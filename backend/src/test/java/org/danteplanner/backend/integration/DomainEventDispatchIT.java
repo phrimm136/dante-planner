@@ -10,33 +10,31 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventDispatcher;
-import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.danteplanner.backend.support.SseTopicRecorder;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 /**
  * Dispatching the same event twice derives its effect once.
@@ -54,8 +52,12 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
     @Autowired
     private DomainEventDispatcher dispatcher;
 
-    @MockitoBean
-    private SsePublisher ssePublisher;
+    @Autowired
+    @Qualifier("sseLocalRedisConnectionFactory")
+    private RedisConnectionFactory sseConnectionFactory;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Autowired
     private UserRepository userRepository;
@@ -81,13 +83,19 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
     private User owner;
     private User commenter;
     private Planner planner;
+    private SseTopicRecorder recorder;
 
     @BeforeEach
     void setUp() {
-        Mockito.reset(ssePublisher);
+        recorder = SseTopicRecorder.open(sseConnectionFactory, objectMapper);
         owner = TestDataFactory.createTestUser(userRepository, "dispatch-owner@example.com");
         commenter = TestDataFactory.createTestUser(userRepository, "dispatch-commenter@example.com");
         planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+    }
+
+    @AfterEach
+    void closeRecorder() {
+        recorder.close();
     }
 
     @Test
@@ -106,10 +114,11 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
                         + "second arm from running at all")
                 .hasSize(1);
 
-        verify(ssePublisher, times(1)).publishUserEvent(
-                eq(owner.getId()), eq(SseEventType.NOTIFY_COMMENT), any(), any());
-        verify(ssePublisher, times(1)).publishCommentEvent(
-                eq(planner.getId()), eq(SseEventType.COMMENT_ADDED), any(), eq(commenter.getId()), any());
+        recorder.fence();
+        assertThat(recorder.userEvents(owner.getId(), SseEventType.NOTIFY_COMMENT)).hasSize(1);
+        assertThat(recorder.commentEvents(planner.getId(), SseEventType.COMMENT_ADDED))
+                .filteredOn(envelope -> commenter.getId().equals(envelope.excludeUserId()))
+                .hasSize(1);
         assertThat(attempts(eventId))
                 .as("both attempts are counted — the count is what the poison cap reads — while "
                         + "only the first derived anything")
@@ -126,7 +135,8 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
         assertThat(notificationRepository.findByUserIdAndContentIdAndNotificationType(
                 owner.getId(), comment.getId().toString(), NotificationType.COMMENT_RECEIVED))
                 .isEmpty();
-        verify(ssePublisher, never()).publishUserEvent(eq(owner.getId()), any(), any(), any());
+        recorder.fence();
+        assertThat(recorder.userEvents(owner.getId())).isEmpty();
     }
 
     @Test
@@ -140,8 +150,8 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
         assertThat(notificationRepository.findByUserIdAndContentIdAndNotificationType(
                 parentAuthor.getId(), reply.getId().toString(), NotificationType.REPLY_RECEIVED))
                 .isPresent();
-        verify(ssePublisher, times(1)).publishUserEvent(
-                eq(parentAuthor.getId()), eq(SseEventType.NOTIFY_COMMENT), any(), any());
+        recorder.fence();
+        assertThat(recorder.userEvents(parentAuthor.getId(), SseEventType.NOTIFY_COMMENT)).hasSize(1);
     }
 
     @Test
@@ -156,7 +166,8 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
         assertThat(notificationRepository.findByUserIdAndContentIdAndNotificationType(
                 parentAuthor.getId(), reply.getId().toString(), NotificationType.REPLY_RECEIVED))
                 .isEmpty();
-        verify(ssePublisher, never()).publishUserEvent(eq(parentAuthor.getId()), any(), any(), any());
+        recorder.fence();
+        assertThat(recorder.userEvents(parentAuthor.getId())).isEmpty();
     }
 
     @Test
@@ -172,8 +183,8 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
         assertThat(notificationRepository.findByUserIdAndContentIdAndNotificationType(
                 parentAuthor.getId(), reply.getId().toString(), NotificationType.REPLY_RECEIVED))
                 .isPresent();
-        verify(ssePublisher, times(1)).publishUserEvent(
-                eq(parentAuthor.getId()), eq(SseEventType.NOTIFY_COMMENT), any(), any());
+        recorder.fence();
+        assertThat(recorder.userEvents(parentAuthor.getId(), SseEventType.NOTIFY_COMMENT)).hasSize(1);
     }
 
     private PlannerComment insertComment(User author, String content, Long parentCommentId) {

@@ -99,6 +99,7 @@ dependencies {
     testImplementation("com.redis:testcontainers-redis:2.2.2")
     testImplementation("com.tngtech.archunit:archunit-junit5:1.3.0")
     testImplementation("net.jqwik:jqwik:1.9.3")
+    testImplementation("org.wiremock:wiremock-standalone:3.13.2")
 
     errorprone("com.google.errorprone:error_prone_core:2.36.0")
 }

@@ -1,5 +1,5 @@
 # 171 tests-keep-class-concurrency-and-enforce-isolation-by-rule
-epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs
+epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @mocks
 
 ## Decisions
 - @tests @concurrency — Backend test classes keep running concurrently inside each Gradle fork, three
@@ -52,6 +52,20 @@ epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs
   REJECTED: `@Isolated` per class — serializes the fork for every log assertion.
   INVARIANT: only `support.LogCapture` attaches a logback appender — the log-capture rule
   (`LogCaptureRule`, checked by `TestLogCaptureConventionTest`).
+- @tests @mocks — No test replaces a Spring bean with a Mockito mock or spy. An integration test
+  observes an effect where it leaves the process: an SSE push on its Redis topic or on a real HTTP
+  event stream, an OAuth login through a stub of Google's HTTP endpoints. A fault is injected by a
+  hand-written `@TestBean` subclass that fails one method and runs the rest for real. Each
+  distinct override set mints its own application context, and a mocked service replaces the code
+  under test: two of the eleven overrides were never used, and the mocked `AuthenticationService`
+  let the login test assert cookie values the real service never issues.
+  REJECTED: a recording `SseChannelSender` bean — it skips the Redis hop and splits the context of
+  every class that imports it.
+  REJECTED: a scripted `OAuthProvider` bean — it skips the provider's HTTP and id_token handling,
+  and the provider registry keys providers by name, so it must replace the real bean per class.
+  INVARIANT: no `@MockitoBean`, `@MockitoSpyBean` or Boot's `@MockBean`/`@SpyBean`, directly or
+  through a meta-annotation, in the test tree — the mock-bean rule (`MockBeanRule`, checked by
+  `TestMockBeanConventionTest`).
 
 ## Takeaway
 - takeaway: when concurrency in a test suite exposes shared state, close each hazard with a rule

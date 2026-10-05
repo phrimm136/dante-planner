@@ -1,28 +1,30 @@
 package org.danteplanner.backend.integration;
 
+import java.util.Map;
 import java.util.UUID;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
-import org.danteplanner.backend.shared.sse.SseService;
+import org.danteplanner.backend.support.SseTopicRecorder;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Publish-event seam: the publish SSE broadcast must be emitted only after the publishing
@@ -45,17 +47,27 @@ class PlannerPublishEventIT extends SharedMySqlContainerSupport {
     @Autowired
     private UserRepository userRepository;
 
-    @MockitoBean
-    private SseService sseService;
+    @Autowired
+    @Qualifier("sseLocalRedisConnectionFactory")
+    private RedisConnectionFactory sseConnectionFactory;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private User owner;
     private UUID plannerId;
+    private SseTopicRecorder recorder;
 
     @BeforeEach
     void setUp() {
-        Mockito.reset(sseService);
+        recorder = SseTopicRecorder.open(sseConnectionFactory, objectMapper);
         owner = TestDataFactory.createTestUser(userRepository, "publisher@example.com");
         plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, false).getId();
+    }
+
+    @AfterEach
+    void closeRecorder() {
+        recorder.close();
     }
 
     @Test
@@ -64,6 +76,9 @@ class PlannerPublishEventIT extends SharedMySqlContainerSupport {
         plannerPublishingService.publish(owner.getId(), plannerId);
 
         // The surrounding @Transactional rolls back, so a commit-only emission never fires.
-        verify(sseService, never()).broadcastToAll(any(), any(), any());
+        recorder.fence();
+        assertThat(recorder.broadcasts(envelope -> envelope.payload() instanceof Map<?, ?> map
+                && plannerId.toString().equals(map.get("plannerId"))))
+                .isEmpty();
     }
 }

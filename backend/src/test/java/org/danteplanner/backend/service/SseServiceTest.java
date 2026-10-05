@@ -161,6 +161,19 @@ class SseServiceTest {
         }
 
         @Test
+        void broadcastToAll_WhenAUserIsExcluded_SkipsOnlyThatUsersEmitters() throws IOException {
+            Long excludedUser = USER_ID;
+            Long otherUser = 2L;
+            sseService.subscribe(excludedUser, UUID.randomUUID()).complete();
+            sseService.subscribe(otherUser, UUID.randomUUID()).complete();
+
+            sseService.broadcastToAll(excludedUser, "notify:published", Map.of("k", "v"));
+
+            assertThat(sseService.getActiveConnectionCount(excludedUser)).isEqualTo(1);
+            assertThat(sseService.getActiveConnectionCount(otherUser)).isZero();
+        }
+
+        @Test
         void broadcastToAll_WhenSerializationFails_DoesNotThrow() throws Exception {
             ObjectMapper failingMapper = mock(ObjectMapper.class);
             when(failingMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("boom") {});

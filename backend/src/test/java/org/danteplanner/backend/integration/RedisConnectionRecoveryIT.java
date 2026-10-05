@@ -6,24 +6,31 @@ import eu.rekawek.toxiproxy.model.Toxic;
 import eu.rekawek.toxiproxy.model.ToxicDirection;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.time.Duration;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.BooleanSupplier;
 import javax.sql.DataSource;
+import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.LoginRedirect;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.sse.SsePublisher;
-import org.danteplanner.backend.shared.sse.SseService;
+import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.SseStream;
+import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -33,7 +40,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -42,12 +48,6 @@ import org.testcontainers.toxiproxy.ToxiproxyContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -108,7 +108,8 @@ class RedisConnectionRecoveryIT {
     private static final long RECOVERY_DEADLINE_MS = 30_000L;
     private static final long POLL_INTERVAL_MS = 250L;
     private static final int SSE_REPUBLISH_ATTEMPTS = 20;
-    private static final long SSE_DELIVERY_WAIT_MS = 1_000L;
+    private static final Duration SSE_DELIVERY_WAIT = Duration.ofSeconds(1);
+    private static final Duration SSE_WARMUP_WAIT = Duration.ofSeconds(10);
 
     /** Minimal planner content that passes {@code PlannerContentValidator} (from DegradationIT). */
 
@@ -192,8 +193,14 @@ class RedisConnectionRecoveryIT {
     @Autowired
     private SsePublisher ssePublisher;
 
-    @MockitoSpyBean
-    private SseService sseService;
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private JwtTokenService jwtTokenService;
+
+    @LocalServerPort
+    private int port;
 
     @Autowired
     private MockMvc mockMvc;
@@ -264,15 +271,21 @@ class RedisConnectionRecoveryIT {
 
     @Test
     void sseFanout_WhenSubscriberConnectionRestored_ResubscribesAndDelivers() throws IOException {
-        Long userId = 4243L;
+        User user = TestDataFactory.createTestUser(userRepository, "recovery-sse-" + UUID.randomUUID() + "@example.com");
+        Long userId = user.getId();
+        try (SseStream stream = SseStream.user(port, AuthCookies.session(
+                TestDataFactory.generateAccessToken(jwtTokenService, user), UUID.randomUUID()))) {
+            assertResubscribes(stream, userId);
+        }
+    }
 
+    private void assertResubscribes(SseStream stream, Long userId) throws IOException {
         ssePublisher.publishUserEvent(userId, null, SseEventType.COMMENT_ADDED, "recovery-warmup",
                 Map.of("id", "recovery-warmup"));
-        verify(sseService, timeout(10_000)).sendToUser(eq(userId), isNull(), eq("comment:added"), any());
+        stream.next("comment:added", data -> data.contains("recovery-warmup"), SSE_WARMUP_WAIT);
 
         SSE_LOCAL_REDIS_PROXY.disable();
         SSE_LOCAL_REDIS_PROXY.enable();
-        clearInvocations(sseService);
 
         // The listener container's recovery loop re-subscribes on its own schedule, and only
         // events published AFTER the re-subscription are delivered — so publish fresh events
@@ -282,8 +295,7 @@ class RedisConnectionRecoveryIT {
             ssePublisher.publishUserEvent(userId, null, SseEventType.COMMENT_ADDED,
                     "recovery-attempt-" + attempt, Map.of("id", "recovery-attempt-" + attempt));
             try {
-                verify(sseService, timeout(SSE_DELIVERY_WAIT_MS).atLeastOnce())
-                        .sendToUser(eq(userId), isNull(), eq("comment:added"), any());
+                stream.next("comment:added", data -> data.contains("recovery-attempt-"), SSE_DELIVERY_WAIT);
                 delivered = true;
             } catch (AssertionError notYetResubscribed) {
                 delivered = false;

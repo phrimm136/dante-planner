@@ -1,36 +1,45 @@
 package org.danteplanner.backend.integration;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
+
+import jakarta.servlet.http.Cookie;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
+import org.danteplanner.backend.comment.dto.CreateCommentResponse;
 import org.danteplanner.backend.comment.service.CommentCommandService;
-import org.danteplanner.backend.comment.service.PlannerCommentSseService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.entity.SseEventType;
-import org.danteplanner.backend.shared.sse.SseService;
 import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.danteplanner.backend.shared.sse.SseService;
 import org.danteplanner.backend.shared.sse.SuspensionType;
+import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.SseStream;
 import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.service.UserSettingsService;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Phase-10 acceptance test: cross-node SSE fan-out over Redis pub/sub.
@@ -46,9 +55,7 @@ import static org.mockito.Mockito.verify;
  * subscriber binds to the distinct {@code redis.sse-local.*} endpoint. Both point at the same
  * {@code AUTH_REDIS} container: the code contract (publish via the primary factory, subscribe via a
  * distinct sse-local factory, fan out to local emitters) is proven; replication propagation is a
- * Redis deployment guarantee, out of scope. Async delivery is captured with a Mockito
- * {@code timeout(...)} verification on a {@link MockitoSpyBean} {@link SseService} — no fixed sleeps
- * (INV4).</p>
+ * Redis deployment guarantee, out of scope.</p>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
@@ -56,11 +63,18 @@ import static org.mockito.Mockito.verify;
 @Import(TestConfig.class)
 class SseFanoutIT extends CausalHarnessSupport {
 
+    private static final Duration DELIVERY_TIMEOUT = Duration.ofSeconds(5);
+    private static final int SETTINGS_REPUBLISH_ATTEMPTS = 20;
+    private static final Duration SETTINGS_DELIVERY_WAIT = Duration.ofMillis(500);
+
     @DynamicPropertySource
     static void sseLocalRedis(DynamicPropertyRegistry registry) {
         registry.add("redis.sse-local.host", AUTH_REDIS::getRedisHost);
         registry.add("redis.sse-local.port", AUTH_REDIS::getRedisPort);
     }
+
+    @LocalServerPort
+    private int port;
 
     @Autowired
     private SsePublisher ssePublisher;
@@ -74,100 +88,160 @@ class SseFanoutIT extends CausalHarnessSupport {
     @Autowired
     private UserRepository userRepository;
 
-    @MockitoSpyBean
-    private SseService sseService;
+    @Autowired
+    private JwtTokenService jwtTokenService;
 
-    @MockitoSpyBean
-    private PlannerCommentSseService plannerCommentSseService;
+    @Autowired
+    private UserSettingsService userSettingsService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     void fanout_WhenPublishedOnPrimary_DeliveredToLocalEmitterWithPayload() {
-        Long userId = 4242L;
-        String entityId = "planner-9";
+        User user = user("sse-fanout");
+        String entityId = "planner-" + UUID.randomUUID();
         Map<String, Object> payload = Map.of("plannerId", entityId, "title", "Refactored deck");
 
-        ssePublisher.publishUserEvent(userId, null, SseEventType.COMMENT_ADDED, entityId, payload);
+        try (SseStream stream = SseStream.user(port, session(user))) {
+            ssePublisher.publishUserEvent(user.getId(), null, SseEventType.COMMENT_ADDED, entityId, payload);
 
-        verify(sseService, timeout(5000)).sendToUser(
-                eq(userId),
-                isNull(),
-                eq(SseEventType.COMMENT_ADDED.getValue()),
-                argThat(data -> data != null && data.toString().contains(entityId)));
+            assertThat(stream.next(SseEventType.COMMENT_ADDED.getValue(), DELIVERY_TIMEOUT)).contains(entityId);
+        }
     }
 
     @Test
     void sseBroadcastCrossPod_WhenPublishedOnPrimary_DeliveredWithRawPayload() {
-        Long authorId = 5150L;
-        String plannerId = "planner-broadcast-1";
+        User recipient = user("sse-broadcast-recipient");
+        enableNewPublicationNotices(recipient);
+        User author = user("sse-broadcast-author");
+        String plannerId = "planner-broadcast-" + UUID.randomUUID();
         Map<String, Object> payload = Map.of("plannerId", plannerId, "plannerTitle", "Cross-pod build");
 
-        ssePublisher.publishBroadcast(authorId, SseEventType.NOTIFY_PUBLISHED, payload);
+        try (SseStream stream = SseStream.user(port, session(recipient))) {
+            ssePublisher.publishBroadcast(author.getId(), SseEventType.NOTIFY_PUBLISHED, payload);
 
-        verify(sseService, timeout(5000)).broadcastToAll(
-                eq(authorId),
-                eq(SseEventType.NOTIFY_PUBLISHED.getValue()),
-                argThat(data -> data instanceof Map<?, ?> map
-                        && plannerId.equals(map.get("plannerId"))
-                        && !map.containsKey("excludeUserId")));
+            JsonNode data = json(stream.next(SseEventType.NOTIFY_PUBLISHED.getValue(),
+                    names(plannerId), DELIVERY_TIMEOUT));
+            assertThat(data.path("plannerId").asText()).isEqualTo(plannerId);
+            assertThat(data.has("excludeUserId")).isFalse();
+        }
     }
 
     @Test
     void sseSuspensionCrossPod_WhenPublishedOnPrimary_DeliveredToSuspendedUser() {
-        Long suspendedUserId = 6161L;
+        User suspended = user("sse-suspended");
 
-        ssePublisher.publishAccountSuspended(suspendedUserId, "spam", SuspensionType.BAN, null);
+        try (SseStream stream = SseStream.user(port, session(suspended))) {
+            ssePublisher.publishAccountSuspended(suspended.getId(), "spam", SuspensionType.BAN, null);
 
-        verify(sseService, timeout(5000)).notifyAccountSuspended(
-                eq(suspendedUserId),
-                argThat(data -> data instanceof Map<?, ?> map
-                        && "BAN".equals(map.get("suspensionType"))));
+            JsonNode data = json(stream.next(SseEventType.ACCOUNT_SUSPENDED.getValue(), DELIVERY_TIMEOUT));
+            assertThat(data.path("suspensionType").asText()).isEqualTo("BAN");
+        }
     }
 
     @Test
     void settingsInvalidate_WhenPublishedOnPrimary_InvalidatesLocalSettingsCache() {
-        Long userId = 7777L;
+        User user = user("sse-settings");
+        User author = user("sse-settings-author");
+        String plannerId = "planner-settings-" + UUID.randomUUID();
 
-        ssePublisher.publishSettingsInvalidation(userId);
+        try (SseStream stream = SseStream.user(port, session(user))) {
+            enableNewPublicationNotices(user);
 
-        verify(sseService, timeout(5000)).invalidateSettingsCache(eq(userId));
+            ssePublisher.publishSettingsInvalidation(user.getId());
+
+            boolean delivered = false;
+            for (int attempt = 0; attempt < SETTINGS_REPUBLISH_ATTEMPTS && !delivered; attempt++) {
+                ssePublisher.publishBroadcast(author.getId(), SseEventType.NOTIFY_PUBLISHED,
+                        Map.of("plannerId", plannerId, "plannerTitle", "Settings probe"));
+                try {
+                    stream.next(SseEventType.NOTIFY_PUBLISHED.getValue(), names(plannerId), SETTINGS_DELIVERY_WAIT);
+                    delivered = true;
+                } catch (AssertionError stillCached) {
+                    delivered = false;
+                }
+            }
+
+            assertThat(delivered)
+                    .as("the stream caches the preferences it registered with, so a publication notice "
+                            + "reaches it only once the invalidation has dropped that cache")
+                    .isTrue();
+        }
     }
 
     @Test
     void commentFanout_WhenPublishedOnPrimary_DeliveredToCommentSubscribersWithPayload() {
-        UUID plannerId = UUID.randomUUID();
-        String commentId = "comment-123";
+        User owner = user("sse-comment-fanout-owner");
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        String commentId = "comment-" + UUID.randomUUID();
         Map<String, Object> payload = Map.of("commentId", commentId, "body", "nice deck");
 
-        ssePublisher.publishCommentEvent(plannerId, SseEventType.COMMENT_ADDED, commentId, null, payload);
+        try (SseStream stream = SseStream.comments(port, planner.getId(), session(owner))) {
+            ssePublisher.publishCommentEvent(planner.getId(), SseEventType.COMMENT_ADDED, commentId, null, payload);
 
-        verify(plannerCommentSseService, timeout(5000)).broadcast(
-                eq(plannerId),
-                eq(SseEventType.COMMENT_ADDED.getValue()),
-                argThat(data -> data != null && data.toString().contains(commentId)),
-                any());
+            assertThat(stream.next(SseEventType.COMMENT_ADDED.getValue(), DELIVERY_TIMEOUT)).contains(commentId);
+        }
     }
 
     @Test
-    void createComment_WhenWritePathRuns_FansOutToCommentSubscribers() {
-        User owner = TestDataFactory.createTestUser(
-                userRepository, "sse-comment-owner-" + UUID.randomUUID() + "@example.com");
+    void createComment_WhenWritePathRuns_FansOutToEverySubscriberButTheCommenter() {
+        User owner = user("sse-comment-owner");
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
-        User commenter = TestDataFactory.createTestUser(
-                userRepository, "sse-comment-" + UUID.randomUUID() + "@example.com");
-        Long commenterId = commenter.getId();
+        User commenter = user("sse-comment");
+        User markerAuthor = user("sse-comment-marker");
         UUID plannerId = planner.getId();
-        UUID deviceId = UUID.randomUUID();
 
-        commentCommandService.createComment(
-                plannerId,
-                commenterId,
-                deviceId,
-                new CreateCommentRequest("Great deck, thanks for sharing", null));
+        try (SseStream commenterStream = SseStream.comments(port, plannerId, session(commenter));
+             SseStream stream = SseStream.comments(port, plannerId, session(owner))) {
+            CreateCommentResponse own = commentCommandService.createComment(
+                    plannerId,
+                    commenter.getId(),
+                    UUID.randomUUID(),
+                    new CreateCommentRequest("Great deck, thanks for sharing", null));
 
-        verify(plannerCommentSseService, timeout(5000)).broadcast(
-                eq(plannerId),
-                eq("comment:added"),
-                argThat(data -> data != null && data.toString().contains(plannerId.toString())),
-                eq(commenterId));
+            assertThat(stream.next(SseEventType.COMMENT_ADDED.getValue(), entity(own.id()), DELIVERY_TIMEOUT))
+                    .contains(plannerId.toString());
+
+            CreateCommentResponse marker = commentCommandService.createComment(
+                    plannerId,
+                    markerAuthor.getId(),
+                    UUID.randomUUID(),
+                    new CreateCommentRequest("A later comment from someone else", null));
+
+            assertThat(json(commenterStream.next(SseEventType.COMMENT_ADDED.getValue(), DELIVERY_TIMEOUT))
+                    .path("entityId").asText())
+                    .as("a planner's subscribers are sent to in registration order, and the commenter's "
+                            + "stream registered before the owner's, so its own comment would precede this one")
+                    .isEqualTo(marker.id().toString());
+        }
+    }
+
+    private User user(String prefix) {
+        return TestDataFactory.createTestUser(userRepository, prefix + "-" + UUID.randomUUID() + "@example.com");
+    }
+
+    private Cookie[] session(User user) {
+        return AuthCookies.session(TestDataFactory.generateAccessToken(jwtTokenService, user), UUID.randomUUID());
+    }
+
+    private void enableNewPublicationNotices(User user) {
+        userSettingsService.updateSettings(user.getId(), new UpdateUserSettingsRequest(null, null, null, true));
+    }
+
+    private Predicate<String> entity(UUID entityId) {
+        return data -> entityId.toString().equals(json(data).path("entityId").asText());
+    }
+
+    private Predicate<String> names(String plannerId) {
+        return data -> plannerId.equals(json(data).path("plannerId").asText());
+    }
+
+    private JsonNode json(String data) {
+        try {
+            return objectMapper.readTree(data);
+        } catch (JsonProcessingException e) {
+            throw new AssertionError("the frame data is not JSON: " + data, e);
+        }
     }
 }

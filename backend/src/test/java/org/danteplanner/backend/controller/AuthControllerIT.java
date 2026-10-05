@@ -5,7 +5,6 @@ import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.auth.service.AuthenticationService;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.AuthCookies;
@@ -13,14 +12,12 @@ import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 
@@ -47,17 +44,11 @@ class AuthControllerIT extends SharedMySqlContainerSupport {
     @Autowired
     private JwtTokenService jwtTokenService;
 
-    @MockitoSpyBean
-    private AuthenticationService authService;
-
     private User testUser;
     private String accessToken;
 
     @BeforeEach
     void setUp() {
-        Mockito.reset(authService);
-
-
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
         accessToken = TestDataFactory.generateAccessToken(jwtTokenService, testUser);
     }

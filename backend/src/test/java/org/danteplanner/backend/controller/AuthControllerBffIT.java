@@ -4,29 +4,27 @@ import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.user.api.UserSummary;
-import org.danteplanner.backend.auth.service.AuthenticationService;
-import org.danteplanner.backend.auth.service.AuthenticationService.AuthResult;
 import org.danteplanner.backend.auth.oauth.OAuthStateService;
+import org.danteplanner.backend.auth.token.JwtTokenService;
+import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.shared.util.CookieConstants;
-import org.junit.jupiter.api.BeforeEach;
+import org.danteplanner.backend.support.GoogleStub;
+import org.danteplanner.backend.user.api.AuthProviderType;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -51,13 +49,11 @@ class AuthControllerBffIT extends SharedMySqlContainerSupport {
     @Autowired
     private OAuthStateService oAuthStateService;
 
-    @MockitoBean
-    private AuthenticationService authService;
+    @Autowired
+    private JwtTokenService jwtTokenService;
 
-    @BeforeEach
-    void setUp() {
-        Mockito.reset(authService);
-    }
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     void googleStart_WhenInvoked_RedirectsToGoogleAndSetsOauthTx() throws Exception {
@@ -75,29 +71,40 @@ class AuthControllerBffIT extends SharedMySqlContainerSupport {
         String verifier = "verifier-match";
         String returnTo = "http://localhost:5173/planner/1";
         String oauthTx = oAuthStateService.seal(state, verifier, returnTo);
+        String code = uniqueCode();
+        String subject = "google-sub-" + UUID.randomUUID();
+        String email = "bff-login-" + UUID.randomUUID() + "@example.com";
+        GoogleStub.script(code).user(subject, email);
 
-        UserSummary user = Mockito.mock(UserSummary.class);
-        when(authService.authenticateWithOAuth(eq("google"), eq("auth-code"), anyString(), eq(verifier)))
-                .thenReturn(new AuthResult(user, "access-jwt", "refresh-jwt", false));
-
-        mockMvc.perform(get("/api/auth/google/callback")
-                        .param("code", "auth-code")
+        MvcResult result = mockMvc.perform(get("/api/auth/google/callback")
+                        .param("code", code)
                         .param("state", state)
                         .cookie(new Cookie(CookieConstants.OAUTH_TX, oauthTx)))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location", returnTo))
-                .andExpect(cookie().value(CookieConstants.ACCESS_TOKEN, "access-jwt"))
-                .andExpect(cookie().value(CookieConstants.REFRESH_TOKEN, "refresh-jwt"))
-                .andExpect(cookie().maxAge(CookieConstants.OAUTH_TX, 0));
+                .andExpect(cookie().exists(CookieConstants.ACCESS_TOKEN))
+                .andExpect(cookie().exists(CookieConstants.REFRESH_TOKEN))
+                .andExpect(cookie().maxAge(CookieConstants.OAUTH_TX, 0))
+                .andReturn();
+
+        User user = userRepository.findByProviderAndProviderId(AuthProviderType.GOOGLE, subject).orElseThrow();
+        assertThat(user.getEmail()).isEqualTo(email);
+        TokenClaims access = jwtTokenService.validateAccessToken(
+                result.getResponse().getCookie(CookieConstants.ACCESS_TOKEN).getValue());
+        TokenClaims refresh = jwtTokenService.validateRefreshToken(
+                result.getResponse().getCookie(CookieConstants.REFRESH_TOKEN).getValue());
+        assertThat(access.userId()).isEqualTo(user.getId());
+        assertThat(refresh.userId()).isEqualTo(user.getId());
     }
 
     // INV2
     @Test
     void googleCallback_WhenStateMismatch_RejectsWithoutAuthCookies() throws Exception {
         String oauthTx = oAuthStateService.seal("real-state", "verifier", "http://localhost");
+        String code = scriptedCode();
 
         mockMvc.perform(get("/api/auth/google/callback")
-                        .param("code", "auth-code")
+                        .param("code", code)
                         .param("state", "forged-state")
                         .cookie(new Cookie(CookieConstants.OAUTH_TX, oauthTx)))
                 .andExpect(status().isFound())
@@ -105,25 +112,30 @@ class AuthControllerBffIT extends SharedMySqlContainerSupport {
                 .andExpect(cookie().doesNotExist(CookieConstants.ACCESS_TOKEN))
                 .andExpect(cookie().doesNotExist(CookieConstants.REFRESH_TOKEN));
 
-        verify(authService, never()).authenticateWithOAuth(any(), any(), any(), any());
+        assertThat(GoogleStub.tokenCalls(code)).isZero();
     }
 
     // INV2
     @Test
     void googleCallback_WhenNoOauthTx_Rejects() throws Exception {
+        String code = scriptedCode();
+
         mockMvc.perform(get("/api/auth/google/callback")
-                        .param("code", "auth-code")
+                        .param("code", code)
                         .param("state", "some-state"))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location", containsString("login=error")))
                 .andExpect(cookie().doesNotExist(CookieConstants.ACCESS_TOKEN));
 
-        verify(authService, never()).authenticateWithOAuth(any(), any(), any(), any());
+        assertThat(GoogleStub.tokenCalls(code)).isZero();
     }
 
     @Test
     void googleCallback_WhenProviderError_RedirectsToErrorAndClearsOauthTx() throws Exception {
+        String code = scriptedCode();
+
         mockMvc.perform(get("/api/auth/google/callback")
+                        .param("code", code)
                         .param("error", "access_denied")
                         .cookie(new Cookie(CookieConstants.OAUTH_TX, "sealed-value")))
                 .andExpect(status().isFound())
@@ -131,23 +143,35 @@ class AuthControllerBffIT extends SharedMySqlContainerSupport {
                 .andExpect(cookie().maxAge(CookieConstants.OAUTH_TX, 0))
                 .andExpect(cookie().doesNotExist(CookieConstants.ACCESS_TOKEN));
 
-        verify(authService, never()).authenticateWithOAuth(any(), any(), any(), any());
+        assertThat(GoogleStub.tokenCalls(code)).isZero();
     }
 
     @Test
     void googleCallback_WhenExchangeThrows_RedirectsToErrorWithoutAuthCookies() throws Exception {
         String state = "state-throw";
         String oauthTx = oAuthStateService.seal(state, "verifier", "http://localhost:5173/planner/1");
-        when(authService.authenticateWithOAuth(eq("google"), eq("auth-code"), anyString(), anyString()))
-                .thenThrow(new RuntimeException("token endpoint unavailable"));
+        String code = uniqueCode();
+        GoogleStub.script(code).tokenEndpointFails();
 
         mockMvc.perform(get("/api/auth/google/callback")
-                        .param("code", "auth-code")
+                        .param("code", code)
                         .param("state", state)
                         .cookie(new Cookie(CookieConstants.OAUTH_TX, oauthTx)))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location", containsString("login=error")))
                 .andExpect(cookie().doesNotExist(CookieConstants.ACCESS_TOKEN))
                 .andExpect(cookie().doesNotExist(CookieConstants.REFRESH_TOKEN));
+
+        assertThat(GoogleStub.tokenCalls(code)).isEqualTo(1);
+    }
+
+    private static String uniqueCode() {
+        return "auth-code-" + UUID.randomUUID();
+    }
+
+    private static String scriptedCode() {
+        String code = uniqueCode();
+        GoogleStub.script(code).user("google-sub-" + UUID.randomUUID(), "bff-unused@example.com");
+        return code;
     }
 }

@@ -9,7 +9,6 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.outbox.config.OutboxConstants;
 import org.danteplanner.backend.shared.outbox.service.DomainEventDispatcher;
-import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -23,7 +22,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -49,9 +47,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @Tag("containerized")
 @Import(TestConfig.class)
 class DomainEventPoisonIT extends SharedMySqlContainerSupport {
-
-    @MockitoBean
-    private SsePublisher ssePublisher;
 
     @Autowired
     private DomainEventDispatcher dispatcher;

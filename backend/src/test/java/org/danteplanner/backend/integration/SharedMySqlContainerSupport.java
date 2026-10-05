@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 
+import org.danteplanner.backend.support.GoogleStub;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.mysql.MySQLContainer;
@@ -117,6 +118,10 @@ public abstract class SharedMySqlContainerSupport {
         registry.add("spring.flyway.user", MYSQL::getUsername);
         registry.add("spring.flyway.password", MYSQL::getPassword);
         SharedRedisContainerSupport.registerSharedRedis(registry);
+        registry.add("oauth.google.token-url", GoogleStub::tokenUrl);
+        registry.add("oauth.google.user-info-url", GoogleStub::userInfoUrl);
+        registry.add("oauth.google.jwks-uri", GoogleStub::jwksUri);
+        registry.add("oauth.google.issuer", GoogleStub::issuer);
         return MYSQL.getJdbcUrl();
     }
 }

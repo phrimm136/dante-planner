@@ -11,20 +11,24 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.convention.TestBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -48,7 +52,7 @@ class AccountDeletionGuardIT extends SharedMySqlContainerSupport {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean
+    @TestBean(name = "tokenBlacklistService")
     private TokenBlacklistService tokenBlacklistService;
 
     @Autowired
@@ -60,18 +64,44 @@ class AccountDeletionGuardIT extends SharedMySqlContainerSupport {
     private User user;
     private Cookie accessToken;
 
+    static TokenBlacklistService tokenBlacklistService() {
+        LettuceConnectionFactory factory = new LettuceConnectionFactory(new RedisStandaloneConfiguration(
+                SharedRedisContainerSupport.host(), SharedRedisContainerSupport.port()));
+        factory.afterPropertiesSet();
+        return new RevocationFailsBlacklist(factory, new StringRedisTemplate(factory), new SimpleMeterRegistry(),
+                TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
+    }
+
+    static final class RevocationFailsBlacklist extends TokenBlacklistService
+            implements ApplicationListener<ContextClosedEvent> {
+
+        private final LettuceConnectionFactory connectionFactory;
+
+        RevocationFailsBlacklist(LettuceConnectionFactory connectionFactory, StringRedisTemplate template,
+                SimpleMeterRegistry meterRegistry, long refreshTokenExpiry) {
+            super(template, template, meterRegistry, refreshTokenExpiry);
+            this.connectionFactory = connectionFactory;
+        }
+
+        @Override
+        public void invalidateUserTokens(Long userId) {
+            throw new RedisConnectionFailureException("token store unreachable");
+        }
+
+        @Override
+        public void onApplicationEvent(ContextClosedEvent event) {
+            connectionFactory.destroy();
+        }
+    }
+
     @BeforeEach
     void setUp() {
-        Mockito.reset(tokenBlacklistService);
         user = TestDataFactory.createTestUser(userRepository, "deletion-guard@example.com");
         accessToken = AuthCookies.accessToken(TestDataFactory.generateAccessToken(jwtTokenService, user));
     }
 
     @Test
     void redisOutageAbortsAccountDeletion_WhenTokenRevocationThrows_RollsBackAndDegrades() throws Exception {
-        doThrow(new RedisConnectionFailureException("token store unreachable"))
-                .when(tokenBlacklistService).invalidateUserTokens(anyLong());
-
         mockMvc.perform(delete("/api/user/me").with(withCsrf()).cookie(accessToken))
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(jsonPath("$.code").value("AUTH_TEMPORARILY_UNAVAILABLE"));

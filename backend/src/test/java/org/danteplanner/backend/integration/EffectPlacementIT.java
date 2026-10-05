@@ -13,36 +13,35 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.outbox.scheduler.DomainEventRelay;
-import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.danteplanner.backend.support.SseTopicRecorder;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.convention.TestBean;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
 
 /**
  * The chain from a write to its announcement, asserted at the three points it can break.
@@ -63,19 +62,21 @@ import static org.mockito.Mockito.verify;
 @Import(TestConfig.class)
 class EffectPlacementIT extends SharedMySqlContainerSupport {
 
-    /**
-     * Stands in for every subscriber, and for the fleet lock the relay takes.
-     *
-     * <p>Nothing the publisher receives reaches anyone, which is what lets a test claim an
-     * announcement was or was not made. The lock is always granted because this class drives the
-     * relay directly, and fleet arbitration is {@code ShedLockMultiPodIT}'s subject, not this
-     * one's.</p>
-     */
-    @MockitoBean
-    private SsePublisher ssePublisher;
+    private static final Duration DELIVERY_TIMEOUT = Duration.ofSeconds(10);
 
+    /**
+     * The lock is always granted because this class drives the relay directly, and fleet
+     * arbitration is {@code ShedLockMultiPodIT}'s subject, not this one's.
+     */
     @TestBean
     private LockProvider lockProvider;
+
+    @Autowired
+    @Qualifier("sseLocalRedisConnectionFactory")
+    private RedisConnectionFactory sseConnectionFactory;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Autowired
     private CommentCommandService commentCommandService;
@@ -104,6 +105,7 @@ class EffectPlacementIT extends SharedMySqlContainerSupport {
     private User owner;
     private User commenter;
     private Planner planner;
+    private SseTopicRecorder recorder;
 
     static LockProvider lockProvider() {
         return configuration -> Optional.of(() -> { });
@@ -111,10 +113,15 @@ class EffectPlacementIT extends SharedMySqlContainerSupport {
 
     @BeforeEach
     void setUp() {
-        Mockito.reset(ssePublisher);
+        recorder = SseTopicRecorder.open(sseConnectionFactory, objectMapper);
         owner = TestDataFactory.createTestUser(userRepository, "effect-owner@example.com");
         commenter = TestDataFactory.createTestUser(userRepository, "effect-commenter@example.com");
         planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+    }
+
+    @AfterEach
+    void closeRecorder() {
+        recorder.close();
     }
 
     @Test
@@ -133,8 +140,9 @@ class EffectPlacementIT extends SharedMySqlContainerSupport {
                 .as("with no event row there is nothing for any dispatch to derive")
                 .isEmpty();
 
-        verify(ssePublisher, never()).publishUserEvent(any(), any(), any(), any());
-        verify(ssePublisher, never()).publishCommentEvent(any(), any(), any(), any(), any());
+        recorder.fence();
+        assertThat(recorder.userEvents(owner.getId())).isEmpty();
+        assertThat(recorder.commentEvents(planner.getId())).isEmpty();
     }
 
     @Test
@@ -146,11 +154,7 @@ class EffectPlacementIT extends SharedMySqlContainerSupport {
                 .as("the write's whole obligation is the row")
                 .isEqualTo(1);
 
-        verify(ssePublisher, timeout(10000)).publishUserEvent(
-                eq(owner.getId()), eq(SseEventType.NOTIFY_COMMENT), any(), any());
-        verify(ssePublisher, timeout(10000)).publishCommentEvent(
-                eq(planner.getId()), eq(SseEventType.COMMENT_ADDED), any(),
-                eq(commenter.getId()), any());
+        assertAnnouncedOnce();
 
         List<Notification> delivered = notificationsFor(owner);
         assertThat(delivered).hasSize(1);
@@ -177,11 +181,7 @@ class EffectPlacementIT extends SharedMySqlContainerSupport {
                 .hasSize(1);
         assertThat(delivered.get(0).getNotificationType()).isEqualTo(NotificationType.COMMENT_RECEIVED);
 
-        verify(ssePublisher).publishUserEvent(
-                eq(owner.getId()), eq(SseEventType.NOTIFY_COMMENT), any(), any());
-        verify(ssePublisher).publishCommentEvent(
-                eq(planner.getId()), eq(SseEventType.COMMENT_ADDED), any(),
-                eq(commenter.getId()), any());
+        assertAnnouncedOnce();
     }
 
     /**
@@ -203,6 +203,16 @@ class EffectPlacementIT extends SharedMySqlContainerSupport {
                 """,
                 planner.getId().toString(),
                 commentId));
+    }
+
+    private void assertAnnouncedOnce() {
+        recorder.awaitUserEvents(owner.getId(), SseEventType.NOTIFY_COMMENT, DELIVERY_TIMEOUT);
+        recorder.awaitCommentEvents(planner.getId(), SseEventType.COMMENT_ADDED, DELIVERY_TIMEOUT);
+        recorder.fence();
+        assertThat(recorder.userEvents(owner.getId(), SseEventType.NOTIFY_COMMENT)).hasSize(1);
+        assertThat(recorder.commentEvents(planner.getId(), SseEventType.COMMENT_ADDED))
+                .extracting(envelope -> envelope.excludeUserId())
+                .containsExactly(commenter.getId());
     }
 
     private int eventRowsForPlanner() {
