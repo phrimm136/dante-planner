@@ -8,7 +8,6 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.test.context.ActiveProfiles;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,7 +33,6 @@ class RedisEndpointIsolationTest {
     private Map<String, LettuceConnectionFactory> connectionFactories;
 
     @Test
-    @DisplayName("every configured Redis endpoint resolves to the refused port, not the machine's Redis")
     void redisEndpoint_WhenConfigured_IsIsolatedFromDeveloperMachine() {
         assertThat(connectionFactories)
                 .as("the axis is derived from the context; an empty map would pass vacuously")

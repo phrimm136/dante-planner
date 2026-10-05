@@ -12,7 +12,6 @@ import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -71,11 +70,9 @@ class PlannerReportServiceTest {
     }
 
     @Nested
-    @DisplayName("createReport Tests")
     class CreateReportTests {
 
         @Test
-        @DisplayName("Should create report when not previously reported")
         void createReport_WhenNotReported_CreatesReport() {
             // Arrange
             when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
@@ -95,7 +92,6 @@ class PlannerReportServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw ReportAlreadyExistsException when already reported")
         void createReport_WhenAlreadyReported_ThrowsException() {
             // Arrange
             when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
@@ -114,7 +110,6 @@ class PlannerReportServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw PlannerNotFoundException when planner not found")
         void createReport_WhenPlannerNotFound_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
@@ -131,7 +126,6 @@ class PlannerReportServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw PlannerNotFoundException when planner not published")
         void createReport_WhenPlannerNotPublished_ThrowsException() {
             // Arrange
             when(plannerRepository.existsPublishedById(plannerId)).thenReturn(false);
@@ -144,7 +138,6 @@ class PlannerReportServiceTest {
         }
 
         @Test
-        @DisplayName("Should validate planner before checking existing report")
         void createReport_WhenPlannerMissing_ValidatesPlannerFirst() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
@@ -163,11 +156,9 @@ class PlannerReportServiceTest {
     }
 
     @Nested
-    @DisplayName("hasReported Tests")
     class HasReportedTests {
 
         @Test
-        @DisplayName("Should return true when user has reported")
         void hasReported_WhenReported_ReturnsTrue() {
             // Arrange
             when(reportRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))
@@ -181,7 +172,6 @@ class PlannerReportServiceTest {
         }
 
         @Test
-        @DisplayName("Should return false when user has not reported")
         void hasReported_WhenNotReported_ReturnsFalse() {
             // Arrange
             when(reportRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))
@@ -195,7 +185,6 @@ class PlannerReportServiceTest {
         }
 
         @Test
-        @DisplayName("Should check correct user and planner IDs")
         void hasReported_WhenCalled_ChecksCorrectIds() {
             // Arrange
             Long userId = 42L;

@@ -17,7 +17,6 @@ import org.danteplanner.backend.user.service.UserSettingsService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -176,8 +175,8 @@ class PlannerUserDeleteSweepIT {
                 + "VALUES (?, ?, 'UP', NOW(), 0)", commentId, userId);
     }
 
+    // user-delete-sweeps-aggregate
     @Test
-    @DisplayName("user-delete-sweeps-aggregate: hard delete removes every planner row across aggregate, projection, filter, and child tables, then the user")
     void userDeleteSweepsAggregate_WhenHardDeleted_NoOrphansRemain() {
         // Published planner with the full projection set and third-party engagement
         Planner published = TestDataFactory.planner(owner)
@@ -224,7 +223,6 @@ class PlannerUserDeleteSweepIT {
     }
 
     @Test
-    @DisplayName("vote-outlives-voter: a hard-deleted user's planner vote survives the users cascade, carried by the live sentinel account")
     void reassignedPlannerVote_WhenSwept_PointsAtLiveSentinelAccount() {
         Planner thirdPartyPlanner = TestDataFactory.planner(other)
                 .title("Sweep Voted")
@@ -244,7 +242,6 @@ class PlannerUserDeleteSweepIT {
     }
 
     @Test
-    @DisplayName("comment-text-does-not-outlive-its-author: a hard-deleted account's comment keeps its row and loses its content, and a third party's comment is untouched")
     void commentContent_WhenAuthorHardDeleted_IsEmptiedWhileTheRowSurvives() {
         Planner thirdPartyPlanner = TestDataFactory.planner(other)
                 .title("Sweep Comment Content")
@@ -267,7 +264,6 @@ class PlannerUserDeleteSweepIT {
     }
 
     @Test
-    @DisplayName("vote-reassignment-spans-both-tables: neither planner nor comment votes keep a row for the deleted account, and third-party votes are untouched")
     void voteRow_WhenAccountDeleted_SurvivesInNeitherTable() {
         Planner thirdPartyPlanner = TestDataFactory.planner(other)
                 .title("Sweep Both Vote Tables")
@@ -290,7 +286,6 @@ class PlannerUserDeleteSweepIT {
     }
 
     @Test
-    @DisplayName("hard delete removes the purged user's settings row")
     void settingsRow_WhenUserHardDeleted_IsRemoved() {
         userSettingsService.getOrCreateEntity(owner.getId());
         assertThat(userSettingsRepository.findByUserId(owner.getId())).as("the settings row exists").isPresent();
@@ -302,7 +297,6 @@ class PlannerUserDeleteSweepIT {
     }
 
     @Test
-    @DisplayName("empty-sweep-still-removes-account: an account owning nothing and having voted nowhere is removed anyway")
     void account_WhenNothingToReassign_IsStillRemoved() {
         purgeOwner(owner.getId());
 

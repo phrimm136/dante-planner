@@ -9,7 +9,6 @@ import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.auth.token.TokenValidator;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -63,7 +62,6 @@ class SessionRevocationServiceLineageTest {
 
 
     @Test
-    @DisplayName("logout revokes current family when flag on; subsequent refresh in same family is revoked")
     void logout_WhenFlagOn_RevokesFamily() {
         String accessToken = "access.jwt";
         String refreshToken = "refresh.jwt";
@@ -87,7 +85,6 @@ class SessionRevocationServiceLineageTest {
     }
 
     @Test
-    @DisplayName("logout still blacklists access token immediately when flag on")
     void logout_WhenFlagOn_BlacklistsAccessToken() {
         String accessToken = "access.jwt";
         Date accessExpiry = new Date(System.currentTimeMillis() + 60000);

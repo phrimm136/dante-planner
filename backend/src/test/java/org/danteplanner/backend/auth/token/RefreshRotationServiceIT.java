@@ -10,7 +10,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -116,11 +115,9 @@ class RefreshRotationServiceIT {
     }
 
     @Nested
-    @DisplayName("Happy path rotation")
     class HappyPath {
 
         @Test
-        @DisplayName("Fresh login token rotates: parent PENDING, successor UNUSED_LATEST")
         void rotate_WhenFreshLogin_ParentPendingSuccessorUnusedLatest() {
             String r1 = freshLoginToken();
             String r1Jti = tokenService.validateToken(r1).jti();
@@ -139,14 +136,15 @@ class RefreshRotationServiceIT {
         }
 
         @Test
-        @DisplayName("Successor first use marks parent RETIRED and drops its memoized successor")
-        void rotate_WhenSuccessorFirstUse_MarksParentRetired() {
+        void rotate_WhenSuccessorFirstUse_MarksParentRetiredAndDropsItsMemoizedSuccessor() {
             String r1 = freshLoginToken();
             String r1Jti = tokenService.validateToken(r1).jti();
 
             RotationResult.Rotated first = (RotationResult.Rotated) rotationService.rotate(r1);
             String r2 = first.newRefreshJwt();
             String r2Jti = first.claims().jti();
+            String familyKey = RefreshRotationService.familyKey(first.claims().familyId());
+            assertTrue(sharedTemplate.opsForHash().hasKey(familyKey, "succjwt:" + r1Jti));
 
             RotationResult.Rotated second = (RotationResult.Rotated) rotationService.rotate(r2);
 
@@ -154,10 +152,10 @@ class RefreshRotationServiceIT {
             assertEquals(RotationState.PENDING, rotationService.stateOf(r2Jti));
             assertEquals(r2Jti, second.claims().parentJti());
             assertEquals(2.0, outcomeCount(RefreshRotationService.OUTCOME_ROTATED));
+            assertFalse(sharedTemplate.opsForHash().hasKey(familyKey, "succjwt:" + r1Jti));
         }
 
         @Test
-        @DisplayName("Rotation hands back the successor JWT its own claims describe")
         void rotate_WhenRotated_CarriesSuccessorJwt() {
             String r1 = freshLoginToken();
 
@@ -171,11 +169,9 @@ class RefreshRotationServiceIT {
     }
 
     @Nested
-    @DisplayName("Retry (Scenario C)")
     class Retry {
 
         @Test
-        @DisplayName("Re-presenting parent within the reuse window replays the same successor")
         void rotate_WhenParentRepresentedWithinWindow_ReusesSuccessor() {
             String r1 = freshLoginToken();
 
@@ -192,7 +188,6 @@ class RefreshRotationServiceIT {
         }
 
         @Test
-        @DisplayName("Re-presenting parent outside the reuse window supersedes prior successor and mints a fresh one")
         void rotate_WhenParentRepresentedOutsideWindow_SupersedesPredecessor() {
             RefreshRotationService noReuse = serviceWithReuseWindow(0L);
             String r1 = freshLoginToken();
@@ -212,7 +207,6 @@ class RefreshRotationServiceIT {
         }
 
         @Test
-        @DisplayName("Fresh successor from retry rotates normally")
         void rotate_WhenRetrySuccessor_RotatesNormally() {
             String r1 = freshLoginToken();
             rotationService.rotate(r1);
@@ -225,11 +219,9 @@ class RefreshRotationServiceIT {
     }
 
     @Nested
-    @DisplayName("Theft detection")
     class TheftDetection {
 
         @Test
-        @DisplayName("Scenario D: presenting a RETIRED token revokes the family")
         void rotate_WhenRetiredToken_RevokesFamily() {
             String r1 = freshLoginToken();
             String familyId = tokenService.validateToken(r1).familyId();
@@ -246,7 +238,6 @@ class RefreshRotationServiceIT {
         }
 
         @Test
-        @DisplayName("Entry persisted under the pre-rename USED spelling still reads as RETIRED and trips theft")
         void rotate_WhenLegacyUsedSpelling_RevokesFamily() {
             String r1 = freshLoginToken();
             TokenClaims claims = tokenService.validateToken(r1);
@@ -265,7 +256,6 @@ class RefreshRotationServiceIT {
         }
 
         @Test
-        @DisplayName("Scenarios A/B: presenting a SUPERSEDED token revokes the family")
         void rotate_WhenSupersededToken_RevokesFamily() {
             RefreshRotationService noReuse = serviceWithReuseWindow(0L);
             String r1 = freshLoginToken();
@@ -284,11 +274,9 @@ class RefreshRotationServiceIT {
     }
 
     @Nested
-    @DisplayName("Family revocation")
     class FamilyRevocation {
 
         @Test
-        @DisplayName("All tokens in a revoked family are rejected")
         void rotate_WhenRevokedFamily_RejectsAllTokens() {
             String r1 = freshLoginToken();
             String familyId = tokenService.validateToken(r1).familyId();
@@ -306,7 +294,6 @@ class RefreshRotationServiceIT {
         }
 
         @Test
-        @DisplayName("Invalid token is rejected as INVALID")
         void rotate_WhenInvalidToken_Rejected() {
             RotationResult result = rotationService.rotate("not.a.jwt");
 
@@ -317,7 +304,6 @@ class RefreshRotationServiceIT {
         }
 
         @Test
-        @DisplayName("Access token is rejected as INVALID and mints nothing even with legacy admit on")
         void rotate_WhenAccessToken_RejectedEvenWithLegacyAdmit() {
             String accessToken = tokenService.generateAccessToken(USER_ID, UserRole.NORMAL);
 
@@ -331,7 +317,6 @@ class RefreshRotationServiceIT {
         }
 
         @Test
-        @DisplayName("Access token into a real rotate: Rejected(INVALID), no successor minted, family untouched")
         void rotate_WhenAccessTokenClaims_RejectedAndFamilyUntouched() {
             JwtTokenService generatorSpy = spy(tokenService);
             RefreshRotationService svc = new RefreshRotationService(
@@ -351,7 +336,6 @@ class RefreshRotationServiceIT {
     }
 
     @Nested
-    @DisplayName("User-wide invalidation")
     class UserInvalidation {
 
         private static final String UINV_KEY = "uinv:" + USER_ID;
@@ -362,7 +346,6 @@ class RefreshRotationServiceIT {
         }
 
         @Test
-        @DisplayName("A refresh token issued before logout-all cannot rotate")
         void rotate_WhenIssuedBeforeInvalidation_Rejected() {
             String token = freshLoginToken();
             sharedTemplate.opsForValue().set(
@@ -378,7 +361,6 @@ class RefreshRotationServiceIT {
         }
 
         @Test
-        @DisplayName("A refresh token issued after logout-all rotates normally")
         void rotate_WhenIssuedAfterInvalidation_Rotates() {
             sharedTemplate.opsForValue().set(
                     UINV_KEY, String.valueOf(System.currentTimeMillis() - 60_000));
@@ -390,7 +372,6 @@ class RefreshRotationServiceIT {
         }
 
         @Test
-        @DisplayName("Invalidation outranks a family that would otherwise rotate")
         void rotate_WhenFamilyHealthyButUserInvalidated_Rejected() {
             String token = freshLoginToken();
             RotationResult.Rotated first =
@@ -405,11 +386,9 @@ class RefreshRotationServiceIT {
     }
 
     @Nested
-    @DisplayName("Concurrent rotation race")
     class ConcurrentRotation {
 
         @Test
-        @DisplayName("Two threads rotating same parent converge on one successor: one rotate, one reuse")
         void rotate_WhenConcurrentSameParent_ConvergesOnOneSuccessor() throws Exception {
             String r1 = freshLoginToken();
             String r1Jti = tokenService.validateToken(r1).jti();
@@ -460,11 +439,9 @@ class RefreshRotationServiceIT {
     }
 
     @Nested
-    @DisplayName("Cross-instance atomicity")
     class CrossInstanceAtomicity {
 
         @Test
-        @DisplayName("Token driven to RETIRED on instance A is detected as theft when replayed on instance B over shared Redis")
         void rotate_WhenTokenRetiredOnInstanceA_ReplayOnInstanceB_DetectsTheftOverSharedRedis() {
             StringRedisTemplate templateA = buildTemplate(SharedRedisContainerSupport.host(), SharedRedisContainerSupport.port());
             StringRedisTemplate templateB = buildTemplate(SharedRedisContainerSupport.host(), SharedRedisContainerSupport.port());
@@ -491,7 +468,6 @@ class RefreshRotationServiceIT {
     }
 
     @Nested
-    @DisplayName("Legacy token admission")
     class LegacyAdmission {
 
         private static final String LEGACY_TOKEN = "legacy.refresh.jwt";
@@ -509,7 +485,6 @@ class RefreshRotationServiceIT {
         }
 
         @Test
-        @DisplayName("Admit on: legacy token admitted, successor carries real lineage, counter increments")
         void rotate_WhenLegacyAdmitOn_AdmitsAndRotates() {
             JwtTokenService validator = spy(tokenService);
             doReturn(legacyClaims(new Date())).when(validator).validateToken(LEGACY_TOKEN);
@@ -527,7 +502,6 @@ class RefreshRotationServiceIT {
         }
 
         @Test
-        @DisplayName("Admit off: legacy token rejected as INVALID, no state entry")
         void rotate_WhenLegacyAdmitOff_Rejects() {
             JwtTokenService validator = spy(tokenService);
             doReturn(legacyClaims(new Date())).when(validator).validateToken(LEGACY_TOKEN);
@@ -544,7 +518,6 @@ class RefreshRotationServiceIT {
         }
 
         @Test
-        @DisplayName("Same legacy token presented twice converges on the same synthesized family and successor")
         void rotate_WhenSameLegacyTokenTwice_DeterministicFamily() {
             Date issuedAt = new Date();
             JwtTokenService validator = spy(tokenService);

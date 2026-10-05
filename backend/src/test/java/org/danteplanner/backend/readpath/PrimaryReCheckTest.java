@@ -9,7 +9,6 @@ import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.danteplanner.backend.shared.readpath.PrimaryReCheck;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -83,11 +82,9 @@ class PrimaryReCheckTest {
     }
 
     @Nested
-    @DisplayName("a replica hit")
     class ReplicaHit {
 
         @Test
-        @DisplayName("is returned unpinned when no tombstone covers it")
         void liveEntity_WhenReadFromReplica_IsServed() {
             when(tombstoneStore.isTombstoned(ENTITY_TYPE, id)).thenReturn(false);
 
@@ -99,7 +96,6 @@ class PrimaryReCheckTest {
         }
 
         @Test
-        @DisplayName("is masked as absent when a tombstone covers it")
         void deletedEntity_WhenReplicaHits_IsMasked() {
             when(tombstoneStore.isTombstoned(ENTITY_TYPE, id)).thenReturn(true);
 
@@ -113,7 +109,6 @@ class PrimaryReCheckTest {
          * never re-examines a positive.
          */
         @Test
-        @DisplayName("is served when the tombstone store cannot answer")
         void tombstoneStore_WhenFailingOpen_ServesTheRow() {
             when(tombstoneStore.isTombstoned(ENTITY_TYPE, id)).thenReturn(false);
 
@@ -122,11 +117,9 @@ class PrimaryReCheckTest {
     }
 
     @Nested
-    @DisplayName("a replica miss")
     class ReplicaMiss {
 
         @Test
-        @DisplayName("re-runs the dereference pinned to the bulkhead pool")
         void miss_WhenReplicaMisses_IsRecheckedThroughBulkhead() {
             AtomicInteger attempts = new AtomicInteger();
             Supplier<String> dereference = () -> {
@@ -144,7 +137,6 @@ class PrimaryReCheckTest {
         }
 
         @Test
-        @DisplayName("clears the pin once the re-check succeeds")
         void pin_WhenRecheckSucceeds_IsReleased() {
             AtomicInteger attempts = new AtomicInteger();
             reCheck.readWithReCheck(ENTITY_TYPE, id, () -> {
@@ -159,7 +151,6 @@ class PrimaryReCheckTest {
         }
 
         @Test
-        @DisplayName("clears the pin when the primary misses too")
         void pin_WhenRecheckAlsoMisses_IsReleased() {
             assertThrows(EntityNotFoundException.class, () -> reCheck.readWithReCheck(
                     ENTITY_TYPE, id, () -> {
@@ -170,7 +161,6 @@ class PrimaryReCheckTest {
         }
 
         @Test
-        @DisplayName("does not consult the tombstone gate on the promoted path")
         void promotedRead_WhenPromoted_SkipsTombstoneGate() {
             AtomicInteger attempts = new AtomicInteger();
             reCheck.readWithReCheck(ENTITY_TYPE, id, () -> {
@@ -185,7 +175,6 @@ class PrimaryReCheckTest {
     }
 
     @Nested
-    @DisplayName("a batch read")
     class BatchRead {
 
         private final UUID replicated = UUID.randomUUID();
@@ -206,7 +195,6 @@ class PrimaryReCheckTest {
         };
 
         @Test
-        @DisplayName("re-reads every replica miss in one bulkhead dereference and omits ids missing there too")
         void misses_WhenReplicaLacksThem_AreReReadOnceThroughBulkhead() {
             when(tombstoneStore.tombstonedAmong(ENTITY_TYPE, Set.of(replicated))).thenReturn(Set.of());
 
@@ -222,7 +210,6 @@ class PrimaryReCheckTest {
         }
 
         @Test
-        @DisplayName("drops a tombstoned replica hit and leaves it out of the re-check")
         void tombstonedHit_WhenReplicaServesIt_IsDropped() {
             when(tombstoneStore.tombstonedAmong(ENTITY_TYPE, Set.of(replicated))).thenReturn(Set.of(replicated));
 
@@ -235,7 +222,6 @@ class PrimaryReCheckTest {
         }
 
         @Test
-        @DisplayName("spends no bulkhead dereference when the replica returns every id")
         void allHits_WhenReplicaHasEveryId_SkipTheReCheck() {
             when(tombstoneStore.tombstonedAmong(ENTITY_TYPE, Set.of(replicated))).thenReturn(Set.of());
 
@@ -248,7 +234,6 @@ class PrimaryReCheckTest {
         }
 
         @Test
-        @DisplayName("does not consult the tombstone gate for promoted rows")
         void promotedRows_WhenReCheckedOnPrimary_SkipTombstoneGate() {
             when(tombstoneStore.tombstonedAmong(ENTITY_TYPE, Set.of())).thenReturn(Set.of());
 
@@ -265,14 +250,12 @@ class PrimaryReCheckTest {
     }
 
     @Nested
-    @DisplayName("bulkhead re-check accounting")
     class BulkheadQueries {
 
         private final UUID first = UUID.randomUUID();
         private final UUID second = UUID.randomUUID();
 
         @Test
-        @DisplayName("counts one query for a single-read miss")
         void singleMiss_WhenReCheckedOnPrimary_CountsOneQuery() {
             AtomicInteger calls = new AtomicInteger();
             Supplier<String> dereference = () -> {
@@ -288,7 +271,6 @@ class PrimaryReCheckTest {
         }
 
         @Test
-        @DisplayName("counts one query for a batch however many rows it promotes")
         void batchMisses_WhenReReadOnPrimary_CountOneQueryAndEveryPromotedRow() {
             when(tombstoneStore.tombstonedAmong(ENTITY_TYPE, Set.of())).thenReturn(Set.of());
             Function<Collection<UUID>, List<UUID>> dereference = requested ->
@@ -301,7 +283,6 @@ class PrimaryReCheckTest {
         }
 
         @Test
-        @DisplayName("counts nothing when the replica serves every id")
         void batchHits_WhenReplicaServesEveryId_CountNoQuery() {
             when(tombstoneStore.tombstonedAmong(ENTITY_TYPE, Set.of(first, second))).thenReturn(Set.of());
 
@@ -312,13 +293,11 @@ class PrimaryReCheckTest {
     }
 
     @Nested
-    @DisplayName("a public-view read under a withdrawal marker")
     class PublicViewReRead {
 
         private static final String SCOPE = "published-planner";
 
         @Test
-        @DisplayName("serves the replica hit untouched when no marker exists")
         void hit_WhenNoMarkerExists_IsServedWithoutReRead() {
             when(tombstoneStore.isTombstoned(SCOPE, id)).thenReturn(false);
             AtomicInteger calls = new AtomicInteger();
@@ -332,7 +311,6 @@ class PrimaryReCheckTest {
         }
 
         @Test
-        @DisplayName("re-reads through the bulkhead and serves what the primary holds when a marker exists")
         void hit_WhenMarkerExistsAndPrimaryHoldsTheRow_ServesThePrimaryRow() {
             when(tombstoneStore.isTombstoned(SCOPE, id)).thenReturn(true);
             List<Object> routedTo = new ArrayList<>();
@@ -349,7 +327,6 @@ class PrimaryReCheckTest {
         }
 
         @Test
-        @DisplayName("answers with the primary's own miss when a marker exists and the primary lacks the row")
         void hit_WhenMarkerExistsAndPrimaryLacksTheRow_PropagatesThePrimaryMiss() {
             when(tombstoneStore.isTombstoned(SCOPE, id)).thenReturn(true);
             EntityNotFoundException primaryMiss = new EntityNotFoundException(ENTITY_TYPE, id);

@@ -2,7 +2,6 @@ package org.danteplanner.backend.integration;
 
 import javax.sql.DataSource;
 import org.danteplanner.backend.config.TestConfig;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +57,6 @@ class RoutingSeoulIT extends CausalHarnessSupport {
     }
 
     @Test
-    @DisplayName("readOnly tx routes to the stale replica; read-write tx routes to the fresh primary")
     void routing_WhenReadOnlyTxSeesStaleReplica_ReadWriteTxSeesFreshPrimary() {
         try {
             primaryJdbcTemplate.execute(

@@ -13,7 +13,6 @@ import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -83,7 +82,6 @@ class NotificationServiceLayerTest {
     }
 
     @Nested
-    @DisplayName("notifyPlannerPublished Tests")
     class NotifyPlannerPublishedTests {
 
         @Test
@@ -101,11 +99,9 @@ class NotificationServiceLayerTest {
     }
 
     @Nested
-    @DisplayName("notifyPlannerRecommended Tests")
     class NotifyPlannerRecommendedTests {
 
         @Test
-        @DisplayName("Should derive a PLANNER_RECOMMENDED row on the dedup key")
         void notifyPlannerRecommended_WhenValid_CreatesNotification() {
             // Arrange
             whenInsertIgnoreYields(1);
@@ -127,7 +123,6 @@ class NotificationServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Should read nothing back when the dedup key refused the row")
         void notifyPlannerRecommended_WhenAlreadyNotified_WritesNothing() {
             // Arrange
             whenInsertIgnoreYields(0);
@@ -143,7 +138,6 @@ class NotificationServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Should hand the arm the written row's payload on success")
         void notifyPlannerRecommended_WhenSuccess_CarriesTheWrittenPayload() {
             // Arrange
             whenInsertIgnoreYields(1);
@@ -167,11 +161,9 @@ class NotificationServiceLayerTest {
     }
 
     @Nested
-    @DisplayName("notifyCommentReceived Tests")
     class NotifyCommentReceivedTests {
 
         @Test
-        @DisplayName("Should derive a COMMENT_RECEIVED row keyed on the comment")
         void notifyCommentReceived_WhenRaised_CreatesNotification() {
             // Arrange
             Long plannerOwnerId = 100L;
@@ -198,7 +190,6 @@ class NotificationServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Should read nothing back when the dedup key refused the row")
         void notifyCommentReceived_WhenAlreadyNotified_WritesNothing() {
             // Arrange
             Long plannerOwnerId = 100L;
@@ -219,11 +210,9 @@ class NotificationServiceLayerTest {
     }
 
     @Nested
-    @DisplayName("notifyReplyReceived Tests")
     class NotifyReplyReceivedTests {
 
         @Test
-        @DisplayName("Should derive a REPLY_RECEIVED row keyed on the reply")
         void notifyReplyReceived_WhenRaised_CreatesNotification() {
             // Arrange
             Long replyId = 101L;
@@ -251,11 +240,9 @@ class NotificationServiceLayerTest {
     }
 
     @Nested
-    @DisplayName("getInbox Tests")
     class GetInboxTests {
 
         @Test
-        @DisplayName("Should return paginated notifications")
         void getInbox_WhenNotificationsExist_ReturnsPagedResults() {
             // Arrange
             Notification n1 = new Notification(testUserId, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED);
@@ -277,7 +264,6 @@ class NotificationServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Should return empty page when no notifications")
         void getInbox_WhenNoNotifications_ReturnsEmpty() {
             // Arrange
             Page<Notification> emptyPage = new PageImpl<>(List.of());
@@ -295,11 +281,9 @@ class NotificationServiceLayerTest {
     }
 
     @Nested
-    @DisplayName("getUnreadCount Tests")
     class GetUnreadCountTests {
 
         @Test
-        @DisplayName("Should return correct unread count")
         void getUnreadCount_WhenUnreadExist_ReturnsCount() {
             // Arrange
             when(notificationRepository.countByUserIdAndReadFalseAndDeletedAtIsNull(testUserId))
@@ -313,7 +297,6 @@ class NotificationServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Should return 0 when no unread notifications")
         void getUnreadCount_WhenNoUnread_ReturnsZero() {
             // Arrange
             when(notificationRepository.countByUserIdAndReadFalseAndDeletedAtIsNull(testUserId))
@@ -328,11 +311,9 @@ class NotificationServiceLayerTest {
     }
 
     @Nested
-    @DisplayName("markAsRead Tests")
     class MarkAsReadTests {
 
         @Test
-        @DisplayName("Should mark notification as read and set readAt timestamp")
         void markAsRead_WhenSuccess_SetsReadFlag() {
             // Arrange
             UUID publicId = UUID.randomUUID();
@@ -353,7 +334,6 @@ class NotificationServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Should throw exception when notification not found")
         void markAsRead_WhenNotFound_ThrowsException() {
             // Arrange
             UUID publicId = UUID.randomUUID();
@@ -366,7 +346,6 @@ class NotificationServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Should throw exception when notification does not belong to user")
         void markAsRead_WhenWrongUser_ThrowsException() {
             // Arrange
             UUID publicId = UUID.randomUUID();
@@ -383,11 +362,9 @@ class NotificationServiceLayerTest {
     }
 
     @Nested
-    @DisplayName("markAllAsRead Tests")
     class MarkAllAsReadTests {
 
         @Test
-        @DisplayName("Should mark all unread notifications as read")
         void markAllAsRead_WhenUnreadExist_ReturnsUpdatedCount() {
             // Arrange
             when(notificationRepository.markAllAsRead(eq(testUserId), any(Instant.class)))
@@ -401,7 +378,6 @@ class NotificationServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Should return 0 when no unread notifications")
         void markAllAsRead_WhenNoUnread_ReturnsZero() {
             // Arrange
             when(notificationRepository.markAllAsRead(eq(testUserId), any(Instant.class)))
@@ -416,11 +392,9 @@ class NotificationServiceLayerTest {
     }
 
     @Nested
-    @DisplayName("deleteNotification Tests")
     class DeleteNotificationTests {
 
         @Test
-        @DisplayName("Should soft-delete notification successfully")
         void deleteNotification_WhenSuccess_SoftDeletes() {
             // Arrange
             UUID publicId = UUID.randomUUID();
@@ -440,7 +414,6 @@ class NotificationServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Should throw exception when notification not found")
         void deleteNotification_WhenNotFound_ThrowsException() {
             // Arrange
             UUID publicId = UUID.randomUUID();
@@ -453,7 +426,6 @@ class NotificationServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Should throw exception when notification does not belong to user")
         void deleteNotification_WhenWrongUser_ThrowsException() {
             // Arrange
             UUID publicId = UUID.randomUUID();
@@ -470,11 +442,9 @@ class NotificationServiceLayerTest {
     }
 
     @Nested
-    @DisplayName("cleanupOldNotifications Tests")
     class CleanupOldNotificationsTests {
 
         @Test
-        @DisplayName("Should soft-delete old read notifications and hard-delete old soft-deleted")
         void cleanupOldNotifications_WhenRun_SoftAndHardDeletes() {
             // Arrange
             when(notificationRepository.softDeleteOldReadNotifications(any(Instant.class), any(Instant.class)))
@@ -493,7 +463,6 @@ class NotificationServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Should use correct cutoff dates")
         void cleanupOldNotifications_WhenRun_UsesCorrectCutoffDates() {
             // Arrange
             ArgumentCaptor<Instant> softDeleteCutoffCaptor = ArgumentCaptor.forClass(Instant.class);

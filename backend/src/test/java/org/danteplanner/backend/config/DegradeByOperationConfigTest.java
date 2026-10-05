@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration;
@@ -35,8 +34,7 @@ class DegradeByOperationConfigTest {
     }
 
     @Test
-    @DisplayName("the scheduler a stalled task shares has spare threads, and the view flush has its own")
-    void schedulerNotStarvedByCrossRegionHang_WhenTaskStalls_PoolHasSpareThreads() {
+    void schedulerNotStarvedByCrossRegionHang_WhenTaskStalls_PoolHasSpareThreadsAndTheViewFlushHasItsOwn() {
         new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(TaskSchedulingAutoConfiguration.class))
                 .withUserConfiguration(ViewFlushSchedulerConfig.class)
@@ -58,8 +56,7 @@ class DegradeByOperationConfigTest {
     }
 
     @Test
-    @DisplayName("the application JDBC url bounds connect and socket waits, while Flyway's stays unbounded")
-    void writeHangReadsSurvive_WhenPrimaryHangs_AppJdbcUrlBoundsSocketWait() throws IOException {
+    void writeHangReadsSurvive_WhenPrimaryHangs_AppJdbcUrlBoundsSocketWaitAndFlywayUrlStaysUnbounded() throws IOException {
         Properties prod = load("/application-prod.properties");
         String appUrl = prod.getProperty("spring.datasource.url");
         String replicaUrl = prod.getProperty("datasource.replica.url");

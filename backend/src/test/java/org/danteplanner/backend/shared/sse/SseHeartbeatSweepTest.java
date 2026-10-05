@@ -11,7 +11,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,7 +58,6 @@ class SseHeartbeatSweepTest {
     }
 
     @Test
-    @DisplayName("the sweep returns while stalled sends are still blocked, leaving the scheduler free")
     void sweepHeartbeatConnections_WhenPeersStall_LeavesTheSchedulerThreadFree() throws Exception {
         CountDownLatch sweepReturned = new CountDownLatch(1);
         scheduler.execute(() -> {
@@ -83,7 +81,6 @@ class SseHeartbeatSweepTest {
     }
 
     @Test
-    @DisplayName("a responsive connection is heartbeaten even while other peers stall")
     void sweepHeartbeatConnections_WhenPeersStall_StillHeartbeatsTheHealthyConnection() throws Exception {
         scheduler.execute(service::sweepHeartbeatConnections);
 

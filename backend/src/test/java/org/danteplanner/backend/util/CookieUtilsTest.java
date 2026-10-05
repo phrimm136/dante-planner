@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.tomcat.util.http.Rfc6265CookieProcessor;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -42,11 +41,9 @@ class CookieUtilsTest {
     }
 
     @Nested
-    @DisplayName("setCookie Tests")
     class SetCookieTests {
 
         @Test
-        @DisplayName("Should set HttpOnly, Secure, and SameSite attributes")
         void setCookie_WhenCalled_SetsHttpOnlySecureSameSite() {
             // Arrange
             String name = "accessToken";
@@ -71,7 +68,6 @@ class CookieUtilsTest {
         }
 
         @Test
-        @DisplayName("Should set path to root")
         void setCookie_WhenCalled_SetsPathToRoot() {
             // Act
             cookieUtils.setCookie(response, "test", "value", 3600);
@@ -84,7 +80,6 @@ class CookieUtilsTest {
         }
 
         @Test
-        @DisplayName("Should set correct max age")
         void setCookie_WhenCalled_SetsCorrectMaxAge() {
             // Arrange
             int expectedMaxAge = 86400; // 1 day
@@ -100,7 +95,6 @@ class CookieUtilsTest {
         }
 
         @Test
-        @DisplayName("Should set Secure=false when configured for development")
         void setCookie_WhenDevMode_SetsSecureFalse() {
             // Arrange - dev mode with secure cookies disabled
             CookieUtils devCookieUtils = new CookieUtils(false, "", "Lax");
@@ -117,11 +111,9 @@ class CookieUtilsTest {
     }
 
     @Nested
-    @DisplayName("getCookieValue Tests")
     class GetCookieValueTests {
 
         @Test
-        @DisplayName("Should return value for existing cookie")
         void getCookieValue_WhenCookieExists_ReturnsValue() {
             // Arrange
             String expectedName = "accessToken";
@@ -141,7 +133,6 @@ class CookieUtilsTest {
         }
 
         @Test
-        @DisplayName("Should return empty for missing cookie")
         void getCookieValue_WhenCookieMissing_ReturnsEmpty() {
             // Arrange
             Cookie[] cookies = {
@@ -158,7 +149,6 @@ class CookieUtilsTest {
         }
 
         @Test
-        @DisplayName("Should return empty when no cookies present")
         void getCookieValue_WhenNoCookies_ReturnsEmpty() {
             // Arrange
             when(request.getCookies()).thenReturn(null);
@@ -171,7 +161,6 @@ class CookieUtilsTest {
         }
 
         @Test
-        @DisplayName("Should return empty for empty cookies array")
         void getCookieValue_WhenEmptyCookiesArray_ReturnsEmpty() {
             // Arrange
             when(request.getCookies()).thenReturn(new Cookie[0]);
@@ -184,7 +173,6 @@ class CookieUtilsTest {
         }
 
         @Test
-        @DisplayName("Should handle case-sensitive cookie names")
         void getCookieValue_WhenDifferentCase_ReturnsEmpty() {
             // Arrange
             Cookie[] cookies = {new Cookie("AccessToken", "value")};
@@ -199,11 +187,9 @@ class CookieUtilsTest {
     }
 
     @Nested
-    @DisplayName("clearCookie Tests")
     class ClearCookieTests {
 
         @Test
-        @DisplayName("Should set cookie with zero max age")
         void clearCookie_WhenCalled_SetsZeroMaxAge() {
             // Arrange
             String name = "accessToken";
@@ -222,7 +208,6 @@ class CookieUtilsTest {
         }
 
         @Test
-        @DisplayName("Should set security attributes when clearing")
         void clearCookie_WhenCalled_SetsSecurityAttributes() {
             // Act
             cookieUtils.clearCookie(response, "tokenToClear");
@@ -239,7 +224,6 @@ class CookieUtilsTest {
         }
 
         @Test
-        @DisplayName("Should emit a Set-Cookie the browser reads as a deletion")
         void clearCookie_WhenCalled_EmitsDeletingSetCookieHeader() {
             // A cleared cookie only takes effect through its rendered header, and the Cookie
             // object alone cannot show that: the container decides what an empty value emits.
@@ -255,7 +239,6 @@ class CookieUtilsTest {
         }
 
         @Test
-        @DisplayName("Should set path to root when clearing")
         void clearCookie_WhenCalled_SetsPathToRoot() {
             // Act
             cookieUtils.clearCookie(response, "test");
@@ -269,11 +252,9 @@ class CookieUtilsTest {
     }
 
     @Nested
-    @DisplayName("Edge Cases")
     class EdgeCaseTests {
 
         @Test
-        @DisplayName("Should throw IllegalArgumentException for empty cookie name")
         void setCookie_WhenEmptyName_Throws() {
             // Act & Assert - Cookie API does not allow empty names
             assertThrows(
@@ -283,7 +264,6 @@ class CookieUtilsTest {
         }
 
         @Test
-        @DisplayName("Should throw IllegalArgumentException for null cookie name")
         void setCookie_WhenNullName_Throws() {
             // Act & Assert - Cookie API does not allow null names
             assertThrows(
@@ -293,7 +273,6 @@ class CookieUtilsTest {
         }
 
         @Test
-        @DisplayName("Should handle empty cookie value")
         void setCookie_WhenEmptyValue_SetsEmptyValue() {
             // Act
             cookieUtils.setCookie(response, "name", "", 3600);
@@ -305,7 +284,6 @@ class CookieUtilsTest {
         }
 
         @Test
-        @DisplayName("Should handle zero max age")
         void setCookie_WhenZeroMaxAge_SetsZeroMaxAge() {
             // Act
             cookieUtils.setCookie(response, "name", "value", 0);
@@ -317,7 +295,6 @@ class CookieUtilsTest {
         }
 
         @Test
-        @DisplayName("Should handle negative max age")
         void setCookie_WhenNegativeMaxAge_SetsNegativeMaxAge() {
             // Act - negative max age means session cookie
             cookieUtils.setCookie(response, "name", "value", -1);

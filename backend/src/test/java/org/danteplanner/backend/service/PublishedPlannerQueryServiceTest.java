@@ -27,7 +27,6 @@ import org.danteplanner.backend.planner.service.RedisViewRecorder;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -145,7 +144,6 @@ class PublishedPlannerQueryServiceTest {
     }
 
     @Nested
-    @DisplayName("published listing")
     class PublishedListingTests {
 
         @Test
@@ -210,7 +208,6 @@ class PublishedPlannerQueryServiceTest {
     }
 
     @Nested
-    @DisplayName("recommended listing")
     class RecommendedListingTests {
 
         @Test
@@ -252,11 +249,9 @@ class PublishedPlannerQueryServiceTest {
     }
 
     @Nested
-    @DisplayName("incrementViewCount Tests")
     class IncrementViewCountTests {
 
         @Test
-        @DisplayName("Should increment view count atomically")
         void incrementViewCount_WhenSuccess_IncrementsCount() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
@@ -272,7 +267,6 @@ class PublishedPlannerQueryServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw PlannerNotFoundException when planner not found")
         void incrementViewCount_WhenNotFound_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
@@ -287,7 +281,6 @@ class PublishedPlannerQueryServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw PlannerNotFoundException when planner is soft-deleted")
         void incrementViewCount_WhenDeletedPlanner_ThrowsException() {
             // Arrange: a soft-deleted planner still has a core row but is not active
             UUID deletedId = UUID.randomUUID();
@@ -303,7 +296,6 @@ class PublishedPlannerQueryServiceTest {
     }
 
     @Nested
-    @DisplayName("getPublishedPlanner Tests")
     class GetPublishedPlannerTests {
 
         private static final String IP_ADDRESS = "192.168.1.100";
@@ -331,7 +323,6 @@ class PublishedPlannerQueryServiceTest {
         }
 
         @Test
-        @DisplayName("Should buffer view and return pre-request count for anonymous visitor")
         void getPublishedPlanner_WhenNewAnonymousView_BuffersView() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
@@ -352,7 +343,6 @@ class PublishedPlannerQueryServiceTest {
         }
 
         @Test
-        @DisplayName("Should buffer view and return pre-request count for authenticated visitor")
         void getPublishedPlanner_WhenNewAuthenticatedView_BuffersView() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
@@ -377,7 +367,6 @@ class PublishedPlannerQueryServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw PlannerNotFoundException for unpublished planner")
         void getPublishedPlanner_WhenUnpublishedPlanner_ThrowsException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
@@ -393,7 +382,6 @@ class PublishedPlannerQueryServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw PlannerNotFoundException for non-existent planner")
         void getPublishedPlanner_WhenPlannerNotFound_ThrowsException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
@@ -405,7 +393,6 @@ class PublishedPlannerQueryServiceTest {
         }
 
         @Test
-        @DisplayName("Should handle null User-Agent gracefully")
         void getPublishedPlanner_WhenNullUserAgent_Success() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
@@ -423,7 +410,6 @@ class PublishedPlannerQueryServiceTest {
         }
 
         @Test
-        @DisplayName("Should use different viewer hashes for authenticated vs anonymous")
         void getPublishedPlanner_WhenAuthVsAnon_DifferentHashes() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
@@ -452,7 +438,6 @@ class PublishedPlannerQueryServiceTest {
     }
 
     @Nested
-    @DisplayName("summary projection")
     class SummaryProjectionTests {
 
         @Test
@@ -494,11 +479,9 @@ class PublishedPlannerQueryServiceTest {
     }
 
     @Nested
-    @DisplayName("searchPlanners Tests")
     class SearchPlannersTests {
 
         @Test
-        @DisplayName("Should search planners via specification and map for anonymous user")
         void searchPlanners_WhenAnonymousNoFilters_ReturnsPage() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
@@ -520,7 +503,6 @@ class PublishedPlannerQueryServiceTest {
         }
 
         @Test
-        @DisplayName("Should reject a non-numeric entity filter id rather than empty the page")
         void malformedEntityFilterId_WhenParsed_IsRejectedNotSilentlyDropped() {
             // Arrange
             CatalogQuery query = new CatalogQuery(false, null, null, null,

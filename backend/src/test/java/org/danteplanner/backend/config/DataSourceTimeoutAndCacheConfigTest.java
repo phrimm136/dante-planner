@@ -22,7 +22,6 @@ import org.danteplanner.backend.shared.config.RoutingDataSourceConfig;
 import org.danteplanner.backend.shared.config.StatementCache;
 import org.danteplanner.backend.shared.config.TimeoutHierarchy;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -78,7 +77,6 @@ class DataSourceTimeoutAndCacheConfigTest {
     }
 
     @Nested
-    @DisplayName("hand-built routing pools")
     class RoutingPools {
 
         private final RoutingDataSourceConfig config =
@@ -96,7 +94,6 @@ class DataSourceTimeoutAndCacheConfigTest {
         }
 
         @Test
-        @DisplayName("primary, replica and fallback replica acquire within the main pool budget")
         void buildHikariConfig_WhenBuilt_TakesConnectionTimeoutFromThePoolAcquireConstant() {
             assertThat(config.buildPrimaryHikariConfig().getConnectionTimeout())
                     .isEqualTo(TimeoutHierarchy.POOL_ACQUIRE_TIMEOUT_MS);
@@ -107,14 +104,12 @@ class DataSourceTimeoutAndCacheConfigTest {
         }
 
         @Test
-        @DisplayName("the re-check bulkhead sheds on its own shorter budget")
         void buildBulkheadHikariConfig_WhenBuilt_TakesConnectionTimeoutFromTheBulkheadConstant() {
             assertThat(config.buildBulkheadHikariConfig().getConnectionTimeout())
                     .isEqualTo(TimeoutHierarchy.BULKHEAD_ACQUIRE_TIMEOUT_MS);
         }
 
         @Test
-        @DisplayName("every pool bounds the InnoDB row-lock wait on connect")
         void buildHikariConfig_WhenBuilt_SetsTheLockWaitInitSqlOnEveryPool() {
             assertThat(allPools())
                     .allSatisfy(pool -> assertThat(pool.getConnectionInitSql())
@@ -122,7 +117,6 @@ class DataSourceTimeoutAndCacheConfigTest {
         }
 
         @Test
-        @DisplayName("every pool bounds the socket read")
         void buildHikariConfig_WhenBuilt_SetsTheSocketTimeoutOnEveryPool() {
             assertThat(allPools())
                     .allSatisfy(pool -> assertThat(pool.getDataSourceProperties())
@@ -132,15 +126,14 @@ class DataSourceTimeoutAndCacheConfigTest {
         }
 
         @Test
-        @DisplayName("every pool carries the statement cache")
         void buildHikariConfig_WhenBuilt_SetsTheStatementCachePropertiesOnEveryPool() {
             assertThat(allPools())
                     .allSatisfy(pool -> assertThat(pool.getDataSourceProperties())
                             .containsAllEntriesOf(StatementCache.DRIVER_PROPERTIES));
         }
 
+        // it blinds @Version optimistic locking
         @Test
-        @DisplayName("no pool rewrites batched statements — it blinds @Version optimistic locking")
         void buildHikariConfig_WhenBuilt_NeverSetsRewriteBatchedStatements() {
             assertThat(allPools())
                     .allSatisfy(pool -> assertThat(pool.getDataSourceProperties())
@@ -149,11 +142,9 @@ class DataSourceTimeoutAndCacheConfigTest {
     }
 
     @Nested
-    @DisplayName("properties bound onto the pool Boot builds")
     class BootBuiltPool {
 
         @Test
-        @DisplayName("the statement cache reaches the Boot-built pool on every MySQL-bound profile")
         void dataSourceProperties_WhenConfigured_CarryTheStatementCacheSettings() {
             Properties base = load("/application.properties");
 
@@ -165,7 +156,6 @@ class DataSourceTimeoutAndCacheConfigTest {
         }
 
         @Test
-        @DisplayName("no MySQL-bound profile rewrites batched statements")
         void dataSourceProperties_WhenConfigured_NeverMentionRewriteBatchedStatements() {
             for (String profile : MYSQL_BOUND_PROFILES) {
                 Properties properties = load(profile);
@@ -180,21 +170,18 @@ class DataSourceTimeoutAndCacheConfigTest {
         }
 
         @Test
-        @DisplayName("the configured pool acquire is the ledger's, not a drifted copy")
         void connectionTimeout_WhenConfigured_MatchesThePoolAcquireConstant() {
             assertThat(load("/application.properties").getProperty(HIKARI_KEY_PREFIX + "connection-timeout"))
                     .isEqualTo(String.valueOf(TimeoutHierarchy.POOL_ACQUIRE_TIMEOUT_MS));
         }
 
         @Test
-        @DisplayName("Tomcat's connector timeout is the ledger's write bound, not a drifted copy")
         void tomcatConnectionTimeout_WhenConfigured_MatchesTheWriteBoundConstant() {
             assertThat(load("/application.properties").getProperty("server.tomcat.connection-timeout"))
                     .isEqualTo(String.valueOf(TimeoutHierarchy.TOMCAT_CONNECTION_TIMEOUT_MS));
         }
 
         @Test
-        @DisplayName("dev and prod bound the row-lock wait on connect")
         void connectionInitSql_WhenConfigured_MatchesTheLockWaitStatement() {
             assertThat(load("/application-dev.properties").getProperty(HIKARI_KEY_PREFIX + "connection-init-sql"))
                     .isEqualTo(TimeoutHierarchy.LOCK_WAIT_INIT_SQL);
@@ -203,7 +190,6 @@ class DataSourceTimeoutAndCacheConfigTest {
         }
 
         @Test
-        @DisplayName("dev and prod application urls carry the ledger's socket timeout")
         void jdbcUrl_WhenAssembled_CarriesTheSocketTimeoutConstant() {
             String expected = TimeoutHierarchy.SOCKET_TIMEOUT_PROPERTY
                     + "=" + TimeoutHierarchy.JDBC_SOCKET_TIMEOUT_MS;
@@ -216,8 +202,8 @@ class DataSourceTimeoutAndCacheConfigTest {
                     .contains(expected);
         }
 
+        // a long migration must not abort at the socket timeout
         @Test
-        @DisplayName("Flyway stays unbounded — a long migration must not abort at the socket timeout")
         void flywayUrl_WhenAssembled_CarriesNoSocketTimeout() {
             assertThat(load("/application-prod.properties").getProperty("spring.flyway.url"))
                     .doesNotContain(TimeoutHierarchy.SOCKET_TIMEOUT_PROPERTY);
@@ -227,7 +213,6 @@ class DataSourceTimeoutAndCacheConfigTest {
     }
 
     @Nested
-    @DisplayName("the binding Boot performs onto its own pool")
     class BootBinding {
 
         private HikariConfig bindBaseProfile() {
@@ -239,7 +224,6 @@ class DataSourceTimeoutAndCacheConfigTest {
         }
 
         @Test
-        @DisplayName("the configured spelling actually reaches HikariConfig, not just the file")
         void hikariProperties_WhenBound_ReachTheStatementCacheAndPoolAcquire() {
             HikariConfig bound = bindBaseProfile();
 
@@ -252,11 +236,10 @@ class DataSourceTimeoutAndCacheConfigTest {
     }
 
     @Nested
-    @DisplayName("Hibernate query tuning")
     class HibernateProperties {
 
+        // so a varying list reuses one plan
         @Test
-        @DisplayName("IN-clause parameter padding is on, so a varying list reuses one plan")
         void hibernateProperties_WhenConfigured_EnableInClauseParameterPadding() {
             assertThat(load("/application.properties")
                     .getProperty("spring.jpa.properties.hibernate.query.in_clause_parameter_padding"))

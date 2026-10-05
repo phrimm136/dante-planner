@@ -2,7 +2,6 @@ package org.danteplanner.backend.config;
 
 import org.danteplanner.backend.shared.config.PoolLedger;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,8 +15,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class PoolLedgerConfigTest {
 
+    // INV9
     @Test
-    @DisplayName("INV9: Σ(primary-hitting pools) × max pods ≤ max_connections − reserve")
     void poolLedger_WhenSummedAcrossMaxPods_StaysWithinConnectionBudget() {
         int primaryHittingLoad =
                 (PoolLedger.OREGON_PRIMARY_POOL + PoolLedger.SEOUL_PRIMARY_POOL)
@@ -28,16 +27,16 @@ class PoolLedgerConfigTest {
         assertThat(primaryHittingLoad).isLessThanOrEqualTo(usableConnections);
     }
 
+    // mechanics §6
     @Test
-    @DisplayName("ledger values match mechanics §6 BINDING pool sizes")
     void poolLedger_WhenRead_MatchesBindingPoolSizes() {
         assertThat(PoolLedger.OREGON_PRIMARY_POOL).isEqualTo(15);
         assertThat(PoolLedger.SEOUL_PRIMARY_POOL).isEqualTo(10);
         assertThat(PoolLedger.SEOUL_REPLICA_POOL).isEqualTo(15);
     }
 
+    // INV9
     @Test
-    @DisplayName("INV9: Σ(primary-hitting pools including Seoul bulkhead) × max pods ≤ budget")
     void poolLedger_WhenBulkheadIncluded_StaysWithinConnectionBudget() {
         int primaryHittingLoad =
                 (PoolLedger.OREGON_PRIMARY_POOL
@@ -50,8 +49,8 @@ class PoolLedgerConfigTest {
         assertThat(primaryHittingLoad).isLessThanOrEqualTo(usableConnections);
     }
 
+    // mechanics §6
     @Test
-    @DisplayName("bulkhead pool size matches mechanics §6 (isolation, not throughput)")
     void poolLedger_WhenReadBulkhead_MatchesBindingPoolSize() {
         assertThat(PoolLedger.BULKHEAD_POOL).isEqualTo(3);
     }

@@ -3,7 +3,6 @@ import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 
 import org.danteplanner.backend.shared.ratelimit.RateLimitExceededException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -43,7 +42,6 @@ class ApiExceptionHandlerRateLimitSseTest {
     }
 
     @Test
-    @DisplayName("Rate-limited text/event-stream request maps to 429, not 500")
     void rateLimitedSseRequest_WhenAcceptIsEventStream_MapsTo429() throws Exception {
         mockMvc.perform(get("/sse/boom").accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isTooManyRequests())

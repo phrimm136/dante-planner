@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,11 +55,10 @@ class MdcLoggingFilterTest {
     }
 
     @Nested
-    @DisplayName("shouldNotFilter")
     class ShouldNotFilterTests {
 
+        // avoids double MDC population on SSE continuations
         @Test
-        @DisplayName("Returns true for ASYNC dispatch — avoids double MDC population on SSE continuations")
         void shouldNotFilter_WhenAsyncDispatch_ReturnsTrue() {
             when(request.getDispatcherType()).thenReturn(DispatcherType.ASYNC);
 
@@ -68,15 +66,14 @@ class MdcLoggingFilterTest {
         }
 
         @Test
-        @DisplayName("Returns false for normal REQUEST dispatch")
         void shouldNotFilter_WhenNormalRequest_ReturnsFalse() {
             when(request.getDispatcherType()).thenReturn(DispatcherType.REQUEST);
 
             assertThat(filter.shouldNotFilter(request)).isFalse();
         }
 
+        // generates fresh MDC for error page rendering
         @Test
-        @DisplayName("Returns false for ERROR dispatch — generates fresh MDC for error page rendering")
         void shouldNotFilter_WhenErrorDispatch_ReturnsFalse() {
             when(request.getDispatcherType()).thenReturn(DispatcherType.ERROR);
 
@@ -85,11 +82,9 @@ class MdcLoggingFilterTest {
     }
 
     @Nested
-    @DisplayName("MDC population")
     class MdcPopulationTests {
 
         @Test
-        @DisplayName("Guest request — userId is 'guest'")
         void doFilterInternal_WhenNoAuthentication_SetsGuestUserId() throws Exception {
             when(request.getMethod()).thenReturn("GET");
             when(request.getRequestURI()).thenReturn("/api/planner/md/published");
@@ -106,7 +101,6 @@ class MdcLoggingFilterTest {
         }
 
         @Test
-        @DisplayName("Authenticated request — userId matches Long principal")
         void doFilterInternal_WhenAuthenticatedUser_SetsNumericUserId() throws Exception {
             Long userId = 42L;
             var auth = new UsernamePasswordAuthenticationToken(
@@ -129,7 +123,6 @@ class MdcLoggingFilterTest {
         }
 
         @Test
-        @DisplayName("AnonymousAuthenticationToken — userId is 'guest', not 'anonymousUser'")
         void doFilterInternal_WhenSpringAnonymousToken_SetsGuestUserId() throws Exception {
             var anon = new AnonymousAuthenticationToken(
                     "key", "anonymousUser",
@@ -152,7 +145,6 @@ class MdcLoggingFilterTest {
         }
 
         @Test
-        @DisplayName("Populates method and path from request")
         void doFilterInternal_WhenRequest_SetsMethodAndPath() throws Exception {
             when(request.getMethod()).thenReturn("DELETE");
             when(request.getRequestURI()).thenReturn("/api/planner/123");
@@ -172,7 +164,6 @@ class MdcLoggingFilterTest {
         }
 
         @Test
-        @DisplayName("Strips CR and LF from URI — prevents log injection via crafted paths")
         void doFilterInternal_WhenCrlfInUri_SanitizesPath() throws Exception {
             when(request.getMethod()).thenReturn("GET");
             when(request.getRequestURI()).thenReturn("/api/planner\r\nFAKE LOG ENTRY");
@@ -194,11 +185,9 @@ class MdcLoggingFilterTest {
     }
 
     @Nested
-    @DisplayName("MDC cleanup")
     class MdcCleanupTests {
 
         @Test
-        @DisplayName("Clears MDC after successful request — verifies it was populated then cleaned up")
         void doFilterInternal_WhenSuccess_ClearsMdcAfterChain() throws Exception {
             when(request.getMethod()).thenReturn("GET");
             when(request.getRequestURI()).thenReturn("/api/planner/md/published");
@@ -216,7 +205,6 @@ class MdcLoggingFilterTest {
         }
 
         @Test
-        @DisplayName("Clears MDC even when filter chain throws — finally block guarantees cleanup")
         void doFilterInternal_WhenChainThrows_ClearsMdc() throws Exception {
             when(request.getMethod()).thenReturn("GET");
             when(request.getRequestURI()).thenReturn("/api/planner/md/published");

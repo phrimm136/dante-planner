@@ -2,7 +2,6 @@ package org.danteplanner.backend.exception;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,7 +51,6 @@ class ApiExceptionHandlerRateLimitRedisTest {
     }
 
     @Test
-    @DisplayName("Lettuce command timeout (RedisException) maps to RATE_LIMIT_TEMPORARILY_UNAVAILABLE 503")
     void lettuceCommandTimeout_WhenThrown_MapsToRateLimitUnavailable503() throws Exception {
         mockMvc.perform(get("/boom/lettuce-timeout"))
                 .andExpect(status().isServiceUnavailable())
@@ -61,7 +59,6 @@ class ApiExceptionHandlerRateLimitRedisTest {
     }
 
     @Test
-    @DisplayName("bucket4j request timeout (not a RedisException) maps to RATE_LIMIT_TEMPORARILY_UNAVAILABLE 503, not 500")
     void bucket4jRequestTimeout_WhenThrown_MapsToRateLimitUnavailable503() throws Exception {
         mockMvc.perform(get("/boom/bucket4j-timeout"))
                 .andExpect(status().isServiceUnavailable())

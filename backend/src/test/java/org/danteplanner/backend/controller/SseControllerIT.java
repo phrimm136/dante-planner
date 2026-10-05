@@ -9,7 +9,6 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -56,14 +55,12 @@ class SseControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("returns 401 when unauthenticated")
     void subscribe_WhenUnauthenticated_Returns401() throws Exception {
         mockMvc.perform(get("/api/sse/subscribe"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @DisplayName("opens a text/event-stream when authenticated")
     void subscribe_WhenAuthenticated_StartsEventStream() throws Exception {
         MvcResult result = performAuthed(mockMvc, get("/api/sse/subscribe"), accessToken)
                 .andExpect(request().asyncStarted())

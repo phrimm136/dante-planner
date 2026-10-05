@@ -18,7 +18,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import com.redis.testcontainers.RedisContainer;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -116,8 +115,7 @@ class AuthLocalReadSplitIT {
     }
 
     @Test
-    @DisplayName("Blacklist bl: and uinv: writes land on auth but are invisible via the read path until auth-local catches up")
-    void blacklistReadWriteSplit_WhenBl_And_Uinv() {
+    void blacklistAndInvalidationWrites_WhenAuthLocalStale_AreInvisibleOnTheReadPathUntilCaughtUp() {
         // bl: half
         String token = "phase14a-access-token";
         Date futureExpiry = new Date(System.currentTimeMillis() + Duration.ofHours(1).toMillis());
@@ -161,7 +159,6 @@ class AuthLocalReadSplitIT {
     }
 
     @Test
-    @DisplayName("Tombstone del: write lands on auth but is invisible via the read path until auth-local catches up")
     void tombstoneRead_WhenAuthLocalStale_ReturnsFalseUntilCaughtUp() {
         UUID id = UUID.randomUUID();
 
@@ -184,7 +181,6 @@ class AuthLocalReadSplitIT {
     }
 
     @Test
-    @DisplayName("Both read paths fail open (no exception) when auth-local is unreachable")
     void reads_WhenAuthLocalUnreachable_FailOpen() {
         LettuceConnectionFactory deadFactory = new LettuceConnectionFactory(
                 new RedisStandaloneConfiguration(deadHost, deadPort));

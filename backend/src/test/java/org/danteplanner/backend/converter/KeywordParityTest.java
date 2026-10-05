@@ -4,7 +4,6 @@ import org.danteplanner.backend.planner.entity.PlannerKeywords;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -53,7 +52,6 @@ class KeywordParityTest {
             Pattern.compile("MODIFY COLUMN selected_keywords SET\\s*\\((.*?)\\)", Pattern.DOTALL);
 
     @Test
-    @DisplayName("VALID_KEYWORDS equals the FE plannerKeywords.json id set")
     void validKeywords_WhenComparedToFrontendList_AreEqual() throws IOException {
         Set<String> feKeywords = readFrontendKeywordIds();
         assertThat(PlannerKeywords.VALID_KEYWORDS)
@@ -62,7 +60,6 @@ class KeywordParityTest {
     }
 
     @Test
-    @DisplayName("VALID_KEYWORDS equals the selected_keywords SET column members")
     void validKeywords_WhenComparedToMigrationSet_AreEqual() throws IOException {
         Set<String> setMembers = readMigrationSetMembers();
         assertThat(PlannerKeywords.VALID_KEYWORDS)

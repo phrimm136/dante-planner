@@ -34,7 +34,6 @@ import org.danteplanner.backend.planner.precondition.ContentVersionValidator;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.planner.validation.PlannerDocument;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -178,11 +177,9 @@ class PlannerCommandServiceTest {
     }
 
     @Nested
-    @DisplayName("createPlanner Tests")
     class CreatePlannerTests {
 
         @Test
-        @DisplayName("Should create planner successfully when within limit")
         void createPlanner_WhenWithinLimit_Succeeds() {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
@@ -206,7 +203,6 @@ class PlannerCommandServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw PlannerLimitExceededException when at max planners")
         void createPlanner_WhenAtLimit_ThrowsException() {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
@@ -223,7 +219,6 @@ class PlannerCommandServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw UserNotFoundException when user not found")
         void createPlanner_WhenUserNotFound_ThrowsException() {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
@@ -243,7 +238,6 @@ class PlannerCommandServiceTest {
         }
 
         @Test
-        @DisplayName("Should use default title when not provided")
         void createPlanner_WhenNoTitle_UsesDefault() {
             // Arrange
             UpsertPlannerRequest request = withTitle(createValidRequest(), null);
@@ -266,7 +260,6 @@ class PlannerCommandServiceTest {
         }
 
         @Test
-        @DisplayName("Should call content validator before saving")
         void createPlanner_WhenCalled_ValidatesContentBeforeSave() {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
@@ -288,7 +281,6 @@ class PlannerCommandServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw PlannerValidationException when content version is invalid")
         void createPlanner_WhenInvalidContentVersion_ThrowsException() {
             // Arrange
             UpsertPlannerRequest request = withContentVersion(createValidRequest(), 5); // Old version
@@ -309,7 +301,6 @@ class PlannerCommandServiceTest {
     }
 
     @Nested
-    @DisplayName("upsertPlanner category Tests")
     class UpsertCategoryTests {
 
         private UpsertPlannerRequest resending(Planner planner, String category, String content) {
@@ -321,7 +312,6 @@ class PlannerCommandServiceTest {
                 java.util.Set.of("Burst"));
 
         @Test
-        @DisplayName("A category change resending the stored content checks only the floor rules")
         void upsertPlanner_WhenOnlyTheCategoryChanges_ChecksOnlyTheFloorRules() {
             Planner planner = createTestPlanner();
             String stored = planner.getContentJson();
@@ -340,7 +330,6 @@ class PlannerCommandServiceTest {
         }
 
         @Test
-        @DisplayName("A category change carrying edited content validates the content")
         void upsertPlanner_WhenCategoryAndContentChange_ValidatesTheContent() {
             Planner planner = createTestPlanner();
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
@@ -355,7 +344,6 @@ class PlannerCommandServiceTest {
         }
 
         @Test
-        @DisplayName("A category change resending the stored content under a new content version validates it")
         void upsertPlanner_WhenCategoryAndContentVersionChange_ValidatesTheContent() {
             Planner planner = createTestPlanner();
             String stored = planner.getContentJson();
@@ -373,7 +361,6 @@ class PlannerCommandServiceTest {
         }
 
         @Test
-        @DisplayName("Resending the stored content without a category change still validates it")
         void upsertPlanner_WhenCategoryIsUnchanged_ValidatesTheContent() {
             Planner planner = createTestPlanner();
             String stored = planner.getContentJson();
@@ -420,11 +407,9 @@ class PlannerCommandServiceTest {
     }
 
     @Nested
-    @DisplayName("deletePlanner Tests")
     class DeletePlannerTests {
 
         @Test
-        @DisplayName("Should throw PlannerNotFoundException when not found")
         void deletePlanner_WhenNotFound_ThrowsException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
@@ -441,7 +426,6 @@ class PlannerCommandServiceTest {
         }
 
         @Test
-        @DisplayName("Should auto-unpublish published planner before deletion")
         void deletePlanner_WhenPublishedPlanner_UnpublishesFirst() {
             // Arrange
             Planner planner = testPlanner(1L, true);
@@ -459,7 +443,6 @@ class PlannerCommandServiceTest {
         }
 
         @Test
-        @DisplayName("Should not change unpublished planner on delete")
         void deletePlanner_WhenUnpublishedPlanner_NoPublishChange() {
             // Arrange
             Planner planner = testPlanner(1L, false);
@@ -477,11 +460,9 @@ class PlannerCommandServiceTest {
     }
 
     @Nested
-    @DisplayName("Planner Limit Edge Cases")
     class PlannerLimitEdgeCaseTests {
 
         @Test
-        @DisplayName("Should allow creating planner when at max-1")
         void createPlanner_WhenAtMaxMinusOne_Succeeds() {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
@@ -504,7 +485,6 @@ class PlannerCommandServiceTest {
         }
 
         @Test
-        @DisplayName("Should fail creating planner when at max")
         void createPlanner_WhenAtMax_ThrowsLimitExceeded() {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
@@ -520,7 +500,6 @@ class PlannerCommandServiceTest {
         }
 
         @Test
-        @DisplayName("Should count only non-deleted planners for limit")
         void createPlanner_WhenCheckingLimit_CountsOnlyNonDeleted() {
             UpsertPlannerRequest request = createValidRequest();
             // Only the deleted-excluding count is stubbed, and with a value no other source could
@@ -539,11 +518,9 @@ class PlannerCommandServiceTest {
     }
 
     @Nested
-    @DisplayName("Ban Enforcement Tests")
     class BanEnforcementTests {
 
         @Test
-        @DisplayName("A ban does not block private planner work")
         void upsertPlanner_WhenBannedUser_IsNotBlockedByTheGuard() {
             testUser.setBannedAt(java.time.Instant.now());
             testUser.setBannedBy(1L);
@@ -571,7 +548,6 @@ class PlannerCommandServiceTest {
         }
 
         @Test
-        @DisplayName("Non-banned user can upsert planner")
         void upsertPlanner_WhenNonBannedUser_Succeeds() {
             // Arrange
             when(userService.findById(testUser.getId()))
@@ -600,7 +576,6 @@ class PlannerCommandServiceTest {
     }
 
     @Nested
-    @DisplayName("Upsert Soft-Delete Guard Tests")
     class UpsertSoftDeleteGuardTests {
 
         private UpsertPlannerRequest buildRequest() {
@@ -610,8 +585,7 @@ class PlannerCommandServiceTest {
         }
 
         @Test
-        @DisplayName("create ownership check: an owner's soft-deleted planner throws PlannerNotFoundException from one SELECT")
-        void createExistenceTwoSelects_WhenOwnSoftDeleted_ThrowsNotFound() {
+        void createOwnershipCheck_WhenOwnSoftDeleted_ThrowsNotFoundWithoutAnExistenceProbe() {
             UUID plannerId = UUID.randomUUID();
             UpsertPlannerRequest request = buildRequest();
             PlannerOwnershipRow ownership = mock(PlannerOwnershipRow.class);
@@ -632,8 +606,7 @@ class PlannerCommandServiceTest {
         }
 
         @Test
-        @DisplayName("create ownership check: another user's active planner throws PlannerForbiddenException from one SELECT")
-        void createExistenceTwoSelects_WhenOtherUserActive_ThrowsForbidden() {
+        void createOwnershipCheck_WhenOtherUserActive_ThrowsForbiddenWithoutAnExistenceProbe() {
             UUID plannerId = UUID.randomUUID();
             UpsertPlannerRequest request = buildRequest();
             PlannerOwnershipRow ownership = mock(PlannerOwnershipRow.class);
@@ -653,8 +626,7 @@ class PlannerCommandServiceTest {
         }
 
         @Test
-        @DisplayName("create ownership check: a genuinely new id proceeds to create")
-        void createExistenceTwoSelects_WhenGenuinelyNew_Creates() {
+        void createOwnershipCheck_WhenGenuinelyNew_CreatesWithoutAnExistenceProbe() {
             UUID plannerId = UUID.randomUUID();
             UpsertPlannerRequest request = buildRequest();
             when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))
@@ -678,7 +650,6 @@ class PlannerCommandServiceTest {
     }
 
     @Nested
-    @DisplayName("Keyword derivation Tests")
     class KeywordDerivationTests {
 
         private static final String SINKING_CONTENT = TestDataFactory.withSelectedKeywords(

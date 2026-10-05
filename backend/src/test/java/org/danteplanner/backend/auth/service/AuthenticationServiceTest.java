@@ -13,7 +13,6 @@ import org.danteplanner.backend.auth.oauth.OAuthTokens;
 import org.danteplanner.backend.auth.oauth.OAuthUserInfo;
 import org.danteplanner.backend.auth.token.TokenGenerator;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -71,11 +70,9 @@ class AuthenticationServiceTest {
     }
 
     @Nested
-    @DisplayName("authenticateWithOAuth Tests")
     class AuthenticateWithOAuthTests {
 
         @Test
-        @DisplayName("Should return user and tokens on successful OAuth for existing active user")
         void authenticateWithOAuth_WhenExistingActiveUser_ReturnsUserAndTokens() {
             // Arrange
             String providerName = "google";
@@ -110,7 +107,6 @@ class AuthenticationServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw when provider not found")
         void authenticateWithOAuth_WhenProviderNotFound_Throws() {
             // Arrange
             when(providerRegistry.getProvider("unknown"))
@@ -130,7 +126,6 @@ class AuthenticationServiceTest {
         }
 
         @Test
-        @DisplayName("Should create new user when not found")
         void authenticateWithOAuth_WhenUserNotFound_CreatesNewUser() {
             // Arrange
             OAuthTokens oauthTokens = new OAuthTokens("access", null, null);
@@ -160,7 +155,6 @@ class AuthenticationServiceTest {
         }
 
         @Test
-        @DisplayName("Should reactivate soft-deleted user on OAuth login")
         void authenticateWithOAuth_WhenUserSoftDeleted_ReactivatesUser() {
             // Arrange
             User deletedUser = User.builder()

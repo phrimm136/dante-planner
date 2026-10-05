@@ -26,7 +26,6 @@ import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
@@ -149,7 +148,6 @@ class OregonReadFallbackIT {
     }
 
     @Test
-    @DisplayName("Oregon without a replica: a write mints ryw_gtid, and a read carrying it is served from the primary without running the gate or touching the cookie")
     void rywCookie_WhenRegionHasNoReplica_WriteMintsCookieAndGatedReadLeavesItUntouched()
             throws Exception {
         Session session = newSession("oregon-ryw-");
@@ -184,7 +182,6 @@ class OregonReadFallbackIT {
     }
 
     @Test
-    @DisplayName("Primary unreachable with no traffic: the probe opens the breaker within five seconds")
     void primaryReadBreaker_WhenPrimaryUnreachableWithoutTraffic_ProbeOpensTheBreaker() throws Exception {
         double openedBefore = transitions("closed", "open");
 
@@ -200,7 +197,6 @@ class OregonReadFallbackIT {
     }
 
     @Test
-    @DisplayName("Primary returns with no traffic: the probe closes the breaker within five seconds and reads go back to the primary")
     void primaryReadBreaker_WhenPrimaryReturnsWithoutTraffic_ProbeClosesTheBreaker() throws Exception {
         Session session = newSession("oregon-probe-close-");
         UUID plannerId = UUID.randomUUID();
@@ -224,7 +220,6 @@ class OregonReadFallbackIT {
     }
 
     @Test
-    @DisplayName("Open breaker: reads are served stale by the fallback replica and writes fail typed")
     void primaryReadBreaker_WhenOpen_ServesStaleReadsAndFailsWritesTyped() throws Exception {
         Session session = newSession("oregon-breaker-");
         UUID plannerId = UUID.randomUUID();
@@ -252,7 +247,6 @@ class OregonReadFallbackIT {
     }
 
     @Test
-    @DisplayName("Primary fails again right after a recovery: every read in the relapse window still returns 200")
     void primaryReadBreaker_WhenPrimaryFailsAgainRightAfterRecovery_ReadsStayUp() throws Exception {
         Session session = newSession("oregon-relapse-");
         UUID plannerId = UUID.randomUUID();

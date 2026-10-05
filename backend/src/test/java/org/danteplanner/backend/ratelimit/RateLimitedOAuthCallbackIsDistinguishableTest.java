@@ -22,7 +22,6 @@ import org.danteplanner.backend.shared.ratelimit.RateLimitService;
 import org.danteplanner.backend.shared.util.CookieUtils;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Isolated;
 
@@ -87,7 +86,6 @@ class RateLimitedOAuthCallbackIsDistinguishableTest {
     }
 
     @Test
-    @DisplayName("An exhausted AUTH bucket redirects the callback under its own rate-limit code")
     void exhaustedAuthBucket_WhenCallbackRequested_RedirectsWithTheRateLimitCode() throws Exception {
         doThrow(new RateLimitExceededException(null, "auth", 1L))
                 .when(rateLimitService).check(eq(RateLimitPolicy.AUTH), anyString());
@@ -98,7 +96,6 @@ class RateLimitedOAuthCallbackIsDistinguishableTest {
     }
 
     @Test
-    @DisplayName("An exhausted AUTH bucket redirects the Apple callback under the rate-limit code")
     void exhaustedAuthBucket_WhenAppleCallbackPosted_RedirectsWithTheRateLimitCode() throws Exception {
         doThrow(new RateLimitExceededException(null, "auth", 1L))
                 .when(rateLimitService).check(eq(RateLimitPolicy.AUTH), anyString());
@@ -109,7 +106,6 @@ class RateLimitedOAuthCallbackIsDistinguishableTest {
     }
 
     @Test
-    @DisplayName("Declined consent keeps the generic login-error code, distinct from the rate-limit one")
     void declinedConsent_WhenCallbackRequested_RedirectsWithTheLoginErrorCode() throws Exception {
         mockMvc.perform(get("/api/auth/google/callback").param("error", "access_denied"))
                 .andExpect(status().isFound())
@@ -117,7 +113,6 @@ class RateLimitedOAuthCallbackIsDistinguishableTest {
     }
 
     @Test
-    @DisplayName("The two rejection codes are different URLs")
     void rejectionCodes_WhenCompared_AreDistinct() {
         assertThat(LoginRedirect.RATE_LIMITED).isNotEqualTo(LoginRedirect.ERROR);
     }

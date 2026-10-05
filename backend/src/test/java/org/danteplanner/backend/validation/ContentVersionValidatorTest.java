@@ -6,7 +6,6 @@ import org.danteplanner.backend.planner.gamedata.PlannerVersions;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -33,17 +32,14 @@ class ContentVersionValidatorTest {
     }
 
     @Nested
-    @DisplayName("validateVersionForCreate Tests")
     class ValidateVersionForCreateTests {
 
         @Test
-        @DisplayName("MD: accepts current version")
         void validateVersionForCreate_WhenMdCurrentVersion_Succeeds() {
             assertDoesNotThrow(() -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, 7));
         }
 
         @Test
-        @DisplayName("MD: rejects old version")
         void validateVersionForCreate_WhenMdOldVersion_Throws() {
             PlannerValidationException ex = assertThrows(
                     PlannerValidationException.class,
@@ -53,7 +49,6 @@ class ContentVersionValidatorTest {
         }
 
         @Test
-        @DisplayName("MD: rejects future version")
         void validateVersionForCreate_WhenMdFutureVersion_Throws() {
             PlannerValidationException ex = assertThrows(
                     PlannerValidationException.class,
@@ -63,19 +58,16 @@ class ContentVersionValidatorTest {
         }
 
         @Test
-        @DisplayName("RR: accepts version 1")
         void validateVersionForCreate_WhenRrVersion1_Succeeds() {
             assertDoesNotThrow(() -> validator.validateVersionForCreate(PlannerType.REFRACTED_RAILWAY, 1));
         }
 
         @Test
-        @DisplayName("RR: accepts version 5")
         void validateVersionForCreate_WhenRrVersion5_Succeeds() {
             assertDoesNotThrow(() -> validator.validateVersionForCreate(PlannerType.REFRACTED_RAILWAY, 5));
         }
 
         @Test
-        @DisplayName("RR: rejects version not in list")
         void validateVersionForCreate_WhenRrVersionNotInList_Throws() {
             PlannerValidationException ex = assertThrows(
                     PlannerValidationException.class,
@@ -85,7 +77,6 @@ class ContentVersionValidatorTest {
         }
 
         @Test
-        @DisplayName("Null version throws exception")
         void validateVersionForCreate_WhenNullVersion_Throws() {
             PlannerValidationException ex = assertThrows(
                     PlannerValidationException.class,
@@ -96,11 +87,9 @@ class ContentVersionValidatorTest {
     }
 
     @Nested
-    @DisplayName("Versions from plannerVersions.json")
     class PlannerVersionsFileTests {
 
         @Test
-        @DisplayName("MD: rejects a listed season that is not the last one")
         void validateVersionForCreate_WhenMdVersionIsAnEarlierListedSeason_ThrowsInvalidContentVersion() {
             PlannerValidationException ex = assertThrows(
                     PlannerValidationException.class,
@@ -110,7 +99,6 @@ class ContentVersionValidatorTest {
         }
 
         @Test
-        @DisplayName("RR: rejects a version between the listed ones")
         void validateVersionForCreate_WhenRrVersionIsNotListed_ThrowsInvalidContentVersion() {
             PlannerValidationException ex = assertThrows(
                     PlannerValidationException.class,

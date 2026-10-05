@@ -26,7 +26,6 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.notification.service.NotificationDispatchService;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -173,7 +172,6 @@ class VoteNotificationFlowIT {
     // ==================== IT1: Vote Crossing Threshold Creates Notification ====================
 
     @Test
-    @DisplayName("IT1: Vote crossing threshold (9→10) creates PLANNER_RECOMMENDED notification")
     void castVote_WhenCrossingThreshold_CreatesNotification() {
         // Arrange - Set planner to 1 vote below threshold
         seedStats(recommendedThreshold - 1, null);
@@ -207,7 +205,6 @@ class VoteNotificationFlowIT {
     }
 
     @Test
-    @DisplayName("IT1.1: Vote below threshold does not create notification")
     void castVote_WhenBelowThreshold_NoNotification() {
         // Arrange - Set planner to 2 votes below threshold
         seedStats(recommendedThreshold - 2, null);
@@ -230,7 +227,6 @@ class VoteNotificationFlowIT {
     }
 
     @Test
-    @DisplayName("IT1.2: Vote exactly at threshold creates notification")
     void castVote_WhenExactlyAtThreshold_CreatesNotification() {
         // Arrange - Set planner to 1 vote below threshold
         seedStats(recommendedThreshold - 1, null);
@@ -252,7 +248,6 @@ class VoteNotificationFlowIT {
     // ==================== IT2: Concurrent Votes Create Single Notification ====================
 
     @Test
-    @DisplayName("IT2: Concurrent votes on threshold-1 planner create single notification (race condition test)")
     void castVote_WhenConcurrentCrossingThreshold_CreatesSingleNotification() throws Exception {
         // Arrange - Set planner to 1 vote below threshold
         seedStats(recommendedThreshold - 1, null);
@@ -323,7 +318,6 @@ class VoteNotificationFlowIT {
     // ==================== IT3: No Duplicate Notifications ====================
 
     @Test
-    @DisplayName("IT3: Second threshold crossing does not create duplicate notification")
     void castVote_WhenSecondThresholdCrossing_NoDuplicateNotification() {
         // Arrange - Set planner to exactly threshold with flag already set
         seedStats(recommendedThreshold, Instant.now());
@@ -353,7 +347,6 @@ class VoteNotificationFlowIT {
     }
 
     @Test
-    @DisplayName("IT3.1: Vote after threshold maintains single notification")
     void castVote_WhenAfterThreshold_MaintainsSingleNotification() {
         // Arrange - Set planner well above threshold with notification already sent
         seedStats(recommendedThreshold + 5, Instant.now());
@@ -379,7 +372,6 @@ class VoteNotificationFlowIT {
     // ==================== IT4: Transaction Consistency ====================
 
     @Test
-    @DisplayName("IT4: Vote and notification are committed together (transaction consistency)")
     void castVote_WhenCrossingThreshold_CommitsVoteAndNotificationTogether() {
         // Arrange - Set planner to 1 below threshold
         seedStats(recommendedThreshold - 1, null);
@@ -409,7 +401,6 @@ class VoteNotificationFlowIT {
     }
 
     @Test
-    @DisplayName("IT4.1: UNIQUE constraint prevents duplicate notifications")
     void notificationSave_WhenDuplicate_ViolatesUniqueConstraint() {
         // Arrange
         Notification notification1 = new Notification(
@@ -437,7 +428,6 @@ class VoteNotificationFlowIT {
     // ==================== IT5: Edge Cases ====================
 
     @Test
-    @DisplayName("IT5.1: Notification only sent on upward crossing, not downward")
     void castVote_WhenDownwardCrossing_NoNotification() {
         // Arrange - Planner above threshold, notification sent, then votes drop below
         seedStats(recommendedThreshold, Instant.now());

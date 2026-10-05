@@ -9,7 +9,6 @@ import org.danteplanner.backend.shared.outbox.service.DomainEventPayloadReader;
 import org.danteplanner.backend.shared.outbox.service.EffectPushQueue;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -55,7 +54,6 @@ class PlannerEffectVisibilityTest {
     }
 
     @Test
-    @DisplayName("a planner withdrawn before dispatch is not announced as published")
     void publishedEffect_WhenThePlannerIsNoLongerPublished_AnnouncesNothing() {
         PlannerPublishedEffect effect = new PlannerPublishedEffect(
                 plannerRepository, notificationDispatchService, payloads);
@@ -68,7 +66,6 @@ class PlannerEffectVisibilityTest {
     }
 
     @Test
-    @DisplayName("a planner withdrawn before dispatch is not announced as recommended")
     void recommendedEffect_WhenThePlannerIsNoLongerPublished_AnnouncesNothing() {
         PlannerRecommendedEffect effect = new PlannerRecommendedEffect(
                 plannerRepository, notificationDispatchService, payloads);

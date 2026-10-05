@@ -20,7 +20,6 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,7 +109,6 @@ class PlannerCatalogSyncIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("a publish is indexed and unmarked by the next pass")
     void catalogSync_WhenAPlannerIsPublished_IndexesItAndClearsTheMarker() throws Exception {
         Planner draft = TestDataFactory.planner(owner).title("Sync Publish").save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(draft.getId()).build());
@@ -124,7 +122,6 @@ class PlannerCatalogSyncIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("an unpublish is cleared and marked by the next pass")
     void catalogSync_WhenAPlannerIsUnpublished_ClearsItsRowsAndMarksIt() {
         Planner planner = publishClean("Sync Unpublish");
 
@@ -137,7 +134,6 @@ class PlannerCatalogSyncIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("a deactivated owner's planner is cleared and marked, and reindexed and unmarked on reactivation")
     void catalogSync_WhenTheOwnerDeactivatesAndReactivates_ClearsThenRebuilds() throws Exception {
         Planner planner = publishClean("Sync Owner Away");
 
@@ -153,7 +149,6 @@ class PlannerCatalogSyncIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("a delete is tombstoned before it returns and cleared, marked and tombstoned by the next pass")
     void catalogSync_WhenAPlannerIsDeleted_TombstonesItAtOnceAndAgainFromThePass() {
         Planner planner = publishClean("Sync Delete");
 
@@ -169,7 +164,6 @@ class PlannerCatalogSyncIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("three events for one planner in one pass cost one sync and are all marked done")
     void drainPending_WhenAPlannerHasThreeEvents_SyncsItOnceAndMarksAllThree() {
         Planner planner = publishClean("Sync Burst");
         List<Long> ids = List.of(recordEvent(planner.getId()), recordEvent(planner.getId()),
@@ -184,7 +178,6 @@ class PlannerCatalogSyncIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("a planner whose sync throws stays pending with an attempt counted while the next planner syncs, and the next pass repairs it")
     void drainPending_WhenOnePlannersSyncThrows_KeepsItPendingSyncsTheNextAndRepairsItLater() throws Exception {
         Planner failing = publishClean("Sync Throws");
         Planner withdrawn = publishClean("Sync Withdrawn Neighbour");
@@ -216,7 +209,6 @@ class PlannerCatalogSyncIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("an event recorded after a pass read its batch stays pending for the next pass")
     void syncPlanner_WhenAnEventArrivesAfterThePassReadItsBatch_LeavesItPending() {
         Planner planner = publishClean("Sync Mid Pass");
         long read = recordEvent(planner.getId());
@@ -229,14 +221,12 @@ class PlannerCatalogSyncIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("the catalog sync's mark does not wait on an earlier-inserted aggregate's locked event row")
     void markDispatched_WhenAnEarlierAggregatesEventIsLocked_MarksWithoutWaiting() throws Exception {
         UUID planner = UUID.randomUUID();
         assertMarkDoesNotWaitOn(new UUID(0L, UUID.randomUUID().getLeastSignificantBits()), planner);
     }
 
     @Test
-    @DisplayName("the catalog sync's mark does not wait on the locked event row of the aggregate sorting right after it")
     void markDispatched_WhenTheNextAggregatesEventIsLocked_MarksWithoutWaiting() throws Exception {
         UUID planner = UUID.randomUUID();
         assertMarkDoesNotWaitOn(
@@ -244,7 +234,6 @@ class PlannerCatalogSyncIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("a pending row that spent its attempts does not age the backlog while a retryable one does")
     void backlogAgeSeconds_WhenTheOldestPendingRowIsCapped_ReportsTheOldestRetryableRow() {
         long capped = recordEvent(UUID.randomUUID());
         long retryable = recordEvent(UUID.randomUUID());

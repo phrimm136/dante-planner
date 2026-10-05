@@ -2,7 +2,6 @@ package org.danteplanner.backend.user.service;
 
 import org.danteplanner.backend.shared.config.EpithetProvider;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,11 +49,9 @@ class RandomUsernameGeneratorTest {
     }
 
     @Nested
-    @DisplayName("Suffix Generation Tests")
     class SuffixGenerationTests {
 
         @Test
-        @DisplayName("Should generate suffix with exactly 5 characters")
         void generateSuffix_WhenCalled_ReturnsExactly5Characters() {
             String suffix = generator.generateSuffix();
 
@@ -62,7 +59,6 @@ class RandomUsernameGeneratorTest {
         }
 
         @Test
-        @DisplayName("Should generate suffix using only safe alphanumeric characters")
         void generateSuffix_WhenCalled_UsesOnlySafeCharset() {
             // Generate multiple suffixes to increase confidence
             for (int i = 0; i < 100; i++) {
@@ -73,7 +69,6 @@ class RandomUsernameGeneratorTest {
         }
 
         @Test
-        @DisplayName("Should generate lowercase suffix only")
         void generateSuffix_WhenCalled_IsLowercase() {
             for (int i = 0; i < 100; i++) {
                 String suffix = generator.generateSuffix();
@@ -83,7 +78,6 @@ class RandomUsernameGeneratorTest {
         }
 
         @Test
-        @DisplayName("Should not contain ambiguous characters (0, 1, o, i, l)")
         void generateSuffix_WhenCalled_ExcludesAmbiguousChars() {
             Set<Character> ambiguous = Set.of('0', '1', 'o', 'i', 'l');
 
@@ -97,7 +91,6 @@ class RandomUsernameGeneratorTest {
         }
 
         @Test
-        @DisplayName("Should generate diverse suffixes (not all the same)")
         void generateSuffix_WhenCalledRepeatedly_ProducesDiverseResults() {
             Set<String> suffixes = new HashSet<>();
 
@@ -111,11 +104,9 @@ class RandomUsernameGeneratorTest {
     }
 
     @Nested
-    @DisplayName("Weighted Association Selection Tests")
     class WeightedSelectionTests {
 
         @Test
-        @DisplayName("Should select from available associations")
         void selectWeightedEpithet_WhenCalled_ReturnsValidAssociation() {
             List<String> associations = List.of("W_CORP", "ZWEI", "SEVEN");
             when(epithetProvider.getEpithets()).thenReturn(associations);
@@ -127,7 +118,6 @@ class RandomUsernameGeneratorTest {
         }
 
         @Test
-        @DisplayName("Should throw IllegalStateException when no associations configured")
         void selectWeightedEpithet_WhenNoAssociations_ThrowsException() {
             when(epithetProvider.getEpithets()).thenReturn(List.of());
 
@@ -137,7 +127,6 @@ class RandomUsernameGeneratorTest {
         }
 
         @Test
-        @DisplayName("Should favor higher weighted associations in selection")
         void selectWeightedEpithet_WhenWeighted_FavorsHigherWeight() {
             // Set up one association with weight 3, another with weight 1
             List<String> associations = List.of("NEW_ASSOC", "OLD_ASSOC");
@@ -167,7 +156,6 @@ class RandomUsernameGeneratorTest {
         }
 
         @Test
-        @DisplayName("Should work with single association")
         void selectWeightedEpithet_WhenSingleAssociation_ReturnsThatAssociation() {
             when(epithetProvider.getEpithets()).thenReturn(List.of("ONLY_ONE"));
             when(epithetProvider.getWeight("ONLY_ONE")).thenReturn(1);
@@ -179,11 +167,9 @@ class RandomUsernameGeneratorTest {
     }
 
     @Nested
-    @DisplayName("Full Generation Tests")
     class FullGenerationTests {
 
         @Test
-        @DisplayName("Should generate complete username components")
         void generate_WhenCalled_ReturnsValidComponents() {
             when(epithetProvider.getEpithets()).thenReturn(List.of("W_CORP"));
             when(epithetProvider.getWeight("W_CORP")).thenReturn(1);
@@ -196,7 +182,6 @@ class RandomUsernameGeneratorTest {
         }
 
         @Test
-        @DisplayName("Should generate unique suffixes on multiple calls")
         void generate_WhenCalledRepeatedly_ProducesUniqueSuffixes() {
             when(epithetProvider.getEpithets()).thenReturn(List.of("W_CORP"));
             when(epithetProvider.getWeight("W_CORP")).thenReturn(1);

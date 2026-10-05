@@ -15,7 +15,6 @@ import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -172,8 +171,8 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
         };
     }
 
+    // stale-identical-save-acks-current-version
     @Test
-    @DisplayName("stale-identical-save-acks-current-version: acknowledged with the stored version, nothing written")
     void staleIdenticalSave_WhenEveryCarriedFieldMatches_AcksCurrentVersion() throws Exception {
         UUID id = plannerPastItsFirstSave();
         long stored = storedRow(id).getSyncVersion();
@@ -195,8 +194,8 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
                 .isEqualTo(lockBefore);
     }
 
+    // retry-after-committed-save-is-idempotent
     @Test
-    @DisplayName("retry-after-committed-save-is-idempotent: the byte-identical retry is acknowledged")
     void retryAfterCommittedSave_WhenResentAtTheConsumedVersion_IsIdempotent() throws Exception {
         UUID id = plannerPastItsFirstSave();
         long consumed = storedRow(id).getSyncVersion();
@@ -220,8 +219,8 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
         assertThat(after.getRowLockVersion()).isEqualTo(lockBefore);
     }
 
+    // pulled-rendering-counts-as-identical
     @Test
-    @DisplayName("pulled-rendering-counts-as-identical: the storage layer's rendering is the same document")
     void pulledRendering_WhenResavedAtAStaleVersion_CountsAsIdentical() throws Exception {
         UUID id = UUID.randomUUID();
         send(id, request(id, BASE_TITLE, TestDataFactory.VALID_CONTENT, PlannerStatus.DRAFT, CONTENT_VERSION, null),
@@ -242,8 +241,8 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
                 .andExpect(jsonPath("$.syncVersion").value(stored));
     }
 
+    // stale-title-change-still-conflicts
     @Test
-    @DisplayName("stale-title-change-still-conflicts: a moved scalar is still a conflict")
     void staleTitleChange_WhenContentIsTreeEqual_StillConflicts() throws Exception {
         UUID id = plannerPastItsFirstSave();
         long stored = storedRow(id).getSyncVersion();
@@ -255,8 +254,8 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
                 .andExpect(jsonPath("$.serverVersion").value(stored));
     }
 
+    // stale-different-content-conflicts
     @Test
-    @DisplayName("stale-different-content-conflicts: a document that is not tree-equal is still a conflict")
     void staleDifferentContent_WhenNotTreeEqual_Conflicts() throws Exception {
         UUID id = plannerPastItsFirstSave();
         long stored = storedRow(id).getSyncVersion();
@@ -268,8 +267,8 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
                 .andExpect(jsonPath("$.serverVersion").value(stored));
     }
 
+    // unparseable-content-falls-through-to-conflict
     @Test
-    @DisplayName("unparseable-content-falls-through-to-conflict: a document that will not parse conflicts, not 500")
     void unparseableContent_WhenCarriedByAStaleWrite_FallsThroughToConflict() throws Exception {
         UUID id = plannerPastItsFirstSave();
         long stored = storedRow(id).getSyncVersion();
@@ -282,8 +281,8 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
         assertThat(storedRow(id).getSyncVersion()).isEqualTo(stored);
     }
 
+    // no-version-still-conflicts
     @Test
-    @DisplayName("no-version-still-conflicts: naming no version is a conflict even when nothing would change")
     void noVersion_WhenPlannerExistsAndNotForced_Conflicts() throws Exception {
         UUID id = plannerPastItsFirstSave();
         long stored = storedRow(id).getSyncVersion();
@@ -296,8 +295,8 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
         assertThat(storedRow(id).getSyncVersion()).isEqualTo(stored);
     }
 
+    // force-still-bypasses
     @Test
-    @DisplayName("force-still-bypasses: a forced write is applied even when it would move nothing")
     void force_WhenCarryingIdenticalStateAtAStaleVersion_StillWrites() throws Exception {
         UUID id = plannerPastItsFirstSave();
         long stored = storedRow(id).getSyncVersion();
@@ -327,7 +326,6 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("writeVariants")
-    @DisplayName("the acknowledgement answers exactly when applying the write would move no field")
     void arbitration_WhenComparedWithApplyingTheSameWrite_IsBiconditional(
             String label, String title, ContentChoice choice, PlannerStatus status, int contentVersion)
             throws Exception {

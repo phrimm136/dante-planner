@@ -11,7 +11,6 @@ import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -69,11 +68,9 @@ class AuthControllerIT extends SharedMySqlContainerSupport {
 
 
     @Nested
-    @DisplayName("GET /api/auth/me - Current User")
     class GetCurrentUserTests {
 
         @Test
-        @DisplayName("Should return 200 with user data when token is valid")
         void getCurrentUser_WhenValidToken_Returns200() throws Exception {
             mockMvc.perform(get("/api/auth/me")
                             .cookie(accessTokenCookie()))
@@ -82,7 +79,6 @@ class AuthControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Should return 204 when no token provided (guest user)")
         void getCurrentUser_WhenNoToken_Returns204() throws Exception {
             mockMvc.perform(get("/api/auth/me"))
                     .andExpect(status().isNoContent())
@@ -94,7 +90,6 @@ class AuthControllerIT extends SharedMySqlContainerSupport {
         // The malformed token test below covers invalid token rejection.
 
         @Test
-        @DisplayName("Should return 204 when token is malformed (treat as guest)")
         void getCurrentUser_WhenMalformedToken_Returns204() throws Exception {
             Cookie malformedCookie = AuthCookies.accessToken("malformed.token.here");
 
@@ -106,11 +101,9 @@ class AuthControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("POST /api/auth/apple/callback - Apple OAuth Stub")
     class AppleCallbackTests {
 
         @Test
-        @DisplayName("Should return 400 as Apple OAuth not implemented")
         void appleCallback_WhenNotImplemented_Returns400() throws Exception {
             mockMvc.perform(post("/api/auth/apple/callback").with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)

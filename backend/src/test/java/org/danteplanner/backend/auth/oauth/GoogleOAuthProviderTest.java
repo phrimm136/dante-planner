@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.auth.exception.OAuthException;
 import org.danteplanner.backend.shared.config.OAuthProperties;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.client.RestTemplate;
@@ -52,7 +51,6 @@ class GoogleOAuthProviderTest {
     }
 
     @Test
-    @DisplayName("A verified token carrying both claims yields the user info")
     void getUserInfo_WhenClaimsPresent_ReturnsUserInfo() {
         when(idTokenVerifier.verify(anyString()))
                 .thenReturn(jwt().subject(SUBJECT).claim("email", EMAIL).build());
@@ -64,7 +62,6 @@ class GoogleOAuthProviderTest {
     }
 
     @Test
-    @DisplayName("A verified token without an email claim is rejected, not passed on as null")
     void getUserInfo_WhenEmailClaimAbsent_ThrowsOAuthException() {
         when(idTokenVerifier.verify(anyString()))
                 .thenReturn(jwt().subject(SUBJECT).build());
@@ -75,7 +72,6 @@ class GoogleOAuthProviderTest {
     }
 
     @Test
-    @DisplayName("A verified token without a subject is rejected")
     void getUserInfo_WhenSubjectAbsent_ThrowsOAuthException() {
         when(idTokenVerifier.verify(anyString()))
                 .thenReturn(jwt().claim("email", EMAIL).claim("unused", "x").build());
@@ -86,7 +82,6 @@ class GoogleOAuthProviderTest {
     }
 
     @Test
-    @DisplayName("A blank email claim is rejected the same as an absent one")
     void getUserInfo_WhenEmailClaimBlank_ThrowsOAuthException() {
         when(idTokenVerifier.verify(anyString()))
                 .thenReturn(jwt().subject(SUBJECT).claim("email", "   ").build());

@@ -9,7 +9,6 @@ import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,7 +50,6 @@ class ModerationRosterIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("a soft-deleted account is absent from the moderation roster")
     void roster_WhenAccountSoftDeleted_OmitsIt() {
         User active = TestDataFactory.createTestUser(userRepository, "active@example.com");
         User removed = TestDataFactory.createTestUser(userRepository, "removed@example.com");
@@ -65,7 +63,6 @@ class ModerationRosterIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("the excluded account is absent from the roster query")
     void rosterQuery_WhenAccountExcluded_OmitsIt() {
         User kept = TestDataFactory.createTestUser(userRepository, "kept@example.com");
         User excluded = TestDataFactory.createTestUser(userRepository, "excluded@example.com");

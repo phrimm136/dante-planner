@@ -19,7 +19,6 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,7 +134,6 @@ class PlannerFilterRebuildIT {
     }
 
     @Test
-    @DisplayName("a rebuild over existing filter rows replaces them without a duplicate-key failure")
     void rebuildFilters_WhenRowsAlreadyExist_ReplacesWithoutDuplicateKey() {
         Planner planner = TestDataFactory.planner(owner)
                 .selectedKeywords(Set.of("Sinking", "Combustion"))
@@ -155,7 +153,6 @@ class PlannerFilterRebuildIT {
     }
 
     @Test
-    @DisplayName("the procedure's extraction matches the Java oracle the drift reconciler audits with")
     void rebuildFilters_WhenFactoryContent_MatchesExtractorOracle() throws Exception {
         Planner planner = TestDataFactory.planner(owner)
                 .published(true)
@@ -178,7 +175,6 @@ class PlannerFilterRebuildIT {
     }
 
     @Test
-    @DisplayName("enhanced gift ids index under their base, collapsing onto an existing base row")
     void rebuildFilters_WhenEnhancedGiftIds_IndexesBaseIdOnly() throws Exception {
         String content = """
                 {"equipment":{},

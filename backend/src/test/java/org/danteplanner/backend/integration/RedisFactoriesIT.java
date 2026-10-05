@@ -1,7 +1,6 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +45,6 @@ class RedisFactoriesIT extends CausalHarnessSupport {
     private LettuceConnectionFactory authLocalRedisConnectionFactory;
 
     @Test
-    @DisplayName("Auth and rate-limit LettuceConnectionFactory beans are distinct injectable instances")
     void redisFactories_WhenAuthAndRateLimit_AreDistinctInjectableBeans() {
         assertThat(authRedisConnectionFactory).isNotNull();
         assertThat(rateLimitRedisConnectionFactory).isNotNull();
@@ -54,7 +52,6 @@ class RedisFactoriesIT extends CausalHarnessSupport {
     }
 
     @Test
-    @DisplayName("auth-local LettuceConnectionFactory bean is a distinct injectable instance")
     void authLocalFactory_WhenContextLoads_IsDistinctInjectableBean() {
         assertThat(authLocalRedisConnectionFactory).isNotNull();
         assertThat(authLocalRedisConnectionFactory).isNotSameAs(authRedisConnectionFactory);

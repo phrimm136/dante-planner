@@ -27,7 +27,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -83,8 +82,7 @@ class RoutingDataSourceConfigTest {
     }
 
     @Nested
-    @DisplayName("Seoul pod (replica enabled)")
-    class SeoulPod {
+    class SeoulPodWithReplica {
 
         private final RoutingDataSourceConfig config =
                 new RoutingDataSourceConfig(primaryProperties(), replicaProperties(true));
@@ -115,8 +113,7 @@ class RoutingDataSourceConfigTest {
     }
 
     @Nested
-    @DisplayName("Oregon pod (replica disabled)")
-    class OregonPod {
+    class OregonPodWithoutReplica {
 
         private final RoutingDataSourceConfig config =
                 new RoutingDataSourceConfig(primaryProperties(), replicaProperties(false));

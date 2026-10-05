@@ -34,7 +34,6 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -459,7 +458,6 @@ class DegradationIT {
     }
 
     @Test
-    @DisplayName("(a) Auth Redis unreachable: blacklist check fails open (does not throw/deny) and blacklist_check_skipped_total increments")
     void blacklistCheck_WhenAuthRedisUnreachable_FailsOpenAndIncrementsSkipCounter() throws IOException {
         String token = "degradation-fail-open-token";
 
@@ -478,7 +476,6 @@ class DegradationIT {
     }
 
     @Test
-    @DisplayName("(b) AOF-replay integrity: a token blacklisted with Redis UP is still rejected after DEBUG LOADAOF")
     void blacklistedToken_WhenAuthRedisReloadsFromAof_StaysRejected() {
         String token = "degradation-aof-replay-token";
         Date expiry = new Date(System.currentTimeMillis() + ONE_HOUR_MS);
@@ -504,7 +501,6 @@ class DegradationIT {
      * cookie) so {@code @Transactional(readOnly=true)} routes to the healthy replica.
      */
     @Test
-    @DisplayName("INV5: primary DB cut → readiness stays UP, write returns WRITE_TEMPORARILY_UNAVAILABLE, list read still serves the replica")
     void primaryDbCut_WhenWriteAttempted_ReturnsWriteTemporarilyUnavailableWhileReadsServe() throws Exception {
         User author = TestDataFactory.createTestUser(
                 userRepository, "degradation-inv5-" + UUID.randomUUID() + "@example.com");
@@ -557,7 +553,6 @@ class DegradationIT {
      * carries.
      */
     @Test
-    @DisplayName("primary blackholed (hangs, not refuses) → write 503 WRITE_TEMPORARILY_UNAVAILABLE within the timeout budget, read still 200 from the replica")
     void writeHangReadsSurvive_WhenPrimaryBlackholed_WriteFails503WithinTimeoutWhileReadStillServes()
             throws Exception {
         User author = TestDataFactory.createTestUser(
@@ -608,7 +603,6 @@ class DegradationIT {
     }
 
     @Test
-    @DisplayName("F2: rate-limit Redis cut → a CRUD write proceeds unmetered and the skip is counted")
     void rateLimitRedisCut_WhenCrudWriteCalled_ProceedsAndCountsTheSkippedCharge() throws Exception {
         User author = TestDataFactory.createTestUser(
                 userRepository, "degradation-f2-" + UUID.randomUUID() + "@example.com");
@@ -630,7 +624,6 @@ class DegradationIT {
     }
 
     @Test
-    @DisplayName("F3: rate-limit Redis cut → the published list is served and the PUBLIC_READ skip is counted")
     void rateLimitRedisCut_WhenPublishedListRead_ServesAndCountsTheSkippedCharge() throws Exception {
         double before = rateLimitSkipCount(RateLimitPolicy.PUBLIC_READ);
 
@@ -643,7 +636,6 @@ class DegradationIT {
     }
 
     @Test
-    @DisplayName("F4: rate-limit Redis cut → the OAuth callback redirects to the SPA with login=unavailable")
     void rateLimitRedisCut_WhenOAuthCallbackCalled_RedirectsToLoginUnavailable() throws Exception {
         cutRateLimitRedis();
 
@@ -653,7 +645,6 @@ class DegradationIT {
     }
 
     @Test
-    @DisplayName("Scenario 5: auth Redis cut → a viewcount post still answers 204 and views.record.failed increments")
     void viewCount_WhenAuthRedisUnreachable_Returns204AndCountsTheFailure() throws Exception {
         User author = TestDataFactory.createTestUser(
                 userRepository, "degradation-views-" + UUID.randomUUID() + "@example.com");

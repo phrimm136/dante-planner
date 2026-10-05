@@ -6,7 +6,6 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 
 import io.lettuce.core.RedisURI;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +20,6 @@ class BoundedRedisConnectionsTest {
     private static final int PORT = 6379;
 
     @Test
-    @DisplayName("a connection factory from the helper carries the bounded command timeout")
     void connectionFactory_WhenBuilt_CarriesBoundedCommandTimeout() {
         LettuceConnectionFactory factory =
                 BoundedRedisConnections.connectionFactory(new RedisStandaloneConfiguration(HOST, PORT));
@@ -31,7 +29,6 @@ class BoundedRedisConnectionsTest {
     }
 
     @Test
-    @DisplayName("a Redis URI from the helper carries the bound, not Lettuce's default")
     void redisUri_WhenBuilt_CarriesBoundedTimeoutRatherThanLettuceDefault() {
         RedisURI uri = BoundedRedisConnections.redisUri(HOST, PORT);
 
@@ -44,7 +41,6 @@ class BoundedRedisConnectionsTest {
     }
 
     @Test
-    @DisplayName("the bound is three seconds")
     void commandTimeout_WhenRead_IsThreeSeconds() {
         assertThat(BoundedRedisConnections.COMMAND_TIMEOUT).isEqualTo(Duration.ofSeconds(3));
     }

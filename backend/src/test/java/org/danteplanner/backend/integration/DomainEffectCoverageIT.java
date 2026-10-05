@@ -3,7 +3,6 @@ package org.danteplanner.backend.integration;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEffectHandler;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +33,6 @@ class DomainEffectCoverageIT extends SharedMySqlContainerSupport {
     private List<DomainEffectHandler> effects;
 
     @Test
-    @DisplayName("every declared event type is either armed or batch-consumed, never both and never neither")
     void effectArms_WhenRegistered_CoverEveryTypeTheBatchConsumerDoesNot() {
         assertThat(effects)
                 .as("two arms declaring one type would leave the registry silently holding one; an arm "

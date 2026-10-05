@@ -12,7 +12,6 @@ import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.moderation.service.ModerationQueryService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -81,7 +80,6 @@ class ModerationAuditTrailBoundIT {
     }
 
     @Test
-    @DisplayName("the dashboard reads a bounded page, not the whole table")
     void auditTrailPage_WhenRead_IsTruncatedByTheQuery() {
         List<ModerationAction> page = moderationQueryService.getModerationActions();
 
@@ -91,7 +89,6 @@ class ModerationAuditTrailBoundIT {
     }
 
     @Test
-    @DisplayName("the bounded page is the newest end of the trail, newest first")
     void auditTrailPage_WhenRead_HoldsNewestRecordsFirst() {
         List<ModerationAction> page = moderationQueryService.getModerationActions();
 

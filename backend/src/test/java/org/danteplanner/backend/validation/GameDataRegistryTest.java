@@ -5,7 +5,6 @@ import org.danteplanner.backend.planner.gamedata.GameDataLoadException;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
 import org.danteplanner.backend.planner.gamedata.PlannerIdMigrations;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -214,7 +213,6 @@ class GameDataRegistryTest {
     }
 
     @Test
-    @DisplayName("an unreadable data path fails startup instead of emptying the registry")
     void init_WhenDataPathUnreadable_ThrowsIllegalState() {
         GameDataRegistry registry = new GameDataRegistry(
                 new GameDataLoader(new ObjectMapper()), "/nonexistent/game-data-path");
@@ -223,7 +221,6 @@ class GameDataRegistryTest {
     }
 
     @Test
-    @DisplayName("an unparseable data file fails startup")
     void init_WhenDataFileUnparseable_ThrowsGameDataLoadException(@TempDir Path dataDir) throws IOException {
         Files.writeString(dataDir.resolve("identitySpecList.json"), "{ \"10101\": ");
 

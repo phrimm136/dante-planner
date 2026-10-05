@@ -4,7 +4,6 @@ import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -70,7 +69,6 @@ class PlannerCommentSseControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("opens a text/event-stream for a guest with no authentication")
     void subscribeToComments_WhenNoAuth_StartsEventStream() throws Exception {
         MvcResult result = mockMvc.perform(get("/api/planner/{plannerId}/comments/events", publishedPlannerId))
                 .andExpect(request().asyncStarted())
@@ -81,7 +79,6 @@ class PlannerCommentSseControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("opens a text/event-stream when a device cookie is present")
     void subscribeToComments_WhenDeviceCookiePresent_StartsEventStream() throws Exception {
         MvcResult result = mockMvc.perform(get("/api/planner/{plannerId}/comments/events", publishedPlannerId)
                         .cookie(AuthCookies.freshDeviceId()))
@@ -98,7 +95,6 @@ class PlannerCommentSseControllerIT extends SharedMySqlContainerSupport {
      * connection registry and lock its real subscribers out. The bucket must follow the caller.
      */
     @Test
-    @DisplayName("charges one bucket across cookie-less requests from the same client address")
     void subscribeToComments_WhenCookielessRepeatFromSameAddress_ExhaustsOneBucket() throws Exception {
         mockMvc.perform(get("/api/planner/{plannerId}/comments/events", publishedPlannerId)
                         .header(CF_CONNECTING_IP, ATTACKER_IP))
@@ -113,7 +109,6 @@ class PlannerCommentSseControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("answers 404 with the domain code when the planner is not published")
     void subscribeToComments_WhenPlannerUnpublished_NotFound() throws Exception {
         mockMvc.perform(get("/api/planner/{plannerId}/comments/events", UUID.randomUUID())
                         .accept(MediaType.TEXT_EVENT_STREAM)
@@ -125,7 +120,6 @@ class PlannerCommentSseControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("answers 404 for a malformed planner id")
     void subscribeToComments_WhenIdMalformed_NotFound() throws Exception {
         mockMvc.perform(get("/api/planner/{plannerId}/comments/events", "not-a-uuid")
                         .accept(MediaType.TEXT_EVENT_STREAM))

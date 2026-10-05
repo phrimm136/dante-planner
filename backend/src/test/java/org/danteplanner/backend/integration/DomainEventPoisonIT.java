@@ -17,7 +17,6 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
@@ -98,7 +97,6 @@ class DomainEventPoisonIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("an attempt survives the rollback of the dispatch that spent it")
     void dispatch_WhenTheArmThrows_KeepsTheAttemptItRecorded() {
         long eventId = undispatchableEvent(0);
 
@@ -116,7 +114,6 @@ class DomainEventPoisonIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("a row at the attempt cap leaves the relay's scan, having alarmed once")
     void relayScan_WhenARowReachesTheAttemptCap_ExcludesItAndAlarmsOnce() {
         long eventId = undispatchableEvent(OutboxConstants.DISPATCH_ATTEMPT_CAP - 1);
 
@@ -142,7 +139,6 @@ class DomainEventPoisonIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("the attempt that spends the last try and succeeds pages nobody")
     void dispatch_WhenTheCappingAttemptSucceeds_RaisesNoAlarm() {
         long eventId = dispatchableEvent(OutboxConstants.DISPATCH_ATTEMPT_CAP - 1);
 
@@ -155,7 +151,6 @@ class DomainEventPoisonIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("a redundant dispatch of a closed row pages nobody")
     void dispatch_WhenTheRowIsAlreadyDispatched_RaisesNoAlarm() {
         long eventId = dispatchableEvent(OutboxConstants.DISPATCH_ATTEMPT_CAP - 1);
         dispatcher.dispatchDomainEvent(eventId);

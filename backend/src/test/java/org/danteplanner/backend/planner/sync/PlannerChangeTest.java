@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.StoredPlannerContent;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -74,14 +73,14 @@ class PlannerChangeTest {
                 .deviceId(DEVICE);
     }
 
+    // stale-identical-save-acks-current-version
     @Test
-    @DisplayName("stale-identical-save-acks-current-version: every carried field equal is a no-op")
     void isNone_WhenEveryCarriedFieldEqualsTheStoredRow_IsTrue() {
         assertThat(isNone(storedRow(), carryingStoredValues().build())).isTrue();
     }
 
+    // pulled-rendering-counts-as-identical
     @Test
-    @DisplayName("pulled-rendering-counts-as-identical: content is compared as a tree, not as bytes")
     void isNone_WhenContentDiffersOnlyInRendering_IsTrue() {
         CarriedWrite carried = carryingStoredValues().content(SAME_DOCUMENT_RESTYLED).build();
 
@@ -102,24 +101,24 @@ class PlannerChangeTest {
         assertThat(isNone(stored, carried)).isTrue();
     }
 
+    // stale-different-content-conflicts
     @Test
-    @DisplayName("stale-different-content-conflicts: a document that is not tree-equal is not a no-op")
     void isNone_WhenContentTreeDiffers_IsFalse() {
         CarriedWrite carried = carryingStoredValues().content(OTHER_DOCUMENT).build();
 
         assertThat(isNone(storedRow(), carried)).isFalse();
     }
 
+    // stale-title-change-still-conflicts
     @Test
-    @DisplayName("stale-title-change-still-conflicts: a scalar the request moves is not a no-op")
     void isNone_WhenTitleDiffers_IsFalse() {
         CarriedWrite carried = carryingStoredValues().title("Renamed").build();
 
         assertThat(isNone(storedRow(), carried)).isFalse();
     }
 
+    // unparseable-content-falls-through-to-conflict
     @Test
-    @DisplayName("unparseable-content-falls-through-to-conflict: stored side unparseable")
     void isNone_WhenStoredContentIsUnparseable_IsFalse() {
         PlannerContent stored = StoredPlannerContent.holding(PlannerContent.builder()
                 .title("Stored Title")
@@ -134,8 +133,8 @@ class PlannerChangeTest {
         assertThat(isNone(stored, carryingStoredValues().build())).isFalse();
     }
 
+    // unparseable-content-falls-through-to-conflict
     @Test
-    @DisplayName("unparseable-content-falls-through-to-conflict: carried side unparseable")
     void isNone_WhenCarriedContentIsUnparseable_IsFalse() {
         CarriedWrite carried = carryingStoredValues().content("{\"equipment\":").build();
 
@@ -173,7 +172,6 @@ class PlannerChangeTest {
     }
 
     @Test
-    @DisplayName("a field the request does not carry changes nothing, so it cannot defeat the no-op")
     void isNone_WhenNoFieldIsCarried_IsTrue() {
         assertThat(isNone(storedRow(), CarriedWrite.builder().build())).isTrue();
     }

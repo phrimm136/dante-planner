@@ -21,7 +21,6 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,8 +108,8 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
         return catalogRepository.existsById(plannerId);
     }
 
+    // catalog-membership-on-transition
     @Test
-    @DisplayName("catalog-membership-on-transition: row exists after publish, absent after unpublish, delete, and takedown")
     void catalogMembership_WhenVisibilityTransitions_RowPresenceMatches() {
         // publish -> row
         Planner planner = draft();
@@ -135,8 +134,8 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
         assertThat(hasCatalogRow(takenDown.getId())).as("taken-down planner has no catalog row").isFalse();
     }
 
+    // recommended-flag-and-detail
     @Test
-    @DisplayName("recommended-flag-and-detail: vote crossing sets catalog.recommended; hide clears it; unhide restores it")
     void recommendedFlag_WhenVoteAndModerationTransitions_TracksDerivation() {
         Planner planner = draft();
         publishingService.publish(owner.getId(), planner.getId());
@@ -171,8 +170,8 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
                 .as("unhide restores the stats-derived flag").isTrue();
     }
 
+    // takedown-blocks-republish
     @Test
-    @DisplayName("takedown-blocks-republish: a moderator-taken-down planner rejects the owner's publish and gains no catalog row")
     void takedownBlocksRepublish_WhenOwnerPublishes_RejectedWithoutCatalogRow() {
         Planner planner = draft();
         publishingService.publish(owner.getId(), planner.getId());

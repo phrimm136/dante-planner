@@ -8,7 +8,6 @@ import org.danteplanner.backend.auth.service.AuthenticationService;
 import org.danteplanner.backend.auth.oauth.OAuthStateService;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,8 +58,8 @@ class OAuthMitmResistanceIT extends SharedMySqlContainerSupport {
         Mockito.reset(authService);
     }
 
+    // PKCE/BFF core defense
     @Test
-    @DisplayName("Intercepted code with no server-side verifier cannot redeem (PKCE/BFF core defense)")
     void interceptedCode_WhenWithoutOauthTx_CannotRedeem() throws Exception {
         // Attacker has a valid-looking code + state from interception, but no oauth_tx —
         // the code_verifier never left the server, so the exchange is never attempted.
@@ -76,7 +75,6 @@ class OAuthMitmResistanceIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Intercepted code paired with a forged oauth_tx is rejected (cannot supply own verifier)")
     void interceptedCode_WhenForgedOauthTx_IsRejected() throws Exception {
         // Attacker forges an oauth_tx to inject a chosen verifier alongside the stolen code.
         // The cookie is not a validly-signed token, so open() fails closed.
@@ -94,7 +92,6 @@ class OAuthMitmResistanceIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Tampered (bit-flipped) oauth_tx from a real session is rejected")
     void interceptedCode_WhenTamperedOauthTx_IsRejected() throws Exception {
         // Attacker captures a genuine oauth_tx and mutates it to alter the sealed verifier/state.
         String genuine = oAuthStateService.seal("victim-state", "victim-verifier", "http://localhost");

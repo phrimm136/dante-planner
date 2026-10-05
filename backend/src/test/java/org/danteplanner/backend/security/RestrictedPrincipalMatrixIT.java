@@ -13,7 +13,6 @@ import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,7 +128,6 @@ class RestrictedPrincipalMatrixIT extends SharedMySqlContainerSupport {
     }
 
     @TestFactory
-    @DisplayName("a ban blocks publishing and commenting, and nothing else")
     Stream<DynamicTest> ban_WhenApplied_WithdrawsDistributionOnly() {
         return mutatingApiEndpoints().map(endpoint -> {
             String key = endpoint.method() + " " + endpoint.pattern();

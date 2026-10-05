@@ -1,5 +1,5 @@
 # 171 tests-keep-class-concurrency-and-enforce-isolation-by-rule
-epic: none · pr: none @tests @concurrency @deletion
+epic: none · pr: none @tests @concurrency @deletion @naming
 
 ## Decisions
 - @tests @concurrency — Backend test classes keep running concurrently inside each Gradle fork, three
@@ -26,6 +26,12 @@ epic: none · pr: none @tests @concurrency @deletion
   shape, an error code the frontend matches on) are never deleted — unenforced.
   NON-GOAL: line coverage as a deletion criterion — it shows that a line ran, not that a test
   protects it.
+- @tests @naming — No test class or test method carries `@DisplayName`; the method name is the only
+  name a test has, and an identifier that resolves to a record (an invariant, RFC slug or migration
+  id) sits in a one-line comment above the method. Three of every five methods carried a display name
+  that restated the method name, and several had drifted to say the opposite of the assertions.
+  REJECTED: display names that restate the method name — two names drift.
+  INVARIANT: no test class or test method carries `@DisplayName` — the display-name convention rule.
 
 ## Takeaway
 - takeaway: when concurrency in a test suite exposes shared state, close each hazard with a rule

@@ -2,7 +2,6 @@ package org.danteplanner.backend.shared.outbox;
 
 import org.danteplanner.backend.shared.outbox.service.DomainEventAttemptRecorder;
 import org.danteplanner.backend.shared.outbox.service.DomainEventDispatcher;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class OutboxRoutingTest {
 
     @Test
-    @DisplayName("the relay's scan is declared read-write, so it reads the primary")
     void pendingEventIds_WhenDeclared_IsTransactionalAndNotReadOnly() throws NoSuchMethodException {
         Method scan = DomainEventDispatcher.class.getMethod(
                 "pendingEventIds", Instant.class, int.class);
@@ -42,7 +40,6 @@ class OutboxRoutingTest {
     }
 
     @Test
-    @DisplayName("the attempt counter is written in a transaction of its own")
     void recordAttempt_WhenDeclared_RunsRequiresNew() throws NoSuchMethodException {
         Method recordAttempt = DomainEventAttemptRecorder.class.getMethod(
                 "recordAttempt", long.class);

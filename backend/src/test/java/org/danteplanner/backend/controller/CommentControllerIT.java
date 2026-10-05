@@ -34,7 +34,6 @@ import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -174,11 +173,9 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("GET /api/planner/{id}/comments - Get Comments")
     class GetCommentsTests {
 
         @Test
-        @DisplayName("Should return 200 with public access to published planner")
         void getComments_WhenPublishedPlanner_Returns200() throws Exception {
             createComment(null, 0);
 
@@ -189,7 +186,6 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Should return 404 when accessing unpublished planner as non-owner")
         void getComments_WhenUnpublishedPlanner_Returns404() throws Exception {
             mockMvc.perform(get("/api/planner/{id}/comments", unpublishedPlanner.getId())
                             .cookie(otherUserAccessTokenCookie()))
@@ -198,8 +194,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
 
         @Test
-        @DisplayName("A leaf by a deactivated author stays in the tree with its body and name hidden, and the row keeps its content")
-        void getComments_WhenLeafAuthorDeactivated_ServesTheLeafWithHiddenBody() throws Exception {
+        void getComments_WhenLeafAuthorDeactivated_ServesTheLeafWithHiddenBodyAndMaskedNameAndKeepsTheRowContent() throws Exception {
             PlannerComment leaf = commentRepository.save(new PlannerComment(
                     publishedPlanner.getId(), otherUser.getId(), "still here", null, 0));
             otherUser.softDelete(Instant.now().plus(Duration.ofDays(30)));
@@ -218,7 +213,6 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("A reply under a deactivated author's comment still renders with its own body")
         void getComments_WhenParentAuthorDeactivated_ServesTheReply() throws Exception {
             PlannerComment parent = commentRepository.save(new PlannerComment(
                     publishedPlanner.getId(), otherUser.getId(), "still here", null, 0));
@@ -236,7 +230,6 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Should return empty array for planner with no comments")
         void getComments_WhenNoComments_ReturnsEmptyArray() throws Exception {
             mockMvc.perform(get("/api/planner/{id}/comments", publishedPlanner.getId()))
                     .andExpect(status().isOk())
@@ -246,11 +239,9 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("POST /api/planner/{id}/comments - Create Comment")
     class CreateCommentTests {
 
         @Test
-        @DisplayName("Should return 201 when creating valid top-level comment")
         void createComment_WhenValidTopLevel_Returns201() throws Exception {
             String requestBody = "{\"content\":\"New comment\"}";
 
@@ -264,7 +255,6 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Should set correct depth when replying with parentId")
         void createComment_WhenParent_SetsCorrectDepth() throws Exception {
             PlannerComment parent = createComment(null, 0);
 
@@ -287,7 +277,6 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Should return 401 when unauthenticated")
         void createComment_WhenUnauthenticated_Returns401() throws Exception {
             String requestBody = "{\"content\":\"Test\"}";
 
@@ -298,7 +287,6 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Should return 403 when commenting on unpublished planner")
         void createComment_WhenUnpublishedPlanner_Returns403() throws Exception {
             String requestBody = "{\"content\":\"Test\"}";
 
@@ -310,7 +298,6 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Should return 400 when content is empty")
         void createComment_WhenEmptyContent_Returns400() throws Exception {
             String requestBody = "{\"content\":\"\"}";
 
@@ -322,7 +309,6 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Depth 0 - Top-level comment has depth 0")
         void createComment_WhenTopLevel_HasDepth0() throws Exception {
             String requestBody = "{\"content\":\"Top-level\"}";
 
@@ -340,7 +326,6 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Depth 1-5 - Replies increment depth correctly")
         void createComment_WhenReplies_IncrementDepth() throws Exception {
             PlannerComment depth0 = createComment(null, 0);
             String requestBody1 = "{\"content\":\"Depth 1\",\"parentCommentId\":\"" + depth0.getPublicId() + "\"}";
@@ -362,7 +347,6 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Depth 6 - Comment at depth 6 is allowed (MAX_DEPTH=MAX_VALUE)")
         void createComment_WhenDepth6_IsAllowed() throws Exception {
             PlannerComment depth0 = createComment(null, 0);
             PlannerComment depth1 = createComment(depth0.getId(), 1);
@@ -391,7 +375,6 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Depth 6 - Comment at depth 6 has correct parent (no flattening)")
         void createComment_WhenDepth6_HasCorrectParent() throws Exception {
             PlannerComment depth0 = createComment(null, 0);
             PlannerComment depth1 = createComment(depth0.getId(), 1);
@@ -416,7 +399,6 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Should create notification when replying to comment")
         void createComment_WhenReplyToComment_CreatesNotification() throws Exception {
             PlannerComment parentComment = createComment(null, 0);
 
@@ -434,7 +416,6 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Should create notification when top-level comment on planner")
         void createComment_WhenTopLevelOnPlanner_CreatesNotification() throws Exception {
             String requestBody = "{\"content\":\"Top-level comment\"}";
 
@@ -451,11 +432,9 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("PUT /api/comments/{id} - Update Comment")
     class UpdateCommentTests {
 
         @Test
-        @DisplayName("Should return 200 when owner edits comment")
         void updateComment_WhenOwner_Returns200() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
@@ -474,7 +453,6 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Should return 403 when non-owner tries to edit")
         void updateComment_WhenNonOwner_Returns403() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
@@ -488,7 +466,6 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Should persist updated content")
         void updateComment_WhenOwner_PersistsContent() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
@@ -507,11 +484,9 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("DELETE /api/comments/{id} - Delete Comment")
     class DeleteCommentTests {
 
         @Test
-        @DisplayName("Should return 204 when owner deletes comment")
         void deleteComment_WhenOwner_Returns204() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
@@ -521,7 +496,6 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Should return 403 when non-owner tries to delete")
         void deleteComment_WhenNonOwner_Returns403() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
@@ -533,11 +507,9 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("POST /api/comments/{id}/upvote - Upvote Comment")
     class UpvoteTests {
 
         @Test
-        @DisplayName("Should create vote on first upvote")
         void upvote_WhenFirstTime_CreatesVote() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
@@ -550,7 +522,6 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
 
         @Test
-        @DisplayName("Should increment counter atomically")
         void upvote_WhenAtomicCounter_IncrementsCorrectly() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
@@ -563,7 +534,6 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Should return 401 when unauthenticated")
         void upvote_WhenUnauthenticated_Returns401() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
@@ -572,7 +542,6 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Should return updated vote status")
         void upvote_WhenSuccess_ReturnsUpdatedStatus() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
@@ -586,7 +555,6 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("POST /api/comments/{id}/report - Report Comment")
     class ReportTests {
 
         private static final String REPORT_BODY = "{\"reason\":\"SPAM\"}";

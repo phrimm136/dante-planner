@@ -10,7 +10,6 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +44,6 @@ class UserProfileImmutableIT extends SharedMySqlContainerSupport {
     private JdbcTemplate jdbcTemplate;
 
     @Test
-    @DisplayName("a reflective change to a loaded UserProfile is not written at commit")
     void userProfile_WhenChangedByReflectionAndCommitted_RunsNoUpdateAndKeepsTheRow() {
         User user = TestDataFactory.createTestUser(userRepository, "profile-immutable@example.com");
         String epithet = user.getUsernameEpithet();

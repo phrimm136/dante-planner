@@ -1,7 +1,6 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ToxiproxyWanIT extends CausalHarnessSupport {
 
     @Test
-    @DisplayName("The wan profile can be applied and removed: latency toxic present after apply, absent after remove")
     void wanProfile_WhenApplyThenRemove_ToxicPresentThenAbsent() throws Exception {
         toxiproxyControl.applyWan();
         assertThat(toxiproxyControl.appToPrimaryProxy().toxics().getAll()).isNotEmpty();

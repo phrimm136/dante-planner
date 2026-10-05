@@ -13,7 +13,6 @@ import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -70,7 +69,6 @@ class CommentThreadNotFoundContractTest {
     }
 
     @Test
-    @DisplayName("a non-owner reading an unpublished planner's thread gets the detail read's 404")
     void getComments_WhenNonOwnerReadsUnpublishedThread_AnswersPlannerNotFound() throws Exception {
         signInAs(STRANGER_ID);
 
@@ -81,7 +79,6 @@ class CommentThreadNotFoundContractTest {
     }
 
     @Test
-    @DisplayName("an anonymous reader of an unpublished planner's thread gets the detail read's 404")
     void getComments_WhenAnonymousReadsUnpublishedThread_AnswersPlannerNotFound() throws Exception {
         mockMvc.perform(get("/api/planner/{id}/comments", plannerId).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -89,7 +86,6 @@ class CommentThreadNotFoundContractTest {
     }
 
     @Test
-    @DisplayName("the owner still reads their own unpublished thread")
     void getComments_WhenOwnerReadsOwnUnpublishedThread_Succeeds() throws Exception {
         signInAs(OWNER_ID);
 

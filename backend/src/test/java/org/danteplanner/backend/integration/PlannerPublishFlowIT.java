@@ -8,6 +8,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerEntityFilter;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
@@ -19,6 +20,7 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
 import org.danteplanner.backend.auth.token.JwtTokenService;
+import org.danteplanner.backend.shared.entity.ContentEntityType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.AuthCookies;
@@ -26,7 +28,6 @@ import org.danteplanner.backend.support.CatalogEffects;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,15 +136,17 @@ class PlannerPublishFlowIT {
     private void cleanUp() {
     }
 
+    private static final int UNREACHABLE_ENTITY_ID = 424242;
+
     private long entityFilterRows(UUID plannerId) {
         return entityFilterRepository.findAll().stream()
                 .filter(f -> f.getPlannerId().equals(plannerId))
                 .count();
     }
 
+    // published-title-edit-consistent
     @Test
-    @DisplayName("published-title-edit-consistent: a title edit shows in the public list and detail immediately; a title-only edit leaves the filter index alone")
-    void publishedTitleEditConsistent_WhenTitleEdited_ListAndDetailImmediate() throws Exception {
+    void publishedTitleEditConsistent_WhenTitleEdited_ListAndDetailImmediateAndFilterIndexUntouched() throws Exception {
         Planner planner = TestDataFactory.planner(owner)
                 .title("Before Edit")
                 .published(true)
@@ -151,8 +154,10 @@ class PlannerPublishFlowIT {
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
         catalogSyncService.syncPlanner(planner.getId(), List.of());
+        PlannerEntityFilter planted = entityFilterRepository.save(
+                new PlannerEntityFilter(ContentEntityType.THEME_PACK, UNREACHABLE_ENTITY_ID, planner.getId()));
         long filterRowsBefore = entityFilterRows(planner.getId());
-        assertThat(filterRowsBefore).isPositive();
+        assertThat(filterRowsBefore).isGreaterThan(1);
 
         // Owner edits only the title: the client sends the full document with
         // everything but the title unchanged (the wire contract requires it)
@@ -175,13 +180,14 @@ class PlannerPublishFlowIT {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("After Edit"));
 
-        assertThat(entityFilterRows(planner.getId()))
-                .as("a title-only edit does not rebuild the entity filter")
-                .isEqualTo(filterRowsBefore);
+        assertThat(entityFilterRepository.findById(planted.getId()))
+                .as("a title-only edit does not rebuild the entity filter: a rebuild clears every row "
+                        + "for the planner, so the planted row would be gone")
+                .isPresent();
+        assertThat(entityFilterRows(planner.getId())).isEqualTo(filterRowsBefore);
     }
 
     @Test
-    @DisplayName("publish-intent-single-request: the intent route's body creates the draft server-side and publishes it")
     void publishIntentSingleRequest_WhenContentCarried_CreatesAndPublishesAtomically() throws Exception {
         UUID plannerId = UUID.randomUUID();
         String content = TestDataFactory.planner(owner).build().getContentJson();
@@ -208,7 +214,6 @@ class PlannerPublishFlowIT {
     }
 
     @Test
-    @DisplayName("publish-intent-rejects-partial-content: an incomplete body is refused before anything is stored")
     void publishIntentSingleRequest_WhenContentIncomplete_Returns400AndStoresNothing() throws Exception {
         UUID plannerId = UUID.randomUUID();
 
@@ -257,7 +262,6 @@ class PlannerPublishFlowIT {
     }
 
     @Test
-    @DisplayName("publish-carries-the-save: one content-carrying publish leaves the state save-then-publish leaves")
     void publishWithContent_WhenLocalEditsUnsaved_EqualsSaveThenPublish() throws Exception {
         UUID device = UUID.randomUUID();
         UUID throughTwoRequests = UUID.randomUUID();
@@ -296,7 +300,6 @@ class PlannerPublishFlowIT {
     }
 
     @Test
-    @DisplayName("stale-publish-conflicts-like-a-stale-save: the same stale body answers the same conflict on both routes")
     void publishWithContent_WhenSyncVersionStale_AnswersTheSaveConflict() throws Exception {
         UUID device = UUID.randomUUID();
         UUID id = UUID.randomUUID();
@@ -322,7 +325,6 @@ class PlannerPublishFlowIT {
     }
 
     @Test
-    @DisplayName("publish-stamps-the-device: the publishing device is stored, so another device's stale resend conflicts")
     void publishWithContent_WhenStaleResendFromAnotherDevice_ConflictsInsteadOfAcking() throws Exception {
         UUID firstDevice = UUID.randomUUID();
         UUID secondDevice = UUID.randomUUID();
@@ -341,7 +343,6 @@ class PlannerPublishFlowIT {
     }
 
     @Test
-    @DisplayName("unpublish-ignores-a-body: the unpublish intent saves no content even when a body is sent")
     void unpublishIntent_WhenBodySent_SavesNoContent() throws Exception {
         UUID device = UUID.randomUUID();
         UUID id = UUID.randomUUID();
@@ -384,7 +385,6 @@ class PlannerPublishFlowIT {
     }
 
     @Test
-    @DisplayName("title-only-save-skips-rebuild: resending the content exactly as the owner received it runs no filter rebuild")
     void publishedTitleSave_WhenContentResentAsReceived_SkipsFilterRebuild() throws Exception {
         Planner planner = TestDataFactory.planner(owner)
                 .published(true)
@@ -403,7 +403,6 @@ class PlannerPublishFlowIT {
     }
 
     @Test
-    @DisplayName("composition-change-rebuilds: a save that swaps an identity rebuilds the filter index")
     void publishedContentSave_WhenIdentityChanged_RebuildsFilters() throws Exception {
         Planner planner = TestDataFactory.planner(owner)
                 .published(true)

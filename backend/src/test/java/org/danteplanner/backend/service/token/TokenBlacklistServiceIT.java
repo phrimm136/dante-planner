@@ -13,7 +13,6 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -65,11 +64,9 @@ class TokenBlacklistServiceIT {
     }
 
     @Nested
-    @DisplayName("blacklistToken Tests")
     class BlacklistTokenTests {
 
         @Test
-        @DisplayName("Should add token to blacklist")
         void blacklistToken_WhenCalled_AddsTokenToBlacklist() {
             // Arrange
             String token = "test.jwt.token";
@@ -84,7 +81,6 @@ class TokenBlacklistServiceIT {
         }
 
         @Test
-        @DisplayName("Should overwrite existing entry for same token")
         void blacklistToken_WhenSameToken_Overwrites() {
             // Arrange
             String token = "test.jwt.token";
@@ -102,11 +98,9 @@ class TokenBlacklistServiceIT {
     }
 
     @Nested
-    @DisplayName("isBlacklisted Tests")
     class IsBlacklistedTests {
 
         @Test
-        @DisplayName("Should return true for blacklisted token")
         void isBlacklisted_WhenBlacklisted_ReturnsTrue() {
             // Arrange
             String token = "blacklisted.jwt.token";
@@ -121,7 +115,6 @@ class TokenBlacklistServiceIT {
         }
 
         @Test
-        @DisplayName("Should return false for non-blacklisted token")
         void isBlacklisted_WhenNotBlacklisted_ReturnsFalse() {
             // Arrange
             String unknownToken = "unknown.jwt.token";
@@ -134,7 +127,6 @@ class TokenBlacklistServiceIT {
         }
 
         @Test
-        @DisplayName("Should return false for expired blacklist entry (TTL cleanup)")
         void isBlacklisted_WhenEntryExpired_ReturnsFalse() {
             // Arrange - token with expiry in the past
             String token = "expired.jwt.token";
@@ -151,11 +143,9 @@ class TokenBlacklistServiceIT {
     }
 
     @Nested
-    @DisplayName("Utility Methods Tests")
     class UtilityMethodsTests {
 
         @Test
-        @DisplayName("clear() should remove all entries")
         void clear_WhenCalled_RemovesAllEntries() {
             // Arrange
             Date expiry = new Date(System.currentTimeMillis() + 60000);
@@ -173,7 +163,6 @@ class TokenBlacklistServiceIT {
         }
 
         @Test
-        @DisplayName("size() should return correct count")
         void size_WhenEntriesExist_ReturnsCorrectCount() {
             // Arrange
             Date expiry = new Date(System.currentTimeMillis() + 60000);
@@ -191,11 +180,9 @@ class TokenBlacklistServiceIT {
     }
 
     @Nested
-    @DisplayName("Rotation Grace Period Tests")
     class RotationGracePeriodTests {
 
         @Test
-        @DisplayName("Rotation-blacklisted token should be allowed within grace period")
         void blacklistTokenForRotation_WhenWithinGracePeriod_Allowed() {
             // Arrange
             String token = "rotation.refresh.token";
@@ -209,7 +196,6 @@ class TokenBlacklistServiceIT {
         }
 
         @Test
-        @DisplayName("Immediate-blacklisted token should be rejected instantly")
         void blacklistToken_WhenBlacklisted_RejectedImmediately() {
             // Arrange
             String token = "logout.refresh.token";
@@ -223,7 +209,6 @@ class TokenBlacklistServiceIT {
         }
 
         @Test
-        @DisplayName("Rotation-blacklisted token should be rejected after grace period")
         void blacklistTokenForRotation_WhenAfterGracePeriod_Rejected() throws InterruptedException {
             // Arrange
             String token = "rotation.expired.grace.token";
@@ -242,7 +227,6 @@ class TokenBlacklistServiceIT {
         }
 
         @Test
-        @DisplayName("Same token: rotation then logout should override to immediate")
         void blacklistToken_WhenRotationThenLogout_OverridesToImmediate() {
             // Arrange
             String token = "rotate.then.logout.token";
@@ -260,11 +244,9 @@ class TokenBlacklistServiceIT {
     }
 
     @Nested
-    @DisplayName("Token Hashing Tests")
     class TokenHashingTests {
 
         @Test
-        @DisplayName("Different tokens should not collide")
         void blacklistToken_WhenDifferentTokens_DoNotCollide() {
             // Arrange
             Date expiry = new Date(System.currentTimeMillis() + 60000);
@@ -280,7 +262,6 @@ class TokenBlacklistServiceIT {
         }
 
         @Test
-        @DisplayName("Same token value should always match")
         void isBlacklisted_WhenSameToken_AlwaysMatches() {
             // Arrange
             Date expiry = new Date(System.currentTimeMillis() + 60000);
@@ -297,11 +278,9 @@ class TokenBlacklistServiceIT {
     }
 
     @Nested
-    @DisplayName("Cross-Instance Externalization Tests")
     class CrossInstanceTests {
 
         @Test
-        @DisplayName("A blacklisted token is visible to a second service over the same Redis")
         void blacklistToken_WhenCalled_IsVisibleToASecondServiceOverTheSameRedis() {
             // Arrange
             String token = "cross.instance.token";
@@ -319,11 +298,9 @@ class TokenBlacklistServiceIT {
     }
 
     @Nested
-    @DisplayName("User Invalidation Redis Externalization Tests")
     class UserInvalidationRedisTests {
 
         @Test
-        @DisplayName("A user invalidation is visible to a second service over the same Redis")
         void invalidateUserTokens_WhenCalled_IsVisibleToASecondServiceOverTheSameRedis() {
             // Arrange
             Long userId = TestDataFactory.nextUserId();
@@ -339,7 +316,6 @@ class TokenBlacklistServiceIT {
         }
 
         @Test
-        @DisplayName("userInvalidationSize reflects Redis state and clear() resets it")
         void userInvalidationSize_WhenInvalidatedThenCleared_ReflectsRedis() {
             // Arrange
             Long userId = TestDataFactory.nextUserId();
@@ -354,7 +330,6 @@ class TokenBlacklistServiceIT {
         }
 
         @Test
-        @DisplayName("clearUserInvalidation removes the user's invalidation")
         void clearUserInvalidation_WhenCalled_RemovesInvalidation() {
             // Arrange
             Long userId = TestDataFactory.nextUserId();
@@ -370,13 +345,11 @@ class TokenBlacklistServiceIT {
     }
 
     @Nested
-    @DisplayName("Read-Path Fail-Open Tests")
     class FailOpenTests {
 
         private static final String SKIP_COUNTER = "blacklist_check_skipped_total";
 
         @Test
-        @DisplayName("isBlacklisted fails open and increments skip counter when Redis read throws")
         void isBlacklisted_WhenRedisReadFails_ReturnsFalseAndIncrementsSkipCounter() {
             // Arrange - a template whose read path throws a DataAccessException
             StringRedisTemplate mockTemplate = mock(StringRedisTemplate.class);
@@ -394,7 +367,6 @@ class TokenBlacklistServiceIT {
         }
 
         @Test
-        @DisplayName("isUserTokenInvalidated fails open and increments skip counter when Redis read throws")
         void isUserTokenInvalidated_WhenRedisReadFails_ReturnsFalseAndIncrementsSkipCounter() {
             // Arrange - a template whose read path throws a DataAccessException
             StringRedisTemplate mockTemplate = mock(StringRedisTemplate.class);

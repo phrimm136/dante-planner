@@ -27,7 +27,6 @@ import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -149,7 +148,6 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Scenario 3: two viewcount posts by one user on one UTC day count once and leave one expiring seen key")
     void viewCount_WhenSameUserPostsTwiceInOneDay_BuffersOneViewUnderOneExpiringSeenKey() throws Exception {
         UUID plannerId = published.getId();
         LocalDate before = LocalDate.now(ZoneOffset.UTC);
@@ -174,7 +172,6 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("A buffered view reaches the stats counter on flush and leaves neither the buffer entry nor a batch key")
     void flush_WhenBufferHoldsAView_AppliesItAndClearsTheBuffer() throws Exception {
         UUID plannerId = published.getId();
         int before = viewCountOf(plannerId);
@@ -189,7 +186,6 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Scenario 4a: a leftover batch whose id is recorded is deleted without being applied again")
     void flush_WhenLeftoverBatchIsAlreadyRecorded_DeletesItWithoutReapplying() {
         UUID plannerId = published.getId();
         UUID batchId = UUID.randomUUID();
@@ -206,7 +202,6 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Scenario 4b: a leftover batch whose id is not recorded is applied, recorded, then deleted")
     void flush_WhenLeftoverBatchIsNotRecorded_AppliesRecordsAndDeletesIt() {
         UUID plannerId = published.getId();
         UUID batchId = UUID.randomUUID();
@@ -223,7 +218,6 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Scenario 9: stats carry exactly the detail read's counts and are never cached")
     void stats_WhenPublished_ReturnsTheCountsWithNoStore() throws Exception {
         UUID plannerId = published.getId();
         transactionTemplate.executeWithoutResult(status -> {
@@ -246,7 +240,6 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Flags for a non-owner who upvoted and subscribed are true, true and false, never cached")
     void flags_WhenNonOwnerUpvotedAndSubscribed_ReturnsTrueTrueFalseWithNoStore() throws Exception {
         UUID plannerId = published.getId();
         plannerVoteRepository.save(new PlannerVote(viewer.getId(), plannerId, VoteType.UP));
@@ -267,7 +260,6 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Flags for the owner who upvoted and subscribed carry the owner's notification setting")
     void flags_WhenOwnerUpvotedAndSubscribed_CarriesTheOwnerNotificationSetting() throws Exception {
         UUID plannerId = published.getId();
         plannerVoteRepository.save(new PlannerVote(owner.getId(), plannerId, VoteType.UP));
@@ -281,7 +273,6 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Flags for an anonymous caller are all false")
     void flags_WhenAnonymous_ReturnsAllFalse() throws Exception {
         mockMvc.perform(get("/api/planner/md/published/{id}/flags", published.getId()))
                 .andExpect(status().isOk())
@@ -291,7 +282,6 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Stats, flags and viewcount on an unpublished planner answer the detail read's 404")
     void splitEndpoints_WhenPlannerUnpublished_AnswerTheDetailReadNotFound() throws Exception {
         UUID plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, false).getId();
         String detail = "Planner not found with id: " + plannerId;
@@ -318,7 +308,6 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("An anonymous viewcount post is accepted without a login")
     void viewCount_WhenAnonymous_Returns204AndBuffersTheView() throws Exception {
         UUID plannerId = published.getId();
 
@@ -330,7 +319,6 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("A leftover batch key that was never registered in the batch set is not discovered or replayed")
     void flush_WhenBatchKeyIsNotRegistered_LeavesItUnreplayed() {
         UUID plannerId = published.getId();
         UUID batchId = UUID.randomUUID();
@@ -352,7 +340,6 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("A registered batch that cannot be applied is counted and skipped, and the live buffer is still flushed")
     void flush_WhenARegisteredBatchCannotBeApplied_CountsItAndStillFlushesTheBuffer() throws Exception {
         UUID plannerId = published.getId();
         String poison = "not-a-batch-id-" + UUID.randomUUID();
@@ -375,7 +362,6 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Stats, flags and viewcount on a planner whose content is soft-deleted answer the detail read's 404")
     void splitEndpoints_WhenContentSoftDeleted_AnswerTheDetailReadNotFound() throws Exception {
         published.softDelete();
         plannerRepository.save(published);
@@ -384,7 +370,6 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Stats, flags and viewcount on a planner a moderator took down answer the detail read's 404")
     void splitEndpoints_WhenTakenDownByModerator_AnswerTheDetailReadNotFound() throws Exception {
         User moderator = TestDataFactory.createModerator(userRepository, "split-read-moderator@example.com");
         mockMvc.perform(post("/api/moderation/planner/{id}/takedown", published.getId()).with(withCsrf())
@@ -397,7 +382,6 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Stats, flags and viewcount on a planner whose owner is deactivated answer the detail read's 404")
     void splitEndpoints_WhenOwnerDeactivated_AnswerTheDetailReadNotFound() throws Exception {
         owner.softDelete(Instant.now().plusSeconds(86_400L * 30));
         userRepository.save(owner);
@@ -434,7 +418,6 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Exhausting a client's view-record budget leaves its public-read and planner-stats budgets whole")
     void viewCount_WhenClientExhaustsViewRecordBudget_LeavesPublicReadAndPlannerStatsBudgetsWhole() throws Exception {
         UUID deviceId = UUID.randomUUID();
         Cookie device = AuthCookies.deviceId(deviceId);

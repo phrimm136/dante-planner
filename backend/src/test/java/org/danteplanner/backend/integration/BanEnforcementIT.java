@@ -17,7 +17,6 @@ import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -92,7 +91,6 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Banned user keeps private planner work - upsert succeeds")
     void upsertPlanner_WhenOwnerBanned_KeepsPrivateWork() throws Exception {
         // Arrange - ban the user
         userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Test ban");
@@ -123,7 +121,6 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Banned user cannot publish - returns 403")
     void publish_WhenOwnerBanned_Returns403() throws Exception {
         // Arrange - create planner first (before ban)
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, false);
@@ -145,7 +142,6 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Banned user cannot create comment - returns 403")
     void createComment_WhenAuthorBanned_Returns403() throws Exception {
         // Arrange - create published planner
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
@@ -169,7 +165,6 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Unbanned user can resume operations - verified by audit trail")
     void unbanUser_WhenUnbanned_CanResumeOperations() {
         // Arrange - ban then unban
         userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Test ban");
@@ -190,7 +185,6 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Ban action is logged to audit trail")
     void banUser_WhenBanned_LogsAuditAction() {
         // Arrange & Act
         userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Test reason");
@@ -211,7 +205,6 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Unban action is logged to audit trail")
     void unbanUser_WhenUnbanned_LogsAuditAction() {
         // Arrange
         userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Test ban");
@@ -240,8 +233,7 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Concurrent timeout and ban still permit private planner work")
-    void concurrentRestrictions_WhenTimeoutAndBan_BothBlock() throws Exception {
+    void concurrentRestrictions_WhenTimeoutAndBan_StillPermitPrivatePlannerWork() throws Exception {
         // Arrange - both timeout AND ban the user
         userModerationService.timeoutUser(adminUser.getId(), regularUser.getId(), 60, "Test timeout");
         userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Also banned");
@@ -269,7 +261,6 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("GET /me returns ban status for banned user")
     void getMe_WhenBannedUser_ReturnsBanStatus() throws Exception {
         // Arrange
         userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Test reason");
@@ -284,7 +275,6 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("GET /me returns timeout status for timed-out user")
     void getMe_WhenTimedOutUser_ReturnsTimeoutStatus() throws Exception {
         // Arrange
         userModerationService.timeoutUser(adminUser.getId(), regularUser.getId(), 30, "Test timeout");

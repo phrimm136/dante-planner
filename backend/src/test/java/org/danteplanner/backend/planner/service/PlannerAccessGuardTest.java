@@ -11,7 +11,6 @@ import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,11 +50,9 @@ class PlannerAccessGuardTest {
     }
 
     @Nested
-    @DisplayName("checkPublished")
     class CheckPublished {
 
         @Test
-        @DisplayName("passes without loading the aggregate when the planner is published")
         void checkPublished_WhenPublished_DoesNotLoadAggregate() {
             when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
 
@@ -65,7 +62,6 @@ class PlannerAccessGuardTest {
         }
 
         @Test
-        @DisplayName("throws PlannerNotFoundException when no published planner carries the id")
         void checkPublished_WhenUnpublishedOrMissing_ThrowsPlannerNotFound() {
             when(plannerRepository.existsPublishedById(plannerId)).thenReturn(false);
 
@@ -78,11 +74,9 @@ class PlannerAccessGuardTest {
     }
 
     @Nested
-    @DisplayName("requirePublished")
     class RequirePublished {
 
         @Test
-        @DisplayName("throws the same exception as checkPublished when the planner is absent")
         void requirePublished_WhenUnpublishedOrMissing_ThrowsPlannerNotFound() {
             when(plannerRepository.findPublishedAggregate(plannerId)).thenReturn(Optional.empty());
 
@@ -92,7 +86,6 @@ class PlannerAccessGuardTest {
         }
 
         @Test
-        @DisplayName("returns the loaded aggregate when the planner is published")
         void requirePublished_WhenPublished_ReturnsAggregate() {
             Planner planner = new Planner();
             when(plannerRepository.findPublishedAggregate(plannerId)).thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(TestDataFactory.unsavedUser(1L)))));

@@ -7,7 +7,6 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CyclicBarrier;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,7 +28,6 @@ class SseEmitterRegistryAtomicityTest {
     private static final long JOIN_TIMEOUT_MS = 30_000;
 
     @Test
-    @DisplayName("a registered emitter stays reachable while a neighbour device unregisters")
     void registry_WhenTwoDevicesChurnOneKey_KeepsEveryLiveEmitterReachable() throws Exception {
         ChurnableSseService service = new ChurnableSseService();
         List<String> unreachable = new CopyOnWriteArrayList<>();

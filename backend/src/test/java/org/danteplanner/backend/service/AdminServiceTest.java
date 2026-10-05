@@ -9,7 +9,6 @@ import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -85,11 +84,9 @@ class AdminServiceTest {
     }
 
     @Nested
-    @DisplayName("changeRole Tests")
     class ChangeRoleTests {
 
         @Test
-        @DisplayName("Admin can promote normal user to moderator")
         void changeRole_WhenAdminPromotesToModerator_Succeeds() {
             // Arrange - use locking query method
             when(userService.lockActiveById(adminUser.getId()))
@@ -105,7 +102,6 @@ class AdminServiceTest {
         }
 
         @Test
-        @DisplayName("Admin can demote moderator to normal")
         void changeRole_WhenAdminDemotesModerator_Succeeds() {
             // Arrange - use locking query method
             when(userService.lockActiveById(adminUser.getId()))
@@ -121,7 +117,6 @@ class AdminServiceTest {
         }
 
         @Test
-        @DisplayName("Cannot grant role higher than own")
         void changeRole_WhenModeratorGrantsAdmin_ThrowsException() {
             // Arrange - moderator tries to grant ADMIN (use locking query method)
             when(userService.lockActiveById(moderatorUser.getId()))
@@ -139,7 +134,6 @@ class AdminServiceTest {
         }
 
         @Test
-        @DisplayName("Cannot modify user of equal rank")
         void changeRole_WhenModeratorModifiesModerator_ThrowsException() {
             // Arrange - create another moderator
             User otherModerator = User.builder()
@@ -169,7 +163,6 @@ class AdminServiceTest {
         }
 
         @Test
-        @DisplayName("Cannot modify user of higher rank")
         void changeRole_WhenModeratorModifiesAdmin_ThrowsException() {
             // Arrange - moderator tries to modify admin (use locking query method)
             when(userService.lockActiveById(moderatorUser.getId()))
@@ -187,7 +180,6 @@ class AdminServiceTest {
         }
 
         @Test
-        @DisplayName("Cannot demote last admin")
         void changeRole_WhenDemoteLastAdmin_ThrowsException() {
             // Arrange - use locking query method
             when(userService.lockActiveById(adminUser.getId()))
@@ -204,7 +196,6 @@ class AdminServiceTest {
         }
 
         @Test
-        @DisplayName("Cannot demote another admin even when multiple admins exist")
         void changeRole_WhenDemotingOtherAdmin_Throws() {
             // Arrange - per spec: "Cannot modify role of users at equal or higher rank (unless self-demotion)"
             User otherAdmin = User.builder()
@@ -234,7 +225,6 @@ class AdminServiceTest {
         }
 
         @Test
-        @DisplayName("Throws UserNotFoundException for non-existent actor")
         void changeRole_WhenNonExistentActor_ThrowsUserNotFoundException() {
             // Arrange - use locking query method
             Long nonExistentId = 999L;
@@ -249,7 +239,6 @@ class AdminServiceTest {
         }
 
         @Test
-        @DisplayName("Throws UserNotFoundException for non-existent target")
         void changeRole_WhenNonExistentTarget_ThrowsUserNotFoundException() {
             // Arrange - use locking query method
             Long nonExistentId = 999L;
@@ -266,7 +255,6 @@ class AdminServiceTest {
         }
 
         @Test
-        @DisplayName("Admin can self-demote when multiple admins exist")
         void changeRole_WhenAdminSelfDemotion_Succeeds() {
             // Arrange - use locking query method
             when(userService.lockActiveById(adminUser.getId()))
@@ -282,11 +270,9 @@ class AdminServiceTest {
     }
 
     @Nested
-    @DisplayName("getUserRole Tests")
     class GetUserRoleTests {
 
         @Test
-        @DisplayName("Should return user role when user exists")
         void getUserRole_WhenUserExists_ReturnsRole() {
             // Arrange
             when(userService.findActiveById(adminUser.getId()))
@@ -300,7 +286,6 @@ class AdminServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw UserNotFoundException when user not found")
         void getUserRole_WhenUserNotFound_ThrowsException() {
             // Arrange
             Long nonExistentId = 999L;

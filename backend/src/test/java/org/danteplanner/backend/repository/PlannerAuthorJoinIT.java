@@ -12,7 +12,6 @@ import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.ThreadStatementCounter;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +54,6 @@ class PlannerAuthorJoinIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("the published read carries the author's epithet and suffix in one statement")
     void findPublishedAggregate_WhenPublished_ReadsAuthorInOneStatement() {
         User author = newUser();
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
@@ -71,7 +69,6 @@ class PlannerAuthorJoinIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("a deactivated author's planner is not read as published")
     void findPublishedAggregate_WhenAuthorDeactivated_ReturnsEmpty() {
         User author = newUser();
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
@@ -81,7 +78,6 @@ class PlannerAuthorJoinIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("the published check joins the author in one statement and excludes a deactivated author")
     void existsPublishedById_WhenAuthorDeactivated_TurnsFalseInOneStatement() {
         User author = newUser();
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
@@ -97,7 +93,6 @@ class PlannerAuthorJoinIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("the thread read reports owner, publication and owner deactivation in one statement")
     void findThread_WhenOwnerDeactivated_ReportsItInOneStatement() {
         User owner = newUser();
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
@@ -113,7 +108,6 @@ class PlannerAuthorJoinIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("a planner saved with an owner id stores it in user_id and the owner queries find it")
     void insert_WhenSavedWithUserId_StoresItAndOwnerQueriesFindIt() {
         User owner = newUser();
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);

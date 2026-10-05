@@ -16,7 +16,6 @@ import org.danteplanner.backend.shared.outbox.service.DomainEventPayloadReader;
 import org.danteplanner.backend.shared.outbox.service.EffectPushQueue;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -82,13 +81,11 @@ class ReplyReceivedEffectTest {
     }
 
     @Test
-    @DisplayName("the arm answers for REPLY_RECEIVED")
     void type_WhenAsked_IsReplyReceived() {
         assertThat(effect.type()).isEqualTo(DomainEventType.REPLY_RECEIVED);
     }
 
     @Test
-    @DisplayName("an eligible parent author gets the notification and its push, plus the thread push")
     void applyEffect_WhenTheParentAuthorIsEligible_NotifiesAndPushesBoth() {
         givenAReplyTo(givenAParent(PARENT_AUTHOR_ID, true));
         when(notificationDispatchService.notifyReplyReceived(
@@ -107,7 +104,6 @@ class ReplyReceivedEffectTest {
     }
 
     @Test
-    @DisplayName("a self-reply notifies nobody and still reaches the thread")
     void applyEffect_WhenTheReplierWroteTheParent_NotifiesNobodyButStillPushesTheThread() {
         givenAReplyTo(givenAParent(REPLIER_ID, true));
 
@@ -120,7 +116,6 @@ class ReplyReceivedEffectTest {
     }
 
     @Test
-    @DisplayName("a parent author who switched notifications off still gets the thread push")
     void applyEffect_WhenTheParentAuthorDisabledNotifications_NotifiesNobodyButStillPushesTheThread() {
         givenAReplyTo(givenAParent(PARENT_AUTHOR_ID, false));
 
@@ -133,7 +128,6 @@ class ReplyReceivedEffectTest {
     }
 
     @Test
-    @DisplayName("a reply withdrawn before dispatch announces nothing")
     void applyEffect_WhenTheReplyWasWithdrawn_AnnouncesNothing() {
         PlannerComment parent = givenAParent(PARENT_AUTHOR_ID, true);
         PlannerComment reply =
@@ -150,7 +144,6 @@ class ReplyReceivedEffectTest {
     }
 
     @Test
-    @DisplayName("a reply deleted before dispatch announces nothing")
     void applyEffect_WhenTheReplyIsGone_AnnouncesNothing() {
         when(commentRepository.findById(REPLY_ID)).thenReturn(Optional.empty());
 

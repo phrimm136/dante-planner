@@ -10,7 +10,6 @@ import org.danteplanner.backend.auth.service.AuthenticationService.AuthResult;
 import org.danteplanner.backend.auth.oauth.OAuthStateService;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +60,6 @@ class AuthControllerBffIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("GET /google/start redirects to Google and sets the oauth_tx cookie")
     void googleStart_WhenInvoked_RedirectsToGoogleAndSetsOauthTx() throws Exception {
         mockMvc.perform(get("/api/auth/google/start"))
                 .andExpect(status().isFound())
@@ -72,7 +70,6 @@ class AuthControllerBffIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("GET /google/callback with matching state logs in and clears oauth_tx")
     void googleCallback_WhenStateMatches_SetsAuthCookiesAndClearsOauthTx() throws Exception {
         String state = "state-match";
         String verifier = "verifier-match";
@@ -94,8 +91,8 @@ class AuthControllerBffIT extends SharedMySqlContainerSupport {
                 .andExpect(cookie().maxAge(CookieConstants.OAUTH_TX, 0));
     }
 
+    // INV2
     @Test
-    @DisplayName("GET /google/callback with mismatched state is rejected and sets no auth cookies (INV2)")
     void googleCallback_WhenStateMismatch_RejectsWithoutAuthCookies() throws Exception {
         String oauthTx = oAuthStateService.seal("real-state", "verifier", "http://localhost");
 
@@ -111,8 +108,8 @@ class AuthControllerBffIT extends SharedMySqlContainerSupport {
         verify(authService, never()).authenticateWithOAuth(any(), any(), any(), any());
     }
 
+    // INV2
     @Test
-    @DisplayName("GET /google/callback with no oauth_tx cookie is rejected (INV2)")
     void googleCallback_WhenNoOauthTx_Rejects() throws Exception {
         mockMvc.perform(get("/api/auth/google/callback")
                         .param("code", "auth-code")
@@ -125,7 +122,6 @@ class AuthControllerBffIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("GET /google/callback with an error param redirects to error and clears oauth_tx")
     void googleCallback_WhenProviderError_RedirectsToErrorAndClearsOauthTx() throws Exception {
         mockMvc.perform(get("/api/auth/google/callback")
                         .param("error", "access_denied")
@@ -139,7 +135,6 @@ class AuthControllerBffIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("GET /google/callback redirects to error (no auth cookies) when the exchange throws")
     void googleCallback_WhenExchangeThrows_RedirectsToErrorWithoutAuthCookies() throws Exception {
         String state = "state-throw";
         String oauthTx = oAuthStateService.seal(state, "verifier", "http://localhost:5173/planner/1");

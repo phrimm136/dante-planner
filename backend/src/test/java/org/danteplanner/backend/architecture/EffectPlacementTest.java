@@ -9,7 +9,6 @@ import com.tngtech.archunit.core.domain.JavaModifier;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayDeque;
@@ -91,7 +90,6 @@ class EffectPlacementTest {
             "org.danteplanner.backend.user.service.UserAccountLifecycleService.performHardDelete");
 
     @Test
-    @DisplayName("a transactional method reaches no observer publish, and no guard outside the allowlist")
     void crossStoreEffect_WhenReachedFromATransactionalMethod_IsRejected() {
         Set<String> offenders = new TreeSet<>();
 
@@ -117,7 +115,6 @@ class EffectPlacementTest {
     }
 
     @Test
-    @DisplayName("every allowlisted guard still performs its inline call")
     void guardAllowlist_WhenScanned_NamesOnlyLiveInlineCalls() {
         Set<String> stale = new TreeSet<>(GUARDS_ALLOWED_INLINE);
 
@@ -171,7 +168,6 @@ class EffectPlacementTest {
             "softDeleteOldReadNotifications", "hardDeleteOldNotifications", "softDeleteAllByUserId");
 
     @Test
-    @DisplayName("no after-commit listener derives a notification")
     void afterCommitListener_WhenItDerivesANotification_IsRejected() {
         Set<String> offenders = afterCommitListeners().stream()
                 .filter(listener -> RAISE_OWNERS.stream().anyMatch(owner -> reaches(listener, owner)))
@@ -186,7 +182,6 @@ class EffectPlacementTest {
     }
 
     @Test
-    @DisplayName("the eager hop is the only after-commit listener that reaches the dispatcher")
     void outboxDispatch_WhenReachedFromAfterCommit_ComesOnlyFromTheEagerHop() {
         Set<String> reaching = afterCommitListeners().stream()
                 .filter(listener -> reaches(listener, DOMAIN_EVENT_DISPATCHER))
@@ -201,7 +196,6 @@ class EffectPlacementTest {
     }
 
     @Test
-    @DisplayName("notification rows are written only from within the notification feature")
     void notificationWrite_WhenIssuedOutsideTheFeature_IsRejected() {
         Set<String> offenders = new TreeSet<>();
 
@@ -225,7 +219,6 @@ class EffectPlacementTest {
     }
 
     @Test
-    @DisplayName("a notification is raised only by an effect arm")
     void raiseMethod_WhenCalledOutsideAnEffectArm_IsRejected() {
         Set<String> offenders = new TreeSet<>();
 
@@ -250,7 +243,6 @@ class EffectPlacementTest {
     }
 
     @Test
-    @DisplayName("every effect arm lives in its feature's effect package")
     void effectArm_WhenDeclaredOutsideAnEffectPackage_IsRejected() {
         Set<String> offenders = MAIN_CLASSES.stream()
                 .filter(javaClass -> javaClass.getAllRawInterfaces().stream()
@@ -266,7 +258,6 @@ class EffectPlacementTest {
     }
 
     @Test
-    @DisplayName("no effect arm can reach the publisher at all")
     void effectArm_WhenItDependsOnThePublisher_IsRejected() {
         Set<String> offenders = MAIN_CLASSES.stream()
                 .filter(javaClass -> javaClass.getPackageName().contains(".effect"))
@@ -443,8 +434,7 @@ class EffectPlacementTest {
     private static final String FIXTURE_WRITER_CALLER = FIXTURE_PACKAGE + ".TombstoneWritingService.drainPending";
 
     @Test
-    @DisplayName("a transactional method reaches no tombstone write before its commit, except the admitted catalog sync")
-    void tombstoneWrite_WhenReachedFromATransactionalMethod_IsRejected() {
+    void tombstoneWrite_WhenReachedFromATransactionalMethodOtherThanTheCatalogSync_IsRejected() {
         assertThat(tombstoneOffendersIn(MAIN_CLASSES, ADMITTED_TOMBSTONE_WRITERS))
                 .as("a tombstone written before the commit outlives a rollback and masks a live row "
                         + "for its whole TTL; register it in an afterCommit synchronization. Only the "
@@ -454,7 +444,6 @@ class EffectPlacementTest {
     }
 
     @Test
-    @DisplayName("every admitted tombstone writer still writes one and is called only by the catalog drain")
     void admittedTombstoneWriter_WhenScanned_IsLiveAndCalledOnlyByTheDrain() {
         assertThat(ADMITTED_TOMBSTONE_WRITERS)
                 .as("an admitted writer that no longer reaches a tombstone write grants permission "
@@ -469,7 +458,6 @@ class EffectPlacementTest {
     }
 
     @Test
-    @DisplayName("the tombstone rule names the unadmitted write and the unadmitted caller in the fixture")
     void tombstoneWrite_WhenTheRuleRunsOverTheFixture_NamesOnlyTheUnadmittedPaths() {
         assertThat(tombstoneOffendersIn(FIXTURE_CLASSES, FIXTURE_ADMITTED_WRITERS))
                 .as("the rules above pass vacuously unless these show them rejecting a write")

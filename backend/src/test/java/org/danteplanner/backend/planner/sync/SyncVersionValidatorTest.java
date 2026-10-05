@@ -5,7 +5,6 @@ import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.StoredPlannerContent;
 import org.danteplanner.backend.planner.exception.PlannerConflictException;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -77,8 +76,8 @@ class SyncVersionValidatorTest {
                 .isEqualTo(WriteArbitration.WRITE);
     }
 
+    // force-still-bypasses
     @Test
-    @DisplayName("force-still-bypasses: a forced write is applied without arbitration")
     void arbitrate_WhenForcedWithAStaleVersion_Writes() {
         assertThat(validator.arbitrate(true, 4L, 5L, divergentChange()))
                 .isEqualTo(WriteArbitration.WRITE);
@@ -90,15 +89,15 @@ class SyncVersionValidatorTest {
                 .isEqualTo(WriteArbitration.WRITE);
     }
 
+    // stale-identical-save-acks-current-version
     @Test
-    @DisplayName("stale-identical-save-acks-current-version: a stale write moving no field is acknowledged")
     void arbitrate_WhenStaleAndNothingWouldChange_AcknowledgesWithoutWriting() {
         assertThat(validator.arbitrate(false, 4L, 5L, identicalChange()))
                 .isEqualTo(WriteArbitration.ACK_NO_OP);
     }
 
+    // stale-different-content-conflicts
     @Test
-    @DisplayName("stale-different-content-conflicts: a stale write that would move a field still conflicts")
     void arbitrate_WhenStaleAndAFieldWouldChange_Throws() {
         assertThatThrownBy(() -> validator.arbitrate(false, 4L, 5L, divergentChange()))
                 .isInstanceOf(PlannerConflictException.class)
@@ -106,15 +105,15 @@ class SyncVersionValidatorTest {
                 .isEqualTo(5L);
     }
 
+    // no-version-still-conflicts
     @Test
-    @DisplayName("no-version-still-conflicts: naming no version is a conflict even when nothing would change")
     void arbitrate_WhenNoVersionIsNamed_ThrowsWithoutArbitrating() {
         assertThatThrownBy(() -> validator.arbitrate(false, null, 5L, identicalChange()))
                 .isInstanceOf(PlannerConflictException.class);
     }
 
+    // unparseable-content-falls-through-to-conflict
     @Test
-    @DisplayName("unparseable-content-falls-through-to-conflict: arbitration never turns an error into a write")
     void arbitrate_WhenStaleAndTheStoredDocumentIsUnparseable_Throws() {
         PlannerContent unparseable = StoredPlannerContent.holding(PlannerContent.builder()
                 .title("Stored Title")

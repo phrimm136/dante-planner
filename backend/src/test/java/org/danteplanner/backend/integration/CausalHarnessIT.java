@@ -1,7 +1,6 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +52,6 @@ class CausalHarnessIT extends CausalHarnessSupport {
     private LettuceConnectionFactory rateLimitRedisConnectionFactory;
 
     @Test
-    @DisplayName("Replication round-trip: a write made while the replica is stopped is invisible until start+awaitCaughtUp")
     void replicationRoundTrip_WhenWriteWhileStopped_InvisibleUntilResumedAndCaughtUp() {
         primaryJdbcTemplate.execute("CREATE TABLE IF NOT EXISTS harness_probe (id INT PRIMARY KEY)");
         primaryJdbcTemplate.update("INSERT INTO harness_probe (id) VALUES (1)");
@@ -70,7 +68,6 @@ class CausalHarnessIT extends CausalHarnessSupport {
     }
 
     @Test
-    @DisplayName("Two distinct LettuceConnectionFactory beans are injectable by auth and rate-limit qualifiers")
     void redisFactories_WhenAuthAndRateLimit_AreDistinctInjectableBeans() {
         assertThat(authRedisConnectionFactory).isNotNull();
         assertThat(rateLimitRedisConnectionFactory).isNotNull();

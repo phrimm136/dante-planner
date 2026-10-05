@@ -30,7 +30,6 @@ import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.planner.validation.floor.Stage;
 import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -150,7 +149,6 @@ class ValidatorGoldenCorpusTest {
     }
 
     @Test
-    @DisplayName("the snapshot holds exactly the corpus, no more and no less")
     void snapshot_WhenComparedToTheCorpus_CoversEveryEntryExactlyOnce() {
         assertThat(snapshot().keySet())
                 .as("a section with no entry is a frozen message nothing produces any more, and an "

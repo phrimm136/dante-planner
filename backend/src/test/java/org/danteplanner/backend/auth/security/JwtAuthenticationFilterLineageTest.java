@@ -25,7 +25,6 @@ import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -126,7 +125,6 @@ class JwtAuthenticationFilterLineageTest {
     }
 
     @Test
-    @DisplayName("Flag off: auto-refresh uses legacy blacklist rotation, never the rotation service")
     void doFilterInternal_WhenFlagOff_UsesLegacyRotation() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(false);
         String refreshToken = "legacy.refresh.jwt";
@@ -161,7 +159,6 @@ class JwtAuthenticationFilterLineageTest {
     }
 
     @Test
-    @DisplayName("Flag on: UNUSED_LATEST rotates, sets both cookies, authenticates")
     void doFilterInternal_WhenFlagOnAndUnusedLatest_RotatesAndAuthenticates() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(true);
         String refreshToken = "unused.latest.jwt";
@@ -191,8 +188,7 @@ class JwtAuthenticationFilterLineageTest {
     }
 
     @Test
-    @DisplayName("Flag on: RETIRED token (theft) revokes family, clears context, no auth")
-    void doFilterInternal_WhenFlagOnAndUsedToken_RevokesFamilyNoAuth() throws Exception {
+    void doFilterInternal_WhenFlagOnAndRetiredToken_RevokesFamilyNoAuth() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(true);
         String refreshToken = "used.jwt";
         Long userId = 21L;
@@ -217,7 +213,6 @@ class JwtAuthenticationFilterLineageTest {
     }
 
     @Test
-    @DisplayName("Flag on: SUPERSEDED token (theft) revokes family, no auth")
     void doFilterInternal_WhenFlagOnAndSupersededToken_RevokesFamilyNoAuth() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(true);
         String refreshToken = "superseded.jwt";
@@ -237,7 +232,6 @@ class JwtAuthenticationFilterLineageTest {
     }
 
     @Test
-    @DisplayName("Flag on: revoked-family token rejected at rotation, no auth")
     void doFilterInternal_WhenFlagOnAndRevokedFamily_RejectedNoAuth() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(true);
         String refreshToken = "revoked.family.jwt";
@@ -261,7 +255,6 @@ class JwtAuthenticationFilterLineageTest {
     }
 
     @Test
-    @DisplayName("Flag on + legacy-admit on: legacy token admitted, sets cookie, authenticates")
     void doFilterInternal_WhenFlagOnAndLegacyAdmit_AdmitsAndAuthenticates() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(true);
         String refreshToken = "legacy.refresh.jwt";
@@ -290,7 +283,6 @@ class JwtAuthenticationFilterLineageTest {
     }
 
     @Test
-    @DisplayName("Flag on + legacy-admit off: legacy token rejected, no auth, no rotation")
     void doFilterInternal_WhenFlagOnAndLegacyAdmitOff_RejectedNoAuth() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(true);
         String refreshToken = "legacy.refresh.jwt";
@@ -314,7 +306,6 @@ class JwtAuthenticationFilterLineageTest {
     }
 
     @Test
-    @DisplayName("Flag on: expired access token triggers lineage refresh path")
     void doFilterInternal_WhenFlagOnAndExpiredAccess_TriggersLineageRefresh() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(true);
         String accessToken = "expired.access.jwt";
@@ -349,7 +340,6 @@ class JwtAuthenticationFilterLineageTest {
     }
 
     @Test
-    @DisplayName("Flag on: a blacklisted refresh token is abandoned before any rotation")
     void doFilterInternal_WhenFlagOnAndBlacklistedToken_AbandonsWithoutRotating() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(true);
         String refreshToken = "blacklisted.jwt";
@@ -369,7 +359,6 @@ class JwtAuthenticationFilterLineageTest {
     }
 
     @Test
-    @DisplayName("Flag on: a token issued before the account's invalidation is abandoned before any rotation")
     void doFilterInternal_WhenFlagOnAndUserTokensInvalidated_AbandonsWithoutRotating() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(true);
         String refreshToken = "pre-invalidation.jwt";

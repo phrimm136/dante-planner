@@ -1,7 +1,6 @@
 package org.danteplanner.backend.planner.gamedata;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
@@ -36,7 +35,6 @@ class GameDataRegistrySnapshotTest {
     private static final int RR_VERSION = 1;
 
     @Test
-    @DisplayName("a lookup round spanning a reload sees one load's data or the other's, never both")
     void read_WhenARefreshRunsConcurrently_ObservesOneGeneration() throws InterruptedException {
         GenerationalGameDataLoader loader = new GenerationalGameDataLoader();
         GameDataRegistry registry = new GameDataRegistry(loader, "generational");

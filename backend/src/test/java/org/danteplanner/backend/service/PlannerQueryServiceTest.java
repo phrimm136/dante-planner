@@ -15,7 +15,6 @@ import org.danteplanner.backend.planner.repository.PlannerSummaryRow;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -128,11 +127,9 @@ class PlannerQueryServiceTest {
     }
 
     @Nested
-    @DisplayName("getPlanners Tests")
     class GetPlannersTests {
 
         @Test
-        @DisplayName("Should return paginated planners for user")
         void getPlanners_WhenCalled_ReturnsPaginatedResults() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
@@ -154,7 +151,6 @@ class PlannerQueryServiceTest {
         }
 
         @Test
-        @DisplayName("Should carry tombstones only through the includeDeleted listing")
         void getPlanners_WhenIncludeDeleted_CarriesTombstones() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
@@ -174,7 +170,6 @@ class PlannerQueryServiceTest {
         }
 
         @Test
-        @DisplayName("Should return empty page when no planners exist")
         void getPlanners_WhenNoPlanners_ReturnsEmptyPage() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
@@ -193,11 +188,9 @@ class PlannerQueryServiceTest {
     }
 
     @Nested
-    @DisplayName("getPlanner Tests")
     class GetPlannerTests {
 
         @Test
-        @DisplayName("Should return planner when found")
         void getPlanner_WhenFound_ReturnsPlanner() {
             // Arrange
             Planner planner = createTestPlanner();
@@ -214,7 +207,6 @@ class PlannerQueryServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw PlannerNotFoundException when not found")
         void getPlanner_WhenNotFound_ThrowsException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();

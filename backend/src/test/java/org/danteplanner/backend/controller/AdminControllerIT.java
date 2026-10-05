@@ -11,7 +11,6 @@ import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +77,6 @@ class AdminControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("PUT /api/admin/user/{targetId}/role")
     class ChangeRoleTests {
 
         @Test
@@ -112,7 +110,6 @@ class AdminControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("GET /api/admin/user/{targetId}/role")
     class GetUserRoleTests {
 
         @Test

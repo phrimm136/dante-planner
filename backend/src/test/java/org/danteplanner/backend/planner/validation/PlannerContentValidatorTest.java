@@ -13,7 +13,6 @@ import org.danteplanner.backend.planner.validation.floor.Stage;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -357,11 +356,9 @@ class PlannerContentValidatorTest {
     }
 
     @Nested
-    @DisplayName("Valid Content Tests")
     class ValidContentTests {
 
         @Test
-        @DisplayName("Should pass validation with all required fields")
         void validate_WhenAllRequiredFields_Passes() {
             setupMocksForValidIds();
             String content = createValidContent();
@@ -370,7 +367,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should pass validation with required and optional fields")
         void validate_WhenRequiredAndOptionalFields_Passes() {
             setupMocksForValidIds();
             String content = createFullContent();
@@ -379,7 +375,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should pass validation with null selectedGiftKeyword")
         void validate_WhenNullSelectedGiftKeyword_Passes() {
             setupMocksForValidIds();
             // Add selectedGiftKeyword: null to valid content
@@ -401,7 +396,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception when equipment is empty (missing all 12 sinners)")
         void validate_WhenEmptyEquipment_ThrowsException() {
             String content = """
                 {
@@ -418,7 +412,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should pass with valid equipment and empty deploymentOrder array")
         void validate_WhenEmptyDeploymentOrder_Passes() {
             setupMocksForValidIds();
             // Uses createValidContent() which has complete equipment (12 sinners)
@@ -433,11 +426,9 @@ class PlannerContentValidatorTest {
     }
 
     @Nested
-    @DisplayName("Missing Required Fields Tests")
     class MissingRequiredFieldsTests {
 
         @Test
-        @DisplayName("Should throw exception when selectedKeywords is missing")
         void validate_WhenMissingSelectedKeywords_ThrowsException() {
             String content = """
                 {
@@ -452,7 +443,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception when equipment is missing")
         void validate_WhenMissingEquipment_ThrowsException() {
             String content = """
                 {
@@ -467,7 +457,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception when deploymentOrder is missing")
         void validate_WhenMissingDeploymentOrder_ThrowsException() {
             String content = """
                 {
@@ -482,7 +471,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception when floorSelections is missing")
         void validate_WhenMissingFloorSelections_ThrowsException() {
             String content = """
                 {
@@ -497,7 +485,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception when sectionNotes is missing")
         void validate_WhenMissingSectionNotes_ThrowsException() {
             String content = """
                 {
@@ -513,7 +500,6 @@ class PlannerContentValidatorTest {
     }
 
     @Nested
-    @DisplayName("Wrong Field Types Tests")
     class WrongFieldTypesTests {
 
         @ParameterizedTest(name = "{0} is {1}")
@@ -552,11 +538,9 @@ class PlannerContentValidatorTest {
     }
 
     @Nested
-    @DisplayName("Unknown Fields Tests (STRICT mode)")
     class UnknownFieldsTests {
 
         @Test
-        @DisplayName("Should throw exception for unknown field")
         void validate_WhenUnknownField_ThrowsException() {
             String content = """
                 {
@@ -580,7 +564,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for multiple unknown fields")
         void validate_WhenMultipleUnknownFields_ThrowsException() {
             String content = """
                 {
@@ -599,11 +582,9 @@ class PlannerContentValidatorTest {
     }
 
     @Nested
-    @DisplayName("Content Size Tests")
     class ContentSizeTests {
 
         @Test
-        @DisplayName("Should throw exception when content size exceeds 50KB limit")
         void validate_WhenContentExceedsSizeLimit_ThrowsException() {
             // Generate content that exceeds 50KB (51200 bytes)
             // The size check runs before the schema, so any oversized field reaches it
@@ -622,7 +603,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should pass when content is under 50KB limit")
         void validate_WhenContentUnderLimit_Passes() {
             setupMocksForValidIds();
             // Use createValidContent which is well under 50KB
@@ -631,11 +611,9 @@ class PlannerContentValidatorTest {
     }
 
     @Nested
-    @DisplayName("Note Size Tests")
     class NoteSizeTests {
 
         @Test
-        @DisplayName("Should throw exception when single note exceeds 1KB")
         void validate_WhenNoteTooLarge_ThrowsException() {
             String content = replaceOnce(createValidContent(), "\"sectionNotes\": {}",
                     "\"sectionNotes\": {\"floor-1\": {\"content\": {\"type\": \"doc\", \"text\": \""
@@ -668,7 +646,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should pass when note is under 1KB limit")
         void validate_WhenNoteUnderLimit_Passes() {
             setupMocksForValidIds();
             String noteContent = "Short note";
@@ -682,7 +659,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should pass with empty sectionNotes")
         void validate_WhenEmptySectionNotes_Passes() {
             setupMocksForValidIds();
             // createValidContent already has empty sectionNotes
@@ -691,11 +667,9 @@ class PlannerContentValidatorTest {
     }
 
     @Nested
-    @DisplayName("Empty/Null Content Tests")
     class EmptyNullContentTests {
 
         @Test
-        @DisplayName("Should throw exception for null content")
         void validate_WhenNullContent_ThrowsException() {
             PlannerValidationException exception = assertThrows(
                     PlannerValidationException.class,
@@ -706,49 +680,41 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for empty content")
         void validate_WhenEmptyContent_ThrowsException() {
             assertThrows(PlannerValidationException.class, () -> validate("", "5F"));
         }
 
         @Test
-        @DisplayName("Should throw exception for blank content")
         void validate_WhenBlankContent_ThrowsException() {
             assertThrows(PlannerValidationException.class, () -> validate("   ", "5F"));
         }
 
         @Test
-        @DisplayName("Should throw exception for non-JSON content")
         void validate_WhenNonJsonContent_ThrowsException() {
             assertThrows(PlannerValidationException.class, () -> validate("not json", "5F"));
         }
 
         @Test
-        @DisplayName("Should throw exception for JSON array instead of object")
         void validate_WhenJsonArrayContent_ThrowsException() {
             assertThrows(PlannerValidationException.class, () -> validate("[]", "5F"));
         }
 
         @Test
-        @DisplayName("Should throw exception for JSON primitive instead of object")
         void validate_WhenJsonPrimitiveContent_ThrowsException() {
             assertThrows(PlannerValidationException.class, () -> validate("\"string\"", "5F"));
         }
     }
 
     @Nested
-    @DisplayName("Sinner Index Validation Tests")
     class SinnerIndexTests {
 
         @Test
-        @DisplayName("Should pass with valid sinner indices (01-12) in equipment keys")
         void validate_WhenValidSinnerIndicesInEquipment_Passes() {
             setupMocksForValidIds();
             assertDoesNotThrow(() -> validate(createValidContent(), "5F"));
         }
 
         @Test
-        @DisplayName("Should throw exception for sinner index 0 in equipment (1-indexed)")
         void validate_WhenSinnerIndex0InEquipment_ThrowsException() {
             // Equipment keys are 1-indexed (1-12), so 0 is invalid
             String content = """
@@ -767,7 +733,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for sinner index above 12 in equipment")
         void validate_WhenSinnerIndexAbove12InEquipment_ThrowsException() {
             // Equipment keys are 1-indexed (1-12), so 13 is invalid
             String content = """
@@ -786,7 +751,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for non-numeric equipment key")
         void validate_WhenNonNumericEquipmentKey_ThrowsException() {
             String content = """
                 {
@@ -804,7 +768,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should pass with valid sinner indices (0-11) in deploymentOrder")
         void validate_WhenValidSinnerIndicesInDeploymentOrder_Passes() {
             setupMocksForValidIds();
             // Use createValidContent and replace deploymentOrder with all valid indices
@@ -817,7 +780,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for negative sinner index in deploymentOrder")
         void validate_WhenNegativeSinnerIndexInDeploymentOrder_ThrowsException() {
             String content = """
                 {
@@ -833,7 +795,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for sinner index above 11 in deploymentOrder")
         void validate_WhenSinnerIndexAbove11InDeploymentOrder_ThrowsException() {
             String content = """
                 {
@@ -849,7 +810,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for non-numeric value in deploymentOrder")
         void validate_WhenNonNumericDeploymentOrder_ThrowsException() {
             String content = """
                 {
@@ -866,11 +826,9 @@ class PlannerContentValidatorTest {
     }
 
     @Nested
-    @DisplayName("Start Buff Validation Tests")
     class StartBuffValidationTests {
 
         @Test
-        @DisplayName("Should pass with valid start buff IDs")
         void validate_WhenValidStartBuffIds_Passes() {
             setupMocksForValidIds();
             // createFullContent has selectedBuffIds: [100, 201, 302]
@@ -878,7 +836,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should pass with empty selectedBuffIds")
         void validate_WhenEmptyStartBuffIds_Passes() {
             setupMocksForValidIdsWithoutBuffs();
             String content = replaceOnce(createValidContent(),
@@ -889,7 +846,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should pass with max 10 start buffs")
         void validate_WhenMax10StartBuffs_Passes() {
             setupMocksForValidIds();
             // All 10 base buffs with different enhancement levels
@@ -901,7 +857,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception when start buffs exceed 10")
         void validate_WhenExceedMax10StartBuffs_ThrowsException() {
             // Fails at max count check, never reaches buff ID or gift validation
             setupMocksForValidIdsWithoutBuffsAndGifts();
@@ -914,7 +869,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for duplicate base buff IDs (same buff, different enhancement)")
         void validate_WhenDuplicateBaseBuffId_ThrowsException() {
             setupMocksForValidIdsWithoutGifts();
             // 100 and 200 have the same base ID (00)
@@ -926,7 +880,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for duplicate base buff IDs (base and ++)")
         void validate_WhenDuplicateBaseBuffIdBaseAndPlusPlus_ThrowsException() {
             setupMocksForValidIdsWithoutGifts();
             // 101 and 301 have the same base ID (01)
@@ -938,7 +891,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for non-number in selectedBuffIds")
         void validate_WhenNonNumberInBuffIds_ThrowsException() {
             // Fails at type check before any ID validation
             String content = replaceOnce(createValidContent(),
@@ -960,7 +912,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for buff ID not found in game data")
         void validate_WhenBuffIdNotInGameData_ThrowsException() {
             // Fails in buff validation, never reaches gift validation
             setupMocksForValidIdsWithoutGifts();
@@ -974,7 +925,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for invalid base ID (outside 00-09)")
         void validate_WhenInvalidBaseBuffId_ThrowsException() {
             // Fails in buff validation, never reaches gift validation
             setupMocksForValidIdsWithoutGifts();
@@ -988,11 +938,9 @@ class PlannerContentValidatorTest {
     }
 
     @Nested
-    @DisplayName("Start Gift Validation Tests")
     class StartGiftValidationTests {
 
         @Test
-        @DisplayName("Should pass with valid keyword and gift IDs from pool")
         void validate_WhenValidKeywordAndGiftIds_Passes() {
             setupMocksForValidIds();
             // createValidContent has Combustion keyword with 9001 which is in the pool
@@ -1000,7 +948,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should pass with null keyword and empty gift IDs")
         void validate_WhenNullKeywordEmptyGifts_Passes() {
             setupMocksForValidIdsWithoutGifts();
             String content = replaceOnce(
@@ -1011,7 +958,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should pass with multiple gift IDs from same keyword pool")
         void validate_WhenMultipleGiftsFromSamePool_Passes() {
             setupMocksForValidIds();
             // Combustion pool has 9001, 9009, 9103
@@ -1023,7 +969,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for gift IDs without keyword")
         void validate_WhenGiftIdsWithoutKeyword_ThrowsException() {
             // Fails at keyword check, never reaches pool validation
             setupMocksForValidIdsWithoutGifts();
@@ -1033,7 +978,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for invalid keyword")
         void validate_WhenInvalidKeyword_ThrowsException() {
             setupBaseMocks();
             setupStartBuffMocks();
@@ -1047,7 +991,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for gift ID not in keyword pool")
         void validate_WhenGiftIdNotInPool_ThrowsException() {
             setupBaseMocks();
             setupStartBuffMocks();
@@ -1063,7 +1006,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for duplicate gift IDs")
         void validate_WhenDuplicateGiftIds_ThrowsException() {
             // Duplicate check happens after first ID is validated
             setupMocksForGiftDuplicateFailure();
@@ -1075,7 +1017,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for non-string gift ID")
         void validate_WhenNonStringGiftId_ThrowsException() {
             String content = replaceOnce(createValidContent(),
                     "\"selectedGiftIds\": [\"9001\"],",
@@ -1086,11 +1027,9 @@ class PlannerContentValidatorTest {
     }
 
     @Nested
-    @DisplayName("Comprehensive/Observation Gift Validation Tests")
     class ComprehensiveGiftValidationTests {
 
         @Test
-        @DisplayName("Should pass with valid comprehensiveGiftIds")
         void validate_WhenValidComprehensiveGiftIds_Passes() {
             setupMocksForValidIds();
             String content = createFullContent();
@@ -1098,7 +1037,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for duplicate comprehensiveGiftIds")
         void validate_WhenDuplicateComprehensiveGiftIds_ThrowsException() {
             // Duplicate check happens after first ID is validated
             setupMocksForGiftDuplicateFailure();
@@ -1110,7 +1048,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for non-string comprehensiveGiftIds element")
         void validate_WhenNonStringComprehensiveGiftId_ThrowsException() {
             String content = replaceOnce(createFullContent(),
                     "\"comprehensiveGiftIds\": [\"19050\"]",
@@ -1120,7 +1057,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for invalid comprehensiveGiftIds")
         void validate_WhenInvalidComprehensiveGiftId_ThrowsException() {
             // ID lookup fails - need hasEgoGift mock
             setupMocksForGiftDuplicateFailure();
@@ -1134,7 +1070,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for duplicate observationGiftIds")
         void validate_WhenDuplicateObservationGiftIds_ThrowsException() {
             // Duplicate check happens after first ID is validated
             setupMocksForGiftDuplicateFailure();
@@ -1146,7 +1081,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for non-string observationGiftIds element")
         void validate_WhenNonStringObservationGiftId_ThrowsException() {
             String content = replaceOnce(createFullContent(),
                     "\"observationGiftIds\": [\"9100\"]",
@@ -1157,11 +1091,9 @@ class PlannerContentValidatorTest {
     }
 
     @Nested
-    @DisplayName("Floor Selection Gift Validation Tests")
     class FloorSelectionGiftValidationTests {
 
         @Test
-        @DisplayName("Should pass with valid floor giftIds")
         void validate_WhenValidFloorGiftIds_Passes() {
             setupMocksForValidIds();
             String content = createValidContent();
@@ -1169,7 +1101,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for duplicate giftIds within same floor")
         void validate_WhenDuplicateFloorGiftIds_ThrowsException() {
             // Floor validation fails before buff/gift pool validation
             setupMocksForValidIdsWithoutBuffsAndGifts();
@@ -1181,7 +1112,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for non-string floor giftIds element")
         void validate_WhenNonStringFloorGiftId_ThrowsException() {
             String content = replaceOnce(createValidContent(),
                     "\"giftIds\": [\"9002\"]",
@@ -1191,7 +1121,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for invalid floor giftIds")
         void validate_WhenInvalidFloorGiftId_ThrowsException() {
             // Floor validation fails before buff/gift pool validation
             setupMocksForValidIdsWithoutBuffsAndGifts();
@@ -1205,7 +1134,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should allow same giftId across different floors")
         void validate_WhenSameGiftIdAcrossFloors_Passes() {
             setupMocksForValidIds();
             String content = replaceOnce(createValidContent(),
@@ -1217,11 +1145,9 @@ class PlannerContentValidatorTest {
     }
 
     @Nested
-    @DisplayName("Granular Error Codes")
     class GranularErrorCodeTests {
 
         @Test
-        @DisplayName("Gift not affordable for theme pack should produce UNAFFORDABLE_EGOGIFT sub-error")
         void validate_WhenGiftNotAffordable_ProducesUnaffordableEgoGiftCode() {
             setupMocksForUnaffordableGifts();
 
@@ -1233,7 +1159,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Duplicate gift ID in floor giftIds should produce DUPLICATE_EGOGIFT sub-error")
         void validate_WhenDuplicateFloorGiftId_ProducesDuplicateEgoGiftCode() {
             setupMocksForValidIds();
             String content = replaceOnce(createValidContent(),
@@ -1249,7 +1174,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Duplicate base ID in selectedBuffIds should produce DUPLICATE_STARTBUFF sub-error")
         void validate_WhenDuplicateBuffBaseId_ProducesDuplicateStartBuffCode() {
             setupMocksForValidIds();
             // 100 and 200 share base ID 0 (100 % 100 == 0, 200 % 100 == 0)
@@ -1266,7 +1190,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Duplicate gift ID in selectedGiftIds should produce DUPLICATE_STARTGIFT sub-error")
         void validate_WhenDuplicateSelectedGiftId_ProducesDuplicateStartGiftCode() {
             setupMocksForValidIds();
             String content = replaceOnce(createValidContent(),
@@ -1281,7 +1204,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Floor N having themePackId when floor N-1 lacks it should produce OUT_OF_ORDER_THEMEPACK sub-error")
         void validate_WhenFloorPrerequisiteViolation_ProducesOutOfOrderThemePackCode() {
             setupMocksForValidIds();
             // Floor 0 has null themePackId; floor 1 has one → prerequisite violation
@@ -1298,7 +1220,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("selectedGiftIds present without selectedGiftKeyword should produce MISSING_STARTGIFT_KEYWORD sub-error")
         void validate_WhenGiftsWithoutKeyword_ProducesMissingStartGiftKeywordCode() {
             // No start gift keyword mocks needed: validateStartGiftIds returns early on null keyword
             setupMocksForValidIdsWithoutGifts();
@@ -1316,11 +1237,9 @@ class PlannerContentValidatorTest {
     }
 
     @Nested
-    @DisplayName("Multi-Error Collection")
     class MultiErrorCollectionTests {
 
         @Test
-        @DisplayName("Two independent errors should both appear in sub-errors of combined exception")
         void validate_WhenTwoIndependentErrors_CollectsBothInSubErrors() {
             setupMocksForUnaffordableGifts();
             // deploymentOrder[0] = 99 is OOB (0–11) → OUT_OF_RANGE_DEPLOYMENT
@@ -1342,7 +1261,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Single validation error should produce combined exception with exactly one sub-error")
         void validate_WhenSingleError_ProducesCombinedExceptionWithOneSubError() {
             setupMocksForUnaffordableGifts();
 
@@ -1356,11 +1274,9 @@ class PlannerContentValidatorTest {
     }
 
     @Nested
-    @DisplayName("Edge Cases")
     class EdgeCaseTests {
 
         @Test
-        @DisplayName("Should pass with boundary sinner indices (01 and 12 for equipment, 0 and 11 for deployment)")
         void validate_WhenBoundarySinnerIndices_Passes() {
             setupMocksForValidIds();
             // createValidContent already uses boundary values:
@@ -1375,14 +1291,12 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should throw exception for malformed JSON")
         void validate_WhenMalformedJson_ThrowsException() {
             assertThrows(PlannerValidationException.class,
                     () -> validate("{\"title\": \"unclosed string}", "5F"));
         }
 
         @Test
-        @DisplayName("Should handle deeply nested but valid structure")
         void validate_WhenValidDeepNesting_Passes() {
             setupMocksForValidIds();
             // Use createFullContent which has all optional fields and complete equipment
@@ -1394,7 +1308,6 @@ class PlannerContentValidatorTest {
     class ThreadspinPerEgoMaxTests {
 
         @Test
-        @DisplayName("Should pass when threadspin equals the EGO's max (5 on a 5-cap EGO)")
         void validate_WhenThreadspin5OnFiveCapEgo_Passes() {
             setupMocksForValidIds();
             lenient().when(gameDataRegistry.getEgoMaxThreadspin("20101")).thenReturn(5);
@@ -1408,7 +1321,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should fail when threadspin exceeds the EGO's per-EGO max")
         void validate_WhenThreadspin5OnFourCapEgo_Fails() {
             setupMocksForValidIds();
 
@@ -1424,7 +1336,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should fail when EGO id has no maxThreadspin in registry")
         void validate_WhenThreadspinWithUnknownRegistryEntry_Fails() {
             setupMocksForValidIds();
             lenient().when(gameDataRegistry.getEgoMaxThreadspin(anyString())).thenReturn(null);
@@ -1438,7 +1349,6 @@ class PlannerContentValidatorTest {
     class IdReferenceAccumulationTests {
 
         @Test
-        @DisplayName("Should report the out-of-range level and uptie on one identity together")
         void validate_WhenLevelAndUptieOutOfRange_ReportsBoth() {
             setupMocksForValidIds();
 
@@ -1490,7 +1400,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should report an out-of-range threadspin alongside a failure on another sinner")
         void validate_WhenThreadspinAndUptieOutOfRange_ReportsBoth() {
             setupMocksForValidIds();
 
@@ -1511,7 +1420,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should accept a draft floor carrying gifts before a theme pack is chosen")
         void validate_WhenFloorHasGiftsWithoutThemePack_DoesNotThrow() {
             setupMocksForValidIds();
 
@@ -1525,7 +1433,6 @@ class PlannerContentValidatorTest {
     }
 
     @Nested
-    @DisplayName("Publish Policy Floor Tests")
     class PublishPolicyTests {
 
         private void setupMocksWithoutThemePack() {
@@ -1539,7 +1446,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should accept a fully filled in planner")
         void validate_WhenPublishPolicyAndFloorsComplete_Passes() {
             setupMocksForValidIds();
 
@@ -1548,7 +1454,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should reject a floor without a theme pack")
         void validate_WhenPublishPolicyAndFloorHasNoThemePack_ReportsMissingThemePack() {
             setupMocksWithoutThemePack();
             String content = replaceOnce(createValidContent(),
@@ -1564,7 +1469,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should reject a floor whose theme pack is unknown to game data")
         void validate_WhenPublishPolicyAndThemePackUnknown_ReportsUnknownThemePack() {
             setupMocksWithoutThemePack();
             when(gameDataRegistry.hasThemePack(anyString())).thenReturn(false);
@@ -1578,7 +1482,6 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        @DisplayName("Should reject a 10F floor that is not on Hard")
         void validate_WhenPublishPolicyAndDifficultyBelowCategoryRule_ReportsInsufficientEntry() {
             setupMocksWithoutThemePack();
             when(gameDataRegistry.hasThemePack(anyString())).thenReturn(true);
@@ -1766,7 +1669,6 @@ class PlannerContentValidatorTest {
     }
 
     @Nested
-    @DisplayName("Keyword membership Tests")
     class KeywordMembershipTests {
 
         private String selecting(String keywords) {

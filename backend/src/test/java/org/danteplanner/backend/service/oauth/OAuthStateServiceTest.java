@@ -8,7 +8,6 @@ import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.auth.oauth.OAuthStateService.OAuthTransaction;
 import org.danteplanner.backend.auth.token.AesGcmCipher;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.security.KeyPair;
@@ -60,7 +59,6 @@ class OAuthStateServiceTest {
     }
 
     @Test
-    @DisplayName("seal then open returns the same state and code verifier")
     void open_WhenSealedByService_ReturnsSameTransaction() {
         String state = "state-abc";
         String verifier = "verifier-xyz";
@@ -75,19 +73,16 @@ class OAuthStateServiceTest {
     }
 
     @Test
-    @DisplayName("open returns empty when the token is null")
     void open_WhenNull_ReturnsEmpty() {
         assertThat(stateService.open(null)).isEmpty();
     }
 
     @Test
-    @DisplayName("open returns empty when the token is blank")
     void open_WhenBlank_ReturnsEmpty() {
         assertThat(stateService.open("   ")).isEmpty();
     }
 
     @Test
-    @DisplayName("open returns empty when the signature is tampered")
     void open_WhenTampered_ReturnsEmpty() {
         String sealed = stateService.seal("state", "verifier", "http://localhost");
         // Corrupt a character mid-payload so the signed content changes (flipping the final
@@ -101,7 +96,6 @@ class OAuthStateServiceTest {
     }
 
     @Test
-    @DisplayName("open returns empty when the token is signed by a different key")
     void open_WhenSignedByForeignKey_ReturnsEmpty() throws Exception {
         KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
         generator.initialize(2048);
@@ -118,7 +112,6 @@ class OAuthStateServiceTest {
     }
 
     @Test
-    @DisplayName("open returns empty when the token is expired")
     void open_WhenExpired_ReturnsEmpty() throws Exception {
         Date past = new Date(System.currentTimeMillis() - 1_000L);
         String expiredToken = Jwts.builder()
@@ -132,7 +125,6 @@ class OAuthStateServiceTest {
     }
 
     @Test
-    @DisplayName("generateCodeChallenge is the S256 hash of the verifier")
     void generateCodeChallenge_WhenGivenVerifier_ReturnsS256Hash() throws Exception {
         String verifier = stateService.generateCodeVerifier();
 

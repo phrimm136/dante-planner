@@ -31,7 +31,6 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
@@ -151,7 +150,6 @@ class ModerationAuditMatrixTest {
     }
 
     @TestFactory
-    @DisplayName("every moderator action leaves an audit record of the matching type")
     Stream<DynamicTest> auditRecord_WhenActionPerformed_IsWritten() {
         return auditProducers().entrySet().stream().map(entry -> DynamicTest.dynamicTest(
                 entry.getKey().name(),
@@ -168,7 +166,6 @@ class ModerationAuditMatrixTest {
     }
 
     @Test
-    @DisplayName("no declared action type is left without a producer")
     void actionType_WhenEnumerated_HasAProducer() {
         Set<ModerationActionType> covered = auditProducers().keySet();
         Set<ModerationActionType> declared = EnumSet.allOf(ModerationActionType.class);

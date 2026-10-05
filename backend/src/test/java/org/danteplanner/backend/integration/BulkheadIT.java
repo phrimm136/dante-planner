@@ -18,7 +18,6 @@ import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -98,8 +97,8 @@ class BulkheadIT extends CausalHarnessSupport {
         registry.add("datasource.bulkhead.password", () -> "test");
     }
 
+    // INV7
     @Test
-    @DisplayName("INV7: a wan-slowed re-check miss-flood saturating the bulkhead never delays a concurrent write on the separate primary write pool")
     void reCheckFlood_WhenBulkheadSaturated_DoesNotDelayConcurrentWrite() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "bulkhead-inv7@example.com");
         Long userId = owner.getId();

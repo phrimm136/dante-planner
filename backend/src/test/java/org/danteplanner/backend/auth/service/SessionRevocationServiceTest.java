@@ -8,7 +8,6 @@ import org.danteplanner.backend.auth.token.TokenValidator;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.user.api.UserRole;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,11 +46,9 @@ class SessionRevocationServiceTest {
 
     /** logout is void: the revoked-session entry lands in Redis, observable only in a containerized test. */
     @Nested
-    @DisplayName("logout Tests")
     class LogoutTests {
 
         @Test
-        @DisplayName("Should blacklist both tokens")
         void logout_WhenBothTokensValid_BlacklistsBoth() {
             // Arrange
             String accessToken = "access-token";
@@ -79,7 +76,6 @@ class SessionRevocationServiceTest {
         }
 
         @Test
-        @DisplayName("Should handle null access token")
         void logout_WhenNullAccessToken_BlacklistsOnlyRefresh() {
             // Arrange
             String refreshToken = "refresh-token";
@@ -99,7 +95,6 @@ class SessionRevocationServiceTest {
         }
 
         @Test
-        @DisplayName("logout-with-only-an-access-token-revokes-exactly-it: no refresh cookie, no family revocation")
         void logout_WhenNullRefreshToken_BlacklistsOnlyAccess() {
             // Arrange
             String accessToken = "access-token";
@@ -119,7 +114,6 @@ class SessionRevocationServiceTest {
         }
 
         @Test
-        @DisplayName("Should handle both tokens null")
         void logout_WhenBothTokensNull_DoesNothing() {
             // Act
             sessionRevocationService.logout(null, null);
@@ -131,7 +125,6 @@ class SessionRevocationServiceTest {
         }
 
         @Test
-        @DisplayName("Should skip blacklist for already invalid access token")
         void logout_WhenInvalidAccessToken_SkipsBlacklist() {
             // Arrange
             String invalidAccessToken = "invalid-access";
@@ -154,7 +147,6 @@ class SessionRevocationServiceTest {
         }
 
         @Test
-        @DisplayName("Should skip blacklist for already invalid refresh token")
         void logout_WhenInvalidRefreshToken_SkipsBlacklist() {
             // Arrange
             String validAccessToken = "valid-access";
@@ -178,11 +170,9 @@ class SessionRevocationServiceTest {
     }
 
     @Nested
-    @DisplayName("session end")
     class SessionEndTests {
 
         @Test
-        @DisplayName("ending every session invalidates every token the user holds")
         void endAllSessions_WhenCalled_InvalidatesUserTokens() {
             sessionRevocationService.endAllSessions(USER_ID);
 
@@ -190,7 +180,6 @@ class SessionRevocationServiceTest {
         }
 
         @Test
-        @DisplayName("ending every session fails when the token store is unreachable")
         void endAllSessions_WhenTokenStoreUnreachable_Throws() {
             doThrow(new RedisConnectionFailureException("token store unreachable"))
                     .when(tokenBlacklistService).invalidateUserTokens(USER_ID);
@@ -200,7 +189,6 @@ class SessionRevocationServiceTest {
         }
 
         @Test
-        @DisplayName("ending the deleting request's session revokes the tokens it carried")
         void endSession_WhenBothTokensValid_RevokesBoth() {
             Date accessExpiry = new Date(System.currentTimeMillis() + 60000);
             Date refreshExpiry = new Date(System.currentTimeMillis() + 86400000);

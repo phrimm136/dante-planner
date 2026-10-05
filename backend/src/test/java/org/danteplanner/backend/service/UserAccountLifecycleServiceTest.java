@@ -8,7 +8,6 @@ import org.danteplanner.backend.user.api.AccountLifecycleParticipant;
 import org.danteplanner.backend.user.api.SessionEndHandler;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,11 +64,9 @@ class UserAccountLifecycleServiceTest {
     }
 
     @Nested
-    @DisplayName("deleteAccount Tests")
     class DeleteAccountTests {
 
         @Test
-        @DisplayName("Should set deletedAt and scheduledDate on first deletion")
         void deleteAccount_WhenFirstDeletion_SetsDeletedAtAndScheduledDate() {
             // Arrange
             when(userRepository.findWithLockById(testUser.getId())).thenReturn(Optional.of(testUser));
@@ -96,7 +93,6 @@ class UserAccountLifecycleServiceTest {
         }
 
         @Test
-        @DisplayName("Should be idempotent and return existing scheduled date")
         void deleteAccount_WhenIdempotent_ReturnsExistingScheduledDate() {
             // Arrange - user already deleted
             Instant existingScheduledAt = Instant.now().plus(Duration.ofDays(25));
@@ -114,7 +110,6 @@ class UserAccountLifecycleServiceTest {
         }
 
         @Test
-        @DisplayName("Should fail the deletion when the token store is unreachable")
         void deleteAccount_WhenEndingSessionsFails_Propagates() {
             when(userRepository.findWithLockById(testUser.getId())).thenReturn(Optional.of(testUser));
             doThrow(new RedisConnectionFailureException("token store unreachable"))
@@ -125,7 +120,6 @@ class UserAccountLifecycleServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw UserNotFoundException when user not found")
         void deleteAccount_WhenUserNotFound_ThrowsException() {
             // Arrange
             Long nonExistentId = 999L;
@@ -142,11 +136,9 @@ class UserAccountLifecycleServiceTest {
     }
 
     @Nested
-    @DisplayName("reactivateAccount Tests")
     class ReactivateAccountTests {
 
         @Test
-        @DisplayName("Should clear deletedAt and scheduledDate on reactivation")
         void reactivateAccount_WhenSoftDeleted_ClearsDeletedAtAndScheduledDate() {
             // Arrange - user is soft-deleted
             testUser.softDelete(Instant.now().plus(Duration.ofDays(30)));
@@ -166,7 +158,6 @@ class UserAccountLifecycleServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw UserNotFoundException when user not found")
         void reactivateAccount_WhenUserNotFound_ThrowsException() {
             // Arrange
             Long nonExistentId = 999L;
@@ -182,7 +173,6 @@ class UserAccountLifecycleServiceTest {
         }
 
         @Test
-        @DisplayName("Should be idempotent for non-deleted user")
         void reactivateAccount_WhenNonDeletedUser_NoOp() {
             // Arrange - user is not deleted
             assertFalse(testUser.isDeleted());
@@ -199,11 +189,9 @@ class UserAccountLifecycleServiceTest {
     }
 
     @Nested
-    @DisplayName("performHardDelete Tests")
     class PerformHardDeleteTests {
 
         @Test
-        @DisplayName("Should reassign in every participant before any deletes, then delete the user")
         void performHardDelete_WhenPurgeable_ReassignsEverywhereBeforeAnyDeletion() {
             when(userRepository.findWithLockPurgeable(eq(testUser.getId()), any(Instant.class)))
                     .thenReturn(Optional.of(testUser));
@@ -223,7 +211,6 @@ class UserAccountLifecycleServiceTest {
         }
 
         @Test
-        @DisplayName("Should purge anyway when the token store is unreachable")
         void performHardDelete_WhenEndingSessionsFails_StillPurges() {
             when(userRepository.findWithLockPurgeable(eq(testUser.getId()), any(Instant.class)))
                     .thenReturn(Optional.of(testUser));
@@ -239,7 +226,6 @@ class UserAccountLifecycleServiceTest {
         }
 
         @Test
-        @DisplayName("Should skip and touch nothing when the account was reactivated after listing")
         void performHardDelete_WhenNoLongerPurgeable_SkipsWithoutDeleting() {
             when(userRepository.findWithLockPurgeable(eq(testUser.getId()), any(Instant.class)))
                     .thenReturn(Optional.empty());

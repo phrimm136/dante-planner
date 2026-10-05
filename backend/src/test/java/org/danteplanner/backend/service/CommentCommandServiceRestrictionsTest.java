@@ -19,7 +19,6 @@ import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserBannedException;
 import org.danteplanner.backend.user.api.UserTimedOutException;
 import org.danteplanner.backend.user.service.UserService;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -78,7 +77,6 @@ class CommentCommandServiceRestrictionsTest {
     }
 
     @Test
-    @DisplayName("a banned user cannot reply to a comment")
     void createReply_WhenUserBanned_ThrowsUserBanned() {
         User banned = restrictedUser();
         banned.setBannedAt(Instant.now());
@@ -89,7 +87,6 @@ class CommentCommandServiceRestrictionsTest {
     }
 
     @Test
-    @DisplayName("a timed-out user cannot reply to a comment")
     void createReply_WhenUserTimedOut_ThrowsUserTimedOut() {
         User timedOut = restrictedUser();
         timedOut.setTimeoutUntil(Instant.now().plus(1, ChronoUnit.HOURS));

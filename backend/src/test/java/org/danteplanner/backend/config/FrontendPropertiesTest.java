@@ -1,7 +1,6 @@
 package org.danteplanner.backend.config;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,13 +17,11 @@ class FrontendPropertiesTest {
             new FrontendProperties("http://localhost:5173,http://localhost");
 
     @Test
-    @DisplayName("getUrl returns the first allowed origin")
     void getUrl_WhenCalled_ReturnsFirstOrigin() {
         assertThat(properties.getUrl()).isEqualTo("http://localhost:5173");
     }
 
     @Test
-    @DisplayName("resolveReturnTo keeps a returnTo whose origin is allowlisted")
     void resolveReturnTo_WhenOriginAllowed_KeepsIt() {
         assertThat(properties.resolveReturnTo("http://localhost:5173/planner/1"))
                 .isEqualTo("http://localhost:5173/planner/1");
@@ -33,21 +30,18 @@ class FrontendPropertiesTest {
     }
 
     @Test
-    @DisplayName("resolveReturnTo rejects a foreign origin (open-redirect guard)")
     void resolveReturnTo_WhenForeignOrigin_FallsBack() {
         assertThat(properties.resolveReturnTo("http://evil.com/phish"))
                 .isEqualTo("http://localhost:5173");
     }
 
     @Test
-    @DisplayName("resolveReturnTo rejects a port mismatch (exact origin match)")
     void resolveReturnTo_WhenPortMismatch_FallsBack() {
         assertThat(properties.resolveReturnTo("http://localhost:9999/x"))
                 .isEqualTo("http://localhost:5173");
     }
 
     @Test
-    @DisplayName("resolveReturnTo rejects protocol-relative, relative, malformed, and blank values")
     void resolveReturnTo_WhenNotAbsoluteAllowed_FallsBack() {
         assertThat(properties.resolveReturnTo("//evil.com")).isEqualTo("http://localhost:5173");
         assertThat(properties.resolveReturnTo("/planner/1")).isEqualTo("http://localhost:5173");
@@ -57,7 +51,6 @@ class FrontendPropertiesTest {
     }
 
     @Test
-    @DisplayName("resolveReturnTo rejects classic open-redirect bypass attempts")
     void resolveReturnTo_WhenBypassAttempt_FallsBack() {
         // javascript: scheme has a null host
         assertThat(properties.resolveReturnTo("javascript:alert(1)")).isEqualTo("http://localhost:5173");
@@ -74,7 +67,6 @@ class FrontendPropertiesTest {
     }
 
     @Test
-    @DisplayName("constructor fails fast when no origin is configured")
     void constructor_WhenBlank_Throws() {
         assertThatThrownBy(() -> new FrontendProperties("   "))
                 .isInstanceOf(IllegalStateException.class);

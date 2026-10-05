@@ -14,7 +14,6 @@ import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.shared.security.CsrfTokenService;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockFilterChain;
@@ -29,7 +28,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link CsrfDoubleSubmitFilter} — realizes INV3 (every state-changing
  * request carries an {@code X-CSRF-Token} equal to the {@code csrf} cookie, or is 403).
  */
-@DisplayName("CsrfDoubleSubmitFilter")
 class CsrfDoubleSubmitFilterTest {
 
     private CsrfDoubleSubmitFilter filter;
@@ -66,11 +64,9 @@ class CsrfDoubleSubmitFilterTest {
     }
 
     @Nested
-    @DisplayName("Enforcement on unsafe methods")
     class Enforcement {
 
         @Test
-        @DisplayName("POST with cookie but no header → 403, chain not continued")
         void unsafeMethod_WhenMissingHeader_Rejected() throws Exception {
             MockHttpServletRequest req = request("POST", "/api/planner/md/1");
             req.setCookies(csrfCookie(token));
@@ -91,7 +87,6 @@ class CsrfDoubleSubmitFilterTest {
         }
 
         @Test
-        @DisplayName("POST with mismatched header → 403, chain not continued")
         void unsafeMethod_WhenMismatchedHeader_Rejected() throws Exception {
             MockHttpServletRequest req = request("POST", "/api/planner/md/1");
             req.setCookies(csrfCookie(token));
@@ -106,7 +101,6 @@ class CsrfDoubleSubmitFilterTest {
         }
 
         @Test
-        @DisplayName("POST with matching cookie + header → passes through")
         void unsafeMethod_WhenMatchingToken_Passes() throws Exception {
             MockHttpServletRequest req = request("POST", "/api/planner/md/1");
             req.setCookies(csrfCookie(token));
@@ -121,7 +115,6 @@ class CsrfDoubleSubmitFilterTest {
         }
 
         @Test
-        @DisplayName("PUT/PATCH/DELETE are enforced like POST")
         void otherUnsafeMethods_WhenMissingHeader_Rejected() throws Exception {
             for (String method : new String[]{"PUT", "PATCH", "DELETE"}) {
                 MockHttpServletRequest req = request(method, "/api/planner/md/1");
@@ -138,11 +131,9 @@ class CsrfDoubleSubmitFilterTest {
     }
 
     @Nested
-    @DisplayName("Exempt requests")
     class Exempt {
 
         @Test
-        @DisplayName("GET is never blocked, even without any token")
         void safeMethod_WhenNoToken_NeverBlocked() throws Exception {
             MockHttpServletRequest req = request("GET", "/api/planner/md/1");
             MockHttpServletResponse res = new MockHttpServletResponse();
@@ -157,11 +148,9 @@ class CsrfDoubleSubmitFilterTest {
     }
 
     @Nested
-    @DisplayName("Guest bootstrap (ensure-cookie)")
     class GuestBootstrap {
 
         @Test
-        @DisplayName("Request with no csrf cookie receives a Set-Cookie for csrf")
         void safeMethod_WhenNoCsrfCookie_SetsCookieOnResponse() throws Exception {
             MockHttpServletRequest req = request("GET", "/api/planner/md/recommended");
             MockHttpServletResponse res = new MockHttpServletResponse();
@@ -177,7 +166,6 @@ class CsrfDoubleSubmitFilterTest {
         }
 
         @Test
-        @DisplayName("Guest mutation: Set-Cookie issued AND request rejected 403")
         void guestMutation_WhenNoCsrfCookie_SetsCookieThenRejects() throws Exception {
             MockHttpServletRequest req = request("POST", "/api/planner/md/1");
             MockHttpServletResponse res = new MockHttpServletResponse();
@@ -191,7 +179,6 @@ class CsrfDoubleSubmitFilterTest {
         }
 
         @Test
-        @DisplayName("Retry with echoed cookie + header passes")
         void retryWithEchoedToken_WhenCookieAndHeaderMatch_Passes() throws Exception {
             MockHttpServletRequest first = request("POST", "/api/planner/md/1");
             MockHttpServletResponse firstRes = new MockHttpServletResponse();
@@ -211,7 +198,6 @@ class CsrfDoubleSubmitFilterTest {
         }
 
         @Test
-        @DisplayName("A matching pair this server never minted is rejected")
         void mutation_WhenTokenNotServerIssued_Rejected() throws Exception {
             String attackerChosen = "attacker-planted-value";
             MockHttpServletRequest req = request("POST", "/api/planner/md/1");
@@ -227,7 +213,6 @@ class CsrfDoubleSubmitFilterTest {
         }
 
         @Test
-        @DisplayName("A minted token whose payload was edited is rejected")
         void mutation_WhenTokenTampered_Rejected() throws Exception {
             String tampered = (token.charAt(0) == 'x' ? 'y' : 'x') + token.substring(1);
             assertThat(tampered).isNotEqualTo(token);

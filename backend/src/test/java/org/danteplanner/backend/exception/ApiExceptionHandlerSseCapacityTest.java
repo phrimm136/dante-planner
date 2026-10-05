@@ -4,7 +4,6 @@ import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.sse.SseCapacityExceededException;
 import org.danteplanner.backend.shared.sse.SseConstants;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -48,15 +47,14 @@ class ApiExceptionHandlerSseCapacityTest {
     }
 
     @Test
-    @DisplayName("A refused text/event-stream subscription maps to 429, not 500")
     void refusedSseSubscription_WhenAcceptIsEventStream_MapsTo429() throws Exception {
         mockMvc.perform(get("/sse/full").accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.code").value("SSE_CAPACITY_EXCEEDED"));
     }
 
+    // so the client does not retry sooner
     @Test
-    @DisplayName("A refused subscription names the wait, so the client does not retry sooner")
     void refusedSseSubscription_WhenRegistryIsFull_CarriesRetryAfter() throws Exception {
         mockMvc.perform(get("/sse/full").accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(header().string(HttpHeaders.RETRY_AFTER,

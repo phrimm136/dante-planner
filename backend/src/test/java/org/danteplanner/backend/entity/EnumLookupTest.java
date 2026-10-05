@@ -4,7 +4,6 @@ import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.api.UserRole;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -19,11 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class EnumLookupTest {
 
     @Nested
-    @DisplayName("fromValue Tests")
     class FromValueTests {
 
         @Test
-        @DisplayName("returns the matching MDCategory constant")
         void fromValue_WhenMdCategory_ReturnsConstant() {
             assertEquals(MDCategory.F5, EnumLookup.fromValue(MDCategory.class, "5F"));
             assertEquals(MDCategory.F10, EnumLookup.fromValue(MDCategory.class, "10F"));
@@ -31,22 +28,19 @@ class EnumLookupTest {
         }
 
         @Test
-        @DisplayName("returns the matching PlannerType constant")
         void fromValue_WhenPlannerType_ReturnsConstant() {
             assertEquals(PlannerType.MIRROR_DUNGEON, EnumLookup.fromValue(PlannerType.class, "MIRROR_DUNGEON"));
             assertEquals(PlannerType.REFRACTED_RAILWAY, EnumLookup.fromValue(PlannerType.class, "REFRACTED_RAILWAY"));
         }
 
         @Test
-        @DisplayName("throws IllegalArgumentException on unknown value with the original message format")
-        void fromValue_WhenUnknown_Throws() {
+        void fromValue_WhenUnknown_ThrowsWithTheOriginalMessageFormat() {
             IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                     () -> EnumLookup.fromValue(MDCategory.class, "banana"));
             assertEquals("Unknown MDCategory value: banana", ex.getMessage());
         }
 
         @Test
-        @DisplayName("throws IllegalArgumentException on null value")
         void fromValue_WhenNull_Throws() {
             assertThrows(IllegalArgumentException.class,
                     () -> EnumLookup.fromValue(MDCategory.class, null));
@@ -54,11 +48,9 @@ class EnumLookupTest {
     }
 
     @Nested
-    @DisplayName("isValid Tests")
     class IsValidTests {
 
         @Test
-        @DisplayName("returns true for valid MDCategory values")
         void isValid_WhenMdCategory_True() {
             assertTrue(EnumLookup.isValid(MDCategory.class, "5F"));
             assertTrue(EnumLookup.isValid(MDCategory.class, "10F"));
@@ -66,14 +58,12 @@ class EnumLookupTest {
         }
 
         @Test
-        @DisplayName("returns false for unknown and null values without throwing")
         void isValid_WhenUnknownOrNull_False() {
             assertFalse(EnumLookup.isValid(MDCategory.class, "banana"));
             assertFalse(EnumLookup.isValid(MDCategory.class, null));
         }
 
         @Test
-        @DisplayName("returns true for a valid UserRole value")
         void isValid_WhenUserRole_True() {
             assertTrue(EnumLookup.isValid(UserRole.class, "ADMIN"));
             assertFalse(EnumLookup.isValid(UserRole.class, "SUPERADMIN"));

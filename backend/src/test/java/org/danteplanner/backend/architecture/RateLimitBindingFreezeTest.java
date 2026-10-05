@@ -16,7 +16,6 @@ import org.danteplanner.backend.shared.ratelimit.RateLimitProperties;
 import org.danteplanner.backend.shared.ratelimit.RateLimitProperties.BucketConfig;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.tngtech.archunit.core.domain.JavaClasses;
@@ -119,13 +118,11 @@ class RateLimitBindingFreezeTest {
             "VIEW_RECORD -> capacity 30, refill 30 per 60s");
 
     @Test
-    @DisplayName("Every handler is charged against the policy the frozen table records")
     void handlerBindings_WhenScanned_MatchTheFrozenTable() {
         assertThat(scanBindings()).containsExactlyElementsOf(FROZEN_BINDINGS);
     }
 
     @Test
-    @DisplayName("Every policy's limit and the config version match the frozen table")
     void policyLimits_WhenBoundFromApplicationProperties_MatchTheFrozenTable() throws IOException {
         List<String> bound = boundLimits();
 

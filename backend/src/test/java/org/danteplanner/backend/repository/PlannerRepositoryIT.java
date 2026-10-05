@@ -15,7 +15,6 @@ import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -88,7 +87,6 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
     // ==================== Upvote Tests ====================
 
     @Test
-    @DisplayName("incrementUpvotes - existing planner increments count")
     void incrementUpvotes_WhenExistingPlanner_IncrementsCount() {
         // Act
         statsRepository.incrementUpvotes(testPlanner.getId());
@@ -102,7 +100,6 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
     // ==================== Atomic Notification Flag Tests ====================
 
     @Test
-    @DisplayName("trySetRecommendedNotified - first call on threshold planner returns 1 and sets flag")
     void trySetRecommendedNotified_WhenFirstCall_ReturnsOne() {
         // Arrange - Set planner to exactly meet threshold (upvotes=10, threshold=10)
         seedUpvotes(10);
@@ -118,7 +115,6 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("trySetRecommendedNotified - second call returns 0 (atomic flag already set)")
     void trySetRecommendedNotified_WhenSecondCall_ReturnsZero() {
         // Arrange - Set planner to meet threshold and set flag
         seedUpvotes(15);
@@ -135,7 +131,6 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("trySetRecommendedNotified - returns 0 when threshold not met")
     void trySetRecommendedNotified_WhenBelowThreshold_ReturnsZero() {
         // Arrange - Planner below threshold (upvotes=5, threshold=10)
         seedUpvotes(5);
@@ -150,7 +145,6 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("trySetRecommendedNotified - returns 0 for non-existent planner")
     void trySetRecommendedNotified_WhenNonExistentPlanner_ReturnsZero() {
         // Arrange
         UUID nonExistentId = UUID.randomUUID();

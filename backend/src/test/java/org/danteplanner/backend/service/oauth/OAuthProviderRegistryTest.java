@@ -6,7 +6,6 @@ import org.danteplanner.backend.auth.oauth.OAuthUserInfo;
 import org.danteplanner.backend.auth.oauth.OAuthProvider;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -42,11 +41,9 @@ class OAuthProviderRegistryTest {
     }
 
     @Nested
-    @DisplayName("getProvider Tests")
     class GetProviderTests {
 
         @Test
-        @DisplayName("Should return Google provider for 'google'")
         void getProvider_WhenGoogle_ReturnsGoogleProvider() {
             // Act
             OAuthProvider result = registry.getProvider("google");
@@ -57,7 +54,6 @@ class OAuthProviderRegistryTest {
         }
 
         @Test
-        @DisplayName("Should return Apple provider for 'apple'")
         void getProvider_WhenApple_ReturnsAppleProvider() {
             // Act
             OAuthProvider result = registry.getProvider("apple");
@@ -68,7 +64,6 @@ class OAuthProviderRegistryTest {
         }
 
         @Test
-        @DisplayName("Should throw InvalidRequestException for unknown provider")
         void getProvider_WhenUnknownProvider_Throws() {
             // Act & Assert
             InvalidRequestException exception = assertThrows(
@@ -83,7 +78,6 @@ class OAuthProviderRegistryTest {
         }
 
         @Test
-        @DisplayName("Should be case-insensitive for provider names")
         void getProvider_WhenMixedCase_IsCaseInsensitive() {
             // Act
             OAuthProvider upperCase = registry.getProvider("GOOGLE");
@@ -97,7 +91,6 @@ class OAuthProviderRegistryTest {
         }
 
         @Test
-        @DisplayName("Should throw for empty provider name")
         void getProvider_WhenEmptyName_Throws() {
             // Act & Assert
             assertThrows(
@@ -108,11 +101,9 @@ class OAuthProviderRegistryTest {
     }
 
     @Nested
-    @DisplayName("hasProvider Tests")
     class HasProviderTests {
 
         @Test
-        @DisplayName("Should return true for registered provider")
         void hasProvider_WhenRegistered_ReturnsTrue() {
             // Act & Assert
             assertTrue(registry.hasProvider("google"));
@@ -120,7 +111,6 @@ class OAuthProviderRegistryTest {
         }
 
         @Test
-        @DisplayName("Should return false for unregistered provider")
         void hasProvider_WhenUnregistered_ReturnsFalse() {
             // Act & Assert
             assertFalse(registry.hasProvider("discord"));
@@ -128,7 +118,6 @@ class OAuthProviderRegistryTest {
         }
 
         @Test
-        @DisplayName("Should be case-insensitive")
         void hasProvider_WhenMixedCase_IsCaseInsensitive() {
             // Act & Assert
             assertTrue(registry.hasProvider("GOOGLE"));
@@ -137,7 +126,6 @@ class OAuthProviderRegistryTest {
         }
 
         @Test
-        @DisplayName("Should return false for empty name")
         void hasProvider_WhenEmptyName_ReturnsFalse() {
             // Act & Assert
             assertFalse(registry.hasProvider(""));
@@ -145,11 +133,9 @@ class OAuthProviderRegistryTest {
     }
 
     @Nested
-    @DisplayName("Constructor Tests")
     class ConstructorTests {
 
         @Test
-        @DisplayName("Should handle empty provider list")
         void constructor_WhenEmptyProviderList_BuildsEmptyRegistry() {
             // Act
             OAuthProviderRegistry emptyRegistry = new OAuthProviderRegistry(Collections.emptyList());
@@ -163,7 +149,6 @@ class OAuthProviderRegistryTest {
         }
 
         @Test
-        @DisplayName("Should handle single provider")
         void constructor_WhenSingleProvider_RegistersIt() {
             // Arrange
             OAuthProviderRegistry singleProviderRegistry =
@@ -176,7 +161,6 @@ class OAuthProviderRegistryTest {
         }
 
         @Test
-        @DisplayName("Should throw IllegalStateException for duplicate provider names")
         void constructor_WhenDuplicateProviderNames_Throws() {
             // Arrange
             OAuthProvider googleProvider1 = mock(OAuthProvider.class);
@@ -194,11 +178,9 @@ class OAuthProviderRegistryTest {
     }
 
     @Nested
-    @DisplayName("Provider Interface Integration")
     class ProviderInterfaceTests {
 
         @Test
-        @DisplayName("Should return provider that implements OAuthProvider interface")
         void getProvider_WhenCalled_ReturnsInterfaceImplementation() {
             // Act
             OAuthProvider provider = registry.getProvider("google");
@@ -209,7 +191,6 @@ class OAuthProviderRegistryTest {
         }
 
         @Test
-        @DisplayName("Returned provider should be usable for OAuth operations")
         void getProvider_WhenCalled_ReturnedProviderIsUsable() {
             // Arrange
             OAuthTokens expectedTokens = new OAuthTokens("access", "refresh", null);

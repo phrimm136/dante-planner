@@ -14,7 +14,6 @@ import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -106,11 +105,9 @@ class PlannerModerationServiceTest {
     }
 
     @Nested
-    @DisplayName("unpublishPlanner Tests")
     class UnpublishPlannerTests {
 
         @Test
-        @DisplayName("Moderator can unpublish planner")
         void unpublishPlanner_WhenModeratorUnpublishes_Succeeds() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
@@ -137,7 +134,6 @@ class PlannerModerationServiceTest {
         }
 
         @Test
-        @DisplayName("Admin can unpublish planner")
         void unpublishPlanner_WhenAdminUnpublishes_Succeeds() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
@@ -160,7 +156,6 @@ class PlannerModerationServiceTest {
         }
 
         @Test
-        @DisplayName("Unpublish already unpublished planner succeeds")
         void unpublishPlanner_WhenAlreadyUnpublished_Succeeds() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
@@ -183,7 +178,6 @@ class PlannerModerationServiceTest {
         }
 
         @Test
-        @DisplayName("Throws PlannerNotFoundException for non-existent planner")
         void unpublishPlanner_WhenNonExistentPlanner_ThrowsPlannerNotFoundException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
@@ -198,7 +192,6 @@ class PlannerModerationServiceTest {
         }
 
         @Test
-        @DisplayName("Throws PlannerNotFoundException for deleted planner")
         void unpublishPlanner_WhenDeletedPlanner_ThrowsPlannerNotFoundException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();

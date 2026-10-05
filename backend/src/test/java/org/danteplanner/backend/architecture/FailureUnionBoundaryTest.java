@@ -6,7 +6,6 @@ import com.tngtech.archunit.core.domain.JavaMethod;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -48,7 +47,6 @@ class FailureUnionBoundaryTest {
             .importPackages(FIXTURE_PACKAGE);
 
     @Test
-    @DisplayName("no transactional method returns a failure union")
     void transactionalMethod_WhenItReturnsAFailureUnion_IsRejected() {
         assertThat(offendersIn(MAIN_CLASSES))
                 .as("a failure handed back across the transaction proxy commits the writes made "
@@ -58,8 +56,7 @@ class FailureUnionBoundaryTest {
     }
 
     @Test
-    @DisplayName("the rule names the offending method when one exists, annotated either way")
-    void offendingMethod_WhenTheRuleRunsOverTheFixture_IsNamed() {
+    void offendingMethod_WhenTheRuleRunsOverTheFixture_IsNamedWhetherMethodOrClassIsAnnotated() {
         assertThat(offendersIn(FIXTURE_CLASSES))
                 .as("the rule above passes vacuously unless this one shows it rejecting a violation, "
                         + "and no class in main sources is annotated at class level to exercise that "

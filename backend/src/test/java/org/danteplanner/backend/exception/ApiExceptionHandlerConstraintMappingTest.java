@@ -5,7 +5,6 @@ import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.backend.shared.exception.KnownConstraint;
 import org.hibernate.exception.ConstraintViolationException;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -168,7 +167,6 @@ class ApiExceptionHandlerConstraintMappingTest {
     }
 
     @Test
-    @DisplayName("a UNIQUE violation maps to 409 under a Turkish default locale")
     void handleDataIntegrityViolation_WhenTurkishLocale_MapsUniqueToConflict() {
         ResponseEntity<Object> response =
                 handleUnder(Locale.forLanguageTag("tr"), duplicateKey("planner_votes.PRIMARY"));
@@ -178,7 +176,6 @@ class ApiExceptionHandlerConstraintMappingTest {
     }
 
     @Test
-    @DisplayName("a UNIQUE violation maps identically under the root locale")
     void handleDataIntegrityViolation_WhenRootLocale_MapsUniqueToConflict() {
         ResponseEntity<Object> response =
                 handleUnder(Locale.ROOT, duplicateKey("planner_votes.PRIMARY"));

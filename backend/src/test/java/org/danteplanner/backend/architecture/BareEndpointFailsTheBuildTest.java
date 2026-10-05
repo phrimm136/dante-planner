@@ -4,7 +4,6 @@ import org.danteplanner.ratelimitfixture.BareHandlerFixture;
 import org.danteplanner.ratelimitfixture.DeclaredHandlerFixture;
 import org.danteplanner.ratelimitfixture.MisdeclaredHandlerFixture;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.tngtech.archunit.core.domain.JavaClasses;
@@ -25,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class BareEndpointFailsTheBuildTest {
 
     @Test
-    @DisplayName("Bare endpoint fails the build, and the failure names the handler method")
     void bareHandler_WhenCoverageRuleRuns_FailsNamingTheHandlerMethod() {
         JavaClasses bare = new ClassFileImporter().importClasses(BareHandlerFixture.class);
 
@@ -37,7 +35,6 @@ class BareEndpointFailsTheBuildTest {
     }
 
     @Test
-    @DisplayName("A class-level policy and a method-level exemption both satisfy coverage")
     void declaredHandlers_WhenCoverageRuleRuns_Pass() {
         JavaClasses declared = new ClassFileImporter().importClasses(DeclaredHandlerFixture.class);
 
@@ -46,7 +43,6 @@ class BareEndpointFailsTheBuildTest {
     }
 
     @Test
-    @DisplayName("A per-route policy declared without an endpoint fails the build")
     void perRoutePolicy_WhenDeclaredWithoutEndpoint_FailsTheShapeRule() {
         JavaClasses misdeclared = new ClassFileImporter().importClasses(MisdeclaredHandlerFixture.class);
 
@@ -58,7 +54,6 @@ class BareEndpointFailsTheBuildTest {
     }
 
     @Test
-    @DisplayName("A self-naming policy given an endpoint anyway fails the build")
     void selfNamingPolicy_WhenGivenAnEndpoint_FailsTheShapeRule() {
         JavaClasses misdeclared = new ClassFileImporter().importClasses(MisdeclaredHandlerFixture.class);
 
@@ -72,7 +67,6 @@ class BareEndpointFailsTheBuildTest {
     }
 
     @Test
-    @DisplayName("Correctly shaped declarations satisfy the shape rule")
     void declaredHandlers_WhenShapeRuleRuns_Pass() {
         JavaClasses declared = new ClassFileImporter().importClasses(DeclaredHandlerFixture.class);
 

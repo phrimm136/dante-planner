@@ -20,7 +20,6 @@ import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,7 +115,6 @@ class CausalGateIT extends CausalHarnessSupport {
     }
 
     @Test
-    @DisplayName("Author write sets a GTID cookie; the cookie-bearing read routes to the fresh primary while the replica lags, then serves the replica and clears the cookie once caught up")
     void causalGate_WhenAuthorWriteSetsGtidCookie_ReadYourOwnWriteRoutesPrimaryThenClearsCookieWhenCaughtUp()
             throws Exception {
         User author = TestDataFactory.createTestUser(
@@ -180,7 +178,6 @@ class CausalGateIT extends CausalHarnessSupport {
     }
 
     @Test
-    @DisplayName("A token under a server uuid the primary never executed is cleared by the read against the real primary")
     void causalGate_WhenTokenNamesForeignServerUuid_ReadClearsCookie() throws Exception {
         User author = TestDataFactory.createTestUser(
                 userRepository, "causal-foreign-" + UUID.randomUUID() + "@example.com");
@@ -211,7 +208,6 @@ class CausalGateIT extends CausalHarnessSupport {
     }
 
     @Test
-    @DisplayName("A Redis-only logout commits no MySQL transaction, so no read-your-writes GTID cookie is minted")
     void rywNoCookieOnRedisOnlyWrite_WhenLogoutCommitsNoTx_MintsNoGtidCookie() throws Exception {
         User user = TestDataFactory.createTestUser(
                 userRepository, "logout-gate-" + UUID.randomUUID() + "@example.com");
@@ -240,7 +236,6 @@ class CausalGateIT extends CausalHarnessSupport {
      * this is the only test that fails if capture stops reaching the connection that committed.
      */
     @Test
-    @DisplayName("A committed write reports its own GTID through the session tracker, not the superset fallback")
     void ownGtidTracker_WhenWriteCommits_ReportsTransactionOwnGtid() throws Exception {
         User author = TestDataFactory.createTestUser(
                 userRepository, "gtid-tracker-author-" + UUID.randomUUID() + "@example.com");

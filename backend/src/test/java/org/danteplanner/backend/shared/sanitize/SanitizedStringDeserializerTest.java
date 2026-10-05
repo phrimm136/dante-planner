@@ -3,7 +3,6 @@ package org.danteplanner.backend.shared.sanitize;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,7 +32,6 @@ class SanitizedStringDeserializerTest {
         "text":"click","marks":[{"type":"link","attrs":{"href":"javascript:alert(1)"}}]}]}}}}""";
 
     @Test
-    @DisplayName("a plain component arrives with its markup stripped")
     void plainComponent_WhenPayloadCarriesHtml_ArrivesAsText() throws Exception {
         Payload payload = MAPPER.readValue(
                 MAPPER.writeValueAsString(new RawPayload(
@@ -44,7 +42,6 @@ class SanitizedStringDeserializerTest {
     }
 
     @Test
-    @DisplayName("a component carrying no declaration is left exactly as it arrived")
     void undeclaredComponent_WhenPayloadCarriesHtml_ArrivesUnchanged() throws Exception {
         String raw = "<b>kept</b>";
 
@@ -56,7 +53,6 @@ class SanitizedStringDeserializerTest {
     }
 
     @Test
-    @DisplayName("a planner-content component arrives with its dangerous link neutralized")
     void plannerContentComponent_WhenLinkUsesScriptProtocol_ArrivesNeutralized() throws Exception {
         Payload payload = MAPPER.readValue(
                 MAPPER.writeValueAsString(new RawPayload("", DANGEROUS_DOCUMENT, "")),
@@ -68,7 +64,6 @@ class SanitizedStringDeserializerTest {
     }
 
     @Test
-    @DisplayName("a declared component that arrives null stays null")
     void declaredComponent_WhenPayloadOmitsIt_StaysNull() throws Exception {
         Payload payload = MAPPER.readValue("{}", Payload.class);
 

@@ -19,7 +19,6 @@ import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.shared.sse.SseService;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -241,7 +240,6 @@ class RedisConnectionRecoveryIT {
     }
 
     @Test
-    @DisplayName("Auth Redis restored: a token blacklisted before the outage is rejected again without a restart")
     void blacklistedToken_WhenAuthRedisRestored_IsRejectedAgain() throws IOException {
         String token = "recovery-blacklist-token-" + UUID.randomUUID();
         tokenBlacklistService.blacklistToken(token, new Date(System.currentTimeMillis() + ONE_HOUR_MS));
@@ -265,7 +263,6 @@ class RedisConnectionRecoveryIT {
     }
 
     @Test
-    @DisplayName("SSE-local Redis restored: the pub/sub container re-subscribes and fan-out delivery resumes")
     void sseFanout_WhenSubscriberConnectionRestored_ResubscribesAndDelivers() throws IOException {
         Long userId = 4243L;
 
@@ -300,7 +297,6 @@ class RedisConnectionRecoveryIT {
     }
 
     @Test
-    @DisplayName("Rate-limit Redis restored: the OAuth callback's login-unavailable redirect gives way to normal request handling")
     void oauthCallback_WhenRateLimitRedisRestored_StopsRedirectingToLoginUnavailable() throws Exception {
         String unavailable = frontendProperties.getUrl() + LoginRedirect.UNAVAILABLE;
         RATE_LIMIT_REDIS_PROXY.disable();

@@ -11,7 +11,6 @@ import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,11 +59,9 @@ class PlannerSubscriptionServiceTest {
     }
 
     @Nested
-    @DisplayName("toggleSubscription Tests")
     class ToggleSubscriptionTests {
 
         @Test
-        @DisplayName("Should create new subscription when not subscribed")
         void toggleSubscription_WhenNotSubscribed_CreatesNewSubscription() {
             // Arrange
             when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
@@ -88,7 +85,6 @@ class PlannerSubscriptionServiceTest {
         }
 
         @Test
-        @DisplayName("Should toggle enabled to disabled when already subscribed")
         void toggleSubscription_WhenSubscribed_TogglesEnabled() {
             // Arrange
             PlannerSubscription existingSubscription = new PlannerSubscription(testUser.getId(), plannerId);
@@ -108,7 +104,6 @@ class PlannerSubscriptionServiceTest {
         }
 
         @Test
-        @DisplayName("Should toggle disabled to enabled when re-subscribing")
         void toggleSubscription_WhenDisabled_TogglesBackToEnabled() {
             // Arrange
             PlannerSubscription disabledSubscription = new PlannerSubscription(testUser.getId(), plannerId);
@@ -127,7 +122,6 @@ class PlannerSubscriptionServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw PlannerNotFoundException when planner not found")
         void toggleSubscription_WhenPlannerNotFound_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
@@ -144,7 +138,6 @@ class PlannerSubscriptionServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw PlannerNotFoundException when planner not published")
         void toggleSubscription_WhenPlannerNotPublished_ThrowsException() {
             // Arrange
             when(plannerRepository.existsPublishedById(plannerId)).thenReturn(false);
@@ -158,11 +151,9 @@ class PlannerSubscriptionServiceTest {
     }
 
     @Nested
-    @DisplayName("isSubscribed Tests")
     class IsSubscribedTests {
 
         @Test
-        @DisplayName("Should return true when subscribed and enabled")
         void isSubscribed_WhenSubscribedAndEnabled_ReturnsTrue() {
             // Arrange
             PlannerSubscription enabledSubscription = new PlannerSubscription(testUser.getId(), plannerId);
@@ -178,7 +169,6 @@ class PlannerSubscriptionServiceTest {
         }
 
         @Test
-        @DisplayName("Should return false when subscribed but disabled")
         void isSubscribed_WhenSubscribedButDisabled_ReturnsFalse() {
             // Arrange
             PlannerSubscription disabledSubscription = new PlannerSubscription(testUser.getId(), plannerId);
@@ -195,7 +185,6 @@ class PlannerSubscriptionServiceTest {
         }
 
         @Test
-        @DisplayName("Should return false when not subscribed")
         void isSubscribed_WhenNotSubscribed_ReturnsFalse() {
             // Arrange
             when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
@@ -210,11 +199,9 @@ class PlannerSubscriptionServiceTest {
     }
 
     @Nested
-    @DisplayName("createSubscription Tests")
     class CreateSubscriptionTests {
 
         @Test
-        @DisplayName("Should create subscription when not exists")
         void createSubscription_WhenNotExists_CreatesSubscription() {
             // Arrange
             when(subscriptionRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))
@@ -234,7 +221,6 @@ class PlannerSubscriptionServiceTest {
         }
 
         @Test
-        @DisplayName("Should do nothing when subscription already exists")
         void createSubscription_WhenExists_DoesNothing() {
             // Arrange
             when(subscriptionRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))
@@ -249,11 +235,9 @@ class PlannerSubscriptionServiceTest {
     }
 
     @Nested
-    @DisplayName("getSubscriberUserIds Tests")
     class GetSubscriberUserIdsTests {
 
         @Test
-        @DisplayName("Should return only enabled subscriber user IDs")
         void getSubscriberUserIds_WhenCalled_ReturnsOnlyEnabled() {
             // Arrange
             PlannerSubscription sub1 = new PlannerSubscription(1L, plannerId);
@@ -274,7 +258,6 @@ class PlannerSubscriptionServiceTest {
         }
 
         @Test
-        @DisplayName("Should return empty list when no subscribers")
         void getSubscriberUserIds_WhenNoSubscribers_ReturnsEmpty() {
             // Arrange
             when(subscriptionRepository.findByPlannerIdAndEnabledTrue(plannerId))

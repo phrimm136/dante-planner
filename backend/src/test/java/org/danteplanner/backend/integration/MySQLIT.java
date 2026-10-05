@@ -23,7 +23,6 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.danteplanner.backend.support.TestDataFactory;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -112,11 +111,9 @@ class MySQLIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("Concurrent Atomic Operations")
     class ConcurrentAtomicTests {
 
         @Test
-        @DisplayName("20 concurrent votes with no lost updates")
         void concurrentVotes_When20Threads_NoLostUpdates() throws InterruptedException {
             // Create 20 users (reduced from 50 to lower CI resource pressure)
             List<User> users = IntStream.range(0, 20)
@@ -169,11 +166,10 @@ class MySQLIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("Concurrent castVote Through Service")
     class ConcurrentCastVoteTests {
 
+        // concurrent-vote-no-deadlock
         @Test
-        @DisplayName("concurrent-vote-no-deadlock: N concurrent castVote() calls succeed without retry, upvotes == vote rows, exactly one recommended notification")
         void concurrentVote_WhenNoDeadlock_AllCountedAndSingleNotification() throws InterruptedException {
             // Seed to one below the threshold sequentially (no notification yet), then run a
             // concurrent burst that crosses it — many burst transactions read upvotes==threshold-1,
@@ -258,12 +254,10 @@ class MySQLIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("MySQL Constraint Validation")
     @Transactional
     class ConstraintValidationTests {
 
         @Test
-        @DisplayName("UNIQUE constraint violation throws DataIntegrityViolationException with 'Duplicate entry'")
         void uniqueConstraint_WhenDuplicateVote_ThrowsException() {
             PlannerVote vote1 = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
             voteRepository.save(vote1);
@@ -281,7 +275,6 @@ class MySQLIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("UNIQUE constraint on provider+providerId validates MySQL error format")
         void uniqueConstraint_WhenMySQLErrorFormat_ValidatesMessage() {
             // Create user with specific provider ID
             User user1 = User.builder()
@@ -312,7 +305,6 @@ class MySQLIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("GOOGLE persists as lowercase 'google' in the provider VARCHAR column and reads back as GOOGLE")
         void authProviderType_WhenGoogle_RoundTripsThroughVarcharColumn() {
             User user = User.builder()
                     .email("provider-roundtrip@example.com")
@@ -338,12 +330,10 @@ class MySQLIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("PlannerStatus ENUM Round-Trip")
     @Transactional
     class PlannerStatusEnumTests {
 
         @Test
-        @DisplayName("SAVED persists as lowercase 'saved' in the ENUM column and reads back as SAVED")
         void plannerStatus_WhenSaved_RoundTripsThroughEnumColumn() {
             Planner planner = TestDataFactory.planner(testUser)
                     .status(PlannerStatus.SAVED)
@@ -364,12 +354,10 @@ class MySQLIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("Hard-Delete Vote Reassignment")
     @Transactional
     class HardDeleteVoteReassignmentTests {
 
         @Test
-        @DisplayName("Reassigning to a sentinel that already voted on the same planner deletes the collision instead of violating the PK")
         void reassignVotes_WhenSentinelAlreadyVotedSamePlanner_DeletesCollisionThenReassigns() {
             User leaving = TestDataFactory.createTestUser(userRepository, "leaving@example.com");
             User sentinel = TestDataFactory.createTestUser(userRepository, "sentinel@example.com");
@@ -398,12 +386,10 @@ class MySQLIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("Timestamp Precision Tests")
     @Transactional
     class TimestampPrecisionTests {
 
         @Test
-        @DisplayName("Microsecond precision preserved in timestamp ordering")
         void timestamp_WhenMicrosecondPrecision_Preserved() {
             // created_at is @PrePersist-assigned and updatable=false, so set
             // deterministic microsecond-spaced values via native SQL to verify the
@@ -455,11 +441,9 @@ class MySQLIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("SelectedKeywords JSON Column")
     class SelectedKeywordsTests {
 
         @Test
-        @DisplayName("planner persists and restores every FE keyword through the real JSON column")
         void saveAllKeywords_WhenPersistedAndReloaded_RoundTripsThroughSetColumn() {
             // Empirical all-keywords save against the real MySQL JSON column: the full
             // set must survive the converter's write and read paths end-to-end, which

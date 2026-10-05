@@ -13,7 +13,6 @@ import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -117,7 +116,6 @@ class PlannerEngagementServiceTest {
     }
 
     @Nested
-    @DisplayName("castVote Immutability Tests")
     class CastVoteImmutabilityTests {
 
         private Planner createPublishedPlanner() {
@@ -125,7 +123,6 @@ class PlannerEngagementServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw VoteAlreadyExistsException when user attempts duplicate vote")
         void castVote_WhenDuplicateVote_ThrowsException() {
             // Arrange
             Planner planner = createPublishedPlanner();
@@ -151,7 +148,6 @@ class PlannerEngagementServiceTest {
         }
 
         @Test
-        @DisplayName("Should allow first vote and create new vote record")
         void castVote_WhenFirstVote_CreatesVote() {
             // Arrange
             Planner planner = createPublishedPlanner();
@@ -185,7 +181,6 @@ class PlannerEngagementServiceTest {
         }
 
         @Test
-        @DisplayName("crossing the threshold records one PLANNER_RECOMMENDED event")
         void castVote_WhenCrossingTheThreshold_RecordsTheRecommendedEvent() {
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
@@ -207,7 +202,6 @@ class PlannerEngagementServiceTest {
         }
 
         @Test
-        @DisplayName("a vote the latch refuses records nothing, so one crossing owes one event")
         void castVote_WhenAnotherVoteAlreadyLatched_RecordsNothing() {
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
@@ -227,7 +221,6 @@ class PlannerEngagementServiceTest {
         }
 
         @Test
-        @DisplayName("a vote below the threshold records nothing")
         void castVote_WhenBelowTheThreshold_RecordsNothing() {
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();

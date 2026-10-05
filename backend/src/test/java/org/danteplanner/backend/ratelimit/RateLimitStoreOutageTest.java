@@ -38,7 +38,6 @@ import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.ratelimitfixture.DeclaredHandlerFixture;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.slf4j.LoggerFactory;
@@ -83,7 +82,6 @@ class RateLimitStoreOutageTest {
     }
 
     @Test
-    @DisplayName("The unreachable store fixture raises what production's lazy connect raises")
     void unreachableStore_WhenProxyManagerBuilt_ThrowsRedisConnectionException() throws IOException {
         int port = closedPort();
 
@@ -92,7 +90,6 @@ class RateLimitStoreOutageTest {
     }
 
     @Test
-    @DisplayName("Store unreachable: the published list is served and the PUBLIC_READ skip is counted once")
     void publishedList_WhenStoreUnreachable_ServesAndCountsTheSkippedCharge() throws Exception {
         MockMvc mockMvc = mvcAgainst(new RateLimitService(unreachableProxyManager(), bucketProperties()));
 
@@ -107,7 +104,6 @@ class RateLimitStoreOutageTest {
     }
 
     @Test
-    @DisplayName("Store unreachable: a CRUD handler runs and its skip is counted under CRUD")
     void crudHandler_WhenStoreUnreachable_RunsAndCountsTheSkippedCharge() throws Exception {
         MockMvc mockMvc = mvcAgainst(new RateLimitService(unreachableProxyManager(), bucketProperties()));
         SecurityContextHolder.getContext().setAuthentication(
@@ -120,7 +116,6 @@ class RateLimitStoreOutageTest {
     }
 
     @Test
-    @DisplayName("Store unreachable: the Google OAuth callback redirects to login-unavailable and nothing is skipped")
     void googleCallback_WhenStoreUnreachable_RedirectsToLoginUnavailable() throws Exception {
         MockMvc mockMvc = mvcAgainst(new RateLimitService(unreachableProxyManager(), bucketProperties()));
 
@@ -132,7 +127,6 @@ class RateLimitStoreOutageTest {
     }
 
     @Test
-    @DisplayName("Store unreachable: the Apple OAuth callback redirects to login-unavailable and nothing is skipped")
     void appleCallback_WhenStoreUnreachable_RedirectsToLoginUnavailable() throws Exception {
         MockMvc mockMvc = mvcAgainst(new RateLimitService(unreachableProxyManager(), bucketProperties()));
 
@@ -144,7 +138,6 @@ class RateLimitStoreOutageTest {
     }
 
     @Test
-    @DisplayName("A bucket4j request timeout fails a PUBLIC_READ charge open")
     void publishedList_WhenChargeTimesOut_ServesAndCountsTheSkippedCharge() throws Exception {
         RateLimitService rateLimitService = mock(RateLimitService.class);
         doThrow(new io.github.bucket4j.TimeoutException(
@@ -158,7 +151,6 @@ class RateLimitStoreOutageTest {
     }
 
     @Test
-    @DisplayName("A bucket4j request timeout on the Apple callback's AUTH charge redirects to login-unavailable")
     void appleCallback_WhenChargeTimesOut_RedirectsToLoginUnavailable() throws Exception {
         RateLimitService rateLimitService = mock(RateLimitService.class);
         doThrow(new io.github.bucket4j.TimeoutException(
@@ -171,7 +163,6 @@ class RateLimitStoreOutageTest {
     }
 
     @Test
-    @DisplayName("One WARN per failure burst: a successful charge ends the burst")
     void skippedCharges_WhenStoreFailsInBursts_WarnOncePerBurst() throws Exception {
         RateLimitService rateLimitService = mock(RateLimitService.class);
         doThrow(new RedisConnectionException("down"))
@@ -195,7 +186,6 @@ class RateLimitStoreOutageTest {
     }
 
     @Test
-    @DisplayName("Only AUTH fails closed")
     void policies_WhenClassified_OnlyAuthFailsClosed() {
         assertThat(List.of(RateLimitPolicy.values()))
                 .filteredOn(RateLimitPolicy::failsClosed)

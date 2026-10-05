@@ -11,7 +11,6 @@ import org.danteplanner.backend.planner.searchindex.PlannerContentEntityExtracto
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.tngtech.archunit.core.domain.JavaClass;
@@ -37,7 +36,6 @@ class ContentWritersAdmitFloorsTest {
             .importPackages("org.danteplanner.backend");
 
     @Test
-    @DisplayName("Every production class rebuilding the entity filter depends on the admission path")
     void contentWriters_WhenScanned_DependOnTheAdmissionPathUnlessFrozen() {
         Set<String> unfrozen = new TreeSet<>(unadmittedWriters(PRODUCTION));
         unfrozen.removeAll(FROZEN_UNADMITTED_WRITERS);
@@ -49,7 +47,6 @@ class ContentWritersAdmitFloorsTest {
     }
 
     @Test
-    @DisplayName("Every frozen unadmitted writer still writes without the admission path")
     void frozenUnadmittedWriters_WhenScanned_StillWriteWithoutAdmission() {
         Set<String> stale = new TreeSet<>(FROZEN_UNADMITTED_WRITERS);
         stale.removeAll(unadmittedWriters(PRODUCTION));
@@ -60,14 +57,12 @@ class ContentWritersAdmitFloorsTest {
     }
 
     @Test
-    @DisplayName("The writer selector finds today's index writers")
     void contentWriters_WhenScanned_IncludeEveryKnownWriter() {
         assertThat(topLevelNames(PRODUCTION, ContentWritersAdmitFloorsTest::writes)).containsExactlyInAnyOrder(
                 PlannerCatalogSyncService.class.getName());
     }
 
     @Test
-    @DisplayName("A class rebuilding the entity filter without the admission path is named by the rule")
     void unadmittedFilterRebuilder_WhenScanned_IsNamed() {
         JavaClasses fixture = new ClassFileImporter().importClasses(UnadmittedFilterRebuilder.class);
 

@@ -15,7 +15,6 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -72,7 +71,6 @@ class PlannerCatalogServiceTest {
     }
 
     @Test
-    @DisplayName("becoming visible adds the catalog row and records the event, with nothing left for after the commit")
     void onBecameVisible_WhenCalled_AddsTheRowAndRecordsTheEvent() {
         Planner planner = loadedPlanner();
 
@@ -84,7 +82,6 @@ class PlannerCatalogServiceTest {
     }
 
     @Test
-    @DisplayName("becoming invisible removes the catalog row, records the event, and marks the planner after the commit")
     void onBecameInvisible_WhenCommitted_RemovesTheRowRecordsTheEventAndMarksIt() {
         UUID plannerId = UUID.randomUUID();
 
@@ -98,7 +95,6 @@ class PlannerCatalogServiceTest {
     }
 
     @Test
-    @DisplayName("hiding an owner's planners withdraws their rows, records one event each, and marks them after the commit")
     void accountDeactivated_WhenCommitted_WithdrawsRecordsAnEventPerPlannerAndMarksThem() {
         List<UUID> published = List.of(UUID.randomUUID(), UUID.randomUUID());
         when(plannerRepository.findPublishedIdsOwnedBy(OWNER_ID)).thenReturn(published);
@@ -113,7 +109,6 @@ class PlannerCatalogServiceTest {
     }
 
     @Test
-    @DisplayName("restoring an owner's planners restores their rows and records one event per published planner")
     void accountReactivated_WhenCalled_RestoresAndRecordsAnEventPerPublishedPlanner() {
         List<UUID> published = List.of(UUID.randomUUID(), UUID.randomUUID());
         when(plannerRepository.findPublishedIdsOwnedBy(OWNER_ID)).thenReturn(published);
@@ -126,7 +121,6 @@ class PlannerCatalogServiceTest {
     }
 
     @Test
-    @DisplayName("the recommended flag is recomputed with the configured threshold")
     void refreshRecommended_WhenCalled_PassesTheThreshold() {
         UUID plannerId = UUID.randomUUID();
 
@@ -136,7 +130,6 @@ class PlannerCatalogServiceTest {
     }
 
     @Test
-    @DisplayName("an edit that keeps the searchable composition syncs the catalog copies and records nothing")
     void onVisibleEditCommitted_WhenCompositionUnchanged_CopiesScalarsWithoutEventOrSync() {
         Planner planner = loadedPlanner();
         ReflectionTestUtils.setField(planner.getContent(), "title", "Renamed");
@@ -153,7 +146,6 @@ class PlannerCatalogServiceTest {
     }
 
     @Test
-    @DisplayName("an edit that changes the content records the event")
     void onVisibleEditCommitted_WhenContentChanged_RecordsTheEvent() {
         Planner planner = loadedPlanner();
         ReflectionTestUtils.setField(planner.getContent(), "content", "{\"selectedGiftIds\":[\"9099\"]}");
@@ -162,7 +154,6 @@ class PlannerCatalogServiceTest {
     }
 
     @Test
-    @DisplayName("an edit that changes the keywords records the event")
     void onVisibleEditCommitted_WhenKeywordsChanged_RecordsTheEvent() {
         Planner planner = loadedPlanner();
         ReflectionTestUtils.setField(planner.getContent(), "selectedKeywords", Set.of("Burst"));
@@ -171,7 +162,6 @@ class PlannerCatalogServiceTest {
     }
 
     @Test
-    @DisplayName("an edit that changes the category records the event")
     void onVisibleEditCommitted_WhenCategoryChanged_RecordsTheEvent() {
         Planner planner = loadedPlanner();
         ReflectionTestUtils.setField(planner.getContent(), "category", "10F");
@@ -180,7 +170,6 @@ class PlannerCatalogServiceTest {
     }
 
     @Test
-    @DisplayName("an edit whose content is only re-serialized counts as unchanged")
     void onVisibleEditCommitted_WhenContentIsTheSameDocumentReformatted_RecordsNothing() {
         Planner planner = loadedPlanner();
         ReflectionTestUtils.setField(planner.getContent(), "content",
@@ -192,7 +181,6 @@ class PlannerCatalogServiceTest {
     }
 
     @Test
-    @DisplayName("an edit whose stored content is not parseable counts as changed")
     void onVisibleEditCommitted_WhenContentIsUnparseable_RecordsTheEvent() {
         Planner planner = loadedPlanner();
         ReflectionTestUtils.setField(planner.getContent(), "content", "{not json");
@@ -201,7 +189,6 @@ class PlannerCatalogServiceTest {
     }
 
     @Test
-    @DisplayName("an edit that clears the keywords of a planner that had none counts as unchanged")
     void onVisibleEditCommitted_WhenKeywordsGoFromAbsentToEmpty_RecordsNothing() {
         Planner planner = loadedPlanner();
         ReflectionTestUtils.setField(planner.getContent(), "loadedSelectedKeywords", null);
@@ -213,7 +200,6 @@ class PlannerCatalogServiceTest {
     }
 
     @Test
-    @DisplayName("an edit where only one side carries content counts as changed")
     void onVisibleEditCommitted_WhenLoadedContentIsAbsent_RecordsTheEvent() {
         Planner planner = loadedPlanner();
         ReflectionTestUtils.setField(planner.getContent(), "loadedContent", null);

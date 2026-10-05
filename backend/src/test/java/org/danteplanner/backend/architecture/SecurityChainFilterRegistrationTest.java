@@ -24,7 +24,6 @@ import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -49,7 +48,6 @@ class SecurityChainFilterRegistrationTest {
             .importPackages("org.danteplanner.backend");
 
     @Test
-    @DisplayName("every component-scanned filter in the security chain is disabled for the servlet container")
     void chainFilter_WhenComponentScanned_IsDisabledForTheServletContainer() {
         List<Class<?>> chainFilters = chainFilters();
 

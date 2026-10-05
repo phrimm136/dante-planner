@@ -37,7 +37,6 @@ import org.danteplanner.backend.planner.gamedata.GameDataLoader;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -143,11 +142,9 @@ class PlannerPublishingServiceTest {
     }
 
     @Nested
-    @DisplayName("publish intent Tests")
-    class SetPublishedTests {
+    class PublishIntentTests {
 
         @Test
-        @DisplayName("publishing an already-published planner twice leaves it published")
         void publishIdempotentStateTargeted_WhenSentTwice_StaysPublished() {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
@@ -161,7 +158,6 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
-        @DisplayName("unpublishing an already-unpublished planner leaves it unpublished")
         void publishIdempotentStateTargeted_WhenUnpublishRepeated_StaysUnpublished() {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
@@ -174,7 +170,6 @@ class PlannerPublishingServiceTest {
     }
 
     @Nested
-    @DisplayName("publish normalization Tests")
     class PublishNormalizationTests {
 
         private final ObjectMapper mapper = new ObjectMapper();
@@ -196,7 +191,6 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
-        @DisplayName("publishing stored content that holds a renamed gift stores the replacement id")
         void publish_WhenStoredContentHoldsARenamedGift_StoresTheNewId() throws Exception {
             PlannerContentValidator renaming = validatorRenaming("{\"egoGift\":{\"rename\":{\"9247\":\"9002\"}}}");
             String stored = TestDataFactory.VALID_CONTENT.replace(
@@ -219,7 +213,6 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
-        @DisplayName("publishing content no migration touches leaves the stored string as it was")
         void publish_WhenNothingIsMigrated_KeepsTheStoredString() {
             Planner planner = testPlannerBuilder().published(false).build();
             String stored = planner.getContentJson();
@@ -236,11 +229,9 @@ class PlannerPublishingServiceTest {
     }
 
     @Nested
-    @DisplayName("publish effect recording Tests")
     class PublishEffectRecordingTests {
 
         @Test
-        @DisplayName("a first publish records one PLANNER_PUBLISHED event and announces nothing itself")
         void applyPublish_WhenFirstPublish_RecordsTheEventInsteadOfAnnouncing() {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
@@ -254,7 +245,6 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
-        @DisplayName("a repeated publish records nothing, because nothing changed to announce")
         void applyPublish_WhenAlreadyPublished_RecordsNothing() {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
@@ -267,7 +257,6 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
-        @DisplayName("a withdrawal records nothing, because it has no observer effect")
         void applyUnpublish_WhenWithdrawn_RecordsNothing() {
             Planner planner = testPlannerBuilder().published(true).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
@@ -279,11 +268,9 @@ class PlannerPublishingServiceTest {
     }
 
     @Nested
-    @DisplayName("withdrawFromPublicView Tests")
     class WithdrawFromPublicViewTests {
 
         @Test
-        @DisplayName("withdrawing an already-unpublished planner writes nothing and drops no catalog row")
         void withdrawFromPublicView_WhenAlreadyUnpublished_HasNoSideEffects() {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
@@ -296,7 +283,6 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
-        @DisplayName("withdrawing a published planner persists it and drops its catalog row")
         void withdrawFromPublicView_WhenPublished_PersistsAndDropsCatalogRow() {
             Planner planner = testPlannerBuilder().published(true).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
@@ -310,7 +296,6 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
-        @DisplayName("taking down an unpublished planner still persists the moderation stamp")
         void withdrawFromPublicView_WhenTakedownOfUnpublished_StillPersists() {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
@@ -323,11 +308,9 @@ class PlannerPublishingServiceTest {
     }
 
     @Nested
-    @DisplayName("publishWithContent Tests")
     class PublishWithContentTests {
 
         @Test
-        @DisplayName("publish-with-content reuses the aggregate the upsert already loaded")
         void publishLoadsAggregateOnce_WhenContentCarried_ReusesUpsertedAggregate() {
             Planner planner = testPlannerBuilder().published(false).build();
             UpsertPlannerRequest request = new UpsertPlannerRequest(
@@ -355,11 +338,9 @@ class PlannerPublishingServiceTest {
     }
 
     @Nested
-    @DisplayName("publication state transition Tests")
     class PublicationStateTransitionTests {
 
         @Test
-        @DisplayName("Should publish when owner")
         void publish_WhenOwner_Publishes() {
             // Arrange
             Planner planner = testPlannerBuilder().published(false).build();
@@ -376,7 +357,6 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
-        @DisplayName("Should unpublish a published planner")
         void unpublish_WhenPublished_Unpublishes() {
             // Arrange
             Planner planner = testPlannerBuilder().published(true).build();
@@ -391,7 +371,6 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw PlannerForbiddenException when not owner")
         void publish_WhenNotOwner_ThrowsException() {
             // Arrange
             User otherUser = User.builder()
@@ -418,7 +397,6 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw PlannerNotFoundException when planner not found")
         void publish_WhenNotFound_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
@@ -432,7 +410,6 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw PlannerNotFoundException when planner is deleted")
         void publish_WhenDeleted_ThrowsException() {
             // Arrange
             Planner planner = createTestPlanner();
@@ -449,7 +426,6 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
-        @DisplayName("Should auto-subscribe owner when publishing")
         void publish_WhenPublishing_AutoSubscribesOwner() {
             // Arrange
             Planner planner = testPlannerBuilder().published(false).build();
@@ -467,7 +443,6 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
-        @DisplayName("Should not auto-subscribe when unpublishing")
         void unpublish_WhenUnpublishing_DoesNotAutoSubscribe() {
             // Arrange
             Planner planner = testPlannerBuilder().published(true).build();
@@ -484,11 +459,9 @@ class PlannerPublishingServiceTest {
     }
 
     @Nested
-    @DisplayName("Ban Enforcement Tests")
     class BanEnforcementTests {
 
         @Test
-        @DisplayName("Banned user cannot change publication state")
         void publish_WhenBannedUser_ThrowsUserBannedException() {
             // Arrange
             testUser.setBannedAt(java.time.Instant.now());
@@ -507,7 +480,6 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
-        @DisplayName("a ban withdraws distribution, so a banned owner may still unpublish")
         void unpublish_WhenBannedOwner_Unpublishes() {
             testUser.setBannedAt(java.time.Instant.now());
             testUser.setBannedBy(1L);
@@ -523,11 +495,9 @@ class PlannerPublishingServiceTest {
     }
 
     @Nested
-    @DisplayName("toggleOwnerNotifications Tests")
     class ToggleOwnerNotificationsTests {
 
         @Test
-        @DisplayName("Should update setting when owner")
         void toggleOwnerNotifications_WhenOwner_UpdatesSetting() {
             // Arrange
             Planner planner = createTestPlanner();
@@ -543,7 +513,6 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw PlannerForbiddenException when not owner")
         void toggleOwnerNotifications_WhenNotOwner_ThrowsException() {
             // Arrange
             User otherUser = User.builder()
@@ -569,11 +538,9 @@ class PlannerPublishingServiceTest {
     }
 
     @Nested
-    @DisplayName("publish-validates-before-mutating")
     class PublishValidatesBeforeMutatingTests {
 
         @Test
-        @DisplayName("a blank title refuses the publish before the aggregate moves")
         void publishValidatesBeforeMutating_WhenTitleBlank_LeavesAggregateUnpublished() {
             Planner planner = testPlannerBuilder().title("   ").published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
@@ -588,7 +555,6 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
-        @DisplayName("a blank title in the body refuses the publish before an unknown version reaches the upsert")
         void publishValidatesBeforeMutating_WhenBodyTitleBlankAndVersionUnknown_RefusesTitleWithoutWrite() {
             Planner planner = testPlannerBuilder().title("Stored Title").published(false).build();
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
@@ -607,7 +573,6 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
-        @DisplayName("an absent body title with a blank stored title refuses the publish without a write")
         void publishValidatesBeforeMutating_WhenBodyTitleAbsentAndStoredBlank_RefusesTitleWithoutWrite() {
             Planner planner = testPlannerBuilder().title("   ").published(false).build();
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
@@ -625,7 +590,6 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
-        @DisplayName("an absent body title keeps the stored title, which admits the publish")
         void publishValidatesBeforeMutating_WhenBodyTitleAbsentAndStoredPresent_Publishes() {
             Planner planner = testPlannerBuilder().title("Stored Title").published(false).build();
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
@@ -646,7 +610,6 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
-        @DisplayName("refused content leaves the aggregate where it was")
         void publishValidatesBeforeMutating_WhenContentRefused_LeavesAggregateUnpublished() {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));

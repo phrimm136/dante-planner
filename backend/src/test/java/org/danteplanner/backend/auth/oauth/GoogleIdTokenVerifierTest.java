@@ -12,7 +12,6 @@ import org.danteplanner.backend.auth.exception.OAuthException;
 import org.danteplanner.backend.shared.config.OAuthProperties;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.net.InetSocketAddress;
@@ -114,7 +113,6 @@ class GoogleIdTokenVerifierTest {
     }
 
     @Test
-    @DisplayName("A token signed by the published key is accepted and yields its claims")
     void verify_WhenGenuineToken_ReturnsClaims() throws Exception {
         var verified = verifier.verify(genuineToken());
 
@@ -123,7 +121,6 @@ class GoogleIdTokenVerifierTest {
     }
 
     @Test
-    @DisplayName("A token signed by a key the issuer never published is rejected")
     void verify_WhenForeignSigningKey_Rejected() throws Exception {
         String forged = mint(foreignKey, ISSUER, CLIENT_ID, Instant.now().plusSeconds(600));
 
@@ -132,7 +129,6 @@ class GoogleIdTokenVerifierTest {
     }
 
     @Test
-    @DisplayName("A token minted for another client is rejected")
     void verify_WhenAudienceIsAnotherClient_Rejected() throws Exception {
         String otherAudience =
                 mint(signingKey, ISSUER, "someone-else.apps.googleusercontent.com",
@@ -143,7 +139,6 @@ class GoogleIdTokenVerifierTest {
     }
 
     @Test
-    @DisplayName("A token from an unexpected issuer is rejected")
     void verify_WhenIssuerUnexpected_Rejected() throws Exception {
         String wrongIssuer =
                 mint(signingKey, "https://accounts.evil.example", CLIENT_ID,
@@ -154,7 +149,6 @@ class GoogleIdTokenVerifierTest {
     }
 
     @Test
-    @DisplayName("An expired token is rejected")
     void verify_WhenExpired_Rejected() throws Exception {
         String expired = mint(signingKey, ISSUER, CLIENT_ID, Instant.now().minusSeconds(600));
 
@@ -163,7 +157,6 @@ class GoogleIdTokenVerifierTest {
     }
 
     @Test
-    @DisplayName("A structurally valid but unsigned payload is rejected")
     void verify_WhenUnsignedPayload_Rejected() {
         String unsigned = "eyJhbGciOiJub25lIn0"
                 + ".eyJzdWIiOiJhdHRhY2tlciIsImVtYWlsIjoiYUBiLmMifQ.";

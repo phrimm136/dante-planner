@@ -10,7 +10,6 @@ import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.repository.UserSettingsRepository;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +48,6 @@ class NotificationFanoutIT extends SharedMySqlContainerSupport {
 
     @Test
     @Transactional
-    @DisplayName("publish fan-out inserts one row per enabled non-author non-deleted subscriber, and dedups a re-publish")
     void publishFanoutSingleStatement_WhenSubscribersVary_InsertsOnlyEligibleThenDedups() {
         Long author = enabledUser("author").getId();
         Long enabledA = enabledUser("enabled-a").getId();
@@ -85,7 +83,6 @@ class NotificationFanoutIT extends SharedMySqlContainerSupport {
      */
     @Test
     @Transactional
-    @DisplayName("the dedup key refuses the second write, soft-deleted rows included")
     void dedupKey_WhenARowAlreadyOccupiesIt_RefusesTheSecondWriteIncludingSoftDeleted() {
         Long recipient = enabledUser("dedup").getId();
         UUID plannerId = UUID.randomUUID();

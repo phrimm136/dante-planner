@@ -7,7 +7,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.test.context.ActiveProfiles;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,7 +24,6 @@ class BoundedRedisConnectionsContextTest {
     private Map<String, LettuceConnectionFactory> connectionFactories;
 
     @Test
-    @DisplayName("every LettuceConnectionFactory bean carries the bounded command timeout")
     void connectionFactoryBeans_WhenContextLoads_CarryBoundedCommandTimeout() {
         assertThat(connectionFactories)
                 .as("the axis is derived from the context; an empty map would pass vacuously")

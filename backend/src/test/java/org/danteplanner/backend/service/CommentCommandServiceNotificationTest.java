@@ -22,7 +22,6 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -90,7 +89,6 @@ class CommentCommandServiceNotificationTest {
     }
 
     @Test
-    @DisplayName("A top-level comment records one COMMENT_RECEIVED row naming it")
     void createComment_WhenTopLevel_RecordsOneCommentReceivedEvent() {
         givenAPublishedPlanner();
         when(commentRepository.insert(any(PlannerComment.class))).thenAnswer(savedComment(1L));
@@ -104,7 +102,6 @@ class CommentCommandServiceNotificationTest {
     }
 
     @Test
-    @DisplayName("A comment carrying a parent records one REPLY_RECEIVED row naming it")
     void createComment_WhenItCarriesAParent_RecordsOneReplyReceivedEvent() {
         givenAPublishedPlanner();
         when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parent()));
@@ -119,7 +116,6 @@ class CommentCommandServiceNotificationTest {
     }
 
     @Test
-    @DisplayName("A reply records one REPLY_RECEIVED row naming it")
     void createReply_WhenPosted_RecordsOneReplyReceivedEvent() {
         givenAPublishedPlanner();
         when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parent()));

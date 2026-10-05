@@ -6,7 +6,6 @@ import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.shared.util.CommentConstants;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -48,7 +47,6 @@ class CommentTreeNodeAuthorLifecycleTest {
     }
 
     @Test
-    @DisplayName("a comment by an author deactivated within the grace window is served with an empty body")
     void fromEntity_WhenAuthorDeactivatedInGraceWindow_BlanksTheBody() {
         User author = author("GONE");
         author.softDelete(Instant.now().plus(Duration.ofDays(30)));
@@ -65,7 +63,6 @@ class CommentTreeNodeAuthorLifecycleTest {
     }
 
     @Test
-    @DisplayName("projecting a deactivated author's comment leaves the stored content untouched")
     void fromEntity_WhenAuthorDeactivated_LeavesTheEntityContent() {
         User author = author("GONE");
         author.softDelete(Instant.now().plus(Duration.ofDays(30)));
@@ -77,7 +74,6 @@ class CommentTreeNodeAuthorLifecycleTest {
     }
 
     @Test
-    @DisplayName("reactivating the author restores the body")
     void fromEntity_WhenAuthorReactivated_ServesTheBody() {
         User author = author("GONE");
         author.softDelete(Instant.now().plus(Duration.ofDays(30)));
@@ -92,7 +88,6 @@ class CommentTreeNodeAuthorLifecycleTest {
     }
 
     @Test
-    @DisplayName("a comment whose author is missing is served with an empty body")
     void fromEntity_WhenAuthorMissing_BlanksTheBody() {
         CommentTreeNode node = project(comment(3L), null);
 
@@ -101,8 +96,7 @@ class CommentTreeNodeAuthorLifecycleTest {
     }
 
     @Test
-    @DisplayName("a live author without an epithet has the name masked but the body served")
-    void fromEntity_WhenLiveAuthorHasNoEpithet_ServesTheBody() {
+    void fromEntity_WhenLiveAuthorHasNoEpithet_MasksTheNameAndServesTheBody() {
         User author = author(null);
 
         CommentTreeNode node = project(comment(author.getId()), author);
@@ -112,7 +106,6 @@ class CommentTreeNodeAuthorLifecycleTest {
     }
 
     @Test
-    @DisplayName("a deleted comment by a deactivated author is served with an empty body")
     void fromEntity_WhenCommentDeletedAndAuthorDeactivated_BlanksTheBody() {
         User author = author("GONE");
         author.softDelete(Instant.now().plus(Duration.ofDays(30)));

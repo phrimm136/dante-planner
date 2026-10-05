@@ -9,7 +9,6 @@ import org.springframework.data.redis.core.script.RedisScript;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -46,7 +45,6 @@ class TokenBlacklistServiceTest {
     }
 
     @Test
-    @DisplayName("guard-invoked-with-null-throws: invalidateUserTokens rejects a null user id")
     void invalidateUserTokens_WhenUserIdNull_ThrowsAndStampsNothing() {
         assertThatThrownBy(() -> blacklistService.invalidateUserTokens(null))
                 .isInstanceOf(NullPointerException.class);
@@ -55,7 +53,6 @@ class TokenBlacklistServiceTest {
     }
 
     @Test
-    @DisplayName("guard-invoked-with-null-throws: clearUserInvalidation rejects a null user id")
     void clearUserInvalidation_WhenUserIdNull_ThrowsAndDeletesNothing() {
         assertThatThrownBy(() -> blacklistService.clearUserInvalidation(null))
                 .isInstanceOf(NullPointerException.class);
@@ -64,7 +61,6 @@ class TokenBlacklistServiceTest {
     }
 
     @Test
-    @DisplayName("logout-with-only-an-access-token-revokes-exactly-it: one blacklist key, no family key")
     void revokeLogoutSession_WhenOnlyATokenRevocation_WritesOneImmediateEntryAndNoFamily() {
         Date expiry = new Date(System.currentTimeMillis() + 60_000);
 
@@ -84,7 +80,6 @@ class TokenBlacklistServiceTest {
     }
 
     @Test
-    @DisplayName("logout-with-only-an-access-token-revokes-exactly-it: a family revocation adds its key")
     void revokeLogoutSession_WhenAFamilyRevocationIsIncluded_AppendsTheFamilyKeyAfterTheTokenKeys() {
         Date expiry = new Date(System.currentTimeMillis() + 60_000);
 
@@ -103,7 +98,6 @@ class TokenBlacklistServiceTest {
     }
 
     @Test
-    @DisplayName("logout-with-only-an-access-token-revokes-exactly-it: nothing present issues no command")
     void revokeLogoutSession_WhenNoRevocations_IssuesNoRedisCommand() {
         blacklistService.revokeLogoutSession(List.of());
 
@@ -111,7 +105,6 @@ class TokenBlacklistServiceTest {
     }
 
     @Test
-    @DisplayName("logout-with-only-an-access-token-revokes-exactly-it: an expired token asks for no entry")
     void revokeLogoutSession_WhenTheOnlyTokenHasLapsed_IssuesNoRedisCommand() {
         Date lapsed = new Date(System.currentTimeMillis() - 60_000);
 
@@ -122,7 +115,6 @@ class TokenBlacklistServiceTest {
     }
 
     @Test
-    @DisplayName("logout-with-only-an-access-token-revokes-exactly-it: revocation items reject null")
     void revocationItems_WhenConstructedWithNull_Throw() {
         Date expiry = new Date(System.currentTimeMillis() + 60_000);
 

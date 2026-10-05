@@ -2,7 +2,6 @@ package org.danteplanner.backend.exception;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.data.redis.RedisConnectionFailureException;
@@ -58,7 +57,6 @@ class ApiExceptionHandlerDbUnavailableTest {
     }
 
     @Test
-    @DisplayName("@Transactional path (CannotCreateTransactionException) maps to 503, not 500")
     void transactionBeginFailure_WhenThrown_MapsTo503() throws Exception {
         mockMvc.perform(get("/boom/transaction"))
                 .andExpect(status().isServiceUnavailable())
@@ -67,7 +65,6 @@ class ApiExceptionHandlerDbUnavailableTest {
     }
 
     @Test
-    @DisplayName("Query-time path (DataAccessResourceFailureException) still maps to 503")
     void queryTimeFailure_WhenThrown_MapsTo503() throws Exception {
         mockMvc.perform(get("/boom/query"))
                 .andExpect(status().isServiceUnavailable())
@@ -76,7 +73,6 @@ class ApiExceptionHandlerDbUnavailableTest {
     }
 
     @Test
-    @DisplayName("Redis path (RedisConnectionFailureException) maps to AUTH_TEMPORARILY_UNAVAILABLE 503")
     void redisConnectionFailure_WhenThrown_MapsToAuthUnavailable503() throws Exception {
         mockMvc.perform(get("/boom/redis"))
                 .andExpect(status().isServiceUnavailable())

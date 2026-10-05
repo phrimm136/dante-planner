@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.moderation.dto.BanRequest;
@@ -31,7 +30,6 @@ class RequestBoundarySanitizationTest {
             "/sectionNotes/intro/content/content/0/marks/0/attrs/href";
 
     @Test
-    @DisplayName("an upsert arrives with its title stripped and its document neutralized")
     void upsertRequest_WhenPayloadIsHostile_ArrivesSanitized() throws Exception {
         UpsertPlannerRequest request =
                 MAPPER.treeToValue(hostileUpsertPayload(), UpsertPlannerRequest.class);
@@ -41,7 +39,6 @@ class RequestBoundarySanitizationTest {
     }
 
     @Test
-    @DisplayName("a moderation reason arrives with its markup stripped")
     void banRequest_WhenReasonCarriesHtml_ArrivesAsText() throws Exception {
         BanRequest request = MAPPER.readValue(
                 "{\"reason\":\"<img src=x onerror=alert(1)><b>spam ring</b>\"}", BanRequest.class);
@@ -50,7 +47,6 @@ class RequestBoundarySanitizationTest {
     }
 
     @Test
-    @DisplayName("an identifier opted out of sanitization arrives byte for byte")
     void optedOutComponent_WhenUpsertIsRead_ArrivesUnchanged() throws Exception {
         UpsertPlannerRequest request =
                 MAPPER.treeToValue(hostileUpsertPayload(), UpsertPlannerRequest.class);

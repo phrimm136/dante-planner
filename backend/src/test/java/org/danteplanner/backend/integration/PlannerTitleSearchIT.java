@@ -17,7 +17,6 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,8 +128,8 @@ class PlannerTitleSearchIT {
         catalogSyncService.syncPlanner(planner.getId(), List.of());
     }
 
+    // title-search-ngram
     @Test
-    @DisplayName("title-search-ngram: substrings of two or more characters match, Latin and CJK")
     void titleSearchNgram_WhenSubstringQueried_MatchesLatinAndCjk() throws Exception {
         mockMvc.perform(get("/api/planner/md/published").param("q", "eed"))
                 .andExpect(status().isOk())
@@ -143,24 +142,24 @@ class PlannerTitleSearchIT {
                 .andExpect(jsonPath("$.content[0].title").value("출혈 덱 공략"));
     }
 
+    // title-search-ngram
     @Test
-    @DisplayName("title-search-ngram: multi-word input matches regardless of word order")
     void titleSearchNgram_WhenWordsReordered_StillMatches() throws Exception {
         mockMvc.perform(get("/api/planner/md/published").param("q", "team bleed"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].title").value("Bleed Team"));
     }
 
+    // title-search-ngram
     @Test
-    @DisplayName("title-search-ngram: input shorter than the ngram token size matches nothing")
     void titleSearchNgram_WhenSingleChar_MatchesNothing() throws Exception {
         mockMvc.perform(get("/api/planner/md/published").param("q", "e"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.page.totalElements").value(0));
     }
 
+    // title-search-ngram
     @Test
-    @DisplayName("title-search-ngram: boolean-mode operators in the input are inert, not syntax")
     void titleSearchNgram_WhenOperatorsInInput_TreatedAsText() throws Exception {
         // A dangling double quote is a boolean-mode syntax error when unescaped
         mockMvc.perform(get("/api/planner/md/published").param("q", "\"eed"))
@@ -173,8 +172,8 @@ class PlannerTitleSearchIT {
                 .andExpect(jsonPath("$.content[0].title").value("Bleed Team"));
     }
 
+    // q-matches-title-or-keyword
     @Test
-    @DisplayName("q-matches-title-or-keyword: a keyword-only match is returned alongside title search")
     void qMatchesTitleOrKeyword_WhenKeywordOnlyMatch_Returned() throws Exception {
         // "Kit Collection" has no 'sinking' in its title — only the keyword
         mockMvc.perform(get("/api/planner/md/published").param("q", "Sinking"))
@@ -183,8 +182,8 @@ class PlannerTitleSearchIT {
                 .andExpect(jsonPath("$.content[0].title").value("Kit Collection"));
     }
 
+    // list-recency-sort
     @Test
-    @DisplayName("list-recency-sort: newest first_published_at first, served without a filesort")
     void listRecencySort_WhenBrowsing_NewestFirstFilesortFree() throws Exception {
         catalogRepository.deleteAll();
         Instant now = Instant.now();

@@ -4,7 +4,6 @@ import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -29,7 +28,6 @@ class TestIsolationConventionTest {
             new ClassFileImporter().importPackages("org.danteplanner.backend");
 
     @Test
-    @DisplayName("only a class owning its database truncates a table")
     void truncation_WhenClassSharesTheDatabase_IsRejected() {
         List<String> offenders = TEST_CLASSES.stream()
                 .filter(TestIsolationConventionTest::isTestClass)
@@ -58,7 +56,6 @@ class TestIsolationConventionTest {
             java.util.regex.Pattern.CASE_INSENSITIVE);
 
     @Test
-    @DisplayName("only a class owning its database empties a table in SQL")
     void unscopedDeletion_WhenClassSharesTheDatabase_IsRejected() {
         List<String> offenders = containerizedSources().entrySet().stream()
                 .filter(entry -> boundToTheSharedDatabase(entry.getValue()))
@@ -95,7 +92,6 @@ class TestIsolationConventionTest {
                     java.util.Set.of("flushAll", "flushDb"));
 
     @Test
-    @DisplayName("only a class owning its Redis scans the whole keyspace")
     void keyspaceScan_WhenClassSharesTheRedis_IsRejected() {
         List<String> offenders = TEST_CLASSES.stream()
                 .filter(TestIsolationConventionTest::scansTheKeyspace)
@@ -134,7 +130,6 @@ class TestIsolationConventionTest {
     }
 
     @Test
-    @DisplayName("no test class carries @Execution")
     void executionMode_WhenDeclaredOnAClass_IsRejected() {
         List<String> offenders = TEST_CLASSES.stream()
                 .filter(TestIsolationConventionTest::isTestClass)
@@ -151,7 +146,6 @@ class TestIsolationConventionTest {
     }
 
     @Test
-    @DisplayName("a test that drives HTTP does not roll back")
     void committingTier_WhenDeclaringTransactional_IsRejected() {
         List<String> offenders = TEST_CLASSES.stream()
                 .filter(TestIsolationConventionTest::isTestClass)
@@ -177,7 +171,6 @@ class TestIsolationConventionTest {
      * scanner that scans itself reports itself.
      */
     @Test
-    @DisplayName("a class declares at most one @BeforeEach")
     void setup_WhenDeclaredMoreThanOnce_IsRejected() {
         List<String> offenders = TEST_CLASSES.stream()
                 .filter(TestIsolationConventionTest::isTestClass)
@@ -195,7 +188,6 @@ class TestIsolationConventionTest {
     }
 
     @Test
-    @DisplayName("users are built through TestDataFactory, never by hand")
     void userFixture_WhenBuiltByHand_IsRejected() {
         List<String> offenders = TEST_CLASSES.stream()
                 .filter(TestIsolationConventionTest::isTestClass)
@@ -228,7 +220,6 @@ class TestIsolationConventionTest {
                     + "|\\b(?:Long|long)\\s+\\w*(?:[Uu]serId|[Aa]ctorId|[Oo]wnerId|[Vv]iewerId)\\s*=\\s*[0-9]+L");
 
     @Test
-    @DisplayName("identities in shared namespaces come from a sequence, not a literal")
     void sharedIdentity_WhenHardCoded_IsRejected() {
         List<String> offenders = containerizedSources().entrySet().stream()
                 // A class that stands up its own infrastructure owns the namespace it writes into,
@@ -260,7 +251,6 @@ class TestIsolationConventionTest {
             "@AfterEach\\b[^{]*\\{[^}]*clearContext", java.util.regex.Pattern.DOTALL);
 
     @Test
-    @DisplayName("a test filling the security context clears it on the way out")
     void securityContext_WhenNotClearedOnExit_IsRejected() {
         List<String> offenders = testSources().entrySet().stream()
                 // Excludes this file: the token it searches for is a literal in its own source, so
@@ -318,7 +308,6 @@ class TestIsolationConventionTest {
     private static final int CONTEXT_BUDGET = 30;
 
     @Test
-    @DisplayName("the suite stays within its application-context budget")
     void distinctContexts_WhenOverBudget_IsRejected() {
         List<String> forcing = TEST_CLASSES.stream()
                 .filter(clazz -> clazz.getMethods().stream()

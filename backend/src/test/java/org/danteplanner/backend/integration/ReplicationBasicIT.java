@@ -1,7 +1,6 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +40,6 @@ class ReplicationBasicIT extends CausalHarnessSupport {
     private JdbcTemplate replicaJdbcTemplate;
 
     @Test
-    @DisplayName("A row written to the primary is visible on the replica after awaitCaughtUp")
     void basicReplication_WhenWriteOnPrimary_VisibleOnReplicaAfterCaughtUp() {
         primaryJdbcTemplate.execute("CREATE TABLE IF NOT EXISTS replication_basic_probe (id INT PRIMARY KEY)");
         primaryJdbcTemplate.update("INSERT INTO replication_basic_probe (id) VALUES (1)");

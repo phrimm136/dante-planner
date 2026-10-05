@@ -25,7 +25,6 @@ import org.danteplanner.backend.support.CatalogEffects;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,8 +146,8 @@ class PlannerKeywordFacetIT {
         return planner;
     }
 
+    // entity-facet-filter
     @Test
-    @DisplayName("entity-facet-filter: only planners whose entity index contains the entity are returned")
     void entityFacetFilter_WhenFiltered_ReturnsOnlyMatchingPlanners() throws Exception {
         publishWithFilters("With Entities", Set.of("Sinking"));
         // A planner with empty content indexes nothing
@@ -177,8 +176,8 @@ class PlannerKeywordFacetIT {
                 .andExpect(jsonPath("$.page.totalElements").value(0));
     }
 
+    // keyword-facet-filter
     @Test
-    @DisplayName("keyword-facet-filter: only planners whose keyword index contains the keyword are returned")
     void keywordFacetFilter_WhenFiltered_ReturnsOnlyMatchingPlanners() throws Exception {
         publishWithFilters("Sinking Build", Set.of("Sinking"));
         publishWithFilters("Burn Build", Set.of("Combustion"));
@@ -193,8 +192,8 @@ class PlannerKeywordFacetIT {
                 .andExpect(jsonPath("$.page.totalElements").value(0));
     }
 
+    // keyword-rename-normalized-on-write
     @Test
-    @DisplayName("keyword-rename-normalized-on-write: a legacy name in the content is stored, indexed, and filterable as the current id; the top-level copy is ignored")
     void keywordRenameNormalizedOnWrite_WhenContentSelectsALegacyName_StoredAsCurrentId() throws Exception {
         Planner planner = publishWithFilters("Legacy Keywords", Set.of("Sinking"));
 
@@ -226,8 +225,8 @@ class PlannerKeywordFacetIT {
                 .andExpect(jsonPath("$.content[0].title").value("Legacy Keywords"));
     }
 
+    // keyword-read-passthrough-total
     @Test
-    @DisplayName("keyword-read-passthrough-total: legacy names at rest read back current; malformed storage reads as empty, never throws")
     void keywordReadPassthroughTotal_WhenLegacyOrMalformedStorage_ReadsWithoutError() throws Exception {
         Planner planner = publishWithFilters("At Rest", Set.of("Sinking"));
         JdbcTemplate jdbc = new JdbcTemplate(dataSource);

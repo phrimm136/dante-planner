@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.api.PlannerAccess;
 import org.danteplanner.backend.shared.sse.SseCapacityExceededException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.task.TaskExecutor;
@@ -56,11 +55,9 @@ class PlannerCommentSseServiceTest {
     }
 
     @Nested
-    @DisplayName("subscribe")
     class Subscribe {
 
         @Test
-        @DisplayName("registers a subscriber for the planner")
         void subscribe_WhenNewDevice_RegistersSubscriber() throws IOException {
             service.subscribe(plannerId, UUID.randomUUID(), null);
 
@@ -68,7 +65,6 @@ class PlannerCommentSseServiceTest {
         }
 
         @Test
-        @DisplayName("replaces the prior emitter when the same device reconnects")
         void subscribe_WhenSameDeviceReconnects_DoesNotDuplicate() throws IOException {
             UUID deviceId = UUID.randomUUID();
 
@@ -79,7 +75,6 @@ class PlannerCommentSseServiceTest {
         }
 
         @Test
-        @DisplayName("rejects the arriving subscriber at capacity")
         void subscribe_WhenAtCapacity_RejectsTheNewcomer() throws IOException {
             fillToCapacity();
 
@@ -88,7 +83,6 @@ class PlannerCommentSseServiceTest {
         }
 
         @Test
-        @DisplayName("keeps every connected subscriber when one is rejected at capacity")
         void subscribe_WhenAtCapacity_KeepsTheConnectedSubscribers() throws IOException {
             fillToCapacity();
 
@@ -103,7 +97,6 @@ class PlannerCommentSseServiceTest {
         }
 
         @Test
-        @DisplayName("admits a connected device's own reconnect at capacity")
         void subscribe_WhenSameDeviceReconnectsAtCapacity_IsAdmitted() throws IOException {
             UUID deviceId = UUID.randomUUID();
             service.subscribe(plannerId, deviceId, null);
@@ -124,11 +117,9 @@ class PlannerCommentSseServiceTest {
     }
 
     @Nested
-    @DisplayName("broadcastCommentAdded")
     class BroadcastCommentAdded {
 
         @Test
-        @DisplayName("removes the connection when the emitter is dead")
         void broadcast_WhenEmitterDead_RemovesConnection() throws IOException {
             UUID deviceId = UUID.randomUUID();
             SseEmitter emitter = service.subscribe(plannerId, deviceId, null);
@@ -141,7 +132,6 @@ class PlannerCommentSseServiceTest {
         }
 
         @Test
-        @DisplayName("does nothing when the planner has no subscribers")
         void broadcast_WhenNoSubscribers_DoesNothing() {
             assertThatCode(() -> service.broadcast(plannerId, "comment:added", Map.of("id", UUID.randomUUID().toString()), null))
                     .doesNotThrowAnyException();
@@ -149,7 +139,6 @@ class PlannerCommentSseServiceTest {
         }
 
         @Test
-        @DisplayName("does not propagate when serialization fails")
         void broadcast_WhenSerializationFails_DoesNotThrow() throws Exception {
             ObjectMapper failingMapper = mock(ObjectMapper.class);
             when(failingMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("boom") {});
@@ -164,11 +153,9 @@ class PlannerCommentSseServiceTest {
     }
 
     @Nested
-    @DisplayName("sweepSseHeartbeats")
-    class SendHeartbeats {
+    class SweepSseHeartbeats {
 
         @Test
-        @DisplayName("removes the connection when the emitter is dead")
         void sweepSseHeartbeats_WhenEmitterDead_RemovesConnection() throws IOException {
             SseEmitter emitter = service.subscribe(plannerId, UUID.randomUUID(), null);
             emitter.complete();
@@ -180,7 +167,6 @@ class PlannerCommentSseServiceTest {
         }
 
         @Test
-        @DisplayName("keeps a live connection")
         void sweepSseHeartbeats_WhenEmitterLive_KeepsConnection() throws IOException {
             service.subscribe(plannerId, UUID.randomUUID(), null);
 
@@ -191,11 +177,9 @@ class PlannerCommentSseServiceTest {
     }
 
     @Nested
-    @DisplayName("cleanupZombieConnections")
     class CleanupZombieConnections {
 
         @Test
-        @DisplayName("removes the connection when the probe fails")
         void cleanupZombieConnections_WhenEmitterDead_RemovesConnection() throws IOException {
             SseEmitter emitter = service.subscribe(plannerId, UUID.randomUUID(), null);
             emitter.complete();
@@ -207,7 +191,6 @@ class PlannerCommentSseServiceTest {
         }
 
         @Test
-        @DisplayName("keeps a live connection")
         void cleanupZombieConnections_WhenEmitterLive_KeepsConnection() throws IOException {
             service.subscribe(plannerId, UUID.randomUUID(), null);
 
@@ -218,11 +201,9 @@ class PlannerCommentSseServiceTest {
     }
 
     @Nested
-    @DisplayName("removeConnection")
     class RemoveConnection {
 
         @Test
-        @DisplayName("is idempotent when called twice for the same device")
         void removeConnection_WhenCalledTwice_DoesNotThrow() throws IOException {
             UUID deviceId = UUID.randomUUID();
             service.subscribe(plannerId, deviceId, null);
@@ -237,11 +218,9 @@ class PlannerCommentSseServiceTest {
     }
 
     @Nested
-    @DisplayName("author exclusion")
     class AuthorExclusion {
 
         @Test
-        @DisplayName("skips every connection of the excluded account and keeps the rest")
         void broadcast_WhenExcludingAuthor_SkipsTheirConnectionsOnly() throws IOException {
             Long author = 7L;
             SseEmitter authorTab = service.subscribe(plannerId, UUID.randomUUID(), author);
@@ -262,11 +241,9 @@ class PlannerCommentSseServiceTest {
     }
 
     @Nested
-    @DisplayName("getTotalConnectionCount")
     class GetTotalConnectionCount {
 
         @Test
-        @DisplayName("sums subscribers across all planners")
         void getTotalConnectionCount_WhenMultiplePlanners_SumsAll() throws IOException {
             service.subscribe(plannerId, UUID.randomUUID(), null);
             service.subscribe(UUID.randomUUID(), UUID.randomUUID(), null);

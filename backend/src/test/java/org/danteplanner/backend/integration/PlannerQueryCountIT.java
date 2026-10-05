@@ -22,7 +22,6 @@ import org.danteplanner.backend.support.TestDataFactory;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -157,46 +156,39 @@ class PlannerQueryCountIT {
     }
 
     @Test
-    @DisplayName("published listing: statement count is constant across result-set sizes")
     void publishedListing_WhenResultSizeVaries_StatementCountConstant() {
         assertConstantStatementCount(() -> measure(publishedBrowse(), PAGE));
     }
 
     @Test
-    @DisplayName("recommended listing: statement count is constant across result-set sizes")
     void recommendedListing_WhenResultSizeVaries_StatementCountConstant() {
         assertConstantStatementCount(() -> measure(recommendedBrowse(), PAGE), true);
     }
 
     @Test
-    @DisplayName("search listing: statement count is constant across result-set sizes")
     void searchListing_WhenResultSizeVaries_StatementCountConstant() {
         assertConstantStatementCount(() -> measure(titleSearch(), PAGE));
     }
 
     @Test
-    @DisplayName("published listing: a one-row page costs a fixed number of statements")
     void publishedListing_WhenOneRowPage_IssuesFixedStatementCount() {
         seedPlanners(SMALL_SET, false);
         assertFixedStatementCount(PlannerQueryCountIT::publishedBrowse, PUBLISHED_LIST_STATEMENTS);
     }
 
     @Test
-    @DisplayName("recommended listing: a one-row page costs a fixed number of statements")
     void recommendedListing_WhenOneRowPage_IssuesFixedStatementCount() {
         seedPlanners(SMALL_SET, true);
         assertFixedStatementCount(PlannerQueryCountIT::recommendedBrowse, RECOMMENDED_LIST_STATEMENTS);
     }
 
     @Test
-    @DisplayName("search listing: a one-row page costs a fixed number of statements")
     void searchListing_WhenOneRowPage_IssuesFixedStatementCount() {
         seedPlanners(SMALL_SET, false);
         assertFixedStatementCount(PlannerQueryCountIT::titleSearch, SEARCH_LIST_STATEMENTS);
     }
 
     @Test
-    @DisplayName("loading a user by id issues one statement")
     void userLoad_WhenFoundById_PreparesOneStatement() {
         userSettingsService.getOrCreateEntity(viewerId);
 

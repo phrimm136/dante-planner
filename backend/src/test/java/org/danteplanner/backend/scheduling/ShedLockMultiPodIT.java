@@ -16,7 +16,6 @@ import net.javacrumbs.shedlock.provider.redis.spring.RedisLockProvider;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -48,7 +47,6 @@ class ShedLockMultiPodIT {
 
 
     @Test
-    @DisplayName("Two pods sharing one Redis lock store: first acquires the lock, concurrent second is refused")
     void lock_WhenTwoPodsContendSameLockName_OnlyFirstAcquires() {
         LockProvider podA = new RedisLockProvider(connectionFactory);
         LockProvider podB = new RedisLockProvider(connectionFactory);
@@ -66,7 +64,6 @@ class ShedLockMultiPodIT {
     }
 
     @Test
-    @DisplayName("Notification 2AM cleanup job carries @SchedulerLock")
     void cleanupOldNotifications_WhenDeclared_IsAnnotatedWithSchedulerLock() throws NoSuchMethodException {
         assertThat(NotificationCleanupScheduler.class
             .getDeclaredMethod("cleanupOldNotifications")
@@ -76,7 +73,6 @@ class ShedLockMultiPodIT {
     }
 
     @Test
-    @DisplayName("User 3AM cleanup job carries @SchedulerLock")
     void cleanupExpiredUsers_WhenDeclared_IsAnnotatedWithSchedulerLock() throws NoSuchMethodException {
         assertThat(UserCleanupScheduler.class
             .getDeclaredMethod("cleanupExpiredUsers")

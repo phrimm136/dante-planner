@@ -9,7 +9,6 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,7 +131,6 @@ class PlannerViewPurgeIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("view-rows-are-swept-app-side: a hard-deleted account's planner leaves no view rows behind, with no foreign key to carry them off")
     void plannerViews_WhenOwnerAccountHardDeleted_AreDeletedWithoutForeignKeySupport() {
         assertNoForeignKeyBacksTheSweep();
         Planner viewed = plannerWithViews(owner, "Swept Views", 3);
@@ -154,7 +152,6 @@ class PlannerViewPurgeIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("the-sweep-is-scoped-to-the-account: another owner's planner keeps its view rows through the purge")
     void plannerViews_WhenAnotherAccountHardDeleted_SurviveOnTheUntouchedPlanner() {
         assertNoForeignKeyBacksTheSweep();
         Planner theirs = plannerWithViews(other, "Kept Views", 2);

@@ -18,7 +18,6 @@ import org.springframework.asm.Label;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -71,7 +70,6 @@ class FloorBoundaryConfinementTest {
             .importPackages("org.danteplanner.backend");
 
     @Test
-    @DisplayName("No class outside the floor module reads floor fields from a JsonNode unless frozen")
     void rawFloorReads_WhenScanned_AreConfinedToTheFloorModule() {
         Set<String> unfrozen = new TreeSet<>(rawFloorReaders(PRODUCTION));
         unfrozen.removeAll(FROZEN_RAW_FLOOR_READERS);
@@ -83,7 +81,6 @@ class FloorBoundaryConfinementTest {
     }
 
     @Test
-    @DisplayName("Every frozen raw floor reader still reads raw floors")
     void frozenRawFloorReaders_WhenScanned_StillReadRawFloors() {
         Set<String> stale = new TreeSet<>(FROZEN_RAW_FLOOR_READERS);
         stale.removeAll(rawFloorReaders(PRODUCTION));
@@ -95,7 +92,6 @@ class FloorBoundaryConfinementTest {
     }
 
     @Test
-    @DisplayName("A class reading a floor field from a JsonNode is named by the rule")
     void rawFloorReader_WhenScanned_IsNamed() {
         JavaClasses fixture = new ClassFileImporter().importClasses(RawFloorReader.class);
 
@@ -103,7 +99,6 @@ class FloorBoundaryConfinementTest {
     }
 
     @Test
-    @DisplayName("Handing floorSelections to the parse boundary, or naming it in a message, is not a raw read")
     void boundaryFloorReader_WhenScanned_IsNotNamed() {
         JavaClasses fixture = new ClassFileImporter().importClasses(BoundaryFloorReader.class);
 
@@ -111,14 +106,12 @@ class FloorBoundaryConfinementTest {
     }
 
     @Test
-    @DisplayName("No production class outside the floor module builds a FloorSelection")
     void floorSelectionConstruction_WhenScanned_StaysInTheFloorModule() {
         assertThatCode(() -> FLOOR_SELECTIONS_ARE_BUILT_BY_THE_FLOOR_MODULE.check(PRODUCTION))
                 .doesNotThrowAnyException();
     }
 
     @Test
-    @DisplayName("A class building a FloorSelection outside the floor module fails naming the class")
     void floorSelectionOutsideModule_WhenScanned_FailsNamingTheClass() {
         JavaClasses fixture = new ClassFileImporter().importClasses(FloorSelectionOutsideModule.class);
 

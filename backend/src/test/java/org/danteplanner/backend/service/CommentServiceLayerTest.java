@@ -35,7 +35,6 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -155,11 +154,9 @@ class CommentServiceLayerTest {
     }
 
     @Nested
-    @DisplayName("createComment Tests")
     class CreateCommentTests {
 
         @Test
-        @DisplayName("Creates top-level comment successfully")
         void createComment_WhenTopLevel_Succeeds() {
             // Arrange
             CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
@@ -192,7 +189,6 @@ class CommentServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Creates reply comment successfully")
         void createComment_WhenReply_Succeeds() {
             // Arrange
             UUID parentPublicId = UUID.randomUUID();
@@ -231,7 +227,6 @@ class CommentServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Throws PlannerNotFoundException for non-existent planner")
         void createComment_WhenPlannerNotFound_ThrowsException() {
             // Arrange
             CreateCommentRequest request = new CreateCommentRequest("Test", null);
@@ -245,7 +240,6 @@ class CommentServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Throws CommentNotFoundException for non-existent parent")
         void createComment_WhenParentNotFound_ThrowsException() {
             // Arrange
             UUID nonExistentParentId = UUID.randomUUID();
@@ -262,7 +256,6 @@ class CommentServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Allows nesting below MAX_DEPTH without flattening")
         void createComment_WhenDeepNesting_AllowedWithoutFlattening() {
             // Arrange
             // depth 5 sits well below MAX_DEPTH (127), so no flattening occurs
@@ -304,11 +297,9 @@ class CommentServiceLayerTest {
     }
 
     @Nested
-    @DisplayName("updateComment Tests")
     class UpdateCommentTests {
 
         @Test
-        @DisplayName("Author can edit their comment")
         void updateComment_WhenByAuthor_Succeeds() {
             // Arrange
             UUID commentPublicId = UUID.randomUUID();
@@ -330,7 +321,6 @@ class CommentServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Non-author cannot edit comment")
         void updateComment_WhenByNonAuthor_ThrowsException() {
             // Arrange
             UUID commentPublicId = UUID.randomUUID();
@@ -347,7 +337,6 @@ class CommentServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Cannot edit deleted comment")
         void updateComment_WhenDeletedComment_ThrowsException() {
             // Arrange
             UUID commentPublicId = UUID.randomUUID();
@@ -366,11 +355,9 @@ class CommentServiceLayerTest {
     }
 
     @Nested
-    @DisplayName("deleteComment Tests")
     class DeleteCommentTests {
 
         @Test
-        @DisplayName("Author can delete their comment")
         void deleteComment_WhenByAuthor_Succeeds() {
             // Arrange
             UUID commentPublicId = UUID.randomUUID();
@@ -390,7 +377,6 @@ class CommentServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Non-author cannot delete comment")
         void deleteComment_WhenByNonAuthor_ThrowsException() {
             // Arrange
             UUID commentPublicId = UUID.randomUUID();
@@ -407,7 +393,6 @@ class CommentServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Deleting already deleted comment is idempotent")
         void deleteComment_WhenAlreadyDeleted_Idempotent() {
             // Arrange
             UUID commentPublicId = UUID.randomUUID();
@@ -427,11 +412,9 @@ class CommentServiceLayerTest {
     }
 
     @Nested
-    @DisplayName("getCommentTree Tests")
     class GetCommentTreeTests {
 
         @Test
-        @DisplayName("Returns empty list for planner with no comments")
         void getCommentTree_WhenNoComments_ReturnsEmptyList() {
             // Arrange
             when(plannerRepository.findThread(plannerId))
@@ -447,7 +430,6 @@ class CommentServiceLayerTest {
         }
 
         @Test
-        @DisplayName("A deactivated author is unattributed while an active author is named")
         void getCommentTree_WhenAuthorAccountDeactivated_OmitsTheAuthorName() {
             User deactivated = User.builder()
                     .id(3L)
@@ -494,7 +476,6 @@ class CommentServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Throws PlannerNotFoundException for non-existent planner")
         void getCommentTree_WhenPlannerNotFound_ThrowsException() {
             // Arrange
             when(plannerRepository.findThread(plannerId))
@@ -507,11 +488,9 @@ class CommentServiceLayerTest {
     }
 
     @Nested
-    @DisplayName("Restriction Enforcement Tests")
     class RestrictionEnforcementTests {
 
         @Test
-        @DisplayName("Timed-out user cannot create comment")
         void createComment_WhenTimedOutUser_ThrowsUserTimedOutException() {
             // Arrange
             java.time.Instant futureTimeout = java.time.Instant.now().plusSeconds(3600);
@@ -532,7 +511,6 @@ class CommentServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Banned user cannot create comment")
         void createComment_WhenBannedUser_ThrowsUserBannedException() {
             // Arrange
             testUser.setBannedAt(java.time.Instant.now());
@@ -553,7 +531,6 @@ class CommentServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Timed-out user may still vote on a comment")
         void toggleUpvote_WhenTimedOutUser_IsNotRestricted() {
             // Arrange
             java.time.Instant futureTimeout = java.time.Instant.now().plusSeconds(3600);
@@ -572,7 +549,6 @@ class CommentServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Banned user cannot vote on comment")
         void toggleUpvote_WhenBannedUser_ThrowsUserBannedException() {
             // Arrange
             testUser.setBannedAt(java.time.Instant.now());
@@ -591,7 +567,6 @@ class CommentServiceLayerTest {
         }
 
         @Test
-        @DisplayName("The vote response carries the counter re-read after the atomic increment")
         void toggleUpvote_WhenVoteCast_ReportsTheReReadCount() {
             UUID commentPublicId = UUID.randomUUID();
             PlannerComment stale = new PlannerComment(plannerId, otherUser.getId(), "text", null, 0);

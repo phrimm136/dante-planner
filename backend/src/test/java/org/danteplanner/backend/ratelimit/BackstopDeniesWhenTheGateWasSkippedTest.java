@@ -19,7 +19,6 @@ import org.danteplanner.ratelimitfixture.DeclaredHandlerFixture;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.slf4j.LoggerFactory;
@@ -92,7 +91,6 @@ class BackstopDeniesWhenTheGateWasSkippedTest {
     }
 
     @Test
-    @DisplayName("An undeclared handler is denied with 500, logged by name, and its body never runs")
     void undeclaredHandler_WhenRequested_IsDeniedAndNeverReached() throws Exception {
         mockMvc.perform(get("/api/fixture/bare"))
                 .andExpect(status().isInternalServerError())
@@ -112,7 +110,6 @@ class BackstopDeniesWhenTheGateWasSkippedTest {
     }
 
     @Test
-    @DisplayName("A handler inheriting its controller's policy is charged under that policy and runs")
     void inheritedPolicy_WhenRequested_IsChargedAndReached() throws Exception {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(7L, null, List.of()));
@@ -125,7 +122,6 @@ class BackstopDeniesWhenTheGateWasSkippedTest {
     }
 
     @Test
-    @DisplayName("A handler overriding its controller's policy with an exemption is charged nothing")
     void methodExemption_WhenRequested_OverridesTheClassPolicy() throws Exception {
         mockMvc.perform(get("/api/fixture/exempt"))
                 .andExpect(status().isOk());

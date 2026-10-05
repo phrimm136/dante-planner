@@ -6,7 +6,6 @@ import org.danteplanner.backend.planner.validation.ContentVerdict;
 import org.danteplanner.backend.planner.validation.ErrorCode;
 import org.danteplanner.backend.planner.validation.Violation;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -19,7 +18,6 @@ class PlannerValidationExceptionTest {
     private static final String CONTENT = "{\"equipment\":[]}";
 
     @Test
-    @DisplayName("Single-error constructor should produce empty subErrors list")
     void singleErrorConstructor_WhenUsed_HasEmptySubErrors() {
         PlannerValidationException ex = new PlannerValidationException("MY_CODE", "My message");
 
@@ -29,7 +27,6 @@ class PlannerValidationExceptionTest {
     }
 
     @Test
-    @DisplayName("rejecting() carries every violation as a sub-error with its rendered path")
     void rejecting_WhenTwoViolations_CarriesBothAsSubErrorsWithPaths() {
         ContentVerdict.Rejected rejected = new ContentVerdict.Rejected(List.of(
                 new Violation(ErrorCode.MISSING_REQUIRED_FIELD, ContentPath.of("equipment"), "First error"),
@@ -46,7 +43,6 @@ class PlannerValidationExceptionTest {
     }
 
     @Test
-    @DisplayName("rejecting() with one violation still reports it as a sub-error under the generic code")
     void rejecting_WhenOneViolation_HasExactlyOneSubErrorUnderTheGenericCode() {
         PlannerValidationException ex = PlannerValidationException.rejecting(new ContentVerdict.Rejected(List.of(
                 new Violation(ErrorCode.UNKNOWN_EGO, ContentPath.of("equipment"), "Only message"))), CONTENT);
@@ -56,7 +52,6 @@ class PlannerValidationExceptionTest {
     }
 
     @Test
-    @DisplayName("refusing() keeps the violation's own code and message and carries it as the one sub-error")
     void refusing_WhenAUserFacingViolation_KeepsItsCodeAndMessage() {
         PlannerValidationException ex = PlannerValidationException.refusing(new ContentVerdict.Refused(
                 new Violation(ErrorCode.EMPTY_CONTENT, ContentPath.root(), "Content is empty or null")), CONTENT);
@@ -70,7 +65,6 @@ class PlannerValidationExceptionTest {
     }
 
     @Test
-    @DisplayName("refusing() masks a code that is not user-facing to the generic code on the wire")
     void refusing_WhenACodeIsNotUserFacing_MasksItOnTheWire() {
         PlannerValidationException ex = PlannerValidationException.refusing(new ContentVerdict.Refused(
                 new Violation(ErrorCode.UNKNOWN_FIELD, ContentPath.root(), "Unknown fields: [theme]")), CONTENT);
@@ -81,7 +75,6 @@ class PlannerValidationExceptionTest {
     }
 
     @Test
-    @DisplayName("refusing() an oversized note carries its path in the one sub-error and leaves the body as it was")
     void refusing_WhenANoteIsOversized_CarriesTheNotePathAndKeepsTheBody() {
         PlannerValidationException ex = PlannerValidationException.refusing(new ContentVerdict.Refused(
                 new Violation(ErrorCode.SIZE_EXCEEDED, ContentPath.of("sectionNotes").key("floor1"),
@@ -96,8 +89,7 @@ class PlannerValidationExceptionTest {
     }
 
     @Test
-    @DisplayName("rejecting() only unknown keywords answers UNKNOWN_KEYWORD with the unknown keywords listed")
-    void rejecting_WhenEveryViolationIsAnUnknownKeyword_AnswersUnknownKeywordOnTheWire() {
+    void rejecting_WhenEveryViolationIsAnUnknownKeyword_AnswersUnknownKeywordOnTheWireListingThem() {
         PlannerValidationException ex = PlannerValidationException.rejecting(new ContentVerdict.Rejected(List.of(
                 Violation.unknownValue(ErrorCode.UNKNOWN_KEYWORD, ContentPath.of("selectedKeywords").index(1),
                         "selectedKeywords", "Zilch"),
@@ -114,7 +106,6 @@ class PlannerValidationExceptionTest {
     }
 
     @Test
-    @DisplayName("rejecting() an unknown keyword beside another violation stays the generic code")
     void rejecting_WhenAnUnknownKeywordSitsBesideAnotherViolation_MasksToTheGenericCode() {
         PlannerValidationException ex = PlannerValidationException.rejecting(new ContentVerdict.Rejected(List.of(
                 new Violation(ErrorCode.UNKNOWN_IDENTITY, ContentPath.of("equipment").key("01"), "identity"),

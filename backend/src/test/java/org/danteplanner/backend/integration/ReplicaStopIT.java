@@ -1,7 +1,6 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +41,6 @@ class ReplicaStopIT extends CausalHarnessSupport {
     private JdbcTemplate replicaJdbcTemplate;
 
     @Test
-    @DisplayName("After stopReplica, a row written to the primary is not visible on the replica")
     void stopReplica_WhenWriteAfterStop_NotVisibleOnReplica() {
         primaryJdbcTemplate.execute("CREATE TABLE IF NOT EXISTS replica_stop_probe (id INT PRIMARY KEY)");
         primaryJdbcTemplate.update("INSERT INTO replica_stop_probe (id) VALUES (101)");

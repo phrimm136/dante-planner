@@ -10,7 +10,6 @@ import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +55,6 @@ class TombstoneRollbackIT extends CausalHarnessSupport {
     private PlatformTransactionManager transactionManager;
 
     @Test
-    @DisplayName("A delete whose transaction rolls back must leave no tombstone for the still-live planner")
     void deletePlanner_WhenTransactionRollsBack_LeavesNoTombstone() {
         User owner = TestDataFactory.createTestUser(
                 userRepository, "f1-tombstone-rollback-" + UUID.randomUUID() + "@example.com");

@@ -1,7 +1,6 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +42,6 @@ class ReplicaResumeIT extends CausalHarnessSupport {
     private JdbcTemplate replicaJdbcTemplate;
 
     @Test
-    @DisplayName("After startReplica + awaitCaughtUp, a row written while stopped becomes visible on the replica")
     void startReplica_WhenWriteWithheldWhileStopped_VisibleAfterResumeAndCaughtUp() {
         primaryJdbcTemplate.execute("CREATE TABLE IF NOT EXISTS replica_resume_probe (id INT PRIMARY KEY)");
         primaryJdbcTemplate.update("INSERT INTO replica_resume_probe (id) VALUES (201)");

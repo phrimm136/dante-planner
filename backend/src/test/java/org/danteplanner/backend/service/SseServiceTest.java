@@ -6,7 +6,6 @@ import org.danteplanner.backend.shared.sse.NotificationPreferenceProvider.Prefer
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,11 +64,9 @@ class SseServiceTest {
     }
 
     @Nested
-    @DisplayName("subscribe")
     class Subscribe {
 
         @Test
-        @DisplayName("registers a connection for the user")
         void subscribe_WhenNewDevice_RegistersConnection() throws IOException {
             sseService.subscribe(USER_ID, UUID.randomUUID());
 
@@ -77,7 +74,6 @@ class SseServiceTest {
         }
 
         @Test
-        @DisplayName("replaces the prior emitter when the same device reconnects")
         void subscribe_WhenSameDeviceReconnects_DoesNotDuplicate() throws IOException {
             UUID deviceId = UUID.randomUUID();
 
@@ -88,7 +84,6 @@ class SseServiceTest {
         }
 
         @Test
-        @DisplayName("tracks each distinct device separately")
         void subscribe_WhenMultipleDevices_CountsAll() throws IOException {
             sseService.subscribe(USER_ID, UUID.randomUUID());
             sseService.subscribe(USER_ID, UUID.randomUUID());
@@ -98,11 +93,9 @@ class SseServiceTest {
     }
 
     @Nested
-    @DisplayName("sendToUser")
     class SendToUser {
 
         @Test
-        @DisplayName("removes the connection when the emitter is dead")
         void sendToUser_WhenEmitterDead_RemovesConnection() throws IOException {
             UUID deviceId = UUID.randomUUID();
             SseEmitter emitter = sseService.subscribe(USER_ID, deviceId);
@@ -115,7 +108,6 @@ class SseServiceTest {
         }
 
         @Test
-        @DisplayName("sends nothing when the user turned comment notifications off")
         void sendToUser_WhenCommentNotificationsOff_DoesNotSend() throws IOException {
             when(preferenceProvider.preferencesOf(USER_ID)).thenReturn(new Preferences(false, true, true));
             SseEmitter emitter = sseService.subscribe(USER_ID, UUID.randomUUID());
@@ -127,7 +119,6 @@ class SseServiceTest {
         }
 
         @Test
-        @DisplayName("does not propagate or remove when serialization fails")
         void sendToUser_WhenSerializationFails_DoesNotThrowNorRemove() throws Exception {
             ObjectMapper failingMapper = mock(ObjectMapper.class);
             when(failingMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("boom") {});
@@ -140,7 +131,6 @@ class SseServiceTest {
         }
 
         @Test
-        @DisplayName("does not deliver an event type this node does not recognize")
         void sendToUser_WhenEventTypeUnrecognized_DoesNotDeliver() throws Exception {
             ObjectMapper watchedMapper = mock(ObjectMapper.class);
             SseService service = new SseService(watchedMapper, preferenceProvider, SAME_THREAD);
@@ -156,11 +146,9 @@ class SseServiceTest {
     }
 
     @Nested
-    @DisplayName("broadcastToAll")
     class BroadcastToAll {
 
         @Test
-        @DisplayName("removes the connection when the emitter is dead")
         void broadcastToAll_WhenEmitterDead_RemovesConnection() throws IOException {
             UUID deviceId = UUID.randomUUID();
             SseEmitter emitter = sseService.subscribe(USER_ID, deviceId);
@@ -173,7 +161,6 @@ class SseServiceTest {
         }
 
         @Test
-        @DisplayName("does not propagate when serialization fails")
         void broadcastToAll_WhenSerializationFails_DoesNotThrow() throws Exception {
             ObjectMapper failingMapper = mock(ObjectMapper.class);
             when(failingMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("boom") {});
@@ -187,11 +174,9 @@ class SseServiceTest {
     }
 
     @Nested
-    @DisplayName("sweepSseHeartbeats")
-    class SendHeartbeats {
+    class SweepSseHeartbeats {
 
         @Test
-        @DisplayName("removes the connection when the emitter is dead")
         void sweepSseHeartbeats_WhenEmitterDead_RemovesConnection() throws IOException {
             SseEmitter emitter = sseService.subscribe(USER_ID, UUID.randomUUID());
             emitter.complete();
@@ -203,7 +188,6 @@ class SseServiceTest {
         }
 
         @Test
-        @DisplayName("keeps a live connection")
         void sweepSseHeartbeats_WhenEmitterLive_KeepsConnection() throws IOException {
             sseService.subscribe(USER_ID, UUID.randomUUID());
 
@@ -214,11 +198,9 @@ class SseServiceTest {
     }
 
     @Nested
-    @DisplayName("cleanupZombieConnections")
     class CleanupZombieConnections {
 
         @Test
-        @DisplayName("removes the connection when the probe fails")
         void cleanupZombieConnections_WhenEmitterDead_RemovesConnection() throws IOException {
             SseEmitter emitter = sseService.subscribe(USER_ID, UUID.randomUUID());
             emitter.complete();
@@ -230,7 +212,6 @@ class SseServiceTest {
         }
 
         @Test
-        @DisplayName("keeps a live connection")
         void cleanupZombieConnections_WhenEmitterLive_KeepsConnection() throws IOException {
             sseService.subscribe(USER_ID, UUID.randomUUID());
 
@@ -241,11 +222,9 @@ class SseServiceTest {
     }
 
     @Nested
-    @DisplayName("removeConnection")
     class RemoveConnection {
 
         @Test
-        @DisplayName("is idempotent when called twice for the same device")
         void removeConnection_WhenCalledTwice_DoesNotThrow() throws IOException {
             UUID deviceId = UUID.randomUUID();
             sseService.subscribe(USER_ID, deviceId);

@@ -1,7 +1,6 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,7 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ToxiproxyPartitionIT extends CausalHarnessSupport {
 
     @Test
-    @DisplayName("The partition profile can be applied and removed: timeout toxic present after apply, absent after remove")
     void partitionProfile_WhenApplyThenRemove_ToxicPresentThenAbsent() throws Exception {
         toxiproxyControl.applyPartition();
         assertThat(toxiproxyControl.appToPrimaryProxy().toxics().getAll()).isNotEmpty();

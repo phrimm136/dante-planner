@@ -1,7 +1,6 @@
 package org.danteplanner.backend.shared.config;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +53,6 @@ class RedisAuthPasswordIT {
     private StringRedisTemplate stringRedisTemplate;
 
     @Test
-    @DisplayName("With AUTH_REDIS_PASSWORD set, a blacklist write+read round-trips against a requirepass Redis")
     void authRedis_WhenPasswordConfigured_BlacklistWriteReadRoundTrips() {
         String key = "bl:password-wiring-test";
 

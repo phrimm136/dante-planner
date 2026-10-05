@@ -13,7 +13,6 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -70,7 +69,6 @@ class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Should save vote and retrieve by user ID and planner ID")
     void saveAndFindVote_WhenSaved_RetrievableByUserAndPlanner() {
         // Arrange
         PlannerVote vote = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
@@ -90,7 +88,6 @@ class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Should return empty optional when vote not found")
     void findByUserIdAndPlannerId_WhenNotFound_ReturnsEmpty() {
         // Act
         Optional<PlannerVote> result = plannerVoteRepository.findByUserIdAndPlannerId(
@@ -101,7 +98,6 @@ class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Should allow multiple users to vote on same planner")
     void save_WhenMultipleUsersVoteSamePlanner_AllPersisted() {
         // Arrange - Create another user
         User secondUser = TestDataFactory.createTestUser(userRepository, "second@example.com");
@@ -125,7 +121,6 @@ class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Should allow same user to vote on multiple planners")
     void save_WhenSameUserVotesMultiplePlanners_AllPersisted() {
         // Arrange - Create another planner
         Planner secondPlanner = TestDataFactory.planner(testUser)
@@ -154,7 +149,6 @@ class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Vote type is immutable - cannot be changed after creation")
     void voteType_WhenSaved_IsImmutable() {
         // Arrange
         PlannerVote vote = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);

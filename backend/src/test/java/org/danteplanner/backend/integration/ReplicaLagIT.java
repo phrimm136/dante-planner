@@ -36,7 +36,6 @@ import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -147,8 +146,8 @@ class ReplicaLagIT extends CausalHarnessSupport {
         registry.add("datasource.replica.password", REPLICA::getPassword);
     }
 
+    // INV1
     @Test
-    @DisplayName("INV1: a replica byId miss re-checks the primary, serves the entity, and increments the promotion counter")
     void byIdMissOnPausedReplica_WhenReChecksPrimary_ServesEntityAndIncrementsCounter() {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-it@example.com");
         Long userId = owner.getId();
@@ -185,8 +184,8 @@ class ReplicaLagIT extends CausalHarnessSupport {
         }
     }
 
+    // INV1
     @Test
-    @DisplayName("INV1 negative: a byId absent on both replica and primary propagates PlannerNotFoundException, does not promote, and clears the BULKHEAD pin so a follow-on read-only read still routes to the replica")
     void byIdMissOnBothReplicaAndPrimary_WhenPropagatesNotFound_DoesNotPromote_AndClearsPin() {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-doublemiss@example.com");
         Long userId = owner.getId();
@@ -226,8 +225,8 @@ class ReplicaLagIT extends CausalHarnessSupport {
         }
     }
 
+    // INV1
     @Test
-    @DisplayName("INV1 replica hit: a byId present on the replica is served without a re-check and leaves the promotion counter unchanged")
     void byIdHitOnReplica_WhenServesWithoutReCheck_AndDoesNotPromote() {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-hit@example.com");
         Long userId = owner.getId();
@@ -259,7 +258,6 @@ class ReplicaLagIT extends CausalHarnessSupport {
     }
 
     @Test
-    @DisplayName("INV2: a delete on the primary while replication is paused makes a byId via the stale replica return 404, even though the replica still holds the non-soft-deleted row")
     void deleteTombstonesGhost_WhenReplicaPositive_Returns404() {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-tombstone@example.com");
         Long userId = owner.getId();
@@ -296,7 +294,6 @@ class ReplicaLagIT extends CausalHarnessSupport {
     }
 
     @Test
-    @DisplayName("INV2 write half: a delete issues a del:planner:<id> tombstone synchronously with a bounded ~1h TTL")
     void deleteOnPrimary_WhenWritesTombstoneKey_WithBoundedTtl() {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-tombstone-write@example.com");
 
@@ -319,7 +316,6 @@ class ReplicaLagIT extends CausalHarnessSupport {
     }
 
     @Test
-    @DisplayName("INV2 published read: an owner soft-delete on the primary masks the published read from the paused replica with the tombstone's 404")
     void publishedRead_WhenOwnerSoftDeletesOnPausedReplica_Returns404FromTheTombstone() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-published-delete@example.com");
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
@@ -343,7 +339,6 @@ class ReplicaLagIT extends CausalHarnessSupport {
 
     @ParameterizedTest
     @ValueSource(strings = {"moderator-takedown", "moderator-unpublish", "owner-unpublish"})
-    @DisplayName("INV2 published read: a planner withdrawn from public view on the primary answers on the paused replica the 404 a caught-up replica gives")
     void publishedRead_WhenWithdrawnFromPublicViewOnPausedReplica_Returns404LikeACaughtUpReplica(String withdrawal)
             throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-withdraw-" + withdrawal + "@example.com");
@@ -369,7 +364,6 @@ class ReplicaLagIT extends CausalHarnessSupport {
 
     @ParameterizedTest
     @ValueSource(strings = {"moderator-takedown", "moderator-unpublish", "owner-unpublish"})
-    @DisplayName("INV2 owner read: withdrawing a planner from public view leaves the owner's own by-id read served")
     void ownerRead_WhenWithdrawnFromPublicViewOnPausedReplica_StillServesTheOwner(String withdrawal) {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-owner-read-" + withdrawal + "@example.com");
         User moderator = TestDataFactory.createModerator(userRepository, "replica-lag-owner-read-mod-" + withdrawal + "@example.com");
@@ -395,7 +389,6 @@ class ReplicaLagIT extends CausalHarnessSupport {
     }
 
     @Test
-    @DisplayName("INV2 published read: a planner unpublished and republished on the primary is served while the replica is paused")
     void publishedRead_WhenRepublishedOnPausedReplica_ServesThePlanner() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-republish@example.com");
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
@@ -422,7 +415,6 @@ class ReplicaLagIT extends CausalHarnessSupport {
 
     @ParameterizedTest
     @ValueSource(strings = {"GET", "POST"})
-    @DisplayName("INV2 batch: a planner deleted on the primary is omitted from the batch pull while the paused replica still holds it")
     void batchPull_WhenAPlannerIsTombstoned_OmitsItWhileKeepingTheLiveOne(String method) throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-batch-tombstone-" + method + "@example.com");
         Planner live = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
@@ -453,9 +445,9 @@ class ReplicaLagIT extends CausalHarnessSupport {
         }
     }
 
+    // INV1
     @ParameterizedTest
     @ValueSource(strings = {"GET", "POST"})
-    @DisplayName("INV1 batch: a planner the paused replica lacks is promoted from the primary into the owner's batch pull")
     void batchPull_WhenReplicaLacksAnOwnedPlanner_PromotesItFromThePrimary(String method) throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-batch-miss-" + method + "@example.com");
         replicationControl.awaitCaughtUp();
@@ -482,7 +474,6 @@ class ReplicaLagIT extends CausalHarnessSupport {
 
     @ParameterizedTest
     @ValueSource(strings = {"GET", "POST"})
-    @DisplayName("batch: ids that exist nowhere are omitted without promoting anything")
     void batchPull_WhenIdsExistNowhere_ReturnsAnEmptyArray(String method) throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-batch-unknown-" + method + "@example.com");
         replicationControl.awaitCaughtUp();
@@ -525,7 +516,6 @@ class ReplicaLagIT extends CausalHarnessSupport {
     }
 
     @Test
-    @DisplayName("INV2 published read: once a withdrawn planner is republished, a read on the caught-up replica issues no bulkhead query")
     void publishedRead_WhenRepublishedAfterWithdrawalOnCaughtUpReplica_IssuesNoBulkheadQuery() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-republish-bulkhead@example.com");
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
@@ -607,7 +597,6 @@ class ReplicaLagIT extends CausalHarnessSupport {
     }
 
     @Test
-    @DisplayName("INV2 published read: a deactivated owner's planners answer on the paused replica the 404 a caught-up replica gives")
     void publishedRead_WhenOwnerDeactivatedOnPausedReplica_Returns404LikeACaughtUpReplica() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-deactivate@example.com");
         Planner first = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
@@ -635,7 +624,6 @@ class ReplicaLagIT extends CausalHarnessSupport {
     }
 
     @Test
-    @DisplayName("INV2 published read: once a deactivated owner reactivates, a read on the caught-up replica issues no bulkhead query")
     void publishedRead_WhenOwnerReactivatedOnCaughtUpReplica_IssuesNoBulkheadQuery() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-reactivate@example.com");
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
@@ -658,7 +646,6 @@ class ReplicaLagIT extends CausalHarnessSupport {
     }
 
     @Test
-    @DisplayName("INV2 split reads: a deactivated owner's planner answers stats, flags and viewcount on the paused replica with the detail read's 404 and records no view")
     void splitReads_WhenOwnerDeactivatedOnPausedReplica_Return404AndRecordNoView() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-split-owner@example.com");
         User viewer = TestDataFactory.createTestUser(userRepository, "replica-lag-split-viewer@example.com");
@@ -696,7 +683,6 @@ class ReplicaLagIT extends CausalHarnessSupport {
     }
 
     @Test
-    @DisplayName("INV2 comment thread: a deactivated owner's thread answers 404 on the paused replica")
     void commentThread_WhenOwnerDeactivatedOnPausedReplica_Returns404LikeACaughtUpReplica() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "comment-lag-owner@example.com");
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
@@ -724,7 +710,6 @@ class ReplicaLagIT extends CausalHarnessSupport {
     }
 
     @Test
-    @DisplayName("INV2 comment thread: a deactivated owner's thread answers 404 on a caught-up replica")
     void commentThread_WhenOwnerDeactivatedOnCaughtUpReplica_Returns404() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "comment-caught-up-owner@example.com");
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);

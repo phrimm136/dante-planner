@@ -24,7 +24,6 @@ import jakarta.persistence.EntityManager;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,10 +98,8 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("Foreign Key Constraint Tests")
     class ForeignKeyTests {
         @Test
-        @DisplayName("Invalid planner ID in vote throws FK constraint exception")
         void foreignKey_WhenInvalidPlannerId_ThrowsException() {
             assertThatThrownBy(() -> {
                 PlannerVote vote = new PlannerVote(testUser.getId(), UUID.randomUUID(), VoteType.UP);
@@ -110,7 +107,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
             }).isInstanceOf(DataIntegrityViolationException.class);
         }
         @Test
-        @DisplayName("Invalid user ID in vote throws FK constraint exception")
         void foreignKey_WhenInvalidUserId_ThrowsException() {
             Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
 
@@ -120,7 +116,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
             }).isInstanceOf(DataIntegrityViolationException.class);
         }
         @Test
-        @DisplayName("Invalid planner ID in comment throws FK constraint exception")
         void foreignKey_WhenInvalidPlannerIdInComment_ThrowsException() {
             assertThatThrownBy(() -> {
                 PlannerComment comment = new PlannerComment(
@@ -135,7 +130,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
             }).isInstanceOf(DataIntegrityViolationException.class);
         }
         @Test
-        @DisplayName("Invalid user ID in comment throws FK constraint exception")
         void foreignKey_WhenInvalidUserIdInComment_ThrowsException() {
             Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
 
@@ -152,7 +146,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
             }).isInstanceOf(DataIntegrityViolationException.class);
         }
         @Test
-        @DisplayName("Cascade delete on planner removes associated votes")
         void foreignKey_WhenCascadeDelete_DeletesChildVotes() {
             Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
 
@@ -170,7 +163,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
             assertThat(votesAfterDelete).isZero();
         }
         @Test
-        @DisplayName("Cascade delete on planner removes associated comments")
         void foreignKey_WhenCascadeDelete_DeletesChildComments() {
             Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
 
@@ -208,11 +200,9 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("UNIQUE Constraint Tests")
     class UniqueConstraintTests {
 
         @Test
-        @DisplayName("Duplicate vote (same user + planner) throws UNIQUE constraint exception")
         void uniqueConstraint_WhenDuplicateVote_ThrowsException() {
             Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
 
@@ -232,7 +222,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Different user same planner allows separate votes")
         void uniqueConstraint_WhenDifferentUserSamePlanner_Allowed() {
             Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
             User otherUser = TestDataFactory.createTestUser(userRepository, "other@example.com");
@@ -247,7 +236,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Same user different planner allows separate votes")
         void uniqueConstraint_WhenSameUserDifferentPlanner_Allowed() {
             Planner planner1 = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
             Planner planner2 = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
@@ -262,7 +250,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Duplicate username_suffix throws UNIQUE constraint exception")
         void uniqueConstraint_WhenDuplicateUsernameSuffix_ThrowsException() {
             String suffix = "test1";
 
@@ -292,7 +279,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Duplicate provider + providerId throws UNIQUE constraint exception")
         void uniqueConstraint_WhenDuplicateProviderAndProviderId_ThrowsException() {
             User user1 = User.builder()
                     .email("user1@example.com")
@@ -320,7 +306,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Different provider same providerId allows separate users")
         void uniqueConstraint_WhenDifferentProviderSameProviderId_Allowed() {
             User user1 = User.builder()
                     .email("user1@example.com")
@@ -347,11 +332,9 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("NOT NULL Constraint Tests")
     class NotNullTests {
 
         @Test
-        @DisplayName("Missing planner title throws NOT NULL constraint exception")
         void notNullConstraint_WhenMissingTitle_ThrowsException() {
             assertThatThrownBy(() -> {
                 Planner planner = buildPlanner(testUser.getId(), null);
@@ -364,7 +347,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Missing planner owner throws NOT NULL constraint exception")
         void notNullConstraint_WhenMissingOwner_ThrowsException() {
             assertThatThrownBy(() -> {
                 Planner planner = buildPlanner(null, "Test Title");
@@ -377,7 +359,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Missing comment content throws NOT NULL constraint exception")
         void notNullConstraint_WhenMissingCommentContent_ThrowsException() {
             Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
 
@@ -395,7 +376,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Missing user email throws NOT NULL constraint exception")
         void notNullConstraint_WhenMissingEmail_ThrowsException() {
             assertThatThrownBy(() -> {
                 User user = User.builder()
@@ -412,7 +392,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Missing user provider throws NOT NULL constraint exception")
         void notNullConstraint_WhenMissingProvider_ThrowsException() {
             assertThatThrownBy(() -> {
                 User user = User.builder()
@@ -429,7 +408,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Missing user providerId throws NOT NULL constraint exception")
         void notNullConstraint_WhenMissingProviderId_ThrowsException() {
             assertThatThrownBy(() -> {
                 User user = User.builder()
@@ -446,7 +424,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Empty string title allowed, null forbidden")
         void notNullConstraint_WhenEmptyStringAllowed_NullForbidden() {
             Planner planner1 = buildPlanner(testUser.getId(), "");
             plannerRepository.save(planner1);
@@ -465,7 +442,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Default value applied for published field (false)")
         void notNullConstraint_WhenDefaultValueApplied_PublishedFalse() {
             Planner planner = buildPlanner(testUser.getId(), "Test");
             plannerRepository.save(planner);
@@ -476,7 +452,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Default value applied for upvotes field (0)")
         void notNullConstraint_WhenDefaultValueApplied_UpvotesZero() {
             Planner planner = buildPlanner(testUser.getId(), "Test");
             plannerRepository.save(planner);
@@ -489,7 +464,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Default value applied for comment upvoteCount (0)")
         void notNullConstraint_WhenDefaultValueApplied_CommentUpvoteCountZero() {
             Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
 

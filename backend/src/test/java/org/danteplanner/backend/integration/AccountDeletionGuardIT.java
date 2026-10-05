@@ -9,7 +9,6 @@ import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -69,7 +68,6 @@ class AccountDeletionGuardIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("Redis outage aborts account deletion")
     void redisOutageAbortsAccountDeletion_WhenTokenRevocationThrows_RollsBackAndDegrades() throws Exception {
         doThrow(new RedisConnectionFailureException("token store unreachable"))
                 .when(tokenBlacklistService).invalidateUserTokens(anyLong());

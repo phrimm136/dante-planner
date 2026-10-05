@@ -5,7 +5,6 @@ import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -50,7 +49,6 @@ class NotificationDispatchOutcomeTest {
     private NotificationDispatchService dispatchService;
 
     @Test
-    @DisplayName("a raise the dedup key refuses yields Suppressed and reads nothing back")
     void raise_WhenTheDedupKeyIsAlreadyOccupied_YieldsSuppressedAndReadsNothingBack() {
         whenInsertIgnoreYields(0);
 
@@ -64,7 +62,6 @@ class NotificationDispatchOutcomeTest {
     }
 
     @Test
-    @DisplayName("a raise the dedup key accepts yields Delivered carrying the recipient's payload")
     void raise_WhenTheDedupKeyIsFree_YieldsDeliveredCarryingTheRecipientsPayload() {
         whenInsertIgnoreYields(1);
         when(notificationRepository.findByUserIdAndContentIdAndNotificationType(

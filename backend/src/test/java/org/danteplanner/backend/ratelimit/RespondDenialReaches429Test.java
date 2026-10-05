@@ -20,7 +20,6 @@ import org.danteplanner.ratelimitfixture.DeclaredHandlerFixture;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -79,7 +78,6 @@ class RespondDenialReaches429Test {
     }
 
     @Test
-    @DisplayName("An exhausted bucket on a RESPOND handler renders 429 RATE_LIMIT_EXCEEDED")
     void exhaustedBucket_WhenRespondHandlerRequested_Renders429() throws Exception {
         doThrow(new RateLimitExceededException(7L, "fixture", 1L))
                 .when(rateLimitService).check(eq(RateLimitPolicy.CRUD), eq(7L), anyString());
@@ -90,7 +88,6 @@ class RespondDenialReaches429Test {
     }
 
     @Test
-    @DisplayName("An available bucket lets the handler run")
     void availableBucket_WhenRespondHandlerRequested_ReachesTheHandler() throws Exception {
         mockMvc.perform(get("/api/fixture/inherited"))
                 .andExpect(status().isOk());

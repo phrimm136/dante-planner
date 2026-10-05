@@ -10,7 +10,6 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -168,8 +167,8 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
                 "syncVersion", "lastModifiedAt");
     }
 
+    // list-card-fields
     @Test
-    @DisplayName("list-card-fields: the public list card carries firstPublishedAt and drops contentVersion and lastModifiedAt")
     void listCardFields_WhenListed_TrimmedCardShape() throws Exception {
         PlannerStats stats =
                 PlannerStats.builder()
@@ -194,8 +193,8 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
         assertThat(flag(card, "isBookmarked")).isFalse();
     }
 
+    // list-card-fields
     @Test
-    @DisplayName("list-card-fields: an authenticated list card carries the viewer's own vote state")
     void listCardFields_WhenListedAsViewer_CarriesUserContext() throws Exception {
         statsRepository.save(PlannerStats.builder().plannerId(published.getId()).build());
         catalogService.add(published);
@@ -212,8 +211,8 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
                 .isTrue();
     }
 
+    // unpublished-changes-visible-to-owner
     @Test
-    @DisplayName("unpublished-changes-visible-to-owner: the owner detail carries status and published so the FE derives modified-but-not-published")
     void unpublishedChangesVisibleToOwner_WhenStatusDirty_StatusAndPublishedCarried() throws Exception {
         // A published planner whose edit state went dirty (draft) after publish
         published.getContent().setStatus(PlannerStatus.DRAFT);
@@ -284,7 +283,6 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("no-upvotes-on-planner-response: the upsert response carries no upvotes key on create or update")
     void noUpvotes_WhenUpserted_KeyAbsent() throws Exception {
         UUID id = UUID.randomUUID();
 
@@ -300,7 +298,6 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("no-upvotes-on-planner-response: the batch pull elements carry no upvotes key")
     void noUpvotes_WhenBatchPulled_KeyAbsent() throws Exception {
         performAuthed(mockMvc, post("/api/planner/md/batch").with(withCsrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -314,7 +311,6 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("no-upvotes-on-planner-response: the GET batch pull elements carry no upvotes key")
     void noUpvotes_WhenBatchPulledByGet_KeyAbsent() throws Exception {
         Planner draft = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
 

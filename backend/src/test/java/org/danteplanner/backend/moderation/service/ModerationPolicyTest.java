@@ -5,7 +5,6 @@ import org.danteplanner.backend.moderation.exception.ModerationForbiddenExceptio
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserSummary;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -19,7 +18,6 @@ class ModerationPolicyTest {
     private static final ModerationPolicy POLICY = new ModerationPolicy();
 
     @Test
-    @DisplayName("a moderator cannot ban, whatever the target's rank")
     void requireCanRestrict_WhenActorRankTooLow_ThrowsModerationForbidden() {
         assertThatThrownBy(() -> POLICY.requireCanRestrict(
                 user(1L, UserRole.MODERATOR), normalUser(), ModerationActionType.BAN))
@@ -28,7 +26,6 @@ class ModerationPolicyTest {
     }
 
     @Test
-    @DisplayName("a moderator cannot time out another moderator")
     void requireCanRestrict_WhenTargetOfEqualRank_ThrowsModerationForbidden() {
         assertThatThrownBy(() -> POLICY.requireCanRestrict(
                 user(1L, UserRole.MODERATOR), user(2L, UserRole.MODERATOR),
@@ -38,7 +35,6 @@ class ModerationPolicyTest {
     }
 
     @Test
-    @DisplayName("an action that is not an account restriction is rejected as a programming error")
     void requireCanRestrict_WhenActionIsNotARestriction_ThrowsIllegalArgument() {
         assertThatThrownBy(() -> POLICY.requireCanRestrict(
                 user(1L, UserRole.ADMIN), normalUser(),
@@ -47,7 +43,6 @@ class ModerationPolicyTest {
     }
 
     @Test
-    @DisplayName("an admin cannot grant a role above their own")
     void requireCanChangeRole_WhenNewRoleOutranksActor_ThrowsModerationForbidden() {
         assertThatThrownBy(() -> POLICY.requireCanChangeRole(
                 summary(1L, UserRole.MODERATOR), summary(2L, UserRole.NORMAL), UserRole.ADMIN))
@@ -56,7 +51,6 @@ class ModerationPolicyTest {
     }
 
     @Test
-    @DisplayName("an admin may change their own role")
     void requireCanChangeRole_WhenActorIsTheTarget_Allows() {
         UserSummary actor = summary(1L, UserRole.ADMIN);
 

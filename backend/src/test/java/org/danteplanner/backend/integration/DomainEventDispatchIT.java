@@ -16,7 +16,6 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -92,7 +91,6 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("a replayed dispatch writes one row and pushes once")
     void dispatch_WhenTheSameEventIsDispatchedTwice_DerivesTheEffectOnce() {
         PlannerComment comment = transaction().execute(status -> commentRepository.insert(
                 new PlannerComment(planner.getId(), commenter.getId(), "A comment dispatched twice",

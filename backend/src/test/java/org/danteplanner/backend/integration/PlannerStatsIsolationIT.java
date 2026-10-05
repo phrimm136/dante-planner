@@ -21,7 +21,6 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,8 +138,8 @@ class PlannerStatsIsolationIT {
                 .orElse(-1);
     }
 
+    // comment-count-maintained
     @Test
-    @DisplayName("comment-count-maintained: create/reply increment, author and moderator deletes decrement, floor at zero")
     void commentCountMaintained_WhenCreateAndDeleteTransitions_CounterTracks() {
         seedStats(0, 0, 0);
 
@@ -171,8 +170,8 @@ class PlannerStatsIsolationIT {
         assertThat(commentCount()).as("decrement floors at zero").isEqualTo(0);
     }
 
+    // counter-reads-from-stats
     @Test
-    @DisplayName("counter-reads-from-stats: list and detail serve seeded stats values, not derived counts")
     void counterReadsFromStats_WhenStatsSeeded_ListAndDetailServeThem() throws Exception {
         // No comment rows exist: any non-zero commentCount can only come from planner_stats.
         // The list is asserted BEFORE the detail: the detail request buffers a view
@@ -192,8 +191,8 @@ class PlannerStatsIsolationIT {
                 .andExpect(jsonPath("$.commentCount").value(7));
     }
 
+    // detail-view-count-async
     @Test
-    @DisplayName("detail-view-count-async: detail serves the pre-request count; the buffered view lands in planner_stats on flush")
     void detailViewCountAsync_WhenViewed_PreRequestCountServedThenFlushIncrements() throws Exception {
         seedStats(10, 0, 0);
 

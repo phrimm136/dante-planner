@@ -14,7 +14,6 @@ import org.danteplanner.backend.user.service.UserSettingsService;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -88,7 +87,6 @@ class UserControllerTest {
     }
 
     @Nested
-    @DisplayName("deleteMyAccount Tests")
     class DeleteMyAccountTests {
 
         @BeforeEach
@@ -99,7 +97,6 @@ class UserControllerTest {
         }
 
         @Test
-        @DisplayName("Should return success response with deletion details")
         void deleteMyAccount_WhenAuthenticated_ReturnsSuccessResponse() {
             // Arrange
             Instant scheduledDeleteAt = Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS));
@@ -121,7 +118,6 @@ class UserControllerTest {
         }
 
         @Test
-        @DisplayName("Should blacklist tokens and clear cookies on deletion")
         void deleteMyAccount_WhenAuthenticated_BlacklistsTokensAndClearsCookies() {
             // Arrange
             Instant scheduledDeleteAt = Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS));
@@ -144,7 +140,6 @@ class UserControllerTest {
         }
 
         @Test
-        @DisplayName("Should be idempotent and return existing scheduled date on repeat call")
         void deleteMyAccount_WhenIdempotent_ReturnsExistingScheduledDate() {
             // Arrange - simulate second call returning same scheduled date
             Instant originalScheduledAt = Instant.now().plus(Duration.ofDays(25));
@@ -160,7 +155,6 @@ class UserControllerTest {
         }
 
         @Test
-        @DisplayName("Should pass the authenticated user ID to the lifecycle service")
         void deleteMyAccount_WhenAuthenticated_PassesUserIdToLifecycleService() {
             // Arrange
             Long userId = 456L;
@@ -177,7 +171,6 @@ class UserControllerTest {
         }
 
         @Test
-        @DisplayName("Should use configured grace period in response")
         void deleteMyAccount_WhenConfiguredGracePeriod_UsesItInResponse() {
             // Arrange
             int customGracePeriod = 60;
@@ -195,11 +188,9 @@ class UserControllerTest {
     }
 
     @Nested
-    @DisplayName("updateSettings Tests")
     class UpdateSettingsTests {
 
         @Test
-        @DisplayName("Publishes the cross-pod SSE settings invalidation after persisting the update")
         void sseSettingsInvalidationCrossPod_WhenSettingsUpdated_PublishesInvalidationForUser() {
             // Arrange
             UpdateUserSettingsRequest updateRequest = new UpdateUserSettingsRequest(true, null, null, null);

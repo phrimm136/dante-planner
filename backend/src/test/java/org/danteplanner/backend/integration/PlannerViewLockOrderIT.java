@@ -19,7 +19,6 @@ import org.danteplanner.backend.planner.service.PlannerViewRecorder;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,7 +67,6 @@ class PlannerViewLockOrderIT extends SharedMySqlContainerSupport {
     private PlatformTransactionManager transactionManager;
 
     @Test
-    @DisplayName("concurrent flushes over the same two planners never deadlock on the counter rows")
     void flush_WhenConcurrentFlushesShareTwoPlanners_AdvancesEveryCounter() throws InterruptedException {
         User owner = TestDataFactory.createTestUser(userRepository, "lock-order-owner@example.com");
         List<UUID> planners = List.of(

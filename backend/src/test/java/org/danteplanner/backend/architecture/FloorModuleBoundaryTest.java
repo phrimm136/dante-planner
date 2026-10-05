@@ -3,7 +3,6 @@ package org.danteplanner.backend.architecture;
 import org.danteplanner.backend.architecture.fixture.planner.validation.floor.ServiceReachingFloorModule;
 import org.danteplanner.backend.architecture.fixture.planner.validation.floor.SiblingReachingFloorModule;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.tngtech.archunit.base.DescribedPredicate;
@@ -49,13 +48,11 @@ class FloorModuleBoundaryTest {
             .importPackages("org.danteplanner.backend.planner.validation.floor");
 
     @Test
-    @DisplayName("The floor module depends on no caller package")
     void floorModule_WhenScanned_DependsOnNoCallerPackage() {
         assertThatCode(() -> FLOOR_MODULE_KNOWS_NO_CALLERS.check(PRODUCTION)).doesNotThrowAnyException();
     }
 
     @Test
-    @DisplayName("A floor-module class reaching a service fails naming the class")
     void serviceReachingFloorClass_WhenScanned_FailsNamingTheClass() {
         JavaClasses fixture = new ClassFileImporter().importClasses(ServiceReachingFloorModule.class);
 
@@ -65,13 +62,11 @@ class FloorModuleBoundaryTest {
     }
 
     @Test
-    @DisplayName("The floor module depends on no sibling subject package")
     void floorModule_WhenScanned_DependsOnNoSiblingSubject() {
         assertThatCode(() -> FLOOR_MODULE_KNOWS_NO_SIBLING_SUBJECT.check(PRODUCTION)).doesNotThrowAnyException();
     }
 
     @Test
-    @DisplayName("A floor-module class reaching a sibling subject fails naming the class")
     void siblingReachingFloorClass_WhenScanned_FailsNamingTheClass() {
         JavaClasses fixture = new ClassFileImporter().importClasses(SiblingReachingFloorModule.class);
 

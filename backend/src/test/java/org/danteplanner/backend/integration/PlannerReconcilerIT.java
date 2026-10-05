@@ -23,7 +23,6 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.CatalogEffects;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -150,8 +149,8 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
                 .toList();
     }
 
+    // reconciler-detects-drift
     @Test
-    @DisplayName("reconciler-detects-drift: each seeded divergence yields a structured record and is not auto-repaired")
     void reconcilerDetectsDrift_WhenDriftSeeded_ReportsWithoutRepair() {
         // A clean planner: must produce no records
         Planner clean = publishClean("Clean");
@@ -225,7 +224,6 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("moderation-less planner is audited, not skipped: its recommended drift is still reported")
     void recommendedDrift_WhenModerationRowMissing_IsStillReported() {
         Planner noModeration = publishClean("No Moderation Row");
         jdbc.update("DELETE FROM planner_moderation WHERE planner_id = UUID_TO_BIN(?)",
@@ -244,7 +242,6 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("corrupt keyword column: the index audits read keywords from the content and report no filter drift, and the catalog copy is compared as the empty set the runtime serves")
     void corruptKeywordColumn_WhenTheContentIsReadable_ReportsCatalogDriftButNoFilterDrift() {
         Planner unreadable = publishClean("Unreadable Content");
         assertThat(entityFilterRows(unreadable.getId()))
@@ -273,7 +270,6 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("catalog scalar drift: a stale title copy is reported once, naming both sides")
     void catalogTitleDrift_WhenTheCatalogCopyDivergesFromTheContentRow_ReportsOneRecord() {
         Planner titleDrift = publishClean("Catalog Title Drift");
         jdbc.update("UPDATE planner_catalog SET title = 'Stale Copy' WHERE planner_id = UUID_TO_BIN(?)",
@@ -296,7 +292,6 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("catalog scalar drift: a copy differing only by case or by a trailing space is still stale")
     void catalogTitleDrift_WhenTheCopyDiffersOnlyByCaseOrTrailingSpace_ReportsEachAsDrift() {
         Planner caseOnly = publishClean("Sinking Build");
         jdbc.update("UPDATE planner_catalog SET title = 'sinking build' WHERE planner_id = UUID_TO_BIN(?)",
@@ -319,7 +314,6 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("catalog keyword drift: element order is not drift, a different set is")
     void catalogKeywordDrift_WhenTheStoredArraysDifferInOrderAndInMembership_ReportsOnlyTheSetDifference() {
         Planner reordered = publishClean("Reordered Keywords", Set.of("Burst", "Sinking"));
         jdbc.update("UPDATE planner_catalog SET selected_keywords = '[\"Sinking\", \"Burst\"]' "
@@ -340,7 +334,6 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("catalog copies of a tombstoned planner: one leftover row is one finding, not three")
     void catalogCopyDrift_WhenThePlannerIsTombstoned_ReportsMembershipAlone() {
         Planner tombstoned = publishClean("Tombstoned Copy");
         jdbc.update("UPDATE planner_catalog SET title = 'Stale', selected_keywords = '[\"Combustion\"]' "
@@ -359,7 +352,6 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("recommendation stamp with neither an event nor a notification row is reported; either row clears it")
     void recommendedNotificationDrift_WhenTheStampCarriesNeitherRow_ReportsUntilEitherExists() {
         Planner neither = publishClean("Stamped Without Effect");
         Planner withEvent = publishClean("Stamped With Event");
@@ -396,7 +388,6 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("recommendation stamp older than the audit window: absence is age, not drift")
     void recommendedNotificationDrift_WhenTheStampPredatesTheAuditWindow_ReportsNothing() {
         Planner aged = publishClean("Stamped Long Ago");
         jdbc.update("UPDATE planner_stats SET recommended_notified_at = DATE_SUB(NOW(6), INTERVAL 60 DAY) "
@@ -409,7 +400,6 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("lock stand-in: back-to-back passes both run inside lockAtLeastFor")
     void reconcile_WhenCalledTwiceInsideLockAtLeastFor_RunsBothPasses() {
         assertThat(reconciler.reconcile()).isNotNull();
         assertThat(reconciler.reconcile())
@@ -537,7 +527,6 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("an edit whose catalog sync fails stays pending and the next pass rebuilds its filter rows")
     void catalogSync_WhenTheRebuildFails_TheNextPassRebuildsTheFilterRows() throws Exception {
         Planner planner = publishClean("Crash Window Rebuild Throws", Set.of());
         assertThat(CRASH_CONTENT).isNotEqualTo(TestDataFactory.VALID_CONTENT);
@@ -572,7 +561,6 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("an edit whose after-commit step never ran has its filter rows rebuilt by the next pass")
     void catalogSync_WhenTheEventWasNeverConsumed_TheNextPassRebuildsTheFilterRows() throws Exception {
         Planner planner = publishClean("Crash Window Pod Dies", Set.of());
         jdbc.update("UPDATE planner_content SET content = ? WHERE planner_id = UUID_TO_BIN(?)",

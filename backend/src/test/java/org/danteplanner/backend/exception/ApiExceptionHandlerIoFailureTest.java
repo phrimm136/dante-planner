@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.catalina.connector.ClientAbortException;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -51,7 +50,6 @@ class ApiExceptionHandlerIoFailureTest {
     }
 
     @Test
-    @DisplayName("An unexpected IOException before commit answers 500 with the error envelope")
     void unexpectedIoFailure_WhenResponseNotCommitted_AnswersFiveHundredWithEnvelope() throws Exception {
         mockMvc.perform(get("/io/boom").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError())
@@ -59,7 +57,6 @@ class ApiExceptionHandlerIoFailureTest {
     }
 
     @Test
-    @DisplayName("An unexpected IOException after commit writes nothing")
     void unexpectedIoFailure_WhenResponseCommitted_WritesNothing() throws Exception {
         HttpServletResponse response = mock(HttpServletResponse.class);
         when(response.isCommitted()).thenReturn(true);
@@ -70,7 +67,6 @@ class ApiExceptionHandlerIoFailureTest {
     }
 
     @Test
-    @DisplayName("A client disconnect is handled without a response body")
     void clientDisconnect_WhenSeen_IsHandledWithoutABody() {
         HttpServletResponse response = mock(HttpServletResponse.class);
 

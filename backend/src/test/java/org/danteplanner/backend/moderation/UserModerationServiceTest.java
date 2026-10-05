@@ -17,7 +17,6 @@ import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -102,11 +101,9 @@ class UserModerationServiceTest {
     }
 
     @Nested
-    @DisplayName("timeoutUser Tests")
     class TimeoutUserTests {
 
         @Test
-        @DisplayName("Moderator can timeout normal user")
         void timeoutUser_WhenModeratorTimeoutsNormalUser_Succeeds() {
             // Arrange
             when(userService.findActiveById(moderatorUser.getId()))
@@ -126,7 +123,6 @@ class UserModerationServiceTest {
         }
 
         @Test
-        @DisplayName("Admin can timeout normal user")
         void timeoutUser_WhenAdminTimeoutsNormalUser_Succeeds() {
             // Arrange
             when(userService.findActiveById(adminUser.getId()))
@@ -142,7 +138,6 @@ class UserModerationServiceTest {
         }
 
         @Test
-        @DisplayName("Admin can timeout moderator")
         void timeoutUser_WhenAdminTimeoutsModerator_Succeeds() {
             // Arrange
             when(userService.findActiveById(adminUser.getId()))
@@ -158,7 +153,6 @@ class UserModerationServiceTest {
         }
 
         @Test
-        @DisplayName("Cannot timeout administrators")
         void timeoutUser_WhenTargetIsAdmin_ThrowsException() {
             // Arrange
             User targetAdmin = User.builder()
@@ -186,7 +180,6 @@ class UserModerationServiceTest {
         }
 
         @Test
-        @DisplayName("Moderator cannot timeout other moderators")
         void timeoutUser_WhenModeratorTimeoutsModerator_ThrowsException() {
             // Arrange
             User otherModerator = User.builder()
@@ -214,7 +207,6 @@ class UserModerationServiceTest {
         }
 
         @Test
-        @DisplayName("Throws UserNotFoundException for non-existent actor")
         void timeoutUser_WhenNonExistentActor_ThrowsUserNotFoundException() {
             // Arrange
             Long nonExistentId = 999L;
@@ -229,7 +221,6 @@ class UserModerationServiceTest {
         }
 
         @Test
-        @DisplayName("Throws UserNotFoundException for non-existent target")
         void timeoutUser_WhenNonExistentTarget_ThrowsUserNotFoundException() {
             // Arrange
             Long nonExistentId = 999L;
@@ -247,11 +238,9 @@ class UserModerationServiceTest {
     }
 
     @Nested
-    @DisplayName("removeTimeout Tests")
     class RemoveTimeoutTests {
 
         @Test
-        @DisplayName("Moderator can remove timeout from user")
         void removeTimeout_WhenModeratorRemovesTimeout_Succeeds() {
             // Arrange
             normalUser.setTimeoutUntil(java.time.Instant.now().plusSeconds(3600));
@@ -272,7 +261,6 @@ class UserModerationServiceTest {
         }
 
         @Test
-        @DisplayName("Throws UserNotFoundException for non-existent target")
         void removeTimeout_WhenNonExistentTarget_ThrowsUserNotFoundException() {
             // Arrange
             Long nonExistentId = 999L;
@@ -289,7 +277,6 @@ class UserModerationServiceTest {
         }
 
         @Test
-        @DisplayName("Moderator cannot lift a timeout an admin placed on a peer moderator")
         void removeTimeout_WhenModeratorTargetsModerator_ThrowsException() {
             // Arrange
             User otherModerator = User.builder()
@@ -315,7 +302,6 @@ class UserModerationServiceTest {
         }
 
         @Test
-        @DisplayName("Normal user cannot clear a timeout")
         void removeTimeout_WhenActorIsNormalUser_ThrowsException() {
             // Arrange
             User target = User.builder()
@@ -341,11 +327,9 @@ class UserModerationServiceTest {
     }
 
     @Nested
-    @DisplayName("banUser Tests")
     class BanUserTests {
 
         @Test
-        @DisplayName("Admin can ban normal user")
         void banUser_WhenAdminBansNormalUser_Succeeds() {
             // Arrange
             when(userService.findActiveById(adminUser.getId()))
@@ -376,7 +360,6 @@ class UserModerationServiceTest {
         }
 
         @Test
-        @DisplayName("Admin can ban moderator")
         void banUser_WhenAdminBansModerator_Succeeds() {
             // Arrange
             when(userService.findActiveById(adminUser.getId()))
@@ -397,7 +380,6 @@ class UserModerationServiceTest {
         }
 
         @Test
-        @DisplayName("Cannot ban administrators")
         void banUser_WhenTargetIsAdmin_ThrowsException() {
             // Arrange
             User targetAdmin = User.builder()
@@ -421,7 +403,6 @@ class UserModerationServiceTest {
         }
 
         @Test
-        @DisplayName("Moderator cannot ban users")
         void banUser_WhenModeratorBansUser_ThrowsException() {
             // Arrange
             when(userService.findActiveById(moderatorUser.getId()))
@@ -440,11 +421,9 @@ class UserModerationServiceTest {
     }
 
     @Nested
-    @DisplayName("unbanUser Tests")
     class UnbanUserTests {
 
         @Test
-        @DisplayName("Admin can unban user")
         void unbanUser_WhenAdminUnbansUser_Succeeds() {
             // Arrange
             normalUser.setBannedAt(java.time.Instant.now());
@@ -474,7 +453,6 @@ class UserModerationServiceTest {
         }
 
         @Test
-        @DisplayName("Moderator cannot unban user")
         void unbanUser_WhenModeratorUnbans_ThrowsException() {
             // Arrange
             when(userService.findActiveById(moderatorUser.getId()))
@@ -491,7 +469,6 @@ class UserModerationServiceTest {
         }
 
         @Test
-        @DisplayName("Cannot unban administrators")
         void unbanUser_WhenTargetIsAdmin_ThrowsException() {
             // Arrange
             User targetAdmin = User.builder()

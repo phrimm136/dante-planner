@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,7 +27,6 @@ class InternalSurfaceRemovedTest {
     private static final Path MAIN_RESOURCES = Path.of("src/main/resources");
 
     @Test
-    @DisplayName("no production source or configuration mentions the internal API surface")
     void internalEndpointsRemoved_WhenSourcesScanned_NoInternalSurfaceRemains() throws IOException {
         List<String> offenders = Stream.concat(walk(MAIN_SOURCES), walk(MAIN_RESOURCES))
                 .filter(InternalSurfaceRemovedTest::mentionsInternalSurface)

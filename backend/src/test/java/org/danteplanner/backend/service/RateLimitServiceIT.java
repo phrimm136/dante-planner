@@ -16,7 +16,6 @@ import io.github.bucket4j.distributed.proxy.ProxyManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -110,11 +109,9 @@ class RateLimitServiceIT {
     }
 
     @Nested
-    @DisplayName("Bucket Allows Requests Within Limit Tests")
     class AllowRequestsWithinLimitTests {
 
         @Test
-        @DisplayName("Should allow requests within capacity limit")
         void checkRateLimit_WhenWithinLimit_Succeeds() {
             Long userId = 1L;
             String endpoint = "test-endpoint";
@@ -128,7 +125,6 @@ class RateLimitServiceIT {
         }
 
         @Test
-        @DisplayName("Should allow CRUD requests within limit")
         void checkCrudLimit_WhenWithinLimit_Succeeds() {
             Long userId = 1L;
 
@@ -140,7 +136,6 @@ class RateLimitServiceIT {
         }
 
         @Test
-        @DisplayName("Should allow SSE requests within limit")
         void checkSseLimit_WhenWithinLimit_Succeeds() {
             Long userId = 1L;
 
@@ -153,11 +148,9 @@ class RateLimitServiceIT {
     }
 
     @Nested
-    @DisplayName("Bucket Throws RateLimitExceededException When Limit Exceeded Tests")
     class ExceededLimitTests {
 
         @Test
-        @DisplayName("Should throw RateLimitExceededException when capacity exceeded")
         void checkRateLimit_WhenExceedsLimit_ThrowsException() {
             Long userId = 1L;
             String endpoint = "test-endpoint";
@@ -181,7 +174,6 @@ class RateLimitServiceIT {
         }
 
         @Test
-        @DisplayName("Should throw RateLimitExceededException for CRUD when limit exceeded")
         void checkCrudLimit_WhenExceedsLimit_ThrowsException() {
             Long userId = 1L;
 
@@ -201,7 +193,6 @@ class RateLimitServiceIT {
         }
 
         @Test
-        @DisplayName("Should throw RateLimitExceededException for SSE when limit exceeded")
         void checkSseLimit_WhenExceedsLimit_ThrowsException() {
             Long userId = 1L;
 
@@ -222,11 +213,9 @@ class RateLimitServiceIT {
     }
 
     @Nested
-    @DisplayName("Different Endpoints Have Separate Buckets Tests")
     class SeparateBucketsPerEndpointTests {
 
         @Test
-        @DisplayName("Should maintain separate buckets for different endpoints")
         void checkRateLimit_WhenDifferentEndpoints_SeparateBuckets() {
             Long userId = 1L;
             properties.setCrud(testBucketConfig);
@@ -245,7 +234,6 @@ class RateLimitServiceIT {
         }
 
         @Test
-        @DisplayName("Should maintain separate buckets for different CRUD endpoints")
         void checkCrudLimit_WhenDifferentEndpoints_SeparateBuckets() {
             Long userId = 1L;
 
@@ -260,11 +248,9 @@ class RateLimitServiceIT {
     }
 
     @Nested
-    @DisplayName("Different Users Have Separate Buckets Tests")
     class SeparateBucketsPerUserTests {
 
         @Test
-        @DisplayName("Should maintain separate buckets for different users")
         void checkRateLimit_WhenDifferentUsers_SeparateBuckets() {
             Long user1 = 1L;
             Long user2 = 2L;
@@ -285,7 +271,6 @@ class RateLimitServiceIT {
         }
 
         @Test
-        @DisplayName("Should maintain separate CRUD buckets for different users")
         void checkCrudLimit_WhenDifferentUsers_SeparateBuckets() {
             Long user1 = 1L;
             Long user2 = 2L;
@@ -304,7 +289,6 @@ class RateLimitServiceIT {
         }
 
         @Test
-        @DisplayName("Should maintain separate SSE buckets for different users")
         void checkSseLimit_WhenDifferentUsers_SeparateBuckets() {
             Long user1 = 1L;
             Long user2 = 2L;
@@ -324,11 +308,9 @@ class RateLimitServiceIT {
     }
 
     @Nested
-    @DisplayName("Bucket Key Format Tests")
     class BucketKeyTests {
 
         @Test
-        @DisplayName("Should create unique bucket for each user-endpoint combination")
         void checkRateLimit_WhenUniqueKeys_SeparateBuckets() {
             // User 1 + endpoint A
             // User 1 + endpoint B
@@ -369,11 +351,9 @@ class RateLimitServiceIT {
     }
 
     @Nested
-    @DisplayName("BucketConfig Tests")
     class BucketConfigTests {
 
         @Test
-        @DisplayName("Should correctly store and retrieve capacity")
         void bucketConfig_WhenCapacity_StoredCorrectly() {
             RateLimitProperties.BucketConfig config = new RateLimitProperties.BucketConfig();
             config.setCapacity(100);
@@ -382,7 +362,6 @@ class RateLimitServiceIT {
         }
 
         @Test
-        @DisplayName("Should correctly store and retrieve refill tokens")
         void bucketConfig_WhenRefillTokens_StoredCorrectly() {
             RateLimitProperties.BucketConfig config = new RateLimitProperties.BucketConfig();
             config.setRefillTokens(50);
@@ -391,7 +370,6 @@ class RateLimitServiceIT {
         }
 
         @Test
-        @DisplayName("Should correctly store and retrieve refill duration")
         void bucketConfig_WhenRefillDuration_StoredCorrectly() {
             RateLimitProperties.BucketConfig config = new RateLimitProperties.BucketConfig();
             config.setRefillDurationSeconds(120);
@@ -401,11 +379,9 @@ class RateLimitServiceIT {
     }
 
     @Nested
-    @DisplayName("Auth Limit (Identifier-Based) Tests")
     class AuthLimitIdentifierTests {
 
         @Test
-        @DisplayName("Should create separate buckets for different identifiers")
         void checkAuthLimit_WhenDifferentIdentifiers_SeparateBuckets() {
             // Set up auth config
             RateLimitProperties.BucketConfig authConfig = new RateLimitProperties.BucketConfig();
@@ -431,7 +407,6 @@ class RateLimitServiceIT {
         }
 
         @Test
-        @DisplayName("Should isolate buckets between ip and device prefixes")
         void checkAuthLimit_WhenIpVsDevice_Isolated() {
             RateLimitProperties.BucketConfig authConfig = new RateLimitProperties.BucketConfig();
             authConfig.setCapacity(3);
@@ -453,7 +428,6 @@ class RateLimitServiceIT {
         }
 
         @Test
-        @DisplayName("Should use unified bucket key format identifier:auth")
         void checkAuthLimit_WhenBucketKeyFormat_IdentifierColonAuth() {
             RateLimitProperties.BucketConfig authConfig = new RateLimitProperties.BucketConfig();
             authConfig.setCapacity(2);
@@ -473,7 +447,6 @@ class RateLimitServiceIT {
         }
 
         @Test
-        @DisplayName("Should handle unknown device identifier")
         void checkAuthLimit_WhenUnknownDevice_Works() {
             RateLimitProperties.BucketConfig authConfig = new RateLimitProperties.BucketConfig();
             authConfig.setCapacity(1);
@@ -493,11 +466,9 @@ class RateLimitServiceIT {
     }
 
     @Nested
-    @DisplayName("Edge Cases Tests")
     class EdgeCaseTests {
 
         @Test
-        @DisplayName("Should handle single capacity bucket correctly")
         void checkRateLimit_WhenSingleCapacity_ExhaustsAfterOne() {
             RateLimitProperties.BucketConfig singleConfig = new RateLimitProperties.BucketConfig();
             singleConfig.setCapacity(1);
@@ -517,7 +488,6 @@ class RateLimitServiceIT {
         }
 
         @Test
-        @DisplayName("Should handle large capacity bucket correctly")
         void checkRateLimit_WhenLargeCapacity_HandlesCorrectly() {
             RateLimitProperties.BucketConfig largeConfig = new RateLimitProperties.BucketConfig();
             largeConfig.setCapacity(1000);
@@ -539,7 +509,6 @@ class RateLimitServiceIT {
         }
 
         @Test
-        @DisplayName("Should reuse bucket for same user-endpoint combination")
         void checkRateLimit_WhenSameKey_ReusesBucket() {
             Long userId = 1L;
             String endpoint = "reuse-test";
@@ -562,11 +531,9 @@ class RateLimitServiceIT {
     }
 
     @Nested
-    @DisplayName("Local Redis Persistence Acceptance Tests")
     class LocalRedisPersistenceTests {
 
         @Test
-        @DisplayName("Consuming a token persists the bucket key in the local rate-limit Redis with a positive TTL")
         void rateLimitBucket_WhenConsumed_PersistsInLocalRedisWithTtl() {
             ProxyManager<byte[]> proxyManager = RedisConnectionConfig.buildRateLimitProxyManager(
                     REDIS.getRedisHost(), REDIS.getRedisPort(), Duration.ofSeconds(2));
@@ -593,7 +560,6 @@ class RateLimitServiceIT {
         }
 
         @Test
-        @DisplayName("Consuming a token writes to the rate-limit Redis only, never the auth Redis")
         void rateLimitBucket_WhenConsumed_IsAbsentFromAuthRedis() {
             ProxyManager<byte[]> proxyManager = RedisConnectionConfig.buildRateLimitProxyManager(
                     REDIS.getRedisHost(), REDIS.getRedisPort(), Duration.ofSeconds(2));

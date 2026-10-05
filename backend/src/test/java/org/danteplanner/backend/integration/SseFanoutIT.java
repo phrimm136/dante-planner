@@ -15,7 +15,6 @@ import org.danteplanner.backend.shared.sse.SuspensionType;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +81,6 @@ class SseFanoutIT extends CausalHarnessSupport {
     private PlannerCommentSseService plannerCommentSseService;
 
     @Test
-    @DisplayName("Event published on the primary Redis is delivered to a local emitter with its payload")
     void fanout_WhenPublishedOnPrimary_DeliveredToLocalEmitterWithPayload() {
         Long userId = 4242L;
         String entityId = "planner-9";
@@ -98,7 +96,6 @@ class SseFanoutIT extends CausalHarnessSupport {
     }
 
     @Test
-    @DisplayName("Broadcast published on the primary Redis reaches a subscriber on another node, carrying the payload and not the envelope")
     void sseBroadcastCrossPod_WhenPublishedOnPrimary_DeliveredWithRawPayload() {
         Long authorId = 5150L;
         String plannerId = "planner-broadcast-1";
@@ -115,7 +112,6 @@ class SseFanoutIT extends CausalHarnessSupport {
     }
 
     @Test
-    @DisplayName("Suspension published on the primary Redis reaches the suspended user's stream on another node")
     void sseSuspensionCrossPod_WhenPublishedOnPrimary_DeliveredToSuspendedUser() {
         Long suspendedUserId = 6161L;
 
@@ -128,7 +124,6 @@ class SseFanoutIT extends CausalHarnessSupport {
     }
 
     @Test
-    @DisplayName("Settings-cache invalidation published on the primary Redis invalidates the local cache")
     void settingsInvalidate_WhenPublishedOnPrimary_InvalidatesLocalSettingsCache() {
         Long userId = 7777L;
 
@@ -138,7 +133,6 @@ class SseFanoutIT extends CausalHarnessSupport {
     }
 
     @Test
-    @DisplayName("Comment event published on the primary Redis is delivered to comment subscribers with its payload")
     void commentFanout_WhenPublishedOnPrimary_DeliveredToCommentSubscribersWithPayload() {
         UUID plannerId = UUID.randomUUID();
         String commentId = "comment-123";
@@ -154,7 +148,6 @@ class SseFanoutIT extends CausalHarnessSupport {
     }
 
     @Test
-    @DisplayName("A real comment write runs through the write path and fans out cross-node to comment subscribers")
     void createComment_WhenWritePathRuns_FansOutToCommentSubscribers() {
         User owner = TestDataFactory.createTestUser(
                 userRepository, "sse-comment-owner-" + UUID.randomUUID() + "@example.com");

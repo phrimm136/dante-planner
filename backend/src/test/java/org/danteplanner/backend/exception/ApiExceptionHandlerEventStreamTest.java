@@ -11,7 +11,6 @@ import org.danteplanner.backend.shared.sse.SseConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.HttpHeaders;
@@ -131,7 +130,6 @@ class ApiExceptionHandlerEventStreamTest {
     }
 
     @Test
-    @DisplayName("an absent planner answers 404 as a problem document")
     void absentPlanner_WhenAcceptIsEventStream_AnswersProblemNotFound() throws Exception {
         mockMvc.perform(get("/probe/{id}/absent", UUID.randomUUID()).accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isNotFound())
@@ -142,7 +140,6 @@ class ApiExceptionHandlerEventStreamTest {
     }
 
     @Test
-    @DisplayName("a malformed path id answers 404, not 500")
     void malformedPathId_WhenAcceptIsEventStream_AnswersNotFound() throws Exception {
         mockMvc.perform(get("/probe/{id}/typed", "not-a-uuid").accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isNotFound())
@@ -151,8 +148,7 @@ class ApiExceptionHandlerEventStreamTest {
     }
 
     @Test
-    @DisplayName("a full registry answers 429 and names the wait")
-    void fullRegistry_WhenAcceptIsEventStream_AnswersTooManyRequests() throws Exception {
+    void fullRegistry_WhenAcceptIsEventStream_AnswersTooManyRequestsNamingTheWait() throws Exception {
         mockMvc.perform(get("/probe/{id}/full", UUID.randomUUID()).accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isTooManyRequests())
                 .andExpect(header().string(HttpHeaders.RETRY_AFTER,
@@ -162,7 +158,6 @@ class ApiExceptionHandlerEventStreamTest {
     }
 
     @Test
-    @DisplayName("an exhausted bucket answers 429")
     void exhaustedBucket_WhenAcceptIsEventStream_AnswersTooManyRequests() throws Exception {
         mockMvc.perform(get("/probe/throttled").accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isTooManyRequests())
@@ -171,8 +166,7 @@ class ApiExceptionHandlerEventStreamTest {
     }
 
     @Test
-    @DisplayName("an unreachable database answers 503 and names the wait")
-    void unreachableDatabase_WhenAcceptIsEventStream_AnswersServiceUnavailable() throws Exception {
+    void unreachableDatabase_WhenAcceptIsEventStream_AnswersServiceUnavailableNamingTheWait() throws Exception {
         mockMvc.perform(get("/probe/degraded").accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(header().string(HttpHeaders.RETRY_AFTER, DEGRADED_RETRY_AFTER))
@@ -181,7 +175,6 @@ class ApiExceptionHandlerEventStreamTest {
     }
 
     @Test
-    @DisplayName("a revoked session answers 401 and still clears the auth cookies")
     void revokedSession_WhenAcceptIsEventStream_AnswersUnauthorizedAndClearsCookies() throws Exception {
         mockMvc.perform(get("/probe/revoked").accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isUnauthorized())
@@ -192,7 +185,6 @@ class ApiExceptionHandlerEventStreamTest {
     }
 
     @Test
-    @DisplayName("an unmapped failure answers 500 as a problem document")
     void unmappedFailure_WhenAcceptIsEventStream_AnswersInternalError() throws Exception {
         mockMvc.perform(get("/probe/unexpected").accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isInternalServerError())
@@ -201,7 +193,6 @@ class ApiExceptionHandlerEventStreamTest {
     }
 
     @Test
-    @DisplayName("an unrouted path answers 404 as a problem document")
     void unroutedPath_WhenAcceptIsEventStream_AnswersProblemNotFound() throws Exception {
         mockMvc.perform(get("/probe/missing").accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isNotFound())
@@ -212,7 +203,6 @@ class ApiExceptionHandlerEventStreamTest {
     }
 
     @Test
-    @DisplayName("a timed-out stream is swallowed, leaving the response untouched")
     void timedOutStream_WhenAcceptIsEventStream_WritesNothing() throws Exception {
         mockMvc.perform(get("/probe/expired").accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isOk())

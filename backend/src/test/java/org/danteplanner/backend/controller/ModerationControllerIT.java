@@ -15,7 +15,6 @@ import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,7 +111,6 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("POST /api/moderation/user/{suffix}/timeout")
     class TimeoutUserTests {
 
         @Test
@@ -162,7 +160,6 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
      * request rather than trusting the role claim the token still carries.
      */
     @Nested
-    @DisplayName("Account restriction on the acting moderator")
     class RestrictedActorTests {
 
         @Test
@@ -206,7 +203,6 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("POST /api/moderation/user/{suffix}/clear-timeout")
     class RemoveTimeoutTests {
 
         @Test
@@ -242,7 +238,6 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("PUT /api/moderation/planner/{id}/unpublish")
     class UnpublishPlannerTests {
 
         @Test
@@ -270,7 +265,6 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("POST /api/moderation/user/{suffix}/ban")
     class BanUserTests {
 
         @Test
@@ -319,7 +313,6 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("POST /api/moderation/user/{suffix}/unban")
     class UnbanUserTests {
 
         @Test
@@ -352,7 +345,6 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("GET /api/moderation/users")
     class GetAllUsersTests {
 
         @Test
@@ -394,7 +386,6 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("GET /api/moderation/users/timed-out")
     class GetTimedOutUsersTests {
 
         @Test
@@ -427,7 +418,6 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("GET /api/moderation/actions")
     class GetModerationActionsTests {
 
         @Test
@@ -467,7 +457,6 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("POST /api/moderation/planner/{id}/takedown")
     class TakedownPlannerTests {
 
         @Test
@@ -500,7 +489,6 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("POST /api/moderation/comments/{publicId}/delete")
     class DeleteCommentTests {
 
         private PlannerComment createComment() {

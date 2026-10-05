@@ -28,7 +28,6 @@ import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -172,11 +171,9 @@ class JwtAuthenticationFilterTest {
     }
 
     @Nested
-    @DisplayName("Token-only Authentication Tests (Fix 3)")
     class ActiveUserAuthenticationTests {
 
         @Test
-        @DisplayName("Valid token authenticates from claims WITHOUT any DB lookup")
         void doFilterInternal_WhenValidToken_AuthenticatesWithoutDbLookup() throws Exception {
             String token = "valid.jwt.token";
             Long userId = 123L;
@@ -198,11 +195,9 @@ class JwtAuthenticationFilterTest {
     }
 
     @Nested
-    @DisplayName("Invalidated User Tests (deleted/demoted via in-memory invalidation)")
     class InvalidatedUserTests {
 
         @Test
-        @DisplayName("Token issued before invalidation is rejected (deleted/demoted user)")
         void doFilterInternal_WhenInvalidatedUser_ClearsContextAndContinues() throws Exception {
             String token = "valid.jwt.token";
             Long userId = 123L;
@@ -223,11 +218,9 @@ class JwtAuthenticationFilterTest {
     }
 
     @Nested
-    @DisplayName("Sentinel User Protection Tests")
     class SentinelUserProtectionTests {
 
         @Test
-        @DisplayName("Should skip authentication for sentinel user (id=0)")
         void doFilterInternal_WhenSentinelUser_SkipsAuthentication() throws Exception {
             String token = "sentinel.jwt.token";
             Long sentinelId = 0L;
@@ -245,11 +238,9 @@ class JwtAuthenticationFilterTest {
     }
 
     @Nested
-    @DisplayName("No Token Tests")
     class NoTokenTests {
 
         @Test
-        @DisplayName("Should continue without authentication when no token present")
         void doFilterInternal_WhenNoToken_ContinuesWithoutAuth() throws Exception {
             when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(Optional.empty());
 
@@ -263,11 +254,9 @@ class JwtAuthenticationFilterTest {
     }
 
     @Nested
-    @DisplayName("DB Unavailable During Refresh Tests (Fix 2a)")
     class DbUnavailableDuringRefreshTests {
 
         @Test
-        @DisplayName("Expired token + DB down during refresh returns 503, not a silent guest")
         void doFilterInternal_WhenExpiredToken_RefreshDbDown_Returns503() throws Exception {
             String expiredToken = "expired.jwt.token";
             String refreshToken = "refresh.jwt.token";
@@ -289,7 +278,6 @@ class JwtAuthenticationFilterTest {
         }
 
         @Test
-        @DisplayName("No access token + refresh present + DB down during refresh returns 503 (Site 1)")
         void doFilterInternal_WhenNoAccessToken_RefreshDbDown_Returns503() throws Exception {
             String refreshToken = "refresh.jwt.token";
             Long userId = 123L;
@@ -311,7 +299,6 @@ class JwtAuthenticationFilterTest {
         }
 
         @Test
-        @DisplayName("Expired token + tx-begin failure during refresh returns 503, not a silent guest")
         void doFilterInternal_WhenExpiredToken_RefreshTxBeginFails_Returns503() throws Exception {
             String expiredToken = "expired.jwt.token";
             String refreshToken = "refresh.jwt.token";
@@ -335,7 +322,6 @@ class JwtAuthenticationFilterTest {
         }
 
         @Test
-        @DisplayName("Redis auth-write failure during refresh returns 503 with AUTH_TEMPORARILY_UNAVAILABLE body")
         void doFilterInternal_WhenRefreshRedisWriteFails_ReturnsAuthTemporarilyUnavailable() throws Exception {
             String refreshToken = "refresh.jwt.token";
             Long userId = 123L;
@@ -362,7 +348,6 @@ class JwtAuthenticationFilterTest {
         }
 
         @Test
-        @DisplayName("DB down during refresh writes body code WRITE_TEMPORARILY_UNAVAILABLE")
         void doFilterInternal_WhenRefreshDbDown_BodyCodeIsWriteTemporarilyUnavailable() throws Exception {
             String expiredToken = "expired.jwt.token";
             String refreshToken = "refresh.jwt.token";
@@ -386,11 +371,9 @@ class JwtAuthenticationFilterTest {
     }
 
     @Nested
-    @DisplayName("Invalid Token Handling Tests")
     class InvalidTokenHandlingTests {
 
         @Test
-        @DisplayName("Should attempt auto-refresh for expired token")
         void doFilterInternal_WhenExpiredToken_AttemptsAutoRefresh() throws Exception {
             String expiredToken = "expired.jwt.token";
 
@@ -406,8 +389,7 @@ class JwtAuthenticationFilterTest {
         }
 
         @Test
-        @DisplayName("Should clear SecurityContext for malformed token AND log TOKEN_INVALID (MALFORMED)")
-        void doFilterInternal_WhenMalformedToken_ClearsContext() throws Exception {
+        void doFilterInternal_WhenMalformedToken_ClearsContextAndLogsTokenInvalid() throws Exception {
             String token = "malformed.jwt.token";
 
             when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(Optional.of(token));
@@ -423,8 +405,7 @@ class JwtAuthenticationFilterTest {
         }
 
         @Test
-        @DisplayName("Should clear SecurityContext for invalid signature AND log TOKEN_INVALID (INVALID_SIGNATURE)")
-        void doFilterInternal_WhenInvalidSignature_ClearsContext() throws Exception {
+        void doFilterInternal_WhenInvalidSignature_ClearsContextAndLogsTokenInvalid() throws Exception {
             String token = "tampered.jwt.token";
 
             when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(Optional.of(token));
@@ -440,7 +421,6 @@ class JwtAuthenticationFilterTest {
         }
 
         @Test
-        @DisplayName("Should clear SecurityContext for revoked token")
         void doFilterInternal_WhenRevokedToken_ClearsContext() throws Exception {
             String token = "revoked.jwt.token";
 
@@ -456,11 +436,9 @@ class JwtAuthenticationFilterTest {
     }
 
     @Nested
-    @DisplayName("Token-Type Enforcement Tests (INV1 / INV5) — refresh-typed JWT in access cookie")
     class TokenTypeEnforcementTests {
 
         @Test
-        @DisplayName("S1: refresh-typed JWT in the access cookie is rejected (INVALID_TYPE), request proceeds as guest")
         void doFilterInternal_WhenRefreshTypedTokenInAccessCookie_DoesNotAuthenticate() throws Exception {
             String token = "refresh.typed.in.access.cookie";
             Long userId = 123L;
@@ -477,7 +455,6 @@ class JwtAuthenticationFilterTest {
         }
 
         @Test
-        @DisplayName("S2: refresh-typed JWT in the access cookie logs TOKEN_INVALID (INVALID_TYPE)")
         void doFilterInternal_WhenRefreshTypedTokenInAccessCookie_LogsInvalidTypeReason() throws Exception {
             String token = "refresh.typed.in.access.cookie";
             Long userId = 123L;
@@ -495,11 +472,9 @@ class JwtAuthenticationFilterTest {
     }
 
     @Nested
-    @DisplayName("Token-Type Enforcement Tests (TW2, flag-off) — access-typed JWT on the auto-refresh path")
     class RefreshPathTokenTypeEnforcementTests {
 
         @Test
-        @DisplayName("S3: access-typed JWT on the flag-off auto-refresh path is validated as a refresh token, yields guest, no rotation")
         void doFilterInternal_WhenAccessTypedTokenOnRefreshPath_UsesValidateRefreshToken() throws Exception {
             String refreshCookieToken = "access.typed.in.refresh.cookie";
             Long userId = 123L;

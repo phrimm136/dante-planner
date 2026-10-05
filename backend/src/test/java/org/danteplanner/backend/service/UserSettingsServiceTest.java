@@ -9,7 +9,6 @@ import org.danteplanner.backend.user.entity.UserSettings;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.repository.UserSettingsRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,11 +57,9 @@ class UserSettingsServiceTest {
     }
 
     @Nested
-    @DisplayName("getSettings Tests - Lazy Creation")
     class GetSettingsTests {
 
         @Test
-        @DisplayName("Should return existing settings when found")
         void getSettings_WhenExistingSettings_ReturnsSettings() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
@@ -80,7 +77,6 @@ class UserSettingsServiceTest {
         }
 
         @Test
-        @DisplayName("Should return default settings without persisting for a missing row")
         void getSettings_WhenNewUser_ReturnsDefaultsWithoutPersisting() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
@@ -99,7 +95,6 @@ class UserSettingsServiceTest {
         }
 
         @Test
-        @DisplayName("Should return default settings for a user with no settings row")
         void getSettings_WhenNonExistentUser_ReturnsDefaults() {
             // Arrange
             Long nonExistentId = 999L;
@@ -119,11 +114,9 @@ class UserSettingsServiceTest {
     }
 
     @Nested
-    @DisplayName("updateSettings Tests - Partial Update")
     class UpdateSettingsTests {
 
         @Test
-        @DisplayName("Should update only syncEnabled when only syncEnabled provided")
         void updateSettings_WhenOnlySyncEnabled_UpdatesOnlySyncEnabled() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
@@ -147,7 +140,6 @@ class UserSettingsServiceTest {
         }
 
         @Test
-        @DisplayName("Should mark the sync choice made when an unchosen user answers the prompt")
         void updateSettings_WhenChoiceNotYetMade_MarksChoiceMade() {
             UserSettings unchosen = UserSettings.builder()
                     .user(testUser)
@@ -166,7 +158,6 @@ class UserSettingsServiceTest {
         }
 
         @Test
-        @DisplayName("Should leave the sync choice untouched when sync is not provided")
         void updateSettings_WhenSyncAbsent_LeavesChoiceUnmade() {
             UserSettings unchosen = UserSettings.builder()
                     .user(testUser)
@@ -186,7 +177,6 @@ class UserSettingsServiceTest {
         }
 
         @Test
-        @DisplayName("Should update only notification settings when sync not provided")
         void updateSettings_WhenOnlyNotifications_UpdatesOnlyNotifications() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
@@ -211,7 +201,6 @@ class UserSettingsServiceTest {
         }
 
         @Test
-        @DisplayName("Should not modify any field when all nulls provided")
         void updateSettings_WhenAllNulls_NoChanges() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
@@ -233,11 +222,9 @@ class UserSettingsServiceTest {
     }
 
     @Nested
-    @DisplayName("getOrCreateEntity Tests")
     class GetOrCreateEntityTests {
 
         @Test
-        @DisplayName("Should reuse existing entity")
         void getOrCreateEntity_WhenExisting_ReusesEntity() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
@@ -253,7 +240,6 @@ class UserSettingsServiceTest {
         }
 
         @Test
-        @DisplayName("Should create new entity when not found")
         void getOrCreateEntity_WhenNotFound_CreatesNew() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))

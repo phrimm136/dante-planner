@@ -11,7 +11,6 @@ import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.shared.sanitize.NotUserContent;
@@ -54,7 +53,6 @@ class SanitizationCoverageTest {
             .importPackages(USER_CONTENT_DTO_PACKAGES);
 
     @Test
-    @DisplayName("every String a user-content request DTO carries declares how it is handled")
     void stringComponent_WhenNeitherSanitizedNorOptedOut_IsRejected() {
         List<String> undeclared = undeclaredComponents().stream()
                 .filter(name -> !PENDING.contains(name))
@@ -68,7 +66,6 @@ class SanitizationCoverageTest {
     }
 
     @Test
-    @DisplayName("a pending exception that no longer applies is removed from the set")
     void pendingException_WhenAlreadyResolved_IsRejected() {
         assertThat(undeclaredComponents())
                 .as("a name here that is now annotated, renamed, or deleted makes the exception set "

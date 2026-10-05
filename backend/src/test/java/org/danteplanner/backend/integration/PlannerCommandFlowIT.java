@@ -29,7 +29,6 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -197,7 +196,6 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("an edit that leaves the searchable composition alone syncs the catalog copies and never touches the filter index")
     void edit_WhenCompositionUnchanged_LeavesFilterIndexUntouched() {
         Planner planner = publishedPlanner("Before Edit", Set.of("Sinking", "Combustion"));
         UUID plannerId = planner.getId();
@@ -225,7 +223,6 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("an edit that changes the searchable composition rebuilds both filter indexes from the committed row")
     void edit_WhenCompositionChanged_RebuildsBothFilterIndexes() throws Exception {
         Planner planner = publishedPlanner("Keyword Edit", Set.of("Sinking"));
         UUID plannerId = planner.getId();
@@ -252,7 +249,6 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("a soft delete persists the deletion stamp and withdraws the planner from the owner path, the catalog, and both filter indexes")
     void softDelete_WhenApplied_WithdrawsPlannerFromEveryProjection() {
         Planner planner = publishedPlanner("Doomed", Set.of("Sinking"));
         UUID plannerId = planner.getId();

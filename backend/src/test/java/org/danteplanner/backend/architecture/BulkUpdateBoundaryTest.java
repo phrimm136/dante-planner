@@ -8,7 +8,6 @@ import com.tngtech.archunit.core.domain.JavaType;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayDeque;
@@ -61,7 +60,6 @@ class BulkUpdateBoundaryTest {
             .importPackages(FIXTURE_PACKAGE);
 
     @Test
-    @DisplayName("no repository of a version-checked row issues a bulk UPDATE")
     void bulkUpdate_WhenIssuedOnAVersionedRow_IsRejected() {
         assertThat(offendersIn(MAIN_CLASSES))
                 .as("a statement the database applies without reading the version leaves the "
@@ -71,8 +69,7 @@ class BulkUpdateBoundaryTest {
     }
 
     @Test
-    @DisplayName("the rule names the offending method, and leaves the bulk delete beside it alone")
-    void offendingMethod_WhenTheRuleRunsOverTheFixture_IsNamed() {
+    void offendingMethod_WhenTheRuleRunsOverTheFixture_IsNamedLeavingTheBulkDeleteAlone() {
         assertThat(offendersIn(FIXTURE_CLASSES))
                 .as("the rule above passes vacuously unless this one shows it rejecting a bulk "
                         + "UPDATE, and naming only the UPDATE is what keeps the sweeps green")

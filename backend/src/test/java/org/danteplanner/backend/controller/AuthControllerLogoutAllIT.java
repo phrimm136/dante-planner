@@ -10,7 +10,6 @@ import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -81,18 +80,15 @@ class AuthControllerLogoutAllIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("POST /api/auth/logout-all - Authorization")
     class AuthorizationTests {
 
         @Test
-        @DisplayName("Should return 401 when no token provided")
         void logoutAll_WhenUnauthenticated_Returns401() throws Exception {
             mockMvc.perform(post("/api/auth/logout-all").with(withCsrf()))
                     .andExpect(status().isUnauthorized());
         }
 
         @Test
-        @DisplayName("Should return 401 when token is malformed")
         void logoutAll_WhenMalformedToken_Returns401() throws Exception {
             Cookie malformed = AuthCookies.accessToken("malformed.token.here");
 
@@ -103,11 +99,9 @@ class AuthControllerLogoutAllIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("POST /api/auth/logout-all - Success")
     class SuccessTests {
 
         @Test
-        @DisplayName("Should return 204 and clear both cookies when authenticated")
         void logoutAll_WhenAuthenticated_Returns204AndClearsCookies() throws Exception {
             mockMvc.perform(post("/api/auth/logout-all").with(withCsrf())
                             .cookie(accessTokenCookie())
@@ -120,7 +114,6 @@ class AuthControllerLogoutAllIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Should invalidate all of the user's tokens")
         void logoutAll_WhenAuthenticated_InvalidatesUserTokens() throws Exception {
             assertThat(tokenBlacklistService.isUserTokenInvalidated(testUser.getId(), 0L)).isFalse();
 
@@ -137,11 +130,9 @@ class AuthControllerLogoutAllIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("POST /api/auth/logout-all - Post-action token rejection")
     class PostActionTests {
 
         @Test
-        @DisplayName("Pre-action access token is rejected on a subsequent request")
         void preActionAccessToken_WhenLoggedOutEverywhere_IsRejected() throws Exception {
             mockMvc.perform(post("/api/auth/logout-all").with(withCsrf())
                             .cookie(accessTokenCookie())
@@ -159,7 +150,6 @@ class AuthControllerLogoutAllIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Pre-action refresh token is rejected after user invalidation")
         void preActionRefreshToken_WhenLoggedOutEverywhere_IsInvalidated() throws Exception {
             TokenClaims refreshClaims = jwtTokenService.validateToken(refreshToken);
 

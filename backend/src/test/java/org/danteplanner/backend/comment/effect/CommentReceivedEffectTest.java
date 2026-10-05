@@ -16,7 +16,6 @@ import org.danteplanner.backend.shared.outbox.service.DomainEventPayloadReader;
 import org.danteplanner.backend.shared.outbox.service.EffectPushQueue;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -80,13 +79,11 @@ class CommentReceivedEffectTest {
     }
 
     @Test
-    @DisplayName("the arm answers for COMMENT_RECEIVED")
     void type_WhenAsked_IsCommentReceived() {
         assertThat(effect.type()).isEqualTo(DomainEventType.COMMENT_RECEIVED);
     }
 
     @Test
-    @DisplayName("an eligible owner gets the notification and its push, plus the thread push")
     void applyEffect_WhenTheOwnerIsEligible_NotifiesAndPushesBoth() {
         givenAComment(COMMENTER_ID);
         givenAPlanner(true);
@@ -106,7 +103,6 @@ class CommentReceivedEffectTest {
     }
 
     @Test
-    @DisplayName("a self-comment notifies nobody and still reaches the thread")
     void applyEffect_WhenTheCommenterOwnsThePlanner_NotifiesNobodyButStillPushesTheThread() {
         givenAComment(OWNER_ID);
         givenAPlanner(true);
@@ -120,7 +116,6 @@ class CommentReceivedEffectTest {
     }
 
     @Test
-    @DisplayName("an owner who switched notifications off still gets the thread push")
     void applyEffect_WhenTheOwnerDisabledNotifications_NotifiesNobodyButStillPushesTheThread() {
         givenAComment(COMMENTER_ID);
         givenAPlanner(false);
@@ -134,7 +129,6 @@ class CommentReceivedEffectTest {
     }
 
     @Test
-    @DisplayName("a comment deleted before dispatch announces nothing")
     void applyEffect_WhenTheCommentIsGone_AnnouncesNothing() {
         when(commentRepository.findById(COMMENT_ID)).thenReturn(Optional.empty());
 
@@ -144,7 +138,6 @@ class CommentReceivedEffectTest {
     }
 
     @Test
-    @DisplayName("a comment withdrawn before dispatch announces nothing")
     void applyEffect_WhenTheCommentWasWithdrawn_AnnouncesNothing() {
         PlannerComment comment = new PlannerComment(PLANNER_ID, COMMENTER_ID, "A comment", null, 0);
         comment.setId(COMMENT_ID);
@@ -159,7 +152,6 @@ class CommentReceivedEffectTest {
     }
 
     @Test
-    @DisplayName("a planner deleted before dispatch announces nothing")
     void applyEffect_WhenThePlannerIsGone_AnnouncesNothing() {
         givenAComment(COMMENTER_ID);
         when(plannerQueryService.notificationTargetOf(PLANNER_ID)).thenReturn(Optional.empty());

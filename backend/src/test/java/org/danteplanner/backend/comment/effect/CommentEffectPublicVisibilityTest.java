@@ -16,7 +16,6 @@ import org.danteplanner.backend.shared.outbox.service.DomainEventPayloadReader;
 import org.danteplanner.backend.shared.outbox.service.EffectPushQueue;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -80,7 +79,6 @@ class CommentEffectPublicVisibilityTest {
     }
 
     @Test
-    @DisplayName("a comment on a planner unpublished before dispatch pushes no COMMENT_ADDED to the public channel")
     void commentReceived_WhenPlannerUnpublishedBeforeDispatch_PushesNoPublicCommentAdded() {
         givenUnpublished();
         PlannerComment comment = comment(COMMENT_ID, WRITER_ID, null);
@@ -98,7 +96,6 @@ class CommentEffectPublicVisibilityTest {
     }
 
     @Test
-    @DisplayName("a reply on a planner unpublished before dispatch pushes no COMMENT_ADDED to the public channel")
     void replyReceived_WhenPlannerUnpublishedBeforeDispatch_PushesNoPublicCommentAdded() {
         givenUnpublished();
         when(commentRepository.findById(PARENT_ID))
@@ -113,7 +110,6 @@ class CommentEffectPublicVisibilityTest {
     }
 
     @Test
-    @DisplayName("a reply under a parent withdrawn before dispatch notifies nobody")
     void replyReceived_WhenParentWithdrawnBeforeDispatch_NotifiesNobody() {
         PlannerComment parent = comment(PARENT_ID, PARENT_AUTHOR_ID, null);
         parent.softDelete();
@@ -134,7 +130,6 @@ class CommentEffectPublicVisibilityTest {
     }
 
     @Test
-    @DisplayName("the owner of a planner unpublished before dispatch still gets the comment notification and its push")
     void commentReceived_WhenPlannerUnpublishedBeforeDispatch_StillNotifiesTheOwner() {
         givenUnpublished();
         when(commentRepository.findById(COMMENT_ID)).thenReturn(Optional.of(comment(COMMENT_ID, WRITER_ID, null)));
@@ -154,7 +149,6 @@ class CommentEffectPublicVisibilityTest {
     }
 
     @Test
-    @DisplayName("a reply under a parent withdrawn before dispatch still pushes the live reply to the thread")
     void replyReceived_WhenParentWithdrawnBeforeDispatch_StillPushesTheReplyToTheThread() {
         PlannerComment parent = comment(PARENT_ID, PARENT_AUTHOR_ID, null);
         parent.softDelete();
@@ -169,7 +163,6 @@ class CommentEffectPublicVisibilityTest {
     }
 
     @Test
-    @DisplayName("a reply on an unpublished planner does not notify a parent author who is not the owner")
     void replyReceived_WhenPlannerUnpublishedAndParentAuthorIsNotTheOwner_NotifiesNobody() {
         givenUnpublished();
         givenAReplyUnder(PARENT_AUTHOR_ID);
@@ -183,7 +176,6 @@ class CommentEffectPublicVisibilityTest {
     }
 
     @Test
-    @DisplayName("a reply on an unpublished planner still notifies the owner as parent author")
     void replyReceived_WhenPlannerUnpublishedAndParentAuthorIsTheOwner_NotifiesTheOwner() {
         givenUnpublished();
         givenAReplyUnder(OWNER_ID);
@@ -198,7 +190,6 @@ class CommentEffectPublicVisibilityTest {
     }
 
     @Test
-    @DisplayName("a reply on a published planner notifies a parent author who is not the owner")
     void replyReceived_WhenPlannerPublishedAndParentAuthorIsNotTheOwner_NotifiesTheParentAuthor() {
         givenAReplyUnder(PARENT_AUTHOR_ID);
         when(notificationDispatchService.notifyReplyReceived(anyLong(), any(), any(), any(), any(), anyLong()))
