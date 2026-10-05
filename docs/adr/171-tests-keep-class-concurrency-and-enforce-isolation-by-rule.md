@@ -1,5 +1,5 @@
 # 171 tests-keep-class-concurrency-and-enforce-isolation-by-rule
-epic: none · pr: none @tests @concurrency @deletion @naming @rejections
+epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs
 
 ## Decisions
 - @tests @concurrency — Backend test classes keep running concurrently inside each Gradle fork, three
@@ -42,6 +42,16 @@ epic: none · pr: none @tests @concurrency @deletion @naming @rejections
   the exception type (a bare `assertThrows`, `assertThrowsExactly` or `assertRejected`, or an
   `assertThatThrownBy` chain of type checks only) — the `no-bare-assert-throws` ast-grep rule,
   scanned by `astGrepTestSources` under `check`.
+- @tests @logs — Log capture is scoped to the calling thread; no test attaches a global appender.
+  A test opens `LogCapture` for the loggers it asserts on and closes it within the test's
+  lifecycle, and sees only the lines its own thread logged. The test JVM runs with Spring Boot's
+  logging system off (`org.springframework.boot.logging.LoggingSystem=none`) and is configured once by
+  `logback-test.xml`, because Spring Boot reinitialises logging on each context start and close,
+  which detaches every appender attached at runtime — a concurrent class starting a context
+  emptied a capture mid-test.
+  REJECTED: `@Isolated` per class — serializes the fork for every log assertion.
+  INVARIANT: only `support.LogCapture` attaches a logback appender — the log-capture rule
+  (`LogCaptureRule`, checked by `TestLogCaptureConventionTest`).
 
 ## Takeaway
 - takeaway: when concurrency in a test suite exposes shared state, close each hazard with a rule

@@ -54,8 +54,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import org.danteplanner.backend.shared.exception.EntityNotFoundException;
-import org.danteplanner.backend.planner.api.PlannerNotFoundException;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
  * Phase-3 acceptance test (INV1): a replica {@code byId} miss re-checks the primary before
@@ -205,14 +204,12 @@ class ReplicaLagIT extends CausalHarnessSupport {
             UUID absentEverywhere = UUID.randomUUID();
             double before = promotedCount();
 
-            Throwable thrown = catchThrowable(() -> byIdReadGuard.read(
+            assertRejected(() -> byIdReadGuard.read(
                     ByIdReadGuard.PLANNER_ENTITY_TYPE,
                     absentEverywhere,
-                    () -> plannerQueryService.getPlanner(userId, absentEverywhere)));
-
-            assertThat(thrown)
+                    () -> plannerQueryService.getPlanner(userId, absentEverywhere)))
                     .as("a byId absent on both replica and primary must propagate the miss as a 404")
-                    .isInstanceOf(PlannerNotFoundException.class);
+                    .withCode("PLANNER_NOT_FOUND");
             assertThat(promotedCount() - before)
                     .as("a double-miss must NOT increment " + PROMOTED_COUNTER)
                     .isEqualTo(0.0);
@@ -279,14 +276,12 @@ class ReplicaLagIT extends CausalHarnessSupport {
                     .as("the paused replica must still hold the row un-soft-deleted, so the 404 comes from the tombstone, not replication catching up")
                     .isNull();
 
-            Throwable thrown = catchThrowable(() -> byIdReadGuard.read(
+            assertRejected(() -> byIdReadGuard.read(
                     ByIdReadGuard.PLANNER_ENTITY_TYPE,
                     plannerId,
-                    () -> plannerQueryService.getPlanner(userId, plannerId)));
-
-            assertThat(thrown)
+                    () -> plannerQueryService.getPlanner(userId, plannerId)))
                     .as("a delete issues a tombstone synchronously before the response, so a replica-served positive whose del:planner:<id> is present must return 404")
-                    .isInstanceOf(EntityNotFoundException.class);
+                    .withCode("NOT_FOUND");
         } finally {
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();

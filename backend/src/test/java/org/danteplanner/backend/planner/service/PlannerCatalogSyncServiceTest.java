@@ -1,9 +1,7 @@
 package org.danteplanner.backend.planner.service;
 
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.PlannerType;
@@ -20,6 +18,7 @@ import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
 import org.danteplanner.backend.shared.outbox.service.DomainEventAttemptRecorder;
 import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
+import org.danteplanner.backend.support.LogCapture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +26,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -172,16 +170,7 @@ class PlannerCatalogSyncServiceTest {
     }
 
     private static List<ILoggingEvent> errorsDuring(Runnable action) {
-        Logger logger = (Logger) LoggerFactory.getLogger(PlannerCatalogSyncService.class);
-        ListAppender<ILoggingEvent> appender = new ListAppender<>();
-        appender.start();
-        logger.addAppender(appender);
-        try {
-            action.run();
-        } finally {
-            logger.detachAppender(appender);
-        }
-        return appender.list.stream().filter(event -> event.getLevel() == Level.ERROR).toList();
+        return LogCapture.during(action, Level.ERROR, PlannerCatalogSyncService.class);
     }
 
     @Test

@@ -14,14 +14,13 @@ import org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.shared.ratelimit.RateLimitService;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.ratelimitfixture.BareHandlerFixture;
 import org.danteplanner.ratelimitfixture.DeclaredHandlerFixture;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Isolated;
-import org.slf4j.LoggerFactory;
 
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 
@@ -30,9 +29,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -49,18 +45,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * <p>The coverage rule makes an undeclared handler unreachable in a build that ran its tests. This
  * covers the deploy where it did not: the interceptor refuses rather than waving the request
  * through, because a silently unguarded endpoint is the failure the whole seam exists to end.</p>
- *
- * <p>Runs exclusively: the assertions read a Logback appender attached to a logger the whole JVM
- * shares, so a concurrent class logging through the interceptor would land in this appender.</p>
  */
-@Isolated
 class BackstopDeniesWhenTheGateWasSkippedTest {
 
     private final BareHandlerFixture bareFixture = new BareHandlerFixture();
 
     private RateLimitService rateLimitService;
-    private Logger interceptorLogger;
-    private ListAppender<ILoggingEvent> logAppender;
+    private LogCapture interceptorLog;
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -78,16 +69,13 @@ class BackstopDeniesWhenTheGateWasSkippedTest {
                 .addInterceptors(interceptor)
                 .build();
 
-        interceptorLogger = (Logger) LoggerFactory.getLogger(RateLimitInterceptor.class);
-        logAppender = new ListAppender<>();
-        logAppender.start();
-        interceptorLogger.addAppender(logAppender);
+        interceptorLog = LogCapture.onThisThread(RateLimitInterceptor.class);
     }
 
     @AfterEach
     void tearDown() {
         SecurityContextHolder.clearContext();
-        interceptorLogger.detachAppender(logAppender);
+        interceptorLog.close();
     }
 
     @Test
@@ -102,7 +90,7 @@ class BackstopDeniesWhenTheGateWasSkippedTest {
         assertThat(bareFixture.bodyRan()).isFalse();
         verifyNoInteractions(rateLimitService);
 
-        assertThat(logAppender.list).anySatisfy(event -> {
+        assertThat(interceptorLog.events()).anySatisfy(event -> {
             assertThat(event.getLevel()).isEqualTo(Level.ERROR);
             assertThat(event.getFormattedMessage())
                     .contains(BareHandlerFixture.class.getName() + ".bare");
@@ -118,7 +106,7 @@ class BackstopDeniesWhenTheGateWasSkippedTest {
                 .andExpect(status().isOk());
 
         verify(rateLimitService).check(RateLimitPolicy.CRUD, 7L, "fixture");
-        assertThat(logAppender.list).isEmpty();
+        assertThat(interceptorLog.events()).isEmpty();
     }
 
     @Test
@@ -127,6 +115,6 @@ class BackstopDeniesWhenTheGateWasSkippedTest {
                 .andExpect(status().isOk());
 
         verifyNoInteractions(rateLimitService);
-        assertThat(logAppender.list).isEmpty();
+        assertThat(interceptorLog.events()).isEmpty();
     }
 }

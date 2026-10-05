@@ -130,6 +130,7 @@ tasks.withType<Test> {
     // failure lands in an unrelated class at full suite size only. Must stay above the
     // containerized class count; TestIsolationConventionTest budgets the classes that key their own.
     systemProperty("spring.test.context.cache.maxSize", "513")
+    systemProperty("org.springframework.boot.logging.LoggingSystem", "none")
     maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(2)
     // Measured: a worker sits near 1 GB resident, and the containers it drives total well under
     // that, so the JVMs are what the box has to fit. maxParallelForks × maxHeapSize must leave

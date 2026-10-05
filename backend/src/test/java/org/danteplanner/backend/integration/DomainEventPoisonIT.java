@@ -1,9 +1,7 @@
 package org.danteplanner.backend.integration;
 
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
@@ -12,6 +10,7 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.outbox.config.OutboxConstants;
 import org.danteplanner.backend.shared.outbox.service.DomainEventDispatcher;
 import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -19,7 +18,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -75,8 +73,7 @@ class DomainEventPoisonIT extends SharedMySqlContainerSupport {
 
     private Planner planner;
     private User commenter;
-    private ListAppender<ILoggingEvent> alarms;
-    private Logger alarmLogger;
+    private LogCapture alarms;
 
     @BeforeEach
     void setUp() {
@@ -84,16 +81,12 @@ class DomainEventPoisonIT extends SharedMySqlContainerSupport {
         commenter = TestDataFactory.createTestUser(userRepository, "poison-commenter@example.com");
         planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
 
-        alarms = new ListAppender<>();
-        alarms.start();
-        alarmLogger = (Logger) LoggerFactory.getLogger(DomainEventDispatcher.class);
-        alarmLogger.addAppender(alarms);
+        alarms = LogCapture.onThisThread(DomainEventDispatcher.class);
     }
 
     @AfterEach
     void tearDown() {
-        alarmLogger.detachAppender(alarms);
-        alarms.stop();
+        alarms.close();
     }
 
     @Test
@@ -224,8 +217,7 @@ class DomainEventPoisonIT extends SharedMySqlContainerSupport {
     }
 
     private java.util.List<ILoggingEvent> alarmsFor(long eventId) {
-        return alarms.list.stream()
-                .filter(logged -> logged.getLevel() == Level.ERROR)
+        return alarms.at(Level.ERROR).stream()
                 .filter(logged -> logged.getFormattedMessage().contains(String.valueOf(eventId)))
                 .toList();
     }

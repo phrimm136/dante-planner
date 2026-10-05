@@ -35,17 +35,13 @@ import org.danteplanner.backend.shared.ratelimit.RateLimitProperties.BucketConfi
 import org.danteplanner.backend.shared.ratelimit.RateLimitService;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.ratelimitfixture.DeclaredHandlerFixture;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Isolated;
-import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 import io.lettuce.core.RedisConnectionException;
 import io.micrometer.core.instrument.Counter;
@@ -63,7 +59,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@Isolated
 class RateLimitStoreOutageTest {
 
     private static final String SKIPPED_COUNTER = "rate_limit.charge_skipped";
@@ -72,13 +67,10 @@ class RateLimitStoreOutageTest {
     private static final String FRONTEND_URL = "https://planner.example";
 
     private final SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
-    private final Logger interceptorLogger = (Logger) LoggerFactory.getLogger(RateLimitInterceptor.class);
-    private final ListAppender<ILoggingEvent> logAppender = new ListAppender<>();
 
     @AfterEach
     void tearDown() {
         SecurityContextHolder.clearContext();
-        interceptorLogger.detachAppender(logAppender);
     }
 
     @Test
@@ -173,16 +165,14 @@ class RateLimitStoreOutageTest {
                 .doThrow(new RedisConnectionException("down"))
                 .when(rateLimitService).check(eq(RateLimitPolicy.PUBLIC_READ), anyString());
         MockMvc mockMvc = mvcAgainst(rateLimitService);
-        logAppender.start();
-        interceptorLogger.addAppender(logAppender);
 
-        for (int request = 0; request < 5; request++) {
-            mockMvc.perform(get("/api/planner/md/published")).andExpect(status().isOk());
+        try (LogCapture interceptorLog = LogCapture.onThisThread(RateLimitInterceptor.class)) {
+            for (int request = 0; request < 5; request++) {
+                mockMvc.perform(get("/api/planner/md/published")).andExpect(status().isOk());
+            }
+
+            assertThat(interceptorLog.at(Level.WARN)).hasSize(2);
         }
-
-        assertThat(logAppender.list)
-                .filteredOn(event -> event.getLevel() == Level.WARN)
-                .hasSize(2);
         assertThat(skipped(RateLimitPolicy.PUBLIC_READ)).isEqualTo(4.0);
     }
 

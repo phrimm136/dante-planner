@@ -18,7 +18,6 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.stubbing.Answer;
 import org.springframework.http.HttpHeaders;
@@ -28,14 +27,11 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 import jakarta.servlet.http.Cookie;
 
-import org.slf4j.LoggerFactory;
-
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.shared.config.ReplicaDataSourceProperties;
+import org.danteplanner.backend.support.LogCapture;
 
 class GtidPinExitTest {
 
@@ -51,17 +47,10 @@ class GtidPinExitTest {
     private static final int NOT_SUBSET = 0;
     private static final int SUBSET = 1;
 
-    private final Logger gateLogger = (Logger) LoggerFactory.getLogger(GtidReadGate.class);
-    private final ListAppender<ILoggingEvent> appender = new ListAppender<>();
     private final SimpleMeterRegistry meters = new SimpleMeterRegistry();
     private final PreparedStatement waitStatement = mock(PreparedStatement.class);
     private final PreparedStatement subsetStatement = mock(PreparedStatement.class);
     private final List<String> preparedSql = new ArrayList<>();
-
-    @AfterEach
-    void detach() {
-        gateLogger.detachAppender(appender);
-    }
 
     private static String rawCookie(String gtid) {
         return Base64.getUrlEncoder().withoutPadding()
@@ -112,8 +101,6 @@ class GtidPinExitTest {
     }
 
     private GtidCookieFilter filterOver(DataSource dataSource) {
-        appender.start();
-        gateLogger.addAppender(appender);
         return new GtidCookieFilter(
                 new GtidReadGate(dataSource, meters), new GtidWriteCapture(meters), true);
     }
@@ -141,10 +128,6 @@ class GtidPinExitTest {
                 .anyMatch(h -> h.startsWith(GtidCookie.NAME + "=") && h.contains("Max-Age=0"));
     }
 
-    private List<ILoggingEvent> warnings() {
-        return appender.list.stream().filter(e -> e.getLevel() == Level.WARN).toList();
-    }
-
     private double primaryPinned() {
         return meters.counter("gtid.gate", "outcome", "primary").count();
     }
@@ -162,12 +145,14 @@ class GtidPinExitTest {
         GtidCookieFilter filter = filterOver(database(
                 throwing(malformedGtidSet(MALFORMED)), returning(SUBSET)));
 
-        List<MockHttpServletResponse> responses = consecutiveReads(filter, MALFORMED);
+        try (LogCapture logs = LogCapture.onThisThread(GtidReadGate.class)) {
+            List<MockHttpServletResponse> responses = consecutiveReads(filter, MALFORMED);
 
-        assertThat(clearsCookie(responses.get(0))).as("first response clears").isTrue();
-        assertThat(primaryPinned()).isZero();
-        assertThat(waitQueries()).isZero();
-        assertThat(warnings()).hasSizeLessThanOrEqualTo(1);
+            assertThat(clearsCookie(responses.get(0))).as("first response clears").isTrue();
+            assertThat(primaryPinned()).isZero();
+            assertThat(waitQueries()).isZero();
+            assertThat(logs.at(Level.WARN)).hasSizeLessThanOrEqualTo(1);
+        }
     }
 
     @Test
@@ -176,13 +161,15 @@ class GtidPinExitTest {
         GtidCookieFilter filter = filterOver(database(
                 throwing(malformedGtidSet(FOREIGN_UUID)), returning(SUBSET)));
 
-        List<MockHttpServletResponse> responses = consecutiveReads(filter, FOREIGN_UUID);
+        try (LogCapture logs = LogCapture.onThisThread(GtidReadGate.class)) {
+            List<MockHttpServletResponse> responses = consecutiveReads(filter, FOREIGN_UUID);
 
-        assertThat(clearsCookie(responses.get(0))).as("first response clears").isTrue();
-        assertThat(primaryPinned()).isZero();
-        assertThat(subsetQueries()).isZero();
-        assertThat(warnings()).hasSize(1);
-        assertThat(warnings().get(0).getThrowableProxy()).isNull();
+            assertThat(clearsCookie(responses.get(0))).as("first response clears").isTrue();
+            assertThat(primaryPinned()).isZero();
+            assertThat(subsetQueries()).isZero();
+            assertThat(logs.at(Level.WARN)).singleElement()
+                    .extracting(ILoggingEvent::getThrowableProxy).isNull();
+        }
     }
 
     @Test

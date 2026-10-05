@@ -23,7 +23,6 @@ import org.danteplanner.backend.shared.util.CookieUtils;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Isolated;
 
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 
@@ -48,7 +47,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * made a rate-limited user indistinguishable from one who declined consent — the two need
  * different remedies, so they need different codes.</p>
  */
-@Isolated
 class RateLimitedOAuthCallbackIsDistinguishableTest {
 
     private static final String FRONTEND_URL = "https://planner.example";

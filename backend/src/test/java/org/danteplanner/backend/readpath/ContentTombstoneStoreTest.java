@@ -13,18 +13,16 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
+import org.danteplanner.backend.support.LogCapture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -97,16 +95,8 @@ class ContentTombstoneStoreTest {
     }
 
     private List<ILoggingEvent> warningsDuring(Runnable action) {
-        Logger logger = (Logger) LoggerFactory.getLogger(ContentTombstoneStore.class);
-        ListAppender<ILoggingEvent> appender = new ListAppender<>();
-        appender.start();
-        logger.addAppender(appender);
-        try {
-            assertThatCode(action::run).doesNotThrowAnyException();
-        } finally {
-            logger.detachAppender(appender);
-        }
-        return appender.list.stream().filter(e -> e.getLevel() == Level.WARN).toList();
+        return LogCapture.during(() -> assertThatCode(action::run).doesNotThrowAnyException(),
+                Level.WARN, ContentTombstoneStore.class);
     }
 
     @Test

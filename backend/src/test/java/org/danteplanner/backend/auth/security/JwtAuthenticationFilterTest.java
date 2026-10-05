@@ -16,16 +16,14 @@ import org.danteplanner.backend.auth.token.TokenGenerator;
 import org.danteplanner.backend.auth.token.TokenValidator;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.danteplanner.backend.support.LogCapture;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import com.jayway.jsonpath.JsonPath;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
-import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -33,7 +31,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -62,12 +59,6 @@ import org.danteplanner.backend.auth.token.RefreshRotationService;
  * path returns 503 rather than a 500 or a silent guest downgrade.</p>
  */
 @ExtendWith(MockitoExtension.class)
-/**
- * Runs exclusively: the security-event assertions read a Logback appender attached at runtime,
- * and Spring Boot re-initializes the logging system on every context refresh, detaching it. A
- * concurrent class booting a context would empty the capture mid-test.
- */
-@Isolated
 class JwtAuthenticationFilterTest {
 
     @Mock
@@ -95,9 +86,7 @@ class JwtAuthenticationFilterTest {
     private ObjectMapper objectMapper;
     private MockHttpServletRequest request;
     private MockHttpServletResponse response;
-    private Logger filterLogger;
-    private Logger authenticatorLogger;
-    private ListAppender<ILoggingEvent> logAppender;
+    private LogCapture securityEvents;
 
     @BeforeEach
     void setUp() {
@@ -110,18 +99,12 @@ class JwtAuthenticationFilterTest {
         // Capture WARN security events so audit-log rendering can be asserted. Both classes on
         // the authentication path feed the same appender: the assertions are about the event a
         // rejection renders, which no consumer keys to a logger name.
-        filterLogger = (Logger) LoggerFactory.getLogger(JwtAuthenticationFilter.class);
-        authenticatorLogger = (Logger) LoggerFactory.getLogger(AccessTokenAuthenticator.class);
-        logAppender = new ListAppender<>();
-        logAppender.start();
-        filterLogger.addAppender(logAppender);
-        authenticatorLogger.addAppender(logAppender);
+        securityEvents = LogCapture.onThisThread(JwtAuthenticationFilter.class, AccessTokenAuthenticator.class);
     }
 
     @AfterEach
     void tearDown() {
-        filterLogger.detachAppender(logAppender);
-        authenticatorLogger.detachAppender(logAppender);
+        securityEvents.close();
         // The filter under test populates SecurityContextHolder, whose default strategy is a
         // ThreadLocal that outlives this class. MockMvc runs its filter chain on the calling
         // thread, and JwtAuthenticationFilter sets a principal only when none is present, so a
@@ -130,7 +113,7 @@ class JwtAuthenticationFilterTest {
     }
 
     private List<String> loggedMessages() {
-        return logAppender.list.stream().map(ILoggingEvent::getFormattedMessage).toList();
+        return securityEvents.events().stream().map(ILoggingEvent::getFormattedMessage).toList();
     }
 
     private List<String> grantedAuthorities() {
