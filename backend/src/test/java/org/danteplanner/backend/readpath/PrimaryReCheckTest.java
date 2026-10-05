@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
  * The replica-miss re-check: what it promotes, what it masks, and what it must leave behind.
@@ -99,8 +100,7 @@ class PrimaryReCheckTest {
         void deletedEntity_WhenReplicaHits_IsMasked() {
             when(tombstoneStore.isTombstoned(ENTITY_TYPE, id)).thenReturn(true);
 
-            assertThrows(EntityNotFoundException.class,
-                    () -> reCheck.readWithReCheck(ENTITY_TYPE, id, () -> "planner"));
+            assertRejected(() -> reCheck.readWithReCheck(ENTITY_TYPE, id, () -> "planner")).withCode("NOT_FOUND");
         }
 
         /**
@@ -152,10 +152,10 @@ class PrimaryReCheckTest {
 
         @Test
         void pin_WhenRecheckAlsoMisses_IsReleased() {
-            assertThrows(EntityNotFoundException.class, () -> reCheck.readWithReCheck(
+            assertRejected(() -> reCheck.readWithReCheck(
                     ENTITY_TYPE, id, () -> {
                         throw new EntityNotFoundException(ENTITY_TYPE, id);
-                    }));
+                    })).withCode("NOT_FOUND");
 
             assertNull(currentRoutingKeyOverride());
         }

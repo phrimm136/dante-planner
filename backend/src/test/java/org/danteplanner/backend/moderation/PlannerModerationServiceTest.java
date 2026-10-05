@@ -24,6 +24,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
  * Unit tests for PlannerModerationService.
@@ -185,10 +186,8 @@ class PlannerModerationServiceTest {
                     .thenThrow(new PlannerNotFoundException(nonExistentId));
 
             // Act & Assert
-            assertThrows(
-                    PlannerNotFoundException.class,
-                    () -> moderationService.unpublishPlanner(moderatorUser.getId(), nonExistentId)
-            );
+            assertRejected(() -> moderationService.unpublishPlanner(moderatorUser.getId(), nonExistentId))
+                    .withCode("PLANNER_NOT_FOUND");
         }
 
         @Test
@@ -211,10 +210,8 @@ class PlannerModerationServiceTest {
                     .thenThrow(new PlannerNotFoundException(plannerId));
 
             // Act & Assert
-            assertThrows(
-                    PlannerNotFoundException.class,
-                    () -> moderationService.unpublishPlanner(moderatorUser.getId(), plannerId)
-            );
+            assertRejected(() -> moderationService.unpublishPlanner(moderatorUser.getId(), plannerId))
+                    .withCode("PLANNER_NOT_FOUND");
         }
     }
 }

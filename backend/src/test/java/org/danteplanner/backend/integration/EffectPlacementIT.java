@@ -123,7 +123,8 @@ class EffectPlacementIT extends SharedMySqlContainerSupport {
             commentCommandService.createComment(planner.getId(), commenter.getId(), UUID.randomUUID(),
                     new CreateCommentRequest("A comment whose transaction does not survive", null));
             throw new IllegalStateException("the write fails after recording its event");
-        })).isInstanceOf(IllegalStateException.class);
+        })).isInstanceOf(IllegalStateException.class)
+                .hasMessage("the write fails after recording its event");
 
         assertThat(eventRowsForPlanner())
                 .as("the event row commits with the write that owed it, so a rollback takes it too")

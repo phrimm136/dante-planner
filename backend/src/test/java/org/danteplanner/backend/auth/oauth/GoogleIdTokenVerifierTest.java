@@ -8,7 +8,6 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.sun.net.httpserver.HttpServer;
-import org.danteplanner.backend.auth.exception.OAuthException;
 import org.danteplanner.backend.shared.config.OAuthProperties;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -26,7 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
  * Unit tests for {@link GoogleIdTokenVerifier}.
@@ -99,7 +98,7 @@ class GoogleIdTokenVerifierTest {
                 .subject(SUBJECT)
                 .audience(List.of(audience))
                 .claim("email", email)
-                .issueTime(Date.from(Instant.now().minusSeconds(30)))
+                .issueTime(Date.from((expiry.isBefore(Instant.now()) ? expiry : Instant.now()).minusSeconds(30)))
                 .expirationTime(Date.from(expiry))
                 .build();
         SignedJWT jwt = new SignedJWT(
@@ -124,8 +123,9 @@ class GoogleIdTokenVerifierTest {
     void verify_WhenForeignSigningKey_Rejected() throws Exception {
         String forged = mint(foreignKey, ISSUER, CLIENT_ID, Instant.now().plusSeconds(600));
 
-        assertThatThrownBy(() -> verifier.verify(forged))
-                .isInstanceOf(OAuthException.class);
+        assertRejected(() -> verifier.verify(forged))
+                .withCode("OAUTH_ERROR")
+                .satisfies(rejection -> assertThat(rejection.getCause()).hasMessageContaining("Signed JWT rejected"));
     }
 
     @Test
@@ -134,8 +134,9 @@ class GoogleIdTokenVerifierTest {
                 mint(signingKey, ISSUER, "someone-else.apps.googleusercontent.com",
                         Instant.now().plusSeconds(600));
 
-        assertThatThrownBy(() -> verifier.verify(otherAudience))
-                .isInstanceOf(OAuthException.class);
+        assertRejected(() -> verifier.verify(otherAudience))
+                .withCode("OAUTH_ERROR")
+                .satisfies(rejection -> assertThat(rejection.getCause()).hasMessageContaining("The aud claim is not valid"));
     }
 
     @Test
@@ -144,16 +145,18 @@ class GoogleIdTokenVerifierTest {
                 mint(signingKey, "https://accounts.evil.example", CLIENT_ID,
                         Instant.now().plusSeconds(600));
 
-        assertThatThrownBy(() -> verifier.verify(wrongIssuer))
-                .isInstanceOf(OAuthException.class);
+        assertRejected(() -> verifier.verify(wrongIssuer))
+                .withCode("OAUTH_ERROR")
+                .satisfies(rejection -> assertThat(rejection.getCause()).hasMessageContaining("The iss claim is not valid"));
     }
 
     @Test
     void verify_WhenExpired_Rejected() throws Exception {
         String expired = mint(signingKey, ISSUER, CLIENT_ID, Instant.now().minusSeconds(600));
 
-        assertThatThrownBy(() -> verifier.verify(expired))
-                .isInstanceOf(OAuthException.class);
+        assertRejected(() -> verifier.verify(expired))
+                .withCode("OAUTH_ERROR")
+                .satisfies(rejection -> assertThat(rejection.getCause()).hasMessageContaining("Jwt expired at"));
     }
 
     @Test
@@ -161,7 +164,8 @@ class GoogleIdTokenVerifierTest {
         String unsigned = "eyJhbGciOiJub25lIn0"
                 + ".eyJzdWIiOiJhdHRhY2tlciIsImVtYWlsIjoiYUBiLmMifQ.";
 
-        assertThatThrownBy(() -> verifier.verify(unsigned))
-                .isInstanceOf(OAuthException.class);
+        assertRejected(() -> verifier.verify(unsigned))
+                .withCode("OAUTH_ERROR")
+                .satisfies(rejection -> assertThat(rejection.getCause()).hasMessageContaining("Unsupported algorithm of none"));
     }
 }

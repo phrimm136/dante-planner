@@ -16,8 +16,6 @@ import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
-import org.danteplanner.backend.user.api.UserBannedException;
-import org.danteplanner.backend.user.api.UserTimedOutException;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,9 +28,9 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
  * Every comment write path consults the access guard, whichever entry point the client used.
@@ -82,8 +80,9 @@ class CommentCommandServiceRestrictionsTest {
         banned.setBannedAt(Instant.now());
         when(userService.findById(anyLong())).thenReturn(banned);
 
-        assertThrows(UserBannedException.class, () -> commentService()
-                .createReply(UUID.randomUUID(), banned.getId(), UUID.randomUUID(), "reply body"));
+        assertRejected(() -> commentService()
+                .createReply(UUID.randomUUID(), banned.getId(), UUID.randomUUID(), "reply body"))
+                .withCode("USER_BANNED");
     }
 
     @Test
@@ -92,7 +91,8 @@ class CommentCommandServiceRestrictionsTest {
         timedOut.setTimeoutUntil(Instant.now().plus(1, ChronoUnit.HOURS));
         when(userService.findById(anyLong())).thenReturn(timedOut);
 
-        assertThrows(UserTimedOutException.class, () -> commentService()
-                .createReply(UUID.randomUUID(), timedOut.getId(), UUID.randomUUID(), "reply body"));
+        assertRejected(() -> commentService()
+                .createReply(UUID.randomUUID(), timedOut.getId(), UUID.randomUUID(), "reply body"))
+                .withCode("USER_TIMED_OUT");
     }
 }

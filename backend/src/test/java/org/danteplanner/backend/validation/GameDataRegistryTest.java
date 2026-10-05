@@ -18,8 +18,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 /**
  * An unreadable game-data path is a startup failure, not a silently empty registry.
  *
@@ -116,7 +114,9 @@ class GameDataRegistryTest {
         Files.writeString(dataDir.resolve("idMigrations.json"), "{\"sinner\":{}}");
         GameDataRegistry registry = registryOver(dataDir);
 
-        assertThatThrownBy(registry::init).isInstanceOf(GameDataLoadException.class);
+        assertThatThrownBy(registry::init).isInstanceOf(GameDataLoadException.class)
+                .hasMessageEndingWith("idMigrations.json")
+                .hasRootCauseMessage("unknown entity type 'sinner'; expected one of [identity, ego, egoGift, themePack, startBuff]");
     }
 
     private static void writePlannerVersions(Path dataDir, String json) throws IOException {
@@ -217,7 +217,9 @@ class GameDataRegistryTest {
         GameDataRegistry registry = new GameDataRegistry(
                 new GameDataLoader(new ObjectMapper()), "/nonexistent/game-data-path");
 
-        assertThrows(IllegalStateException.class, registry::init);
+        assertThatThrownBy(registry::init)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Planner versions file not found: /nonexistent/game-data-path/plannerVersions.json");
     }
 
     @Test
@@ -227,6 +229,8 @@ class GameDataRegistryTest {
         GameDataRegistry registry = new GameDataRegistry(
                 new GameDataLoader(new ObjectMapper()), dataDir.toString());
 
-        assertThrows(GameDataLoadException.class, registry::init);
+        assertThatThrownBy(registry::init)
+                .isInstanceOf(GameDataLoadException.class)
+                .hasMessage("Unreadable game data file: " + dataDir.resolve("identitySpecList.json"));
     }
 }

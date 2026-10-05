@@ -327,8 +327,15 @@ val astGrep by tasks.registering(Exec::class) {
     args("scan", "--error", "src/main/java")
 }
 
+val astGrepTestSources by tasks.registering(Exec::class) {
+    group = "verification"
+    dependsOn(astGrepRuleTests)
+    executable = astGrepBinary
+    args("scan", "--error", "src/test/java")
+}
+
 tasks.check {
-    dependsOn(astGrep, checkstyleValidation)
+    dependsOn(astGrep, astGrepTestSources, checkstyleValidation)
 }
 
 // Copy-paste detection as a regression ratchet: catch NEW production duplication.

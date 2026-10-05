@@ -14,7 +14,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.danteplanner.backend.shared.sse.SuspensionType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
-import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -29,6 +28,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
  * Unit tests for UserModerationService.
@@ -214,10 +214,8 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.empty());
 
             // Act & Assert
-            assertThrows(
-                    UserNotFoundException.class,
-                    () -> moderationService.timeoutUser(nonExistentId, normalUser.getId(), 60, "Test")
-            );
+            assertRejected(() -> moderationService.timeoutUser(nonExistentId, normalUser.getId(), 60, "Test"))
+                    .withCode("USER_NOT_FOUND");
         }
 
         @Test
@@ -230,10 +228,8 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.empty());
 
             // Act & Assert
-            assertThrows(
-                    UserNotFoundException.class,
-                    () -> moderationService.timeoutUser(moderatorUser.getId(), nonExistentId, 60, "Test")
-            );
+            assertRejected(() -> moderationService.timeoutUser(moderatorUser.getId(), nonExistentId, 60, "Test"))
+                    .withCode("USER_NOT_FOUND");
         }
     }
 
@@ -270,10 +266,8 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.empty());
 
             // Act & Assert
-            assertThrows(
-                    UserNotFoundException.class,
-                    () -> moderationService.removeTimeout(moderatorUser.getId(), nonExistentId, "Test")
-            );
+            assertRejected(() -> moderationService.removeTimeout(moderatorUser.getId(), nonExistentId, "Test"))
+                    .withCode("USER_NOT_FOUND");
         }
 
         @Test

@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for AuthenticationService.
@@ -113,12 +114,9 @@ class AuthenticationServiceTest {
                     .thenThrow(new IllegalArgumentException("Unknown OAuth provider: unknown"));
 
             // Act & Assert
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> authenticationService.authenticateWithOAuth(
-                            "unknown", "code", "redirect", "verifier"
-                    )
-            );
+            assertThatThrownBy(() -> authenticationService.authenticateWithOAuth("unknown", "code", "redirect", "verifier"))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("Unknown OAuth provider: unknown");
 
             // Verify no tokens generated
             verify(tokenGenerator, never()).generateAccessToken(any(), any());

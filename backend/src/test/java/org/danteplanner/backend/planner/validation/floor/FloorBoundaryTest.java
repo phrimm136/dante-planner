@@ -62,7 +62,8 @@ class FloorBoundaryTest {
 
     @Test
     void chosenThemePack_WhenIdIsEmpty_IsRefused() {
-        assertThatThrownBy(() -> ThemePack.chosen("")).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> ThemePack.chosen("")).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("a chosen theme pack id is never empty");
     }
 
     @Test

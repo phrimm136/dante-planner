@@ -14,6 +14,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 import java.util.Locale;
 
 /**
@@ -93,10 +95,7 @@ class OAuthProviderRegistryTest {
         @Test
         void getProvider_WhenEmptyName_Throws() {
             // Act & Assert
-            assertThrows(
-                    InvalidRequestException.class,
-                    () -> registry.getProvider("")
-            );
+            assertRejected(() -> registry.getProvider("")).withCode("UNKNOWN_OAUTH_PROVIDER");
         }
     }
 
@@ -141,10 +140,7 @@ class OAuthProviderRegistryTest {
             OAuthProviderRegistry emptyRegistry = new OAuthProviderRegistry(Collections.emptyList());
 
             // Assert
-            assertThrows(
-                    InvalidRequestException.class,
-                    () -> emptyRegistry.getProvider("any")
-            );
+            assertRejected(() -> emptyRegistry.getProvider("any")).withCode("UNKNOWN_OAUTH_PROVIDER");
             assertFalse(emptyRegistry.hasProvider("google"));
         }
 
@@ -170,10 +166,9 @@ class OAuthProviderRegistryTest {
             when(googleProvider2.getProviderName()).thenReturn("google");
 
             // Act & Assert - Collectors.toMap throws on duplicate keys
-            assertThrows(
-                    IllegalStateException.class,
-                    () -> new OAuthProviderRegistry(List.of(googleProvider1, googleProvider2))
-            );
+            assertThatThrownBy(() -> new OAuthProviderRegistry(List.of(googleProvider1, googleProvider2)))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageStartingWith("Duplicate key google");
         }
     }
 

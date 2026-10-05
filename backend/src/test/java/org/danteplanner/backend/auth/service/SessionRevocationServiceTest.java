@@ -18,12 +18,12 @@ import org.springframework.data.redis.RedisConnectionFailureException;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
 class SessionRevocationServiceTest {
@@ -184,8 +184,9 @@ class SessionRevocationServiceTest {
             doThrow(new RedisConnectionFailureException("token store unreachable"))
                     .when(tokenBlacklistService).invalidateUserTokens(USER_ID);
 
-            assertThrows(RedisConnectionFailureException.class,
-                    () -> sessionRevocationService.endAllSessions(USER_ID));
+            assertThatThrownBy(() -> sessionRevocationService.endAllSessions(USER_ID))
+                    .isInstanceOf(RedisConnectionFailureException.class)
+                    .hasMessage("token store unreachable");
         }
 
         @Test

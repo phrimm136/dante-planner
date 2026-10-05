@@ -22,8 +22,6 @@ import org.danteplanner.backend.planner.validation.floor.Stage;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerLimitExceededException;
-import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
-import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerOwnershipRow;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.user.api.UserNotFoundException;
@@ -52,6 +50,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 import org.danteplanner.backend.user.api.UserBannedException;
 
 /**
@@ -417,10 +416,8 @@ class PlannerCommandServiceTest {
                     .thenReturn(Optional.empty());
 
             // Act & Assert
-            assertThrows(
-                    PlannerNotFoundException.class,
-                    () -> commandService.deletePlanner(testUser.getId(), plannerId)
-            );
+            assertRejected(() -> commandService.deletePlanner(testUser.getId(), plannerId))
+                    .withCode("PLANNER_NOT_FOUND");
 
             verify(plannerRepository, never()).insert(any());
         }
@@ -491,10 +488,8 @@ class PlannerCommandServiceTest {
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) maxPlannersPerUser);
 
             // Act & Assert
-            assertThrows(
-                    PlannerLimitExceededException.class,
-                    () -> commandService.createPlanner(testUser.getId(), deviceId, request)
-            );
+            assertRejected(() -> commandService.createPlanner(testUser.getId(), deviceId, request))
+                    .withCode("PLANNER_LIMIT_EXCEEDED");
 
             verify(plannerRepository, never()).insert(any());
         }
@@ -596,10 +591,8 @@ class PlannerCommandServiceTest {
             lenient().when(plannerRepository.findOwnershipById(plannerId))
                     .thenReturn(Optional.of(ownership));
 
-            assertThrows(
-                    PlannerNotFoundException.class,
-                    () -> commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false)
-            );
+            assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false))
+                    .withCode("PLANNER_NOT_FOUND");
             verify(plannerRepository, never()).existsActiveById(any());
             verify(plannerRepository, never()).insert(any());
             verify(plannerRepository, never()).countActiveByUserId(any());
@@ -617,10 +610,8 @@ class PlannerCommandServiceTest {
             lenient().when(plannerRepository.findOwnershipById(plannerId))
                     .thenReturn(Optional.of(ownership));
 
-            assertThrows(
-                    PlannerForbiddenException.class,
-                    () -> commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false)
-            );
+            assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false))
+                    .withCode("PLANNER_FORBIDDEN");
             verify(plannerRepository, never()).existsActiveById(any());
             verify(plannerRepository, never()).insert(any());
         }

@@ -58,7 +58,6 @@ class OAuthMitmResistanceIT extends SharedMySqlContainerSupport {
         Mockito.reset(authService);
     }
 
-    // PKCE/BFF core defense
     @Test
     void interceptedCode_WhenWithoutOauthTx_CannotRedeem() throws Exception {
         // Attacker has a valid-looking code + state from interception, but no oauth_tx —

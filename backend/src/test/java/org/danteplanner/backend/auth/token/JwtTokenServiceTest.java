@@ -16,6 +16,8 @@ import java.time.ZoneOffset;
 import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -479,10 +481,9 @@ class JwtTokenServiceTest {
             String invalidToken = "invalid.token";
 
             // Act & Assert
-            assertThrows(
-                    InvalidTokenException.class,
-                    () -> tokenService.getUserIdFromToken(invalidToken)
-            );
+            assertRejected(() -> tokenService.getUserIdFromToken(invalidToken))
+                    .withCode("UNAUTHORIZED")
+                    .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Token is malformed"));
         }
     }
 

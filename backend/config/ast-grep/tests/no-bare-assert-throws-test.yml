@@ -1,0 +1,155 @@
+id: no-bare-assert-throws
+valid:
+  - |
+    class A {
+      void m() {
+        var e = assertThrows(IllegalStateException.class, () -> f());
+        assertEquals("boom", e.getMessage());
+      }
+    }
+  - |
+    class A {
+      IllegalStateException m() {
+        return assertThrows(IllegalStateException.class, () -> f());
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThat(assertThrows(IllegalStateException.class, () -> f())).hasMessage("boom");
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertRejected(() -> f()).withCode("PLANNER_NOT_FOUND");
+      }
+    }
+  - |
+    class A {
+      void m() {
+        Rejections.assertRejected(() -> f()).withViolation("UNKNOWN_FIELD", "x");
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertRejected(() -> f()).withCode("UNAUTHORIZED").isExactlyInstanceOf(InvalidTokenException.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThatThrownBy(() -> f()).isInstanceOf(IllegalStateException.class).hasMessage("boom");
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThatThrownBy(() -> f())
+            .isInstanceOf(IllegalStateException.class)
+            .satisfies(e -> assertThat(e.getCause()).isSameAs(cause));
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThatThrownBy(() -> f()).hasMessageContaining("boom").isInstanceOf(IllegalStateException.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> f()).withMessage("boom");
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThat(result).isInstanceOf(Planner.class);
+      }
+    }
+invalid:
+  - |
+    class A {
+      void m() {
+        assertThrows(IllegalStateException.class, () -> f());
+      }
+    }
+  - |
+    class A {
+      void m() {
+        Assertions.assertThrows(IllegalStateException.class, () -> f(), "message");
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThrows(
+            IllegalStateException.class,
+            () -> {
+              f();
+              g();
+            });
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThrowsExactly(IllegalStateException.class, () -> f());
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThatThrownBy(() -> f()).isInstanceOf(IllegalStateException.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThatThrownBy(() -> f()).isExactlyInstanceOf(IllegalStateException.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThatThrownBy(() -> f()).isInstanceOfAny(IllegalStateException.class, IllegalArgumentException.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThatThrownBy(() -> f()).as("why").isInstanceOf(IllegalStateException.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThatThrownBy(() -> f()).isInstanceOf(IllegalStateException.class).hasCauseInstanceOf(IOException.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThatThrownBy(() -> f());
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertRejected(() -> f());
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> f());
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThatIllegalArgumentException().isThrownBy(() -> f());
+      }
+    }

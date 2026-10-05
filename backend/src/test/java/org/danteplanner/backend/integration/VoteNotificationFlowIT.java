@@ -43,6 +43,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Integration test for Vote → Notification Flow.
@@ -419,10 +420,12 @@ class VoteNotificationFlowIT {
         );
 
         // Assert - UNIQUE constraint violation (caught by service layer)
-        assertThrows(org.springframework.dao.DataIntegrityViolationException.class, () -> {
+        assertThatThrownBy(() -> {
             notificationRepository.save(notification2);
             notificationRepository.flush();
-        });
+        })
+                .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class)
+                .hasMessageContaining("uk_notification_dedup");
     }
 
     // ==================== IT5: Edge Cases ====================

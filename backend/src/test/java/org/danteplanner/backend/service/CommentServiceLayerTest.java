@@ -25,9 +25,6 @@ import org.danteplanner.backend.comment.dto.CreateCommentResponse;
 import org.danteplanner.backend.comment.dto.UpdateCommentResponse;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.dto.UpdateCommentRequest;
-import org.danteplanner.backend.comment.exception.CommentForbiddenException;
-import org.danteplanner.backend.comment.exception.CommentNotFoundException;
-import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.planner.api.PlannerThread;
@@ -52,6 +49,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.api.UserBannedException;
 import org.danteplanner.backend.user.api.UserTimedOutException;
@@ -235,8 +234,8 @@ class CommentServiceLayerTest {
 
             // Act & Assert
             UUID deviceId = UUID.randomUUID();
-            assertThrows(PlannerNotFoundException.class,
-                    () -> commandService.createComment(plannerId, testUser.getId(), deviceId, request));
+            assertRejected(() -> commandService.createComment(plannerId, testUser.getId(), deviceId, request))
+                    .withCode("PLANNER_NOT_FOUND");
         }
 
         @Test
@@ -251,8 +250,8 @@ class CommentServiceLayerTest {
 
             // Act & Assert
             UUID deviceId = UUID.randomUUID();
-            assertThrows(CommentNotFoundException.class,
-                    () -> commandService.createComment(plannerId, testUser.getId(), deviceId, request));
+            assertRejected(() -> commandService.createComment(plannerId, testUser.getId(), deviceId, request))
+                    .withCode("COMMENT_NOT_FOUND");
         }
 
         @Test
@@ -332,8 +331,9 @@ class CommentServiceLayerTest {
             when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(comment));
 
             // Act & Assert
-            assertThrows(CommentForbiddenException.class,
-                    () -> commandService.updateComment(commentPublicId, otherUser.getId(), request));
+            assertRejected(() -> commandService.updateComment(commentPublicId, otherUser.getId(), request))
+                    .withCode("COMMENT_FORBIDDEN")
+                    .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Only the author can edit this comment"));
         }
 
         @Test
@@ -349,8 +349,9 @@ class CommentServiceLayerTest {
             when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(comment));
 
             // Act & Assert
-            assertThrows(CommentForbiddenException.class,
-                    () -> commandService.updateComment(commentPublicId, testUser.getId(), request));
+            assertRejected(() -> commandService.updateComment(commentPublicId, testUser.getId(), request))
+                    .withCode("COMMENT_FORBIDDEN")
+                    .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Cannot edit a deleted comment"));
         }
     }
 
@@ -387,8 +388,9 @@ class CommentServiceLayerTest {
             when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(comment));
 
             // Act & Assert
-            assertThrows(CommentForbiddenException.class,
-                    () -> commandService.deleteComment(commentPublicId, otherUser.getId()));
+            assertRejected(() -> commandService.deleteComment(commentPublicId, otherUser.getId()))
+                    .withCode("COMMENT_FORBIDDEN")
+                    .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Only the author can delete this comment"));
             assertFalse(comment.isDeleted());
         }
 
@@ -482,8 +484,8 @@ class CommentServiceLayerTest {
                     .thenReturn(Optional.empty());
 
             // Act & Assert
-            assertThrows(PlannerNotFoundException.class,
-                    () -> queryService.getCommentTree(plannerId, testUser.getId()));
+            assertRejected(() -> queryService.getCommentTree(plannerId, testUser.getId()))
+                    .withCode("PLANNER_NOT_FOUND");
         }
     }
 
@@ -541,10 +543,8 @@ class CommentServiceLayerTest {
                     .thenReturn(testUser);
 
             // Act & Assert - only a ban withdraws engagement
-            assertThrows(
-                    CommentNotFoundException.class,
-                    () -> engagementService.toggleUpvote(commentId, testUser.getId())
-            );
+            assertRejected(() -> engagementService.toggleUpvote(commentId, testUser.getId()))
+                    .withCode("COMMENT_NOT_FOUND");
             verify(commentVoteRepository, never()).insert(any());
         }
 
@@ -559,10 +559,7 @@ class CommentServiceLayerTest {
                     .thenReturn(testUser);
 
             // Act & Assert
-            assertThrows(
-                    UserBannedException.class,
-                    () -> engagementService.toggleUpvote(commentId, testUser.getId())
-            );
+            assertRejected(() -> engagementService.toggleUpvote(commentId, testUser.getId())).withCode("USER_BANNED");
             verify(commentVoteRepository, never()).insert(any());
         }
 

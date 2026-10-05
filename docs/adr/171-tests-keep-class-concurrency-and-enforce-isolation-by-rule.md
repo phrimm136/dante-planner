@@ -1,5 +1,5 @@
 # 171 tests-keep-class-concurrency-and-enforce-isolation-by-rule
-epic: none · pr: none @tests @concurrency @deletion @naming
+epic: none · pr: none @tests @concurrency @deletion @naming @rejections
 
 ## Decisions
 - @tests @concurrency — Backend test classes keep running concurrently inside each Gradle fork, three
@@ -32,6 +32,16 @@ epic: none · pr: none @tests @concurrency @deletion @naming
   that restated the method name, and several had drifted to say the opposite of the assertions.
   REJECTED: display names that restate the method name — two names drift.
   INVARIANT: no test class or test method carries `@DisplayName` — the display-name convention rule.
+- @tests @rejections — A rejection test asserts which rejection: a domain rejection through
+  `Rejections.assertRejected` with the wire code or the validation violation (and its path where the
+  validator reports one), any other exception through `assertThatThrownBy` with a message or property
+  that tells it apart from another failure of the same type. Type-only assertions hid tests whose
+  input was refused for a reason other than the one their name claimed.
+  REJECTED: asserting the exception type alone — any failure of that type passes.
+  INVARIANT: no thrown-exception assertion in the `org.danteplanner.backend` test packages stops at
+  the exception type (a bare `assertThrows`, `assertThrowsExactly` or `assertRejected`, or an
+  `assertThatThrownBy` chain of type checks only) — the `no-bare-assert-throws` ast-grep rule,
+  scanned by `astGrepTestSources` under `check`.
 
 ## Takeaway
 - takeaway: when concurrency in a test suite exposes shared state, close each hazard with a rule

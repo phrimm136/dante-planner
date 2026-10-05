@@ -8,7 +8,6 @@ import org.danteplanner.backend.moderation.api.dto.CommentReportRequest;
 import org.danteplanner.backend.moderation.api.dto.CommentReportResponse;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.moderation.entity.PlannerCommentReport;
-import org.danteplanner.backend.comment.exception.CommentForbiddenException;
 import org.danteplanner.backend.comment.exception.CommentNotFoundException;
 import org.danteplanner.backend.moderation.exception.CommentReportAlreadyExistsException;
 import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
@@ -29,6 +28,8 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
  * Unit tests for CommentReportService.
@@ -111,8 +112,7 @@ class CommentReportServiceTest {
                     .when(accessGuard).checkNotBanned(REPORTER_ID);
             CommentReportRequest request = new CommentReportRequest(REASON);
 
-            assertThrows(UserBannedException.class,
-                    () -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request));
+            assertRejected(() -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request)).withCode("USER_BANNED");
 
             verify(reportRepository, never()).insert(any(PlannerCommentReport.class));
             verifyNoInteractions(commentQueryService);
@@ -126,8 +126,8 @@ class CommentReportServiceTest {
             CommentReportRequest request = new CommentReportRequest(REASON);
 
             // Act & Assert
-            assertThrows(CommentNotFoundException.class,
-                    () -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request));
+            assertRejected(() -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request))
+                    .withCode("COMMENT_NOT_FOUND");
 
             verify(reportRepository, never()).existsByReporterIdAndCommentId(any(), any());
             verify(reportRepository, never()).insert(any());
@@ -160,8 +160,9 @@ class CommentReportServiceTest {
             CommentReportRequest request = new CommentReportRequest(REASON);
 
             // Act & Assert
-            assertThrows(CommentForbiddenException.class,
-                    () -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request));
+            assertRejected(() -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request))
+                    .withCode("COMMENT_FORBIDDEN")
+                    .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Cannot report a deleted comment"));
 
             verify(reportRepository, never()).existsByReporterIdAndCommentId(any(), any());
             verify(reportRepository, never()).insert(any());
@@ -175,8 +176,8 @@ class CommentReportServiceTest {
             CommentReportRequest request = new CommentReportRequest(REASON);
 
             // Act & Assert
-            assertThrows(CommentNotFoundException.class,
-                    () -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request));
+            assertRejected(() -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request))
+                    .withCode("COMMENT_NOT_FOUND");
 
             // Verify order: comment lookup first, then never reaches report check
             verify(commentQueryService).requireByPublicId(COMMENT_PUBLIC_ID);

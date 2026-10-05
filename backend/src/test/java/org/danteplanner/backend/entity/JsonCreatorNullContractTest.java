@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * The {@code @JsonCreator} null contract for the two enums whose stored value differs from the
@@ -32,12 +32,16 @@ class JsonCreatorNullContractTest {
     void plannerStatus_WhenValueIsStored_ResolvesByWireValueNotName() {
         assertEquals(PlannerStatus.DRAFT, PlannerStatus.fromValue("draft"));
         // The constant name is not a value this enum accepts; only the stored form is.
-        assertThrows(IllegalArgumentException.class, () -> PlannerStatus.fromValue("DRAFT"));
+        assertThatThrownBy(() -> PlannerStatus.fromValue("DRAFT"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Unknown PlannerStatus value: DRAFT");
     }
 
     @Test
     void authProviderType_WhenValueIsStored_ResolvesByWireValueNotName() {
         assertEquals(AuthProviderType.GOOGLE, AuthProviderType.fromValue("google"));
-        assertThrows(IllegalArgumentException.class, () -> AuthProviderType.fromValue("GOOGLE"));
+        assertThatThrownBy(() -> AuthProviderType.fromValue("GOOGLE"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Unknown AuthProviderType value: GOOGLE");
     }
 }

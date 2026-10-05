@@ -8,7 +8,6 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.VoteType;
-import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -33,7 +32,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
  * Catalog projection lifecycle: membership equals visibility, the recommended
@@ -178,9 +177,9 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
         plannerModerationService.deletePlanner(admin.getId(), planner.getId(), "violation");
         assertThat(hasCatalogRow(planner.getId())).isFalse();
 
-        assertThatThrownBy(() -> publishingService.publish(owner.getId(), planner.getId()))
+        assertRejected(() -> publishingService.publish(owner.getId(), planner.getId()))
                 .as("the aggregate root rejects republishing a taken-down planner")
-                .isInstanceOf(PlannerForbiddenException.class);
+                .withCode("PLANNER_FORBIDDEN");
         assertThat(hasCatalogRow(planner.getId()))
                 .as("no catalog row appears for the rejected publish").isFalse();
     }

@@ -328,7 +328,8 @@ class FloorRulesCorpusTest {
     @Test
     void stages_WhenReadFromTheTable_MapOntoEveryStage() {
         assertThat(TABLE.stages().stream().map(Stage::fromTableName)).containsExactlyInAnyOrder(Stage.values());
-        assertThatThrownBy(() -> Stage.fromTableName("import")).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> Stage.fromTableName("import")).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("unknown floor rule stage 'import'; expected one of [draft, publish, index]");
     }
 
     @Test

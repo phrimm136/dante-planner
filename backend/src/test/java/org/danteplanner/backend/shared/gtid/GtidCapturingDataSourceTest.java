@@ -97,7 +97,8 @@ class GtidCapturingDataSourceTest {
         GtidCapturingDataSource dataSource = new GtidCapturingDataSource(new StubDataSource(), capture);
 
         assertThatThrownBy(() -> dataSource.unwrap(Runnable.class))
-                .isInstanceOf(SQLException.class);
+                .isInstanceOf(SQLException.class)
+                .hasMessage("not a wrapper for interface java.lang.Runnable");
     }
 
     @Test

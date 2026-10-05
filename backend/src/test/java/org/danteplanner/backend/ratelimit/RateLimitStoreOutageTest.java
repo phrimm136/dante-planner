@@ -86,7 +86,8 @@ class RateLimitStoreOutageTest {
         int port = closedPort();
 
         assertThatThrownBy(() -> RedisConnectionConfig.buildRateLimitProxyManager(TRUSTED_PROXY_IP, port, BUCKET_TTL))
-                .isInstanceOf(RedisConnectionException.class);
+                .isInstanceOf(RedisConnectionException.class)
+                .hasMessageEndingWith(":" + port);
     }
 
     @Test

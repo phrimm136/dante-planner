@@ -39,7 +39,8 @@ class ModerationPolicyTest {
         assertThatThrownBy(() -> POLICY.requireCanRestrict(
                 user(1L, UserRole.ADMIN), normalUser(),
                 ModerationActionType.DELETE_COMMENT))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Not an account restriction: DELETE_COMMENT");
     }
 
     @Test

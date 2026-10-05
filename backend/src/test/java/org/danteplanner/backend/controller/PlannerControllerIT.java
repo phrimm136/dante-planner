@@ -1290,8 +1290,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void getPublishedPlanner_WhenEmptyUuid_Returns401() throws Exception {
-            // Act & Assert - Empty path segment routes to different endpoint
-            // Spring routing treats "/published/" as a different path that may require auth
+            // The trailing slash matches neither permitAll pattern, so anyRequest().authenticated() answers before routing
             mockMvc.perform(get("/api/planner/md/published/"))
                     .andExpect(status().isUnauthorized());
         }

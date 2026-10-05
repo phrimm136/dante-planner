@@ -184,7 +184,8 @@ class ContentTombstoneStoreTest {
 
         assertThatThrownBy(
                         () -> store.writeTombstoneOrThrow("published-planner", deleted))
-                .isInstanceOf(QueryTimeoutException.class);
+                .isInstanceOf(QueryTimeoutException.class)
+                .hasMessage("down");
     }
 
     @Test
@@ -193,7 +194,8 @@ class ContentTombstoneStoreTest {
 
         assertThatThrownBy(
                         () -> store.clearTombstoneOrThrow("published-planner", live))
-                .isInstanceOf(QueryTimeoutException.class);
+                .isInstanceOf(QueryTimeoutException.class)
+                .hasMessage("down");
     }
 
     @Test

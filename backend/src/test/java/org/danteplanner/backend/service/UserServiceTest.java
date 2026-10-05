@@ -27,6 +27,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
 
 /**
@@ -108,8 +109,9 @@ class UserServiceTest {
             when(userRepository.insert(any(User.class))).thenThrow(
                     IntegrityViolations.duplicateEntry("users.uk_users_username_suffix"));
 
-            assertThrows(UsernameGenerationException.class,
-                    () -> userService.findOrCreateUser("google", IDENTITY));
+            assertThatThrownBy(() -> userService.findOrCreateUser("google", IDENTITY))
+                    .isInstanceOf(UsernameGenerationException.class)
+                    .hasMessageStartingWith("Failed to generate unique username");
 
             // No recovery lookup: exhaustion is not a race, so there is no winner to find.
             verify(userRepository, times(1))

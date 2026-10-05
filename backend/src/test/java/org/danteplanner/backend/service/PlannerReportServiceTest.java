@@ -6,7 +6,6 @@ import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
 import org.danteplanner.backend.moderation.validation.ReporterStandingValidator;
 import org.danteplanner.backend.moderation.entity.PlannerReport;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.moderation.exception.ReportAlreadyExistsException;
 import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -24,6 +23,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerModerationTargetAdapter;
 import org.danteplanner.backend.user.service.UserService;
@@ -116,10 +116,8 @@ class PlannerReportServiceTest {
             when(plannerRepository.existsPublishedById(nonExistentId)).thenReturn(false);
 
             // Act & Assert
-            assertThrows(
-                    PlannerNotFoundException.class,
-                    () -> reportService.createReport(testUser.getId(), nonExistentId)
-            );
+            assertRejected(() -> reportService.createReport(testUser.getId(), nonExistentId))
+                    .withCode("PLANNER_NOT_FOUND");
 
             verify(reportRepository, never()).existsByUserIdAndPlannerId(any(), any());
             verify(reportRepository, never()).insert(any());
@@ -131,10 +129,7 @@ class PlannerReportServiceTest {
             when(plannerRepository.existsPublishedById(plannerId)).thenReturn(false);
 
             // Act & Assert
-            assertThrows(
-                    PlannerNotFoundException.class,
-                    () -> reportService.createReport(testUser.getId(), plannerId)
-            );
+            assertRejected(() -> reportService.createReport(testUser.getId(), plannerId)).withCode("PLANNER_NOT_FOUND");
         }
 
         @Test
@@ -144,10 +139,8 @@ class PlannerReportServiceTest {
             when(plannerRepository.existsPublishedById(nonExistentId)).thenReturn(false);
 
             // Act & Assert
-            assertThrows(
-                    PlannerNotFoundException.class,
-                    () -> reportService.createReport(testUser.getId(), nonExistentId)
-            );
+            assertRejected(() -> reportService.createReport(testUser.getId(), nonExistentId))
+                    .withCode("PLANNER_NOT_FOUND");
 
             // Verify order: planner lookup first, then never reaches report check
             verify(plannerRepository).existsPublishedById(nonExistentId);

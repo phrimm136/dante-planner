@@ -27,7 +27,7 @@ class PoolLedgerConfigTest {
         assertThat(primaryHittingLoad).isLessThanOrEqualTo(usableConnections);
     }
 
-    // mechanics §6
+    // docs/legacy/tasks/034-multi-region-k8s-architecture/mechanics.md §6
     @Test
     void poolLedger_WhenRead_MatchesBindingPoolSizes() {
         assertThat(PoolLedger.OREGON_PRIMARY_POOL).isEqualTo(15);
@@ -49,7 +49,7 @@ class PoolLedgerConfigTest {
         assertThat(primaryHittingLoad).isLessThanOrEqualTo(usableConnections);
     }
 
-    // mechanics §6
+    // docs/legacy/tasks/034-multi-region-k8s-architecture/mechanics.md §6
     @Test
     void poolLedger_WhenReadBulkhead_MatchesBindingPoolSize() {
         assertThat(PoolLedger.BULKHEAD_POOL).isEqualTo(3);

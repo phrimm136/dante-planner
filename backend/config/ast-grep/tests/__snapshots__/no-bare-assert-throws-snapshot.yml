@@ -1,0 +1,338 @@
+id: no-bare-assert-throws
+snapshots:
+  ? |
+    class A {
+      void m() {
+        Assertions.assertThrows(IllegalStateException.class, () -> f(), "message");
+      }
+    }
+  : labels:
+    - source: Assertions.assertThrows(IllegalStateException.class, () -> f(), "message");
+      style: primary
+      start: 27
+      end: 102
+    - source: assertThrows
+      style: secondary
+      start: 38
+      end: 50
+    - source: Assertions.assertThrows(IllegalStateException.class, () -> f(), "message")
+      style: secondary
+      start: 27
+      end: 101
+  ? |
+    class A {
+      void m() {
+        assertRejected(() -> f());
+      }
+    }
+  : labels:
+    - source: assertRejected(() -> f());
+      style: primary
+      start: 27
+      end: 53
+    - source: assertRejected
+      style: secondary
+      start: 27
+      end: 41
+    - source: assertRejected(() -> f())
+      style: secondary
+      start: 27
+      end: 52
+  ? |
+    class A {
+      void m() {
+        assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> f());
+      }
+    }
+  : labels:
+    - source: assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> f());
+      style: primary
+      start: 27
+      end: 104
+    - source: isThrownBy
+      style: secondary
+      start: 82
+      end: 92
+    - source: assertThatExceptionOfType
+      style: secondary
+      start: 27
+      end: 52
+    - source: assertThatExceptionOfType(IllegalStateException.class)
+      style: secondary
+      start: 27
+      end: 81
+    - source: assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> f())
+      style: secondary
+      start: 27
+      end: 103
+  ? |
+    class A {
+      void m() {
+        assertThatIllegalArgumentException().isThrownBy(() -> f());
+      }
+    }
+  : labels:
+    - source: assertThatIllegalArgumentException().isThrownBy(() -> f());
+      style: primary
+      start: 27
+      end: 86
+    - source: isThrownBy
+      style: secondary
+      start: 64
+      end: 74
+    - source: assertThatIllegalArgumentException
+      style: secondary
+      start: 27
+      end: 61
+    - source: assertThatIllegalArgumentException()
+      style: secondary
+      start: 27
+      end: 63
+    - source: assertThatIllegalArgumentException().isThrownBy(() -> f())
+      style: secondary
+      start: 27
+      end: 85
+  ? |
+    class A {
+      void m() {
+        assertThatThrownBy(() -> f()).as("why").isInstanceOf(IllegalStateException.class);
+      }
+    }
+  : labels:
+    - source: assertThatThrownBy(() -> f()).as("why").isInstanceOf(IllegalStateException.class);
+      style: primary
+      start: 27
+      end: 109
+    - source: isInstanceOf
+      style: secondary
+      start: 67
+      end: 79
+    - source: as
+      style: secondary
+      start: 57
+      end: 59
+    - source: assertThatThrownBy
+      style: secondary
+      start: 27
+      end: 45
+    - source: assertThatThrownBy(() -> f())
+      style: secondary
+      start: 27
+      end: 56
+    - source: assertThatThrownBy(() -> f()).as("why")
+      style: secondary
+      start: 27
+      end: 66
+    - source: assertThatThrownBy(() -> f()).as("why").isInstanceOf(IllegalStateException.class)
+      style: secondary
+      start: 27
+      end: 108
+  ? |
+    class A {
+      void m() {
+        assertThatThrownBy(() -> f()).isExactlyInstanceOf(IllegalStateException.class);
+      }
+    }
+  : labels:
+    - source: assertThatThrownBy(() -> f()).isExactlyInstanceOf(IllegalStateException.class);
+      style: primary
+      start: 27
+      end: 106
+    - source: isExactlyInstanceOf
+      style: secondary
+      start: 57
+      end: 76
+    - source: assertThatThrownBy
+      style: secondary
+      start: 27
+      end: 45
+    - source: assertThatThrownBy(() -> f())
+      style: secondary
+      start: 27
+      end: 56
+    - source: assertThatThrownBy(() -> f()).isExactlyInstanceOf(IllegalStateException.class)
+      style: secondary
+      start: 27
+      end: 105
+  ? |
+    class A {
+      void m() {
+        assertThatThrownBy(() -> f()).isInstanceOf(IllegalStateException.class).hasCauseInstanceOf(IOException.class);
+      }
+    }
+  : labels:
+    - source: assertThatThrownBy(() -> f()).isInstanceOf(IllegalStateException.class).hasCauseInstanceOf(IOException.class);
+      style: primary
+      start: 27
+      end: 137
+    - source: hasCauseInstanceOf
+      style: secondary
+      start: 99
+      end: 117
+    - source: isInstanceOf
+      style: secondary
+      start: 57
+      end: 69
+    - source: assertThatThrownBy
+      style: secondary
+      start: 27
+      end: 45
+    - source: assertThatThrownBy(() -> f())
+      style: secondary
+      start: 27
+      end: 56
+    - source: assertThatThrownBy(() -> f()).isInstanceOf(IllegalStateException.class)
+      style: secondary
+      start: 27
+      end: 98
+    - source: assertThatThrownBy(() -> f()).isInstanceOf(IllegalStateException.class).hasCauseInstanceOf(IOException.class)
+      style: secondary
+      start: 27
+      end: 136
+  ? |
+    class A {
+      void m() {
+        assertThatThrownBy(() -> f()).isInstanceOf(IllegalStateException.class);
+      }
+    }
+  : labels:
+    - source: assertThatThrownBy(() -> f()).isInstanceOf(IllegalStateException.class);
+      style: primary
+      start: 27
+      end: 99
+    - source: isInstanceOf
+      style: secondary
+      start: 57
+      end: 69
+    - source: assertThatThrownBy
+      style: secondary
+      start: 27
+      end: 45
+    - source: assertThatThrownBy(() -> f())
+      style: secondary
+      start: 27
+      end: 56
+    - source: assertThatThrownBy(() -> f()).isInstanceOf(IllegalStateException.class)
+      style: secondary
+      start: 27
+      end: 98
+  ? |
+    class A {
+      void m() {
+        assertThatThrownBy(() -> f()).isInstanceOfAny(IllegalStateException.class, IllegalArgumentException.class);
+      }
+    }
+  : labels:
+    - source: assertThatThrownBy(() -> f()).isInstanceOfAny(IllegalStateException.class, IllegalArgumentException.class);
+      style: primary
+      start: 27
+      end: 134
+    - source: isInstanceOfAny
+      style: secondary
+      start: 57
+      end: 72
+    - source: assertThatThrownBy
+      style: secondary
+      start: 27
+      end: 45
+    - source: assertThatThrownBy(() -> f())
+      style: secondary
+      start: 27
+      end: 56
+    - source: assertThatThrownBy(() -> f()).isInstanceOfAny(IllegalStateException.class, IllegalArgumentException.class)
+      style: secondary
+      start: 27
+      end: 133
+  ? |
+    class A {
+      void m() {
+        assertThatThrownBy(() -> f());
+      }
+    }
+  : labels:
+    - source: assertThatThrownBy(() -> f());
+      style: primary
+      start: 27
+      end: 57
+    - source: assertThatThrownBy
+      style: secondary
+      start: 27
+      end: 45
+    - source: assertThatThrownBy(() -> f())
+      style: secondary
+      start: 27
+      end: 56
+  ? |
+    class A {
+      void m() {
+        assertThrows(
+            IllegalStateException.class,
+            () -> {
+              f();
+              g();
+            });
+      }
+    }
+  : labels:
+    - source: |-
+        assertThrows(
+                IllegalStateException.class,
+                () -> {
+                  f();
+                  g();
+                });
+      style: primary
+      start: 27
+      end: 135
+    - source: assertThrows
+      style: secondary
+      start: 27
+      end: 39
+    - source: |-
+        assertThrows(
+                IllegalStateException.class,
+                () -> {
+                  f();
+                  g();
+                })
+      style: secondary
+      start: 27
+      end: 134
+  ? |
+    class A {
+      void m() {
+        assertThrows(IllegalStateException.class, () -> f());
+      }
+    }
+  : labels:
+    - source: assertThrows(IllegalStateException.class, () -> f());
+      style: primary
+      start: 27
+      end: 80
+    - source: assertThrows
+      style: secondary
+      start: 27
+      end: 39
+    - source: assertThrows(IllegalStateException.class, () -> f())
+      style: secondary
+      start: 27
+      end: 79
+  ? |
+    class A {
+      void m() {
+        assertThrowsExactly(IllegalStateException.class, () -> f());
+      }
+    }
+  : labels:
+    - source: assertThrowsExactly(IllegalStateException.class, () -> f());
+      style: primary
+      start: 27
+      end: 87
+    - source: assertThrowsExactly
+      style: secondary
+      start: 27
+      end: 46
+    - source: assertThrowsExactly(IllegalStateException.class, () -> f())
+      style: secondary
+      start: 27
+      end: 86

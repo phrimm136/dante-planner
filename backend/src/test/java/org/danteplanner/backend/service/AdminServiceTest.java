@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
@@ -232,10 +233,8 @@ class AdminServiceTest {
                     .thenThrow(new UserNotFoundException(nonExistentId));
 
             // Act & Assert
-            assertThrows(
-                    UserNotFoundException.class,
-                    () -> adminService.changeRole(nonExistentId, normalUser.getId(), UserRole.MODERATOR)
-            );
+            assertRejected(() -> adminService.changeRole(nonExistentId, normalUser.getId(), UserRole.MODERATOR))
+                    .withCode("USER_NOT_FOUND");
         }
 
         @Test
@@ -248,10 +247,8 @@ class AdminServiceTest {
                     .thenThrow(new UserNotFoundException(nonExistentId));
 
             // Act & Assert
-            assertThrows(
-                    UserNotFoundException.class,
-                    () -> adminService.changeRole(adminUser.getId(), nonExistentId, UserRole.MODERATOR)
-            );
+            assertRejected(() -> adminService.changeRole(adminUser.getId(), nonExistentId, UserRole.MODERATOR))
+                    .withCode("USER_NOT_FOUND");
         }
 
         @Test
@@ -293,10 +290,7 @@ class AdminServiceTest {
                     .thenReturn(Optional.empty());
 
             // Act & Assert
-            assertThrows(
-                    UserNotFoundException.class,
-                    () -> adminService.getUserRole(nonExistentId)
-            );
+            assertRejected(() -> adminService.getUserRole(nonExistentId)).withCode("USER_NOT_FOUND");
         }
     }
 }

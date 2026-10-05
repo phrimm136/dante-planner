@@ -47,7 +47,8 @@ class TokenBlacklistServiceTest {
     @Test
     void invalidateUserTokens_WhenUserIdNull_ThrowsAndStampsNothing() {
         assertThatThrownBy(() -> blacklistService.invalidateUserTokens(null))
-                .isInstanceOf(NullPointerException.class);
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("userId");
 
         verifyNoInteractions(writeTemplate);
     }
@@ -55,7 +56,8 @@ class TokenBlacklistServiceTest {
     @Test
     void clearUserInvalidation_WhenUserIdNull_ThrowsAndDeletesNothing() {
         assertThatThrownBy(() -> blacklistService.clearUserInvalidation(null))
-                .isInstanceOf(NullPointerException.class);
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("userId");
 
         verifyNoInteractions(writeTemplate);
     }
@@ -119,10 +121,13 @@ class TokenBlacklistServiceTest {
         Date expiry = new Date(System.currentTimeMillis() + 60_000);
 
         assertThatThrownBy(() -> new LogoutRevocation.TokenRevocation(null, expiry))
-                .isInstanceOf(NullPointerException.class);
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("token");
         assertThatThrownBy(() -> new LogoutRevocation.TokenRevocation("access.jwt", null))
-                .isInstanceOf(NullPointerException.class);
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("expiry");
         assertThatThrownBy(() -> new LogoutRevocation.FamilyRevocation(null))
-                .isInstanceOf(NullPointerException.class);
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("familyId");
     }
 }

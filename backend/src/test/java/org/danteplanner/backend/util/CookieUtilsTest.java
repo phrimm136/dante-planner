@@ -16,6 +16,7 @@ import org.mockito.MockitoAnnotations;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for CookieUtils.
@@ -257,19 +258,17 @@ class CookieUtilsTest {
         @Test
         void setCookie_WhenEmptyName_Throws() {
             // Act & Assert - Cookie API does not allow empty names
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> cookieUtils.setCookie(response, "", "value", 3600)
-            );
+            assertThatThrownBy(() -> cookieUtils.setCookie(response, "", "value", 3600))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("Cookie name may not be null or zero length");
         }
 
         @Test
         void setCookie_WhenNullName_Throws() {
             // Act & Assert - Cookie API does not allow null names
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> cookieUtils.setCookie(response, null, "value", 3600)
-            );
+            assertThatThrownBy(() -> cookieUtils.setCookie(response, null, "value", 3600))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("Cookie name may not be null or zero length");
         }
 
         @Test

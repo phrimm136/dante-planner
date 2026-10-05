@@ -24,7 +24,6 @@ import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.validation.floor.Stage;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
-import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -68,7 +67,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import org.danteplanner.backend.user.api.UserBannedException;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
  * Unit tests for PlannerPublishingService (publish toggle, owner notification settings).
@@ -403,10 +402,8 @@ class PlannerPublishingServiceTest {
             when(plannerRepository.findAggregate(nonExistentId)).thenReturn(Optional.empty());
 
             // Act & Assert
-            assertThrows(
-                    PlannerNotFoundException.class,
-                    () -> publishingService.publish(testUser.getId(), nonExistentId)
-            );
+            assertRejected(() -> publishingService.publish(testUser.getId(), nonExistentId))
+                    .withCode("PLANNER_NOT_FOUND");
         }
 
         @Test
@@ -419,10 +416,8 @@ class PlannerPublishingServiceTest {
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.empty());
 
             // Act & Assert
-            assertThrows(
-                    PlannerNotFoundException.class,
-                    () -> publishingService.publish(testUser.getId(), planner.getId())
-            );
+            assertRejected(() -> publishingService.publish(testUser.getId(), planner.getId()))
+                    .withCode("PLANNER_NOT_FOUND");
         }
 
         @Test
@@ -472,10 +467,7 @@ class PlannerPublishingServiceTest {
                     .thenReturn(testUser);
 
             // Act & Assert
-            assertThrows(
-                    UserBannedException.class,
-                    () -> publishingService.publish(testUser.getId(), plannerId)
-            );
+            assertRejected(() -> publishingService.publish(testUser.getId(), plannerId)).withCode("USER_BANNED");
             verify(plannerCatalogService, never()).onBecameVisible(any());
         }
 
@@ -529,10 +521,8 @@ class PlannerPublishingServiceTest {
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
 
             // Act & Assert
-            assertThrows(
-                    PlannerForbiddenException.class,
-                    () -> publishingService.toggleOwnerNotifications(testUser.getId(), planner.getId(), true)
-            );
+            assertRejected(() -> publishingService.toggleOwnerNotifications(testUser.getId(), planner.getId(), true))
+                    .withCode("PLANNER_FORBIDDEN");
             assertTrue(planner.isOwnerNotificationsEnabled());
         }
     }
@@ -617,9 +607,8 @@ class PlannerPublishingServiceTest {
                     .when(contentValidator)
                     .parse(any(), any(), any(), eq(Stage.PUBLISH));
 
-            assertThrows(
-                    PlannerValidationException.class,
-                    () -> publishingService.publish(testUser.getId(), planner.getId()));
+            assertRejected(() -> publishingService.publish(testUser.getId(), planner.getId()))
+                    .withCode("EMPTY_CONTENT");
 
             assertFalse(planner.isPublished());
             assertNull(planner.getFirstPublishedAt());

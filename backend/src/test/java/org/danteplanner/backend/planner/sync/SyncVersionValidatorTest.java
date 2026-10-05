@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
  * The optimistic-locking rule a client write is held to. {@code force} skips the check and a
@@ -108,8 +109,9 @@ class SyncVersionValidatorTest {
     // no-version-still-conflicts
     @Test
     void arbitrate_WhenNoVersionIsNamed_ThrowsWithoutArbitrating() {
-        assertThatThrownBy(() -> validator.arbitrate(false, null, 5L, identicalChange()))
-                .isInstanceOf(PlannerConflictException.class);
+        assertRejected(() -> validator.arbitrate(false, null, 5L, identicalChange()))
+                .withCode("SYNC_CONFLICT")
+                .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Sync version conflict: expected null but found 5"));
     }
 
     // unparseable-content-falls-through-to-conflict
@@ -123,8 +125,9 @@ class SyncVersionValidatorTest {
                 .gameContentVersion(6)
                 .build(), "{\"equipment\":");
 
-        assertThatThrownBy(() -> validator.arbitrate(false, 4L, 5L,
+        assertRejected(() -> validator.arbitrate(false, 4L, 5L,
                 PlannerChange.between(unparseable, identicalWrite(), MAPPER)))
-                .isInstanceOf(PlannerConflictException.class);
+                .withCode("SYNC_CONFLICT")
+                .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Sync version conflict: expected 4 but found 5"));
     }
 }

@@ -1,0 +1,38 @@
+id: no-bare-assert-throws
+language: Java
+severity: error
+message: 'A rejection test asserts which rejection: use Rejections.assertRejected(...).withCode/withViolation, or follow the type check with a message or property check.'
+files:
+  - src/test/java/org/danteplanner/backend/**
+utils:
+  thrown:
+    kind: method_invocation
+    any:
+      - has:
+          field: name
+          regex: ^(assertThrows|assertThrowsExactly|assertThatThrownBy|assertRejected)$
+      - all:
+          - has:
+              field: name
+              regex: ^isThrownBy$
+          - has:
+              field: object
+              kind: method_invocation
+              has:
+                field: name
+                regex: ^assertThat(ExceptionOfType|IllegalArgumentException|IllegalStateException|NullPointerException|IOException)$
+  type-only:
+    kind: method_invocation
+    any:
+      - matches: thrown
+      - all:
+          - has:
+              field: name
+              regex: ^(as|describedAs|isNotNull|isInstanceOf|isExactlyInstanceOf|isInstanceOfAny|hasCauseInstanceOf|hasCauseExactlyInstanceOf|hasRootCauseInstanceOf|hasRootCauseExactlyInstanceOf)$
+          - has:
+              field: object
+              matches: type-only
+rule:
+  kind: expression_statement
+  has:
+    matches: type-only

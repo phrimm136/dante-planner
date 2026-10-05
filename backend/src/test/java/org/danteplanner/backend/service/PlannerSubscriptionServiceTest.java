@@ -4,7 +4,6 @@ import org.danteplanner.backend.user.service.UsersApiAdapter;
 
 import org.danteplanner.backend.planner.entity.PlannerSubscription;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
@@ -25,6 +24,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
  * Unit tests for PlannerSubscriptionService.
@@ -128,10 +128,8 @@ class PlannerSubscriptionServiceTest {
             when(plannerRepository.existsPublishedById(nonExistentId)).thenReturn(false);
 
             // Act & Assert
-            assertThrows(
-                    PlannerNotFoundException.class,
-                    () -> subscriptionService.toggleSubscription(testUser.getId(), nonExistentId)
-            );
+            assertRejected(() -> subscriptionService.toggleSubscription(testUser.getId(), nonExistentId))
+                    .withCode("PLANNER_NOT_FOUND");
 
             verify(subscriptionRepository, never()).findByUserIdAndPlannerId(any(), any());
             verify(subscriptionRepository, never()).insert(any());
@@ -143,10 +141,8 @@ class PlannerSubscriptionServiceTest {
             when(plannerRepository.existsPublishedById(plannerId)).thenReturn(false);
 
             // Act & Assert
-            assertThrows(
-                    PlannerNotFoundException.class,
-                    () -> subscriptionService.toggleSubscription(testUser.getId(), plannerId)
-            );
+            assertRejected(() -> subscriptionService.toggleSubscription(testUser.getId(), plannerId))
+                    .withCode("PLANNER_NOT_FOUND");
         }
     }
 

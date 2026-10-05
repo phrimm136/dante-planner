@@ -1,5 +1,4 @@
 package org.danteplanner.backend.service;
-import org.danteplanner.backend.shared.exception.EntityNotFoundException;
 
 import org.danteplanner.backend.notification.service.NotificationRetentionService;
 import org.danteplanner.backend.notification.service.NotificationDispatchService;
@@ -33,6 +32,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
  * Unit tests for the notification service layer.
@@ -341,8 +342,9 @@ class NotificationServiceLayerTest {
                     .thenReturn(Optional.empty());
 
             // Act & Assert
-            assertThrows(EntityNotFoundException.class,
-                    () -> inboxService.markAsRead(publicId, testUserId));
+            assertRejected(() -> inboxService.markAsRead(publicId, testUserId))
+                    .withCode("NOT_FOUND")
+                    .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Notification not found with id: " + publicId));
         }
 
         @Test
@@ -356,8 +358,9 @@ class NotificationServiceLayerTest {
                     .thenReturn(Optional.of(notification));
 
             // Act & Assert
-            assertThrows(EntityNotFoundException.class,
-                    () -> inboxService.markAsRead(publicId, 999L));
+            assertRejected(() -> inboxService.markAsRead(publicId, 999L))
+                    .withCode("NOT_FOUND")
+                    .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Notification not found with id: " + publicId));
         }
     }
 
@@ -421,8 +424,9 @@ class NotificationServiceLayerTest {
                     .thenReturn(Optional.empty());
 
             // Act & Assert
-            assertThrows(EntityNotFoundException.class,
-                    () -> inboxService.deleteNotification(publicId, testUserId));
+            assertRejected(() -> inboxService.deleteNotification(publicId, testUserId))
+                    .withCode("NOT_FOUND")
+                    .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Notification not found with id: " + publicId));
         }
 
         @Test
@@ -436,8 +440,9 @@ class NotificationServiceLayerTest {
                     .thenReturn(Optional.of(notification));
 
             // Act & Assert
-            assertThrows(EntityNotFoundException.class,
-                    () -> inboxService.deleteNotification(publicId, 999L));
+            assertRejected(() -> inboxService.deleteNotification(publicId, 999L))
+                    .withCode("NOT_FOUND")
+                    .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Notification not found with id: " + publicId));
         }
     }
 

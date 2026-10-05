@@ -23,6 +23,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for UserAccountLifecycleService.
@@ -115,8 +116,9 @@ class UserAccountLifecycleServiceTest {
             doThrow(new RedisConnectionFailureException("token store unreachable"))
                     .when(sessionEndHandler).endAllSessions(testUser.getId());
 
-            assertThrows(RedisConnectionFailureException.class,
-                    () -> lifecycleService.deleteAccount(testUser.getId()));
+            assertThatThrownBy(() -> lifecycleService.deleteAccount(testUser.getId()))
+                    .isInstanceOf(RedisConnectionFailureException.class)
+                    .hasMessage("token store unreachable");
         }
 
         @Test

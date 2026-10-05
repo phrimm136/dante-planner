@@ -253,7 +253,8 @@ class PlannerCatalogSyncServiceTest {
         doThrow(new IllegalStateException("store down"))
                 .when(tombstoneStore).writeTombstoneOrThrow("published-planner", plannerId);
 
-        assertThatThrownBy(() -> syncService.syncPlanner(plannerId, List.of(7L))).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> syncService.syncPlanner(plannerId, List.of(7L))).isInstanceOf(IllegalStateException.class)
+                .hasMessage("store down");
 
         verify(events, never()).markDispatched(any(), any());
     }
@@ -296,7 +297,8 @@ class PlannerCatalogSyncServiceTest {
         stubScope(PlannerType.MIRROR_DUNGEON, "20F");
         when(gameDataRegistry.floorRules()).thenReturn(TABLE);
 
-        assertThatThrownBy(() -> syncService.syncPlanner(plannerId, List.of(7L))).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> syncService.syncPlanner(plannerId, List.of(7L))).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Unknown MDCategory value: 20F");
 
         verify(entityFilterRepository, never()).rebuildPlannerFilters(any(), anyInt());
         verify(events, never()).markDispatched(any(), any());

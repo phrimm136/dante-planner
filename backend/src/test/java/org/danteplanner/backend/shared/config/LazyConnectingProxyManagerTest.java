@@ -68,7 +68,8 @@ class LazyConnectingProxyManagerTest {
                     return connected;
                 });
 
-        assertThatThrownBy(manager::builder).isInstanceOf(RedisConnectionException.class);
+        assertThatThrownBy(manager::builder).isInstanceOf(RedisConnectionException.class)
+                .hasMessage("connect refused");
 
         assertThat(manager.builder()).isSameAs(bucketBuilder);
         assertThat(connectorCalls).hasValue(2);

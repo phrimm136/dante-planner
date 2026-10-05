@@ -34,6 +34,7 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -407,8 +408,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("MISSING_REQUIRED_FIELD", "equipment[1]");
         }
 
         @Test
@@ -439,7 +439,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("MISSING_REQUIRED_FIELD", "selectedKeywords");
         }
 
         @Test
@@ -453,7 +453,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("MISSING_REQUIRED_FIELD", "equipment");
         }
 
         @Test
@@ -467,7 +467,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("MISSING_REQUIRED_FIELD", "deploymentOrder");
         }
 
         @Test
@@ -481,7 +481,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("MISSING_REQUIRED_FIELD", "floorSelections");
         }
 
         @Test
@@ -495,7 +495,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("MISSING_REQUIRED_FIELD", "sectionNotes");
         }
     }
 
@@ -516,7 +516,7 @@ class PlannerContentValidatorTest {
         void validate_WhenFieldHasWrongType_ThrowsException(String field, String wrongTypedValue) {
             String content = contentWithWrongType(field, wrongTypedValue);
 
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("INVALID_FIELD_TYPE", field);
         }
 
         /**
@@ -577,7 +577,9 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("UNKNOWN_FIELD", "unknownField1")
+                    .withViolation("UNKNOWN_FIELD", "unknownField2");
         }
     }
 
@@ -681,27 +683,27 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenEmptyContent_ThrowsException() {
-            assertThrows(PlannerValidationException.class, () -> validate("", "5F"));
+            assertRejected(() -> validate("", "5F")).withViolation("EMPTY_CONTENT");
         }
 
         @Test
         void validate_WhenBlankContent_ThrowsException() {
-            assertThrows(PlannerValidationException.class, () -> validate("   ", "5F"));
+            assertRejected(() -> validate("   ", "5F")).withViolation("EMPTY_CONTENT");
         }
 
         @Test
         void validate_WhenNonJsonContent_ThrowsException() {
-            assertThrows(PlannerValidationException.class, () -> validate("not json", "5F"));
+            assertRejected(() -> validate("not json", "5F")).withViolation("MALFORMED_JSON");
         }
 
         @Test
         void validate_WhenJsonArrayContent_ThrowsException() {
-            assertThrows(PlannerValidationException.class, () -> validate("[]", "5F"));
+            assertRejected(() -> validate("[]", "5F")).withViolation("MALFORMED_JSON");
         }
 
         @Test
         void validate_WhenJsonPrimitiveContent_ThrowsException() {
-            assertThrows(PlannerValidationException.class, () -> validate("\"string\"", "5F"));
+            assertRejected(() -> validate("\"string\"", "5F")).withViolation("MALFORMED_JSON");
         }
     }
 
@@ -729,7 +731,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("UNKNOWN_FIELD", "equipment[0]");
         }
 
         @Test
@@ -747,7 +749,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("UNKNOWN_FIELD", "equipment[13]");
         }
 
         @Test
@@ -764,7 +766,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("UNKNOWN_FIELD", "equipment[yi_sang]");
         }
 
         @Test
@@ -781,32 +783,26 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenNegativeSinnerIndexInDeploymentOrder_ThrowsException() {
-            String content = """
-                {
-                    "selectedKeywords": [],
-                    "equipment": {},
-                    "deploymentOrder": [-1, 0, 1],
-                    "floorSelections": [],
-                    "sectionNotes": {}
-                }
-                """;
+            setupMocksForValidIds();
+            String content = replaceOnce(createValidContent(),
+                    "\"deploymentOrder\": [0, 1, 2, 3, 4, 5]",
+                    "\"deploymentOrder\": [-1, 0, 1]"
+            );
 
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("OUT_OF_RANGE_DEPLOYMENT", "deploymentOrder[0]");
         }
 
         @Test
         void validate_WhenSinnerIndexAbove11InDeploymentOrder_ThrowsException() {
-            String content = """
-                {
-                    "selectedKeywords": [],
-                    "equipment": {},
-                    "deploymentOrder": [0, 12],
-                    "floorSelections": [],
-                    "sectionNotes": {}
-                }
-                """;
+            setupMocksForValidIds();
+            String content = replaceOnce(createValidContent(),
+                    "\"deploymentOrder\": [0, 1, 2, 3, 4, 5]",
+                    "\"deploymentOrder\": [0, 12]"
+            );
 
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("OUT_OF_RANGE_DEPLOYMENT", "deploymentOrder[1]");
         }
 
         @Test
@@ -821,7 +817,7 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("INVALID_FIELD_TYPE", "deploymentOrder[1]");
         }
     }
 
@@ -865,7 +861,7 @@ class PlannerContentValidatorTest {
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 200],"
             );
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("EXCESS_STARTBUFF", "selectedBuffIds");
         }
 
         @Test
@@ -876,7 +872,7 @@ class PlannerContentValidatorTest {
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [100, 200],"
             );
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("DUPLICATE_STARTBUFF", "selectedBuffIds[1]");
         }
 
         @Test
@@ -887,7 +883,7 @@ class PlannerContentValidatorTest {
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [101, 301],"
             );
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("DUPLICATE_STARTBUFF", "selectedBuffIds[1]");
         }
 
         @Test
@@ -897,7 +893,7 @@ class PlannerContentValidatorTest {
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [100, \"invalid\"],"
             );
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("INVALID_FIELD_TYPE", "selectedBuffIds[1]");
         }
 
         @Test
@@ -921,7 +917,7 @@ class PlannerContentValidatorTest {
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [100, 999],"
             );
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("UNKNOWN_STARTBUFF", "selectedBuffIds[1]");
         }
 
         @Test
@@ -933,7 +929,7 @@ class PlannerContentValidatorTest {
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [115],"
             );
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("OUT_OF_RANGE_STARTBUFF", "selectedBuffIds[0]");
         }
     }
 
@@ -974,7 +970,7 @@ class PlannerContentValidatorTest {
             setupMocksForValidIdsWithoutGifts();
             String content = replaceOnce(createValidContent(), "\"selectedGiftKeyword\": \"Combustion\",", "\"selectedGiftKeyword\": null,");
             // Still has selectedGiftIds: ["9001"]
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("MISSING_STARTGIFT_KEYWORD", "selectedGiftIds");
         }
 
         @Test
@@ -987,7 +983,8 @@ class PlannerContentValidatorTest {
                     "\"selectedGiftKeyword\": \"Combustion\",",
                     "\"selectedGiftKeyword\": \"InvalidKeyword\","
             );
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("UNKNOWN_STARTGIFT_KEYWORD", "selectedGiftKeyword");
         }
 
         @Test
@@ -1002,7 +999,7 @@ class PlannerContentValidatorTest {
                     "\"selectedGiftIds\": [\"9001\"],",
                     "\"selectedGiftIds\": [\"9001\", \"9999\"],"
             );
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("MISMATCHED_STARTGIFT", "selectedGiftIds[1]");
         }
 
         @Test
@@ -1013,7 +1010,7 @@ class PlannerContentValidatorTest {
                     "\"selectedGiftIds\": [\"9001\"],",
                     "\"selectedGiftIds\": [\"9001\", \"9001\"],"
             );
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("DUPLICATE_STARTGIFT", "selectedGiftIds[1]");
         }
 
         @Test
@@ -1022,7 +1019,7 @@ class PlannerContentValidatorTest {
                     "\"selectedGiftIds\": [\"9001\"],",
                     "\"selectedGiftIds\": [9001],"
             );
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("INVALID_FIELD_TYPE", "selectedGiftIds[0]");
         }
     }
 
@@ -1044,7 +1041,7 @@ class PlannerContentValidatorTest {
                     "\"comprehensiveGiftIds\": [\"19050\"]",
                     "\"comprehensiveGiftIds\": [\"19050\", \"19050\"]"
             );
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("DUPLICATE_EGOGIFT", "comprehensiveGiftIds[1]");
         }
 
         @Test
@@ -1053,7 +1050,8 @@ class PlannerContentValidatorTest {
                     "\"comprehensiveGiftIds\": [\"19050\"]",
                     "\"comprehensiveGiftIds\": [19050]"
             );
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("INVALID_FIELD_TYPE", "comprehensiveGiftIds[0]");
         }
 
         @Test
@@ -1066,7 +1064,7 @@ class PlannerContentValidatorTest {
                     "\"comprehensiveGiftIds\": [\"19050\"]",
                     "\"comprehensiveGiftIds\": [\"9999\"]"
             );
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("UNKNOWN_EGOGIFT", "comprehensiveGiftIds[0]");
         }
 
         @Test
@@ -1077,7 +1075,7 @@ class PlannerContentValidatorTest {
                     "\"observationGiftIds\": [\"9100\"]",
                     "\"observationGiftIds\": [\"9100\", \"9100\"]"
             );
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("DUPLICATE_EGOGIFT", "observationGiftIds[1]");
         }
 
         @Test
@@ -1086,7 +1084,7 @@ class PlannerContentValidatorTest {
                     "\"observationGiftIds\": [\"9100\"]",
                     "\"observationGiftIds\": [9100]"
             );
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F")).withViolation("INVALID_FIELD_TYPE", "observationGiftIds[0]");
         }
     }
 
@@ -1108,7 +1106,8 @@ class PlannerContentValidatorTest {
                     "\"giftIds\": [\"9002\"]",
                     "\"giftIds\": [\"9002\", \"9002\"]"
             );
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("DUPLICATE_EGOGIFT", "floorSelections[0].giftIds");
         }
 
         @Test
@@ -1117,7 +1116,8 @@ class PlannerContentValidatorTest {
                     "\"giftIds\": [\"9002\"]",
                     "\"giftIds\": [9002]"
             );
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("INVALID_FIELD_TYPE", "floorSelections[0].giftIds[0]");
         }
 
         @Test
@@ -1130,7 +1130,8 @@ class PlannerContentValidatorTest {
                     "\"giftIds\": [\"9002\"]",
                     "\"giftIds\": [\"9999\"]"
             );
-            assertThrows(PlannerValidationException.class, () -> validate(content, "5F"));
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("UNKNOWN_EGOGIFT_FLOOR", "floorSelections[0].giftIds[0]");
         }
 
         @Test
@@ -1292,8 +1293,7 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenMalformedJson_ThrowsException() {
-            assertThrows(PlannerValidationException.class,
-                    () -> validate("{\"title\": \"unclosed string}", "5F"));
+            assertRejected(() -> validate("{\"title\": \"unclosed string}", "5F")).withViolation("MALFORMED_JSON");
         }
 
         @Test
@@ -1340,8 +1340,8 @@ class PlannerContentValidatorTest {
             setupMocksForValidIds();
             lenient().when(gameDataRegistry.getEgoMaxThreadspin(anyString())).thenReturn(null);
 
-            assertThrows(PlannerValidationException.class,
-                    () -> validate(createValidContent(), "5F"));
+            assertRejected(() -> validate(createValidContent(), "5F"))
+                    .withViolation("MISSING_EGO_THREADSPIN_CEILING", "equipment[1].egos.ZAYIN.threadspin");
         }
     }
 

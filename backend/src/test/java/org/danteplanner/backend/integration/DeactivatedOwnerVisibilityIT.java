@@ -5,7 +5,6 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerSubscription;
-import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
@@ -52,11 +51,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
  * A deactivated owner's published planners are invisible to public reads and to the drift
@@ -172,8 +171,8 @@ class DeactivatedOwnerVisibilityIT extends SharedMySqlContainerSupport {
     void checkPublished_WhenOwnerDeactivated_ThrowsPlannerNotFound() {
         lifecycleService.deleteAccount(owner.getId());
 
-        assertThatThrownBy(() -> accessGuard.checkPublished(planner.getId()))
-                .isInstanceOf(PlannerNotFoundException.class);
+        assertRejected(() -> accessGuard.checkPublished(planner.getId()))
+                .withCode("PLANNER_NOT_FOUND");
     }
 
     @Test
@@ -347,8 +346,9 @@ class DeactivatedOwnerVisibilityIT extends SharedMySqlContainerSupport {
         Planner draft = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
         lifecycleService.deleteAccount(owner.getId());
 
-        assertThatThrownBy(() -> publishingService.publish(owner.getId(), draft.getId()))
-                .isInstanceOf(AccountDeletedException.class);
+        assertRejected(() -> publishingService.publish(owner.getId(), draft.getId()))
+                .withCode("UNAUTHORIZED")
+                .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Account with ID " + owner.getId() + " has been deleted"));
         assertThat(published(draft.getId())).isFalse();
     }
 }

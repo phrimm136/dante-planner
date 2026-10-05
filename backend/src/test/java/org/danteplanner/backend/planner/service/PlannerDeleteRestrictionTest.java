@@ -20,8 +20,6 @@ import org.danteplanner.backend.planner.sync.SyncVersionValidator;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.api.UserBannedException;
-import org.danteplanner.backend.user.api.UserTimedOutException;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,10 +31,10 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 class PlannerDeleteRestrictionTest {
 
@@ -106,14 +104,14 @@ class PlannerDeleteRestrictionTest {
     void accessGuard_WhenOwnerBanned_RefusesTheRestrictionCheck() {
         ban();
 
-        assertThrows(UserBannedException.class, () -> accessGuard.checkNotRestricted(owner.getId()));
+        assertRejected(() -> accessGuard.checkNotRestricted(owner.getId())).withCode("USER_BANNED");
     }
 
     @Test
     void accessGuard_WhenOwnerTimedOut_RefusesTheRestrictionCheck() {
         timeOut();
 
-        assertThrows(UserTimedOutException.class, () -> accessGuard.checkNotRestricted(owner.getId()));
+        assertRejected(() -> accessGuard.checkNotRestricted(owner.getId())).withCode("USER_TIMED_OUT");
     }
 
     @Test

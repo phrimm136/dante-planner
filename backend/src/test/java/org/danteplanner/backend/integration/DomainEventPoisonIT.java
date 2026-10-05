@@ -101,13 +101,15 @@ class DomainEventPoisonIT extends SharedMySqlContainerSupport {
         long eventId = undispatchableEvent(0);
 
         assertThatThrownBy(() -> dispatcher.dispatchDomainEvent(eventId))
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("domain event " + eventId + " carries no commentId");
         assertThat(attemptsOf(eventId))
                 .as("the increment commits separately, or the failure erases the only record of it")
                 .isEqualTo(1);
 
         assertThatThrownBy(() -> dispatcher.dispatchDomainEvent(eventId))
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("domain event " + eventId + " carries no commentId");
         assertThat(attemptsOf(eventId))
                 .as("a counter that does not climb is a row that is retried forever")
                 .isEqualTo(2);
@@ -122,7 +124,8 @@ class DomainEventPoisonIT extends SharedMySqlContainerSupport {
                 .contains(eventId);
 
         assertThatThrownBy(() -> dispatcher.dispatchDomainEvent(eventId))
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("domain event " + eventId + " carries no commentId");
 
         assertThat(attemptsOf(eventId)).isEqualTo(OutboxConstants.DISPATCH_ATTEMPT_CAP);
         assertThat(pendingIds())

@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class GameDataLoaderTest {
 
@@ -40,7 +41,9 @@ class GameDataLoaderTest {
         Path file = dataDir.resolve("identitySpecList.json");
         Files.writeString(file, "{ \"10101\": ");
 
-        assertThrows(GameDataLoadException.class, () -> loader.loadKeysFromFile(file));
+        assertThatThrownBy(() -> loader.loadKeysFromFile(file))
+                .isInstanceOf(GameDataLoadException.class)
+                .hasMessage("Unreadable game data file: " + file);
     }
 
     @Test
@@ -48,7 +51,9 @@ class GameDataLoaderTest {
         Path file = dataDir.resolve("startEgoGiftPools.json");
         Files.writeString(file, "not json at all");
 
-        assertThrows(GameDataLoadException.class, () -> loader.loadStartGiftPools(file));
+        assertThatThrownBy(() -> loader.loadStartGiftPools(file))
+                .isInstanceOf(GameDataLoadException.class)
+                .hasMessage("Unreadable game data file: " + file);
     }
 
     @Test
@@ -158,6 +163,8 @@ class GameDataLoaderTest {
         Path file = dataDir.resolve("idMigrations.json");
         Files.writeString(file, "{ \"egoGift\": ");
 
-        assertThrows(GameDataLoadException.class, () -> loader.loadIdMigrations(file));
+        assertThatThrownBy(() -> loader.loadIdMigrations(file))
+                .isInstanceOf(GameDataLoadException.class)
+                .hasMessage("Unreadable game data file: " + file);
     }
 }

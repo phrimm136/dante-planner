@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for the shared {@link EnumLookup} resolver.
@@ -42,8 +43,9 @@ class EnumLookupTest {
 
         @Test
         void fromValue_WhenNull_Throws() {
-            assertThrows(IllegalArgumentException.class,
-                    () -> EnumLookup.fromValue(MDCategory.class, null));
+            assertThatThrownBy(() -> EnumLookup.fromValue(MDCategory.class, null))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("Unknown MDCategory value: null");
         }
     }
 

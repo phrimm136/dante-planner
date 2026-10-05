@@ -79,7 +79,8 @@ class PlannerCommentSseServiceTest {
             fillToCapacity();
 
             assertThatThrownBy(() -> service.subscribe(plannerId, UUID.randomUUID(), null))
-                    .isInstanceOf(SseCapacityExceededException.class);
+                    .isInstanceOf(SseCapacityExceededException.class)
+                    .hasMessageStartingWith("SSE connection limit reached for planner " + plannerId);
         }
 
         @Test
@@ -87,7 +88,8 @@ class PlannerCommentSseServiceTest {
             fillToCapacity();
 
             assertThatThrownBy(() -> service.subscribe(plannerId, UUID.randomUUID(), null))
-                    .isInstanceOf(SseCapacityExceededException.class);
+                    .isInstanceOf(SseCapacityExceededException.class)
+                    .hasMessageStartingWith("SSE connection limit reached for planner " + plannerId);
 
             assertThat(service.getSubscriberCount(plannerId)).isEqualTo(MAX_CONNECTIONS_PER_PLANNER);
             // A closed emitter throws on the next send and is dropped, so a count that survives a

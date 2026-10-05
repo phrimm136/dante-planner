@@ -54,12 +54,16 @@ class FallbackReplicaPropertiesTest {
     @Test
     void bind_WhenFailureRateAboveOneHundred_IsRejected() {
         assertThatThrownBy(() -> bind(Map.of(PREFIX + ".breaker.failure-rate-threshold", "150")))
-                .isInstanceOf(BindException.class);
+                .isInstanceOf(BindException.class)
+                .cause()
+                .hasMessageContaining("on field 'failureRateThreshold': rejected value [150.0]");
     }
 
     @Test
     void bind_WhenWaitInOpenStateUnderOneSecond_IsRejected() {
         assertThatThrownBy(() -> bind(Map.of(PREFIX + ".breaker.wait-duration-in-open-state", "PT0S")))
-                .isInstanceOf(BindException.class);
+                .isInstanceOf(BindException.class)
+                .cause()
+                .hasMessageContaining("on field 'waitDurationInOpenState': rejected value [PT0S]");
     }
 }

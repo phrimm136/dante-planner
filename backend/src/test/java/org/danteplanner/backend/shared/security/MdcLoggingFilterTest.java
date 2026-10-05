@@ -212,7 +212,8 @@ class MdcLoggingFilterTest {
                     .when(filterChain).doFilter(request, response);
 
             assertThatThrownBy(() -> filter.doFilterInternal(request, response, filterChain))
-                    .isInstanceOf(ServletException.class);
+                    .isInstanceOf(ServletException.class)
+                    .hasMessage("downstream failure");
 
             assertThat(MDC.getCopyOfContextMap()).isNullOrEmpty();
         }

@@ -69,6 +69,7 @@ class FrontendPropertiesTest {
     @Test
     void constructor_WhenBlank_Throws() {
         assertThatThrownBy(() -> new FrontendProperties("   "))
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("cors.allowed-origins must define a non-blank origin for the SPA redirect");
     }
 }

@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
  * What every rotation outcome means, as one table.
@@ -54,7 +55,9 @@ class RotationResultMatrixTest {
                         assertSame(outcome, outcome.orThrow(),
                                 "a successful rotation is returned, not wrapped");
                     } else {
-                        assertThrows(entry.getValue(), outcome::orThrow);
+                        assertRejected(outcome::orThrow)
+                                .withCode("UNAUTHORIZED")
+                                .isExactlyInstanceOf(entry.getValue());
                     }
                 }));
     }

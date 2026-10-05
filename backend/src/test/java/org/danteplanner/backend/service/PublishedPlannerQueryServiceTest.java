@@ -16,7 +16,6 @@ import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
@@ -56,6 +55,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -273,10 +273,7 @@ class PublishedPlannerQueryServiceTest {
             when(plannerRepository.existsActiveById(nonExistentId)).thenReturn(false);
 
             // Act & Assert
-            assertThrows(
-                    PlannerNotFoundException.class,
-                    () -> publishedQueryService.incrementViewCount(nonExistentId)
-            );
+            assertRejected(() -> publishedQueryService.incrementViewCount(nonExistentId)).withCode("PLANNER_NOT_FOUND");
             verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
         }
 
@@ -287,10 +284,7 @@ class PublishedPlannerQueryServiceTest {
             when(plannerRepository.existsActiveById(deletedId)).thenReturn(false);
 
             // Act & Assert
-            assertThrows(
-                    PlannerNotFoundException.class,
-                    () -> publishedQueryService.incrementViewCount(deletedId)
-            );
+            assertRejected(() -> publishedQueryService.incrementViewCount(deletedId)).withCode("PLANNER_NOT_FOUND");
             verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
         }
     }
@@ -374,8 +368,8 @@ class PublishedPlannerQueryServiceTest {
             when(plannerRepository.findPublishedAggregate(plannerId)).thenReturn(Optional.empty());
 
             // Act & Assert
-            assertThrows(PlannerNotFoundException.class,
-                    () -> publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT));
+            assertRejected(() -> publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT))
+                    .withCode("PLANNER_NOT_FOUND");
 
             verify(plannerViewRecorder, never()).record(any(), any(), any());
             verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
@@ -388,8 +382,8 @@ class PublishedPlannerQueryServiceTest {
             when(plannerRepository.findPublishedAggregate(plannerId)).thenReturn(Optional.empty());
 
             // Act & Assert
-            assertThrows(PlannerNotFoundException.class,
-                    () -> publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT));
+            assertRejected(() -> publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT))
+                    .withCode("PLANNER_NOT_FOUND");
         }
 
         @Test

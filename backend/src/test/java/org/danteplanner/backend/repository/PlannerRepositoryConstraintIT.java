@@ -104,7 +104,8 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
             assertThatThrownBy(() -> {
                 PlannerVote vote = new PlannerVote(testUser.getId(), UUID.randomUUID(), VoteType.UP);
                 voteRepository.saveAndFlush(vote);
-            }).isInstanceOf(DataIntegrityViolationException.class);
+            }).isInstanceOf(DataIntegrityViolationException.class)
+                    .hasMessageContaining("fk_vote_planner");
         }
         @Test
         void foreignKey_WhenInvalidUserId_ThrowsException() {
@@ -113,7 +114,8 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
             assertThatThrownBy(() -> {
                 PlannerVote vote = new PlannerVote(99999L, planner.getId(), VoteType.UP);
                 voteRepository.saveAndFlush(vote);
-            }).isInstanceOf(DataIntegrityViolationException.class);
+            }).isInstanceOf(DataIntegrityViolationException.class)
+                    .hasMessageContaining("fk_vote_user");
         }
         @Test
         void foreignKey_WhenInvalidPlannerIdInComment_ThrowsException() {
@@ -127,7 +129,8 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
                 );
                 commentRepository.save(comment);
                 entityManager.flush();
-            }).isInstanceOf(DataIntegrityViolationException.class);
+            }).isInstanceOf(DataIntegrityViolationException.class)
+                    .hasMessageContaining("fk_comment_planner");
         }
         @Test
         void foreignKey_WhenInvalidUserIdInComment_ThrowsException() {
@@ -143,7 +146,8 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
                 );
                 commentRepository.save(comment);
                 entityManager.flush();
-            }).isInstanceOf(DataIntegrityViolationException.class);
+            }).isInstanceOf(DataIntegrityViolationException.class)
+                    .hasMessageContaining("fk_comment_user");
         }
         @Test
         void foreignKey_WhenCascadeDelete_DeletesChildVotes() {
@@ -275,7 +279,8 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
                         .build();
                 userRepository.save(user2);
                 entityManager.flush();
-            }).isInstanceOf(DataIntegrityViolationException.class);
+            }).isInstanceOf(DataIntegrityViolationException.class)
+                    .hasMessageContaining("uk_users_username_suffix");
         }
 
         @Test
@@ -302,7 +307,8 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
                         .build();
                 userRepository.save(user2);
                 entityManager.flush();
-            }).isInstanceOf(DataIntegrityViolationException.class);
+            }).isInstanceOf(DataIntegrityViolationException.class)
+                    .hasMessageContaining("uk_provider_provider_id");
         }
 
         @Test
@@ -372,7 +378,8 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
                 );
                 commentRepository.save(comment);
                 entityManager.flush();
-            }).isInstanceOf(DataIntegrityViolationException.class);
+            }).isInstanceOf(DataIntegrityViolationException.class)
+                    .hasMessageContaining("Column 'content' cannot be null");
         }
 
         @Test
@@ -388,7 +395,8 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
                         .build();
                 userRepository.save(user);
                 entityManager.flush();
-            }).isInstanceOf(DataIntegrityViolationException.class);
+            }).isInstanceOf(DataIntegrityViolationException.class)
+                    .hasMessageContaining("Column 'email' cannot be null");
         }
 
         @Test
@@ -404,7 +412,8 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
                         .build();
                 userRepository.save(user);
                 entityManager.flush();
-            }).isInstanceOf(DataIntegrityViolationException.class);
+            }).isInstanceOf(DataIntegrityViolationException.class)
+                    .hasMessageContaining("Column 'provider' cannot be null");
         }
 
         @Test
@@ -420,7 +429,8 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
                         .build();
                 userRepository.save(user);
                 entityManager.flush();
-            }).isInstanceOf(DataIntegrityViolationException.class);
+            }).isInstanceOf(DataIntegrityViolationException.class)
+                    .hasMessageContaining("Column 'provider_id' cannot be null");
         }
 
         @Test
