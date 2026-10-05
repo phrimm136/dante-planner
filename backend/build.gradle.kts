@@ -180,6 +180,8 @@ pitest {
     // differs from the class under test.
     targetTests.set(listOf("org.danteplanner.backend.*"))
     excludedTestClasses.set(listOf("*IT", "*IntegrationTest", "*ControllerTest"))
+    // The minion does not inherit the test task's system properties.
+    jvmArgs.set(listOf("-Dorg.springframework.boot.logging.LoggingSystem=none"))
     junit5PluginVersion.set("1.2.1")
     threads.set(4)
     timestampedReports.set(false)
