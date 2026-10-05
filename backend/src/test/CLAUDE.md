@@ -15,19 +15,19 @@ Run: default `test` task is both tiers (Docker required); `-PexcludeTags=contain
 
 ## What a test may assume about data
 
-Every integration class in a fork shares one database. A test owns the rows it creates and nothing
+Every integration class shares one database. A test owns the rows it creates and nothing
 else — see **Parallelism** for which classes run beside it.
 
 - **Fixtures carry a unique identity.** `TestDataFactory` sub-addresses every email it issues, so two classes asking for `owner@example.com` get different rows. Anything built by hand needs the same treatment.
 - **Never truncate in the shared database.** `deleteAll()` there removes rows a concurrent neighbour is mid-assertion on. `@ResourceLock` does not make it safe: a lock excludes only the classes that declare it.
 - **Assert about your rows, never about the table.** `repository.count()`, `findAll()`, and `$.content.length()` are claims about every test's data. Narrow to the id the test created.
-- **When the subject is a per-context singleton** — a write buffer, a cache, a scheduler — take
-  `registerOwnDatabase` as well. The point there is not the data but the context: a distinct cache
-  key gives the class its own bean, which is what the assertion actually needs. Two beans in this
+- **When the subject is a per-context singleton** — a write buffer, a cache, a scheduler — extend
+  `ExclusiveDatabaseSupport` as well. The point there is not the data but the context: its lock
+  keeps every other class using that bean from running beside this one. Two beans in this
   codebase hold mutable state: `PlannerViewRecorder`'s flush buffer and `AbstractSseService`'s
   emitter registry. A new one is found by looking for a collection or atomic assigned inline in a
   `@Service` or `@Component`; per-call objects do not count.
-- **When the subject genuinely is a whole table or index** — title search, keyword facets, a global rebuild procedure — take `SharedMySqlContainerSupport.registerOwnDatabase(registry, "name")` and truncate freely inside it. Costs one application context, so reach for a narrowed assertion first.
+- **When the subject genuinely is a whole table or index** — title search, keyword facets, a global rebuild procedure — extend `ExclusiveDatabaseSupport`. Its classes run one at a time on a database of their own, which holds whatever the earlier ones left: truncate what you count at the start of your setup (`emptyPlannerTables` empties the planner tables in raw SQL, whatever shape an earlier class left a planner in), or narrow to your rows. They serialize, so reach for a narrowed assertion first.
 
 ## `@Transactional` on a test class
 
@@ -43,11 +43,10 @@ Three costs, all silent:
 
 ## Parallelism
 
-Classes run concurrently inside a fork, three at a time and in random order; the methods of one class
-run on one thread (`junit-platform.properties`). Gradle runs a JVM per `maxParallelForks` slot on top,
-and each fork owns its own containers. So every class runs beside others against the same database,
-Redis and application context, and the ownership rules above are what keeps the suite passing.
-Breaking one costs a debugging session in somebody else's class.
+The suite runs in one JVM, twelve classes at a time and in random order; the methods of one class
+run on one thread (`junit-platform.properties`, `maxParallelForks = 1`). So every class runs beside
+others against the same database, Redis and application context, and the ownership rules above are
+what keeps the suite passing. Breaking one costs a debugging session in somebody else's class.
 
 - **Never annotate a class with `@Execution`.** The mode propagates to its methods, and concurrent methods share the class's `@BeforeEach` fixtures.
 - **Never add a second `@BeforeEach`.** JUnit does not order siblings, so a cleanup method can run after the setup it was meant to precede. Put cleanup as the first statements of the one existing setup method.
@@ -62,5 +61,5 @@ Breaking one costs a debugging session in somebody else's class.
 - Time-dependent JWT tests inject a fixed `Clock` — never 1 ms expiries (see `JwtTokenServiceTest`).
 - Deterministic ordering via `entity.setCreatedAt(now.minusSeconds(n))` — never `Thread.sleep()`.
 - Build reusable entities with `TestDataFactory`.
-- A failing test is retried once in a fresh fork, and the build fails even when the retry passes. A failed execution followed by a passing one in the `build/test-results` XML (in CI, the `backend-test-reports` artifact, because the PR gate runs `check -q` and prints no per-test lines) means the test passes without the rest of the suite: it is nondeterministic, or it depends on order or suite size. The XML does not record which fork ran a class, so before filing it as flaky, rerun the full suite where it failed (for a CI failure, re-run the CI job, because the fork count sets class order): a failure that comes back at full size depends on order or suite size. Never raise `maxRetries`.
+- A failing test is retried once in a fresh fork, and the build fails even when the retry passes. A failed execution followed by a passing one in the `build/test-results` XML (in CI, the `backend-test-reports` artifact, because the PR gate runs `check -q` and prints no per-test lines) means the test passes without the rest of the suite: it is nondeterministic, or it depends on order or suite size. Before filing it as flaky, rerun the full suite (for a CI failure, re-run the CI job): class order comes from the random orderer's seed (`junit.jupiter.execution.order.random.seed` replays one), so a lone rerun of the class tells nothing, and a failure that comes back at full size depends on order or suite size. Never raise `maxRetries`.
 - Gradle does not capture application stdout in this project's test output — localize a failing integration test by assertion-based bisection, not log statements.

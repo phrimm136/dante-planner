@@ -1,24 +1,17 @@
 package org.danteplanner.backend.integration;
 
 import java.time.LocalDate;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.DynamicPropertyRegistry;
 import java.util.UUID;
 
-import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerViewRecorder;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,21 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * day) and advances each planner's counters by exactly its new-view count, across planners and
  * with in-batch duplicates.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@ActiveProfiles("it")
-@Tag("containerized")
-@Import(TestConfig.class)
-class PlannerViewBatchFlushIT {
-
-    /**
-     * Its own database, and so its own context: the subject is the recorder's process-wide buffer,
-     * which is one bean per context. Sharing a context means sharing the buffer with every class in
-     * it, and a neighbour's flush drains the batch this test is about to assert on.
-     */
-    @DynamicPropertySource
-    static void ownDatabase(DynamicPropertyRegistry registry) {
-        SharedMySqlContainerSupport.registerOwnDatabase(registry, "view_batch_flush");
-    }
+class PlannerViewBatchFlushIT extends ExclusiveDatabaseSupport {
 
     private static final LocalDate DAY = LocalDate.of(2026, 3, 1);
 

@@ -1,13 +1,8 @@
 package org.danteplanner.backend.integration;
 
-import org.danteplanner.backend.config.TestConfig;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
-import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
-import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
@@ -17,14 +12,9 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.sql.DataSource;
@@ -45,21 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * two or more characters, CJK included, order-independent) OR exact membership
  * in the keyword index; boolean-mode operators in the input are inert.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@AutoConfigureMockMvc
-@ActiveProfiles("it")
-@Tag("containerized")
-@Import(TestConfig.class)
-class PlannerTitleSearchIT {
-
-    @DynamicPropertySource
-    static void ownIndex(DynamicPropertyRegistry registry) {
-        SharedMySqlContainerSupport.registerOwnDatabase(registry, "title_search");
-    }
-
-
-
-
+class PlannerTitleSearchIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private MockMvc mockMvc;
@@ -77,12 +53,6 @@ class PlannerTitleSearchIT {
     private PlannerStatsRepository statsRepository;
 
     @Autowired
-    private PlannerEntityFilterRepository entityFilterRepository;
-
-    @Autowired
-    private PlannerKeywordFilterRepository keywordFilterRepository;
-
-    @Autowired
     private PlannerCatalogService catalogService;
 
     @Autowired
@@ -97,11 +67,7 @@ class PlannerTitleSearchIT {
     void setUp() {
         // First statement of the only @BeforeEach: JUnit does not order sibling
         // @BeforeEach methods, so a separate wipe method could run after setup.
-        catalogRepository.deleteAll();
-        entityFilterRepository.deleteAll();
-        keywordFilterRepository.deleteAll();
-        plannerRepository.deleteAll();
-        statsRepository.deleteAll();
+        emptyPlannerTables(new JdbcTemplate(dataSource));
         cleanUp();
         owner = TestDataFactory.createTestUser(userRepository, "search-owner@example.com");
         publish("Bleed Team", null);

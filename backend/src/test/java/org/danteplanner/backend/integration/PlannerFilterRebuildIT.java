@@ -1,9 +1,6 @@
 package org.danteplanner.backend.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerKeywordFilter;
@@ -19,13 +16,9 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -48,20 +41,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * indexes while rows from a prior build are present must replace them in one
  * transaction, not collide on the composite primary key.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@ActiveProfiles("it")
-@Tag("containerized")
-@Import(TestConfig.class)
-class PlannerFilterRebuildIT {
-
-    @DynamicPropertySource
-    static void ownIndex(DynamicPropertyRegistry registry) {
-        SharedMySqlContainerSupport.registerOwnDatabase(registry, "filter_rebuild");
-    }
-
-
-
-
+class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private UserRepository userRepository;
@@ -118,9 +98,7 @@ class PlannerFilterRebuildIT {
     void setUp() {
         // First statement of the only @BeforeEach: JUnit does not order sibling
         // @BeforeEach methods, so a separate wipe method could run after setup.
-        entityFilterRepository.deleteAll();
-        keywordFilterRepository.deleteAll();
-        plannerRepository.deleteAll();
+        emptyPlannerTables(new JdbcTemplate(dataSource));
         cleanUp();
         owner = TestDataFactory.createTestUser(userRepository, "rebuild-owner@example.com");
     }

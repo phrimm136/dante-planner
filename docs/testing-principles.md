@@ -137,7 +137,7 @@ mine". → [why](testing-evidence.md#13-what-sharing-a-database-costs)
 - A shared context is a shared object graph. In-memory singleton state (a buffer, a cache, a
   scheduler, a metric registry) can be narrowed to nothing.
 - The rule is about stores, not SQL. `flushAll()` is `deleteAll()` for Redis.
-- When the subject genuinely is a whole table or index, take `registerOwnDatabase`.
+- When the subject genuinely is a whole table or index, extend `ExclusiveDatabaseSupport`.
 
 **The browser tier is the same rule against a shared deployment.** `e2e/` seeds through `seed.ts`
 into one database that every worker, every other spec, and the environment's own leftovers also
@@ -150,8 +150,8 @@ named `danteplanner`, and auto-save writes it on every keystroke. `e2e/src/brows
 before the app's first script, so a spec inherits no editor state from its predecessor.
 
 **The parallelism annotations cannot express what you want:** `@Execution(CONCURRENT)` propagates to
-a class's methods, `@ResourceLock` excludes only other lock holders and cannot cross Gradle forks,
-and sibling `@BeforeEach` methods have no defined order.
+a class's methods, `@ResourceLock` excludes only other lock holders, and sibling `@BeforeEach`
+methods have no defined order.
 
 > Contention is a naming problem before it is a concurrency problem. Names can be enumerated
 > statically; interleavings cannot.

@@ -3,7 +3,6 @@ package org.danteplanner.backend.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import net.javacrumbs.shedlock.core.LockProvider;
-import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -23,13 +22,9 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.CatalogEffects;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.convention.TestBean;
 
 import javax.sql.DataSource;
@@ -47,11 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Reconciler drill: seeded drift in every audited dimension is detected and
  * reported as structured records — and deliberately NOT repaired.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@ActiveProfiles("it")
-@Tag("containerized")
-@Import(TestConfig.class)
-class PlannerReconcilerIT extends SharedMySqlContainerSupport {
+class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
 
     /**
      * Stands in for the fleet lock the pass takes.
@@ -126,8 +117,8 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-        catalogService.add(planner);
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        catalogService.onBecameVisible(planner);
+        CatalogEffects.drain(catalogSyncService, jdbc, planner.getId());
         return planner;
     }
 
@@ -421,8 +412,8 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-        catalogService.add(planner);
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        catalogService.onBecameVisible(planner);
+        CatalogEffects.drain(catalogSyncService, jdbc, planner.getId());
 
         assertThat(kindsFor(reconciler.reconcile(), planner.getId())).doesNotContain("entity_filter");
     }
@@ -437,8 +428,8 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-        catalogService.add(planner);
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        catalogService.onBecameVisible(planner);
+        CatalogEffects.drain(catalogSyncService, jdbc, planner.getId());
 
         assertThat(kindsFor(reconciler.reconcile(), planner.getId()))
                 .doesNotContain("entity_filter", "keyword_filter");
@@ -481,7 +472,9 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
         Planner planner = publishClean("Index Follows Column", Set.of("Sinking"));
         jdbc.update("UPDATE planner_content SET selected_keywords = '[\"Burst\"]' WHERE planner_id = UUID_TO_BIN(?)",
                 planner.getId().toString());
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        jdbc.update("INSERT INTO domain_events (event_type, aggregate_id, payload) "
+                + "VALUES ('PLANNER_CATALOG_CHANGED', UUID_TO_BIN(?), '{}')", planner.getId().toString());
+        CatalogEffects.drain(catalogSyncService, jdbc, planner.getId());
 
         assertThat(recordsFor(reconciler.reconcile(), planner.getId(), "keyword_filter"))
                 .singleElement()
@@ -517,7 +510,7 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
 
     private long catalogChangedEventOf(UUID plannerId) {
         return jdbc.queryForObject("SELECT id FROM domain_events WHERE aggregate_id = UUID_TO_BIN(?) "
-                + "AND event_type = 'PLANNER_CATALOG_CHANGED'", Long.class, plannerId.toString());
+                + "AND event_type = 'PLANNER_CATALOG_CHANGED' AND dispatched_at IS NULL", Long.class, plannerId.toString());
     }
 
     private void recordStaleCatalogChangedEvent(UUID plannerId) {

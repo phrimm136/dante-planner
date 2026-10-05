@@ -12,11 +12,11 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.mysql.MySQLContainer;
 
 /**
- * One {@code mysqld} per Gradle fork, one database, one Spring context for every subclass.
+ * One {@code mysqld} per test JVM, one database, one Spring context for every subclass.
  *
  * <p>The property source is declared here rather than per subclass, which is what collapses them
  * onto a single cached context: Spring keys the cache on the set of dynamic-property methods, so a
- * shared method means a shared context, a shared database, and one schema build for the fork
+ * shared method means a shared context, a shared database, and one schema build for the run
  * instead of one per class.</p>
  *
  * <p>That only holds while subclasses isolate themselves by the rows they write. A test that
@@ -25,7 +25,7 @@ import org.testcontainers.mysql.MySQLContainer;
  *
  * <p>The data directory is a tmpfs. DDL is metadata-heavy and the schema build is the tier's
  * dominant cost, so the win is large and the loss is nothing: the container is discarded when the
- * fork ends, making durability worthless.</p>
+ * test JVM ends, making durability worthless.</p>
  */
 public abstract class SharedMySqlContainerSupport {
 
@@ -74,23 +74,17 @@ public abstract class SharedMySqlContainerSupport {
     }
 
     /**
-     * Binds a subclass to a database of its own.
+     * Binds a caller to a database and a {@code redis-server} of their own, created on first use.
      *
-     * <p>For a test whose subject is a whole table or index rather than a row it created: an
-     * assertion over every published planner, or over what a search term returns, has nothing to
-     * narrow. Such a test truncates, and truncating the shared database deletes rows its concurrent
-     * neighbours are still using; a lock does not help, since it excludes only other lock holders
-     * while the rest of the suite carries on.</p>
-     *
-     * <p>Costs one Spring context per caller, the database name being part of the context cache
-     * key, plus a {@code redis-server} of its own. Prefer narrowing the assertion to rows the test
-     * created.</p>
+     * <p>A test that needs a database no concurrent class shares extends
+     * {@link ExclusiveDatabaseSupport}, the one caller; a second name costs a second Spring context
+     * and a second {@code redis-server}.</p>
      *
      * @param registry the Spring dynamic property registry
-     * @param database a name unique to the calling class
+     * @param database the database name
      * @return the JDBC URL bound to that database
      */
-    public static String registerOwnDatabase(DynamicPropertyRegistry registry, String database) {
+    static String registerOwnDatabase(DynamicPropertyRegistry registry, String database) {
         String url = "jdbc:mysql://" + MYSQL.getHost() + ":" + MYSQL.getFirstMappedPort()
                 + "/" + database + "?createDatabaseIfNotExist=true";
         registry.add("spring.datasource.url", () -> url);
@@ -118,10 +112,14 @@ public abstract class SharedMySqlContainerSupport {
         registry.add("spring.flyway.user", MYSQL::getUsername);
         registry.add("spring.flyway.password", MYSQL::getPassword);
         SharedRedisContainerSupport.registerSharedRedis(registry);
+        registerGoogleStub(registry);
+        return MYSQL.getJdbcUrl();
+    }
+
+    static void registerGoogleStub(DynamicPropertyRegistry registry) {
         registry.add("oauth.google.token-url", GoogleStub::tokenUrl);
         registry.add("oauth.google.user-info-url", GoogleStub::userInfoUrl);
         registry.add("oauth.google.jwks-uri", GoogleStub::jwksUri);
         registry.add("oauth.google.issuer", GoogleStub::issuer);
-        return MYSQL.getJdbcUrl();
     }
 }

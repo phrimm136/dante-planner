@@ -1,18 +1,12 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.admin.service.AdminService;
-import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.UUID;
 import java.util.concurrent.CyclicBarrier;
@@ -32,24 +26,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  * ({@code COUNT(*) WHERE role='ADMIN'}), which is write skew exactly: each transaction preserves
  * "at least one admin" on its own, and together they do not.</p>
  *
- * <p>Takes its own database because the safeguard reads a whole-table predicate. An admin created
- * by a neighbouring class in the shared database counts toward it, and the invariant asserted here
- * would then hold for reasons this test did not create.</p>
+ * <p>Takes the exclusive database and demotes every administrator in it first, because the
+ * safeguard reads a whole-table predicate. An admin created by another class counts toward it, and
+ * the invariant asserted here would then hold for reasons this test did not create.</p>
  *
  * <p>The assertion is the invariant, not the mechanism. Whichever way the two transactions
  * resolve — serialized, so the loser is refused by the safeguard, or interleaved, so InnoDB breaks
  * the deadlock — an administrator must remain.</p>
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@ActiveProfiles("it")
-@Tag("containerized")
-@Import(TestConfig.class)
-class AdminRoleWriteSkewIT {
-
-    @DynamicPropertySource
-    static void ownDatabase(DynamicPropertyRegistry registry) {
-        SharedMySqlContainerSupport.registerOwnDatabase(registry, "admin_role_skew");
-    }
+class AdminRoleWriteSkewIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private AdminService adminService;
@@ -57,8 +42,12 @@ class AdminRoleWriteSkewIT {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @Test
     void changeRole_WhenBothRemainingAdminsSelfDemoteConcurrently_LeavesAnAdmin() throws Exception {
+        jdbcTemplate.update("UPDATE users SET role = 'NORMAL' WHERE role = 'ADMIN'");
         Long firstAdmin = TestDataFactory
                 .createAdmin(userRepository, "skew-a-" + UUID.randomUUID() + "@example.com").getId();
         Long secondAdmin = TestDataFactory

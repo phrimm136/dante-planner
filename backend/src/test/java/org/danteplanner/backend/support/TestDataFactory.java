@@ -116,7 +116,7 @@ public class TestDataFactory {
 
     /**
      * A user id no other class in this JVM will use. Services key Redis entries by user id
-     * ({@code uinv:<id>}), and classes sharing the per-fork Redis therefore share that namespace:
+     * ({@code uinv:<id>}), and classes sharing the run's Redis therefore share that namespace:
      * a literal id claims a name any other class may also claim.
      *
      * @return an id unique within this JVM

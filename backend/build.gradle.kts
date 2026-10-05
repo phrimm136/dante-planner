@@ -122,28 +122,24 @@ tasks.withType<Test> {
             excludeTags(*excludeTags.toTypedArray())
         }
     }
-    // Fork count sets when the longest class starts, not how fast it runs: the heavy replication
-    // and recovery harnesses sit behind ~40 classes in their fork's queue, and a wider pool drains
-    // that queue sooner. The ceiling is memory, not cores — each fork holds its own heap and its
-    // own Testcontainers set, whose data directories are tmpfs.
     // Sized so the cache never evicts. Eviction closes a context while other classes are still
     // running against it, and the default bound of 32 sits below what this suite creates, so the
     // failure lands in an unrelated class at full suite size only. Must stay above the
     // containerized class count; TestIsolationConventionTest budgets the classes that key their own.
     systemProperty("spring.test.context.cache.maxSize", "513")
     systemProperty("org.springframework.boot.logging.LoggingSystem", "none")
-    maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(2)
-    // Measured: a worker sits near 1 GB resident, and the containers it drives total well under
-    // that, so the JVMs are what the box has to fit. maxParallelForks × maxHeapSize must leave
-    // room for Docker, the Testcontainers set, and their tmpfs data directories.
-    maxHeapSize = "1g"
+    // One JVM, with class concurrency inside it (junit-platform.properties). Every fork repeats the
+    // whole fixed cost — a JVM, its Spring contexts and a Testcontainers set — so a fork per core
+    // costs memory that a thread per class does not.
+    maxParallelForks = 1
+    // Measured: the heap peaks at 1785 MiB with twelve classes running, so this leaves 30% free.
+    maxHeapSize = "2560m"
     // Test JVMs are short-lived and dominated by Spring context startup, so C1-only JIT favors
     // fast warmup over peak speed the fork never reaches.
     //
-    // G1 rather than the throughput collector because it uncommits: a fork that peaks during one
-    // heavy context would otherwise hold that heap for the whole run, six forks ratcheting upward
-    // independently and never coming back down. The free-ratio bounds are what make it give the
-    // memory back between contexts.
+    // G1 rather than the throughput collector because it uncommits: a JVM that peaks during one
+    // heavy context would otherwise hold that heap for the rest of the run. The free-ratio bounds
+    // are what make it give the memory back between contexts.
     //
     // The code cache is sized up because a fork hosting the whole suite loads enough classes to
     // exhaust the adapter space ("Out of space in CodeCache for adapters").

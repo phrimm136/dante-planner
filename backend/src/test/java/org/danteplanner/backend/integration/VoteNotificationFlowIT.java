@@ -1,8 +1,5 @@
 package org.danteplanner.backend.integration;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.entity.VoteType;
@@ -22,16 +19,12 @@ import org.danteplanner.backend.notification.entity.Notification;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.notification.service.NotificationDispatchService;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -53,21 +46,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  *
  * @see <a href="https://www.baeldung.com/spring-test-programmatic-transactions">Baeldung - Programmatic Transactions</a>
  */
-@SpringBootTest
-@ActiveProfiles("it")
-@Tag("containerized")
-@Import(TestConfig.class)
-class VoteNotificationFlowIT {
-
-    /**
-     * Its own database: two of these assert about the notifications table as a whole (the UNIQUE
-     * constraint that collapses duplicates, and what concurrent votes leave behind), which cannot
-     * be narrowed to a row the test created.
-     */
-    @DynamicPropertySource
-    static void ownDatabase(DynamicPropertyRegistry registry) {
-        SharedMySqlContainerSupport.registerOwnDatabase(registry, "vote_notification_flow");
-    }
+class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private PlannerEngagementService plannerEngagementService;

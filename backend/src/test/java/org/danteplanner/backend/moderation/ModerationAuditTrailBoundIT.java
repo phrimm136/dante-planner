@@ -2,21 +2,14 @@ package org.danteplanner.backend.moderation;
 
 import org.danteplanner.backend.moderation.api.ModerationActionType;
 import org.danteplanner.backend.moderation.api.ModerationTargetType;
-import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.integration.ExclusiveDatabaseSupport;
 import org.danteplanner.backend.support.TestDataFactory;
-import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
-import org.junit.jupiter.api.Tag;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.moderation.service.ModerationQueryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.time.Instant;
 import java.util.Comparator;
@@ -33,22 +26,7 @@ import org.danteplanner.backend.user.repository.UserRepository;
  * <p>Seeds more records than the dashboard returns, so a page that came back whole — or came back
  * from the wrong end — is visible in the assertions rather than only in the query plan.</p>
  */
-@SpringBootTest
-@ActiveProfiles("it")
-@Tag("containerized")
-@Import(TestConfig.class)
-class ModerationAuditTrailBoundIT {
-
-    /**
-     * The subject is the whole audit trail: the assertions compare a bounded page against the
-     * newest record in the table, and there is no id to narrow either side to. A neighbour
-     * moderating anything between the two reads puts a newer record outside the page.
-     */
-    @DynamicPropertySource
-    static void ownDatabase(DynamicPropertyRegistry registry) {
-        SharedMySqlContainerSupport.registerOwnDatabase(registry, "audit_trail_bound");
-    }
-
+class ModerationAuditTrailBoundIT extends ExclusiveDatabaseSupport {
 
     /** Comfortably more than the dashboard's page, so truncation has something to remove. */
     private static final int SEEDED_RECORDS = 150;

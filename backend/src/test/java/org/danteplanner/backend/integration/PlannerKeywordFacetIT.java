@@ -2,16 +2,11 @@ package org.danteplanner.backend.integration;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import org.danteplanner.backend.config.TestConfig;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerKeywordFilter;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerType;
-import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
-import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -25,14 +20,9 @@ import org.danteplanner.backend.support.CatalogEffects;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.sql.DataSource;
@@ -52,21 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * before storage and the filter table, and reading any persisted keyword row
  * is total.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@AutoConfigureMockMvc
-@ActiveProfiles("it")
-@Tag("containerized")
-@Import(TestConfig.class)
-class PlannerKeywordFacetIT {
-
-    @DynamicPropertySource
-    static void ownIndex(DynamicPropertyRegistry registry) {
-        SharedMySqlContainerSupport.registerOwnDatabase(registry, "keyword_facet");
-    }
-
-
-
-
+class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private MockMvc mockMvc;
@@ -78,13 +54,7 @@ class PlannerKeywordFacetIT {
     private PlannerRepository plannerRepository;
 
     @Autowired
-    private PlannerCatalogRepository catalogRepository;
-
-    @Autowired
     private PlannerStatsRepository statsRepository;
-
-    @Autowired
-    private PlannerEntityFilterRepository entityFilterRepository;
 
     @Autowired
     private PlannerKeywordFilterRepository keywordFilterRepository;
@@ -113,11 +83,7 @@ class PlannerKeywordFacetIT {
     void setUp() {
         // First statement of the only @BeforeEach: JUnit does not order sibling
         // @BeforeEach methods, so a separate wipe method could run after setup.
-        catalogRepository.deleteAll();
-        entityFilterRepository.deleteAll();
-        keywordFilterRepository.deleteAll();
-        plannerRepository.deleteAll();
-        statsRepository.deleteAll();
+        emptyPlannerTables(new JdbcTemplate(dataSource));
         cleanUp();
         owner = TestDataFactory.createTestUser(userRepository, "facet-owner@example.com");
     }

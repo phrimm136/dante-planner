@@ -1,7 +1,6 @@
 package org.danteplanner.backend.integration;
 
 import jakarta.persistence.EntityManagerFactory;
-import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.comment.entity.PlannerComment;
@@ -22,17 +21,11 @@ import org.danteplanner.backend.support.TestDataFactory;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,20 +44,16 @@ import static org.assertj.core.api.Assertions.assertThat;
  * regression that drops an {@code @EntityGraph}/JOIN FETCH or a batch {@code findBy...In} would
  * make the count grow with row count, failing the slope assertion.</p>
  *
- * <p>The database is this class's own: the measured calls are list reads over every published
- * planner, so a neighbour publishing between the two measurements would add rows to the page
- * whose statement-count slope the assertion bounds.</p>
+ * <p>The database is the exclusive one, emptied of catalog rows at each test's start: the measured
+ * calls are list reads over every published planner, so a row another class published would add
+ * to the page whose statement-count slope the assertion bounds.</p>
  *
  * <p>The class is deliberately NOT {@code @Transactional}: each measured service call runs in
  * its own fresh read-only transaction (a new Hibernate session), so the author and the
  * vote/comment context must actually be fetched from the database rather than served
  * from a shared L1 cache — otherwise an N+1 would be masked and the assertion would be a tautology.</p>
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("it")
-@Tag("containerized")
-@Import(TestConfig.class)
-class PlannerQueryCountIT {
+class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
 
     private static final int SMALL_SET = 3;
     private static final int LARGE_SET = 8;
@@ -78,21 +67,13 @@ class PlannerQueryCountIT {
     // always full so Spring Data always issues the count query.
     private static final Pageable ONE_ROW_PAGE = PageRequest.of(0, 1);
 
-    // Seeded titles all carry this token so the title-search shape returns rows in this class's
-    // own database.
+    // Seeded titles all carry this token so the title-search shape returns this class's rows.
     private static final String SEARCH_MARKER = "querycountmarker";
 
     // Page + count + core info + stats + votes.
     private static final long PUBLISHED_LIST_STATEMENTS = 5;
     private static final long RECOMMENDED_LIST_STATEMENTS = 5;
     private static final long SEARCH_LIST_STATEMENTS = 5;
-
-    @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        SharedMySqlContainerSupport.registerOwnDatabase(registry, "query_count");
-        // Enable Hibernate statistics so getPrepareStatementCount() reflects real SQL issued.
-        registry.add("spring.jpa.properties.hibernate.generate_statistics", () -> "true");
-    }
 
     @Autowired
     private PlannerRepository plannerRepository;
@@ -132,6 +113,7 @@ class PlannerQueryCountIT {
 
     @BeforeEach
     void setUp() {
+        plannerCatalogRepository.deleteAll();
 
         // A distinct viewer drives the authenticated read-path (vote + comment batches).
         viewerId = TestDataFactory.createTestUser(userRepository, "viewer@example.com").getId();

@@ -3,9 +3,6 @@ package org.danteplanner.backend.integration;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerEntityFilter;
@@ -14,7 +11,6 @@ import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
-import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
@@ -28,14 +24,9 @@ import org.danteplanner.backend.support.CatalogEffects;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -59,21 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * publishing is one content-carrying request that upserts and sets published
  * atomically. Unpublish carries no body.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@AutoConfigureMockMvc
-@ActiveProfiles("it")
-@Tag("containerized")
-@Import(TestConfig.class)
-class PlannerPublishFlowIT {
-
-    @DynamicPropertySource
-    static void ownIndex(DynamicPropertyRegistry registry) {
-        SharedMySqlContainerSupport.registerOwnDatabase(registry, "publish_flow");
-    }
-
-
-
-
+class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private MockMvc mockMvc;
@@ -92,9 +69,6 @@ class PlannerPublishFlowIT {
 
     @Autowired
     private PlannerEntityFilterRepository entityFilterRepository;
-
-    @Autowired
-    private PlannerKeywordFilterRepository keywordFilterRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -118,11 +92,7 @@ class PlannerPublishFlowIT {
     void setUp() {
         // First statement of the only @BeforeEach: JUnit does not order sibling
         // @BeforeEach methods, so a separate wipe method could run after setup.
-        catalogRepository.deleteAll();
-        entityFilterRepository.deleteAll();
-        keywordFilterRepository.deleteAll();
-        statsRepository.deleteAll();
-        plannerRepository.deleteAll();
+        emptyPlannerTables(jdbcTemplate);
         cleanUp();
         owner = TestDataFactory.createTestUser(userRepository, "publish-owner@example.com");
         token = TestDataFactory.generateAccessToken(jwtTokenService, owner);

@@ -34,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -75,6 +76,8 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
     private static final int UNREACHABLE_ENTITY_ID = 424242;
 
     private static final String PLANTED_ROW = ContentEntityType.THEME_PACK + ":" + UNREACHABLE_ENTITY_ID;
+
+    private static final int SEED_SYNC_ATTEMPTS = 5;
 
     private static final String SIX_FLOOR_CONTENT = TestDataFactory.VALID_CONTENT.replace(
             "{\"themePackId\":\"1005\",\"difficulty\":0,\"giftIds\":[]}",
@@ -149,10 +152,25 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        syncRetryingDeadlocks(planner.getId());
         // MySQL re-serializes a JSON column, so "the content did not change" is only
         // expressible against the stored form, not the string handed to the insert.
         return plannerRepository.findAggregateForOwner(planner.getId(), owner.getId()).orElseThrow();
+    }
+
+    // A concurrent rebuild's gap locks can deadlock this one, and in production drainPending's next
+    // pass retries it; this retry stands in for that pass.
+    private void syncRetryingDeadlocks(UUID plannerId) {
+        for (int attempt = 1; ; attempt++) {
+            try {
+                catalogSyncService.syncPlanner(plannerId, List.of());
+                return;
+            } catch (CannotAcquireLockException deadlock) {
+                if (attempt == SEED_SYNC_ATTEMPTS) {
+                    throw deadlock;
+                }
+            }
+        }
     }
 
     private void plantUnreachableEntityRow(UUID plannerId) {
@@ -317,7 +335,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        syncRetryingDeadlocks(planner.getId());
         return plannerRepository.findById(planner.getId()).orElseThrow();
     }
 

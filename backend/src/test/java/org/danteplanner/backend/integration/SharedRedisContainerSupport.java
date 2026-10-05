@@ -9,7 +9,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import com.redis.testcontainers.RedisContainer;
 
 /**
- * One {@code redis-server} per Gradle fork, started on first use so the Docker-free unit tier never
+ * One {@code redis-server} per test JVM, started on first use so the Docker-free unit tier never
  * pays for it.
  *
  * <p>Without this the endpoints resolve to {@code application.properties}' {@code localhost:6379},

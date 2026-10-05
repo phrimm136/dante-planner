@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
  * <p>Tests the Redis-backed token blacklist behavior including
  * add, check, and TTL expiration functionality over a live Redis container.</p>
  *
- * <p>The container is this class's own, not the fork-shared one: {@code size()},
+ * <p>The container is this class's own, not the run's shared one: {@code size()},
  * {@code userInvalidationSize()} and {@code clear()} are the subject here, and all three span the
  * whole keyspace, so there is no id to narrow them to.</p>
  */

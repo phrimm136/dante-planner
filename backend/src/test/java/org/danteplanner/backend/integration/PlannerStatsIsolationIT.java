@@ -1,11 +1,8 @@
 package org.danteplanner.backend.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.service.CommentCommandService;
-import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.moderation.service.CommentModerationService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
@@ -21,13 +18,8 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
@@ -42,25 +34,7 @@ import org.danteplanner.backend.moderation.repository.ModerationActionRepository
  * Counter isolation: planner_stats is the single home of view/upvote/comment
  * counters — maintained on every transition and the source every read serves.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@AutoConfigureMockMvc
-@ActiveProfiles("it")
-@Tag("containerized")
-@Import(TestConfig.class)
-class PlannerStatsIsolationIT {
-
-    /**
-     * Its own database, and so its own context: these assert what the view recorder has buffered
-     * versus flushed, and the recorder is one bean per context. A neighbour recording or flushing
-     * moves the number this test is about to read.
-     */
-    @DynamicPropertySource
-    static void ownDatabase(DynamicPropertyRegistry registry) {
-        SharedMySqlContainerSupport.registerOwnDatabase(registry, "stats_isolation");
-    }
-
-
-
+class PlannerStatsIsolationIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private MockMvc mockMvc;

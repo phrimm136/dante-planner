@@ -42,8 +42,8 @@ abstract class CausalHarnessSupport {
 
     /**
      * The thirteen subclasses drive replication state and toxics through one primary/replica pair,
-     * one Redis, and one Toxiproxy held as per-fork statics. Unlike the single-database tests they
-     * cannot isolate by owning a database, so they serialize against each other instead.
+     * one Redis, and one Toxiproxy held as statics of the test JVM. Unlike the single-database
+     * tests they cannot isolate by owning a database, so they serialize against each other instead.
      */
     static final String SHARED_HARNESS = "causal-harness";
 

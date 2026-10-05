@@ -6,6 +6,8 @@ import com.tngtech.archunit.core.importer.ClassFileImporter;
 
 import org.junit.jupiter.api.Test;
 
+import org.danteplanner.backend.integration.ExclusiveDatabaseSupport;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -32,16 +34,21 @@ class TestIsolationConventionTest {
         List<String> offenders = TEST_CLASSES.stream()
                 .filter(TestIsolationConventionTest::isTestClass)
                 .filter(TestIsolationConventionTest::truncatesATable)
-                .filter(clazz -> !mentions(clazz, "registerOwnDatabase"))
+                .filter(clazz -> !clazz.isAssignableTo(ExclusiveDatabaseSupport.class))
                 .map(JavaClass::getSimpleName)
                 .sorted()
                 .toList();
 
         assertThat(offenders)
                 .as("these truncate the shared database, deleting rows their concurrent neighbours "
-                        + "are still using; narrow the assertion to rows the test created, or take "
-                        + "registerOwnDatabase")
+                        + "are still using; narrow the assertion to rows the test created, or extend "
+                        + "ExclusiveDatabaseSupport")
                 .isEmpty();
+    }
+
+    @Test
+    void plannerTableEmptying_WhenCalledOutsideAnExclusiveMember_IsRejected() {
+        ExclusiveDatabaseRule.PLANNER_TABLES_EMPTIED_ONLY_BY_EXCLUSIVE_MEMBERS.check(TEST_CLASSES);
     }
 
     /**
@@ -66,21 +73,20 @@ class TestIsolationConventionTest {
 
         assertThat(offenders)
                 .as("these empty a table their concurrent neighbours are still reading; add a WHERE "
-                        + "naming the test's own rows, or take registerOwnDatabase")
+                        + "naming the test's own rows, or extend ExclusiveDatabaseSupport")
                 .isEmpty();
     }
 
-    /** True for a class drawing on the fork's shared database rather than one of its own. */
+    /** True for a class drawing on the run's shared database rather than the exclusive one. */
     private static boolean boundToTheSharedDatabase(String source) {
-        return (source.contains("extends SharedMySqlContainerSupport")
-                        || source.contains("registerSharedMysql"))
-                && !source.contains("registerOwnDatabase");
+        return source.contains("extends SharedMySqlContainerSupport")
+                || source.contains("registerSharedMysql");
     }
 
     /**
      * Redis calls whose scope is the whole keyspace, as owner to method names.
      *
-     * <p>A blacklist entry is keyed by a hash of its own token, so classes sharing the fork's Redis
+     * <p>A blacklist entry is keyed by a hash of its own token, so classes sharing the run's Redis
      * cannot collide on one. A scan is the exception: it counts and deletes keys written by classes
      * it has never heard of, and no id exists to narrow it to.</p>
      */
@@ -299,13 +305,14 @@ class TestIsolationConventionTest {
 
     /**
      * Each class declaring its own {@code @DynamicPropertySource} keys a distinct application
-     * context. Past the cache bound Spring evicts, and eviction closes a context while other
+     * context; a base class's, such as {@code ExclusiveDatabaseSupport}'s, keys one for all its
+     * subclasses. Past the cache bound Spring evicts, and eviction closes a context while other
      * classes are still running against it — which surfaces as rows that vanish mid-test, in some
      * unrelated class, only at full suite size. Raising the bound defers that; keeping the count
      * low is what prevents it. The budget sits at the current count, so any addition is a
      * deliberate decision rather than a silent slide toward the bound.
      */
-    private static final int CONTEXT_BUDGET = 30;
+    private static final int CONTEXT_BUDGET = 18;
 
     @Test
     void distinctContexts_WhenOverBudget_IsRejected() {

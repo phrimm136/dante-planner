@@ -1,11 +1,8 @@
 package org.danteplanner.backend.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
-import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -16,13 +13,8 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -42,23 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  * is not serialized behind a held write lock), and the response returns the pre-request view
  * count while the view row is persisted only when the buffer is later flushed.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@AutoConfigureMockMvc
-@ActiveProfiles("it")
-@Tag("containerized")
-@Import(TestConfig.class)
-class PublishedPlannerDetailIT {
-
-    /**
-     * The subject includes {@link PlannerViewRecorder}'s flush buffer, a per-context singleton. On a
-     * shared context its timer drains one batch spanning every class, and the drain removes entries
-     * before the write commits, so a neighbour's failing entry takes this class's view with it.
-     */
-    @DynamicPropertySource
-    static void ownDatabase(DynamicPropertyRegistry registry) {
-        SharedMySqlContainerSupport.registerOwnDatabase(registry, "published_detail");
-    }
-
+class PublishedPlannerDetailIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private MockMvc mockMvc;

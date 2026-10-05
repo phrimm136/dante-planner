@@ -1,20 +1,46 @@
 # 171 tests-keep-class-concurrency-and-enforce-isolation-by-rule
-epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @mocks
+epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @mocks @memory @isolation
 
 ## Decisions
-- @tests @concurrency — Backend test classes keep running concurrently inside each Gradle fork, three
+- @tests @concurrency — Backend test classes keep running concurrently inside the test JVM, twelve
   at a time in random order, and each hazard that concurrency exposes is closed by a rule that names
   it rather than by serializing the suite. Concurrent classes share one database, one Redis and one
   application context per configuration, so a class that reaches past its own rows and keys breaks a
   neighbour.
-  REJECTED: turning in-fork class concurrency off — measured over three runs each, the suite took
+  REJECTED: turning class concurrency off — measured over three runs each, the suite took
   58 s longer on average (+25%), with the wall-clock ranges not overlapping, and peak memory did not
   move outside the run-to-run noise.
   INVARIANT: a test class shares the database only for rows it created: it truncates nothing, deletes
   no table without a WHERE, scans no shared Redis keyspace, and takes no hard-coded identity in a
   shared namespace — the test-isolation convention scan.
   NON-GOAL: lowering memory by running fewer threads, shrinking the context cache or lowering the
-  per-fork heap — memory falls by sharing containers and merging context keys instead.
+  heap below the measured peak — memory falls by sharing containers and merging context keys instead.
+- @tests @concurrency @memory — The backend suite runs in one test JVM with a 2560 MiB heap, and the
+  parallelism lives in JUnit's class threads instead of Gradle forks. A Spring context and the static
+  Testcontainers a class starts live in one JVM only, so every fork rebuilt the contexts and the
+  containers of the classes it happened to run and paid about 350 MiB of class metadata, code and
+  GC structures of its own. Measured on one tree: six forks of three threads peaked at 9405 MiB
+  (java and Docker,
+  20 MySQL containers, 234 s); one JVM of twelve threads, with the whole-table classes on one
+  exclusive database, peaked at 7078–7576 MiB over three runs (7 MySQL containers) in 176–211 s.
+  REJECTED: per-fork tuning (`-XX:ActiveProcessorCount=2`, SerialGC, a context cache of 8, lazy bean
+  initialization) — each moved the peak by less than run-to-run noise or raised it, and lazy
+  initialization broke the metrics registration test.
+  REJECTED: fewer forks at three threads each — the fixed per-JVM cost falls, but the wall clock rises
+  with nothing to fill the cores.
+  INVARIANT: the heap is at least 1.25 times the measured peak (1785 MiB before GC) —
+  unenforced; re-measure with the GC log when the context count or the thread count changes.
+- @tests @concurrency @isolation — A test class whose subject is a whole table, or that changes a
+  shared object such as a stored procedure, extends `ExclusiveDatabaseSupport`: one database and one
+  Redis for all such classes, which run one at a time under `@ResourceLock("exclusive-db")` and share
+  one context unless a member overrides a bean. A member owns nothing between classes, so it empties
+  what it asserts over at its start (`emptyPlannerTables` for the planner tables) or narrows to its
+  own rows; it never relies on a fresh database.
+  REJECTED: a database per class — each one minted its own context and Redis container (13 of each),
+  and a class that drops a shared procedure on the shared database broke concurrent neighbours.
+  INVARIANT: a class that truncates or deletes without a WHERE extends `ExclusiveDatabaseSupport`, and
+  the classes that declare their own property source stay within a budget — the test-isolation
+  convention scan.
 - @tests @deletion — A test is deleted only when one of five criteria holds, with its evidence
   recorded: it kills no mutant in a full mutation-matrix run (unit tests only) and no behavior it
   checks is left unchecked by other tests; it duplicates another test's arrange, act and assert; it
@@ -49,7 +75,7 @@ epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @
   `logback-test.xml`, because Spring Boot reinitialises logging on each context start and close,
   which detaches every appender attached at runtime — a concurrent class starting a context
   emptied a capture mid-test.
-  REJECTED: `@Isolated` per class — serializes the fork for every log assertion.
+  REJECTED: `@Isolated` per class — serializes the test JVM for every log assertion.
   INVARIANT: only `support.LogCapture` attaches a logback appender — the log-capture rule
   (`LogCaptureRule`, checked by `TestLogCaptureConventionTest`).
 - @tests @mocks — No test replaces a Spring bean with a Mockito mock or spy. An integration test

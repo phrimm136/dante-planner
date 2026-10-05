@@ -1,8 +1,5 @@
 package org.danteplanner.backend.integration;
 
-import org.danteplanner.backend.config.TestConfig;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.DynamicPropertyRegistry;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -17,13 +14,9 @@ import org.danteplanner.backend.user.service.UserSettingsService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
 
 import javax.sql.DataSource;
 import java.time.Instant;
@@ -43,21 +36,7 @@ import java.time.ZoneOffset;
  * reassigned to the sentinel account so they outlive the {@code ON DELETE CASCADE}
  * that the users row would otherwise carry them off with.</p>
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@ActiveProfiles("it")
-@Tag("containerized")
-@Import(TestConfig.class)
-class PlannerUserDeleteSweepIT {
-
-    /**
-     * Its own database: the sweep hard-deletes by criteria over the whole users table, so in the
-     * shared one it removes rows belonging to every concurrently running class.
-     */
-    @DynamicPropertySource
-    static void ownDatabase(DynamicPropertyRegistry registry) {
-        SharedMySqlContainerSupport.registerOwnDatabase(registry, "user_delete_sweep");
-    }
-
+class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private UserRepository userRepository;
@@ -104,14 +83,7 @@ class PlannerUserDeleteSweepIT {
     }
 
     private void cleanUp() {
-        for (String table : List.of(
-                "planner_reports", "planner_subscriptions", "planner_bookmarks",
-                "planner_comment_votes", "planner_comments", "planner_views", "planner_votes",
-                "planner_entity_filter", "planner_keyword_filter", "planner_catalog",
-                "planner_stats", "planner_moderation", "planner_publication",
-                "planner_content", "planner")) {
-            jdbc.update("DELETE FROM " + table);
-        }
+        emptyPlannerTables(jdbc);
     }
 
     private int rowsFor(String table, UUID plannerId) {

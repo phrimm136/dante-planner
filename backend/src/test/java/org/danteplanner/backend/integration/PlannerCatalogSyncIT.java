@@ -1,7 +1,6 @@
 package org.danteplanner.backend.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -20,14 +19,10 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -51,11 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The catalog sync drains pending planner-catalog-changed rows one planner at a time and derives
  * filter rows, the withdrawal marker and the delete tombstone from the planner's committed row.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@ActiveProfiles("it")
-@Tag("containerized")
-@Import(TestConfig.class)
-class PlannerCatalogSyncIT extends SharedMySqlContainerSupport {
+class PlannerCatalogSyncIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private UserRepository userRepository;
@@ -284,8 +275,8 @@ class PlannerCatalogSyncIT extends SharedMySqlContainerSupport {
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-        catalogService.add(planner);
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        catalogService.onBecameVisible(planner);
+        CatalogEffects.drain(catalogSyncService, jdbc, planner.getId());
         return planner;
     }
 

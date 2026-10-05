@@ -193,20 +193,21 @@ because the original passes when the single row present belongs to someone else.
 in three unrelated classes.
 
 Three classes asserting on one view recorder's in-memory buffer failed intermittently for a day
-before that was named. A private database is really a private context, and a private context is a
-private bean.
+before that was named. `ExclusiveDatabaseSupport` members share one database, one Redis and one
+context, and so one recorder, unless a member overrides a bean. They are serialized, not private: a
+member can still flush what an earlier one buffered.
 
 `.actorId(1L)` asserts that user 1 exists and is yours, which holds only on a database nobody else
 writes to and no engine enforces.
 
-`registerOwnDatabase` costs one application context, so narrow the assertion first.
+`ExclusiveDatabaseSupport` runs its subclasses one at a time, so narrow the assertion first.
 
 **Annotations.** `@Execution(CONCURRENT)` on a class makes its methods concurrent, and they share
 that class's `@BeforeEach` fixtures; "classes parallel, methods sequential" exists only in
 `junit-platform.properties`. `@ResourceLock` is an in-JVM lock, so a locked class truncating a shared
 table still clobbers every class that did not declare it. Spring collects `@DynamicPropertySource`
-from a class hierarchy with no defined order, so a subclass binding its own database while
-inheriting one that binds the shared database is a coin flip.
+from a class hierarchy with no defined order, so a subclass binding a database of its own while
+inheriting `ExclusiveDatabaseSupport`'s or the shared one is a coin flip.
 
 Serialization coordinates only participants — a developer's own running Redis never agreed to take
 your lock.
