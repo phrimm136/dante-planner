@@ -17,6 +17,7 @@ import org.springframework.test.context.DynamicPropertySource;
 
 import com.redis.testcontainers.RedisContainer;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -77,15 +78,16 @@ class AuthLocalReadSplitIT {
     @Autowired
     private ContentTombstoneStore contentTombstoneStore;
 
+    private LettuceConnectionFactory authLocalFactory;
     private StringRedisTemplate authLocalTemplate;
 
     @BeforeEach
     void setUp() {
-        LettuceConnectionFactory factory = new LettuceConnectionFactory(
+        authLocalFactory = new LettuceConnectionFactory(
                 new RedisStandaloneConfiguration(
                         AUTH_LOCAL_REDIS.getRedisHost(), AUTH_LOCAL_REDIS.getRedisPort()));
-        factory.afterPropertiesSet();
-        authLocalTemplate = new StringRedisTemplate(factory);
+        authLocalFactory.afterPropertiesSet();
+        authLocalTemplate = new StringRedisTemplate(authLocalFactory);
         authLocalTemplate.afterPropertiesSet();
 
         tokenBlacklistService.clear();
@@ -99,6 +101,11 @@ class AuthLocalReadSplitIT {
         if (localKeys != null && !localKeys.isEmpty()) {
             authLocalTemplate.delete(localKeys);
         }
+    }
+
+    @AfterEach
+    void tearDown() {
+        authLocalFactory.destroy();
     }
 
     private void mirror(String pattern) {
@@ -187,32 +194,35 @@ class AuthLocalReadSplitIT {
         deadFactory.afterPropertiesSet();
         StringRedisTemplate deadTemplate = new StringRedisTemplate(deadFactory);
         deadTemplate.afterPropertiesSet();
+        try {
+            SimpleMeterRegistry registry = new SimpleMeterRegistry();
+            TokenBlacklistService blSvc =
+                    new TokenBlacklistService(stringRedisTemplate, deadTemplate, registry,
+                            TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
+            ContentTombstoneStore tsSvc =
+                    new ContentTombstoneStore(stringRedisTemplate, deadTemplate,
+                            new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
 
-        SimpleMeterRegistry registry = new SimpleMeterRegistry();
-        TokenBlacklistService blSvc =
-                new TokenBlacklistService(stringRedisTemplate, deadTemplate, registry,
-                        TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
-        ContentTombstoneStore tsSvc =
-                new ContentTombstoneStore(stringRedisTemplate, deadTemplate,
-                        new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
+            String token = "phase14a-failopen-token";
+            Date futureExpiry = new Date(System.currentTimeMillis() + Duration.ofHours(1).toMillis());
+            blSvc.blacklistToken(token, futureExpiry);
 
-        String token = "phase14a-failopen-token";
-        Date futureExpiry = new Date(System.currentTimeMillis() + Duration.ofHours(1).toMillis());
-        blSvc.blacklistToken(token, futureExpiry);
+            assertThat(blSvc.isBlacklisted(token))
+                    .as("fail-open: read routed to the unreachable auth-local, not the auth write store")
+                    .isFalse();
 
-        assertThat(blSvc.isBlacklisted(token))
-                .as("fail-open: read routed to the unreachable auth-local, not the auth write store")
-                .isFalse();
+            assertThat(registry.get("blacklist_check_skipped_total").counter().count())
+                    .as("fail-open increments the skip counter")
+                    .isGreaterThanOrEqualTo(1.0);
 
-        assertThat(registry.get("blacklist_check_skipped_total").counter().count())
-                .as("fail-open increments the skip counter")
-                .isGreaterThanOrEqualTo(1.0);
+            UUID id = UUID.randomUUID();
+            tsSvc.writeTombstone("planner", id);
 
-        UUID id = UUID.randomUUID();
-        tsSvc.writeTombstone("planner", id);
-
-        assertThat(tsSvc.isTombstoned("planner", id))
-                .as("fail-open: tombstone read routed to the unreachable auth-local, not the auth write store")
-                .isFalse();
+            assertThat(tsSvc.isTombstoned("planner", id))
+                    .as("fail-open: tombstone read routed to the unreachable auth-local, not the auth write store")
+                    .isFalse();
+        } finally {
+            deadFactory.destroy();
+        }
     }
 }

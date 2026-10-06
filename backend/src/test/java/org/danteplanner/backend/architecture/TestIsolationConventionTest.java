@@ -41,8 +41,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class TestIsolationConventionTest {
 
-    private static final JavaClasses TEST_CLASSES =
-            new ClassFileImporter().importPackages("org.danteplanner.backend");
+    private static final JavaClasses TEST_CLASSES = ImportedClasses.everything();
 
     @Test
     void truncation_WhenClassSharesTheDatabase_IsRejected() {

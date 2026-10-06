@@ -4,7 +4,6 @@ import org.danteplanner.backend.notification.scheduler.NotificationCleanupSchedu
 import org.danteplanner.backend.integration.SharedRedisContainerSupport;
 import org.danteplanner.backend.user.scheduler.UserCleanupScheduler;
 
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 
@@ -15,6 +14,7 @@ import net.javacrumbs.shedlock.core.SimpleLock;
 import net.javacrumbs.shedlock.provider.redis.spring.RedisLockProvider;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Tag("containerized")
 class ShedLockMultiPodIT {
 
-    private static RedisConnectionFactory connectionFactory;
+    private static LettuceConnectionFactory connectionFactory;
 
     @BeforeAll
     static void startRedis() {
@@ -43,6 +43,11 @@ class ShedLockMultiPodIT {
             new RedisStandaloneConfiguration(SharedRedisContainerSupport.host(), SharedRedisContainerSupport.port()));
         f.afterPropertiesSet();
         connectionFactory = f;
+    }
+
+    @AfterAll
+    static void stopRedis() {
+        connectionFactory.destroy();
     }
 
 

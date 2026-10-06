@@ -7,6 +7,7 @@ import org.danteplanner.backend.shared.config.JwtProperties;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,6 +65,11 @@ class RefreshRotationServiceIT {
     @BeforeAll
     static void startRedis() {
         sharedTemplate = buildTemplate(SharedRedisContainerSupport.host(), SharedRedisContainerSupport.port());
+    }
+
+    @AfterAll
+    static void stopRedis() {
+        ((LettuceConnectionFactory) sharedTemplate.getRequiredConnectionFactory()).destroy();
     }
 
     private static StringRedisTemplate buildTemplate(String host, int port) {

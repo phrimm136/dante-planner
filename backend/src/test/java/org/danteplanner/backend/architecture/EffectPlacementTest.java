@@ -7,7 +7,6 @@ import com.tngtech.archunit.core.domain.JavaMethod;
 import com.tngtech.archunit.core.domain.JavaMethodCall;
 import com.tngtech.archunit.core.domain.JavaModifier;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
-import com.tngtech.archunit.core.importer.ImportOption;
 
 import org.junit.jupiter.api.Test;
 
@@ -56,9 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class EffectPlacementTest {
 
-    private static final JavaClasses MAIN_CLASSES = new ClassFileImporter()
-            .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
-            .importPackages("org.danteplanner.backend");
+    private static final JavaClasses MAIN_CLASSES = ImportedClasses.production();
 
     private static final String TRANSACTIONAL = "org.springframework.transaction.annotation.Transactional";
 

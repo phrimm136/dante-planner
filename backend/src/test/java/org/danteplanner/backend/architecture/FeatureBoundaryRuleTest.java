@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
-import com.tngtech.archunit.core.importer.ImportOption;
 
 import org.danteplanner.moduleboundaryfixture.backend.archive.service.ArchivedUserReaderFixture;
 import org.danteplanner.moduleboundaryfixture.backend.comment.service.PlannerCallerFixture;
@@ -92,9 +91,7 @@ class FeatureBoundaryRuleTest {
 
     @Test
     void moduleSet_WhenDerivedFromMainSources_IsTheSevenFeatures() {
-        JavaClasses main = new ClassFileImporter()
-                .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
-                .importPackages("org.danteplanner.backend");
+        JavaClasses main = ImportedClasses.production();
 
         assertThat(FeatureBoundaryTest.modulesOf(main)).isEqualTo(
                 Set.of("admin", "auth", "comment", "moderation", "notification", "planner", "user"));

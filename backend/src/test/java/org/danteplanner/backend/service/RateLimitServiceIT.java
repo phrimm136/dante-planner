@@ -64,6 +64,8 @@ class RateLimitServiceIT {
 
     @AfterAll
     static void stopContainers() {
+        ((LettuceConnectionFactory) rateLimitTemplate.getRequiredConnectionFactory()).destroy();
+        ((LettuceConnectionFactory) authTemplate.getRequiredConnectionFactory()).destroy();
         REDIS.stop();
         AUTH_REDIS.stop();
     }

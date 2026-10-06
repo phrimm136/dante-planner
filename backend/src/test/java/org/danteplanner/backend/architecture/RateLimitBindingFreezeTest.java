@@ -20,8 +20,6 @@ import org.junit.jupiter.api.Test;
 
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.domain.JavaMethod;
-import com.tngtech.archunit.core.importer.ClassFileImporter;
-import com.tngtech.archunit.core.importer.ImportOption;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -163,9 +161,7 @@ class RateLimitBindingFreezeTest {
     }
 
     private static List<String> scanBindings() {
-        JavaClasses production = new ClassFileImporter()
-                .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
-                .importPackages("org.danteplanner.backend");
+        JavaClasses production = ImportedClasses.production();
 
         return production.stream()
                 .flatMap(javaClass -> javaClass.getMethods().stream())

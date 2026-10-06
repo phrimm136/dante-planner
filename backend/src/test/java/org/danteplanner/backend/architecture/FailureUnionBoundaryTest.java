@@ -4,7 +4,6 @@ import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.domain.JavaMethod;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
-import com.tngtech.archunit.core.importer.ImportOption;
 
 import org.junit.jupiter.api.Test;
 
@@ -39,9 +38,7 @@ class FailureUnionBoundaryTest {
 
     private static final String FIXTURE_PACKAGE = "org.danteplanner.backend.architecture.fixture";
 
-    private static final JavaClasses MAIN_CLASSES = new ClassFileImporter()
-            .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
-            .importPackages("org.danteplanner.backend");
+    private static final JavaClasses MAIN_CLASSES = ImportedClasses.production();
 
     private static final JavaClasses FIXTURE_CLASSES = new ClassFileImporter()
             .importPackages(FIXTURE_PACKAGE);

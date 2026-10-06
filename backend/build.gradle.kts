@@ -132,8 +132,8 @@ tasks.withType<Test> {
     // whole fixed cost — a JVM, its Spring contexts and a Testcontainers set — so a fork per core
     // costs memory that a thread per class does not.
     maxParallelForks = 1
-    // Measured: the heap peaks at 1381 MiB with twelve classes running, so this leaves 46% free.
-    maxHeapSize = "2560m"
+    // Measured: at most 989 MiB survives a collecting GC with twelve classes running; 2 GiB is about twice that.
+    maxHeapSize = "2g"
     // Test JVMs are short-lived and dominated by Spring context startup, so C1-only JIT favors
     // fast warmup over peak speed the fork never reaches.
     //

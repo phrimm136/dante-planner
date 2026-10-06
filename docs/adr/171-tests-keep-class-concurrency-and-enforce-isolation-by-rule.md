@@ -14,8 +14,8 @@ epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @
   no table without a WHERE, scans no shared Redis keyspace, and takes no hard-coded identity in a
   shared namespace — the test-isolation convention scan.
   NON-GOAL: lowering memory by running fewer threads, shrinking the context cache or lowering the
-  heap below the measured peak — memory falls by sharing containers and merging context keys instead.
-- @tests @concurrency @memory — The backend suite runs in one test JVM with a 2560 MiB heap, and the
+  heap below the invariant's margin — memory falls by sharing containers and imports instead.
+- @tests @concurrency @memory — The backend suite runs in one test JVM with a 2 GiB heap, and the
   parallelism lives in JUnit's class threads instead of Gradle forks. A Spring context and the static
   Testcontainers a class starts live in one JVM only, so every fork rebuilt the contexts and the
   containers of the classes it happened to run and paid about 350 MiB of class metadata, code and
@@ -29,8 +29,10 @@ epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @
   initialization broke the metrics registration test.
   REJECTED: fewer forks at three threads each — the fixed per-JVM cost falls, but the wall clock rises
   with nothing to fill the cores.
-  INVARIANT: the heap is at least 1.25 times the measured peak (1381 MiB before GC) —
-  unenforced; re-measure with the GC log when the context count or the thread count changes.
+  INVARIANT: the heap is at least 1.25 times the largest heap that survives a collecting pause
+  (989 MiB, against 2 GiB) — unenforced; re-measure with the GC log when the context count or the
+  thread count changes. Neither the peak before a GC nor a Cleanup or Remark pause is the measure:
+  G1 grows the young generation into whatever the limit allows, and those pauses free nothing.
 - @tests @concurrency @contexts — The test classpath shadows spring-test's
   `DefaultCacheAwareContextLoaderDelegate` with a copy whose only change is per-configuration
   locking: a cached context is returned without a lock, and a load blocks only callers of the same

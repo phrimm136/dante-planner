@@ -8,14 +8,13 @@ import java.util.Set;
 
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
-import com.tngtech.archunit.core.importer.ClassFileImporter;
-import com.tngtech.archunit.core.importer.ImportOption;
 
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.shared.sanitize.NotUserContent;
 import org.danteplanner.backend.shared.sanitize.Sanitized;
 
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyPackage;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -48,9 +47,8 @@ class SanitizationCoverageTest {
             "CreateCommentRequest.content",
             "UpdateCommentRequest.content");
 
-    private static final JavaClasses DTO_CLASSES = new ClassFileImporter()
-            .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
-            .importPackages(USER_CONTENT_DTO_PACKAGES);
+    private static final JavaClasses DTO_CLASSES = ImportedClasses.production().that(resideInAnyPackage(
+            USER_CONTENT_DTO_PACKAGES.stream().map(dtoPackage -> dtoPackage + "..").toArray(String[]::new)));
 
     @Test
     void stringComponent_WhenNeitherSanitizedNorOptedOut_IsRejected() {

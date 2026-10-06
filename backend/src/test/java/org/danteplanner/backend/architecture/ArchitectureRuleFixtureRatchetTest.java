@@ -34,6 +34,7 @@ import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ArchitectureRuleFixtureRatchetTest {
@@ -49,7 +50,8 @@ class ArchitectureRuleFixtureRatchetTest {
             "org.junit.jupiter.api.Assertions.assertThrows");
     private static final String MESSAGE_ASSERTION_PREFIX = "hasMessage";
 
-    private static final JavaClasses ARCHITECTURE_CLASSES = new ClassFileImporter().importPackages(ARCHITECTURE);
+    private static final JavaClasses ARCHITECTURE_CLASSES =
+            ImportedClasses.everything().that(resideInAPackage(ARCHITECTURE + ".."));
     private static final Rules RULES = rulesIn(ARCHITECTURE_CLASSES.stream()
             .filter(holder -> !isFixturePackage(holder.getPackageName()))
             .toList());

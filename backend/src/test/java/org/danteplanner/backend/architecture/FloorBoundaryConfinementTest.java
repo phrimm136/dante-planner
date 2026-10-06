@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
-import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.lang.ArchRule;
 
 import static com.tngtech.archunit.core.domain.JavaCall.Predicates.target;
@@ -65,9 +64,7 @@ class FloorBoundaryConfinementTest {
                     .should().callConstructorWhere(target(owner(equivalentTo(FloorSelection.class))))
                     .as("floor selections are built by the floor module's parse boundary");
 
-    private static final JavaClasses PRODUCTION = new ClassFileImporter()
-            .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
-            .importPackages("org.danteplanner.backend");
+    private static final JavaClasses PRODUCTION = ImportedClasses.production();
 
     @Test
     void rawFloorReads_WhenScanned_AreConfinedToTheFloorModule() {

@@ -16,8 +16,7 @@ import com.tngtech.archunit.core.domain.AccessTarget;
 import com.tngtech.archunit.core.domain.JavaAccess;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.domain.JavaFieldAccess;
-import com.tngtech.archunit.core.importer.ClassFileImporter;
-import com.tngtech.archunit.core.importer.ImportOption;
+import org.danteplanner.backend.architecture.ImportedClasses;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.junit.jupiter.api.Test;
 
@@ -34,9 +33,7 @@ class ErrorCodeVocabularyTest {
             ErrorCode.class.getName(),
             PlannerValidationException.class.getName());
 
-    private static final JavaClasses PRODUCTION = new ClassFileImporter()
-            .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
-            .importPackages("org.danteplanner.backend");
+    private static final JavaClasses PRODUCTION = ImportedClasses.production();
 
     @Test
     void errorCode_WhenComparedWithTheVocabulary_HoldsExactlyItsCodes() throws IOException {

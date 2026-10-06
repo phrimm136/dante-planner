@@ -17,7 +17,6 @@ import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.domain.JavaMethodCall;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
-import com.tngtech.archunit.core.importer.ImportOption;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,9 +30,7 @@ class ContentWritersAdmitFloorsTest {
     private static final Set<String> FROZEN_UNADMITTED_WRITERS = Set.of(
             PlannerCatalogSyncService.class.getName());
 
-    private static final JavaClasses PRODUCTION = new ClassFileImporter()
-            .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
-            .importPackages("org.danteplanner.backend");
+    private static final JavaClasses PRODUCTION = ImportedClasses.production();
 
     @Test
     void contentWriters_WhenScanned_DependOnTheAdmissionPathUnlessFrozen() {

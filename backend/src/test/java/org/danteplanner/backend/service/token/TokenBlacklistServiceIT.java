@@ -11,6 +11,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import com.redis.testcontainers.RedisContainer;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -46,6 +47,11 @@ class TokenBlacklistServiceIT {
     static void startRedis() {
         REDIS.start();
         ownTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
+    }
+
+    @AfterAll
+    static void stopRedis() {
+        ((LettuceConnectionFactory) ownTemplate.getRequiredConnectionFactory()).destroy();
     }
 
     private static StringRedisTemplate buildTemplate(String host, int port) {

@@ -7,7 +7,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
@@ -102,7 +104,26 @@ class LogoutRevocationIT {
                         AUTH_REDIS.getRedisHost(), AUTH_REDIS.getRedisPort()),
                 clientConfig);
         factory.afterPropertiesSet();
-        return new StringRedisTemplate(factory);
+        return new ClosingTemplate(factory, resources);
+    }
+
+    static final class ClosingTemplate extends StringRedisTemplate
+            implements ApplicationListener<ContextClosedEvent> {
+
+        private final LettuceConnectionFactory connectionFactory;
+        private final ClientResources resources;
+
+        ClosingTemplate(LettuceConnectionFactory connectionFactory, ClientResources resources) {
+            super(connectionFactory);
+            this.connectionFactory = connectionFactory;
+            this.resources = resources;
+        }
+
+        @Override
+        public void onApplicationEvent(ContextClosedEvent event) {
+            connectionFactory.destroy();
+            resources.shutdown();
+        }
     }
 
     @Autowired

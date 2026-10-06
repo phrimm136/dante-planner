@@ -9,9 +9,9 @@ import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
-import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.lang.ArchRule;
 
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -43,9 +43,8 @@ class FloorModuleBoundaryTest {
                     .should().dependOnClassesThat(SIBLING_SUBJECT)
                     .as("the floor module depends on the validation root, never on a sibling subject package");
 
-    private static final JavaClasses PRODUCTION = new ClassFileImporter()
-            .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
-            .importPackages("org.danteplanner.backend.planner.validation.floor");
+    private static final JavaClasses PRODUCTION = ImportedClasses.production()
+            .that(resideInAPackage("org.danteplanner.backend.planner.validation.floor.."));
 
     @Test
     void floorModule_WhenScanned_DependsOnNoCallerPackage() {
