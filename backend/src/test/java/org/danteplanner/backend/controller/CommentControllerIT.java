@@ -2,7 +2,6 @@ package org.danteplanner.backend.controller;
 
 
 import jakarta.servlet.http.Cookie;
-import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
@@ -13,23 +12,10 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
-import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
-import org.danteplanner.backend.moderation.service.CommentReportService;
-import org.danteplanner.backend.planner.api.PlannerAccess;
-import org.danteplanner.backend.planner.api.PlannerCommentCounts;
-import org.danteplanner.backend.planner.api.PlannerVotes;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
-import org.danteplanner.backend.comment.service.CommentCommandService;
-import org.danteplanner.backend.comment.service.CommentEngagementService;
-import org.danteplanner.backend.comment.service.CommentQueryService;
-import org.danteplanner.backend.comment.validation.CommentAccessValidator;
-import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
-import org.danteplanner.backend.comment.validation.CommentStateValidator;
-import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.shared.util.CommentConstants;
-import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -38,11 +24,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -58,60 +40,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@AutoConfigureMockMvc
 @ActiveProfiles("it")
 @Tag("containerized")
-@Import({TestConfig.class, CommentControllerIT.MockCommentServiceConfig.class})
+@Import(TestConfig.class)
 class CommentControllerIT extends SharedMySqlContainerSupport {
-
-
-
-
-    @TestConfiguration
-    static class MockCommentServiceConfig {
-        @Bean
-        @Primary
-        public CommentQueryService commentQueryService(
-                PlannerCommentRepository commentRepository,
-                PlannerCommentVoteRepository commentVoteRepository,
-                PlannerAccess plannerAccess,
-                UserService userService) {
-            return new CommentQueryService(commentRepository, commentVoteRepository, new UsersApiAdapter(userService, null),
-                    plannerAccess,
-                    new CommentAccessValidator());
-        }
-
-        @Bean
-        @Primary
-        public CommentCommandService commentCommandService(
-                PlannerCommentRepository commentRepository,
-                CommentQueryService commentQueryService,
-                PlannerAccess plannerAccess,
-                PlannerCommentCounts plannerCommentCounts,
-                DomainEventRecorder domainEventRecorder) {
-            return new CommentCommandService(commentRepository, commentQueryService,
-                    domainEventRecorder,
-                    plannerAccess,
-                    plannerCommentCounts,
-                    new CommentAccessValidator(), new CommentAuthorshipValidator(),
-                    new CommentStateValidator());
-        }
-
-        @Bean
-        @Primary
-        public CommentEngagementService commentEngagementService(
-                PlannerCommentRepository commentRepository,
-                PlannerCommentVoteRepository commentVoteRepository,
-                CommentQueryService commentQueryService,
-                PlannerAccess plannerAccess,
-                PlannerVotes plannerVotes,
-                CommentReportService commentReportService) {
-            return new CommentEngagementService(commentRepository, commentVoteRepository, commentQueryService,
-                    plannerAccess,
-                    commentReportService, new CommentAuthorshipValidator(),
-                    new CommentStateValidator(), plannerVotes);
-        }
-    }
 
     @Autowired
     private MockMvc mockMvc;

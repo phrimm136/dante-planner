@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Test;
 import org.danteplanner.backend.config.TestConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -62,7 +61,6 @@ import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
  * validation, error handling, and business logic.</p>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@AutoConfigureMockMvc
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)

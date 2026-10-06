@@ -1,5 +1,5 @@
 # 171 tests-keep-class-concurrency-and-enforce-isolation-by-rule
-epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @mocks @memory @isolation
+epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @mocks @memory @isolation @transactions
 
 ## Decisions
 - @tests @concurrency — Backend test classes keep running concurrently inside the test JVM, twelve
@@ -22,14 +22,33 @@ epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @
   GC structures of its own. Measured on one tree: six forks of three threads peaked at 9405 MiB
   (java and Docker,
   20 MySQL containers, 234 s); one JVM of twelve threads, with the whole-table classes on one
-  exclusive database, peaked at 7078–7576 MiB over three runs (7 MySQL containers) in 176–211 s.
+  exclusive database, merged context keys (29 contexts to 20) and class-lived harness containers,
+  peaked at 6388–6473 MiB over three runs in 199–219 s.
   REJECTED: per-fork tuning (`-XX:ActiveProcessorCount=2`, SerialGC, a context cache of 8, lazy bean
   initialization) — each moved the peak by less than run-to-run noise or raised it, and lazy
   initialization broke the metrics registration test.
   REJECTED: fewer forks at three threads each — the fixed per-JVM cost falls, but the wall clock rises
   with nothing to fill the cores.
-  INVARIANT: the heap is at least 1.25 times the measured peak (1785 MiB before GC) —
+  INVARIANT: the heap is at least 1.25 times the measured peak (1381 MiB before GC) —
   unenforced; re-measure with the GC log when the context count or the thread count changes.
+- @tests @concurrency @transactions — No test holds a Spring test-managed transaction: no test class
+  or method carries `@Transactional`, so cleanup is ownership of rows, and a test that needs a
+  transaction boundary (flush-time constraints, lazy navigation, a rollback under test) opens one
+  with `TransactionTemplate`. spring-test keeps the test transaction in an inheritable thread local
+  and refuses to start a test while one is present. When a test holding it blocks in a
+  `ForkJoinPool.managedBlock`-aware wait (Lettuce's synchronous API waits on a `CompletableFuture`),
+  the JUnit pool creates a compensation worker from that thread, the worker inherits the context, and
+  the first test it runs fails. A harness of 24 classes that saturated the pool failed 5 tests with
+  that `IllegalStateException` in two of three runs, on compensation workers only, and passed once
+  with the annotation removed; the inheritance itself is in the bytecode (spring-test's holder is a
+  `NamedInheritableThreadLocal`, and JDK 21's `ForkJoinWorkerThread` inherits).
+  `TransactionTemplate` binds plain thread locals, which do not inherit.
+  REJECTED: JUnit's non-ForkJoin executor — experimental and only in JUnit 6.1, a major upgrade past
+  what Spring Boot 3.5 manages, and it would avoid the leak only by not creating such threads.
+  REJECTED: an extension that clears the context before each test — it hides a leaked transaction
+  instead of removing it.
+  INVARIANT: no test class or method carries Spring's or Jakarta's `@Transactional` — the test-isolation
+  convention scan (`TESTS_HOLD_NO_SPRING_TRANSACTION`).
 - @tests @concurrency @isolation — A test class whose subject is a whole table, or that changes a
   shared object such as a stored procedure, extends `ExclusiveDatabaseSupport`: one database and one
   Redis for all such classes, which run one at a time under `@ResourceLock("exclusive-db")` and share

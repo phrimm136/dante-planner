@@ -27,8 +27,6 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,21 +43,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
-class UndeclaredPrimaryAccessIT extends SharedMySqlContainerSupport {
+class UndeclaredPrimaryAccessIT extends SharedRoutingSupport {
 
     private static final String PROBE_QUERY = "SELECT 1";
     private static final String UNDECLARED_MESSAGE = "outside a transaction";
     private static final Duration RESPONSE_HEADERS_TIMEOUT = Duration.ofSeconds(10);
-
-    @DynamicPropertySource
-    static void routingProperties(DynamicPropertyRegistry registry) {
-        String url = registerSharedMysql(registry);
-        registry.add("datasource.routing.enabled", () -> "true");
-        registry.add("datasource.replica.enabled", () -> "true");
-        registry.add("datasource.replica.url", () -> url);
-        registry.add("datasource.replica.username", MYSQL::getUsername);
-        registry.add("datasource.replica.password", MYSQL::getPassword);
-    }
 
     @Autowired
     private DataSource dataSource;

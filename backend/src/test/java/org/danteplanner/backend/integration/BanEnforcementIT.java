@@ -19,7 +19,6 @@ import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
@@ -43,7 +42,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
  * Tests end-to-end flow: ban user → attempt restricted action → verify 403.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@AutoConfigureMockMvc
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)

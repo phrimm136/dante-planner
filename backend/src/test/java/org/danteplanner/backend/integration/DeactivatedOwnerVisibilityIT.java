@@ -1,6 +1,5 @@
 package org.danteplanner.backend.integration;
 
-import net.javacrumbs.shedlock.core.LockProvider;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -24,12 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
@@ -43,7 +38,6 @@ import java.sql.PreparedStatement;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -62,21 +56,10 @@ import static org.danteplanner.backend.support.Rejections.assertRejected;
  * audit's catalog membership for the grace window, and visible again on reactivation.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@AutoConfigureMockMvc
 @ActiveProfiles("it")
 @Tag("containerized")
-@Import({TestConfig.class, DeactivatedOwnerVisibilityIT.GrantedLockHarness.class})
+@Import(TestConfig.class)
 class DeactivatedOwnerVisibilityIT extends SharedMySqlContainerSupport {
-
-    @TestConfiguration
-    static class GrantedLockHarness {
-
-        @Bean
-        @Primary
-        LockProvider grantedLockProvider() {
-            return configuration -> Optional.of(() -> { });
-        }
-    }
 
     @Autowired
     private MockMvc mockMvc;

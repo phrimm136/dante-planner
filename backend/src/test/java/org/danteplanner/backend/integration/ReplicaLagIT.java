@@ -48,8 +48,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -72,7 +70,7 @@ import static org.danteplanner.backend.support.Rejections.assertRejected;
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
-class ReplicaLagIT extends CausalHarnessSupport {
+class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
 
     private static final String PROMOTED_COUNTER = "replica_miss_promoted_total";
 
@@ -135,15 +133,6 @@ class ReplicaLagIT extends CausalHarnessSupport {
 
     @LocalServerPort
     private int port;
-
-    @DynamicPropertySource
-    static void routingProperties(DynamicPropertyRegistry registry) {
-        registry.add("datasource.routing.enabled", () -> "true");
-        registry.add("datasource.replica.enabled", () -> "true");
-        registry.add("datasource.replica.url", REPLICA::getJdbcUrl);
-        registry.add("datasource.replica.username", REPLICA::getUsername);
-        registry.add("datasource.replica.password", REPLICA::getPassword);
-    }
 
     // INV1
     @Test

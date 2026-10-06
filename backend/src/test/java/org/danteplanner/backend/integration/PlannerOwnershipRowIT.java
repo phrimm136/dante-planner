@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * SELECT resolves a planner's owner and soft-delete state through the aliased getters, so the upsert
  * create branch can distinguish owner-soft-deleted from other-user-active in one query.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)

@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -39,7 +38,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
-@Transactional
 class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
 
     @Autowired

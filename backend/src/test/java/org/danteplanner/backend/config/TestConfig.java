@@ -1,6 +1,7 @@
 package org.danteplanner.backend.config;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.springframework.context.ApplicationListener;
@@ -15,6 +16,7 @@ import io.github.bucket4j.distributed.BucketProxy;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 import io.github.bucket4j.distributed.proxy.RemoteBucketBuilder;
 import io.lettuce.core.RedisException;
+import net.javacrumbs.shedlock.core.LockProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +58,14 @@ public class TestConfig {
         ProxyManager<byte[]> proxyManager = mock(ProxyManager.class);
         when(proxyManager.builder()).thenReturn(builder);
         return proxyManager;
+    }
+
+    // Fleet lock arbitration is ShedLockMultiPodIT's subject, so integration contexts grant every lock.
+    @Bean
+    @Primary
+    @Profile("it")
+    public LockProvider grantedLockProvider() {
+        return configuration -> Optional.of(() -> { });
     }
 
     @Bean

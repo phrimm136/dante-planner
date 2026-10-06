@@ -22,7 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -54,6 +54,9 @@ class PlannerPublishEventIT extends SharedMySqlContainerSupport {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     private User owner;
     private UUID plannerId;
     private SseTopicRecorder recorder;
@@ -71,11 +74,12 @@ class PlannerPublishEventIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @Transactional
     void publish_WhenRolledBack_EmitsNoSseEvent() {
-        plannerPublishingService.publish(owner.getId(), plannerId);
+        transactionTemplate.executeWithoutResult(status -> {
+            plannerPublishingService.publish(owner.getId(), plannerId);
+            status.setRollbackOnly();
+        });
 
-        // The surrounding @Transactional rolls back, so a commit-only emission never fires.
         recorder.fence();
         assertThat(recorder.broadcasts(envelope -> envelope.payload() instanceof Map<?, ?> map
                 && plannerId.toString().equals(map.get("plannerId"))))

@@ -11,8 +11,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;
@@ -38,22 +36,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
-class MetricsRegistrationIT extends SharedMySqlContainerSupport {
+class MetricsRegistrationIT extends SharedRoutingSupport {
 
     private static final String CONNECTIONS_MAX = "hikaricp.connections.max";
     private static final String POOL_TAG = "pool";
-
-    @DynamicPropertySource
-    static void registerProperties(DynamicPropertyRegistry registry) {
-        String url = registerSharedMysql(registry);
-        registry.add("datasource.routing.enabled", () -> "true");
-        registry.add("datasource.replica.enabled", () -> "true");
-        registry.add("datasource.replica.url", () -> url);
-        registry.add("datasource.replica.username", MYSQL::getUsername);
-        registry.add("datasource.replica.password", MYSQL::getPassword);
-        registry.add("management.endpoints.web.exposure.include", () -> "health,prometheus");
-        registry.add("management.prometheus.metrics.export.enabled", () -> "true");
-    }
 
     @Autowired
     private TestRestTemplate restTemplate;

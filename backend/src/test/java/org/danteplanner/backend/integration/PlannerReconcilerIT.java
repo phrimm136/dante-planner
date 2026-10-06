@@ -2,7 +2,6 @@ package org.danteplanner.backend.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
-import net.javacrumbs.shedlock.core.LockProvider;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -25,13 +24,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.bean.override.convention.TestBean;
 
 import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -43,17 +40,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * reported as structured records — and deliberately NOT repaired.
  */
 class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
-
-    /**
-     * Stands in for the fleet lock the pass takes.
-     *
-     * <p>The lock is always granted because this class drives {@code reconcile()} directly and
-     * several times over: the real provider holds the lock for {@code lockAtLeastFor} past each
-     * release, and a refused call returns null rather than a record list. Fleet arbitration is
-     * {@code ShedLockMultiPodIT}'s subject, not this one's.</p>
-     */
-    @TestBean
-    private LockProvider lockProvider;
 
     @Autowired
     private UserRepository userRepository;
@@ -95,10 +81,6 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
             "{\"themePackId\":\"1005\",\"difficulty\":0,\"giftIds\":[]},"
                     + "{\"themePackId\":\"1006\",\"difficulty\":0,\"giftIds\":[\"9004\"]}");
     private User owner;
-
-    static LockProvider lockProvider() {
-        return configuration -> Optional.of(() -> { });
-    }
 
     @BeforeEach
     void setUp() {
@@ -388,14 +370,6 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
                 .as("both carriers are swept on their own retention, so an old stamp with neither "
                         + "row is the expected end state rather than a finding")
                 .doesNotContain("recommended_notification");
-    }
-
-    @Test
-    void reconcile_WhenCalledTwiceInsideLockAtLeastFor_RunsBothPasses() {
-        assertThat(reconciler.reconcile()).isNotNull();
-        assertThat(reconciler.reconcile())
-                .as("the real provider refuses a second pass inside lockAtLeastFor and the call returns null")
-                .isNotNull();
     }
 
     private void stampRecommended(Planner planner) {

@@ -17,7 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * {@code INSERT IGNORE ... SELECT FROM user_settings} inserts a row for each enabled, non-author,
  * non-deleted subscriber and no one else, and a re-publish is absorbed by the dedup constraint.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
@@ -45,9 +45,11 @@ class NotificationFanoutIT extends SharedMySqlContainerSupport {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
 
     @Test
-    @Transactional
     void publishFanoutSingleStatement_WhenSubscribersVary_InsertsOnlyEligibleThenDedups() {
         Long author = enabledUser("author").getId();
         Long enabledA = enabledUser("enabled-a").getId();
@@ -57,20 +59,18 @@ class NotificationFanoutIT extends SharedMySqlContainerSupport {
 
         UUID plannerId = UUID.randomUUID();
 
-        int inserted = notificationRepository.insertPublishedFanout(author, plannerId.toString(), "Fan Build");
+        publishFanout(author, plannerId);
 
-        assertThat(inserted).isEqualTo(2);
-        assertThat(unread(enabledA)).isEqualTo(1);
-        assertThat(unread(enabledB)).isEqualTo(1);
-        assertThat(unread(author)).isZero();
-        assertThat(unread(disabled)).isZero();
-        assertThat(unread(deletedButEnabled)).isZero();
+        assertThat(published(enabledA, plannerId)).isEqualTo(1);
+        assertThat(published(enabledB, plannerId)).isEqualTo(1);
+        assertThat(published(author, plannerId)).isZero();
+        assertThat(published(disabled, plannerId)).isZero();
+        assertThat(published(deletedButEnabled, plannerId)).isZero();
 
-        int rePublished =
-                notificationRepository.insertPublishedFanout(author, plannerId.toString(), "Fan Build");
+        publishFanout(author, plannerId);
 
-        assertThat(rePublished).as("uk_notification_dedup absorbs the re-publish").isZero();
-        assertThat(unread(enabledA)).isEqualTo(1);
+        assertThat(published(enabledA, plannerId)).as("uk_notification_dedup absorbs the re-publish").isEqualTo(1);
+        assertThat(published(enabledB, plannerId)).as("uk_notification_dedup absorbs the re-publish").isEqualTo(1);
     }
 
     /**
@@ -82,7 +82,6 @@ class NotificationFanoutIT extends SharedMySqlContainerSupport {
      * still write nothing.</p>
      */
     @Test
-    @Transactional
     void dedupKey_WhenARowAlreadyOccupiesIt_RefusesTheSecondWriteIncludingSoftDeleted() {
         Long recipient = enabledUser("dedup").getId();
         UUID plannerId = UUID.randomUUID();
@@ -118,12 +117,20 @@ class NotificationFanoutIT extends SharedMySqlContainerSupport {
     }
 
     private int raise(Long userId, String contentId, NotificationType type, UUID plannerId) {
-        return notificationRepository.insertIgnore(userId, contentId, type.name(),
-                plannerId.toString(), "Recommended Build", null, null);
+        return transactionTemplate.execute(status -> notificationRepository.insertIgnore(userId, contentId,
+                type.name(), plannerId.toString(), "Recommended Build", null, null));
     }
 
-    private long unread(Long userId) {
-        return notificationRepository.countByUserIdAndReadFalseAndDeletedAtIsNull(userId);
+    private void publishFanout(Long authorId, UUID plannerId) {
+        transactionTemplate.executeWithoutResult(status ->
+                notificationRepository.insertPublishedFanout(authorId, plannerId.toString(), "Fan Build"));
+    }
+
+    private long published(Long userId, UUID plannerId) {
+        return jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM notifications WHERE user_id = ? AND content_id = ? "
+                        + "AND notification_type = ? AND `read` = FALSE AND deleted_at IS NULL",
+                Long.class, userId, plannerId.toString(), NotificationType.PLANNER_PUBLISHED.name());
     }
 
     private User enabledUser(String name) {

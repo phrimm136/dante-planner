@@ -6,8 +6,6 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
 
 
-import jakarta.persistence.EntityManager;
-
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -20,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.UUID;
 
@@ -36,7 +34,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
-@Transactional
 class PlannerRepositoryIT extends SharedMySqlContainerSupport {
 
     @Autowired
@@ -49,7 +46,7 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private EntityManager entityManager;
+    private TransactionTemplate transactionTemplate;
 
     private User testUser;
     private Planner testPlanner;
@@ -67,21 +64,16 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(testPlanner.getId()).build());
-        statsRepository.flush();
     }
 
     private void seedUpvotes(int upvotes) {
         // Replace the setUp row: PlannerStats persists as-new, so a second save
-        // of the same id must not meet the first instance in the session
+        // of the same id inserts rather than updates
         statsRepository.deleteById(testPlanner.getId());
-        statsRepository.flush();
-        entityManager.clear();
         statsRepository.save(PlannerStats.builder()
                 .plannerId(testPlanner.getId())
                 .upvotes(upvotes)
                 .build());
-        statsRepository.flush();
-        entityManager.clear();
     }
 
     // ==================== Upvote Tests ====================
@@ -89,8 +81,7 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
     @Test
     void incrementUpvotes_WhenExistingPlanner_IncrementsCount() {
         // Act
-        statsRepository.incrementUpvotes(testPlanner.getId());
-        entityManager.clear(); // Clear persistence context to force re-read
+        transactionTemplate.executeWithoutResult(status -> statsRepository.incrementUpvotes(testPlanner.getId()));
 
         // Assert
         PlannerStats updated = statsRepository.findById(testPlanner.getId()).orElseThrow();
@@ -105,8 +96,7 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
         seedUpvotes(10);
 
         // Act
-        int rowsUpdated = statsRepository.trySetRecommendedNotified(testPlanner.getId(), 10);
-        entityManager.clear();
+        int rowsUpdated = trySetRecommendedNotified(testPlanner.getId());
 
         // Assert
         assertEquals(1, rowsUpdated);
@@ -120,11 +110,10 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
         seedUpvotes(15);
 
         // First call sets the flag
-        statsRepository.trySetRecommendedNotified(testPlanner.getId(), 10);
-        entityManager.clear();
+        trySetRecommendedNotified(testPlanner.getId());
 
         // Act - Second call should return 0
-        int rowsUpdated = statsRepository.trySetRecommendedNotified(testPlanner.getId(), 10);
+        int rowsUpdated = trySetRecommendedNotified(testPlanner.getId());
 
         // Assert
         assertEquals(0, rowsUpdated);
@@ -136,7 +125,7 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
         seedUpvotes(5);
 
         // Act
-        int rowsUpdated = statsRepository.trySetRecommendedNotified(testPlanner.getId(), 10);
+        int rowsUpdated = trySetRecommendedNotified(testPlanner.getId());
 
         // Assert
         assertEquals(0, rowsUpdated);
@@ -150,10 +139,13 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
         UUID nonExistentId = UUID.randomUUID();
 
         // Act
-        int rowsUpdated = statsRepository.trySetRecommendedNotified(nonExistentId, 10);
+        int rowsUpdated = trySetRecommendedNotified(nonExistentId);
 
         // Assert
         assertEquals(0, rowsUpdated);
     }
 
+    private int trySetRecommendedNotified(UUID plannerId) {
+        return transactionTemplate.execute(status -> statsRepository.trySetRecommendedNotified(plannerId, 10));
+    }
 }

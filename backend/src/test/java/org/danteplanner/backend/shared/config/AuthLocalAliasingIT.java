@@ -10,8 +10,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,15 +22,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @Import(TestConfig.class)
 @Tag("containerized")
-class AuthLocalAliasingIT {
+class AuthLocalAliasingIT extends SharedAuthRedisSupport {
 
     static {
-    }
-
-    @DynamicPropertySource
-    static void authRedisProperties(DynamicPropertyRegistry registry) {
-        registry.add("AUTH_REDIS_HOST", SharedRedisContainerSupport::host);
-        registry.add("AUTH_REDIS_PORT", SharedRedisContainerSupport::port);
     }
 
     @Autowired

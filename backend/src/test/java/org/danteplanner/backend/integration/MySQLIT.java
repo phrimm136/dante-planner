@@ -31,7 +31,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -40,6 +40,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -65,7 +66,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * <p>Tagged with @Tag("containerized") for optional CI execution.
  * Requires Docker daemon running.</p>
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
@@ -98,6 +99,9 @@ class MySQLIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private EntityManager entityManager;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     private User testUser;
     private Planner testPlanner;
@@ -254,68 +258,63 @@ class MySQLIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @Transactional
     class ConstraintValidationTests {
 
         @Test
         void uniqueConstraint_WhenDuplicateVote_ThrowsException() {
             PlannerVote vote1 = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
             voteRepository.save(vote1);
-            entityManager.flush();
-            entityManager.clear();  // Detach entities so Hibernate doesn't catch duplicate at session level
 
             // Try to create duplicate vote - will hit MySQL constraint
             PlannerVote vote2 = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
 
-            assertThatThrownBy(() -> {
+            assertThatThrownBy(() -> transactionTemplate.executeWithoutResult(status -> {
                 voteRepository.save(vote2);
                 entityManager.flush();
-            })
+            }))
                     .hasMessageContaining("Duplicate entry"); // MySQL-specific error message
         }
 
         @Test
         void uniqueConstraint_WhenMySQLErrorFormat_ValidatesMessage() {
+            String providerId = "duplicate-provider-" + UUID.randomUUID();
             // Create user with specific provider ID
             User user1 = User.builder()
                     .email("user1@example.com")
                     .provider(AuthProviderType.GOOGLE)
-                    .providerId("duplicate-provider-id")
+                    .providerId(providerId)
                     .usernameEpithet("W_CORP")
                     .usernameSuffix(TestDataFactory.uniqueSuffix(""))
                     .build();
             userRepository.save(user1);
-            entityManager.flush();
-            entityManager.clear();  // Detach entities so duplicate hits MySQL constraint
 
             // Try to create another user with same provider+providerId
             User user2 = User.builder()
                     .email("user2@example.com")
                     .provider(AuthProviderType.GOOGLE)
-                    .providerId("duplicate-provider-id")
+                    .providerId(providerId)
                     .usernameEpithet("W_CORP")
                     .usernameSuffix(TestDataFactory.uniqueSuffix(""))
                     .build();
 
-            assertThatThrownBy(() -> {
+            assertThatThrownBy(() -> transactionTemplate.executeWithoutResult(status -> {
                 userRepository.save(user2);
                 entityManager.flush();
-            })
+            }))
                     .hasMessageContaining("Duplicate entry"); // MySQL-specific error message
         }
 
         @Test
         void authProviderType_WhenGoogle_RoundTripsThroughVarcharColumn() {
+            String providerId = "roundtrip-provider-" + UUID.randomUUID();
             User user = User.builder()
                     .email("provider-roundtrip@example.com")
                     .provider(AuthProviderType.GOOGLE)
-                    .providerId("roundtrip-provider-id")
+                    .providerId(providerId)
                     .usernameEpithet("W_CORP")
                     .usernameSuffix(TestDataFactory.uniqueSuffix(""))
                     .build();
             userRepository.save(user);
-            entityManager.flush();
-            entityManager.clear();
 
             String rawColumn = (String) entityManager.createNativeQuery(
                             "SELECT provider FROM users WHERE id = ?")
@@ -324,13 +323,12 @@ class MySQLIT extends SharedMySqlContainerSupport {
             assertThat(rawColumn).isEqualTo("google");
 
             User reloaded = userRepository.findByProviderAndProviderId(
-                    AuthProviderType.GOOGLE, "roundtrip-provider-id").orElseThrow();
+                    AuthProviderType.GOOGLE, providerId).orElseThrow();
             assertThat(reloaded.getProvider()).isEqualTo(AuthProviderType.GOOGLE);
         }
     }
 
     @Nested
-    @Transactional
     class PlannerStatusEnumTests {
 
         @Test
@@ -338,8 +336,6 @@ class MySQLIT extends SharedMySqlContainerSupport {
             Planner planner = TestDataFactory.planner(testUser)
                     .status(PlannerStatus.SAVED)
                     .save(plannerRepository);
-            entityManager.flush();
-            entityManager.clear();
 
             String hexId = planner.getId().toString().replace("-", "");
             String rawColumn = (String) entityManager.createNativeQuery(
@@ -354,7 +350,6 @@ class MySQLIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @Transactional
     class HardDeleteVoteReassignmentTests {
 
         @Test
@@ -369,14 +364,12 @@ class MySQLIT extends SharedMySqlContainerSupport {
             voteRepository.save(new PlannerVote(sentinel.getId(), sharedPlanner.getId(), VoteType.UP));
             voteRepository.save(new PlannerVote(leaving.getId(), sharedPlanner.getId(), VoteType.UP));
             voteRepository.save(new PlannerVote(leaving.getId(), soloPlanner.getId(), VoteType.UP));
-            entityManager.flush();
-            entityManager.clear();
 
             // Replicates the hard-delete vote step: drop collisions, then reassign the rest.
-            voteRepository.deleteVotesCollidingWithSentinel(leaving.getId(), sentinel.getId());
-            voteRepository.reassignUserVotes(leaving.getId(), sentinel.getId());
-            entityManager.flush();
-            entityManager.clear();
+            transactionTemplate.executeWithoutResult(status -> {
+                voteRepository.deleteVotesCollidingWithSentinel(leaving.getId(), sentinel.getId());
+                voteRepository.reassignUserVotes(leaving.getId(), sentinel.getId());
+            });
 
             assertThat(voteRepository.findByUserIdAndPlannerId(leaving.getId(), sharedPlanner.getId())).isEmpty();
             assertThat(voteRepository.findByUserIdAndPlannerId(leaving.getId(), soloPlanner.getId())).isEmpty();
@@ -386,7 +379,6 @@ class MySQLIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @Transactional
     class TimestampPrecisionTests {
 
         @Test
@@ -398,12 +390,12 @@ class MySQLIT extends SharedMySqlContainerSupport {
             Notification n1 = createNotification("content-1");
             Notification n2 = createNotification("content-2");
             Notification n3 = createNotification("content-3");
-            entityManager.flush();
 
-            overrideCreatedAt(n1.getId(), base);
-            overrideCreatedAt(n2.getId(), base.plusNanos(10_000));
-            overrideCreatedAt(n3.getId(), base.plusNanos(20_000));
-            entityManager.clear();
+            transactionTemplate.executeWithoutResult(status -> {
+                overrideCreatedAt(n1.getId(), base);
+                overrideCreatedAt(n2.getId(), base.plusNanos(10_000));
+                overrideCreatedAt(n3.getId(), base.plusNanos(20_000));
+            });
 
             // The three this test wrote, in created order: the table also holds every other
             // class's notifications.

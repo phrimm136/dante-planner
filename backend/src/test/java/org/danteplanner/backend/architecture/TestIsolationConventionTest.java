@@ -1,12 +1,24 @@
 package org.danteplanner.backend.architecture;
 
+import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
+import com.tngtech.archunit.lang.ArchCondition;
+import com.tngtech.archunit.lang.ArchRule;
+import com.tngtech.archunit.lang.ConditionEvents;
+import com.tngtech.archunit.lang.SimpleConditionEvent;
 
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.integration.ExclusiveDatabaseSupport;
+import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
+import org.danteplanner.testtransactionfixture.InheritingFixture;
+import org.danteplanner.testtransactionfixture.JakartaTransactionalFixture;
+import org.danteplanner.testtransactionfixture.TransactionalBeanFixture;
+import org.danteplanner.testtransactionfixture.TransactionalClassFixture;
+import org.danteplanner.testtransactionfixture.TransactionalMethodFixture;
+import org.danteplanner.testtransactionfixture.TransactionalSupportFixture;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +26,10 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * The data-ownership rules the integration tier depends on, checked by scan rather than by review.
@@ -64,8 +79,9 @@ class TestIsolationConventionTest {
 
     @Test
     void unscopedDeletion_WhenClassSharesTheDatabase_IsRejected() {
-        List<String> offenders = containerizedSources().entrySet().stream()
-                .filter(entry -> boundToTheSharedDatabase(entry.getValue()))
+        java.util.Set<String> sharedDatabaseSources = sharedDatabaseSources();
+        List<String> offenders = testSources().entrySet().stream()
+                .filter(entry -> sharedDatabaseSources.contains(entry.getKey()))
                 .filter(entry -> UNSCOPED_DELETE.matcher(entry.getValue()).find())
                 .map(java.util.Map.Entry::getKey)
                 .sorted()
@@ -77,10 +93,13 @@ class TestIsolationConventionTest {
                 .isEmpty();
     }
 
-    /** True for a class drawing on the run's shared database rather than the exclusive one. */
-    private static boolean boundToTheSharedDatabase(String source) {
-        return source.contains("extends SharedMySqlContainerSupport")
-                || source.contains("registerSharedMysql");
+    /** Source paths of the classes drawing on the run's shared database rather than the exclusive one. */
+    private static java.util.Set<String> sharedDatabaseSources() {
+        return TEST_CLASSES.stream()
+                .filter(clazz -> clazz.isAssignableTo(SharedMySqlContainerSupport.class))
+                .map(TestIsolationConventionTest::outermost)
+                .map(clazz -> clazz.getName().replace('.', '/') + ".java")
+                .collect(java.util.stream.Collectors.toSet());
     }
 
     /**
@@ -151,25 +170,83 @@ class TestIsolationConventionTest {
                 .isEmpty();
     }
 
-    @Test
-    void committingTier_WhenDeclaringTransactional_IsRejected() {
-        List<String> offenders = TEST_CLASSES.stream()
-                .filter(TestIsolationConventionTest::isTestClass)
-                // Tests that drive HTTP: the endpoint owns the transaction boundary, so wrapping
-                // one in a test transaction tests a path production never runs. A repository test
-                // may keep @Transactional, because there the boundary is the subject.
-                .filter(clazz -> clazz.isAnnotatedWith(
-                        "org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc"))
-                .filter(clazz -> clazz.isAnnotatedWith("org.springframework.transaction.annotation.Transactional"))
-                .map(JavaClass::getSimpleName)
-                .sorted()
-                .toList();
+    private static final java.util.Map<String, String> TRANSACTIONAL_ANNOTATIONS = java.util.Map.of(
+            "org.springframework.transaction.annotation.Transactional", "Spring's Transactional",
+            "jakarta.transaction.Transactional", "Jakarta's Transactional");
 
-        assertThat(offenders)
-                .as("rollback suppresses the AFTER_COMMIT effects these tests exist to cover, hides "
-                        + "their rows from the FULLTEXT index, and binds a transaction to a thread "
-                        + "JUnit's executor may hand to another test")
-                .isEmpty();
+    static final ArchRule TESTS_HOLD_NO_SPRING_TRANSACTION =
+            classes()
+                    .that(declareTests())
+                    .should(carryNoSpringTransactional())
+                    .as("no test class or test method carries Spring's or Jakarta's Transactional, both of "
+                            + "which open a test-managed transaction: rollback suppresses "
+                            + "the AFTER_COMMIT effects, hides rows from the FULLTEXT index, and binds a "
+                            + "transaction to a thread whose context JUnit's executor hands to another test")
+                    .allowEmptyShould(true);
+
+    @Test
+    void springTransactional_WhenOnATestClassOrMethod_IsRejected() {
+        TESTS_HOLD_NO_SPRING_TRANSACTION.check(TEST_CLASSES);
+    }
+
+    @Test
+    void springTransactional_WhenTheFixtureDeclaresIt_FailsNamingEachCarrier() {
+        JavaClasses fixtures = new ClassFileImporter().importClasses(TransactionalClassFixture.class,
+                TransactionalClassFixture.Group.class, TransactionalMethodFixture.class,
+                TransactionalSupportFixture.class, InheritingFixture.class, JakartaTransactionalFixture.class);
+
+        assertThatThrownBy(() -> TESTS_HOLD_NO_SPRING_TRANSACTION.check(fixtures))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining(TransactionalClassFixture.class.getName() + " carries Spring's Transactional")
+                .hasMessageContaining(TransactionalClassFixture.Group.class.getName()
+                        + " inherits Spring's Transactional from " + TransactionalClassFixture.class.getName())
+                .hasMessageContaining(TransactionalMethodFixture.class.getName()
+                        + ".subject_WhenTheMethodIsTransactional_RunsInATestTransaction() carries Spring's Transactional")
+                .hasMessageContaining(InheritingFixture.class.getName()
+                        + " inherits Spring's Transactional from " + TransactionalSupportFixture.class.getName())
+                .hasMessageContaining(JakartaTransactionalFixture.class.getName()
+                        + ".subject_WhenTheMethodIsJakartaTransactional_RunsInATestTransaction()"
+                        + " carries Jakarta's Transactional");
+    }
+
+    @Test
+    void springTransactional_WhenOnABeanDeclaringNoTests_Passes() {
+        JavaClasses bean = new ClassFileImporter().importClasses(TransactionalBeanFixture.class);
+
+        assertThatCode(() -> TESTS_HOLD_NO_SPRING_TRANSACTION.check(bean)).doesNotThrowAnyException();
+    }
+
+    private static DescribedPredicate<JavaClass> declareTests() {
+        return DescribedPredicate.describe("declare tests", clazz -> clazz.getMethods().stream()
+                .anyMatch(method -> method.isMetaAnnotatedWith("org.junit.platform.commons.annotation.Testable")));
+    }
+
+    private static ArchCondition<JavaClass> carryNoSpringTransactional() {
+        return new ArchCondition<>("carry no Spring or Jakarta Transactional on the class, its methods, or what it "
+                + "inherits") {
+            @Override
+            public void check(JavaClass clazz, ConditionEvents events) {
+                TRANSACTIONAL_ANNOTATIONS.forEach((annotation, label) -> {
+                    if (clazz.isMetaAnnotatedWith(annotation)) {
+                        events.add(SimpleConditionEvent.violated(clazz, clazz.getName() + " carries " + label));
+                    }
+                    java.util.stream.Stream.concat(clazz.getAllRawSuperclasses().stream(), enclosing(clazz))
+                            .filter(origin -> origin.isMetaAnnotatedWith(annotation))
+                            .forEach(origin -> events.add(SimpleConditionEvent.violated(clazz, clazz.getName()
+                                    + " inherits " + label + " from " + origin.getName())));
+                    clazz.getMethods().stream()
+                            .filter(method -> method.isMetaAnnotatedWith(annotation))
+                            .forEach(method -> events.add(SimpleConditionEvent.violated(
+                                    method, method.getFullName() + " carries " + label)));
+                });
+            }
+        };
+    }
+
+    private static java.util.stream.Stream<JavaClass> enclosing(JavaClass clazz) {
+        return java.util.stream.Stream.iterate(clazz.getEnclosingClass(), java.util.Optional::isPresent,
+                        current -> current.get().getEnclosingClass())
+                .map(java.util.Optional::get);
     }
 
     /**
@@ -312,7 +389,7 @@ class TestIsolationConventionTest {
      * low is what prevents it. The budget sits at the current count, so any addition is a
      * deliberate decision rather than a silent slide toward the bound.
      */
-    private static final int CONTEXT_BUDGET = 18;
+    private static final int CONTEXT_BUDGET = 15;
 
     @Test
     void distinctContexts_WhenOverBudget_IsRejected() {

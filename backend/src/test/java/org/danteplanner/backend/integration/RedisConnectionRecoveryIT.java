@@ -24,6 +24,7 @@ import org.danteplanner.backend.support.SseStream;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -234,6 +235,15 @@ class RedisConnectionRecoveryIT {
 
         registry.add("redis.sse-local.host", RECOVERY_TOXIPROXY::getHost);
         registry.add("redis.sse-local.port", () -> RECOVERY_TOXIPROXY.getMappedPort(SSE_LOCAL_PROXY_LISTEN_PORT));
+    }
+
+    @AfterAll
+    static void stopHarness() {
+        RECOVERY_TOXIPROXY.stop();
+        DEDICATED_REDIS.stop();
+        REPLICA.stop();
+        PRIMARY.stop();
+        RECOVERY_NETWORK.close();
     }
 
     @AfterEach

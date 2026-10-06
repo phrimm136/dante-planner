@@ -7,6 +7,7 @@ import java.sql.Statement;
 import java.util.Map;
 
 import org.danteplanner.backend.support.GoogleStub;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.mysql.MySQLContainer;
@@ -27,7 +28,11 @@ import org.testcontainers.mysql.MySQLContainer;
  * dominant cost, so the win is large and the loss is nothing: the container is discarded when the
  * test JVM ends, making durability worthless.</p>
  */
+@AutoConfigureMockMvc
 public abstract class SharedMySqlContainerSupport {
+
+    // One context replaced six pools of five, and five alone ran out of connections under the merged load.
+    private static final int SHARED_CONTEXT_POOL_SIZE = 30;
 
     static final MySQLContainer MYSQL = new MySQLContainer("mysql:8.0")
             .withDatabaseName("it")
@@ -71,6 +76,7 @@ public abstract class SharedMySqlContainerSupport {
     @DynamicPropertySource
     static void sharedDatasource(DynamicPropertyRegistry registry) {
         registerSharedMysql(registry);
+        registry.add("spring.datasource.hikari.maximum-pool-size", () -> SHARED_CONTEXT_POOL_SIZE);
     }
 
     /**

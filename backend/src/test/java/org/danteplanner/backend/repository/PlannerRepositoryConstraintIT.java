@@ -32,7 +32,7 @@ import org.springframework.context.annotation.Import;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.UUID;
 
@@ -49,7 +49,6 @@ import static org.assertj.core.api.Assertions.*;
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
-@Transactional
 class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
 
     @Autowired
@@ -70,13 +69,13 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
     @Autowired
     private EntityManager entityManager;
 
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     private User testUser;
 
     @BeforeEach
     void setUp() {
-        entityManager.flush();
-        entityManager.clear();
-
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
     }
 
@@ -95,6 +94,10 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
                 PlannerPublication.builder().build(),
                 PlannerModeration.builder().build());
         return planner;
+    }
+
+    private void inTransaction(Runnable work) {
+        transactionTemplate.executeWithoutResult(status -> work.run());
     }
 
     @Nested
@@ -119,7 +122,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         }
         @Test
         void foreignKey_WhenInvalidPlannerIdInComment_ThrowsException() {
-            assertThatThrownBy(() -> {
+            assertThatThrownBy(() -> inTransaction(() -> {
                 PlannerComment comment = new PlannerComment(
                         UUID.randomUUID(),
                         testUser.getId(),
@@ -129,14 +132,14 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
                 );
                 commentRepository.save(comment);
                 entityManager.flush();
-            }).isInstanceOf(DataIntegrityViolationException.class)
+            })).isInstanceOf(DataIntegrityViolationException.class)
                     .hasMessageContaining("fk_comment_planner");
         }
         @Test
         void foreignKey_WhenInvalidUserIdInComment_ThrowsException() {
             Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
 
-            assertThatThrownBy(() -> {
+            assertThatThrownBy(() -> inTransaction(() -> {
                 PlannerComment comment = new PlannerComment(
                         planner.getId(),
                         99999L,
@@ -146,7 +149,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
                 );
                 commentRepository.save(comment);
                 entityManager.flush();
-            }).isInstanceOf(DataIntegrityViolationException.class)
+            })).isInstanceOf(DataIntegrityViolationException.class)
                     .hasMessageContaining("fk_comment_user");
         }
         @Test
@@ -155,13 +158,11 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
 
             PlannerVote vote = new PlannerVote(testUser.getId(), planner.getId(), VoteType.UP);
             voteRepository.save(vote);
-            entityManager.flush();
 
             long votesBeforeDelete = countVotesFor(planner.getId());
             assertThat(votesBeforeDelete).isEqualTo(1);
 
             plannerRepository.delete(planner);
-            entityManager.flush();
 
             long votesAfterDelete = countVotesFor(planner.getId());
             assertThat(votesAfterDelete).isZero();
@@ -178,13 +179,11 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
                     0
             );
             commentRepository.save(comment);
-            entityManager.flush();
 
             long commentsBeforeDelete = countCommentsFor(planner.getId());
             assertThat(commentsBeforeDelete).isEqualTo(1);
 
             plannerRepository.delete(planner);
-            entityManager.flush();
 
             long commentsAfterDelete = countCommentsFor(planner.getId());
             assertThat(commentsAfterDelete).isZero();
@@ -212,14 +211,12 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
 
             PlannerVote vote1 = new PlannerVote(testUser.getId(), planner.getId(), VoteType.UP);
             voteRepository.save(vote1);
-            entityManager.flush();
-            entityManager.clear();
 
-            assertThatThrownBy(() -> {
+            assertThatThrownBy(() -> inTransaction(() -> {
                 PlannerVote vote2 = new PlannerVote(testUser.getId(), planner.getId(), VoteType.UP);
                 voteRepository.save(vote2);
                 entityManager.flush();
-            }).satisfiesAnyOf(
+            })).satisfiesAnyOf(
                     e -> assertThat(e).isInstanceOf(DataIntegrityViolationException.class),
                     e -> assertThat(e).isInstanceOf(ConstraintViolationException.class)
             );
@@ -231,12 +228,13 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
             User otherUser = TestDataFactory.createTestUser(userRepository, "other@example.com");
 
             PlannerVote vote1 = new PlannerVote(testUser.getId(), planner.getId(), VoteType.UP);
-            voteRepository.save(vote1);
-
             PlannerVote vote2 = new PlannerVote(otherUser.getId(), planner.getId(), VoteType.UP);
-            voteRepository.save(vote2);
 
-            assertThatNoException().isThrownBy(() -> entityManager.flush());
+            assertThatNoException().isThrownBy(() -> inTransaction(() -> {
+                voteRepository.save(vote1);
+                voteRepository.save(vote2);
+                entityManager.flush();
+            }));
         }
 
         @Test
@@ -245,95 +243,97 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
             Planner planner2 = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
 
             PlannerVote vote1 = new PlannerVote(testUser.getId(), planner1.getId(), VoteType.UP);
-            voteRepository.save(vote1);
-
             PlannerVote vote2 = new PlannerVote(testUser.getId(), planner2.getId(), VoteType.UP);
-            voteRepository.save(vote2);
 
-            assertThatNoException().isThrownBy(() -> entityManager.flush());
+            assertThatNoException().isThrownBy(() -> inTransaction(() -> {
+                voteRepository.save(vote1);
+                voteRepository.save(vote2);
+                entityManager.flush();
+            }));
         }
 
         @Test
         void uniqueConstraint_WhenDuplicateUsernameSuffix_ThrowsException() {
-            String suffix = "test1";
+            String suffix = TestDataFactory.uniqueSuffix("");
 
             User user1 = User.builder()
                     .email("user1@example.com")
                     .provider(AuthProviderType.GOOGLE)
-                    .providerId("google-1")
+                    .providerId("google-" + UUID.randomUUID())
                     .usernameEpithet("TEST")
                     .usernameSuffix(suffix)
                     .role(UserRole.NORMAL)
                     .build();
             userRepository.save(user1);
-            entityManager.flush();
 
-            assertThatThrownBy(() -> {
+            assertThatThrownBy(() -> inTransaction(() -> {
                 User user2 = User.builder()
                         .email("user2@example.com")
                         .provider(AuthProviderType.GOOGLE)
-                        .providerId("google-2")
+                        .providerId("google-" + UUID.randomUUID())
                         .usernameEpithet("TEST")
                         .usernameSuffix(suffix)
                         .role(UserRole.NORMAL)
                         .build();
                 userRepository.save(user2);
                 entityManager.flush();
-            }).isInstanceOf(DataIntegrityViolationException.class)
+            })).isInstanceOf(DataIntegrityViolationException.class)
                     .hasMessageContaining("uk_users_username_suffix");
         }
 
         @Test
         void uniqueConstraint_WhenDuplicateProviderAndProviderId_ThrowsException() {
+            String providerId = "google-" + UUID.randomUUID();
             User user1 = User.builder()
                     .email("user1@example.com")
                     .provider(AuthProviderType.GOOGLE)
-                    .providerId("google-123")
+                    .providerId(providerId)
                     .usernameEpithet("TEST")
                     .usernameSuffix(TestDataFactory.uniqueSuffix(""))
                     .role(UserRole.NORMAL)
                     .build();
             userRepository.save(user1);
-            entityManager.flush();
 
-            assertThatThrownBy(() -> {
+            assertThatThrownBy(() -> inTransaction(() -> {
                 User user2 = User.builder()
                         .email("user2@example.com")
                         .provider(AuthProviderType.GOOGLE)
-                        .providerId("google-123")
+                        .providerId(providerId)
                         .usernameEpithet("TEST")
                         .usernameSuffix(TestDataFactory.uniqueSuffix(""))
                         .role(UserRole.NORMAL)
                         .build();
                 userRepository.save(user2);
                 entityManager.flush();
-            }).isInstanceOf(DataIntegrityViolationException.class)
+            })).isInstanceOf(DataIntegrityViolationException.class)
                     .hasMessageContaining("uk_provider_provider_id");
         }
 
         @Test
         void uniqueConstraint_WhenDifferentProviderSameProviderId_Allowed() {
+            String providerId = "shared-" + UUID.randomUUID();
             User user1 = User.builder()
                     .email("user1@example.com")
                     .provider(AuthProviderType.GOOGLE)
-                    .providerId("123")
+                    .providerId(providerId)
                     .usernameEpithet("TEST")
                     .usernameSuffix(TestDataFactory.uniqueSuffix(""))
                     .role(UserRole.NORMAL)
                     .build();
-            userRepository.save(user1);
-
             User user2 = User.builder()
                     .email("user2@example.com")
                     .provider(AuthProviderType.APPLE)
-                    .providerId("123")
+                    .providerId(providerId)
                     .usernameEpithet("TEST")
                     .usernameSuffix(TestDataFactory.uniqueSuffix(""))
                     .role(UserRole.NORMAL)
                     .build();
-            userRepository.save(user2);
 
-            assertThatNoException().isThrownBy(() -> entityManager.flush());
+            assertThatNoException().isThrownBy(() -> inTransaction(() -> {
+                userRepository.save(user1);
+                userRepository.save(user2);
+                entityManager.flush();
+            }));
         }
     }
 
@@ -342,11 +342,11 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
 
         @Test
         void notNullConstraint_WhenMissingTitle_ThrowsException() {
-            assertThatThrownBy(() -> {
+            assertThatThrownBy(() -> inTransaction(() -> {
                 Planner planner = buildPlanner(testUser.getId(), null);
                 plannerRepository.save(planner);
                 entityManager.flush();
-            }).satisfiesAnyOf(
+            })).satisfiesAnyOf(
                     e -> assertThat(e).isInstanceOf(DataIntegrityViolationException.class),
                     e -> assertThat(e).isInstanceOf(ConstraintViolationException.class)
             );
@@ -354,11 +354,11 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
 
         @Test
         void notNullConstraint_WhenMissingOwner_ThrowsException() {
-            assertThatThrownBy(() -> {
+            assertThatThrownBy(() -> inTransaction(() -> {
                 Planner planner = buildPlanner(null, "Test Title");
                 plannerRepository.save(planner);
                 entityManager.flush();
-            }).satisfiesAnyOf(
+            })).satisfiesAnyOf(
                     e -> assertThat(e).isInstanceOf(DataIntegrityViolationException.class),
                     e -> assertThat(e).isInstanceOf(ConstraintViolationException.class)
             );
@@ -368,7 +368,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         void notNullConstraint_WhenMissingCommentContent_ThrowsException() {
             Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
 
-            assertThatThrownBy(() -> {
+            assertThatThrownBy(() -> inTransaction(() -> {
                 PlannerComment comment = new PlannerComment(
                         planner.getId(),
                         testUser.getId(),
@@ -378,13 +378,13 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
                 );
                 commentRepository.save(comment);
                 entityManager.flush();
-            }).isInstanceOf(DataIntegrityViolationException.class)
+            })).isInstanceOf(DataIntegrityViolationException.class)
                     .hasMessageContaining("Column 'content' cannot be null");
         }
 
         @Test
         void notNullConstraint_WhenMissingEmail_ThrowsException() {
-            assertThatThrownBy(() -> {
+            assertThatThrownBy(() -> inTransaction(() -> {
                 User user = User.builder()
                         .email(null)
                         .provider(AuthProviderType.GOOGLE)
@@ -395,13 +395,13 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
                         .build();
                 userRepository.save(user);
                 entityManager.flush();
-            }).isInstanceOf(DataIntegrityViolationException.class)
+            })).isInstanceOf(DataIntegrityViolationException.class)
                     .hasMessageContaining("Column 'email' cannot be null");
         }
 
         @Test
         void notNullConstraint_WhenMissingProvider_ThrowsException() {
-            assertThatThrownBy(() -> {
+            assertThatThrownBy(() -> inTransaction(() -> {
                 User user = User.builder()
                         .email("test@example.com")
                         .provider(null)
@@ -412,13 +412,13 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
                         .build();
                 userRepository.save(user);
                 entityManager.flush();
-            }).isInstanceOf(DataIntegrityViolationException.class)
+            })).isInstanceOf(DataIntegrityViolationException.class)
                     .hasMessageContaining("Column 'provider' cannot be null");
         }
 
         @Test
         void notNullConstraint_WhenMissingProviderId_ThrowsException() {
-            assertThatThrownBy(() -> {
+            assertThatThrownBy(() -> inTransaction(() -> {
                 User user = User.builder()
                         .email("test@example.com")
                         .provider(AuthProviderType.GOOGLE)
@@ -429,23 +429,23 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
                         .build();
                 userRepository.save(user);
                 entityManager.flush();
-            }).isInstanceOf(DataIntegrityViolationException.class)
+            })).isInstanceOf(DataIntegrityViolationException.class)
                     .hasMessageContaining("Column 'provider_id' cannot be null");
         }
 
         @Test
         void notNullConstraint_WhenEmptyStringAllowed_NullForbidden() {
             Planner planner1 = buildPlanner(testUser.getId(), "");
-            plannerRepository.save(planner1);
-            assertThatNoException().isThrownBy(() -> entityManager.flush());
+            assertThatNoException().isThrownBy(() -> inTransaction(() -> {
+                plannerRepository.save(planner1);
+                entityManager.flush();
+            }));
 
-            entityManager.clear();
-
-            assertThatThrownBy(() -> {
+            assertThatThrownBy(() -> inTransaction(() -> {
                 Planner planner2 = buildPlanner(testUser.getId(), null);
                 plannerRepository.save(planner2);
                 entityManager.flush();
-            }).satisfiesAnyOf(
+            })).satisfiesAnyOf(
                     e -> assertThat(e).isInstanceOf(DataIntegrityViolationException.class),
                     e -> assertThat(e).isInstanceOf(ConstraintViolationException.class)
             );
@@ -455,7 +455,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         void notNullConstraint_WhenDefaultValueApplied_PublishedFalse() {
             Planner planner = buildPlanner(testUser.getId(), "Test");
             plannerRepository.save(planner);
-            entityManager.flush();
 
             Planner saved = plannerRepository.findById(planner.getId()).orElseThrow();
             assertThat(saved.isPublished()).isFalse();
@@ -466,8 +465,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
             Planner planner = buildPlanner(testUser.getId(), "Test");
             plannerRepository.save(planner);
             statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-            entityManager.flush();
-            entityManager.clear();
 
             PlannerStats saved = statsRepository.findById(planner.getId()).orElseThrow();
             assertThat(saved.getUpvotes()).isZero();
@@ -485,7 +482,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
                     0
             );
             commentRepository.save(comment);
-            entityManager.flush();
 
             PlannerComment saved = commentRepository.findById(comment.getId()).orElseThrow();
             assertThat(saved.getUpvoteCount()).isZero();

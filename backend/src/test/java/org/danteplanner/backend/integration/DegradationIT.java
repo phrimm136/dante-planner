@@ -32,6 +32,7 @@ import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -305,6 +306,15 @@ class DegradationIT {
                 + DEGRADATION_TOXIPROXY.getMappedPort(PRIMARY_DB_PROXY_LISTEN_PORT) + "/testdb"
                 + "?connectTimeout=" + JDBC_CONNECT_TIMEOUT_MS
                 + "&socketTimeout=" + JDBC_SOCKET_TIMEOUT_MS;
+    }
+
+    @AfterAll
+    static void stopHarness() {
+        DEGRADATION_TOXIPROXY.stop();
+        DEDICATED_AUTH_REDIS.stop();
+        REPLICA.stop();
+        PRIMARY.stop();
+        DEGRADATION_NETWORK.close();
     }
 
     @BeforeEach

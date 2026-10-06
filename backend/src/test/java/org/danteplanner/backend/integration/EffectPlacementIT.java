@@ -1,6 +1,5 @@
 package org.danteplanner.backend.integration;
 
-import net.javacrumbs.shedlock.core.LockProvider;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
@@ -29,13 +28,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.convention.TestBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,13 +60,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class EffectPlacementIT extends SharedMySqlContainerSupport {
 
     private static final Duration DELIVERY_TIMEOUT = Duration.ofSeconds(10);
-
-    /**
-     * The lock is always granted because this class drives the relay directly, and fleet
-     * arbitration is {@code ShedLockMultiPodIT}'s subject, not this one's.
-     */
-    @TestBean
-    private LockProvider lockProvider;
 
     @Autowired
     @Qualifier("sseLocalRedisConnectionFactory")
@@ -106,10 +96,6 @@ class EffectPlacementIT extends SharedMySqlContainerSupport {
     private User commenter;
     private Planner planner;
     private SseTopicRecorder recorder;
-
-    static LockProvider lockProvider() {
-        return configuration -> Optional.of(() -> { });
-    }
 
     @BeforeEach
     void setUp() {

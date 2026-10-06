@@ -29,17 +29,20 @@ else — see **Parallelism** for which classes run beside it.
   `@Service` or `@Component`; per-call objects do not count.
 - **When the subject genuinely is a whole table or index** — title search, keyword facets, a global rebuild procedure — extend `ExclusiveDatabaseSupport`. Its classes run one at a time on a database of their own, which holds whatever the earlier ones left: truncate what you count at the start of your setup (`emptyPlannerTables` empties the planner tables in raw SQL, whatever shape an earlier class left a planner in), or narrow to your rows. They serialize, so reach for a narrowed assertion first.
 
-## `@Transactional` on a test class
+## No test-managed transactions
 
-Only where the transaction boundary is itself the subject: constraint violations that surface at
-flush, and repository tests that navigate a lazy graph. Never on a test that drives HTTP, where
-the endpoint owns the boundary; that is the case `TestIsolationConventionTest` enforces. Never as a cleanup mechanism — unique fixtures already provide that.
+No test class or test method carries Spring's or Jakarta's `@Transactional` (Spring's test listener
+honors both), and nothing uses `TestTransaction`;
+`TestIsolationConventionTest` enforces it. Rows a test commits are owned through unique fixtures,
+not rolled back. Where the boundary is itself the subject — a constraint violation that surfaces at
+flush, a lazy graph, a rollback — open it inside the test with a `TransactionTemplate` (or
+`setRollbackOnly` on its status).
 
-Three costs, all silent:
+Three costs of a test-managed transaction, all silent:
 
 - `@TransactionalEventListener(AFTER_COMMIT)` never fires, so a rolled-back controller test exercises a path production never takes.
 - InnoDB flushes its FULLTEXT index cache at commit, so `MATCH ... AGAINST` cannot see the test's own rows and a `q=` search returns nothing.
-- The transaction is bound to a `ThreadLocal`, and JUnit's executor blocks in `ForkJoinTask.join()`. A blocked ForkJoin thread runs another task while waiting, which then inherits the binding and fails with `Cannot start new transaction without ending existing transaction`.
+- Spring's test transaction context lives in an `InheritableThreadLocal`, and JUnit's executor runs classes on a ForkJoin pool. It leaks into another test two ways. A thread blocked in `ForkJoinTask.join()` runs another task while waiting, on the same thread. A thread blocked in a `ForkJoinPool.managedBlock`-aware wait (`CompletableFuture.get`, which Lettuce's sync API uses) makes the pool start a compensation worker, and that new thread inherits the context. Either way the next test on that thread fails with `Cannot start new transaction without ending existing transaction`. A `TransactionTemplate` binds through plain `ThreadLocal`s, so neither path carries it.
 
 ## Parallelism
 

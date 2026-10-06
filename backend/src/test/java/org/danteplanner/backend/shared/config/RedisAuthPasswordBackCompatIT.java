@@ -1,6 +1,5 @@
 package org.danteplanner.backend.shared.config;
 
-import org.danteplanner.backend.integration.SharedRedisContainerSupport;
 import org.danteplanner.backend.config.TestConfig;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -9,8 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,15 +21,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @Import(TestConfig.class)
 @Tag("containerized")
-class RedisAuthPasswordBackCompatIT {
+class RedisAuthPasswordBackCompatIT extends SharedAuthRedisSupport {
 
     static {
-    }
-
-    @DynamicPropertySource
-    static void authRedisProperties(DynamicPropertyRegistry registry) {
-        registry.add("AUTH_REDIS_HOST", SharedRedisContainerSupport::host);
-        registry.add("AUTH_REDIS_PORT", SharedRedisContainerSupport::port);
     }
 
     @Autowired
