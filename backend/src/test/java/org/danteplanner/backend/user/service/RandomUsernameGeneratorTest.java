@@ -4,19 +4,15 @@ import org.danteplanner.backend.shared.config.EpithetProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 import java.util.Locale;
 
 /**
@@ -28,11 +24,7 @@ import java.util.Locale;
  * - Weight calculation: 0-30d=3, 31-60d=2, 61+d=1
  * - Weighted selection favors newer associations
  */
-@ExtendWith(MockitoExtension.class)
 class RandomUsernameGeneratorTest {
-
-    @Mock
-    private EpithetProvider epithetProvider;
 
     private RandomUsernameGenerator generator;
 
@@ -45,7 +37,21 @@ class RandomUsernameGeneratorTest {
 
     @BeforeEach
     void setUp() {
-        generator = new RandomUsernameGenerator(epithetProvider);
+        generator = generatorOver(Map.of());
+    }
+
+    private static RandomUsernameGenerator generatorOver(Map<String, Integer> weights) {
+        return new RandomUsernameGenerator(new EpithetProvider() {
+            @Override
+            public List<String> getEpithets() {
+                return List.copyOf(weights.keySet());
+            }
+
+            @Override
+            public int getWeight(String keyword) {
+                return weights.get(keyword);
+            }
+        });
     }
 
     @Nested
@@ -109,8 +115,7 @@ class RandomUsernameGeneratorTest {
         @Test
         void selectWeightedEpithet_WhenCalled_ReturnsValidAssociation() {
             List<String> associations = List.of("W_CORP", "ZWEI", "SEVEN");
-            when(epithetProvider.getEpithets()).thenReturn(associations);
-            when(epithetProvider.getWeight(anyString())).thenReturn(1);
+            generator = generatorOver(Map.of("W_CORP", 1, "ZWEI", 1, "SEVEN", 1));
 
             String selected = generator.selectWeightedEpithet();
 
@@ -119,7 +124,7 @@ class RandomUsernameGeneratorTest {
 
         @Test
         void selectWeightedEpithet_WhenNoAssociations_ThrowsException() {
-            when(epithetProvider.getEpithets()).thenReturn(List.of());
+            generator = generatorOver(Map.of());
 
             assertThatThrownBy(() -> generator.selectWeightedEpithet())
                     .isInstanceOf(IllegalStateException.class)
@@ -129,10 +134,7 @@ class RandomUsernameGeneratorTest {
         @Test
         void selectWeightedEpithet_WhenWeighted_FavorsHigherWeight() {
             // Set up one association with weight 3, another with weight 1
-            List<String> associations = List.of("NEW_ASSOC", "OLD_ASSOC");
-            when(epithetProvider.getEpithets()).thenReturn(associations);
-            when(epithetProvider.getWeight("NEW_ASSOC")).thenReturn(3);
-            when(epithetProvider.getWeight("OLD_ASSOC")).thenReturn(1);
+            generator = generatorOver(Map.of("NEW_ASSOC", 3, "OLD_ASSOC", 1));
 
             // Count selections over many iterations
             int newCount = 0;
@@ -157,8 +159,7 @@ class RandomUsernameGeneratorTest {
 
         @Test
         void selectWeightedEpithet_WhenSingleAssociation_ReturnsThatAssociation() {
-            when(epithetProvider.getEpithets()).thenReturn(List.of("ONLY_ONE"));
-            when(epithetProvider.getWeight("ONLY_ONE")).thenReturn(1);
+            generator = generatorOver(Map.of("ONLY_ONE", 1));
 
             String selected = generator.selectWeightedEpithet();
 
@@ -171,8 +172,7 @@ class RandomUsernameGeneratorTest {
 
         @Test
         void generate_WhenCalled_ReturnsValidComponents() {
-            when(epithetProvider.getEpithets()).thenReturn(List.of("W_CORP"));
-            when(epithetProvider.getWeight("W_CORP")).thenReturn(1);
+            generator = generatorOver(Map.of("W_CORP", 1));
 
             RandomUsernameGenerator.UsernameComponents result = generator.generate();
 
@@ -183,8 +183,7 @@ class RandomUsernameGeneratorTest {
 
         @Test
         void generate_WhenCalledRepeatedly_ProducesUniqueSuffixes() {
-            when(epithetProvider.getEpithets()).thenReturn(List.of("W_CORP"));
-            when(epithetProvider.getWeight("W_CORP")).thenReturn(1);
+            generator = generatorOver(Map.of("W_CORP", 1));
 
             Set<String> suffixes = new HashSet<>();
             for (int i = 0; i < 50; i++) {

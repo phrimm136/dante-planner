@@ -1,6 +1,5 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
-import org.danteplanner.backend.user.service.UsersApiAdapter;
 
 import org.danteplanner.backend.planner.entity.PlannerSubscription;
 import org.danteplanner.backend.user.entity.User;
@@ -8,7 +7,6 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.support.TestDataFactory;
-import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -40,9 +38,6 @@ class PlannerSubscriptionServiceTest {
     @Mock
     private PlannerRepository plannerRepository;
 
-    @Mock
-    private UserService userService;
-
     private PlannerSubscriptionService subscriptionService;
 
     private User testUser;
@@ -51,7 +46,7 @@ class PlannerSubscriptionServiceTest {
     @BeforeEach
     void setUp() {
         subscriptionService = new PlannerSubscriptionService(
-                subscriptionRepository, new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository));
+                subscriptionRepository, new PlannerAccessGuard(null, plannerRepository));
 
         testUser = TestDataFactory.unsavedUser(1L);
 

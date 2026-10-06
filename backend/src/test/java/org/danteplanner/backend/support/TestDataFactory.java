@@ -246,6 +246,14 @@ public class TestDataFactory {
         }
     }
 
+    public static GameDataRegistry gameDataRegistry() {
+        return StaticDataParser.REGISTRY;
+    }
+
+    public static PlannerContentValidator contentValidator() {
+        return StaticDataParser.VALIDATOR;
+    }
+
     static int mdCurrentVersion() {
         return StaticDataParser.REGISTRY.plannerVersions().mdCurrentVersion();
     }

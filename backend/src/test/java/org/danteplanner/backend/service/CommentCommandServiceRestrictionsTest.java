@@ -1,7 +1,7 @@
 package org.danteplanner.backend.service;
 
 import org.danteplanner.backend.user.api.AuthProviderType;
-import org.danteplanner.backend.user.service.UsersApiAdapter;
+import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.comment.service.CommentCommandService;
@@ -16,7 +16,6 @@ import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
-import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -28,8 +27,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
@@ -46,17 +43,18 @@ class CommentCommandServiceRestrictionsTest {
     @Mock PlannerCommentVoteRepository commentVoteRepository;
     @Mock PlannerRepository plannerRepository;
     @Mock PlannerStatsRepository plannerStatsRepository;
-    @Mock UserService userService;
     @Mock DomainEventRecorder domainEventRecorder;
+
+    private final FakeUsers users = new FakeUsers();
 
     private CommentCommandService commentService() {
         return new CommentCommandService(
                 commentRepository,
-                new CommentQueryService(commentRepository, commentVoteRepository, new UsersApiAdapter(userService, null),
-                        new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository),
+                new CommentQueryService(commentRepository, commentVoteRepository, users,
+                        new PlannerAccessGuard(users, plannerRepository),
                         new CommentAccessValidator()),
                 domainEventRecorder,
-                new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository),
+                new PlannerAccessGuard(users, plannerRepository),
                 new PlannerStatsService(plannerStatsRepository),
                 new CommentAccessValidator(), new CommentAuthorshipValidator(),
                 new CommentStateValidator());
@@ -78,7 +76,7 @@ class CommentCommandServiceRestrictionsTest {
     void createReply_WhenUserBanned_ThrowsUserBanned() {
         User banned = restrictedUser();
         banned.setBannedAt(Instant.now());
-        when(userService.findById(anyLong())).thenReturn(banned);
+        users.add(banned);
 
         assertRejected(() -> commentService()
                 .createReply(UUID.randomUUID(), banned.getId(), UUID.randomUUID(), "reply body"))
@@ -89,7 +87,7 @@ class CommentCommandServiceRestrictionsTest {
     void createReply_WhenUserTimedOut_ThrowsUserTimedOut() {
         User timedOut = restrictedUser();
         timedOut.setTimeoutUntil(Instant.now().plus(1, ChronoUnit.HOURS));
-        when(userService.findById(anyLong())).thenReturn(timedOut);
+        users.add(timedOut);
 
         assertRejected(() -> commentService()
                 .createReply(UUID.randomUUID(), timedOut.getId(), UUID.randomUUID(), "reply body"))

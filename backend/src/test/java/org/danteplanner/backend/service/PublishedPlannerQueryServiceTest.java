@@ -1,6 +1,5 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
-import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 import org.danteplanner.backend.planner.precondition.CatalogReadValidator;
 
@@ -57,7 +56,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
-import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 
 /**
@@ -67,9 +65,6 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
 class PublishedPlannerQueryServiceTest {
-
-    @Mock
-    private UserService userService;
 
     @Mock
     private PlannerRepository plannerRepository;
@@ -100,7 +95,7 @@ class PublishedPlannerQueryServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        PlannerAccessGuard accessGuard = new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository);
+        PlannerAccessGuard accessGuard = new PlannerAccessGuard(null, plannerRepository);
 
         publishedQueryService = new PublishedPlannerQueryService(
                 plannerRepository,

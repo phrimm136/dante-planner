@@ -1,6 +1,6 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
-import org.danteplanner.backend.user.service.UsersApiAdapter;
+import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.user.api.UserRole;
@@ -30,7 +30,6 @@ import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.TestDataFactory;
-import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -77,9 +76,6 @@ class CommentServiceLayerTest {
     private PlannerStatsRepository plannerStatsRepository;
 
     @Mock
-    private UserService userService;
-
-    @Mock
     private DomainEventRecorder domainEventRecorder;
 
 
@@ -89,6 +85,8 @@ class CommentServiceLayerTest {
     @Mock
     private CommentReportService commentReportService;
 
+
+    private final FakeUsers users = new FakeUsers();
 
     private CommentQueryService queryService;
     private CommentCommandService commandService;
@@ -102,18 +100,18 @@ class CommentServiceLayerTest {
     @BeforeEach
     void setUp() {
         queryService = new CommentQueryService(
-                commentRepository, commentVoteRepository, new UsersApiAdapter(userService, null),
-                new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository),
+                commentRepository, commentVoteRepository, users,
+                new PlannerAccessGuard(users, plannerRepository),
                 new CommentAccessValidator());
         commandService = new CommentCommandService(
                 commentRepository, queryService, domainEventRecorder,
-                new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository),
+                new PlannerAccessGuard(users, plannerRepository),
                 new PlannerStatsService(plannerStatsRepository),
                 new CommentAccessValidator(), new CommentAuthorshipValidator(),
                 new CommentStateValidator());
         engagementService = new CommentEngagementService(
                 commentRepository, commentVoteRepository, queryService,
-                new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository),
+                new PlannerAccessGuard(users, plannerRepository),
                 commentReportService, new CommentAuthorshipValidator(),
                 new CommentStateValidator(), new VoteUniquenessValidator());
 
@@ -136,6 +134,8 @@ class CommentServiceLayerTest {
                 .usernameSuffix("oth01")
                 .role(UserRole.NORMAL)
                 .build();
+        users.add(testUser);
+        users.add(otherUser);
 
         plannerId = UUID.randomUUID();
         publishedPlanner = TestDataFactory.planner(testUser)
@@ -146,10 +146,6 @@ class CommentServiceLayerTest {
                 .plannerType(PlannerType.MIRROR_DUNGEON)
                 .published(true)
                 .build();
-        // The access guard resolves the principal on every guarded path; an unstubbed
-        // repository would surface as UserNotFoundException instead of the behavior under test.
-        lenient().when(userService.findById(anyLong())).thenReturn(testUser);
-
     }
 
     @Nested
@@ -160,7 +156,6 @@ class CommentServiceLayerTest {
             // Arrange
             CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
             AtomicReference<PlannerComment> persisted = new AtomicReference<>();
-            when(userService.findById(testUser.getId())).thenReturn(testUser);
             when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
             when(commentRepository.insert(any(PlannerComment.class)))
                     .thenAnswer(i -> {
@@ -198,7 +193,6 @@ class CommentServiceLayerTest {
 
             CreateCommentRequest request = new CreateCommentRequest("Reply comment", parentPublicId);
             AtomicReference<PlannerComment> persisted = new AtomicReference<>();
-            when(userService.findById(testUser.getId())).thenReturn(testUser);
             when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
             when(commentRepository.findByPublicId(parentPublicId))
                     .thenReturn(Optional.of(parentComment));
@@ -229,7 +223,6 @@ class CommentServiceLayerTest {
         void createComment_WhenPlannerNotFound_ThrowsException() {
             // Arrange
             CreateCommentRequest request = new CreateCommentRequest("Test", null);
-            when(userService.findById(testUser.getId())).thenReturn(testUser);
             when(plannerRepository.existsPublishedById(plannerId)).thenReturn(false);
 
             // Act & Assert
@@ -243,7 +236,6 @@ class CommentServiceLayerTest {
             // Arrange
             UUID nonExistentParentId = UUID.randomUUID();
             CreateCommentRequest request = new CreateCommentRequest("Reply", nonExistentParentId);
-            when(userService.findById(testUser.getId())).thenReturn(testUser);
             when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
             when(commentRepository.findByPublicId(nonExistentParentId))
                     .thenReturn(Optional.empty());
@@ -267,7 +259,6 @@ class CommentServiceLayerTest {
 
             CreateCommentRequest request = new CreateCommentRequest("Very deep reply", parentPublicId);
             AtomicReference<PlannerComment> persisted = new AtomicReference<>();
-            when(userService.findById(testUser.getId())).thenReturn(testUser);
             when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
             when(commentRepository.findByPublicId(parentPublicId))
                     .thenReturn(Optional.of(depth5Parent));
@@ -460,8 +451,7 @@ class CommentServiceLayerTest {
                     .thenReturn(Optional.of(new PlannerThread(plannerId, publishedPlanner.getUserId(), publishedPlanner.isPublished(), false)));
             when(commentRepository.findByPlannerId(plannerId))
                     .thenReturn(List.of(byActive, byDeactivated));
-            when(userService.findAllByIds(anyCollection()))
-                    .thenReturn(List.of(otherUser, deactivated));
+            users.add(deactivated);
 
             List<CommentTreeNode> comments = queryService.getCommentTree(plannerId, testUser.getId());
 
@@ -498,9 +488,6 @@ class CommentServiceLayerTest {
             java.time.Instant futureTimeout = java.time.Instant.now().plusSeconds(3600);
             testUser.setTimeoutUntil(futureTimeout);
 
-            when(userService.findById(testUser.getId()))
-                    .thenReturn(testUser);
-
             CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
 
             // Act & Assert
@@ -517,9 +504,6 @@ class CommentServiceLayerTest {
             // Arrange
             testUser.setBannedAt(java.time.Instant.now());
             testUser.setBannedBy(1L);
-
-            when(userService.findById(testUser.getId()))
-                    .thenReturn(testUser);
 
             CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
 
@@ -539,9 +523,6 @@ class CommentServiceLayerTest {
             testUser.setTimeoutUntil(futureTimeout);
 
             UUID commentId = UUID.randomUUID();
-            when(userService.findById(testUser.getId()))
-                    .thenReturn(testUser);
-
             // Act & Assert - only a ban withdraws engagement
             assertRejected(() -> engagementService.toggleUpvote(commentId, testUser.getId()))
                     .withCode("COMMENT_NOT_FOUND");
@@ -555,9 +536,6 @@ class CommentServiceLayerTest {
             testUser.setBannedBy(1L);
 
             UUID commentId = UUID.randomUUID();
-            when(userService.findById(testUser.getId()))
-                    .thenReturn(testUser);
-
             // Act & Assert
             assertRejected(() -> engagementService.toggleUpvote(commentId, testUser.getId())).withCode("USER_BANNED");
             verify(commentVoteRepository, never()).insert(any());
@@ -573,7 +551,6 @@ class CommentServiceLayerTest {
             org.springframework.test.util.ReflectionTestUtils.setField(incremented, "id", 10L);
             org.springframework.test.util.ReflectionTestUtils.setField(incremented, "upvoteCount", 8);
 
-            when(userService.findById(testUser.getId())).thenReturn(testUser);
             when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(stale));
             when(commentVoteRepository.existsById(any())).thenReturn(false);
             when(commentRepository.findById(10L)).thenReturn(Optional.of(incremented));

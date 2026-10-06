@@ -18,22 +18,29 @@ import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.web.ErrorResponse;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
 import org.danteplanner.backend.shared.exception.DomainException;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
+import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class PrivilegedRouteRulesTest {
 
     private static final Instant NOW = Instant.parse("2026-01-01T00:00:00Z");
     private static final Clock CLOCK = Clock.fixed(NOW, ZoneOffset.UTC);
+
+    @Mock
+    private UserRepository userRepository;
 
     @Test
     void refusal_WhenActorRowMissing_RefusesAsForbidden() {
@@ -99,8 +106,8 @@ class PrivilegedRouteRulesTest {
 
     @Test
     void liveActorAtLeast_WhenActorLookupCannotReachTheDatabase_DeniesWithDbUnavailable() {
-        UserService userService = mock(UserService.class);
-        when(userService.findActiveByIdFromPrimary(7L))
+        UserService userService = new UserService(userRepository, null, null, null, null, null);
+        when(userRepository.findByIdAndDeletedAtIsNull(7L))
                 .thenThrow(new CannotCreateTransactionException("connection refused"));
         AuthorizationManager<RequestAuthorizationContext> manager =
                 new PrivilegedRouteRules(userService, CLOCK).liveActorAtLeast(UserRole.MODERATOR);

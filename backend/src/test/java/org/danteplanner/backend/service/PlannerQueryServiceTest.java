@@ -1,6 +1,5 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
-import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.planner.service.PlannerQueryService;
 
 import org.danteplanner.backend.planner.dto.PlannerResponse;
@@ -13,7 +12,6 @@ import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerSummaryRow;
 import org.danteplanner.backend.support.TestDataFactory;
-import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -45,9 +43,6 @@ class PlannerQueryServiceTest {
     @Mock
     private PlannerRepository plannerRepository;
 
-    @Mock
-    private UserService userService;
-
     private PlannerQueryService queryService;
 
     private User testUser;
@@ -56,7 +51,7 @@ class PlannerQueryServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        PlannerAccessGuard accessGuard = new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository);
+        PlannerAccessGuard accessGuard = new PlannerAccessGuard(null, plannerRepository);
         queryService = new PlannerQueryService(plannerRepository, accessGuard);
 
         testUser = TestDataFactory.unsavedUser(1L);

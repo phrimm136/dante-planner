@@ -7,7 +7,6 @@ import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
-import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository.FloorScopeRow;
 import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
@@ -19,6 +18,7 @@ import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
 import org.danteplanner.backend.shared.outbox.service.DomainEventAttemptRecorder;
 import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.danteplanner.backend.support.LogCapture;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -84,9 +84,6 @@ class PlannerCatalogSyncServiceTest {
     private PlannerKeywordFilterRepository keywordFilterRepository;
 
     @Mock
-    private GameDataRegistry gameDataRegistry;
-
-    @Mock
     private ContentTombstoneStore tombstoneStore;
 
     @Mock
@@ -104,7 +101,7 @@ class PlannerCatalogSyncServiceTest {
     @BeforeEach
     void setUp() {
         syncService = new PlannerCatalogSyncService(events, attemptRecorder, plannerRepository,
-                entityFilterRepository, keywordFilterRepository, gameDataRegistry, tombstoneStore, self,
+                entityFilterRepository, keywordFilterRepository, TestDataFactory.gameDataRegistry(), tombstoneStore, self,
                 transactionManager, clock);
         lenient().when(clock.instant()).thenReturn(PASS_START);
         plannerId = UUID.randomUUID();
@@ -252,7 +249,6 @@ class PlannerCatalogSyncServiceTest {
     void syncPlanner_WhenMirrorDungeonPlanner_PassesTheTableFloorCount() {
         givenVisible(true);
         stubScope(PlannerType.MIRROR_DUNGEON, "10F");
-        when(gameDataRegistry.floorRules()).thenReturn(TABLE);
 
         syncService.syncPlanner(plannerId, List.of(7L));
 
@@ -267,7 +263,6 @@ class PlannerCatalogSyncServiceTest {
         syncService.syncPlanner(plannerId, List.of(7L));
 
         verify(entityFilterRepository).rebuildPlannerFilters(plannerId, 0);
-        verifyNoInteractions(gameDataRegistry);
     }
 
     @Test
@@ -284,7 +279,6 @@ class PlannerCatalogSyncServiceTest {
     void syncPlanner_WhenMirrorDungeonCategoryIsUnknown_ThrowsBeforeTheCall() {
         givenVisible(true);
         stubScope(PlannerType.MIRROR_DUNGEON, "20F");
-        when(gameDataRegistry.floorRules()).thenReturn(TABLE);
 
         assertThatThrownBy(() -> syncService.syncPlanner(plannerId, List.of(7L))).isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Unknown MDCategory value: 20F");

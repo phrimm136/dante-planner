@@ -12,7 +12,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import org.danteplanner.backend.auth.controller.AuthController;
-import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthStateService;
 import org.danteplanner.backend.auth.service.AuthenticationService;
 import org.danteplanner.backend.auth.service.SessionRevocationService;
@@ -21,9 +20,7 @@ import org.danteplanner.backend.planner.controller.PublishedPlannerController;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
-import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.shared.config.LoginRedirect;
-import org.danteplanner.backend.shared.config.OAuthProperties;
 import org.danteplanner.backend.shared.config.RedisConnectionConfig;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
@@ -203,11 +200,11 @@ class RateLimitStoreOutageTest {
                 mock(AuthenticationService.class),
                 mock(SessionRevocationService.class),
                 mock(TokenValidator.class),
-                mock(OAuthProperties.class),
+                null,
                 cookieUtils,
-                mock(JwtProperties.class),
+                null,
                 mock(OAuthStateService.class),
-                mock(OAuthProviderRegistry.class),
+                null,
                 frontendProperties);
         PublishedPlannerController publishedPlannerController = new PublishedPlannerController(
                 mock(PublishedPlannerQueryService.class), securityProperties, new ByIdReadGuard(), deviceIdResolver);

@@ -1,7 +1,7 @@
 package org.danteplanner.backend.service;
 
 import org.danteplanner.backend.comment.entity.PlannerComment;
-import org.danteplanner.backend.user.service.UsersApiAdapter;
+import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator;
@@ -20,7 +20,6 @@ import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
-import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -67,10 +66,9 @@ class CommentCommandServiceNotificationTest {
     private PlannerStatsRepository plannerStatsRepository;
 
     @Mock
-    private UserService userService;
-
-    @Mock
     private DomainEventRecorder domainEventRecorder;
+
+    private final FakeUsers users = new FakeUsers();
 
     private CommentCommandService service;
 
@@ -78,11 +76,11 @@ class CommentCommandServiceNotificationTest {
     void setUp() {
         service = new CommentCommandService(
                 commentRepository,
-                new CommentQueryService(commentRepository, commentVoteRepository, new UsersApiAdapter(userService, null),
-                        new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository),
+                new CommentQueryService(commentRepository, commentVoteRepository, users,
+                        new PlannerAccessGuard(users, plannerRepository),
                         new CommentAccessValidator()),
                 domainEventRecorder,
-                new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository),
+                new PlannerAccessGuard(users, plannerRepository),
                 new PlannerStatsService(plannerStatsRepository),
                 new CommentAccessValidator(), new CommentAuthorshipValidator(),
                 new CommentStateValidator());
@@ -129,7 +127,7 @@ class CommentCommandServiceNotificationTest {
     }
 
     private void givenAPublishedPlanner() {
-        when(userService.findById(COMMENTER_ID)).thenReturn(User.builder()
+        users.add(User.builder()
                 .id(COMMENTER_ID)
                 .email("commenter@example.com")
                 .provider(AuthProviderType.GOOGLE)

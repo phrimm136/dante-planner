@@ -15,7 +15,9 @@ import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.comment.service.CommentModerationTargetAdapter;
 import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.moderation.validation.ReporterStandingValidator;
-import org.danteplanner.backend.user.api.UserBannedException;
+import org.danteplanner.backend.support.FakeUsers;
+import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.user.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -47,10 +49,9 @@ class CommentReportServiceTest {
     @Mock
     private CommentCommandService commentCommandService;
 
-    @Mock
-    private ReporterStandingValidator accessGuard;
-
     private CommentReportService service;
+
+    private User reporter;
 
     private static final Long COMMENT_INTERNAL_ID = 1L;
     private static final UUID COMMENT_PUBLIC_ID = UUID.randomUUID();
@@ -60,10 +61,12 @@ class CommentReportServiceTest {
 
     @BeforeEach
     void setUp() {
+        FakeUsers users = new FakeUsers();
+        reporter = users.add(TestDataFactory.unsavedUser(REPORTER_ID));
         service = new CommentReportService(reportRepository,
                 new CommentModerationTargetAdapter(commentQueryService, commentCommandService,
                         new CommentStateValidator()),
-                accessGuard, new ReportUniquenessValidator());
+                new ReporterStandingValidator(users), new ReportUniquenessValidator());
     }
 
     @Nested
@@ -108,8 +111,7 @@ class CommentReportServiceTest {
 
         @Test
         void createReport_WhenReporterIsBanned_ThrowsAndWritesNothing() {
-            doThrow(new UserBannedException(REPORTER_ID, java.time.Instant.now()))
-                    .when(accessGuard).checkNotBanned(REPORTER_ID);
+            reporter.setBannedAt(java.time.Instant.now());
             CommentReportRequest request = new CommentReportRequest(REASON);
 
             assertRejected(() -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request)).withCode("USER_BANNED");

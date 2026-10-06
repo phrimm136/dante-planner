@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 
 import org.danteplanner.backend.moderation.api.ModeratedPlanner;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,9 +19,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,7 +31,7 @@ class PlannerModerationTargetAdapterTest {
     private PlannerPublishingService plannerPublishingService;
 
     @Mock
-    private PlannerAccessGuard accessGuard;
+    private PlannerRepository plannerRepository;
 
     private PlannerModerationTargetAdapter adapter;
 
@@ -38,7 +39,8 @@ class PlannerModerationTargetAdapterTest {
 
     @BeforeEach
     void setUp() {
-        adapter = new PlannerModerationTargetAdapter(plannerPublishingService, accessGuard);
+        adapter = new PlannerModerationTargetAdapter(plannerPublishingService,
+                new PlannerAccessGuard(null, plannerRepository));
         planner = TestDataFactory.planner(TestDataFactory.unsavedUser(1L))
                 .title("Moderated Planner")
                 .published(true)
@@ -47,9 +49,9 @@ class PlannerModerationTargetAdapterTest {
 
     @Test
     void checkPublished_WhenCalled_DelegatesToTheAccessGuard() {
-        adapter.checkPublished(planner.getId());
+        when(plannerRepository.existsPublishedById(planner.getId())).thenReturn(false);
 
-        verify(accessGuard).checkPublished(planner.getId());
+        assertRejected(() -> adapter.checkPublished(planner.getId())).withCode("PLANNER_NOT_FOUND");
     }
 
     @Test

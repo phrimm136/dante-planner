@@ -19,6 +19,7 @@ import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 import org.danteplanner.backend.shared.ratelimit.RateLimitService;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -51,16 +52,20 @@ class ByIdReadSeamTest {
     PublishedPlannerQueryService publishedPlannerQueryService;
 
     @Mock
-    SecurityProperties securityProperties;
-
-    @Mock
     HttpServletRequest request;
 
     @InjectMocks
     PlannerQueryController plannerQueryController;
 
-    @InjectMocks
     PublishedPlannerController publishedPlannerController;
+
+    @BeforeEach
+    void setUp() {
+        SecurityProperties securityProperties = new SecurityProperties();
+        securityProperties.parseTrustedProxyIps();
+        publishedPlannerController = new PublishedPlannerController(
+                publishedPlannerQueryService, securityProperties, byIdReadGuard, null);
+    }
 
     @Test
     void getPlanner_WhenInvoked_RoutesThroughByIdReadGuard() {
@@ -81,7 +86,6 @@ class ByIdReadSeamTest {
         UUID id = UUID.randomUUID();
         PublishedPlannerDetailResponse expected = mock(PublishedPlannerDetailResponse.class);
         when(request.getRemoteAddr()).thenReturn("1.2.3.4");
-        when(securityProperties.isTrustedProxy("1.2.3.4")).thenReturn(false);
         when(request.getHeader("User-Agent")).thenReturn("agent");
         // No edge in front of this seam, so the viewer identity falls through to the peer address.
         when(request.getHeader("CF-Connecting-IP")).thenReturn(null);

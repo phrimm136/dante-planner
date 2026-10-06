@@ -4,16 +4,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import org.danteplanner.backend.auth.controller.AuthController;
-import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthStateService;
 import org.danteplanner.backend.auth.service.AuthenticationService;
 import org.danteplanner.backend.auth.service.SessionRevocationService;
 import org.danteplanner.backend.auth.token.TokenValidator;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
-import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.shared.config.LoginRedirect;
-import org.danteplanner.backend.shared.config.OAuthProperties;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.shared.ratelimit.RateLimitExceededException;
 import org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor;
@@ -58,21 +55,23 @@ class RateLimitedOAuthCallbackIsDistinguishableTest {
     void setUp() {
         rateLimitService = mock(RateLimitService.class);
         FrontendProperties frontendProperties = new FrontendProperties(FRONTEND_URL);
+        SecurityProperties securityProperties = new SecurityProperties();
+        securityProperties.parseTrustedProxyIps();
 
         AuthController authController = new AuthController(
                 mock(AuthenticationService.class),
                 mock(SessionRevocationService.class),
                 mock(TokenValidator.class),
-                mock(OAuthProperties.class),
+                null,
                 new CookieUtils(false, "", "Lax"),
-                mock(JwtProperties.class),
+                null,
                 mock(OAuthStateService.class),
-                mock(OAuthProviderRegistry.class),
+                null,
                 frontendProperties);
 
         RateLimitInterceptor interceptor = new RateLimitInterceptor(
                 rateLimitService,
-                mock(SecurityProperties.class),
+                securityProperties,
                 new DeviceIdResolver(new CookieUtils(false, "", "Lax")),
                 frontendProperties,
                 new ProblemWriter(Jackson2ObjectMapperBuilder.json().build()),

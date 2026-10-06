@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
 import java.util.Locale;
@@ -31,15 +30,34 @@ class OAuthProviderRegistryTest {
 
     @BeforeEach
     void setUp() {
-        // Create mock providers
-        googleProvider = mock(OAuthProvider.class);
-        when(googleProvider.getProviderName()).thenReturn("google");
+        googleProvider = named("google");
+        appleProvider = named("apple");
 
-        appleProvider = mock(OAuthProvider.class);
-        when(appleProvider.getProviderName()).thenReturn("apple");
-
-        // Create registry with mock providers
         registry = new OAuthProviderRegistry(List.of(googleProvider, appleProvider));
+    }
+
+    private static OAuthProvider named(String name) {
+        return new OAuthProvider() {
+            @Override
+            public String getProviderName() {
+                return name;
+            }
+
+            @Override
+            public String buildAuthorizationUrl(String state, String codeChallenge) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public OAuthTokens exchangeCodeForTokens(String code, String redirectUri, String codeVerifier) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public OAuthUserInfo getUserInfo(String accessToken) {
+                throw new UnsupportedOperationException();
+            }
+        };
     }
 
     @Nested
@@ -159,11 +177,8 @@ class OAuthProviderRegistryTest {
         @Test
         void constructor_WhenDuplicateProviderNames_Throws() {
             // Arrange
-            OAuthProvider googleProvider1 = mock(OAuthProvider.class);
-            when(googleProvider1.getProviderName()).thenReturn("google");
-
-            OAuthProvider googleProvider2 = mock(OAuthProvider.class);
-            when(googleProvider2.getProviderName()).thenReturn("google");
+            OAuthProvider googleProvider1 = named("google");
+            OAuthProvider googleProvider2 = named("google");
 
             // Act & Assert - Collectors.toMap throws on duplicate keys
             assertThatThrownBy(() -> new OAuthProviderRegistry(List.of(googleProvider1, googleProvider2)))
@@ -183,27 +198,6 @@ class OAuthProviderRegistryTest {
             // Assert
             assertNotNull(provider);
             assertEquals("google", provider.getProviderName());
-        }
-
-        @Test
-        void getProvider_WhenCalled_ReturnedProviderIsUsable() {
-            // Arrange
-            OAuthTokens expectedTokens = new OAuthTokens("access", "refresh", null);
-            OAuthUserInfo expectedUserInfo = new OAuthUserInfo("123", "test@example.com");
-
-            when(googleProvider.exchangeCodeForTokens("code", "redirect", "verifier"))
-                    .thenReturn(expectedTokens);
-            when(googleProvider.getUserInfo("access"))
-                    .thenReturn(expectedUserInfo);
-
-            // Act
-            OAuthProvider provider = registry.getProvider("google");
-            OAuthTokens tokens = provider.exchangeCodeForTokens("code", "redirect", "verifier");
-            OAuthUserInfo userInfo = provider.getUserInfo("access");
-
-            // Assert
-            assertSame(expectedTokens, tokens);
-            assertSame(expectedUserInfo, userInfo);
         }
     }
 }

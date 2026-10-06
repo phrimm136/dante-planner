@@ -57,9 +57,11 @@ class BackstopDeniesWhenTheGateWasSkippedTest {
     @BeforeEach
     void setUp() {
         rateLimitService = mock(RateLimitService.class);
+        SecurityProperties securityProperties = new SecurityProperties();
+        securityProperties.parseTrustedProxyIps();
         RateLimitInterceptor interceptor = new RateLimitInterceptor(
                 rateLimitService,
-                mock(SecurityProperties.class),
+                securityProperties,
                 new DeviceIdResolver(new CookieUtils(false, "", "Lax")),
                 new FrontendProperties("https://planner.example"),
                 new ProblemWriter(Jackson2ObjectMapperBuilder.json().build()),

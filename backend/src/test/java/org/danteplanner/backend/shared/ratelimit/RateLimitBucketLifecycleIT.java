@@ -38,7 +38,6 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @Tag("containerized")
@@ -218,9 +217,11 @@ class RateLimitBucketLifecycleIT {
     @Test
     void exhaustedBucket_WhenOneMoreRequestArrives_Answers429WithRetryAfter() throws Exception {
         properties.setCrud(bucket(1));
+        SecurityProperties securityProperties = new SecurityProperties();
+        securityProperties.parseTrustedProxyIps();
         RateLimitInterceptor interceptor = new RateLimitInterceptor(
                 rateLimitService,
-                mock(SecurityProperties.class),
+                securityProperties,
                 new DeviceIdResolver(new CookieUtils(false, "", "Lax")),
                 new FrontendProperties("https://planner.example"),
                 new ProblemWriter(Jackson2ObjectMapperBuilder.json().build()),

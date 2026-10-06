@@ -2,7 +2,6 @@ package org.danteplanner.backend.moderation;
 
 import org.danteplanner.backend.moderation.api.ModerationActionType;
 import org.danteplanner.backend.admin.service.AdminService;
-import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
@@ -29,6 +28,8 @@ import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
+import org.danteplanner.backend.support.FakeUsers;
+import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
@@ -70,7 +71,7 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class ModerationAuditMatrixTest {
 
-    @Mock UserService userService;
+    @Mock UserRepository userRepository;
     @Mock PlannerPublishingService plannerPublishingService;
     @Mock CommentCommandService commentCommandService;
     @Mock CommentQueryService commentQueryService;
@@ -78,6 +79,7 @@ class ModerationAuditMatrixTest {
     ModerationAuditService auditService;
     @Mock TokenBlacklistService tokenBlacklistService;
     @Mock ApplicationEventPublisher eventPublisher;
+    private final FakeUsers users = new FakeUsers();
 
     private UserModerationService userModerationService;
     private PlannerModerationService plannerModerationService;
@@ -120,22 +122,22 @@ class ModerationAuditMatrixTest {
     void setUp() {
         auditService = new ModerationAuditService(moderationActionRepository);
         ModerationPolicy moderationPolicy = new ModerationPolicy();
-        userModerationService = new UserModerationService(userService, auditService, eventPublisher, moderationPolicy);
+        userModerationService = new UserModerationService(
+                new UserService(userRepository, null, null, null, null, null), auditService, eventPublisher, moderationPolicy);
         plannerModerationService = new PlannerModerationService(
                 new PlannerModerationTargetAdapter(plannerPublishingService, null), auditService);
         commentModerationService = new CommentModerationService(
                 new CommentModerationTargetAdapter(commentQueryService, commentCommandService,
                         new CommentStateValidator()),
                 auditService);
-        adminService = new AdminService(new UsersApiAdapter(userService, null), auditService, moderationPolicy);
+        adminService = new AdminService(users, auditService, moderationPolicy);
 
         User actor = user(ACTOR, UserRole.ADMIN);
         User target = user(TARGET, UserRole.MODERATOR);
-        when(userService.findActiveById(ACTOR)).thenReturn(Optional.of(actor));
-        when(userService.findActiveById(TARGET)).thenReturn(Optional.of(target));
-        when(userService.lockActiveById(ACTOR)).thenReturn(actor);
-        when(userService.lockActiveById(TARGET)).thenReturn(target);
-        when(userService.countByRole(any())).thenReturn(5L);
+        when(userRepository.findByIdAndDeletedAtIsNull(ACTOR)).thenReturn(Optional.of(actor));
+        when(userRepository.findByIdAndDeletedAtIsNull(TARGET)).thenReturn(Optional.of(target));
+        users.add(actor);
+        users.add(target);
 
         Planner planner = plannerAggregate(actor);
         when(plannerPublishingService.withdrawFromPublicView(eq(plannerId), any()))

@@ -1,7 +1,6 @@
 package org.danteplanner.backend.planner.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.entity.PlannerContentLifecycle;
@@ -12,15 +11,13 @@ import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.entity.StoredPlannerContent;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
-import org.danteplanner.backend.planner.precondition.ContentVersionValidator;
 import org.danteplanner.backend.planner.precondition.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.precondition.PlannerLimitValidator;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator;
-import org.danteplanner.backend.planner.validation.PlannerContentValidator;
+import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -40,7 +37,7 @@ class PlannerDeleteRestrictionTest {
 
     private final PlannerRepository plannerRepository = mock(PlannerRepository.class);
     private final PlannerCatalogService catalogService = mock(PlannerCatalogService.class);
-    private final UserService userService = mock(UserService.class);
+    private final FakeUsers users = new FakeUsers();
 
     private PlannerAccessGuard accessGuard;
     private PlannerCommandService commandService;
@@ -48,12 +45,12 @@ class PlannerDeleteRestrictionTest {
 
     @BeforeEach
     void setUp() {
-        accessGuard = new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository);
+        accessGuard = new PlannerAccessGuard(users, plannerRepository);
         commandService = new PlannerCommandService(
                 plannerRepository,
                 mock(PlannerStatsRepository.class),
-                mock(PlannerContentValidator.class),
-                mock(ContentVersionValidator.class),
+                null,
+                null,
                 catalogService,
                 accessGuard,
                 new PlannerCategoryValidator(),
@@ -63,8 +60,7 @@ class PlannerDeleteRestrictionTest {
                 new ObjectMapper(),
                 100,
                 2);
-        owner = TestDataFactory.unsavedUser(1L);
-        when(userService.findById(owner.getId())).thenReturn(owner);
+        owner = users.add(TestDataFactory.unsavedUser(1L));
     }
 
     private Planner ownedPlanner(boolean published) {

@@ -1,7 +1,6 @@
 package org.danteplanner.backend.service;
 
 import org.danteplanner.backend.moderation.service.PlannerReportService;
-import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
 import org.danteplanner.backend.moderation.validation.ReporterStandingValidator;
 import org.danteplanner.backend.moderation.entity.PlannerReport;
@@ -9,6 +8,7 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.moderation.exception.ReportAlreadyExistsException;
 import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -26,7 +26,6 @@ import static org.mockito.Mockito.*;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerModerationTargetAdapter;
-import org.danteplanner.backend.user.service.UserService;
 
 /**
  * Unit tests for PlannerReportService.
@@ -40,9 +39,6 @@ class PlannerReportServiceTest {
     private PlannerReportRepository reportRepository;
 
     @Mock
-    private UserService userService;
-
-    @Mock
     private PlannerRepository plannerRepository;
 
     private PlannerReportService reportService;
@@ -52,21 +48,16 @@ class PlannerReportServiceTest {
 
     @BeforeEach
     void setUp() {
-        UsersApiAdapter users = new UsersApiAdapter(userService, null);
+        FakeUsers users = new FakeUsers();
         reportService = new PlannerReportService(reportRepository,
                 new ReporterStandingValidator(users),
                 new PlannerModerationTargetAdapter(null,
                         new PlannerAccessGuard(users, plannerRepository)),
                 new ReportUniquenessValidator());
 
-        testUser = TestDataFactory.unsavedUser(1L);
+        testUser = users.add(TestDataFactory.unsavedUser(1L));
 
         plannerId = UUID.randomUUID();
-
-        // The access guard resolves the principal on every guarded path; an unstubbed
-        // repository would surface as UserNotFoundException instead of the behavior under test.
-        lenient().when(userService.findById(anyLong())).thenReturn(testUser);
-
     }
 
     @Nested

@@ -8,6 +8,7 @@ import org.danteplanner.backend.shared.exception.StreamLifecycleExceptionAdvice;
 import org.danteplanner.backend.shared.ratelimit.RateLimitExceededException;
 import org.danteplanner.backend.shared.sse.SseCapacityExceededException;
 import org.danteplanner.backend.shared.sse.SseConstants;
+import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,11 +29,9 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -101,12 +100,11 @@ class ApiExceptionHandlerEventStreamTest {
         }
     }
 
-    private CookieUtils cookieUtils;
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        cookieUtils = mock(CookieUtils.class);
+        CookieUtils cookieUtils = new CookieUtils(false, "", "Lax");
         ApiExceptionHandler apiExceptionHandler = new ApiExceptionHandler();
         mockMvc = standaloneSetup(new EventStreamThrowingController())
                 .setControllerAdvice(apiExceptionHandler, new StreamLifecycleExceptionAdvice(),
@@ -179,9 +177,9 @@ class ApiExceptionHandlerEventStreamTest {
         mockMvc.perform(get("/probe/revoked").accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("UNAUTHORIZED"))
-                .andExpect(rendersOperableBody());
-
-        verify(cookieUtils).clearAuthCookies(any());
+                .andExpect(rendersOperableBody())
+                .andExpect(cookie().maxAge(CookieConstants.ACCESS_TOKEN, 0))
+                .andExpect(cookie().maxAge(CookieConstants.REFRESH_TOKEN, 0));
     }
 
     @Test

@@ -1,6 +1,6 @@
 package org.danteplanner.backend.comment.controller;
 
-import org.danteplanner.backend.user.service.UsersApiAdapter;
+import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
@@ -10,7 +10,6 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
-import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +41,7 @@ class CommentThreadNotFoundContractTest {
 
     private final PlannerRepository plannerRepository = mock(PlannerRepository.class);
     private final PlannerCommentRepository commentRepository = mock(PlannerCommentRepository.class);
-    private final UserService userService = mock(UserService.class);
+    private final FakeUsers users = new FakeUsers();
 
     private MockMvc mockMvc;
     private UUID plannerId;
@@ -50,8 +49,8 @@ class CommentThreadNotFoundContractTest {
     @BeforeEach
     void setUp() {
         CommentQueryService queryService = new CommentQueryService(
-                commentRepository, mock(PlannerCommentVoteRepository.class), new UsersApiAdapter(userService, null),
-                new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository), new CommentAccessValidator());
+                commentRepository, mock(PlannerCommentVoteRepository.class), users,
+                new PlannerAccessGuard(users, plannerRepository), new CommentAccessValidator());
         mockMvc = standaloneSetup(new CommentController(queryService, null, null, new ByIdReadGuard()))
                 .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
                 .setControllerAdvice(new ApiExceptionHandler())

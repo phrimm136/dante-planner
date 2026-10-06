@@ -1,7 +1,7 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
-import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
@@ -11,6 +11,7 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.moderation.service.PlannerReportService;
+import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -30,14 +31,12 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
-import org.danteplanner.backend.user.service.UserService;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.ArgumentMatchers.anyLong;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator;
@@ -53,9 +52,6 @@ import org.danteplanner.backend.planner.entity.VoteType;
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
 class PlannerEngagementServiceTest {
-
-    @Mock
-    private UserService userService;
 
     @Mock
     private PlannerRepository plannerRepository;
@@ -85,23 +81,20 @@ class PlannerEngagementServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        FakeUsers users = new FakeUsers();
 
         engagementService = new PlannerEngagementService(
                 plannerVoteRepository,
                 plannerStatsService,
                 plannerCatalogService,
                 domainEventRecorder,
-                new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository),
+                new PlannerAccessGuard(users, plannerRepository),
                 reportService,
                 new VoteUniquenessValidator(),
                 recommendedThreshold
         );
 
-        testUser = TestDataFactory.unsavedUser(1L);
-        // The access guard resolves the principal on every guarded path; an unstubbed
-        // repository would surface as UserNotFoundException instead of the behavior under test.
-        lenient().when(userService.findById(anyLong())).thenReturn(testUser);
-
+        testUser = users.add(TestDataFactory.unsavedUser(1L));
     }
 
     private TestDataFactory.PlannerBuilder testPlannerBuilder() {
@@ -168,6 +161,9 @@ class PlannerEngagementServiceTest {
                     engagementService.castVote(testUser.getId(), plannerId, VoteType.UP);
 
             // Assert
+            InOrder countAfterIncrement = inOrder(plannerStatsService);
+            countAfterIncrement.verify(plannerStatsService).incrementUpvotes(plannerId);
+            countAfterIncrement.verify(plannerStatsService).upvotesOf(plannerId);
             assertEquals(6, response.upvoteCount());
             assertTrue(response.hasUpvoted());
             ArgumentCaptor<PlannerVote> voteCaptor =
@@ -177,7 +173,6 @@ class PlannerEngagementServiceTest {
             assertEquals(plannerId, voteCaptor.getValue().getPlannerId());
             assertEquals(VoteType.UP,
                     voteCaptor.getValue().getVoteType());
-            verify(plannerStatsService).incrementUpvotes(plannerId);
         }
 
         @Test

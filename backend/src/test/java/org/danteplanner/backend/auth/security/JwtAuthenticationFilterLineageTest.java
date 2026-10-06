@@ -13,8 +13,7 @@ import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
-import org.danteplanner.backend.user.api.Users;
-import org.danteplanner.backend.user.service.UsersApiAdapter;
+import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
 import org.danteplanner.backend.auth.token.RotationResult;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
@@ -35,7 +34,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Date;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -65,8 +63,7 @@ class JwtAuthenticationFilterLineageTest {
     @Mock
     private TokenBlacklistService tokenBlacklistService;
 
-    @Mock
-    private Users users;
+    private final FakeUsers users = new FakeUsers();
 
     @Mock
     private TokenGenerator tokenGenerator;
@@ -135,7 +132,7 @@ class JwtAuthenticationFilterLineageTest {
         when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(refreshClaims(userId, null, null));
         when(tokenBlacklistService.isBlacklisted(refreshToken)).thenReturn(false);
         when(tokenBlacklistService.isUserTokenInvalidated(eq(userId), any(Long.class))).thenReturn(false);
-        when(users.findActiveById(userId)).thenReturn(Optional.of(UsersApiAdapter.toSummary(user)));
+        users.add(user);
         when(tokenGenerator.generateAccessToken(eq(userId), any())).thenReturn("new.access");
         when(tokenGenerator.generateRefreshToken(eq(userId))).thenReturn("new.refresh");
 
@@ -171,7 +168,7 @@ class JwtAuthenticationFilterLineageTest {
                 .thenReturn(refreshClaims(userId, "presented-jti", "fam-1"));
         when(refreshRotationService.rotate(refreshToken))
                 .thenReturn(new RotationResult.Rotated("new.refresh.jwt", successorClaims));
-        when(users.findActiveById(userId)).thenReturn(Optional.of(UsersApiAdapter.toSummary(user)));
+        users.add(user);
         when(tokenGenerator.generateAccessToken(eq(userId), any(UserRole.class)))
                 .thenReturn("new.access.jwt");
 
@@ -196,7 +193,7 @@ class JwtAuthenticationFilterLineageTest {
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
         when(tokenValidator.validateRefreshToken(refreshToken))
                 .thenReturn(refreshClaims(userId, "retired-jti", "fam-theft"));
-        when(users.findActiveById(userId)).thenReturn(Optional.of(UsersApiAdapter.toSummary(activeUser(userId))));
+        users.add(activeUser(userId));
         when(refreshRotationService.rotate(refreshToken))
                 .thenReturn(new RotationResult.Revoked("fam-theft"));
 
@@ -221,7 +218,7 @@ class JwtAuthenticationFilterLineageTest {
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
         when(tokenValidator.validateRefreshToken(refreshToken))
                 .thenReturn(refreshClaims(userId, "superseded-jti", "fam-superseded"));
-        when(users.findActiveById(userId)).thenReturn(Optional.of(UsersApiAdapter.toSummary(activeUser(userId))));
+        users.add(activeUser(userId));
         when(refreshRotationService.rotate(refreshToken))
                 .thenReturn(new RotationResult.Revoked("fam-superseded"));
 
@@ -240,7 +237,7 @@ class JwtAuthenticationFilterLineageTest {
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
         when(tokenValidator.validateRefreshToken(refreshToken))
                 .thenReturn(refreshClaims(userId, "revoked-jti", "fam-revoked"));
-        when(users.findActiveById(userId)).thenReturn(Optional.of(UsersApiAdapter.toSummary(activeUser(userId))));
+        users.add(activeUser(userId));
         when(refreshRotationService.rotate(refreshToken))
                 .thenReturn(new RotationResult.Rejected(RotationResult.Rejected.Reason.REVOKED_FAMILY));
 
@@ -267,7 +264,7 @@ class JwtAuthenticationFilterLineageTest {
                 .thenReturn(refreshClaims(userId, null, null));
         when(refreshRotationService.rotate(refreshToken))
                 .thenReturn(new RotationResult.Rotated("new.refresh.jwt", successorClaims));
-        when(users.findActiveById(userId)).thenReturn(Optional.of(UsersApiAdapter.toSummary(user)));
+        users.add(user);
         when(tokenGenerator.generateAccessToken(eq(userId), any(UserRole.class)))
                 .thenReturn("new.access.jwt");
 
@@ -291,7 +288,7 @@ class JwtAuthenticationFilterLineageTest {
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
         when(tokenValidator.validateRefreshToken(refreshToken))
                 .thenReturn(refreshClaims(userId, null, null));
-        when(users.findActiveById(userId)).thenReturn(Optional.of(UsersApiAdapter.toSummary(activeUser(userId))));
+        users.add(activeUser(userId));
         when(refreshRotationService.rotate(refreshToken))
                 .thenReturn(new RotationResult.Rejected(RotationResult.Rejected.Reason.INVALID));
 
@@ -323,7 +320,7 @@ class JwtAuthenticationFilterLineageTest {
                 .thenReturn(refreshClaims(userId, "presented-jti", "fam-2"));
         when(refreshRotationService.rotate(refreshToken))
                 .thenReturn(new RotationResult.Rotated("new.refresh.jwt", successorClaims));
-        when(users.findActiveById(userId)).thenReturn(Optional.of(UsersApiAdapter.toSummary(user)));
+        users.add(user);
         when(tokenGenerator.generateAccessToken(eq(userId), any(UserRole.class)))
                 .thenReturn("new.access.jwt");
 

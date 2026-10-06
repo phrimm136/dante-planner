@@ -54,10 +54,12 @@ class RespondDenialReaches429Test {
     void setUp() {
         rateLimitService = mock(RateLimitService.class);
         ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
+        SecurityProperties securityProperties = new SecurityProperties();
+        securityProperties.parseTrustedProxyIps();
 
         RateLimitInterceptor interceptor = new RateLimitInterceptor(
                 rateLimitService,
-                mock(SecurityProperties.class),
+                securityProperties,
                 new DeviceIdResolver(new CookieUtils(false, "", "Lax")),
                 new FrontendProperties("https://planner.example"),
                 new ProblemWriter(objectMapper),

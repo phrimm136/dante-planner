@@ -14,6 +14,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.danteplanner.backend.shared.sse.SuspensionType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
+import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -40,7 +41,7 @@ import static org.danteplanner.backend.support.Rejections.assertRejected;
 class UserModerationServiceTest {
 
     @Mock
-    private UserService userService;
+    private UserRepository userRepository;
 
     @Mock
     private ModerationActionRepository moderationActionRepository;
@@ -56,7 +57,7 @@ class UserModerationServiceTest {
 
     @BeforeEach
     void setUp() {
-        moderationService = new UserModerationService(userService,
+        moderationService = new UserModerationService(new UserService(userRepository, null, null, null, null, null),
                 new ModerationAuditService(moderationActionRepository), eventPublisher,
                 new ModerationPolicy());
 
@@ -106,9 +107,9 @@ class UserModerationServiceTest {
         @Test
         void timeoutUser_WhenModeratorTimeoutsNormalUser_Succeeds() {
             // Arrange
-            when(userService.findActiveById(moderatorUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));
-            when(userService.findActiveById(normalUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(normalUser.getId()))
                     .thenReturn(Optional.of(normalUser));
 
             // Act
@@ -125,9 +126,9 @@ class UserModerationServiceTest {
         @Test
         void timeoutUser_WhenAdminTimeoutsNormalUser_Succeeds() {
             // Arrange
-            when(userService.findActiveById(adminUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(adminUser.getId()))
                     .thenReturn(Optional.of(adminUser));
-            when(userService.findActiveById(normalUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(normalUser.getId()))
                     .thenReturn(Optional.of(normalUser));
 
             // Act
@@ -140,9 +141,9 @@ class UserModerationServiceTest {
         @Test
         void timeoutUser_WhenAdminTimeoutsModerator_Succeeds() {
             // Arrange
-            when(userService.findActiveById(adminUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(adminUser.getId()))
                     .thenReturn(Optional.of(adminUser));
-            when(userService.findActiveById(moderatorUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));
 
             // Act
@@ -165,9 +166,9 @@ class UserModerationServiceTest {
                     .role(UserRole.ADMIN)
                     .build();
 
-            when(userService.findActiveById(adminUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(adminUser.getId()))
                     .thenReturn(Optional.of(adminUser));
-            when(userService.findActiveById(targetAdmin.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(targetAdmin.getId()))
                     .thenReturn(Optional.of(targetAdmin));
 
             // Act & Assert
@@ -192,9 +193,9 @@ class UserModerationServiceTest {
                     .role(UserRole.MODERATOR)
                     .build();
 
-            when(userService.findActiveById(moderatorUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));
-            when(userService.findActiveById(otherModerator.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(otherModerator.getId()))
                     .thenReturn(Optional.of(otherModerator));
 
             // Act & Assert
@@ -210,7 +211,7 @@ class UserModerationServiceTest {
         void timeoutUser_WhenNonExistentActor_ThrowsUserNotFoundException() {
             // Arrange
             Long nonExistentId = 999L;
-            when(userService.findActiveById(nonExistentId))
+            when(userRepository.findByIdAndDeletedAtIsNull(nonExistentId))
                     .thenReturn(Optional.empty());
 
             // Act & Assert
@@ -222,9 +223,9 @@ class UserModerationServiceTest {
         void timeoutUser_WhenNonExistentTarget_ThrowsUserNotFoundException() {
             // Arrange
             Long nonExistentId = 999L;
-            when(userService.findActiveById(moderatorUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));
-            when(userService.findActiveById(nonExistentId))
+            when(userRepository.findByIdAndDeletedAtIsNull(nonExistentId))
                     .thenReturn(Optional.empty());
 
             // Act & Assert
@@ -241,9 +242,9 @@ class UserModerationServiceTest {
             // Arrange
             normalUser.setTimeoutUntil(java.time.Instant.now().plusSeconds(3600));
 
-            when(userService.findActiveById(moderatorUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));
-            when(userService.findActiveById(normalUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(normalUser.getId()))
                     .thenReturn(Optional.of(normalUser));
 
             // Act
@@ -260,9 +261,9 @@ class UserModerationServiceTest {
         void removeTimeout_WhenNonExistentTarget_ThrowsUserNotFoundException() {
             // Arrange
             Long nonExistentId = 999L;
-            when(userService.findActiveById(moderatorUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));
-            when(userService.findActiveById(nonExistentId))
+            when(userRepository.findByIdAndDeletedAtIsNull(nonExistentId))
                     .thenReturn(Optional.empty());
 
             // Act & Assert
@@ -280,9 +281,9 @@ class UserModerationServiceTest {
                     .build();
             otherModerator.setTimeoutUntil(java.time.Instant.now().plusSeconds(3600));
 
-            when(userService.findActiveById(moderatorUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));
-            when(userService.findActiveById(otherModerator.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(otherModerator.getId()))
                     .thenReturn(Optional.of(otherModerator));
 
             // Act & Assert
@@ -305,9 +306,9 @@ class UserModerationServiceTest {
                     .build();
             target.setTimeoutUntil(java.time.Instant.now().plusSeconds(3600));
 
-            when(userService.findActiveById(normalUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(normalUser.getId()))
                     .thenReturn(Optional.of(normalUser));
-            when(userService.findActiveById(target.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(target.getId()))
                     .thenReturn(Optional.of(target));
 
             // Act & Assert
@@ -326,9 +327,9 @@ class UserModerationServiceTest {
         @Test
         void banUser_WhenAdminBansNormalUser_Succeeds() {
             // Arrange
-            when(userService.findActiveById(adminUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(adminUser.getId()))
                     .thenReturn(Optional.of(adminUser));
-            when(userService.findActiveById(normalUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(normalUser.getId()))
                     .thenReturn(Optional.of(normalUser));
 
             // Act
@@ -356,9 +357,9 @@ class UserModerationServiceTest {
         @Test
         void banUser_WhenAdminBansModerator_Succeeds() {
             // Arrange
-            when(userService.findActiveById(adminUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(adminUser.getId()))
                     .thenReturn(Optional.of(adminUser));
-            when(userService.findActiveById(moderatorUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));
 
             // Act
@@ -381,9 +382,9 @@ class UserModerationServiceTest {
                     .role(UserRole.ADMIN)
                     .build();
 
-            when(userService.findActiveById(adminUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(adminUser.getId()))
                     .thenReturn(Optional.of(adminUser));
-            when(userService.findActiveById(targetAdmin.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(targetAdmin.getId()))
                     .thenReturn(Optional.of(targetAdmin));
 
             // Act & Assert
@@ -399,9 +400,9 @@ class UserModerationServiceTest {
         @Test
         void banUser_WhenModeratorBansUser_ThrowsException() {
             // Arrange
-            when(userService.findActiveById(moderatorUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));
-            when(userService.findActiveById(normalUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(normalUser.getId()))
                     .thenReturn(Optional.of(normalUser));
 
             // Act & Assert
@@ -423,9 +424,9 @@ class UserModerationServiceTest {
             normalUser.setBannedAt(java.time.Instant.now());
             normalUser.setBannedBy(adminUser.getId());
 
-            when(userService.findActiveById(adminUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(adminUser.getId()))
                     .thenReturn(Optional.of(adminUser));
-            when(userService.findActiveById(normalUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(normalUser.getId()))
                     .thenReturn(Optional.of(normalUser));
 
             // Act
@@ -449,9 +450,9 @@ class UserModerationServiceTest {
         @Test
         void unbanUser_WhenModeratorUnbans_ThrowsException() {
             // Arrange
-            when(userService.findActiveById(moderatorUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));
-            when(userService.findActiveById(normalUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(normalUser.getId()))
                     .thenReturn(Optional.of(normalUser));
 
             // Act & Assert
@@ -472,9 +473,9 @@ class UserModerationServiceTest {
                     .build();
             targetAdmin.setBannedAt(java.time.Instant.now());
 
-            when(userService.findActiveById(adminUser.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(adminUser.getId()))
                     .thenReturn(Optional.of(adminUser));
-            when(userService.findActiveById(targetAdmin.getId()))
+            when(userRepository.findByIdAndDeletedAtIsNull(targetAdmin.getId()))
                     .thenReturn(Optional.of(targetAdmin));
 
             // Act & Assert

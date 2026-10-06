@@ -4,12 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.planner.entity.MDCategory;
-import org.danteplanner.backend.planner.gamedata.FloorRuleTable;
-import org.danteplanner.backend.planner.gamedata.GameDataLoader;
-import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
 import org.danteplanner.backend.planner.searchindex.PlannerContentEntityExtractor.EntityRef;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -25,17 +23,12 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class PlannerContentEntityExtractorTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static final JsonNode CORPUS = readCorpus(Path.of("../testdata/planner-floor-rules.corpus.json"));
-
-    private static final FloorRuleTable TABLE = new GameDataLoader(MAPPER)
-            .loadFloorRules(Path.of("../static/data", GameDataRegistry.FLOOR_RULES_FILE));
 
     private static final String SIX_FLOORS = """
             {"floorSelections":[
@@ -48,13 +41,8 @@ class PlannerContentEntityExtractorTest {
             ]}
             """;
 
-    private final PlannerContentEntityExtractor extractor = extractorOverTheTable();
-
-    private static PlannerContentEntityExtractor extractorOverTheTable() {
-        GameDataRegistry registry = mock(GameDataRegistry.class);
-        when(registry.floorRules()).thenReturn(TABLE);
-        return new PlannerContentEntityExtractor(new FloorRules(registry), registry);
-    }
+    private final PlannerContentEntityExtractor extractor = new PlannerContentEntityExtractor(
+            new FloorRules(TestDataFactory.gameDataRegistry()), TestDataFactory.gameDataRegistry());
 
     private static JsonNode readCorpus(Path file) {
         try {

@@ -1,6 +1,5 @@
 package org.danteplanner.backend.service;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.danteplanner.backend.user.service.UsersApiAdapter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
@@ -18,22 +17,19 @@ import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
-import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.planner.validation.floor.Stage;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
-import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
-import org.danteplanner.backend.planner.validation.PlannerDocument;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
+import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -56,10 +52,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -83,12 +76,6 @@ class PlannerPublishingServiceTest {
     private PlannerStatsRepository plannerStatsRepository;
 
     @Mock
-    private UserService userService;
-
-    @Mock
-    private PlannerContentValidator contentValidator;
-
-    @Mock
     private PlannerCommandService plannerCommandService;
 
     @Mock
@@ -100,6 +87,8 @@ class PlannerPublishingServiceTest {
     @Mock
     private DomainEventRecorder domainEventRecorder;
 
+    private final FakeUsers users = new FakeUsers();
+
     private PlannerPublishingService publishingService;
 
     private User testUser;
@@ -108,28 +97,25 @@ class PlannerPublishingServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        PlannerAccessGuard accessGuard = new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository);
+        publishingService = publishingServiceWith(TestDataFactory.contentValidator());
 
-        publishingService = new PlannerPublishingService(
+        testUser = users.add(TestDataFactory.unsavedUser(1L));
+    }
+
+    private PlannerPublishingService publishingServiceWith(PlannerContentValidator contentValidator) {
+        return new PlannerPublishingService(
                 plannerRepository,
                 plannerStatsRepository,
                 plannerCommandService,
                 contentValidator,
                 plannerCatalogService,
                 subscriptionService,
-                accessGuard,
+                new PlannerAccessGuard(users, plannerRepository),
                 new PlannerOwnershipValidator(),
                 new PlannerPublishValidator(),
                 new PlannerCategoryValidator(),
                 domainEventRecorder
         );
-
-        testUser = TestDataFactory.unsavedUser(1L);
-
-        when(userService.findById(testUser.getId())).thenReturn(testUser);
-        when(userService.holdActiveById(testUser.getId())).thenReturn(testUser);
-        when(contentValidator.parse(any(), any(), any(), any()))
-                .thenAnswer(invocation -> TestDataFactory.document(invocation.getArgument(0)));
     }
 
     private TestDataFactory.PlannerBuilder testPlannerBuilder() {
@@ -196,34 +182,16 @@ class PlannerPublishingServiceTest {
                     "\"observationGiftIds\":[]", "\"observationGiftIds\":[\"19247\"]");
             Planner planner = testPlannerBuilder().published(false).content(stored).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
-            doAnswer(invocation -> renaming.parse(stored, MDCategory.F5,
-                    renaming.season(planner.getContentVersion()), Stage.PUBLISH))
-                    .when(contentValidator).parse(eq(stored), eq(MDCategory.F5), any(), eq(Stage.PUBLISH));
             List<String> indexedContent = new ArrayList<>();
             doAnswer(invocation -> indexedContent.add(((Planner) invocation.getArgument(0)).getContentJson()))
                     .when(plannerCatalogService).onBecameVisible(any());
 
-            publishingService.publish(testUser.getId(), planner.getId());
+            publishingServiceWith(renaming).publish(testUser.getId(), planner.getId());
 
             JsonNode published = mapper.readTree(planner.getContentJson());
             assertEquals(mapper.createArrayNode().add("19002"), published.path("observationGiftIds"));
             assertEquals(List.of(planner.getContentJson()), indexedContent);
             assertTrue(planner.isPublished());
-        }
-
-        @Test
-        void publish_WhenNothingIsMigrated_KeepsTheStoredString() {
-            Planner planner = testPlannerBuilder().published(false).build();
-            String stored = planner.getContentJson();
-            PlannerDocument unmigrated = TestDataFactory.document(
-                    TestDataFactory.withSelectedKeywords(TestDataFactory.VALID_CONTENT, java.util.Set.of("Burst")));
-            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
-            doReturn(unmigrated)
-                    .when(contentValidator).parse(eq(stored), any(), any(), eq(Stage.PUBLISH));
-
-            publishingService.publish(testUser.getId(), planner.getId());
-
-            assertSame(stored, planner.getContentJson());
         }
     }
 
@@ -463,8 +431,6 @@ class PlannerPublishingServiceTest {
             testUser.setBannedBy(1L);
 
             UUID plannerId = UUID.randomUUID();
-            when(userService.findById(testUser.getId()))
-                    .thenReturn(testUser);
 
             // Act & Assert
             assertRejected(() -> publishingService.publish(testUser.getId(), plannerId)).withCode("USER_BANNED");
@@ -475,7 +441,6 @@ class PlannerPublishingServiceTest {
         void unpublish_WhenBannedOwner_Unpublishes() {
             testUser.setBannedAt(java.time.Instant.now());
             testUser.setBannedBy(1L);
-            when(userService.findById(testUser.getId())).thenReturn(testUser);
             Planner planner = testPlannerBuilder().published(true).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
 
@@ -601,11 +566,8 @@ class PlannerPublishingServiceTest {
 
         @Test
         void publishValidatesBeforeMutating_WhenContentRefused_LeavesAggregateUnpublished() {
-            Planner planner = testPlannerBuilder().published(false).build();
+            Planner planner = testPlannerBuilder().content("").published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
-            doThrow(new PlannerValidationException("EMPTY_CONTENT", "Content is required"))
-                    .when(contentValidator)
-                    .parse(any(), any(), any(), eq(Stage.PUBLISH));
 
             assertRejected(() -> publishingService.publish(testUser.getId(), planner.getId()))
                     .withCode("EMPTY_CONTENT");

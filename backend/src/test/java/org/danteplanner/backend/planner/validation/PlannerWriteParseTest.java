@@ -1,7 +1,6 @@
 package org.danteplanner.backend.planner.validation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.danteplanner.backend.user.service.UsersApiAdapter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.dto.UpsertResult;
@@ -11,7 +10,6 @@ import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
-import org.danteplanner.backend.planner.precondition.ContentVersionValidator;
 import org.danteplanner.backend.planner.precondition.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.precondition.PlannerLimitValidator;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
@@ -25,7 +23,6 @@ import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,12 +51,6 @@ class PlannerWriteParseTest {
     private PlannerStatsRepository statsRepository;
 
     @Mock
-    private UserService userService;
-
-    @Mock
-    private ContentVersionValidator contentVersionValidator;
-
-    @Mock
     private PlannerCatalogService plannerCatalogService;
 
     private final User owner = TestDataFactory.unsavedUser(1L);
@@ -77,9 +68,9 @@ class PlannerWriteParseTest {
                 plannerRepository,
                 statsRepository,
                 contentValidator,
-                contentVersionValidator,
+                null,
                 plannerCatalogService,
-                new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository),
+                new PlannerAccessGuard(null, plannerRepository),
                 new PlannerCategoryValidator(),
                 new PlannerLimitValidator(),
                 new PlannerOwnershipValidator(),
@@ -126,6 +117,7 @@ class PlannerWriteParseTest {
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex ->
                         assertThat(ex.getSubErrors()).extracting(ValidationError::code)
                                 .contains("UNKNOWN_IDENTITY"));
+        assertThat(planner.getCategory()).isEqualTo("5F");
     }
 
     @Test

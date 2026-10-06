@@ -1,6 +1,4 @@
 package org.danteplanner.backend.controller;
-import org.danteplanner.backend.user.service.UserService;
-import org.danteplanner.backend.shared.config.EpithetConfig;
 import org.danteplanner.backend.user.controller.UserController;
 
 import jakarta.servlet.http.Cookie;
@@ -19,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -46,13 +43,7 @@ class UserControllerTest {
     private UserAccountLifecycleService lifecycleService;
 
     @Mock
-    private UserService userService;
-
-    @Mock
     private UserSettingsService userSettingsService;
-
-    @Mock
-    private EpithetConfig epithetConfig;
 
     @Mock
     private SsePublisher ssePublisher;
@@ -63,8 +54,7 @@ class UserControllerTest {
     /**
      * Real, so the auth cookies the controller clears are inspectable state on the response.
      */
-    @Spy
-    private CookieUtils cookieUtils = new CookieUtils(true, "", "Lax");
+    private final CookieUtils cookieUtils = new CookieUtils(true, "", "Lax");
 
     private final MockHttpServletRequest request = new MockHttpServletRequest();
     private final MockHttpServletResponse response = new MockHttpServletResponse();
@@ -82,8 +72,8 @@ class UserControllerTest {
     }
 
     private UserController controllerWithGracePeriod(int gracePeriodDays) {
-        return new UserController(lifecycleService, userService, userSettingsService, ssePublisher,
-                epithetConfig, sessionEndHandler, cookieUtils, gracePeriodDays);
+        return new UserController(lifecycleService, null, userSettingsService, ssePublisher,
+                null, sessionEndHandler, cookieUtils, gracePeriodDays);
     }
 
     @Nested

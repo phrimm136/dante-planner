@@ -2,20 +2,16 @@ package org.danteplanner.backend.service;
 
 import org.danteplanner.backend.admin.service.AdminService;
 import org.danteplanner.backend.user.api.UserSummary;
-import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
-import org.danteplanner.backend.user.api.UserNotFoundException;
-import org.danteplanner.backend.user.service.UserService;
+import org.danteplanner.backend.support.FakeUsers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -33,8 +29,7 @@ import org.danteplanner.backend.moderation.service.ModerationPolicy;
 @ExtendWith(MockitoExtension.class)
 class AdminServiceTest {
 
-    @Mock
-    private UserService userService;
+    private final FakeUsers users = new FakeUsers();
 
     @Mock
     private ModerationActionRepository moderationActionRepository;
@@ -47,7 +42,7 @@ class AdminServiceTest {
 
     @BeforeEach
     void setUp() {
-        adminService = new AdminService(new UsersApiAdapter(userService, null),
+        adminService = new AdminService(users,
                 new ModerationAuditService(moderationActionRepository), new ModerationPolicy());
 
         adminUser = User.builder()
@@ -82,6 +77,10 @@ class AdminServiceTest {
                 .usernameSuffix("usr01")
                 .role(UserRole.NORMAL)
                 .build();
+
+        users.add(adminUser);
+        users.add(moderatorUser);
+        users.add(normalUser);
     }
 
     @Nested
@@ -89,12 +88,6 @@ class AdminServiceTest {
 
         @Test
         void changeRole_WhenAdminPromotesToModerator_Succeeds() {
-            // Arrange - use locking query method
-            when(userService.lockActiveById(adminUser.getId()))
-                    .thenReturn(adminUser);
-            when(userService.lockActiveById(normalUser.getId()))
-                    .thenReturn(normalUser);
-
             // Act
             UserSummary result = adminService.changeRole(adminUser.getId(), normalUser.getId(), UserRole.MODERATOR);
 
@@ -104,12 +97,6 @@ class AdminServiceTest {
 
         @Test
         void changeRole_WhenAdminDemotesModerator_Succeeds() {
-            // Arrange - use locking query method
-            when(userService.lockActiveById(adminUser.getId()))
-                    .thenReturn(adminUser);
-            when(userService.lockActiveById(moderatorUser.getId()))
-                    .thenReturn(moderatorUser);
-
             // Act
             UserSummary result = adminService.changeRole(adminUser.getId(), moderatorUser.getId(), UserRole.NORMAL);
 
@@ -119,11 +106,7 @@ class AdminServiceTest {
 
         @Test
         void changeRole_WhenModeratorGrantsAdmin_ThrowsException() {
-            // Arrange - moderator tries to grant ADMIN (use locking query method)
-            when(userService.lockActiveById(moderatorUser.getId()))
-                    .thenReturn(moderatorUser);
-            when(userService.lockActiveById(normalUser.getId()))
-                    .thenReturn(normalUser);
+            // Arrange - moderator tries to grant ADMIN
 
             // Act & Assert
             ModerationForbiddenException exception = assertThrows(
@@ -148,11 +131,7 @@ class AdminServiceTest {
                     .role(UserRole.MODERATOR)
                     .build();
 
-            // Use locking query method
-            when(userService.lockActiveById(moderatorUser.getId()))
-                    .thenReturn(moderatorUser);
-            when(userService.lockActiveById(otherModerator.getId()))
-                    .thenReturn(otherModerator);
+            users.add(otherModerator);
 
             // Act & Assert
             ModerationForbiddenException exception = assertThrows(
@@ -165,11 +144,7 @@ class AdminServiceTest {
 
         @Test
         void changeRole_WhenModeratorModifiesAdmin_ThrowsException() {
-            // Arrange - moderator tries to modify admin (use locking query method)
-            when(userService.lockActiveById(moderatorUser.getId()))
-                    .thenReturn(moderatorUser);
-            when(userService.lockActiveById(adminUser.getId()))
-                    .thenReturn(adminUser);
+            // Arrange - moderator tries to modify admin
 
             // Act & Assert
             ModerationForbiddenException exception = assertThrows(
@@ -182,11 +157,6 @@ class AdminServiceTest {
 
         @Test
         void changeRole_WhenDemoteLastAdmin_ThrowsException() {
-            // Arrange - use locking query method
-            when(userService.lockActiveById(adminUser.getId()))
-                    .thenReturn(adminUser);
-            when(userService.countByRole(UserRole.ADMIN)).thenReturn(1L);
-
             // Act & Assert
             ModerationForbiddenException exception = assertThrows(
                     ModerationForbiddenException.class,
@@ -210,11 +180,7 @@ class AdminServiceTest {
                     .role(UserRole.ADMIN)
                     .build();
 
-            // Use locking query method
-            when(userService.lockActiveById(adminUser.getId()))
-                    .thenReturn(adminUser);
-            when(userService.lockActiveById(otherAdmin.getId()))
-                    .thenReturn(otherAdmin);
+            users.add(otherAdmin);
 
             // Act & Assert - admin cannot demote another admin (only self-demotion allowed)
             ModerationForbiddenException exception = assertThrows(
@@ -227,10 +193,7 @@ class AdminServiceTest {
 
         @Test
         void changeRole_WhenNonExistentActor_ThrowsUserNotFoundException() {
-            // Arrange - use locking query method
             Long nonExistentId = 999L;
-            when(userService.lockActiveById(nonExistentId))
-                    .thenThrow(new UserNotFoundException(nonExistentId));
 
             // Act & Assert
             assertRejected(() -> adminService.changeRole(nonExistentId, normalUser.getId(), UserRole.MODERATOR))
@@ -239,12 +202,7 @@ class AdminServiceTest {
 
         @Test
         void changeRole_WhenNonExistentTarget_ThrowsUserNotFoundException() {
-            // Arrange - use locking query method
             Long nonExistentId = 999L;
-            when(userService.lockActiveById(adminUser.getId()))
-                    .thenReturn(adminUser);
-            when(userService.lockActiveById(nonExistentId))
-                    .thenThrow(new UserNotFoundException(nonExistentId));
 
             // Act & Assert
             assertRejected(() -> adminService.changeRole(adminUser.getId(), nonExistentId, UserRole.MODERATOR))
@@ -253,10 +211,16 @@ class AdminServiceTest {
 
         @Test
         void changeRole_WhenAdminSelfDemotion_Succeeds() {
-            // Arrange - use locking query method
-            when(userService.lockActiveById(adminUser.getId()))
-                    .thenReturn(adminUser);
-            when(userService.countByRole(UserRole.ADMIN)).thenReturn(2L);
+            users.add(User.builder()
+                    .id(5L)
+                    .publicId(java.util.UUID.randomUUID())
+                    .email("admin2@example.com")
+                    .provider(AuthProviderType.GOOGLE)
+                    .providerId("admin2-123")
+                    .usernameEpithet("ADMIN2")
+                    .usernameSuffix("adm02")
+                    .role(UserRole.ADMIN)
+                    .build());
 
             // Act
             UserSummary result = adminService.changeRole(adminUser.getId(), adminUser.getId(), UserRole.MODERATOR);
@@ -271,10 +235,6 @@ class AdminServiceTest {
 
         @Test
         void getUserRole_WhenUserExists_ReturnsRole() {
-            // Arrange
-            when(userService.findActiveById(adminUser.getId()))
-                    .thenReturn(Optional.of(adminUser));
-
             // Act
             UserRole result = adminService.getUserRole(adminUser.getId());
 
@@ -286,8 +246,6 @@ class AdminServiceTest {
         void getUserRole_WhenUserNotFound_ThrowsException() {
             // Arrange
             Long nonExistentId = 999L;
-            when(userService.findActiveById(nonExistentId))
-                    .thenReturn(Optional.empty());
 
             // Act & Assert
             assertRejected(() -> adminService.getUserRole(nonExistentId)).withCode("USER_NOT_FOUND");

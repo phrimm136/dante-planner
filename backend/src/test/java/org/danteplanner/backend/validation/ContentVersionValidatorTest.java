@@ -1,7 +1,6 @@
 package org.danteplanner.backend.validation;
 import org.danteplanner.backend.planner.precondition.ContentVersionValidator;
-import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
-import org.danteplanner.backend.planner.gamedata.PlannerVersions;
+import org.danteplanner.backend.support.TestDataFactory;
 
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
@@ -9,11 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for ContentVersionValidator.
@@ -22,13 +17,9 @@ class ContentVersionValidatorTest {
 
     private ContentVersionValidator validator;
 
-    private static final PlannerVersions PLANNER_VERSIONS = new PlannerVersions(2, List.of(6, 7), List.of(1, 5));
-
     @BeforeEach
     void setUp() {
-        GameDataRegistry registry = mock(GameDataRegistry.class);
-        when(registry.plannerVersions()).thenReturn(PLANNER_VERSIONS);
-        validator = new ContentVersionValidator(registry);
+        validator = new ContentVersionValidator(TestDataFactory.gameDataRegistry());
     }
 
     @Nested

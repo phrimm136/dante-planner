@@ -19,8 +19,7 @@ import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.api.Users;
-import org.danteplanner.backend.user.service.UsersApiAdapter;
+import org.danteplanner.backend.support.FakeUsers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +33,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Date;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -62,11 +60,11 @@ class AutoRefreshFailureContractTest {
 
     @Mock private TokenValidator tokenValidator;
     @Mock private TokenBlacklistService tokenBlacklistService;
-    @Mock private Users users;
     @Mock private TokenGenerator tokenGenerator;
     @Mock private RefreshRotationService refreshRotationService;
-    @Mock private JwtProperties jwtProperties;
 
+    private final FakeUsers users = new FakeUsers();
+    private final JwtProperties jwtProperties = new JwtProperties();
     private final CookieUtils cookieUtils = new CookieUtils(true, "", "Lax");
     private MockHttpServletRequest request;
     private MockHttpServletResponse response;
@@ -110,7 +108,7 @@ class AutoRefreshFailureContractTest {
     private void givenTheTokenIsDead(boolean lineageEnabled) {
         when(tokenValidator.validateRefreshToken(DEAD_REFRESH_TOKEN)).thenReturn(refreshClaims());
         if (lineageEnabled) {
-            when(users.findActiveById(USER_ID)).thenReturn(Optional.of(UsersApiAdapter.toSummary(activeUser())));
+            users.add(activeUser());
             when(refreshRotationService.rotate(DEAD_REFRESH_TOKEN))
                     .thenReturn(new RotationResult.Revoked("fam-revoked"));
         } else {

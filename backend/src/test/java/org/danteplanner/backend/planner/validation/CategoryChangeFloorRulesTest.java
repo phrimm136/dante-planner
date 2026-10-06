@@ -1,7 +1,6 @@
 package org.danteplanner.backend.planner.validation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerType;
@@ -9,7 +8,6 @@ import org.danteplanner.backend.planner.exception.PlannerValidationException.Val
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
-import org.danteplanner.backend.planner.precondition.ContentVersionValidator;
 import org.danteplanner.backend.planner.precondition.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.precondition.PlannerLimitValidator;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
@@ -20,9 +18,9 @@ import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
+import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,15 +59,11 @@ class CategoryChangeFloorRulesTest {
     private PlannerStatsRepository statsRepository;
 
     @Mock
-    private UserService userService;
-
-    @Mock
-    private ContentVersionValidator contentVersionValidator;
-
-    @Mock
     private PlannerCatalogService plannerCatalogService;
 
-    private final User owner = TestDataFactory.unsavedUser(1L);
+    private final FakeUsers users = new FakeUsers();
+
+    private final User owner = users.add(TestDataFactory.unsavedUser(1L));
 
     private PlannerCommandService commandService;
 
@@ -84,9 +78,9 @@ class CategoryChangeFloorRulesTest {
                 plannerRepository,
                 statsRepository,
                 contentValidator,
-                contentVersionValidator,
+                null,
                 plannerCatalogService,
-                new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository),
+                new PlannerAccessGuard(users, plannerRepository),
                 new PlannerCategoryValidator(),
                 new PlannerLimitValidator(),
                 new PlannerOwnershipValidator(),
@@ -126,7 +120,6 @@ class CategoryChangeFloorRulesTest {
     @Test
     void upsertPlanner_WhenAPublishedFiveFloorPlannerMovesToFifteenFloors_RejectsTheMissingFloors() {
         Planner planner = stored(TestDataFactory.planner(owner).published(true).build());
-        when(userService.findById(owner.getId())).thenReturn(owner);
 
         assertThatThrownBy(() -> commandService.upsertPlanner(
                         owner.getId(), null, planner.getId(), resending(planner, "15F"), false))
@@ -166,7 +159,6 @@ class CategoryChangeFloorRulesTest {
     void upsertPlanner_WhenAPublishedPlannerWhoseStoredFloorSixIsNotAnObjectMovesToFifteenFloors_RejectsTheFloorType() {
         Planner planner = stored(TestDataFactory.planner(owner)
                 .content(FLOOR_SIX_NOT_AN_OBJECT_CONTENT).published(true).build());
-        when(userService.findById(owner.getId())).thenReturn(owner);
 
         assertThatThrownBy(() -> commandService.upsertPlanner(
                         owner.getId(), null, planner.getId(), resending(planner, "15F"), false))

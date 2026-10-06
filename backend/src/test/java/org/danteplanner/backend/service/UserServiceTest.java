@@ -43,12 +43,6 @@ class UserServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private RandomUsernameGenerator usernameGenerator;
-
-    @Mock
-    private EpithetConfig epithetConfig;
-
-    @Mock
     private ModerationAuditService moderationAuditService;
 
     @Mock
@@ -63,7 +57,9 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(userRepository, usernameGenerator, new EpithetValidator(epithetConfig),
+        EpithetConfig epithetConfig = new EpithetConfig();
+        userService = new UserService(userRepository, new RandomUsernameGenerator(epithetConfig),
+                new EpithetValidator(epithetConfig),
                 moderationAuditService, userSettingsService, transactionTemplate);
 
         testUser = TestDataFactory.unsavedUser(123L);
@@ -87,8 +83,6 @@ class UserServiceTest {
             when(userRepository.findByProviderAndProviderId(AuthProviderType.GOOGLE, PROVIDER_ID))
                     .thenReturn(Optional.empty())
                     .thenReturn(Optional.of(testUser));
-            when(usernameGenerator.generate())
-                    .thenReturn(new RandomUsernameGenerator.UsernameComponents("W_CORP", "test1"));
             when(userRepository.insert(any(User.class))).thenThrow(
                     IntegrityViolations.duplicateEntry("users.uk_provider_provider_id"));
 
@@ -104,8 +98,6 @@ class UserServiceTest {
             runTransactionsInline();
             when(userRepository.findByProviderAndProviderId(AuthProviderType.GOOGLE, PROVIDER_ID))
                     .thenReturn(Optional.empty());
-            when(usernameGenerator.generate())
-                    .thenReturn(new RandomUsernameGenerator.UsernameComponents("W_CORP", "test1"));
             when(userRepository.insert(any(User.class))).thenThrow(
                     IntegrityViolations.duplicateEntry("users.uk_users_username_suffix"));
 

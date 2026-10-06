@@ -1,7 +1,6 @@
 package org.danteplanner.backend.planner.service;
 
 import java.util.Optional;
-import org.danteplanner.backend.user.service.UsersApiAdapter;
 import java.util.UUID;
 
 import org.danteplanner.backend.planner.entity.Planner;
@@ -9,7 +8,6 @@ import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
 import org.danteplanner.backend.support.TestDataFactory;
-import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -34,9 +32,6 @@ import static org.mockito.Mockito.when;
 class PlannerAccessGuardTest {
 
     @Mock
-    private UserService userService;
-
-    @Mock
     private PlannerRepository plannerRepository;
 
     private PlannerAccessGuard accessGuard;
@@ -45,7 +40,7 @@ class PlannerAccessGuardTest {
 
     @BeforeEach
     void setUp() {
-        accessGuard = new PlannerAccessGuard(new UsersApiAdapter(userService, null), plannerRepository);
+        accessGuard = new PlannerAccessGuard(null, plannerRepository);
         plannerId = UUID.randomUUID();
     }
 
