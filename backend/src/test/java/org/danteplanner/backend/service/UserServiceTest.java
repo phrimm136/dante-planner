@@ -1,7 +1,6 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.user.service.RandomUsernameGenerator;
 import org.danteplanner.backend.user.service.UserService;
-import org.danteplanner.backend.user.service.UserSettingsService;
 
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.shared.config.EpithetConfig;
@@ -46,9 +45,6 @@ class UserServiceTest {
     private ModerationAuditService moderationAuditService;
 
     @Mock
-    private UserSettingsService userSettingsService;
-
-    @Mock
     private org.springframework.transaction.support.TransactionTemplate transactionTemplate;
 
     private UserService userService;
@@ -60,7 +56,7 @@ class UserServiceTest {
         EpithetConfig epithetConfig = new EpithetConfig();
         userService = new UserService(userRepository, new RandomUsernameGenerator(epithetConfig),
                 new EpithetValidator(epithetConfig),
-                moderationAuditService, userSettingsService, transactionTemplate);
+                moderationAuditService, null, transactionTemplate);
 
         testUser = TestDataFactory.unsavedUser(123L);
     }

@@ -1,23 +1,27 @@
 package org.danteplanner.backend.planner.effect;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.danteplanner.backend.notification.api.Notifications;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventPayloadReader;
 import org.danteplanner.backend.shared.outbox.service.EffectPushQueue;
 import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.danteplanner.backend.support.FakeUsers;
+import org.danteplanner.backend.support.RecordingNotifications;
+import org.danteplanner.backend.support.RecordingSseChannelSender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.mockito.Mockito.verifyNoInteractions;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 /**
@@ -36,11 +40,12 @@ class PlannerEffectVisibilityTest {
     @Mock
     private PlannerRepository plannerRepository;
 
-    @Mock
-    private Notifications notificationDispatchService;
+    private final RecordingNotifications notificationDispatchService = new RecordingNotifications(new FakeUsers());
 
-    @Mock
-    private SsePublisher ssePublisher;
+    private final RecordingSseChannelSender sseChannel = new RecordingSseChannelSender();
+
+    private final SsePublisher ssePublisher =
+            new SsePublisher(sseChannel, Jackson2ObjectMapperBuilder.json().build(), new SimpleMeterRegistry());
 
     private final DomainEventPayloadReader payloads =
             new DomainEventPayloadReader(new ObjectMapper());
@@ -62,7 +67,8 @@ class PlannerEffectVisibilityTest {
                 "{\"authorId\":7}"), pushes);
         pushes.flush();
 
-        verifyNoInteractions(notificationDispatchService, ssePublisher);
+        assertThat(notificationDispatchService.calls()).isEmpty();
+        assertThat(sseChannel.attempts()).isEmpty();
     }
 
     @Test
@@ -74,6 +80,7 @@ class PlannerEffectVisibilityTest {
                 "{\"ownerId\":7}"), pushes);
         pushes.flush();
 
-        verifyNoInteractions(notificationDispatchService, ssePublisher);
+        assertThat(notificationDispatchService.calls()).isEmpty();
+        assertThat(sseChannel.attempts()).isEmpty();
     }
 }

@@ -1,11 +1,15 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 
+import org.danteplanner.backend.support.RecordingAccountLifecycleParticipant;
+import org.danteplanner.backend.support.RecordingAccountLifecycleParticipant.Call;
+import org.danteplanner.backend.support.RecordingAccountLifecycleParticipant.Event;
+import org.danteplanner.backend.support.RecordingSessionEndHandler;
+import org.danteplanner.backend.support.RecordingSessionEndHandler.EndAllSessions;
+import org.danteplanner.backend.support.ScriptedFailuresCheck;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserNotFoundException;
-import org.danteplanner.backend.user.api.AccountLifecycleParticipant;
-import org.danteplanner.backend.user.api.SessionEndHandler;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -17,34 +21,37 @@ import org.springframework.data.redis.RedisConnectionFailureException;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for UserAccountLifecycleService.
  *
- * <p>Tests soft-delete, reactivation, and hard-delete functionality
- * with all dependencies mocked.</p>
+ * <p>Tests soft-delete, reactivation, and hard-delete functionality.</p>
  */
 @ExtendWith(MockitoExtension.class)
+@ExtendWith(ScriptedFailuresCheck.class)
 class UserAccountLifecycleServiceTest {
+
+    private static final String USER_ROW_DELETED = "userRepository.delete";
 
     @Mock
     private UserRepository userRepository;
 
-    @Mock
-    private AccountLifecycleParticipant firstParticipant;
+    private final List<Object> journal = new ArrayList<>();
 
-    @Mock
-    private AccountLifecycleParticipant secondParticipant;
+    private final RecordingAccountLifecycleParticipant firstParticipant = new RecordingAccountLifecycleParticipant(journal);
 
-    @Mock
-    private SessionEndHandler sessionEndHandler;
+    private final RecordingAccountLifecycleParticipant secondParticipant = new RecordingAccountLifecycleParticipant(journal);
+
+    private final RecordingSessionEndHandler sessionEndHandler = new RecordingSessionEndHandler(journal);
 
     private UserAccountLifecycleService lifecycleService;
 
@@ -62,6 +69,10 @@ class UserAccountLifecycleServiceTest {
         );
 
         testUser = TestDataFactory.unsavedUser(123L);
+    }
+
+    private void journalUserRowDeletion() {
+        doAnswer(invocation -> journal.add(USER_ROW_DELETED)).when(userRepository).delete(testUser);
     }
 
     @Nested
@@ -87,10 +98,10 @@ class UserAccountLifecycleServiceTest {
             assertTrue(scheduledDate.isAfter(expectedScheduleMin));
             assertTrue(scheduledDate.isBefore(expectedScheduleMax));
 
-            var inOrder = inOrder(firstParticipant, secondParticipant, sessionEndHandler);
-            inOrder.verify(firstParticipant).accountDeactivated(testUser.getId());
-            inOrder.verify(secondParticipant).accountDeactivated(testUser.getId());
-            inOrder.verify(sessionEndHandler).endAllSessions(testUser.getId());
+            assertThat(journal).containsExactly(
+                    new Call(firstParticipant, Event.DEACTIVATED, testUser.getId(), null),
+                    new Call(secondParticipant, Event.DEACTIVATED, testUser.getId(), null),
+                    new EndAllSessions(testUser.getId()));
         }
 
         @Test
@@ -106,19 +117,20 @@ class UserAccountLifecycleServiceTest {
 
             // Assert
             assertEquals(existingScheduledAt, scheduledDate);
-            verify(firstParticipant, never()).accountDeactivated(any());
-            verify(sessionEndHandler, never()).endAllSessions(any());
+            assertThat(journal).isEmpty();
         }
 
         @Test
         void deleteAccount_WhenEndingSessionsFails_Propagates() {
             when(userRepository.findWithLockById(testUser.getId())).thenReturn(Optional.of(testUser));
-            doThrow(new RedisConnectionFailureException("token store unreachable"))
-                    .when(sessionEndHandler).endAllSessions(testUser.getId());
+            RedisConnectionFailureException unreachable = new RedisConnectionFailureException("token store unreachable");
+            sessionEndHandler.failNext(RecordingSessionEndHandler.Operation.END_ALL_SESSIONS, unreachable);
 
             assertThatThrownBy(() -> lifecycleService.deleteAccount(testUser.getId()))
                     .isInstanceOf(RedisConnectionFailureException.class)
                     .hasMessage("token store unreachable");
+            assertThat(sessionEndHandler.calls()).containsExactly(new RecordingSessionEndHandler.Failed(
+                    RecordingSessionEndHandler.Operation.END_ALL_SESSIONS, unreachable));
         }
 
         @Test
@@ -155,8 +167,10 @@ class UserAccountLifecycleServiceTest {
             assertFalse(testUser.isDeleted());
             assertNull(testUser.getDeletedAt());
             assertNull(testUser.getPermanentDeleteScheduledAt());
-            verify(firstParticipant).accountReactivated(testUser.getId());
-            verify(secondParticipant).accountReactivated(testUser.getId());
+            assertThat(firstParticipant.calls())
+                    .containsExactly(new Call(firstParticipant, Event.REACTIVATED, testUser.getId(), null));
+            assertThat(secondParticipant.calls())
+                    .containsExactly(new Call(secondParticipant, Event.REACTIVATED, testUser.getId(), null));
         }
 
         @Test
@@ -186,7 +200,7 @@ class UserAccountLifecycleServiceTest {
 
             // Assert
             assertFalse(testUser.isDeleted());
-            verify(firstParticipant, never()).accountReactivated(any());
+            assertThat(journal).isEmpty();
         }
     }
 
@@ -197,34 +211,38 @@ class UserAccountLifecycleServiceTest {
         void performHardDelete_WhenPurgeable_ReassignsEverywhereBeforeAnyDeletion() {
             when(userRepository.findWithLockPurgeable(eq(testUser.getId()), any(Instant.class)))
                     .thenReturn(Optional.of(testUser));
+            journalUserRowDeletion();
 
             lifecycleService.performHardDelete(testUser.getId(), Instant.now());
 
-            var inOrder = inOrder(sessionEndHandler, firstParticipant, secondParticipant, userRepository);
-            inOrder.verify(sessionEndHandler).endAllSessions(testUser.getId());
-            inOrder.verify(firstParticipant)
-                    .reassignToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
-            inOrder.verify(secondParticipant)
-                    .reassignToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
-            inOrder.verify(firstParticipant).deleteOwnedData(testUser.getId());
-            inOrder.verify(secondParticipant).deleteOwnedData(testUser.getId());
-            // Last: the cascade off this row removes the planner cores the sweep left behind.
-            inOrder.verify(userRepository).delete(testUser);
+            Long sentinel = UserAccountLifecycleService.SENTINEL_USER_ID;
+            assertThat(journal).containsExactly(
+                    new EndAllSessions(testUser.getId()),
+                    new Call(firstParticipant, Event.REASSIGNED_TO_SENTINEL, testUser.getId(), sentinel),
+                    new Call(secondParticipant, Event.REASSIGNED_TO_SENTINEL, testUser.getId(), sentinel),
+                    new Call(firstParticipant, Event.OWNED_DATA_DELETED, testUser.getId(), null),
+                    new Call(secondParticipant, Event.OWNED_DATA_DELETED, testUser.getId(), null),
+                    // Last: the cascade off this row removes the planner cores the sweep left behind.
+                    USER_ROW_DELETED);
         }
 
         @Test
         void performHardDelete_WhenEndingSessionsFails_StillPurges() {
             when(userRepository.findWithLockPurgeable(eq(testUser.getId()), any(Instant.class)))
                     .thenReturn(Optional.of(testUser));
-            doThrow(new RedisConnectionFailureException("token store unreachable"))
-                    .when(sessionEndHandler).endAllSessions(testUser.getId());
+            RedisConnectionFailureException unreachable = new RedisConnectionFailureException("token store unreachable");
+            sessionEndHandler.failNext(RecordingSessionEndHandler.Operation.END_ALL_SESSIONS, unreachable);
+            journalUserRowDeletion();
 
             assertTrue(lifecycleService.performHardDelete(testUser.getId(), Instant.now()));
 
-            verify(firstParticipant)
-                    .reassignToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
-            verify(firstParticipant).deleteOwnedData(testUser.getId());
-            verify(userRepository).delete(testUser);
+            Long sentinel = UserAccountLifecycleService.SENTINEL_USER_ID;
+            assertThat(sessionEndHandler.calls()).containsExactly(new RecordingSessionEndHandler.Failed(
+                    RecordingSessionEndHandler.Operation.END_ALL_SESSIONS, unreachable));
+            assertThat(firstParticipant.calls()).containsExactly(
+                    new Call(firstParticipant, Event.REASSIGNED_TO_SENTINEL, testUser.getId(), sentinel),
+                    new Call(firstParticipant, Event.OWNED_DATA_DELETED, testUser.getId(), null));
+            assertThat(journal).last().isEqualTo(USER_ROW_DELETED);
         }
 
         @Test
@@ -236,7 +254,7 @@ class UserAccountLifecycleServiceTest {
 
             assertFalse(deleted);
             verify(userRepository, never()).delete(any(User.class));
-            verifyNoInteractions(firstParticipant, secondParticipant, sessionEndHandler);
+            assertThat(journal).isEmpty();
         }
     }
 }

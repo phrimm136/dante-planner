@@ -3,7 +3,6 @@ package org.danteplanner.backend.moderation;
 import org.danteplanner.backend.moderation.api.ModerationActionType;
 import org.danteplanner.backend.admin.service.AdminService;
 import org.danteplanner.backend.user.api.AuthProviderType;
-import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.comment.service.CommentModerationTargetAdapter;
@@ -77,7 +76,6 @@ class ModerationAuditMatrixTest {
     @Mock CommentQueryService commentQueryService;
     @Mock ModerationActionRepository moderationActionRepository;
     ModerationAuditService auditService;
-    @Mock TokenBlacklistService tokenBlacklistService;
     @Mock ApplicationEventPublisher eventPublisher;
     private final FakeUsers users = new FakeUsers();
 

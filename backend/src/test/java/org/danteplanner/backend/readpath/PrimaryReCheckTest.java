@@ -5,17 +5,12 @@ import org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource;
 import org.danteplanner.backend.shared.config.RoutingKey;
 import org.danteplanner.backend.shared.config.UndeclaredPrimaryAccessGuard;
 import org.danteplanner.backend.shared.exception.EntityNotFoundException;
-import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.danteplanner.backend.shared.readpath.PrimaryReCheck;
+import org.danteplanner.backend.support.RecordingTombstoneStore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,9 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
@@ -43,8 +35,6 @@ import static org.danteplanner.backend.support.Rejections.assertRejected;
  * pool it would reach. That is the only seam through which the pin is visible, and leaking one
  * would silently route a later unrelated read on the same worker thread.</p>
  */
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 class PrimaryReCheckTest {
 
     private static final String ENTITY_TYPE = "planner";
@@ -54,7 +44,7 @@ class PrimaryReCheckTest {
     private static final UndeclaredPrimaryAccessGuard PROBE_GUARD =
             new UndeclaredPrimaryAccessGuard(new SimpleMeterRegistry(), false);
 
-    @Mock ContentTombstoneStore tombstoneStore;
+    private final RecordingTombstoneStore tombstoneStore = new RecordingTombstoneStore();
 
     private SimpleMeterRegistry meterRegistry;
     private PrimaryReCheck reCheck;
@@ -87,8 +77,6 @@ class PrimaryReCheckTest {
 
         @Test
         void liveEntity_WhenReadFromReplica_IsServed() {
-            when(tombstoneStore.isTombstoned(ENTITY_TYPE, id)).thenReturn(false);
-
             String result = reCheck.readWithReCheck(ENTITY_TYPE, id, () -> "planner");
 
             assertEquals("planner", result);
@@ -98,7 +86,7 @@ class PrimaryReCheckTest {
 
         @Test
         void deletedEntity_WhenReplicaHits_IsMasked() {
-            when(tombstoneStore.isTombstoned(ENTITY_TYPE, id)).thenReturn(true);
+            tombstoneStore.writeTombstone(ENTITY_TYPE, id);
 
             assertRejected(() -> reCheck.readWithReCheck(ENTITY_TYPE, id, () -> "planner")).withCode("NOT_FOUND");
         }
@@ -110,8 +98,6 @@ class PrimaryReCheckTest {
          */
         @Test
         void tombstoneStore_WhenFailingOpen_ServesTheRow() {
-            when(tombstoneStore.isTombstoned(ENTITY_TYPE, id)).thenReturn(false);
-
             assertEquals("planner", reCheck.readWithReCheck(ENTITY_TYPE, id, () -> "planner"));
         }
     }
@@ -162,15 +148,16 @@ class PrimaryReCheckTest {
 
         @Test
         void promotedRead_WhenPromoted_SkipsTombstoneGate() {
+            tombstoneStore.writeTombstone(ENTITY_TYPE, id);
             AtomicInteger attempts = new AtomicInteger();
-            reCheck.readWithReCheck(ENTITY_TYPE, id, () -> {
+            String served = reCheck.readWithReCheck(ENTITY_TYPE, id, () -> {
                 if (attempts.getAndIncrement() == 0) {
                     throw new EntityNotFoundException(ENTITY_TYPE, id);
                 }
                 return "planner";
             });
 
-            verify(tombstoneStore, never()).isTombstoned(ENTITY_TYPE, id);
+            assertEquals("planner", served);
         }
     }
 
@@ -196,8 +183,6 @@ class PrimaryReCheckTest {
 
         @Test
         void misses_WhenReplicaLacksThem_AreReReadOnceThroughBulkhead() {
-            when(tombstoneStore.tombstonedAmong(ENTITY_TYPE, Set.of(replicated))).thenReturn(Set.of());
-
             List<UUID> served = reCheck.readAllWithReCheck(
                     ENTITY_TYPE, List.of(replicated, primaryOnly, nowhere), dereference, Function.identity());
 
@@ -211,7 +196,7 @@ class PrimaryReCheckTest {
 
         @Test
         void tombstonedHit_WhenReplicaServesIt_IsDropped() {
-            when(tombstoneStore.tombstonedAmong(ENTITY_TYPE, Set.of(replicated))).thenReturn(Set.of(replicated));
+            tombstoneStore.writeTombstone(ENTITY_TYPE, replicated);
 
             List<UUID> served = reCheck.readAllWithReCheck(
                     ENTITY_TYPE, List.of(replicated), dereference, Function.identity());
@@ -223,8 +208,6 @@ class PrimaryReCheckTest {
 
         @Test
         void allHits_WhenReplicaHasEveryId_SkipTheReCheck() {
-            when(tombstoneStore.tombstonedAmong(ENTITY_TYPE, Set.of(replicated))).thenReturn(Set.of());
-
             List<UUID> served = reCheck.readAllWithReCheck(
                     ENTITY_TYPE, List.of(replicated), dereference, Function.identity());
 
@@ -235,12 +218,12 @@ class PrimaryReCheckTest {
 
         @Test
         void promotedRows_WhenReCheckedOnPrimary_SkipTombstoneGate() {
-            when(tombstoneStore.tombstonedAmong(ENTITY_TYPE, Set.of())).thenReturn(Set.of());
+            tombstoneStore.writeTombstone(ENTITY_TYPE, primaryOnly);
 
-            reCheck.readAllWithReCheck(ENTITY_TYPE, List.of(primaryOnly), dereference, Function.identity());
+            List<UUID> served = reCheck.readAllWithReCheck(
+                    ENTITY_TYPE, List.of(primaryOnly), dereference, Function.identity());
 
-            verify(tombstoneStore).tombstonedAmong(ENTITY_TYPE, Set.of());
-            verify(tombstoneStore, never()).tombstonedAmong(ENTITY_TYPE, Set.of(primaryOnly));
+            assertThat(served).containsExactly(primaryOnly);
         }
     }
 
@@ -272,7 +255,6 @@ class PrimaryReCheckTest {
 
         @Test
         void batchMisses_WhenReReadOnPrimary_CountOneQueryAndEveryPromotedRow() {
-            when(tombstoneStore.tombstonedAmong(ENTITY_TYPE, Set.of())).thenReturn(Set.of());
             Function<Collection<UUID>, List<UUID>> dereference = requested ->
                     currentRoutingKeyOverride() == RoutingKey.BULKHEAD ? List.copyOf(requested) : List.of();
 
@@ -284,8 +266,6 @@ class PrimaryReCheckTest {
 
         @Test
         void batchHits_WhenReplicaServesEveryId_CountNoQuery() {
-            when(tombstoneStore.tombstonedAmong(ENTITY_TYPE, Set.of(first, second))).thenReturn(Set.of());
-
             reCheck.readAllWithReCheck(ENTITY_TYPE, List.of(first, second), List::copyOf, Function.identity());
 
             assertEquals(0d, bulkheadQueries());
@@ -299,7 +279,6 @@ class PrimaryReCheckTest {
 
         @Test
         void hit_WhenNoMarkerExists_IsServedWithoutReRead() {
-            when(tombstoneStore.isTombstoned(SCOPE, id)).thenReturn(false);
             AtomicInteger calls = new AtomicInteger();
 
             String served = reCheck.reReadWhenTombstoned(SCOPE, id, "replica",
@@ -312,7 +291,7 @@ class PrimaryReCheckTest {
 
         @Test
         void hit_WhenMarkerExistsAndPrimaryHoldsTheRow_ServesThePrimaryRow() {
-            when(tombstoneStore.isTombstoned(SCOPE, id)).thenReturn(true);
+            tombstoneStore.writeTombstone(SCOPE, id);
             List<Object> routedTo = new ArrayList<>();
 
             String served = reCheck.reReadWhenTombstoned(SCOPE, id, "replica", () -> {
@@ -328,7 +307,7 @@ class PrimaryReCheckTest {
 
         @Test
         void hit_WhenMarkerExistsAndPrimaryLacksTheRow_PropagatesThePrimaryMiss() {
-            when(tombstoneStore.isTombstoned(SCOPE, id)).thenReturn(true);
+            tombstoneStore.writeTombstone(SCOPE, id);
             EntityNotFoundException primaryMiss = new EntityNotFoundException(ENTITY_TYPE, id);
 
             EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class,

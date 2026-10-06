@@ -4,6 +4,7 @@ import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.shared.exception.InvalidRequestException;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.support.TestJwt;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserSummary;
@@ -11,39 +12,30 @@ import org.danteplanner.backend.auth.oauth.OAuthProvider;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthTokens;
 import org.danteplanner.backend.auth.oauth.OAuthUserInfo;
-import org.danteplanner.backend.auth.token.TokenGenerator;
+import org.danteplanner.backend.auth.token.TokenClaims;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for AuthenticationService.
  *
- * <p>Tests OAuth authentication and token refresh flows
- * with all dependencies mocked.</p>
+ * <p>Tests OAuth authentication and token refresh flows.</p>
  */
-@ExtendWith(MockitoExtension.class)
 class AuthenticationServiceTest {
 
-    @Mock
-    private TokenGenerator tokenGenerator;
+    private static final String PROVIDER_NAME = "google";
 
-    @Mock
-    private OAuthProvider oauthProvider;
+    private final StubOAuthProvider oauthProvider = new StubOAuthProvider();
 
-    @Mock
-    private jakarta.servlet.http.HttpServletResponse response;
+    private final TestJwt jwt = new TestJwt();
 
     private final FakeUsers users = new FakeUsers();
 
@@ -53,14 +45,22 @@ class AuthenticationServiceTest {
 
     @BeforeEach
     void setUp() {
-        when(oauthProvider.getProviderName()).thenReturn("google");
         authenticationService = new AuthenticationService(
                 new OAuthProviderRegistry(List.of(oauthProvider)),
-                tokenGenerator,
+                jwt.service(),
                 users
         );
 
         testUser = users.add(TestDataFactory.unsavedUser(123L));
+    }
+
+    private void assertTokensBelongTo(AuthenticationService.AuthResult result, Long userId, UserRole role) {
+        TokenClaims access = jwt.service().validateAccessToken(result.accessToken());
+        assertEquals(userId, access.userId());
+        assertEquals(role, access.role());
+        TokenClaims refresh = jwt.service().validateRefreshToken(result.refreshToken());
+        assertEquals(userId, refresh.userId());
+        assertNull(refresh.parentJti(), "a login opens a new refresh family, it does not rotate one");
     }
 
     @Nested
@@ -75,14 +75,7 @@ class AuthenticationServiceTest {
             String codeVerifier = "verifier";
 
             OAuthTokens oauthTokens = new OAuthTokens("oauth-access", "oauth-refresh", null);
-            OAuthUserInfo userInfo = new OAuthUserInfo("google-123", "test@example.com");
-
-            when(oauthProvider.exchangeCodeForTokens(code, redirectUri, codeVerifier)).thenReturn(oauthTokens);
-            when(oauthProvider.getUserInfo(oauthTokens)).thenReturn(userInfo);
-            when(tokenGenerator.generateAccessToken(testUser.getId(), UserRole.NORMAL))
-                    .thenReturn("jwt-access-token");
-            when(tokenGenerator.generateRefreshToken(testUser.getId()))
-                    .thenReturn("jwt-refresh-token");
+            oauthProvider.answer(oauthTokens, new OAuthUserInfo("google-123", "test@example.com"));
 
             // Act
             AuthenticationService.AuthResult result = authenticationService.authenticateWithOAuth(
@@ -92,9 +85,10 @@ class AuthenticationServiceTest {
             // Assert
             assertNotNull(result);
             assertEquals(testUser.getId(), result.user().id());
-            assertEquals("jwt-access-token", result.accessToken());
-            assertEquals("jwt-refresh-token", result.refreshToken());
+            assertTokensBelongTo(result, testUser.getId(), UserRole.NORMAL);
             assertFalse(result.reactivated());
+            assertThat(oauthProvider.exchanges).containsExactly(List.of(code, redirectUri, codeVerifier));
+            assertThat(oauthProvider.userInfoRequests).containsExactly(oauthTokens.accessToken());
         }
 
         @Test
@@ -104,21 +98,14 @@ class AuthenticationServiceTest {
                     .isInstanceOf(InvalidRequestException.class)
                     .hasMessage("Unknown OAuth provider: unknown");
 
-            // Verify no tokens generated
-            verify(tokenGenerator, never()).generateAccessToken(any(), any());
-            verify(tokenGenerator, never()).generateRefreshToken(any());
+            assertThat(oauthProvider.exchanges).isEmpty();
         }
 
         @Test
         void authenticateWithOAuth_WhenUserNotFound_CreatesNewUser() {
             // Arrange
-            OAuthTokens oauthTokens = new OAuthTokens("access", null, null);
-            OAuthUserInfo userInfo = new OAuthUserInfo("provider-id-123", "user@email.com");
-
-            when(oauthProvider.exchangeCodeForTokens(any(), any(), any())).thenReturn(oauthTokens);
-            when(oauthProvider.getUserInfo(any(OAuthTokens.class))).thenReturn(userInfo);
-            when(tokenGenerator.generateAccessToken(any(), eq(UserRole.NORMAL))).thenReturn("access");
-            when(tokenGenerator.generateRefreshToken(any())).thenReturn("refresh");
+            oauthProvider.answer(new OAuthTokens("access", null, null),
+                    new OAuthUserInfo("provider-id-123", "user@email.com"));
 
             // Act
             AuthenticationService.AuthResult result = authenticationService.authenticateWithOAuth(
@@ -129,10 +116,7 @@ class AuthenticationServiceTest {
             assertFalse(result.reactivated());
             assertEquals(created.id(), result.user().id());
             assertEquals("user@email.com", created.email());
-            verify(tokenGenerator).generateAccessToken(created.id(), UserRole.NORMAL);
-            verify(tokenGenerator).generateRefreshToken(created.id());
-            assertEquals("access", result.accessToken());
-            assertEquals("refresh", result.refreshToken());
+            assertTokensBelongTo(result, created.id(), UserRole.NORMAL);
         }
 
         @Test
@@ -149,13 +133,8 @@ class AuthenticationServiceTest {
             deletedUser.softDelete(java.time.Instant.now().plusSeconds(86400 * 30));
             users.add(deletedUser);
 
-            OAuthTokens oauthTokens = new OAuthTokens("access", null, null);
-            OAuthUserInfo userInfo = new OAuthUserInfo("deleted-123", "deleted@example.com");
-
-            when(oauthProvider.exchangeCodeForTokens(any(), any(), any())).thenReturn(oauthTokens);
-            when(oauthProvider.getUserInfo(any(OAuthTokens.class))).thenReturn(userInfo);
-            when(tokenGenerator.generateAccessToken(any(), any())).thenReturn("access");
-            when(tokenGenerator.generateRefreshToken(any())).thenReturn("refresh");
+            oauthProvider.answer(new OAuthTokens("access", null, null),
+                    new OAuthUserInfo("deleted-123", "deleted@example.com"));
 
             // Act
             AuthenticationService.AuthResult result = authenticationService.authenticateWithOAuth(
@@ -165,14 +144,42 @@ class AuthenticationServiceTest {
             assertTrue(result.reactivated());
             assertEquals(deletedUser.getId(), result.user().id());
             assertFalse(deletedUser.isDeleted());
+            assertTokensBelongTo(result, deletedUser.getId(), UserRole.NORMAL);
         }
     }
 
+    private static final class StubOAuthProvider implements OAuthProvider {
 
-    /**
-     * TW6 — type enforcement at the facade seams, exercised with a REAL {@link JwtTokenService}
-     * so minted tokens carry a real {@code type} claim and the typed parser actually enforces it.
-     * A {@code @Mock TokenValidator} returns canned claims and can never exercise type enforcement,
-     * so these cases wire their own facade with a real validator, leaving the mocked cases intact.
-     */
+        private final List<List<String>> exchanges = new ArrayList<>();
+        private final List<String> userInfoRequests = new ArrayList<>();
+        private OAuthTokens tokens;
+        private OAuthUserInfo userInfo;
+
+        void answer(OAuthTokens answeredTokens, OAuthUserInfo answeredUserInfo) {
+            this.tokens = answeredTokens;
+            this.userInfo = answeredUserInfo;
+        }
+
+        @Override
+        public String getProviderName() {
+            return PROVIDER_NAME;
+        }
+
+        @Override
+        public String buildAuthorizationUrl(String state, String codeChallenge) {
+            throw new UnsupportedOperationException("authorization URLs are not part of a code exchange");
+        }
+
+        @Override
+        public OAuthTokens exchangeCodeForTokens(String code, String redirectUri, String codeVerifier) {
+            exchanges.add(List.of(code, redirectUri, codeVerifier));
+            return tokens;
+        }
+
+        @Override
+        public OAuthUserInfo getUserInfo(String accessToken) {
+            userInfoRequests.add(accessToken);
+            return userInfo;
+        }
+    }
 }

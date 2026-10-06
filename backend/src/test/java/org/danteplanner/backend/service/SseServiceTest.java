@@ -1,7 +1,9 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.shared.sse.SseService;
-import org.danteplanner.backend.shared.sse.NotificationPreferenceProvider;
 import org.danteplanner.backend.shared.sse.NotificationPreferenceProvider.Preferences;
+import org.danteplanner.backend.support.FakeNotificationPreferences;
+import org.danteplanner.backend.support.FakeUsers;
+import org.danteplanner.backend.support.UsersContract;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,7 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -21,8 +22,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -42,12 +41,14 @@ import static org.mockito.Mockito.when;
 class SseServiceTest {
 
     private static final Long USER_ID = 1L;
+    private static final Long OTHER_USER_ID = 2L;
 
     /** Runs each submitted heartbeat on the calling thread, so a sweep's effects hold on return. */
     private static final TaskExecutor SAME_THREAD = Runnable::run;
 
-    @Mock
-    private NotificationPreferenceProvider preferenceProvider;
+    private final FakeUsers users = new FakeUsers();
+
+    private final FakeNotificationPreferences preferenceProvider = new FakeNotificationPreferences(users);
 
     private ObjectMapper objectMapper;
     private SseService sseService;
@@ -56,7 +57,10 @@ class SseServiceTest {
     void setUp() {
         objectMapper = new ObjectMapper();
         sseService = new SseService(objectMapper, preferenceProvider, SAME_THREAD);
-        lenient().when(preferenceProvider.preferencesOf(anyLong())).thenReturn(allEnabledSettings());
+        users.add(UsersContract.newUser().id(USER_ID).build());
+        users.add(UsersContract.newUser().id(OTHER_USER_ID).build());
+        preferenceProvider.set(USER_ID, allEnabledSettings());
+        preferenceProvider.set(OTHER_USER_ID, allEnabledSettings());
     }
 
     private Preferences allEnabledSettings() {
@@ -109,7 +113,7 @@ class SseServiceTest {
 
         @Test
         void sendToUser_WhenCommentNotificationsOff_DoesNotSend() throws IOException {
-            when(preferenceProvider.preferencesOf(USER_ID)).thenReturn(new Preferences(false, true, true));
+            preferenceProvider.set(USER_ID, new Preferences(false, true, true));
             SseEmitter emitter = sseService.subscribe(USER_ID, UUID.randomUUID());
             emitter.complete();
 
@@ -163,7 +167,7 @@ class SseServiceTest {
         @Test
         void broadcastToAll_WhenAUserIsExcluded_SkipsOnlyThatUsersEmitters() throws IOException {
             Long excludedUser = USER_ID;
-            Long otherUser = 2L;
+            Long otherUser = OTHER_USER_ID;
             sseService.subscribe(excludedUser, UUID.randomUUID()).complete();
             sseService.subscribe(otherUser, UUID.randomUUID()).complete();
 

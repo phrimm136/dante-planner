@@ -1,7 +1,9 @@
 package org.danteplanner.backend.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
+import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
@@ -36,8 +38,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -46,15 +50,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -85,7 +88,7 @@ class PlannerPublishingServiceTest {
     private PlannerSubscriptionService subscriptionService;
 
     @Mock
-    private DomainEventRecorder domainEventRecorder;
+    private DomainEventRepository domainEventRepository;
 
     private final FakeUsers users = new FakeUsers();
 
@@ -96,6 +99,11 @@ class PlannerPublishingServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        when(domainEventRepository.insert(any(DomainEvent.class))).thenAnswer(invocation -> {
+            DomainEvent row = invocation.getArgument(0);
+            ReflectionTestUtils.setField(row, "id", 1L);
+            return row;
+        });
 
         publishingService = publishingServiceWith(TestDataFactory.contentValidator());
 
@@ -114,7 +122,7 @@ class PlannerPublishingServiceTest {
                 new PlannerOwnershipValidator(),
                 new PlannerPublishValidator(),
                 new PlannerCategoryValidator(),
-                domainEventRecorder
+                new DomainEventRecorder(domainEventRepository, new ObjectMapper(), event -> { })
         );
     }
 
@@ -205,10 +213,12 @@ class PlannerPublishingServiceTest {
 
             publishingService.publish(testUser.getId(), planner.getId());
 
-            verify(domainEventRecorder).recordDomainEvent(
-                    DomainEventType.PLANNER_PUBLISHED, planner.getId(),
-                    Map.of("authorId", testUser.getId()));
-            verifyNoMoreInteractions(domainEventRecorder);
+            ArgumentCaptor<DomainEvent> recorded = ArgumentCaptor.forClass(DomainEvent.class);
+            verify(domainEventRepository).insert(recorded.capture());
+            verifyNoMoreInteractions(domainEventRepository);
+            assertEquals(DomainEventType.PLANNER_PUBLISHED, recorded.getValue().getEventType());
+            assertEquals(planner.getId(), recorded.getValue().getAggregateId());
+            assertEquals("{\"authorId\":" + testUser.getId() + "}", recorded.getValue().getPayload());
         }
 
         @Test
@@ -216,11 +226,11 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
             publishingService.publish(testUser.getId(), planner.getId());
-            reset(domainEventRecorder);
+            clearInvocations(domainEventRepository);
 
             publishingService.publish(testUser.getId(), planner.getId());
 
-            verifyNoInteractions(domainEventRecorder);
+            verify(domainEventRepository, never()).insert(any());
         }
 
         @Test
@@ -230,7 +240,7 @@ class PlannerPublishingServiceTest {
 
             publishingService.unpublish(testUser.getId(), planner.getId());
 
-            verifyNoInteractions(domainEventRecorder);
+            verify(domainEventRepository, never()).insert(any());
         }
     }
 

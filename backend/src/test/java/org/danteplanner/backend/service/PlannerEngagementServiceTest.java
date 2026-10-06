@@ -20,13 +20,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Value;
+import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
+import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
-import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -60,7 +63,7 @@ class PlannerEngagementServiceTest {
     private PlannerVoteRepository plannerVoteRepository;
 
     @Mock
-    private DomainEventRecorder domainEventRecorder;
+    private DomainEventRepository domainEventRepository;
 
     @Mock
     private PlannerStatsService plannerStatsService;
@@ -87,7 +90,7 @@ class PlannerEngagementServiceTest {
                 plannerVoteRepository,
                 plannerStatsService,
                 plannerCatalogService,
-                domainEventRecorder,
+                new DomainEventRecorder(domainEventRepository, new ObjectMapper(), event -> { }),
                 new PlannerAccessGuard(users, plannerRepository),
                 reportService,
                 new VoteUniquenessValidator(),
@@ -188,12 +191,19 @@ class PlannerEngagementServiceTest {
             when(plannerStatsService.upvotesOf(plannerId)).thenReturn(recommendedThreshold);
             when(plannerStatsService.trySetRecommendedNotified(plannerId, recommendedThreshold))
                     .thenReturn(1);
+            when(domainEventRepository.insert(any(DomainEvent.class))).thenAnswer(invocation -> {
+                DomainEvent row = invocation.getArgument(0);
+                ReflectionTestUtils.setField(row, "id", 1L);
+                return row;
+            });
 
             engagementService.castVote(testUser.getId(), plannerId, VoteType.UP);
 
-            verify(domainEventRecorder).recordDomainEvent(
-                    DomainEventType.PLANNER_RECOMMENDED, plannerId,
-                    Map.of("ownerId", planner.getUserId()));
+            ArgumentCaptor<DomainEvent> recorded = ArgumentCaptor.forClass(DomainEvent.class);
+            verify(domainEventRepository).insert(recorded.capture());
+            assertEquals(DomainEventType.PLANNER_RECOMMENDED, recorded.getValue().getEventType());
+            assertEquals(plannerId, recorded.getValue().getAggregateId());
+            assertEquals("{\"ownerId\":" + planner.getUserId() + "}", recorded.getValue().getPayload());
         }
 
         @Test
@@ -212,7 +222,7 @@ class PlannerEngagementServiceTest {
 
             engagementService.castVote(testUser.getId(), plannerId, VoteType.UP);
 
-            verifyNoInteractions(domainEventRecorder);
+            verifyNoInteractions(domainEventRepository);
         }
 
         @Test
@@ -229,7 +239,7 @@ class PlannerEngagementServiceTest {
 
             engagementService.castVote(testUser.getId(), plannerId, VoteType.UP);
 
-            verifyNoInteractions(domainEventRecorder);
+            verifyNoInteractions(domainEventRepository);
         }
     }
 

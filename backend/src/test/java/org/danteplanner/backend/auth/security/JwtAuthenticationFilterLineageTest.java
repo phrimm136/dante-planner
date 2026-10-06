@@ -8,44 +8,36 @@ import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import jakarta.servlet.http.Cookie;
 
+import java.time.Duration;
 import java.util.List;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
-import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.support.FakeUsers;
+import org.danteplanner.backend.support.RecordingRefreshRotation;
+import org.danteplanner.backend.support.RecordingRefreshRotation.Rotation;
+import org.danteplanner.backend.support.RecordingTokenBlacklist;
+import org.danteplanner.backend.support.TestJwt;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
 import org.danteplanner.backend.auth.token.RotationResult;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
-import org.danteplanner.backend.auth.token.TokenGenerator;
-import org.danteplanner.backend.auth.token.TokenValidator;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.Date;
-
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
-import org.danteplanner.backend.shared.config.JwtProperties;
 
 /**
  * Integration tests for {@link JwtAuthenticationFilter} lineage-rotation behavior.
@@ -54,26 +46,18 @@ import org.danteplanner.backend.shared.config.JwtProperties;
  * blacklist-on-rotation path (delegating to {@link TokenBlacklistService}), and
  * flag on must delegate auto-refresh to {@link RefreshRotationService}.</p>
  */
-@ExtendWith(MockitoExtension.class)
 class JwtAuthenticationFilterLineageTest {
 
-    @Mock
-    private TokenValidator tokenValidator;
+    private final TestJwt jwt = new TestJwt();
 
-    @Mock
-    private TokenBlacklistService tokenBlacklistService;
+    private final RecordingTokenBlacklist tokenBlacklist = new RecordingTokenBlacklist(jwt.clock());
 
     private final FakeUsers users = new FakeUsers();
 
-    @Mock
-    private TokenGenerator tokenGenerator;
-
-    @Mock
-    private RefreshRotationService refreshRotationService;
+    private final RecordingRefreshRotation refreshRotation = new RecordingRefreshRotation(jwt, tokenBlacklist);
 
     private final ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
     private final CookieUtils cookieUtils = new CookieUtils(true, "", "Lax");
-    private final JwtProperties jwtProperties = new JwtProperties();
 
     private MockHttpServletRequest request;
     private MockHttpServletResponse response;
@@ -96,18 +80,27 @@ class JwtAuthenticationFilterLineageTest {
     }
 
     private JwtAuthenticationFilter filterWithFlag(boolean lineageEnabled) {
-        return new JwtAuthenticationFilter(
-                tokenValidator, tokenBlacklistService,
-                new AccessTokenAuthenticator(tokenValidator, tokenBlacklistService), cookieUtils, users,
-                new AuthDegradationResponder(new ProblemWriter(objectMapper)), tokenGenerator, refreshRotationService, new LineageRotationFlag(lineageEnabled),
-                jwtProperties);
+        return filterWithFlag(lineageEnabled, refreshRotation);
     }
 
-    private TokenClaims refreshClaims(Long userId, String jti, String familyId) {
-        return new TokenClaims(
-                userId, TokenClaims.TYPE_REFRESH, null,
-                new Date(), new Date(System.currentTimeMillis() + 604800000L),
-                jti, familyId, null);
+    private JwtAuthenticationFilter filterWithFlag(boolean lineageEnabled, RefreshRotationService rotation) {
+        return new JwtAuthenticationFilter(
+                jwt.service(), tokenBlacklist,
+                new AccessTokenAuthenticator(jwt.service(), tokenBlacklist), cookieUtils, users,
+                new AuthDegradationResponder(new ProblemWriter(objectMapper)), jwt.service(), rotation, new LineageRotationFlag(lineageEnabled),
+                jwt.properties());
+    }
+
+    private String freshLogin(Long userId) {
+        return jwt.service().generateRefreshToken(userId);
+    }
+
+    private String familyOf(String refreshToken) {
+        return jwt.service().validateRefreshToken(refreshToken).familyId();
+    }
+
+    private RotationResult.Rotated rotateAhead(RefreshRotationService rotation, String refreshToken) {
+        return (RotationResult.Rotated) rotation.rotate(refreshToken);
     }
 
     private User activeUser(Long id) {
@@ -124,31 +117,25 @@ class JwtAuthenticationFilterLineageTest {
     @Test
     void doFilterInternal_WhenFlagOff_UsesLegacyRotation() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(false);
-        String refreshToken = "legacy.refresh.jwt";
         Long userId = 42L;
+        String refreshToken = jwt.legacyRefreshToken(userId);
         User user = activeUser(userId);
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
-        when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(refreshClaims(userId, null, null));
-        when(tokenBlacklistService.isBlacklisted(refreshToken)).thenReturn(false);
-        when(tokenBlacklistService.isUserTokenInvalidated(eq(userId), any(Long.class))).thenReturn(false);
         users.add(user);
-        when(tokenGenerator.generateAccessToken(eq(userId), any())).thenReturn("new.access");
-        when(tokenGenerator.generateRefreshToken(eq(userId))).thenReturn("new.refresh");
 
         filter.doFilterInternal(request, response, filterChain);
 
         // Minting the successor here rather than taking it from the rotation service is what
         // distinguishes the legacy path; the cookie the client ends up with is the same shape.
-        Cookie accessCookie = response.getCookie(CookieConstants.ACCESS_TOKEN);
-        assertNotNull(accessCookie);
-        assertEquals("new.access", accessCookie.getValue());
-        assertEquals(jwtProperties.getAccessTokenExpirySeconds(), accessCookie.getMaxAge());
-        assertRefreshCookie("new.refresh");
-        // The rotation blacklist entry lands in Redis and has no response-visible form;
-        // asserting it as state needs the containerized tier with a live TokenBlacklistService.
-        verify(tokenBlacklistService).blacklistTokenForRotation(eq(refreshToken), any());
-        verifyNoInteractions(refreshRotationService);
+        assertAccessCookieFor(userId);
+        Cookie refreshCookie = assertRefreshCookieFor(userId);
+        assertNotEquals(refreshToken, refreshCookie.getValue());
+        assertNull(jwt.service().validateRefreshToken(refreshCookie.getValue()).parentJti(),
+                "the legacy path mints a new family rather than rotating the presented one");
+        jwt.clock().advance(Duration.ofSeconds(5));
+        assertThat(tokenBlacklist.blacklistedTokens()).containsExactly(refreshToken);
+        assertThat(refreshRotation.calls()).isEmpty();
         assertSame(request, filterChain.getRequest());
         assertSame(response, filterChain.getResponse());
         assertNotNull(SecurityContextHolder.getContext().getAuthentication());
@@ -158,28 +145,18 @@ class JwtAuthenticationFilterLineageTest {
     @Test
     void doFilterInternal_WhenFlagOnAndUnusedLatest_RotatesAndAuthenticates() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(true);
-        String refreshToken = "unused.latest.jwt";
         Long userId = 7L;
+        String refreshToken = freshLogin(userId);
         User user = activeUser(userId);
-        TokenClaims successorClaims = refreshClaims(userId, "successor-jti", "fam-1");
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
-        when(tokenValidator.validateRefreshToken(refreshToken))
-                .thenReturn(refreshClaims(userId, "presented-jti", "fam-1"));
-        when(refreshRotationService.rotate(refreshToken))
-                .thenReturn(new RotationResult.Rotated("new.refresh.jwt", successorClaims));
         users.add(user);
-        when(tokenGenerator.generateAccessToken(eq(userId), any(UserRole.class)))
-                .thenReturn("new.access.jwt");
 
         filter.doFilterInternal(request, response, filterChain);
 
-        Cookie accessCookie = response.getCookie(CookieConstants.ACCESS_TOKEN);
-        assertNotNull(accessCookie);
-        assertEquals("new.access.jwt", accessCookie.getValue());
-        assertEquals(jwtProperties.getAccessTokenExpirySeconds(), accessCookie.getMaxAge());
-        assertRefreshCookie("new.refresh.jwt");
-        verify(tokenBlacklistService, never()).blacklistTokenForRotation(any(), any());
+        assertAccessCookieFor(userId);
+        assertRefreshCookie(rotatedTo(refreshToken));
+        assertEquals(0, tokenBlacklist.size());
         assertNotNull(SecurityContextHolder.getContext().getAuthentication());
         assertEquals(userId, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
     }
@@ -187,151 +164,118 @@ class JwtAuthenticationFilterLineageTest {
     @Test
     void doFilterInternal_WhenFlagOnAndRetiredToken_RevokesFamilyNoAuth() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(true);
-        String refreshToken = "used.jwt";
         Long userId = 21L;
+        String refreshToken = freshLogin(userId);
+        refreshRotation.rotate(rotateAhead(refreshRotation, refreshToken).newRefreshJwt());
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
-        when(tokenValidator.validateRefreshToken(refreshToken))
-                .thenReturn(refreshClaims(userId, "retired-jti", "fam-theft"));
         users.add(activeUser(userId));
-        when(refreshRotationService.rotate(refreshToken))
-                .thenReturn(new RotationResult.Revoked("fam-theft"));
 
         filter.doFilterInternal(request, response, filterChain);
 
-        // attemptAutoRefresh swallows every exception, so a stub-argument mismatch cannot fail
-        // the run: only this verify pins that the presented token reached the rotation seam.
-        verify(refreshRotationService).rotate(refreshToken);
+        assertThat(refreshRotation.rotations().getLast())
+                .isEqualTo(new Rotation(refreshToken, new RotationResult.Revoked(familyOf(refreshToken))));
         assertSessionCleared();
         assertSame(request, filterChain.getRequest());
         assertSame(response, filterChain.getResponse());
         assertNull(SecurityContextHolder.getContext().getAuthentication());
-        verify(tokenGenerator, never()).generateAccessToken(any(), any());
     }
 
     @Test
     void doFilterInternal_WhenFlagOnAndSupersededToken_RevokesFamilyNoAuth() throws Exception {
-        JwtAuthenticationFilter filter = filterWithFlag(true);
-        String refreshToken = "superseded.jwt";
+        RecordingRefreshRotation noReuseWindow = new RecordingRefreshRotation(jwt, tokenBlacklist, true, 0L);
+        JwtAuthenticationFilter filter = filterWithFlag(true, noReuseWindow);
         Long userId = 22L;
+        String login = freshLogin(userId);
+        String superseded = rotateAhead(noReuseWindow, login).newRefreshJwt();
+        noReuseWindow.rotate(login);
 
-        request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
-        when(tokenValidator.validateRefreshToken(refreshToken))
-                .thenReturn(refreshClaims(userId, "superseded-jti", "fam-superseded"));
+        request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, superseded));
         users.add(activeUser(userId));
-        when(refreshRotationService.rotate(refreshToken))
-                .thenReturn(new RotationResult.Revoked("fam-superseded"));
 
         filter.doFilterInternal(request, response, filterChain);
 
+        assertThat(noReuseWindow.rotations().getLast())
+                .isEqualTo(new Rotation(superseded, new RotationResult.Revoked(familyOf(login))));
         assertNull(SecurityContextHolder.getContext().getAuthentication());
-        verify(tokenGenerator, never()).generateAccessToken(any(), any());
+        assertSessionCleared();
     }
 
     @Test
     void doFilterInternal_WhenFlagOnAndRevokedFamily_RejectedNoAuth() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(true);
-        String refreshToken = "revoked.family.jwt";
         Long userId = 23L;
+        String refreshToken = freshLogin(userId);
+        refreshRotation.revokeFamily(familyOf(refreshToken));
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
-        when(tokenValidator.validateRefreshToken(refreshToken))
-                .thenReturn(refreshClaims(userId, "revoked-jti", "fam-revoked"));
         users.add(activeUser(userId));
-        when(refreshRotationService.rotate(refreshToken))
-                .thenReturn(new RotationResult.Rejected(RotationResult.Rejected.Reason.REVOKED_FAMILY));
 
         filter.doFilterInternal(request, response, filterChain);
 
-        // attemptAutoRefresh swallows every exception, so a stub-argument mismatch cannot fail
-        // the run: only this verify pins that the presented token reached the rotation seam.
-        verify(refreshRotationService).rotate(refreshToken);
+        assertThat(refreshRotation.rotations()).containsExactly(new Rotation(refreshToken,
+                new RotationResult.Rejected(RotationResult.Rejected.Reason.REVOKED_FAMILY)));
         assertSessionCleared();
         assertNull(SecurityContextHolder.getContext().getAuthentication());
-        verify(tokenGenerator, never()).generateAccessToken(any(), any());
     }
 
     @Test
     void doFilterInternal_WhenFlagOnAndLegacyAdmit_AdmitsAndAuthenticates() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(true);
-        String refreshToken = "legacy.refresh.jwt";
         Long userId = 99L;
+        String refreshToken = jwt.legacyRefreshToken(userId);
         User user = activeUser(userId);
-        TokenClaims successorClaims = refreshClaims(userId, "synth-successor-jti", "synth-fam");
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
-        when(tokenValidator.validateRefreshToken(refreshToken))
-                .thenReturn(refreshClaims(userId, null, null));
-        when(refreshRotationService.rotate(refreshToken))
-                .thenReturn(new RotationResult.Rotated("new.refresh.jwt", successorClaims));
         users.add(user);
-        when(tokenGenerator.generateAccessToken(eq(userId), any(UserRole.class)))
-                .thenReturn("new.access.jwt");
 
         filter.doFilterInternal(request, response, filterChain);
 
-        Cookie accessCookie = response.getCookie(CookieConstants.ACCESS_TOKEN);
-        assertNotNull(accessCookie);
-        assertEquals("new.access.jwt", accessCookie.getValue());
-        assertEquals(jwtProperties.getAccessTokenExpirySeconds(), accessCookie.getMaxAge());
-        assertRefreshCookie("new.refresh.jwt");
+        assertAccessCookieFor(userId);
+        assertRefreshCookie(rotatedTo(refreshToken));
         assertNotNull(SecurityContextHolder.getContext().getAuthentication());
         assertEquals(userId, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
     }
 
     @Test
     void doFilterInternal_WhenFlagOnAndLegacyAdmitOff_RejectedNoAuth() throws Exception {
-        JwtAuthenticationFilter filter = filterWithFlag(true);
-        String refreshToken = "legacy.refresh.jwt";
+        RecordingRefreshRotation legacyAdmitOff = new RecordingRefreshRotation(jwt, tokenBlacklist, false,
+                RecordingRefreshRotation.DEFAULT_RETRY_REUSE_WINDOW_MS);
+        JwtAuthenticationFilter filter = filterWithFlag(true, legacyAdmitOff);
         Long userId = 24L;
+        String refreshToken = jwt.legacyRefreshToken(userId);
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
-        when(tokenValidator.validateRefreshToken(refreshToken))
-                .thenReturn(refreshClaims(userId, null, null));
         users.add(activeUser(userId));
-        when(refreshRotationService.rotate(refreshToken))
-                .thenReturn(new RotationResult.Rejected(RotationResult.Rejected.Reason.INVALID));
 
         filter.doFilterInternal(request, response, filterChain);
 
-        // attemptAutoRefresh swallows every exception, so a stub-argument mismatch cannot fail
-        // the run: only this verify pins that the presented token reached the rotation seam.
-        verify(refreshRotationService).rotate(refreshToken);
+        assertThat(legacyAdmitOff.rotations()).containsExactly(new Rotation(refreshToken,
+                new RotationResult.Rejected(RotationResult.Rejected.Reason.INVALID)));
         assertSessionCleared();
         assertNull(SecurityContextHolder.getContext().getAuthentication());
-        verify(tokenGenerator, never()).generateAccessToken(any(), any());
     }
 
     @Test
     void doFilterInternal_WhenFlagOnAndExpiredAccess_TriggersLineageRefresh() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(true);
-        String accessToken = "expired.access.jwt";
-        String refreshToken = "unused.latest.jwt";
         Long userId = 11L;
+        String accessToken = new TestJwt(jwt.clock().instant().minus(Duration.ofHours(1))).service()
+                .generateAccessToken(userId, UserRole.NORMAL);
+        String refreshToken = freshLogin(userId);
         User user = activeUser(userId);
-        TokenClaims successorClaims = refreshClaims(userId, "successor-jti", "fam-2");
 
         request.setCookies(
                 new Cookie(CookieConstants.ACCESS_TOKEN, accessToken),
                 new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
-        when(tokenValidator.validateAccessToken(accessToken))
-                .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
-        when(tokenValidator.validateRefreshToken(refreshToken))
-                .thenReturn(refreshClaims(userId, "presented-jti", "fam-2"));
-        when(refreshRotationService.rotate(refreshToken))
-                .thenReturn(new RotationResult.Rotated("new.refresh.jwt", successorClaims));
         users.add(user);
-        when(tokenGenerator.generateAccessToken(eq(userId), any(UserRole.class)))
-                .thenReturn("new.access.jwt");
 
         filter.doFilterInternal(request, response, filterChain);
 
-        Cookie accessCookie = response.getCookie(CookieConstants.ACCESS_TOKEN);
-        assertNotNull(accessCookie);
-        assertEquals("new.access.jwt", accessCookie.getValue());
-        assertEquals(jwtProperties.getAccessTokenExpirySeconds(), accessCookie.getMaxAge());
-        assertRefreshCookie("new.refresh.jwt");
-        verify(tokenBlacklistService, never()).blacklistTokenForRotation(any(), any());
+        Cookie accessCookie = assertAccessCookieFor(userId);
+        assertNotEquals(accessToken, accessCookie.getValue());
+        assertRefreshCookie(rotatedTo(refreshToken));
+        assertEquals(0, tokenBlacklist.size());
         assertNotNull(SecurityContextHolder.getContext().getAuthentication());
         assertEquals(userId, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
     }
@@ -339,39 +283,60 @@ class JwtAuthenticationFilterLineageTest {
     @Test
     void doFilterInternal_WhenFlagOnAndBlacklistedToken_AbandonsWithoutRotating() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(true);
-        String refreshToken = "blacklisted.jwt";
         Long userId = 31L;
+        String refreshToken = freshLogin(userId);
+        tokenBlacklist.blacklistToken(refreshToken, jwt.service().validateRefreshToken(refreshToken).expiration());
+        users.add(activeUser(userId));
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
-        when(tokenValidator.validateRefreshToken(refreshToken))
-                .thenReturn(refreshClaims(userId, "blacklisted-jti", "fam-3"));
-        when(tokenBlacklistService.isBlacklisted(refreshToken)).thenReturn(true);
 
         filter.doFilterInternal(request, response, filterChain);
 
-        verifyNoInteractions(refreshRotationService);
+        assertThat(refreshRotation.calls()).isEmpty();
         assertSessionCleared();
         assertNull(SecurityContextHolder.getContext().getAuthentication());
-        verify(tokenGenerator, never()).generateAccessToken(any(), any());
     }
 
     @Test
     void doFilterInternal_WhenFlagOnAndUserTokensInvalidated_AbandonsWithoutRotating() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(true);
-        String refreshToken = "pre-invalidation.jwt";
         Long userId = 32L;
+        jwt.clock().advance(Duration.ofMinutes(-1));
+        String refreshToken = freshLogin(userId);
+        jwt.clock().advance(Duration.ofMinutes(1));
+        tokenBlacklist.invalidateUserTokens(userId);
+        users.add(activeUser(userId));
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
-        when(tokenValidator.validateRefreshToken(refreshToken))
-                .thenReturn(refreshClaims(userId, "stale-jti", "fam-4"));
-        when(tokenBlacklistService.isUserTokenInvalidated(eq(userId), any(Long.class))).thenReturn(true);
 
         filter.doFilterInternal(request, response, filterChain);
 
-        verifyNoInteractions(refreshRotationService);
+        assertThat(refreshRotation.calls()).isEmpty();
         assertSessionCleared();
         assertNull(SecurityContextHolder.getContext().getAuthentication());
-        verify(tokenGenerator, never()).generateAccessToken(any(), any());
+    }
+
+    private String rotatedTo(String presented) {
+        Rotation rotation = refreshRotation.rotations().getLast();
+        assertEquals(presented, rotation.presented());
+        return ((RotationResult.Rotated) rotation.result()).newRefreshJwt();
+    }
+
+    private Cookie assertAccessCookieFor(Long userId) {
+        Cookie accessCookie = response.getCookie(CookieConstants.ACCESS_TOKEN);
+        assertNotNull(accessCookie);
+        TokenClaims claims = jwt.service().validateAccessToken(accessCookie.getValue());
+        assertEquals(userId, claims.userId());
+        assertEquals(jwt.properties().getAccessTokenExpirySeconds(), accessCookie.getMaxAge());
+        return accessCookie;
+    }
+
+    private Cookie assertRefreshCookieFor(Long userId) {
+        Cookie refreshCookie = response.getCookie(CookieConstants.REFRESH_TOKEN);
+        assertNotNull(refreshCookie);
+        assertEquals(userId, jwt.service().validateRefreshToken(refreshCookie.getValue()).userId());
+        assertEquals(jwt.properties().getRefreshTokenExpirySeconds(), refreshCookie.getMaxAge());
+        return refreshCookie;
     }
 
     /**
@@ -382,7 +347,7 @@ class JwtAuthenticationFilterLineageTest {
         Cookie refreshCookie = response.getCookie(CookieConstants.REFRESH_TOKEN);
         assertNotNull(refreshCookie);
         assertEquals(expectedValue, refreshCookie.getValue());
-        assertEquals(jwtProperties.getRefreshTokenExpirySeconds(), refreshCookie.getMaxAge());
+        assertEquals(jwt.properties().getRefreshTokenExpirySeconds(), refreshCookie.getMaxAge());
     }
 
     /**

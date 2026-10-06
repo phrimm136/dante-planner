@@ -1,6 +1,11 @@
 package org.danteplanner.backend.scheduler;
 import org.danteplanner.backend.user.scheduler.UserCleanupScheduler;
 
+import org.danteplanner.backend.support.RecordingAccountLifecycleParticipant;
+import org.danteplanner.backend.support.RecordingAccountLifecycleParticipant.Event;
+import org.danteplanner.backend.support.RecordingSessionEndHandler;
+import org.danteplanner.backend.support.RecordingSessionEndHandler.EndAllSessions;
+import org.danteplanner.backend.support.ScriptedFailuresCheck;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -15,9 +20,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -28,19 +34,35 @@ import static org.mockito.Mockito.*;
  * whose grace period has expired.</p>
  */
 @ExtendWith(MockitoExtension.class)
+@ExtendWith(ScriptedFailuresCheck.class)
 class UserCleanupSchedulerTest {
+
+    private static final int GRACE_PERIOD_DAYS = 30;
 
     @Mock
     private UserRepository userRepository;
 
-    @Mock
-    private UserAccountLifecycleService lifecycleService;
+    private final RecordingAccountLifecycleParticipant participant = new RecordingAccountLifecycleParticipant();
+
+    private final RecordingSessionEndHandler sessionEndHandler = new RecordingSessionEndHandler();
 
     private UserCleanupScheduler scheduler;
 
     @BeforeEach
     void setUp() {
-        scheduler = new UserCleanupScheduler(userRepository, lifecycleService);
+        scheduler = new UserCleanupScheduler(userRepository, new UserAccountLifecycleService(
+                userRepository, List.of(participant), sessionEndHandler, GRACE_PERIOD_DAYS));
+    }
+
+    private void givenPurgeable(User user) {
+        when(userRepository.findWithLockPurgeable(eq(user.getId()), any(Instant.class))).thenReturn(Optional.of(user));
+    }
+
+    private List<Long> sessionsEnded() {
+        return sessionEndHandler.calls().stream()
+                .filter(EndAllSessions.class::isInstance)
+                .map(call -> ((EndAllSessions) call).userId())
+                .toList();
     }
 
     private User createExpiredUser(Long id) {
@@ -70,15 +92,15 @@ class UserCleanupSchedulerTest {
 
             when(userRepository.findByPermanentDeleteScheduledAtBefore(any(Instant.class)))
                     .thenReturn(expiredUsers);
-            when(lifecycleService.performHardDelete(anyLong(), any(Instant.class))).thenReturn(true);
+            expiredUsers.forEach(UserCleanupSchedulerTest.this::givenPurgeable);
 
             // Act
             scheduler.cleanupExpiredUsers();
 
             // Assert
-            verify(lifecycleService, times(3)).performHardDelete(anyLong(), any(Instant.class));
+            assertThat(sessionsEnded()).containsExactly(1L, 2L, 3L);
             for (User expired : expiredUsers) {
-                verify(lifecycleService).performHardDelete(eq(expired.getId()), any(Instant.class));
+                verify(userRepository).delete(expired);
             }
         }
 
@@ -92,7 +114,7 @@ class UserCleanupSchedulerTest {
             scheduler.cleanupExpiredUsers();
 
             // Assert
-            verify(lifecycleService, never()).performHardDelete(anyLong(), any(Instant.class));
+            verify(userRepository, never()).findWithLockPurgeable(any(), any());
         }
 
         @Test
@@ -105,18 +127,22 @@ class UserCleanupSchedulerTest {
 
             when(userRepository.findByPermanentDeleteScheduledAtBefore(any(Instant.class)))
                     .thenReturn(expiredUsers);
+            expiredUsers.forEach(UserCleanupSchedulerTest.this::givenPurgeable);
 
             // First user fails, second and third succeed
-            when(lifecycleService.performHardDelete(anyLong(), any(Instant.class)))
-                    .thenThrow(new RuntimeException("Database error"))
-                    .thenReturn(true)
-                    .thenReturn(true);
+            RuntimeException databaseError = new RuntimeException("Database error");
+            participant.failNext(Event.REASSIGNED_TO_SENTINEL, databaseError);
 
             // Act - should not throw, should continue processing
             scheduler.cleanupExpiredUsers();
 
             // Assert - all users were attempted
-            verify(lifecycleService, times(3)).performHardDelete(anyLong(), any(Instant.class));
+            assertThat(sessionsEnded()).containsExactly(1L, 2L, 3L);
+            assertThat(participant.failed()).containsExactly(new RecordingAccountLifecycleParticipant.Failed(
+                    participant, Event.REASSIGNED_TO_SENTINEL, 1L, databaseError));
+            verify(userRepository, never()).delete(user1);
+            verify(userRepository).delete(user2);
+            verify(userRepository).delete(user3);
         }
 
         @Test

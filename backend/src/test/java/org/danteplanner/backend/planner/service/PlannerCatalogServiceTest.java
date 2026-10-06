@@ -7,9 +7,13 @@ import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
+import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
-import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
+import org.danteplanner.backend.support.RecordingTombstoneStore;
+import org.danteplanner.backend.support.RecordingTombstoneStore.Write;
+import org.danteplanner.backend.support.RecordingTombstoneStore.Writes;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
@@ -24,13 +28,13 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -51,10 +55,9 @@ class PlannerCatalogServiceTest {
     private PlannerStatsRepository statsRepository;
 
     @Mock
-    private DomainEventRecorder domainEventRecorder;
+    private DomainEventRepository domainEventRepository;
 
-    @Mock
-    private ContentTombstoneStore tombstoneStore;
+    private final RecordingTombstoneStore tombstoneStore = new RecordingTombstoneStore();
 
     private PlannerCatalogService catalogService;
 
@@ -62,7 +65,8 @@ class PlannerCatalogServiceTest {
     void setUp() {
         TransactionSynchronizationManager.initSynchronization();
         catalogService = new PlannerCatalogService(catalogRepository, plannerRepository, statsRepository,
-                domainEventRecorder, new ObjectMapper(), tombstoneStore, THRESHOLD);
+                new DomainEventRecorder(domainEventRepository, new ObjectMapper(), event -> { }),
+                new ObjectMapper(), tombstoneStore, THRESHOLD);
     }
 
     @AfterEach
@@ -89,9 +93,9 @@ class PlannerCatalogServiceTest {
 
         verify(catalogRepository).deleteById(plannerId);
         verifyRecorded(plannerId);
-        verify(tombstoneStore, never()).writeTombstone(any(), any());
+        assertThat(tombstoneStore.calls()).isEmpty();
         commit();
-        verify(tombstoneStore).writeTombstone("published-planner", plannerId);
+        assertThat(tombstoneStore.calls()).containsExactly(new Write("published-planner", plannerId));
     }
 
     @Test
@@ -103,9 +107,9 @@ class PlannerCatalogServiceTest {
 
         verify(catalogRepository).withdrawAllOwnedBy(OWNER_ID);
         published.forEach(this::verifyRecorded);
-        verify(tombstoneStore, never()).writeTombstones(any(), any());
+        assertThat(tombstoneStore.calls()).isEmpty();
         commit();
-        verify(tombstoneStore).writeTombstones("published-planner", published);
+        assertThat(tombstoneStore.calls()).containsExactly(new Writes("published-planner", published));
     }
 
     @Test
@@ -141,7 +145,7 @@ class PlannerCatalogServiceTest {
         assertThat(row.getTitle()).isEqualTo("Renamed");
         assertThat(row.getCategory()).isEqualTo(planner.getCategory());
         assertThat(row.getSelectedKeywords()).isEqualTo(planner.getSelectedKeywords());
-        verify(domainEventRecorder, never()).recordDomainEvent(any(), any(), any());
+        verifyNothingRecorded();
         assertThat(TransactionSynchronizationManager.getSynchronizations()).isEmpty();
     }
 
@@ -177,7 +181,7 @@ class PlannerCatalogServiceTest {
 
         catalogService.onVisibleEditCommitted(planner);
 
-        verify(domainEventRecorder, never()).recordDomainEvent(any(), any(), any());
+        verifyNothingRecorded();
     }
 
     @Test
@@ -196,7 +200,7 @@ class PlannerCatalogServiceTest {
 
         catalogService.onVisibleEditCommitted(planner);
 
-        verify(domainEventRecorder, never()).recordDomainEvent(any(), any(), any());
+        verifyNothingRecorded();
     }
 
     @Test
@@ -219,7 +223,14 @@ class PlannerCatalogServiceTest {
     }
 
     private void verifyRecorded(UUID plannerId) {
-        verify(domainEventRecorder).recordDomainEvent(DomainEventType.PLANNER_CATALOG_CHANGED, plannerId, Map.of());
+        verify(domainEventRepository).insert(argThat((DomainEvent row) ->
+                row.getEventType() == DomainEventType.PLANNER_CATALOG_CHANGED
+                        && row.getAggregateId().equals(plannerId)
+                        && row.getPayload().equals("{}")));
+    }
+
+    private void verifyNothingRecorded() {
+        verify(domainEventRepository, never()).insert(any());
     }
 
     private static Planner loadedPlanner() {

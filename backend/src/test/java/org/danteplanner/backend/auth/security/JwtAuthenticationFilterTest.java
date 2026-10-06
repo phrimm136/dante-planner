@@ -1,6 +1,7 @@
 package org.danteplanner.backend.auth.security;
 
 import org.danteplanner.backend.shared.security.AuthDegradationResponder;
+import org.danteplanner.backend.shared.security.CustomAuthenticationEntryPoint;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
@@ -12,16 +13,16 @@ import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.support.FakeUsers;
-import org.danteplanner.backend.auth.token.TokenBlacklistService;
-import org.danteplanner.backend.auth.token.TokenClaims;
-import org.danteplanner.backend.auth.token.TokenGenerator;
-import org.danteplanner.backend.auth.token.TokenValidator;
+import org.danteplanner.backend.support.RecordingTokenBlacklist;
+import org.danteplanner.backend.support.ScriptedFailuresCheck;
+import org.danteplanner.backend.support.TestJwt;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.backend.support.LogCapture;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import com.jayway.jsonpath.JsonPath;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -40,17 +41,14 @@ import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.Date;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
-import org.danteplanner.backend.auth.exception.InvalidTokenException;
-
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import org.danteplanner.backend.shared.config.JwtProperties;
-import org.danteplanner.backend.auth.token.RefreshRotationService;
 
 /**
  * Unit tests for JwtAuthenticationFilter.
@@ -61,23 +59,16 @@ import org.danteplanner.backend.auth.token.RefreshRotationService;
  * path returns 503 rather than a 500 or a silent guest downgrade.</p>
  */
 @ExtendWith(MockitoExtension.class)
+@ExtendWith(ScriptedFailuresCheck.class)
 class JwtAuthenticationFilterTest {
 
-    @Mock
-    private TokenValidator tokenValidator;
+    private final TestJwt jwt = new TestJwt();
 
-    @Mock
-    private TokenBlacklistService tokenBlacklistService;
+    private final RecordingTokenBlacklist tokenBlacklist = new RecordingTokenBlacklist(jwt.clock());
 
     private final CookieUtils cookieUtils = new CookieUtils(false, "", "Lax");
 
     private final FakeUsers users = new FakeUsers();
-
-    @Mock
-    private TokenGenerator tokenGenerator;
-
-    @Mock
-    private RefreshRotationService refreshRotationService;
 
     @Mock
     private FilterChain filterChain;
@@ -112,8 +103,8 @@ class JwtAuthenticationFilterTest {
     }
 
     private JwtAuthenticationFilter filterOver(Users lookup) {
-        return new JwtAuthenticationFilter(tokenValidator, tokenBlacklistService,
-                new AccessTokenAuthenticator(tokenValidator, tokenBlacklistService), cookieUtils, lookup, new AuthDegradationResponder(new ProblemWriter(objectMapper)), tokenGenerator, refreshRotationService, new LineageRotationFlag(false), new JwtProperties());
+        return new JwtAuthenticationFilter(jwt.service(), tokenBlacklist,
+                new AccessTokenAuthenticator(jwt.service(), tokenBlacklist), cookieUtils, lookup, new AuthDegradationResponder(new ProblemWriter(objectMapper)), jwt.service(), null, new LineageRotationFlag(false), jwt.properties());
     }
 
     private static FakeUsers usersFailingWith(RuntimeException failure) {
@@ -140,24 +131,26 @@ class JwtAuthenticationFilterTest {
                 .toList();
     }
 
-    private TokenClaims createValidClaims(Long userId) {
-        return new TokenClaims(
-                userId,
-                TokenClaims.TYPE_ACCESS,
-                UserRole.NORMAL,
-                new Date(),
-                new Date(System.currentTimeMillis() + 3600000)
-        );
+    private String accessToken(Long userId) {
+        return jwt.service().generateAccessToken(userId, UserRole.NORMAL);
     }
 
-    private TokenClaims createRefreshClaims(Long userId) {
-        return new TokenClaims(
-                userId,
-                TokenClaims.TYPE_REFRESH,
-                UserRole.NORMAL,
-                new Date(),
-                new Date(System.currentTimeMillis() + 3600000)
-        );
+    private String refreshToken(Long userId) {
+        return jwt.service().generateRefreshToken(userId);
+    }
+
+    private TestJwt anHourAgo() {
+        return new TestJwt(jwt.clock().instant().minus(Duration.ofHours(1)));
+    }
+
+    private String expiredAccessToken(Long userId) {
+        return anHourAgo().service().generateAccessToken(userId, UserRole.NORMAL);
+    }
+
+    private String tamperedAccessToken(Long userId) {
+        String[] signed = accessToken(userId).split("\\.");
+        String[] other = accessToken(userId + 1).split("\\.");
+        return signed[0] + "." + other[1] + "." + signed[2];
     }
 
     private User activeUser(Long id) {
@@ -176,14 +169,12 @@ class JwtAuthenticationFilterTest {
 
         @Test
         void doFilterInternal_WhenValidToken_AuthenticatesWithoutDbLookup() throws Exception {
-            String token = "valid.jwt.token";
             Long userId = 123L;
+            String token = accessToken(userId);
 
             // The hot path must not touch the DB (keeps auth alive during DB maintenance)
             filter = filterOver(usersFailingWith(new DataAccessResourceFailureException("DB unreachable")));
             request.setCookies(new Cookie(CookieConstants.ACCESS_TOKEN, token));
-            when(tokenBlacklistService.isBlacklisted(token)).thenReturn(false);
-            lenient().when(tokenValidator.validateAccessToken(token)).thenReturn(createValidClaims(userId));
 
             filter.doFilterInternal(request, response, filterChain);
 
@@ -199,15 +190,14 @@ class JwtAuthenticationFilterTest {
 
         @Test
         void doFilterInternal_WhenInvalidatedUser_ClearsContextAndContinues() throws Exception {
-            String token = "valid.jwt.token";
             Long userId = 123L;
+            jwt.clock().advance(Duration.ofMinutes(-1));
+            String token = accessToken(userId);
+            jwt.clock().advance(Duration.ofMinutes(1));
 
             filter = filterOver(usersFailingWith(new DataAccessResourceFailureException("DB unreachable")));
             request.setCookies(new Cookie(CookieConstants.ACCESS_TOKEN, token));
-            when(tokenBlacklistService.isBlacklisted(token)).thenReturn(false);
-            lenient().when(tokenValidator.validateAccessToken(token)).thenReturn(createValidClaims(userId));
-            // deleteAccount()/demotion called invalidateUserTokens → this returns true
-            when(tokenBlacklistService.isUserTokenInvalidated(eq(userId), anyLong())).thenReturn(true);
+            tokenBlacklist.invalidateUserTokens(userId);
 
             filter.doFilterInternal(request, response, filterChain);
 
@@ -222,13 +212,10 @@ class JwtAuthenticationFilterTest {
 
         @Test
         void doFilterInternal_WhenSentinelUser_SkipsAuthentication() throws Exception {
-            String token = "sentinel.jwt.token";
-            Long sentinelId = 0L;
+            String token = accessToken(Users.SENTINEL_USER_ID);
 
             filter = filterOver(usersFailingWith(new DataAccessResourceFailureException("DB unreachable")));
             request.setCookies(new Cookie(CookieConstants.ACCESS_TOKEN, token));
-            when(tokenBlacklistService.isBlacklisted(token)).thenReturn(false);
-            lenient().when(tokenValidator.validateAccessToken(token)).thenReturn(createValidClaims(sentinelId));
 
             filter.doFilterInternal(request, response, filterChain);
 
@@ -247,8 +234,8 @@ class JwtAuthenticationFilterTest {
 
             verify(filterChain).doFilter(request, response);
             assertNull(SecurityContextHolder.getContext().getAuthentication());
-            verify(tokenValidator, never()).validateAccessToken(any());
-            verify(tokenValidator, never()).validateRefreshToken(any());
+            assertThat(response.getCookies()).isEmpty();
+            assertThat(loggedMessages()).isEmpty();
         }
     }
 
@@ -257,14 +244,9 @@ class JwtAuthenticationFilterTest {
 
         @Test
         void doFilterInternal_WhenExpiredToken_RefreshDbDown_Returns503() throws Exception {
-            String expiredToken = "expired.jwt.token";
-            String refreshToken = "refresh.jwt.token";
             Long userId = 123L;
 
-            request.setCookies(new Cookie(CookieConstants.ACCESS_TOKEN, expiredToken), new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
-            lenient().when(tokenValidator.validateAccessToken(expiredToken))
-                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
-            lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(createRefreshClaims(userId));
+            request.setCookies(new Cookie(CookieConstants.ACCESS_TOKEN, expiredAccessToken(userId)), new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken(userId)));
             filter = filterOver(usersFailingWith(new DataAccessResourceFailureException("DB unreachable")));
 
             filter.doFilterInternal(request, response, filterChain);
@@ -276,14 +258,12 @@ class JwtAuthenticationFilterTest {
 
         @Test
         void doFilterInternal_WhenNoAccessToken_RefreshDbDown_Returns503() throws Exception {
-            String refreshToken = "refresh.jwt.token";
             Long userId = 123L;
 
             // Access cookie absent (expiry/MaxAge desync) but a refresh cookie is present —
             // this routes through the token==null branch, a different catch site than the
             // expired-token path below.
-            request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
-            lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(createRefreshClaims(userId));
+            request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken(userId)));
             filter = filterOver(usersFailingWith(new DataAccessResourceFailureException("DB unreachable")));
 
             filter.doFilterInternal(request, response, filterChain);
@@ -295,14 +275,9 @@ class JwtAuthenticationFilterTest {
 
         @Test
         void doFilterInternal_WhenExpiredToken_RefreshTxBeginFails_Returns503() throws Exception {
-            String expiredToken = "expired.jwt.token";
-            String refreshToken = "refresh.jwt.token";
             Long userId = 123L;
 
-            request.setCookies(new Cookie(CookieConstants.ACCESS_TOKEN, expiredToken), new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
-            lenient().when(tokenValidator.validateAccessToken(expiredToken))
-                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
-            lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(createRefreshClaims(userId));
+            request.setCookies(new Cookie(CookieConstants.ACCESS_TOKEN, expiredAccessToken(userId)), new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken(userId)));
             // findActiveById is @Transactional; a DB-down failure surfaces at transaction-begin
             // as CannotCreateTransactionException, NOT DataAccessResourceFailureException.
             filter = filterOver(usersFailingWith(new CannotCreateTransactionException("Could not open JPA EntityManager for transaction")));
@@ -316,17 +291,13 @@ class JwtAuthenticationFilterTest {
 
         @Test
         void doFilterInternal_WhenRefreshRedisWriteFails_ReturnsAuthTemporarilyUnavailable() throws Exception {
-            String refreshToken = "refresh.jwt.token";
             Long userId = 123L;
             User user = activeUser(userId);
+            RedisConnectionFailureException authRedisDown = new RedisConnectionFailureException("auth redis down");
 
-            request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
-            lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(createRefreshClaims(userId));
-            when(tokenBlacklistService.isBlacklisted(refreshToken)).thenReturn(false);
-            when(tokenBlacklistService.isUserTokenInvalidated(eq(userId), anyLong())).thenReturn(false);
+            request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken(userId)));
             users.add(user);
-            doThrow(new org.springframework.data.redis.RedisConnectionFailureException("auth redis down"))
-                    .when(tokenBlacklistService).blacklistTokenForRotation(eq(refreshToken), any());
+            tokenBlacklist.failNext(RecordingTokenBlacklist.Operation.BLACKLIST_TOKEN_FOR_ROTATION, authRedisDown);
 
             filter.doFilterInternal(request, response, filterChain);
 
@@ -337,18 +308,15 @@ class JwtAuthenticationFilterTest {
             assertEquals("AUTH_TEMPORARILY_UNAVAILABLE", (String) JsonPath.read(body, "$.code"));
             assertEquals((String) JsonPath.read(body, "$.detail"), (String) JsonPath.read(body, "$.message"));
             assertEquals("10", response.getHeader(HttpHeaders.RETRY_AFTER));
+            assertThat(tokenBlacklist.failed()).containsExactly(new RecordingTokenBlacklist.Failed(
+                    RecordingTokenBlacklist.Operation.BLACKLIST_TOKEN_FOR_ROTATION, authRedisDown));
         }
 
         @Test
         void doFilterInternal_WhenRefreshDbDown_BodyCodeIsWriteTemporarilyUnavailable() throws Exception {
-            String expiredToken = "expired.jwt.token";
-            String refreshToken = "refresh.jwt.token";
             Long userId = 123L;
 
-            request.setCookies(new Cookie(CookieConstants.ACCESS_TOKEN, expiredToken), new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
-            lenient().when(tokenValidator.validateAccessToken(expiredToken))
-                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
-            lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(createRefreshClaims(userId));
+            request.setCookies(new Cookie(CookieConstants.ACCESS_TOKEN, expiredAccessToken(userId)), new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken(userId)));
             filter = filterOver(usersFailingWith(new DataAccessResourceFailureException("DB unreachable")));
 
             filter.doFilterInternal(request, response, filterChain);
@@ -365,11 +333,7 @@ class JwtAuthenticationFilterTest {
 
         @Test
         void doFilterInternal_WhenExpiredToken_AttemptsAutoRefresh() throws Exception {
-            String expiredToken = "expired.jwt.token";
-
-            request.setCookies(new Cookie(CookieConstants.ACCESS_TOKEN, expiredToken));
-            lenient().when(tokenValidator.validateAccessToken(expiredToken))
-                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
+            request.setCookies(new Cookie(CookieConstants.ACCESS_TOKEN, expiredAccessToken(123L)));
 
             filter.doFilterInternal(request, response, filterChain);
 
@@ -382,8 +346,6 @@ class JwtAuthenticationFilterTest {
             String token = "malformed.jwt.token";
 
             request.setCookies(new Cookie(CookieConstants.ACCESS_TOKEN, token));
-            lenient().when(tokenValidator.validateAccessToken(token))
-                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.MALFORMED));
 
             filter.doFilterInternal(request, response, filterChain);
 
@@ -395,11 +357,9 @@ class JwtAuthenticationFilterTest {
 
         @Test
         void doFilterInternal_WhenInvalidSignature_ClearsContextAndLogsTokenInvalid() throws Exception {
-            String token = "tampered.jwt.token";
+            String token = tamperedAccessToken(123L);
 
             request.setCookies(new Cookie(CookieConstants.ACCESS_TOKEN, token));
-            lenient().when(tokenValidator.validateAccessToken(token))
-                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.INVALID_SIGNATURE));
 
             filter.doFilterInternal(request, response, filterChain);
 
@@ -411,11 +371,10 @@ class JwtAuthenticationFilterTest {
 
         @Test
         void doFilterInternal_WhenRevokedToken_ClearsContext() throws Exception {
-            String token = "revoked.jwt.token";
+            String token = accessToken(123L);
+            tokenBlacklist.blacklistToken(token, jwt.service().validateAccessToken(token).expiration());
 
             request.setCookies(new Cookie(CookieConstants.ACCESS_TOKEN, token));
-            lenient().when(tokenValidator.validateAccessToken(token))
-                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.REVOKED));
 
             filter.doFilterInternal(request, response, filterChain);
 
@@ -429,12 +388,7 @@ class JwtAuthenticationFilterTest {
 
         @Test
         void doFilterInternal_WhenRefreshTypedTokenInAccessCookie_DoesNotAuthenticate() throws Exception {
-            String token = "refresh.typed.in.access.cookie";
-            Long userId = 123L;
-
-            request.setCookies(new Cookie(CookieConstants.ACCESS_TOKEN, token));
-            lenient().when(tokenValidator.validateAccessToken(token))
-                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.INVALID_TYPE));
+            request.setCookies(new Cookie(CookieConstants.ACCESS_TOKEN, refreshToken(123L)));
 
             filter.doFilterInternal(request, response, filterChain);
 
@@ -445,12 +399,7 @@ class JwtAuthenticationFilterTest {
 
         @Test
         void doFilterInternal_WhenRefreshTypedTokenInAccessCookie_LogsInvalidTypeReason() throws Exception {
-            String token = "refresh.typed.in.access.cookie";
-            Long userId = 123L;
-
-            request.setCookies(new Cookie(CookieConstants.ACCESS_TOKEN, token));
-            lenient().when(tokenValidator.validateAccessToken(token))
-                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.INVALID_TYPE));
+            request.setCookies(new Cookie(CookieConstants.ACCESS_TOKEN, refreshToken(123L)));
 
             filter.doFilterInternal(request, response, filterChain);
 
@@ -465,23 +414,17 @@ class JwtAuthenticationFilterTest {
 
         @Test
         void doFilterInternal_WhenAccessTypedTokenOnRefreshPath_UsesValidateRefreshToken() throws Exception {
-            String refreshCookieToken = "access.typed.in.refresh.cookie";
-            Long userId = 123L;
-
-            request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshCookieToken));
-            lenient().when(tokenValidator.validateRefreshToken(refreshCookieToken))
-                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.INVALID_TYPE));
+            request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, accessToken(123L)));
 
             filter.doFilterInternal(request, response, filterChain);
 
             // The reroute contract: the auto-refresh site must delegate to the refresh-typed validator.
-            // Routing through validateAccessToken instead ends in the same guest outcome, so only a real
-            // TokenValidator behind a real refresh cookie could separate the two by outcome alone.
-            verify(tokenValidator).validateRefreshToken(refreshCookieToken);
+            assertNull(request.getAttribute(CustomAuthenticationEntryPoint.AUTH_ERROR_ATTRIBUTE));
+            assertNull(response.getCookie(CookieConstants.REFRESH_TOKEN));
             // Preserved-behavior anchor: still a guest, still no rotation.
             assertNull(SecurityContextHolder.getContext().getAuthentication(),
                     "An access-typed token on the refresh path must NOT authenticate");
-            verify(tokenBlacklistService, never()).blacklistTokenForRotation(any(), any());
+            assertEquals(0, tokenBlacklist.size());
         }
     }
 }

@@ -1,24 +1,14 @@
 package org.danteplanner.backend.auth.service;
 
-import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
-import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.auth.token.LogoutRevocation;
-import org.danteplanner.backend.auth.token.TokenBlacklistService;
-import org.danteplanner.backend.auth.token.TokenClaims;
-import org.danteplanner.backend.auth.token.TokenValidator;
+import org.danteplanner.backend.support.RecordingTokenBlacklist;
+import org.danteplanner.backend.support.TestJwt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Date;
-import java.util.List;
-
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * {@link SessionRevocationService} logout with {@code jwt.rotation.lineage-enabled} turned on.
@@ -26,79 +16,45 @@ import static org.mockito.Mockito.when;
  * <p>Logout revokes the current refresh-token family and still blacklists the access token
  * immediately, so neither half of the pair outlives the session.</p>
  */
-@ExtendWith(MockitoExtension.class)
 class SessionRevocationServiceLineageTest {
 
-    @Mock
-    private TokenValidator tokenValidator;
+    private static final Long USER_ID = 123L;
 
-    @Mock
-    private TokenBlacklistService tokenBlacklistService;
+    private final TestJwt jwt = new TestJwt();
+
+    private final RecordingTokenBlacklist tokenBlacklist = new RecordingTokenBlacklist(jwt.clock());
 
     private SessionRevocationService facade;
-    private User testUser;
 
     @BeforeEach
     void setUp() {
-        facade = new SessionRevocationService(tokenValidator, tokenBlacklistService, new LineageRotationFlag(true));
-
-        testUser = User.builder()
-                .id(123L)
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-123")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("tst01")
-                .build();
+        facade = new SessionRevocationService(jwt.service(), tokenBlacklist, new LineageRotationFlag(true));
     }
-
-    private TokenClaims refreshClaims(String jti, String familyId, String parentJti) {
-        return new TokenClaims(
-                testUser.getId(), TokenClaims.TYPE_REFRESH, null,
-                new Date(), new Date(System.currentTimeMillis() + 604800000L),
-                jti, familyId, parentJti);
-    }
-
-
 
     @Test
     void logout_WhenFlagOn_RevokesFamily() {
-        String accessToken = "access.jwt";
-        String refreshToken = "refresh.jwt";
-        Date accessExpiry = new Date(System.currentTimeMillis() + 60000);
-        TokenClaims accessClaims = new TokenClaims(
-                testUser.getId(), TokenClaims.TYPE_ACCESS, UserRole.NORMAL,
-                new Date(), accessExpiry);
-        TokenClaims refresh = refreshClaims("jti-1", "fam-logout", null);
-
-        when(tokenValidator.validateAccessToken(accessToken)).thenReturn(accessClaims);
-        when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(refresh);
+        String accessToken = jwt.service().generateAccessToken(USER_ID, UserRole.NORMAL);
+        String refreshToken = jwt.service().generateRefreshToken(USER_ID);
 
         facade.logout(accessToken, refreshToken);
 
-        // The logout revocation lands in Redis and has no response-visible form;
-        // asserting it as state needs the containerized tier with a live TokenBlacklistService.
-        verify(tokenBlacklistService).revokeLogoutSession(List.of(
-                new LogoutRevocation.TokenRevocation(accessToken, accessExpiry),
-                new LogoutRevocation.TokenRevocation(refreshToken, refresh.expiration()),
-                new LogoutRevocation.FamilyRevocation("fam-logout")));
+        assertThat(tokenBlacklist.revocations()).containsExactly(
+                new LogoutRevocation.TokenRevocation(accessToken,
+                        jwt.service().validateAccessToken(accessToken).expiration()),
+                new LogoutRevocation.TokenRevocation(refreshToken,
+                        jwt.service().validateRefreshToken(refreshToken).expiration()),
+                new LogoutRevocation.FamilyRevocation(jwt.service().validateRefreshToken(refreshToken).familyId()));
     }
 
     @Test
     void logout_WhenFlagOn_BlacklistsAccessToken() {
-        String accessToken = "access.jwt";
-        Date accessExpiry = new Date(System.currentTimeMillis() + 60000);
-        TokenClaims accessClaims = new TokenClaims(
-                testUser.getId(), TokenClaims.TYPE_ACCESS, UserRole.NORMAL,
-                new Date(), accessExpiry);
-
-        when(tokenValidator.validateAccessToken(accessToken)).thenReturn(accessClaims);
+        String accessToken = jwt.service().generateAccessToken(USER_ID, UserRole.NORMAL);
 
         facade.logout(accessToken, null);
 
-        // The access-token blacklist entry lands in Redis and has no response-visible form;
-        // asserting it as state needs the containerized tier with a live TokenBlacklistService.
-        verify(tokenBlacklistService).revokeLogoutSession(List.of(
-                new LogoutRevocation.TokenRevocation(accessToken, accessExpiry)));
+        assertThat(tokenBlacklist.revocations()).containsExactly(
+                new LogoutRevocation.TokenRevocation(accessToken,
+                        jwt.service().validateAccessToken(accessToken).expiration()));
+        assertThat(tokenBlacklist.blacklistedTokens()).containsExactly(accessToken);
     }
 }

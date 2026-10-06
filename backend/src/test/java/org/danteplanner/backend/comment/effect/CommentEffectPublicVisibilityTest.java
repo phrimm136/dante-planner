@@ -1,37 +1,39 @@
 package org.danteplanner.backend.comment.effect;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
-import org.danteplanner.backend.notification.api.NotificationEventPayload;
-import org.danteplanner.backend.notification.api.NotificationOutcome;
-import org.danteplanner.backend.notification.api.Notifications;
 import org.danteplanner.backend.planner.api.PlannerNotificationTarget;
-import org.danteplanner.backend.planner.api.PublishedPlanners;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventPayloadReader;
 import org.danteplanner.backend.shared.outbox.service.EffectPushQueue;
+import org.danteplanner.backend.shared.sse.SseChannel;
+import org.danteplanner.backend.shared.sse.SseEnvelope;
 import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.danteplanner.backend.support.FakePublishedPlanners;
+import org.danteplanner.backend.support.FakeUsers;
+import org.danteplanner.backend.support.RecordingNotifications;
+import org.danteplanner.backend.support.RecordingNotifications.CommentReceived;
+import org.danteplanner.backend.support.RecordingNotifications.ReplyReceived;
+import org.danteplanner.backend.support.RecordingSseChannelSender;
+import org.danteplanner.backend.support.UsersContract;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.Mockito.when;
 
 /**
@@ -43,7 +45,6 @@ import static org.mockito.Mockito.when;
  * {@code c.deletedAt}; the planner's published state is what {@code isPublished} answers.</p>
  */
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 class CommentEffectPublicVisibilityTest {
 
     private static final UUID PLANNER_ID = UUID.randomUUID();
@@ -53,29 +54,34 @@ class CommentEffectPublicVisibilityTest {
     private static final Long COMMENT_ID = 77L;
     private static final Long PARENT_ID = 50L;
     private static final Long REPLY_ID = 101L;
+    private static final PlannerNotificationTarget TARGET =
+            new PlannerNotificationTarget(PLANNER_ID, "Test Planner", OWNER_ID, true);
 
     @Mock
     private PlannerCommentRepository commentRepository;
 
-    @Mock
-    private CommentQueryService commentQueryService;
+    private final FakeUsers users = new FakeUsers();
 
-    @Mock
-    private PublishedPlanners plannerQueryService;
+    private final FakePublishedPlanners publishedPlanners = new FakePublishedPlanners();
 
-    @Mock
-    private Notifications notificationDispatchService;
+    private final RecordingNotifications notifications = new RecordingNotifications(users);
 
-    @Mock
-    private SsePublisher ssePublisher;
+    private final RecordingSseChannelSender sseChannel = new RecordingSseChannelSender();
+
+    private final SsePublisher ssePublisher =
+            new SsePublisher(sseChannel, Jackson2ObjectMapperBuilder.json().build(), new SimpleMeterRegistry());
 
     private final DomainEventPayloadReader payloads = new DomainEventPayloadReader(new ObjectMapper());
 
     @BeforeEach
     void setUp() {
-        when(plannerQueryService.notificationTargetOf(PLANNER_ID)).thenReturn(Optional.of(
-                new PlannerNotificationTarget(PLANNER_ID, "Test Planner", OWNER_ID, true)));
-        when(plannerQueryService.isPublished(PLANNER_ID)).thenReturn(true);
+        publishedPlanners.add(TARGET, true);
+        users.add(UsersContract.newUser().id(OWNER_ID).build());
+        users.add(UsersContract.newUser().id(PARENT_AUTHOR_ID).build());
+    }
+
+    private CommentQueryService commentQueryService() {
+        return new CommentQueryService(commentRepository, null, users, null, null);
     }
 
     @Test
@@ -83,16 +89,15 @@ class CommentEffectPublicVisibilityTest {
         givenUnpublished();
         PlannerComment comment = comment(COMMENT_ID, WRITER_ID, null);
         when(commentRepository.findById(COMMENT_ID)).thenReturn(Optional.of(comment));
-        CommentReceivedEffect effect = new CommentReceivedEffect(commentRepository, commentQueryService,
-                plannerQueryService, notificationDispatchService, payloads);
+        CommentReceivedEffect effect = new CommentReceivedEffect(commentRepository, commentQueryService(),
+                publishedPlanners, notifications, payloads);
 
         EffectPushQueue pushes = new EffectPushQueue(ssePublisher);
         effect.applyEffect(DomainEvent.of(DomainEventType.COMMENT_RECEIVED, PLANNER_ID,
                 "{\"commentId\":" + COMMENT_ID + "}"), pushes);
         pushes.flush();
 
-        verify(ssePublisher, never()).publishCommentEvent(
-                eq(PLANNER_ID), eq(SseEventType.COMMENT_ADDED), any(), any(), any());
+        assertThat(sseChannel.envelopes(SseChannel.COMMENT)).isEmpty();
     }
 
     @Test
@@ -105,8 +110,7 @@ class CommentEffectPublicVisibilityTest {
 
         applyReply();
 
-        verify(ssePublisher, never()).publishCommentEvent(
-                eq(PLANNER_ID), eq(SseEventType.COMMENT_ADDED), any(), any(), any());
+        assertThat(sseChannel.envelopes(SseChannel.COMMENT)).isEmpty();
     }
 
     @Test
@@ -119,33 +123,32 @@ class CommentEffectPublicVisibilityTest {
 
         applyReply();
 
-        verify(notificationDispatchService, never()).notifyReplyReceived(
-                anyLong(), any(), any(), any(), any(), anyLong());
-        verify(ssePublisher, never()).publishUserEvent(
-                eq(PARENT_AUTHOR_ID), eq(SseEventType.NOTIFY_COMMENT), any(), any());
+        assertThat(notifications.calls()).isEmpty();
+        assertThat(sseChannel.envelopes(SseChannel.USER)).isEmpty();
     }
 
     private void givenUnpublished() {
-        when(plannerQueryService.isPublished(PLANNER_ID)).thenReturn(false);
+        publishedPlanners.add(TARGET, false);
     }
 
     @Test
     void commentReceived_WhenPlannerUnpublishedBeforeDispatch_StillNotifiesTheOwner() {
         givenUnpublished();
         when(commentRepository.findById(COMMENT_ID)).thenReturn(Optional.of(comment(COMMENT_ID, WRITER_ID, null)));
-        when(notificationDispatchService.notifyCommentReceived(anyLong(), any(), any(), any(), any(), anyLong()))
-                .thenReturn(delivered(OWNER_ID));
-        CommentReceivedEffect effect = new CommentReceivedEffect(commentRepository, commentQueryService,
-                plannerQueryService, notificationDispatchService, payloads);
+        CommentReceivedEffect effect = new CommentReceivedEffect(commentRepository, commentQueryService(),
+                publishedPlanners, notifications, payloads);
 
         EffectPushQueue pushes = new EffectPushQueue(ssePublisher);
         effect.applyEffect(DomainEvent.of(DomainEventType.COMMENT_RECEIVED, PLANNER_ID,
                 "{\"commentId\":" + COMMENT_ID + "}"), pushes);
         pushes.flush();
 
-        verify(notificationDispatchService).notifyCommentReceived(
-                eq(COMMENT_ID), any(), eq(PLANNER_ID), any(), any(), eq(OWNER_ID));
-        verify(ssePublisher).publishUserEvent(eq(OWNER_ID), eq(SseEventType.NOTIFY_COMMENT), any(), any());
+        assertThat(notifications.calls()).singleElement().isInstanceOfSatisfying(CommentReceived.class, call -> {
+            assertThat(call.commentId()).isEqualTo(COMMENT_ID);
+            assertThat(call.plannerId()).isEqualTo(PLANNER_ID);
+            assertThat(call.plannerOwnerId()).isEqualTo(OWNER_ID);
+        });
+        assertNotifyCommentPushedTo(OWNER_ID);
     }
 
     @Test
@@ -158,8 +161,9 @@ class CommentEffectPublicVisibilityTest {
 
         applyReply();
 
-        verify(ssePublisher).publishCommentEvent(
-                eq(PLANNER_ID), eq(SseEventType.COMMENT_ADDED), any(), eq(WRITER_ID), any());
+        assertThat(sseChannel.envelopes(SseChannel.COMMENT))
+                .extracting(SseEnvelope::type, SseEnvelope::plannerId, SseEnvelope::excludeUserId)
+                .containsExactly(tuple(SseEventType.COMMENT_ADDED, PLANNER_ID.toString(), WRITER_ID));
     }
 
     @Test
@@ -169,37 +173,43 @@ class CommentEffectPublicVisibilityTest {
 
         applyReply();
 
-        verify(notificationDispatchService, never()).notifyReplyReceived(
-                anyLong(), any(), any(), any(), any(), anyLong());
-        verify(ssePublisher, never()).publishUserEvent(
-                eq(PARENT_AUTHOR_ID), eq(SseEventType.NOTIFY_COMMENT), any(), any());
+        assertThat(notifications.calls()).isEmpty();
+        assertThat(sseChannel.envelopes(SseChannel.USER)).isEmpty();
     }
 
     @Test
     void replyReceived_WhenPlannerUnpublishedAndParentAuthorIsTheOwner_NotifiesTheOwner() {
         givenUnpublished();
         givenAReplyUnder(OWNER_ID);
-        when(notificationDispatchService.notifyReplyReceived(anyLong(), any(), any(), any(), any(), anyLong()))
-                .thenReturn(delivered(OWNER_ID));
 
         applyReply();
 
-        verify(notificationDispatchService).notifyReplyReceived(
-                eq(REPLY_ID), any(), eq(PLANNER_ID), any(), any(), eq(OWNER_ID));
-        verify(ssePublisher).publishUserEvent(eq(OWNER_ID), eq(SseEventType.NOTIFY_COMMENT), any(), any());
+        assertReplyNotifiedTo(OWNER_ID);
+        assertNotifyCommentPushedTo(OWNER_ID);
     }
 
     @Test
     void replyReceived_WhenPlannerPublishedAndParentAuthorIsNotTheOwner_NotifiesTheParentAuthor() {
         givenAReplyUnder(PARENT_AUTHOR_ID);
-        when(notificationDispatchService.notifyReplyReceived(anyLong(), any(), any(), any(), any(), anyLong()))
-                .thenReturn(delivered(PARENT_AUTHOR_ID));
 
         applyReply();
 
-        verify(notificationDispatchService).notifyReplyReceived(
-                eq(REPLY_ID), any(), eq(PLANNER_ID), any(), any(), eq(PARENT_AUTHOR_ID));
-        verify(ssePublisher).publishUserEvent(eq(PARENT_AUTHOR_ID), eq(SseEventType.NOTIFY_COMMENT), any(), any());
+        assertReplyNotifiedTo(PARENT_AUTHOR_ID);
+        assertNotifyCommentPushedTo(PARENT_AUTHOR_ID);
+    }
+
+    private void assertReplyNotifiedTo(Long recipientId) {
+        assertThat(notifications.calls()).singleElement().isInstanceOfSatisfying(ReplyReceived.class, call -> {
+            assertThat(call.replyId()).isEqualTo(REPLY_ID);
+            assertThat(call.plannerId()).isEqualTo(PLANNER_ID);
+            assertThat(call.parentAuthorId()).isEqualTo(recipientId);
+        });
+    }
+
+    private void assertNotifyCommentPushedTo(Long recipientId) {
+        assertThat(sseChannel.envelopes(SseChannel.USER))
+                .extracting(SseEnvelope::type, SseEnvelope::userId)
+                .containsExactly(tuple(SseEventType.NOTIFY_COMMENT, recipientId));
     }
 
     private void givenAReplyUnder(Long parentAuthorId) {
@@ -208,15 +218,9 @@ class CommentEffectPublicVisibilityTest {
                 .thenReturn(Optional.of(comment(REPLY_ID, WRITER_ID, PARENT_ID)));
     }
 
-    private static NotificationOutcome delivered(Long recipientId) {
-        return new NotificationOutcome.Delivered(recipientId, new NotificationEventPayload(
-                UUID.randomUUID().toString(), "COMMENT_RECEIVED", COMMENT_ID.toString(),
-                Instant.now().toString(), PLANNER_ID.toString(), "Test Planner", "text", null));
-    }
-
     private void applyReply() {
-        ReplyReceivedEffect effect = new ReplyReceivedEffect(commentRepository, commentQueryService,
-                plannerQueryService, notificationDispatchService, payloads);
+        ReplyReceivedEffect effect = new ReplyReceivedEffect(commentRepository, commentQueryService(),
+                publishedPlanners, notifications, payloads);
         EffectPushQueue pushes = new EffectPushQueue(ssePublisher);
         effect.applyEffect(DomainEvent.of(DomainEventType.REPLY_RECEIVED, PLANNER_ID,
                 "{\"replyId\":" + REPLY_ID + "}"), pushes);

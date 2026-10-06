@@ -16,8 +16,11 @@ import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
 import org.danteplanner.backend.shared.outbox.service.DomainEventAttemptRecorder;
-import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.danteplanner.backend.support.LogCapture;
+import org.danteplanner.backend.support.RecordingTombstoneStore;
+import org.danteplanner.backend.support.RecordingTombstoneStore.ClearOrThrow;
+import org.danteplanner.backend.support.RecordingTombstoneStore.WriteOrThrow;
+import org.danteplanner.backend.support.ScriptedFailuresCheck;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -49,6 +53,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
@@ -59,6 +64,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@ExtendWith(ScriptedFailuresCheck.class)
 class PlannerCatalogSyncServiceTest {
 
     private static final FloorRuleTable TABLE = new GameDataLoader(new ObjectMapper())
@@ -72,9 +78,6 @@ class PlannerCatalogSyncServiceTest {
     private DomainEventRepository events;
 
     @Mock
-    private DomainEventAttemptRecorder attemptRecorder;
-
-    @Mock
     private PlannerRepository plannerRepository;
 
     @Mock
@@ -83,8 +86,7 @@ class PlannerCatalogSyncServiceTest {
     @Mock
     private PlannerKeywordFilterRepository keywordFilterRepository;
 
-    @Mock
-    private ContentTombstoneStore tombstoneStore;
+    private final RecordingTombstoneStore tombstoneStore = new RecordingTombstoneStore();
 
     @Mock
     private PlannerCatalogSyncService self;
@@ -100,7 +102,7 @@ class PlannerCatalogSyncServiceTest {
 
     @BeforeEach
     void setUp() {
-        syncService = new PlannerCatalogSyncService(events, attemptRecorder, plannerRepository,
+        syncService = new PlannerCatalogSyncService(events, new DomainEventAttemptRecorder(events), plannerRepository,
                 entityFilterRepository, keywordFilterRepository, TestDataFactory.gameDataRegistry(), tombstoneStore, self,
                 transactionManager, clock);
         lenient().when(clock.instant()).thenReturn(PASS_START);
@@ -117,7 +119,7 @@ class PlannerCatalogSyncServiceTest {
         InOrder order = inOrder(self);
         order.verify(self).syncPlanner(plannerId, List.of(1L, 3L));
         order.verify(self).syncPlanner(other, List.of(2L));
-        verifyNoInteractions(attemptRecorder);
+        verify(events, never()).incrementAttempts(anyLong());
     }
 
     @Test
@@ -134,13 +136,13 @@ class PlannerCatalogSyncServiceTest {
         UUID other = UUID.randomUUID();
         givenPending(event(1L, plannerId), event(2L, other), event(3L, plannerId));
         doThrow(new IllegalStateException("store down")).when(self).syncPlanner(plannerId, List.of(1L, 3L));
-        when(attemptRecorder.recordAttempt(anyLong())).thenReturn(1);
+        when(events.attemptsOf(anyLong())).thenReturn(Optional.of(1));
 
         assertThat(syncService.drainPending()).isEqualTo(1);
 
-        verify(attemptRecorder).recordAttempt(1L);
-        verify(attemptRecorder).recordAttempt(3L);
-        verify(attemptRecorder, never()).recordAttempt(2L);
+        verify(events).incrementAttempts(1L);
+        verify(events).incrementAttempts(3L);
+        verify(events, never()).incrementAttempts(2L);
         verify(self).syncPlanner(other, List.of(2L));
     }
 
@@ -149,7 +151,7 @@ class PlannerCatalogSyncServiceTest {
         UUID other = UUID.randomUUID();
         givenPending(event(1L, plannerId), event(2L, other));
         doThrow(new IllegalStateException("store down")).when(self).syncPlanner(plannerId, List.of(1L));
-        when(attemptRecorder.recordAttempt(1L)).thenReturn(10);
+        when(events.attemptsOf(1L)).thenReturn(Optional.of(10));
 
         List<ILoggingEvent> errors = errorsDuring(() -> assertThat(syncService.drainPending()).isEqualTo(1));
 
@@ -161,7 +163,7 @@ class PlannerCatalogSyncServiceTest {
     void drainPending_WhenAFailedSyncHasAttemptsLeft_RaisesNoAlarm() {
         givenPending(event(1L, plannerId));
         doThrow(new IllegalStateException("store down")).when(self).syncPlanner(plannerId, List.of(1L));
-        when(attemptRecorder.recordAttempt(1L)).thenReturn(9);
+        when(events.attemptsOf(1L)).thenReturn(Optional.of(9));
 
         assertThat(errorsDuring(syncService::drainPending)).as("a retryable failure does not page").isEmpty();
     }
@@ -174,16 +176,23 @@ class PlannerCatalogSyncServiceTest {
     void syncPlanner_WhenThePlannerIsVisible_RebuildsClearsTheMarkerAndMarksItsEventsDone() {
         givenVisible(true);
         stubScope(PlannerType.REFRACTED_RAILWAY, "RR_PLACEHOLDER");
+        List<List<RecordingTombstoneStore.Call>> markersAtRebuild = new ArrayList<>();
+        List<List<RecordingTombstoneStore.Call>> markersAtMarkDispatched = new ArrayList<>();
+        doAnswer(invocation -> markersAtRebuild.add(tombstoneStore.calls()))
+                .when(entityFilterRepository).rebuildPlannerFilters(plannerId, 0);
+        when(events.markDispatched(eq(List.of(7L)), any(Instant.class))).thenAnswer(invocation -> {
+            markersAtMarkDispatched.add(tombstoneStore.calls());
+            return 1;
+        });
 
         syncService.syncPlanner(plannerId, List.of(7L));
 
-        InOrder order = inOrder(entityFilterRepository, tombstoneStore, events);
-        order.verify(entityFilterRepository).rebuildPlannerFilters(plannerId, 0);
-        order.verify(tombstoneStore).clearTombstoneOrThrow("published-planner", plannerId);
-        order.verify(events).markDispatched(eq(List.of(7L)), any(Instant.class));
+        ClearOrThrow cleared = new ClearOrThrow("published-planner", plannerId);
+        assertThat(markersAtRebuild).containsExactly(List.of());
+        assertThat(markersAtMarkDispatched).containsExactly(List.of(cleared));
         verify(entityFilterRepository, never()).deleteByPlannerId(any());
         verifyNoInteractions(keywordFilterRepository);
-        verify(tombstoneStore, never()).writeTombstoneOrThrow(any(), any());
+        assertThat(tombstoneStore.calls()).containsExactly(cleared);
     }
 
     @Test
@@ -196,8 +205,7 @@ class PlannerCatalogSyncServiceTest {
         verify(entityFilterRepository).deleteByPlannerId(plannerId);
         verify(keywordFilterRepository).deleteByPlannerId(plannerId);
         verify(entityFilterRepository, never()).rebuildPlannerFilters(any(), anyInt());
-        verify(tombstoneStore).writeTombstoneOrThrow("published-planner", plannerId);
-        verify(tombstoneStore, never()).writeTombstoneOrThrow("planner", plannerId);
+        assertThat(tombstoneStore.calls()).containsExactly(new WriteOrThrow("published-planner", plannerId));
         verify(events).markDispatched(eq(List.of(7L)), any(Instant.class));
     }
 
@@ -208,7 +216,7 @@ class PlannerCatalogSyncServiceTest {
 
         syncService.syncPlanner(plannerId, List.of());
 
-        verify(tombstoneStore).writeTombstoneOrThrow("published-planner", plannerId);
+        assertThat(tombstoneStore.calls()).containsExactly(new WriteOrThrow("published-planner", plannerId));
         verify(events, never()).markDispatched(any(), any());
     }
 
@@ -219,8 +227,8 @@ class PlannerCatalogSyncServiceTest {
 
         syncService.syncPlanner(plannerId, List.of(7L));
 
-        verify(tombstoneStore).writeTombstoneOrThrow("published-planner", plannerId);
-        verify(tombstoneStore).writeTombstoneOrThrow("planner", plannerId);
+        assertThat(tombstoneStore.calls()).containsExactly(
+                new WriteOrThrow("published-planner", plannerId), new WriteOrThrow("planner", plannerId));
     }
 
     @Test
@@ -230,19 +238,21 @@ class PlannerCatalogSyncServiceTest {
 
         syncService.syncPlanner(plannerId, List.of(7L));
 
-        verify(tombstoneStore).writeTombstoneOrThrow("planner", plannerId);
+        assertThat(tombstoneStore.calls()).contains(new WriteOrThrow("planner", plannerId));
     }
 
     @Test
     void syncPlanner_WhenTheMarkerWriteFails_ThrowsBeforeMarkingItsEventsDone() {
         givenVisible(false);
-        doThrow(new IllegalStateException("store down"))
-                .when(tombstoneStore).writeTombstoneOrThrow("published-planner", plannerId);
+        IllegalStateException storeDown = new IllegalStateException("store down");
+        tombstoneStore.failNext(RecordingTombstoneStore.Operation.WRITE_OR_THROW, storeDown);
 
         assertThatThrownBy(() -> syncService.syncPlanner(plannerId, List.of(7L))).isInstanceOf(IllegalStateException.class)
                 .hasMessage("store down");
 
         verify(events, never()).markDispatched(any(), any());
+        assertThat(tombstoneStore.calls()).containsExactly(
+                new RecordingTombstoneStore.Failed(RecordingTombstoneStore.Operation.WRITE_OR_THROW, storeDown));
     }
 
     @Test

@@ -15,7 +15,11 @@ import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator;
 import org.danteplanner.backend.moderation.service.CommentReportService;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
+import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
+import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.danteplanner.backend.shared.util.CommentConstants;
 
 
@@ -76,7 +80,7 @@ class CommentServiceLayerTest {
     private PlannerStatsRepository plannerStatsRepository;
 
     @Mock
-    private DomainEventRecorder domainEventRecorder;
+    private DomainEventRepository domainEventRepository;
 
 
     // A comment write records one domain event and nothing else; who hears about it is decided by
@@ -104,7 +108,8 @@ class CommentServiceLayerTest {
                 new PlannerAccessGuard(users, plannerRepository),
                 new CommentAccessValidator());
         commandService = new CommentCommandService(
-                commentRepository, queryService, domainEventRecorder,
+                commentRepository, queryService,
+                new DomainEventRecorder(domainEventRepository, new ObjectMapper(), event -> { }),
                 new PlannerAccessGuard(users, plannerRepository),
                 new PlannerStatsService(plannerStatsRepository),
                 new CommentAccessValidator(), new CommentAuthorshipValidator(),
@@ -148,11 +153,20 @@ class CommentServiceLayerTest {
                 .build();
     }
 
+    private void givenEventRowsAreStored() {
+        when(domainEventRepository.insert(any(DomainEvent.class))).thenAnswer(invocation -> {
+            DomainEvent row = invocation.getArgument(0);
+            ReflectionTestUtils.setField(row, "id", 1L);
+            return row;
+        });
+    }
+
     @Nested
     class CreateCommentTests {
 
         @Test
         void createComment_WhenTopLevel_Succeeds() {
+            givenEventRowsAreStored();
             // Arrange
             CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
             AtomicReference<PlannerComment> persisted = new AtomicReference<>();
@@ -184,6 +198,7 @@ class CommentServiceLayerTest {
 
         @Test
         void createComment_WhenReply_Succeeds() {
+            givenEventRowsAreStored();
             // Arrange
             UUID parentPublicId = UUID.randomUUID();
             PlannerComment parentComment = new PlannerComment(plannerId, otherUser.getId(), "Parent", null, 0);
@@ -248,6 +263,7 @@ class CommentServiceLayerTest {
 
         @Test
         void createComment_WhenDeepNesting_AllowedWithoutFlattening() {
+            givenEventRowsAreStored();
             // Arrange
             // depth 5 sits well below MAX_DEPTH (127), so no flattening occurs
             UUID parentPublicId = UUID.randomUUID();

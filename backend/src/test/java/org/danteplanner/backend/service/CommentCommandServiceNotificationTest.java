@@ -9,8 +9,11 @@ import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
 import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
+import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
+import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
@@ -23,15 +26,18 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -66,7 +72,7 @@ class CommentCommandServiceNotificationTest {
     private PlannerStatsRepository plannerStatsRepository;
 
     @Mock
-    private DomainEventRecorder domainEventRecorder;
+    private DomainEventRepository domainEventRepository;
 
     private final FakeUsers users = new FakeUsers();
 
@@ -79,7 +85,7 @@ class CommentCommandServiceNotificationTest {
                 new CommentQueryService(commentRepository, commentVoteRepository, users,
                         new PlannerAccessGuard(users, plannerRepository),
                         new CommentAccessValidator()),
-                domainEventRecorder,
+                new DomainEventRecorder(domainEventRepository, new ObjectMapper(), event -> { }),
                 new PlannerAccessGuard(users, plannerRepository),
                 new PlannerStatsService(plannerStatsRepository),
                 new CommentAccessValidator(), new CommentAuthorshipValidator(),
@@ -89,41 +95,55 @@ class CommentCommandServiceNotificationTest {
     @Test
     void createComment_WhenTopLevel_RecordsOneCommentReceivedEvent() {
         givenAPublishedPlanner();
+        givenEventRowsAreStored();
         when(commentRepository.insert(any(PlannerComment.class))).thenAnswer(savedComment(1L));
 
         service.createComment(PLANNER_ID, COMMENTER_ID, UUID.randomUUID(),
                 new CreateCommentRequest("Top level", null));
 
-        verify(domainEventRecorder).recordDomainEvent(
-                DomainEventType.COMMENT_RECEIVED, PLANNER_ID, Map.of("commentId", 1L));
-        verifyNoMoreInteractions(domainEventRecorder);
+        assertRecordedOnce(DomainEventType.COMMENT_RECEIVED, "{\"commentId\":1}");
     }
 
     @Test
     void createComment_WhenItCarriesAParent_RecordsOneReplyReceivedEvent() {
         givenAPublishedPlanner();
+        givenEventRowsAreStored();
         when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parent()));
         when(commentRepository.insert(any(PlannerComment.class))).thenAnswer(savedComment(101L));
 
         service.createComment(PLANNER_ID, COMMENTER_ID, UUID.randomUUID(),
                 new CreateCommentRequest("Reply", PARENT_PUBLIC_ID));
 
-        verify(domainEventRecorder).recordDomainEvent(
-                DomainEventType.REPLY_RECEIVED, PLANNER_ID, Map.of("replyId", 101L));
-        verifyNoMoreInteractions(domainEventRecorder);
+        assertRecordedOnce(DomainEventType.REPLY_RECEIVED, "{\"replyId\":101}");
     }
 
     @Test
     void createReply_WhenPosted_RecordsOneReplyReceivedEvent() {
         givenAPublishedPlanner();
+        givenEventRowsAreStored();
         when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parent()));
         when(commentRepository.insert(any(PlannerComment.class))).thenAnswer(savedComment(101L));
 
         service.createReply(PARENT_PUBLIC_ID, COMMENTER_ID, UUID.randomUUID(), "Reply");
 
-        verify(domainEventRecorder).recordDomainEvent(
-                DomainEventType.REPLY_RECEIVED, PLANNER_ID, Map.of("replyId", 101L));
-        verifyNoMoreInteractions(domainEventRecorder);
+        assertRecordedOnce(DomainEventType.REPLY_RECEIVED, "{\"replyId\":101}");
+    }
+
+    private void assertRecordedOnce(DomainEventType type, String payload) {
+        ArgumentCaptor<DomainEvent> recorded = ArgumentCaptor.forClass(DomainEvent.class);
+        verify(domainEventRepository).insert(recorded.capture());
+        verifyNoMoreInteractions(domainEventRepository);
+        assertThat(recorded.getAllValues())
+                .extracting(DomainEvent::getEventType, DomainEvent::getAggregateId, DomainEvent::getPayload)
+                .containsExactly(tuple(type, PLANNER_ID, payload));
+    }
+
+    private void givenEventRowsAreStored() {
+        when(domainEventRepository.insert(any(DomainEvent.class))).thenAnswer(inv -> {
+            DomainEvent row = inv.getArgument(0);
+            ReflectionTestUtils.setField(row, "id", 1L);
+            return row;
+        });
     }
 
     private void givenAPublishedPlanner() {

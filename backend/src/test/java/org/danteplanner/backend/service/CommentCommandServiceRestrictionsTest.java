@@ -13,7 +13,6 @@ import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
-import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
 import org.junit.jupiter.api.Test;
@@ -43,7 +42,6 @@ class CommentCommandServiceRestrictionsTest {
     @Mock PlannerCommentVoteRepository commentVoteRepository;
     @Mock PlannerRepository plannerRepository;
     @Mock PlannerStatsRepository plannerStatsRepository;
-    @Mock DomainEventRecorder domainEventRecorder;
 
     private final FakeUsers users = new FakeUsers();
 
@@ -53,7 +51,7 @@ class CommentCommandServiceRestrictionsTest {
                 new CommentQueryService(commentRepository, commentVoteRepository, users,
                         new PlannerAccessGuard(users, plannerRepository),
                         new CommentAccessValidator()),
-                domainEventRecorder,
+                null,
                 new PlannerAccessGuard(users, plannerRepository),
                 new PlannerStatsService(plannerStatsRepository),
                 new CommentAccessValidator(), new CommentAuthorshipValidator(),

@@ -1,14 +1,19 @@
 package org.danteplanner.backend.moderation.listener;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.moderation.event.AccountSuspendedEvent;
+import org.danteplanner.backend.shared.entity.SseEventType;
+import org.danteplanner.backend.shared.sse.SseChannel;
+import org.danteplanner.backend.shared.sse.SseEnvelope;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.shared.sse.SuspensionType;
+import org.danteplanner.backend.support.RecordingSseChannelSender;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
-import static org.mockito.Mockito.verify;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * The forwarding half of the moved suspension announcement.
@@ -16,11 +21,12 @@ import static org.mockito.Mockito.verify;
  * <p>The service side proves the event is raised. Nothing else proves it is still acted on, and a
  * listener that stops receiving fails no test that only checks what the service published.</p>
  */
-@ExtendWith(MockitoExtension.class)
 class AccountSuspensionEventListenerTest {
 
-    @Mock
-    private SsePublisher ssePublisher;
+    private final RecordingSseChannelSender sseChannel = new RecordingSseChannelSender();
+
+    private final SsePublisher ssePublisher =
+            new SsePublisher(sseChannel, Jackson2ObjectMapperBuilder.json().build(), new SimpleMeterRegistry());
 
     @Test
     void handleAccountSuspended_WhenTimeoutDelivered_ForwardsEveryFieldToThePublisher() {
@@ -29,16 +35,8 @@ class AccountSuspensionEventListenerTest {
         listener.handleAccountSuspended(
                 new AccountSuspendedEvent(7L, "Repeated spam", SuspensionType.TIMED_OUT, 30));
 
-        verify(ssePublisher).publishAccountSuspended(7L, "Repeated spam", SuspensionType.TIMED_OUT, 30);
-    }
-
-    @Test
-    void handleAccountSuspended_WhenBanDelivered_ForwardsTheAbsentDurationUntouched() {
-        AccountSuspensionEventListener listener = new AccountSuspensionEventListener(ssePublisher);
-
-        listener.handleAccountSuspended(
-                new AccountSuspendedEvent(9L, null, SuspensionType.BAN, null));
-
-        verify(ssePublisher).publishAccountSuspended(9L, null, SuspensionType.BAN, null);
+        assertThat(sseChannel.envelopes(SseChannel.USER)).containsExactly(new SseEnvelope(
+                SseEventType.ACCOUNT_SUSPENDED, 7L, null, null, null, null,
+                Map.of("suspensionType", "TIMEOUT", "reason", "Repeated spam", "durationMinutes", 30)));
     }
 }

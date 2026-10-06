@@ -8,36 +8,28 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import jakarta.servlet.http.Cookie;
 
 import org.danteplanner.backend.user.api.AuthProviderType;
-import org.danteplanner.backend.auth.token.RefreshRotationService;
 import org.danteplanner.backend.auth.token.RotationResult;
-import org.danteplanner.backend.auth.token.TokenBlacklistService;
-import org.danteplanner.backend.auth.token.TokenClaims;
-import org.danteplanner.backend.auth.token.TokenGenerator;
-import org.danteplanner.backend.auth.token.TokenValidator;
-import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.support.FakeUsers;
+import org.danteplanner.backend.support.RecordingRefreshRotation;
+import org.danteplanner.backend.support.RecordingTokenBlacklist;
+import org.danteplanner.backend.support.TestJwt;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.Date;
-
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.when;
 
 /**
  * One contract, both rotation implementations.
@@ -52,19 +44,16 @@ import static org.mockito.Mockito.when;
  * the assertion is not. A third implementation added behind this flag gains this contract by
  * appearing in the value source.</p>
  */
-@ExtendWith(MockitoExtension.class)
 class AutoRefreshFailureContractTest {
 
-    private static final String DEAD_REFRESH_TOKEN = "dead.refresh.jwt";
     private static final Long USER_ID = 42L;
 
-    @Mock private TokenValidator tokenValidator;
-    @Mock private TokenBlacklistService tokenBlacklistService;
-    @Mock private TokenGenerator tokenGenerator;
-    @Mock private RefreshRotationService refreshRotationService;
+    private final TestJwt jwt = new TestJwt();
+    private final RecordingTokenBlacklist tokenBlacklist = new RecordingTokenBlacklist(jwt.clock());
+    private final RecordingRefreshRotation refreshRotation = new RecordingRefreshRotation(jwt, tokenBlacklist);
 
     private final FakeUsers users = new FakeUsers();
-    private final JwtProperties jwtProperties = new JwtProperties();
+    private final String deadRefreshToken = jwt.service().generateRefreshToken(USER_ID);
     private final CookieUtils cookieUtils = new CookieUtils(true, "", "Lax");
     private MockHttpServletRequest request;
     private MockHttpServletResponse response;
@@ -87,7 +76,7 @@ class AutoRefreshFailureContractTest {
     @ValueSource(booleans = {true, false})
     void autoRefresh_WhenRefreshTokenIsDead_WithdrawsBothCookies(boolean lineageEnabled)
             throws Exception {
-        request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, DEAD_REFRESH_TOKEN));
+        request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, deadRefreshToken));
         givenTheTokenIsDead(lineageEnabled);
 
         filterWithFlag(lineageEnabled).doFilterInternal(request, response, filterChain);
@@ -99,6 +88,7 @@ class AutoRefreshFailureContractTest {
         assertEquals(CustomAuthenticationEntryPoint.SESSION_REVOKED,
                 request.getAttribute(CustomAuthenticationEntryPoint.AUTH_ERROR_ATTRIBUTE),
                 "the client is owed the reason, so it can stop retrying");
+        assertTheDeadTokenWasRefused(lineageEnabled);
     }
 
     /**
@@ -106,13 +96,23 @@ class AutoRefreshFailureContractTest {
      * revoked family, and the legacy path finds the token on the rotation blacklist.
      */
     private void givenTheTokenIsDead(boolean lineageEnabled) {
-        when(tokenValidator.validateRefreshToken(DEAD_REFRESH_TOKEN)).thenReturn(refreshClaims());
+        users.add(activeUser());
         if (lineageEnabled) {
-            users.add(activeUser());
-            when(refreshRotationService.rotate(DEAD_REFRESH_TOKEN))
-                    .thenReturn(new RotationResult.Revoked("fam-revoked"));
+            RotationResult.Rotated successor = (RotationResult.Rotated) refreshRotation.rotate(deadRefreshToken);
+            refreshRotation.rotate(successor.newRefreshJwt());
         } else {
-            when(tokenBlacklistService.isBlacklisted(DEAD_REFRESH_TOKEN)).thenReturn(true);
+            tokenBlacklist.blacklistToken(deadRefreshToken,
+                    jwt.service().validateRefreshToken(deadRefreshToken).expiration());
+        }
+    }
+
+    private void assertTheDeadTokenWasRefused(boolean lineageEnabled) {
+        if (lineageEnabled) {
+            assertThat(refreshRotation.rotations().getLast()).isEqualTo(new RecordingRefreshRotation.Rotation(
+                    deadRefreshToken,
+                    new RotationResult.Revoked(jwt.service().validateRefreshToken(deadRefreshToken).familyId())));
+        } else {
+            assertThat(refreshRotation.calls()).isEmpty();
         }
     }
 
@@ -124,17 +124,10 @@ class AutoRefreshFailureContractTest {
 
     private JwtAuthenticationFilter filterWithFlag(boolean lineageEnabled) {
         return new JwtAuthenticationFilter(
-                tokenValidator, tokenBlacklistService,
-                new AccessTokenAuthenticator(tokenValidator, tokenBlacklistService), cookieUtils, users,
-                new AuthDegradationResponder(new ProblemWriter(Jackson2ObjectMapperBuilder.json().build())), tokenGenerator, refreshRotationService,
-                new LineageRotationFlag(lineageEnabled), jwtProperties);
-    }
-
-    private TokenClaims refreshClaims() {
-        return new TokenClaims(
-                USER_ID, TokenClaims.TYPE_REFRESH, null,
-                new Date(), new Date(System.currentTimeMillis() + 604_800_000L),
-                "jti-1", "fam-1", null);
+                jwt.service(), tokenBlacklist,
+                new AccessTokenAuthenticator(jwt.service(), tokenBlacklist), cookieUtils, users,
+                new AuthDegradationResponder(new ProblemWriter(Jackson2ObjectMapperBuilder.json().build())), jwt.service(), refreshRotation,
+                new LineageRotationFlag(lineageEnabled), jwt.properties());
     }
 
     private User activeUser() {
