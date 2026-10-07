@@ -18,15 +18,19 @@ import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.event.CircuitBreakerOnStateTransitionEvent;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class PrimaryHealthProbeTest {
 
     private static final int THRESHOLD = 2;
@@ -35,15 +39,21 @@ class PrimaryHealthProbeTest {
     private static final Duration SUB_SECOND_TIMEOUT = Duration.ofMillis(500);
     private static final int MIN_VALID_TIMEOUT_SECONDS = 1;
 
-    private final DataSource primaryDirect = mock(DataSource.class);
-    private final Connection connection = mock(Connection.class);
+    @Mock
+    private DataSource primaryDirect;
+
+    @Mock
+    private Connection connection;
+
     private final CircuitBreaker breaker = CircuitBreaker.of(
             "test", new FallbackReplicaProperties.Breaker().circuitBreakerConfig());
     private final List<CircuitBreakerOnStateTransitionEvent> transitions = new ArrayList<>();
-    private final PrimaryHealthProbe probe = new PrimaryHealthProbe(primaryDirect, breaker, settings());
+    private PrimaryHealthProbe probe;
 
-    PrimaryHealthProbeTest() {
+    @BeforeEach
+    void setUp() {
         breaker.getEventPublisher().onStateTransition(transitions::add);
+        probe = new PrimaryHealthProbe(primaryDirect, breaker, settings());
     }
 
     private static FallbackReplicaProperties.Probe settings() {

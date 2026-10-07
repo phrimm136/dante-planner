@@ -27,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import org.danteplanner.backend.moderation.service.ModerationAuditService;
 
 /**
  * Unit tests for UserService.
@@ -42,9 +41,6 @@ class UserServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private ModerationAuditService moderationAuditService;
-
-    @Mock
     private org.springframework.transaction.support.TransactionTemplate transactionTemplate;
 
     private UserService userService;
@@ -56,7 +52,7 @@ class UserServiceTest {
         EpithetConfig epithetConfig = new EpithetConfig();
         userService = new UserService(userRepository, new RandomUsernameGenerator(epithetConfig),
                 new EpithetValidator(epithetConfig),
-                moderationAuditService, null, transactionTemplate);
+                null, null, transactionTemplate);
 
         testUser = TestDataFactory.unsavedUser(123L);
     }

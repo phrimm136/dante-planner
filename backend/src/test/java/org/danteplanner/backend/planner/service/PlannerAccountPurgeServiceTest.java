@@ -1,6 +1,5 @@
 package org.danteplanner.backend.planner.service;
 
-import org.danteplanner.backend.moderation.api.PlannerReportPurge;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerContentRepository;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
@@ -11,15 +10,19 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerViewRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.support.FakeReportPurge;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -40,9 +43,19 @@ class PlannerAccountPurgeServiceTest {
     @Mock private PlannerKeywordFilterRepository plannerKeywordFilterRepository;
     @Mock private PlannerViewRepository plannerViewRepository;
     @Mock private PlannerVoteRepository plannerVoteRepository;
-    @Mock private PlannerReportPurge plannerReportPurge;
 
-    @InjectMocks private PlannerAccountPurgeService purgeService;
+    private final List<Object> journal = new ArrayList<>();
+    private final FakeReportPurge plannerReportPurge = new FakeReportPurge(journal);
+
+    private PlannerAccountPurgeService purgeService;
+
+    @BeforeEach
+    void setUp() {
+        purgeService = new PlannerAccountPurgeService(plannerRepository, plannerContentRepository,
+                plannerPublicationRepository, plannerModerationRepository, plannerStatsRepository,
+                plannerCatalogRepository, plannerEntityFilterRepository, plannerKeywordFilterRepository,
+                plannerViewRepository, plannerVoteRepository, plannerReportPurge);
+    }
 
     @Test
     void reassignToSentinel_WhenSentinelAlreadyVoted_DeletesCollisionsFirst() {
@@ -81,14 +94,20 @@ class PlannerAccountPurgeServiceTest {
     void deleteOwnedData_WhenTheOwnerHasPlanners_DeletesReportsBeforeProjections() {
         List<UUID> owned = List.of(UUID.randomUUID());
         when(plannerRepository.findIdsByUserId(USER_ID)).thenReturn(owned);
+        doAnswer(invocation -> {
+            journal.add("views deleted");
+            return owned.size();
+        }).when(plannerViewRepository).deleteViewsByPlannerIds(owned);
+        doAnswer(invocation -> {
+            journal.add("content deleted");
+            return null;
+        }).when(plannerContentRepository).deleteAllByPlannerIds(owned);
 
         purgeService.deleteOwnedData(USER_ID);
 
         // Reports hold no-action FKs to the rows the sweep and the cascade remove, so they go first.
-        var inOrder = inOrder(plannerReportPurge, plannerViewRepository, plannerContentRepository);
-        inOrder.verify(plannerReportPurge).deleteReportsFor(owned);
-        inOrder.verify(plannerViewRepository).deleteViewsByPlannerIds(owned);
-        inOrder.verify(plannerContentRepository).deleteAllByPlannerIds(owned);
+        assertThat(journal).containsExactly(
+                new FakeReportPurge.DeleteReportsFor(owned), "views deleted", "content deleted");
     }
 
     @Test
@@ -97,6 +116,7 @@ class PlannerAccountPurgeServiceTest {
 
         purgeService.deleteOwnedData(USER_ID);
 
-        verifyNoInteractions(plannerReportPurge, plannerViewRepository, plannerContentRepository);
+        assertThat(plannerReportPurge.calls()).isEmpty();
+        verifyNoInteractions(plannerViewRepository, plannerContentRepository);
     }
 }

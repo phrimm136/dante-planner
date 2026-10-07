@@ -6,10 +6,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Covers trusted-proxy admission, header parsing, and the private-address fallback that keeps
@@ -37,15 +36,15 @@ class ClientIpResolverTest {
     }
 
     private static HttpServletRequest request(String remoteAddr, String xForwardedFor, String cfConnectingIp) {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getRemoteAddr()).thenReturn(remoteAddr);
-        lenientHeader(request, "X-Forwarded-For", xForwardedFor);
-        lenientHeader(request, "CF-Connecting-IP", cfConnectingIp);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRemoteAddr(remoteAddr);
+        if (xForwardedFor != null) {
+            request.addHeader("X-Forwarded-For", xForwardedFor);
+        }
+        if (cfConnectingIp != null) {
+            request.addHeader("CF-Connecting-IP", cfConnectingIp);
+        }
         return request;
-    }
-
-    private static void lenientHeader(HttpServletRequest request, String name, String value) {
-        when(request.getHeader(name)).thenReturn(value);
     }
 
     @Nested

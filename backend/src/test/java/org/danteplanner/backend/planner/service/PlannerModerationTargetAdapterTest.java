@@ -1,7 +1,7 @@
 package org.danteplanner.backend.planner.service;
 
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -10,28 +10,41 @@ import org.springframework.data.domain.Pageable;
 
 import org.danteplanner.backend.moderation.api.ModeratedPlanner;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
+import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
+import org.danteplanner.backend.support.RecordingTombstoneStore;
 import org.danteplanner.backend.support.TestDataFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PlannerModerationTargetAdapterTest {
 
     @Mock
-    private PlannerPublishingService plannerPublishingService;
+    private PlannerRepository plannerRepository;
 
     @Mock
-    private PlannerRepository plannerRepository;
+    private PlannerStatsRepository statsRepository;
+
+    @Mock
+    private PlannerCatalogRepository catalogRepository;
+
+    @Mock
+    private DomainEventRepository domainEventRepository;
 
     private PlannerModerationTargetAdapter adapter;
 
@@ -39,12 +52,24 @@ class PlannerModerationTargetAdapterTest {
 
     @BeforeEach
     void setUp() {
-        adapter = new PlannerModerationTargetAdapter(plannerPublishingService,
-                new PlannerAccessGuard(null, plannerRepository));
+        ObjectMapper objectMapper = new ObjectMapper();
+        PlannerAccessGuard accessGuard = new PlannerAccessGuard(null, plannerRepository);
+        PlannerCatalogService catalogService = new PlannerCatalogService(catalogRepository, plannerRepository,
+                statsRepository, new DomainEventRecorder(domainEventRepository, objectMapper, null), objectMapper,
+                new RecordingTombstoneStore(), 10);
+        PlannerPublishingService publishingService = new PlannerPublishingService(plannerRepository,
+                statsRepository, null, null, catalogService, null, accessGuard, null, null, null, null);
+        adapter = new PlannerModerationTargetAdapter(publishingService, accessGuard);
         planner = TestDataFactory.planner(TestDataFactory.unsavedUser(1L))
                 .title("Moderated Planner")
                 .published(true)
                 .build();
+        TransactionSynchronizationManager.initSynchronization();
+    }
+
+    @AfterEach
+    void clearSynchronization() {
+        TransactionSynchronizationManager.clearSynchronization();
     }
 
     @Test
@@ -81,20 +106,12 @@ class PlannerModerationTargetAdapterTest {
     }
 
     private void withdrawalAppliesTo(Planner target) {
-        when(plannerPublishingService.withdrawFromPublicView(eq(target.getId()), any()))
-                .thenAnswer(invocation -> {
-                    invocation.<PlannerPublishingService.Withdrawal>getArgument(1).apply(target);
-                    return target;
-                });
+        when(plannerRepository.findAggregate(target.getId())).thenReturn(Optional.of(target));
     }
 
     @Test
     void hideFromRecommended_WhenListingChanges_HidesWithTheModeratorAndReason() {
-        when(plannerPublishingService.changeRecommendedListing(eq(planner.getId()), any()))
-                .thenAnswer(invocation -> {
-                    invocation.<Consumer<Planner>>getArgument(1).accept(planner);
-                    return planner;
-                });
+        when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
 
         ModeratedPlanner result = adapter.hideFromRecommended(planner.getId(), 7L, "spam");
 
@@ -107,11 +124,7 @@ class PlannerModerationTargetAdapterTest {
     @Test
     void unhideFromRecommended_WhenListingChanges_ClearsTheHiddenState() {
         planner.hideFromRecommended(7L, "spam");
-        when(plannerPublishingService.changeRecommendedListing(eq(planner.getId()), any()))
-                .thenAnswer(invocation -> {
-                    invocation.<Consumer<Planner>>getArgument(1).accept(planner);
-                    return planner;
-                });
+        when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
 
         ModeratedPlanner result = adapter.unhideFromRecommended(planner.getId());
 
@@ -122,7 +135,7 @@ class PlannerModerationTargetAdapterTest {
     @Test
     void listHiddenFromRecommended_WhenPageHasPlanners_MapsEachPlanner() {
         Pageable pageable = PageRequest.of(0, 20);
-        when(plannerPublishingService.listHiddenFromRecommended(pageable))
+        when(plannerRepository.findHiddenFromRecommended(pageable))
                 .thenReturn(new PageImpl<>(List.of(planner), pageable, 1));
 
         Page<ModeratedPlanner> result = adapter.listHiddenFromRecommended(pageable);
@@ -133,7 +146,7 @@ class PlannerModerationTargetAdapterTest {
 
     @Test
     void upvoteCount_WhenDelegateCounts_ReturnsTheDelegateCount() {
-        when(plannerPublishingService.upvoteCount(planner.getId())).thenReturn(42);
+        when(statsRepository.upvotesOf(planner.getId())).thenReturn(42);
 
         assertThat(adapter.upvoteCount(planner.getId())).isEqualTo(42);
     }

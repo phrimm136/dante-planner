@@ -14,7 +14,6 @@ import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
-import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
@@ -58,9 +57,6 @@ class CategoryChangeFloorRulesTest {
     @Mock
     private PlannerStatsRepository statsRepository;
 
-    @Mock
-    private PlannerCatalogService plannerCatalogService;
-
     private final FakeUsers users = new FakeUsers();
 
     private final User owner = users.add(TestDataFactory.unsavedUser(1L));
@@ -79,7 +75,7 @@ class CategoryChangeFloorRulesTest {
                 statsRepository,
                 contentValidator,
                 null,
-                plannerCatalogService,
+                null,
                 new PlannerAccessGuard(users, plannerRepository),
                 new PlannerCategoryValidator(),
                 new PlannerLimitValidator(),

@@ -9,17 +9,27 @@ import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.entity.StoredPlannerContent;
+import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
-import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.precondition.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.precondition.PlannerLimitValidator;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator;
+import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
+import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
+import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
+import org.danteplanner.backend.support.RecordingTombstoneStore;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -28,16 +38,25 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.mock;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
 
+@ExtendWith(MockitoExtension.class)
 class PlannerDeleteRestrictionTest {
 
-    private final PlannerRepository plannerRepository = mock(PlannerRepository.class);
-    private final PlannerCatalogService catalogService = mock(PlannerCatalogService.class);
+    @Mock
+    private PlannerRepository plannerRepository;
+
+    @Mock
+    private PlannerCatalogRepository catalogRepository;
+
+    @Mock
+    private DomainEventRepository domainEventRepository;
+
     private final FakeUsers users = new FakeUsers();
+    private final RecordingTombstoneStore tombstoneStore = new RecordingTombstoneStore();
 
     private PlannerAccessGuard accessGuard;
     private PlannerCommandService commandService;
@@ -46,9 +65,12 @@ class PlannerDeleteRestrictionTest {
     @BeforeEach
     void setUp() {
         accessGuard = new PlannerAccessGuard(users, plannerRepository);
+        ObjectMapper objectMapper = new ObjectMapper();
+        PlannerCatalogService catalogService = new PlannerCatalogService(catalogRepository, plannerRepository, null,
+                new DomainEventRecorder(domainEventRepository, objectMapper, null), objectMapper, tombstoneStore, 10);
         commandService = new PlannerCommandService(
                 plannerRepository,
-                mock(PlannerStatsRepository.class),
+                null,
                 null,
                 null,
                 catalogService,
@@ -57,7 +79,7 @@ class PlannerDeleteRestrictionTest {
                 new PlannerLimitValidator(),
                 new PlannerOwnershipValidator(),
                 new SyncVersionValidator(),
-                new ObjectMapper(),
+                objectMapper,
                 100,
                 2);
         owner = users.add(TestDataFactory.unsavedUser(1L));
@@ -85,6 +107,24 @@ class PlannerDeleteRestrictionTest {
         when(plannerRepository.findAggregateForOwner(planner.getId(), owner.getId()))
                 .thenReturn(Optional.of(planner));
         return planner;
+    }
+
+    @AfterEach
+    void clearSynchronization() {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.clearSynchronization();
+        }
+    }
+
+    private void deleteAndCommit(Planner planner) {
+        TransactionSynchronizationManager.initSynchronization();
+        commandService.deletePlanner(owner.getId(), planner.getId());
+        TransactionSynchronizationManager.getSynchronizations().forEach(TransactionSynchronization::afterCommit);
+    }
+
+    private void assertWithdrawnFromTheCatalog(Planner planner) {
+        verify(catalogRepository).deleteById(planner.getId());
+        assertTrue(tombstoneStore.isTombstoned(ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, planner.getId()));
     }
 
     private void ban() {
@@ -115,11 +155,11 @@ class PlannerDeleteRestrictionTest {
         ban();
         Planner planner = ownedPlanner(true);
 
-        commandService.deletePlanner(owner.getId(), planner.getId());
+        deleteAndCommit(planner);
 
         assertFalse(planner.isPublished());
         assertNotNull(planner.getContent().getDeletedAt());
-        verify(catalogService).onBecameInvisible(planner.getId());
+        assertWithdrawnFromTheCatalog(planner);
     }
 
     @Test
@@ -127,11 +167,11 @@ class PlannerDeleteRestrictionTest {
         timeOut();
         Planner planner = ownedPlanner(true);
 
-        commandService.deletePlanner(owner.getId(), planner.getId());
+        deleteAndCommit(planner);
 
         assertFalse(planner.isPublished());
         assertNotNull(planner.getContent().getDeletedAt());
-        verify(catalogService).onBecameInvisible(planner.getId());
+        assertWithdrawnFromTheCatalog(planner);
     }
 
     @Test
@@ -139,7 +179,7 @@ class PlannerDeleteRestrictionTest {
         ban();
         Planner planner = ownedPlanner(false);
 
-        commandService.deletePlanner(owner.getId(), planner.getId());
+        deleteAndCommit(planner);
 
         assertNotNull(planner.getContent().getDeletedAt());
     }
@@ -148,10 +188,10 @@ class PlannerDeleteRestrictionTest {
     void deletePlanner_WhenOwnerUnrestricted_WithdrawsThePublishedPlanner() {
         Planner planner = ownedPlanner(true);
 
-        commandService.deletePlanner(owner.getId(), planner.getId());
+        deleteAndCommit(planner);
 
         assertFalse(planner.isPublished());
         assertNotNull(planner.getContent().getDeletedAt());
-        verify(catalogService).onBecameInvisible(planner.getId());
+        assertWithdrawnFromTheCatalog(planner);
     }
 }

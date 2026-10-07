@@ -5,6 +5,9 @@ import org.apache.catalina.connector.ClientAbortException;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -16,7 +19,6 @@ import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,7 +32,11 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * told so: an uncommitted response carries the standard error envelope under 500, while a
  * committed one can only be marked handled.
  */
+@ExtendWith(MockitoExtension.class)
 class ApiExceptionHandlerIoFailureTest {
+
+    @Mock
+    private HttpServletResponse response;
 
     private MockMvc mockMvc;
 
@@ -58,7 +64,6 @@ class ApiExceptionHandlerIoFailureTest {
 
     @Test
     void unexpectedIoFailure_WhenResponseCommitted_WritesNothing() throws Exception {
-        HttpServletResponse response = mock(HttpServletResponse.class);
         when(response.isCommitted()).thenReturn(true);
 
         assertThat(handler().handleIOException(new IOException("No space left on device"), response, webRequest())).isNull();
@@ -68,7 +73,6 @@ class ApiExceptionHandlerIoFailureTest {
 
     @Test
     void clientDisconnect_WhenSeen_IsHandledWithoutABody() {
-        HttpServletResponse response = mock(HttpServletResponse.class);
 
         assertThat(handler().handleIOException(new ClientAbortException(), response, webRequest())).isNull();
         verify(response, never()).isCommitted();

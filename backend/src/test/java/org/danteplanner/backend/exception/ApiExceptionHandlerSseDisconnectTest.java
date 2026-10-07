@@ -1,10 +1,10 @@
 package org.danteplanner.backend.exception;
 
 import io.sentry.Sentry;
-import jakarta.servlet.http.HttpServletResponse;
 import org.apache.catalina.connector.ClientAbortException;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -12,7 +12,6 @@ import org.mockito.MockedStatic;
 import java.io.IOException;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 
@@ -55,7 +54,7 @@ class ApiExceptionHandlerSseDisconnectTest {
 
     private static void handle(IOException ex) {
         new ApiExceptionHandler()
-                .handleIOException(ex, mock(HttpServletResponse.class), webRequest());
+                .handleIOException(ex, new MockHttpServletResponse(), webRequest());
     }
 
     private static ServletWebRequest webRequest() {

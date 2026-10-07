@@ -1,12 +1,10 @@
 package org.danteplanner.backend.service;
 
-import java.nio.charset.StandardCharsets;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -14,25 +12,14 @@ import org.danteplanner.backend.shared.ratelimit.RateLimitProperties;
 import org.danteplanner.backend.shared.ratelimit.RateLimitExceededException;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.shared.ratelimit.RateLimitService;
+import org.danteplanner.backend.support.InMemoryProxyManager;
 
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
-import org.mockito.ArgumentCaptor;
-
-import io.github.bucket4j.BucketConfiguration;
-import io.github.bucket4j.ConsumptionProbe;
-import io.github.bucket4j.distributed.BucketProxy;
-import io.github.bucket4j.distributed.proxy.ProxyManager;
-import io.github.bucket4j.distributed.proxy.RemoteBucketBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Freezes what a live production bucket is called and which configured bucket it draws from.
@@ -40,7 +27,7 @@ import static org.mockito.Mockito.when;
  * <p>A bucket's state lives in Redis under its key, so respelling a key hands every currently
  * limited caller a full allowance — an invisible outage of the limit itself. Drawing from the
  * wrong configured bucket silently retunes a limit the same way. Both are pinned here per
- * {@link RateLimitPolicy}, against a bucket4j {@link ProxyManager} double that records the key
+ * {@link RateLimitPolicy}, against an in-memory bucket4j proxy manager that records the key
  * and configuration the service asks for.</p>
  *
  * <p>The row set is checked against {@link RateLimitPolicy#values()}, so a policy added without
@@ -106,14 +93,17 @@ class RateLimitKeyFormatTest {
     @TestFactory
     Stream<DynamicTest> policy_WhenCharged_ConsumesFrozenBucketKey() {
         return FROZEN_KEYS.stream().map(frozen -> DynamicTest.dynamicTest(frozen.policy().name(), () -> {
-            BucketRecorder allowing = new BucketRecorder(true);
-            frozen.charge().accept(new RateLimitService(allowing.proxyManager, properties()));
+            InMemoryProxyManager allowing = new InMemoryProxyManager();
+            frozen.charge().accept(new RateLimitService(allowing, properties()));
 
-            assertThat(allowing.consumedKey()).isEqualTo(frozen.key());
-            assertThat(allowing.consumedCapacity()).isEqualTo(frozen.capacity());
+            assertThat(allowing.charges()).singleElement().satisfies(charge -> {
+                assertThat(charge.key()).isEqualTo(frozen.key());
+                assertThat(charge.configuration().getBandwidths()[0].getCapacity()).isEqualTo(frozen.capacity());
+            });
 
-            BucketRecorder refusing = new BucketRecorder(false);
-            RateLimitService refused = new RateLimitService(refusing.proxyManager, properties());
+            InMemoryProxyManager refusing = new InMemoryProxyManager();
+            refusing.denyNext(1);
+            RateLimitService refused = new RateLimitService(refusing, properties());
 
             assertThatThrownBy(() -> frozen.charge().accept(refused))
                     .isInstanceOf(RateLimitExceededException.class)
@@ -171,43 +161,5 @@ class RateLimitKeyFormatTest {
         config.setRefillTokens((int) capacity);
         config.setRefillDurationSeconds(60);
         return config;
-    }
-
-    /**
-     * Stands in for the bucket4j proxy manager — a third-party boundary — and records the key
-     * bytes and bucket configuration the service asked it to build.
-     */
-    private static final class BucketRecorder {
-
-        private final ProxyManager<byte[]> proxyManager;
-        private final RemoteBucketBuilder<byte[]> builder;
-
-        @SuppressWarnings("unchecked")
-        private BucketRecorder(boolean allow) {
-            proxyManager = mock(ProxyManager.class);
-            builder = mock(RemoteBucketBuilder.class);
-            BucketProxy bucketProxy = mock(BucketProxy.class);
-            when(proxyManager.builder()).thenReturn(builder);
-            when(builder.withImplicitConfigurationReplacement(anyLong(), any())).thenReturn(builder);
-            when(builder.build(any(byte[].class), any(Supplier.class))).thenReturn(bucketProxy);
-            when(bucketProxy.tryConsumeAndReturnRemaining(anyLong())).thenReturn(allow
-                    ? ConsumptionProbe.consumed(1, 0)
-                    : ConsumptionProbe.rejected(0, 1, 1));
-        }
-
-        @SuppressWarnings("unchecked")
-        private String consumedKey() {
-            ArgumentCaptor<byte[]> key = ArgumentCaptor.forClass(byte[].class);
-            verify(builder).build(key.capture(), any(Supplier.class));
-            return new String(key.getValue(), StandardCharsets.UTF_8);
-        }
-
-        @SuppressWarnings("unchecked")
-        private long consumedCapacity() {
-            ArgumentCaptor<Supplier<BucketConfiguration>> configuration =
-                    ArgumentCaptor.forClass(Supplier.class);
-            verify(builder).build(any(byte[].class), configuration.capture());
-            return configuration.getValue().get().getBandwidths()[0].getCapacity();
-        }
     }
 }

@@ -2,6 +2,7 @@ package org.danteplanner.backend.auth.token;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.support.TestJwt;
 import org.danteplanner.backend.integration.SharedRedisContainerSupport;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -31,14 +32,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.danteplanner.backend.user.api.UserRole;
 
-import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for {@link RefreshRotationService}.
@@ -324,9 +319,8 @@ class RefreshRotationServiceIT {
 
         @Test
         void rotate_WhenAccessTokenClaims_RejectedAndFamilyUntouched() {
-            JwtTokenService generatorSpy = spy(tokenService);
             RefreshRotationService svc = new RefreshRotationService(
-                    sharedTemplate, tokenService, generatorSpy, jwtProperties, meterRegistry,
+                    sharedTemplate, tokenService, tokenService, jwtProperties, meterRegistry,
                     true, RETRY_REUSE_WINDOW_MS);
             String accessToken = tokenService.generateAccessToken(USER_ID, UserRole.NORMAL);
 
@@ -335,9 +329,9 @@ class RefreshRotationServiceIT {
             assertInstanceOf(RotationResult.Rejected.class, result);
             assertEquals(RotationResult.Rejected.Reason.INVALID,
                     ((RotationResult.Rejected) result).reason());
-            verify(generatorSpy, never()).generateRefreshToken(any(), any(), any());
-            verify(generatorSpy, never()).generateRefreshToken(any());
             assertEquals(0, svc.rotationStateSize());
+            assertEquals(0.0, outcomeCount(RefreshRotationService.OUTCOME_ROTATED));
+            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_REJECTED_INVALID));
         }
     }
 
@@ -476,28 +470,19 @@ class RefreshRotationServiceIT {
     @Nested
     class LegacyAdmission {
 
-        private static final String LEGACY_TOKEN = "legacy.refresh.jwt";
+        private final TestJwt legacyIssuer = new TestJwt();
 
-        private TokenClaims legacyClaims(Date issuedAt) {
-            return new TokenClaims(
-                    USER_ID, TokenClaims.TYPE_REFRESH, UserRole.NORMAL,
-                    issuedAt, new Date(issuedAt.getTime() + REFRESH_TOKEN_EXPIRY));
-        }
-
-        private RefreshRotationService serviceWith(TokenValidator validator, boolean legacyAdmit) {
+        private RefreshRotationService serviceWith(boolean legacyAdmit) {
             return new RefreshRotationService(
-                    sharedTemplate, validator, tokenService, jwtProperties, meterRegistry,
+                    sharedTemplate, legacyIssuer.service(), legacyIssuer.service(), jwtProperties, meterRegistry,
                     legacyAdmit, RETRY_REUSE_WINDOW_MS);
         }
 
         @Test
         void rotate_WhenLegacyAdmitOn_AdmitsAndRotates() {
-            JwtTokenService validator = spy(tokenService);
-            doReturn(legacyClaims(new Date())).when(validator).validateToken(LEGACY_TOKEN);
-            doReturn(legacyClaims(new Date())).when(validator).validateRefreshToken(LEGACY_TOKEN);
-            RefreshRotationService svc = serviceWith(validator, true);
+            RefreshRotationService svc = serviceWith(true);
 
-            RotationResult result = svc.rotate(LEGACY_TOKEN);
+            RotationResult result = svc.rotate(legacyIssuer.legacyRefreshToken(USER_ID));
 
             assertInstanceOf(RotationResult.Rotated.class, result);
             RotationResult.Rotated rotated = (RotationResult.Rotated) result;
@@ -509,12 +494,9 @@ class RefreshRotationServiceIT {
 
         @Test
         void rotate_WhenLegacyAdmitOff_Rejects() {
-            JwtTokenService validator = spy(tokenService);
-            doReturn(legacyClaims(new Date())).when(validator).validateToken(LEGACY_TOKEN);
-            doReturn(legacyClaims(new Date())).when(validator).validateRefreshToken(LEGACY_TOKEN);
-            RefreshRotationService svc = serviceWith(validator, false);
+            RefreshRotationService svc = serviceWith(false);
 
-            RotationResult result = svc.rotate(LEGACY_TOKEN);
+            RotationResult result = svc.rotate(legacyIssuer.legacyRefreshToken(USER_ID));
 
             assertInstanceOf(RotationResult.Rejected.class, result);
             assertEquals(RotationResult.Rejected.Reason.INVALID,
@@ -525,14 +507,11 @@ class RefreshRotationServiceIT {
 
         @Test
         void rotate_WhenSameLegacyTokenTwice_DeterministicFamily() {
-            Date issuedAt = new Date();
-            JwtTokenService validator = spy(tokenService);
-            doReturn(legacyClaims(issuedAt)).when(validator).validateToken(LEGACY_TOKEN);
-            doReturn(legacyClaims(issuedAt)).when(validator).validateRefreshToken(LEGACY_TOKEN);
-            RefreshRotationService svc = serviceWith(validator, true);
+            String legacyToken = legacyIssuer.legacyRefreshToken(USER_ID);
+            RefreshRotationService svc = serviceWith(true);
 
-            RotationResult.Rotated first = (RotationResult.Rotated) svc.rotate(LEGACY_TOKEN);
-            RotationResult.Rotated second = (RotationResult.Rotated) svc.rotate(LEGACY_TOKEN);
+            RotationResult.Rotated first = (RotationResult.Rotated) svc.rotate(legacyToken);
+            RotationResult.Rotated second = (RotationResult.Rotated) svc.rotate(legacyToken);
 
             assertEquals(first.claims().familyId(), second.claims().familyId());
             assertEquals(first.claims().jti(), second.claims().jti());

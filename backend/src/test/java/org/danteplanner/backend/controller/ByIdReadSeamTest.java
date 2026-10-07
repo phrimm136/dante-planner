@@ -1,101 +1,117 @@
 package org.danteplanner.backend.controller;
 
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.danteplanner.backend.planner.controller.PlannerQueryController;
 import org.danteplanner.backend.planner.controller.PublishedPlannerController;
-import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
+import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerQueryService;
+import org.danteplanner.backend.planner.service.PlannerViewRecorder;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
-import org.danteplanner.backend.shared.ratelimit.RateLimitService;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
+import org.danteplanner.backend.shared.readpath.PrimaryReCheck;
+import org.danteplanner.backend.support.RecordingTombstoneStore;
+import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.user.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletResponse;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 /**
  * Proves both byId GET endpoints route their service dereference through
- * {@link ByIdReadGuard}. The guard is a real pass-through wrapped in a spy, so the
- * supplier still executes (service value flows through) while invocation is verifiable.
+ * {@link ByIdReadGuard}: a tombstoned id is masked even though the service still finds it.
  */
 @ExtendWith(MockitoExtension.class)
 class ByIdReadSeamTest {
 
-    @Spy
-    ByIdReadGuard byIdReadGuard = new ByIdReadGuard();
+    @Mock
+    PlannerRepository plannerRepository;
 
     @Mock
-    PlannerQueryService plannerQueryService;
+    PlannerStatsRepository plannerStatsRepository;
 
-    @Mock
-    RateLimitService rateLimitService;
+    private final RecordingTombstoneStore tombstoneStore = new RecordingTombstoneStore();
+    private final User owner = TestDataFactory.unsavedUser(42L);
+    private final UUID id = UUID.randomUUID();
 
-    @Mock
-    PublishedPlannerQueryService publishedPlannerQueryService;
-
-    @Mock
-    HttpServletRequest request;
-
-    @InjectMocks
     PlannerQueryController plannerQueryController;
 
     PublishedPlannerController publishedPlannerController;
 
+    PublishedPlannerQueryService publishedPlannerQueryService;
+
+    SecurityProperties securityProperties;
+
     @BeforeEach
     void setUp() {
-        SecurityProperties securityProperties = new SecurityProperties();
+        ByIdReadGuard byIdReadGuard = new ByIdReadGuard(
+                Optional.of(new PrimaryReCheck(new SimpleMeterRegistry(), tombstoneStore)));
+        PlannerAccessGuard accessGuard = new PlannerAccessGuard(null, plannerRepository);
+        plannerQueryController = new PlannerQueryController(
+                new PlannerQueryService(plannerRepository, accessGuard), byIdReadGuard);
+        securityProperties = new SecurityProperties();
         securityProperties.parseTrustedProxyIps();
+        publishedPlannerQueryService = new PublishedPlannerQueryService(
+                null, null, null, null, null, new PlannerViewRecorder(null, null), null, plannerStatsRepository,
+                accessGuard, null);
         publishedPlannerController = new PublishedPlannerController(
                 publishedPlannerQueryService, securityProperties, byIdReadGuard, null);
+        tombstoneStore.writeTombstone(ByIdReadGuard.PLANNER_ENTITY_TYPE, id);
     }
 
     @Test
-    void getPlanner_WhenInvoked_RoutesThroughByIdReadGuard() {
-        Long userId = 42L;
-        UUID id = UUID.randomUUID();
-        PlannerResponse expected = mock(PlannerResponse.class);
-        when(plannerQueryService.getPlanner(userId, id)).thenReturn(expected);
+    void getPlanner_WhenTheServiceFindsATombstonedId_IsMaskedByTheByIdReadGuard() {
+        Planner planner = TestDataFactory.planner(owner).id(id).build();
+        when(plannerRepository.findAggregateForOwner(id, owner.getId())).thenReturn(Optional.of(planner));
 
-        ResponseEntity<PlannerResponse> result = plannerQueryController.getPlanner(userId, id);
-
-        assertThat(result.getBody()).isSameAs(expected);
-        verify(byIdReadGuard).read(eq("planner"), eq(id), any());
+        assertRejected(() -> plannerQueryController.getPlanner(owner.getId(), id)).withCode("NOT_FOUND");
     }
 
     @Test
-    void getPublishedPlanner_WhenInvoked_RoutesThroughByIdReadGuard() {
-        Long userId = 42L;
-        UUID id = UUID.randomUUID();
-        PublishedPlannerDetailResponse expected = mock(PublishedPlannerDetailResponse.class);
-        when(request.getRemoteAddr()).thenReturn("1.2.3.4");
-        when(request.getHeader("User-Agent")).thenReturn("agent");
-        // No edge in front of this seam, so the viewer identity falls through to the peer address.
-        when(request.getHeader("CF-Connecting-IP")).thenReturn(null);
-        when(publishedPlannerQueryService.getPublishedPlanner(eq(id), eq(userId), anyString(), any()))
-                .thenReturn(expected);
+    void getPublishedPlanner_WhenTheServiceFindsATombstonedId_IsMaskedByTheByIdReadGuard() {
+        Planner planner = TestDataFactory.planner(owner).id(id).published(true).build();
+        when(plannerRepository.findPublishedAggregate(id))
+                .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(owner))));
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRemoteAddr("1.2.3.4");
+        request.addHeader("User-Agent", "agent");
+
+        assertRejected(() -> publishedPlannerController.getPublishedPlanner(
+                request, new MockHttpServletResponse(), id, null)).withCode("NOT_FOUND");
+    }
+
+    @Test
+    void getPublishedPlanner_WhenTheGuardHasNoReCheck_ServesTheServiceRead() {
+        Planner planner = TestDataFactory.planner(owner).id(id).published(true).build();
+        when(plannerRepository.findPublishedAggregate(id))
+                .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(owner))));
+        PublishedPlannerController withoutReCheck = new PublishedPlannerController(
+                publishedPlannerQueryService, securityProperties, new ByIdReadGuard(), null);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRemoteAddr("1.2.3.4");
 
         ResponseEntity<PublishedPlannerDetailResponse> result =
-                publishedPlannerController.getPublishedPlanner(request, mock(HttpServletResponse.class), id, userId);
+                withoutReCheck.getPublishedPlanner(request, new MockHttpServletResponse(), id, null);
 
-        assertThat(result.getBody()).isSameAs(expected);
-        verify(byIdReadGuard).read(eq("planner"), eq(id), any());
+        assertThat(result.getBody()).isNotNull();
+        assertThat(result.getBody().id()).isEqualTo(id);
     }
 }

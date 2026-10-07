@@ -24,7 +24,15 @@ import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
+import org.danteplanner.backend.planner.entity.PlannerCatalog;
+import org.danteplanner.backend.planner.entity.PlannerSubscription;
+import org.danteplanner.backend.planner.precondition.ContentVersionValidator;
+import org.danteplanner.backend.planner.precondition.PlannerLimitValidator;
+import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
+import org.danteplanner.backend.planner.sync.SyncVersionValidator;
+import org.danteplanner.backend.support.RecordingTombstoneStore;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
@@ -33,6 +41,7 @@ import org.danteplanner.backend.planner.gamedata.GameDataLoader;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.TestDataFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -40,10 +49,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -56,11 +64,11 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
@@ -68,9 +76,14 @@ import static org.danteplanner.backend.support.Rejections.assertRejected;
 /**
  * Unit tests for PlannerPublishingService (publish toggle, owner notification settings).
  */
-@ExtendWith(SpringExtension.class)
-@TestPropertySource(locations = "classpath:application-test.properties")
+@ExtendWith(MockitoExtension.class)
 class PlannerPublishingServiceTest {
+
+    private static final int MAX_PLANNERS_PER_USER = 100;
+
+    private static final int RECOMMENDED_THRESHOLD = 10;
+
+    private static final int CURRENT_SCHEMA_VERSION = 2;
 
     @Mock
     private PlannerRepository plannerRepository;
@@ -79,16 +92,16 @@ class PlannerPublishingServiceTest {
     private PlannerStatsRepository plannerStatsRepository;
 
     @Mock
-    private PlannerCommandService plannerCommandService;
+    private PlannerCatalogRepository catalogRepository;
 
     @Mock
-    private PlannerCatalogService plannerCatalogService;
-
-    @Mock
-    private PlannerSubscriptionService subscriptionService;
+    private PlannerSubscriptionRepository subscriptionRepository;
 
     @Mock
     private DomainEventRepository domainEventRepository;
+
+    @Mock
+    private DomainEventRepository catalogEventRepository;
 
     private final FakeUsers users = new FakeUsers();
 
@@ -98,27 +111,54 @@ class PlannerPublishingServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        when(domainEventRepository.insert(any(DomainEvent.class))).thenAnswer(invocation -> {
-            DomainEvent row = invocation.getArgument(0);
-            ReflectionTestUtils.setField(row, "id", 1L);
-            return row;
-        });
+        TransactionSynchronizationManager.initSynchronization();
 
         publishingService = publishingServiceWith(TestDataFactory.contentValidator());
 
         testUser = users.add(TestDataFactory.unsavedUser(1L));
     }
 
+    @AfterEach
+    void clearSynchronization() {
+        TransactionSynchronizationManager.clearSynchronization();
+    }
+
+    private void publishedEventsPersist() {
+        when(domainEventRepository.insert(any(DomainEvent.class))).thenAnswer(invocation -> {
+            DomainEvent row = invocation.getArgument(0);
+            ReflectionTestUtils.setField(row, "id", 1L);
+            return row;
+        });
+    }
+
     private PlannerPublishingService publishingServiceWith(PlannerContentValidator contentValidator) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        PlannerAccessGuard accessGuard = new PlannerAccessGuard(users, plannerRepository);
+        PlannerCatalogService catalogService = new PlannerCatalogService(catalogRepository, plannerRepository,
+                plannerStatsRepository, new DomainEventRecorder(catalogEventRepository, objectMapper, null),
+                objectMapper, new RecordingTombstoneStore(), RECOMMENDED_THRESHOLD);
+        PlannerCommandService commandService = new PlannerCommandService(
+                plannerRepository,
+                plannerStatsRepository,
+                contentValidator,
+                new ContentVersionValidator(TestDataFactory.gameDataRegistry()),
+                catalogService,
+                accessGuard,
+                new PlannerCategoryValidator(),
+                new PlannerLimitValidator(),
+                new PlannerOwnershipValidator(),
+                new SyncVersionValidator(),
+                objectMapper,
+                MAX_PLANNERS_PER_USER,
+                CURRENT_SCHEMA_VERSION);
         return new PlannerPublishingService(
                 plannerRepository,
                 plannerStatsRepository,
-                plannerCommandService,
+                commandService,
                 contentValidator,
-                plannerCatalogService,
-                subscriptionService,
-                new PlannerAccessGuard(users, plannerRepository),
+                catalogService,
+                new PlannerSubscriptionService(subscriptionRepository, accessGuard),
+                accessGuard,
                 new PlannerOwnershipValidator(),
                 new PlannerPublishValidator(),
                 new PlannerCategoryValidator(),
@@ -141,13 +181,14 @@ class PlannerPublishingServiceTest {
         void publishIdempotentStateTargeted_WhenSentTwice_StaysPublished() {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            publishedEventsPersist();
 
             PlannerResponse first = publishingService.publish(testUser.getId(), planner.getId());
             PlannerResponse second = publishingService.publish(testUser.getId(), planner.getId());
 
             assertTrue(first.published());
             assertTrue(second.published(), "a repeated publish must not flip the planner back");
-            verify(plannerCatalogService, times(1)).onBecameVisible(any());
+            verify(catalogRepository, times(1)).insert(any(PlannerCatalog.class));
         }
 
         @Test
@@ -158,7 +199,7 @@ class PlannerPublishingServiceTest {
             PlannerResponse result = publishingService.unpublish(testUser.getId(), planner.getId());
 
             assertFalse(result.published());
-            verify(plannerCatalogService, never()).onBecameInvisible(any());
+            verify(catalogRepository, never()).deleteById(any());
         }
     }
 
@@ -190,9 +231,12 @@ class PlannerPublishingServiceTest {
                     "\"observationGiftIds\":[]", "\"observationGiftIds\":[\"19247\"]");
             Planner planner = testPlannerBuilder().published(false).content(stored).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            publishedEventsPersist();
             List<String> indexedContent = new ArrayList<>();
-            doAnswer(invocation -> indexedContent.add(((Planner) invocation.getArgument(0)).getContentJson()))
-                    .when(plannerCatalogService).onBecameVisible(any());
+            doAnswer(invocation -> {
+                indexedContent.add(planner.getContentJson());
+                return null;
+            }).when(catalogRepository).insert(any(PlannerCatalog.class));
 
             publishingServiceWith(renaming).publish(testUser.getId(), planner.getId());
 
@@ -210,6 +254,7 @@ class PlannerPublishingServiceTest {
         void applyPublish_WhenFirstPublish_RecordsTheEventInsteadOfAnnouncing() {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            publishedEventsPersist();
 
             publishingService.publish(testUser.getId(), planner.getId());
 
@@ -225,6 +270,7 @@ class PlannerPublishingServiceTest {
         void applyPublish_WhenAlreadyPublished_RecordsNothing() {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            publishedEventsPersist();
             publishingService.publish(testUser.getId(), planner.getId());
             clearInvocations(domainEventRepository);
 
@@ -256,7 +302,7 @@ class PlannerPublishingServiceTest {
                     planner.getId(), Planner::unpublish);
 
             assertSame(planner, result);
-            verify(plannerCatalogService, never()).onBecameInvisible(any());
+            verify(catalogRepository, never()).deleteById(any());
         }
 
         @Test
@@ -269,7 +315,7 @@ class PlannerPublishingServiceTest {
 
             assertSame(planner, result);
             assertFalse(result.isPublished());
-            verify(plannerCatalogService).onBecameInvisible(planner.getId());
+            verify(catalogRepository).deleteById(planner.getId());
         }
 
         @Test
@@ -291,25 +337,20 @@ class PlannerPublishingServiceTest {
         void publishLoadsAggregateOnce_WhenContentCarried_ReusesUpsertedAggregate() {
             Planner planner = testPlannerBuilder().published(false).build();
             UpsertPlannerRequest request = new UpsertPlannerRequest(
-                    planner.getId().toString(), "5F", "Reused Aggregate", null, "{}", 1,
-                    PlannerType.MIRROR_DUNGEON, null, null);
+                    planner.getId().toString(), "5F", "Reused Aggregate", null, planner.getContentJson(),
+                    planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), null);
 
             UUID deviceId = UUID.randomUUID();
-            when(plannerCommandService.upsertAggregate(
-                    testUser.getId(), deviceId, planner.getId(), request, false))
-                    .thenReturn(new PlannerCommandService.UpsertedPlanner(
-                            planner, PlannerResponse.fromEntity(planner), false));
-            // Decoys: a reload by either route would succeed and stay silent, so the prohibitions
-            // below fail on the reload itself rather than on a null downstream.
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
-            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            publishedEventsPersist();
 
             PlannerResponse result = publishingService.publish(
                     testUser.getId(), deviceId, planner.getId(), request);
 
             assertTrue(result.published());
-            verify(plannerRepository, never()).findAggregateForOwner(any(), any());
+            assertEquals("Reused Aggregate", result.title());
+            verify(plannerRepository, times(1)).findAggregateForOwner(any(), any());
             verify(plannerRepository, never()).findAggregate(any());
         }
     }
@@ -323,6 +364,7 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().published(false).build();
 
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            publishedEventsPersist();
 
             // Act
             PlannerResponse result = publishingService.publish(testUser.getId(), planner.getId());
@@ -404,6 +446,7 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().published(false).build();
 
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            publishedEventsPersist();
 
             // Act
             PlannerResponse result = publishingService.publish(testUser.getId(), planner.getId());
@@ -412,7 +455,10 @@ class PlannerPublishingServiceTest {
             assertTrue(result.published());
             // The subscription is a row in another aggregate and never reaches this response;
             // asserting it as state needs a containerized test with a real subscription repository.
-            verify(subscriptionService).createSubscription(testUser.getId(), planner.getId());
+            ArgumentCaptor<PlannerSubscription> subscription = ArgumentCaptor.forClass(PlannerSubscription.class);
+            verify(subscriptionRepository).insert(subscription.capture());
+            assertEquals(testUser.getId(), subscription.getValue().getUserId());
+            assertEquals(planner.getId(), subscription.getValue().getPlannerId());
         }
 
         @Test
@@ -427,7 +473,7 @@ class PlannerPublishingServiceTest {
 
             // Assert
             assertFalse(result.published());
-            verify(subscriptionService, never()).createSubscription(any(), any());
+            verify(subscriptionRepository, never()).insert(any());
         }
     }
 
@@ -444,7 +490,7 @@ class PlannerPublishingServiceTest {
 
             // Act & Assert
             assertRejected(() -> publishingService.publish(testUser.getId(), plannerId)).withCode("USER_BANNED");
-            verify(plannerCatalogService, never()).onBecameVisible(any());
+            verify(catalogRepository, never()).insert(any());
         }
 
         @Test
@@ -457,7 +503,7 @@ class PlannerPublishingServiceTest {
             PlannerResponse result = publishingService.unpublish(testUser.getId(), planner.getId());
 
             assertFalse(result.published());
-            verify(plannerCatalogService).onBecameInvisible(planner.getId());
+            verify(catalogRepository).deleteById(planner.getId());
         }
     }
 
@@ -522,7 +568,8 @@ class PlannerPublishingServiceTest {
         @Test
         void publishValidatesBeforeMutating_WhenBodyTitleBlankAndVersionUnknown_RefusesTitleWithoutWrite() {
             Planner planner = testPlannerBuilder().title("Stored Title").published(false).build();
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+            long syncVersionBefore = planner.getSyncVersion();
+            lenient().when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             UpsertPlannerRequest request = new UpsertPlannerRequest(
                     planner.getId().toString(), "5F", "  ", null, "{}", 99,
@@ -533,13 +580,15 @@ class PlannerPublishingServiceTest {
                     () -> publishingService.publish(testUser.getId(), UUID.randomUUID(), planner.getId(), request));
 
             assertEquals("MISSING_TITLE", thrown.getOriginalCode());
-            verifyNoInteractions(plannerCommandService);
+            assertEquals(syncVersionBefore, planner.getSyncVersion());
+            assertEquals("Stored Title", planner.getTitle());
             assertFalse(planner.isPublished());
         }
 
         @Test
         void publishValidatesBeforeMutating_WhenBodyTitleAbsentAndStoredBlank_RefusesTitleWithoutWrite() {
             Planner planner = testPlannerBuilder().title("   ").published(false).build();
+            long syncVersionBefore = planner.getSyncVersion();
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             UpsertPlannerRequest request = new UpsertPlannerRequest(
@@ -551,7 +600,7 @@ class PlannerPublishingServiceTest {
                     () -> publishingService.publish(testUser.getId(), UUID.randomUUID(), planner.getId(), request));
 
             assertEquals("MISSING_TITLE", thrown.getOriginalCode());
-            verifyNoInteractions(plannerCommandService);
+            assertEquals(syncVersionBefore, planner.getSyncVersion());
         }
 
         @Test
@@ -560,13 +609,10 @@ class PlannerPublishingServiceTest {
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             UpsertPlannerRequest request = new UpsertPlannerRequest(
-                    planner.getId().toString(), "5F", null, null, "{}", 1,
-                    PlannerType.MIRROR_DUNGEON, null, null);
+                    planner.getId().toString(), "5F", null, null, planner.getContentJson(),
+                    planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), null);
             UUID deviceId = UUID.randomUUID();
-            when(plannerCommandService.upsertAggregate(
-                    testUser.getId(), deviceId, planner.getId(), request, false))
-                    .thenReturn(new PlannerCommandService.UpsertedPlanner(
-                            planner, PlannerResponse.fromEntity(planner), false));
+            publishedEventsPersist();
 
             PlannerResponse result = publishingService.publish(
                     testUser.getId(), deviceId, planner.getId(), request);
@@ -584,7 +630,7 @@ class PlannerPublishingServiceTest {
 
             assertFalse(planner.isPublished());
             assertNull(planner.getFirstPublishedAt());
-            verify(plannerCatalogService, never()).onBecameVisible(any());
+            verify(catalogRepository, never()).insert(any());
         }
     }
 }

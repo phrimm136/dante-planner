@@ -1,5 +1,5 @@
 # 171 tests-keep-class-concurrency-and-enforce-isolation-by-rule
-epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @mocks @memory @isolation @transactions @contexts
+epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @mocks @memory @isolation @transactions @contexts @fakes
 
 ## Decisions
 - @tests @concurrency — Backend test classes keep running concurrently inside the test JVM, twelve
@@ -126,6 +126,27 @@ epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @
   INVARIANT: no `@MockitoBean`, `@MockitoSpyBean` or Boot's `@MockBean`/`@SpyBean`, directly or
   through a meta-annotation, in the test tree — the mock-bean rule (`MockBeanRule`, checked by
   `TestMockBeanConventionTest`).
+- @tests @mocks @fakes — A unit test mocks only infrastructure ports: Spring Data repositories, Redis,
+  JDBC, the clock, the Servlet API, outbound HTTP and types outside the codebase. A collaborator
+  inside the codebase is a real object, or a fake in `support` whose behaviour a contract test pins:
+  the same scenarios run against the fake and, in an integration test, against the real
+  implementation. Mocks are fields under `MockitoExtension`, never `mock(...)` calls, and an argument
+  a test never reaches is `null`. A test whose subject leans on a heavy collaborator moves to the
+  integration tier, unless it kills mutants in the mutation-testing target set: mutation testing
+  runs unit tests only, so such a test stays in the unit tier with the heavy collaborator real and
+  its ports mocked. A mocked collaborator restated its behaviour in every test that used it (the user
+  lookup was mocked at 22 sites), a validator stub invented an error code the real validator never
+  raises, and unused strict stubs were the only thing killing some mutants.
+  REJECTED: mocking interfaces as contracts — the interface fixes signatures, not behaviour, so each
+  test still invents the behaviour it stubs.
+  REJECTED: in-memory fakes or an embedded database for the repositories — the queries lean on
+  MySQL (native SQL, collation, gap locks, FULLTEXT), so either would re-implement or diverge from
+  what the repository integration tests already prove.
+  INVARIANT: no `@Mock`/`@Spy` of a type in `org.danteplanner` other than a Spring Data repository,
+  mocks only through `MockitoExtension`, and no other Mockito factory (`mock`, `spy`, `mockStatic`,
+  `mockConstruction`, through `Mockito` or `BDDMockito`) in test sources, except a static mock of a
+  named third-party API with no injectable seam (Sentry) — the mock-port rule (`MockPortRule`) and
+  the ast-grep rule `no-mock-call`.
 
 ## Takeaway
 - takeaway: when concurrency in a test suite exposes shared state, close each hazard with a rule

@@ -10,12 +10,14 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
@@ -23,6 +25,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
  * Null-boundary behavior of {@link TokenBlacklistService}, over mocked Redis templates so the
  * contract is observable as the commands issued rather than as Redis state.
  */
+@ExtendWith(MockitoExtension.class)
 class TokenBlacklistServiceTest {
 
     /**
@@ -31,14 +34,16 @@ class TokenBlacklistServiceTest {
      */
     private static final String IMMEDIATE_MARKER = "1:";
 
+    @Mock
     private StringRedisTemplate writeTemplate;
+
+    @Mock
     private StringRedisTemplate readTemplate;
+
     private TokenBlacklistService blacklistService;
 
     @BeforeEach
     void setUp() {
-        writeTemplate = mock(StringRedisTemplate.class);
-        readTemplate = mock(StringRedisTemplate.class);
         blacklistService = new TokenBlacklistService(
                 writeTemplate, readTemplate, new SimpleMeterRegistry(),
                 TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);

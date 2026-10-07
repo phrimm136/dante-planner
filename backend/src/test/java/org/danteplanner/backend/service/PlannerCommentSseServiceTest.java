@@ -4,10 +4,15 @@ import org.danteplanner.backend.comment.service.PlannerCommentSseService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.api.PlannerAccess;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.shared.sse.SseCapacityExceededException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -19,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 /**
@@ -33,6 +38,7 @@ import static org.mockito.Mockito.when;
  * {@link IllegalStateException}, which the service catches and treats as a dead
  * connection (identical to the production {@code IOException} path).</p>
  */
+@ExtendWith(MockitoExtension.class)
 class PlannerCommentSseServiceTest {
 
     /** Mirrors {@code PlannerCommentSseService.MAX_CONNECTIONS_PER_PLANNER}. */
@@ -40,6 +46,12 @@ class PlannerCommentSseServiceTest {
 
     /** Runs each submitted heartbeat on the calling thread, so a sweep's effects hold on return. */
     private static final TaskExecutor SAME_THREAD = Runnable::run;
+
+    @Mock
+    private PlannerRepository plannerRepository;
+
+    @Mock
+    private ObjectMapper failingMapper;
 
     private ObjectMapper objectMapper;
     private PlannerAccess plannerAccessGuard;
@@ -49,9 +61,10 @@ class PlannerCommentSseServiceTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        plannerAccessGuard = mock(PlannerAccess.class);
+        plannerAccessGuard = new PlannerAccessGuard(null, plannerRepository);
         service = new PlannerCommentSseService(objectMapper, plannerAccessGuard, SAME_THREAD);
         plannerId = UUID.randomUUID();
+        lenient().when(plannerRepository.existsPublishedById(any(UUID.class))).thenReturn(true);
     }
 
     @Nested
@@ -142,7 +155,6 @@ class PlannerCommentSseServiceTest {
 
         @Test
         void broadcast_WhenSerializationFails_DoesNotThrow() throws Exception {
-            ObjectMapper failingMapper = mock(ObjectMapper.class);
             when(failingMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("boom") {});
             PlannerCommentSseService failingService =
                     new PlannerCommentSseService(failingMapper, plannerAccessGuard, SAME_THREAD);

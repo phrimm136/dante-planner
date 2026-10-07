@@ -2,7 +2,6 @@ package org.danteplanner.backend.config;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
@@ -11,19 +10,13 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.test.context.TestConfiguration;
 
-import io.github.bucket4j.ConsumptionProbe;
-import io.github.bucket4j.distributed.BucketProxy;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
-import io.github.bucket4j.distributed.proxy.RemoteBucketBuilder;
 import io.lettuce.core.RedisException;
 import net.javacrumbs.shedlock.core.LockProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.danteplanner.backend.support.InMemoryProxyManager;
 
 /**
  * Test configuration class providing beans needed for integration tests.
@@ -48,16 +41,8 @@ public class TestConfig {
     @Bean
     @Primary
     @Profile("test")
-    @SuppressWarnings("unchecked")
     public ProxyManager<byte[]> testRateLimitProxyManager() {
-        BucketProxy alwaysAllow = mock(BucketProxy.class);
-        when(alwaysAllow.tryConsumeAndReturnRemaining(anyLong())).thenReturn(ConsumptionProbe.consumed(1, 0));
-        RemoteBucketBuilder<byte[]> builder = mock(RemoteBucketBuilder.class);
-        when(builder.withImplicitConfigurationReplacement(anyLong(), any())).thenReturn(builder);
-        when(builder.build(any(byte[].class), any(Supplier.class))).thenReturn(alwaysAllow);
-        ProxyManager<byte[]> proxyManager = mock(ProxyManager.class);
-        when(proxyManager.builder()).thenReturn(builder);
-        return proxyManager;
+        return new InMemoryProxyManager();
     }
 
     // Fleet lock arbitration is ShedLockMultiPodIT's subject, so integration contexts grant every lock.

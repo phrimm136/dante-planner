@@ -1,11 +1,14 @@
 package org.danteplanner.backend.config;
 
+import java.time.Duration;
+
 import org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource;
 import org.danteplanner.backend.shared.config.RoutingKey;
 import org.danteplanner.backend.shared.config.UndeclaredPrimaryAccessGuard;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -14,7 +17,6 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
 
 class ReadOnlyRoutingDataSourceTest {
 
@@ -30,7 +32,8 @@ class ReadOnlyRoutingDataSourceTest {
     private UndeclaredPrimaryAccessGuard guard(boolean failFast, boolean armed) {
         UndeclaredPrimaryAccessGuard created = new UndeclaredPrimaryAccessGuard(meterRegistry, failFast);
         if (armed) {
-            created.onApplicationEvent(mock(ApplicationReadyEvent.class));
+            created.onApplicationEvent(
+                    new ApplicationReadyEvent(new SpringApplication(), new String[0], null, Duration.ZERO));
         }
         return created;
     }

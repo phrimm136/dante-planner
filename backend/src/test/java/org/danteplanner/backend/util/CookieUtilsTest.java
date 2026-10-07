@@ -10,9 +10,10 @@ import org.apache.tomcat.util.http.Rfc6265CookieProcessor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -24,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * <p>Tests cookie creation, retrieval, and clearing
  * with proper security attributes.</p>
  */
+@ExtendWith(MockitoExtension.class)
 class CookieUtilsTest {
 
     @Mock
@@ -36,7 +38,6 @@ class CookieUtilsTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         // Default: secure cookies enabled (production mode), same-origin, SameSite=Lax
         cookieUtils = new CookieUtils(true, "", "Lax");
     }

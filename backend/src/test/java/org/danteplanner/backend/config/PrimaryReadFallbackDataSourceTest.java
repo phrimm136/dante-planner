@@ -23,21 +23,25 @@ import org.danteplanner.backend.shared.config.PrimaryReadFallbackDataSource;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class PrimaryReadFallbackDataSourceTest {
 
     private static final int WINDOW = 2;
@@ -52,13 +56,25 @@ class PrimaryReadFallbackDataSourceTest {
     private static final SQLTransientConnectionException POOL_SATURATION_TIMEOUT =
             new SQLTransientConnectionException(POOL_TIMEOUT_MESSAGE, null, 0, null);
 
-    private final DataSource primary = mock(DataSource.class);
-    private final DataSource fallbackReplica = mock(DataSource.class);
-    private final Connection primaryConnection = mock(Connection.class);
-    private final Connection replicaConnection = mock(Connection.class);
+    @Mock
+    private DataSource primary;
+
+    @Mock
+    private DataSource fallbackReplica;
+
+    @Mock
+    private Connection primaryConnection;
+
+    @Mock
+    private Connection replicaConnection;
+
     private final CircuitBreaker breaker = CircuitBreaker.of("test", breakerProperties().circuitBreakerConfig());
-    private final PrimaryReadFallbackDataSource dataSource =
-            new PrimaryReadFallbackDataSource(primary, fallbackReplica, breaker);
+    private PrimaryReadFallbackDataSource dataSource;
+
+    @BeforeEach
+    void setUp() {
+        dataSource = new PrimaryReadFallbackDataSource(primary, fallbackReplica, breaker);
+    }
 
     private static FallbackReplicaProperties.Breaker breakerProperties() {
         FallbackReplicaProperties.Breaker properties = new FallbackReplicaProperties.Breaker();

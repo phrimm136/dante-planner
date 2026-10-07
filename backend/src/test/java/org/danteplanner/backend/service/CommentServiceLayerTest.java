@@ -13,7 +13,6 @@ import org.danteplanner.backend.comment.validation.CommentAccessValidator;
 import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
 import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator;
-import org.danteplanner.backend.moderation.service.CommentReportService;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
@@ -86,10 +85,6 @@ class CommentServiceLayerTest {
     // A comment write records one domain event and nothing else; who hears about it is decided by
     // the arm that dispatches the row, so no create test here can assert delivery.
 
-    @Mock
-    private CommentReportService commentReportService;
-
-
     private final FakeUsers users = new FakeUsers();
 
     private CommentQueryService queryService;
@@ -117,7 +112,7 @@ class CommentServiceLayerTest {
         engagementService = new CommentEngagementService(
                 commentRepository, commentVoteRepository, queryService,
                 new PlannerAccessGuard(users, plannerRepository),
-                commentReportService, new CommentAuthorshipValidator(),
+                null, new CommentAuthorshipValidator(),
                 new CommentStateValidator(), new VoteUniquenessValidator());
 
         testUser = User.builder()

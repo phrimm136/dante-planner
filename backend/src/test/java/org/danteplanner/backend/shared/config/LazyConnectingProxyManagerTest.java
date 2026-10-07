@@ -13,12 +13,12 @@ import io.github.bucket4j.distributed.proxy.RemoteBucketBuilder;
 import io.lettuce.core.RedisConnectionException;
 import io.lettuce.core.RedisException;
 
+import org.danteplanner.backend.support.InMemoryProxyManager;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class LazyConnectingProxyManagerTest {
 
@@ -54,11 +54,9 @@ class LazyConnectingProxyManagerTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void builder_WhenTheConnectFailed_RetriesOnTheNextCall() {
-        ProxyManager<byte[]> connected = mock(ProxyManager.class);
-        RemoteBucketBuilder<byte[]> bucketBuilder = mock(RemoteBucketBuilder.class);
-        when(connected.builder()).thenReturn(bucketBuilder);
+        InMemoryProxyManager connected = new InMemoryProxyManager();
+        RemoteBucketBuilder<byte[]> bucketBuilder = connected.builder();
         AtomicInteger connectorCalls = new AtomicInteger();
         RedisConnectionConfig.LazyConnectingProxyManager manager =
                 new RedisConnectionConfig.LazyConnectingProxyManager(() -> {

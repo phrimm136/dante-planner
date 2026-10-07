@@ -50,14 +50,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -89,9 +86,6 @@ class PlannerCatalogSyncServiceTest {
     private final RecordingTombstoneStore tombstoneStore = new RecordingTombstoneStore();
 
     @Mock
-    private PlannerCatalogSyncService self;
-
-    @Mock
     private PlatformTransactionManager transactionManager;
 
     @Mock
@@ -102,7 +96,11 @@ class PlannerCatalogSyncServiceTest {
 
     @BeforeEach
     void setUp() {
-        syncService = new PlannerCatalogSyncService(events, new DomainEventAttemptRecorder(events), plannerRepository,
+        DomainEventAttemptRecorder attemptRecorder = new DomainEventAttemptRecorder(events);
+        PlannerCatalogSyncService self = new PlannerCatalogSyncService(events, attemptRecorder, plannerRepository,
+                entityFilterRepository, keywordFilterRepository, TestDataFactory.gameDataRegistry(), tombstoneStore, null,
+                transactionManager, clock);
+        syncService = new PlannerCatalogSyncService(events, attemptRecorder, plannerRepository,
                 entityFilterRepository, keywordFilterRepository, TestDataFactory.gameDataRegistry(), tombstoneStore, self,
                 transactionManager, clock);
         lenient().when(clock.instant()).thenReturn(PASS_START);
@@ -116,9 +114,9 @@ class PlannerCatalogSyncServiceTest {
 
         assertThat(syncService.drainPending()).isEqualTo(2);
 
-        InOrder order = inOrder(self);
-        order.verify(self).syncPlanner(plannerId, List.of(1L, 3L));
-        order.verify(self).syncPlanner(other, List.of(2L));
+        InOrder order = inOrder(events);
+        order.verify(events).markDispatched(eq(List.of(1L, 3L)), any(Instant.class));
+        order.verify(events).markDispatched(eq(List.of(2L)), any(Instant.class));
         verify(events, never()).incrementAttempts(anyLong());
     }
 
@@ -135,7 +133,7 @@ class PlannerCatalogSyncServiceTest {
     void drainPending_WhenOnePlannersSyncThrows_RecordsItsAttemptsAndSyncsTheNext() {
         UUID other = UUID.randomUUID();
         givenPending(event(1L, plannerId), event(2L, other), event(3L, plannerId));
-        doThrow(new IllegalStateException("store down")).when(self).syncPlanner(plannerId, List.of(1L, 3L));
+        givenSyncFails();
         when(events.attemptsOf(anyLong())).thenReturn(Optional.of(1));
 
         assertThat(syncService.drainPending()).isEqualTo(1);
@@ -143,26 +141,26 @@ class PlannerCatalogSyncServiceTest {
         verify(events).incrementAttempts(1L);
         verify(events).incrementAttempts(3L);
         verify(events, never()).incrementAttempts(2L);
-        verify(self).syncPlanner(other, List.of(2L));
+        verify(events).markDispatched(eq(List.of(2L)), any(Instant.class));
     }
 
     @Test
     void drainPending_WhenAFailedSyncSpendsTheLastAttempt_RaisesTheAlarmAndKeepsDraining() {
         UUID other = UUID.randomUUID();
         givenPending(event(1L, plannerId), event(2L, other));
-        doThrow(new IllegalStateException("store down")).when(self).syncPlanner(plannerId, List.of(1L));
+        givenSyncFails();
         when(events.attemptsOf(1L)).thenReturn(Optional.of(10));
 
         List<ILoggingEvent> errors = errorsDuring(() -> assertThat(syncService.drainPending()).isEqualTo(1));
 
         assertThat(errors).as("spending the last attempt pages").hasSize(1);
-        verify(self).syncPlanner(other, List.of(2L));
+        verify(events).markDispatched(eq(List.of(2L)), any(Instant.class));
     }
 
     @Test
     void drainPending_WhenAFailedSyncHasAttemptsLeft_RaisesNoAlarm() {
         givenPending(event(1L, plannerId));
-        doThrow(new IllegalStateException("store down")).when(self).syncPlanner(plannerId, List.of(1L));
+        givenSyncFails();
         when(events.attemptsOf(1L)).thenReturn(Optional.of(9));
 
         assertThat(errorsDuring(syncService::drainPending)).as("a retryable failure does not page").isEmpty();
@@ -322,8 +320,8 @@ class PlannerCatalogSyncServiceTest {
 
         assertThat(syncService.drainPending()).isEqualTo(1);
 
-        verify(self).syncPlanner(plannerId, List.of(1L));
-        verify(self, never()).syncPlanner(eq(other), anyList());
+        verify(events).markDispatched(eq(List.of(1L)), any(Instant.class));
+        verify(events, never()).markDispatched(eq(List.of(2L)), any(Instant.class));
     }
 
     @Test
@@ -334,10 +332,10 @@ class PlannerCatalogSyncServiceTest {
         syncService.drainPending();
 
         ArgumentCaptor<TransactionDefinition> definition = ArgumentCaptor.forClass(TransactionDefinition.class);
-        InOrder order = inOrder(transactionManager, self);
+        InOrder order = inOrder(transactionManager, events);
         order.verify(transactionManager).getTransaction(definition.capture());
         order.verify(transactionManager).commit(any());
-        order.verify(self).syncPlanner(plannerId, List.of(1L));
+        order.verify(events).markDispatched(eq(List.of(1L)), any(Instant.class));
         assertThat(definition.getValue().isReadOnly()).as("the batch read must reach the primary").isFalse();
         assertThat(PlannerCatalogSyncService.class.getMethod("drainPending").getAnnotation(Transactional.class))
                 .as("no outer transaction may hold a connection or read view across the pass")
@@ -376,16 +374,38 @@ class PlannerCatalogSyncServiceTest {
         when(plannerRepository.existsPublishedById(plannerId)).thenReturn(visible);
     }
 
+    private void givenSyncFails() {
+        when(plannerRepository.existsPublishedById(plannerId)).thenThrow(new IllegalStateException("store down"));
+    }
+
     private void givenDeleted(boolean deleted) {
-        PlannerOwnershipRow row = mock(PlannerOwnershipRow.class);
-        when(row.getDeletedAt()).thenReturn(deleted ? Instant.now() : null);
+        Instant deletedAt = deleted ? Instant.now() : null;
+        PlannerOwnershipRow row = new PlannerOwnershipRow() {
+            @Override
+            public Long getUserId() {
+                return 1L;
+            }
+
+            @Override
+            public Instant getDeletedAt() {
+                return deletedAt;
+            }
+        };
         when(plannerRepository.findOwnershipById(plannerId)).thenReturn(Optional.of(row));
     }
 
     private void stubScope(PlannerType plannerType, String category) {
-        FloorScopeRow scope = mock(FloorScopeRow.class);
-        when(scope.getPlannerType()).thenReturn(plannerType);
-        lenient().when(scope.getCategory()).thenReturn(category);
+        FloorScopeRow scope = new FloorScopeRow() {
+            @Override
+            public PlannerType getPlannerType() {
+                return plannerType;
+            }
+
+            @Override
+            public String getCategory() {
+                return category;
+            }
+        };
         when(entityFilterRepository.floorScopeOf(plannerId)).thenReturn(Optional.of(scope));
     }
 }

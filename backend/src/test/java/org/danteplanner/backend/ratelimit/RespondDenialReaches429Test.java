@@ -1,6 +1,7 @@
 package org.danteplanner.backend.ratelimit;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,11 +12,11 @@ import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
-import org.danteplanner.backend.shared.ratelimit.RateLimitExceededException;
 import org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor;
-import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
+import org.danteplanner.backend.shared.ratelimit.RateLimitProperties;
 import org.danteplanner.backend.shared.ratelimit.RateLimitService;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.danteplanner.backend.support.InMemoryProxyManager;
 import org.danteplanner.ratelimitfixture.DeclaredHandlerFixture;
 
 import org.junit.jupiter.api.AfterEach;
@@ -28,10 +29,7 @@ import org.danteplanner.backend.shared.exception.ProblemWriter;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -47,18 +45,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 class RespondDenialReaches429Test {
 
-    private RateLimitService rateLimitService;
+    private final InMemoryProxyManager rateLimitStore = new InMemoryProxyManager();
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        rateLimitService = mock(RateLimitService.class);
         ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
         SecurityProperties securityProperties = new SecurityProperties();
         securityProperties.parseTrustedProxyIps();
 
         RateLimitInterceptor interceptor = new RateLimitInterceptor(
-                rateLimitService,
+                new RateLimitService(rateLimitStore, crudBucket()),
                 securityProperties,
                 new DeviceIdResolver(new CookieUtils(false, "", "Lax")),
                 new FrontendProperties("https://planner.example"),
@@ -81,17 +78,29 @@ class RespondDenialReaches429Test {
 
     @Test
     void exhaustedBucket_WhenRespondHandlerRequested_Renders429() throws Exception {
-        doThrow(new RateLimitExceededException(7L, "fixture", 1L))
-                .when(rateLimitService).check(eq(RateLimitPolicy.CRUD), eq(7L), anyString());
+        rateLimitStore.denyNext(TimeUnit.SECONDS.toNanos(1));
 
         mockMvc.perform(get("/api/fixture/inherited"))
                 .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.code").value("RATE_LIMIT_EXCEEDED"));
+
+        assertThat(rateLimitStore.charges()).extracting(InMemoryProxyManager.Charge::key)
+                .containsExactly("7:fixture");
     }
 
     @Test
     void availableBucket_WhenRespondHandlerRequested_ReachesTheHandler() throws Exception {
         mockMvc.perform(get("/api/fixture/inherited"))
                 .andExpect(status().isOk());
+    }
+
+    private static RateLimitProperties crudBucket() {
+        RateLimitProperties.BucketConfig bucket = new RateLimitProperties.BucketConfig();
+        bucket.setCapacity(10);
+        bucket.setRefillTokens(10);
+        bucket.setRefillDurationSeconds(60);
+        RateLimitProperties properties = new RateLimitProperties();
+        properties.setCrud(bucket);
+        return properties;
     }
 }

@@ -1,5 +1,10 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.planner.entity.PlannerSubscription;
+import org.danteplanner.backend.planner.entity.PlannerViewId;
+import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
+import org.danteplanner.backend.planner.repository.PlannerViewRepository;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
+import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 import org.danteplanner.backend.planner.precondition.CatalogReadValidator;
 
@@ -21,25 +26,25 @@ import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
 import org.danteplanner.backend.planner.service.PlannerViewRecorder;
-import org.danteplanner.backend.planner.service.RedisViewRecorder;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.support.TestDataFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -48,10 +53,8 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
@@ -62,8 +65,7 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
  * Unit tests for PublishedPlannerQueryService (public catalog read model:
  * published/recommended listings, search, and single-planner detail).
  */
-@ExtendWith(SpringExtension.class)
-@TestPropertySource(locations = "classpath:application-test.properties")
+@ExtendWith(MockitoExtension.class)
 class PublishedPlannerQueryServiceTest {
 
     @Mock
@@ -76,41 +78,58 @@ class PublishedPlannerQueryServiceTest {
     private PlannerVoteRepository plannerVoteRepository;
 
     @Mock
-    private PlannerViewRecorder plannerViewRecorder;
+    private PlannerViewRepository plannerViewRepository;
 
     @Mock
-    private PlannerSubscriptionService subscriptionService;
+    private PlannerSubscriptionRepository subscriptionRepository;
 
     @Mock
-    private PlannerReportService reportService;
+    private PlannerReportRepository reportRepository;
 
     @Mock
     private PlannerStatsRepository plannerStatsRepository;
 
     private PublishedPlannerQueryService publishedQueryService;
 
+    private PlannerViewRecorder plannerViewRecorder;
+
     private User testUser;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-
         PlannerAccessGuard accessGuard = new PlannerAccessGuard(null, plannerRepository);
+        plannerViewRecorder = new PlannerViewRecorder(plannerViewRepository, plannerStatsRepository);
 
         publishedQueryService = new PublishedPlannerQueryService(
                 plannerRepository,
                 catalogRepository,
                 plannerVoteRepository,
-                subscriptionService,
-                reportService,
+                new PlannerSubscriptionService(subscriptionRepository, accessGuard),
+                new PlannerReportService(reportRepository, null, null, null),
                 plannerViewRecorder,
-                mock(RedisViewRecorder.class),
+                null,
                 plannerStatsRepository,
                 accessGuard,
                 new CatalogReadValidator()
         );
 
         testUser = TestDataFactory.unsavedUser(1L);
+    }
+
+    @AfterEach
+    void clearSynchronization() {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.clearSynchronization();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<PlannerViewId> bufferedViews() {
+        TransactionSynchronizationManager.initSynchronization();
+        plannerViewRecorder.flush();
+        ArgumentCaptor<Collection<PlannerViewId>> drained = ArgumentCaptor.forClass(Collection.class);
+        verify(plannerViewRepository, atMost(1)).insertIgnoreReturningNewCounts(drained.capture(), any());
+        return drained.getAllValues().stream().flatMap(Collection::stream).toList();
     }
 
     private PlannerCatalog catalogRow(String title, boolean recommended) {
@@ -307,8 +326,9 @@ class PublishedPlannerQueryServiceTest {
         private void mockUserContext(UUID plannerId) {
             when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(Optional.of(new PlannerVote(testUser.getId(), plannerId, VoteType.UP)));
-            when(subscriptionService.isSubscribed(testUser.getId(), plannerId)).thenReturn(true);
-            when(reportService.hasReported(testUser.getId(), plannerId)).thenReturn(false);
+            when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
+                    .thenReturn(Optional.of(new PlannerSubscription(testUser.getId(), plannerId)));
+            when(reportRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId)).thenReturn(false);
         }
 
         @Test
@@ -322,9 +342,7 @@ class PublishedPlannerQueryServiceTest {
                     publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT);
 
             // Assert
-            // A buffered view has no state form at this tier: it reaches planner_view only when
-            // PlannerViewRecorder.flush() commits, which needs a containerized test.
-            verify(plannerViewRecorder).record(eq(plannerId), any(), any());
+            assertEquals(List.of(plannerId), bufferedViews().stream().map(PlannerViewId::getPlannerId).toList());
             verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
             assertEquals(10, result.viewCount());
             assertEquals(testUser.getUsernameEpithet(), result.authorUsernameEpithet());
@@ -343,9 +361,7 @@ class PublishedPlannerQueryServiceTest {
                     publishedQueryService.getPublishedPlanner(plannerId, testUser.getId(), IP_ADDRESS, USER_AGENT);
 
             // Assert
-            // A buffered view has no state form at this tier: it reaches planner_view only when
-            // PlannerViewRecorder.flush() commits, which needs a containerized test.
-            verify(plannerViewRecorder).record(eq(plannerId), any(), any());
+            assertEquals(List.of(plannerId), bufferedViews().stream().map(PlannerViewId::getPlannerId).toList());
             verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
             assertEquals(10, result.viewCount());
             assertTrue(result.hasUpvoted());
@@ -366,7 +382,7 @@ class PublishedPlannerQueryServiceTest {
             assertRejected(() -> publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT))
                     .withCode("PLANNER_NOT_FOUND");
 
-            verify(plannerViewRecorder, never()).record(any(), any(), any());
+            assertTrue(bufferedViews().isEmpty());
             verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
         }
 
@@ -405,24 +421,16 @@ class PublishedPlannerQueryServiceTest {
             mockNewView(plannerId);
             mockUserContext(plannerId);
 
-            // The viewer hash never reaches the response; comparing the two forms through state
-            // would mean reading the recorded planner_view rows in a containerized test.
-            ArgumentCaptor<String> anonHash = ArgumentCaptor.forClass(String.class);
-
             // Act - anonymous first
             publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT);
-            verify(plannerViewRecorder).record(eq(plannerId), anonHash.capture(), any());
-
-            // Reset the recorder for the authenticated call
-            reset(plannerViewRecorder);
-            ArgumentCaptor<String> authHash = ArgumentCaptor.forClass(String.class);
 
             // Act - authenticated
             publishedQueryService.getPublishedPlanner(plannerId, testUser.getId(), IP_ADDRESS, USER_AGENT);
-            verify(plannerViewRecorder).record(eq(plannerId), authHash.capture(), any());
 
             // Assert - hashes must differ
-            assertNotEquals(anonHash.getValue(), authHash.getValue());
+            List<PlannerViewId> views = bufferedViews();
+            assertEquals(2, views.size());
+            assertNotEquals(views.get(0).getViewerHash(), views.get(1).getViewerHash());
         }
     }
 

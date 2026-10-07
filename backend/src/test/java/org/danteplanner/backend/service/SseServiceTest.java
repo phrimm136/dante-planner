@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -22,7 +23,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,6 +49,9 @@ class SseServiceTest {
     private final FakeUsers users = new FakeUsers();
 
     private final FakeNotificationPreferences preferenceProvider = new FakeNotificationPreferences(users);
+
+    @Mock
+    private ObjectMapper mockedMapper;
 
     private ObjectMapper objectMapper;
     private SseService sseService;
@@ -124,9 +127,8 @@ class SseServiceTest {
 
         @Test
         void sendToUser_WhenSerializationFails_DoesNotThrowNorRemove() throws Exception {
-            ObjectMapper failingMapper = mock(ObjectMapper.class);
-            when(failingMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("boom") {});
-            SseService service = new SseService(failingMapper, preferenceProvider, SAME_THREAD);
+            when(mockedMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("boom") {});
+            SseService service = new SseService(mockedMapper, preferenceProvider, SAME_THREAD);
             service.subscribe(USER_ID, UUID.randomUUID());
 
             assertThatCode(() -> service.sendToUser(USER_ID, "notify:comment", Map.of("k", "v")))
@@ -136,15 +138,14 @@ class SseServiceTest {
 
         @Test
         void sendToUser_WhenEventTypeUnrecognized_DoesNotDeliver() throws Exception {
-            ObjectMapper watchedMapper = mock(ObjectMapper.class);
-            SseService service = new SseService(watchedMapper, preferenceProvider, SAME_THREAD);
+            SseService service = new SseService(mockedMapper, preferenceProvider, SAME_THREAD);
             service.subscribe(USER_ID, UUID.randomUUID());
 
             service.sendToUser(USER_ID, "notify:something-this-node-cannot-name", Map.of("k", "v"));
 
             // Serialization is the first step of delivery, so never reaching it is what proves the
             // event was dropped rather than sent.
-            verify(watchedMapper, never()).writeValueAsString(any());
+            verify(mockedMapper, never()).writeValueAsString(any());
             assertThat(service.getActiveConnectionCount(USER_ID)).isEqualTo(1);
         }
     }
@@ -179,9 +180,8 @@ class SseServiceTest {
 
         @Test
         void broadcastToAll_WhenSerializationFails_DoesNotThrow() throws Exception {
-            ObjectMapper failingMapper = mock(ObjectMapper.class);
-            when(failingMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("boom") {});
-            SseService service = new SseService(failingMapper, preferenceProvider, SAME_THREAD);
+            when(mockedMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("boom") {});
+            SseService service = new SseService(mockedMapper, preferenceProvider, SAME_THREAD);
             service.subscribe(USER_ID, UUID.randomUUID());
 
             assertThatCode(() -> service.broadcastToAll(null, "notify:published", Map.of("k", "v")))

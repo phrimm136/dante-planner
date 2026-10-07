@@ -2,11 +2,9 @@ package org.danteplanner.backend.service.token;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.support.TestDataFactory;
 
-import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
-
 
 import com.redis.testcontainers.RedisContainer;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -21,8 +19,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for TokenBlacklistService.
@@ -347,46 +343,6 @@ class TokenBlacklistServiceIT {
             // Assert
             assertThat(blacklistService.isUserTokenInvalidated(userId, 0L)).isFalse();
             assertThat(blacklistService.userInvalidationSize()).isEqualTo(0);
-        }
-    }
-
-    @Nested
-    class FailOpenTests {
-
-        private static final String SKIP_COUNTER = "blacklist_check_skipped_total";
-
-        @Test
-        void isBlacklisted_WhenRedisReadFails_ReturnsFalseAndIncrementsSkipCounter() {
-            // Arrange - a template whose read path throws a DataAccessException
-            StringRedisTemplate mockTemplate = mock(StringRedisTemplate.class);
-            when(mockTemplate.opsForValue()).thenThrow(new RedisConnectionFailureException("down"));
-            SimpleMeterRegistry registry = new SimpleMeterRegistry();
-            TokenBlacklistService service = new TokenBlacklistService(mockTemplate, mockTemplate, registry,
-                    TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
-
-            // Act
-            boolean result = service.isBlacklisted("t");
-
-            // Assert - fail open (false) and skip counter incremented once
-            assertThat(result).isFalse();
-            assertThat(registry.get(SKIP_COUNTER).counter().count()).isEqualTo(1.0);
-        }
-
-        @Test
-        void isUserTokenInvalidated_WhenRedisReadFails_ReturnsFalseAndIncrementsSkipCounter() {
-            // Arrange - a template whose read path throws a DataAccessException
-            StringRedisTemplate mockTemplate = mock(StringRedisTemplate.class);
-            when(mockTemplate.opsForValue()).thenThrow(new RedisConnectionFailureException("down"));
-            SimpleMeterRegistry registry = new SimpleMeterRegistry();
-            TokenBlacklistService service = new TokenBlacklistService(mockTemplate, mockTemplate, registry,
-                    TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
-
-            // Act
-            boolean result = service.isUserTokenInvalidated(1L, 0L);
-
-            // Assert - fail open (false) and skip counter incremented once
-            assertThat(result).isFalse();
-            assertThat(registry.get(SKIP_COUNTER).counter().count()).isEqualTo(1.0);
         }
     }
 }

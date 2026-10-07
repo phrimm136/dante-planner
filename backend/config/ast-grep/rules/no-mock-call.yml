@@ -1,0 +1,38 @@
+id: no-mock-call
+language: Java
+severity: error
+message: 'A mock is a @Mock or @Spy field under MockitoExtension, where MockPortRule checks its type; a value object is built for real.'
+files:
+  - src/test/java/**
+rule:
+  any:
+    - kind: method_invocation
+      any:
+        - has:
+            field: name
+            regex: ^(mock|spy)$
+        - all:
+            - has:
+                field: name
+                regex: ^(mockStatic|mockConstruction|mockConstructionWithAnswer)$
+            # Sentry's static API is a third-party port with no injectable seam.
+            - not:
+                has:
+                  field: arguments
+                  regex: ^\((io\.sentry\.)?Sentry\.class\)$
+      not:
+        has:
+          field: object
+          pattern: $OBJECT
+          not:
+            regex: ^(org\.mockito\.)?(BDD)?Mockito$
+    - kind: method_reference
+      all:
+        - has:
+            nthChild:
+              position: 1
+              reverse: true
+            regex: ^(mock|spy|mockStatic|mockConstruction|mockConstructionWithAnswer)$
+        - has:
+            nthChild: 1
+            regex: ^(org\.mockito\.)?(BDD)?Mockito$

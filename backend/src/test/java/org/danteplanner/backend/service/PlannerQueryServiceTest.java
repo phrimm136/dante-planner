@@ -17,13 +17,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Instant;
 import java.util.List;
@@ -36,8 +34,7 @@ import static org.mockito.Mockito.when;
 /**
  * Unit tests for PlannerQueryService (owner read operations for owned planners).
  */
-@ExtendWith(SpringExtension.class)
-@TestPropertySource(locations = "classpath:application-test.properties")
+@ExtendWith(MockitoExtension.class)
 class PlannerQueryServiceTest {
 
     @Mock
@@ -49,8 +46,6 @@ class PlannerQueryServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-
         PlannerAccessGuard accessGuard = new PlannerAccessGuard(null, plannerRepository);
         queryService = new PlannerQueryService(plannerRepository, accessGuard);
 

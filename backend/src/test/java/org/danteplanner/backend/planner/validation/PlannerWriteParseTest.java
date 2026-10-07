@@ -16,7 +16,6 @@ import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
-import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
@@ -50,9 +49,6 @@ class PlannerWriteParseTest {
     @Mock
     private PlannerStatsRepository statsRepository;
 
-    @Mock
-    private PlannerCatalogService plannerCatalogService;
-
     private final User owner = TestDataFactory.unsavedUser(1L);
 
     private PlannerCommandService commandService;
@@ -69,7 +65,7 @@ class PlannerWriteParseTest {
                 statsRepository,
                 contentValidator,
                 null,
-                plannerCatalogService,
+                null,
                 new PlannerAccessGuard(null, plannerRepository),
                 new PlannerCategoryValidator(),
                 new PlannerLimitValidator(),

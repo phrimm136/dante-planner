@@ -23,7 +23,6 @@ import jakarta.servlet.Filter;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -103,7 +102,7 @@ class SecurityChainFilterRegistrationTest {
                 .filter(method -> method.isAnnotationPresent(Bean.class))
                 .filter(method -> FilterRegistrationBean.class.isAssignableFrom(method.getReturnType()))
                 .filter(method -> registeredFilter(method) == filter || registeredFilter(method) == declared)
-                .anyMatch(method -> !invoke(method).isEnabled());
+                .anyMatch(method -> !invoke(method, filter).isEnabled());
     }
 
     /** The {@code T} of a {@code FilterRegistrationBean<T>} bean method, null when it is raw. */
@@ -115,19 +114,36 @@ class SecurityChainFilterRegistrationTest {
         return null;
     }
 
-    private static FilterRegistrationBean<?> invoke(Method beanMethod) {
+    private static FilterRegistrationBean<?> invoke(Method beanMethod, Class<?> component) {
         try {
-            Constructor<?> constructor = beanMethod.getDeclaringClass().getDeclaredConstructors()[0];
-            constructor.setAccessible(true);
-            Object configuration = constructor.newInstance(new Object[constructor.getParameterCount()]);
-            Object[] arguments = Arrays.stream(beanMethod.getParameterTypes())
-                    .map(Mockito::mock)
-                    .toArray();
+            Object configuration = instantiateWithNulls(beanMethod.getDeclaringClass());
+            Class<?>[] parameterTypes = beanMethod.getParameterTypes();
+            Object[] arguments = new Object[parameterTypes.length];
+            for (int i = 0; i < parameterTypes.length; i++) {
+                arguments[i] = instantiateWithNulls(argumentClass(beanMethod, parameterTypes[i], component));
+            }
             beanMethod.setAccessible(true);
             return (FilterRegistrationBean<?>) beanMethod.invoke(configuration, arguments);
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException(
                     "could not evaluate the registration bean " + beanMethod.getName(), e);
         }
+    }
+
+    private static Class<?> argumentClass(Method beanMethod, Class<?> parameterType, Class<?> component) {
+        if (parameterType.isAssignableFrom(component)) {
+            return component;
+        }
+        if (parameterType.isInterface() || Modifier.isAbstract(parameterType.getModifiers())) {
+            throw new IllegalStateException("cannot build the " + parameterType.getName()
+                    + " argument of the registration bean " + beanMethod.getName());
+        }
+        return parameterType;
+    }
+
+    private static Object instantiateWithNulls(Class<?> type) throws ReflectiveOperationException {
+        Constructor<?> constructor = type.getDeclaredConstructors()[0];
+        constructor.setAccessible(true);
+        return constructor.newInstance(new Object[constructor.getParameterCount()]);
     }
 }

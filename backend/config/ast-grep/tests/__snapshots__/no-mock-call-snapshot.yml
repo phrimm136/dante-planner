@@ -1,0 +1,294 @@
+id: no-mock-call
+snapshots:
+  ? |
+    class A {
+      void m() {
+        List<Object> made = types.stream().map(BDDMockito::mock).toList();
+      }
+    }
+  : labels:
+    - source: BDDMockito::mock
+      style: primary
+      start: 66
+      end: 82
+    - source: mock
+      style: secondary
+      start: 78
+      end: 82
+    - source: BDDMockito
+      style: secondary
+      start: 66
+      end: 76
+  ? |
+    class A {
+      void m() {
+        List<Object> made = types.stream().map(Mockito::mock).toList();
+      }
+    }
+  : labels:
+    - source: Mockito::mock
+      style: primary
+      start: 66
+      end: 79
+    - source: mock
+      style: secondary
+      start: 75
+      end: 79
+    - source: Mockito
+      style: secondary
+      start: 66
+      end: 73
+  ? |
+    class A {
+      void m() {
+        List<Object> made = types.stream().map(Mockito::mockStatic).toList();
+      }
+    }
+  : labels:
+    - source: Mockito::mockStatic
+      style: primary
+      start: 66
+      end: 85
+    - source: mockStatic
+      style: secondary
+      start: 75
+      end: 85
+    - source: Mockito
+      style: secondary
+      start: 66
+      end: 73
+  ? |
+    class A {
+      void m() {
+        List<Object> made = types.stream().map(org.mockito.Mockito::spy).toList();
+      }
+    }
+  : labels:
+    - source: org.mockito.Mockito::spy
+      style: primary
+      start: 66
+      end: 90
+    - source: spy
+      style: secondary
+      start: 87
+      end: 90
+    - source: org.mockito.Mockito
+      style: secondary
+      start: 66
+      end: 85
+  ? |
+    class A {
+      void m() {
+        List<String> names = Mockito.spy(new ArrayList<>());
+      }
+    }
+  : labels:
+    - source: Mockito.spy(new ArrayList<>())
+      style: primary
+      start: 48
+      end: 78
+    - source: spy
+      style: secondary
+      start: 56
+      end: 59
+  ? |
+    class A {
+      void m() {
+        List<String> names = spy(new ArrayList<>());
+      }
+    }
+  : labels:
+    - source: spy(new ArrayList<>())
+      style: primary
+      start: 48
+      end: 70
+    - source: spy
+      style: secondary
+      start: 48
+      end: 51
+  ? |
+    class A {
+      void m() {
+        UserRepository repository = BDDMockito.mock(UserRepository.class);
+      }
+    }
+  : labels:
+    - source: BDDMockito.mock(UserRepository.class)
+      style: primary
+      start: 55
+      end: 92
+    - source: mock
+      style: secondary
+      start: 66
+      end: 70
+  ? |
+    class A {
+      void m() {
+        UserRepository repository = Mockito.mock(UserRepository.class);
+      }
+    }
+  : labels:
+    - source: Mockito.mock(UserRepository.class)
+      style: primary
+      start: 55
+      end: 89
+    - source: mock
+      style: secondary
+      start: 63
+      end: 67
+  ? |
+    class A {
+      void m() {
+        UserRepository repository = mock(UserRepository.class);
+      }
+    }
+  : labels:
+    - source: mock(UserRepository.class)
+      style: primary
+      start: 55
+      end: 81
+    - source: mock
+      style: secondary
+      start: 55
+      end: 59
+  ? |
+    class A {
+      void m() {
+        UserRepository repository = mock(UserRepository.class, withSettings().strictness(Strictness.LENIENT));
+      }
+    }
+  : labels:
+    - source: mock(UserRepository.class, withSettings().strictness(Strictness.LENIENT))
+      style: primary
+      start: 55
+      end: 128
+    - source: mock
+      style: secondary
+      start: 55
+      end: 59
+  ? |
+    class A {
+      void m() {
+        UserRepository repository = org.mockito.Mockito.mock(UserRepository.class);
+      }
+    }
+  : labels:
+    - source: org.mockito.Mockito.mock(UserRepository.class)
+      style: primary
+      start: 55
+      end: 101
+    - source: mock
+      style: secondary
+      start: 75
+      end: 79
+  ? |
+    class A {
+      void m() {
+        service(mock(PlannerResponse.class));
+      }
+    }
+  : labels:
+    - source: mock(PlannerResponse.class)
+      style: primary
+      start: 35
+      end: 62
+    - source: mock
+      style: secondary
+      start: 35
+      end: 39
+  ? |
+    class A {
+      void m() {
+        try (MockedConstruction<GtidReadGate> gates = mockConstruction(GtidReadGate.class)) {
+        }
+      }
+    }
+  : labels:
+    - source: mockConstruction(GtidReadGate.class)
+      style: primary
+      start: 73
+      end: 109
+    - source: mockConstruction
+      style: secondary
+      start: 73
+      end: 89
+  ? |
+    class A {
+      void m() {
+        try (MockedConstruction<GtidReadGate> gates = org.mockito.Mockito.mockConstructionWithAnswer(GtidReadGate.class, RETURNS_DEEP_STUBS)) {
+        }
+      }
+    }
+  : labels:
+    - source: org.mockito.Mockito.mockConstructionWithAnswer(GtidReadGate.class, RETURNS_DEEP_STUBS)
+      style: primary
+      start: 73
+      end: 159
+    - source: mockConstructionWithAnswer
+      style: secondary
+      start: 93
+      end: 119
+  ? |
+    class A {
+      void m() {
+        try (MockedConstruction<PlannerPublishingService> services = mockConstruction(PlannerPublishingService.class)) {
+        }
+      }
+    }
+  : labels:
+    - source: mockConstruction(PlannerPublishingService.class)
+      style: primary
+      start: 88
+      end: 136
+    - source: mockConstruction
+      style: secondary
+      start: 88
+      end: 104
+  ? |
+    class A {
+      void m() {
+        try (MockedStatic<GtidReadGate> gates = org.mockito.BDDMockito.mockStatic(GtidReadGate.class)) {
+        }
+      }
+    }
+  : labels:
+    - source: org.mockito.BDDMockito.mockStatic(GtidReadGate.class)
+      style: primary
+      start: 67
+      end: 120
+    - source: mockStatic
+      style: secondary
+      start: 90
+      end: 100
+  ? |
+    class A {
+      void m() {
+        try (MockedStatic<ReadOnlyRoutingDataSource> ds = Mockito.mockStatic(ReadOnlyRoutingDataSource.class)) {
+        }
+      }
+    }
+  : labels:
+    - source: Mockito.mockStatic(ReadOnlyRoutingDataSource.class)
+      style: primary
+      start: 77
+      end: 128
+    - source: mockStatic
+      style: secondary
+      start: 85
+      end: 95
+  ? |
+    class A {
+      void m() {
+        try (MockedStatic<ReadOnlyRoutingDataSource> ds = mockStatic(ReadOnlyRoutingDataSource.class)) {
+        }
+      }
+    }
+  : labels:
+    - source: mockStatic(ReadOnlyRoutingDataSource.class)
+      style: primary
+      start: 77
+      end: 120
+    - source: mockStatic
+      style: secondary
+      start: 77
+      end: 87

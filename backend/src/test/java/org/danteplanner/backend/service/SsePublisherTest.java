@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -51,14 +50,17 @@ class SsePublisherTest {
     static class RetryHarness {
 
         @Bean
-        StringRedisTemplate stringRedisTemplate() {
-            return Mockito.mock(StringRedisTemplate.class);
-        }
-
-        @Bean
         SseChannelSender sseChannelSender(StringRedisTemplate stringRedisTemplate) {
             return new SseChannelSender(stringRedisTemplate);
         }
+    }
+
+    private AnnotationConfigApplicationContext retryHarness() {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.registerBean(StringRedisTemplate.class, () -> stringRedisTemplate);
+        context.register(RetryHarness.class);
+        context.refresh();
+        return context;
     }
 
     @Test
@@ -108,8 +110,7 @@ class SsePublisherTest {
      */
     @Test
     void publishUserEvent_WhenTheFirstTwoSendsFail_StillReachesRedisAndCountsNoDrop() {
-        try (AnnotationConfigApplicationContext context =
-                new AnnotationConfigApplicationContext(RetryHarness.class)) {
+        try (AnnotationConfigApplicationContext context = retryHarness()) {
             StringRedisTemplate template = context.getBean(StringRedisTemplate.class);
             when(template.convertAndSend(anyString(), any()))
                     .thenThrow(new RedisConnectionFailureException("primary unreachable"))
@@ -135,8 +136,7 @@ class SsePublisherTest {
      */
     @Test
     void publishUserEvent_WhenTheSendTimesOut_IsRetriedOnTheSameTerms() {
-        try (AnnotationConfigApplicationContext context =
-                new AnnotationConfigApplicationContext(RetryHarness.class)) {
+        try (AnnotationConfigApplicationContext context = retryHarness()) {
             StringRedisTemplate template = context.getBean(StringRedisTemplate.class);
             when(template.convertAndSend(anyString(), any()))
                     .thenThrow(new QueryTimeoutException("command timed out during failover"))
@@ -161,8 +161,7 @@ class SsePublisherTest {
      */
     @Test
     void publishUserEvent_WhenEverySendFails_CountsOneDropAfterTheAttemptsAreSpent() {
-        try (AnnotationConfigApplicationContext context =
-                new AnnotationConfigApplicationContext(RetryHarness.class)) {
+        try (AnnotationConfigApplicationContext context = retryHarness()) {
             StringRedisTemplate template = context.getBean(StringRedisTemplate.class);
             when(template.convertAndSend(anyString(), any()))
                     .thenThrow(new RedisConnectionFailureException("primary unreachable"));

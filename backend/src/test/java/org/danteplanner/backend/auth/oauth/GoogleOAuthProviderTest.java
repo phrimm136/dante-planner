@@ -3,18 +3,15 @@ package org.danteplanner.backend.auth.oauth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.auth.exception.OAuthException;
 import org.danteplanner.backend.shared.config.OAuthProperties;
+import org.danteplanner.backend.support.GoogleStub;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for how {@link GoogleOAuthProvider} reads a verified {@code id_token}.
@@ -29,14 +26,38 @@ class GoogleOAuthProviderTest {
     private static final String SUBJECT = "google-subject-1";
     private static final String EMAIL = "person@example.com";
 
-    private GoogleIdTokenVerifier idTokenVerifier;
+    private final ScriptedIdTokenVerifier idTokenVerifier = new ScriptedIdTokenVerifier();
     private GoogleOAuthProvider provider;
 
     @BeforeEach
     void setUp() {
-        idTokenVerifier = mock(GoogleIdTokenVerifier.class);
-        provider = new GoogleOAuthProvider(
-                mock(RestTemplate.class), new ObjectMapper(), new OAuthProperties(), idTokenVerifier);
+        provider = new GoogleOAuthProvider(null, new ObjectMapper(), new OAuthProperties(), idTokenVerifier);
+    }
+
+    private static final class ScriptedIdTokenVerifier extends GoogleIdTokenVerifier {
+
+        private Jwt verified;
+
+        private ScriptedIdTokenVerifier() {
+            super(googleProperties());
+        }
+
+        private static OAuthProperties googleProperties() {
+            OAuthProperties properties = new OAuthProperties();
+            properties.getGoogle().setClientId(GoogleStub.CLIENT_ID);
+            properties.getGoogle().setJwksUri("https://www.googleapis.com/oauth2/v3/certs");
+            properties.getGoogle().setIssuer("https://accounts.google.com");
+            return properties;
+        }
+
+        private void verifies(Jwt jwt) {
+            verified = jwt;
+        }
+
+        @Override
+        public Jwt verify(String idToken) {
+            return verified;
+        }
     }
 
     private static Jwt.Builder jwt() {
@@ -52,8 +73,7 @@ class GoogleOAuthProviderTest {
 
     @Test
     void getUserInfo_WhenClaimsPresent_ReturnsUserInfo() {
-        when(idTokenVerifier.verify(anyString()))
-                .thenReturn(jwt().subject(SUBJECT).claim("email", EMAIL).build());
+        idTokenVerifier.verifies(jwt().subject(SUBJECT).claim("email", EMAIL).build());
 
         OAuthUserInfo info = provider.getUserInfo(tokensWithIdToken());
 
@@ -63,8 +83,7 @@ class GoogleOAuthProviderTest {
 
     @Test
     void getUserInfo_WhenEmailClaimAbsent_ThrowsOAuthException() {
-        when(idTokenVerifier.verify(anyString()))
-                .thenReturn(jwt().subject(SUBJECT).build());
+        idTokenVerifier.verifies(jwt().subject(SUBJECT).build());
 
         assertThatThrownBy(() -> provider.getUserInfo(tokensWithIdToken()))
                 .isInstanceOf(OAuthException.class)
@@ -73,8 +92,7 @@ class GoogleOAuthProviderTest {
 
     @Test
     void getUserInfo_WhenSubjectAbsent_ThrowsOAuthException() {
-        when(idTokenVerifier.verify(anyString()))
-                .thenReturn(jwt().claim("email", EMAIL).claim("unused", "x").build());
+        idTokenVerifier.verifies(jwt().claim("email", EMAIL).claim("unused", "x").build());
 
         assertThatThrownBy(() -> provider.getUserInfo(tokensWithIdToken()))
                 .isInstanceOf(OAuthException.class)
@@ -83,8 +101,7 @@ class GoogleOAuthProviderTest {
 
     @Test
     void getUserInfo_WhenEmailClaimBlank_ThrowsOAuthException() {
-        when(idTokenVerifier.verify(anyString()))
-                .thenReturn(jwt().subject(SUBJECT).claim("email", "   ").build());
+        idTokenVerifier.verifies(jwt().subject(SUBJECT).claim("email", "   ").build());
 
         assertThatThrownBy(() -> provider.getUserInfo(tokensWithIdToken()))
                 .isInstanceOf(OAuthException.class)

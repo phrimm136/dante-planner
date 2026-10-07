@@ -1,7 +1,6 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
 
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
@@ -10,7 +9,14 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.moderation.entity.PlannerReport;
+import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
 import org.danteplanner.backend.moderation.service.PlannerReportService;
+import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
+import org.danteplanner.backend.moderation.validation.ReporterStandingValidator;
+import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.service.PlannerModerationTargetAdapter;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,23 +24,21 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Value;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -52,9 +56,10 @@ import org.danteplanner.backend.planner.entity.VoteType;
 /**
  * Unit tests for PlannerEngagementService (immutable voting).
  */
-@ExtendWith(SpringExtension.class)
-@TestPropertySource(locations = "classpath:application-test.properties")
+@ExtendWith(MockitoExtension.class)
 class PlannerEngagementServiceTest {
+
+    private static final int RECOMMENDED_THRESHOLD = 10;
 
     @Mock
     private PlannerRepository plannerRepository;
@@ -66,35 +71,33 @@ class PlannerEngagementServiceTest {
     private DomainEventRepository domainEventRepository;
 
     @Mock
-    private PlannerStatsService plannerStatsService;
+    private PlannerStatsRepository statsRepository;
 
     @Mock
-    private PlannerCatalogService plannerCatalogService;
+    private PlannerCatalogRepository catalogRepository;
 
     @Mock
-    private PlannerReportService reportService;
+    private PlannerReportRepository reportRepository;
 
     private PlannerEngagementService engagementService;
-
-    @Value("${planner.recommended-threshold}")
-    private int recommendedThreshold;
 
     private User testUser;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         FakeUsers users = new FakeUsers();
+        PlannerAccessGuard accessGuard = new PlannerAccessGuard(users, plannerRepository);
 
         engagementService = new PlannerEngagementService(
                 plannerVoteRepository,
-                plannerStatsService,
-                plannerCatalogService,
+                new PlannerStatsService(statsRepository),
+                new PlannerCatalogService(catalogRepository, null, null, null, null, null, RECOMMENDED_THRESHOLD),
                 new DomainEventRecorder(domainEventRepository, new ObjectMapper(), event -> { }),
-                new PlannerAccessGuard(users, plannerRepository),
-                reportService,
+                accessGuard,
+                new PlannerReportService(reportRepository, new ReporterStandingValidator(users),
+                        new PlannerModerationTargetAdapter(null, accessGuard), new ReportUniquenessValidator()),
                 new VoteUniquenessValidator(),
-                recommendedThreshold
+                RECOMMENDED_THRESHOLD
         );
 
         testUser = users.add(TestDataFactory.unsavedUser(1L));
@@ -140,7 +143,7 @@ class PlannerEngagementServiceTest {
             assertEquals(plannerId, exception.getPlannerId());
             assertEquals(testUser.getId(), exception.getUserId());
             verify(plannerVoteRepository, never()).insert(any());
-            verify(plannerStatsService, never()).incrementUpvotes(any());
+            verify(statsRepository, never()).incrementUpvotes(any());
         }
 
         @Test
@@ -157,16 +160,15 @@ class PlannerEngagementServiceTest {
                     .thenReturn(false);
             when(plannerVoteRepository.insert(any(PlannerVote.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerStatsService.upvotesOf(plannerId)).thenReturn(6);
+            AtomicInteger upvotes = new AtomicInteger(5);
+            doAnswer(invocation -> upvotes.incrementAndGet()).when(statsRepository).incrementUpvotes(plannerId);
+            when(statsRepository.upvotesOf(plannerId)).thenAnswer(invocation -> upvotes.get());
 
             // Act
             VoteResponse response =
                     engagementService.castVote(testUser.getId(), plannerId, VoteType.UP);
 
             // Assert
-            InOrder countAfterIncrement = inOrder(plannerStatsService);
-            countAfterIncrement.verify(plannerStatsService).incrementUpvotes(plannerId);
-            countAfterIncrement.verify(plannerStatsService).upvotesOf(plannerId);
             assertEquals(6, response.upvoteCount());
             assertTrue(response.hasUpvoted());
             ArgumentCaptor<PlannerVote> voteCaptor =
@@ -188,8 +190,8 @@ class PlannerEngagementServiceTest {
             when(plannerVoteRepository.existsById(any(PlannerVoteId.class))).thenReturn(false);
             when(plannerVoteRepository.insert(any(PlannerVote.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerStatsService.upvotesOf(plannerId)).thenReturn(recommendedThreshold);
-            when(plannerStatsService.trySetRecommendedNotified(plannerId, recommendedThreshold))
+            when(statsRepository.upvotesOf(plannerId)).thenReturn(RECOMMENDED_THRESHOLD);
+            when(statsRepository.trySetRecommendedNotified(plannerId, RECOMMENDED_THRESHOLD))
                     .thenReturn(1);
             when(domainEventRepository.insert(any(DomainEvent.class))).thenAnswer(invocation -> {
                 DomainEvent row = invocation.getArgument(0);
@@ -216,8 +218,8 @@ class PlannerEngagementServiceTest {
             when(plannerVoteRepository.existsById(any(PlannerVoteId.class))).thenReturn(false);
             when(plannerVoteRepository.insert(any(PlannerVote.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerStatsService.upvotesOf(plannerId)).thenReturn(recommendedThreshold);
-            when(plannerStatsService.trySetRecommendedNotified(plannerId, recommendedThreshold))
+            when(statsRepository.upvotesOf(plannerId)).thenReturn(RECOMMENDED_THRESHOLD);
+            when(statsRepository.trySetRecommendedNotified(plannerId, RECOMMENDED_THRESHOLD))
                     .thenReturn(0);
 
             engagementService.castVote(testUser.getId(), plannerId, VoteType.UP);
@@ -235,7 +237,7 @@ class PlannerEngagementServiceTest {
             when(plannerVoteRepository.existsById(any(PlannerVoteId.class))).thenReturn(false);
             when(plannerVoteRepository.insert(any(PlannerVote.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerStatsService.upvotesOf(plannerId)).thenReturn(recommendedThreshold - 1);
+            when(statsRepository.upvotesOf(plannerId)).thenReturn(RECOMMENDED_THRESHOLD - 1);
 
             engagementService.castVote(testUser.getId(), plannerId, VoteType.UP);
 
@@ -246,9 +248,13 @@ class PlannerEngagementServiceTest {
     @Test
     void reportPlanner_WhenCalled_CreatesTheReportForTheReporterAndPlanner() {
         UUID plannerId = UUID.randomUUID();
+        when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
 
         engagementService.reportPlanner(testUser.getId(), plannerId);
 
-        verify(reportService).createReport(testUser.getId(), plannerId);
+        ArgumentCaptor<PlannerReport> report = ArgumentCaptor.forClass(PlannerReport.class);
+        verify(reportRepository).insert(report.capture());
+        assertEquals(testUser.getId(), report.getValue().getUserId());
+        assertEquals(plannerId, report.getValue().getPlannerId());
     }
 }

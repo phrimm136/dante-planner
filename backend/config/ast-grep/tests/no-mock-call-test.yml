@@ -1,0 +1,171 @@
+id: no-mock-call
+valid:
+  - |
+    class A {
+      @Mock
+      private UserRepository userRepository;
+    }
+  - |
+    class A {
+      void m() {
+        factory.mock(UserRepository.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+      }
+    }
+  - |
+    class A {
+      void m() {
+        mockMvc.perform(get("/api/users/me"));
+      }
+    }
+  - |
+    import static org.mockito.Mockito.mockStatic;
+
+    class A {
+    }
+  - |
+    class A {
+      void m() {
+        registry.mockStatic(Sentry.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        try (MockedStatic<Sentry> sentry = mockStatic(Sentry.class)) {
+        }
+      }
+    }
+  - |
+    class A {
+      void m() {
+        try (MockedStatic<Sentry> sentry = Mockito.mockStatic(io.sentry.Sentry.class)) {
+        }
+      }
+    }
+  - |
+    class A {
+      void m() {
+        List<Object> made = types.stream().map(this::mock).toList();
+      }
+    }
+invalid:
+  - |
+    class A {
+      void m() {
+        UserRepository repository = mock(UserRepository.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        UserRepository repository = Mockito.mock(UserRepository.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        UserRepository repository = org.mockito.Mockito.mock(UserRepository.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        UserRepository repository = mock(UserRepository.class, withSettings().strictness(Strictness.LENIENT));
+      }
+    }
+  - |
+    class A {
+      void m() {
+        List<String> names = spy(new ArrayList<>());
+      }
+    }
+  - |
+    class A {
+      void m() {
+        List<String> names = Mockito.spy(new ArrayList<>());
+      }
+    }
+  - |
+    class A {
+      void m() {
+        service(mock(PlannerResponse.class));
+      }
+    }
+  - |
+    class A {
+      void m() {
+        try (MockedStatic<ReadOnlyRoutingDataSource> ds = Mockito.mockStatic(ReadOnlyRoutingDataSource.class)) {
+        }
+      }
+    }
+  - |
+    class A {
+      void m() {
+        try (MockedConstruction<GtidReadGate> gates = mockConstruction(GtidReadGate.class)) {
+        }
+      }
+    }
+  - |
+    class A {
+      void m() {
+        try (MockedConstruction<GtidReadGate> gates = org.mockito.Mockito.mockConstructionWithAnswer(GtidReadGate.class, RETURNS_DEEP_STUBS)) {
+        }
+      }
+    }
+  - |
+    class A {
+      void m() {
+        UserRepository repository = BDDMockito.mock(UserRepository.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        try (MockedStatic<ReadOnlyRoutingDataSource> ds = mockStatic(ReadOnlyRoutingDataSource.class)) {
+        }
+      }
+    }
+  - |
+    class A {
+      void m() {
+        try (MockedConstruction<PlannerPublishingService> services = mockConstruction(PlannerPublishingService.class)) {
+        }
+      }
+    }
+  - |
+    class A {
+      void m() {
+        try (MockedStatic<GtidReadGate> gates = org.mockito.BDDMockito.mockStatic(GtidReadGate.class)) {
+        }
+      }
+    }
+  - |
+    class A {
+      void m() {
+        List<Object> made = types.stream().map(Mockito::mock).toList();
+      }
+    }
+  - |
+    class A {
+      void m() {
+        List<Object> made = types.stream().map(org.mockito.Mockito::spy).toList();
+      }
+    }
+  - |
+    class A {
+      void m() {
+        List<Object> made = types.stream().map(BDDMockito::mock).toList();
+      }
+    }
+  - |
+    class A {
+      void m() {
+        List<Object> made = types.stream().map(Mockito::mockStatic).toList();
+      }
+    }

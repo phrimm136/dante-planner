@@ -24,7 +24,11 @@ import org.danteplanner.backend.planner.exception.PlannerLimitExceededException;
 import org.danteplanner.backend.planner.repository.PlannerOwnershipRow;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.user.api.UserNotFoundException;
+import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
+import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
+import org.danteplanner.backend.support.RecordingTombstoneStore;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.precondition.ContentVersionValidator;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
@@ -33,6 +37,7 @@ import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
 import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -40,10 +45,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -61,8 +64,7 @@ import static org.danteplanner.backend.support.Rejections.assertRejected;
  * Unit tests for PlannerCommandService (owner CRUD write operations:
  * create/upsert/update/delete).
  */
-@ExtendWith(SpringExtension.class)
-@TestPropertySource(locations = "classpath:application-test.properties")
+@ExtendWith(MockitoExtension.class)
 class PlannerCommandServiceTest {
 
     @Mock
@@ -72,12 +74,16 @@ class PlannerCommandServiceTest {
     private PlannerStatsRepository statsRepository;
 
     @Mock
-    private PlannerCatalogService plannerCatalogService;
+    private PlannerCatalogRepository catalogRepository;
+
+    @Mock
+    private DomainEventRepository domainEventRepository;
 
     private PlannerCommandService commandService;
 
-    @Value("${planner.max-per-user}")
-    private int maxPlannersPerUser;
+    private static final int MAX_PLANNERS_PER_USER = 100;
+
+    private static final int RECOMMENDED_THRESHOLD = 10;
 
     private static final int CURRENT_SCHEMA_VERSION = 2;
 
@@ -94,8 +100,6 @@ class PlannerCommandServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-
         commandService = commandServiceWith(TestDataFactory.contentValidator());
 
         testUser = users.add(TestDataFactory.unsavedUser(1L));
@@ -109,16 +113,25 @@ class PlannerCommandServiceTest {
                 statsRepository,
                 contentValidator,
                 new ContentVersionValidator(TestDataFactory.gameDataRegistry()),
-                plannerCatalogService,
+                new PlannerCatalogService(catalogRepository, plannerRepository, statsRepository,
+                        new DomainEventRecorder(domainEventRepository, new ObjectMapper(), null), new ObjectMapper(),
+                        new RecordingTombstoneStore(), RECOMMENDED_THRESHOLD),
                 new PlannerAccessGuard(users, plannerRepository),
                 new PlannerCategoryValidator(),
                 new PlannerLimitValidator(),
                 new PlannerOwnershipValidator(),
                 new SyncVersionValidator(),
                 new ObjectMapper(),
-                maxPlannersPerUser,
+                MAX_PLANNERS_PER_USER,
                 CURRENT_SCHEMA_VERSION
         );
+    }
+
+    @AfterEach
+    void clearSynchronization() {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.clearSynchronization();
+        }
     }
 
     private UpsertPlannerRequest createValidRequest() {
@@ -208,7 +221,7 @@ class PlannerCommandServiceTest {
         void createPlanner_WhenAtLimit_ThrowsException() {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
-            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) maxPlannersPerUser);
+            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) MAX_PLANNERS_PER_USER);
 
             // Act & Assert
             PlannerLimitExceededException exception = assertThrows(
@@ -216,7 +229,7 @@ class PlannerCommandServiceTest {
                     () -> commandService.createPlanner(testUser.getId(), deviceId, request)
             );
 
-            assertTrue(exception.getMessage().contains(String.valueOf(maxPlannersPerUser)));
+            assertTrue(exception.getMessage().contains(String.valueOf(MAX_PLANNERS_PER_USER)));
             verify(plannerRepository, never()).insert(any());
         }
 
@@ -225,7 +238,6 @@ class PlannerCommandServiceTest {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
             Long nonExistentUserId = 999L;
-            when(plannerRepository.countActiveByUserId(nonExistentUserId)).thenReturn(0L);
 
             // Act & Assert
             UserNotFoundException exception = assertThrows(
@@ -411,6 +423,7 @@ class PlannerCommandServiceTest {
 
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
+            TransactionSynchronizationManager.initSynchronization();
 
             // Act
             commandService.deletePlanner(testUser.getId(), planner.getId());
@@ -427,6 +440,7 @@ class PlannerCommandServiceTest {
 
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
+            TransactionSynchronizationManager.initSynchronization();
 
             // Act
             commandService.deletePlanner(testUser.getId(), planner.getId());
@@ -444,7 +458,7 @@ class PlannerCommandServiceTest {
         void createPlanner_WhenAtMaxMinusOne_Succeeds() {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
-            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 1));
+            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) (MAX_PLANNERS_PER_USER - 1));
             when(plannerRepository.insert(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
@@ -465,7 +479,7 @@ class PlannerCommandServiceTest {
         void createPlanner_WhenAtMax_ThrowsLimitExceeded() {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
-            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) maxPlannersPerUser);
+            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) MAX_PLANNERS_PER_USER);
 
             // Act & Assert
             assertRejected(() -> commandService.createPlanner(testUser.getId(), deviceId, request))
@@ -479,7 +493,7 @@ class PlannerCommandServiceTest {
             UpsertPlannerRequest request = createValidRequest();
             // Only the deleted-excluding count is stubbed, and with a value no other source could
             // supply, so the verdict can only carry it if that count is what the limit reads.
-            long activeCount = maxPlannersPerUser + 7L;
+            long activeCount = MAX_PLANNERS_PER_USER + 7L;
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(activeCount);
 
             PlannerLimitExceededException exception = assertThrows(
@@ -565,6 +579,20 @@ class PlannerCommandServiceTest {
     @Nested
     class UpsertSoftDeleteGuardTests {
 
+        private static PlannerOwnershipRow ownership(Long userId, Instant deletedAt) {
+            return new PlannerOwnershipRow() {
+                @Override
+                public Long getUserId() {
+                    return userId;
+                }
+
+                @Override
+                public Instant getDeletedAt() {
+                    return deletedAt;
+                }
+            };
+        }
+
         private UpsertPlannerRequest buildRequest() {
             UpsertPlannerRequest request = new UpsertPlannerRequest(null, "5F", "Test Planner", null,
                     TestDataFactory.VALID_CONTENT, CURRENT_MD_VERSION, PlannerType.MIRROR_DUNGEON, null, null);
@@ -575,12 +603,10 @@ class PlannerCommandServiceTest {
         void createOwnershipCheck_WhenOwnSoftDeleted_ThrowsNotFoundWithoutAnExistenceProbe() {
             UUID plannerId = UUID.randomUUID();
             UpsertPlannerRequest request = buildRequest();
-            PlannerOwnershipRow ownership = mock(PlannerOwnershipRow.class);
-            lenient().when(ownership.getUserId()).thenReturn(testUser.getId());
-            lenient().when(ownership.getDeletedAt()).thenReturn(Instant.now());
+            PlannerOwnershipRow ownership = ownership(testUser.getId(), Instant.now());
             when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))
                     .thenReturn(Optional.empty());
-            lenient().when(plannerRepository.findOwnershipById(plannerId))
+            when(plannerRepository.findOwnershipById(plannerId))
                     .thenReturn(Optional.of(ownership));
 
             assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false))
@@ -594,12 +620,10 @@ class PlannerCommandServiceTest {
         void createOwnershipCheck_WhenOtherUserActive_ThrowsForbiddenWithoutAnExistenceProbe() {
             UUID plannerId = UUID.randomUUID();
             UpsertPlannerRequest request = buildRequest();
-            PlannerOwnershipRow ownership = mock(PlannerOwnershipRow.class);
-            lenient().when(ownership.getUserId()).thenReturn(testUser.getId() + 1);
-            lenient().when(ownership.getDeletedAt()).thenReturn(null);
+            PlannerOwnershipRow ownership = ownership(testUser.getId() + 1, null);
             when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))
                     .thenReturn(Optional.empty());
-            lenient().when(plannerRepository.findOwnershipById(plannerId))
+            when(plannerRepository.findOwnershipById(plannerId))
                     .thenReturn(Optional.of(ownership));
 
             assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false))
@@ -614,7 +638,7 @@ class PlannerCommandServiceTest {
             UpsertPlannerRequest request = buildRequest();
             when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))
                     .thenReturn(Optional.empty());
-            lenient().when(plannerRepository.findOwnershipById(plannerId))
+            when(plannerRepository.findOwnershipById(plannerId))
                     .thenReturn(Optional.empty());
             when(plannerRepository.countActiveByUserId(testUser.getId()))
                     .thenReturn(0L);

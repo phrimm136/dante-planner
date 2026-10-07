@@ -2,7 +2,6 @@ package org.danteplanner.backend.comment.controller;
 
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
-import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator;
 import org.danteplanner.backend.planner.api.PlannerThread;
@@ -13,6 +12,9 @@ import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,7 +25,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -34,13 +35,18 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  * The comment thread of a planner the caller may not see answers exactly what the published detail
  * read answers for it: 404 PLANNER_NOT_FOUND.
  */
+@ExtendWith(MockitoExtension.class)
 class CommentThreadNotFoundContractTest {
 
     private static final Long OWNER_ID = 1L;
     private static final Long STRANGER_ID = 2L;
 
-    private final PlannerRepository plannerRepository = mock(PlannerRepository.class);
-    private final PlannerCommentRepository commentRepository = mock(PlannerCommentRepository.class);
+    @Mock
+    private PlannerRepository plannerRepository;
+
+    @Mock
+    private PlannerCommentRepository commentRepository;
+
     private final FakeUsers users = new FakeUsers();
 
     private MockMvc mockMvc;
@@ -49,7 +55,7 @@ class CommentThreadNotFoundContractTest {
     @BeforeEach
     void setUp() {
         CommentQueryService queryService = new CommentQueryService(
-                commentRepository, mock(PlannerCommentVoteRepository.class), users,
+                commentRepository, null, users,
                 new PlannerAccessGuard(users, plannerRepository), new CommentAccessValidator());
         mockMvc = standaloneSetup(new CommentController(queryService, null, null, new ByIdReadGuard()))
                 .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
@@ -59,7 +65,6 @@ class CommentThreadNotFoundContractTest {
         plannerId = UUID.randomUUID();
         when(plannerRepository.findThread(plannerId))
                 .thenReturn(Optional.of(new PlannerThread(plannerId, OWNER_ID, false, false)));
-        when(commentRepository.findByPlannerId(plannerId)).thenReturn(List.of());
     }
 
     @AfterEach
@@ -86,6 +91,7 @@ class CommentThreadNotFoundContractTest {
 
     @Test
     void getComments_WhenOwnerReadsOwnUnpublishedThread_Succeeds() throws Exception {
+        when(commentRepository.findByPlannerId(plannerId)).thenReturn(List.of());
         signInAs(OWNER_ID);
 
         mockMvc.perform(get("/api/planner/{id}/comments", plannerId).accept(MediaType.APPLICATION_JSON))

@@ -5,6 +5,9 @@ import java.net.ServerSocket;
 import java.time.Duration;
 import java.util.List;
 
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,11 +15,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import org.danteplanner.backend.auth.controller.AuthController;
-import org.danteplanner.backend.auth.oauth.OAuthStateService;
-import org.danteplanner.backend.auth.service.AuthenticationService;
-import org.danteplanner.backend.auth.service.SessionRevocationService;
-import org.danteplanner.backend.auth.token.TokenValidator;
 import org.danteplanner.backend.planner.controller.PublishedPlannerController;
+import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
@@ -32,30 +32,32 @@ import org.danteplanner.backend.shared.ratelimit.RateLimitProperties.BucketConfi
 import org.danteplanner.backend.shared.ratelimit.RateLimitService;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.danteplanner.backend.support.InMemoryProxyManager;
 import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.ratelimitfixture.DeclaredHandlerFixture;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import ch.qos.logback.classic.Level;
-import io.github.bucket4j.distributed.proxy.ProxyManager;
 import io.lettuce.core.RedisConnectionException;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@ExtendWith(MockitoExtension.class)
 class RateLimitStoreOutageTest {
 
     private static final String SKIPPED_COUNTER = "rate_limit.charge_skipped";
@@ -64,6 +66,10 @@ class RateLimitStoreOutageTest {
     private static final String FRONTEND_URL = "https://planner.example";
 
     private final SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
+    private final InMemoryProxyManager rateLimitStore = new InMemoryProxyManager();
+
+    @Mock
+    private PlannerCatalogRepository catalogRepository;
 
     @AfterEach
     void tearDown() {
@@ -81,7 +87,9 @@ class RateLimitStoreOutageTest {
 
     @Test
     void publishedList_WhenStoreUnreachable_ServesAndCountsTheSkippedCharge() throws Exception {
-        MockMvc mockMvc = mvcAgainst(new RateLimitService(unreachableProxyManager(), bucketProperties()));
+        storeUnreachableOnNextCharge();
+        catalogHasNoPlanners();
+        MockMvc mockMvc = mvcAgainst();
 
         mockMvc.perform(get("/api/planner/md/published").with(request -> {
                     request.setRemoteAddr(TRUSTED_PROXY_IP);
@@ -95,7 +103,8 @@ class RateLimitStoreOutageTest {
 
     @Test
     void crudHandler_WhenStoreUnreachable_RunsAndCountsTheSkippedCharge() throws Exception {
-        MockMvc mockMvc = mvcAgainst(new RateLimitService(unreachableProxyManager(), bucketProperties()));
+        storeUnreachableOnNextCharge();
+        MockMvc mockMvc = mvcAgainst();
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(7L, null, List.of()));
 
@@ -107,7 +116,8 @@ class RateLimitStoreOutageTest {
 
     @Test
     void googleCallback_WhenStoreUnreachable_RedirectsToLoginUnavailable() throws Exception {
-        MockMvc mockMvc = mvcAgainst(new RateLimitService(unreachableProxyManager(), bucketProperties()));
+        storeUnreachableOnNextCharge();
+        MockMvc mockMvc = mvcAgainst();
 
         mockMvc.perform(get("/api/auth/google/callback").param("code", "any").param("state", "any"))
                 .andExpect(status().isFound())
@@ -118,7 +128,8 @@ class RateLimitStoreOutageTest {
 
     @Test
     void appleCallback_WhenStoreUnreachable_RedirectsToLoginUnavailable() throws Exception {
-        MockMvc mockMvc = mvcAgainst(new RateLimitService(unreachableProxyManager(), bucketProperties()));
+        storeUnreachableOnNextCharge();
+        MockMvc mockMvc = mvcAgainst();
 
         mockMvc.perform(post("/api/auth/apple/callback"))
                 .andExpect(status().isFound())
@@ -129,48 +140,46 @@ class RateLimitStoreOutageTest {
 
     @Test
     void publishedList_WhenChargeTimesOut_ServesAndCountsTheSkippedCharge() throws Exception {
-        RateLimitService rateLimitService = mock(RateLimitService.class);
-        doThrow(new io.github.bucket4j.TimeoutException(
-                "Violated timeout while waiting for redis future", 3_000_000_000L, 3_000_000_000L))
-                .when(rateLimitService).check(eq(RateLimitPolicy.PUBLIC_READ), anyString());
+        rateLimitStore.failNext(new io.github.bucket4j.TimeoutException(
+                "Violated timeout while waiting for redis future", 3_000_000_000L, 3_000_000_000L));
+        catalogHasNoPlanners();
 
-        mvcAgainst(rateLimitService).perform(get("/api/planner/md/published"))
+        mvcAgainst().perform(get("/api/planner/md/published"))
                 .andExpect(status().isOk());
 
         assertThat(skipped(RateLimitPolicy.PUBLIC_READ)).isEqualTo(1.0);
+        assertThat(chargedKeys()).singleElement().satisfies(key -> assertThat(key).endsWith(":public-read"));
     }
 
     @Test
     void appleCallback_WhenChargeTimesOut_RedirectsToLoginUnavailable() throws Exception {
-        RateLimitService rateLimitService = mock(RateLimitService.class);
-        doThrow(new io.github.bucket4j.TimeoutException(
-                "Violated timeout while waiting for redis future", 3_000_000_000L, 3_000_000_000L))
-                .when(rateLimitService).check(eq(RateLimitPolicy.AUTH), anyString());
+        rateLimitStore.failNext(new io.github.bucket4j.TimeoutException(
+                "Violated timeout while waiting for redis future", 3_000_000_000L, 3_000_000_000L));
 
-        mvcAgainst(rateLimitService).perform(post("/api/auth/apple/callback"))
+        mvcAgainst().perform(post("/api/auth/apple/callback"))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location", FRONTEND_URL + LoginRedirect.UNAVAILABLE));
+        assertThat(chargedKeys()).singleElement().satisfies(key -> assertThat(key).endsWith(":auth"));
     }
 
     @Test
     void skippedCharges_WhenStoreFailsInBursts_WarnOncePerBurst() throws Exception {
-        RateLimitService rateLimitService = mock(RateLimitService.class);
-        doThrow(new RedisConnectionException("down"))
-                .doThrow(new RedisConnectionException("down"))
-                .doThrow(new RedisConnectionException("down"))
-                .doNothing()
-                .doThrow(new RedisConnectionException("down"))
-                .when(rateLimitService).check(eq(RateLimitPolicy.PUBLIC_READ), anyString());
-        MockMvc mockMvc = mvcAgainst(rateLimitService);
+        catalogHasNoPlanners();
+        MockMvc mockMvc = mvcAgainst();
 
         try (LogCapture interceptorLog = LogCapture.onThisThread(RateLimitInterceptor.class)) {
-            for (int request = 0; request < 5; request++) {
+            for (int request = 0; request < 3; request++) {
+                rateLimitStore.failNext(new RedisConnectionException("down"));
                 mockMvc.perform(get("/api/planner/md/published")).andExpect(status().isOk());
             }
+            mockMvc.perform(get("/api/planner/md/published")).andExpect(status().isOk());
+            rateLimitStore.failNext(new RedisConnectionException("down"));
+            mockMvc.perform(get("/api/planner/md/published")).andExpect(status().isOk());
 
             assertThat(interceptorLog.at(Level.WARN)).hasSize(2);
         }
         assertThat(skipped(RateLimitPolicy.PUBLIC_READ)).isEqualTo(4.0);
+        assertThat(chargedKeys()).hasSize(5).allSatisfy(key -> assertThat(key).endsWith(":public-read"));
     }
 
     @Test
@@ -180,7 +189,7 @@ class RateLimitStoreOutageTest {
                 .containsExactly(RateLimitPolicy.AUTH);
     }
 
-    private MockMvc mvcAgainst(RateLimitService rateLimitService) {
+    private MockMvc mvcAgainst() {
         CookieUtils cookieUtils = new CookieUtils(false, "", "Lax");
         FrontendProperties frontendProperties = new FrontendProperties(FRONTEND_URL);
         SecurityProperties securityProperties = new SecurityProperties();
@@ -189,7 +198,7 @@ class RateLimitStoreOutageTest {
         DeviceIdResolver deviceIdResolver = new DeviceIdResolver(cookieUtils);
 
         RateLimitInterceptor interceptor = new RateLimitInterceptor(
-                rateLimitService,
+                new RateLimitService(rateLimitStore, bucketProperties()),
                 securityProperties,
                 deviceIdResolver,
                 frontendProperties,
@@ -197,17 +206,19 @@ class RateLimitStoreOutageTest {
                 meterRegistry);
 
         AuthController authController = new AuthController(
-                mock(AuthenticationService.class),
-                mock(SessionRevocationService.class),
-                mock(TokenValidator.class),
+                null,
+                null,
+                null,
                 null,
                 cookieUtils,
                 null,
-                mock(OAuthStateService.class),
+                null,
                 null,
                 frontendProperties);
+        PublishedPlannerQueryService queryService = new PublishedPlannerQueryService(
+                null, catalogRepository, null, null, null, null, null, null, null, null);
         PublishedPlannerController publishedPlannerController = new PublishedPlannerController(
-                mock(PublishedPlannerQueryService.class), securityProperties, new ByIdReadGuard(), deviceIdResolver);
+                queryService, securityProperties, new ByIdReadGuard(), deviceIdResolver);
 
         return MockMvcBuilders.standaloneSetup(authController, publishedPlannerController, new DeclaredHandlerFixture())
                 .addInterceptors(interceptor)
@@ -215,13 +226,22 @@ class RateLimitStoreOutageTest {
                 .build();
     }
 
-    @SuppressWarnings("unchecked")
-    private static ProxyManager<byte[]> unreachableProxyManager() throws IOException {
+    private void storeUnreachableOnNextCharge() throws IOException {
         int port = closedPort();
-        ProxyManager<byte[]> proxyManager = mock(ProxyManager.class);
-        when(proxyManager.builder()).thenAnswer(invocation ->
-                RedisConnectionConfig.buildRateLimitProxyManager(TRUSTED_PROXY_IP, port, BUCKET_TTL).builder());
-        return proxyManager;
+        Throwable unreachable = catchThrowable(
+                () -> RedisConnectionConfig.buildRateLimitProxyManager(TRUSTED_PROXY_IP, port, BUCKET_TTL));
+        assertThat(unreachable).isInstanceOf(RedisConnectionException.class);
+        rateLimitStore.failNext((RedisConnectionException) unreachable);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void catalogHasNoPlanners() {
+        when(catalogRepository.findAll(any(Specification.class), any(Pageable.class)))
+                .thenAnswer(invocation -> new PageImpl<>(List.of(), invocation.<Pageable>getArgument(1), 0));
+    }
+
+    private List<String> chargedKeys() {
+        return rateLimitStore.charges().stream().map(InMemoryProxyManager.Charge::key).toList();
     }
 
     private static int closedPort() throws IOException {

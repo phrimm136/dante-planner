@@ -2,7 +2,6 @@ package org.danteplanner.backend.shared.gtid;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -10,15 +9,21 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
 import javax.sql.DataSource;
+import javax.sql.rowset.CachedRowSet;
+import javax.sql.rowset.RowSetMetaDataImpl;
+import javax.sql.rowset.RowSetProvider;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockFilterChain;
@@ -33,6 +38,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.shared.config.ReplicaDataSourceProperties;
 import org.danteplanner.backend.support.LogCapture;
 
+@ExtendWith(MockitoExtension.class)
 class GtidPinExitTest {
 
     private static final int READS = 20;
@@ -48,8 +54,19 @@ class GtidPinExitTest {
     private static final int SUBSET = 1;
 
     private final SimpleMeterRegistry meters = new SimpleMeterRegistry();
-    private final PreparedStatement waitStatement = mock(PreparedStatement.class);
-    private final PreparedStatement subsetStatement = mock(PreparedStatement.class);
+
+    @Mock
+    private DataSource dataSource;
+
+    @Mock
+    private Connection connection;
+
+    @Mock
+    private PreparedStatement waitStatement;
+
+    @Mock
+    private PreparedStatement subsetStatement;
+
     private final List<String> preparedSql = new ArrayList<>();
 
     private static String rawCookie(String gtid) {
@@ -59,13 +76,17 @@ class GtidPinExitTest {
 
     private static Answer<ResultSet> returning(int value) {
         return invocation -> {
-            ResultSet resultSet = mock(ResultSet.class);
-            ResultSetMetaData metaData = mock(ResultSetMetaData.class);
-            when(metaData.getColumnCount()).thenReturn(1);
-            when(resultSet.getMetaData()).thenReturn(metaData);
-            when(resultSet.next()).thenReturn(true, false);
-            when(resultSet.getInt(1)).thenReturn(value);
-            return resultSet;
+            CachedRowSet rows = RowSetProvider.newFactory().createCachedRowSet();
+            RowSetMetaDataImpl metaData = new RowSetMetaDataImpl();
+            metaData.setColumnCount(1);
+            metaData.setColumnType(1, Types.INTEGER);
+            rows.setMetaData(metaData);
+            rows.moveToInsertRow();
+            rows.updateInt(1, value);
+            rows.insertRow();
+            rows.moveToCurrentRow();
+            rows.beforeFirst();
+            return rows;
         };
     }
 
@@ -84,10 +105,7 @@ class GtidPinExitTest {
         return new SQLException("Communications link failure", "08S01", 0);
     }
 
-    private DataSource database(Answer<ResultSet> waitAnswer, Answer<ResultSet> subsetAnswer)
-            throws SQLException {
-        DataSource dataSource = mock(DataSource.class);
-        Connection connection = mock(Connection.class);
+    private DataSource database(Answer<ResultSet> waitAnswer) throws SQLException {
         when(dataSource.getConnection()).thenReturn(connection);
         when(connection.getAutoCommit()).thenReturn(true);
         when(connection.prepareStatement(anyString())).thenAnswer(invocation -> {
@@ -96,6 +114,12 @@ class GtidPinExitTest {
             return sql.contains(SUBSET_FUNCTION) ? subsetStatement : waitStatement;
         });
         when(waitStatement.executeQuery()).thenAnswer(waitAnswer);
+        return dataSource;
+    }
+
+    private DataSource database(Answer<ResultSet> waitAnswer, Answer<ResultSet> subsetAnswer)
+            throws SQLException {
+        database(waitAnswer);
         when(subsetStatement.executeQuery()).thenAnswer(subsetAnswer);
         return dataSource;
     }
@@ -142,8 +166,7 @@ class GtidPinExitTest {
 
     @Test
     void readGet_WhenMalformedGtidCookie_FirstResponseClearsAndNothingIsPinned() throws Exception {
-        GtidCookieFilter filter = filterOver(database(
-                throwing(malformedGtidSet(MALFORMED)), returning(SUBSET)));
+        GtidCookieFilter filter = filterOver(dataSource);
 
         try (LogCapture logs = LogCapture.onThisThread(GtidReadGate.class)) {
             List<MockHttpServletResponse> responses = consecutiveReads(filter, MALFORMED);
@@ -158,8 +181,7 @@ class GtidPinExitTest {
     @Test
     void readGet_WhenReplicaRejectsGtidAsMalformed_ClearsUnpinnedAndWarnsOnceWithoutStack()
             throws Exception {
-        GtidCookieFilter filter = filterOver(database(
-                throwing(malformedGtidSet(FOREIGN_UUID)), returning(SUBSET)));
+        GtidCookieFilter filter = filterOver(database(throwing(malformedGtidSet(FOREIGN_UUID))));
 
         try (LogCapture logs = LogCapture.onThisThread(GtidReadGate.class)) {
             List<MockHttpServletResponse> responses = consecutiveReads(filter, FOREIGN_UUID);
@@ -213,8 +235,7 @@ class GtidPinExitTest {
 
     @Test
     void readGet_WhenReplicaCaughtUp_ClearsWithoutAskingPrimary() throws Exception {
-        GtidCookieFilter filter = filterOver(database(
-                returning(WAIT_APPLIED), returning(SUBSET)));
+        GtidCookieFilter filter = filterOver(database(returning(WAIT_APPLIED)));
 
         List<MockHttpServletResponse> responses = consecutiveReads(filter, FOREIGN_UUID);
 
@@ -225,8 +246,7 @@ class GtidPinExitTest {
 
     @Test
     void readGet_WhenWaitFailsTransiently_EveryReadPinnedAndCookieKept() throws Exception {
-        GtidCookieFilter filter = filterOver(database(
-                throwing(connectionFailure()), returning(NOT_SUBSET)));
+        GtidCookieFilter filter = filterOver(database(throwing(connectionFailure())));
 
         List<MockHttpServletResponse> responses = consecutiveReads(filter, FOREIGN_UUID);
 
@@ -248,8 +268,7 @@ class GtidPinExitTest {
 
     @Test
     void registration_WhenReplicaDisabledAndPrimaryWouldReportCaughtUp_KeepsCookie() throws Exception {
-        GtidReadGate primaryAnsweringGate = mock(GtidReadGate.class);
-        when(primaryAnsweringGate.probe(anyString())).thenReturn(GtidReadGate.Verdict.CAUGHT_UP);
+        GtidReadGate primaryAnsweringGate = new GtidReadGate(dataSource, meters);
         ReplicaDataSourceProperties oregon = new ReplicaDataSourceProperties();
         GtidCookieFilter filter = new GtidGateConfig().gtidCookieFilterRegistration(
                 primaryAnsweringGate, new GtidWriteCapture(meters), oregon).getFilter();
@@ -261,8 +280,7 @@ class GtidPinExitTest {
 
     @Test
     void registration_WhenReplicaEnabledAndGateReportsCaughtUp_ClearsCookie() throws Exception {
-        GtidReadGate caughtUpGate = mock(GtidReadGate.class);
-        when(caughtUpGate.probe(anyString())).thenReturn(GtidReadGate.Verdict.CAUGHT_UP);
+        GtidReadGate caughtUpGate = new GtidReadGate(database(returning(WAIT_APPLIED)), meters);
         ReplicaDataSourceProperties seoul = new ReplicaDataSourceProperties();
         seoul.setEnabled(true);
         GtidCookieFilter filter = new GtidGateConfig().gtidCookieFilterRegistration(

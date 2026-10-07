@@ -11,9 +11,10 @@ import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor;
-import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
+import org.danteplanner.backend.shared.ratelimit.RateLimitProperties;
 import org.danteplanner.backend.shared.ratelimit.RateLimitService;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.danteplanner.backend.support.InMemoryProxyManager;
 import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.ratelimitfixture.BareHandlerFixture;
 import org.danteplanner.ratelimitfixture.DeclaredHandlerFixture;
@@ -31,9 +32,6 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import ch.qos.logback.classic.Level;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -50,17 +48,16 @@ class BackstopDeniesWhenTheGateWasSkippedTest {
 
     private final BareHandlerFixture bareFixture = new BareHandlerFixture();
 
-    private RateLimitService rateLimitService;
+    private final InMemoryProxyManager rateLimitStore = new InMemoryProxyManager();
     private LogCapture interceptorLog;
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        rateLimitService = mock(RateLimitService.class);
         SecurityProperties securityProperties = new SecurityProperties();
         securityProperties.parseTrustedProxyIps();
         RateLimitInterceptor interceptor = new RateLimitInterceptor(
-                rateLimitService,
+                new RateLimitService(rateLimitStore, crudBucket()),
                 securityProperties,
                 new DeviceIdResolver(new CookieUtils(false, "", "Lax")),
                 new FrontendProperties("https://planner.example"),
@@ -90,7 +87,7 @@ class BackstopDeniesWhenTheGateWasSkippedTest {
                 .andExpect(jsonPath("$.message").value("Request rejected"));
 
         assertThat(bareFixture.bodyRan()).isFalse();
-        verifyNoInteractions(rateLimitService);
+        assertThat(rateLimitStore.charges()).isEmpty();
 
         assertThat(interceptorLog.events()).anySatisfy(event -> {
             assertThat(event.getLevel()).isEqualTo(Level.ERROR);
@@ -107,7 +104,8 @@ class BackstopDeniesWhenTheGateWasSkippedTest {
         mockMvc.perform(get("/api/fixture/inherited"))
                 .andExpect(status().isOk());
 
-        verify(rateLimitService).check(RateLimitPolicy.CRUD, 7L, "fixture");
+        assertThat(rateLimitStore.charges()).extracting(InMemoryProxyManager.Charge::key)
+                .containsExactly("7:fixture");
         assertThat(interceptorLog.events()).isEmpty();
     }
 
@@ -116,7 +114,17 @@ class BackstopDeniesWhenTheGateWasSkippedTest {
         mockMvc.perform(get("/api/fixture/exempt"))
                 .andExpect(status().isOk());
 
-        verifyNoInteractions(rateLimitService);
+        assertThat(rateLimitStore.charges()).isEmpty();
         assertThat(interceptorLog.events()).isEmpty();
+    }
+
+    private static RateLimitProperties crudBucket() {
+        RateLimitProperties.BucketConfig bucket = new RateLimitProperties.BucketConfig();
+        bucket.setCapacity(10);
+        bucket.setRefillTokens(10);
+        bucket.setRefillDurationSeconds(60);
+        RateLimitProperties properties = new RateLimitProperties();
+        properties.setCrud(bucket);
+        return properties;
     }
 }

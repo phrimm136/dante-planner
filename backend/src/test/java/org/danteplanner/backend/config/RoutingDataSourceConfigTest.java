@@ -16,6 +16,7 @@ import org.danteplanner.backend.shared.config.UndeclaredPrimaryAccessGuard;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 
@@ -31,8 +32,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Scenario test for requirements §6 / INV9 — the routing datasource config sizes its HikariCP pools
@@ -58,12 +57,12 @@ class RoutingDataSourceConfigTest {
         return props;
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> ObjectProvider<T> provider(T bean) {
-        ObjectProvider<T> provider = mock(ObjectProvider.class);
-        when(provider.getIfAvailable()).thenReturn(bean);
-        when(provider.getObject()).thenReturn(bean);
-        return provider;
+    private static <T> ObjectProvider<T> provider(Class<T> type, T bean) {
+        StaticListableBeanFactory beans = new StaticListableBeanFactory();
+        if (bean != null) {
+            beans.addBean(type.getName(), bean);
+        }
+        return beans.getBeanProvider(type);
     }
 
     private static Map<Object, DataSource> resolvedTargets(
@@ -72,11 +71,11 @@ class RoutingDataSourceConfigTest {
         DataSource dataSource = config.dataSource(
                 new GtidWriteCapture(meterRegistry),
                 new UndeclaredPrimaryAccessGuard(meterRegistry, false),
-                mock(HikariDataSource.class),
-                provider(null),
-                provider(null),
-                provider(fallbackReplicaPool),
-                provider(fallbackReplicaPool == null ? null : CircuitBreaker.ofDefaults("test")));
+                new HikariDataSource(),
+                provider(HikariDataSource.class, null),
+                provider(HikariDataSource.class, null),
+                provider(HikariDataSource.class, fallbackReplicaPool),
+                provider(CircuitBreaker.class, fallbackReplicaPool == null ? null : CircuitBreaker.ofDefaults("test")));
         LazyConnectionDataSourceProxy lazy = (LazyConnectionDataSourceProxy) dataSource;
         return ((AbstractRoutingDataSource) lazy.getTargetDataSource()).getResolvedDataSources();
     }
@@ -135,7 +134,7 @@ class RoutingDataSourceConfigTest {
 
         @Test
         void dataSource_WhenFallbackReplicaPoolExists_ReadsThroughTheBreakerAndWritesDoNot() {
-            Map<Object, DataSource> targets = resolvedTargets(config, mock(HikariDataSource.class));
+            Map<Object, DataSource> targets = resolvedTargets(config, new HikariDataSource());
 
             assertThat(targets.get(RoutingKey.REPLICA)).isInstanceOf(PrimaryReadFallbackDataSource.class);
             assertThat(targets.get(RoutingKey.PRIMARY)).isNotInstanceOf(PrimaryReadFallbackDataSource.class);

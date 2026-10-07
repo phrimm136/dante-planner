@@ -23,8 +23,6 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-
 class ReadFallbackConfigTest {
 
     private static final String PRIMARY_URL = "jdbc:mysql://127.0.0.1:1/planner";
@@ -36,7 +34,7 @@ class ReadFallbackConfigTest {
             .withBean(DataSourceProperties.class, ReadFallbackConfigTest::primaryProperties)
             .withBean(HikariTuningProperties.class)
             .withBean(MeterRegistry.class, SimpleMeterRegistry::new)
-            .withBean("primaryPool", HikariDataSource.class, () -> mock(HikariDataSource.class));
+            .withBean("primaryPool", HikariDataSource.class, HikariDataSource::new);
 
     private static DataSourceProperties primaryProperties() {
         DataSourceProperties properties = new DataSourceProperties();
