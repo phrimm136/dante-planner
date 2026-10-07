@@ -2,12 +2,9 @@
   "env": {
       "ENABLE_LSP_TOOL": "1"
   },
-  "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": [
-    "mysql",
-    "sequential-thinking",
-    "playwright"
-  ],
+  "enabledPlugins": {
+    "playwright@claude-plugins-official": true
+  },
   "permissions": {
     "deny": [
       "Read(./.env)",
