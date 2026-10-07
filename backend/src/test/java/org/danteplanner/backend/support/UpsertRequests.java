@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
+import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 
@@ -18,6 +19,18 @@ public final class UpsertRequests {
 
     public static Builder draft() {
         return new Builder();
+    }
+
+    public static Builder resending(Planner planner) {
+        return draft()
+                .id(planner.getId().toString())
+                .category(planner.getCategory())
+                .title(planner.getTitle())
+                .status(null)
+                .content(planner.getContentJson())
+                .contentVersion(planner.getContentVersion())
+                .plannerType(planner.getPlannerType())
+                .syncVersion(planner.getSyncVersion());
     }
 
     public static final class Builder {

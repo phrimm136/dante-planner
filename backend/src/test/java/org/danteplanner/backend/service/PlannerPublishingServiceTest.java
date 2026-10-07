@@ -15,12 +15,10 @@ import org.danteplanner.backend.planner.precondition.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.precondition.PlannerPublishValidator;
 
 
-import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
@@ -41,6 +39,7 @@ import org.danteplanner.backend.planner.gamedata.GameDataLoader;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.support.UpsertRequests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -336,9 +335,7 @@ class PlannerPublishingServiceTest {
         @Test
         void publishLoadsAggregateOnce_WhenContentCarried_ReusesUpsertedAggregate() {
             Planner planner = testPlannerBuilder().published(false).build();
-            UpsertPlannerRequest request = new UpsertPlannerRequest(
-                    planner.getId().toString(), "5F", "Reused Aggregate", null, planner.getContentJson(),
-                    planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), null);
+            UpsertPlannerRequest request = UpsertRequests.resending(planner).title("Reused Aggregate").build();
 
             UUID deviceId = UUID.randomUUID();
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
@@ -392,14 +389,7 @@ class PlannerPublishingServiceTest {
         @Test
         void publish_WhenNotOwner_ThrowsException() {
             // Arrange
-            User otherUser = User.builder()
-                    .id(999L)
-                    .email("other@example.com")
-                    .provider(AuthProviderType.GOOGLE)
-                    .providerId("google-999")
-                    .usernameEpithet("W_CORP")
-                    .usernameSuffix("test2")
-                    .build();
+            User otherUser = TestDataFactory.unsavedUser(999L);
             Planner planner = createTestPlanner();
             planner.setUserId(otherUser.getId());
 
@@ -528,14 +518,7 @@ class PlannerPublishingServiceTest {
         @Test
         void toggleOwnerNotifications_WhenNotOwner_ThrowsException() {
             // Arrange
-            User otherUser = User.builder()
-                    .id(999L)
-                    .email("other@example.com")
-                    .provider(AuthProviderType.GOOGLE)
-                    .providerId("google-999")
-                    .usernameEpithet("W_CORP")
-                    .usernameSuffix("test2")
-                    .build();
+            User otherUser = TestDataFactory.unsavedUser(999L);
             Planner planner = createTestPlanner();
             planner.setUserId(otherUser.getId());
 
@@ -571,9 +554,13 @@ class PlannerPublishingServiceTest {
             long syncVersionBefore = planner.getSyncVersion();
             lenient().when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
-            UpsertPlannerRequest request = new UpsertPlannerRequest(
-                    planner.getId().toString(), "5F", "  ", null, "{}", 99,
-                    PlannerType.MIRROR_DUNGEON, null, null);
+            UpsertPlannerRequest request = UpsertRequests.draft()
+                    .id(planner.getId().toString())
+                    .title("  ")
+                    .status(null)
+                    .content("{}")
+                    .contentVersion(99)
+                    .build();
 
             PlannerValidationException thrown = assertThrows(
                     PlannerValidationException.class,
@@ -591,9 +578,13 @@ class PlannerPublishingServiceTest {
             long syncVersionBefore = planner.getSyncVersion();
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
-            UpsertPlannerRequest request = new UpsertPlannerRequest(
-                    planner.getId().toString(), "5F", null, null, "{}", 99,
-                    PlannerType.MIRROR_DUNGEON, null, null);
+            UpsertPlannerRequest request = UpsertRequests.draft()
+                    .id(planner.getId().toString())
+                    .title(null)
+                    .status(null)
+                    .content("{}")
+                    .contentVersion(99)
+                    .build();
 
             PlannerValidationException thrown = assertThrows(
                     PlannerValidationException.class,
@@ -608,9 +599,7 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().title("Stored Title").published(false).build();
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
-            UpsertPlannerRequest request = new UpsertPlannerRequest(
-                    planner.getId().toString(), "5F", null, null, planner.getContentJson(),
-                    planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), null);
+            UpsertPlannerRequest request = UpsertRequests.resending(planner).title(null).build();
             UUID deviceId = UUID.randomUUID();
             publishedEventsPersist();
 

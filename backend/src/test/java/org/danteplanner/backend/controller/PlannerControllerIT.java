@@ -53,6 +53,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.support.UpsertRequests;
 
 /**
  * Integration tests for the planner endpoints under /api/planner/md.
@@ -137,73 +138,8 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         return AuthCookies.session(accessToken, deviceId);
     }
 
-    private UpsertPlannerRequest createValidPlannerRequest() {
-        return new UpsertPlannerRequest(
-                UUID.randomUUID().toString(),
-                "5F",
-                "Test Planner",
-                PlannerStatus.DRAFT,
-                TestDataFactory.VALID_CONTENT,
-                7,
-                PlannerType.MIRROR_DUNGEON,
-                null,
-                null);
-    }
-
-    /**
-     * Create an upsert request pre-populated with existing planner's required fields.
-     * Use this for update tests to satisfy validation while testing specific field changes.
-     */
     private static final String UNKNOWN_GIFT_CONTENT = TestDataFactory.VALID_CONTENT.replace(
             "\"observationGiftIds\":[]", "\"observationGiftIds\":[\"9899\"]");
-
-    private UpsertPlannerRequest createUpsertRequestFromPlanner(Planner planner) {
-        return new UpsertPlannerRequest(
-                planner.getId().toString(),
-                planner.getCategory(),
-                null,
-                null,
-                planner.getContentJson(),
-                planner.getContentVersion(),
-                planner.getPlannerType(),
-                planner.getSyncVersion(),
-                null);
-    }
-
-    private UpsertPlannerRequest withCategory(UpsertPlannerRequest r, String category) {
-        return new UpsertPlannerRequest(r.id(), category, r.title(), r.status(),
-                r.content(), r.contentVersion(), r.plannerType(), r.syncVersion(), r.selectedKeywords());
-    }
-
-    private UpsertPlannerRequest withTitle(UpsertPlannerRequest r, String title) {
-        return new UpsertPlannerRequest(r.id(), r.category(), title, r.status(),
-                r.content(), r.contentVersion(), r.plannerType(), r.syncVersion(), r.selectedKeywords());
-    }
-
-    private UpsertPlannerRequest withStatus(UpsertPlannerRequest r, PlannerStatus status) {
-        return new UpsertPlannerRequest(r.id(), r.category(), r.title(), status,
-                r.content(), r.contentVersion(), r.plannerType(), r.syncVersion(), r.selectedKeywords());
-    }
-
-    private UpsertPlannerRequest withContent(UpsertPlannerRequest r, String content) {
-        return new UpsertPlannerRequest(r.id(), r.category(), r.title(), r.status(),
-                content, r.contentVersion(), r.plannerType(), r.syncVersion(), r.selectedKeywords());
-    }
-
-    private UpsertPlannerRequest withContentVersion(UpsertPlannerRequest r, Integer contentVersion) {
-        return new UpsertPlannerRequest(r.id(), r.category(), r.title(), r.status(),
-                r.content(), contentVersion, r.plannerType(), r.syncVersion(), r.selectedKeywords());
-    }
-
-    private UpsertPlannerRequest withPlannerType(UpsertPlannerRequest r, PlannerType plannerType) {
-        return new UpsertPlannerRequest(r.id(), r.category(), r.title(), r.status(),
-                r.content(), r.contentVersion(), plannerType, r.syncVersion(), r.selectedKeywords());
-    }
-
-    private UpsertPlannerRequest withSyncVersion(UpsertPlannerRequest r, Long syncVersion) {
-        return new UpsertPlannerRequest(r.id(), r.category(), r.title(), r.status(),
-                r.content(), r.contentVersion(), r.plannerType(), syncVersion, r.selectedKeywords());
-    }
 
     private Planner createTestPlanner(User user) {
         return TestDataFactory.planner(user)
@@ -233,7 +169,12 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void createPlanner_WhenValidData_Returns201() throws Exception {
-            UpsertPlannerRequest request = createValidPlannerRequest();
+            UpsertPlannerRequest request = UpsertRequests.draft()
+                    .title("Test Planner")
+                    .category("5F")
+                    .status(PlannerStatus.DRAFT)
+                    .contentVersion(7)
+                    .build();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(session())
@@ -252,7 +193,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void createPlanner_WhenNoAuth_Returns401() throws Exception {
-            UpsertPlannerRequest request = createValidPlannerRequest();
+            UpsertPlannerRequest request = UpsertRequests.valid();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(deviceIdCookie())
@@ -263,7 +204,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void createPlanner_WhenMissingCategory_Returns400() throws Exception {
-            UpsertPlannerRequest request = withCategory(createValidPlannerRequest(), null);
+            UpsertPlannerRequest request = UpsertRequests.draft().category(null).build();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(session())
@@ -275,7 +216,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void createPlanner_WhenInvalidStatus_Returns400WithoutEcho() throws Exception {
-            UpsertPlannerRequest request = createValidPlannerRequest();
+            UpsertPlannerRequest request = UpsertRequests.draft().status(PlannerStatus.DRAFT).build();
             String body = objectMapper.writeValueAsString(request)
                     .replace("\"status\":\"draft\"", "\"status\":\"garbage\"");
 
@@ -290,7 +231,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void createPlanner_WhenMissingContent_Returns400() throws Exception {
-            UpsertPlannerRequest request = withContent(createValidPlannerRequest(), null);
+            UpsertPlannerRequest request = UpsertRequests.draft().content(null).build();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(session())
@@ -302,14 +243,13 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void createPlanner_WhenContentTooLarge_Returns400() throws Exception {
-            UpsertPlannerRequest request = createValidPlannerRequest();
             // Create valid content structure that exceeds 50KB
             String largeTitle = "x".repeat(52000);
             String largeContent = String.format(
                 "{\"title\":\"%s\",\"category\":\"5F\",\"selectedKeywords\":[],\"equipment\":{},\"deploymentOrder\":[],\"floorSelections\":[],\"sectionNotes\":{}}",
                 largeTitle
             );
-            request = withContent(request, largeContent);
+            UpsertPlannerRequest request = UpsertRequests.draft().content(largeContent).build();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(session())
@@ -321,14 +261,13 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void createPlanner_WhenNoteTooLarge_Returns400() throws Exception {
-            UpsertPlannerRequest request = createValidPlannerRequest();
             // Create valid content structure with a note larger than 1KB
             String largeNote = "x".repeat(1100);
             String contentWithLargeNote = String.format(
                 "{\"title\":\"Test\",\"category\":\"5F\",\"selectedKeywords\":[],\"equipment\":{},\"deploymentOrder\":[],\"floorSelections\":[],\"sectionNotes\":{\"section1\":{\"content\":{\"type\":\"doc\",\"text\":\"%s\"}}}}",
                 largeNote
             );
-            request = withContent(request, contentWithLargeNote);
+            UpsertPlannerRequest request = UpsertRequests.draft().content(contentWithLargeNote).build();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(session())
@@ -340,8 +279,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void createPlanner_WhenMissingContentVersion_Returns400() throws Exception {
-            UpsertPlannerRequest request = createValidPlannerRequest();
-            request = withContentVersion(request, null);
+            UpsertPlannerRequest request = UpsertRequests.draft().contentVersion(null).build();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(session())
@@ -353,8 +291,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void createPlanner_WhenMissingPlannerType_Returns400() throws Exception {
-            UpsertPlannerRequest request = createValidPlannerRequest();
-            request = withPlannerType(request, null);
+            UpsertPlannerRequest request = UpsertRequests.draft().plannerType(null).build();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(session())
@@ -366,8 +303,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void createPlanner_WhenNonPositiveContentVersion_Returns400() throws Exception {
-            UpsertPlannerRequest request = createValidPlannerRequest();
-            request = withContentVersion(request, 0);
+            UpsertPlannerRequest request = UpsertRequests.draft().contentVersion(0).build();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(session())
@@ -379,7 +315,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void createPlanner_WhenContentVersionIsThePreviousSeason_Returns400() throws Exception {
-            UpsertPlannerRequest request = withContentVersion(createValidPlannerRequest(), 6);
+            UpsertPlannerRequest request = UpsertRequests.draft().contentVersion(6).build();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(session())
@@ -396,7 +332,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                 createTestPlanner(testUser);
             }
 
-            UpsertPlannerRequest request = createValidPlannerRequest();
+            UpsertPlannerRequest request = UpsertRequests.valid();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(session())
@@ -408,8 +344,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void createPlanner_WhenInvalidCategoryForType_Returns400() throws Exception {
-            UpsertPlannerRequest request = createValidPlannerRequest();
-            request = withCategory(request, "INVALID_CATEGORY");
+            UpsertPlannerRequest request = UpsertRequests.draft().category("INVALID_CATEGORY").build();
 
             // Note: INVALID_CATEGORY is mapped to generic VALIDATION_ERROR in ApiExceptionHandler
             // to prevent schema probing attacks
@@ -423,8 +358,10 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void createPlanner_WhenMdCategoryWithRrType_Returns400() throws Exception {
-            UpsertPlannerRequest request = createValidPlannerRequest();
-            request = withCategory(withPlannerType(request, PlannerType.REFRACTED_RAILWAY), "5F"); // MD category, invalid for RR
+            UpsertPlannerRequest request = UpsertRequests.draft()
+                    .plannerType(PlannerType.REFRACTED_RAILWAY)
+                    .category("5F") // MD category, invalid for RR
+                    .build();
 
             // Note: INVALID_CATEGORY is mapped to generic VALIDATION_ERROR in ApiExceptionHandler
             // to prevent schema probing attacks
@@ -563,8 +500,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             Planner planner = createTestPlanner(testUser);
             Long initialSyncVersion = planner.getSyncVersion();
 
-            UpsertPlannerRequest request = createUpsertRequestFromPlanner(planner);
-            request = withTitle(request, "Updated Title");
+            UpsertPlannerRequest request = UpsertRequests.resending(planner).title("Updated Title").build();
 
             mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
                             .cookie(session())
@@ -581,7 +517,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                     .status(PlannerStatus.DRAFT)
                     .content(UNKNOWN_GIFT_CONTENT)
                     .save(plannerRepository);
-            UpsertPlannerRequest request = withCategory(createUpsertRequestFromPlanner(planner), "10F");
+            UpsertPlannerRequest request = UpsertRequests.resending(planner).title(null).category("10F").build();
 
             mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
                             .cookie(session())
@@ -594,8 +530,11 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         @Test
         void updatePlanner_WhenCategoryAndContentChangeOverARetiredId_Returns400() throws Exception {
             Planner planner = createTestPlanner(testUser);
-            UpsertPlannerRequest request = withContent(
-                    withCategory(createUpsertRequestFromPlanner(planner), "10F"), UNKNOWN_GIFT_CONTENT);
+            UpsertPlannerRequest request = UpsertRequests.resending(planner)
+                    .title(null)
+                    .category("10F")
+                    .content(UNKNOWN_GIFT_CONTENT)
+                    .build();
 
             mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
                             .cookie(session())
@@ -609,8 +548,10 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         void updatePlanner_WhenVersionMismatch_Returns409() throws Exception {
             Planner planner = createTestPlanner(testUser);
 
-            UpsertPlannerRequest request = createUpsertRequestFromPlanner(planner);
-            request = withSyncVersion(withTitle(request, "Updated Title"), 999L); // Wrong version
+            UpsertPlannerRequest request = UpsertRequests.resending(planner)
+                    .title("Updated Title")
+                    .syncVersion(999L) // Wrong version
+                    .build();
 
             mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
                             .cookie(session())
@@ -625,8 +566,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         void updatePlanner_WhenOwnedByOtherUser_Returns403() throws Exception {
             Planner otherUserPlanner = createTestPlanner(otherUser);
 
-            UpsertPlannerRequest request = createUpsertRequestFromPlanner(otherUserPlanner);
-            request = withTitle(request, "Updated Title");
+            UpsertPlannerRequest request = UpsertRequests.resending(otherUserPlanner).title("Updated Title").build();
 
             mockMvc.perform(put("/api/planner/md/{id}", otherUserPlanner.getId()).with(withCsrf())
                             .cookie(session())
@@ -640,12 +580,11 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         void updatePlanner_WhenContentTooLarge_Returns400() throws Exception {
             Planner planner = createTestPlanner(testUser);
 
-            UpsertPlannerRequest request = createUpsertRequestFromPlanner(planner);
             String largeTitle = "x".repeat(52000);
-            request = withContent(request, String.format(
+            UpsertPlannerRequest request = UpsertRequests.resending(planner).title(null).content(String.format(
                 "{\"title\":\"%s\",\"category\":\"5F\",\"selectedKeywords\":[],\"equipment\":{},\"deploymentOrder\":[],\"floorSelections\":[],\"sectionNotes\":{}}",
                 largeTitle
-            ));
+            )).build();
 
             mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
                             .cookie(session())
@@ -659,8 +598,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         void updatePlanner_WhenNoAuth_Returns401() throws Exception {
             Planner planner = createTestPlanner(testUser);
 
-            UpsertPlannerRequest request = createUpsertRequestFromPlanner(planner);
-            request = withTitle(request, "Updated Title");
+            UpsertPlannerRequest request = UpsertRequests.resending(planner).title("Updated Title").build();
 
             mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
                             .cookie(deviceIdCookie())
@@ -673,8 +611,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         void updatePlanner_WhenContentVersionUpdated_PersistsNewVersion() throws Exception {
             Planner planner = createTestPlanner(testUser); // contentVersion = 6
 
-            UpsertPlannerRequest request = createUpsertRequestFromPlanner(planner);
-            request = withContentVersion(request, 7);
+            UpsertPlannerRequest request = UpsertRequests.resending(planner).title(null).contentVersion(7).build();
 
             mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
                             .cookie(session())
@@ -687,7 +624,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         @Test
         void updatePlanner_WhenPublishedCategoryGrowsPastItsFloors_Returns400AndKeepsTheCategory() throws Exception {
             Planner planner = createPublishedPlanner(testUser, "Five Floors", "5F", 0);
-            UpsertPlannerRequest request = withCategory(createUpsertRequestFromPlanner(planner), "15F");
+            UpsertPlannerRequest request = UpsertRequests.resending(planner).title(null).category("15F").build();
 
             mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
                             .cookie(session())
@@ -711,7 +648,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                     .save(plannerRepository);
             statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
             catalogService.add(planner);
-            UpsertPlannerRequest request = withCategory(createUpsertRequestFromPlanner(planner), "15F");
+            UpsertPlannerRequest request = UpsertRequests.resending(planner).title(null).category("15F").build();
 
             mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
                             .cookie(session())
@@ -832,7 +769,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             }
 
             // 100th planner should succeed
-            UpsertPlannerRequest request = createValidPlannerRequest();
+            UpsertPlannerRequest request = UpsertRequests.valid();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(session())
@@ -852,7 +789,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             }
 
             // 101st planner should fail
-            UpsertPlannerRequest request = createValidPlannerRequest();
+            UpsertPlannerRequest request = UpsertRequests.valid();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(session())
@@ -876,7 +813,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             plannerRepository.save(toDelete);
 
             // Now should be able to create one more
-            UpsertPlannerRequest request = createValidPlannerRequest();
+            UpsertPlannerRequest request = UpsertRequests.valid();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(session())
@@ -887,9 +824,8 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void upsertPlanner_WhenContentUnder50KB_Succeeds() throws Exception {
-            UpsertPlannerRequest request = createValidPlannerRequest();
             // Use TestDataFactory.VALID_CONTENT which is already well under 50KB
-            request = withContent(request, TestDataFactory.VALID_CONTENT);
+            UpsertPlannerRequest request = UpsertRequests.draft().content(TestDataFactory.VALID_CONTENT).build();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(session())
@@ -1049,7 +985,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                 notes.set("n" + i, objectMapper.createObjectNode().set("content", objectMapper.valueToTree(new int[500])));
             }
             String content = objectMapper.writeValueAsString(document);
-            UpsertPlannerRequest request = withContent(createValidPlannerRequest(), content);
+            UpsertPlannerRequest request = UpsertRequests.draft().content(content).build();
             UUID plannerId = UUID.fromString(request.id());
 
             mockMvc.perform(put("/api/planner/md/{id}", plannerId).with(withCsrf())
@@ -1074,8 +1010,9 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             ObjectNode document = (ObjectNode) objectMapper.readTree(TestDataFactory.VALID_CONTENT);
             document.set("floorSelections",
                     objectMapper.readTree("[{\"themePackId\":null,\"difficulty\":0,\"giftIds\":[]}]"));
-            UpsertPlannerRequest request = withContent(createValidPlannerRequest(),
-                    objectMapper.writeValueAsString(document));
+            UpsertPlannerRequest request = UpsertRequests.draft()
+                    .content(objectMapper.writeValueAsString(document))
+                    .build();
             UUID plannerId = UUID.fromString(request.id());
 
             mockMvc.perform(put("/api/planner/md/{id}", plannerId).with(withCsrf())
@@ -1099,8 +1036,9 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                     "[{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[]},"
                             + "{\"themePackId\":\"1002\",\"difficulty\":0,\"giftIds\":[]},"
                             + "{\"themePackId\":\"1003\",\"difficulty\":0,\"giftIds\":[]}]"));
-            UpsertPlannerRequest request = withContent(createValidPlannerRequest(),
-                    objectMapper.writeValueAsString(document));
+            UpsertPlannerRequest request = UpsertRequests.draft()
+                    .content(objectMapper.writeValueAsString(document))
+                    .build();
             UUID plannerId = UUID.fromString(request.id());
 
             mockMvc.perform(put("/api/planner/md/{id}", plannerId).with(withCsrf())
@@ -1126,8 +1064,9 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                             + "{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[]},"
                             + "{\"themePackId\":\"1003\",\"difficulty\":0,\"giftIds\":[]},"
                             + "{\"themePackId\":\"1004\",\"difficulty\":0,\"giftIds\":[]}]"));
-            UpsertPlannerRequest request = withContent(createValidPlannerRequest(),
-                    objectMapper.writeValueAsString(document));
+            UpsertPlannerRequest request = UpsertRequests.draft()
+                    .content(objectMapper.writeValueAsString(document))
+                    .build();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(session())

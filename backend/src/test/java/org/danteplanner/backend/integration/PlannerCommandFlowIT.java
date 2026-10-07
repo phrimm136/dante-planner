@@ -10,7 +10,6 @@ import org.danteplanner.backend.planner.entity.PlannerEntityFilter;
 import org.danteplanner.backend.planner.entity.PlannerKeywordFilter;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
-import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerContentRepository;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
@@ -27,6 +26,7 @@ import org.danteplanner.backend.support.CatalogEffects;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.support.UpsertRequests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -200,17 +200,13 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
     }
 
     private UpsertPlannerRequest edit(Planner planner, String title, Set<String> keywords) {
-        return new UpsertPlannerRequest(
-                planner.getId().toString(),
-                planner.getCategory(),
-                title,
-                PlannerStatus.SAVED,
-                keywords == null ? planner.getContentJson()
-                        : TestDataFactory.withSelectedKeywords(planner.getContentJson(), keywords),
-                planner.getContentVersion(),
-                PlannerType.MIRROR_DUNGEON,
-                planner.getSyncVersion(),
-                keywords);
+        return UpsertRequests.resending(planner)
+                .title(title)
+                .status(PlannerStatus.SAVED)
+                .content(keywords == null ? planner.getContentJson()
+                        : TestDataFactory.withSelectedKeywords(planner.getContentJson(), keywords))
+                .selectedKeywords(keywords)
+                .build();
     }
 
     @Test
@@ -300,9 +296,10 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
         UUID plannerId = publishedPlanner("Hidden Floor", Set.of("Sinking")).getId();
         Planner planner = plannerRepository.findById(plannerId).orElseThrow();
 
-        commandService.upsertPlanner(owner.getId(), deviceId, plannerId, new UpsertPlannerRequest(
-                plannerId.toString(), "5F", planner.getTitle(), PlannerStatus.SAVED, SIX_FLOOR_CONTENT,
-                planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), null), false);
+        commandService.upsertPlanner(owner.getId(), deviceId, plannerId, UpsertRequests.resending(planner)
+                .status(PlannerStatus.SAVED)
+                .content(SIX_FLOOR_CONTENT)
+                .build(), false);
         CatalogEffects.drain(catalogSyncService, jdbcTemplate, plannerId);
 
         Planner saved = plannerRepository.findById(plannerId).orElseThrow();
@@ -340,10 +337,10 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
     }
 
     private void switchCategory(Planner planner, String category) {
-        commandService.upsertPlanner(owner.getId(), deviceId, planner.getId(), new UpsertPlannerRequest(
-                planner.getId().toString(), category, planner.getTitle(), PlannerStatus.SAVED,
-                planner.getContentJson(), planner.getContentVersion(), PlannerType.MIRROR_DUNGEON,
-                planner.getSyncVersion(), null), false);
+        commandService.upsertPlanner(owner.getId(), deviceId, planner.getId(), UpsertRequests.resending(planner)
+                .category(category)
+                .status(PlannerStatus.SAVED)
+                .build(), false);
         CatalogEffects.drain(catalogSyncService, jdbcTemplate, planner.getId());
     }
 

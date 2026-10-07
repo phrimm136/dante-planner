@@ -22,7 +22,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.danteplanner.backend.shared.util.CommentConstants;
 
 
-import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.comment.dto.CommentTreeNode;
 import org.danteplanner.backend.comment.dto.CreateCommentResponse;
 import org.danteplanner.backend.comment.dto.UpdateCommentResponse;
@@ -115,24 +114,10 @@ class CommentServiceLayerTest {
                 null, new CommentAuthorshipValidator(),
                 new CommentStateValidator(), new VoteUniquenessValidator());
 
-        testUser = User.builder()
-                .id(1L)
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("test-123")
-                .usernameEpithet("TEST")
-                .usernameSuffix("tst01")
-                .role(UserRole.NORMAL)
-                .build();
+        testUser = TestDataFactory.unsavedUser(UserRole.NORMAL);
 
-        otherUser = User.builder()
-                .id(2L)
-                .email("other@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("other-123")
+        otherUser = TestDataFactory.user()
                 .usernameEpithet("OTHER")
-                .usernameSuffix("oth01")
-                .role(UserRole.NORMAL)
                 .build();
         users.add(testUser);
         users.add(otherUser);
@@ -435,15 +420,7 @@ class CommentServiceLayerTest {
 
         @Test
         void getCommentTree_WhenAuthorAccountDeactivated_OmitsTheAuthorName() {
-            User deactivated = User.builder()
-                    .id(3L)
-                    .email("gone@example.com")
-                    .provider(AuthProviderType.GOOGLE)
-                    .providerId("gone-123")
-                    .usernameEpithet("GONE")
-                    .usernameSuffix("gon01")
-                    .role(UserRole.NORMAL)
-                    .build();
+            User deactivated = TestDataFactory.unsavedUser(UserRole.NORMAL);
             deactivated.softDelete(Instant.now().plus(Duration.ofDays(30)));
 
             PlannerComment byActive =

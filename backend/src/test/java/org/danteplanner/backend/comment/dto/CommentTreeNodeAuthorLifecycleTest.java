@@ -1,11 +1,10 @@
 package org.danteplanner.backend.comment.dto;
 
-import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.service.UsersApiAdapter;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.shared.util.CommentConstants;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.api.UserRole;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -22,14 +21,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CommentTreeNodeAuthorLifecycleTest {
 
     private static User author(String epithet) {
-        return User.builder()
+        return TestDataFactory.user()
                 .id(3L)
-                .email("gone@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("gone-123")
                 .usernameEpithet(epithet)
-                .usernameSuffix("gon01")
-                .role(UserRole.NORMAL)
                 .build();
     }
 

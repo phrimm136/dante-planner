@@ -2,8 +2,8 @@ package org.danteplanner.backend.planner.entity;
 
 import org.junit.jupiter.api.Test;
 
-import java.time.Instant;
-import java.util.UUID;
+import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.user.api.UserRole;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
@@ -14,27 +14,9 @@ import static org.danteplanner.backend.support.Rejections.assertRejected;
  */
 class PlannerEntityTest {
 
-    private Planner publishedPlanner() {
-        Planner planner = Planner.builder()
-                .id(UUID.randomUUID())
-                .plannerType(PlannerType.MIRROR_DUNGEON)
-                .createdAt(Instant.now())
-                .build();
-        planner.attach(
-                StoredPlannerContent.holding(PlannerContent.builder()
-                        .title("Test Planner")
-                        .category("5F")
-                        .gameContentVersion(6)
-                        .build(), "{}"),
-                PlannerPublication.builder().build(),
-                PlannerModeration.builder().build());
-        planner.publish();
-        return planner;
-    }
-
     @Test
     void takeDown_WhenInvoked_Unpublishes() {
-        Planner planner = publishedPlanner();
+        Planner planner = TestDataFactory.planner(TestDataFactory.unsavedUser(UserRole.NORMAL)).published(true).build();
 
         planner.takeDown();
 
@@ -44,7 +26,7 @@ class PlannerEntityTest {
 
     @Test
     void publish_WhenTakenDown_Throws() {
-        Planner planner = publishedPlanner();
+        Planner planner = TestDataFactory.planner(TestDataFactory.unsavedUser(UserRole.NORMAL)).published(true).build();
         planner.takeDown();
 
         assertThat(planner.isPublished()).isFalse();

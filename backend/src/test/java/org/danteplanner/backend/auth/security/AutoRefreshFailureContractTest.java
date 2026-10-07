@@ -7,16 +7,15 @@ import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import jakarta.servlet.http.Cookie;
 
-import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.auth.token.RotationResult;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
-import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.RecordingRefreshRotation;
 import org.danteplanner.backend.support.RecordingTokenBlacklist;
 import org.danteplanner.backend.support.TestJwt;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -96,7 +95,7 @@ class AutoRefreshFailureContractTest {
      * revoked family, and the legacy path finds the token on the rotation blacklist.
      */
     private void givenTheTokenIsDead(boolean lineageEnabled) {
-        users.add(activeUser());
+        users.add(TestDataFactory.unsavedUser(USER_ID));
         if (lineageEnabled) {
             RotationResult.Rotated successor = (RotationResult.Rotated) refreshRotation.rotate(deadRefreshToken);
             refreshRotation.rotate(successor.newRefreshJwt());
@@ -128,16 +127,5 @@ class AutoRefreshFailureContractTest {
                 new AccessTokenAuthenticator(jwt.service(), tokenBlacklist), cookieUtils, users,
                 new AuthDegradationResponder(new ProblemWriter(Jackson2ObjectMapperBuilder.json().build())), jwt.service(), refreshRotation,
                 new LineageRotationFlag(lineageEnabled), jwt.properties());
-    }
-
-    private User activeUser() {
-        return User.builder()
-                .id(USER_ID)
-                .email("user@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-" + USER_ID)
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("usr42")
-                .build();
     }
 }

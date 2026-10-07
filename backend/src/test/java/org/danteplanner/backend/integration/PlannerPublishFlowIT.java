@@ -22,6 +22,7 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.CatalogEffects;
 import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.support.UpsertRequests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -131,10 +132,10 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
 
         // Owner edits only the title: the client sends the full document with
         // everything but the title unchanged (the wire contract requires it)
-        UpsertPlannerRequest titleEdit = new UpsertPlannerRequest(
-                planner.getId().toString(), "5F", "After Edit", PlannerStatus.SAVED,
-                planner.getContentJson(), 6,
-                PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), null);
+        UpsertPlannerRequest titleEdit = UpsertRequests.resending(planner)
+                .title("After Edit")
+                .status(PlannerStatus.SAVED)
+                .build();
         mockMvc.perform(put("/api/planner/md/{id}", planner.getId())
                         .cookie(AuthCookies.accessToken(token))
                         .with(withCsrf())
@@ -161,9 +162,12 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
     void publishIntentSingleRequest_WhenContentCarried_CreatesAndPublishesAtomically() throws Exception {
         UUID plannerId = UUID.randomUUID();
         String content = TestDataFactory.planner(owner).build().getContentJson();
-        UpsertPlannerRequest publishRequest = new UpsertPlannerRequest(
-                plannerId.toString(), "5F", "Intent One-Shot", PlannerStatus.SAVED,
-                content, 7, PlannerType.MIRROR_DUNGEON, null, null);
+        UpsertPlannerRequest publishRequest = UpsertRequests.draft()
+                .id(plannerId.toString())
+                .title("Intent One-Shot")
+                .status(PlannerStatus.SAVED)
+                .content(content)
+                .build();
 
         mockMvc.perform(post("/api/planner/md/{id}/publish", plannerId)
                         .cookie(AuthCookies.accessToken(token))
@@ -198,12 +202,14 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
                 .as("a refused body creates nothing").isFalse();
     }
 
-    private static final int CURRENT_CONTENT_VERSION = 7;
-
     private UpsertPlannerRequest upsertBody(UUID id, String title, String content, Long syncVersion) {
-        return new UpsertPlannerRequest(
-                id.toString(), "5F", title, PlannerStatus.SAVED, content,
-                CURRENT_CONTENT_VERSION, PlannerType.MIRROR_DUNGEON, syncVersion, null);
+        return UpsertRequests.draft()
+                .id(id.toString())
+                .title(title)
+                .status(PlannerStatus.SAVED)
+                .content(content)
+                .syncVersion(syncVersion)
+                .build();
     }
 
     private ResultActions sendAs(UUID device, MockHttpServletRequestBuilder request, Object body) throws Exception {
@@ -341,11 +347,17 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
     }
 
     private void saveBack(JsonNode received, String title, String content) throws Exception {
-        UpsertPlannerRequest save = new UpsertPlannerRequest(
-                received.get("id").asText(), received.get("category").asText(), title,
-                objectMapper.treeToValue(received.get("status"), PlannerStatus.class), content,
-                received.get("contentVersion").asInt(), objectMapper.treeToValue(received.get("plannerType"), PlannerType.class),
-                received.get("syncVersion").asLong(), null);
+        UpsertPlannerRequest save = UpsertRequests.draft()
+                .id(received.get("id").asText())
+                .category(received.get("category").asText())
+                .title(title)
+                .status(objectMapper.treeToValue(received.get("status"), PlannerStatus.class))
+                .content(content)
+                .contentVersion(received.get("contentVersion").asInt())
+                .plannerType(objectMapper.treeToValue(received.get("plannerType"), PlannerType.class))
+                .syncVersion(received.get("syncVersion").asLong())
+                .selectedKeywords(null)
+                .build();
         mockMvc.perform(put("/api/planner/md/{id}", received.get("id").asText())
                         .cookie(AuthCookies.accessToken(token))
                         .with(withCsrf())
@@ -428,9 +440,10 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
     @Test
     void publishedTitleSave_WhenStoredContentSelectsAnUnknownKeyword_Returns400UnknownKeyword() throws Exception {
         Planner planner = publishedWithUnknownKeyword("Published Unknown Keyword");
-        UpsertPlannerRequest titleEdit = new UpsertPlannerRequest(
-                planner.getId().toString(), "5F", "Retitled", PlannerStatus.SAVED, planner.getContentJson(),
-                planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), null);
+        UpsertPlannerRequest titleEdit = UpsertRequests.resending(planner)
+                .title("Retitled")
+                .status(PlannerStatus.SAVED)
+                .build();
 
         mockMvc.perform(put("/api/planner/md/{id}", planner.getId())
                         .cookie(AuthCookies.accessToken(token))
@@ -449,10 +462,11 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
         Planner draft = TestDataFactory.planner(owner).title("Draft Before Publish")
                 .selectedKeywords(Set.of("Sinking")).save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(draft.getId()).build());
-        UpsertPlannerRequest publishBody = new UpsertPlannerRequest(
-                draft.getId().toString(), "5F", "Draft Published With Unknown", PlannerStatus.SAVED,
-                TestDataFactory.withSelectedKeywords(draft.getContentJson(), List.of("NotAKeyword")),
-                draft.getContentVersion(), PlannerType.MIRROR_DUNGEON, draft.getSyncVersion(), null);
+        UpsertPlannerRequest publishBody = UpsertRequests.resending(draft)
+                .title("Draft Published With Unknown")
+                .status(PlannerStatus.SAVED)
+                .content(TestDataFactory.withSelectedKeywords(draft.getContentJson(), List.of("NotAKeyword")))
+                .build();
 
         mockMvc.perform(post("/api/planner/md/{id}/publish", draft.getId())
                         .cookie(AuthCookies.accessToken(token))

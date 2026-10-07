@@ -1,6 +1,8 @@
 package org.danteplanner.backend.user.entity;
 
 import org.danteplanner.backend.user.api.RestrictionState;
+import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.user.api.UserRole;
 import org.junit.jupiter.api.Test;
 
 import java.time.Clock;
@@ -19,7 +21,7 @@ class UserRestrictionStateTest {
     private static final Clock CLOCK = Clock.fixed(NOW, ZoneOffset.UTC);
 
     private User user(Instant timeoutUntil, Instant bannedAt) {
-        User user = User.builder().build();
+        User user = TestDataFactory.unsavedUser(UserRole.NORMAL);
         user.setTimeoutUntil(timeoutUntil);
         user.setBannedAt(bannedAt);
         return user;

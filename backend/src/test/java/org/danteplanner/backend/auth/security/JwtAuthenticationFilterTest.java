@@ -7,7 +7,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
-import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.Users;
@@ -21,6 +20,7 @@ import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.backend.support.LogCapture;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
+import org.danteplanner.backend.support.TestDataFactory;
 import com.jayway.jsonpath.JsonPath;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.http.HttpHeaders;
@@ -153,17 +153,6 @@ class JwtAuthenticationFilterTest {
         return signed[0] + "." + other[1] + "." + signed[2];
     }
 
-    private User activeUser(Long id) {
-        return User.builder()
-                .id(id)
-                .email("user@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-" + id)
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("usr" + String.format("%02d", id % 100))
-                .build();
-    }
-
     @Nested
     class ActiveUserAuthenticationTests {
 
@@ -292,7 +281,7 @@ class JwtAuthenticationFilterTest {
         @Test
         void doFilterInternal_WhenRefreshRedisWriteFails_ReturnsAuthTemporarilyUnavailable() throws Exception {
             Long userId = 123L;
-            User user = activeUser(userId);
+            User user = TestDataFactory.unsavedUser(userId);
             RedisConnectionFailureException authRedisDown = new RedisConnectionFailureException("auth redis down");
 
             request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken(userId)));

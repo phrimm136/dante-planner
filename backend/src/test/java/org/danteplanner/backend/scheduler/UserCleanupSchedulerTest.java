@@ -6,10 +6,10 @@ import org.danteplanner.backend.support.RecordingAccountLifecycleParticipant.Eve
 import org.danteplanner.backend.support.RecordingSessionEndHandler;
 import org.danteplanner.backend.support.RecordingSessionEndHandler.EndAllSessions;
 import org.danteplanner.backend.support.ScriptedFailuresCheck;
-import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -66,14 +66,7 @@ class UserCleanupSchedulerTest {
     }
 
     private User createExpiredUser(Long id) {
-        User user = User.builder()
-                .id(id)
-                .email("user" + id + "@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-" + id)
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("tst" + String.format("%02d", id % 100))
-                .build();
+        User user = TestDataFactory.unsavedUser(id);
         user.softDelete(Instant.now().minusSeconds(86400)); // Expired 1 day ago
         return user;
     }

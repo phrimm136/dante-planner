@@ -1,7 +1,6 @@
 package org.danteplanner.backend.planner.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
@@ -16,7 +15,6 @@ import org.danteplanner.backend.support.RecordingTombstoneStore.Write;
 import org.danteplanner.backend.support.RecordingTombstoneStore.Writes;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.api.UserRole;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -234,15 +232,7 @@ class PlannerCatalogServiceTest {
     }
 
     private static Planner loadedPlanner() {
-        User owner = User.builder()
-                .id(OWNER_ID)
-                .email("catalog-owner@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("catalog-owner")
-                .usernameEpithet("OWNER")
-                .usernameSuffix("cat01")
-                .role(UserRole.NORMAL)
-                .build();
+        User owner = TestDataFactory.unsavedUser(OWNER_ID);
         Planner planner = TestDataFactory.planner(owner)
                 .id(UUID.randomUUID())
                 .category("5F")

@@ -8,12 +8,12 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
-import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.support.UpsertRequests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -59,7 +59,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
 
     private static final String BASE_TITLE = "Arbitration Fixture";
-    private static final String CATEGORY = "5F";
     private static final int CONTENT_VERSION = 7;
 
     @Autowired
@@ -107,11 +106,13 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
             UUID deviceId) {
     }
 
-    private UpsertPlannerRequest request(
-            UUID id, String title, String content, PlannerStatus status, int contentVersion, Long syncVersion) {
-        return new UpsertPlannerRequest(
-                id.toString(), CATEGORY, title, status, content,
-                contentVersion, PlannerType.MIRROR_DUNGEON, syncVersion, null);
+    private UpsertRequests.Builder write(UUID id) {
+        return UpsertRequests.draft()
+                .id(id.toString())
+                .title(BASE_TITLE)
+                .content(TestDataFactory.VALID_CONTENT)
+                .status(PlannerStatus.DRAFT)
+                .contentVersion(CONTENT_VERSION);
     }
 
     private ResultActions send(UUID id, UpsertPlannerRequest request, boolean force) throws Exception {
@@ -147,10 +148,8 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
     /** A planner created and then saved once, so there is a version to be stale against. */
     private UUID plannerPastItsFirstSave() throws Exception {
         UUID id = UUID.randomUUID();
-        send(id, request(id, BASE_TITLE, TestDataFactory.VALID_CONTENT, PlannerStatus.DRAFT, CONTENT_VERSION, null),
-                false).andExpect(status().isCreated());
-        send(id, request(id, BASE_TITLE, TestDataFactory.VALID_CONTENT, PlannerStatus.DRAFT, CONTENT_VERSION, 1L),
-                false).andExpect(status().isOk());
+        send(id, write(id).build(), false).andExpect(status().isCreated());
+        send(id, write(id).syncVersion(1L).build(), false).andExpect(status().isOk());
         return id;
     }
 
@@ -178,8 +177,7 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
         String bytesBefore = storedRow(id).getContent();
         long lockBefore = storedRow(id).getRowLockVersion();
 
-        send(id, request(id, BASE_TITLE, TestDataFactory.VALID_CONTENT, PlannerStatus.DRAFT,
-                        CONTENT_VERSION, stored - 1), false)
+        send(id, write(id).syncVersion(stored - 1).build(), false)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.syncVersion").value(stored));
 
@@ -198,8 +196,7 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
         UUID id = plannerPastItsFirstSave();
         long consumed = storedRow(id).getSyncVersion();
 
-        UpsertPlannerRequest committing = request(
-                id, "Retried Title", TestDataFactory.VALID_CONTENT, PlannerStatus.DRAFT, CONTENT_VERSION, consumed);
+        UpsertPlannerRequest committing = write(id).title("Retried Title").syncVersion(consumed).build();
         send(id, committing, false)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.syncVersion").value(consumed + 1));
@@ -221,11 +218,9 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
     @Test
     void pulledRendering_WhenResavedAtAStaleVersion_CountsAsIdentical() throws Exception {
         UUID id = UUID.randomUUID();
-        send(id, request(id, BASE_TITLE, TestDataFactory.VALID_CONTENT, PlannerStatus.DRAFT, CONTENT_VERSION, null),
-                false).andExpect(status().isCreated());
+        send(id, write(id).build(), false).andExpect(status().isCreated());
 
-        send(id, request(id, BASE_TITLE, TestDataFactory.VALID_CONTENT, PlannerStatus.DRAFT, CONTENT_VERSION, null),
-                true).andExpect(status().isOk());
+        send(id, write(id).build(), true).andExpect(status().isOk());
 
         long stored = storedRow(id).getSyncVersion();
         String pulled = readBack(id).get("content").asText();
@@ -234,7 +229,10 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
                 .as("the case only tests anything while the stored rendering differs from the sent bytes")
                 .isNotEqualTo(TestDataFactory.VALID_CONTENT);
 
-        send(id, request(id, BASE_TITLE, pulled, PlannerStatus.DRAFT, CONTENT_VERSION, stored - 1), false)
+        send(id, write(id)
+                        .content(pulled)
+                        .syncVersion(stored - 1)
+                        .build(), false)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.syncVersion").value(stored));
     }
@@ -245,8 +243,10 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
         UUID id = plannerPastItsFirstSave();
         long stored = storedRow(id).getSyncVersion();
 
-        send(id, request(id, "A Different Title", TestDataFactory.VALID_CONTENT, PlannerStatus.DRAFT,
-                        CONTENT_VERSION, stored - 1), false)
+        send(id, write(id)
+                        .title("A Different Title")
+                        .syncVersion(stored - 1)
+                        .build(), false)
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("SYNC_CONFLICT"))
                 .andExpect(jsonPath("$.serverVersion").value(stored));
@@ -258,8 +258,10 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
         UUID id = plannerPastItsFirstSave();
         long stored = storedRow(id).getSyncVersion();
 
-        send(id, request(id, BASE_TITLE, divergentContent(), PlannerStatus.DRAFT, CONTENT_VERSION, stored - 1),
-                false)
+        send(id, write(id)
+                        .content(divergentContent())
+                        .syncVersion(stored - 1)
+                        .build(), false)
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("SYNC_CONFLICT"))
                 .andExpect(jsonPath("$.serverVersion").value(stored));
@@ -271,8 +273,10 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
         UUID id = plannerPastItsFirstSave();
         long stored = storedRow(id).getSyncVersion();
 
-        send(id, request(id, BASE_TITLE, "{\"equipment\":", PlannerStatus.DRAFT, CONTENT_VERSION, stored - 1),
-                false)
+        send(id, write(id)
+                        .content("{\"equipment\":")
+                        .syncVersion(stored - 1)
+                        .build(), false)
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("SYNC_CONFLICT"));
 
@@ -285,8 +289,7 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
         UUID id = plannerPastItsFirstSave();
         long stored = storedRow(id).getSyncVersion();
 
-        send(id, request(id, BASE_TITLE, TestDataFactory.VALID_CONTENT, PlannerStatus.DRAFT, CONTENT_VERSION, null),
-                false)
+        send(id, write(id).build(), false)
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("SYNC_CONFLICT"));
 
@@ -299,8 +302,7 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
         UUID id = plannerPastItsFirstSave();
         long stored = storedRow(id).getSyncVersion();
 
-        send(id, request(id, BASE_TITLE, TestDataFactory.VALID_CONTENT, PlannerStatus.DRAFT,
-                        CONTENT_VERSION, stored - 1), true)
+        send(id, write(id).syncVersion(stored - 1).build(), true)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.syncVersion").value(stored + 1));
 
@@ -332,7 +334,13 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
         String content = contentFor(choice, id);
         RowState before = stateOf(id);
 
-        int staleStatus = send(id, request(id, title, content, status, contentVersion, stored - 1), false)
+        int staleStatus = send(id, write(id)
+                        .title(title)
+                        .content(content)
+                        .status(status)
+                        .contentVersion(contentVersion)
+                        .syncVersion(stored - 1)
+                        .build(), false)
                 .andReturn().getResponse().getStatus();
 
         assertThat(staleStatus).isIn(200, 409);
@@ -340,7 +348,13 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
                 .as("%s: neither an acknowledgement nor a conflict may write", label)
                 .isEqualTo(before);
 
-        send(id, request(id, title, content, status, contentVersion, stored), false)
+        send(id, write(id)
+                        .title(title)
+                        .content(content)
+                        .status(status)
+                        .contentVersion(contentVersion)
+                        .syncVersion(stored)
+                        .build(), false)
                 .andExpect(status().isOk());
 
         boolean movedAField = !stateOf(id).equals(before);

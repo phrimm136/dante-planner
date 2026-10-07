@@ -1,6 +1,5 @@
 package org.danteplanner.backend.service;
 
-import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
@@ -15,6 +14,7 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -55,21 +55,9 @@ class CommentCommandServiceRestrictionsTest {
                 new CommentStateValidator());
     }
 
-    private User restrictedUser() {
-        return User.builder()
-                .id(7L)
-                .email("restricted@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-restricted")
-                .usernameEpithet("TEST")
-                .usernameSuffix("res01")
-                .role(UserRole.NORMAL)
-                .build();
-    }
-
     @Test
     void createReply_WhenUserBanned_ThrowsUserBanned() {
-        User banned = restrictedUser();
+        User banned = TestDataFactory.unsavedUser(UserRole.NORMAL);
         banned.setBannedAt(Instant.now());
         users.add(banned);
 
@@ -80,7 +68,7 @@ class CommentCommandServiceRestrictionsTest {
 
     @Test
     void createReply_WhenUserTimedOut_ThrowsUserTimedOut() {
-        User timedOut = restrictedUser();
+        User timedOut = TestDataFactory.unsavedUser(UserRole.NORMAL);
         timedOut.setTimeoutUntil(Instant.now().plus(1, ChronoUnit.HOURS));
         users.add(timedOut);
 

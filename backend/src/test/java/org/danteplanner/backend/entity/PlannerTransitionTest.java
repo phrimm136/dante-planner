@@ -1,15 +1,13 @@
 package org.danteplanner.backend.entity;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerContent;
-import org.danteplanner.backend.planner.entity.PlannerModeration;
-import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PublicationChange;
 
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
+import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.user.api.UserRole;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -19,21 +17,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class PlannerTransitionTest {
 
-    private static Planner planner(UUID id, PlannerContent content,
-            PlannerPublication publication, PlannerModeration moderation) {
-        Planner planner = Planner.builder()
-                .id(id)
-                .build();
-        planner.attach(content, publication, moderation);
-        return planner;
+    private static TestDataFactory.PlannerBuilder planner() {
+        return TestDataFactory.planner(TestDataFactory.unsavedUser(UserRole.NORMAL));
     }
 
     @Test
     void takeDown_WhenPublished_UnpublishesAndStamps() {
-        Planner planner = planner(UUID.randomUUID(),
-                PlannerContent.builder().build(),
-                PlannerPublication.builder().published(true).build(),
-                PlannerModeration.builder().build());
+        Planner planner = planner().build();
+        planner.publish();
 
         planner.takeDown();
 
@@ -43,24 +34,18 @@ class PlannerTransitionTest {
 
     @Test
     void publish_WhenTakenDown_Throws() {
-        UUID plannerId = UUID.randomUUID();
-        Planner planner = planner(plannerId,
-                PlannerContent.builder().build(),
-                PlannerPublication.builder().published(false).build(),
-                PlannerModeration.builder().takenDownAt(Instant.now()).build());
+        Planner planner = planner().build();
+        planner.takeDown();
 
         assertThatThrownBy(planner::publish)
                 .isInstanceOf(PlannerForbiddenException.class)
                 .extracting(ex -> ((PlannerForbiddenException) ex).getPlannerId())
-                .isEqualTo(plannerId);
+                .isEqualTo(planner.getId());
     }
 
     @Test
     void publish_WhenFirstPublish_StampsFirstPublishedAtOnce() {
-        Planner planner = planner(UUID.randomUUID(),
-                PlannerContent.builder().build(),
-                PlannerPublication.builder().published(false).build(),
-                PlannerModeration.builder().build());
+        Planner planner = planner().build();
 
         planner.publish();
         Instant firstStamp = planner.getFirstPublishedAt();
@@ -78,10 +63,7 @@ class PlannerTransitionTest {
 
     @Test
     void publish_WhenAlreadyPublished_ChangesNothing() {
-        Planner planner = planner(UUID.randomUUID(),
-                PlannerContent.builder().build(),
-                PlannerPublication.builder().published(false).build(),
-                PlannerModeration.builder().build());
+        Planner planner = planner().build();
 
         planner.publish();
         Instant firstStamp = planner.getFirstPublishedAt();
@@ -96,10 +78,7 @@ class PlannerTransitionTest {
 
     @Test
     void hideFromRecommended_WhenCalled_SetsAllFourFields() {
-        Planner planner = planner(UUID.randomUUID(),
-                PlannerContent.builder().build(),
-                PlannerPublication.builder().build(),
-                PlannerModeration.builder().build());
+        Planner planner = planner().build();
 
         planner.hideFromRecommended(42L, "spam");
 
@@ -111,15 +90,8 @@ class PlannerTransitionTest {
 
     @Test
     void unhideFromRecommended_WhenCalled_ClearsAllFourFields() {
-        Planner planner = planner(UUID.randomUUID(),
-                PlannerContent.builder().build(),
-                PlannerPublication.builder().build(),
-                PlannerModeration.builder()
-                        .hiddenFromRecommended(true)
-                        .hiddenByModeratorId(42L)
-                        .hiddenReason("spam")
-                        .hiddenAt(Instant.now())
-                        .build());
+        Planner planner = planner().build();
+        planner.hideFromRecommended(42L, "spam");
 
         planner.unhideFromRecommended();
 
@@ -131,10 +103,7 @@ class PlannerTransitionTest {
 
     @Test
     void recordSave_WhenCalled_IncrementsSyncVersion() {
-        Planner planner = planner(UUID.randomUUID(),
-                PlannerContent.builder().syncVersion(5L).build(),
-                PlannerPublication.builder().build(),
-                PlannerModeration.builder().build());
+        Planner planner = planner().syncVersion(5).build();
 
         planner.recordSave();
 
@@ -142,12 +111,11 @@ class PlannerTransitionTest {
     }
 
     @Test
-    void unpublish_WhenPublished_OnlyClearsPublished() {
-        Instant takenDownAt = Instant.now();
-        Planner planner = planner(UUID.randomUUID(),
-                PlannerContent.builder().build(),
-                PlannerPublication.builder().published(true).build(),
-                PlannerModeration.builder().takenDownAt(takenDownAt).build());
+    void unpublish_WhenTakenDown_KeepsTakenDownAt() {
+        Planner planner = planner().build();
+        planner.publish();
+        planner.takeDown();
+        Instant takenDownAt = planner.getTakenDownAt();
 
         planner.unpublish();
 

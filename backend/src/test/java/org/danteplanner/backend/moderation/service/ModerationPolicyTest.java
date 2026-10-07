@@ -2,9 +2,9 @@ package org.danteplanner.backend.moderation.service;
 
 import org.danteplanner.backend.moderation.api.ModerationActionType;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
-import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserSummary;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -20,7 +20,8 @@ class ModerationPolicyTest {
     @Test
     void requireCanRestrict_WhenActorRankTooLow_ThrowsModerationForbidden() {
         assertThatThrownBy(() -> POLICY.requireCanRestrict(
-                user(1L, UserRole.MODERATOR), normalUser(), ModerationActionType.BAN))
+                TestDataFactory.unsavedUser(UserRole.MODERATOR), TestDataFactory.unsavedUser(UserRole.NORMAL),
+                ModerationActionType.BAN))
                 .isInstanceOf(ModerationForbiddenException.class)
                 .hasMessage("Only administrators can ban users");
     }
@@ -28,7 +29,7 @@ class ModerationPolicyTest {
     @Test
     void requireCanRestrict_WhenTargetOfEqualRank_ThrowsModerationForbidden() {
         assertThatThrownBy(() -> POLICY.requireCanRestrict(
-                user(1L, UserRole.MODERATOR), user(2L, UserRole.MODERATOR),
+                TestDataFactory.unsavedUser(UserRole.MODERATOR), TestDataFactory.unsavedUser(UserRole.MODERATOR),
                 ModerationActionType.TIMEOUT))
                 .isInstanceOf(ModerationForbiddenException.class)
                 .hasMessage("Cannot timeout a user of equal or higher rank");
@@ -37,7 +38,7 @@ class ModerationPolicyTest {
     @Test
     void requireCanRestrict_WhenActionIsNotARestriction_ThrowsIllegalArgument() {
         assertThatThrownBy(() -> POLICY.requireCanRestrict(
-                user(1L, UserRole.ADMIN), normalUser(),
+                TestDataFactory.unsavedUser(UserRole.ADMIN), TestDataFactory.unsavedUser(UserRole.NORMAL),
                 ModerationActionType.DELETE_COMMENT))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Not an account restriction: DELETE_COMMENT");
@@ -57,14 +58,6 @@ class ModerationPolicyTest {
 
         assertThatCode(() -> POLICY.requireCanChangeRole(actor, actor, UserRole.NORMAL))
                 .doesNotThrowAnyException();
-    }
-
-    private static User normalUser() {
-        return user(2L, UserRole.NORMAL);
-    }
-
-    private static User user(Long id, UserRole role) {
-        return User.builder().id(id).role(role).build();
     }
 
     private static UserSummary summary(Long id, UserRole role) {

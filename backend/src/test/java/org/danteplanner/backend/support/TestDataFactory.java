@@ -40,6 +40,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 public class TestDataFactory {
 
@@ -146,15 +147,12 @@ public class TestDataFactory {
         return local + "+" + UUID.randomUUID() + "@" + domain;
     }
 
+    public static UserBuilder user() {
+        return new UserBuilder();
+    }
+
     public static User createTestUser(UserRepository userRepository, String email) {
-        User user = User.builder()
-                .email(uniqueEmail(email))
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-" + UUID.randomUUID())
-                .usernameEpithet("W_CORP")
-                .usernameSuffix(uniqueSuffix(""))
-                .build();
-        return userRepository.save(user);
+        return user().email(uniqueEmail(email)).save(userRepository);
     }
 
     /**
@@ -166,26 +164,21 @@ public class TestDataFactory {
      * @return an unsaved user
      */
     public static User unsavedUser(Long id) {
-        return User.builder()
+        return user()
                 .id(id)
                 .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-123")
-                .usernameEpithet("W_CORP")
                 .usernameSuffix("test1")
                 .build();
     }
 
     public static User unsavedUser(UserRole role) {
         Long id = nextUserId();
-        return User.builder()
+        return user()
                 .id(id)
                 .publicId(UUID.randomUUID())
                 .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-" + id)
-                .usernameEpithet("W_CORP")
-                .usernameSuffix(uniqueSuffix(""))
                 .role(role)
                 .build();
     }
@@ -200,27 +193,19 @@ public class TestDataFactory {
     }
 
     public static User createAdmin(UserRepository userRepository, String email) {
-        User admin = User.builder()
+        return user()
                 .email(uniqueEmail(email))
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-" + UUID.randomUUID())
-                .usernameEpithet("W_CORP")
                 .usernameSuffix(uniqueSuffix("a"))
                 .role(UserRole.ADMIN)
-                .build();
-        return userRepository.save(admin);
+                .save(userRepository);
     }
 
     public static User createModerator(UserRepository userRepository, String email) {
-        User moderator = User.builder()
+        return user()
                 .email(uniqueEmail(email))
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-" + UUID.randomUUID())
-                .usernameEpithet("W_CORP")
                 .usernameSuffix(uniqueSuffix("m"))
                 .role(UserRole.MODERATOR)
-                .build();
-        return userRepository.save(moderator);
+                .save(userRepository);
     }
 
     public static Planner createTestPlanner(PlannerRepository plannerRepository, User owner, boolean published) {
@@ -286,12 +271,83 @@ public class TestDataFactory {
         }
     }
 
+    public static class UserBuilder {
+        private Long id;
+        private UUID publicId;
+        private String email = uniqueEmail("test@example.com");
+        private AuthProviderType provider = AuthProviderType.GOOGLE;
+        private String providerId = "google-" + UUID.randomUUID();
+        private String usernameEpithet = "W_CORP";
+        private String usernameSuffix = uniqueSuffix("");
+        private UserRole role = UserRole.NORMAL;
+
+        private UserBuilder() {
+        }
+
+        public UserBuilder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        private UserBuilder publicId(UUID publicId) {
+            this.publicId = publicId;
+            return this;
+        }
+
+        public UserBuilder email(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public UserBuilder provider(AuthProviderType provider) {
+            this.provider = provider;
+            return this;
+        }
+
+        public UserBuilder providerId(String providerId) {
+            this.providerId = providerId;
+            return this;
+        }
+
+        public UserBuilder usernameEpithet(String usernameEpithet) {
+            this.usernameEpithet = usernameEpithet;
+            return this;
+        }
+
+        public UserBuilder usernameSuffix(String usernameSuffix) {
+            this.usernameSuffix = usernameSuffix;
+            return this;
+        }
+
+        public UserBuilder role(UserRole role) {
+            this.role = role;
+            return this;
+        }
+
+        public User build() {
+            return User.builder()
+                    .id(id)
+                    .publicId(publicId)
+                    .email(email)
+                    .provider(provider)
+                    .providerId(providerId)
+                    .usernameEpithet(usernameEpithet)
+                    .usernameSuffix(usernameSuffix)
+                    .role(role)
+                    .build();
+        }
+
+        public User save(UserRepository userRepository) {
+            return userRepository.save(build());
+        }
+    }
+
     /**
      * Fluent aggregate builder: assembles the planner core plus its content,
      * publication, and moderation satellites in one call chain.
      */
     public static class PlannerBuilder {
-        private final User owner;
+        private Supplier<Long> ownerId;
         private UUID id = UUID.randomUUID();
         private String title = "Test Planner";
         private String category = "5F";
@@ -304,9 +360,15 @@ public class TestDataFactory {
         private boolean published;
         private Instant firstPublishedAt;
         private int upvotes;
+        private long syncVersion = 1L;
 
         private PlannerBuilder(User owner) {
-            this.owner = owner;
+            this.ownerId = owner::getId;
+        }
+
+        public PlannerBuilder ownerId(Long ownerId) {
+            this.ownerId = () -> ownerId;
+            return this;
         }
 
         public PlannerBuilder id(UUID id) {
@@ -369,11 +431,16 @@ public class TestDataFactory {
             return this;
         }
 
+        public PlannerBuilder syncVersion(long syncVersion) {
+            this.syncVersion = syncVersion;
+            return this;
+        }
+
         public Planner build() {
             String document = selectedKeywords == null ? content : withSelectedKeywords(content, selectedKeywords);
             Planner planner = Planner.builder()
                     .id(id)
-                    .userId(owner.getId())
+                    .userId(ownerId.get())
                     .plannerType(plannerType)
                     .build();
             planner.attach(
@@ -384,6 +451,7 @@ public class TestDataFactory {
                                     : (published ? PlannerStatus.SAVED : PlannerStatus.DRAFT))
                             .contentSchemaVersion(schemaVersion)
                             .gameContentVersion(contentVersion)
+                            .syncVersion(syncVersion)
                             .selectedKeywords(PlannerKeywords.fromContent(document).asSet())
                             .build(), document)),
                     PlannerPublication.builder().build(),

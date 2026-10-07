@@ -2,7 +2,6 @@ package org.danteplanner.backend.auth.security;
 
 import org.danteplanner.backend.shared.security.AuthDegradationResponder;
 
-import org.danteplanner.backend.user.api.AuthProviderType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -24,6 +23,7 @@ import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -103,23 +103,12 @@ class JwtAuthenticationFilterLineageTest {
         return (RotationResult.Rotated) rotation.rotate(refreshToken);
     }
 
-    private User activeUser(Long id) {
-        return User.builder()
-                .id(id)
-                .email("user@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-" + id)
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("usr" + String.format("%02d", id % 100))
-                .build();
-    }
-
     @Test
     void doFilterInternal_WhenFlagOff_UsesLegacyRotation() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(false);
         Long userId = 42L;
         String refreshToken = jwt.legacyRefreshToken(userId);
-        User user = activeUser(userId);
+        User user = TestDataFactory.unsavedUser(userId);
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
         users.add(user);
@@ -147,7 +136,7 @@ class JwtAuthenticationFilterLineageTest {
         JwtAuthenticationFilter filter = filterWithFlag(true);
         Long userId = 7L;
         String refreshToken = freshLogin(userId);
-        User user = activeUser(userId);
+        User user = TestDataFactory.unsavedUser(userId);
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
         users.add(user);
@@ -169,7 +158,7 @@ class JwtAuthenticationFilterLineageTest {
         refreshRotation.rotate(rotateAhead(refreshRotation, refreshToken).newRefreshJwt());
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
-        users.add(activeUser(userId));
+        users.add(TestDataFactory.unsavedUser(userId));
 
         filter.doFilterInternal(request, response, filterChain);
 
@@ -191,7 +180,7 @@ class JwtAuthenticationFilterLineageTest {
         noReuseWindow.rotate(login);
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, superseded));
-        users.add(activeUser(userId));
+        users.add(TestDataFactory.unsavedUser(userId));
 
         filter.doFilterInternal(request, response, filterChain);
 
@@ -209,7 +198,7 @@ class JwtAuthenticationFilterLineageTest {
         refreshRotation.revokeFamily(familyOf(refreshToken));
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
-        users.add(activeUser(userId));
+        users.add(TestDataFactory.unsavedUser(userId));
 
         filter.doFilterInternal(request, response, filterChain);
 
@@ -224,7 +213,7 @@ class JwtAuthenticationFilterLineageTest {
         JwtAuthenticationFilter filter = filterWithFlag(true);
         Long userId = 99L;
         String refreshToken = jwt.legacyRefreshToken(userId);
-        User user = activeUser(userId);
+        User user = TestDataFactory.unsavedUser(userId);
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
         users.add(user);
@@ -246,7 +235,7 @@ class JwtAuthenticationFilterLineageTest {
         String refreshToken = jwt.legacyRefreshToken(userId);
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
-        users.add(activeUser(userId));
+        users.add(TestDataFactory.unsavedUser(userId));
 
         filter.doFilterInternal(request, response, filterChain);
 
@@ -263,7 +252,7 @@ class JwtAuthenticationFilterLineageTest {
         String accessToken = new TestJwt(jwt.clock().instant().minus(Duration.ofHours(1))).service()
                 .generateAccessToken(userId, UserRole.NORMAL);
         String refreshToken = freshLogin(userId);
-        User user = activeUser(userId);
+        User user = TestDataFactory.unsavedUser(userId);
 
         request.setCookies(
                 new Cookie(CookieConstants.ACCESS_TOKEN, accessToken),
@@ -286,7 +275,7 @@ class JwtAuthenticationFilterLineageTest {
         Long userId = 31L;
         String refreshToken = freshLogin(userId);
         tokenBlacklist.blacklistToken(refreshToken, jwt.service().validateRefreshToken(refreshToken).expiration());
-        users.add(activeUser(userId));
+        users.add(TestDataFactory.unsavedUser(userId));
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
 
@@ -305,7 +294,7 @@ class JwtAuthenticationFilterLineageTest {
         String refreshToken = freshLogin(userId);
         jwt.clock().advance(Duration.ofMinutes(1));
         tokenBlacklist.invalidateUserTokens(userId);
-        users.add(activeUser(userId));
+        users.add(TestDataFactory.unsavedUser(userId));
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
 

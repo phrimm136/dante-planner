@@ -2,13 +2,6 @@ package org.danteplanner.backend.planner.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerContent;
-import org.danteplanner.backend.planner.entity.PlannerContentLifecycle;
-import org.danteplanner.backend.planner.entity.PlannerModeration;
-import org.danteplanner.backend.planner.entity.PlannerPublication;
-import org.danteplanner.backend.planner.entity.PlannerStatus;
-import org.danteplanner.backend.planner.entity.PlannerType;
-import org.danteplanner.backend.planner.entity.StoredPlannerContent;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.precondition.PlannerCategoryValidator;
@@ -34,7 +27,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -86,24 +78,7 @@ class PlannerDeleteRestrictionTest {
     }
 
     private Planner ownedPlanner(boolean published) {
-        Planner planner = Planner.builder()
-                .id(UUID.randomUUID())
-                .userId(owner.getId())
-                .plannerType(PlannerType.MIRROR_DUNGEON)
-                .createdAt(Instant.now())
-                .build();
-        planner.attach(
-                PlannerContentLifecycle.asPersisted(StoredPlannerContent.holding(PlannerContent.builder()
-                        .title("Planner")
-                        .category("5F")
-                        .status(PlannerStatus.DRAFT)
-                        .contentSchemaVersion(2)
-                        .gameContentVersion(6)
-                        .syncVersion(1L)
-                        .lastModifiedAt(Instant.now())
-                        .build(), "{}")),
-                PlannerPublication.builder().published(published).build(),
-                PlannerModeration.builder().build());
+        Planner planner = TestDataFactory.planner(owner).published(published).build();
         when(plannerRepository.findAggregateForOwner(planner.getId(), owner.getId()))
                 .thenReturn(Optional.of(planner));
         return planner;

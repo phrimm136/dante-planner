@@ -39,8 +39,8 @@ import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.dto.PlannerBatchRequest;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
-import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.UpsertRequests;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -270,9 +270,11 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     }
 
     private ResultActions upsert(UUID id, Long syncVersion) throws Exception {
-        UpsertPlannerRequest request = new UpsertPlannerRequest(
-                id.toString(), "5F", "Contract Upsert", PlannerStatus.DRAFT, TestDataFactory.VALID_CONTENT,
-                7, PlannerType.MIRROR_DUNGEON, syncVersion, null);
+        UpsertPlannerRequest request = UpsertRequests.draft()
+                .id(id.toString())
+                .title("Contract Upsert")
+                .syncVersion(syncVersion)
+                .build();
         return performAuthed(mockMvc, put("/api/planner/md/{id}", id).with(withCsrf())
                         .cookie(AuthCookies.deviceId(UUID.randomUUID()))
                         .contentType(MediaType.APPLICATION_JSON)

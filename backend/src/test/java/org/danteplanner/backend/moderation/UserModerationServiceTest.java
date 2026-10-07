@@ -2,7 +2,6 @@ package org.danteplanner.backend.moderation;
 
 import org.danteplanner.backend.moderation.api.ModerationActionType;
 import org.danteplanner.backend.moderation.api.ModerationTargetType;
-import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
@@ -16,6 +15,7 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserService;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -61,38 +60,11 @@ class UserModerationServiceTest {
                 new ModerationAuditService(moderationActionRepository), eventPublisher,
                 new ModerationPolicy());
 
-        adminUser = User.builder()
-                .id(1L)
-                .publicId(UUID.randomUUID())
-                .email("admin@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("admin-123")
-                .usernameEpithet("ADMIN")
-                .usernameSuffix("adm01")
-                .role(UserRole.ADMIN)
-                .build();
+        adminUser = TestDataFactory.unsavedUser(UserRole.ADMIN);
 
-        moderatorUser = User.builder()
-                .id(2L)
-                .publicId(UUID.randomUUID())
-                .email("mod@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("mod-123")
-                .usernameEpithet("MOD")
-                .usernameSuffix("mod01")
-                .role(UserRole.MODERATOR)
-                .build();
+        moderatorUser = TestDataFactory.unsavedUser(UserRole.MODERATOR);
 
-        normalUser = User.builder()
-                .id(3L)
-                .publicId(UUID.randomUUID())
-                .email("user@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("user-123")
-                .usernameEpithet("USER")
-                .usernameSuffix("usr01")
-                .role(UserRole.NORMAL)
-                .build();
+        normalUser = TestDataFactory.unsavedUser(UserRole.NORMAL);
     }
 
     private ModerationAction persistedAction() {
@@ -156,15 +128,7 @@ class UserModerationServiceTest {
         @Test
         void timeoutUser_WhenTargetIsAdmin_ThrowsException() {
             // Arrange
-            User targetAdmin = User.builder()
-                    .id(5L)
-                    .email("admin2@example.com")
-                    .provider(AuthProviderType.GOOGLE)
-                    .providerId("admin2-123")
-                    .usernameEpithet("ADMIN2")
-                    .usernameSuffix("adm02")
-                    .role(UserRole.ADMIN)
-                    .build();
+            User targetAdmin = TestDataFactory.unsavedUser(UserRole.ADMIN);
 
             when(userRepository.findByIdAndDeletedAtIsNull(adminUser.getId()))
                     .thenReturn(Optional.of(adminUser));
@@ -183,15 +147,7 @@ class UserModerationServiceTest {
         @Test
         void timeoutUser_WhenModeratorTimeoutsModerator_ThrowsException() {
             // Arrange
-            User otherModerator = User.builder()
-                    .id(4L)
-                    .email("mod2@example.com")
-                    .provider(AuthProviderType.GOOGLE)
-                    .providerId("mod2-123")
-                    .usernameEpithet("MOD2")
-                    .usernameSuffix("mod02")
-                    .role(UserRole.MODERATOR)
-                    .build();
+            User otherModerator = TestDataFactory.unsavedUser(UserRole.MODERATOR);
 
             when(userRepository.findByIdAndDeletedAtIsNull(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));
@@ -274,11 +230,7 @@ class UserModerationServiceTest {
         @Test
         void removeTimeout_WhenModeratorTargetsModerator_ThrowsException() {
             // Arrange
-            User otherModerator = User.builder()
-                    .id(4L)
-                    .publicId(UUID.randomUUID())
-                    .role(UserRole.MODERATOR)
-                    .build();
+            User otherModerator = TestDataFactory.unsavedUser(UserRole.MODERATOR);
             otherModerator.setTimeoutUntil(java.time.Instant.now().plusSeconds(3600));
 
             when(userRepository.findByIdAndDeletedAtIsNull(moderatorUser.getId()))
@@ -299,11 +251,7 @@ class UserModerationServiceTest {
         @Test
         void removeTimeout_WhenActorIsNormalUser_ThrowsException() {
             // Arrange
-            User target = User.builder()
-                    .id(6L)
-                    .publicId(UUID.randomUUID())
-                    .role(UserRole.NORMAL)
-                    .build();
+            User target = TestDataFactory.unsavedUser(UserRole.NORMAL);
             target.setTimeoutUntil(java.time.Instant.now().plusSeconds(3600));
 
             when(userRepository.findByIdAndDeletedAtIsNull(normalUser.getId()))
@@ -377,10 +325,7 @@ class UserModerationServiceTest {
         @Test
         void banUser_WhenTargetIsAdmin_ThrowsException() {
             // Arrange
-            User targetAdmin = User.builder()
-                    .id(5L)
-                    .role(UserRole.ADMIN)
-                    .build();
+            User targetAdmin = TestDataFactory.unsavedUser(UserRole.ADMIN);
 
             when(userRepository.findByIdAndDeletedAtIsNull(adminUser.getId()))
                     .thenReturn(Optional.of(adminUser));
@@ -466,11 +411,7 @@ class UserModerationServiceTest {
         @Test
         void unbanUser_WhenTargetIsAdmin_ThrowsException() {
             // Arrange
-            User targetAdmin = User.builder()
-                    .id(5L)
-                    .publicId(UUID.randomUUID())
-                    .role(UserRole.ADMIN)
-                    .build();
+            User targetAdmin = TestDataFactory.unsavedUser(UserRole.ADMIN);
             targetAdmin.setBannedAt(java.time.Instant.now());
 
             when(userRepository.findByIdAndDeletedAtIsNull(adminUser.getId()))

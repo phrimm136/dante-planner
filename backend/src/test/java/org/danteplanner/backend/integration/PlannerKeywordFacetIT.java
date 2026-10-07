@@ -6,7 +6,6 @@ import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerKeywordFilter;
 import org.danteplanner.backend.planner.entity.PlannerStats;
-import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -18,6 +17,7 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.CatalogEffects;
 import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.support.UpsertRequests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -164,10 +164,11 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
         Planner planner = publishWithFilters("Legacy Keywords", Set.of("Sinking"));
 
         // A stale client syncs the pre-rename name plus an unknown keyword
-        UpsertPlannerRequest req = new UpsertPlannerRequest(
-                planner.getId().toString(), planner.getCategory(), null, null, contentWith(Set.of("AccelBullet")),
-                planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(),
-                Set.of("AccelBullet", "NotAKeyword"));
+        UpsertPlannerRequest req = UpsertRequests.resending(planner)
+                .title(null)
+                .content(contentWith(Set.of("AccelBullet")))
+                .selectedKeywords(Set.of("AccelBullet", "NotAKeyword"))
+                .build();
         commandService.upsertPlanner(owner.getId(), null, planner.getId(), req, false);
         CatalogEffects.drain(catalogSyncService, jdbc(), planner.getId());
 
@@ -230,12 +231,6 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
         return counter == null ? 0 : counter.count();
     }
 
-    private UpsertPlannerRequest saving(Planner planner, String content, Set<String> topLevel) {
-        return new UpsertPlannerRequest(
-                planner.getId().toString(), planner.getCategory(), null, null, content,
-                planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), topLevel);
-    }
-
     @Test
     void upsert_WhenTopLevelKeywordsDisagreeWithContent_StoresTheContentKeywordsAndCountsAMismatch() {
         Planner planner = TestDataFactory.planner(owner).title("Top-Level Copy")
@@ -244,7 +239,11 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
         double mismatchesBefore = topLevelCount("mismatch");
 
         commandService.upsertPlanner(owner.getId(), null, planner.getId(),
-                saving(planner, contentWith(Set.of("Sinking")), Set.of("Burst")), false);
+                UpsertRequests.resending(planner)
+                        .title(null)
+                        .content(contentWith(Set.of("Sinking")))
+                        .selectedKeywords(Set.of("Burst"))
+                        .build(), false);
 
         assertThat(storedKeywords(planner)).isEqualTo("[\"Sinking\"]");
         assertThat(topLevelCount("mismatch")).isEqualTo(mismatchesBefore + 1);
@@ -259,9 +258,13 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
         double matchesBefore = topLevelCount("match");
 
         commandService.upsertPlanner(owner.getId(), null, planner.getId(),
-                saving(planner, contentWith(Set.of("Burst")), null), false);
+                UpsertRequests.resending(planner).title(null).content(contentWith(Set.of("Burst"))).build(), false);
         commandService.upsertPlanner(owner.getId(), null, planner.getId(),
-                saving(planner, contentWith(Set.of("Combustion")), Set.of("Combustion")), true);
+                UpsertRequests.resending(planner)
+                        .title(null)
+                        .content(contentWith(Set.of("Combustion")))
+                        .selectedKeywords(Set.of("Combustion"))
+                        .build(), true);
 
         assertThat(topLevelCount("absent")).isEqualTo(absentBefore + 1);
         assertThat(topLevelCount("match")).isEqualTo(matchesBefore + 1);
@@ -272,8 +275,10 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
         Planner draft = TestDataFactory.planner(owner).title("Draft Rename").save(plannerRepository);
 
         commandService.upsertPlanner(owner.getId(), null, draft.getId(),
-                saving(draft, contentWith(new java.util.LinkedHashSet<>(java.util.List.of("AccelBullet", "NotAKeyword"))),
-                        null), false);
+                UpsertRequests.resending(draft)
+                        .title(null)
+                        .content(contentWith(new java.util.LinkedHashSet<>(java.util.List.of("AccelBullet", "NotAKeyword"))))
+                        .build(), false);
 
         assertThat(storedKeywords(draft)).isEqualTo("[\"9828\"]");
         String blobKeywords = new JdbcTemplate(dataSource).queryForObject(
@@ -289,7 +294,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
                 .save(plannerRepository);
 
         commandService.upsertPlanner(owner.getId(), null, planner.getId(),
-                saving(planner, contentWith(Set.of("Burst")), null), false);
+                UpsertRequests.resending(planner).title(null).content(contentWith(Set.of("Burst"))).build(), false);
 
         assertThat(storedKeywords(planner)).isEqualTo("[\"Burst\"]");
     }

@@ -4,10 +4,8 @@ import org.danteplanner.backend.moderation.api.ModerationActionType;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -92,9 +90,6 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
     void upsertPlanner_WhenOwnerBanned_KeepsPrivateWork() throws Exception {
         // Arrange - ban the user
         userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Test ban");
-
-        UpsertPlannerRequest request = new UpsertPlannerRequest(
-                null, "5F", "Test Planner", null, "{}", 1, PlannerType.MIRROR_DUNGEON, null, null);
 
         UUID plannerId = UUID.randomUUID();
 

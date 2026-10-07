@@ -12,14 +12,13 @@ import java.util.regex.Pattern;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
-import org.danteplanner.backend.planner.entity.PlannerStatus;
-import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.shared.gtid.GtidCookie;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.support.UpsertRequests;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -350,9 +349,7 @@ class CausalGateIT extends CausalHarnessSupport {
     }
 
     private String upsertBody(UUID id, String title) throws Exception {
-        UpsertPlannerRequest request = new UpsertPlannerRequest(
-                id.toString(), "5F", title, PlannerStatus.DRAFT, TestDataFactory.VALID_CONTENT, 7,
-                PlannerType.MIRROR_DUNGEON, null, null);
+        UpsertPlannerRequest request = UpsertRequests.draft().id(id.toString()).title(title).build();
         return objectMapper.writeValueAsString(request);
     }
 

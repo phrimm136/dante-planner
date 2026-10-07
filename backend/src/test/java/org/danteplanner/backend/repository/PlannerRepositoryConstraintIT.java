@@ -5,15 +5,9 @@ import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.entity.VoteType;
-import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerContent;
-import org.danteplanner.backend.planner.entity.PlannerModeration;
-import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStats;
-import org.danteplanner.backend.planner.entity.StoredPlannerContent;
-import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.comment.entity.PlannerComment;
@@ -77,23 +71,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
     @BeforeEach
     void setUp() {
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
-    }
-
-    private Planner buildPlanner(Long ownerId, String title) {
-        Planner planner = Planner.builder()
-                .id(UUID.randomUUID())
-                .userId(ownerId)
-                .plannerType(PlannerType.MIRROR_DUNGEON)
-                .build();
-        planner.attach(
-                StoredPlannerContent.holding(PlannerContent.builder()
-                        .title(title)
-                        .category("5F")
-                        .gameContentVersion(1)
-                        .build(), "{}"),
-                PlannerPublication.builder().build(),
-                PlannerModeration.builder().build());
-        return planner;
     }
 
     private void inTransaction(Runnable work) {
@@ -256,24 +233,14 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         void uniqueConstraint_WhenDuplicateUsernameSuffix_ThrowsException() {
             String suffix = TestDataFactory.uniqueSuffix("");
 
-            User user1 = User.builder()
-                    .email("user1@example.com")
-                    .provider(AuthProviderType.GOOGLE)
-                    .providerId("google-" + UUID.randomUUID())
-                    .usernameEpithet("TEST")
+            User user1 = TestDataFactory.user()
                     .usernameSuffix(suffix)
-                    .role(UserRole.NORMAL)
                     .build();
             userRepository.save(user1);
 
             assertThatThrownBy(() -> inTransaction(() -> {
-                User user2 = User.builder()
-                        .email("user2@example.com")
-                        .provider(AuthProviderType.GOOGLE)
-                        .providerId("google-" + UUID.randomUUID())
-                        .usernameEpithet("TEST")
+                User user2 = TestDataFactory.user()
                         .usernameSuffix(suffix)
-                        .role(UserRole.NORMAL)
                         .build();
                 userRepository.save(user2);
                 entityManager.flush();
@@ -284,24 +251,14 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         @Test
         void uniqueConstraint_WhenDuplicateProviderAndProviderId_ThrowsException() {
             String providerId = "google-" + UUID.randomUUID();
-            User user1 = User.builder()
-                    .email("user1@example.com")
-                    .provider(AuthProviderType.GOOGLE)
+            User user1 = TestDataFactory.user()
                     .providerId(providerId)
-                    .usernameEpithet("TEST")
-                    .usernameSuffix(TestDataFactory.uniqueSuffix(""))
-                    .role(UserRole.NORMAL)
                     .build();
             userRepository.save(user1);
 
             assertThatThrownBy(() -> inTransaction(() -> {
-                User user2 = User.builder()
-                        .email("user2@example.com")
-                        .provider(AuthProviderType.GOOGLE)
+                User user2 = TestDataFactory.user()
                         .providerId(providerId)
-                        .usernameEpithet("TEST")
-                        .usernameSuffix(TestDataFactory.uniqueSuffix(""))
-                        .role(UserRole.NORMAL)
                         .build();
                 userRepository.save(user2);
                 entityManager.flush();
@@ -312,21 +269,13 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         @Test
         void uniqueConstraint_WhenDifferentProviderSameProviderId_Allowed() {
             String providerId = "shared-" + UUID.randomUUID();
-            User user1 = User.builder()
-                    .email("user1@example.com")
+            User user1 = TestDataFactory.user()
                     .provider(AuthProviderType.GOOGLE)
                     .providerId(providerId)
-                    .usernameEpithet("TEST")
-                    .usernameSuffix(TestDataFactory.uniqueSuffix(""))
-                    .role(UserRole.NORMAL)
                     .build();
-            User user2 = User.builder()
-                    .email("user2@example.com")
+            User user2 = TestDataFactory.user()
                     .provider(AuthProviderType.APPLE)
                     .providerId(providerId)
-                    .usernameEpithet("TEST")
-                    .usernameSuffix(TestDataFactory.uniqueSuffix(""))
-                    .role(UserRole.NORMAL)
                     .build();
 
             assertThatNoException().isThrownBy(() -> inTransaction(() -> {
@@ -343,7 +292,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         @Test
         void notNullConstraint_WhenMissingTitle_ThrowsException() {
             assertThatThrownBy(() -> inTransaction(() -> {
-                Planner planner = buildPlanner(testUser.getId(), null);
+                Planner planner = TestDataFactory.planner(testUser).title(null).build();
                 plannerRepository.save(planner);
                 entityManager.flush();
             })).satisfiesAnyOf(
@@ -355,7 +304,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         @Test
         void notNullConstraint_WhenMissingOwner_ThrowsException() {
             assertThatThrownBy(() -> inTransaction(() -> {
-                Planner planner = buildPlanner(null, "Test Title");
+                Planner planner = TestDataFactory.planner(testUser).ownerId(null).build();
                 plannerRepository.save(planner);
                 entityManager.flush();
             })).satisfiesAnyOf(
@@ -385,13 +334,8 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         @Test
         void notNullConstraint_WhenMissingEmail_ThrowsException() {
             assertThatThrownBy(() -> inTransaction(() -> {
-                User user = User.builder()
+                User user = TestDataFactory.user()
                         .email(null)
-                        .provider(AuthProviderType.GOOGLE)
-                        .providerId("google-123")
-                        .usernameEpithet("TEST")
-                        .usernameSuffix(TestDataFactory.uniqueSuffix(""))
-                        .role(UserRole.NORMAL)
                         .build();
                 userRepository.save(user);
                 entityManager.flush();
@@ -402,13 +346,8 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         @Test
         void notNullConstraint_WhenMissingProvider_ThrowsException() {
             assertThatThrownBy(() -> inTransaction(() -> {
-                User user = User.builder()
-                        .email("test@example.com")
+                User user = TestDataFactory.user()
                         .provider(null)
-                        .providerId("google-123")
-                        .usernameEpithet("TEST")
-                        .usernameSuffix(TestDataFactory.uniqueSuffix(""))
-                        .role(UserRole.NORMAL)
                         .build();
                 userRepository.save(user);
                 entityManager.flush();
@@ -419,13 +358,8 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         @Test
         void notNullConstraint_WhenMissingProviderId_ThrowsException() {
             assertThatThrownBy(() -> inTransaction(() -> {
-                User user = User.builder()
-                        .email("test@example.com")
-                        .provider(AuthProviderType.GOOGLE)
+                User user = TestDataFactory.user()
                         .providerId(null)
-                        .usernameEpithet("TEST")
-                        .usernameSuffix(TestDataFactory.uniqueSuffix(""))
-                        .role(UserRole.NORMAL)
                         .build();
                 userRepository.save(user);
                 entityManager.flush();
@@ -435,14 +369,14 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
 
         @Test
         void notNullConstraint_WhenEmptyStringAllowed_NullForbidden() {
-            Planner planner1 = buildPlanner(testUser.getId(), "");
+            Planner planner1 = TestDataFactory.planner(testUser).title("").build();
             assertThatNoException().isThrownBy(() -> inTransaction(() -> {
                 plannerRepository.save(planner1);
                 entityManager.flush();
             }));
 
             assertThatThrownBy(() -> inTransaction(() -> {
-                Planner planner2 = buildPlanner(testUser.getId(), null);
+                Planner planner2 = TestDataFactory.planner(testUser).title(null).build();
                 plannerRepository.save(planner2);
                 entityManager.flush();
             })).satisfiesAnyOf(
@@ -453,7 +387,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
 
         @Test
         void notNullConstraint_WhenDefaultValueApplied_PublishedFalse() {
-            Planner planner = buildPlanner(testUser.getId(), "Test");
+            Planner planner = TestDataFactory.planner(testUser).build();
             plannerRepository.save(planner);
 
             Planner saved = plannerRepository.findById(planner.getId()).orElseThrow();
@@ -462,7 +396,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
 
         @Test
         void notNullConstraint_WhenDefaultValueApplied_UpvotesZero() {
-            Planner planner = buildPlanner(testUser.getId(), "Test");
+            Planner planner = TestDataFactory.planner(testUser).build();
             plannerRepository.save(planner);
             statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
 

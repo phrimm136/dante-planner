@@ -2,15 +2,14 @@ package org.danteplanner.backend.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.support.UpsertRequests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -65,21 +64,20 @@ class PlannerUpsertConflictIT extends SharedMySqlContainerSupport {
     private User owner;
     private String token;
     private Planner planner;
-    private String validContent;
 
     @BeforeEach
     void setUp() {
         owner = TestDataFactory.createTestUser(userRepository, "owner@example.com");
         token = TestDataFactory.generateAccessToken(jwtTokenService, owner);
         planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
-        validContent = planner.getContentJson();
     }
 
 
     private String body(Long syncVersion) throws Exception {
-        return objectMapper.writeValueAsString(new UpsertPlannerRequest(
-                planner.getId().toString(), "5F", "Conflict Test", null,
-                validContent, 6, PlannerType.MIRROR_DUNGEON, syncVersion, null));
+        return objectMapper.writeValueAsString(UpsertRequests.resending(planner)
+                .title("Conflict Test")
+                .syncVersion(syncVersion)
+                .build());
     }
 
     private MockHttpServletResponse doPut(Long syncVersion) throws Exception {

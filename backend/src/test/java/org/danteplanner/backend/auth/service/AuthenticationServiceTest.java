@@ -122,13 +122,10 @@ class AuthenticationServiceTest {
         @Test
         void authenticateWithOAuth_WhenUserSoftDeleted_ReactivatesUser() {
             // Arrange
-            User deletedUser = User.builder()
+            User deletedUser = TestDataFactory.user()
                     .id(456L)
-                    .email("deleted@example.com")
                     .provider(AuthProviderType.GOOGLE)
                     .providerId("deleted-123")
-                    .usernameEpithet("W_CORP")
-                    .usernameSuffix("test2")
                     .build();
             deletedUser.softDelete(java.time.Instant.now().plusSeconds(86400 * 30));
             users.add(deletedUser);

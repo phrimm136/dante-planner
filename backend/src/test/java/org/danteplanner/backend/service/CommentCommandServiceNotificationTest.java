@@ -15,14 +15,12 @@ import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
-import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -147,15 +145,7 @@ class CommentCommandServiceNotificationTest {
     }
 
     private void givenAPublishedPlanner() {
-        users.add(User.builder()
-                .id(COMMENTER_ID)
-                .email("commenter@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("commenter-123")
-                .usernameEpithet("COMMENTER")
-                .usernameSuffix("com01")
-                .role(UserRole.NORMAL)
-                .build());
+        users.add(TestDataFactory.unsavedUser(COMMENTER_ID));
         when(plannerRepository.existsPublishedById(PLANNER_ID)).thenReturn(true);
     }
 

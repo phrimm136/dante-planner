@@ -2,7 +2,6 @@ package org.danteplanner.backend.service;
 
 import org.danteplanner.backend.admin.service.AdminService;
 import org.danteplanner.backend.user.api.UserSummary;
-import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.support.FakeUsers;
@@ -20,6 +19,7 @@ import org.danteplanner.backend.moderation.exception.ModerationForbiddenExceptio
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
 import org.danteplanner.backend.moderation.service.ModerationPolicy;
+import org.danteplanner.backend.support.TestDataFactory;
 
 /**
  * Unit tests for AdminService.
@@ -45,38 +45,11 @@ class AdminServiceTest {
         adminService = new AdminService(users,
                 new ModerationAuditService(moderationActionRepository), new ModerationPolicy());
 
-        adminUser = User.builder()
-                .id(1L)
-                .publicId(java.util.UUID.randomUUID())
-                .email("admin@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("admin-123")
-                .usernameEpithet("ADMIN")
-                .usernameSuffix("adm01")
-                .role(UserRole.ADMIN)
-                .build();
+        adminUser = TestDataFactory.unsavedUser(UserRole.ADMIN);
 
-        moderatorUser = User.builder()
-                .id(2L)
-                .publicId(java.util.UUID.randomUUID())
-                .email("mod@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("mod-123")
-                .usernameEpithet("MOD")
-                .usernameSuffix("mod01")
-                .role(UserRole.MODERATOR)
-                .build();
+        moderatorUser = TestDataFactory.unsavedUser(UserRole.MODERATOR);
 
-        normalUser = User.builder()
-                .id(3L)
-                .publicId(java.util.UUID.randomUUID())
-                .email("user@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("user-123")
-                .usernameEpithet("USER")
-                .usernameSuffix("usr01")
-                .role(UserRole.NORMAL)
-                .build();
+        normalUser = TestDataFactory.unsavedUser(UserRole.NORMAL);
 
         users.add(adminUser);
         users.add(moderatorUser);
@@ -120,16 +93,7 @@ class AdminServiceTest {
         @Test
         void changeRole_WhenModeratorModifiesModerator_ThrowsException() {
             // Arrange - create another moderator
-            User otherModerator = User.builder()
-                    .id(4L)
-                    .publicId(java.util.UUID.randomUUID())
-                    .email("mod2@example.com")
-                    .provider(AuthProviderType.GOOGLE)
-                    .providerId("mod2-123")
-                    .usernameEpithet("MOD2")
-                    .usernameSuffix("mod02")
-                    .role(UserRole.MODERATOR)
-                    .build();
+            User otherModerator = TestDataFactory.unsavedUser(UserRole.MODERATOR);
 
             users.add(otherModerator);
 
@@ -169,16 +133,7 @@ class AdminServiceTest {
         @Test
         void changeRole_WhenDemotingOtherAdmin_Throws() {
             // Arrange - per spec: "Cannot modify role of users at equal or higher rank (unless self-demotion)"
-            User otherAdmin = User.builder()
-                    .id(5L)
-                    .publicId(java.util.UUID.randomUUID())
-                    .email("admin2@example.com")
-                    .provider(AuthProviderType.GOOGLE)
-                    .providerId("admin2-123")
-                    .usernameEpithet("ADMIN2")
-                    .usernameSuffix("adm02")
-                    .role(UserRole.ADMIN)
-                    .build();
+            User otherAdmin = TestDataFactory.unsavedUser(UserRole.ADMIN);
 
             users.add(otherAdmin);
 
@@ -211,16 +166,7 @@ class AdminServiceTest {
 
         @Test
         void changeRole_WhenAdminSelfDemotion_Succeeds() {
-            users.add(User.builder()
-                    .id(5L)
-                    .publicId(java.util.UUID.randomUUID())
-                    .email("admin2@example.com")
-                    .provider(AuthProviderType.GOOGLE)
-                    .providerId("admin2-123")
-                    .usernameEpithet("ADMIN2")
-                    .usernameSuffix("adm02")
-                    .role(UserRole.ADMIN)
-                    .build());
+            users.add(TestDataFactory.unsavedUser(UserRole.ADMIN));
 
             // Act
             UserSummary result = adminService.changeRole(adminUser.getId(), adminUser.getId(), UserRole.MODERATOR);

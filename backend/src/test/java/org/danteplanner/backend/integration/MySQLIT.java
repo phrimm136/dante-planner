@@ -279,22 +279,14 @@ class MySQLIT extends SharedMySqlContainerSupport {
         void uniqueConstraint_WhenMySQLErrorFormat_ValidatesMessage() {
             String providerId = "duplicate-provider-" + UUID.randomUUID();
             // Create user with specific provider ID
-            User user1 = User.builder()
-                    .email("user1@example.com")
-                    .provider(AuthProviderType.GOOGLE)
+            User user1 = TestDataFactory.user()
                     .providerId(providerId)
-                    .usernameEpithet("W_CORP")
-                    .usernameSuffix(TestDataFactory.uniqueSuffix(""))
                     .build();
             userRepository.save(user1);
 
             // Try to create another user with same provider+providerId
-            User user2 = User.builder()
-                    .email("user2@example.com")
-                    .provider(AuthProviderType.GOOGLE)
+            User user2 = TestDataFactory.user()
                     .providerId(providerId)
-                    .usernameEpithet("W_CORP")
-                    .usernameSuffix(TestDataFactory.uniqueSuffix(""))
                     .build();
 
             assertThatThrownBy(() -> transactionTemplate.executeWithoutResult(status -> {
@@ -307,12 +299,9 @@ class MySQLIT extends SharedMySqlContainerSupport {
         @Test
         void authProviderType_WhenGoogle_RoundTripsThroughVarcharColumn() {
             String providerId = "roundtrip-provider-" + UUID.randomUUID();
-            User user = User.builder()
-                    .email("provider-roundtrip@example.com")
+            User user = TestDataFactory.user()
                     .provider(AuthProviderType.GOOGLE)
                     .providerId(providerId)
-                    .usernameEpithet("W_CORP")
-                    .usernameSuffix(TestDataFactory.uniqueSuffix(""))
                     .build();
             userRepository.save(user);
 

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.dto.UpsertResult;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
@@ -22,6 +21,7 @@ import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.support.UpsertRequests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -83,12 +83,6 @@ class PlannerWriteParseTest {
         return planner;
     }
 
-    private static UpsertPlannerRequest request(Planner planner, String category, String content, int version,
-                                                Long syncVersion) {
-        return new UpsertPlannerRequest(planner.getId().toString(), category, planner.getTitle(), null,
-                content, version, PlannerType.MIRROR_DUNGEON, syncVersion, null);
-    }
-
     private UpsertResult upsert(Planner planner, UpsertPlannerRequest request) {
         return commandService.upsertPlanner(owner.getId(), null, planner.getId(), request, false);
     }
@@ -97,8 +91,7 @@ class PlannerWriteParseTest {
     void upsertPlanner_WhenOnlyTheCategoryChanges_ReadmitsTheStoredDocumentWithoutTheIdChecks() {
         Planner planner = stored(UNKNOWN_IDENTITY_CONTENT);
 
-        upsert(planner, request(planner, "10F", planner.getContentJson(), planner.getContentVersion(),
-                planner.getSyncVersion()));
+        upsert(planner, UpsertRequests.resending(planner).category("10F").build());
 
         assertThat(planner.getCategory()).isEqualTo("10F");
         assertThat(planner.getContentJson()).isEqualTo(UNKNOWN_IDENTITY_CONTENT);
@@ -108,8 +101,10 @@ class PlannerWriteParseTest {
     void upsertPlanner_WhenTheContentItselfCarriesTheUnknownIdentity_ReportsIt() {
         Planner planner = stored(TestDataFactory.VALID_CONTENT);
 
-        assertThatThrownBy(() -> upsert(planner, request(planner, "10F", UNKNOWN_IDENTITY_CONTENT,
-                planner.getContentVersion(), planner.getSyncVersion())))
+        assertThatThrownBy(() -> upsert(planner, UpsertRequests.resending(planner)
+                .category("10F")
+                .content(UNKNOWN_IDENTITY_CONTENT)
+                .build()))
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex ->
                         assertThat(ex.getSubErrors()).extracting(ValidationError::code)
                                 .contains("UNKNOWN_IDENTITY"));
@@ -123,8 +118,10 @@ class PlannerWriteParseTest {
         long storedVersion = planner.getSyncVersion();
         String restyled = MAPPER.readTree(planner.getContentJson()).toPrettyString();
 
-        UpsertResult result = upsert(planner, request(planner, planner.getCategory(), restyled,
-                planner.getContentVersion(), storedVersion - 1));
+        UpsertResult result = upsert(planner, UpsertRequests.resending(planner)
+                .content(restyled)
+                .syncVersion(storedVersion - 1)
+                .build());
 
         assertThat(restyled).isNotEqualTo(planner.getContentJson());
         assertThat(result.response().syncVersion()).isEqualTo(storedVersion);
@@ -136,8 +133,9 @@ class PlannerWriteParseTest {
     void upsertPlanner_WhenTheCarriedContentIsUnparseable_RefusesItAsMalformed() {
         Planner planner = stored(TestDataFactory.VALID_CONTENT);
 
-        assertThatThrownBy(() -> upsert(planner, request(planner, planner.getCategory(), "{\"equipment\":",
-                planner.getContentVersion(), planner.getSyncVersion())))
+        assertThatThrownBy(() -> upsert(planner, UpsertRequests.resending(planner)
+                .content("{\"equipment\":")
+                .build()))
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex ->
                         assertThat(ex.getSubErrors()).extracting(ValidationError::code)
                                 .containsExactly("MALFORMED_JSON"));
@@ -147,8 +145,10 @@ class PlannerWriteParseTest {
     void upsertPlanner_WhenAnUpdateCarriesAVersionWithNoGameData_RefusesTheVersionAlone() {
         Planner planner = stored(TestDataFactory.VALID_CONTENT);
 
-        assertThatThrownBy(() -> upsert(planner, request(planner, planner.getCategory(), UNKNOWN_IDENTITY_CONTENT,
-                99, planner.getSyncVersion())))
+        assertThatThrownBy(() -> upsert(planner, UpsertRequests.resending(planner)
+                .content(UNKNOWN_IDENTITY_CONTENT)
+                .contentVersion(99)
+                .build()))
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex ->
                         assertThat(ex.getSubErrors()).containsExactly(new ValidationError("UNKNOWN_VERSION", "",
                                 "No game data for content version 99")));

@@ -10,12 +10,8 @@ import org.danteplanner.backend.planner.precondition.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.precondition.PlannerLimitValidator;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator;
-import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.entity.PlannerContentLifecycle;
-import org.danteplanner.backend.planner.entity.PlannerModeration;
-import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
-import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.entity.StoredPlannerContent;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -37,6 +33,7 @@ import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
 import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
+import org.danteplanner.backend.support.UpsertRequests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -87,9 +84,6 @@ class PlannerCommandServiceTest {
 
     private static final int CURRENT_SCHEMA_VERSION = 2;
 
-    private static final int CURRENT_MD_VERSION =
-            TestDataFactory.gameDataRegistry().plannerVersions().mdCurrentVersion();
-
     private static final String UNKNOWN_IDENTITY_CONTENT = TestDataFactory.VALID_CONTENT.replace(
             "\"identity\":{\"id\":\"10101\"", "\"identity\":{\"id\":\"10199\"");
 
@@ -134,58 +128,18 @@ class PlannerCommandServiceTest {
         }
     }
 
-    private UpsertPlannerRequest createValidRequest() {
-        return new UpsertPlannerRequest(
-                UUID.randomUUID().toString(),
-                "5F",
-                "Test Planner",
-                PlannerStatus.DRAFT,
-                TestDataFactory.VALID_CONTENT,
-                CURRENT_MD_VERSION,
-                PlannerType.MIRROR_DUNGEON,
-                null,
-                null);
-    }
-
-    private UpsertPlannerRequest withTitle(UpsertPlannerRequest r, String title) {
-        return new UpsertPlannerRequest(r.id(), r.category(), title, r.status(),
-                r.content(), r.contentVersion(), r.plannerType(), r.syncVersion(), r.selectedKeywords());
-    }
-
-    private UpsertPlannerRequest withContentVersion(UpsertPlannerRequest r, Integer contentVersion) {
-        return new UpsertPlannerRequest(r.id(), r.category(), r.title(), r.status(),
-                r.content(), contentVersion, r.plannerType(), r.syncVersion(), r.selectedKeywords());
-    }
-
-    private UpsertPlannerRequest withContent(UpsertPlannerRequest r, String content) {
-        return new UpsertPlannerRequest(r.id(), r.category(), r.title(), r.status(),
-                content, r.contentVersion(), r.plannerType(), r.syncVersion(), r.selectedKeywords());
-    }
-
     private Planner testPlanner(long syncVersion, boolean published) {
         return testPlanner(syncVersion, published, "{\"data\": \"test\"}");
     }
 
     private Planner testPlanner(long syncVersion, boolean published, String content) {
-        Planner planner = Planner.builder()
-                .id(UUID.randomUUID())
-                .userId(testUser.getId())
-                .plannerType(PlannerType.MIRROR_DUNGEON)
-                .createdAt(Instant.now())
+        return TestDataFactory.planner(testUser)
+                .title("Test Planner")
+                .status(PlannerStatus.DRAFT)
+                .content(content)
+                .published(published)
+                .syncVersion(syncVersion)
                 .build();
-        planner.attach(
-                PlannerContentLifecycle.asPersisted(StoredPlannerContent.holding(PlannerContent.builder()
-                        .title("Test Planner")
-                        .category("5F")
-                        .status(PlannerStatus.DRAFT)
-                        .contentSchemaVersion(1)
-                        .gameContentVersion(6)
-                        .syncVersion(syncVersion)
-                        .lastModifiedAt(Instant.now())
-                        .build(), content)),
-                PlannerPublication.builder().published(published).build(),
-                PlannerModeration.builder().build());
-        return planner;
     }
 
     private Planner createTestPlanner() {
@@ -198,7 +152,7 @@ class PlannerCommandServiceTest {
         @Test
         void createPlanner_WhenWithinLimit_Succeeds() {
             // Arrange
-            UpsertPlannerRequest request = createValidRequest();
+            UpsertPlannerRequest request = UpsertRequests.draft().title("Test Planner").category("5F").build();
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(50L);
             when(plannerRepository.insert(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
@@ -220,7 +174,7 @@ class PlannerCommandServiceTest {
         @Test
         void createPlanner_WhenAtLimit_ThrowsException() {
             // Arrange
-            UpsertPlannerRequest request = createValidRequest();
+            UpsertPlannerRequest request = UpsertRequests.valid();
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) MAX_PLANNERS_PER_USER);
 
             // Act & Assert
@@ -236,7 +190,7 @@ class PlannerCommandServiceTest {
         @Test
         void createPlanner_WhenUserNotFound_ThrowsException() {
             // Arrange
-            UpsertPlannerRequest request = createValidRequest();
+            UpsertPlannerRequest request = UpsertRequests.valid();
             Long nonExistentUserId = 999L;
 
             // Act & Assert
@@ -253,7 +207,7 @@ class PlannerCommandServiceTest {
         @Test
         void createPlanner_WhenNoTitle_UsesDefault() {
             // Arrange
-            UpsertPlannerRequest request = withTitle(createValidRequest(), null);
+            UpsertPlannerRequest request = UpsertRequests.draft().title(null).build();
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
 
             ArgumentCaptor<Planner> plannerCaptor = ArgumentCaptor.forClass(Planner.class);
@@ -274,9 +228,8 @@ class PlannerCommandServiceTest {
         @Test
         void createPlanner_WhenCalled_ValidatesContentBeforeSave() {
             // Arrange
-            UpsertPlannerRequest request = createValidRequest();
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
-            UpsertPlannerRequest unknownIdentity = withContent(request, UNKNOWN_IDENTITY_CONTENT);
+            UpsertPlannerRequest unknownIdentity = UpsertRequests.draft().content(UNKNOWN_IDENTITY_CONTENT).build();
 
             // Act & Assert
             PlannerValidationException exception = assertThrows(
@@ -292,8 +245,10 @@ class PlannerCommandServiceTest {
         @Test
         void createPlanner_WhenInvalidContentVersion_ThrowsException() {
             // Arrange
-            UpsertPlannerRequest request = withContent(
-                    withContentVersion(createValidRequest(), 5), "{\"equipment\":"); // Old version
+            UpsertPlannerRequest request = UpsertRequests.draft()
+                    .contentVersion(5) // Old version
+                    .content("{\"equipment\":")
+                    .build();
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
 
             // Act & Assert
@@ -327,18 +282,15 @@ class PlannerCommandServiceTest {
                     new FloorRules(registry));
         }
 
-        private UpsertPlannerRequest resending(Planner planner, String category, String content) {
-            return new UpsertPlannerRequest(planner.getId().toString(), category, planner.getTitle(), null,
-                    content, planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), null);
-        }
-
         @Test
         void upsertPlanner_WhenCategoryAndContentVersionChange_ValidatesTheContent() {
             Planner planner = testPlanner(1L, false, TestDataFactory.VALID_CONTENT);
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
-            UpsertPlannerRequest request = withContentVersion(
-                    resending(planner, "10F", TestDataFactory.VALID_CONTENT), 99);
+            UpsertPlannerRequest request = UpsertRequests.resending(planner)
+                    .category("10F")
+                    .contentVersion(99)
+                    .build();
 
             PlannerValidationException exception = assertThrows(PlannerValidationException.class,
                     () -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), request, false));
@@ -352,9 +304,7 @@ class PlannerCommandServiceTest {
             Planner planner = testPlanner(1L, false, UNKNOWN_IDENTITY_CONTENT);
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
-            UpsertPlannerRequest retitled = new UpsertPlannerRequest(planner.getId().toString(), "5F", "Renamed",
-                    null, UNKNOWN_IDENTITY_CONTENT, planner.getContentVersion(), PlannerType.MIRROR_DUNGEON,
-                    planner.getSyncVersion(), null);
+            UpsertPlannerRequest retitled = UpsertRequests.resending(planner).title("Renamed").build();
 
             PlannerValidationException exception = assertThrows(PlannerValidationException.class,
                     () -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), retitled, false));
@@ -375,7 +325,7 @@ class PlannerCommandServiceTest {
                     .thenReturn(Optional.of(planner));
 
             commandServiceWith(renaming).upsertPlanner(testUser.getId(), deviceId, planner.getId(),
-                    resending(planner, "5F", stored), false);
+                    UpsertRequests.resending(planner).category("5F").build(), false);
 
             JsonNode saved = new ObjectMapper().readTree(planner.getContentJson());
             assertEquals(new ObjectMapper().createArrayNode().add("19002"), saved.path("observationGiftIds"));
@@ -392,7 +342,7 @@ class PlannerCommandServiceTest {
 
             PlannerValidationException exception = assertThrows(PlannerValidationException.class,
                     () -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(),
-                            resending(planner, "5F", unknownKeyword), false));
+                            UpsertRequests.resending(planner).content(unknownKeyword).build(), false));
 
             assertEquals("UNKNOWN_KEYWORD", exception.getOriginalCode());
         }
@@ -457,7 +407,7 @@ class PlannerCommandServiceTest {
         @Test
         void createPlanner_WhenAtMaxMinusOne_Succeeds() {
             // Arrange
-            UpsertPlannerRequest request = createValidRequest();
+            UpsertPlannerRequest request = UpsertRequests.draft().title("Test Planner").build();
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) (MAX_PLANNERS_PER_USER - 1));
             when(plannerRepository.insert(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
@@ -478,7 +428,7 @@ class PlannerCommandServiceTest {
         @Test
         void createPlanner_WhenAtMax_ThrowsLimitExceeded() {
             // Arrange
-            UpsertPlannerRequest request = createValidRequest();
+            UpsertPlannerRequest request = UpsertRequests.valid();
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) MAX_PLANNERS_PER_USER);
 
             // Act & Assert
@@ -490,7 +440,7 @@ class PlannerCommandServiceTest {
 
         @Test
         void createPlanner_WhenCheckingLimit_CountsOnlyNonDeleted() {
-            UpsertPlannerRequest request = createValidRequest();
+            UpsertPlannerRequest request = UpsertRequests.valid();
             // Only the deleted-excluding count is stubbed, and with a value no other source could
             // supply, so the verdict can only carry it if that count is what the limit reads.
             long activeCount = MAX_PLANNERS_PER_USER + 7L;
@@ -518,8 +468,7 @@ class PlannerCommandServiceTest {
                     .thenAnswer(invocation -> PlannerContentLifecycle.asPersisted(
                             (Planner) invocation.getArgument(0)));
 
-            UpsertPlannerRequest request = new UpsertPlannerRequest(null, "5F", "Test Planner", null,
-                    TestDataFactory.VALID_CONTENT, CURRENT_MD_VERSION, PlannerType.MIRROR_DUNGEON, null, null);
+            UpsertPlannerRequest request = UpsertRequests.draft().id(null).status(null).build();
 
             UUID plannerId = UUID.randomUUID();
 
@@ -539,8 +488,11 @@ class PlannerCommandServiceTest {
                     .thenAnswer(invocation -> PlannerContentLifecycle.asPersisted(
                             (Planner) invocation.getArgument(0)));
 
-            UpsertPlannerRequest request = new UpsertPlannerRequest(null, "5F", "Test Planner", null,
-                    TestDataFactory.VALID_CONTENT, CURRENT_MD_VERSION, PlannerType.MIRROR_DUNGEON, null, null);
+            UpsertPlannerRequest request = UpsertRequests.draft()
+                    .id(null)
+                    .title("Test Planner")
+                    .status(null)
+                    .build();
 
             UUID plannerId = UUID.randomUUID();
 
@@ -566,9 +518,7 @@ class PlannerCommandServiceTest {
             Planner planner = testPlanner(1L, true, TestDataFactory.VALID_CONTENT);
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
-            UpsertPlannerRequest retitled = new UpsertPlannerRequest(planner.getId().toString(), "5F", "Renamed",
-                    null, TestDataFactory.VALID_CONTENT, planner.getContentVersion(), PlannerType.MIRROR_DUNGEON,
-                    planner.getSyncVersion(), null);
+            UpsertPlannerRequest retitled = UpsertRequests.resending(planner).title("Renamed").build();
 
             assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), retitled,
                     false)).withCode("USER_BANNED");
@@ -593,16 +543,10 @@ class PlannerCommandServiceTest {
             };
         }
 
-        private UpsertPlannerRequest buildRequest() {
-            UpsertPlannerRequest request = new UpsertPlannerRequest(null, "5F", "Test Planner", null,
-                    TestDataFactory.VALID_CONTENT, CURRENT_MD_VERSION, PlannerType.MIRROR_DUNGEON, null, null);
-            return request;
-        }
-
         @Test
         void createOwnershipCheck_WhenOwnSoftDeleted_ThrowsNotFoundWithoutAnExistenceProbe() {
             UUID plannerId = UUID.randomUUID();
-            UpsertPlannerRequest request = buildRequest();
+            UpsertPlannerRequest request = UpsertRequests.draft().id(null).status(null).build();
             PlannerOwnershipRow ownership = ownership(testUser.getId(), Instant.now());
             when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))
                     .thenReturn(Optional.empty());
@@ -619,7 +563,7 @@ class PlannerCommandServiceTest {
         @Test
         void createOwnershipCheck_WhenOtherUserActive_ThrowsForbiddenWithoutAnExistenceProbe() {
             UUID plannerId = UUID.randomUUID();
-            UpsertPlannerRequest request = buildRequest();
+            UpsertPlannerRequest request = UpsertRequests.draft().id(null).status(null).build();
             PlannerOwnershipRow ownership = ownership(testUser.getId() + 1, null);
             when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))
                     .thenReturn(Optional.empty());
@@ -635,7 +579,7 @@ class PlannerCommandServiceTest {
         @Test
         void createOwnershipCheck_WhenGenuinelyNew_CreatesWithoutAnExistenceProbe() {
             UUID plannerId = UUID.randomUUID();
-            UpsertPlannerRequest request = buildRequest();
+            UpsertPlannerRequest request = UpsertRequests.draft().id(null).status(null).build();
             when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))
                     .thenReturn(Optional.empty());
             when(plannerRepository.findOwnershipById(plannerId))
@@ -662,12 +606,6 @@ class PlannerCommandServiceTest {
         private static final String BURST_CONTENT = TestDataFactory.withSelectedKeywords(
                 TestDataFactory.VALID_CONTENT, java.util.Set.of("Burst"));
 
-        private UpsertPlannerRequest carrying(Planner planner, String content, java.util.Set<String> topLevel,
-                Long syncVersion) {
-            return new UpsertPlannerRequest(planner.getId().toString(), planner.getCategory(), planner.getTitle(),
-                    null, content, planner.getContentVersion(), PlannerType.MIRROR_DUNGEON, syncVersion, topLevel);
-        }
-
         private Planner storedWithSinking() {
             Planner planner = testPlanner(3L, false);
             StoredPlannerContent.holding(planner.getContent(), SINKING_CONTENT);
@@ -681,8 +619,11 @@ class PlannerCommandServiceTest {
 
         @Test
         void createPlanner_WhenTopLevelKeywordsDisagreeWithContent_StoresTheContentKeywords() {
-            UpsertPlannerRequest request = new UpsertPlannerRequest(UUID.randomUUID().toString(), "5F", "Test Planner",
-                    null, SINKING_CONTENT, CURRENT_MD_VERSION, PlannerType.MIRROR_DUNGEON, null, java.util.Set.of("Burst"));
+            UpsertPlannerRequest request = UpsertRequests.draft()
+                    .status(null)
+                    .content(SINKING_CONTENT)
+                    .selectedKeywords(java.util.Set.of("Burst"))
+                    .build();
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
             ArgumentCaptor<Planner> plannerCaptor = ArgumentCaptor.forClass(Planner.class);
             when(plannerRepository.insert(plannerCaptor.capture()))
@@ -698,7 +639,7 @@ class PlannerCommandServiceTest {
             Planner planner = storedWithSinking();
 
             commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(),
-                    carrying(planner, BURST_CONTENT, null, planner.getSyncVersion()), false);
+                    UpsertRequests.resending(planner).content(BURST_CONTENT).build(), false);
 
             assertEquals(java.util.Set.of("Burst"), planner.getSelectedKeywords());
         }
@@ -709,7 +650,11 @@ class PlannerCommandServiceTest {
             long storedVersion = planner.getSyncVersion();
 
             UpsertResult result = assertDoesNotThrow(() -> commandService.upsertPlanner(testUser.getId(), deviceId,
-                    planner.getId(), carrying(planner, SINKING_CONTENT, java.util.Set.of("Burst"), storedVersion - 1),
+                    planner.getId(), UpsertRequests.resending(planner)
+                            .content(SINKING_CONTENT)
+                            .selectedKeywords(java.util.Set.of("Burst"))
+                            .syncVersion(storedVersion - 1)
+                            .build(),
                     false));
 
             assertEquals(storedVersion, result.response().syncVersion());

@@ -16,8 +16,6 @@ import java.util.concurrent.locks.LockSupport;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
-import org.danteplanner.backend.planner.entity.PlannerStatus;
-import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.shared.config.FallbackReplicaProperties;
 import org.danteplanner.backend.shared.config.ReadFallbackConfig;
 import org.danteplanner.backend.shared.gtid.GtidCookie;
@@ -25,6 +23,7 @@ import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.support.UpsertRequests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -308,9 +307,7 @@ class OregonReadFallbackIT {
 
     private ResultActions upsert(Session session, UUID plannerId, String title, boolean overwrite)
             throws Exception {
-        UpsertPlannerRequest request = new UpsertPlannerRequest(
-                plannerId.toString(), "5F", title, PlannerStatus.DRAFT, TestDataFactory.VALID_CONTENT, 7,
-                PlannerType.MIRROR_DUNGEON, null, null);
+        UpsertPlannerRequest request = UpsertRequests.draft().id(plannerId.toString()).title(title).build();
         String path = "/api/planner/md/" + plannerId + (overwrite ? "?force=true" : "");
         return mockMvc.perform(put(path).with(withCsrf())
                 .cookie(session.auth(), session.device())

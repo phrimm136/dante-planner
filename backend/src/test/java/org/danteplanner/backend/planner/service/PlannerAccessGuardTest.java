@@ -82,7 +82,7 @@ class PlannerAccessGuardTest {
 
         @Test
         void requirePublished_WhenPublished_ReturnsAggregate() {
-            Planner planner = new Planner();
+            Planner planner = TestDataFactory.planner(TestDataFactory.unsavedUser(1L)).build();
             when(plannerRepository.findPublishedAggregate(plannerId)).thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(TestDataFactory.unsavedUser(1L)))));
 
             assertThat(accessGuard.requirePublished(plannerId)).isSameAs(planner);

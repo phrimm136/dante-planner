@@ -1,5 +1,5 @@
 # 171 tests-keep-class-concurrency-and-enforce-isolation-by-rule
-epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @mocks @memory @isolation @transactions @contexts @fakes
+epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @mocks @memory @isolation @transactions @contexts @fakes @fixtures
 
 ## Decisions
 - @tests @concurrency — Backend test classes keep running concurrently inside the test JVM, twelve
@@ -148,6 +148,20 @@ epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @
   `mockConstruction`, through `Mockito` or `BDDMockito`) in test sources, except a static mock of a
   named third-party API with no injectable seam (Sentry) — the mock-port rule (`MockPortRule`) and
   the ast-grep rule `no-mock-call`.
+- @tests @fixtures — A test builds a user, a planner or a planner write request only through the
+  `support` builders: `TestDataFactory.user()`, `TestDataFactory.planner(owner)` and `UpsertRequests`,
+  with `UpsertRequests.resending(planner)` for a write that resends a stored planner. A test that
+  needs a planner in a given state reaches it through the planner's public transitions. Ninety-six
+  hand-built sites restated defaults in about twenty local copy helpers. A planner write is a
+  full-document PUT compared against the stored category and sync version, so a resend assembled field
+  by field silently took another branch whenever one field drifted from the stored row.
+  REJECTED: a request built from `UpsertRequests.draft()` whose defaults match `TestDataFactory`'s
+  planner defaults — the agreement is implicit and breaks when either default or the stored row moves.
+  REJECTED: a support helper that attaches raw planner satellites — it opens states the domain cannot
+  reach (published and taken down) to every test.
+  INVARIANT: outside `support`, no test calls or references `User.builder()`, `Planner.builder()` or
+  a constructor of `User`, `Planner` or `UpsertPlannerRequest` — the fixture-construction rule
+  (`FixtureConstructionRule`, checked by `TestFixtureConventionTest`).
 
 ## Takeaway
 - takeaway: when concurrency in a test suite exposes shared state, close each hazard with a rule
