@@ -1,0 +1,24 @@
+id: no-swallowed-exception-in-tests
+language: Java
+severity: error
+message: 'A catch in a test class rethrows, asserts, fails, returns or records what it caught; an empty or log-only catch lets a failing act pass.'
+files:
+  - src/test/java/org/danteplanner/backend/**/*Test.java
+  - src/test/java/org/danteplanner/backend/**/*IT.java
+  - src/test/java/org/danteplanner/backend/**/*Contract.java
+rule:
+  kind: catch_clause
+  has:
+    field: body
+    kind: block
+    not:
+      has:
+        stopBy: end
+        any:
+          - kind: throw_statement
+          - kind: return_statement
+          - kind: assignment_expression
+          - kind: method_invocation
+            has:
+              field: name
+              regex: ^(assert.*|fail|verify|add|offer|put|set|complete.*|addSuppressed|interrupt)$

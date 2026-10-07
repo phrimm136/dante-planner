@@ -1,5 +1,5 @@
 # 171 tests-keep-class-concurrency-and-enforce-isolation-by-rule
-epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @mocks @memory @isolation @transactions @contexts @fakes @fixtures @assertions
+epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @mocks @memory @isolation @transactions @contexts @fakes @fixtures @assertions @exceptions
 
 ## Decisions
 - @tests @concurrency — Backend test classes keep running concurrently inside the test JVM, twelve
@@ -171,6 +171,24 @@ epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @
   INVARIANT: no test class depends on `org.junit.jupiter.api.Assertions` or
   `org.hamcrest.MatcherAssert` — the assertion-library rule (`JunitAssertionsRule`, checked by
   `TestAssertionLibraryConventionTest`).
+- @tests @exceptions — A catch in a test class keeps what it caught: its body throws, returns,
+  assigns, or calls an assertion or a recorder; and a captured throwable is checked through
+  `assertRejected` or `assertThatThrownBy`, never `catchThrowableOfType`. A catch holding only a
+  comment let a concurrency test pass whatever both of its writes threw, and another discarded a
+  `RuntimeException` the test was meant to see. `catchThrowableOfType` sites each repeated a null
+  check and an original-code read that `assertRejected` already names.
+  REJECTED: limiting the swallow rule to test-annotated methods — the swallow it was written for sat
+  in a private helper the test called.
+  REJECTED: a rule for assertions that only repeat what a stub returns — syntactically a stub echo and
+  a routing test that asserts which stubbed source answered look the same.
+  REJECTED: requiring the catch to use the caught variable — twenty legitimate catches never name it:
+  three set an outcome flag for a later assertion, and the rest restore the interrupt or return an
+  outcome.
+  INVARIANT: no catch body in a `*Test`, `*IT` or `*Contract` class lacks a throw, a return, an
+  assignment or a call named in the rule's list (the rule checks names, not data flow), no
+  `catchThrowableOfType` call, and no thrown-exception chain stops at type or cause-type checks after
+  `succeedsWithin` or `failsWithin` — the ast-grep rules `no-swallowed-exception-in-tests`,
+  `no-catch-throwable-of-type` and `no-bare-assert-throws`.
 
 ## Takeaway
 - takeaway: when concurrency in a test suite exposes shared state, close each hazard with a rule

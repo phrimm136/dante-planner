@@ -28,7 +28,27 @@ utils:
       - all:
           - has:
               field: name
-              regex: ^(as|describedAs|isNotNull|isInstanceOf|isExactlyInstanceOf|isInstanceOfAny|hasCauseInstanceOf|hasCauseExactlyInstanceOf|hasRootCauseInstanceOf|hasRootCauseExactlyInstanceOf)$
+              regex: ^(isInstanceOf|isExactlyInstanceOf|isInstanceOfAny|hasCauseInstanceOf|hasCauseExactlyInstanceOf|hasRootCauseInstanceOf|hasRootCauseExactlyInstanceOf|withCauseInstanceOf|withCauseExactlyInstanceOf|withRootCauseInstanceOf|withRootCauseExactlyInstanceOf|havingCause|havingRootCause)$
+          - has:
+              field: object
+              kind: method_invocation
+              has:
+                field: name
+                regex: ^(succeedsWithin|withThrowableThat)$
+      - all:
+          - has:
+              field: name
+              regex: ^withThrowableOfType$
+          - has:
+              field: object
+              kind: method_invocation
+              has:
+                field: name
+                regex: ^failsWithin$
+      - all:
+          - has:
+              field: name
+              regex: ^(as|describedAs|isNotNull|cause|rootCause|isInstanceOf|isExactlyInstanceOf|isInstanceOfAny|hasCauseInstanceOf|hasCauseExactlyInstanceOf|hasRootCauseInstanceOf|hasRootCauseExactlyInstanceOf|withCauseInstanceOf|withCauseExactlyInstanceOf|withRootCauseInstanceOf|withRootCauseExactlyInstanceOf|havingCause|havingRootCause)$
           - has:
               field: object
               matches: type-only

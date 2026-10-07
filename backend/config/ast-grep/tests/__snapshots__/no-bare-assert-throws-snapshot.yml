@@ -41,6 +41,412 @@ snapshots:
   ? |
     class A {
       void m() {
+        assertThat(CompletableFuture.supplyAsync(() -> catchThrowable(manager::builder), executor))
+            .succeedsWithin(FAIL_FAST_BUDGET)
+            .isInstanceOf(RedisException.class);
+      }
+    }
+  : labels:
+    - source: |-
+        assertThat(CompletableFuture.supplyAsync(() -> catchThrowable(manager::builder), executor))
+                .succeedsWithin(FAIL_FAST_BUDGET)
+                .isInstanceOf(RedisException.class);
+      style: primary
+      start: 27
+      end: 205
+    - source: isInstanceOf
+      style: secondary
+      start: 170
+      end: 182
+    - source: succeedsWithin
+      style: secondary
+      start: 128
+      end: 142
+    - source: |-
+        assertThat(CompletableFuture.supplyAsync(() -> catchThrowable(manager::builder), executor))
+                .succeedsWithin(FAIL_FAST_BUDGET)
+      style: secondary
+      start: 27
+      end: 160
+    - source: |-
+        assertThat(CompletableFuture.supplyAsync(() -> catchThrowable(manager::builder), executor))
+                .succeedsWithin(FAIL_FAST_BUDGET)
+                .isInstanceOf(RedisException.class)
+      style: secondary
+      start: 27
+      end: 204
+  ? |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).havingCause().isInstanceOf(RedisException.class);
+      }
+    }
+  : labels:
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).havingCause().isInstanceOf(RedisException.class);
+      style: primary
+      start: 27
+      end: 161
+    - source: isInstanceOf
+      style: secondary
+      start: 126
+      end: 138
+    - source: havingCause
+      style: secondary
+      start: 112
+      end: 123
+    - source: withThrowableOfType
+      style: secondary
+      start: 66
+      end: 85
+    - source: failsWithin
+      style: secondary
+      start: 46
+      end: 57
+    - source: assertThat(future).failsWithin(BUDGET)
+      style: secondary
+      start: 27
+      end: 65
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class)
+      style: secondary
+      start: 27
+      end: 111
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).havingCause()
+      style: secondary
+      start: 27
+      end: 125
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).havingCause().isInstanceOf(RedisException.class)
+      style: secondary
+      start: 27
+      end: 160
+  ? |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).havingRootCause().isExactlyInstanceOf(RedisException.class);
+      }
+    }
+  : labels:
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).havingRootCause().isExactlyInstanceOf(RedisException.class);
+      style: primary
+      start: 27
+      end: 172
+    - source: isExactlyInstanceOf
+      style: secondary
+      start: 130
+      end: 149
+    - source: havingRootCause
+      style: secondary
+      start: 112
+      end: 127
+    - source: withThrowableOfType
+      style: secondary
+      start: 66
+      end: 85
+    - source: failsWithin
+      style: secondary
+      start: 46
+      end: 57
+    - source: assertThat(future).failsWithin(BUDGET)
+      style: secondary
+      start: 27
+      end: 65
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class)
+      style: secondary
+      start: 27
+      end: 111
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).havingRootCause()
+      style: secondary
+      start: 27
+      end: 129
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).havingRootCause().isExactlyInstanceOf(RedisException.class)
+      style: secondary
+      start: 27
+      end: 171
+  ? |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).withCauseExactlyInstanceOf(RedisException.class);
+      }
+    }
+  : labels:
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).withCauseExactlyInstanceOf(RedisException.class);
+      style: primary
+      start: 27
+      end: 161
+    - source: withCauseExactlyInstanceOf
+      style: secondary
+      start: 112
+      end: 138
+    - source: withThrowableOfType
+      style: secondary
+      start: 66
+      end: 85
+    - source: failsWithin
+      style: secondary
+      start: 46
+      end: 57
+    - source: assertThat(future).failsWithin(BUDGET)
+      style: secondary
+      start: 27
+      end: 65
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class)
+      style: secondary
+      start: 27
+      end: 111
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).withCauseExactlyInstanceOf(RedisException.class)
+      style: secondary
+      start: 27
+      end: 160
+  ? |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).withCauseInstanceOf(RedisException.class);
+      }
+    }
+  : labels:
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).withCauseInstanceOf(RedisException.class);
+      style: primary
+      start: 27
+      end: 154
+    - source: withCauseInstanceOf
+      style: secondary
+      start: 112
+      end: 131
+    - source: withThrowableOfType
+      style: secondary
+      start: 66
+      end: 85
+    - source: failsWithin
+      style: secondary
+      start: 46
+      end: 57
+    - source: assertThat(future).failsWithin(BUDGET)
+      style: secondary
+      start: 27
+      end: 65
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class)
+      style: secondary
+      start: 27
+      end: 111
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).withCauseInstanceOf(RedisException.class)
+      style: secondary
+      start: 27
+      end: 153
+  ? |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).withRootCauseInstanceOf(RedisException.class);
+      }
+    }
+  : labels:
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).withRootCauseInstanceOf(RedisException.class);
+      style: primary
+      start: 27
+      end: 158
+    - source: withRootCauseInstanceOf
+      style: secondary
+      start: 112
+      end: 135
+    - source: withThrowableOfType
+      style: secondary
+      start: 66
+      end: 85
+    - source: failsWithin
+      style: secondary
+      start: 46
+      end: 57
+    - source: assertThat(future).failsWithin(BUDGET)
+      style: secondary
+      start: 27
+      end: 65
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class)
+      style: secondary
+      start: 27
+      end: 111
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).withRootCauseInstanceOf(RedisException.class)
+      style: secondary
+      start: 27
+      end: 157
+  ? |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class);
+      }
+    }
+  : labels:
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class);
+      style: primary
+      start: 27
+      end: 112
+    - source: withThrowableOfType
+      style: secondary
+      start: 66
+      end: 85
+    - source: failsWithin
+      style: secondary
+      start: 46
+      end: 57
+    - source: assertThat(future).failsWithin(BUDGET)
+      style: secondary
+      start: 27
+      end: 65
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class)
+      style: secondary
+      start: 27
+      end: 111
+  ? |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableThat().havingCause().isInstanceOf(RedisException.class);
+      }
+    }
+  : labels:
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableThat().havingCause().isInstanceOf(RedisException.class);
+      style: primary
+      start: 27
+      end: 135
+    - source: isInstanceOf
+      style: secondary
+      start: 100
+      end: 112
+    - source: havingCause
+      style: secondary
+      start: 86
+      end: 97
+    - source: withThrowableThat
+      style: secondary
+      start: 66
+      end: 83
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableThat()
+      style: secondary
+      start: 27
+      end: 85
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableThat().havingCause()
+      style: secondary
+      start: 27
+      end: 99
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableThat().havingCause().isInstanceOf(RedisException.class)
+      style: secondary
+      start: 27
+      end: 134
+  ? |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableThat().isInstanceOf(ExecutionException.class).hasCauseInstanceOf(X.class);
+      }
+    }
+  : labels:
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableThat().isInstanceOf(ExecutionException.class).hasCauseInstanceOf(X.class);
+      style: primary
+      start: 27
+      end: 153
+    - source: hasCauseInstanceOf
+      style: secondary
+      start: 125
+      end: 143
+    - source: isInstanceOf
+      style: secondary
+      start: 86
+      end: 98
+    - source: withThrowableThat
+      style: secondary
+      start: 66
+      end: 83
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableThat()
+      style: secondary
+      start: 27
+      end: 85
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableThat().isInstanceOf(ExecutionException.class)
+      style: secondary
+      start: 27
+      end: 124
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableThat().isInstanceOf(ExecutionException.class).hasCauseInstanceOf(X.class)
+      style: secondary
+      start: 27
+      end: 152
+  ? |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableThat().withRootCauseExactlyInstanceOf(RedisException.class);
+      }
+    }
+  : labels:
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableThat().withRootCauseExactlyInstanceOf(RedisException.class);
+      style: primary
+      start: 27
+      end: 139
+    - source: withRootCauseExactlyInstanceOf
+      style: secondary
+      start: 86
+      end: 116
+    - source: withThrowableThat
+      style: secondary
+      start: 66
+      end: 83
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableThat()
+      style: secondary
+      start: 27
+      end: 85
+    - source: assertThat(future).failsWithin(BUDGET).withThrowableThat().withRootCauseExactlyInstanceOf(RedisException.class)
+      style: secondary
+      start: 27
+      end: 138
+  ? |
+    class A {
+      void m() {
+        assertThat(future).succeedsWithin(BUDGET, InstanceOfAssertFactories.THROWABLE).isInstanceOf(X.class);
+      }
+    }
+  : labels:
+    - source: assertThat(future).succeedsWithin(BUDGET, InstanceOfAssertFactories.THROWABLE).isInstanceOf(X.class);
+      style: primary
+      start: 27
+      end: 128
+    - source: isInstanceOf
+      style: secondary
+      start: 106
+      end: 118
+    - source: succeedsWithin
+      style: secondary
+      start: 46
+      end: 60
+    - source: assertThat(future).succeedsWithin(BUDGET, InstanceOfAssertFactories.THROWABLE)
+      style: secondary
+      start: 27
+      end: 105
+    - source: assertThat(future).succeedsWithin(BUDGET, InstanceOfAssertFactories.THROWABLE).isInstanceOf(X.class)
+      style: secondary
+      start: 27
+      end: 127
+  ? |
+    class A {
+      void m() {
+        assertThat(future).succeedsWithin(BUDGET, THROWABLE).isExactlyInstanceOf(X.class);
+      }
+    }
+  : labels:
+    - source: assertThat(future).succeedsWithin(BUDGET, THROWABLE).isExactlyInstanceOf(X.class);
+      style: primary
+      start: 27
+      end: 109
+    - source: isExactlyInstanceOf
+      style: secondary
+      start: 80
+      end: 99
+    - source: succeedsWithin
+      style: secondary
+      start: 46
+      end: 60
+    - source: assertThat(future).succeedsWithin(BUDGET, THROWABLE)
+      style: secondary
+      start: 27
+      end: 79
+    - source: assertThat(future).succeedsWithin(BUDGET, THROWABLE).isExactlyInstanceOf(X.class)
+      style: secondary
+      start: 27
+      end: 108
+  ? |
+    class A {
+      void m() {
         assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> f());
       }
     }
@@ -68,6 +474,84 @@ snapshots:
   ? |
     class A {
       void m() {
+        assertThatExceptionOfType(X.class).isThrownBy(() -> f()).havingCause().isInstanceOf(Y.class);
+      }
+    }
+  : labels:
+    - source: assertThatExceptionOfType(X.class).isThrownBy(() -> f()).havingCause().isInstanceOf(Y.class);
+      style: primary
+      start: 27
+      end: 120
+    - source: isInstanceOf
+      style: secondary
+      start: 98
+      end: 110
+    - source: havingCause
+      style: secondary
+      start: 84
+      end: 95
+    - source: isThrownBy
+      style: secondary
+      start: 62
+      end: 72
+    - source: assertThatExceptionOfType
+      style: secondary
+      start: 27
+      end: 52
+    - source: assertThatExceptionOfType(X.class)
+      style: secondary
+      start: 27
+      end: 61
+    - source: assertThatExceptionOfType(X.class).isThrownBy(() -> f())
+      style: secondary
+      start: 27
+      end: 83
+    - source: assertThatExceptionOfType(X.class).isThrownBy(() -> f()).havingCause()
+      style: secondary
+      start: 27
+      end: 97
+    - source: assertThatExceptionOfType(X.class).isThrownBy(() -> f()).havingCause().isInstanceOf(Y.class)
+      style: secondary
+      start: 27
+      end: 119
+  ? |
+    class A {
+      void m() {
+        assertThatExceptionOfType(X.class).isThrownBy(() -> f()).withCauseInstanceOf(Y.class);
+      }
+    }
+  : labels:
+    - source: assertThatExceptionOfType(X.class).isThrownBy(() -> f()).withCauseInstanceOf(Y.class);
+      style: primary
+      start: 27
+      end: 113
+    - source: withCauseInstanceOf
+      style: secondary
+      start: 84
+      end: 103
+    - source: isThrownBy
+      style: secondary
+      start: 62
+      end: 72
+    - source: assertThatExceptionOfType
+      style: secondary
+      start: 27
+      end: 52
+    - source: assertThatExceptionOfType(X.class)
+      style: secondary
+      start: 27
+      end: 61
+    - source: assertThatExceptionOfType(X.class).isThrownBy(() -> f())
+      style: secondary
+      start: 27
+      end: 83
+    - source: assertThatExceptionOfType(X.class).isThrownBy(() -> f()).withCauseInstanceOf(Y.class)
+      style: secondary
+      start: 27
+      end: 112
+  ? |
+    class A {
+      void m() {
         assertThatIllegalArgumentException().isThrownBy(() -> f());
       }
     }
@@ -92,6 +576,84 @@ snapshots:
       style: secondary
       start: 27
       end: 85
+  ? |
+    class A {
+      void m() {
+        assertThatThrownBy(() -> a()).cause().isInstanceOf(Y.class);
+      }
+    }
+  : labels:
+    - source: assertThatThrownBy(() -> a()).cause().isInstanceOf(Y.class);
+      style: primary
+      start: 27
+      end: 87
+    - source: isInstanceOf
+      style: secondary
+      start: 65
+      end: 77
+    - source: cause
+      style: secondary
+      start: 57
+      end: 62
+    - source: assertThatThrownBy
+      style: secondary
+      start: 27
+      end: 45
+    - source: assertThatThrownBy(() -> a())
+      style: secondary
+      start: 27
+      end: 56
+    - source: assertThatThrownBy(() -> a()).cause()
+      style: secondary
+      start: 27
+      end: 64
+    - source: assertThatThrownBy(() -> a()).cause().isInstanceOf(Y.class)
+      style: secondary
+      start: 27
+      end: 86
+  ? |
+    class A {
+      void m() {
+        assertThatThrownBy(() -> a()).isInstanceOf(X.class).rootCause().isInstanceOf(Y.class);
+      }
+    }
+  : labels:
+    - source: assertThatThrownBy(() -> a()).isInstanceOf(X.class).rootCause().isInstanceOf(Y.class);
+      style: primary
+      start: 27
+      end: 113
+    - source: isInstanceOf
+      style: secondary
+      start: 91
+      end: 103
+    - source: rootCause
+      style: secondary
+      start: 79
+      end: 88
+    - source: isInstanceOf
+      style: secondary
+      start: 57
+      end: 69
+    - source: assertThatThrownBy
+      style: secondary
+      start: 27
+      end: 45
+    - source: assertThatThrownBy(() -> a())
+      style: secondary
+      start: 27
+      end: 56
+    - source: assertThatThrownBy(() -> a()).isInstanceOf(X.class)
+      style: secondary
+      start: 27
+      end: 78
+    - source: assertThatThrownBy(() -> a()).isInstanceOf(X.class).rootCause()
+      style: secondary
+      start: 27
+      end: 90
+    - source: assertThatThrownBy(() -> a()).isInstanceOf(X.class).rootCause().isInstanceOf(Y.class)
+      style: secondary
+      start: 27
+      end: 112
   ? |
     class A {
       void m() {

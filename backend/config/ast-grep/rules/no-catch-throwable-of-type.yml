@@ -1,0 +1,11 @@
+id: no-catch-throwable-of-type
+language: Java
+severity: error
+message: 'catchThrowableOfType returns null when nothing is thrown: use Rejections.assertRejected(...) or assertThatThrownBy(...) with a message or property check.'
+files:
+  - src/test/java/org/danteplanner/backend/**
+rule:
+  kind: method_invocation
+  has:
+    field: name
+    regex: ^catchThrowableOfType$

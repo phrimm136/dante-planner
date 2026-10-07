@@ -1,15 +1,18 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.admin.service.AdminService;
+import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.UUID;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -69,7 +72,7 @@ class AdminRoleWriteSkewIT extends ExclusiveDatabaseSupport {
             assertThat(userRepository.countByRole(UserRole.ADMIN))
                     .as("both self-demotions must not commit: the system cannot be left without an "
                             + "administrator, whichever transaction wins")
-                    .isGreaterThanOrEqualTo(1L);
+                    .isEqualTo(1L);
         } finally {
             pool.shutdownNow();
         }
@@ -85,16 +88,20 @@ class AdminRoleWriteSkewIT extends ExclusiveDatabaseSupport {
     }
 
     /**
-     * Waits for a demotion to finish either way. A refusal by the safeguard and a rollback forced
-     * by the database are both correct outcomes; only the surviving admin count is asserted.
+     * Waits for a demotion to finish. A losing one is either refused by the safeguard or rolled back
+     * by the database as a deadlock; any other failure fails the test.
      */
     private void awaitSettled(Future<?> attempt) throws Exception {
         try {
             attempt.get(15, TimeUnit.SECONDS);
-        } catch (java.util.concurrent.ExecutionException expected) {
-            // A losing transaction reports as ModerationForbiddenException (serialized: the
-            // safeguard saw one admin left) or as a data-access failure (interleaved: InnoDB rolled
-            // one back). Both leave the invariant intact, which the caller asserts.
+        } catch (ExecutionException losing) {
+            assertThat(losing.getCause())
+                    .as("a losing self-demotion is refused by the last-admin safeguard or rolled back as a deadlock")
+                    .satisfiesAnyOf(
+                            refusal -> assertThat(refusal)
+                                    .isInstanceOf(ModerationForbiddenException.class)
+                                    .hasMessage("Cannot demote the last administrator"),
+                            rollback -> assertThat(rollback).isInstanceOf(CannotAcquireLockException.class));
         }
     }
 }

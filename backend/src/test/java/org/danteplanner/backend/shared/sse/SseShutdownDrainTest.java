@@ -71,7 +71,9 @@ class SseShutdownDrainTest {
             soft.assertThat(service.completed.getCount()).as("emitters left uncompleted after close").isZero();
             soft.assertThat(service.openCount()).as("registry entries left after close").isZero();
         });
-        bodies.forEach(SseShutdownDrainTest::closeQuietly);
+        for (InputStream body : bodies) {
+            body.close();
+        }
     }
 
     @Test
@@ -177,14 +179,6 @@ class SseShutdownDrainTest {
             bodies.add(body);
         }
         return bodies;
-    }
-
-    private static void closeQuietly(InputStream body) {
-        try {
-            body.close();
-        } catch (Exception ignored) {
-            // the server side is already gone
-        }
     }
 
     @ImportAutoConfiguration({

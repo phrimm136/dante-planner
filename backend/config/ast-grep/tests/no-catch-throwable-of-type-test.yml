@@ -1,0 +1,42 @@
+id: no-catch-throwable-of-type
+valid:
+  - |
+    class A {
+      void m() {
+        Throwable thrown = catchThrowable(() -> f());
+        assertThat(thrown).isSameAs(failure);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        var unused = catchThrowable(manager::builder);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertRejected(() -> f()).withCode("PLANNER_NOT_FOUND");
+      }
+    }
+invalid:
+  - |
+    class A {
+      void m() {
+        var e = catchThrowableOfType(() -> f(), PlannerValidationException.class);
+        assertThat(e.getOriginalCode()).isEqualTo("X");
+      }
+    }
+  - |
+    class A {
+      void m() {
+        var e = Assertions.catchThrowableOfType(X.class, () -> f());
+        assertThat(e).hasMessage("boom");
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThat(catchThrowableOfType(X.class, () -> f())).hasMessage("boom");
+      }
+    }

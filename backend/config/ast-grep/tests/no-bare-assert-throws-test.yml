@@ -69,7 +69,165 @@ valid:
         assertThat(result).isInstanceOf(Planner.class);
       }
     }
+  - |
+    class A {
+      void m() {
+        assertThat(future).succeedsWithin(BUDGET, InstanceOfAssertFactories.THROWABLE).isInstanceOf(X.class).hasMessage("boom");
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThat(future).succeedsWithin(BUDGET).isEqualTo(value);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).withMessageContaining("boom");
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThat(stream).as("ends").succeedsWithin(Duration.ofMillis(PROMPT_CLOSE_MS));
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).withCauseInstanceOf(RedisException.class).withMessageContaining("boom");
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).havingCause().isInstanceOf(RedisException.class).hasMessage("boom");
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableThat().havingRootCause().withMessage("boom");
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThatExceptionOfType(X.class).isThrownBy(() -> f()).withCauseInstanceOf(Y.class).withMessage("boom");
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThatThrownBy(() -> a()).cause().hasMessageContaining("rejected value");
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThatThrownBy(() -> a()).isInstanceOf(X.class).rootCause().isInstanceOf(Y.class).hasMessageContaining("boom");
+      }
+    }
 invalid:
+  - |
+    class A {
+      void m() {
+        assertThatThrownBy(() -> a()).cause().isInstanceOf(Y.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThatThrownBy(() -> a()).isInstanceOf(X.class).rootCause().isInstanceOf(Y.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).withCauseInstanceOf(RedisException.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).havingCause().isInstanceOf(RedisException.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableThat().havingCause().isInstanceOf(RedisException.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableThat().withRootCauseExactlyInstanceOf(RedisException.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).havingRootCause().isExactlyInstanceOf(RedisException.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).withCauseExactlyInstanceOf(RedisException.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class).withRootCauseInstanceOf(RedisException.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThatExceptionOfType(X.class).isThrownBy(() -> f()).withCauseInstanceOf(Y.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThatExceptionOfType(X.class).isThrownBy(() -> f()).havingCause().isInstanceOf(Y.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThat(CompletableFuture.supplyAsync(() -> catchThrowable(manager::builder), executor))
+            .succeedsWithin(FAIL_FAST_BUDGET)
+            .isInstanceOf(RedisException.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThat(future).succeedsWithin(BUDGET, InstanceOfAssertFactories.THROWABLE).isInstanceOf(X.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThat(future).succeedsWithin(BUDGET, THROWABLE).isExactlyInstanceOf(X.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableOfType(ExecutionException.class);
+      }
+    }
+  - |
+    class A {
+      void m() {
+        assertThat(future).failsWithin(BUDGET).withThrowableThat().isInstanceOf(ExecutionException.class).hasCauseInstanceOf(X.class);
+      }
+    }
   - |
     class A {
       void m() {

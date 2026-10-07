@@ -1,0 +1,129 @@
+id: no-swallowed-exception-in-tests
+valid:
+  - |
+    class A {
+      @Test
+      void m() {
+        try { f(); } catch (IOException e) { throw new UncheckedIOException(e); }
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        try { f(); } catch (UserBannedException e) { blocked = e; }
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        run(() -> {
+          try { f(); } catch (RuntimeException e) { failure.set(e); }
+        });
+        assertThat(failure.get()).isNull();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        executor.submit(() -> {
+          try { latch.await(); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        });
+      }
+    }
+  - |
+    class A {
+      @ParameterizedTest
+      @ValueSource(ints = {1, 2})
+      void m(int n) {
+        try { f(n); } catch (RuntimeException e) { failures.add(e); }
+      }
+    }
+  - |
+    class A {
+      @RepeatedTest(3)
+      void m() {
+        try { f(); } catch (RuntimeException e) { fail("unexpected", e); }
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        try { stream.close(); } catch (RuntimeException closeFailure) { notReady.addSuppressed(closeFailure); }
+      }
+    }
+invalid:
+  - |
+    class SseShutdownDrainTest {
+      private static void closeQuietly(Response response) {
+        try { response.close(); } catch (IOException ignored) {
+        }
+      }
+    }
+  - |
+    class AdminRoleWriteSkewIT {
+      private void awaitSettled(Future<?> attempt) throws Exception {
+        try {
+          attempt.get(15, TimeUnit.SECONDS);
+        } catch (ExecutionException expected) {
+          // both outcomes leave the invariant intact
+        }
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        try { f(); } catch (UserBannedException e) { blocked = e; } catch (RuntimeException ignored) {
+          // unrelated to the restriction verdict
+        }
+      }
+    }
+  - |
+    class A {
+      @org.junit.jupiter.api.Test
+      void m() {
+        try { attempt.get(15, TimeUnit.SECONDS); } catch (ExecutionException expected) {
+        }
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        try { f(); } catch (RedisException unreachable) { LOG.warn("unreachable", unreachable); }
+      }
+    }
+  - |
+    class A {
+      @ParameterizedTest(name = "{0}")
+      @MethodSource("cases")
+      void m(Case c) {
+        try { f(c); } catch (RuntimeException ignored) {
+        }
+      }
+    }
+  - |
+    class A {
+      @TestFactory
+      Stream<DynamicTest> m() {
+        return Stream.of(dynamicTest("x", () -> {
+          try { f(); } catch (RuntimeException ignored) {
+          }
+        }));
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        executor.submit(() -> {
+          try { f(); } catch (RuntimeException ignored) {
+          }
+        });
+      }
+    }

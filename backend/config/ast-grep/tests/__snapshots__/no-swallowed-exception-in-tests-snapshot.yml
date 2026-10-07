@@ -1,0 +1,176 @@
+id: no-swallowed-exception-in-tests
+snapshots:
+  ? |
+    class A {
+      @ParameterizedTest(name = "{0}")
+      @MethodSource("cases")
+      void m(Case c) {
+        try { f(c); } catch (RuntimeException ignored) {
+        }
+      }
+    }
+  : labels:
+    - source: |-
+        catch (RuntimeException ignored) {
+            }
+      style: primary
+      start: 107
+      end: 147
+    - source: |-
+        {
+            }
+      style: secondary
+      start: 140
+      end: 147
+  ? |
+    class A {
+      @Test
+      void m() {
+        executor.submit(() -> {
+          try { f(); } catch (RuntimeException ignored) {
+          }
+        });
+      }
+    }
+  : labels:
+    - source: |-
+        catch (RuntimeException ignored) {
+              }
+      style: primary
+      start: 78
+      end: 120
+    - source: |-
+        {
+              }
+      style: secondary
+      start: 111
+      end: 120
+  ? |
+    class A {
+      @Test
+      void m() {
+        try { f(); } catch (RedisException unreachable) { LOG.warn("unreachable", unreachable); }
+      }
+    }
+  : labels:
+    - source: catch (RedisException unreachable) { LOG.warn("unreachable", unreachable); }
+      style: primary
+      start: 48
+      end: 124
+    - source: '{ LOG.warn("unreachable", unreachable); }'
+      style: secondary
+      start: 83
+      end: 124
+  ? |
+    class A {
+      @Test
+      void m() {
+        try { f(); } catch (UserBannedException e) { blocked = e; } catch (RuntimeException ignored) {
+          // unrelated to the restriction verdict
+        }
+      }
+    }
+  : labels:
+    - source: |-
+        catch (RuntimeException ignored) {
+              // unrelated to the restriction verdict
+            }
+      style: primary
+      start: 95
+      end: 181
+    - source: |-
+        {
+              // unrelated to the restriction verdict
+            }
+      style: secondary
+      start: 128
+      end: 181
+  ? |
+    class A {
+      @TestFactory
+      Stream<DynamicTest> m() {
+        return Stream.of(dynamicTest("x", () -> {
+          try { f(); } catch (RuntimeException ignored) {
+          }
+        }));
+      }
+    }
+  : labels:
+    - source: |-
+        catch (RuntimeException ignored) {
+              }
+      style: primary
+      start: 118
+      end: 160
+    - source: |-
+        {
+              }
+      style: secondary
+      start: 151
+      end: 160
+  ? |
+    class A {
+      @org.junit.jupiter.api.Test
+      void m() {
+        try { attempt.get(15, TimeUnit.SECONDS); } catch (ExecutionException expected) {
+        }
+      }
+    }
+  : labels:
+    - source: |-
+        catch (ExecutionException expected) {
+            }
+      style: primary
+      start: 100
+      end: 143
+    - source: |-
+        {
+            }
+      style: secondary
+      start: 136
+      end: 143
+  ? |
+    class AdminRoleWriteSkewIT {
+      private void awaitSettled(Future<?> attempt) throws Exception {
+        try {
+          attempt.get(15, TimeUnit.SECONDS);
+        } catch (ExecutionException expected) {
+          // both outcomes leave the invariant intact
+        }
+      }
+    }
+  : labels:
+    - source: |-
+        catch (ExecutionException expected) {
+              // both outcomes leave the invariant intact
+            }
+      style: primary
+      start: 152
+      end: 245
+    - source: |-
+        {
+              // both outcomes leave the invariant intact
+            }
+      style: secondary
+      start: 188
+      end: 245
+  ? |
+    class SseShutdownDrainTest {
+      private static void closeQuietly(Response response) {
+        try { response.close(); } catch (IOException ignored) {
+        }
+      }
+    }
+  : labels:
+    - source: |-
+        catch (IOException ignored) {
+            }
+      style: primary
+      start: 115
+      end: 150
+    - source: |-
+        {
+            }
+      style: secondary
+      start: 143
+      end: 150

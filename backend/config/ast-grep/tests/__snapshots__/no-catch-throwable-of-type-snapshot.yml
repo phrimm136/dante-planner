@@ -1,0 +1,49 @@
+id: no-catch-throwable-of-type
+snapshots:
+  ? |
+    class A {
+      void m() {
+        assertThat(catchThrowableOfType(X.class, () -> f())).hasMessage("boom");
+      }
+    }
+  : labels:
+    - source: catchThrowableOfType(X.class, () -> f())
+      style: primary
+      start: 38
+      end: 78
+    - source: catchThrowableOfType
+      style: secondary
+      start: 38
+      end: 58
+  ? |
+    class A {
+      void m() {
+        var e = Assertions.catchThrowableOfType(X.class, () -> f());
+        assertThat(e).hasMessage("boom");
+      }
+    }
+  : labels:
+    - source: Assertions.catchThrowableOfType(X.class, () -> f())
+      style: primary
+      start: 35
+      end: 86
+    - source: catchThrowableOfType
+      style: secondary
+      start: 46
+      end: 66
+  ? |
+    class A {
+      void m() {
+        var e = catchThrowableOfType(() -> f(), PlannerValidationException.class);
+        assertThat(e.getOriginalCode()).isEqualTo("X");
+      }
+    }
+  : labels:
+    - source: catchThrowableOfType(() -> f(), PlannerValidationException.class)
+      style: primary
+      start: 35
+      end: 100
+    - source: catchThrowableOfType
+      style: secondary
+      start: 35
+      end: 55
