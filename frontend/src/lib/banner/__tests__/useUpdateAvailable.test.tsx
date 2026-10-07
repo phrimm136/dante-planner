@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { http, HttpResponse } from 'msw'
@@ -44,10 +44,6 @@ function settledWith(client: QueryClient, status: 'success' | 'error') {
 }
 
 describe('useUpdateAvailable', () => {
-  beforeAll(() => {
-    server.listen({ onUnhandledRequest: 'error' })
-  })
-
   beforeEach(() => {
     vi.stubEnv('DEV', false)
     vi.spyOn(console, 'error').mockImplementation(() => undefined)
@@ -56,14 +52,8 @@ describe('useUpdateAvailable', () => {
   })
 
   afterEach(() => {
-    server.resetHandlers()
     vi.unstubAllEnvs()
     vi.restoreAllMocks()
-  })
-
-  afterAll(() => {
-    server.close()
-    globalThis.fetch = vi.fn() as unknown as typeof fetch
   })
 
   it('returns the deployed build id when it differs from the running one', async () => {
@@ -110,9 +100,10 @@ describe('useUpdateAvailable', () => {
 
     const { result, client } = renderSignal()
 
-    await act(() => new Promise((resolve) => setTimeout(resolve, 50)))
+    const [query] = client.getQueryCache().findAll()
+    expect(query?.isDisabled()).toBe(true)
+    expect(query?.state.fetchStatus).toBe('idle')
     expect(versionRequests.count).toBe(0)
-    expect(client.getQueryCache().findAll()[0]?.state.fetchStatus).toBe('idle')
     expect(result.current).toBeNull()
   })
 

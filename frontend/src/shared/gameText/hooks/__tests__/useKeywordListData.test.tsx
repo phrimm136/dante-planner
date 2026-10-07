@@ -27,7 +27,7 @@ function createWrapper() {
 }
 
 describe('useKeywordListSpec', () => {
-  it('should fetch spec data and return a record', async () => {
+  it('fetches spec data and returns a record', async () => {
     const { result } = renderHook(() => useKeywordListSpec(), {
       wrapper: createWrapper(),
     })
@@ -38,7 +38,7 @@ describe('useKeywordListSpec', () => {
     })
   })
 
-  it('should return entries with correct shape', async () => {
+  it('returns entries with the correct shape', async () => {
     const { result } = renderHook(() => useKeywordListSpec(), {
       wrapper: createWrapper(),
     })
@@ -58,7 +58,7 @@ describe('useKeywordListSpec', () => {
 })
 
 describe('useKeywordListI18n', () => {
-  it('should fetch i18n data with language key', async () => {
+  it('fetches i18n data with the language key', async () => {
     const { result } = renderHook(() => useKeywordListI18n(), {
       wrapper: createWrapper(),
     })
@@ -69,7 +69,7 @@ describe('useKeywordListI18n', () => {
     })
   })
 
-  it('should return entries with name and desc', async () => {
+  it('returns entries with name and desc', async () => {
     const { result } = renderHook(() => useKeywordListI18n(), {
       wrapper: createWrapper(),
     })

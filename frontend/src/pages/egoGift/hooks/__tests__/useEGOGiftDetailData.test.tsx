@@ -28,7 +28,7 @@ function createWrapper() {
 }
 
 describe('useEGOGiftDetailSpec', () => {
-  it('should fetch spec data without language in query key', async () => {
+  it('fetches spec data without the language in the query key', async () => {
     const { result } = renderHook(() => useEGOGiftDetailSpec('9001'), {
       wrapper: createWrapper(),
     })
@@ -40,7 +40,7 @@ describe('useEGOGiftDetailSpec', () => {
     })
   })
 
-  it('should return typed spec data', async () => {
+  it('returns typed spec data', async () => {
     const { result } = renderHook(() => useEGOGiftDetailSpec('9001'), {
       wrapper: createWrapper(),
     })
@@ -56,7 +56,7 @@ describe('useEGOGiftDetailSpec', () => {
 })
 
 describe('useEGOGiftDetailI18n', () => {
-  it('should fetch i18n data with language in query key', async () => {
+  it('fetches i18n data with the language in the query key', async () => {
     const { result } = renderHook(() => useEGOGiftDetailI18n('9001'), {
       wrapper: createWrapper(),
     })
@@ -68,7 +68,7 @@ describe('useEGOGiftDetailI18n', () => {
     })
   })
 
-  it('should return typed i18n data', async () => {
+  it('returns typed i18n data', async () => {
     const { result } = renderHook(() => useEGOGiftDetailI18n('9001'), {
       wrapper: createWrapper(),
     })

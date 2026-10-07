@@ -6,6 +6,9 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { http, HttpResponse, type JsonBodyType } from 'msw'
+
+import { server } from '@/test-utils/mswServer'
 import { ApiClient } from '../api'
 import { useServerStatusStore, type ServerStatus } from '../banner/serverStatus'
 import {
@@ -36,14 +39,40 @@ vi.mock('../queryClient', () => ({
   },
 }))
 
-// Mock global fetch
-const mockFetch = vi.fn()
-global.fetch = mockFetch
+interface SeenRequest {
+  method: string
+  url: string
+  headers: Headers
+  body: string
+  credentials: RequestCredentials
+}
 
-function firstRequestInit(): RequestInit {
-  const [firstCall] = mockFetch.mock.calls
-  if (!firstCall) throw new Error('fetch was never called')
-  return firstCall[1] as RequestInit
+let seen: SeenRequest[] = []
+
+/** Answers every API request with `resolver`, recording the request as the server sees it. */
+function answer(resolver: () => Response) {
+  server.use(
+    http.all('http://localhost:8080/*', async ({ request }) => {
+      seen.push({
+        method: request.method,
+        url: request.url,
+        headers: request.headers,
+        body: await request.clone().text(),
+        credentials: request.credentials,
+      })
+      return resolver()
+    }),
+  )
+}
+
+const json = (status: number, body: JsonBodyType) => () => HttpResponse.json(body, { status })
+const empty = (status: number) => () => new HttpResponse(null, { status })
+const unparseable = (status: number) => () => HttpResponse.text('<!doctype html>', { status })
+
+function firstRequest(): SeenRequest {
+  const [first] = seen
+  if (!first) throw new Error('no request reached the server')
+  return first
 }
 
 // Mock window.location for redirect tests
@@ -57,6 +86,7 @@ describe('ApiClient', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockLocation.href = ''
+    seen = []
   })
 
   afterEach(() => {
@@ -65,26 +95,19 @@ describe('ApiClient', () => {
 
   describe('204 No Content handling', () => {
     it('returns undefined for 204 response without parsing JSON', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        status: 204,
-        json: vi.fn().mockRejectedValue(new Error('Should not be called')),
-      })
+      answer(empty(204))
 
       const result = await ApiClient.delete('/api/auth/logout')
 
       expect(result).toBeUndefined()
-      expect(mockFetch).toHaveBeenCalledWith(
-        'http://localhost:8080/api/auth/logout',
-        expect.objectContaining({ method: 'DELETE' }),
-      )
+      expect(firstRequest()).toMatchObject({
+        method: 'DELETE',
+        url: 'http://localhost:8080/api/auth/logout',
+      })
     })
 
     it('handles DELETE operations returning 204', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        status: 204,
-      })
+      answer(empty(204))
 
       const result = await ApiClient.delete('/api/planner/123')
 
@@ -92,10 +115,7 @@ describe('ApiClient', () => {
     })
 
     it('handles POST logout returning 204', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        status: 204,
-      })
+      answer(empty(204))
 
       const result = await ApiClient.post('/api/auth/logout')
 
@@ -106,11 +126,7 @@ describe('ApiClient', () => {
   describe('200 OK with JSON body', () => {
     it('parses JSON response for 200 status', async () => {
       const mockData = { id: 1, email: 'test@example.com' }
-      mockFetch.mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(mockData),
-      })
+      answer(json(200, mockData))
 
       const result = await ApiClient.get('/api/auth/me')
 
@@ -120,23 +136,17 @@ describe('ApiClient', () => {
 
   describe('401 Unauthorized handling', () => {
     it('clears auth state and throws error for 401 response', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 401,
-      })
+      answer(empty(401))
 
       await expect(ApiClient.get('/api/planner/123')).rejects.toBeInstanceOf(UnauthorizedError)
 
       // Auth state should be cleared so UI shows logged-out state
       expect(mockSetQueryData).toHaveBeenCalledWith(['auth', 'me'], null)
-      expect(mockFetch).toHaveBeenCalledTimes(1)
+      expect(seen).toHaveLength(1)
     })
 
     it('clears auth state for 401 on /auth/me', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 401,
-      })
+      answer(empty(401))
 
       await expect(ApiClient.get('/api/auth/me')).rejects.toBeInstanceOf(UnauthorizedError)
 
@@ -144,10 +154,7 @@ describe('ApiClient', () => {
     })
 
     it('clears auth state for 401 on /auth/logout', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 401,
-      })
+      answer(empty(401))
 
       await expect(ApiClient.post('/api/auth/logout')).rejects.toBeInstanceOf(UnauthorizedError)
 
@@ -157,15 +164,13 @@ describe('ApiClient', () => {
 
   describe('409 Conflict handling', () => {
     it('throws ConflictError with serverVersion from response', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 409,
-        json: vi.fn().mockResolvedValue({
+      answer(
+        json(409, {
           code: 'VERSION_CONFLICT',
           detail: 'Version conflict',
           serverVersion: 5,
         }),
-      })
+      )
 
       await expect(ApiClient.put('/api/planner/123', { version: 3 })).rejects.toThrow(ConflictError)
 
@@ -176,11 +181,7 @@ describe('ApiClient', () => {
     })
 
     it('reports no server version when the response body cannot be parsed', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 409,
-        json: vi.fn().mockRejectedValue(new Error('Parse error')),
-      })
+      answer(unparseable(409))
 
       const error = await ApiClient.put('/api/planner/123', { version: 3 }).catch((e: unknown) => e)
 
@@ -189,15 +190,13 @@ describe('ApiClient', () => {
     })
 
     it('reports no server version for a concurrent write, and carries its code', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 409,
-        json: vi.fn().mockResolvedValue({
+      answer(
+        json(409, {
           code: 'CONCURRENT_WRITE',
           detail: 'The resource was modified concurrently',
           serverVersion: null,
         }),
-      })
+      )
 
       const error = await ApiClient.put('/api/planner/123', {}).catch((e: unknown) => e)
 
@@ -209,14 +208,12 @@ describe('ApiClient', () => {
 
   describe('403 Forbidden handling', () => {
     it('throws ForbiddenError carrying the code and detail', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 403,
-        json: vi.fn().mockResolvedValue({
+      answer(
+        json(403, {
           code: 'PLANNER_FORBIDDEN',
           detail: 'This planner belongs to someone else',
         }),
-      })
+      )
 
       const error = await ApiClient.get('/api/planner/md/123').catch((e: unknown) => e)
 
@@ -226,11 +223,7 @@ describe('ApiClient', () => {
     })
 
     it('falls back to a generic error when the body fails the problem schema', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 403,
-        json: vi.fn().mockResolvedValue({ code: 5 }),
-      })
+      answer(json(403, { code: 5 }))
 
       const error = await ApiClient.get('/api/planner/md/123').catch((e: unknown) => e)
 
@@ -242,14 +235,12 @@ describe('ApiClient', () => {
 
   describe('400 / 429 typed errors', () => {
     it('400 throws ValidationError carrying the backend code', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 400,
-        json: vi.fn().mockResolvedValue({
+      answer(
+        json(400, {
           code: 'VALIDATION_ERROR',
           detail: 'Invalid planner content structure',
         }),
-      })
+      )
 
       const error = await ApiClient.post('/api/planner/md', {}).catch((e: unknown) => e)
 
@@ -259,14 +250,12 @@ describe('ApiClient', () => {
     })
 
     it('429 throws RateLimitError', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 429,
-        json: vi.fn().mockResolvedValue({
+      answer(
+        json(429, {
           code: 'RATE_LIMIT_EXCEEDED',
           detail: 'Too many requests',
         }),
-      })
+      )
 
       const error = await ApiClient.post('/api/planner/md', {}).catch((e: unknown) => e)
 
@@ -277,11 +266,7 @@ describe('ApiClient', () => {
     it.each(['RATE_LIMIT_TEMPORARILY_UNAVAILABLE', 'DEADLOCK'])(
       '503 with code %s throws RetryableUnavailableError',
       async (code) => {
-        mockFetch.mockResolvedValue({
-          ok: false,
-          status: 503,
-          json: vi.fn().mockResolvedValue({ code, detail: 'please retry' }),
-        })
+        answer(json(503, { code, detail: 'please retry' }))
 
         await expect(ApiClient.post('/api/planner/md', {})).rejects.toBeInstanceOf(
           RetryableUnavailableError,
@@ -292,14 +277,12 @@ describe('ApiClient', () => {
 
   describe('503 regional failover typed errors', () => {
     it('503 with code WRITE_TEMPORARILY_UNAVAILABLE throws WriteTemporarilyUnavailableError', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 503,
-        json: vi.fn().mockResolvedValue({
+      answer(
+        json(503, {
           code: 'WRITE_TEMPORARILY_UNAVAILABLE',
           detail: 'Database temporarily unavailable, please retry',
         }),
-      })
+      )
 
       await expect(ApiClient.put('/api/planner/123', {})).rejects.toBeInstanceOf(
         WriteTemporarilyUnavailableError,
@@ -307,14 +290,12 @@ describe('ApiClient', () => {
     })
 
     it('503 with code AUTH_TEMPORARILY_UNAVAILABLE throws AuthTemporarilyUnavailableError', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 503,
-        json: vi.fn().mockResolvedValue({
+      answer(
+        json(503, {
           code: 'AUTH_TEMPORARILY_UNAVAILABLE',
           detail: 'Authentication service temporarily unavailable, please retry',
         }),
-      })
+      )
 
       await expect(ApiClient.put('/api/planner/123', {})).rejects.toBeInstanceOf(
         AuthTemporarilyUnavailableError,
@@ -322,14 +303,12 @@ describe('ApiClient', () => {
     })
 
     it('503 without a recognized code still throws BackendUnavailableError', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 503,
-        json: vi.fn().mockResolvedValue({
+      answer(
+        json(503, {
           code: 'BACKEND_UNAVAILABLE',
           detail: 'Service temporarily unavailable',
         }),
-      })
+      )
 
       await expect(ApiClient.put('/api/planner/123', {})).rejects.toBeInstanceOf(
         BackendUnavailableError,
@@ -339,19 +318,13 @@ describe('ApiClient', () => {
 
   describe('Error propagation', () => {
     it('throws error with status for 4xx responses', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 404,
-      })
+      answer(empty(404))
 
       await expect(ApiClient.get('/api/planner/nonexistent')).rejects.toThrow('Resource not found')
     })
 
     it('throws error with status for 5xx responses', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 500,
-      })
+      answer(empty(500))
 
       await expect(ApiClient.get('/api/planner/123')).rejects.toThrow('HTTP error! status: 500')
     })
@@ -359,60 +332,38 @@ describe('ApiClient', () => {
 
   describe('Request configuration', () => {
     it('includes credentials for cookie-based auth', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue({}),
-      })
+      answer(json(200, {}))
 
       await ApiClient.get('/api/auth/me')
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({ credentials: 'include' }),
-      )
+      expect(firstRequest().credentials).toBe('include')
     })
 
     it('sets Content-Type to application/json', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue({}),
-      })
+      answer(json(200, {}))
 
       await ApiClient.post('/api/planner', { name: 'Test' })
 
-      const headers = new Headers(firstRequestInit().headers)
-      expect(headers.get('Content-Type')).toBe('application/json')
+      expect(firstRequest().headers.get('Content-Type')).toBe('application/json')
     })
 
     it('stringifies request body for POST', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue({}),
-      })
+      answer(json(200, {}))
 
       const data = { name: 'Test', version: 1 }
       await ApiClient.post('/api/planner', data)
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          body: JSON.stringify(data),
-        }),
-      )
+      expect(firstRequest().body).toBe(JSON.stringify(data))
     })
   })
 
   describe('CORS preflight avoidance (regression guard)', () => {
     // Bodyless GET/HEAD must stay CORS "simple" requests: a request Content-Type would
     // force a preflight OPTIONS that blocks the cold-load request burst.
-    const okJson = () => ({ ok: true, status: 200, json: vi.fn().mockResolvedValue({}) })
-    const sentHeaders = () => new Headers(firstRequestInit().headers)
+    const sentHeaders = () => firstRequest().headers
 
     it('GET requests send no Content-Type header', async () => {
-      mockFetch.mockResolvedValue(okJson())
+      answer(json(200, {}))
 
       await ApiClient.get('/api/planner/md/published?page=0&size=20')
 
@@ -420,7 +371,7 @@ describe('ApiClient', () => {
     })
 
     it('GET requests carry only CORS-safelisted headers', async () => {
-      mockFetch.mockResolvedValue(okJson())
+      answer(json(200, {}))
 
       await ApiClient.get('/api/auth/me')
 
@@ -432,7 +383,7 @@ describe('ApiClient', () => {
     })
 
     it('POST with a JSON body still sends Content-Type (write path unchanged)', async () => {
-      mockFetch.mockResolvedValue(okJson())
+      answer(json(200, {}))
 
       await ApiClient.post('/api/planner/md/123/publish', { published: true })
 
@@ -440,17 +391,17 @@ describe('ApiClient', () => {
     })
 
     it('does not force application/json on a FormData body', async () => {
-      mockFetch.mockResolvedValue(okJson())
+      answer(json(200, {}))
 
       const form = new FormData()
       form.append('file', new Blob(['x']), 'x.png')
       await ApiClient.fetch('/api/upload', { method: 'POST', body: form })
 
-      expect(sentHeaders().has('Content-Type')).toBe(false)
+      expect(sentHeaders().get('Content-Type')).toMatch(/^multipart\/form-data; boundary=/)
     })
 
     it('preserves a caller-supplied Content-Type', async () => {
-      mockFetch.mockResolvedValue(okJson())
+      answer(json(200, {}))
 
       await ApiClient.fetch('/api/thing', {
         method: 'POST',
@@ -463,8 +414,7 @@ describe('ApiClient', () => {
   })
 
   describe('CSRF double-submit header', () => {
-    const okJson = () => ({ ok: true, status: 200, json: vi.fn().mockResolvedValue({}) })
-    const sentHeaders = () => new Headers(firstRequestInit().headers)
+    const sentHeaders = () => firstRequest().headers
 
     let cookieValue = ''
     beforeEach(() => {
@@ -477,7 +427,7 @@ describe('ApiClient', () => {
 
     it('attaches X-CSRF-Token from the csrf cookie on a POST request', async () => {
       cookieValue = 'foo=bar; csrf=token-abc123; baz=qux'
-      mockFetch.mockResolvedValue(okJson())
+      answer(json(200, {}))
 
       await ApiClient.post('/api/planner', { name: 'Test' })
 
@@ -486,25 +436,25 @@ describe('ApiClient', () => {
 
     it('does not attach X-CSRF-Token on a GET request', async () => {
       cookieValue = 'csrf=token-abc123'
-      mockFetch.mockResolvedValue(okJson())
+      answer(json(200, {}))
 
       await ApiClient.get('/api/auth/me')
 
-      expect(sentHeaders()).not.toHaveProperty('X-CSRF-Token')
+      expect(sentHeaders().has('X-CSRF-Token')).toBe(false)
     })
 
     it('attaches no header when the csrf cookie is absent', async () => {
       cookieValue = 'foo=bar'
-      mockFetch.mockResolvedValue(okJson())
+      answer(json(200, {}))
 
       await ApiClient.post('/api/planner', { name: 'Test' })
 
-      expect(sentHeaders()).not.toHaveProperty('X-CSRF-Token')
+      expect(sentHeaders().has('X-CSRF-Token')).toBe(false)
     })
 
     it('selects csrf, not a cookie whose name merely ends with csrf', async () => {
       cookieValue = 'mycsrf=fake; csrf=real-token'
-      mockFetch.mockResolvedValue(okJson())
+      answer(json(200, {}))
 
       await ApiClient.post('/api/planner', { name: 'Test' })
 
@@ -513,7 +463,7 @@ describe('ApiClient', () => {
 
     it('preserves "=" characters in the cookie value', async () => {
       cookieValue = 'csrf=abc=def=='
-      mockFetch.mockResolvedValue(okJson())
+      answer(json(200, {}))
 
       await ApiClient.post('/api/planner', { name: 'Test' })
 
@@ -523,12 +473,8 @@ describe('ApiClient', () => {
 
   describe('server status recording', () => {
     const status = () => useServerStatusStore.getState().status
-    const respond = (code: number, body: unknown = null) =>
-      mockFetch.mockResolvedValue({
-        ok: code >= 200 && code < 300,
-        status: code,
-        json: vi.fn().mockResolvedValue(body),
-      })
+    const respond = (code: number, body: JsonBodyType = null) =>
+      answer(code === 204 ? empty(204) : json(code, body))
 
     function startFrom(initial: ServerStatus) {
       useServerStatusStore.setState({ status: initial })
@@ -557,11 +503,7 @@ describe('ApiClient', () => {
     })
 
     it('records down for a 503 whose body cannot be parsed', async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 503,
-        json: vi.fn().mockRejectedValue(new SyntaxError('Unexpected token')),
-      })
+      answer(unparseable(503))
 
       await expect(ApiClient.get('/api/planner/md')).rejects.toBeInstanceOf(BackendUnavailableError)
 
@@ -569,7 +511,7 @@ describe('ApiClient', () => {
     })
 
     it('records down when the request never reaches a server', async () => {
-      mockFetch.mockRejectedValue(new TypeError('Failed to fetch'))
+      answer(() => HttpResponse.error())
 
       await expect(ApiClient.get('/api/planner/md')).rejects.toBeInstanceOf(TypeError)
 
@@ -579,7 +521,7 @@ describe('ApiClient', () => {
     it('leaves the status alone when the caller aborted the request', async () => {
       const controller = new AbortController()
       controller.abort()
-      mockFetch.mockRejectedValue(new DOMException('aborted', 'AbortError'))
+      answer(json(200, {}))
 
       await expect(
         ApiClient.get('/api/planner/md', { signal: controller.signal }),

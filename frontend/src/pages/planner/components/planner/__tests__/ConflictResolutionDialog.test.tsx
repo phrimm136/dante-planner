@@ -29,20 +29,20 @@ describe('ConflictResolutionDialog', () => {
     onChoice: vi.fn(),
   }
 
-  it('should render when open is true', () => {
+  it('renders when open is true', () => {
     render(<ConflictResolutionDialog {...defaultProps} />)
 
     expect(screen.getByText('Save Conflict Detected')).toBeInTheDocument()
     expect(screen.getByText(/This planner was modified on another device/)).toBeInTheDocument()
   })
 
-  it('should not render when open is false', () => {
+  it('renders nothing when open is false', () => {
     render(<ConflictResolutionDialog {...defaultProps} open={false} />)
 
     expect(screen.queryByText('Save Conflict Detected')).not.toBeInTheDocument()
   })
 
-  it('should call onChoice with overwrite when Keep Local button is clicked', () => {
+  it('calls onChoice with overwrite when Keep Local is clicked', () => {
     const onChoice = vi.fn()
     render(<ConflictResolutionDialog {...defaultProps} onChoice={onChoice} />)
 
@@ -51,7 +51,7 @@ describe('ConflictResolutionDialog', () => {
     expect(onChoice).toHaveBeenCalledWith('overwrite')
   })
 
-  it('should call onChoice with discard when Use Server button is clicked', () => {
+  it('calls onChoice with discard when Use Server is clicked', () => {
     const onChoice = vi.fn()
     render(<ConflictResolutionDialog {...defaultProps} onChoice={onChoice} />)
 
@@ -60,7 +60,7 @@ describe('ConflictResolutionDialog', () => {
     expect(onChoice).toHaveBeenCalledWith('discard')
   })
 
-  it('should disable buttons when isResolving is true', () => {
+  it('disables the buttons when isResolving is true', () => {
     render(<ConflictResolutionDialog {...defaultProps} isResolving={true} />)
 
     expect(screen.getByText('Keep Local')).toBeDisabled()

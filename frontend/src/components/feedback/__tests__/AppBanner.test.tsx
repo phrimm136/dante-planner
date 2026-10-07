@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
 import { QueryClientProvider, useMutation, useQuery, type QueryClient } from '@tanstack/react-query'
@@ -94,10 +94,6 @@ function unavailable(code?: string) {
 }
 
 describe('AppBanner', () => {
-  beforeAll(() => {
-    server.listen({ onUnhandledRequest: 'error' })
-  })
-
   beforeEach(() => {
     vi.clearAllMocks()
     vi.spyOn(console, 'error').mockImplementation(() => undefined)
@@ -107,13 +103,7 @@ describe('AppBanner', () => {
   })
 
   afterEach(() => {
-    server.resetHandlers()
     vi.restoreAllMocks()
-  })
-
-  afterAll(() => {
-    server.close()
-    globalThis.fetch = vi.fn() as unknown as typeof fetch
   })
 
   it('renders nothing while no condition holds', () => {

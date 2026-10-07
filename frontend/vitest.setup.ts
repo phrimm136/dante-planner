@@ -1,6 +1,8 @@
-import { afterEach, vi } from 'vitest'
+import { afterAll, afterEach, beforeAll, vi } from 'vitest'
 import { cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
+
+import { server } from './src/test-utils/mswServer'
 
 // The plugin project runs in the node environment, where none of the browser
 // globals below exist and there is nothing to unmount.
@@ -81,5 +83,14 @@ vi.mock('@/lib/env', () => ({
   },
 }))
 
-// Mock fetch for testing (simple implementation)
-globalThis.fetch = vi.fn<() => Promise<Response>>() as any
+beforeAll(() => {
+  server.listen({ onUnhandledRequest: 'error' })
+})
+
+afterEach(() => {
+  server.resetHandlers()
+})
+
+afterAll(() => {
+  server.close()
+})

@@ -136,7 +136,7 @@ beforeEach(() => {
   useSseStore.setState({ isConnected: false, lastEventTime: null, reconnectAttempts: 0 })
   vi.spyOn(console, 'error').mockImplementation(() => {})
   vi.spyOn(console, 'warn').mockImplementation(() => {})
-  vi.mocked(globalThis.fetch).mockImplementation((_input: unknown, init: RequestInit = {}) => {
+  vi.spyOn(globalThis, 'fetch').mockImplementation((_input: unknown, init: RequestInit = {}) => {
     let controller: ReadableStreamDefaultController<Uint8Array> | null = null
     const body = new ReadableStream<Uint8Array>({
       start(c) {

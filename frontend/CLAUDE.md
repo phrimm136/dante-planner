@@ -5,7 +5,7 @@ React 19 + TypeScript + Vite + TanStack Query/Router + Zustand + Zod + Tailwind 
 ## Commands & deploy
 
 - Lint is oxlint: `yarn lint` (type-aware, config `.oxlintrc.json`), which also runs the eslint plugins declared under `jsPlugins` in-process. eslint is never invoked as a runner; the `eslint` devDependency exists only to satisfy `eslint-plugin-react-refresh`'s peer requirement, not react-hooks'. `eslint-plugin-react-hooks` declares a peer range that the installed eslint 10 falls outside of — inert, since nothing loads eslint, so do not downgrade eslint to silence it. Errors fail the command, warnings do not — severity in the config decides what blocks. Format: `yarn fmt` (oxfmt). Typecheck: `yarn typecheck` (`tsc -b`).
-- From the repo root, always target the frontend: `yarn --cwd frontend vitest run`, `yarn --cwd frontend tsc -b`. Bare `vitest`/`tsc` at the repo root creates a stray `node_modules/.vite` there and is blocked by a hook.
+- From the repo root, always target the frontend: run tests only through `yarn --cwd frontend test run [paths]` (the script carries the worker heap through `NODE_OPTIONS`; `vitest.global-setup.ts` pins `TZ=UTC`), never `yarn --cwd frontend vitest …`; typecheck with `yarn --cwd frontend tsc -b`. Bare `vitest`/`tsc` at the repo root creates a stray `node_modules/.vite` there and is blocked by a hook.
 - Deploy is Cloudflare Pages serving plain `vite build` output — no Workers, no wrangler config.
 
 ## Layer boundaries (oxlint-enforced)
@@ -46,7 +46,7 @@ Code-based routes only, defined in `src/lib/router.tsx` with `lazyRouteComponent
 
 ## Testing
 
-- MSW handlers live in `src/test-utils/handlers.ts`; `vitest.setup.ts` stubs `globalThis.fetch = vi.fn()` suite-wide, so network-level test files scope their own MSW lifecycle and restore the fetch stub — see `src/test-utils/mswServer.ts`.
+- MSW handlers live in `src/test-utils/handlers.ts`. `vitest.setup.ts` runs the shared server (`src/test-utils/mswServer.ts`) for every file and fails any awaited request no handler matches; a test adds handlers with `server.use(...)`. A test that needs `fetch` itself as the double uses `vi.spyOn(globalThis, 'fetch')`.
 - Mock at the boundary the test crosses: HTTP → MSW per-test handlers; pure store state → no mocks; injected adapter → `vi.mock` the adapter module, not fetch.
 - Gestures — whether a click reaches the server — belong to `e2e/`, not jsdom: the defects are geometric (an element moving between `mousedown` and `mouseup`, scroll anchoring, a modal intercepting pointer events) and jsdom has no layout to reproduce them. `e2e/src/gestures.ts` carries the primitives and `e2e/README.md` the local invocation.
 - A component that unmounts on blur moves everything below it. If a control sits under one, an `e2e` gesture spec has to cover the click — `docs/testing-principles.md` §13 governs what it may assert.

@@ -35,6 +35,7 @@
     "vite-plugin-build-id.ts",
     "vite-plugin-build-id.test.ts",
     "vite-config.test.ts",
+    "vitest.global-setup.ts",
     "scripts/check-bundle-budget.ts",
     "scripts/lib/*.ts"
   ],

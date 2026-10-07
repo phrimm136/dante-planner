@@ -39,12 +39,12 @@ const validCommentNode = {
 // ============================================================================
 
 describe('CommentNodeSchema', () => {
-  it('should validate a valid comment node', () => {
+  it('accepts a valid comment node', () => {
     const result = CommentNodeSchema.safeParse(validCommentNode)
     expect(result.success).toBe(true)
   })
 
-  it('should validate deleted comment with empty content', () => {
+  it('accepts a deleted comment with empty content', () => {
     const deletedComment = {
       ...validCommentNode,
       content: '',
@@ -54,7 +54,7 @@ describe('CommentNodeSchema', () => {
     expect(result.success).toBe(true)
   })
 
-  it('should validate updated comment', () => {
+  it('accepts an updated comment', () => {
     const updatedComment = {
       ...validCommentNode,
       updatedAt: '2024-01-02T00:00:00Z',
@@ -63,13 +63,13 @@ describe('CommentNodeSchema', () => {
     expect(result.success).toBe(true)
   })
 
-  it('should reject comment without authorNotificationsEnabled', () => {
+  it('rejects a comment without authorNotificationsEnabled', () => {
     const { authorNotificationsEnabled: _omitted, ...missingField } = validCommentNode
     const result = CommentNodeSchema.safeParse(missingField)
     expect(result.success).toBe(false)
   })
 
-  it('should validate comment with nested replies', () => {
+  it('accepts a comment with nested replies', () => {
     const withReplies = {
       ...validCommentNode,
       replies: [
@@ -81,7 +81,7 @@ describe('CommentNodeSchema', () => {
     expect(result.success).toBe(true)
   })
 
-  it('should validate deeply nested replies', () => {
+  it('accepts deeply nested replies', () => {
     const deepNested = {
       ...validCommentNode,
       replies: [
@@ -101,19 +101,19 @@ describe('CommentNodeSchema', () => {
     expect(result.success).toBe(true)
   })
 
-  it('should reject invalid id (not UUID)', () => {
+  it('rejects an id that is not a UUID', () => {
     const invalidComment = { ...validCommentNode, id: 'not-a-uuid' }
     const result = CommentNodeSchema.safeParse(invalidComment)
     expect(result.success).toBe(false)
   })
 
-  it('should reject negative upvoteCount', () => {
+  it('rejects a negative upvoteCount', () => {
     const invalidComment = { ...validCommentNode, upvoteCount: -1 }
     const result = CommentNodeSchema.safeParse(invalidComment)
     expect(result.success).toBe(false)
   })
 
-  it('should reject missing required fields', () => {
+  it('rejects missing required fields', () => {
     const { content: _content, ...missingContent } = validCommentNode
     const result = CommentNodeSchema.safeParse(missingContent)
     expect(result.success).toBe(false)
@@ -125,17 +125,17 @@ describe('CommentNodeSchema', () => {
 // ============================================================================
 
 describe('CommentTreeSchema', () => {
-  it('should validate empty array', () => {
+  it('accepts an empty array', () => {
     const result = CommentTreeSchema.safeParse([])
     expect(result.success).toBe(true)
   })
 
-  it('should validate array with single comment', () => {
+  it('accepts an array with a single comment', () => {
     const result = CommentTreeSchema.safeParse([validCommentNode])
     expect(result.success).toBe(true)
   })
 
-  it('should validate array with multiple top-level comments', () => {
+  it('accepts an array with multiple top-level comments', () => {
     const comments = [
       validCommentNode,
       { ...validCommentNode, id: '223e4567-e89b-12d3-a456-426614174001' },
@@ -145,7 +145,7 @@ describe('CommentTreeSchema', () => {
     expect(result.success).toBe(true)
   })
 
-  it('should reject array with invalid comment', () => {
+  it('rejects an array with an invalid comment', () => {
     const comments = [validCommentNode, { ...validCommentNode, id: 'invalid' }]
     const result = CommentTreeSchema.safeParse(comments)
     expect(result.success).toBe(false)
@@ -157,7 +157,7 @@ describe('CommentTreeSchema', () => {
 // ============================================================================
 
 describe('CommentVoteResponseSchema', () => {
-  it('should validate vote response', () => {
+  it('accepts a vote response', () => {
     const response = {
       commentId: '123e4567-e89b-12d3-a456-426614174000',
       upvoteCount: 10,
@@ -167,7 +167,7 @@ describe('CommentVoteResponseSchema', () => {
     expect(result.success).toBe(true)
   })
 
-  it('should validate zero upvoteCount', () => {
+  it('accepts a zero upvoteCount', () => {
     const response = {
       commentId: '123e4567-e89b-12d3-a456-426614174000',
       upvoteCount: 0,
@@ -177,7 +177,7 @@ describe('CommentVoteResponseSchema', () => {
     expect(result.success).toBe(true)
   })
 
-  it('should reject extra fields (strict)', () => {
+  it('rejects extra fields (strict)', () => {
     const response = {
       commentId: '123e4567-e89b-12d3-a456-426614174000',
       upvoteCount: 10,
@@ -188,7 +188,7 @@ describe('CommentVoteResponseSchema', () => {
     expect(result.success).toBe(false)
   })
 
-  it('should reject negative upvoteCount', () => {
+  it('rejects a negative upvoteCount', () => {
     const response = {
       commentId: '123e4567-e89b-12d3-a456-426614174000',
       upvoteCount: -1,
@@ -198,7 +198,7 @@ describe('CommentVoteResponseSchema', () => {
     expect(result.success).toBe(false)
   })
 
-  it('should reject invalid commentId (not UUID)', () => {
+  it('rejects a commentId that is not a UUID', () => {
     const response = {
       commentId: 'not-a-uuid',
       upvoteCount: 10,
@@ -214,7 +214,7 @@ describe('CommentVoteResponseSchema', () => {
 // ============================================================================
 
 describe('CommentReportResponseSchema', () => {
-  it('should validate report response', () => {
+  it('accepts a report response', () => {
     const response = {
       id: 1,
       commentId: '123e4567-e89b-12d3-a456-426614174000',
@@ -225,7 +225,7 @@ describe('CommentReportResponseSchema', () => {
     expect(result.success).toBe(true)
   })
 
-  it('should reject extra fields (strict)', () => {
+  it('rejects extra fields (strict)', () => {
     const response = {
       id: 1,
       commentId: '123e4567-e89b-12d3-a456-426614174000',
@@ -237,7 +237,7 @@ describe('CommentReportResponseSchema', () => {
     expect(result.success).toBe(false)
   })
 
-  it('should reject missing createdAt', () => {
+  it('rejects a missing createdAt', () => {
     const response = {
       id: 1,
       commentId: '123e4567-e89b-12d3-a456-426614174000',
@@ -253,7 +253,7 @@ describe('CommentReportResponseSchema', () => {
 // ============================================================================
 
 describe('CommentReportReasonSchema', () => {
-  it('should validate all valid reasons', () => {
+  it('accepts every valid reason', () => {
     const validReasons = ['SPAM', 'HARASSMENT', 'OFF_TOPIC', 'OTHER'] as const
     for (const reason of validReasons) {
       const result = CommentReportReasonSchema.safeParse(reason)
@@ -261,12 +261,12 @@ describe('CommentReportReasonSchema', () => {
     }
   })
 
-  it('should reject invalid reason', () => {
+  it('rejects an invalid reason', () => {
     const result = CommentReportReasonSchema.safeParse('INVALID_REASON')
     expect(result.success).toBe(false)
   })
 
-  it('should reject lowercase reason', () => {
+  it('rejects a lowercase reason', () => {
     const result = CommentReportReasonSchema.safeParse('spam')
     expect(result.success).toBe(false)
   })

@@ -12,9 +12,6 @@ import { closeSeedPool } from '../src/seed'
 /** The copy `planner:sync.removedOnAnotherDevice` renders in the suite's language. */
 const REMOVED_COPY = 'This planner was removed on another device'
 
-/** Long enough offline for the open stream to die; attempts made offline earn no response. */
-const OFFLINE_DWELL_MS = 1_500
-
 /** Longest a reconnect could wait before it would show up as a further response. */
 const RECONNECT_WINDOW_MS = COMMENT_SSE_CONNECTION.MAX_DELAY + COMMENT_SSE_CONNECTION.MAX_JITTER
 
@@ -56,8 +53,11 @@ test('a stream whose planner was deleted reports gone once and stops reconnectin
     expect(streamStatuses).toHaveLength(openedResponses)
 
     const droppedAt = streamStatuses.length
+    const streamFailed = page.waitForEvent('requestfailed', {
+      predicate: (request) => request.url().includes(eventsUrl),
+    })
     await context.setOffline(true)
-    await page.waitForTimeout(OFFLINE_DWELL_MS)
+    await streamFailed
     await context.setOffline(false)
 
     await becomesTrue(async () => streamStatuses.includes(404), {

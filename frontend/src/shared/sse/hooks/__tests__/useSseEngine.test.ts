@@ -126,7 +126,7 @@ beforeEach(() => {
   useSseStore.setState({ isConnected: false, lastEventTime: null, reconnectAttempts: 0 })
   vi.spyOn(console, 'warn').mockImplementation(() => {})
   vi.spyOn(Math, 'random').mockReturnValue(0)
-  vi.mocked(globalThis.fetch).mockImplementation((input: unknown, init: RequestInit = {}) => {
+  vi.spyOn(globalThis, 'fetch').mockImplementation((input: unknown, init: RequestInit = {}) => {
     requestUrls.push(String(input))
     requests.push(init)
     const responder = onceQueue.shift() ?? defaultResponder

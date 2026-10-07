@@ -16,6 +16,9 @@ import { closeSeedPool, createUser, deleteUser } from '../src/seed'
 // the budget is the worst case ADR 072 promises rather than the happy path.
 test.describe.configure({ timeout: 90_000 })
 
+/** A misrouted push would leave in the owner's dispatch, so this covers only its delivery skew. */
+const BYSTANDER_SILENCE_MS = 2_000
+
 test.afterAll(closeSeedPool)
 
 test('a comment on a published planner pushes a refetch to the owner and lands in their badge', async ({
@@ -84,7 +87,7 @@ test('a comment on a published planner pushes a refetch to the owner and lands i
 
     // Delivery is targeted: the bystander's open stream carried nothing. Asserted only after
     // the owner's toast proves the event fired at all.
-    await bystanderPage.waitForTimeout(2_000)
+    await bystanderPage.waitForTimeout(BYSTANDER_SILENCE_MS)
     await expect(bystanderPage.getByText('New comment')).toHaveCount(0)
     await expect(
       bystanderPage.getByRole('banner').locator('span', { hasText: /^\d+$/ }),

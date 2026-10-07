@@ -4,8 +4,11 @@ import { Suspense } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 
 import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
+import { diffHtml, normalizeHtml } from '@/test-utils/domDiff'
+import { prefetchDescriptionData } from '@/test-utils/prefetchDescriptionData'
 import { createTestQueryClient } from '@/test-utils/queryClient'
 import EGODetailPage from '../EGODetailPage'
+import { egoI18n20102 } from './egoDetailFixtures'
 
 vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>()
@@ -45,6 +48,12 @@ vi.mock('@/components/layout/EntityMetaInfoI18n', () => ({
 }))
 
 const SKILL_TABS = [/awakening/i, /corrosion/i] as const
+
+/** The passives pane is the last section the page reveals; every threadspin lists this passive. */
+const LAST_SECTION_TEXT = Object.values(egoI18n20102.passives)[0]!.name
+
+/** Imported lazily under a null Suspense fallback, so the skeleton check cannot see it pending. */
+const EXPAND_IMAGE_BUTTON = 'a11y.expandImage'
 const SKILL_TAB_NAMES = ['awaken', 'erosion'] as const
 
 /** Radix stamps a transient presence-animation style that has no bearing on structure. */
@@ -65,7 +74,9 @@ async function waitForI18nSettled(container: HTMLElement) {
 
 /** One matrix cell: mount, settle the reveal, drive threadspin + skill type, return the DOM. */
 async function renderCell(threadspin: number, tab: RegExp, isMobile = false): Promise<string> {
+  vi.mocked(useIsBreakpoint).mockReturnValue(isMobile)
   const queryClient = createTestQueryClient()
+  await prefetchDescriptionData(queryClient, 'EN')
   const { container, unmount } = render(
     <QueryClientProvider client={queryClient}>
       <Suspense fallback={<div data-testid="page-skeleton">Loading...</div>}>
@@ -75,9 +86,12 @@ async function renderCell(threadspin: number, tab: RegExp, isMobile = false): Pr
   )
 
   await waitFor(() => {
-    const revealed = isMobile
-      ? screen.getAllByRole('tab').length === 2
-      : screen.getAllByRole('button', { name: /corrosion/i }).length > 0
+    const revealed =
+      (isMobile
+        ? screen.getAllByRole('tab').length === 2
+        : screen.queryAllByRole('button', { name: /corrosion/i }).length > 0 &&
+          screen.queryAllByText(LAST_SECTION_TEXT).length > 0) &&
+      screen.queryAllByRole('button', { name: EXPAND_IMAGE_BUTTON }).length > 0
     if (!revealed) throw new Error('last section not revealed yet')
   })
 
@@ -90,8 +104,27 @@ async function renderCell(threadspin: number, tab: RegExp, isMobile = false): Pr
   return html
 }
 
+const baselines = new Map<boolean, Promise<string>>()
+
+/** Each layout's baseline cell (threadspin 1, awakening), rendered once per file run. */
+function baselineHtml(isMobile: boolean): Promise<string> {
+  let baseline = baselines.get(isMobile)
+  if (!baseline) {
+    baseline = renderCell(1, SKILL_TABS[0], isMobile)
+    baselines.set(isMobile, baseline)
+  }
+  return baseline
+}
+
+/** The baseline cell's whole DOM; for every other cell, its diff against that baseline. */
+async function cellSnapshot(threadspin: number, tab: RegExp, isMobile: boolean): Promise<string> {
+  const baseline = await baselineHtml(isMobile)
+  return threadspin === 1 && tab === SKILL_TABS[0]
+    ? normalizeHtml(baseline)
+    : diffHtml(baseline, await renderCell(threadspin, tab, isMobile))
+}
+
 beforeEach(() => {
-  vi.mocked(useIsBreakpoint).mockReturnValue(false)
   vi.spyOn(global, 'fetch').mockImplementation(
     () => Promise.resolve({ ok: true, json: () => Promise.resolve({}) }) as Promise<Response>,
   )
@@ -102,21 +135,17 @@ describe('EGODetailPage DOM parity', () => {
     for (const threadspin of [1, 2, 4, 5]) {
       for (const [index, tab] of SKILL_TABS.entries()) {
         it(`renders threadspin ${threadspin} with ${SKILL_TAB_NAMES[index]} selected`, async () => {
-          expect(await renderCell(threadspin, tab)).toMatchSnapshot()
+          expect(await cellSnapshot(threadspin, tab, false)).toMatchSnapshot()
         })
       }
     }
   })
 
   describe('mobile', () => {
-    beforeEach(() => {
-      vi.mocked(useIsBreakpoint).mockReturnValue(true)
-    })
-
     for (const threadspin of [1, 5]) {
       for (const [index, tab] of SKILL_TABS.entries()) {
         it(`renders threadspin ${threadspin} with ${SKILL_TAB_NAMES[index]} selected`, async () => {
-          expect(await renderCell(threadspin, tab, true)).toMatchSnapshot()
+          expect(await cellSnapshot(threadspin, tab, true)).toMatchSnapshot()
         })
       }
     }

@@ -190,7 +190,8 @@
       "rules": {
         "typescript/unbound-method": "off",
         "vitest/expect-expect": ["error", { "assertFunctionNames": ["expect", "validateFile"] }],
-        "vitest/require-mock-type-parameters": "off"
+        "vitest/require-mock-type-parameters": "off",
+        "vitest/valid-title": ["error", { "disallowedWords": ["should"] }]
       }
     },
     {

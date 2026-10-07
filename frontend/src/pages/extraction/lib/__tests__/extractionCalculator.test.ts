@@ -1420,7 +1420,7 @@ describe('calculateExtraction - successiveProbabilities and totalItemsWanted', (
   })
 
   describe('pity allocation with allEgoCollected modifier (bug fix)', () => {
-    it('2/1/1 @ 200 pulls: allEgoCollected should increase probability by allocating pity optimally', () => {
+    it('2/1/1 @ 200 pulls: pity goes to the lowest-probability target, so allEgoCollected leaves the single-copy probability unchanged', () => {
       // Bug scenario: When allEgoCollected doubles EGO rate (0.65% → 1.3%),
       // pity should NOT go to EGO anymore (which has decent 92.7% natural prob).
       // Instead, pity should go to the target with LOWEST natural probability.
@@ -1483,7 +1483,7 @@ describe('calculateExtraction - successiveProbabilities and totalItemsWanted', (
       ).toBeLessThan(0.001)
     })
 
-    it('2/1/1 @ 200 pulls with wanting 2 IDs: allEgoCollected should SIGNIFICANTLY increase probability', () => {
+    it('2/1/1 @ 200 pulls with wanting 2 IDs: allEgoCollected SIGNIFICANTLY increases probability', () => {
       // This test exposes the BUG more clearly:
       // When wanting 2 IDs (collect BOTH), ID has LOWEST natural probability.
       // With allEgoCollected=true, pity should go to ID (worst at 58.8%),

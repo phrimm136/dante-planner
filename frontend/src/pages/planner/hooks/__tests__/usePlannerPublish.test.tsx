@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { http, HttpResponse } from 'msw'
@@ -68,7 +68,6 @@ function renderPublish() {
 
 describe('usePlannerPublish', () => {
   beforeAll(() => {
-    server.listen({ onUnhandledRequest: 'error' })
     server.events.on('request:start', ({ request }) => {
       const clone = request.clone()
       void clone.text().then((body) => {
@@ -82,14 +81,8 @@ describe('usePlannerPublish', () => {
     vi.clearAllMocks()
   })
 
-  afterEach(() => {
-    server.resetHandlers()
-  })
-
   afterAll(() => {
     server.events.removeAllListeners()
-    server.close()
-    globalThis.fetch = vi.fn() as unknown as typeof fetch
   })
 
   it('publishes in one request that carries the save body', async () => {

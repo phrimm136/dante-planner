@@ -23,14 +23,14 @@ function createWrapper() {
 }
 
 describe('GiftNameI18n', () => {
-  it('should render gift name from i18n data', () => {
+  it('renders the gift name from i18n data', () => {
     render(<GiftNameI18n id="9001" attributeType="CRIMSON" />, { wrapper: createWrapper() })
 
     // Should render the name from mocked i18n data
     expect(screen.getByText('Test Gift Name')).toBeDefined()
   })
 
-  it('should not suspend parent component', () => {
+  it('does not suspend the parent component', () => {
     const { container } = render(<GiftNameI18n id="9001" attributeType="CRIMSON" />, {
       wrapper: createWrapper(),
     })

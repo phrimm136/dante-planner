@@ -10,6 +10,8 @@ import { describe, it, expect, vi, beforeEach, assert } from 'vitest'
 import { render, waitFor } from '@testing-library/react'
 import { flushMicrotask, pasteIntoNote, stubRangeRects } from '@/test-utils'
 import { ok } from '@/lib/result'
+import { openStorageDb } from '@/lib/storage'
+import { floorCount } from '@/shared/gameData'
 import type { Result } from '@/lib/result'
 import type { SaveablePlanner } from '../../../types/PlannerTypes'
 import type { AppError } from '@/lib/apiErrorClassifier'
@@ -159,28 +161,38 @@ function renderShell(initialState?: Partial<PlannerEditorState>) {
   return { ...utils, storeApi: storeApi as StoreApi<PlannerEditorStore> }
 }
 
-/** Long enough for every section to reveal and the storage session to open. */
-const MOUNT_SETTLE_MS = 800
+/** Every note the shell renders for the store's category: the fixed sections plus one per floor. */
+function expectedNoteCount(storeApi: StoreApi<PlannerEditorStore>): number {
+  const fixedNotes = Object.keys(createDefaultSectionNotes()).filter(
+    (key) => !key.startsWith('floor-'),
+  ).length
+  return fixedNotes + floorCount(storeApi.getState().category)
+}
 
 /**
- * Sections reveal one animation frame at a time, so wait for the whole set:
- * nothing the mount itself began is still in flight afterwards.
+ * Sections reveal one animation frame at a time and the last floor's note is the
+ * last to mount, so wait for every note's editor and for the storage open the
+ * mount began: nothing the mount itself began is still in flight afterwards.
  *
  * Deliberately no mockClear. Mounting an editor hands Tiptap's parsed document
  * over synchronously, which is not an edit and must not write; clearing here
  * would throw away the evidence for exactly that.
  */
-async function settleMount() {
-  await waitFor(() => expect(document.querySelector('.note-editor-content')).toBeTruthy())
-  await new Promise((resolve) => setTimeout(resolve, MOUNT_SETTLE_MS))
+async function settleMount(storeApi: StoreApi<PlannerEditorStore>) {
+  await waitFor(() =>
+    expect(document.querySelectorAll('.note-editor-content')).toHaveLength(
+      expectedNoteCount(storeApi),
+    ),
+  )
+  await openStorageDb().catch(() => null)
 }
 
 const writtenJson = () => mockSaveToLocal.mock.calls.map(([planner]) => JSON.stringify(planner))
 
 describe('PlannerEditorShell - write-through with real note editors', () => {
   it('writes note text in the task it was typed in, with no lifecycle event', async () => {
-    renderShell()
-    await settleMount()
+    const { storeApi } = renderShell()
+    await settleMount(storeApi)
     mockSaveToLocal.mockClear()
 
     typeIntoFirstNote('typed and immediately gone')
@@ -193,11 +205,11 @@ describe('PlannerEditorShell - write-through with real note editors', () => {
   it('writes text typed in a progressively revealed section', async () => {
     // Sections reveal one animation frame at a time, so every note past the first
     // mounts in a later commit than the shell.
-    renderShell()
+    const { storeApi } = renderShell()
     await waitFor(() => {
       expect(document.querySelectorAll('.note-editor').length).toBeGreaterThanOrEqual(3)
     })
-    await settleMount()
+    await settleMount(storeApi)
     mockSaveToLocal.mockClear()
 
     const revealedNote = document.querySelectorAll('.note-editor')[2]
@@ -221,8 +233,8 @@ describe('PlannerEditorShell - write-through with real note editors', () => {
       Object.keys(createDefaultSectionNotes()).map((key) => [key, { content: '' }]),
     ) as unknown as PlannerEditorState['sectionNotes']
 
-    renderShell({ sectionNotes: emptied })
-    await settleMount()
+    const { storeApi } = renderShell({ sectionNotes: emptied })
+    await settleMount(storeApi)
 
     expect(mockSaveToLocal).not.toHaveBeenCalled()
   })
@@ -230,16 +242,16 @@ describe('PlannerEditorShell - write-through with real note editors', () => {
   it('writes nothing when a planner is only opened', async () => {
     // Opening is not editing. Tiptap reparses every note on mount, and if that
     // travelled as an edit it would rewrite a saved planner as a draft.
-    renderShell()
-    await settleMount()
+    const { storeApi } = renderShell()
+    await settleMount(storeApi)
 
     expect(mockSaveToLocal).not.toHaveBeenCalled()
   })
 
   it('registers no unload listener: nothing is ever held outside storage', async () => {
     const addSpy = vi.spyOn(window, 'addEventListener')
-    renderShell()
-    await settleMount()
+    const { storeApi } = renderShell()
+    await settleMount(storeApi)
 
     const unloadListeners = addSpy.mock.calls
       .map(([type]) => type)

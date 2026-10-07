@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { StartBuffCard } from '../StartBuffCard'
 import type { StartBuff, StartBuffI18n, EnhancementLevel } from '@/shared/gameText'
@@ -9,6 +9,10 @@ import { FontAdvanceTableSchema } from '@/shared/cardLayout'
 
 /** The face the Korean cards are drawn in, as the site ships it. */
 const KR_TABLE = FontAdvanceTableSchema.parse(krTable)
+
+afterEach(() => {
+  vi.useRealTimers()
+})
 
 vi.mock('@/shared/cardLayout', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/shared/cardLayout')>()),
@@ -132,7 +136,6 @@ describe('StartBuffCard', () => {
 
     expect(clearTimeoutSpy).toHaveBeenCalled()
     clearTimeoutSpy.mockRestore()
-    vi.useRealTimers()
   })
 
   // Locks the per-variant layout: any class, offset or border-image change shows up here

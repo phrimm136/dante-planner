@@ -6,6 +6,7 @@ const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost'
 
 export default defineConfig({
   testDir: './tests',
+  globalSetup: './global-setup.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

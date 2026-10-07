@@ -31,8 +31,19 @@ test('the EGO detail image keeps its box while the corrosion CG loads', async ({
   })
   expect(heights[0]).toBeGreaterThan(100)
 
+  const image = section.locator('img.object-contain').first()
+  const awakeningSrc = await image.getAttribute('src')
   await corrosionTab.click()
-  await page.waitForTimeout(IMAGE_DELAY_MS * 4)
+  await expect(image).not.toHaveAttribute('src', awakeningSrc ?? '')
+  await expect
+    .poll(() => image.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0), {
+      timeout: 20_000,
+    })
+    .toBe(true)
+  await page.evaluate(
+    () =>
+      new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+  )
 
   const trace = await page.evaluate(
     () => (window as unknown as { __heights: number[] }).__heights,

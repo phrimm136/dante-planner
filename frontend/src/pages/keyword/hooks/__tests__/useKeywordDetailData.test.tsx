@@ -27,7 +27,7 @@ function createWrapper() {
 }
 
 describe('useKeywordDetailSpec', () => {
-  it('should return spec entry for a known keyword', async () => {
+  it('returns the spec entry for a known keyword', async () => {
     const { result } = renderHook(() => useKeywordDetailSpec('Aggro'), {
       wrapper: createWrapper(),
     })
@@ -42,7 +42,7 @@ describe('useKeywordDetailSpec', () => {
     })
   })
 
-  it('should return undefined for unknown keyword', async () => {
+  it('returns undefined for an unknown keyword', async () => {
     const { result } = renderHook(() => useKeywordDetailSpec('NonExistentKeyword_XYZ'), {
       wrapper: createWrapper(),
     })
@@ -55,7 +55,7 @@ describe('useKeywordDetailSpec', () => {
 })
 
 describe('useKeywordDetailI18n', () => {
-  it('should return i18n entry for a known keyword', async () => {
+  it('returns the i18n entry for a known keyword', async () => {
     const { result } = renderHook(() => useKeywordDetailI18n('Aggro'), {
       wrapper: createWrapper(),
     })
@@ -67,7 +67,7 @@ describe('useKeywordDetailI18n', () => {
     })
   })
 
-  it('should return undefined for unknown keyword', async () => {
+  it('returns undefined for an unknown keyword', async () => {
     const { result } = renderHook(() => useKeywordDetailI18n('NonExistentKeyword_XYZ'), {
       wrapper: createWrapper(),
     })

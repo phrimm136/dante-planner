@@ -205,6 +205,7 @@ export default defineConfig({
 
     // Setup file
     setupFiles: './vitest.setup.ts',
+    globalSetup: './vitest.global-setup.ts',
 
     // Coverage configuration
     coverage: {

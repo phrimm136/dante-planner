@@ -14,6 +14,9 @@ import { readPlannerRows } from '../src/localPlanner'
 
 test.use({ ...devices['Pixel 7'] })
 
+/** Delay before the crash; it must fall inside the control's 1.5 s busy task. */
+const CRASH_INSIDE_BUSY_TASK_MS = 300
+
 test('note text typed the instant before a renderer crash is in IndexedDB afterwards', async ({
   page,
   context,
@@ -77,7 +80,7 @@ test('a put committed inside a task survives a renderer crash in that same task'
       [DB_NAME, DB_VERSION, STORAGE_STORE_NAME, key] as const,
     )
     .catch(() => undefined)
-  await page.waitForTimeout(300)
+  await page.waitForTimeout(CRASH_INSIDE_BUSY_TASK_MS)
   void cdp.send('Page.crash').catch(() => undefined)
   await page.waitForEvent('crash', { timeout: 5_000 })
   await busy

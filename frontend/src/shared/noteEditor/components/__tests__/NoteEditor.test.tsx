@@ -85,7 +85,7 @@ describe('NoteEditor', () => {
   })
 
   describe('Rendering', () => {
-    it('should render the editor', async () => {
+    it('renders the editor', async () => {
       render(<NoteEditor value={defaultValue} onChange={mockOnChange} />)
 
       // Editor should be visible
@@ -94,7 +94,7 @@ describe('NoteEditor', () => {
       })
     })
 
-    it('should render with placeholder', async () => {
+    it('renders with a placeholder', async () => {
       render(
         <NoteEditor
           value={defaultValue}
@@ -111,7 +111,7 @@ describe('NoteEditor', () => {
       // Just verify the editor rendered successfully
     })
 
-    it('should apply readOnly state', async () => {
+    it('applies the readOnly state', async () => {
       render(<NoteEditor value={defaultValue} onChange={mockOnChange} readOnly />)
 
       await waitFor(() => {
@@ -120,7 +120,7 @@ describe('NoteEditor', () => {
       })
     })
 
-    it('should apply custom className', async () => {
+    it('applies a custom className', async () => {
       render(<NoteEditor value={defaultValue} onChange={mockOnChange} className="custom-class" />)
 
       await waitFor(() => {
@@ -131,7 +131,7 @@ describe('NoteEditor', () => {
   })
 
   describe('Focus Behavior', () => {
-    it('should show toolbar when focused', async () => {
+    it('shows the toolbar when focused', async () => {
       render(<NoteEditor value={defaultValue} onChange={mockOnChange} />)
 
       await waitFor(() => {
@@ -183,7 +183,7 @@ describe('NoteEditor', () => {
   })
 
   describe('Controlled Component', () => {
-    it('should accept value prop changes without crashing', async () => {
+    it('accepts value prop changes without crashing', async () => {
       // Note: The NoteEditor has debouncing and internal state management
       // that prevents immediate updates when hasLocalChangesRef is true.
       // This test verifies the component accepts new props gracefully.
@@ -232,7 +232,7 @@ describe('NoteEditor - XSS Prevention', () => {
   })
 
   describe('Link Dialog XSS Protection', () => {
-    it('should render link dialog when link button is clicked', async () => {
+    it('renders the link dialog when the link button is clicked', async () => {
       const user = userEvent.setup()
       render(<NoteEditor value={defaultValue} onChange={mockOnChange} />)
 
@@ -258,7 +258,7 @@ describe('NoteEditor - XSS Prevention', () => {
       })
     })
 
-    it('should show error toast for javascript: URL', async () => {
+    it('shows an error toast for a javascript: URL', async () => {
       const user = userEvent.setup()
       render(<NoteEditor value={defaultValue} onChange={mockOnChange} />)
 
@@ -295,7 +295,7 @@ describe('NoteEditor - XSS Prevention', () => {
       })
     })
 
-    it('should show error toast for data: URL', async () => {
+    it('shows an error toast for a data: URL', async () => {
       const user = userEvent.setup()
       render(<NoteEditor value={defaultValue} onChange={mockOnChange} />)
 
@@ -332,7 +332,7 @@ describe('NoteEditor - XSS Prevention', () => {
       })
     })
 
-    it('should accept valid https: URL', async () => {
+    it('accepts a valid https: URL', async () => {
       const user = userEvent.setup()
       render(<NoteEditor value={defaultValue} onChange={mockOnChange} />)
 
@@ -372,7 +372,7 @@ describe('NoteEditor - XSS Prevention', () => {
       })
     })
 
-    it('should auto-add https:// to URLs without protocol', async () => {
+    it('adds https:// to URLs without a protocol', async () => {
       const user = userEvent.setup()
       render(<NoteEditor value={defaultValue} onChange={mockOnChange} />)
 
@@ -425,7 +425,7 @@ describe('NoteEditor - XSS Prevention', () => {
     ]
 
     maliciousUrls.forEach(({ name, url }) => {
-      it(`should block ${name}`, async () => {
+      it(`blocks ${name}`, async () => {
         const user = userEvent.setup()
         render(<NoteEditor value={defaultValue} onChange={mockOnChange} />)
 
@@ -474,7 +474,7 @@ describe('NoteEditor - XSS Prevention', () => {
     ]
 
     safeUrls.forEach(({ name, url }) => {
-      it(`should allow ${name}`, async () => {
+      it(`allows ${name}`, async () => {
         const user = userEvent.setup()
         render(<NoteEditor value={defaultValue} onChange={mockOnChange} />)
 

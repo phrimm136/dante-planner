@@ -27,7 +27,7 @@ function createWrapper() {
 }
 
 describe('useBattleKeywords', () => {
-  it('should return merged data with name, desc, iconId, buffType', async () => {
+  it('returns merged data with name, desc, iconId, buffType', async () => {
     const { result } = renderHook(() => useBattleKeywords(), {
       wrapper: createWrapper(),
     })
@@ -39,7 +39,7 @@ describe('useBattleKeywords', () => {
     })
   })
 
-  it('should produce entries with the correct merged shape', async () => {
+  it('produces entries with the correct merged shape', async () => {
     const { result } = renderHook(() => useBattleKeywords(), {
       wrapper: createWrapper(),
     })
@@ -56,7 +56,7 @@ describe('useBattleKeywords', () => {
     })
   })
 
-  it('should have iconId as string or null', async () => {
+  it('has iconId as a string or null', async () => {
     const { result } = renderHook(() => useBattleKeywords(), {
       wrapper: createWrapper(),
     })
@@ -109,14 +109,14 @@ describe('useBattleKeywords', () => {
 })
 
 describe('getKeywordName', () => {
-  it('should return translated name when keyword exists', () => {
+  it('returns the translated name when the keyword exists', () => {
     const keywords = {
       Burn: { name: 'Burn', desc: 'Deals damage.', iconId: 'Burn', buffType: 'Negative' },
     }
     expect(getKeywordName(keywords, 'Burn')).toBe('Burn')
   })
 
-  it('should return original key when keyword does not exist', () => {
+  it('returns the original key when the keyword does not exist', () => {
     expect(getKeywordName({}, 'UnknownKeyword')).toBe('UnknownKeyword')
   })
 })

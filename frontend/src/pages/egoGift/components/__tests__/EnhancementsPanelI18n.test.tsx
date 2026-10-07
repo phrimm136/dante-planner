@@ -23,7 +23,7 @@ function createWrapper() {
 }
 
 describe('EnhancementsPanelI18n', () => {
-  it('should render enhancement panel with descriptions', () => {
+  it('renders the enhancement panel with descriptions', () => {
     render(<EnhancementsPanelI18n giftId="9001" maxEnhancement={2} costs={[100, 200, 300]} />, {
       wrapper: createWrapper(),
     })
@@ -33,7 +33,7 @@ describe('EnhancementsPanelI18n', () => {
     expect(images.length).toBeGreaterThan(0)
   })
 
-  it('should not suspend parent component', () => {
+  it('does not suspend the parent component', () => {
     const { container } = render(
       <EnhancementsPanelI18n giftId="9001" maxEnhancement={1} costs={[100, 200]} />,
       { wrapper: createWrapper() },

@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { announcementQueryKeys, useAnnouncementData } from '../useAnnouncementData'
 import {
   AnnouncementSpecListSchema,
@@ -9,6 +9,10 @@ import {
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ i18n: { language: 'EN' } }),
 }))
+
+afterEach(() => {
+  vi.useRealTimers()
+})
 
 vi.mock('@tanstack/react-query', async () => {
   const actual = await vi.importActual('@tanstack/react-query')
@@ -203,8 +207,6 @@ describe('useAnnouncementData business logic', () => {
     // Before midnight on expiry date — entry is still visible (expiresAt is same-day)
     // new Date('2026-02-20') = midnight UTC; our time is 10:00 UTC = past midnight → filtered
     expect(result.current).toHaveLength(0)
-
-    vi.useRealTimers()
   })
 
   it('merges spec and i18n into Announcement shape', () => {

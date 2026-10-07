@@ -73,7 +73,7 @@ async function emit(stream: StreamHandle, type: string, data: unknown) {
 beforeEach(() => {
   streams.length = 0
   requestUrls.length = 0
-  vi.mocked(globalThis.fetch).mockImplementation((input: unknown) => {
+  vi.spyOn(globalThis, 'fetch').mockImplementation((input: unknown) => {
     requestUrls.push(String(input))
     let controller: ReadableStreamDefaultController<Uint8Array> | null = null
     const body = new ReadableStream<Uint8Array>({

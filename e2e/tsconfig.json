@@ -16,5 +16,5 @@
       "@static/*": ["../static/*"]
     }
   },
-  "include": ["tests/**/*.ts", "src/**/*.ts", "playwright.config.ts"]
+  "include": ["tests/**/*.ts", "src/**/*.ts", "playwright.config.ts", "global-setup.ts"]
 }
