@@ -3,12 +3,14 @@ package org.danteplanner.backend.auth.token;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
+import org.danteplanner.backend.support.TestJwt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.Instant;
@@ -31,19 +33,15 @@ class JwtTokenServiceTest {
 
     private static final Long ACCESS_TOKEN_EXPIRY = 900000L; // 15 minutes
     private static final Long REFRESH_TOKEN_EXPIRY = 604800000L; // 7 days
+    private static final JwtProperties SHARED_KEYS = new TestJwt().properties();
+    private static final KeyPair DIFFERENT_KEY_PAIR = generateKeyPair();
 
     private JwtTokenService tokenService;
     private JwtProperties jwtProperties;
-    private KeyPair testKeyPair;
     private byte[] testAesKey;
 
     @BeforeEach
     void setUp() throws Exception {
-        // Generate RSA keypair for testing
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-        keyPairGenerator.initialize(2048);
-        testKeyPair = keyPairGenerator.generateKeyPair();
-
         // Generate AES-256 key for testing
         testAesKey = new byte[32];
         SecureRandom secureRandom = new SecureRandom();
@@ -51,13 +49,23 @@ class JwtTokenServiceTest {
 
         // Setup JWT properties
         jwtProperties = new JwtProperties();
-        jwtProperties.setPrivateKey(testKeyPair.getPrivate());
-        jwtProperties.setPublicKey(testKeyPair.getPublic());
+        jwtProperties.setPrivateKey(SHARED_KEYS.getPrivateKey());
+        jwtProperties.setPublicKey(SHARED_KEYS.getPublicKey());
         jwtProperties.setEncryptionKeyBytes(testAesKey);
         jwtProperties.setAccessTokenExpiry(ACCESS_TOKEN_EXPIRY);
         jwtProperties.setRefreshTokenExpiry(REFRESH_TOKEN_EXPIRY);
 
         tokenService = new JwtTokenService(jwtProperties);
+    }
+
+    private static KeyPair generateKeyPair() {
+        try {
+            KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+            generator.initialize(2048);
+            return generator.generateKeyPair();
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private static String decodePayload(String token) {
@@ -246,13 +254,9 @@ class JwtTokenServiceTest {
         @Test
         void givenInvalidSignature_WhenValidate_ThenThrowsInvalidTokenException() throws Exception {
             // Arrange - create token with different RSA keypair
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048);
-            KeyPair differentKeyPair = keyPairGenerator.generateKeyPair();
-
             JwtProperties differentKeyProps = new JwtProperties();
-            differentKeyProps.setPrivateKey(differentKeyPair.getPrivate());
-            differentKeyProps.setPublicKey(differentKeyPair.getPublic());
+            differentKeyProps.setPrivateKey(DIFFERENT_KEY_PAIR.getPrivate());
+            differentKeyProps.setPublicKey(DIFFERENT_KEY_PAIR.getPublic());
             differentKeyProps.setEncryptionKeyBytes(testAesKey);
             differentKeyProps.setAccessTokenExpiry(ACCESS_TOKEN_EXPIRY);
             differentKeyProps.setRefreshTokenExpiry(REFRESH_TOKEN_EXPIRY);
@@ -299,7 +303,7 @@ class JwtTokenServiceTest {
                     .claim("type", TokenClaims.TYPE_ACCESS)
                     .issuedAt(new java.util.Date())
                     .expiration(new java.util.Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
-                    .signWith(testKeyPair.getPrivate(), io.jsonwebtoken.SignatureAlgorithm.RS256)
+                    .signWith(SHARED_KEYS.getPrivateKey(), io.jsonwebtoken.SignatureAlgorithm.RS256)
                     .compact();
 
             // Act & Assert
@@ -316,7 +320,7 @@ class JwtTokenServiceTest {
                     .claim("type", TokenClaims.TYPE_ACCESS)
                     .issuedAt(new java.util.Date())
                     .expiration(new java.util.Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
-                    .signWith(testKeyPair.getPrivate(), io.jsonwebtoken.SignatureAlgorithm.RS256)
+                    .signWith(SHARED_KEYS.getPrivateKey(), io.jsonwebtoken.SignatureAlgorithm.RS256)
                     .compact();
 
             // Act & Assert
@@ -430,7 +434,7 @@ class JwtTokenServiceTest {
                     .subject("3001")
                     .issuedAt(new java.util.Date())
                     .expiration(new java.util.Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
-                    .signWith(testKeyPair.getPrivate(), io.jsonwebtoken.SignatureAlgorithm.RS256)
+                    .signWith(SHARED_KEYS.getPrivateKey(), io.jsonwebtoken.SignatureAlgorithm.RS256)
                     .compact();
 
             assertRejected(() -> tokenService.validateAccessToken(token))

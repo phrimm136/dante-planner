@@ -1,5 +1,5 @@
 # 171 tests-keep-class-concurrency-and-enforce-isolation-by-rule
-epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @mocks @memory @isolation @transactions @contexts @fakes @fixtures @assertions @exceptions
+epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @mocks @memory @isolation @transactions @contexts @fakes @fixtures @assertions @exceptions @schedules
 
 ## Decisions
 - @tests @concurrency — Backend test classes keep running concurrently inside the test JVM, twelve
@@ -189,6 +189,20 @@ epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @
   `catchThrowableOfType` call, and no thrown-exception chain stops at type or cause-type checks after
   `succeedsWithin` or `failsWithin` — the ast-grep rules `no-swallowed-exception-in-tests`,
   `no-catch-throwable-of-type` and `no-bare-assert-throws`.
+- @tests @schedules — Integration contexts register no wall-clock cron that the test profiles can
+  turn off, and every production schedule is pinned by a test that resolves the value the build ships
+  and computes its next fire times from a fixed clock. ShedLock grants every lock in test contexts,
+  so a run crossing 03:00 or 04:00 fired the user purge and the drift sweep in every context at once
+  against the shared database, while no test waited for a cron to fire: each drives the job's method.
+  The random order seed is drawn per run, printed even under `-q`, and replayed with `-PtestSeed`.
+  REJECTED: dispatching the outbox synchronously in the integration profile — the flakes it was meant
+  to remove came from a test sweeping the whole events table, and a same-thread executor would run the
+  dispatch while the committed transaction's resources are still bound.
+  REJECTED: a production property for the 02:00 notification purge and the 500 ms view flush only to
+  switch them off in tests — no test was disturbed by them, and the schedule test pins both.
+  INVARIANT: every production `@Scheduled` method appears in the schedule table with its trigger as
+  `application.properties` overlaid by `application-prod.properties` resolves it; environment
+  variables are outside the check — `ScheduledJobsTest`.
 
 ## Takeaway
 - takeaway: when concurrency in a test suite exposes shared state, close each hazard with a rule

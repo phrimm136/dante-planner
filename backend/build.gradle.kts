@@ -372,8 +372,30 @@ tasks.jacocoTestReport {
     }
 }
 
+abstract class RandomOrderSeed : CommandLineArgumentProvider {
+    @get:Input
+    @get:Optional
+    abstract val fixedSeed: Property<String>
+
+    @get:Internal
+    var drawnSeed: String? = null
+
+    fun seed(): String = fixedSeed.orNull
+        ?: drawnSeed
+        ?: kotlin.random.Random.nextLong().toString().also { drawnSeed = it }
+
+    override fun asArguments(): Iterable<String> =
+        listOf("-Djunit.jupiter.execution.order.random.seed=${seed()}")
+}
+
 tasks.test {
     inputs.file(layout.projectDirectory.file("config/architecture-rules-without-fixtures.txt"))
+    val randomOrderSeed = objects.newInstance<RandomOrderSeed>()
+    randomOrderSeed.fixedSeed.set(providers.gradleProperty("testSeed"))
+    jvmArgumentProviders.add(randomOrderSeed)
+    doFirst {
+        logger.quiet("JUnit random order seed: ${randomOrderSeed.seed()}")
+    }
     finalizedBy(tasks.jacocoTestReport)
     retry {
         maxRetries = 1

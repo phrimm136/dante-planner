@@ -1,6 +1,5 @@
 package org.danteplanner.backend.integration;
 
-import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerSubscription;
@@ -20,14 +19,10 @@ import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
 import org.danteplanner.backend.support.CatalogEffects;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -55,11 +50,7 @@ import static org.danteplanner.backend.support.Rejections.assertRejected;
  * A deactivated owner's published planners are invisible to public reads and to the drift
  * audit's catalog membership for the grace window, and visible again on reactivation.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@ActiveProfiles("it")
-@Tag("containerized")
-@Import(TestConfig.class)
-class DeactivatedOwnerVisibilityIT extends SharedMySqlContainerSupport {
+class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private MockMvc mockMvc;
@@ -254,7 +245,11 @@ class DeactivatedOwnerVisibilityIT extends SharedMySqlContainerSupport {
 
     private int lockWaits() {
         return new JdbcTemplate(dataSource).queryForObject(
-                "SELECT COUNT(*) FROM information_schema.innodb_trx WHERE trx_state = 'LOCK WAIT'", Integer.class);
+                """
+                SELECT COUNT(*) FROM information_schema.innodb_trx t
+                JOIN information_schema.processlist p ON p.id = t.trx_mysql_thread_id
+                WHERE t.trx_state = 'LOCK WAIT' AND p.db = DATABASE()
+                """, Integer.class);
     }
 
     private void awaitCondition(BooleanSupplier condition) throws InterruptedException {

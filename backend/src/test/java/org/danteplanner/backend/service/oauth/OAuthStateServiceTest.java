@@ -7,11 +7,13 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.auth.oauth.OAuthStateService.OAuthTransaction;
 import org.danteplanner.backend.auth.token.AesGcmCipher;
+import org.danteplanner.backend.support.TestJwt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.util.Base64;
@@ -31,6 +33,8 @@ class OAuthStateServiceTest {
 
     private static final String TX_CLAIM = "tx";
     private static final Base64.Encoder URL_ENCODER = Base64.getUrlEncoder().withoutPadding();
+    private static final JwtProperties SHARED_KEYS = new TestJwt().properties();
+    private static final KeyPair FOREIGN_KEY_PAIR = generateKeyPair();
 
     private OAuthStateService stateService;
     private AesGcmCipher aesGcmCipher;
@@ -40,22 +44,29 @@ class OAuthStateServiceTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-        keyPairGenerator.initialize(2048);
-        KeyPair keyPair = keyPairGenerator.generateKeyPair();
-        signingKey = keyPair.getPrivate();
+        signingKey = SHARED_KEYS.getPrivateKey();
 
         aesKey = new byte[32];
         new SecureRandom().nextBytes(aesKey);
 
         JwtProperties jwtProperties = new JwtProperties();
-        jwtProperties.setPrivateKey(keyPair.getPrivate());
-        jwtProperties.setPublicKey(keyPair.getPublic());
+        jwtProperties.setPrivateKey(SHARED_KEYS.getPrivateKey());
+        jwtProperties.setPublicKey(SHARED_KEYS.getPublicKey());
         jwtProperties.setEncryptionKeyBytes(aesKey);
 
         aesGcmCipher = new AesGcmCipher();
         objectMapper = new ObjectMapper();
         stateService = new OAuthStateService(jwtProperties, objectMapper, aesGcmCipher);
+    }
+
+    private static KeyPair generateKeyPair() {
+        try {
+            KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+            generator.initialize(2048);
+            return generator.generateKeyPair();
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     @Test
@@ -97,9 +108,7 @@ class OAuthStateServiceTest {
 
     @Test
     void open_WhenSignedByForeignKey_ReturnsEmpty() throws Exception {
-        KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-        generator.initialize(2048);
-        PrivateKey foreignKey = generator.generateKeyPair().getPrivate();
+        PrivateKey foreignKey = FOREIGN_KEY_PAIR.getPrivate();
 
         String foreignToken = Jwts.builder()
                 .claim(TX_CLAIM, encryptTx("state", "verifier"))

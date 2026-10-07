@@ -2,7 +2,6 @@ package org.danteplanner.backend.integration;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -15,13 +14,9 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -42,11 +37,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * <p>The failing arm here is a real one failing for a real reason — an event whose payload names no
  * id — rather than a stub, so the rollback under test is the one production would take.</p>
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@ActiveProfiles("it")
-@Tag("containerized")
-@Import(TestConfig.class)
-class DomainEventPoisonIT extends SharedMySqlContainerSupport {
+class DomainEventPoisonIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private DomainEventDispatcher dispatcher;

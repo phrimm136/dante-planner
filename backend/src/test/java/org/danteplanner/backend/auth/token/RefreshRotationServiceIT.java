@@ -17,8 +17,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,16 +75,14 @@ class RefreshRotationServiceIT {
 
     @BeforeEach
     void setUp() throws Exception {
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-        keyPairGenerator.initialize(2048);
-        KeyPair keyPair = keyPairGenerator.generateKeyPair();
+        JwtProperties sharedKeys = new TestJwt().properties();
 
         byte[] aesKey = new byte[32];
         new SecureRandom().nextBytes(aesKey);
 
         jwtProperties = new JwtProperties();
-        jwtProperties.setPrivateKey(keyPair.getPrivate());
-        jwtProperties.setPublicKey(keyPair.getPublic());
+        jwtProperties.setPrivateKey(sharedKeys.getPrivateKey());
+        jwtProperties.setPublicKey(sharedKeys.getPublicKey());
         jwtProperties.setEncryptionKeyBytes(aesKey);
         jwtProperties.setAccessTokenExpiry(900000L);
         jwtProperties.setRefreshTokenExpiry(REFRESH_TOKEN_EXPIRY);
