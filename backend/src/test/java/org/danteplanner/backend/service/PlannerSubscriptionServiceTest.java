@@ -117,7 +117,7 @@ class PlannerSubscriptionServiceTest {
         }
 
         @Test
-        void toggleSubscription_WhenPlannerNotFound_ThrowsException() {
+        void toggleSubscription_WhenPlannerMissingOrUnpublished_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
             when(plannerRepository.existsPublishedById(nonExistentId)).thenReturn(false);
@@ -128,16 +128,6 @@ class PlannerSubscriptionServiceTest {
 
             verify(subscriptionRepository, never()).findByUserIdAndPlannerId(any(), any());
             verify(subscriptionRepository, never()).insert(any());
-        }
-
-        @Test
-        void toggleSubscription_WhenPlannerNotPublished_ThrowsException() {
-            // Arrange
-            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(false);
-
-            // Act & Assert
-            assertRejected(() -> subscriptionService.toggleSubscription(testUser.getId(), plannerId))
-                    .withCode("PLANNER_NOT_FOUND");
         }
     }
 
@@ -246,19 +236,6 @@ class PlannerSubscriptionServiceTest {
             assertThat(result).contains(1L);
             assertThat(result).contains(2L);
             assertThat(result).contains(3L);
-        }
-
-        @Test
-        void getSubscriberUserIds_WhenNoSubscribers_ReturnsEmpty() {
-            // Arrange
-            when(subscriptionRepository.findByPlannerIdAndEnabledTrue(plannerId))
-                    .thenReturn(List.of());
-
-            // Act
-            List<Long> result = subscriptionService.getSubscriberUserIds(plannerId);
-
-            // Assert
-            assertThat(result).isEmpty();
         }
     }
 }

@@ -163,21 +163,6 @@ class CommentReportServiceTest {
             verify(reportRepository, never()).existsByReporterIdAndCommentId(any(), any());
             verify(reportRepository, never()).insert(any());
         }
-
-        @Test
-        void createReport_WhenCommentMissing_ValidatesCommentFirst() {
-            // Arrange
-            when(commentRepository.findByPublicId(COMMENT_PUBLIC_ID)).thenReturn(Optional.empty());
-            CommentReportRequest request = new CommentReportRequest(REASON);
-
-            // Act & Assert
-            assertRejected(() -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request))
-                    .withCode("COMMENT_NOT_FOUND");
-
-            // Verify order: comment lookup first, then never reaches report check
-            verify(commentRepository).findByPublicId(COMMENT_PUBLIC_ID);
-            verify(reportRepository, never()).existsByReporterIdAndCommentId(any(), any());
-        }
     }
 
     @Nested

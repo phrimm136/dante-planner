@@ -404,27 +404,13 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
-        void publish_WhenNotFound_ThrowsException() {
+        void publish_WhenPlannerMissingOrDeleted_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
             when(plannerRepository.findAggregate(nonExistentId)).thenReturn(Optional.empty());
 
             // Act & Assert
             assertRejected(() -> publishingService.publish(testUser.getId(), nonExistentId))
-                    .withCode("PLANNER_NOT_FOUND");
-        }
-
-        @Test
-        void publish_WhenDeleted_ThrowsException() {
-            // Arrange
-            Planner planner = createTestPlanner();
-            planner.softDelete();
-
-            // findAggregate filters soft-deleted rows at the query level
-            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.empty());
-
-            // Act & Assert
-            assertRejected(() -> publishingService.publish(testUser.getId(), planner.getId()))
                     .withCode("PLANNER_NOT_FOUND");
         }
 

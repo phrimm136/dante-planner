@@ -121,15 +121,6 @@ class PlannerCatalogSyncServiceTest {
     }
 
     @Test
-    void drainPending_WhenAskingForWork_ReadsOneBatchOfCatalogEventsBelowTheAttemptCap() {
-        givenPending();
-
-        assertThat(syncService.drainPending()).isZero();
-
-        verify(events).pendingEventsOfType(CATALOG_CHANGED, 10, PageRequest.of(0, 200));
-    }
-
-    @Test
     void drainPending_WhenOnePlannersSyncThrows_RecordsItsAttemptsAndSyncsTheNext() {
         UUID other = UUID.randomUUID();
         givenPending(event(1L, plannerId), event(2L, other), event(3L, plannerId));

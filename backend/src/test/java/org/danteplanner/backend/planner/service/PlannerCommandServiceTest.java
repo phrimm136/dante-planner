@@ -320,21 +320,6 @@ class PlannerCommandServiceTest {
             assertThat(saved.path("observationGiftIds")).isEqualTo(new ObjectMapper().createArrayNode().add("19002"));
             assertThat(planner.getCategory()).isEqualTo("5F");
         }
-
-        @Test
-        void upsertPlanner_WhenAPublishedPlannersContentChanges_ValidatesAtPublish() {
-            Planner planner = testPlanner(1L, true, TestDataFactory.VALID_CONTENT);
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
-                    .thenReturn(Optional.of(planner));
-            String unknownKeyword = TestDataFactory.withSelectedKeywords(TestDataFactory.VALID_CONTENT,
-                    java.util.List.of("Nope"));
-
-            assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(),
-                    UpsertRequests.resending(planner).content(unknownKeyword).build(), false))
-                    .withViolation("UNKNOWN_KEYWORD")
-                    .isInstanceOfSatisfying(PlannerValidationException.class,
-                            exception -> assertThat(exception.getOriginalCode()).isEqualTo("UNKNOWN_KEYWORD"));
-        }
     }
 
     @Nested

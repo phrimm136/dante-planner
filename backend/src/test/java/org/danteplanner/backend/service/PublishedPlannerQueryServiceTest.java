@@ -281,24 +281,13 @@ class PublishedPlannerQueryServiceTest {
         }
 
         @Test
-        void incrementViewCount_WhenNotFound_ThrowsException() {
+        void incrementViewCount_WhenPlannerMissingOrDeleted_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
             when(plannerRepository.existsActiveById(nonExistentId)).thenReturn(false);
 
             // Act & Assert
             assertRejected(() -> publishedQueryService.incrementViewCount(nonExistentId)).withCode("PLANNER_NOT_FOUND");
-            verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
-        }
-
-        @Test
-        void incrementViewCount_WhenDeletedPlanner_ThrowsException() {
-            // Arrange: a soft-deleted planner still has a core row but is not active
-            UUID deletedId = UUID.randomUUID();
-            when(plannerRepository.existsActiveById(deletedId)).thenReturn(false);
-
-            // Act & Assert
-            assertRejected(() -> publishedQueryService.incrementViewCount(deletedId)).withCode("PLANNER_NOT_FOUND");
             verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
         }
     }
@@ -374,7 +363,7 @@ class PublishedPlannerQueryServiceTest {
         }
 
         @Test
-        void getPublishedPlanner_WhenUnpublishedPlanner_ThrowsException() {
+        void getPublishedPlanner_WhenPlannerMissingOrUnpublished_ThrowsException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             // findPublishedAggregate filters unpublished rows at the query level
@@ -386,17 +375,6 @@ class PublishedPlannerQueryServiceTest {
 
             assertThat(bufferedViews()).isEmpty();
             verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
-        }
-
-        @Test
-        void getPublishedPlanner_WhenPlannerNotFound_ThrowsException() {
-            // Arrange
-            UUID plannerId = UUID.randomUUID();
-            when(plannerRepository.findPublishedAggregate(plannerId)).thenReturn(Optional.empty());
-
-            // Act & Assert
-            assertRejected(() -> publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT))
-                    .withCode("PLANNER_NOT_FOUND");
         }
 
         @Test

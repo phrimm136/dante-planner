@@ -145,16 +145,4 @@ class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
         assertThat(planner1Vote.get().getVoteType()).isEqualTo(VoteType.UP);
         assertThat(planner2Vote.get().getVoteType()).isEqualTo(VoteType.UP);
     }
-
-    @Test
-    void voteType_WhenSaved_IsImmutable() {
-        // Arrange
-        PlannerVote vote = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
-        vote = plannerVoteRepository.save(vote);
-
-        // Assert - voteType field is final, no setter exists
-        assertThat(vote.getVoteType()).isEqualTo(VoteType.UP);
-        // A vote is immutable: there is no setVoteType()
-        // Attempting to change vote type would require creating a new vote (which would violate composite PK)
-    }
 }

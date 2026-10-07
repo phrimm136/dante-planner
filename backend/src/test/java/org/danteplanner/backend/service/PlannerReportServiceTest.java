@@ -100,7 +100,7 @@ class PlannerReportServiceTest {
         }
 
         @Test
-        void createReport_WhenPlannerNotFound_ThrowsException() {
+        void createReport_WhenPlannerMissingOrUnpublished_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
             when(plannerRepository.existsPublishedById(nonExistentId)).thenReturn(false);
@@ -111,30 +111,6 @@ class PlannerReportServiceTest {
 
             verify(reportRepository, never()).existsByUserIdAndPlannerId(any(), any());
             verify(reportRepository, never()).insert(any());
-        }
-
-        @Test
-        void createReport_WhenPlannerNotPublished_ThrowsException() {
-            // Arrange
-            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(false);
-
-            // Act & Assert
-            assertRejected(() -> reportService.createReport(testUser.getId(), plannerId)).withCode("PLANNER_NOT_FOUND");
-        }
-
-        @Test
-        void createReport_WhenPlannerMissing_ValidatesPlannerFirst() {
-            // Arrange
-            UUID nonExistentId = UUID.randomUUID();
-            when(plannerRepository.existsPublishedById(nonExistentId)).thenReturn(false);
-
-            // Act & Assert
-            assertRejected(() -> reportService.createReport(testUser.getId(), nonExistentId))
-                    .withCode("PLANNER_NOT_FOUND");
-
-            // Verify order: planner lookup first, then never reaches report check
-            verify(plannerRepository).existsPublishedById(nonExistentId);
-            verify(reportRepository, never()).existsByUserIdAndPlannerId(any(), any());
         }
     }
 
