@@ -39,11 +39,11 @@ if [[ -n "$records" ]]; then
     body=$(git show ":$f")
     num=$(basename "$f" | cut -c1-3)
 
-    echo "$body" | head -1 | grep -qE "^# ${num} " \
+    head -1 <<<"$body" | grep -qE "^# ${num} " \
       || adr_fail "$f" "first line must be '# ${num} <kebab-title>'"
 
-    echo "$body" | grep -q '^## Decisions' || adr_fail "$f" "missing '## Decisions'"
-    echo "$body" | grep -q '^## Takeaway'  || adr_fail "$f" "missing '## Takeaway'"
+    grep -q '^## Decisions' <<<"$body" || adr_fail "$f" "missing '## Decisions'"
+    grep -q '^## Takeaway' <<<"$body" || adr_fail "$f" "missing '## Takeaway'"
 
     # Every record bullet is tag-addressed, so a decision is citable as NNN @tag.
     untagged=$(echo "$body" | awk '
