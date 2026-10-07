@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 class PlannerPublishValidatorTest {
 
@@ -19,15 +19,15 @@ class PlannerPublishValidatorTest {
     @NullSource
     @ValueSource(strings = {"", "   "})
     void requireTitle_WhenTheTitleIsAbsentOrBlank_RefusesWithMissingTitleAtTheTitle(String title) {
-        PlannerValidationException ex = catchThrowableOfType(PlannerValidationException.class,
-                () -> validator.requireTitle(title));
-
-        assertThat(ex).isNotNull();
-        assertThat(ex.getOriginalCode()).isEqualTo("MISSING_TITLE");
-        assertThat(ex.getSubErrors()).containsExactly(
-                new ValidationError("MISSING_TITLE", "title", "Title is required for publishing"));
-        assertThat(ex.getBody().getProperties()).containsEntry("code", "VALIDATION_ERROR");
-        assertThat(ex.getBody().getDetail()).isEqualTo("Invalid planner content structure");
+        assertRejected(() -> validator.requireTitle(title))
+                .withCode("VALIDATION_ERROR")
+                .withViolation("MISSING_TITLE", "title")
+                .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                    assertThat(ex.getOriginalCode()).isEqualTo("MISSING_TITLE");
+                    assertThat(ex.getSubErrors()).containsExactly(
+                            new ValidationError("MISSING_TITLE", "title", "Title is required for publishing"));
+                    assertThat(ex.getBody().getDetail()).isEqualTo("Invalid planner content structure");
+                });
     }
 
     @Test

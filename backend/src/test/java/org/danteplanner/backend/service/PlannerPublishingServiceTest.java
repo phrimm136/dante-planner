@@ -604,6 +604,7 @@ class PlannerPublishingServiceTest {
                     testUser.getId(), deviceId, planner.getId(), request);
 
             assertThat(result.published()).isTrue();
+            assertThat(result.title()).isEqualTo("Stored Title");
         }
 
         @Test

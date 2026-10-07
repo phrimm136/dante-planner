@@ -9,10 +9,11 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
+
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 import io.github.bucket4j.distributed.proxy.RemoteBucketBuilder;
 import io.lettuce.core.RedisConnectionException;
-import io.lettuce.core.RedisException;
 
 import org.danteplanner.backend.support.InMemoryProxyManager;
 
@@ -46,8 +47,9 @@ class LazyConnectingProxyManagerTest {
         try {
             assertThat(CompletableFuture.supplyAsync(() -> catchThrowable(manager::builder),
                     task -> Thread.ofPlatform().start(task)))
-                    .succeedsWithin(FAIL_FAST_BUDGET)
-                    .isInstanceOf(RedisException.class);
+                    .succeedsWithin(FAIL_FAST_BUDGET, InstanceOfAssertFactories.THROWABLE)
+                    .isInstanceOf(RedisConnectionException.class)
+                    .hasMessage("Rate-limit store connect already in progress");
             assertThat(connectorCalls).hasValue(1);
         } finally {
             release.countDown();

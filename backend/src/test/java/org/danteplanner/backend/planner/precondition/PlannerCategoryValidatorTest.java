@@ -11,7 +11,7 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 class PlannerCategoryValidatorTest {
 
@@ -19,33 +19,31 @@ class PlannerCategoryValidatorTest {
 
     @Test
     void requireCategoryForType_WhenTheCategoryBelongsToAnotherType_ThrowsMismatchedCategory() {
-        PlannerValidationException ex = catchThrowableOfType(PlannerValidationException.class,
-                () -> validator.requireCategoryForType(PlannerType.MIRROR_DUNGEON, "RR_PLACEHOLDER"));
-
-        assertThat(ex).isNotNull();
-        assertThat(ex.getOriginalCode()).isEqualTo("MISMATCHED_CATEGORY");
+        assertRejected(() -> validator.requireCategoryForType(PlannerType.MIRROR_DUNGEON, "RR_PLACEHOLDER"))
+                .withViolation("MISMATCHED_CATEGORY")
+                .isInstanceOfSatisfying(PlannerValidationException.class,
+                        ex -> assertThat(ex.getOriginalCode()).isEqualTo("MISMATCHED_CATEGORY"));
     }
 
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {"XX", "20F", "5f"})
     void requireCategoryForType_WhenAMirrorDungeonCategoryIsUnknown_ThrowsMismatchedCategory(String category) {
-        PlannerValidationException ex = catchThrowableOfType(PlannerValidationException.class,
-                () -> validator.requireCategoryForType(PlannerType.MIRROR_DUNGEON, category));
-
-        assertThat(ex).isNotNull();
-        assertThat(ex.getOriginalCode()).isEqualTo("MISMATCHED_CATEGORY");
+        assertRejected(() -> validator.requireCategoryForType(PlannerType.MIRROR_DUNGEON, category))
+                .withViolation("MISMATCHED_CATEGORY")
+                .isInstanceOfSatisfying(PlannerValidationException.class,
+                        ex -> assertThat(ex.getOriginalCode()).isEqualTo("MISMATCHED_CATEGORY"));
     }
 
     @Test
     void requireCategoryForType_WhenTheTypeAcceptsACategoryTheContentParseCannotUse_ThrowsInvalidCategoryAlone() {
-        PlannerValidationException ex = catchThrowableOfType(PlannerValidationException.class,
-                () -> validator.requireCategoryForType(PlannerType.REFRACTED_RAILWAY, "RR_PLACEHOLDER"));
-
-        assertThat(ex).isNotNull();
-        assertThat(ex.getOriginalCode()).isEqualTo("INVALID_CATEGORY");
-        assertThat(ex.getSubErrors()).containsExactly(
-                new ValidationError("INVALID_CATEGORY", "", "Invalid category: RR_PLACEHOLDER"));
+        assertRejected(() -> validator.requireCategoryForType(PlannerType.REFRACTED_RAILWAY, "RR_PLACEHOLDER"))
+                .withViolation("INVALID_CATEGORY", "")
+                .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                    assertThat(ex.getOriginalCode()).isEqualTo("INVALID_CATEGORY");
+                    assertThat(ex.getSubErrors()).containsExactly(
+                            new ValidationError("INVALID_CATEGORY", "", "Invalid category: RR_PLACEHOLDER"));
+                });
     }
 
     @ParameterizedTest

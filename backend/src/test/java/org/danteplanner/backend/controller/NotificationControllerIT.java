@@ -21,9 +21,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -52,6 +54,9 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private JwtTokenService jwtTokenService;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     private User testUser;
     private User otherUser;
@@ -84,13 +89,9 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
         return notificationRepository.save(notification);
     }
 
-    /**
-     * Sets the createdAt timestamp for a notification.
-     * Uses entity setter for consistency with PlannerComment, PlannerView patterns.
-     */
     private void setCreatedAt(Notification notification, Instant timestamp) {
-        notification.setCreatedAt(timestamp);
-        notificationRepository.save(notification);
+        jdbcTemplate.update("UPDATE notifications SET created_at = ? WHERE id = ?",
+                Timestamp.from(timestamp), notification.getId());
     }
 
     @Nested
@@ -169,10 +170,10 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
         @Test
         void getInbox_WhenOrdering_NewestFirst() throws Exception {
             Instant now = Instant.now();
-            Notification old = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
-            setCreatedAt(old, now.minusSeconds(10));
             Notification newer = createNotification(testUser, NotificationType.REPLY_RECEIVED);
+            Notification old = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             setCreatedAt(newer, now);
+            setCreatedAt(old, now.minusSeconds(10));
 
             mockMvc.perform(get("/api/notifications/inbox")
                             .cookie(accessTokenCookie()))

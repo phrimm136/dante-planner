@@ -1,5 +1,7 @@
 package org.danteplanner.backend.planner.validation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.planner.entity.MDCategory;
@@ -20,9 +22,9 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -126,6 +128,20 @@ class PlannerContentValidatorTest {
     private static String replaceRegexOnce(String content, String regex, String replacement) {
         assertThat(Pattern.compile(regex).matcher(content).results()).hasSize(1);
         return content.replaceAll(regex, replacement);
+    }
+
+    private String validContentWith(Consumer<ObjectNode> edit) {
+        ObjectNode root = (ObjectNode) readTree(createValidContent());
+        edit.accept(root);
+        return root.toString();
+    }
+
+    private JsonNode readTree(String json) {
+        try {
+            return objectMapper.readTree(json);
+        } catch (JsonProcessingException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
@@ -310,17 +326,17 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenEmptyEquipment_ThrowsException() {
-            String content = """
-                {
-                    "selectedKeywords": [],
-                    "equipment": {},
-                    "deploymentOrder": [],
-                    "floorSelections": [],
-                    "sectionNotes": {}
-                }
-                """;
+            String content = validContentWith(root -> root.set("equipment", objectMapper.createObjectNode()));
 
-            assertRejected(() -> validate(content, "5F")).withViolation("MISSING_REQUIRED_FIELD", "equipment[1]");
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("MISSING_REQUIRED_FIELD", "equipment[1]")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            exception -> assertThat(exception.getSubErrors())
+                                    .extracting(ValidationError::code, ValidationError::path)
+                                    .containsExactlyInAnyOrderElementsOf(IntStream.rangeClosed(1, 12)
+                                            .mapToObj(sinner -> tuple("MISSING_REQUIRED_FIELD",
+                                                    "equipment[" + sinner + "]"))
+                                            .toList()));
         }
 
         @Test
@@ -341,72 +357,52 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenMissingSelectedKeywords_ThrowsException() {
-            String content = """
-                {
-                    "equipment": {},
-                    "deploymentOrder": [],
-                    "floorSelections": [],
-                    "sectionNotes": {}
-                }
-                """;
+            String content = validContentWith(root -> root.remove("selectedKeywords"));
 
-            assertRejected(() -> validate(content, "5F")).withViolation("MISSING_REQUIRED_FIELD", "selectedKeywords");
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("MISSING_REQUIRED_FIELD", "selectedKeywords")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            exception -> assertThat(exception.getSubErrors()).hasSize(1));
         }
 
         @Test
         void validate_WhenMissingEquipment_ThrowsException() {
-            String content = """
-                {
-                    "selectedKeywords": [],
-                    "deploymentOrder": [],
-                    "floorSelections": [],
-                    "sectionNotes": {}
-                }
-                """;
+            String content = validContentWith(root -> root.remove("equipment"));
 
-            assertRejected(() -> validate(content, "5F")).withViolation("MISSING_REQUIRED_FIELD", "equipment");
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("MISSING_REQUIRED_FIELD", "equipment")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            exception -> assertThat(exception.getSubErrors()).hasSize(1));
         }
 
         @Test
         void validate_WhenMissingDeploymentOrder_ThrowsException() {
-            String content = """
-                {
-                    "selectedKeywords": [],
-                    "equipment": {},
-                    "floorSelections": [],
-                    "sectionNotes": {}
-                }
-                """;
+            String content = validContentWith(root -> root.remove("deploymentOrder"));
 
-            assertRejected(() -> validate(content, "5F")).withViolation("MISSING_REQUIRED_FIELD", "deploymentOrder");
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("MISSING_REQUIRED_FIELD", "deploymentOrder")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            exception -> assertThat(exception.getSubErrors()).hasSize(1));
         }
 
         @Test
         void validate_WhenMissingFloorSelections_ThrowsException() {
-            String content = """
-                {
-                    "selectedKeywords": [],
-                    "equipment": {},
-                    "deploymentOrder": [],
-                    "sectionNotes": {}
-                }
-                """;
+            String content = validContentWith(root -> root.remove("floorSelections"));
 
-            assertRejected(() -> validate(content, "5F")).withViolation("MISSING_REQUIRED_FIELD", "floorSelections");
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("MISSING_REQUIRED_FIELD", "floorSelections")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            exception -> assertThat(exception.getSubErrors()).hasSize(1));
         }
 
         @Test
         void validate_WhenMissingSectionNotes_ThrowsException() {
-            String content = """
-                {
-                    "selectedKeywords": [],
-                    "equipment": {},
-                    "deploymentOrder": [],
-                    "floorSelections": []
-                }
-                """;
+            String content = validContentWith(root -> root.remove("sectionNotes"));
 
-            assertRejected(() -> validate(content, "5F")).withViolation("MISSING_REQUIRED_FIELD", "sectionNotes");
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("MISSING_REQUIRED_FIELD", "sectionNotes")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            exception -> assertThat(exception.getSubErrors()).hasSize(1));
         }
     }
 
@@ -427,24 +423,15 @@ class PlannerContentValidatorTest {
         void validate_WhenFieldHasWrongType_ThrowsException(String field, String wrongTypedValue) {
             String content = contentWithWrongType(field, wrongTypedValue);
 
-            assertRejected(() -> validate(content, "5F")).withViolation("INVALID_FIELD_TYPE", field);
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("INVALID_FIELD_TYPE", field)
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            exception -> assertThat(exception.getSubErrors()).hasSize(1));
         }
 
-        /**
-         * The five required fields at their valid empty values, with {@code field} carrying
-         * {@code value} instead — replacing a required field, or adding an optional one.
-         */
         private String contentWithWrongType(String field, String value) {
-            Map<String, String> fields = new LinkedHashMap<>();
-            fields.put("selectedKeywords", "[]");
-            fields.put("equipment", "{}");
-            fields.put("deploymentOrder", "[]");
-            fields.put("floorSelections", "[]");
-            fields.put("sectionNotes", "{}");
-            fields.put(field, value);
-            return fields.entrySet().stream()
-                    .map(entry -> "\"" + entry.getKey() + "\": " + entry.getValue())
-                    .collect(Collectors.joining(", ", "{", "}"));
+            JsonNode wrongTyped = readTree(value);
+            return validContentWith(root -> root.set(field, wrongTyped));
         }
     }
 
@@ -453,22 +440,13 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenUnknownField_ThrowsException() {
-            String content = """
-                {
-                    "selectedKeywords": [],
-                    "equipment": {},
-                    "deploymentOrder": [],
-                    "floorSelections": [],
-                    "sectionNotes": {},
-                    "unknownField": "value"
-                }
-                """;
+            String content = validContentWith(root -> root.put("unknownField", "value"));
 
             assertRejected(() -> validate(content, "5F"))
                     .withViolation("UNKNOWN_FIELD", "unknownField")
                     .isInstanceOfSatisfying(PlannerValidationException.class, exception -> {
                         assertThat(exception.getOriginalCode()).isEqualTo("VALIDATION_ERROR");
-                        assertThat(exception.getSubErrors()).contains(
+                        assertThat(exception.getSubErrors()).containsExactly(
                                 new ValidationError("UNKNOWN_FIELD", "unknownField",
                                         "Field 'unknownField' is unknown"));
                     });
@@ -476,21 +454,13 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenMultipleUnknownFields_ThrowsException() {
-            String content = """
-                {
-                    "selectedKeywords": [],
-                    "equipment": {},
-                    "deploymentOrder": [],
-                    "floorSelections": [],
-                    "sectionNotes": {},
-                    "unknownField1": "value",
-                    "unknownField2": 123
-                }
-                """;
+            String content = validContentWith(root -> root.put("unknownField1", "value").put("unknownField2", 123));
 
             assertRejected(() -> validate(content, "5F"))
                     .withViolation("UNKNOWN_FIELD", "unknownField1")
-                    .withViolation("UNKNOWN_FIELD", "unknownField2");
+                    .withViolation("UNKNOWN_FIELD", "unknownField2")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            exception -> assertThat(exception.getSubErrors()).hasSize(2));
         }
     }
 
@@ -623,54 +593,36 @@ class PlannerContentValidatorTest {
         @Test
         void validate_WhenSinnerIndex0InEquipment_ThrowsException() {
             // Equipment keys are 1-indexed (1-12), so 0 is invalid
-            String content = """
-                {
-                    "selectedKeywords": [],
-                    "equipment": {
-                        "0": {"identity": {"id": "10101", "uptie": 4, "level": 45}, "egos": {}}
-                    },
-                    "deploymentOrder": [],
-                    "floorSelections": [],
-                    "sectionNotes": {}
-                }
-                """;
+            String content = validContentWith(root -> ((ObjectNode) root.get("equipment")).set("0",
+                    readTree("{\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": 45}, \"egos\": {}}")));
 
-            assertRejected(() -> validate(content, "5F")).withViolation("UNKNOWN_FIELD", "equipment[0]");
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("UNKNOWN_FIELD", "equipment[0]")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            exception -> assertThat(exception.getSubErrors()).hasSize(1));
         }
 
         @Test
         void validate_WhenSinnerIndexAbove12InEquipment_ThrowsException() {
             // Equipment keys are 1-indexed (1-12), so 13 is invalid
-            String content = """
-                {
-                    "selectedKeywords": [],
-                    "equipment": {
-                        "13": {"identity": {"id": "10101", "uptie": 4, "level": 45}, "egos": {}}
-                    },
-                    "deploymentOrder": [],
-                    "floorSelections": [],
-                    "sectionNotes": {}
-                }
-                """;
+            String content = validContentWith(root -> ((ObjectNode) root.get("equipment")).set("13",
+                    readTree("{\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": 45}, \"egos\": {}}")));
 
-            assertRejected(() -> validate(content, "5F")).withViolation("UNKNOWN_FIELD", "equipment[13]");
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("UNKNOWN_FIELD", "equipment[13]")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            exception -> assertThat(exception.getSubErrors()).hasSize(1));
         }
 
         @Test
         void validate_WhenNonNumericEquipmentKey_ThrowsException() {
-            String content = """
-                {
-                    "selectedKeywords": [],
-                    "equipment": {
-                        "yi_sang": {"identity": {"id": "10101", "uptie": 4, "level": 45}, "egos": {}}
-                    },
-                    "deploymentOrder": [],
-                    "floorSelections": [],
-                    "sectionNotes": {}
-                }
-                """;
+            String content = validContentWith(root -> ((ObjectNode) root.get("equipment")).set("yi_sang",
+                    readTree("{\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": 45}, \"egos\": {}}")));
 
-            assertRejected(() -> validate(content, "5F")).withViolation("UNKNOWN_FIELD", "equipment[yi_sang]");
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("UNKNOWN_FIELD", "equipment[yi_sang]")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            exception -> assertThat(exception.getSubErrors()).hasSize(1));
         }
 
         @Test
@@ -708,17 +660,12 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenNonNumericDeploymentOrder_ThrowsException() {
-            String content = """
-                {
-                    "selectedKeywords": [],
-                    "equipment": {},
-                    "deploymentOrder": [0, "abc"],
-                    "floorSelections": [],
-                    "sectionNotes": {}
-                }
-                """;
+            String content = validContentWith(root -> root.set("deploymentOrder", readTree("[0, \"abc\"]")));
 
-            assertRejected(() -> validate(content, "5F")).withViolation("INVALID_FIELD_TYPE", "deploymentOrder[1]");
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("INVALID_FIELD_TYPE", "deploymentOrder[1]")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            exception -> assertThat(exception.getSubErrors()).hasSize(1));
         }
     }
 
@@ -755,7 +702,6 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenExceedMax10StartBuffs_ThrowsException() {
-            // Fails at max count check, never reaches buff ID or gift validation
             // 11 buffs - exceeds limit
             String content = replaceOnce(createValidContent(),
                     "\"selectedBuffIds\": [100, 201],",
@@ -806,8 +752,6 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenBuffIdNotInGameData_ThrowsException() {
-            // Fails in buff validation, never reaches gift validation
-
             String content = replaceOnce(createValidContent(),
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [100, 999],"
@@ -972,7 +916,6 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenDuplicateFloorGiftIds_ThrowsException() {
-            // Floor validation fails before buff/gift pool validation
             String content = replaceOnce(createValidContent(),
                     "\"giftIds\": [\"9002\"]",
                     "\"giftIds\": [\"9002\", \"9002\"]"
@@ -993,8 +936,6 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenInvalidFloorGiftId_ThrowsException() {
-            // Floor validation fails before buff/gift pool validation
-
             String content = replaceOnce(createValidContent(),
                     "\"giftIds\": [\"9002\"]",
                     "\"giftIds\": [\"9999\"]"

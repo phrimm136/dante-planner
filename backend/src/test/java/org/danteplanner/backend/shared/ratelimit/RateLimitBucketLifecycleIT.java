@@ -38,6 +38,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @Tag("containerized")
@@ -95,8 +96,13 @@ class RateLimitBucketLifecycleIT {
     private int successfulCharges(long userId, int attempts) {
         int passed = 0;
         for (int i = 0; i < attempts; i++) {
-            if (catchThrowable(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT)) == null) {
+            Throwable refused = catchThrowable(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT));
+            if (refused == null) {
                 passed++;
+            } else {
+                assertRejected(() -> {
+                    throw refused;
+                }).withCode("RATE_LIMIT_EXCEEDED");
             }
         }
         return passed;
