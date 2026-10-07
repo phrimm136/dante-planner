@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for ViewerHashUtil.
@@ -35,7 +35,7 @@ class ViewerHashUtilTest {
             String hash2 = ViewerHashUtil.hashForAuthenticatedUser(USER_ID, PLANNER_ID);
 
             // Assert
-            assertEquals(hash1, hash2, "Same inputs should produce same hash");
+            assertThat(hash2).as("Same inputs should produce same hash").isEqualTo(hash1);
         }
 
         @Test
@@ -44,8 +44,8 @@ class ViewerHashUtilTest {
             String hash = ViewerHashUtil.hashForAuthenticatedUser(USER_ID, PLANNER_ID);
 
             // Assert
-            assertEquals(64, hash.length(), "SHA-256 hex should be 64 characters");
-            assertTrue(hash.matches("[0-9a-f]+"), "Hash should be lowercase hex");
+            assertThat(hash.length()).as("SHA-256 hex should be 64 characters").isEqualTo(64);
+            assertThat(hash).as("Hash should be lowercase hex").matches("[0-9a-f]+");
         }
 
         @Test
@@ -55,7 +55,7 @@ class ViewerHashUtilTest {
             String hash2 = ViewerHashUtil.hashForAuthenticatedUser(OTHER_USER_ID, PLANNER_ID);
 
             // Assert
-            assertNotEquals(hash1, hash2, "Different userIds should produce different hashes");
+            assertThat(hash2).as("Different userIds should produce different hashes").isNotEqualTo(hash1);
         }
 
         @Test
@@ -65,7 +65,7 @@ class ViewerHashUtilTest {
             String hash2 = ViewerHashUtil.hashForAuthenticatedUser(USER_ID, OTHER_PLANNER_ID);
 
             // Assert
-            assertNotEquals(hash1, hash2, "Different plannerIds should produce different hashes");
+            assertThat(hash2).as("Different plannerIds should produce different hashes").isNotEqualTo(hash1);
         }
     }
 
@@ -79,7 +79,7 @@ class ViewerHashUtilTest {
             String hash2 = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, USER_AGENT, PLANNER_ID);
 
             // Assert
-            assertEquals(hash1, hash2, "Same inputs should produce same hash");
+            assertThat(hash2).as("Same inputs should produce same hash").isEqualTo(hash1);
         }
 
         @Test
@@ -88,8 +88,8 @@ class ViewerHashUtilTest {
             String hash = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, USER_AGENT, PLANNER_ID);
 
             // Assert
-            assertEquals(64, hash.length(), "SHA-256 hex should be 64 characters");
-            assertTrue(hash.matches("[0-9a-f]+"), "Hash should be lowercase hex");
+            assertThat(hash.length()).as("SHA-256 hex should be 64 characters").isEqualTo(64);
+            assertThat(hash).as("Hash should be lowercase hex").matches("[0-9a-f]+");
         }
 
         @Test
@@ -99,7 +99,7 @@ class ViewerHashUtilTest {
             String hash2 = ViewerHashUtil.hashForAnonymousUser(OTHER_IP_ADDRESS, USER_AGENT, PLANNER_ID);
 
             // Assert
-            assertNotEquals(hash1, hash2, "Different IPs should produce different hashes");
+            assertThat(hash2).as("Different IPs should produce different hashes").isNotEqualTo(hash1);
         }
 
         @Test
@@ -109,7 +109,7 @@ class ViewerHashUtilTest {
             String hash2 = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, OTHER_USER_AGENT, PLANNER_ID);
 
             // Assert
-            assertNotEquals(hash1, hash2, "Different User-Agents should produce different hashes");
+            assertThat(hash2).as("Different User-Agents should produce different hashes").isNotEqualTo(hash1);
         }
 
         @Test
@@ -119,7 +119,7 @@ class ViewerHashUtilTest {
             String hash2 = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, USER_AGENT, OTHER_PLANNER_ID);
 
             // Assert
-            assertNotEquals(hash1, hash2, "Different plannerIds should produce different hashes");
+            assertThat(hash2).as("Different plannerIds should produce different hashes").isNotEqualTo(hash1);
         }
     }
 
@@ -133,7 +133,7 @@ class ViewerHashUtilTest {
             String hashEmpty = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, "", PLANNER_ID);
 
             // Assert
-            assertEquals(hashNull, hashEmpty, "Null User-Agent should be treated as empty string");
+            assertThat(hashEmpty).as("Null User-Agent should be treated as empty string").isEqualTo(hashNull);
         }
 
         @Test
@@ -147,7 +147,7 @@ class ViewerHashUtilTest {
             String hashTruncated = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, truncatedUserAgent, PLANNER_ID);
 
             // Assert
-            assertEquals(hashLong, hashTruncated, "User-Agent > 256 chars should be truncated");
+            assertThat(hashTruncated).as("User-Agent > 256 chars should be truncated").isEqualTo(hashLong);
         }
 
         @Test
@@ -161,7 +161,7 @@ class ViewerHashUtilTest {
             String hashShorter = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, shorterUserAgent, PLANNER_ID);
 
             // Assert
-            assertNotEquals(hashExact, hashShorter, "256 chars should not equal 255 chars");
+            assertThat(hashShorter).as("256 chars should not equal 255 chars").isNotEqualTo(hashExact);
         }
 
         @Test
@@ -174,7 +174,7 @@ class ViewerHashUtilTest {
             String hash2 = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, shortUserAgent, PLANNER_ID);
 
             // Assert
-            assertEquals(hash1, hash2, "Short User-Agent should not be modified");
+            assertThat(hash2).as("Short User-Agent should not be modified").isEqualTo(hash1);
         }
     }
 
@@ -188,7 +188,7 @@ class ViewerHashUtilTest {
             String anonHash = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, USER_AGENT, PLANNER_ID);
 
             // Assert
-            assertNotEquals(authHash, anonHash, "Auth and anon hashes should differ");
+            assertThat(anonHash).as("Auth and anon hashes should differ").isNotEqualTo(authHash);
         }
     }
 }

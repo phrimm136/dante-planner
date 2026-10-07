@@ -25,10 +25,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
@@ -87,16 +87,16 @@ class UserAccountLifecycleServiceTest {
             Instant scheduledDate = lifecycleService.deleteAccount(testUser.getId());
 
             // Assert
-            assertNotNull(scheduledDate);
-            assertTrue(testUser.isDeleted());
-            assertNotNull(testUser.getDeletedAt());
-            assertNotNull(testUser.getPermanentDeleteScheduledAt());
+            assertThat(scheduledDate).isNotNull();
+            assertThat(testUser.isDeleted()).isTrue();
+            assertThat(testUser.getDeletedAt()).isNotNull();
+            assertThat(testUser.getPermanentDeleteScheduledAt()).isNotNull();
 
             // Verify scheduled date is approximately 30 days from now
             Instant expectedScheduleMin = Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS - 1));
             Instant expectedScheduleMax = Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS + 1));
-            assertTrue(scheduledDate.isAfter(expectedScheduleMin));
-            assertTrue(scheduledDate.isBefore(expectedScheduleMax));
+            assertThat(scheduledDate).isAfter(expectedScheduleMin);
+            assertThat(scheduledDate).isBefore(expectedScheduleMax);
 
             assertThat(journal).containsExactly(
                     new Call(firstParticipant, Event.DEACTIVATED, testUser.getId(), null),
@@ -116,7 +116,7 @@ class UserAccountLifecycleServiceTest {
             Instant scheduledDate = lifecycleService.deleteAccount(testUser.getId());
 
             // Assert
-            assertEquals(existingScheduledAt, scheduledDate);
+            assertThat(scheduledDate).isEqualTo(existingScheduledAt);
             assertThat(journal).isEmpty();
         }
 
@@ -140,12 +140,10 @@ class UserAccountLifecycleServiceTest {
             when(userRepository.findWithLockById(nonExistentId)).thenReturn(Optional.empty());
 
             // Act & Assert
-            UserNotFoundException exception = assertThrows(
-                    UserNotFoundException.class,
-                    () -> lifecycleService.deleteAccount(nonExistentId)
-            );
-
-            assertEquals(nonExistentId, exception.getUserId());
+            assertRejected(() -> lifecycleService.deleteAccount(nonExistentId))
+                    .withCode("USER_NOT_FOUND")
+                    .isInstanceOfSatisfying(UserNotFoundException.class,
+                            exception -> assertThat(exception.getUserId()).isEqualTo(nonExistentId));
         }
     }
 
@@ -156,7 +154,7 @@ class UserAccountLifecycleServiceTest {
         void reactivateAccount_WhenSoftDeleted_ClearsDeletedAtAndScheduledDate() {
             // Arrange - user is soft-deleted
             testUser.softDelete(Instant.now().plus(Duration.ofDays(30)));
-            assertTrue(testUser.isDeleted());
+            assertThat(testUser.isDeleted()).isTrue();
 
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
 
@@ -164,9 +162,9 @@ class UserAccountLifecycleServiceTest {
             lifecycleService.reactivateAccount(testUser.getId());
 
             // Assert
-            assertFalse(testUser.isDeleted());
-            assertNull(testUser.getDeletedAt());
-            assertNull(testUser.getPermanentDeleteScheduledAt());
+            assertThat(testUser.isDeleted()).isFalse();
+            assertThat(testUser.getDeletedAt()).isNull();
+            assertThat(testUser.getPermanentDeleteScheduledAt()).isNull();
             assertThat(firstParticipant.calls())
                     .containsExactly(new Call(firstParticipant, Event.REACTIVATED, testUser.getId(), null));
             assertThat(secondParticipant.calls())
@@ -180,18 +178,16 @@ class UserAccountLifecycleServiceTest {
             when(userRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
             // Act & Assert
-            UserNotFoundException exception = assertThrows(
-                    UserNotFoundException.class,
-                    () -> lifecycleService.reactivateAccount(nonExistentId)
-            );
-
-            assertEquals(nonExistentId, exception.getUserId());
+            assertRejected(() -> lifecycleService.reactivateAccount(nonExistentId))
+                    .withCode("USER_NOT_FOUND")
+                    .isInstanceOfSatisfying(UserNotFoundException.class,
+                            exception -> assertThat(exception.getUserId()).isEqualTo(nonExistentId));
         }
 
         @Test
         void reactivateAccount_WhenNonDeletedUser_NoOp() {
             // Arrange - user is not deleted
-            assertFalse(testUser.isDeleted());
+            assertThat(testUser.isDeleted()).isFalse();
 
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
 
@@ -199,7 +195,7 @@ class UserAccountLifecycleServiceTest {
             lifecycleService.reactivateAccount(testUser.getId());
 
             // Assert
-            assertFalse(testUser.isDeleted());
+            assertThat(testUser.isDeleted()).isFalse();
             assertThat(journal).isEmpty();
         }
     }
@@ -234,7 +230,7 @@ class UserAccountLifecycleServiceTest {
             sessionEndHandler.failNext(RecordingSessionEndHandler.Operation.END_ALL_SESSIONS, unreachable);
             journalUserRowDeletion();
 
-            assertTrue(lifecycleService.performHardDelete(testUser.getId(), Instant.now()));
+            assertThat(lifecycleService.performHardDelete(testUser.getId(), Instant.now())).isTrue();
 
             Long sentinel = UserAccountLifecycleService.SENTINEL_USER_ID;
             assertThat(sessionEndHandler.calls()).containsExactly(new RecordingSessionEndHandler.Failed(
@@ -252,7 +248,7 @@ class UserAccountLifecycleServiceTest {
 
             boolean deleted = lifecycleService.performHardDelete(testUser.getId(), Instant.now());
 
-            assertFalse(deleted);
+            assertThat(deleted).isFalse();
             verify(userRepository, never()).delete(any(User.class));
             assertThat(journal).isEmpty();
         }

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
@@ -122,8 +122,9 @@ class RateLimitServiceIT {
 
             // Should not throw for 5 requests (capacity = 5)
             for (int i = 0; i < 5; i++) {
-                assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, endpoint),
-                        "Request " + (i + 1) + " should succeed");
+                assertThatCode(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, endpoint))
+                        .as("request %d", i + 1)
+                        .doesNotThrowAnyException();
             }
         }
 
@@ -133,8 +134,9 @@ class RateLimitServiceIT {
 
             // Should not throw for 10 requests (CRUD capacity = 10)
             for (int i = 0; i < 10; i++) {
-                assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, "planners"),
-                        "CRUD request " + (i + 1) + " should succeed");
+                assertThatCode(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, "planners"))
+                        .as("request %d", i + 1)
+                        .doesNotThrowAnyException();
             }
         }
 
@@ -144,8 +146,9 @@ class RateLimitServiceIT {
 
             // Should not throw for 2 requests (SSE capacity = 2)
             for (int i = 0; i < 2; i++) {
-                assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.SSE, userId),
-                        "SSE request " + (i + 1) + " should succeed");
+                assertThatCode(() -> rateLimitService.check(RateLimitPolicy.SSE, userId))
+                        .as("request %d", i + 1)
+                        .doesNotThrowAnyException();
             }
         }
     }
@@ -165,15 +168,13 @@ class RateLimitServiceIT {
             }
 
             // 6th request should fail
-            RateLimitExceededException exception = assertThrows(
-                    RateLimitExceededException.class,
-                    () -> rateLimitService.check(RateLimitPolicy.CRUD, userId, endpoint)
-            );
-
-            assertEquals(userId, exception.getUserId());
-            assertEquals(endpoint, exception.getEndpoint());
-            assertTrue(exception.getMessage().contains(userId.toString()));
-            assertTrue(exception.getMessage().contains(endpoint));
+            assertRejected(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, endpoint))
+                    .withCode("RATE_LIMIT_EXCEEDED")
+                    .isInstanceOfSatisfying(RateLimitExceededException.class, exception -> {
+                        assertThat(exception.getUserId()).isEqualTo(userId);
+                        assertThat(exception.getEndpoint()).isEqualTo(endpoint);
+                        assertThat(exception.getMessage()).contains(userId.toString(), endpoint);
+                    });
         }
 
         @Test
@@ -186,13 +187,12 @@ class RateLimitServiceIT {
             }
 
             // 11th request should fail
-            RateLimitExceededException exception = assertThrows(
-                    RateLimitExceededException.class,
-                    () -> rateLimitService.check(RateLimitPolicy.CRUD, userId, "planners")
-            );
-
-            assertEquals(userId, exception.getUserId());
-            assertEquals("planners", exception.getEndpoint());
+            assertRejected(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, "planners"))
+                    .withCode("RATE_LIMIT_EXCEEDED")
+                    .isInstanceOfSatisfying(RateLimitExceededException.class, exception -> {
+                        assertThat(exception.getUserId()).isEqualTo(userId);
+                        assertThat(exception.getEndpoint()).isEqualTo("planners");
+                    });
         }
 
         @Test
@@ -205,13 +205,12 @@ class RateLimitServiceIT {
             }
 
             // 3rd request should fail
-            RateLimitExceededException exception = assertThrows(
-                    RateLimitExceededException.class,
-                    () -> rateLimitService.check(RateLimitPolicy.SSE, userId)
-            );
-
-            assertEquals(userId, exception.getUserId());
-            assertEquals("sse", exception.getEndpoint());
+            assertRejected(() -> rateLimitService.check(RateLimitPolicy.SSE, userId))
+                    .withCode("RATE_LIMIT_EXCEEDED")
+                    .isInstanceOfSatisfying(RateLimitExceededException.class, exception -> {
+                        assertThat(exception.getUserId()).isEqualTo(userId);
+                        assertThat(exception.getEndpoint()).isEqualTo("sse");
+                    });
         }
     }
 
@@ -229,7 +228,8 @@ class RateLimitServiceIT {
             }
 
             // Should still allow requests to endpoint2 (separate bucket)
-            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, "endpoint2"));
+            assertThatCode(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, "endpoint2"))
+                    .doesNotThrowAnyException();
 
             // endpoint1 should still be exhausted
             assertRejected(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, "endpoint1"))
@@ -246,7 +246,8 @@ class RateLimitServiceIT {
             }
 
             // Should still allow requests to different endpoint
-            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, "other-resource"));
+            assertThatCode(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, "other-resource"))
+                    .doesNotThrowAnyException();
         }
     }
 
@@ -266,7 +267,8 @@ class RateLimitServiceIT {
             }
 
             // User2 should still be able to make requests (separate bucket)
-            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.CRUD, user2, endpoint));
+            assertThatCode(() -> rateLimitService.check(RateLimitPolicy.CRUD, user2, endpoint))
+                    .doesNotThrowAnyException();
 
             // User1 should still be exhausted
             assertRejected(() -> rateLimitService.check(RateLimitPolicy.CRUD, user1, endpoint))
@@ -284,7 +286,8 @@ class RateLimitServiceIT {
             }
 
             // User2 should still be able to make requests
-            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.CRUD, user2, "planners"));
+            assertThatCode(() -> rateLimitService.check(RateLimitPolicy.CRUD, user2, "planners"))
+                    .doesNotThrowAnyException();
 
             // User1 should still be exhausted
             assertRejected(() -> rateLimitService.check(RateLimitPolicy.CRUD, user1, "planners"))
@@ -302,7 +305,7 @@ class RateLimitServiceIT {
             }
 
             // User2 should still be able to connect
-            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.SSE, user2));
+            assertThatCode(() -> rateLimitService.check(RateLimitPolicy.SSE, user2)).doesNotThrowAnyException();
 
             // User1 should still be exhausted
             assertRejected(() -> rateLimitService.check(RateLimitPolicy.SSE, user1)).withCode("RATE_LIMIT_EXCEEDED");
@@ -360,7 +363,7 @@ class RateLimitServiceIT {
             RateLimitProperties.BucketConfig config = new RateLimitProperties.BucketConfig();
             config.setCapacity(100);
 
-            assertEquals(100, config.getCapacity());
+            assertThat(config.getCapacity()).isEqualTo(100);
         }
 
         @Test
@@ -368,7 +371,7 @@ class RateLimitServiceIT {
             RateLimitProperties.BucketConfig config = new RateLimitProperties.BucketConfig();
             config.setRefillTokens(50);
 
-            assertEquals(50, config.getRefillTokens());
+            assertThat(config.getRefillTokens()).isEqualTo(50);
         }
 
         @Test
@@ -376,7 +379,7 @@ class RateLimitServiceIT {
             RateLimitProperties.BucketConfig config = new RateLimitProperties.BucketConfig();
             config.setRefillDurationSeconds(120);
 
-            assertEquals(120, config.getRefillDurationSeconds());
+            assertThat(config.getRefillDurationSeconds()).isEqualTo(120);
         }
     }
 
@@ -401,7 +404,8 @@ class RateLimitServiceIT {
             }
 
             // Device identifier should still work (separate bucket)
-            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.AUTH, deviceIdentifier));
+            assertThatCode(() -> rateLimitService.check(RateLimitPolicy.AUTH, deviceIdentifier))
+                    .doesNotThrowAnyException();
 
             // IP identifier should still be exhausted
             assertRejected(() -> rateLimitService.check(RateLimitPolicy.AUTH, ipIdentifier))
@@ -426,7 +430,8 @@ class RateLimitServiceIT {
                     .withCode("RATE_LIMIT_EXCEEDED");
 
             // device:192.168.1.1 should have separate bucket
-            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.AUTH, "device:192.168.1.1"));
+            assertThatCode(() -> rateLimitService.check(RateLimitPolicy.AUTH, "device:192.168.1.1"))
+                    .doesNotThrowAnyException();
         }
 
         @Test
@@ -459,7 +464,8 @@ class RateLimitServiceIT {
             String unknownIdentifier = "device:unknown";
 
             // Should work for first request
-            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.AUTH, unknownIdentifier));
+            assertThatCode(() -> rateLimitService.check(RateLimitPolicy.AUTH, unknownIdentifier))
+                    .doesNotThrowAnyException();
 
             // Should fail for second (bucket exhausted)
             assertRejected(() -> rateLimitService.check(RateLimitPolicy.AUTH, unknownIdentifier))
@@ -482,7 +488,8 @@ class RateLimitServiceIT {
             String endpoint = "single-test";
 
             // First request should succeed
-            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, endpoint));
+            assertThatCode(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, endpoint))
+                    .doesNotThrowAnyException();
 
             // Second request should fail
             assertRejected(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, endpoint))
@@ -523,7 +530,8 @@ class RateLimitServiceIT {
 
             // Use 2 more tokens (should work, total 5)
             for (int i = 0; i < 2; i++) {
-                assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, endpoint));
+                assertThatCode(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, endpoint))
+                        .doesNotThrowAnyException();
             }
 
             // 6th should fail

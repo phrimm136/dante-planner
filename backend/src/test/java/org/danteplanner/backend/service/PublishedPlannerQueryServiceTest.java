@@ -50,7 +50,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.atMost;
@@ -168,8 +168,8 @@ class PublishedPlannerQueryServiceTest {
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
                     new CatalogQuery(false, null, null, null, null), pageable, null);
 
-            assertEquals(2, result.getTotalElements());
-            assertEquals(2, result.getContent().size());
+            assertThat(result.getTotalElements()).isEqualTo(2);
+            assertThat(result.getContent().size()).isEqualTo(2);
         }
 
         @Test
@@ -181,11 +181,11 @@ class PublishedPlannerQueryServiceTest {
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
                     new CatalogQuery(false, "5F", null, null, null), pageable, null);
 
-            assertEquals(1, result.getTotalElements());
+            assertThat(result.getTotalElements()).isEqualTo(1);
             PublicPlannerResponse card = result.getContent().get(0);
-            assertEquals(inCategory.getPlannerId(), card.id());
-            assertEquals("F5 Planner", card.title());
-            assertEquals("5F", card.category());
+            assertThat(card.id()).isEqualTo(inCategory.getPlannerId());
+            assertThat(card.title()).isEqualTo("F5 Planner");
+            assertThat(card.category()).isEqualTo("5F");
         }
 
         @Test
@@ -196,8 +196,8 @@ class PublishedPlannerQueryServiceTest {
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
                     new CatalogQuery(false, null, null, null, null), pageable, null);
 
-            assertEquals(0, result.getTotalElements());
-            assertTrue(result.getContent().isEmpty());
+            assertThat(result.getTotalElements()).isEqualTo(0);
+            assertThat(result.getContent()).isEmpty();
         }
 
         @Test
@@ -212,12 +212,12 @@ class PublishedPlannerQueryServiceTest {
                     new CatalogQuery(false, null, null, null, null), pageable, null)
                     .getContent().get(0);
 
-            assertEquals(0, card.upvotes());
-            assertEquals(0, card.viewCount());
-            assertEquals(0L, card.commentCount());
-            assertNull(card.authorUsernameEpithet());
-            assertNull(card.authorUsernameSuffix());
-            assertNull(card.createdAt());
+            assertThat(card.upvotes()).isEqualTo(0);
+            assertThat(card.viewCount()).isEqualTo(0);
+            assertThat(card.commentCount()).isEqualTo(0L);
+            assertThat(card.authorUsernameEpithet()).isNull();
+            assertThat(card.authorUsernameSuffix()).isNull();
+            assertThat(card.createdAt()).isNull();
         }
     }
 
@@ -232,7 +232,7 @@ class PublishedPlannerQueryServiceTest {
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
                     new CatalogQuery(true, null, null, null, null), pageable, null);
 
-            assertEquals(2, result.getTotalElements());
+            assertThat(result.getTotalElements()).isEqualTo(2);
         }
 
         @Test
@@ -244,10 +244,10 @@ class PublishedPlannerQueryServiceTest {
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
                     new CatalogQuery(true, "10F", null, null, null), pageable, null);
 
-            assertEquals(1, result.getTotalElements());
+            assertThat(result.getTotalElements()).isEqualTo(1);
             PublicPlannerResponse card = result.getContent().get(0);
-            assertEquals(inCategory.getPlannerId(), card.id());
-            assertEquals("F10 Planner", card.title());
+            assertThat(card.id()).isEqualTo(inCategory.getPlannerId());
+            assertThat(card.title()).isEqualTo("F10 Planner");
         }
 
         @Test
@@ -258,7 +258,7 @@ class PublishedPlannerQueryServiceTest {
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
                     new CatalogQuery(true, null, null, null, null), pageable, null);
 
-            assertTrue(result.getContent().isEmpty());
+            assertThat(result.getContent()).isEmpty();
         }
     }
 
@@ -342,11 +342,12 @@ class PublishedPlannerQueryServiceTest {
                     publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT);
 
             // Assert
-            assertEquals(List.of(plannerId), bufferedViews().stream().map(PlannerViewId::getPlannerId).toList());
+            assertThat(bufferedViews().stream().map(PlannerViewId::getPlannerId).toList())
+                    .isEqualTo(List.of(plannerId));
             verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
-            assertEquals(10, result.viewCount());
-            assertEquals(testUser.getUsernameEpithet(), result.authorUsernameEpithet());
-            assertEquals(testUser.getUsernameSuffix(), result.authorUsernameSuffix());
+            assertThat(result.viewCount()).isEqualTo(10);
+            assertThat(result.authorUsernameEpithet()).isEqualTo(testUser.getUsernameEpithet());
+            assertThat(result.authorUsernameSuffix()).isEqualTo(testUser.getUsernameSuffix());
         }
 
         @Test
@@ -361,14 +362,15 @@ class PublishedPlannerQueryServiceTest {
                     publishedQueryService.getPublishedPlanner(plannerId, testUser.getId(), IP_ADDRESS, USER_AGENT);
 
             // Assert
-            assertEquals(List.of(plannerId), bufferedViews().stream().map(PlannerViewId::getPlannerId).toList());
+            assertThat(bufferedViews().stream().map(PlannerViewId::getPlannerId).toList())
+                    .isEqualTo(List.of(plannerId));
             verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
-            assertEquals(10, result.viewCount());
-            assertTrue(result.hasUpvoted());
-            assertTrue(result.isSubscribed());
-            assertFalse(result.hasReported());
-            assertEquals(testUser.getUsernameEpithet(), result.authorUsernameEpithet());
-            assertEquals(testUser.getUsernameSuffix(), result.authorUsernameSuffix());
+            assertThat(result.viewCount()).isEqualTo(10);
+            assertThat(result.hasUpvoted()).isTrue();
+            assertThat(result.isSubscribed()).isTrue();
+            assertThat(result.hasReported()).isFalse();
+            assertThat(result.authorUsernameEpithet()).isEqualTo(testUser.getUsernameEpithet());
+            assertThat(result.authorUsernameSuffix()).isEqualTo(testUser.getUsernameSuffix());
         }
 
         @Test
@@ -382,7 +384,7 @@ class PublishedPlannerQueryServiceTest {
             assertRejected(() -> publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT))
                     .withCode("PLANNER_NOT_FOUND");
 
-            assertTrue(bufferedViews().isEmpty());
+            assertThat(bufferedViews()).isEmpty();
             verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
         }
 
@@ -404,14 +406,14 @@ class PublishedPlannerQueryServiceTest {
             mockNewView(plannerId);
 
             // Act
-            PublishedPlannerDetailResponse result = assertDoesNotThrow(() ->
-                    publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, null));
+            PublishedPlannerDetailResponse result =
+                    publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, null);
 
             // Assert
-            assertEquals(plannerId, result.id());
-            assertEquals(10, result.viewCount());
-            assertNotNull(result.content());
-            assertFalse(result.hasUpvoted());
+            assertThat(result.id()).isEqualTo(plannerId);
+            assertThat(result.viewCount()).isEqualTo(10);
+            assertThat(result.content()).isNotNull();
+            assertThat(result.hasUpvoted()).isFalse();
         }
 
         @Test
@@ -429,8 +431,8 @@ class PublishedPlannerQueryServiceTest {
 
             // Assert - hashes must differ
             List<PlannerViewId> views = bufferedViews();
-            assertEquals(2, views.size());
-            assertNotEquals(views.get(0).getViewerHash(), views.get(1).getViewerHash());
+            assertThat(views.size()).isEqualTo(2);
+            assertThat(views.get(1).getViewerHash()).isNotEqualTo(views.get(0).getViewerHash());
         }
     }
 
@@ -458,20 +460,20 @@ class PublishedPlannerQueryServiceTest {
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
                     new CatalogQuery(false, null, null, null, null), pageable, null);
 
-            assertEquals(1, result.getTotalElements());
+            assertThat(result.getTotalElements()).isEqualTo(1);
             PublicPlannerResponse card = result.getContent().get(0);
-            assertEquals(plannerId, card.id());
-            assertEquals("Test Planner", card.title());
-            assertEquals("5F", card.category());
-            assertEquals(PlannerType.MIRROR_DUNGEON, card.plannerType());
-            assertEquals(row.getFirstPublishedAt(), card.firstPublishedAt());
-            assertEquals("W_CORP", card.authorUsernameEpithet());
-            assertEquals("test1", card.authorUsernameSuffix());
-            assertEquals(createdAt, card.createdAt());
-            assertEquals(42, card.viewCount());
-            assertEquals(7, card.upvotes());
-            assertEquals(3L, card.commentCount());
-            assertFalse(card.hasUpvoted());
+            assertThat(card.id()).isEqualTo(plannerId);
+            assertThat(card.title()).isEqualTo("Test Planner");
+            assertThat(card.category()).isEqualTo("5F");
+            assertThat(card.plannerType()).isEqualTo(PlannerType.MIRROR_DUNGEON);
+            assertThat(card.firstPublishedAt()).isEqualTo(row.getFirstPublishedAt());
+            assertThat(card.authorUsernameEpithet()).isEqualTo("W_CORP");
+            assertThat(card.authorUsernameSuffix()).isEqualTo("test1");
+            assertThat(card.createdAt()).isEqualTo(createdAt);
+            assertThat(card.viewCount()).isEqualTo(42);
+            assertThat(card.upvotes()).isEqualTo(7);
+            assertThat(card.commentCount()).isEqualTo(3L);
+            assertThat(card.hasUpvoted()).isFalse();
         }
     }
 
@@ -492,11 +494,11 @@ class PublishedPlannerQueryServiceTest {
                     new CatalogQuery(false, null, null, null, null), pageable, null);
 
             // Assert
-            assertEquals(1, result.getTotalElements());
+            assertThat(result.getTotalElements()).isEqualTo(1);
             PublicPlannerResponse card = result.getContent().get(0);
-            assertEquals(row.getPlannerId(), card.id());
-            assertEquals("Test Planner", card.title());
-            assertFalse(card.hasUpvoted());
+            assertThat(card.id()).isEqualTo(row.getPlannerId());
+            assertThat(card.title()).isEqualTo("Test Planner");
+            assertThat(card.hasUpvoted()).isFalse();
         }
 
         @Test
@@ -505,12 +507,11 @@ class PublishedPlannerQueryServiceTest {
             CatalogQuery query = new CatalogQuery(false, null, null, null,
                     Map.of(ContentEntityType.THEME_PACK, List.of("not-a-number")));
 
-            // Act
-            PlannerValidationException thrown = assertThrows(PlannerValidationException.class,
-                    () -> publishedQueryService.searchPlanners(query, PageRequest.of(0, 10), null));
-
-            // Assert
-            assertEquals("INVALID_FILTER_ID", thrown.getOriginalCode());
+            // Act & Assert
+            assertRejected(() -> publishedQueryService.searchPlanners(query, PageRequest.of(0, 10), null))
+                    .withViolation("INVALID_FILTER_ID")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            thrown -> assertThat(thrown.getOriginalCode()).isEqualTo("INVALID_FILTER_ID"));
         }
     }
 }

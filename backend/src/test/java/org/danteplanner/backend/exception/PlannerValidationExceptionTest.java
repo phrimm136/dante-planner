@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class PlannerValidationExceptionTest {
 
@@ -21,9 +20,9 @@ class PlannerValidationExceptionTest {
     void singleErrorConstructor_WhenUsed_HasEmptySubErrors() {
         PlannerValidationException ex = new PlannerValidationException("MY_CODE", "My message");
 
-        assertEquals("MY_CODE", ex.getOriginalCode());
-        assertEquals("My message", ex.getMessage());
-        assertTrue(ex.getSubErrors().isEmpty());
+        assertThat(ex.getOriginalCode()).isEqualTo("MY_CODE");
+        assertThat(ex.getMessage()).isEqualTo("My message");
+        assertThat(ex.getSubErrors()).isEmpty();
     }
 
     @Test
@@ -34,12 +33,13 @@ class PlannerValidationExceptionTest {
 
         PlannerValidationException ex = PlannerValidationException.rejecting(rejected, CONTENT);
 
-        assertEquals("VALIDATION_ERROR", ex.getOriginalCode());
+        assertThat(ex.getOriginalCode()).isEqualTo("VALIDATION_ERROR");
         assertThat(ex.getSubErrors()).containsExactly(
                 new ValidationError("MISSING_REQUIRED_FIELD", "equipment", "First error"),
                 new ValidationError("INVALID_FIELD_TYPE", "equipment[05]", "Second error"));
-        assertEquals("[MISSING_REQUIRED_FIELD] First error; [INVALID_FIELD_TYPE] Second error", ex.getMessage());
-        assertEquals(CONTENT, ex.getFailedContent());
+        assertThat(ex.getMessage())
+                .isEqualTo("[MISSING_REQUIRED_FIELD] First error; [INVALID_FIELD_TYPE] Second error");
+        assertThat(ex.getFailedContent()).isEqualTo(CONTENT);
     }
 
     @Test
@@ -47,7 +47,7 @@ class PlannerValidationExceptionTest {
         PlannerValidationException ex = PlannerValidationException.rejecting(new ContentVerdict.Rejected(List.of(
                 new Violation(ErrorCode.UNKNOWN_EGO, ContentPath.of("equipment"), "Only message"))), CONTENT);
 
-        assertEquals("VALIDATION_ERROR", ex.getOriginalCode());
+        assertThat(ex.getOriginalCode()).isEqualTo("VALIDATION_ERROR");
         assertThat(ex.getSubErrors()).containsExactly(new ValidationError("UNKNOWN_EGO", "equipment", "Only message"));
     }
 
@@ -56,12 +56,12 @@ class PlannerValidationExceptionTest {
         PlannerValidationException ex = PlannerValidationException.refusing(new ContentVerdict.Refused(
                 new Violation(ErrorCode.EMPTY_CONTENT, ContentPath.root(), "Content is empty or null")), CONTENT);
 
-        assertEquals("EMPTY_CONTENT", ex.getOriginalCode());
-        assertEquals("Content is empty or null", ex.getMessage());
-        assertEquals("EMPTY_CONTENT", ex.getBody().getProperties().get("code"));
+        assertThat(ex.getOriginalCode()).isEqualTo("EMPTY_CONTENT");
+        assertThat(ex.getMessage()).isEqualTo("Content is empty or null");
+        assertThat(ex.getBody().getProperties().get("code")).isEqualTo("EMPTY_CONTENT");
         assertThat(ex.getSubErrors()).containsExactly(
                 new ValidationError("EMPTY_CONTENT", "", "Content is empty or null"));
-        assertEquals(CONTENT, ex.getFailedContent());
+        assertThat(ex.getFailedContent()).isEqualTo(CONTENT);
     }
 
     @Test
@@ -69,9 +69,9 @@ class PlannerValidationExceptionTest {
         PlannerValidationException ex = PlannerValidationException.refusing(new ContentVerdict.Refused(
                 new Violation(ErrorCode.UNKNOWN_FIELD, ContentPath.root(), "Unknown fields: [theme]")), CONTENT);
 
-        assertEquals("UNKNOWN_FIELD", ex.getOriginalCode());
-        assertEquals("VALIDATION_ERROR", ex.getBody().getProperties().get("code"));
-        assertEquals("Invalid planner content structure", ex.getBody().getDetail());
+        assertThat(ex.getOriginalCode()).isEqualTo("UNKNOWN_FIELD");
+        assertThat(ex.getBody().getProperties().get("code")).isEqualTo("VALIDATION_ERROR");
+        assertThat(ex.getBody().getDetail()).isEqualTo("Invalid planner content structure");
     }
 
     @Test
@@ -82,10 +82,11 @@ class PlannerValidationExceptionTest {
 
         assertThat(ex.getSubErrors()).containsExactly(
                 new ValidationError("SIZE_EXCEEDED", "sectionNotes[floor1]", "Note 'floor1' size 1100 exceeds limit 1024"));
-        assertEquals(400, ex.getBody().getStatus());
-        assertEquals(java.util.Map.of("code", "SIZE_EXCEEDED", "message", "Note 'floor1' size 1100 exceeds limit 1024"),
-                ex.getBody().getProperties());
-        assertEquals("Note 'floor1' size 1100 exceeds limit 1024", ex.getBody().getDetail());
+        assertThat(ex.getBody().getStatus()).isEqualTo(400);
+        assertThat(ex.getBody().getProperties())
+                .isEqualTo(java.util.Map.of(
+                        "code", "SIZE_EXCEEDED", "message", "Note 'floor1' size 1100 exceeds limit 1024"));
+        assertThat(ex.getBody().getDetail()).isEqualTo("Note 'floor1' size 1100 exceeds limit 1024");
     }
 
     @Test
@@ -97,10 +98,10 @@ class PlannerValidationExceptionTest {
                         "selectedKeywords", "Nope"))),
                 "{\"selectedKeywords\":[\"Sinking\",\"Zilch\",\"Nope\",\"AccelBullet\"]}");
 
-        assertEquals("UNKNOWN_KEYWORD", ex.getOriginalCode());
-        assertEquals("UNKNOWN_KEYWORD", ex.getBody().getProperties().get("code"));
-        assertEquals("Unknown keywords: [Nope, Zilch]", ex.getBody().getDetail());
-        assertFalse(ex.reportable());
+        assertThat(ex.getOriginalCode()).isEqualTo("UNKNOWN_KEYWORD");
+        assertThat(ex.getBody().getProperties().get("code")).isEqualTo("UNKNOWN_KEYWORD");
+        assertThat(ex.getBody().getDetail()).isEqualTo("Unknown keywords: [Nope, Zilch]");
+        assertThat(ex.reportable()).isFalse();
         assertThat(ex.getSubErrors()).extracting(ValidationError::path)
                 .containsExactly("selectedKeywords[1]", "selectedKeywords[2]");
     }
@@ -113,7 +114,7 @@ class PlannerValidationExceptionTest {
                         "selectedKeywords", "Nope"))),
                 "{\"selectedKeywords\":[\"Nope\"]}");
 
-        assertEquals("VALIDATION_ERROR", ex.getBody().getProperties().get("code"));
-        assertEquals("Invalid planner content structure", ex.getBody().getDetail());
+        assertThat(ex.getBody().getProperties().get("code")).isEqualTo("VALIDATION_ERROR");
+        assertThat(ex.getBody().getDetail()).isEqualTo("Invalid planner content structure");
     }
 }

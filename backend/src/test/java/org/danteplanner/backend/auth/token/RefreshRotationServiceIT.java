@@ -32,8 +32,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.danteplanner.backend.user.api.UserRole;
 
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link RefreshRotationService}.
@@ -153,14 +152,14 @@ class RefreshRotationServiceIT {
 
             RotationResult result = rotationService.rotate(r1);
 
-            assertInstanceOf(RotationResult.Rotated.class, result);
+            assertThat(result).isInstanceOf(RotationResult.Rotated.class);
             RotationResult.Rotated rotated = (RotationResult.Rotated) result;
 
-            assertEquals(RotationState.PENDING, stateIn(familyId, r1Jti));
-            assertEquals(RotationState.UNUSED_LATEST, stateIn(familyId, rotated.claims().jti()));
-            assertEquals(familyId, rotated.claims().familyId());
-            assertEquals(r1Jti, rotated.claims().parentJti());
-            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_ROTATED));
+            assertThat(stateIn(familyId, r1Jti)).isEqualTo(RotationState.PENDING);
+            assertThat(stateIn(familyId, rotated.claims().jti())).isEqualTo(RotationState.UNUSED_LATEST);
+            assertThat(rotated.claims().familyId()).isEqualTo(familyId);
+            assertThat(rotated.claims().parentJti()).isEqualTo(r1Jti);
+            assertThat(outcomeCount(RefreshRotationService.OUTCOME_ROTATED)).isEqualTo(1.0);
         }
 
         @Test
@@ -172,15 +171,15 @@ class RefreshRotationServiceIT {
             String r2 = first.newRefreshJwt();
             String r2Jti = first.claims().jti();
             String familyKey = RefreshRotationService.familyKey(first.claims().familyId());
-            assertTrue(sharedTemplate.opsForHash().hasKey(familyKey, "succjwt:" + r1Jti));
+            assertThat(sharedTemplate.opsForHash().hasKey(familyKey, "succjwt:" + r1Jti)).isTrue();
 
             RotationResult.Rotated second = (RotationResult.Rotated) rotationService.rotate(r2);
 
-            assertEquals(RotationState.RETIRED, stateIn(first.claims().familyId(), r1Jti));
-            assertEquals(RotationState.PENDING, stateIn(first.claims().familyId(), r2Jti));
-            assertEquals(r2Jti, second.claims().parentJti());
-            assertEquals(2.0, outcomeCount(RefreshRotationService.OUTCOME_ROTATED));
-            assertFalse(sharedTemplate.opsForHash().hasKey(familyKey, "succjwt:" + r1Jti));
+            assertThat(stateIn(first.claims().familyId(), r1Jti)).isEqualTo(RotationState.RETIRED);
+            assertThat(stateIn(first.claims().familyId(), r2Jti)).isEqualTo(RotationState.PENDING);
+            assertThat(second.claims().parentJti()).isEqualTo(r2Jti);
+            assertThat(outcomeCount(RefreshRotationService.OUTCOME_ROTATED)).isEqualTo(2.0);
+            assertThat(sharedTemplate.opsForHash().hasKey(familyKey, "succjwt:" + r1Jti)).isFalse();
         }
 
         @Test
@@ -191,8 +190,7 @@ class RefreshRotationServiceIT {
 
             // The caller writes this value as the refresh cookie, so it has to be the token the
             // reported claims belong to.
-            assertEquals(rotated.claims().jti(),
-                    tokenService.validateToken(rotated.newRefreshJwt()).jti());
+            assertThat(tokenService.validateToken(rotated.newRefreshJwt()).jti()).isEqualTo(rotated.claims().jti());
         }
     }
 
@@ -208,12 +206,12 @@ class RefreshRotationServiceIT {
 
             RotationResult.Rotated retry = (RotationResult.Rotated) rotationService.rotate(r1);
 
-            assertEquals(firstAttempt.claims().jti(), retry.claims().jti());
-            assertEquals(firstAttempt.newRefreshJwt(), retry.newRefreshJwt());
-            assertEquals(RotationState.UNUSED_LATEST, stateIn(familyId, retry.claims().jti()));
-            assertEquals(RotationState.PENDING, stateIn(familyId, tokenService.validateToken(r1).jti()));
-            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_ROTATED));
-            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_RETRY_REUSED));
+            assertThat(retry.claims().jti()).isEqualTo(firstAttempt.claims().jti());
+            assertThat(retry.newRefreshJwt()).isEqualTo(firstAttempt.newRefreshJwt());
+            assertThat(stateIn(familyId, retry.claims().jti())).isEqualTo(RotationState.UNUSED_LATEST);
+            assertThat(stateIn(familyId, tokenService.validateToken(r1).jti())).isEqualTo(RotationState.PENDING);
+            assertThat(outcomeCount(RefreshRotationService.OUTCOME_ROTATED)).isEqualTo(1.0);
+            assertThat(outcomeCount(RefreshRotationService.OUTCOME_RETRY_REUSED)).isEqualTo(1.0);
         }
 
         @Test
@@ -228,12 +226,12 @@ class RefreshRotationServiceIT {
             RotationResult.Rotated retry = (RotationResult.Rotated) noReuse.rotate(r1);
             String r2Retry = retry.claims().jti();
 
-            assertNotEquals(r2First, r2Retry);
-            assertEquals(RotationState.SUPERSEDED, stateIn(familyId, r2First));
-            assertEquals(RotationState.UNUSED_LATEST, stateIn(familyId, r2Retry));
-            assertEquals(RotationState.PENDING, stateIn(familyId, tokenService.validateToken(r1).jti()));
-            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_ROTATED));
-            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_RETRY_SUPERSEDED));
+            assertThat(r2Retry).isNotEqualTo(r2First);
+            assertThat(stateIn(familyId, r2First)).isEqualTo(RotationState.SUPERSEDED);
+            assertThat(stateIn(familyId, r2Retry)).isEqualTo(RotationState.UNUSED_LATEST);
+            assertThat(stateIn(familyId, tokenService.validateToken(r1).jti())).isEqualTo(RotationState.PENDING);
+            assertThat(outcomeCount(RefreshRotationService.OUTCOME_ROTATED)).isEqualTo(1.0);
+            assertThat(outcomeCount(RefreshRotationService.OUTCOME_RETRY_SUPERSEDED)).isEqualTo(1.0);
         }
 
         @Test
@@ -244,7 +242,7 @@ class RefreshRotationServiceIT {
 
             RotationResult result = rotationService.rotate(retry.newRefreshJwt());
 
-            assertInstanceOf(RotationResult.Rotated.class, result);
+            assertThat(result).isInstanceOf(RotationResult.Rotated.class);
         }
     }
 
@@ -261,10 +259,10 @@ class RefreshRotationServiceIT {
 
             RotationResult result = rotationService.rotate(r1);
 
-            assertInstanceOf(RotationResult.Revoked.class, result);
-            assertEquals(familyId, ((RotationResult.Revoked) result).familyId());
-            assertTrue(rotationService.isFamilyRevoked(familyId));
-            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_THEFT_REVOKED));
+            assertThat(result).isInstanceOf(RotationResult.Revoked.class);
+            assertThat(((RotationResult.Revoked) result).familyId()).isEqualTo(familyId);
+            assertThat(rotationService.isFamilyRevoked(familyId)).isTrue();
+            assertThat(outcomeCount(RefreshRotationService.OUTCOME_THEFT_REVOKED)).isEqualTo(1.0);
         }
 
         @Test
@@ -278,9 +276,9 @@ class RefreshRotationServiceIT {
 
             RotationResult result = rotationService.rotate(r1);
 
-            assertInstanceOf(RotationResult.Revoked.class, result);
-            assertTrue(rotationService.isFamilyRevoked(claims.familyId()));
-            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_THEFT_REVOKED));
+            assertThat(result).isInstanceOf(RotationResult.Revoked.class);
+            assertThat(rotationService.isFamilyRevoked(claims.familyId())).isTrue();
+            assertThat(outcomeCount(RefreshRotationService.OUTCOME_THEFT_REVOKED)).isEqualTo(1.0);
         }
 
         @Test
@@ -295,9 +293,9 @@ class RefreshRotationServiceIT {
 
             RotationResult result = noReuse.rotate(r2Superseded);
 
-            assertInstanceOf(RotationResult.Revoked.class, result);
-            assertTrue(noReuse.isFamilyRevoked(familyId));
-            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_THEFT_REVOKED));
+            assertThat(result).isInstanceOf(RotationResult.Revoked.class);
+            assertThat(noReuse.isFamilyRevoked(familyId)).isTrue();
+            assertThat(outcomeCount(RefreshRotationService.OUTCOME_THEFT_REVOKED)).isEqualTo(1.0);
         }
     }
 
@@ -315,20 +313,19 @@ class RefreshRotationServiceIT {
 
             RotationResult result = rotationService.rotate(r2);
 
-            assertInstanceOf(RotationResult.Rejected.class, result);
-            assertEquals(RotationResult.Rejected.Reason.REVOKED_FAMILY,
-                    ((RotationResult.Rejected) result).reason());
-            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_REJECTED_REVOKED_FAMILY));
+            assertThat(result).isInstanceOf(RotationResult.Rejected.class);
+            assertThat(((RotationResult.Rejected) result).reason())
+                    .isEqualTo(RotationResult.Rejected.Reason.REVOKED_FAMILY);
+            assertThat(outcomeCount(RefreshRotationService.OUTCOME_REJECTED_REVOKED_FAMILY)).isEqualTo(1.0);
         }
 
         @Test
         void rotate_WhenInvalidToken_Rejected() {
             RotationResult result = rotationService.rotate("not.a.jwt");
 
-            assertInstanceOf(RotationResult.Rejected.class, result);
-            assertEquals(RotationResult.Rejected.Reason.INVALID,
-                    ((RotationResult.Rejected) result).reason());
-            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_REJECTED_INVALID));
+            assertThat(result).isInstanceOf(RotationResult.Rejected.class);
+            assertThat(((RotationResult.Rejected) result).reason()).isEqualTo(RotationResult.Rejected.Reason.INVALID);
+            assertThat(outcomeCount(RefreshRotationService.OUTCOME_REJECTED_INVALID)).isEqualTo(1.0);
         }
 
         @Test
@@ -337,11 +334,10 @@ class RefreshRotationServiceIT {
 
             RotationResult result = rotationService.rotate(accessToken);
 
-            assertInstanceOf(RotationResult.Rejected.class, result);
-            assertEquals(RotationResult.Rejected.Reason.INVALID,
-                    ((RotationResult.Rejected) result).reason());
-            assertFalse(synthesizedFamilyExists(tokenService.validateToken(accessToken)));
-            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_REJECTED_INVALID));
+            assertThat(result).isInstanceOf(RotationResult.Rejected.class);
+            assertThat(((RotationResult.Rejected) result).reason()).isEqualTo(RotationResult.Rejected.Reason.INVALID);
+            assertThat(synthesizedFamilyExists(tokenService.validateToken(accessToken))).isFalse();
+            assertThat(outcomeCount(RefreshRotationService.OUTCOME_REJECTED_INVALID)).isEqualTo(1.0);
         }
 
         @Test
@@ -353,12 +349,11 @@ class RefreshRotationServiceIT {
 
             RotationResult result = svc.rotate(accessToken);
 
-            assertInstanceOf(RotationResult.Rejected.class, result);
-            assertEquals(RotationResult.Rejected.Reason.INVALID,
-                    ((RotationResult.Rejected) result).reason());
-            assertFalse(synthesizedFamilyExists(tokenService.validateToken(accessToken)));
-            assertEquals(0.0, outcomeCount(RefreshRotationService.OUTCOME_ROTATED));
-            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_REJECTED_INVALID));
+            assertThat(result).isInstanceOf(RotationResult.Rejected.class);
+            assertThat(((RotationResult.Rejected) result).reason()).isEqualTo(RotationResult.Rejected.Reason.INVALID);
+            assertThat(synthesizedFamilyExists(tokenService.validateToken(accessToken))).isFalse();
+            assertThat(outcomeCount(RefreshRotationService.OUTCOME_ROTATED)).isEqualTo(0.0);
+            assertThat(outcomeCount(RefreshRotationService.OUTCOME_REJECTED_INVALID)).isEqualTo(1.0);
         }
     }
 
@@ -382,11 +377,10 @@ class RefreshRotationServiceIT {
 
             RotationResult result = rotationService.rotate(token);
 
-            assertInstanceOf(RotationResult.Rejected.class, result);
-            assertEquals(RotationResult.Rejected.Reason.REVOKED_FAMILY,
-                    ((RotationResult.Rejected) result).reason());
-            assertEquals(1.0,
-                    outcomeCount(RefreshRotationService.OUTCOME_REJECTED_USER_INVALIDATED));
+            assertThat(result).isInstanceOf(RotationResult.Rejected.class);
+            assertThat(((RotationResult.Rejected) result).reason())
+                    .isEqualTo(RotationResult.Rejected.Reason.REVOKED_FAMILY);
+            assertThat(outcomeCount(RefreshRotationService.OUTCOME_REJECTED_USER_INVALIDATED)).isEqualTo(1.0);
         }
 
         @Test
@@ -397,7 +391,7 @@ class RefreshRotationServiceIT {
 
             RotationResult result = rotationService.rotate(token);
 
-            assertInstanceOf(RotationResult.Rotated.class, result);
+            assertThat(result).isInstanceOf(RotationResult.Rotated.class);
         }
 
         @Test
@@ -410,7 +404,7 @@ class RefreshRotationServiceIT {
 
             RotationResult result = rotationService.rotate(first.newRefreshJwt());
 
-            assertInstanceOf(RotationResult.Rejected.class, result);
+            assertThat(result).isInstanceOf(RotationResult.Rejected.class);
         }
     }
 
@@ -446,25 +440,25 @@ class RefreshRotationServiceIT {
                 });
             }
 
-            assertTrue(done.await(10, TimeUnit.SECONDS));
+            assertThat(done.await(10, TimeUnit.SECONDS)).isTrue();
             pool.shutdownNow();
-            assertNull(failure.get(), () -> "thread failed: " + failure.get());
+            assertThat(failure.get()).as(() -> "thread failed: " + failure.get()).isNull();
 
-            assertEquals(2, results.size());
+            assertThat(results.size()).isEqualTo(2);
 
             // Parent ends PENDING pointing at the single shared successor.
-            assertEquals(RotationState.PENDING, stateIn(familyId, r1Jti));
+            assertThat(stateIn(familyId, r1Jti)).isEqualTo(RotationState.PENDING);
 
             String jtiA = results.get(0).claims().jti();
             String jtiB = results.get(1).claims().jti();
-            assertEquals(jtiA, jtiB);
-            assertEquals(results.get(0).newRefreshJwt(), results.get(1).newRefreshJwt());
-            assertEquals(RotationState.UNUSED_LATEST, stateIn(familyId, jtiA));
+            assertThat(jtiB).isEqualTo(jtiA);
+            assertThat(results.get(1).newRefreshJwt()).isEqualTo(results.get(0).newRefreshJwt());
+            assertThat(stateIn(familyId, jtiA)).isEqualTo(RotationState.UNUSED_LATEST);
 
             // One racer rotated, the other replayed the memoized successor; no tombstones.
-            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_ROTATED));
-            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_RETRY_REUSED));
-            assertEquals(2, rotationEntriesIn(familyId));
+            assertThat(outcomeCount(RefreshRotationService.OUTCOME_ROTATED)).isEqualTo(1.0);
+            assertThat(outcomeCount(RefreshRotationService.OUTCOME_RETRY_REUSED)).isEqualTo(1.0);
+            assertThat(rotationEntriesIn(familyId)).isEqualTo(2);
         }
     }
 
@@ -491,9 +485,9 @@ class RefreshRotationServiceIT {
 
             RotationResult replay = instanceB.rotate(r1);
 
-            assertInstanceOf(RotationResult.Revoked.class, replay);
-            assertEquals(familyId, ((RotationResult.Revoked) replay).familyId());
-            assertTrue(instanceB.isFamilyRevoked(familyId));
+            assertThat(replay).isInstanceOf(RotationResult.Revoked.class);
+            assertThat(((RotationResult.Revoked) replay).familyId()).isEqualTo(familyId);
+            assertThat(instanceB.isFamilyRevoked(familyId)).isTrue();
         }
     }
 
@@ -514,12 +508,12 @@ class RefreshRotationServiceIT {
 
             RotationResult result = svc.rotate(legacyIssuer.legacyRefreshToken(userId));
 
-            assertInstanceOf(RotationResult.Rotated.class, result);
+            assertThat(result).isInstanceOf(RotationResult.Rotated.class);
             RotationResult.Rotated rotated = (RotationResult.Rotated) result;
-            assertNotNull(rotated.claims().jti());
-            assertNotNull(rotated.claims().familyId());
-            assertNotNull(rotated.claims().parentJti());
-            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_LEGACY_ADMITTED));
+            assertThat(rotated.claims().jti()).isNotNull();
+            assertThat(rotated.claims().familyId()).isNotNull();
+            assertThat(rotated.claims().parentJti()).isNotNull();
+            assertThat(outcomeCount(RefreshRotationService.OUTCOME_LEGACY_ADMITTED)).isEqualTo(1.0);
         }
 
         @Test
@@ -530,11 +524,10 @@ class RefreshRotationServiceIT {
 
             RotationResult result = svc.rotate(legacyToken);
 
-            assertInstanceOf(RotationResult.Rejected.class, result);
-            assertEquals(RotationResult.Rejected.Reason.INVALID,
-                    ((RotationResult.Rejected) result).reason());
-            assertFalse(synthesizedFamilyExists(legacyIssuer.service().validateToken(legacyToken)));
-            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_REJECTED_INVALID));
+            assertThat(result).isInstanceOf(RotationResult.Rejected.class);
+            assertThat(((RotationResult.Rejected) result).reason()).isEqualTo(RotationResult.Rejected.Reason.INVALID);
+            assertThat(synthesizedFamilyExists(legacyIssuer.service().validateToken(legacyToken))).isFalse();
+            assertThat(outcomeCount(RefreshRotationService.OUTCOME_REJECTED_INVALID)).isEqualTo(1.0);
         }
 
         @Test
@@ -545,11 +538,11 @@ class RefreshRotationServiceIT {
             RotationResult.Rotated first = (RotationResult.Rotated) svc.rotate(legacyToken);
             RotationResult.Rotated second = (RotationResult.Rotated) svc.rotate(legacyToken);
 
-            assertEquals(first.claims().familyId(), second.claims().familyId());
-            assertEquals(first.claims().jti(), second.claims().jti());
-            assertEquals(first.newRefreshJwt(), second.newRefreshJwt());
-            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_LEGACY_ADMITTED));
-            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_RETRY_REUSED));
+            assertThat(second.claims().familyId()).isEqualTo(first.claims().familyId());
+            assertThat(second.claims().jti()).isEqualTo(first.claims().jti());
+            assertThat(second.newRefreshJwt()).isEqualTo(first.newRefreshJwt());
+            assertThat(outcomeCount(RefreshRotationService.OUTCOME_LEGACY_ADMITTED)).isEqualTo(1.0);
+            assertThat(outcomeCount(RefreshRotationService.OUTCOME_RETRY_REUSED)).isEqualTo(1.0);
         }
     }
 }

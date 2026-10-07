@@ -46,7 +46,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -168,9 +167,9 @@ class JwtAuthenticationFilterTest {
             filter.doFilterInternal(request, response, filterChain);
 
             verify(filterChain).doFilter(request, response);
-            assertNotNull(SecurityContextHolder.getContext().getAuthentication());
-            assertEquals(userId, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-            assertEquals(List.of("ROLE_" + UserRole.NORMAL.getValue()), grantedAuthorities());
+            assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
+            assertThat(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).isEqualTo(userId);
+            assertThat(grantedAuthorities()).isEqualTo(List.of("ROLE_" + UserRole.NORMAL.getValue()));
         }
     }
 
@@ -191,8 +190,9 @@ class JwtAuthenticationFilterTest {
             filter.doFilterInternal(request, response, filterChain);
 
             verify(filterChain).doFilter(request, response);
-            assertNull(SecurityContextHolder.getContext().getAuthentication(),
-                    "Invalidated user must not be authenticated");
+            assertThat(SecurityContextHolder.getContext().getAuthentication())
+                    .as("Invalidated user must not be authenticated")
+                    .isNull();
         }
     }
 
@@ -209,7 +209,7 @@ class JwtAuthenticationFilterTest {
             filter.doFilterInternal(request, response, filterChain);
 
             verify(filterChain).doFilter(request, response);
-            assertNull(SecurityContextHolder.getContext().getAuthentication());
+            assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         }
     }
 
@@ -222,7 +222,7 @@ class JwtAuthenticationFilterTest {
             filter.doFilterInternal(request, response, filterChain);
 
             verify(filterChain).doFilter(request, response);
-            assertNull(SecurityContextHolder.getContext().getAuthentication());
+            assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
             assertThat(response.getCookies()).isEmpty();
             assertThat(loggedMessages()).isEmpty();
         }
@@ -240,9 +240,9 @@ class JwtAuthenticationFilterTest {
 
             filter.doFilterInternal(request, response, filterChain);
 
-            assertEquals(HttpServletResponse.SC_SERVICE_UNAVAILABLE, response.getStatus());
+            assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
             verify(filterChain, never()).doFilter(any(), any());
-            assertNull(SecurityContextHolder.getContext().getAuthentication());
+            assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         }
 
         @Test
@@ -257,9 +257,9 @@ class JwtAuthenticationFilterTest {
 
             filter.doFilterInternal(request, response, filterChain);
 
-            assertEquals(HttpServletResponse.SC_SERVICE_UNAVAILABLE, response.getStatus());
+            assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
             verify(filterChain, never()).doFilter(any(), any());
-            assertNull(SecurityContextHolder.getContext().getAuthentication());
+            assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         }
 
         @Test
@@ -273,9 +273,9 @@ class JwtAuthenticationFilterTest {
 
             filter.doFilterInternal(request, response, filterChain);
 
-            assertEquals(HttpServletResponse.SC_SERVICE_UNAVAILABLE, response.getStatus());
+            assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
             verify(filterChain, never()).doFilter(any(), any());
-            assertNull(SecurityContextHolder.getContext().getAuthentication());
+            assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         }
 
         @Test
@@ -291,12 +291,12 @@ class JwtAuthenticationFilterTest {
             filter.doFilterInternal(request, response, filterChain);
 
             String body = response.getContentAsString();
-            assertEquals(HttpServletResponse.SC_SERVICE_UNAVAILABLE, response.getStatus());
+            assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
             verify(filterChain, never()).doFilter(any(), any());
-            assertEquals(MediaType.APPLICATION_PROBLEM_JSON_VALUE, response.getContentType());
-            assertEquals("AUTH_TEMPORARILY_UNAVAILABLE", (String) JsonPath.read(body, "$.code"));
-            assertEquals((String) JsonPath.read(body, "$.detail"), (String) JsonPath.read(body, "$.message"));
-            assertEquals("10", response.getHeader(HttpHeaders.RETRY_AFTER));
+            assertThat(response.getContentType()).isEqualTo(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
+            assertThat((String) JsonPath.read(body, "$.code")).isEqualTo("AUTH_TEMPORARILY_UNAVAILABLE");
+            assertThat((String) JsonPath.read(body, "$.message")).isEqualTo((String) JsonPath.read(body, "$.detail"));
+            assertThat(response.getHeader(HttpHeaders.RETRY_AFTER)).isEqualTo("10");
             assertThat(tokenBlacklist.failed()).containsExactly(new RecordingTokenBlacklist.Failed(
                     RecordingTokenBlacklist.Operation.BLACKLIST_TOKEN_FOR_ROTATION, authRedisDown));
         }
@@ -311,9 +311,9 @@ class JwtAuthenticationFilterTest {
             filter.doFilterInternal(request, response, filterChain);
 
             String body = response.getContentAsString();
-            assertEquals(MediaType.APPLICATION_PROBLEM_JSON_VALUE, response.getContentType());
-            assertEquals("WRITE_TEMPORARILY_UNAVAILABLE", (String) JsonPath.read(body, "$.code"));
-            assertEquals((String) JsonPath.read(body, "$.detail"), (String) JsonPath.read(body, "$.message"));
+            assertThat(response.getContentType()).isEqualTo(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
+            assertThat((String) JsonPath.read(body, "$.code")).isEqualTo("WRITE_TEMPORARILY_UNAVAILABLE");
+            assertThat((String) JsonPath.read(body, "$.message")).isEqualTo((String) JsonPath.read(body, "$.detail"));
         }
     }
 
@@ -327,7 +327,9 @@ class JwtAuthenticationFilterTest {
             filter.doFilterInternal(request, response, filterChain);
 
             verify(filterChain).doFilter(request, response);
-            assertNull(SecurityContextHolder.getContext().getAuthentication(), "SecurityContext should be cleared");
+            assertThat(SecurityContextHolder.getContext().getAuthentication())
+                    .as("SecurityContext should be cleared")
+                    .isNull();
         }
 
         @Test
@@ -339,9 +341,12 @@ class JwtAuthenticationFilterTest {
             filter.doFilterInternal(request, response, filterChain);
 
             verify(filterChain).doFilter(request, response);
-            assertNull(SecurityContextHolder.getContext().getAuthentication(), "SecurityContext should be cleared");
-            assertTrue(loggedMessages().stream().anyMatch(m -> m.contains("TOKEN_INVALID (MALFORMED)")),
-                    "Malformed token must render its reason in the security event, got: " + loggedMessages());
+            assertThat(SecurityContextHolder.getContext().getAuthentication())
+                    .as("SecurityContext should be cleared")
+                    .isNull();
+            assertThat(loggedMessages())
+                    .as("Malformed token must render its reason in the security event")
+                    .anySatisfy(m -> assertThat(m).contains("TOKEN_INVALID (MALFORMED)"));
         }
 
         @Test
@@ -353,9 +358,12 @@ class JwtAuthenticationFilterTest {
             filter.doFilterInternal(request, response, filterChain);
 
             verify(filterChain).doFilter(request, response);
-            assertNull(SecurityContextHolder.getContext().getAuthentication(), "SecurityContext should be cleared");
-            assertTrue(loggedMessages().stream().anyMatch(m -> m.contains("TOKEN_INVALID (INVALID_SIGNATURE)")),
-                    "Invalid-signature token must render its reason in the security event, got: " + loggedMessages());
+            assertThat(SecurityContextHolder.getContext().getAuthentication())
+                    .as("SecurityContext should be cleared")
+                    .isNull();
+            assertThat(loggedMessages())
+                    .as("Invalid-signature token must render its reason in the security event")
+                    .anySatisfy(m -> assertThat(m).contains("TOKEN_INVALID (INVALID_SIGNATURE)"));
         }
 
         @Test
@@ -368,7 +376,9 @@ class JwtAuthenticationFilterTest {
             filter.doFilterInternal(request, response, filterChain);
 
             verify(filterChain).doFilter(request, response);
-            assertNull(SecurityContextHolder.getContext().getAuthentication(), "SecurityContext should be cleared");
+            assertThat(SecurityContextHolder.getContext().getAuthentication())
+                    .as("SecurityContext should be cleared")
+                    .isNull();
         }
     }
 
@@ -382,8 +392,9 @@ class JwtAuthenticationFilterTest {
             filter.doFilterInternal(request, response, filterChain);
 
             verify(filterChain).doFilter(request, response);
-            assertNull(SecurityContextHolder.getContext().getAuthentication(),
-                    "A refresh-typed token in the access cookie must NOT authenticate (INVALID_TYPE)");
+            assertThat(SecurityContextHolder.getContext().getAuthentication())
+                    .as("A refresh-typed token in the access cookie must NOT authenticate (INVALID_TYPE)")
+                    .isNull();
         }
 
         @Test
@@ -392,9 +403,9 @@ class JwtAuthenticationFilterTest {
 
             filter.doFilterInternal(request, response, filterChain);
 
-            assertTrue(loggedMessages().stream().anyMatch(m -> m.contains("TOKEN_INVALID (INVALID_TYPE)")),
-                    "Wrong-type access token must surface the INVALID_TYPE reason in the security event, got: "
-                            + loggedMessages());
+            assertThat(loggedMessages())
+                    .as("Wrong-type access token must surface the INVALID_TYPE reason in the security event")
+                    .anySatisfy(m -> assertThat(m).contains("TOKEN_INVALID (INVALID_TYPE)"));
         }
     }
 
@@ -408,12 +419,13 @@ class JwtAuthenticationFilterTest {
             filter.doFilterInternal(request, response, filterChain);
 
             // The reroute contract: the auto-refresh site must delegate to the refresh-typed validator.
-            assertNull(request.getAttribute(CustomAuthenticationEntryPoint.AUTH_ERROR_ATTRIBUTE));
-            assertNull(response.getCookie(CookieConstants.REFRESH_TOKEN));
+            assertThat(request.getAttribute(CustomAuthenticationEntryPoint.AUTH_ERROR_ATTRIBUTE)).isNull();
+            assertThat(response.getCookie(CookieConstants.REFRESH_TOKEN)).isNull();
             // Preserved-behavior anchor: still a guest, still no rotation.
-            assertNull(SecurityContextHolder.getContext().getAuthentication(),
-                    "An access-typed token on the refresh path must NOT authenticate");
-            assertEquals(0, tokenBlacklist.size());
+            assertThat(SecurityContextHolder.getContext().getAuthentication())
+                    .as("An access-typed token on the refresh path must NOT authenticate")
+                    .isNull();
+            assertThat(tokenBlacklist.size()).isEqualTo(0);
         }
     }
 }

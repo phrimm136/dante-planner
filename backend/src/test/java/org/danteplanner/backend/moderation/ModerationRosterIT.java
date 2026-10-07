@@ -19,8 +19,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * The moderation roster is narrowed by the database, not by the application.
@@ -58,8 +57,8 @@ class ModerationRosterIT extends SharedMySqlContainerSupport {
 
         List<Long> roster = moderationQueryService.getAllUsers().stream().map(UserSummary::id).toList();
 
-        assertTrue(roster.contains(active.getId()));
-        assertFalse(roster.contains(removed.getId()));
+        assertThat(roster).contains(active.getId());
+        assertThat(roster).doesNotContain(removed.getId());
     }
 
     @Test
@@ -69,7 +68,7 @@ class ModerationRosterIT extends SharedMySqlContainerSupport {
 
         List<Long> roster = idsOf(userRepository.findByDeletedAtIsNullAndIdNot(excluded.getId()));
 
-        assertTrue(roster.contains(kept.getId()));
-        assertFalse(roster.contains(excluded.getId()));
+        assertThat(roster).contains(kept.getId());
+        assertThat(roster).doesNotContain(excluded.getId());
     }
 }

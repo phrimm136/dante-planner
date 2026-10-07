@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -120,15 +119,15 @@ class UserControllerTest {
             ResponseEntity<UserDeletionResponse> result = userController.deleteMyAccount(TEST_USER_ID, request, response);
 
             // Assert
-            assertNotNull(result);
-            assertEquals(200, result.getStatusCode().value());
+            assertThat(result).isNotNull();
+            assertThat(result.getStatusCode().value()).isEqualTo(200);
 
             UserDeletionResponse body = result.getBody();
-            assertNotNull(body);
-            assertEquals("Account scheduled for deletion", body.message());
-            assertNotNull(body.deletedAt());
-            assertEquals(account.getPermanentDeleteScheduledAt(), body.permanentDeleteAt());
-            assertEquals(GRACE_PERIOD_DAYS, body.gracePeriodDays());
+            assertThat(body).isNotNull();
+            assertThat(body.message()).isEqualTo("Account scheduled for deletion");
+            assertThat(body.deletedAt()).isNotNull();
+            assertThat(body.permanentDeleteAt()).isEqualTo(account.getPermanentDeleteScheduledAt());
+            assertThat(body.gracePeriodDays()).isEqualTo(GRACE_PERIOD_DAYS);
         }
 
         @Test
@@ -141,11 +140,11 @@ class UserControllerTest {
 
             // Assert - both auth cookies come back expired, so the browser drops them
             Cookie clearedAccess = response.getCookie(CookieConstants.ACCESS_TOKEN);
-            assertNotNull(clearedAccess);
-            assertEquals(0, clearedAccess.getMaxAge());
+            assertThat(clearedAccess).isNotNull();
+            assertThat(clearedAccess.getMaxAge()).isEqualTo(0);
             Cookie clearedRefresh = response.getCookie(CookieConstants.REFRESH_TOKEN);
-            assertNotNull(clearedRefresh);
-            assertEquals(0, clearedRefresh.getMaxAge());
+            assertThat(clearedRefresh).isNotNull();
+            assertThat(clearedRefresh.getMaxAge()).isEqualTo(0);
             // Blacklisting lands in Redis and has no response-visible form; asserting it as state
             // needs the containerized tier with a live TokenBlacklistService. The arguments prove
             // both tokens were read from their own cookies.
@@ -164,9 +163,9 @@ class UserControllerTest {
             ResponseEntity<UserDeletionResponse> result = userController.deleteMyAccount(TEST_USER_ID, request, response);
 
             // Assert
-            assertNotNull(result);
-            assertEquals(200, result.getStatusCode().value());
-            assertEquals(originalScheduledAt, result.getBody().permanentDeleteAt());
+            assertThat(result).isNotNull();
+            assertThat(result.getStatusCode().value()).isEqualTo(200);
+            assertThat(result.getBody().permanentDeleteAt()).isEqualTo(originalScheduledAt);
         }
 
         @Test
@@ -180,8 +179,8 @@ class UserControllerTest {
                     userController.deleteMyAccount(userId, request, response);
 
             // Assert
-            assertTrue(account.isDeleted());
-            assertEquals(account.getPermanentDeleteScheduledAt(), result.getBody().permanentDeleteAt());
+            assertThat(account.isDeleted()).isTrue();
+            assertThat(result.getBody().permanentDeleteAt()).isEqualTo(account.getPermanentDeleteScheduledAt());
         }
 
         @Test
@@ -195,7 +194,7 @@ class UserControllerTest {
             ResponseEntity<UserDeletionResponse> result = userController.deleteMyAccount(TEST_USER_ID, request, response);
 
             // Assert
-            assertEquals(customGracePeriod, result.getBody().gracePeriodDays());
+            assertThat(result.getBody().gracePeriodDays()).isEqualTo(customGracePeriod);
         }
     }
 
@@ -220,8 +219,8 @@ class UserControllerTest {
 
             // Assert - the invalidation must go out for the updated user, after the persist,
             // so every pod drops its stale settingsCache entry.
-            assertEquals(200, result.getStatusCode().value());
-            assertEquals(new UserSettingsResponse(true, true, true, true, false), result.getBody());
+            assertThat(result.getStatusCode().value()).isEqualTo(200);
+            assertThat(result.getBody()).isEqualTo(new UserSettingsResponse(true, true, true, true, false));
             assertThat(invalidationsAtPersist).containsExactly(List.of());
             assertThat(sseChannel.envelopes(SseChannel.USER)).containsExactly(
                     new SseEnvelope(SseEventType.SETTINGS_INVALIDATED, TEST_USER_ID, null, null, null, null, null));

@@ -35,7 +35,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
@@ -161,7 +161,7 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
         // Verify no notification exists before
         long notificationsBefore = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
                 plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getTotalElements();
-        assertEquals(0, notificationsBefore);
+        assertThat(notificationsBefore).isEqualTo(0);
 
         // Act - Cast vote that crosses threshold
         plannerEngagementService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
@@ -171,17 +171,17 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
         // Assert - Notification derived from the committed event
         List<Notification> notifications = awaitNotifications(plannerOwner.getId(), 1);
 
-        assertEquals(1, notifications.size());
+        assertThat(notifications.size()).isEqualTo(1);
         Notification notification = notifications.get(0);
-        assertEquals(plannerOwner.getId(), notification.getUserId());
-        assertEquals(testPlanner.getId().toString(), notification.getContentId());
-        assertEquals(NotificationType.PLANNER_RECOMMENDED, notification.getNotificationType());
-        assertFalse(notification.isRead());
-        assertNotNull(notification.getCreatedAt());
+        assertThat(notification.getUserId()).isEqualTo(plannerOwner.getId());
+        assertThat(notification.getContentId()).isEqualTo(testPlanner.getId().toString());
+        assertThat(notification.getNotificationType()).isEqualTo(NotificationType.PLANNER_RECOMMENDED);
+        assertThat(notification.isRead()).isFalse();
+        assertThat(notification.getCreatedAt()).isNotNull();
 
         // Verify stats flag set
         PlannerStats stats = plannerStatsRepository.findById(testPlanner.getId()).orElseThrow();
-        assertNotNull(stats.getRecommendedNotifiedAt());
+        assertThat(stats.getRecommendedNotifiedAt()).isNotNull();
     }
 
     @Test
@@ -199,11 +199,11 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
         // Assert - No notification created
         long notificationsCount = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
                 plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getTotalElements();
-        assertEquals(0, notificationsCount);
+        assertThat(notificationsCount).isEqualTo(0);
 
         // Verify stats flag NOT set
         PlannerStats stats = plannerStatsRepository.findById(testPlanner.getId()).orElseThrow();
-        assertNull(stats.getRecommendedNotifiedAt());
+        assertThat(stats.getRecommendedNotifiedAt()).isNull();
     }
 
     @Test
@@ -219,10 +219,10 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
         // The vote commits its event row; the dispatch derives from it afterwards.
 
         // Assert - Notification derived from the committed event
-        assertEquals(1, awaitNotifications(plannerOwner.getId(), 1).size());
+        assertThat(awaitNotifications(plannerOwner.getId(), 1).size()).isEqualTo(1);
 
         PlannerStats stats = plannerStatsRepository.findById(testPlanner.getId()).orElseThrow();
-        assertEquals(recommendedThreshold, stats.getUpvotes());
+        assertThat(stats.getUpvotes()).isEqualTo(recommendedThreshold);
     }
 
     // ==================== IT2: Concurrent Votes Create Single Notification ====================
@@ -281,18 +281,20 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
         List<Notification> notifications = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
                 plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getContent();
 
-        assertEquals(1, notifications.size(), "Only one notification should be created despite concurrent votes");
-        assertEquals(NotificationType.PLANNER_RECOMMENDED, notifications.get(0).getNotificationType());
+        assertThat(notifications.size())
+                .as("Only one notification should be created despite concurrent votes")
+                .isEqualTo(1);
+        assertThat(notifications.get(0).getNotificationType()).isEqualTo(NotificationType.PLANNER_RECOMMENDED);
 
         // Verify atomic flag was set exactly once
         PlannerStats stats = plannerStatsRepository.findById(testPlanner.getId()).orElseThrow();
-        assertNotNull(stats.getRecommendedNotifiedAt(), "Recommended notification flag should be set");
+        assertThat(stats.getRecommendedNotifiedAt()).as("Recommended notification flag should be set").isNotNull();
 
         // Verify multiple votes were cast (at least some succeeded)
         long voteCount = plannerVoteRepository.findAll().stream()
                 .filter(vote -> testPlanner.getId().equals(vote.getPlannerId()))
                 .count();
-        assertTrue(voteCount > 0, "At least one vote should succeed");
+        assertThat(voteCount).as("At least one vote should succeed").isPositive();
     }
 
     // ==================== IT3: No Duplicate Notifications ====================
@@ -313,7 +315,7 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
         // Verify exactly 1 notification exists
         long notificationsBefore = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
                 plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getTotalElements();
-        assertEquals(1, notificationsBefore);
+        assertThat(notificationsBefore).isEqualTo(1);
 
         // Act - Cast another upvote (still above threshold)
         plannerEngagementService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
@@ -323,7 +325,7 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
         // Assert - No new notification created
         long notificationsAfter = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
                 plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getTotalElements();
-        assertEquals(1, notificationsAfter, "No duplicate notification should be created");
+        assertThat(notificationsAfter).as("No duplicate notification should be created").isEqualTo(1);
     }
 
     @Test
@@ -346,7 +348,7 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
         // Assert - Still only 1 notification
         long notificationsCount = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
                 plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getTotalElements();
-        assertEquals(1, notificationsCount);
+        assertThat(notificationsCount).isEqualTo(1);
     }
 
     // ==================== IT4: Transaction Consistency ====================
@@ -366,18 +368,19 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
         // Assert - Both vote and notification persisted
         // 1. Vote exists
         PlannerVoteId voteId = new PlannerVoteId(voter1.getId(), testPlanner.getId());
-        assertTrue(plannerVoteRepository.existsById(voteId), "Vote should be persisted");
+        assertThat(plannerVoteRepository.existsById(voteId)).as("Vote should be persisted").isTrue();
 
         // 2. Notification derived from the event the vote committed
-        assertEquals(1, awaitNotifications(plannerOwner.getId(), 1).size(),
-                "Notification should be derived");
+        assertThat(awaitNotifications(plannerOwner.getId(), 1).size())
+                .as("Notification should be derived")
+                .isEqualTo(1);
 
         // 3. Planner vote count updated
         PlannerStats stats = plannerStatsRepository.findById(testPlanner.getId()).orElseThrow();
-        assertEquals(recommendedThreshold, stats.getUpvotes());
+        assertThat(stats.getUpvotes()).isEqualTo(recommendedThreshold);
 
         // 4. Atomic flag set
-        assertNotNull(stats.getRecommendedNotifiedAt(), "Atomic flag should be set");
+        assertThat(stats.getRecommendedNotifiedAt()).as("Atomic flag should be set").isNotNull();
     }
 
     @Test
@@ -426,7 +429,7 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
 
         long notificationsBefore = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
                 plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getTotalElements();
-        assertEquals(1, notificationsBefore);
+        assertThat(notificationsBefore).isEqualTo(1);
 
         // Act - Even if planner later goes below threshold (via downvotes), no new notification
         // (This is hypothetical since votes are immutable, but tests the logic)
@@ -435,6 +438,6 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
         // Assert - Notification remains
         long notificationsAfter = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
                 plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getTotalElements();
-        assertEquals(1, notificationsAfter);
+        assertThat(notificationsAfter).isEqualTo(1);
     }
 }

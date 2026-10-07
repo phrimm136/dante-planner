@@ -15,7 +15,6 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Base64;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
 import java.nio.charset.StandardCharsets;
@@ -63,7 +62,7 @@ class JwtTokenServiceTest {
 
     private static String decodePayload(String token) {
         String[] parts = token.split("\\.");
-        assertEquals(3, parts.length, "JWT should have 3 parts");
+        assertThat(parts.length).as("JWT should have 3 parts").isEqualTo(3);
         return new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
     }
 
@@ -79,13 +78,13 @@ class JwtTokenServiceTest {
             String token = tokenService.generateAccessToken(userId, UserRole.NORMAL);
 
             // Assert
-            assertNotNull(token);
+            assertThat(token).isNotNull();
             TokenClaims claims = tokenService.validateToken(token);
-            assertEquals(userId, claims.userId());
-            assertEquals(TokenClaims.TYPE_ACCESS, claims.type());
-            assertEquals(UserRole.NORMAL, claims.role());
-            assertTrue(claims.isAccessToken());
-            assertFalse(claims.isRefreshToken());
+            assertThat(claims.userId()).isEqualTo(userId);
+            assertThat(claims.type()).isEqualTo(TokenClaims.TYPE_ACCESS);
+            assertThat(claims.role()).isEqualTo(UserRole.NORMAL);
+            assertThat(claims.isAccessToken()).isTrue();
+            assertThat(claims.isRefreshToken()).isFalse();
         }
 
         @Test
@@ -98,7 +97,7 @@ class JwtTokenServiceTest {
 
             // Assert - expiration should be in the future
             TokenClaims claims = tokenService.validateToken(token);
-            assertFalse(claims.isExpired(), "Token should not be expired immediately after creation");
+            assertThat(claims.isExpired()).as("Token should not be expired immediately after creation").isFalse();
 
             // Verify expiration is approximately ACCESS_TOKEN_EXPIRY from now
             long now = System.currentTimeMillis();
@@ -107,10 +106,9 @@ class JwtTokenServiceTest {
 
             // Allow 5 second tolerance for timing variations
             long tolerance = 5000;
-            assertTrue(timeDiff >= ACCESS_TOKEN_EXPIRY - tolerance,
-                    "Expiration should be at least " + (ACCESS_TOKEN_EXPIRY - tolerance) + "ms from now (got " + timeDiff + ")");
-            assertTrue(timeDiff <= ACCESS_TOKEN_EXPIRY + tolerance,
-                    "Expiration should be at most " + (ACCESS_TOKEN_EXPIRY + tolerance) + "ms from now (got " + timeDiff + ")");
+            assertThat(timeDiff)
+                    .as("ms from now to expiration")
+                    .isBetween(ACCESS_TOKEN_EXPIRY - tolerance, ACCESS_TOKEN_EXPIRY + tolerance);
         }
 
         @Test
@@ -128,8 +126,7 @@ class JwtTokenServiceTest {
             long issuedAt = claims.issuedAt().getTime();
             // Allow 100ms tolerance for timing variations (JWT truncates to seconds)
             long tolerance = 1100;
-            assertTrue(issuedAt >= beforeGeneration - tolerance && issuedAt <= afterGeneration + tolerance,
-                    "issuedAt (" + issuedAt + ") should be between " + (beforeGeneration - tolerance) + " and " + (afterGeneration + tolerance));
+            assertThat(issuedAt).as("issuedAt").isBetween(beforeGeneration - tolerance, afterGeneration + tolerance);
         }
     }
 
@@ -145,12 +142,12 @@ class JwtTokenServiceTest {
             String token = tokenService.generateRefreshToken(userId);
 
             // Assert
-            assertNotNull(token);
+            assertThat(token).isNotNull();
             TokenClaims claims = tokenService.validateToken(token);
-            assertEquals(userId, claims.userId());
-            assertEquals(TokenClaims.TYPE_REFRESH, claims.type());
-            assertTrue(claims.isRefreshToken());
-            assertFalse(claims.isAccessToken());
+            assertThat(claims.userId()).isEqualTo(userId);
+            assertThat(claims.type()).isEqualTo(TokenClaims.TYPE_REFRESH);
+            assertThat(claims.isRefreshToken()).isTrue();
+            assertThat(claims.isAccessToken()).isFalse();
         }
 
         @Test
@@ -166,8 +163,9 @@ class JwtTokenServiceTest {
             TokenClaims accessClaims = tokenService.validateToken(accessToken);
             TokenClaims refreshClaims = tokenService.validateToken(refreshToken);
 
-            assertTrue(refreshClaims.expiration().after(accessClaims.expiration()),
-                    "Refresh token should expire after access token");
+            assertThat(refreshClaims.expiration().after(accessClaims.expiration()))
+                    .as("Refresh token should expire after access token")
+                    .isTrue();
         }
     }
 
@@ -183,9 +181,9 @@ class JwtTokenServiceTest {
             String token = tokenService.generateRefreshToken(userId, familyId, parentJti);
 
             TokenClaims claims = tokenService.validateToken(token);
-            assertNotNull(claims.jti());
-            assertEquals(familyId, claims.familyId());
-            assertEquals(parentJti, claims.parentJti());
+            assertThat(claims.jti()).isNotNull();
+            assertThat(claims.familyId()).isEqualTo(familyId);
+            assertThat(claims.parentJti()).isEqualTo(parentJti);
         }
 
         @Test
@@ -193,9 +191,9 @@ class JwtTokenServiceTest {
             String token = tokenService.generateRefreshToken(222L);
 
             TokenClaims claims = tokenService.validateToken(token);
-            assertNotNull(claims.jti());
-            assertNotNull(claims.familyId());
-            assertNull(claims.parentJti());
+            assertThat(claims.jti()).isNotNull();
+            assertThat(claims.familyId()).isNotNull();
+            assertThat(claims.parentJti()).isNull();
         }
 
         @Test
@@ -203,9 +201,9 @@ class JwtTokenServiceTest {
             String token = tokenService.generateAccessToken(333L, UserRole.NORMAL);
 
             TokenClaims claims = tokenService.validateToken(token);
-            assertNull(claims.jti());
-            assertNull(claims.familyId());
-            assertNull(claims.parentJti());
+            assertThat(claims.jti()).isNull();
+            assertThat(claims.familyId()).isNull();
+            assertThat(claims.parentJti()).isNull();
         }
     }
 
@@ -222,10 +220,10 @@ class JwtTokenServiceTest {
             TokenClaims claims = tokenService.validateToken(token);
 
             // Assert
-            assertNotNull(claims);
-            assertEquals(userId, claims.userId());
-            assertNotNull(claims.issuedAt());
-            assertNotNull(claims.expiration());
+            assertThat(claims).isNotNull();
+            assertThat(claims.userId()).isEqualTo(userId);
+            assertThat(claims.issuedAt()).isNotNull();
+            assertThat(claims.expiration()).isNotNull();
         }
 
         @Test
@@ -239,11 +237,10 @@ class JwtTokenServiceTest {
                     Clock.fixed(t0.plusMillis(ACCESS_TOKEN_EXPIRY + 1000), ZoneOffset.UTC));
 
             // Act & Assert
-            InvalidTokenException exception = assertThrows(
-                    InvalidTokenException.class,
-                    () -> laterValidator.validateToken(token)
-            );
-            assertEquals(InvalidTokenException.Reason.EXPIRED, exception.getReason());
+            assertRejected(() -> laterValidator.validateToken(token))
+                    .withCode("UNAUTHORIZED")
+                    .isInstanceOfSatisfying(InvalidTokenException.class, rejection -> assertThat(rejection.getReason())
+                            .isEqualTo(InvalidTokenException.Reason.EXPIRED));
         }
 
         @Test
@@ -264,11 +261,10 @@ class JwtTokenServiceTest {
             String tokenWithDifferentSignature = differentService.generateAccessToken(123L, UserRole.NORMAL);
 
             // Act & Assert
-            InvalidTokenException exception = assertThrows(
-                    InvalidTokenException.class,
-                    () -> tokenService.validateToken(tokenWithDifferentSignature)
-            );
-            assertEquals(InvalidTokenException.Reason.INVALID_SIGNATURE, exception.getReason());
+            assertRejected(() -> tokenService.validateToken(tokenWithDifferentSignature))
+                    .withCode("UNAUTHORIZED")
+                    .isInstanceOfSatisfying(InvalidTokenException.class, rejection -> assertThat(rejection.getReason())
+                            .isEqualTo(InvalidTokenException.Reason.INVALID_SIGNATURE));
         }
 
         @Test
@@ -277,11 +273,10 @@ class JwtTokenServiceTest {
             String malformedToken = "not.a.valid.jwt.token";
 
             // Act & Assert
-            InvalidTokenException exception = assertThrows(
-                    InvalidTokenException.class,
-                    () -> tokenService.validateToken(malformedToken)
-            );
-            assertEquals(InvalidTokenException.Reason.MALFORMED, exception.getReason());
+            assertRejected(() -> tokenService.validateToken(malformedToken))
+                    .withCode("UNAUTHORIZED")
+                    .isInstanceOfSatisfying(InvalidTokenException.class, rejection -> assertThat(rejection.getReason())
+                            .isEqualTo(InvalidTokenException.Reason.MALFORMED));
         }
 
         @Test
@@ -290,11 +285,10 @@ class JwtTokenServiceTest {
             String invalidToken = "garbage-data";
 
             // Act & Assert
-            InvalidTokenException exception = assertThrows(
-                    InvalidTokenException.class,
-                    () -> tokenService.validateToken(invalidToken)
-            );
-            assertEquals(InvalidTokenException.Reason.MALFORMED, exception.getReason());
+            assertRejected(() -> tokenService.validateToken(invalidToken))
+                    .withCode("UNAUTHORIZED")
+                    .isInstanceOfSatisfying(InvalidTokenException.class, rejection -> assertThat(rejection.getReason())
+                            .isEqualTo(InvalidTokenException.Reason.MALFORMED));
         }
 
         @Test
@@ -309,11 +303,10 @@ class JwtTokenServiceTest {
                     .compact();
 
             // Act & Assert
-            InvalidTokenException exception = assertThrows(
-                    InvalidTokenException.class,
-                    () -> tokenService.validateToken(token)
-            );
-            assertEquals(InvalidTokenException.Reason.MALFORMED, exception.getReason());
+            assertRejected(() -> tokenService.validateToken(token))
+                    .withCode("UNAUTHORIZED")
+                    .isInstanceOfSatisfying(InvalidTokenException.class, rejection -> assertThat(rejection.getReason())
+                            .isEqualTo(InvalidTokenException.Reason.MALFORMED));
         }
 
         @Test
@@ -327,11 +320,10 @@ class JwtTokenServiceTest {
                     .compact();
 
             // Act & Assert
-            InvalidTokenException exception = assertThrows(
-                    InvalidTokenException.class,
-                    () -> tokenService.validateToken(token)
-            );
-            assertEquals(InvalidTokenException.Reason.MISSING_CLAIMS, exception.getReason());
+            assertRejected(() -> tokenService.validateToken(token))
+                    .withCode("UNAUTHORIZED")
+                    .isInstanceOfSatisfying(InvalidTokenException.class, rejection -> assertThat(rejection.getReason())
+                            .isEqualTo(InvalidTokenException.Reason.MISSING_CLAIMS));
         }
     }
 
@@ -345,9 +337,9 @@ class JwtTokenServiceTest {
 
             TokenClaims claims = tokenService.validateToken(token);
 
-            assertNotNull(claims);
-            assertEquals(555L, claims.userId());
-            assertEquals(TokenClaims.TYPE_ACCESS, claims.type());
+            assertThat(claims).isNotNull();
+            assertThat(claims.userId()).isEqualTo(555L);
+            assertThat(claims.type()).isEqualTo(TokenClaims.TYPE_ACCESS);
         }
 
         @Test
@@ -357,9 +349,9 @@ class JwtTokenServiceTest {
 
             TokenClaims claims = tokenService.validateToken(token);
 
-            assertNotNull(claims);
-            assertEquals(555L, claims.userId());
-            assertEquals(TokenClaims.TYPE_REFRESH, claims.type());
+            assertThat(claims).isNotNull();
+            assertThat(claims.userId()).isEqualTo(555L);
+            assertThat(claims.type()).isEqualTo(TokenClaims.TYPE_REFRESH);
         }
     }
 
@@ -372,20 +364,19 @@ class JwtTokenServiceTest {
 
             TokenClaims claims = tokenService.validateAccessToken(token);
 
-            assertNotNull(claims);
-            assertEquals(1001L, claims.userId());
-            assertEquals(TokenClaims.TYPE_ACCESS, claims.type());
+            assertThat(claims).isNotNull();
+            assertThat(claims.userId()).isEqualTo(1001L);
+            assertThat(claims.type()).isEqualTo(TokenClaims.TYPE_ACCESS);
         }
 
         @Test
         void validateAccessToken_WhenRefreshToken_ThrowsInvalidType() {
             String token = tokenService.generateRefreshToken(1002L);
 
-            InvalidTokenException exception = assertThrows(
-                    InvalidTokenException.class,
-                    () -> tokenService.validateAccessToken(token)
-            );
-            assertEquals(InvalidTokenException.Reason.INVALID_TYPE, exception.getReason());
+            assertRejected(() -> tokenService.validateAccessToken(token))
+                    .withCode("UNAUTHORIZED")
+                    .isInstanceOfSatisfying(InvalidTokenException.class, rejection -> assertThat(rejection.getReason())
+                            .isEqualTo(InvalidTokenException.Reason.INVALID_TYPE));
         }
 
         @Test
@@ -394,20 +385,19 @@ class JwtTokenServiceTest {
 
             TokenClaims claims = tokenService.validateRefreshToken(token);
 
-            assertNotNull(claims);
-            assertEquals(1003L, claims.userId());
-            assertEquals(TokenClaims.TYPE_REFRESH, claims.type());
+            assertThat(claims).isNotNull();
+            assertThat(claims.userId()).isEqualTo(1003L);
+            assertThat(claims.type()).isEqualTo(TokenClaims.TYPE_REFRESH);
         }
 
         @Test
         void validateRefreshToken_WhenAccessToken_ThrowsInvalidType() {
             String token = tokenService.generateAccessToken(1004L, UserRole.NORMAL);
 
-            InvalidTokenException exception = assertThrows(
-                    InvalidTokenException.class,
-                    () -> tokenService.validateRefreshToken(token)
-            );
-            assertEquals(InvalidTokenException.Reason.INVALID_TYPE, exception.getReason());
+            assertRejected(() -> tokenService.validateRefreshToken(token))
+                    .withCode("UNAUTHORIZED")
+                    .isInstanceOfSatisfying(InvalidTokenException.class, rejection -> assertThat(rejection.getReason())
+                            .isEqualTo(InvalidTokenException.Reason.INVALID_TYPE));
         }
 
         @Test
@@ -418,22 +408,20 @@ class JwtTokenServiceTest {
             TokenClaims accessClaims = tokenService.validateAccessToken(accessToken);
             TokenClaims refreshClaims = tokenService.validateRefreshToken(refreshToken);
 
-            assertEquals(1005L, accessClaims.userId());
-            assertEquals(TokenClaims.TYPE_ACCESS, accessClaims.type());
-            assertEquals(1005L, refreshClaims.userId());
-            assertEquals(TokenClaims.TYPE_REFRESH, refreshClaims.type());
+            assertThat(accessClaims.userId()).isEqualTo(1005L);
+            assertThat(accessClaims.type()).isEqualTo(TokenClaims.TYPE_ACCESS);
+            assertThat(refreshClaims.userId()).isEqualTo(1005L);
+            assertThat(refreshClaims.type()).isEqualTo(TokenClaims.TYPE_REFRESH);
         }
 
         @Test
         void acceptance_WhenWrongTypeToken_MapsToInvalidTypeNotMalformed() {
             String refreshToken = tokenService.generateRefreshToken(2001L);
 
-            InvalidTokenException exception = assertThrows(
-                    InvalidTokenException.class,
-                    () -> tokenService.validateAccessToken(refreshToken)
-            );
-            assertEquals(InvalidTokenException.Reason.INVALID_TYPE, exception.getReason());
-            assertNotEquals(InvalidTokenException.Reason.MALFORMED, exception.getReason());
+            assertRejected(() -> tokenService.validateAccessToken(refreshToken))
+                    .withCode("UNAUTHORIZED")
+                    .isInstanceOfSatisfying(InvalidTokenException.class, rejection -> assertThat(rejection.getReason())
+                            .isEqualTo(InvalidTokenException.Reason.INVALID_TYPE));
         }
 
         @Test
@@ -445,17 +433,15 @@ class JwtTokenServiceTest {
                     .signWith(testKeyPair.getPrivate(), io.jsonwebtoken.SignatureAlgorithm.RS256)
                     .compact();
 
-            InvalidTokenException accessException = assertThrows(
-                    InvalidTokenException.class,
-                    () -> tokenService.validateAccessToken(token)
-            );
-            assertEquals(InvalidTokenException.Reason.INVALID_TYPE, accessException.getReason());
+            assertRejected(() -> tokenService.validateAccessToken(token))
+                    .withCode("UNAUTHORIZED")
+                    .isInstanceOfSatisfying(InvalidTokenException.class, rejection -> assertThat(rejection.getReason())
+                            .isEqualTo(InvalidTokenException.Reason.INVALID_TYPE));
 
-            InvalidTokenException refreshException = assertThrows(
-                    InvalidTokenException.class,
-                    () -> tokenService.validateRefreshToken(token)
-            );
-            assertEquals(InvalidTokenException.Reason.INVALID_TYPE, refreshException.getReason());
+            assertRejected(() -> tokenService.validateRefreshToken(token))
+                    .withCode("UNAUTHORIZED")
+                    .isInstanceOfSatisfying(InvalidTokenException.class, rejection -> assertThat(rejection.getReason())
+                            .isEqualTo(InvalidTokenException.Reason.INVALID_TYPE));
         }
     }
 
@@ -472,7 +458,7 @@ class JwtTokenServiceTest {
             Long actualUserId = tokenService.getUserIdFromToken(token);
 
             // Assert
-            assertEquals(expectedUserId, actualUserId);
+            assertThat(actualUserId).isEqualTo(expectedUserId);
         }
 
         @Test
@@ -499,7 +485,7 @@ class JwtTokenServiceTest {
             boolean expired = tokenService.isTokenExpired(token);
 
             // Assert
-            assertFalse(expired);
+            assertThat(expired).isFalse();
         }
 
         @Test
@@ -516,7 +502,7 @@ class JwtTokenServiceTest {
             boolean expired = laterValidator.isTokenExpired(token);
 
             // Assert
-            assertTrue(expired);
+            assertThat(expired).isTrue();
         }
 
         @Test
@@ -528,7 +514,7 @@ class JwtTokenServiceTest {
             boolean expired = tokenService.isTokenExpired(invalidToken);
 
             // Assert
-            assertTrue(expired);
+            assertThat(expired).isTrue();
         }
     }
 
@@ -544,7 +530,7 @@ class JwtTokenServiceTest {
             String type = tokenService.getTokenType(token);
 
             // Assert
-            assertEquals(TokenClaims.TYPE_ACCESS, type);
+            assertThat(type).isEqualTo(TokenClaims.TYPE_ACCESS);
         }
 
         @Test
@@ -556,7 +542,7 @@ class JwtTokenServiceTest {
             String type = tokenService.getTokenType(token);
 
             // Assert
-            assertEquals(TokenClaims.TYPE_REFRESH, type);
+            assertThat(type).isEqualTo(TokenClaims.TYPE_REFRESH);
         }
     }
 
@@ -572,11 +558,11 @@ class JwtTokenServiceTest {
             String payload = decodePayload(token);
 
             // Assert
-            assertTrue(payload.contains("\"sub\":\"12345\""), "sub should be the numeric userId");
-            assertFalse(payload.contains("enc"), "Payload must not contain an encrypted claim blob");
-            assertFalse(payload.contains("email"), "Payload must not contain email");
-            assertFalse(payload.contains("@"), "Payload must not contain an email address");
-            assertTrue(payload.contains(UserRole.ADMIN.getValue()), "role should be present in cleartext");
+            assertThat(payload).as("sub should be the numeric userId").contains("\"sub\":\"12345\"");
+            assertThat(payload).as("Payload must not contain an encrypted claim blob").doesNotContain("enc");
+            assertThat(payload).as("Payload must not contain email").doesNotContain("email");
+            assertThat(payload).as("Payload must not contain an email address").doesNotContain("@");
+            assertThat(payload).as("role should be present in cleartext").contains(UserRole.ADMIN.getValue());
         }
 
         @Test
@@ -589,12 +575,12 @@ class JwtTokenServiceTest {
             TokenClaims claims = tokenService.validateToken(token);
 
             // Assert
-            assertTrue(payload.contains("\"sub\":\"67890\""), "sub should be the numeric userId");
-            assertFalse(payload.contains("enc"), "Payload must not contain an encrypted claim blob");
-            assertFalse(payload.contains("email"), "Payload must not contain email");
-            assertNotNull(claims.jti());
-            assertEquals("fam-1", claims.familyId());
-            assertEquals("parent-jti", claims.parentJti());
+            assertThat(payload).as("sub should be the numeric userId").contains("\"sub\":\"67890\"");
+            assertThat(payload).as("Payload must not contain an encrypted claim blob").doesNotContain("enc");
+            assertThat(payload).as("Payload must not contain email").doesNotContain("email");
+            assertThat(claims.jti()).isNotNull();
+            assertThat(claims.familyId()).isEqualTo("fam-1");
+            assertThat(claims.parentJti()).isEqualTo("parent-jti");
         }
     }
 }

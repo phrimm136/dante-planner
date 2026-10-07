@@ -6,8 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for PlannerStatusConverter.
@@ -29,17 +28,17 @@ class PlannerStatusConverterTest {
 
         @Test
         void convertToDatabaseColumn_WhenDraft_ReturnsLowercaseDraft() {
-            assertEquals("draft", converter.convertToDatabaseColumn(PlannerStatus.DRAFT));
+            assertThat(converter.convertToDatabaseColumn(PlannerStatus.DRAFT)).isEqualTo("draft");
         }
 
         @Test
         void convertToDatabaseColumn_WhenSaved_ReturnsLowercaseSaved() {
-            assertEquals("saved", converter.convertToDatabaseColumn(PlannerStatus.SAVED));
+            assertThat(converter.convertToDatabaseColumn(PlannerStatus.SAVED)).isEqualTo("saved");
         }
 
         @Test
         void convertToDatabaseColumn_WhenNull_ReturnsNull() {
-            assertNull(converter.convertToDatabaseColumn(null));
+            assertThat(converter.convertToDatabaseColumn(null)).isNull();
         }
     }
 
@@ -48,17 +47,17 @@ class PlannerStatusConverterTest {
 
         @Test
         void convertToEntityAttribute_WhenDraft_ReturnsDraftEnum() {
-            assertEquals(PlannerStatus.DRAFT, converter.convertToEntityAttribute("draft"));
+            assertThat(converter.convertToEntityAttribute("draft")).isEqualTo(PlannerStatus.DRAFT);
         }
 
         @Test
         void convertToEntityAttribute_WhenSaved_ReturnsSavedEnum() {
-            assertEquals(PlannerStatus.SAVED, converter.convertToEntityAttribute("saved"));
+            assertThat(converter.convertToEntityAttribute("saved")).isEqualTo(PlannerStatus.SAVED);
         }
 
         @Test
         void convertToEntityAttribute_WhenNull_ReturnsNull() {
-            assertNull(converter.convertToEntityAttribute(null));
+            assertThat(converter.convertToEntityAttribute(null)).isNull();
         }
     }
 }

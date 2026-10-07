@@ -16,8 +16,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.danteplanner.backend.user.repository.UserRepository;
 
 /**
@@ -61,23 +60,25 @@ class ModerationAuditTrailBoundIT extends ExclusiveDatabaseSupport {
     void auditTrailPage_WhenRead_IsTruncatedByTheQuery() {
         List<ModerationAction> page = moderationQueryService.getModerationActions();
 
-        assertTrue(page.size() < SEEDED_RECORDS,
-                "the whole table came back: the limit is not being applied by the query");
-        assertEquals(100, page.size());
+        assertThat(page)
+                .as("the whole table came back: the limit is not being applied by the query")
+                .hasSizeLessThan(SEEDED_RECORDS);
+        assertThat(page.size()).isEqualTo(100);
     }
 
     @Test
     void auditTrailPage_WhenRead_HoldsNewestRecordsFirst() {
         List<ModerationAction> page = moderationQueryService.getModerationActions();
 
-        assertTrue(isNonIncreasing(page), "records are not ordered newest first");
+        assertThat(isNonIncreasing(page)).as("records are not ordered newest first").isTrue();
 
         Instant newestStored = moderationActionRepository.findAll().stream()
                 .map(ModerationAction::getCreatedAt)
                 .max(Comparator.naturalOrder())
                 .orElseThrow();
-        assertEquals(newestStored, page.get(0).getCreatedAt(),
-                "the page starts at the oldest end of the trail");
+        assertThat(page.get(0).getCreatedAt())
+                .as("the page starts at the oldest end of the trail")
+                .isEqualTo(newestStored);
     }
 
     private static boolean isNonIncreasing(List<ModerationAction> actions) {

@@ -22,7 +22,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Repository tests for PlannerStatsRepository atomic counter operations.
@@ -85,7 +85,7 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
 
         // Assert
         PlannerStats updated = statsRepository.findById(testPlanner.getId()).orElseThrow();
-        assertEquals(1, updated.getUpvotes());
+        assertThat(updated.getUpvotes()).isEqualTo(1);
     }
 
     // ==================== Atomic Notification Flag Tests ====================
@@ -99,9 +99,9 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
         int rowsUpdated = trySetRecommendedNotified(testPlanner.getId());
 
         // Assert
-        assertEquals(1, rowsUpdated);
+        assertThat(rowsUpdated).isEqualTo(1);
         PlannerStats updated = statsRepository.findById(testPlanner.getId()).orElseThrow();
-        assertNotNull(updated.getRecommendedNotifiedAt());
+        assertThat(updated.getRecommendedNotifiedAt()).isNotNull();
     }
 
     @Test
@@ -116,7 +116,7 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
         int rowsUpdated = trySetRecommendedNotified(testPlanner.getId());
 
         // Assert
-        assertEquals(0, rowsUpdated);
+        assertThat(rowsUpdated).isEqualTo(0);
     }
 
     @Test
@@ -128,9 +128,9 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
         int rowsUpdated = trySetRecommendedNotified(testPlanner.getId());
 
         // Assert
-        assertEquals(0, rowsUpdated);
+        assertThat(rowsUpdated).isEqualTo(0);
         PlannerStats updated = statsRepository.findById(testPlanner.getId()).orElseThrow();
-        assertNull(updated.getRecommendedNotifiedAt());
+        assertThat(updated.getRecommendedNotifiedAt()).isNull();
     }
 
     @Test
@@ -142,7 +142,7 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
         int rowsUpdated = trySetRecommendedNotified(nonExistentId);
 
         // Assert
-        assertEquals(0, rowsUpdated);
+        assertThat(rowsUpdated).isEqualTo(0);
     }
 
     private int trySetRecommendedNotified(UUID plannerId) {

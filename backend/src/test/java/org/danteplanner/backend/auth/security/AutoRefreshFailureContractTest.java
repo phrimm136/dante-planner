@@ -26,9 +26,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * One contract, both rotation implementations.
@@ -82,11 +79,12 @@ class AutoRefreshFailureContractTest {
 
         assertCookieWithdrawn(CookieConstants.ACCESS_TOKEN);
         assertCookieWithdrawn(CookieConstants.REFRESH_TOKEN);
-        assertNull(SecurityContextHolder.getContext().getAuthentication(),
-                "a dead token must not authenticate the request");
-        assertEquals(CustomAuthenticationEntryPoint.SESSION_REVOKED,
-                request.getAttribute(CustomAuthenticationEntryPoint.AUTH_ERROR_ATTRIBUTE),
-                "the client is owed the reason, so it can stop retrying");
+        assertThat(SecurityContextHolder.getContext().getAuthentication())
+                .as("a dead token must not authenticate the request")
+                .isNull();
+        assertThat(request.getAttribute(CustomAuthenticationEntryPoint.AUTH_ERROR_ATTRIBUTE))
+                .as("the client is owed the reason, so it can stop retrying")
+                .isEqualTo(CustomAuthenticationEntryPoint.SESSION_REVOKED);
         assertTheDeadTokenWasRefused(lineageEnabled);
     }
 
@@ -117,8 +115,8 @@ class AutoRefreshFailureContractTest {
 
     private void assertCookieWithdrawn(String name) {
         Cookie cookie = response.getCookie(name);
-        assertNotNull(cookie, name + " must be withdrawn, not left with the client");
-        assertEquals(0, cookie.getMaxAge(), name + " must be withdrawn, not reissued");
+        assertThat(cookie).as(name + " must be withdrawn, not left with the client").isNotNull();
+        assertThat(cookie.getMaxAge()).as(name + " must be withdrawn, not reissued").isEqualTo(0);
     }
 
     private JwtAuthenticationFilter filterWithFlag(boolean lineageEnabled) {

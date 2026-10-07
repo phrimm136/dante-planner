@@ -9,9 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
@@ -52,8 +50,9 @@ class RotationResultMatrixTest {
                 () -> {
                     RotationResult outcome = entry.getKey();
                     if (entry.getValue() == null) {
-                        assertSame(outcome, outcome.orThrow(),
-                                "a successful rotation is returned, not wrapped");
+                        assertThat(outcome.orThrow())
+                                .as("a successful rotation is returned, not wrapped")
+                                .isSameAs(outcome);
                     } else {
                         assertRejected(outcome::orThrow)
                                 .withCode("UNAUTHORIZED")
@@ -69,21 +68,21 @@ class RotationResultMatrixTest {
                 : Stream.of(RotationResult.class.getPermittedSubclasses())
                         .map(permitted -> DynamicTest.dynamicTest(
                                 permitted.getSimpleName() + " is covered",
-                                () -> assertEquals(1,
-                                        outcomes().keySet().stream()
-                                                .filter(permitted::isInstance)
-                                                .findAny().stream().count(),
-                                        permitted.getSimpleName()
-                                                + " has no row; say what a caller is owed for it")));
+                                () -> assertThat(outcomes().keySet().stream()
+                                        .filter(permitted::isInstance)
+                                        .findAny().stream().count())
+                                        .as(permitted.getSimpleName() + " has no row; say what a caller is owed for it")
+                                        .isEqualTo(1)));
     }
 
     @TestFactory
     Stream<DynamicTest> orThrow_WhenFamilyIsRevoked_CarriesTheFamilyForward() {
         return Stream.of(DynamicTest.dynamicTest("Revoked carries its family id", () -> {
-            SessionRevokedException thrown = assertThrows(SessionRevokedException.class,
-                    () -> new RotationResult.Revoked(FAMILY_ID).orThrow());
             // The family is what a responder revokes; losing it here would revoke nothing.
-            assertEquals(FAMILY_ID, thrown.getFamilyId());
+            assertRejected(() -> new RotationResult.Revoked(FAMILY_ID).orThrow())
+                    .withCode("UNAUTHORIZED")
+                    .isInstanceOfSatisfying(SessionRevokedException.class,
+                            thrown -> assertThat(thrown.getFamilyId()).isEqualTo(FAMILY_ID));
         }));
     }
 }

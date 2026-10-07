@@ -8,9 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Every SSE event type, and what a subscriber does with it.
@@ -49,11 +47,13 @@ class SseEventTypeMatrixTest {
                 () -> {
                     SseEventType type = entry.getKey();
                     String[] expected = entry.getValue();
-                    assertEquals(expected[0], type.getValue(), "wire value is a published contract");
-                    assertEquals(expected[1], type.userDelivery().name(),
-                            "delivery decides which subscriber branch runs");
-                    assertEquals("payload".equals(expected[2]), type.deliversRawPayload(),
-                            "a client schema expecting top-level fields breaks on the envelope");
+                    assertThat(type.getValue()).as("wire value is a published contract").isEqualTo(expected[0]);
+                    assertThat(type.userDelivery().name())
+                            .as("delivery decides which subscriber branch runs")
+                            .isEqualTo(expected[1]);
+                    assertThat(type.deliversRawPayload())
+                            .as("a client schema expecting top-level fields breaks on the envelope")
+                            .isEqualTo("payload".equals(expected[2]));
                 }));
     }
 
@@ -61,8 +61,9 @@ class SseEventTypeMatrixTest {
     Stream<DynamicTest> eventType_WhenAdded_HasARowInThisTable() {
         return Arrays.stream(SseEventType.values()).map(type -> DynamicTest.dynamicTest(
                 type.name() + " is covered",
-                () -> assertTrue(table().containsKey(type),
-                        type.name() + " has no row; state its wire value and delivery")));
+                () -> assertThat(table())
+                        .as(type.name() + " has no row; state its wire value and delivery")
+                        .containsKey(type)));
     }
 
     @TestFactory
@@ -71,19 +72,17 @@ class SseEventTypeMatrixTest {
                 type.name() + " names a delivery",
                 // The subscriber switches on this exhaustively; a null would fall through to no
                 // branch at all and the event would reach nobody.
-                () -> assertNotNull(type.userDelivery())));
+                () -> assertThat(type.userDelivery()).isNotNull()));
     }
 
     @TestFactory
     Stream<DynamicTest> wireValue_WhenTypesAreCompared_IsUniqueAcrossTheEnum() {
         return Arrays.stream(SseEventType.values()).map(type -> DynamicTest.dynamicTest(
                 type.getValue() + " is claimed once",
-                () -> assertEquals(1,
-                        Arrays.stream(SseEventType.values())
-                                .filter(other -> other.getValue().equals(type.getValue()))
-                                .count(),
-                        // Two types sharing a wire value would deliver each other's payloads to a
-                        // listener that cannot tell them apart.
-                        "wire value " + type.getValue() + " is declared by more than one type")));
+                () -> assertThat(Arrays.stream(SseEventType.values())
+                        .filter(other -> other.getValue().equals(type.getValue()))
+                        .count())
+                        .as("wire value " + type.getValue() + " is declared by more than one type")
+                        .isEqualTo(1)));
     }
 }

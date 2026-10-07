@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
@@ -69,14 +69,14 @@ class PlannerSubscriptionServiceTest {
             PlannerSubscription result = subscriptionService.toggleSubscription(testUser.getId(), plannerId);
 
             // Assert
-            assertNotNull(result);
-            assertTrue(result.isEnabled());
-            assertEquals(testUser.getId(), result.getUserId());
-            assertEquals(plannerId, result.getPlannerId());
+            assertThat(result).isNotNull();
+            assertThat(result.isEnabled()).isTrue();
+            assertThat(result.getUserId()).isEqualTo(testUser.getId());
+            assertThat(result.getPlannerId()).isEqualTo(plannerId);
 
             ArgumentCaptor<PlannerSubscription> captor = ArgumentCaptor.forClass(PlannerSubscription.class);
             verify(subscriptionRepository).insert(captor.capture());
-            assertTrue(captor.getValue().isEnabled());
+            assertThat(captor.getValue().isEnabled()).isTrue();
         }
 
         @Test
@@ -93,9 +93,9 @@ class PlannerSubscriptionServiceTest {
             PlannerSubscription result = subscriptionService.toggleSubscription(testUser.getId(), plannerId);
 
             // Assert
-            assertNotNull(result);
-            assertFalse(result.isEnabled()); // Was enabled, now disabled
-            assertSame(existingSubscription, result);
+            assertThat(result).isNotNull();
+            assertThat(result.isEnabled()).isFalse(); // Was enabled, now disabled
+            assertThat(result).isSameAs(existingSubscription);
         }
 
         @Test
@@ -112,8 +112,8 @@ class PlannerSubscriptionServiceTest {
             PlannerSubscription result = subscriptionService.toggleSubscription(testUser.getId(), plannerId);
 
             // Assert
-            assertNotNull(result);
-            assertTrue(result.isEnabled()); // Was disabled, now enabled
+            assertThat(result).isNotNull();
+            assertThat(result.isEnabled()).isTrue(); // Was disabled, now enabled
         }
 
         @Test
@@ -156,7 +156,7 @@ class PlannerSubscriptionServiceTest {
             boolean result = subscriptionService.isSubscribed(testUser.getId(), plannerId);
 
             // Assert
-            assertTrue(result);
+            assertThat(result).isTrue();
         }
 
         @Test
@@ -172,7 +172,7 @@ class PlannerSubscriptionServiceTest {
             boolean result = subscriptionService.isSubscribed(testUser.getId(), plannerId);
 
             // Assert
-            assertFalse(result);
+            assertThat(result).isFalse();
         }
 
         @Test
@@ -185,7 +185,7 @@ class PlannerSubscriptionServiceTest {
             boolean result = subscriptionService.isSubscribed(testUser.getId(), plannerId);
 
             // Assert
-            assertFalse(result);
+            assertThat(result).isFalse();
         }
     }
 
@@ -206,9 +206,9 @@ class PlannerSubscriptionServiceTest {
             verify(subscriptionRepository).insert(captor.capture());
 
             PlannerSubscription saved = captor.getValue();
-            assertEquals(testUser.getId(), saved.getUserId());
-            assertEquals(plannerId, saved.getPlannerId());
-            assertTrue(saved.isEnabled());
+            assertThat(saved.getUserId()).isEqualTo(testUser.getId());
+            assertThat(saved.getPlannerId()).isEqualTo(plannerId);
+            assertThat(saved.isEnabled()).isTrue();
         }
 
         @Test
@@ -242,10 +242,10 @@ class PlannerSubscriptionServiceTest {
             List<Long> result = subscriptionService.getSubscriberUserIds(plannerId);
 
             // Assert
-            assertEquals(3, result.size());
-            assertTrue(result.contains(1L));
-            assertTrue(result.contains(2L));
-            assertTrue(result.contains(3L));
+            assertThat(result.size()).isEqualTo(3);
+            assertThat(result).contains(1L);
+            assertThat(result).contains(2L);
+            assertThat(result).contains(3L);
         }
 
         @Test
@@ -258,7 +258,7 @@ class PlannerSubscriptionServiceTest {
             List<Long> result = subscriptionService.getSubscriberUserIds(plannerId);
 
             // Assert
-            assertTrue(result.isEmpty());
+            assertThat(result).isEmpty();
         }
     }
 }

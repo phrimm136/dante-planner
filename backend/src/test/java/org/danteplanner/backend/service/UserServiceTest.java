@@ -23,7 +23,8 @@ import org.springframework.transaction.support.TransactionCallback;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -80,7 +81,7 @@ class UserServiceTest {
 
             User resolved = userService.findOrCreateUser("google", IDENTITY);
 
-            assertEquals(testUser.getId(), resolved.getId());
+            assertThat(resolved.getId()).isEqualTo(testUser.getId());
             // A constraint no new suffix can satisfy must not be retried against new suffixes.
             verify(userRepository, times(1)).insert(any(User.class));
         }
@@ -116,8 +117,8 @@ class UserServiceTest {
             Optional<User> result = userService.findActiveById(testUser.getId());
 
             // Assert
-            assertTrue(result.isPresent());
-            assertEquals(testUser, result.get());
+            assertThat(result).isPresent();
+            assertThat(result.get()).isEqualTo(testUser);
         }
 
         @Test
@@ -130,7 +131,7 @@ class UserServiceTest {
             Optional<User> result = userService.findActiveById(testUser.getId());
 
             // Assert
-            assertTrue(result.isEmpty());
+            assertThat(result).isEmpty();
         }
 
         @Test
@@ -144,7 +145,7 @@ class UserServiceTest {
             Optional<User> result = userService.findActiveById(nonExistentId);
 
             // Assert
-            assertTrue(result.isEmpty());
+            assertThat(result).isEmpty();
         }
     }
 
@@ -160,7 +161,7 @@ class UserServiceTest {
             User result = userService.findById(testUser.getId());
 
             // Assert
-            assertEquals(testUser, result);
+            assertThat(result).isEqualTo(testUser);
         }
 
         @Test
@@ -170,12 +171,10 @@ class UserServiceTest {
             when(userRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
             // Act & Assert
-            UserNotFoundException exception = assertThrows(
-                    UserNotFoundException.class,
-                    () -> userService.findById(nonExistentId)
-            );
-
-            assertEquals(nonExistentId, exception.getUserId());
+            assertRejected(() -> userService.findById(nonExistentId))
+                    .withCode("USER_NOT_FOUND")
+                    .isInstanceOfSatisfying(UserNotFoundException.class,
+                            exception -> assertThat(exception.getUserId()).isEqualTo(nonExistentId));
         }
     }
 }

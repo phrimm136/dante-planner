@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -56,11 +55,11 @@ class AuthenticationServiceTest {
 
     private void assertTokensBelongTo(AuthenticationService.AuthResult result, Long userId, UserRole role) {
         TokenClaims access = jwt.service().validateAccessToken(result.accessToken());
-        assertEquals(userId, access.userId());
-        assertEquals(role, access.role());
+        assertThat(access.userId()).isEqualTo(userId);
+        assertThat(access.role()).isEqualTo(role);
         TokenClaims refresh = jwt.service().validateRefreshToken(result.refreshToken());
-        assertEquals(userId, refresh.userId());
-        assertNull(refresh.parentJti(), "a login opens a new refresh family, it does not rotate one");
+        assertThat(refresh.userId()).isEqualTo(userId);
+        assertThat(refresh.parentJti()).as("a login opens a new refresh family, it does not rotate one").isNull();
     }
 
     @Nested
@@ -83,10 +82,10 @@ class AuthenticationServiceTest {
             );
 
             // Assert
-            assertNotNull(result);
-            assertEquals(testUser.getId(), result.user().id());
+            assertThat(result).isNotNull();
+            assertThat(result.user().id()).isEqualTo(testUser.getId());
             assertTokensBelongTo(result, testUser.getId(), UserRole.NORMAL);
-            assertFalse(result.reactivated());
+            assertThat(result.reactivated()).isFalse();
             assertThat(oauthProvider.exchanges).containsExactly(List.of(code, redirectUri, codeVerifier));
             assertThat(oauthProvider.userInfoRequests).containsExactly(oauthTokens.accessToken());
         }
@@ -113,9 +112,9 @@ class AuthenticationServiceTest {
 
             // Assert
             UserSummary created = users.findByProvider(AuthProviderType.GOOGLE, "provider-id-123").orElseThrow();
-            assertFalse(result.reactivated());
-            assertEquals(created.id(), result.user().id());
-            assertEquals("user@email.com", created.email());
+            assertThat(result.reactivated()).isFalse();
+            assertThat(result.user().id()).isEqualTo(created.id());
+            assertThat(created.email()).isEqualTo("user@email.com");
             assertTokensBelongTo(result, created.id(), UserRole.NORMAL);
         }
 
@@ -138,9 +137,9 @@ class AuthenticationServiceTest {
                     "google", "code", "redirect", "verifier");
 
             // Assert
-            assertTrue(result.reactivated());
-            assertEquals(deletedUser.getId(), result.user().id());
-            assertFalse(deletedUser.isDeleted());
+            assertThat(result.reactivated()).isTrue();
+            assertThat(result.user().id()).isEqualTo(deletedUser.getId());
+            assertThat(deletedUser.isDeleted()).isFalse();
             assertTokensBelongTo(result, deletedUser.getId(), UserRole.NORMAL);
         }
     }

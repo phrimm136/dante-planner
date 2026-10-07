@@ -8,7 +8,6 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerSummaryRow;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -28,7 +27,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 import static org.mockito.Mockito.when;
 
 /**
@@ -134,10 +134,10 @@ class PlannerQueryServiceTest {
             Page<PlannerSummaryResponse> result = queryService.getPlanners(testUser.getId(), pageable, false);
 
             // Assert
-            assertEquals(2, result.getTotalElements());
-            assertEquals(2, result.getContent().size());
-            assertEquals(planner.getTitle(), result.getContent().get(0).title());
-            assertEquals(planner.getSyncVersion(), result.getContent().get(0).syncVersion());
+            assertThat(result.getTotalElements()).isEqualTo(2);
+            assertThat(result.getContent().size()).isEqualTo(2);
+            assertThat(result.getContent().get(0).title()).isEqualTo(planner.getTitle());
+            assertThat(result.getContent().get(0).syncVersion()).isEqualTo(planner.getSyncVersion());
         }
 
         @Test
@@ -156,7 +156,7 @@ class PlannerQueryServiceTest {
                     queryService.getPlanners(testUser.getId(), pageable, true);
 
             // Assert
-            assertEquals(deletedAt, result.getContent().get(0).deletedAt());
+            assertThat(result.getContent().get(0).deletedAt()).isEqualTo(deletedAt);
         }
 
         @Test
@@ -172,8 +172,8 @@ class PlannerQueryServiceTest {
             Page<PlannerSummaryResponse> result = queryService.getPlanners(testUser.getId(), pageable, false);
 
             // Assert
-            assertEquals(0, result.getTotalElements());
-            assertTrue(result.getContent().isEmpty());
+            assertThat(result.getTotalElements()).isEqualTo(0);
+            assertThat(result.getContent()).isEmpty();
         }
     }
 
@@ -191,9 +191,9 @@ class PlannerQueryServiceTest {
             PlannerResponse response = queryService.getPlanner(testUser.getId(), planner.getId());
 
             // Assert
-            assertNotNull(response);
-            assertEquals(planner.getId(), response.id());
-            assertEquals(planner.getTitle(), response.title());
+            assertThat(response).isNotNull();
+            assertThat(response.id()).isEqualTo(planner.getId());
+            assertThat(response.title()).isEqualTo(planner.getTitle());
         }
 
         @Test
@@ -204,12 +204,9 @@ class PlannerQueryServiceTest {
                     .thenReturn(Optional.empty());
 
             // Act & Assert
-            PlannerNotFoundException exception = assertThrows(
-                    PlannerNotFoundException.class,
-                    () -> queryService.getPlanner(testUser.getId(), plannerId)
-            );
-
-            assertTrue(exception.getMessage().contains(plannerId.toString()));
+            assertRejected(() -> queryService.getPlanner(testUser.getId(), plannerId))
+                    .withCode("PLANNER_NOT_FOUND")
+                    .satisfies(rejection -> assertThat(rejection.getMessage()).contains(plannerId.toString()));
         }
     }
 }

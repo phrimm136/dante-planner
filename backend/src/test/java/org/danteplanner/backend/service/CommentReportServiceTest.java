@@ -27,7 +27,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -97,13 +96,13 @@ class CommentReportServiceTest {
             CommentReportResponse response = service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request);
 
             // Assert
-            assertNotNull(response.createdAt());
+            assertThat(response.createdAt()).isNotNull();
 
             ArgumentCaptor<PlannerCommentReport> captor =
                     ArgumentCaptor.forClass(PlannerCommentReport.class);
             verify(reportRepository).insert(captor.capture());
-            assertEquals(REPORTER_ID, captor.getValue().getReporterId());
-            assertEquals(REASON, captor.getValue().getReason());
+            assertThat(captor.getValue().getReporterId()).isEqualTo(REPORTER_ID);
+            assertThat(captor.getValue().getReason()).isEqualTo(REASON);
         }
 
         @Test
@@ -140,13 +139,12 @@ class CommentReportServiceTest {
             CommentReportRequest request = new CommentReportRequest(REASON);
 
             // Act & Assert
-            CommentReportAlreadyExistsException exception = assertThrows(
-                    CommentReportAlreadyExistsException.class,
-                    () -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request)
-            );
-
-            assertEquals(COMMENT_INTERNAL_ID, exception.getCommentId());
-            assertEquals(REPORTER_ID, exception.getUserId());
+            assertRejected(() -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request))
+                    .withCode("COMMENT_REPORT_ALREADY_EXISTS")
+                    .isInstanceOfSatisfying(CommentReportAlreadyExistsException.class, exception -> {
+                        assertThat(exception.getCommentId()).isEqualTo(COMMENT_INTERNAL_ID);
+                        assertThat(exception.getUserId()).isEqualTo(REPORTER_ID);
+                    });
             verify(reportRepository, never()).insert(any());
         }
 
@@ -195,7 +193,7 @@ class CommentReportServiceTest {
             boolean result = service.hasReported(REPORTER_ID, COMMENT_INTERNAL_ID);
 
             // Assert
-            assertTrue(result);
+            assertThat(result).isTrue();
         }
 
         @Test
@@ -208,7 +206,7 @@ class CommentReportServiceTest {
             boolean result = service.hasReported(REPORTER_ID, COMMENT_INTERNAL_ID);
 
             // Assert
-            assertFalse(result);
+            assertThat(result).isFalse();
         }
 
         @Test

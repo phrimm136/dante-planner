@@ -4,8 +4,7 @@ import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
@@ -20,17 +19,17 @@ class JsonCreatorNullContractTest {
 
     @Test
     void plannerStatus_WhenValueIsNull_ReturnsNullRatherThanThrowing() {
-        assertNull(PlannerStatus.fromValue(null));
+        assertThat(PlannerStatus.fromValue(null)).isNull();
     }
 
     @Test
     void authProviderType_WhenValueIsNull_ReturnsNullRatherThanThrowing() {
-        assertNull(AuthProviderType.fromValue(null));
+        assertThat(AuthProviderType.fromValue(null)).isNull();
     }
 
     @Test
     void plannerStatus_WhenValueIsStored_ResolvesByWireValueNotName() {
-        assertEquals(PlannerStatus.DRAFT, PlannerStatus.fromValue("draft"));
+        assertThat(PlannerStatus.fromValue("draft")).isEqualTo(PlannerStatus.DRAFT);
         // The constant name is not a value this enum accepts; only the stored form is.
         assertThatThrownBy(() -> PlannerStatus.fromValue("DRAFT"))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -39,7 +38,7 @@ class JsonCreatorNullContractTest {
 
     @Test
     void authProviderType_WhenValueIsStored_ResolvesByWireValueNotName() {
-        assertEquals(AuthProviderType.GOOGLE, AuthProviderType.fromValue("google"));
+        assertThat(AuthProviderType.fromValue("google")).isEqualTo(AuthProviderType.GOOGLE);
         assertThatThrownBy(() -> AuthProviderType.fromValue("GOOGLE"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Unknown AuthProviderType value: GOOGLE");

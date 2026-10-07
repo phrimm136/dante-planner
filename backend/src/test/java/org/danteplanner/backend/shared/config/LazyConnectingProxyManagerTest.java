@@ -1,6 +1,7 @@
 package org.danteplanner.backend.shared.config;
 
 import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,7 +19,6 @@ import org.danteplanner.backend.support.InMemoryProxyManager;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
 class LazyConnectingProxyManagerTest {
 
@@ -44,8 +44,10 @@ class LazyConnectingProxyManagerTest {
         assertThat(connecting.await(LATCH_WAIT_SECONDS, TimeUnit.SECONDS)).isTrue();
 
         try {
-            assertTimeoutPreemptively(FAIL_FAST_BUDGET, () -> assertThatThrownBy(manager::builder)
-                    .isInstanceOf(RedisException.class));
+            assertThat(CompletableFuture.supplyAsync(() -> catchThrowable(manager::builder),
+                    task -> Thread.ofPlatform().start(task)))
+                    .succeedsWithin(FAIL_FAST_BUDGET)
+                    .isInstanceOf(RedisException.class);
             assertThat(connectorCalls).hasValue(1);
         } finally {
             release.countDown();

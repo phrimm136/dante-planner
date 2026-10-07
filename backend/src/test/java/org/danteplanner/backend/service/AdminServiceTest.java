@@ -12,10 +12,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
-import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
 import org.danteplanner.backend.moderation.service.ModerationPolicy;
@@ -65,7 +64,7 @@ class AdminServiceTest {
             UserSummary result = adminService.changeRole(adminUser.getId(), normalUser.getId(), UserRole.MODERATOR);
 
             // Assert
-            assertEquals(UserRole.MODERATOR, result.role());
+            assertThat(result.role()).isEqualTo(UserRole.MODERATOR);
         }
 
         @Test
@@ -74,7 +73,7 @@ class AdminServiceTest {
             UserSummary result = adminService.changeRole(adminUser.getId(), moderatorUser.getId(), UserRole.NORMAL);
 
             // Assert
-            assertEquals(UserRole.NORMAL, result.role());
+            assertThat(result.role()).isEqualTo(UserRole.NORMAL);
         }
 
         @Test
@@ -82,12 +81,10 @@ class AdminServiceTest {
             // Arrange - moderator tries to grant ADMIN
 
             // Act & Assert
-            ModerationForbiddenException exception = assertThrows(
-                    ModerationForbiddenException.class,
-                    () -> adminService.changeRole(moderatorUser.getId(), normalUser.getId(), UserRole.ADMIN)
-            );
-            assertTrue(exception.getMessage().contains("higher than your own"));
-            assertEquals(UserRole.NORMAL, normalUser.getRole());
+            assertRejected(() -> adminService.changeRole(moderatorUser.getId(), normalUser.getId(), UserRole.ADMIN))
+                    .withCode("FORBIDDEN")
+                    .satisfies(rejection -> assertThat(rejection.getMessage()).contains("higher than your own"));
+            assertThat(normalUser.getRole()).isEqualTo(UserRole.NORMAL);
         }
 
         @Test
@@ -98,12 +95,11 @@ class AdminServiceTest {
             users.add(otherModerator);
 
             // Act & Assert
-            ModerationForbiddenException exception = assertThrows(
-                    ModerationForbiddenException.class,
-                    () -> adminService.changeRole(moderatorUser.getId(), otherModerator.getId(), UserRole.NORMAL)
-            );
-            assertTrue(exception.getMessage().contains("equal or higher rank"));
-            assertEquals(UserRole.MODERATOR, otherModerator.getRole());
+            assertRejected(() -> adminService.changeRole(moderatorUser.getId(), otherModerator.getId(),
+                    UserRole.NORMAL))
+                    .withCode("FORBIDDEN")
+                    .satisfies(rejection -> assertThat(rejection.getMessage()).contains("equal or higher rank"));
+            assertThat(otherModerator.getRole()).isEqualTo(UserRole.MODERATOR);
         }
 
         @Test
@@ -111,23 +107,19 @@ class AdminServiceTest {
             // Arrange - moderator tries to modify admin
 
             // Act & Assert
-            ModerationForbiddenException exception = assertThrows(
-                    ModerationForbiddenException.class,
-                    () -> adminService.changeRole(moderatorUser.getId(), adminUser.getId(), UserRole.NORMAL)
-            );
-            assertTrue(exception.getMessage().contains("equal or higher rank"));
-            assertEquals(UserRole.ADMIN, adminUser.getRole());
+            assertRejected(() -> adminService.changeRole(moderatorUser.getId(), adminUser.getId(), UserRole.NORMAL))
+                    .withCode("FORBIDDEN")
+                    .satisfies(rejection -> assertThat(rejection.getMessage()).contains("equal or higher rank"));
+            assertThat(adminUser.getRole()).isEqualTo(UserRole.ADMIN);
         }
 
         @Test
         void changeRole_WhenDemoteLastAdmin_ThrowsException() {
             // Act & Assert
-            ModerationForbiddenException exception = assertThrows(
-                    ModerationForbiddenException.class,
-                    () -> adminService.changeRole(adminUser.getId(), adminUser.getId(), UserRole.MODERATOR)
-            );
-            assertTrue(exception.getMessage().contains("last administrator"));
-            assertEquals(UserRole.ADMIN, adminUser.getRole());
+            assertRejected(() -> adminService.changeRole(adminUser.getId(), adminUser.getId(), UserRole.MODERATOR))
+                    .withCode("FORBIDDEN")
+                    .satisfies(rejection -> assertThat(rejection.getMessage()).contains("last administrator"));
+            assertThat(adminUser.getRole()).isEqualTo(UserRole.ADMIN);
         }
 
         @Test
@@ -138,12 +130,10 @@ class AdminServiceTest {
             users.add(otherAdmin);
 
             // Act & Assert - admin cannot demote another admin (only self-demotion allowed)
-            ModerationForbiddenException exception = assertThrows(
-                    ModerationForbiddenException.class,
-                    () -> adminService.changeRole(adminUser.getId(), otherAdmin.getId(), UserRole.MODERATOR)
-            );
-            assertTrue(exception.getMessage().contains("equal or higher rank"));
-            assertEquals(UserRole.ADMIN, otherAdmin.getRole());
+            assertRejected(() -> adminService.changeRole(adminUser.getId(), otherAdmin.getId(), UserRole.MODERATOR))
+                    .withCode("FORBIDDEN")
+                    .satisfies(rejection -> assertThat(rejection.getMessage()).contains("equal or higher rank"));
+            assertThat(otherAdmin.getRole()).isEqualTo(UserRole.ADMIN);
         }
 
         @Test
@@ -172,7 +162,7 @@ class AdminServiceTest {
             UserSummary result = adminService.changeRole(adminUser.getId(), adminUser.getId(), UserRole.MODERATOR);
 
             // Assert
-            assertEquals(UserRole.MODERATOR, result.role());
+            assertThat(result.role()).isEqualTo(UserRole.MODERATOR);
         }
     }
 
@@ -185,7 +175,7 @@ class AdminServiceTest {
             UserRole result = adminService.getUserRole(adminUser.getId());
 
             // Assert
-            assertEquals(UserRole.ADMIN, result);
+            assertThat(result).isEqualTo(UserRole.ADMIN);
         }
 
         @Test

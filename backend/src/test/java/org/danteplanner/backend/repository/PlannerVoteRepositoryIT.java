@@ -22,7 +22,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Repository tests for PlannerVoteRepository.
@@ -77,12 +77,12 @@ class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
                 testUser.getId(), testPlanner.getId());
 
         // Assert
-        assertNotNull(saved);
-        assertNotNull(saved.getCreatedAt());
-        assertTrue(found.isPresent());
-        assertEquals(VoteType.UP, found.get().getVoteType());
-        assertEquals(testUser.getId(), found.get().getUserId());
-        assertEquals(testPlanner.getId(), found.get().getPlannerId());
+        assertThat(saved).isNotNull();
+        assertThat(saved.getCreatedAt()).isNotNull();
+        assertThat(found).isPresent();
+        assertThat(found.get().getVoteType()).isEqualTo(VoteType.UP);
+        assertThat(found.get().getUserId()).isEqualTo(testUser.getId());
+        assertThat(found.get().getPlannerId()).isEqualTo(testPlanner.getId());
     }
 
     @Test
@@ -92,7 +92,7 @@ class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
                 999L, UUID.randomUUID());
 
         // Assert
-        assertFalse(result.isPresent());
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -112,10 +112,10 @@ class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
         Optional<PlannerVote> user2Vote = plannerVoteRepository.findByUserIdAndPlannerId(
                 secondUser.getId(), testPlanner.getId());
 
-        assertTrue(user1Vote.isPresent());
-        assertTrue(user2Vote.isPresent());
-        assertEquals(VoteType.UP, user1Vote.get().getVoteType());
-        assertEquals(VoteType.UP, user2Vote.get().getVoteType());
+        assertThat(user1Vote).isPresent();
+        assertThat(user2Vote).isPresent();
+        assertThat(user1Vote.get().getVoteType()).isEqualTo(VoteType.UP);
+        assertThat(user2Vote.get().getVoteType()).isEqualTo(VoteType.UP);
     }
 
     @Test
@@ -140,10 +140,10 @@ class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
         Optional<PlannerVote> planner2Vote = plannerVoteRepository.findByUserIdAndPlannerId(
                 testUser.getId(), secondPlanner.getId());
 
-        assertTrue(planner1Vote.isPresent());
-        assertTrue(planner2Vote.isPresent());
-        assertEquals(VoteType.UP, planner1Vote.get().getVoteType());
-        assertEquals(VoteType.UP, planner2Vote.get().getVoteType());
+        assertThat(planner1Vote).isPresent();
+        assertThat(planner2Vote).isPresent();
+        assertThat(planner1Vote.get().getVoteType()).isEqualTo(VoteType.UP);
+        assertThat(planner2Vote.get().getVoteType()).isEqualTo(VoteType.UP);
     }
 
     @Test
@@ -153,7 +153,7 @@ class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
         vote = plannerVoteRepository.save(vote);
 
         // Assert - voteType field is final, no setter exists
-        assertEquals(VoteType.UP, vote.getVoteType());
+        assertThat(vote.getVoteType()).isEqualTo(VoteType.UP);
         // A vote is immutable: there is no setVoteType()
         // Attempting to change vote type would require creating a new vote (which would violate composite PK)
     }

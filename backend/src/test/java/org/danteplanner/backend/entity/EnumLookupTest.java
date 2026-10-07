@@ -7,10 +7,7 @@ import org.danteplanner.backend.user.api.UserRole;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
@@ -23,22 +20,23 @@ class EnumLookupTest {
 
         @Test
         void fromValue_WhenMdCategory_ReturnsConstant() {
-            assertEquals(MDCategory.F5, EnumLookup.fromValue(MDCategory.class, "5F"));
-            assertEquals(MDCategory.F10, EnumLookup.fromValue(MDCategory.class, "10F"));
-            assertEquals(MDCategory.F15, EnumLookup.fromValue(MDCategory.class, "15F"));
+            assertThat(EnumLookup.fromValue(MDCategory.class, "5F")).isEqualTo(MDCategory.F5);
+            assertThat(EnumLookup.fromValue(MDCategory.class, "10F")).isEqualTo(MDCategory.F10);
+            assertThat(EnumLookup.fromValue(MDCategory.class, "15F")).isEqualTo(MDCategory.F15);
         }
 
         @Test
         void fromValue_WhenPlannerType_ReturnsConstant() {
-            assertEquals(PlannerType.MIRROR_DUNGEON, EnumLookup.fromValue(PlannerType.class, "MIRROR_DUNGEON"));
-            assertEquals(PlannerType.REFRACTED_RAILWAY, EnumLookup.fromValue(PlannerType.class, "REFRACTED_RAILWAY"));
+            assertThat(EnumLookup.fromValue(PlannerType.class, "MIRROR_DUNGEON")).isEqualTo(PlannerType.MIRROR_DUNGEON);
+            assertThat(EnumLookup.fromValue(PlannerType.class, "REFRACTED_RAILWAY"))
+                    .isEqualTo(PlannerType.REFRACTED_RAILWAY);
         }
 
         @Test
         void fromValue_WhenUnknown_ThrowsWithTheOriginalMessageFormat() {
-            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                    () -> EnumLookup.fromValue(MDCategory.class, "banana"));
-            assertEquals("Unknown MDCategory value: banana", ex.getMessage());
+            assertThatThrownBy(() -> EnumLookup.fromValue(MDCategory.class, "banana"))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("Unknown MDCategory value: banana");
         }
 
         @Test
@@ -54,21 +52,21 @@ class EnumLookupTest {
 
         @Test
         void isValid_WhenMdCategory_True() {
-            assertTrue(EnumLookup.isValid(MDCategory.class, "5F"));
-            assertTrue(EnumLookup.isValid(MDCategory.class, "10F"));
-            assertTrue(EnumLookup.isValid(MDCategory.class, "15F"));
+            assertThat(EnumLookup.isValid(MDCategory.class, "5F")).isTrue();
+            assertThat(EnumLookup.isValid(MDCategory.class, "10F")).isTrue();
+            assertThat(EnumLookup.isValid(MDCategory.class, "15F")).isTrue();
         }
 
         @Test
         void isValid_WhenUnknownOrNull_False() {
-            assertFalse(EnumLookup.isValid(MDCategory.class, "banana"));
-            assertFalse(EnumLookup.isValid(MDCategory.class, null));
+            assertThat(EnumLookup.isValid(MDCategory.class, "banana")).isFalse();
+            assertThat(EnumLookup.isValid(MDCategory.class, null)).isFalse();
         }
 
         @Test
         void isValid_WhenUserRole_True() {
-            assertTrue(EnumLookup.isValid(UserRole.class, "ADMIN"));
-            assertFalse(EnumLookup.isValid(UserRole.class, "SUPERADMIN"));
+            assertThat(EnumLookup.isValid(UserRole.class, "ADMIN")).isTrue();
+            assertThat(EnumLookup.isValid(UserRole.class, "SUPERADMIN")).isFalse();
         }
     }
 }

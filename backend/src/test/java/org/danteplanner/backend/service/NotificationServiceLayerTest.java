@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -133,7 +132,7 @@ class NotificationServiceLayerTest {
                     .notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
 
             // Assert - the constraint decides, so nothing precedes the statement and nothing follows it
-            assertInstanceOf(NotificationOutcome.Suppressed.class, outcome);
+            assertThat(outcome).isInstanceOf(NotificationOutcome.Suppressed.class);
             verify(notificationRepository, never())
                     .findByUserIdAndContentIdAndNotificationType(any(), any(), any());
         }
@@ -150,14 +149,14 @@ class NotificationServiceLayerTest {
                     .notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
 
             // Assert
-            NotificationOutcome.Delivered delivered =
-                    assertInstanceOf(NotificationOutcome.Delivered.class, outcome);
-            assertEquals(testUserId, delivered.userId());
-            assertEquals(publicId.toString(), delivered.payload().id());
-            assertEquals(NotificationType.PLANNER_RECOMMENDED.name(), delivered.payload().type());
-            assertEquals(testPlannerId.toString(), delivered.payload().contentId());
-            assertEquals(testPlannerId.toString(), delivered.payload().plannerId());
-            assertEquals("Test Planner Title", delivered.payload().plannerTitle());
+            assertThat(outcome).isInstanceOfSatisfying(NotificationOutcome.Delivered.class, delivered -> {
+                assertThat(delivered.userId()).isEqualTo(testUserId);
+                assertThat(delivered.payload().id()).isEqualTo(publicId.toString());
+                assertThat(delivered.payload().type()).isEqualTo(NotificationType.PLANNER_RECOMMENDED.name());
+                assertThat(delivered.payload().contentId()).isEqualTo(testPlannerId.toString());
+                assertThat(delivered.payload().plannerId()).isEqualTo(testPlannerId.toString());
+                assertThat(delivered.payload().plannerTitle()).isEqualTo("Test Planner Title");
+            });
         }
     }
 
@@ -204,7 +203,7 @@ class NotificationServiceLayerTest {
                     "Test content", plannerOwnerId);
 
             // Assert
-            assertInstanceOf(NotificationOutcome.Suppressed.class, outcome);
+            assertThat(outcome).isInstanceOf(NotificationOutcome.Suppressed.class);
             verify(notificationRepository, never())
                     .findByUserIdAndContentIdAndNotificationType(any(), any(), any());
         }
@@ -258,10 +257,10 @@ class NotificationServiceLayerTest {
             NotificationInboxResponse response = inboxService.getInbox(testUserId, 0, 20);
 
             // Assert
-            assertEquals(2, response.notifications().size());
-            assertEquals(0, response.page());
-            assertEquals(2, response.size()); // actual size, not requested size
-            assertEquals(2, response.totalElements());
+            assertThat(response.notifications().size()).isEqualTo(2);
+            assertThat(response.page()).isEqualTo(0);
+            assertThat(response.size()).isEqualTo(2); // actual size, not requested size
+            assertThat(response.totalElements()).isEqualTo(2);
         }
 
         @Test
@@ -276,8 +275,8 @@ class NotificationServiceLayerTest {
             NotificationInboxResponse response = inboxService.getInbox(testUserId, 0, 20);
 
             // Assert
-            assertTrue(response.notifications().isEmpty());
-            assertEquals(0, response.totalElements());
+            assertThat(response.notifications()).isEmpty();
+            assertThat(response.totalElements()).isEqualTo(0);
         }
     }
 
@@ -294,7 +293,7 @@ class NotificationServiceLayerTest {
             UnreadCountResponse response = inboxService.getUnreadCount(testUserId);
 
             // Assert
-            assertEquals(5L, response.unreadCount());
+            assertThat(response.unreadCount()).isEqualTo(5L);
         }
 
         @Test
@@ -307,7 +306,7 @@ class NotificationServiceLayerTest {
             UnreadCountResponse response = inboxService.getUnreadCount(testUserId);
 
             // Assert
-            assertEquals(0L, response.unreadCount());
+            assertThat(response.unreadCount()).isEqualTo(0L);
         }
     }
 
@@ -320,7 +319,7 @@ class NotificationServiceLayerTest {
             UUID publicId = UUID.randomUUID();
             Notification notification = new Notification(testUserId, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED);
             notification.setPublicId(publicId);
-            assertFalse(notification.isRead());
+            assertThat(notification.isRead()).isFalse();
 
             when(notificationRepository.findByPublicId(publicId))
                     .thenReturn(Optional.of(notification));
@@ -329,9 +328,9 @@ class NotificationServiceLayerTest {
             NotificationResponse response = inboxService.markAsRead(publicId, testUserId);
 
             // Assert
-            assertTrue(notification.isRead());
-            assertNotNull(notification.getReadAt());
-            assertTrue(response.read());
+            assertThat(notification.isRead()).isTrue();
+            assertThat(notification.getReadAt()).isNotNull();
+            assertThat(response.read()).isTrue();
         }
 
         @Test
@@ -377,7 +376,7 @@ class NotificationServiceLayerTest {
             int count = inboxService.markAllAsRead(testUserId);
 
             // Assert
-            assertEquals(3, count);
+            assertThat(count).isEqualTo(3);
         }
 
         @Test
@@ -390,7 +389,7 @@ class NotificationServiceLayerTest {
             int count = inboxService.markAllAsRead(testUserId);
 
             // Assert
-            assertEquals(0, count);
+            assertThat(count).isEqualTo(0);
         }
     }
 
@@ -403,7 +402,7 @@ class NotificationServiceLayerTest {
             UUID publicId = UUID.randomUUID();
             Notification notification = new Notification(testUserId, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED);
             notification.setPublicId(publicId);
-            assertFalse(notification.isDeleted());
+            assertThat(notification.isDeleted()).isFalse();
 
             when(notificationRepository.findByPublicId(publicId))
                     .thenReturn(Optional.of(notification));
@@ -412,8 +411,8 @@ class NotificationServiceLayerTest {
             inboxService.deleteNotification(publicId, testUserId);
 
             // Assert
-            assertTrue(notification.isDeleted());
-            assertNotNull(notification.getDeletedAt());
+            assertThat(notification.isDeleted()).isTrue();
+            assertThat(notification.getDeletedAt()).isNotNull();
         }
 
         @Test
@@ -491,8 +490,8 @@ class NotificationServiceLayerTest {
             long softDeleteDays = ChronoUnit.DAYS.between(softDeleteCutoff, now);
             long hardDeleteDays = ChronoUnit.DAYS.between(hardDeleteCutoff, now);
 
-            assertTrue(softDeleteDays >= 89 && softDeleteDays <= 91, "Soft delete cutoff should be ~90 days");
-            assertTrue(hardDeleteDays >= 364 && hardDeleteDays <= 366, "Hard delete cutoff should be ~365 days");
+            assertThat(softDeleteDays).as("Soft delete cutoff should be ~90 days").isBetween(89L, 91L);
+            assertThat(hardDeleteDays).as("Hard delete cutoff should be ~365 days").isBetween(364L, 366L);
         }
     }
 }

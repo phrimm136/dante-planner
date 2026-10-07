@@ -16,7 +16,6 @@ import org.danteplanner.backend.planner.entity.StoredPlannerContent;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.planner.exception.PlannerLimitExceededException;
 import org.danteplanner.backend.planner.repository.PlannerOwnershipRow;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.user.api.UserNotFoundException;
@@ -52,7 +51,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
@@ -165,10 +164,10 @@ class PlannerCommandServiceTest {
             PlannerResponse response = commandService.createPlanner(testUser.getId(), deviceId, request);
 
             // Assert
-            assertNotNull(response);
-            assertEquals("Test Planner", response.title());
-            assertEquals("5F", response.category());
-            assertEquals(1L, response.syncVersion());
+            assertThat(response).isNotNull();
+            assertThat(response.title()).isEqualTo("Test Planner");
+            assertThat(response.category()).isEqualTo("5F");
+            assertThat(response.syncVersion()).isEqualTo(1L);
         }
 
         @Test
@@ -178,12 +177,10 @@ class PlannerCommandServiceTest {
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) MAX_PLANNERS_PER_USER);
 
             // Act & Assert
-            PlannerLimitExceededException exception = assertThrows(
-                    PlannerLimitExceededException.class,
-                    () -> commandService.createPlanner(testUser.getId(), deviceId, request)
-            );
-
-            assertTrue(exception.getMessage().contains(String.valueOf(MAX_PLANNERS_PER_USER)));
+            assertRejected(() -> commandService.createPlanner(testUser.getId(), deviceId, request))
+                    .withCode("PLANNER_LIMIT_EXCEEDED")
+                    .satisfies(rejection -> assertThat(rejection.getMessage())
+                            .contains(String.valueOf(MAX_PLANNERS_PER_USER)));
             verify(plannerRepository, never()).insert(any());
         }
 
@@ -194,13 +191,12 @@ class PlannerCommandServiceTest {
             Long nonExistentUserId = 999L;
 
             // Act & Assert
-            UserNotFoundException exception = assertThrows(
-                    UserNotFoundException.class,
-                    () -> commandService.createPlanner(nonExistentUserId, deviceId, request)
-            );
-
-            assertEquals(nonExistentUserId, exception.getUserId());
-            assertTrue(exception.getMessage().contains(nonExistentUserId.toString()));
+            assertRejected(() -> commandService.createPlanner(nonExistentUserId, deviceId, request))
+                    .withCode("USER_NOT_FOUND")
+                    .isInstanceOfSatisfying(UserNotFoundException.class, exception -> {
+                        assertThat(exception.getUserId()).isEqualTo(nonExistentUserId);
+                        assertThat(exception.getMessage()).contains(nonExistentUserId.toString());
+                    });
             verify(plannerRepository, never()).insert(any());
         }
 
@@ -222,7 +218,7 @@ class PlannerCommandServiceTest {
             commandService.createPlanner(testUser.getId(), deviceId, request);
 
             // Assert
-            assertEquals("Untitled", plannerCaptor.getValue().getTitle());
+            assertThat(plannerCaptor.getValue().getTitle()).isEqualTo("Untitled");
         }
 
         @Test
@@ -232,13 +228,8 @@ class PlannerCommandServiceTest {
             UpsertPlannerRequest unknownIdentity = UpsertRequests.draft().content(UNKNOWN_IDENTITY_CONTENT).build();
 
             // Act & Assert
-            PlannerValidationException exception = assertThrows(
-                    PlannerValidationException.class,
-                    () -> commandService.createPlanner(testUser.getId(), deviceId, unknownIdentity)
-            );
-
-            assertTrue(exception.getSubErrors().stream().map(ValidationError::code).toList()
-                    .contains("UNKNOWN_IDENTITY"));
+            assertRejected(() -> commandService.createPlanner(testUser.getId(), deviceId, unknownIdentity))
+                    .withViolation("UNKNOWN_IDENTITY");
             verify(plannerRepository, never()).insert(any());
         }
 
@@ -252,12 +243,10 @@ class PlannerCommandServiceTest {
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
 
             // Act & Assert
-            PlannerValidationException exception = assertThrows(
-                    PlannerValidationException.class,
-                    () -> commandService.createPlanner(testUser.getId(), deviceId, request)
-            );
-
-            assertEquals("INVALID_CONTENT_VERSION", exception.getOriginalCode());
+            assertRejected(() -> commandService.createPlanner(testUser.getId(), deviceId, request))
+                    .withViolation("INVALID_CONTENT_VERSION")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            exception -> assertThat(exception.getOriginalCode()).isEqualTo("INVALID_CONTENT_VERSION"));
             verify(plannerRepository, never()).insert(any());
         }
     }
@@ -292,11 +281,13 @@ class PlannerCommandServiceTest {
                     .contentVersion(99)
                     .build();
 
-            PlannerValidationException exception = assertThrows(PlannerValidationException.class,
-                    () -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), request, false));
-
-            assertEquals(java.util.List.of(new ValidationError("UNKNOWN_VERSION", "",
-                    "No game data for content version 99")), exception.getSubErrors());
+            assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), request,
+                    false))
+                    .withViolation("UNKNOWN_VERSION")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            exception -> assertThat(exception.getSubErrors()).isEqualTo(java.util.List.of(
+                                    new ValidationError("UNKNOWN_VERSION", "",
+                                            "No game data for content version 99"))));
         }
 
         @Test
@@ -306,11 +297,9 @@ class PlannerCommandServiceTest {
                     .thenReturn(Optional.of(planner));
             UpsertPlannerRequest retitled = UpsertRequests.resending(planner).title("Renamed").build();
 
-            PlannerValidationException exception = assertThrows(PlannerValidationException.class,
-                    () -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), retitled, false));
-
-            assertTrue(exception.getSubErrors().stream().map(ValidationError::code).toList()
-                    .contains("UNKNOWN_IDENTITY"));
+            assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), retitled,
+                    false))
+                    .withViolation("UNKNOWN_IDENTITY");
         }
 
         @Test
@@ -328,8 +317,8 @@ class PlannerCommandServiceTest {
                     UpsertRequests.resending(planner).category("5F").build(), false);
 
             JsonNode saved = new ObjectMapper().readTree(planner.getContentJson());
-            assertEquals(new ObjectMapper().createArrayNode().add("19002"), saved.path("observationGiftIds"));
-            assertEquals("5F", planner.getCategory());
+            assertThat(saved.path("observationGiftIds")).isEqualTo(new ObjectMapper().createArrayNode().add("19002"));
+            assertThat(planner.getCategory()).isEqualTo("5F");
         }
 
         @Test
@@ -340,11 +329,11 @@ class PlannerCommandServiceTest {
             String unknownKeyword = TestDataFactory.withSelectedKeywords(TestDataFactory.VALID_CONTENT,
                     java.util.List.of("Nope"));
 
-            PlannerValidationException exception = assertThrows(PlannerValidationException.class,
-                    () -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(),
-                            UpsertRequests.resending(planner).content(unknownKeyword).build(), false));
-
-            assertEquals("UNKNOWN_KEYWORD", exception.getOriginalCode());
+            assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(),
+                    UpsertRequests.resending(planner).content(unknownKeyword).build(), false))
+                    .withViolation("UNKNOWN_KEYWORD")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            exception -> assertThat(exception.getOriginalCode()).isEqualTo("UNKNOWN_KEYWORD"));
         }
     }
 
@@ -369,7 +358,7 @@ class PlannerCommandServiceTest {
         void deletePlanner_WhenPublishedPlanner_UnpublishesFirst() {
             // Arrange
             Planner planner = testPlanner(1L, true);
-            assertTrue(planner.isPublished());
+            assertThat(planner.isPublished()).isTrue();
 
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
@@ -379,8 +368,8 @@ class PlannerCommandServiceTest {
             commandService.deletePlanner(testUser.getId(), planner.getId());
 
             // Assert
-            assertFalse(planner.isPublished()); // Auto-unpublished
-            assertNotNull(planner.getContent().getDeletedAt()); // Then soft deleted
+            assertThat(planner.isPublished()).isFalse(); // Auto-unpublished
+            assertThat(planner.getContent().getDeletedAt()).isNotNull(); // Then soft deleted
         }
 
         @Test
@@ -396,8 +385,8 @@ class PlannerCommandServiceTest {
             commandService.deletePlanner(testUser.getId(), planner.getId());
 
             // Assert
-            assertFalse(planner.isPublished()); // Still unpublished
-            assertNotNull(planner.getContent().getDeletedAt());
+            assertThat(planner.isPublished()).isFalse(); // Still unpublished
+            assertThat(planner.getContent().getDeletedAt()).isNotNull();
         }
     }
 
@@ -417,12 +406,11 @@ class PlannerCommandServiceTest {
             });
 
             // Act & Assert - should not throw
-            PlannerResponse response = assertDoesNotThrow(
-                    () -> commandService.createPlanner(testUser.getId(), deviceId, request));
+            PlannerResponse response = commandService.createPlanner(testUser.getId(), deviceId, request);
 
-            assertEquals(UUID.fromString(request.id()), response.id());
-            assertEquals("Test Planner", response.title());
-            assertEquals(1L, response.syncVersion());
+            assertThat(response.id()).isEqualTo(UUID.fromString(request.id()));
+            assertThat(response.title()).isEqualTo("Test Planner");
+            assertThat(response.syncVersion()).isEqualTo(1L);
         }
 
         @Test
@@ -446,12 +434,9 @@ class PlannerCommandServiceTest {
             long activeCount = MAX_PLANNERS_PER_USER + 7L;
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(activeCount);
 
-            PlannerLimitExceededException exception = assertThrows(
-                    PlannerLimitExceededException.class,
-                    () -> commandService.createPlanner(testUser.getId(), deviceId, request)
-            );
-
-            assertTrue(exception.getMessage().contains(String.valueOf(activeCount)));
+            assertRejected(() -> commandService.createPlanner(testUser.getId(), deviceId, request))
+                    .withCode("PLANNER_LIMIT_EXCEEDED")
+                    .satisfies(rejection -> assertThat(rejection.getMessage()).contains(String.valueOf(activeCount)));
             verify(plannerRepository, never()).insert(any());
         }
     }
@@ -475,8 +460,8 @@ class PlannerCommandServiceTest {
             // A ban withdraws distribution (publish, comment), never possession.
             UpsertResult result = commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false);
 
-            assertTrue(result.isCreated(), "a banned user must keep private planner work");
-            assertEquals(plannerId, result.response().id());
+            assertThat(result.isCreated()).as("a banned user must keep private planner work").isTrue();
+            assertThat(result.response().id()).isEqualTo(plannerId);
         }
 
         @Test
@@ -501,10 +486,10 @@ class PlannerCommandServiceTest {
                     testUser.getId(), deviceId, plannerId, request, false);
 
             // Assert
-            assertNotNull(result);
-            assertTrue(result.isCreated());
-            assertEquals(plannerId, result.response().id());
-            assertEquals("Test Planner", result.response().title());
+            assertThat(result).isNotNull();
+            assertThat(result.isCreated()).isTrue();
+            assertThat(result.response().id()).isEqualTo(plannerId);
+            assertThat(result.response().title()).isEqualTo("Test Planner");
         }
     }
 
@@ -522,7 +507,7 @@ class PlannerCommandServiceTest {
 
             assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), retitled,
                     false)).withCode("USER_BANNED");
-            assertEquals("Test Planner", planner.getTitle());
+            assertThat(planner.getTitle()).isEqualTo("Test Planner");
         }
     }
 
@@ -593,7 +578,7 @@ class PlannerCommandServiceTest {
             UpsertResult result = commandService.upsertPlanner(
                     testUser.getId(), deviceId, plannerId, request, false);
 
-            assertTrue(result.isCreated());
+            assertThat(result.isCreated()).isTrue();
             verify(plannerRepository, never()).existsActiveById(any());
         }
     }
@@ -631,7 +616,7 @@ class PlannerCommandServiceTest {
 
             commandService.createPlanner(testUser.getId(), deviceId, request);
 
-            assertEquals(java.util.Set.of("Sinking"), plannerCaptor.getValue().getSelectedKeywords());
+            assertThat(plannerCaptor.getValue().getSelectedKeywords()).isEqualTo(java.util.Set.of("Sinking"));
         }
 
         @Test
@@ -641,7 +626,7 @@ class PlannerCommandServiceTest {
             commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(),
                     UpsertRequests.resending(planner).content(BURST_CONTENT).build(), false);
 
-            assertEquals(java.util.Set.of("Burst"), planner.getSelectedKeywords());
+            assertThat(planner.getSelectedKeywords()).isEqualTo(java.util.Set.of("Burst"));
         }
 
         @Test
@@ -649,16 +634,16 @@ class PlannerCommandServiceTest {
             Planner planner = storedWithSinking();
             long storedVersion = planner.getSyncVersion();
 
-            UpsertResult result = assertDoesNotThrow(() -> commandService.upsertPlanner(testUser.getId(), deviceId,
+            UpsertResult result = commandService.upsertPlanner(testUser.getId(), deviceId,
                     planner.getId(), UpsertRequests.resending(planner)
                             .content(SINKING_CONTENT)
                             .selectedKeywords(java.util.Set.of("Burst"))
                             .syncVersion(storedVersion - 1)
                             .build(),
-                    false));
+                    false);
 
-            assertEquals(storedVersion, result.response().syncVersion());
-            assertEquals(java.util.Set.of("Sinking"), planner.getSelectedKeywords());
+            assertThat(result.response().syncVersion()).isEqualTo(storedVersion);
+            assertThat(planner.getSelectedKeywords()).isEqualTo(java.util.Set.of("Sinking"));
         }
     }
 }

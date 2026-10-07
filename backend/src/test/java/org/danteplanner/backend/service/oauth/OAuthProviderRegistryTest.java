@@ -1,5 +1,4 @@
 package org.danteplanner.backend.service.oauth;
-import org.danteplanner.backend.shared.exception.InvalidRequestException;
 import org.danteplanner.backend.auth.oauth.OAuthTokens;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthUserInfo;
@@ -12,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
 import java.util.Locale;
@@ -69,8 +68,8 @@ class OAuthProviderRegistryTest {
             OAuthProvider result = registry.getProvider("google");
 
             // Assert
-            assertNotNull(result);
-            assertSame(googleProvider, result);
+            assertThat(result).isNotNull();
+            assertThat(result).isSameAs(googleProvider);
         }
 
         @Test
@@ -79,22 +78,23 @@ class OAuthProviderRegistryTest {
             OAuthProvider result = registry.getProvider("apple");
 
             // Assert
-            assertNotNull(result);
-            assertSame(appleProvider, result);
+            assertThat(result).isNotNull();
+            assertThat(result).isSameAs(appleProvider);
         }
 
         @Test
         void getProvider_WhenUnknownProvider_Throws() {
             // Act & Assert
-            InvalidRequestException exception = assertThrows(
-                    InvalidRequestException.class,
-                    () -> registry.getProvider("unknown")
-            );
-
-            assertTrue(exception.getMessage().contains("unknown"),
-                    "Exception message should contain the unknown provider name");
-            assertTrue(exception.getMessage().toLowerCase(Locale.ROOT).contains("unknown oauth provider"),
-                    "Exception message should indicate it's an unknown provider");
+            assertRejected(() -> registry.getProvider("unknown"))
+                    .withCode("UNKNOWN_OAUTH_PROVIDER")
+                    .satisfies(rejection -> {
+                        assertThat(rejection.getMessage())
+                                .as("Exception message should contain the unknown provider name")
+                                .contains("unknown");
+                        assertThat(rejection.getMessage().toLowerCase(Locale.ROOT))
+                                .as("Exception message should indicate it's an unknown provider")
+                                .contains("unknown oauth provider");
+                    });
         }
 
         @Test
@@ -105,9 +105,9 @@ class OAuthProviderRegistryTest {
             OAuthProvider lowerCase = registry.getProvider("google");
 
             // Assert
-            assertSame(googleProvider, upperCase);
-            assertSame(googleProvider, mixedCase);
-            assertSame(googleProvider, lowerCase);
+            assertThat(upperCase).isSameAs(googleProvider);
+            assertThat(mixedCase).isSameAs(googleProvider);
+            assertThat(lowerCase).isSameAs(googleProvider);
         }
 
         @Test
@@ -123,29 +123,29 @@ class OAuthProviderRegistryTest {
         @Test
         void hasProvider_WhenRegistered_ReturnsTrue() {
             // Act & Assert
-            assertTrue(registry.hasProvider("google"));
-            assertTrue(registry.hasProvider("apple"));
+            assertThat(registry.hasProvider("google")).isTrue();
+            assertThat(registry.hasProvider("apple")).isTrue();
         }
 
         @Test
         void hasProvider_WhenUnregistered_ReturnsFalse() {
             // Act & Assert
-            assertFalse(registry.hasProvider("discord"));
-            assertFalse(registry.hasProvider("facebook"));
+            assertThat(registry.hasProvider("discord")).isFalse();
+            assertThat(registry.hasProvider("facebook")).isFalse();
         }
 
         @Test
         void hasProvider_WhenMixedCase_IsCaseInsensitive() {
             // Act & Assert
-            assertTrue(registry.hasProvider("GOOGLE"));
-            assertTrue(registry.hasProvider("Google"));
-            assertTrue(registry.hasProvider("gOoGlE"));
+            assertThat(registry.hasProvider("GOOGLE")).isTrue();
+            assertThat(registry.hasProvider("Google")).isTrue();
+            assertThat(registry.hasProvider("gOoGlE")).isTrue();
         }
 
         @Test
         void hasProvider_WhenEmptyName_ReturnsFalse() {
             // Act & Assert
-            assertFalse(registry.hasProvider(""));
+            assertThat(registry.hasProvider("")).isFalse();
         }
     }
 
@@ -159,7 +159,7 @@ class OAuthProviderRegistryTest {
 
             // Assert
             assertRejected(() -> emptyRegistry.getProvider("any")).withCode("UNKNOWN_OAUTH_PROVIDER");
-            assertFalse(emptyRegistry.hasProvider("google"));
+            assertThat(emptyRegistry.hasProvider("google")).isFalse();
         }
 
         @Test
@@ -169,9 +169,9 @@ class OAuthProviderRegistryTest {
                     new OAuthProviderRegistry(List.of(googleProvider));
 
             // Act & Assert
-            assertTrue(singleProviderRegistry.hasProvider("google"));
-            assertFalse(singleProviderRegistry.hasProvider("apple"));
-            assertSame(googleProvider, singleProviderRegistry.getProvider("google"));
+            assertThat(singleProviderRegistry.hasProvider("google")).isTrue();
+            assertThat(singleProviderRegistry.hasProvider("apple")).isFalse();
+            assertThat(singleProviderRegistry.getProvider("google")).isSameAs(googleProvider);
         }
 
         @Test
@@ -196,8 +196,8 @@ class OAuthProviderRegistryTest {
             OAuthProvider provider = registry.getProvider("google");
 
             // Assert
-            assertNotNull(provider);
-            assertEquals("google", provider.getProviderName());
+            assertThat(provider).isNotNull();
+            assertThat(provider.getProviderName()).isEqualTo("google");
         }
     }
 }

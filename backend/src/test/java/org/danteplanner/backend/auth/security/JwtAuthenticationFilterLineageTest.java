@@ -33,11 +33,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
  * Integration tests for {@link JwtAuthenticationFilter} lineage-rotation behavior.
@@ -119,16 +114,17 @@ class JwtAuthenticationFilterLineageTest {
         // distinguishes the legacy path; the cookie the client ends up with is the same shape.
         assertAccessCookieFor(userId);
         Cookie refreshCookie = assertRefreshCookieFor(userId);
-        assertNotEquals(refreshToken, refreshCookie.getValue());
-        assertNull(jwt.service().validateRefreshToken(refreshCookie.getValue()).parentJti(),
-                "the legacy path mints a new family rather than rotating the presented one");
+        assertThat(refreshCookie.getValue()).isNotEqualTo(refreshToken);
+        assertThat(jwt.service().validateRefreshToken(refreshCookie.getValue()).parentJti())
+                .as("the legacy path mints a new family rather than rotating the presented one")
+                .isNull();
         jwt.clock().advance(Duration.ofSeconds(5));
         assertThat(tokenBlacklist.blacklistedTokens()).containsExactly(refreshToken);
         assertThat(refreshRotation.calls()).isEmpty();
-        assertSame(request, filterChain.getRequest());
-        assertSame(response, filterChain.getResponse());
-        assertNotNull(SecurityContextHolder.getContext().getAuthentication());
-        assertEquals(userId, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        assertThat(filterChain.getRequest()).isSameAs(request);
+        assertThat(filterChain.getResponse()).isSameAs(response);
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
+        assertThat(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).isEqualTo(userId);
     }
 
     @Test
@@ -145,9 +141,9 @@ class JwtAuthenticationFilterLineageTest {
 
         assertAccessCookieFor(userId);
         assertRefreshCookie(rotatedTo(refreshToken));
-        assertEquals(0, tokenBlacklist.size());
-        assertNotNull(SecurityContextHolder.getContext().getAuthentication());
-        assertEquals(userId, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        assertThat(tokenBlacklist.size()).isEqualTo(0);
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
+        assertThat(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).isEqualTo(userId);
     }
 
     @Test
@@ -165,9 +161,9 @@ class JwtAuthenticationFilterLineageTest {
         assertThat(refreshRotation.rotations().getLast())
                 .isEqualTo(new Rotation(refreshToken, new RotationResult.Revoked(familyOf(refreshToken))));
         assertSessionCleared();
-        assertSame(request, filterChain.getRequest());
-        assertSame(response, filterChain.getResponse());
-        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        assertThat(filterChain.getRequest()).isSameAs(request);
+        assertThat(filterChain.getResponse()).isSameAs(response);
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
     }
 
     @Test
@@ -186,7 +182,7 @@ class JwtAuthenticationFilterLineageTest {
 
         assertThat(noReuseWindow.rotations().getLast())
                 .isEqualTo(new Rotation(superseded, new RotationResult.Revoked(familyOf(login))));
-        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         assertSessionCleared();
     }
 
@@ -205,7 +201,7 @@ class JwtAuthenticationFilterLineageTest {
         assertThat(refreshRotation.rotations()).containsExactly(new Rotation(refreshToken,
                 new RotationResult.Rejected(RotationResult.Rejected.Reason.REVOKED_FAMILY)));
         assertSessionCleared();
-        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
     }
 
     @Test
@@ -222,8 +218,8 @@ class JwtAuthenticationFilterLineageTest {
 
         assertAccessCookieFor(userId);
         assertRefreshCookie(rotatedTo(refreshToken));
-        assertNotNull(SecurityContextHolder.getContext().getAuthentication());
-        assertEquals(userId, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
+        assertThat(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).isEqualTo(userId);
     }
 
     @Test
@@ -242,7 +238,7 @@ class JwtAuthenticationFilterLineageTest {
         assertThat(legacyAdmitOff.rotations()).containsExactly(new Rotation(refreshToken,
                 new RotationResult.Rejected(RotationResult.Rejected.Reason.INVALID)));
         assertSessionCleared();
-        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
     }
 
     @Test
@@ -262,11 +258,11 @@ class JwtAuthenticationFilterLineageTest {
         filter.doFilterInternal(request, response, filterChain);
 
         Cookie accessCookie = assertAccessCookieFor(userId);
-        assertNotEquals(accessToken, accessCookie.getValue());
+        assertThat(accessCookie.getValue()).isNotEqualTo(accessToken);
         assertRefreshCookie(rotatedTo(refreshToken));
-        assertEquals(0, tokenBlacklist.size());
-        assertNotNull(SecurityContextHolder.getContext().getAuthentication());
-        assertEquals(userId, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        assertThat(tokenBlacklist.size()).isEqualTo(0);
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
+        assertThat(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).isEqualTo(userId);
     }
 
     @Test
@@ -283,7 +279,7 @@ class JwtAuthenticationFilterLineageTest {
 
         assertThat(refreshRotation.calls()).isEmpty();
         assertSessionCleared();
-        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
     }
 
     @Test
@@ -302,29 +298,29 @@ class JwtAuthenticationFilterLineageTest {
 
         assertThat(refreshRotation.calls()).isEmpty();
         assertSessionCleared();
-        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
     }
 
     private String rotatedTo(String presented) {
         Rotation rotation = refreshRotation.rotations().getLast();
-        assertEquals(presented, rotation.presented());
+        assertThat(rotation.presented()).isEqualTo(presented);
         return ((RotationResult.Rotated) rotation.result()).newRefreshJwt();
     }
 
     private Cookie assertAccessCookieFor(Long userId) {
         Cookie accessCookie = response.getCookie(CookieConstants.ACCESS_TOKEN);
-        assertNotNull(accessCookie);
+        assertThat(accessCookie).isNotNull();
         TokenClaims claims = jwt.service().validateAccessToken(accessCookie.getValue());
-        assertEquals(userId, claims.userId());
-        assertEquals(jwt.properties().getAccessTokenExpirySeconds(), accessCookie.getMaxAge());
+        assertThat(claims.userId()).isEqualTo(userId);
+        assertThat(accessCookie.getMaxAge()).isEqualTo(jwt.properties().getAccessTokenExpirySeconds());
         return accessCookie;
     }
 
     private Cookie assertRefreshCookieFor(Long userId) {
         Cookie refreshCookie = response.getCookie(CookieConstants.REFRESH_TOKEN);
-        assertNotNull(refreshCookie);
-        assertEquals(userId, jwt.service().validateRefreshToken(refreshCookie.getValue()).userId());
-        assertEquals(jwt.properties().getRefreshTokenExpirySeconds(), refreshCookie.getMaxAge());
+        assertThat(refreshCookie).isNotNull();
+        assertThat(jwt.service().validateRefreshToken(refreshCookie.getValue()).userId()).isEqualTo(userId);
+        assertThat(refreshCookie.getMaxAge()).isEqualTo(jwt.properties().getRefreshTokenExpirySeconds());
         return refreshCookie;
     }
 
@@ -334,9 +330,9 @@ class JwtAuthenticationFilterLineageTest {
      */
     private void assertRefreshCookie(String expectedValue) {
         Cookie refreshCookie = response.getCookie(CookieConstants.REFRESH_TOKEN);
-        assertNotNull(refreshCookie);
-        assertEquals(expectedValue, refreshCookie.getValue());
-        assertEquals(jwt.properties().getRefreshTokenExpirySeconds(), refreshCookie.getMaxAge());
+        assertThat(refreshCookie).isNotNull();
+        assertThat(refreshCookie.getValue()).isEqualTo(expectedValue);
+        assertThat(refreshCookie.getMaxAge()).isEqualTo(jwt.properties().getRefreshTokenExpirySeconds());
     }
 
     /**
@@ -347,8 +343,8 @@ class JwtAuthenticationFilterLineageTest {
     private void assertSessionCleared() {
         for (String name : List.of(CookieConstants.ACCESS_TOKEN, CookieConstants.REFRESH_TOKEN)) {
             Cookie cookie = response.getCookie(name);
-            assertNotNull(cookie, name + " must be withdrawn");
-            assertEquals(0, cookie.getMaxAge(), name + " must be withdrawn, not reissued");
+            assertThat(cookie).as(name + " must be withdrawn").isNotNull();
+            assertThat(cookie.getMaxAge()).as(name + " must be withdrawn, not reissued").isEqualTo(0);
         }
     }
 }

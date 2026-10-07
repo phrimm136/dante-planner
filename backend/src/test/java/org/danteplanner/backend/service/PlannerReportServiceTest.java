@@ -20,7 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
@@ -78,8 +78,8 @@ class PlannerReportServiceTest {
             // Assert
             ArgumentCaptor<PlannerReport> captor = ArgumentCaptor.forClass(PlannerReport.class);
             verify(reportRepository).insert(captor.capture());
-            assertEquals(testUser.getId(), captor.getValue().getUserId());
-            assertEquals(plannerId, captor.getValue().getPlannerId());
+            assertThat(captor.getValue().getUserId()).isEqualTo(testUser.getId());
+            assertThat(captor.getValue().getPlannerId()).isEqualTo(plannerId);
         }
 
         @Test
@@ -90,13 +90,12 @@ class PlannerReportServiceTest {
                     .thenReturn(true);
 
             // Act & Assert
-            ReportAlreadyExistsException exception = assertThrows(
-                    ReportAlreadyExistsException.class,
-                    () -> reportService.createReport(testUser.getId(), plannerId)
-            );
-
-            assertEquals(plannerId, exception.getPlannerId());
-            assertEquals(testUser.getId(), exception.getUserId());
+            assertRejected(() -> reportService.createReport(testUser.getId(), plannerId))
+                    .withCode("REPORT_ALREADY_EXISTS")
+                    .isInstanceOfSatisfying(ReportAlreadyExistsException.class, exception -> {
+                        assertThat(exception.getPlannerId()).isEqualTo(plannerId);
+                        assertThat(exception.getUserId()).isEqualTo(testUser.getId());
+                    });
             verify(reportRepository, never()).insert(any());
         }
 
@@ -152,7 +151,7 @@ class PlannerReportServiceTest {
             boolean result = reportService.hasReported(testUser.getId(), plannerId);
 
             // Assert
-            assertTrue(result);
+            assertThat(result).isTrue();
         }
 
         @Test
@@ -165,7 +164,7 @@ class PlannerReportServiceTest {
             boolean result = reportService.hasReported(testUser.getId(), plannerId);
 
             // Assert
-            assertFalse(result);
+            assertThat(result).isFalse();
         }
 
         @Test

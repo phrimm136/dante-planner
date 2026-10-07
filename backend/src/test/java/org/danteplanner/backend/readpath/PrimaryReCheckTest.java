@@ -22,9 +22,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
@@ -79,9 +77,9 @@ class PrimaryReCheckTest {
         void liveEntity_WhenReadFromReplica_IsServed() {
             String result = reCheck.readWithReCheck(ENTITY_TYPE, id, () -> "planner");
 
-            assertEquals("planner", result);
-            assertEquals(0d, promoted(), "a hit must not spend a bulkhead re-check");
-            assertNull(currentRoutingKeyOverride(), "the thread must be left unpinned");
+            assertThat(result).isEqualTo("planner");
+            assertThat(promoted()).as("a hit must not spend a bulkhead re-check").isEqualTo(0d);
+            assertThat(currentRoutingKeyOverride()).as("the thread must be left unpinned").isNull();
         }
 
         @Test
@@ -98,7 +96,7 @@ class PrimaryReCheckTest {
          */
         @Test
         void tombstoneStore_WhenFailingOpen_ServesTheRow() {
-            assertEquals("planner", reCheck.readWithReCheck(ENTITY_TYPE, id, () -> "planner"));
+            assertThat(reCheck.readWithReCheck(ENTITY_TYPE, id, () -> "planner")).isEqualTo("planner");
         }
     }
 
@@ -112,14 +110,15 @@ class PrimaryReCheckTest {
                 if (attempts.getAndIncrement() == 0) {
                     throw new EntityNotFoundException(ENTITY_TYPE, id);
                 }
-                assertEquals(RoutingKey.BULKHEAD, currentRoutingKey(),
-                        "the re-check must reach the primary through the isolated bulkhead pool");
+                assertThat(currentRoutingKey())
+                        .as("the re-check must reach the primary through the isolated bulkhead pool")
+                        .isEqualTo(RoutingKey.BULKHEAD);
                 return "planner";
             };
 
-            assertEquals("planner", reCheck.readWithReCheck(ENTITY_TYPE, id, dereference));
-            assertEquals(2, attempts.get());
-            assertEquals(1d, promoted());
+            assertThat(reCheck.readWithReCheck(ENTITY_TYPE, id, dereference)).isEqualTo("planner");
+            assertThat(attempts.get()).isEqualTo(2);
+            assertThat(promoted()).isEqualTo(1d);
         }
 
         @Test
@@ -132,8 +131,9 @@ class PrimaryReCheckTest {
                 return "planner";
             });
 
-            assertNull(currentRoutingKeyOverride(),
-                    "a leaked pin would route a later unrelated read on this worker thread");
+            assertThat(currentRoutingKeyOverride())
+                    .as("a leaked pin would route a later unrelated read on this worker thread")
+                    .isNull();
         }
 
         @Test
@@ -143,7 +143,7 @@ class PrimaryReCheckTest {
                         throw new EntityNotFoundException(ENTITY_TYPE, id);
                     })).withCode("NOT_FOUND");
 
-            assertNull(currentRoutingKeyOverride());
+            assertThat(currentRoutingKeyOverride()).isNull();
         }
 
         @Test
@@ -157,7 +157,7 @@ class PrimaryReCheckTest {
                 return "planner";
             });
 
-            assertEquals("planner", served);
+            assertThat(served).isEqualTo("planner");
         }
     }
 
@@ -190,8 +190,8 @@ class PrimaryReCheckTest {
             assertThat(calls).containsExactly(
                     List.of(replicated, primaryOnly, nowhere), List.of(primaryOnly, nowhere));
             assertThat(routedTo).containsExactly(null, RoutingKey.BULKHEAD);
-            assertEquals(1d, promoted());
-            assertNull(currentRoutingKeyOverride(), "a leaked pin would route a later unrelated read");
+            assertThat(promoted()).isEqualTo(1d);
+            assertThat(currentRoutingKeyOverride()).as("a leaked pin would route a later unrelated read").isNull();
         }
 
         @Test
@@ -203,7 +203,7 @@ class PrimaryReCheckTest {
 
             assertThat(served).isEmpty();
             assertThat(calls).hasSize(1);
-            assertEquals(0d, promoted());
+            assertThat(promoted()).isEqualTo(0d);
         }
 
         @Test
@@ -213,7 +213,7 @@ class PrimaryReCheckTest {
 
             assertThat(served).containsExactly(replicated);
             assertThat(calls).hasSize(1);
-            assertEquals(0d, promoted());
+            assertThat(promoted()).isEqualTo(0d);
         }
 
         @Test
@@ -250,7 +250,7 @@ class PrimaryReCheckTest {
 
             reCheck.readWithReCheck(ENTITY_TYPE, id, dereference);
 
-            assertEquals(1d, bulkheadQueries());
+            assertThat(bulkheadQueries()).isEqualTo(1d);
         }
 
         @Test
@@ -260,15 +260,15 @@ class PrimaryReCheckTest {
 
             reCheck.readAllWithReCheck(ENTITY_TYPE, List.of(first, second), dereference, Function.identity());
 
-            assertEquals(1d, bulkheadQueries());
-            assertEquals(2d, promoted());
+            assertThat(bulkheadQueries()).isEqualTo(1d);
+            assertThat(promoted()).isEqualTo(2d);
         }
 
         @Test
         void batchHits_WhenReplicaServesEveryId_CountNoQuery() {
             reCheck.readAllWithReCheck(ENTITY_TYPE, List.of(first, second), List::copyOf, Function.identity());
 
-            assertEquals(0d, bulkheadQueries());
+            assertThat(bulkheadQueries()).isEqualTo(0d);
         }
     }
 
@@ -284,9 +284,9 @@ class PrimaryReCheckTest {
             String served = reCheck.reReadWhenTombstoned(SCOPE, id, "replica",
                     () -> "primary-" + calls.incrementAndGet());
 
-            assertEquals("replica", served);
-            assertEquals(0, calls.get());
-            assertEquals(0d, bulkheadQueries());
+            assertThat(served).isEqualTo("replica");
+            assertThat(calls.get()).isEqualTo(0);
+            assertThat(bulkheadQueries()).isEqualTo(0d);
         }
 
         @Test
@@ -299,10 +299,10 @@ class PrimaryReCheckTest {
                 return "primary";
             });
 
-            assertEquals("primary", served);
+            assertThat(served).isEqualTo("primary");
             assertThat(routedTo).containsExactly(RoutingKey.BULKHEAD);
-            assertEquals(1d, bulkheadQueries());
-            assertNull(currentRoutingKeyOverride(), "a leaked pin would route a later unrelated read");
+            assertThat(bulkheadQueries()).isEqualTo(1d);
+            assertThat(currentRoutingKeyOverride()).as("a leaked pin would route a later unrelated read").isNull();
         }
 
         @Test
@@ -310,13 +310,10 @@ class PrimaryReCheckTest {
             tombstoneStore.writeTombstone(SCOPE, id);
             EntityNotFoundException primaryMiss = new EntityNotFoundException(ENTITY_TYPE, id);
 
-            EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class,
-                    () -> reCheck.reReadWhenTombstoned(SCOPE, id, "replica", () -> {
-                        throw primaryMiss;
-                    }));
-
-            assertThat(thrown).isSameAs(primaryMiss);
-            assertNull(currentRoutingKeyOverride(), "a leaked pin would route a later unrelated read");
+            assertThatThrownBy(() -> reCheck.reReadWhenTombstoned(SCOPE, id, "replica", () -> {
+                throw primaryMiss;
+            })).isSameAs(primaryMiss);
+            assertThat(currentRoutingKeyOverride()).as("a leaked pin would route a later unrelated read").isNull();
         }
     }
 

@@ -46,8 +46,7 @@ class ArchitectureRuleFixtureRatchetTest {
     private static final String TESTABLE = "org.junit.platform.commons.annotation.Testable";
     private static final Set<String> FAILURE_ASSERTIONS = Set.of(
             "org.assertj.core.api.Assertions.assertThatThrownBy",
-            "org.assertj.core.api.Assertions.assertThatExceptionOfType",
-            "org.junit.jupiter.api.Assertions.assertThrows");
+            "org.assertj.core.api.Assertions.assertThatExceptionOfType");
     private static final String MESSAGE_ASSERTION_PREFIX = "hasMessage";
 
     private static final JavaClasses ARCHITECTURE_CLASSES =

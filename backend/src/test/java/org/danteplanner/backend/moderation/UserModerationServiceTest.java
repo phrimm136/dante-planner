@@ -3,7 +3,6 @@ package org.danteplanner.backend.moderation;
 import org.danteplanner.backend.moderation.api.ModerationActionType;
 import org.danteplanner.backend.moderation.api.ModerationTargetType;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
-import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
 import org.danteplanner.backend.moderation.service.ModerationPolicy;
@@ -26,7 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
 
@@ -88,11 +87,10 @@ class UserModerationServiceTest {
             User result = moderationService.timeoutUser(moderatorUser.getId(), normalUser.getId(), 60, "Test timeout");
 
             // Assert
-            assertNotNull(result.getTimeoutUntil());
+            assertThat(result.getTimeoutUntil()).isNotNull();
 
             // The loaded entity carries the change dirty checking would write at commit.
-            assertSame(normalUser, result);
-            assertEquals(result.getTimeoutUntil(), normalUser.getTimeoutUntil());
+            assertThat(result).isSameAs(normalUser);
         }
 
         @Test
@@ -107,7 +105,7 @@ class UserModerationServiceTest {
             User result = moderationService.timeoutUser(adminUser.getId(), normalUser.getId(), 60, "Test timeout");
 
             // Assert
-            assertNotNull(result.getTimeoutUntil());
+            assertThat(result.getTimeoutUntil()).isNotNull();
         }
 
         @Test
@@ -122,7 +120,7 @@ class UserModerationServiceTest {
             User result = moderationService.timeoutUser(adminUser.getId(), moderatorUser.getId(), 60, "Test timeout");
 
             // Assert
-            assertNotNull(result.getTimeoutUntil());
+            assertThat(result.getTimeoutUntil()).isNotNull();
         }
 
         @Test
@@ -136,12 +134,11 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(targetAdmin));
 
             // Act & Assert
-            ModerationForbiddenException exception = assertThrows(
-                    ModerationForbiddenException.class,
-                    () -> moderationService.timeoutUser(adminUser.getId(), targetAdmin.getId(), 60, "Test")
-            );
-            assertTrue(exception.getMessage().contains("Cannot timeout a user of equal or higher rank"));
-            assertNull(targetAdmin.getTimeoutUntil());
+            assertRejected(() -> moderationService.timeoutUser(adminUser.getId(), targetAdmin.getId(), 60, "Test"))
+                    .withCode("FORBIDDEN")
+                    .satisfies(rejection -> assertThat(rejection.getMessage())
+                            .contains("Cannot timeout a user of equal or higher rank"));
+            assertThat(targetAdmin.getTimeoutUntil()).isNull();
         }
 
         @Test
@@ -155,12 +152,12 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(otherModerator));
 
             // Act & Assert
-            ModerationForbiddenException exception = assertThrows(
-                    ModerationForbiddenException.class,
-                    () -> moderationService.timeoutUser(moderatorUser.getId(), otherModerator.getId(), 60, "Test")
-            );
-            assertTrue(exception.getMessage().contains("Cannot timeout a user of equal or higher rank"));
-            assertNull(otherModerator.getTimeoutUntil());
+            assertRejected(() -> moderationService.timeoutUser(moderatorUser.getId(), otherModerator.getId(), 60,
+                    "Test"))
+                    .withCode("FORBIDDEN")
+                    .satisfies(rejection -> assertThat(rejection.getMessage())
+                            .contains("Cannot timeout a user of equal or higher rank"));
+            assertThat(otherModerator.getTimeoutUntil()).isNull();
         }
 
         @Test
@@ -207,10 +204,10 @@ class UserModerationServiceTest {
             User result = moderationService.removeTimeout(moderatorUser.getId(), normalUser.getId(), "Test clear timeout");
 
             // Assert
-            assertNull(result.getTimeoutUntil());
+            assertThat(result.getTimeoutUntil()).isNull();
 
-            assertSame(normalUser, result);
-            assertNull(normalUser.getTimeoutUntil());
+            assertThat(result).isSameAs(normalUser);
+            assertThat(normalUser.getTimeoutUntil()).isNull();
         }
 
         @Test
@@ -239,13 +236,11 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(otherModerator));
 
             // Act & Assert
-            ModerationForbiddenException exception = assertThrows(
-                    ModerationForbiddenException.class,
-                    () -> moderationService.removeTimeout(moderatorUser.getId(), otherModerator.getId(), "Test")
-            );
-            assertTrue(exception.getMessage()
-                    .contains("Cannot clear the timeout of a user of equal or higher rank"));
-            assertNotNull(otherModerator.getTimeoutUntil());
+            assertRejected(() -> moderationService.removeTimeout(moderatorUser.getId(), otherModerator.getId(), "Test"))
+                    .withCode("FORBIDDEN")
+                    .satisfies(rejection -> assertThat(rejection.getMessage())
+                            .contains("Cannot clear the timeout of a user of equal or higher rank"));
+            assertThat(otherModerator.getTimeoutUntil()).isNotNull();
         }
 
         @Test
@@ -260,12 +255,11 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(target));
 
             // Act & Assert
-            ModerationForbiddenException exception = assertThrows(
-                    ModerationForbiddenException.class,
-                    () -> moderationService.removeTimeout(normalUser.getId(), target.getId(), "Test")
-            );
-            assertTrue(exception.getMessage().contains("Only moderators can clear timeouts"));
-            assertNotNull(target.getTimeoutUntil());
+            assertRejected(() -> moderationService.removeTimeout(normalUser.getId(), target.getId(), "Test"))
+                    .withCode("FORBIDDEN")
+                    .satisfies(rejection -> assertThat(rejection.getMessage())
+                            .contains("Only moderators can clear timeouts"));
+            assertThat(target.getTimeoutUntil()).isNotNull();
         }
     }
 
@@ -284,19 +278,19 @@ class UserModerationServiceTest {
             User result = moderationService.banUser(adminUser.getId(), normalUser.getId(), "Test ban reason");
 
             // Assert
-            assertTrue(result.isBanned());
-            assertNotNull(result.getBannedAt());
-            assertEquals(adminUser.getId(), result.getBannedBy());
+            assertThat(result.isBanned()).isTrue();
+            assertThat(result.getBannedAt()).isNotNull();
+            assertThat(result.getBannedBy()).isEqualTo(adminUser.getId());
 
-            assertSame(normalUser, result);
-            assertTrue(normalUser.isBanned());
-            assertEquals(adminUser.getId(), normalUser.getBannedBy());
+            assertThat(result).isSameAs(normalUser);
+            assertThat(normalUser.isBanned()).isTrue();
+            assertThat(normalUser.getBannedBy()).isEqualTo(adminUser.getId());
 
             ModerationAction action = persistedAction();
-            assertEquals(ModerationActionType.BAN, action.getActionType());
-            assertEquals(ModerationTargetType.USER, action.getTargetType());
-            assertEquals(adminUser.getId(), action.getActorId());
-            assertEquals("Test ban reason", action.getReason());
+            assertThat(action.getActionType()).isEqualTo(ModerationActionType.BAN);
+            assertThat(action.getTargetType()).isEqualTo(ModerationTargetType.USER);
+            assertThat(action.getActorId()).isEqualTo(adminUser.getId());
+            assertThat(action.getReason()).isEqualTo("Test ban reason");
 
             verify(eventPublisher).publishEvent(new AccountSuspendedEvent(
                     normalUser.getId(), "Test ban reason", SuspensionType.BAN, null));
@@ -314,12 +308,12 @@ class UserModerationServiceTest {
             User result = moderationService.banUser(adminUser.getId(), moderatorUser.getId(), null);
 
             // Assert
-            assertTrue(result.isBanned());
+            assertThat(result.isBanned()).isTrue();
 
             ModerationAction action = persistedAction();
-            assertEquals(ModerationActionType.BAN, action.getActionType());
-            assertEquals(adminUser.getId(), action.getActorId());
-            assertNull(action.getReason());
+            assertThat(action.getActionType()).isEqualTo(ModerationActionType.BAN);
+            assertThat(action.getActorId()).isEqualTo(adminUser.getId());
+            assertThat(action.getReason()).isNull();
         }
 
         @Test
@@ -333,12 +327,11 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(targetAdmin));
 
             // Act & Assert
-            ModerationForbiddenException exception = assertThrows(
-                    ModerationForbiddenException.class,
-                    () -> moderationService.banUser(adminUser.getId(), targetAdmin.getId(), "Reason")
-            );
-            assertTrue(exception.getMessage().contains("Cannot ban a user of equal or higher rank"));
-            assertFalse(targetAdmin.isBanned());
+            assertRejected(() -> moderationService.banUser(adminUser.getId(), targetAdmin.getId(), "Reason"))
+                    .withCode("FORBIDDEN")
+                    .satisfies(rejection -> assertThat(rejection.getMessage())
+                            .contains("Cannot ban a user of equal or higher rank"));
+            assertThat(targetAdmin.isBanned()).isFalse();
             verify(eventPublisher, never()).publishEvent(any(AccountSuspendedEvent.class));
         }
 
@@ -351,12 +344,10 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(normalUser));
 
             // Act & Assert
-            ModerationForbiddenException exception = assertThrows(
-                    ModerationForbiddenException.class,
-                    () -> moderationService.banUser(moderatorUser.getId(), normalUser.getId(), "Reason")
-            );
-            assertTrue(exception.getMessage().contains("Only administrators can ban"));
-            assertFalse(normalUser.isBanned());
+            assertRejected(() -> moderationService.banUser(moderatorUser.getId(), normalUser.getId(), "Reason"))
+                    .withCode("FORBIDDEN")
+                    .satisfies(rejection -> assertThat(rejection.getMessage()).contains("Only administrators can ban"));
+            assertThat(normalUser.isBanned()).isFalse();
         }
     }
 
@@ -378,18 +369,18 @@ class UserModerationServiceTest {
             User result = moderationService.unbanUser(adminUser.getId(), normalUser.getId(), "Test unban");
 
             // Assert
-            assertFalse(result.isBanned());
-            assertNull(result.getBannedAt());
-            assertNull(result.getBannedBy());
+            assertThat(result.isBanned()).isFalse();
+            assertThat(result.getBannedAt()).isNull();
+            assertThat(result.getBannedBy()).isNull();
 
-            assertSame(normalUser, result);
-            assertFalse(normalUser.isBanned());
-            assertNull(normalUser.getBannedBy());
+            assertThat(result).isSameAs(normalUser);
+            assertThat(normalUser.isBanned()).isFalse();
+            assertThat(normalUser.getBannedBy()).isNull();
 
             ModerationAction action = persistedAction();
-            assertEquals(ModerationActionType.UNBAN, action.getActionType());
-            assertEquals(ModerationTargetType.USER, action.getTargetType());
-            assertEquals(adminUser.getId(), action.getActorId());
+            assertThat(action.getActionType()).isEqualTo(ModerationActionType.UNBAN);
+            assertThat(action.getTargetType()).isEqualTo(ModerationTargetType.USER);
+            assertThat(action.getActorId()).isEqualTo(adminUser.getId());
         }
 
         @Test
@@ -401,11 +392,10 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(normalUser));
 
             // Act & Assert
-            ModerationForbiddenException exception = assertThrows(
-                    ModerationForbiddenException.class,
-                    () -> moderationService.unbanUser(moderatorUser.getId(), normalUser.getId(), "Test")
-            );
-            assertTrue(exception.getMessage().contains("Only administrators can unban"));
+            assertRejected(() -> moderationService.unbanUser(moderatorUser.getId(), normalUser.getId(), "Test"))
+                    .withCode("FORBIDDEN")
+                    .satisfies(rejection -> assertThat(rejection.getMessage())
+                            .contains("Only administrators can unban"));
         }
 
         @Test
@@ -420,12 +410,11 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(targetAdmin));
 
             // Act & Assert
-            ModerationForbiddenException exception = assertThrows(
-                    ModerationForbiddenException.class,
-                    () -> moderationService.unbanUser(adminUser.getId(), targetAdmin.getId(), "Test")
-            );
-            assertTrue(exception.getMessage().contains("Cannot unban a user of equal or higher rank"));
-            assertTrue(targetAdmin.isBanned());
+            assertRejected(() -> moderationService.unbanUser(adminUser.getId(), targetAdmin.getId(), "Test"))
+                    .withCode("FORBIDDEN")
+                    .satisfies(rejection -> assertThat(rejection.getMessage())
+                            .contains("Cannot unban a user of equal or higher rank"));
+            assertThat(targetAdmin.isBanned()).isTrue();
         }
     }
 }

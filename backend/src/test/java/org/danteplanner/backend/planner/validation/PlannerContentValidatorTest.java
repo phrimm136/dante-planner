@@ -34,7 +34,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for PlannerContentValidator.
@@ -280,15 +279,15 @@ class PlannerContentValidatorTest {
         @Test
         void validate_WhenAllRequiredFields_Passes() {
             String content = createValidContent();
-            String result = assertDoesNotThrow(() -> validate(content, "5F"));
-            assertEquals(content, result);
+            String result = validate(content, "5F");
+            assertThat(result).isEqualTo(content);
         }
 
         @Test
         void validate_WhenRequiredAndOptionalFields_Passes() {
             String content = createFullContent();
-            String result = assertDoesNotThrow(() -> validate(content, "5F"));
-            assertEquals(content, result);
+            String result = validate(content, "5F");
+            assertThat(result).isEqualTo(content);
         }
 
         @Test
@@ -299,7 +298,7 @@ class PlannerContentValidatorTest {
                     "\"selectedKeywords\": [\"Combustion\", \"Slash\"],\n                \"selectedGiftKeyword\": null"
             );
 
-            assertDoesNotThrow(() -> validate(content, "5F"));
+            assertThatCode(() -> validate(content, "5F")).doesNotThrowAnyException();
         }
 
         @ParameterizedTest
@@ -333,7 +332,7 @@ class PlannerContentValidatorTest {
                     "\"deploymentOrder\": []"
             );
 
-            assertDoesNotThrow(() -> validate(content, "5F"));
+            assertThatCode(() -> validate(content, "5F")).doesNotThrowAnyException();
         }
     }
 
@@ -465,14 +464,14 @@ class PlannerContentValidatorTest {
                 }
                 """;
 
-            PlannerValidationException exception = assertThrows(
-                    PlannerValidationException.class,
-                    () -> validate(content, "5F")
-            );
-
-            assertEquals("VALIDATION_ERROR", exception.getOriginalCode());
-            assertThat(exception.getSubErrors()).contains(new ValidationError("UNKNOWN_FIELD", "unknownField",
-                    "Field 'unknownField' is unknown"));
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("UNKNOWN_FIELD", "unknownField")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, exception -> {
+                        assertThat(exception.getOriginalCode()).isEqualTo("VALIDATION_ERROR");
+                        assertThat(exception.getSubErrors()).contains(
+                                new ValidationError("UNKNOWN_FIELD", "unknownField",
+                                        "Field 'unknownField' is unknown"));
+                    });
         }
 
         @Test
@@ -507,19 +506,18 @@ class PlannerContentValidatorTest {
             sb.append("\",\"category\":\"5F\",\"selectedKeywords\":[],\"equipment\":{},");
             sb.append("\"deploymentOrder\":[],\"floorSelections\":[],\"sectionNotes\":{}}");
 
-            PlannerValidationException exception = assertThrows(
-                    PlannerValidationException.class,
-                    () -> validate(sb.toString(), "5F")
-            );
-
-            // Granular error code for size limit exceeded
-            assertEquals("SIZE_EXCEEDED", exception.getOriginalCode());
+            assertRejected(() -> validate(sb.toString(), "5F"))
+                    .withViolation("SIZE_EXCEEDED")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, exception -> {
+                        // Granular error code for size limit exceeded
+                        assertThat(exception.getOriginalCode()).isEqualTo("SIZE_EXCEEDED");
+                    });
         }
 
         @Test
         void validate_WhenContentUnderLimit_Passes() {
             // Use createValidContent which is well under 50KB
-            assertDoesNotThrow(() -> validate(createValidContent(), "5F"));
+            assertThatCode(() -> validate(createValidContent(), "5F")).doesNotThrowAnyException();
         }
     }
 
@@ -532,12 +530,10 @@ class PlannerContentValidatorTest {
                     "\"sectionNotes\": {\"floor-1\": {\"content\": {\"type\": \"doc\", \"text\": \""
                             + "x".repeat(1100) + "\"}}}");
 
-            PlannerValidationException exception = assertThrows(
-                    PlannerValidationException.class,
-                    () -> validate(content, "5F")
-            );
-
-            assertEquals("SIZE_EXCEEDED", exception.getOriginalCode());
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("SIZE_EXCEEDED")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            exception -> assertThat(exception.getOriginalCode()).isEqualTo("SIZE_EXCEEDED"));
         }
 
         @Test
@@ -546,16 +542,18 @@ class PlannerContentValidatorTest {
                     "\"sectionNotes\": {\"floor1\": {\"content\": {\"type\": \"doc\", \"text\": \""
                             + "x".repeat(MAX_NOTE_SIZE_BYTES) + "\"}}}");
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F"));
-
-            assertThat(ex.getSubErrors()).singleElement().satisfies(error -> {
-                assertEquals("SIZE_EXCEEDED", error.code());
-                assertEquals("sectionNotes[floor1]", error.path());
-            });
-            String detail = ex.getSubErrors().getFirst().message();
-            assertEquals(Map.of("code", "SIZE_EXCEEDED", "message", detail), ex.getBody().getProperties());
-            assertEquals(detail, ex.getBody().getDetail());
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("SIZE_EXCEEDED", "sectionNotes[floor1]")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getSubErrors()).singleElement().satisfies(error -> {
+                            assertThat(error.code()).isEqualTo("SIZE_EXCEEDED");
+                            assertThat(error.path()).isEqualTo("sectionNotes[floor1]");
+                        });
+                        String detail = ex.getSubErrors().getFirst().message();
+                        assertThat(ex.getBody().getProperties())
+                                .isEqualTo(Map.of("code", "SIZE_EXCEEDED", "message", detail));
+                        assertThat(ex.getBody().getDetail()).isEqualTo(detail);
+                    });
         }
 
         @Test
@@ -567,13 +565,13 @@ class PlannerContentValidatorTest {
                     "\"sectionNotes\": {\"floor-1\": {\"content\": {\"type\": \"doc\", \"text\": \"" + noteContent + "\"}}}"
             );
 
-            assertDoesNotThrow(() -> validate(content, "5F"));
+            assertThatCode(() -> validate(content, "5F")).doesNotThrowAnyException();
         }
 
         @Test
         void validate_WhenEmptySectionNotes_Passes() {
             // createValidContent already has empty sectionNotes
-            assertDoesNotThrow(() -> validate(createValidContent(), "5F"));
+            assertThatCode(() -> validate(createValidContent(), "5F")).doesNotThrowAnyException();
         }
     }
 
@@ -582,12 +580,10 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenNullContent_ThrowsException() {
-            PlannerValidationException exception = assertThrows(
-                    PlannerValidationException.class,
-                    () -> validate(null, "5F")
-            );
-
-            assertEquals("EMPTY_CONTENT", exception.getOriginalCode());
+            assertRejected(() -> validate(null, "5F"))
+                    .withViolation("EMPTY_CONTENT")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            exception -> assertThat(exception.getOriginalCode()).isEqualTo("EMPTY_CONTENT"));
         }
 
         @Test
@@ -621,7 +617,7 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenValidSinnerIndicesInEquipment_Passes() {
-            assertDoesNotThrow(() -> validate(createValidContent(), "5F"));
+            assertThatCode(() -> validate(createValidContent(), "5F")).doesNotThrowAnyException();
         }
 
         @Test
@@ -685,7 +681,7 @@ class PlannerContentValidatorTest {
                     "\"deploymentOrder\": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]"
             );
 
-            assertDoesNotThrow(() -> validate(content, "5F"));
+            assertThatCode(() -> validate(content, "5F")).doesNotThrowAnyException();
         }
 
         @Test
@@ -735,7 +731,7 @@ class PlannerContentValidatorTest {
         @Test
         void validate_WhenValidStartBuffIds_Passes() {
             // createFullContent has selectedBuffIds: [100, 201, 302]
-            assertDoesNotThrow(() -> validate(createFullContent(), "5F"));
+            assertThatCode(() -> validate(createFullContent(), "5F")).doesNotThrowAnyException();
         }
 
         @Test
@@ -744,7 +740,7 @@ class PlannerContentValidatorTest {
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [],"
             );
-            assertDoesNotThrow(() -> validate(content, "5F"));
+            assertThatCode(() -> validate(content, "5F")).doesNotThrowAnyException();
         }
 
         @Test
@@ -754,7 +750,7 @@ class PlannerContentValidatorTest {
                     "\"selectedBuffIds\": [100, 201],",
                     "\"selectedBuffIds\": [100, 201, 302, 103, 204, 305, 106, 207, 308, 109],"
             );
-            assertDoesNotThrow(() -> validate(content, "5F"));
+            assertThatCode(() -> validate(content, "5F")).doesNotThrowAnyException();
         }
 
         @Test
@@ -805,7 +801,7 @@ class PlannerContentValidatorTest {
                     "\"selectedBuffIds\": [100, 101.0],"
             );
 
-            assertDoesNotThrow(() -> validate(content, "5F"));
+            assertThatCode(() -> validate(content, "5F")).doesNotThrowAnyException();
         }
 
         @Test
@@ -838,7 +834,7 @@ class PlannerContentValidatorTest {
         @Test
         void validate_WhenValidKeywordAndGiftIds_Passes() {
             // createValidContent has Combustion keyword with 9001 which is in the pool
-            assertDoesNotThrow(() -> validate(createValidContent(), "5F"));
+            assertThatCode(() -> validate(createValidContent(), "5F")).doesNotThrowAnyException();
         }
 
         @Test
@@ -847,7 +843,7 @@ class PlannerContentValidatorTest {
                     replaceOnce(createValidContent(),
                             "\"selectedGiftKeyword\": \"Combustion\",", "\"selectedGiftKeyword\": null,"),
                     "\"selectedGiftIds\": [\"9001\"],", "\"selectedGiftIds\": [],");
-            assertDoesNotThrow(() -> validate(content, "5F"));
+            assertThatCode(() -> validate(content, "5F")).doesNotThrowAnyException();
         }
 
         @Test
@@ -857,7 +853,7 @@ class PlannerContentValidatorTest {
                     "\"selectedGiftIds\": [\"9001\"],",
                     "\"selectedGiftIds\": [\"9001\", \"9009\", \"9103\"],"
             );
-            assertDoesNotThrow(() -> validate(content, "5F"));
+            assertThatCode(() -> validate(content, "5F")).doesNotThrowAnyException();
         }
 
         @Test
@@ -913,7 +909,7 @@ class PlannerContentValidatorTest {
         @Test
         void validate_WhenValidComprehensiveGiftIds_Passes() {
             String content = createFullContent();
-            assertDoesNotThrow(() -> validate(content, "5F"));
+            assertThatCode(() -> validate(content, "5F")).doesNotThrowAnyException();
         }
 
         @Test
@@ -971,7 +967,7 @@ class PlannerContentValidatorTest {
         @Test
         void validate_WhenValidFloorGiftIds_Passes() {
             String content = createValidContent();
-            assertDoesNotThrow(() -> validate(content, "5F"));
+            assertThatCode(() -> validate(content, "5F")).doesNotThrowAnyException();
         }
 
         @Test
@@ -1013,7 +1009,7 @@ class PlannerContentValidatorTest {
                     "{\"themePackId\": \"1002\", \"difficulty\": 0, \"giftIds\": []}",
                     "{\"themePackId\": \"1002\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}"
             );
-            assertDoesNotThrow(() -> validate(content, "5F"));
+            assertThatCode(() -> validate(content, "5F")).doesNotThrowAnyException();
         }
     }
 
@@ -1022,11 +1018,8 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenGiftNotAffordable_ProducesUnaffordableEgoGiftCode() {
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(withUnaffordableFloorGifts("9212"), "5F"));
-
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "UNAFFORDABLE_EGOGIFT".equals(e.code())),
-                    "Expected UNAFFORDABLE_EGOGIFT in sub-errors");
+            assertRejected(() -> validate(withUnaffordableFloorGifts("9212"), "5F"))
+                    .withViolation("UNAFFORDABLE_EGOGIFT");
         }
 
         @Test
@@ -1036,11 +1029,8 @@ class PlannerContentValidatorTest {
                     "\"giftIds\": [\"9002\", \"9002\"]"
             );
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F"));
-
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "DUPLICATE_EGOGIFT".equals(e.code())),
-                    "Expected DUPLICATE_EGOGIFT in sub-errors");
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("DUPLICATE_EGOGIFT");
         }
 
         @Test
@@ -1051,11 +1041,8 @@ class PlannerContentValidatorTest {
                     "\"selectedBuffIds\": [100, 200]"
             );
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F"));
-
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "DUPLICATE_STARTBUFF".equals(e.code())),
-                    "Expected DUPLICATE_STARTBUFF in sub-errors");
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("DUPLICATE_STARTBUFF");
         }
 
         @Test
@@ -1065,10 +1052,10 @@ class PlannerContentValidatorTest {
                     "\"selectedGiftIds\": [\"9001\", \"9001\"]"
             );
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F"));
-
-            assertThat(ex.getSubErrors()).extracting(ValidationError::code).containsOnlyOnce("DUPLICATE_STARTGIFT");
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("DUPLICATE_STARTGIFT")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> assertThat(ex.getSubErrors())
+                            .extracting(ValidationError::code).containsOnlyOnce("DUPLICATE_STARTGIFT"));
         }
 
         @Test
@@ -1079,11 +1066,8 @@ class PlannerContentValidatorTest {
                     "{\"themePackId\": null, \"difficulty\": 0, \"giftIds\": []}, {\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": []}"
             );
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F"));
-
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "OUT_OF_ORDER_THEMEPACK".equals(e.code())),
-                    "Expected OUT_OF_ORDER_THEMEPACK in sub-errors");
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("OUT_OF_ORDER_THEMEPACK");
         }
 
         @Test
@@ -1093,11 +1077,8 @@ class PlannerContentValidatorTest {
                     "\"selectedGiftKeyword\": null"
             );
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F"));
-
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "MISSING_STARTGIFT_KEYWORD".equals(e.code())),
-                    "Expected MISSING_STARTGIFT_KEYWORD in sub-errors");
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("MISSING_STARTGIFT_KEYWORD");
         }
     }
 
@@ -1113,25 +1094,26 @@ class PlannerContentValidatorTest {
                     "\"deploymentOrder\": [99]"
             );
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F"));
-
-            assertEquals("VALIDATION_ERROR", ex.getOriginalCode());
-            assertTrue(ex.getSubErrors().size() >= 2, "Expected at least 2 sub-errors");
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "OUT_OF_RANGE_DEPLOYMENT".equals(e.code())),
-                    "Expected OUT_OF_RANGE_DEPLOYMENT in sub-errors");
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "UNAFFORDABLE_EGOGIFT".equals(e.code())),
-                    "Expected UNAFFORDABLE_EGOGIFT in sub-errors");
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("OUT_OF_RANGE_DEPLOYMENT")
+                    .withViolation("UNAFFORDABLE_EGOGIFT")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getOriginalCode()).isEqualTo("VALIDATION_ERROR");
+                        assertThat(ex.getSubErrors())
+                                .as("Expected at least 2 sub-errors")
+                                .hasSizeGreaterThanOrEqualTo(2);
+                    });
         }
 
         @Test
         void validate_WhenSingleError_ProducesCombinedExceptionWithOneSubError() {
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(withUnaffordableFloorGifts("9212"), "5F"));
-
-            assertEquals("VALIDATION_ERROR", ex.getOriginalCode());
-            assertEquals(1, ex.getSubErrors().size());
-            assertEquals("UNAFFORDABLE_EGOGIFT", ex.getSubErrors().get(0).code());
+            assertRejected(() -> validate(withUnaffordableFloorGifts("9212"), "5F"))
+                    .withViolation("UNAFFORDABLE_EGOGIFT")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getOriginalCode()).isEqualTo("VALIDATION_ERROR");
+                        assertThat(ex.getSubErrors().size()).isEqualTo(1);
+                        assertThat(ex.getSubErrors().get(0).code()).isEqualTo("UNAFFORDABLE_EGOGIFT");
+                    });
         }
     }
 
@@ -1148,7 +1130,7 @@ class PlannerContentValidatorTest {
                     "\"deploymentOrder\": [0, 11]"  // Boundary values 0 and 11
             );
 
-            assertDoesNotThrow(() -> validate(content, "5F"));
+            assertThatCode(() -> validate(content, "5F")).doesNotThrowAnyException();
         }
 
         @Test
@@ -1159,7 +1141,7 @@ class PlannerContentValidatorTest {
         @Test
         void validate_WhenValidDeepNesting_Passes() {
             // Use createFullContent which has all optional fields and complete equipment
-            assertDoesNotThrow(() -> validate(createFullContent(), "5F"));
+            assertThatCode(() -> validate(createFullContent(), "5F")).doesNotThrowAnyException();
         }
     }
 
@@ -1176,7 +1158,7 @@ class PlannerContentValidatorTest {
                     "\"egos\": {\"ZAYIN\": {\"id\": \"20405\", \"threadspin\": 5}}"
             );
 
-            assertDoesNotThrow(() -> validate(content, "5F"));
+            assertThatCode(() -> validate(content, "5F")).doesNotThrowAnyException();
         }
 
         @Test
@@ -1186,10 +1168,10 @@ class PlannerContentValidatorTest {
                     "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 5}}"
             );
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F"));
-            assertTrue(ex.getMessage().contains("threadspin"),
-                    "Exception message should mention threadspin: " + ex.getMessage());
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("OUT_OF_RANGE_EGO_THREADSPIN")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            ex -> assertThat(ex.getMessage()).contains("threadspin"));
         }
 
         @Test
@@ -1212,13 +1194,13 @@ class PlannerContentValidatorTest {
                     "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": 45}",
                     "\"identity\": {\"id\": \"10101\", \"uptie\": 99, \"level\": 999}");
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F"));
-
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> e.message().contains("level")),
-                    "Expected the level range failure in sub-errors: " + ex.getSubErrors());
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> e.message().contains("uptie")),
-                    "Expected the uptie range failure in sub-errors: " + ex.getSubErrors());
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("OUT_OF_RANGE_IDENTITY_LEVEL")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getSubErrors())
+                                .anySatisfy(error -> assertThat(error.message()).contains("level"))
+                                .anySatisfy(error -> assertThat(error.message()).contains("uptie"));
+                    });
         }
 
         @Test
@@ -1227,12 +1209,13 @@ class PlannerContentValidatorTest {
                     "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": 45}",
                     "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": \"abc\"}");
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F"));
-
-            assertThat(ex.getSubErrors()).containsExactly(new PlannerValidationException.ValidationError(
-                    "INVALID_FIELD_TYPE", "equipment[1].identity.level",
-                    "Field 'equipment[1].identity.level' has an invalid value: string \"abc\""));
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("INVALID_FIELD_TYPE", "equipment[1].identity.level")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getSubErrors()).containsExactly(new PlannerValidationException.ValidationError(
+                                "INVALID_FIELD_TYPE", "equipment[1].identity.level",
+                                "Field 'equipment[1].identity.level' has an invalid value: string \"abc\""));
+                    });
         }
 
         @Test
@@ -1241,7 +1224,7 @@ class PlannerContentValidatorTest {
                     "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": 45}",
                     "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": 45.0}");
 
-            assertDoesNotThrow(() -> validate(content, "5F"));
+            assertThatCode(() -> validate(content, "5F")).doesNotThrowAnyException();
         }
 
         @Test
@@ -1250,7 +1233,7 @@ class PlannerContentValidatorTest {
                     "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 4}}",
                     "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 4.0}}");
 
-            assertDoesNotThrow(() -> validate(content, "5F"));
+            assertThatCode(() -> validate(content, "5F")).doesNotThrowAnyException();
         }
 
         @Test
@@ -1262,13 +1245,13 @@ class PlannerContentValidatorTest {
                     "\"identity\": {\"id\": \"10201\", \"uptie\": 4, \"level\": 45}",
                     "\"identity\": {\"id\": \"10201\", \"uptie\": 99, \"level\": 45}");
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F"));
-
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> e.message().contains("threadspin")),
-                    "Expected the threadspin range failure in sub-errors: " + ex.getSubErrors());
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> e.message().contains("uptie")),
-                    "Expected the uptie range failure in sub-errors: " + ex.getSubErrors());
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("OUT_OF_RANGE_EGO_THREADSPIN")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getSubErrors())
+                                .anySatisfy(error -> assertThat(error.message()).contains("threadspin"))
+                                .anySatisfy(error -> assertThat(error.message()).contains("uptie"));
+                    });
         }
 
         @Test
@@ -1278,7 +1261,7 @@ class PlannerContentValidatorTest {
                     "{\"themePackId\": \"1004\", \"difficulty\": 0, \"giftIds\": []},\n"
                             + "                    {\"themePackId\": null, \"difficulty\": 0, \"giftIds\": [\"9004\"]}");
 
-            assertDoesNotThrow(() -> validate(content, "5F"));
+            assertThatCode(() -> validate(content, "5F")).doesNotThrowAnyException();
         }
     }
 
@@ -1287,8 +1270,9 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenPublishPolicyAndFloorsComplete_Passes() {
-            assertDoesNotThrow(() ->
-                    validate(createValidContent(), "5F", Stage.PUBLISH));
+            assertThatCode(() ->
+                    validate(createValidContent(), "5F", Stage.PUBLISH))
+                    .doesNotThrowAnyException();
         }
 
         @Test
@@ -1297,12 +1281,14 @@ class PlannerContentValidatorTest {
                     "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
                     "{\"themePackId\": null, \"difficulty\": 0, \"giftIds\": []}");
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F", Stage.PUBLISH));
-
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "MISSING_THEMEPACK".equals(e.code())
-                            && "floorSelections[0] must have a theme pack selected".equals(e.message())),
-                    "Expected the missing themePackId failure in sub-errors: " + ex.getSubErrors());
+            assertRejected(() -> validate(content, "5F", Stage.PUBLISH))
+                    .withViolation("MISSING_THEMEPACK")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getSubErrors())
+                                .extracting(ValidationError::code, ValidationError::message)
+                                .contains(tuple("MISSING_THEMEPACK",
+                                        "floorSelections[0] must have a theme pack selected"));
+                    });
         }
 
         @Test
@@ -1311,22 +1297,26 @@ class PlannerContentValidatorTest {
                     "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
                     "{\"themePackId\": \"8888\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}");
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F", Stage.PUBLISH));
-
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "UNKNOWN_THEMEPACK".equals(e.code())
-                            && "floorSelections[0].themePackId ID '8888' not found or invalid".equals(e.message())),
-                    "Expected the unknown themePackId failure in sub-errors: " + ex.getSubErrors());
+            assertRejected(() -> validate(content, "5F", Stage.PUBLISH))
+                    .withViolation("UNKNOWN_THEMEPACK")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getSubErrors())
+                                .extracting(ValidationError::code, ValidationError::message)
+                                .contains(tuple("UNKNOWN_THEMEPACK",
+                                        "floorSelections[0].themePackId ID '8888' not found or invalid"));
+                    });
         }
 
         @Test
         void validate_WhenPublishPolicyAndDifficultyBelowCategoryRule_ReportsInsufficientEntry() {
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(createValidContent(), "10F", Stage.PUBLISH));
-
-            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "INSUFFICIENT_DIFFICULTY_ENTRY".equals(e.code())
-                            && "floorSelections[0].difficulty value 0 is out of range [1-1]".equals(e.message())),
-                    "Expected the difficulty range failure in sub-errors: " + ex.getSubErrors());
+            assertRejected(() -> validate(createValidContent(), "10F", Stage.PUBLISH))
+                    .withViolation("INSUFFICIENT_DIFFICULTY_ENTRY")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getSubErrors())
+                                .extracting(ValidationError::code, ValidationError::message)
+                                .contains(tuple("INSUFFICIENT_DIFFICULTY_ENTRY",
+                                        "floorSelections[0].difficulty value 0 is out of range [1-1]"));
+                    });
         }
 
         @Test
@@ -1335,11 +1325,13 @@ class PlannerContentValidatorTest {
                     "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
                     "{\"themePackId\": \"1001\", \"difficulty\": 2147483648, \"giftIds\": [\"9002\"]}");
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F", Stage.PUBLISH));
-
-            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("OUT_OF_RANGE_DIFFICULTY", "floorSelections[0].difficulty",
-                    "floorSelections[0].difficulty value 2147483648 is out of range [0-1]"));
+            assertRejected(() -> validate(content, "5F", Stage.PUBLISH))
+                    .withViolation("OUT_OF_RANGE_DIFFICULTY", "floorSelections[0].difficulty")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getSubErrors()).containsExactly(
+                                new ValidationError("OUT_OF_RANGE_DIFFICULTY", "floorSelections[0].difficulty",
+                                        "floorSelections[0].difficulty value 2147483648 is out of range [0-1]"));
+                    });
         }
 
         @Test
@@ -1360,14 +1352,16 @@ class PlannerContentValidatorTest {
                     "{\"themePackId\": \"1003\", \"difficulty\": 0, \"giftIds\": []}",
                     "{\"themePackId\": \"1002\", \"difficulty\": 0, \"giftIds\": []}");
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F", Stage.PUBLISH));
-
-            assertThat(ex.getSubErrors()).containsExactlyInAnyOrder(
-                    new ValidationError("DUPLICATE_THEMEPACK", "floorSelections[2].themePackId",
-                            "floorSelections[2].themePackId repeats theme pack '1002' from floorSelections[1]"),
-                    new ValidationError("UNKNOWN_THEMEPACK", "floorSelections[0].themePackId",
-                            "floorSelections[0].themePackId ID '9999' not found or invalid"));
+            assertRejected(() -> validate(content, "5F", Stage.PUBLISH))
+                    .withViolation("DUPLICATE_THEMEPACK", "floorSelections[2].themePackId")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getSubErrors()).containsExactlyInAnyOrder(
+                                new ValidationError("DUPLICATE_THEMEPACK", "floorSelections[2].themePackId",
+                                        "floorSelections[2].themePackId repeats theme pack '1002'"
+                                        + " from floorSelections[1]"),
+                                new ValidationError("UNKNOWN_THEMEPACK", "floorSelections[0].themePackId",
+                                        "floorSelections[0].themePackId ID '9999' not found or invalid"));
+                    });
         }
 
         @Test
@@ -1376,24 +1370,28 @@ class PlannerContentValidatorTest {
                     "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
                     "{\"themePackId\": \"8888\", \"difficulty\": 0, \"giftIds\": [\"9999\"]}");
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F"));
-
-            assertThat(ex.getSubErrors()).containsExactly(
-                    new ValidationError("UNKNOWN_EGOGIFT_FLOOR", "floorSelections[0].giftIds[0]",
-                            "floorSelections[0].giftIds[0] ID '9999' not found or invalid"),
-                    new ValidationError("UNKNOWN_THEMEPACK", "floorSelections[0].themePackId",
-                            "floorSelections[0].themePackId ID '8888' not found or invalid"));
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("UNKNOWN_EGOGIFT_FLOOR", "floorSelections[0].giftIds[0]")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getSubErrors()).containsExactly(
+                                new ValidationError("UNKNOWN_EGOGIFT_FLOOR", "floorSelections[0].giftIds[0]",
+                                        "floorSelections[0].giftIds[0] ID '9999' not found or invalid"),
+                                new ValidationError("UNKNOWN_THEMEPACK", "floorSelections[0].themePackId",
+                                        "floorSelections[0].themePackId ID '8888' not found or invalid"));
+                    });
         }
 
         @Test
         void validate_WhenAFloorHoldsTwoUnaffordableGifts_ReportsOneViolationPerGift() {
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(withUnaffordableFloorGifts("9212", "9214"), "5F"));
-
-            assertThat(ex.getSubErrors()).containsExactly(
-                    new ValidationError("UNAFFORDABLE_EGOGIFT", "floorSelections[0].giftIds[0]", "Gift '9212' is not affordable for theme pack '1001'"),
-                    new ValidationError("UNAFFORDABLE_EGOGIFT", "floorSelections[0].giftIds[1]", "Gift '9214' is not affordable for theme pack '1001'"));
+            assertRejected(() -> validate(withUnaffordableFloorGifts("9212", "9214"), "5F"))
+                    .withViolation("UNAFFORDABLE_EGOGIFT", "floorSelections[0].giftIds[0]")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getSubErrors()).containsExactly(
+                                new ValidationError("UNAFFORDABLE_EGOGIFT", "floorSelections[0].giftIds[0]",
+                                        "Gift '9212' is not affordable for theme pack '1001'"),
+                                new ValidationError("UNAFFORDABLE_EGOGIFT", "floorSelections[0].giftIds[1]",
+                                        "Gift '9214' is not affordable for theme pack '1001'"));
+                    });
         }
 
         @Test
@@ -1401,11 +1399,13 @@ class PlannerContentValidatorTest {
             String content = replaceOnce(createValidContent(),
                     "\"giftIds\": [\"9002\"]", "\"giftIds\": \"9002\"");
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F"));
-
-            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("INVALID_FIELD_TYPE", "floorSelections[0].giftIds",
-                    "Field 'floorSelections[0].giftIds' has an invalid value: string \"9002\""));
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("INVALID_FIELD_TYPE", "floorSelections[0].giftIds")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getSubErrors()).containsExactly(
+                                new ValidationError("INVALID_FIELD_TYPE", "floorSelections[0].giftIds",
+                                        "Field 'floorSelections[0].giftIds' has an invalid value: string \"9002\""));
+                    });
         }
 
         @Test
@@ -1425,14 +1425,17 @@ class PlannerContentValidatorTest {
                     "{\"themePackId\": \"1005\", \"difficulty\": 0, \"giftIds\": []}, 7, "
                             + "{\"themePackId\": 1001, \"difficulty\": \"hard\", \"giftIds\": {}}");
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F", Stage.PUBLISH));
-
-            assertThat(ex.getSubErrors()).extracting(ValidationError::code, ValidationError::path).containsExactly(
-                    tuple("INVALID_FIELD_TYPE", "floorSelections[5]"),
-                    tuple("INVALID_FIELD_TYPE", "floorSelections[6].difficulty"),
-                    tuple("INVALID_FIELD_TYPE", "floorSelections[6].giftIds"),
-                    tuple("INVALID_FIELD_TYPE", "floorSelections[6].themePackId"));
+            assertRejected(() -> validate(content, "5F", Stage.PUBLISH))
+                    .withViolation("INVALID_FIELD_TYPE", "floorSelections[5]")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getSubErrors())
+                                .extracting(ValidationError::code, ValidationError::path)
+                                .containsExactly(
+                                        tuple("INVALID_FIELD_TYPE", "floorSelections[5]"),
+                                        tuple("INVALID_FIELD_TYPE", "floorSelections[6].difficulty"),
+                                        tuple("INVALID_FIELD_TYPE", "floorSelections[6].giftIds"),
+                                        tuple("INVALID_FIELD_TYPE", "floorSelections[6].themePackId"));
+                    });
         }
 
         @Test
@@ -1441,11 +1444,13 @@ class PlannerContentValidatorTest {
                     "(?s)\"floorSelections\": \\[.*?\\],\\s*\"sectionNotes\"",
                     "\"floorSelections\": 5, \"sectionNotes\"");
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "5F"));
-
-            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("INVALID_FIELD_TYPE", "floorSelections",
-                    "Field 'floorSelections' has an invalid value: number 5"));
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("INVALID_FIELD_TYPE", "floorSelections")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getSubErrors()).containsExactly(
+                                new ValidationError("INVALID_FIELD_TYPE", "floorSelections",
+                                        "Field 'floorSelections' has an invalid value: number 5"));
+                    });
         }
 
         @Test
@@ -1457,14 +1462,16 @@ class PlannerContentValidatorTest {
             String content = replaceRegexOnce(createValidContent(),
                     "(?s)\"floorSelections\": \\[.*?\\],\\s*\"sectionNotes\"", Matcher.quoteReplacement(floors));
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> validate(content, "15F", Stage.PUBLISH));
-
-            assertThat(ex.getSubErrors()).containsExactly(
-                    new ValidationError("OUT_OF_RANGE_DIFFICULTY_NOT_HARD", "floorSelections[5].difficulty",
-                            "floorSelections[5].difficulty value 0 is out of range [1-1]"),
-                    new ValidationError("OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME", "floorSelections[10].difficulty",
-                            "floorSelections[10].difficulty value 1 is out of range [3-3]"));
+            assertRejected(() -> validate(content, "15F", Stage.PUBLISH))
+                    .withViolation("OUT_OF_RANGE_DIFFICULTY_NOT_HARD", "floorSelections[5].difficulty")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getSubErrors()).containsExactly(
+                                new ValidationError("OUT_OF_RANGE_DIFFICULTY_NOT_HARD", "floorSelections[5].difficulty",
+                                        "floorSelections[5].difficulty value 0 is out of range [1-1]"),
+                                new ValidationError("OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME",
+                                        "floorSelections[10].difficulty",
+                                        "floorSelections[10].difficulty value 1 is out of range [3-3]"));
+                    });
         }
 
         @Test
@@ -1478,13 +1485,16 @@ class PlannerContentValidatorTest {
                     "{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[\"9002\"]}",
                     "{\"themePackId\":\"9999\",\"difficulty\":0,\"giftIds\":[\"9212\"]}");
 
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
-                    () -> realValidator.parse(content, MDCategory.F5, realValidator.season(VERSION), Stage.PUBLISH));
-
-            assertThat(ex.getSubErrors()).containsExactly(
-                    new ValidationError("UNAFFORDABLE_EGOGIFT", "floorSelections[0].giftIds[0]", "Gift '9212' is not affordable for theme pack '9999'"),
-                    new ValidationError("UNKNOWN_THEMEPACK", "floorSelections[0].themePackId",
-                            "floorSelections[0].themePackId ID '9999' not found or invalid"));
+            assertRejected(() -> realValidator.parse(content, MDCategory.F5, realValidator.season(VERSION),
+                    Stage.PUBLISH))
+                    .withViolation("UNAFFORDABLE_EGOGIFT", "floorSelections[0].giftIds[0]")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getSubErrors()).containsExactly(
+                                new ValidationError("UNAFFORDABLE_EGOGIFT", "floorSelections[0].giftIds[0]",
+                                        "Gift '9212' is not affordable for theme pack '9999'"),
+                                new ValidationError("UNKNOWN_THEMEPACK", "floorSelections[0].themePackId",
+                                        "floorSelections[0].themePackId ID '9999' not found or invalid"));
+                    });
         }
     }
 
@@ -1498,74 +1508,78 @@ class PlannerContentValidatorTest {
 
         @Test
         void validate_WhenPublishPolicyAndContentSelectsAnUnknownKeyword_RefusesItAtItsIndex() {
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class, () ->
-                    validate(selecting("[\"Combustion\", \"NotAKeyword\"]"), "5F", Stage.PUBLISH));
-
-            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("UNKNOWN_KEYWORD",
-                    "selectedKeywords[1]", "selectedKeywords ID 'NotAKeyword' not found or invalid"));
-            assertEquals("UNKNOWN_KEYWORD", ex.getBody().getProperties().get("code"));
-            assertEquals("Unknown keywords: [NotAKeyword]", ex.getBody().getDetail());
+            assertRejected(() -> validate(selecting("[\"Combustion\", \"NotAKeyword\"]"), "5F", Stage.PUBLISH))
+                    .withCode("UNKNOWN_KEYWORD")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getSubErrors()).containsExactly(new ValidationError("UNKNOWN_KEYWORD",
+                                "selectedKeywords[1]", "selectedKeywords ID 'NotAKeyword' not found or invalid"));
+                        assertThat(ex.getBody().getDetail()).isEqualTo("Unknown keywords: [NotAKeyword]");
+                    });
         }
 
         @Test
         void validate_WhenPublishPolicyAndContentSelectsABlankKeyword_AnswersUnknownKeywordNamingTheBlank() {
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class, () ->
-                    validate(selecting("[\"Sinking\", \"\"]"), "5F", Stage.PUBLISH));
-
-            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("UNKNOWN_KEYWORD",
-                    "selectedKeywords[1]", "selectedKeywords ID '' not found or invalid"));
-            assertEquals("UNKNOWN_KEYWORD", ex.getBody().getProperties().get("code"));
-            assertEquals("Unknown keywords: [\"\"]", ex.getBody().getDetail());
+            assertRejected(() -> validate(selecting("[\"Sinking\", \"\"]"), "5F", Stage.PUBLISH))
+                    .withCode("UNKNOWN_KEYWORD")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getSubErrors()).containsExactly(new ValidationError("UNKNOWN_KEYWORD",
+                                "selectedKeywords[1]", "selectedKeywords ID '' not found or invalid"));
+                        assertThat(ex.getBody().getDetail()).isEqualTo("Unknown keywords: [\"\"]");
+                    });
         }
 
         @Test
         void validate_WhenDraftPolicyAndContentSelectsAnUnknownKeyword_Passes() {
-            assertDoesNotThrow(() ->
-                    validate(selecting("[\"Combustion\", \"NotAKeyword\"]"), "5F", Stage.DRAFT));
+            assertThatCode(() ->
+                    validate(selecting("[\"Combustion\", \"NotAKeyword\"]"), "5F", Stage.DRAFT))
+                    .doesNotThrowAnyException();
         }
 
         @Test
         void validate_WhenPublishPolicyAndContentSelectsARenamedKeyword_Passes() {
-            assertDoesNotThrow(() ->
-                    validate(selecting("[\"AccelBullet\", \"ChargeLoad\"]"), "5F", Stage.PUBLISH));
+            assertThatCode(() ->
+                    validate(selecting("[\"AccelBullet\", \"ChargeLoad\"]"), "5F", Stage.PUBLISH))
+                    .doesNotThrowAnyException();
         }
 
         @Test
         void validate_WhenPublishPolicyAndKeywordsMixARenameAnUnknownAndABlank_ReportsEachUnknownAtItsIndex() {
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class, () ->
-                    validate(selecting("[\"AccelBullet\", \"Nope\", \"\"]"), "5F", Stage.PUBLISH));
-
-            assertThat(ex.getSubErrors()).containsExactly(
-                    new ValidationError("UNKNOWN_KEYWORD", "selectedKeywords[1]",
-                            "selectedKeywords ID 'Nope' not found or invalid"),
-                    new ValidationError("UNKNOWN_KEYWORD", "selectedKeywords[2]",
-                            "selectedKeywords ID '' not found or invalid"));
+            assertRejected(() -> validate(selecting("[\"AccelBullet\", \"Nope\", \"\"]"), "5F", Stage.PUBLISH))
+                    .withViolation("UNKNOWN_KEYWORD", "selectedKeywords[1]")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getSubErrors()).containsExactly(
+                                new ValidationError("UNKNOWN_KEYWORD", "selectedKeywords[1]",
+                                        "selectedKeywords ID 'Nope' not found or invalid"),
+                                new ValidationError("UNKNOWN_KEYWORD", "selectedKeywords[2]",
+                                        "selectedKeywords ID '' not found or invalid"));
+                    });
         }
 
         @Test
         void validate_WhenKeywordsHoldANumberBesideAnUnknown_ReportsTheNumberAlone() {
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class, () ->
-                    validate(selecting("[\"AccelBullet\", \"Nope\", 5, \"\"]"), "5F", Stage.PUBLISH));
-
-            assertThat(ex.getSubErrors()).containsExactly(new ValidationError("INVALID_FIELD_TYPE",
-                    "selectedKeywords[2]", "Field 'selectedKeywords[2]' has an invalid value: number 5"));
-            assertEquals("VALIDATION_ERROR", ex.getBody().getProperties().get("code"));
+            assertRejected(() -> validate(selecting("[\"AccelBullet\", \"Nope\", 5, \"\"]"), "5F", Stage.PUBLISH))
+                    .withCode("VALIDATION_ERROR")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getSubErrors()).containsExactly(new ValidationError("INVALID_FIELD_TYPE",
+                                "selectedKeywords[2]", "Field 'selectedKeywords[2]' has an invalid value: number 5"));
+                    });
         }
 
         @Test
         void validate_WhenDraftPolicyAndKeywordsMixARenameAnUnknownAndABlank_Passes() {
-            assertDoesNotThrow(() -> validate(selecting("[\"AccelBullet\", \"Nope\", \"\"]"), "5F", Stage.DRAFT));
+            assertThatCode(() -> validate(selecting("[\"AccelBullet\", \"Nope\", \"\"]"), "5F", Stage.DRAFT))
+                    .doesNotThrowAnyException();
         }
 
         @Test
         void validate_WhenPublishPolicyAndTwoKeywordsAreUnknown_AnswersUnknownKeywordListingBoth() {
-            PlannerValidationException ex = assertThrows(PlannerValidationException.class, () ->
-                    validate(selecting("[\"Zilch\", \"Combustion\", \"Nope\"]"), "5F", Stage.PUBLISH));
-
-            assertThat(ex.getSubErrors()).extracting(ValidationError::path)
-                    .containsExactly("selectedKeywords[0]", "selectedKeywords[2]");
-            assertEquals("UNKNOWN_KEYWORD", ex.getBody().getProperties().get("code"));
-            assertEquals("Unknown keywords: [Nope, Zilch]", ex.getBody().getDetail());
+            assertRejected(() -> validate(selecting("[\"Zilch\", \"Combustion\", \"Nope\"]"), "5F", Stage.PUBLISH))
+                    .withCode("UNKNOWN_KEYWORD")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
+                        assertThat(ex.getSubErrors()).extracting(ValidationError::path)
+                                .containsExactly("selectedKeywords[0]", "selectedKeywords[2]");
+                        assertThat(ex.getBody().getDetail()).isEqualTo("Unknown keywords: [Nope, Zilch]");
+                    });
         }
     }
 }

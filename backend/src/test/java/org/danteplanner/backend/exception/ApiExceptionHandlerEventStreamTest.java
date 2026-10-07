@@ -28,7 +28,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
@@ -122,8 +122,8 @@ class ApiExceptionHandlerEventStreamTest {
             String detail = JsonPath.read(content, "$.detail");
             String message = JsonPath.read(content, "$.message");
             int status = JsonPath.read(content, "$.status");
-            assertEquals(detail, message, "message mirrors detail");
-            assertEquals(result.getResponse().getStatus(), status, "the body names its own status");
+            assertThat(message).as("message mirrors detail").isEqualTo(detail);
+            assertThat(status).as("the body names its own status").isEqualTo(result.getResponse().getStatus());
         };
     }
 

@@ -28,9 +28,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
@@ -99,7 +97,7 @@ class PlannerDeleteRestrictionTest {
 
     private void assertWithdrawnFromTheCatalog(Planner planner) {
         verify(catalogRepository).deleteById(planner.getId());
-        assertTrue(tombstoneStore.isTombstoned(ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, planner.getId()));
+        assertThat(tombstoneStore.isTombstoned(ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, planner.getId())).isTrue();
     }
 
     private void ban() {
@@ -132,8 +130,8 @@ class PlannerDeleteRestrictionTest {
 
         deleteAndCommit(planner);
 
-        assertFalse(planner.isPublished());
-        assertNotNull(planner.getContent().getDeletedAt());
+        assertThat(planner.isPublished()).isFalse();
+        assertThat(planner.getContent().getDeletedAt()).isNotNull();
         assertWithdrawnFromTheCatalog(planner);
     }
 
@@ -144,8 +142,8 @@ class PlannerDeleteRestrictionTest {
 
         deleteAndCommit(planner);
 
-        assertFalse(planner.isPublished());
-        assertNotNull(planner.getContent().getDeletedAt());
+        assertThat(planner.isPublished()).isFalse();
+        assertThat(planner.getContent().getDeletedAt()).isNotNull();
         assertWithdrawnFromTheCatalog(planner);
     }
 
@@ -156,7 +154,7 @@ class PlannerDeleteRestrictionTest {
 
         deleteAndCommit(planner);
 
-        assertNotNull(planner.getContent().getDeletedAt());
+        assertThat(planner.getContent().getDeletedAt()).isNotNull();
     }
 
     @Test
@@ -165,8 +163,8 @@ class PlannerDeleteRestrictionTest {
 
         deleteAndCommit(planner);
 
-        assertFalse(planner.isPublished());
-        assertNotNull(planner.getContent().getDeletedAt());
+        assertThat(planner.isPublished()).isFalse();
+        assertThat(planner.getContent().getDeletedAt()).isNotNull();
         assertWithdrawnFromTheCatalog(planner);
     }
 }

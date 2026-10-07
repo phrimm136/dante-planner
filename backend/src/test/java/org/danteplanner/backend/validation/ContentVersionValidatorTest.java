@@ -8,7 +8,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
  * Unit tests for ContentVersionValidator.
@@ -27,53 +29,52 @@ class ContentVersionValidatorTest {
 
         @Test
         void validateVersionForCreate_WhenMdCurrentVersion_Succeeds() {
-            assertDoesNotThrow(() -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, 7));
+            assertThatCode(() -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, 7))
+                    .doesNotThrowAnyException();
         }
 
         @Test
         void validateVersionForCreate_WhenMdOldVersion_Throws() {
-            PlannerValidationException ex = assertThrows(
-                    PlannerValidationException.class,
-                    () -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, 5)
-            );
-            assertEquals("INVALID_CONTENT_VERSION", ex.getOriginalCode());
+            assertRejected(() -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, 5))
+                    .withViolation("INVALID_CONTENT_VERSION")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            ex -> assertThat(ex.getOriginalCode()).isEqualTo("INVALID_CONTENT_VERSION"));
         }
 
         @Test
         void validateVersionForCreate_WhenMdFutureVersion_Throws() {
-            PlannerValidationException ex = assertThrows(
-                    PlannerValidationException.class,
-                    () -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, 99)
-            );
-            assertEquals("INVALID_CONTENT_VERSION", ex.getOriginalCode());
+            assertRejected(() -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, 99))
+                    .withViolation("INVALID_CONTENT_VERSION")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            ex -> assertThat(ex.getOriginalCode()).isEqualTo("INVALID_CONTENT_VERSION"));
         }
 
         @Test
         void validateVersionForCreate_WhenRrVersion1_Succeeds() {
-            assertDoesNotThrow(() -> validator.validateVersionForCreate(PlannerType.REFRACTED_RAILWAY, 1));
+            assertThatCode(() -> validator.validateVersionForCreate(PlannerType.REFRACTED_RAILWAY, 1))
+                    .doesNotThrowAnyException();
         }
 
         @Test
         void validateVersionForCreate_WhenRrVersion5_Succeeds() {
-            assertDoesNotThrow(() -> validator.validateVersionForCreate(PlannerType.REFRACTED_RAILWAY, 5));
+            assertThatCode(() -> validator.validateVersionForCreate(PlannerType.REFRACTED_RAILWAY, 5))
+                    .doesNotThrowAnyException();
         }
 
         @Test
         void validateVersionForCreate_WhenRrVersionNotInList_Throws() {
-            PlannerValidationException ex = assertThrows(
-                    PlannerValidationException.class,
-                    () -> validator.validateVersionForCreate(PlannerType.REFRACTED_RAILWAY, 3)
-            );
-            assertEquals("INVALID_CONTENT_VERSION", ex.getOriginalCode());
+            assertRejected(() -> validator.validateVersionForCreate(PlannerType.REFRACTED_RAILWAY, 3))
+                    .withViolation("INVALID_CONTENT_VERSION")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            ex -> assertThat(ex.getOriginalCode()).isEqualTo("INVALID_CONTENT_VERSION"));
         }
 
         @Test
         void validateVersionForCreate_WhenNullVersion_Throws() {
-            PlannerValidationException ex = assertThrows(
-                    PlannerValidationException.class,
-                    () -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, null)
-            );
-            assertEquals("CONTENT_VERSION_REQUIRED", ex.getOriginalCode());
+            assertRejected(() -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, null))
+                    .withViolation("CONTENT_VERSION_REQUIRED")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            ex -> assertThat(ex.getOriginalCode()).isEqualTo("CONTENT_VERSION_REQUIRED"));
         }
     }
 
@@ -82,20 +83,18 @@ class ContentVersionValidatorTest {
 
         @Test
         void validateVersionForCreate_WhenMdVersionIsAnEarlierListedSeason_ThrowsInvalidContentVersion() {
-            PlannerValidationException ex = assertThrows(
-                    PlannerValidationException.class,
-                    () -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, 6)
-            );
-            assertEquals("INVALID_CONTENT_VERSION", ex.getOriginalCode());
+            assertRejected(() -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, 6))
+                    .withViolation("INVALID_CONTENT_VERSION")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            ex -> assertThat(ex.getOriginalCode()).isEqualTo("INVALID_CONTENT_VERSION"));
         }
 
         @Test
         void validateVersionForCreate_WhenRrVersionIsNotListed_ThrowsInvalidContentVersion() {
-            PlannerValidationException ex = assertThrows(
-                    PlannerValidationException.class,
-                    () -> validator.validateVersionForCreate(PlannerType.REFRACTED_RAILWAY, 2)
-            );
-            assertEquals("INVALID_CONTENT_VERSION", ex.getOriginalCode());
+            assertRejected(() -> validator.validateVersionForCreate(PlannerType.REFRACTED_RAILWAY, 2))
+                    .withViolation("INVALID_CONTENT_VERSION")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            ex -> assertThat(ex.getOriginalCode()).isEqualTo("INVALID_CONTENT_VERSION"));
         }
     }
 

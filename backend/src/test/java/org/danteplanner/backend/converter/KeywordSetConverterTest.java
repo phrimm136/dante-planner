@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for KeywordSetConverter.
@@ -31,64 +31,64 @@ class KeywordSetConverterTest {
 
         @Test
         void convertToDatabaseColumn_WhenNullSet_ReturnsNull() {
-            assertNull(converter.convertToDatabaseColumn(null));
+            assertThat(converter.convertToDatabaseColumn(null)).isNull();
         }
 
         @Test
         void convertToDatabaseColumn_WhenEmptySet_ReturnsNull() {
-            assertNull(converter.convertToDatabaseColumn(Set.of()));
+            assertThat(converter.convertToDatabaseColumn(Set.of())).isNull();
         }
 
         @Test
         void convertToDatabaseColumn_WhenSingleKeyword_ReturnsKeyword() {
             String result = converter.convertToDatabaseColumn(Set.of("Combustion"));
-            assertEquals("[\"Combustion\"]", result);
+            assertThat(result).isEqualTo("[\"Combustion\"]");
         }
 
         @Test
         void convertToDatabaseColumn_WhenMultipleKeywords_ReturnsSortedArray() {
             Set<String> keywords = new HashSet<>(Set.of("Sinking", "CRIMSON", "Combustion"));
             String result = converter.convertToDatabaseColumn(keywords);
-            assertEquals("[\"CRIMSON\",\"Combustion\",\"Sinking\"]", result);
+            assertThat(result).isEqualTo("[\"CRIMSON\",\"Combustion\",\"Sinking\"]");
         }
 
         @Test
         void convertToDatabaseColumn_WhenEgoGiftKeyword_ReturnsKeyword() {
             String result = converter.convertToDatabaseColumn(Set.of("9154"));
-            assertEquals("[\"9154\"]", result);
+            assertThat(result).isEqualTo("[\"9154\"]");
         }
 
         @Test
         void convertToDatabaseColumn_WhenMixedKeywordTypes_ReturnsSortedArray() {
             Set<String> keywords = new HashSet<>(Set.of("CRIMSON", "9154", "Combustion"));
             String result = converter.convertToDatabaseColumn(keywords);
-            assertEquals("[\"9154\",\"CRIMSON\",\"Combustion\"]", result);
+            assertThat(result).isEqualTo("[\"9154\",\"CRIMSON\",\"Combustion\"]");
         }
 
         @Test
         void convertToDatabaseColumn_WhenUnknownKeyword_DropsIt() {
             Set<String> keywords = new HashSet<>(Set.of("Combustion", "REMOVED_KEYWORD"));
             String result = converter.convertToDatabaseColumn(keywords);
-            assertEquals("[\"Combustion\"]", result);
+            assertThat(result).isEqualTo("[\"Combustion\"]");
         }
 
         @Test
         void convertToDatabaseColumn_WhenAllUnknown_ReturnsNull() {
-            assertNull(converter.convertToDatabaseColumn(Set.of("REMOVED_KEYWORD", "GhostKeyword")));
+            assertThat(converter.convertToDatabaseColumn(Set.of("REMOVED_KEYWORD", "GhostKeyword"))).isNull();
         }
 
         @Test
         void convertToDatabaseColumn_WhenRenamedKeyword_RemapsToCurrent() {
             Set<String> keywords = new HashSet<>(Set.of("AccelBullet", "ChargeLoad"));
             String result = converter.convertToDatabaseColumn(keywords);
-            assertEquals("[\"9828\",\"EmergencyChargeForceField\"]", result);
+            assertThat(result).isEqualTo("[\"9828\",\"EmergencyChargeForceField\"]");
         }
 
         @Test
         void convertToDatabaseColumn_WhenRenamedAndCurrentPresent_Deduplicates() {
             Set<String> keywords = new HashSet<>(Set.of("AccelBullet", "9828"));
             String result = converter.convertToDatabaseColumn(keywords);
-            assertEquals("[\"9828\"]", result);
+            assertThat(result).isEqualTo("[\"9828\"]");
         }
 
         @Test
@@ -96,7 +96,7 @@ class KeywordSetConverterTest {
             Set<String> all = new HashSet<>(PlannerKeywords.VALID_KEYWORDS);
             String result = converter.convertToDatabaseColumn(all);
             Set<String> resultSet = converter.convertToEntityAttribute(result);
-            assertEquals(all, resultSet);
+            assertThat(resultSet).isEqualTo(all);
         }
     }
 
@@ -106,55 +106,55 @@ class KeywordSetConverterTest {
         @Test
         void convertToEntityAttribute_WhenNull_ReturnsEmptySet() {
             Set<String> result = converter.convertToEntityAttribute(null);
-            assertTrue(result.isEmpty());
+            assertThat(result).isEmpty();
         }
 
         @Test
         void convertToEntityAttribute_WhenEmptyString_ReturnsEmptySet() {
             Set<String> result = converter.convertToEntityAttribute("");
-            assertTrue(result.isEmpty());
+            assertThat(result).isEmpty();
         }
 
         @Test
         void convertToEntityAttribute_WhenSingleKeyword_ReturnsSet() {
             Set<String> result = converter.convertToEntityAttribute("[\"Combustion\"]");
-            assertEquals(Set.of("Combustion"), result);
+            assertThat(result).isEqualTo(Set.of("Combustion"));
         }
 
         @Test
         void convertToEntityAttribute_WhenArray_ReturnsSet() {
             Set<String> result = converter.convertToEntityAttribute("[\"CRIMSON\",\"Combustion\",\"Sinking\"]");
-            assertEquals(Set.of("CRIMSON", "Combustion", "Sinking"), result);
+            assertThat(result).isEqualTo(Set.of("CRIMSON", "Combustion", "Sinking"));
         }
 
         @Test
         void convertToEntityAttribute_WhenEgoGift_ReturnsSet() {
             Set<String> result = converter.convertToEntityAttribute("[\"9154\",\"Combustion\"]");
-            assertEquals(Set.of("9154", "Combustion"), result);
+            assertThat(result).isEqualTo(Set.of("9154", "Combustion"));
         }
 
         @Test
         void convertToEntityAttribute_WhenInvalidKeywords_FiltersThem() {
             Set<String> result = converter.convertToEntityAttribute("[\"Combustion\",\"REMOVED_KEYWORD\",\"Sinking\"]");
-            assertEquals(Set.of("Combustion", "Sinking"), result);
+            assertThat(result).isEqualTo(Set.of("Combustion", "Sinking"));
         }
 
         @Test
         void convertToEntityAttribute_WhenRenamedKeywordStored_RemapsToCurrent() {
             Set<String> result = converter.convertToEntityAttribute("[\"AccelBullet\",\"Combustion\"]");
-            assertEquals(Set.of("9828", "Combustion"), result);
+            assertThat(result).isEqualTo(Set.of("9828", "Combustion"));
         }
 
         @Test
         void convertToEntityAttribute_WhenMalformedJson_ReturnsEmptySet() {
             Set<String> result = converter.convertToEntityAttribute("Combustion,Sinking");
-            assertTrue(result.isEmpty());
+            assertThat(result).isEmpty();
         }
 
         @Test
         void convertToEntityAttribute_WhenNonArrayJson_ReturnsEmptySet() {
             Set<String> result = converter.convertToEntityAttribute("{\"keywords\":[\"Combustion\"]}");
-            assertTrue(result.isEmpty());
+            assertThat(result).isEmpty();
         }
     }
 
@@ -166,7 +166,7 @@ class KeywordSetConverterTest {
             Set<String> original = new HashSet<>(Set.of("CRIMSON", "9154", "Combustion", "HeishouSynergy"));
             String dbValue = converter.convertToDatabaseColumn(original);
             Set<String> restored = converter.convertToEntityAttribute(dbValue);
-            assertEquals(original, restored);
+            assertThat(restored).isEqualTo(original);
         }
     }
 }

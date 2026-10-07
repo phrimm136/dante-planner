@@ -15,7 +15,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -60,13 +60,13 @@ class CookieUtilsTest {
             verify(response).addCookie(cookieCaptor.capture());
 
             Cookie cookie = cookieCaptor.getValue();
-            assertEquals(name, cookie.getName());
-            assertEquals(value, cookie.getValue());
-            assertTrue(cookie.isHttpOnly(), "Cookie should be HttpOnly");
-            assertTrue(cookie.getSecure(), "Cookie should be Secure");
-            assertEquals("/", cookie.getPath());
-            assertEquals(maxAge, cookie.getMaxAge());
-            assertEquals("Lax", cookie.getAttribute("SameSite"));
+            assertThat(cookie.getName()).isEqualTo(name);
+            assertThat(cookie.getValue()).isEqualTo(value);
+            assertThat(cookie.isHttpOnly()).as("Cookie should be HttpOnly").isTrue();
+            assertThat(cookie.getSecure()).as("Cookie should be Secure").isTrue();
+            assertThat(cookie.getPath()).isEqualTo("/");
+            assertThat(cookie.getMaxAge()).isEqualTo(maxAge);
+            assertThat(cookie.getAttribute("SameSite")).isEqualTo("Lax");
         }
 
         @Test
@@ -78,7 +78,7 @@ class CookieUtilsTest {
             ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
             verify(response).addCookie(cookieCaptor.capture());
 
-            assertEquals("/", cookieCaptor.getValue().getPath());
+            assertThat(cookieCaptor.getValue().getPath()).isEqualTo("/");
         }
 
         @Test
@@ -93,7 +93,7 @@ class CookieUtilsTest {
             ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
             verify(response).addCookie(cookieCaptor.capture());
 
-            assertEquals(expectedMaxAge, cookieCaptor.getValue().getMaxAge());
+            assertThat(cookieCaptor.getValue().getMaxAge()).isEqualTo(expectedMaxAge);
         }
 
         @Test
@@ -108,7 +108,7 @@ class CookieUtilsTest {
             ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
             verify(response).addCookie(cookieCaptor.capture());
 
-            assertFalse(cookieCaptor.getValue().getSecure(), "Cookie should not be Secure in dev mode");
+            assertThat(cookieCaptor.getValue().getSecure()).as("Cookie should not be Secure in dev mode").isFalse();
         }
     }
 
@@ -131,7 +131,7 @@ class CookieUtilsTest {
             Optional<String> result = cookieUtils.getCookieValue(request, expectedName);
 
             // Assert
-            assertEquals(Optional.of(expectedValue), result);
+            assertThat(result).isEqualTo(Optional.of(expectedValue));
         }
 
         @Test
@@ -147,7 +147,7 @@ class CookieUtilsTest {
             Optional<String> result = cookieUtils.getCookieValue(request, "nonExistentCookie");
 
             // Assert
-            assertTrue(result.isEmpty());
+            assertThat(result).isEmpty();
         }
 
         @Test
@@ -159,7 +159,7 @@ class CookieUtilsTest {
             Optional<String> result = cookieUtils.getCookieValue(request, "anyCookie");
 
             // Assert
-            assertTrue(result.isEmpty());
+            assertThat(result).isEmpty();
         }
 
         @Test
@@ -171,7 +171,7 @@ class CookieUtilsTest {
             Optional<String> result = cookieUtils.getCookieValue(request, "anyCookie");
 
             // Assert
-            assertTrue(result.isEmpty());
+            assertThat(result).isEmpty();
         }
 
         @Test
@@ -184,7 +184,7 @@ class CookieUtilsTest {
             Optional<String> result = cookieUtils.getCookieValue(request, "accessToken");
 
             // Assert - different case should not match
-            assertTrue(result.isEmpty());
+            assertThat(result).isEmpty();
         }
     }
 
@@ -204,9 +204,9 @@ class CookieUtilsTest {
             verify(response).addCookie(cookieCaptor.capture());
 
             Cookie cookie = cookieCaptor.getValue();
-            assertEquals(name, cookie.getName());
-            assertEquals("", cookie.getValue());
-            assertEquals(0, cookie.getMaxAge());
+            assertThat(cookie.getName()).isEqualTo(name);
+            assertThat(cookie.getValue()).isEqualTo("");
+            assertThat(cookie.getMaxAge()).isEqualTo(0);
         }
 
         @Test
@@ -219,10 +219,10 @@ class CookieUtilsTest {
             verify(response).addCookie(cookieCaptor.capture());
 
             Cookie cookie = cookieCaptor.getValue();
-            assertTrue(cookie.isHttpOnly(), "Cleared cookie should be HttpOnly");
-            assertTrue(cookie.getSecure(), "Cleared cookie should be Secure");
-            assertEquals("/", cookie.getPath());
-            assertEquals("Lax", cookie.getAttribute("SameSite"));
+            assertThat(cookie.isHttpOnly()).as("Cleared cookie should be HttpOnly").isTrue();
+            assertThat(cookie.getSecure()).as("Cleared cookie should be Secure").isTrue();
+            assertThat(cookie.getPath()).isEqualTo("/");
+            assertThat(cookie.getAttribute("SameSite")).isEqualTo("Lax");
         }
 
         @Test
@@ -234,10 +234,9 @@ class CookieUtilsTest {
             ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
             verify(response).addCookie(cookieCaptor.capture());
 
-            assertEquals(
-                    "accessToken=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:10 GMT; Path=/;"
-                            + " Secure; HttpOnly; SameSite=Lax",
-                    new Rfc6265CookieProcessor().generateHeader(cookieCaptor.getValue(), null));
+            assertThat(new Rfc6265CookieProcessor().generateHeader(cookieCaptor.getValue(), null))
+                    .isEqualTo("accessToken=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:10 GMT; Path=/;"
+                            + " Secure; HttpOnly; SameSite=Lax");
         }
 
         @Test
@@ -249,7 +248,7 @@ class CookieUtilsTest {
             ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
             verify(response).addCookie(cookieCaptor.capture());
 
-            assertEquals("/", cookieCaptor.getValue().getPath());
+            assertThat(cookieCaptor.getValue().getPath()).isEqualTo("/");
         }
     }
 
@@ -280,7 +279,7 @@ class CookieUtilsTest {
             // Assert
             ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
             verify(response).addCookie(cookieCaptor.capture());
-            assertEquals("", cookieCaptor.getValue().getValue());
+            assertThat(cookieCaptor.getValue().getValue()).isEqualTo("");
         }
 
         @Test
@@ -291,7 +290,7 @@ class CookieUtilsTest {
             // Assert
             ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
             verify(response).addCookie(cookieCaptor.capture());
-            assertEquals(0, cookieCaptor.getValue().getMaxAge());
+            assertThat(cookieCaptor.getValue().getMaxAge()).isEqualTo(0);
         }
 
         @Test
@@ -302,7 +301,7 @@ class CookieUtilsTest {
             // Assert
             ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
             verify(response).addCookie(cookieCaptor.capture());
-            assertEquals(-1, cookieCaptor.getValue().getMaxAge());
+            assertThat(cookieCaptor.getValue().getMaxAge()).isEqualTo(-1);
         }
     }
 }

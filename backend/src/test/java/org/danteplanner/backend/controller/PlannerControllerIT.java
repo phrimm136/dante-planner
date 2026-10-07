@@ -47,8 +47,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
@@ -633,7 +633,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
 
-            assertEquals("5F", plannerRepository.findAggregate(planner.getId()).orElseThrow().getCategory());
+            assertThat(plannerRepository.findAggregate(planner.getId()).orElseThrow().getCategory()).isEqualTo("5F");
         }
 
         @Test
@@ -657,7 +657,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
 
-            assertEquals("5F", plannerRepository.findAggregate(planner.getId()).orElseThrow().getCategory());
+            assertThat(plannerRepository.findAggregate(planner.getId()).orElseThrow().getCategory()).isEqualTo("5F");
         }
     }
 
@@ -674,8 +674,8 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
             // Verify soft delete
             Planner deletedPlanner = plannerRepository.findById(planner.getId()).orElseThrow();
-            assertNotNull(deletedPlanner.getContent().getDeletedAt());
-            assertTrue(deletedPlanner.isDeleted());
+            assertThat(deletedPlanner.getContent().getDeletedAt()).isNotNull();
+            assertThat(deletedPlanner.isDeleted()).isTrue();
         }
 
         @Test
@@ -778,7 +778,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(status().isCreated());
 
             // Verify count is now 100
-            assertEquals(100, plannerRepository.countActiveByUserId(testUser.getId()));
+            assertThat(plannerRepository.countActiveByUserId(testUser.getId())).isEqualTo(100);
         }
 
         @Test
@@ -954,8 +954,8 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
 
             Planner stored = plannerRepository.findById(planner.getId()).orElseThrow();
-            assertFalse(stored.isPublished());
-            assertNull(stored.getFirstPublishedAt(), "a refused publish leaves no first-publish stamp");
+            assertThat(stored.isPublished()).isFalse();
+            assertThat(stored.getFirstPublishedAt()).as("a refused publish leaves no first-publish stamp").isNull();
         }
 
         @Test
@@ -967,14 +967,14 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.published").value(true));
-            assertTrue(plannerRepository.findById(planner.getId()).orElseThrow().isPublished());
+            assertThat(plannerRepository.findById(planner.getId()).orElseThrow().isPublished()).isTrue();
 
             mockMvc.perform(post("/api/planner/md/{id}/unpublish", planner.getId()).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.published").value(false));
-            assertFalse(plannerRepository.findById(planner.getId()).orElseThrow().isPublished());
+            assertThat(plannerRepository.findById(planner.getId()).orElseThrow().isPublished()).isFalse();
         }
 
         @Test
@@ -995,8 +995,8 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(status().isCreated());
 
             String stored = plannerRepository.findById(plannerId).orElseThrow().getContentJson();
-            assertTrue(content.getBytes(StandardCharsets.UTF_8).length < maxContentSizeBytes);
-            assertTrue(stored.getBytes(StandardCharsets.UTF_8).length > maxContentSizeBytes);
+            assertThat(content.getBytes(StandardCharsets.UTF_8).length).isLessThan(maxContentSizeBytes);
+            assertThat(stored.getBytes(StandardCharsets.UTF_8).length).isGreaterThan(maxContentSizeBytes);
 
             mockMvc.perform(post("/api/planner/md/{id}/publish", plannerId).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -1026,7 +1026,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
-            assertFalse(plannerRepository.findById(plannerId).orElseThrow().isPublished());
+            assertThat(plannerRepository.findById(plannerId).orElseThrow().isPublished()).isFalse();
         }
 
         @Test
@@ -1052,7 +1052,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
-            assertFalse(plannerRepository.findById(plannerId).orElseThrow().isPublished());
+            assertThat(plannerRepository.findById(plannerId).orElseThrow().isPublished()).isFalse();
         }
 
         @Test
@@ -1096,7 +1096,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                             .cookie(AuthCookies.accessToken(otherUserAccessToken)))
                     .andExpect(status().isForbidden())
                     .andExpect(jsonPath("$.code").value("PLANNER_FORBIDDEN"));
-            assertFalse(plannerRepository.findById(planner.getId()).orElseThrow().isPublished());
+            assertThat(plannerRepository.findById(planner.getId()).orElseThrow().isPublished()).isFalse();
         }
 
         @Test
@@ -1125,7 +1125,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                             .content("{\"published\":true}")
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isMethodNotAllowed());
-            assertFalse(plannerRepository.findById(planner.getId()).orElseThrow().isPublished());
+            assertThat(plannerRepository.findById(planner.getId()).orElseThrow().isPublished()).isFalse();
         }
     }
 
@@ -1199,7 +1199,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         void castVote_WhenUnpublishedPlanner_Returns404() throws Exception {
             // Arrange - Create unpublished planner
             Planner planner = createTestPlanner(otherUser);
-            assertFalse(planner.isPublished());
+            assertThat(planner.isPublished()).isFalse();
 
             VoteRequest request = new VoteRequest(VoteType.UP);
 

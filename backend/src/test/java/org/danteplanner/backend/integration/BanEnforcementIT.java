@@ -25,15 +25,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
  * Integration tests for ban enforcement across the full stack.
@@ -109,8 +108,9 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
                         .cookie(userCookie())
                         .contentType(APPLICATION_JSON)
                         .content(json))
-                .andExpect(r -> assertNotEquals(HttpStatus.FORBIDDEN.value(), r.getResponse().getStatus(),
-                        "a ban must not withdraw private planner work"));
+                .andExpect(r -> assertThat(r.getResponse().getStatus())
+                        .as("a ban must not withdraw private planner work")
+                        .isNotEqualTo(HttpStatus.FORBIDDEN.value()));
     }
 
     @Test
@@ -131,7 +131,7 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
 
         // Verify planner was not published
         Planner updated = plannerRepository.findById(plannerId).orElseThrow();
-        assertFalse(updated.isPublished());
+        assertThat(updated.isPublished()).isFalse();
     }
 
     @Test
@@ -165,16 +165,16 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
 
         // Assert - user is no longer banned
         User refreshed = userRepository.findById(regularUser.getId()).orElseThrow();
-        assertFalse(refreshed.isBanned());
-        assertNull(refreshed.getBannedAt());
+        assertThat(refreshed.isBanned()).isFalse();
+        assertThat(refreshed.getBannedAt()).isNull();
 
         // Scoped to the user this test moderated: the table also holds every other test's actions.
         List<ModerationAction> actions = moderationActionRepository.findAll().stream()
                 .filter(action -> regularUser.getPublicId().toString().equals(action.getTargetUuid()))
                 .toList();
-        assertEquals(2, actions.size());
-        assertTrue(actions.stream().anyMatch(a -> a.getActionType() == ModerationActionType.BAN));
-        assertTrue(actions.stream().anyMatch(a -> a.getActionType() == ModerationActionType.UNBAN));
+        assertThat(actions.size()).isEqualTo(2);
+        assertThat(actions).extracting(ModerationAction::getActionType)
+                .contains(ModerationActionType.BAN, ModerationActionType.UNBAN);
     }
 
     @Test
@@ -187,14 +187,14 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
         List<ModerationAction> actions = moderationActionRepository.findAll().stream()
                 .filter(a -> regularUser.getPublicId().toString().equals(a.getTargetUuid()))
                 .toList();
-        assertEquals(1, actions.size());
+        assertThat(actions.size()).isEqualTo(1);
 
         ModerationAction action = actions.get(0);
-        assertEquals(ModerationActionType.BAN, action.getActionType());
-        assertEquals(adminUser.getId(), action.getActorId());
-        assertEquals(regularUser.getPublicId().toString(), action.getTargetUuid());
-        assertEquals("Test reason", action.getReason());
-        assertNotNull(action.getCreatedAt());
+        assertThat(action.getActionType()).isEqualTo(ModerationActionType.BAN);
+        assertThat(action.getActorId()).isEqualTo(adminUser.getId());
+        assertThat(action.getTargetUuid()).isEqualTo(regularUser.getPublicId().toString());
+        assertThat(action.getReason()).isEqualTo("Test reason");
+        assertThat(action.getCreatedAt()).isNotNull();
     }
 
     @Test
@@ -210,19 +210,19 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
         List<ModerationAction> actions = moderationActionRepository.findAll().stream()
                 .filter(action -> regularUser.getPublicId().toString().equals(action.getTargetUuid()))
                 .toList();
-        assertEquals(2, actions.size());
+        assertThat(actions.size()).isEqualTo(2);
 
         ModerationAction banAction = actions.stream()
                 .filter(a -> a.getActionType() == ModerationActionType.BAN)
                 .findFirst()
                 .orElseThrow();
-        assertEquals("Test ban", banAction.getReason());
+        assertThat(banAction.getReason()).isEqualTo("Test ban");
 
         ModerationAction unbanAction = actions.stream()
                 .filter(a -> a.getActionType() == ModerationActionType.UNBAN)
                 .findFirst()
                 .orElseThrow();
-        assertNotNull(unbanAction.getCreatedAt());
+        assertThat(unbanAction.getCreatedAt()).isNotNull();
     }
 
     @Test
@@ -249,8 +249,9 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
                         .cookie(userCookie())
                         .contentType(APPLICATION_JSON)
                         .content(json))
-                .andExpect(r -> assertNotEquals(HttpStatus.FORBIDDEN.value(), r.getResponse().getStatus(),
-                        "neither a timeout nor a ban withdraws private planner work"));
+                .andExpect(r -> assertThat(r.getResponse().getStatus())
+                        .as("neither a timeout nor a ban withdraws private planner work")
+                        .isNotEqualTo(HttpStatus.FORBIDDEN.value()));
     }
 
     @Test

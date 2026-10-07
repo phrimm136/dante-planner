@@ -15,9 +15,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class GameDataLoaderTest {
@@ -58,12 +56,12 @@ class GameDataLoaderTest {
 
     @Test
     void loadKeysFromFile_WhenFileAbsent_ReturnsEmptySet(@TempDir Path dataDir) {
-        assertTrue(loader.loadKeysFromFile(dataDir.resolve("identitySpecList.json")).isEmpty());
+        assertThat(loader.loadKeysFromFile(dataDir.resolve("identitySpecList.json"))).isEmpty();
     }
 
     @Test
     void loadEgoMaxThreadspin_WhenFileAbsent_ReturnsEmptyMap(@TempDir Path dataDir) {
-        assertTrue(loader.loadEgoMaxThreadspin(dataDir.resolve("egoSpecList.json")).isEmpty());
+        assertThat(loader.loadEgoMaxThreadspin(dataDir.resolve("egoSpecList.json"))).isEmpty();
     }
 
     @Test
@@ -71,7 +69,7 @@ class GameDataLoaderTest {
         Path file = dataDir.resolve("plannerVersions.json");
         Files.writeString(file, "{\"schemaVersion\":2,\"mdAvailableVersions\":[6,7],\"rrAvailableVersions\":[1,5]}");
 
-        assertEquals(new PlannerVersions(2, List.of(6, 7), List.of(1, 5)), loader.loadPlannerVersions(file));
+        assertThat(loader.loadPlannerVersions(file)).isEqualTo(new PlannerVersions(2, List.of(6, 7), List.of(1, 5)));
     }
 
     @ParameterizedTest
@@ -86,8 +84,9 @@ class GameDataLoaderTest {
         Path file = dataDir.resolve("plannerVersions.json");
         Files.writeString(file, versions);
 
-        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> loader.loadPlannerVersions(file));
-        assertTrue(ex.getMessage().contains("plannerVersions.json"), ex.getMessage());
+        assertThatThrownBy(() -> loader.loadPlannerVersions(file))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("plannerVersions.json");
     }
 
     @Test
@@ -98,17 +97,17 @@ class GameDataLoaderTest {
 
         FloorRuleTable table = loader.loadFloorRules(file);
 
-        assertEquals(1, table.schemaVersion());
-        assertEquals(List.of("draft", "publish", "index"), table.stages());
-        assertEquals(5, table.floorCount(MDCategory.F5));
-        assertEquals(10, table.floorCount(MDCategory.F10));
-        assertEquals(15, table.floorCount(MDCategory.F15));
-        assertEquals(Set.of(0, 1), table.layout(MDCategory.F5).difficulties().get(4));
-        assertEquals(Set.of(1), table.layout(MDCategory.F10).difficulties().get(9));
-        assertEquals(Set.of(1), table.layout(MDCategory.F15).difficulties().get(9));
-        assertEquals(Set.of(3), table.layout(MDCategory.F15).difficulties().get(10));
-        assertEquals(Set.of("draft", "publish"), table.stagesFor(FloorRuleTable.RuleName.NOT_REPEATED));
-        assertEquals(Set.of("publish"), table.stagesFor(FloorRuleTable.RuleName.NO_NORMAL_AFTER_HARD));
+        assertThat(table.schemaVersion()).isEqualTo(1);
+        assertThat(table.stages()).isEqualTo(List.of("draft", "publish", "index"));
+        assertThat(table.floorCount(MDCategory.F5)).isEqualTo(5);
+        assertThat(table.floorCount(MDCategory.F10)).isEqualTo(10);
+        assertThat(table.floorCount(MDCategory.F15)).isEqualTo(15);
+        assertThat(table.layout(MDCategory.F5).difficulties().get(4)).isEqualTo(Set.of(0, 1));
+        assertThat(table.layout(MDCategory.F10).difficulties().get(9)).isEqualTo(Set.of(1));
+        assertThat(table.layout(MDCategory.F15).difficulties().get(9)).isEqualTo(Set.of(1));
+        assertThat(table.layout(MDCategory.F15).difficulties().get(10)).isEqualTo(Set.of(3));
+        assertThat(table.stagesFor(FloorRuleTable.RuleName.NOT_REPEATED)).isEqualTo(Set.of("draft", "publish"));
+        assertThat(table.stagesFor(FloorRuleTable.RuleName.NO_NORMAL_AFTER_HARD)).isEqualTo(Set.of("publish"));
     }
 
     static Stream<String> floorRulesBreakingTheShape() {
@@ -135,27 +134,30 @@ class GameDataLoaderTest {
         Path file = dataDir.resolve(FLOOR_RULES_FILE);
         Files.writeString(file, floorRules);
 
-        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> loader.loadFloorRules(file));
-        assertTrue(ex.getMessage().contains(FLOOR_RULES_FILE), ex.getMessage());
+        assertThatThrownBy(() -> loader.loadFloorRules(file))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining(FLOOR_RULES_FILE);
     }
 
     @Test
     void loadFloorRules_WhenFileAbsent_ThrowsNamingTheFile(@TempDir Path dataDir) {
         Path file = dataDir.resolve(FLOOR_RULES_FILE);
 
-        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> loader.loadFloorRules(file));
-        assertEquals("Floor rules file not found: " + file, ex.getMessage());
+        assertThatThrownBy(() -> loader.loadFloorRules(file))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Floor rules file not found: " + file);
     }
 
     @Test
     void seasonDirectory_WhenListedSeasonHasNoDirectory_ThrowsNamingTheSeason(@TempDir Path dataDir) {
-        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> loader.seasonDirectory(dataDir, 8));
-        assertTrue(ex.getMessage().contains("MD8"), ex.getMessage());
+        assertThatThrownBy(() -> loader.seasonDirectory(dataDir, 8))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("MD8");
     }
 
     @Test
     void loadIdMigrations_WhenFileAbsent_ReturnsEmptyTable(@TempDir Path dataDir) {
-        assertEquals(PlannerIdMigrations.EMPTY, loader.loadIdMigrations(dataDir.resolve("idMigrations.json")));
+        assertThat(loader.loadIdMigrations(dataDir.resolve("idMigrations.json"))).isEqualTo(PlannerIdMigrations.EMPTY);
     }
 
     @Test

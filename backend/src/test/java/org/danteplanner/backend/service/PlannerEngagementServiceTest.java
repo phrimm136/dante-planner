@@ -36,7 +36,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
@@ -135,13 +136,12 @@ class PlannerEngagementServiceTest {
                     .thenReturn(true);
 
             // Act & Assert
-            VoteAlreadyExistsException exception = assertThrows(
-                    VoteAlreadyExistsException.class,
-                    () -> engagementService.castVote(testUser.getId(), plannerId, VoteType.UP)
-            );
-
-            assertEquals(plannerId, exception.getPlannerId());
-            assertEquals(testUser.getId(), exception.getUserId());
+            assertRejected(() -> engagementService.castVote(testUser.getId(), plannerId, VoteType.UP))
+                    .withCode("VOTE_ALREADY_EXISTS")
+                    .isInstanceOfSatisfying(VoteAlreadyExistsException.class, exception -> {
+                        assertThat(exception.getPlannerId()).isEqualTo(plannerId);
+                        assertThat(exception.getUserId()).isEqualTo(testUser.getId());
+                    });
             verify(plannerVoteRepository, never()).insert(any());
             verify(statsRepository, never()).incrementUpvotes(any());
         }
@@ -169,15 +169,14 @@ class PlannerEngagementServiceTest {
                     engagementService.castVote(testUser.getId(), plannerId, VoteType.UP);
 
             // Assert
-            assertEquals(6, response.upvoteCount());
-            assertTrue(response.hasUpvoted());
+            assertThat(response.upvoteCount()).isEqualTo(6);
+            assertThat(response.hasUpvoted()).isTrue();
             ArgumentCaptor<PlannerVote> voteCaptor =
                     ArgumentCaptor.forClass(PlannerVote.class);
             verify(plannerVoteRepository).insert(voteCaptor.capture());
-            assertEquals(testUser.getId(), voteCaptor.getValue().getUserId());
-            assertEquals(plannerId, voteCaptor.getValue().getPlannerId());
-            assertEquals(VoteType.UP,
-                    voteCaptor.getValue().getVoteType());
+            assertThat(voteCaptor.getValue().getUserId()).isEqualTo(testUser.getId());
+            assertThat(voteCaptor.getValue().getPlannerId()).isEqualTo(plannerId);
+            assertThat(voteCaptor.getValue().getVoteType()).isEqualTo(VoteType.UP);
         }
 
         @Test
@@ -203,9 +202,9 @@ class PlannerEngagementServiceTest {
 
             ArgumentCaptor<DomainEvent> recorded = ArgumentCaptor.forClass(DomainEvent.class);
             verify(domainEventRepository).insert(recorded.capture());
-            assertEquals(DomainEventType.PLANNER_RECOMMENDED, recorded.getValue().getEventType());
-            assertEquals(plannerId, recorded.getValue().getAggregateId());
-            assertEquals("{\"ownerId\":" + planner.getUserId() + "}", recorded.getValue().getPayload());
+            assertThat(recorded.getValue().getEventType()).isEqualTo(DomainEventType.PLANNER_RECOMMENDED);
+            assertThat(recorded.getValue().getAggregateId()).isEqualTo(plannerId);
+            assertThat(recorded.getValue().getPayload()).isEqualTo("{\"ownerId\":" + planner.getUserId() + "}");
         }
 
         @Test
@@ -254,7 +253,7 @@ class PlannerEngagementServiceTest {
 
         ArgumentCaptor<PlannerReport> report = ArgumentCaptor.forClass(PlannerReport.class);
         verify(reportRepository).insert(report.capture());
-        assertEquals(testUser.getId(), report.getValue().getUserId());
-        assertEquals(plannerId, report.getValue().getPlannerId());
+        assertThat(report.getValue().getUserId()).isEqualTo(testUser.getId());
+        assertThat(report.getValue().getPlannerId()).isEqualTo(plannerId);
     }
 }

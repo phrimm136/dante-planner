@@ -61,6 +61,7 @@ what keeps the suite passing. Breaking one costs a debugging session in somebody
 - A class carrying `@Tag("containerized")` ends in `IT`; everything else ends in `Test`. The suffix
   is what the tier rules select on, so a misnamed class silently escapes them.
 - Naming: `subject_WhenCondition_Expectation`, one style with no exceptions; enforced by `architecture/TestNamingConventionTest`. The method name is the only name: no `@DisplayName` on a test class or method, enforced by `architecture/TestDisplayNameConventionTest`.
+- Assertions are AssertJ only: no test depends on `org.junit.jupiter.api.Assertions` or `org.hamcrest.MatcherAssert` (Hamcrest matchers as MockMvc arguments stay), enforced by the assertion-library rule (`architecture/TestAssertionLibraryConventionTest`).
 - Time-dependent JWT tests inject a fixed `Clock` — never 1 ms expiries (see `JwtTokenServiceTest`).
 - Deterministic ordering via `entity.setCreatedAt(now.minusSeconds(n))` — never `Thread.sleep()`.
 - Build reusable entities with `TestDataFactory`.

@@ -47,7 +47,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -167,13 +166,13 @@ class CommentServiceLayerTest {
 
             // Assert
             PlannerComment stored = persisted.get();
-            assertEquals(plannerId, stored.getPlannerId());
-            assertEquals(testUser.getId(), stored.getUserId());
-            assertEquals("Test comment", stored.getContent());
-            assertEquals(0, stored.getDepth());
-            assertNull(stored.getParentCommentId());
-            assertEquals(stored.getPublicId(), response.id());
-            assertEquals(stored.getCreatedAt(), response.createdAt());
+            assertThat(stored.getPlannerId()).isEqualTo(plannerId);
+            assertThat(stored.getUserId()).isEqualTo(testUser.getId());
+            assertThat(stored.getContent()).isEqualTo("Test comment");
+            assertThat(stored.getDepth()).isEqualTo(0);
+            assertThat(stored.getParentCommentId()).isNull();
+            assertThat(response.id()).isEqualTo(stored.getPublicId());
+            assertThat(response.createdAt()).isEqualTo(stored.getCreatedAt());
         }
 
         @Test
@@ -207,11 +206,11 @@ class CommentServiceLayerTest {
 
             // Assert
             PlannerComment stored = persisted.get();
-            assertEquals("Reply comment", stored.getContent());
-            assertEquals(1, stored.getDepth());
-            assertEquals(50L, stored.getParentCommentId());
-            assertEquals(stored.getPublicId(), response.id());
-            assertEquals(stored.getCreatedAt(), response.createdAt());
+            assertThat(stored.getContent()).isEqualTo("Reply comment");
+            assertThat(stored.getDepth()).isEqualTo(1);
+            assertThat(stored.getParentCommentId()).isEqualTo(50L);
+            assertThat(response.id()).isEqualTo(stored.getPublicId());
+            assertThat(response.createdAt()).isEqualTo(stored.getCreatedAt());
         }
 
         @Test
@@ -274,11 +273,11 @@ class CommentServiceLayerTest {
 
             // Assert
             PlannerComment stored = persisted.get();
-            assertEquals(6, stored.getDepth());
+            assertThat(stored.getDepth()).isEqualTo(6);
             // 40L is the parent's own parent: a flattening implementation reparents the reply there.
-            assertEquals(50L, stored.getParentCommentId());
-            assertEquals(stored.getPublicId(), response.id());
-            assertEquals(stored.getCreatedAt(), response.createdAt());
+            assertThat(stored.getParentCommentId()).isEqualTo(50L);
+            assertThat(response.id()).isEqualTo(stored.getPublicId());
+            assertThat(response.createdAt()).isEqualTo(stored.getCreatedAt());
         }
     }
 
@@ -301,9 +300,9 @@ class CommentServiceLayerTest {
             UpdateCommentResponse response = commandService.updateComment(commentPublicId, testUser.getId(), request);
 
             // Assert
-            assertEquals("Updated content", comment.getContent());
-            assertNotNull(comment.getEditedAt());
-            assertEquals(comment.getEditedAt(), response.editedAt());
+            assertThat(comment.getContent()).isEqualTo("Updated content");
+            assertThat(comment.getEditedAt()).isNotNull();
+            assertThat(response.editedAt()).isEqualTo(comment.getEditedAt());
         }
 
         @Test
@@ -360,8 +359,8 @@ class CommentServiceLayerTest {
             commandService.deleteComment(commentPublicId, testUser.getId());
 
             // Assert
-            assertTrue(comment.isDeleted());
-            assertEquals("", comment.getContent()); // Content cleared on soft delete
+            assertThat(comment.isDeleted()).isTrue();
+            assertThat(comment.getContent()).isEqualTo(""); // Content cleared on soft delete
         }
 
         @Test
@@ -378,7 +377,7 @@ class CommentServiceLayerTest {
             assertRejected(() -> commandService.deleteComment(commentPublicId, otherUser.getId()))
                     .withCode("COMMENT_FORBIDDEN")
                     .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Only the author can delete this comment"));
-            assertFalse(comment.isDeleted());
+            assertThat(comment.isDeleted()).isFalse();
         }
 
         @Test
@@ -415,7 +414,7 @@ class CommentServiceLayerTest {
             List<CommentTreeNode> comments = queryService.getCommentTree(plannerId, testUser.getId());
 
             // Assert
-            assertTrue(comments.isEmpty());
+            assertThat(comments).isEmpty();
         }
 
         @Test
@@ -448,11 +447,12 @@ class CommentServiceLayerTest {
             CommentTreeNode hidden = comments.stream()
                     .filter(c -> c.id().equals(byDeactivated.getPublicId())).findFirst().orElseThrow();
 
-            assertEquals("OTHER", active.authorEpithet(), "an active author is still named");
-            assertEquals("", hidden.authorEpithet(), "a deactivated author is not named");
-            assertEquals("", hidden.authorSuffix(), "nor is their suffix");
-            assertEquals(CommentConstants.DELETED_CONTENT, hidden.content(),
-                    "a deactivated author's body is hidden under the same author-lifecycle rule as the name");
+            assertThat(active.authorEpithet()).as("an active author is still named").isEqualTo("OTHER");
+            assertThat(hidden.authorEpithet()).as("a deactivated author is not named").isEqualTo("");
+            assertThat(hidden.authorSuffix()).as("nor is their suffix").isEqualTo("");
+            assertThat(hidden.content())
+                    .as("a deactivated author's body is hidden under the same author-lifecycle rule as the name")
+                    .isEqualTo(CommentConstants.DELETED_CONTENT);
         }
 
         @Test
@@ -479,11 +479,10 @@ class CommentServiceLayerTest {
             CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
 
             // Act & Assert
-            UserTimedOutException exception = assertThrows(
-                    UserTimedOutException.class,
-                    () -> commandService.createComment(plannerId, testUser.getId(), UUID.randomUUID(), request)
-            );
-            assertEquals(testUser.getId(), exception.getUserId());
+            assertRejected(() -> commandService.createComment(plannerId, testUser.getId(), UUID.randomUUID(), request))
+                    .withCode("USER_TIMED_OUT")
+                    .isInstanceOfSatisfying(UserTimedOutException.class,
+                            exception -> assertThat(exception.getUserId()).isEqualTo(testUser.getId()));
             verify(commentRepository, never()).insert(any());
         }
 
@@ -496,11 +495,10 @@ class CommentServiceLayerTest {
             CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
 
             // Act & Assert
-            UserBannedException exception = assertThrows(
-                    UserBannedException.class,
-                    () -> commandService.createComment(plannerId, testUser.getId(), UUID.randomUUID(), request)
-            );
-            assertEquals(testUser.getId(), exception.getUserId());
+            assertRejected(() -> commandService.createComment(plannerId, testUser.getId(), UUID.randomUUID(), request))
+                    .withCode("USER_BANNED")
+                    .isInstanceOfSatisfying(UserBannedException.class,
+                            exception -> assertThat(exception.getUserId()).isEqualTo(testUser.getId()));
             verify(commentRepository, never()).insert(any());
         }
 
@@ -545,7 +543,7 @@ class CommentServiceLayerTest {
 
             var response = engagementService.toggleUpvote(commentPublicId, testUser.getId());
 
-            assertEquals(8, response.upvoteCount());
+            assertThat(response.upvoteCount()).isEqualTo(8);
             verify(commentRepository).incrementUpvoteCount(10L);
         }
     }

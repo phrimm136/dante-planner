@@ -2,39 +2,38 @@ package org.danteplanner.backend.planner.entity;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class PlannerTypeTest {
 
     @Test
     void isValidCategory_WhenValidMdCategory_ReturnsTrue() {
-        assertTrue(PlannerType.MIRROR_DUNGEON.isValidCategory("5F"));
-        assertTrue(PlannerType.MIRROR_DUNGEON.isValidCategory("10F"));
-        assertTrue(PlannerType.MIRROR_DUNGEON.isValidCategory("15F"));
+        assertThat(PlannerType.MIRROR_DUNGEON.isValidCategory("5F")).isTrue();
+        assertThat(PlannerType.MIRROR_DUNGEON.isValidCategory("10F")).isTrue();
+        assertThat(PlannerType.MIRROR_DUNGEON.isValidCategory("15F")).isTrue();
     }
 
     @Test
     void isValidCategory_WhenValidRrCategory_ReturnsTrue() {
-        assertTrue(PlannerType.REFRACTED_RAILWAY.isValidCategory("RR_PLACEHOLDER"));
+        assertThat(PlannerType.REFRACTED_RAILWAY.isValidCategory("RR_PLACEHOLDER")).isTrue();
     }
 
     @Test
     void isValidCategory_WhenInvalidCategory_ReturnsFalse() {
-        assertFalse(PlannerType.MIRROR_DUNGEON.isValidCategory("INVALID"));
-        assertFalse(PlannerType.MIRROR_DUNGEON.isValidCategory(""));
-        assertFalse(PlannerType.MIRROR_DUNGEON.isValidCategory(null));
+        assertThat(PlannerType.MIRROR_DUNGEON.isValidCategory("INVALID")).isFalse();
+        assertThat(PlannerType.MIRROR_DUNGEON.isValidCategory("")).isFalse();
+        assertThat(PlannerType.MIRROR_DUNGEON.isValidCategory(null)).isFalse();
     }
 
     @Test
     void isValidCategory_WhenMdCategoryWithRrType_ReturnsFalse() {
-        assertFalse(PlannerType.REFRACTED_RAILWAY.isValidCategory("5F"));
-        assertFalse(PlannerType.REFRACTED_RAILWAY.isValidCategory("10F"));
-        assertFalse(PlannerType.REFRACTED_RAILWAY.isValidCategory("15F"));
+        assertThat(PlannerType.REFRACTED_RAILWAY.isValidCategory("5F")).isFalse();
+        assertThat(PlannerType.REFRACTED_RAILWAY.isValidCategory("10F")).isFalse();
+        assertThat(PlannerType.REFRACTED_RAILWAY.isValidCategory("15F")).isFalse();
     }
 
     @Test
     void isValidCategory_WhenRrCategoryWithMdType_ReturnsFalse() {
-        assertFalse(PlannerType.MIRROR_DUNGEON.isValidCategory("RR_PLACEHOLDER"));
+        assertThat(PlannerType.MIRROR_DUNGEON.isValidCategory("RR_PLACEHOLDER")).isFalse();
     }
 }

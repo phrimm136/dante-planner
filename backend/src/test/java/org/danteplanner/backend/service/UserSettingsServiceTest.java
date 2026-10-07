@@ -17,7 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -69,10 +69,10 @@ class UserSettingsServiceTest {
             UserSettingsResponse result = userSettingsService.getSettings(testUser.getId());
 
             // Assert
-            assertTrue(result.syncEnabled());
-            assertTrue(result.syncChoiceMade());
-            assertTrue(result.notifyComments());
-            assertFalse(result.notifyRecommendations());
+            assertThat(result.syncEnabled()).isTrue();
+            assertThat(result.syncChoiceMade()).isTrue();
+            assertThat(result.notifyComments()).isTrue();
+            assertThat(result.notifyRecommendations()).isFalse();
             verify(userRepository, never()).findById(any());
         }
 
@@ -86,11 +86,11 @@ class UserSettingsServiceTest {
             UserSettingsResponse result = userSettingsService.getSettings(testUser.getId());
 
             // Assert
-            assertFalse(result.syncEnabled());
-            assertFalse(result.syncChoiceMade());
-            assertTrue(result.notifyComments());
-            assertTrue(result.notifyRecommendations());
-            assertFalse(result.notifyNewPublications());
+            assertThat(result.syncEnabled()).isFalse();
+            assertThat(result.syncChoiceMade()).isFalse();
+            assertThat(result.notifyComments()).isTrue();
+            assertThat(result.notifyRecommendations()).isTrue();
+            assertThat(result.notifyNewPublications()).isFalse();
             verify(userSettingsRepository, never()).insert(any());
         }
 
@@ -105,11 +105,11 @@ class UserSettingsServiceTest {
             UserSettingsResponse result = userSettingsService.getSettings(nonExistentId);
 
             // Assert
-            assertFalse(result.syncEnabled());
-            assertFalse(result.syncChoiceMade());
-            assertTrue(result.notifyComments());
-            assertTrue(result.notifyRecommendations());
-            assertFalse(result.notifyNewPublications());
+            assertThat(result.syncEnabled()).isFalse();
+            assertThat(result.syncChoiceMade()).isFalse();
+            assertThat(result.notifyComments()).isTrue();
+            assertThat(result.notifyRecommendations()).isTrue();
+            assertThat(result.notifyNewPublications()).isFalse();
         }
     }
 
@@ -133,10 +133,10 @@ class UserSettingsServiceTest {
             UserSettingsResponse result = userSettingsService.updateSettings(testUser.getId(), request);
 
             // Assert
-            assertFalse(result.syncEnabled());
-            assertTrue(result.syncChoiceMade());
-            assertTrue(result.notifyComments());      // unchanged from existing
-            assertFalse(result.notifyRecommendations()); // unchanged from existing
+            assertThat(result.syncEnabled()).isFalse();
+            assertThat(result.syncChoiceMade()).isTrue();
+            assertThat(result.notifyComments()).isTrue();      // unchanged from existing
+            assertThat(result.notifyRecommendations()).isFalse(); // unchanged from existing
         }
 
         @Test
@@ -153,8 +153,8 @@ class UserSettingsServiceTest {
 
             UserSettingsResponse result = userSettingsService.updateSettings(testUser.getId(), request);
 
-            assertTrue(result.syncEnabled());
-            assertTrue(result.syncChoiceMade());
+            assertThat(result.syncEnabled()).isTrue();
+            assertThat(result.syncChoiceMade()).isTrue();
         }
 
         @Test
@@ -171,9 +171,9 @@ class UserSettingsServiceTest {
 
             UserSettingsResponse result = userSettingsService.updateSettings(testUser.getId(), request);
 
-            assertFalse(result.syncEnabled());
-            assertFalse(result.syncChoiceMade());
-            assertFalse(result.notifyComments());
+            assertThat(result.syncEnabled()).isFalse();
+            assertThat(result.syncChoiceMade()).isFalse();
+            assertThat(result.notifyComments()).isFalse();
         }
 
         @Test
@@ -193,11 +193,11 @@ class UserSettingsServiceTest {
             UserSettingsResponse result = userSettingsService.updateSettings(testUser.getId(), request);
 
             // Assert
-            assertTrue(result.syncEnabled());         // unchanged from existing
-            assertTrue(result.syncChoiceMade());      // unchanged from existing
-            assertFalse(result.notifyComments());
-            assertTrue(result.notifyRecommendations());
-            assertTrue(result.notifyNewPublications());
+            assertThat(result.syncEnabled()).isTrue();         // unchanged from existing
+            assertThat(result.syncChoiceMade()).isTrue();      // unchanged from existing
+            assertThat(result.notifyComments()).isFalse();
+            assertThat(result.notifyRecommendations()).isTrue();
+            assertThat(result.notifyNewPublications()).isTrue();
         }
 
         @Test
@@ -214,10 +214,10 @@ class UserSettingsServiceTest {
             UserSettingsResponse result = userSettingsService.updateSettings(testUser.getId(), request);
 
             // Assert - all values unchanged
-            assertTrue(result.syncEnabled());
-            assertTrue(result.notifyComments());
-            assertFalse(result.notifyRecommendations());
-            assertFalse(result.notifyNewPublications());
+            assertThat(result.syncEnabled()).isTrue();
+            assertThat(result.notifyComments()).isTrue();
+            assertThat(result.notifyRecommendations()).isFalse();
+            assertThat(result.notifyNewPublications()).isFalse();
         }
     }
 
@@ -234,7 +234,7 @@ class UserSettingsServiceTest {
             UserSettings result = userSettingsService.getOrCreateEntity(testUser.getId());
 
             // Assert
-            assertSame(existingSettings, result);
+            assertThat(result).isSameAs(existingSettings);
             verify(userRepository, never()).findById(any());
             verify(userSettingsRepository, never()).insert(any());
         }
@@ -253,8 +253,8 @@ class UserSettingsServiceTest {
             UserSettings result = userSettingsService.getOrCreateEntity(testUser.getId());
 
             // Assert
-            assertNotNull(result);
-            assertEquals(testUser, result.getUser());
+            assertThat(result).isNotNull();
+            assertThat(result.getUser()).isEqualTo(testUser);
             verify(userSettingsRepository).insert(any(UserSettings.class));
         }
     }

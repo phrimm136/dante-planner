@@ -6,8 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for AuthProviderTypeConverter.
@@ -29,23 +28,23 @@ class AuthProviderTypeConverterTest {
 
         @Test
         void convertToDatabaseColumn_WhenGoogle_ReturnsLowercaseGoogle() {
-            assertEquals("google", converter.convertToDatabaseColumn(AuthProviderType.GOOGLE));
+            assertThat(converter.convertToDatabaseColumn(AuthProviderType.GOOGLE)).isEqualTo("google");
         }
 
         @Test
         void convertToDatabaseColumn_WhenApple_ReturnsLowercaseApple() {
-            assertEquals("apple", converter.convertToDatabaseColumn(AuthProviderType.APPLE));
+            assertThat(converter.convertToDatabaseColumn(AuthProviderType.APPLE)).isEqualTo("apple");
         }
 
         // V009 deleted-user sentinel
         @Test
         void convertToDatabaseColumn_WhenSystem_ReturnsLowercaseSystem() {
-            assertEquals("system", converter.convertToDatabaseColumn(AuthProviderType.SYSTEM));
+            assertThat(converter.convertToDatabaseColumn(AuthProviderType.SYSTEM)).isEqualTo("system");
         }
 
         @Test
         void convertToDatabaseColumn_WhenNull_ReturnsNull() {
-            assertNull(converter.convertToDatabaseColumn(null));
+            assertThat(converter.convertToDatabaseColumn(null)).isNull();
         }
     }
 
@@ -54,23 +53,23 @@ class AuthProviderTypeConverterTest {
 
         @Test
         void convertToEntityAttribute_WhenGoogle_ReturnsGoogleEnum() {
-            assertEquals(AuthProviderType.GOOGLE, converter.convertToEntityAttribute("google"));
+            assertThat(converter.convertToEntityAttribute("google")).isEqualTo(AuthProviderType.GOOGLE);
         }
 
         @Test
         void convertToEntityAttribute_WhenApple_ReturnsAppleEnum() {
-            assertEquals(AuthProviderType.APPLE, converter.convertToEntityAttribute("apple"));
+            assertThat(converter.convertToEntityAttribute("apple")).isEqualTo(AuthProviderType.APPLE);
         }
 
         // V009 deleted-user sentinel
         @Test
         void convertToEntityAttribute_WhenSystem_ReturnsSystemEnum() {
-            assertEquals(AuthProviderType.SYSTEM, converter.convertToEntityAttribute("system"));
+            assertThat(converter.convertToEntityAttribute("system")).isEqualTo(AuthProviderType.SYSTEM);
         }
 
         @Test
         void convertToEntityAttribute_WhenNull_ReturnsNull() {
-            assertNull(converter.convertToEntityAttribute(null));
+            assertThat(converter.convertToEntityAttribute(null)).isNull();
         }
     }
 }

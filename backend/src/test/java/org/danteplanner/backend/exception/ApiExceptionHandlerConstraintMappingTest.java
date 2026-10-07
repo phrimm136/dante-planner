@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
@@ -70,9 +70,9 @@ class ApiExceptionHandlerConstraintMappingTest {
     void listedConstraint_WhenMapped_KeepsFrozenResponse(ContractRow row) {
         ResponseEntity<Object> response = handle(duplicateKey(row.constraintName()));
 
-        assertEquals(row.status(), response.getStatusCode());
-        assertEquals(row.code(), codeOf(response));
-        assertEquals(row.message(), detailOf(response));
+        assertThat(response.getStatusCode()).isEqualTo(row.status());
+        assertThat(codeOf(response)).isEqualTo(row.code());
+        assertThat(detailOf(response)).isEqualTo(row.message());
     }
 
     /**
@@ -87,16 +87,16 @@ class ApiExceptionHandlerConstraintMappingTest {
                 .flatMap(Optional::stream)
                 .collect(Collectors.toCollection(() -> EnumSet.noneOf(KnownConstraint.class)));
 
-        assertEquals(EnumSet.allOf(KnownConstraint.class), covered);
+        assertThat(covered).isEqualTo(EnumSet.allOf(KnownConstraint.class));
     }
 
     @Test
     void unlistedUniqueKey_WhenMapped_IsReportedAsConflict() {
         ResponseEntity<Object> response = handle(duplicateKey("planner_stats.PRIMARY"));
 
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("CONFLICT", codeOf(response));
-        assertEquals("Resource conflict", detailOf(response));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(codeOf(response)).isEqualTo("CONFLICT");
+        assertThat(detailOf(response)).isEqualTo("Resource conflict");
     }
 
     @Test
@@ -104,9 +104,9 @@ class ApiExceptionHandlerConstraintMappingTest {
         ResponseEntity<Object> response = handle(otherIntegrityFailure(
                 "Cannot add or update a child row: a foreign key constraint fails", 1452, "fk_vote_planner"));
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("INVALID_REQUEST", codeOf(response));
-        assertEquals("Invalid data", detailOf(response));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(codeOf(response)).isEqualTo("INVALID_REQUEST");
+        assertThat(detailOf(response)).isEqualTo("Invalid data");
     }
 
     /**
@@ -118,8 +118,8 @@ class ApiExceptionHandlerConstraintMappingTest {
         ResponseEntity<Object> response = handle(otherIntegrityFailure(
                 "Column 'planner_id' cannot be null", 1048, "planner_votes.PRIMARY"));
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("INVALID_REQUEST", codeOf(response));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(codeOf(response)).isEqualTo("INVALID_REQUEST");
     }
 
     /**
@@ -135,8 +135,8 @@ class ApiExceptionHandlerConstraintMappingTest {
 
         ResponseEntity<Object> response = handle(ex);
 
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("CONFLICT", codeOf(response));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(codeOf(response)).isEqualTo("CONFLICT");
     }
 
     @Test
@@ -144,8 +144,8 @@ class ApiExceptionHandlerConstraintMappingTest {
         ResponseEntity<Object> response =
                 handle(new DuplicateKeyException("a row with that key already exists"));
 
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("CONFLICT", codeOf(response));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(codeOf(response)).isEqualTo("CONFLICT");
     }
 
     @Test
@@ -171,8 +171,8 @@ class ApiExceptionHandlerConstraintMappingTest {
         ResponseEntity<Object> response =
                 handleUnder(Locale.forLanguageTag("tr"), duplicateKey("planner_votes.PRIMARY"));
 
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("DUPLICATE_ACTION", codeOf(response));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(codeOf(response)).isEqualTo("DUPLICATE_ACTION");
     }
 
     @Test
@@ -180,8 +180,8 @@ class ApiExceptionHandlerConstraintMappingTest {
         ResponseEntity<Object> response =
                 handleUnder(Locale.ROOT, duplicateKey("planner_votes.PRIMARY"));
 
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("DUPLICATE_ACTION", codeOf(response));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(codeOf(response)).isEqualTo("DUPLICATE_ACTION");
     }
 
     /**
@@ -193,8 +193,8 @@ class ApiExceptionHandlerConstraintMappingTest {
         ResponseEntity<Object> response =
                 handleUnder(Locale.forLanguageTag("tr"), duplicateKey("planner.PRIMARY"));
 
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("UUID_COLLISION", codeOf(response));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(codeOf(response)).isEqualTo("UUID_COLLISION");
     }
 
     private static ResponseEntity<Object> handle(DataIntegrityViolationException ex) {

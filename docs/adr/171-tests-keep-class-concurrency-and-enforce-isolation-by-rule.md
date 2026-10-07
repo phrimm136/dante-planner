@@ -1,5 +1,5 @@
 # 171 tests-keep-class-concurrency-and-enforce-isolation-by-rule
-epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @mocks @memory @isolation @transactions @contexts @fakes @fixtures
+epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @mocks @memory @isolation @transactions @contexts @fakes @fixtures @assertions
 
 ## Decisions
 - @tests @concurrency — Backend test classes keep running concurrently inside the test JVM, twelve
@@ -162,6 +162,15 @@ epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @
   INVARIANT: outside `support`, no test calls or references `User.builder()`, `Planner.builder()` or
   a constructor of `User`, `Planner` or `UpsertPlannerRequest` — the fixture-construction rule
   (`FixtureConstructionRule`, checked by `TestFixtureConventionTest`).
+- @tests @assertions — Tests assert through AssertJ only; Hamcrest stays only as the matcher argument
+  MockMvc's API takes. The rejection helper, soft assertions and the fixture rules are built on AssertJ,
+  and with JUnit's assertions beside it one suite carried two argument orders and two message styles:
+  one JUnit pair had its expected and actual values swapped, and one compared an object with itself.
+  REJECTED: JUnit's `Assertions` beside AssertJ — expected-first and actual-first calls mix in one
+  file, and a type-only `assertThrows` escapes the rejection rule as a variable declaration.
+  INVARIANT: no test class depends on `org.junit.jupiter.api.Assertions` or
+  `org.hamcrest.MatcherAssert` — the assertion-library rule (`JunitAssertionsRule`, checked by
+  `TestAssertionLibraryConventionTest`).
 
 ## Takeaway
 - takeaway: when concurrency in a test suite exposes shared state, close each hazard with a rule

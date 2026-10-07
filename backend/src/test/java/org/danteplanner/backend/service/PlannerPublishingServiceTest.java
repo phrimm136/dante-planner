@@ -60,7 +60,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
@@ -185,8 +185,8 @@ class PlannerPublishingServiceTest {
             PlannerResponse first = publishingService.publish(testUser.getId(), planner.getId());
             PlannerResponse second = publishingService.publish(testUser.getId(), planner.getId());
 
-            assertTrue(first.published());
-            assertTrue(second.published(), "a repeated publish must not flip the planner back");
+            assertThat(first.published()).isTrue();
+            assertThat(second.published()).as("a repeated publish must not flip the planner back").isTrue();
             verify(catalogRepository, times(1)).insert(any(PlannerCatalog.class));
         }
 
@@ -197,7 +197,7 @@ class PlannerPublishingServiceTest {
 
             PlannerResponse result = publishingService.unpublish(testUser.getId(), planner.getId());
 
-            assertFalse(result.published());
+            assertThat(result.published()).isFalse();
             verify(catalogRepository, never()).deleteById(any());
         }
     }
@@ -240,9 +240,9 @@ class PlannerPublishingServiceTest {
             publishingServiceWith(renaming).publish(testUser.getId(), planner.getId());
 
             JsonNode published = mapper.readTree(planner.getContentJson());
-            assertEquals(mapper.createArrayNode().add("19002"), published.path("observationGiftIds"));
-            assertEquals(List.of(planner.getContentJson()), indexedContent);
-            assertTrue(planner.isPublished());
+            assertThat(published.path("observationGiftIds")).isEqualTo(mapper.createArrayNode().add("19002"));
+            assertThat(indexedContent).isEqualTo(List.of(planner.getContentJson()));
+            assertThat(planner.isPublished()).isTrue();
         }
     }
 
@@ -260,9 +260,9 @@ class PlannerPublishingServiceTest {
             ArgumentCaptor<DomainEvent> recorded = ArgumentCaptor.forClass(DomainEvent.class);
             verify(domainEventRepository).insert(recorded.capture());
             verifyNoMoreInteractions(domainEventRepository);
-            assertEquals(DomainEventType.PLANNER_PUBLISHED, recorded.getValue().getEventType());
-            assertEquals(planner.getId(), recorded.getValue().getAggregateId());
-            assertEquals("{\"authorId\":" + testUser.getId() + "}", recorded.getValue().getPayload());
+            assertThat(recorded.getValue().getEventType()).isEqualTo(DomainEventType.PLANNER_PUBLISHED);
+            assertThat(recorded.getValue().getAggregateId()).isEqualTo(planner.getId());
+            assertThat(recorded.getValue().getPayload()).isEqualTo("{\"authorId\":" + testUser.getId() + "}");
         }
 
         @Test
@@ -300,7 +300,7 @@ class PlannerPublishingServiceTest {
             Planner result = publishingService.withdrawFromPublicView(
                     planner.getId(), Planner::unpublish);
 
-            assertSame(planner, result);
+            assertThat(result).isSameAs(planner);
             verify(catalogRepository, never()).deleteById(any());
         }
 
@@ -312,8 +312,8 @@ class PlannerPublishingServiceTest {
             Planner result = publishingService.withdrawFromPublicView(
                     planner.getId(), Planner::unpublish);
 
-            assertSame(planner, result);
-            assertFalse(result.isPublished());
+            assertThat(result).isSameAs(planner);
+            assertThat(result.isPublished()).isFalse();
             verify(catalogRepository).deleteById(planner.getId());
         }
 
@@ -324,8 +324,8 @@ class PlannerPublishingServiceTest {
 
             Planner result = publishingService.withdrawFromPublicView(planner.getId(), Planner::takeDown);
 
-            assertSame(planner, result);
-            assertTrue(result.isTakenDown());
+            assertThat(result).isSameAs(planner);
+            assertThat(result.isTakenDown()).isTrue();
         }
     }
 
@@ -345,8 +345,8 @@ class PlannerPublishingServiceTest {
             PlannerResponse result = publishingService.publish(
                     testUser.getId(), deviceId, planner.getId(), request);
 
-            assertTrue(result.published());
-            assertEquals("Reused Aggregate", result.title());
+            assertThat(result.published()).isTrue();
+            assertThat(result.title()).isEqualTo("Reused Aggregate");
             verify(plannerRepository, times(1)).findAggregateForOwner(any(), any());
             verify(plannerRepository, never()).findAggregate(any());
         }
@@ -367,9 +367,9 @@ class PlannerPublishingServiceTest {
             PlannerResponse result = publishingService.publish(testUser.getId(), planner.getId());
 
             // Assert
-            assertTrue(result.published());
-            assertEquals(planner.getId(), result.id());
-            assertEquals("Test Planner", result.title());
+            assertThat(result.published()).isTrue();
+            assertThat(result.id()).isEqualTo(planner.getId());
+            assertThat(result.title()).isEqualTo("Test Planner");
         }
 
         @Test
@@ -383,7 +383,7 @@ class PlannerPublishingServiceTest {
             PlannerResponse result = publishingService.unpublish(testUser.getId(), planner.getId());
 
             // Assert
-            assertFalse(result.published());
+            assertThat(result.published()).isFalse();
         }
 
         @Test
@@ -396,13 +396,11 @@ class PlannerPublishingServiceTest {
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
 
             // Act & Assert
-            PlannerForbiddenException exception = assertThrows(
-                    PlannerForbiddenException.class,
-                    () -> publishingService.publish(testUser.getId(), planner.getId())
-            );
-
-            assertEquals(planner.getId(), exception.getPlannerId());
-            assertFalse(planner.isPublished());
+            assertRejected(() -> publishingService.publish(testUser.getId(), planner.getId()))
+                    .withCode("PLANNER_FORBIDDEN")
+                    .isInstanceOfSatisfying(PlannerForbiddenException.class,
+                            exception -> assertThat(exception.getPlannerId()).isEqualTo(planner.getId()));
+            assertThat(planner.isPublished()).isFalse();
         }
 
         @Test
@@ -442,13 +440,13 @@ class PlannerPublishingServiceTest {
             PlannerResponse result = publishingService.publish(testUser.getId(), planner.getId());
 
             // Assert
-            assertTrue(result.published());
+            assertThat(result.published()).isTrue();
             // The subscription is a row in another aggregate and never reaches this response;
             // asserting it as state needs a containerized test with a real subscription repository.
             ArgumentCaptor<PlannerSubscription> subscription = ArgumentCaptor.forClass(PlannerSubscription.class);
             verify(subscriptionRepository).insert(subscription.capture());
-            assertEquals(testUser.getId(), subscription.getValue().getUserId());
-            assertEquals(planner.getId(), subscription.getValue().getPlannerId());
+            assertThat(subscription.getValue().getUserId()).isEqualTo(testUser.getId());
+            assertThat(subscription.getValue().getPlannerId()).isEqualTo(planner.getId());
         }
 
         @Test
@@ -462,7 +460,7 @@ class PlannerPublishingServiceTest {
             PlannerResponse result = publishingService.unpublish(testUser.getId(), planner.getId());
 
             // Assert
-            assertFalse(result.published());
+            assertThat(result.published()).isFalse();
             verify(subscriptionRepository, never()).insert(any());
         }
     }
@@ -492,7 +490,7 @@ class PlannerPublishingServiceTest {
 
             PlannerResponse result = publishingService.unpublish(testUser.getId(), planner.getId());
 
-            assertFalse(result.published());
+            assertThat(result.published()).isFalse();
             verify(catalogRepository).deleteById(planner.getId());
         }
     }
@@ -511,8 +509,8 @@ class PlannerPublishingServiceTest {
                     publishingService.toggleOwnerNotifications(testUser.getId(), planner.getId(), false);
 
             // Assert
-            assertFalse(response.ownerNotificationsEnabled());
-            assertFalse(planner.isOwnerNotificationsEnabled());
+            assertThat(response.ownerNotificationsEnabled()).isFalse();
+            assertThat(planner.isOwnerNotificationsEnabled()).isFalse();
         }
 
         @Test
@@ -527,7 +525,7 @@ class PlannerPublishingServiceTest {
             // Act & Assert
             assertRejected(() -> publishingService.toggleOwnerNotifications(testUser.getId(), planner.getId(), true))
                     .withCode("PLANNER_FORBIDDEN");
-            assertTrue(planner.isOwnerNotificationsEnabled());
+            assertThat(planner.isOwnerNotificationsEnabled()).isTrue();
         }
     }
 
@@ -539,13 +537,12 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().title("   ").published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
 
-            PlannerValidationException thrown = assertThrows(
-                    PlannerValidationException.class,
-                    () -> publishingService.publish(testUser.getId(), planner.getId()));
-
-            assertEquals("MISSING_TITLE", thrown.getOriginalCode());
-            assertFalse(planner.isPublished());
-            assertNull(planner.getFirstPublishedAt());
+            assertRejected(() -> publishingService.publish(testUser.getId(), planner.getId()))
+                    .withViolation("MISSING_TITLE")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            thrown -> assertThat(thrown.getOriginalCode()).isEqualTo("MISSING_TITLE"));
+            assertThat(planner.isPublished()).isFalse();
+            assertThat(planner.getFirstPublishedAt()).isNull();
         }
 
         @Test
@@ -562,14 +559,14 @@ class PlannerPublishingServiceTest {
                     .contentVersion(99)
                     .build();
 
-            PlannerValidationException thrown = assertThrows(
-                    PlannerValidationException.class,
-                    () -> publishingService.publish(testUser.getId(), UUID.randomUUID(), planner.getId(), request));
-
-            assertEquals("MISSING_TITLE", thrown.getOriginalCode());
-            assertEquals(syncVersionBefore, planner.getSyncVersion());
-            assertEquals("Stored Title", planner.getTitle());
-            assertFalse(planner.isPublished());
+            assertRejected(() -> publishingService.publish(testUser.getId(), UUID.randomUUID(), planner.getId(),
+                    request))
+                    .withViolation("MISSING_TITLE")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            thrown -> assertThat(thrown.getOriginalCode()).isEqualTo("MISSING_TITLE"));
+            assertThat(planner.getSyncVersion()).isEqualTo(syncVersionBefore);
+            assertThat(planner.getTitle()).isEqualTo("Stored Title");
+            assertThat(planner.isPublished()).isFalse();
         }
 
         @Test
@@ -586,12 +583,12 @@ class PlannerPublishingServiceTest {
                     .contentVersion(99)
                     .build();
 
-            PlannerValidationException thrown = assertThrows(
-                    PlannerValidationException.class,
-                    () -> publishingService.publish(testUser.getId(), UUID.randomUUID(), planner.getId(), request));
-
-            assertEquals("MISSING_TITLE", thrown.getOriginalCode());
-            assertEquals(syncVersionBefore, planner.getSyncVersion());
+            assertRejected(() -> publishingService.publish(testUser.getId(), UUID.randomUUID(), planner.getId(),
+                    request))
+                    .withViolation("MISSING_TITLE")
+                    .isInstanceOfSatisfying(PlannerValidationException.class,
+                            thrown -> assertThat(thrown.getOriginalCode()).isEqualTo("MISSING_TITLE"));
+            assertThat(planner.getSyncVersion()).isEqualTo(syncVersionBefore);
         }
 
         @Test
@@ -606,7 +603,7 @@ class PlannerPublishingServiceTest {
             PlannerResponse result = publishingService.publish(
                     testUser.getId(), deviceId, planner.getId(), request);
 
-            assertTrue(result.published());
+            assertThat(result.published()).isTrue();
         }
 
         @Test
@@ -617,8 +614,8 @@ class PlannerPublishingServiceTest {
             assertRejected(() -> publishingService.publish(testUser.getId(), planner.getId()))
                     .withCode("EMPTY_CONTENT");
 
-            assertFalse(planner.isPublished());
-            assertNull(planner.getFirstPublishedAt());
+            assertThat(planner.isPublished()).isFalse();
+            assertThat(planner.getFirstPublishedAt()).isNull();
             verify(catalogRepository, never()).insert(any());
         }
     }
