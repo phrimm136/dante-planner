@@ -23,11 +23,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-/**
- * Unit tests for AuthenticationService.
- *
- * <p>Tests OAuth authentication and token refresh flows.</p>
- */
 class AuthenticationServiceTest {
 
     private static final String PROVIDER_NAME = "google";

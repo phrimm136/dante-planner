@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * <p>The defense is structural: the PKCE {@code code_verifier} never leaves the server — it lives
  * only inside the signed-and-encrypted {@code oauth_tx} cookie. So a stolen {@code code} is inert
  * without the matching server-held verifier, and the verifier cannot be forged (RS256 signature) or
- * substituted (state binding, INV2). In every case the token exchange is never even attempted.</p>
+ * substituted (state binding). In every case the token exchange is never even attempted.</p>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ActiveProfiles("it")

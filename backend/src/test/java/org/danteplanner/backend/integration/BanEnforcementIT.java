@@ -65,7 +65,6 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
     private User regularUser;
     private User adminUser;
     private String regularUserToken;
-    private String adminToken;
 
     @BeforeEach
     void setUp() {
@@ -74,15 +73,10 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
         adminUser = TestDataFactory.createAdmin(userRepository, "admin@example.com");
 
         regularUserToken = TestDataFactory.generateAccessToken(jwtTokenService, regularUser);
-        adminToken = TestDataFactory.generateAccessToken(jwtTokenService, adminUser);
     }
 
     private Cookie userCookie() {
         return AuthCookies.accessToken(regularUserToken);
-    }
-
-    private Cookie adminCookie() {
-        return AuthCookies.accessToken(adminToken);
     }
 
     @Test

@@ -340,9 +340,6 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void unhideFromRecommended_WhenAdminRole_Returns200() throws Exception {
-            // Re-read first: with the test no longer wrapped in a transaction, AFTER_COMMIT
-            // listeners run and bump this row's version, leaving the instance from @BeforeEach
-            // stale.
             Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
             hidden.hideFromRecommended(adminUser.getId(), "Test hide reason");
             plannerRepository.save(hidden);
@@ -367,9 +364,6 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void unhideFromRecommended_WhenRegularUser_Returns403() throws Exception {
-            // Re-read first: with the test no longer wrapped in a transaction, AFTER_COMMIT
-            // listeners run and bump this row's version, leaving the instance from @BeforeEach
-            // stale.
             Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
             hidden.hideFromRecommended(adminUser.getId(), "Test hide reason");
             plannerRepository.save(hidden);
@@ -381,9 +375,6 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void unhideFromRecommended_WhenHiddenPlanner_ClearsHiddenFlag() throws Exception {
-            // Re-read first: with the test no longer wrapped in a transaction, AFTER_COMMIT
-            // listeners run and bump this row's version, leaving the instance from @BeforeEach
-            // stale.
             Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
             hidden.hideFromRecommended(adminUser.getId(), "Test hide reason");
             plannerRepository.save(hidden);
@@ -398,9 +389,6 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void unhideFromRecommended_WhenHiddenPlanner_ClearsHiddenAt() throws Exception {
-            // Re-read first: with the test no longer wrapped in a transaction, AFTER_COMMIT
-            // listeners run and bump this row's version, leaving the instance from @BeforeEach
-            // stale.
             Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
             hidden.hideFromRecommended(adminUser.getId(), "Test hide reason");
             plannerRepository.save(hidden);
@@ -415,9 +403,6 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void unhideFromRecommended_WhenHiddenPlanner_ClearsModeratorId() throws Exception {
-            // Re-read first: with the test no longer wrapped in a transaction, AFTER_COMMIT
-            // listeners run and bump this row's version, leaving the instance from @BeforeEach
-            // stale.
             Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
             hidden.hideFromRecommended(adminUser.getId(), "Test hide reason");
             plannerRepository.save(hidden);
@@ -432,9 +417,6 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void unhideFromRecommended_WhenHiddenPlanner_ClearsHideReason() throws Exception {
-            // Re-read first: with the test no longer wrapped in a transaction, AFTER_COMMIT
-            // listeners run and bump this row's version, leaving the instance from @BeforeEach
-            // stale.
             Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
             hidden.hideFromRecommended(adminUser.getId(), "Test hide reason");
             plannerRepository.save(hidden);
@@ -477,9 +459,6 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void unhideFromRecommended_WhenVotes_PreservesVotes() throws Exception {
-            // Re-read first: with the test no longer wrapped in a transaction, AFTER_COMMIT
-            // listeners run and bump this row's version, leaving the instance from @BeforeEach
-            // stale.
             Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
             hidden.hideFromRecommended(adminUser.getId(), "Test hide reason");
             plannerRepository.save(hidden);

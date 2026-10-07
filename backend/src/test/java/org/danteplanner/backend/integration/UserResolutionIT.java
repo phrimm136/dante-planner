@@ -6,7 +6,6 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.repository.UserSettingsRepository;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.support.TestDataFactory;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,10 +43,6 @@ class UserResolutionIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private UserSettingsRepository userSettingsRepository;
-
-    @BeforeEach
-    void setUp() {
-    }
 
     private Map<String, String> identity(String providerId) {
         return Map.of("id", providerId, "email", providerId + "@example.com");

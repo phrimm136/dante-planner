@@ -37,8 +37,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Phase-3 co-acceptance test (INV7): a re-check miss-flood on the dedicated bulkhead pool never
- * delays a concurrent write.
+ * A re-check miss-flood on the dedicated bulkhead pool never delays a concurrent write.
  *
  * <p>The bulkhead datasource is pointed through the Toxiproxy app→primary proxy and slowed with the
  * {@code wan} latency toxic, so every replica-miss re-check holds a bulkhead connection for the
@@ -47,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The write path draws from the separate, un-proxied primary write pool, so a concurrent write must
  * complete without being serialized behind the flood.</p>
  *
- * <p>Determinism (INV4): INV7 is asserted as <em>comparative isolation</em>, never an absolute
+ * <p>Determinism: the isolation is asserted as <em>comparative isolation</em>, never an absolute
  * latency SLA. A single wan-slowed re-check is timed first as an in-test reference; the concurrent
  * write must beat that one re-check (a ratio, not a tuned constant) and must return while flood
  * tasks are still in flight. The only wall-clock number is the reference re-check, and it is a
@@ -97,7 +96,6 @@ class BulkheadIT extends CausalHarnessSupport {
         registry.add("datasource.bulkhead.password", () -> "test");
     }
 
-    // INV7
     @Test
     void reCheckFlood_WhenBulkheadSaturated_DoesNotDelayConcurrentWrite() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "bulkhead-inv7@example.com");
@@ -134,7 +132,7 @@ class BulkheadIT extends CausalHarnessSupport {
             }
             long floodDrainMs = (System.nanoTime() - floodStart) / 1_000_000;
 
-            log.info("INV7 magnitudes: singleReCheckMs={} writeElapsedMs={} stillInFlight={} floodDrainMs={} outcomes={}",
+            log.info("bulkhead isolation magnitudes: singleReCheckMs={} writeElapsedMs={} stillInFlight={} floodDrainMs={} outcomes={}",
                     singleReCheckMs, writeElapsedMs, stillInFlight, floodDrainMs, distinct(floodOutcomes));
 
             assertThat(floodOutcomes)
@@ -161,13 +159,13 @@ class BulkheadIT extends CausalHarnessSupport {
                     .isEqualTo(WRITE_PROBE_VALUE);
 
             assertThat(writeElapsedMs)
-                    .as("INV7: the write draws from the separate primary write pool and must NOT be "
+                    .as("the write draws from the separate primary write pool and must NOT be "
                             + "serialized behind the saturated bulkhead — it must beat even a single "
                             + "wan-slowed re-check (%dms)", singleReCheckMs)
                     .isLessThan(singleReCheckMs);
 
             assertThat(stillInFlight)
-                    .as("INV7 structural: the write must return while the bulkhead flood is still draining")
+                    .as("the write must return while the bulkhead flood is still draining")
                     .isGreaterThan(0L);
         } finally {
             flood.shutdownNow();

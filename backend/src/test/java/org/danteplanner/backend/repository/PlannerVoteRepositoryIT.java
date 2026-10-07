@@ -24,16 +24,6 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Repository tests for PlannerVoteRepository.
- *
- * <p>Tests data access layer operations for planner votes
- * using H2 in-memory database in test profile.</p>
- *
- * <p>NOTE: Soft-delete tests removed in Phase 2 - votes are now immutable.
- * Old tests for toggle behavior, soft-delete, reactivation, and vote type changes
- * are obsolete and have been deleted.</p>
- */
 @SpringBootTest
 @ActiveProfiles("it")
 @Tag("containerized")

@@ -7,8 +7,6 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
-import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
-import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
@@ -52,12 +50,6 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private PlannerStatsRepository statsRepository;
-
-    @Autowired
-    private PlannerEntityFilterRepository entityFilterRepository;
-
-    @Autowired
-    private PlannerKeywordFilterRepository keywordFilterRepository;
 
     @Autowired
     private PlannerCatalogService catalogService;

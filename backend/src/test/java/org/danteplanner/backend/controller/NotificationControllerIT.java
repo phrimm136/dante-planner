@@ -10,7 +10,6 @@ import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.AuthCookies;
@@ -50,9 +49,6 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
     private NotificationRepository notificationRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
-
-    @Autowired
     private JwtTokenService jwtTokenService;
 
     @Autowired
@@ -61,7 +57,6 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
     private User testUser;
     private User otherUser;
     private String accessToken;
-    private String otherUserAccessToken;
 
     @BeforeEach
     void setUp() {
@@ -69,15 +64,10 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
         otherUser = TestDataFactory.createTestUser(userRepository, "other@example.com");
         accessToken = TestDataFactory.generateAccessToken(jwtTokenService, testUser);
-        otherUserAccessToken = TestDataFactory.generateAccessToken(jwtTokenService, otherUser);
     }
 
     private Cookie accessTokenCookie() {
         return AuthCookies.accessToken(accessToken);
-    }
-
-    private Cookie otherUserAccessTokenCookie() {
-        return AuthCookies.accessToken(otherUserAccessToken);
     }
 
     private Notification createNotification(User recipient, NotificationType type) {

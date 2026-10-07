@@ -97,17 +97,6 @@ public class TestDataFactory {
         }
         """.trim().replace("\n", "").replace(" ", "");
 
-    /**
-     * Makes a caller's label unique.
-     *
-     * <p>Every integration class shares one database, so a fixed address collides the moment two
-     * classes, or two methods, create "their" user. Sub-addressing keeps the label readable in a
-     * failure message while making the row this test's own, which is what lets the suite drop the
-     * global truncation that used to buy the same guarantee by deleting everyone else's rows.</p>
-     *
-     * @param requested the caller's readable label
-     * @return an address no other test will produce
-     */
     // Seeded past the all-digit range so a generated suffix never collides with a literal
     // someone typed into a fixture.
     private static final AtomicLong SUFFIX_SEQUENCE = new AtomicLong(10L * 36 * 36 * 36 * 36);
@@ -140,6 +129,16 @@ public class TestDataFactory {
         return prefix + "0".repeat(width - encoded.length()) + encoded;
     }
 
+    /**
+     * Makes a caller's label unique.
+     *
+     * <p>Every integration class shares one database, so a fixed address collides the moment two
+     * classes, or two methods, create "their" user. Sub-addressing keeps the label readable in a
+     * failure message while making the row this test's own.</p>
+     *
+     * @param requested the caller's readable label
+     * @return an address no other test will produce
+     */
     private static String uniqueEmail(String requested) {
         int at = requested.indexOf('@');
         String local = at < 0 ? requested : requested.substring(0, at);

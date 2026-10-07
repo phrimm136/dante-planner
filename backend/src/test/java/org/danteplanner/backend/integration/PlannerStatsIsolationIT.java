@@ -1,6 +1,5 @@
 package org.danteplanner.backend.integration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.moderation.service.CommentModerationService;
@@ -12,7 +11,6 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerViewRecorder;
-import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -28,7 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 
 /**
  * Counter isolation: planner_stats is the single home of view/upvote/comment
@@ -52,9 +49,6 @@ class PlannerStatsIsolationIT extends ExclusiveDatabaseSupport {
     private PlannerCommentRepository commentRepository;
 
     @Autowired
-    private ModerationActionRepository moderationActionRepository;
-
-    @Autowired
     private CommentCommandService commentCommandService;
 
     @Autowired
@@ -65,12 +59,6 @@ class PlannerStatsIsolationIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private PlannerViewRecorder viewRecorder;
-
-    @Autowired
-    private JwtTokenService jwtTokenService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private User owner;
     private User commenter;

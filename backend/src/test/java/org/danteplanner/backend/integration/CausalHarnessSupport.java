@@ -33,7 +33,7 @@ import org.testcontainers.toxiproxy.ToxiproxyContainer;
  * the harness exposes the primary and replica as qualified {@link JdbcTemplate} beans and hands
  * both to {@link ReplicationControl}.</p>
  *
- * <p>No timing constants live here (INV4): replication readiness is asserted through
+ * <p>No timing constants live here: replication readiness is asserted through
  * {@link ReplicationControl#awaitCaughtUp()} on the caller's side, never a sleep.</p>
  */
 @Import(CausalHarnessSupport.HarnessDataSourceConfig.class)

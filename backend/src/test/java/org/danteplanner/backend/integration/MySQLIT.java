@@ -51,21 +51,6 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-/**
- * MySQL Integration Tests using TestContainers.
- *
- * <p>Tests MySQL-specific behavior that H2 in-memory database cannot validate:
- * <ul>
- *   <li>Concurrent atomic operations with real MySQL locking</li>
- *   <li>UNIQUE constraint error message format validation</li>
- *   <li>Timestamp precision (microseconds)</li>
- *   <li>Transaction isolation behavior</li>
- * </ul>
- * </p>
- *
- * <p>Tagged with @Tag("containerized") for optional CI execution.
- * Requires Docker daemon running.</p>
- */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ActiveProfiles("it")
 @Tag("containerized")
@@ -425,7 +410,7 @@ class MySQLIT extends SharedMySqlContainerSupport {
     class SelectedKeywordsTests {
 
         @Test
-        void saveAllKeywords_WhenPersistedAndReloaded_RoundTripsThroughSetColumn() {
+        void saveAllKeywords_WhenPersistedAndReloaded_RoundTripsThroughJsonColumn() {
             // Empirical all-keywords save against the real MySQL JSON column: the full
             // set must survive the converter's write and read paths end-to-end, which
             // is why it lives in the containerized tier.

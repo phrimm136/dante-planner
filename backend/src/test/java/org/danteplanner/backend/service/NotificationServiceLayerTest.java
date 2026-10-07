@@ -90,8 +90,6 @@ class NotificationServiceLayerTest {
 
             dispatchService.notifyPlannerPublished(testUserId, testPlannerId, title);
 
-            // The recipient filter runs inside the INSERT ... SELECT, so the rows the fan-out
-            // produces are observable only in a containerized test against the migrated schema.
             verify(notificationRepository)
                     .insertPublishedFanout(testUserId, testPlannerId.toString(), title);
             verify(notificationRepository, never()).saveAll(any());
@@ -460,8 +458,6 @@ class NotificationServiceLayerTest {
             retentionService.purgeExpired();
 
             // Assert
-            // Which rows the two sweeps remove is observable only in a containerized test seeded
-            // with read and soft-deleted rows on both sides of the cutoffs.
             verify(notificationRepository).softDeleteOldReadNotifications(any(Instant.class), any(Instant.class));
             verify(notificationRepository).hardDeleteOldNotifications(any(Instant.class));
         }
@@ -481,8 +477,6 @@ class NotificationServiceLayerTest {
             retentionService.purgeExpired();
 
             // Assert - verify cutoff dates are approximately correct
-            // The 90/365-day retention window is only observable as the cutoff arguments here;
-            // asserting which rows survive it needs a containerized test with aged rows.
             Instant now = Instant.now();
             Instant softDeleteCutoff = softDeleteCutoffCaptor.getValue();
             Instant hardDeleteCutoff = hardDeleteCutoffCaptor.getValue();

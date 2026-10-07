@@ -10,10 +10,10 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Phase-1 scenario test: the Toxiproxy {@code wan} profile (a 130ms latency toxic on the
+ * The Toxiproxy {@code wan} profile (a 130ms latency toxic on the
  * app→primary path) can be applied and removed per test through the harness control API.
  *
- * <p>Determinism (INV4): the profile's effect is asserted through Toxiproxy's own control
+ * <p>Determinism: the profile's effect is asserted through Toxiproxy's own control
  * API — the presence and absence of the toxic on the app→primary proxy — never through a
  * measured wall-clock latency or a sleep. Applying the profile must leave a toxic on the
  * proxy; removing it must leave the proxy with no toxics.</p>

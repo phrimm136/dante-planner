@@ -12,7 +12,7 @@ import java.util.concurrent.locks.LockSupport;
  *
  * <p>{@link #awaitCaughtUp()} blocks on a replication-status condition — the replica's executed
  * GTID set becoming a superset of the primary's GTID set captured at call entry — never on a
- * fixed delay (INV4). The API carries no duration parameters; the inter-poll pause and the
+ * fixed delay. The API carries no duration parameters; the inter-poll pause and the
  * liveness cap are harness internals, not tunable timing windows.</p>
  */
 final class ReplicationControl {

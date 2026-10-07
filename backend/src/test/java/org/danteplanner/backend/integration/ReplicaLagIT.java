@@ -58,16 +58,13 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
- * Phase-3 acceptance test (INV1): a replica {@code byId} miss re-checks the primary before
- * answering.
+ * A replica {@code byId} miss re-checks the primary before answering.
  *
  * <p>With replication paused, a planner row is written to the primary that has not replicated.
  * A read through the {@link ByIdReadGuard} seam wraps {@link PlannerQueryService#getPlanner}, which
  * is {@code @Transactional(readOnly = true)} and therefore routes to the stale replica — a genuine
  * miss. The contract: the seam re-checks the primary, finds the entity, serves it, and increments
- * {@code replica_miss_promoted_total}. The seam is a pass-through today, so the miss surfaces as a
- * {@link org.danteplanner.backend.planner.api.PlannerNotFoundException} where a promotion was
- * expected.</p>
+ * {@code replica_miss_promoted_total}.</p>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
@@ -137,7 +134,6 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
     @LocalServerPort
     private int port;
 
-    // INV1
     @Test
     void byIdMissOnPausedReplica_WhenReChecksPrimary_ServesEntityAndIncrementsCounter() {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-it@example.com");
@@ -175,7 +171,6 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
         }
     }
 
-    // INV1
     @Test
     void byIdMissOnBothReplicaAndPrimary_WhenPropagatesNotFound_DoesNotPromote_AndClearsPin() {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-doublemiss@example.com");
@@ -214,7 +209,6 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
         }
     }
 
-    // INV1
     @Test
     void byIdHitOnReplica_WhenServesWithoutReCheck_AndDoesNotPromote() {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-hit@example.com");
@@ -432,7 +426,6 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
         }
     }
 
-    // INV1
     @ParameterizedTest
     @ValueSource(strings = {"GET", "POST"})
     void batchPull_WhenReplicaLacksAnOwnedPlanner_PromotesItFromThePrimary(String method) throws Exception {

@@ -19,7 +19,6 @@ import org.danteplanner.backend.notification.entity.Notification;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-import org.danteplanner.backend.notification.service.NotificationDispatchService;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +31,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,9 +48,6 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private PlannerEngagementService plannerEngagementService;
-
-    @Autowired
-    private NotificationDispatchService notificationDispatchService;
 
     @Autowired
     private PlannerRepository plannerRepository;
@@ -77,8 +72,6 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
 
     private User plannerOwner;
     private User voter1;
-    private User voter2;
-    private User voter3;
     private Planner testPlanner;
 
     @BeforeEach
@@ -88,10 +81,6 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
 
         // Create voters
         voter1 = TestDataFactory.createTestUser(userRepository, "voter1@example.com");
-
-        voter2 = TestDataFactory.createTestUser(userRepository, "voter2@example.com");
-
-        voter3 = TestDataFactory.createTestUser(userRepository, "voter3@example.com");
 
         // Create published planner with initial vote counts at 0
         testPlanner = TestDataFactory.planner(plannerOwner)
@@ -238,30 +227,26 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
             voters.add(TestDataFactory.createTestUser(userRepository, "concurrent" + i + "@example.com"));
         }
 
-        // Commit setup data so concurrent threads can see it
-
         // Act - Simulate concurrent votes using ExecutorService
         // Each thread will run in its own transaction (managed by service layer)
         ExecutorService executor = Executors.newFixedThreadPool(5);
         CountDownLatch latch = new CountDownLatch(1);
-        List<Future<Exception>> results = new ArrayList<>();
 
         for (User voter : voters) {
-            results.add(executor.submit(() -> {
+            executor.execute(() -> {
                 try {
                     latch.await(); // Wait for signal to start all threads simultaneously
                     plannerEngagementService.castVote(voter.getId(), testPlanner.getId(), VoteType.UP);
-                    return null;
-                } catch (Exception e) {
-                    return e;
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
-            }));
+            });
         }
 
         // Start all threads simultaneously
         latch.countDown();
         executor.shutdown();
-        executor.awaitTermination(10, TimeUnit.SECONDS);
+        assertThat(executor.awaitTermination(10, TimeUnit.SECONDS)).as("every vote finished").isTrue();
 
         // Poll for the dispatch to derive the notification instead of a fixed sleep.
         long deadline = System.currentTimeMillis() + 2000;
@@ -289,12 +274,7 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
         // Verify atomic flag was set exactly once
         PlannerStats stats = plannerStatsRepository.findById(testPlanner.getId()).orElseThrow();
         assertThat(stats.getRecommendedNotifiedAt()).as("Recommended notification flag should be set").isNotNull();
-
-        // Verify multiple votes were cast (at least some succeeded)
-        long voteCount = plannerVoteRepository.findAll().stream()
-                .filter(vote -> testPlanner.getId().equals(vote.getPlannerId()))
-                .count();
-        assertThat(voteCount).as("At least one vote should succeed").isPositive();
+        assertThat(stats.getUpvotes()).as("every concurrent vote commits").isEqualTo(recommendedThreshold - 1 + voters.size());
     }
 
     // ==================== IT3: No Duplicate Notifications ====================

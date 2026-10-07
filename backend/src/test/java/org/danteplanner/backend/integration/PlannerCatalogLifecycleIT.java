@@ -2,7 +2,6 @@ package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.moderation.dto.HidePlannerRequest;
-import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.moderation.service.PlannerModerationService;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
@@ -11,7 +10,6 @@ import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
-import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
@@ -55,12 +53,6 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private PlannerStatsRepository statsRepository;
-
-    @Autowired
-    private PlannerVoteRepository voteRepository;
-
-    @Autowired
-    private ModerationActionRepository moderationActionRepository;
 
     @Autowired
     private PlannerCommandService commandService;

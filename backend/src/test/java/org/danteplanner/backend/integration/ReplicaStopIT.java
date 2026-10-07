@@ -13,18 +13,15 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Phase-1 scenario test: {@code stopReplica()} actually halts replication.
+ * {@code stopReplica()} actually halts replication.
  *
  * <p>Pins the halting contract in isolation — once {@code replicationControl.stopReplica()}
  * has run, a row subsequently written to the primary provably cannot reach the replica, so it
  * stays invisible on the replica-qualified datasource with no wait needed (the row can never
- * catch up while replication is stopped). Resume + re-catch-up is scenario 4, deliberately not
- * exercised here. A baseline row asserted visible after {@code awaitCaughtUp()} first proves the
+ * catch up while replication is stopped). Resume + re-catch-up is {@link ReplicaResumeIT}'s
+ * subject, deliberately not exercised here. A baseline row asserted visible after {@code awaitCaughtUp()} first proves the
  * replica link is live before it is stopped. A distinct probe table and ids avoid cross-talk with
  * the other integration tests sharing the process-wide container pair.</p>
- *
- * <p>No Redis bean is autowired, so this class's context loads independently of the
- * not-yet-built Redis beans.</p>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")

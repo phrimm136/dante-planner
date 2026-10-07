@@ -13,18 +13,12 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Phase-1 scenario test: the two production Redis connection factories are the foundation
- * deliverable.
- *
- * <p>Pins the narrowest Redis-bean contract — two distinct
+ * Pins the narrowest Redis-bean contract — two distinct
  * {@link LettuceConnectionFactory} beans exist and are injectable by their distinct
  * qualifiers: {@code authRedisConnectionFactory} (auth Redis, Oregon primary) and
  * {@code rateLimitRedisConnectionFactory} (the local ephemeral rate-limit Redis). It
  * deliberately does NOT exercise any Redis command path — that is downstream (blacklist,
- * rate limiter). It asserts injectability and instance-distinctness only.</p>
- *
- * <p>See {@code mechanics.md §1} (two Redis roles) and {@code §9.5} (qualifier naming,
- * PLAN-TIME); {@code plan.md} "Redis connection topology".</p>
+ * rate limiter). It asserts injectability and instance-distinctness only.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")

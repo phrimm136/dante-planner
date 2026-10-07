@@ -14,19 +14,16 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Phase-1 acceptance test for the causal-consistency Testcontainers harness.
- *
- * <p>Pins the two external contracts the harness must satisfy before any downstream
- * INV suite can run:
+ * Pins the two external contracts of the causal-consistency Testcontainers harness:
  * <ol>
  *   <li>A primary/replica pair wired like a Seoul pod, whose replication can be paused
- *       and resumed through {@link ReplicationControl} (no timing constants — INV4);
+ *       and resumed through {@link ReplicationControl} (no timing constants);
  *       a write made while the replica is stopped is invisible on the replica-qualified
  *       datasource until {@code startReplica()} + {@code awaitCaughtUp()}.</li>
  *   <li>Two distinct {@link LettuceConnectionFactory} beans — auth Redis and the local
  *       ephemeral rate-limit Redis — injectable by distinct qualifiers.</li>
  * </ol>
- * Bootstrap (containers, GTID replication wiring, Toxiproxy profiles) lives in the
+ * <p>Bootstrap (containers, GTID replication wiring, Toxiproxy profiles) lives in the
  * inherited harness base; this class asserts contract only.</p>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

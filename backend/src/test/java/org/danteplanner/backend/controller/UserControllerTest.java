@@ -44,14 +44,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-/**
- * Unit tests for UserController.
- *
- * <p>Tests the DELETE /api/user/me endpoint logic.
- * Note: Integration tests for this endpoint require proper transaction handling
- * that is currently not stable in the test suite. The core business logic
- * is tested here and in UserServiceTest.</p>
- */
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
 

@@ -48,8 +48,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Phase-8 acceptance test (INV3): the causal GTID cookie gate gives an author read-your-own-write
- * across the stale local replica without any server-side token store.
+ * The causal GTID cookie gate gives an author read-your-own-write across the stale local replica
+ * without any server-side token store.
  *
  * <p>Drives the external contract over the real authenticated planner API (MockMvc through the full
  * security + gate filter chain), never the gate internals, so it survives any implementation choice
@@ -57,8 +57,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * <ol>
  *   <li><b>Write sets the cookie.</b> An authenticated write returns a {@code Set-Cookie} carrying a
  *       non-empty Base64url-encoded GTID with {@code HttpOnly}, {@code Secure}, {@code SameSite=Lax}.
- *       The cookie is identified name-agnostically by its GTID-shaped decoded value (the implementer
- *       fixes the name in green), so this asserts the contract, not a hardcoded name.</li>
+ *       The cookie is identified name-agnostically by its GTID-shaped decoded value, so this
+ *       asserts the contract, not a hardcoded name.</li>
  *   <li><b>Read-your-own-write routes to primary while the replica lags.</b> Mirroring the
  *       {@link RoutingSeoulIT} probe technique: the author's planner is replicated, replication is
  *       stopped, the author writes a fresh primary-only value; a cookie-bearing read observes the
@@ -68,7 +68,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *       from the replica and the gate clears its cookie ({@code Max-Age=0}).</li>
  * </ol>
  *
- * <p>Replication is always restored in a {@code finally} (INV4: no timing windows, only
+ * <p>Replication is always restored in a {@code finally} (no timing windows, only
  * {@code awaitCaughtUp()}).</p>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -131,7 +131,7 @@ class CausalGateIT extends CausalHarnessSupport {
                     .andExpect(status().is2xxSuccessful())
                     .andReturn();
 
-            GateCookie writeCookie = assertGtidCookie(created);
+            assertGtidCookie(created);
 
             replicationControl.awaitCaughtUp();
 

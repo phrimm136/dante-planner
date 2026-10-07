@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Acceptance test for INV9 — the pool-ledger invariant. The connection pools that hit the shared
+ * The pool-ledger invariant: the connection pools that hit the shared
  * Oregon primary (Oregon primary pool + Seoul write pool), summed across the max pods per ASG, must
  * stay within the db.t4g.micro connection budget minus the reserve. Fed by the production
  * {@link PoolLedger} constants the datasource config itself reads, so the invariant and production
@@ -15,7 +15,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class PoolLedgerConfigTest {
 
-    // INV9
     @Test
     void poolLedger_WhenSummedAcrossMaxPods_StaysWithinConnectionBudget() {
         int primaryHittingLoad =
@@ -27,7 +26,6 @@ class PoolLedgerConfigTest {
         assertThat(primaryHittingLoad).isLessThanOrEqualTo(usableConnections);
     }
 
-    // docs/legacy/tasks/034-multi-region-k8s-architecture/mechanics.md §6
     @Test
     void poolLedger_WhenRead_MatchesBindingPoolSizes() {
         assertThat(PoolLedger.OREGON_PRIMARY_POOL).isEqualTo(15);
@@ -35,7 +33,6 @@ class PoolLedgerConfigTest {
         assertThat(PoolLedger.SEOUL_REPLICA_POOL).isEqualTo(15);
     }
 
-    // INV9
     @Test
     void poolLedger_WhenBulkheadIncluded_StaysWithinConnectionBudget() {
         int primaryHittingLoad =
@@ -49,7 +46,6 @@ class PoolLedgerConfigTest {
         assertThat(primaryHittingLoad).isLessThanOrEqualTo(usableConnections);
     }
 
-    // docs/legacy/tasks/034-multi-region-k8s-architecture/mechanics.md §6
     @Test
     void poolLedger_WhenReadBulkhead_MatchesBindingPoolSize() {
         assertThat(PoolLedger.BULKHEAD_POOL).isEqualTo(3);

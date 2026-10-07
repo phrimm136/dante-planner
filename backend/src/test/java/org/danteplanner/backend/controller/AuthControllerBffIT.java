@@ -31,8 +31,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * BFF OAuth flow tests for {@link AuthController}: the server-side {@code /google/start} and
- * {@code /google/callback} endpoints. Covers the happy path and the login-fixation rejections
- * (INV2): a callback is honored only when its query {@code state} matches the {@code state}
+ * {@code /google/callback} endpoints. Covers the happy path and the login-fixation rejections:
+ * a callback is honored only when its query {@code state} matches the {@code state}
  * sealed in a valid {@code oauth_tx} cookie; otherwise no auth cookies are set.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -95,7 +95,6 @@ class AuthControllerBffIT extends SharedMySqlContainerSupport {
         assertThat(refresh.userId()).isEqualTo(user.getId());
     }
 
-    // INV2
     @Test
     void googleCallback_WhenStateMismatch_RejectsWithoutAuthCookies() throws Exception {
         String oauthTx = oAuthStateService.seal("real-state", "verifier", "http://localhost");
@@ -113,7 +112,6 @@ class AuthControllerBffIT extends SharedMySqlContainerSupport {
         assertThat(GoogleStub.tokenCalls(code)).isZero();
     }
 
-    // INV2
     @Test
     void googleCallback_WhenNoOauthTx_Rejects() throws Exception {
         String code = scriptedCode();

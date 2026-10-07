@@ -13,7 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Phase-1 scenario test: {@code startReplica()} resumes replication so a withheld write catches up.
+ * {@code startReplica()} resumes replication so a withheld write catches up.
  *
  * <p>Pins the resume half of the replication round-trip in isolation — the complement to
  * {@link ReplicaStopIT}, which pins the halt. A baseline row is asserted visible after
@@ -21,11 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * written to the primary while it is stopped, which must stay invisible on the replica; finally
  * {@code startReplica()} + {@code awaitCaughtUp()} must make that withheld row observable on the
  * replica-qualified datasource. Catch-up is awaited through the GTID status condition, never a
- * sleep (INV4). A distinct probe table and ids avoid cross-talk with the other integration tests
+ * sleep. A distinct probe table and ids avoid cross-talk with the other integration tests
  * sharing the process-wide container pair.</p>
- *
- * <p>No Redis bean is autowired, so this class's context loads independently of the
- * not-yet-built Redis beans.</p>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")

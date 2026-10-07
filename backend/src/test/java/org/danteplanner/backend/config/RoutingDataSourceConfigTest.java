@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Scenario test for requirements §6 / INV9 — the routing datasource config sizes its HikariCP pools
+ * The routing datasource config sizes its HikariCP pools
  * from the {@link PoolLedger} constants per region, reading the same ledger production reads rather
  * than copies. Exercises only the connection-free builder methods, never {@code dataSource()}.
  */

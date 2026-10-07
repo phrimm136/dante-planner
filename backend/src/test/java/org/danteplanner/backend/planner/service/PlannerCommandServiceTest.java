@@ -141,10 +141,6 @@ class PlannerCommandServiceTest {
                 .build();
     }
 
-    private Planner createTestPlanner() {
-        return testPlanner(1L, false);
-    }
-
     @Nested
     class CreatePlannerTests {
 

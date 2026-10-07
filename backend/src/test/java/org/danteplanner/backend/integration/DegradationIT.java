@@ -76,16 +76,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Degradation-by-operation acceptance tests. Two contracts share one self-contained harness:
  *
  * <ul>
- *   <li><b>INV6 fail-open ladder</b> (Phase-5): with the app's auth Redis path cut, a blacklist
+ *   <li><b>Fail-open ladder</b>: with the app's auth Redis path cut, a blacklist
  *       check still returns cleanly (fail-open) and increments {@code blacklist_check_skipped_total},
  *       and a token blacklisted while auth Redis was UP survives an AOF reload ({@code DEBUG LOADAOF}).</li>
- *   <li><b>INV5 typed write degradation + health semantics</b> (Phase-9): with the app's WRITE
+ *   <li><b>Typed write degradation + health semantics</b>: with the app's WRITE
  *       (primary) datasource severed by disabling its Toxiproxy proxy while the READ (replica)
  *       datasource stays healthy, readiness stays UP, an HTTP write returns {@code WRITE_TEMPORARILY_UNAVAILABLE}
  *       (503), and a list read still serves from the replica — degrade by operation, not by service.</li>
  * </ul>
  *
- * <p><b>Isolation (Option B):</b> DegradationIT does NOT extend {@link CausalHarnessSupport}; it
+ * <p><b>Isolation:</b> DegradationIT does NOT extend {@link CausalHarnessSupport}; it
  * stands up its own self-contained harness — a MySQL primary/replica GTID pair plus a dedicated auth
  * Redis ({@code --appendonly yes --appendfsync always --enable-debug-command local}) behind a
  * dedicated Toxiproxy — so the JVM-shared containers of the causal harness are never toxic-ed,
@@ -93,7 +93,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * app→primary DB proxy, {@code wireReplication}) is copied from {@link CausalHarnessSupport} rather
  * than inherited, to keep this harness's toxics off the shared containers.</p>
  *
- * <p>Determinism (INV4): every cut is asserted through the observed outcome and the Toxiproxy
+ * <p>Determinism: every cut is asserted through the observed outcome and the Toxiproxy
  * control API, never a wall-clock timeout — the primary write path fails within Hikari's
  * production connection-timeout (a production constant, not a test timing window), and replication
  * readiness is gated by {@link ReplicationControl#awaitCaughtUp()}; {@code appendfsync always}
@@ -319,7 +319,7 @@ class DegradationIT {
     @BeforeEach
     void verifyDedicatedAuthRedisWiring() {
         assertThat(authRedisConnectionFactory.getPort())
-                .as("Option B: the app must talk to the dedicated Toxiproxy in front of the "
+                .as("the app must talk to the dedicated Toxiproxy in front of the "
                         + "dedicated AOF auth Redis, not any shared Redis")
                 .isEqualTo(DEGRADATION_TOXIPROXY.getMappedPort(PROXY_LISTEN_PORT));
     }
@@ -502,7 +502,7 @@ class DegradationIT {
     }
 
     /**
-     * INV5: with the primary write path severed (Toxiproxy timeout toxic) and the replica read path
+     * With the primary write path severed (Toxiproxy timeout toxic) and the replica read path
      * healthy, the app degrades by operation, not by service — readiness stays UP, an HTTP write
      * returns a typed {@code WRITE_TEMPORARILY_UNAVAILABLE}, and a list read still serves from the
      * replica. A row is seeded (write while healthy) and replication is caught up before the cut so
@@ -801,7 +801,7 @@ class DegradationIT {
 
     /**
      * Exposes the primary and replica as distinct qualified {@link JdbcTemplate} beans, each backed
-     * by its own root-privileged connection, so INV5 can drive {@link ReplicationControl} against
+     * by its own root-privileged connection, so the write-degradation test can drive {@link ReplicationControl} against
      * the same pair the app reads and writes through.
      */
     @TestConfiguration(proxyBeanMethods = false)

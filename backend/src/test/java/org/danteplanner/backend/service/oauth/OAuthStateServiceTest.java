@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * <p>Verifies the seal/open round-trip and, critically, that {@link OAuthStateService#open}
  * fails closed on every tamper, wrong-signer, expiry, and absence path — the guarantee the
- * login-fixation defense (INV2) and verifier confidentiality (INV5) rest on.</p>
+ * login-fixation defense and verifier confidentiality rest on.</p>
  */
 class OAuthStateServiceTest {
 

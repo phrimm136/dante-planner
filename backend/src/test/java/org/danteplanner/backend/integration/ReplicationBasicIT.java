@@ -13,17 +13,14 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Phase-1 scenario test: basic GTID replication is wired.
+ * Basic GTID replication is wired.
  *
  * <p>Pins the narrowest replication contract — a row written to the primary becomes visible
  * through the replica-qualified datasource after {@code replicationControl.awaitCaughtUp()}.
  * This proves the primary/replica pair boots and replicates
  * ({@code CHANGE REPLICATION SOURCE TO … SOURCE_AUTO_POSITION=1}). It deliberately does NOT
- * exercise stop/start (scenarios 2 and 3) and observes the replica through the
- * replica-qualified datasource directly, never through routing (Phase 2, not yet built).</p>
- *
- * <p>No Redis bean is autowired, so this class's context loads independently of the
- * not-yet-built Redis beans.</p>
+ * exercise stop/start and observes the replica through the replica-qualified datasource
+ * directly, never through routing.</p>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")

@@ -14,8 +14,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
  * cannot scope a name rule to annotated methods, so the strict regex would also reject the
  * suite's legitimate camelCase helpers ({@code createTestUser}, {@code setUp}, ...) and break
  * the zero-suppression baseline. ArchUnit is annotation-aware, so the rule targets exactly the
- * test methods and leaves helpers untouched. The regex is byte-identical to the phase-11
- * sweep pattern.</p>
+ * test methods and leaves helpers untouched.</p>
  *
  * <p>Config includes test classes ({@code @AnalyzeClasses} default) — a
  * {@code DoNotIncludeTests} import option would make this rule pass vacuously against zero

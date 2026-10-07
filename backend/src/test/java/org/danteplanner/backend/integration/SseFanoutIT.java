@@ -42,7 +42,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Phase-10 acceptance test: cross-node SSE fan-out over Redis pub/sub.
+ * Cross-node SSE fan-out over Redis pub/sub.
  *
  * <p>Models a Seoul-style pod that publishes to the Oregon Redis <b>primary</b> yet subscribes to
  * its <b>local</b> Redis: an event published on the primary via {@link SsePublisher} must reach the

@@ -24,17 +24,11 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Repository tests for PlannerStatsRepository atomic counter operations.
- *
- * <p>Tests atomic increment queries for upvotes
- * using H2 in-memory database in test profile.</p>
- */
 @SpringBootTest
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
-class PlannerRepositoryIT extends SharedMySqlContainerSupport {
+class PlannerStatsRepositoryIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private PlannerRepository plannerRepository;

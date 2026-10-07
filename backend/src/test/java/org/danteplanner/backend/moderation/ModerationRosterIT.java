@@ -8,7 +8,6 @@ import org.danteplanner.backend.moderation.service.ModerationQueryService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,10 +38,6 @@ class ModerationRosterIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private UserRepository userRepository;
-
-    @BeforeEach
-    void setUp() {
-    }
 
     private List<Long> idsOf(List<User> users) {
         return users.stream().map(User::getId).toList();

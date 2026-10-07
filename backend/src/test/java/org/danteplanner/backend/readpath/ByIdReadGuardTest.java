@@ -11,9 +11,8 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Scenario test for the Phase-2 read-path seam — {@link ByIdReadGuard#read} is a pure pass-through:
- * it invokes the dereference supplier exactly once and returns exactly what the supplier produced.
- * No routing, re-check, or tombstone yet (Phases 3/4/8).
+ * Without a {@code PrimaryReCheck}, {@link ByIdReadGuard#read} is a pure pass-through: it invokes
+ * the dereference supplier exactly once and returns exactly what the supplier produced.
  */
 class ByIdReadGuardTest {
 

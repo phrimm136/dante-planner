@@ -11,12 +11,12 @@ import java.io.IOException;
  * <p>{@link #applyWan()} attaches the {@code wan} latency toxic (a fixed 130ms delay on the
  * app→primary direction); {@link #removeWan()} detaches it, leaving the proxy toxic-free. The
  * 130ms is an internal performance-simulation constant of the toxic, not a tunable API
- * parameter — the public methods carry no duration argument (INV4).</p>
+ * parameter — the public methods carry no duration argument.</p>
  *
  * <p>{@link #applyPartition()} attaches the {@code partition} timeout toxic (a black-hole on the
  * app→primary direction that holds the connection open without forwarding, modeling peering loss);
  * {@link #removePartition()} detaches it. The timeout value is likewise an internal fault-fixture
- * constant, not an API parameter (INV4).</p>
+ * constant, not an API parameter.</p>
  */
 final class ToxiproxyControl {
 

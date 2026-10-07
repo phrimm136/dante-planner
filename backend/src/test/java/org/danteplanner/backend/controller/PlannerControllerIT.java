@@ -52,7 +52,6 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
-import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.support.UpsertRequests;
 
 /**
@@ -84,12 +83,6 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private PlannerRepository plannerRepository;
-
-    @Autowired
-    private PlannerVoteRepository plannerVoteRepository;
-
-    @Autowired
-    private jakarta.persistence.EntityManager entityManager;
 
     @Autowired
     private PlannerViewRepository plannerViewRepository;

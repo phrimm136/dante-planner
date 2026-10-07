@@ -9,7 +9,6 @@ import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
-import org.danteplanner.backend.user.repository.UserSettingsRepository;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +34,6 @@ class NotificationFanoutIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private UserSettingsRepository userSettingsRepository;
 
     @Autowired
     private NotificationRepository notificationRepository;

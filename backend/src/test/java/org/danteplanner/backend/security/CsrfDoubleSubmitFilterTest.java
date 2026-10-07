@@ -25,8 +25,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link CsrfDoubleSubmitFilter} — realizes INV3 (every state-changing
- * request carries an {@code X-CSRF-Token} equal to the {@code csrf} cookie, or is 403).
+ * Unit tests for {@link CsrfDoubleSubmitFilter}: every state-changing request carries an
+ * {@code X-CSRF-Token} equal to the {@code csrf} cookie, or is 403.
  */
 class CsrfDoubleSubmitFilterTest {
 

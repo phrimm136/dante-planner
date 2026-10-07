@@ -16,8 +16,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Phase-2 scenario test: the app's {@code @Primary} routing datasource routes by the transaction
- * read-only flag against the real replicating primary/replica pair.
+ * The app's {@code @Primary} routing datasource routes by the transaction read-only flag against
+ * the real replicating primary/replica pair.
  *
  * <p>With replication paused, a read inside a read-only transaction must observe the STALE replica
  * value while a read inside a read-write transaction observes the FRESH primary value. Writes go

@@ -36,8 +36,7 @@ import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
  *
  * <p>Pins the JSON request/response shape of every moderation endpoint (field names +
  * representative values) plus the authorization boundary (NORMAL user &rarr; 403,
- * unauthenticated &rarr; 401). These assertions must survive the DTO records migration
- * unmodified.</p>
+ * unauthenticated &rarr; 401).</p>
  *
  * <p>Privacy convention (enforced here): moderation responses carrying user identity expose
  * {@code usernameSuffix} and never a raw numeric {@code userId}.</p>
