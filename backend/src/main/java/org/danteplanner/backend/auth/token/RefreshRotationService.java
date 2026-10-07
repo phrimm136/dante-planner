@@ -5,7 +5,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
-import org.danteplanner.backend.shared.redis.RedisKeyScanner;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -34,9 +32,7 @@ public class RefreshRotationService {
     private static final String LEGACY_JTI_SYNTHESIS_FORMAT = "legacy-jti:%d:%d";
 
     static final String FAMILY_KEY_PREFIX = "rt:fam:";
-    private static final String FAMILY_KEY_PATTERN = FAMILY_KEY_PREFIX + "*";
     static final String REVOKED_FIELD = "__revoked__";
-    private static final String SUCCESSOR_JWT_FIELD_PREFIX = "succjwt:";
     private static final String FIELD_SEPARATOR = "|";
     private static final String REUSED_RESULT_PREFIX = Outcome.REUSED.name() + FIELD_SEPARATOR;
     private static final String UNEXPECTED_RESULT_MESSAGE = "Unexpected rotation transition result: ";
@@ -232,11 +228,6 @@ public class RefreshRotationService {
         return new RotationResult.Rejected(RotationResult.Rejected.Reason.INVALID);
     }
 
-    private static RotationState parseLeadingState(String fieldValue) {
-        int sep = fieldValue.indexOf(FIELD_SEPARATOR);
-        return RotationState.of(sep >= 0 ? fieldValue.substring(0, sep) : fieldValue);
-    }
-
     /**
      * Each constant is spelled
      * exactly as the script returns it; {@link #REUSED} carries the memoized successor JWT
@@ -311,38 +302,8 @@ public class RefreshRotationService {
         return TokenBlacklistService.USER_INVALIDATION_KEY_PREFIX + userId;
     }
 
-    RotationState stateOf(String jti) {
-        for (String key : RedisKeyScanner.scanKeys(authRedisTemplate, FAMILY_KEY_PATTERN)) {
-            Object value = authRedisTemplate.opsForHash().get(key, jti);
-            if (value != null) {
-                return parseLeadingState(value.toString());
-            }
-        }
-        return null;
-    }
-
     boolean isFamilyRevoked(String familyId) {
         return Boolean.TRUE.equals(
                 authRedisTemplate.opsForHash().hasKey(familyKey(familyId), REVOKED_FIELD));
-    }
-
-    int rotationStateSize() {
-        int total = 0;
-        for (String key : RedisKeyScanner.scanKeys(authRedisTemplate, FAMILY_KEY_PATTERN)) {
-            for (Object field : authRedisTemplate.opsForHash().keys(key)) {
-                if (!REVOKED_FIELD.equals(field)
-                        && !field.toString().startsWith(SUCCESSOR_JWT_FIELD_PREFIX)) {
-                    total++;
-                }
-            }
-        }
-        return total;
-    }
-
-    void clear() {
-        Set<String> keys = RedisKeyScanner.scanKeys(authRedisTemplate, FAMILY_KEY_PATTERN);
-        if (!keys.isEmpty()) {
-            authRedisTemplate.delete(keys);
-        }
     }
 }

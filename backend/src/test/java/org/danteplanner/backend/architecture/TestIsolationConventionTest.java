@@ -11,8 +11,10 @@ import com.tngtech.archunit.lang.SimpleConditionEvent;
 
 import org.junit.jupiter.api.Test;
 
+import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.integration.ExclusiveDatabaseSupport;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
+import org.danteplanner.backend.shared.redis.RedisKeyScanner;
 import org.danteplanner.testtransactionfixture.InheritingFixture;
 import org.danteplanner.testtransactionfixture.JakartaTransactionalFixture;
 import org.danteplanner.testtransactionfixture.TransactionalBeanFixture;
@@ -102,22 +104,87 @@ class TestIsolationConventionTest {
     }
 
     /**
-     * Redis calls whose scope is the whole keyspace, as owner to method names.
+     * Redis calls whose scope is the whole keyspace, as {@code owner#method}: Redis's own key
+     * listings, scans and flushes, plus every production method that reaches one of them.
      *
      * <p>A blacklist entry is keyed by a hash of its own token, so classes sharing the run's Redis
      * cannot collide on one. A scan is the exception: it counts and deletes keys written by classes
      * it has never heard of, and no id exists to narrow it to.</p>
      */
-    private static final java.util.Map<String, java.util.Set<String>> KEYSPACE_WIDE_CALLS =
-            java.util.Map.of(
-                    "org.danteplanner.backend.auth.token.TokenBlacklistService",
-                    java.util.Set.of("clear", "size", "userInvalidationSize"),
-                    "org.springframework.data.redis.connection.RedisServerCommands",
-                    java.util.Set.of("flushAll", "flushDb"));
+    private static final java.util.Set<String> KEYSPACE_WIDE_CALLS = keyspaceWideCalls();
+
+    private static java.util.Set<String> keyspaceWideCalls() {
+        java.util.Set<String> calls = new java.util.HashSet<>(java.util.Set.of(
+                "org.springframework.data.redis.core.RedisOperations#keys",
+                "org.springframework.data.redis.core.RedisOperations#scan",
+                "org.springframework.data.redis.connection.RedisKeyCommands#keys",
+                "org.springframework.data.redis.connection.RedisKeyCommands#scan",
+                "org.springframework.data.redis.connection.RedisServerCommands#flushAll",
+                "org.springframework.data.redis.connection.RedisServerCommands#flushDb"));
+        boolean grew = true;
+        while (grew) {
+            java.util.Set<String> reached = ImportedClasses.production().stream()
+                    .flatMap(clazz -> clazz.getCodeUnitAccessesFromSelf().stream())
+                    .filter(access -> reachesKeyspace(access, calls))
+                    .map(access -> callKey(access.getOrigin().getOwner().getName(), access.getOrigin().getName()))
+                    .collect(java.util.stream.Collectors.toSet());
+            grew = calls.addAll(reached);
+        }
+        return java.util.Set.copyOf(calls);
+    }
+
+    private static boolean reachesKeyspace(com.tngtech.archunit.core.domain.JavaCodeUnitAccess<?> call,
+            java.util.Set<String> keyspaceWide) {
+        String declaringOwner = call.getTarget().resolveMember()
+                .<String>map(member -> member.getOwner().getName())
+                .orElse(call.getTarget().getOwner().getName());
+        return keyspaceWide.stream().anyMatch(entry -> {
+            int separator = entry.indexOf('#');
+            String owner = entry.substring(0, separator);
+            if (!call.getTarget().getName().equals(entry.substring(separator + 1))) {
+                return false;
+            }
+            return owner.startsWith(PROJECT_PACKAGE_PREFIX)
+                    ? declaringOwner.equals(owner)
+                    : call.getTarget().getOwner().isAssignableTo(owner);
+        });
+    }
+
+    private static final String PROJECT_PACKAGE_PREFIX = "org.danteplanner.";
+
+    private static String callKey(String owner, String method) {
+        return owner + "#" + method;
+    }
+
+    @Test
+    void keyspaceWideCalls_WhenDerivedFromProduction_IncludeTheBlacklistScans() {
+        assertThat(KEYSPACE_WIDE_CALLS).contains(
+                callKey(RedisKeyScanner.class.getName(), "scanKeys"),
+                callKey(TokenBlacklistService.class.getName(), "clear"),
+                callKey(TokenBlacklistService.class.getName(), "size"),
+                callKey(TokenBlacklistService.class.getName(), "userInvalidationSize"));
+    }
+
+    @Test
+    void keyspaceScan_WhenAFixtureCallsOrReferencesKeys_NamesBoth() {
+        JavaClasses fixtures = new ClassFileImporter().importPackages("org.danteplanner.keyspacefixture");
+
+        assertThat(keyspaceScanners(fixtures))
+                .containsExactly("KeyspaceMethodReferenceFixtureIT", "KeyspaceScanFixtureIT");
+    }
 
     @Test
     void keyspaceScan_WhenClassSharesTheRedis_IsRejected() {
-        List<String> offenders = TEST_CLASSES.stream()
+        List<String> offenders = keyspaceScanners(TEST_CLASSES);
+
+        assertThat(offenders)
+                .as("these delete or count keys their concurrent neighbours wrote; assert about the "
+                        + "token or user the test owns, or start a RedisContainer of its own")
+                .isEmpty();
+    }
+
+    private static List<String> keyspaceScanners(JavaClasses classes) {
+        return classes.stream()
                 .filter(TestIsolationConventionTest::scansTheKeyspace)
                 .map(TestIsolationConventionTest::outermost)
                 .filter(TestIsolationConventionTest::isTestClass)
@@ -126,18 +193,11 @@ class TestIsolationConventionTest {
                 .distinct()
                 .sorted()
                 .toList();
-
-        assertThat(offenders)
-                .as("these delete or count keys their concurrent neighbours wrote; assert about the "
-                        + "token or user the test owns, or start a RedisContainer of its own")
-                .isEmpty();
     }
 
     private static boolean scansTheKeyspace(JavaClass clazz) {
-        return clazz.getMethodCallsFromSelf().stream()
-                .anyMatch(call -> KEYSPACE_WIDE_CALLS
-                        .getOrDefault(call.getTarget().getOwner().getName(), java.util.Set.of())
-                        .contains(call.getTarget().getName()));
+        return clazz.getCodeUnitAccessesFromSelf().stream()
+                .anyMatch(access -> reachesKeyspace(access, KEYSPACE_WIDE_CALLS));
     }
 
     /**

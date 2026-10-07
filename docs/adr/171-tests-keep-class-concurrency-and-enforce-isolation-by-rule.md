@@ -11,8 +11,9 @@ epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @
   58 s longer on average (+25%), with the wall-clock ranges not overlapping, and peak memory did not
   move outside the run-to-run noise.
   INVARIANT: a test class shares the database only for rows it created: it truncates nothing, deletes
-  no table without a WHERE, scans no shared Redis keyspace, and takes no hard-coded identity in a
-  shared namespace — the test-isolation convention scan.
+  no table without a WHERE, scans no shared Redis keyspace (directly or through a production method
+  that scans it), and takes no hard-coded identity in a shared namespace — the test-isolation
+  convention scan.
   NON-GOAL: lowering memory by running fewer threads, shrinking the context cache or lowering the
   heap below the invariant's margin — memory falls by sharing containers and imports instead.
 - @tests @concurrency @memory — The backend suite runs in one test JVM with a 2 GiB heap, and the

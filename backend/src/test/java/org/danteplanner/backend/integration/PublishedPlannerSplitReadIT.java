@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Spliterators;
 import java.util.UUID;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -136,8 +137,14 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
         return plannerStatsRepository.findById(plannerId).map(PlannerStats::getViewCount).orElse(0);
     }
 
-    private Set<String> seenKeysOf(UUID plannerId) {
-        return redisTemplate.keys("views:seen:*:" + plannerId + ":*");
+    private static String seenKey(LocalDate viewDate, UUID plannerId, String viewerHash) {
+        return "views:seen:" + viewDate + ":" + plannerId + ":" + viewerHash;
+    }
+
+    private void assertNoSeenKeyForViewer(UUID plannerId, LocalDate before, LocalDate after) {
+        String hash = ViewerHashUtil.hashForAuthenticatedUser(viewer.getId(), plannerId);
+        assertThat(redisTemplate.hasKey(seenKey(before, plannerId, hash))).isFalse();
+        assertThat(redisTemplate.hasKey(seenKey(after, plannerId, hash))).isFalse();
     }
 
     private static Set<String> fieldNames(JsonNode node) {
@@ -160,12 +167,12 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
         assertThat(redisTemplate.opsForHash().get(BUFFER_KEY, plannerId.toString())).isEqualTo("1");
 
         String hash = ViewerHashUtil.hashForAuthenticatedUser(viewer.getId(), plannerId);
-        Set<String> seen = seenKeysOf(plannerId);
+        List<String> seen = Stream.of(seenKey(before, plannerId, hash), seenKey(after, plannerId, hash))
+                .distinct()
+                .filter(candidate -> Boolean.TRUE.equals(redisTemplate.hasKey(candidate)))
+                .toList();
         assertThat(seen).hasSize(1);
-        String key = seen.iterator().next();
-        assertThat(key).isIn(
-                "views:seen:" + before + ":" + plannerId + ":" + hash,
-                "views:seen:" + after + ":" + plannerId + ":" + hash);
+        String key = seen.get(0);
         assertThat(redisTemplate.getExpire(key)).isGreaterThanOrEqualTo(86_400L - 5L);
     }
 
@@ -295,14 +302,16 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
                     .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"))
                     .andExpect(jsonPath("$.detail").value(detail));
         }
+        LocalDate before = LocalDate.now(ZoneOffset.UTC);
         mockMvc.perform(post("/api/planner/md/published/{id}/viewcount", plannerId).with(withCsrf())
                         .cookie(authOf(viewer)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"))
                 .andExpect(jsonPath("$.detail").value(detail));
+        LocalDate after = LocalDate.now(ZoneOffset.UTC);
 
         assertThat(redisTemplate.opsForHash().hasKey(BUFFER_KEY, plannerId.toString())).isFalse();
-        assertThat(seenKeysOf(plannerId)).isEmpty();
+        assertNoSeenKeyForViewer(plannerId, before, after);
     }
 
     @Test
@@ -400,14 +409,16 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
                     .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"))
                     .andExpect(jsonPath("$.detail").value(detail));
         }
+        LocalDate before = LocalDate.now(ZoneOffset.UTC);
         mockMvc.perform(post("/api/planner/md/published/{id}/viewcount", plannerId).with(withCsrf())
                         .cookie(authOf(viewer)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"))
                 .andExpect(jsonPath("$.detail").value(detail));
+        LocalDate after = LocalDate.now(ZoneOffset.UTC);
 
         assertThat(redisTemplate.opsForHash().hasKey(BUFFER_KEY, plannerId.toString())).isFalse();
-        assertThat(seenKeysOf(plannerId)).isEmpty();
+        assertNoSeenKeyForViewer(plannerId, before, after);
     }
 
     private double batchFailedCount() {

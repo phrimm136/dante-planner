@@ -5,6 +5,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -30,6 +32,7 @@ import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter;
 import org.danteplanner.backend.shared.security.CsrfTokenService;
 import org.danteplanner.backend.shared.util.CookieConstants;
+import org.danteplanner.backend.shared.util.ViewerHashUtil;
 import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
 import org.danteplanner.backend.support.CatalogEffects;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -653,13 +656,20 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
             assertNotFoundLikeACaughtUpReplica(send(HttpRequest.newBuilder(URI.create(base + "/flags"))
                     .header("Cookie", viewerCookie).GET()), plannerId);
             String csrf = csrfTokenService.mint();
+            UUID deviceId = UUID.randomUUID();
+            String userAgent = "replica-lag-split-viewer";
+            LocalDate before = LocalDate.now(ZoneOffset.UTC);
             assertNotFoundLikeACaughtUpReplica(send(HttpRequest.newBuilder(URI.create(base + "/viewcount"))
                     .header(CsrfDoubleSubmitFilter.CSRF_HEADER, csrf)
-                    .header("Cookie", CookieConstants.CSRF + "=" + csrf)
+                    .header("Cookie", CookieConstants.CSRF + "=" + csrf + "; " + CookieConstants.DEVICE_ID + "=" + deviceId)
+                    .header("User-Agent", userAgent)
                     .POST(HttpRequest.BodyPublishers.noBody())), plannerId);
+            LocalDate after = LocalDate.now(ZoneOffset.UTC);
 
             assertThat(stringRedisTemplate.opsForHash().hasKey("views:buffer", plannerId.toString())).isFalse();
-            assertThat(stringRedisTemplate.keys("views:seen:*:" + plannerId + ":*")).isEmpty();
+            String hash = ViewerHashUtil.hashForAnonymousUser("device:" + deviceId, userAgent, plannerId);
+            assertThat(stringRedisTemplate.hasKey("views:seen:" + before + ":" + plannerId + ":" + hash)).isFalse();
+            assertThat(stringRedisTemplate.hasKey("views:seen:" + after + ":" + plannerId + ":" + hash)).isFalse();
         } finally {
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();
