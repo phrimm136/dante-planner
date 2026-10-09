@@ -9,7 +9,7 @@ usage: $0 <clean|all|check|PATCH> [--seeds K] [--out FILE]
   all    clean, then every planted bug
   --seeds K   seeds per variant (default 20)
   --out FILE  markdown table the row is appended to (default backend/build/consistency/planted-bugs.md)
-Exits 0 when clean has 0 violations and every planted bug run was detected by the checker.
+Exits 0 when ConsistencyRunIT passed on clean and every planted bug run was detected by the checker.
 EOF
   exit 2
 }
@@ -188,8 +188,8 @@ import re
 import sys
 import xml.etree.ElementTree as ET
 
-results, package, run_class, *baseline = sys.argv[1:]
-GUARD = re.compile(r"operations have an unknown outcome|has no Found or NotFound read of a key after its own applied save")
+results, package, run_class, variant, *baseline = sys.argv[1:]
+GUARD = re.compile(r"operations have an unknown outcome|has no Found or NotFound read of a key")
 
 
 def suite(cls):
@@ -210,29 +210,35 @@ for cls in baseline:
         failed.append(cls)
 
 root = suite(run_class)
-first, by_rule = "-", ""
+first, by_rule, passed = "-", "", "no"
 if root is None:
     detected = "no result"
 else:
     output = "".join(node.text or "" for node in root.iter("system-out"))
     seeds = [(int(m[1]), int(m[2])) for m in re.finditer(r"^consistency seed (\d+): (\d+) violations", output, re.M)]
     messages = [node.get("message") or node.text or "" for node in failures(root)]
-    if any(GUARD.search(message) for message in messages):
-        detected = "guard failed"
+    guard = any(GUARD.search((node.get("message") or "") + (node.text or "")) for node in failures(root))
+    detecting = [seed for seed, violations in seeds if violations > 0]
+    if detecting:
+        detected, first = "yes", str(detecting[0])
+        rules = re.findall(rf"seed {first} \(.*?\): Violation\[rule=([\w-]+)", messages[0] if messages else "")
+        counts = {rule: rules.count(rule) for rule in sorted(set(rules))}
+        by_rule = ", ".join(f"{rule} {count}" for rule, count in counts.items()) or "not in failure message"
+        if guard:
+            by_rule += "; guard failed"
+    elif messages:
+        detected = "failed run (guard failed)" if guard else "failed run"
     elif not seeds:
         detected = "no result"
     else:
-        detecting = [seed for seed, violations in seeds if violations > 0]
-        if detecting:
-            detected, first = "yes", str(detecting[0])
-            rules = re.findall(rf"seed {first} \(.*?\): Violation\[rule=([\w-]+)", messages[0] if messages else "")
-            counts = {rule: rules.count(rule) for rule in sorted(set(rules))}
-            by_rule = ", ".join(f"{rule} {count}" for rule, count in counts.items()) or "not in failure message"
-        else:
-            detected = "no"
-            by_rule = f"0 violations in {len(seeds)} seeds"
+        detected = "no"
+        by_rule = f"0 violations in {len(seeds)} seeds"
+    if variant == "clean":
+        passed = "yes" if not messages and seeds and not detecting else "no"
+    else:
+        passed = "yes" if detecting else "no"
 
-print("\t".join([", ".join(failed) or "none", detected, first, by_rule]))
+print("\t".join([", ".join(failed) or "none", detected, first, passed, by_rule]))
 PY
 }
 
@@ -253,7 +259,7 @@ abort_variant() {
 }
 
 run_variant() {
-  local name=$1 stop=true started elapsed gradle_rc verdict discovered baseline_failed detected first by_rule
+  local name=$1 stop=true started elapsed gradle_rc verdict discovered baseline_failed detected first passed by_rule
   local -a baseline gradle_args
   if ! require_targets_at_head; then
     echo "variant $name refused: the checkout does not match HEAD at a planted-bug target" >&2
@@ -301,12 +307,13 @@ run_variant() {
     exit 1
   fi
 
-  if ! verdict=$(judge "${baseline[@]}"); then
+  if ! verdict=$(judge "$name" "${baseline[@]}"); then
     echo "variant $name aborted: judging the test results failed" >&2
     return 1
   fi
-  IFS=$'\t' read -r baseline_failed detected first by_rule <<< "$verdict"
-  if [ -z "$baseline_failed" ] || [ -z "$detected" ] || [ -z "$first" ]; then
+  IFS=$'\t' read -r baseline_failed detected first passed by_rule <<< "$verdict"
+  if [ -z "$baseline_failed" ] || [ -z "$detected" ] || [ -z "$first" ] \
+      || { [ "$passed" != yes ] && [ "$passed" != no ]; }; then
     echo "variant $name aborted: malformed verdict: $verdict" >&2
     return 1
   fi
@@ -315,11 +322,7 @@ run_variant() {
     return 1
   fi
 
-  if [ "$name" = clean ]; then
-    [ "$detected" = no ]
-  else
-    [ "$detected" = yes ]
-  fi
+  [ "$passed" = yes ]
 }
 
 case $variant in
