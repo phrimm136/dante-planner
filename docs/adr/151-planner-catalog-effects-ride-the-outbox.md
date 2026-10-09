@@ -1,5 +1,5 @@
 # 151 planner-catalog-effects-ride-the-outbox
-epic: none · pr: none
+epic: none · pr: none · supersedes: 008 @withdraw @tombstone
 
 ## Decisions
 - @outbox @catalog @filters — Every change that can alter a planner's catalog presence (publish,
@@ -56,6 +56,18 @@ epic: none · pr: none
   deleted row from a lagging replica.
   INVARIANT: no transactional method other than the catalog sync reaches a tombstone write before
   its commit — the effect placement rule, which admits that one method.
+- @withdraw @tombstone — Leaving public view without a delete (owner unpublish, moderator takedown
+  or unpublish, account deactivation, which marks every published planner of the owner) writes a
+  separate published-view marker after commit, checked only by the public read. A public read that
+  hits it re-reads on the primary, so a republish is visible at once, and only the catalog sync
+  clears the marker. A replica still showing the planner as published would otherwise serve it for
+  the replication window. Clearing on the republish request was the earlier rule; the sync already
+  rewrites and clears markers per pass, and a marker on a visible planner costs only one primary
+  re-read.
+  REJECTED: reusing the delete tombstone — owner reads check it too, so the owner would lose their
+  own unpublished planner for the tombstone's lifetime.
+  REJECTED: masking outright on a marker hit — a republish would stay hidden until the marker
+  expired.
 - @comments @visibility — A comment thread follows its planner's public view: a reader other than
   the owner gets the planner-not-found answer for an unpublished planner, a thread read that hits a
   withdrawal marker re-reads on the primary, and the thread's public push fires only while the
