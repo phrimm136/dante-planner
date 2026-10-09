@@ -7,6 +7,7 @@ import eu.rekawek.toxiproxy.ToxiproxyClient;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import javax.sql.DataSource;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +42,7 @@ import org.testcontainers.toxiproxy.ToxiproxyContainer;
 abstract class CausalHarnessSupport {
 
     /**
-     * The thirteen subclasses drive replication state and toxics through one primary/replica pair,
+     * The subclasses drive replication state and toxics through one primary/replica pair,
      * one Redis, and one Toxiproxy held as statics of the test JVM. Unlike the single-database
      * tests they cannot isolate by owning a database, so they serialize against each other instead.
      */
@@ -59,8 +60,12 @@ abstract class CausalHarnessSupport {
     private static final String REDIS_IMAGE = "redis:7-alpine";
 
     private static final String TOXIPROXY_IMAGE = "ghcr.io/shopify/toxiproxy:2.5.0";
+    private static final String TOXIPROXY_ALIAS = "toxiproxy";
     private static final String APP_TO_PRIMARY_PROXY_NAME = "app-to-primary";
     private static final int PROXY_LISTEN_PORT = 8666;
+    private static final String REPLICATION_PROXY_NAME = "replica-to-primary";
+    private static final int REPLICATION_PROXY_LISTEN_PORT = 8667;
+    private static final int SOURCE_CONNECT_RETRY_SECONDS = 1;
 
     private static final Network NETWORK = Network.newNetwork();
 
@@ -116,9 +121,12 @@ abstract class CausalHarnessSupport {
     static final RedisContainer RATE_LIMIT_REDIS = new RedisContainer(REDIS_IMAGE);
 
     static final ToxiproxyContainer TOXIPROXY = new ToxiproxyContainer(TOXIPROXY_IMAGE)
-            .withNetwork(NETWORK);
+            .withNetwork(NETWORK)
+            .withNetworkAliases(TOXIPROXY_ALIAS);
 
     static final Proxy APP_TO_PRIMARY_PROXY;
+
+    static final Proxy REPLICATION_PROXY;
 
     static {
         PRIMARY.start();
@@ -127,6 +135,7 @@ abstract class CausalHarnessSupport {
         RATE_LIMIT_REDIS.start();
         TOXIPROXY.start();
         APP_TO_PRIMARY_PROXY = createAppToPrimaryProxy();
+        REPLICATION_PROXY = createReplicationProxy();
         wireReplication(new JdbcTemplate(adminDataSource(PRIMARY)), new JdbcTemplate(adminDataSource(REPLICA)));
     }
 
@@ -168,6 +177,11 @@ abstract class CausalHarnessSupport {
         toxiproxyControl.removeWan();
     }
 
+    @AfterAll
+    static void clearReplicationProxy() throws IOException {
+        new ToxiproxyControl(APP_TO_PRIMARY_PROXY).removeReplicationLatency();
+    }
+
     /** Appends the driver flag, respecting any query string the container url already carries. */
     static String withSessionStateTracking(String jdbcUrl) {
         return jdbcUrl + (jdbcUrl.contains("?") ? "&" : "?") + "trackSessionState=true";
@@ -191,12 +205,24 @@ abstract class CausalHarnessSupport {
         }
     }
 
+    private static Proxy createReplicationProxy() {
+        try {
+            ToxiproxyClient client = new ToxiproxyClient(TOXIPROXY.getHost(), TOXIPROXY.getControlPort());
+            return client.createProxy(
+                    REPLICATION_PROXY_NAME,
+                    "0.0.0.0:" + REPLICATION_PROXY_LISTEN_PORT,
+                    PRIMARY_ALIAS + ":" + MYSQL_INTERNAL_PORT);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to create the replica→primary Toxiproxy proxy", e);
+        }
+    }
+
     /**
      * Establishes GTID replication from the freshly booted replica to the primary.
      *
      * <p>Purges the primary's pre-replication history on the replica ({@code gtid_purged}) so the
      * two independently bootstrapped databases do not fight over their own init transactions, then
-     * points the replica at the primary with {@code SOURCE_AUTO_POSITION=1} — the same incantation
+     * points the replica at the primary through {@link #REPLICATION_PROXY} with {@code SOURCE_AUTO_POSITION=1} — the same incantation
      * as the RDS migration runbook.</p>
      */
     private static void wireReplication(JdbcTemplate primary, JdbcTemplate replica) {
@@ -214,11 +240,12 @@ abstract class CausalHarnessSupport {
             replica.execute("SET GLOBAL gtid_purged = '" + primaryGtid.replaceAll("\\s+", "") + "'");
         }
         replica.execute("CHANGE REPLICATION SOURCE TO "
-                + "SOURCE_HOST='" + PRIMARY_ALIAS + "', "
-                + "SOURCE_PORT=" + MYSQL_INTERNAL_PORT + ", "
+                + "SOURCE_HOST='" + TOXIPROXY_ALIAS + "', "
+                + "SOURCE_PORT=" + REPLICATION_PROXY_LISTEN_PORT + ", "
                 + "SOURCE_USER='" + REPL_USER + "', "
                 + "SOURCE_PASSWORD='" + REPL_PASSWORD + "', "
-                + "SOURCE_AUTO_POSITION=1");
+                + "SOURCE_AUTO_POSITION=1, "
+                + "SOURCE_CONNECT_RETRY=" + SOURCE_CONNECT_RETRY_SECONDS);
         replica.execute("START REPLICA");
         log.info("GTID replication wired: replica {} following primary {}",
                 REPLICA.getJdbcUrl(), PRIMARY.getJdbcUrl());
