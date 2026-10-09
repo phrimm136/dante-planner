@@ -188,7 +188,8 @@ import re
 import sys
 import xml.etree.ElementTree as ET
 
-results, package, run_class, variant, *baseline = sys.argv[1:]
+results, package, run_class, variant, seed_count, *baseline = sys.argv[1:]
+requested = set(range(1, int(seed_count) + 1))
 GUARD = re.compile(r"operations have an unknown outcome|has no Found or NotFound read of a key")
 
 
@@ -232,9 +233,12 @@ else:
         detected = "no result"
     else:
         detected = "no"
-        by_rule = f"0 violations in {len(seeds)} seeds"
+        by_rule = f"0 violations in {len({seed for seed, _ in seeds})} seeds"
     if variant == "clean":
-        passed = "yes" if not messages and seeds and not detecting else "no"
+        ran = {seed for seed, _ in seeds}
+        if ran != requested and not detecting:
+            detected = f"failed run (ran {len(ran)} of {len(requested)} seeds)" + (" (guard failed)" if guard else "")
+        passed = "yes" if not messages and ran == requested and not detecting else "no"
     else:
         passed = "yes" if detecting else "no"
 
@@ -307,7 +311,7 @@ run_variant() {
     exit 1
   fi
 
-  if ! verdict=$(judge "$name" "${baseline[@]}"); then
+  if ! verdict=$(judge "$name" "$seeds" "${baseline[@]}"); then
     echo "variant $name aborted: judging the test results failed" >&2
     return 1
   fi
