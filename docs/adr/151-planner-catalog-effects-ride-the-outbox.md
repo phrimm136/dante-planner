@@ -61,9 +61,10 @@ epic: none · pr: none · supersedes: 008 @withdraw @tombstone
   separate published-view marker after commit, checked only by the public read. A public read that
   hits it re-reads on the primary, so a republish is visible at once, and only the catalog sync
   clears the marker. A replica still showing the planner as published would otherwise serve it for
-  the replication window. Clearing on the republish request was the earlier rule; the sync already
-  rewrites and clears markers per pass, and a marker on a visible planner costs only one primary
-  re-read.
+  the replication window.
+  REJECTED: clearing the marker on the republish request — a second clearing path beside the sync,
+  which already rewrites and clears markers per pass; a marker on a visible planner costs only one
+  primary re-read.
   REJECTED: reusing the delete tombstone — owner reads check it too, so the owner would lose their
   own unpublished planner for the tombstone's lifetime.
   REJECTED: masking outright on a marker hit — a republish would stay hidden until the marker

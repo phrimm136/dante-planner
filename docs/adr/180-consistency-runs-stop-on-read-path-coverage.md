@@ -13,7 +13,7 @@ epic: none · pr: none @consistency-checker @generator
   draw left default seeds with no stale read, and a seed set that misses a branch passes silently.
   REJECTED: reading the gate's probe timeout from the code instead of measuring — the measured
   boundary is the one that matters. A slower machine, such as a CI runner, moves it.
-  INVARIANT: a passing run hit every target at least once — the coverage assertion in the run.
+  INVARIANT: a passing run hit every target at least once — `ConsistencyRunIT`, through `Coverage`.
   NON-GOAL: tuning toward rare interleavings beyond branch coverage — the seed budget bounds the run
   time, and branch coverage is the claim the run makes.
 - @consistency-checker @observability — The application counts tombstone hits and withdrawal-marker
