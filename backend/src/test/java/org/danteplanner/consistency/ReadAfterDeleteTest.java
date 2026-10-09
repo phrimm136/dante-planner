@@ -51,11 +51,27 @@ class ReadAfterDeleteTest {
     }
 
     @Test
-    void key_WhenASaveCompletesAfterTheDeleteBegins_IsSkipped() {
+    void key_WhenARejectedSaveCompletesAfterTheDeleteBegins_IsJudged() {
+        Read resurrected = new Read("s2", "p1", 25, 30, new Found(3));
+
+        assertThat(violations(new Save("s3", "p1", 5, 11, new Rejected(409)), DELETED, resurrected))
+                .containsExactly(new Violation("read-after-delete", "s2", "p1", resurrected));
+    }
+
+    @Test
+    void key_WhenAnAppliedSaveCompletesAfterTheDeleteBegins_IsSkipped() {
         assertThat(violations(
-                new Save("s3", "p1", 5, 11, new Rejected(409)),
+                new Save("s3", "p1", 5, 11, new Applied(4)),
                 DELETED,
-                new Read("s2", "p1", 25, 30, new Found(3)))).isEmpty();
+                new Read("s2", "p1", 25, 30, new Found(4)))).isEmpty();
+    }
+
+    @Test
+    void key_WhenAnUnknownSaveCompletesAfterTheDeleteBegins_IsSkipped() {
+        assertThat(violations(
+                new Save("s3", "p1", 5, 11, new Unknown()),
+                DELETED,
+                new Read("s2", "p1", 25, 30, new Found(4)))).isEmpty();
     }
 
     @Test

@@ -22,7 +22,16 @@ final class ReadAfterDelete implements Rule {
         return completedDeletes(key, history).stream()
                 .anyMatch(delete -> history.all(Save.class).stream()
                         .filter(save -> save.key().equals(key))
+                        .filter(save -> mayHaveApplied(save.result()))
                         .anyMatch(save -> save.completedAt() > delete.invokedAt()));
+    }
+
+    private static boolean mayHaveApplied(SaveResult result) {
+        return switch (result) {
+            case Applied applied -> true;
+            case Rejected rejected -> false;
+            case Unknown unknown -> true;
+        };
     }
 
     static List<Delete> completedDeletes(String key, History history) {
