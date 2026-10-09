@@ -1,0 +1,15 @@
+diff --git a/backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidCookieFilter.java b/backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidCookieFilter.java
+index 06cfbec5..015117c4 100644
+--- a/backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidCookieFilter.java
++++ b/backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidCookieFilter.java
+@@ -64,9 +64,7 @@ public class GtidCookieFilter extends OncePerRequestFilter {
+             return;
+         }
+         GtidReadGate.Verdict verdict = readGate.probe(gtid.get());
+-        if (verdict != GtidReadGate.Verdict.NOT_CAUGHT_UP) {
+-            addCookie(response, GtidCookie.cleared());
+-        }
++        addCookie(response, GtidCookie.cleared());
+         if (verdict == GtidReadGate.Verdict.CAUGHT_UP || verdict == GtidReadGate.Verdict.UNUSABLE) {
+             filterChain.doFilter(request, response);
+             return;
