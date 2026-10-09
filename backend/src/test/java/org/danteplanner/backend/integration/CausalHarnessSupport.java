@@ -7,7 +7,6 @@ import eu.rekawek.toxiproxy.ToxiproxyClient;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import javax.sql.DataSource;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,11 +175,6 @@ abstract class CausalHarnessSupport {
         toxiproxyControl = new ToxiproxyControl(APP_TO_PRIMARY_PROXY);
         toxiproxyControl.removeWan();
         toxiproxyControl.removeReplicationLatency();
-    }
-
-    @AfterAll
-    static void clearReplicationProxy() throws IOException {
-        new ToxiproxyControl(APP_TO_PRIMARY_PROXY).removeReplicationLatency();
     }
 
     /** Appends the driver flag, respecting any query string the container url already carries. */
