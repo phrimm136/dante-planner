@@ -37,7 +37,7 @@ public interface PlannerEntityFilterRepository
 
     @Query(value = "SELECT p.planner_type AS plannerType, c.category AS category"
             + " FROM planner_content c JOIN planner p ON p.id = c.planner_id"
-            + " WHERE c.planner_id = :plannerId FOR SHARE OF c", nativeQuery = true)
+            + " WHERE c.planner_id = :plannerId FOR UPDATE OF c", nativeQuery = true)
     Optional<FloorScopeRow> floorScopeOf(@Param("plannerId") UUID plannerId);
 
     @Modifying

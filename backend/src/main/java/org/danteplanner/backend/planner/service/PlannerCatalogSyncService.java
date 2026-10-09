@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -118,10 +120,11 @@ public class PlannerCatalogSyncService {
         return synced;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     public void syncPlanner(UUID plannerId, List<Long> eventIds) {
+        Optional<FloorScopeRow> scope = entityFilterRepository.floorScopeOf(plannerId);
         if (plannerRepository.existsPublishedById(plannerId)) {
-            rebuildFilters(plannerId);
+            rebuildFilters(plannerId, scope);
             tombstoneStore.clearTombstoneOrThrow(ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, plannerId);
         } else {
             clearFilters(plannerId);
@@ -158,8 +161,8 @@ public class PlannerCatalogSyncService {
                 .orElse(true);
     }
 
-    private void rebuildFilters(UUID plannerId) {
-        int floorCount = entityFilterRepository.floorScopeOf(plannerId).map(this::floorCountOf).orElse(0);
+    private void rebuildFilters(UUID plannerId, Optional<FloorScopeRow> scope) {
+        int floorCount = scope.map(this::floorCountOf).orElse(0);
         entityFilterRepository.rebuildPlannerFilters(plannerId, floorCount);
     }
 

@@ -199,6 +199,19 @@ class PlannerCatalogSyncServiceTest {
     }
 
     @Test
+    void syncPlanner_WhenThePlannerIsWithdrawn_LocksItsContentRowBeforeClearing() {
+        givenVisible(false);
+        givenDeleted(false);
+
+        syncService.syncPlanner(plannerId, List.of(7L));
+
+        InOrder order = inOrder(entityFilterRepository, plannerRepository);
+        order.verify(entityFilterRepository).floorScopeOf(plannerId);
+        order.verify(plannerRepository).existsPublishedById(plannerId);
+        order.verify(entityFilterRepository).deleteByPlannerId(plannerId);
+    }
+
+    @Test
     void syncPlanner_WhenGivenNoEventIds_SyncsAndMarksNothing() {
         givenVisible(false);
         givenDeleted(false);
@@ -294,13 +307,13 @@ class PlannerCatalogSyncServiceTest {
     }
 
     @Test
-    void syncPlanner_WhenDeclared_RunsInItsOwnWriteTransactionAtTheDefaultIsolation() throws NoSuchMethodException {
+    void syncPlanner_WhenDeclared_RunsInItsOwnWriteTransactionAtReadCommitted() throws NoSuchMethodException {
         Transactional transactional = PlannerCatalogSyncService.class
                 .getMethod("syncPlanner", UUID.class, List.class).getAnnotation(Transactional.class);
 
         assertThat(transactional.readOnly()).isFalse();
         assertThat(transactional.propagation()).isEqualTo(Propagation.REQUIRES_NEW);
-        assertThat(transactional.isolation()).isEqualTo(Isolation.DEFAULT);
+        assertThat(transactional.isolation()).isEqualTo(Isolation.READ_COMMITTED);
     }
 
     @Test
@@ -343,12 +356,12 @@ class PlannerCatalogSyncServiceTest {
     }
 
     @Test
-    void floorScopeOf_WhenDeclared_ReadsTheContentRowUnderAShareLock() throws NoSuchMethodException {
+    void floorScopeOf_WhenDeclared_ReadsTheContentRowUnderAnExclusiveLock() throws NoSuchMethodException {
         Query query = PlannerEntityFilterRepository.class.getMethod("floorScopeOf", UUID.class)
                 .getAnnotation(Query.class);
 
         assertThat(query.nativeQuery()).isTrue();
-        assertThat(query.value()).endsWith(" FOR SHARE OF c");
+        assertThat(query.value()).endsWith(" FOR UPDATE OF c");
     }
 
     private void givenPending(DomainEvent... pending) {
