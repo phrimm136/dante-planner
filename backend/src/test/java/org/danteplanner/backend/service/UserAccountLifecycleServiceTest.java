@@ -1,5 +1,6 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
+import org.danteplanner.backend.user.validation.RoleChangeValidator;
 
 import org.danteplanner.backend.support.RecordingAccountLifecycleParticipant;
 import org.danteplanner.backend.support.RecordingAccountLifecycleParticipant.Call;
@@ -10,6 +11,7 @@ import org.danteplanner.backend.support.ScriptedFailuresCheck;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserNotFoundException;
+import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -65,6 +67,7 @@ class UserAccountLifecycleServiceTest {
                 userRepository,
                 List.of(firstParticipant, secondParticipant),
                 sessionEndHandler,
+                new RoleChangeValidator(userRepository),
                 GRACE_PERIOD_DAYS
         );
 
@@ -117,6 +120,44 @@ class UserAccountLifecycleServiceTest {
 
             // Assert
             assertThat(scheduledDate).isEqualTo(existingScheduledAt);
+            assertThat(journal).isEmpty();
+        }
+
+        @Test
+        void deleteAccount_WhenTheLastActiveAdminWithdraws_ThrowsLastAdministrator() {
+            User admin = TestDataFactory.unsavedUser(UserRole.ADMIN);
+            when(userRepository.findWithLockById(admin.getId())).thenReturn(Optional.of(admin));
+            when(userRepository.countByRoleAndDeletedAtIsNull(UserRole.ADMIN)).thenReturn(1L);
+
+            assertRejected(() -> lifecycleService.deleteAccount(admin.getId())).withCode("LAST_ADMINISTRATOR");
+
+            assertThat(admin.isDeleted()).isFalse();
+            assertThat(journal).isEmpty();
+        }
+
+        @Test
+        void deleteAccount_WhenAnotherActiveAdminRemains_SoftDeletesTheAdmin() {
+            User admin = TestDataFactory.unsavedUser(UserRole.ADMIN);
+            when(userRepository.findWithLockById(admin.getId())).thenReturn(Optional.of(admin));
+            when(userRepository.countByRoleAndDeletedAtIsNull(UserRole.ADMIN)).thenReturn(2L);
+
+            lifecycleService.deleteAccount(admin.getId());
+
+            assertThat(admin.isDeleted()).isTrue();
+            assertThat(journal).containsExactly(
+                    new Call(firstParticipant, Event.DEACTIVATED, admin.getId(), null),
+                    new Call(secondParticipant, Event.DEACTIVATED, admin.getId(), null),
+                    new EndAllSessions(admin.getId()));
+        }
+
+        @Test
+        void deleteAccount_WhenAWithdrawnAdminWithdrawsAgain_ReturnsBeforeTheGuard() {
+            User admin = TestDataFactory.unsavedUser(UserRole.ADMIN);
+            Instant existingScheduledAt = Instant.now().plus(Duration.ofDays(25));
+            admin.softDelete(existingScheduledAt);
+            when(userRepository.findWithLockById(admin.getId())).thenReturn(Optional.of(admin));
+
+            assertThat(lifecycleService.deleteAccount(admin.getId())).isEqualTo(existingScheduledAt);
             assertThat(journal).isEmpty();
         }
 

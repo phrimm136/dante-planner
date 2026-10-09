@@ -15,6 +15,7 @@ import org.danteplanner.backend.support.RecordingSessionEndHandler.Failed;
 import org.danteplanner.backend.support.RecordingSessionEndHandler.Operation;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
+import org.danteplanner.backend.user.validation.RoleChangeValidator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -36,7 +37,8 @@ class RecordingSessionEndHandlerTest {
     void calls_WhenTheRealLifecycleDeletesAnAccount_RecordThatAllItsSessionsEnd() {
         when(userRepository.findWithLockById(USER_ID)).thenReturn(Optional.of(TestDataFactory.unsavedUser(USER_ID)));
 
-        new UserAccountLifecycleService(userRepository, List.of(), sessions, GRACE_PERIOD_DAYS).deleteAccount(USER_ID);
+        new UserAccountLifecycleService(userRepository, List.of(), sessions,
+                new RoleChangeValidator(userRepository), GRACE_PERIOD_DAYS).deleteAccount(USER_ID);
 
         assertThat(sessions.calls()).containsExactly(new EndAllSessions(USER_ID));
     }
@@ -47,7 +49,8 @@ class RecordingSessionEndHandlerTest {
         RedisConnectionFailureException down = new RedisConnectionFailureException("down");
         sessions.failNext(Operation.END_ALL_SESSIONS, down);
         UserAccountLifecycleService lifecycle =
-                new UserAccountLifecycleService(userRepository, List.of(), sessions, GRACE_PERIOD_DAYS);
+                new UserAccountLifecycleService(userRepository, List.of(), sessions,
+                new RoleChangeValidator(userRepository), GRACE_PERIOD_DAYS);
 
         assertThatThrownBy(() -> lifecycle.deleteAccount(USER_ID))
                 .isInstanceOf(RedisConnectionFailureException.class)

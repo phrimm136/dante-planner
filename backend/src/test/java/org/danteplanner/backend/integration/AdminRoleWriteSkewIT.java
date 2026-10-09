@@ -1,7 +1,7 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.admin.service.AdminService;
-import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
+import org.danteplanner.backend.user.api.LastAdministratorException;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <p>Self-demotion is the only route by which an administrator's role drops: safeguard 2 rejects
  * an actor modifying anyone of equal or higher rank, so one admin cannot demote another. Two
  * admins self-demoting therefore lock disjoint rows while both reading the same predicate
- * ({@code COUNT(*) WHERE role='ADMIN'}), which is write skew exactly: each transaction preserves
+ * ({@code COUNT(*) WHERE role='ADMIN' AND deleted_at IS NULL}), which is write skew exactly: each transaction preserves
  * "at least one admin" on its own, and together they do not.</p>
  *
  * <p>Takes the exclusive database and demotes every administrator in it first, because the
@@ -56,7 +56,7 @@ class AdminRoleWriteSkewIT extends ExclusiveDatabaseSupport {
         Long secondAdmin = TestDataFactory
                 .createAdmin(userRepository, "skew-b-" + UUID.randomUUID() + "@example.com").getId();
 
-        assertThat(userRepository.countByRole(UserRole.ADMIN))
+        assertThat(userRepository.countByRoleAndDeletedAtIsNull(UserRole.ADMIN))
                 .as("the skew only exists when these two are the last administrators")
                 .isEqualTo(2L);
 
@@ -69,7 +69,7 @@ class AdminRoleWriteSkewIT extends ExclusiveDatabaseSupport {
             awaitSettled(a);
             awaitSettled(b);
 
-            assertThat(userRepository.countByRole(UserRole.ADMIN))
+            assertThat(userRepository.countByRoleAndDeletedAtIsNull(UserRole.ADMIN))
                     .as("both self-demotions must not commit: the system cannot be left without an "
                             + "administrator, whichever transaction wins")
                     .isEqualTo(1L);
@@ -99,8 +99,7 @@ class AdminRoleWriteSkewIT extends ExclusiveDatabaseSupport {
                     .as("a losing self-demotion is refused by the last-admin safeguard or rolled back as a deadlock")
                     .satisfiesAnyOf(
                             refusal -> assertThat(refusal)
-                                    .isInstanceOf(ModerationForbiddenException.class)
-                                    .hasMessage("Cannot demote the last administrator"),
+                                    .isInstanceOf(LastAdministratorException.class),
                             rollback -> assertThat(rollback).isInstanceOf(CannotAcquireLockException.class));
         }
     }

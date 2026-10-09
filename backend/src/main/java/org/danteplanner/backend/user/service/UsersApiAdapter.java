@@ -2,11 +2,13 @@ package org.danteplanner.backend.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.user.api.AuthProviderType;
+import org.danteplanner.backend.user.api.RoleChange;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.user.api.dto.UserResponse;
 import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.validation.RoleChangeValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,7 @@ public class UsersApiAdapter implements Users {
 
     private final UserService userService;
     private final UserAccountLifecycleService lifecycleService;
+    private final RoleChangeValidator roleChangeValidator;
 
     public static UserSummary toSummary(User user) {
         return new UserSummary(
@@ -37,18 +40,8 @@ public class UsersApiAdapter implements Users {
     }
 
     @Override
-    public long countByRole(UserRole role) {
-        return userService.countByRole(role);
-    }
-
-    @Override
     public Optional<UserSummary> findActiveById(Long userId) {
         return userService.findActiveById(userId).map(UsersApiAdapter::toSummary);
-    }
-
-    @Override
-    public UserSummary lockActiveById(Long userId) {
-        return toSummary(userService.lockActiveById(userId));
     }
 
     @Override
@@ -113,9 +106,14 @@ public class UsersApiAdapter implements Users {
 
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
-    public UserSummary changeRole(long userId, UserRole role) {
-        User user = userService.lockActiveById(userId);
-        user.setRole(role);
-        return toSummary(user);
+    public RoleChange changeRole(Long actorId, Long targetId, UserRole newRole) {
+        User actor = userService.lockActiveById(actorId);
+        User target = userService.lockActiveById(targetId);
+        UserRole previousRole = target.getRole();
+
+        roleChangeValidator.requireCanChangeRole(actor, target, newRole);
+
+        target.setRole(newRole);
+        return new RoleChange(previousRole, toSummary(target));
     }
 }

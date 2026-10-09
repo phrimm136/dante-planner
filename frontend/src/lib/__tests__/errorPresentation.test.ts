@@ -172,6 +172,15 @@ describe('presentError', () => {
       expected: { key: 'planner:sync.changedElsewhere', severity: 'warning', supportHint: false },
     },
     {
+      name: 'a refusal that would leave no active administrator',
+      error: { kind: 'conflict', code: 'LAST_ADMINISTRATOR', serverVersion: null },
+      expected: {
+        key: 'common:errors.lastAdministrator.message',
+        severity: 'error',
+        supportHint: false,
+      },
+    },
+    {
       name: 'an exhausted server-side planner allowance',
       error: { kind: 'conflict', code: 'PLANNER_LIMIT_EXCEEDED', serverVersion: null },
       expected: { key: 'common:errors.generic.message', severity: 'error', supportHint: true },

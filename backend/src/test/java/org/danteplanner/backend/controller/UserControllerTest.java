@@ -20,6 +20,7 @@ import org.danteplanner.backend.user.entity.UserSettings;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.repository.UserSettingsRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
+import org.danteplanner.backend.user.validation.RoleChangeValidator;
 import org.danteplanner.backend.user.service.UserSettingsService;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
@@ -79,7 +80,8 @@ class UserControllerTest {
 
     private UserController controllerWithGracePeriod(int gracePeriodDays) {
         return new UserController(
-                new UserAccountLifecycleService(userRepository, List.of(), sessionEndHandler, gracePeriodDays),
+                new UserAccountLifecycleService(userRepository, List.of(), sessionEndHandler,
+                        new RoleChangeValidator(userRepository), gracePeriodDays),
                 null,
                 new UserSettingsService(userSettingsRepository, userRepository),
                 new SsePublisher(sseChannel, Jackson2ObjectMapperBuilder.json().build(), new SimpleMeterRegistry()),

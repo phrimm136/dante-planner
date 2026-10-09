@@ -13,7 +13,9 @@ import java.util.function.Predicate;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import org.danteplanner.backend.user.api.AuthProviderType;
+import org.danteplanner.backend.user.api.LastAdministratorException;
 import org.danteplanner.backend.user.api.RestrictionReasonProvider;
+import org.danteplanner.backend.user.api.RoleChange;
 import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserSummary;
@@ -21,6 +23,7 @@ import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.user.api.dto.UserResponse;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.exception.AccountDeletedException;
+import org.danteplanner.backend.user.exception.UserForbiddenException;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.user.service.UsersApiAdapter;
 
@@ -76,18 +79,8 @@ public class FakeUsers implements Users {
     }
 
     @Override
-    public long countByRole(UserRole role) {
-        return rows.values().stream().filter(user -> user.getRole() == role).count();
-    }
-
-    @Override
     public Optional<UserSummary> findActiveById(Long userId) {
         return active(userId).map(UsersApiAdapter::toSummary);
-    }
-
-    @Override
-    public UserSummary lockActiveById(Long userId) {
-        return UsersApiAdapter.toSummary(active(userId).orElseThrow(() -> new UserNotFoundException(userId)));
     }
 
     @Override
@@ -172,10 +165,25 @@ public class FakeUsers implements Users {
     }
 
     @Override
-    public UserSummary changeRole(long userId, UserRole role) {
-        User user = active(userId).orElseThrow(() -> new UserNotFoundException(userId));
-        user.setRole(role);
-        return UsersApiAdapter.toSummary(user);
+    public RoleChange changeRole(Long actorId, Long targetId, UserRole newRole) {
+        User actor = active(actorId).orElseThrow(() -> new UserNotFoundException(actorId));
+        User target = active(targetId).orElseThrow(() -> new UserNotFoundException(targetId));
+        UserRole previousRole = target.getRole();
+
+        if (newRole.outranks(actor.getRole())) {
+            throw new UserForbiddenException("Cannot grant role higher than your own");
+        }
+        if (!actor.getId().equals(target.getId()) && target.getRole().hasRankAtLeast(actor.getRole())) {
+            throw new UserForbiddenException("Cannot modify user of equal or higher rank");
+        }
+        if (previousRole == UserRole.ADMIN && newRole != UserRole.ADMIN
+                && rows.values().stream().filter(user -> !user.isDeleted() && user.getRole() == UserRole.ADMIN)
+                        .count() <= 1) {
+            throw new LastAdministratorException();
+        }
+
+        target.setRole(newRole);
+        return new RoleChange(previousRole, UsersApiAdapter.toSummary(target));
     }
 
     private long nextFreeId() {

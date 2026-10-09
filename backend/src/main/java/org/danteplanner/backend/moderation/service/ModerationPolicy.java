@@ -1,18 +1,16 @@
 package org.danteplanner.backend.moderation.service;
 
 import org.danteplanner.backend.moderation.api.ModerationActionType;
-import org.danteplanner.backend.moderation.api.RoleChangePolicy;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
-import org.danteplanner.backend.user.api.UserSummary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.util.Map;
 
 @Service
-public class ModerationPolicy implements RoleChangePolicy {
+public class ModerationPolicy {
 
     private record Authority(UserRole minimumActorRole, String power, String verb) {}
 
@@ -43,30 +41,6 @@ public class ModerationPolicy implements RoleChangePolicy {
         if (!actor.getRole().outranks(target.getRole())) {
             throw new ModerationForbiddenException(
                     "Cannot %s a user of equal or higher rank".formatted(authority.verb()));
-        }
-    }
-
-    @Override
-    public boolean demotesAnAdministrator(UserRole currentRole, UserRole newRole) {
-        return currentRole == UserRole.ADMIN && newRole != UserRole.ADMIN;
-    }
-
-    @Override
-    public void requireAnotherAdministratorRemains(long administratorCount) {
-        if (administratorCount <= 1) {
-            throw new ModerationForbiddenException("Cannot demote the last administrator");
-        }
-    }
-
-    @Override
-    public void requireCanChangeRole(UserSummary actor, UserSummary target, UserRole newRole) {
-        if (newRole.outranks(actor.role())) {
-            throw new ModerationForbiddenException("Cannot grant role higher than your own");
-        }
-
-        boolean self = actor.id().equals(target.id());
-        if (!self && target.role().hasRankAtLeast(actor.role())) {
-            throw new ModerationForbiddenException("Cannot modify user of equal or higher rank");
         }
     }
 }

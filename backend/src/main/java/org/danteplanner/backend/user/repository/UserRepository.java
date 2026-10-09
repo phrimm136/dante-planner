@@ -27,7 +27,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByIdAndDeletedAtIsNull(Long id);
 
-    long countByRole(UserRole role);
+    long countByRoleAndDeletedAtIsNull(UserRole role);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<User> findWithLockByIdAndDeletedAtIsNull(Long id);

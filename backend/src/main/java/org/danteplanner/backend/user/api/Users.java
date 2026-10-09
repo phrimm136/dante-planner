@@ -11,11 +11,7 @@ public interface Users {
 
     Long SENTINEL_USER_ID = 0L;
 
-    long countByRole(UserRole role);
-
     Optional<UserSummary> findActiveById(Long userId);
-
-    UserSummary lockActiveById(Long userId);
 
     UserSummary findOrCreateUser(String provider, Map<String, String> userInfo);
 
@@ -41,5 +37,5 @@ public interface Users {
 
     void reactivateAccount(Long userId);
 
-    UserSummary changeRole(long userId, UserRole role);
+    RoleChange changeRole(Long actorId, Long targetId, UserRole newRole);
 }

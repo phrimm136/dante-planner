@@ -6,7 +6,6 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.danteplanner.backend.user.api.dto.UserResponse;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.exception.AccountDeletedException;
 import org.danteplanner.backend.user.exception.UsernameGenerationException;
 import org.danteplanner.backend.user.api.UserNotFoundException;
@@ -213,11 +212,6 @@ public class UserService {
     public User holdActiveById(Long userId) {
         return userRepository.findWithSharedLockByIdAndDeletedAtIsNull(userId)
                 .orElseThrow(() -> new AccountDeletedException(userId));
-    }
-
-    @Transactional(readOnly = true)
-    public long countByRole(UserRole role) {
-        return userRepository.countByRole(role);
     }
 
     @Transactional

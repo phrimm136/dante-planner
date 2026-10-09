@@ -18,6 +18,7 @@ import org.danteplanner.backend.support.RecordingSessionEndHandler.EndAllSession
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
+import org.danteplanner.backend.user.validation.RoleChangeValidator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -84,6 +85,6 @@ class RecordingAccountLifecycleParticipantTest {
 
     private UserAccountLifecycleService lifecycle() {
         return new UserAccountLifecycleService(userRepository, List.of(first, second),
-                new RecordingSessionEndHandler(journal), GRACE_PERIOD_DAYS);
+                new RecordingSessionEndHandler(journal), new RoleChangeValidator(userRepository), GRACE_PERIOD_DAYS);
     }
 }

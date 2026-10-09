@@ -4,6 +4,7 @@ import org.danteplanner.backend.moderation.api.ModerationActionType;
 import org.danteplanner.backend.moderation.api.ModerationTargetType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.user.api.RoleChange;
 import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserSummary;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.danteplanner.backend.moderation.api.ModerationAudit;
-import org.danteplanner.backend.moderation.api.RoleChangePolicy;
 
 /**
  * Service for administrative operations.
@@ -24,26 +24,15 @@ public class AdminService {
 
     private final Users users;
     private final ModerationAudit auditService;
-    private final RoleChangePolicy moderationPolicy;
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public UserSummary changeRole(Long actorId, Long targetId, UserRole newRole) {
-        UserSummary actor = users.lockActiveById(actorId);
-        UserSummary target = users.lockActiveById(targetId);
-
-        UserRole targetCurrentRole = target.role();
-
-        moderationPolicy.requireCanChangeRole(actor, target, newRole);
-
-        if (moderationPolicy.demotesAnAdministrator(targetCurrentRole, newRole)) {
-            moderationPolicy.requireAnotherAdministratorRemains(users.countByRole(UserRole.ADMIN));
-        }
-
-        UserRole oldRole = target.role();
-        UserSummary updated = users.changeRole(targetId, newRole);
+        RoleChange change = users.changeRole(actorId, targetId, newRole);
+        UserRole oldRole = change.previousRole();
+        UserSummary updated = change.user();
 
         boolean demotion = oldRole.outranks(newRole);
-        auditService.record(actorId, target.publicId().toString(),
+        auditService.record(actorId, updated.publicId().toString(),
                 demotion ? ModerationActionType.DEMOTE : ModerationActionType.PROMOTE,
                 ModerationTargetType.USER, oldRole + " -> " + newRole);
 

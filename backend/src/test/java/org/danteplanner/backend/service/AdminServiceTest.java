@@ -12,12 +12,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
-import org.danteplanner.backend.moderation.service.ModerationPolicy;
 import org.danteplanner.backend.support.TestDataFactory;
 
 /**
@@ -41,8 +41,7 @@ class AdminServiceTest {
 
     @BeforeEach
     void setUp() {
-        adminService = new AdminService(users,
-                new ModerationAuditService(moderationActionRepository), new ModerationPolicy());
+        adminService = new AdminService(users, new ModerationAuditService(moderationActionRepository));
 
         adminUser = TestDataFactory.unsavedUser(UserRole.ADMIN);
 
@@ -110,15 +109,6 @@ class AdminServiceTest {
             assertRejected(() -> adminService.changeRole(moderatorUser.getId(), adminUser.getId(), UserRole.NORMAL))
                     .withCode("FORBIDDEN")
                     .satisfies(rejection -> assertThat(rejection.getMessage()).contains("equal or higher rank"));
-            assertThat(adminUser.getRole()).isEqualTo(UserRole.ADMIN);
-        }
-
-        @Test
-        void changeRole_WhenDemoteLastAdmin_ThrowsException() {
-            // Act & Assert
-            assertRejected(() -> adminService.changeRole(adminUser.getId(), adminUser.getId(), UserRole.MODERATOR))
-                    .withCode("FORBIDDEN")
-                    .satisfies(rejection -> assertThat(rejection.getMessage()).contains("last administrator"));
             assertThat(adminUser.getRole()).isEqualTo(UserRole.ADMIN);
         }
 

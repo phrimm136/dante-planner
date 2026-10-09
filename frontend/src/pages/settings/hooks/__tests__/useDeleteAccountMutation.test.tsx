@@ -3,6 +3,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { useDeleteAccountMutation } from '../useAccountData'
 import { ApiClient } from '@/lib/api'
+import { ConflictError } from '@/lib/apiErrors'
+import { createTestQueryClient } from '@/test-utils/queryClient'
+import { toast as sonnerToast } from 'sonner'
 
 // Mock ApiClient
 vi.mock('@/lib/api', () => ({
@@ -10,6 +13,19 @@ vi.mock('@/lib/api', () => ({
     delete: vi.fn(),
   },
 }))
+
+vi.mock('sonner', () => {
+  const toastFn = Object.assign(vi.fn(), {
+    error: vi.fn(),
+    success: vi.fn(),
+    warning: vi.fn(),
+    info: vi.fn(),
+    dismiss: vi.fn(),
+  })
+  return { toast: toastFn }
+})
+
+vi.mock('@/lib/i18n', () => ({ default: { t: (key: string) => key } }))
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -114,6 +130,26 @@ describe('useDeleteAccountMutation', () => {
     await waitFor(() => expect(result.current.isError).toBe(true))
 
     expect(console.error).toHaveBeenCalledWith('Failed to delete account:', error)
+  })
+
+  it('tells the last active administrator to assign another one first', async () => {
+    vi.mocked(ApiClient.delete).mockRejectedValue(
+      new ConflictError('LAST_ADMINISTRATOR', 'Another active administrator must remain', null),
+    )
+    const queryClient = createTestQueryClient()
+    const { result } = renderHook(() => useDeleteAccountMutation(), {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      ),
+    })
+
+    result.current.mutate()
+
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(sonnerToast.error).toHaveBeenCalledWith(
+      'common:errors.lastAdministrator.message',
+      undefined,
+    )
   })
 
   it('exposes isPending state during mutation', async () => {

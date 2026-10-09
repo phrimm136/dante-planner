@@ -1,6 +1,7 @@
 package org.danteplanner.backend.support;
 
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +11,7 @@ import org.danteplanner.backend.user.entity.User;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class FakeUsersContractTest implements UsersContract, UsersRoleCountContract {
+class FakeUsersContractTest implements UsersContract, UsersRoleChangeContract {
 
     private final FakeUsers users = new FakeUsers();
 
@@ -37,6 +38,15 @@ class FakeUsersContractTest implements UsersContract, UsersRoleCountContract {
     @Override
     public Class<? extends RuntimeException> duplicateKeyFailure() {
         return IllegalStateException.class;
+    }
+
+    @Override
+    public void leaveNoAdministrator() {
+    }
+
+    @Override
+    public <T> T inTransaction(Supplier<T> work) {
+        return work.get();
     }
 
     @Test

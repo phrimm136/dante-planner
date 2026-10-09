@@ -9,6 +9,7 @@ import org.danteplanner.backend.support.ScriptedFailuresCheck;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
+import org.danteplanner.backend.user.validation.RoleChangeValidator;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -51,7 +52,8 @@ class UserCleanupSchedulerTest {
     @BeforeEach
     void setUp() {
         scheduler = new UserCleanupScheduler(userRepository, new UserAccountLifecycleService(
-                userRepository, List.of(participant), sessionEndHandler, GRACE_PERIOD_DAYS));
+                userRepository, List.of(participant), sessionEndHandler, new RoleChangeValidator(userRepository),
+                GRACE_PERIOD_DAYS));
     }
 
     private void givenPurgeable(User user) {

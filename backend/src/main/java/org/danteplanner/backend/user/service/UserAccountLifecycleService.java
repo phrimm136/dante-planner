@@ -5,11 +5,14 @@ import org.danteplanner.backend.user.api.AccountLifecycleParticipant;
 import org.danteplanner.backend.user.api.SessionEndHandler;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserNotFoundException;
+import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.validation.RoleChangeValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
@@ -29,26 +32,33 @@ public class UserAccountLifecycleService {
     private final UserRepository userRepository;
     private final List<AccountLifecycleParticipant> participants;
     private final SessionEndHandler sessionEndHandler;
+    private final RoleChangeValidator roleChangeValidator;
     private final int gracePeriodDays;
 
     public UserAccountLifecycleService(
             UserRepository userRepository,
             List<AccountLifecycleParticipant> participants,
             SessionEndHandler sessionEndHandler,
+            RoleChangeValidator roleChangeValidator,
             @Value("${app.user.deletion.grace-period-days:30}") int gracePeriodDays) {
         this.userRepository = userRepository;
         this.participants = participants;
         this.sessionEndHandler = sessionEndHandler;
+        this.roleChangeValidator = roleChangeValidator;
         this.gracePeriodDays = gracePeriodDays;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public Instant deleteAccount(Long userId) {
         User user = userRepository.findWithLockById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         if (user.isDeleted()) {
             return user.getPermanentDeleteScheduledAt();
+        }
+
+        if (user.getRole() == UserRole.ADMIN) {
+            roleChangeValidator.requireAnotherActiveAdministrator();
         }
 
         Instant scheduledDeleteAt = Instant.now().plus(Duration.ofDays(gracePeriodDays));

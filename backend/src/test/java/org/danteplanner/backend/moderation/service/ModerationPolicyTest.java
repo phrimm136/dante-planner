@@ -3,11 +3,9 @@ package org.danteplanner.backend.moderation.service;
 import org.danteplanner.backend.moderation.api.ModerationActionType;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
 import org.danteplanner.backend.user.api.UserRole;
-import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
@@ -42,25 +40,5 @@ class ModerationPolicyTest {
                 ModerationActionType.DELETE_COMMENT))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Not an account restriction: DELETE_COMMENT");
-    }
-
-    @Test
-    void requireCanChangeRole_WhenNewRoleOutranksActor_ThrowsModerationForbidden() {
-        assertThatThrownBy(() -> POLICY.requireCanChangeRole(
-                summary(1L, UserRole.MODERATOR), summary(2L, UserRole.NORMAL), UserRole.ADMIN))
-                .isInstanceOf(ModerationForbiddenException.class)
-                .hasMessage("Cannot grant role higher than your own");
-    }
-
-    @Test
-    void requireCanChangeRole_WhenActorIsTheTarget_Allows() {
-        UserSummary actor = summary(1L, UserRole.ADMIN);
-
-        assertThatCode(() -> POLICY.requireCanChangeRole(actor, actor, UserRole.NORMAL))
-                .doesNotThrowAnyException();
-    }
-
-    private static UserSummary summary(Long id, UserRole role) {
-        return new UserSummary(id, null, null, null, null, role, false, null, null);
     }
 }

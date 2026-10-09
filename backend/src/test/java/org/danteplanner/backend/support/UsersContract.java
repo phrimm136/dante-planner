@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.user.api.AuthProviderType;
+import org.danteplanner.backend.user.api.RoleChange;
 import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserSummary;
@@ -19,6 +20,7 @@ import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.user.api.dto.UserResponse;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.exception.AccountDeletedException;
+import org.danteplanner.backend.user.exception.UserForbiddenException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -74,22 +76,6 @@ public interface UsersContract {
     @Test
     default void findActiveById_WhenTheIdIsUnknown_ReturnsEmpty() {
         assertThat(users().findActiveById(UNKNOWN_ID)).isEmpty();
-    }
-
-    @Test
-    default void lockActiveById_WhenTheUserIsLive_ReturnsItsRow() {
-        User user = persisted(newUser().build());
-
-        assertThat(inTransaction(() -> users().lockActiveById(user.getId())).id()).isEqualTo(user.getId());
-    }
-
-    @Test
-    default void lockActiveById_WhenTheUserIsDeleted_ThrowsUserNotFound() {
-        User user = persisted(deletedUser().build());
-
-        assertThatThrownBy(() -> inTransaction(() -> users().lockActiveById(user.getId())))
-                .isInstanceOf(UserNotFoundException.class)
-                .hasMessage("User not found with id: " + user.getId());
     }
 
     @Test
@@ -341,21 +327,60 @@ public interface UsersContract {
 
     @Test
     default void changeRole_WhenTheUserIsLive_StoresTheNewRole() {
+        User admin = persisted(newUser().role(UserRole.ADMIN).build());
         User user = persisted(newUser().build());
 
-        UserSummary changed = inTransaction(() -> users().changeRole(user.getId(), UserRole.MODERATOR));
+        RoleChange change = inTransaction(() -> users().changeRole(admin.getId(), user.getId(), UserRole.MODERATOR));
 
-        assertThat(changed.role()).isEqualTo(UserRole.MODERATOR);
+        assertThat(change.previousRole()).isEqualTo(UserRole.NORMAL);
+        assertThat(change.user().role()).isEqualTo(UserRole.MODERATOR);
         assertThat(users().findById(user.getId()).role()).isEqualTo(UserRole.MODERATOR);
     }
 
     @Test
     default void changeRole_WhenTheUserIsDeleted_ThrowsUserNotFound() {
+        User admin = persisted(newUser().role(UserRole.ADMIN).build());
         User user = persisted(deletedUser().build());
 
-        assertThatThrownBy(() -> inTransaction(() -> users().changeRole(user.getId(), UserRole.MODERATOR)))
+        assertThatThrownBy(() -> inTransaction(
+                () -> users().changeRole(admin.getId(), user.getId(), UserRole.MODERATOR)))
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessage("User not found with id: " + user.getId());
+    }
+
+    @Test
+    default void changeRole_WhenTheActorIsDeleted_ThrowsUserNotFound() {
+        User admin = persisted(deletedUser().role(UserRole.ADMIN).build());
+        User user = persisted(newUser().build());
+
+        assertThatThrownBy(() -> inTransaction(
+                () -> users().changeRole(admin.getId(), user.getId(), UserRole.MODERATOR)))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage("User not found with id: " + admin.getId());
+    }
+
+    @Test
+    default void changeRole_WhenTheNewRoleOutranksTheActor_ThrowsUserForbidden() {
+        User moderator = persisted(newUser().role(UserRole.MODERATOR).build());
+        User user = persisted(newUser().build());
+
+        assertThatThrownBy(() -> inTransaction(
+                () -> users().changeRole(moderator.getId(), user.getId(), UserRole.ADMIN)))
+                .isInstanceOf(UserForbiddenException.class)
+                .hasMessage("Cannot grant role higher than your own");
+        assertThat(users().findById(user.getId()).role()).isEqualTo(UserRole.NORMAL);
+    }
+
+    @Test
+    default void changeRole_WhenTheTargetIsOfEqualRank_ThrowsUserForbidden() {
+        User moderator = persisted(newUser().role(UserRole.MODERATOR).build());
+        User otherModerator = persisted(newUser().role(UserRole.MODERATOR).build());
+
+        assertThatThrownBy(() -> inTransaction(
+                () -> users().changeRole(moderator.getId(), otherModerator.getId(), UserRole.NORMAL)))
+                .isInstanceOf(UserForbiddenException.class)
+                .hasMessage("Cannot modify user of equal or higher rank");
+        assertThat(users().findById(otherModerator.getId()).role()).isEqualTo(UserRole.MODERATOR);
     }
 
     static User.UserBuilder newUser() {

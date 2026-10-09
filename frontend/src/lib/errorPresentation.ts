@@ -23,6 +23,7 @@ const FORBIDDEN_KEY = 'common:errors.forbidden.message'
 const RESOURCE_NOT_FOUND_KEY = 'common:errors.resourceNotFound.message'
 const RETRYABLE_KEY = 'common:errors.retryable.message'
 const CHANGED_ELSEWHERE_KEY = 'planner:sync.changedElsewhere'
+const LAST_ADMINISTRATOR_KEY = 'common:errors.lastAdministrator.message'
 
 const RESTRICTION_KEY: Record<RestrictionKind, string> = {
   banned: 'common:moderation.banned',
@@ -40,6 +41,9 @@ function presentConflict(code: string): ErrorPresentation | null {
   if (code === CONFLICT_CODE.SYNC_CONFLICT) return null
   if (code === CONFLICT_CODE.CONCURRENT_WRITE) {
     return { key: CHANGED_ELSEWHERE_KEY, severity: 'warning', supportHint: false }
+  }
+  if (code === CONFLICT_CODE.LAST_ADMINISTRATOR) {
+    return { key: LAST_ADMINISTRATOR_KEY, severity: 'error', supportHint: false }
   }
   return { key: GENERIC_KEY, severity: 'error', supportHint: true }
 }
