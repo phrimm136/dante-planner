@@ -15,8 +15,7 @@ public class InvalidTokenException extends DomainException {
         MALFORMED("Token is malformed"),
         INVALID_SIGNATURE("Token signature is invalid"),
         MISSING_CLAIMS("Token is missing required claims"),
-        INVALID_TYPE("Token type is invalid for this operation"),
-        REVOKED("Token has been revoked");
+        INVALID_TYPE("Token type is invalid for this operation");
 
         private final String description;
 

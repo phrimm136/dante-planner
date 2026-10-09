@@ -40,7 +40,6 @@ public class AccessTokenAuthenticator {
         } catch (InvalidTokenException e) {
             return switch (e.getReason()) {
                 case EXPIRED -> AccessTokenVerdict.EXPIRED;
-                case REVOKED -> rejected("TOKEN_REVOKED", e.getReason(), request);
                 case MALFORMED, INVALID_SIGNATURE, MISSING_CLAIMS, INVALID_TYPE ->
                         rejected("TOKEN_INVALID", e.getReason(), request);
             };

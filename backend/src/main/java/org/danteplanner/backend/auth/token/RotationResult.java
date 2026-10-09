@@ -13,7 +13,7 @@ public sealed interface RotationResult extends FailureUnion
             case Revoked revoked -> throw new SessionRevokedException(revoked.familyId());
             case Rejected rejected -> throw rejected.reason() == Rejected.Reason.REVOKED_FAMILY
                     ? new SessionRevokedException()
-                    : new InvalidTokenException(InvalidTokenException.Reason.REVOKED);
+                    : new InvalidTokenException(InvalidTokenException.Reason.MISSING_CLAIMS);
         };
     }
 
