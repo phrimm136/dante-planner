@@ -100,8 +100,7 @@ class PrimaryReCheckTest {
         void tombstoneHit_WhenReplicaHitIsMasked_CountsOnceUnderItsEntityType() {
             tombstoneStore.writeTombstone(ENTITY_TYPE, id);
 
-            assertThatThrownBy(() -> reCheck.readWithReCheck(ENTITY_TYPE, id, () -> "planner"))
-                    .isInstanceOf(EntityNotFoundException.class);
+            assertRejected(() -> reCheck.readWithReCheck(ENTITY_TYPE, id, () -> "planner")).withCode("NOT_FOUND");
             assertThat(tombstoneHits(ENTITY_TYPE)).isEqualTo(1d);
             assertThat(tombstoneHits(MARKER_SCOPE)).isEqualTo(0d);
         }
