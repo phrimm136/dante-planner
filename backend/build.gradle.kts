@@ -137,6 +137,9 @@ tasks.withType<Test> {
     // containerized class count; TestIsolationConventionTest budgets the classes that key their own.
     systemProperty("spring.test.context.cache.maxSize", "513")
     systemProperty("org.springframework.boot.logging.LoggingSystem", "none")
+    System.getProperties().stringPropertyNames()
+        .filter { it.startsWith("consistency.") }
+        .forEach { systemProperty(it, System.getProperty(it)) }
     // One JVM, with class concurrency inside it (junit-platform.properties). Every fork repeats the
     // whole fixed cost — a JVM, its Spring contexts and a Testcontainers set — so a fork per core
     // costs memory that a thread per class does not.

@@ -5,8 +5,8 @@ epic: none · pr: none @consistency-checker @history-format
 - @consistency-checker @history-format — A history is a JSON Lines file with one line per operation.
   Each line holds the client session, the operation, the planner key, the invoke and complete times, the
   outcome, the status code and the returned `syncVersion`. The outcome is `ok`, `fail` or `unknown`.
-  `unknown` marks a request whose response never arrived, so the checker treats its write as possibly
-  applied. Without that value, a write that landed behind a dropped connection reads as a stale read.
+  `unknown` marks a request with no response or a server error, so the checker treats its write as
+  possibly applied. Without that value, a write that landed behind a dropped connection reads as a stale read.
   Both times are required, because only content saves advance `syncVersion`. Publish, unpublish and
   delete carry no version, so the checker orders them by time.
   REJECTED: Jepsen's two events per operation in EDN — Elle judges transactional isolation. Its fit to
