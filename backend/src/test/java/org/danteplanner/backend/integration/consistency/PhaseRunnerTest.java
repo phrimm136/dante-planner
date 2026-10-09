@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.jupiter.api.Test;
 
@@ -38,6 +39,29 @@ class PhaseRunnerTest {
         PhaseRunner.run(phase, sessions, recording(events, otherSessionOperated));
 
         assertThat(events).hasSize(8).startsWith("stop").endsWith("start").containsOnlyOnce("stop", "start");
+    }
+
+    @Test
+    void plan_WhenPhaseAEnds_AwaitsCatchUpBeforePhaseBStopsAndReturnsTheStampedStaleWindow() throws Exception {
+        List<String> events = Collections.synchronizedList(new ArrayList<>());
+        PlannedOperation read = new PlannedOperation.Read(Slot.K1);
+        List<List<PlannedOperation>> twoReadsEach = List.of(List.of(read, read), List.of(read, read), List.of(read, read));
+        Plan plan = new Plan(
+                new Phase(List.of(new Round(twoReadsEach)), new FaultWindow(0, 2)),
+                new Phase(List.of(new Round(twoReadsEach)), new FaultWindow(0, 2)));
+        List<OperationPerformer> sessions = List.of(
+                operation -> events.add("operation"),
+                operation -> events.add("operation"),
+                operation -> events.add("operation"));
+        AtomicLong clock = new AtomicLong();
+
+        StaleWindow window = PhaseRunner.runPlan(plan, sessions, recording(events, new CountDownLatch(0)),
+                clock::incrementAndGet);
+
+        assertThat(events).filteredOn(event -> !event.equals("operation"))
+                .containsExactly("stop", "start", "await", "stop", "start");
+        assertThat(events.subList(0, events.indexOf("await"))).filteredOn("operation"::equals).hasSize(6);
+        assertThat(window).isEqualTo(new StaleWindow(1, 2));
     }
 
     private static Replication recording(List<String> events, CountDownLatch otherSessionOperated) {

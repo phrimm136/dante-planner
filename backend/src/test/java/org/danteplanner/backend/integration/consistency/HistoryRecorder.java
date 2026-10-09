@@ -32,19 +32,19 @@ public final class HistoryRecorder implements Closeable {
         this.clock = clock;
     }
 
-    public Optional<Response> save(String session, String key, Exchange exchange) {
+    Optional<Response> save(String session, String key, Exchange exchange) {
         return record(line(session, "save").put("key", key), exchange, HistoryRecorder::saveOutcome);
     }
 
-    public Optional<Response> delete(String session, String key, Exchange exchange) {
+    Optional<Response> delete(String session, String key, Exchange exchange) {
         return record(line(session, "delete").put("key", key), exchange, HistoryRecorder::deleteOutcome);
     }
 
-    public Optional<Response> read(String session, String key, Exchange exchange) {
+    Optional<Response> read(String session, String key, Exchange exchange) {
         return record(line(session, "read").put("key", key), exchange, HistoryRecorder::readOutcome);
     }
 
-    public Optional<Response> list(String session, Exchange exchange) {
+    Optional<Response> list(String session, Exchange exchange) {
         return record(line(session, "list"), exchange, HistoryRecorder::listOutcome);
     }
 
@@ -97,6 +97,8 @@ public final class HistoryRecorder implements Closeable {
             outcome(line, OK, response).put("syncVersion", response.syncVersion());
         } else if (response.status() == HttpStatus.NOT_FOUND.value()) {
             outcome(line, OK, response);
+        } else if (HttpStatusCode.valueOf(response.status()).is5xxServerError()) {
+            outcome(line, UNKNOWN, response);
         } else {
             outcome(line, FAIL, response);
         }
@@ -142,7 +144,7 @@ public final class HistoryRecorder implements Closeable {
     }
 
     @FunctionalInterface
-    public interface Exchange {
+    interface Exchange {
 
         Response perform() throws Exception;
     }

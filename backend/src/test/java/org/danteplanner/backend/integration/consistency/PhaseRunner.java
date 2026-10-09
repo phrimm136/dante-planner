@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.LongSupplier;
 
 import org.danteplanner.backend.integration.consistency.Plan.Phase;
 import org.danteplanner.backend.integration.consistency.Plan.Round;
@@ -17,7 +18,16 @@ public final class PhaseRunner {
     private PhaseRunner() {
     }
 
-    public static void run(Phase phase, List<? extends OperationPerformer> sessions, Replication replication)
+    public static StaleWindow runPlan(Plan plan, List<? extends OperationPerformer> sessions,
+            Replication replication, LongSupplier clock) throws InterruptedException, ExecutionException {
+        StampingReplication phaseA = new StampingReplication(replication, clock);
+        run(plan.phaseA(), sessions, phaseA);
+        replication.awaitCaughtUp();
+        run(plan.phaseB(), sessions, replication);
+        return phaseA.window();
+    }
+
+    static void run(Phase phase, List<? extends OperationPerformer> sessions, Replication replication)
             throws InterruptedException, ExecutionException {
         FaultScheduler faults = new FaultScheduler(replication, phase.fault());
         faults.reach(0);
@@ -51,6 +61,43 @@ public final class PhaseRunner {
             for (Future<Void> session : running) {
                 session.get();
             }
+        }
+    }
+
+    private static final class StampingReplication implements Replication {
+
+        private final Replication replication;
+        private final LongSupplier clock;
+        private Long stoppedAt;
+        private Long restartedAt;
+
+        StampingReplication(Replication replication, LongSupplier clock) {
+            this.replication = replication;
+            this.clock = clock;
+        }
+
+        @Override
+        public synchronized void stopReplica() {
+            replication.stopReplica();
+            stoppedAt = clock.getAsLong();
+        }
+
+        @Override
+        public synchronized void startReplica() {
+            restartedAt = clock.getAsLong();
+            replication.startReplica();
+        }
+
+        @Override
+        public void awaitCaughtUp() {
+            replication.awaitCaughtUp();
+        }
+
+        synchronized StaleWindow window() {
+            if (stoppedAt == null || restartedAt == null) {
+                throw new IllegalStateException("phase A did not both stop and restart replication");
+            }
+            return new StaleWindow(stoppedAt, restartedAt);
         }
     }
 }

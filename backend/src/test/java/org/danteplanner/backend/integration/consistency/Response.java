@@ -7,7 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public record Response(int status, String body) {
+record Response(int status, String body) {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 

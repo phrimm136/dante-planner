@@ -20,6 +20,7 @@ import org.danteplanner.consistency.History;
 import org.danteplanner.consistency.NotFound;
 import org.danteplanner.consistency.Operation;
 import org.danteplanner.consistency.Read;
+import org.danteplanner.consistency.ReadFailed;
 import org.danteplanner.consistency.Rejected;
 import org.danteplanner.consistency.Save;
 import org.danteplanner.consistency.Unknown;
@@ -43,6 +44,7 @@ class HistoryRecorderTest {
             recorder.read("s1", key, () -> new Response(200, found));
             recorder.delete("s1", key, () -> new Response(204, ""));
             recorder.read("s2", key, () -> new Response(404, ""));
+            recorder.read("s3", key, () -> new Response(503, ""));
             recorder.save("s1", key, () -> new Response(409, ""));
             recorder.save("s1", key, () -> new Response(500, ""));
             recorder.save("s1", key, () -> {
@@ -51,11 +53,11 @@ class HistoryRecorderTest {
         }
 
         List<String> outcomes = Files.readAllLines(file).stream().map(HistoryRecorderTest::outcome).toList();
-        assertThat(outcomes).containsExactly("ok", "ok", "ok", "fail", "unknown", "unknown");
+        assertThat(outcomes).containsExactly("ok", "ok", "ok", "unknown", "fail", "unknown", "unknown");
         assertThat(History.read(file).operations())
                 .extracting(HistoryRecorderTest::result)
-                .containsExactly(new Found(3), new Deleted(), new NotFound(), new Rejected(409), new Unknown(),
-                        new Unknown());
+                .containsExactly(new Found(3), new Deleted(), new NotFound(), new ReadFailed(0), new Rejected(409),
+                        new Unknown(), new Unknown());
     }
 
     private static Object result(Operation operation) {

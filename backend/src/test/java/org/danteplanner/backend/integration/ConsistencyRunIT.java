@@ -2,12 +2,12 @@ package org.danteplanner.backend.integration;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.function.LongSupplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -35,25 +35,17 @@ import org.danteplanner.backend.integration.consistency.Plan;
 import org.danteplanner.backend.integration.consistency.PlannedOperation;
 import org.danteplanner.backend.integration.consistency.PlannerSession;
 import org.danteplanner.backend.integration.consistency.Replication;
+import org.danteplanner.backend.integration.consistency.SeedGuard;
 import org.danteplanner.backend.integration.consistency.SeedLoop;
 import org.danteplanner.backend.integration.consistency.Slot;
+import org.danteplanner.backend.integration.consistency.StaleWindow;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.consistency.Anomaly;
-import org.danteplanner.consistency.Applied;
 import org.danteplanner.consistency.ConsistencyChecker;
-import org.danteplanner.consistency.Delete;
-import org.danteplanner.consistency.Found;
 import org.danteplanner.consistency.History;
-import org.danteplanner.consistency.ListRead;
-import org.danteplanner.consistency.NotFound;
-import org.danteplanner.consistency.Operation;
-import org.danteplanner.consistency.Read;
-import org.danteplanner.consistency.ReadFailed;
-import org.danteplanner.consistency.Save;
-import org.danteplanner.consistency.Unknown;
 import org.danteplanner.consistency.Verdict;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -76,8 +68,6 @@ import static org.danteplanner.backend.integration.consistency.ConsistencyBudget
 @Tag("containerized")
 @Import(TestConfig.class)
 class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
-
-    private static final int NO_RESPONSE = 0;
 
     @Autowired
     private MockMvc mockMvc;
@@ -116,7 +106,7 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
                                 + "): " + violation))
                 .toList();
         List<String> uncheckedSeeds = results.stream()
-                .flatMap(result -> guardFailures(result.operations()).stream()
+                .flatMap(result -> result.guardFailures().stream()
                         .map(failure -> "seed " + result.seed() + " (" + result.history().toAbsolutePath()
                                 + "): " + failure))
                 .toList();
@@ -135,7 +125,9 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
             keys.put(slot, UUID.randomUUID());
         }
         Path history = historyFile(seed);
-        try (HistoryRecorder recorder = new HistoryRecorder(Files.newBufferedWriter(history), System::nanoTime)) {
+        LongSupplier clock = System::nanoTime;
+        StaleWindow staleWindow;
+        try (HistoryRecorder recorder = new HistoryRecorder(Files.newBufferedWriter(history), clock)) {
             List<PlannerSession> sessions = IntStream.range(0, SESSIONS)
                     .mapToObj(index -> new PlannerSession(sessionName(index),
                             new CookieJar(accessToken, AuthCookies.freshDeviceId()),
@@ -144,11 +136,11 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
             for (Slot slot : Slot.values()) {
                 sessions.get(0).perform(new PlannedOperation.Save(slot));
             }
-            PhaseRunner.run(plan.phaseA(), sessions, replication);
-            PhaseRunner.run(plan.phaseB(), sessions, replication);
+            staleWindow = PhaseRunner.runPlan(plan, sessions, replication, clock);
         }
         History recorded = History.read(history);
-        return new SeedResult(seed, plan, history, recorded.operations(), ConsistencyChecker.check(recorded));
+        return new SeedResult(seed, plan, history, SeedGuard.failures(recorded.operations(), staleWindow),
+                ConsistencyChecker.check(recorded));
     }
 
     private static Map<String, Long> anomalyCounts(Verdict verdict) {
@@ -156,39 +148,7 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
                 .collect(Collectors.groupingBy(Anomaly::kind, TreeMap::new, Collectors.counting()));
     }
 
-    private static List<String> guardFailures(List<Operation> operations) {
-        List<String> failures = new ArrayList<>();
-        long unknown = operations.stream().filter(ConsistencyRunIT::unknown).count();
-        if (unknown > 0) {
-            failures.add(unknown + " operations have an unknown outcome, and phase 1 injects no client-side fault");
-        }
-        String author = sessionName(0);
-        boolean readsAfterOwnSave = operations.stream()
-                .filter(Read.class::isInstance)
-                .map(Read.class::cast)
-                .filter(read -> read.session().equals(author))
-                .filter(read -> read.result() instanceof Found || read.result() instanceof NotFound)
-                .anyMatch(read -> operations.stream()
-                        .filter(Save.class::isInstance)
-                        .map(Save.class::cast)
-                        .anyMatch(save -> save.session().equals(author) && save.key().equals(read.key())
-                                && save.result() instanceof Applied && save.completedAt() < read.invokedAt()));
-        if (!readsAfterOwnSave) {
-            failures.add(author + " has no Found or NotFound read of a key after its own applied save of it");
-        }
-        return failures;
-    }
-
-    private static boolean unknown(Operation operation) {
-        return switch (operation) {
-            case Save save -> save.result() instanceof Unknown;
-            case Delete delete -> delete.result() instanceof Unknown;
-            case Read read -> read.result() instanceof ReadFailed failed && failed.status() == NO_RESPONSE;
-            case ListRead list -> false;
-        };
-    }
-
-    private record SeedResult(long seed, Plan plan, Path history, List<Operation> operations, Verdict verdict) {
+    private record SeedResult(long seed, Plan plan, Path history, List<String> guardFailures, Verdict verdict) {
     }
 
     private static final class HarnessReplication implements Replication {
