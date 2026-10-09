@@ -1,5 +1,5 @@
 # 178 planted-bug-runs-gate-only-consistency-changes
-epic: none · pr: none @consistency-checker @ci
+epic: none · pr: none · supersedes: 037 @ci @gates @consistency-checker @ci
 
 ## Decisions
 - @consistency-checker @ci — The planted-bug run is a blocking `consistency` job in the PR gate. A
@@ -19,6 +19,24 @@ epic: none · pr: none @consistency-checker @ci
   matrix. A skipped matrix job reports one check under its own name instead of one per variant.
   NON-GOAL: guarding the contract against changes outside the gated paths with planted bugs — the
   small clean run inside `gradlew check` covers those.
+
+- @ci @gates — Verification attaches to events, not refs. The pull-request event runs
+  change-filtered blocking lanes. The trunk push event runs every lane unconditionally, except the
+  planted-bug lane, which follows its change area there too. The deploy pipeline consumes only the
+  trunk run's verdict. Change detection is a first job that emits per-area outputs for job-level
+  conditions. Branch protection counts a skipped job as satisfied, while a workflow that never
+  triggered reports nothing and wedges the merge. The unconditional trunk run catches two pull
+  requests that pass on their own bases and break together. The planted-bug lane tests the checker,
+  not the application: the clean consistency run inside every backend lane still runs on each trunk
+  push, and two changes that weaken the checker together both touch the lane's area.
+  REJECTED: workflow-level path filters with required checks — structurally incompatible, the wedge
+  is permanent.
+  REJECTED: a merge queue — closes the stale-base race at per-merge latency and puts a third party in
+  the merge path; the unconditional trunk run catches the same race minutes later at zero merge cost,
+  and a paged revert is acceptable for a single-maintainer trunk.
+  REJECTED: the planted-bug lane on every trunk push — every deploy waits for the slowest variant,
+  while the race it would catch needs a change outside the lane's area that weakens only the
+  checker.
 
 ## Takeaway
 - takeaway: if a test or its subject changes, the test of that test runs. Parallel runners remove

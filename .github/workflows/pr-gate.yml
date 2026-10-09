@@ -1,8 +1,8 @@
 name: PR Gate
 
 # The one verification workflow for code. Pull requests get change-filtered blocking lanes;
-# every push to main gets an unconditional full run, and that run's success is the signal the
-# deploy pipeline consumes. Change detection is a job, not a workflow-level paths filter: a
+# every push to main runs every lane except the planted-bug lane, which follows its change area,
+# and that run's success is the signal the deploy pipeline consumes. Change detection is a job, not a workflow-level paths filter: a
 # required check whose workflow never triggers wedges the merge at "Expected", while a skipped
 # job satisfies it.
 on:
