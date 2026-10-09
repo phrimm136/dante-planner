@@ -175,6 +175,7 @@ abstract class CausalHarnessSupport {
         replicaJdbcTemplate.execute("START REPLICA");
         toxiproxyControl = new ToxiproxyControl(APP_TO_PRIMARY_PROXY);
         toxiproxyControl.removeWan();
+        toxiproxyControl.removeReplicationLatency();
     }
 
     @AfterAll

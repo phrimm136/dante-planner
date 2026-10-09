@@ -15,7 +15,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
@@ -26,7 +25,6 @@ class ReplicationProxyIT extends CausalHarnessSupport {
     private static final long LATENCY_MILLIS = 500;
     private static final long POLL_INTERVAL_NANOS = TimeUnit.MILLISECONDS.toNanos(10);
     private static final long VISIBILITY_DEADLINE_NANOS = TimeUnit.SECONDS.toNanos(30);
-    private static final String DELIBERATE_FAILURE = "fails with the replication latency still applied";
 
     @Autowired
     @Qualifier("primaryJdbcTemplate")
@@ -38,14 +36,18 @@ class ReplicationProxyIT extends CausalHarnessSupport {
 
     @Test
     void replicationLatency_WhenAppliedThenRemoved_DelaysThenReleasesTheReplica() throws IOException {
+        assertThat(REPLICATION_PROXY.toxics().getAll()).isEmpty();
         primaryJdbcTemplate.execute(
                 "CREATE TABLE IF NOT EXISTS replication_proxy_probe (marker VARCHAR(36) PRIMARY KEY)");
         replicationControl.awaitCaughtUp();
 
         toxiproxyControl.applyReplicationLatency(LATENCY_MILLIS);
-        long delayedMillis = millisUntilVisibleOnReplica(UUID.randomUUID().toString());
-
-        toxiproxyControl.removeReplicationLatency();
+        long delayedMillis;
+        try {
+            delayedMillis = millisUntilVisibleOnReplica(UUID.randomUUID().toString());
+        } finally {
+            toxiproxyControl.removeReplicationLatency();
+        }
         replicationControl.awaitCaughtUp();
         long releasedMillis = millisUntilVisibleOnReplica(UUID.randomUUID().toString());
 
@@ -54,20 +56,18 @@ class ReplicationProxyIT extends CausalHarnessSupport {
     }
 
     @Test
-    void replicationProxyTeardown_WhenATestFailsWithLatencyApplied_LeavesNoToxic() throws IOException {
-        assertThatThrownBy(this::failWithReplicationLatency)
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage(DELIBERATE_FAILURE);
-        assertThat(REPLICATION_PROXY.toxics().getAll()).isNotEmpty();
-
-        clearReplicationProxy();
-
-        assertThat(REPLICATION_PROXY.toxics().getAll()).isEmpty();
+    void replicationProxy_WhenAnotherTestLeftLatency_StartsWithoutToxics() throws IOException {
+        assertCleanThenLeaveLatency();
     }
 
-    private void failWithReplicationLatency() throws IOException {
+    @Test
+    void replicationProxy_WhenThisTestLeavesLatency_NextTestStartsWithoutToxics() throws IOException {
+        assertCleanThenLeaveLatency();
+    }
+
+    private void assertCleanThenLeaveLatency() throws IOException {
+        assertThat(REPLICATION_PROXY.toxics().getAll()).isEmpty();
         toxiproxyControl.applyReplicationLatency(LATENCY_MILLIS);
-        throw new IllegalStateException(DELIBERATE_FAILURE);
     }
 
     private long millisUntilVisibleOnReplica(String marker) {
