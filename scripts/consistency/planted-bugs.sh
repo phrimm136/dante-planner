@@ -190,7 +190,7 @@ import xml.etree.ElementTree as ET
 
 results, package, run_class, variant, seed_count, *baseline = sys.argv[1:]
 requested = set(range(1, int(seed_count) + 1))
-GUARD = re.compile(r"operations have an unknown outcome|has no Found or NotFound read of a key")
+GUARD = re.compile(r"operations have an unknown outcome")
 
 
 def suite(cls):
@@ -211,12 +211,16 @@ for cls in baseline:
         failed.append(cls)
 
 root = suite(run_class)
-first, by_rule, passed = "-", "", "no"
+first, by_rule, passed, calibration, coverage = "-", "", "no", "-", "-"
 if root is None:
     detected = "no result"
 else:
     output = "".join(node.text or "" for node in root.iter("system-out"))
     seeds = [(int(m[1]), int(m[2])) for m in re.finditer(r"^consistency seed (\d+): (\d+) violations", output, re.M)]
+    calibration_line = re.search(r"^consistency calibration: (.+)$", output, re.M)
+    coverage_line = re.search(r"^consistency coverage: (.+)$", output, re.M)
+    calibration = calibration_line[1].strip() if calibration_line else "-"
+    coverage = coverage_line[1].strip() if coverage_line else "-"
     messages = [node.get("message") or node.text or "" for node in failures(root)]
     guard = any(GUARD.search((node.get("message") or "") + (node.text or "")) for node in failures(root))
     detecting = [seed for seed, violations in seeds if violations > 0]
@@ -242,7 +246,8 @@ else:
     else:
         passed = "yes" if detecting else "no"
 
-print("\t".join([", ".join(failed) or "none", detected, first, passed, by_rule]))
+fields = [", ".join(failed) or "none", detected, first, passed, calibration, coverage, by_rule]
+print("\t".join(field.replace("|", "\\|").replace("\t", " ") for field in fields))
 PY
 }
 
@@ -250,11 +255,11 @@ append_row() {
   mkdir -p "$(dirname "$out")"
   if [ ! -s "$out" ]; then
     printf '%s\n' \
-      "| variant | baseline ITs failed | checker detected | first detecting seed | violations by rule | wall time (s) |" \
-      "|---|---|---|---|---|---|" > "$out"
+      "| variant | baseline ITs failed | checker detected | first detecting seed | violations by rule | calibration | coverage | wall time (s) |" \
+      "|---|---|---|---|---|---|---|---|" > "$out"
   fi
-  printf '| %s | %s | %s | %s | %s | %s |\n' "$@" >> "$out"
-  printf '| %s | %s | %s | %s | %s | %s |\n' "$@"
+  printf '| %s | %s | %s | %s | %s | %s | %s | %s |\n' "$@" >> "$out"
+  printf '| %s | %s | %s | %s | %s | %s | %s | %s |\n' "$@"
 }
 
 abort_variant() {
@@ -263,7 +268,7 @@ abort_variant() {
 }
 
 run_variant() {
-  local name=$1 stop=true started elapsed gradle_rc verdict discovered baseline_failed detected first passed by_rule
+  local name=$1 stop=true started elapsed gradle_rc verdict discovered baseline_failed detected first passed calibration coverage by_rule
   local -a baseline gradle_args
   if ! require_targets_at_head; then
     echo "variant $name refused: the checkout does not match HEAD at a planted-bug target" >&2
@@ -315,13 +320,14 @@ run_variant() {
     echo "variant $name aborted: judging the test results failed" >&2
     return 1
   fi
-  IFS=$'\t' read -r baseline_failed detected first passed by_rule <<< "$verdict"
+  IFS=$'\t' read -r baseline_failed detected first passed calibration coverage by_rule <<< "$verdict"
   if [ -z "$baseline_failed" ] || [ -z "$detected" ] || [ -z "$first" ] \
+      || [ -z "$calibration" ] || [ -z "$coverage" ] \
       || { [ "$passed" != yes ] && [ "$passed" != no ]; }; then
     echo "variant $name aborted: malformed verdict: $verdict" >&2
     return 1
   fi
-  if ! append_row "$name" "$baseline_failed" "$detected" "$first" "$by_rule" "$elapsed"; then
+  if ! append_row "$name" "$baseline_failed" "$detected" "$first" "$by_rule" "$calibration" "$coverage" "$elapsed"; then
     echo "variant $name aborted: the row could not be written to $out" >&2
     return 1
   fi
