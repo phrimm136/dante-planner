@@ -175,7 +175,126 @@ class HistoryTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"save", "delete", "read"})
+    @ValueSource(strings = {"publish", "unpublish"})
+    void visibilityOk_WhenStatusIs200_IsChanged(String kind) throws IOException {
+        assertThat(only(line(kind, "ok", "'status':200"))).isEqualTo(visibility(kind, new Changed()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"publish", "unpublish"})
+    void visibilityOk_WhenStatusIsNot200_IsMalformed(String kind) throws IOException {
+        assertMalformed(1, line(kind, "ok", "'status':204"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"publish", "unpublish"})
+    void visibilityOk_WhenStatusIsMissing_IsMalformed(String kind) throws IOException {
+        assertMalformed(1, line(kind, "ok", null));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {400, 499})
+    void publishFail_WhenStatusIs4xx_IsRejected(int status) throws IOException {
+        assertThat(only(line("publish", "fail", "'status':" + status)))
+                .isEqualTo(new Publish("s1", "p1", 10, 20, new Rejected(status)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {400, 499})
+    void unpublishFail_WhenStatusIs4xx_IsRejected(int status) throws IOException {
+        assertThat(only(line("unpublish", "fail", "'status':" + status)))
+                .isEqualTo(new Unpublish("s1", "p1", 10, 20, new Rejected(status)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"publish", "unpublish"})
+    void visibilityFail_WhenStatusIsNot4xx_IsMalformed(String kind) throws IOException {
+        assertMalformed(1, line(kind, "fail", "'status':399"));
+        assertMalformed(1, line(kind, "fail", "'status':500"));
+        assertMalformed(1, line(kind, "fail", null));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"publish", "unpublish"})
+    void visibilityUnknown_WhenNoResponseArrived_IsUnknown(String kind) throws IOException {
+        assertThat(only(line(kind, "unknown", null))).isEqualTo(visibility(kind, new Unknown()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"publish", "unpublish"})
+    void visibilityUnknown_WhenStatusIs5xx_IsUnknown(String kind) throws IOException {
+        assertThat(only(line(kind, "unknown", "'status':500"))).isEqualTo(visibility(kind, new Unknown()));
+        assertThat(only(line(kind, "unknown", "'status':599"))).isEqualTo(visibility(kind, new Unknown()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"publish", "unpublish"})
+    void visibilityUnknown_WhenStatusIsNot5xx_IsMalformed(String kind) throws IOException {
+        assertMalformed(1, line(kind, "unknown", "'status':200"));
+        assertMalformed(1, line(kind, "unknown", "'status':499"));
+        assertMalformed(1, line(kind, "unknown", "'status':600"));
+    }
+
+    @Test
+    void publicReadOk_WhenStatusIs200WithAVersion_IsFound() throws IOException {
+        assertThat(only(line("public-read", "ok", "'status':200,'syncVersion':7")))
+                .isEqualTo(new PublicRead("s1", "p1", 10, 20, new Found(7)));
+    }
+
+    @Test
+    void publicReadOk_WhenStatusIs200WithoutAVersion_IsMalformed() throws IOException {
+        assertMalformed(1, line("public-read", "ok", "'status':200"));
+    }
+
+    @Test
+    void publicReadOk_WhenStatusIs404_IsNotFound() throws IOException {
+        assertThat(only(line("public-read", "ok", "'status':404")))
+                .isEqualTo(new PublicRead("s1", "p1", 10, 20, new NotFound()));
+    }
+
+    @Test
+    void publicReadOk_WhenStatusIsNeither200Nor404_IsMalformed() throws IOException {
+        assertMalformed(1, line("public-read", "ok", "'status':500"));
+    }
+
+    @Test
+    void publicReadFail_WhenStatusIsAnyOther_IsReadFailed() throws IOException {
+        assertThat(only(line("public-read", "fail", "'status':429")))
+                .isEqualTo(new PublicRead("s1", "p1", 10, 20, new ReadFailed(429)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {200, 404})
+    void publicReadFail_WhenStatusIs200Or404_IsMalformed(int status) throws IOException {
+        assertMalformed(1, line("public-read", "fail", "'status':" + status));
+    }
+
+    @Test
+    void publicReadFail_WhenStatusIsMissing_IsMalformed() throws IOException {
+        assertMalformed(1, line("public-read", "fail", null));
+    }
+
+    @Test
+    void publicReadUnknown_WhenNoResponseArrived_IsReadFailedWithStatusZero() throws IOException {
+        assertThat(only(line("public-read", "unknown", null)))
+                .isEqualTo(new PublicRead("s1", "p1", 10, 20, new ReadFailed(0)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {500, 599})
+    void publicReadUnknown_WhenStatusIs5xx_IsReadFailedWithStatusZero(int status) throws IOException {
+        assertThat(only(line("public-read", "unknown", "'status':" + status)))
+                .isEqualTo(new PublicRead("s1", "p1", 10, 20, new ReadFailed(0)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {200, 404, 499, 600})
+    void publicReadUnknown_WhenStatusIsNot5xx_IsMalformed(int status) throws IOException {
+        assertMalformed(1, line("public-read", "unknown", "'status':" + status + ",'syncVersion':1"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"save", "delete", "read", "publish", "unpublish", "public-read"})
     void unknown_WhenStatusIsNull_IsMalformed(String kind) throws IOException {
         assertMalformed(1, line(kind, "unknown", "'status':null"));
     }
@@ -212,13 +331,13 @@ class HistoryTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"save", "delete", "read"})
+    @ValueSource(strings = {"save", "delete", "read", "publish", "unpublish", "public-read"})
     void outcome_WhenNotOkFailOrUnknown_IsMalformed(String kind) throws IOException {
         assertMalformed(1, line(kind, "maybe", "'status':200,'syncVersion':1"));
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"save", "delete", "read"})
+    @ValueSource(strings = {"save", "delete", "read", "publish", "unpublish", "public-read"})
     void key_WhenMissingFromAKeyedKind_IsMalformed(String kind) throws IOException {
         assertMalformed(1, json("{'session':'s1','kind':'" + kind + "','invokedAt':10,'completedAt':20,"
                 + "'outcome':'unknown'}"));
@@ -316,6 +435,12 @@ class HistoryTest {
         assertThatThrownBy(() -> History.read(missing))
                 .isInstanceOf(UncheckedIOException.class)
                 .hasMessageContaining("missing.jsonl");
+    }
+
+    private static Operation visibility(String kind, VisibilityResult result) {
+        return kind.equals("publish")
+                ? new Publish("s1", "p1", 10, 20, result)
+                : new Unpublish("s1", "p1", 10, 20, result);
     }
 
     private static String line(String kind, String outcome, String extra) {

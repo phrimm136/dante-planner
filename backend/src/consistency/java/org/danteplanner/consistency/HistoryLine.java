@@ -64,6 +64,12 @@ final class HistoryLine {
                     Optional.of(new Delete(session, text("key"), invokedAt, completedAt, deleteResult(outcome)));
             case "read" -> Optional.of(new Read(session, text("key"), invokedAt, completedAt, readResult(outcome)));
             case "list" -> listRead(session, invokedAt, completedAt, outcome);
+            case "publish" -> Optional.of(
+                    new Publish(session, text("key"), invokedAt, completedAt, visibilityResult(kind, outcome)));
+            case "unpublish" -> Optional.of(
+                    new Unpublish(session, text("key"), invokedAt, completedAt, visibilityResult(kind, outcome)));
+            case "public-read" ->
+                    Optional.of(new PublicRead(session, text("key"), invokedAt, completedAt, readResult(outcome)));
             default -> throw failure("unknown kind " + kind);
         };
     }
@@ -91,6 +97,24 @@ final class HistoryLine {
                     throw failure("delete ok with status " + status);
                 }
                 yield new Deleted();
+            }
+            case "fail" -> new Rejected(statusOfClass(CLIENT_ERROR_CLASS));
+            case "unknown" -> {
+                requireNoResponseOrServerError();
+                yield new Unknown();
+            }
+            default -> throw unknownOutcome(outcome);
+        };
+    }
+
+    private VisibilityResult visibilityResult(String kind, String outcome) {
+        return switch (outcome) {
+            case "ok" -> {
+                int status = status();
+                if (status != OK) {
+                    throw failure(kind + " ok with status " + status);
+                }
+                yield new Changed();
             }
             case "fail" -> new Rejected(statusOfClass(CLIENT_ERROR_CLASS));
             case "unknown" -> {

@@ -8,7 +8,10 @@ public final class ConsistencyChecker {
             new AuthorReadYourWrites(),
             new ReadAfterDelete(),
             new ExposureDuringDelete(),
-            new MonotonicReadRegression());
+            new MonotonicReadRegression(),
+            new ReadAfterUnpublish(),
+            new ReadAfterPublish(),
+            new ReadAfterCreate());
 
     private ConsistencyChecker() {
     }

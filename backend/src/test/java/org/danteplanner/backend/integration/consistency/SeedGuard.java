@@ -9,10 +9,13 @@ import org.danteplanner.consistency.Found;
 import org.danteplanner.consistency.ListRead;
 import org.danteplanner.consistency.NotFound;
 import org.danteplanner.consistency.Operation;
+import org.danteplanner.consistency.PublicRead;
+import org.danteplanner.consistency.Publish;
 import org.danteplanner.consistency.Read;
 import org.danteplanner.consistency.ReadFailed;
 import org.danteplanner.consistency.Save;
 import org.danteplanner.consistency.Unknown;
+import org.danteplanner.consistency.Unpublish;
 
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.sessionName;
 
@@ -61,6 +64,9 @@ public final class SeedGuard {
             case Delete delete -> delete.result() instanceof Unknown;
             case Read read -> read.result() instanceof ReadFailed failed && failed.status() == NO_RESPONSE;
             case ListRead list -> false;
+            case Publish publish -> publish.result() instanceof Unknown;
+            case Unpublish unpublish -> unpublish.result() instanceof Unknown;
+            case PublicRead read -> read.result() instanceof ReadFailed failed && failed.status() == NO_RESPONSE;
         };
     }
 }

@@ -38,4 +38,20 @@ final class Results {
             case Unknown unknown -> true;
         };
     }
+
+    static boolean changed(VisibilityResult result) {
+        return switch (result) {
+            case Changed changed -> true;
+            case Rejected rejected -> false;
+            case Unknown unknown -> false;
+        };
+    }
+
+    static boolean mayHaveChanged(VisibilityResult result) {
+        return switch (result) {
+            case Changed changed -> true;
+            case Rejected rejected -> false;
+            case Unknown unknown -> true;
+        };
+    }
 }

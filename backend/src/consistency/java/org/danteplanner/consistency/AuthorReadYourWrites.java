@@ -33,7 +33,7 @@ final class AuthorReadYourWrites implements Rule {
         };
     }
 
-    private static boolean deleteMayPrecede(Read read, History history) {
+    static boolean deleteMayPrecede(Read read, History history) {
         return history.all(Delete.class).stream()
                 .filter(delete -> delete.key().equals(read.key()))
                 .filter(delete -> delete.invokedAt() < read.completedAt())

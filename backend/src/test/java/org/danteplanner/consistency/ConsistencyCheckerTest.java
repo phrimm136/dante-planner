@@ -127,6 +127,83 @@ class ConsistencyCheckerTest {
     }
 
     @Test
+    void publicRead_WhenItFindsThePlannerAfterTheUnpublishResponse_IsOneViolation() {
+        PublicRead shown = new PublicRead("anon", "p1", 25, 30, new Found(3));
+
+        Verdict verdict = ConsistencyChecker.check(History.of(List.of(
+                new Unpublish("s1", "p1", 10, 20, new Changed()),
+                shown)));
+
+        assertThat(verdict.violations())
+                .containsExactly(new Violation("read-after-unpublish", "anon", "p1", shown));
+    }
+
+    @Test
+    void publicRead_WhenARepublishOverlapsIt_IsClean() {
+        Verdict verdict = ConsistencyChecker.check(History.of(List.of(
+                new Unpublish("s1", "p1", 10, 20, new Changed()),
+                new Publish("s2", "p1", 24, 40, new Changed()),
+                new PublicRead("anon", "p1", 25, 30, new Found(3)))));
+
+        assertThat(verdict.violations()).isEmpty();
+    }
+
+    @Test
+    void publicRead_WhenItMissesThePlannerAfterThePublishResponse_IsOneViolation() {
+        PublicRead missed = new PublicRead("anon", "p1", 25, 30, new NotFound());
+
+        Verdict verdict = ConsistencyChecker.check(History.of(List.of(
+                new Publish("s1", "p1", 10, 20, new Changed()),
+                missed)));
+
+        assertThat(verdict.violations())
+                .containsExactly(new Violation("read-after-publish", "anon", "p1", missed));
+    }
+
+    @Test
+    void publicRead_WhenAnUnpublishOverlapsTheMiss_IsClean() {
+        Verdict verdict = ConsistencyChecker.check(History.of(List.of(
+                new Publish("s1", "p1", 10, 20, new Changed()),
+                new PublicRead("anon", "p1", 25, 30, new NotFound()),
+                new Unpublish("s2", "p1", 26, 35, new Changed()))));
+
+        assertThat(verdict.violations()).isEmpty();
+    }
+
+    @Test
+    void read_WhenAnotherDeviceMissesACreatedPlanner_IsOneViolation() {
+        Read missed = new Read("s2", "p1", 25, 30, new NotFound());
+
+        Verdict verdict = ConsistencyChecker.check(History.of(List.of(
+                new Save("s1", "p1", 10, 20, new Applied(1)),
+                missed)));
+
+        assertThat(verdict.violations())
+                .containsExactly(new Violation("read-after-create", "s2", "p1", missed));
+    }
+
+    @Test
+    void read_WhenTheAuthorMissesItsCreatedPlanner_IsOnlyAnAuthorReadYourWritesViolation() {
+        Read missed = new Read("s1", "p1", 25, 30, new NotFound());
+
+        Verdict verdict = ConsistencyChecker.check(History.of(List.of(
+                new Save("s1", "p1", 10, 20, new Applied(1)),
+                missed)));
+
+        assertThat(verdict.violations())
+                .containsExactly(new Violation("author-read-your-writes", "s1", "p1", missed));
+    }
+
+    @Test
+    void publicRead_WhenThePublishWasRejected_IsClean() {
+        Verdict verdict = ConsistencyChecker.check(History.of(List.of(
+                new Publish("s1", "p1", 10, 20, new Rejected(400)),
+                new PublicRead("anon", "p1", 25, 30, new NotFound()))));
+
+        assertThat(verdict.violations()).isEmpty();
+    }
+
+    @Test
     void check_WhenTheHistoryIsEmpty_IsClean() {
         Verdict verdict = ConsistencyChecker.check(History.of(List.of()));
 
