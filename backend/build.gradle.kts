@@ -36,6 +36,13 @@ repositories {
     mavenCentral()
 }
 
+val consistency by sourceSets.creating
+
+sourceSets.test {
+    compileClasspath += consistency.output
+    runtimeClasspath += consistency.output
+}
+
 dependencyManagement {
     imports {
         // Override log4j to fix CVE-2025-68161
@@ -102,6 +109,8 @@ dependencies {
     testImplementation("org.wiremock:wiremock-standalone:3.13.2")
 
     errorprone("com.google.errorprone:error_prone_core:2.36.0")
+
+    "consistencyImplementation"("com.fasterxml.jackson.core:jackson-databind")
 }
 
 tasks.processResources {
@@ -175,10 +184,12 @@ pitest {
         "org.danteplanner.backend.planner.validation.startgift.*",
         "org.danteplanner.backend.planner.validation.Violation*",
         "org.danteplanner.backend.planner.validation.ContentPath*",
-        "org.danteplanner.backend.planner.validation.Positions*"))
+        "org.danteplanner.backend.planner.validation.Positions*",
+        "org.danteplanner.consistency.*"))
+    mainSourceSets.set(setOf(sourceSets.main.get(), consistency))
     // Without this, PIT derives targetTests from targetClasses and misses any test whose package
     // differs from the class under test.
-    targetTests.set(listOf("org.danteplanner.backend.*"))
+    targetTests.set(listOf("org.danteplanner.backend.*", "org.danteplanner.consistency.*"))
     excludedTestClasses.set(listOf("*IT", "*IntegrationTest", "*ControllerTest"))
     // The minion does not inherit the test task's system properties.
     jvmArgs.set(listOf("-Dorg.springframework.boot.logging.LoggingSystem=none"))
