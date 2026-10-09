@@ -121,10 +121,14 @@ restore() {
   local patch=$applied_patch file=$applied_file
   applied_patch=""
   applied_file=""
-  if ! git -C "$repo" apply -R "$patch"; then
-    echo "git apply -R failed for $patch" >&2
+  if git -C "$repo" apply -R --check "$patch" 2>/dev/null; then
+    if ! git -C "$repo" apply -R "$patch"; then
+      echo "git apply -R failed for $patch" >&2
+    fi
+  else
+    echo "$patch is not applied; nothing to reverse"
   fi
-  if ! git -C "$repo" diff --quiet -- "$file"; then
+  if ! git -C "$repo" diff --quiet HEAD -- "$file"; then
     echo "the tree was not restored: $file still differs from HEAD" >&2
     return 1
   fi
@@ -149,18 +153,32 @@ apply_patch() {
     return 1
   fi
   file=$(patch_target "$patch") || return 1
-  if ! git -C "$repo" diff --quiet -- "$file"; then
-    echo "$file has uncommitted changes; refusing to plant $1 over them" >&2
-    return 1
-  fi
   if ! git -C "$repo" apply --check "$patch"; then
     echo "planted bug does not apply to HEAD: $1" >&2
     return 1
   fi
-  git -C "$repo" apply "$patch" || return 1
   applied_file=$file
   applied_patch=$patch
+  git -C "$repo" apply "$patch" || return 1
   echo "applied $1 to $file"
+}
+
+require_targets_at_head() {
+  local name target dirty=""
+  for name in $(patch_names); do
+    target=$(patch_target "$planted/$name.patch") || return 1
+    if ! git -C "$repo" diff --quiet HEAD -- "$target"; then
+      case " $dirty " in
+        *" $target "*) ;;
+        *) dirty="$dirty $target" ;;
+      esac
+    fi
+  done
+  if [ -n "$dirty" ]; then
+    echo "planted-bug target files differ from HEAD:$dirty" >&2
+    echo "restore them (git checkout -- <file>) before measuring any variant" >&2
+    return 1
+  fi
 }
 
 judge() {
@@ -237,6 +255,10 @@ abort_variant() {
 run_variant() {
   local name=$1 stop=true started elapsed gradle_rc verdict discovered baseline_failed detected first by_rule
   local -a baseline gradle_args
+  if ! require_targets_at_head; then
+    echo "variant $name refused: the checkout does not match HEAD at a planted-bug target" >&2
+    return 1
+  fi
   if [ "$name" = clean ]; then
     stop=false
   elif ! apply_patch "$name"; then
