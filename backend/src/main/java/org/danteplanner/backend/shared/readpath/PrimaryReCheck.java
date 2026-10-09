@@ -20,12 +20,17 @@ public class PrimaryReCheck {
 
     static final String PROMOTED_COUNTER = "replica_miss_promoted_total";
     static final String BULKHEAD_QUERIES_COUNTER = "replica_bulkhead_queries_total";
+    static final String TOMBSTONE_HIT_COUNTER = "tombstone.hit";
+    static final String SCOPE_TAG = "scope";
+
+    private final MeterRegistry meterRegistry;
 
     private final Counter promotedCounter;
     private final Counter bulkheadQueriesCounter;
     private final ContentTombstoneStore tombstoneStore;
 
     public PrimaryReCheck(MeterRegistry meterRegistry, ContentTombstoneStore tombstoneStore) {
+        this.meterRegistry = meterRegistry;
         this.promotedCounter = Counter.builder(PROMOTED_COUNTER).register(meterRegistry);
         this.bulkheadQueriesCounter = Counter.builder(BULKHEAD_QUERIES_COUNTER).register(meterRegistry);
         this.tombstoneStore = tombstoneStore;
@@ -41,6 +46,7 @@ public class PrimaryReCheck {
             return promoted;
         }
         if (tombstoneStore.isTombstoned(entityType, id)) {
+            countTombstoneHits(entityType, 1);
             throw new EntityNotFoundException(entityType, id);
         }
         return hit;
@@ -51,6 +57,9 @@ public class PrimaryReCheck {
         List<T> hits = dereference.apply(ids);
         Set<UUID> hitIds = hits.stream().map(idOf).collect(Collectors.toSet());
         Set<UUID> tombstoned = tombstoneStore.tombstonedAmong(entityType, hitIds);
+        if (!tombstoned.isEmpty()) {
+            countTombstoneHits(entityType, tombstoned.size());
+        }
         List<T> served = new ArrayList<>(hits.stream()
                 .filter(hit -> !tombstoned.contains(idOf.apply(hit)))
                 .toList());
@@ -68,7 +77,12 @@ public class PrimaryReCheck {
         if (!tombstoneStore.isTombstoned(scope, id)) {
             return hit;
         }
+        countTombstoneHits(scope, 1);
         return onBulkhead(dereference);
+    }
+
+    private void countTombstoneHits(String scope, int hits) {
+        Counter.builder(TOMBSTONE_HIT_COUNTER).tag(SCOPE_TAG, scope).register(meterRegistry).increment(hits);
     }
 
     private <T> T onBulkhead(Supplier<T> dereference) {

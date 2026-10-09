@@ -37,6 +37,8 @@ class PrimaryReCheckTest {
 
     private static final String ENTITY_TYPE = "planner";
     private static final String PROMOTED_COUNTER = "replica_miss_promoted_total";
+    private static final String TOMBSTONE_HIT_COUNTER = "tombstone.hit";
+    private static final String MARKER_SCOPE = "published-planner";
 
     /** Never armed: these probes read the routing decision, they do not acquire a connection. */
     private static final UndeclaredPrimaryAccessGuard PROBE_GUARD =
@@ -70,6 +72,11 @@ class PrimaryReCheckTest {
         return counter == null ? 0d : counter.count();
     }
 
+    private double tombstoneHits(String scope) {
+        var counter = meterRegistry.find(TOMBSTONE_HIT_COUNTER).tag("scope", scope).counter();
+        return counter == null ? 0d : counter.count();
+    }
+
     @Nested
     class ReplicaHit {
 
@@ -87,6 +94,25 @@ class PrimaryReCheckTest {
             tombstoneStore.writeTombstone(ENTITY_TYPE, id);
 
             assertRejected(() -> reCheck.readWithReCheck(ENTITY_TYPE, id, () -> "planner")).withCode("NOT_FOUND");
+        }
+
+        @Test
+        void tombstoneHit_WhenReplicaHitIsMasked_CountsOnceUnderItsEntityType() {
+            tombstoneStore.writeTombstone(ENTITY_TYPE, id);
+
+            assertThatThrownBy(() -> reCheck.readWithReCheck(ENTITY_TYPE, id, () -> "planner"))
+                    .isInstanceOf(EntityNotFoundException.class);
+            assertThat(tombstoneHits(ENTITY_TYPE)).isEqualTo(1d);
+            assertThat(tombstoneHits(MARKER_SCOPE)).isEqualTo(0d);
+        }
+
+        @Test
+        void tombstoneHit_WhenNoTombstoneAndNoMarker_CountsNothing() {
+            reCheck.readWithReCheck(ENTITY_TYPE, id, () -> "planner");
+            reCheck.reReadWhenTombstoned(MARKER_SCOPE, id, "planner", () -> "primary");
+
+            assertThat(tombstoneHits(ENTITY_TYPE)).isEqualTo(0d);
+            assertThat(tombstoneHits(MARKER_SCOPE)).isEqualTo(0d);
         }
 
         /**
@@ -159,6 +185,22 @@ class PrimaryReCheckTest {
 
             assertThat(served).isEqualTo("planner");
         }
+
+        @Test
+        void tombstoneHit_WhenMissIsPromoted_IsNotCounted() {
+            tombstoneStore.writeTombstone(ENTITY_TYPE, id);
+            AtomicInteger attempts = new AtomicInteger();
+
+            reCheck.readWithReCheck(ENTITY_TYPE, id, () -> {
+                if (attempts.getAndIncrement() == 0) {
+                    throw new EntityNotFoundException(ENTITY_TYPE, id);
+                }
+                return "planner";
+            });
+
+            assertThat(tombstoneHits(ENTITY_TYPE)).isEqualTo(0d);
+            assertThat(promoted()).isEqualTo(1d);
+        }
     }
 
     @Nested
@@ -224,6 +266,38 @@ class PrimaryReCheckTest {
                     ENTITY_TYPE, List.of(primaryOnly), dereference, Function.identity());
 
             assertThat(served).containsExactly(primaryOnly);
+        }
+
+        @Test
+        void tombstoneHit_WhenOneOfTwoHitsIsTombstoned_CountsOne() {
+            UUID live = UUID.randomUUID();
+            UUID deleted = UUID.randomUUID();
+            tombstoneStore.writeTombstone(ENTITY_TYPE, deleted);
+
+            List<UUID> served = reCheck.readAllWithReCheck(
+                    ENTITY_TYPE, List.of(live, deleted), List::copyOf, Function.identity());
+
+            assertThat(served).containsExactly(live);
+            assertThat(tombstoneHits(ENTITY_TYPE)).isEqualTo(1d);
+        }
+
+        @Test
+        void tombstoneHit_WhenEveryHitIsTombstoned_CountsEachOne() {
+            UUID first = UUID.randomUUID();
+            UUID second = UUID.randomUUID();
+            tombstoneStore.writeTombstone(ENTITY_TYPE, first);
+            tombstoneStore.writeTombstone(ENTITY_TYPE, second);
+
+            reCheck.readAllWithReCheck(ENTITY_TYPE, List.of(first, second), List::copyOf, Function.identity());
+
+            assertThat(tombstoneHits(ENTITY_TYPE)).isEqualTo(2d);
+        }
+
+        @Test
+        void tombstoneHit_WhenNoHitIsTombstoned_RegistersNoSeries() {
+            reCheck.readAllWithReCheck(ENTITY_TYPE, List.of(replicated), dereference, Function.identity());
+
+            assertThat(meterRegistry.find(TOMBSTONE_HIT_COUNTER).counters()).isEmpty();
         }
     }
 
@@ -303,6 +377,17 @@ class PrimaryReCheckTest {
             assertThat(routedTo).containsExactly(RoutingKey.BULKHEAD);
             assertThat(bulkheadQueries()).isEqualTo(1d);
             assertThat(currentRoutingKeyOverride()).as("a leaked pin would route a later unrelated read").isNull();
+        }
+
+        @Test
+        void markerHit_WhenMarkerExists_CountsOnceUnderTheMarkerScope() {
+            tombstoneStore.writeTombstone(SCOPE, id);
+
+            String served = reCheck.reReadWhenTombstoned(SCOPE, id, "replica", () -> "primary");
+
+            assertThat(served).isEqualTo("primary");
+            assertThat(tombstoneHits(SCOPE)).isEqualTo(1d);
+            assertThat(tombstoneHits(ENTITY_TYPE)).isEqualTo(0d);
         }
 
         @Test
