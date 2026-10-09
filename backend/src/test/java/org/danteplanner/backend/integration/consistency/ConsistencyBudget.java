@@ -1,6 +1,7 @@
 package org.danteplanner.backend.integration.consistency;
 
 import java.nio.file.Path;
+import java.util.List;
 
 public final class ConsistencyBudget {
 
@@ -22,6 +23,11 @@ public final class ConsistencyBudget {
     static final int READ_PERCENT = 50;
 
     public static final int FAULT_QUARTERS = 4;
+
+    public static final Slot AUTHOR_ONLY_SLOT = Slot.K3;
+    public static final List<Slot> SHARED_SLOTS = List.of(Slot.K1, Slot.K2);
+    public static final int STALE_SAVE_OFFSET = 0;
+    public static final int STALE_READ_OFFSET = 1;
 
     private ConsistencyBudget() {
     }

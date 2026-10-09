@@ -8,16 +8,21 @@ import org.danteplanner.backend.integration.consistency.Plan.FaultWindow;
 import org.danteplanner.backend.integration.consistency.Plan.Phase;
 import org.danteplanner.backend.integration.consistency.Plan.Round;
 
+import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.AUTHOR_ONLY_SLOT;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.FAULT_QUARTERS;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.PERCENT;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.READ_PERCENT;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.SAVE_PERCENT;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.SESSIONS;
+import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.SHARED_SLOTS;
+import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.STALE_READ_OFFSET;
+import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.STALE_SAVE_OFFSET;
 
 public final class OperationGenerator {
 
     private static final Slot[] SLOTS = Slot.values();
     private static final Slot DELETED = Slot.K1;
+    private static final int AUTHOR_SESSION = 0;
 
     private OperationGenerator() {
     }
@@ -26,9 +31,13 @@ public final class OperationGenerator {
         SplittableRandom random = new SplittableRandom(seed);
         List<List<PlannedOperation>> bySession = emptySessions();
         for (int step = 0; step < budget; step++) {
-            bySession.get(step % SESSIONS).add(nextOperation(random));
+            int session = step % SESSIONS;
+            bySession.get(session).add(nextOperation(random, session == AUTHOR_SESSION));
         }
-        Phase phaseA = new Phase(List.of(new Round(bySession)), phaseAFault(random, bySession.get(0).size()));
+        List<PlannedOperation> author = bySession.get(AUTHOR_SESSION);
+        FaultWindow phaseAFault = phaseAFault(random, author.size());
+        plantStalePair(author, phaseAFault.stopAt());
+        Phase phaseA = new Phase(List.of(new Round(bySession)), phaseAFault);
         List<Round> phaseBRounds = phaseBRounds();
         int phaseBFaultSessionOperations = phaseBRounds.stream()
                 .mapToInt(round -> round.bySession().get(0).size())
@@ -37,16 +46,23 @@ public final class OperationGenerator {
         return new Plan(phaseA, phaseB);
     }
 
-    private static PlannedOperation nextOperation(SplittableRandom random) {
+    private static PlannedOperation nextOperation(SplittableRandom random, boolean author) {
         int draw = random.nextInt(PERCENT);
-        Slot slot = SLOTS[random.nextInt(SLOTS.length)];
         if (draw < SAVE_PERCENT) {
-            return new PlannedOperation.Save(slot);
+            List<Slot> writable = author ? List.of(SLOTS) : SHARED_SLOTS;
+            return new PlannedOperation.Save(writable.get(random.nextInt(writable.size())));
         }
         if (draw < SAVE_PERCENT + READ_PERCENT) {
-            return new PlannedOperation.Read(slot);
+            return new PlannedOperation.Read(SLOTS[random.nextInt(SLOTS.length)]);
         }
         return new PlannedOperation.ListAll();
+    }
+
+    private static void plantStalePair(List<PlannedOperation> author, int stopAt) {
+        if (stopAt + STALE_READ_OFFSET < author.size()) {
+            author.set(stopAt + STALE_SAVE_OFFSET, new PlannedOperation.Save(AUTHOR_ONLY_SLOT));
+            author.set(stopAt + STALE_READ_OFFSET, new PlannedOperation.Read(AUTHOR_ONLY_SLOT));
+        }
     }
 
     private static FaultWindow phaseAFault(SplittableRandom random, int faultSessionOperations) {
