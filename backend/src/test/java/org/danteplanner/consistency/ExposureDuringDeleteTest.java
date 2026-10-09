@@ -68,6 +68,19 @@ class ExposureDuringDeleteTest {
                 new Read("s2", "p1", 15, 18, new Found(3)))).isEmpty();
     }
 
+    @Test
+    void publicRead_WhenItOverlapsTheDeleteAndFindsTheRow_IsAnAnomaly() {
+        PublicRead overlapping = new PublicRead("anon", "p1", 15, 18, new Found(3));
+
+        assertThat(anomalies(DELETED, overlapping))
+                .containsExactly(new Anomaly("exposure-during-delete", "anon", "p1", overlapping));
+    }
+
+    @Test
+    void publicRead_WhenItOverlapsTheDeleteAndMisses_IsClean() {
+        assertThat(anomalies(DELETED, new PublicRead("anon", "p1", 15, 18, new NotFound()))).isEmpty();
+    }
+
     private static List<Anomaly> anomalies(Operation... operations) {
         Verdict verdict = new ExposureDuringDelete().judge(History.of(List.of(operations)));
         assertThat(verdict.violations()).isEmpty();

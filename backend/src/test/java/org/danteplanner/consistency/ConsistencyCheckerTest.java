@@ -204,6 +204,45 @@ class ConsistencyCheckerTest {
     }
 
     @Test
+    void publicRead_WhenItFindsThePlannerAfterTheDeleteResponse_IsOneReadAfterDeleteViolation() {
+        PublicRead resurrected = new PublicRead("anon", "p1", 25, 30, new Found(3));
+
+        Verdict verdict = ConsistencyChecker.check(History.of(List.of(
+                new Delete("s1", "p1", 10, 20, new Deleted()),
+                resurrected)));
+
+        assertThat(verdict.violations())
+                .containsExactly(new Violation("read-after-delete", "anon", "p1", resurrected));
+        assertThat(verdict.anomalies()).isEmpty();
+    }
+
+    @Test
+    void publicRead_WhenItOverlapsTheDeleteAndFindsThePlanner_IsOneAnomaly() {
+        PublicRead overlapping = new PublicRead("anon", "p1", 15, 18, new Found(3));
+
+        Verdict verdict = ConsistencyChecker.check(History.of(List.of(
+                new Delete("s1", "p1", 10, 20, new Deleted()),
+                overlapping)));
+
+        assertThat(verdict.violations()).isEmpty();
+        assertThat(verdict.anomalies())
+                .containsExactly(new Anomaly("exposure-during-delete", "anon", "p1", overlapping));
+    }
+
+    @Test
+    void publicRead_WhenOlderThanTheSameSessionsEarlierPublicRead_IsOneAnomaly() {
+        PublicRead regressed = new PublicRead("anon", "p1", 30, 40, new Found(4));
+
+        Verdict verdict = ConsistencyChecker.check(History.of(List.of(
+                new PublicRead("anon", "p1", 10, 20, new Found(5)),
+                regressed)));
+
+        assertThat(verdict.violations()).isEmpty();
+        assertThat(verdict.anomalies())
+                .containsExactly(new Anomaly("monotonic-read-regression", "anon", "p1", regressed));
+    }
+
+    @Test
     void check_WhenTheHistoryIsEmpty_IsClean() {
         Verdict verdict = ConsistencyChecker.check(History.of(List.of()));
 

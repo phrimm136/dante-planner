@@ -8,12 +8,12 @@ final class ExposureDuringDelete implements Rule {
 
     @Override
     public Verdict judge(History history) {
-        List<Anomaly> anomalies = history.all(Read.class).stream()
+        List<Anomaly> anomalies = ByIdRead.all(history).stream()
                 .filter(read -> Results.foundVersion(read.result()).isPresent())
                 .filter(read -> ReadAfterDelete.completedDeletes(read.key(), history).stream()
                         .anyMatch(delete -> read.invokedAt() <= delete.completedAt()
                                 && read.completedAt() >= delete.invokedAt()))
-                .map(read -> new Anomaly(KIND, read.session(), read.key(), read))
+                .map(read -> new Anomaly(KIND, read.session(), read.key(), read.operation()))
                 .toList();
         return new Verdict(List.of(), anomalies);
     }

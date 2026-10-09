@@ -8,12 +8,12 @@ final class ReadAfterDelete implements Rule {
 
     @Override
     public Verdict judge(History history) {
-        List<Violation> violations = history.all(Read.class).stream()
+        List<Violation> violations = ByIdRead.all(history).stream()
                 .filter(read -> Results.foundVersion(read.result()).isPresent())
                 .filter(read -> !saveOutlivesADelete(read.key(), history))
                 .filter(read -> completedDeletes(read.key(), history).stream()
                         .anyMatch(delete -> read.invokedAt() > delete.completedAt()))
-                .map(read -> new Violation(NAME, read.session(), read.key(), read))
+                .map(read -> new Violation(NAME, read.session(), read.key(), read.operation()))
                 .toList();
         return new Verdict(violations, List.of());
     }

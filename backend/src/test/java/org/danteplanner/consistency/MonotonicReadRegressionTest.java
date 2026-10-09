@@ -89,6 +89,24 @@ class MonotonicReadRegressionTest {
                 regressed)).containsExactly(new Anomaly("monotonic-read-regression", "s1", "p1", regressed));
     }
 
+    @Test
+    void lowerPublicRead_WhenInvokedAfterTheSameSessionsEarlierPublicRead_IsAnAnomaly() {
+        PublicRead regressed = new PublicRead("anon", "p1", 30, 40, new Found(4));
+
+        assertThat(anomalies(new PublicRead("anon", "p1", 10, 20, new Found(5)), regressed))
+                .containsExactly(new Anomaly("monotonic-read-regression", "anon", "p1", regressed));
+    }
+
+    @Test
+    void lowerPublicRead_WhenTheAuthorSavedTheHigherVersion_IsStillAnAnomaly() {
+        PublicRead regressed = new PublicRead("s1", "p1", 30, 40, new Found(4));
+
+        assertThat(anomalies(
+                new Save("s1", "p1", 1, 5, new Applied(5)),
+                new PublicRead("s1", "p1", 10, 20, new Found(5)),
+                regressed)).containsExactly(new Anomaly("monotonic-read-regression", "s1", "p1", regressed));
+    }
+
     private static List<Anomaly> anomalies(Operation... operations) {
         Verdict verdict = new MonotonicReadRegression().judge(History.of(List.of(operations)));
         assertThat(verdict.violations()).isEmpty();

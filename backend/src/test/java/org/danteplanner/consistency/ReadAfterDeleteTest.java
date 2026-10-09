@@ -109,6 +109,40 @@ class ReadAfterDeleteTest {
                 .containsExactly(new Violation("read-after-delete", "s2", "p1", resurrected));
     }
 
+    @Test
+    void publicRead_WhenItFindsTheRowAfterTheDeleteCompletion_IsAViolation() {
+        PublicRead resurrected = new PublicRead("anon", "p1", 21, 30, new Found(3));
+
+        assertThat(violations(DELETED, resurrected))
+                .containsExactly(new Violation("read-after-delete", "anon", "p1", resurrected));
+    }
+
+    @Test
+    void publicRead_WhenNotFoundOrFailed_IsClean() {
+        assertThat(violations(
+                DELETED,
+                new PublicRead("anon", "p1", 25, 30, new NotFound()),
+                new PublicRead("anon", "p1", 25, 30, new ReadFailed(0)))).isEmpty();
+    }
+
+    @Test
+    void reads_WhenAnOwnerAndAPublicReadBothFindTheRow_AreOneViolationEachInHistoryOrder() {
+        PublicRead publicRead = new PublicRead("anon", "p1", 25, 30, new Found(3));
+        Read ownerRead = new Read("s2", "p1", 35, 40, new Found(3));
+
+        assertThat(violations(DELETED, publicRead, ownerRead)).containsExactly(
+                new Violation("read-after-delete", "anon", "p1", publicRead),
+                new Violation("read-after-delete", "s2", "p1", ownerRead));
+    }
+
+    @Test
+    void publicRead_WhenAnAppliedSaveCompletesAfterTheDeleteBegins_IsSkipped() {
+        assertThat(violations(
+                new Save("s3", "p1", 5, 11, new Applied(4)),
+                DELETED,
+                new PublicRead("anon", "p1", 25, 30, new Found(4)))).isEmpty();
+    }
+
     private static List<Violation> violations(Operation... operations) {
         Verdict verdict = new ReadAfterDelete().judge(History.of(List.of(operations)));
         assertThat(verdict.anomalies()).isEmpty();

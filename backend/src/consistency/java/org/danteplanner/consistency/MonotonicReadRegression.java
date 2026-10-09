@@ -15,15 +15,15 @@ final class MonotonicReadRegression implements Rule {
         Set<Operation> violating = authorReadYourWrites.judge(history).violations().stream()
                 .map(Violation::operation)
                 .collect(Collectors.toSet());
-        List<FoundRead> found = history.all(Read.class).stream()
+        List<FoundRead> found = ByIdRead.all(history).stream()
                 .<FoundRead>mapMulti((read, sink) -> Results.foundVersion(read.result())
                         .ifPresent(version -> sink.accept(new FoundRead(read, version))))
                 .toList();
         List<Anomaly> anomalies = found.stream()
                 .filter(later -> found.stream().anyMatch(earlier -> regresses(earlier, later)))
                 .map(FoundRead::read)
-                .filter(read -> !violating.contains(read))
-                .map(read -> new Anomaly(KIND, read.session(), read.key(), read))
+                .filter(read -> !violating.contains(read.operation()))
+                .map(read -> new Anomaly(KIND, read.session(), read.key(), read.operation()))
                 .toList();
         return new Verdict(List.of(), anomalies);
     }
@@ -35,6 +35,6 @@ final class MonotonicReadRegression implements Rule {
                 && later.version() < earlier.version();
     }
 
-    private record FoundRead(Read read, long version) {
+    private record FoundRead(ByIdRead read, long version) {
     }
 }
