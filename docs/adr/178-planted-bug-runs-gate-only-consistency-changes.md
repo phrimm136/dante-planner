@@ -1,5 +1,5 @@
 # 178 planted-bug-runs-gate-only-consistency-changes
-epic: none · pr: none · supersedes: 037 @ci @gates @consistency-checker @ci
+epic: none · pr: none @consistency-checker @ci · supersedes: 037 @ci @gates
 
 ## Decisions
 - @consistency-checker @ci — The planted-bug run is a blocking `consistency` job in the PR gate. A
