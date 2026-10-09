@@ -2,7 +2,12 @@ package org.danteplanner.backend.shared.config;
 
 import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -109,7 +114,8 @@ public class RedisConnectionConfig {
     @Bean
     public ProxyManager<byte[]> rateLimitProxyManager() {
         return new LazyConnectingProxyManager(() -> buildRateLimitProxyManager(
-                rateLimit.getHost(), rateLimit.getPort(), Duration.ofSeconds(rateLimit.getBucketTtlSeconds())));
+                rateLimit.getHost(), rateLimit.getPort(), Duration.ofSeconds(rateLimit.getBucketTtlSeconds())),
+                System::nanoTime);
     }
 
     public static ProxyManager<byte[]> buildRateLimitProxyManager(String host, int port, Duration bucketTtl) {
@@ -118,7 +124,7 @@ public class RedisConnectionConfig {
         try {
             connection = client.connect(ByteArrayCodec.INSTANCE);
         } catch (RuntimeException e) {
-            client.shutdown(Duration.ZERO, Duration.ofSeconds(2));
+            var unused = client.shutdownAsync(0, 2, TimeUnit.SECONDS);
             throw e;
         }
         return LettuceBasedProxyManager.builderFor(connection)
@@ -130,12 +136,20 @@ public class RedisConnectionConfig {
 
     static final class LazyConnectingProxyManager implements ProxyManager<byte[]> {
 
-        private final Supplier<ProxyManager<byte[]>> connector;
-        private final ReentrantLock connectLock = new ReentrantLock();
-        private volatile ProxyManager<byte[]> target;
+        private static final long RETRY_AFTER_NANOS =
+                TimeUnit.MILLISECONDS.toNanos(TimeoutHierarchy.RATE_LIMIT_CONNECT_RETRY_AFTER_MS);
 
-        LazyConnectingProxyManager(Supplier<ProxyManager<byte[]>> connector) {
+        private final Supplier<ProxyManager<byte[]>> connector;
+        private final LongSupplier nanoTime;
+        private final ReentrantLock stateLock = new ReentrantLock();
+        private volatile ProxyManager<byte[]> target;
+        private CompletableFuture<ProxyManager<byte[]>> attempt;
+        private Throwable lastFailure;
+        private long lastFailureNanos;
+
+        LazyConnectingProxyManager(Supplier<ProxyManager<byte[]>> connector, LongSupplier nanoTime) {
             this.connector = connector;
+            this.nanoTime = nanoTime;
         }
 
         private ProxyManager<byte[]> target() {
@@ -143,19 +157,82 @@ public class RedisConnectionConfig {
             if (connected != null) {
                 return connected;
             }
-            if (!connectLock.tryLock()) {
-                throw new RedisConnectionException("Rate-limit store connect already in progress");
-            }
+            CompletableFuture<ProxyManager<byte[]>> started = new CompletableFuture<>();
+            CompletableFuture<ProxyManager<byte[]>> shared = join(started);
+            return shared == started ? connect(started) : await(shared);
+        }
+
+        private CompletableFuture<ProxyManager<byte[]>> join(CompletableFuture<ProxyManager<byte[]>> started) {
+            stateLock.lock();
             try {
-                connected = target;
-                if (connected == null) {
-                    connected = connector.get();
-                    target = connected;
+                if (target != null) {
+                    return CompletableFuture.completedFuture(target);
                 }
-                return connected;
+                if (attempt != null) {
+                    return attempt;
+                }
+                if (lastFailure != null && nanoTime.getAsLong() - lastFailureNanos < RETRY_AFTER_NANOS) {
+                    return CompletableFuture.failedFuture(lastFailure);
+                }
+                attempt = started;
+                return started;
             } finally {
-                connectLock.unlock();
+                stateLock.unlock();
             }
+        }
+
+        private ProxyManager<byte[]> connect(CompletableFuture<ProxyManager<byte[]>> started) {
+            try {
+                ProxyManager<byte[]> connected = connector.get();
+                succeeded(connected);
+                started.complete(connected);
+                return connected;
+            } catch (RuntimeException | Error failure) {
+                failed(failure);
+                started.completeExceptionally(failure);
+                throw failure;
+            }
+        }
+
+        private void succeeded(ProxyManager<byte[]> connected) {
+            stateLock.lock();
+            try {
+                target = connected;
+                attempt = null;
+            } finally {
+                stateLock.unlock();
+            }
+        }
+
+        private void failed(Throwable failure) {
+            stateLock.lock();
+            try {
+                lastFailure = failure;
+                lastFailureNanos = nanoTime.getAsLong();
+                attempt = null;
+            } finally {
+                stateLock.unlock();
+            }
+        }
+
+        private static ProxyManager<byte[]> await(CompletableFuture<ProxyManager<byte[]>> shared) {
+            try {
+                return shared.get(TimeoutHierarchy.RATE_LIMIT_CONNECT_WAIT_MS, TimeUnit.MILLISECONDS);
+            } catch (ExecutionException e) {
+                throw propagate(e.getCause());
+            } catch (TimeoutException e) {
+                throw new RedisConnectionException("Rate-limit store connect still in progress", e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RedisConnectionException("Interrupted waiting for the rate-limit store connect", e);
+            }
+        }
+
+        private static RuntimeException propagate(Throwable failure) {
+            if (failure instanceof Error error) {
+                throw error;
+            }
+            return (RuntimeException) failure;
         }
 
         @Override

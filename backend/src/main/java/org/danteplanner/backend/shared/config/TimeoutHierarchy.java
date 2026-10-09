@@ -26,6 +26,10 @@ public final class TimeoutHierarchy {
      */
     public static final long RATE_LIMIT_FUTURE_TIMEOUT_MS = 4_000L;
 
+    public static final long RATE_LIMIT_CONNECT_WAIT_MS = BoundedRedisConnections.COMMAND_TIMEOUT.toMillis() + 300L;
+
+    public static final long RATE_LIMIT_CONNECT_RETRY_AFTER_MS = 5_000L;
+
     /**
      * Tomcat's connector timeout also bounds a blocking response write.
      */
