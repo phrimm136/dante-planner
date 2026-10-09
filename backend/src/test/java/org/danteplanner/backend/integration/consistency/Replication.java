@@ -7,4 +7,8 @@ public interface Replication {
     void startReplica();
 
     void awaitCaughtUp();
+
+    void applyLatency(long millis);
+
+    void removeLatency();
 }

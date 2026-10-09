@@ -1,0 +1,53 @@
+package org.danteplanner.backend.integration.consistency;
+
+import java.util.EnumMap;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class CoverageTest {
+
+    @Test
+    void coverage_WhenTheWithdrawalMarkerCounterNeverMoves_NamesItUncovered() throws Exception {
+        Map<CoverageTarget, Double> counters = new EnumMap<>(CoverageTarget.class);
+        Coverage coverage = new Coverage(target -> counters.getOrDefault(target, 0.0));
+
+        coverage.measure(() -> moveAllBut(counters, CoverageTarget.WITHDRAWAL_MARKER_HIT));
+        coverage.measure(() -> moveAllBut(counters, CoverageTarget.WITHDRAWAL_MARKER_HIT));
+
+        assertThat(coverage.uncovered()).containsExactly("withdrawal-marker hit");
+        assertThat(coverage.summary()).isEqualTo("{gate pins the primary=2, gate serves the replica=2, "
+                + "replica miss promoted=2, tombstone hit=2, withdrawal-marker hit=0}");
+    }
+
+    @Test
+    void coverage_WhenEveryCounterMovesInSomeSeed_HasNothingUncovered() throws Exception {
+        Map<CoverageTarget, Double> counters = new EnumMap<>(CoverageTarget.class);
+        counters.put(CoverageTarget.TOMBSTONE_HIT, 7.0);
+        Coverage coverage = new Coverage(target -> counters.getOrDefault(target, 0.0));
+
+        coverage.measure(() -> moveAllBut(counters, CoverageTarget.TOMBSTONE_HIT));
+        coverage.measure(() -> counters.merge(CoverageTarget.TOMBSTONE_HIT, 1.0, Double::sum));
+
+        assertThat(coverage.uncovered()).isEmpty();
+    }
+
+    @Test
+    void coverage_WhenNoSeedRan_NamesEveryTargetUncovered() {
+        Coverage coverage = new Coverage(target -> 0.0);
+
+        assertThat(coverage.uncovered()).containsExactly("gate pins the primary", "gate serves the replica",
+                "replica miss promoted", "tombstone hit", "withdrawal-marker hit");
+    }
+
+    private static Void moveAllBut(Map<CoverageTarget, Double> counters, CoverageTarget still) {
+        for (CoverageTarget target : CoverageTarget.values()) {
+            if (target != still) {
+                counters.merge(target, 1.0, Double::sum);
+            }
+        }
+        return null;
+    }
+}

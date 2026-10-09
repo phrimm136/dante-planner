@@ -1,7 +1,8 @@
 package org.danteplanner.backend.integration.consistency;
 
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.http.HttpHeaders;
@@ -21,74 +22,110 @@ import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 public final class PlannerSession implements OperationPerformer {
 
     private static final String PLANNERS = "/api/planner/md";
+    private static final String PUBLISHED = PLANNERS + "/published";
 
     private final String name;
     private final CookieJar jar;
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
     private final HistoryRecorder recorder;
-    private final Map<Slot, UUID> keys;
-    private final Map<Slot, Long> seenVersions = new EnumMap<>(Slot.class);
+    private final PlannerPool pool;
+    private final Map<UUID, Long> seenVersions = new HashMap<>();
     private int saves;
 
     public PlannerSession(String name, CookieJar jar, MockMvc mockMvc, ObjectMapper objectMapper,
-            HistoryRecorder recorder, Map<Slot, UUID> keys) {
+            HistoryRecorder recorder, PlannerPool pool) {
         this.name = name;
         this.jar = jar;
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
         this.recorder = recorder;
-        this.keys = Map.copyOf(keys);
+        this.pool = pool;
     }
 
     @Override
     public void perform(PlannedOperation operation) throws JsonProcessingException {
         switch (operation) {
-            case PlannedOperation.Save save -> save(save.slot());
-            case PlannedOperation.Read read -> read(read.slot());
+            case PlannedOperation.Save save -> save(pool.pick(save.key()));
+            case PlannedOperation.Create create -> create();
+            case PlannedOperation.Read read -> read(pool.pick(read.key()));
             case PlannedOperation.ListAll list -> list();
-            case PlannedOperation.Delete delete -> deletePlanner(delete.slot());
+            case PlannedOperation.Publish publish -> publish(pool.pick(publish.key()));
+            case PlannedOperation.Unpublish unpublish -> unpublish(pool.pick(unpublish.key()));
+            case PlannedOperation.PublicRead read -> publicRead(pool.pick(read.key()));
+            case PlannedOperation.Delete delete -> deletePlanner(pool.pick(delete.key()));
         }
     }
 
-    private void save(Slot slot) throws JsonProcessingException {
-        UUID id = keys.get(slot);
+    private void create() throws JsonProcessingException {
+        UUID id = UUID.randomUUID();
+        if (save(id).isPresent()) {
+            pool.add(id);
+        }
+    }
+
+    private Optional<Response> save(UUID id) throws JsonProcessingException {
         saves++;
         String body = objectMapper.writeValueAsString(UpsertRequests.draft()
                 .id(id.toString())
                 .title(name + "-" + saves)
-                .syncVersion(seenVersions.get(slot))
+                .syncVersion(seenVersions.get(id))
                 .build());
-        recorder.save(name, id.toString(), () -> unsafe(put(PLANNERS + "/" + id)
+        Optional<Response> applied = recorder.save(name, id.toString(), () -> unsafe(put(PLANNERS + "/" + id)
                         .contentType(APPLICATION_JSON)
                         .content(body)))
-                .filter(response -> HttpStatusCode.valueOf(response.status()).is2xxSuccessful())
-                .ifPresent(response -> see(slot, response.syncVersion()));
+                .filter(response -> HttpStatusCode.valueOf(response.status()).is2xxSuccessful());
+        applied.ifPresent(response -> see(id, response.syncVersion()));
+        return applied;
     }
 
-    private void read(Slot slot) {
-        UUID id = keys.get(slot);
+    private void read(UUID id) {
         recorder.read(name, id.toString(), () -> safe(get(PLANNERS + "/" + id)))
-                .filter(response -> response.status() == HttpStatus.OK.value())
-                .ifPresent(response -> see(slot, response.syncVersion()));
+                .filter(PlannerSession::ok)
+                .ifPresent(response -> see(id, response.syncVersion()));
     }
 
     private void list() {
-        recorder.list(name, () -> safe(get(PLANNERS)));
+        recorder.list(name, () -> safe(get(PLANNERS)))
+                .filter(PlannerSession::ok)
+                .ifPresent(response -> response.plannerVersions()
+                        .forEach((id, version) -> see(UUID.fromString(id), version)));
     }
 
-    private void deletePlanner(Slot slot) {
-        UUID id = keys.get(slot);
+    private void publish(UUID id) {
+        recorder.publish(name, id.toString(), () -> unsafe(post(PLANNERS + "/" + id + "/publish")))
+                .filter(PlannerSession::ok)
+                .ifPresent(response -> see(id, response.syncVersion()));
+    }
+
+    private void unpublish(UUID id) {
+        recorder.unpublish(name, id.toString(), () -> unsafe(post(PLANNERS + "/" + id + "/unpublish")))
+                .filter(PlannerSession::ok)
+                .ifPresent(response -> see(id, response.syncVersion()));
+    }
+
+    private void publicRead(UUID id) {
+        recorder.publicRead(name, id.toString(), () -> safe(get(PUBLISHED + "/" + id)))
+                .filter(PlannerSession::ok)
+                .ifPresent(response -> see(id, response.syncVersion()));
+    }
+
+    private void deletePlanner(UUID id) {
         recorder.delete(name, id.toString(), () -> unsafe(delete(PLANNERS + "/" + id)));
     }
 
-    private void see(Slot slot, long syncVersion) {
-        seenVersions.merge(slot, syncVersion, Math::max);
+    private static boolean ok(Response response) {
+        return response.status() == HttpStatus.OK.value();
+    }
+
+    private void see(UUID id, long syncVersion) {
+        seenVersions.merge(id, syncVersion, Math::max);
     }
 
     private Response safe(MockHttpServletRequestBuilder request) throws Exception {

@@ -1,13 +1,15 @@
 package org.danteplanner.backend.integration;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.function.LongSupplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -21,24 +23,30 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.integration.consistency.Calibration;
 import org.danteplanner.backend.integration.consistency.CookieJar;
+import org.danteplanner.backend.integration.consistency.Coverage;
+import org.danteplanner.backend.integration.consistency.CoverageTarget;
 import org.danteplanner.backend.integration.consistency.HistoryRecorder;
+import org.danteplanner.backend.integration.consistency.HistoryWriter;
+import org.danteplanner.backend.integration.consistency.KeyDraw;
 import org.danteplanner.backend.integration.consistency.OperationGenerator;
 import org.danteplanner.backend.integration.consistency.PhaseRunner;
 import org.danteplanner.backend.integration.consistency.Plan;
 import org.danteplanner.backend.integration.consistency.PlannedOperation;
+import org.danteplanner.backend.integration.consistency.PlannerPool;
 import org.danteplanner.backend.integration.consistency.PlannerSession;
 import org.danteplanner.backend.integration.consistency.Replication;
 import org.danteplanner.backend.integration.consistency.SeedGuard;
 import org.danteplanner.backend.integration.consistency.SeedLoop;
-import org.danteplanner.backend.integration.consistency.Slot;
-import org.danteplanner.backend.integration.consistency.StaleWindow;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -46,21 +54,28 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.consistency.Anomaly;
 import org.danteplanner.consistency.ConsistencyChecker;
 import org.danteplanner.consistency.History;
+import org.danteplanner.consistency.Shrinker;
 import org.danteplanner.consistency.Verdict;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.AUTHOR_DEVICES;
+import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.BISECTION_DEPTH_BUDGET;
+import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.CREATOR;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.DEFAULT_OPS_PER_SEED;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.DEFAULT_SEED_COUNT;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.DEFAULT_SEED_FROM;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.DEFAULT_STOP_AT_FIRST_VIOLATION;
+import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.DOUBLING_BUDGET;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.HISTORY_DIRECTORY;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.OPS_PER_SEED;
+import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.PROBE_BATCH_BUDGET;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.SEED_COUNT;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.SEED_FROM;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.SESSIONS;
+import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.SETUP_PLANNERS;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.STOP_AT_FIRST_VIOLATION;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.historyFile;
-import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.sessionName;
+import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.minimalHistoryFile;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -68,6 +83,8 @@ import static org.danteplanner.backend.integration.consistency.ConsistencyBudget
 @Tag("containerized")
 @Import(TestConfig.class)
 class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
+
+    private static final KeyDraw ONLY_PLANNER = new KeyDraw(0);
 
     @Autowired
     private MockMvc mockMvc;
@@ -81,6 +98,9 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
     @Autowired
     private JwtTokenService jwtTokenService;
 
+    @Autowired
+    private MeterRegistry meterRegistry;
+
     @Test
     void plannerHistories_WhenSessionsRunUnderReplicationFaults_KeepTheContract() throws Exception {
         long seedFrom = Long.getLong(SEED_FROM, DEFAULT_SEED_FROM);
@@ -89,17 +109,21 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
         boolean stopAtFirstViolation = Boolean.parseBoolean(
                 System.getProperty(STOP_AT_FIRST_VIOLATION, String.valueOf(DEFAULT_STOP_AT_FIRST_VIOLATION)));
         List<Long> seeds = LongStream.range(seedFrom, seedFrom + seedCount).boxed().toList();
-        Replication replication = new HarnessReplication(replicationControl);
+        Replication replication = new HarnessReplication(replicationControl, toxiproxyControl);
         Files.createDirectories(HISTORY_DIRECTORY);
 
+        Calibration.Result calibration = calibrate(replication);
+        System.out.println("consistency calibration: " + calibration);
+        Coverage coverage = new Coverage(this::count);
         List<SeedResult> results = SeedLoop.run(seeds, replication,
-                seed -> runSeed(seed, budget, replication),
+                seed -> coverage.measure(() -> runSeed(seed, budget, calibration.latencyMillis(), replication)),
                 result -> stopAtFirstViolation && !result.verdict().violations().isEmpty());
 
         results.forEach(result -> System.out.println("consistency seed " + result.seed() + ": "
                 + result.verdict().violations().size() + " violations, anomalies "
                 + anomalyCounts(result.verdict()) + ", faults A " + result.plan().phaseA().fault()
                 + " B " + result.plan().phaseB().fault() + ", history " + result.history().toAbsolutePath()));
+        System.out.println("consistency coverage: " + coverage.summary());
         List<String> violations = results.stream()
                 .flatMap(result -> result.verdict().violations().stream()
                         .map(violation -> "seed " + result.seed() + " (" + result.history().toAbsolutePath()
@@ -114,33 +138,82 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
                 .as("seeds whose history cannot show a violation, then violations of the ADR 008 contract, "
                         + "by seed and history file")
                 .isEmpty();
+        assertThat(coverage.uncovered())
+                .as("read-path targets no seed hit (ADR 180), coverage " + coverage.summary())
+                .isEmpty();
     }
 
-    private SeedResult runSeed(long seed, int budget, Replication replication) throws Exception {
-        Plan plan = OperationGenerator.plan(seed, budget);
+    private Calibration.Result calibrate(Replication replication) throws Exception {
+        try {
+            return Calibration.find(this::probePinsPrimary, PROBE_BATCH_BUDGET, DOUBLING_BUDGET,
+                    BISECTION_DEPTH_BUDGET);
+        } finally {
+            replication.removeLatency();
+            replication.awaitCaughtUp();
+        }
+    }
+
+    private boolean probePinsPrimary(long latencyMillis) throws Exception {
+        toxiproxyControl.applyReplicationLatency(latencyMillis);
+        User author = TestDataFactory.createTestUser(userRepository,
+                "consistency-calibration-" + UUID.randomUUID() + "@example.com");
+        Cookie accessToken = AuthCookies.accessToken(TestDataFactory.generateAccessToken(jwtTokenService, author));
+        PlannerPool pool = new PlannerPool();
+        try (HistoryRecorder recorder = new HistoryRecorder(Writer.nullWriter(), System::nanoTime)) {
+            PlannerSession session = new PlannerSession(SESSIONS.get(CREATOR),
+                    new CookieJar(accessToken, AuthCookies.freshDeviceId()), mockMvc, objectMapper, recorder, pool);
+            session.perform(new PlannedOperation.Create());
+            double primaryBefore = count(CoverageTarget.GATE_PINS_PRIMARY);
+            double replicaBefore = count(CoverageTarget.GATE_SERVES_REPLICA);
+            session.perform(new PlannedOperation.Read(ONLY_PLANNER));
+            boolean pinned = count(CoverageTarget.GATE_PINS_PRIMARY) > primaryBefore;
+            if (!pinned && count(CoverageTarget.GATE_SERVES_REPLICA) == replicaBefore) {
+                throw new IllegalStateException("a calibration read at " + latencyMillis
+                        + " ms moved neither gtid.gate counter");
+            }
+            return pinned;
+        } finally {
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    private SeedResult runSeed(long seed, int budget, long latencyBound, Replication replication) throws Exception {
+        Plan plan = OperationGenerator.plan(seed, budget, latencyBound);
         User author = TestDataFactory.createTestUser(userRepository, "consistency-seed-" + seed + "@example.com");
         Cookie accessToken = AuthCookies.accessToken(TestDataFactory.generateAccessToken(jwtTokenService, author));
-        Map<Slot, UUID> keys = new EnumMap<>(Slot.class);
-        for (Slot slot : Slot.values()) {
-            keys.put(slot, UUID.randomUUID());
-        }
         Path history = historyFile(seed);
-        LongSupplier clock = System::nanoTime;
-        StaleWindow staleWindow;
-        try (HistoryRecorder recorder = new HistoryRecorder(Files.newBufferedWriter(history), clock)) {
-            List<PlannerSession> sessions = IntStream.range(0, SESSIONS)
-                    .mapToObj(index -> new PlannerSession(sessionName(index),
-                            new CookieJar(accessToken, AuthCookies.freshDeviceId()),
-                            mockMvc, objectMapper, recorder, keys))
+        try (HistoryRecorder recorder = new HistoryRecorder(Files.newBufferedWriter(history), System::nanoTime)) {
+            PlannerPool pool = new PlannerPool();
+            List<PlannerSession> sessions = IntStream.range(0, SESSIONS.size())
+                    .mapToObj(index -> new PlannerSession(SESSIONS.get(index), index < AUTHOR_DEVICES
+                            ? new CookieJar(accessToken, AuthCookies.freshDeviceId())
+                            : new CookieJar(AuthCookies.freshDeviceId()),
+                            mockMvc, objectMapper, recorder, pool))
                     .toList();
-            for (Slot slot : Slot.values()) {
-                sessions.get(0).perform(new PlannedOperation.Save(slot));
+            for (int planner = 0; planner < SETUP_PLANNERS; planner++) {
+                sessions.get(CREATOR).perform(new PlannedOperation.Create());
             }
-            staleWindow = PhaseRunner.runPlan(plan, sessions, replication, clock);
+            if (pool.size() != SETUP_PLANNERS) {
+                throw new IllegalStateException("setup created " + pool.size() + " of " + SETUP_PLANNERS
+                        + " planners, history " + history.toAbsolutePath());
+            }
+            for (int device = 0; device < AUTHOR_DEVICES; device++) {
+                sessions.get(device).perform(new PlannedOperation.ListAll());
+            }
+            PhaseRunner.runPlan(plan, sessions, replication);
         }
         History recorded = History.read(history);
-        return new SeedResult(seed, plan, history, SeedGuard.failures(recorded.operations(), staleWindow),
-                ConsistencyChecker.check(recorded));
+        Verdict verdict = ConsistencyChecker.check(recorded);
+        if (!verdict.violations().isEmpty()) {
+            HistoryWriter.write(Shrinker.shrink(recorded, verdict.violations().get(0)), minimalHistoryFile(seed));
+        }
+        return new SeedResult(seed, plan, history, SeedGuard.failures(recorded.operations()), verdict);
+    }
+
+    private double count(CoverageTarget target) {
+        return Optional.ofNullable(meterRegistry.find(target.meter()).tags(target.tags()).counter())
+                .map(Counter::count)
+                .orElse(0.0);
     }
 
     private static Map<String, Long> anomalyCounts(Verdict verdict) {
@@ -154,9 +227,11 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
     private static final class HarnessReplication implements Replication {
 
         private final ReplicationControl control;
+        private final ToxiproxyControl toxiproxy;
 
-        HarnessReplication(ReplicationControl control) {
+        HarnessReplication(ReplicationControl control, ToxiproxyControl toxiproxy) {
             this.control = control;
+            this.toxiproxy = toxiproxy;
         }
 
         @Override
@@ -172,6 +247,24 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
         @Override
         public void awaitCaughtUp() {
             control.awaitCaughtUp();
+        }
+
+        @Override
+        public void applyLatency(long millis) {
+            try {
+                toxiproxy.applyReplicationLatency(millis);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+
+        @Override
+        public void removeLatency() {
+            try {
+                toxiproxy.removeReplicationLatency();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
     }
 }

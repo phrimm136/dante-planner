@@ -1,77 +1,117 @@
 package org.danteplanner.backend.integration.consistency;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import org.junit.jupiter.api.Test;
 
-import org.danteplanner.backend.integration.consistency.Plan.FaultWindow;
+import org.danteplanner.backend.integration.consistency.Plan.Latency;
+import org.danteplanner.backend.integration.consistency.Plan.Phase;
+import org.danteplanner.backend.integration.consistency.Plan.Round;
+import org.danteplanner.backend.integration.consistency.Plan.Stopped;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class OperationGeneratorTest {
 
     private static final int BUDGET = 100;
-    private static final int S1_PHASE_A_OPERATIONS = 34;
-    private static final int FIRST_QUARTER_END = 8;
-    private static final int LAST_QUARTER_START = 26;
-    private static final int S1_PHASE_B_OPERATIONS = 4;
+    private static final long LATENCY_BOUND = 80;
+    private static final int S1 = 0;
+    private static final int VIEWER = 3;
+    private static final int ANON = 4;
 
     @Test
-    void plan_WhenBuiltTwiceFromOneSeed_IsEqualOperationByOperationAndFaultByFault() {
-        Plan first = OperationGenerator.plan(42, BUDGET);
-        Plan second = OperationGenerator.plan(42, BUDGET);
+    void plan_WhenBuiltTwiceFromOneSeedBudgetAndBound_IsEqual() {
+        Plan first = OperationGenerator.plan(42, BUDGET, LATENCY_BOUND);
+        Plan second = OperationGenerator.plan(42, BUDGET, LATENCY_BOUND);
 
-        assertThat(second.phaseA().rounds()).isEqualTo(first.phaseA().rounds());
-        assertThat(second.phaseB().rounds()).isEqualTo(first.phaseB().rounds());
-        assertThat(second.phaseA().fault()).isEqualTo(first.phaseA().fault());
-        assertThat(second.phaseB().fault()).isEqualTo(first.phaseB().fault());
-        assertThat(first.phaseA().rounds().get(0).bySession().stream().mapToInt(List::size).sum())
-                .isEqualTo(BUDGET);
+        assertThat(second).isEqualTo(first);
+        assertThat(authorOperations(first.phaseA()) + authorOperations(first.phaseB()))
+                .as("author operations, plus phase B's delete")
+                .isEqualTo(BUDGET + 1);
     }
 
     @Test
     void plan_WhenSeedsDiffer_Differs() {
-        assertThat(OperationGenerator.plan(1, BUDGET)).isNotEqualTo(OperationGenerator.plan(2, BUDGET));
+        assertThat(OperationGenerator.plan(1, BUDGET, LATENCY_BOUND))
+                .isNotEqualTo(OperationGenerator.plan(2, BUDGET, LATENCY_BOUND));
     }
 
     @Test
-    void phaseAFault_WhenSeedsRunFromOneToFifty_StopsInTheFirstQuarterAndStartsInTheLastQuarter() {
+    void sessions_WhenSeedsRunFromOneToFifty_DrawOnlyTheirOwnKindsAndEveryAuthorKindAppears() {
+        Set<Class<?>> authorKinds = new HashSet<>();
         LongStream.rangeClosed(1, 50).forEach(seed -> {
-            Plan plan = OperationGenerator.plan(seed, BUDGET);
-            FaultWindow fault = plan.phaseA().fault();
+            Plan plan = OperationGenerator.plan(seed, BUDGET, LATENCY_BOUND);
+            for (Phase phase : List.of(plan.phaseA(), plan.phaseB())) {
+                List<List<PlannedOperation>> bySession = bySession(phase);
+                assertThat(bySession.get(ANON)).as("seed %d anon", seed)
+                        .isNotEmpty()
+                        .allMatch(PlannedOperation.PublicRead.class::isInstance);
+                assertThat(bySession.subList(S1, ANON)).as("seed %d authors", seed)
+                        .allSatisfy(operations -> assertThat(operations)
+                                .noneMatch(PlannedOperation.PublicRead.class::isInstance));
+                assertThat(bySession.get(VIEWER)).as("seed %d viewer", seed)
+                        .isNotEmpty()
+                        .allMatch(operation -> operation instanceof PlannedOperation.Read
+                                || operation instanceof PlannedOperation.ListAll);
+                assertThat(bySession.subList(S1 + 1, ANON)).as("seed %d s2, s3 and viewer", seed)
+                        .allSatisfy(operations -> assertThat(operations)
+                                .noneMatch(PlannedOperation.Create.class::isInstance)
+                                .noneMatch(PlannedOperation.Delete.class::isInstance));
+                bySession.subList(S1, ANON).forEach(operations ->
+                        operations.forEach(operation -> authorKinds.add(operation.getClass())));
+            }
+        });
 
-            assertThat(plan.phaseA().rounds().get(0).bySession().get(0)).hasSize(S1_PHASE_A_OPERATIONS);
-            assertThat(fault.stopAt()).as("seed %d stopAt", seed).isBetween(0, FIRST_QUARTER_END - 1);
-            assertThat(fault.startAt()).as("seed %d startAt", seed)
-                    .isBetween(LAST_QUARTER_START, S1_PHASE_A_OPERATIONS);
-            assertThat(fault.startAt() - fault.stopAt()).as("seed %d window", seed)
-                    .isGreaterThanOrEqualTo(S1_PHASE_A_OPERATIONS / 2);
+        assertThat(authorKinds).contains(PlannedOperation.Save.class, PlannedOperation.Read.class,
+                PlannedOperation.ListAll.class, PlannedOperation.Publish.class, PlannedOperation.Unpublish.class,
+                PlannedOperation.Create.class);
+    }
+
+    @Test
+    void faults_WhenSeedsRunFromOneToFifty_AreALatencyUpToTheBoundThenAStopAndNeverATimeout() {
+        LongStream.rangeClosed(1, 50).forEach(seed -> {
+            Plan plan = OperationGenerator.plan(seed, BUDGET, LATENCY_BOUND);
+
+            assertThat(plan.phaseA().fault()).as("seed %d phase A", seed)
+                    .isInstanceOfSatisfying(Latency.class,
+                            latency -> assertThat(latency.millis()).isBetween(0L, LATENCY_BOUND));
+            assertThat(plan.phaseB().fault()).as("seed %d phase B", seed).isEqualTo(new Stopped());
         });
     }
 
     @Test
-    void phaseA_WhenSeedsRunFromOneToFifty_LeavesK3ToS1AndPlantsASaveThenReadOfK3AtTheStop() {
+    void phaseB_WhenSeedsRunFromOneToFifty_OpensWithARoundOfExactlyOneS1Delete() {
         LongStream.rangeClosed(1, 50).forEach(seed -> {
-            Plan plan = OperationGenerator.plan(seed, BUDGET);
-            List<List<PlannedOperation>> bySession = plan.phaseA().rounds().get(0).bySession();
-            int stopAt = plan.phaseA().fault().stopAt();
+            Plan plan = OperationGenerator.plan(seed, BUDGET, LATENCY_BOUND);
 
-            assertThat(bySession.subList(1, bySession.size()))
-                    .as("seed %d, s2 and s3", seed)
-                    .allSatisfy(operations -> assertThat(operations)
-                            .doesNotContain(new PlannedOperation.Save(Slot.K3)));
-            assertThat(bySession.get(0).subList(stopAt, stopAt + 2))
-                    .as("seed %d, s1 at stopAt %d", seed, stopAt)
-                    .containsExactly(new PlannedOperation.Save(Slot.K3), new PlannedOperation.Read(Slot.K3));
+            List<Round> rounds = plan.phaseB().rounds();
+
+            assertThat(rounds).as("seed %d phase B", seed).hasSize(2);
+            assertThat(rounds.get(0).bySession().get(S1)).as("seed %d opening round, s1", seed)
+                    .singleElement().isInstanceOf(PlannedOperation.Delete.class);
+            assertThat(rounds.get(0).bySession().subList(S1 + 1, rounds.get(0).bySession().size()))
+                    .as("seed %d opening round, other sessions", seed)
+                    .allSatisfy(operations -> assertThat(operations).isEmpty());
+            assertThat(rounds.get(1).bySession().stream().flatMap(List::stream)).as("seed %d second round", seed)
+                    .noneMatch(PlannedOperation.Delete.class::isInstance);
+            assertThat(bySession(plan.phaseA()).stream().flatMap(List::stream)).as("seed %d phase A", seed)
+                    .noneMatch(PlannedOperation.Delete.class::isInstance);
         });
     }
 
-    @Test
-    void phaseBFault_WhenSeedsRunFromOneToFifty_StopsBeforeRoundOneAndStartsAfterRoundTwo() {
-        LongStream.rangeClosed(1, 50).forEach(seed ->
-                assertThat(OperationGenerator.plan(seed, BUDGET).phaseB().fault())
-                        .as("seed %d", seed)
-                        .isEqualTo(new FaultWindow(0, S1_PHASE_B_OPERATIONS)));
+    private static int authorOperations(Phase phase) {
+        return bySession(phase).subList(S1, ANON).stream().mapToInt(List::size).sum();
+    }
+
+    private static List<List<PlannedOperation>> bySession(Phase phase) {
+        return IntStream.range(0, ANON + 1)
+                .mapToObj(session -> phase.rounds().stream()
+                        .flatMap(round -> round.bySession().get(session).stream())
+                        .toList())
+                .toList();
     }
 }

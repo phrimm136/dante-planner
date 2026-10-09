@@ -48,6 +48,20 @@ public final class HistoryRecorder implements Closeable {
         return record(line(session, "list"), exchange, HistoryRecorder::listOutcome);
     }
 
+    Optional<Response> publish(String session, String key, Exchange exchange) {
+        return record(line(session, "publish").put("key", key), exchange,
+                (line, response) -> visibilityOutcome("publish", line, response));
+    }
+
+    Optional<Response> unpublish(String session, String key, Exchange exchange) {
+        return record(line(session, "unpublish").put("key", key), exchange,
+                (line, response) -> visibilityOutcome("unpublish", line, response));
+    }
+
+    Optional<Response> publicRead(String session, String key, Exchange exchange) {
+        return record(line(session, "public-read").put("key", key), exchange, HistoryRecorder::readOutcome);
+    }
+
     private Optional<Response> record(ObjectNode line, Exchange exchange,
             BiConsumer<ObjectNode, Response> outcome) {
         long invokedAt = clock.getAsLong();
@@ -89,6 +103,19 @@ public final class HistoryRecorder implements Closeable {
             outcome(line, UNKNOWN, response);
         } else {
             throw unexpected("delete", response);
+        }
+    }
+
+    private static void visibilityOutcome(String kind, ObjectNode line, Response response) {
+        HttpStatusCode status = HttpStatusCode.valueOf(response.status());
+        if (response.status() == HttpStatus.OK.value()) {
+            outcome(line, OK, response);
+        } else if (status.is4xxClientError()) {
+            outcome(line, FAIL, response);
+        } else if (status.is5xxServerError()) {
+            outcome(line, UNKNOWN, response);
+        } else {
+            throw unexpected(kind, response);
         }
     }
 

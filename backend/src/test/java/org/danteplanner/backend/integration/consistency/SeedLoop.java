@@ -17,6 +17,7 @@ public final class SeedLoop {
             try {
                 result = body.run(seed);
             } finally {
+                replication.removeLatency();
                 replication.startReplica();
                 replication.awaitCaughtUp();
             }

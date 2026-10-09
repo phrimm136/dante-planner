@@ -1,90 +1,62 @@
 package org.danteplanner.backend.integration.consistency;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.jupiter.api.Test;
 
-import org.danteplanner.backend.integration.consistency.Plan.FaultWindow;
+import org.danteplanner.backend.integration.consistency.Plan.Latency;
 import org.danteplanner.backend.integration.consistency.Plan.Phase;
 import org.danteplanner.backend.integration.consistency.Plan.Round;
+import org.danteplanner.backend.integration.consistency.Plan.Stopped;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PhaseRunnerTest {
 
-    private static final long OTHER_SESSIONS_HEAD_START_MILLIS = 200;
+    private static final PlannedOperation READ = new PlannedOperation.Read(new KeyDraw(0));
+    private static final List<List<PlannedOperation>> TWO_READS_EACH =
+            List.of(List.of(READ, READ), List.of(READ, READ), List.of(READ, READ), List.of(READ, READ));
 
     @Test
-    void phase_WhenTheFaultStopsAtIndexZero_StopsBeforeAnySessionOperates() throws Exception {
-        List<String> events = Collections.synchronizedList(new ArrayList<>());
-        CountDownLatch otherSessionOperated = new CountDownLatch(1);
-        PlannedOperation read = new PlannedOperation.Read(Slot.K1);
-        Phase phase = new Phase(
-                List.of(new Round(List.of(List.of(new PlannedOperation.Delete(Slot.K1)), List.of(read), List.of(read))),
-                        new Round(List.of(List.of(read), List.of(read), List.of(read)))),
-                new FaultWindow(0, 2));
-        List<OperationPerformer> sessions = List.of(
-                operation -> events.add("s1 " + operation),
-                operation -> {
-                    events.add("s2 " + operation);
-                    otherSessionOperated.countDown();
-                },
-                operation -> events.add("s3 " + operation));
+    void plan_WhenPhaseAEnds_RestoresReplicationBeforePhaseBStopsIt() throws Exception {
+        RecordingReplication replication = new RecordingReplication();
+        Plan plan = new Plan(new Phase(List.of(new Round(TWO_READS_EACH)), new Latency(30)), new Phase(List.of(new Round(TWO_READS_EACH)), new Stopped()));
 
-        PhaseRunner.run(phase, sessions, recording(events, otherSessionOperated));
+        PhaseRunner.runPlan(plan, sessions(replication), replication);
 
-        assertThat(events).hasSize(8).startsWith("stop").endsWith("start").containsOnlyOnce("stop", "start");
+        assertThat(replication.events).filteredOn(event -> !event.equals("operation"))
+                .containsExactly("latency 30", "remove latency", "start", "await", "stop");
+        List<String> events = replication.events;
+        assertThat(events.subList(0, events.indexOf("remove latency"))).filteredOn("operation"::equals).hasSize(8);
+        assertThat(events.subList(events.indexOf("stop"), events.size())).filteredOn("operation"::equals)
+                .hasSize(8);
     }
 
     @Test
-    void plan_WhenPhaseAEnds_AwaitsCatchUpBeforePhaseBStopsAndReturnsTheStampedStaleWindow() throws Exception {
-        List<String> events = Collections.synchronizedList(new ArrayList<>());
-        PlannedOperation read = new PlannedOperation.Read(Slot.K1);
-        List<List<PlannedOperation>> twoReadsEach = List.of(List.of(read, read), List.of(read, read), List.of(read, read));
-        Plan plan = new Plan(
-                new Phase(List.of(new Round(twoReadsEach)), new FaultWindow(0, 2)),
-                new Phase(List.of(new Round(twoReadsEach)), new FaultWindow(0, 2)));
-        List<OperationPerformer> sessions = List.of(
-                operation -> events.add("operation"),
-                operation -> events.add("operation"),
-                operation -> events.add("operation"));
-        AtomicLong clock = new AtomicLong();
+    void phase_WhenTheLatencyDrawIsZero_AddsNoToxic() throws Exception {
+        RecordingReplication replication = new RecordingReplication();
 
-        StaleWindow window = PhaseRunner.runPlan(plan, sessions, recording(events, new CountDownLatch(0)),
-                clock::incrementAndGet);
+        PhaseRunner.run(new Phase(List.of(new Round(TWO_READS_EACH)), new Latency(0)), sessions(replication), replication);
 
-        assertThat(events).filteredOn(event -> !event.equals("operation"))
-                .containsExactly("stop", "start", "await", "stop", "start");
-        assertThat(events.subList(0, events.indexOf("await"))).filteredOn("operation"::equals).hasSize(6);
-        assertThat(window).isEqualTo(new StaleWindow(1, 2));
+        assertThat(replication.events).containsOnly("operation").hasSize(8);
     }
 
-    private static Replication recording(List<String> events, CountDownLatch otherSessionOperated) {
-        return new Replication() {
-            @Override
-            public void stopReplica() {
-                try {
-                    otherSessionOperated.await(OTHER_SESSIONS_HEAD_START_MILLIS, TimeUnit.MILLISECONDS);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-                events.add("stop");
-            }
+    @Test
+    void phase_WhenItHasTwoRounds_CompletesTheFirstBeforeAnyOperationOfTheSecondStarts() throws Exception {
+        RecordingReplication replication = new RecordingReplication();
+        PlannedOperation delete = new PlannedOperation.Delete(new KeyDraw(0));
+        Round deleteOnly = new Round(List.of(List.of(delete), List.of(), List.of(), List.of()));
+        OperationPerformer session = operation -> replication.events.add(operation == delete ? "delete" : "read");
 
-            @Override
-            public void startReplica() {
-                events.add("start");
-            }
+        PhaseRunner.run(new Phase(List.of(deleteOnly, new Round(TWO_READS_EACH)), new Stopped()),
+                List.of(session, session, session, session), replication);
 
-            @Override
-            public void awaitCaughtUp() {
-                events.add("await");
-            }
-        };
+        assertThat(replication.events).containsExactly("stop", "delete", "read", "read", "read", "read", "read",
+                "read", "read", "read");
+    }
+
+    private static List<OperationPerformer> sessions(RecordingReplication replication) {
+        OperationPerformer session = operation -> replication.events.add("operation");
+        return List.of(session, session, session, session);
     }
 }
