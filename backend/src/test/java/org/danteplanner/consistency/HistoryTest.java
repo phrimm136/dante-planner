@@ -17,6 +17,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class HistoryTest {
 
+    private static final String WRITE_UNAVAILABLE = "'status':503,'code':'WRITE_TEMPORARILY_UNAVAILABLE'";
+
     @TempDir
     private Path dir;
 
@@ -140,8 +142,8 @@ class HistoryTest {
 
     @Test
     void readFail_WhenStatusIsAnyOther_IsReadFailed() throws IOException {
-        assertThat(only(line("read", "fail", "'status':503")))
-                .isEqualTo(new Read("s1", "p1", 10, 20, new ReadFailed(503)));
+        assertThat(only(line("read", "fail", "'status':429")))
+                .isEqualTo(new Read("s1", "p1", 10, 20, new ReadFailed(429)));
     }
 
     @ParameterizedTest
@@ -291,6 +293,35 @@ class HistoryTest {
     @ValueSource(ints = {200, 404, 499, 600})
     void publicReadUnknown_WhenStatusIsNot5xx_IsMalformed(int status) throws IOException {
         assertMalformed(1, line("public-read", "unknown", "'status':" + status + ",'syncVersion':1"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"save", "delete", "publish", "unpublish"})
+    void writeFail_WhenStatusIs503WithTheWriteUnavailableCode_IsRejected503(String kind) throws IOException {
+        Operation expected = switch (kind) {
+            case "save" -> new Save("s1", "p1", 10, 20, new Rejected(503));
+            case "delete" -> new Delete("s1", "p1", 10, 20, new Rejected(503));
+            default -> visibility(kind, new Rejected(503));
+        };
+
+        assertThat(only(line(kind, "fail", WRITE_UNAVAILABLE))).isEqualTo(expected);
+    }
+
+    @Test
+    void readFail_WhenStatusIs503WithTheWriteUnavailableCode_IsReadFailed503() throws IOException {
+        assertThat(only(line("read", "fail", WRITE_UNAVAILABLE)))
+                .isEqualTo(new Read("s1", "p1", 10, 20, new ReadFailed(503)));
+        assertThat(only(line("public-read", "fail", WRITE_UNAVAILABLE)))
+                .isEqualTo(new PublicRead("s1", "p1", 10, 20, new ReadFailed(503)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"save", "delete", "read", "publish", "unpublish", "public-read"})
+    void fail_WhenStatusIs503WithoutTheWriteUnavailableCode_IsMalformedNamingTheLine(String kind)
+            throws IOException {
+        assertMalformed(2, line(kind, "unknown", null), line(kind, "fail", "'status':503"));
+        assertMalformed(2, line(kind, "unknown", null), line(kind, "fail", "'status':503,'code':'DEADLOCK'"));
+        assertMalformed(2, line(kind, "unknown", null), line(kind, "fail", "'status':503,'code':5"));
     }
 
     @ParameterizedTest

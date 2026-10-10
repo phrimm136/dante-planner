@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
 import org.danteplanner.consistency.Applied;
 import org.danteplanner.consistency.Changed;
 import org.danteplanner.consistency.Delete;
@@ -81,7 +82,7 @@ public final class HistoryWriter {
     private static ObjectNode saveResult(ObjectNode line, SaveResult result) {
         return switch (result) {
             case Applied applied -> outcome(line, OK, HttpStatus.OK.value()).put("syncVersion", applied.syncVersion());
-            case Rejected rejected -> outcome(line, FAIL, rejected.status());
+            case Rejected rejected -> failed(line, rejected.status());
             case Unknown unknown -> line.put("outcome", UNKNOWN);
         };
     }
@@ -89,7 +90,7 @@ public final class HistoryWriter {
     private static ObjectNode deleteResult(ObjectNode line, DeleteResult result) {
         return switch (result) {
             case Deleted deleted -> outcome(line, OK, HttpStatus.NO_CONTENT.value());
-            case Rejected rejected -> outcome(line, FAIL, rejected.status());
+            case Rejected rejected -> failed(line, rejected.status());
             case Unknown unknown -> line.put("outcome", UNKNOWN);
         };
     }
@@ -97,7 +98,7 @@ public final class HistoryWriter {
     private static ObjectNode visibilityResult(ObjectNode line, VisibilityResult result) {
         return switch (result) {
             case Changed changed -> outcome(line, OK, HttpStatus.OK.value());
-            case Rejected rejected -> outcome(line, FAIL, rejected.status());
+            case Rejected rejected -> failed(line, rejected.status());
             case Unknown unknown -> line.put("outcome", UNKNOWN);
         };
     }
@@ -108,7 +109,7 @@ public final class HistoryWriter {
             case NotFound notFound -> outcome(line, OK, HttpStatus.NOT_FOUND.value());
             case ReadFailed failed -> failed.status() == NO_RESPONSE
                     ? line.put("outcome", UNKNOWN)
-                    : outcome(line, FAIL, failed.status());
+                    : failed(line, failed.status());
         };
     }
 
@@ -116,6 +117,13 @@ public final class HistoryWriter {
         ArrayNode keys = outcome(line, OK, HttpStatus.OK.value()).putArray("keys");
         list.keys().forEach(keys::add);
         return line;
+    }
+
+    private static ObjectNode failed(ObjectNode line, int status) {
+        outcome(line, FAIL, status);
+        return status == HttpStatus.SERVICE_UNAVAILABLE.value()
+                ? line.put("code", DegradationErrorConstants.DB_UNAVAILABLE.code())
+                : line;
     }
 
     private static ObjectNode outcome(ObjectNode line, String outcome, int status) {

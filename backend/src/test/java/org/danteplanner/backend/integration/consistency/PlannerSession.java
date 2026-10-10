@@ -1,9 +1,11 @@
 package org.danteplanner.backend.integration.consistency;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.support.UpsertRequests;
 
+import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.SESSIONS;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -32,21 +35,31 @@ public final class PlannerSession implements OperationPerformer {
 
     private final String name;
     private final CookieJar jar;
-    private final MockMvc mockMvc;
+    private final MockMvc writes;
+    private final MockMvc reads;
     private final ObjectMapper objectMapper;
     private final HistoryRecorder recorder;
     private final PlannerPool pool;
     private final Map<UUID, Long> seenVersions = new HashMap<>();
     private int saves;
 
-    public PlannerSession(String name, CookieJar jar, MockMvc mockMvc, ObjectMapper objectMapper,
+    public PlannerSession(String name, CookieJar jar, MockMvc writes, MockMvc reads, ObjectMapper objectMapper,
             HistoryRecorder recorder, PlannerPool pool) {
         this.name = name;
         this.jar = jar;
-        this.mockMvc = mockMvc;
+        this.writes = writes;
+        this.reads = reads;
         this.objectMapper = objectMapper;
         this.recorder = recorder;
         this.pool = pool;
+    }
+
+    public static List<PlannerSession> forPlan(Plan plan, List<CookieJar> jars, MockMvc seoul, MockMvc oregon,
+            ObjectMapper objectMapper, HistoryRecorder recorder, PlannerPool pool) {
+        return IntStream.range(0, SESSIONS.size())
+                .mapToObj(index -> new PlannerSession(SESSIONS.get(index), jars.get(index), oregon,
+                        plan.homes().get(index) == Region.SEOUL ? seoul : oregon, objectMapper, recorder, pool))
+                .toList();
     }
 
     @Override
@@ -129,15 +142,15 @@ public final class PlannerSession implements OperationPerformer {
     }
 
     private Response safe(MockHttpServletRequestBuilder request) throws Exception {
-        return exchange(request.cookie(jar.cookies()));
+        return exchange(reads, request.cookie(jar.cookies()));
     }
 
     private Response unsafe(MockHttpServletRequestBuilder request) throws Exception {
-        return exchange(request.cookie(jar.cookiesExcept(CookieConstants.CSRF)).with(withCsrf()));
+        return exchange(writes, request.cookie(jar.cookiesExcept(CookieConstants.CSRF)).with(withCsrf()));
     }
 
-    private Response exchange(MockHttpServletRequestBuilder request) throws Exception {
-        MockHttpServletResponse response = mockMvc.perform(request).andReturn().getResponse();
+    private Response exchange(MockMvc context, MockHttpServletRequestBuilder request) throws Exception {
+        MockHttpServletResponse response = context.perform(request).andReturn().getResponse();
         jar.apply(response.getHeaders(HttpHeaders.SET_COOKIE));
         return new Response(response.getStatus(), response.getContentAsString());
     }

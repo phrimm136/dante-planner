@@ -5,11 +5,16 @@ import java.io.UncheckedIOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -23,8 +28,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.search.Search;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -39,14 +48,18 @@ import org.danteplanner.backend.integration.consistency.HistoryRecorder;
 import org.danteplanner.backend.integration.consistency.HistoryWriter;
 import org.danteplanner.backend.integration.consistency.KeyDraw;
 import org.danteplanner.backend.integration.consistency.OperationGenerator;
+import org.danteplanner.backend.integration.consistency.OregonPrimary;
 import org.danteplanner.backend.integration.consistency.PhaseRunner;
 import org.danteplanner.backend.integration.consistency.Plan;
 import org.danteplanner.backend.integration.consistency.PlannedOperation;
 import org.danteplanner.backend.integration.consistency.PlannerPool;
 import org.danteplanner.backend.integration.consistency.PlannerSession;
+import org.danteplanner.backend.integration.consistency.Region;
 import org.danteplanner.backend.integration.consistency.Replication;
 import org.danteplanner.backend.integration.consistency.SeedGuard;
 import org.danteplanner.backend.integration.consistency.SeedLoop;
+import org.danteplanner.backend.shared.config.PoolLedger;
+import org.danteplanner.backend.shared.config.ReadFallbackConfig;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -85,6 +98,10 @@ import static org.danteplanner.backend.integration.consistency.ConsistencyBudget
 class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
 
     private static final KeyDraw ONLY_PLANNER = new KeyDraw(0);
+    private static final long OREGON_DEADLINE_MS = 5_000L;
+    private static final long OREGON_POLL_INTERVAL_MS = 100L;
+    private static final String BREAKER_STATE_GAUGE = "resilience4j.circuitbreaker.state";
+    private static final String POOL_IDLE_GAUGE = "hikaricp.connections.idle";
 
     @Autowired
     private MockMvc mockMvc;
@@ -112,35 +129,44 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
         Replication replication = new HarnessReplication(replicationControl, toxiproxyControl);
         Files.createDirectories(HISTORY_DIRECTORY);
 
-        Calibration.Result calibration = calibrate(replication);
-        System.out.println("consistency calibration: " + calibration);
-        Coverage coverage = new Coverage(this::count);
-        List<SeedResult> results = SeedLoop.run(seeds, replication,
-                seed -> coverage.measure(() -> runSeed(seed, budget, calibration.latencyMillis(), replication)),
-                result -> stopAtFirstViolation && !result.verdict().violations().isEmpty());
+        try (OregonContext oregon = OregonContext.start()) {
+            Calibration.Result calibration = calibrate(replication);
+            System.out.println("consistency calibration: " + calibration);
+            OregonPrimary oregonPrimary = new HarnessOregonPrimary(toxiproxyControl, oregon.meterRegistry());
+            Coverage coverage = new Coverage(target -> count(registry(target, oregon), target));
+            List<SeedResult> results = SeedLoop.run(seeds, replication, oregonPrimary,
+                    seed -> coverage.measure(() -> runSeed(seed, budget, calibration.latencyMillis(), replication,
+                            oregonPrimary, oregon)),
+                    result -> stopAtFirstViolation && !result.verdict().violations().isEmpty());
 
-        results.forEach(result -> System.out.println("consistency seed " + result.seed() + ": "
-                + result.verdict().violations().size() + " violations, anomalies "
-                + anomalyCounts(result.verdict()) + ", faults A " + result.plan().phaseA().fault()
-                + " B " + result.plan().phaseB().fault() + ", history " + result.history().toAbsolutePath()));
-        System.out.println("consistency coverage: " + coverage.summary());
-        List<String> violations = results.stream()
-                .flatMap(result -> result.verdict().violations().stream()
-                        .map(violation -> "seed " + result.seed() + " (" + result.history().toAbsolutePath()
-                                + "): " + violation))
-                .toList();
-        List<String> uncheckedSeeds = results.stream()
-                .flatMap(result -> result.guardFailures().stream()
-                        .map(failure -> "seed " + result.seed() + " (" + result.history().toAbsolutePath()
-                                + "): " + failure))
-                .toList();
-        assertThat(Stream.concat(uncheckedSeeds.stream(), violations.stream()).toList())
-                .as("seeds whose history cannot show a violation, then violations of the ADR 008 contract, "
-                        + "by seed and history file")
-                .isEmpty();
-        assertThat(coverage.uncovered())
-                .as("read-path targets no seed hit (ADR 180), coverage " + coverage.summary())
-                .isEmpty();
+            results.forEach(result -> {
+                System.out.println("consistency seed " + result.seed() + ": "
+                        + result.verdict().violations().size() + " violations, anomalies "
+                        + anomalyCounts(result.verdict()) + ", faults A " + result.plan().phaseA().fault()
+                        + " B " + result.plan().phaseB().fault() + " C " + result.plan().phaseC().fault()
+                        + ", history " + result.history().toAbsolutePath());
+                System.out.println("consistency seed " + result.seed() + " homes " + homes(result.plan())
+                        + ", phase C " + result.phaseC().toMillis() + " ms");
+            });
+            System.out.println("consistency coverage: " + coverage.summary());
+            List<String> violations = results.stream()
+                    .flatMap(result -> result.verdict().violations().stream()
+                            .map(violation -> "seed " + result.seed() + " (" + result.history().toAbsolutePath()
+                                    + "): " + violation))
+                    .toList();
+            List<String> uncheckedSeeds = results.stream()
+                    .flatMap(result -> result.guardFailures().stream()
+                            .map(failure -> "seed " + result.seed() + " (" + result.history().toAbsolutePath()
+                                    + "): " + failure))
+                    .toList();
+            assertThat(Stream.concat(uncheckedSeeds.stream(), violations.stream()).toList())
+                    .as("seeds whose history cannot show a violation, then violations of the ADR 008 contract, "
+                            + "by seed and history file")
+                    .isEmpty();
+            assertThat(coverage.uncovered())
+                    .as("read-path targets no seed hit (ADR 180), coverage " + coverage.summary())
+                    .isEmpty();
+        }
     }
 
     private Calibration.Result calibrate(Replication replication) throws Exception {
@@ -161,13 +187,14 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
         PlannerPool pool = new PlannerPool();
         try (HistoryRecorder recorder = new HistoryRecorder(Writer.nullWriter(), System::nanoTime)) {
             PlannerSession session = new PlannerSession(SESSIONS.get(CREATOR),
-                    new CookieJar(accessToken, AuthCookies.freshDeviceId()), mockMvc, objectMapper, recorder, pool);
+                    new CookieJar(accessToken, AuthCookies.freshDeviceId()), mockMvc, mockMvc, objectMapper, recorder,
+                    pool);
             session.perform(new PlannedOperation.Create());
-            double primaryBefore = count(CoverageTarget.GATE_PINS_PRIMARY);
-            double replicaBefore = count(CoverageTarget.GATE_SERVES_REPLICA);
+            double primaryBefore = count(meterRegistry, CoverageTarget.GATE_PINS_PRIMARY);
+            double replicaBefore = count(meterRegistry, CoverageTarget.GATE_SERVES_REPLICA);
             session.perform(new PlannedOperation.Read(ONLY_PLANNER));
-            boolean pinned = count(CoverageTarget.GATE_PINS_PRIMARY) > primaryBefore;
-            if (!pinned && count(CoverageTarget.GATE_SERVES_REPLICA) == replicaBefore) {
+            boolean pinned = count(meterRegistry, CoverageTarget.GATE_PINS_PRIMARY) > primaryBefore;
+            if (!pinned && count(meterRegistry, CoverageTarget.GATE_SERVES_REPLICA) == replicaBefore) {
                 throw new IllegalStateException("a calibration read at " + latencyMillis
                         + " ms moved neither gtid.gate counter");
             }
@@ -177,19 +204,22 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
         }
     }
 
-    private SeedResult runSeed(long seed, int budget, long latencyBound, Replication replication) throws Exception {
+    private SeedResult runSeed(long seed, int budget, long latencyBound, Replication replication,
+            OregonPrimary oregonPrimary, OregonContext oregon) throws Exception {
         Plan plan = OperationGenerator.plan(seed, budget, latencyBound);
         User author = TestDataFactory.createTestUser(userRepository, "consistency-seed-" + seed + "@example.com");
         Cookie accessToken = AuthCookies.accessToken(TestDataFactory.generateAccessToken(jwtTokenService, author));
         Path history = historyFile(seed);
+        Duration phaseC;
         try (HistoryRecorder recorder = new HistoryRecorder(Files.newBufferedWriter(history), System::nanoTime)) {
             PlannerPool pool = new PlannerPool();
-            List<PlannerSession> sessions = IntStream.range(0, SESSIONS.size())
-                    .mapToObj(index -> new PlannerSession(SESSIONS.get(index), index < AUTHOR_DEVICES
+            List<CookieJar> jars = IntStream.range(0, SESSIONS.size())
+                    .mapToObj(index -> index < AUTHOR_DEVICES
                             ? new CookieJar(accessToken, AuthCookies.freshDeviceId())
-                            : new CookieJar(AuthCookies.freshDeviceId()),
-                            mockMvc, objectMapper, recorder, pool))
+                            : new CookieJar(AuthCookies.freshDeviceId()))
                     .toList();
+            List<PlannerSession> sessions = PlannerSession.forPlan(plan, jars, mockMvc, oregon.mockMvc(),
+                    objectMapper, recorder, pool);
             for (int planner = 0; planner < SETUP_PLANNERS; planner++) {
                 sessions.get(CREATOR).perform(new PlannedOperation.Create());
             }
@@ -200,20 +230,34 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
             for (int device = 0; device < AUTHOR_DEVICES; device++) {
                 sessions.get(device).perform(new PlannedOperation.ListAll());
             }
-            PhaseRunner.runPlan(plan, sessions, replication);
+            phaseC = PhaseRunner.runPlan(plan, sessions, replication, oregonPrimary);
         }
         History recorded = History.read(history);
         Verdict verdict = ConsistencyChecker.check(recorded);
         if (!verdict.violations().isEmpty()) {
             HistoryWriter.write(Shrinker.shrink(recorded, verdict.violations().get(0)), minimalHistoryFile(seed));
         }
-        return new SeedResult(seed, plan, history, SeedGuard.failures(recorded.operations()), verdict);
+        return new SeedResult(seed, plan, history, SeedGuard.failures(recorded.operations()), verdict, phaseC);
     }
 
-    private double count(CoverageTarget target) {
-        return Optional.ofNullable(meterRegistry.find(target.meter()).tags(target.tags()).counter())
-                .map(Counter::count)
-                .orElse(0.0);
+    private MeterRegistry registry(CoverageTarget target, OregonContext oregon) {
+        return target.region() == Region.SEOUL ? meterRegistry : oregon.meterRegistry();
+    }
+
+    private static double count(MeterRegistry registry, CoverageTarget target) {
+        Search search = registry.find(target.meter()).tags(target.tags());
+        return switch (target.instrument()) {
+            case COUNTER -> search.counters().stream().mapToDouble(Counter::count).sum();
+            case TIMER -> search.timers().stream().mapToDouble(Timer::count).sum();
+        };
+    }
+
+    private static Map<String, Region> homes(Plan plan) {
+        Map<String, Region> homes = new LinkedHashMap<>();
+        for (int index = 0; index < SESSIONS.size(); index++) {
+            homes.put(SESSIONS.get(index), plan.homes().get(index));
+        }
+        return homes;
     }
 
     private static Map<String, Long> anomalyCounts(Verdict verdict) {
@@ -221,7 +265,62 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
                 .collect(Collectors.groupingBy(Anomaly::kind, TreeMap::new, Collectors.counting()));
     }
 
-    private record SeedResult(long seed, Plan plan, Path history, List<String> guardFailures, Verdict verdict) {
+    private record SeedResult(long seed, Plan plan, Path history, List<String> guardFailures, Verdict verdict,
+            Duration phaseC) {
+    }
+
+    private static final class HarnessOregonPrimary implements OregonPrimary {
+
+        private final ToxiproxyControl toxiproxy;
+        private final MeterRegistry registry;
+
+        HarnessOregonPrimary(ToxiproxyControl toxiproxy, MeterRegistry registry) {
+            this.toxiproxy = toxiproxy;
+            this.registry = registry;
+        }
+
+        @Override
+        public void cut() {
+            try {
+                toxiproxy.cutOregonPrimary();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+            await("the Oregon breaker reads open", () -> breakerGauge(CircuitBreaker.State.OPEN) == 1.0);
+        }
+
+        @Override
+        public void restore() {
+            try {
+                toxiproxy.restoreOregonPrimary();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+            await("the Oregon breaker reads closed", () -> breakerGauge(CircuitBreaker.State.CLOSED) == 1.0);
+            await("the Oregon primary pool holds an idle connection", () -> primaryPoolIdle() >= 1.0);
+        }
+
+        private void await(String condition, BooleanSupplier reached) {
+            long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(OREGON_DEADLINE_MS);
+            while (!reached.getAsBoolean()) {
+                if (System.nanoTime() >= deadline) {
+                    throw new IllegalStateException("not within " + OREGON_DEADLINE_MS + " ms: " + condition);
+                }
+                LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(OREGON_POLL_INTERVAL_MS));
+            }
+        }
+
+        private double breakerGauge(CircuitBreaker.State state) {
+            Gauge gauge = registry.find(BREAKER_STATE_GAUGE)
+                    .tag("name", ReadFallbackConfig.PRIMARY_READ_BREAKER)
+                    .tag("state", state.name().toLowerCase(Locale.ROOT)).gauge();
+            return gauge == null ? Double.NaN : gauge.value();
+        }
+
+        private double primaryPoolIdle() {
+            Gauge gauge = registry.find(POOL_IDLE_GAUGE).tag("pool", PoolLedger.PRIMARY_POOL_NAME).gauge();
+            return gauge == null ? Double.NaN : gauge.value();
+        }
     }
 
     private static final class HarnessReplication implements Replication {

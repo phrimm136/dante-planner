@@ -9,17 +9,21 @@ public final class SeedLoop {
     private SeedLoop() {
     }
 
-    public static <T> List<T> run(List<Long> seeds, Replication replication, SeedBody<T> body,
-            Predicate<T> stopAfter) throws Exception {
+    public static <T> List<T> run(List<Long> seeds, Replication replication, OregonPrimary oregon,
+            SeedBody<T> body, Predicate<T> stopAfter) throws Exception {
         List<T> results = new ArrayList<>();
         for (long seed : seeds) {
             T result;
             try {
                 result = body.run(seed);
             } finally {
-                replication.removeLatency();
-                replication.startReplica();
-                replication.awaitCaughtUp();
+                try {
+                    oregon.restore();
+                } finally {
+                    replication.removeLatency();
+                    replication.startReplica();
+                    replication.awaitCaughtUp();
+                }
             }
             results.add(result);
             if (stopAfter.test(result)) {

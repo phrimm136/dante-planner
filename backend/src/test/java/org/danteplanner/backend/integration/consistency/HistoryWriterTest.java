@@ -7,12 +7,18 @@ import java.nio.file.Path;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
+import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
+import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.consistency.ConsistencyChecker;
 import org.danteplanner.consistency.History;
 import org.danteplanner.consistency.Shrinker;
@@ -24,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class HistoryWriterTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper PROBLEM_MAPPER = Jackson2ObjectMapperBuilder.json().build();
     private static final String K1 = UUID.randomUUID().toString();
     private static final String K2 = UUID.randomUUID().toString();
 
@@ -37,7 +44,7 @@ class HistoryWriterTest {
         HistoryWriter.write(original, written);
 
         assertThat(History.read(written)).isEqualTo(original);
-        assertThat(original.operations()).hasSize(17);
+        assertThat(original.operations()).hasSize(19);
     }
 
     @Test
@@ -60,6 +67,9 @@ class HistoryWriterTest {
         String version1 = MAPPER.writeValueAsString(PlannerResponse.builder().syncVersion(1).build());
         String version2 = MAPPER.writeValueAsString(PlannerResponse.builder().syncVersion(2).build());
         String publicView = MAPPER.writeValueAsString(PublishedPlannerDetailResponse.builder().syncVersion(1).build());
+        String writeUnavailable = PROBLEM_MAPPER.writeValueAsString(Problems.fill(
+                ProblemDetail.forStatus(HttpStatus.SERVICE_UNAVAILABLE),
+                DegradationErrorConstants.DB_UNAVAILABLE.code(), DegradationErrorConstants.DB_UNAVAILABLE.message()));
         String page = "{\"content\":[{\"id\":\"" + K1 + "\"},{\"id\":\"" + K2 + "\"}]}";
         try (HistoryRecorder recorder = new HistoryRecorder(Files.newBufferedWriter(file), clock::incrementAndGet)) {
             recorder.save("s1", K1, () -> new Response(201, version1));
@@ -82,6 +92,8 @@ class HistoryWriterTest {
             recorder.delete("s1", K2, () -> new Response(204, ""));
             recorder.delete("s1", K2, () -> new Response(404, ""));
             recorder.read("s3", K2, () -> new Response(404, ""));
+            recorder.save("s2", K1, () -> new Response(503, writeUnavailable));
+            recorder.read("s3", K1, () -> new Response(503, writeUnavailable));
         }
         return file;
     }

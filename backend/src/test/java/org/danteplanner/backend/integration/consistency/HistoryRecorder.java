@@ -16,6 +16,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
+
 public final class HistoryRecorder implements Closeable {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -23,6 +25,8 @@ public final class HistoryRecorder implements Closeable {
     private static final String OK = "ok";
     private static final String FAIL = "fail";
     private static final String UNKNOWN = "unknown";
+    private static final String CODE = "code";
+    private static final String WRITE_UNAVAILABLE_CODE = DegradationErrorConstants.DB_UNAVAILABLE.code();
 
     private final Writer writer;
     private final LongSupplier clock;
@@ -87,7 +91,7 @@ public final class HistoryRecorder implements Closeable {
         } else if (status.is4xxClientError()) {
             outcome(line, FAIL, response);
         } else if (status.is5xxServerError()) {
-            outcome(line, UNKNOWN, response);
+            serverError(line, response);
         } else {
             throw unexpected("save", response);
         }
@@ -100,7 +104,7 @@ public final class HistoryRecorder implements Closeable {
         } else if (status.is4xxClientError()) {
             outcome(line, FAIL, response);
         } else if (status.is5xxServerError()) {
-            outcome(line, UNKNOWN, response);
+            serverError(line, response);
         } else {
             throw unexpected("delete", response);
         }
@@ -113,7 +117,7 @@ public final class HistoryRecorder implements Closeable {
         } else if (status.is4xxClientError()) {
             outcome(line, FAIL, response);
         } else if (status.is5xxServerError()) {
-            outcome(line, UNKNOWN, response);
+            serverError(line, response);
         } else {
             throw unexpected(kind, response);
         }
@@ -125,7 +129,7 @@ public final class HistoryRecorder implements Closeable {
         } else if (response.status() == HttpStatus.NOT_FOUND.value()) {
             outcome(line, OK, response);
         } else if (HttpStatusCode.valueOf(response.status()).is5xxServerError()) {
-            outcome(line, UNKNOWN, response);
+            serverError(line, response);
         } else {
             outcome(line, FAIL, response);
         }
@@ -136,9 +140,18 @@ public final class HistoryRecorder implements Closeable {
             ArrayNode keys = outcome(line, OK, response).putArray("keys");
             response.plannerIds().forEach(keys::add);
         } else if (HttpStatusCode.valueOf(response.status()).is5xxServerError()) {
-            outcome(line, UNKNOWN, response);
+            serverError(line, response);
         } else {
             outcome(line, FAIL, response);
+        }
+    }
+
+    private static void serverError(ObjectNode line, Response response) {
+        if (response.status() == HttpStatus.SERVICE_UNAVAILABLE.value()
+                && response.code().filter(WRITE_UNAVAILABLE_CODE::equals).isPresent()) {
+            outcome(line, FAIL, response).put(CODE, WRITE_UNAVAILABLE_CODE);
+        } else {
+            outcome(line, UNKNOWN, response);
         }
     }
 

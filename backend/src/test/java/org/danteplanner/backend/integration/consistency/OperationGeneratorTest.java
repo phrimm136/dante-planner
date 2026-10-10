@@ -8,6 +8,7 @@ import java.util.stream.LongStream;
 
 import org.junit.jupiter.api.Test;
 
+import org.danteplanner.backend.integration.consistency.Plan.CutOregon;
 import org.danteplanner.backend.integration.consistency.Plan.Latency;
 import org.danteplanner.backend.integration.consistency.Plan.Phase;
 import org.danteplanner.backend.integration.consistency.Plan.Round;
@@ -22,6 +23,7 @@ class OperationGeneratorTest {
     private static final int S1 = 0;
     private static final int VIEWER = 3;
     private static final int ANON = 4;
+    private static final int SESSIONS = 5;
 
     @Test
     void plan_WhenBuiltTwiceFromOneSeedBudgetAndBound_IsEqual() {
@@ -29,7 +31,9 @@ class OperationGeneratorTest {
         Plan second = OperationGenerator.plan(42, BUDGET, LATENCY_BOUND);
 
         assertThat(second).isEqualTo(first);
-        assertThat(authorOperations(first.phaseA()) + authorOperations(first.phaseB()))
+        assertThat(second.homes()).isEqualTo(first.homes()).hasSize(SESSIONS);
+        assertThat(authorOperations(first.phaseA()) + authorOperations(first.phaseB())
+                + authorOperations(first.phaseC()))
                 .as("author operations, plus phase B's delete")
                 .isEqualTo(BUDGET + 1);
     }
@@ -45,7 +49,7 @@ class OperationGeneratorTest {
         Set<Class<?>> authorKinds = new HashSet<>();
         LongStream.rangeClosed(1, 50).forEach(seed -> {
             Plan plan = OperationGenerator.plan(seed, BUDGET, LATENCY_BOUND);
-            for (Phase phase : List.of(plan.phaseA(), plan.phaseB())) {
+            for (Phase phase : List.of(plan.phaseA(), plan.phaseB(), plan.phaseC())) {
                 List<List<PlannedOperation>> bySession = bySession(phase);
                 assertThat(bySession.get(ANON)).as("seed %d anon", seed)
                         .isNotEmpty()
@@ -72,7 +76,7 @@ class OperationGeneratorTest {
     }
 
     @Test
-    void faults_WhenSeedsRunFromOneToFifty_AreALatencyUpToTheBoundThenAStopAndNeverATimeout() {
+    void faults_WhenSeedsRunFromOneToFifty_AreALatencyUpToTheBoundThenAStopThenAnOregonCut() {
         LongStream.rangeClosed(1, 50).forEach(seed -> {
             Plan plan = OperationGenerator.plan(seed, BUDGET, LATENCY_BOUND);
 
@@ -80,7 +84,22 @@ class OperationGeneratorTest {
                     .isInstanceOfSatisfying(Latency.class,
                             latency -> assertThat(latency.millis()).isBetween(0L, LATENCY_BOUND));
             assertThat(plan.phaseB().fault()).as("seed %d phase B", seed).isEqualTo(new Stopped());
+            assertThat(plan.phaseC().fault()).as("seed %d phase C", seed).isEqualTo(new CutOregon());
         });
+    }
+
+    @Test
+    void homes_WhenSeedsRunFromOneToFifty_GiveEverySessionSeoulOrOregonAndDrawBoth() {
+        Set<Region> drawn = new HashSet<>();
+        LongStream.rangeClosed(1, 50).forEach(seed -> {
+            List<Region> homes = OperationGenerator.plan(seed, BUDGET, LATENCY_BOUND).homes();
+
+            assertThat(homes).as("seed %d homes", seed).hasSize(SESSIONS)
+                    .allMatch(home -> home == Region.SEOUL || home == Region.OREGON);
+            drawn.addAll(homes);
+        });
+
+        assertThat(drawn).containsExactlyInAnyOrder(Region.SEOUL, Region.OREGON);
     }
 
     @Test
@@ -99,6 +118,8 @@ class OperationGeneratorTest {
             assertThat(rounds.get(1).bySession().stream().flatMap(List::stream)).as("seed %d second round", seed)
                     .noneMatch(PlannedOperation.Delete.class::isInstance);
             assertThat(bySession(plan.phaseA()).stream().flatMap(List::stream)).as("seed %d phase A", seed)
+                    .noneMatch(PlannedOperation.Delete.class::isInstance);
+            assertThat(bySession(plan.phaseC()).stream().flatMap(List::stream)).as("seed %d phase C", seed)
                     .noneMatch(PlannedOperation.Delete.class::isInstance);
         });
     }

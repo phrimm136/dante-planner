@@ -10,13 +10,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class SeedLoopTest {
 
     @Test
-    void seedLoop_WhenASeedThrowsUnderAToxicAndAStop_RemovesTheToxicAndRestoresReplication() {
+    void seedLoop_WhenASeedThrowsUnderAToxicAStopAndACut_RestoresOregonThenReplication() {
         RecordingReplication replication = new RecordingReplication();
 
-        assertThatThrownBy(() -> SeedLoop.run(List.of(1L, 2L, 3L), replication, seed -> {
+        assertThatThrownBy(() -> SeedLoop.run(List.of(1L, 2L, 3L), replication, replication, seed -> {
             replication.events.add("seed " + seed + " began");
             replication.applyLatency(seed);
             replication.stopReplica();
+            replication.cut();
             if (seed == 2L) {
                 throw new IllegalStateException("seed 2 failed mid-run");
             }
@@ -26,15 +27,17 @@ class SeedLoopTest {
                 .hasMessage("seed 2 failed mid-run");
 
         assertThat(replication.events).containsExactly(
-                "seed 1 began", "latency 1", "stop", "remove latency", "start", "await",
-                "seed 2 began", "latency 2", "stop", "remove latency", "start", "await");
+                "seed 1 began", "latency 1", "stop", "cut oregon", "restore oregon", "remove latency", "start", "await",
+                "seed 2 began", "latency 2", "stop", "cut oregon", "restore oregon", "remove latency", "start",
+                "await");
     }
 
     @Test
     void seedLoop_WhenStopAfterMatches_RunsNoFurtherSeed() throws Exception {
         RecordingReplication replication = new RecordingReplication();
 
-        List<Long> results = SeedLoop.run(List.of(1L, 2L, 3L), replication, seed -> seed, seed -> seed == 2L);
+        List<Long> results = SeedLoop.run(List.of(1L, 2L, 3L), replication, replication, seed -> seed,
+                seed -> seed == 2L);
 
         assertThat(results).containsExactly(1L, 2L);
     }

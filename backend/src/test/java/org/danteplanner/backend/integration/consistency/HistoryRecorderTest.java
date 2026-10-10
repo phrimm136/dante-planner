@@ -8,12 +8,18 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
+import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
+import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.consistency.Changed;
 import org.danteplanner.consistency.Delete;
 import org.danteplanner.consistency.Deleted;
@@ -35,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class HistoryRecorderTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper PROBLEM_MAPPER = Jackson2ObjectMapperBuilder.json().build();
     private static final UUID KEY = UUID.randomUUID();
 
     @Test
@@ -94,6 +101,48 @@ class HistoryRecorderTest {
                         new Found(4), new NotFound());
     }
 
+    @Test
+    void recorder_When503CarriesTheWriteUnavailableCode_RecordsFailWithTheCodeAndOtherwiseUnknown(
+            @TempDir Path directory) throws IOException {
+        Path file = directory.resolve("history.jsonl");
+        AtomicLong clock = new AtomicLong();
+        String writeUnavailable = problem(DegradationErrorConstants.DB_UNAVAILABLE.code());
+        String deadlock = problem("DEADLOCK");
+        String key = KEY.toString();
+
+        try (HistoryRecorder recorder = new HistoryRecorder(Files.newBufferedWriter(file), clock::incrementAndGet)) {
+            recorder.save("s1", key, () -> new Response(503, writeUnavailable));
+            recorder.save("s1", key, () -> new Response(503, deadlock));
+            recorder.read("s2", key, () -> new Response(503, writeUnavailable));
+            recorder.read("s2", key, () -> new Response(503, deadlock));
+            recorder.delete("s1", key, () -> new Response(503, writeUnavailable));
+            recorder.publish("s1", key, () -> new Response(503, writeUnavailable));
+            recorder.unpublish("s1", key, () -> new Response(503, writeUnavailable));
+            recorder.publicRead("anon", key, () -> new Response(503, writeUnavailable));
+            recorder.list("s3", () -> new Response(503, writeUnavailable));
+            recorder.save("s1", key, () -> new Response(500, writeUnavailable));
+        }
+
+        List<String> lines = Files.readAllLines(file);
+        assertThat(lines).extracting(HistoryRecorderTest::outcome)
+                .containsExactly("fail", "unknown", "fail", "unknown", "fail", "fail", "fail", "fail", "fail",
+                        "unknown");
+        assertThat(lines).extracting(line -> field(line, "code"))
+                .containsExactly("WRITE_TEMPORARILY_UNAVAILABLE", null, "WRITE_TEMPORARILY_UNAVAILABLE", null,
+                        "WRITE_TEMPORARILY_UNAVAILABLE", "WRITE_TEMPORARILY_UNAVAILABLE",
+                        "WRITE_TEMPORARILY_UNAVAILABLE", "WRITE_TEMPORARILY_UNAVAILABLE",
+                        "WRITE_TEMPORARILY_UNAVAILABLE", null);
+        assertThat(History.read(file).operations())
+                .extracting(HistoryRecorderTest::result)
+                .containsExactly(new Rejected(503), new Unknown(), new ReadFailed(503), new ReadFailed(0),
+                        new Rejected(503), new Rejected(503), new Rejected(503), new ReadFailed(503), new Unknown());
+    }
+
+    private static String problem(String code) throws IOException {
+        return PROBLEM_MAPPER.writeValueAsString(
+                Problems.fill(ProblemDetail.forStatus(HttpStatus.SERVICE_UNAVAILABLE), code, "retry"));
+    }
+
     private static Object result(Operation operation) {
         return switch (operation) {
             case Save save -> save.result();
@@ -107,8 +156,12 @@ class HistoryRecorderTest {
     }
 
     private static String outcome(String line) {
+        return field(line, "outcome");
+    }
+
+    private static String field(String line, String name) {
         try {
-            return MAPPER.readTree(line).path("outcome").textValue();
+            return MAPPER.readTree(line).path(name).textValue();
         } catch (IOException e) {
             throw new IllegalStateException(line, e);
         }

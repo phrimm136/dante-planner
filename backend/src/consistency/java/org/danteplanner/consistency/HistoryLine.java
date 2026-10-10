@@ -18,6 +18,8 @@ final class HistoryLine {
     private static final int OK = 200;
     private static final int NO_CONTENT = 204;
     private static final int NOT_FOUND = 404;
+    private static final int SERVICE_UNAVAILABLE = 503;
+    private static final String WRITE_UNAVAILABLE_CODE = "WRITE_TEMPORARILY_UNAVAILABLE";
     private static final int SUCCESS_CLASS = 2;
     private static final int CLIENT_ERROR_CLASS = 4;
     private static final int SERVER_ERROR_CLASS = 5;
@@ -80,7 +82,7 @@ final class HistoryLine {
                 statusOfClass(SUCCESS_CLASS);
                 yield new Applied(integral("syncVersion"));
             }
-            case "fail" -> new Rejected(statusOfClass(CLIENT_ERROR_CLASS));
+            case "fail" -> new Rejected(rejectedStatus());
             case "unknown" -> {
                 requireNoResponseOrServerError();
                 yield new Unknown();
@@ -98,7 +100,7 @@ final class HistoryLine {
                 }
                 yield new Deleted();
             }
-            case "fail" -> new Rejected(statusOfClass(CLIENT_ERROR_CLASS));
+            case "fail" -> new Rejected(rejectedStatus());
             case "unknown" -> {
                 requireNoResponseOrServerError();
                 yield new Unknown();
@@ -116,7 +118,7 @@ final class HistoryLine {
                 }
                 yield new Changed();
             }
-            case "fail" -> new Rejected(statusOfClass(CLIENT_ERROR_CLASS));
+            case "fail" -> new Rejected(rejectedStatus());
             case "unknown" -> {
                 requireNoResponseOrServerError();
                 yield new Unknown();
@@ -142,6 +144,9 @@ final class HistoryLine {
                 if (status == OK || status == NOT_FOUND) {
                     throw failure("read fail with status " + status);
                 }
+                if (status == SERVICE_UNAVAILABLE) {
+                    requireWriteUnavailableCode();
+                }
                 yield new ReadFailed(status);
             }
             case "unknown" -> {
@@ -158,6 +163,20 @@ final class HistoryLine {
             case "fail", "unknown" -> Optional.empty();
             default -> throw unknownOutcome(outcome);
         };
+    }
+
+    private int rejectedStatus() {
+        if (status() == SERVICE_UNAVAILABLE) {
+            requireWriteUnavailableCode();
+            return SERVICE_UNAVAILABLE;
+        }
+        return statusOfClass(CLIENT_ERROR_CLASS);
+    }
+
+    private void requireWriteUnavailableCode() {
+        if (!WRITE_UNAVAILABLE_CODE.equals(node.path("code").textValue())) {
+            throw failure("fail with status " + SERVICE_UNAVAILABLE + " without code " + WRITE_UNAVAILABLE_CODE);
+        }
     }
 
     private void requireNoResponseOrServerError() {

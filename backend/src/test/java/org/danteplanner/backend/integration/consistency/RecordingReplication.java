@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-final class RecordingReplication implements Replication {
+final class RecordingReplication implements Replication, OregonPrimary {
 
     final List<String> events = Collections.synchronizedList(new ArrayList<>());
 
@@ -31,5 +31,15 @@ final class RecordingReplication implements Replication {
     @Override
     public void removeLatency() {
         events.add("remove latency");
+    }
+
+    @Override
+    public void cut() {
+        events.add("cut oregon");
+    }
+
+    @Override
+    public void restore() {
+        events.add("restore oregon");
     }
 }

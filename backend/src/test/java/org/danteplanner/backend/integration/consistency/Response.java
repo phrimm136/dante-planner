@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -19,6 +20,15 @@ record Response(int status, String body) {
             throw new IllegalStateException("no integral syncVersion in a " + status + " body: " + body);
         }
         return version.longValue();
+    }
+
+    Optional<String> code() {
+        try {
+            JsonNode code = MAPPER.readTree(body).path("code");
+            return code.isTextual() ? Optional.of(code.textValue()) : Optional.empty();
+        } catch (JsonProcessingException e) {
+            return Optional.empty();
+        }
     }
 
     List<String> plannerIds() {

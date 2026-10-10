@@ -19,7 +19,8 @@ class CoverageTest {
 
         assertThat(coverage.uncovered()).containsExactly("withdrawal-marker hit");
         assertThat(coverage.summary()).isEqualTo("{gate pins the primary=2, gate serves the replica=2, "
-                + "replica miss promoted=2, tombstone hit=2, withdrawal-marker hit=0}");
+                + "replica miss promoted=2, tombstone hit=2, withdrawal-marker hit=0, oregon read fell back=2, "
+                + "oregon breaker opened=2}");
     }
 
     @Test
@@ -39,7 +40,18 @@ class CoverageTest {
         Coverage coverage = new Coverage(target -> 0.0);
 
         assertThat(coverage.uncovered()).containsExactly("gate pins the primary", "gate serves the replica",
-                "replica miss promoted", "tombstone hit", "withdrawal-marker hit");
+                "replica miss promoted", "tombstone hit", "withdrawal-marker hit", "oregon read fell back",
+                "oregon breaker opened");
+    }
+
+    @Test
+    void coverage_WhenTheOregonFallbackPoolNeverMoves_NamesItUncovered() throws Exception {
+        Map<CoverageTarget, Double> counters = new EnumMap<>(CoverageTarget.class);
+        Coverage coverage = new Coverage(target -> counters.getOrDefault(target, 0.0));
+
+        coverage.measure(() -> moveAllBut(counters, CoverageTarget.OREGON_READ_FELL_BACK));
+
+        assertThat(coverage.uncovered()).containsExactly("oregon read fell back");
     }
 
     private static Void moveAllBut(Map<CoverageTarget, Double> counters, CoverageTarget still) {

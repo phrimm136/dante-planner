@@ -1,5 +1,6 @@
 package org.danteplanner.backend.integration.consistency;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -7,6 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.danteplanner.backend.integration.consistency.Plan.CutOregon;
 import org.danteplanner.backend.integration.consistency.Plan.Fault;
 import org.danteplanner.backend.integration.consistency.Plan.Latency;
 import org.danteplanner.backend.integration.consistency.Plan.Phase;
@@ -18,21 +20,26 @@ public final class PhaseRunner {
     private PhaseRunner() {
     }
 
-    public static void runPlan(Plan plan, List<? extends OperationPerformer> sessions, Replication replication)
-            throws InterruptedException, ExecutionException {
-        run(plan.phaseA(), sessions, replication);
+    public static Duration runPlan(Plan plan, List<? extends OperationPerformer> sessions, Replication replication,
+            OregonPrimary oregon) throws InterruptedException, ExecutionException {
+        run(plan.phaseA(), sessions, replication, oregon);
         replication.removeLatency();
         replication.startReplica();
         replication.awaitCaughtUp();
-        run(plan.phaseB(), sessions, replication);
+        run(plan.phaseB(), sessions, replication, oregon);
+        Duration phaseC = run(plan.phaseC(), sessions, replication, oregon);
+        oregon.restore();
+        return phaseC;
     }
 
-    static void run(Phase phase, List<? extends OperationPerformer> sessions, Replication replication)
-            throws InterruptedException, ExecutionException {
-        apply(phase.fault(), replication);
+    static Duration run(Phase phase, List<? extends OperationPerformer> sessions, Replication replication,
+            OregonPrimary oregon) throws InterruptedException, ExecutionException {
+        apply(phase.fault(), replication, oregon);
+        long started = System.nanoTime();
         for (Round round : phase.rounds()) {
             run(round, sessions);
         }
+        return Duration.ofNanos(System.nanoTime() - started);
     }
 
     private static void run(Round round, List<? extends OperationPerformer> sessions)
@@ -55,7 +62,7 @@ public final class PhaseRunner {
         }
     }
 
-    private static void apply(Fault fault, Replication replication) {
+    private static void apply(Fault fault, Replication replication, OregonPrimary oregon) {
         switch (fault) {
             case Latency latency -> {
                 if (latency.millis() > 0) {
@@ -63,6 +70,7 @@ public final class PhaseRunner {
                 }
             }
             case Stopped stopped -> replication.stopReplica();
+            case CutOregon cut -> oregon.cut();
         }
     }
 }

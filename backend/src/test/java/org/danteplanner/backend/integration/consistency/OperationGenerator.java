@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SplittableRandom;
 
+import org.danteplanner.backend.integration.consistency.Plan.CutOregon;
 import org.danteplanner.backend.integration.consistency.Plan.Latency;
 import org.danteplanner.backend.integration.consistency.Plan.Phase;
 import org.danteplanner.backend.integration.consistency.Plan.Round;
@@ -32,23 +33,35 @@ public final class OperationGenerator {
     private static final List<Kind> VIEWER_KINDS = List.of(Kind.READ, Kind.LIST);
     private static final List<Kind> CREATOR_KINDS =
             List.of(Kind.SAVE, Kind.READ, Kind.LIST, Kind.PUBLISH, Kind.UNPUBLISH, Kind.CREATE);
-    private static final int PHASES = 2;
+    private static final int PHASES = 3;
 
     private OperationGenerator() {
     }
 
     public static Plan plan(long seed, int budget, long latencyBound) {
         SplittableRandom random = new SplittableRandom(seed);
-        int phaseABudget = budget / PHASES;
-        int phaseAPublicReads = PUBLIC_READ_BUDGET / PHASES;
-        List<List<PlannedOperation>> phaseA = sessions(random, phaseABudget, phaseAPublicReads);
+        List<Region> homes = homes(random);
+        int phaseBudget = budget / PHASES;
+        int phasePublicReads = PUBLIC_READ_BUDGET / PHASES;
+        List<List<PlannedOperation>> phaseA = sessions(random, phaseBudget, phasePublicReads);
         Latency latency = new Latency(random.nextLong(latencyBound + 1));
-        List<List<PlannedOperation>> phaseB =
-                sessions(random, budget - phaseABudget, PUBLIC_READ_BUDGET - phaseAPublicReads);
+        List<List<PlannedOperation>> phaseB = sessions(random, phaseBudget, phasePublicReads);
         List<List<PlannedOperation>> deleteRound = emptySessions();
         deleteRound.get(CREATOR).add(new PlannedOperation.Delete(draw(random)));
-        return new Plan(new Phase(List.of(new Round(phaseA)), latency),
-                new Phase(List.of(new Round(deleteRound), new Round(phaseB)), new Stopped()));
+        List<List<PlannedOperation>> phaseC = sessions(random, budget - (PHASES - 1) * phaseBudget,
+                PUBLIC_READ_BUDGET - (PHASES - 1) * phasePublicReads);
+        return new Plan(homes, new Phase(List.of(new Round(phaseA)), latency),
+                new Phase(List.of(new Round(deleteRound), new Round(phaseB)), new Stopped()),
+                new Phase(List.of(new Round(phaseC)), new CutOregon()));
+    }
+
+    private static List<Region> homes(SplittableRandom random) {
+        Region[] regions = Region.values();
+        List<Region> homes = new ArrayList<>();
+        for (int session = 0; session < SESSIONS.size(); session++) {
+            homes.add(regions[random.nextInt(regions.length)]);
+        }
+        return homes;
     }
 
     private static List<List<PlannedOperation>> sessions(SplittableRandom random, int authorBudget,
