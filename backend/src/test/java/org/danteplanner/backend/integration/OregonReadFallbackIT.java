@@ -139,6 +139,7 @@ class OregonReadFallbackIT {
         CausalHarnessSupport.APP_TO_PRIMARY_PROXY.enable();
         new ToxiproxyControl(CausalHarnessSupport.APP_TO_PRIMARY_PROXY).removeWan();
         new ToxiproxyControl(CausalHarnessSupport.APP_TO_PRIMARY_PROXY).removeReplicationLatency();
+        new ToxiproxyControl(CausalHarnessSupport.APP_TO_PRIMARY_PROXY).restoreOregonPrimary();
         replicationControl = new ReplicationControl(primaryJdbcTemplate, replicaJdbcTemplate);
         replicaJdbcTemplate.execute("START REPLICA");
         primaryReadBreaker.reset();

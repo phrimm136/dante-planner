@@ -6,7 +6,7 @@ import eu.rekawek.toxiproxy.model.ToxicDirection;
 import java.io.IOException;
 
 /**
- * Harness control over the Toxiproxy profiles on the app→primary and replica→primary paths.
+ * Harness control over the Toxiproxy profiles on the app→primary, replica→primary and Oregon→primary paths.
  *
  * <p>{@link #applyWan()} attaches the {@code wan} latency toxic (a fixed 130ms delay on the
  * app→primary direction); {@link #removeWan()} detaches it, leaving the proxy toxic-free. The
@@ -62,6 +62,17 @@ final class ToxiproxyControl {
 
     void removeReplicationLatency() throws IOException {
         for (Toxic toxic : CausalHarnessSupport.REPLICATION_PROXY.toxics().getAll()) {
+            toxic.remove();
+        }
+    }
+
+    void cutOregonPrimary() throws IOException {
+        CausalHarnessSupport.OREGON_TO_PRIMARY_PROXY.disable();
+    }
+
+    void restoreOregonPrimary() throws IOException {
+        CausalHarnessSupport.OREGON_TO_PRIMARY_PROXY.enable();
+        for (Toxic toxic : CausalHarnessSupport.OREGON_TO_PRIMARY_PROXY.toxics().getAll()) {
             toxic.remove();
         }
     }

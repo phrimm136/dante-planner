@@ -64,6 +64,8 @@ abstract class CausalHarnessSupport {
     private static final int PROXY_LISTEN_PORT = 8666;
     private static final String REPLICATION_PROXY_NAME = "replica-to-primary";
     private static final int REPLICATION_PROXY_LISTEN_PORT = 8667;
+    private static final String OREGON_TO_PRIMARY_PROXY_NAME = "oregon-to-primary";
+    static final int OREGON_PROXY_LISTEN_PORT = 8668;
     private static final int SOURCE_CONNECT_RETRY_SECONDS = 1;
 
     private static final Network NETWORK = Network.newNetwork();
@@ -127,6 +129,8 @@ abstract class CausalHarnessSupport {
 
     static final Proxy REPLICATION_PROXY;
 
+    static final Proxy OREGON_TO_PRIMARY_PROXY;
+
     static {
         PRIMARY.start();
         REPLICA.start();
@@ -135,6 +139,7 @@ abstract class CausalHarnessSupport {
         TOXIPROXY.start();
         APP_TO_PRIMARY_PROXY = createAppToPrimaryProxy();
         REPLICATION_PROXY = createReplicationProxy();
+        OREGON_TO_PRIMARY_PROXY = createOregonToPrimaryProxy();
         wireReplication(new JdbcTemplate(adminDataSource(PRIMARY)), new JdbcTemplate(adminDataSource(REPLICA)));
     }
 
@@ -175,6 +180,7 @@ abstract class CausalHarnessSupport {
         toxiproxyControl = new ToxiproxyControl(APP_TO_PRIMARY_PROXY);
         toxiproxyControl.removeWan();
         toxiproxyControl.removeReplicationLatency();
+        toxiproxyControl.restoreOregonPrimary();
     }
 
     /** Appends the driver flag, respecting any query string the container url already carries. */
@@ -209,6 +215,18 @@ abstract class CausalHarnessSupport {
                     PRIMARY_ALIAS + ":" + MYSQL_INTERNAL_PORT);
         } catch (IOException e) {
             throw new UncheckedIOException("Failed to create the replica→primary Toxiproxy proxy", e);
+        }
+    }
+
+    private static Proxy createOregonToPrimaryProxy() {
+        try {
+            ToxiproxyClient client = new ToxiproxyClient(TOXIPROXY.getHost(), TOXIPROXY.getControlPort());
+            return client.createProxy(
+                    OREGON_TO_PRIMARY_PROXY_NAME,
+                    "0.0.0.0:" + OREGON_PROXY_LISTEN_PORT,
+                    PRIMARY_ALIAS + ":" + MYSQL_INTERNAL_PORT);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to create the Oregon→primary Toxiproxy proxy", e);
         }
     }
 
