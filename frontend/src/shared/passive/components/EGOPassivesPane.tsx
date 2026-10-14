@@ -2,9 +2,10 @@ import { Fragment, type CSSProperties, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Separator } from '@/components/ui/separator'
-import { GAME_TEXT_CLASS, PASSIVE_TAB_UNITS, SECTION_STYLES } from '@/lib/constants'
+import { GAME_TEXT_CLASS, PASSIVE_TAB_UNITS } from '@/lib/constants'
 import { clientLength, cn } from '@/lib/utils'
 import { getEffectiveEgoPassives, getLockedEgoPassives } from '../lib/egoPassiveSelection'
+import { PassivePlaceholder } from './PassivePlaceholder'
 
 import type { PassiveId, Threadspin } from '@/shared/gameData'
 
@@ -81,7 +82,7 @@ export function EGOPassivesPane({
     <PassiveTab>
       <PassiveRun passives={shown} renderPassive={renderPassive} />
       {shown.length === 0 && (
-        <div className={SECTION_STYLES.TEXT.caption}>{t('passive.none', 'No passives')}</div>
+        <PassivePlaceholder>{t('passive.none', 'No passives')}</PassivePlaceholder>
       )}
     </PassiveTab>
   )

@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import { TextSkeleton } from '@/components/feedback/TextSkeleton'
 
-import { SECTION_STYLES } from '@/lib/constants'
-import { IdentityPassivesPane, PassiveRun, PassiveTab } from '@/shared/passive'
+import { IdentityPassivesPane, PassivePlaceholder, PassiveRun, PassiveTab } from '@/shared/passive'
 import type { ImportancePalette, Uptie } from '@/shared/gameData'
 import { useBattleDetailI18n } from '../../hooks/useBattleDetailData'
 import {
@@ -85,9 +84,7 @@ function ShownPassives({ source, phase, parts, part, tier, palette }: BattlePass
           />
         )}
       />
-      {entries.length === 0 && (
-        <div className={SECTION_STYLES.TEXT.caption}>{t('passive.none')}</div>
-      )}
+      {entries.length === 0 && <PassivePlaceholder>{t('passive.none')}</PassivePlaceholder>}
     </PassiveTab>
   )
 }

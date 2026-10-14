@@ -1,15 +1,11 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import {
-  PASSIVE_INDICATOR_COLORS,
-  PASSIVE_TAB_UNITS,
-  SECTION_STYLES,
-  UNIT_PANEL_COLORS,
-} from '@/lib/constants'
+import { PASSIVE_INDICATOR_COLORS, PASSIVE_TAB_UNITS, UNIT_PANEL_COLORS } from '@/lib/constants'
 import { clientLength, getDisplayFontForLanguage } from '@/lib/utils'
 import { getEffectivePassives, getLockedPassives } from '../lib/identityPassiveSelection'
 import { PassiveRun, PassiveTab } from './EGOPassivesPane'
+import { PassivePlaceholder } from './PassivePlaceholder'
 
 import type { PassiveId, Uptie } from '@/shared/gameData'
 
@@ -80,9 +76,9 @@ export function IdentityPassivesPane({
       </div>
       <PassiveRun passives={battlePassives} renderPassive={renderPassive} />
       {battlePassives.length === 0 && (
-        <div className={SECTION_STYLES.TEXT.caption}>
+        <PassivePlaceholder>
           {t('identity.noBattlePassives', { ns: 'database' })}
-        </div>
+        </PassivePlaceholder>
       )}
       <div
         data-slot="passive-header"
@@ -93,9 +89,9 @@ export function IdentityPassivesPane({
       </div>
       <PassiveRun passives={supportPassives} renderPassive={renderPassive} />
       {supportPassives.length === 0 && (
-        <div className={SECTION_STYLES.TEXT.caption}>
+        <PassivePlaceholder>
           {t('identity.noSupportPassives', { ns: 'database' })}
-        </div>
+        </PassivePlaceholder>
       )}
     </PassiveTab>
   )
