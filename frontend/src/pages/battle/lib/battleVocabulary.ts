@@ -34,6 +34,10 @@ export const NEUTRAL_RESISTANCE = 1
 
 export const ENGAGEMENT_LABEL_SEPARATOR = ' · '
 
+export const RPG_ROUTE_LETTER_LENGTH = 1
+
+export const RPG_FLOOR_SUFFIX = 'F'
+
 export const ENGAGEMENT_PLACE_JOINER = ' / '
 
 export const BATTLE_DETAIL_ROUTES = {

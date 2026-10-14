@@ -168,11 +168,11 @@ describe('engagement selector', () => {
   )
 
   it(
-    'labels an RPG row by node and floor',
+    'labels an RPG row by route and floor',
     async () => {
       await mountEnemy('1474')
 
-      expect(groupButtons('Story')).toContain('10-5 · Floor B1 (Lv. 64)')
+      expect(groupButtons('Story')).toContain('10-B B1F (Lv. 64)')
     },
     TEST_BUDGET_MS,
   )

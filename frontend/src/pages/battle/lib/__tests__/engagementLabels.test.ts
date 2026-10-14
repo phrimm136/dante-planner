@@ -90,27 +90,48 @@ describe('engagement labels', () => {
     )
   })
 
-  it('labels an RPG battle by node and floor in each language', async () => {
+  it('labels an RPG battle by route and floor with the same text in each language', async () => {
     const row = rowOn(enemy1474, '11054')
-    expect(engagementPlace(row, sources, translate)).toBe('10-5 · Floor B1')
+    expect(engagementPlace(row, sources, translate)).toBe('10-B B1F')
     await i18n.changeLanguage('KR')
-    await vi.waitFor(() => expect(engagementPlace(row, sources, translate)).toBe('10-5 · B1층'))
+    await vi.waitFor(() => expect(i18n.language).toBe('KR'))
+    expect(engagementPlace(row, sources, translate)).toBe('10-B B1F')
   })
 
-  it('labels an RPG battle with no floor by its node alone', () => {
+  it('labels an RPG battle on route A by its route letter and floor', () => {
+    expect(
+      stageLabelText(
+        { kind: 'rpg', canto: 10, node: 4, route: 'A', floor: '1' },
+        undefined,
+        translate,
+      ),
+    ).toBe('10-A 1F')
+  })
+
+  it('labels an RPG battle on a basement floor with the floor suffix', () => {
+    expect(
+      stageLabelText(
+        { kind: 'rpg', canto: 10, node: 5, route: 'B', floor: 'B1' },
+        undefined,
+        translate,
+      ),
+    ).toBe('10-B B1F')
+  })
+
+  it('labels an RPG battle with no floor by its route letter alone', () => {
     expect(
       stageLabelText({ kind: 'rpg', canto: 10, node: 6, route: 'C-1' }, undefined, translate),
-    ).toBe('10-6')
+    ).toBe('10-C')
   })
 
-  it('labels an RPG battle on a floor by its node and floor', () => {
+  it('labels an RPG battle on a C sub-route by the letter C and its floor', () => {
     expect(
       stageLabelText(
         { kind: 'rpg', canto: 10, node: 6, route: 'C-2', floor: '7' },
         undefined,
         translate,
       ),
-    ).toBe('10-6 · Floor 7')
+    ).toBe('10-C 7F')
   })
 
   it('parses an RPG label with or without a floor and rejects an unknown key', () => {
@@ -125,7 +146,7 @@ describe('engagement labels', () => {
 
   it('joins every label of a row placed on two floors', () => {
     expect(engagementPlace(rowOn(enemy1474, '11033'), sources, translate)).toBe(
-      '10-5 · Floor B1 / 10-5 · Floor B2',
+      '10-B B1F / 10-B B2F',
     )
   })
 
@@ -153,8 +174,8 @@ describe('engagement labels', () => {
 
   it('collapses stages 11008 and 11024 of 1474, whose content matches', () => {
     const labels = storyEntries(enemy1474, enemy1474I18n)
-    expect(labels.filter((label) => label.startsWith('10-4 · Floor B1 (Lv. 35)'))).toEqual([
-      '10-4 · Floor B1 (Lv. 35)',
+    expect(labels.filter((label) => label.startsWith('10-A B1F (Lv. 35)'))).toEqual([
+      '10-A B1F (Lv. 35)',
     ])
   })
 

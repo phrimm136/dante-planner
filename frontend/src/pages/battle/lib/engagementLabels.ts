@@ -11,6 +11,8 @@ import {
   ENGAGEMENT_LABEL_SEPARATOR,
   ENGAGEMENT_PLACE_JOINER,
   PROLOGUE_CANTO,
+  RPG_FLOOR_SUFFIX,
+  RPG_ROUTE_LETTER_LENGTH,
 } from './battleVocabulary'
 import { cantoLabel, type Translate } from './enemy/enemyFacetOptions'
 import type { SelectorEntry } from './engagementRows'
@@ -85,11 +87,10 @@ export function stageLabelText(
       return text?.title ?? label.titleKey
     case 'tutorial':
       return cantoLabel(PROLOGUE_CANTO, t)
-    case 'rpg':
-      return joined(
-        `${String(label.canto)}-${String(label.node)}`,
-        label.floor === undefined ? undefined : t('battle.rpgFloor', { floor: label.floor }),
-      )
+    case 'rpg': {
+      const place = `${String(label.canto)}-${label.route.slice(0, RPG_ROUTE_LETTER_LENGTH)}`
+      return label.floor === undefined ? place : `${place} ${label.floor}${RPG_FLOOR_SUFFIX}`
+    }
   }
 }
 
