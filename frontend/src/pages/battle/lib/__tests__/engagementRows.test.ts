@@ -2,12 +2,7 @@ import { describe, it, expect } from 'vitest'
 
 import enemy1366 from '@static/data/enemy/1366.json'
 import { EnemyDataSchema } from '../../schemas/BattleDetailSchemas'
-import {
-  defaultRowIndex,
-  firstMapName,
-  groupSelectorRows,
-  selectorEntries,
-} from '../engagementRows'
+import { defaultRowIndex, groupSelectorRows, selectorEntries } from '../engagementRows'
 
 const rows1366 = EnemyDataSchema.parse(enemy1366).engagements
 const groups1366 = groupSelectorRows(rows1366)
@@ -46,10 +41,5 @@ describe('selector rows', () => {
     expect(defaultRowIndex(groups1366, 'story')).toBe(0)
     expect(defaultRowIndex(groups1366, 'refractral')).toBe(0)
     expect(defaultRowIndex([], 'story')).toBeUndefined()
-  })
-
-  it('takes the background from the first row in mode order', () => {
-    expect(firstMapName(groups1366)).toBe('Walpu8_WelfareHallway')
-    expect(firstMapName([])).toBeUndefined()
   })
 })

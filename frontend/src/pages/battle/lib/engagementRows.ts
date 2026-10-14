@@ -58,7 +58,3 @@ export function defaultRowIndex(
   const arrived = groups.find((group) => group.battleCase === arrivalMode)
   return (arrived ?? groups[0])?.rows[0]?.index
 }
-
-export function firstMapName(groups: readonly SelectorRowGroup[]): string | undefined {
-  return groups[0]?.rows[0]?.row.mapName
-}

@@ -9,7 +9,7 @@ import {
   SkillLevelSchema,
   skillMapWithRetiredKeys,
 } from '@/shared/gameData'
-import { BATTLE_CASES } from '../lib/battleVocabulary'
+import { BATTLE_CASES, HAZARD_CLASSES, LEVEL_NUMBER_PLATES } from '../lib/battleVocabulary'
 import { BattleSpriteSchema } from './BattleSpecSchemas'
 
 const unused = z.unknown().optional()
@@ -280,16 +280,35 @@ export const EngagementRowSchema = z
 
 const PHASES = z.tuple([BattlePhaseSchema], BattlePhaseSchema)
 
+export const RiskPlateSchema = z.union([
+  z
+    .object({ classType: z.enum(HAZARD_CLASSES), hazardGrade: z.string().optional() })
+    .strict()
+    .transform(({ classType, hazardGrade }) => ({
+      kind: 'class' as const,
+      class: classType,
+      grade: hazardGrade,
+    })),
+  z
+    .object({ classType: z.literal('SUPPLEMENT'), hazardGrade: z.string() })
+    .strict()
+    .transform(({ hazardGrade }) => ({ kind: 'supplement' as const, grade: hazardGrade })),
+  z
+    .object({ classType: z.literal('HIDDEN') })
+    .strict()
+    .transform(() => ({ kind: 'hidden' as const })),
+  z
+    .object({ classType: z.enum(LEVEL_NUMBER_PLATES) })
+    .strict()
+    .transform(({ classType }) => ({ kind: 'levelNumber' as const, which: classType })),
+])
+
+export type RiskPlate = z.output<typeof RiskPlateSchema>
+
 const EnemyKitSchema = z
   .object({
     phases: PHASES,
-    badge: z
-      .object({
-        classType: z.string(),
-        hazardGrade: z.string().optional(),
-      })
-      .strict()
-      .optional(),
+    badge: RiskPlateSchema.optional(),
   })
   .strict()
 

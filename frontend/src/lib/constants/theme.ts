@@ -457,3 +457,22 @@ export const PANEL_TEXT_NODES = {
   CONDITION_ADD: { LINE_SPACING_EM: 0.2, LETTER_SPACING_EM: -0.02, WORD_SPACING_EM: -0.05 },
   CONDITION_MIN: { LINE_SPACING_EM: 0.2, LETTER_SPACING_EM: -0.02, WORD_SPACING_EM: -0.1 },
 } as const
+
+// Prefab_UnitInformationAbnormalityNameTag/[Image]AbClassRank, in client units.
+export const RISK_PLATE_UNITS = {
+  WIDTH: 188.46,
+  HEIGHT: 80.409,
+  // [Text]HazardGrade: anchoredPosition (70, 14), sizeDelta 50x40, font size 40.
+  GRADE: { CENTER_X: 70, CENTER_Y: 14, WIDTH: 50, HEIGHT: 40, FONT: 40 },
+  // [Text]HazardGrade_NoneClassType: anchoredPosition (58, 8), sizeDelta 65x55, font size 55.
+  NONE_CLASS_GRADE: { CENTER_X: 58, CENTER_Y: 8, WIDTH: 65, HEIGHT: 55, FONT: 55 },
+} as const
+
+export const RISK_PLATE_GRADE_COLORS = {
+  ZAYIN: '#f8c200',
+  TETH: '#f8c200',
+  HE: '#f8c200',
+  WAW: '#ff9600',
+  ALEPH: '#ff0000',
+  SUPPLEMENT: '#f8c200',
+} as const

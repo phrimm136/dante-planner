@@ -17,7 +17,7 @@ import {
   type PartSelection,
 } from '../../lib/battleDetail'
 import type { BattleCase, BattleFamily } from '../../lib/battleVocabulary'
-import { defaultRowIndex, firstMapName, groupSelectorRows } from '../../lib/engagementRows'
+import { defaultRowIndex, groupSelectorRows } from '../../lib/engagementRows'
 import type { BattleKit, EngagementRow } from '../../schemas/BattleDetailSchemas'
 import { BattleDetailHeader } from './BattleDetailHeader'
 import { BattleEgoSection } from './BattleEgoSection'
@@ -150,22 +150,12 @@ export function BattleDetailView({
           unitId={unitId}
           config={config}
           phase={phase}
-          classType={kit.badge?.classType}
-          hazardGrade={kit.badge?.hazardGrade}
-          mapName={firstMapName(rowGroups)}
+          riskPlate={kit.badge}
+          mapName={row?.mapName}
         />
       }
       metadata={
-        <BattleInfoPane
-          config={config}
-          id={id}
-          unitId={unitId}
-          phase={phase}
-          parts={parts}
-          part={part}
-          level={level}
-          tier={tier}
-        />
+        <BattleInfoPane phase={phase} parts={parts} part={part} level={level} tier={tier} />
       }
       selector={selector}
     >

@@ -16,6 +16,8 @@ export const DEFAULT_BATTLE_MODE: BattleCase = 'story'
 
 export const HAZARD_CLASSES = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH'] as const
 
+export const LEVEL_NUMBER_PLATES = ['UNDEF', 'HYPHEN'] as const
+
 export const HIDDEN_BATTLE = 'hidden'
 
 export type HiddenBattle = typeof HIDDEN_BATTLE

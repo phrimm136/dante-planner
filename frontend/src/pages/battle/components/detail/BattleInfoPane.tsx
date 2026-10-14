@@ -1,4 +1,4 @@
-import { Suspense, type ReactNode } from 'react'
+import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { LabeledPanel } from '@/components/layout/LabeledPanel'
@@ -16,9 +16,6 @@ import { phaseTexts, statusView, type StatusView } from '../../lib/battleDetail'
 import type { BattlePart, BattlePhase } from '../../schemas/BattleDetailSchemas'
 
 interface BattleInfoPaneProps {
-  config: BattleI18nConfig
-  id: string
-  unitId: string
   phase: BattlePhase
   parts: readonly BattlePart[]
   part: BattlePart | undefined
@@ -42,11 +39,10 @@ function hasStatus(view: StatusView): boolean {
   return view.hp !== undefined || view.physical !== undefined
 }
 
-function StatusBlock({ view, title }: { view: StatusView; title?: ReactNode }) {
+function StatusBlock({ view }: { view: StatusView }) {
   const { hp, speed, defense, physical, sins, breakSection } = view
   return (
     <div data-testid="battle-status-block" className="space-y-2">
-      {title !== undefined && <div className="text-sm font-semibold">{title}</div>}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
         {hp !== undefined && speed !== undefined && defense !== undefined && (
           <StatusPanel hp={hp} speed={speed} defense={defense} />
@@ -94,36 +90,12 @@ export function BattlePartLabel(props: PartLabelProps) {
   )
 }
 
-export function BattleInfoPane({
-  config,
-  id,
-  unitId,
-  phase,
-  parts,
-  part,
-  level,
-  tier,
-}: BattleInfoPaneProps) {
+export function BattleInfoPane({ phase, parts, part, level, tier }: BattleInfoPaneProps) {
   const view = statusView(phase, part, parts, level, tier)
 
   return (
     <div className="space-y-4">
-      {hasStatus(view) && (
-        <StatusBlock
-          view={view}
-          title={
-            part === undefined ? undefined : (
-              <BattlePartLabel
-                config={config}
-                id={id}
-                unitId={unitId}
-                phaseId={String(phase.id)}
-                part={part}
-              />
-            )
-          }
-        />
-      )}
+      {hasStatus(view) && <StatusBlock view={view} />}
 
       <TraitsDisplay
         traits={[...(phase.unitKeywordList ?? []), ...(phase.associationList ?? [])]}

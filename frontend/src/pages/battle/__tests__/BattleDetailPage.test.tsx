@@ -11,7 +11,16 @@ import {
 import type { ReactNode } from 'react'
 
 import i18n from '@/lib/i18n'
-import { getBattleSkillIconPath, getHazardPlatePath, getStageBackgroundPath } from '@/shared/assets'
+import {
+  getBattleSkillIconPath,
+  getHazardGradedPlatePath,
+  getHazardHiddenPlatePath,
+  getHazardPlatePath,
+  getHazardSupplementPlatePath,
+  getLevelNumberHyphenPlatePath,
+  getLevelNumberUndefPlatePath,
+  getStageBackgroundPath,
+} from '@/shared/assets'
 import { createTestQueryClient } from '@/test-utils/queryClient'
 import { mountRoute } from '@/test-utils/mountRoute'
 import BattlePage from '../BattlePage'
@@ -234,7 +243,7 @@ describe('parts', () => {
       expect(blocks).toHaveLength(1)
       const [head] = blocks
       if (head === undefined) throw new Error('no status block')
-      expect(within(head).getByText('Head')).toBeDefined()
+      expect(within(head).queryByText('Head')).toBeNull()
       expect(within(head).getByText('357')).toBeDefined()
       expect(within(head).getByText('Resistances')).toBeDefined()
       expect(within(head).getByText('Stagger')).toBeDefined()
@@ -339,6 +348,31 @@ describe('header', () => {
   )
 
   it(
+    'draws the selected engagement map behind the sprite',
+    async () => {
+      await mountEnemy('8041')
+
+      const header = within(requireSlot('detail-header'))
+      expect(header.getByTestId('battle-detail-background').getAttribute('src')).toBe(
+        getStageBackgroundPath('Cp4_BrokenKCorpStreet_v1'),
+      )
+      const stories = groupButtons('Story')
+      selectIn('Story', stories[stories.length - 1] ?? '')
+
+      await waitFor(
+        () =>
+          expect(
+            within(requireSlot('detail-header'))
+              .getByTestId('battle-detail-background')
+              .getAttribute('src'),
+          ).toBe(getStageBackgroundPath('Cp4_TcorStreet')),
+        { timeout: LOAD_WAIT_MS },
+      )
+    },
+    TEST_BUDGET_MS,
+  )
+
+  it(
     'shows the hazard plate for a ZAYIN enemy',
     async () => {
       await mountEnemy('8016')
@@ -352,25 +386,59 @@ describe('header', () => {
   )
 
   it(
-    'shows the hazard grade beside the plate when the enemy has one',
+    'draws a graded TETH enemy on the graded plate with its grade in the plate',
     async () => {
       await mountEnemy('8041')
 
       const header = within(requireSlot('detail-header'))
       expect(header.getByTestId('battle-hazard-plate').getAttribute('src')).toBe(
-        getHazardPlatePath('TETH'),
+        getHazardGradedPlatePath('TETH'),
       )
-      expect(header.getByTestId('battle-hazard-grade')).toHaveTextContent('03')
+      const grade = header.getByTestId('battle-hazard-grade')
+      expect(grade.textContent).toBe('-03')
+      expect(grade.style.color).toBe('#f8c200')
     },
     TEST_BUDGET_MS,
   )
 
   it(
-    'shows no plate for a HYPHEN enemy',
+    'draws the hyphen level-number plate for a HYPHEN enemy',
     async () => {
       await mountEnemy('8678')
 
-      expect(within(requireSlot('detail-header')).queryByTestId('battle-hazard-plate')).toBeNull()
+      const header = within(requireSlot('detail-header'))
+      expect(header.getByTestId('battle-hazard-plate').getAttribute('src')).toBe(
+        getLevelNumberHyphenPlatePath(),
+      )
+      expect(header.queryByTestId('battle-hazard-grade')).toBeNull()
+    },
+    TEST_BUDGET_MS,
+  )
+
+  it(
+    'draws the blank plate and the grade for a SUPPLEMENT enemy',
+    async () => {
+      await mountEnemy('1004')
+
+      const header = within(requireSlot('detail-header'))
+      expect(header.getByTestId('battle-hazard-plate').getAttribute('src')).toBe(
+        getHazardSupplementPlatePath(),
+      )
+      expect(header.getByTestId('battle-hazard-grade').textContent).toBe('-01')
+    },
+    TEST_BUDGET_MS,
+  )
+
+  it(
+    'draws the hidden plate without a grade for a HIDDEN enemy',
+    async () => {
+      await mountEnemy('8043')
+
+      const header = within(requireSlot('detail-header'))
+      expect(header.getByTestId('battle-hazard-plate').getAttribute('src')).toBe(
+        getHazardHiddenPlatePath(),
+      )
+      expect(header.queryByTestId('battle-hazard-grade')).toBeNull()
     },
     TEST_BUDGET_MS,
   )
@@ -504,25 +572,41 @@ describe('restored coverage', () => {
   )
 
   it.each([
-    ['1082', 'HE'],
-    ['1123', 'WAW'],
+    ['1082', 'HE', '#f8c200'],
+    ['1123', 'WAW', '#ff9600'],
   ])(
-    'shows the hazard plate of %s as %s',
-    async (id, classType) => {
+    'shows the graded hazard plate of %s as %s with its grade in %s',
+    async (id, classType, color) => {
       await mountEnemy(id)
 
-      const plate = within(requireSlot('detail-header')).getByTestId('battle-hazard-plate')
-      expect(plate.getAttribute('src')).toBe(getHazardPlatePath(classType))
+      const header = within(requireSlot('detail-header'))
+      expect(header.getByTestId('battle-hazard-plate').getAttribute('src')).toBe(
+        getHazardGradedPlatePath(classType),
+      )
+      expect(header.getByTestId('battle-hazard-grade').style.color).toBe(color)
     },
     TEST_BUDGET_MS,
   )
 
   it(
-    'shows no plate for an UNDEF enemy',
+    'draws the page language UNDEF plate for an UNDEF enemy',
     async () => {
       await mountEnemy('1366')
 
-      expect(within(requireSlot('detail-header')).queryByTestId('battle-hazard-plate')).toBeNull()
+      const plate = within(requireSlot('detail-header')).getByTestId('battle-hazard-plate')
+      expect(plate.getAttribute('src')).toBe(getLevelNumberUndefPlatePath('en'))
+
+      await i18n.changeLanguage('KR')
+
+      await waitFor(
+        () =>
+          expect(
+            within(requireSlot('detail-header'))
+              .getByTestId('battle-hazard-plate')
+              .getAttribute('src'),
+          ).toBe(getLevelNumberUndefPlatePath('kr')),
+        { timeout: LOAD_WAIT_MS },
+      )
     },
     TEST_BUDGET_MS,
   )

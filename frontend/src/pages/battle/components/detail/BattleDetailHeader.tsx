@@ -6,7 +6,6 @@ import { SECTION_STYLES } from '@/lib/constants'
 import { getDisplayFontForLanguage } from '@/lib/utils'
 import {
   getBattleSpritePath,
-  getHazardPlatePath,
   getRarityIconPath,
   getSinnerIconPath,
   getStageBackgroundPath,
@@ -17,8 +16,9 @@ import { unitName } from '../../lib/battleDetail'
 import { BATTLE_DETAIL_SPRITE_ASPECT_RATIO } from '../../lib/cardLayout'
 import { headerSpriteStyle } from '../../lib/headerSprite'
 import type { BattleSprite } from '../../schemas/BattleSpecSchemas'
-import { HAZARD_CLASSES, type BattleFamily } from '../../lib/battleVocabulary'
-import type { BattlePhase } from '../../schemas/BattleDetailSchemas'
+import type { BattleFamily } from '../../lib/battleVocabulary'
+import type { BattlePhase, RiskPlate as RiskPlateBadge } from '../../schemas/BattleDetailSchemas'
+import { RiskPlate } from './RiskPlate'
 
 interface BattleDetailHeaderProps {
   family: BattleFamily
@@ -26,15 +26,8 @@ interface BattleDetailHeaderProps {
   unitId: string
   config: BattleI18nConfig
   phase: BattlePhase
-  classType: string | undefined
-  hazardGrade: string | undefined
+  riskPlate: RiskPlateBadge | undefined
   mapName: string | undefined
-}
-
-function hazardClass(classType: string | undefined): string | undefined {
-  return (HAZARD_CLASSES as readonly (string | undefined)[]).includes(classType)
-    ? classType
-    : undefined
 }
 
 function sinnerOf(family: BattleFamily, phase: BattlePhase): string | undefined {
@@ -145,12 +138,10 @@ export function BattleDetailHeader({
   unitId,
   config,
   phase,
-  classType,
-  hazardGrade,
+  riskPlate,
   mapName,
 }: BattleDetailHeaderProps) {
   const sinner = sinnerOf(family, phase)
-  const hazard = hazardClass(classType)
   const sprite = { family, id, spriteId: phase.spriteId, sprite: phase.sprite, mapName }
 
   return (
@@ -165,22 +156,9 @@ export function BattleDetailHeader({
             />
           </div>
         )}
-        {hazard !== undefined && (
-          <div className="flex items-center justify-end gap-1">
-            <img
-              data-testid="battle-hazard-plate"
-              src={getHazardPlatePath(hazard)}
-              alt={hazard}
-              className="h-6 object-contain"
-            />
-            {hazardGrade !== undefined && (
-              <span
-                data-testid="battle-hazard-grade"
-                className="text-sm font-semibold tabular-nums"
-              >
-                {hazardGrade}
-              </span>
-            )}
+        {riskPlate !== undefined && (
+          <div className="flex justify-end">
+            <RiskPlate plate={riskPlate} />
           </div>
         )}
         <div className="flex items-center gap-3">
