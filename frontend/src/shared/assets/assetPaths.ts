@@ -39,7 +39,8 @@ const AB_PART_SPRITES: Record<AbPartType, string> = {
   HEAD_PLATE: 'head-plate',
 }
 
-const frameLevel = (skillTier: number): number => Math.max(1, Math.min(3, skillTier))
+const frameLevel = (attr: SkillAttributeType, skillTier: number): number =>
+  attr === 'NEUTRAL' ? 1 : Math.max(1, Math.min(3, skillTier))
 
 const pascalWord = (word: string): string =>
   word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
@@ -106,12 +107,12 @@ export const PATHS = {
 
   skillFrame: (attributeType: SkillAttributeType | undefined, skillTier: number) => {
     const attr = attributeType ?? 'NEUTRAL'
-    const level = String(frameLevel(skillTier))
+    const level = String(frameLevel(attr, skillTier))
     return resolveAsset(`/images/UI/skill/frame-${attr.toLowerCase()}-tier${level}.webp`)
   },
   skillFrameBG: (attributeType: SkillAttributeType | undefined, skillTier: number) => {
     const attr = attributeType ?? 'NEUTRAL'
-    const level = String(frameLevel(skillTier))
+    const level = String(frameLevel(attr, skillTier))
     return resolveAsset(`/images/UI/skill/frameBg-${attr.toLowerCase()}-tier${level}.webp`)
   },
   attackTypeFrame: (attributeType: SkillAttributeType) =>
@@ -149,7 +150,8 @@ export const PATHS = {
   importanceGlow: (palette: ImportancePalette, tier: ImportanceTier) =>
     resolveAsset(`/images/UI/common/importance-glow-${palette}-${tier}.webp`),
   cautionStripe: () => resolveAsset('/images/UI/common/caution-stripe.webp'),
-  namePlate: (kind: 'skill' | 'passive') => resolveAsset(`/images/UI/common/name-plate-${kind}.webp`),
+  namePlate: (kind: 'skill' | 'passive') =>
+    resolveAsset(`/images/UI/common/name-plate-${kind}.webp`),
   egoTierIcon: (tier: number) => resolveAsset(`/images/UI/common/tier-${String(tier)}.webp`),
   abPartIcon: (sprite: string) => resolveAsset(`/images/UI/common/part-${sprite}.webp`),
   lockIcon: () => resolveAsset('/images/UI/common/lock.webp'),
@@ -349,8 +351,7 @@ export const getAbEventImagePath = (eventId: string): string => path('abEventIma
 export const getBattleSpritePath = (family: string, spriteId: string): string =>
   path('battleSprite', family, spriteId)
 export const getBattleSkillIconPath = (iconId: string): string => path('battleSkillIcon', iconId)
-export const getStageBackgroundPath = (mapName: string): string =>
-  path('stageBackground', mapName)
+export const getStageBackgroundPath = (mapName: string): string => path('stageBackground', mapName)
 export const getHazardPlatePath = (classType: string): string => path('hazardPlate', classType)
 export const getBannerImagePath = (): string => path('bannerImage')
 export const getLogoPath = (): string => path('logo')
