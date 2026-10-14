@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 
-import { FONT_LICENSES, type FontLicense } from '@/lib/constants'
+import { FONT_LICENSES, type FontLicense } from '@/lib/constants/fonts'
 
 const NAMESPACE = 'pages.licenses'
 

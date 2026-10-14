@@ -29,7 +29,7 @@ Code-based routes only, defined in `src/lib/router.tsx` with `lazyRouteComponent
 
 ## Constants & styling
 
-- Game vocabulary (sinners, affinities, level caps) → `src/shared/gameData/constants.ts`; app config (delays, stale times, colors) → `src/lib/constants/`, split into `app`/`api`/`layout`/`planner`/`theme` and re-exported from its `index.ts`, so every consumer imports `@/lib/constants`. No hardcoded hex colors or magic numbers in components — add to the right module first.
+- Game vocabulary (sinners, affinities, level caps) → `src/shared/gameData/constants.ts`; app config (delays, stale times, colors) → `src/lib/constants/`, split into `app`/`api`/`layout`/`planner`/`theme` and re-exported from its `index.ts`, so every consumer imports `@/lib/constants`. Exception: a module that imports Vite asset queries (`?url`) stays out of the barrel (`@/lib/constants/fonts`), because e2e imports the barrel from Node. No hardcoded hex colors or magic numbers in components — add to the right module first.
 - Color/style exports are `SANITY_INDICATOR_COLORS`, `PASSIVE_INDICATOR_COLORS`, `ACCENT_COLORS`, and `SECTION_STYLES` — there is no `COLORS` export.
 - Class merging via `cn` from `src/lib/utils.ts`. `lg:` (1024px) is the mobile/desktop breakpoint.
 - Asset paths go through the helpers in `@/shared/assets`, never hardcoded `"/images/..."` strings.

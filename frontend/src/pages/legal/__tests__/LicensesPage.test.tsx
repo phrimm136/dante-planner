@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import sarasaLicence from '@/assets/fonts/ChineseFont.OFL.txt?url'
 import corporateLogoLicence from '@/assets/fonts/Corporate-Logo-Bold-ver2.OFL.txt?url'
-import { FONT_LICENCE_KINDS, FONT_LICENSES } from '@/lib/constants'
+import { FONT_LICENCE_KINDS, FONT_LICENSES } from '@/lib/constants/fonts'
 import i18n from '@/lib/i18n'
 import { mountRoute } from '@/test-utils/mountRoute'
 import LicensesPage from '../LicensesPage'
