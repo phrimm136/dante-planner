@@ -21,6 +21,6 @@
     "@playwright/test": "1.62.1",
     "@types/node": "^26.1.2",
     "mysql2": "^3.15.3",
-    "typescript": "^5"
+    "typescript": "^7"
   }
 }
