@@ -198,7 +198,7 @@ class PlannerPublishingServiceTest {
             PlannerResponse result = publishingService.unpublish(testUser.getId(), planner.getId());
 
             assertThat(result.published()).isFalse();
-            verify(catalogRepository, never()).deleteById(any());
+            verify(catalogRepository, never()).deleteByPlannerId(any());
         }
     }
 
@@ -301,7 +301,7 @@ class PlannerPublishingServiceTest {
                     planner.getId(), Planner::unpublish);
 
             assertThat(result).isSameAs(planner);
-            verify(catalogRepository, never()).deleteById(any());
+            verify(catalogRepository, never()).deleteByPlannerId(any());
         }
 
         @Test
@@ -314,7 +314,7 @@ class PlannerPublishingServiceTest {
 
             assertThat(result).isSameAs(planner);
             assertThat(result.isPublished()).isFalse();
-            verify(catalogRepository).deleteById(planner.getId());
+            verify(catalogRepository).deleteByPlannerId(planner.getId());
         }
 
         @Test
@@ -477,7 +477,7 @@ class PlannerPublishingServiceTest {
             PlannerResponse result = publishingService.unpublish(testUser.getId(), planner.getId());
 
             assertThat(result.published()).isFalse();
-            verify(catalogRepository).deleteById(planner.getId());
+            verify(catalogRepository).deleteByPlannerId(planner.getId());
         }
     }
 

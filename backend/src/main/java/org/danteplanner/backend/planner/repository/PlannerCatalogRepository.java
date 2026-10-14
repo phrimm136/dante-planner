@@ -19,6 +19,10 @@ public interface PlannerCatalogRepository
     @Query(value = RecommendedSql.REFRESH_RECOMMENDED, nativeQuery = true)
     int refreshRecommended(@Param("plannerId") UUID plannerId, @Param("threshold") int threshold);
 
+    @Modifying(flushAutomatically = true)
+    @Query("DELETE FROM PlannerCatalog c WHERE c.plannerId = :plannerId")
+    int deleteByPlannerId(@Param("plannerId") UUID plannerId);
+
     @Modifying
     @Query("DELETE FROM PlannerCatalog c WHERE c.plannerId IN :plannerIds")
     void deleteAllByPlannerIds(@Param("plannerIds") Collection<UUID> plannerIds);

@@ -89,7 +89,7 @@ class PlannerCatalogServiceTest {
 
         catalogService.onBecameInvisible(plannerId);
 
-        verify(catalogRepository).deleteById(plannerId);
+        verify(catalogRepository).deleteByPlannerId(plannerId);
         verifyRecorded(plannerId);
         assertThat(tombstoneStore.calls()).isEmpty();
         commit();

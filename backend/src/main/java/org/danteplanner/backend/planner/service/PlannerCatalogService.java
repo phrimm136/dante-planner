@@ -163,7 +163,7 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
 
     @Transactional
     public void remove(UUID plannerId) {
-        catalogRepository.deleteById(plannerId);
+        catalogRepository.deleteByPlannerId(plannerId);
         log.debug("Catalog row removed for planner {}", plannerId);
     }
 

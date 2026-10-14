@@ -96,7 +96,7 @@ class PlannerDeleteRestrictionTest {
     }
 
     private void assertWithdrawnFromTheCatalog(Planner planner) {
-        verify(catalogRepository).deleteById(planner.getId());
+        verify(catalogRepository).deleteByPlannerId(planner.getId());
         assertThat(tombstoneStore.isTombstoned(ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, planner.getId())).isTrue();
     }
 
