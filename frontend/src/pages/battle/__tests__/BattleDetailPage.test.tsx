@@ -23,6 +23,7 @@ import {
 } from '@/shared/assets'
 import { createTestQueryClient } from '@/test-utils/queryClient'
 import { mountRoute } from '@/test-utils/mountRoute'
+import AssistantDetailPage from '../AssistantDetailPage'
 import BattlePage from '../BattlePage'
 import EnemyDetailPage from '../EnemyDetailPage'
 import { battleFilterStore } from '../stores/battleFilterStore'
@@ -49,6 +50,13 @@ async function mountEnemy(id: string) {
     timeout: LOAD_WAIT_MS,
   })
   await waitFor(() => expect(document.querySelectorAll('[data-slot="skeleton"]').length).toBe(0), {
+    timeout: LOAD_WAIT_MS,
+  })
+}
+
+async function mountAssistant(id: string) {
+  mountRoute('/battle/assistant/$id', `/battle/assistant/${id}`, AssistantDetailPage)
+  await waitFor(() => expect(requireSlot('detail-sections')).toBeDefined(), {
     timeout: LOAD_WAIT_MS,
   })
 }
@@ -209,9 +217,11 @@ describe('stage effects', () => {
     async () => {
       await mountEnemy('8016')
 
-      selectIn('Story', '4-12 (Lv. 31)')
+      selectIn('Story', 'Canto IV · Rowdy League of Nine Littérateurs (Lv. 31)')
 
-      await waitFor(() => expect(pressed('Story')).toBe('4-12 (Lv. 31)'))
+      await waitFor(() =>
+        expect(pressed('Story')).toBe('Canto IV · Rowdy League of Nine Littérateurs (Lv. 31)'),
+      )
       expect(
         within(requireSlot('detail-selector')).queryByTestId('battle-stage-effects'),
       ).toBeNull()
@@ -678,6 +688,42 @@ describe('client text styles', () => {
       expect(first?.textContent).toContain('Gain 8')
       expect(first?.querySelector('button')).not.toBeNull()
       expect(card.textContent).not.toContain('<')
+    },
+    TEST_BUDGET_MS,
+  )
+})
+
+describe('regrouped assist units', () => {
+  it(
+    'lists the rows of units 400001 and 400005 on /battle/assistant/400001',
+    async () => {
+      await mountAssistant('400001')
+
+      const strikeLevel = () =>
+        requireSlot('detail-sections').querySelector(
+          '[data-skill-id="40000101"] [data-slot="skill-level"]',
+        )?.textContent
+      await waitFor(
+        () => expect(renderedSkillIds()).toEqual(['40000101', '40000102', '40000103', '40000104']),
+        { timeout: LOAD_WAIT_MS },
+      )
+      expect(strikeLevel()).toBe('50')
+
+      const rows = groupButtons('Story')
+      const grown: string[] = []
+      for (const label of rows) {
+        selectIn('Story', label)
+        await waitFor(() => expect(pressed('Story')).toBe(label))
+        if (renderedSkillIds().includes('40000501')) grown.push(label)
+      }
+      expect(grown.length).toBeGreaterThan(0)
+      expect(grown.length).toBeLessThan(rows.length)
+
+      const [first] = grown
+      if (first === undefined) throw new Error('no 400005 row')
+      selectIn('Story', first)
+      await waitFor(() => expect(strikeLevel()).toBe('67'))
+      expect(statCell('Defense')).toMatch(/^60\b/)
     },
     TEST_BUDGET_MS,
   )

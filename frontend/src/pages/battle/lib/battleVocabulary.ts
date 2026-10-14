@@ -14,6 +14,13 @@ export type BattleCase = (typeof BATTLE_CASES)[number]
 
 export const DEFAULT_BATTLE_MODE: BattleCase = 'story'
 
+export const SKILL_LEVEL_ADDER_BY_DEF_TYPE: Readonly<Record<string, 'attack' | 'defense'>> = {
+  ATTACK: 'attack',
+  COUNTER: 'attack',
+  GUARD: 'defense',
+  EVADE: 'defense',
+}
+
 export const HAZARD_CLASSES = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH'] as const
 
 export const LEVEL_NUMBER_PLATES = ['UNDEF', 'HYPHEN'] as const

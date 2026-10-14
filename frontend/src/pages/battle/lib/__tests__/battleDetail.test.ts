@@ -11,6 +11,8 @@ import enemy8390 from '@static/data/enemy/8390.json'
 import enemy8390I18n from '@static/i18n/EN/enemy/8390.json'
 import enemy8549 from '@static/data/enemy/8549.json'
 import enemy8678 from '@static/data/enemy/8678.json'
+import assistant400001 from '@static/data/assistant/400001.json'
+import assistant400001KR from '@static/i18n/KR/assistant/400001.json'
 import assistant400038 from '@static/data/assistant/400038.json'
 import assistant400038I18n from '@static/i18n/EN/assistant/400038.json'
 import sinnerEvent10101 from '@static/data/sinnerEvent/10101.json'
@@ -27,6 +29,7 @@ import {
 } from '../../schemas/BattleDetailSchemas'
 import {
   ALL_PARTS,
+  acquireConditionText,
   isIdentityShaped,
   isShownPassive,
   phaseTextKeywords,
@@ -37,6 +40,8 @@ import {
   unitName,
   unitTextKeywords,
   selectedPart,
+  skillLevelAdder,
+  skillLevelName,
   stageEffectGrants,
   statAtLevel,
   statusView,
@@ -353,7 +358,10 @@ describe('status view', () => {
     ])
     const body = statusView(phase, parts[0], parts, 40, 1)
     expect(body.speed).toEqual({ kind: 'shown', value: { min: 1, max: 2 } })
-    expect(body.physical).toEqual({ kind: 'shown', value: { slash: 1.2, pierce: 0.9, blunt: 0.9 } })
+    expect(body.physical).toEqual({
+      kind: 'shown',
+      value: { slash: 1.2, pierce: 0.9, blunt: 0.9 },
+    })
     expect(body.breakSection).toEqual([60])
   })
 
@@ -395,5 +403,74 @@ describe('status view', () => {
   it('keeps the phase values of an abnormality with no parts', () => {
     const lone: BattlePhase = { ...shadow8678, unitKeywordList: [], parts: [] }
     expect(statusView(lone, undefined, [], 40, 1)).toEqual(shadowShown)
+  })
+})
+
+describe('grown assist skills', () => {
+  const xichun = firstPhase(AssistantDataSchema.parse(assistant400001), '400005')
+  const xichunTexts = phaseTexts(
+    BattleEntityI18nSchema.parse(assistant400001KR),
+    '400005',
+    '400005',
+  )
+  const KR_JOINERS = { and: ', ', or: ' 또는 ' }
+
+  function acquireOf(skillId: string) {
+    const acquire = xichun.skills[skillId]?.acquire
+    if (acquire === undefined) throw new Error(`skill ${skillId} has no acquire`)
+    return acquire
+  }
+
+  it('adds the attack adder to attack and counter skills of 400005', () => {
+    expect(xichun.skillLevelAdders).toEqual({ attack: 7, defense: 4 })
+    expect(skillLevelAdder('ATTACK', xichun.skillLevelAdders)).toBe(7)
+    expect(skillLevelAdder('COUNTER', xichun.skillLevelAdders)).toBe(7)
+  })
+
+  it('adds the defense adder to guard and evade skills of 400005', () => {
+    expect(skillLevelAdder('GUARD', xichun.skillLevelAdders)).toBe(4)
+    expect(skillLevelAdder('EVADE', xichun.skillLevelAdders)).toBe(4)
+  })
+
+  it('reads the raw defense level of 400005, without the defense adder', () => {
+    expect(statusView(xichun, undefined, [], 60, 5).defense).toEqual({
+      kind: 'shown',
+      value: { level: 60, correction: 0 },
+    })
+  })
+
+  it('adds nothing on a phase without adders', () => {
+    const [phase] = EnemyDataSchema.parse(enemy1347).units['1347']?.phases ?? []
+    expect(phase?.skillLevelAdders).toBeUndefined()
+    expect(skillLevelAdder('ATTACK', phase?.skillLevelAdders)).toBe(0)
+    expect(skillLevelAdder('GUARD', undefined)).toBe(0)
+  })
+
+  it('names a level of 40000101 and 40000104 by its own text', () => {
+    const strike = xichunTexts?.skills?.['40000101']
+    const evade = xichunTexts?.skills?.['40000104']
+    if (strike === undefined || evade === undefined) throw new Error('no 400005 skill texts')
+    expect(skillLevelName(strike.descs, 2, strike.name)).toBe('적격 2형 - 파(破)')
+    expect(skillLevelName(strike.descs, 5, strike.name)).toBe('적격 5형 - 진(進)')
+    expect(skillLevelName(evade.descs, 4, evade.name)).toBe('수회유환')
+  })
+
+  it('falls back to the skill name past the descs or on a desc without a name', () => {
+    expect(skillLevelName([{ name: 'Lv1' }], 2, 'Skill')).toBe('Skill')
+    expect(skillLevelName([{ desc: 'text' }], 1, 'Skill')).toBe('Skill')
+  })
+
+  it('joins the acquire sets of 40000501 by or and their conditions by and', () => {
+    expect(
+      acquireConditionText(acquireOf('40000501'), xichunTexts?.conditionNames, KR_JOINERS),
+    ).toBe('지(智) 800 또는 지(智) 500, 용(勇) 500')
+  })
+
+  it('writes one AND set without or, and an unnamed condition by its key', () => {
+    const [, both] = acquireOf('40000501')
+    if (both === undefined) throw new Error('no second acquire set')
+    expect(acquireConditionText([both], { ProjectGSJiaXichunWisdom: '지(智)' }, KR_JOINERS)).toBe(
+      '지(智) 500, ProjectGSJiaXichunCourage 500',
+    )
   })
 })

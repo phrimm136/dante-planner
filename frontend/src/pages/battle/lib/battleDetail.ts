@@ -1,18 +1,21 @@
 import { ATK_TYPES } from '@/shared/gameData'
-import type { SkillEntry, SkillId } from '@/shared/gameData'
+import type { SkillDescEntry, SkillId } from '@/shared/gameData'
 import type { Shown } from '@/shared/unitStatus'
 import type {
   BattleEntityI18n,
   BattlePart,
   BattlePhase,
   BattlePhaseI18n,
+  BattleSkillAcquire,
+  BattleSkillEntry,
   BuffGrant,
   EngagementRow,
   IdentityShapedPassives,
   PassiveImportanceMap,
   ResistInfo,
+  SkillLevelAdders,
 } from '../schemas/BattleDetailSchemas'
-import { NEUTRAL_RESISTANCE } from './battleVocabulary'
+import { NEUTRAL_RESISTANCE, SKILL_LEVEL_ADDER_BY_DEF_TYPE } from './battleVocabulary'
 
 export const ALL_PARTS = 'all'
 
@@ -43,7 +46,12 @@ interface Resistances {
 
 export interface OrderedBattleSkill {
   id: SkillId
-  entry: SkillEntry
+  entry: BattleSkillEntry
+}
+
+export interface AcquireJoiners {
+  and: string
+  or: string
 }
 
 export function statAtLevel(growth: StatGrowth, level: number): number {
@@ -52,6 +60,33 @@ export function statAtLevel(growth: StatGrowth, level: number): number {
 
 function defenseAtLevel(level: number, defCorrection: number): number {
   return Math.max(1, level + defCorrection)
+}
+
+export function skillLevelAdder(defType: string, adders: SkillLevelAdders | undefined): number {
+  const adder = SKILL_LEVEL_ADDER_BY_DEF_TYPE[defType]
+  return adders === undefined || adder === undefined ? 0 : adders[adder]
+}
+
+export function skillLevelName(
+  descs: readonly SkillDescEntry[],
+  level: number,
+  skillName: string,
+): string {
+  return descs[level - 1]?.name ?? skillName
+}
+
+export function acquireConditionText(
+  acquire: BattleSkillAcquire,
+  conditionNames: Readonly<Record<string, string>> | undefined,
+  joiners: AcquireJoiners,
+): string {
+  return acquire
+    .map(({ condition }) =>
+      condition
+        .map(({ condition: key, value }) => `${conditionNames?.[key] ?? key} ${String(value)}`)
+        .join(joiners.and),
+    )
+    .join(joiners.or)
 }
 
 export function phaseTexts(
@@ -102,7 +137,7 @@ export function visibleSkills(
       .flatMap((each) => each.skillIds.map(String))
       .filter((id) => !present.has(id)),
   )
-  return (Object.entries(phase.skills) as [SkillId, SkillEntry][])
+  return (Object.entries(phase.skills) as [SkillId, BattleSkillEntry][])
     .filter(([id]) => !absentOnly.has(id) && (linked === undefined || linked.has(id)))
     .sort(([a], [b]) => Number(a) - Number(b))
     .map(([id, entry]) => ({ id, entry }))

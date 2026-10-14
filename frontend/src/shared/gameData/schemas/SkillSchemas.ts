@@ -4,6 +4,7 @@ import { SkillIdSchema } from '../ids'
 import { AbPartTypeSchema } from './SharedSchemas'
 
 export const SkillDescEntrySchema = z.object({
+  name: z.string().optional(),
   desc: z.string().optional(),
   coinDescs: z.array(z.string()).optional(),
 })

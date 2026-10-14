@@ -30,16 +30,16 @@ function positions(
 }
 
 describe('per-mode card order', () => {
-  it('orders Story canto, then intervallo, then walpurgis, each by chapter and node', () => {
+  it('orders Story by the chapter chain, intervallo 7.5 between canto 4 and canto 8, then walpurgis', () => {
     const story = modeItems(ENTITIES, 'story')
     const [canto4, canto8, intervallo, walpurgis] = positions(
       ['enemy-8044', 'enemy-1133', 'enemy-1126', 'enemy-1366'],
       story,
     )
     expect(canto4).toBeGreaterThanOrEqual(0)
-    expect(canto4).toBeLessThan(canto8 ?? -1)
-    expect(canto8).toBeLessThan(intervallo ?? -1)
-    expect(intervallo).toBeLessThan(walpurgis ?? -1)
+    expect(canto4).toBeLessThan(intervallo ?? -1)
+    expect(intervallo).toBeLessThan(canto8 ?? -1)
+    expect(canto8).toBeLessThan(walpurgis ?? -1)
   })
 
   it('orders Mirror Dungeon by theme pack id, then stage id', () => {

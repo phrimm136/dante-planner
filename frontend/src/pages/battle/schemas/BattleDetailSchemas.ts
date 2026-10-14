@@ -72,6 +72,8 @@ const BattleSanitySchema = z
   })
   .strict()
 
+const SkillLevelAddersSchema = z.object({ attack: z.number(), defense: z.number() }).strict()
+
 const PassiveImportanceSchema = z.object({ importanceLevel: z.number() }).strict()
 
 export const PassiveImportanceMapSchema = z.record(PassiveIdSchema, PassiveImportanceSchema)
@@ -92,8 +94,11 @@ const RETIRED_SKILL_KEYS = ['skill1', 'skill2', 'skill3', 'skillDef'] as const
 
 const BattleSkillLevelSchema = SkillLevelSchema.extend({ unlock: unused })
 
+const AcquireConditionSchema = z.object({ condition: z.string(), value: z.number() }).strict()
+
 const BattleSkillEntrySchema = SkillEntrySchema.extend({
   textID: z.number().optional(),
+  acquire: z.array(z.object({ condition: z.array(AcquireConditionSchema) }).strict()).optional(),
   linkedPartTypes: z.array(AbPartTypeSchema).optional(),
   levels: z.tuple([BattleSkillLevelSchema], BattleSkillLevelSchema),
 })
@@ -167,6 +172,7 @@ export const BattlePhaseSchema = z
     sprite: BattleSpriteSchema.optional(),
     hp: StatGrowthSchema,
     defCorrection: z.number().optional(),
+    skillLevelAdders: SkillLevelAddersSchema.optional(),
     minSpeedList: z.array(z.number()).optional(),
     maxSpeedList: z.array(z.number()).optional(),
     breakSection: BreakSectionSchema.optional(),
@@ -371,6 +377,7 @@ const BattlePhaseI18nSchema = z
     passives: z.record(z.string(), BattlePassiveI18nSchema).optional(),
     parts: z.record(z.string(), z.object({ name: z.string() }).strict()).optional(),
     egos: z.record(z.string(), z.object({ name: z.string() }).strict()).optional(),
+    conditionNames: z.record(z.string(), z.string()).optional(),
     sanity: z
       .object({
         conditions: z.record(z.string(), z.string()).optional(),
@@ -421,6 +428,7 @@ const StageLabelSchema = z.discriminatedUnion('kind', [
           difficulty: z.string().optional(),
         })
         .strict(),
+      dungeonId: unused,
       dungeonNodeId: z.string().optional(),
     })
     .strict(),
@@ -530,6 +538,9 @@ export const BattleEgoI18nSchema = z.object({
   passives: z.record(z.string(), z.object({ name: z.string(), desc: z.string() })),
 })
 
+export type BattleSkillEntry = z.infer<typeof BattleSkillEntrySchema>
+export type BattleSkillAcquire = NonNullable<BattleSkillEntry['acquire']>
+export type SkillLevelAdders = z.infer<typeof SkillLevelAddersSchema>
 export type BattlePart = z.infer<typeof BattlePartSchema>
 export type BattlePhase = z.infer<typeof BattlePhaseSchema>
 export type EngagementRow = z.infer<typeof EngagementRowSchema>

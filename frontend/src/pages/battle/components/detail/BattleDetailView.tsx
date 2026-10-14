@@ -172,6 +172,7 @@ export function BattleDetailView({
               palette={palette}
               importancePosition={importancePosition}
               unitLevel={level}
+              skillLevelAdders={phase.skillLevelAdders}
             />
           )}
         />
