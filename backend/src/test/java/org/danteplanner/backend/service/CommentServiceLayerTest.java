@@ -52,8 +52,6 @@ import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
-import org.danteplanner.backend.user.api.UserBannedException;
-import org.danteplanner.backend.user.api.UserTimedOutException;
 
 /**
  * Unit tests for the comment service layer.
@@ -109,7 +107,6 @@ class CommentServiceLayerTest {
                 new CommentStateValidator());
         engagementService = new CommentEngagementService(
                 commentRepository, commentVoteRepository, queryService,
-                new PlannerAccessGuard(users, plannerRepository),
                 null, new CommentAuthorshipValidator(),
                 new CommentStateValidator(), new VoteUniquenessValidator());
 
@@ -468,64 +465,7 @@ class CommentServiceLayerTest {
     }
 
     @Nested
-    class RestrictionEnforcementTests {
-
-        @Test
-        void createComment_WhenTimedOutUser_ThrowsUserTimedOutException() {
-            // Arrange
-            java.time.Instant futureTimeout = java.time.Instant.now().plusSeconds(3600);
-            testUser.setTimeoutUntil(futureTimeout);
-
-            CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
-
-            // Act & Assert
-            assertRejected(() -> commandService.createComment(plannerId, testUser.getId(), UUID.randomUUID(), request))
-                    .withCode("USER_TIMED_OUT")
-                    .isInstanceOfSatisfying(UserTimedOutException.class,
-                            exception -> assertThat(exception.getUserId()).isEqualTo(testUser.getId()));
-            verify(commentRepository, never()).insert(any());
-        }
-
-        @Test
-        void createComment_WhenBannedUser_ThrowsUserBannedException() {
-            // Arrange
-            testUser.setBannedAt(java.time.Instant.now());
-            testUser.setBannedBy(1L);
-
-            CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
-
-            // Act & Assert
-            assertRejected(() -> commandService.createComment(plannerId, testUser.getId(), UUID.randomUUID(), request))
-                    .withCode("USER_BANNED")
-                    .isInstanceOfSatisfying(UserBannedException.class,
-                            exception -> assertThat(exception.getUserId()).isEqualTo(testUser.getId()));
-            verify(commentRepository, never()).insert(any());
-        }
-
-        @Test
-        void toggleUpvote_WhenTimedOutUser_IsNotRestricted() {
-            // Arrange
-            java.time.Instant futureTimeout = java.time.Instant.now().plusSeconds(3600);
-            testUser.setTimeoutUntil(futureTimeout);
-
-            UUID commentId = UUID.randomUUID();
-            // Act & Assert - only a ban withdraws engagement
-            assertRejected(() -> engagementService.toggleUpvote(commentId, testUser.getId()))
-                    .withCode("COMMENT_NOT_FOUND");
-            verify(commentVoteRepository, never()).insert(any());
-        }
-
-        @Test
-        void toggleUpvote_WhenBannedUser_ThrowsUserBannedException() {
-            // Arrange
-            testUser.setBannedAt(java.time.Instant.now());
-            testUser.setBannedBy(1L);
-
-            UUID commentId = UUID.randomUUID();
-            // Act & Assert
-            assertRejected(() -> engagementService.toggleUpvote(commentId, testUser.getId())).withCode("USER_BANNED");
-            verify(commentVoteRepository, never()).insert(any());
-        }
+    class ToggleUpvoteTests {
 
         @Test
         void toggleUpvote_WhenVoteCast_ReportsTheReReadCount() {

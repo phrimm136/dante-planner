@@ -2,6 +2,8 @@ package org.danteplanner.backend.planner.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.danteplanner.backend.shared.restriction.Restricted;
+import org.danteplanner.backend.shared.restriction.RestrictionExempt;
 import org.danteplanner.backend.shared.config.DeviceId;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
@@ -29,6 +31,7 @@ public class PlannerPublishingController {
     private final PlannerPublishingService plannerPublishingService;
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "publish")
+    @Restricted
     @PostMapping("/{id}/publish")
     public ResponseEntity<PlannerResponse> publishPlanner(
             @AuthenticationPrincipal Long userId,
@@ -42,6 +45,7 @@ public class PlannerPublishingController {
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "unpublish")
+    @RestrictionExempt(reason = "withdrawal from public view")
     @PostMapping("/{id}/unpublish")
     public ResponseEntity<PlannerResponse> unpublishPlanner(
             @AuthenticationPrincipal Long userId,
@@ -51,6 +55,7 @@ public class PlannerPublishingController {
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-toggle")
+    @RestrictionExempt(reason = "own setting")
     @PatchMapping("/{id}/notifications")
     public ResponseEntity<ToggleOwnerNotificationsResponse> toggleOwnerNotifications(
             @AuthenticationPrincipal Long userId,

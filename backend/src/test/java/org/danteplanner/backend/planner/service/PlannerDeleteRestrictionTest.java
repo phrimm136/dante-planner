@@ -1,6 +1,8 @@
 package org.danteplanner.backend.planner.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.moderation.service.RestrictionCheckService;
+import org.danteplanner.backend.moderation.validation.AccountStandingValidator;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -31,7 +33,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 @ExtendWith(MockitoExtension.class)
 class PlannerDeleteRestrictionTest {
@@ -65,6 +66,7 @@ class PlannerDeleteRestrictionTest {
                 null,
                 catalogService,
                 accessGuard,
+                new RestrictionCheckService(users, new AccountStandingValidator()),
                 new PlannerCategoryValidator(),
                 new PlannerLimitValidator(),
                 new PlannerOwnershipValidator(),
@@ -107,20 +109,6 @@ class PlannerDeleteRestrictionTest {
 
     private void timeOut() {
         owner.setTimeoutUntil(Instant.now().plus(Duration.ofHours(1)));
-    }
-
-    @Test
-    void accessGuard_WhenOwnerBanned_RefusesTheRestrictionCheck() {
-        ban();
-
-        assertRejected(() -> accessGuard.checkNotRestricted(owner.getId())).withCode("USER_BANNED");
-    }
-
-    @Test
-    void accessGuard_WhenOwnerTimedOut_RefusesTheRestrictionCheck() {
-        timeOut();
-
-        assertRejected(() -> accessGuard.checkNotRestricted(owner.getId())).withCode("USER_TIMED_OUT");
     }
 
     @Test

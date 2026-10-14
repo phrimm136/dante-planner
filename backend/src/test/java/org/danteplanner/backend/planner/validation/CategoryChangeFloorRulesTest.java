@@ -1,6 +1,8 @@
 package org.danteplanner.backend.planner.validation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.moderation.service.RestrictionCheckService;
+import org.danteplanner.backend.moderation.validation.AccountStandingValidator;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
@@ -77,6 +79,7 @@ class CategoryChangeFloorRulesTest {
                 null,
                 null,
                 new PlannerAccessGuard(users, plannerRepository),
+                new RestrictionCheckService(users, new AccountStandingValidator()),
                 new PlannerCategoryValidator(),
                 new PlannerLimitValidator(),
                 new PlannerOwnershipValidator(),

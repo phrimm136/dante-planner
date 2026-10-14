@@ -2,6 +2,7 @@ package org.danteplanner.backend.planner.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.moderation.api.RestrictionCheck;
 import org.danteplanner.backend.planner.entity.PlannerSubscription;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class PlannerSubscriptionService {
 
     private final PlannerSubscriptionRepository subscriptionRepository;
     private final PlannerAccessGuard accessGuard;
+    private final RestrictionCheck restrictionCheck;
 
     @Transactional
     public PlannerSubscription toggleSubscription(Long userId, UUID plannerId) {
@@ -29,15 +31,25 @@ public class PlannerSubscriptionService {
 
         if (existingSubscription.isPresent()) {
             PlannerSubscription subscription = existingSubscription.get();
+            decideToggle(userId, subscription.isEnabled());
             subscription.toggle();
             log.debug("User {} toggled subscription for planner {} to enabled={}",
                     userId, plannerId, subscription.isEnabled());
             return subscription;
         } else {
+            restrictionCheck.requireUnrestricted(userId);
             PlannerSubscription subscription = new PlannerSubscription(userId, plannerId);
             PlannerSubscription saved = subscriptionRepository.insert(subscription);
             log.debug("User {} created subscription for planner {}", userId, plannerId);
             return saved;
+        }
+    }
+
+    private void decideToggle(Long userId, boolean turningOff) {
+        if (turningOff) {
+            restrictionCheck.recordPrivate();
+        } else {
+            restrictionCheck.requireUnrestricted(userId);
         }
     }
 

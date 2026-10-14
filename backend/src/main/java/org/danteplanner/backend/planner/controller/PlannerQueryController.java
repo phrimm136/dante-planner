@@ -2,6 +2,7 @@ package org.danteplanner.backend.planner.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.danteplanner.backend.shared.restriction.RestrictionExempt;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.planner.dto.PlannerBatchRequest;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
@@ -46,6 +47,7 @@ public class PlannerQueryController {
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "batch")
+    @RestrictionExempt(reason = "read shaped as POST")
     @PostMapping("/batch")
     public ResponseEntity<List<PlannerResponse>> getPlannerBatch(
             @AuthenticationPrincipal Long userId,

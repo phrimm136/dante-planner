@@ -58,8 +58,6 @@ public class PlannerEngagementService {
 
     @Transactional
     public VoteResponse castVote(Long userId, UUID plannerId, VoteType voteType) {
-        accessGuard.checkNotBanned(userId);
-
         Planner planner = accessGuard.requirePublished(plannerId);
 
         PlannerVoteId voteId = new PlannerVoteId(userId, plannerId);

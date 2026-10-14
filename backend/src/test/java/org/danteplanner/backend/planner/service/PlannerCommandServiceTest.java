@@ -1,4 +1,5 @@
 package org.danteplanner.backend.planner.service;
+
 import org.danteplanner.backend.planner.dto.UpsertResult;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
@@ -14,6 +15,8 @@ import org.danteplanner.backend.planner.entity.PlannerContentLifecycle;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.StoredPlannerContent;
 import org.danteplanner.backend.support.FakeUsers;
+import org.danteplanner.backend.support.RecordingRestrictionCheck;
+import org.danteplanner.backend.support.RecordingRestrictionCheck.Decision;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.repository.PlannerOwnershipRow;
@@ -77,6 +80,8 @@ class PlannerCommandServiceTest {
 
     private PlannerCommandService commandService;
 
+    private RecordingRestrictionCheck restrictionCheck;
+
     private static final int MAX_PLANNERS_PER_USER = 100;
 
     private static final int RECOMMENDED_THRESHOLD = 10;
@@ -93,6 +98,7 @@ class PlannerCommandServiceTest {
 
     @BeforeEach
     void setUp() {
+        restrictionCheck = new RecordingRestrictionCheck(users);
         commandService = commandServiceWith(TestDataFactory.contentValidator());
 
         testUser = users.add(TestDataFactory.unsavedUser(1L));
@@ -110,6 +116,7 @@ class PlannerCommandServiceTest {
                         new DomainEventRecorder(domainEventRepository, new ObjectMapper(), null), new ObjectMapper(),
                         new RecordingTombstoneStore(), RECOMMENDED_THRESHOLD),
                 new PlannerAccessGuard(users, plannerRepository),
+                restrictionCheck,
                 new PlannerCategoryValidator(),
                 new PlannerLimitValidator(),
                 new PlannerOwnershipValidator(),
@@ -489,6 +496,47 @@ class PlannerCommandServiceTest {
             assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), retitled,
                     false)).withCode("USER_BANNED");
             assertThat(planner.getTitle()).isEqualTo("Test Planner");
+        }
+
+        @Test
+        void upsertPlanner_WhenTimedOutOwnerEditsAPublishedPlanner_RefusesBeforeTheSyncVersionCheck() {
+            testUser.setTimeoutUntil(Instant.now().plusSeconds(3600));
+            Planner planner = testPlanner(5L, true, TestDataFactory.VALID_CONTENT);
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            UpsertPlannerRequest stale = UpsertRequests.resending(planner).title("Renamed").syncVersion(1L).build();
+
+            assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), stale,
+                    false)).withCode("USER_TIMED_OUT");
+            assertThat(restrictionCheck.decisions()).containsExactly(Decision.CHECKED);
+        }
+
+        @Test
+        void upsertPlanner_WhenBannedOwnerEditsAPrivatePlanner_SavesAndRecordsAPrivateDecision() {
+            testUser.setBannedAt(Instant.now());
+            testUser.setBannedBy(2L);
+            Planner planner = testPlanner(1L, false, TestDataFactory.VALID_CONTENT);
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            UpsertPlannerRequest retitled = UpsertRequests.resending(planner).title("Renamed").build();
+
+            commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), retitled, false);
+
+            assertThat(planner.getTitle()).isEqualTo("Renamed");
+            assertThat(restrictionCheck.decisions()).containsExactly(Decision.PRIVATE);
+        }
+
+        @Test
+        void upsertPlanner_WhenCreatingAPlanner_RecordsAPrivateDecision() {
+            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
+            when(plannerRepository.insert(any(Planner.class)))
+                    .thenAnswer(invocation -> PlannerContentLifecycle.asPersisted(
+                            (Planner) invocation.getArgument(0)));
+
+            commandService.upsertPlanner(testUser.getId(), deviceId, UUID.randomUUID(),
+                    UpsertRequests.draft().id(null).status(null).build(), false);
+
+            assertThat(restrictionCheck.decisions()).containsExactly(Decision.PRIVATE);
         }
     }
 

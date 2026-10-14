@@ -16,7 +16,6 @@ import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.danteplanner.backend.moderation.api.dto.CommentReportRequest;
 import org.danteplanner.backend.moderation.api.dto.CommentReportResponse;
 import org.danteplanner.backend.moderation.api.CommentReports;
-import org.danteplanner.backend.planner.api.PlannerAccess;
 import org.danteplanner.backend.planner.api.PlannerVotes;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +34,6 @@ public class CommentEngagementService {
     private final PlannerCommentRepository commentRepository;
     private final PlannerCommentVoteRepository commentVoteRepository;
     private final CommentQueryService commentQueryService;
-    private final PlannerAccess plannerAccess;
     private final CommentReports reportService;
     private final CommentAuthorshipValidator authorshipValidator;
     private final CommentStateValidator stateValidator;
@@ -43,8 +41,6 @@ public class CommentEngagementService {
 
     @Transactional
     public CommentVoteResponse toggleUpvote(UUID commentPublicId, Long userId) {
-        plannerAccess.checkNotBanned(userId);
-
         PlannerComment comment = commentQueryService.requireByPublicId(commentPublicId);
         Long internalId = comment.getId();
 

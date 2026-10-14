@@ -2,6 +2,8 @@ package org.danteplanner.backend.planner.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.danteplanner.backend.shared.restriction.Restricted;
+import org.danteplanner.backend.shared.restriction.RestrictedByState;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.moderation.api.dto.PlannerActionResponse;
 import org.danteplanner.backend.planner.dto.SubscriptionResponse;
@@ -30,6 +32,7 @@ public class PlannerEngagementController {
     private final PlannerSubscriptionService subscriptionService;
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "vote")
+    @Restricted
     @PostMapping("/{id}/upvote")
     public ResponseEntity<VoteResponse> castUpvote(
             @AuthenticationPrincipal Long userId,
@@ -41,6 +44,7 @@ public class PlannerEngagementController {
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "subscribe")
+    @RestrictedByState
     @PostMapping("/{id}/subscribe")
     public ResponseEntity<SubscriptionResponse> toggleSubscription(
             @AuthenticationPrincipal Long userId,
@@ -55,6 +59,7 @@ public class PlannerEngagementController {
     }
 
     @RateLimited(RateLimitPolicy.REPORT)
+    @Restricted
     @PostMapping("/{id}/report")
     public ResponseEntity<PlannerActionResponse> submitReport(
             @AuthenticationPrincipal Long userId,

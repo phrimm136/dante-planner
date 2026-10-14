@@ -121,5 +121,8 @@ post_rule "planner-catalog-sync-backlog" "2m" \
 post_rule "read-source-breaker-open-sustained" "5m" \
   'max by (cluster, name) (resilience4j_circuitbreaker_state{name=~"read-source-.+",state="open"}) > 0'
 
-echo "== done: 15 rules in folder ${FOLDER}, group app-rules"
+post_rule "restriction-undecided-commit" "0s" \
+  'sum by (cluster) (increase(restriction_undecided_total[10m])) > 0'
+
+echo "== done: 16 rules in folder ${FOLDER}, group app-rules"
 echo "   All noDataState=OK — non-paging while a series is absent; staleness-meta owns absence."

@@ -7,7 +7,6 @@ import org.danteplanner.backend.moderation.api.PlannerReports;
 import org.danteplanner.backend.moderation.entity.PlannerReport;
 import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
-import org.danteplanner.backend.moderation.validation.ReporterStandingValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,15 +21,12 @@ import java.util.UUID;
 public class PlannerReportService implements PlannerReports {
 
     private final PlannerReportRepository reportRepository;
-    private final ReporterStandingValidator reporterStandingValidator;
     private final PlannerModerationTarget plannerTarget;
     private final ReportUniquenessValidator reportUniquenessValidator;
 
     @Override
     @Transactional
     public void createReport(Long userId, UUID plannerId) {
-        reporterStandingValidator.checkNotBanned(userId);
-
         plannerTarget.checkPublished(plannerId);
 
         reportUniquenessValidator.requireFirstPlannerReport(

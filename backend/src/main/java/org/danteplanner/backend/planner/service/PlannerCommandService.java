@@ -6,6 +6,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.danteplanner.backend.moderation.api.RestrictionCheck;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.dto.UpsertResult;
@@ -57,6 +58,7 @@ public class PlannerCommandService {
     private final ContentVersionValidator contentVersionValidator;
     private final PlannerCatalogService plannerCatalogService;
     private final PlannerAccessGuard accessGuard;
+    private final RestrictionCheck restrictionCheck;
     private final PlannerCategoryValidator categoryValidator;
     private final PlannerLimitValidator limitValidator;
     private final PlannerOwnershipValidator ownershipValidator;
@@ -75,6 +77,7 @@ public class PlannerCommandService {
             ContentVersionValidator contentVersionValidator,
             PlannerCatalogService plannerCatalogService,
             PlannerAccessGuard accessGuard,
+            RestrictionCheck restrictionCheck,
             PlannerCategoryValidator categoryValidator,
             PlannerLimitValidator limitValidator,
             PlannerOwnershipValidator ownershipValidator,
@@ -83,7 +86,7 @@ public class PlannerCommandService {
             int maxPlannersPerUser,
             int currentSchemaVersion) {
         this(plannerRepository, statsRepository, contentValidator, contentVersionValidator,
-                plannerCatalogService, accessGuard, categoryValidator, limitValidator, ownershipValidator,
+                plannerCatalogService, accessGuard, restrictionCheck, categoryValidator, limitValidator, ownershipValidator,
                 syncVersionValidator, objectMapper, Optional.empty(), new SimpleMeterRegistry(),
                 maxPlannersPerUser, currentSchemaVersion);
     }
@@ -96,6 +99,7 @@ public class PlannerCommandService {
             ContentVersionValidator contentVersionValidator,
             PlannerCatalogService plannerCatalogService,
             PlannerAccessGuard accessGuard,
+            RestrictionCheck restrictionCheck,
             PlannerCategoryValidator categoryValidator,
             PlannerLimitValidator limitValidator,
             PlannerOwnershipValidator ownershipValidator,
@@ -106,7 +110,7 @@ public class PlannerCommandService {
             @Value("${planner.max-per-user}") int maxPlannersPerUser,
             GameDataRegistry gameDataRegistry) {
         this(plannerRepository, statsRepository, contentValidator, contentVersionValidator,
-                plannerCatalogService, accessGuard, categoryValidator, limitValidator, ownershipValidator,
+                plannerCatalogService, accessGuard, restrictionCheck, categoryValidator, limitValidator, ownershipValidator,
                 syncVersionValidator, objectMapper, tombstoneStore, meterRegistry,
                 maxPlannersPerUser, gameDataRegistry.plannerVersions().schemaVersion());
     }
@@ -118,6 +122,7 @@ public class PlannerCommandService {
             ContentVersionValidator contentVersionValidator,
             PlannerCatalogService plannerCatalogService,
             PlannerAccessGuard accessGuard,
+            RestrictionCheck restrictionCheck,
             PlannerCategoryValidator categoryValidator,
             PlannerLimitValidator limitValidator,
             PlannerOwnershipValidator ownershipValidator,
@@ -133,6 +138,7 @@ public class PlannerCommandService {
         this.contentVersionValidator = contentVersionValidator;
         this.plannerCatalogService = plannerCatalogService;
         this.accessGuard = accessGuard;
+        this.restrictionCheck = restrictionCheck;
         this.categoryValidator = categoryValidator;
         this.limitValidator = limitValidator;
         this.ownershipValidator = ownershipValidator;
@@ -263,7 +269,9 @@ public class PlannerCommandService {
             Planner planner = existingPlanner.get();
 
             if (planner.isPublished()) {
-                accessGuard.checkNotRestricted(userId);
+                restrictionCheck.requireUnrestricted(userId);
+            } else {
+                restrictionCheck.recordPrivate();
             }
 
             CarriedWrite carried = CarriedWrite.builder()
@@ -311,6 +319,7 @@ public class PlannerCommandService {
 
         log.info("Planner {} not found, creating for user {}", id, userId);
 
+        restrictionCheck.recordPrivate();
         return createAggregate(userId, deviceId, request.withId(id.toString()));
     }
 

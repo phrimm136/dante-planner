@@ -3,6 +3,7 @@ package org.danteplanner.backend.planner.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.danteplanner.backend.shared.restriction.RestrictionExempt;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
 import org.danteplanner.backend.planner.dto.PlannerFlagsResponse;
@@ -122,6 +123,7 @@ public class PublishedPlannerController {
     }
 
     @RateLimited(RateLimitPolicy.VIEW_RECORD)
+    @RestrictionExempt(reason = "view count, no database write")
     @PostMapping("/published/{id}/viewcount")
     public ResponseEntity<Void> recordView(
             HttpServletRequest request,

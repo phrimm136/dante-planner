@@ -3,6 +3,7 @@ package org.danteplanner.backend.moderation.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.shared.restriction.RestrictionExempt;
 import org.danteplanner.backend.moderation.dto.HidePlannerRequest;
 import org.danteplanner.backend.moderation.dto.ModerationResponse;
 import org.danteplanner.backend.moderation.service.PlannerModerationService;
@@ -26,6 +27,7 @@ public class AdminModerationController {
     private final PlannerModerationService plannerModerationService;
 
     @RateLimitExempt
+    @RestrictionExempt(reason = "privileged route: PrivilegedRouteRules checks the live actor")
     @PostMapping("/{id}/hide-from-recommended")
     public ResponseEntity<ModerationResponse> hideFromRecommended(
             @AuthenticationPrincipal Long moderatorId,
@@ -39,6 +41,7 @@ public class AdminModerationController {
     }
 
     @RateLimitExempt
+    @RestrictionExempt(reason = "privileged route: PrivilegedRouteRules checks the live actor")
     @PostMapping("/{id}/unhide-from-recommended")
     public ResponseEntity<ModerationResponse> unhideFromRecommended(
             @AuthenticationPrincipal Long moderatorId,

@@ -58,7 +58,6 @@ public class PlannerPublishingService {
 
     @Transactional
     public PlannerResponse publish(Long userId, UUID plannerId) {
-        accessGuard.checkNotRestricted(userId);
         accessGuard.holdActiveAccount(userId);
 
         return applyPublish(userId, accessGuard.requireAggregate(plannerId));
@@ -66,7 +65,6 @@ public class PlannerPublishingService {
 
     @Transactional
     public PlannerResponse publish(Long userId, UUID deviceId, UUID plannerId, UpsertPlannerRequest content) {
-        accessGuard.checkNotRestricted(userId);
         accessGuard.holdActiveAccount(userId);
         requireTitleAfterUpsert(userId, plannerId, content);
 

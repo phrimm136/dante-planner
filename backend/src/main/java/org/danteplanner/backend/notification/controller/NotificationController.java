@@ -2,6 +2,7 @@ package org.danteplanner.backend.notification.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.shared.restriction.RestrictionExempt;
 import org.danteplanner.backend.notification.dto.NotificationBulkResultResponse;
 import org.danteplanner.backend.notification.dto.NotificationInboxResponse;
 import org.danteplanner.backend.notification.dto.NotificationResponse;
@@ -54,6 +55,7 @@ public class NotificationController {
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-mark-read")
+    @RestrictionExempt(reason = "own inbox")
     @PostMapping("/{id}/mark-read")
     public ResponseEntity<NotificationResponse> markAsRead(
             @AuthenticationPrincipal Long userId,
@@ -65,6 +67,7 @@ public class NotificationController {
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-mark-all-read")
+    @RestrictionExempt(reason = "own inbox")
     @PostMapping("/mark-all-read")
     public ResponseEntity<NotificationBulkResultResponse> markAllAsRead(
             @AuthenticationPrincipal Long userId) {
@@ -75,6 +78,7 @@ public class NotificationController {
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-delete")
+    @RestrictionExempt(reason = "own inbox")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNotification(
             @AuthenticationPrincipal Long userId,
@@ -86,6 +90,7 @@ public class NotificationController {
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-delete-all")
+    @RestrictionExempt(reason = "own inbox")
     @DeleteMapping("/all")
     public ResponseEntity<NotificationBulkResultResponse> deleteAllNotifications(
             @AuthenticationPrincipal Long userId) {

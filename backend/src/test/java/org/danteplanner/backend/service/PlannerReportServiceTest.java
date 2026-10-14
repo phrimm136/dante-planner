@@ -2,7 +2,6 @@ package org.danteplanner.backend.service;
 
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
-import org.danteplanner.backend.moderation.validation.ReporterStandingValidator;
 import org.danteplanner.backend.moderation.entity.PlannerReport;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.moderation.exception.ReportAlreadyExistsException;
@@ -50,7 +49,6 @@ class PlannerReportServiceTest {
     void setUp() {
         FakeUsers users = new FakeUsers();
         reportService = new PlannerReportService(reportRepository,
-                new ReporterStandingValidator(users),
                 new PlannerModerationTargetAdapter(null,
                         new PlannerAccessGuard(users, plannerRepository)),
                 new ReportUniquenessValidator());

@@ -42,8 +42,6 @@ public class CommentCommandService {
 
     @Transactional
     public CreateCommentResponse createComment(UUID plannerId, Long userId, UUID deviceId, CreateCommentRequest request) {
-        plannerAccess.checkNotRestricted(userId);
-
         plannerAccess.checkPublished(plannerId);
 
         int depth = 0;
@@ -83,8 +81,6 @@ public class CommentCommandService {
 
     @Transactional
     public CreateCommentResponse createReply(UUID parentPublicId, Long userId, UUID deviceId, String content) {
-        plannerAccess.checkNotRestricted(userId);
-
         PlannerComment parent = commentQueryService.requireByPublicId(parentPublicId);
 
         UUID plannerId = parent.getPlannerId();
@@ -114,8 +110,6 @@ public class CommentCommandService {
 
     @Transactional
     public UpdateCommentResponse updateComment(UUID commentPublicId, Long userId, UpdateCommentRequest request) {
-        plannerAccess.checkNotRestricted(userId);
-
         PlannerComment comment = commentQueryService.requireByPublicId(commentPublicId);
 
         stateValidator.requireEditable(comment);

@@ -2,6 +2,8 @@ package org.danteplanner.backend.planner.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.danteplanner.backend.shared.restriction.RestrictedByState;
+import org.danteplanner.backend.shared.restriction.RestrictionExempt;
 import org.danteplanner.backend.shared.config.DeviceId;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
@@ -30,6 +32,7 @@ public class PlannerCommandController {
     private final PlannerCommandService plannerCommandService;
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "upsert")
+    @RestrictedByState
     @PutMapping("/{id}")
     public ResponseEntity<PlannerResponse> upsertPlanner(
             @AuthenticationPrincipal Long userId,
@@ -45,6 +48,7 @@ public class PlannerCommandController {
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "delete")
+    @RestrictionExempt(reason = "own planner")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlanner(
             @AuthenticationPrincipal Long userId,

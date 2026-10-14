@@ -9,7 +9,6 @@ import org.danteplanner.backend.moderation.api.dto.CommentReportResponse;
 import org.danteplanner.backend.moderation.entity.PlannerCommentReport;
 import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
-import org.danteplanner.backend.moderation.validation.ReporterStandingValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,14 +24,11 @@ public class CommentReportService implements CommentReports {
 
     private final PlannerCommentReportRepository reportRepository;
     private final CommentModerationTarget commentTarget;
-    private final ReporterStandingValidator reporterStandingValidator;
     private final ReportUniquenessValidator reportUniquenessValidator;
 
     @Override
     @Transactional
     public CommentReportResponse createReport(UUID commentPublicId, Long userId, CommentReportRequest request) {
-        reporterStandingValidator.checkNotBanned(userId);
-
         Long internalId = commentTarget.requireReportable(commentPublicId);
 
         reportUniquenessValidator.requireFirstCommentReport(

@@ -7,8 +7,4 @@ public interface PlannerAccess {
     PlannerThread requireExisting(UUID plannerId);
 
     void checkPublished(UUID plannerId);
-
-    void checkNotRestricted(Long userId);
-
-    void checkNotBanned(Long userId);
 }

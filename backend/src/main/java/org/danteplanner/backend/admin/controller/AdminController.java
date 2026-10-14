@@ -3,6 +3,7 @@ package org.danteplanner.backend.admin.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.shared.restriction.RestrictionExempt;
 import org.danteplanner.backend.admin.dto.ChangeRoleRequest;
 import org.danteplanner.backend.admin.dto.UserRoleResponse;
 import org.danteplanner.backend.user.api.UserRole;
@@ -27,6 +28,7 @@ public class AdminController {
     private final AdminService adminService;
 
     @RateLimitExempt
+    @RestrictionExempt(reason = "privileged route: PrivilegedRouteRules checks the live actor")
     @PutMapping("/user/{targetId}/role")
     public ResponseEntity<UserRoleResponse> changeRole(
             @AuthenticationPrincipal Long actorId,

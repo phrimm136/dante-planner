@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.shared.restriction.RestrictionExempt;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.LoginRedirect;
 import org.danteplanner.backend.shared.config.JwtProperties;
@@ -128,6 +129,7 @@ public class AuthController {
     }
 
     @RateLimited(value = RateLimitPolicy.AUTH, denial = RateLimitDenial.REDIRECT_LOGIN)
+    @RestrictionExempt(reason = "authentication")
     @PostMapping("/apple/callback")
     public ResponseEntity<UserResponse> appleCallback() {
         return ResponseEntity.badRequest().build();
@@ -153,6 +155,7 @@ public class AuthController {
     }
 
     @RateLimitExempt
+    @RestrictionExempt(reason = "authentication")
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
         String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)
@@ -168,6 +171,7 @@ public class AuthController {
     }
 
     @RateLimitExempt
+    @RestrictionExempt(reason = "authentication")
     @PostMapping("/logout-all")
     public ResponseEntity<Void> logoutAll(HttpServletRequest request, HttpServletResponse response) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

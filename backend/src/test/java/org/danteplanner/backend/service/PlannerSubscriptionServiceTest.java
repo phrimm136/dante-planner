@@ -1,4 +1,7 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.support.FakeUsers;
+import org.danteplanner.backend.support.RecordingRestrictionCheck;
+import org.danteplanner.backend.support.RecordingRestrictionCheck.Decision;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 
 import org.danteplanner.backend.planner.entity.PlannerSubscription;
@@ -15,6 +18,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,15 +44,19 @@ class PlannerSubscriptionServiceTest {
 
     private PlannerSubscriptionService subscriptionService;
 
+    private RecordingRestrictionCheck restrictionCheck;
+
     private User testUser;
     private UUID plannerId;
 
     @BeforeEach
     void setUp() {
+        FakeUsers users = new FakeUsers();
+        restrictionCheck = new RecordingRestrictionCheck(users);
         subscriptionService = new PlannerSubscriptionService(
-                subscriptionRepository, new PlannerAccessGuard(null, plannerRepository));
+                subscriptionRepository, new PlannerAccessGuard(null, plannerRepository), restrictionCheck);
 
-        testUser = TestDataFactory.unsavedUser(1L);
+        testUser = users.add(TestDataFactory.unsavedUser(1L));
 
         plannerId = UUID.randomUUID();
     }
@@ -128,6 +136,48 @@ class PlannerSubscriptionServiceTest {
 
             verify(subscriptionRepository, never()).findByUserIdAndPlannerId(any(), any());
             verify(subscriptionRepository, never()).insert(any());
+        }
+
+        @Test
+        void toggleSubscription_WhenBannedAndNotSubscribed_RefusesAndInsertsNothing() {
+            testUser.setBannedAt(Instant.now());
+            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
+            when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
+                    .thenReturn(Optional.empty());
+
+            assertRejected(() -> subscriptionService.toggleSubscription(testUser.getId(), plannerId))
+                    .withCode("USER_BANNED");
+
+            verify(subscriptionRepository, never()).insert(any());
+        }
+
+        @Test
+        void toggleSubscription_WhenTimedOutAndDisabled_RefusesAndLeavesItDisabled() {
+            testUser.setTimeoutUntil(Instant.now().plusSeconds(3600));
+            PlannerSubscription disabledSubscription = new PlannerSubscription(testUser.getId(), plannerId);
+            disabledSubscription.toggle();
+            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
+            when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
+                    .thenReturn(Optional.of(disabledSubscription));
+
+            assertRejected(() -> subscriptionService.toggleSubscription(testUser.getId(), plannerId))
+                    .withCode("USER_TIMED_OUT");
+
+            assertThat(disabledSubscription.isEnabled()).isFalse();
+        }
+
+        @Test
+        void toggleSubscription_WhenBannedAndSubscribed_TurnsItOffAsAPrivateDecision() {
+            testUser.setBannedAt(Instant.now());
+            PlannerSubscription existingSubscription = new PlannerSubscription(testUser.getId(), plannerId);
+            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
+            when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
+                    .thenReturn(Optional.of(existingSubscription));
+
+            PlannerSubscription result = subscriptionService.toggleSubscription(testUser.getId(), plannerId);
+
+            assertThat(result.isEnabled()).isFalse();
+            assertThat(restrictionCheck.decisions()).containsExactly(Decision.PRIVATE);
         }
     }
 

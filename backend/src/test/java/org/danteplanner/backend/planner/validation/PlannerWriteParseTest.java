@@ -2,6 +2,8 @@ package org.danteplanner.backend.planner.validation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.moderation.service.RestrictionCheckService;
+import org.danteplanner.backend.moderation.validation.AccountStandingValidator;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.dto.UpsertResult;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -67,6 +69,7 @@ class PlannerWriteParseTest {
                 null,
                 null,
                 new PlannerAccessGuard(null, plannerRepository),
+                new RestrictionCheckService(null, new AccountStandingValidator()),
                 new PlannerCategoryValidator(),
                 new PlannerLimitValidator(),
                 new PlannerOwnershipValidator(),

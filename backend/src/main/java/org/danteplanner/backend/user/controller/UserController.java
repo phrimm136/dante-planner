@@ -3,6 +3,7 @@ package org.danteplanner.backend.user.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.danteplanner.backend.shared.restriction.RestrictionExempt;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.shared.config.EpithetConfig;
 import org.danteplanner.backend.user.api.SessionEndHandler;
@@ -72,6 +73,7 @@ public class UserController {
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "user-epithet-update")
+    @RestrictionExempt(reason = "epithet from a fixed list of harmless phrases")
     @PutMapping("/me/username-epithet")
     public ResponseEntity<UserResponse> updateUsernameEpithet(
             @AuthenticationPrincipal Long userId,
@@ -82,6 +84,7 @@ public class UserController {
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "user-delete")
+    @RestrictionExempt(reason = "own account")
     @DeleteMapping("/me")
     public ResponseEntity<UserDeletionResponse> deleteMyAccount(
             @AuthenticationPrincipal Long userId,
@@ -112,6 +115,7 @@ public class UserController {
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "user-settings-update")
+    @RestrictionExempt(reason = "own setting")
     @PutMapping("/settings")
     public ResponseEntity<UserSettingsResponse> updateSettings(
             @AuthenticationPrincipal Long userId,

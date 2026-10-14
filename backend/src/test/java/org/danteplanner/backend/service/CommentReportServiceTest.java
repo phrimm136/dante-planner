@@ -13,10 +13,6 @@ import org.danteplanner.backend.moderation.repository.PlannerCommentReportReposi
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.comment.service.CommentModerationTargetAdapter;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
-import org.danteplanner.backend.moderation.validation.ReporterStandingValidator;
-import org.danteplanner.backend.support.FakeUsers;
-import org.danteplanner.backend.support.TestDataFactory;
-import org.danteplanner.backend.user.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -47,8 +43,6 @@ class CommentReportServiceTest {
 
     private CommentReportService service;
 
-    private User reporter;
-
     private static final Long COMMENT_INTERNAL_ID = 1L;
     private static final UUID COMMENT_PUBLIC_ID = UUID.randomUUID();
     private static final Long REPORTER_ID = 100L;
@@ -57,12 +51,10 @@ class CommentReportServiceTest {
 
     @BeforeEach
     void setUp() {
-        FakeUsers users = new FakeUsers();
-        reporter = users.add(TestDataFactory.unsavedUser(REPORTER_ID));
         service = new CommentReportService(reportRepository,
                 new CommentModerationTargetAdapter(new CommentQueryService(commentRepository, null, null, null, null),
                         null, new CommentStateValidator()),
-                new ReporterStandingValidator(users), new ReportUniquenessValidator());
+                new ReportUniquenessValidator());
     }
 
     @Nested
@@ -103,17 +95,6 @@ class CommentReportServiceTest {
             verify(reportRepository).insert(captor.capture());
             assertThat(captor.getValue().getReporterId()).isEqualTo(REPORTER_ID);
             assertThat(captor.getValue().getReason()).isEqualTo(REASON);
-        }
-
-        @Test
-        void createReport_WhenReporterIsBanned_ThrowsAndWritesNothing() {
-            reporter.setBannedAt(java.time.Instant.now());
-            CommentReportRequest request = new CommentReportRequest(REASON);
-
-            assertRejected(() -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request)).withCode("USER_BANNED");
-
-            verify(reportRepository, never()).insert(any(PlannerCommentReport.class));
-            verifyNoInteractions(commentRepository);
         }
 
         @Test

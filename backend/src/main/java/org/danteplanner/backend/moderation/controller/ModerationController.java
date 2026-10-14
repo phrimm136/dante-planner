@@ -6,6 +6,7 @@ import java.util.UUID;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.shared.restriction.RestrictionExempt;
 import org.danteplanner.backend.moderation.dto.BanRequest;
 import org.danteplanner.backend.moderation.dto.BanStatusResponse;
 import org.danteplanner.backend.moderation.dto.ModeratedUserResponse;
@@ -46,6 +47,7 @@ public class ModerationController {
     private final CommentModerationService commentModerationService;
     private final ModerationQueryService moderationQueryService;
 
+    @RestrictionExempt(reason = "privileged route: PrivilegedRouteRules checks the live actor")
     @PostMapping("/user/{usernameSuffix}/timeout")
     public ResponseEntity<TimeoutResponse> timeoutUser(
             @AuthenticationPrincipal Long actorId,
@@ -63,6 +65,7 @@ public class ModerationController {
                 .build());
     }
 
+    @RestrictionExempt(reason = "privileged route: PrivilegedRouteRules checks the live actor")
     @PostMapping("/user/{usernameSuffix}/clear-timeout")
     public ResponseEntity<TimeoutResponse> removeTimeout(
             @AuthenticationPrincipal Long actorId,
@@ -79,6 +82,7 @@ public class ModerationController {
                 .build());
     }
 
+    @RestrictionExempt(reason = "privileged route: PrivilegedRouteRules checks the live actor")
     @PutMapping("/planner/{plannerId}/unpublish")
     public ResponseEntity<UnpublishPlannerResponse> unpublishPlanner(
             @AuthenticationPrincipal Long actorId,
@@ -91,6 +95,7 @@ public class ModerationController {
                 planner.id(), planner.published(), "Planner unpublished successfully"));
     }
 
+    @RestrictionExempt(reason = "privileged route: PrivilegedRouteRules checks the live actor")
     @PostMapping("/user/{usernameSuffix}/ban")
     public ResponseEntity<BanStatusResponse> banUser(
             @AuthenticationPrincipal Long actorId,
@@ -103,6 +108,7 @@ public class ModerationController {
         return ResponseEntity.ok(new BanStatusResponse(user.isBanned(), "User banned successfully"));
     }
 
+    @RestrictionExempt(reason = "privileged route: PrivilegedRouteRules checks the live actor")
     @PostMapping("/user/{usernameSuffix}/unban")
     public ResponseEntity<BanStatusResponse> unbanUser(
             @AuthenticationPrincipal Long actorId,
@@ -141,6 +147,7 @@ public class ModerationController {
         return ResponseEntity.ok(actions);
     }
 
+    @RestrictionExempt(reason = "privileged route: PrivilegedRouteRules checks the live actor")
     @PostMapping("/planner/{plannerId}/takedown")
     public ResponseEntity<PlannerActionResponse> takedownPlanner(
             @AuthenticationPrincipal Long actorId,
@@ -154,6 +161,7 @@ public class ModerationController {
                 new PlannerActionResponse(plannerId, "Planner taken down successfully"));
     }
 
+    @RestrictionExempt(reason = "privileged route: PrivilegedRouteRules checks the live actor")
     @PostMapping("/comments/{commentPublicId}/delete")
     public ResponseEntity<Void> deleteComment(
             @AuthenticationPrincipal Long actorId,

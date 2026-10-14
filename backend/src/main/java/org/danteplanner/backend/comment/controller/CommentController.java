@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.danteplanner.backend.shared.restriction.Restricted;
+import org.danteplanner.backend.shared.restriction.RestrictionExempt;
 import org.danteplanner.backend.shared.config.DeviceId;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.comment.dto.CommentTreeNode;
@@ -59,6 +61,7 @@ public class CommentController {
         return ResponseEntity.ok(comments);
     }
 
+    @Restricted
     @PostMapping("/planner/{plannerId}/comments")
     public ResponseEntity<CreateCommentResponse> createComment(
             @AuthenticationPrincipal Long userId,
@@ -70,6 +73,7 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Restricted
     @PostMapping("/comments/{parentCommentId}/replies")
     public ResponseEntity<CreateCommentResponse> createReply(
             @AuthenticationPrincipal Long userId,
@@ -81,6 +85,7 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Restricted
     @PutMapping("/comments/{commentId}")
     public ResponseEntity<UpdateCommentResponse> updateComment(
             @AuthenticationPrincipal Long userId,
@@ -91,6 +96,7 @@ public class CommentController {
         return ResponseEntity.ok(response);
     }
 
+    @RestrictionExempt(reason = "own comment")
     @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<Void> deleteComment(
             @AuthenticationPrincipal Long userId,
@@ -100,6 +106,7 @@ public class CommentController {
         return ResponseEntity.noContent().build();
     }
 
+    @Restricted
     @PostMapping("/comments/{commentId}/upvote")
     public ResponseEntity<CommentVoteResponse> toggleUpvote(
             @AuthenticationPrincipal Long userId,
@@ -110,6 +117,7 @@ public class CommentController {
     }
 
     @RateLimited(RateLimitPolicy.REPORT)
+    @Restricted
     @PostMapping("/comments/{commentId}/report")
     public ResponseEntity<CommentReportResponse> reportComment(
             @AuthenticationPrincipal Long userId,
@@ -120,6 +128,7 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @RestrictionExempt(reason = "own setting")
     @PatchMapping("/comments/{commentId}/notifications")
     public ResponseEntity<ToggleNotificationResponse> toggleNotification(
             @AuthenticationPrincipal Long userId,

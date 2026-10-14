@@ -13,7 +13,6 @@ import org.danteplanner.backend.moderation.entity.PlannerReport;
 import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
-import org.danteplanner.backend.moderation.validation.ReporterStandingValidator;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerModerationTargetAdapter;
@@ -95,7 +94,7 @@ class PlannerEngagementServiceTest {
                 new PlannerCatalogService(catalogRepository, null, null, null, null, null, RECOMMENDED_THRESHOLD),
                 new DomainEventRecorder(domainEventRepository, new ObjectMapper(), event -> { }),
                 accessGuard,
-                new PlannerReportService(reportRepository, new ReporterStandingValidator(users),
+                new PlannerReportService(reportRepository,
                         new PlannerModerationTargetAdapter(null, accessGuard), new ReportUniquenessValidator()),
                 new VoteUniquenessValidator(),
                 RECOMMENDED_THRESHOLD

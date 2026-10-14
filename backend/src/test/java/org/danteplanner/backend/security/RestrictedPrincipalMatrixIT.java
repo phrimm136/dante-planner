@@ -9,6 +9,7 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -42,8 +43,8 @@ import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 /**
  * A ban withdraws distribution, never possession.
  *
- * <p>Blocked: publishing a planner, and every way of putting text or a score on someone else's
- * content. Everything else stays reachable, including private planner CRUD.</p>
+ * <p>Blocked: publishing a planner, subscribing to one, and every way of putting text or a score on
+ * someone else's content. Everything else stays reachable, including private planner CRUD.</p>
  *
  * <p>The endpoint axis comes from {@link RequestMappingHandlerMapping}, so both arms grow on their
  * own. A newly added endpoint lands in the must-not-be-blocked arm. That arm checks only that a
@@ -69,12 +70,16 @@ class RestrictedPrincipalMatrixIT extends SharedMySqlContainerSupport {
 
     private static final Set<String> MUTATING_METHODS = Set.of("POST", "PUT", "PATCH", "DELETE");
 
+    private static final String SUBSCRIBE = "POST /api/planner/md/{id}/subscribe";
+
     /**
-     * Every guarded path checks the principal before it looks anything up, so a synthetic path
-     * variable still reaches the guard. The bodies exist only to clear bean validation, which runs
+     * Every guarded path but subscribe checks the principal before it looks anything up, so a
+     * synthetic path variable still reaches the guard. Subscribe decides after reading the planner,
+     * so its row targets a published one. The bodies exist only to clear bean validation, which runs
      * earlier than the controller and would otherwise mask the guard behind a 400.
      */
     private static final Map<String, String> BLOCKED_FOR_BANNED = Map.of(
+            SUBSCRIBE, "",
             "POST /api/planner/md/{id}/publish", "",
             "POST /api/planner/md/{id}/upvote", "{\"voteType\":\"UP\"}",
             "POST /api/planner/md/{id}/report", "{}",
@@ -107,6 +112,7 @@ class RestrictedPrincipalMatrixIT extends SharedMySqlContainerSupport {
     private RequestMappingHandlerMapping handlerMapping;
 
     @Autowired private UserRepository userRepository;
+    @Autowired private PlannerRepository plannerRepository;
     @Autowired private JwtTokenService jwtTokenService;
 
     /**
@@ -131,7 +137,7 @@ class RestrictedPrincipalMatrixIT extends SharedMySqlContainerSupport {
             String key = endpoint.method() + " " + endpoint.pattern();
             return DynamicTest.dynamicTest(key, () -> {
                 MvcResult result = mockMvc
-                        .perform(request(endpoint,
+                        .perform(request(endpoint, pathOf(endpoint, key),
                                 BLOCKED_FOR_BANNED.getOrDefault(key, ALLOWED_BODIES.get(key)),
                                 freshBannedPrincipal()))
                         .andReturn();
@@ -156,8 +162,17 @@ class RestrictedPrincipalMatrixIT extends SharedMySqlContainerSupport {
         });
     }
 
-    private MockHttpServletRequestBuilder request(Endpoint endpoint, String body, Cookie principal) {
-        String path = endpoint.pattern().replaceAll("\\{[^}]+}", UUID.randomUUID().toString());
+    private String pathOf(Endpoint endpoint, String key) {
+        UUID id = SUBSCRIBE.equals(key) ? publishedPlannerId() : UUID.randomUUID();
+        return endpoint.pattern().replaceAll("\\{[^}]+}", id.toString());
+    }
+
+    private UUID publishedPlannerId() {
+        User owner = TestDataFactory.createTestUser(userRepository, "matrix-owner@example.com");
+        return TestDataFactory.createTestPlanner(plannerRepository, owner, true).getId();
+    }
+
+    private MockHttpServletRequestBuilder request(Endpoint endpoint, String path, String body, Cookie principal) {
         return MockMvcRequestBuilders.request(
                         org.springframework.http.HttpMethod.valueOf(endpoint.method()), path)
                 .with(withCsrf())

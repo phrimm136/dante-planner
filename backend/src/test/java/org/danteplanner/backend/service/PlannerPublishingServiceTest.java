@@ -1,6 +1,9 @@
 package org.danteplanner.backend.service;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.moderation.service.RestrictionCheckService;
+import org.danteplanner.backend.moderation.validation.AccountStandingValidator;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
@@ -133,6 +136,7 @@ class PlannerPublishingServiceTest {
     private PlannerPublishingService publishingServiceWith(PlannerContentValidator contentValidator) {
         ObjectMapper objectMapper = new ObjectMapper();
         PlannerAccessGuard accessGuard = new PlannerAccessGuard(users, plannerRepository);
+        RestrictionCheckService restrictionCheck = new RestrictionCheckService(users, new AccountStandingValidator());
         PlannerCatalogService catalogService = new PlannerCatalogService(catalogRepository, plannerRepository,
                 plannerStatsRepository, new DomainEventRecorder(catalogEventRepository, objectMapper, null),
                 objectMapper, new RecordingTombstoneStore(), RECOMMENDED_THRESHOLD);
@@ -143,6 +147,7 @@ class PlannerPublishingServiceTest {
                 new ContentVersionValidator(TestDataFactory.gameDataRegistry()),
                 catalogService,
                 accessGuard,
+                restrictionCheck,
                 new PlannerCategoryValidator(),
                 new PlannerLimitValidator(),
                 new PlannerOwnershipValidator(),
@@ -156,7 +161,7 @@ class PlannerPublishingServiceTest {
                 commandService,
                 contentValidator,
                 catalogService,
-                new PlannerSubscriptionService(subscriptionRepository, accessGuard),
+                new PlannerSubscriptionService(subscriptionRepository, accessGuard, restrictionCheck),
                 accessGuard,
                 new PlannerOwnershipValidator(),
                 new PlannerPublishValidator(),
@@ -453,19 +458,6 @@ class PlannerPublishingServiceTest {
 
     @Nested
     class BanEnforcementTests {
-
-        @Test
-        void publish_WhenBannedUser_ThrowsUserBannedException() {
-            // Arrange
-            testUser.setBannedAt(java.time.Instant.now());
-            testUser.setBannedBy(1L);
-
-            UUID plannerId = UUID.randomUUID();
-
-            // Act & Assert
-            assertRejected(() -> publishingService.publish(testUser.getId(), plannerId)).withCode("USER_BANNED");
-            verify(catalogRepository, never()).insert(any());
-        }
 
         @Test
         void unpublish_WhenBannedOwner_Unpublishes() {
