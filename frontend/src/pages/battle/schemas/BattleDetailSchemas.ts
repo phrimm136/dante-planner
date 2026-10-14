@@ -377,6 +377,7 @@ const BattlePhaseI18nSchema = z
         panicName: z.string().optional(),
         panicText: z.string().optional(),
         lowMoraleText: z.string().optional(),
+        panicFlavor: z.string().optional(),
       })
       .strict()
       .optional(),

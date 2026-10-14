@@ -12,6 +12,7 @@ import {
   GAME_TEXT_CLASS,
   SANITY_INDICATOR_COLORS,
   SECTION_STYLES,
+  SANITY_UNITS,
   UNIT_PANEL_COLORS,
 } from '@/lib/constants'
 import type { SanityConditionType } from '@/shared/gameData'
@@ -40,6 +41,7 @@ interface PanicTypeSectionProps {
   nameSlot: ReactNode
   descSlot: ReactNode
   lowMoraleSlot?: ReactNode
+  flavor?: string | undefined
 }
 
 export function PanicTypeSection({
@@ -47,6 +49,7 @@ export function PanicTypeSection({
   nameSlot,
   descSlot,
   lowMoraleSlot,
+  flavor,
 }: PanicTypeSectionProps) {
   const { t, i18n } = useTranslation(['database', 'common'])
   const displayStyle = getDisplayFontForLanguage(i18n.language)
@@ -106,6 +109,23 @@ export function PanicTypeSection({
           </>
         )}
         <Suspense fallback={<Skeleton className="h-8 w-full" />}>{descSlot}</Suspense>
+        {flavor !== undefined && flavor !== '' && (
+          <>
+            <br />
+            <br />
+            <span
+              data-slot="panic-flavor"
+              style={{
+                fontSize: clientLength(SANITY_UNITS.PANIC.FLAVOR.FONT),
+                fontStyle: 'italic',
+                color: UNIT_PANEL_COLORS.FLAVOR,
+                whiteSpace: 'pre-line',
+              }}
+            >
+              {flavor}
+            </span>
+          </>
+        )}
       </div>
     </div>
   )
@@ -176,6 +196,7 @@ function PanicTypeSectionContent({ panicType }: PanicTypeSectionI18nProps) {
       panicType={panicType}
       nameSlot={<PanicName name={panicEntry?.name ?? ''} />}
       descSlot={<FormattedDescription text={panicEntry?.panicDesc ?? ''} />}
+      flavor={panicEntry?.flavor}
       {...(lowMoraleDesc !== '' && {
         lowMoraleSlot: <FormattedDescription text={lowMoraleDesc} />,
       })}

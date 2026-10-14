@@ -5,6 +5,7 @@ export const PanicInfoEntrySchema = z
     name: z.string(),
     lowMoraleDesc: z.string(),
     panicDesc: z.string(),
+    flavor: z.string().optional(),
   })
   .strict()
 

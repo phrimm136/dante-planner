@@ -382,6 +382,7 @@ export const SANITY_UNITS = {
       LINE_SPACING_EM: -0.15,
     },
     DESC: { LEFT: 300, SHIFT: 17, PAD_TOP: 120 },
+    FLAVOR: { FONT: 33 },
   },
   SECTION_GAP: 50,
   CONDITION: {

@@ -40,7 +40,17 @@ vi.mock(import('@/shared/gameText'), async (importOriginal) => ({
 
 vi.mock(import('../../hooks/usePanicInfo'), async (importOriginal) => ({
   ...(await importOriginal()),
-  usePanicInfo: () => ({ data: panicInfoEN }),
+  usePanicInfo: () => ({
+    data: {
+      ...panicInfoEN,
+      '8888': {
+        name: 'Tremor',
+        lowMoraleDesc: '',
+        panicDesc: 'Does not act.',
+        flavor: 'My hands shake...',
+      },
+    },
+  }),
 }))
 
 vi.mock('../../hooks/useSanityConditionFormatter', () => ({
@@ -59,16 +69,19 @@ function flatten(node: Node): string {
   return Array.from(node.childNodes).map(flatten).join('')
 }
 
-function renderPanic(lowMorale?: string, panicType = '9999') {
+function renderPanic(lowMorale?: string, panicType = '9999', flavor?: string) {
   return render(
     <PanicTypeSection
       panicType={panicType}
       nameSlot={<span>Panic</span>}
       descSlot={<span>Does not act.</span>}
       {...(lowMorale !== undefined && { lowMoraleSlot: <span>{lowMorale}</span> })}
+      flavor={flavor}
     />,
   )
 }
+
+const FLAVOR_KR = '손이 떨리면, 가위질도 흔들려… 이대로는 재단할 수 없어…'
 
 describe('panic section', () => {
   it('renders both parts as one block with no margin between them', () => {
@@ -148,6 +161,32 @@ describe('panic section', () => {
     expect(container.querySelector('[data-slot="low-morale-effect"]')).toBeNull()
   })
 
+  it('appends the flavor after an empty line in small italic brown', () => {
+    const { container } = renderPanic('Lose 3 SP.', '9999', FLAVOR_KR)
+    const desc = slot(container, 'panic-desc')
+    expect(flatten(desc)).toBe(
+      `·Low Morale Effects|Lose 3 SP.|·Panic Effects|Does not act.||${FLAVOR_KR}`,
+    )
+    const flavor = slot(desc, 'panic-flavor')
+    expect(flavor.textContent).toBe(FLAVOR_KR)
+    expect(flavor.style.fontSize).toBe('0.7219rem')
+    expect(flavor.style.fontStyle).toBe('italic')
+    expect(flavor.style.color).toBe('#724b2b')
+    expect(flavor.style.whiteSpace).toBe('pre-line')
+    expect(desc.lastElementChild).toBe(flavor)
+  })
+
+  it('appends the flavor to a description-only panic type', () => {
+    const { container } = renderPanic(undefined, '9997', FLAVOR_KR)
+    expect(flatten(slot(container, 'panic-desc'))).toBe(`Does not act.||${FLAVOR_KR}`)
+  })
+
+  it.each([undefined, ''])('adds no flavor and no line breaks for flavor %j', (flavor) => {
+    const { container } = renderPanic(undefined, '9999', flavor)
+    expect(flatten(slot(container, 'panic-desc'))).toBe('·Panic Effects|Does not act.')
+    expect(container.querySelector('[data-slot="panic-flavor"]')).toBeNull()
+  })
+
   it('draws no runtime panic-buff row', () => {
     const { container } = renderPanic('Lose 3 SP.')
     expect(container.querySelector('[data-slot="panic-buff"]')).toBeNull()
@@ -161,6 +200,15 @@ describe('panic section from panic info', () => {
     expect(flatten(slot(container, 'panic-desc'))).toBe(
       '·Low Morale Effects|Turn Start: Gain 2 [Agility] and 2 [Vulnerable]|·Panic Effects|Turn Start: Lose 10 HP.',
     )
+  })
+
+  it('shows the flavor of a panic info entry after its panic text', async () => {
+    const { container } = render(<PanicTypeSectionI18n panicType="8888" />)
+    await screen.findByText('Tremor')
+    expect(flatten(slot(container, 'panic-desc'))).toBe(
+      '·Panic Effects|Does not act.||My hands shake...',
+    )
+    expect(slot(container, 'panic-flavor').textContent).toBe('My hands shake...')
   })
 
   it('shows only [Unobservable] for panic type 9997', async () => {
