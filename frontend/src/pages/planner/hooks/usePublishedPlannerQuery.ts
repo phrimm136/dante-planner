@@ -7,7 +7,8 @@ import { publishedPlannerQueryKeys } from '../lib/publishedPlannerQueryKeys'
 import { PublishedPlannerDetailSchema } from '../schemas/PlannerListSchemas'
 import { validateSaveablePlanner } from '../schemas/PlannerSchemas'
 import { loadIdMigrationTable } from './loadIdMigrationTable'
-import { normalizePlannerIds } from '../lib/plannerIdNormalize'
+import { loadIdentityLevelCaps } from './loadIdentityLevelCaps'
+import { normalizePlannerContent } from '../lib/plannerIdNormalize'
 
 import type { PublishedPlannerDetail } from '../types/PlannerListTypes'
 import type { SaveablePlanner } from '../types/PlannerTypes'
@@ -83,7 +84,16 @@ export async function parsePublishedPlanner(
     throw new Error(`planner published / ${plannerId}: content is not JSON`)
   }
   if (apiData.plannerType === 'MIRROR_DUNGEON' && isContentRecord(contentData)) {
-    contentData = normalizePlannerIds(contentData, await loadIdMigrationTable())
+    const [table, identityLevelCaps] = await Promise.all([
+      loadIdMigrationTable(),
+      loadIdentityLevelCaps(),
+    ])
+    contentData = normalizePlannerContent(
+      contentData,
+      apiData.contentVersion,
+      table,
+      identityLevelCaps,
+    )
   }
 
   const planner = validateSaveablePlanner({

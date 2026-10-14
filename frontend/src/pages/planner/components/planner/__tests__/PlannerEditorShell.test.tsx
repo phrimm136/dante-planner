@@ -163,7 +163,7 @@ function StoreCapture({ onReady }: { onReady: (api: StoreApi<PlannerEditorStore>
 function renderShell() {
   let storeApi: StoreApi<PlannerEditorStore> | null = null
   const utils = render(
-    <PlannerEditorStoreProvider>
+    <PlannerEditorStoreProvider identityMaxLevel={60}>
       <StoreCapture
         onReady={(api) => {
           storeApi = api

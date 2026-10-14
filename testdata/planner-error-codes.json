@@ -191,7 +191,7 @@
       "kind": "rule",
       "subject": "STARTBUFF",
       "problem": "EXCESS",
-      "rule": "At most 10 start buffs are selected.",
+      "rule": "At most as many start buffs are selected as the season has distinct base ids (id modulo 100).",
       "emittedBy": ["backend", "frontend"]
     },
     "UNKNOWN_STARTBUFF": {
@@ -199,13 +199,6 @@
       "subject": "STARTBUFF",
       "problem": "UNKNOWN",
       "rule": "The start buff id exists for the season.",
-      "emittedBy": ["backend", "frontend"]
-    },
-    "OUT_OF_RANGE_STARTBUFF": {
-      "kind": "rule",
-      "subject": "STARTBUFF",
-      "problem": "OUT_OF_RANGE",
-      "rule": "A start buff's base id (id modulo 100) is between 0 and 9.",
       "emittedBy": ["backend", "frontend"]
     },
     "DUPLICATE_STARTBUFF": {

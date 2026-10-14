@@ -48,7 +48,11 @@ const registry: PlannerIdRegistry = {
   egoIds: new Set(corpus.gameData.egoIds),
   egoMaxThreadspin: new Map(corpus.gameData.egoIds.map((egoId) => [egoId, EGO_MAX_THREADSPIN])),
   themePackIds: new Set(corpus.gameData.themePackIds),
-  season: { startBuffIds: new Set(corpus.gameData.startBuffIds), startGiftPools: new Map() },
+  season: {
+    startBuffIds: new Set(corpus.gameData.startBuffIds),
+    startGiftPools: new Map(),
+    identityMaxLevel: 60,
+  },
 }
 
 const egoGiftSpec: Record<string, EGOGiftSpec> = Object.fromEntries(

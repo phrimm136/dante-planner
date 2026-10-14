@@ -10,12 +10,7 @@ import { START_BUFF_GRID_COLUMNS } from '../../lib/cardLayout'
 import { getStartBuffEnhancementIconPath } from '@/shared/assets'
 import { useStartBuffSelection } from '../../hooks/useStartBuffSelection'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
-import {
-  BASE_BUFF_IDS,
-  createBuffId,
-  deriveEnhancements,
-  getBaseIdFromBuffId,
-} from '@/shared/gameText'
+import { createBuffId, deriveEnhancements, getBaseIdFromBuffId } from '@/shared/gameText'
 import type { EnhancementLevel } from '@/shared/gameText'
 import { StarlightCostDisplay } from '../StarlightCostDisplay'
 import { StartBuffCard } from './StartBuffCard'
@@ -37,6 +32,8 @@ export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEd
     selectedBuffIds,
     setSelectedBuffIds,
   )
+
+  const baseBuffIds = displayBuffs.map((buff) => buff.baseId)
 
   const mobileScale = CARD_MOBILE_SCALE_DENSE
   const { widthPx: columnWidth, heightPx: rowHeight } = useSlotSizePx(
@@ -81,7 +78,7 @@ export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEd
 
   const handleSelectAll = () => {
     const newSelection = new Set<number>()
-    for (const baseId of BASE_BUFF_IDS) {
+    for (const baseId of baseBuffIds) {
       newSelection.add(createBuffId(baseId, getEnhancement(baseId)))
     }
     setSelectedBuffIds(newSelection)
@@ -89,7 +86,7 @@ export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEd
 
   const handleBatchEnhancement = (level: EnhancementLevel) => {
     const newPreviews: Record<number, EnhancementLevel> = {}
-    for (const baseId of BASE_BUFF_IDS) {
+    for (const baseId of baseBuffIds) {
       newPreviews[baseId] = level
     }
     setEnhancementPreviews(newPreviews)
@@ -143,7 +140,7 @@ export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEd
           <button
             type="button"
             className="selectable px-3 h-8 rounded-md border border-border text-sm"
-            data-selected={selectedBuffIds.size === BASE_BUFF_IDS.length}
+            data-selected={selectedBuffIds.size === baseBuffIds.length}
             onClick={handleSelectAll}
           >
             {t('common:selectAll')}

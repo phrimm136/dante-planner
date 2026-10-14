@@ -44,7 +44,7 @@ function makeContent(
     selectedGiftIds: [ENCODED_9001, ENCODED_9002],
     observationGiftIds: [ENCODED_9003],
     comprehensiveGiftIds: [ENCODED_9004],
-    equipment: createDefaultEquipment(),
+    equipment: createDefaultEquipment(60),
     deploymentOrder: [0, 1, 2],
     skillEAState: createDefaultSkillEAState(),
     floorSelections: [
@@ -84,7 +84,7 @@ function serialize(state: PlannerState) {
 }
 
 function roundTrip(content: MDPlannerContent, metadata: EditorMetadata = METADATA) {
-  return serialize(projectEditorState(hydrateEditorState(content, metadata)))
+  return serialize(projectEditorState(hydrateEditorState(content, metadata, 60)))
 }
 
 describe('hydrateEditorState / projectEditorState round trip', () => {
@@ -219,14 +219,15 @@ describe('hydrateEditorState / projectEditorState round trip', () => {
         skillEAState: undefined as unknown as MDPlannerContent['skillEAState'],
       }),
       METADATA,
+      60,
     )
 
-    expect(state.equipment).toEqual(createDefaultEquipment())
+    expect(state.equipment).toEqual(createDefaultEquipment(60))
     expect(state.skillEAState).toEqual(createDefaultSkillEAState())
   })
 
   it('hydrates array fields into Set instances and a reset deck filter', () => {
-    const state = hydrateEditorState(makeContent(), METADATA)
+    const state = hydrateEditorState(makeContent(), METADATA, 60)
 
     expect(state.selectedKeywords).toBeInstanceOf(Set)
     expect(state.selectedBuffIds).toBeInstanceOf(Set)
@@ -239,7 +240,7 @@ describe('hydrateEditorState / projectEditorState round trip', () => {
   })
 
   it('carries metadata through hydrate and back out of the projection', () => {
-    const state = hydrateEditorState(makeContent(), METADATA)
+    const state = hydrateEditorState(makeContent(), METADATA, 60)
 
     expect(state.isPublished).toBe(true)
 
@@ -251,7 +252,7 @@ describe('hydrateEditorState / projectEditorState round trip', () => {
   })
 
   it('projects the state fields by reference, without copying', () => {
-    const state = hydrateEditorState(makeContent(), METADATA)
+    const state = hydrateEditorState(makeContent(), METADATA, 60)
     const projected = projectEditorState(state)
 
     expect(projected.selectedKeywords).toBe(state.selectedKeywords)
@@ -270,6 +271,7 @@ describe('skill EA reconciliation at ingest', () => {
         } as unknown as MDPlannerContent['skillEAState'],
       }),
       METADATA,
+      60,
     )
     expect(state.skillEAState['1']).toEqual({ 0: 3, 1: 2, 2: 1 })
   })
@@ -282,6 +284,7 @@ describe('skill EA reconciliation at ingest', () => {
         } as unknown as MDPlannerContent['skillEAState'],
       }),
       METADATA,
+      60,
     )
     expect(state.skillEAState['1']).toEqual({ 1: 2, 2: 1 })
   })
@@ -292,6 +295,7 @@ describe('skill EA reconciliation at ingest', () => {
         skillEAState: 'nope' as unknown as MDPlannerContent['skillEAState'],
       }),
       METADATA,
+      60,
     )
     expect(state.skillEAState).toEqual(createDefaultSkillEAState())
   })
@@ -348,7 +352,7 @@ describe('floor difficulty defaults follow the category table', () => {
   })
 
   it('hydrate keeps a stored difficulty the table would not default to', () => {
-    const state = hydrateEditorState(makeContent(), METADATA)
+    const state = hydrateEditorState(makeContent(), METADATA, 60)
     expect(state.floorSelections[0]?.difficulty).toBe(DUNGEON_IDX.NORMAL)
   })
 
@@ -359,7 +363,7 @@ describe('floor difficulty defaults follow the category table', () => {
         { themePackId: '', difficulty: DUNGEON_IDX.HARD },
       ] as unknown as MDPlannerContent['floorSelections'],
     })
-    const floor = hydrateEditorState(content, METADATA).floorSelections[0]
+    const floor = hydrateEditorState(content, METADATA, 60).floorSelections[0]
     expect(floor?.themePackId).toBeNull()
     expect(floor?.giftIds).toEqual(new Set())
   })
@@ -374,7 +378,7 @@ describe('floor difficulty defaults follow the category table', () => {
         } as unknown as MDPlannerContent['floorSelections'][number],
       ],
     })
-    const state = hydrateEditorState(content, METADATA)
+    const state = hydrateEditorState(content, METADATA, 60)
     expect(state.floorSelections[0]?.difficulty).toBe(DUNGEON_IDX.HARD)
   })
 })

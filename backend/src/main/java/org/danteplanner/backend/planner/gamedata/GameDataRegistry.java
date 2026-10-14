@@ -28,7 +28,7 @@ public class GameDataRegistry {
 
     public static final String FLOOR_RULES_FILE = "plannerFloorRules.json";
 
-    private record Season(Set<String> startBuffIds, Map<String, Set<String>> startGiftPools) {
+    private record Season(Set<String> startBuffIds, Map<String, Set<String>> startGiftPools, int identityMaxLevel) {
 
         private boolean isPopulated() {
             return !startBuffIds.isEmpty() && !startGiftPools.isEmpty();
@@ -100,9 +100,16 @@ public class GameDataRegistry {
         Map<Integer, Season> seasons = new HashMap<>();
         for (int version : plannerVersions.mdAvailableVersions()) {
             Path seasonDir = loader.seasonDirectory(Path.of(dataPath), version);
+            Path seasonFile = seasonDir.resolve(MirrorDungeonSeason.FILE);
+            MirrorDungeonSeason mirrorDungeon = loader.loadMirrorDungeonSeason(seasonFile);
+            if (mirrorDungeon.version() != version) {
+                throw new IllegalStateException(seasonFile + " holds version " + mirrorDungeon.version()
+                        + " but sits in the directory of season " + version);
+            }
             seasons.put(version, new Season(
                     Set.copyOf(loader.loadKeysFromFile(seasonDir.resolve("startBuffs.json"))),
-                    Map.copyOf(loader.loadStartGiftPools(seasonDir.resolve("startEgoGiftPools.json")))));
+                    Map.copyOf(loader.loadStartGiftPools(seasonDir.resolve("startEgoGiftPools.json"))),
+                    mirrorDungeon.identityMaxLevel()));
         }
 
         Snapshot loaded = new Snapshot(
@@ -175,9 +182,17 @@ public class GameDataRegistry {
         return snapshot.floorRules();
     }
 
-    public boolean hasStartBuff(int version, String id) {
+    public Set<String> startBuffIds(int version) {
         Season season = snapshot.seasons().get(version);
-        return season != null && season.startBuffIds().contains(id);
+        return season == null ? Set.of() : season.startBuffIds();
+    }
+
+    public int identityMaxLevel(int version) {
+        Season season = snapshot.seasons().get(version);
+        if (season == null) {
+            throw new IllegalArgumentException("No game data for season " + version);
+        }
+        return season.identityMaxLevel();
     }
 
     public Set<String> getStartGiftPool(int version, String keyword) {

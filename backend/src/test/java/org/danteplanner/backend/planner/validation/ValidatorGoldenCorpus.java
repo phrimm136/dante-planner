@@ -52,6 +52,7 @@ final class ValidatorGoldenCorpus {
     static final int MAX_NOTE_SIZE_BYTES = 1024;
 
     static final int MD_CURRENT_VERSION = 7;
+    static final int IDENTITY_MAX_LEVEL = 60;
     static final List<Integer> RR_AVAILABLE_VERSIONS = List.of(1, 5);
     static final int SCHEMA_VERSION = 2;
 
@@ -68,7 +69,7 @@ final class ValidatorGoldenCorpus {
     static final Set<String> THEME_PACK_IDS = IntStream.rangeClosed(1001, 1015)
             .mapToObj(String::valueOf)
             .collect(Collectors.toUnmodifiableSet());
-    static final Set<String> START_BUFF_IDS = Set.of("100", "101", "115", "200", "201", "302");
+    static final Set<String> START_BUFF_IDS = Set.of("100", "101", "200", "201", "302");
 
     static final Map<String, Set<String>> START_GIFT_POOLS = Map.of(
             "Combustion", Set.of("9001", "9002", "gift_a"),
@@ -324,7 +325,7 @@ final class ValidatorGoldenCorpus {
                 Map.of("5", "\"5\":{\"identity\":{\"id\":\"10601\",\"level\":45,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
         entries.add(draft("identity-level-out-of-range", valid().with("equipment", equipmentWith(
-                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":99,\"uptie\":4},"
+                Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":0,\"uptie\":4},"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
         entries.add(draft("identity-uptie-out-of-range", valid().with("equipment", equipmentWith(
                 Map.of("5", "\"5\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":9},"
@@ -409,7 +410,6 @@ final class ValidatorGoldenCorpus {
                 valid().with("selectedBuffIds", "[100,101,102,103,104,105,106,107,108,109,200]")));
         entries.add(draft("buff-not-number", valid().with("selectedBuffIds", "[100,\"x\"]")));
         entries.add(draft("buff-id-unknown", valid().with("selectedBuffIds", "[100,999]")));
-        entries.add(draft("buff-base-id-out-of-range", valid().with("selectedBuffIds", "[115]")));
         entries.add(draft("buff-base-id-duplicate", valid().with("selectedBuffIds", "[100,200]")));
 
         entries.add(draft("start-gift-keyword-absent", valid().without("selectedGiftKeyword")));

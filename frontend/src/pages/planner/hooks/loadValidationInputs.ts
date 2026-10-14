@@ -8,6 +8,7 @@ import { IDENTITY_LIST } from '@/pages/identity'
 import { THEME_PACK_LIST } from '@/pages/themePack'
 import { startBuffSpecQueryOptions } from './useStartBuffList'
 import { startGiftPoolsQueryOptions } from './useStartGiftPools'
+import { mirrorDungeonQueryOptions } from './useMirrorDungeonSeason'
 import { plannerIdRegistry } from '../lib/plannerIdRegistry'
 import type { EGOGiftSpec } from '@/pages/egoGift'
 import type { PlannerIdRegistry } from '../lib/validation/plannerValidation'
@@ -28,6 +29,7 @@ export async function loadValidationInputs(contentVersion: number): Promise<Vali
     themePackSpec,
     startBuffs,
     startGiftPools,
+    mirrorDungeons,
   ] = await Promise.all([
     queryClient.ensureQueryData(entityListSpecOptions(EGO_GIFT_LIST)),
     queryClient.ensureQueryData(entityListI18nOptions(EGO_GIFT_LIST, i18n.language)),
@@ -40,15 +42,19 @@ export async function loadValidationInputs(contentVersion: number): Promise<Vali
     Promise.all(
       versions.map((version) => queryClient.ensureQueryData(startGiftPoolsQueryOptions(version))),
     ),
+    Promise.all(
+      versions.map((version) => queryClient.ensureQueryData(mirrorDungeonQueryOptions(version))),
+    ),
   ])
   const registryFor = plannerIdRegistry({
     identitySpec,
     egoSpec,
     themePackSpec,
-    seasons: versions.map((version, i) => ({
+    seasons: mirrorDungeons.map(({ version, identityMaxLevel }, i) => ({
       version,
       startBuffs: startBuffs[i] ?? {},
       startGiftPools: startGiftPools[i] ?? {},
+      identityMaxLevel,
     })),
   })
   return { egoGiftSpec, egoGiftI18n, registry: registryFor(contentVersion) }

@@ -11,6 +11,7 @@ import {
 import { classifyAppError } from '@/lib/apiErrorClassifier'
 import { isMDPlanner } from '../types/PlannerTypes'
 import { loadIdMigrationTable } from './loadIdMigrationTable'
+import { loadIdentityLevelCaps } from './loadIdentityLevelCaps'
 import { withNormalizedIds } from '../lib/plannerIdNormalize'
 import type { Result } from '@/lib/result'
 import type { StorageReadError } from '@/lib/storage'
@@ -170,8 +171,11 @@ export function usePlannerStorage(): PlannerStorageOperations {
       }
 
       const planner = toSaveablePlanner(validated.metadata, validated.config, validated.content)
-      const table = await loadIdMigrationTable()
-      return ok(withNormalizedIds(withMigratedKeywords(planner), table))
+      const [table, identityLevelCaps] = await Promise.all([
+        loadIdMigrationTable(),
+        loadIdentityLevelCaps(),
+      ])
+      return ok(withNormalizedIds(withMigratedKeywords(planner), table, identityLevelCaps))
     }
 
     async function collectRows<T, R>(
@@ -248,7 +252,10 @@ export function usePlannerStorage(): PlannerStorageOperations {
     }
 
     const listLocalFull = async (): Promise<SaveablePlanner[]> => {
-      const table = await loadIdMigrationTable()
+      const [table, identityLevelCaps] = await Promise.all([
+        loadIdMigrationTable(),
+        loadIdentityLevelCaps(),
+      ])
       const rows = await collectRows(
         PLANNER_STORAGE_KEYS.PLANNER,
         SaveablePlannerSchema,
@@ -259,6 +266,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
               toSaveablePlanner(validated.metadata, validated.config, validated.content),
             ),
             table,
+            identityLevelCaps,
           ),
       )
       return rows.sort((a, b) => newestFirst(a.metadata.lastModifiedAt, b.metadata.lastModifiedAt))

@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest'
 import {
-  BASE_BUFF_IDS,
   createBuffId,
   deriveEnhancements,
   getBaseIdFromBuffId,
@@ -10,6 +9,7 @@ import {
 } from '../StartBuffTypes'
 
 const ENHANCEMENTS: EnhancementLevel[] = [0, 1, 2]
+const BASE_BUFF_IDS = [100, 101, 102, 103, 104, 105, 106, 107, 108, 109]
 
 describe('buff id algebra', () => {
   it('round-trips every (baseId, enhancement) pair through createBuffId', () => {

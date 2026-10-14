@@ -7,6 +7,7 @@ import org.danteplanner.backend.planner.validation.Violation;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -19,13 +20,9 @@ public final class StartBuffRules {
         }
 
         Optional<Long> countedBase() {
-            return known && inBaseRange(baseId()) ? Optional.of(baseId()) : Optional.empty();
+            return known ? Optional.of(baseId()) : Optional.empty();
         }
     }
-
-    static final int MAX_START_BUFFS = 10;
-    static final int MIN_BASE_ID = 0;
-    static final int MAX_BASE_ID = 9;
 
     private static final int BASE_ID_MODULUS = 100;
     private static final ContentPath SELECTED_BUFF_IDS = ContentPath.of("selectedBuffIds");
@@ -34,19 +31,30 @@ public final class StartBuffRules {
     }
 
     public static List<Violation> check(List<Long> selectedBuffIds, StartBuffSeason season) {
+        Set<String> seasonIds = season.startBuffIds();
+        int maxCount = baseCount(seasonIds);
         return Stream.concat(
-                        selectedBuffIds.size() > MAX_START_BUFFS
-                                ? Stream.of(StartBuffViolations.tooMany(SELECTED_BUFF_IDS, selectedBuffIds.size()))
+                        selectedBuffIds.size() > maxCount
+                                ? Stream.of(StartBuffViolations.tooMany(SELECTED_BUFF_IDS, selectedBuffIds.size(),
+                                        maxCount))
                                 : Stream.<Violation>empty(),
-                        buffs(selectedBuffIds, season))
+                        buffs(selectedBuffIds, seasonIds))
                 .sorted(Violation.BY_PATH_THEN_CODE)
                 .toList();
     }
 
-    private static Stream<Violation> buffs(List<Long> buffIds, StartBuffSeason season) {
+    private static int baseCount(Set<String> seasonIds) {
+        return (int) seasonIds.stream()
+                .mapToLong(Long::parseLong)
+                .map(id -> id % BASE_ID_MODULUS)
+                .distinct()
+                .count();
+    }
+
+    private static Stream<Violation> buffs(List<Long> buffIds, Set<String> seasonIds) {
         List<Buff> buffs = IntStream.range(0, buffIds.size())
                 .mapToObj(index -> new Buff(index, buffIds.get(index),
-                        season.hasStartBuff(String.valueOf(buffIds.get(index)))))
+                        seasonIds.contains(String.valueOf(buffIds.get(index)))))
                 .toList();
         List<Optional<Long>> countedBases = buffs.stream().map(Buff::countedBase).toList();
         Map<Optional<Long>, Integer> firstIndex = Positions.firstIndexOf(countedBases);
@@ -60,14 +68,8 @@ public final class StartBuffRules {
         ContentPath path = SELECTED_BUFF_IDS.index(buff.index());
         return !buff.known()
                 ? Stream.of(StartBuffViolations.unknownBuff(path, SELECTED_BUFF_IDS, buff.buffId()))
-                : !inBaseRange(buff.baseId())
-                        ? Stream.of(StartBuffViolations.baseIdOutOfRange(path, buff.baseId()))
-                        : repeatsABase
-                                ? Stream.of(StartBuffViolations.duplicateBaseId(path, SELECTED_BUFF_IDS, buff.baseId()))
-                                : Stream.empty();
-    }
-
-    private static boolean inBaseRange(long baseId) {
-        return baseId >= MIN_BASE_ID && baseId <= MAX_BASE_ID;
+                : repeatsABase
+                        ? Stream.of(StartBuffViolations.duplicateBaseId(path, SELECTED_BUFF_IDS, buff.baseId()))
+                        : Stream.empty();
     }
 }

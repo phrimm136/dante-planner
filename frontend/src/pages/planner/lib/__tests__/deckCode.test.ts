@@ -52,16 +52,26 @@ describe('deck code gzip header', () => {
 
 describe('decodeDeckCode', () => {
   it('recovers the deployment order from a previously emitted code', () => {
-    const { deploymentOrder } = decodeDeckCode(KNOWN_CODE, {}, {})
+    const { deploymentOrder } = decodeDeckCode(KNOWN_CODE, {}, {}, 60)
 
     expect(deploymentOrder).toEqual([3, 4, 0, 9, 2, 1, 10, 6, 7])
   })
 
   it('decodes without throwing when spec maps are empty', () => {
-    const { equipment, warnings } = decodeDeckCode(KNOWN_CODE, {}, {})
+    const { equipment, warnings } = decodeDeckCode(KNOWN_CODE, {}, {}, 60)
 
     expect(Object.keys(equipment)).toHaveLength(12)
     expect(warnings.length).toBeGreaterThan(0)
+  })
+})
+
+describe('decodeDeckCode season cap', () => {
+  it('sets every imported identity to the given cap', () => {
+    const { equipment } = decodeDeckCode(KNOWN_CODE, {}, {}, 55)
+
+    expect(Object.values(equipment).map((sinner) => sinner.identity.level)).toEqual(
+      Array.from({ length: 12 }, () => 55),
+    )
   })
 })
 
@@ -74,7 +84,7 @@ describe('deck code length bound', () => {
   })
 
   it('decodes an over-long code to nothing rather than inflating it', () => {
-    const decoded = decodeDeckCode(overLong, {}, {})
+    const decoded = decodeDeckCode(overLong, {}, {}, 60)
     expect(decoded.equipment).toEqual({})
     expect(decoded.deploymentOrder).toEqual([])
     expect(decoded.warnings.length).toBeGreaterThan(0)

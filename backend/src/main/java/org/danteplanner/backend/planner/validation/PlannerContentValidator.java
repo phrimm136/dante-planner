@@ -15,6 +15,7 @@ import org.danteplanner.backend.planner.validation.floor.FloorReferenceData;
 import org.danteplanner.backend.planner.validation.floor.FloorReferences;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.planner.validation.floor.Stage;
+import org.danteplanner.backend.planner.validation.identity.IdentityLevels;
 import org.danteplanner.backend.planner.validation.identity.IdentityRules;
 import org.danteplanner.backend.planner.validation.sinner.DeploymentOrder;
 import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
@@ -114,7 +115,7 @@ public class PlannerContentValidator {
         return document.contentSize(parsed)
                 .or(() -> DocumentChecks.objectRoot(parsed))
                 .<ContentVerdict>map(ContentVerdict.Refused::new)
-                .orElseGet(() -> checkShape(normalized(content, parsed), category,
+                .orElseGet(() -> checkShape(clipped(normalized(content, parsed), season), category,
                         tree -> document.noteSize(tree.sectionNotes()),
                         tree -> contentViolations(tree, season, stage)));
     }
@@ -152,11 +153,16 @@ public class PlannerContentValidator {
         return new Normalized(content, parsed, gameDataRegistry.idMigrations().normalize(parsed));
     }
 
+    private static Normalized clipped(Normalized normalized, Season season) {
+        return new Normalized(normalized.content(), normalized.parsed(),
+                IdentityLevels.clip(normalized.root(), season.identityMaxLevel()));
+    }
+
     private List<Violation> contentViolations(PlannerContent tree, Season season, Stage stage) {
         FloorBoundary.Parsed floors = tree.floorSelections().parsed();
         return Stream.of(
                         DocumentChecks.selectedKeywords(tree.selectedKeywords(), stage),
-                        IdentityRules.check(tree.identities(), references),
+                        IdentityRules.check(tree.identities(), references, season.identityMaxLevel()),
                         EgoRules.check(tree.egos(), references),
                         DeploymentOrder.check(tree.deploymentOrder()),
                         SkillRules.check(tree.skillEAState()),

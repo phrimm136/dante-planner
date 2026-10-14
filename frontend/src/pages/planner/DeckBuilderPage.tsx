@@ -11,13 +11,14 @@ import {
 } from './stores/usePlannerEditorStore'
 
 import { useDeckClipboard } from './hooks/useDeckClipboard'
+import { useIdentityMaxLevel } from './hooks/useMirrorDungeonSeason'
 
 import { StoreBoundDeckBuilderSummary } from './components/deckBuilder/DeckBuilderSummary'
 import { DeckBuilderPane } from './components/deckBuilder/DeckBuilderPane'
 import { StoreBoundDeckBuilderContent } from './components/deckBuilder/DeckBuilderContent'
 import { DeckImportConfirmDialog } from './components/deckBuilder/DeckImportConfirmDialog'
 import { DeckBuilderPageSkeleton } from './components/plannerSkeletons'
-import { SECTION_STYLES } from '@/lib/constants'
+import { PLANNER_CONFIG, SECTION_STYLES } from '@/lib/constants'
 
 function DeckBuilderPageContent() {
   const storeApi = usePlannerEditorStoreApi()
@@ -31,6 +32,7 @@ function DeckBuilderPageContent() {
 
   const { handleImport, handleExport, pendingImport, clearPending } = useDeckClipboard({
     readDeck: () => storeApi.getState(),
+    mdVersion: PLANNER_CONFIG.mdCurrentVersion,
   })
 
   const handleImportConfirm = () => {
@@ -89,14 +91,21 @@ function DeckBuilderPageContent() {
   )
 }
 
-export default function DeckBuilderPage() {
+function DeckBuilderPageStore() {
   const storeKey = useId()
+  const identityMaxLevel = useIdentityMaxLevel(PLANNER_CONFIG.mdCurrentVersion)
 
   return (
-    <PlannerEditorStoreProvider key={storeKey}>
-      <Suspense fallback={<DeckBuilderPageSkeleton />}>
-        <DeckBuilderPageContent />
-      </Suspense>
+    <PlannerEditorStoreProvider key={storeKey} identityMaxLevel={identityMaxLevel}>
+      <DeckBuilderPageContent />
     </PlannerEditorStoreProvider>
+  )
+}
+
+export default function DeckBuilderPage() {
+  return (
+    <Suspense fallback={<DeckBuilderPageSkeleton />}>
+      <DeckBuilderPageStore />
+    </Suspense>
   )
 }

@@ -760,15 +760,38 @@ class PlannerContentValidatorTest {
         }
 
         @Test
-        void validate_WhenInvalidBaseBuffId_ThrowsException() throws IOException {
-            PlannerContentValidator knowingBuff115 = validatorOverDataWith(dataDir, "MD7/startBuffs.json",
-                    buffs -> buffs.set("115", buffs.get("100")));
+        void validate_WhenMd7GetsBuff110_RejectsItAsUnknown() {
             String content = replaceOnce(createValidContent(),
                     "\"selectedBuffIds\": [100, 201],",
-                    "\"selectedBuffIds\": [115],"
+                    "\"selectedBuffIds\": [110],"
             );
-            assertRejected(() -> knowingBuff115.parse(content, MDCategory.F5, knowingBuff115.season(VERSION), Stage.DRAFT))
-                    .withViolation("OUT_OF_RANGE_STARTBUFF", "selectedBuffIds[0]");
+            assertRejected(() -> validate(content, "5F")).withViolation("UNKNOWN_STARTBUFF", "selectedBuffIds[0]");
+        }
+
+        @Test
+        void validate_WhenMd7GetsAnEleventhBuff_RejectsTheCountAgainstTen() {
+            String content = replaceOnce(createValidContent(),
+                    "\"selectedBuffIds\": [100, 201],",
+                    "\"selectedBuffIds\": [100, 201, 302, 103, 204, 305, 106, 207, 308, 109, 300],"
+            );
+            assertRejected(() -> validate(content, "5F"))
+                    .withViolation("EXCESS_STARTBUFF", "selectedBuffIds")
+                    .isInstanceOfSatisfying(PlannerValidationException.class, ex ->
+                            assertThat(ex.getSubErrors()).anySatisfy(error -> assertThat(error.message())
+                                    .isEqualTo("selectedBuffIds count value 11 is out of range [0-10]")));
+        }
+
+        @Test
+        void validate_WhenTheSeasonHasBase10_AcceptsBuff110AndElevenBuffs() throws IOException {
+            PlannerContentValidator knowingBuff110 = validatorOverDataWith(dataDir, "MD7/startBuffs.json",
+                    buffs -> buffs.set("110", buffs.get("100")));
+            String content = replaceOnce(createValidContent(),
+                    "\"selectedBuffIds\": [100, 201],",
+                    "\"selectedBuffIds\": [100, 201, 302, 103, 204, 305, 106, 207, 308, 109, 110],"
+            );
+
+            assertThatCode(() -> knowingBuff110.parse(content, MDCategory.F5, knowingBuff110.season(VERSION),
+                    Stage.DRAFT)).doesNotThrowAnyException();
         }
     }
 
@@ -1133,7 +1156,7 @@ class PlannerContentValidatorTest {
         void validate_WhenLevelAndUptieOutOfRange_ReportsBoth() {
             String content = replaceOnce(createValidContent(),
                     "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": 45}",
-                    "\"identity\": {\"id\": \"10101\", \"uptie\": 99, \"level\": 999}");
+                    "\"identity\": {\"id\": \"10101\", \"uptie\": 99, \"level\": 0}");
 
             assertRejected(() -> validate(content, "5F"))
                     .withViolation("OUT_OF_RANGE_IDENTITY_LEVEL")

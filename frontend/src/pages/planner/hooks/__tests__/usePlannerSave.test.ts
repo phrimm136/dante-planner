@@ -110,7 +110,7 @@ import { usePlannerSave } from '../usePlannerSave'
  * skill EA summing to 6, real Set instances (required by serializeSets).
  */
 function validState(overrides: Partial<PlannerState> = {}): PlannerState {
-  const base = createPlannerEditorStore().getState().getPlannerState()
+  const base = createPlannerEditorStore(60).getState().getPlannerState()
   return { ...base, ...overrides }
 }
 

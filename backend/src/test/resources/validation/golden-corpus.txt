@@ -244,8 +244,8 @@ sub 1: MISMATCHED_IDENTITY | identity '10601' does not belong to sinner 5
 
 ### identity-level-out-of-range
 code: VALIDATION_ERROR
-message: [OUT_OF_RANGE_IDENTITY_LEVEL] level value 99 is out of range [1-60]
-sub 1: OUT_OF_RANGE_IDENTITY_LEVEL | level value 99 is out of range [1-60]
+message: [OUT_OF_RANGE_IDENTITY_LEVEL] level value 0 is out of range [1-60]
+sub 1: OUT_OF_RANGE_IDENTITY_LEVEL | level value 0 is out of range [1-60]
 
 ### identity-uptie-out-of-range
 code: VALIDATION_ERROR
@@ -404,8 +404,8 @@ sub 1: UNAFFORDABLE_EGOGIFT | Gift '9004' is not affordable for theme pack '1001
 
 ### buff-count-exceeded
 code: VALIDATION_ERROR
-message: [EXCESS_STARTBUFF] selectedBuffIds count value 11 is out of range [0-10]; [UNKNOWN_STARTBUFF] selectedBuffIds ID '102' not found or invalid; [UNKNOWN_STARTBUFF] selectedBuffIds ID '103' not found or invalid; [UNKNOWN_STARTBUFF] selectedBuffIds ID '104' not found or invalid; [UNKNOWN_STARTBUFF] selectedBuffIds ID '105' not found or invalid; [UNKNOWN_STARTBUFF] selectedBuffIds ID '106' not found or invalid; [UNKNOWN_STARTBUFF] selectedBuffIds ID '107' not found or invalid; [UNKNOWN_STARTBUFF] selectedBuffIds ID '108' not found or invalid; [UNKNOWN_STARTBUFF] selectedBuffIds ID '109' not found or invalid; [DUPLICATE_STARTBUFF] Duplicate value '0' in selectedBuffIds base IDs
-sub 1: EXCESS_STARTBUFF | selectedBuffIds count value 11 is out of range [0-10]
+message: [EXCESS_STARTBUFF] selectedBuffIds count value 11 is out of range [0-3]; [UNKNOWN_STARTBUFF] selectedBuffIds ID '102' not found or invalid; [UNKNOWN_STARTBUFF] selectedBuffIds ID '103' not found or invalid; [UNKNOWN_STARTBUFF] selectedBuffIds ID '104' not found or invalid; [UNKNOWN_STARTBUFF] selectedBuffIds ID '105' not found or invalid; [UNKNOWN_STARTBUFF] selectedBuffIds ID '106' not found or invalid; [UNKNOWN_STARTBUFF] selectedBuffIds ID '107' not found or invalid; [UNKNOWN_STARTBUFF] selectedBuffIds ID '108' not found or invalid; [UNKNOWN_STARTBUFF] selectedBuffIds ID '109' not found or invalid; [DUPLICATE_STARTBUFF] Duplicate value '0' in selectedBuffIds base IDs
+sub 1: EXCESS_STARTBUFF | selectedBuffIds count value 11 is out of range [0-3]
 sub 2: UNKNOWN_STARTBUFF | selectedBuffIds ID '102' not found or invalid
 sub 3: UNKNOWN_STARTBUFF | selectedBuffIds ID '103' not found or invalid
 sub 4: UNKNOWN_STARTBUFF | selectedBuffIds ID '104' not found or invalid
@@ -425,11 +425,6 @@ sub 1: INVALID_FIELD_TYPE | Field 'selectedBuffIds[1]' has an invalid value: str
 code: VALIDATION_ERROR
 message: [UNKNOWN_STARTBUFF] selectedBuffIds ID '999' not found or invalid
 sub 1: UNKNOWN_STARTBUFF | selectedBuffIds ID '999' not found or invalid
-
-### buff-base-id-out-of-range
-code: VALIDATION_ERROR
-message: [OUT_OF_RANGE_STARTBUFF] selectedBuffIds[0] base ID value 15 is out of range [0-9]
-sub 1: OUT_OF_RANGE_STARTBUFF | selectedBuffIds[0] base ID value 15 is out of range [0-9]
 
 ### buff-base-id-duplicate
 code: VALIDATION_ERROR

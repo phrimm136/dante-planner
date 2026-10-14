@@ -205,7 +205,7 @@ export function PlannerEditorShell({
     handleExport: handleDeckExport,
     pendingImport,
     clearPending,
-  } = useDeckClipboard({ readDeck: () => storeApi.getState() })
+  } = useDeckClipboard({ readDeck: () => storeApi.getState(), mdVersion })
 
   const titleByteLength = calculateByteLength(title)
   const isTitleValid = titleByteLength <= MAX_TITLE_BYTES

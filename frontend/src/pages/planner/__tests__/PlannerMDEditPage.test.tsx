@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import PlannerMDEditPage from '../PlannerMDEditPage'
 import { useSavedPlannerQuery } from '../hooks/useSavedPlannerQuery'
@@ -24,13 +24,23 @@ vi.mock('react-i18next', () => ({
 
 vi.mock('../hooks/useSavedPlannerQuery')
 
-vi.mock('../components/planner/PlannerEditEditor', () => ({
-  PlannerEditEditor: ({ planner }: { planner?: SaveablePlanner }) => (
-    <div data-testid="editor-content">
-      EditEditor - Planner ID: {planner?.metadata.id || 'none'}
-    </div>
-  ),
-}))
+vi.mock('../components/planner/PlannerEditEditor', async (importOriginal) => {
+  const { usePlannerEditorStore } = await import('../stores/usePlannerEditorStore')
+  return {
+    ...(await importOriginal<typeof import('../components/planner/PlannerEditEditor')>()),
+    PlannerEditEditor: ({ planner }: { planner?: SaveablePlanner }) => {
+      const reset = usePlannerEditorStore((s) => s.reset)
+      const level = usePlannerEditorStore((s) => s.equipment['1']?.identity.level)
+      return (
+        <div data-testid="editor-content">
+          EditEditor - Planner ID: {planner?.metadata.id || 'none'}
+          <button onClick={reset}>reset deck</button>
+          <span data-testid="default-level">{level}</span>
+        </div>
+      )
+    },
+  }
+})
 
 vi.mock('@/components/feedback/ErrorBoundary', () => ({
   ErrorBoundary: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -100,17 +110,31 @@ describe('PlannerMDEditPage', () => {
       expect(useSavedPlannerQuery).toHaveBeenCalledWith('test-planner-123')
     })
 
-    it('renders the edit editor with the loaded planner', () => {
+    it('renders the edit editor with the loaded planner', async () => {
       render(
         <QueryClientProvider client={queryClient}>
           <PlannerMDEditPage />
         </QueryClientProvider>,
       )
 
-      const editor = screen.getByTestId('editor-content')
+      const editor = await screen.findByTestId('editor-content')
       expect(editor).toBeDefined()
       expect(editor.textContent).toContain('EditEditor')
       expect(editor.textContent).toContain('Planner ID: test-planner-123')
+    })
+  })
+
+  describe('identity level cap', () => {
+    it("equips a default deck at the MD6 planner's cap of 55", async () => {
+      render(
+        <QueryClientProvider client={queryClient}>
+          <PlannerMDEditPage />
+        </QueryClientProvider>,
+      )
+
+      fireEvent.click(await screen.findByRole('button', { name: 'reset deck' }))
+
+      expect(screen.getByTestId('default-level').textContent).toBe('55')
     })
   })
 
@@ -150,25 +174,25 @@ describe('PlannerMDEditPage', () => {
   })
 
   describe('state initialization', () => {
-    it('passes loaded planner to the edit editor', () => {
+    it('passes loaded planner to the edit editor', async () => {
       render(
         <QueryClientProvider client={queryClient}>
           <PlannerMDEditPage />
         </QueryClientProvider>,
       )
 
-      const editor = screen.getByTestId('editor-content')
+      const editor = await screen.findByTestId('editor-content')
       expect(editor.textContent).toContain('test-planner-123')
     })
 
-    it('routes to the edit editor rather than the create editor', () => {
+    it('routes to the edit editor rather than the create editor', async () => {
       render(
         <QueryClientProvider client={queryClient}>
           <PlannerMDEditPage />
         </QueryClientProvider>,
       )
 
-      const editor = screen.getByTestId('editor-content')
+      const editor = await screen.findByTestId('editor-content')
       expect(editor.textContent).toContain('EditEditor')
     })
   })

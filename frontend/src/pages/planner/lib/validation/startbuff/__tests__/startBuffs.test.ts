@@ -1,10 +1,24 @@
 import { describe, it, expect } from 'vitest'
 
-import { startBuffViolations } from '../startBuffs'
+import md7StartBuffs from '@static/data/MD7/startBuffs.json'
+import { startBuffBaseIds, startBuffViolations } from '../startBuffs'
 import type { StartBuffSeason } from '../startBuffs'
 import { rendered } from '../../__tests__/rendered'
 
-const KNOWS_ALL: StartBuffSeason = { hasStartBuff: () => true }
+const TEN_BASES = startBuffBaseIds([
+  '100',
+  '101',
+  '102',
+  '103',
+  '104',
+  '105',
+  '106',
+  '107',
+  '108',
+  '109',
+])
+
+const KNOWS_ALL: StartBuffSeason = { hasStartBuff: () => true, startBuffBaseIds: TEN_BASES }
 
 const violationsOf = (buffIds: number[], season: StartBuffSeason = KNOWS_ALL) =>
   rendered(startBuffViolations(buffIds, season))
@@ -25,28 +39,18 @@ describe('startBuffViolations', () => {
     ])
   })
 
-  it('reports a base id outside 0-9 at the buff', () => {
-    expect(violationsOf([110])).toEqual([
-      { code: 'OUT_OF_RANGE_STARTBUFF', path: 'selectedBuffIds[0]' },
-    ])
-  })
-
   it('reports a repeated base id at the later buff', () => {
     expect(violationsOf([100, 200])).toEqual([
       { code: 'DUPLICATE_STARTBUFF', path: 'selectedBuffIds[1]' },
     ])
   })
-
-  it('does not count an out-of-range base id as a repeat', () => {
-    expect(violationsOf([110, 210])).toEqual([
-      { code: 'OUT_OF_RANGE_STARTBUFF', path: 'selectedBuffIds[0]' },
-      { code: 'OUT_OF_RANGE_STARTBUFF', path: 'selectedBuffIds[1]' },
-    ])
-  })
 })
 
 describe('unknown start buffs', () => {
-  const knows = (ids: string[]): StartBuffSeason => ({ hasStartBuff: (id) => ids.includes(id) })
+  const knows = (ids: string[]): StartBuffSeason => ({
+    hasStartBuff: (id) => ids.includes(id),
+    startBuffBaseIds: TEN_BASES,
+  })
 
   it('reports each unknown buff with its id as the message parameter', () => {
     expect(violationsOf([100, 201], knows(['100']))).toEqual([
@@ -71,7 +75,34 @@ describe('unknown start buffs', () => {
     expect(violationsOf(buffs, knows(buffs.map(String).filter((id) => id !== '999')))).toEqual([
       { code: 'EXCESS_STARTBUFF', path: 'selectedBuffIds' },
       { code: 'UNKNOWN_STARTBUFF', path: 'selectedBuffIds[9]', params: { id: '999' } },
-      { code: 'OUT_OF_RANGE_STARTBUFF', path: 'selectedBuffIds[10]' },
+    ])
+  })
+})
+
+describe('start buff limits follow the season', () => {
+  const ELEVEN_IDS = [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110]
+  const MD7: StartBuffSeason = {
+    hasStartBuff: (buffId) => buffId in md7StartBuffs,
+    startBuffBaseIds: startBuffBaseIds(Object.keys(md7StartBuffs)),
+  }
+
+  it('accepts 11 buffs in a season with ids 100 to 110', () => {
+    const season: StartBuffSeason = {
+      hasStartBuff: () => true,
+      startBuffBaseIds: startBuffBaseIds(ELEVEN_IDS.map(String)),
+    }
+
+    expect(violationsOf(ELEVEN_IDS, season)).toEqual([])
+  })
+
+  it('accepts 10 buffs in MD7', () => {
+    expect(violationsOf(ELEVEN_IDS.slice(0, 10), MD7)).toEqual([])
+  })
+
+  it('rejects 110 as UNKNOWN_STARTBUFF and an 11th buff as EXCESS_STARTBUFF in MD7', () => {
+    expect(violationsOf(ELEVEN_IDS, MD7)).toEqual([
+      { code: 'EXCESS_STARTBUFF', path: 'selectedBuffIds' },
+      { code: 'UNKNOWN_STARTBUFF', path: 'selectedBuffIds[10]', params: { id: '110' } },
     ])
   })
 })

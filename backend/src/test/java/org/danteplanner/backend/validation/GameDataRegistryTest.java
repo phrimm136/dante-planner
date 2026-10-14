@@ -38,6 +38,21 @@ class GameDataRegistryTest {
         }
     }
 
+    private static Path unlinkSeasonFile(Path dataDir, int version) throws IOException {
+        Path season = dataDir.resolve("MD" + version);
+        Path source = Files.readSymbolicLink(season);
+        Files.delete(season);
+        Files.createDirectory(season);
+        try (Stream<Path> entries = Files.list(source)) {
+            for (Path entry : entries.toList()) {
+                if (!entry.getFileName().toString().equals("mirrorDungeon.json")) {
+                    Files.createSymbolicLink(season.resolve(entry.getFileName()), entry);
+                }
+            }
+        }
+        return season.resolve("mirrorDungeon.json");
+    }
+
     private static GameDataRegistry registryOver(Path dataDir) {
         return new GameDataRegistry(new GameDataLoader(new ObjectMapper()), dataDir.toString());
     }
@@ -140,8 +155,8 @@ class GameDataRegistryTest {
         assertThat(registry.hasSeason(6)).isTrue();
         assertThat(registry.hasSeason(7)).isTrue();
         assertThat(registry.hasSeason(8)).isFalse();
-        assertThat(registry.hasStartBuff(7, "100")).isTrue();
-        assertThat(registry.hasStartBuff(8, "100")).isFalse();
+        assertThat(registry.startBuffIds(7)).contains("100");
+        assertThat(registry.startBuffIds(8)).doesNotContain("100");
         assertThat(registry.getStartGiftPool(7, "Combustion")).contains("9001");
     }
 
@@ -156,9 +171,9 @@ class GameDataRegistryTest {
         registry.init();
 
         assertThat(registry.hasSeason(6)).isFalse();
-        assertThat(registry.hasStartBuff(6, "100")).isFalse();
+        assertThat(registry.startBuffIds(6)).doesNotContain("100");
         assertThat(registry.hasStartGiftKeyword(6, "Combustion")).isFalse();
-        assertThat(registry.hasStartBuff(7, "100")).isTrue();
+        assertThat(registry.startBuffIds(7)).contains("100");
     }
 
     @ParameterizedTest
@@ -188,6 +203,59 @@ class GameDataRegistryTest {
         assertThatThrownBy(registry::init)
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("MD8");
+    }
+
+    @Test
+    void init_WhenStaticDataIsLoaded_ReadsEachSeasonsIdentityCap(@TempDir Path dataDir) throws IOException {
+        linkStaticData(dataDir);
+        GameDataRegistry registry = registryOver(dataDir);
+
+        registry.init();
+
+        assertThat(registry.identityMaxLevel(6)).isEqualTo(55);
+        assertThat(registry.identityMaxLevel(7)).isEqualTo(60);
+    }
+
+    @Test
+    void init_WhenASeasonHasNoMirrorDungeonFile_FailsNamingTheFile(@TempDir Path dataDir) throws IOException {
+        linkStaticData(dataDir);
+        unlinkSeasonFile(dataDir, 7);
+        GameDataRegistry registry = registryOver(dataDir);
+
+        assertThatThrownBy(registry::init)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Mirror dungeon season file not found: " + dataDir.resolve("MD7/mirrorDungeon.json"));
+    }
+
+    @Test
+    void init_WhenASeasonFileHoldsAnotherVersion_FailsNamingTheFileAndBothVersions(@TempDir Path dataDir)
+            throws IOException {
+        linkStaticData(dataDir);
+        Files.writeString(unlinkSeasonFile(dataDir, 7),
+                "{\"version\":6,\"identityMaxLevel\":60,\"nameLocalizeId\":\"mirrordungeon_name_7\"}");
+        GameDataRegistry registry = registryOver(dataDir);
+
+        assertThatThrownBy(registry::init)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage(dataDir.resolve("MD7/mirrorDungeon.json")
+                        + " holds version 6 but sits in the directory of season 7");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "{\"version\":7,\"identityMaxLevel\":0,\"nameLocalizeId\":\"mirrordungeon_name_7\"}",
+            "{\"version\":7,\"nameLocalizeId\":\"mirrordungeon_name_7\"}",
+            "{\"version\":7,\"identityMaxLevel\":\"60\",\"nameLocalizeId\":\"mirrordungeon_name_7\"}"})
+    void init_WhenASeasonFileHasNoPositiveIdentityCap_FailsNamingTheFile(String season, @TempDir Path dataDir)
+            throws IOException {
+        linkStaticData(dataDir);
+        Files.writeString(unlinkSeasonFile(dataDir, 7), season);
+        GameDataRegistry registry = registryOver(dataDir);
+
+        assertThatThrownBy(registry::init)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageStartingWith("Invalid mirror dungeon season file " + dataDir.resolve("MD7/mirrorDungeon.json"))
+                .hasMessageContaining("identityMaxLevel");
     }
 
     @Test

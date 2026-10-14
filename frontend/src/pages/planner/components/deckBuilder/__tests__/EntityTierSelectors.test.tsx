@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { MAX_LEVEL } from '@/shared/gameData'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { EgoThreadspinSelector, IdentityTierSelector } from '../EntityTierSelectors'
 import { asEGOId, asIdentityId } from '@/test-utils/fixtures'
@@ -133,6 +132,7 @@ describe('IdentityTierSelector — uptie and level', () => {
         entityId={IDENTITY_10101}
         currentUptie={4}
         currentLevel={45}
+        maxLevel={60}
         onConfirm={vi.fn()}
       >
         <div data-testid="identity-card">card</div>
@@ -153,6 +153,7 @@ describe('IdentityTierSelector — uptie and level', () => {
         entityId={IDENTITY_10101}
         currentUptie={4}
         currentLevel={45}
+        maxLevel={60}
         onConfirm={onConfirm}
       >
         <div data-testid="identity-card">card</div>
@@ -175,6 +176,7 @@ describe('IdentityTierSelector — uptie and level', () => {
         entityId={IDENTITY_10101}
         currentUptie={4}
         currentLevel={45}
+        maxLevel={60}
         onConfirm={onConfirm}
       >
         <div data-testid="identity-card">card</div>
@@ -186,7 +188,7 @@ describe('IdentityTierSelector — uptie and level', () => {
     fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '9999' } })
     fireEvent.click(screen.getByRole('button', { name: /equip/i }))
 
-    expect(onConfirm).toHaveBeenCalledWith('10101', { uptie: 4, level: MAX_LEVEL })
+    expect(onConfirm).toHaveBeenCalledWith('10101', { uptie: 4, level: 60 })
   })
 
   it('offers no unequip button', () => {
@@ -195,6 +197,7 @@ describe('IdentityTierSelector — uptie and level', () => {
         entityId={IDENTITY_10102}
         currentUptie={4}
         currentLevel={45}
+        maxLevel={60}
         onConfirm={vi.fn()}
       >
         <div data-testid="identity-card">card</div>
@@ -204,6 +207,41 @@ describe('IdentityTierSelector — uptie and level', () => {
     openPopover(container)
 
     expect(screen.queryByRole('button', { name: /unequip/i })).toBeNull()
+  })
+})
+
+describe('IdentityTierSelector — season cap', () => {
+  function renderAtCap(onConfirm = vi.fn()) {
+    const { container } = render(
+      <IdentityTierSelector entityId={IDENTITY_10101} maxLevel={55} onConfirm={onConfirm}>
+        <div data-testid="identity-card">card</div>
+      </IdentityTierSelector>,
+    )
+    openPopover(container)
+    return onConfirm
+  }
+
+  it('caps the level input at the season cap', () => {
+    renderAtCap()
+
+    expect(screen.getByRole('spinbutton')).toHaveAttribute('max', '55')
+  })
+
+  it('equips a new identity at the season cap', () => {
+    const onConfirm = renderAtCap()
+
+    fireEvent.click(screen.getByRole('button', { name: /equip/i }))
+
+    expect(onConfirm).toHaveBeenCalledWith('10101', { uptie: 4, level: 55 })
+  })
+
+  it('clamps a typed level to the season cap', () => {
+    const onConfirm = renderAtCap()
+
+    fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '60' } })
+    fireEvent.click(screen.getByRole('button', { name: /equip/i }))
+
+    expect(onConfirm).toHaveBeenCalledWith('10101', { uptie: 4, level: 55 })
   })
 })
 

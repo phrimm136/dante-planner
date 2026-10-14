@@ -33,8 +33,6 @@ export interface StartBuff {
   iconSpriteId: string
 }
 
-export const BASE_BUFF_IDS = [100, 101, 102, 103, 104, 105, 106, 107, 108, 109] as const
-
 export function getBaseIdFromBuffId(id: number): number {
   return (id % 100) + 100
 }

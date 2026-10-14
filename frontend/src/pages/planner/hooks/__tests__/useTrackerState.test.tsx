@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { useTrackerState } from '../useTrackerState'
-import { DEFAULT_SKILL_EA, MAX_LEVEL, SINNERS } from '@/shared/gameData'
+import { DEFAULT_SKILL_EA, SINNERS } from '@/shared/gameData'
 import { asIdentityId } from '@/test-utils/fixtures'
 
 const IDENTITY_TEST = asIdentityId('10101')
@@ -226,7 +226,7 @@ describe('useTrackerState', () => {
   describe('Reset State', () => {
     it('resets all state to defaults', () => {
       const initialEquipment = {
-        '1': { identity: { id: IDENTITY_TEST, uptie: 4 as const, level: MAX_LEVEL }, egos: {} },
+        '1': { identity: { id: IDENTITY_TEST, uptie: 4 as const, level: 60 }, egos: {} },
       }
       const initialDeployment = [0, 1, 2]
       const { result } = renderHook(() => useTrackerState(initialEquipment, initialDeployment))

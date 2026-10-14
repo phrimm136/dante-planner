@@ -16,9 +16,13 @@ public final class Season implements StartBuffSeason, StartGiftSeason {
         this.version = version;
     }
 
+    public int identityMaxLevel() {
+        return registry.identityMaxLevel(version);
+    }
+
     @Override
-    public boolean hasStartBuff(String buffId) {
-        return registry.hasStartBuff(version, buffId);
+    public Set<String> startBuffIds() {
+        return registry.startBuffIds(version);
     }
 
     @Override

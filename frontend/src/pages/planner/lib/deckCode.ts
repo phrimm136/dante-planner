@@ -17,7 +17,7 @@
  */
 
 import { gzip, ungzip } from 'pako'
-import { SINNERS, MAX_LEVEL, IdentityIdSchema, EGOIdSchema } from '@/shared/gameData'
+import { SINNERS, IdentityIdSchema, EGOIdSchema } from '@/shared/gameData'
 import { DECK_CODE_MAX_LENGTH } from '@/lib/constants'
 import type { SinnerEquipment } from '../types/DeckTypes'
 import type { EgoType, IdentityId, EGOId } from '@/shared/gameData'
@@ -144,6 +144,7 @@ export function decodeDeckCode(
   code: string,
   identitySpecMap: Record<string, unknown>,
   egoSpecMap: Record<string, { maxThreadspin: 4 | 5 }>,
+  maxLevel: number,
 ): DecodedDeck {
   const warnings: string[] = []
 
@@ -220,7 +221,7 @@ export function decodeDeckCode(
         identity: {
           id: identityId,
           uptie: 4,
-          level: MAX_LEVEL,
+          level: maxLevel,
         },
         egos,
       }
@@ -230,7 +231,7 @@ export function decodeDeckCode(
         identity: {
           id: defaultIdentityId,
           uptie: 4,
-          level: MAX_LEVEL,
+          level: maxLevel,
         },
         egos,
       }
@@ -241,7 +242,7 @@ export function decodeDeckCode(
         identity: {
           id: defaultIdentityId,
           uptie: 4,
-          level: MAX_LEVEL,
+          level: maxLevel,
         },
         egos: {
           ZAYIN: {

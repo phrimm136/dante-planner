@@ -12,6 +12,7 @@
   },
   "gameData": {
     "contentVersion": 7,
+    "identityMaxLevel": 60,
     "identityIds": [
       "10101",
       "10201",
@@ -103,7 +104,6 @@
       "107",
       "108",
       "109",
-      "115",
       "200",
       "201",
       "302"
@@ -7340,18 +7340,8 @@
         }
       ],
       "expected": {
-        "draft": [
-          {
-            "code": "OUT_OF_RANGE_IDENTITY_LEVEL",
-            "path": "equipment[1].identity.level"
-          }
-        ],
-        "publish": [
-          {
-            "code": "OUT_OF_RANGE_IDENTITY_LEVEL",
-            "path": "equipment[1].identity.level"
-          }
-        ]
+        "draft": [],
+        "publish": []
       }
     },
     {
@@ -7427,6 +7417,26 @@
             "level"
           ],
           "value": 60.0
+        }
+      ],
+      "expected": {
+        "draft": [],
+        "publish": []
+      }
+    },
+    {
+      "name": "identity-level-integral-double-above",
+      "subject": "identity",
+      "category": "5F",
+      "edits": [
+        {
+          "at": [
+            "equipment",
+            "1",
+            "identity",
+            "level"
+          ],
+          "value": 61.0
         }
       ],
       "expected": {
@@ -11633,35 +11643,6 @@
       }
     },
     {
-      "name": "startbuff-known-base-out-of-range",
-      "subject": "startbuff",
-      "category": "5F",
-      "edits": [
-        {
-          "at": [
-            "selectedBuffIds"
-          ],
-          "value": [
-            115
-          ]
-        }
-      ],
-      "expected": {
-        "draft": [
-          {
-            "code": "OUT_OF_RANGE_STARTBUFF",
-            "path": "selectedBuffIds[0]"
-          }
-        ],
-        "publish": [
-          {
-            "code": "OUT_OF_RANGE_STARTBUFF",
-            "path": "selectedBuffIds[0]"
-          }
-        ]
-      }
-    },
-    {
       "name": "startbuff-duplicate-base",
       "subject": "startbuff",
       "category": "5F",
@@ -13469,7 +13450,7 @@
             "identity",
             "level"
           ],
-          "value": 99
+          "value": 0
         },
         {
           "at": [
@@ -13478,7 +13459,7 @@
             "identity",
             "level"
           ],
-          "value": 99
+          "value": 0
         }
       ],
       "expected": {

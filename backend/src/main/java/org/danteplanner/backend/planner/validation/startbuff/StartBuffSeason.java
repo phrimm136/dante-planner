@@ -1,6 +1,8 @@
 package org.danteplanner.backend.planner.validation.startbuff;
 
+import java.util.Set;
+
 public interface StartBuffSeason {
 
-    boolean hasStartBuff(String buffId);
+    Set<String> startBuffIds();
 }

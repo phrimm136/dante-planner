@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { MDCategory } from '@/shared/gameData'
 import type { EGOGiftSpec } from '@/pages/egoGift'
+import { clipToSeason } from '../../plannerIdNormalize'
 import { renderContentPath } from '../contentPath'
 import type { PlannerIdRegistry } from '../plannerValidation'
 import { draftValidation, publishValidation } from './stagedValidation'
@@ -38,6 +39,7 @@ type Corpus = {
     themePackIds: string[]
     startBuffIds: string[]
     startGiftPools: Record<string, string[]>
+    identityMaxLevel?: number
   }
   base: Record<string, unknown>
   cases: CorpusCase[]
@@ -58,6 +60,17 @@ const corpus = JSON.parse(fs.readFileSync(CORPUS_PATH, 'utf-8')) as Corpus
 
 const { gameData } = corpus
 
+function corpusIdentityMaxLevel(): number {
+  if (gameData.identityMaxLevel === undefined) {
+    throw new Error(`${CORPUS_PATH}: gameData.identityMaxLevel is absent`)
+  }
+  return gameData.identityMaxLevel
+}
+
+const IDENTITY_MAX_LEVEL = corpusIdentityMaxLevel()
+
+const IDENTITY_LEVEL_CAPS = new Map([[gameData.contentVersion, IDENTITY_MAX_LEVEL]])
+
 const season: PlannerIdRegistry['season'] = {
   startBuffIds: new Set(gameData.startBuffIds),
   startGiftPools: new Map(
@@ -66,14 +79,18 @@ const season: PlannerIdRegistry['season'] = {
       new Set(giftIds),
     ]),
   ),
+  identityMaxLevel: IDENTITY_MAX_LEVEL,
 }
+
+const hasSeason = (c: CorpusCase): boolean =>
+  (c.version ?? gameData.contentVersion) === gameData.contentVersion
 
 const registryFor = (c: CorpusCase): PlannerIdRegistry => ({
   identityIds: new Set(gameData.identityIds),
   egoIds: new Set(gameData.egoIds),
   egoMaxThreadspin: new Map(Object.entries(gameData.egoMaxThreadspin)),
   themePackIds: new Set(gameData.themePackIds),
-  season: (c.version ?? gameData.contentVersion) === gameData.contentVersion ? season : undefined,
+  season: hasSeason(c) ? season : undefined,
 })
 
 const egoGiftSpec: Record<string, EGOGiftSpec> = Object.fromEntries(
@@ -105,7 +122,11 @@ function applyEdit(content: Container, { at, value, remove }: Edit): void {
 function contentOf(c: CorpusCase): MDPlannerContent {
   const content = structuredClone(corpus.base) as Container
   c.edits.forEach((edit) => applyEdit(content, edit))
-  return content as unknown as MDPlannerContent
+  return clipToSeason(
+    content,
+    c.version ?? gameData.contentVersion,
+    IDENTITY_LEVEL_CAPS,
+  ) as unknown as MDPlannerContent
 }
 
 const titleOf = (c: CorpusCase): string | undefined =>
@@ -184,6 +205,18 @@ describe('planner content corpus replay', () => {
     )('%s', (_name, c) => {
       expect(outcomeOf(c, stage)).toEqual({ violations: c.expected[stage] })
     })
+  })
+
+  it.each([
+    ['identity-level-above', 60],
+    ['identity-level-integral-double-above', 60],
+    ['identity-level-integral-double', 60],
+  ])('stores %s at level %i', (name, level) => {
+    const c = corpus.cases.find((corpusCase) => corpusCase.name === name)
+    if (c === undefined) throw new Error(`corpus case ${name} is absent`)
+    const equipment = contentOf(c).equipment as Record<string, { identity: { level: unknown } }>
+
+    expect(equipment['1']?.identity.level).toBe(level)
   })
 
   it.skipIf(OUT === undefined)('writes the ordered codes and paths', () => {

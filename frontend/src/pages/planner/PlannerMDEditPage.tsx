@@ -9,13 +9,15 @@ import {
   createDefaultSectionNotes,
 } from './stores/usePlannerEditorStore'
 import { deserializeSets } from './schemas/PlannerSchemas'
-import { PlannerEditEditor } from './components/planner/PlannerEditEditor'
+import { PlannerEditEditor, editorSessionFor } from './components/planner/PlannerEditEditor'
 import { PlannerViewerSkeleton } from './components/plannerSkeletons'
 import { useSavedPlannerQuery } from './hooks/useSavedPlannerQuery'
+import { useIdentityMaxLevel } from './hooks/useMirrorDungeonSeason'
 import { isMDPlanner } from './types/PlannerTypes'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { PlannerEditorState } from './stores/usePlannerEditorStore'
-import { SECTION_STYLES } from '@/lib/constants'
+import type { MDSaveablePlanner } from './types/PlannerTypes'
+import { PLANNER_CONFIG, SECTION_STYLES } from '@/lib/constants'
 
 export default function PlannerMDEditPage() {
   const { id } = useParams({ from: '/planner/md/$id/edit' })
@@ -90,7 +92,23 @@ function PlannerEditContent({ id }: { id: string }) {
   }
 
   return (
-    <PlannerEditorStoreProvider key={planner.metadata.id} initialState={initialState}>
+    <PlannerEditStore key={planner.metadata.id} planner={planner} initialState={initialState} />
+  )
+}
+
+function PlannerEditStore({
+  planner,
+  initialState,
+}: {
+  planner: MDSaveablePlanner
+  initialState: Partial<PlannerEditorState>
+}) {
+  const identityMaxLevel = useIdentityMaxLevel(
+    editorSessionFor(planner, PLANNER_CONFIG.mdCurrentVersion).contentVersion,
+  )
+
+  return (
+    <PlannerEditorStoreProvider identityMaxLevel={identityMaxLevel} initialState={initialState}>
       <PlannerEditEditor planner={planner} />
     </PlannerEditorStoreProvider>
   )

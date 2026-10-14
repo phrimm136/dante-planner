@@ -4,6 +4,7 @@ import { showError, showErrorMessage, showSuccess } from '@/lib/errorPresentatio
 import { useIdentityListSpec } from '@/pages/identity'
 import { useEGOListSpec } from '@/pages/ego'
 
+import { loadIdentityMaxLevel } from './loadIdentityLevelCaps'
 import type { DecodedDeck } from '../lib/deckCode'
 import type { SinnerEquipment } from '../types/DeckTypes'
 
@@ -14,6 +15,7 @@ export interface DeckSnapshot {
 
 export interface UseDeckClipboardOptions {
   readDeck: () => DeckSnapshot
+  mdVersion: number
 }
 
 export interface DeckClipboard {
@@ -38,7 +40,7 @@ function writeDeckCode({ equipment, deploymentOrder }: DeckSnapshot): Promise<vo
   return navigator.clipboard.write([new ClipboardItem({ 'text/plain': blob })])
 }
 
-export function useDeckClipboard({ readDeck }: UseDeckClipboardOptions): DeckClipboard {
+export function useDeckClipboard({ readDeck, mdVersion }: UseDeckClipboardOptions): DeckClipboard {
   const identitySpec = useIdentityListSpec()
   const egoSpec = useEGOListSpec()
 
@@ -64,7 +66,8 @@ export function useDeckClipboard({ readDeck }: UseDeckClipboardOptions): DeckCli
         return
       }
 
-      setPendingImport(decodeDeckCode(clipboardText, identitySpec, egoSpec))
+      const maxLevel = await loadIdentityMaxLevel(mdVersion)
+      setPendingImport(decodeDeckCode(clipboardText, identitySpec, egoSpec, maxLevel))
     } catch (error) {
       showError(error)
     }

@@ -5,6 +5,7 @@ import { useEGOGiftObservationData } from '@/pages/egoGift'
 import { useEGOGiftListSpec, useEGOGiftListI18n, encodeGiftSelection } from '@/pages/egoGift'
 import type { EGOGiftId } from '@/shared/gameData'
 import { useCappedSelection } from '../../hooks/useCappedSelection'
+import { maxObservableGifts } from '../../lib/observationGifts'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import type { EGOGiftEntity } from '@/pages/egoGift'
 import type { SortMode } from '@/shared/filter'
@@ -14,7 +15,6 @@ import { StarlightCostDisplay } from '../StarlightCostDisplay'
 import { sortEGOGifts } from '@/pages/egoGift'
 import { EGOGiftSelectionList } from '@/pages/egoGift'
 import { EGOGiftObservationSelection } from '@/pages/egoGift'
-import { MAX_OBSERVABLE_GIFTS } from '@/shared/gameData'
 import { toEGOGiftEntity } from '@/pages/egoGift'
 
 interface EGOGiftObservationEditPaneProps {
@@ -64,7 +64,7 @@ export function EGOGiftObservationEditPane({
   }, [open])
 
   const { toggle, clear } = useCappedSelection({
-    cap: MAX_OBSERVABLE_GIFTS,
+    cap: maxObservableGifts(observationData.observationEgoGiftCostDataList),
     selected: selectedGiftIds,
     onSelectedChange: setObservationGiftIds,
     mirror: comprehensiveGiftIds,

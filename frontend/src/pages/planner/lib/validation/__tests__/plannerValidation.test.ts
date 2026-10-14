@@ -833,7 +833,7 @@ describe('validatePlannerForSync', () => {
     egoIds: new Set(),
     egoMaxThreadspin: new Map(),
     themePackIds: new Set(['1001', '1002', '1003', '1004', '1005']),
-    season: { startBuffIds: new Set(), startGiftPools: new Map() },
+    season: { startBuffIds: new Set(), startGiftPools: new Map(), identityMaxLevel: 60 },
   }
 
   function twoViolations(): MDPlannerContent {
@@ -906,7 +906,11 @@ describe('entity id registry checks', () => {
       egoIds: new Set(egoIds),
       egoMaxThreadspin: ceilingsOf(egoIds),
       themePackIds: new Set(content.floorSelections.map((f) => f.themePackId ?? '')),
-      season: { startBuffIds: new Set(['100', '101', '200']), startGiftPools: new Map() },
+      season: {
+        startBuffIds: new Set(['100', '101', '200']),
+        startGiftPools: new Map(),
+        identityMaxLevel: 60,
+      },
     }
   }
 
@@ -1055,7 +1059,7 @@ describe('retired E.G.O after id normalization', () => {
       egoIds: new Set(egoIds),
       egoMaxThreadspin: ceilingsOf(egoIds),
       themePackIds: new Set(content.floorSelections.map((f) => f.themePackId ?? '')),
-      season: { startBuffIds: new Set(['100']), startGiftPools: new Map() },
+      season: { startBuffIds: new Set(['100']), startGiftPools: new Map(), identityMaxLevel: 60 },
     }
   }
 
@@ -1107,7 +1111,7 @@ describe('content fields that are absent or of the wrong kind', () => {
     egoIds: new Set(validEgoIds),
     egoMaxThreadspin: ceilingsOf(validEgoIds),
     themePackIds: new Set(valid.floorSelections.map((f) => f.themePackId ?? '')),
-    season: { startBuffIds: new Set(), startGiftPools: new Map() },
+    season: { startBuffIds: new Set(), startGiftPools: new Map(), identityMaxLevel: 60 },
   }
 
   const validate: Record<Stage, (content: MDPlannerContent) => StagedResult> = {
@@ -1256,8 +1260,9 @@ describe('one content verdict on both runtimes', () => {
   }
 
   const SEASON: PlannerIdRegistry['season'] = {
-    startBuffIds: new Set(['100']),
+    startBuffIds: new Set(['100', '101', '102', '103', '104', '105', '106', '107', '108', '109']),
     startGiftPools: new Map([['Combustion', new Set(['9001'])]]),
+    identityMaxLevel: 60,
   }
 
   const draft = (content: MDPlannerContent, registry = registryWith(SEASON)) =>

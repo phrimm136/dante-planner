@@ -1,5 +1,5 @@
 import { startTransition, useState, useEffect, useRef } from 'react'
-import { MAX_LEVEL, EGO_TYPES, EGOIdSchema, floorCount } from '@/shared/gameData'
+import { EGO_TYPES, EGOIdSchema, floorCount } from '@/shared/gameData'
 import type { EGOGiftId, EGOId, IdentityId } from '@/shared/gameData'
 import {
   PlannerEditorStoreProvider,
@@ -43,6 +43,7 @@ export interface DeckBuilderContentProps extends DeckBuilderDeck, DeckBuilderAct
   filterState: DeckFilterState
   isActive: boolean
   ownedGiftIds: ReadonlySet<EGOGiftId>
+  maxLevel: number
 }
 
 export function DeckBuilderContent({
@@ -53,6 +54,7 @@ export function DeckBuilderContent({
   filterState,
   isActive,
   ownedGiftIds,
+  maxLevel,
   onImport,
   onExport,
   onResetOrder,
@@ -262,7 +264,7 @@ export function DeckBuilderContent({
             identity: {
               id: identityId,
               uptie: data.uptie || 4,
-              level: data.level || MAX_LEVEL,
+              level: data.level || maxLevel,
             },
           },
         }
@@ -373,6 +375,7 @@ export function DeckBuilderContent({
         equippedIdentityIds={equippedIdentityIds}
         identityScrollRef={identityScrollRef}
         onEquipIdentity={handleEquipIdentity}
+        maxLevel={maxLevel}
         sortedEgos={sortedEgos}
         visibleEgoIds={visibleEgoIds}
         equippedEgoIds={equippedEgoIds}
@@ -398,6 +401,7 @@ export function StoreBoundDeckBuilderContent(props: StoreBoundDeckBuilderContent
   const comprehensiveGiftIds = usePlannerEditorStore((s) => s.comprehensiveGiftIds)
   const floorSelections = usePlannerEditorStore((s) => s.floorSelections)
   const category = usePlannerEditorStore((s) => s.category)
+  const maxLevel = usePlannerEditorStore((s) => s.identityMaxLevel)
   const ownedGiftIds = collectOwnedGiftIds(
     { selectedGiftIds, observationGiftIds, comprehensiveGiftIds, floorSelections },
     floorCount(category),
@@ -412,6 +416,7 @@ export function StoreBoundDeckBuilderContent(props: StoreBoundDeckBuilderContent
       setDeploymentOrder={setDeploymentOrder}
       filterState={filterState}
       ownedGiftIds={ownedGiftIds}
+      maxLevel={maxLevel}
     />
   )
 }
@@ -420,7 +425,7 @@ export type TrackerDeckBuilderContentProps = Omit<DeckBuilderContentProps, 'filt
 
 export function TrackerDeckBuilderContent(props: TrackerDeckBuilderContentProps) {
   return (
-    <PlannerEditorStoreProvider>
+    <PlannerEditorStoreProvider identityMaxLevel={props.maxLevel}>
       <StoreFilteredDeckBuilderContent {...props} />
     </PlannerEditorStoreProvider>
   )

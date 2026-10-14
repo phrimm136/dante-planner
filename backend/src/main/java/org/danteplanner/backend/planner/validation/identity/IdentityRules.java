@@ -18,29 +18,30 @@ public final class IdentityRules {
     private static final ContentPath EQUIPMENT = ContentPath.of("equipment");
     private static final String IDENTITY = "identity";
     private static final String ID = "id";
-    private static final Bound LEVEL = new Bound("level", Identity::level, ErrorCode.OUT_OF_RANGE_IDENTITY_LEVEL,
-            GameConstants.MIN_LEVEL, GameConstants.MAX_LEVEL);
     private static final Bound UPTIE = new Bound("uptie", Identity::uptie, ErrorCode.OUT_OF_RANGE_IDENTITY_UPTIE,
             GameConstants.MIN_UPTIE, GameConstants.MAX_UPTIE);
 
     private IdentityRules() {
     }
 
-    public static List<Violation> check(Map<String, Identity> identities, IdentityReferenceData data) {
+    public static List<Violation> check(Map<String, Identity> identities, IdentityReferenceData data, int maxLevel) {
+        Bound level = new Bound("level", Identity::level, ErrorCode.OUT_OF_RANGE_IDENTITY_LEVEL,
+                GameConstants.MIN_LEVEL, maxLevel);
         return identities.entrySet().stream()
-                .flatMap(sinner -> identity(sinner.getKey(), sinner.getValue(), data))
+                .flatMap(sinner -> identity(sinner.getKey(), sinner.getValue(), data, level))
                 .sorted(Violation.BY_PATH_THEN_CODE)
                 .toList();
     }
 
-    private static Stream<Violation> identity(String sinnerKey, Identity identity, IdentityReferenceData data) {
+    private static Stream<Violation> identity(String sinnerKey, Identity identity, IdentityReferenceData data,
+                                              Bound level) {
         ContentPath path = EQUIPMENT.key(sinnerKey).field(IDENTITY);
         ContentPath idPath = path.field(ID);
         return !data.hasIdentity(identity.id())
                 ? Stream.of(IdentityViolations.unknownIdentity(idPath, identity.id()))
                 : !data.belongsToSinner(sinnerKey, identity.id())
                         ? Stream.of(IdentityViolations.identityOfAnotherSinner(idPath, sinnerKey, identity.id()))
-                        : Stream.of(LEVEL, UPTIE).flatMap(bound -> bounded(identity, path, bound));
+                        : Stream.of(level, UPTIE).flatMap(bound -> bounded(identity, path, bound));
     }
 
     private static Stream<Violation> bounded(Identity identity, ContentPath path, Bound bound) {

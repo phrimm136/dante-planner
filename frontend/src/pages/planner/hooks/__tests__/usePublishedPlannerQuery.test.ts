@@ -26,7 +26,7 @@ import {
 } from '../usePublishedPlannerQuery'
 import { STALE_TIME } from '@/lib/constants'
 import { isMDPlanner } from '../../types/PlannerTypes'
-import { publishedPayload } from './publishedPlannerPayload'
+import { publishedContent, publishedPayload } from './publishedPlannerPayload'
 
 beforeEach(() => {
   apiMocks.get.mockReset()
@@ -53,6 +53,23 @@ describe('fetchPublishedPlanner', () => {
     expect(state.planner.config).toEqual({ type: 'MIRROR_DUNGEON', category: '5F' })
     if (!isMDPlanner(state.planner)) throw new Error('expected a Mirror Dungeon planner')
     expect(state.planner.content.selectedGiftIds).toEqual(['9001'])
+  })
+
+  it('clips an MD6 identity level of 60 to the season cap of 55', async () => {
+    const content = structuredClone(publishedContent)
+    content.equipment['1']!.identity.level = 60
+    apiMocks.get.mockResolvedValue({
+      ...publishedPayload,
+      contentVersion: 6,
+      content: JSON.stringify(content),
+    })
+
+    const state = await fetchPublishedPlanner('planner-1')
+
+    if (isPlannerRemoved(state) || !isMDPlanner(state.planner)) {
+      throw new Error('expected a loaded Mirror Dungeon planner')
+    }
+    expect(state.planner.content.equipment['1']?.identity.level).toBe(55)
   })
 
   it('still throws every other failure to the boundary', async () => {

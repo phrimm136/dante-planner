@@ -1,6 +1,5 @@
 import {
   SINNERS,
-  MAX_LEVEL,
   DEFAULT_SKILL_EA,
   DUNGEON_IDX,
   migrateKeywords,
@@ -36,7 +35,7 @@ const DEFAULT_ZAYIN_MAX_THREADSPIN: Record<string, ThreadspinTier> = (() => {
   return out
 })()
 
-export function createDefaultEquipment(): Record<string, SinnerEquipment> {
+export function createDefaultEquipment(maxLevel: number): Record<string, SinnerEquipment> {
   const equipment: Record<string, SinnerEquipment> = {}
   SINNERS.forEach((_, index) => {
     const sinnerCode = String(index + 1)
@@ -44,7 +43,7 @@ export function createDefaultEquipment(): Record<string, SinnerEquipment> {
     const defaultIdentityId = IdentityIdSchema.parse(`1${sinnerIdPart}01`)
     const defaultEgoId = EGOIdSchema.parse(`2${sinnerIdPart}01`)
     equipment[sinnerCode] = {
-      identity: { id: defaultIdentityId, uptie: 4, level: MAX_LEVEL },
+      identity: { id: defaultIdentityId, uptie: 4, level: maxLevel },
       egos: {
         ZAYIN: { id: defaultEgoId, threadspin: DEFAULT_ZAYIN_MAX_THREADSPIN[defaultEgoId] ?? 4 },
       },
@@ -180,13 +179,14 @@ export type ProjectableEditorState = Pick<
 export function hydrateEditorState(
   content: MDPlannerContent,
   metadata: EditorMetadata,
+  identityMaxLevel: number,
 ): HydratedEditorState {
   return {
     title: metadata.title,
     category: metadata.category,
     isPublished: metadata.isPublished,
 
-    equipment: content.equipment ?? createDefaultEquipment(),
+    equipment: content.equipment ?? createDefaultEquipment(identityMaxLevel),
     floorSelections: Array.isArray(content.floorSelections)
       ? content.floorSelections.map((floor, floorIndex) =>
           toFloorThemeSelection(floor, metadata.category, floorIndex),

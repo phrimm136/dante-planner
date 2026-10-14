@@ -156,3 +156,36 @@ describe('lists when the database cannot open', () => {
     await expect(list()).rejects.toBe(blocked)
   })
 })
+
+describe('loadFromLocal', () => {
+  function storedAt(contentVersion: number, level: number): string {
+    const planner = buildSaveablePlanner({ metadata: { contentVersion } })
+    const content = planner.content as unknown as {
+      equipment: Record<string, { identity: { level: number } }>
+    }
+    content.equipment['1']!.identity.level = level
+    return JSON.stringify(planner)
+  }
+
+  async function loadedLevel(stored: string): Promise<unknown> {
+    mockGetItem.mockResolvedValue(ok(stored))
+    const loaded = await storageHook().loadFromLocal(buildSaveablePlanner().metadata.id)
+    if (!loaded.ok || loaded.value === null) throw new Error('planner did not load')
+    const content = loaded.value.content as unknown as {
+      equipment: Record<string, { identity: { level: unknown } }>
+    }
+    return content.equipment['1']?.identity.level
+  }
+
+  it('clips an MD6 level of 60 to the season cap of 55', async () => {
+    expect(await loadedLevel(storedAt(6, 60))).toBe(55)
+  })
+
+  it('clips an MD7 level of 61 to the season cap of 60', async () => {
+    expect(await loadedLevel(storedAt(7, 61))).toBe(60)
+  })
+
+  it('keeps an MD7 level of 60', async () => {
+    expect(await loadedLevel(storedAt(7, 60))).toBe(60)
+  })
+})

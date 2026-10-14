@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TrackerModeViewer } from '../TrackerModeViewer'
-import { DUNGEON_IDX, MAX_LEVEL } from '@/shared/gameData'
+import { DUNGEON_IDX } from '@/shared/gameData'
 import type { MDSaveablePlanner, MDPlannerContent } from '../../../types/PlannerTypes'
 import { ThemePackIdSchema } from '@/shared/gameData'
 import { asEncodedGiftId, asIdentityId } from '@/test-utils/fixtures'
@@ -230,8 +230,8 @@ describe('TrackerModeViewer', () => {
 
     const content: MDPlannerContent = {
       equipment: {
-        YiSang: { identity: { id: IDENTITY_IDENT1, uptie: 3, level: MAX_LEVEL }, egos: {} },
-        Faust: { identity: { id: IDENTITY_IDENT2, uptie: 4, level: MAX_LEVEL }, egos: {} },
+        YiSang: { identity: { id: IDENTITY_IDENT1, uptie: 3, level: 60 }, egos: {} },
+        Faust: { identity: { id: IDENTITY_IDENT2, uptie: 4, level: 60 }, egos: {} },
       },
       deploymentOrder: [0, 1],
       selectedKeywords: [],

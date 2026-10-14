@@ -108,7 +108,7 @@ vi.mock('@/components/hooks/use-is-breakpoint', () => ({ useIsBreakpoint: () => 
 // Static data
 // ---------------------------------------------------------------------------
 
-const DEFAULT_EQUIPMENT = createDefaultEquipment()
+const DEFAULT_EQUIPMENT = createDefaultEquipment(60)
 
 const IDENTITY_SPEC = Object.fromEntries(
   Object.values(DEFAULT_EQUIPMENT).map((eq) => [
@@ -210,7 +210,11 @@ const CURRENT_EA: Record<string, SkillEAState> = { '1': { 0: 2, 1: 3, 2: 1 } }
 const MD_VERSION = 7
 
 function withStore(state: Partial<PlannerEditorState>, ui: ReactElement) {
-  return <PlannerEditorStoreProvider initialState={state}>{ui}</PlannerEditorStoreProvider>
+  return (
+    <PlannerEditorStoreProvider identityMaxLevel={60} initialState={state}>
+      {ui}
+    </PlannerEditorStoreProvider>
+  )
 }
 
 function html(ui: ReactElement): string {

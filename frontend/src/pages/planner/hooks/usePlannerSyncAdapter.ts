@@ -4,6 +4,7 @@ import { ok, err } from '@/lib/result'
 import { classifyAppError } from '@/lib/apiErrorClassifier'
 import { toSaveablePlanner, PlannerConfigDiscriminatedSchema } from '../schemas/PlannerSchemas'
 import { loadIdMigrationTable } from './loadIdMigrationTable'
+import { loadIdentityLevelCaps } from './loadIdentityLevelCaps'
 import { withNormalizedIds } from '../lib/plannerIdNormalize'
 import type { Result } from '@/lib/result'
 import type { AppError } from '@/lib/apiErrorClassifier'
@@ -109,9 +110,12 @@ export function usePlannerSyncAdapter(): PlannerSyncAdapterOperations {
       force?: boolean,
     ): Promise<AcknowledgedPlanner> => {
       const response = await plannerApi.upsert(planner.metadata.id, toUpsertRequest(planner), force)
-      const table = await loadIdMigrationTable()
+      const [table, identityLevelCaps] = await Promise.all([
+        loadIdMigrationTable(),
+        loadIdentityLevelCaps(),
+      ])
       return {
-        planner: withNormalizedIds(serverResponseToSaveable(response), table),
+        planner: withNormalizedIds(serverResponseToSaveable(response), table, identityLevelCaps),
         ack: ackOf(response),
       }
     },
@@ -119,9 +123,12 @@ export function usePlannerSyncAdapter(): PlannerSyncAdapterOperations {
     fetchFromServer: async (id: string): Promise<Result<AcknowledgedPlanner, AppError>> => {
       try {
         const response = await plannerApi.get(id)
-        const table = await loadIdMigrationTable()
+        const [table, identityLevelCaps] = await Promise.all([
+          loadIdMigrationTable(),
+          loadIdentityLevelCaps(),
+        ])
         return ok({
-          planner: withNormalizedIds(serverResponseToSaveable(response), table),
+          planner: withNormalizedIds(serverResponseToSaveable(response), table, identityLevelCaps),
           ack: ackOf(response),
         })
       } catch (error) {

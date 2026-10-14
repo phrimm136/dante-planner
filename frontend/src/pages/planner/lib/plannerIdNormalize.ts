@@ -13,6 +13,8 @@ const GIFT_ARRAY_FIELDS = ['selectedGiftIds', 'observationGiftIds', 'comprehensi
 
 type Loose = Record<string, unknown>
 
+export type IdentityLevelCaps = ReadonlyMap<number, number>
+
 function isRecord(value: unknown): value is Loose {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
@@ -134,14 +136,55 @@ export function normalizePlannerIds(content: Loose, table: IdMigrationTable): Lo
   return next
 }
 
+function clipSinnerIdentityLevel(raw: unknown, maxLevel: number): unknown {
+  if (!isRecord(raw) || !isRecord(raw.identity)) return raw
+  const { level } = raw.identity
+  if (typeof level !== 'number' || !Number.isInteger(level) || level <= maxLevel) return raw
+  return { ...raw, identity: { ...raw.identity, level: maxLevel } }
+}
+
+export function clipIdentityLevels(content: Loose, maxLevel: number): Loose {
+  if (!isRecord(content.equipment)) return content
+  return {
+    ...content,
+    equipment: Object.fromEntries(
+      Object.entries(content.equipment).map(([sinnerKey, equipment]) => [
+        sinnerKey,
+        clipSinnerIdentityLevel(equipment, maxLevel),
+      ]),
+    ),
+  }
+}
+
+export function clipToSeason(
+  content: Loose,
+  contentVersion: number,
+  identityLevelCaps: IdentityLevelCaps,
+): Loose {
+  const maxLevel = identityLevelCaps.get(contentVersion)
+  return maxLevel === undefined ? content : clipIdentityLevels(content, maxLevel)
+}
+
+export function normalizePlannerContent(
+  content: Loose,
+  contentVersion: number,
+  table: IdMigrationTable,
+  identityLevelCaps: IdentityLevelCaps,
+): Loose {
+  return clipToSeason(normalizePlannerIds(content, table), contentVersion, identityLevelCaps)
+}
+
 export function withNormalizedIds(
   planner: SaveablePlanner,
   table: IdMigrationTable,
+  identityLevelCaps: IdentityLevelCaps,
 ): SaveablePlanner {
   if (!isMDPlanner(planner)) return planner
-  const content = normalizePlannerIds(
+  const content = normalizePlannerContent(
     planner.content as unknown as Loose,
+    planner.metadata.contentVersion,
     table,
+    identityLevelCaps,
   ) as unknown as MDPlannerContent
   return { ...planner, content }
 }

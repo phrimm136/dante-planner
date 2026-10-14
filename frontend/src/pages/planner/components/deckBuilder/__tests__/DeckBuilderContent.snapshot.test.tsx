@@ -68,7 +68,7 @@ vi.mock('../EgoGrid', () => ({ EgoGrid: stub('ego-grid') }))
 // Static data
 // ---------------------------------------------------------------------------
 
-const DEFAULT_EQUIPMENT = createDefaultEquipment()
+const DEFAULT_EQUIPMENT = createDefaultEquipment(60)
 
 const IDENTITY_SPEC = Object.fromEntries(
   Object.values(DEFAULT_EQUIPMENT).map((eq, index) => [
@@ -158,6 +158,7 @@ const ACTIONS = {
   onExport: () => {},
   onResetOrder: () => {},
   onIdentityChange: () => {},
+  maxLevel: 60,
 }
 
 const TRACKER_DECK = {
@@ -169,7 +170,11 @@ const TRACKER_DECK = {
 }
 
 function withStore(state: Partial<PlannerEditorState>, ui: ReactElement) {
-  return <PlannerEditorStoreProvider initialState={state}>{ui}</PlannerEditorStoreProvider>
+  return (
+    <PlannerEditorStoreProvider identityMaxLevel={60} initialState={state}>
+      {ui}
+    </PlannerEditorStoreProvider>
+  )
 }
 
 function html(ui: ReactElement): string {

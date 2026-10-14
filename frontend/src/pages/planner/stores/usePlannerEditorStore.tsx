@@ -1,6 +1,7 @@
 import { createContext, useContext, useState } from 'react'
 import { createStore, useStore } from 'zustand'
 import { devtools } from 'zustand/middleware'
+import { MIN_LEVEL } from '@/shared/gameData'
 
 import {
   createDefaultDeckFilterState,
@@ -98,12 +99,17 @@ export interface PlannerEditorActions {
   getPlannerState: () => PlannerState
 }
 
-export type PlannerEditorStore = PlannerEditorState & PlannerEditorActions
+export type PlannerEditorStore = PlannerEditorState & {
+  identityMaxLevel: number
+} & PlannerEditorActions
 
-const createInitialState = (overrides?: Partial<PlannerEditorState>): PlannerEditorState => {
+const createInitialState = (
+  identityMaxLevel: number,
+  overrides?: Partial<PlannerEditorState>,
+): PlannerEditorState => {
   const category = overrides?.category ?? '5F'
   return {
-    equipment: overrides?.equipment ?? createDefaultEquipment(),
+    equipment: overrides?.equipment ?? createDefaultEquipment(identityMaxLevel),
     floorSelections: overrides?.floorSelections ?? createDefaultFloorSelections(category),
     comprehensiveGiftIds: overrides?.comprehensiveGiftIds ?? new Set(),
     deploymentOrder: overrides?.deploymentOrder ?? [],
@@ -125,13 +131,17 @@ const createInitialState = (overrides?: Partial<PlannerEditorState>): PlannerEdi
   }
 }
 
-export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorState>) => {
-  const state = createInitialState(initialState)
+export const createPlannerEditorStore = (
+  identityMaxLevel: number,
+  initialState?: Partial<PlannerEditorState>,
+) => {
+  const state = createInitialState(identityMaxLevel, initialState)
 
   return createStore<PlannerEditorStore>()(
     devtools(
       (set, get) => ({
         ...state,
+        identityMaxLevel,
 
         setEquipment: (equipment) => {
           if (typeof equipment === 'function') {
@@ -245,9 +255,13 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
           ),
 
         initializeFromPlanner: (content, metadata) =>
-          set(hydrateEditorState(content, metadata), false, 'initializeFromPlanner'),
+          set(
+            hydrateEditorState(content, metadata, identityMaxLevel),
+            false,
+            'initializeFromPlanner',
+          ),
 
-        reset: () => set(createInitialState(), false, 'reset'),
+        reset: () => set(createInitialState(identityMaxLevel), false, 'reset'),
 
         getPlannerState: () => projectEditorState(get()),
       }),
@@ -260,14 +274,16 @@ const PlannerEditorStoreContext = createContext<StoreApi<PlannerEditorStore> | n
 
 interface PlannerEditorStoreProviderProps {
   children: ReactNode
+  identityMaxLevel: number
   initialState?: Partial<PlannerEditorState> | undefined
 }
 
 export function PlannerEditorStoreProvider({
   children,
+  identityMaxLevel,
   initialState,
 }: PlannerEditorStoreProviderProps) {
-  const [store] = useState(() => createPlannerEditorStore(initialState))
+  const [store] = useState(() => createPlannerEditorStore(identityMaxLevel, initialState))
 
   return (
     <PlannerEditorStoreContext.Provider value={store}>
@@ -289,7 +305,7 @@ export function usePlannerEditorStore<T>(selector: (state: PlannerEditorStore) =
 let placeholderStore: StoreApi<PlannerEditorStore> | null = null
 
 function getPlaceholderStore(): StoreApi<PlannerEditorStore> {
-  placeholderStore ??= createPlannerEditorStore()
+  placeholderStore ??= createPlannerEditorStore(MIN_LEVEL)
   return placeholderStore
 }
 

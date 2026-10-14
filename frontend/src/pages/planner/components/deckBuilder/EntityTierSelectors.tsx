@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MAX_LEVEL } from '@/shared/gameData'
 import type { UptieTier, ThreadspinTier } from '../../types/DeckTypes'
 import type { EGOId, IdentityId } from '@/shared/gameData'
 import { getEGOTierIconPath } from '@/shared/assets'
@@ -169,6 +168,7 @@ interface IdentityTierSelectorProps {
   entityId: IdentityId
   currentUptie?: UptieTier
   currentLevel?: number
+  maxLevel: number
   onConfirm: (entityId: IdentityId, data: TierSelection) => void
   children: React.ReactNode
 }
@@ -176,7 +176,8 @@ interface IdentityTierSelectorProps {
 export function IdentityTierSelector({
   entityId,
   currentUptie = 4,
-  currentLevel = MAX_LEVEL,
+  currentLevel,
+  maxLevel,
   onConfirm,
   children,
 }: IdentityTierSelectorProps) {
@@ -186,7 +187,8 @@ export function IdentityTierSelector({
         <IdentityTierSelectorInner
           entityId={entityId}
           currentUptie={currentUptie}
-          currentLevel={currentLevel}
+          currentLevel={currentLevel ?? maxLevel}
+          maxLevel={maxLevel}
           onConfirm={onConfirm}
         />
       }
@@ -200,11 +202,13 @@ function IdentityTierSelectorInner({
   entityId,
   currentUptie,
   currentLevel,
+  maxLevel,
   onConfirm,
 }: {
   entityId: IdentityId
   currentUptie: UptieTier
   currentLevel: number
+  maxLevel: number
   onConfirm: (entityId: IdentityId, data: TierSelection) => void
 }) {
   const { t } = useTranslation(['common'])
@@ -214,7 +218,7 @@ function IdentityTierSelectorInner({
   const handleLevelChange = (value: string) => {
     const num = parseInt(value, 10)
     if (!isNaN(num)) {
-      setLevel(Math.max(1, Math.min(MAX_LEVEL, num)))
+      setLevel(Math.max(1, Math.min(maxLevel, num)))
     }
   }
 
@@ -233,7 +237,7 @@ function IdentityTierSelectorInner({
             e.stopPropagation()
           }}
           min={1}
-          max={MAX_LEVEL}
+          max={maxLevel}
           className="w-10 h-5 px-1 text-center text-xs bg-transparent text-white border-0 outline-none"
         />
       </div>

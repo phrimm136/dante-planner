@@ -4,7 +4,7 @@ import { contentPath, field, key } from '../../contentPath'
 import type { SinnerEquipmentValue } from '../../contentShape'
 import type { SinnerEntry } from '../../sinnerEntries'
 import { identityRuleViolations } from '../identity'
-import type { IdentityReferenceData } from '../identity'
+import type { IdentityReferenceData, IdentitySeason } from '../identity'
 import { rendered } from '../../__tests__/rendered'
 
 const SINNER_PATH = contentPath(field('equipment'), key('1'))
@@ -20,8 +20,14 @@ describe('identityRuleViolations', () => {
   const knows = (ids: string[]) => ({ hasIdentity: (id: string) => ids.includes(id) })
   const knowsAll: IdentityReferenceData = { hasIdentity: () => true }
 
-  const rulesOf = (identity: { id: string; level?: number; uptie?: number }, data = knowsAll) =>
-    rendered(identityRuleViolations(entryOf({ level: 1, uptie: 1, ...identity }), data))
+  const MD7: IdentitySeason = { identityMaxLevel: 60 }
+  const MD6: IdentitySeason = { identityMaxLevel: 55 }
+
+  const rulesOf = (
+    identity: { id: string; level?: number; uptie?: number },
+    data = knowsAll,
+    season = MD7,
+  ) => rendered(identityRuleViolations(entryOf({ level: 1, uptie: 1, ...identity }), data, season))
 
   it('passes a known identity of its sinner within the level and uptie bounds', () => {
     expect(rulesOf({ id: '10101', level: 60, uptie: 4 })).toEqual([])
@@ -42,7 +48,7 @@ describe('identityRuleViolations', () => {
 
   it('matches a two-digit sinner key against the id digits', () => {
     const entry = { ...entryOf({ id: '11201', level: 1, uptie: 1 }), sinnerKey: '12' }
-    expect(identityRuleViolations(entry, knowsAll)).toEqual([])
+    expect(identityRuleViolations(entry, knowsAll, MD7)).toEqual([])
   })
 
   it.each([
@@ -53,6 +59,16 @@ describe('identityRuleViolations', () => {
   ] as const)('reports %s %d at the field', (name, value, code) => {
     expect(rulesOf({ id: '10101', [name]: value })).toEqual([
       { code, path: `equipment[1].identity.${name}` },
+    ])
+  })
+
+  it('passes level 55 in MD6', () => {
+    expect(rulesOf({ id: '10101', level: 55 }, knowsAll, MD6)).toEqual([])
+  })
+
+  it('reports level 56 in MD6', () => {
+    expect(rulesOf({ id: '10101', level: 56 }, knowsAll, MD6)).toEqual([
+      { code: 'OUT_OF_RANGE_IDENTITY_LEVEL', path: 'equipment[1].identity.level' },
     ])
   })
 })

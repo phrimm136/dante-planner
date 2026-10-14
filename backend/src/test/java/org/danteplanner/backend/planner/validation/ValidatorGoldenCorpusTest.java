@@ -24,6 +24,7 @@ import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
+import org.danteplanner.backend.planner.gamedata.MirrorDungeonSeason;
 import org.danteplanner.backend.planner.gamedata.PlannerVersions;
 import org.danteplanner.backend.planner.precondition.ContentVersionValidator;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
@@ -350,6 +351,12 @@ class ValidatorGoldenCorpusTest {
         @Override
         public FloorRuleTable loadFloorRules(Path filePath) {
             return super.loadFloorRules(Path.of("../static/data", GameDataRegistry.FLOOR_RULES_FILE));
+        }
+
+        @Override
+        public MirrorDungeonSeason loadMirrorDungeonSeason(Path filePath) {
+            return new MirrorDungeonSeason(ValidatorGoldenCorpus.MD_CURRENT_VERSION,
+                    ValidatorGoldenCorpus.IDENTITY_MAX_LEVEL, "fixture");
         }
 
         @Override

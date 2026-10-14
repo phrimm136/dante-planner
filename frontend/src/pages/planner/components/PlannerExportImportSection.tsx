@@ -38,6 +38,7 @@ import {
 } from '../lib/plannerExportImport'
 import { planConflictResolution } from '../lib/conflictChoice'
 import { loadIdMigrationTable } from '../hooks/loadIdMigrationTable'
+import { loadIdentityLevelCaps } from '../hooks/loadIdentityLevelCaps'
 import { validatePlannerForSync } from '../lib/validation/plannerValidation'
 import { toUserFriendlyError } from '../lib/validation/plannerValidationErrors'
 
@@ -241,12 +242,15 @@ function PlannerExportImportSectionContent() {
     const existingPlanners = await listLocal()
     const existingIds = new Set(existingPlanners.map((p) => p.id))
 
-    const table = await loadIdMigrationTable()
+    const [table, identityLevelCaps] = await Promise.all([
+      loadIdMigrationTable(),
+      loadIdentityLevelCaps(),
+    ])
     const {
       conflicting,
       fresh,
       skipped: rejected,
-    } = partitionImport(envelope.value, existingIds, table, (planner) => {
+    } = partitionImport(envelope.value, existingIds, table, identityLevelCaps, (planner) => {
       const validated = validatePlannerForSync(
         planner,
         egoGiftSpec,

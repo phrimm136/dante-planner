@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { normalizePlannerIds, withNormalizedIds } from '../plannerIdNormalize'
+import { clipIdentityLevels, normalizePlannerIds, withNormalizedIds } from '../plannerIdNormalize'
 import { EMPTY_ID_MIGRATION_TABLE } from '../idMigrationTable'
 import { buildSaveablePlanner } from '@/test-utils/fixtures'
 import type { IdMigrationTable } from '../idMigrationTable'
@@ -139,10 +139,86 @@ describe('withNormalizedIds', () => {
     const content = planner.content as unknown as Record<string, unknown>
     const stale = { ...planner, content: { ...content, selectedGiftIds: ['19247'] } }
 
-    const normalized = withNormalizedIds(stale as typeof planner, TABLE)
+    const normalized = withNormalizedIds(stale as typeof planner, TABLE, new Map())
 
     expect((normalized.content as unknown as Record<string, unknown>).selectedGiftIds).toEqual([
       '19300',
     ])
+  })
+})
+
+describe('clipIdentityLevels', () => {
+  const withLevel = (level: unknown): Record<string, unknown> => ({
+    equipment: { '1': { identity: { id: '10101', uptie: 4, level }, egos: {} } },
+  })
+
+  it('clips a level above the cap to the cap', () => {
+    expect(clipIdentityLevels(withLevel(61), 60)).toEqual(withLevel(60))
+  })
+
+  it('keeps a level at the cap', () => {
+    expect(clipIdentityLevels(withLevel(60), 60)).toEqual(withLevel(60))
+  })
+
+  it('clips a level beyond the largest safe integer', () => {
+    expect(clipIdentityLevels(withLevel(Number.MAX_SAFE_INTEGER * 4), 60)).toEqual(withLevel(60))
+  })
+
+  it.each([['60'], [1.5], [0], [-1], [null]])('leaves the level %j untouched', (level) => {
+    expect(clipIdentityLevels(withLevel(level), 55)).toEqual(withLevel(level))
+  })
+
+  it('leaves an identity without a level untouched', () => {
+    const content = { equipment: { '1': { identity: { id: '10101', uptie: 4 }, egos: {} } } }
+
+    expect(clipIdentityLevels(content, 55)).toEqual(content)
+  })
+
+  it('leaves an equipment slot without an identity untouched', () => {
+    const content = { equipment: { '1': { egos: {} }, '2': 'x' } }
+
+    expect(clipIdentityLevels(content, 55)).toEqual(content)
+  })
+
+  it('leaves content without equipment untouched', () => {
+    expect(clipIdentityLevels({ selectedBuffIds: [] }, 55)).toEqual({ selectedBuffIds: [] })
+  })
+
+  it('clips the same way twice as once', () => {
+    const once = clipIdentityLevels(withLevel(70), 55)
+
+    expect(clipIdentityLevels(once, 55)).toEqual(once)
+  })
+})
+
+describe('withNormalizedIds identity level caps', () => {
+  const CAPS = new Map([
+    [6, 55],
+    [7, 60],
+  ])
+
+  function plannerAt(contentVersion: number, level: number) {
+    const planner = buildSaveablePlanner({ metadata: { contentVersion } })
+    const content = planner.content as unknown as {
+      equipment: Record<string, { identity: { level: number } }>
+    }
+    content.equipment['1']!.identity.level = level
+    return planner
+  }
+
+  const levelOf = (planner: ReturnType<typeof plannerAt>) =>
+    (planner.content as unknown as { equipment: Record<string, { identity: { level: number } }> })
+      .equipment['1']?.identity.level
+
+  it('clips an MD6 level of 60 to 55', () => {
+    expect(levelOf(withNormalizedIds(plannerAt(6, 60), EMPTY_ID_MIGRATION_TABLE, CAPS))).toBe(55)
+  })
+
+  it('clips an MD7 level of 61 to 60', () => {
+    expect(levelOf(withNormalizedIds(plannerAt(7, 61), EMPTY_ID_MIGRATION_TABLE, CAPS))).toBe(60)
+  })
+
+  it('leaves a planner whose version has no season unclipped', () => {
+    expect(levelOf(withNormalizedIds(plannerAt(99, 61), EMPTY_ID_MIGRATION_TABLE, CAPS))).toBe(61)
   })
 })

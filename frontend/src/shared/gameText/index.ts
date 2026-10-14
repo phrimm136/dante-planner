@@ -30,7 +30,6 @@ export {
 export { StartBuffDataListSchema, StartBuffI18nSchema } from './schemas/StartBuffSchemas'
 
 export {
-  BASE_BUFF_IDS,
   createBuffId,
   deriveEnhancements,
   getBaseIdFromBuffId,

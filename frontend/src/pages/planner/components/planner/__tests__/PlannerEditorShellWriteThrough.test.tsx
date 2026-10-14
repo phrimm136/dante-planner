@@ -148,7 +148,7 @@ function StoreCapture({ onReady }: { onReady: (api: StoreApi<PlannerEditorStore>
 function renderShell(initialState?: Partial<PlannerEditorState>) {
   let storeApi: StoreApi<PlannerEditorStore> | null = null
   const utils = render(
-    <PlannerEditorStoreProvider initialState={initialState}>
+    <PlannerEditorStoreProvider identityMaxLevel={60} initialState={initialState}>
       <StoreCapture
         onReady={(api) => {
           storeApi = api

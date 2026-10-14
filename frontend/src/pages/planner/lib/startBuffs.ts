@@ -1,5 +1,4 @@
 import type { StartBuff, StartBuffDataList, StartBuffI18n } from '@/shared/gameText'
-import { BASE_BUFF_IDS } from '@/shared/gameText'
 
 export function toStartBuffs(spec: StartBuffDataList, names: StartBuffI18n): StartBuff[] {
   return Object.entries(spec).map(([id, buff]) => ({
@@ -18,9 +17,5 @@ export function getBuffById(buffs: StartBuff[] | undefined, id: number): StartBu
 }
 
 export function getBaseBuffs(buffs: StartBuff[] | undefined): StartBuff[] {
-  return (
-    buffs?.filter(
-      (b) => BASE_BUFF_IDS.includes(b.baseId as (typeof BASE_BUFF_IDS)[number]) && b.level === 1,
-    ) ?? []
-  )
+  return buffs?.filter((b) => b.level === 1) ?? []
 }

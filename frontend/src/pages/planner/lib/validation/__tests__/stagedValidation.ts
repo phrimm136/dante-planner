@@ -35,7 +35,22 @@ export const EVERY_ID_REGISTRY: PlannerIdRegistry = {
   egoIds: new EveryId(),
   egoMaxThreadspin: new EveryEgoCeiling(),
   themePackIds: new EveryId(),
-  season: { startBuffIds: new EveryId(), startGiftPools: new EveryStartGiftPool() },
+  season: {
+    startBuffIds: new EveryId([
+      '100',
+      '101',
+      '102',
+      '103',
+      '104',
+      '105',
+      '106',
+      '107',
+      '108',
+      '109',
+    ]),
+    startGiftPools: new EveryStartGiftPool(),
+    identityMaxLevel: 60,
+  },
 }
 
 export const EVERY_GIFT_SPEC: Record<string, EGOGiftSpec> = new Proxy({}, { has: () => true })

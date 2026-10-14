@@ -9,6 +9,7 @@ import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
+import org.danteplanner.backend.planner.gamedata.MirrorDungeonSeason;
 import org.danteplanner.backend.planner.gamedata.PlannerVersions;
 import org.danteplanner.backend.planner.precondition.PlannerPublishValidator;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -47,6 +49,7 @@ class ContentCorpusReplayTest {
     private static final JsonNode CORPUS = readCorpus();
     private static final JsonNode GAME_DATA = CORPUS.path("gameData");
     private static final int CONTENT_VERSION = GAME_DATA.path("contentVersion").asInt();
+    private static final int IDENTITY_MAX_LEVEL = GAME_DATA.path("identityMaxLevel").asInt();
 
     private final GameDataRegistry registry = registry();
     private final PlannerContentValidator validator = new PlannerContentValidator(MAPPER, MAX_CONTENT_SIZE_BYTES,
@@ -77,7 +80,7 @@ class ContentCorpusReplayTest {
     }
 
     @Test
-    void parse_WhenALevelIsWrittenAsAnIntegralDouble_BindsItAsTheIntegerAndStoresTheTextAsReceived() {
+    void parse_WhenALevelIsWrittenAsAnIntegralDouble_StoresItAsTheIntegerAsAMigration() {
         ObjectNode content = CORPUS.path("base").deepCopy();
         ((ObjectNode) content.path("equipment").path("1").path("identity")).put("level", 60.0);
         String raw = content.toString();
@@ -86,7 +89,23 @@ class ContentCorpusReplayTest {
 
         assertThat(raw).contains("\"level\":60.0");
         assertThat(document.content().identities().get("1").level()).isEqualTo(60L);
-        assertThat(document.json()).isEqualTo(raw);
+        assertThat(document.json()).isEqualTo(raw.replace("\"level\":60.0", "\"level\":60"));
+        assertThat(document.migrated()).isTrue();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"identity-level-above", "identity-level-integral-double-above"})
+    void parse_WhenALevelAboveTheCapIsReplayed_StoresTheSeasonCap(String name) throws IOException {
+        JsonNode above = cases().filter(corpusCase -> name.equals(corpusCase.path("name").asText()))
+                .findFirst().orElseThrow();
+
+        PlannerDocument document = validator.parse(contentOf(above), MDCategory.F5,
+                validator.season(CONTENT_VERSION), Stage.PUBLISH);
+
+        assertThat(document.migrated()).isTrue();
+        assertThat(document.content().identities().get("1").level()).isEqualTo(60L);
+        assertThat(MAPPER.readTree(document.json()).path("equipment").path("1").path("identity").path("level"))
+                .isEqualTo(MAPPER.getNodeFactory().numberNode(60));
     }
 
     @Test
@@ -244,6 +263,11 @@ class ContentCorpusReplayTest {
         @Override
         public FloorRuleTable loadFloorRules(Path filePath) {
             return super.loadFloorRules(Path.of("../static/data", GameDataRegistry.FLOOR_RULES_FILE));
+        }
+
+        @Override
+        public MirrorDungeonSeason loadMirrorDungeonSeason(Path filePath) {
+            return new MirrorDungeonSeason(CONTENT_VERSION, IDENTITY_MAX_LEVEL, "corpus");
         }
 
         @Override

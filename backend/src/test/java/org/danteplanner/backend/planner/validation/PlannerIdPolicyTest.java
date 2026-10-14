@@ -9,6 +9,7 @@ import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
+import org.danteplanner.backend.planner.gamedata.MirrorDungeonSeason;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.planner.validation.floor.Stage;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -315,6 +316,8 @@ class PlannerIdPolicyTest {
         Files.createDirectory(previous);
         Files.createSymbolicLink(previous.resolve("startEgoGiftPools.json"),
                 source.resolve("startEgoGiftPools.json").toAbsolutePath());
+        Files.createSymbolicLink(previous.resolve(MirrorDungeonSeason.FILE),
+                source.resolve(MirrorDungeonSeason.FILE).toAbsolutePath());
         ObjectNode recorded = (ObjectNode) MAPPER.readTree(Files.readString(source.resolve("startBuffs.json")));
         assertThat(recorded.has(buffId)).isTrue();
         recorded.remove(buffId);

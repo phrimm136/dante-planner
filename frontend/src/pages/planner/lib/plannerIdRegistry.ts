@@ -8,6 +8,7 @@ export type SeasonSource = {
   version: number
   startBuffs: StartBuffDataList
   startGiftPools: StartEgoGiftPools
+  identityMaxLevel: number
 }
 
 export type PlannerIdRegistrySources = {
@@ -17,8 +18,9 @@ export type PlannerIdRegistrySources = {
   seasons: readonly SeasonSource[]
 }
 
-const seasonOf = ({ startBuffs, startGiftPools }: SeasonSource): Season => ({
+const seasonOf = ({ startBuffs, startGiftPools, identityMaxLevel }: SeasonSource): Season => ({
   startBuffIds: new Set(Object.keys(startBuffs)),
+  identityMaxLevel,
   startGiftPools: new Map(
     Object.entries(startGiftPools).map(([keyword, giftIds]) => [keyword, new Set<string>(giftIds)]),
   ),

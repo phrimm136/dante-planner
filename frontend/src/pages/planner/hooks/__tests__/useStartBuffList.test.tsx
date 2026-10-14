@@ -13,7 +13,6 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { createTestQueryClient } from '@/test-utils/queryClient'
-import { BASE_BUFF_IDS } from '@/shared/gameText'
 import type { MDVersion } from '@/shared/gameData'
 import { useStartBuffListSpec, useStartBuffListI18n } from '../useStartBuffList'
 import { toStartBuffs, getBaseBuffs, getBuffById } from '../../lib/startBuffs'
@@ -64,10 +63,11 @@ describe('useStartBuffList', () => {
     const data = await renderBuffs(version)
     const baseBuffs = getBaseBuffs(data)
 
-    expect(baseBuffs).toHaveLength(BASE_BUFF_IDS.length)
     expect(baseBuffs.every((b) => b.level === 1)).toBe(true)
     const byValue = (a: number, b: number) => a - b
-    expect(baseBuffs.map((b) => b.baseId).sort(byValue)).toEqual([...BASE_BUFF_IDS].sort(byValue))
+    expect(baseBuffs.map((b) => b.baseId).sort(byValue)).toEqual([
+      100, 101, 102, 103, 104, 105, 106, 107, 108, 109,
+    ])
   })
 
   it('getBuffById resolves an enhanced buff by its full id', async () => {

@@ -1,4 +1,4 @@
-import { MAX_ENTITY_TIER, MAX_LEVEL, MIN_ENTITY_TIER, MIN_LEVEL } from '@/shared/gameData'
+import { MAX_ENTITY_TIER, MIN_ENTITY_TIER, MIN_LEVEL } from '@/shared/gameData'
 import { outOfRangeViolations } from '../boundary'
 import type { Bounds } from '../boundary'
 import type { Codes } from '../codes'
@@ -13,7 +13,6 @@ const ID = 'id'
 const LEVEL = 'level'
 const UPTIE = 'uptie'
 
-const LEVEL_BOUNDS: Bounds = { min: MIN_LEVEL, max: MAX_LEVEL }
 const UPTIE_BOUNDS: Bounds = { min: MIN_ENTITY_TIER.identity, max: MAX_ENTITY_TIER.identity }
 
 export type IdentityViolation =
@@ -27,16 +26,19 @@ export type IdentityViolation =
 
 export type IdentityReferenceData = { hasIdentity: (identityId: string) => boolean }
 
+export type IdentitySeason = { identityMaxLevel: number }
+
 type EquippedIdentity = SinnerEquipmentValue['identity']
 
 const progressionViolations = (
   identity: EquippedIdentity,
   identityPath: ContentPath,
+  season: IdentitySeason,
 ): IdentityViolation[] => [
   ...outOfRangeViolations(
     identity.level,
     extendPath(identityPath, field(LEVEL)),
-    LEVEL_BOUNDS,
+    { min: MIN_LEVEL, max: season.identityMaxLevel },
     'OUT_OF_RANGE_IDENTITY_LEVEL',
   ),
   ...outOfRangeViolations(
@@ -50,6 +52,7 @@ const progressionViolations = (
 export function identityRuleViolations(
   { sinnerKey, path, value }: SinnerEntry<SinnerEquipmentValue>,
   data: IdentityReferenceData,
+  season: IdentitySeason,
 ): IdentityViolation[] {
   const { identity } = value
   const identityPath = extendPath(path, field(IDENTITY))
@@ -60,5 +63,5 @@ export function identityRuleViolations(
   if (!belongsToSinner(identity.id, sinnerKey)) {
     return [{ code: 'MISMATCHED_IDENTITY', path: idPath }]
   }
-  return progressionViolations(identity, identityPath)
+  return progressionViolations(identity, identityPath, season)
 }

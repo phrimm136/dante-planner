@@ -31,6 +31,7 @@ class GameDataRegistrySnapshotTest {
     private static final int READ_ROUNDS = 20_000;
     private static final long JOIN_TIMEOUT_MS = 60_000;
     private static final int SEASON = 7;
+    private static final int IDENTITY_MAX_LEVEL = 60;
     private static final int SCHEMA_VERSION = 2;
     private static final int RR_VERSION = 1;
 
@@ -87,7 +88,7 @@ class GameDataRegistrySnapshotTest {
                 && registry.hasEgo("ego-" + generation)
                 && registry.hasEgoGift("gift-" + generation)
                 && registry.hasThemePack("pack-" + generation)
-                && registry.hasStartBuff(SEASON, "buff-" + generation)
+                && registry.startBuffIds(SEASON).contains("buff-" + generation)
                 && registry.hasStartGiftKeyword(SEASON, "keyword-" + generation)
                 && registry.getStartGiftPool(SEASON, "keyword-" + generation) != null
                 && registry.isGiftAffordableForThemePack("themed-gift-" + generation, "pack-" + generation)
@@ -126,6 +127,11 @@ class GameDataRegistrySnapshotTest {
         @Override
         public FloorRuleTable loadFloorRules(Path filePath) {
             return super.loadFloorRules(Path.of("../static/data", GameDataRegistry.FLOOR_RULES_FILE));
+        }
+
+        @Override
+        public MirrorDungeonSeason loadMirrorDungeonSeason(Path filePath) {
+            return new MirrorDungeonSeason(SEASON, IDENTITY_MAX_LEVEL, "generational");
         }
 
         @Override

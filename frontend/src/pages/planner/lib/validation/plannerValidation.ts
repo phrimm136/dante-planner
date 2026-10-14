@@ -24,12 +24,12 @@ import { floorReferenceViolations } from './floor/floorReferences'
 import type { FloorReferenceData, FloorReferenceViolation } from './floor/floorReferences'
 import { admitFloors, parseFloors } from './floor/floorRules'
 import { identityRuleViolations } from './identity/identity'
-import type { IdentityReferenceData } from './identity/identity'
+import type { IdentityReferenceData, IdentitySeason } from './identity/identity'
 import type { FloorReferenceError, PlannerValidationError } from './plannerValidationErrors'
 import { deploymentOrderViolations } from './sinner/deploymentOrder'
 import { sinnerEntries } from './sinnerEntries'
 import { sinnerSkillViolations } from './skill/skillEAState'
-import { startBuffViolations } from './startbuff/startBuffs'
+import { startBuffBaseIds, startBuffViolations } from './startbuff/startBuffs'
 import type { StartBuffSeason } from './startbuff/startBuffs'
 import { START_GIFT_IDS_PATH, startGiftViolations } from './startgift/startGift'
 import type { StartGiftSeason } from './startgift/startGift'
@@ -44,6 +44,7 @@ export interface PlannerIdRegistry {
     | {
         startBuffIds: ReadonlySet<string>
         startGiftPools: ReadonlyMap<string, ReadonlySet<string>>
+        identityMaxLevel: number
       }
     | undefined
 }
@@ -56,7 +57,7 @@ type ContentStage = Exclude<FloorRuleStage, 'index'>
 
 type ReferenceData = IdentityReferenceData & EgoReferenceData & GiftReferenceData
 
-type SeasonReferenceData = StartBuffSeason & StartGiftSeason
+type SeasonReferenceData = StartBuffSeason & StartGiftSeason & IdentitySeason
 
 type PlannerPlan = {
   stage: ContentStage
@@ -108,6 +109,8 @@ function seasonReferenceData(registry: PlannerIdRegistry): SeasonReferenceData |
   if (season === undefined) return undefined
   return {
     hasStartBuff: (buffId) => season.startBuffIds.has(buffId),
+    startBuffBaseIds: startBuffBaseIds(season.startBuffIds),
+    identityMaxLevel: season.identityMaxLevel,
     hasStartGiftKeyword: (keyword) => season.startGiftPools.has(keyword),
     inStartGiftPool: (keyword, baseGiftId) =>
       season.startGiftPools.get(keyword)?.has(baseGiftId) === true,
@@ -159,10 +162,10 @@ function floorReferenceError(
   }
 }
 
-const equippedEntities: PlannerCheck = ({ content, references }) => {
+const equippedEntities: PlannerCheck = ({ content, references, season }) => {
   const entries = sinnerEntries(content.equipment, EQUIPMENT_PATH)
   return [
-    ...entries.flatMap((entry) => identityRuleViolations(entry, references)),
+    ...entries.flatMap((entry) => identityRuleViolations(entry, references, season)),
     ...entries.flatMap((entry) => egoRuleViolations(entry, references)),
   ]
 }

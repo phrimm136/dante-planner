@@ -26,34 +26,36 @@ class IdentityRulesTest {
     }
 
     private static final IdentityReferenceData DATA = new KnownIdentities(Set.of("10501", "10601"));
+    private static final int MAX_LEVEL = 60;
     private static final ContentPath IDENTITY = ContentPath.of("equipment").key("5").field("identity");
 
     @Test
     void check_WhenEquipmentHasNoSinners_ReportsNothing() {
-        assertThat(IdentityRules.check(Map.of(), DATA)).isEmpty();
+        assertThat(IdentityRules.check(Map.of(), DATA, MAX_LEVEL)).isEmpty();
     }
 
     @Test
     void check_WhenTheIdentityIsKnownAndInRange_ReportsNothing() {
-        assertThat(IdentityRules.check(sinnerFive(new Identity("10501", 45, 4)), DATA)).isEmpty();
+        assertThat(IdentityRules.check(sinnerFive(new Identity("10501", 45, 4)), DATA, MAX_LEVEL)).isEmpty();
     }
 
     @Test
     void check_WhenTheIdIsUnknown_ReportsItAndSkipsTheBounds() {
-        assertThat(IdentityRules.check(sinnerFive(new Identity("10599", 99, 4)), DATA)).containsExactly(new Violation(
-                ErrorCode.UNKNOWN_IDENTITY, IDENTITY.field("id"), "identity ID '10599' not found or invalid"));
+        assertThat(IdentityRules.check(sinnerFive(new Identity("10599", 99, 4)), DATA, MAX_LEVEL))
+                .containsExactly(new Violation(ErrorCode.UNKNOWN_IDENTITY, IDENTITY.field("id"),
+                        "identity ID '10599' not found or invalid"));
     }
 
     @Test
     void check_WhenTheIdBelongsToAnotherSinner_ReportsTheMismatch() {
-        assertThat(IdentityRules.check(sinnerFive(new Identity("10601", 45, 4)), DATA))
+        assertThat(IdentityRules.check(sinnerFive(new Identity("10601", 45, 4)), DATA, MAX_LEVEL))
                 .containsExactly(new Violation(ErrorCode.MISMATCHED_IDENTITY, IDENTITY.field("id"),
                         "identity '10601' does not belong to sinner 5"));
     }
 
     @Test
     void check_WhenLevelAndUptieAreBothOutOfRange_ReportsEachInPathOrder() {
-        assertThat(IdentityRules.check(sinnerFive(new Identity("10501", 99, 5)), DATA)).containsExactly(
+        assertThat(IdentityRules.check(sinnerFive(new Identity("10501", 99, 5)), DATA, MAX_LEVEL)).containsExactly(
                 new Violation(ErrorCode.OUT_OF_RANGE_IDENTITY_LEVEL, IDENTITY.field("level"),
                         "level value 99 is out of range [1-60]"),
                 new Violation(ErrorCode.OUT_OF_RANGE_IDENTITY_UPTIE, IDENTITY.field("uptie"),
@@ -61,16 +63,31 @@ class IdentityRulesTest {
     }
 
     @Test
+    void check_WhenLevelIsBelowTheRange_ReportsItAgainstTheSeasonCap() {
+        assertThat(IdentityRules.check(sinnerFive(new Identity("10501", 0, 4)), DATA, MAX_LEVEL)).containsExactly(
+                new Violation(ErrorCode.OUT_OF_RANGE_IDENTITY_LEVEL, IDENTITY.field("level"),
+                        "level value 0 is out of range [1-60]"));
+    }
+
+    @Test
+    void check_WhenTheSeasonCapIsLower_BoundsTheLevelByIt() {
+        assertThat(IdentityRules.check(sinnerFive(new Identity("10501", 56, 4)), DATA, 55)).containsExactly(
+                new Violation(ErrorCode.OUT_OF_RANGE_IDENTITY_LEVEL, IDENTITY.field("level"),
+                        "level value 56 is out of range [1-55]"));
+        assertThat(IdentityRules.check(sinnerFive(new Identity("10501", 55, 4)), DATA, 55)).isEmpty();
+    }
+
+    @Test
     void check_WhenUptieIsBelowTheRange_ReportsIt() {
-        assertThat(IdentityRules.check(sinnerFive(new Identity("10501", 45, 0)), DATA)).containsExactly(
+        assertThat(IdentityRules.check(sinnerFive(new Identity("10501", 45, 0)), DATA, MAX_LEVEL)).containsExactly(
                 new Violation(ErrorCode.OUT_OF_RANGE_IDENTITY_UPTIE, IDENTITY.field("uptie"),
                         "uptie value 0 is out of range [1-4]"));
     }
 
     @Test
     void check_WhenLevelExceedsAnInt_ReportsItOutOfRange() {
-        assertThat(IdentityRules.check(sinnerFive(new Identity("10501", 3_000_000_000L, 4)), DATA)).containsExactly(
-                new Violation(ErrorCode.OUT_OF_RANGE_IDENTITY_LEVEL, IDENTITY.field("level"),
+        assertThat(IdentityRules.check(sinnerFive(new Identity("10501", 3_000_000_000L, 4)), DATA, MAX_LEVEL))
+                .containsExactly(new Violation(ErrorCode.OUT_OF_RANGE_IDENTITY_LEVEL, IDENTITY.field("level"),
                         "level value 3000000000 is out of range [1-60]"));
     }
 

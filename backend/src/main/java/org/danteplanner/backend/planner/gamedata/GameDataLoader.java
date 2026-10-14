@@ -64,6 +64,26 @@ public class GameDataLoader {
         }
     }
 
+    public MirrorDungeonSeason loadMirrorDungeonSeason(Path filePath) {
+        if (!Files.exists(filePath)) {
+            throw new IllegalStateException("Mirror dungeon season file not found: " + filePath);
+        }
+
+        JsonNode root;
+        try {
+            root = objectMapper.readTree(Files.readString(filePath));
+        } catch (IOException e) {
+            throw new GameDataLoadException(filePath, e);
+        }
+
+        try {
+            return MirrorDungeonSeason.parse(root);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException(
+                    "Invalid mirror dungeon season file " + filePath + ": " + e.getMessage(), e);
+        }
+    }
+
     public Path seasonDirectory(Path dataDir, int version) {
         Path seasonDir = dataDir.resolve(SEASON_DIRECTORY_PREFIX + version);
         if (!Files.isDirectory(seasonDir)) {

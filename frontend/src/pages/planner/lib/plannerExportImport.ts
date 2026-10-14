@@ -11,6 +11,7 @@ import { sanitizeToPlainText } from '@/shared/sanitize'
 import { ExportEnvelopeSchema, toSaveablePlanner } from '../schemas/PlannerSchemas'
 import { GZIP_OS_BYTE_OFFSET, GZIP_OS_TOPS20 } from './deckCode'
 import { withNormalizedIds } from './plannerIdNormalize'
+import type { IdentityLevelCaps } from './plannerIdNormalize'
 import type { IdMigrationTable } from './idMigrationTable'
 
 import type { Result } from '@/lib/result'
@@ -208,6 +209,7 @@ export function partitionImport(
   envelope: ImportEnvelope,
   existingIds: ReadonlySet<string>,
   table: IdMigrationTable,
+  identityLevelCaps: IdentityLevelCaps,
   validate: ImportValidator,
 ): PartitionedImport {
   const conflicting: ImportConflictCandidate[] = []
@@ -215,7 +217,7 @@ export function partitionImport(
   const skipped: SkippedImport[] = []
 
   for (const item of envelope.planners) {
-    const incoming = withNormalizedIds(toImportedPlanner(item), table)
+    const incoming = withNormalizedIds(toImportedPlanner(item), table, identityLevelCaps)
     const reason = validate(incoming)
     if (reason !== null) {
       skipped.push({ id: item.id, title: incoming.metadata.title, reason })

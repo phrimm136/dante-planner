@@ -73,7 +73,7 @@ function renderWithStore(ui: ReactNode) {
 
   const utils = render(
     <QueryClientProvider client={queryClient}>
-      <PlannerEditorStoreProvider>
+      <PlannerEditorStoreProvider identityMaxLevel={60}>
         <StoreCapture
           onReady={(api) => {
             storeApi = api

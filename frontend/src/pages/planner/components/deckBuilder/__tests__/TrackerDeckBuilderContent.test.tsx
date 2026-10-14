@@ -43,7 +43,7 @@ vi.mock('@/components/hooks/use-is-breakpoint', () => ({
   useIsBreakpoint: () => true,
 }))
 
-const DEFAULT_EQUIPMENT = createDefaultEquipment()
+const DEFAULT_EQUIPMENT = createDefaultEquipment(60)
 
 const IDENTITY_SPEC = Object.fromEntries(
   Object.values(DEFAULT_EQUIPMENT).map((eq, index) => [
@@ -109,6 +109,7 @@ const ACTIONS = {
   onExport: () => {},
   onResetOrder: () => {},
   onIdentityChange: () => {},
+  maxLevel: 60,
 }
 
 function renderPane(ui: ReactElement) {

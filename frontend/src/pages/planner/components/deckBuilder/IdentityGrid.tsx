@@ -1,6 +1,5 @@
 import { memo, type Ref } from 'react'
 
-import { MAX_LEVEL } from '@/shared/gameData'
 import { CARD_MOBILE_SCALE } from '@/lib/constants'
 import { getFormationBadgePath } from '@/shared/assets'
 import { useDeckVisibleCount } from '../../stores/usePlannerEditorStore'
@@ -19,6 +18,7 @@ interface IdentityGridProps {
   onEquip: (identityId: IdentityId, data: { uptie?: UptieTier; level?: number }) => void
   scrollRef: Ref<HTMLDivElement>
   isActive: boolean
+  maxLevel: number
 }
 
 export function IdentityGrid({
@@ -28,6 +28,7 @@ export function IdentityGrid({
   onEquip,
   scrollRef,
   isActive,
+  maxLevel,
 }: IdentityGridProps) {
   const visibleCount = useDeckVisibleCount()
 
@@ -48,6 +49,7 @@ export function IdentityGrid({
                 visibleIds={visibleIds}
                 equippedIds={equippedIds}
                 onEquip={onEquip}
+                maxLevel={maxLevel}
               />
             ))}
           </ResponsiveCardGrid>
@@ -62,6 +64,7 @@ interface IdentityGridCardProps {
   visibleIds: Set<string>
   equippedIds: Set<string>
   onEquip: (identityId: IdentityId, data: { uptie?: UptieTier; level?: number }) => void
+  maxLevel: number
 }
 
 /**
@@ -73,6 +76,7 @@ const IdentityGridCard = memo(function IdentityGridCard({
   visibleIds,
   equippedIds,
   onEquip,
+  maxLevel,
 }: IdentityGridCardProps) {
   const isSelected = equippedIds.has(identity.id)
   const isVisible = visibleIds.has(identity.id)
@@ -82,12 +86,13 @@ const IdentityGridCard = memo(function IdentityGridCard({
       <IdentityTierSelector
         entityId={identity.id}
         currentUptie={4}
-        currentLevel={MAX_LEVEL}
+        maxLevel={maxLevel}
         onConfirm={onEquip}
       >
         <CardSlot size={IDENTITY_GEOMETRY.size}>
           <IdentityCard
             identity={identity}
+            level={maxLevel}
             isSelected={isSelected}
             overlay={
               isSelected ? (

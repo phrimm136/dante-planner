@@ -11,19 +11,13 @@ final class StartBuffViolations {
     private StartBuffViolations() {
     }
 
-    static Violation tooMany(ContentPath path, int count) {
+    static Violation tooMany(ContentPath path, int count, int maxCount) {
         return Violation.valueOutOfRange(ErrorCode.EXCESS_STARTBUFF, path, String.format("%s count", path.render()),
-                String.valueOf(count), NO_BUFFS, StartBuffRules.MAX_START_BUFFS);
+                String.valueOf(count), NO_BUFFS, maxCount);
     }
 
     static Violation unknownBuff(ContentPath path, ContentPath selectedBuffIds, long buffId) {
         return Violation.unknownId(ErrorCode.UNKNOWN_STARTBUFF, path, selectedBuffIds.render(), String.valueOf(buffId));
-    }
-
-    static Violation baseIdOutOfRange(ContentPath path, long baseId) {
-        return Violation.valueOutOfRange(ErrorCode.OUT_OF_RANGE_STARTBUFF, path,
-                String.format("%s base ID", path.render()), String.valueOf(baseId),
-                StartBuffRules.MIN_BASE_ID, StartBuffRules.MAX_BASE_ID);
     }
 
     static Violation duplicateBaseId(ContentPath path, ContentPath selectedBuffIds, long baseId) {

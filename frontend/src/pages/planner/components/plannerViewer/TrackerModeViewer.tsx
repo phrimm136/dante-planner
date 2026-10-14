@@ -26,6 +26,7 @@ import { ReadOnlyNote } from '@/shared/noteEditor/components/ReadOnlyNote'
 import { HorizontalThemePackGallery } from './HorizontalThemePackGallery'
 import { useTrackerState } from '../../hooks/useTrackerState'
 import { useDeckClipboard } from '../../hooks/useDeckClipboard'
+import { useIdentityMaxLevel } from '../../hooks/useMirrorDungeonSeason'
 import { useProgressiveReveal } from '@/components/hooks/useProgressiveReveal'
 import { DEFAULT_SKILL_EA, floorCount as categoryFloorCount } from '@/shared/gameData'
 import { isNoteEmpty } from '@/shared/noteEditor'
@@ -33,8 +34,17 @@ import { NOTE_SECTIONS } from './viewerSections'
 import type { NoteSectionId } from './viewerSections'
 import { deserializeSets } from '../../schemas/PlannerSchemas'
 import type { MDSaveablePlanner } from '../../types/PlannerTypes'
+import type { TrackerDeckBuilderContentProps } from '../deckBuilder/DeckBuilderContent'
 
 const SECTION_COUNT = NOTE_SECTIONS.length
+
+function SeasonTrackerDeckBuilderContent({
+  mdVersion,
+  ...props
+}: Omit<TrackerDeckBuilderContentProps, 'maxLevel'> & { mdVersion: number }) {
+  const maxLevel = useIdentityMaxLevel(mdVersion)
+  return <TrackerDeckBuilderContent {...props} maxLevel={maxLevel} />
+}
 
 interface TrackerModeViewerProps {
   planner: MDSaveablePlanner
@@ -74,6 +84,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
       equipment: trackerState.equipment,
       deploymentOrder: trackerState.deploymentOrder,
     }),
+    mdVersion: planner.metadata.contentVersion,
   })
 
   const deserialized = deserializeSets(
@@ -123,7 +134,8 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
       ),
       aside: (
         <DeckBuilderPane open={deckEditPaneOpen} onOpenChange={setDeckEditPaneOpen}>
-          <TrackerDeckBuilderContent
+          <SeasonTrackerDeckBuilderContent
+            mdVersion={planner.metadata.contentVersion}
             isActive={deckEditPaneOpen}
             ownedGiftIds={collectOwnedGiftIds(deserialized, floorCount)}
             equipment={trackerState.equipment}

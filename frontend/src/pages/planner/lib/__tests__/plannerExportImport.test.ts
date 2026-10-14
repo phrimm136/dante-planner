@@ -409,6 +409,7 @@ describe('partitionImport', () => {
       envelopeOf([EXPORT_ITEM]),
       new Set(),
       EMPTY_ID_MIGRATION_TABLE,
+      new Map(),
       ACCEPT_ALL,
     )
 
@@ -423,6 +424,7 @@ describe('partitionImport', () => {
       envelopeOf([EXPORT_ITEM]),
       new Set([VALID_UUID]),
       EMPTY_ID_MIGRATION_TABLE,
+      new Map(),
       ACCEPT_ALL,
     )
 
@@ -441,6 +443,7 @@ describe('partitionImport', () => {
       envelopeOf([scripted]),
       new Set(),
       EMPTY_ID_MIGRATION_TABLE,
+      new Map(),
       ACCEPT_ALL,
     )
 
@@ -461,6 +464,7 @@ describe('partitionImport', () => {
       envelopeOf(items),
       new Set(),
       EMPTY_ID_MIGRATION_TABLE,
+      new Map(),
       (planner) => (planner.metadata.title === 'Plan 3' ? rejection : null),
     )
 
@@ -477,6 +481,7 @@ describe('partitionImport', () => {
       envelopeOf([withGift]),
       new Set(),
       { egoGift: { rename: { '9001': '9002' }, drop: [] } },
+      new Map(),
       (planner) => {
         seen.push((planner.content as { selectedGiftIds?: unknown }).selectedGiftIds)
         return null

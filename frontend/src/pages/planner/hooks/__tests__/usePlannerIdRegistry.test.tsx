@@ -53,6 +53,15 @@ describe('usePlannerIdRegistry', () => {
     ).toEqual(expected)
   })
 
+  it.each([
+    [6, 55],
+    [7, 60],
+  ])('gives content version %i the identity max level %i', async (version, identityMaxLevel) => {
+    const registryFor = await renderRegistry()
+
+    expect(registryFor(version).season?.identityMaxLevel).toBe(identityMaxLevel)
+  })
+
   it('gives every E.G.O a threadspin ceiling', async () => {
     const registry = (await renderRegistry())(PLANNER_CONFIG.mdCurrentVersion)
 
