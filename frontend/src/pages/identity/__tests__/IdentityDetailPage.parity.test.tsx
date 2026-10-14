@@ -4,7 +4,6 @@ import { Suspense } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 
 import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
-import { MAX_LEVEL } from '@/shared/gameData'
 import { diffHtml, normalizeHtml } from '@/test-utils/domDiff'
 import { prefetchDescriptionData } from '@/test-utils/prefetchDescriptionData'
 import { createTestQueryClient } from '@/test-utils/queryClient'
@@ -199,7 +198,7 @@ describe('IdentityDetailPage DOM parity', () => {
     const slider = screen.getByRole('slider')
     fireEvent.keyDown(slider, { key: 'ArrowLeft' })
     await waitFor(() => {
-      expect(screen.getByText(`Lv. ${MAX_LEVEL - 1}`)).toBeDefined()
+      expect(screen.getByText('Lv. 64')).toBeDefined()
     })
     await waitForI18nSettled(container)
 

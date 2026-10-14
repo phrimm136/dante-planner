@@ -8,6 +8,7 @@ interface SkillsSectionI18nProps {
   skills: Record<SkillSlot, IdentitySkillEntry[]>
   activeSkillSlot: SkillSlot
   uptieLevel: Uptie
+  level: number
   getSkillSlotNumber: (slot: SkillSlot) => number
 }
 
@@ -16,6 +17,7 @@ export function SkillsSectionI18n({
   skills,
   activeSkillSlot,
   uptieLevel,
+  level,
   getSkillSlotNumber,
 }: SkillsSectionI18nProps) {
   return (
@@ -32,6 +34,7 @@ export function SkillsSectionI18n({
             skillSlot={getSkillSlotNumber(activeSkillSlot)}
             skillEntry={skill}
             uptie={displayUptie}
+            level={level}
             isLocked={isLocked}
           />
         )

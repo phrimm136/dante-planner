@@ -1,7 +1,7 @@
 import { Suspense, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { MAX_LEVEL } from '@/shared/gameData'
+import { MIN_LEVEL } from '@/shared/gameData'
 import { SANITY_INDICATOR_COLORS, SECTION_STYLES } from '@/lib/constants'
 import { getDisplayFontForNumeric } from '@/lib/utils'
 import { StyledNameSkeleton } from '@/shared/gameText'
@@ -20,6 +20,7 @@ interface SkillInfoPanelData {
 
 interface SkillInfoPanelWithSuspenseProps {
   skillData: SkillInfoPanelData
+  level: number
   coinString: string
   nameSlot: ReactNode
   isDefenseSkill?: boolean
@@ -28,6 +29,7 @@ interface SkillInfoPanelWithSuspenseProps {
 
 export function SkillInfoPanelWithSuspense({
   skillData,
+  level,
   coinString,
   nameSlot,
   isDefenseSkill = false,
@@ -35,7 +37,7 @@ export function SkillInfoPanelWithSuspense({
 }: SkillInfoPanelWithSuspenseProps) {
   const { t } = useTranslation('database')
   const skillLevelCorrection = skillData.skillLevelCorrection ?? 0
-  const totalLevel = Math.max(1, MAX_LEVEL + skillLevelCorrection)
+  const totalLevel = Math.max(MIN_LEVEL, level + skillLevelCorrection)
   const atkWeight = skillData.targetNum ?? 1
 
   return (

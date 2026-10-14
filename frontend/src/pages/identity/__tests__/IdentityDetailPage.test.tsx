@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { Suspense } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { createTestQueryClient } from '@/test-utils/queryClient'
-import { MAX_LEVEL, SkillIdSchema, PassiveIdSchema } from '@/shared/gameData'
+import { SkillIdSchema, PassiveIdSchema } from '@/shared/gameData'
 import IdentityDetailPage from '../IdentityDetailPage'
 import type { IdentityData, IdentityI18n } from '../types/IdentityTypes'
 
@@ -323,15 +323,15 @@ describe('IdentityDetailPage', () => {
     })
   })
 
-  it('renders level display with default MAX_LEVEL', async () => {
+  it('starts at the season level cap from identityLevelCap.json', async () => {
     renderWithProviders(<IdentityDetailPage />)
 
     await waitFor(() => {
-      // Level label should be present in 'Lv. X' format
-      expect(screen.getByText(`Lv. ${MAX_LEVEL}`)).toBeDefined()
-      // Slider should exist
-      expect(screen.getByRole('slider')).toBeDefined()
+      expect(screen.getByText('Lv. 65')).toBeDefined()
     })
+    const slider = screen.getByRole('slider')
+    expect(slider).toHaveAttribute('aria-valuemax', '65')
+    expect(slider).toHaveAttribute('aria-valuenow', '65')
   })
 
   it('renders skill slot buttons', async () => {
@@ -368,8 +368,7 @@ describe('IdentityDetailPage', () => {
     await waitFor(() => {
       // The slider component should be rendered
       expect(screen.getByRole('slider')).toBeDefined()
-      // Level value from constants (appears in multiple places)
-      const levelElements = screen.getAllByText(String(MAX_LEVEL))
+      const levelElements = screen.getAllByText('65')
       expect(levelElements.length).toBeGreaterThan(0)
     })
   })
@@ -399,6 +398,70 @@ describe('IdentityDetailPage', () => {
     await waitFor(() => {
       const skill2Button = screen.getByRole('button', { name: /skill 2/i })
       expect(skill2Button.style.backgroundColor).toBeTruthy()
+    })
+  })
+
+  describe('with a skill level correction of -2', () => {
+    beforeEach(() => {
+      const [firstSkill] = mockIdentityData10114.skills.skill1
+      mockIdentityData = {
+        ...mockIdentityData10114,
+        skills: {
+          ...mockIdentityData10114.skills,
+          skill1: [
+            {
+              ...firstSkill!,
+              skillData: [
+                { attributeType: 'AMBER', atkType: 'SLASH', skillLevelCorrection: -2 },
+                {},
+                {},
+                {},
+              ],
+            },
+          ],
+        },
+      }
+    })
+
+    afterEach(() => {
+      mockIdentityData = mockIdentityData10114
+    })
+
+    function offenseLevel(): string | null | undefined {
+      return screen.getByAltText('Attack').nextElementSibling?.textContent
+    }
+
+    it('shows the offense level at the slider level plus the correction', async () => {
+      renderWithProviders(<IdentityDetailPage />)
+
+      await waitFor(() => {
+        expect(offenseLevel()).toBe('63')
+      })
+
+      const slider = screen.getByRole('slider')
+      for (let step = 0; step < 15; step++) {
+        fireEvent.keyDown(slider, { key: 'ArrowLeft' })
+      }
+
+      await waitFor(() => {
+        expect(screen.getByText('Lv. 50')).toBeDefined()
+      })
+      expect(offenseLevel()).toBe('48')
+    })
+
+    it('floors the offense level at 1 when the correction would take it lower', async () => {
+      renderWithProviders(<IdentityDetailPage />)
+
+      await waitFor(() => {
+        expect(offenseLevel()).toBe('63')
+      })
+
+      fireEvent.keyDown(screen.getByRole('slider'), { key: 'Home' })
+
+      await waitFor(() => {
+        expect(screen.getByText('Lv. 1')).toBeDefined()
+      })
+      expect(offenseLevel()).toBe('1')
     })
   })
 

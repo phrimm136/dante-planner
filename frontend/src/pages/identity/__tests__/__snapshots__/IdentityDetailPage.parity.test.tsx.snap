@@ -43,7 +43,7 @@ exports[`IdentityDetailPage DOM parity > desktop > renders uptie 1 with skill1 s
               <div class="flex flex-col items-center gap-1">
                 <img alt="HP" class="w-6 h-6 object-contain" src="/a/3252b17a3cf4.webp" />
                 <span class="text-xs tabular-nums">
-                  "270"
+                  "287"
                 </span>
               </div>
               <div class="flex flex-col items-center gap-1">
@@ -55,7 +55,7 @@ exports[`IdentityDetailPage DOM parity > desktop > renders uptie 1 with skill1 s
               <div class="flex flex-col items-center gap-1">
                 <img alt="Defense" class="w-6 h-6 object-contain" src="/a/a2dfb4e9de5d.webp" />
                 <span class="text-xs tabular-nums">
-                  "65 (+5)"
+                  "70 (+5)"
                 </span>
               </div>
             </div>
@@ -108,7 +108,7 @@ exports[`IdentityDetailPage DOM parity > desktop > renders uptie 1 with skill1 s
               <div class="flex justify-evenly">
                 <div class="flex flex-col items-center gap-1">
                   <p class="text-xs tabular-nums text-stagger-1">
-                    "162"
+                    "172"
                   </p>
                   <span class="text-xs tabular-nums text-stagger-1">
                     "(60%)"
@@ -116,7 +116,7 @@ exports[`IdentityDetailPage DOM parity > desktop > renders uptie 1 with skill1 s
                 </div>
                 <div class="flex flex-col items-center gap-1">
                   <p class="text-xs tabular-nums text-stagger-2">
-                    "81"
+                    "86"
                   </p>
                   <span class="text-xs tabular-nums text-stagger-2">
                     "(30%)"
@@ -198,7 +198,7 @@ exports[`IdentityDetailPage DOM parity > desktop > renders uptie 1 with skill1 s
               </div>
               <div class="flex items-center gap-3 flex-1" style="font-family: var(--font-excelsior);">
                 <span class="text-[26px] -translate-y-1">
-                  "Lv. 60"
+                  "Lv. 65"
                 </span>
                 <div class="flex-1 max-w-[200px]">
                   <span aria-disabled="false" class="relative flex w-full touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col" data-orientation="horizontal" data-slot="slider" dir="ltr" style="--radix-slider-thumb-transform: translateX(-50%);">
@@ -206,7 +206,7 @@ exports[`IdentityDetailPage DOM parity > desktop > renders uptie 1 with skill1 s
                       <span class="bg-primary absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full" data-orientation="horizontal" data-slot="slider-range" style="left: 0%; right: 0%;" />
                     </span>
                     <span style="transform: var(--radix-slider-thumb-transform); position: absolute; left: calc(100% + 0px);">
-                      <span aria-orientation="horizontal" aria-valuemax="60" aria-valuemin="1" aria-valuenow="60" class="border-primary ring-ring/50 block size-4 shrink-0 rounded-full border bg-white shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50" data-orientation="horizontal" data-radix-collection-item="" data-slot="slider-thumb" role="slider" tabindex="0" />
+                      <span aria-orientation="horizontal" aria-valuemax="65" aria-valuemin="1" aria-valuenow="65" class="border-primary ring-ring/50 block size-4 shrink-0 rounded-full border bg-white shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50" data-orientation="horizontal" data-radix-collection-item="" data-slot="slider-thumb" role="slider" tabindex="0" />
                     </span>
                   </span>
                 </div>
@@ -286,7 +286,7 @@ exports[`IdentityDetailPage DOM parity > desktop > renders uptie 1 with skill1 s
                       <div class="flex items-center gap-2">
                         <img alt="Attack" class="w-11 h-11" src="/a/59bf908cec9a.webp" />
                         <span class="underline text-[38px] -translate-y-1.5 leading-none" style="font-family: var(--font-excelsior);">
-                          "60"
+                          "65"
                         </span>
                       </div>
                       <div class="flex items-center gap-2 text-yellow-400">
@@ -611,7 +611,7 @@ exports[`IdentityDetailPage DOM parity > desktop > renders uptie 1 with skill3 s
 - div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] #1: <div class="flex items-center gap-2">
 - div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] #1: <img alt="Attack" class="w-11 h-11" src="/a/59bf908cec9a.webp" />
 - div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] #2: <span class="underline text-[38px] -translate-y-1.5 leading-none" style="font-family: var(--font-excelsior);">
-- div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "60"
+- div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "65"
 - div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] #2: </span>
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] #2: <div class="flex grow flex-col pb-4 -ml-5">
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] #1: <div />
@@ -634,7 +634,7 @@ exports[`IdentityDetailPage DOM parity > desktop > renders uptie 1 with skill3 s
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] #1: <div class="flex items-center gap-2">
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] #1: <img alt="Attack" class="w-11 h-11" src="/a/59bf908cec9a.webp" />
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] #2: <span class="underline text-[38px] -translate-y-1.5 leading-none" style="font-family: var(--font-excelsior);">
-+ div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "60"
++ div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "65"
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] #2: </span>
 @@
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] #2: <div class="flex items-center gap-2 text-yellow-400">
@@ -858,7 +858,7 @@ exports[`IdentityDetailPage DOM parity > desktop > renders uptie 2 with skill3 s
 - div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] #1: <div class="flex items-center gap-2">
 - div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] #1: <img alt="Attack" class="w-11 h-11" src="/a/59bf908cec9a.webp" />
 - div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] #2: <span class="underline text-[38px] -translate-y-1.5 leading-none" style="font-family: var(--font-excelsior);">
-- div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "60"
+- div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "65"
 - div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] #2: </span>
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] #2: <div class="flex grow flex-col pb-4 -ml-5">
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] #1: <div />
@@ -881,7 +881,7 @@ exports[`IdentityDetailPage DOM parity > desktop > renders uptie 2 with skill3 s
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] #1: <div class="flex items-center gap-2">
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] #1: <img alt="Attack" class="w-11 h-11" src="/a/59bf908cec9a.webp" />
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] #2: <span class="underline text-[38px] -translate-y-1.5 leading-none" style="font-family: var(--font-excelsior);">
-+ div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "60"
++ div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "65"
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] #2: </span>
 @@
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] #2: <div class="flex items-center gap-2 text-yellow-400">
@@ -1505,7 +1505,7 @@ exports[`IdentityDetailPage DOM parity > mobile > renders uptie 1 with skill1 se
               <div class="flex flex-col items-center gap-1">
                 <img alt="HP" class="w-6 h-6 object-contain" src="/a/3252b17a3cf4.webp" />
                 <span class="text-xs tabular-nums">
-                  "270"
+                  "287"
                 </span>
               </div>
               <div class="flex flex-col items-center gap-1">
@@ -1517,7 +1517,7 @@ exports[`IdentityDetailPage DOM parity > mobile > renders uptie 1 with skill1 se
               <div class="flex flex-col items-center gap-1">
                 <img alt="Defense" class="w-6 h-6 object-contain" src="/a/a2dfb4e9de5d.webp" />
                 <span class="text-xs tabular-nums">
-                  "65 (+5)"
+                  "70 (+5)"
                 </span>
               </div>
             </div>
@@ -1570,7 +1570,7 @@ exports[`IdentityDetailPage DOM parity > mobile > renders uptie 1 with skill1 se
               <div class="flex justify-evenly">
                 <div class="flex flex-col items-center gap-1">
                   <p class="text-xs tabular-nums text-stagger-1">
-                    "162"
+                    "172"
                   </p>
                   <span class="text-xs tabular-nums text-stagger-1">
                     "(60%)"
@@ -1578,7 +1578,7 @@ exports[`IdentityDetailPage DOM parity > mobile > renders uptie 1 with skill1 se
                 </div>
                 <div class="flex flex-col items-center gap-1">
                   <p class="text-xs tabular-nums text-stagger-2">
-                    "81"
+                    "86"
                   </p>
                   <span class="text-xs tabular-nums text-stagger-2">
                     "(30%)"
@@ -1658,7 +1658,7 @@ exports[`IdentityDetailPage DOM parity > mobile > renders uptie 1 with skill1 se
           </div>
           <div class="flex items-center gap-3 flex-1" style="font-family: var(--font-excelsior);">
             <span class="text-[26px] -translate-y-1">
-              "Lv. 60"
+              "Lv. 65"
             </span>
             <div class="flex-1 max-w-[200px]">
               <span aria-disabled="false" class="relative flex w-full touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col" data-orientation="horizontal" data-slot="slider" dir="ltr" style="--radix-slider-thumb-transform: translateX(-50%);">
@@ -1666,7 +1666,7 @@ exports[`IdentityDetailPage DOM parity > mobile > renders uptie 1 with skill1 se
                   <span class="bg-primary absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full" data-orientation="horizontal" data-slot="slider-range" style="left: 0%; right: 0%;" />
                 </span>
                 <span style="transform: var(--radix-slider-thumb-transform); position: absolute; left: calc(100% + 0px);">
-                  <span aria-orientation="horizontal" aria-valuemax="60" aria-valuemin="1" aria-valuenow="60" class="border-primary ring-ring/50 block size-4 shrink-0 rounded-full border bg-white shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50" data-orientation="horizontal" data-radix-collection-item="" data-slot="slider-thumb" role="slider" tabindex="0" />
+                  <span aria-orientation="horizontal" aria-valuemax="65" aria-valuemin="1" aria-valuenow="65" class="border-primary ring-ring/50 block size-4 shrink-0 rounded-full border bg-white shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50" data-orientation="horizontal" data-radix-collection-item="" data-slot="slider-thumb" role="slider" tabindex="0" />
                 </span>
               </span>
             </div>
@@ -1759,7 +1759,7 @@ exports[`IdentityDetailPage DOM parity > mobile > renders uptie 1 with skill1 se
                       <div class="flex items-center gap-2">
                         <img alt="Attack" class="w-11 h-11" src="/a/59bf908cec9a.webp" />
                         <span class="underline text-[38px] -translate-y-1.5 leading-none" style="font-family: var(--font-excelsior);">
-                          "60"
+                          "65"
                         </span>
                       </div>
                       <div class="flex items-center gap-2 text-yellow-400">
@@ -1870,7 +1870,7 @@ exports[`IdentityDetailPage DOM parity > mobile > renders uptie 1 with skill3 se
 - div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] #1: <div class="flex items-center gap-2">
 - div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] #1: <img alt="Attack" class="w-11 h-11" src="/a/59bf908cec9a.webp" />
 - div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] #2: <span class="underline text-[38px] -translate-y-1.5 leading-none" style="font-family: var(--font-excelsior);">
-- div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "60"
+- div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "65"
 - div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] #2: </span>
 + div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] #2: <div class="flex grow flex-col pb-4 -ml-5">
 + div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] #1: <div />
@@ -1893,7 +1893,7 @@ exports[`IdentityDetailPage DOM parity > mobile > renders uptie 1 with skill3 se
 + div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] #1: <div class="flex items-center gap-2">
 + div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] #1: <img alt="Attack" class="w-11 h-11" src="/a/59bf908cec9a.webp" />
 + div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] #2: <span class="underline text-[38px] -translate-y-1.5 leading-none" style="font-family: var(--font-excelsior);">
-+ div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "60"
++ div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "65"
 + div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] #2: </span>
 @@
 + div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.relative[1] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] #2: <div class="flex items-center gap-2 text-yellow-400">
@@ -2006,20 +2006,20 @@ exports[`IdentityDetailPage DOM parity > renders the stats panel at a lowered le
 - div.container[1] > div.grid[1] > div.col-span-10[1] > div.space-y-4[1] > div.space-y-4[1] > div.relative[2] > div.absolute[2] #1: <button class="group relative w-12 h-12 disabled:opacity-50 disabled:cursor-not-allowed" disabled="" style="background-image: url(\\"/a/00ffb4c2ce2a.webp\\"); background-size: cover; background-position: center center;">
 + div.container[1] > div.grid[1] > div.col-span-10[1] > div.space-y-4[1] > div.space-y-4[1] > div.relative[2] > div.absolute[2] #1: <button class="group relative w-12 h-12 disabled:opacity-50 disabled:cursor-not-allowed" style="background-image: url(\\"/a/00ffb4c2ce2a.webp\\"); background-size: cover; background-position: center center;">
 @@
-- div.container[1] > div.grid[1] > div.col-span-10[1] > div.space-y-4[1] > div.grid[2] > div.border[1] > div.grid[2] > div.flex[1] > span.text-xs[2] #1: "270"
-+ div.container[1] > div.grid[1] > div.col-span-10[1] > div.space-y-4[1] > div.grid[2] > div.border[1] > div.grid[2] > div.flex[1] > span.text-xs[2] #1: "267"
+- div.container[1] > div.grid[1] > div.col-span-10[1] > div.space-y-4[1] > div.grid[2] > div.border[1] > div.grid[2] > div.flex[1] > span.text-xs[2] #1: "287"
++ div.container[1] > div.grid[1] > div.col-span-10[1] > div.space-y-4[1] > div.grid[2] > div.border[1] > div.grid[2] > div.flex[1] > span.text-xs[2] #1: "284"
 @@
 - div.container[1] > div.grid[1] > div.col-span-10[1] > div.space-y-4[1] > div.grid[2] > div.border[1] > div.grid[2] > div.flex[2] > span.text-xs[2] #1: "3-5"
 + div.container[1] > div.grid[1] > div.col-span-10[1] > div.space-y-4[1] > div.grid[2] > div.border[1] > div.grid[2] > div.flex[2] > span.text-xs[2] #1: "4-7"
 @@
-- div.container[1] > div.grid[1] > div.col-span-10[1] > div.space-y-4[1] > div.grid[2] > div.border[1] > div.grid[2] > div.flex[3] > span.text-xs[2] #1: "65 (+5)"
-+ div.container[1] > div.grid[1] > div.col-span-10[1] > div.space-y-4[1] > div.grid[2] > div.border[1] > div.grid[2] > div.flex[3] > span.text-xs[2] #1: "64 (+5)"
+- div.container[1] > div.grid[1] > div.col-span-10[1] > div.space-y-4[1] > div.grid[2] > div.border[1] > div.grid[2] > div.flex[3] > span.text-xs[2] #1: "70 (+5)"
++ div.container[1] > div.grid[1] > div.col-span-10[1] > div.space-y-4[1] > div.grid[2] > div.border[1] > div.grid[2] > div.flex[3] > span.text-xs[2] #1: "69 (+5)"
 @@
-- div.container[1] > div.grid[1] > div.col-span-10[1] > div.space-y-4[1] > div.grid[2] > div.col-span-2[3] > div.border[1] > div.flex[2] > div.flex[1] > p.text-xs[1] #1: "162"
-+ div.container[1] > div.grid[1] > div.col-span-10[1] > div.space-y-4[1] > div.grid[2] > div.col-span-2[3] > div.border[1] > div.flex[2] > div.flex[1] > p.text-xs[1] #1: "160"
+- div.container[1] > div.grid[1] > div.col-span-10[1] > div.space-y-4[1] > div.grid[2] > div.col-span-2[3] > div.border[1] > div.flex[2] > div.flex[1] > p.text-xs[1] #1: "172"
++ div.container[1] > div.grid[1] > div.col-span-10[1] > div.space-y-4[1] > div.grid[2] > div.col-span-2[3] > div.border[1] > div.flex[2] > div.flex[1] > p.text-xs[1] #1: "170"
 @@
-- div.container[1] > div.grid[1] > div.col-span-10[1] > div.space-y-4[1] > div.grid[2] > div.col-span-2[3] > div.border[1] > div.flex[2] > div.flex[2] > p.text-xs[1] #1: "81"
-+ div.container[1] > div.grid[1] > div.col-span-10[1] > div.space-y-4[1] > div.grid[2] > div.col-span-2[3] > div.border[1] > div.flex[2] > div.flex[2] > p.text-xs[1] #1: "80"
+- div.container[1] > div.grid[1] > div.col-span-10[1] > div.space-y-4[1] > div.grid[2] > div.col-span-2[3] > div.border[1] > div.flex[2] > div.flex[2] > p.text-xs[1] #1: "86"
++ div.container[1] > div.grid[1] > div.col-span-10[1] > div.space-y-4[1] > div.grid[2] > div.col-span-2[3] > div.border[1] > div.flex[2] > div.flex[2] > p.text-xs[1] #1: "85"
 @@
 - div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.sticky[1] > div.bg-background/95[1] > div.flex[1] > div.flex[1] > div.flex[2] #1: <button aria-label="filters.tier 1" class="selectable w-10 h-10 rounded flex items-center justify-center translation-250ms" data-selected="true" type="button">
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.sticky[1] > div.bg-background/95[1] > div.flex[1] > div.flex[1] > div.flex[2] #1: <button aria-label="filters.tier 1" class="selectable w-10 h-10 rounded flex items-center justify-center translation-250ms opacity-60 hover:opacity-100" data-selected="false" type="button">
@@ -2027,20 +2027,23 @@ exports[`IdentityDetailPage DOM parity > renders the stats panel at a lowered le
 - div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.sticky[1] > div.bg-background/95[1] > div.flex[1] > div.flex[1] > div.flex[2] #4: <button aria-label="filters.tier 4" class="selectable w-10 h-10 rounded flex items-center justify-center translation-250ms opacity-60 hover:opacity-100" data-selected="false" type="button">
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.sticky[1] > div.bg-background/95[1] > div.flex[1] > div.flex[1] > div.flex[2] #4: <button aria-label="filters.tier 4" class="selectable w-10 h-10 rounded flex items-center justify-center translation-250ms" data-selected="true" type="button">
 @@
-- div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.sticky[1] > div.bg-background/95[1] > div.flex[1] > div.flex[2] > span.text-[26px][1] #1: "Lv. 60"
-+ div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.sticky[1] > div.bg-background/95[1] > div.flex[1] > div.flex[2] > span.text-[26px][1] #1: "Lv. 59"
+- div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.sticky[1] > div.bg-background/95[1] > div.flex[1] > div.flex[2] > span.text-[26px][1] #1: "Lv. 65"
++ div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.sticky[1] > div.bg-background/95[1] > div.flex[1] > div.flex[2] > span.text-[26px][1] #1: "Lv. 64"
 @@
 - div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.sticky[1] > div.bg-background/95[1] > div.flex[1] > div.flex[2] > div.flex-1[2] > span.relative[1] > span.bg-muted[1] #1: <span class="bg-primary absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full" data-orientation="horizontal" data-slot="slider-range" style="left: 0%; right: 0%;" />
-+ div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.sticky[1] > div.bg-background/95[1] > div.flex[1] > div.flex[2] > div.flex-1[2] > span.relative[1] > span.bg-muted[1] #1: <span class="bg-primary absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full" data-orientation="horizontal" data-slot="slider-range" style="left: 0%; right: 1.6949152542372872%;" />
++ div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.sticky[1] > div.bg-background/95[1] > div.flex[1] > div.flex[2] > div.flex-1[2] > span.relative[1] > span.bg-muted[1] #1: <span class="bg-primary absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full" data-orientation="horizontal" data-slot="slider-range" style="left: 0%; right: 1.5625%;" />
 @@
 - div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.sticky[1] > div.bg-background/95[1] > div.flex[1] > div.flex[2] > div.flex-1[2] > span.relative[1] #2: <span style="transform: var(--radix-slider-thumb-transform); position: absolute; left: calc(100% + 0px);">
-- div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.sticky[1] > div.bg-background/95[1] > div.flex[1] > div.flex[2] > div.flex-1[2] > span.relative[1] > span[2] #1: <span aria-orientation="horizontal" aria-valuemax="60" aria-valuemin="1" aria-valuenow="60" class="border-primary ring-ring/50 block size-4 shrink-0 rounded-full border bg-white shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50" data-orientation="horizontal" data-radix-collection-item="" data-slot="slider-thumb" role="slider" tabindex="0" />
-+ div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.sticky[1] > div.bg-background/95[1] > div.flex[1] > div.flex[2] > div.flex-1[2] > span.relative[1] #2: <span style="transform: var(--radix-slider-thumb-transform); position: absolute; left: calc(98.30508474576271% + 0px);">
-+ div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.sticky[1] > div.bg-background/95[1] > div.flex[1] > div.flex[2] > div.flex-1[2] > span.relative[1] > span[2] #1: <span aria-orientation="horizontal" aria-valuemax="60" aria-valuemin="1" aria-valuenow="59" class="border-primary ring-ring/50 block size-4 shrink-0 rounded-full border bg-white shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50" data-orientation="horizontal" data-radix-collection-item="" data-slot="slider-thumb" role="slider" tabindex="0" />
+- div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.sticky[1] > div.bg-background/95[1] > div.flex[1] > div.flex[2] > div.flex-1[2] > span.relative[1] > span[2] #1: <span aria-orientation="horizontal" aria-valuemax="65" aria-valuemin="1" aria-valuenow="65" class="border-primary ring-ring/50 block size-4 shrink-0 rounded-full border bg-white shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50" data-orientation="horizontal" data-radix-collection-item="" data-slot="slider-thumb" role="slider" tabindex="0" />
++ div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.sticky[1] > div.bg-background/95[1] > div.flex[1] > div.flex[2] > div.flex-1[2] > span.relative[1] #2: <span style="transform: var(--radix-slider-thumb-transform); position: absolute; left: calc(98.4375% + 0px);">
++ div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.sticky[1] > div.bg-background/95[1] > div.flex[1] > div.flex[2] > div.flex-1[2] > span.relative[1] > span[2] #1: <span aria-orientation="horizontal" aria-valuemax="65" aria-valuemin="1" aria-valuenow="64" class="border-primary ring-ring/50 block size-4 shrink-0 rounded-full border bg-white shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50" data-orientation="horizontal" data-radix-collection-item="" data-slot="slider-thumb" role="slider" tabindex="0" />
 @@
 - div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.flex[1] > button.flex-1[3] #1: <img alt="" class="mr-1 inline-block h-6" src="/a/f614610802b9.webp" />
 - div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.flex[1] > button.flex-1[3] #2: <span class="text-muted-foreground" style="font-family: var(--font-mikodacs);">
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.flex[1] > button.flex-1[3] #1: <span class="" style="font-family: var(--font-mikodacs);">
+@@
+- div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "65"
++ div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "64"
 @@
 - div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.border[2] > div.space-y-3[1] #4: <div class="relative space-y-1 opacity-50">
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.border[2] > div.space-y-3[1] #4: <div class="relative space-y-1">

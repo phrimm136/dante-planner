@@ -10,7 +10,7 @@ import { DetailRightPanel } from '@/components/layout/DetailRightPanel'
 import { MobileDetailTabs } from '@/components/layout/MobileDetailTabs'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
 import { getEGOTierIconPath } from '@/shared/assets'
-import { MAX_LEVEL, MAX_ENTITY_TIER, MIN_ENTITY_TIER } from '@/shared/gameData'
+import { IDENTITY_LEVEL_CAP, MAX_ENTITY_TIER, MIN_ENTITY_TIER } from '@/shared/gameData'
 import { IdentityDetailSkeleton } from './components/IdentityDetailSkeleton'
 import { IdentityInfoPane } from './components/IdentityInfoPane'
 import { IdentitySkillsPane } from './components/IdentitySkillsPane'
@@ -23,7 +23,7 @@ function IdentityDetailContent() {
   const { t } = useTranslation('database')
 
   const [uptie, setUptie] = useState<number>(MAX_ENTITY_TIER.identity)
-  const [level, setLevel] = useState<number>(MAX_LEVEL)
+  const [level, setLevel] = useState<number>(IDENTITY_LEVEL_CAP)
 
   const totalSections = 3
   const visibleSections = useProgressiveCount({ total: totalSections, step: 1, initial: 0 })
@@ -46,6 +46,7 @@ function IdentityDetailContent() {
       onTierChange={setUptie}
       tierIconPath={getEGOTierIconPath}
       level={level}
+      maxLevel={IDENTITY_LEVEL_CAP}
       onLevelChange={setLevel}
       sticky
     />
@@ -56,7 +57,12 @@ function IdentityDetailContent() {
   )
 
   const skillsContent = (
-    <IdentitySkillsPane id={id} skills={identityData.skills} uptieLevel={uptieLevel} />
+    <IdentitySkillsPane
+      id={id}
+      skills={identityData.skills}
+      uptieLevel={uptieLevel}
+      level={level}
+    />
   )
 
   const passivesContent = (

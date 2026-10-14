@@ -3,20 +3,27 @@ import { useTranslation } from 'react-i18next'
 
 import { Slider } from '@/components/ui/slider'
 import { cn, getDisplayFontForNumeric, getDisplayFontForLanguage } from '@/lib/utils'
-import { MAX_LEVEL } from '@/shared/gameData'
+import { MIN_LEVEL } from '@/shared/gameData'
 import { SECTION_STYLES } from '@/lib/constants'
 
-interface DetailEntitySelectorProps {
+interface TierSelectorProps {
   tierLabel: ReactNode
   minTier: number
   maxTier: number
   tier: number
   onTierChange: (tier: number) => void
   tierIconPath: (tier: number) => string
-  level?: number
-  onLevelChange?: (level: number) => void
   sticky?: boolean
 }
+
+interface LevelControlProps {
+  level: number
+  maxLevel: number
+  onLevelChange: (level: number) => void
+}
+
+type DetailEntitySelectorProps = TierSelectorProps &
+  (LevelControlProps | { [K in keyof LevelControlProps]?: never })
 
 export function DetailEntitySelector({
   tierLabel,
@@ -25,7 +32,8 @@ export function DetailEntitySelector({
   tier,
   onTierChange,
   tierIconPath,
-  level = MAX_LEVEL,
+  level,
+  maxLevel,
   onLevelChange,
   sticky = false,
 }: DetailEntitySelectorProps) {
@@ -83,7 +91,7 @@ export function DetailEntitySelector({
           </div>
         </div>
 
-        {onLevelChange && (
+        {maxLevel !== undefined && (
           <div
             className="flex items-center gap-3 flex-1"
             style={{ fontFamily: getDisplayFontForNumeric() }}
@@ -93,8 +101,8 @@ export function DetailEntitySelector({
               <Slider
                 value={[level]}
                 onValueChange={handleSliderChange}
-                min={1}
-                max={MAX_LEVEL}
+                min={MIN_LEVEL}
+                max={maxLevel}
                 step={1}
               />
             </div>

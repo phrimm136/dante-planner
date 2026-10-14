@@ -21,6 +21,7 @@ interface SkillCardProps {
   coinString: string
   skillImagePath: string
   skillTier: number
+  level: number
   nameSlot: ReactNode
   descriptionSlot: ReactNode
   isDefenseSkill?: boolean
@@ -33,6 +34,7 @@ export function SkillCard({
   coinString,
   skillImagePath,
   skillTier,
+  level,
   nameSlot,
   descriptionSlot,
   isDefenseSkill = false,
@@ -63,6 +65,7 @@ export function SkillCard({
       infoPanel={
         <SkillInfoPanelWithSuspense
           skillData={skillData}
+          level={level}
           coinString={coinString}
           nameSlot={nameSlot}
           isDefenseSkill={isDefenseSkill}

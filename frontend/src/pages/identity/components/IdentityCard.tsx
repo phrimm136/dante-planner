@@ -14,7 +14,7 @@ import {
   getSinnerFacePath,
   getIdentityGradePath,
 } from '@/shared/assets'
-import { MAX_LEVEL, getSinnerFromId } from '@/shared/gameData'
+import { IDENTITY_LEVEL_CAP, getSinnerFromId } from '@/shared/gameData'
 import { layerStyle } from '@/shared/cardLayout'
 import { cn, getDisplayFontForNumeric } from '@/lib/utils'
 import {
@@ -40,7 +40,7 @@ interface IdentityCardProps {
 export function IdentityCard({
   identity,
   uptie = 4,
-  level = MAX_LEVEL,
+  level = IDENTITY_LEVEL_CAP,
   isSelected = false,
   dim = 1,
   overlay,

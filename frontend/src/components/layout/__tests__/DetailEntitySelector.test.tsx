@@ -2,7 +2,9 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { DetailEntitySelector } from '../DetailEntitySelector'
 import { getEGOTierIconPath } from '@/shared/assets'
-import { MAX_LEVEL, MAX_ENTITY_TIER, MIN_ENTITY_TIER } from '@/shared/gameData'
+import { MAX_ENTITY_TIER, MIN_ENTITY_TIER } from '@/shared/gameData'
+
+const SEASON_LEVEL_CAP = 65
 
 const IDENTITY_BOUNDS = {
   tierLabel: 'Uptie',
@@ -35,7 +37,8 @@ describe('DetailEntitySelector', () => {
           {...IDENTITY_BOUNDS}
           tier={4}
           onTierChange={onTierChange}
-          level={MAX_LEVEL}
+          level={SEASON_LEVEL_CAP}
+          maxLevel={SEASON_LEVEL_CAP}
           onLevelChange={onLevelChange}
         />,
       )
@@ -56,13 +59,14 @@ describe('DetailEntitySelector', () => {
           {...IDENTITY_BOUNDS}
           tier={4}
           onTierChange={onTierChange}
-          level={MAX_LEVEL}
+          level={SEASON_LEVEL_CAP}
+          maxLevel={SEASON_LEVEL_CAP}
           onLevelChange={onLevelChange}
         />,
       )
 
       // Should have level label (Lv. X format) and slider
-      expect(screen.getByText(`Lv. ${MAX_LEVEL}`)).toBeDefined()
+      expect(screen.getByText('Lv. 65')).toBeDefined()
       expect(screen.getByRole('slider')).toBeDefined()
     })
 
@@ -75,7 +79,8 @@ describe('DetailEntitySelector', () => {
           {...IDENTITY_BOUNDS}
           tier={4}
           onTierChange={onTierChange}
-          level={MAX_LEVEL}
+          level={SEASON_LEVEL_CAP}
+          maxLevel={SEASON_LEVEL_CAP}
           onLevelChange={onLevelChange}
         />,
       )
@@ -94,6 +99,7 @@ describe('DetailEntitySelector', () => {
           tier={4}
           onTierChange={onTierChange}
           level={30}
+          maxLevel={SEASON_LEVEL_CAP}
           onLevelChange={onLevelChange}
         />,
       )
@@ -101,7 +107,7 @@ describe('DetailEntitySelector', () => {
       const slider = screen.getByRole('slider')
       // Slider should be configured with correct range and current value
       expect(slider).toHaveAttribute('aria-valuemin', '1')
-      expect(slider).toHaveAttribute('aria-valuemax', String(MAX_LEVEL))
+      expect(slider).toHaveAttribute('aria-valuemax', '65')
       expect(slider).toHaveAttribute('aria-valuenow', '30')
     })
 
@@ -114,17 +120,17 @@ describe('DetailEntitySelector', () => {
           {...IDENTITY_BOUNDS}
           tier={4}
           onTierChange={onTierChange}
-          level={MAX_LEVEL}
+          level={SEASON_LEVEL_CAP}
+          maxLevel={SEASON_LEVEL_CAP}
           onLevelChange={onLevelChange}
         />,
       )
 
       const slider = screen.getByRole('slider')
 
-      // Slider component should have max attribute set to MAX_LEVEL
-      expect(slider).toHaveAttribute('aria-valuemax', String(MAX_LEVEL))
+      expect(slider).toHaveAttribute('aria-valuemax', '65')
       expect(slider).toHaveAttribute('aria-valuemin', '1')
-      expect(slider).toHaveAttribute('aria-valuenow', String(MAX_LEVEL))
+      expect(slider).toHaveAttribute('aria-valuenow', '65')
     })
 
     it('renders the caller-supplied tier label', () => {
@@ -133,7 +139,8 @@ describe('DetailEntitySelector', () => {
           {...IDENTITY_BOUNDS}
           tier={4}
           onTierChange={vi.fn()}
-          level={MAX_LEVEL}
+          level={SEASON_LEVEL_CAP}
+          maxLevel={SEASON_LEVEL_CAP}
           onLevelChange={vi.fn()}
         />,
       )
@@ -183,7 +190,7 @@ describe('DetailEntitySelector', () => {
       expect(screen.getByRole('button', { name: /tier 5/i })).toBeDefined()
     })
 
-    it('omits the level slider when no onLevelChange is given', () => {
+    it('omits the level slider when no level control is given', () => {
       render(<DetailEntitySelector {...EGO_BOUNDS} maxTier={5} tier={5} onTierChange={vi.fn()} />)
 
       expect(screen.queryByRole('slider')).toBeNull()

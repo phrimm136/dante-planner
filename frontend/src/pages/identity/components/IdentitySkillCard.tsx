@@ -15,6 +15,7 @@ interface IdentitySkillCardWithGranularI18nProps {
   skillSlot: number
   skillEntry: IdentitySkillEntry
   uptie: Uptie
+  level: number
   isLocked?: boolean
 }
 
@@ -38,6 +39,7 @@ export function IdentitySkillCardWithGranularI18n({
   skillSlot,
   skillEntry,
   uptie,
+  level,
   isLocked = false,
 }: IdentitySkillCardWithGranularI18nProps) {
   const mergedData = mergeSkillDataUpToLevel(skillEntry.skillData, uptie)
@@ -55,6 +57,7 @@ export function IdentitySkillCardWithGranularI18n({
       coinString={coinString}
       skillImagePath={skillImagePath}
       skillTier={skillEntry.skillTier ?? skillSlot}
+      level={level}
       nameSlot={
         <IdentitySkillName
           identityId={identityId}

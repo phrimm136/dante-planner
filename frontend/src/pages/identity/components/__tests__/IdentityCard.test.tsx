@@ -216,6 +216,12 @@ describe('IdentityCard text', () => {
     expect(level.style.top).toBe('')
   })
 
+  it('shows the season level cap when no level is given', () => {
+    renderCard()
+
+    expect(screen.getByTestId('identity-level').textContent).toBe('Lv. 65')
+  })
+
   it('anchors the name block to its bottom edge with no height', () => {
     renderCard()
     const block = screen.getByTestId('identity-name-block')

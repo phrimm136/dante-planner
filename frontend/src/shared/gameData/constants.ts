@@ -5,8 +5,6 @@ import type { EGOGiftId, EGOId, IdentityId, SinnerScopedId } from './ids'
 
 export const MIN_LEVEL = 1
 
-export const MAX_LEVEL = 60
-
 export const SINNERS = [
   'YiSang',
   'Faust',
@@ -192,8 +190,6 @@ export const GIFT_KEYWORD_GRANTS: ReadonlyMap<EGOGiftId, KeywordGrant> = new Map
 export const KEYWORD_GRANT_MIN_THREADSPIN = 2
 
 export const DEFAULT_DEPLOYMENT_MAX = 7
-
-export const MAX_OBSERVABLE_GIFTS = 3
 
 export const ENHANCEMENT_LEVELS = [0, 1, 2] as const
 

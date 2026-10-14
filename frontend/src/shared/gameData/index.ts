@@ -9,7 +9,6 @@ export type { AttributeColorRoles } from './schemas/ColorSchemas'
 
 export {
   MIN_LEVEL,
-  MAX_LEVEL,
   SINNERS,
   STATUS_EFFECTS,
   AFFINITIES,
@@ -34,7 +33,6 @@ export {
   GIFT_KEYWORD_GRANTS,
   KEYWORD_GRANT_MIN_THREADSPIN,
   DEFAULT_DEPLOYMENT_MAX,
-  MAX_OBSERVABLE_GIFTS,
   ENHANCEMENT_LEVELS,
   ENHANCEMENT_LABELS,
   OFFENSIVE_SKILL_SLOTS,
@@ -103,6 +101,8 @@ export {
   stagesFor,
 } from './floorRules'
 export type { FloorRuleStage, FloorRuleName, FloorRuleTable } from './floorRules'
+
+export { IdentityLevelCapSchema, IDENTITY_LEVEL_CAP } from './identityLevelCap'
 
 export { getAttributeColors, getSeasonColor } from './colorUtils'
 export type { AttributeColors } from './colorUtils'

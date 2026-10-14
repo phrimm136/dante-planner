@@ -14,9 +14,10 @@ interface IdentitySkillsPaneProps {
   id: string
   skills: IdentityData['skills']
   uptieLevel: Uptie
+  level: number
 }
 
-export function IdentitySkillsPane({ id, skills, uptieLevel }: IdentitySkillsPaneProps) {
+export function IdentitySkillsPane({ id, skills, uptieLevel, level }: IdentitySkillsPaneProps) {
   const { t } = useTranslation(['database', 'common'])
   const [activeSkillSlot, setActiveSkillSlot] = useState<SkillSlot>('skill1')
 
@@ -65,6 +66,7 @@ export function IdentitySkillsPane({ id, skills, uptieLevel }: IdentitySkillsPan
         skills={skills}
         activeSkillSlot={activeSkillSlot}
         uptieLevel={uptieLevel}
+        level={level}
         getSkillSlotNumber={getSkillSlotNumber}
       />
     </div>

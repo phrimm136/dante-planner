@@ -290,7 +290,7 @@ exports[`EGODetailPage DOM parity > desktop > renders threadspin 1 with awaken s
                       <div class="flex items-center gap-2">
                         <img alt="Attack" class="w-11 h-11" src="/a/59bf908cec9a.webp" />
                         <span class="underline text-[38px] -translate-y-1.5 leading-none" style="font-family: var(--font-excelsior);">
-                          "62"
+                          "67"
                         </span>
                       </div>
                       <div class="flex items-center gap-2 text-yellow-400">
@@ -526,8 +526,8 @@ exports[`EGODetailPage DOM parity > desktop > renders threadspin 5 with awaken s
 - div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.relative[1] > div.absolute[7] > div.relative[1] #1: "+8"
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.relative[1] > div.absolute[7] > div.relative[1] #1: "+12"
 @@
-- div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "62"
-+ div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "63"
+- div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "67"
++ div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "68"
 @@
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[2] > div.flex[2] #4: <img alt="" class="w-3 h-3" src="/a/b6c4dcbdd567.webp" />
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[2] > div.flex[2] #5: <img alt="" class="w-3 h-3" src="/a/b6c4dcbdd567.webp" />
@@ -582,8 +582,8 @@ exports[`EGODetailPage DOM parity > desktop > renders threadspin 5 with erosion 
 - div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div[1] > div.flex[1] #1: <img alt="Coin" class="w-6 h-6" src="/a/bd76bb1afd06.webp" />
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div[1] > div.flex[1] #1: <img alt="Unbreakable coin" class="w-6 h-6" src="/a/1d349c0728f2.webp" />
 @@
-- div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "62"
-+ div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "63"
+- div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "67"
++ div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "68"
 @@
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[2] > div.flex[2] #4: <img alt="" class="w-3 h-3" src="/a/b6c4dcbdd567.webp" />
 + div.container[1] > div.grid[1] > div.col-span-10[2] > div.flex[1] > div.space-y-6[2] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[2] > div.flex[2] #5: <img alt="" class="w-3 h-3" src="/a/b6c4dcbdd567.webp" />
@@ -907,7 +907,7 @@ exports[`EGODetailPage DOM parity > mobile > renders threadspin 1 with awaken se
                       <div class="flex items-center gap-2">
                         <img alt="Attack" class="w-11 h-11" src="/a/59bf908cec9a.webp" />
                         <span class="underline text-[38px] -translate-y-1.5 leading-none" style="font-family: var(--font-excelsior);">
-                          "62"
+                          "67"
                         </span>
                       </div>
                       <div class="flex items-center gap-2 text-yellow-400">
@@ -993,8 +993,8 @@ exports[`EGODetailPage DOM parity > mobile > renders threadspin 5 with awaken se
 - div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.relative[1] > div.absolute[7] > div.relative[1] #1: "+8"
 + div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.relative[1] > div.absolute[7] > div.relative[1] #1: "+12"
 @@
-- div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "62"
-+ div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "63"
+- div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "67"
++ div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "68"
 @@
 + div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[2] > div.flex[2] #4: <img alt="" class="w-3 h-3" src="/a/b6c4dcbdd567.webp" />
 + div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[2] > div.flex[2] #5: <img alt="" class="w-3 h-3" src="/a/b6c4dcbdd567.webp" />
@@ -1039,8 +1039,8 @@ exports[`EGODetailPage DOM parity > mobile > renders threadspin 5 with erosion s
 - div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div[1] > div.flex[1] #1: <img alt="Coin" class="w-6 h-6" src="/a/bd76bb1afd06.webp" />
 + div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div[1] > div.flex[1] #1: <img alt="Unbreakable coin" class="w-6 h-6" src="/a/1d349c0728f2.webp" />
 @@
-- div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "62"
-+ div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "63"
+- div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "67"
++ div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[1] > span.underline[2] #1: "68"
 @@
 + div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[2] > div.flex[2] #4: <img alt="" class="w-3 h-3" src="/a/b6c4dcbdd567.webp" />
 + div.container[1] > div.space-y-6[1] > div.flex[3] > div.flex-1[2] > div.space-y-6[1] > div.space-y-4[1] > div.border[2] > div.p-4[1] > div.flex[1] > div.flex[2] > div.flex[3] > div.flex[2] > div.flex[2] #5: <img alt="" class="w-3 h-3" src="/a/b6c4dcbdd567.webp" />

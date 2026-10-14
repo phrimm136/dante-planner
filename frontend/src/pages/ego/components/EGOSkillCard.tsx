@@ -8,6 +8,7 @@ import {
 import { StyledSkillName } from '@/shared/gameText'
 import { getEGOSkillImagePath } from '@/shared/assets'
 import type { EGOSkillEntry, Threadspin } from '../types/EGOTypes'
+import { IDENTITY_LEVEL_CAP } from '@/shared/gameData'
 import type { SkillId } from '@/shared/gameData'
 
 interface EGOSkillCardWithGranularI18nProps {
@@ -32,6 +33,7 @@ export function EGOSkillCardWithGranularI18n({
       coinString={coinString}
       skillImagePath={getEGOSkillImagePath(egoId, skillType)}
       skillTier={3}
+      level={IDENTITY_LEVEL_CAP}
       nameSlot={
         <EGOSkillName
           egoId={egoId}
