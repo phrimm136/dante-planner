@@ -20,6 +20,7 @@ final class HistoryLine {
     private static final int NOT_FOUND = 404;
     private static final int SERVICE_UNAVAILABLE = 503;
     private static final String WRITE_UNAVAILABLE_CODE = "WRITE_TEMPORARILY_UNAVAILABLE";
+    private static final String READ_UNAVAILABLE_CODE = "READ_TEMPORARILY_UNAVAILABLE";
     private static final int SUCCESS_CLASS = 2;
     private static final int CLIENT_ERROR_CLASS = 4;
     private static final int SERVER_ERROR_CLASS = 5;
@@ -145,7 +146,7 @@ final class HistoryLine {
                     throw failure("read fail with status " + status);
                 }
                 if (status == SERVICE_UNAVAILABLE) {
-                    requireWriteUnavailableCode();
+                    requireUnavailableCode(READ_UNAVAILABLE_CODE);
                 }
                 yield new ReadFailed(status);
             }
@@ -160,22 +161,28 @@ final class HistoryLine {
     private Optional<Operation> listRead(String session, long invokedAt, long completedAt, String outcome) {
         return switch (outcome) {
             case "ok" -> Optional.of(new ListRead(session, invokedAt, completedAt, keys()));
-            case "fail", "unknown" -> Optional.empty();
+            case "fail" -> {
+                if (node.path("status").intValue() == SERVICE_UNAVAILABLE) {
+                    requireUnavailableCode(READ_UNAVAILABLE_CODE);
+                }
+                yield Optional.empty();
+            }
+            case "unknown" -> Optional.empty();
             default -> throw unknownOutcome(outcome);
         };
     }
 
     private int rejectedStatus() {
         if (status() == SERVICE_UNAVAILABLE) {
-            requireWriteUnavailableCode();
+            requireUnavailableCode(WRITE_UNAVAILABLE_CODE);
             return SERVICE_UNAVAILABLE;
         }
         return statusOfClass(CLIENT_ERROR_CLASS);
     }
 
-    private void requireWriteUnavailableCode() {
-        if (!WRITE_UNAVAILABLE_CODE.equals(node.path("code").textValue())) {
-            throw failure("fail with status " + SERVICE_UNAVAILABLE + " without code " + WRITE_UNAVAILABLE_CODE);
+    private void requireUnavailableCode(String code) {
+        if (!code.equals(node.path("code").textValue())) {
+            throw failure("fail with status " + SERVICE_UNAVAILABLE + " without code " + code);
         }
     }
 

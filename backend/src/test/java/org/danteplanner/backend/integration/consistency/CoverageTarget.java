@@ -4,8 +4,7 @@ import java.util.Locale;
 
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 
-import org.danteplanner.backend.shared.config.FallbackReplicaProperties;
-import org.danteplanner.backend.shared.config.ReadFallbackConfig;
+import org.danteplanner.backend.shared.config.ReadSourcesConfig;
 
 public enum CoverageTarget {
     GATE_PINS_PRIMARY("gate pins the primary", Region.SEOUL, Instrument.COUNTER, "gtid.gate", "outcome", "primary"),
@@ -17,9 +16,9 @@ public enum CoverageTarget {
     WITHDRAWAL_MARKER_HIT("withdrawal-marker hit", Region.SEOUL, Instrument.COUNTER, "tombstone.hit", "scope",
             "published-planner"),
     OREGON_READ_FELL_BACK("oregon read fell back", Region.OREGON, Instrument.TIMER, "hikaricp.connections.acquire",
-            "pool", FallbackReplicaProperties.POOL_NAME),
+            "pool", "seoul-replica"),
     OREGON_BREAKER_OPENED("oregon breaker opened", Region.OREGON, Instrument.COUNTER,
-            ReadFallbackConfig.BREAKER_TRANSITIONS, "to", CircuitBreaker.State.OPEN.name().toLowerCase(Locale.ROOT));
+            ReadSourcesConfig.BREAKER_TRANSITIONS, "to", CircuitBreaker.State.OPEN.name().toLowerCase(Locale.ROOT));
 
     public enum Instrument {
         COUNTER,

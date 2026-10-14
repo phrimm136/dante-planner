@@ -84,8 +84,6 @@ services:
   # Seoul: the region that owns the read-your-writes gate. Writes cross to the primary, reads
   # go to its local replica, and the gate filter registers because routing is enabled.
   backend:
-    # The replica pool is validated at boot, so the replica must be accepting connections
-    # before this starts; a second MySQL takes appreciably longer to initialise than the first.
     depends_on:
       mysql:
         condition: service_healthy
@@ -93,15 +91,16 @@ services:
         condition: service_healthy
     environment:
       DATASOURCE_ROUTING_ENABLED: "true"
-      DATASOURCE_REPLICA_ENABLED: "true"
       DEPLOY_REGION: ap-northeast-2
       # local-multiregion-up.sh migrates the primary before either region starts, because the
       # replica must already hold the schema for a routing-enabled instance to boot at all.
       SPRING_FLYWAY_ENABLED: "false"
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true&trackSessionState=true
-      DATASOURCE_REPLICA_URL: jdbc:mysql://mysql-replica:3306/${MYSQL_DATABASE}?sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true&trackSessionState=true
-      DATASOURCE_REPLICA_USERNAME: ${MYSQL_USER}
-      DATASOURCE_REPLICA_PASSWORD: ${MYSQL_PASSWORD}
+      DATASOURCE_READSOURCES_0_NAME: seoul-replica
+      DATASOURCE_READSOURCES_0_URL: jdbc:mysql://mysql-replica:3306/${MYSQL_DATABASE}?sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true&trackSessionState=true
+      DATASOURCE_READSOURCES_0_USERNAME: ${MYSQL_USER}
+      DATASOURCE_READSOURCES_0_PASSWORD: ${MYSQL_PASSWORD}
+      DATASOURCE_READSOURCES_1_NAME: primary
     ports:
       - "8082:8080"
 

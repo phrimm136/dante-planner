@@ -2,7 +2,14 @@
 epic: none · pr: none · supersedes: 130 @reads @outage @trigger
 
 ## Decisions
-- @reads @outage @trigger — A probe in each Oregon pod opens a fresh connection to the primary
+- @reads @outage @alert — An alert fires when a read-source breaker stays open on any pod for
+  five minutes. ADR 092 puts a primary restore at minutes, so a longer open state means the probe or
+  the primary needs a person.
+  REJECTED: alert on each open transition — a short outage that the fallback absorbs pages nobody
+  usefully.
+
+## Superseded
+- @reads @outage @trigger → 182 — A probe in each Oregon pod opens a fresh connection to the primary
   every second with a one-second bound, outside the Hikari pool. Two consecutive failures open the
   primary-read breaker, and one success closes it from any other state. User reads never act as
   half-open probes, because the breaker waits an hour in the open state. The breaker still records
@@ -19,7 +26,7 @@ epic: none · pr: none · supersedes: 130 @reads @outage @trigger
   INVARIANT: the probe runs on its own single-thread scheduler. A long job on the shared pool of
   four threads cannot delay detection — PrimaryHealthProbeTest and OregonReadFallbackIT.
   NON-GOAL: a shared breaker state across pods — each pod opens and closes on its own evidence.
-- @reads @outage @acquire — When a read cannot get a connection from the primary, the breaker
+- @reads @outage @acquire → 182 — When a read cannot get a connection from the primary, the breaker
   records the failure and the same request reads from the Seoul replica. Oregon has no replica of
   its own, so the Seoul replica is the only other source for that read. Errors other than
   connection failures still propagate. If the replica also fails, the replica's error propagates
@@ -32,11 +39,6 @@ epic: none · pr: none · supersedes: 130 @reads @outage @trigger
   PrimaryReadFallbackDataSourceTest and the OregonReadFallbackIT regression test.
   NON-GOAL: fallback for a failure after the connection is lent — a statement that fails mid-query
   cannot move to the replica, because the transaction already holds the primary connection.
-- @reads @outage @alert — An alert fires when the primary-read breaker stays open on any pod for
-  five minutes. ADR 092 puts a primary restore at minutes, so a longer open state means the probe or
-  the primary needs a person.
-  REJECTED: alert on each open transition — a short outage that the fallback absorbs pages nobody
-  usefully.
 
 ## Takeaway
 - takeaway: a health check that rides on user requests charges its failures to users; probe on a

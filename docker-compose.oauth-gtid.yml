@@ -35,15 +35,16 @@ services:
       # tick that proves nothing. Suite C belongs on docker-compose.multiregion.yml, where the
       # replica is real and the lag is a knob (SOURCE_DELAY).
       DATASOURCE_ROUTING_ENABLED: "true"
-      DATASOURCE_REPLICA_ENABLED: "true"
       # trackSessionState is not optional here: without it Connector/J never exposes the
       # server's GTID tracking, capture falls to the fallback branch, and the gate is untestable.
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true&trackSessionState=true
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
-      DATASOURCE_REPLICA_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true&trackSessionState=true
-      DATASOURCE_REPLICA_USERNAME: ${MYSQL_USER}
-      DATASOURCE_REPLICA_PASSWORD: ${MYSQL_PASSWORD}
+      DATASOURCE_READSOURCES_0_NAME: seoul-replica
+      DATASOURCE_READSOURCES_0_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true&trackSessionState=true
+      DATASOURCE_READSOURCES_0_USERNAME: ${MYSQL_USER}
+      DATASOURCE_READSOURCES_0_PASSWORD: ${MYSQL_PASSWORD}
+      DATASOURCE_READSOURCES_1_NAME: primary
 
   oauth-stub:
     image: node:20-alpine

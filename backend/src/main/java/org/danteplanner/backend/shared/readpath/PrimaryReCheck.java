@@ -5,13 +5,18 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.transaction.CannotCreateTransactionException;
+
 import org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource;
 import org.danteplanner.backend.shared.config.RoutingKey;
 import org.danteplanner.backend.shared.exception.EntityNotFoundException;
+import org.danteplanner.backend.shared.exception.ReadTemporarilyUnavailableException;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -28,12 +33,19 @@ public class PrimaryReCheck {
     private final Counter promotedCounter;
     private final Counter bulkheadQueriesCounter;
     private final ContentTombstoneStore tombstoneStore;
+    private final BooleanSupplier servedByAuthority;
+    private final BooleanSupplier authorityHealthy;
+    private final RoutingKey reCheckTarget;
 
-    public PrimaryReCheck(MeterRegistry meterRegistry, ContentTombstoneStore tombstoneStore) {
+    public PrimaryReCheck(MeterRegistry meterRegistry, ContentTombstoneStore tombstoneStore,
+            BooleanSupplier servedByAuthority, BooleanSupplier authorityHealthy, RoutingKey reCheckTarget) {
         this.meterRegistry = meterRegistry;
         this.promotedCounter = Counter.builder(PROMOTED_COUNTER).register(meterRegistry);
         this.bulkheadQueriesCounter = Counter.builder(BULKHEAD_QUERIES_COUNTER).register(meterRegistry);
         this.tombstoneStore = tombstoneStore;
+        this.servedByAuthority = servedByAuthority;
+        this.authorityHealthy = authorityHealthy;
+        this.reCheckTarget = reCheckTarget;
     }
 
     public <T> T readWithReCheck(String entityType, UUID id, Supplier<T> dereference) {
@@ -41,9 +53,15 @@ public class PrimaryReCheck {
         try {
             hit = dereference.get();
         } catch (EntityNotFoundException miss) {
+            if (servedByAuthority.getAsBoolean()) {
+                throw miss;
+            }
             T promoted = onBulkhead(dereference);
             promotedCounter.increment();
             return promoted;
+        }
+        if (servedByAuthority.getAsBoolean()) {
+            return hit;
         }
         if (tombstoneStore.isTombstoned(entityType, id)) {
             countTombstoneHits(entityType, 1);
@@ -55,6 +73,9 @@ public class PrimaryReCheck {
     public <T> List<T> readAllWithReCheck(String entityType, Collection<UUID> ids,
             Function<Collection<UUID>, List<T>> dereference, Function<T, UUID> idOf) {
         List<T> hits = dereference.apply(ids);
+        if (servedByAuthority.getAsBoolean()) {
+            return hits;
+        }
         Set<UUID> hitIds = hits.stream().map(idOf).collect(Collectors.toSet());
         Set<UUID> tombstoned = tombstoneStore.tombstonedAmong(entityType, hitIds);
         if (!tombstoned.isEmpty()) {
@@ -74,7 +95,7 @@ public class PrimaryReCheck {
     }
 
     public <T> T reReadWhenTombstoned(String scope, UUID id, T hit, Supplier<T> dereference) {
-        if (!tombstoneStore.isTombstoned(scope, id)) {
+        if (servedByAuthority.getAsBoolean() || !tombstoneStore.isTombstoned(scope, id)) {
             return hit;
         }
         countTombstoneHits(scope, 1);
@@ -86,10 +107,15 @@ public class PrimaryReCheck {
     }
 
     private <T> T onBulkhead(Supplier<T> dereference) {
+        if (!authorityHealthy.getAsBoolean()) {
+            throw new ReadTemporarilyUnavailableException();
+        }
         bulkheadQueriesCounter.increment();
-        ReadOnlyRoutingDataSource.pinTo(RoutingKey.BULKHEAD);
+        ReadOnlyRoutingDataSource.pinTo(reCheckTarget);
         try {
             return dereference.get();
+        } catch (DataAccessResourceFailureException | CannotCreateTransactionException failure) {
+            throw new ReadTemporarilyUnavailableException(failure);
         } finally {
             ReadOnlyRoutingDataSource.clear();
         }

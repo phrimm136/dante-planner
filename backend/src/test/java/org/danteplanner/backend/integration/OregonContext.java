@@ -17,13 +17,14 @@ import io.micrometer.core.instrument.MeterRegistry;
 
 import org.danteplanner.backend.BackendApplication;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.shared.config.FallbackReplicaProperties;
 
 final class OregonContext implements AutoCloseable {
 
     static final long CONNECTION_TIMEOUT_BUDGET_MS = 250L;
 
     static final int BREAKER_WINDOW = 2;
+
+    static final String REPLICA_SOURCE = "seoul-replica";
 
     private static final String PROFILE = "it";
 
@@ -83,10 +84,13 @@ final class OregonContext implements AutoCloseable {
         properties.put("redis.rate-limit.host", CausalHarnessSupport.RATE_LIMIT_REDIS.getRedisHost());
         properties.put("redis.rate-limit.port", CausalHarnessSupport.RATE_LIMIT_REDIS.getRedisPort());
         properties.put("datasource.routing.enabled", true);
-        properties.put("datasource.replica.enabled", false);
-        properties.put(FallbackReplicaProperties.URL_PROPERTY, CausalHarnessSupport.REPLICA.getJdbcUrl());
-        properties.put("datasource.fallback-replica.breaker.sliding-window-size", BREAKER_WINDOW);
-        properties.put("datasource.fallback-replica.breaker.minimum-number-of-calls", BREAKER_WINDOW);
+        properties.put("datasource.read-sources[0].name", "primary");
+        properties.put("datasource.read-sources[1].name", REPLICA_SOURCE);
+        properties.put("datasource.read-sources[1].url", CausalHarnessSupport.REPLICA.getJdbcUrl());
+        properties.put("datasource.read-sources[1].username", CausalHarnessSupport.REPLICA.getUsername());
+        properties.put("datasource.read-sources[1].password", CausalHarnessSupport.REPLICA.getPassword());
+        properties.put("datasource.read-source-breaker.sliding-window-size", BREAKER_WINDOW);
+        properties.put("datasource.read-source-breaker.minimum-number-of-calls", BREAKER_WINDOW);
         return properties.entrySet().stream()
                 .map(entry -> "--" + entry.getKey() + "=" + entry.getValue())
                 .toArray(String[]::new);

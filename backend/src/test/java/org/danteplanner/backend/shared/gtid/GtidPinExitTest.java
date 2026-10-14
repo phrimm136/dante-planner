@@ -34,8 +34,11 @@ import jakarta.servlet.http.Cookie;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import org.danteplanner.backend.shared.config.ReplicaDataSourceProperties;
+import org.danteplanner.backend.shared.config.ReadSourceSelector;
+import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.danteplanner.backend.support.LogCapture;
 
 @ExtendWith(MockitoExtension.class)
@@ -107,7 +110,6 @@ class GtidPinExitTest {
 
     private DataSource database(Answer<ResultSet> waitAnswer) throws SQLException {
         when(dataSource.getConnection()).thenReturn(connection);
-        when(connection.getAutoCommit()).thenReturn(true);
         when(connection.prepareStatement(anyString())).thenAnswer(invocation -> {
             String sql = invocation.getArgument(0);
             preparedSql.add(sql);
@@ -124,9 +126,19 @@ class GtidPinExitTest {
         return dataSource;
     }
 
+    private static ReadSourceSelector.Source source(String name, boolean authoritative, DataSource pool) {
+        return new ReadSourceSelector.Source(name, authoritative, pool, CircuitBreaker.ofDefaults(name));
+    }
+
+    private GtidReadGate seoulGateOver(DataSource dataSource) {
+        return new GtidReadGate(new ReadSourceSelector(List.of(
+                source("seoul-replica", false, dataSource),
+                source("primary", true, dataSource))), meters);
+    }
+
     private GtidCookieFilter filterOver(DataSource dataSource) {
-        return new GtidCookieFilter(
-                new GtidReadGate(dataSource, meters), new GtidWriteCapture(meters), true);
+        return new GtidCookieFilter(seoulGateOver(dataSource), new GtidWriteCapture(meters),
+                new ProblemWriter(new ObjectMapper()));
     }
 
     /** Sends the cookie until a response clears it, as a browser does. */
@@ -267,11 +279,12 @@ class GtidPinExitTest {
     }
 
     @Test
-    void registration_WhenReplicaDisabledAndPrimaryWouldReportCaughtUp_KeepsCookie() throws Exception {
-        GtidReadGate primaryAnsweringGate = new GtidReadGate(dataSource, meters);
-        ReplicaDataSourceProperties oregon = new ReplicaDataSourceProperties();
+    void registration_WhenThePrimaryReadsFirstAndWouldReportCaughtUp_KeepsCookie() throws Exception {
+        GtidReadGate primaryAnsweringGate = new GtidReadGate(new ReadSourceSelector(List.of(
+                source("primary", true, dataSource),
+                source("seoul-replica", false, dataSource))), meters);
         GtidCookieFilter filter = new GtidGateConfig().gtidCookieFilterRegistration(
-                primaryAnsweringGate, new GtidWriteCapture(meters), oregon).getFilter();
+                primaryAnsweringGate, new GtidWriteCapture(meters), new ProblemWriter(new ObjectMapper())).getFilter();
 
         List<MockHttpServletResponse> responses = consecutiveReads(filter, FOREIGN_UUID);
 
@@ -279,12 +292,10 @@ class GtidPinExitTest {
     }
 
     @Test
-    void registration_WhenReplicaEnabledAndGateReportsCaughtUp_ClearsCookie() throws Exception {
-        GtidReadGate caughtUpGate = new GtidReadGate(database(returning(WAIT_APPLIED)), meters);
-        ReplicaDataSourceProperties seoul = new ReplicaDataSourceProperties();
-        seoul.setEnabled(true);
+    void registration_WhenTheReplicaReadsFirstAndGateReportsCaughtUp_ClearsCookie() throws Exception {
+        GtidReadGate caughtUpGate = seoulGateOver(database(returning(WAIT_APPLIED)));
         GtidCookieFilter filter = new GtidGateConfig().gtidCookieFilterRegistration(
-                caughtUpGate, new GtidWriteCapture(meters), seoul).getFilter();
+                caughtUpGate, new GtidWriteCapture(meters), new ProblemWriter(new ObjectMapper())).getFilter();
 
         List<MockHttpServletResponse> responses = consecutiveReads(filter, FOREIGN_UUID);
 

@@ -1,5 +1,8 @@
 package org.danteplanner.backend.exception;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
+import org.danteplanner.backend.shared.exception.ReadTemporarilyUnavailableException;
+
+import java.sql.SQLTransientConnectionException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,6 +46,18 @@ class ApiExceptionHandlerDbUnavailableTest {
             throw new DataAccessResourceFailureException("Unable to acquire JDBC connection");
         }
 
+        @GetMapping("/boom/read")
+        public String readGuardUnavailable() {
+            throw new ReadTemporarilyUnavailableException();
+        }
+
+        @GetMapping("/boom/read-sources")
+        public String everyReadSourceUnreachable() {
+            throw new DataAccessResourceFailureException("Unable to acquire JDBC Connection",
+                    new SQLTransientConnectionException("No read source could lend a connection", "08001",
+                            new ReadTemporarilyUnavailableException()));
+        }
+
         @GetMapping("/boom/redis")
         public String redisDown() {
             throw new RedisConnectionFailureException("Unable to connect to Redis");
@@ -77,5 +92,21 @@ class ApiExceptionHandlerDbUnavailableTest {
         mockMvc.perform(get("/boom/redis"))
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(jsonPath("$.code").value("AUTH_TEMPORARILY_UNAVAILABLE"));
+    }
+
+    @Test
+    void readGuardUnavailable_WhenThrown_MapsToReadUnavailable503() throws Exception {
+        mockMvc.perform(get("/boom/read"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(header().string("Retry-After", "10"))
+                .andExpect(jsonPath("$.code").value("READ_TEMPORARILY_UNAVAILABLE"));
+    }
+
+    @Test
+    void everyReadSourceUnreachable_WhenWrappedInAConnectionFailure_MapsToReadUnavailable503() throws Exception {
+        mockMvc.perform(get("/boom/read-sources"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(header().string("Retry-After", "10"))
+                .andExpect(jsonPath("$.code").value("READ_TEMPORARILY_UNAVAILABLE"));
     }
 }

@@ -51,6 +51,14 @@ class ReadAfterDeleteTest {
     }
 
     @Test
+    void reads_WhenRefusedWith503_AreClean() {
+        assertThat(violations(
+                DELETED,
+                new Read("s2", "p1", 25, 30, new ReadFailed(503)),
+                new PublicRead("anon", "p1", 25, 30, new ReadFailed(503)))).isEmpty();
+    }
+
+    @Test
     void key_WhenARejectedSaveCompletesAfterTheDeleteBegins_IsJudged() {
         Read resurrected = new Read("s2", "p1", 25, 30, new Found(3));
 

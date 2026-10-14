@@ -59,7 +59,8 @@ import org.danteplanner.backend.integration.consistency.Replication;
 import org.danteplanner.backend.integration.consistency.SeedGuard;
 import org.danteplanner.backend.integration.consistency.SeedLoop;
 import org.danteplanner.backend.shared.config.PoolLedger;
-import org.danteplanner.backend.shared.config.ReadFallbackConfig;
+import org.danteplanner.backend.shared.config.ReadSourceProperties;
+import org.danteplanner.backend.shared.config.ReadSourcesConfig;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -312,7 +313,7 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
 
         private double breakerGauge(CircuitBreaker.State state) {
             Gauge gauge = registry.find(BREAKER_STATE_GAUGE)
-                    .tag("name", ReadFallbackConfig.PRIMARY_READ_BREAKER)
+                    .tag("name", ReadSourcesConfig.breakerName(ReadSourceProperties.PRIMARY))
                     .tag("state", state.name().toLowerCase(Locale.ROOT)).gauge();
             return gauge == null ? Double.NaN : gauge.value();
         }

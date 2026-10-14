@@ -42,6 +42,8 @@ public final class HistoryWriter {
     private static final String FAIL = "fail";
     private static final String UNKNOWN = "unknown";
     private static final int NO_RESPONSE = 0;
+    private static final String WRITE_UNAVAILABLE_CODE = DegradationErrorConstants.DB_UNAVAILABLE.code();
+    private static final String READ_UNAVAILABLE_CODE = DegradationErrorConstants.READ_UNAVAILABLE.code();
 
     private HistoryWriter() {
     }
@@ -82,7 +84,7 @@ public final class HistoryWriter {
     private static ObjectNode saveResult(ObjectNode line, SaveResult result) {
         return switch (result) {
             case Applied applied -> outcome(line, OK, HttpStatus.OK.value()).put("syncVersion", applied.syncVersion());
-            case Rejected rejected -> failed(line, rejected.status());
+            case Rejected rejected -> failed(line, rejected.status(), WRITE_UNAVAILABLE_CODE);
             case Unknown unknown -> line.put("outcome", UNKNOWN);
         };
     }
@@ -90,7 +92,7 @@ public final class HistoryWriter {
     private static ObjectNode deleteResult(ObjectNode line, DeleteResult result) {
         return switch (result) {
             case Deleted deleted -> outcome(line, OK, HttpStatus.NO_CONTENT.value());
-            case Rejected rejected -> failed(line, rejected.status());
+            case Rejected rejected -> failed(line, rejected.status(), WRITE_UNAVAILABLE_CODE);
             case Unknown unknown -> line.put("outcome", UNKNOWN);
         };
     }
@@ -98,7 +100,7 @@ public final class HistoryWriter {
     private static ObjectNode visibilityResult(ObjectNode line, VisibilityResult result) {
         return switch (result) {
             case Changed changed -> outcome(line, OK, HttpStatus.OK.value());
-            case Rejected rejected -> failed(line, rejected.status());
+            case Rejected rejected -> failed(line, rejected.status(), WRITE_UNAVAILABLE_CODE);
             case Unknown unknown -> line.put("outcome", UNKNOWN);
         };
     }
@@ -109,7 +111,7 @@ public final class HistoryWriter {
             case NotFound notFound -> outcome(line, OK, HttpStatus.NOT_FOUND.value());
             case ReadFailed failed -> failed.status() == NO_RESPONSE
                     ? line.put("outcome", UNKNOWN)
-                    : failed(line, failed.status());
+                    : failed(line, failed.status(), READ_UNAVAILABLE_CODE);
         };
     }
 
@@ -119,10 +121,10 @@ public final class HistoryWriter {
         return line;
     }
 
-    private static ObjectNode failed(ObjectNode line, int status) {
+    private static ObjectNode failed(ObjectNode line, int status, String unavailableCode) {
         outcome(line, FAIL, status);
         return status == HttpStatus.SERVICE_UNAVAILABLE.value()
-                ? line.put("code", DegradationErrorConstants.DB_UNAVAILABLE.code())
+                ? line.put("code", unavailableCode)
                 : line;
     }
 

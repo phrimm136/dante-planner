@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
-import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -18,21 +17,26 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource;
 import org.danteplanner.backend.shared.config.RoutingKey;
 import org.danteplanner.backend.shared.config.UndeclaredPrimaryAccessGuard;
+import org.danteplanner.backend.shared.exception.ProblemWriter;
+import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 
 class GtidCookieFilterTest {
 
     private static final String GTID = "3E11FA47-71CA-11E1-9E33-C80AA9429562:1-5";
 
-    private final ScriptedReadGate readGate = new ScriptedReadGate();
+    private final ScriptedReadGate readGate = new ScriptedReadGate(false);
+    private final ScriptedReadGate authorityGate = new ScriptedReadGate(true);
     private final GtidWriteCapture writeCapture = new GtidWriteCapture(new SimpleMeterRegistry());
-    private final GtidCookieFilter filter = new GtidCookieFilter(readGate, writeCapture, true);
-    private final GtidCookieFilter replicalessFilter =
-            new GtidCookieFilter(readGate, writeCapture, false);
+    private final ProblemWriter problemWriter = new ProblemWriter(new ObjectMapper());
+    private final GtidCookieFilter filter = new GtidCookieFilter(readGate, writeCapture, problemWriter);
+    private final GtidCookieFilter authorityFilter =
+            new GtidCookieFilter(authorityGate, writeCapture, problemWriter);
     private final ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(
             new UndeclaredPrimaryAccessGuard(new SimpleMeterRegistry(), true));
     private final List<Object> routedTo = new ArrayList<>();
@@ -40,14 +44,27 @@ class GtidCookieFilterTest {
     private static final class ScriptedReadGate extends GtidReadGate {
 
         private final List<String> probed = new ArrayList<>();
+        private final boolean readsAuthority;
+        private boolean authorityHealthy = true;
         private Verdict verdict;
 
-        private ScriptedReadGate() {
-            super(new SimpleDriverDataSource(), new SimpleMeterRegistry());
+        private ScriptedReadGate(boolean readsAuthority) {
+            super(null, new SimpleMeterRegistry());
+            this.readsAuthority = readsAuthority;
         }
 
         private void answers(Verdict scripted) {
             verdict = scripted;
+        }
+
+        @Override
+        public boolean readsAuthority() {
+            return readsAuthority;
+        }
+
+        @Override
+        public boolean isAuthorityHealthy() {
+            return authorityHealthy;
         }
 
         @Override
@@ -190,25 +207,38 @@ class GtidCookieFilterTest {
     }
 
     @Test
-    void readGet_WhenCookieAndNoReplica_ServesWithoutGateOrPinAndKeepsCookie() throws Exception {
+    void readGet_WhenTheAuthorityReadsFirstAndTheCookieIsUsable_PinsPrimaryWithoutGateAndKeepsCookie()
+            throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/planners");
         request.setCookies(new Cookie(GtidCookie.NAME, GtidCookie.of(GTID).getValue()));
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        replicalessFilter.doFilter(request, response, reading());
+        authorityFilter.doFilter(request, response, reading());
 
-        assertThat(routedTo).containsExactly(RoutingKey.REPLICA);
+        assertThat(routedTo).containsExactly(RoutingKey.PRIMARY);
+        assertThat(readOnlyRoute()).isEqualTo(RoutingKey.REPLICA);
 
-        assertThat(readGate.probed).isEmpty();
+        assertThat(authorityGate.probed).isEmpty();
         assertThat(response.getHeaders(HttpHeaders.SET_COOKIE)).isEmpty();
     }
 
     @Test
-    void write_WhenNoReplicaAndCaptureHasGtid_SetsGtidCookie() throws Exception {
+    void readGet_WhenTheAuthorityReadsFirstWithoutACookie_PassesThroughWithoutGateOrPin() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/planners");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        authorityFilter.doFilter(request, response, reading());
+
+        assertThat(routedTo).containsExactly(RoutingKey.REPLICA);
+        assertThat(authorityGate.probed).isEmpty();
+    }
+
+    @Test
+    void write_WhenTheAuthorityReadsFirstAndCaptureHasGtid_SetsGtidCookie() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/api/planners");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        replicalessFilter.doFilter(request, response, committing(GTID));
+        authorityFilter.doFilter(request, response, committing(GTID));
 
         assertThat(response.getHeaders(HttpHeaders.SET_COOKIE))
                 .anySatisfy(header -> assertThat(header)
@@ -285,14 +315,15 @@ class GtidCookieFilterTest {
     }
 
     @Test
-    void readGet_WhenCookieIsNotGtidSyntaxAndNoReplica_KeepsCookie() throws Exception {
+    void readGet_WhenCookieIsNotGtidSyntaxAndTheAuthorityReadsFirst_KeepsCookie() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/planners");
         request.setCookies(new Cookie(GtidCookie.NAME, GtidCookie.of("not-a-gtid").getValue()));
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        replicalessFilter.doFilter(request, response, new MockFilterChain());
+        authorityFilter.doFilter(request, response, reading());
 
-        assertThat(readGate.probed).isEmpty();
+        assertThat(routedTo).containsExactly(RoutingKey.REPLICA);
+        assertThat(authorityGate.probed).isEmpty();
         assertThat(response.getHeaders(HttpHeaders.SET_COOKIE)).isEmpty();
     }
 
@@ -305,5 +336,49 @@ class GtidCookieFilterTest {
         filter.doFilter(request, response, new MockFilterChain());
 
         assertThat(response.getHeaders(HttpHeaders.SET_COOKIE)).isEmpty();
+    }
+
+    @Test
+    void readGet_WhenNotCaughtUpAndThePrimaryIsDown_AnswersReadUnavailableAndKeepsCookie() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/planners");
+        request.setCookies(new Cookie(GtidCookie.NAME, GtidCookie.of(GTID).getValue()));
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        readGate.answers(GtidReadGate.Verdict.NOT_CAUGHT_UP);
+        readGate.authorityHealthy = false;
+
+        filter.doFilter(request, response, reading());
+
+        assertThat(routedTo).as("the read must not run").isEmpty();
+        assertThat(response.getStatus()).isEqualTo(503);
+        assertThat(response.getHeader(HttpHeaders.RETRY_AFTER)).isEqualTo("10");
+        assertThat(response.getContentAsString()).contains("\"code\":\"READ_TEMPORARILY_UNAVAILABLE\"");
+        assertThat(response.getHeaders(HttpHeaders.SET_COOKIE)).isEmpty();
+        assertThat(readOnlyRoute()).isEqualTo(RoutingKey.REPLICA);
+    }
+
+    @Test
+    void request_WhenTheChainThrows_ClearsTheChosenReadSource() {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/planners");
+        RuntimeException boom = new RuntimeException("chain blew up");
+        FilterChain throwingChain = (req, res) -> {
+            ChosenReadSource.record("seoul-replica", false);
+            throw boom;
+        };
+
+        assertThatThrownBy(() -> filter.doFilter(request, new MockHttpServletResponse(), throwingChain))
+                .isSameAs(boom);
+
+        assertThat(ChosenReadSource.name()).isEmpty();
+    }
+
+    @Test
+    void request_WhenAStaleSourceIsRecordedOnTheThread_StartsWithNoneRecorded() throws Exception {
+        ChosenReadSource.record("seoul-replica", false);
+        List<Boolean> servedByAuthority = new ArrayList<>();
+
+        filter.doFilter(new MockHttpServletRequest("GET", "/api/planners"), new MockHttpServletResponse(),
+                (req, res) -> servedByAuthority.add(ChosenReadSource.servedByAuthority()));
+
+        assertThat(servedByAuthority).containsExactly(true);
     }
 }

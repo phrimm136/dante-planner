@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class HistoryTest {
 
     private static final String WRITE_UNAVAILABLE = "'status':503,'code':'WRITE_TEMPORARILY_UNAVAILABLE'";
+    private static final String READ_UNAVAILABLE = "'status':503,'code':'READ_TEMPORARILY_UNAVAILABLE'";
 
     @TempDir
     private Path dir;
@@ -308,16 +309,33 @@ class HistoryTest {
     }
 
     @Test
-    void readFail_WhenStatusIs503WithTheWriteUnavailableCode_IsReadFailed503() throws IOException {
-        assertThat(only(line("read", "fail", WRITE_UNAVAILABLE)))
+    void readFail_WhenStatusIs503WithTheReadUnavailableCode_IsReadFailed503() throws IOException {
+        assertThat(only(line("read", "fail", READ_UNAVAILABLE)))
                 .isEqualTo(new Read("s1", "p1", 10, 20, new ReadFailed(503)));
-        assertThat(only(line("public-read", "fail", WRITE_UNAVAILABLE)))
+        assertThat(only(line("public-read", "fail", READ_UNAVAILABLE)))
                 .isEqualTo(new PublicRead("s1", "p1", 10, 20, new ReadFailed(503)));
     }
 
+    @Test
+    void listFail_WhenStatusIs503WithTheReadUnavailableCode_IsSkipped() throws IOException {
+        assertThat(read(line("list", "fail", READ_UNAVAILABLE)).operations()).isEmpty();
+    }
+
     @ParameterizedTest
-    @ValueSource(strings = {"save", "delete", "read", "publish", "unpublish", "public-read"})
-    void fail_WhenStatusIs503WithoutTheWriteUnavailableCode_IsMalformedNamingTheLine(String kind)
+    @ValueSource(strings = {"save", "delete", "publish", "unpublish"})
+    void writeFail_WhenStatusIs503WithTheReadUnavailableCode_IsMalformed(String kind) throws IOException {
+        assertMalformed(1, line(kind, "fail", READ_UNAVAILABLE));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"read", "public-read", "list"})
+    void readFail_WhenStatusIs503WithTheWriteUnavailableCode_IsMalformed(String kind) throws IOException {
+        assertMalformed(1, line(kind, "fail", WRITE_UNAVAILABLE));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"save", "delete", "read", "publish", "unpublish", "public-read", "list"})
+    void fail_WhenStatusIs503WithoutAnUnavailableCode_IsMalformedNamingTheLine(String kind)
             throws IOException {
         assertMalformed(2, line(kind, "unknown", null), line(kind, "fail", "'status':503"));
         assertMalformed(2, line(kind, "unknown", null), line(kind, "fail", "'status':503,'code':'DEADLOCK'"));

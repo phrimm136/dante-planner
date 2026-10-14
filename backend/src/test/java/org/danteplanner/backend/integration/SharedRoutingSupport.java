@@ -9,10 +9,11 @@ abstract class SharedRoutingSupport extends SharedMySqlContainerSupport {
     static void routingProperties(DynamicPropertyRegistry registry) {
         String url = registerSharedMysql(registry);
         registry.add("datasource.routing.enabled", () -> "true");
-        registry.add("datasource.replica.enabled", () -> "true");
-        registry.add("datasource.replica.url", () -> url);
-        registry.add("datasource.replica.username", MYSQL::getUsername);
-        registry.add("datasource.replica.password", MYSQL::getPassword);
+        registry.add("datasource.read-sources[0].name", () -> "seoul-replica");
+        registry.add("datasource.read-sources[0].url", () -> url);
+        registry.add("datasource.read-sources[0].username", MYSQL::getUsername);
+        registry.add("datasource.read-sources[0].password", MYSQL::getPassword);
+        registry.add("datasource.read-sources[1].name", () -> "primary");
         registry.add("management.endpoints.web.exposure.include", () -> "health,prometheus");
         registry.add("management.prometheus.metrics.export.enabled", () -> "true");
     }

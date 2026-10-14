@@ -27,6 +27,7 @@ public final class HistoryRecorder implements Closeable {
     private static final String UNKNOWN = "unknown";
     private static final String CODE = "code";
     private static final String WRITE_UNAVAILABLE_CODE = DegradationErrorConstants.DB_UNAVAILABLE.code();
+    private static final String READ_UNAVAILABLE_CODE = DegradationErrorConstants.READ_UNAVAILABLE.code();
 
     private final Writer writer;
     private final LongSupplier clock;
@@ -91,7 +92,7 @@ public final class HistoryRecorder implements Closeable {
         } else if (status.is4xxClientError()) {
             outcome(line, FAIL, response);
         } else if (status.is5xxServerError()) {
-            serverError(line, response);
+            serverError(line, response, WRITE_UNAVAILABLE_CODE);
         } else {
             throw unexpected("save", response);
         }
@@ -104,7 +105,7 @@ public final class HistoryRecorder implements Closeable {
         } else if (status.is4xxClientError()) {
             outcome(line, FAIL, response);
         } else if (status.is5xxServerError()) {
-            serverError(line, response);
+            serverError(line, response, WRITE_UNAVAILABLE_CODE);
         } else {
             throw unexpected("delete", response);
         }
@@ -117,7 +118,7 @@ public final class HistoryRecorder implements Closeable {
         } else if (status.is4xxClientError()) {
             outcome(line, FAIL, response);
         } else if (status.is5xxServerError()) {
-            serverError(line, response);
+            serverError(line, response, WRITE_UNAVAILABLE_CODE);
         } else {
             throw unexpected(kind, response);
         }
@@ -129,7 +130,7 @@ public final class HistoryRecorder implements Closeable {
         } else if (response.status() == HttpStatus.NOT_FOUND.value()) {
             outcome(line, OK, response);
         } else if (HttpStatusCode.valueOf(response.status()).is5xxServerError()) {
-            serverError(line, response);
+            serverError(line, response, READ_UNAVAILABLE_CODE);
         } else {
             outcome(line, FAIL, response);
         }
@@ -140,19 +141,27 @@ public final class HistoryRecorder implements Closeable {
             ArrayNode keys = outcome(line, OK, response).putArray("keys");
             response.plannerIds().forEach(keys::add);
         } else if (HttpStatusCode.valueOf(response.status()).is5xxServerError()) {
-            serverError(line, response);
+            serverError(line, response, READ_UNAVAILABLE_CODE);
         } else {
             outcome(line, FAIL, response);
         }
     }
 
-    private static void serverError(ObjectNode line, Response response) {
-        if (response.status() == HttpStatus.SERVICE_UNAVAILABLE.value()
-                && response.code().filter(WRITE_UNAVAILABLE_CODE::equals).isPresent()) {
-            outcome(line, FAIL, response).put(CODE, WRITE_UNAVAILABLE_CODE);
+    private static void serverError(ObjectNode line, Response response, String unavailableCode) {
+        Optional<String> code = response.status() == HttpStatus.SERVICE_UNAVAILABLE.value()
+                ? response.code().filter(observed -> isRecordedAsFailure(observed, unavailableCode))
+                : Optional.empty();
+        if (code.isPresent()) {
+            outcome(line, FAIL, response).put(CODE, code.get());
         } else {
             outcome(line, UNKNOWN, response);
         }
+    }
+
+    private static boolean isRecordedAsFailure(String observed, String unavailableCode) {
+        return READ_UNAVAILABLE_CODE.equals(unavailableCode)
+                || observed.equals(unavailableCode)
+                || observed.equals(READ_UNAVAILABLE_CODE);
     }
 
     private static ObjectNode outcome(ObjectNode line, String outcome, Response response) {

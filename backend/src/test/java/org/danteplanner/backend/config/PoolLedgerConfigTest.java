@@ -31,14 +31,17 @@ class PoolLedgerConfigTest {
         assertThat(PoolLedger.OREGON_PRIMARY_POOL).isEqualTo(15);
         assertThat(PoolLedger.SEOUL_PRIMARY_POOL).isEqualTo(10);
         assertThat(PoolLedger.SEOUL_REPLICA_POOL).isEqualTo(15);
+        assertThat(PoolLedger.READ_FALLBACK_POOL).isEqualTo(3);
+        assertThat(PoolLedger.SEOUL_PRIMARY_READ_POOL).isEqualTo(6);
     }
 
     @Test
-    void poolLedger_WhenBulkheadIncluded_StaysWithinConnectionBudget() {
+    void poolLedger_WhenBulkheadAndSeoulPrimaryReadPoolIncluded_StaysWithinConnectionBudget() {
         int primaryHittingLoad =
                 (PoolLedger.OREGON_PRIMARY_POOL
                                 + PoolLedger.SEOUL_PRIMARY_POOL
-                                + PoolLedger.BULKHEAD_POOL)
+                                + PoolLedger.BULKHEAD_POOL
+                                + PoolLedger.SEOUL_PRIMARY_READ_POOL)
                         * PoolLedger.MAX_PODS_PER_ASG;
         int usableConnections =
                 PoolLedger.RDS_MICRO_MAX_CONNECTIONS - PoolLedger.CONNECTION_RESERVE;

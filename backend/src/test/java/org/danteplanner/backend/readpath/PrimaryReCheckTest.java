@@ -5,13 +5,19 @@ import org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource;
 import org.danteplanner.backend.shared.config.RoutingKey;
 import org.danteplanner.backend.shared.config.UndeclaredPrimaryAccessGuard;
 import org.danteplanner.backend.shared.exception.EntityNotFoundException;
+import org.danteplanner.backend.shared.exception.ReadTemporarilyUnavailableException;
 import org.danteplanner.backend.shared.readpath.PrimaryReCheck;
 import org.danteplanner.backend.support.RecordingTombstoneStore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.sql.SQLException;
+import java.sql.SQLTransientConnectionException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -53,13 +59,18 @@ class PrimaryReCheckTest {
     @BeforeEach
     void setUp() {
         meterRegistry = new SimpleMeterRegistry();
-        reCheck = new PrimaryReCheck(meterRegistry, tombstoneStore);
+        reCheck = reCheck(false, true, RoutingKey.BULKHEAD);
         ReadOnlyRoutingDataSource.clear();
     }
 
     @AfterEach
     void clearPin() {
         ReadOnlyRoutingDataSource.clear();
+    }
+
+    private PrimaryReCheck reCheck(boolean servedByAuthority, boolean authorityHealthy, RoutingKey target) {
+        return new PrimaryReCheck(meterRegistry, tombstoneStore,
+                () -> servedByAuthority, () -> authorityHealthy, target);
     }
 
     /** What the current thread would route to, as the routing datasource itself decides it. */
@@ -214,18 +225,18 @@ class PrimaryReCheckTest {
         private final List<Object> routedTo = new ArrayList<>();
 
         /** The replica holds only {@code replicated}; the primary holds it and {@code primaryOnly}. */
-        private final Function<Collection<UUID>, List<UUID>> dereference = requested -> {
+        private List<UUID> dereference(Collection<UUID> requested) {
             calls.add(List.copyOf(requested));
             Object key = currentRoutingKeyOverride();
             routedTo.add(key);
             Set<UUID> visible = key == RoutingKey.BULKHEAD ? onPrimary : Set.of(replicated);
             return requested.stream().filter(visible::contains).toList();
-        };
+        }
 
         @Test
         void misses_WhenReplicaLacksThem_AreReReadOnceThroughBulkhead() {
             List<UUID> served = reCheck.readAllWithReCheck(
-                    ENTITY_TYPE, List.of(replicated, primaryOnly, nowhere), dereference, Function.identity());
+                    ENTITY_TYPE, List.of(replicated, primaryOnly, nowhere), this::dereference, Function.identity());
 
             assertThat(served).containsExactlyInAnyOrder(replicated, primaryOnly);
             assertThat(calls).containsExactly(
@@ -240,7 +251,7 @@ class PrimaryReCheckTest {
             tombstoneStore.writeTombstone(ENTITY_TYPE, replicated);
 
             List<UUID> served = reCheck.readAllWithReCheck(
-                    ENTITY_TYPE, List.of(replicated), dereference, Function.identity());
+                    ENTITY_TYPE, List.of(replicated), this::dereference, Function.identity());
 
             assertThat(served).isEmpty();
             assertThat(calls).hasSize(1);
@@ -250,7 +261,7 @@ class PrimaryReCheckTest {
         @Test
         void allHits_WhenReplicaHasEveryId_SkipTheReCheck() {
             List<UUID> served = reCheck.readAllWithReCheck(
-                    ENTITY_TYPE, List.of(replicated), dereference, Function.identity());
+                    ENTITY_TYPE, List.of(replicated), this::dereference, Function.identity());
 
             assertThat(served).containsExactly(replicated);
             assertThat(calls).hasSize(1);
@@ -262,7 +273,7 @@ class PrimaryReCheckTest {
             tombstoneStore.writeTombstone(ENTITY_TYPE, primaryOnly);
 
             List<UUID> served = reCheck.readAllWithReCheck(
-                    ENTITY_TYPE, List.of(primaryOnly), dereference, Function.identity());
+                    ENTITY_TYPE, List.of(primaryOnly), this::dereference, Function.identity());
 
             assertThat(served).containsExactly(primaryOnly);
         }
@@ -294,7 +305,7 @@ class PrimaryReCheckTest {
 
         @Test
         void tombstoneHit_WhenNoHitIsTombstoned_RegistersNoSeries() {
-            reCheck.readAllWithReCheck(ENTITY_TYPE, List.of(replicated), dereference, Function.identity());
+            reCheck.readAllWithReCheck(ENTITY_TYPE, List.of(replicated), this::dereference, Function.identity());
 
             assertThat(meterRegistry.find(TOMBSTONE_HIT_COUNTER).counters()).isEmpty();
         }
@@ -398,6 +409,168 @@ class PrimaryReCheckTest {
                 throw primaryMiss;
             })).isSameAs(primaryMiss);
             assertThat(currentRoutingKeyOverride()).as("a leaked pin would route a later unrelated read").isNull();
+        }
+    }
+
+    @Nested
+    class ServedByTheAuthority {
+
+        private PrimaryReCheck authoritative;
+
+        @BeforeEach
+        void servedByThePrimary() {
+            authoritative = reCheck(true, true, RoutingKey.BULKHEAD);
+        }
+
+        @Test
+        void hit_WhenTheAuthorityServedIt_IsServedWithoutATombstoneLookup() {
+            tombstoneStore.writeTombstone(ENTITY_TYPE, id);
+
+            assertThat(authoritative.readWithReCheck(ENTITY_TYPE, id, () -> "planner")).isEqualTo("planner");
+            assertThat(tombstoneHits(ENTITY_TYPE)).isEqualTo(0d);
+        }
+
+        @Test
+        void miss_WhenTheAuthorityMissed_PropagatesWithoutAReCheck() {
+            AtomicInteger attempts = new AtomicInteger();
+            EntityNotFoundException miss = new EntityNotFoundException(ENTITY_TYPE, id);
+
+            assertThatThrownBy(() -> authoritative.readWithReCheck(ENTITY_TYPE, id, () -> {
+                attempts.incrementAndGet();
+                throw miss;
+            })).isSameAs(miss);
+            assertThat(attempts.get()).isEqualTo(1);
+            assertThat(bulkheadQueries()).isEqualTo(0d);
+        }
+
+        @Test
+        void batch_WhenTheAuthorityServedIt_ReturnsTheHitsWithoutGuards() {
+            UUID other = UUID.randomUUID();
+            tombstoneStore.writeTombstone(ENTITY_TYPE, id);
+
+            List<UUID> served = authoritative.readAllWithReCheck(
+                    ENTITY_TYPE, List.of(id, other), requested -> List.of(id), Function.identity());
+
+            assertThat(served).containsExactly(id);
+            assertThat(promoted()).isEqualTo(0d);
+        }
+
+        @Test
+        void publicView_WhenTheAuthorityServedAMarkedRow_ServesItWithoutReRead() {
+            tombstoneStore.writeTombstone(MARKER_SCOPE, id);
+
+            assertThat(authoritative.reReadWhenTombstoned(MARKER_SCOPE, id, "primary", () -> "re-read"))
+                    .isEqualTo("primary");
+            assertThat(bulkheadQueries()).isEqualTo(0d);
+        }
+    }
+
+    @Nested
+    class AuthorityUnreachable {
+
+        private PrimaryReCheck primaryDown;
+
+        @BeforeEach
+        void primaryBreakerOpen() {
+            primaryDown = reCheck(false, false, RoutingKey.BULKHEAD);
+        }
+
+        @Test
+        void miss_WhenThePrimaryBreakerIsOpen_AnswersReadUnavailableWithoutReReading() {
+            AtomicInteger attempts = new AtomicInteger();
+
+            assertRejected(() -> primaryDown.readWithReCheck(ENTITY_TYPE, id, () -> {
+                attempts.incrementAndGet();
+                throw new EntityNotFoundException(ENTITY_TYPE, id);
+            })).withCode("READ_TEMPORARILY_UNAVAILABLE");
+            assertThat(attempts.get()).isEqualTo(1);
+            assertThat(currentRoutingKeyOverride()).isNull();
+        }
+
+        @Test
+        void tombstoneHit_WhenThePrimaryBreakerIsOpen_StaysNotFound() {
+            tombstoneStore.writeTombstone(ENTITY_TYPE, id);
+
+            assertRejected(() -> primaryDown.readWithReCheck(ENTITY_TYPE, id, () -> "planner")).withCode("NOT_FOUND");
+        }
+
+        @Test
+        void markerHit_WhenThePrimaryBreakerIsOpen_AnswersReadUnavailable() {
+            tombstoneStore.writeTombstone(MARKER_SCOPE, id);
+
+            assertRejected(() -> primaryDown.reReadWhenTombstoned(MARKER_SCOPE, id, "replica", () -> "primary"))
+                    .withCode("READ_TEMPORARILY_UNAVAILABLE");
+        }
+
+        @Test
+        void reCheck_WhenTheAcquireFailsToConnect_AnswersReadUnavailableAndReleasesThePin() {
+            AtomicInteger attempts = new AtomicInteger();
+            DataAccessResourceFailureException unreachable = new DataAccessResourceFailureException(
+                    "Unable to acquire JDBC Connection",
+                    new SQLTransientConnectionException("bulkhead - Connection is not available", "08S01"));
+
+            assertThatThrownBy(() -> reCheck.readWithReCheck(ENTITY_TYPE, id, () -> {
+                if (attempts.getAndIncrement() == 0) {
+                    throw new EntityNotFoundException(ENTITY_TYPE, id);
+                }
+                throw unreachable;
+            })).isInstanceOf(ReadTemporarilyUnavailableException.class).hasCause(unreachable);
+            assertThat(currentRoutingKeyOverride()).isNull();
+        }
+
+        @Test
+        void reCheck_WhenTheAcquireTimesOutWithoutAConnectionFailure_AnswersReadUnavailableAndReleasesThePin() {
+            AtomicInteger attempts = new AtomicInteger();
+            DataAccessResourceFailureException saturated = new DataAccessResourceFailureException(
+                    "Unable to acquire JDBC Connection", new SQLException("bulkhead - request timed out"));
+
+            assertThatThrownBy(() -> reCheck.readWithReCheck(ENTITY_TYPE, id, () -> {
+                if (attempts.getAndIncrement() == 0) {
+                    throw new EntityNotFoundException(ENTITY_TYPE, id);
+                }
+                throw saturated;
+            })).isInstanceOf(ReadTemporarilyUnavailableException.class).hasCause(saturated);
+            assertThat(currentRoutingKeyOverride()).isNull();
+        }
+
+        @Test
+        void reCheck_WhenTheReReadFailsMidStatementWithANonConnectionError_PropagatesIt() {
+            AtomicInteger attempts = new AtomicInteger();
+            BadSqlGrammarException midStatement = new BadSqlGrammarException(
+                    "re-read", "SELECT 1", new SQLException("syntax", "42000"));
+
+            assertThatThrownBy(() -> reCheck.readWithReCheck(ENTITY_TYPE, id, () -> {
+                if (attempts.getAndIncrement() == 0) {
+                    throw new EntityNotFoundException(ENTITY_TYPE, id);
+                }
+                throw midStatement;
+            })).isSameAs(midStatement);
+        }
+    }
+
+    @Nested
+    class ReCheckWithoutABulkhead {
+
+        @Test
+        void miss_WhenNoBulkheadPoolExists_ReReadsThroughThePrimaryTarget() {
+            PrimaryReCheck oregon = reCheck(false, true, RoutingKey.PRIMARY);
+            AtomicInteger attempts = new AtomicInteger();
+            List<Object> routedTo = new ArrayList<>();
+
+            TransactionSynchronizationManager.setCurrentTransactionReadOnly(true);
+            try {
+                oregon.readWithReCheck(ENTITY_TYPE, id, () -> {
+                    routedTo.add(currentRoutingKey());
+                    if (attempts.getAndIncrement() == 0) {
+                        throw new EntityNotFoundException(ENTITY_TYPE, id);
+                    }
+                    return "planner";
+                });
+            } finally {
+                TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
+            }
+
+            assertThat(routedTo).containsExactly(RoutingKey.REPLICA, RoutingKey.PRIMARY);
         }
     }
 

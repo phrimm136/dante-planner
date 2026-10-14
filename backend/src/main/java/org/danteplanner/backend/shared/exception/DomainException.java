@@ -32,6 +32,7 @@ public abstract class DomainException extends ErrorResponseException {
             case INVALID_REQUEST -> HttpStatus.BAD_REQUEST;
             case UNAUTHENTICATED -> HttpStatus.UNAUTHORIZED;
             case OVER_QUOTA -> HttpStatus.TOO_MANY_REQUESTS;
+            case UNAVAILABLE -> HttpStatus.SERVICE_UNAVAILABLE;
         };
     }
 }

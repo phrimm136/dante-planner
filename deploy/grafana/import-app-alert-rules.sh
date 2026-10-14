@@ -118,8 +118,8 @@ post_rule "traffic-drop" "10m" "$TRAFFIC_DROP_EXPR"
 post_rule "planner-catalog-sync-backlog" "2m" \
   'max by (cluster) (planner_catalog_sync_backlog_age_seconds) > 60'
 
-post_rule "primary-read-breaker-open-sustained" "5m" \
-  'max by (cluster) (resilience4j_circuitbreaker_state{name="primary-read",state="open"}) > 0'
+post_rule "read-source-breaker-open-sustained" "5m" \
+  'max by (cluster, name) (resilience4j_circuitbreaker_state{name=~"read-source-.+",state="open"}) > 0'
 
 echo "== done: 15 rules in folder ${FOLDER}, group app-rules"
 echo "   All noDataState=OK — non-paging while a series is absent; staleness-meta owns absence."

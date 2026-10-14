@@ -19,6 +19,7 @@ import org.danteplanner.backend.planner.service.PlannerQueryService;
 import org.danteplanner.backend.planner.service.PlannerViewRecorder;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 import org.danteplanner.backend.shared.config.SecurityProperties;
+import org.danteplanner.backend.shared.config.RoutingKey;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.readpath.PrimaryReCheck;
 import org.danteplanner.backend.support.RecordingTombstoneStore;
@@ -63,7 +64,8 @@ class ByIdReadSeamTest {
     @BeforeEach
     void setUp() {
         ByIdReadGuard byIdReadGuard = new ByIdReadGuard(
-                Optional.of(new PrimaryReCheck(new SimpleMeterRegistry(), tombstoneStore)));
+                Optional.of(new PrimaryReCheck(new SimpleMeterRegistry(), tombstoneStore,
+                        () -> false, () -> true, RoutingKey.BULKHEAD)));
         PlannerAccessGuard accessGuard = new PlannerAccessGuard(null, plannerRepository);
         plannerQueryController = new PlannerQueryController(
                 new PlannerQueryService(plannerRepository, accessGuard), byIdReadGuard);

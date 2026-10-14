@@ -9,7 +9,9 @@ epic: none · pr: none @consistency-checker @history-format
   possibly applied. Without that value, a write that landed behind a dropped connection reads as a
   stale read. The exception is a 503 whose code is `WRITE_TEMPORARILY_UNAVAILABLE`: the server
   raises it when it cannot get a primary connection, so no statement ran, and the line records it
-  as `fail` with that code.
+  as `fail` with that code. A read answered 503 with `READ_TEMPORARILY_UNAVAILABLE` is likewise
+  `fail`: the server refused to answer rather than answering stale, so the read observed nothing.
+  Writes accept only the write code, reads only the read code.
   Both times are required, because only content saves advance `syncVersion`. Publish, unpublish and
   delete carry no version, so the checker orders them by time.
   REJECTED: Jepsen's two events per operation in EDN — Elle judges transactional isolation. Its fit to

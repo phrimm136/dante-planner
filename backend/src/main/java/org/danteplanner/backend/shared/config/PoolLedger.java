@@ -4,12 +4,14 @@ public final class PoolLedger {
 
     /** Hikari pool names, carried as the {@code pool} tag on every {@code hikaricp_*} meter. */
     public static final String PRIMARY_POOL_NAME = "primary";
-    public static final String REPLICA_POOL_NAME = "replica";
     public static final String BULKHEAD_POOL_NAME = "bulkhead";
+    public static final String PRIMARY_READ_POOL_NAME = "primary-read";
 
     public static final int OREGON_PRIMARY_POOL = 15;
     public static final int SEOUL_PRIMARY_POOL = 10;
     public static final int SEOUL_REPLICA_POOL = 15;
+    public static final int READ_FALLBACK_POOL = 3;
+    public static final int SEOUL_PRIMARY_READ_POOL = 6;
 
     public static final int BULKHEAD_POOL = 3;
 

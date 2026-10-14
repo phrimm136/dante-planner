@@ -14,10 +14,9 @@ import org.springframework.boot.context.properties.source.MapConfigurationProper
 
 import com.zaxxer.hikari.HikariConfig;
 
-import org.danteplanner.backend.shared.config.FallbackReplicaProperties;
 import org.danteplanner.backend.shared.config.HikariTuningProperties;
-import org.danteplanner.backend.shared.config.ReadFallbackConfig;
-import org.danteplanner.backend.shared.config.ReplicaDataSourceProperties;
+import org.danteplanner.backend.shared.config.ReadSourceProperties;
+import org.danteplanner.backend.shared.config.ReadSourcesConfig;
 import org.danteplanner.backend.shared.config.RoutingDataSourceConfig;
 import org.danteplanner.backend.shared.config.StatementCache;
 import org.danteplanner.backend.shared.config.TimeoutHierarchy;
@@ -39,6 +38,8 @@ class DataSourceTimeoutAndCacheConfigTest {
     private static final String HIKARI_KEY_PREFIX = HIKARI_PREFIX + ".";
     private static final String DRIVER_PROPERTY_PREFIX = HIKARI_KEY_PREFIX + "data-source-properties.";
 
+    private static final String REPLICA = "seoul-replica";
+
     private static final List<String> MYSQL_BOUND_PROFILES =
             List.of("/application.properties", "/application-dev.properties", "/application-prod.properties");
 
@@ -50,18 +51,14 @@ class DataSourceTimeoutAndCacheConfigTest {
         return props;
     }
 
-    private static ReplicaDataSourceProperties replicaProperties() {
-        ReplicaDataSourceProperties props = new ReplicaDataSourceProperties();
-        props.setEnabled(true);
-        props.setUrl("jdbc:mysql://replica:3306/planner");
-        props.setUsername("replicaUser");
-        props.setPassword("replicaPw");
-        return props;
-    }
-
-    private static FallbackReplicaProperties fallbackReplicaProperties() {
-        FallbackReplicaProperties props = new FallbackReplicaProperties();
-        props.setUrl("jdbc:mysql://seoul-replica:3306/planner");
+    private static ReadSourceProperties readSourceProperties() {
+        ReadSourceProperties.Source replica = new ReadSourceProperties.Source();
+        replica.setName(REPLICA);
+        replica.setUrl("jdbc:mysql://seoul-replica:3306/planner");
+        ReadSourceProperties.Source primary = new ReadSourceProperties.Source();
+        primary.setName(ReadSourceProperties.PRIMARY);
+        ReadSourceProperties props = new ReadSourceProperties();
+        props.setReadSources(List.of(replica, primary));
         return props;
     }
 
@@ -80,26 +77,23 @@ class DataSourceTimeoutAndCacheConfigTest {
     class RoutingPools {
 
         private final RoutingDataSourceConfig config =
-                new RoutingDataSourceConfig(primaryProperties(), replicaProperties());
+                new RoutingDataSourceConfig(primaryProperties(), readSourceProperties());
 
-        private final ReadFallbackConfig fallbackConfig = new ReadFallbackConfig(
-                primaryProperties(), new HikariTuningProperties(), fallbackReplicaProperties());
+        private final ReadSourcesConfig readSourcesConfig = new ReadSourcesConfig(
+                primaryProperties(), new HikariTuningProperties(), readSourceProperties());
 
         private List<HikariConfig> allPools() {
             return List.of(
                     config.buildPrimaryHikariConfig(),
-                    config.buildReplicaHikariConfig(),
                     config.buildBulkheadHikariConfig(),
-                    fallbackConfig.buildFallbackReplicaHikariConfig());
+                    readSourcesConfig.buildSourceHikariConfig(REPLICA));
         }
 
         @Test
         void buildHikariConfig_WhenBuilt_TakesConnectionTimeoutFromThePoolAcquireConstant() {
             assertThat(config.buildPrimaryHikariConfig().getConnectionTimeout())
                     .isEqualTo(TimeoutHierarchy.POOL_ACQUIRE_TIMEOUT_MS);
-            assertThat(config.buildReplicaHikariConfig().getConnectionTimeout())
-                    .isEqualTo(TimeoutHierarchy.POOL_ACQUIRE_TIMEOUT_MS);
-            assertThat(fallbackConfig.buildFallbackReplicaHikariConfig().getConnectionTimeout())
+            assertThat(readSourcesConfig.buildSourceHikariConfig(REPLICA).getConnectionTimeout())
                     .isEqualTo(TimeoutHierarchy.POOL_ACQUIRE_TIMEOUT_MS);
         }
 
@@ -197,8 +191,6 @@ class DataSourceTimeoutAndCacheConfigTest {
             assertThat(load("/application-dev.properties").getProperty("spring.datasource.url"))
                     .contains(expected);
             assertThat(load("/application-prod.properties").getProperty("spring.datasource.url"))
-                    .contains(expected);
-            assertThat(load("/application-prod.properties").getProperty("datasource.replica.url"))
                     .contains(expected);
         }
 

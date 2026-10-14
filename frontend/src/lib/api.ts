@@ -54,6 +54,7 @@ const UNAVAILABLE_ERROR_BY_CODE: Record<string, ApiErrorConstructor> = {
   AUTH_TEMPORARILY_UNAVAILABLE: AuthTemporarilyUnavailableError,
   RATE_LIMIT_TEMPORARILY_UNAVAILABLE: RetryableUnavailableError,
   DEADLOCK: RetryableUnavailableError,
+  READ_TEMPORARILY_UNAVAILABLE: RetryableUnavailableError,
 }
 
 const SERVER_DOWN_ERRORS: ReadonlySet<ApiErrorConstructor> = new Set([

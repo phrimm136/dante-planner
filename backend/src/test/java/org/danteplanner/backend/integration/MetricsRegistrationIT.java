@@ -68,7 +68,7 @@ class MetricsRegistrationIT extends SharedRoutingSupport {
         assertThat(meterRegistry.find(CONNECTIONS_MAX).gauges())
                 .extracting(gauge -> gauge.getId().getTag(POOL_TAG))
                 .contains(PoolLedger.PRIMARY_POOL_NAME,
-                        PoolLedger.REPLICA_POOL_NAME,
+                        OregonContext.REPLICA_SOURCE,
                         PoolLedger.BULKHEAD_POOL_NAME);
     }
 

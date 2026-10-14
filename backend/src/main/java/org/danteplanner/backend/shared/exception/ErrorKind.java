@@ -12,5 +12,7 @@ public enum ErrorKind {
 
     UNAUTHENTICATED,
 
-    OVER_QUOTA
+    OVER_QUOTA,
+
+    UNAVAILABLE
 }

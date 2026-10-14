@@ -8,6 +8,10 @@ public final class DegradationErrorConstants {
             "WRITE_TEMPORARILY_UNAVAILABLE",
             "Database temporarily unavailable, please retry");
 
+    public static final Entry READ_UNAVAILABLE = new Entry(
+            "READ_TEMPORARILY_UNAVAILABLE",
+            "This data cannot be read right now, please retry");
+
     public static final Entry AUTH_UNAVAILABLE = new Entry(
             "AUTH_TEMPORARILY_UNAVAILABLE",
             "Authentication service temporarily unavailable, please retry");

@@ -16,24 +16,28 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource;
 import org.danteplanner.backend.shared.config.RoutingKey;
+import org.danteplanner.backend.shared.exception.ProblemWriter;
+import org.danteplanner.backend.shared.exception.ReadTemporarilyUnavailableException;
+import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 
 public class GtidCookieFilter extends OncePerRequestFilter {
 
     private final GtidReadGate readGate;
     private final GtidWriteCapture writeCapture;
-    private final boolean replicaPresent;
+    private final ProblemWriter problemWriter;
 
     public GtidCookieFilter(
-            GtidReadGate readGate, GtidWriteCapture writeCapture, boolean replicaPresent) {
+            GtidReadGate readGate, GtidWriteCapture writeCapture, ProblemWriter problemWriter) {
         this.readGate = readGate;
         this.writeCapture = writeCapture;
-        this.replicaPresent = replicaPresent;
+        this.problemWriter = problemWriter;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
         writeCapture.begin();
+        ChosenReadSource.clear();
         try {
             if (isSafeMethod(request)) {
                 handleRead(request, response, filterChain);
@@ -45,17 +49,22 @@ public class GtidCookieFilter extends OncePerRequestFilter {
                     .ifPresent(gtid -> addCookie(response, GtidCookie.of(gtid)));
         } finally {
             writeCapture.clear();
+            ChosenReadSource.clear();
         }
     }
 
     private void handleRead(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
-        if (!replicaPresent) {
-            filterChain.doFilter(request, response);
-            return;
-        }
         String cookieValue = readCookie(request);
         Optional<String> gtid = GtidCookie.decode(cookieValue);
+        if (readGate.readsAuthority()) {
+            if (gtid.isPresent()) {
+                readOnPrimary(request, response, filterChain);
+            } else {
+                filterChain.doFilter(request, response);
+            }
+            return;
+        }
         if (gtid.isEmpty()) {
             if (GtidCookie.isUnusable(cookieValue)) {
                 addCookie(response, GtidCookie.cleared());
@@ -71,6 +80,16 @@ public class GtidCookieFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+        if (!readGate.isAuthorityHealthy()) {
+            ReadTemporarilyUnavailableException unavailable = new ReadTemporarilyUnavailableException();
+            problemWriter.write(request, response, unavailable.getBody(), unavailable.getHeaders());
+            return;
+        }
+        readOnPrimary(request, response, filterChain);
+    }
+
+    private void readOnPrimary(HttpServletRequest request, HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
         ReadOnlyRoutingDataSource.pinTo(RoutingKey.PRIMARY);
         try {
             filterChain.doFilter(request, response);

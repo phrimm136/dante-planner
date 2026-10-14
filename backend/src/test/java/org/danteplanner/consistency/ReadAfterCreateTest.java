@@ -37,6 +37,11 @@ class ReadAfterCreateTest {
     }
 
     @Test
+    void read_WhenRefusedWith503_IsClean() {
+        assertThat(violations(CREATED, new Read("s2", "p1", 25, 30, new ReadFailed(503)))).isEmpty();
+    }
+
+    @Test
     void notFound_WhenTheReadIsOfAnotherKey_IsClean() {
         assertThat(violations(CREATED, new Read("s2", "p2", 25, 30, new NotFound()))).isEmpty();
     }

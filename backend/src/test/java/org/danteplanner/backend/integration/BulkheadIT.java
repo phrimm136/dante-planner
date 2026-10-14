@@ -14,6 +14,7 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.service.PlannerQueryService;
 import org.danteplanner.backend.shared.config.PoolLedger;
+import org.danteplanner.backend.shared.exception.ReadTemporarilyUnavailableException;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -26,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.test.context.ActiveProfiles;
@@ -86,10 +86,11 @@ class BulkheadIT extends CausalHarnessSupport {
     @DynamicPropertySource
     static void routingProperties(DynamicPropertyRegistry registry) {
         registry.add("datasource.routing.enabled", () -> "true");
-        registry.add("datasource.replica.enabled", () -> "true");
-        registry.add("datasource.replica.url", REPLICA::getJdbcUrl);
-        registry.add("datasource.replica.username", REPLICA::getUsername);
-        registry.add("datasource.replica.password", REPLICA::getPassword);
+        registry.add("datasource.read-sources[0].name", () -> "seoul-replica");
+        registry.add("datasource.read-sources[0].url", REPLICA::getJdbcUrl);
+        registry.add("datasource.read-sources[0].username", REPLICA::getUsername);
+        registry.add("datasource.read-sources[0].password", REPLICA::getPassword);
+        registry.add("datasource.read-sources[1].name", () -> "primary");
         registry.add("datasource.bulkhead.url", () -> "jdbc:mysql://"
                 + TOXIPROXY.getHost() + ":" + TOXIPROXY.getMappedPort(PROXY_LISTEN_PORT) + "/testdb");
         registry.add("datasource.bulkhead.username", () -> "test");
@@ -141,7 +142,7 @@ class BulkheadIT extends CausalHarnessSupport {
                     .hasSize(FLOOD_SIZE)
                     .allSatisfy(outcome -> assertThat(outcome).isIn(
                             PlannerNotFoundException.class.getSimpleName(),
-                            DataAccessResourceFailureException.class.getSimpleName()));
+                            ReadTemporarilyUnavailableException.class.getSimpleName()));
 
             assertThat(floodOutcomes)
                     .as("at least one flood task must reach the replica through the bulkhead — an "

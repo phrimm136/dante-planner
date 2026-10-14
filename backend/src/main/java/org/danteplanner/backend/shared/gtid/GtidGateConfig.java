@@ -13,7 +13,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import jakarta.persistence.EntityManagerFactory;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import org.danteplanner.backend.shared.config.ReplicaDataSourceProperties;
+import org.danteplanner.backend.shared.config.ReadSourceSelector;
+import org.danteplanner.backend.shared.exception.ProblemWriter;
 
 /**
  * Wires the read-your-writes GTID gate wherever the routing datasource is present.
@@ -30,8 +31,8 @@ public class GtidGateConfig {
     private static final String GATE_URL_PATTERN = "/api/*";
 
     @Bean
-    public GtidReadGate gtidReadGate(DataSource dataSource, MeterRegistry meterRegistry) {
-        return new GtidReadGate(dataSource, meterRegistry);
+    public GtidReadGate gtidReadGate(ReadSourceSelector readSourceSelector, MeterRegistry meterRegistry) {
+        return new GtidReadGate(readSourceSelector, meterRegistry);
     }
 
     /**
@@ -62,9 +63,9 @@ public class GtidGateConfig {
     public FilterRegistrationBean<GtidCookieFilter> gtidCookieFilterRegistration(
             GtidReadGate readGate,
             GtidWriteCapture writeCapture,
-            ReplicaDataSourceProperties replicaProperties) {
+            ProblemWriter problemWriter) {
         FilterRegistrationBean<GtidCookieFilter> registration = new FilterRegistrationBean<>(
-                new GtidCookieFilter(readGate, writeCapture, replicaProperties.isEnabled()));
+                new GtidCookieFilter(readGate, writeCapture, problemWriter));
         registration.addUrlPatterns(GATE_URL_PATTERN);
         registration.setOrder(Ordered.LOWEST_PRECEDENCE);
         return registration;

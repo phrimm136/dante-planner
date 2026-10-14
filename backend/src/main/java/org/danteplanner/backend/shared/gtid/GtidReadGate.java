@@ -2,29 +2,18 @@ package org.danteplanner.backend.shared.gtid;
 
 import lombok.extern.slf4j.Slf4j;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.Set;
-
-import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import com.mysql.cj.exceptions.MysqlErrorNumbers;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource;
-import org.danteplanner.backend.shared.config.RoutingKey;
+import org.danteplanner.backend.shared.config.ReadSourceSelector;
 
-/**
- * Checks whether the local replica has applied a given GTID.
- *
- * <p>Runs {@code WAIT_FOR_EXECUTED_GTID_SET} inside a read-only transaction on the {@code @Primary}
- * routing datasource, so the probe resolves to the replica pool. Called before the request pins to
- * the primary, so a not-caught-up result lets the filter route this one request to the primary.</p>
- */
 @Slf4j
 public class GtidReadGate {
 
@@ -51,8 +40,7 @@ public class GtidReadGate {
         NEVER_EXECUTED
     }
 
-    private final JdbcTemplate jdbcTemplate;
-    private final TransactionTemplate readOnlyTransaction;
+    private final ReadSourceSelector selector;
 
     /**
      * Where each gated read was routed, tagged {@code replica} or {@code primary}. A pinned read
@@ -62,27 +50,33 @@ public class GtidReadGate {
     private final Counter replicaServed;
     private final Counter primaryPinned;
 
-    public GtidReadGate(DataSource dataSource, MeterRegistry meterRegistry) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.readOnlyTransaction = new TransactionTemplate(new DataSourceTransactionManager(dataSource));
-        this.readOnlyTransaction.setReadOnly(true);
+    public GtidReadGate(ReadSourceSelector selector, MeterRegistry meterRegistry) {
+        this.selector = selector;
         this.replicaServed = meterRegistry.counter("gtid.gate", "outcome", "replica");
         this.primaryPinned = meterRegistry.counter("gtid.gate", "outcome", "primary");
     }
 
+    public boolean readsAuthority() {
+        return selector.current().map(ReadSourceSelector.Source::authoritative).orElse(false);
+    }
+
+    public boolean isAuthorityHealthy() {
+        return selector.isAuthorityHealthy();
+    }
+
     public Verdict probe(String gtid) {
-        Verdict verdict = waitVerdict(gtid);
+        Optional<ReadSourceSelector.Source> chosen = selector.current().filter(source -> !source.authoritative());
+        Verdict verdict = chosen.isEmpty() ? Verdict.NOT_CAUGHT_UP : waitVerdict(chosen.get(), gtid);
         boolean pinned = verdict == Verdict.NOT_CAUGHT_UP || verdict == Verdict.NEVER_EXECUTED;
         (pinned ? primaryPinned : replicaServed).increment();
         return verdict;
     }
 
-    private Verdict waitVerdict(String gtid) {
+    private Verdict waitVerdict(ReadSourceSelector.Source source, String gtid) {
         Integer result;
         try {
-            result = readOnlyTransaction.execute(status ->
-                    jdbcTemplate.queryForObject(
-                            WAIT_GTID_SQL, Integer.class, gtid, PROBE_TIMEOUT_SECONDS));
+            result = new JdbcTemplate(source.dataSource()).queryForObject(
+                    WAIT_GTID_SQL, Integer.class, gtid, PROBE_TIMEOUT_SECONDS);
         } catch (DataAccessException e) {
             if (isMalformedGtid(e)) {
                 log.warn("GTID wait rejected gtid={} as malformed, clearing the cookie: {}",
@@ -95,23 +89,22 @@ public class GtidReadGate {
         if (result != null && result == APPLIED) {
             return Verdict.CAUGHT_UP;
         }
-        if (result != null && result == TIMED_OUT && isNeverExecutedOnPrimary(gtid)) {
+        if (result != null && result == TIMED_OUT
+                && selector.isAuthorityHealthy() && isNeverExecutedOnPrimary(gtid)) {
             return Verdict.NEVER_EXECUTED;
         }
         return Verdict.NOT_CAUGHT_UP;
     }
 
     private boolean isNeverExecutedOnPrimary(String gtid) {
-        ReadOnlyRoutingDataSource.pinTo(RoutingKey.PRIMARY);
         try {
-            Integer subset = jdbcTemplate.queryForObject(PRIMARY_EXECUTED_SQL, Integer.class, gtid);
+            Integer subset = new JdbcTemplate(selector.authority().dataSource())
+                    .queryForObject(PRIMARY_EXECUTED_SQL, Integer.class, gtid);
             return subset != null && subset == NOT_SUBSET;
         } catch (DataAccessException e) {
             log.warn("GTID subset check on the primary failed for gtid={}, routing to primary",
                     gtid, e);
             return false;
-        } finally {
-            ReadOnlyRoutingDataSource.clear();
         }
     }
 

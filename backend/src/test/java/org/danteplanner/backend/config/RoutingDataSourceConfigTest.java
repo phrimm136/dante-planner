@@ -1,15 +1,17 @@
 package org.danteplanner.backend.config;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.danteplanner.backend.shared.config.FallbackReplicaProperties;
-import org.danteplanner.backend.shared.config.HikariTuningProperties;
 import org.danteplanner.backend.shared.config.PoolLedger;
-import org.danteplanner.backend.shared.config.PrimaryReadFallbackDataSource;
-import org.danteplanner.backend.shared.config.ReadFallbackConfig;
-import org.danteplanner.backend.shared.config.ReplicaDataSourceProperties;
+import org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource;
+import org.danteplanner.backend.shared.config.ReadSourceProperties;
+import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.config.RoutingDataSourceConfig;
 import org.danteplanner.backend.shared.config.RoutingKey;
 import org.danteplanner.backend.shared.config.UndeclaredPrimaryAccessGuard;
@@ -19,6 +21,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 
@@ -30,15 +33,28 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 /**
  * The routing datasource config sizes its HikariCP pools
  * from the {@link PoolLedger} constants per region, reading the same ledger production reads rather
- * than copies. Exercises only the connection-free builder methods, never {@code dataSource()}.
+ * than copies. Exercises only the connection-free builder methods and the target wiring.
  */
+@ExtendWith(MockitoExtension.class)
 class RoutingDataSourceConfigTest {
+
+    private static final String REPLICA = "seoul-replica";
+
+    @Mock
+    private DataSource primaryReadPool;
+
+    @Mock
+    private Connection primaryReadConnection;
 
     private static DataSourceProperties primaryProperties() {
         DataSourceProperties props = new DataSourceProperties();
@@ -48,12 +64,16 @@ class RoutingDataSourceConfigTest {
         return props;
     }
 
-    private static ReplicaDataSourceProperties replicaProperties(boolean enabled) {
-        ReplicaDataSourceProperties props = new ReplicaDataSourceProperties();
-        props.setEnabled(enabled);
-        props.setUrl("jdbc:mysql://replica:3306/planner");
-        props.setUsername("replicaUser");
-        props.setPassword("replicaPw");
+    private static ReadSourceProperties readSources(String... names) {
+        ReadSourceProperties props = new ReadSourceProperties();
+        props.setReadSources(Arrays.stream(names).map(name -> {
+            ReadSourceProperties.Source source = new ReadSourceProperties.Source();
+            source.setName(name);
+            if (!source.isPrimary()) {
+                source.setUrl("jdbc:mysql://replica:3306/planner");
+            }
+            return source;
+        }).toList());
         return props;
     }
 
@@ -65,107 +85,104 @@ class RoutingDataSourceConfigTest {
         return beans.getBeanProvider(type);
     }
 
-    private static Map<Object, DataSource> resolvedTargets(
-            RoutingDataSourceConfig config, HikariDataSource fallbackReplicaPool) {
+    private static ReadSourceSelector selector() {
+        return new ReadSourceSelector(List.of(new ReadSourceSelector.Source(
+                ReadSourceProperties.PRIMARY, true, new HikariDataSource(), CircuitBreaker.ofDefaults("test"))));
+    }
+
+    private static AbstractRoutingDataSource routing(
+            RoutingDataSourceConfig config, ReadSourceSelector selector, HikariDataSource bulkheadPool) {
         SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
         DataSource dataSource = config.dataSource(
                 new GtidWriteCapture(meterRegistry),
                 new UndeclaredPrimaryAccessGuard(meterRegistry, false),
                 new HikariDataSource(),
-                provider(HikariDataSource.class, null),
-                provider(HikariDataSource.class, null),
-                provider(HikariDataSource.class, fallbackReplicaPool),
-                provider(CircuitBreaker.class, fallbackReplicaPool == null ? null : CircuitBreaker.ofDefaults("test")));
+                provider(HikariDataSource.class, bulkheadPool),
+                selector);
         LazyConnectionDataSourceProxy lazy = (LazyConnectionDataSourceProxy) dataSource;
-        return ((AbstractRoutingDataSource) lazy.getTargetDataSource()).getResolvedDataSources();
+        return (AbstractRoutingDataSource) lazy.getTargetDataSource();
+    }
+
+    private static Map<Object, DataSource> resolvedTargets(
+            RoutingDataSourceConfig config, ReadSourceSelector selector, HikariDataSource bulkheadPool) {
+        return routing(config, selector, bulkheadPool).getResolvedDataSources();
     }
 
     @Nested
-    class SeoulPodWithReplica {
+    class SeoulPodReadingTheReplicaFirst {
 
         private final RoutingDataSourceConfig config =
-                new RoutingDataSourceConfig(primaryProperties(), replicaProperties(true));
+                new RoutingDataSourceConfig(primaryProperties(), readSources(REPLICA, ReadSourceProperties.PRIMARY));
 
         @Test
-        void buildPrimaryHikariConfig_WhenReplicaEnabled_UsesSeoulPrimaryPool() {
+        void buildPrimaryHikariConfig_WhenTheReplicaReadsFirst_UsesSeoulPrimaryPool() {
             HikariConfig hikari = config.buildPrimaryHikariConfig();
 
             assertThat(hikari.getMaximumPoolSize()).isEqualTo(PoolLedger.SEOUL_PRIMARY_POOL);
         }
 
         @Test
-        void buildReplicaHikariConfig_WhenReplicaEnabled_UsesSeoulReplicaPool() {
-            HikariConfig hikari = config.buildReplicaHikariConfig();
-
-            assertThat(hikari.getMaximumPoolSize()).isEqualTo(PoolLedger.SEOUL_REPLICA_POOL);
-        }
-
-        @Test
         void buildHikariConfig_WhenBuilt_NamesEachPoolFromTheLedger() {
             assertThat(config.buildPrimaryHikariConfig().getPoolName())
                     .isEqualTo(PoolLedger.PRIMARY_POOL_NAME);
-            assertThat(config.buildReplicaHikariConfig().getPoolName())
-                    .isEqualTo(PoolLedger.REPLICA_POOL_NAME);
             assertThat(config.buildBulkheadHikariConfig().getPoolName())
                     .isEqualTo(PoolLedger.BULKHEAD_POOL_NAME);
+        }
+
+        @Test
+        void dataSource_WhenABulkheadPoolExists_RoutesReadsToTheSelectorAndReChecksToTheBulkhead() {
+            ReadSourceSelector selector = selector();
+            HikariDataSource bulkhead = new HikariDataSource();
+
+            Map<Object, DataSource> targets = resolvedTargets(config, selector, bulkhead);
+
+            assertThat(targets.get(RoutingKey.REPLICA)).isSameAs(selector);
+            assertThat(targets.get(RoutingKey.BULKHEAD)).isSameAs(bulkhead);
+            assertThat(targets.get(RoutingKey.PRIMARY)).isNotSameAs(selector);
+        }
+
+        @Test
+        void dataSource_WhenAReadOnlyTransactionIsPinnedToPrimary_LendsFromTheSelectorsAuthority()
+                throws SQLException {
+            when(primaryReadPool.getConnection()).thenReturn(primaryReadConnection);
+            ReadSourceSelector selector = new ReadSourceSelector(List.of(
+                    new ReadSourceSelector.Source(REPLICA, false, new HikariDataSource(),
+                            CircuitBreaker.ofDefaults(REPLICA)),
+                    new ReadSourceSelector.Source(ReadSourceProperties.PRIMARY, true, primaryReadPool,
+                            CircuitBreaker.ofDefaults(ReadSourceProperties.PRIMARY))));
+            AbstractRoutingDataSource routing = routing(config, selector, new HikariDataSource());
+            TransactionSynchronizationManager.setCurrentTransactionReadOnly(true);
+            ReadOnlyRoutingDataSource.pinTo(RoutingKey.PRIMARY);
+            try {
+                assertThat(routing.getConnection()).isSameAs(primaryReadConnection);
+            } finally {
+                ReadOnlyRoutingDataSource.clear();
+                TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
+            }
         }
     }
 
     @Nested
-    class OregonPodWithoutReplica {
+    class OregonPodReadingThePrimaryFirst {
 
         private final RoutingDataSourceConfig config =
-                new RoutingDataSourceConfig(primaryProperties(), replicaProperties(false));
+                new RoutingDataSourceConfig(primaryProperties(), readSources(ReadSourceProperties.PRIMARY, REPLICA));
 
         @Test
-        void buildPrimaryHikariConfig_WhenReplicaDisabled_UsesOregonPrimaryPool() {
+        void buildPrimaryHikariConfig_WhenThePrimaryReadsFirst_UsesOregonPrimaryPool() {
             HikariConfig hikari = config.buildPrimaryHikariConfig();
 
             assertThat(hikari.getMaximumPoolSize()).isEqualTo(PoolLedger.OREGON_PRIMARY_POOL);
         }
 
         @Test
-        void dataSource_WhenNoFallbackReplicaPool_ReadsTheSamePrimaryTargetAsWrites() {
-            Map<Object, DataSource> targets = resolvedTargets(config, null);
+        void dataSource_WhenNoBulkheadPoolExists_RoutesReadsToTheSelectorAndHoldsNoBulkheadTarget() {
+            ReadSourceSelector selector = selector();
 
-            assertThat(targets.get(RoutingKey.REPLICA)).isSameAs(targets.get(RoutingKey.PRIMARY));
+            Map<Object, DataSource> targets = resolvedTargets(config, selector, null);
+
+            assertThat(targets.get(RoutingKey.REPLICA)).isSameAs(selector);
             assertThat(targets).doesNotContainKey(RoutingKey.BULKHEAD);
-        }
-
-        @Test
-        void dataSource_WhenFallbackReplicaPoolExists_ReadsThroughTheBreakerAndWritesDoNot() {
-            Map<Object, DataSource> targets = resolvedTargets(config, new HikariDataSource());
-
-            assertThat(targets.get(RoutingKey.REPLICA)).isInstanceOf(PrimaryReadFallbackDataSource.class);
-            assertThat(targets.get(RoutingKey.PRIMARY)).isNotInstanceOf(PrimaryReadFallbackDataSource.class);
-        }
-
-        @Test
-        void buildFallbackReplicaHikariConfig_WhenBuilt_IsASmallPoolOnThePrimaryCredentials() {
-            FallbackReplicaProperties fallback = new FallbackReplicaProperties();
-            fallback.setUrl("jdbc:mysql://seoul-replica:3306/planner");
-
-            HikariConfig hikari = new ReadFallbackConfig(
-                    primaryProperties(), new HikariTuningProperties(), fallback)
-                    .buildFallbackReplicaHikariConfig();
-
-            assertThat(hikari.getJdbcUrl()).isEqualTo(fallback.getUrl());
-            assertThat(hikari.getUsername()).isEqualTo(primaryProperties().getUsername());
-            assertThat(hikari.getPassword()).isEqualTo(primaryProperties().getPassword());
-            assertThat(hikari.getPoolName()).isEqualTo(FallbackReplicaProperties.POOL_NAME);
-            assertThat(hikari.getMaximumPoolSize()).isEqualTo(FallbackReplicaProperties.POOL_SIZE);
-        }
-
-        @Test
-        void buildFallbackReplicaHikariConfig_WhenBuilt_StartsWithoutReachingTheFallbackReplica() {
-            FallbackReplicaProperties fallback = new FallbackReplicaProperties();
-            fallback.setUrl("jdbc:mysql://seoul-replica:3306/planner");
-
-            HikariConfig hikari = new ReadFallbackConfig(
-                    primaryProperties(), new HikariTuningProperties(), fallback)
-                    .buildFallbackReplicaHikariConfig();
-
-            assertThat(hikari.getInitializationFailTimeout()).isNegative();
         }
     }
 }

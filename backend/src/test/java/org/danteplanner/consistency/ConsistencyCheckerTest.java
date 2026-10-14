@@ -243,6 +243,24 @@ class ConsistencyCheckerTest {
     }
 
     @Test
+    void reads_WhenEachWasRefusedWith503_AreClean() {
+        Verdict verdict = ConsistencyChecker.check(History.of(List.of(
+                new Save("s1", "p1", 10, 20, new Applied(5)),
+                new Read("s1", "p1", 30, 40, new ReadFailed(503)),
+                new Read("s2", "p1", 30, 40, new ReadFailed(503)),
+                new Publish("s1", "p1", 50, 60, new Changed()),
+                new PublicRead("anon", "p1", 70, 80, new ReadFailed(503)),
+                new Unpublish("s1", "p1", 90, 100, new Changed()),
+                new PublicRead("anon", "p1", 110, 120, new ReadFailed(503)),
+                new Delete("s1", "p1", 130, 140, new Deleted()),
+                new Read("s2", "p1", 150, 160, new ReadFailed(503)),
+                new PublicRead("anon", "p1", 150, 160, new ReadFailed(503)))));
+
+        assertThat(verdict.violations()).isEmpty();
+        assertThat(verdict.anomalies()).isEmpty();
+    }
+
+    @Test
     void check_WhenTheHistoryIsEmpty_IsClean() {
         Verdict verdict = ConsistencyChecker.check(History.of(List.of()));
 

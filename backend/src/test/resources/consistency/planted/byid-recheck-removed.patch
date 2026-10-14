@@ -1,15 +1,15 @@
 diff --git a/backend/src/main/java/org/danteplanner/backend/shared/readpath/PrimaryReCheck.java b/backend/src/main/java/org/danteplanner/backend/shared/readpath/PrimaryReCheck.java
-index ace41ee8..56a18838 100644
+index 9d984fe..c6ea1db 100644
 --- a/backend/src/main/java/org/danteplanner/backend/shared/readpath/PrimaryReCheck.java
 +++ b/backend/src/main/java/org/danteplanner/backend/shared/readpath/PrimaryReCheck.java
-@@ -41,9 +41,7 @@ public class PrimaryReCheck {
-         try {
-             hit = dereference.get();
-         } catch (EntityNotFoundException miss) {
+@@ -58,9 +58,7 @@ public class PrimaryReCheck {
+             if (servedByAuthority.getAsBoolean()) {
+                 throw miss;
+             }
 -            T promoted = onBulkhead(dereference);
 -            promotedCounter.increment();
 -            return promoted;
 +            throw miss;
          }
-         if (tombstoneStore.isTombstoned(entityType, id)) {
-             countTombstoneHits(entityType, 1);
+         if (servedByAuthority.getAsBoolean()) {
+             return hit;

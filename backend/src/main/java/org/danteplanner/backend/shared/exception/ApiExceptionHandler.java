@@ -31,8 +31,11 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -165,8 +168,22 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
             CannotCreateTransactionException.class
     })
     public ResponseEntity<Object> handleDatabaseUnavailable(NestedRuntimeException ex, WebRequest request) {
+        ReadTemporarilyUnavailableException read = readUnavailableCause(ex);
+        if (read != null) {
+            return handleErrorResponseException(read, read.getHeaders(), read.getStatusCode(), request);
+        }
         log.warn("Database unavailable (transient): {}", ex.getMessage());
         return degraded(ex, DegradationErrorConstants.DB_UNAVAILABLE, request);
+    }
+
+    private static ReadTemporarilyUnavailableException readUnavailableCause(Throwable failure) {
+        Set<Throwable> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        for (Throwable link = failure; link != null && visited.add(link); link = link.getCause()) {
+            if (link instanceof ReadTemporarilyUnavailableException read) {
+                return read;
+            }
+        }
+        return null;
     }
 
     /**

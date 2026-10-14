@@ -278,10 +278,11 @@ class DegradationIT {
         registry.add("spring.flyway.password", PRIMARY::getPassword);
 
         registry.add("datasource.routing.enabled", () -> "true");
-        registry.add("datasource.replica.enabled", () -> "true");
-        registry.add("datasource.replica.url", REPLICA::getJdbcUrl);
-        registry.add("datasource.replica.username", REPLICA::getUsername);
-        registry.add("datasource.replica.password", REPLICA::getPassword);
+        registry.add("datasource.read-sources[0].name", () -> "seoul-replica");
+        registry.add("datasource.read-sources[0].url", REPLICA::getJdbcUrl);
+        registry.add("datasource.read-sources[0].username", REPLICA::getUsername);
+        registry.add("datasource.read-sources[0].password", REPLICA::getPassword);
+        registry.add("datasource.read-sources[1].name", () -> "primary");
 
         registry.add("redis.auth.host", DEGRADATION_TOXIPROXY::getHost);
         registry.add("redis.auth.port", () -> DEGRADATION_TOXIPROXY.getMappedPort(PROXY_LISTEN_PORT));

@@ -37,8 +37,9 @@ import org.junit.jupiter.api.Test;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
-import org.danteplanner.backend.shared.config.FallbackReplicaProperties;
-import org.danteplanner.backend.shared.config.ReadFallbackConfig;
+import org.danteplanner.backend.shared.config.ReadSourceProperties;
+import org.danteplanner.backend.shared.config.ReadSourceSelector;
+import org.danteplanner.backend.shared.config.ReadSourcesConfig;
 import org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource;
 import org.danteplanner.backend.shared.config.RoutingKey;
 import org.danteplanner.backend.shared.config.UndeclaredPrimaryAccessGuard;
@@ -94,6 +95,9 @@ class TwoRegionHarnessIT extends ReplicaRoutingHarnessSupport {
     @Autowired
     private DataSource dataSource;
 
+    @Autowired
+    private ReadSourceSelector readSourceSelector;
+
     @AfterAll
     static void closeOregon() {
         if (oregon != null) {
@@ -128,12 +132,13 @@ class TwoRegionHarnessIT extends ReplicaRoutingHarnessSupport {
     @Test
     void oregonPrimaryCut_WhenBothRegionsWrite_OnlyOregonAnswersWriteUnavailable() throws Exception {
         Session session = newSession("two-region-cut-write-");
+        MockMvc oregonMvc = oregon().mockMvc();
 
         try {
             toxiproxyControl.cutOregonPrimary();
             awaitOregonBreaker(CircuitBreaker.State.OPEN);
 
-            upsert(oregon().mockMvc(), session, UUID.randomUUID(), "two-region-oregon-blocked", false)
+            upsert(oregonMvc, session, UUID.randomUUID(), "two-region-oregon-blocked", false)
                     .andExpect(status().isServiceUnavailable())
                     .andExpect(jsonPath("$.code").value("WRITE_TEMPORARILY_UNAVAILABLE"));
             upsert(mockMvc, session, UUID.randomUUID(), "two-region-seoul-write", false)
@@ -161,7 +166,7 @@ class TwoRegionHarnessIT extends ReplicaRoutingHarnessSupport {
 
             assertThat(fallbackAcquisitions())
                     .as("the read must acquire a connection from the Oregon %s pool",
-                            FallbackReplicaProperties.POOL_NAME)
+                            OregonContext.REPLICA_SOURCE)
                     .isGreaterThanOrEqualTo(acquisitionsBefore + 1);
         } finally {
             restoreOregonPrimary();
@@ -174,12 +179,16 @@ class TwoRegionHarnessIT extends ReplicaRoutingHarnessSupport {
         UUID plannerId = UUID.randomUUID();
 
         try {
-            writePrimaryOnlyTitle(session, plannerId);
+            upsert(oregon().mockMvc(), session, plannerId, REPLICATED_TITLE, false).andExpect(status().isCreated());
+            replicationControl.awaitCaughtUp();
             toxiproxyControl.cutOregonPrimary();
             awaitOregonBreaker(CircuitBreaker.State.OPEN);
             assertThat(oregonTitle(session, plannerId))
-                    .as("an open breaker serves the stale fallback replica")
+                    .as("an open breaker serves a planner unchanged since before the cut from the replica")
                     .isEqualTo(REPLICATED_TITLE);
+
+            replicationControl.stopReplica();
+            upsert(mockMvc, session, plannerId, PRIMARY_ONLY_TITLE, true).andExpect(status().isOk());
 
             long restoredAt = System.nanoTime();
             toxiproxyControl.restoreOregonPrimary();
@@ -236,6 +245,34 @@ class TwoRegionHarnessIT extends ReplicaRoutingHarnessSupport {
         }
     }
 
+    @Test
+    void seoulPrimaryBreaker_WhenOpen_LeavesTheOregonPrimaryBreakerClosed() {
+        double oregonOpenedBefore = oregonTransitions("closed", "open");
+        CircuitBreaker seoulPrimary = readSourceSelector.authority().breaker();
+
+        try {
+            seoulPrimary.transitionToOpenState();
+
+            assertThat(oregonBreakerGauge("closed"))
+                    .as("the Oregon breaker for the primary stays closed while Seoul's is open")
+                    .isEqualTo(1.0);
+            assertThat(oregonTransitions("closed", "open"))
+                    .as("opening Seoul's breaker records no transition in Oregon")
+                    .isEqualTo(oregonOpenedBefore);
+            assertThat(seoulPrimary.getState())
+                    .as("Seoul's breaker was open throughout the Oregon checks")
+                    .isEqualTo(CircuitBreaker.State.OPEN);
+        } finally {
+            seoulPrimary.reset();
+        }
+    }
+
+    private double oregonTransitions(String from, String to) {
+        Counter counter = oregon().meterRegistry().find(ReadSourcesConfig.BREAKER_TRANSITIONS)
+                .tag("source", ReadSourceProperties.PRIMARY).tag("from", from).tag("to", to).counter();
+        return counter == null ? 0.0 : counter.count();
+    }
+
     private static OregonContext oregon() {
         if (oregon == null) {
             oregon = OregonContext.start();
@@ -270,14 +307,14 @@ class TwoRegionHarnessIT extends ReplicaRoutingHarnessSupport {
 
     private double oregonBreakerGauge(String state) {
         Gauge gauge = oregon().meterRegistry().find(BREAKER_STATE_GAUGE)
-                .tag("name", ReadFallbackConfig.PRIMARY_READ_BREAKER).tag("state", state).gauge();
+                .tag("name", ReadSourcesConfig.breakerName(ReadSourceProperties.PRIMARY)).tag("state", state).gauge();
         return gauge == null ? Double.NaN : gauge.value();
     }
 
     private long fallbackAcquisitions() {
         Timer timer = oregon().meterRegistry().find(POOL_ACQUIRE_TIMER)
-                .tag("pool", FallbackReplicaProperties.POOL_NAME).timer();
-        assertThat(timer).as("the Oregon context meters the %s pool", FallbackReplicaProperties.POOL_NAME)
+                .tag("pool", OregonContext.REPLICA_SOURCE).timer();
+        assertThat(timer).as("the Oregon context meters the %s pool", OregonContext.REPLICA_SOURCE)
                 .isNotNull();
         return timer.count();
     }

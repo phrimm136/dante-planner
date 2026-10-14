@@ -263,7 +263,7 @@ describe('ApiClient', () => {
       expect((error as RateLimitError).code).toBe('RATE_LIMIT_EXCEEDED')
     })
 
-    it.each(['RATE_LIMIT_TEMPORARILY_UNAVAILABLE', 'DEADLOCK'])(
+    it.each(['RATE_LIMIT_TEMPORARILY_UNAVAILABLE', 'DEADLOCK', 'READ_TEMPORARILY_UNAVAILABLE'])(
       '503 with code %s throws RetryableUnavailableError',
       async (code) => {
         answer(json(503, { code, detail: 'please retry' }))
@@ -546,6 +546,7 @@ describe('ApiClient', () => {
         ['AUTH_TEMPORARILY_UNAVAILABLE', AuthTemporarilyUnavailableError],
         ['RATE_LIMIT_TEMPORARILY_UNAVAILABLE', RetryableUnavailableError],
         ['DEADLOCK', RetryableUnavailableError],
+        ['READ_TEMPORARILY_UNAVAILABLE', RetryableUnavailableError],
         ['SERVICE_UPDATING', ServiceUpdatingError],
       ].flatMap(([code, error]) =>
         initialStatuses.map((initial) => [code, error, initial] as const),

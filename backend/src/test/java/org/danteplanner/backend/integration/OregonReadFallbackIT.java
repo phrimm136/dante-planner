@@ -16,8 +16,9 @@ import java.util.concurrent.locks.LockSupport;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
-import org.danteplanner.backend.shared.config.FallbackReplicaProperties;
-import org.danteplanner.backend.shared.config.ReadFallbackConfig;
+import org.danteplanner.backend.shared.config.ReadSourceProperties;
+import org.danteplanner.backend.shared.config.ReadSourceSelector;
+import org.danteplanner.backend.shared.config.ReadSourcesConfig;
 import org.danteplanner.backend.shared.gtid.GtidCookie;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -87,6 +88,8 @@ class OregonReadFallbackIT {
     private MeterRegistry meterRegistry;
 
     @Autowired
+    private ReadSourceSelector readSourceSelector;
+
     private CircuitBreaker primaryReadBreaker;
 
     @Autowired
@@ -120,10 +123,11 @@ class OregonReadFallbackIT {
         registry.add("redis.rate-limit.port", CausalHarnessSupport.RATE_LIMIT_REDIS::getRedisPort);
 
         registry.add("datasource.routing.enabled", () -> "true");
-        registry.add("datasource.replica.enabled", () -> "false");
-        registry.add(FallbackReplicaProperties.URL_PROPERTY, CausalHarnessSupport.REPLICA::getJdbcUrl);
-        registry.add("datasource.fallback-replica.breaker.sliding-window-size", () -> BREAKER_WINDOW);
-        registry.add("datasource.fallback-replica.breaker.minimum-number-of-calls", () -> BREAKER_WINDOW);
+        registry.add("datasource.read-sources[0].name", () -> ReadSourceProperties.PRIMARY);
+        registry.add("datasource.read-sources[1].name", () -> OregonContext.REPLICA_SOURCE);
+        registry.add("datasource.read-sources[1].url", CausalHarnessSupport.REPLICA::getJdbcUrl);
+        registry.add("datasource.read-source-breaker.sliding-window-size", () -> BREAKER_WINDOW);
+        registry.add("datasource.read-source-breaker.minimum-number-of-calls", () -> BREAKER_WINDOW);
     }
 
     private static String primaryUrlThroughProxy() {
@@ -142,6 +146,7 @@ class OregonReadFallbackIT {
         new ToxiproxyControl(CausalHarnessSupport.APP_TO_PRIMARY_PROXY).restoreOregonPrimary();
         replicationControl = new ReplicationControl(primaryJdbcTemplate, replicaJdbcTemplate);
         replicaJdbcTemplate.execute("START REPLICA");
+        primaryReadBreaker = readSourceSelector.authority().breaker();
         primaryReadBreaker.reset();
         assertThat(primaryPool.getJdbcUrl())
                 .as("the Oregon primary must be reached through the proxy the test cuts")
@@ -149,7 +154,7 @@ class OregonReadFallbackIT {
     }
 
     @Test
-    void rywCookie_WhenRegionHasNoReplica_WriteMintsCookieAndGatedReadLeavesItUntouched()
+    void rywCookie_WhenTheAuthorityReadsFirstOnAClosedBreaker_WriteMintsCookieAndReadLeavesItUntouchedWithoutTheGate()
             throws Exception {
         Session session = newSession("oregon-ryw-");
         UUID plannerId = UUID.randomUUID();
@@ -171,10 +176,10 @@ class OregonReadFallbackIT {
                     .andReturn();
 
             assertThat(read.getResponse().getHeaders(HttpHeaders.SET_COOKIE))
-                    .as("with no replica the read must neither clear nor re-mint the ryw cookie")
+                    .as("a read the closed-breaker authority serves first must neither clear nor re-mint the ryw cookie")
                     .noneMatch(header -> header.startsWith(GtidCookie.NAME + "="));
             assertThat(gateRuns())
-                    .as("a region without a replica never runs the read gate")
+                    .as("a read the closed-breaker authority serves first never runs the read gate")
                     .isEqualTo(gateRunsBefore);
         } finally {
             replicationControl.startReplica();
@@ -221,21 +226,22 @@ class OregonReadFallbackIT {
     }
 
     @Test
-    void primaryReadBreaker_WhenOpen_ServesStaleReadsAndFailsWritesTyped() throws Exception {
+    void primaryReadBreaker_WhenOpen_ServesUnchangedReadsFromTheReplicaAndFailsWritesTyped() throws Exception {
         Session session = newSession("oregon-breaker-");
         UUID plannerId = UUID.randomUUID();
 
         try {
-            writePrimaryOnlyTitle(session, plannerId);
+            upsert(session, plannerId, REPLICATED_TITLE, false).andExpect(status().is2xxSuccessful());
+            replicationControl.awaitCaughtUp();
             assertThat(readTitle(session, plannerId))
                     .as("closed breaker: reads go to the primary")
-                    .isEqualTo(PRIMARY_ONLY_TITLE);
+                    .isEqualTo(REPLICATED_TITLE);
 
             cutThePrimary();
             awaitBreaker(CircuitBreaker.State.OPEN);
 
             assertThat(readTitle(session, plannerId))
-                    .as("open breaker: reads are served by the fallback replica, stale by design")
+                    .as("open breaker: a planner unchanged since before the cut is served by the Seoul replica")
                     .isEqualTo(REPLICATED_TITLE);
             upsert(session, UUID.randomUUID(), "oregon-breaker-blocked-write", false)
                     .andExpect(status().isServiceUnavailable())
@@ -343,14 +349,14 @@ class OregonReadFallbackIT {
     }
 
     private double transitions(String from, String to) {
-        Counter counter = meterRegistry.find(ReadFallbackConfig.BREAKER_TRANSITIONS)
-                .tag("from", from).tag("to", to).counter();
+        Counter counter = meterRegistry.find(ReadSourcesConfig.BREAKER_TRANSITIONS)
+                .tag("source", ReadSourceProperties.PRIMARY).tag("from", from).tag("to", to).counter();
         return counter == null ? 0.0 : counter.count();
     }
 
     private double breakerStateGauge(String state) {
         Gauge gauge = meterRegistry.find(BREAKER_STATE_GAUGE)
-                .tag("name", ReadFallbackConfig.PRIMARY_READ_BREAKER).tag("state", state).gauge();
+                .tag("name", ReadSourcesConfig.breakerName(ReadSourceProperties.PRIMARY)).tag("state", state).gauge();
         return gauge == null ? Double.NaN : gauge.value();
     }
 

@@ -2,7 +2,12 @@ package org.danteplanner.backend.config;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -23,6 +28,11 @@ class DegradeByOperationConfigTest {
 
     private static final int MIN_SCHEDULER_POOL = 4;
     private static final int MAX_SOCKET_TIMEOUT_MS = 15_000;
+    private static final List<Path> REGION_CONFIGMAPS = List.of(
+            Path.of("../deploy/overlays/seoul/configmap-patch.yaml"),
+            Path.of("../deploy/overlays/oregon/configmap-patch.yaml"));
+    private static final Pattern READ_SOURCE_URL =
+            Pattern.compile("^\\s*DATASOURCE_READSOURCES_\\d+_URL:\\s*\"?([^\"]*)\"?\\s*$", Pattern.MULTILINE);
 
     private static Properties load(String resource) throws IOException {
         Properties properties = new Properties();
@@ -59,7 +69,6 @@ class DegradeByOperationConfigTest {
     void writeHangReadsSurvive_WhenPrimaryHangs_AppJdbcUrlBoundsSocketWaitAndFlywayUrlStaysUnbounded() throws IOException {
         Properties prod = load("/application-prod.properties");
         String appUrl = prod.getProperty("spring.datasource.url");
-        String replicaUrl = prod.getProperty("datasource.replica.url");
         String flywayUrl = prod.getProperty("spring.flyway.url");
 
         assertThat(socketTimeoutOf(appUrl))
@@ -69,10 +78,16 @@ class DegradeByOperationConfigTest {
                 .isLessThanOrEqualTo(MAX_SOCKET_TIMEOUT_MS);
         assertThat(appUrl).as("the application url must bound the connect wait").contains("connectTimeout=");
 
-        assertThat(socketTimeoutOf(replicaUrl))
-                .as("the replica url must bound the socket wait too")
-                .isNotNull()
-                .isLessThanOrEqualTo(MAX_SOCKET_TIMEOUT_MS);
+        for (Path configmap : REGION_CONFIGMAPS) {
+            Matcher readSourceUrls = READ_SOURCE_URL.matcher(Files.readString(configmap));
+            assertThat(readSourceUrls.find()).as("%s must set a read-source url", configmap).isTrue();
+            do {
+                assertThat(socketTimeoutOf(readSourceUrls.group(1)))
+                        .as("the replica url must bound the socket wait too")
+                        .isNotNull()
+                        .isLessThanOrEqualTo(MAX_SOCKET_TIMEOUT_MS);
+            } while (readSourceUrls.find());
+        }
 
         assertThat(flywayUrl)
                 .as("Flyway must stay unbounded; a long migration would abort at the socket timeout")

@@ -1,6 +1,7 @@
 package org.danteplanner.backend.shared.config;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -13,18 +14,22 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 import org.springframework.util.StringUtils;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.danteplanner.backend.shared.gtid.GtidCapturingDataSource;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
+import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.danteplanner.backend.shared.readpath.PrimaryReCheck;
 
@@ -36,30 +41,30 @@ import org.danteplanner.backend.shared.readpath.PrimaryReCheck;
 @ConditionalOnProperty(name = "datasource.routing.enabled", havingValue = "true")
 @EnableConfigurationProperties({
         DataSourceProperties.class,
-        ReplicaDataSourceProperties.class,
+        ReadSourceProperties.class,
         BulkheadDataSourceProperties.class,
         HikariTuningProperties.class})
 public class RoutingDataSourceConfig {
 
     private final DataSourceProperties primaryProperties;
-    private final ReplicaDataSourceProperties replicaProperties;
+    private final ReadSourceProperties readSourceProperties;
     private final BulkheadDataSourceProperties bulkheadProperties;
     private final HikariTuningProperties hikariProperties;
 
     public RoutingDataSourceConfig(
-            DataSourceProperties primaryProperties, ReplicaDataSourceProperties replicaProperties) {
-        this(primaryProperties, replicaProperties,
+            DataSourceProperties primaryProperties, ReadSourceProperties readSourceProperties) {
+        this(primaryProperties, readSourceProperties,
                 new BulkheadDataSourceProperties(), new HikariTuningProperties());
     }
 
     @Autowired
     public RoutingDataSourceConfig(
             DataSourceProperties primaryProperties,
-            ReplicaDataSourceProperties replicaProperties,
+            ReadSourceProperties readSourceProperties,
             BulkheadDataSourceProperties bulkheadProperties,
             HikariTuningProperties hikariProperties) {
         this.primaryProperties = primaryProperties;
-        this.replicaProperties = replicaProperties;
+        this.readSourceProperties = readSourceProperties;
         this.bulkheadProperties = bulkheadProperties;
         this.hikariProperties = hikariProperties;
     }
@@ -70,19 +75,9 @@ public class RoutingDataSourceConfig {
         applyEndpoint(config, primaryProperties.getUrl(),
                 primaryProperties.getUsername(), primaryProperties.getPassword());
         config.setMaximumPoolSize(
-                replicaProperties.isEnabled()
-                        ? PoolLedger.SEOUL_PRIMARY_POOL
-                        : PoolLedger.OREGON_PRIMARY_POOL);
-        config.setConnectionTimeout(hikariProperties.getConnectionTimeout());
-        return config;
-    }
-
-    public HikariConfig buildReplicaHikariConfig() {
-        HikariConfig config = new HikariConfig();
-        config.setPoolName(PoolLedger.REPLICA_POOL_NAME);
-        applyEndpoint(config, replicaProperties.getUrl(),
-                replicaProperties.getUsername(), replicaProperties.getPassword());
-        config.setMaximumPoolSize(PoolLedger.SEOUL_REPLICA_POOL);
+                readSourceProperties.readsPrimaryFirst()
+                        ? PoolLedger.OREGON_PRIMARY_POOL
+                        : PoolLedger.SEOUL_PRIMARY_POOL);
         config.setConnectionTimeout(hikariProperties.getConnectionTimeout());
         return config;
     }
@@ -118,13 +113,7 @@ public class RoutingDataSourceConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(name = "datasource.replica.enabled", havingValue = "true")
-    public HikariDataSource replicaPool() {
-        return new HikariDataSource(buildReplicaHikariConfig());
-    }
-
-    @Bean
-    @ConditionalOnProperty(name = "datasource.replica.enabled", havingValue = "true")
+    @Conditional(ReadsAReplicaFirst.class)
     public HikariDataSource bulkheadPool() {
         return new HikariDataSource(buildBulkheadHikariConfig());
     }
@@ -142,34 +131,39 @@ public class RoutingDataSourceConfig {
             GtidWriteCapture gtidWriteCapture,
             UndeclaredPrimaryAccessGuard undeclaredGuard,
             @Qualifier("primaryPool") HikariDataSource primaryPool,
-            @Qualifier("replicaPool") ObjectProvider<HikariDataSource> replicaPool,
             @Qualifier("bulkheadPool") ObjectProvider<HikariDataSource> bulkheadPool,
-            @Qualifier("fallbackReplicaPool") ObjectProvider<HikariDataSource> fallbackReplicaPool,
-            ObjectProvider<CircuitBreaker> primaryReadBreaker) {
+            ReadSourceSelector readSourceSelector) {
         // The committed GTID lives as session state on the physical connection.
         DataSource primary = new GtidCapturingDataSource(primaryPool, gtidWriteCapture);
         Map<Object, Object> targets = new HashMap<>();
         targets.put(RoutingKey.PRIMARY, primary);
-        if (replicaProperties.isEnabled()) {
-            targets.put(RoutingKey.REPLICA, replicaPool.getObject());
-            targets.put(RoutingKey.BULKHEAD, bulkheadPool.getObject());
-        } else {
-            HikariDataSource fallbackReplica = fallbackReplicaPool.getIfAvailable();
-            targets.put(RoutingKey.REPLICA, fallbackReplica == null
-                    ? primary
-                    : new PrimaryReadFallbackDataSource(
-                            primary, fallbackReplica, primaryReadBreaker.getObject()));
-        }
+        targets.put(RoutingKey.REPLICA, readSourceSelector);
+        bulkheadPool.ifAvailable(bulkhead -> targets.put(RoutingKey.BULKHEAD, bulkhead));
         ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(undeclaredGuard);
         routing.setTargetDataSources(targets);
+        routing.setAuthorityReadSource(readSourceSelector.authorityReads());
         routing.setDefaultTargetDataSource(primary);
         routing.afterPropertiesSet();
         return new LazyConnectionDataSourceProxy(routing);
     }
 
     @Bean
-    @ConditionalOnProperty(name = "datasource.replica.enabled", havingValue = "true")
-    public PrimaryReCheck primaryReCheck(MeterRegistry meterRegistry, ContentTombstoneStore tombstoneStore) {
-        return new PrimaryReCheck(meterRegistry, tombstoneStore);
+    public PrimaryReCheck primaryReCheck(
+            MeterRegistry meterRegistry,
+            ContentTombstoneStore tombstoneStore,
+            ReadSourceSelector readSourceSelector) {
+        return new PrimaryReCheck(meterRegistry, tombstoneStore,
+                ChosenReadSource::servedByAuthority,
+                readSourceSelector::isAuthorityHealthy,
+                readSourceProperties.readsPrimaryFirst() ? RoutingKey.PRIMARY : RoutingKey.BULKHEAD);
+    }
+
+    public static class ReadsAReplicaFirst implements Condition {
+
+        @Override
+        public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+            List<ReadSourceProperties.Source> sources = ReadSourcesConfig.boundSources(context.getEnvironment());
+            return !sources.isEmpty() && !sources.get(0).isPrimary();
+        }
     }
 }

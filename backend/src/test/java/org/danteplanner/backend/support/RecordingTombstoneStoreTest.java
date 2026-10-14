@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
+import org.danteplanner.backend.shared.config.RoutingKey;
 import org.danteplanner.backend.shared.exception.EntityNotFoundException;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.readpath.PrimaryReCheck;
@@ -31,7 +32,8 @@ class RecordingTombstoneStoreTest {
     private static final String PUBLISHED = ByIdReadGuard.PUBLISHED_PLANNER_SCOPE;
 
     private final RecordingTombstoneStore store = new RecordingTombstoneStore();
-    private final PrimaryReCheck reCheck = new PrimaryReCheck(new SimpleMeterRegistry(), store);
+    private final PrimaryReCheck reCheck = new PrimaryReCheck(new SimpleMeterRegistry(), store,
+            () -> false, () -> true, RoutingKey.BULKHEAD);
 
     @Test
     void readWithReCheck_WhenTheRowIsTombstoned_TreatsItAsGone() {
