@@ -88,7 +88,7 @@ export function stageLabelText(
     case 'rpg':
       return joined(
         `${String(label.canto)}-${String(label.node)}`,
-        t('battle.rpgFloor', { floor: label.floor }),
+        label.floor === undefined ? undefined : t('battle.rpgFloor', { floor: label.floor }),
       )
   }
 }

@@ -450,7 +450,7 @@ const StageLabelSchema = z.discriminatedUnion('kind', [
       canto: z.number(),
       node: z.number(),
       route: z.string(),
-      floor: z.string(),
+      floor: z.string().optional(),
     })
     .strict(),
   z.object({ kind: z.literal('tutorial') }).strict(),

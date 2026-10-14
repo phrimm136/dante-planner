@@ -27,6 +27,7 @@ import { BattleFacetNamesSchema } from '../../schemas/BattleSpecSchemas'
 import {
   engagementLabel,
   engagementPlace,
+  stageLabelText,
   suffixedLabel,
   type EngagementSources,
 } from '../engagementLabels'
@@ -94,6 +95,32 @@ describe('engagement labels', () => {
     expect(engagementPlace(row, sources, translate)).toBe('10-5 · Floor B1')
     await i18n.changeLanguage('KR')
     await vi.waitFor(() => expect(engagementPlace(row, sources, translate)).toBe('10-5 · B1층'))
+  })
+
+  it('labels an RPG battle with no floor by its node alone', () => {
+    expect(
+      stageLabelText({ kind: 'rpg', canto: 10, node: 6, route: 'C-1' }, undefined, translate),
+    ).toBe('10-6')
+  })
+
+  it('labels an RPG battle on a floor by its node and floor', () => {
+    expect(
+      stageLabelText(
+        { kind: 'rpg', canto: 10, node: 6, route: 'C-2', floor: '7' },
+        undefined,
+        translate,
+      ),
+    ).toBe('10-6 · Floor 7')
+  })
+
+  it('parses an RPG label with or without a floor and rejects an unknown key', () => {
+    const stage = stageList['storybattle-a1c10p2.json#11033']
+    const withLabels = (labels: unknown[]) =>
+      BattleStageListSchema.safeParse({ 'rpg#1': { ...stage, labels } }).success
+    const floorless = { kind: 'rpg', canto: 10, node: 6, route: 'C-1' }
+    expect(withLabels([floorless])).toBe(true)
+    expect(withLabels([{ ...floorless, floor: '7' }])).toBe(true)
+    expect(withLabels([{ ...floorless, extra: 1 }])).toBe(false)
   })
 
   it('joins every label of a row placed on two floors', () => {
