@@ -6,51 +6,51 @@ import {
   getPierceResistIconPath,
   getBluntResistIconPath,
 } from '@/shared/assets'
-import { getResistanceInfo } from '@/shared/gameData'
+import { RESIST_LEVEL_COLOURS, resistLevel } from '@/shared/gameData'
+
+import { BlankValue, type Shown } from './StatusPanel'
 
 interface ResistancePanelProps {
-  slash: number
-  pierce: number
-  blunt: number
+  resist: Shown<{ slash: number; pierce: number; blunt: number }>
 }
 
-export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) {
+export function ResistReading({ value }: { value: number | undefined }) {
+  const { t } = useTranslation('database')
+  if (value === undefined) return <BlankValue />
+  const level = resistLevel(value)
+  const color = RESIST_LEVEL_COLOURS[level]
+  return (
+    <div className="flex flex-col items-center">
+      <span className="text-xs" style={{ color }}>
+        {t(`identity.resist.${level}`)}
+      </span>
+      <span className="text-xs" style={{ color }}>
+        (x{value})
+      </span>
+    </div>
+  )
+}
+
+export function ResistancePanel({ resist }: ResistancePanelProps) {
   const { t } = useTranslation(['database', 'common'])
-  const slashInfo = getResistanceInfo(slash)
-  const pierceInfo = getResistanceInfo(pierce)
-  const bluntInfo = getResistanceInfo(blunt)
+  const shown = resist.kind === 'shown' ? resist.value : undefined
 
   return (
     <LabeledPanel title={t('identity.resistances')}>
       <div className="flex justify-around items-center">
         <div className="flex flex-col items-center gap-2">
           <img src={getSlashResistIconPath()} alt="Slash" className="w-6 h-6 object-contain" />
-          <div className="flex flex-col items-center">
-            <span className={`text-xs ${slashInfo.color}`}>
-              {t(`identity.resist.${slashInfo.categoryKey}`)}
-            </span>
-            <span className={`text-xs ${slashInfo.color}`}>(x{slashInfo.value})</span>
-          </div>
+          <ResistReading value={shown?.slash} />
         </div>
 
         <div className="flex flex-col items-center gap-2">
           <img src={getPierceResistIconPath()} alt="Pierce" className="w-6 h-6 object-contain" />
-          <div className="flex flex-col items-center">
-            <span className={`text-xs ${pierceInfo.color}`}>
-              {t(`identity.resist.${pierceInfo.categoryKey}`)}
-            </span>
-            <span className={`text-xs ${pierceInfo.color}`}>(x{pierceInfo.value})</span>
-          </div>
+          <ResistReading value={shown?.pierce} />
         </div>
 
         <div className="flex flex-col items-center gap-2">
           <img src={getBluntResistIconPath()} alt="Blunt" className="w-6 h-6 object-contain" />
-          <div className="flex flex-col items-center">
-            <span className={`text-xs ${bluntInfo.color}`}>
-              {t(`identity.resist.${bluntInfo.categoryKey}`)}
-            </span>
-            <span className={`text-xs ${bluntInfo.color}`}>(x{bluntInfo.value})</span>
-          </div>
+          <ResistReading value={shown?.blunt} />
         </div>
       </div>
     </LabeledPanel>

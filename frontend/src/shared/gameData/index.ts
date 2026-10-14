@@ -120,8 +120,8 @@ export type { AttributeColors } from './colorUtils'
 
 export { migrateKeywords } from './keywordNormalize'
 
-export { getResistanceInfo } from './resistance'
-export type { ResistanceCategoryKey, ResistanceInfo } from './resistance'
+export { RESIST_LEVEL_COLOURS, resistLevel } from './resistance'
+export type { ResistLevel } from './resistance'
 
 export {
   IdentityIdSchema,

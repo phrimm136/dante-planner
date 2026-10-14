@@ -12,16 +12,7 @@ import {
   TraitsDisplay,
 } from '@/shared/unitStatus'
 import { useBattleDetailI18n, type BattleI18nConfig } from '../../hooks/useBattleDetailData'
-import {
-  defenseAtLevel,
-  partStatus,
-  phaseStatus,
-  phaseTexts,
-  resistances,
-  speedAtTier,
-  statAtLevel,
-  type UnitStatus,
-} from '../../lib/battleDetail'
+import { phaseTexts, statusView, type StatusView } from '../../lib/battleDetail'
 import type { BattlePart, BattlePhase } from '../../schemas/BattleDetailSchemas'
 
 interface BattleInfoPaneProps {
@@ -47,58 +38,28 @@ function HpPanel({ hp }: { hp: number }) {
   )
 }
 
-function hasStatus(status: UnitStatus): boolean {
-  return status.hp !== undefined || status.resistInfo !== undefined
+function hasStatus(view: StatusView): boolean {
+  return view.hp !== undefined || view.physical !== undefined
 }
 
-function StatusBlock({
-  status,
-  level,
-  tier,
-  title,
-  summary = false,
-}: {
-  status: UnitStatus
-  level: number | undefined
-  tier: number
-  title?: ReactNode
-  summary?: boolean
-}) {
-  const hp =
-    status.hp === undefined || level === undefined ? undefined : statAtLevel(status.hp, level)
-  const minSpeed = speedAtTier(status.minSpeedList, tier)
-  const maxSpeed = speedAtTier(status.maxSpeedList, tier)
-  const resist =
-    summary || status.resistInfo === undefined ? undefined : resistances(status.resistInfo)
-
-  const defCorrection = status.defCorrection
-  const hasFullStatus =
-    minSpeed !== undefined && maxSpeed !== undefined && defCorrection !== undefined
-
+function StatusBlock({ view, title }: { view: StatusView; title?: ReactNode }) {
+  const { hp, speed, defense, physical, sins, breakSection } = view
   return (
     <div data-testid="battle-status-block" className="space-y-2">
       {title !== undefined && <div className="text-sm font-semibold">{title}</div>}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-        {hp !== undefined && level !== undefined && hasFullStatus && (
-          <StatusPanel
-            hp={hp}
-            minSpeed={minSpeed}
-            maxSpeed={maxSpeed}
-            defLevel={defenseAtLevel(level, defCorrection)}
-            defCorrection={defCorrection}
-          />
+        {hp !== undefined && speed !== undefined && defense !== undefined && (
+          <StatusPanel hp={hp} speed={speed} defense={defense} />
         )}
-        {hp !== undefined && !hasFullStatus && <HpPanel hp={hp} />}
-        {resist !== undefined && (
-          <ResistancePanel slash={resist.slash} pierce={resist.pierce} blunt={resist.blunt} />
-        )}
-        {!summary && hp !== undefined && status.breakSection !== undefined && (
+        {hp !== undefined && (speed === undefined || defense === undefined) && <HpPanel hp={hp} />}
+        {physical !== undefined && <ResistancePanel resist={physical} />}
+        {hp !== undefined && breakSection !== undefined && (
           <div className="col-span-2 md:col-span-1">
-            <StaggerPanel maxHP={hp} staggerThresholds={status.breakSection.sectionList} />
+            <StaggerPanel maxHP={hp} staggerThresholds={breakSection} />
           </div>
         )}
       </div>
-      {resist !== undefined && <SinResistancePanel resistances={resist.attributes} />}
+      {sins !== undefined && <SinResistancePanel resistances={sins} />}
     </div>
   )
 }
@@ -133,36 +94,6 @@ export function BattlePartLabel(props: PartLabelProps) {
   )
 }
 
-function PartHpLines({
-  parts,
-  level,
-  label,
-}: {
-  parts: readonly BattlePart[]
-  level: number | undefined
-  label: (part: BattlePart) => ReactNode
-}) {
-  return (
-    <ul className="space-y-1 text-sm">
-      {parts.map((each) => (
-        <li
-          key={each.id}
-          data-testid="battle-part-hp"
-          className="flex items-center justify-between gap-2 rounded border border-border px-3 py-1"
-        >
-          <span>{label(each)}</span>
-          {each.hp !== undefined && level !== undefined && (
-            <span className="flex items-center gap-1 tabular-nums">
-              <img src={getHPIconPath()} alt="HP" className="h-4 w-4 object-contain" />
-              {statAtLevel(each.hp, level)}
-            </span>
-          )}
-        </li>
-      ))}
-    </ul>
-  )
-}
-
 export function BattleInfoPane({
   config,
   id,
@@ -173,30 +104,26 @@ export function BattleInfoPane({
   level,
   tier,
 }: BattleInfoPaneProps) {
-  const phaseId = String(phase.id)
-  const summary = part === undefined && parts.length >= 2
-  const partBlocks = summary
-    ? []
-    : (part === undefined ? parts : [part]).filter((each) => hasStatus(partStatus(each)))
-  const partLabel = (each: BattlePart) => (
-    <BattlePartLabel config={config} id={id} unitId={unitId} phaseId={phaseId} part={each} />
-  )
+  const view = statusView(phase, part, parts, level, tier)
 
   return (
     <div className="space-y-4">
-      {part === undefined && (
-        <StatusBlock status={phaseStatus(phase)} level={level} tier={tier} summary={summary} />
-      )}
-      {summary && <PartHpLines parts={parts} level={level} label={partLabel} />}
-      {partBlocks.map((each) => (
+      {hasStatus(view) && (
         <StatusBlock
-          key={each.id}
-          status={partStatus(each)}
-          level={level}
-          tier={tier}
-          title={partLabel(each)}
+          view={view}
+          title={
+            part === undefined ? undefined : (
+              <BattlePartLabel
+                config={config}
+                id={id}
+                unitId={unitId}
+                phaseId={String(phase.id)}
+                part={part}
+              />
+            )
+          }
         />
-      ))}
+      )}
 
       <TraitsDisplay
         traits={[...(phase.unitKeywordList ?? []), ...(phase.associationList ?? [])]}

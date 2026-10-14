@@ -94,6 +94,19 @@ function stageEffectKeywords(): (string | null)[] {
   )
 }
 
+function statCell(alt: string): string | null | undefined {
+  return requireSlot('detail-metadata').querySelector(`img[alt="${alt}"]`)?.parentElement
+    ?.textContent
+}
+
+function statCells(alts: readonly string[]): (string | null | undefined)[] {
+  return alts.map(statCell)
+}
+
+const SIN_CELLS = ['CRIMSON', 'SCARLET', 'AMBER', 'SHAMROCK', 'AZURE', 'INDIGO', 'VIOLET']
+const RESIST_CELLS = ['Slash', 'Pierce', 'Blunt', ...SIN_CELLS]
+const WHOLE_BLANK_CELLS = ['Speed', 'Defense', ...RESIST_CELLS]
+
 describe('engagement selector', () => {
   it(
     'opens 1366 on its first Mirror Dungeon row when arriving from Mirror Dungeon',
@@ -200,16 +213,15 @@ describe('stage effects', () => {
 
 describe('parts', () => {
   it(
-    'summarizes group 8063 under All and narrows Head to its status, skills and passive',
+    'shows only the whole HP of group 8063 under All and narrows Head to its status, skills and passive',
     async () => {
       await mountEnemy('8063')
 
       expect(groupButtons('Part')).toEqual(['All', 'Head', 'Shell'])
-      const lines = metadata().getAllByTestId('battle-part-hp')
-      expect(lines.map((line) => line.textContent)).toEqual(['Head357', 'Shell102'])
+      expect(metadata().queryAllByTestId('battle-part-hp')).toHaveLength(0)
       expect(metadata().getAllByTestId('battle-status-block')).toHaveLength(1)
-      expect(metadata().queryByText('552')).not.toBeNull()
-      expect(metadata().queryByText('Resistances')).toBeNull()
+      expect(statCell('HP')).toBe('552')
+      expect(statCells(WHOLE_BLANK_CELLS)).toEqual(WHOLE_BLANK_CELLS.map(() => '-'))
       expect(metadata().queryByText('Stagger')).toBeNull()
       expect(renderedPassiveIds()).toEqual(expect.arrayContaining(['806301']))
 
@@ -245,6 +257,68 @@ describe('single-part units', () => {
 
       const card = requireSlot('detail-sections').querySelector('[data-skill-id="134707"]')
       expect(card?.querySelector('[data-slot="skill-level"]')?.textContent).toBe('88')
+    },
+    TEST_BUDGET_MS,
+  )
+
+  it(
+    'shows no speed or multiplier for the whole of one-part 1347 and shows them for its part',
+    async () => {
+      await mountEnemy('1347')
+
+      expect(statCells(WHOLE_BLANK_CELLS)).toEqual(WHOLE_BLANK_CELLS.map(() => '-'))
+      expect(metadata().queryByText(/\(x/)).toBeNull()
+
+      const [, part] = groupButtons('Part')
+      if (part === undefined) throw new Error('no part button')
+      selectIn('Part', part)
+
+      await waitFor(() => expect(statCell('Speed')).toMatch(/^\d+-\d+$/))
+      expect(statCell('Slash')).toBe('Weak(x1.2)')
+    },
+    TEST_BUDGET_MS,
+  )
+})
+
+describe('abnormality whole', () => {
+  it(
+    'draws "-" for every resistance of two-part 1003 under All, with no part lines or stagger',
+    async () => {
+      await mountEnemy('1003')
+
+      expect(groupButtons('Part')).toEqual(['All', 'Shell', 'Pearl'])
+      expect(statCells(RESIST_CELLS)).toEqual(RESIST_CELLS.map(() => '-'))
+      expect(metadata().queryAllByTestId('battle-part-hp')).toHaveLength(0)
+      expect(metadata().queryByText('Stagger')).toBeNull()
+      expect(metadata().queryByText(/\(x/)).toBeNull()
+    },
+    TEST_BUDGET_MS,
+  )
+
+  it(
+    'reads CRIMSON and INDIGO of 1003 part Pearl as Weak (x1.2)',
+    async () => {
+      await mountEnemy('1003')
+
+      selectIn('Part', 'Pearl')
+
+      await waitFor(() => expect(statCell('CRIMSON')).toBe('Weak(x1.2)'))
+      expect(statCell('INDIGO')).toBe('Weak(x1.2)')
+    },
+    TEST_BUDGET_MS,
+  )
+
+  it(
+    'keeps the speed, defense and resistances of shadow 8678 under All',
+    async () => {
+      await mountEnemy('8678')
+
+      expect(pressed('Part')).toBe('All')
+      expect(statCell('Speed')).toMatch(/^\d+-\d+$/)
+      expect(statCell('Defense')).toMatch(/^\d+ \(\+3\)$/)
+      expect(statCell('Slash')).toBe('Fatal(x2)')
+      expect(statCell('INDIGO')).toBe('Endure(x0.75)')
+      expect(metadata().queryByText('Stagger')).not.toBeNull()
     },
     TEST_BUDGET_MS,
   )

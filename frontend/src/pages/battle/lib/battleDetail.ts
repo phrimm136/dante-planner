@@ -1,5 +1,6 @@
 import { ATK_TYPES } from '@/shared/gameData'
 import type { SkillEntry, SkillId } from '@/shared/gameData'
+import type { Shown } from '@/shared/unitStatus'
 import type {
   BattleEntityI18n,
   BattlePart,
@@ -15,6 +16,8 @@ import { NEUTRAL_RESISTANCE } from './battleVocabulary'
 
 export const ALL_PARTS = 'all'
 
+const SHADOW_ENEMY = 'SHADOW_ENEMY'
+
 export type PartSelection = typeof ALL_PARTS | number
 
 export interface StatGrowth {
@@ -22,16 +25,16 @@ export interface StatGrowth {
   incrementByLevel: number
 }
 
-export interface UnitStatus {
-  hp: StatGrowth | undefined
-  defCorrection: number | undefined
-  minSpeedList: readonly number[] | undefined
-  maxSpeedList: readonly number[] | undefined
-  breakSection: { sectionList: number[] } | undefined
-  resistInfo: ResistInfo | undefined
+export interface StatusView {
+  hp: number | undefined
+  speed: Shown<{ min: number; max: number }> | undefined
+  defense: Shown<{ level: number; correction: number }> | undefined
+  physical: Shown<{ slash: number; pierce: number; blunt: number }> | undefined
+  sins: Shown<Record<string, number>> | undefined
+  breakSection: number[] | undefined
 }
 
-export interface Resistances {
+interface Resistances {
   slash: number
   pierce: number
   blunt: number
@@ -47,7 +50,7 @@ export function statAtLevel(growth: StatGrowth, level: number): number {
   return Math.floor(growth.defaultStat + growth.incrementByLevel * level)
 }
 
-export function defenseAtLevel(level: number, defCorrection: number): number {
+function defenseAtLevel(level: number, defCorrection: number): number {
   return Math.max(1, level + defCorrection)
 }
 
@@ -157,31 +160,66 @@ export function visiblePassives(
   return [...own, ...fromParts]
 }
 
-export function phaseStatus(phase: BattlePhase): UnitStatus {
-  return {
-    hp: phase.hp,
-    defCorrection: phase.defCorrection,
-    minSpeedList: phase.minSpeedList,
-    maxSpeedList: phase.maxSpeedList,
-    breakSection: phase.breakSection,
-    resistInfo: phase.resistInfo,
-  }
+function isAbnormalityWhole(
+  phase: BattlePhase,
+  part: BattlePart | undefined,
+  parts: readonly BattlePart[],
+): boolean {
+  return (
+    part === undefined &&
+    phase.ownerType === 'ABNORMALITY' &&
+    parts.length >= 1 &&
+    !(phase.unitKeywordList?.includes(SHADOW_ENEMY) ?? false)
+  )
 }
 
-export function partStatus(part: BattlePart): UnitStatus {
+export function statusView(
+  phase: BattlePhase,
+  part: BattlePart | undefined,
+  parts: readonly BattlePart[],
+  level: number | undefined,
+  tier: number,
+): StatusView {
+  const unit = part ?? phase
+  const hp = unit.hp === undefined || level === undefined ? undefined : statAtLevel(unit.hp, level)
+  if (isAbnormalityWhole(phase, part, parts)) {
+    const blank = { kind: 'blank' } as const
+    return {
+      hp,
+      speed: blank,
+      defense: blank,
+      physical: blank,
+      sins: blank,
+      breakSection: undefined,
+    }
+  }
+  const min = speedAtTier(unit.minSpeedList, tier)
+  const max = speedAtTier(unit.maxSpeedList, tier)
+  const correction = unit.defCorrection
+  const resist = unit.resistInfo === undefined ? undefined : resistances(unit.resistInfo)
   return {
-    hp: part.hp,
-    defCorrection: part.defCorrection,
-    minSpeedList: part.minSpeedList,
-    maxSpeedList: part.maxSpeedList,
-    breakSection: part.breakSection,
-    resistInfo: part.resistInfo,
+    hp,
+    speed:
+      min === undefined || max === undefined ? undefined : { kind: 'shown', value: { min, max } },
+    defense:
+      level === undefined || correction === undefined
+        ? undefined
+        : { kind: 'shown', value: { level: defenseAtLevel(level, correction), correction } },
+    physical:
+      resist === undefined
+        ? undefined
+        : {
+            kind: 'shown',
+            value: { slash: resist.slash, pierce: resist.pierce, blunt: resist.blunt },
+          },
+    sins: resist === undefined ? undefined : { kind: 'shown', value: resist.attributes },
+    breakSection: unit.breakSection?.sectionList,
   }
 }
 
 const [SLASH, PENETRATE, HIT] = ATK_TYPES
 
-export function resistances(info: ResistInfo): Resistances {
+function resistances(info: ResistInfo): Resistances {
   const attack = new Map(info.atkResistList.map(({ type, value }) => [type, value]))
   return {
     slash: attack.get(SLASH) ?? NEUTRAL_RESISTANCE,
@@ -193,7 +231,7 @@ export function resistances(info: ResistInfo): Resistances {
   }
 }
 
-export function speedAtTier(list: readonly number[] | undefined, tier: number): number | undefined {
+function speedAtTier(list: readonly number[] | undefined, tier: number): number | undefined {
   if (list === undefined) return undefined
   return list[tier - 1] ?? list[list.length - 1]
 }

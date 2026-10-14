@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest'
 
+import enemy1003 from '@static/data/enemy/1003.json'
 import enemy1110 from '@static/data/enemy/1110.json'
+import enemy1347 from '@static/data/enemy/1347.json'
 import enemy8041 from '@static/data/enemy/8041.json'
 import enemy8063 from '@static/data/enemy/8063.json'
 import enemy8209 from '@static/data/enemy/8209.json'
@@ -8,6 +10,7 @@ import enemy8277 from '@static/data/enemy/8277.json'
 import enemy8390 from '@static/data/enemy/8390.json'
 import enemy8390I18n from '@static/i18n/EN/enemy/8390.json'
 import enemy8549 from '@static/data/enemy/8549.json'
+import enemy8678 from '@static/data/enemy/8678.json'
 import assistant400038 from '@static/data/assistant/400038.json'
 import assistant400038I18n from '@static/i18n/EN/assistant/400038.json'
 import sinnerEvent10101 from '@static/data/sinnerEvent/10101.json'
@@ -36,6 +39,7 @@ import {
   selectedPart,
   stageEffectGrants,
   statAtLevel,
+  statusView,
   visiblePassives,
   visibleSkills,
   withShownPassives,
@@ -294,5 +298,102 @@ describe('stage effect grants', () => {
   it('drops a grant a spawned unit already explains', () => {
     const grants = row.facts.buffGrants.filter((grant) => grant.keywordId === 'FragmentOfHope')
     expect(grants.every((grant) => grant.derivable)).toBe(true)
+  })
+})
+
+describe('status view', () => {
+  const blank = { kind: 'blank' }
+  const whole1003 = firstPhase(EnemyDataSchema.parse(enemy1003), '1003')
+  const parts1003 = rowParts(whole1003, undefined)
+  const shadow8678 = firstPhase(EnemyDataSchema.parse(enemy8678), '8678')
+  const shadowShown = {
+    hp: 188,
+    speed: { kind: 'shown', value: { min: 2, max: 5 } },
+    defense: { kind: 'shown', value: { level: 43, correction: 3 } },
+    physical: { kind: 'shown', value: { slash: 2, pierce: 0.5, blunt: 1 } },
+    sins: {
+      kind: 'shown',
+      value: {
+        CRIMSON: 1,
+        SCARLET: 1,
+        AMBER: 1,
+        SHAMROCK: 1,
+        AZURE: 2,
+        INDIGO: 0.75,
+        VIOLET: 2,
+        WHITE: 2,
+        BLACK: 2,
+      },
+    },
+    breakSection: [70, 30],
+  }
+
+  it('blanks everything but HP for the whole of two-part abnormality 1003', () => {
+    expect(parts1003.map((part) => part.id)).toEqual([100301, 100302])
+    expect(statusView(whole1003, undefined, parts1003, 40, 1)).toEqual({
+      hp: 657,
+      speed: blank,
+      defense: blank,
+      physical: blank,
+      sins: blank,
+      breakSection: undefined,
+    })
+  })
+
+  it('blanks the whole of one-part abnormality 1347 and shows its part when selected', () => {
+    const phase = firstPhase(EnemyDataSchema.parse(enemy1347), '1347')
+    const parts = rowParts(phase, undefined)
+    expect(parts).toHaveLength(1)
+    const whole = statusView(phase, undefined, parts, 40, 1)
+    expect([whole.speed, whole.defense, whole.physical, whole.sins]).toEqual([
+      blank,
+      blank,
+      blank,
+      blank,
+    ])
+    const body = statusView(phase, parts[0], parts, 40, 1)
+    expect(body.speed).toEqual({ kind: 'shown', value: { min: 1, max: 2 } })
+    expect(body.physical).toEqual({ kind: 'shown', value: { slash: 1.2, pierce: 0.9, blunt: 0.9 } })
+    expect(body.breakSection).toEqual([60])
+  })
+
+  it('shows the values of part 100302 when it is selected', () => {
+    const pearl = selectedPart(parts1003, 100302)
+    const view = statusView(whole1003, pearl, parts1003, 40, 1)
+    expect(view.hp).toBe(520)
+    expect(view.defense).toEqual({ kind: 'shown', value: { level: 35, correction: -5 } })
+    expect(view.sins).toEqual(
+      expect.objectContaining({ value: expect.objectContaining({ CRIMSON: 1.2, INDIGO: 1.2 }) }),
+    )
+    expect(view.breakSection).toEqual([50])
+  })
+
+  it('keeps every value of shadow abnormality 8678 under All', () => {
+    expect(shadow8678.unitKeywordList).toContain('SHADOW_ENEMY')
+    expect(statusView(shadow8678, undefined, rowParts(shadow8678, undefined), 40, 1)).toEqual(
+      shadowShown,
+    )
+  })
+
+  it('blanks 8678 once its unit keywords lose SHADOW_ENEMY', () => {
+    const unshadowed = { ...shadow8678, unitKeywordList: [] }
+    expect(statusView(unshadowed, undefined, rowParts(unshadowed, undefined), 40, 1).speed).toEqual(
+      blank,
+    )
+  })
+
+  it('reads SHADOW_ENEMY from the unit keywords, not the battle keywords', () => {
+    const moved = { ...shadow8678, unitKeywordList: [], battleKeywordList: ['SHADOW_ENEMY'] }
+    expect(statusView(moved, undefined, rowParts(moved, undefined), 40, 1).physical).toEqual(blank)
+  })
+
+  it('keeps the phase values of a non-abnormality with parts', () => {
+    const enemy: BattlePhase = { ...shadow8678, ownerType: 'ENEMY', unitKeywordList: [] }
+    expect(statusView(enemy, undefined, rowParts(enemy, undefined), 40, 1)).toEqual(shadowShown)
+  })
+
+  it('keeps the phase values of an abnormality with no parts', () => {
+    const lone: BattlePhase = { ...shadow8678, unitKeywordList: [], parts: [] }
+    expect(statusView(lone, undefined, [], 40, 1)).toEqual(shadowShown)
   })
 })

@@ -30,16 +30,22 @@ export function IdentityInfoPane({ id, identity, uptie, level }: IdentityInfoPan
       <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
         <StatusPanel
           hp={calculatedHp}
-          minSpeed={minSpeed}
-          maxSpeed={maxSpeed}
-          defLevel={calculatedDefense}
-          defCorrection={identity.defCorrection}
+          speed={{ kind: 'shown', value: { min: minSpeed, max: maxSpeed } }}
+          defense={{
+            kind: 'shown',
+            value: { level: calculatedDefense, correction: identity.defCorrection },
+          }}
         />
 
         <ResistancePanel
-          slash={identity.ResistInfo.SLASH}
-          pierce={identity.ResistInfo.PENETRATE}
-          blunt={identity.ResistInfo.HIT}
+          resist={{
+            kind: 'shown',
+            value: {
+              slash: identity.ResistInfo.SLASH,
+              pierce: identity.ResistInfo.PENETRATE,
+              blunt: identity.ResistInfo.HIT,
+            },
+          }}
         />
 
         <div className="col-span-2 md:col-span-1">

@@ -15,7 +15,7 @@ export function EGOInfoPane({ ego }: EGOInfoPaneProps) {
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         <SinCostPanel costs={ego.requirements} />
-        <SinResistancePanel resistances={ego.attributeResist} />
+        <SinResistancePanel resistances={{ kind: 'shown', value: ego.attributeResist }} />
       </div>
 
       <KeywordsDisplay keywords={ego.battleKeywordList} />

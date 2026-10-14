@@ -1,4 +1,5 @@
 export { StatusPanel } from './components/StatusPanel'
+export type { Shown } from './components/StatusPanel'
 export { ResistancePanel } from './components/ResistancePanel'
 export { StaggerPanel } from './components/StaggerPanel'
 export { TraitsDisplay } from './components/TraitsDisplay'

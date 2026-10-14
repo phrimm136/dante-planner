@@ -1,28 +1,26 @@
-export type ResistanceCategoryKey = 'fatal' | 'weak' | 'normal' | 'endure' | 'ineffective'
+export type ResistLevel = 'immune' | 'ineffective' | 'endure' | 'normal' | 'weak' | 'fatal'
 
-export interface ResistanceInfo {
-  categoryKey: ResistanceCategoryKey
-  value: number
-  color: string
+export const RESIST_LEVEL_COLOURS: Record<ResistLevel | 'blank', string> = {
+  immune: '#808080',
+  ineffective: '#808080',
+  endure: '#CCCCCC',
+  normal: '#E4C393',
+  weak: '#FF8D8D',
+  fatal: '#FF4040',
+  blank: '#E4C393',
 }
 
-const RESISTANCE_BANDS: ReadonlyArray<{
-  categoryKey: ResistanceCategoryKey
-  color: string
-  matches: (value: number) => boolean
-}> = [
-  { categoryKey: 'fatal', color: 'text-red-500', matches: (value) => value > 1.5 },
-  { categoryKey: 'weak', color: 'text-orange-300', matches: (value) => value > 1.0 },
-  { categoryKey: 'normal', color: 'text-amber-100', matches: (value) => value === 1.0 },
-  { categoryKey: 'endure', color: 'text-gray-400', matches: (value) => value >= 0.75 },
-]
+const IMMUNE_MAX = 0
+const INEFFECTIVE_MAX = 0.51
+const ENDURE_BELOW = 0.99
+const NORMAL_BELOW = 1.01
+const WEAK_MAX = 1.51
 
-const RESISTANCE_FALLBACK_BAND = {
-  categoryKey: 'ineffective' as ResistanceCategoryKey,
-  color: 'text-gray-500',
-}
-
-export function getResistanceInfo(value: number): ResistanceInfo {
-  const band = RESISTANCE_BANDS.find((b) => b.matches(value)) ?? RESISTANCE_FALLBACK_BAND
-  return { categoryKey: band.categoryKey, value, color: band.color }
+export function resistLevel(v: number): ResistLevel {
+  if (v <= IMMUNE_MAX) return 'immune'
+  if (v <= INEFFECTIVE_MAX) return 'ineffective'
+  if (v < ENDURE_BELOW) return 'endure'
+  if (v < NORMAL_BELOW) return 'normal'
+  if (v <= WEAK_MAX) return 'weak'
+  return 'fatal'
 }
