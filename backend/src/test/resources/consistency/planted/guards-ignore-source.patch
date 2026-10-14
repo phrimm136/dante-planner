@@ -1,0 +1,13 @@
+diff --git a/backend/src/main/java/org/danteplanner/backend/shared/readpath/PrimaryReCheck.java b/backend/src/main/java/org/danteplanner/backend/shared/readpath/PrimaryReCheck.java
+index aed92fec..fcb7214b 100644
+--- a/backend/src/main/java/org/danteplanner/backend/shared/readpath/PrimaryReCheck.java
++++ b/backend/src/main/java/org/danteplanner/backend/shared/readpath/PrimaryReCheck.java
+@@ -43,7 +43,7 @@ public class PrimaryReCheck {
+         this.promotedCounter = Counter.builder(PROMOTED_COUNTER).register(meterRegistry);
+         this.bulkheadQueriesCounter = Counter.builder(BULKHEAD_QUERIES_COUNTER).register(meterRegistry);
+         this.tombstoneStore = tombstoneStore;
+-        this.servedByAuthority = servedByAuthority;
++        this.servedByAuthority = () -> reCheckTarget == RoutingKey.PRIMARY;
+         this.authorityHealthy = authorityHealthy;
+         this.reCheckTarget = reCheckTarget;
+     }

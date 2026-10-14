@@ -1,0 +1,28 @@
+diff --git a/backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidCookieResponseAdvice.java b/backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidCookieResponseAdvice.java
+index 353a73ea..4c4bc23b 100644
+--- a/backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidCookieResponseAdvice.java
++++ b/backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidCookieResponseAdvice.java
+@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
+ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
+ 
+ import lombok.RequiredArgsConstructor;
++import org.danteplanner.backend.shared.config.ReadSourceSelector;
+ 
+ /**
+  * <p>A JSON-bodied response is committed DURING serialization — the converter's generator flush
+@@ -25,6 +26,7 @@ import lombok.RequiredArgsConstructor;
+ public class GtidCookieResponseAdvice implements ResponseBodyAdvice<Object> {
+ 
+     private final GtidWriteCapture writeCapture;
++    private final ReadSourceSelector readSourceSelector;
+ 
+     @Override
+     public boolean supports(
+@@ -44,6 +46,7 @@ public class GtidCookieResponseAdvice implements ResponseBodyAdvice<Object> {
+         ServerHttpResponse response
+     ) {
+         writeCapture.takeCapturedGtid()
++            .filter(gtid -> !readSourceSelector.sources().get(0).authoritative())
+             .ifPresent(gtid ->
+                 response.getHeaders().add(HttpHeaders.SET_COOKIE, GtidCookie.of(gtid).toString())
+             );
