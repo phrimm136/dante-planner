@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { RISK_PLATE_GRADE_COLORS, RISK_PLATE_UNITS, SKILL_UPPER_UNITS } from '@/lib/constants'
+import { RISK_PLATE_GRADE_COLORS, RISK_PLATE_UNITS } from '@/lib/constants'
 import {
   getHazardGradedPlatePath,
   getHazardHiddenPlatePath,
@@ -67,16 +67,17 @@ function percent(units: number, whole: number): string {
 }
 
 function gradeStyle(box: GradeBox, color: string): CSSProperties {
-  const { WIDTH, HEIGHT } = RISK_PLATE_UNITS
-  const { NUMERIC_FACE } = SKILL_UPPER_UNITS
+  const { WIDTH, HEIGHT, GRADE_FACE } = RISK_PLATE_UNITS
+  const { UNDERLAY } = GRADE_FACE
   return {
     left: percent(WIDTH / 2 + box.CENTER_X - box.WIDTH / 2, WIDTH),
     top: percent(HEIGHT / 2 - box.CENTER_Y - box.HEIGHT / 2, HEIGHT),
     width: percent(box.WIDTH, WIDTH),
     height: percent(box.HEIGHT, HEIGHT),
     fontSize: `${String((box.FONT / WIDTH) * 100)}cqw`,
-    fontFamily: NUMERIC_FACE.FAMILY,
-    lineHeight: NUMERIC_FACE.DIGIT_HEIGHT_EM,
+    fontFamily: GRADE_FACE.FAMILY,
+    lineHeight: GRADE_FACE.LINE_HEIGHT,
+    textShadow: `${String(UNDERLAY.X_EM)}em ${String(UNDERLAY.Y_EM)}em 0 ${UNDERLAY.COLOR}`,
     color,
   }
 }

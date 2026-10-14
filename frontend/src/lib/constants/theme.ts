@@ -467,6 +467,11 @@ export const RISK_PLATE_UNITS = {
   GRADE: { CENTER_X: 70, CENTER_Y: 14, WIDTH: 50, HEIGHT: 40, FONT: 40 },
   // [Text]HazardGrade_NoneClassType: anchoredPosition (58, 8), sizeDelta 65x55, font size 55.
   NONE_CLASS_GRADE: { CENTER_X: 58, CENTER_Y: 8, WIDTH: 65, HEIGHT: 55, FONT: 55 },
+  GRADE_FACE: {
+    FAMILY: 'var(--font-bebas-tmp)',
+    LINE_HEIGHT: 1.2,
+    UNDERLAY: { X_EM: 0.023, Y_EM: 0.029, COLOR: '#000' },
+  },
 } as const
 
 export const RISK_PLATE_GRADE_COLORS = {

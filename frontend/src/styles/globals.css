@@ -118,6 +118,17 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'Bebas Neue TMP';
+  src: url('../assets/fonts/Bebas_Neue/BebasNeue-Regular.ttf');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  ascent-override: 95%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}
+
 /* Tagmarker - Title font */
 @font-face {
   font-family: "Tagmarker";
@@ -139,6 +150,7 @@
   --font-numerals: 'PlannerNumerals', sans-serif;
   --font-numerals-ink: 'PlannerNumerals Ink', sans-serif;
   --font-bebas: 'Bebas Neue', sans-serif;
+  --font-bebas-tmp: 'Bebas Neue TMP', sans-serif;
   --font-tagmarker: 'Tagmarker', sans-serif;
 }
 

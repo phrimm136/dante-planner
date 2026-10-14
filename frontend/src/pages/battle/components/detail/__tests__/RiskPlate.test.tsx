@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 
@@ -20,6 +22,12 @@ function drawBadge(badge: unknown) {
     plate: screen.getByTestId('battle-hazard-plate'),
     grade: screen.queryByTestId('battle-hazard-grade'),
   }
+}
+
+function expectGradeFace(grade: HTMLElement) {
+  expect(grade.style.fontFamily).toBe('var(--font-bebas-tmp)')
+  expect(grade.style.lineHeight).toBe('1.2')
+  expect(grade.style.textShadow).toBe('0.023em 0.029em 0 #000')
 }
 
 function boxOf(element: HTMLElement): number[] {
@@ -80,7 +88,7 @@ describe('RiskPlate', () => {
     expect(top).toBeCloseTo(7.7162, 3)
     expect(width).toBeCloseTo(26.5308, 3)
     expect(height).toBeCloseTo(49.7457, 3)
-    expect(grade.style.fontFamily).toBe('var(--font-numerals-ink)')
+    expectGradeFace(grade)
   })
 
   it('places a SUPPLEMENT grade in the [Text]HazardGrade_NoneClassType rect', () => {
@@ -93,6 +101,7 @@ describe('RiskPlate', () => {
     expect(top).toBeCloseTo(5.8507, 3)
     expect(width).toBeCloseTo(34.4901, 3)
     expect(height).toBeCloseTo(68.4003, 3)
+    expectGradeFace(grade)
   })
 
   it.each([
@@ -103,5 +112,24 @@ describe('RiskPlate', () => {
     expect(drawBadge({ classType: 'UNDEF' }).plate.getAttribute('src')).toBe(
       getLevelNumberUndefPlatePath(plate),
     )
+  })
+})
+
+describe('risk plate grade face', () => {
+  const globalsCss = readFileSync(
+    resolve(import.meta.dirname, '../../../../../styles/globals.css'),
+    'utf8',
+  )
+
+  it('declares Bebas Neue TMP with the BebasKai ascent and descent and no line gap', () => {
+    const face = globalsCss
+      .match(/@font-face\s*\{[^}]*\}/g)
+      ?.find((rule) => rule.includes("font-family: 'Bebas Neue TMP'"))
+    expect(face).toBeDefined()
+    expect(face).toContain("src: url('../assets/fonts/Bebas_Neue/BebasNeue-Regular.ttf')")
+    expect(face).toContain('ascent-override: 95%')
+    expect(face).toContain('descent-override: 25%')
+    expect(face).toContain('line-gap-override: 0%')
+    expect(globalsCss).toContain("--font-bebas-tmp: 'Bebas Neue TMP', sans-serif;")
   })
 })
