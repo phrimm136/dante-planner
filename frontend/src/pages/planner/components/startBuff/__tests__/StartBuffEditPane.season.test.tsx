@@ -42,6 +42,13 @@ vi.mock('@/shared/gameText/hooks/useBattleKeywords', () => ({
   useBattleKeywords: () => ({ data: {} }),
 }))
 
+vi.mock('../../../hooks/useStartBuffCardLayout', async () => {
+  const { StartBuffCardLayoutSchema } = await import('../../../schemas/StartBuffCardSchemas')
+  const md7Card = await import('@static/data/MD7/startBuffCard.json')
+  const layout = StartBuffCardLayoutSchema.parse(md7Card.default)
+  return { useStartBuffCardLayout: () => layout }
+})
+
 vi.mock('../StartBuffCard', () => ({
   StartBuffCard: () => <div data-testid="start-buff-card" />,
 }))

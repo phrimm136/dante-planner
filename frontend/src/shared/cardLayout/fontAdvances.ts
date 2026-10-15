@@ -27,7 +27,7 @@ export const FontAdvanceTableSchema = z
     source: z.string(),
     /** The face's ascender above the baseline, in em. */
     ascender: z.number(),
-    /** The face's descender below the baseline, in em, as a positive distance. */
+    /** The face's descender below the baseline, in em. */
     descender: z.number(),
     /** The face's cap line above the baseline, in em: the top of the drawn glyphs. */
     capLine: z.number(),
@@ -108,15 +108,19 @@ export function lineFaces(table: FontAdvanceTable, line: string): readonly FaceM
 
 /** The metrics a line is laid out from: the tallest of every face that draws it. */
 export function lineMetrics(table: FontAdvanceTable, line: string): FaceMetrics {
-  return lineFaces(table, line).reduce(
-    (tallest, face) => ({
+  return lineFaces(table, line)
+    .map(({ ascender, descender, capLine, lineHeight }) => ({
+      ascender,
+      descender,
+      capLine,
+      lineHeight,
+    }))
+    .reduce((tallest, face) => ({
       ascender: Math.max(tallest.ascender, face.ascender),
       descender: Math.max(tallest.descender, face.descender),
       capLine: Math.max(tallest.capLine, face.capLine),
       lineHeight: Math.max(tallest.lineHeight, face.lineHeight),
-    }),
-    { ascender: 0, descender: 0, capLine: 0, lineHeight: 0 },
-  )
+    }))
 }
 
 /** The tracking a node applies, in em, as TextMeshPro's character and word spacing. */
@@ -155,14 +159,19 @@ export function advanceOf(table: FontAdvanceTable, codePoint: number): number {
  * A string's width is the sum of its code points' advances, plus letter spacing after every
  * code point and word spacing on every space, as TextMeshPro advances the pen.
  */
-export function createAdvanceMeasure(table: FontAdvanceTable, spacing: TrackingSpec): Measure {
+export function createAdvanceMeasure(
+  table: FontAdvanceTable,
+  spacing: TrackingSpec,
+  advanceOverrides: ReadonlyMap<string, number> = new Map(),
+): Measure {
   return (text: string, px: number): number => {
     let advanceEm = 0
     let codePointCount = 0
     let spaceCount = 0
 
     for (const character of text) {
-      advanceEm += advanceOf(table, character.codePointAt(0) ?? 0)
+      advanceEm +=
+        advanceOverrides.get(character) ?? advanceOf(table, character.codePointAt(0) ?? 0)
       codePointCount += 1
       if (character === SPACE) spaceCount += 1
     }

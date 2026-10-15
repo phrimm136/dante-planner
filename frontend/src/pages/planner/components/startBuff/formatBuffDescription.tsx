@@ -1,8 +1,6 @@
 import type { BuffEffect, StartBuffI18n, BattleKeywords } from '@/shared/gameText'
 import { getKeywordName } from '@/shared/gameText'
 
-import { parseColorTags } from '@/shared/gameText'
-
 /**
  * Replaces placeholders in text with effect values
  * Placeholders: {0} = value, {1} = value2
@@ -35,25 +33,25 @@ function replacePlaceholders(
   return result
 }
 
-export function formatEffect(
+function effectText(
   effect: BuffEffect,
   i18n: StartBuffI18n,
   battleKeywords?: BattleKeywords,
-): React.ReactNode {
+): string {
   const translationKey = effect.customLocalizeTextId || effect.type
   const template = i18n[translationKey] || translationKey
-
-  const text = replacePlaceholders(template, effect, battleKeywords)
-
-  return parseColorTags(text)
+  return replacePlaceholders(template, effect, battleKeywords)
 }
 
-export function formatBuffEffects(
+const EFFECT_SEPARATOR = '\n'
+
+export function buffDescriptionText(
   effects: BuffEffect[],
   i18n: StartBuffI18n,
+  bulletPrefix: string,
   battleKeywords?: BattleKeywords,
-): React.ReactNode[] {
-  return effects.map((effect, index) => (
-    <div key={index}>•{formatEffect(effect, i18n, battleKeywords)}</div>
-  ))
+): string {
+  return effects
+    .map((effect) => `${bulletPrefix}${effectText(effect, i18n, battleKeywords)}`)
+    .join(EFFECT_SEPARATOR)
 }

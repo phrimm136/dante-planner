@@ -159,24 +159,8 @@ export const PATHS = {
   atkTypeGiftIcon: (atkType: string) =>
     resolveAsset(`/images/UI/card/egoGift/atkType-${atkType.toLowerCase()}.webp`),
 
-  startBuffIcon: (baseId: number, version: number) =>
-    resolveAsset(`/images/UI/startBuff/md${String(version)}/icon-${String(baseId)}.webp`),
-  startBuffPane: (version: number) =>
-    resolveAsset(`/images/UI/startBuff/md${String(version)}/pane.webp`),
-  startBuffHighlight: (version: number) =>
-    resolveAsset(`/images/UI/startBuff/md${String(version)}/highlight.webp`),
-  startBuffMini: (version: number) =>
-    resolveAsset(`/images/UI/startBuff/md${String(version)}/mini.webp`),
-  startBuffMiniHighlight: (version: number) =>
-    resolveAsset(`/images/UI/startBuff/md${String(version)}/miniHighlight.webp`),
-  startBuffEnhancementBg: (level: 0 | 1 | 2, version: number) =>
-    level === 0
-      ? resolveAsset(`/images/UI/startBuff/md${String(version)}/enhancement-unselected.webp`)
-      : resolveAsset(
-          `/images/UI/startBuff/md${String(version)}/enhancement-selected-${String(level)}.webp`,
-        ),
-  startBuffEnhancementOverlay: (version: number) =>
-    resolveAsset(`/images/UI/startBuff/md${String(version)}/enhancement-selected.webp`),
+  startBuffSprite: (version: number, file: string) =>
+    resolveAsset(`/images/UI/startBuff/md${String(version)}/${file}`),
   startBuffEnhancementIcon: (level: 0 | 1 | 2) =>
     level === 0
       ? resolveAsset('/images/UI/startBuff/enhancementIcon.webp')
@@ -302,18 +286,8 @@ export const getEGOGiftEnhanced2BackgroundPath = (): string => path('egoGiftEnha
 export const getEGOGiftTierEXPath = (): string => path('egoGiftTierEX')
 export const getEGOGiftSelectHighlightPath = (): string => path('egoGiftSelectHighlight')
 
-export const getStartBuffIconPath = (baseId: number, version: number): string =>
-  path('startBuffIcon', baseId, version)
-export const getStartBuffPanePath = (version: number): string => path('startBuffPane', version)
-export const getStartBuffHighlightPath = (version: number): string =>
-  path('startBuffHighlight', version)
-export const getStartBuffMiniPath = (version: number): string => path('startBuffMini', version)
-export const getStartBuffMiniHighlightPath = (version: number): string =>
-  path('startBuffMiniHighlight', version)
-export const getStartBuffEnhancementBgPath = (level: 0 | 1 | 2, version: number): string =>
-  path('startBuffEnhancementBg', level, version)
-export const getStartBuffEnhancementOverlayPath = (version: number): string =>
-  path('startBuffEnhancementOverlay', version)
+export const getStartBuffSpritePath = (version: number, file: string): string =>
+  path('startBuffSprite', version, file)
 export const getStartBuffEnhancementIconPath = (level: 0 | 1 | 2): string =>
   path('startBuffEnhancementIcon', level)
 export const getStartBuffStarLightPath = (): string => path('startBuffStarLight')

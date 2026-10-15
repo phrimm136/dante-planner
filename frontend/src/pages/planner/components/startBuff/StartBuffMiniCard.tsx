@@ -1,91 +1,105 @@
-import { Suspense, type CSSProperties } from 'react'
+import { Suspense, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
-import {
-  getStartBuffIconPath,
-  getStartBuffMiniPath,
-  getStartBuffMiniHighlightPath,
-} from '@/shared/assets'
-import { MD_ACCENT_COLORS } from '@/lib/constants'
+import { getDisplayFontForLanguage } from '@/lib/utils'
 import { EGO_GIFT_GEOMETRY, aspectOf } from '@/shared/cardLayout'
 import { Skeleton } from '@/components/ui/skeleton'
+import type { MDVersion } from '@/shared/gameData'
 import {
   getEnhancementFromBuffId,
   getBaseIdFromBuffId,
   getEnhancementSuffix,
 } from '@/shared/gameText'
-import { EGOGiftEnhancementIndicator } from '@/pages/egoGift'
-import { START_BUFF_MINI_CARD, cqw, pct } from '../../lib/cardLayout'
-import { StartBuffMiniName } from './StartBuffName'
+import { useStartBuffMiniCardLayout } from '../../hooks/useStartBuffCardLayout'
+import {
+  fitSpace,
+  isShown,
+  levelIconFile,
+  spriteFile,
+  type CardState,
+} from '../../lib/startBuffCardLayout'
+import { CardSprite } from './CardSprite'
+import { CardText } from './StartBuffName'
 
 interface StartBuffMiniCardProps {
   buffId: number
   displayName: string
-  mdVersion: number
+  mdVersion: MDVersion
 }
 
-const ROOT_STYLE: CSSProperties = {
-  containerType: 'inline-size',
-  aspectRatio: aspectOf(EGO_GIFT_GEOMETRY.size),
+const SLOT = EGO_GIFT_GEOMETRY.size
+
+export function StartBuffMiniCard(props: StartBuffMiniCardProps) {
+  return (
+    <Suspense fallback={<Skeleton className="w-full h-full" />}>
+      <StartBuffMiniCardBody {...props} />
+    </Suspense>
+  )
 }
 
-const ICON_STYLE: CSSProperties = {
-  width: pct(START_BUFF_MINI_CARD.icon),
-  height: pct(START_BUFF_MINI_CARD.icon),
-}
+function StartBuffMiniCardBody({ buffId, displayName, mdVersion }: StartBuffMiniCardProps) {
+  const { i18n } = useTranslation()
+  const layout = useStartBuffMiniCardLayout(mdVersion)
+  const [hovered, setHovered] = useState(false)
 
-export function StartBuffMiniCard({ buffId, displayName, mdVersion }: StartBuffMiniCardProps) {
   const baseId = getBaseIdFromBuffId(buffId)
   const enhancement = getEnhancementFromBuffId(buffId)
-  const suffix = getEnhancementSuffix(enhancement)
-  const accentColor = MD_ACCENT_COLORS[mdVersion]
+  const space = fitSpace({ x: 0, y: 0, ...layout.root }, SLOT)
+  const state: CardState = {
+    selected: false,
+    hovered,
+    hoveredButton: null,
+    enhancement,
+    overflows: false,
+  }
 
   return (
-    <div className="group relative w-full" style={ROOT_STYLE}>
-      <img
-        src={getStartBuffMiniPath(mdVersion)}
-        alt=""
-        className="absolute inset-0 w-full h-full object-contain"
-      />
-
-      <div
-        className="absolute inset-0 flex flex-col"
-        style={{ gap: cqw(START_BUFF_MINI_CARD.rowGap) }}
-      >
-        <div
-          className="flex-1 flex items-center justify-center"
-          style={{ paddingTop: cqw(START_BUFF_MINI_CARD.iconPaddingTop) }}
-        >
-          <img
-            src={getStartBuffIconPath(baseId, mdVersion)}
-            alt=""
-            className="object-contain"
-            style={ICON_STYLE}
-          />
-        </div>
-
-        <div
-          className="flex-1 flex items-center justify-center overflow-hidden"
-          style={{ paddingInline: cqw(START_BUFF_MINI_CARD.namePaddingX) }}
-        >
-          <Suspense fallback={<Skeleton className="h-5 w-full" />}>
-            <StartBuffMiniName text={`${displayName}${suffix}`} color={accentColor} />
-          </Suspense>
-        </div>
-      </div>
-
-      <div
-        style={{
-          transform: `scale(${String(START_BUFF_MINI_CARD.enhancementScale)}) translate(${cqw(START_BUFF_MINI_CARD.enhancementTranslateX)}, ${cqw(START_BUFF_MINI_CARD.enhancementTranslateY)})`,
-        }}
-      >
-        <EGOGiftEnhancementIndicator enhancement={enhancement} />
-      </div>
-
-      <img
-        src={getStartBuffMiniHighlightPath(mdVersion)}
-        alt=""
-        className="absolute inset-0 w-full h-full object-contain pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"
-      />
+    <div
+      className="relative w-full"
+      style={{ aspectRatio: String(aspectOf(SLOT)) }}
+      onMouseEnter={() => {
+        setHovered(true)
+      }}
+      onMouseLeave={() => {
+        setHovered(false)
+      }}
+    >
+      {layout.elements
+        .filter((element) => isShown(element, state))
+        .map((element) => {
+          const key = element.path
+          if (element.role === 'name') {
+            return (
+              <CardText
+                key={key}
+                text={`${displayName}${getEnhancementSuffix(enhancement)}`}
+                element={element}
+                tableRole="name"
+                language={i18n.language}
+                space={space}
+                color={element.text.color}
+                fontFamily={getDisplayFontForLanguage(i18n.language).fontFamily}
+                testId="start-buff-mini-name"
+              />
+            )
+          }
+          if (!('image' in element)) return null
+          const file =
+            element.role === 'level'
+              ? levelIconFile(layout, enhancement)
+              : spriteFile(element.image, baseId)
+          if (file === null) return null
+          return (
+            <CardSprite
+              key={key}
+              version={mdVersion}
+              file={file}
+              image={element.image}
+              rect={element.rect}
+              space={space}
+            />
+          )
+        })}
     </div>
   )
 }

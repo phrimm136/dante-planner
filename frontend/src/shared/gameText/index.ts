@@ -16,7 +16,7 @@ export {
 } from './hooks/useKeywordListData'
 
 export { applyStrikethrough } from './lib/unityRichText'
-export { extractLeadingColor, stripRichTextTags } from './lib/richText'
+export { colorRuns, extractLeadingColor, stripRichTextTags, type ColorRun } from './lib/richText'
 
 export { ColorCodeMapSchema } from './schemas/ColorCodeSchemas'
 export { SanityConditionI18nSchema } from './schemas/SanityConditionSchemas'

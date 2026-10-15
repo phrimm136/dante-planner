@@ -79,6 +79,18 @@ describe('createAdvanceMeasure', () => {
 
     expect(measure('\u{20001}', 10)).toBeCloseTo(10 - 1, 6)
   })
+
+  it('draws an overridden glyph at the advance it is handed', () => {
+    const measure = createAdvanceMeasure(TABLE, NO_TRACKING, new Map([['•', 0.51]]))
+
+    expect(measure('•a', 10)).toBeCloseTo(5.1 + 5, 6)
+  })
+})
+
+describe('FontAdvanceTableSchema', () => {
+  it('keeps the sign of a descent line above the baseline', () => {
+    expect(FontAdvanceTableSchema.parse({ ...TABLE, descender: -0.24 }).descender).toBe(-0.24)
+  })
 })
 
 describe('lineFaces', () => {
@@ -110,6 +122,13 @@ describe('lineMetrics', () => {
       capLine: 0.7,
       lineHeight: 1.4,
     })
+  })
+
+  it('keeps the signed descender of a face whose descent line sits above the baseline', () => {
+    const metrics = lineMetrics({ ...TABLE, ascender: 0.76, descender: -0.24, fallbacks: [] }, '12')
+
+    expect(metrics.descender).toBe(-0.24)
+    expect(metrics.ascender + metrics.descender).toBeCloseTo(0.52, 6)
   })
 })
 

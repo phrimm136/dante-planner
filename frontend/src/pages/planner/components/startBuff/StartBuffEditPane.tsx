@@ -4,9 +4,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { ENHANCEMENT_LABELS, type MDVersion } from '@/shared/gameData'
 import { CARD_MOBILE_SCALE_DENSE } from '@/lib/constants'
-import { START_BUFF_GEOMETRY } from '../../lib/cardLayout'
 import { CardSlot, useSlotSizePx } from '@/shared/cardLayout'
 import { START_BUFF_GRID_COLUMNS } from '../../lib/cardLayout'
+import { startBuffSlotSize } from '../../lib/startBuffCardLayout'
+import { useStartBuffCardLayout } from '../../hooks/useStartBuffCardLayout'
 import { getStartBuffEnhancementIconPath } from '@/shared/assets'
 import { useStartBuffSelection } from '../../hooks/useStartBuffSelection'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
@@ -35,11 +36,10 @@ export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEd
 
   const baseBuffIds = displayBuffs.map((buff) => buff.baseId)
 
+  const layout = useStartBuffCardLayout(mdVersion)
+  const slotSize = startBuffSlotSize(layout.canvas)
   const mobileScale = CARD_MOBILE_SCALE_DENSE
-  const { widthPx: columnWidth, heightPx: rowHeight } = useSlotSizePx(
-    START_BUFF_GEOMETRY.size,
-    mobileScale,
-  )
+  const { widthPx: columnWidth, heightPx: rowHeight } = useSlotSizePx(slotSize, mobileScale)
 
   const [enhancementPreviews, setEnhancementPreviews] = useState<Record<number, EnhancementLevel>>(
     () => {
@@ -193,13 +193,11 @@ export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEd
               const isSelected = selectedBuffIds.has(buffId)
 
               return (
-                <CardSlot
-                  key={buff.baseId}
-                  size={START_BUFF_GEOMETRY.size}
-                  mobileScale={mobileScale}
-                >
+                <CardSlot key={buff.baseId} size={slotSize} mobileScale={mobileScale}>
                   <StartBuffCard
                     mdVersion={mdVersion}
+                    layout={layout}
+                    slot={slotSize}
                     buff={buff}
                     allBuffs={buffs}
                     i18n={i18n}

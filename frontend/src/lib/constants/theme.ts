@@ -100,12 +100,6 @@ export const MD_CATEGORY_TEXT_COLORS: Record<string, string> = {
   '15F': '#000000',
 } as const
 
-export const MD_ACCENT_COLORS: Record<number, string> = {
-  5: '#ff9933',
-  6: '#00ffcc',
-  7: '#e5d7d7',
-} as const
-
 /**
  * Flavor text color for skill / status-effect lore lines.
  * Mirrors in-game `*FlavorGlow` TMP material face color used by

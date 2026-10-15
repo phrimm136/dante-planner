@@ -404,3 +404,30 @@ function tokenizeLeaf(text: string, base: number, grammar: RichTextGrammar): Ric
 
   return tokens
 }
+
+export interface ColorRun {
+  text: string
+  color: string | undefined
+}
+
+function collectRuns(tokens: RichTextToken[], color: string | undefined, runs: ColorRun[]): void {
+  for (const token of tokens) {
+    switch (token.kind) {
+      case 'text':
+        runs.push({ text: token.value, color })
+        break
+      case 'break':
+        runs.push({ text: '\n', color })
+        break
+      case 'element':
+        collectRuns(token.children, token.name === RICH_TEXT_TAG.color ? token.value : color, runs)
+        break
+    }
+  }
+}
+
+export function colorRuns(text: string): ColorRun[] {
+  const runs: ColorRun[] = []
+  collectRuns(tokenizeRichText(text, NESTED_HEX_COLOR_GRAMMAR), undefined, runs)
+  return runs
+}

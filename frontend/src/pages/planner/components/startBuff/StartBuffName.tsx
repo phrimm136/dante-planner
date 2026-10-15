@@ -1,81 +1,101 @@
-import { useTranslation } from 'react-i18next'
+import { Suspense, type CSSProperties } from 'react'
 
+import { Skeleton } from '@/components/ui/skeleton'
 import {
-  createAdvanceMeasure,
-  fitFontSize,
+  lineMetrics,
+  midlineOffsetEm,
   useFontAdvances,
-  wrapText,
-  type TrackingSpec,
+  type FontTableRole,
 } from '@/shared/cardLayout'
-import { getDisplayFontForLanguage, getLineHeightForLanguage } from '@/lib/utils'
-import { START_BUFF_CARD, START_BUFF_MINI_CARD } from '../../lib/cardLayout'
+import type { TextElement } from '../../schemas/StartBuffCardSchemas'
+import {
+  fitElementText,
+  lineSpacingEm,
+  rectStyle,
+  textTracking,
+  unitsToCqw,
+  type LayoutSpace,
+} from '../../lib/startBuffCardLayout'
 
-/** The start buff faces are drawn with the table's own advances, untracked. */
-const TRACKING: TrackingSpec = { letterSpacingEm: 0, wordSpacingEm: 0 }
+const ITEM_ALIGN = {
+  left: 'flex-start',
+  center: 'center',
+  right: 'flex-end',
+} as const
 
-interface StartBuffNameProps {
+interface CardTextProps {
   text: string
-  maxSize: number
-  color: string | undefined
-  shadow?: string | undefined
+  element: TextElement
+  tableRole: FontTableRole
+  language: string
+  space: LayoutSpace
+  color: string
+  fontFamily: string | undefined
+  testId: string
 }
 
-export function StartBuffName({ text, maxSize, color, shadow }: StartBuffNameProps) {
-  const { i18n } = useTranslation()
-  const fontTable = useFontAdvances(i18n.language)
-  const measure = createAdvanceMeasure(fontTable, TRACKING)
-
-  const fontSize = fitFontSize(
-    text,
-    { max: maxSize, min: 0, width: START_BUFF_CARD.nameWidth },
-    measure,
+export function CardText(props: CardTextProps) {
+  return (
+    <Suspense
+      fallback={
+        <Skeleton
+          style={{ ...rectStyle(props.element.rect, props.space), pointerEvents: 'none' }}
+        />
+      }
+    >
+      <CardTextBody {...props} />
+    </Suspense>
   )
+}
+
+function CardTextBody({
+  text,
+  element,
+  tableRole,
+  language,
+  space,
+  color,
+  fontFamily,
+  testId,
+}: CardTextProps) {
+  const table = useFontAdvances(language, tableRole)
+  const node = element.text
+  const fitted = fitElementText(text, element, table)
+  const tracking = textTracking(node)
+  const geometry = node.vAlign === 'geometry'
+
+  const boxStyle: CSSProperties = {
+    ...rectStyle(element.rect, space),
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: geometry ? 'center' : 'flex-start',
+    alignItems: ITEM_ALIGN[node.hAlign],
+    textAlign: node.hAlign,
+    pointerEvents: 'none',
+    ...(geometry && {
+      transform: `translateY(${unitsToCqw(midlineOffsetEm(table) * fitted.fontSize, space)})`,
+    }),
+  }
 
   return (
-    <span
-      className="text-center"
-      style={{
-        ...getDisplayFontForLanguage(i18n.language),
-        display: 'block',
-        fontSize: `${String(fontSize)}cqw`,
-        whiteSpace: 'nowrap',
-        color,
-        ...(shadow !== undefined && { textShadow: shadow }),
-      }}
-    >
-      {text}
-    </span>
-  )
-}
-
-interface StartBuffMiniNameProps {
-  text: string
-  color: string | undefined
-}
-
-export function StartBuffMiniName({ text, color }: StartBuffMiniNameProps) {
-  const { i18n } = useTranslation()
-  const fontTable = useFontAdvances(i18n.language)
-  const measure = createAdvanceMeasure(fontTable, TRACKING)
-
-  const fontSize = START_BUFF_MINI_CARD.nameSize
-  const { lines } = wrapText(text, fontSize, { width: START_BUFF_MINI_CARD.nameWidth }, measure)
-
-  return (
-    <span
-      className="text-center block"
-      style={{
-        ...getDisplayFontForLanguage(i18n.language),
-        fontSize: `${String(fontSize)}cqw`,
-        lineHeight: getLineHeightForLanguage(i18n.language),
-        color,
-      }}
-    >
-      {lines.slice(0, START_BUFF_MINI_CARD.nameMaxLines).map((line, index) => (
-        <span key={`${String(index)}:${line}`} style={{ display: 'block', whiteSpace: 'nowrap' }}>
+    <div data-testid={testId} style={boxStyle}>
+      {fitted.lines.map((line, index) => (
+        <span
+          key={`${String(index)}:${line}`}
+          data-testid={`${testId}-line`}
+          style={{
+            fontFamily,
+            fontSize: unitsToCqw(fitted.fontSize, space),
+            lineHeight: lineMetrics(table, line).lineHeight + lineSpacingEm(node),
+            letterSpacing: `${String(tracking.letterSpacingEm)}em`,
+            wordSpacing: `${String(tracking.wordSpacingEm)}em`,
+            whiteSpace: 'nowrap',
+            color,
+          }}
+        >
           {line}
         </span>
       ))}
-    </span>
+    </div>
   )
 }

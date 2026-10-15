@@ -1,15 +1,5 @@
-import {
-  CARD_MOBILE_SCALE,
-  CARD_MOBILE_SCALE_DENSE,
-  CARD_MOBILE_SCALE_NONE,
-  MD_ACCENT_COLORS,
-} from '@/lib/constants'
-import {
-  EGO_GIFT_GEOMETRY,
-  IDENTITY_GEOMETRY,
-  aspectOf,
-  type CardGeometry,
-} from '@/shared/cardLayout'
+import { CARD_MOBILE_SCALE, CARD_MOBILE_SCALE_NONE } from '@/lib/constants'
+import { IDENTITY_GEOMETRY, type CardGeometry } from '@/shared/cardLayout'
 
 export const KEYWORD_ICON_GEOMETRY: CardGeometry = {
   size: { widthPx: 64, heightPx: 64 },
@@ -38,12 +28,6 @@ export const SKILL_IMAGE_GEOMETRY: CardGeometry = {
 export const SKILL_EXCHANGE_GEOMETRY: CardGeometry = {
   size: { widthPx: 356, heightPx: 148 },
   mobileScale: CARD_MOBILE_SCALE,
-  rows: 'slot',
-}
-
-export const START_BUFF_GEOMETRY: CardGeometry = {
-  size: { widthPx: 272, heightPx: 320 },
-  mobileScale: CARD_MOBILE_SCALE_DENSE,
   rows: 'slot',
 }
 
@@ -77,8 +61,6 @@ const skillImage = (px: number) => pxToCardPercent(px, SKILL_IMAGE_GEOMETRY.size
 const skillExchange = (px: number) => pxToCardPercent(px, SKILL_EXCHANGE_GEOMETRY.size.widthPx)
 const deck = (px: number) => pxToCardPercent(px, IDENTITY_GEOMETRY.size.widthPx)
 const compactIdentity = (px: number) => pxToCardPercent(px, COMPACT_IDENTITY_GEOMETRY.size.widthPx)
-const startBuff = (px: number) => pxToCardPercent(px, START_BUFF_GEOMETRY.size.widthPx)
-const startBuffTall = (px: number) => pxToCardPercent(px, START_BUFF_GEOMETRY.size.heightPx)
 
 export const KEYWORD_ICON_CARD = {
   icon: keywordIcon(48),
@@ -154,175 +136,6 @@ export const SINNER_GRID_GAP = 8
 
 export const SINNER_GRID_COLUMNS = { lg: 6, md: 4, sm: 3, base: 2 } as const
 
-export interface EnhancementBorder {
-  bgLevel: 0 | 1 | 2
-  width: number
-  slice: number
-  outset: number
-}
-
-export interface StartBuffCardVariant {
-  pane: { width: number; fit: 'cover' | 'fill' }
-  cost: {
-    left: number
-    top: number
-    translateX: number
-    fontSize: number
-    lift: number
-    shadow?: string
-  }
-  nameRowHeight: number
-  buffIcon: { size: number; marginLeft: number }
-  name: { marginLeft: number; translateYSelf: number; maxSize: number; shadow?: string }
-  description: {
-    paddingX: number
-    paddingY: number
-    margin: number
-    marginTop: number
-    marginRight: number
-    color?: string | undefined
-  }
-  enhancementRow: { gap: number; paddingX: number; paddingBottom: number }
-  enhancementSlot: { height: number; marginX: number; translateX: number }
-  enhancementStates: {
-    unselected: EnhancementBorder
-    plus1: EnhancementBorder
-    plus2: EnhancementBorder
-  }
-  enhancementOverlay?: {
-    width: number
-    slice: number
-    outset: number
-    translateX: number
-    translateY: number
-  }
-  highlight: { width: number; height: number; translateX: number; translateY: number }
-}
-
 export const START_BUFF_GRID_COLUMNS = 5
 
-export type StartBuffCardVersion = 6 | 7
-
-export const START_BUFF_CARD = {
-  aspect: aspectOf(START_BUFF_GEOMETRY.size),
-  contentPaddingTop: startBuff(4),
-  costRowHeight: 15,
-  costGap: startBuff(4),
-  starIcon: startBuff(24),
-  enhancementIconGap: startBuff(2),
-  enhancementIcon: {
-    unselected: startBuff(16),
-    plus1: startBuff(16.9),
-    plus2: startBuff(20.8),
-  },
-  effectFontSize: startBuff(16.9),
-  effectLineHeight: startBuff(20),
-  effectGap: startBuff(2),
-  nameWidth: startBuff(160),
-} as const
-
-export const START_BUFF_CARD_VARIANTS: Record<StartBuffCardVersion, StartBuffCardVariant> = {
-  6: {
-    pane: { width: 100, fit: 'cover' },
-    cost: {
-      left: 65.625,
-      top: 62.5,
-      translateX: 0,
-      fontSize: startBuff(25),
-      lift: startBuff(4),
-    },
-    nameRowHeight: 12,
-    buffIcon: { size: startBuff(56), marginLeft: startBuff(32) },
-    name: { marginLeft: startBuff(4), translateYSelf: 0, maxSize: startBuff(20) },
-    description: {
-      paddingX: startBuff(12),
-      paddingY: startBuff(8),
-      margin: startBuff(14),
-      marginTop: startBuff(14),
-      marginRight: startBuff(14),
-    },
-    enhancementRow: { gap: startBuff(8), paddingX: startBuff(28), paddingBottom: startBuff(32) },
-    enhancementSlot: { height: startBuff(24), marginX: 0, translateX: 0 },
-    enhancementStates: {
-      unselected: { bgLevel: 0, width: startBuff(10), slice: 20, outset: 0 },
-      plus1: { bgLevel: 1, width: startBuff(13), slice: 28, outset: startBuff(2) },
-      plus2: { bgLevel: 2, width: startBuff(13), slice: 32, outset: startBuff(2) },
-    },
-    highlight: {
-      width: startBuff(264),
-      height: startBuffTall(310),
-      translateX: startBuff(1),
-      translateY: startBuff(7),
-    },
-  },
-  7: {
-    pane: { width: startBuff(264), fit: 'fill' },
-    cost: {
-      left: 75,
-      top: 28.125,
-      translateX: startBuff(-12),
-      fontSize: startBuff(30),
-      lift: startBuff(3),
-      shadow: '1px 1px 1px black',
-    },
-    nameRowHeight: 5,
-    buffIcon: { size: startBuff(64), marginLeft: startBuff(24) },
-    name: {
-      marginLeft: 0,
-      translateYSelf: 12.5,
-      maxSize: startBuff(22),
-      shadow: '2px 2px 1px black',
-    },
-    description: {
-      paddingX: startBuff(8),
-      paddingY: startBuff(8),
-      margin: startBuff(12),
-      marginTop: startBuff(40),
-      marginRight: startBuff(20),
-      color: MD_ACCENT_COLORS[7],
-    },
-    enhancementRow: { gap: 0, paddingX: startBuff(21), paddingBottom: startBuff(20) },
-    enhancementSlot: { height: startBuff(28), marginX: startBuff(5), translateX: startBuff(-4) },
-    enhancementStates: {
-      unselected: { bgLevel: 0, width: startBuff(6), slice: 8, outset: 0 },
-      plus1: { bgLevel: 0, width: startBuff(6), slice: 8, outset: 0 },
-      plus2: { bgLevel: 0, width: startBuff(6), slice: 8, outset: 0 },
-    },
-    enhancementOverlay: {
-      width: startBuff(8),
-      slice: 16,
-      outset: startBuff(2.5),
-      translateX: startBuff(-1.5),
-      translateY: startBuff(-1),
-    },
-    highlight: {
-      width: startBuff(270),
-      height: startBuffTall(324),
-      translateX: startBuff(-2),
-      translateY: startBuff(-1),
-    },
-  },
-}
-
-const FALLBACK_MD_VERSION: StartBuffCardVersion = 6
-
-function hasCardVariant(mdVersion: number): mdVersion is StartBuffCardVersion {
-  return mdVersion in START_BUFF_CARD_VARIANTS
-}
-
-export function resolveStartBuffCardVersion(mdVersion: number): StartBuffCardVersion {
-  return hasCardVariant(mdVersion) ? mdVersion : FALLBACK_MD_VERSION
-}
-
-export const START_BUFF_MINI_CARD = {
-  icon: pxToCardPercent(48, EGO_GIFT_GEOMETRY.size.widthPx),
-  rowGap: pxToCardPercent(8, EGO_GIFT_GEOMETRY.size.widthPx),
-  iconPaddingTop: pxToCardPercent(4, EGO_GIFT_GEOMETRY.size.widthPx),
-  namePaddingX: pxToCardPercent(4, EGO_GIFT_GEOMETRY.size.widthPx),
-  nameWidth: pxToCardPercent(80, EGO_GIFT_GEOMETRY.size.widthPx),
-  nameSize: pxToCardPercent(12, EGO_GIFT_GEOMETRY.size.widthPx),
-  nameMaxLines: 2,
-  enhancementScale: 0.5,
-  enhancementTranslateX: pxToCardPercent(16, EGO_GIFT_GEOMETRY.size.widthPx),
-  enhancementTranslateY: pxToCardPercent(4, EGO_GIFT_GEOMETRY.size.widthPx),
-} as const
+export const START_BUFF_SLOT_WIDTH_PX = 272

@@ -26,5 +26,11 @@ export {
   type FontAdvanceTable,
   type TrackingSpec,
 } from './fontAdvances'
-export { fontTableLanguage, useFontAdvances, type FontTableLanguage } from './useFontAdvances'
+export {
+  createFontAdvanceQueryOptions,
+  fontTableLanguage,
+  useFontAdvances,
+  type FontTableLanguage,
+  type FontTableRole,
+} from './useFontAdvances'
 export { levelShadow, nameShadow, underlayShadow, type Underlay } from './textShadow'

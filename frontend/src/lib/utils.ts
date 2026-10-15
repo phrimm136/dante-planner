@@ -54,25 +54,12 @@ export function getDisplayFontForNumeric(): string {
   return 'var(--font-excelsior)'
 }
 
-export function getDisplayFontForLabel(): string {
-  return 'var(--font-bebas)'
+export function getDisplayFontForFallback(): string {
+  return 'var(--font-pretendard)'
 }
 
-export function getLineHeightForLanguage(language?: string): number {
-  const lang = language ?? i18n.language
-
-  switch (lang) {
-    case 'KR':
-      return 1.3
-    case 'CN':
-      return 1.1
-    case 'JP':
-      return 1.1
-    case 'EN':
-      return 1.0
-    default:
-      return 1.2
-  }
+export function getDisplayFontForLabel(): string {
+  return 'var(--font-bebas)'
 }
 
 export function clamp01(value: number): number {
