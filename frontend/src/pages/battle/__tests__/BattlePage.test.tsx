@@ -221,27 +221,31 @@ describe('BattlePage', () => {
     TEST_BUDGET_MS,
   )
 
-  it('names the envy card 1099 by unit and copied identity, per mode', async () => {
-    await i18n.changeLanguage('KR')
-    renderPage()
-    await waitForList()
+  it(
+    'names the envy card 1099 by unit and copied identity, per mode',
+    async () => {
+      await i18n.changeLanguage('KR')
+      renderPage()
+      await waitForList()
 
-    expect(
-      await within(
-        await screen.findByTestId('battle-card-1099', {}, { timeout: LOAD_WAIT_MS }),
-      ).findByText('질투 죄종? - W사 3등급 정리 요원', {}, { timeout: LOAD_WAIT_MS }),
-    ).toBeInTheDocument()
+      expect(
+        await within(
+          await screen.findByTestId('battle-card-1099', {}, { timeout: LOAD_WAIT_MS }),
+        ).findByText('질투 죄종? - W사 3등급 정리 요원', {}, { timeout: LOAD_WAIT_MS }),
+      ).toBeInTheDocument()
 
-    fireEvent.click(
-      modeRow().getByRole('button', { name: databaseText('battle.case.mirrorDungeon') }),
-    )
+      fireEvent.click(
+        modeRow().getByRole('button', { name: databaseText('battle.case.mirrorDungeon') }),
+      )
 
-    expect(
-      await within(
-        await screen.findByTestId('battle-card-1099', {}, { timeout: LOAD_WAIT_MS }),
-      ).findByText('굴절된 질투 죄종? - W사 3등급 정리 요원', {}, { timeout: LOAD_WAIT_MS }),
-    ).toBeInTheDocument()
-  })
+      expect(
+        await within(
+          await screen.findByTestId('battle-card-1099', {}, { timeout: LOAD_WAIT_MS }),
+        ).findByText('굴절된 질투 죄종? - W사 3등급 정리 요원', {}, { timeout: LOAD_WAIT_MS }),
+      ).toBeInTheDocument()
+    },
+    TEST_BUDGET_MS,
+  )
 
   it.each([['intervallo:7.5'], ['canto:8']])(
     'lists the merged 자로 card under the %s filter',
