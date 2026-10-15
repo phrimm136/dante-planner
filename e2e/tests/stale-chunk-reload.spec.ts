@@ -37,6 +37,22 @@ async function serveStaleChunks(page: Page, policy: StalePolicy) {
   }
 }
 
+function trackChunkRequests(page: Page) {
+  const inFlight = new Set<string>()
+  const isChunk = (url: string) => CHUNK_PATH.test(new URL(url).pathname)
+  page.on('request', (request) => {
+    if (isChunk(request.url())) inFlight.add(request.url())
+  })
+  const settle = (request: { url: () => string }) => {
+    inFlight.delete(request.url())
+  }
+  page.on('requestfinished', settle)
+  page.on('requestfailed', settle)
+  return {
+    settled: () => expect.poll(() => inFlight.size, { timeout: 20_000 }).toBe(0),
+  }
+}
+
 function countLoads(page: Page) {
   const loads = { count: 0 }
   page.on('load', () => {
@@ -48,38 +64,39 @@ function countLoads(page: Page) {
 async function openHomeThenIdentity(page: Page, policy: StalePolicy) {
   const stale = await serveStaleChunks(page, policy)
   const loads = countLoads(page)
+  const chunks = trackChunkRequests(page)
 
   await page.goto('/', { waitUntil: 'load' })
   await expect(page.locator('#seo-skeleton')).toHaveCount(0, { timeout: 20_000 })
   const identityLink = page.locator('a[href="/identity"]:visible').first()
   await expect(identityLink).toBeVisible()
-  await page.waitForLoadState('networkidle')
+  await chunks.settled()
 
   stale.arm()
   await identityLink.click()
-  return { stale, loads }
+  return { stale, loads, chunks }
 }
 
 test('a stale lazy chunk reloads the tab once and the route renders', async ({ page }) => {
-  const { stale, loads } = await openHomeThenIdentity(page, 'once')
+  const { stale, loads, chunks } = await openHomeThenIdentity(page, 'once')
 
   await expect(page).toHaveURL(/\/identity$/)
   await expect(page.locator('a[href^="/identity/"]').first()).toBeVisible({ timeout: 20_000 })
-  await page.waitForLoadState('networkidle')
+  await chunks.settled()
 
   expect(stale.failed.size).toBe(1)
-  expect(loads.count).toBe(2)
+  await expect.poll(() => loads.count).toBe(2)
   expect(await page.evaluate(() => sessionStorage.getItem('chunkReloadAt'))).toMatch(/^\d+$/)
   await expect(page.getByText('CHUNK_LOAD')).toHaveCount(0)
 })
 
 test('a chunk that keeps failing reloads once, then shows CHUNK_LOAD', async ({ page }) => {
-  const { stale, loads } = await openHomeThenIdentity(page, 'always')
+  const { stale, loads, chunks } = await openHomeThenIdentity(page, 'always')
 
   await expect(page.getByText('CHUNK_LOAD')).toBeVisible({ timeout: 20_000 })
-  await page.waitForLoadState('networkidle')
+  await chunks.settled()
 
   expect(stale.failed.size).toBeGreaterThan(0)
-  expect(loads.count).toBe(2)
+  await expect.poll(() => loads.count).toBe(2)
   await expect(page.getByText('CHUNK_LOAD')).toBeVisible()
 })

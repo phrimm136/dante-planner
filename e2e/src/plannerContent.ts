@@ -11,7 +11,7 @@ const SINNER_SLICE: [number, number] = [1, 3]
 function bySinner(ids: string[]): Record<string, string> {
   const picked: Record<string, string> = {}
   for (const id of [...ids].sort()) {
-    const sinner = id.slice(...SINNER_SLICE)
+    const sinner = String(Number(id.slice(...SINNER_SLICE)))
     picked[sinner] ??= id
   }
   return picked
@@ -79,12 +79,22 @@ export function localPlannerContent(): Record<string, unknown> {
 
 export function minimalPlannerContent(): string {
   const equipment = minimalEquipment()
+  const sinners = Object.keys(identityBySinner)
 
   return JSON.stringify({
     selectedKeywords: [PLANNER_KEYWORD],
+    selectedBuffIds: [],
+    selectedGiftKeyword: null,
+    selectedGiftIds: [],
+    observationGiftIds: [],
+    comprehensiveGiftIds: [],
     equipment,
+    skillEAState: Object.fromEntries(sinners.map((sinner) => [sinner, { ...SKILL_EA_BY_SLOT }])),
     deploymentOrder: [],
-    floorSelections: [],
+    floorSelections: Object.keys(themePackList)
+      .sort()
+      .slice(0, FLOOR_COUNT)
+      .map((themePackId) => ({ themePackId, difficulty: DIFFICULTY_NORMAL, giftIds: [] })),
     sectionNotes: {},
   })
 }
