@@ -13,11 +13,11 @@ Run all checks. A commit that breaks the build wastes everyone's time — catch 
 
 | Check | Command |
 |-------|---------|
-| FE typecheck | `yarn --cwd frontend typecheck` |
-| FE test | `yarn --cwd frontend test` |
-| FE build | `yarn --cwd frontend build` |
-| BE test | `./gradlew -p backend test` |
-| BE build | `./gradlew -p backend build` |
+| FE typecheck | `yarn --cwd <worktree>/frontend typecheck` |
+| FE test | `yarn --cwd <worktree>/frontend test` |
+| FE build | `yarn --cwd <worktree>/frontend build` |
+| BE test | `<worktree>/backend/gradlew -p <worktree>/backend test` |
+| BE build | `<worktree>/backend/gradlew -p <worktree>/backend build` |
 | Mock deploy | `docker compose up --build -d` (repo root; auto-merges the gitignored `docker-compose.override.yml`, which supplies the local mysql/backend/nginx/redis stack) |
 
 Output redirection is enforced by the `check-output-redirect.sh` hook — it will block any test/build command that doesn't redirect to `/tmp/` with a date suffix. Follow the hook's required pattern.
@@ -31,50 +31,22 @@ If any check fails, diagnose and fix before proceeding. Do not skip checks — a
 
 ## Step 2 — Prepare the Branch
 
-### Single-tree
+### Worktree — rebase onto main before committing
 
-When you are **not** in a linked worktree, commit directly onto the long-lived integration branch. Do not create a feature branch.
-
-Detect single-tree vs. worktree by comparing the git dirs — they match in the main checkout and differ in a linked worktree:
+The main checkout is a read-only mirror of `origin/main` and never receives commits; the `commit-on-trunk-guard.sh` hook denies a `git commit` there or on `main`. Every unit lives on a short-lived branch in a worktree created from `origin/main`:
 
 ```bash
-[ "$(git rev-parse --git-dir)" = "$(git rev-parse --git-common-dir)" ]  # true => single-tree
+git worktree add <worktree> -b <branch> origin/main
 ```
 
-Pick the target branch by the first that exists, in order `dev → main → master`, then check it out:
+Before committing, fetch `main` from origin and rebase the branch onto it once, so your commits sit linearly on top of the current trunk. The local `main` mirror is the user's to refresh; the worktree rebases onto `origin/main` directly:
 
 ```bash
-for b in dev main master; do
-  if git show-ref --verify --quiet "refs/heads/$b"; then target="$b"; break; fi
-done
-git checkout "$target"
+git -C <worktree> fetch origin main
+git -C <worktree> rebase origin/main
 ```
 
-`dev` is the default integration branch; `main`/`master` are fallbacks for repos that don't use a `dev` branch. `git show-ref --verify --quiet` probes a ref by exit code only — no output, no mutation — so it's safe to loop over candidates. Always checkout the target first so the commit lands there even if you were on another branch.
-
-### Worktree — sync with dev before committing
-
-The worktree's branch pre-exists from setup. Before committing, fast-forward it to `dev`'s current tip so your commits land linearly on top. While you were working, `dev` in the main worktree may have advanced; syncing now lets you resolve conflicts against the working tree (if any) rather than against pinned commits — and makes the later FF-merge in Step 5 trivial.
-
-```bash
-# Fetch latest dev from origin (in case the main worktree hasn't been updated)
-git -C <worktree-path> fetch origin dev:dev
-
-# Fast-forward the worktree branch to dev's tip
-git -C <worktree-path> merge --ff-only dev
-```
-
-`--ff-only` is mandatory (per `feedback_no_merge_commits`). If FF fails because you've already made local commits that diverge, rebase instead: `git -C <worktree-path> rebase dev`.
-
-After this step, your worktree branch == `dev`'s tip. New commits go on top linearly.
-
-**Why `dev:dev` fetch syntax:** it fetches origin's `dev` and updates your local `dev` ref directly, even though `dev` is checked out in the main worktree. You're not touching the main worktree's checkout — just aligning the ref to origin.
-
-**Why you can't `git checkout dev` inside the worktree:** a git worktree holds an exclusive checkout. `dev` is already checked out in the main worktree, so `git checkout dev` inside a feature worktree errors with "already checked out". Use `git -C <main-repo> ...` when you need to operate on dev directly.
-
-### Submodule
-
-You must not create a feature branch from `main`.
+Resolve rebase conflicts in the worktree, then re-run the Step 1 checks that the conflicts touched.
 
 ## Step 3 — Write the Commit Message
 
@@ -220,24 +192,14 @@ EOF
 
 ## Step 5 — Wrap Up
 
-### Single-tree
-
-Nothing to switch back to — the commit already landed on the target branch (`dev`, or its `main`/`master` fallback) from Step 2. Confirm you're where you expect:
-
-```
-git log --oneline -1
-```
-
-The branch is ready to push (separate workflow).
-
-### Worktree — fast-forward dev from the main worktree
-
-Because Step 2 (Worktree variant) aligned the worktree branch with `dev` before committing, your commits now sit linearly on top of `dev`'s tip. Move `dev` forward to include them:
+The branch is ready. Confirm the commits sit on top of `origin/main`:
 
 ```bash
-git -C <main-repo-path> merge --ff-only <worktree-branch-name>
+git -C <worktree> log --oneline origin/main..HEAD
 ```
 
-`--ff-only` enforces a no-merge-commit, linear history. If it errors, someone pushed to `dev` between your Step 2 sync and now — re-run the Step 2 worktree sync (fetch + ff-merge dev into worktree) and try again.
+Pushing the branch, opening the pull request and merging it are the user's. After the merge, remove the worktree:
 
-The worktree stays checked out on its branch; no need to return anywhere.
+```bash
+git worktree remove <worktree>
+```

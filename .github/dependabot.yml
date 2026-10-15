@@ -5,7 +5,6 @@ updates:
     directory: "/frontend"
     schedule:
       interval: "weekly"
-    target-branch: "dev"
     open-pull-requests-limit: 10
     # Labels help your "Dependabot Helper" workflow identify these PRs
     labels:
@@ -24,7 +23,6 @@ updates:
     directory: "/backend"
     schedule:
       interval: "weekly"
-    target-branch: "dev"
     open-pull-requests-limit: 5
     labels:
       - "backend"
@@ -44,14 +42,12 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-    target-branch: "dev"
 
   # 4. E2E harness: Playwright suite, its own manifest
   - package-ecosystem: "npm"
     directory: "/e2e"
     schedule:
       interval: "weekly"
-    target-branch: "dev"
     labels:
       - "e2e"
       - "dependencies"
@@ -68,7 +64,6 @@ updates:
     directory: "/.claude/hooks"
     schedule:
       interval: "weekly"
-    target-branch: "dev"
     labels:
       - "tooling"
       - "dependencies"
@@ -85,7 +80,6 @@ updates:
     directory: "/backend"
     schedule:
       interval: "weekly"
-    target-branch: "dev"
     labels:
       - "backend"
       - "dependencies"
@@ -96,7 +90,6 @@ updates:
       - "/terraform/*"
     schedule:
       interval: "monthly"
-    target-branch: "dev"
     labels:
       - "infra"
       - "dependencies"
