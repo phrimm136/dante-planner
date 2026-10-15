@@ -37,6 +37,8 @@ import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisConnectionException;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.codec.ByteArrayCodec;
+import io.lettuce.core.resource.ClientResources;
+import io.lettuce.core.resource.DefaultClientResources;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -67,25 +69,30 @@ public class RedisConnectionConfig {
     @Valid
     private Endpoint authLocal = new Endpoint();
 
+    @Bean(destroyMethod = "shutdown")
+    public ClientResources redisClientResources() {
+        return DefaultClientResources.create();
+    }
+
     @Bean
     @Primary
     public LettuceConnectionFactory authRedisConnectionFactory() {
-        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(auth));
+        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(auth), redisClientResources());
     }
 
     @Bean
     public LettuceConnectionFactory rateLimitRedisConnectionFactory() {
-        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(rateLimit));
+        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(rateLimit), redisClientResources());
     }
 
     @Bean
     public LettuceConnectionFactory sseLocalRedisConnectionFactory() {
-        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(sseLocal));
+        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(sseLocal), redisClientResources());
     }
 
     @Bean
     public LettuceConnectionFactory authLocalRedisConnectionFactory() {
-        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(authLocal));
+        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(authLocal), redisClientResources());
     }
 
     private static RedisStandaloneConfiguration standaloneConfiguration(Endpoint endpoint) {

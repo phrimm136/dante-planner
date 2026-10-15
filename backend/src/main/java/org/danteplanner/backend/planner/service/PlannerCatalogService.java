@@ -10,6 +10,8 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.RecommendedSql;
 import org.danteplanner.backend.planner.sync.JsonDocuments;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
@@ -84,6 +86,7 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
         int withdrawn = catalogRepository.withdrawAllOwnedBy(userId);
         log.debug("Withdrew {} catalog rows owned by user {}", withdrawn, userId);
         publishedIds.forEach(this::recordCatalogChanged);
+        FreshnessDeclarations.declare(new FreshnessScope.PublicCatalog());
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
@@ -99,6 +102,7 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
         int restored = catalogRepository.restoreAllOwnedBy(userId, recommendedThreshold);
         log.debug("Restored {} catalog rows owned by user {}", restored, userId);
         publishedIds.forEach(this::recordCatalogChanged);
+        FreshnessDeclarations.declare(new FreshnessScope.PublicCatalog());
     }
 
     @Transactional

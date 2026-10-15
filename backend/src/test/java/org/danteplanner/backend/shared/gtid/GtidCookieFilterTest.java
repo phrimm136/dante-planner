@@ -6,6 +6,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +26,8 @@ import org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource;
 import org.danteplanner.backend.shared.config.RoutingKey;
 import org.danteplanner.backend.shared.config.UndeclaredPrimaryAccessGuard;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 
 class GtidCookieFilterTest {
@@ -34,9 +38,11 @@ class GtidCookieFilterTest {
     private final ScriptedReadGate authorityGate = new ScriptedReadGate(true);
     private final GtidWriteCapture writeCapture = new GtidWriteCapture(new SimpleMeterRegistry());
     private final ProblemWriter problemWriter = new ProblemWriter(new ObjectMapper());
-    private final GtidCookieFilter filter = new GtidCookieFilter(readGate, writeCapture, problemWriter);
+    private final RecordingMarkerStore markerStore = new RecordingMarkerStore();
+    private final GtidCookieFilter filter =
+            new GtidCookieFilter(readGate, writeCapture, markerStore, problemWriter);
     private final GtidCookieFilter authorityFilter =
-            new GtidCookieFilter(authorityGate, writeCapture, problemWriter);
+            new GtidCookieFilter(authorityGate, writeCapture, markerStore, problemWriter);
     private final ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(
             new UndeclaredPrimaryAccessGuard(new SimpleMeterRegistry(), true));
     private final List<Object> routedTo = new ArrayList<>();
@@ -78,6 +84,15 @@ class GtidCookieFilterTest {
         return (request, response) -> {
             routedTo.add(readOnlyRoute());
             writeCapture.recordCommit(gtid, true);
+        };
+    }
+
+    private FilterChain declaring(String gtid, FreshnessScope... scopes) {
+        return (request, response) -> {
+            FreshnessDeclarations.declare(scopes);
+            if (gtid != null) {
+                writeCapture.recordCommit(gtid, true);
+            }
         };
     }
 
@@ -380,5 +395,74 @@ class GtidCookieFilterTest {
                 (req, res) -> servedByAuthority.add(ChosenReadSource.servedByAuthority()));
 
         assertThat(servedByAuthority).containsExactly(true);
+    }
+
+    @Test
+    void bodilessWrite_WhenItCommitsAndDeclares_RaisesTheDeclaredScopesToItsGtidAndKeepsTheCookie() throws Exception {
+        FreshnessScope entity = new FreshnessScope.Entity(UUID.randomUUID());
+        FreshnessScope catalog = new FreshnessScope.PublicCatalog();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(new MockHttpServletRequest("DELETE", "/api/planners"), response,
+                declaring(GTID, entity, catalog));
+
+        assertThat(markerStore.raises).containsExactly(
+                new RecordingMarkerStore.Raise(Set.of(entity, catalog), GTID));
+        assertThat(response.getHeaders(HttpHeaders.SET_COOKIE))
+                .anySatisfy(header -> assertThat(header)
+                        .contains(GtidCookie.NAME + "=" + GtidCookie.of(GTID).getValue()));
+    }
+
+    @Test
+    void write_WhenItDeclaresButCommitsNothing_RaisesNothing() throws Exception {
+        filter.doFilter(new MockHttpServletRequest("PUT", "/api/planners"), new MockHttpServletResponse(),
+                declaring(null, new FreshnessScope.PublicCatalog()));
+
+        assertThat(markerStore.raises).isEmpty();
+    }
+
+    @Test
+    void readGet_WhenItCommitsNothing_RaisesNothing() throws Exception {
+        filter.doFilter(new MockHttpServletRequest("GET", "/api/planners"), new MockHttpServletResponse(),
+                reading());
+
+        assertThat(markerStore.raises).isEmpty();
+    }
+
+    @Test
+    void request_WhenItEnds_LeavesNoDeclarationOnTheThread() throws Exception {
+        filter.doFilter(new MockHttpServletRequest("POST", "/api/planners"), new MockHttpServletResponse(),
+                declaring(null, new FreshnessScope.PublicCatalog()));
+
+        FreshnessDeclarations.declare(new FreshnessScope.OwnerList(1L));
+        assertThat(FreshnessDeclarations.declared()).isEmpty();
+    }
+
+    @Test
+    void request_WhenAStaleDeclarationIsOnTheThread_StartsWithNoneDeclared() throws Exception {
+        FreshnessDeclarations.begin();
+        FreshnessDeclarations.declare(new FreshnessScope.PublicCatalog());
+        FreshnessScope entity = new FreshnessScope.Entity(UUID.randomUUID());
+
+        filter.doFilter(new MockHttpServletRequest("POST", "/api/planners"), new MockHttpServletResponse(),
+                declaring(GTID, entity));
+
+        assertThat(markerStore.raises).containsExactly(new RecordingMarkerStore.Raise(Set.of(entity), GTID));
+    }
+
+    @Test
+    void request_WhenTheChainThrows_ClearsTheDeclarations() {
+        RuntimeException boom = new RuntimeException("chain blew up");
+        FilterChain throwingChain = (req, res) -> {
+            FreshnessDeclarations.declare(new FreshnessScope.PublicCatalog());
+            throw boom;
+        };
+
+        assertThatThrownBy(() -> filter.doFilter(
+                new MockHttpServletRequest("POST", "/api/planners"), new MockHttpServletResponse(), throwingChain))
+                .isSameAs(boom);
+
+        FreshnessDeclarations.declare(new FreshnessScope.OwnerList(1L));
+        assertThat(FreshnessDeclarations.declared()).isEmpty();
     }
 }

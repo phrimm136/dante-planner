@@ -8,6 +8,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
+import io.lettuce.core.resource.ClientResources;
 
 /**
  * Lettuce defaults an unconfigured connection to a minute-long command timeout, both on
@@ -22,11 +23,21 @@ public final class BoundedRedisConnections {
     }
 
     public static LettuceConnectionFactory connectionFactory(RedisStandaloneConfiguration configuration) {
-        return new LettuceConnectionFactory(configuration, clientConfiguration());
+        return new LettuceConnectionFactory(configuration, clientConfiguration().build());
+    }
+
+    public static LettuceConnectionFactory connectionFactory(
+            RedisStandaloneConfiguration configuration, ClientResources clientResources) {
+        return new LettuceConnectionFactory(configuration,
+                clientConfiguration().clientResources(clientResources).build());
     }
 
     public static RedisClient redisClient(String host, int port) {
         return RedisClient.create(redisUri(host, port));
+    }
+
+    public static RedisClient redisClient(ClientResources clientResources, String host, int port) {
+        return RedisClient.create(clientResources, redisUri(host, port));
     }
 
     /**
@@ -41,9 +52,8 @@ public final class BoundedRedisConnections {
                 .build();
     }
 
-    private static LettuceClientConfiguration clientConfiguration() {
+    private static LettuceClientConfiguration.LettuceClientConfigurationBuilder clientConfiguration() {
         return LettuceClientConfiguration.builder()
-                .commandTimeout(COMMAND_TIMEOUT)
-                .build();
+                .commandTimeout(COMMAND_TIMEOUT);
     }
 }

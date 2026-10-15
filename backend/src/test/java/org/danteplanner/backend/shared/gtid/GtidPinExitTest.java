@@ -138,7 +138,7 @@ class GtidPinExitTest {
 
     private GtidCookieFilter filterOver(DataSource dataSource) {
         return new GtidCookieFilter(seoulGateOver(dataSource), new GtidWriteCapture(meters),
-                new ProblemWriter(new ObjectMapper()));
+                new RecordingMarkerStore(), new ProblemWriter(new ObjectMapper()));
     }
 
     /** Sends the cookie until a response clears it, as a browser does. */
@@ -284,7 +284,8 @@ class GtidPinExitTest {
                 source("primary", true, dataSource),
                 source("seoul-replica", false, dataSource))), meters);
         GtidCookieFilter filter = new GtidGateConfig().gtidCookieFilterRegistration(
-                primaryAnsweringGate, new GtidWriteCapture(meters), new ProblemWriter(new ObjectMapper())).getFilter();
+                primaryAnsweringGate, new GtidWriteCapture(meters), new RecordingMarkerStore(),
+                new ProblemWriter(new ObjectMapper())).getFilter();
 
         List<MockHttpServletResponse> responses = consecutiveReads(filter, FOREIGN_UUID);
 
@@ -295,7 +296,8 @@ class GtidPinExitTest {
     void registration_WhenTheReplicaReadsFirstAndGateReportsCaughtUp_ClearsCookie() throws Exception {
         GtidReadGate caughtUpGate = seoulGateOver(database(returning(WAIT_APPLIED)));
         GtidCookieFilter filter = new GtidGateConfig().gtidCookieFilterRegistration(
-                caughtUpGate, new GtidWriteCapture(meters), new ProblemWriter(new ObjectMapper())).getFilter();
+                caughtUpGate, new GtidWriteCapture(meters), new RecordingMarkerStore(),
+                new ProblemWriter(new ObjectMapper())).getFilter();
 
         List<MockHttpServletResponse> responses = consecutiveReads(filter, FOREIGN_UUID);
 

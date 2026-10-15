@@ -4,10 +4,14 @@ import com.redis.testcontainers.RedisContainer;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import eu.rekawek.toxiproxy.Proxy;
 import eu.rekawek.toxiproxy.ToxiproxyClient;
+import eu.rekawek.toxiproxy.model.Toxic;
+import eu.rekawek.toxiproxy.model.ToxicDirection;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.time.Duration;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
+import org.awaitility.core.ConditionTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +27,8 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.mysql.MySQLContainer;
 import org.testcontainers.toxiproxy.ToxiproxyContainer;
 
+import static org.awaitility.Awaitility.await;
+
 /**
  * Base class for the causal-consistency integration tests: boots a shared MySQL
  * primary/replica pair wired with GTID replication, like a Seoul pod.
@@ -32,9 +38,6 @@ import org.testcontainers.toxiproxy.ToxiproxyContainer;
  * The app under test binds its main datasource to the primary via {@link DynamicPropertySource};
  * the harness exposes the primary and replica as qualified {@link JdbcTemplate} beans and hands
  * both to {@link ReplicationControl}.</p>
- *
- * <p>No timing constants live here: replication readiness is asserted through
- * {@link ReplicationControl#awaitCaughtUp()} on the caller's side, never a sleep.</p>
  */
 @Import(CausalHarnessSupport.HarnessDataSourceConfig.class)
 @ResourceLock(CausalHarnessSupport.SHARED_HARNESS)
@@ -57,6 +60,12 @@ abstract class CausalHarnessSupport {
     private static final String REPL_PASSWORD = "repl-pass";
 
     private static final String REDIS_IMAGE = "redis:7-alpine";
+    private static final String AUTH_REDIS_ALIAS = "auth-redis";
+    private static final int REDIS_INTERNAL_PORT = 6379;
+    private static final int MARKER_WAIT_REPLICAS = 1;
+    private static final String REPLICA_LINK_UP = "master_link_status:up";
+    private static final Duration REPLICA_LINK_TIMEOUT = Duration.ofSeconds(30);
+    private static final String AUTH_REDIS_ACK_HOLD = "auth-redis-ack-hold";
 
     private static final String TOXIPROXY_IMAGE = "ghcr.io/shopify/toxiproxy:2.5.0";
     private static final String TOXIPROXY_ALIAS = "toxiproxy";
@@ -66,6 +75,8 @@ abstract class CausalHarnessSupport {
     private static final int REPLICATION_PROXY_LISTEN_PORT = 8667;
     private static final String OREGON_TO_PRIMARY_PROXY_NAME = "oregon-to-primary";
     static final int OREGON_PROXY_LISTEN_PORT = 8668;
+    private static final String AUTH_REDIS_REPLICATION_PROXY_NAME = "auth-redis-replication";
+    private static final int AUTH_REDIS_REPLICATION_LISTEN_PORT = 8670;
     private static final int SOURCE_CONNECT_RETRY_SECONDS = 1;
 
     private static final Network NETWORK = Network.newNetwork();
@@ -117,7 +128,14 @@ abstract class CausalHarnessSupport {
                     "--performance-schema=OFF",
                     "--skip-name-resolve");
 
-    static final RedisContainer AUTH_REDIS = new RedisContainer(REDIS_IMAGE);
+    static final RedisContainer AUTH_REDIS = new RedisContainer(REDIS_IMAGE)
+            .withNetwork(NETWORK)
+            .withNetworkAliases(AUTH_REDIS_ALIAS);
+
+    static final RedisContainer AUTH_REDIS_REPLICA = new RedisContainer(REDIS_IMAGE)
+            .withNetwork(NETWORK)
+            .withCommand("redis-server", "--replicaof", TOXIPROXY_ALIAS,
+                    String.valueOf(AUTH_REDIS_REPLICATION_LISTEN_PORT));
 
     static final RedisContainer RATE_LIMIT_REDIS = new RedisContainer(REDIS_IMAGE);
 
@@ -131,6 +149,8 @@ abstract class CausalHarnessSupport {
 
     static final Proxy OREGON_TO_PRIMARY_PROXY;
 
+    static final Proxy AUTH_REDIS_REPLICATION_PROXY;
+
     static {
         PRIMARY.start();
         REPLICA.start();
@@ -140,6 +160,10 @@ abstract class CausalHarnessSupport {
         APP_TO_PRIMARY_PROXY = createAppToPrimaryProxy();
         REPLICATION_PROXY = createReplicationProxy();
         OREGON_TO_PRIMARY_PROXY = createOregonToPrimaryProxy();
+        AUTH_REDIS_REPLICATION_PROXY = createProxy(AUTH_REDIS_REPLICATION_PROXY_NAME,
+                AUTH_REDIS_REPLICATION_LISTEN_PORT, AUTH_REDIS_ALIAS + ":" + REDIS_INTERNAL_PORT);
+        AUTH_REDIS_REPLICA.start();
+        awaitAuthRedisReplicaLinked();
         wireReplication(new JdbcTemplate(adminDataSource(PRIMARY)), new JdbcTemplate(adminDataSource(REPLICA)));
     }
 
@@ -167,10 +191,11 @@ abstract class CausalHarnessSupport {
         registry.add("spring.flyway.password", PRIMARY::getPassword);
         registry.add("redis.auth.host", AUTH_REDIS::getRedisHost);
         registry.add("redis.auth.port", AUTH_REDIS::getRedisPort);
-        registry.add("redis.auth-local.host", AUTH_REDIS::getRedisHost);
-        registry.add("redis.auth-local.port", AUTH_REDIS::getRedisPort);
+        registry.add("redis.auth-local.host", AUTH_REDIS_REPLICA::getRedisHost);
+        registry.add("redis.auth-local.port", AUTH_REDIS_REPLICA::getRedisPort);
         registry.add("redis.rate-limit.host", RATE_LIMIT_REDIS::getRedisHost);
         registry.add("redis.rate-limit.port", RATE_LIMIT_REDIS::getRedisPort);
+        registry.add("freshness.marker.wait-replicas", () -> MARKER_WAIT_REPLICAS);
     }
 
     @BeforeEach
@@ -181,6 +206,39 @@ abstract class CausalHarnessSupport {
         toxiproxyControl.removeWan();
         toxiproxyControl.removeReplicationLatency();
         toxiproxyControl.restoreOregonPrimary();
+        releaseAuthRedisReplicaAcks();
+    }
+
+    static void holdAuthRedisReplicaAcks() throws IOException {
+        AUTH_REDIS_REPLICATION_PROXY.toxics().timeout(AUTH_REDIS_ACK_HOLD, ToxicDirection.UPSTREAM, 0);
+    }
+
+    static void releaseAuthRedisReplicaAcks() throws IOException {
+        for (Toxic toxic : AUTH_REDIS_REPLICATION_PROXY.toxics().getAll()) {
+            toxic.remove();
+        }
+    }
+
+    static void awaitAuthRedisReplicaLinked() {
+        try {
+            await().pollInSameThread().atMost(REPLICA_LINK_TIMEOUT)
+                    .until(() -> authRedisReplicaInfo().contains(REPLICA_LINK_UP));
+        } catch (ConditionTimeoutException e) {
+            throw new IllegalStateException("the auth Redis replica did not link within " + REPLICA_LINK_TIMEOUT
+                    + "; INFO replication:\n" + authRedisReplicaInfo() + "\nreplica log:\n"
+                    + AUTH_REDIS_REPLICA.getLogs(), e);
+        }
+    }
+
+    private static String authRedisReplicaInfo() {
+        try {
+            return AUTH_REDIS_REPLICA.execInContainer("redis-cli", "INFO", "replication").getStdout();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(e);
+        }
     }
 
     /** Appends the driver flag, respecting any query string the container url already carries. */
@@ -203,6 +261,15 @@ abstract class CausalHarnessSupport {
                     PRIMARY_ALIAS + ":" + MYSQL_INTERNAL_PORT);
         } catch (IOException e) {
             throw new UncheckedIOException("Failed to create the app→primary Toxiproxy proxy", e);
+        }
+    }
+
+    private static Proxy createProxy(String name, int listenPort, String upstream) {
+        try {
+            ToxiproxyClient client = new ToxiproxyClient(TOXIPROXY.getHost(), TOXIPROXY.getControlPort());
+            return client.createProxy(name, "0.0.0.0:" + listenPort, upstream);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to create the " + name + " Toxiproxy proxy", e);
         }
     }
 

@@ -1,11 +1,11 @@
 diff --git a/backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCommandService.java b/backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCommandService.java
-index fa8b51b4..b5468851 100644
+index 04629f51..1788c4b9 100644
 --- a/backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCommandService.java
 +++ b/backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCommandService.java
-@@ -325,13 +325,6 @@ public class PlannerCommandService {
- 
-         planner.softDelete();
+@@ -341,13 +341,6 @@ public class PlannerCommandService {
          plannerCatalogService.onBecameInvisible(id);
+         FreshnessDeclarations.declare(new FreshnessScope.Entity(id), new FreshnessScope.OwnerList(planner.getUserId()),
+                 new FreshnessScope.PublicCatalog());
 -        tombstoneStore.ifPresent(store -> TransactionSynchronizationManager.registerSynchronization(
 -                new TransactionSynchronization() {
 -                    @Override

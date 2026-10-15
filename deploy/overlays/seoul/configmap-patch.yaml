@@ -34,3 +34,4 @@ data:
   # Lineage-based refresh rotation. Deployment-controlled so a region can be flipped
   # without a rebuild and every pod in it agrees across restarts.
   JWT_ROTATION_LINEAGE_ENABLED: "true"
+  FRESHNESS_MARKER_WAIT_REPLICAS: "1"

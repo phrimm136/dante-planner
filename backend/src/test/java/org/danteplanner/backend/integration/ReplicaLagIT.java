@@ -20,13 +20,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.moderation.service.PlannerModerationService;
 import org.danteplanner.backend.planner.dto.PlannerBatchRequest;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
-import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.danteplanner.backend.planner.service.PlannerQueryService;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter;
@@ -112,12 +110,6 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
 
     @Autowired
     private org.springframework.data.redis.core.StringRedisTemplate stringRedisTemplate;
-
-    @Autowired
-    private PlannerModerationService plannerModerationService;
-
-    @Autowired
-    private PlannerPublishingService plannerPublishingService;
 
     @Autowired
     private JwtTokenService jwtTokenService;
@@ -241,7 +233,7 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
     }
 
     @Test
-    void deleteTombstonesGhost_WhenReplicaPositive_Returns404() {
+    void deleteTombstonesGhost_WhenReplicaPositive_Returns404() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-tombstone@example.com");
         Long userId = owner.getId();
 
@@ -252,7 +244,7 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
         try {
             replicationControl.stopReplica();
 
-            plannerCommandService.deletePlanner(userId, plannerId);
+            deletePlanner(owner, plannerId);
 
             Timestamp replicaDeletedAt = replicaJdbcTemplate.queryForObject(
                     "SELECT deleted_at FROM planner_content WHERE planner_id = UUID_TO_BIN(?)",
@@ -306,7 +298,7 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
         try {
             replicationControl.stopReplica();
 
-            plannerCommandService.deletePlanner(owner.getId(), plannerId);
+            deletePlanner(owner, plannerId);
 
             assertThat(replicaStillPublished(plannerId))
                     .as("the paused replica must still hold the planner published and live")
@@ -345,7 +337,8 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
 
     @ParameterizedTest
     @ValueSource(strings = {"moderator-takedown", "moderator-unpublish", "owner-unpublish"})
-    void ownerRead_WhenWithdrawnFromPublicViewOnPausedReplica_StillServesTheOwner(String withdrawal) {
+    void ownerRead_WhenWithdrawnFromPublicViewOnPausedReplica_StillServesTheOwner(String withdrawal)
+            throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-owner-read-" + withdrawal + "@example.com");
         User moderator = TestDataFactory.createModerator(userRepository, "replica-lag-owner-read-mod-" + withdrawal + "@example.com");
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
@@ -379,8 +372,8 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
         try {
             replicationControl.stopReplica();
 
-            plannerPublishingService.unpublish(owner.getId(), plannerId);
-            plannerPublishingService.publish(owner.getId(), plannerId);
+            send(owner, "POST", "/api/planner/md/" + plannerId + "/unpublish", null);
+            send(owner, "POST", "/api/planner/md/" + plannerId + "/publish", null);
 
             HttpResponse<String> response = getPublished(plannerId);
             assertThat(response.statusCode())
@@ -405,7 +398,7 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
         try {
             replicationControl.stopReplica();
 
-            plannerCommandService.deletePlanner(owner.getId(), doomed.getId());
+            deletePlanner(owner, doomed.getId());
 
             Timestamp replicaDeletedAt = replicaJdbcTemplate.queryForObject(
                     "SELECT deleted_at FROM planner_content WHERE planner_id = UUID_TO_BIN(?)",
@@ -465,13 +458,39 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
         assertThat(promotedCount() - before).isEqualTo(0.0);
     }
 
-    private void withdraw(String withdrawal, User owner, User moderator, UUID plannerId) {
+    private void withdraw(String withdrawal, User owner, User moderator, UUID plannerId) throws Exception {
         switch (withdrawal) {
-            case "moderator-takedown" -> plannerModerationService.deletePlanner(moderator.getId(), plannerId, "replica lag");
-            case "moderator-unpublish" -> plannerModerationService.unpublishPlanner(moderator.getId(), plannerId);
-            case "owner-unpublish" -> plannerPublishingService.unpublish(owner.getId(), plannerId);
+            case "moderator-takedown" -> send(moderator, "POST", "/api/moderation/planner/" + plannerId + "/takedown",
+                    "{\"reason\":\"replica lag\"}");
+            case "moderator-unpublish" -> send(moderator, "PUT", "/api/moderation/planner/" + plannerId + "/unpublish",
+                    null);
+            case "owner-unpublish" -> send(owner, "POST", "/api/planner/md/" + plannerId + "/unpublish", null);
             default -> throw new IllegalArgumentException(withdrawal);
         }
+    }
+
+    private void deletePlanner(User owner, UUID plannerId) throws Exception {
+        send(owner, "DELETE", "/api/planner/md/" + plannerId, null);
+    }
+
+    private void deleteAccount(User owner) throws Exception {
+        send(owner, "DELETE", "/api/user/me", null);
+    }
+
+    private void send(User user, String method, String path, String jsonBody) throws Exception {
+        String csrf = csrfTokenService.mint();
+        HttpRequest.Builder request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
+                .header("Content-Type", "application/json")
+                .header(CsrfDoubleSubmitFilter.CSRF_HEADER, csrf)
+                .header("Cookie", CookieConstants.ACCESS_TOKEN + "=" + TestDataFactory.generateAccessToken(jwtTokenService, user)
+                        + "; " + CookieConstants.CSRF + "=" + csrf + "; " + CookieConstants.DEVICE_ID + "=" + UUID.randomUUID())
+                .method(method, jsonBody == null
+                        ? HttpRequest.BodyPublishers.noBody()
+                        : HttpRequest.BodyPublishers.ofString(jsonBody));
+        HttpResponse<String> response = send(request);
+        assertThat(response.statusCode())
+                .as("%s %s answered %s", method, path, response.body())
+                .isBetween(200, 299);
     }
 
     private boolean replicaStillPublished(UUID plannerId) {
@@ -501,8 +520,8 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
         UUID plannerId = planner.getId();
 
-        plannerPublishingService.unpublish(owner.getId(), plannerId);
-        plannerPublishingService.publish(owner.getId(), plannerId);
+        send(owner, "POST", "/api/planner/md/" + plannerId + "/unpublish", null);
+        send(owner, "POST", "/api/planner/md/" + plannerId + "/publish", null);
         CatalogEffects.drain(catalogSyncService, primaryJdbcTemplate, plannerId);
         replicationControl.awaitCaughtUp();
         double before = bulkheadQueries();
@@ -586,7 +605,7 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
         try {
             replicationControl.stopReplica();
 
-            userAccountLifecycleService.deleteAccount(owner.getId());
+            deleteAccount(owner);
 
             Timestamp replicaOwnerDeletedAt = replicaJdbcTemplate.queryForObject(
                     "SELECT deleted_at FROM users WHERE id = ?", Timestamp.class, owner.getId());
@@ -636,7 +655,7 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
         try {
             replicationControl.stopReplica();
 
-            userAccountLifecycleService.deleteAccount(owner.getId());
+            deleteAccount(owner);
 
             assertThat(replicaStillPublished(plannerId)).isTrue();
             String base = "http://localhost:" + port + "/api/planner/md/published/" + plannerId;
@@ -679,7 +698,7 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
         try {
             replicationControl.stopReplica();
 
-            userAccountLifecycleService.deleteAccount(owner.getId());
+            deleteAccount(owner);
 
             assertThat(replicaJdbcTemplate.queryForObject(
                     "SELECT deleted_at FROM users WHERE id = ?", Timestamp.class, owner.getId()))
@@ -701,7 +720,7 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
         User owner = TestDataFactory.createTestUser(userRepository, "comment-caught-up-owner@example.com");
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
 
-        userAccountLifecycleService.deleteAccount(owner.getId());
+        deleteAccount(owner);
         replicationControl.awaitCaughtUp();
 
         assertNotFoundLikeACaughtUpReplica(getComments(planner.getId()), planner.getId());

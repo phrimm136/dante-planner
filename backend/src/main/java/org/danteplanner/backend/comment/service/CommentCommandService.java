@@ -13,6 +13,8 @@ import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
 import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.danteplanner.backend.planner.api.PlannerAccess;
 import org.danteplanner.backend.planner.api.PlannerCommentCounts;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.shared.util.CommentConstants;
@@ -65,6 +67,7 @@ public class CommentCommandService {
         PlannerComment comment = new PlannerComment(plannerId, userId, request.content(), effectiveParentId, depth);
         PlannerComment saved = commentRepository.insert(comment);
         plannerCommentCounts.incrementCommentCount(plannerId);
+        declareCountChanged(plannerId);
 
         if (effectiveParentId == null) {
             domainEventRecorder.recordDomainEvent(DomainEventType.COMMENT_RECEIVED, plannerId,
@@ -99,6 +102,7 @@ public class CommentCommandService {
         PlannerComment reply = new PlannerComment(plannerId, userId, content, effectiveParentId, depth);
         PlannerComment saved = commentRepository.insert(reply);
         plannerCommentCounts.incrementCommentCount(plannerId);
+        declareCountChanged(plannerId);
 
         domainEventRecorder.recordDomainEvent(DomainEventType.REPLY_RECEIVED, plannerId,
                 Map.of("replyId", saved.getId()));
@@ -127,6 +131,11 @@ public class CommentCommandService {
         // mutation made after it would never reach the row.
         comment.softDelete();
         plannerCommentCounts.decrementCommentCount(comment.getPlannerId());
+        declareCountChanged(comment.getPlannerId());
+    }
+
+    private static void declareCountChanged(UUID plannerId) {
+        FreshnessDeclarations.declare(new FreshnessScope.Entity(plannerId), new FreshnessScope.PublicCatalog());
     }
 
     @Transactional

@@ -3,6 +3,8 @@ package org.danteplanner.backend.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.user.api.dto.UserResponse;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;
@@ -222,6 +224,7 @@ public class UserService {
             .orElseThrow(() -> new UserNotFoundException(userId));
 
         user.setUsernameEpithet(epithet);
+        FreshnessDeclarations.declare(new FreshnessScope.Author(userId));
 
         log.info("User {} updated username epithet to {}", userId, epithet);
 

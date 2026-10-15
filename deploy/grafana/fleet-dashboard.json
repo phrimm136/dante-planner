@@ -756,6 +756,55 @@
    }
   },
   {
+   "id": 53,
+   "type": "timeseries",
+   "title": "Freshness marker source breaker open (per pod and source)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 8,
+    "y": 47,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "max by (cluster, instance, name) (resilience4j_circuitbreaker_state{name=~\"marker-source-.+\",state=\"open\"})",
+     "legendFormat": "{{cluster}} {{instance}} {{name}}"
+    }
+   ]
+  },
+  {
+   "id": 54,
+   "type": "timeseries",
+   "title": "Freshness marker WAIT timeouts / raise failures (per min)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 16,
+    "y": 47,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "sum by (cluster) (rate(freshness_marker_wait_timeouts_total[5m])) * 60",
+     "legendFormat": "{{cluster}} WAIT timeouts"
+    },
+    {
+     "refId": "B",
+     "expr": "sum by (cluster) (rate(freshness_marker_raise_failures_total[5m])) * 60",
+     "legendFormat": "{{cluster}} raise failures"
+    }
+   ]
+  },
+  {
    "id": 40,
    "type": "row",
    "title": "Redis",

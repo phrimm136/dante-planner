@@ -16,6 +16,8 @@ import org.danteplanner.backend.planner.validation.PlannerDocument;
 import org.danteplanner.backend.planner.precondition.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.precondition.PlannerPublishValidator;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.springframework.data.domain.Page;
@@ -102,6 +104,8 @@ public class PlannerPublishingService {
                 contentValidator.season(planner.getContentVersion()), Stage.PUBLISH);
         if (document.migrated()) {
             planner.getContent().replaceContent(document);
+            FreshnessDeclarations.declare(new FreshnessScope.Entity(plannerId),
+                    new FreshnessScope.OwnerList(planner.getUserId()));
         }
 
         PublicationChange change = planner.publish();
@@ -110,6 +114,7 @@ public class PlannerPublishingService {
         }
 
         plannerCatalogService.onBecameVisible(planner);
+        FreshnessDeclarations.declare(new FreshnessScope.Entity(plannerId), new FreshnessScope.PublicCatalog());
         subscriptionService.createSubscription(userId, plannerId);
 
         if (change == PublicationChange.FIRST_PUBLISH) {
@@ -130,6 +135,7 @@ public class PlannerPublishingService {
         }
 
         plannerCatalogService.onBecameInvisible(plannerId);
+        FreshnessDeclarations.declare(new FreshnessScope.Entity(plannerId), new FreshnessScope.PublicCatalog());
 
         log.info("Unpublished planner {} by user {}", plannerId, userId);
         return PlannerResponse.fromEntity(planner);
@@ -144,6 +150,7 @@ public class PlannerPublishingService {
         }
 
         plannerCatalogService.onBecameInvisible(plannerId);
+        FreshnessDeclarations.declare(new FreshnessScope.Entity(plannerId), new FreshnessScope.PublicCatalog());
         return planner;
     }
 
@@ -153,6 +160,7 @@ public class PlannerPublishingService {
 
         change.accept(planner);
         plannerCatalogService.refreshRecommended(plannerId);
+        FreshnessDeclarations.declare(new FreshnessScope.PublicCatalog());
         return planner;
     }
 
@@ -174,6 +182,7 @@ public class PlannerPublishingService {
         ownershipValidator.requireOwner(planner, userId);
 
         planner.setOwnerNotificationsEnabled(enabled);
+        FreshnessDeclarations.declare(new FreshnessScope.Entity(plannerId));
 
         log.info("User {} toggled owner notifications for planner {} to {}", userId, plannerId, enabled);
         return new ToggleOwnerNotificationsResponse(enabled);

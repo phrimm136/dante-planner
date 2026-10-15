@@ -37,6 +37,8 @@ class ScheduledJobsTest {
     private static final Map<String, String> SCHEDULES = new TreeMap<>(Map.ofEntries(
             Map.entry("DomainEventRelay.dispatchPendingEvents",
                     "initialDelay 60000ms, fixedDelay 60000ms"),
+            Map.entry("MarkerStore.probe",
+                    "fixedDelay 1000ms on markerSourceProbeScheduler"),
             Map.entry("NotificationCleanupScheduler.cleanupOldNotifications",
                     "cron '0 0 2 * * *' next 2026-01-16T02:00, 2026-01-17T02:00"),
             Map.entry("PlannerCatalogSyncJob.sync",

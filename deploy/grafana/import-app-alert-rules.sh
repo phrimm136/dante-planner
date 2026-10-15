@@ -13,6 +13,7 @@ set -euo pipefail
 : "${GRAFANA_URL:?set GRAFANA_URL, e.g. https://yourslug.grafana.net (no trailing slash)}"
 : "${GRAFANA_TOKEN:?set GRAFANA_TOKEN (service-account token with Editor role)}"
 DS_UID="${DS_UID:-grafanacloud-prom}"
+: "${CW_DS_UID:?set CW_DS_UID (uid of the Grafana CloudWatch datasource the fleet dashboard binds as DS_CW)}"
 
 auth=(-H "Authorization: Bearer ${GRAFANA_TOKEN}" -H "Content-Type: application/json")
 # X-Disable-Provenance keeps the rules editable in the UI afterwards; without it the
@@ -24,6 +25,20 @@ FOLDER_UID=$(curl -s "${auth[@]}" "${GRAFANA_URL}/api/folders" |
   jq -r --arg t "$FOLDER" '[.[] | select(.title==$t)][0].uid // empty')
 [ -n "$FOLDER_UID" ] || { echo "folder ${FOLDER} not found — run import-alert-rules.sh first"; exit 1; }
 echo "   folder uid: ${FOLDER_UID}"
+
+# submit_rule TITLE — reads the rule JSON on stdin and POSTs it
+submit_rule() {
+  local title=$1
+  curl -s -w '\n%{http_code}' "${auth[@]}" "${noprov[@]}" -X POST \
+    "${GRAFANA_URL}/api/v1/provisioning/alert-rules" -d @- | {
+    resp=$(cat); code=${resp##*$'\n'}; body=${resp%$'\n'*}
+    if [ "$code" = 201 ]; then
+      printf '%s' "$body" | jq -r '"   created: " + .title + "  (uid " + .uid + ")"'
+    else
+      echo "   FAILED ${title} (HTTP ${code}): ${body}"; exit 1
+    fi
+  }
+}
 
 # post_rule TITLE FOR_DURATION PROMQL
 post_rule() {
@@ -46,15 +61,36 @@ post_rule() {
                   datasource: {type: "__expr__", uid: "__expr__"}} }
       ]
     }' |
-  curl -s -w '\n%{http_code}' "${auth[@]}" "${noprov[@]}" -X POST \
-    "${GRAFANA_URL}/api/v1/provisioning/alert-rules" -d @- | {
-    resp=$(cat); code=${resp##*$'\n'}; body=${resp%$'\n'*}
-    if [ "$code" = 201 ]; then
-      printf '%s' "$body" | jq -r '"   created: " + .title + "  (uid " + .uid + ")"'
-    else
-      echo "   FAILED ${title} (HTTP ${code}): ${body}"; exit 1
-    fi
-  }
+  submit_rule "$title"
+}
+
+# post_cloudwatch_rule TITLE FOR_DURATION METRIC DBINSTANCE REGION THRESHOLD
+# CloudWatch RDS metric, Maximum over 60 s, alert when the last value >= THRESHOLD.
+post_cloudwatch_rule() {
+  local title=$1 for_dur=$2 metric=$3 db=$4 region=$5 threshold=$6
+  jq -n \
+    --arg title "$title" --arg for "$for_dur" --arg metric "$metric" --arg db "$db" \
+    --arg region "$region" --argjson threshold "$threshold" \
+    --arg ds "$CW_DS_UID" --arg folder "$FOLDER_UID" '
+    {
+      title: $title, ruleGroup: "app-rules", folderUID: $folder,
+      condition: "C", for: $for, noDataState: "Alerting", execErrState: "OK",
+      data: [
+        { refId: "A", relativeTimeRange: {from: 600, to: 0}, datasourceUid: $ds,
+          model: {refId: "A", queryMode: "Metrics", namespace: "AWS/RDS", metricName: $metric,
+                  statistic: "Maximum", period: "60", region: $region, matchExact: true,
+                  dimensions: {DBInstanceIdentifier: $db},
+                  metricQueryType: 0, metricEditorMode: 0, expression: "", id: ""} },
+        { refId: "B", relativeTimeRange: {from: 0, to: 0}, datasourceUid: "__expr__",
+          model: {refId: "B", type: "reduce", reducer: "last", expression: "A",
+                  datasource: {type: "__expr__", uid: "__expr__"}} },
+        { refId: "C", relativeTimeRange: {from: 0, to: 0}, datasourceUid: "__expr__",
+          model: {refId: "C", type: "threshold", expression: "B",
+                  conditions: [{evaluator: {type: "gte", params: [$threshold]}}],
+                  datasource: {type: "__expr__", uid: "__expr__"}} }
+      ]
+    }' |
+  submit_rule "$title"
 }
 
 echo "== creating app rules (legacy CW parity)"
@@ -124,5 +160,17 @@ post_rule "read-source-breaker-open-sustained" "5m" \
 post_rule "restriction-undecided-commit" "0s" \
   'sum by (cluster) (increase(restriction_undecided_total[10m])) > 0'
 
-echo "== done: 16 rules in folder ${FOLDER}, group app-rules"
-echo "   All noDataState=OK — non-paging while a series is absent; staleness-meta owns absence."
+post_rule "marker-store-source-open" "5m" \
+  'max by (cluster, name) (resilience4j_circuitbreaker_state{name=~"marker-source-.+",state="open"}) > 0'
+
+post_rule "marker-wait-timeouts" "0s" \
+  'sum by (cluster) (increase(freshness_marker_wait_timeouts_total[10m])) > 0'
+
+post_rule "marker-raise-failures" "0s" \
+  'sum by (cluster) (increase(freshness_marker_raise_failures_total[10m])) > 0'
+
+# Marker TTL is 1 hour (ADR 183): safe only while the Seoul replica lags far below it.
+post_cloudwatch_rule "seoul-replica-lag" "5m" ReplicaLag danteplanner-mysql-seoul ap-northeast-2 60
+
+echo "== done: 20 rules in folder ${FOLDER}, group app-rules"
+echo "   All noDataState=OK except seoul-replica-lag (Alerting) — non-paging while a series is absent; staleness-meta owns absence."

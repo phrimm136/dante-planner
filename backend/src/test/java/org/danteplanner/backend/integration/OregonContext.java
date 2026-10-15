@@ -28,6 +28,8 @@ final class OregonContext implements AutoCloseable {
 
     private static final String PROFILE = "it";
 
+    private static final int MARKER_WAIT_REPLICAS = 1;
+
     private final ConfigurableApplicationContext context;
 
     private final MockMvc mockMvc;
@@ -83,6 +85,7 @@ final class OregonContext implements AutoCloseable {
         properties.put("redis.auth-local.port", CausalHarnessSupport.AUTH_REDIS.getRedisPort());
         properties.put("redis.rate-limit.host", CausalHarnessSupport.RATE_LIMIT_REDIS.getRedisHost());
         properties.put("redis.rate-limit.port", CausalHarnessSupport.RATE_LIMIT_REDIS.getRedisPort());
+        properties.put("freshness.marker.wait-replicas", MARKER_WAIT_REPLICAS);
         properties.put("datasource.routing.enabled", true);
         properties.put("datasource.read-sources[0].name", "primary");
         properties.put("datasource.read-sources[1].name", REPLICA_SOURCE);

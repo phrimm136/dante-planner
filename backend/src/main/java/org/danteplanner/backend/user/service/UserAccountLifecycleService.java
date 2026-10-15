@@ -1,6 +1,8 @@
 package org.danteplanner.backend.user.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.user.api.AccountLifecycleParticipant;
 import org.danteplanner.backend.user.api.SessionEndHandler;
 import org.danteplanner.backend.user.entity.User;
@@ -63,6 +65,7 @@ public class UserAccountLifecycleService {
 
         Instant scheduledDeleteAt = Instant.now().plus(Duration.ofDays(gracePeriodDays));
         user.softDelete(scheduledDeleteAt);
+        FreshnessDeclarations.declare(new FreshnessScope.Author(userId));
 
         participants.forEach(participant -> participant.accountDeactivated(userId));
         sessionEndHandler.endAllSessions(userId);
@@ -81,6 +84,7 @@ public class UserAccountLifecycleService {
         }
 
         user.reactivate();
+        FreshnessDeclarations.declare(new FreshnessScope.Author(userId));
         participants.forEach(participant -> participant.accountReactivated(userId));
     }
 

@@ -12,6 +12,8 @@ import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.moderation.api.PlannerReports;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.springframework.stereotype.Service;
@@ -68,6 +70,7 @@ public class PlannerEngagementService {
         plannerVoteRepository.insert(newVote);
 
         plannerStatsService.incrementUpvotes(plannerId);
+        FreshnessDeclarations.declare(new FreshnessScope.Entity(plannerId), new FreshnessScope.PublicCatalog());
 
         int upvotesAfter = plannerStatsService.upvotesOf(plannerId);
         int upvotesBefore = upvotesAfter - 1;

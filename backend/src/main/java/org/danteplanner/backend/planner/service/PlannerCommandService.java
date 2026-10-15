@@ -32,6 +32,8 @@ import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.sync.PlannerChange;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator;
 import org.danteplanner.backend.planner.sync.WriteArbitration;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.springframework.stereotype.Service;
@@ -238,6 +240,7 @@ public class PlannerCommandService {
         Planner saved = plannerRepository.insert(
                 buildAggregate(UUID.fromString(request.id()), userId, request, document, deviceId));
         statsRepository.insert(PlannerStats.builder().plannerId(saved.getId()).build());
+        FreshnessDeclarations.declare(new FreshnessScope.Entity(saved.getId()), new FreshnessScope.OwnerList(userId));
         log.info("Created planner {} for user {}", saved.getId(), userId);
 
         PlannerResponse response = PlannerResponse.fromEntity(saved);
@@ -306,8 +309,10 @@ public class PlannerCommandService {
 
             log.info("Updated planner {} via upsert, new syncVersion: {}", id, planner.getSyncVersion());
 
+            FreshnessDeclarations.declare(new FreshnessScope.Entity(id), new FreshnessScope.OwnerList(userId));
             if (planner.isPublished()) {
                 plannerCatalogService.onVisibleEditCommitted(planner);
+                FreshnessDeclarations.declare(new FreshnessScope.PublicCatalog());
             }
 
             PlannerResponse response = PlannerResponse.fromEntity(planner);
@@ -334,6 +339,8 @@ public class PlannerCommandService {
 
         planner.softDelete();
         plannerCatalogService.onBecameInvisible(id);
+        FreshnessDeclarations.declare(new FreshnessScope.Entity(id), new FreshnessScope.OwnerList(planner.getUserId()),
+                new FreshnessScope.PublicCatalog());
         tombstoneStore.ifPresent(store -> TransactionSynchronizationManager.registerSynchronization(
                 new TransactionSynchronization() {
                     @Override

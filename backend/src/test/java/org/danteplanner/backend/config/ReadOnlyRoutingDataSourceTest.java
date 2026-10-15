@@ -22,8 +22,11 @@ import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.SpringApplication;
@@ -50,6 +53,10 @@ class ReadOnlyRoutingDataSourceTest {
 
     private static final String SEOUL_REPLICA = "seoul-replica";
 
+    @RegisterExtension
+    static final BeforeEachCallback STALE_READ_SOURCE_ON_THE_RUNNER_THREAD =
+            context -> ChosenReadSource.record("stale-" + SEOUL_REPLICA, false);
+
     @Mock
     private DataSource primary;
 
@@ -64,6 +71,13 @@ class ReadOnlyRoutingDataSourceTest {
 
     @Mock
     private Connection primaryReadConnection;
+
+    @BeforeEach
+    void clearThreadRoutingState() {
+        TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
+        ReadOnlyRoutingDataSource.clear();
+        ChosenReadSource.clear();
+    }
 
     @AfterEach
     void resetReadOnlyFlag() {
