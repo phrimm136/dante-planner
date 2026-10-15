@@ -3,6 +3,7 @@ import { describe, it, expect } from 'vitest'
 import enemySpec from '@static/data/enemySpecList.json'
 import assistantSpec from '@static/data/assistantSpecList.json'
 import enemyNames from '@static/i18n/EN/enemyNameList.json'
+import enemyNamesKR from '@static/i18n/KR/enemyNameList.json'
 import type { FilterState } from '@/components/hooks/filterStore'
 import { AssistantSpecListSchema } from '../../schemas/AssistantSchemas'
 import { EnemyNameListSchema, EnemySpecListSchema } from '../../schemas/EnemySchemas'
@@ -15,6 +16,7 @@ import { toEnemyEntity } from '../enemy/enemyEntity'
 const ENEMIES = EnemySpecListSchema.parse(enemySpec)
 const ASSISTANTS = AssistantSpecListSchema.parse(assistantSpec)
 const NAMES = EnemyNameListSchema.parse(enemyNames)
+const NAMES_KR = EnemyNameListSchema.parse(enemyNamesKR)
 
 const EMPTY: BattleFacetState = {
   selectedTypes: new Set<BattleFamily>(),
@@ -43,25 +45,31 @@ function matches(
   values: Partial<BattleFacetState>,
   searchQuery = '',
   mode: BattleCase = 'story',
+  names = NAMES,
 ): boolean {
   const state: FilterState<BattleFacetState> = { values: { ...EMPTY, ...values }, searchQuery }
-  return matchesBattle(item, state, buildBattleSearchTerms(item.entity.id, NAMES, mode))
+  return matchesBattle(item, state, buildBattleSearchTerms(item.entity.id, names, mode, undefined))
 }
 
 describe('matchesBattle', () => {
   it('shows every family when no type is selected and only the selected ones otherwise', () => {
-    expect(matches(enemy('1133'), {})).toBe(true)
+    expect(matches(enemy('1126'), {})).toBe(true)
     expect(matches(assistant('400001'), {})).toBe(true)
     const assistantsOnly = { selectedTypes: new Set<BattleFamily>(['assistant']) }
-    expect(matches(enemy('1133'), assistantsOnly)).toBe(false)
+    expect(matches(enemy('1126'), assistantsOnly)).toBe(false)
     expect(matches(assistant('400001'), assistantsOnly)).toBe(true)
   })
 
   it('matches any of the selected values within a facet', () => {
     const chapters = new Set(['canto:8', 'intervallo:7.5'])
-    expect(matches(enemy('1133'), { selectedChapters: chapters })).toBe(true)
+    expect(matches(enemy('1152'), { selectedChapters: chapters })).toBe(true)
     expect(matches(enemy('1126'), { selectedChapters: chapters })).toBe(true)
-    expect(matches(enemy('8701'), { selectedChapters: chapters })).toBe(false)
+    expect(matches(enemy('1307'), { selectedChapters: chapters })).toBe(false)
+  })
+
+  it('shows the merged Zilu card under both the 7.5 and the canto 8 filter', () => {
+    expect(matches(enemy('1126'), { selectedChapters: new Set(['intervallo:7.5']) })).toBe(true)
+    expect(matches(enemy('1126'), { selectedChapters: new Set(['canto:8']) })).toBe(true)
   })
 
   it('requires every facet with a selection', () => {
@@ -69,25 +77,43 @@ describe('matchesBattle', () => {
       selectedChapters: new Set(['canto:8']),
       selectedThemePacks: new Set(['1023']),
     }
-    expect(matches(enemy('1133'), values)).toBe(true)
-    expect(matches(enemy('1126'), values)).toBe(false)
+    expect(matches(enemy('1126'), values)).toBe(true)
+    expect(matches(enemy('1134'), values)).toBe(false)
   })
 
   it('matches the hidden battle option only on hidden enemies', () => {
     const values = { selectedHidden: new Set<HiddenBattle>(['hidden']) }
     expect(matches(enemy('1332'), values)).toBe(true)
-    expect(matches(enemy('1133'), values)).toBe(false)
+    expect(matches(enemy('1126'), values)).toBe(false)
   })
 
   it('matches a railway line by its numeric id', () => {
-    expect(matches(enemy('9501'), { selectedRailwayLines: new Set([1001]) })).toBe(true)
-    expect(matches(enemy('9501'), { selectedRailwayLines: new Set([1]) })).toBe(false)
+    expect(matches(enemy('90014'), { selectedRailwayLines: new Set([1001]) })).toBe(true)
+    expect(matches(enemy('90014'), { selectedRailwayLines: new Set([2]) })).toBe(false)
   })
 
   it('matches the search against the name the mode shows', () => {
-    expect(matches(enemy('1133'), {}, 'zilu')).toBe(true)
-    expect(matches(enemy('8701'), {}, 'zilu')).toBe(false)
+    expect(matches(enemy('1126'), {}, 'zilu')).toBe(true)
+    expect(matches(enemy('1307'), {}, 'zilu')).toBe(false)
     expect(matches(enemy('1152'), {}, 'jia mu', 'story')).toBe(true)
-    expect(matches(enemy('1152'), {}, 'jia mu', 'refractionRailway')).toBe(false)
+  })
+
+  it('matches every unit name of the card in every mode', () => {
+    expect(NAMES['1152']?.aliases).toContain('Jia Mu')
+    expect(matches(enemy('1152'), {}, 'jia mu', 'refractionRailway')).toBe(true)
+  })
+})
+
+describe('name search', () => {
+  it('finds the barber card by its masked alias and by its name', () => {
+    expect(NAMES_KR['8395']?.aliases).toContain('???')
+    expect(matches(enemy('8395'), {}, '???', 'story', NAMES_KR)).toBe(true)
+    expect(matches(enemy('8395'), {}, '이발사', 'story', NAMES_KR)).toBe(true)
+    expect(matches(enemy('8395'), {}, '이발사', 'refractionRailway', NAMES_KR)).toBe(true)
+  })
+
+  it('matches the composed envy name by its identity title', () => {
+    const terms = buildBattleSearchTerms('1099', NAMES_KR, 'story', 'W사 3등급\n정리 요원')
+    expect(terms).toContain('질투 죄종? - w사 3등급 정리 요원')
   })
 })

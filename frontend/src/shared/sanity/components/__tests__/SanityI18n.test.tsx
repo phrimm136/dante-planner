@@ -6,6 +6,7 @@ import enTable from '@static/data/fontAdvances/EN.json'
 import { FontAdvanceTableSchema } from '@/shared/cardLayout'
 import { CLIENT_TEXT_SCALE, SANITY_UNITS } from '@/lib/constants'
 import { clientLength } from '@/lib/utils'
+import { getPanicIconPath } from '@/shared/assets'
 import { PanicTypeSection, PanicTypeSectionI18n, SanityConditionsSectionI18n } from '../SanityI18n'
 
 const LABELS: Record<string, string> = {
@@ -48,6 +49,7 @@ vi.mock(import('../../hooks/usePanicInfo'), async (importOriginal) => ({
         lowMoraleDesc: '',
         panicDesc: 'Does not act.',
         flavor: 'My hands shake...',
+        iconId: 8888,
       },
     },
   }),
@@ -73,6 +75,7 @@ function renderPanic(lowMorale?: string, panicType = '9999', flavor?: string) {
   return render(
     <PanicTypeSection
       panicType={panicType}
+      iconId={9999}
       nameSlot={<span>Panic</span>}
       descSlot={<span>Does not act.</span>}
       {...(lowMorale !== undefined && { lowMoraleSlot: <span>{lowMorale}</span> })}
@@ -221,6 +224,26 @@ describe('panic section from panic info', () => {
     const { container } = render(<PanicTypeSectionI18n panicType="9999" />)
     await screen.findByText('Panic Effects', { exact: false })
     expect(container.querySelector('[data-slot="low-morale-effect"]')).toBeNull()
+  })
+})
+
+describe('panic icon', () => {
+  it.each([
+    ['9997', '9999'],
+    ['1003', '9999'],
+    ['9994', '9994'],
+    ['8888', '8888'],
+  ])('draws panic type %s with the %s icon', async (panicType, icon) => {
+    const { container } = render(<PanicTypeSectionI18n panicType={panicType} />)
+    await screen.findByText('Panic Type', { selector: '[data-slot="panic-tag-text"]' })
+    expect(slot(container, 'panic-icon').getAttribute('src')).toBe(getPanicIconPath(icon))
+  })
+
+  it('draws the 9999 icon for a panic type the panic info has no entry for', async () => {
+    expect(panicInfoEN).not.toHaveProperty('1100')
+    const { container } = render(<PanicTypeSectionI18n panicType="1100" />)
+    await screen.findByText('Panic Type', { selector: '[data-slot="panic-tag-text"]' })
+    expect(slot(container, 'panic-icon').getAttribute('src')).toBe(getPanicIconPath('9999'))
   })
 })
 

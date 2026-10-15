@@ -10,6 +10,7 @@ import AssistantDetailPage from '../AssistantDetailPage'
 import EnemyDetailPage from '../EnemyDetailPage'
 import SinnerEventDetailPage from '../SinnerEventDetailPage'
 import { BATTLE_DETAIL_ROUTES, type BattleFamily } from '../lib/battleVocabulary'
+import { battleModeStore, setBattleMode } from '../stores/battleModeStore'
 
 const LOAD_WAIT_MS = 10000
 const TEST_BUDGET_MS = 30000
@@ -22,6 +23,7 @@ const PAGES: Record<BattleFamily, () => ReactNode> = {
 
 beforeEach(async () => {
   await i18n.changeLanguage('EN')
+  battleModeStore.setState(battleModeStore.getInitialState())
 })
 
 function requireSlot(name: string): HTMLElement {
@@ -147,7 +149,8 @@ describe('battle detail visuals', () => {
   it(
     'shows no sinner mark on enemy 8653, an identity copy',
     async () => {
-      await mountBattle('enemy', '8653')
+      setBattleMode('refractionRailway')
+      await mountBattle('enemy', '1192')
 
       expect(headerImageSources()).not.toContain(sinnerIconOf('10611'))
     },
@@ -233,9 +236,22 @@ function triangleRight(skillId: string): string {
   return decoration.style.getPropertyValue('--importance-icon-right')
 }
 
-function selectPart(label: string) {
-  const group = within(requireSlot('detail-selector')).getByRole('group', { name: 'Part' })
+function selectIn(groupName: string, label: string) {
+  const group = within(requireSlot('detail-selector')).getByRole('group', { name: groupName })
   fireEvent.click(within(group).getByRole('button', { name: label }))
+}
+
+function selectPart(label: string) {
+  selectIn('Part', label)
+}
+
+async function selectStory(label: string, skillId: string) {
+  selectIn('Story', label)
+  await waitFor(() =>
+    expect(
+      requireSlot('detail-sections').querySelector(`[data-skill-id="${skillId}"]`),
+    ).not.toBeNull(),
+  )
 }
 
 describe('skill triangle position by unit owner', () => {
@@ -252,7 +268,8 @@ describe('skill triangle position by unit owner', () => {
   it(
     'places the triangle of skill 9106603 on enemy 91068 at the unlock position, 86 units in',
     async () => {
-      await mountBattle('enemy', '91068')
+      await mountBattle('enemy', '91066')
+      await selectStory('10-A B1F (Lv. 35)', '9106603')
 
       expect(triangleRight('9106603')).toBe('1.8813rem')
     },
@@ -263,6 +280,7 @@ describe('skill triangle position by unit owner', () => {
     'moves the triangle of abnormality 1307 from the base position under All to the unlock position once Roots is selected',
     async () => {
       await mountBattle('enemy', '1307')
+      await selectStory('9-10 (Lv. 58)', '130711')
 
       expect(triangleRight('130711')).toBe('6.2562rem')
 
@@ -301,6 +319,7 @@ describe('skill part icons by view', () => {
     'draws the LEG icon of skill 130711 on abnormality 1307 under All and drops it once Roots is selected',
     async () => {
       await mountBattle('enemy', '1307')
+      await selectStory('9-10 (Lv. 58)', '130711')
 
       expect(partIconsOf('130711')).toEqual(['LEG'])
 

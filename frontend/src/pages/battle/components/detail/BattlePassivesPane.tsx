@@ -13,7 +13,12 @@ import {
   visiblePassives,
   withShownPassives,
 } from '../../lib/battleDetail'
-import type { BattlePart, BattlePhase } from '../../schemas/BattleDetailSchemas'
+import type {
+  BattlePart,
+  BattlePhase,
+  BattleUnlock,
+  IdentityShapedPassives,
+} from '../../schemas/BattleDetailSchemas'
 import { BattlePassiveCard } from './BattlePassiveCard'
 import type { BattleTextSource } from './BattleSkillCard'
 
@@ -24,6 +29,14 @@ interface BattlePassivesPaneProps {
   part: BattlePart | undefined
   tier: number
   palette: ImportancePalette
+}
+
+function passiveUnlock(
+  passives: IdentityShapedPassives,
+  passiveId: string,
+): BattleUnlock | undefined {
+  const byTier: Record<string, BattleUnlock>[] = Object.values(passives.unlock ?? {})
+  return byTier.find((byId) => passiveId in byId)?.[passiveId]
 }
 
 export function BattlePassivesPane(props: BattlePassivesPaneProps) {
@@ -59,6 +72,7 @@ function ShownPassives({ source, phase, parts, part, tier, palette }: BattlePass
             isLocked={isLocked}
             importanceLevel={0}
             palette={palette}
+            unlock={passiveUnlock(passives, passiveId)}
           />
         )}
       />

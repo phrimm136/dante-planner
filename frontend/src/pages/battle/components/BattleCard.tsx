@@ -3,18 +3,15 @@ import { Link } from '@tanstack/react-router'
 
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { getBattleSpritePath } from '@/shared/assets'
-import { spritePlacementStyle } from '../lib/battleListing'
+import { getBattleListImagePath } from '@/shared/assets'
 import { BATTLE_DETAIL_ROUTES, type BattleCase, type BattleFamily } from '../lib/battleVocabulary'
-import type { BattleSprite } from '../schemas/BattleSpecSchemas'
 import { BattleEntityName } from './BattleEntityName'
 
 interface BattleCardProps {
   family: BattleFamily
   id: string
-  spriteId: string
-  sprite: BattleSprite
   mode: BattleCase
+  identityTitle: string | undefined
   enableHoverHighlight?: boolean
   enableDetailLink?: boolean
 }
@@ -22,14 +19,12 @@ interface BattleCardProps {
 export function BattleCard({
   family,
   id,
-  spriteId,
-  sprite,
   mode,
+  identityTitle,
   enableHoverHighlight = false,
   enableDetailLink = false,
 }: BattleCardProps) {
   const [spriteMissing, setSpriteMissing] = useState(false)
-  const placement = spritePlacementStyle(sprite)
 
   const content = (
     <>
@@ -46,14 +41,13 @@ export function BattleCard({
           </div>
         ) : (
           <img
-            src={getBattleSpritePath(family, spriteId)}
+            src={getBattleListImagePath(family, id)}
             alt=""
             loading="lazy"
             onError={() => {
               setSpriteMissing(true)
             }}
-            style={placement}
-            className={placement === undefined ? 'h-full w-full object-contain' : undefined}
+            className="h-full w-full object-cover"
           />
         )}
       </div>
@@ -63,7 +57,7 @@ export function BattleCard({
         className="truncate px-1 text-center text-xs leading-tight"
       >
         <Suspense fallback={<Skeleton className="h-4 w-full" />}>
-          <BattleEntityName family={family} id={id} mode={mode} />
+          <BattleEntityName family={family} id={id} mode={mode} identityTitle={identityTitle} />
         </Suspense>
       </div>
     </>

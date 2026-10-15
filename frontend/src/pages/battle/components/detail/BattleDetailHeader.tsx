@@ -11,8 +11,10 @@ import {
   getStageBackgroundPath,
 } from '@/shared/assets'
 import { SINNERS, SinnerScopedIdSchema, getSinnerFromId } from '@/shared/gameData'
+import { useIdentityListI18n } from '@/pages/identity'
 import { useBattleDetailI18n, type BattleI18nConfig } from '../../hooks/useBattleDetailData'
 import { unitName } from '../../lib/battleDetail'
+import { envyHeaderNames, envyIdentityTitle, singleLineTitle } from '../../lib/battleListing'
 import { BATTLE_DETAIL_SPRITE_ASPECT_RATIO } from '../../lib/cardLayout'
 import { headerSpriteStyle } from '../../lib/headerSprite'
 import type { BattleSprite } from '../../schemas/BattleSpecSchemas'
@@ -40,31 +42,17 @@ function sinnerOf(family: BattleFamily, phase: BattlePhase): string | undefined 
 interface SpriteProps {
   family: BattleFamily
   id: string
-  spriteId: string
   sprite: BattleSprite | undefined
   mapName: string | undefined
 }
 
-function spriteClassName(placed: boolean, placement: boolean): string | undefined {
-  if (placed) return undefined
-  return placement ? 'absolute opacity-0' : 'relative h-full w-full object-contain'
-}
+const SPRITE_EXTENSION = /\.webp$/
 
-function BattleSpriteBox({
-  family,
-  id,
-  spriteId,
-  sprite,
-  mapName,
-  alt,
-}: SpriteProps & { alt: string }) {
+function BattleSpriteBox({ family, id, sprite, mapName, alt }: SpriteProps & { alt: string }) {
   const [missingSprite, setMissingSprite] = useState<string | undefined>(undefined)
   const [missingMap, setMissingMap] = useState<string | undefined>(undefined)
-  const [loaded, setLoaded] = useState<{ spriteId: string; width: number } | undefined>(undefined)
-  const placement = headerSpriteStyle(
-    sprite,
-    loaded?.spriteId === spriteId ? loaded.width : undefined,
-  )
+  const placement = headerSpriteStyle(sprite)
+  const file = sprite?.file
 
   return (
     <div
@@ -83,23 +71,18 @@ function BattleSpriteBox({
           className="absolute inset-0 h-full w-full object-cover"
         />
       )}
-      {missingSprite === spriteId ? (
+      {file === undefined || missingSprite === file ? (
         <span className="relative text-sm text-muted-foreground">{id}</span>
       ) : (
         <img
-          src={getBattleSpritePath(family, spriteId)}
+          data-testid="battle-detail-sprite-image"
+          src={getBattleSpritePath(family, file.replace(SPRITE_EXTENSION, ''))}
           alt={alt}
-          onLoad={(event) => {
-            setLoaded({ spriteId, width: event.currentTarget.naturalWidth })
-          }}
           onError={() => {
-            setMissingSprite(spriteId)
+            setMissingSprite(file)
           }}
           style={placement}
-          className={spriteClassName(
-            placement !== undefined,
-            sprite !== undefined && 'ppu' in sprite,
-          )}
+          className={placement === undefined ? 'relative h-full w-full object-contain' : undefined}
         />
       )}
     </div>
@@ -117,13 +100,35 @@ function useEntityName({ config, id, unitId }: NameProps): string {
   return unitName(i18n, unitId, id)
 }
 
-function BattleName(props: NameProps) {
+function BattleName({
+  personalityId,
+  ...props
+}: NameProps & { personalityId: number | undefined }) {
   const { i18n } = useTranslation()
   const name = useEntityName(props)
+  const title = envyIdentityTitle(personalityId, useIdentityListI18n())
+  const tag = title === undefined ? undefined : envyHeaderNames(name, singleLineTitle(title))
+  const titleStyle = getDisplayFontForLanguage(i18n.language)
+  if (tag === undefined) {
+    return (
+      <h1 className={SECTION_STYLES.TEXT.pageTitle} style={titleStyle}>
+        {name}
+      </h1>
+    )
+  }
   return (
-    <h1 className={SECTION_STYLES.TEXT.pageTitle} style={getDisplayFontForLanguage(i18n.language)}>
-      {name}
-    </h1>
+    <div>
+      <p
+        data-testid="battle-abnormality-line"
+        className={SECTION_STYLES.TEXT.caption}
+        style={titleStyle}
+      >
+        {tag.abnormalityLine}
+      </p>
+      <h1 className={SECTION_STYLES.TEXT.pageTitle} style={titleStyle}>
+        {tag.name}
+      </h1>
+    </div>
   )
 }
 
@@ -142,7 +147,7 @@ export function BattleDetailHeader({
   mapName,
 }: BattleDetailHeaderProps) {
   const sinner = sinnerOf(family, phase)
-  const sprite = { family, id, spriteId: phase.spriteId, sprite: phase.sprite, mapName }
+  const sprite = { family, id, sprite: phase.sprite, mapName }
 
   return (
     <div className="space-y-4">
@@ -170,7 +175,12 @@ export function BattleDetailHeader({
             />
           )}
           <Suspense fallback={<TextSkeleton size="2xl" width="lg" />}>
-            <BattleName config={config} id={id} unitId={unitId} />
+            <BattleName
+              config={config}
+              id={id}
+              unitId={unitId}
+              personalityId={phase.overridePersonalityId}
+            />
           </Suspense>
         </div>
       </div>

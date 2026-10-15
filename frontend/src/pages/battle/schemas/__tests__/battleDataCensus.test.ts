@@ -3,13 +3,18 @@ import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import type { z } from 'zod'
 
+import { AssistantSpecListSchema } from '../AssistantSchemas'
 import {
   AssistantDataSchema,
   BattleEntityI18nSchema,
   BattleStageListSchema,
+  BattleStageTextsSchema,
   EnemyDataSchema,
   SinnerEventDataSchema,
 } from '../BattleDetailSchemas'
+import { BattleNameListSchema } from '../BattleSpecSchemas'
+import { EnemySpecListSchema } from '../EnemySchemas'
+import { SinnerEventSpecListSchema } from '../SinnerEventSchemas'
 
 const STATIC_ROOT = resolve(import.meta.dirname, '../../../../../../static')
 const LANGUAGES = ['KR', 'EN', 'JP', 'CN'] as const
@@ -47,6 +52,32 @@ describe('battle data census', () => {
   ] as const)('parses every file under %s', (dir, schema) => {
     expect(jsonFiles(dir).length).toBeGreaterThan(0)
     expect(failures(dir, schema)).toEqual([])
+  })
+
+  it.each([
+    ['data/enemySpecList.json', EnemySpecListSchema],
+    ['data/assistantSpecList.json', AssistantSpecListSchema],
+    ['data/sinnerEventSpecList.json', SinnerEventSpecListSchema],
+  ] as const)('parses %s', (path, schema) => {
+    expect(schema.safeParse(readJson(path)).success).toBe(true)
+  })
+
+  it.each(LANGUAGES)('parses the %s name lists and stage texts', (language) => {
+    const results = [
+      ...['enemy', 'assistant', 'sinnerEvent'].map((family) =>
+        BattleNameListSchema.safeParse(readJson(`i18n/${language}/${family}NameList.json`)),
+      ),
+      BattleStageTextsSchema.safeParse(readJson(`i18n/${language}/battleStageList.json`)),
+    ]
+    expect(results.map((result) => result.success)).toEqual([true, true, true, true])
+  })
+
+  it.each(LANGUAGES)('parses every %s battle unit text', (language) => {
+    expect([
+      ...failures(`i18n/${language}/enemy`, BattleEntityI18nSchema),
+      ...failures(`i18n/${language}/assistant`, BattleEntityI18nSchema),
+      ...failures(`i18n/${language}/sinnerEvent`, BattleEntityI18nSchema),
+    ]).toEqual([])
   })
 
   it.each(LANGUAGES)('names every acquire condition of the %s assistant texts', (language) => {

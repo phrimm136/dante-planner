@@ -60,6 +60,7 @@ export {
   getThemePackHoverExtremePath,
   getAbEventImagePath,
   getBattleSpritePath,
+  getBattleListImagePath,
   getBattleSkillIconPath,
   getStageBackgroundPath,
   getHazardPlatePath,

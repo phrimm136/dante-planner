@@ -56,3 +56,8 @@ export const LIGHTBOX = {
   MAX_HEIGHT_DVH: 95,
   MAX_ZOOM_SCALE: 4,
 } as const
+
+export const BATTLE_EVENT_PLACE = {
+  MAX_CODE_POINTS: 20,
+  ELLIPSIS: '…',
+} as const

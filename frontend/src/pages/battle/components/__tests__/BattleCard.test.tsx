@@ -2,8 +2,11 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { fireEvent, screen } from '@testing-library/react'
 
 import enemySpec from '@static/data/enemySpecList.json'
+import identityNamesKR from '@static/i18n/KR/identityNameList.json'
 import i18n from '@/lib/i18n'
+import { getBattleListImagePath } from '@/shared/assets'
 import { renderWithProviders } from '@/test-utils/renderWithProviders'
+import { envyIdentityTitle } from '../../lib/battleListing'
 import type { BattleCase } from '../../lib/battleVocabulary'
 import { BATTLE_GEOMETRY } from '../../lib/cardLayout'
 import { EnemySpecListSchema } from '../../schemas/EnemySchemas'
@@ -15,16 +18,21 @@ beforeEach(async () => {
   await i18n.changeLanguage('EN')
 })
 
-function renderCard(id: string, { hover = true, mode = 'story' as BattleCase } = {}) {
-  const entry = SPEC[id as keyof typeof SPEC]
-  if (entry === undefined) throw new Error(`no enemy ${id}`)
+function renderCard(
+  id: string,
+  {
+    hover = true,
+    mode = 'story' as BattleCase,
+    identityTitle = undefined as string | undefined,
+  } = {},
+) {
+  if (SPEC[id as keyof typeof SPEC] === undefined) throw new Error(`no enemy ${id}`)
   renderWithProviders(
     <BattleCard
       family="enemy"
       id={id}
-      spriteId={entry.spriteId}
-      sprite={entry.sprite}
       mode={mode}
+      identityTitle={identityTitle}
       enableHoverHighlight={hover}
     />,
   )
@@ -43,29 +51,23 @@ describe('BattleCard', () => {
     expect(BATTLE_GEOMETRY.mobileScale).toBeGreaterThan(0)
   })
 
-  it('places the sprite at 45 px per world unit with its anchor 35 % below the top', () => {
-    renderCard('1133')
+  it('covers its box with the list image of its card', () => {
+    renderCard('1126')
 
-    const style = spriteImage().style
-    expect(style.position).toBe('absolute')
-    expect(style.left).toBe('50%')
-    expect(style.top).toBe('35%')
-    expect(style.marginLeft).toBe('-558.13px')
-    expect(style.marginTop).toBe('-135.45px')
-    expect(style.transformOrigin).toBe('558.13px 135.45px')
-    expect(style.transform).toBe(`scale(${String(45 / 240)})`)
-    expect(style.maxWidth).toBe('none')
+    expect(spriteImage().getAttribute('src')).toBe(getBattleListImagePath('enemy', '1126'))
+    expect(spriteImage()).toHaveClass('h-full', 'w-full', 'object-cover')
+    expect(spriteImage().getAttribute('style')).toBeNull()
     expect(screen.getByTestId('battle-card-sprite')).toHaveClass('overflow-hidden')
   })
 
-  it('contains a sprite without a placement in its box', () => {
-    renderCard('1288')
+  it('covers the box of the Fools card 8999 with its shipped list image', () => {
+    renderCard('8999')
 
-    expect(spriteImage()).toHaveClass('object-contain')
-    expect(spriteImage().style.transform).toBe('')
+    expect(spriteImage().getAttribute('src')).toBe(getBattleListImagePath('enemy', '8999'))
+    expect(getBattleListImagePath('enemy', '8999')).not.toBe('/images/battleList/enemy/8999.webp')
   })
 
-  it('draws the name below the sprite, per mode where the mode names it differently', async () => {
+  it('draws the name below the image, per mode where the mode names it differently', async () => {
     renderCard('1152', { mode: 'story' })
 
     const sprite = screen.getByTestId('battle-card-sprite')
@@ -82,22 +84,49 @@ describe('BattleCard', () => {
     ).toBeInTheDocument()
   })
 
+  it.each([
+    ['story', '질투 죄종? - W사 3등급 정리 요원'],
+    ['refractionRailway', '굴절된 질투 죄종? - W사 3등급 정리 요원'],
+    ['mirrorDungeon', '굴절된 질투 죄종? - W사 3등급 정리 요원'],
+  ] as const)('names the envy card 1099 by unit and copied identity in %s', async (mode, text) => {
+    await i18n.changeLanguage('KR')
+    const identityTitle = envyIdentityTitle(
+      SPEC['1099' as keyof typeof SPEC]?.personalityId,
+      identityNamesKR,
+    )
+    renderCard('1099', { mode, identityTitle })
+
+    expect(await screen.findByText(text)).toBeInTheDocument()
+  })
+
+  it('names the envy card 1110 by unit and its South Liu identity on one line', async () => {
+    await i18n.changeLanguage('KR')
+    const identityTitle = envyIdentityTitle(
+      SPEC['1110' as keyof typeof SPEC]?.personalityId,
+      identityNamesKR,
+    )
+    expect(SPEC['1110' as keyof typeof SPEC]?.personalityId).toBe(10407)
+    renderCard('1110', { identityTitle })
+
+    expect(await screen.findByText('질투 죄종 - 남부 리우 협회 4과')).toBeInTheDocument()
+  })
+
   it('carries the abEvent hover highlight only when enabled', () => {
-    renderCard('1133')
+    renderCard('1126')
     expect(screen.getByTestId('battle-card-sprite')).toHaveClass('selectable')
   })
 
   it('omits the hover highlight by default', () => {
-    renderCard('1133', { hover: false })
+    renderCard('1126', { hover: false })
     expect(screen.getByTestId('battle-card-sprite')).not.toHaveClass('selectable')
   })
 
-  it('falls back to the id when the sprite fails to load', () => {
-    renderCard('1133')
+  it('shows the card id in place of a list image that fails to load', () => {
+    renderCard('1126')
 
     fireEvent.error(spriteImage())
 
-    expect(screen.getByTestId('battle-card-sprite')).toHaveTextContent('1133')
+    expect(screen.getByTestId('battle-card-sprite')).toHaveTextContent('1126')
     expect(screen.getByTestId('battle-card-sprite').querySelector('img')).toBeNull()
   })
 })

@@ -2,7 +2,13 @@ import { Suspense } from 'react'
 
 import { Skeleton } from '@/components/ui/skeleton'
 import { FormattedDescription } from '@/shared/gameText'
-import { PanicName, PanicTypeSection, SanityConditionsSectionI18n } from '@/shared/sanity'
+import {
+  PanicName,
+  PanicTypeSection,
+  SanityConditionsSectionI18n,
+  panicIconId,
+  usePanicInfo,
+} from '@/shared/sanity'
 import { useBattleDetailI18n } from '../../hooks/useBattleDetailData'
 import { phaseTexts, sanityConditionIds } from '../../lib/battleDetail'
 import type { BattlePhase } from '../../schemas/BattleDetailSchemas'
@@ -17,11 +23,13 @@ function BattlePanicSection({
 }) {
   const i18n = useBattleDetailI18n(source.config, source.id)
   const sanity = phaseTexts(i18n, source.unitId, source.phaseId)?.sanity
+  const { data: panicInfo } = usePanicInfo()
   if (sanity?.panicText === undefined) return null
 
   return (
     <PanicTypeSection
       panicType={panicType}
+      iconId={panicIconId(panicInfo, panicType)}
       nameSlot={<PanicName name={sanity.panicName ?? ''} />}
       descSlot={<FormattedDescription text={sanity.panicText} />}
       flavor={sanity.panicFlavor}

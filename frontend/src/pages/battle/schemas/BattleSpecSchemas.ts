@@ -1,6 +1,8 @@
 import { z } from 'zod'
 import { BATTLE_CASES } from '../lib/battleVocabulary'
 
+const SpriteBoxSchema = z.tuple([z.number(), z.number(), z.number(), z.number()])
+
 export const SpritePlacementSchema = z
   .object({
     file: z.string(),
@@ -8,6 +10,11 @@ export const SpritePlacementSchema = z
     ppu: z.number(),
     anchorX: z.number(),
     anchorY: z.number(),
+    width: z.number(),
+    height: z.number(),
+    massBox: SpriteBoxSchema,
+    centroid: z.tuple([z.number(), z.number()]),
+    drawnBox: SpriteBoxSchema,
   })
   .strict()
 
@@ -27,12 +34,14 @@ export const BATTLE_SPEC_SHAPE = {
   spriteId: z.string(),
   sprite: BattleSpriteSchema,
   sortKey: z.partialRecord(z.enum(BATTLE_CASES), z.array(z.number())),
+  personalityId: z.number().optional(),
 }
 
 export const BattleNameEntrySchema = z
   .object({
     name: z.string(),
     byCase: z.partialRecord(z.enum(BATTLE_CASES), z.string()).optional(),
+    aliases: z.array(z.string()),
   })
   .strict()
 

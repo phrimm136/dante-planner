@@ -1,10 +1,15 @@
 import type { FilterStore } from '@/components/hooks/filterStore'
+import { useIdentityListI18n } from '@/pages/identity'
 import { FilteredEntityGrid, useSearchTermSources } from '@/shared/filter'
 import { ASSISTANT_LIST } from '../hooks/useAssistantListData'
 import { ENEMY_LIST } from '../hooks/useEnemyListData'
 import { SINNER_EVENT_LIST } from '../hooks/useSinnerEventListData'
 import { matchesBattle, type BattleFacetState } from '../lib/battleFilter'
-import { buildBattleSearchTerms, type BattleCardItem } from '../lib/battleListing'
+import {
+  buildBattleSearchTerms,
+  envyIdentityTitle,
+  type BattleCardItem,
+} from '../lib/battleListing'
 import type { BattleCase, BattleFamily } from '../lib/battleVocabulary'
 import { BATTLE_GEOMETRY } from '../lib/cardLayout'
 import type { BattleNameList } from '../schemas/BattleSpecSchemas'
@@ -24,6 +29,9 @@ export function BattleList({ items, mode, store }: BattleListProps) {
     assistant: useSearchTermSources(ASSISTANT_LIST, EMPTY_NAMES, false).names,
     sinnerEvent: useSearchTermSources(SINNER_EVENT_LIST, EMPTY_NAMES, false).names,
   }
+  const identityTitles = useIdentityListI18n()
+  const identityTitle = (item: BattleCardItem) =>
+    envyIdentityTitle(item.entity.personalityId, identityTitles)
 
   return (
     <FilteredEntityGrid
@@ -31,14 +39,15 @@ export function BattleList({ items, mode, store }: BattleListProps) {
       getKey={(item) => `${item.family}-${item.entity.id}`}
       store={store}
       matches={matchesBattle}
-      buildTerms={(item) => buildBattleSearchTerms(item.entity.id, names[item.family], mode)}
+      buildTerms={(item) =>
+        buildBattleSearchTerms(item.entity.id, names[item.family], mode, identityTitle(item))
+      }
       renderCard={(item) => (
         <BattleCard
           family={item.family}
           id={item.entity.id}
-          spriteId={item.entity.spriteId}
-          sprite={item.entity.sprite}
           mode={mode}
+          identityTitle={identityTitle(item)}
           enableHoverHighlight
           enableDetailLink
         />

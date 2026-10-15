@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import stageList from '@static/data/battleStageList.json'
+import enemy1142 from '@static/data/enemy/1142.json'
 import enemy1366 from '@static/data/enemy/1366.json'
 import enemy1366I18n from '@static/i18n/EN/enemy/1366.json'
 import enemy1474 from '@static/data/enemy/1474.json'
@@ -10,7 +11,11 @@ import enemy8016I18n from '@static/i18n/EN/enemy/8016.json'
 import enemy8044 from '@static/data/enemy/8044.json'
 import enemy8063 from '@static/data/enemy/8063.json'
 import enemy8253 from '@static/data/enemy/8253.json'
-import enemy9501 from '@static/data/enemy/9501.json'
+import enemy8112 from '@static/data/enemy/8112.json'
+import enemy8630 from '@static/data/enemy/8630.json'
+import enemy90014 from '@static/data/enemy/90014.json'
+import enemy90034 from '@static/data/enemy/90034.json'
+import enemy90034I18n from '@static/i18n/EN/enemy/90034.json'
 import enStageTexts from '@static/i18n/EN/battleStageList.json'
 import enFacetNames from '@static/i18n/EN/battleFacetNames.json'
 import enThemePacks from '@static/i18n/EN/themePack.json'
@@ -27,6 +32,7 @@ import { BattleFacetNamesSchema } from '../../schemas/BattleSpecSchemas'
 import {
   engagementLabel,
   engagementPlace,
+  eventPlaceText,
   stageLabelText,
   suffixedLabel,
   type EngagementSources,
@@ -79,7 +85,7 @@ describe('engagement labels', () => {
   })
 
   it('labels a rerun railway node by the rerun line and node short name', () => {
-    expect(engagementLabel(rowOn(enemy9501, '100101'), sources, translate)).toBe(
+    expect(engagementLabel(rowOn(enemy90014, '100101'), sources, translate)).toBe(
       'Line 1 BokGak · First Stop: Contact (Lv. 55)',
     )
   })
@@ -165,11 +171,9 @@ describe('engagement labels', () => {
     ])
   })
 
-  it('collapses the two story-dungeon rows of 8016 with the same label and content', () => {
+  it('collapses the story-dungeon rows of 8016 with the same label and content', () => {
     const labels = storyEntries(enemy8016, enemy8016I18n)
-    expect(labels.filter((label) => label === 'Canto II · Snowstorm Fields (Lv. 14)')).toHaveLength(
-      1,
-    )
+    expect(labels.filter((label) => label.startsWith('2-19 (Lv. 14)'))).toEqual(['2-19 (Lv. 14)'])
   })
 
   it('collapses stages 11008 and 11024 of 1474, whose content matches', () => {
@@ -182,12 +186,103 @@ describe('engagement labels', () => {
   it('omits an event place with no text and keeps the named ones', () => {
     const row = rowOn(enemy8253, '2060018')
     const place = engagementPlace(row, sources, translate)
-    expect(place).toBe(enFacetNames.events['901020'])
+    expect(place).toBe('A field of white, ye…')
     expect(place).not.toContain('90102001')
   })
 
   it('falls back to the case label when no place has text', () => {
     const row = { ...rowOn(enemy8253, '2060018'), stage: 'nowhere#1' }
     expect(engagementPlace(row, sources, translate)).toBe('MD')
+  })
+})
+
+function labelOf(stageKey: string) {
+  const label = sources.stages[stageKey]?.labels?.[0]
+  if (label === undefined) throw new Error(`no label on ${stageKey}`)
+  return label
+}
+
+describe('story-dungeon labels', () => {
+  it('labels 8016 on 10412 by chapter and dungeon stage with its level', () => {
+    expect(engagementLabel(rowOn(enemy8016, '10412'), sources, translate)).toBe('4-54 (Lv. 31)')
+  })
+
+  it.each([
+    ['8112', enemy8112, '10506', '5-36 (Lv. 39)'],
+    ['1142', enemy1142, '10801', '8-20 (Lv. 46)'],
+  ] as const)(
+    'labels the row of %s on %s by chapter and dungeon node count',
+    (_, raw, stageId, label) => {
+      expect(engagementLabel(rowOn(raw, stageId), sources, translate)).toBe(label)
+    },
+  )
+
+  it('keeps one 3-22 entry per level for the dungeon 10301 rows of 90034, whose content matches per level', () => {
+    const labels = storyEntries(enemy90034, enemy90034I18n)
+    expect(labels.filter((label) => label.startsWith('3-22 '))).toEqual([
+      '3-22 (Lv. 23)',
+      '3-22 (Lv. 24)',
+      '3-22 (Lv. 25)',
+      '3-22 (Lv. 26)',
+      '3-22 (Lv. 27)',
+      '3-22 (Lv. 28)',
+    ])
+  })
+
+  it('labels the 5.5 dungeon 910701 by intervallo part and dungeon stage', () => {
+    expect(stageLabelText(labelOf('dungeonbattle-ycgd.json#910701'), undefined, translate)).toBe(
+      '5.5-2-24',
+    )
+  })
+
+  it('labels the 8.5 EX pilgrimage by the EX part and node', () => {
+    expect(
+      stageLabelText(labelOf('storybattle-pilgrimage-normal.json#912001'), undefined, translate),
+    ).toBe('8.5-EX-1')
+  })
+
+  it('labels the hard 8.5 EX pilgrimage with the same node and Hard', () => {
+    expect(
+      stageLabelText(labelOf('storybattle-pilgrimage-hard.json#912104'), undefined, translate),
+    ).toBe('8.5-EX-4 · Hard')
+  })
+
+  it('labels a hard 8.5 EX dungeon battle by its dungeon stage and Hard', () => {
+    expect(stageLabelText(labelOf('abbattle-a1c9121.json#912104'), undefined, translate)).toBe(
+      '8.5-EX-14 · Hard',
+    )
+  })
+
+  it('rejects a story-dungeon label carrying a dungeon node id', () => {
+    const stage = stageList['abbattle1-4.json#10412']
+    const label = { ...labelOf('abbattle1-4.json#10412'), dungeonNodeId: '10412' }
+    expect(BattleStageListSchema.safeParse({ 'd#1': { ...stage, labels: [label] } }).success).toBe(
+      false,
+    )
+  })
+})
+
+describe('mirror event places', () => {
+  it('shows the first 20 characters of the 901063 event text on its row', () => {
+    expect(engagementPlace(rowOn(enemy8630, '2070512'), sources, translate)).toBe(
+      "'This is a warzone.'…",
+    )
+  })
+
+  it('shows an event text of 20 characters or fewer whole', () => {
+    const stage = sources.stages['mirrordungeon-abbattle7-0.json#2070512']
+    if (stage === undefined) throw new Error('no stage 2070512')
+    const short: EngagementSources = {
+      ...sources,
+      stages: { ...sources.stages, 'short#1': { ...stage, mirror: { eventIds: ['1'] } } },
+      facetNames: { ...sources.facetNames, events: { '1': 'Twenty chars exactly' } },
+    }
+    const row = { ...rowOn(enemy8630, '2070512'), stage: 'short#1' }
+    expect(engagementPlace(row, short, translate)).toBe('Twenty chars exactly')
+  })
+
+  it('counts characters by code point', () => {
+    expect(eventPlaceText('\u{1D49C}'.repeat(21))).toBe(`${'\u{1D49C}'.repeat(20)}…`)
+    expect(eventPlaceText('\u{1D49C}'.repeat(20))).toBe('\u{1D49C}'.repeat(20))
   })
 })

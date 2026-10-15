@@ -9,7 +9,15 @@ import {
   SkillLevelSchema,
   skillMapWithRetiredKeys,
 } from '@/shared/gameData'
-import { BATTLE_CASES, HAZARD_CLASSES, LEVEL_NUMBER_PLATES } from '../lib/battleVocabulary'
+import {
+  BATTLE_CASES,
+  BATTLE_FAMILIES,
+  BATTLE_FORMS,
+  CO_UNIT_RELATIONS,
+  GROWTH_CATEGORIES,
+  HAZARD_CLASSES,
+  LEVEL_NUMBER_PLATES,
+} from '../lib/battleVocabulary'
 import { BattleSpriteSchema } from './BattleSpecSchemas'
 
 const unused = z.unknown().optional()
@@ -72,7 +80,38 @@ const BattleSanitySchema = z
   })
   .strict()
 
-const SkillLevelAddersSchema = z.object({ attack: z.number(), defense: z.number() }).strict()
+const GrowthConditionSchema = z.object({ condition: z.string(), value: z.number() }).strict()
+
+const UnlockSchema = z.object({ condition: z.array(GrowthConditionSchema) }).strict()
+
+const { slashResist, ...VALUE_GROWTH_CATEGORIES } = GROWTH_CATEGORIES
+
+const GrowthRowSchema = z.union([
+  z
+    .object({
+      category: z.enum(VALUE_GROWTH_CATEGORIES),
+      value: z.number(),
+      conditions: z.array(GrowthConditionSchema),
+    })
+    .strict(),
+  z
+    .object({
+      category: z.literal(slashResist),
+      floatValue: z.number(),
+      conditions: z.array(GrowthConditionSchema),
+    })
+    .strict(),
+])
+
+const GrowthSchema = z
+  .object({
+    tracks: z.array(z.string()),
+    max: z.number(),
+    rows: z.array(GrowthRowSchema),
+  })
+  .strict()
+
+const StartBuffSchema = z.object({ keywordId: z.string(), stack: z.number().optional() }).strict()
 
 const PassiveImportanceSchema = z.object({ importanceLevel: z.number() }).strict()
 
@@ -86,19 +125,17 @@ export const IdentityShapedPassivesSchema = z
       PassiveIdSchema,
       z.object({ type: z.string(), values: z.record(z.string(), z.number()) }).strict(),
     ),
-    unlock: unused,
+    unlock: z.record(z.string(), z.record(PassiveIdSchema, UnlockSchema)).optional(),
   })
   .strict()
 
 const RETIRED_SKILL_KEYS = ['skill1', 'skill2', 'skill3', 'skillDef'] as const
 
-const BattleSkillLevelSchema = SkillLevelSchema.extend({ unlock: unused })
-
-const AcquireConditionSchema = z.object({ condition: z.string(), value: z.number() }).strict()
+const BattleSkillLevelSchema = SkillLevelSchema.extend({ unlock: UnlockSchema.optional() })
 
 const BattleSkillEntrySchema = SkillEntrySchema.extend({
   textID: z.number().optional(),
-  acquire: z.array(z.object({ condition: z.array(AcquireConditionSchema) }).strict()).optional(),
+  acquire: z.array(UnlockSchema).optional(),
   linkedPartTypes: z.array(AbPartTypeSchema).optional(),
   levels: z.tuple([BattleSkillLevelSchema], BattleSkillLevelSchema),
 })
@@ -172,7 +209,8 @@ export const BattlePhaseSchema = z
     sprite: BattleSpriteSchema.optional(),
     hp: StatGrowthSchema,
     defCorrection: z.number().optional(),
-    skillLevelAdders: SkillLevelAddersSchema.optional(),
+    growth: GrowthSchema.optional(),
+    startBuffs: z.array(StartBuffSchema).optional(),
     minSpeedList: z.array(z.number()).optional(),
     maxSpeedList: z.array(z.number()).optional(),
     breakSection: BreakSectionSchema.optional(),
@@ -202,7 +240,7 @@ export const BattlePhaseSchema = z
     initBuffList: unused,
     maxActionSlotNum: unused,
     nameID: unused,
-    overridePersonalityId: unused,
+    overridePersonalityId: z.number().optional(),
     panicSkillOnErosion: unused,
     partialUnlockSkillIdList: unused,
     patternID: unused,
@@ -260,6 +298,16 @@ const SummonSchema = z
   })
   .strict()
 
+const FormKeySchema = z.enum(BATTLE_FORMS)
+
+const CoUnitSchema = z
+  .object({
+    unit: z.number(),
+    card: z.object({ family: z.enum(BATTLE_FAMILIES), id: z.number() }).strict(),
+    relation: z.enum(CO_UNIT_RELATIONS).optional(),
+  })
+  .strict()
+
 export const EngagementRowSchema = z
   .object({
     stage: z.string(),
@@ -281,6 +329,9 @@ export const EngagementRowSchema = z
         buffGrants: z.array(BuffGrantSchema),
       })
       .strict(),
+    coUnits: z.array(CoUnitSchema),
+    phaseMaps: z.record(z.string(), z.string()).optional(),
+    forms: z.array(FormKeySchema).optional(),
   })
   .strict()
 
@@ -318,10 +369,19 @@ const EnemyKitSchema = z
   })
   .strict()
 
+const KitFormSchema = z
+  .object({
+    key: FormKeySchema,
+    giftIds: z.array(z.number()),
+    phase: BattlePhaseSchema,
+  })
+  .strict()
+
 const AssistantKitSchema = z
   .object({
     phases: PHASES,
     level: z.number().optional(),
+    forms: z.array(KitFormSchema).optional(),
   })
   .strict()
 
@@ -378,6 +438,8 @@ const BattlePhaseI18nSchema = z
     parts: z.record(z.string(), z.object({ name: z.string() }).strict()).optional(),
     egos: z.record(z.string(), z.object({ name: z.string() }).strict()).optional(),
     conditionNames: z.record(z.string(), z.string()).optional(),
+    conditionGrades: z.record(z.string(), z.string()).optional(),
+    formNames: z.partialRecord(FormKeySchema, z.string()).optional(),
     sanity: z
       .object({
         conditions: z.record(z.string(), z.string()).optional(),
@@ -405,6 +467,23 @@ export const BattleEntityI18nSchema = z
   .object({ units: z.record(z.string(), BattleUnitI18nSchema) })
   .strict()
 
+const CantoChapterSchema = z
+  .object({ canto: z.number(), difficulty: z.string().optional() })
+  .strict()
+
+const IntervalloChapterSchema = z
+  .object({
+    number: z.string(),
+    part: z.string().optional(),
+    difficulty: z.string().optional(),
+  })
+  .strict()
+
+const ChapterAnchorSchema = z.union([
+  CantoChapterSchema.omit({ difficulty: true }),
+  IntervalloChapterSchema.omit({ difficulty: true }),
+])
+
 const StageLabelSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('canto'), canto: z.number(), node: z.number().optional() }).strict(),
   z
@@ -416,20 +495,20 @@ const StageLabelSchema = z.discriminatedUnion('kind', [
       difficulty: z.string().optional(),
     })
     .strict(),
-  z.object({ kind: z.literal('walpurgis'), ordinal: z.number(), difficulty: z.string() }).strict(),
+  z
+    .object({
+      kind: z.literal('walpurgis'),
+      ordinal: z.number(),
+      difficulty: z.string(),
+      anchor: ChapterAnchorSchema,
+    })
+    .strict(),
   z
     .object({
       kind: z.literal('storyDungeon'),
-      chapter: z
-        .object({
-          canto: z.number().optional(),
-          number: z.string().optional(),
-          part: z.string().optional(),
-          difficulty: z.string().optional(),
-        })
-        .strict(),
-      dungeonId: unused,
-      dungeonNodeId: z.string().optional(),
+      chapter: z.union([CantoChapterSchema, IntervalloChapterSchema]),
+      dungeonId: z.number(),
+      stage: z.number(),
     })
     .strict(),
   z
@@ -507,7 +586,6 @@ const StageLabelTextSchema = z
     line: z.string().optional(),
     node: z.string().optional(),
     dungeon: z.string().optional(),
-    dungeonNode: z.string().optional(),
   })
   .strict()
 
@@ -540,16 +618,25 @@ export const BattleEgoI18nSchema = z.object({
 
 export type BattleSkillEntry = z.infer<typeof BattleSkillEntrySchema>
 export type BattleSkillAcquire = NonNullable<BattleSkillEntry['acquire']>
-export type SkillLevelAdders = z.infer<typeof SkillLevelAddersSchema>
+export type BattleGrowth = z.infer<typeof GrowthSchema>
+export type GrowthCondition = z.infer<typeof GrowthConditionSchema>
+export type BattleUnlock = z.infer<typeof UnlockSchema>
+export type CoUnit = z.infer<typeof CoUnitSchema>
+export type KitForm = z.infer<typeof KitFormSchema>
 export type BattlePart = z.infer<typeof BattlePartSchema>
 export type BattlePhase = z.infer<typeof BattlePhaseSchema>
 export type EngagementRow = z.infer<typeof EngagementRowSchema>
 export type BuffGrant = z.infer<typeof BuffGrantSchema>
+export type StartBuff = z.infer<typeof StartBuffSchema>
 export type EnemyData = z.infer<typeof EnemyDataSchema>
 export type AssistantData = z.infer<typeof AssistantDataSchema>
 export type SinnerEventData = z.infer<typeof SinnerEventDataSchema>
 export type EnemyKit = z.infer<typeof EnemyKitSchema>
-export type BattleKit = EnemyKit & { level?: number | undefined; uptie?: number | undefined }
+export type BattleKit = EnemyKit & {
+  level?: number | undefined
+  uptie?: number | undefined
+  forms?: KitForm[] | undefined
+}
 export type BattleEntityI18n = z.infer<typeof BattleEntityI18nSchema>
 export type BattleUnitI18n = z.infer<typeof BattleUnitI18nSchema>
 export type BattlePhaseI18n = z.infer<typeof BattlePhaseI18nSchema>

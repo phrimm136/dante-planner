@@ -68,6 +68,18 @@ const detailHead = (title: string | undefined, fallback: string) => ({
   meta: [{ title: `${title ?? fallback} | Dante's Planner` }],
 })
 
+const battleDetailSearchSchema = z.object({
+  stage: z.string().optional().catch(undefined),
+})
+
+const battleDetailRemountDeps = ({
+  params,
+  search,
+}: {
+  params: { id: string }
+  search: { stage?: string | undefined }
+}) => [params.id, search.stage]
+
 const mdUserDefaults = {
   page: 0,
 }
@@ -398,6 +410,8 @@ const battleRoute = createRoute({
 const enemyDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/battle/enemy/$id',
+  validateSearch: zodValidator(battleDetailSearchSchema),
+  remountDeps: battleDetailRemountDeps,
   component: lazyRouteComponent(() => import('@/pages/battle/EnemyDetailPage')),
   pendingComponent: BattleDetailSkeleton,
   loader: loadEnemyName,
@@ -407,6 +421,8 @@ const enemyDetailRoute = createRoute({
 const assistantDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/battle/assistant/$id',
+  validateSearch: zodValidator(battleDetailSearchSchema),
+  remountDeps: battleDetailRemountDeps,
   component: lazyRouteComponent(() => import('@/pages/battle/AssistantDetailPage')),
   pendingComponent: BattleDetailSkeleton,
   loader: loadAssistantName,
@@ -416,6 +432,8 @@ const assistantDetailRoute = createRoute({
 const sinnerEventDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/battle/sinnerEvent/$id',
+  validateSearch: zodValidator(battleDetailSearchSchema),
+  remountDeps: battleDetailRemountDeps,
   component: lazyRouteComponent(() => import('@/pages/battle/SinnerEventDetailPage')),
   pendingComponent: BattleDetailSkeleton,
   loader: loadSinnerEventName,

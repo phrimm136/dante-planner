@@ -1,8 +1,14 @@
+import { Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import { PANEL_TEXT_NODES, UNIT_PANEL_COLORS } from '@/lib/constants'
 import { FormattedDescription, NamePlate, type NamePlateImportance } from '@/shared/gameText'
 import { IdentityPassiveCard, passiveBoxLayout } from '@/shared/passive'
+import { textBlockStyle } from '@/shared/skill'
 import type { ImportancePalette } from '@/shared/gameData'
 import { useBattleDetailI18n } from '../../hooks/useBattleDetailData'
-import { phaseTexts } from '../../lib/battleDetail'
+import { acquireConditionText, phaseTexts } from '../../lib/battleDetail'
+import type { BattleUnlock } from '../../schemas/BattleDetailSchemas'
 import type { BattleTextSource } from './BattleSkillCard'
 
 interface PassiveCondition {
@@ -17,7 +23,10 @@ interface BattlePassiveCardProps {
   isLocked: boolean
   importanceLevel: number
   palette: ImportancePalette
+  unlock?: BattleUnlock | undefined
 }
+
+const UNLOCK_STYLE = textBlockStyle(PANEL_TEXT_NODES.PASSIVE_INFO, UNIT_PANEL_COLORS.PASSIVE_INFO)
 
 export function BattlePassiveCard({
   source,
@@ -26,9 +35,10 @@ export function BattlePassiveCard({
   isLocked,
   importanceLevel,
   palette,
+  unlock,
 }: BattlePassiveCardProps) {
   return (
-    <div data-passive-id={passiveId}>
+    <div data-passive-id={passiveId} className="relative">
       <IdentityPassiveCard
         renderName={(importance) => (
           <PassiveName source={source} passiveId={passiveId} importance={importance} />
@@ -40,7 +50,34 @@ export function BattlePassiveCard({
         importanceLevel={importanceLevel}
         palette={palette}
       />
+      {unlock !== undefined && (
+        <Suspense fallback={null}>
+          <PassiveUnlock source={source} unlock={unlock} />
+        </Suspense>
+      )}
     </div>
+  )
+}
+
+function PassiveUnlock({ source, unlock }: { source: BattleTextSource; unlock: BattleUnlock }) {
+  const { t } = useTranslation('database')
+  const i18n = useBattleDetailI18n(source.config, source.id)
+  const texts = phaseTexts(i18n, source.unitId, source.phaseId)
+  const conditions = acquireConditionText(
+    [unlock],
+    texts?.conditionNames,
+    { and: t('battle.detail.acquireAnd'), or: t('battle.detail.acquireOr') },
+    texts?.conditionGrades,
+  )
+  const { right, bottom } = passiveBoxLayout().lock
+  return (
+    <p
+      data-slot="passive-unlock"
+      className="absolute text-sm"
+      style={{ ...UNLOCK_STYLE, right, bottom }}
+    >
+      {t('battle.detail.unlock', { conditions })}
+    </p>
   )
 }
 

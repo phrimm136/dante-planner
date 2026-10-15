@@ -4,13 +4,14 @@ import enemy1003 from '@static/data/enemy/1003.json'
 import enemy1110 from '@static/data/enemy/1110.json'
 import enemy1347 from '@static/data/enemy/1347.json'
 import enemy8041 from '@static/data/enemy/8041.json'
+import enemy8044 from '@static/data/enemy/8044.json'
 import enemy8063 from '@static/data/enemy/8063.json'
-import enemy8209 from '@static/data/enemy/8209.json'
-import enemy8277 from '@static/data/enemy/8277.json'
+import enemy8167 from '@static/data/enemy/8167.json'
+import enemy1228 from '@static/data/enemy/1228.json'
 import enemy8390 from '@static/data/enemy/8390.json'
 import enemy8390I18n from '@static/i18n/EN/enemy/8390.json'
-import enemy8549 from '@static/data/enemy/8549.json'
-import enemy8678 from '@static/data/enemy/8678.json'
+import enemy1308 from '@static/data/enemy/1308.json'
+import enemy1217 from '@static/data/enemy/1217.json'
 import assistant400001 from '@static/data/assistant/400001.json'
 import assistant400001KR from '@static/i18n/KR/assistant/400001.json'
 import assistant400038 from '@static/data/assistant/400038.json'
@@ -30,6 +31,7 @@ import {
 import {
   ALL_PARTS,
   acquireConditionText,
+  headerMapName,
   isIdentityShaped,
   isShownPassive,
   phaseTextKeywords,
@@ -42,6 +44,7 @@ import {
   selectedPart,
   skillLevelAdder,
   skillLevelName,
+  stageEffectEntries,
   stageEffectGrants,
   statAtLevel,
   statusView,
@@ -115,7 +118,7 @@ describe('part selection', () => {
   })
 
   it('lists every head-linked skill under each of the five HEAD parts of phase 8278', () => {
-    const kit = EnemyDataSchema.parse(enemy8277).units['8277']
+    const kit = EnemyDataSchema.parse(enemy1228).units['8277']
     const heavy = kit?.phases.find((each) => each.id === 8278)
     if (heavy === undefined) throw new Error('phase 8278 missing')
     const heads = rowParts(heavy, undefined)
@@ -135,7 +138,7 @@ describe('part selection', () => {
   })
 
   it('keeps an unlinked skill under All only', () => {
-    const unlinked = firstPhase(EnemyDataSchema.parse(enemy8549), '9620')
+    const unlinked = firstPhase(EnemyDataSchema.parse(enemy1308), '9620')
     expect(skillIdsOf(visibleSkills(unlinked, rowParts(unlinked, undefined), undefined))).toContain(
       '962006',
     )
@@ -266,7 +269,7 @@ describe('stage effect grants', () => {
   })
 
   it('treats a grant from one of the unit parts as its own under another unit id', () => {
-    const bossGroup = EnemyDataSchema.parse(enemy8209)
+    const bossGroup = EnemyDataSchema.parse(enemy8167)
     const bossRow = rowOn(bossGroup.engagements, '10644')
     const fromPart = bossRow.facts.buffGrants
       .filter((grant) => grant.source.unitId === 8221 && grant.source.partId === 821901)
@@ -310,7 +313,7 @@ describe('status view', () => {
   const blank = { kind: 'blank' }
   const whole1003 = firstPhase(EnemyDataSchema.parse(enemy1003), '1003')
   const parts1003 = rowParts(whole1003, undefined)
-  const shadow8678 = firstPhase(EnemyDataSchema.parse(enemy8678), '8678')
+  const shadow8678 = firstPhase(EnemyDataSchema.parse(enemy1217), '8678')
   const shadowShown = {
     hp: 188,
     speed: { kind: 'shown', value: { min: 2, max: 5 } },
@@ -421,15 +424,16 @@ describe('grown assist skills', () => {
     return acquire
   }
 
-  it('adds the attack adder to attack and counter skills of 400005', () => {
-    expect(xichun.skillLevelAdders).toEqual({ attack: 7, defense: 4 })
-    expect(skillLevelAdder('ATTACK', xichun.skillLevelAdders)).toBe(7)
-    expect(skillLevelAdder('COUNTER', xichun.skillLevelAdders)).toBe(7)
+  const ADDERS = { attack: 7, defense: 4 }
+
+  it('adds the attack adder to attack and counter skills', () => {
+    expect(skillLevelAdder('ATTACK', ADDERS)).toBe(7)
+    expect(skillLevelAdder('COUNTER', ADDERS)).toBe(7)
   })
 
-  it('adds the defense adder to guard and evade skills of 400005', () => {
-    expect(skillLevelAdder('GUARD', xichun.skillLevelAdders)).toBe(4)
-    expect(skillLevelAdder('EVADE', xichun.skillLevelAdders)).toBe(4)
+  it('adds the defense adder to guard and evade skills', () => {
+    expect(skillLevelAdder('GUARD', ADDERS)).toBe(4)
+    expect(skillLevelAdder('EVADE', ADDERS)).toBe(4)
   })
 
   it('reads the raw defense level of 400005, without the defense adder', () => {
@@ -439,10 +443,8 @@ describe('grown assist skills', () => {
     })
   })
 
-  it('adds nothing on a phase without adders', () => {
-    const [phase] = EnemyDataSchema.parse(enemy1347).units['1347']?.phases ?? []
-    expect(phase?.skillLevelAdders).toBeUndefined()
-    expect(skillLevelAdder('ATTACK', phase?.skillLevelAdders)).toBe(0)
+  it('adds nothing without adders', () => {
+    expect(skillLevelAdder('ATTACK', undefined)).toBe(0)
     expect(skillLevelAdder('GUARD', undefined)).toBe(0)
   })
 
@@ -472,5 +474,98 @@ describe('grown assist skills', () => {
     expect(acquireConditionText([both], { ProjectGSJiaXichunWisdom: '지(智)' }, KR_JOINERS)).toBe(
       '지(智) 500, ProjectGSJiaXichunCourage 500',
     )
+  })
+
+  function unlockOf(passiveId: string) {
+    const { passives } = xichun
+    const unlocks = isIdentityShaped(passives) ? (passives.unlock?.['1'] ?? {}) : {}
+    const unlock = Object.entries(unlocks).find(([id]) => id === passiveId)?.[1]
+    if (unlock === undefined) throw new Error(`passive ${passiveId} has no unlock`)
+    return unlock
+  }
+
+  it('names the lesson-grade unlock of 940000501 by the lesson and its grade word', () => {
+    expect(
+      acquireConditionText(
+        [unlockOf('940000501')],
+        xichunTexts?.conditionNames,
+        KR_JOINERS,
+        xichunTexts?.conditionGrades,
+      ),
+    ).toBe('거울을 통해 본 자아와 세계의 형이상학적 탐구 고급')
+  })
+
+  it('writes the lesson grade as its number without grade words', () => {
+    expect(
+      acquireConditionText([unlockOf('940000501')], xichunTexts?.conditionNames, KR_JOINERS),
+    ).toBe('거울을 통해 본 자아와 세계의 형이상학적 탐구 3')
+  })
+
+  it('keeps track conditions as numbers beside grade words', () => {
+    expect(
+      acquireConditionText(
+        acquireOf('40000501'),
+        xichunTexts?.conditionNames,
+        KR_JOINERS,
+        xichunTexts?.conditionGrades,
+      ),
+    ).toBe('지(智) 800 또는 지(智) 500, 용(勇) 500')
+  })
+})
+
+describe('header map', () => {
+  const camellia = EnemyDataSchema.parse(enemy8044)
+  const row = camellia.engagements.find((each) => each.stage === 'storybattle1-4.json#10448')
+  const [first, second] = camellia.units['8044']?.phases ?? []
+
+  it('shows the second map state on phase 80442 and the row map on 8044', () => {
+    if (row === undefined || first === undefined || second === undefined) {
+      throw new Error('no Camellia row or phases')
+    }
+    expect([first.id, second.id]).toEqual([8044, 80442])
+    expect(headerMapName(row, second)).toBe('Cp4_SheddingTears__second')
+    expect(headerMapName(row, first)).toBe('Cp4_SheddingTears')
+  })
+
+  it('has no map without a row', () => {
+    if (first === undefined) throw new Error('no Camellia phase')
+    expect(headerMapName(undefined, first)).toBeUndefined()
+  })
+})
+
+describe('stage effect entries', () => {
+  const grant = (keywordId: string, target: 'enemy' | 'ally' | 'unknown') => ({
+    buffId: 1,
+    keywordId,
+    target,
+    stack: 1,
+    derivable: false,
+    source: { kind: 'stageScript' as const, class: 'StageScript_Test' },
+  })
+
+  it('lists the form start buffs before the row grants, unsided', () => {
+    expect(
+      stageEffectEntries(
+        [{ keywordId: 'Charge', stack: 3 }, { keywordId: 'BuffetShoes' }],
+        [grant('MeursaultBuffet', 'unknown'), grant('Laceration', 'enemy')],
+      ),
+    ).toEqual([
+      { keywordId: 'Charge', stack: 3, side: undefined },
+      { keywordId: 'BuffetShoes', stack: undefined, side: undefined },
+      { keywordId: 'MeursaultBuffet', stack: 1, side: undefined },
+      { keywordId: 'Laceration', stack: 1, side: 'enemy' },
+    ])
+  })
+
+  it('keeps one entry per keyword, the form start buff', () => {
+    expect(
+      stageEffectEntries([{ keywordId: 'Charge', stack: 4 }], [grant('Charge', 'ally')]),
+    ).toEqual([{ keywordId: 'Charge', stack: 4, side: undefined }])
+  })
+
+  it('lists the row grants alone without start buffs', () => {
+    expect(stageEffectEntries([], [grant('Laceration', 'ally')])).toEqual([
+      { keywordId: 'Laceration', stack: 1, side: 'ally' },
+    ])
   })
 })

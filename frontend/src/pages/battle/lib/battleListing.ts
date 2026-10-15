@@ -1,17 +1,9 @@
-import type { CSSProperties } from 'react'
-
-import type {
-  BattleNameEntry,
-  BattleNameList,
-  BattleSortKeys,
-  BattleSprite,
-} from '../schemas/BattleSpecSchemas'
+import type { BattleNameEntry, BattleNameList, BattleSortKeys } from '../schemas/BattleSpecSchemas'
 import type { EnemyEntity } from '../types/EnemyTypes'
 import type { AssistantEntity } from '../types/AssistantTypes'
 import type { SinnerEventEntity } from '../types/SinnerEventTypes'
 import type { BattleListItem } from './battleFilter'
-import { BATTLE_FAMILIES, type BattleCase } from './battleVocabulary'
-import { BATTLE_CARD_SPRITE } from './cardLayout'
+import { BATTLE_FAMILIES, ENVY_TITLE_SEPARATOR, type BattleCase } from './battleVocabulary'
 
 export type BattleCardItem = BattleListItem<EnemyEntity | AssistantEntity | SinnerEventEntity>
 
@@ -28,13 +20,47 @@ export function battleDisplayName(
   return entry?.byCase?.[mode] ?? entry?.name ?? id
 }
 
+export function envyIdentityTitle(
+  personalityId: number | undefined,
+  identityTitles: Readonly<Record<string, string>>,
+): string | undefined {
+  return personalityId === undefined ? undefined : identityTitles[String(personalityId)]
+}
+
+export function singleLineTitle(title: string): string {
+  return title.replace(/\r?\n/g, ' ')
+}
+
+export function battleListName(
+  entry: BattleNameEntry | undefined,
+  mode: BattleCase,
+  id: string,
+  identityTitle: string | undefined,
+): string {
+  const name = battleDisplayName(entry, mode, id)
+  if (identityTitle === undefined) return name
+  return `${name}${ENVY_TITLE_SEPARATOR}${singleLineTitle(identityTitle)}`
+}
+
+export interface EnvyHeaderNames {
+  name: string
+  abnormalityLine: string
+}
+
+export function envyHeaderNames(unitName: string, identityTitle: string): EnvyHeaderNames {
+  return { name: identityTitle, abnormalityLine: unitName }
+}
+
 export function buildBattleSearchTerms(
   id: string,
   names: BattleNameList,
   mode: BattleCase,
+  identityTitle: string | undefined,
 ): string[] {
   const entry = names[id]
-  return entry === undefined ? [''] : [battleDisplayName(entry, mode, id).toLowerCase()]
+  if (entry === undefined) return ['']
+  const terms = [battleListName(entry, mode, id, identityTitle), entry.name, ...entry.aliases]
+  return [...new Set(terms.map((term) => term.toLowerCase()))]
 }
 
 function compareSortKeys(a: readonly number[], b: readonly number[]): number {
@@ -58,18 +84,4 @@ export function modeItems<TItem extends SortableItem>(
         BATTLE_FAMILIES.indexOf(a.family) - BATTLE_FAMILIES.indexOf(b.family) ||
         Number(a.entity.id) - Number(b.entity.id),
     )
-}
-
-export function spritePlacementStyle(sprite: BattleSprite): CSSProperties | undefined {
-  if (!('ppu' in sprite)) return undefined
-  return {
-    position: 'absolute',
-    left: '50%',
-    top: `${String(BATTLE_CARD_SPRITE.anchorTopFraction * 100)}%`,
-    maxWidth: 'none',
-    marginLeft: `${String(-sprite.anchorX)}px`,
-    marginTop: `${String(-sprite.anchorY)}px`,
-    transformOrigin: `${String(sprite.anchorX)}px ${String(sprite.anchorY)}px`,
-    transform: `scale(${String(BATTLE_CARD_SPRITE.pxPerUnit / sprite.ppu)})`,
-  }
 }

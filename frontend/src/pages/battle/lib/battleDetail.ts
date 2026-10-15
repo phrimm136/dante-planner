@@ -13,8 +13,9 @@ import type {
   IdentityShapedPassives,
   PassiveImportanceMap,
   ResistInfo,
-  SkillLevelAdders,
+  StartBuff,
 } from '../schemas/BattleDetailSchemas'
+import type { SkillLevelAdders } from './battleGrowth'
 import { NEUTRAL_RESISTANCE, SKILL_LEVEL_ADDER_BY_DEF_TYPE } from './battleVocabulary'
 
 export const ALL_PARTS = 'all'
@@ -75,15 +76,32 @@ export function skillLevelName(
   return descs[level - 1]?.name ?? skillName
 }
 
+const LESSON_GRADE_CONDITION = /^ProjectGS\w+LessonGrade$/
+
+type ConditionWords = Readonly<Record<string, string>> | undefined
+
+function conditionText(
+  key: string,
+  value: number,
+  conditionNames: ConditionWords,
+  conditionGrades: ConditionWords,
+): string {
+  const grade = LESSON_GRADE_CONDITION.test(key) ? conditionGrades?.[String(value)] : undefined
+  return `${conditionNames?.[key] ?? key} ${grade ?? String(value)}`
+}
+
 export function acquireConditionText(
   acquire: BattleSkillAcquire,
-  conditionNames: Readonly<Record<string, string>> | undefined,
+  conditionNames: ConditionWords,
   joiners: AcquireJoiners,
+  conditionGrades?: ConditionWords,
 ): string {
   return acquire
     .map(({ condition }) =>
       condition
-        .map(({ condition: key, value }) => `${conditionNames?.[key] ?? key} ${String(value)}`)
+        .map(({ condition: key, value }) =>
+          conditionText(key, value, conditionNames, conditionGrades),
+        )
         .join(joiners.and),
     )
     .join(joiners.or)
@@ -108,6 +126,13 @@ export function rowUnitId(
 ): string {
   if (row !== undefined) return String(row.unit)
   return unitIds.includes(groupId) ? groupId : (unitIds[0] ?? groupId)
+}
+
+export function headerMapName(
+  row: EngagementRow | undefined,
+  phase: BattlePhase,
+): string | undefined {
+  return row?.phaseMaps?.[String(phase.id)] ?? row?.mapName
 }
 
 export function rowParts(phase: BattlePhase, row: EngagementRow | undefined): BattlePart[] {
@@ -336,6 +361,32 @@ export function rowContentKey(
 }
 
 export type StageEffectGrant = BuffGrant & { keywordId: string }
+
+export interface StageEffectEntry {
+  keywordId: string
+  stack: number | undefined
+  side: 'enemy' | 'ally' | undefined
+}
+
+export function stageEffectEntries(
+  startBuffs: readonly StartBuff[],
+  grants: readonly StageEffectGrant[],
+): StageEffectEntry[] {
+  const fromForm = startBuffs.map(
+    (buff): StageEffectEntry => ({ keywordId: buff.keywordId, stack: buff.stack, side: undefined }),
+  )
+  const formKeywords = new Set(fromForm.map((entry) => entry.keywordId))
+  const fromRow = grants
+    .filter((grant) => !formKeywords.has(grant.keywordId))
+    .map(
+      (grant): StageEffectEntry => ({
+        keywordId: grant.keywordId,
+        stack: grant.stack,
+        side: grant.target === 'unknown' ? undefined : grant.target,
+      }),
+    )
+  return [...fromForm, ...fromRow]
+}
 
 export interface OwnSources {
   unitIds: ReadonlySet<number>

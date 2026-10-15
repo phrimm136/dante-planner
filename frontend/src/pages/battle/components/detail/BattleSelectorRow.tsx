@@ -14,6 +14,7 @@ interface SelectorGroupProps<T> {
   options: readonly SelectorOption<T>[]
   selected: T | undefined
   onSelect: (value: T) => void
+  disabled?: boolean
 }
 
 export function SelectorGroup<T extends string | number>({
@@ -21,6 +22,7 @@ export function SelectorGroup<T extends string | number>({
   options,
   selected,
   onSelect,
+  disabled = false,
 }: SelectorGroupProps<T>) {
   const { i18n } = useTranslation()
 
@@ -38,6 +40,7 @@ export function SelectorGroup<T extends string | number>({
               type="button"
               aria-pressed={isSelected}
               data-selected={isSelected}
+              disabled={disabled}
               onClick={() => {
                 onSelect(option.value)
               }}
@@ -52,7 +55,14 @@ export function SelectorGroup<T extends string | number>({
   )
 }
 
-interface BattleSelectorRowProps<TPart extends string | number> {
+export interface FormSelector<TForm extends string> {
+  options: readonly SelectorOption<TForm>[]
+  selected: TForm | undefined
+  locked: boolean
+  onSelect: (form: TForm) => void
+}
+
+interface BattleSelectorRowProps<TPart extends string | number, TForm extends string> {
   engagementRows: ReactNode
   phaseCount: number
   phaseIndex: number
@@ -60,9 +70,11 @@ interface BattleSelectorRowProps<TPart extends string | number> {
   partOptions: readonly SelectorOption<TPart>[]
   part: TPart
   onPartChange: (part: TPart) => void
+  forms: FormSelector<TForm>
+  growth: ReactNode
 }
 
-export function BattleSelectorRow<TPart extends string | number>({
+export function BattleSelectorRow<TPart extends string | number, TForm extends string>({
   engagementRows,
   phaseCount,
   phaseIndex,
@@ -70,7 +82,9 @@ export function BattleSelectorRow<TPart extends string | number>({
   partOptions,
   part,
   onPartChange,
-}: BattleSelectorRowProps<TPart>) {
+  forms,
+  growth,
+}: BattleSelectorRowProps<TPart, TForm>) {
   const { t } = useTranslation('database')
 
   const phaseOptions = Array.from({ length: phaseCount }, (_, index) => ({
@@ -100,6 +114,16 @@ export function BattleSelectorRow<TPart extends string | number>({
             onSelect={onPartChange}
           />
         )}
+        {forms.options.length > 0 && (
+          <SelectorGroup
+            label={t('battle.detail.form')}
+            options={forms.options}
+            selected={forms.selected}
+            onSelect={forms.onSelect}
+            disabled={forms.locked}
+          />
+        )}
+        {growth}
       </div>
     </div>
   )

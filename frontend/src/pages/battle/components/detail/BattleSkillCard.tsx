@@ -19,11 +19,8 @@ import {
   skillLevelAdder,
   skillLevelName,
 } from '../../lib/battleDetail'
-import type {
-  BattleSkillAcquire,
-  BattleSkillEntry,
-  SkillLevelAdders,
-} from '../../schemas/BattleDetailSchemas'
+import type { SkillLevelAdders } from '../../lib/battleGrowth'
+import type { BattleSkillAcquire, BattleSkillEntry } from '../../schemas/BattleDetailSchemas'
 
 export interface BattleTextSource {
   config: BattleI18nConfig

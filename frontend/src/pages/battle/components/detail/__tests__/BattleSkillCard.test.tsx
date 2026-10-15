@@ -12,9 +12,11 @@ import {
   EnemyDataSchema,
   type BattlePhase,
 } from '../../../schemas/BattleDetailSchemas'
+import type { SkillLevelAdders } from '../../../lib/battleGrowth'
 import { BattleSkillCard, type BattleTextSource } from '../BattleSkillCard'
 
 const XICHUN_LEVEL = 60
+const XICHUN_FULL_GROWTH: SkillLevelAdders = { attack: 7, defense: 4 }
 const XICHUN_SOURCE = {
   config: ASSISTANT_DETAIL,
   id: '400001',
@@ -37,6 +39,7 @@ function renderSkill(
   skillId: string,
   tier: number,
   unitLevel: number,
+  skillLevelAdders?: SkillLevelAdders,
 ) {
   const entry = phase?.skills[skillId]
   if (phase === undefined || entry === undefined) throw new Error(`no skill ${skillId}`)
@@ -50,7 +53,7 @@ function renderSkill(
       palette="player"
       importancePosition="unlock"
       unitLevel={unitLevel}
-      skillLevelAdders={phase.skillLevelAdders}
+      skillLevelAdders={skillLevelAdders}
     />,
   )
 }
@@ -61,16 +64,42 @@ function skillLevel(container: HTMLElement): string | null | undefined {
 
 describe('skill level adders', () => {
   it('reads unit level + 7 on 40000101 and unit level + 10 on 40000103 of assist 400005', () => {
-    const strike = renderSkill(xichun, XICHUN_SOURCE, '40000101', 5, XICHUN_LEVEL)
+    const strike = renderSkill(
+      xichun,
+      XICHUN_SOURCE,
+      '40000101',
+      5,
+      XICHUN_LEVEL,
+      XICHUN_FULL_GROWTH,
+    )
     expect(skillLevel(strike.container)).toBe(String(XICHUN_LEVEL + 7))
     strike.unmount()
-    const spring = renderSkill(xichun, XICHUN_SOURCE, '40000103', 5, XICHUN_LEVEL)
+    const spring = renderSkill(
+      xichun,
+      XICHUN_SOURCE,
+      '40000103',
+      5,
+      XICHUN_LEVEL,
+      XICHUN_FULL_GROWTH,
+    )
     expect(skillLevel(spring.container)).toBe(String(XICHUN_LEVEL + 10))
   })
 
   it('reads unit level + 4 on evade skill 40000104 of assist 400005', () => {
-    const { container } = renderSkill(xichun, XICHUN_SOURCE, '40000104', 5, XICHUN_LEVEL)
+    const { container } = renderSkill(
+      xichun,
+      XICHUN_SOURCE,
+      '40000104',
+      5,
+      XICHUN_LEVEL,
+      XICHUN_FULL_GROWTH,
+    )
     expect(skillLevel(container)).toBe(String(XICHUN_LEVEL + 4))
+  })
+
+  it('reads unit level alone on 40000101 with no adders', () => {
+    const { container } = renderSkill(xichun, XICHUN_SOURCE, '40000101', 5, XICHUN_LEVEL)
+    expect(skillLevel(container)).toBe(String(XICHUN_LEVEL))
   })
 
   it('reads unit level + skill level correction on enemy 1347 skill 134707', () => {

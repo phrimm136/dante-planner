@@ -7,14 +7,14 @@ export const BATTLE_GEOMETRY: CardGeometry = {
   rows: 'slot',
 }
 
-export const BATTLE_DETAIL_SPRITE_ASPECT_RATIO = '16 / 9'
+const BATTLE_DETAIL_SPRITE_ASPECT = { width: 16, height: 9 } as const
+
+export const BATTLE_DETAIL_SPRITE_ASPECT_RATIO = `${String(BATTLE_DETAIL_SPRITE_ASPECT.width)} / ${String(BATTLE_DETAIL_SPRITE_ASPECT.height)}`
 
 export const BATTLE_DETAIL_SPRITE = {
   unitsAcross: 10,
-  anchorTopFraction: 0.3,
-} as const
-
-export const BATTLE_CARD_SPRITE = {
-  pxPerUnit: 45,
-  anchorTopFraction: 0.35,
+  boxHeight: BATTLE_DETAIL_SPRITE_ASPECT.height / BATTLE_DETAIL_SPRITE_ASPECT.width,
+  massFill: 0.8,
+  drawnFill: 0.95,
+  massMiddleY: 0.52,
 } as const

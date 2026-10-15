@@ -41,6 +41,7 @@ describe('BattleStageEffects', () => {
         row={row}
         own={{ unitIds: new Set(), partIds: new Set() }}
         phaseIds={[]}
+        startBuffs={[]}
       />,
     )
 

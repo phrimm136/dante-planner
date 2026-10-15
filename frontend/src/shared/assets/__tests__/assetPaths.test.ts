@@ -166,6 +166,7 @@ const CASES: Case[] = [
     ['enemy', '8101_WalkingPearlAppearance'],
     '/images/enemy/8101_WalkingPearlAppearance.webp',
   ],
+  ['getBattleListImagePath', ['enemy', '8395'], '/images/battleList/enemy/8395.webp'],
   ['getBattleSkillIconPath', ['810101'], '/images/battleSkill/810101.webp'],
   [
     'getStageBackgroundPath',

@@ -35,9 +35,11 @@ import {
   panicLayout,
   type SanityConditionKind,
 } from '../lib/sanityLayout'
+import { panicIconId } from '../lib/panicIcon'
 
 interface PanicTypeSectionProps {
   panicType: string
+  iconId: number
   nameSlot: ReactNode
   descSlot: ReactNode
   lowMoraleSlot?: ReactNode
@@ -46,6 +48,7 @@ interface PanicTypeSectionProps {
 
 export function PanicTypeSection({
   panicType,
+  iconId,
   nameSlot,
   descSlot,
   lowMoraleSlot,
@@ -78,7 +81,7 @@ export function PanicTypeSection({
       </span>
       <img
         data-slot="panic-icon"
-        src={getPanicIconPath(panicType)}
+        src={getPanicIconPath(String(iconId))}
         alt={t('common:a11y.panicType')}
         className="object-contain"
         style={layout.icon}
@@ -194,6 +197,7 @@ function PanicTypeSectionContent({ panicType }: PanicTypeSectionI18nProps) {
   return (
     <PanicTypeSection
       panicType={panicType}
+      iconId={panicIconId(panicInfo, panicType)}
       nameSlot={<PanicName name={panicEntry?.name ?? ''} />}
       descSlot={<FormattedDescription text={panicEntry?.panicDesc ?? ''} />}
       flavor={panicEntry?.flavor}

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 
 import i18n from '@/lib/i18n'
 import { mountRoute } from '@/test-utils/mountRoute'
@@ -19,8 +19,12 @@ function renderPage() {
   mountRoute('/battle', '/battle', BattlePage)
 }
 
+function databaseText(key: string): string {
+  return i18n.t(key, { ns: 'database' })
+}
+
 function modeRow() {
-  return within(screen.getByRole('group', { name: 'Mode' }))
+  return within(screen.getByRole('group', { name: databaseText('battle.facet.case') }))
 }
 
 function desktop() {
@@ -56,13 +60,15 @@ function renderedCardIds(): string[] {
 }
 
 async function waitForList() {
-  await waitFor(() => expect(desktop().getByPlaceholderText('Search by name...')).toBeVisible(), {
-    timeout: LOAD_WAIT_MS,
-  })
+  await waitFor(
+    () =>
+      expect(desktop().getByPlaceholderText(databaseText('pages.battle.searchBar'))).toBeVisible(),
+    { timeout: LOAD_WAIT_MS },
+  )
 }
 
 function search(query: string) {
-  fireEvent.change(desktop().getByPlaceholderText('Search by name...'), {
+  fireEvent.change(desktop().getByPlaceholderText(databaseText('pages.battle.searchBar')), {
     target: { value: query },
   })
 }
@@ -144,7 +150,7 @@ describe('BattlePage', () => {
       timeout: LOAD_WAIT_MS,
     })
     const [first] = renderedCardIds()
-    expect(first).toBe('70001')
+    expect(first).toBe('90001')
   })
 
   it('finds a card by the name its mode shows', async () => {
@@ -155,11 +161,98 @@ describe('BattlePage', () => {
 
     await waitFor(
       () => {
-        expect(slotHidden('1133')).toBe(false)
+        expect(slotHidden('1126')).toBe(false)
       },
       { timeout: LOAD_WAIT_MS },
     )
   })
+
+  it.each([['???'], ['이발사'], ['굴절된 이발사']])(
+    'finds the barber card 8395 by any of its names: %s',
+    async (query) => {
+      await i18n.changeLanguage('KR')
+      renderPage()
+      await waitForList()
+
+      search(query)
+
+      await waitFor(() => expect(slotHidden('8395')).toBe(false), { timeout: LOAD_WAIT_MS })
+      expect(slotHidden('90004')).toBe(true)
+    },
+  )
+
+  it('finds the Queequeg card 8112 by its masked name ???', async () => {
+    await i18n.changeLanguage('KR')
+    renderPage()
+    await waitForList()
+
+    search('???')
+
+    await waitFor(() => expect(slotHidden('8112')).toBe(false), { timeout: LOAD_WAIT_MS })
+    expect(slotHidden('90004')).toBe(true)
+  })
+
+  it('lists one card named 뿌이, the assist card 400041', async () => {
+    await i18n.changeLanguage('KR')
+    renderPage()
+    await waitForList()
+
+    const pwie = await screen.findByTestId('battle-card-400041', {}, { timeout: LOAD_WAIT_MS })
+    const grid = pwie.parentElement?.parentElement
+    if (grid === null || grid === undefined) throw new Error('no card grid')
+    await waitFor(() => expect(renderedCardIds()).toHaveLength(grid.children.length), {
+      timeout: LOAD_WAIT_MS,
+    })
+    await waitFor(
+      () =>
+        expect(
+          document.querySelectorAll('[data-testid="battle-card-name"] [data-slot="skeleton"]'),
+        ).toHaveLength(0),
+      { timeout: LOAD_WAIT_MS },
+    )
+    const named = screen.getAllByText('뿌이')
+    expect(named).toHaveLength(1)
+    expect(within(pwie).getByTestId('battle-card-name')).toHaveTextContent('뿌이')
+    expect(pwie.getAttribute('href')).toMatch(/\/battle\/assistant\/400041$/)
+  })
+
+  it('names the envy card 1099 by unit and copied identity, per mode', async () => {
+    await i18n.changeLanguage('KR')
+    renderPage()
+    await waitForList()
+
+    expect(
+      await within(
+        await screen.findByTestId('battle-card-1099', {}, { timeout: LOAD_WAIT_MS }),
+      ).findByText('질투 죄종? - W사 3등급 정리 요원', {}, { timeout: LOAD_WAIT_MS }),
+    ).toBeInTheDocument()
+
+    fireEvent.click(
+      modeRow().getByRole('button', { name: databaseText('battle.case.mirrorDungeon') }),
+    )
+
+    expect(
+      await within(
+        await screen.findByTestId('battle-card-1099', {}, { timeout: LOAD_WAIT_MS }),
+      ).findByText('굴절된 질투 죄종? - W사 3등급 정리 요원', {}, { timeout: LOAD_WAIT_MS }),
+    ).toBeInTheDocument()
+  })
+
+  it.each([['intervallo:7.5'], ['canto:8']])(
+    'lists the merged 자로 card under the %s filter',
+    async (chapter) => {
+      renderPage()
+      await waitForList()
+
+      act(() => {
+        battleFilterStore.store.setState((previous) => ({
+          values: { ...previous.values, selectedChapters: new Set([chapter]) },
+        }))
+      })
+
+      await waitFor(() => expect(slotHidden('1126')).toBe(false), { timeout: LOAD_WAIT_MS })
+    },
+  )
 
   it('resets the type filter with the other filters and the search, keeping the mode', async () => {
     renderPage()
@@ -193,7 +286,7 @@ describe('BattlePage', () => {
     await waitForList()
 
     expect(desktop().getByPlaceholderText('Search by name...')).toHaveValue('Zilu')
-    await waitFor(() => expect(slotHidden('1133')).toBe(false), { timeout: LOAD_WAIT_MS })
+    await waitFor(() => expect(slotHidden('1126')).toBe(false), { timeout: LOAD_WAIT_MS })
   })
 
   it.each([

@@ -54,7 +54,10 @@ export function selectorEntries(
 export function defaultRowIndex(
   groups: readonly SelectorRowGroup[],
   arrivalMode: BattleCase,
+  stage?: string,
 ): number | undefined {
+  const linked = groups.flatMap((group) => group.rows).find(({ row }) => row.stage === stage)
+  if (linked !== undefined) return linked.index
   const arrived = groups.find((group) => group.battleCase === arrivalMode)
   return (arrived ?? groups[0])?.rows[0]?.index
 }

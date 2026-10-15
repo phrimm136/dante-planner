@@ -1,3 +1,4 @@
+import { BATTLE_EVENT_PLACE } from '@/lib/constants'
 import type { ThemePackI18n } from '@/shared/themePack'
 import type {
   BattleStageList,
@@ -37,17 +38,16 @@ function intervalloPrefix(number: string, part: string | undefined): string {
   return part === undefined ? number : `${number}-${part}`
 }
 
-function chapterText(
-  chapter: { canto?: number | undefined; number?: string | undefined; part?: string | undefined },
-  t: Translate,
-): string | undefined {
-  if (chapter.canto !== undefined) return cantoLabel(chapter.canto, t)
-  if (chapter.number !== undefined) {
-    return t('battle.chapter.intervallo', {
-      number: intervalloPrefix(chapter.number, chapter.part),
-    })
-  }
-  return undefined
+type DungeonChapter = Extract<StageLabel, { kind: 'storyDungeon' }>['chapter']
+
+function chapterPrefix(chapter: DungeonChapter): string {
+  return 'canto' in chapter ? String(chapter.canto) : intervalloPrefix(chapter.number, chapter.part)
+}
+
+export function eventPlaceText(text: string): string {
+  const codePoints = Array.from(text)
+  if (codePoints.length <= BATTLE_EVENT_PLACE.MAX_CODE_POINTS) return text
+  return `${codePoints.slice(0, BATTLE_EVENT_PLACE.MAX_CODE_POINTS).join('')}${BATTLE_EVENT_PLACE.ELLIPSIS}`
 }
 
 export function stageLabelText(
@@ -73,9 +73,8 @@ export function stageLabelText(
       return joined(text?.title, difficultyText(label.difficulty, t))
     case 'storyDungeon':
       return joined(
-        chapterText(label.chapter, t),
+        `${chapterPrefix(label.chapter)}-${String(label.stage)}`,
         difficultyText(label.chapter.difficulty, t),
-        text?.dungeonNode,
       )
     case 'railway': {
       const line = text?.line ?? String(label.line)
@@ -103,7 +102,10 @@ function mirrorPlaces(
   if (mirror === undefined) return []
   return [
     ...(mirror.themeIds ?? []).flatMap((id) => sources.themePacks[String(id)]?.name ?? []),
-    ...(mirror.eventIds ?? []).flatMap((id) => sources.facetNames.events[id] ?? []),
+    ...(mirror.eventIds ?? []).flatMap((id) => {
+      const event = sources.facetNames.events[id]
+      return event === undefined ? [] : [eventPlaceText(event)]
+    }),
     ...(mirror.hiddenBattle === true ? [t('battle.facet.hidden', {})] : []),
   ]
 }
