@@ -183,3 +183,38 @@ describe('client-dd6f battle fields', () => {
     })
   })
 })
+
+describe('trigger-gated skill fields', () => {
+  const kit = assistant400001.units['400005']
+  const [phase] = kit.phases
+  const withGate = (rowPatch: object) => ({
+    ...assistant400001,
+    units: {
+      ...assistant400001.units,
+      '400005': { ...kit, phases: [{ ...phase, gatedSkillIds: [40000502] }] },
+    },
+    engagements: assistant400001.engagements.map((row) =>
+      row.stage.endsWith('#911911') ? { ...row, ...rowPatch } : row,
+    ),
+  })
+
+  it('reads gatedSkillIds on a phase and unlockedSkillIds on a row', () => {
+    const group = AssistantDataSchema.parse(withGate({ unlockedSkillIds: [40000502] }))
+    expect(group.units['400005']?.phases[0].gatedSkillIds).toEqual([40000502])
+    expect(
+      group.engagements.find((row) => row.stage.endsWith('#911911'))?.unlockedSkillIds,
+    ).toEqual([40000502])
+  })
+
+  it('parses the current data, which carries neither field', () => {
+    const group = AssistantDataSchema.parse(assistant400001)
+    expect(group.units['400005']?.phases[0].gatedSkillIds).toBeUndefined()
+    expect(group.engagements.every((row) => row.unlockedSkillIds === undefined)).toBe(true)
+  })
+
+  it('rejects a non-numeric unlocked skill id', () => {
+    expect(
+      AssistantDataSchema.safeParse(withGate({ unlockedSkillIds: ['40000502'] })).success,
+    ).toBe(false)
+  })
+})

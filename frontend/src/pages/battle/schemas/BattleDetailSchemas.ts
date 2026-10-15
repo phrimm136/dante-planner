@@ -218,6 +218,7 @@ export const BattlePhaseSchema = z
     unitKeywordList: z.array(z.string()).optional(),
     battleKeywordList: z.array(z.string()),
     skills: BattleSkillMapSchema,
+    gatedSkillIds: z.array(z.number()).optional(),
     passives: z.union([IdentityShapedPassivesSchema, PassiveImportanceMapSchema]),
     parts: z.array(BattlePartSchema).optional(),
     patternResolvesParts: z.boolean().optional(),
@@ -331,6 +332,7 @@ export const EngagementRowSchema = z
       .strict(),
     coUnits: z.array(CoUnitSchema),
     phaseMaps: z.record(z.string(), z.string()).optional(),
+    unlockedSkillIds: z.array(z.number()).optional(),
     forms: z.array(FormKeySchema).optional(),
   })
   .strict()

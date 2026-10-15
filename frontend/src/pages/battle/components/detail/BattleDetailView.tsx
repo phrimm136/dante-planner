@@ -241,7 +241,7 @@ export function BattleDetailView({
     >
       <DetailSection title={t('section.skills')}>
         <SkillList
-          skills={visibleSkills(phase, parts, part)}
+          skills={visibleSkills(phase, parts, part, row)}
           renderSkill={({ id: skillId, entry }) => (
             <BattleSkillCard
               source={source}

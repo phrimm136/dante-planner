@@ -153,8 +153,11 @@ export function visibleSkills(
   phase: BattlePhase,
   parts: readonly BattlePart[],
   part: BattlePart | undefined,
+  row: EngagementRow | undefined,
 ): OrderedBattleSkill[] {
   const linked = part === undefined ? undefined : new Set(part.skillIds.map(String))
+  const unlocked = new Set(row?.unlockedSkillIds ?? [])
+  const locked = new Set((phase.gatedSkillIds ?? []).filter((id) => !unlocked.has(id)).map(String))
   const present = new Set(parts.flatMap((each) => each.skillIds.map(String)))
   const absentOnly = new Set(
     (phase.parts ?? [])
@@ -163,7 +166,9 @@ export function visibleSkills(
       .filter((id) => !present.has(id)),
   )
   return (Object.entries(phase.skills) as [SkillId, BattleSkillEntry][])
-    .filter(([id]) => !absentOnly.has(id) && (linked === undefined || linked.has(id)))
+    .filter(
+      ([id]) => !absentOnly.has(id) && !locked.has(id) && (linked === undefined || linked.has(id)),
+    )
     .sort(([a], [b]) => Number(a) - Number(b))
     .map(([id, entry]) => ({ id, entry }))
 }

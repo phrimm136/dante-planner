@@ -28,7 +28,10 @@ export function SelectorGroup<T extends string | number>({
 
   return (
     <div role="group" aria-label={label} className={SECTION_STYLES.LAYOUT.row}>
-      <span className="text-lg font-medium" style={getDisplayFontForLanguage(i18n.language)}>
+      <span
+        className="shrink-0 text-lg font-medium"
+        style={getDisplayFontForLanguage(i18n.language)}
+      >
         {label}
       </span>
       <div className="flex flex-wrap gap-1">

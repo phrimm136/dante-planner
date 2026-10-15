@@ -88,7 +88,7 @@ describe('part selection', () => {
     expect(parts.map((part) => part.partType)).toEqual(['HEAD', 'BODY'])
 
     const head = selectedPart(parts, 813401)
-    expect(skillIdsOf(visibleSkills(phase, parts, head))).toEqual([
+    expect(skillIdsOf(visibleSkills(phase, parts, head, undefined))).toEqual([
       '806301',
       '806302',
       '806303',
@@ -99,15 +99,9 @@ describe('part selection', () => {
   })
 
   it('shows every skill in ascending id order under All', () => {
-    expect(skillIdsOf(visibleSkills(phase, parts, selectedPart(parts, ALL_PARTS)))).toEqual([
-      '806301',
-      '806302',
-      '806303',
-      '806304',
-      '806305',
-      '806306',
-      '806307',
-    ])
+    expect(
+      skillIdsOf(visibleSkills(phase, parts, selectedPart(parts, ALL_PARTS), undefined)),
+    ).toEqual(['806301', '806302', '806303', '806304', '806305', '806306', '806307'])
   })
 
   it('offers the one part of a single-part phase', () => {
@@ -124,7 +118,7 @@ describe('part selection', () => {
     const heads = rowParts(heavy, undefined)
     expect(heads.map((part) => part.partType)).toEqual(['HEAD', 'HEAD', 'HEAD', 'HEAD', 'HEAD'])
     for (const head of heads) {
-      expect(skillIdsOf(visibleSkills(heavy, heads, head))).toEqual([
+      expect(skillIdsOf(visibleSkills(heavy, heads, head, undefined))).toEqual([
         '827801',
         '827802',
         '827803',
@@ -139,12 +133,12 @@ describe('part selection', () => {
 
   it('keeps an unlinked skill under All only', () => {
     const unlinked = firstPhase(EnemyDataSchema.parse(enemy1308), '9620')
-    expect(skillIdsOf(visibleSkills(unlinked, rowParts(unlinked, undefined), undefined))).toContain(
-      '962006',
-    )
+    expect(
+      skillIdsOf(visibleSkills(unlinked, rowParts(unlinked, undefined), undefined, undefined)),
+    ).toContain('962006')
     for (const part of rowParts(unlinked, undefined)) {
       expect(
-        skillIdsOf(visibleSkills(unlinked, rowParts(unlinked, undefined), part)),
+        skillIdsOf(visibleSkills(unlinked, rowParts(unlinked, undefined), part, undefined)),
       ).not.toContain('962006')
     }
   })
@@ -161,8 +155,9 @@ describe('part selection', () => {
     const group = EnemyDataSchema.parse(enemy8041)
     const bull = firstPhase(group, '8041')
     const skillsOn = (stageId: string, selection: 'all' | number) => {
-      const parts = rowParts(bull, rowOn(group.engagements, stageId))
-      return skillIdsOf(visibleSkills(bull, parts, selectedPart(parts, selection)))
+      const row = rowOn(group.engagements, stageId)
+      const parts = rowParts(bull, row)
+      return skillIdsOf(visibleSkills(bull, parts, selectedPart(parts, selection), row))
     }
     expect(skillsOn('10403', ALL_PARTS)).toEqual(['804101', '804102', '804103', '804104'])
     expect(skillsOn('10406', ALL_PARTS)).toEqual([
@@ -174,6 +169,71 @@ describe('part selection', () => {
       '804106',
     ])
     expect(skillsOn('10406', 804102)).toEqual(['804105', '804106'])
+  })
+})
+
+describe('trigger-gated skills', () => {
+  const group = AssistantDataSchema.parse(assistant400001)
+  const kit = group.units['400005']
+  if (kit === undefined) throw new Error('no unit 400005')
+  const phase: BattlePhase = { ...kit.phases[0], gatedSkillIds: [40000502] }
+  const unlocking: EngagementRow = {
+    ...rowOn(group.engagements, '911911'),
+    unlockedSkillIds: [40000502],
+  }
+  const other = rowOn(group.engagements, '911909')
+  const skillsOn = (row: EngagementRow | undefined) =>
+    skillIdsOf(visibleSkills(phase, [], undefined, row))
+
+  it('hides a gated skill on a row that does not unlock it', () => {
+    expect(skillsOn(other)).not.toContain('40000502')
+  })
+
+  it('hides a gated skill when no row is selected', () => {
+    expect(skillsOn(undefined)).not.toContain('40000502')
+  })
+
+  it('shows a gated skill on the row that unlocks it', () => {
+    expect(skillsOn(unlocking)).toContain('40000502')
+  })
+
+  it('shows an ungated swapped skill on every row', () => {
+    for (const row of [unlocking, other, undefined]) expect(skillsOn(row)).toContain('40000501')
+  })
+
+  it('changes nothing for an unlocking row on a phase without gated skills', () => {
+    const ungated = kit.phases[0]
+    expect(skillIdsOf(visibleSkills(ungated, [], undefined, unlocking))).toEqual(
+      skillIdsOf(visibleSkills(ungated, [], undefined, other)),
+    )
+  })
+
+  describe('combined with part selection', () => {
+    const base = firstPhase(EnemyDataSchema.parse(enemy8063), '1280')
+    const gated: BattlePhase = { ...base, gatedSkillIds: [806305] }
+    const parts = rowParts(gated, undefined)
+    const [row] = EnemyDataSchema.parse(enemy8063).engagements
+    if (row === undefined) throw new Error('no row on 8063')
+    const unlocked: EngagementRow = { ...row, unlockedSkillIds: [806305] }
+    const skillsOn = (selection: 'all' | number, each: EngagementRow) =>
+      skillIdsOf(visibleSkills(gated, parts, selectedPart(parts, selection), each))
+
+    it('drops the gated skill from All and from its part on a row without the unlock', () => {
+      expect(skillsOn(ALL_PARTS, row)).toEqual([
+        '806301',
+        '806302',
+        '806303',
+        '806304',
+        '806306',
+        '806307',
+      ])
+      expect(skillsOn(813401, row)).toEqual(['806301', '806302', '806303', '806307'])
+    })
+
+    it('keeps the gated skill under All and its part on the unlocking row', () => {
+      expect(skillsOn(ALL_PARTS, unlocked)).toContain('806305')
+      expect(skillsOn(813401, unlocked)).toEqual(['806301', '806302', '806303', '806305', '806307'])
+    })
   })
 })
 
