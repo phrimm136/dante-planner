@@ -1,4 +1,4 @@
-# 159 name-plates-draw-their-client-sprites
+# 193 name-plates-draw-their-client-sprites
 epic: none · pr: none · supersedes: 156 @nameplate
 
 ## Decisions
