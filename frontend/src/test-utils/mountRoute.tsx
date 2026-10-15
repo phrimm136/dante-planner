@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { render } from '@testing-library/react'
+import { render, type RenderResult } from '@testing-library/react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import {
   createMemoryHistory,
@@ -10,7 +10,7 @@ import {
 } from '@tanstack/react-router'
 import { createTestQueryClient } from './queryClient'
 
-export function mountRoute(path: string, url: string, component: () => ReactNode) {
+export function mountRoute(path: string, url: string, component: () => ReactNode): RenderResult {
   const rootRoute = createRootRoute()
   const route = createRoute({ getParentRoute: () => rootRoute, path, component })
   const router = createRouter({
