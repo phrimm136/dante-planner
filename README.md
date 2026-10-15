@@ -17,39 +17,36 @@ Dante's Planner assists Limbus Company players throughout the game — planning 
 
 ## Repository layout
 
-Monorepo: `frontend/` (React 19 + TypeScript, Vite), `backend/` (Spring Boot 3.5, MySQL), `static/` (game data submodule).
+Monorepo: `frontend/` (React 19 + TypeScript, Vite), `backend/` (Spring Boot 3.5, MySQL 8.4), `static/` (game data submodule), `deploy/` (k3s manifests that ArgoCD syncs), `terraform/` (AWS and Cloudflare), `e2e/` (Playwright).
 
 ```
-                                browser
-                                   │ every request           ▲ SSE
-                                   ▼                         │
-       ┌────────────────── Cloudflare edge ──────────────────┴────┐
-       │                      CDN · WAF                           │
-       │           host = api.dante-planner.com ?                 │
-       └────────┬─────────────────────────────────┬───────────────┘
-             no │                             yes │           ▲
-                ▼                                 ▼           │
-┌── Cloudflare Pages ───┐    ┌── AWS EC2 ─────────────────────┼───────────┐
-│  React SPA            │    │  nginx ──▶ Spring Boot ── SSE ─┘           │
-│  game assets          │    │               │  (plan sync · comments     │
-└───────────────────────┘    │               │   · notifications)         │
- ◀ frontend/, static/        │               ▼                            │
-                             │             MySQL ── nightly dump ──▶ S3   │
-                             │                                            │
-                             │  logs · metrics ──▶ CloudWatch · Sentry    │
-                             └────────────────────────────────────────────┘
-                              ◀ backend/
+                                   browser
+                                      │                       ▲ SSE (comments · notifications)
+          ┌──────────────── Cloudflare edge · CDN · WAF ──────┴─────────────────────┐
+          │ dante-planner.com                              api.dante-planner.com    │
+          └──────┬──────────────────────────────────────────────┬───────────────────┘
+                 ▼                                              ▼
+ ┌── Cloudflare Pages ──┐                   Cloudflare Load Balancer · geo steering
+ │ React SPA            │                     Asia-Pacific │           │ everyone else
+ │ hashed game assets   │                                  ▼           ▼
+ └──────────────────────┘            ┌── k3s · Seoul ─────────┐ ┌── k3s · Oregon ────────┐
+  ◀ frontend/, static/               │ Cloudflare Tunnel      │ │ Cloudflare Tunnel      │
+                                     │ Traefik ─▶ Spring Boot │ │ Traefik ─▶ Spring Boot │
+                                     │ Redis (replica)        │ │ Redis                  │
+                                     └──┬──────────────┬──────┘ └───────────┬────────────┘
+                                  reads │       writes └────────────────────┤
+                                        ▼                                   ▼
+                              RDS MySQL read replica ◀─── replication ─── RDS MySQL primary
+
+   both regions: metrics ─▶ Prometheus ─▶ Grafana Cloud · logs ─▶ Alloy ─▶ Loki · errors ─▶ Sentry
+                                                                       ◀ backend/, deploy/, terraform/
 ```
 
-## Operations
+Design decisions are recorded in [`docs/adr/`](docs/adr/).
 
-All traffic enters through the Cloudflare edge and AWS Global Accelerator, which routes each user to the nearest of two k3s clusters (Oregon primary, Seoul) running Spring behind Traefik. Data follows a read-local / write-global topology: MySQL on RDS (Multi-AZ primary in Oregon, Seoul read replica) with a causal-consistency read path — GTID read-your-own-write gate, primary re-check on replica miss over a bulkhead pool, and Redis content tombstones for deletes. Deploys are GitOps: CI builds the arm64 image once, pushes to both regional ECRs, and commits the image-tag bump that each region's ArgoCD syncs. Monitored with CloudWatch, Sentry, and per-region Prometheus.
+## Data and credits
 
-Planned: multi-region k3s with a causal-consistency read path — lives in [`docs/adr/`](docs/adr/).
-
-## Testing
-
-Backend: 1,000+ JUnit tests including ArchUnit suites that enforce layer and feature-package boundaries. Frontend: ~6,000 Vitest cases across 128 files. CI replays Flyway migrations against a fresh MySQL container on every backend change.
+Game data, text and images are extracted from the Limbus Company client and belong to Project Moon. The Chinese translation is provided by [LocalizeLimbusCompany](https://github.com/LocalizeLimbusCompany/LocalizeLimbusCompany).
 
 ## License
 
