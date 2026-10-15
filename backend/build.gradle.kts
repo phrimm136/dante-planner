@@ -180,6 +180,7 @@ pitest {
         "org.danteplanner.backend.planner.validation.floor.*",
         "org.danteplanner.backend.planner.validation.sinner.*",
         "org.danteplanner.backend.planner.validation.identity.*",
+        "org.danteplanner.backend.planner.gamedata.IdentityLevels*",
         "org.danteplanner.backend.planner.validation.ego.*",
         "org.danteplanner.backend.planner.validation.skill.*",
         "org.danteplanner.backend.planner.validation.egogift.*",

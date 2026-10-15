@@ -1,8 +1,11 @@
-package org.danteplanner.backend.planner.validation.identity;
+package org.danteplanner.backend.planner.gamedata;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.FloatNode;
+import com.fasterxml.jackson.databind.node.IntNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -105,6 +108,46 @@ class IdentityLevelsTest {
         JsonNode content = MAPPER.readTree(raw);
 
         assertThat(IdentityLevels.clip(content, CAP)).isSameAs(content);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "-2147483648.0,IntNode",
+            "-2147483649.0,LongNode",
+            "-4611686018427387904.0,LongNode",
+            "-9223372036854775808.0,BigIntegerNode",
+            "-18446744073709551616.0,BigIntegerNode"})
+    void clip_WhenAnIntegralDoubleIsBelowTheCap_WritesTheNarrowestIntegerNodeThatHoldsIt(String level, String type)
+            throws JsonProcessingException {
+        JsonNode content = equipment("{\"1\":{\"identity\":{\"id\":\"10101\",\"level\":" + level + ",\"uptie\":4}}}");
+
+        JsonNode written = IdentityLevels.clip(content, CAP).path("equipment").path("1").path("identity").path("level");
+
+        assertThat(written.getClass().getSimpleName()).isEqualTo(type);
+        assertThat(written.bigIntegerValue()).isEqualTo(content.path("equipment").path("1").path("identity")
+                .path("level").decimalValue().toBigIntegerExact());
+    }
+
+    @ParameterizedTest
+    @ValueSource(floats = {Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY})
+    void clip_WhenAFloatLevelIsNotFinite_ReturnsTheContentItself(float level) {
+        JsonNode content = floatLevel(level);
+
+        assertThat(IdentityLevels.clip(content, CAP)).isSameAs(content);
+    }
+
+    @Test
+    void clip_WhenAFiniteFloatLevelIsAboveTheCap_WritesTheCapAsAnInteger() {
+        JsonNode clipped = IdentityLevels.clip(floatLevel(61.0f), CAP)
+                .path("equipment").path("1").path("identity").path("level");
+
+        assertThat(clipped).isEqualTo(IntNode.valueOf(CAP));
+    }
+
+    private static JsonNode floatLevel(float level) {
+        ObjectNode content = MAPPER.createObjectNode();
+        content.putObject("equipment").putObject("1").putObject("identity").set("level", FloatNode.valueOf(level));
+        return content;
     }
 
     private static JsonNode equipment(String equipment) throws JsonProcessingException {

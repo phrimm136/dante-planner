@@ -1,4 +1,4 @@
-package org.danteplanner.backend.planner.validation.identity;
+package org.danteplanner.backend.planner.gamedata;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.BigIntegerNode;

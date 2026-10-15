@@ -1,5 +1,7 @@
 package org.danteplanner.backend.planner.validation;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
+import org.assertj.core.api.ListAssert;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
@@ -9,10 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
 
 class IdentityLevelCapTest {
@@ -58,14 +58,14 @@ class IdentityLevelCapTest {
 
     @Test
     void parse_WhenAnMd7LevelIsBelowOne_RejectsItAgainstTheSeasonRange() {
-        assertThat(subErrors(withLevel("0"), MD7)).containsExactly(new ValidationError(
+        assertSubErrors(withLevel("0"), MD7).containsExactly(new ValidationError(
                 "OUT_OF_RANGE_IDENTITY_LEVEL", LEVEL_PATH, "level value 0 is out of range [1-60]"));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"\"60\"", "1.5", "\"99\""})
     void parse_WhenTheLevelIsNotAnInteger_LeavesItToTheTypeCheck(String level) {
-        assertThat(subErrors(withLevel(level), MD7))
+        assertSubErrors(withLevel(level), MD7)
                 .extracting(ValidationError::code, ValidationError::path)
                 .containsExactly(tuple("INVALID_FIELD_TYPE", LEVEL_PATH));
     }
@@ -84,11 +84,10 @@ class IdentityLevelCapTest {
         return validator.parse(content, MDCategory.F5, validator.season(version), Stage.DRAFT);
     }
 
-    private List<ValidationError> subErrors(String content, int version) {
-        PlannerValidationException rejected =
-                catchThrowableOfType(PlannerValidationException.class, () -> parse(content, version));
-        assertThat(rejected).isNotNull();
-        return rejected.getSubErrors();
+    private ListAssert<ValidationError> assertSubErrors(String content, int version) {
+        return assertThatThrownBy(() -> parse(content, version))
+                .asInstanceOf(InstanceOfAssertFactories.type(PlannerValidationException.class))
+                .extracting(PlannerValidationException::getSubErrors, InstanceOfAssertFactories.list(ValidationError.class));
     }
 
     private static String withLevel(String level) {
