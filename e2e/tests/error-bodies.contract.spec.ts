@@ -2,8 +2,9 @@ import { test, expect } from '@playwright/test'
 import type { APIResponse } from '@playwright/test'
 import { randomUUID } from 'node:crypto'
 import { ProblemSchema } from '@/lib/problem'
+import { authHeaders } from '../src/auth'
 import { dropPlanner, seedPublishedPlanner } from '../src/plannerFixture'
-import { closeSeedPool } from '../src/seed'
+import { closeSeedPool, createUser, deleteUser } from '../src/seed'
 import { ACCESS_HEADERS } from '../src/staging'
 
 // Every error body the client can meet is parsed with the schema the client itself parses it
@@ -42,9 +43,15 @@ test('a planner id that is not a uuid reads as gone', async ({ request }) => {
 })
 
 test('a route nothing serves answers a problem body', async ({ request }) => {
-  const response = await request.get('/api/typo')
+  const user = await createUser('error-bodies-typo')
 
-  await expectProblem(response, 404, 'NOT_FOUND')
+  try {
+    const response = await request.get('/api/typo', { headers: authHeaders(user.id) })
+
+    await expectProblem(response, 404, 'NOT_FOUND')
+  } finally {
+    await deleteUser(user)
+  }
 })
 
 test('a write without the csrf header is refused with its own code', async ({ request }) => {
@@ -57,6 +64,14 @@ test('an unauthenticated read of a protected route answers a problem body', asyn
   request,
 }) => {
   const response = await request.get('/api/notifications/unread-count')
+
+  await expectProblem(response, 401, 'UNAUTHORIZED')
+})
+
+test('an anonymous request to a route nothing serves answers a problem body', async ({
+  request,
+}) => {
+  const response = await request.get('/api/typo')
 
   await expectProblem(response, 401, 'UNAUTHORIZED')
 })
