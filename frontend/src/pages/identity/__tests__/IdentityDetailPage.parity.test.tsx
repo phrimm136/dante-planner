@@ -4,7 +4,7 @@ import { Suspense } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 
 import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
-import { diffHtml, normalizeHtml } from '@/test-utils/domDiff'
+import { IDENTITY_LEVEL_CAP } from '@/shared/gameData'
 import { prefetchDescriptionData } from '@/test-utils/prefetchDescriptionData'
 import { createTestQueryClient } from '@/test-utils/queryClient'
 import IdentityDetailPage from '../IdentityDetailPage'
@@ -114,26 +114,6 @@ async function renderCell(uptie: number): Promise<string> {
   return html
 }
 
-const baselines = new Map<boolean, Promise<string>>()
-
-/** Each layout's baseline cell (uptie 1, skill 1), rendered once per file run. */
-function baselineHtml(isMobile: boolean): Promise<string> {
-  let baseline = baselines.get(isMobile)
-  if (!baseline) {
-    baseline = renderCell(1, SKILL_TABS[0], isMobile)
-    baselines.set(isMobile, baseline)
-  }
-  return baseline
-}
-
-/** The baseline cell's whole DOM; for every other cell, its diff against that baseline. */
-async function cellSnapshot(uptie: number, tab: RegExp, isMobile: boolean): Promise<string> {
-  const baseline = await baselineHtml(isMobile)
-  return uptie === 1 && tab === SKILL_TABS[0]
-    ? normalizeHtml(baseline)
-    : diffHtml(baseline, await renderCell(uptie, tab, isMobile))
-}
-
 beforeEach(() => {
   vi.mocked(useIsBreakpoint).mockReturnValue(false)
   vi.spyOn(global, 'fetch').mockImplementation(
@@ -151,6 +131,10 @@ describe('IdentityDetailPage DOM parity', () => {
   })
 
   describe('mobile', () => {
+    beforeEach(() => {
+      vi.mocked(useIsBreakpoint).mockReturnValue(true)
+    })
+
     for (const uptie of [1, 4]) {
       it(`renders uptie ${uptie} with every skill`, async () => {
         expect(await renderCell(uptie)).toMatchSnapshot()
@@ -159,8 +143,6 @@ describe('IdentityDetailPage DOM parity', () => {
   })
 
   it('renders the stats panel at a lowered level', async () => {
-    const baseline = await baselineHtml(false)
-    vi.mocked(useIsBreakpoint).mockReturnValue(false)
     const queryClient = createTestQueryClient()
     await prefetchDescriptionData(queryClient, 'EN')
     const { container } = render(
@@ -176,10 +158,10 @@ describe('IdentityDetailPage DOM parity', () => {
     const slider = screen.getByRole('slider')
     fireEvent.keyDown(slider, { key: 'ArrowLeft' })
     await waitFor(() => {
-      expect(screen.getByText('Lv. 64')).toBeDefined()
+      expect(screen.getByText(`Lv. ${IDENTITY_LEVEL_CAP - 1}`)).toBeDefined()
     })
     await waitForI18nSettled(container)
 
-    expect(diffHtml(baseline, normalize(container.innerHTML))).toMatchSnapshot()
+    expect(normalize(container.innerHTML)).toMatchSnapshot()
   })
 })

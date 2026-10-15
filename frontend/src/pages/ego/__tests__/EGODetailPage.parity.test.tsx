@@ -4,11 +4,9 @@ import { Suspense } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 
 import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
-import { diffHtml, normalizeHtml } from '@/test-utils/domDiff'
 import { prefetchDescriptionData } from '@/test-utils/prefetchDescriptionData'
 import { createTestQueryClient } from '@/test-utils/queryClient'
 import EGODetailPage from '../EGODetailPage'
-import { egoI18n20102 } from './egoDetailFixtures'
 
 vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>()
@@ -86,27 +84,8 @@ async function renderCell(threadspin: number): Promise<string> {
   return html
 }
 
-const baselines = new Map<boolean, Promise<string>>()
-
-/** Each layout's baseline cell (threadspin 1, awakening), rendered once per file run. */
-function baselineHtml(isMobile: boolean): Promise<string> {
-  let baseline = baselines.get(isMobile)
-  if (!baseline) {
-    baseline = renderCell(1, SKILL_TABS[0], isMobile)
-    baselines.set(isMobile, baseline)
-  }
-  return baseline
-}
-
-/** The baseline cell's whole DOM; for every other cell, its diff against that baseline. */
-async function cellSnapshot(threadspin: number, tab: RegExp, isMobile: boolean): Promise<string> {
-  const baseline = await baselineHtml(isMobile)
-  return threadspin === 1 && tab === SKILL_TABS[0]
-    ? normalizeHtml(baseline)
-    : diffHtml(baseline, await renderCell(threadspin, tab, isMobile))
-}
-
 beforeEach(() => {
+  vi.mocked(useIsBreakpoint).mockReturnValue(false)
   vi.spyOn(global, 'fetch').mockImplementation(
     () => Promise.resolve({ ok: true, json: () => Promise.resolve({}) }) as Promise<Response>,
   )
@@ -122,6 +101,10 @@ describe('EGODetailPage DOM parity', () => {
   })
 
   describe('mobile', () => {
+    beforeEach(() => {
+      vi.mocked(useIsBreakpoint).mockReturnValue(true)
+    })
+
     for (const threadspin of [1, 5]) {
       it(`renders threadspin ${threadspin} with every skill`, async () => {
         expect(await renderCell(threadspin)).toMatchSnapshot()

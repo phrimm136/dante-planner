@@ -106,6 +106,17 @@ function faceChain(table: FontAdvanceTable): readonly ChainFace[] {
 }
 
 /**
+ * How far a line block drops, in em, to sit on its box's midline rather than its own.
+ *
+ * TextMeshPro's `Midline` alignment centres the drawn geometry in the box; a CSS line box
+ * centres its own leading, whose middle sits `(ascender - descender) / 2` below the
+ * baseline while the glyphs' middle sits `capLine / 2` above it.
+ */
+export function midlineOffsetEm(face: FontAdvanceTable): number {
+  return face.capLine / 2 - (face.ascender - face.descender) / 2
+}
+
+/**
  * The faces one line's glyphs are drawn from, the display face first.
  *
  * TextMeshPro lays a line out from the tallest of the font assets that drew it, so a line
@@ -314,8 +325,7 @@ export function createAdvanceMeasure(
 
     for (const character of text) {
       if (previous !== undefined) widthEm += penSpacingEm(table, spacing, previous)
-      widthEm +=
-        advanceOverrides.get(character) ?? advanceOf(table, character.codePointAt(0) ?? 0)
+      widthEm += advanceOverrides.get(character) ?? advanceOf(table, character.codePointAt(0) ?? 0)
       previous = character
     }
 

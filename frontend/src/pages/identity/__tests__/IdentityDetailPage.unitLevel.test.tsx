@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 
 import i18n from '@/lib/i18n'
-import { MAX_LEVEL } from '@/shared/gameData'
+import { IDENTITY_LEVEL_CAP } from '@/shared/gameData'
 import { mountRoute } from '@/test-utils/mountRoute'
 import IdentityDetailPage from '../IdentityDetailPage'
 
@@ -36,8 +36,8 @@ describe('identity skill attack level follows the page level', () => {
     async () => {
       await mountAndSettle()
 
-      expect(attackLevel(UNCORRECTED_SKILL_ID)).toBe(String(MAX_LEVEL))
-      expect(attackLevel(DEFENSE_SKILL_ID)).toBe(String(MAX_LEVEL + DEFENSE_CORRECTION))
+      expect(attackLevel(UNCORRECTED_SKILL_ID)).toBe(String(IDENTITY_LEVEL_CAP))
+      expect(attackLevel(DEFENSE_SKILL_ID)).toBe(String(IDENTITY_LEVEL_CAP + DEFENSE_CORRECTION))
     },
     TEST_BUDGET_MS,
   )

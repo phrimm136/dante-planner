@@ -1,39 +1,49 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import { QueryClientProvider } from '@tanstack/react-query'
 
-import { SkillIdSchema } from '@/shared/gameData'
+import { SkillEntrySchema, SkillIdSchema } from '@/shared/gameData'
 import { createTestQueryClient } from '@/test-utils/queryClient'
 import { EGOSkillCardWithGranularI18n } from '../EGOSkillCard'
-import type { EGOSkillEntry } from '../../types/EGOTypes'
 
 vi.mock('../../hooks/useEGODetailData', () => ({
   useEGODetailI18n: () => ({ skills: {} }),
 }))
 
-const skillEntry: EGOSkillEntry = {
-  id: SkillIdSchema.parse('2010211'),
-  skillData: [
-    { attributeType: 'CRIMSON', atkType: 'SLASH', skillLevelCorrection: 0, coinString: 'C' },
-    {},
-    {},
-    {},
-  ],
+const level = {
+  level: 1,
+  defType: 'ATTACK',
+  attributeType: 'CRIMSON',
+  atkType: 'SLASH',
+  defaultValue: 3,
+  targetNum: 1,
+  skillLevelCorrection: 0,
+  coins: [],
+  coinString: 'C',
 }
+
+const entry = SkillEntrySchema.parse({
+  skillTier: 3,
+  skillType: 'AWAKEN',
+  importanceLevel: 0,
+  mpUsage: 0,
+  isArea: false,
+  levels: [level, level, level, level],
+})
 
 describe('EGOSkillCardWithGranularI18n', () => {
   it('shows the offense level at the season level cap plus the correction', () => {
-    render(
+    const { container } = render(
       <QueryClientProvider client={createTestQueryClient()}>
         <EGOSkillCardWithGranularI18n
           egoId="20102"
-          skillType="awaken"
-          skillEntry={skillEntry}
+          skillId={SkillIdSchema.parse('2010211')}
+          entry={entry}
           threadspin={4}
         />
       </QueryClientProvider>,
     )
 
-    expect(screen.getByAltText('Attack').nextElementSibling?.textContent).toBe('65')
+    expect(container.querySelector('[data-slot="skill-level"]')?.textContent).toBe('65')
   })
 })

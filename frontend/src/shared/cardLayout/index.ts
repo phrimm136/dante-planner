@@ -27,6 +27,7 @@ export {
   geometryCentreEm,
   lineMetrics,
   linePitchesEm,
+  midlineOffsetEm,
   type FontAdvanceTable,
   type TrackingSpec,
 } from './fontAdvances'
