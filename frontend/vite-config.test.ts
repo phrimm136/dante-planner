@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
+import fs from 'fs'
 import path from 'path'
 import type { Plugin } from 'vite'
 import config from './vite.config'
@@ -81,5 +82,15 @@ describe('vite.config.ts', () => {
     expect(JSON.stringify(JSON.parse(emitted.source).buildId)).toBe(
       configHook().define.__BUILD_ID__,
     )
+  })
+
+  it('never inlines a font, since font-src in static/_headers forbids data: URIs', () => {
+    const limit = config.build?.assetsInlineLimit
+    if (typeof limit !== 'function') throw new Error('expected assetsInlineLimit to be a function')
+    const fontPath = path.resolve(__dirname, 'src/assets/fonts/planner-numerals.ttf')
+    const font = fs.readFileSync(fontPath)
+
+    expect(limit(fontPath, font)).toBe(false)
+    expect(limit('/icon.png', Buffer.alloc(16))).toBeUndefined()
   })
 })

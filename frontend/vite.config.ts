@@ -18,6 +18,8 @@ const STATIC_ROOT = path.resolve(__dirname, '../static')
 const STATIC_WHITELIST = ['images', 'data', 'i18n']
 // Well-known files that must be served at stable root paths, outside the hashed pipeline
 const STATIC_ROOT_FILES = ['sitemap.xml', 'robots.txt', 'favicon.ico', '_headers']
+// font-src in static/_headers allows only 'self', so a font inlined as a data: URI is blocked
+const FONT_ASSET = /\.(ttf|otf|woff2?)$/
 
 const I18N_NAMESPACES = [
   'common',
@@ -153,6 +155,7 @@ export default defineConfig({
   },
   publicDir: false,
   build: {
+    assetsInlineLimit: (filePath) => (FONT_ASSET.test(filePath) ? false : undefined),
     rolldownOptions: {
       output: {
         entryFileNames: 'a/[hash:12].js',
