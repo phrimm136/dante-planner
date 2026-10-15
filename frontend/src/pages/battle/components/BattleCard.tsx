@@ -2,6 +2,7 @@ import { Suspense, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 
 import { Skeleton } from '@/components/ui/skeleton'
+import { LIST_CARD_HOVER_CLASS } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { getBattleListImagePath } from '@/shared/assets'
 import { BATTLE_DETAIL_ROUTES, type BattleCase, type BattleFamily } from '../lib/battleVocabulary'
@@ -32,7 +33,7 @@ export function BattleCard({
         data-testid="battle-card-sprite"
         className={cn(
           'relative min-h-0 w-full flex-1 overflow-hidden rounded-sm bg-muted',
-          enableHoverHighlight && 'selectable [--selectable-transition-duration:0ms]',
+          enableHoverHighlight && LIST_CARD_HOVER_CLASS,
         )}
       >
         {spriteMissing ? (

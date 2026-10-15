@@ -1,3 +1,5 @@
+import { LIST_CARD_HOVER_CLASS } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 import { getBattleKeywordIconPath } from '@/shared/assets'
 import { KEYWORD_GEOMETRY } from '../lib/cardLayout'
 
@@ -14,7 +16,10 @@ export const KeywordCard = function KeywordCard({
 }: KeywordCardProps) {
   return (
     <div
-      className={`relative flex items-center justify-center rounded-md border border-border bg-card${enableHoverHighlight ? ' selectable' : ''}`}
+      className={cn(
+        'relative flex items-center justify-center rounded-md border border-border bg-card',
+        enableHoverHighlight && LIST_CARD_HOVER_CLASS,
+      )}
       style={{
         width: `${String(KEYWORD_GEOMETRY.size.widthPx)}px`,
         height: `${String(KEYWORD_GEOMETRY.size.widthPx)}px`,

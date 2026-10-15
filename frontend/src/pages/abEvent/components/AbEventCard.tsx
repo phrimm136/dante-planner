@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { getAbEventImagePath } from '@/shared/assets'
 import { Skeleton } from '@/components/ui/skeleton'
+import { LIST_CARD_HOVER_CLASS } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { AbEventDesc } from './AbEventDesc'
 
@@ -24,7 +25,7 @@ export function AbEventCard({
       <div
         className={cn(
           'relative w-full aspect-[3/2] rounded-sm overflow-hidden bg-muted',
-          enableHoverHighlight && 'selectable [--selectable-transition-duration:0ms]',
+          enableHoverHighlight && LIST_CARD_HOVER_CLASS,
         )}
       >
         {hasImage || illustId ? (

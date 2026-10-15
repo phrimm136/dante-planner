@@ -30,6 +30,8 @@ export const STAR_ICON_CLASS = 'fill-yellow-400 text-yellow-400'
 
 export const GAME_TEXT_CLASS = 'game-text'
 
+export const LIST_CARD_HOVER_CLASS = 'selectable [--selectable-transition-duration:0ms]'
+
 export const ACCENT_COLORS = {
   ENHANCED: '#f8c200',
   TIER: '#fcba03',
