@@ -59,6 +59,11 @@ async function waitForI18nSettled(container: HTMLElement) {
   })
 }
 
+/** The lightbox button loads through lazy() with a null fallback, so no skeleton marks it pending. */
+async function waitForExpandButton() {
+  await screen.findByAltText('a11y.expandImage')
+}
+
 /** One matrix cell: mount, settle the reveal, drive threadspin, return the DOM. */
 async function renderCell(threadspin: number): Promise<string> {
   const queryClient = createTestQueryClient()
@@ -78,6 +83,7 @@ async function renderCell(threadspin: number): Promise<string> {
 
   fireEvent.click(screen.getByRole('button', { name: new RegExp(`tier ${threadspin}`, 'i') }))
   await waitForI18nSettled(container)
+  await waitForExpandButton()
 
   const html = normalize(container.innerHTML)
   unmount()
