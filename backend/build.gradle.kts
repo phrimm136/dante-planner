@@ -199,6 +199,7 @@ pitest {
     jvmArgs.set(listOf("-Dorg.springframework.boot.logging.LoggingSystem=none"))
     junit5PluginVersion.set("1.2.1")
     threads.set(4)
+    enableDefaultIncrementalAnalysis.set(true)
     timestampedReports.set(false)
     outputFormats.set(setOf("HTML", "XML"))
     // Pinned to 1.19.0-rc.1: the 1.19.0 release crashes the coverage minion on this project
