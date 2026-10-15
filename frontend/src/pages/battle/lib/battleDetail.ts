@@ -3,6 +3,7 @@ import type { SkillDescEntry, SkillId } from '@/shared/gameData'
 import type { Shown } from '@/shared/unitStatus'
 import type {
   BattleEntityI18n,
+  BattleKit,
   BattlePart,
   BattlePhase,
   BattlePhaseI18n,
@@ -117,6 +118,12 @@ export function phaseTexts(
 
 export function unitName(i18n: BattleEntityI18n, unitId: string, fallback: string): string {
   return i18n.units[unitId]?.name ?? fallback
+}
+
+export function kitOf(units: Readonly<Record<string, BattleKit>>, unitId: string): BattleKit {
+  const kit = units[unitId]
+  if (kit === undefined) throw new Error(`battle group has no unit ${unitId}`)
+  return kit
 }
 
 export function rowUnitId(

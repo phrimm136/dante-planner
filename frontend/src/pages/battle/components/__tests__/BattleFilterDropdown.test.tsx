@@ -98,4 +98,22 @@ describe('BattleFilterDropdown', () => {
     expect(labelOf('10101')).toBe('이상 (한봄 밤의 꿈 2)')
     expect(labelOf('400025')).toBe('이상 (한봄 밤의 꿈 3)')
   })
+  it('labels every envy copy apart by its identity title', async () => {
+    await i18n.changeLanguage('KR')
+    renderWithProviders(
+      <BattleFilterDropdown
+        family="enemy"
+        selected={new Set()}
+        onSelectionChange={vi.fn()}
+        placeholderKey="keyword.filterIdentity"
+      />,
+    )
+
+    const options = await screen.findAllByTestId('option')
+    const labelOf = (id: string) =>
+      options.find((option) => option.dataset.value === id)?.textContent
+    expect(labelOf('1110')).toBe('질투 죄종 - 남부 리우 협회 4과')
+    expect(labelOf('1111')).toBe('질투 죄종 - 남부 리우 협회 6과')
+    expect(labelOf('1112')).toBe('질투 죄종 - 남부 리우 협회 5과')
+  })
 })

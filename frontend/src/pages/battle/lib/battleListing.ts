@@ -49,7 +49,10 @@ export function battleListName(
   id: string,
   identityTitle: string | undefined,
 ): string {
-  const name = battleDisplayName(entry, mode, id)
+  return withIdentityTitle(battleDisplayName(entry, mode, id), identityTitle)
+}
+
+export function withIdentityTitle(name: string, identityTitle: string | undefined): string {
   if (identityTitle === undefined) return name
   return `${name}${ENVY_TITLE_SEPARATOR}${singleLineTitle(identityTitle)}`
 }

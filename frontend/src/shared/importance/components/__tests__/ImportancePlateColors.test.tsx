@@ -44,6 +44,8 @@ describe('importance name plate colors', () => {
       )
       const colors = importanceColorCode.enemy[level]
       expect(tintDiagonal(container)).toEqual(channelDiagonal(colors.passivePanel))
+      const banner = container.querySelector<HTMLElement>('[data-slot="importance-banner"]')
+      expect(banner?.style.getPropertyValue('--name-text')).toBe(colors.passiveName)
     },
   )
 })

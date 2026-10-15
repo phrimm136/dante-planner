@@ -14,7 +14,6 @@ import {
   defaultGrowthInputs,
   growthState,
   grownPhase,
-  heldSkillLevel,
   passiveSlotIds,
   type GrowthInputs,
 } from '../battleGrowth'
@@ -98,9 +97,7 @@ describe('Jia Xichun at 1000/1000/1000', () => {
     expect(shownSkillLevel(grown, '40000104', state.level, FULL)).toBe(64)
   })
 
-  it('holds every skill level and the acquired skill 40000501', () => {
-    expect(heldSkillLevel(skillOf(xichun, '40000101'), growth, FULL)).toBe(5)
-    expect(heldSkillLevel(skillOf(xichun, '40000104'), growth, FULL)).toBe(4)
+  it('acquires skill 40000501', () => {
     expect(Object.keys(grown.skills)).toContain('40000501')
   })
 

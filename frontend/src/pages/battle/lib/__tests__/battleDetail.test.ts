@@ -32,6 +32,7 @@ import {
   headerMapName,
   isIdentityShaped,
   isShownPassive,
+  kitOf,
   phaseTexts,
   rowParts,
   rowUnitId,
@@ -237,6 +238,18 @@ describe('displayed unit', () => {
     expect(rowUnitId(['1280', '8063'], '8063', row)).toBe('1280')
     expect(rowUnitId(['1280', '8063'], '8063', undefined)).toBe('8063')
     expect(rowUnitId(['1280'], '8063', undefined)).toBe('1280')
+  })
+})
+
+describe('displayed kit', () => {
+  const group = EnemyDataSchema.parse(enemy8063)
+
+  it('takes the kit of the row unit', () => {
+    expect(kitOf(group.units, '1280')).toBe(group.units['1280'])
+  })
+
+  it('throws when the row unit is not a unit of the group', () => {
+    expect(() => kitOf(group.units, '8070')).toThrow('battle group has no unit 8070')
   })
 })
 

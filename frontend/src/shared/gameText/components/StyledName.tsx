@@ -10,7 +10,7 @@ import {
   type TextNodeSpec,
 } from '@/shared/cardLayout'
 import { panelNameShadow } from '../lib/panelUnderlay'
-import { importanceBannerStyle } from '@/shared/importance'
+import { importanceBannerStyle, importanceStyle } from '@/shared/importance'
 import { namePlateSliceStyles, tintColorMatrix, type NamePlateKind } from '../lib/namePlate'
 import { CLIENT_TEXT_SCALE, NAME_PLATE_UNITS, UNIT_PANEL_COLORS } from '@/lib/constants'
 import {
@@ -147,13 +147,13 @@ function plateFrame(kind: NamePlateKind): CSSProperties {
 function plateTint(
   kind: NamePlateKind,
   primary: string,
-  bannerStyle: CSSProperties | undefined,
-): string | undefined {
-  if (bannerStyle !== undefined) {
-    const body: unknown = (bannerStyle as Record<string, unknown>)['--name-body']
-    return typeof body === 'string' ? body : undefined
-  }
-  return NAME_PLATES[kind].tint(primary)
+  importance: NamePlateImportance | undefined,
+): string {
+  const panel =
+    importance === undefined
+      ? undefined
+      : importanceStyle(importance.level, importance.palette)?.colors.passivePanel
+  return panel ?? NAME_PLATES[kind].tint(primary)
 }
 
 function generateStripeGradient(color: string): string {
@@ -255,7 +255,7 @@ export function NamePlate({ kind, name, attributeType, importance }: NamePlatePr
               ))}
             </span>
           </div>
-          <PlateSlices kind={kind} tint={plateTint(kind, primary, bannerStyle)} />
+          <PlateSlices kind={kind} tint={plateTint(kind, primary, importance)} />
         </div>
       </div>
     </div>

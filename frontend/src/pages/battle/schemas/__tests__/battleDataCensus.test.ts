@@ -55,6 +55,20 @@ describe('battle data census', () => {
   })
 
   it.each([
+    ['data/enemy', EnemyDataSchema],
+    ['data/assistant', AssistantDataSchema],
+    ['data/sinnerEvent', SinnerEventDataSchema],
+  ] as const)('finds every row unit of %s among its units', (dir, schema) => {
+    const strays = jsonFiles(dir).flatMap((name) => {
+      const group = schema.parse(readJson(`${dir}/${name}`))
+      return group.engagements
+        .filter((row) => group.units[String(row.unit)] === undefined)
+        .map((row) => `${dir}/${name} ${row.stage} ${String(row.unit)}`)
+    })
+    expect(strays).toEqual([])
+  })
+
+  it.each([
     ['data/enemySpecList.json', EnemySpecListSchema],
     ['data/assistantSpecList.json', AssistantSpecListSchema],
     ['data/sinnerEventSpecList.json', SinnerEventSpecListSchema],

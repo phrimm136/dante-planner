@@ -2,9 +2,9 @@
 epic: none · pr: none · supersedes: 150 @importance @stripe @passive @coin
 
 ## Decisions
-- @passive @importance — A passive's importance paints its name plate as the client does: the level's panel color on the plate body, a darker slanted tail with the caution hatch, the level's text color, and a glow that follows the plate outline and pulses within the level's range. REJECTED: a rectangular glow behind a flat banner — it blinks behind the plate instead of hugging it.
 
 ## Superseded
+- @passive @importance → 193 — A passive's importance paints its name plate as the client does: the level's panel color on the plate body, a darker slanted tail with the caution hatch, the level's text color, and a glow that follows the plate outline and pulses within the level's range. REJECTED: a rectangular glow behind a flat banner — it blinks behind the plate instead of hugging it.
 - @skill @coin → 155 — A coin is 50 client units wide with its aspect kept.
   INVARIANT: every importance and coin length derives from the one client-unit scale — theme constants and the importance table tests.
 - @skill @importance → 154 — Client UI units map to page length through the text: 50 client units are one text-sm line (1.25 rem), for every client-sized element, calibrated against in-game unit information captures. A skill's importance icon is 159 units, 95 units in from the box's right edge (86 when locked) and 45 down, in the header row's part-icon slot; a passive's is 163 units at the right edge, 14 down; the glow is the icon's child and inherits its alpha. REJECTED: client units against the card's width — our cards are about 2.3 times wider relative to their text than the client's panels, so every element came out 2.3 times too large.

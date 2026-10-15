@@ -4,7 +4,6 @@ import { COIN_CLIENT_SPACING, COIN_CLIENT_WIDTH } from '@/lib/constants'
 import { clientLength } from '@/lib/utils'
 import { getCoinSpritePath } from '@/shared/assets'
 import type { CoinColor, SkillCoin } from '@/shared/gameData'
-import { isCoinColor } from '../lib/coinColor'
 
 const COIN_ALT: Record<CoinColor, string> = {
   GOLD: 'Coin',
@@ -26,7 +25,7 @@ interface CoinDisplayProps {
 }
 
 export function CoinDisplay({ coins }: CoinDisplayProps) {
-  const colors = coins.map((coin) => coin.color).filter(isCoinColor)
+  const colors = coins.map((coin) => coin.color)
   if (colors.length === 0) {
     return null
   }

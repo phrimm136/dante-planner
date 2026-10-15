@@ -280,7 +280,7 @@ describe('scanTmpRuns', () => {
     ])
   })
 
-  it('keeps a doubled <u> open to the end of the text', () => {
+  it('keeps a doubled <u> underlined until its second close', () => {
     expect(scanTmpRuns('<u><u>A</u>B</u>C')).toEqual([run('AB', { underline: true }), run('C')])
   })
 

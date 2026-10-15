@@ -50,10 +50,14 @@ export default defineConfig({
       testIgnore: /.*\.(contract|infra|crawl)\.spec\.ts/,
       use: { ...devices['Desktop Chrome'] },
     },
-    {
-      name: 'crawl',
-      testMatch: /.*\.crawl\.spec\.ts/,
-      use: { ...devices['Desktop Chrome'] },
-    },
+    ...(process.env.CRAWL
+      ? [
+          {
+            name: 'crawl',
+            testMatch: /.*\.crawl\.spec\.ts/,
+            use: { ...devices['Desktop Chrome'] },
+          },
+        ]
+      : []),
   ],
 })

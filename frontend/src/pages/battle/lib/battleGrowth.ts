@@ -108,18 +108,6 @@ export function growthState(
   return sums
 }
 
-export function heldSkillLevel(
-  entry: BattleSkillEntry,
-  growth: BattleGrowth,
-  inputs: GrowthInputs,
-): number {
-  return Math.max(
-    ...entry.levels
-      .filter((level) => unlockHolds(level.unlock, growth, inputs))
-      .map((level) => level.level),
-  )
-}
-
 export function passiveSlotIds<TId extends string>(
   tiers: readonly (readonly TId[])[],
   unlocks: PassiveUnlocks | undefined,

@@ -4,10 +4,10 @@ import { render } from '@testing-library/react'
 import enemy1339 from '@static/data/enemy/1339.json'
 import { getCoinSpritePath } from '@/shared/assets'
 import { SkillEntrySchema } from '@/shared/gameData'
-import type { SkillCoin } from '@/shared/gameData'
+import type { CoinColor, SkillCoin } from '@/shared/gameData'
 import { CoinDisplay } from '../CoinDisplay'
 
-const coin = (color: string): SkillCoin => ({
+const coin = (color: CoinColor): SkillCoin => ({
   scale: 1,
   operator: 'ADD',
   grade: 1,

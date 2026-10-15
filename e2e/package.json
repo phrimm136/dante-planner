@@ -14,6 +14,7 @@
     "test:app": "playwright test --project=chromium",
     "test:contract": "playwright test --project=contract",
     "test:infra": "playwright test --project=infra",
+    "test:crawl": "CRAWL=1 playwright test --project=crawl",
     "test:headed": "playwright test --headed",
     "report": "playwright show-report"
   },

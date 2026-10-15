@@ -16,8 +16,10 @@ const PUBLIC_ROUTES = [
   '/theme-pack',
   '/ab-event',
   '/keyword',
+  '/battle',
   '/privacy',
   '/terms',
+  '/licenses',
 ]
 
 for (const route of PUBLIC_ROUTES) {

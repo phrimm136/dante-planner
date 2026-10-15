@@ -10,6 +10,7 @@ import { useBattleDetailI18n, type BattleI18nConfig } from '../../hooks/useBattl
 import {
   ALL_PARTS,
   headerMapName,
+  kitOf,
   phaseTier,
   phaseTexts,
   rowParts,
@@ -88,12 +89,6 @@ function BattleFormLabel(props: FormLabelProps) {
   )
 }
 
-function kitOf(group: BattleGroup, unitId: string): BattleKit {
-  const kit = group.units[unitId] ?? Object.values(group.units)[0]
-  if (kit === undefined) throw new Error('battle group has no unit')
-  return kit
-}
-
 export function BattleDetailView({
   family,
   id,
@@ -115,7 +110,7 @@ export function BattleDetailView({
 
   const row = selection.rowIndex === undefined ? undefined : group.engagements[selection.rowIndex]
   const unitId = rowUnitId(Object.keys(group.units), id, row)
-  const kit = kitOf(group, unitId)
+  const kit = kitOf(group.units, unitId)
   const formKey = selectedFormKey(row, selection.formKey)
   const basePhase = activePhase(kit, row, selection.phaseIndex, formKey)
   const { growth } = basePhase

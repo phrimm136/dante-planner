@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import { COIN_COLORS } from '../constants'
 import { SkillIdSchema } from '../ids'
 import { AbPartTypeSchema } from './SharedSchemas'
 
@@ -20,7 +21,7 @@ export const SkillCoinSchema = z
     scale: z.number(),
     operator: z.string(),
     grade: z.number(),
-    color: z.string(),
+    color: z.enum(COIN_COLORS),
     special: z.boolean(),
   })
   .strict()
