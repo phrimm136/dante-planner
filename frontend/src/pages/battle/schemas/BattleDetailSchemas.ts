@@ -396,6 +396,8 @@ const SinnerEventKitSchema = z
   })
   .strict()
 
+export type UnitEntry<Kit> = { unitId: string; kit: Kit }
+
 function groupSchema<TKit extends z.ZodType>(kit: TKit) {
   return z
     .object({
@@ -403,6 +405,32 @@ function groupSchema<TKit extends z.ZodType>(kit: TKit) {
       engagements: z.array(EngagementRowSchema),
     })
     .strict()
+    .transform((group, ctx) => {
+      const [first, ...rest] = Object.entries(group.units).map(([unitId, unitKit]) => ({
+        unitId,
+        kit: unitKit,
+      }))
+      if (first === undefined) {
+        ctx.addIssue({ code: 'custom', message: 'battle group has no units' })
+        return z.NEVER
+      }
+      const engagements = group.engagements.flatMap((row, index) => {
+        const rowKit = group.units[String(row.unit)]
+        if (rowKit !== undefined) return [{ ...row, kit: rowKit }]
+        ctx.addIssue({
+          code: 'custom',
+          message: `battle group has no unit ${String(row.unit)}`,
+          path: ['engagements', index, 'unit'],
+        })
+        return []
+      })
+      if (engagements.length !== group.engagements.length) return z.NEVER
+      const unitOrder: [UnitEntry<z.output<TKit>>, ...UnitEntry<z.output<TKit>>[]] = [
+        first,
+        ...rest,
+      ]
+      return { units: group.units, engagements, unitOrder }
+    })
 }
 
 export const EnemyDataSchema = groupSchema(EnemyKitSchema)

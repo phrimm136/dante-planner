@@ -148,11 +148,8 @@ export function imageStyle(
   src: string,
 ): CSSProperties {
   const box = rectStyle(rect, space)
+  if (image.slice === null) return { ...box, objectFit: image.preserveAspect ? 'contain' : 'fill' }
   const slice = image.slice
-  if (slice === null) return { ...box, objectFit: image.preserveAspect ? 'contain' : 'fill' }
-  if (image.pixelsPerUnit === null) {
-    throw new Error(`sliced sprite ${src} carries no pixelsPerUnit`)
-  }
 
   const unitsPerPixel = CANVAS_PIXELS_PER_UNIT / image.pixelsPerUnit
   const across = Math.min(1, rect.w / ((slice.left + slice.right) * unitsPerPixel))
@@ -185,23 +182,6 @@ export function textTracking(text: LayoutText): TrackingSpec {
 
 export function lineSpacingEm(text: LayoutText): number {
   return text.lineSpacing * TMP_SPACING_EM
-}
-
-export function textElement(
-  layout: StartBuffCardLayout | StartBuffMiniCardLayout,
-  role: TextElement['role'],
-): TextElement {
-  const found = layout.elements.find(
-    (element): element is TextElement => element.role === role && 'text' in element,
-  )
-  if (found === undefined) throw new Error(`${layout.prefab} has no ${role} text`)
-  return found
-}
-
-export function viewportRect(layout: StartBuffCardLayout): UnitRect {
-  const viewport = layout.elements.find((element) => element.role === 'descViewport')
-  if (viewport === undefined) throw new Error(`${layout.prefab} has no description viewport`)
-  return viewport.rect
 }
 
 export function fitElementText(
@@ -242,7 +222,7 @@ export function bulletGlyph(layout: StartBuffCardLayout): string {
 }
 
 function descriptionMeasure(layout: StartBuffCardLayout, table: FontAdvanceTable): Measure {
-  const desc = textElement(layout, 'desc')
+  const desc = layout.desc
   return createAdvanceMeasure(
     table,
     textTracking(desc.text),
@@ -273,7 +253,7 @@ export function layoutDescription(
   layout: StartBuffCardLayout,
   table: FontAdvanceTable,
 ): DescriptionLayout {
-  const desc = textElement(layout, 'desc')
+  const desc = layout.desc
   const fontSize = layout.description.fontSize
   const measure = descriptionMeasure(layout, table)
   const plain = runs.map((run) => run.text).join('')
@@ -314,7 +294,7 @@ export function layoutDescription(
     lines,
     baselines,
     height,
-    overflows: height > viewportRect(layout).h,
+    overflows: height > layout.viewport.h,
   }
 }
 

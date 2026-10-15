@@ -3,7 +3,6 @@ import type { SkillDescEntry, SkillId } from '@/shared/gameData'
 import type { Shown } from '@/shared/unitStatus'
 import type {
   BattleEntityI18n,
-  BattleKit,
   BattlePart,
   BattlePhase,
   BattlePhaseI18n,
@@ -15,6 +14,7 @@ import type {
   PassiveImportanceMap,
   ResistInfo,
   StartBuff,
+  UnitEntry,
 } from '../schemas/BattleDetailSchemas'
 import type { SkillLevelAdders } from './battleGrowth'
 import { NEUTRAL_RESISTANCE, SKILL_LEVEL_ADDER_BY_DEF_TYPE } from './battleVocabulary'
@@ -120,19 +120,13 @@ export function unitName(i18n: BattleEntityI18n, unitId: string, fallback: strin
   return i18n.units[unitId]?.name ?? fallback
 }
 
-export function kitOf(units: Readonly<Record<string, BattleKit>>, unitId: string): BattleKit {
-  const kit = units[unitId]
-  if (kit === undefined) throw new Error(`battle group has no unit ${unitId}`)
-  return kit
-}
-
-export function rowUnitId(
-  unitIds: readonly string[],
+export function displayedUnit<Kit>(
+  group: { unitOrder: [UnitEntry<Kit>, ...UnitEntry<Kit>[]] },
   groupId: string,
-  row: EngagementRow | undefined,
-): string {
-  if (row !== undefined) return String(row.unit)
-  return unitIds.includes(groupId) ? groupId : (unitIds[0] ?? groupId)
+  row: (EngagementRow & { kit: Kit }) | undefined,
+): UnitEntry<Kit> {
+  if (row !== undefined) return { unitId: String(row.unit), kit: row.kit }
+  return group.unitOrder.find((entry) => entry.unitId === groupId) ?? group.unitOrder[0]
 }
 
 export function headerMapName(

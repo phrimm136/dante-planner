@@ -29,13 +29,12 @@ import {
 import {
   ALL_PARTS,
   acquireConditionText,
+  displayedUnit,
   headerMapName,
   isIdentityShaped,
   isShownPassive,
-  kitOf,
   phaseTexts,
   rowParts,
-  rowUnitId,
   unitName,
   selectedPart,
   skillLevelAdder,
@@ -57,7 +56,7 @@ function firstPhase(group: { units: Record<string, BattleKit> }, unitId: string)
   return kit.phases[0]
 }
 
-function rowOn(rows: readonly EngagementRow[], stageId: string): EngagementRow {
+function rowOn<Row extends EngagementRow>(rows: readonly Row[], stageId: string): Row {
   const row = rows.find((each) => each.stage.endsWith(`#${stageId}`))
   if (row === undefined) throw new Error(`no row on ${stageId}`)
   return row
@@ -234,22 +233,19 @@ describe('trigger-gated skills', () => {
 
 describe('displayed unit', () => {
   it('takes the row unit, else the group id, else the first unit', () => {
-    const row = rowOn(EnemyDataSchema.parse(enemy8063).engagements, '2069001')
-    expect(rowUnitId(['1280', '8063'], '8063', row)).toBe('1280')
-    expect(rowUnitId(['1280', '8063'], '8063', undefined)).toBe('8063')
-    expect(rowUnitId(['1280'], '8063', undefined)).toBe('1280')
-  })
-})
+    const group = EnemyDataSchema.parse(enemy8063)
+    const row = rowOn(group.engagements, '2069001')
+    const only1280 = EnemyDataSchema.parse({
+      ...enemy8063,
+      units: { '1280': enemy8063.units['1280'] },
+      engagements: enemy8063.engagements.filter((each) => each.unit === 1280),
+    })
 
-describe('displayed kit', () => {
-  const group = EnemyDataSchema.parse(enemy8063)
-
-  it('takes the kit of the row unit', () => {
-    expect(kitOf(group.units, '1280')).toBe(group.units['1280'])
-  })
-
-  it('throws when the row unit is not a unit of the group', () => {
-    expect(() => kitOf(group.units, '8070')).toThrow('battle group has no unit 8070')
+    const shown = displayedUnit(group, '8063', row)
+    expect(shown.unitId).toBe('1280')
+    expect(shown.kit).toBe(group.units['1280'])
+    expect(displayedUnit(group, '8063', undefined).unitId).toBe('8063')
+    expect(displayedUnit(only1280, '8063', undefined).unitId).toBe('1280')
   })
 })
 

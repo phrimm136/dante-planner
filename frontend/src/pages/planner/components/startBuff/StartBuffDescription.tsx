@@ -13,10 +13,8 @@ import {
   lineSpacingEm,
   rectStyle,
   spriteFile,
-  textElement,
   textTracking,
   unitsToCqw,
-  viewportRect,
   type CardState,
   type LayoutSpace,
   type TextRun,
@@ -78,7 +76,7 @@ export function StartBuffDescription(props: StartBuffDescriptionProps) {
     <Suspense
       fallback={
         <Skeleton
-          style={{ ...rectStyle(viewportRect(props.layout), props.space), pointerEvents: 'none' }}
+          style={{ ...rectStyle(props.layout.viewport, props.space), pointerEvents: 'none' }}
         />
       }
     >
@@ -99,8 +97,8 @@ function StartBuffDescriptionBody({
 }: StartBuffDescriptionProps) {
   const table = useFontAdvances(language, 'description')
   const description = layoutDescription(runs, layout, table)
-  const viewport = viewportRect(layout)
-  const desc = textElement(layout, 'desc')
+  const viewport = layout.viewport
+  const desc = layout.desc
   const node = desc.text
   const tracking = textTracking(node)
   const spacing = lineSpacingEm(node)

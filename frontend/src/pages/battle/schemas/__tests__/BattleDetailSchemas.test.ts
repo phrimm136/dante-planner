@@ -5,6 +5,7 @@ import assistant400038 from '@static/data/assistant/400038.json'
 import assistant400041 from '@static/data/assistant/400041.json'
 import enemy1099 from '@static/data/enemy/1099.json'
 import enemy8044 from '@static/data/enemy/8044.json'
+import enemy8063 from '@static/data/enemy/8063.json'
 import enemy8556 from '@static/data/enemy/8556.json'
 import stageList from '@static/data/battleStageList.json'
 import enemy1519 from '@static/data/enemy/1519.json'
@@ -220,5 +221,34 @@ describe('trigger-gated skill fields', () => {
     expect(
       AssistantDataSchema.safeParse(withGate({ unlockedSkillIds: ['40000502'] })).success,
     ).toBe(false)
+  })
+})
+
+describe('battle group units', () => {
+  it('refuses a row whose unit the group lacks', () => {
+    const raw = {
+      ...enemy8063,
+      engagements: enemy8063.engagements.map((row, index) =>
+        index === 0 ? { ...row, unit: 8070 } : row,
+      ),
+    }
+    const result = EnemyDataSchema.safeParse(raw)
+
+    expect(result.success).toBe(false)
+    expect(result.error?.issues).toContainEqual(
+      expect.objectContaining({
+        message: 'battle group has no unit 8070',
+        path: ['engagements', 0, 'unit'],
+      }),
+    )
+  })
+
+  it('refuses a group without units', () => {
+    const result = EnemyDataSchema.safeParse({ ...enemy8063, units: {}, engagements: [] })
+
+    expect(result.success).toBe(false)
+    expect(result.error?.issues.map((issue) => issue.message)).toContain(
+      'battle group has no units',
+    )
   })
 })

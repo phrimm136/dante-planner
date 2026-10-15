@@ -9,12 +9,11 @@ import { SkillList } from '@/shared/skill'
 import { useBattleDetailI18n, type BattleI18nConfig } from '../../hooks/useBattleDetailData'
 import {
   ALL_PARTS,
+  displayedUnit,
   headerMapName,
-  kitOf,
   phaseTier,
   phaseTexts,
   rowParts,
-  rowUnitId,
   selectedPart,
   visibleSkills,
   type PartSelection,
@@ -23,7 +22,7 @@ import { activePhase, formsLocked, rowFormKeys, selectedFormKey } from '../../li
 import { defaultGrowthInputs, growthState, grownPhase } from '../../lib/battleGrowth'
 import type { BattleCase, BattleFamily, BattleForm } from '../../lib/battleVocabulary'
 import { defaultRowIndex, groupSelectorRows } from '../../lib/engagementRows'
-import type { BattleKit, EngagementRow } from '../../schemas/BattleDetailSchemas'
+import type { BattleKit, EngagementRow, UnitEntry } from '../../schemas/BattleDetailSchemas'
 import { BattleCoUnits } from '../coUnits/BattleCoUnits'
 import { BattleDetailHeader } from './BattleDetailHeader'
 import { BattleEgoSection } from './BattleEgoSection'
@@ -38,7 +37,8 @@ import { BattleStageEffects } from './BattleStageEffects'
 
 export interface BattleGroup {
   units: Record<string, BattleKit>
-  engagements: readonly EngagementRow[]
+  engagements: readonly (EngagementRow & { kit: BattleKit })[]
+  unitOrder: [UnitEntry<BattleKit>, ...UnitEntry<BattleKit>[]]
 }
 
 export interface BattleDetailViewProps {
@@ -109,8 +109,7 @@ export function BattleDetailView({
   const [growthInputs, setGrowthInputs] = useState<Record<string, number>>({})
 
   const row = selection.rowIndex === undefined ? undefined : group.engagements[selection.rowIndex]
-  const unitId = rowUnitId(Object.keys(group.units), id, row)
-  const kit = kitOf(group.units, unitId)
+  const { unitId, kit } = displayedUnit(group, id, row)
   const formKey = selectedFormKey(row, selection.formKey)
   const basePhase = activePhase(kit, row, selection.phaseIndex, formKey)
   const { growth } = basePhase

@@ -22,16 +22,17 @@ const SliceSchema = z
   })
   .strict()
 
-const ImageSchema = z
-  .object({
-    file: z.string().nullable(),
-    filePattern: z.string().optional(),
-    slice: SliceSchema.nullable(),
-    pixelsPerUnit: z.number().nullable(),
-    preserveAspect: z.boolean(),
-    source: z.string().optional(),
-  })
-  .strict()
+const imageBase = {
+  file: z.string().nullable(),
+  filePattern: z.string().optional(),
+  preserveAspect: z.boolean(),
+  source: z.string().optional(),
+}
+
+const ImageSchema = z.union([
+  z.object({ ...imageBase, slice: z.null(), pixelsPerUnit: z.number().nullable() }).strict(),
+  z.object({ ...imageBase, slice: SliceSchema, pixelsPerUnit: z.number() }).strict(),
+])
 
 export type LayoutImage = z.infer<typeof ImageSchema>
 
@@ -171,6 +172,19 @@ export const StartBuffCardLayoutSchema = z
       .strict(),
   })
   .strict()
+  .transform((layout, ctx) => {
+    const desc = layout.elements.find((element): element is TextElement => element.role === 'desc')
+    if (desc === undefined) {
+      ctx.addIssue({ code: 'custom', message: `${layout.prefab} has no desc text` })
+      return z.NEVER
+    }
+    const viewportElement = layout.elements.find((element) => element.role === 'descViewport')
+    if (viewportElement === undefined) {
+      ctx.addIssue({ code: 'custom', message: `${layout.prefab} has no description viewport` })
+      return z.NEVER
+    }
+    return { ...layout, desc, viewport: viewportElement.rect }
+  })
 
 export type StartBuffCardLayout = z.infer<typeof StartBuffCardLayoutSchema>
 

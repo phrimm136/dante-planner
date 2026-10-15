@@ -9,7 +9,11 @@ import krDescriptionTable from '@static/data/fontAdvances/description/KR.json'
 import krCostTable from '@static/data/fontAdvances/cost/KR.json'
 import { FontAdvanceTableSchema } from '@/shared/cardLayout'
 import { StartBuffDataListSchema, colorRuns, type BattleKeywords } from '@/shared/gameText'
-import { StartBuffCardLayoutSchema } from '../../schemas/StartBuffCardSchemas'
+import {
+  StartBuffCardLayoutSchema,
+  type StartBuffCardLayout,
+  type TextElement,
+} from '../../schemas/StartBuffCardSchemas'
 import { toStartBuffs } from '../startBuffs'
 import {
   costColor,
@@ -18,8 +22,6 @@ import {
   layoutDescription,
   rectStyle,
   startBuffSlotSize,
-  textElement,
-  viewportRect,
   type TextRun,
 } from '../startBuffCardLayout'
 import { buffDescriptionText } from '../../components/startBuff/formatBuffDescription'
@@ -35,6 +37,14 @@ const KR_KEYWORDS = Object.fromEntries(
     ([key, entry]) => [key, { ...entry, iconId: null, buffType: 'Neutral' }],
   ),
 ) as BattleKeywords
+
+function textOf(layout: StartBuffCardLayout, role: TextElement['role']): TextElement {
+  const found = layout.elements.find(
+    (element): element is TextElement => element.role === role && 'text' in element,
+  )
+  if (found === undefined) throw new Error(`${layout.prefab} has no ${role} text`)
+  return found
+}
 
 const CAPTURE_LINES = capture.lines as Record<string, string[]>
 const CUT_BY_VIEWPORT = ['308', '309']
@@ -76,8 +86,8 @@ describe('layoutDescription against the in-game MD7 ++ capture', () => {
     const description = descriptionOf(308)
     const lines = lineTexts(description.lines)
     const lastVisible = lines.indexOf('• 합성 시, 합성 결과(3등급')
-    const desc = textElement(MD7, 'desc')
-    const viewport = viewportRect(MD7)
+    const desc = MD7.desc
+    const viewport = MD7.viewport
     const inkTop = (index: number) =>
       desc.rect.y -
       viewport.y +
@@ -135,14 +145,14 @@ describe('cost', () => {
   })
 
   it('draws 30 and 180 at the same size, 50 units', () => {
-    const cost = textElement(MD7, 'cost')
+    const cost = textOf(MD7, 'cost')
 
     expect(fitElementText('30', cost, KR_COST)).toEqual({ fontSize: 50, lines: ['30'] })
     expect(fitElementText('180', cost, KR_COST)).toEqual({ fontSize: 50, lines: ['180'] })
   })
 
   it('draws every MD7 cost at the same size', () => {
-    const cost = textElement(MD7, 'cost')
+    const cost = textOf(MD7, 'cost')
     const sizes = new Set(
       MD7_BUFFS.map((candidate) => fitElementText(String(candidate.cost), cost, KR_COST).fontSize),
     )
