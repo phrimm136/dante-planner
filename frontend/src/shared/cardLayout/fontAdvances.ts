@@ -143,14 +143,13 @@ export interface LineFaceMetrics extends FaceMetrics {
  * asset, whichever fallback face drew the line.
  */
 export function lineMetrics(table: FontAdvanceTable, line: string): LineFaceMetrics {
-  const tallest = lineFaces(table, line).reduce(
-    (metrics, face) => ({
+  const tallest = lineFaces(table, line)
+    .map(({ ascender, descender, lineHeight }) => ({ ascender, descender, lineHeight }))
+    .reduce((metrics, face) => ({
       ascender: Math.max(metrics.ascender, face.ascender),
       descender: Math.max(metrics.descender, face.descender),
       lineHeight: Math.max(metrics.lineHeight, face.lineHeight),
-    }),
-    { ascender: 0, descender: 0, lineHeight: 0 },
-  )
+    }))
   return { ...tallest, lineGap: table.lineHeight - table.ascender - table.descender }
 }
 

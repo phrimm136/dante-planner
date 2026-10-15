@@ -7,6 +7,10 @@ import { ThemePackIdSchema } from '@/shared/gameData'
 vi.mock('@/pages/themePack/hooks/useThemePackListData', () => ({
   useThemePackListSpec: () =>
     Object.fromEntries(Array.from({ length: 15 }, (_, i) => [String(1001 + i), {}])),
+}))
+
+vi.mock('@/shared/themePack', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/themePack')>()),
   useThemePackListI18n: () => ({}),
 }))
 

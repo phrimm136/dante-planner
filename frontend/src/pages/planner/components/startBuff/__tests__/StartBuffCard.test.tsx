@@ -279,6 +279,9 @@ describe('StartBuffCard name text rendering', () => {
   it('marks the name root as game text', () => {
     renderCard()
 
-    expect(screen.getByText('Test Buff')).toHaveClass('game-text')
+    expect(screen.getByTestId('start-buff-name')).toHaveClass('game-text')
+    for (const line of screen.getAllByTestId('start-buff-name-line')) {
+      expect(line).not.toHaveClass('game-text')
+    }
   })
 })

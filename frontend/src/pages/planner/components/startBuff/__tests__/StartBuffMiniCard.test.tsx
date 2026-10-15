@@ -97,11 +97,12 @@ describe('StartBuffMiniCard', () => {
 })
 
 describe('StartBuffMiniCard name text rendering', () => {
-  it('marks the name root, not its lines, as game text', () => {
-    render(<StartBuffMiniCard buffId={100} displayName="Test Buff" mdVersion={6} />)
-    const line = screen.getByText('Test Buff')
+  it('marks the name root, not its lines, as game text', async () => {
+    await renderMini(101, 101)
+    const lines = screen.getAllByTestId('start-buff-mini-name-line')
 
-    expect(line).not.toHaveClass('game-text')
-    expect(line.parentElement).toHaveClass('game-text')
+    for (const line of lines) expect(line).not.toHaveClass('game-text')
+    expect(lines[0]?.parentElement).toHaveClass('game-text')
+    expect(lines[0]?.parentElement).toBe(screen.getByTestId('start-buff-mini-name'))
   })
 })
