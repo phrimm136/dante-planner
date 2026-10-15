@@ -6,12 +6,11 @@ import enemy1347 from '@static/data/enemy/1347.json'
 import enemy8041 from '@static/data/enemy/8041.json'
 import enemy8044 from '@static/data/enemy/8044.json'
 import enemy8063 from '@static/data/enemy/8063.json'
-import enemy8167 from '@static/data/enemy/8167.json'
 import enemy1228 from '@static/data/enemy/1228.json'
 import enemy8390 from '@static/data/enemy/8390.json'
-import enemy8390I18n from '@static/i18n/EN/enemy/8390.json'
 import enemy1308 from '@static/data/enemy/1308.json'
 import enemy1217 from '@static/data/enemy/1217.json'
+import enemy1485 from '@static/data/enemy/1485.json'
 import assistant400001 from '@static/data/assistant/400001.json'
 import assistant400001KR from '@static/i18n/KR/assistant/400001.json'
 import assistant400038 from '@static/data/assistant/400038.json'
@@ -25,7 +24,6 @@ import {
   SinnerEventDataSchema,
   type BattleKit,
   type BattlePhase,
-  type BuffGrant,
   type EngagementRow,
 } from '../../schemas/BattleDetailSchemas'
 import {
@@ -34,13 +32,10 @@ import {
   headerMapName,
   isIdentityShaped,
   isShownPassive,
-  phaseTextKeywords,
   phaseTexts,
-  ownSources,
   rowParts,
   rowUnitId,
   unitName,
-  unitTextKeywords,
   selectedPart,
   skillLevelAdder,
   skillLevelName,
@@ -52,8 +47,6 @@ import {
   visibleSkills,
   withShownPassives,
 } from '../battleDetail'
-
-const undecided = (grant: BuffGrant): BuffGrant => ({ ...grant, derivable: false })
 
 const skillIdsOf = (skills: { id: string }[]) => skills.map((skill) => skill.id)
 
@@ -291,77 +284,41 @@ describe('shown passives', () => {
   })
 })
 
+describe('stage effects of the Warden row', () => {
+  const row = rowOn(EnemyDataSchema.parse(enemy1485).engagements, '11036')
+  const keywords = stageEffectGrants(row).map((grant) => grant.keywordId)
+
+  it('shows every grant the static data does not make the unit own', () => {
+    expect(keywords).toContain('MeursaultBuffWarderThirdPhase')
+    expect(keywords).toContain('ChargeNoir')
+  })
+
+  it('leaves out the grants the static data makes the unit own', () => {
+    expect(keywords.filter((keyword) => keyword.startsWith('Golden'))).toEqual([])
+  })
+
+  it('keeps the first grant of a keyword granted more than once', () => {
+    const first = row.facts.buffGrants.find(
+      (grant) => grant.keywordId === 'ChargeNoir' && !grant.derivable,
+    )
+    expect(stageEffectGrants(row).filter((grant) => grant.keywordId === 'ChargeNoir')).toEqual([
+      first,
+    ])
+  })
+})
+
 describe('stage effect grants', () => {
-  const group = EnemyDataSchema.parse(enemy8390)
-  const row = rowOn(group.engagements, '10710')
-  const keywordsOf = (grants: { keywordId: string }[]) => grants.map((grant) => grant.keywordId)
-  const OWN_8390 = ownSources('8390', group.units['8390']?.phases ?? [])
-  const NO_OWN = { unitIds: new Set<number>(), partIds: new Set<number>() }
+  const row = rowOn(EnemyDataSchema.parse(enemy8390).engagements, '10710')
+  const keywords = stageEffectGrants(row).map((grant) => grant.keywordId)
 
   it('keeps only the keywords no spawned unit explains, once each', () => {
-    const keywords = keywordsOf(stageEffectGrants(row, OWN_8390, new Set()))
     expect(keywords).not.toContain('FragmentOfHope')
     expect(keywords).toContain('UnfinishedDream')
     expect(new Set(keywords).size).toBe(keywords.length)
   })
 
-  it('drops the keywords granted by a passive of the displayed unit', () => {
-    const keywords = keywordsOf(stageEffectGrants(row, OWN_8390, new Set()))
-    expect(keywords).not.toContain('StarvingDonqui')
-    expect(keywords).not.toContain('ConfinementOfGoldenBranch')
-  })
-
-  it('drops the keywords the displayed form already names in its own text', () => {
-    const keywords = keywordsOf(stageEffectGrants(row, NO_OWN, new Set(['UnfinishedDream'])))
-    expect(keywords).not.toContain('UnfinishedDream')
-  })
-
-  it('reads the bracketed keyword tokens of skill, coin and passive text', () => {
-    expect(
-      phaseTextKeywords({
-        skills: { '1': { name: 'a', descs: [{ desc: '[Burn] x', coinDescs: ['[Bleed]'] }] } },
-        passives: { '2': { desc: 'gain [Haste]' } },
-      }),
-    ).toEqual(new Set(['Burn', 'Bleed', 'Haste']))
-  })
-
-  it('counts every phase of the unit as its own', () => {
-    expect([...OWN_8390.unitIds].sort((a, b) => a - b)).toEqual([8390, 8410])
-  })
-
-  it('treats a grant from one of the unit parts as its own under another unit id', () => {
-    const bossGroup = EnemyDataSchema.parse(enemy8167)
-    const bossRow = rowOn(bossGroup.engagements, '10644')
-    const fromPart = bossRow.facts.buffGrants
-      .filter((grant) => grant.source.unitId === 8221 && grant.source.partId === 821901)
-      .map(undecided)
-    expect(fromPart.length).toBeGreaterThan(0)
-    const onlyPartGrants = { ...bossRow, facts: { ...bossRow.facts, buffGrants: fromPart } }
-    const own = ownSources('8209', bossGroup.units['8209']?.phases ?? [])
-    expect(own.partIds.has(821901)).toBe(true)
-    expect(stageEffectGrants(onlyPartGrants, own, new Set())).toEqual([])
-    expect(stageEffectGrants(onlyPartGrants, NO_OWN, new Set())).not.toEqual([])
-  })
-
-  it('reads the own-text keywords of every phase of the unit', () => {
-    const i18n = BattleEntityI18nSchema.parse(enemy8390I18n)
-    const firstOnly = unitTextKeywords(i18n, '8390', ['8390'])
-    const every = unitTextKeywords(i18n, '8390', ['8390', '8410'])
-    const undecidedRow = {
-      ...row,
-      facts: {
-        ...row.facts,
-        buffGrants: row.facts.buffGrants.map(undecided),
-      },
-    }
-    expect(firstOnly.has('RegainedStrength')).toBe(false)
-    expect(every.has('RegainedStrength')).toBe(true)
-    expect(keywordsOf(stageEffectGrants(undecidedRow, NO_OWN, every))).not.toContain(
-      'RegainedStrength',
-    )
-    expect(keywordsOf(stageEffectGrants(undecidedRow, NO_OWN, firstOnly))).toContain(
-      'RegainedStrength',
-    )
+  it('shows a stage script grant whose keyword the unit text also names', () => {
+    expect(keywords).toContain('FerrisWheel')
   })
 
   it('drops a grant a spawned unit already explains', () => {

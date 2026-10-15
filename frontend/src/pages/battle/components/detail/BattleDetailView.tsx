@@ -13,7 +13,6 @@ import {
   phaseTier,
   phaseTexts,
   rowParts,
-  ownSources,
   rowUnitId,
   selectedPart,
   visibleSkills,
@@ -167,9 +166,6 @@ export function BattleDetailView({
       <BattleSelectorRow
         engagementRows={
           <BattleEngagementRows
-            config={config}
-            id={id}
-            units={group.units}
             groups={rowGroups}
             selected={selection.rowIndex}
             onSelect={(rowIndex) => {
@@ -209,15 +205,7 @@ export function BattleDetailView({
         }
       />
       {row !== undefined && <BattleCoUnits row={row} family={family} id={id} />}
-      {row !== undefined && (
-        <BattleStageEffects
-          source={source}
-          row={row}
-          own={ownSources(unitId, kit.phases)}
-          phaseIds={kit.phases.map((each) => String(each.id))}
-          startBuffs={phase.startBuffs ?? []}
-        />
-      )}
+      {row !== undefined && <BattleStageEffects row={row} startBuffs={phase.startBuffs ?? []} />}
     </>
   )
 

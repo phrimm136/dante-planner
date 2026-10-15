@@ -320,45 +320,8 @@ export function sanityConditionIds(
   )
 }
 
-const KEYWORD_TOKEN = /\[([^\]]+)\]/g
-
-export function phaseTextKeywords(texts: BattlePhaseI18n | undefined): Set<string> {
-  const strings = [
-    ...Object.values(texts?.skills ?? {}).flatMap((skill) =>
-      skill.descs.flatMap((desc) => [desc.desc ?? '', ...(desc.coinDescs ?? [])]),
-    ),
-    ...Object.values(texts?.passives ?? {}).map((passive) => passive.desc ?? ''),
-  ]
-  return new Set(
-    strings.flatMap((text) => [...text.matchAll(KEYWORD_TOKEN)].map((m) => m[1] ?? '')),
-  )
-}
-
-export function unitTextKeywords(
-  i18n: BattleEntityI18n,
-  unitId: string,
-  phaseIds: readonly string[],
-): Set<string> {
-  return new Set(
-    phaseIds.flatMap((phaseId) => [...phaseTextKeywords(phaseTexts(i18n, unitId, phaseId))]),
-  )
-}
-
-export function rowContentKey(
-  row: EngagementRow,
-  phases: readonly BattlePhase[],
-  i18n: BattleEntityI18n,
-): string {
-  const unitId = String(row.unit)
-  const keywords = stageEffectGrants(
-    row,
-    ownSources(unitId, phases),
-    unitTextKeywords(
-      i18n,
-      unitId,
-      phases.map((phase) => String(phase.id)),
-    ),
-  )
+export function rowContentKey(row: EngagementRow): string {
+  const keywords = stageEffectGrants(row)
     .map((grant) => grant.keywordId)
     .sort()
   const parts = [...row.rowParts].sort((a, b) => a - b)
@@ -393,32 +356,12 @@ export function stageEffectEntries(
   return [...fromForm, ...fromRow]
 }
 
-export interface OwnSources {
-  unitIds: ReadonlySet<number>
-  partIds: ReadonlySet<number>
-}
-
-export function ownSources(unitId: string, phases: readonly BattlePhase[]): OwnSources {
-  return {
-    unitIds: new Set([Number(unitId), ...phases.map((phase) => phase.id)]),
-    partIds: new Set(phases.flatMap((phase) => (phase.parts ?? []).map((part) => part.id))),
-  }
-}
-
-export function stageEffectGrants(
-  row: EngagementRow,
-  own: OwnSources,
-  ownKeywords: ReadonlySet<string>,
-): StageEffectGrant[] {
+export function stageEffectGrants(row: EngagementRow): StageEffectGrant[] {
   const seen = new Set<string>()
   const grants: StageEffectGrant[] = []
   for (const grant of row.facts.buffGrants) {
     const { keywordId } = grant
-    if (grant.derivable || keywordId === null) continue
-    if (seen.has(keywordId) || ownKeywords.has(keywordId)) continue
-    const { kind, unitId, partId } = grant.source
-    if (kind === 'passive' && unitId !== undefined && own.unitIds.has(unitId)) continue
-    if (kind === 'passive' && partId !== undefined && own.partIds.has(partId)) continue
+    if (grant.derivable || keywordId === null || seen.has(keywordId)) continue
     seen.add(keywordId)
     grants.push({ ...grant, keywordId })
   }

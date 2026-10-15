@@ -4,32 +4,18 @@ import { useTranslation } from 'react-i18next'
 import { SECTION_STYLES } from '@/lib/constants'
 import { getBattleKeywordIconPath } from '@/shared/assets'
 import { FormattedDescription, useBattleKeywords } from '@/shared/gameText'
-import { useBattleDetailI18n } from '../../hooks/useBattleDetailData'
-import {
-  stageEffectEntries,
-  stageEffectGrants,
-  unitTextKeywords,
-  type OwnSources,
-} from '../../lib/battleDetail'
+import { stageEffectEntries, stageEffectGrants } from '../../lib/battleDetail'
 import type { EngagementRow, StartBuff } from '../../schemas/BattleDetailSchemas'
-import type { BattleTextSource } from './BattleSkillCard'
 
 interface BattleStageEffectsProps {
-  source: BattleTextSource
   row: EngagementRow
-  own: OwnSources
-  phaseIds: readonly string[]
   startBuffs: readonly StartBuff[]
 }
 
-function StageEffectCards({ source, row, own, phaseIds, startBuffs }: BattleStageEffectsProps) {
+function StageEffectCards({ row, startBuffs }: BattleStageEffectsProps) {
   const { t } = useTranslation('database')
-  const i18n = useBattleDetailI18n(source.config, source.id)
   const { data: keywords } = useBattleKeywords()
-  const entries = stageEffectEntries(
-    startBuffs,
-    stageEffectGrants(row, own, unitTextKeywords(i18n, source.unitId, phaseIds)),
-  )
+  const entries = stageEffectEntries(startBuffs, stageEffectGrants(row))
   const shown = entries.flatMap((entry) => {
     const keyword = keywords[entry.keywordId]
     return keyword === undefined ? [] : [{ entry, keyword }]

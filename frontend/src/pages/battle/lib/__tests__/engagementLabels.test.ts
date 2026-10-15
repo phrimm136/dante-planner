@@ -3,11 +3,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import stageList from '@static/data/battleStageList.json'
 import enemy1142 from '@static/data/enemy/1142.json'
 import enemy1366 from '@static/data/enemy/1366.json'
-import enemy1366I18n from '@static/i18n/EN/enemy/1366.json'
 import enemy1474 from '@static/data/enemy/1474.json'
-import enemy1474I18n from '@static/i18n/EN/enemy/1474.json'
 import enemy8016 from '@static/data/enemy/8016.json'
-import enemy8016I18n from '@static/i18n/EN/enemy/8016.json'
 import enemy8044 from '@static/data/enemy/8044.json'
 import enemy8063 from '@static/data/enemy/8063.json'
 import enemy8253 from '@static/data/enemy/8253.json'
@@ -15,7 +12,6 @@ import enemy8112 from '@static/data/enemy/8112.json'
 import enemy8630 from '@static/data/enemy/8630.json'
 import enemy90014 from '@static/data/enemy/90014.json'
 import enemy90034 from '@static/data/enemy/90034.json'
-import enemy90034I18n from '@static/i18n/EN/enemy/90034.json'
 import enStageTexts from '@static/i18n/EN/battleStageList.json'
 import enFacetNames from '@static/i18n/EN/battleFacetNames.json'
 import enThemePacks from '@static/i18n/EN/themePack.json'
@@ -24,7 +20,6 @@ import { ThemePackI18nSchema } from '@/shared/themePack'
 import {
   BattleStageListSchema,
   BattleStageTextsSchema,
-  BattleEntityI18nSchema,
   EnemyDataSchema,
   type EngagementRow,
 } from '../../schemas/BattleDetailSchemas'
@@ -58,14 +53,13 @@ function rowOn(raw: unknown, stageId: string): EngagementRow {
   return row
 }
 
-function storyEntries(raw: unknown, rawI18n: unknown): string[] {
+function storyEntries(raw: unknown): string[] {
   const group = EnemyDataSchema.parse(raw)
-  const i18n = BattleEntityI18nSchema.parse(rawI18n)
   const rows = groupSelectorRows(group.engagements).find((each) => each.battleCase === 'story')
   return selectorEntries(
     rows?.rows ?? [],
     (row) => engagementLabel(row, sources, translate),
-    (row) => rowContentKey(row, group.units[String(row.unit)]?.phases ?? [], i18n),
+    rowContentKey,
   ).map((entry) => suffixedLabel(entry, translate))
 }
 
@@ -163,7 +157,7 @@ describe('engagement labels', () => {
 
   it('keeps three numbered entries for the three units stage 10570 spawns', () => {
     const night = 'The 8th Walpurgis Night · Normal (Lv. 45)'
-    const labels = storyEntries(enemy1366, enemy1366I18n)
+    const labels = storyEntries(enemy1366)
     expect(labels.filter((label) => label.startsWith(night))).toEqual([
       `${night} (1)`,
       `${night} (2)`,
@@ -172,12 +166,12 @@ describe('engagement labels', () => {
   })
 
   it('collapses the story-dungeon rows of 8016 with the same label and content', () => {
-    const labels = storyEntries(enemy8016, enemy8016I18n)
+    const labels = storyEntries(enemy8016)
     expect(labels.filter((label) => label.startsWith('2-19 (Lv. 14)'))).toEqual(['2-19 (Lv. 14)'])
   })
 
   it('collapses stages 11008 and 11024 of 1474, whose content matches', () => {
-    const labels = storyEntries(enemy1474, enemy1474I18n)
+    const labels = storyEntries(enemy1474)
     expect(labels.filter((label) => label.startsWith('10-A B1F (Lv. 35)'))).toEqual([
       '10-A B1F (Lv. 35)',
     ])
@@ -218,7 +212,7 @@ describe('story-dungeon labels', () => {
   )
 
   it('keeps one 3-22 entry per level for the dungeon 10301 rows of 90034, whose content matches per level', () => {
-    const labels = storyEntries(enemy90034, enemy90034I18n)
+    const labels = storyEntries(enemy90034)
     expect(labels.filter((label) => label.startsWith('3-22 '))).toEqual([
       '3-22 (Lv. 23)',
       '3-22 (Lv. 24)',

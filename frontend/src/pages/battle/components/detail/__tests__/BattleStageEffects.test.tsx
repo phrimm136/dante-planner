@@ -4,7 +4,6 @@ import { waitFor } from '@testing-library/react'
 import enemy8390 from '@static/data/enemy/8390.json'
 import i18n from '@/lib/i18n'
 import { renderWithProviders } from '@/test-utils/renderWithProviders'
-import { ENEMY_DETAIL } from '../../../hooks/useBattleDetailData'
 import { EnemyDataSchema, type BuffGrant } from '../../../schemas/BattleDetailSchemas'
 import { BattleStageEffects } from '../BattleStageEffects'
 
@@ -35,15 +34,7 @@ describe('BattleStageEffects', () => {
         buffGrants: [stageGrant('FragmentOfHope', true), stageGrant('UnfinishedDream', false)],
       },
     }
-    const { container } = renderWithProviders(
-      <BattleStageEffects
-        source={{ config: ENEMY_DETAIL, id: '8390', unitId: '8390', phaseId: '8390' }}
-        row={row}
-        own={{ unitIds: new Set(), partIds: new Set() }}
-        phaseIds={[]}
-        startBuffs={[]}
-      />,
-    )
+    const { container } = renderWithProviders(<BattleStageEffects row={row} startBuffs={[]} />)
 
     await waitFor(() =>
       expect(container.querySelector('[data-testid="battle-stage-effects"]')).not.toBeNull(),
