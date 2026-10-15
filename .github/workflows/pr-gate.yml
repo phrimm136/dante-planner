@@ -183,7 +183,7 @@ jobs:
           docker run --rm --network host \
             -v "$PWD/backend/src/main/resources/db/migration:/flyway/sql:ro" \
             flyway/flyway:11.7.2 \
-            -url="jdbc:mysql://127.0.0.1:3306/danteplanner?serverTimezone=UTC" \
+            -url="jdbc:mysql://127.0.0.1:3306/danteplanner?serverTimezone=UTC&allowPublicKeyRetrieval=true" \
             -user=danteplanner -password=danteplanner \
             -locations=filesystem:/flyway/sql \
             -target="$BASE_VERSION" \
@@ -207,7 +207,7 @@ jobs:
           docker run --rm --network host \
             -v "$PWD/backend/src/main/resources/db/migration:/flyway/sql:ro" \
             flyway/flyway:11.7.2 \
-            -url="jdbc:mysql://127.0.0.1:3306/danteplanner?serverTimezone=UTC" \
+            -url="jdbc:mysql://127.0.0.1:3306/danteplanner?serverTimezone=UTC&allowPublicKeyRetrieval=true" \
             -user=danteplanner -password=danteplanner \
             -locations=filesystem:/flyway/sql \
             -validateOnMigrate=false -baselineOnMigrate=false migrate
