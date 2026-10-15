@@ -89,7 +89,7 @@ class RestrictedPrincipalMatrixIT extends SharedMySqlContainerSupport {
                     .put("id", UUID.randomUUID().toString())
                     .put("category", MDCategory.F5.getValue())
                     .put("content", TestDataFactory.VALID_CONTENT)
-                    .put("contentVersion", 7)
+                    .put("contentVersion", 8)
                     .put("plannerType", PlannerType.MIRROR_DUNGEON.name())
                     .toString(),
             "PATCH /api/planner/md/{id}/notifications", "{\"enabled\":true}",

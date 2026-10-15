@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto'
 import type { Locator } from '@playwright/test'
-import startBuffSpec from '@static/data/MD7/startBuffs.json'
-import startBuffNames from '@static/i18n/EN/MD7/startBuffs.json'
-import startGiftPools from '@static/data/MD7/startEgoGiftPools.json'
+import startBuffSpec from '@static/data/MD8/startBuffs.json'
+import startBuffNames from '@static/i18n/EN/MD8/startBuffs.json'
+import startGiftPools from '@static/data/MD8/startEgoGiftPools.json'
 import { PLANNER_CONFIG } from '@/lib/constants'
 import { test, expect } from '../src/browser'
 import { seedLocalPlanner } from '../src/localPlanner'
@@ -13,7 +13,7 @@ import { seedLocalPlanner } from '../src/localPlanner'
 
 // The data assertions read the version's shipped JSON, so they follow a data update but not a
 // version bump — the guard in the test turns that into a named failure.
-const MD_VERSION = 7
+const MD_VERSION = 8
 const SINNER_COUNT = 12
 const GIFTS_PER_KEYWORD_ROW = 3
 const IDENTITY_CARD_ALT = 'Sinner background'

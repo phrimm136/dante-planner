@@ -29,7 +29,7 @@ class ContentVersionValidatorTest {
 
         @Test
         void validateVersionForCreate_WhenMdCurrentVersion_Succeeds() {
-            assertThatCode(() -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, 7))
+            assertThatCode(() -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, 8))
                     .doesNotThrowAnyException();
         }
 

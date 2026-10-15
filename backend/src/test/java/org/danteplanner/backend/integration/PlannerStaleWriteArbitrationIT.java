@@ -59,7 +59,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
 
     private static final String BASE_TITLE = "Arbitration Fixture";
-    private static final int CONTENT_VERSION = 7;
+    private static final int CONTENT_VERSION = 8;
 
     @Autowired
     private MockMvc mockMvc;

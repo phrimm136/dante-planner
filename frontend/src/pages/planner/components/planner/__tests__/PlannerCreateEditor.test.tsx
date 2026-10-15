@@ -12,6 +12,6 @@ describe('PlannerCreateEditor', () => {
   it('starts a new planner at the current season from plannerVersions.json', () => {
     render(<PlannerCreateEditor />)
 
-    expect(screen.getByTestId('shell').textContent).toBe('7')
+    expect(screen.getByTestId('shell').textContent).toBe('8')
   })
 })

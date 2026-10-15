@@ -32,8 +32,8 @@ class PlannerIdPolicyTest {
 
     private static final Path STATIC_DATA = Path.of("../static/data");
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final int CURRENT_SEASON = 7;
-    private static final int PREVIOUS_SEASON = 6;
+    private static final int CURRENT_SEASON = 8;
+    private static final int PREVIOUS_SEASON = 7;
 
     @TempDir
     private Path dataDir;

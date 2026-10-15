@@ -166,7 +166,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                     .title("Test Planner")
                     .category("5F")
                     .status(PlannerStatus.DRAFT)
-                    .contentVersion(7)
+                    .contentVersion(8)
                     .build();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
@@ -180,7 +180,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(jsonPath("$.status").value("draft"))
                     .andExpect(jsonPath("$.syncVersion").value(1))
                     .andExpect(jsonPath("$.schemaVersion").value(2))
-                    .andExpect(jsonPath("$.contentVersion").value(7))
+                    .andExpect(jsonPath("$.contentVersion").value(8))
                     .andExpect(jsonPath("$.plannerType").value("MIRROR_DUNGEON"));
         }
 

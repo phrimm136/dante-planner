@@ -48,12 +48,12 @@ describe('DeckBuilderPage', () => {
   it("caps the deck builder at the current season's identity level", async () => {
     renderPage()
 
-    expect((await screen.findByTestId('max-level')).textContent).toBe('60')
+    expect((await screen.findByTestId('max-level')).textContent).toBe('65')
   })
 
   it("equips the default deck at the current season's identity level", async () => {
     renderPage()
 
-    expect((await screen.findByTestId('default-level')).textContent).toBe('60')
+    expect((await screen.findByTestId('default-level')).textContent).toBe('65')
   })
 })

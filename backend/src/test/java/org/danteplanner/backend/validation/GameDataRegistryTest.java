@@ -197,12 +197,12 @@ class GameDataRegistryTest {
     void init_WhenAListedSeasonHasNoDataDirectory_FailsNamingTheSeason(@TempDir Path dataDir) throws IOException {
         linkStaticData(dataDir);
         writePlannerVersions(dataDir,
-                "{\"schemaVersion\":2,\"mdAvailableVersions\":[6,7,8],\"rrAvailableVersions\":[1,5]}");
+                "{\"schemaVersion\":2,\"mdAvailableVersions\":[6,7,8,9],\"rrAvailableVersions\":[1,5]}");
         GameDataRegistry registry = registryOver(dataDir);
 
         assertThatThrownBy(registry::init)
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("MD8");
+                .hasMessageContaining("MD9");
     }
 
     @Test
@@ -214,6 +214,7 @@ class GameDataRegistryTest {
 
         assertThat(registry.identityMaxLevel(6)).isEqualTo(55);
         assertThat(registry.identityMaxLevel(7)).isEqualTo(60);
+        assertThat(registry.identityMaxLevel(8)).isEqualTo(65);
     }
 
     @Test

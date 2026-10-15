@@ -21,8 +21,8 @@ describe('usePlannerConfig', () => {
     const { result } = renderHook(() => usePlannerConfig())
     expect(result.current).toEqual({
       schemaVersion: 2,
-      mdAvailableVersions: [6, 7],
-      mdCurrentVersion: 7,
+      mdAvailableVersions: [6, 7, 8],
+      mdCurrentVersion: 8,
       rrAvailableVersions: [1, 5],
     })
   })
@@ -55,7 +55,7 @@ describe('usePlannerConfig', () => {
 
 const VALID_FILE = {
   schemaVersion: 2,
-  mdAvailableVersions: [6, 7],
+  mdAvailableVersions: [6, 7, 8],
   rrAvailableVersions: [1, 5],
 }
 
