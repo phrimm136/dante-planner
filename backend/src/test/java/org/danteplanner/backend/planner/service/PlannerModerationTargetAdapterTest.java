@@ -11,10 +11,10 @@ import org.springframework.data.domain.Pageable;
 import org.danteplanner.backend.moderation.api.ModeratedPlanner;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
+import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
+import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
-import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
-import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.support.RecordingTombstoneStore;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
@@ -38,13 +38,16 @@ class PlannerModerationTargetAdapterTest {
     private PlannerRepository plannerRepository;
 
     @Mock
+    private PlannerEntityFilterRepository entityFilterRepository;
+
+    @Mock
+    private PlannerKeywordFilterRepository keywordFilterRepository;
+
+    @Mock
     private PlannerStatsRepository statsRepository;
 
     @Mock
     private PlannerCatalogRepository catalogRepository;
-
-    @Mock
-    private DomainEventRepository domainEventRepository;
 
     private PlannerModerationTargetAdapter adapter;
 
@@ -55,7 +58,8 @@ class PlannerModerationTargetAdapterTest {
         ObjectMapper objectMapper = new ObjectMapper();
         PlannerAccessGuard accessGuard = new PlannerAccessGuard(null, plannerRepository);
         PlannerCatalogService catalogService = new PlannerCatalogService(catalogRepository, plannerRepository,
-                statsRepository, new DomainEventRecorder(domainEventRepository, objectMapper, null), objectMapper,
+                statsRepository, entityFilterRepository,
+                keywordFilterRepository, null, objectMapper,
                 new RecordingTombstoneStore(), 10);
         PlannerPublishingService publishingService = new PlannerPublishingService(plannerRepository,
                 statsRepository, null, null, catalogService, null, accessGuard, null, null, null, null);

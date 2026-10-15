@@ -41,8 +41,6 @@ class ScheduledJobsTest {
                     "fixedDelay 1000ms on markerSourceProbeScheduler"),
             Map.entry("NotificationCleanupScheduler.cleanupOldNotifications",
                     "cron '0 0 2 * * *' next 2026-01-16T02:00, 2026-01-17T02:00"),
-            Map.entry("PlannerCatalogSyncJob.sync",
-                    "initialDelay 1000ms, fixedDelay 1000ms"),
             Map.entry("PlannerCommentSseService.cleanupZombieConnections",
                     "initialDelay 30000ms, fixedRate 60000ms"),
             Map.entry("PlannerCommentSseService.sweepSseHeartbeats",

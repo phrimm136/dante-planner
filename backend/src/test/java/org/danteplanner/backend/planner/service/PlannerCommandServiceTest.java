@@ -14,6 +14,8 @@ import org.danteplanner.backend.planner.sync.SyncVersionValidator;
 import org.danteplanner.backend.planner.entity.PlannerContentLifecycle;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.StoredPlannerContent;
+import org.danteplanner.backend.support.MockCalls;
+import org.danteplanner.backend.support.OwnershipRows;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.RecordingRestrictionCheck;
 import org.danteplanner.backend.support.RecordingRestrictionCheck.Decision;
@@ -23,9 +25,9 @@ import org.danteplanner.backend.planner.repository.PlannerOwnershipRow;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
+import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
+import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
-import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
-import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.support.RecordingTombstoneStore;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.precondition.ContentVersionValidator;
@@ -51,6 +53,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -70,13 +73,16 @@ class PlannerCommandServiceTest {
     private PlannerRepository plannerRepository;
 
     @Mock
+    private PlannerEntityFilterRepository entityFilterRepository;
+
+    @Mock
+    private PlannerKeywordFilterRepository keywordFilterRepository;
+
+    @Mock
     private PlannerStatsRepository statsRepository;
 
     @Mock
     private PlannerCatalogRepository catalogRepository;
-
-    @Mock
-    private DomainEventRepository domainEventRepository;
 
     private PlannerCommandService commandService;
 
@@ -113,7 +119,8 @@ class PlannerCommandServiceTest {
                 contentValidator,
                 new ContentVersionValidator(TestDataFactory.gameDataRegistry()),
                 new PlannerCatalogService(catalogRepository, plannerRepository, statsRepository,
-                        new DomainEventRecorder(domainEventRepository, new ObjectMapper(), null), new ObjectMapper(),
+                        entityFilterRepository, keywordFilterRepository,
+                        null, new ObjectMapper(),
                         new RecordingTombstoneStore(), RECOMMENDED_THRESHOLD),
                 new PlannerAccessGuard(users, plannerRepository),
                 restrictionCheck,
@@ -326,14 +333,58 @@ class PlannerCommandServiceTest {
     }
 
     @Nested
+    class LockOrderTests {
+
+        private List<String> plannerCalls() {
+            return MockCalls.inOrder(plannerRepository, statsRepository, catalogRepository,
+                    entityFilterRepository, keywordFilterRepository);
+        }
+
+        @Test
+        void upsertPlanner_WhenThePlannerExists_LocksTheContentRowBeforeLoadingIt() {
+            Planner planner = testPlanner(1L, false, TestDataFactory.VALID_CONTENT);
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+
+            commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(),
+                    UpsertRequests.resending(planner).title("Locked First").build(), false);
+
+            assertThat(plannerCalls()).startsWith("findOwnershipById", "lockContent", "findAggregateForOwner");
+        }
+
+        @Test
+        void deletePlanner_WhenCalled_LocksTheContentRowBeforeLoadingIt() {
+            Planner planner = testPlanner(1L, true);
+            when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            TransactionSynchronizationManager.initSynchronization();
+
+            commandService.deletePlanner(testUser.getId(), planner.getId());
+
+            assertThat(plannerCalls()).startsWith("findOwnershipById", "lockContent", "findAggregateForOwner");
+        }
+
+        @Test
+        void deletePlanner_WhenAnotherUserAsks_FailsWithoutTakingTheLock() {
+            Planner planner = testPlanner(1L, true);
+            when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
+
+            assertRejected(() -> commandService.deletePlanner(testUser.getId() + 1, planner.getId()))
+                    .withCode("PLANNER_NOT_FOUND");
+            assertThat(plannerCalls()).containsExactly("findOwnershipById");
+        }
+    }
+
+    @Nested
     class DeletePlannerTests {
 
         @Test
         void deletePlanner_WhenNotFound_ThrowsException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
-            when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))
-                    .thenReturn(Optional.empty());
 
             // Act & Assert
             assertRejected(() -> commandService.deletePlanner(testUser.getId(), plannerId))
@@ -350,6 +401,8 @@ class PlannerCommandServiceTest {
 
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
+            when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
             TransactionSynchronizationManager.initSynchronization();
 
             // Act
@@ -367,6 +420,8 @@ class PlannerCommandServiceTest {
 
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
+            when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
             TransactionSynchronizationManager.initSynchronization();
 
             // Act
@@ -562,8 +617,6 @@ class PlannerCommandServiceTest {
             UUID plannerId = UUID.randomUUID();
             UpsertPlannerRequest request = UpsertRequests.draft().id(null).status(null).build();
             PlannerOwnershipRow ownership = ownership(testUser.getId(), Instant.now());
-            when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))
-                    .thenReturn(Optional.empty());
             when(plannerRepository.findOwnershipById(plannerId))
                     .thenReturn(Optional.of(ownership));
 
@@ -579,8 +632,6 @@ class PlannerCommandServiceTest {
             UUID plannerId = UUID.randomUUID();
             UpsertPlannerRequest request = UpsertRequests.draft().id(null).status(null).build();
             PlannerOwnershipRow ownership = ownership(testUser.getId() + 1, null);
-            when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))
-                    .thenReturn(Optional.empty());
             when(plannerRepository.findOwnershipById(plannerId))
                     .thenReturn(Optional.of(ownership));
 

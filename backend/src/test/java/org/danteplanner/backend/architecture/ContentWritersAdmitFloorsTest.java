@@ -6,7 +6,7 @@ import java.util.function.Predicate;
 
 import org.danteplanner.backend.architecture.fixture.UnadmittedFilterRebuilder;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
-import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
+import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.searchindex.PlannerContentEntityExtractor;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
@@ -27,36 +27,20 @@ class ContentWritersAdmitFloorsTest {
             FloorRules.class.getName(),
             PlannerContentEntityExtractor.class.getName());
 
-    private static final Set<String> FROZEN_UNADMITTED_WRITERS = Set.of(
-            PlannerCatalogSyncService.class.getName());
-
     private static final JavaClasses PRODUCTION = ImportedClasses.production();
 
     @Test
-    void contentWriters_WhenScanned_DependOnTheAdmissionPathUnlessFrozen() {
-        Set<String> unfrozen = new TreeSet<>(unadmittedWriters(PRODUCTION));
-        unfrozen.removeAll(FROZEN_UNADMITTED_WRITERS);
-
-        assertThat(unfrozen)
+    void contentWriters_WhenScanned_DependOnTheAdmissionPath() {
+        assertThat(unadmittedWriters(PRODUCTION))
                 .as("these rebuild planner_entity_filter without depending on "
                         + "PlannerContentValidator, FloorRules or PlannerContentEntityExtractor; admit the floors first")
                 .isEmpty();
     }
 
     @Test
-    void frozenUnadmittedWriters_WhenScanned_StillWriteWithoutAdmission() {
-        Set<String> stale = new TreeSet<>(FROZEN_UNADMITTED_WRITERS);
-        stale.removeAll(unadmittedWriters(PRODUCTION));
-
-        assertThat(stale)
-                .as("these no longer write without admission, so the entry excuses nothing; delete it")
-                .isEmpty();
-    }
-
-    @Test
     void contentWriters_WhenScanned_IncludeEveryKnownWriter() {
         assertThat(topLevelNames(PRODUCTION, ContentWritersAdmitFloorsTest::writes)).containsExactlyInAnyOrder(
-                PlannerCatalogSyncService.class.getName());
+                PlannerCatalogService.class.getName());
     }
 
     @Test

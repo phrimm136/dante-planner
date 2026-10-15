@@ -74,9 +74,9 @@ public class UserAccountLifecycleService {
         return scheduledDeleteAt;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void reactivateAccount(Long userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findWithLockById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         if (!user.isDeleted()) {

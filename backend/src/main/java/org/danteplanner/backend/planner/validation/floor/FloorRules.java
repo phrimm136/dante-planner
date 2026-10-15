@@ -1,5 +1,6 @@
 package org.danteplanner.backend.planner.validation.floor;
 
+import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable.CategoryFloors;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable.RuleName;
@@ -74,6 +75,7 @@ public class FloorRules {
             Set.of(GameConstants.HARD_DIFFICULTY), ErrorCode.OUT_OF_RANGE_DIFFICULTY_NOT_HARD,
             Set.of(GameConstants.EXTREME_DIFFICULTY), ErrorCode.OUT_OF_RANGE_DIFFICULTY_NOT_EXTREME);
 
+    private final FloorRuleTable table;
     private final Map<Stage, List<Rule>> requiredRules;
 
     @Autowired
@@ -83,8 +85,13 @@ public class FloorRules {
 
     FloorRules(FloorRuleTable table) {
         Stage.requireTableStages(table.stages());
+        this.table = table;
         this.requiredRules = Arrays.stream(Stage.values()).collect(Collectors.toMap(Function.identity(),
                 stage -> requiredAt(table, stage), (first, later) -> first, () -> new EnumMap<>(Stage.class)));
+    }
+
+    public int floorCount(MDCategory category) {
+        return table.floorCount(category);
     }
 
     public Admission admit(FloorBoundary.Parsed parsed, Stage stage) {

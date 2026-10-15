@@ -1,11 +1,11 @@
 diff --git a/backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCatalogService.java b/backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCatalogService.java
-index 14c5cedf..f75f871c 100644
+index 13228eb..76a747a 100644
 --- a/backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCatalogService.java
 +++ b/backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCatalogService.java
-@@ -69,12 +69,6 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
+@@ -83,12 +83,6 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
      public void onBecameInvisible(UUID plannerId) {
          remove(plannerId);
-         recordCatalogChanged(plannerId);
+         syncFilterRows(plannerId);
 -        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 -            @Override
 -            public void afterCommit() {
@@ -14,4 +14,4 @@ index 14c5cedf..f75f871c 100644
 -        });
      }
  
-     @Transactional
+     @Transactional(propagation = Propagation.MANDATORY)

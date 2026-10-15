@@ -37,6 +37,8 @@ import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -254,15 +256,23 @@ public class PlannerCommandService {
     public record UpsertedPlanner(Planner planner, PlannerResponse response, boolean created) {
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public UpsertResult upsertPlanner(Long userId, UUID deviceId, UUID id, UpsertPlannerRequest request, boolean force) {
+        lockForUpsert(userId, id);
         UpsertedPlanner upserted = upsertAggregate(userId, deviceId, id, request, force);
         return upserted.created()
                 ? UpsertResult.created(upserted.response())
                 : UpsertResult.updated(upserted.response());
     }
 
-    @Transactional
+    void lockForUpsert(Long userId, UUID id) {
+        plannerRepository.findOwnershipById(id)
+                .filter(existing -> !existing.getUserId().equals(userId) || existing.getDeletedAt() != null)
+                .ifPresent(existing -> ownershipValidator.requireIdAvailable(id, userId, existing));
+        plannerRepository.lockContent(id);
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
     public UpsertedPlanner upsertAggregate(
             Long userId, UUID deviceId, UUID id, UpsertPlannerRequest request, boolean force) {
         var existingPlanner = plannerRepository.findAggregateForOwner(id, userId);
@@ -328,8 +338,10 @@ public class PlannerCommandService {
         return createAggregate(userId, deviceId, request.withId(id.toString()));
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deletePlanner(Long userId, UUID id) {
+        ownershipValidator.requireLiveOwnedBy(id, userId, plannerRepository.findOwnershipById(id));
+        plannerRepository.lockContent(id);
         Planner planner = accessGuard.findPlannerOrThrow(userId, id);
 
         if (planner.isPublished()) {

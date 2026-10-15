@@ -14,42 +14,25 @@ import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 
 public class RecordingTombstoneStore extends ContentTombstoneStore {
 
-    public enum Operation {
-        WRITE_OR_THROW,
-        CLEAR_OR_THROW
-    }
-
     public record Tombstone(String entityType, UUID id) {
     }
 
-    public sealed interface Call permits Write, WriteOrThrow, Writes, ClearOrThrow, Failed {
-    }
-
-    public record Failed(Operation operation, RuntimeException failure) implements Call {
+    public sealed interface Call permits Write, Writes, Clears {
     }
 
     public record Write(String entityType, UUID id) implements Call {
     }
 
-    public record WriteOrThrow(String entityType, UUID id) implements Call {
-    }
-
     public record Writes(String entityType, List<UUID> ids) implements Call {
     }
 
-    public record ClearOrThrow(String entityType, UUID id) implements Call {
+    public record Clears(String entityType, List<UUID> ids) implements Call {
     }
 
     private final List<Call> calls = new ArrayList<>();
-    private final ScriptedFailures<Operation> failures =
-            new ScriptedFailures<>(RecordingTombstoneStore.class.getSimpleName(), Operation.class);
 
     public RecordingTombstoneStore() {
         super(null, null, new SimpleMeterRegistry());
-    }
-
-    public void failNext(Operation operation, RuntimeException failure) {
-        failures.failNext(operation, failure);
     }
 
     public List<Call> calls() {
@@ -61,11 +44,8 @@ public class RecordingTombstoneStore extends ContentTombstoneStore {
         for (Call call : calls) {
             switch (call) {
                 case Write write -> standing.add(new Tombstone(write.entityType(), write.id()));
-                case WriteOrThrow write -> standing.add(new Tombstone(write.entityType(), write.id()));
                 case Writes writes -> writes.ids().forEach(id -> standing.add(new Tombstone(writes.entityType(), id)));
-                case ClearOrThrow clear -> standing.remove(new Tombstone(clear.entityType(), clear.id()));
-                case Failed failed -> {
-                }
+                case Clears clears -> clears.ids().forEach(id -> standing.remove(new Tombstone(clears.entityType(), id)));
             }
         }
         return Set.copyOf(standing);
@@ -77,13 +57,6 @@ public class RecordingTombstoneStore extends ContentTombstoneStore {
     }
 
     @Override
-    public void writeTombstoneOrThrow(String entityType, UUID id) {
-        failures.throwIfScripted(Operation.WRITE_OR_THROW,
-                failure -> calls.add(new Failed(Operation.WRITE_OR_THROW, failure)));
-        calls.add(new WriteOrThrow(entityType, id));
-    }
-
-    @Override
     public void writeTombstones(String entityType, Collection<UUID> ids) {
         if (!ids.isEmpty()) {
             calls.add(new Writes(entityType, List.copyOf(ids)));
@@ -91,10 +64,10 @@ public class RecordingTombstoneStore extends ContentTombstoneStore {
     }
 
     @Override
-    public void clearTombstoneOrThrow(String entityType, UUID id) {
-        failures.throwIfScripted(Operation.CLEAR_OR_THROW,
-                failure -> calls.add(new Failed(Operation.CLEAR_OR_THROW, failure)));
-        calls.add(new ClearOrThrow(entityType, id));
+    public void clearTombstones(String entityType, Collection<UUID> ids) {
+        if (!ids.isEmpty()) {
+            calls.add(new Clears(entityType, List.copyOf(ids)));
+        }
     }
 
     @Override

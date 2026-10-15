@@ -10,9 +10,10 @@ import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepositor
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
 import org.danteplanner.backend.planner.searchindex.PlannerContentEntityExtractor;
-import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
+import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.support.FilterRowsSync;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +57,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
     private PlannerKeywordFilterRepository keywordFilterRepository;
 
     @Autowired
-    private PlannerCatalogSyncService catalogSyncService;
+    private PlannerCatalogService catalogService;
 
     @Autowired
     private PlatformTransactionManager transactionManager;
@@ -118,11 +119,11 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                 .published(true)
                 .save(plannerRepository);
 
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
         long entityRowsAfterFirstBuild = entityFilterRepository.count();
         assertThat(entityRowsAfterFirstBuild).isPositive();
 
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
 
         assertThat(entityFilterRepository.count()).isEqualTo(entityRowsAfterFirstBuild);
         assertThat(keywordFilterRepository.findAll())
@@ -131,12 +132,64 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
     }
 
     @Test
+    void rebuildFilters_WhenAStoredKeywordDiffersFromTheContentOnlyInCase_KeepsExactlyTheContentsSpelling() {
+        Planner planner = TestDataFactory.planner(owner)
+                .selectedKeywords(Set.of("Sinking"))
+                .published(true)
+                .save(plannerRepository);
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+        assertThat(storedKeywords(planner)).containsExactly("Sinking");
+
+        new JdbcTemplate(dataSource).update(
+                "UPDATE planner_content SET selected_keywords = '[\"sinking\"]' WHERE planner_id = UUID_TO_BIN(?)",
+                planner.getId().toString());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+
+        assertThat(storedKeywords(planner))
+                .as("the case-insensitive key holds one spelling, and the rebuild compares by binary collation")
+                .containsExactly("sinking");
+    }
+
+    @Test
+    void rebuildFilters_WhenTheContentDropsSomeKeysAndAddsOthers_LeavesExactlyTheNewSet() throws Exception {
+        Planner planner = TestDataFactory.planner(owner)
+                .selectedKeywords(Set.of("Sinking", "Combustion"))
+                .published(true)
+                .save(plannerRepository);
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+        Set<String> before = indexedRows(planner);
+        assertThat(before).contains("IDENTITY:10101", "EGO_GIFT:9001");
+
+        new JdbcTemplate(dataSource).update("UPDATE planner_content SET content = ?, selected_keywords = ?"
+                        + " WHERE planner_id = UUID_TO_BIN(?)",
+                TestDataFactory.VALID_CONTENT
+                        .replace("\"selectedGiftIds\":[\"9001\"]", "\"selectedGiftIds\":[\"9003\"]")
+                        .replace("{\"id\":\"10101\"", "{\"id\":\"10102\""),
+                "[\"Burst\", \"Combustion\"]", planner.getId().toString());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+
+        Planner changed = plannerRepository.findById(planner.getId()).orElseThrow();
+        assertThat(indexedRows(changed))
+                .doesNotContain("IDENTITY:10101", "EGO_GIFT:9001")
+                .contains("IDENTITY:10102", "EGO_GIFT:9003")
+                .isEqualTo(oracleRows(changed));
+        assertThat(storedKeywords(changed)).containsExactlyInAnyOrder("Burst", "Combustion");
+    }
+
+    private List<String> storedKeywords(Planner planner) {
+        return keywordFilterRepository.findAll().stream()
+                .filter(f -> f.getPlannerId().equals(planner.getId()))
+                .map(PlannerKeywordFilter::getKeyword)
+                .toList();
+    }
+
+    @Test
     void rebuildFilters_WhenFactoryContent_MatchesExtractorOracle() throws Exception {
         Planner planner = TestDataFactory.planner(owner)
                 .published(true)
                 .save(plannerRepository);
 
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
 
         Set<String> expected = extractor
                 .extract(objectMapper.readTree(planner.getContentJson()), MDCategory.fromValue(planner.getCategory()))
@@ -166,7 +219,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                 .content(content)
                 .save(plannerRepository);
 
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
 
         Set<Integer> gifts = entityFilterRepository.findAll().stream()
                 .filter(f -> f.getPlannerId().equals(planner.getId()))
@@ -209,7 +262,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                 .published(true)
                 .save(plannerRepository);
 
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
 
         assertThat(indexedRows(planner))
                 .doesNotContain("THEME_PACK:1006", "EGO_GIFT:9004")
@@ -226,7 +279,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                 .published(true)
                 .save(plannerRepository);
 
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
 
         assertThat(indexedRows(planner))
                 .contains("THEME_PACK:1006", "EGO_GIFT:9004")
@@ -242,7 +295,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                     .published(true)
                     .save(plannerRepository);
 
-            catalogSyncService.syncPlanner(planner.getId(), List.of());
+            FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
 
             Set<String> rendered = IntStream.range(0, gameDataRegistry.floorRules().floorCount(category))
                     .boxed()
@@ -319,7 +372,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                 .published(true)
                 .save(plannerRepository);
 
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
 
         assertThat(indexedRows(planner))
                 .contains("IDENTITY:10101", "EGO:20101", "EGO_GIFT:9001")
@@ -341,7 +394,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                     .published(true)
                     .save(plannerRepository);
 
-            catalogSyncService.syncPlanner(planner.getId(), List.of());
+            FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
             Set<String> scoped = indexedRows(planner);
             callRolloutProcedure(planner);
 
@@ -361,7 +414,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                 .published(true)
                 .save(plannerRepository);
 
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
         Set<String> scoped = indexedRows(planner);
         callRolloutProcedure(planner);
 
@@ -379,7 +432,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                 .published(true)
                 .save(plannerRepository);
 
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
 
         assertThat(indexedRows(planner))
                 .filteredOn(row -> row.startsWith("THEME_PACK:") || row.startsWith("EGO_GIFT:"))

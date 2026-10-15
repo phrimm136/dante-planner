@@ -3,29 +3,34 @@ package org.danteplanner.backend.planner.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
+import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
+import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
+import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository.FloorScopeRow;
+import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.RecommendedSql;
 import org.danteplanner.backend.planner.sync.JsonDocuments;
+import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
-import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
-import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.danteplanner.backend.user.api.AccountLifecycleParticipant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -39,7 +44,9 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
     private final PlannerCatalogRepository catalogRepository;
     private final PlannerRepository plannerRepository;
     private final PlannerStatsRepository statsRepository;
-    private final DomainEventRecorder domainEventRecorder;
+    private final PlannerEntityFilterRepository entityFilterRepository;
+    private final PlannerKeywordFilterRepository keywordFilterRepository;
+    private final FloorRules floorRules;
     private final ObjectMapper objectMapper;
     private final ContentTombstoneStore tombstoneStore;
     private final int recommendedThreshold;
@@ -48,29 +55,34 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
             PlannerCatalogRepository catalogRepository,
             PlannerRepository plannerRepository,
             PlannerStatsRepository statsRepository,
-            DomainEventRecorder domainEventRecorder,
+            PlannerEntityFilterRepository entityFilterRepository,
+            PlannerKeywordFilterRepository keywordFilterRepository,
+            FloorRules floorRules,
             ObjectMapper objectMapper,
             ContentTombstoneStore tombstoneStore,
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
         this.catalogRepository = catalogRepository;
         this.plannerRepository = plannerRepository;
         this.statsRepository = statsRepository;
-        this.domainEventRecorder = domainEventRecorder;
+        this.entityFilterRepository = entityFilterRepository;
+        this.keywordFilterRepository = keywordFilterRepository;
+        this.floorRules = floorRules;
         this.objectMapper = objectMapper;
         this.tombstoneStore = tombstoneStore;
         this.recommendedThreshold = recommendedThreshold;
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.MANDATORY)
     public void onBecameVisible(Planner planner) {
         add(planner);
-        recordCatalogChanged(planner.getId());
+        syncFilterRows(planner.getId());
+        clearWithdrawalMarkersAfterCommit(List.of(planner.getId()));
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.MANDATORY)
     public void onBecameInvisible(UUID plannerId) {
         remove(plannerId);
-        recordCatalogChanged(plannerId);
+        syncFilterRows(plannerId);
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
@@ -79,13 +91,14 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
         });
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.MANDATORY)
     @Override
     public void accountDeactivated(Long userId) {
+        plannerRepository.lockContentOwnedBy(userId);
         List<UUID> publishedIds = plannerRepository.findPublishedIdsOwnedBy(userId);
         int withdrawn = catalogRepository.withdrawAllOwnedBy(userId);
         log.debug("Withdrew {} catalog rows owned by user {}", withdrawn, userId);
-        publishedIds.forEach(this::recordCatalogChanged);
+        publishedIds.forEach(this::syncFilterRows);
         FreshnessDeclarations.declare(new FreshnessScope.PublicCatalog());
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
@@ -95,26 +108,51 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
         });
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.MANDATORY)
     @Override
     public void accountReactivated(Long userId) {
+        plannerRepository.lockContentOwnedBy(userId);
         List<UUID> publishedIds = plannerRepository.findPublishedIdsOwnedBy(userId);
         int restored = catalogRepository.restoreAllOwnedBy(userId, recommendedThreshold);
         log.debug("Restored {} catalog rows owned by user {}", restored, userId);
-        publishedIds.forEach(this::recordCatalogChanged);
+        publishedIds.forEach(this::syncFilterRows);
         FreshnessDeclarations.declare(new FreshnessScope.PublicCatalog());
+        clearWithdrawalMarkersAfterCommit(publishedIds);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.MANDATORY)
     public void onVisibleEditCommitted(Planner planner) {
         syncScalarCopy(planner);
         if (searchableCompositionChanged(planner)) {
-            recordCatalogChanged(planner.getId());
+            syncFilterRows(planner.getId());
         }
     }
 
-    private void recordCatalogChanged(UUID plannerId) {
-        domainEventRecorder.recordDomainEvent(DomainEventType.PLANNER_CATALOG_CHANGED, plannerId, Map.of());
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void syncFilterRows(UUID plannerId) {
+        Optional<FloorScopeRow> scope = entityFilterRepository.floorScopeOf(plannerId);
+        if (plannerRepository.existsPublishedById(plannerId)) {
+            entityFilterRepository.rebuildPlannerFilters(plannerId, scope.map(this::floorCountOf).orElse(0));
+        } else {
+            entityFilterRepository.deleteByPlannerId(plannerId);
+            keywordFilterRepository.deleteByPlannerId(plannerId);
+        }
+    }
+
+    private int floorCountOf(FloorScopeRow scope) {
+        if (scope.getPlannerType() != PlannerType.MIRROR_DUNGEON) {
+            return 0;
+        }
+        return floorRules.floorCount(MDCategory.fromValue(scope.getCategory()));
+    }
+
+    private void clearWithdrawalMarkersAfterCommit(List<UUID> plannerIds) {
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                tombstoneStore.clearTombstones(ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, plannerIds);
+            }
+        });
     }
 
     private boolean searchableCompositionChanged(Planner planner) {

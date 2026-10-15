@@ -8,23 +8,12 @@ import java.util.List;
  * orphans every row already written under the old name.
  */
 public enum DomainEventType {
-    PLANNER_PUBLISHED(false),
-    PLANNER_RECOMMENDED(false),
-    COMMENT_RECEIVED(false),
-    REPLY_RECEIVED(false),
-    PLANNER_CATALOG_CHANGED(true);
-
-    private final boolean batchConsumed;
-
-    DomainEventType(boolean batchConsumed) {
-        this.batchConsumed = batchConsumed;
-    }
-
-    public boolean isBatchConsumed() {
-        return batchConsumed;
-    }
+    PLANNER_PUBLISHED,
+    PLANNER_RECOMMENDED,
+    COMMENT_RECEIVED,
+    REPLY_RECEIVED;
 
     public static List<String> dispatchedNames() {
-        return Arrays.stream(values()).filter(type -> !type.batchConsumed).map(Enum::name).toList();
+        return Arrays.stream(values()).map(Enum::name).toList();
     }
 }

@@ -30,9 +30,13 @@ import org.danteplanner.backend.planner.entity.PlannerSubscription;
 import org.danteplanner.backend.planner.precondition.ContentVersionValidator;
 import org.danteplanner.backend.planner.precondition.PlannerLimitValidator;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
+import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
+import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator;
+import org.danteplanner.backend.support.MockCalls;
+import org.danteplanner.backend.support.OwnershipRows;
 import org.danteplanner.backend.support.RecordingTombstoneStore;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
@@ -91,6 +95,12 @@ class PlannerPublishingServiceTest {
     private PlannerRepository plannerRepository;
 
     @Mock
+    private PlannerEntityFilterRepository entityFilterRepository;
+
+    @Mock
+    private PlannerKeywordFilterRepository keywordFilterRepository;
+
+    @Mock
     private PlannerStatsRepository plannerStatsRepository;
 
     @Mock
@@ -101,9 +111,6 @@ class PlannerPublishingServiceTest {
 
     @Mock
     private DomainEventRepository domainEventRepository;
-
-    @Mock
-    private DomainEventRepository catalogEventRepository;
 
     private final FakeUsers users = new FakeUsers();
 
@@ -138,7 +145,8 @@ class PlannerPublishingServiceTest {
         PlannerAccessGuard accessGuard = new PlannerAccessGuard(users, plannerRepository);
         RestrictionCheckService restrictionCheck = new RestrictionCheckService(users, new AccountStandingValidator());
         PlannerCatalogService catalogService = new PlannerCatalogService(catalogRepository, plannerRepository,
-                plannerStatsRepository, new DomainEventRecorder(catalogEventRepository, objectMapper, null),
+                plannerStatsRepository, entityFilterRepository,
+                keywordFilterRepository, null,
                 objectMapper, new RecordingTombstoneStore(), RECOMMENDED_THRESHOLD);
         PlannerCommandService commandService = new PlannerCommandService(
                 plannerRepository,
@@ -185,6 +193,8 @@ class PlannerPublishingServiceTest {
         void publishIdempotentStateTargeted_WhenSentTwice_StaysPublished() {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
             publishedEventsPersist();
 
             PlannerResponse first = publishingService.publish(testUser.getId(), planner.getId());
@@ -199,6 +209,8 @@ class PlannerPublishingServiceTest {
         void publishIdempotentStateTargeted_WhenUnpublishRepeated_StaysUnpublished() {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
 
             PlannerResponse result = publishingService.unpublish(testUser.getId(), planner.getId());
 
@@ -235,6 +247,8 @@ class PlannerPublishingServiceTest {
                     "\"observationGiftIds\":[]", "\"observationGiftIds\":[\"19247\"]");
             Planner planner = testPlannerBuilder().published(false).content(stored).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
             publishedEventsPersist();
             List<String> indexedContent = new ArrayList<>();
             doAnswer(invocation -> {
@@ -258,6 +272,8 @@ class PlannerPublishingServiceTest {
         void applyPublish_WhenFirstPublish_RecordsTheEventInsteadOfAnnouncing() {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
             publishedEventsPersist();
 
             publishingService.publish(testUser.getId(), planner.getId());
@@ -274,6 +290,8 @@ class PlannerPublishingServiceTest {
         void applyPublish_WhenAlreadyPublished_RecordsNothing() {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
             publishedEventsPersist();
             publishingService.publish(testUser.getId(), planner.getId());
             clearInvocations(domainEventRepository);
@@ -287,6 +305,8 @@ class PlannerPublishingServiceTest {
         void applyUnpublish_WhenWithdrawn_RecordsNothing() {
             Planner planner = testPlannerBuilder().published(true).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
 
             publishingService.unpublish(testUser.getId(), planner.getId());
 
@@ -335,6 +355,77 @@ class PlannerPublishingServiceTest {
     }
 
     @Nested
+    class LockOrderTests {
+
+        private List<String> plannerCalls() {
+            return MockCalls.inOrder(plannerRepository, plannerStatsRepository, catalogRepository,
+                    entityFilterRepository, keywordFilterRepository, subscriptionRepository);
+        }
+
+        private void stored(Planner planner) {
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
+        }
+
+        @Test
+        void publish_WhenCalled_LocksTheContentRowRightAfterTheOwnershipCheck() {
+            Planner planner = testPlannerBuilder().published(false).build();
+            stored(planner);
+            publishedEventsPersist();
+
+            publishingService.publish(testUser.getId(), planner.getId());
+
+            assertThat(plannerCalls()).startsWith("findOwnershipById", "lockContent");
+        }
+
+        @Test
+        void publishWithContent_WhenCalled_LocksTheContentRowRightAfterTheOwnershipCheck() {
+            Planner planner = testPlannerBuilder().published(false).build();
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            publishedEventsPersist();
+
+            publishingService.publish(testUser.getId(), UUID.randomUUID(), planner.getId(),
+                    UpsertRequests.resending(planner).title("Locked First").build());
+
+            assertThat(plannerCalls()).startsWith("findOwnershipById", "lockContent");
+            assertThat(plannerCalls()).filteredOn("lockContent"::equals).hasSize(1);
+        }
+
+        @Test
+        void unpublish_WhenCalled_LocksTheContentRowRightAfterTheOwnershipCheck() {
+            Planner planner = testPlannerBuilder().published(true).build();
+            stored(planner);
+
+            publishingService.unpublish(testUser.getId(), planner.getId());
+
+            assertThat(plannerCalls()).startsWith("findOwnershipById", "lockContent");
+        }
+
+        @Test
+        void withdrawFromPublicView_WhenCalled_LocksTheContentRowFirst() {
+            Planner planner = testPlannerBuilder().published(true).build();
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+
+            publishingService.withdrawFromPublicView(planner.getId(), Planner::takeDown);
+
+            assertThat(plannerCalls()).startsWith("lockContent");
+        }
+
+        @Test
+        void unpublish_WhenAnotherUserAsks_FailsWithoutTakingTheLock() {
+            Planner planner = testPlannerBuilder().published(true).build();
+            when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
+
+            assertRejected(() -> publishingService.unpublish(testUser.getId() + 1, planner.getId()))
+                    .withCode("PLANNER_FORBIDDEN");
+            assertThat(plannerCalls()).containsExactly("findOwnershipById");
+        }
+    }
+
+    @Nested
     class PublishWithContentTests {
 
         @Test
@@ -366,6 +457,8 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().published(false).build();
 
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
             publishedEventsPersist();
 
             // Act
@@ -383,6 +476,8 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().published(true).build();
 
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
 
             // Act
             PlannerResponse result = publishingService.unpublish(testUser.getId(), planner.getId());
@@ -398,7 +493,8 @@ class PlannerPublishingServiceTest {
             Planner planner = createTestPlanner();
             planner.setUserId(otherUser.getId());
 
-            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
 
             // Act & Assert
             assertRejected(() -> publishingService.publish(testUser.getId(), planner.getId()))
@@ -412,7 +508,6 @@ class PlannerPublishingServiceTest {
         void publish_WhenPlannerMissingOrDeleted_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
-            when(plannerRepository.findAggregate(nonExistentId)).thenReturn(Optional.empty());
 
             // Act & Assert
             assertRejected(() -> publishingService.publish(testUser.getId(), nonExistentId))
@@ -425,6 +520,8 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().published(false).build();
 
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
             publishedEventsPersist();
 
             // Act
@@ -446,6 +543,8 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().published(true).build();
 
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
 
             // Act
             PlannerResponse result = publishingService.unpublish(testUser.getId(), planner.getId());
@@ -465,6 +564,8 @@ class PlannerPublishingServiceTest {
             testUser.setBannedBy(1L);
             Planner planner = testPlannerBuilder().published(true).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
 
             PlannerResponse result = publishingService.unpublish(testUser.getId(), planner.getId());
 
@@ -481,6 +582,8 @@ class PlannerPublishingServiceTest {
             // Arrange
             Planner planner = createTestPlanner();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
 
             // Act
             ToggleOwnerNotificationsResponse response =
@@ -499,6 +602,8 @@ class PlannerPublishingServiceTest {
             planner.setUserId(otherUser.getId());
 
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
 
             // Act & Assert
             assertRejected(() -> publishingService.toggleOwnerNotifications(testUser.getId(), planner.getId(), true))
@@ -514,6 +619,8 @@ class PlannerPublishingServiceTest {
         void publishValidatesBeforeMutating_WhenTitleBlank_LeavesAggregateUnpublished() {
             Planner planner = testPlannerBuilder().title("   ").published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
 
             assertRejected(() -> publishingService.publish(testUser.getId(), planner.getId()))
                     .withViolation("MISSING_TITLE")
@@ -589,6 +696,8 @@ class PlannerPublishingServiceTest {
         void publishValidatesBeforeMutating_WhenContentRefused_LeavesAggregateUnpublished() {
             Planner planner = testPlannerBuilder().content("").published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
 
             assertRejected(() -> publishingService.publish(testUser.getId(), planner.getId()))
                     .withCode("EMPTY_CONTENT");

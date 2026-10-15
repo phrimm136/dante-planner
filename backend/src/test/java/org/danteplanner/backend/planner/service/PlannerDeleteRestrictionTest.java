@@ -5,14 +5,15 @@ import org.danteplanner.backend.moderation.service.RestrictionCheckService;
 import org.danteplanner.backend.moderation.validation.AccountStandingValidator;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
+import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
+import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.precondition.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.precondition.PlannerLimitValidator;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator;
-import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
-import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
+import org.danteplanner.backend.support.OwnershipRows;
 import org.danteplanner.backend.support.RecordingTombstoneStore;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -41,10 +42,13 @@ class PlannerDeleteRestrictionTest {
     private PlannerRepository plannerRepository;
 
     @Mock
-    private PlannerCatalogRepository catalogRepository;
+    private PlannerEntityFilterRepository entityFilterRepository;
 
     @Mock
-    private DomainEventRepository domainEventRepository;
+    private PlannerKeywordFilterRepository keywordFilterRepository;
+
+    @Mock
+    private PlannerCatalogRepository catalogRepository;
 
     private final FakeUsers users = new FakeUsers();
     private final RecordingTombstoneStore tombstoneStore = new RecordingTombstoneStore();
@@ -58,7 +62,8 @@ class PlannerDeleteRestrictionTest {
         accessGuard = new PlannerAccessGuard(users, plannerRepository);
         ObjectMapper objectMapper = new ObjectMapper();
         PlannerCatalogService catalogService = new PlannerCatalogService(catalogRepository, plannerRepository, null,
-                new DomainEventRecorder(domainEventRepository, objectMapper, null), objectMapper, tombstoneStore, 10);
+                entityFilterRepository, keywordFilterRepository, null,
+                objectMapper, tombstoneStore, 10);
         commandService = new PlannerCommandService(
                 plannerRepository,
                 null,
@@ -81,6 +86,8 @@ class PlannerDeleteRestrictionTest {
         Planner planner = TestDataFactory.planner(owner).published(published).build();
         when(plannerRepository.findAggregateForOwner(planner.getId(), owner.getId()))
                 .thenReturn(Optional.of(planner));
+        when(plannerRepository.findOwnershipById(planner.getId()))
+                .thenReturn(Optional.of(OwnershipRows.of(planner)));
         return planner;
     }
 

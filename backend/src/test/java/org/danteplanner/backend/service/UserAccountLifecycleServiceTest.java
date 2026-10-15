@@ -197,7 +197,7 @@ class UserAccountLifecycleServiceTest {
             testUser.softDelete(Instant.now().plus(Duration.ofDays(30)));
             assertThat(testUser.isDeleted()).isTrue();
 
-            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(userRepository.findWithLockById(testUser.getId())).thenReturn(Optional.of(testUser));
 
             // Act
             lifecycleService.reactivateAccount(testUser.getId());
@@ -216,7 +216,7 @@ class UserAccountLifecycleServiceTest {
         void reactivateAccount_WhenUserNotFound_ThrowsException() {
             // Arrange
             Long nonExistentId = 999L;
-            when(userRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+            when(userRepository.findWithLockById(nonExistentId)).thenReturn(Optional.empty());
 
             // Act & Assert
             assertRejected(() -> lifecycleService.reactivateAccount(nonExistentId))
@@ -230,7 +230,7 @@ class UserAccountLifecycleServiceTest {
             // Arrange - user is not deleted
             assertThat(testUser.isDeleted()).isFalse();
 
-            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(userRepository.findWithLockById(testUser.getId())).thenReturn(Optional.of(testUser));
 
             // Act
             lifecycleService.reactivateAccount(testUser.getId());

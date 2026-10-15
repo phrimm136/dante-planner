@@ -55,7 +55,7 @@ class RecordingAccountLifecycleParticipantTest {
     void calls_WhenTheRealLifecycleReactivatesADeletedAccount_RecordTheReactivation() {
         User user = TestDataFactory.unsavedUser(USER_ID);
         user.softDelete(Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS)));
-        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+        when(userRepository.findWithLockById(USER_ID)).thenReturn(Optional.of(user));
 
         lifecycle().reactivateAccount(USER_ID);
 
@@ -67,7 +67,7 @@ class RecordingAccountLifecycleParticipantTest {
     void failNext_WhenScripted_FailsOneCallAndThenRecovers() {
         User user = TestDataFactory.unsavedUser(USER_ID);
         user.softDelete(Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS)));
-        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+        when(userRepository.findWithLockById(USER_ID)).thenReturn(Optional.of(user));
         IllegalStateException down = new IllegalStateException("participant down");
         second.failNext(Event.REACTIVATED, down);
 

@@ -2,7 +2,9 @@
 epic: none · pr: none @catalog @isolation @locking
 
 ## Decisions
-- @catalog @isolation @locking — A planner's catalog sync runs at READ COMMITTED and first locks that
+
+## Superseded
+- @catalog @isolation @locking → 185 — A planner's catalog sync runs at READ COMMITTED and first locks that
   planner's `planner_content` row `FOR UPDATE`, on both the rebuild and the clear path. Under
   REPEATABLE READ the rebuild's DELETE, when it matched no row, took a gap lock on the filter index,
   so two first syncs of planners in the same gap deadlocked on each other's insert intention (1,629

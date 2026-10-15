@@ -151,9 +151,6 @@ post_rule "node-high-network-out" "0s" \
 TRAFFIC_DROP_EXPR='sum by (cluster) (increase(http_server_requests_seconds_count[5m])) < 1'
 post_rule "traffic-drop" "10m" "$TRAFFIC_DROP_EXPR"
 
-post_rule "planner-catalog-sync-backlog" "2m" \
-  'max by (cluster) (planner_catalog_sync_backlog_age_seconds) > 60'
-
 post_rule "read-source-breaker-open-sustained" "5m" \
   'max by (cluster, name) (resilience4j_circuitbreaker_state{name=~"read-source-.+",state="open"}) > 0'
 

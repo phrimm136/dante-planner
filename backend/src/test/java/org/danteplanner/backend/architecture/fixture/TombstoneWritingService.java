@@ -1,30 +1,32 @@
 package org.danteplanner.backend.architecture.fixture;
 
 import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.List;
 import java.util.UUID;
 
 public class TombstoneWritingService {
 
-    private TombstoneWritingService self;
-
     @Transactional
     public void hideBeforeCommit(ContentTombstoneStore store, UUID plannerId) {
-        store.writeTombstoneOrThrow("published-planner", plannerId);
+        store.writeTombstone("published-planner", plannerId);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void syncFromCommittedState(ContentTombstoneStore store, UUID plannerId) {
-        store.writeTombstoneOrThrow("published-planner", plannerId);
+    @Transactional
+    public void unhideBeforeCommit(ContentTombstoneStore store, UUID plannerId) {
+        store.clearTombstones("published-planner", List.of(plannerId));
     }
 
-    public void drainPending(ContentTombstoneStore store, UUID plannerId) {
-        self.syncFromCommittedState(store, plannerId);
-    }
-
-    public void syncFromElsewhere(ContentTombstoneStore store, UUID plannerId) {
-        syncFromCommittedState(store, plannerId);
+    @Transactional
+    public void unhideAfterCommit(ContentTombstoneStore store, UUID plannerId) {
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                store.clearTombstones("published-planner", List.of(plannerId));
+            }
+        });
     }
 }

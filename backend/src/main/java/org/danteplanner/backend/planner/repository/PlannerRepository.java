@@ -117,4 +117,12 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
     default Planner insert(Planner planner) {
         return save(planner);
     }
+
+    @Query(value = "SELECT COUNT(*) FROM planner_content WHERE planner_id = :plannerId FOR UPDATE",
+            nativeQuery = true)
+    long lockContent(@Param("plannerId") UUID plannerId);
+
+    @Query(value = "SELECT BIN_TO_UUID(c.planner_id) FROM planner p JOIN planner_content c ON c.planner_id = p.id"
+            + " WHERE p.user_id = :userId ORDER BY p.id FOR UPDATE OF c", nativeQuery = true)
+    List<String> lockContentOwnedBy(@Param("userId") Long userId);
 }

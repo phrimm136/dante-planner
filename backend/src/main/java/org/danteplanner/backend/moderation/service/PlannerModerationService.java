@@ -11,6 +11,7 @@ import org.danteplanner.backend.moderation.api.PlannerModerationTarget;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
@@ -27,7 +28,7 @@ public class PlannerModerationService {
     private final PlannerModerationTarget plannerTarget;
     private final ModerationAuditService auditService;
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public ModeratedPlanner deletePlanner(Long actorId, UUID plannerId, String reason) {
         ModeratedPlanner saved = plannerTarget.takeDown(plannerId);
 
@@ -38,7 +39,7 @@ public class PlannerModerationService {
         return saved;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public ModeratedPlanner unpublishPlanner(Long actorId, UUID plannerId) {
         ModeratedPlanner saved = plannerTarget.unpublish(plannerId);
 

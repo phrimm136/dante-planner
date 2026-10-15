@@ -2,7 +2,46 @@
 epic: none · pr: none · supersedes: 008 @withdraw @tombstone
 
 ## Decisions
-- @outbox @catalog @filters — Every change that can alter a planner's catalog presence (publish,
+- @outbox @tombstone @readpath — A change that takes a planner out of public view (unpublish,
+  takedown, owner deactivation, delete) still writes its withdrawal marker, and a delete its
+  tombstone, on the request thread after the commit, before the response returns; the catalog
+  sync writes them again, and only the sync clears a marker. A withdrawal must be masked before a
+  lagging replica can serve it, which only the synchronous write provides; the sync covers the
+  crash and store-error windows, failing that planner's pass on a store error so its rows stay
+  pending. A marker left on a planner that became visible again costs one primary re-read per
+  public read until a pass clears it or it expires. The sync may write a tombstone inside its transaction because the value
+  it writes follows from state already committed, so a rollback cannot leave it masking a live row.
+  REJECTED: leaving withdrawal markers and delete tombstones to the catalog sync alone — the pass
+  runs up to a second after the commit, so a read in that window could be served the withdrawn or
+  deleted row from a lagging replica.
+  INVARIANT: no transactional method other than the catalog sync reaches a tombstone write before
+  its commit — the effect placement rule, which admits that one method.
+- @withdraw @tombstone — Leaving public view without a delete (owner unpublish, moderator takedown
+  or unpublish, account deactivation, which marks every published planner of the owner) writes a
+  separate published-view marker after commit, checked only by the public read. A public read that
+  hits it re-reads on the primary, so a republish is visible at once, and only the catalog sync
+  clears the marker. A replica still showing the planner as published would otherwise serve it for
+  the replication window.
+  REJECTED: clearing the marker on the republish request — a second clearing path beside the sync,
+  which already rewrites and clears markers per pass; a marker on a visible planner costs only one
+  primary re-read.
+  REJECTED: reusing the delete tombstone — owner reads check it too, so the owner would lose their
+  own unpublished planner for the tombstone's lifetime.
+  REJECTED: masking outright on a marker hit — a republish would stay hidden until the marker
+  expired.
+- @comments @visibility — A comment thread follows its planner's public view: a reader other than
+  the owner gets the planner-not-found answer for an unpublished planner, a thread read that hits a
+  withdrawal marker re-reads on the primary, and the thread's public push fires only while the
+  planner is still published. The owner's own comment notification ignores publication; a reply
+  notification to any other parent author fires only while the planner is published, since it
+  names the planner and quotes the reply to someone who would otherwise get not-found.
+  REJECTED: a forbidden answer for another reader — it confirms that a private planner exists,
+  which the planner read itself refuses to do.
+  INVARIANT: an unpublished or withdrawn planner's thread is unreadable to non-owners on every read
+  path — the thread contract test and the replica-lag test.
+
+## Superseded
+- @outbox @catalog @filters → 185 — Every change that can alter a planner's catalog presence (publish,
   unpublish, takedown, delete, a visible edit that changes content, keywords or category, owner
   deactivation and reactivation, and a keyword backfill correction) records one
   planner-catalog-changed event per planner in the transaction of its cause, and one scheduled
@@ -42,43 +81,6 @@ epic: none · pr: none · supersedes: 008 @withdraw @tombstone
   NON-GOAL: the author's own filtered read right after a change is not guaranteed to see it; it
   sees it after the next pass, within about a second plus replication.
   NON-GOAL: the event carries no instruction; its payload is not read to decide the effect.
-- @outbox @tombstone @readpath — A change that takes a planner out of public view (unpublish,
-  takedown, owner deactivation, delete) still writes its withdrawal marker, and a delete its
-  tombstone, on the request thread after the commit, before the response returns; the catalog
-  sync writes them again, and only the sync clears a marker. A withdrawal must be masked before a
-  lagging replica can serve it, which only the synchronous write provides; the sync covers the
-  crash and store-error windows, failing that planner's pass on a store error so its rows stay
-  pending. A marker left on a planner that became visible again costs one primary re-read per
-  public read until a pass clears it or it expires. The sync may write a tombstone inside its transaction because the value
-  it writes follows from state already committed, so a rollback cannot leave it masking a live row.
-  REJECTED: leaving withdrawal markers and delete tombstones to the catalog sync alone — the pass
-  runs up to a second after the commit, so a read in that window could be served the withdrawn or
-  deleted row from a lagging replica.
-  INVARIANT: no transactional method other than the catalog sync reaches a tombstone write before
-  its commit — the effect placement rule, which admits that one method.
-- @withdraw @tombstone — Leaving public view without a delete (owner unpublish, moderator takedown
-  or unpublish, account deactivation, which marks every published planner of the owner) writes a
-  separate published-view marker after commit, checked only by the public read. A public read that
-  hits it re-reads on the primary, so a republish is visible at once, and only the catalog sync
-  clears the marker. A replica still showing the planner as published would otherwise serve it for
-  the replication window.
-  REJECTED: clearing the marker on the republish request — a second clearing path beside the sync,
-  which already rewrites and clears markers per pass; a marker on a visible planner costs only one
-  primary re-read.
-  REJECTED: reusing the delete tombstone — owner reads check it too, so the owner would lose their
-  own unpublished planner for the tombstone's lifetime.
-  REJECTED: masking outright on a marker hit — a republish would stay hidden until the marker
-  expired.
-- @comments @visibility — A comment thread follows its planner's public view: a reader other than
-  the owner gets the planner-not-found answer for an unpublished planner, a thread read that hits a
-  withdrawal marker re-reads on the primary, and the thread's public push fires only while the
-  planner is still published. The owner's own comment notification ignores publication; a reply
-  notification to any other parent author fires only while the planner is published, since it
-  names the planner and quotes the reply to someone who would otherwise get not-found.
-  REJECTED: a forbidden answer for another reader — it confirms that a private planner exists,
-  which the planner read itself refuses to do.
-  INVARIANT: an unpublished or withdrawn planner's thread is unreadable to non-owners on every read
-  path — the thread contract test and the replica-lag test.
 
 ## Takeaway
 - takeaway: an effect that re-derives from committed state can be retried, reordered and repeated

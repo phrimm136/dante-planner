@@ -2,8 +2,6 @@ package org.danteplanner.backend.shared.outbox.repository;
 
 import jakarta.persistence.LockModeType;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
-import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
@@ -31,21 +29,6 @@ public interface DomainEventRepository extends JpaRepository<DomainEvent, Long> 
             """, nativeQuery = true)
     List<Long> undispatchedIdsOlderThan(@Param("cutoff") Instant cutoff, @Param("cap") int cap,
             @Param("types") Collection<String> types, @Param("limit") int limit);
-
-    @Query("SELECT e FROM DomainEvent e WHERE e.eventType = :type AND e.dispatchedAt IS NULL "
-            + "AND e.attempts < :cap ORDER BY e.id")
-    List<DomainEvent> pendingEventsOfType(@Param("type") DomainEventType type, @Param("cap") int cap,
-            Pageable page);
-
-    @Modifying
-    @Query("UPDATE DomainEvent e SET e.dispatchedAt = :now WHERE e.id IN :ids AND e.dispatchedAt IS NULL")
-    int markDispatched(@Param("ids") Collection<Long> ids, @Param("now") Instant now);
-
-    @Query(value = """
-            SELECT COALESCE(TIMESTAMPDIFF(SECOND, MIN(created_at), NOW(6)), 0) FROM domain_events
-            WHERE event_type = :type AND dispatched_at IS NULL AND attempts < :cap
-            """, nativeQuery = true)
-    long oldestPendingAgeSecondsOf(@Param("type") String type, @Param("cap") int cap);
 
     @Modifying
     @Query("UPDATE DomainEvent e SET e.attempts = e.attempts + 1 WHERE e.id = :id")

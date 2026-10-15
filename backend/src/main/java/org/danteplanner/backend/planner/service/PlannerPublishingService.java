@@ -23,6 +23,7 @@ import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
@@ -58,24 +59,33 @@ public class PlannerPublishingService {
         PublicationChange apply(Planner planner);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public PlannerResponse publish(Long userId, UUID plannerId) {
         accessGuard.holdActiveAccount(userId);
+        requireOwnerBeforeLock(userId, plannerId);
+        plannerRepository.lockContent(plannerId);
 
         return applyPublish(userId, accessGuard.requireAggregate(plannerId));
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public PlannerResponse publish(Long userId, UUID deviceId, UUID plannerId, UpsertPlannerRequest content) {
         accessGuard.holdActiveAccount(userId);
+        plannerCommandService.lockForUpsert(userId, plannerId);
         requireTitleAfterUpsert(userId, plannerId, content);
 
         return applyPublish(userId, upserted(userId, deviceId, plannerId, content));
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public PlannerResponse unpublish(Long userId, UUID plannerId) {
+        requireOwnerBeforeLock(userId, plannerId);
+        plannerRepository.lockContent(plannerId);
         return applyUnpublish(userId, accessGuard.requireAggregate(plannerId));
+    }
+
+    private void requireOwnerBeforeLock(Long userId, UUID plannerId) {
+        ownershipValidator.requireLiveOwner(plannerId, userId, plannerRepository.findOwnershipById(plannerId));
     }
 
     private void requireTitleAfterUpsert(Long userId, UUID plannerId, UpsertPlannerRequest content) {
@@ -141,8 +151,9 @@ public class PlannerPublishingService {
         return PlannerResponse.fromEntity(planner);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Planner withdrawFromPublicView(UUID plannerId, Withdrawal withdrawal) {
+        plannerRepository.lockContent(plannerId);
         Planner planner = accessGuard.requireAggregate(plannerId);
 
         if (!withdrawal.apply(planner).changed()) {

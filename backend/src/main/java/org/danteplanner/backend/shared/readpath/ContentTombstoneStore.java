@@ -47,10 +47,6 @@ public class ContentTombstoneStore {
         }
     }
 
-    public void writeTombstoneOrThrow(String entityType, UUID id) {
-        stringRedisTemplate.opsForValue().set(tombstoneKey(entityType, id), TOMBSTONE_MARKER, TOMBSTONE_TTL);
-    }
-
     public void writeTombstones(String entityType, Collection<UUID> ids) {
         if (ids.isEmpty()) {
             return;
@@ -72,8 +68,17 @@ public class ContentTombstoneStore {
         }
     }
 
-    public void clearTombstoneOrThrow(String entityType, UUID id) {
-        stringRedisTemplate.delete(tombstoneKey(entityType, id));
+    public void clearTombstones(String entityType, Collection<UUID> ids) {
+        if (ids.isEmpty()) {
+            return;
+        }
+        List<String> keys = ids.stream().map(id -> tombstoneKey(entityType, id)).toList();
+        try {
+            stringRedisTemplate.delete(keys);
+        } catch (DataAccessException e) {
+            log.warn("tombstone clear failed for {} {} ids — the marker expires with its TTL",
+                    ids.size(), entityType, e);
+        }
     }
 
     public boolean isTombstoned(String entityType, UUID id) {

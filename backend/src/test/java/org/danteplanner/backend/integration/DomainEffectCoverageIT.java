@@ -10,14 +10,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Every event type the tree can record that the batch consumer does not drain has an arm registered
- * to answer for it.
+ * Every event type the tree can record has an arm registered to answer for it.
  *
  * <p>A type with no arm is not a missing feature: the dispatcher throws on it, the row stays open,
  * and the relay re-throws on the same row every tick until someone reads the log. The set equality
@@ -33,14 +31,11 @@ class DomainEffectCoverageIT extends SharedMySqlContainerSupport {
     private List<DomainEffectHandler> effects;
 
     @Test
-    void effectArms_WhenRegistered_CoverEveryTypeTheBatchConsumerDoesNot() {
+    void effectArms_WhenRegistered_CoverEveryType() {
         assertThat(effects)
-                .as("two arms declaring one type would leave the registry silently holding one; an arm "
-                        + "for a batch-consumed type would never be dispatched, and a type with neither "
-                        + "stays pending forever")
+                .as("two arms declaring one type would leave the registry silently holding one, and a type "
+                        + "with no arm stays pending forever")
                 .extracting(DomainEffectHandler::type)
-                .containsExactlyInAnyOrder(Arrays.stream(DomainEventType.values())
-                        .filter(type -> !type.isBatchConsumed())
-                        .toArray(DomainEventType[]::new));
+                .containsExactlyInAnyOrder(DomainEventType.values());
     }
 }

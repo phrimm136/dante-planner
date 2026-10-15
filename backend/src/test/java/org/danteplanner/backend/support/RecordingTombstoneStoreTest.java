@@ -3,10 +3,7 @@ package org.danteplanner.backend.support;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.data.redis.RedisConnectionFailureException;
-
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
@@ -14,18 +11,14 @@ import org.danteplanner.backend.shared.config.RoutingKey;
 import org.danteplanner.backend.shared.exception.EntityNotFoundException;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.readpath.PrimaryReCheck;
-import org.danteplanner.backend.support.RecordingTombstoneStore.ClearOrThrow;
-import org.danteplanner.backend.support.RecordingTombstoneStore.Failed;
-import org.danteplanner.backend.support.RecordingTombstoneStore.Operation;
+import org.danteplanner.backend.support.RecordingTombstoneStore.Clears;
 import org.danteplanner.backend.support.RecordingTombstoneStore.Tombstone;
 import org.danteplanner.backend.support.RecordingTombstoneStore.Write;
-import org.danteplanner.backend.support.RecordingTombstoneStore.WriteOrThrow;
 import org.danteplanner.backend.support.RecordingTombstoneStore.Writes;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@ExtendWith(ScriptedFailuresCheck.class)
 class RecordingTombstoneStoreTest {
 
     private static final String PLANNER = ByIdReadGuard.PLANNER_ENTITY_TYPE;
@@ -62,7 +55,7 @@ class RecordingTombstoneStoreTest {
         UUID id = UUID.randomUUID();
         store.writeTombstone(PLANNER, id);
 
-        store.clearTombstoneOrThrow(PLANNER, id);
+        store.clearTombstones(PLANNER, List.of(id));
 
         assertThat(reCheck.readWithReCheck(PLANNER, id, () -> "row")).isEqualTo("row");
     }
@@ -72,33 +65,15 @@ class RecordingTombstoneStoreTest {
         UUID id = UUID.randomUUID();
         UUID other = UUID.randomUUID();
 
-        store.clearTombstoneOrThrow(PUBLISHED, id);
-        store.writeTombstoneOrThrow(PLANNER, id);
-        store.writeTombstone(PUBLISHED, other);
+        store.writeTombstone(PLANNER, id);
         store.writeTombstones(PUBLISHED, List.of(id, other));
+        store.clearTombstones(PUBLISHED, List.of(other));
 
         assertThat(store.calls()).containsExactly(
-                new ClearOrThrow(PUBLISHED, id),
-                new WriteOrThrow(PLANNER, id),
-                new Write(PUBLISHED, other),
-                new Writes(PUBLISHED, List.of(id, other)));
+                new Write(PLANNER, id),
+                new Writes(PUBLISHED, List.of(id, other)),
+                new Clears(PUBLISHED, List.of(other)));
         assertThat(store.standing()).containsExactlyInAnyOrder(
-                new Tombstone(PLANNER, id), new Tombstone(PUBLISHED, id), new Tombstone(PUBLISHED, other));
-    }
-
-    @Test
-    void failNext_WhenScripted_FailsOneCallAndThenRecovers() {
-        UUID id = UUID.randomUUID();
-        RedisConnectionFailureException down = new RedisConnectionFailureException("down");
-        store.failNext(Operation.WRITE_OR_THROW, down);
-
-        assertThatThrownBy(() -> store.writeTombstoneOrThrow(PLANNER, id))
-                .isInstanceOf(RedisConnectionFailureException.class)
-                .hasMessage("down");
-        assertThat(store.standing()).isEmpty();
-        store.writeTombstoneOrThrow(PLANNER, id);
-
-        assertThat(store.calls())
-                .containsExactly(new Failed(Operation.WRITE_OR_THROW, down), new WriteOrThrow(PLANNER, id));
+                new Tombstone(PLANNER, id), new Tombstone(PUBLISHED, id));
     }
 }

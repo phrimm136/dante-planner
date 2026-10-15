@@ -1,7 +1,10 @@
 package org.danteplanner.backend.integration;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -10,15 +13,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.ConfigurableTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionExecution;
-import org.springframework.transaction.TransactionExecutionListener;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import org.assertj.core.api.SoftAssertions;
@@ -38,6 +39,8 @@ import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.support.TransactionSpans;
+import org.danteplanner.backend.support.TransactionSpans.Span;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
@@ -51,7 +54,16 @@ class PlannerCatalogRemovalConcurrencyIT extends ExclusiveDatabaseSupport {
     private static final long BARRIER_TIMEOUT_SECONDS = 10;
     private static final long JOIN_TIMEOUT_MS = 60_000;
     private static final int MIN_OVERLAPPING_ROUNDS = ROUNDS / 2;
-    private static final ThreadLocal<Span> SPAN = new ThreadLocal<>();
+    private static final long LOCK_WAIT_POLL_MS = 10;
+    private static final String CONTENT_LOCK_WAITERS = """
+            SELECT COUNT(*) FROM information_schema.processlist
+            WHERE db = DATABASE() AND state = 'statistics'
+              AND info LIKE '%FROM planner_content WHERE planner_id = % FOR UPDATE'
+            """;
+    private static final String ACTIVE_STATEMENTS = """
+            SELECT id, command, time, state, info FROM information_schema.processlist
+            WHERE db = DATABASE() AND command <> 'Sleep'
+            """;
 
     @Autowired private UserRepository userRepository;
     @Autowired private PlannerRepository plannerRepository;
@@ -81,12 +93,6 @@ class PlannerCatalogRemovalConcurrencyIT extends ExclusiveDatabaseSupport {
     }
 
     @Test
-    void unpublish_WhenTheOwnersAccountIsDeactivatedAtOnce_BothSucceedAndTheRowIsGone() throws Exception {
-        race(this::unpublish, round -> catalogService.accountDeactivated(round.owner().getId()),
-                this::catalogRowGone);
-    }
-
-    @Test
     void unpublish_WhenTheOwnersAccountIsDeletedAtOnce_BothSucceedAndTheRowIsGone() throws Exception {
         race(this::unpublish, this::deleteAccount, this::catalogRowGone);
     }
@@ -105,9 +111,24 @@ class PlannerCatalogRemovalConcurrencyIT extends ExclusiveDatabaseSupport {
     @Test
     void deletePlanner_WhenAModeratorTakesThePlannerDownAtOnce_ThePlannerIsDeletedAndTheTakedownRecordedOrRefused()
             throws Exception {
-        race(this::deletePlanner, this::takeDown, this::takedownFoundThePlannerDeleted,
+        List<Outcome> outcomes = race(this::seed, this::deletePlanner, this::takeDown, true,
+                this::takedownFoundThePlannerDeleted,
                 outcome -> catalogRowGone(outcome.round()) && plannerDeleted(outcome.round())
                         && (outcome.second() != null || takedownRecorded(outcome.round())));
+
+        List<Integer> mismatched = new ArrayList<>();
+        for (int index = 0; index < outcomes.size(); index++) {
+            boolean deleteLed = firstLeads(index);
+            boolean deleteWon = takedownFoundThePlannerDeleted(outcomes.get(index));
+            boolean takedownWon = outcomes.get(index).second() == null && takedownRecorded(outcomes.get(index).round());
+            if (deleteWon != deleteLed || takedownWon == deleteLed) {
+                mismatched.add(index);
+            }
+        }
+        System.out.println("catalog removal race " + raceName + ": delete led " + (outcomes.size() + 1) / 2
+                + " rounds, takedown led " + outcomes.size() / 2 + ", rounds whose winner was not the leader "
+                + mismatched);
+        assertThat(mismatched).as("rounds whose winner was not the transaction first in the lock queue").isEmpty();
     }
 
     @Test
@@ -120,6 +141,14 @@ class PlannerCatalogRemovalConcurrencyIT extends ExclusiveDatabaseSupport {
     void takeDown_WhenTheOwnersAccountIsDeletedAtOnce_BothSucceedAndTheTakedownIsRecorded() throws Exception {
         race(this::takeDown, this::deleteAccount,
                 round -> catalogRowGone(round) && takedownRecorded(round) && accountDeleted(round));
+    }
+
+    @Test
+    void takeDown_WhenTheDeletedOwnersAccountIsReactivatedAtOnce_BothSucceedAndTheTakedownIsRecorded()
+            throws Exception {
+        race(this::seedWithDeletedOwner, this::reactivateAccount, this::takeDown, false, outcome -> false,
+                outcome -> catalogRowGone(outcome.round()) && takedownRecorded(outcome.round())
+                        && !accountDeleted(outcome.round()));
     }
 
     @Test
@@ -156,6 +185,10 @@ class PlannerCatalogRemovalConcurrencyIT extends ExclusiveDatabaseSupport {
 
     private void deletePlanner(Round round) {
         commandService.deletePlanner(round.owner().getId(), round.plannerId());
+    }
+
+    private void reactivateAccount(Round round) {
+        lifecycleService.reactivateAccount(round.owner().getId());
     }
 
     private void deleteAccount(Round round) {
@@ -203,34 +236,48 @@ class PlannerCatalogRemovalConcurrencyIT extends ExclusiveDatabaseSupport {
         return new Round(owner, plannerId);
     }
 
+    private Round seedWithDeletedOwner() {
+        Round round = seed();
+        lifecycleService.deleteAccount(round.owner().getId());
+        return round;
+    }
+
     private void race(Consumer<Round> first, Consumer<Round> second, Predicate<Round> settled) throws Exception {
         race(first, second, outcome -> false, outcome -> settled.test(outcome.round()));
     }
 
     private void race(Consumer<Round> first, Consumer<Round> second, Predicate<Outcome> secondExcused,
             Predicate<Outcome> settled) throws Exception {
+        race(this::seed, first, second, false, secondExcused, settled);
+    }
+
+    private List<Outcome> race(Supplier<Round> seeder, Consumer<Round> first, Consumer<Round> second,
+            boolean orderedByLockQueue, Predicate<Outcome> secondExcused, Predicate<Outcome> settled)
+            throws Exception {
+        List<Outcome> outcomes = new ArrayList<>();
         List<Throwable> firstFailures = new ArrayList<>();
         List<Throwable> secondFailures = new ArrayList<>();
         List<Integer> unsettledRounds = new ArrayList<>();
         int overlappingRounds = 0;
         int excusedRounds = 0;
-        ConfigurableTransactionManager manager = (ConfigurableTransactionManager) transactionManager;
-        Collection<TransactionExecutionListener> listeners = manager.getTransactionExecutionListeners();
-        List<TransactionExecutionListener> withSpans = new ArrayList<>(listeners);
-        withSpans.add(new SpanListener());
-        manager.setTransactionExecutionListeners(withSpans);
-        try {
+        try (TransactionSpans.Installed unused = TransactionSpans.install(transactionManager)) {
             for (int index = 0; index < ROUNDS; index++) {
-                Round round = seed();
-                CyclicBarrier start = new CyclicBarrier(2);
+                Round round = seeder.get();
+                CyclicBarrier start = new CyclicBarrier(orderedByLockQueue ? 1 : 2);
                 Span firstSpan = new Span();
                 Span secondSpan = new Span();
                 AtomicReference<Throwable> firstFailure = new AtomicReference<>();
                 AtomicReference<Throwable> secondFailure = new AtomicReference<>();
                 Thread one = thread("first", start, firstSpan, firstFailure, () -> first.accept(round));
                 Thread two = thread("second", start, secondSpan, secondFailure, () -> second.accept(round));
-                one.start();
-                two.start();
+                if (orderedByLockQueue) {
+                    startInLockQueueOrder(round, index, firstLeads(index) ? one : two, firstLeads(index) ? two : one,
+                            firstLeads(index) ? firstFailure : secondFailure,
+                            firstLeads(index) ? secondFailure : firstFailure);
+                } else {
+                    one.start();
+                    two.start();
+                }
                 one.join(JOIN_TIMEOUT_MS);
                 two.join(JOIN_TIMEOUT_MS);
                 assertThat(one.isAlive() || two.isAlive()).as("round %d finished", index).isFalse();
@@ -238,6 +285,7 @@ class PlannerCatalogRemovalConcurrencyIT extends ExclusiveDatabaseSupport {
                     overlappingRounds++;
                 }
                 Outcome outcome = new Outcome(round, firstFailure.get(), secondFailure.get());
+                outcomes.add(outcome);
                 if (outcome.first() != null) {
                     firstFailures.add(outcome.first());
                 }
@@ -252,8 +300,6 @@ class PlannerCatalogRemovalConcurrencyIT extends ExclusiveDatabaseSupport {
                     unsettledRounds.add(index);
                 }
             }
-        } finally {
-            manager.setTransactionExecutionListeners(listeners);
         }
         System.out.println("catalog removal race " + raceName + ": " + overlappingRounds + " of " + ROUNDS
                 + " rounds overlapped, " + excusedRounds + " second removers found their target gone");
@@ -265,6 +311,49 @@ class PlannerCatalogRemovalConcurrencyIT extends ExclusiveDatabaseSupport {
             softly.assertThat(overlapped).as("rounds whose transactions overlapped").isGreaterThanOrEqualTo(
                     MIN_OVERLAPPING_ROUNDS);
         });
+        return outcomes;
+    }
+
+    private static boolean firstLeads(int round) {
+        return round % 2 == 0;
+    }
+
+    private void startInLockQueueOrder(Round round, int index, Thread leader, Thread follower,
+            AtomicReference<Throwable> leaderFailure, AtomicReference<Throwable> followerFailure) throws Exception {
+        try (Connection holder = dataSource.getConnection()) {
+            holder.setAutoCommit(false);
+            try (PreparedStatement lock = holder.prepareStatement(
+                    "SELECT planner_id FROM planner_content WHERE planner_id = UUID_TO_BIN(?) FOR UPDATE")) {
+                lock.setString(1, round.plannerId().toString());
+                lock.executeQuery().close();
+            }
+            leader.start();
+            awaitLockWaits(1, index, leader, leaderFailure);
+            follower.start();
+            awaitLockWaits(2, index, follower, followerFailure);
+            holder.rollback();
+        }
+    }
+
+    private void awaitLockWaits(int expected, int index, Thread started, AtomicReference<Throwable> failure)
+            throws InterruptedException {
+        Instant deadline = Instant.now().plus(Duration.ofSeconds(BARRIER_TIMEOUT_SECONDS));
+        while (contentLockWaiters() < expected) {
+            assertThat(started.isAlive())
+                    .as("round %d: %s ended before it queued on the held content row (failure %s)",
+                            index, started.getName(), failure.get())
+                    .isTrue();
+            assertThat(Instant.now())
+                    .as("round %d: %d statements waiting on the held content row, saw %s",
+                            index, expected, jdbc.queryForList(ACTIVE_STATEMENTS))
+                    .isBefore(deadline);
+            TimeUnit.MILLISECONDS.sleep(LOCK_WAIT_POLL_MS);
+        }
+    }
+
+    private int contentLockWaiters() {
+        Integer waiting = jdbc.queryForObject(CONTENT_LOCK_WAITERS, Integer.class);
+        return waiting != null ? waiting : 0;
     }
 
     private static Map<String, Long> tally(List<Throwable> failures) {
@@ -275,68 +364,14 @@ class PlannerCatalogRemovalConcurrencyIT extends ExclusiveDatabaseSupport {
     private Thread thread(String name, CyclicBarrier start, Span span, AtomicReference<Throwable> failure,
             Runnable body) {
         Thread thread = new Thread(() -> {
-            SPAN.set(span);
             try {
                 start.await(BARRIER_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-                body.run();
+                TransactionSpans.within(span, body);
             } catch (Throwable e) {
                 failure.set(e);
-            } finally {
-                SPAN.remove();
             }
         }, name);
         thread.setDaemon(true);
         return thread;
-    }
-
-    private static final class Span {
-
-        private long begunAt = -1;
-        private long endedAt = -1;
-        private int depth;
-
-        void begun() {
-            if (depth++ == 0 && begunAt < 0) {
-                begunAt = System.nanoTime();
-            }
-        }
-
-        void ended() {
-            if (--depth == 0 && endedAt < 0) {
-                endedAt = System.nanoTime();
-            }
-        }
-
-        boolean overlaps(Span other) {
-            return endedAt >= 0 && other.endedAt >= 0
-                    && Math.max(begunAt, other.begunAt) < Math.min(endedAt, other.endedAt);
-        }
-    }
-
-    private static final class SpanListener implements TransactionExecutionListener {
-
-        @Override
-        public void afterBegin(TransactionExecution transaction, Throwable beginFailure) {
-            Span span = SPAN.get();
-            if (span != null && beginFailure == null) {
-                span.begun();
-            }
-        }
-
-        @Override
-        public void afterCommit(TransactionExecution transaction, Throwable commitFailure) {
-            Span span = SPAN.get();
-            if (span != null) {
-                span.ended();
-            }
-        }
-
-        @Override
-        public void afterRollback(TransactionExecution transaction, Throwable rollbackFailure) {
-            Span span = SPAN.get();
-            if (span != null) {
-                span.ended();
-            }
-        }
     }
 }

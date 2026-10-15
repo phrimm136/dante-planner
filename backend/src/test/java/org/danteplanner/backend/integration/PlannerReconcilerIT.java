@@ -1,10 +1,12 @@
 package org.danteplanner.backend.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.micrometer.core.instrument.MeterRegistry;
-import org.danteplanner.backend.planner.entity.MDCategory;
+import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
+import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -12,19 +14,20 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerDriftReconciler;
 import org.danteplanner.backend.planner.service.PlannerDriftReconciler.DriftRecord;
-import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
-import org.danteplanner.backend.planner.searchindex.PlannerContentEntityExtractor;
+import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
-import org.danteplanner.backend.support.CatalogEffects;
+import org.danteplanner.backend.support.FilterRowsSync;
 import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.support.UpsertRequests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +35,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Reconciler drill: seeded drift in every audited dimension is detected and
@@ -55,7 +59,10 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
     private PlannerCatalogService catalogService;
 
     @Autowired
-    private PlannerCatalogSyncService catalogSyncService;
+    private PlannerCommandService commandService;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     @Autowired
     private PlannerDriftReconciler reconciler;
@@ -91,8 +98,8 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-        catalogService.onBecameVisible(planner);
-        CatalogEffects.drain(catalogSyncService, jdbc, planner.getId());
+        FilterRowsSync.readCommitted(transactionManager)
+                .executeWithoutResult(status -> catalogService.onBecameVisible(planner));
         return planner;
     }
 
@@ -378,8 +385,8 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-        catalogService.onBecameVisible(planner);
-        CatalogEffects.drain(catalogSyncService, jdbc, planner.getId());
+        FilterRowsSync.readCommitted(transactionManager)
+                .executeWithoutResult(status -> catalogService.onBecameVisible(planner));
 
         assertThat(kindsFor(reconciler.reconcile(), planner.getId())).doesNotContain("entity_filter");
     }
@@ -394,8 +401,8 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-        catalogService.onBecameVisible(planner);
-        CatalogEffects.drain(catalogSyncService, jdbc, planner.getId());
+        FilterRowsSync.readCommitted(transactionManager)
+                .executeWithoutResult(status -> catalogService.onBecameVisible(planner));
 
         assertThat(kindsFor(reconciler.reconcile(), planner.getId()))
                 .doesNotContain("entity_filter", "keyword_filter");
@@ -438,9 +445,7 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
         Planner planner = publishClean("Index Follows Column", Set.of("Sinking"));
         jdbc.update("UPDATE planner_content SET selected_keywords = '[\"Burst\"]' WHERE planner_id = UUID_TO_BIN(?)",
                 planner.getId().toString());
-        jdbc.update("INSERT INTO domain_events (event_type, aggregate_id, payload) "
-                + "VALUES ('PLANNER_CATALOG_CHANGED', UUID_TO_BIN(?), '{}')", planner.getId().toString());
-        CatalogEffects.drain(catalogSyncService, jdbc, planner.getId());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
 
         assertThat(recordsFor(reconciler.reconcile(), planner.getId(), "keyword_filter"))
                 .singleElement()
@@ -451,84 +456,47 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
     }
 
     @Autowired
-    private PlannerContentEntityExtractor entityExtractor;
-
-    @Autowired
     private ObjectMapper objectMapper;
-
-    private static final String CRASH_CONTENT = TestDataFactory.VALID_CONTENT.replace(
-            "\"selectedGiftIds\":[\"9001\"]", "\"selectedGiftIds\":[\"9099\"]");
 
     private Set<String> indexedEntities(UUID plannerId) {
         return Set.copyOf(jdbc.queryForList("SELECT CONCAT(entity_type, ':', entity_id) FROM planner_entity_filter "
                 + "WHERE planner_id = UUID_TO_BIN(?)", String.class, plannerId.toString()));
     }
 
-    private Set<String> oracleEntities(UUID plannerId) throws Exception {
-        Map<String, Object> row = jdbc.queryForMap("SELECT content, category FROM planner_content "
-                + "WHERE planner_id = UUID_TO_BIN(?)", plannerId.toString());
-        return entityExtractor.extract(objectMapper.readTree(row.get("content").toString()),
-                        MDCategory.fromValue(row.get("category").toString()))
-                .stream()
-                .map(ref -> ref.type().name() + ":" + ref.id())
-                .collect(Collectors.toSet());
-    }
-
-    private long catalogChangedEventOf(UUID plannerId) {
-        return jdbc.queryForObject("SELECT id FROM domain_events WHERE aggregate_id = UUID_TO_BIN(?) "
-                + "AND event_type = 'PLANNER_CATALOG_CHANGED' AND dispatched_at IS NULL", Long.class, plannerId.toString());
-    }
-
-    private void recordStaleCatalogChangedEvent(UUID plannerId) {
-        jdbc.update("INSERT INTO domain_events (event_type, aggregate_id, payload, created_at) "
-                + "VALUES ('PLANNER_CATALOG_CHANGED', UUID_TO_BIN(?), '{}', DATE_SUB(NOW(6), INTERVAL 2 MINUTE))",
+    private Map<String, Object> storedContentRow(UUID plannerId) {
+        return jdbc.queryForMap("SELECT content, sync_version FROM planner_content WHERE planner_id = UUID_TO_BIN(?)",
                 plannerId.toString());
     }
 
     @Test
-    void catalogSync_WhenTheRebuildFails_TheNextPassRebuildsTheFilterRows() throws Exception {
-        Planner planner = publishClean("Crash Window Rebuild Throws", Set.of());
-        assertThat(CRASH_CONTENT).isNotEqualTo(TestDataFactory.VALID_CONTENT);
-        Set<String> before = indexedEntities(planner.getId());
+    void save_WhenTheFilterRebuildFails_RollsTheWholeSaveBack() throws Exception {
+        Planner planner = publishClean("Rebuild Fails", Set.of());
+        UUID plannerId = planner.getId();
+        Set<String> indexedBefore = indexedEntities(plannerId);
+        Map<String, Object> storedBefore = storedContentRow(plannerId);
+        Planner loaded = plannerRepository.findAggregateForOwner(plannerId, owner.getId()).orElseThrow();
+        ObjectNode edited = (ObjectNode) objectMapper.readTree(loaded.getContentJson());
+        ((ObjectNode) edited.get("equipment").get("1").get("identity")).put("id", "10102");
+        UpsertPlannerRequest save = UpsertRequests.resending(loaded)
+                .status(PlannerStatus.SAVED)
+                .content(objectMapper.writeValueAsString(edited))
+                .build();
         Object procedure = jdbc.queryForMap("SHOW CREATE PROCEDURE rebuild_planner_filters_scoped")
                 .get("Create Procedure");
         assertThat(procedure).as("procedure body readable for restore").isNotNull();
 
-        jdbc.update("UPDATE planner_content SET content = ? WHERE planner_id = UUID_TO_BIN(?)",
-                CRASH_CONTENT, planner.getId().toString());
-        recordStaleCatalogChangedEvent(planner.getId());
-        long eventId = catalogChangedEventOf(planner.getId());
-
         jdbc.execute("DROP PROCEDURE rebuild_planner_filters_scoped");
         try {
-            CatalogEffects.drainUntil(catalogSyncService, () -> jdbc.queryForObject(
-                    "SELECT attempts FROM domain_events WHERE id = ?", Integer.class, eventId) > 0,
-                    "a pass over the planner's event");
+            assertThatThrownBy(() -> commandService.upsertPlanner(owner.getId(), null, plannerId, save, false))
+                    .isInstanceOf(DataAccessException.class)
+                    .hasStackTraceContaining("rebuild_planner_filters_scoped does not exist");
         } finally {
             jdbc.execute(procedure.toString());
         }
 
-        assertThat(jdbc.queryForObject("SELECT dispatched_at FROM domain_events WHERE id = ?", Timestamp.class,
-                eventId)).as("the failed sync left the row pending").isNull();
-        assertThat(jdbc.queryForObject("SELECT attempts FROM domain_events WHERE id = ?", Integer.class, eventId))
-                .as("the failed sync counted an attempt").isEqualTo(1);
-        assertThat(indexedEntities(planner.getId())).as("the failed rebuild left the old rows").isEqualTo(before);
-
-        CatalogEffects.drain(catalogSyncService, jdbc, planner.getId());
-
-        assertThat(indexedEntities(planner.getId())).isEqualTo(oracleEntities(planner.getId()));
-    }
-
-    @Test
-    void catalogSync_WhenTheEventWasNeverConsumed_TheNextPassRebuildsTheFilterRows() throws Exception {
-        Planner planner = publishClean("Crash Window Pod Dies", Set.of());
-        jdbc.update("UPDATE planner_content SET content = ? WHERE planner_id = UUID_TO_BIN(?)",
-                CRASH_CONTENT, planner.getId().toString());
-        recordStaleCatalogChangedEvent(planner.getId());
-        assertThat(indexedEntities(planner.getId())).isNotEqualTo(oracleEntities(planner.getId()));
-
-        CatalogEffects.drain(catalogSyncService, jdbc, planner.getId());
-
-        assertThat(indexedEntities(planner.getId())).isEqualTo(oracleEntities(planner.getId()));
+        assertThat(storedContentRow(plannerId))
+                .as("the failed rebuild rolled back the content and the version bump with it")
+                .isEqualTo(storedBefore);
+        assertThat(indexedEntities(plannerId)).isEqualTo(indexedBefore);
     }
 }

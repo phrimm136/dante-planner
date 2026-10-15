@@ -31,8 +31,6 @@ import org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter;
 import org.danteplanner.backend.shared.security.CsrfTokenService;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.ViewerHashUtil;
-import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
-import org.danteplanner.backend.support.CatalogEffects;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -78,9 +76,6 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
 
     @Autowired
     private ByIdReadGuard byIdReadGuard;
-
-    @Autowired
-    private PlannerCatalogSyncService catalogSyncService;
 
     @Autowired
     private PlannerQueryService plannerQueryService;
@@ -493,6 +488,32 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
                 .isBetween(200, 299);
     }
 
+    @Test
+    void publish_WhenTheFilterRebuildRunsOnTheGtidPrimary_ReplicatesTheSameFilterRows() throws Exception {
+        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-filter-rows@example.com");
+        UUID plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, true).getId();
+
+        send(owner, "POST", "/api/planner/md/" + plannerId + "/unpublish", null);
+        send(owner, "POST", "/api/planner/md/" + plannerId + "/publish", null);
+        replicationControl.awaitCaughtUp();
+
+        List<String> onPrimary = filterRows(primaryJdbcTemplate, plannerId);
+        assertThat(onPrimary).as("the publish rebuilt the filter rows on the primary").isNotEmpty();
+        assertThat(filterRows(replicaJdbcTemplate, plannerId))
+                .as("a rebuild that stages rows in temporary tables replicates under GTID consistency")
+                .isEqualTo(onPrimary);
+    }
+
+    private static List<String> filterRows(JdbcTemplate jdbc, UUID plannerId) {
+        return jdbc.queryForList("""
+                SELECT CONCAT(entity_type, ':', entity_id) AS row_key FROM planner_entity_filter
+                WHERE planner_id = UUID_TO_BIN(?)
+                UNION ALL
+                SELECT CONCAT('KEYWORD:', keyword) FROM planner_keyword_filter WHERE planner_id = UUID_TO_BIN(?)
+                ORDER BY row_key
+                """, String.class, plannerId.toString(), plannerId.toString());
+    }
+
     private boolean replicaStillPublished(UUID plannerId) {
         Boolean published = replicaJdbcTemplate.queryForObject(
                 "SELECT published FROM planner_publication WHERE planner_id = UUID_TO_BIN(?)",
@@ -522,7 +543,6 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
 
         send(owner, "POST", "/api/planner/md/" + plannerId + "/unpublish", null);
         send(owner, "POST", "/api/planner/md/" + plannerId + "/publish", null);
-        CatalogEffects.drain(catalogSyncService, primaryJdbcTemplate, plannerId);
         replicationControl.awaitCaughtUp();
         double before = bulkheadQueries();
 
@@ -632,7 +652,6 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
                 .as("the deactivation must have marked the planner, or clearing it proves nothing")
                 .isTrue();
         userAccountLifecycleService.reactivateAccount(owner.getId());
-        CatalogEffects.drain(catalogSyncService, primaryJdbcTemplate, planner.getId());
         replicationControl.awaitCaughtUp();
         double before = bulkheadQueries();
 

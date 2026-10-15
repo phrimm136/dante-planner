@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerEntityFilter;
+import org.danteplanner.backend.planner.entity.PlannerEntityFilterId;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
@@ -14,13 +15,12 @@ import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
-import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.support.FilterRowsSync;
 import org.danteplanner.backend.support.AuthCookies;
-import org.danteplanner.backend.support.CatalogEffects;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.UpsertRequests;
 import org.junit.jupiter.api.AfterEach;
@@ -31,6 +31,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.List;
 import java.util.Set;
@@ -78,7 +79,7 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
     private PlannerCatalogService catalogService;
 
     @Autowired
-    private PlannerCatalogSyncService catalogSyncService;
+    private PlatformTransactionManager transactionManager;
 
     @Autowired
     private JwtTokenService jwtTokenService;
@@ -124,7 +125,7 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
         PlannerEntityFilter planted = entityFilterRepository.save(
                 new PlannerEntityFilter(ContentEntityType.THEME_PACK, UNREACHABLE_ENTITY_ID, planner.getId()));
         long filterRowsBefore = entityFilterRows(planner.getId());
@@ -142,7 +143,6 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(titleEdit)))
                 .andExpect(status().isOk());
-        CatalogEffects.drain(catalogSyncService, jdbcTemplate, planner.getId());
 
         mockMvc.perform(get("/api/planner/md/published"))
                 .andExpect(status().isOk())
@@ -177,7 +177,6 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.published").value(true))
                 .andExpect(jsonPath("$.title").value("Intent One-Shot"));
-        CatalogEffects.drain(catalogSyncService, jdbcTemplate, plannerId);
 
         assertThat(plannerRepository.existsById(plannerId))
                 .as("the single request created the planner").isTrue();
@@ -377,7 +376,6 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
         assertThat(entityFilterRows(planner.getId())).isZero();
 
         saveBack(received, "Renamed", received.get("content").asText());
-        CatalogEffects.drain(catalogSyncService, jdbcTemplate, planner.getId());
 
         assertThat(entityFilterRows(planner.getId()))
                 .as("no rebuild ran, so the deliberately unbuilt index stays empty")
@@ -385,23 +383,27 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
     }
 
     @Test
-    void publishedContentSave_WhenIdentityChanged_RebuildsFilters() throws Exception {
+    void publishedContentSave_WhenIdentityAdded_FilterRowsAndFilteredListReflectItOnResponse() throws Exception {
         Planner planner = TestDataFactory.planner(owner)
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
         JsonNode received = ownerCopy(planner.getId());
-        assertThat(entityFilterRows(planner.getId())).isZero();
+        PlannerEntityFilterId added = new PlannerEntityFilterId(ContentEntityType.IDENTITY, 10102, planner.getId());
+        assertThat(entityFilterRepository.existsById(added)).isFalse();
 
         ObjectNode edited = (ObjectNode) objectMapper.readTree(received.get("content").asText());
         ((ObjectNode) edited.get("equipment").get("1").get("identity")).put("id", "10102");
         saveBack(received, received.get("title").asText(), objectMapper.writeValueAsString(edited));
-        CatalogEffects.drain(catalogSyncService, jdbcTemplate, planner.getId());
 
-        assertThat(entityFilterRows(planner.getId()))
-                .as("the changed composition rebuilt the index")
-                .isPositive();
+        assertThat(entityFilterRepository.existsById(added))
+                .as("the answered save carries the added identity's filter row")
+                .isTrue();
+        mockMvc.perform(get("/api/planner/md/published").param("identity", "10102"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].id").value(planner.getId().toString()));
     }
 
     @Test
@@ -433,7 +435,7 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
                 .selectedKeywords(Set.of("Sinking", "NotAKeyword")).published(true).save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
         return stored(planner.getId());
     }
 

@@ -15,12 +15,12 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.exception.AccountDeletedException;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
-import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
-import org.danteplanner.backend.support.CatalogEffects;
+import org.danteplanner.backend.support.FilterRowsSync;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,6 +33,7 @@ import java.sql.PreparedStatement;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -54,9 +55,6 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private PlannerCatalogSyncService catalogSyncService;
 
     @Autowired
     private UserRepository userRepository;
@@ -103,6 +101,13 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
         planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
+    }
+
+    private Integer filterRows(UUID plannerId) {
+        return new JdbcTemplate(dataSource).queryForObject(
+                "SELECT (SELECT COUNT(*) FROM planner_entity_filter WHERE planner_id = UUID_TO_BIN(?))"
+                        + " + (SELECT COUNT(*) FROM planner_keyword_filter WHERE planner_id = UUID_TO_BIN(?))",
+                Integer.class, plannerId.toString(), plannerId.toString());
     }
 
     private Integer catalogRows(UUID plannerId) {
@@ -233,12 +238,51 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
     }
 
     @Test
+    void deleteAccount_WhenCommitted_ClearsTheFilterRowsAndReactivationRebuildsThem() {
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+        int built = filterRows(planner.getId());
+        assertThat(built).isPositive();
+
+        lifecycleService.deleteAccount(owner.getId());
+
+        assertThat(filterRows(planner.getId()))
+                .as("the deactivation's own soft delete hides the planner from the clear's visibility check")
+                .isZero();
+
+        lifecycleService.reactivateAccount(owner.getId());
+
+        assertThat(filterRows(planner.getId())).isEqualTo(built);
+    }
+
+    @Test
+    void lockContentOwnedBy_WhenExplained_ReadsTheOwnersPlannersThroughTheUserIndex() throws Exception {
+        TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        String sql = PlannerRepository.class.getMethod("lockContentOwnedBy", Long.class)
+                .getAnnotation(Query.class).value()
+                .replace(":userId", String.valueOf(owner.getId()));
+
+        List<Map<String, Object>> plan = new JdbcTemplate(dataSource).queryForList("EXPLAIN " + sql);
+        System.out.println("lockContentOwnedBy plan: " + plan);
+
+        assertThat(plan).as("plan %s", plan)
+                .filteredOn(row -> "p".equals(row.get("table")))
+                .singleElement()
+                .satisfies(row -> {
+                    assertThat(row.get("type")).as("planner is read by user_id, not scanned").isEqualTo("ref");
+                    assertThat(row.get("key")).isNotNull();
+                });
+        assertThat(plan).as("plan %s", plan)
+                .filteredOn(row -> "c".equals(row.get("table")))
+                .singleElement()
+                .satisfies(row -> assertThat(row.get("type")).as("each content row by its key").isEqualTo("eq_ref"));
+    }
+
+    @Test
     void reactivateAccount_WhenCommitted_ClearsTheWithdrawalMarkers() {
         lifecycleService.deleteAccount(owner.getId());
         assertThat(withdrawalMarked(planner.getId())).isTrue();
 
         lifecycleService.reactivateAccount(owner.getId());
-        CatalogEffects.drain(catalogSyncService, new JdbcTemplate(dataSource), planner.getId());
 
         assertThat(withdrawalMarked(planner.getId())).isFalse();
     }

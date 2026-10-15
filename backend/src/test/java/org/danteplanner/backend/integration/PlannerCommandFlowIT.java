@@ -20,9 +20,8 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.searchindex.PlannerContentEntityExtractor;
-import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
-import org.danteplanner.backend.support.CatalogEffects;
+import org.danteplanner.backend.support.FilterRowsSync;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -34,11 +33,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.dao.CannotAcquireLockException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.PlatformTransactionManager;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -76,8 +73,6 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
     private static final int UNREACHABLE_ENTITY_ID = 424242;
 
     private static final String PLANTED_ROW = ContentEntityType.THEME_PACK + ":" + UNREACHABLE_ENTITY_ID;
-
-    private static final int SEED_SYNC_ATTEMPTS = 5;
 
     private static final String SIX_FLOOR_CONTENT = TestDataFactory.VALID_CONTENT.replace(
             "{\"themePackId\":\"1005\",\"difficulty\":0,\"giftIds\":[]}",
@@ -118,13 +113,10 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
     private PlannerCatalogService catalogService;
 
     @Autowired
-    private PlannerCatalogSyncService catalogSyncService;
+    private PlatformTransactionManager transactionManager;
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     private User owner;
     private UUID deviceId;
@@ -152,25 +144,10 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        syncRetryingDeadlocks(planner.getId());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
         // MySQL re-serializes a JSON column, so "the content did not change" is only
         // expressible against the stored form, not the string handed to the insert.
         return plannerRepository.findAggregateForOwner(planner.getId(), owner.getId()).orElseThrow();
-    }
-
-    // A concurrent rebuild's gap locks can deadlock this one, and in production drainPending's next
-    // pass retries it; this retry stands in for that pass.
-    private void syncRetryingDeadlocks(UUID plannerId) {
-        for (int attempt = 1; ; attempt++) {
-            try {
-                catalogSyncService.syncPlanner(plannerId, List.of());
-                return;
-            } catch (CannotAcquireLockException deadlock) {
-                if (attempt == SEED_SYNC_ATTEMPTS) {
-                    throw deadlock;
-                }
-            }
-        }
     }
 
     private void plantUnreachableEntityRow(UUID plannerId) {
@@ -218,7 +195,6 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
 
         commandService.upsertPlanner(owner.getId(), deviceId, plannerId,
                 edit(planner, "After Edit", null), false);
-        CatalogEffects.drain(catalogSyncService, jdbcTemplate, plannerId);
 
         PlannerCatalog catalogRow = catalogRepository.findById(plannerId).orElseThrow();
         assertThat(catalogRow.getTitle())
@@ -247,7 +223,6 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
         planner = plannerRepository.findById(plannerId).orElseThrow();
         commandService.upsertPlanner(owner.getId(), deviceId, plannerId,
                 edit(planner, "Keyword Edit", Set.of("Combustion", "Burst")), false);
-        CatalogEffects.drain(catalogSyncService, jdbcTemplate, plannerId);
 
         assertThat(keywordIndex(plannerId))
                 .as("the keyword index is re-extracted from the committed keyword set")
@@ -270,7 +245,6 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
         assertThat(keywordIndex(plannerId)).isNotEmpty();
 
         commandService.deletePlanner(owner.getId(), plannerId);
-        CatalogEffects.drain(catalogSyncService, jdbcTemplate, plannerId);
 
         assertThat(contentRepository.findById(plannerId).orElseThrow().getDeletedAt())
                 .as("the deletion stamp is on the committed row, not only on the in-memory aggregate")
@@ -300,7 +274,6 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
                 .status(PlannerStatus.SAVED)
                 .content(SIX_FLOOR_CONTENT)
                 .build(), false);
-        CatalogEffects.drain(catalogSyncService, jdbcTemplate, plannerId);
 
         Planner saved = plannerRepository.findById(plannerId).orElseThrow();
         assertThat(saved.getContentJson()).contains("1006");
@@ -332,7 +305,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        syncRetryingDeadlocks(planner.getId());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
         return plannerRepository.findById(planner.getId()).orElseThrow();
     }
 
@@ -341,7 +314,6 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
                 .category(category)
                 .status(PlannerStatus.SAVED)
                 .build(), false);
-        CatalogEffects.drain(catalogSyncService, jdbcTemplate, planner.getId());
     }
 
     @Test

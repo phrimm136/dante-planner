@@ -26,7 +26,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
@@ -87,11 +86,30 @@ class ContentTombstoneStoreTest {
     }
 
     @Test
-    void clearTombstoneOrThrow_WhenCalled_DeletesTheScopedKeyOnTheSharedStore() {
-        store.clearTombstoneOrThrow("published-planner", live);
+    void clearTombstones_WhenCalled_DeletesEveryScopedKeyOnTheSharedStoreInOneCall() {
+        store.clearTombstones("published-planner", List.of(live, deleted));
 
-        verify(sharedTemplate).delete("del:published-planner:" + live);
+        verify(sharedTemplate).delete(List.of("del:published-planner:" + live, "del:published-planner:" + deleted));
         verifyNoInteractions(authLocalTemplate);
+    }
+
+    @Test
+    void clearTombstones_WhenNoIds_SkipsRedis() {
+        store.clearTombstones("published-planner", List.of());
+
+        verifyNoInteractions(sharedTemplate, authLocalTemplate);
+    }
+
+    @Test
+    void clearTombstones_WhenRedisFails_LogsAndDoesNotThrow() {
+        when(sharedTemplate.delete(anyList())).thenThrow(new QueryTimeoutException("down"));
+
+        List<ILoggingEvent> warnings = warningsDuring(
+                () -> store.clearTombstones("published-planner", List.of(live)));
+
+        assertThat(warnings).hasSize(1);
+        assertThat(warnings.get(0).getThrowableProxy().getClassName())
+                .isEqualTo(QueryTimeoutException.class.getName());
     }
 
     private List<ILoggingEvent> warningsDuring(Runnable action) {
@@ -155,37 +173,6 @@ class ContentTombstoneStoreTest {
 
         verify(sharedValues).set("del:planner:" + deleted, "1", Duration.ofHours(1));
         verifyNoInteractions(authLocalTemplate);
-    }
-
-    @Test
-    void writeTombstoneOrThrow_WhenCalled_SetsTheScopedKeyWithABoundedTtl() {
-        when(sharedTemplate.opsForValue()).thenReturn(sharedValues);
-
-        store.writeTombstoneOrThrow("published-planner", deleted);
-
-        verify(sharedValues).set("del:published-planner:" + deleted, "1", Duration.ofHours(1));
-    }
-
-    @Test
-    void writeTombstoneOrThrow_WhenRedisFails_Throws() {
-        when(sharedTemplate.opsForValue()).thenReturn(sharedValues);
-        doThrow(new QueryTimeoutException("down")).when(sharedValues)
-                .set("del:published-planner:" + deleted, "1", Duration.ofHours(1));
-
-        assertThatThrownBy(
-                        () -> store.writeTombstoneOrThrow("published-planner", deleted))
-                .isInstanceOf(QueryTimeoutException.class)
-                .hasMessage("down");
-    }
-
-    @Test
-    void clearTombstoneOrThrow_WhenRedisFails_Throws() {
-        when(sharedTemplate.delete("del:published-planner:" + live)).thenThrow(new QueryTimeoutException("down"));
-
-        assertThatThrownBy(
-                        () -> store.clearTombstoneOrThrow("published-planner", live))
-                .isInstanceOf(QueryTimeoutException.class)
-                .hasMessage("down");
     }
 
     @Test

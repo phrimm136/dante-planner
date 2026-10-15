@@ -9,14 +9,14 @@ import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.planner.repository.PlannerKeywordBackfillRepository;
 import org.danteplanner.backend.planner.repository.PlannerKeywordBackfillRepository.KeywordBackfillRow;
-import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
-import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -30,7 +30,8 @@ public class PlannerKeywordBackfillService {
     };
 
     private final PlannerKeywordBackfillRepository repository;
-    private final DomainEventRecorder domainEventRecorder;
+    private final PlannerRepository plannerRepository;
+    private final PlannerCatalogService plannerCatalogService;
     private final ObjectMapper objectMapper;
 
     /**
@@ -39,25 +40,31 @@ public class PlannerKeywordBackfillService {
     public record BackfillPage(UUID lastPlannerId, int scanned, int corrected) {
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public BackfillPage backfillPage(UUID after, int limit) {
         List<KeywordBackfillRow> rows = repository.keywordRowsAfter(after, limit);
         int corrected = 0;
-        for (KeywordBackfillRow row : rows) {
-            String derived = derivedColumn(row.contentKeywords());
-            boolean columnStale = !Objects.equals(derived, canonical(row.columnKeywords()));
-            boolean catalogStale = row.catalogued() && !Objects.equals(derived, canonical(row.catalogKeywords()));
-            if (columnStale) {
-                repository.refreshContentKeywords(row.plannerId(), derived);
+        for (KeywordBackfillRow candidate : rows) {
+            if (!correctionOf(candidate).needed()) {
+                continue;
+            }
+            plannerRepository.lockContent(candidate.plannerId());
+            Optional<KeywordBackfillRow> locked = repository.keywordRowOf(candidate.plannerId());
+            if (locked.isEmpty()) {
+                continue;
+            }
+            KeywordBackfillRow row = locked.get();
+            Correction correction = correctionOf(row);
+            if (correction.columnStale()) {
+                repository.refreshContentKeywords(row.plannerId(), correction.derived());
                 if (row.published()) {
-                    domainEventRecorder.recordDomainEvent(
-                            DomainEventType.PLANNER_CATALOG_CHANGED, row.plannerId(), Map.of());
+                    plannerCatalogService.syncFilterRows(row.plannerId());
                 }
             }
-            if (catalogStale) {
-                repository.refreshCatalogKeywords(row.plannerId(), derived);
+            if (correction.catalogStale()) {
+                repository.refreshCatalogKeywords(row.plannerId(), correction.derived());
             }
-            if (columnStale || catalogStale) {
+            if (correction.needed()) {
                 corrected++;
             }
         }
@@ -65,6 +72,20 @@ public class PlannerKeywordBackfillService {
         return new BackfillPage(last, rows.size(), corrected);
     }
 
+
+    private record Correction(String derived, boolean columnStale, boolean catalogStale) {
+
+        boolean needed() {
+            return columnStale || catalogStale;
+        }
+    }
+
+    private Correction correctionOf(KeywordBackfillRow row) {
+        String derived = derivedColumn(row.contentKeywords());
+        return new Correction(derived,
+                !Objects.equals(derived, canonical(row.columnKeywords())),
+                row.catalogued() && !Objects.equals(derived, canonical(row.catalogKeywords())));
+    }
 
     private String derivedColumn(String selectionJson) {
         JsonNode selection;

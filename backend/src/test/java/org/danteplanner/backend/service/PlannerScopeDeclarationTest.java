@@ -35,6 +35,8 @@ import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.precondition.PlannerPublishValidator;
 import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
+import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
+import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
@@ -57,6 +59,7 @@ import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
+import org.danteplanner.backend.support.OwnershipRows;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.RecordingTombstoneStore;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -79,6 +82,12 @@ class PlannerScopeDeclarationTest {
 
     @Mock
     private PlannerRepository plannerRepository;
+
+    @Mock
+    private PlannerEntityFilterRepository entityFilterRepository;
+
+    @Mock
+    private PlannerKeywordFilterRepository keywordFilterRepository;
     @Mock
     private PlannerStatsRepository statsRepository;
     @Mock
@@ -127,7 +136,8 @@ class PlannerScopeDeclarationTest {
     }
 
     private PlannerCatalogService catalogService() {
-        return new PlannerCatalogService(catalogRepository, plannerRepository, statsRepository, recorder(), mapper,
+        return new PlannerCatalogService(catalogRepository, plannerRepository, statsRepository,
+                entityFilterRepository, keywordFilterRepository, null, mapper,
                 new RecordingTombstoneStore(), RECOMMENDED_THRESHOLD);
     }
 
@@ -168,6 +178,8 @@ class PlannerScopeDeclarationTest {
 
     private Planner stored(Planner planner) {
         when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+        lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+                .thenReturn(Optional.of(OwnershipRows.of(planner)));
         return planner;
     }
 
@@ -206,6 +218,8 @@ class PlannerScopeDeclarationTest {
 
     private void edit(Planner planner) {
         when(plannerRepository.findAggregateForOwner(planner.getId(), OWNER_ID)).thenReturn(Optional.of(planner));
+        lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+                .thenReturn(Optional.of(OwnershipRows.of(planner)));
 
         commandService(TestDataFactory.contentValidator()).upsertAggregate(OWNER_ID, null, planner.getId(),
                 UpsertRequests.draft().id(planner.getId().toString()).title("edited-" + UUID.randomUUID()).build(),
@@ -216,6 +230,8 @@ class PlannerScopeDeclarationTest {
     void deletePlanner_WhenItSucceeds_DeclaresItsEntityItsOwnersListAndTheCatalog() {
         Planner planner = planner(true);
         when(plannerRepository.findAggregateForOwner(planner.getId(), OWNER_ID)).thenReturn(Optional.of(planner));
+        lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+                .thenReturn(Optional.of(OwnershipRows.of(planner)));
 
         commandService(TestDataFactory.contentValidator()).deletePlanner(OWNER_ID, planner.getId());
 

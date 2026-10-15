@@ -7,7 +7,11 @@ import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.searchindex.PlannerContentEntityExtractor;
-import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
+import org.danteplanner.backend.planner.service.PlannerCatalogService;
+import org.danteplanner.backend.planner.service.PlannerPublishingService;
+import org.danteplanner.backend.support.FilterRowsSync;
+import org.danteplanner.backend.support.TransactionSpans;
+import org.danteplanner.backend.support.TransactionSpans.Span;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -15,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -22,6 +27,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,19 +39,25 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.sql.DataSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class PlannerCatalogSyncConcurrencyIT extends ExclusiveDatabaseSupport {
+class PlannerFilterRowsConcurrencyIT extends ExclusiveDatabaseSupport {
 
-    private static final int ROUNDS = 20;
+    private static final int ROUNDS = 500;
+    private static final int MIN_OVERLAPPING_ROUNDS = ROUNDS / 2;
     private static final long BARRIER_TIMEOUT_SECONDS = 10;
     private static final long JOIN_TIMEOUT_MS = 60_000;
 
-    private static final String SECOND_CONTENT = TestDataFactory.VALID_CONTENT
-            .replace("\"selectedGiftIds\":[\"9001\"]", "\"selectedGiftIds\":[\"9003\"]")
-            .replace("{\"id\":\"10101\"", "{\"id\":\"10102\"");
+    private static final String SECOND_CONTENT = IntStream.rangeClosed(1, 8).boxed().reduce(
+            TestDataFactory.VALID_CONTENT
+                    .replace("\"selectedGiftIds\":[\"9001\"]", "\"selectedGiftIds\":[\"9003\"]"),
+            (content, sinner) -> content
+                    .replace("{\"id\":\"1%02d01\"".formatted(sinner), "{\"id\":\"1%02d02\"".formatted(sinner))
+                    .replace("{\"id\":\"2%02d01\"".formatted(sinner), "{\"id\":\"2%02d02\"".formatted(sinner)),
+            (left, right) -> right);
 
     @Autowired
     private UserRepository userRepository;
@@ -57,7 +69,13 @@ class PlannerCatalogSyncConcurrencyIT extends ExclusiveDatabaseSupport {
     private PlannerStatsRepository statsRepository;
 
     @Autowired
-    private PlannerCatalogSyncService catalogSyncService;
+    private PlannerCatalogService catalogService;
+
+    @Autowired
+    private PlannerPublishingService publishingService;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     @Autowired
     private PlannerContentEntityExtractor entityExtractor;
@@ -75,79 +93,111 @@ class PlannerCatalogSyncConcurrencyIT extends ExclusiveDatabaseSupport {
     void setUp() {
         jdbc = new JdbcTemplate(dataSource);
         emptyPlannerTables(jdbc);
-        owner = TestDataFactory.createTestUser(userRepository, "catalog-sync-concurrency@example.com");
+        owner = TestDataFactory.createTestUser(userRepository, "filter-rows-concurrency@example.com");
     }
 
     @Test
-    void syncPlanner_WhenTwoNeverSyncedPlannersShareAnIndexGap_BothCommitEveryRound() throws Exception {
+    void syncFilterRows_WhenTwoNeverSyncedPlannersShareAnIndexGap_BothCommitEveryRound() throws Exception {
         long high = ThreadLocalRandom.current().nextLong();
         long low = ThreadLocalRandom.current().nextLong(0, Long.MAX_VALUE / 2);
         UUID first = publish(new UUID(high, low + 2));
         UUID second = publish(new UUID(high, low + 3));
         for (UUID neighbour : List.of(new UUID(high, low), new UUID(high, low + 10))) {
-            catalogSyncService.syncPlanner(publish(neighbour), List.of());
+            FilterRowsSync.syncFilterRows(transactionManager, catalogService, publish(neighbour));
         }
         Set<String> expected = oracleEntities(first);
 
         List<Throwable> failures = Collections.synchronizedList(new ArrayList<>());
-        for (int round = 0; round < ROUNDS && failures.isEmpty(); round++) {
-            clearFilterRows(first, second);
-            CyclicBarrier start = new CyclicBarrier(2);
-            Thread one = syncThread(first, start, failures);
-            Thread two = syncThread(second, start, failures);
-            one.start();
-            two.start();
-            one.join(JOIN_TIMEOUT_MS);
-            two.join(JOIN_TIMEOUT_MS);
-            assertThat(one.isAlive() || two.isAlive()).as("round %d finished", round).isFalse();
+        int overlapped = 0;
+        try (TransactionSpans.Installed unused = TransactionSpans.install(transactionManager)) {
+            for (int round = 0; round < ROUNDS && failures.isEmpty(); round++) {
+                clearFilterRows(first, second);
+                CyclicBarrier start = new CyclicBarrier(2);
+                Span oneSpan = new Span();
+                Span twoSpan = new Span();
+                Thread one = syncThread(first, start, oneSpan, failures);
+                Thread two = syncThread(second, start, twoSpan, failures);
+                one.start();
+                two.start();
+                one.join(JOIN_TIMEOUT_MS);
+                two.join(JOIN_TIMEOUT_MS);
+                assertThat(one.isAlive() || two.isAlive()).as("round %d finished", round).isFalse();
+                if (oneSpan.overlaps(twoSpan)) {
+                    overlapped++;
+                }
+            }
         }
 
-        assertThat(failures).as("no sync lost a lock conflict to its neighbour").isEmpty();
+        assertThat(failures).as("no rebuild lost a lock conflict to its neighbour").isEmpty();
+        System.out.println("filter rows race: " + overlapped + " of " + ROUNDS + " rounds overlapped");
+        assertThat(overlapped).as("rounds whose rebuild transactions overlapped").isGreaterThanOrEqualTo(
+                MIN_OVERLAPPING_ROUNDS);
         assertThat(indexedEntities(first)).isEqualTo(expected);
         assertThat(indexedEntities(second)).isEqualTo(expected);
     }
 
     @Test
-    void syncPlanner_WhenTheContentChangesBetweenTwoConcurrentSyncs_CommitsEveryRoundWithOnlyTheFinalContentsRows()
+    void syncFilterRows_WhenTheContentChangesBetweenTwoConcurrentRebuilds_CommitsEveryRoundWithOnlyTheFinalContentsRows()
             throws Exception {
         UUID planner = publish(UUID.randomUUID());
-        catalogSyncService.syncPlanner(planner, List.of());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner);
         String original = contentOf(planner);
+        Set<String> originalRows = oracleEntities(planner);
+        jdbc.update("UPDATE planner_content SET content = ? WHERE planner_id = UUID_TO_BIN(?)",
+                SECOND_CONTENT, planner.toString());
+        Set<String> secondRows = oracleEntities(planner);
+        jdbc.update("UPDATE planner_content SET content = ? WHERE planner_id = UUID_TO_BIN(?)",
+                original, planner.toString());
+        Set<String> changed = new HashSet<>(originalRows);
+        changed.removeAll(secondRows);
+        assertThat(changed.size() * 2)
+                .as("each round's content change swaps about half the key set")
+                .isGreaterThanOrEqualTo(originalRows.size() - 4);
 
         List<Throwable> failures = Collections.synchronizedList(new ArrayList<>());
-        for (int round = 0; round < ROUNDS && failures.isEmpty(); round++) {
-            String next = round % 2 == 0 ? SECOND_CONTENT : original;
-            CyclicBarrier start = new CyclicBarrier(2);
-            Thread syncOnly = syncThread(planner, start, failures);
-            Thread writeThenSync = new Thread(() -> {
-                if (awaited(start, failures)) {
-                    try {
-                        jdbc.update("UPDATE planner_content SET content = ? WHERE planner_id = UUID_TO_BIN(?)",
-                                next, planner.toString());
-                        catalogSyncService.syncPlanner(planner, List.of());
-                    } catch (RuntimeException e) {
-                        failures.add(e);
+        int overlapped = 0;
+        try (TransactionSpans.Installed unused = TransactionSpans.install(transactionManager)) {
+            for (int round = 0; round < ROUNDS && failures.isEmpty(); round++) {
+                String next = round % 2 == 0 ? SECOND_CONTENT : original;
+                CyclicBarrier start = new CyclicBarrier(2);
+                Span syncSpan = new Span();
+                Span writeSpan = new Span();
+                Thread syncOnly = syncThread(planner, start, syncSpan, failures);
+                Thread writeThenSync = new Thread(() -> {
+                    if (awaited(start, failures)) {
+                        try {
+                            jdbc.update("UPDATE planner_content SET content = ? WHERE planner_id = UUID_TO_BIN(?)",
+                                    next, planner.toString());
+                            TransactionSpans.within(writeSpan,
+                                    () -> FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner));
+                        } catch (RuntimeException e) {
+                            failures.add(e);
+                        }
                     }
+                }, "write-then-sync");
+                writeThenSync.setDaemon(true);
+                syncOnly.start();
+                writeThenSync.start();
+                syncOnly.join(JOIN_TIMEOUT_MS);
+                writeThenSync.join(JOIN_TIMEOUT_MS);
+                assertThat(syncOnly.isAlive() || writeThenSync.isAlive()).as("round %d finished", round).isFalse();
+                if (syncSpan.overlaps(writeSpan)) {
+                    overlapped++;
                 }
-            }, "write-then-sync");
-            writeThenSync.setDaemon(true);
-            syncOnly.start();
-            writeThenSync.start();
-            syncOnly.join(JOIN_TIMEOUT_MS);
-            writeThenSync.join(JOIN_TIMEOUT_MS);
-            assertThat(syncOnly.isAlive() || writeThenSync.isAlive()).as("round %d finished", round).isFalse();
 
-            assertThat(indexedEntities(planner)).as("round %d", round).isEqualTo(oracleEntities(planner));
+                assertThat(indexedEntities(planner)).as("round %d", round).isEqualTo(oracleEntities(planner));
+            }
         }
 
         assertThat(failures).isEmpty();
+        System.out.println("filter rows race: " + overlapped + " of " + ROUNDS + " rounds overlapped");
+        assertThat(overlapped).as("rounds whose rebuild transactions overlapped").isGreaterThanOrEqualTo(
+                MIN_OVERLAPPING_ROUNDS);
     }
 
     @Test
-    void drainPending_WhenItSyncsAPlanner_RunsTheSyncAtReadCommitted() throws Exception {
-        UUID planner = publish(UUID.randomUUID());
-        jdbc.update("INSERT INTO domain_events (event_type, aggregate_id, payload) "
-                + "VALUES ('PLANNER_CATALOG_CHANGED', UUID_TO_BIN(?), '{}')", planner.toString());
+    void publish_WhenTheContentRowIsLocked_WaitsAtReadCommitted() throws Exception {
+        UUID planner = draft(UUID.randomUUID());
 
         try (Connection holder = dataSource.getConnection()) {
             holder.setAutoCommit(false);
@@ -157,7 +207,8 @@ class PlannerCatalogSyncConcurrencyIT extends ExclusiveDatabaseSupport {
                 lock.executeQuery().close();
             }
 
-            CompletableFuture<Integer> pass = CompletableFuture.supplyAsync(catalogSyncService::drainPending);
+            CompletableFuture<Void> pass = CompletableFuture.runAsync(
+                    () -> publishingService.publish(owner.getId(), planner));
             try {
                 assertThat(waitingIsolationLevel()).isEqualTo("READ COMMITTED");
             } finally {
@@ -167,16 +218,17 @@ class PlannerCatalogSyncConcurrencyIT extends ExclusiveDatabaseSupport {
         }
     }
 
-    private Thread syncThread(UUID plannerId, CyclicBarrier start, List<Throwable> failures) {
+    private Thread syncThread(UUID plannerId, CyclicBarrier start, Span span, List<Throwable> failures) {
         Thread thread = new Thread(() -> {
             if (awaited(start, failures)) {
                 try {
-                    catalogSyncService.syncPlanner(plannerId, List.of());
+                    TransactionSpans.within(span,
+                            () -> FilterRowsSync.syncFilterRows(transactionManager, catalogService, plannerId));
                 } catch (RuntimeException e) {
                     failures.add(e);
                 }
             }
-        }, "sync-" + plannerId);
+        }, "rebuild-" + plannerId);
         thread.setDaemon(true);
         return thread;
     }
@@ -206,16 +258,24 @@ class PlannerCatalogSyncConcurrencyIT extends ExclusiveDatabaseSupport {
             if (!levels.isEmpty()) {
                 return levels.getFirst();
             }
-            assertThat(Instant.now()).as("the sync never waited on the held content row").isBefore(deadline);
+            assertThat(Instant.now()).as("the write never waited on the held content row").isBefore(deadline);
             TimeUnit.MILLISECONDS.sleep(100);
         }
     }
 
     private UUID publish(UUID id) {
+        return planner(id, true);
+    }
+
+    private UUID draft(UUID id) {
+        return planner(id, false);
+    }
+
+    private UUID planner(UUID id, boolean published) {
         Planner planner = TestDataFactory.planner(owner)
                 .id(id)
-                .selectedKeywords(Set.of("Sinking", "Burn"))
-                .published(true)
+                .selectedKeywords(Set.of("Sinking", "Combustion"))
+                .published(published)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         return planner.getId();

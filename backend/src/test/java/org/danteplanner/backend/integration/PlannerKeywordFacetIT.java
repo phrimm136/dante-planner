@@ -12,10 +12,10 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.scheduler.PlannerKeywordBackfill;
-import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
-import org.danteplanner.backend.support.CatalogEffects;
+import org.danteplanner.backend.user.service.UserAccountLifecycleService;
+import org.danteplanner.backend.support.FilterRowsSync;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.UpsertRequests;
 import org.junit.jupiter.api.AfterEach;
@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import java.util.List;
@@ -66,7 +67,10 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
     private PlannerCatalogService catalogService;
 
     @Autowired
-    private PlannerCatalogSyncService catalogSyncService;
+    private PlatformTransactionManager transactionManager;
+
+    @Autowired
+    private UserAccountLifecycleService lifecycleService;
 
     @Autowired
     private DataSource dataSource;
@@ -108,7 +112,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
         return planner;
     }
 
@@ -125,7 +129,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(empty.getId()).build());
         catalogService.add(empty);
-        catalogSyncService.syncPlanner(empty.getId(), List.of());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, empty.getId());
 
         mockMvc.perform(get("/api/planner/md/published").param("identity", "10101"))
                 .andExpect(status().isOk())
@@ -170,7 +174,6 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
                 .selectedKeywords(Set.of("AccelBullet", "NotAKeyword"))
                 .build();
         commandService.upsertPlanner(owner.getId(), null, planner.getId(), req, false);
-        CatalogEffects.drain(catalogSyncService, jdbc(), planner.getId());
 
         // Stored JSON carries only the normalized current id
         String stored = new JdbcTemplate(dataSource).queryForObject(
@@ -319,9 +322,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
     }
 
     private Integer runBackfill() {
-        Integer corrected = keywordBackfill.backfill();
-        CatalogEffects.drainAll(catalogSyncService, jdbc());
-        return corrected;
+        return keywordBackfill.backfill();
     }
 
     private void clearColumns(UUID plannerId) {
@@ -350,7 +351,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
         clearColumns(planner.getId());
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
         return planner;
     }
 
@@ -366,6 +367,21 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
         assertThat(column("planner_content", planner.getId())).isEqualTo("[\"Burst\"]");
         assertThat(column("planner_catalog", planner.getId())).isEqualTo("[\"Burst\"]");
         assertThat(indexedKeywords(planner.getId())).containsExactly("Burst");
+    }
+
+    @Test
+    void backfill_WhenTheOwnerDeletedTheirAccount_CorrectsTheColumnAndLeavesNoFilterRows() {
+        Planner planner = publishedWithoutColumn("Backfill Deleted Owner", List.of("Burst"));
+        lifecycleService.deleteAccount(owner.getId());
+        jdbc().update("INSERT INTO planner_keyword_filter (keyword, planner_id) VALUES ('Burst', UUID_TO_BIN(?))",
+                planner.getId().toString());
+
+        runBackfill();
+
+        assertThat(column("planner_content", planner.getId())).isEqualTo("[\"Burst\"]");
+        assertThat(indexedKeywords(planner.getId()))
+                .as("the owner's planners are invisible, so the correction clears their rows instead of rebuilding")
+                .isEmpty();
     }
 
     @Test
@@ -393,7 +409,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
                 planner.getId().toString());
         jdbc().update("UPDATE planner_catalog SET selected_keywords = '[\"Sinking\"]' WHERE planner_id = UUID_TO_BIN(?)",
                 planner.getId().toString());
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
         assertThat(indexedKeywords(planner.getId())).containsExactly("Sinking");
 
         runBackfill();
@@ -408,7 +424,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
         Planner planner = publishedWithoutColumn("Backfill Legacy Column", List.of("ChargeLoad"));
         jdbc().update("UPDATE planner_content SET selected_keywords = '[\"ChargeLoad\"]' WHERE planner_id = UUID_TO_BIN(?)",
                 planner.getId().toString());
-        catalogSyncService.syncPlanner(planner.getId(), List.of());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
         assertThat(indexedKeywords(planner.getId())).containsExactly("ChargeLoad");
 
         runBackfill();

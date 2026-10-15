@@ -25,9 +25,7 @@ public class DomainEventRecorder {
     @Transactional(propagation = Propagation.MANDATORY)
     public void recordDomainEvent(DomainEventType type, UUID aggregateId, Map<String, Object> payload) {
         DomainEvent saved = events.insert(DomainEvent.of(type, aggregateId, serializePayload(payload)));
-        if (!type.isBatchConsumed()) {
-            eventPublisher.publishEvent(new DomainEventRecorded(saved.getId()));
-        }
+        eventPublisher.publishEvent(new DomainEventRecorded(saved.getId()));
     }
 
     private String serializePayload(Map<String, Object> payload) {

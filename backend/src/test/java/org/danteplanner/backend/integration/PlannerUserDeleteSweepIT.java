@@ -4,19 +4,20 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
-import org.danteplanner.backend.planner.service.PlannerCatalogSyncService;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.repository.UserSettingsRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.user.service.UserSettingsService;
+import org.danteplanner.backend.support.FilterRowsSync;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import java.time.Instant;
@@ -51,7 +52,7 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
     private PlannerCatalogService catalogService;
 
     @Autowired
-    private PlannerCatalogSyncService catalogSyncService;
+    private PlatformTransactionManager transactionManager;
 
     @Autowired
     private UserAccountLifecycleService lifecycleService;
@@ -158,7 +159,7 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
         statsRepository.save(PlannerStats.builder()
                 .plannerId(published.getId()).viewCount(3).upvotes(1).build());
         catalogService.add(published);
-        catalogSyncService.syncPlanner(published.getId(), List.of());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, published.getId());
         insertPlannerVote(other.getId(), published.getId());
         jdbc.update("INSERT INTO planner_views (planner_id, viewer_hash, view_date, created_at) "
                 + "VALUES (UUID_TO_BIN(?), SHA2('viewer', 256), ?, NOW())",
