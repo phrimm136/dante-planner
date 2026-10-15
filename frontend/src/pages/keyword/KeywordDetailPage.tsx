@@ -9,9 +9,14 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { KeywordBacklinkList } from './components/KeywordBacklinkList'
 import { KeywordCard } from './components/KeywordCard'
 import { KeywordDetailSkeleton } from './components/KeywordDetailSkeleton'
-import { useKeywordDetailSpec, useKeywordDetailI18n } from './hooks/useKeywordDetailData'
+import {
+  useKeywordDetailSpec,
+  useKeywordDetailI18n,
+  useKeywordDetailUsage,
+} from './hooks/useKeywordDetailData'
 import { useIdentityListI18n } from '@/pages/identity'
 import { useEGOListI18n } from '@/pages/ego'
+import { useAssistantListI18n, useEnemyListI18n, useSinnerEventListI18n } from '@/pages/battle'
 import { useEGOGiftListI18n } from '@/shared/egoGift'
 import { getSinnerFromId } from '@/shared/gameData'
 import colorCode from '@static/data/color/skillDescColorCode.json'
@@ -96,6 +101,52 @@ function KeywordRelatedEgoGifts({ ids }: { ids: string[] }) {
   )
 }
 
+function battleUnitNames(list: Record<string, { name: string }>): Record<string, string> {
+  return Object.fromEntries(Object.entries(list).map(([unitId, entry]) => [unitId, entry.name]))
+}
+
+function KeywordRelatedSinners({ id }: { id: string }) {
+  const usage = useKeywordDetailUsage(id)
+  const names = useSinnerEventListI18n()
+
+  return (
+    <KeywordBacklinkList
+      labelKey="keyword.relatedSinners"
+      ids={usage?.sinnerEvent ?? []}
+      names={battleUnitNames(names)}
+      to="/battle/sinnerEvent/$id"
+    />
+  )
+}
+
+function KeywordRelatedUnits({ id }: { id: string }) {
+  const usage = useKeywordDetailUsage(id)
+  const names = useEnemyListI18n()
+
+  return (
+    <KeywordBacklinkList
+      labelKey="keyword.relatedUnits"
+      ids={usage?.enemy ?? []}
+      names={battleUnitNames(names)}
+      to="/battle/enemy/$id"
+    />
+  )
+}
+
+function KeywordRelatedOthers({ id }: { id: string }) {
+  const usage = useKeywordDetailUsage(id)
+  const names = useAssistantListI18n()
+
+  return (
+    <KeywordBacklinkList
+      labelKey="keyword.relatedOthers"
+      ids={usage?.assistant ?? []}
+      names={battleUnitNames(names)}
+      to="/battle/assistant/$id"
+    />
+  )
+}
+
 function KeywordDescriptionContent({ id }: { id: string }) {
   const { t } = useTranslation('database')
   const i18nData = useKeywordDetailI18n(id)
@@ -151,6 +202,15 @@ function KeywordDetailContent() {
         </Suspense>
         <Suspense fallback={<BacklinkSkeleton />}>
           <KeywordRelatedEgoGifts ids={spec.egoGifts} />
+        </Suspense>
+        <Suspense fallback={<BacklinkSkeleton />}>
+          <KeywordRelatedSinners id={id} />
+        </Suspense>
+        <Suspense fallback={<BacklinkSkeleton />}>
+          <KeywordRelatedUnits id={id} />
+        </Suspense>
+        <Suspense fallback={<BacklinkSkeleton />}>
+          <KeywordRelatedOthers id={id} />
         </Suspense>
       </LabeledPanel>
     </div>

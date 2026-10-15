@@ -11,3 +11,6 @@ export {
   BattleStageTextsSchema,
 } from './schemas/BattleDetailSchemas'
 export { BATTLE_FAMILIES } from './lib/battleVocabulary'
+export { useEnemyListI18n } from './hooks/useEnemyListData'
+export { useAssistantListI18n } from './hooks/useAssistantListData'
+export { useSinnerEventListI18n } from './hooks/useSinnerEventListData'

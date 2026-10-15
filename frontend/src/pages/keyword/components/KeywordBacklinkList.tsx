@@ -2,7 +2,13 @@ import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-type KeywordBacklinkRoute = '/identity/$id' | '/ego/$id' | '/ego-gift/$id'
+type KeywordBacklinkRoute =
+  | '/identity/$id'
+  | '/ego/$id'
+  | '/ego-gift/$id'
+  | '/battle/enemy/$id'
+  | '/battle/assistant/$id'
+  | '/battle/sinnerEvent/$id'
 
 interface KeywordBacklinkListProps<Id extends string> {
   labelKey: string
@@ -22,7 +28,7 @@ export function KeywordBacklinkList<Id extends string>({
   const { t } = useTranslation('database')
 
   return (
-    <div className="space-y-1.5">
+    <div data-testid={labelKey} className="space-y-1.5">
       <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
         {t(labelKey)}
       </div>
