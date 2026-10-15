@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 const GZIP_LEVEL = 9
 
-const SCRIPT_TAG = /<script\b([^>]*)>/g
+const SCRIPT_TAG = /<script\b([^>]*)>/gi
 const MODULE_TYPE = /\btype\s*=\s*["']module["']/
 const SRC_ATTR = /\bsrc\s*=\s*["']([^"']+)["']/
 
