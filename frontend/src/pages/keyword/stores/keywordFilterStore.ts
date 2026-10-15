@@ -6,4 +6,7 @@ export const keywordFilterStore = createFilterStore({
   selectedIdentities: new Set<string>(),
   selectedEgos: new Set<string>(),
   selectedEgoGifts: new Set<string>(),
+  selectedEnemies: new Set<string>(),
+  selectedAssistants: new Set<string>(),
+  selectedSinnerEvents: new Set<string>(),
 })

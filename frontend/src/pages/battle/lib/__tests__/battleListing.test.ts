@@ -4,6 +4,14 @@ import enemySpec from '@static/data/enemySpecList.json'
 import assistantSpec from '@static/data/assistantSpecList.json'
 import enemyNamesKR from '@static/i18n/KR/enemyNameList.json'
 import identityNamesKR from '@static/i18n/KR/identityNameList.json'
+import sinnerEventSpec from '@static/data/sinnerEventSpecList.json'
+import sinnerEventNamesKR from '@static/i18n/KR/sinnerEventNameList.json'
+import facetNamesKR from '@static/i18n/KR/battleFacetNames.json'
+import { BattleFacetNamesSchema } from '../../schemas/BattleSpecSchemas'
+import {
+  SinnerEventNameListSchema,
+  SinnerEventSpecListSchema,
+} from '../../schemas/SinnerEventSchemas'
 import { AssistantSpecListSchema } from '../../schemas/AssistantSchemas'
 import {
   EnemyNameListSchema,
@@ -12,7 +20,9 @@ import {
 } from '../../schemas/EnemySchemas'
 import { toAssistantEntity } from '../assistant/assistantEntity'
 import {
+  battleCardName,
   battleDisplayName,
+  battleEventTitle,
   battleListName,
   envyHeaderNames,
   envyIdentityTitle,
@@ -168,5 +178,39 @@ describe('envy-sin card names', () => {
       name: 'W사 3등급\n정리 요원',
       abnormalityLine: '질투 죄종?',
     })
+  })
+})
+
+describe('sinner event card names', () => {
+  const chapters = new Map(
+    Object.entries(SinnerEventSpecListSchema.parse(sinnerEventSpec)).map(([id, spec]) => [
+      id,
+      spec.chapters,
+    ]),
+  )
+  const names = SinnerEventNameListSchema.parse(sinnerEventNamesKR)
+  const chapterNames = BattleFacetNamesSchema.parse(facetNamesKR).chapters
+  const t = (key: string) => key
+  const cardName = (id: string) =>
+    battleCardName(
+      battleListName(names[id], 'story', id, undefined),
+      battleEventTitle('sinnerEvent', chapters.get(id) ?? [], chapterNames, t),
+    )
+
+  it('appends the event name of the card chapter', () => {
+    expect(cardName('10101')).toBe('이상 (한봄 밤의 꿈 2)')
+    expect(cardName('400025')).toBe('이상 (한봄 밤의 꿈 3)')
+  })
+
+  it('gives every sinner event card its own name', () => {
+    const labels = [...chapters.keys()].map(cardName)
+    expect(new Set(labels).size).toBe(labels.length)
+  })
+
+  it('appends no event name to other families', () => {
+    expect(
+      battleEventTitle('enemy', ['aprilFools:fools_2025_entrance_popup_title'], chapterNames, t),
+    ).toBeUndefined()
+    expect(battleCardName('굴절된 이발사', undefined)).toBe('굴절된 이발사')
   })
 })

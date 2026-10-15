@@ -9,6 +9,9 @@ export interface KeywordFacetState {
   selectedIdentities: ReadonlySet<string>
   selectedEgos: ReadonlySet<string>
   selectedEgoGifts: ReadonlySet<string>
+  selectedEnemies: ReadonlySet<string>
+  selectedAssistants: ReadonlySet<string>
+  selectedSinnerEvents: ReadonlySet<string>
 }
 
 export const KEYWORD_FACETS: readonly Facet<KeywordEntity, KeywordFacetState>[] = [
@@ -16,6 +19,9 @@ export const KEYWORD_FACETS: readonly Facet<KeywordEntity, KeywordFacetState>[] 
   { sel: (s) => s.selectedIdentities, get: (k) => k.identities, mode: 'any' },
   { sel: (s) => s.selectedEgos, get: (k) => k.egos, mode: 'any' },
   { sel: (s) => s.selectedEgoGifts, get: (k) => k.egoGifts, mode: 'any' },
+  { sel: (s) => s.selectedEnemies, get: (k) => k.enemies, mode: 'any' },
+  { sel: (s) => s.selectedAssistants, get: (k) => k.assistants, mode: 'any' },
+  { sel: (s) => s.selectedSinnerEvents, get: (k) => k.sinnerEvents, mode: 'any' },
 ]
 
 export function buildKeywordSearchTerms(

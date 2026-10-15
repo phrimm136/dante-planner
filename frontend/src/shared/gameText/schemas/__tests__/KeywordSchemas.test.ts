@@ -12,6 +12,9 @@ describe('BattleKeywordSpecSchema', () => {
     identities: ['10101', '10205'],
     egos: ['20301'],
     egoGifts: ['9001'],
+    enemies: ['8041'],
+    assistants: ['400013'],
+    sinnerEvents: ['10101'],
   }
 
   it('accepts valid entry with all fields', () => {
@@ -34,6 +37,9 @@ describe('BattleKeywordSpecSchema', () => {
       identities: [],
       egos: [],
       egoGifts: [],
+      enemies: [],
+      assistants: [],
+      sinnerEvents: [],
     })
     expect(result.success).toBe(true)
   })
@@ -62,6 +68,15 @@ describe('BattleKeywordSpecSchema', () => {
     expect(result.success).toBe(false)
   })
 
+  it.each(['enemies', 'assistants', 'sinnerEvents'] as const)(
+    'rejects entry missing %s',
+    (field) => {
+      const incomplete: Partial<typeof validEntry> = { ...validEntry }
+      delete incomplete[field]
+      expect(BattleKeywordSpecSchema.safeParse(incomplete).success).toBe(false)
+    },
+  )
+
   it('rejects extra fields (strict mode)', () => {
     const result = BattleKeywordSpecSchema.safeParse({
       ...validEntry,
@@ -80,6 +95,9 @@ describe('BattleKeywordSpecListSchema', () => {
         identities: ['10101'],
         egos: [],
         egoGifts: [],
+        enemies: ['8041'],
+        assistants: [],
+        sinnerEvents: [],
       },
       Burn: {
         iconId: 'Burn',
@@ -87,6 +105,9 @@ describe('BattleKeywordSpecListSchema', () => {
         identities: [],
         egos: ['20301'],
         egoGifts: [],
+        enemies: [],
+        assistants: [],
+        sinnerEvents: ['10101'],
       },
     })
     expect(result.success).toBe(true)

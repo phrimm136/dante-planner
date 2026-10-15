@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import enemySpec from '@static/data/enemySpecList.json'
 import enFacetNames from '@static/i18n/EN/battleFacetNames.json'
+import krFacetNames from '@static/i18n/KR/battleFacetNames.json'
 import i18n from '@/lib/i18n'
 import { EnemySpecListSchema } from '../../schemas/EnemySchemas'
 import {
@@ -45,11 +46,12 @@ describe('enemy facet labels', () => {
     ).toBe("A Midspring Night's Dream 2")
   })
 
-  it('labels EXP luxcavation from its template and thread dungeons by name', () => {
+  it('labels EXP luxcavation from its template and thread dungeons by their attribute', () => {
     expect(luxcavationLabel('exp', enFacetNames.luxcavations, translate)).toBe('EXP Luxcavation')
     expect(luxcavationLabel('thread:1', enFacetNames.luxcavations, translate)).toBe(
-      "Ebony Queen's Apple",
+      'Thread Luxcavation (Wrath)',
     )
+    expect(luxcavationLabel('thread:1', krFacetNames.luxcavations, translate)).toBe('끈 채광(분노)')
   })
 })
 

@@ -2,7 +2,9 @@ import { z } from 'zod'
 import { EnemyIdSchema } from '@/shared/gameData'
 import { BATTLE_SPEC_SHAPE, BattleNameListSchema } from './BattleSpecSchemas'
 
-export const EnemySpecSchema = z.object(BATTLE_SPEC_SHAPE).strict()
+export const EnemySpecSchema = z
+  .object({ ...BATTLE_SPEC_SHAPE, personalityId: z.number().optional() })
+  .strict()
 
 export const EnemySpecListSchema = z.record(EnemyIdSchema, EnemySpecSchema)
 

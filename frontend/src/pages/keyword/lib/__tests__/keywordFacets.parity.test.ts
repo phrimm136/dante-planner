@@ -14,7 +14,15 @@ import type { KeywordEntity } from '../../types/KeywordTypes'
 import { toKeywordEntity } from '../keywordEntity'
 
 function legacyMatches(keyword: KeywordEntity, state: KeywordFacetState): boolean {
-  const { selectedBuffTypes, selectedIdentities, selectedEgos, selectedEgoGifts } = state
+  const {
+    selectedBuffTypes,
+    selectedIdentities,
+    selectedEgos,
+    selectedEgoGifts,
+    selectedEnemies,
+    selectedAssistants,
+    selectedSinnerEvents,
+  } = state
 
   if (selectedBuffTypes.size > 0 && !selectedBuffTypes.has(keyword.buffType as BuffType)) {
     return false
@@ -32,6 +40,18 @@ function legacyMatches(keyword: KeywordEntity, state: KeywordFacetState): boolea
     if (!keyword.egoGifts.some((id) => selectedEgoGifts.has(id))) return false
   }
 
+  if (selectedEnemies.size > 0) {
+    if (!keyword.enemies.some((id) => selectedEnemies.has(id))) return false
+  }
+
+  if (selectedAssistants.size > 0) {
+    if (!keyword.assistants.some((id) => selectedAssistants.has(id))) return false
+  }
+
+  if (selectedSinnerEvents.size > 0) {
+    if (!keyword.sinnerEvents.some((id) => selectedSinnerEvents.has(id))) return false
+  }
+
   return true
 }
 
@@ -41,6 +61,9 @@ const makeKeyword = (
   identities: string[],
   egos: string[],
   egoGifts: string[],
+  enemies: string[],
+  assistants: string[],
+  sinnerEvents: string[],
 ): KeywordEntity =>
   toKeywordEntity(id, {
     iconId: null,
@@ -48,14 +71,26 @@ const makeKeyword = (
     identities: identities.map((identityId) => IdentityIdSchema.parse(identityId)),
     egos: egos.map((egoId) => EGOIdSchema.parse(egoId)),
     egoGifts,
+    enemies,
+    assistants,
+    sinnerEvents,
   })
 
 const ITEMS: KeywordEntity[] = [
-  makeKeyword('Combustion', 'Negative', ['10101'], ['20101'], ['9001']),
-  makeKeyword('Laceration', 'Positive', ['10101', '10201'], ['20101', '20201'], ['9001', '9002']),
-  makeKeyword('Tremor', 'Negative', [], [], []),
-  makeKeyword('Poise', 'Positive', ['10201'], ['20201'], ['9002']),
-  makeKeyword('Sinking', 'Neutral', ['10301'], [], ['9001', '9003']),
+  makeKeyword('Combustion', 'Negative', ['10101'], ['20101'], ['9001'], ['8041'], ['400001'], []),
+  makeKeyword(
+    'Laceration',
+    'Positive',
+    ['10101', '10201'],
+    ['20101', '20201'],
+    ['9001', '9002'],
+    ['8041', '8100'],
+    ['400013'],
+    ['400027'],
+  ),
+  makeKeyword('Tremor', 'Negative', [], [], [], [], [], []),
+  makeKeyword('Poise', 'Positive', ['10201'], ['20201'], ['9002'], ['8100'], [], ['10301']),
+  makeKeyword('Sinking', 'Neutral', ['10301'], [], ['9001', '9003'], [], ['400013'], ['400027']),
 ]
 
 const BASE_STATE: KeywordFacetState = {
@@ -63,6 +98,9 @@ const BASE_STATE: KeywordFacetState = {
   selectedIdentities: new Set(),
   selectedEgos: new Set(),
   selectedEgoGifts: new Set(),
+  selectedEnemies: new Set(),
+  selectedAssistants: new Set(),
+  selectedSinnerEvents: new Set(),
 }
 
 const STATES = enumerateSelectionStates(BASE_STATE, {
@@ -70,11 +108,14 @@ const STATES = enumerateSelectionStates(BASE_STATE, {
   selectedIdentities: [[], ['10101'], ['10201'], ['10101', '10201']],
   selectedEgos: [[], ['20101'], ['20201'], ['20101', '20201']],
   selectedEgoGifts: [[], ['9001'], ['9002'], ['9001', '9002']],
+  selectedEnemies: [[], ['8041'], ['8100'], ['8041', '8100']],
+  selectedAssistants: [[], ['400001'], ['400013'], ['400001', '400013']],
+  selectedSinnerEvents: [[], ['10301'], ['400027'], ['10301', '400027']],
 })
 
 describe('KEYWORD_FACETS parity', () => {
   it('enumerates every selection combination', () => {
-    expect(STATES.length).toBe(4 ** 4)
+    expect(STATES.length).toBe(4 ** 7)
   })
 
   it('survives the same ids as the pre-migration guards', () => {

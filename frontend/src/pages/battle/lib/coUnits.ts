@@ -1,16 +1,20 @@
 import type { EngagementRow } from '../schemas/BattleDetailSchemas'
 import type { BattleNameList } from '../schemas/BattleSpecSchemas'
-import { battleListName, envyIdentityTitle } from './battleListing'
+import type { AssistantSpec } from '../types/AssistantTypes'
+import type { EnemySpec } from '../types/EnemyTypes'
+import type { SinnerEventSpec } from '../types/SinnerEventTypes'
+import { battleCardName, battleListName, envyIdentityTitle } from './battleListing'
 import type { BattleFamily, CoUnitRelation } from './battleVocabulary'
 
-export interface CoUnitCardSpec {
-  personalityId?: number | undefined
-}
-
 export interface CoUnitCatalog {
-  specs: Readonly<Record<BattleFamily, Readonly<Record<string, CoUnitCardSpec>>>>
+  specs: {
+    enemy: Readonly<Record<string, EnemySpec>>
+    assistant: Readonly<Record<string, AssistantSpec>>
+    sinnerEvent: Readonly<Record<string, SinnerEventSpec>>
+  }
   names: Readonly<Record<BattleFamily, BattleNameList>>
   identityTitles: Readonly<Record<string, string>>
+  eventTitle: (family: BattleFamily, id: string) => string | undefined
 }
 
 export interface CoUnitChip {
@@ -37,18 +41,23 @@ export function coUnitChips(
   for (const { card, relation } of row.coUnits) {
     const id = String(card.id)
     if (card.family === current.family && id === current.id) continue
-    const spec = catalog.specs[card.family][id]
-    if (spec === undefined) continue
+    if (catalog.specs[card.family][id] === undefined) continue
     const key = `${card.family}/${id}/${relation ?? ''}`
     if (seen.has(key)) continue
     seen.add(key)
     chips.push({
       key,
-      label: battleListName(
-        catalog.names[card.family][id],
-        row.case,
-        id,
-        envyIdentityTitle(spec.personalityId, catalog.identityTitles),
+      label: battleCardName(
+        battleListName(
+          catalog.names[card.family][id],
+          row.case,
+          id,
+          envyIdentityTitle(
+            card.family === 'enemy' ? catalog.specs.enemy[id]?.personalityId : undefined,
+            catalog.identityTitles,
+          ),
+        ),
+        catalog.eventTitle(card.family, id),
       ),
       family: card.family,
       id,

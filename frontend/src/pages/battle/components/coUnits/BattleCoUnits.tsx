@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { SECTION_STYLES } from '@/lib/constants'
 import { useIdentityListI18n } from '@/pages/identity'
 import { useAssistantListI18n, useAssistantListSpec } from '../../hooks/useAssistantListData'
+import { useBattleEventTitle } from '../../hooks/useBattleCardNames'
 import { useEnemyListI18n, useEnemyListSpec } from '../../hooks/useEnemyListData'
 import { useSinnerEventListI18n, useSinnerEventListSpec } from '../../hooks/useSinnerEventListData'
 import { BATTLE_DETAIL_ROUTES, type BattleFamily } from '../../lib/battleVocabulary'
@@ -31,6 +32,7 @@ function useCoUnitCatalog(): CoUnitCatalog {
       sinnerEvent: useSinnerEventListI18n(),
     },
     identityTitles: useIdentityListI18n(),
+    eventTitle: useBattleEventTitle(),
   }
 }
 

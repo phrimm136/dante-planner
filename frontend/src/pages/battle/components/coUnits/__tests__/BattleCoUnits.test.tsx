@@ -77,7 +77,7 @@ describe('BattleCoUnits', () => {
     const labels = await chipLabels()
     expect(labels).toContain('분노를 머금은 장미 (소환)')
     expect(labels).toContain('색욕을 머금은 장미 (소환)')
-    expect(screen.getByText('함께 등장하는 적')).toBeDefined()
+    expect(screen.getByText('함께 등장하는 유닛')).toBeDefined()
   })
 
   it('marks 장미 표지판 as the summoner on the rose card', async () => {
@@ -121,7 +121,7 @@ describe('BattleCoUnits', () => {
   it('renders nothing on a row without co-units', () => {
     mountChips({ ...rowOf(enemy1137, 1137, '10827'), coUnits: [] }, '1137')
     expect(screen.queryByTestId('battle-co-units')).toBeNull()
-    expect(screen.queryByText('함께 등장하는 적')).toBeNull()
+    expect(screen.queryByText('함께 등장하는 유닛')).toBeNull()
   })
 
   it('renders nothing when every co-unit is the current card', async () => {

@@ -4,14 +4,23 @@ import enemySpec from '@static/data/enemySpecList.json'
 import assistantSpec from '@static/data/assistantSpecList.json'
 import enemyNames from '@static/i18n/EN/enemyNameList.json'
 import enemyNamesKR from '@static/i18n/KR/enemyNameList.json'
+import sinnerEventSpec from '@static/data/sinnerEventSpecList.json'
+import sinnerEventNamesKR from '@static/i18n/KR/sinnerEventNameList.json'
+import facetNamesKR from '@static/i18n/KR/battleFacetNames.json'
 import type { FilterState } from '@/components/hooks/filterStore'
 import { AssistantSpecListSchema } from '../../schemas/AssistantSchemas'
+import { BattleFacetNamesSchema } from '../../schemas/BattleSpecSchemas'
+import {
+  SinnerEventNameListSchema,
+  SinnerEventSpecListSchema,
+} from '../../schemas/SinnerEventSchemas'
 import { EnemyNameListSchema, EnemySpecListSchema } from '../../schemas/EnemySchemas'
 import { toAssistantEntity } from '../assistant/assistantEntity'
 import { matchesBattle, type BattleFacetState } from '../battleFilter'
-import { buildBattleSearchTerms, type BattleCardItem } from '../battleListing'
+import { battleEventTitle, buildBattleSearchTerms, type BattleCardItem } from '../battleListing'
 import type { BattleCase, BattleFamily, HiddenBattle } from '../battleVocabulary'
 import { toEnemyEntity } from '../enemy/enemyEntity'
+import { toSinnerEventEntity } from '../sinnerEvent/sinnerEventEntity'
 
 const ENEMIES = EnemySpecListSchema.parse(enemySpec)
 const ASSISTANTS = AssistantSpecListSchema.parse(assistantSpec)
@@ -48,7 +57,11 @@ function matches(
   names = NAMES,
 ): boolean {
   const state: FilterState<BattleFacetState> = { values: { ...EMPTY, ...values }, searchQuery }
-  return matchesBattle(item, state, buildBattleSearchTerms(item.entity.id, names, mode, undefined))
+  return matchesBattle(
+    item,
+    state,
+    buildBattleSearchTerms(item.entity.id, names, mode, undefined, undefined),
+  )
 }
 
 describe('matchesBattle', () => {
@@ -113,7 +126,41 @@ describe('name search', () => {
   })
 
   it('matches the composed envy name by its identity title', () => {
-    const terms = buildBattleSearchTerms('1099', NAMES_KR, 'story', 'W사 3등급\n정리 요원')
+    const terms = buildBattleSearchTerms(
+      '1099',
+      NAMES_KR,
+      'story',
+      'W사 3등급\n정리 요원',
+      undefined,
+    )
     expect(terms).toContain('질투 죄종? - w사 3등급 정리 요원')
+  })
+})
+
+describe('sinner event search', () => {
+  const specs = SinnerEventSpecListSchema.parse(sinnerEventSpec)
+  const names = SinnerEventNameListSchema.parse(sinnerEventNamesKR)
+  const chapterNames = BattleFacetNamesSchema.parse(facetNamesKR).chapters
+  const t = (key: string) => key
+
+  function found(id: string, searchQuery: string): boolean {
+    const entry = Object.entries(specs).find(([key]) => key === id)
+    if (entry === undefined) throw new Error(`no sinner event ${id}`)
+    const item: BattleCardItem = {
+      family: 'sinnerEvent',
+      entity: toSinnerEventEntity(id, entry[1]),
+    }
+    const eventTitle = battleEventTitle('sinnerEvent', entry[1].chapters, chapterNames, t)
+    return matchesBattle(
+      item,
+      { values: EMPTY, searchQuery },
+      buildBattleSearchTerms(id, names, 'story', undefined, eventTitle),
+    )
+  }
+
+  it('finds sinner event cards by their event name', () => {
+    expect(found('10101', '한봄')).toBe(true)
+    expect(found('400025', '한봄 밤의 꿈 3')).toBe(true)
+    expect(found('10101', '한봄 밤의 꿈 3')).toBe(false)
   })
 })

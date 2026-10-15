@@ -8,6 +8,9 @@ export const BattleKeywordSpecSchema = z
     identities: z.array(IdentityIdSchema),
     egos: z.array(EGOIdSchema),
     egoGifts: z.array(z.string()),
+    enemies: z.array(z.string()),
+    assistants: z.array(z.string()),
+    sinnerEvents: z.array(z.string()),
   })
   .strict()
 

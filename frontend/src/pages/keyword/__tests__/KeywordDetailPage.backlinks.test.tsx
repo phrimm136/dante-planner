@@ -1,17 +1,22 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 
 import i18n from '@/lib/i18n'
 import { mountRoute } from '@/test-utils/mountRoute'
 import KeywordDetailPage from '../KeywordDetailPage'
+import specFixture from './__fixtures__/battleKeywordSpecList.json'
+
+vi.mock('@static/data/battleKeywordSpecList.json', async () => ({
+  default: (await import('./__fixtures__/battleKeywordSpecList.json')).default,
+}))
 
 const LOAD_WAIT_MS = 10000
 const TEST_BUDGET_MS = 30000
 
 const BATTLE_LISTS = [
-  ['keyword.relatedSinners', '/battle/sinnerEvent/'],
-  ['keyword.relatedUnits', '/battle/enemy/'],
-  ['keyword.relatedOthers', '/battle/assistant/'],
+  ['keyword.relatedSinners', '/battle/sinnerEvent/', 'sinnerEvents'],
+  ['keyword.relatedUnits', '/battle/enemy/', 'enemies'],
+  ['keyword.relatedOthers', '/battle/assistant/', 'assistants'],
 ] as const
 
 beforeEach(async () => {
@@ -24,21 +29,18 @@ async function findList(labelKey: string): Promise<HTMLElement> {
 
 describe('KeywordDetailPage battle unit backlinks', () => {
   it(
-    'links Burst to 8 sinners, 212 units and 4 others on their battle routes',
+    'links Burst to the battle cards its spec entry names, on their battle routes',
     async () => {
       mountRoute('/keyword/$id', '/keyword/Burst', KeywordDetailPage)
 
       const counts: number[] = []
-      for (const [labelKey, hrefPrefix] of BATTLE_LISTS) {
+      for (const [labelKey, hrefPrefix, field] of BATTLE_LISTS) {
         const list = await findList(labelKey)
-        const links = [...list.querySelectorAll('a')]
-        expect(links.length).toBeGreaterThan(0)
-        for (const link of links) {
-          expect(link.getAttribute('href')).toMatch(new RegExp(`^${hrefPrefix}\\d+$`))
-        }
-        counts.push(links.length)
+        const hrefs = [...list.querySelectorAll('a')].map((link) => link.getAttribute('href'))
+        expect(hrefs).toEqual(specFixture.Burst[field].map((cardId) => `${hrefPrefix}${cardId}`))
+        counts.push(hrefs.length)
       }
-      expect(counts).toEqual([8, 212, 4])
+      expect(counts).toEqual([8, 167, 4])
     },
     TEST_BUDGET_MS,
   )

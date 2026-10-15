@@ -97,7 +97,7 @@ const ENTITY_ROWS: readonly EntityLayoutRow[] = [
     name: assistantI18n400001.units['400001'].name,
     hasEgo: false,
     hasSanity: true,
-    selectorButton: /^7-1 \(Lv\. 50\)$/,
+    selectorButton: /^7-36 \(Lv\. 50\)$/,
     recordSkillIds: Object.keys(
       AssistantDataSchema.parse(assistant400001).units['400001']?.phases[0].skills ?? {},
     ),

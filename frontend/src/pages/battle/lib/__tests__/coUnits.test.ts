@@ -4,6 +4,8 @@ import enemy1137 from '@static/data/enemy/1137.json'
 import enemy8193 from '@static/data/enemy/8193.json'
 import enemy8556 from '@static/data/enemy/8556.json'
 import enemy8564 from '@static/data/enemy/8564.json'
+import enemy91041 from '@static/data/enemy/91041.json'
+import facetNamesKR from '@static/i18n/KR/battleFacetNames.json'
 import assistantSpec from '@static/data/assistantSpecList.json'
 import enemySpec from '@static/data/enemySpecList.json'
 import sinnerEventSpec from '@static/data/sinnerEventSpecList.json'
@@ -13,10 +15,19 @@ import identityNamesKR from '@static/i18n/KR/identityNameList.json'
 import sinnerEventNamesKR from '@static/i18n/KR/sinnerEventNameList.json'
 import { AssistantSpecListSchema } from '../../schemas/AssistantSchemas'
 import { EnemyDataSchema, type EngagementRow } from '../../schemas/BattleDetailSchemas'
-import { BattleNameListSchema } from '../../schemas/BattleSpecSchemas'
+import { BattleFacetNamesSchema, BattleNameListSchema } from '../../schemas/BattleSpecSchemas'
 import { EnemySpecListSchema } from '../../schemas/EnemySchemas'
 import { SinnerEventSpecListSchema } from '../../schemas/SinnerEventSchemas'
+import { battleEventTitle } from '../battleListing'
 import { coUnitChips, type CoUnitCard, type CoUnitCatalog } from '../coUnits'
+
+const SINNER_EVENT_CHAPTERS = new Map(
+  Object.entries(SinnerEventSpecListSchema.parse(sinnerEventSpec)).map(([id, spec]) => [
+    id,
+    spec.chapters,
+  ]),
+)
+const CHAPTER_NAMES_KR = BattleFacetNamesSchema.parse(facetNamesKR).chapters
 
 const catalog: CoUnitCatalog = {
   specs: {
@@ -30,6 +41,8 @@ const catalog: CoUnitCatalog = {
     sinnerEvent: BattleNameListSchema.parse(sinnerEventNamesKR),
   },
   identityTitles: identityNamesKR,
+  eventTitle: (family, id) =>
+    battleEventTitle(family, SINNER_EVENT_CHAPTERS.get(id) ?? [], CHAPTER_NAMES_KR, (key) => key),
 }
 
 const card = (id: string): CoUnitCard => ({ family: 'enemy', id })
@@ -46,6 +59,13 @@ const chipText = (row: EngagementRow, current: CoUnitCard) =>
   coUnitChips(row, catalog, current).map((chip) => [chip.label, chip.relation])
 
 describe('co-appearing units', () => {
+  it('names a sinner event co-unit with its event on the 2026 april fools row of 91041', () => {
+    const labels = chipText(rowOf(enemy91041, 91041, '20260000'), card('91041')).map(
+      ([label]) => label,
+    )
+    expect(labels).toContain('이상 (한봄 밤의 꿈 3)')
+  })
+
   it('marks the roses 장미 표지판 1026 summons on 2067035', () => {
     const chips = chipText(rowOf(enemy8556, 1026, '2067035'), card('8556'))
     expect(chips).toContainEqual(['분노를 머금은 장미', 'summons'])

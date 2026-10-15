@@ -4,6 +4,10 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useKeywordDetailSpec, useKeywordDetailI18n } from '../useKeywordDetailData'
 
+vi.mock('@static/data/battleKeywordSpecList.json', async () => ({
+  default: (await import('../../__tests__/__fixtures__/battleKeywordSpecList.json')).default,
+}))
+
 vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>()
   return {
@@ -28,7 +32,7 @@ function createWrapper() {
 
 describe('useKeywordDetailSpec', () => {
   it('returns the spec entry for a known keyword', async () => {
-    const { result } = renderHook(() => useKeywordDetailSpec('Aggro'), {
+    const { result } = renderHook(() => useKeywordDetailSpec('Burst'), {
       wrapper: createWrapper(),
     })
 
@@ -39,6 +43,9 @@ describe('useKeywordDetailSpec', () => {
       expect(Array.isArray(result.current?.identities)).toBe(true)
       expect(Array.isArray(result.current?.egos)).toBe(true)
       expect(Array.isArray(result.current?.egoGifts)).toBe(true)
+      expect(result.current?.enemies).toHaveLength(167)
+      expect(result.current?.assistants).toHaveLength(4)
+      expect(result.current?.sinnerEvents).toHaveLength(8)
     })
   })
 

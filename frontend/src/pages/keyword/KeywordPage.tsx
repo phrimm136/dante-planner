@@ -16,6 +16,7 @@ import { SearchBar } from '@/shared/filter'
 import { IdentityFilterDropdown } from '@/pages/identity'
 import { EGOFilterDropdown } from '@/pages/ego'
 import { EGOGiftFilterDropdown } from '@/shared/egoGift'
+import { BattleFilterDropdown } from '@/pages/battle'
 import { KeywordList } from './components/KeywordList'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { KEYWORD_GEOMETRY } from './lib/cardLayout'
@@ -94,6 +95,45 @@ function KeywordPageShell() {
           />
         </Suspense>
       </FilterSection>
+
+      <FilterSection title={t('keyword.filterEnemy')} activeCount={filters.selectedEnemies.size}>
+        <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
+          <BattleFilterDropdown
+            family="enemy"
+            selected={filters.selectedEnemies}
+            onSelectionChange={setters.selectedEnemies}
+            placeholderKey="keyword.filterEnemy"
+          />
+        </Suspense>
+      </FilterSection>
+
+      <FilterSection
+        title={t('keyword.filterAssistant')}
+        activeCount={filters.selectedAssistants.size}
+      >
+        <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
+          <BattleFilterDropdown
+            family="assistant"
+            selected={filters.selectedAssistants}
+            onSelectionChange={setters.selectedAssistants}
+            placeholderKey="keyword.filterAssistant"
+          />
+        </Suspense>
+      </FilterSection>
+
+      <FilterSection
+        title={t('keyword.filterSinnerEvent')}
+        activeCount={filters.selectedSinnerEvents.size}
+      >
+        <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
+          <BattleFilterDropdown
+            family="sinnerEvent"
+            selected={filters.selectedSinnerEvents}
+            onSelectionChange={setters.selectedSinnerEvents}
+            placeholderKey="keyword.filterSinnerEvent"
+          />
+        </Suspense>
+      </FilterSection>
     </>
   )
 
@@ -118,7 +158,7 @@ function KeywordPageShell() {
 
 export default function KeywordPage() {
   return (
-    <EntityListPage skeleton={<ListPageSkeleton geometry={KEYWORD_GEOMETRY} filterCount={4} />}>
+    <EntityListPage skeleton={<ListPageSkeleton geometry={KEYWORD_GEOMETRY} filterCount={7} />}>
       <KeywordPageShell />
     </EntityListPage>
   )

@@ -1,6 +1,7 @@
 import { useState, useEffect, useId, useRef, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, ChevronDown } from 'lucide-react'
+import { defaultFilter } from 'cmdk'
 
 import {
   Command,
@@ -95,7 +96,9 @@ export function SearchableMultiSelect({
         className="w-[var(--radix-popover-trigger-width)] p-0"
         align="start"
       >
-        <Command>
+        <Command
+          filter={(_value, search, keywords = []) => defaultFilter(keywords.join(' '), search)}
+        >
           <CommandInput placeholder={searchPlaceholder} />
           <CommandList>
             <CommandEmpty>{emptyMessage}</CommandEmpty>
@@ -175,7 +178,8 @@ interface OptionProps {
 const Option = memo(function Option({ option, selected, onToggle }: OptionProps) {
   return (
     <CommandItem
-      value={option.label}
+      value={option.value}
+      keywords={[option.label]}
       onSelect={() => {
         onToggle(option.value)
       }}

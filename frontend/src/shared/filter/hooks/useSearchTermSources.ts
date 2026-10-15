@@ -10,8 +10,8 @@ const EMPTY_MAPPINGS: SearchMappings = {
   unitKeywordToValue: new Map(),
 }
 
-export function useSearchTermSources<TSpec, TI18n>(
-  cfg: EntityListDataConfig<TSpec, TI18n>,
+export function useSearchTermSources<TI18n>(
+  cfg: Pick<EntityListDataConfig<unknown, TI18n>, 'kind' | 'i18nImport' | 'i18nSchema'>,
   emptyNames: TI18n,
   withKeywordMappings = true,
 ): { names: TI18n; mappings: SearchMappings } {

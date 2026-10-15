@@ -206,10 +206,14 @@ describe('trigger-gated skill fields', () => {
     ).toEqual([40000502])
   })
 
-  it('parses the current data, which carries neither field', () => {
+  it('parses the shipped gate of 40000502 on 400005 and its unlock on row 911911 alone', () => {
     const group = AssistantDataSchema.parse(assistant400001)
-    expect(group.units['400005']?.phases[0].gatedSkillIds).toBeUndefined()
-    expect(group.engagements.every((row) => row.unlockedSkillIds === undefined)).toBe(true)
+    expect(group.units['400005']?.phases[0].gatedSkillIds).toEqual([40000502])
+    expect(
+      group.engagements
+        .filter((row) => row.unlockedSkillIds !== undefined)
+        .map((row) => [row.stage, row.unlockedSkillIds]),
+    ).toEqual([['storybattle-cultivation.json#911911', [40000502]]])
   })
 
   it('rejects a non-numeric unlocked skill id', () => {

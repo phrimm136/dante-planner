@@ -747,6 +747,7 @@ function skillLevelOf(skillId: string): string | null | undefined {
 }
 
 const XICHUN_STAGE = 'storybattle-cultivation.json#911909'
+const XICHUN_UNLOCK_STAGE = 'storybattle-cultivation.json#911911'
 
 describe('Jia Xichun growth', () => {
   it(
@@ -780,7 +781,8 @@ describe('Jia Xichun growth', () => {
       expect(skillLevelOf('40000103')).toBe('70')
       expect(skillLevelOf('40000104')).toBe('64')
       expect(statCell('Defense')).toMatch(/^60\b/)
-      expect(renderedSkillIds()).toEqual(expect.arrayContaining(['40000501', '40000502']))
+      expect(renderedSkillIds()).toContain('40000501')
+      expect(renderedSkillIds()).not.toContain('40000502')
     },
     TEST_BUDGET_MS,
   )
@@ -788,7 +790,7 @@ describe('Jia Xichun growth', () => {
   it(
     'drops to level 50, level-1 skills, no 40000501 and the base passives at 0/0/0',
     async () => {
-      await mountAssistant('400001', XICHUN_STAGE)
+      await mountAssistant('400001', XICHUN_UNLOCK_STAGE)
 
       setGrowth([0, 0, 0])
 
@@ -891,7 +893,7 @@ describe('swapped skills', () => {
   it(
     'lists 40000502 right after 40000501 on 400005 with no acquire line',
     async () => {
-      await mountAssistant('400001', XICHUN_STAGE)
+      await mountAssistant('400001', XICHUN_UNLOCK_STAGE)
 
       const skillIds = renderedSkillIds()
       expect(skillIds.indexOf('40000502')).toBe(skillIds.indexOf('40000501') + 1)

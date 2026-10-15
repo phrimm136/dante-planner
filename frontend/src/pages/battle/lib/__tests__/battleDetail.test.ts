@@ -202,7 +202,8 @@ describe('trigger-gated skills', () => {
   })
 
   it('changes nothing for an unlocking row on a phase without gated skills', () => {
-    const ungated = kit.phases[0]
+    const { gatedSkillIds: _gatedSkillIds, ...ungated } = kit.phases[0]
+    expect(ungated).not.toHaveProperty('gatedSkillIds')
     expect(skillIdsOf(visibleSkills(ungated, [], undefined, unlocking))).toEqual(
       skillIdsOf(visibleSkills(ungated, [], undefined, other)),
     )

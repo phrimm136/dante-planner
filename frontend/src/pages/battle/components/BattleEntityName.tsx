@@ -1,6 +1,7 @@
 import { useEntityListI18n } from '@/shared/entityCatalog'
 import { BATTLE_NAME_LISTS } from '../hooks/battleNameLists'
-import { battleListName } from '../lib/battleListing'
+import { useBattleEventTitle } from '../hooks/useBattleCardNames'
+import { battleCardName, battleListName } from '../lib/battleListing'
 import type { BattleCase, BattleFamily } from '../lib/battleVocabulary'
 
 interface BattleEntityNameProps {
@@ -12,5 +13,6 @@ interface BattleEntityNameProps {
 
 export function BattleEntityName({ family, id, mode, identityTitle }: BattleEntityNameProps) {
   const names = useEntityListI18n(BATTLE_NAME_LISTS[family])
-  return battleListName(names[id], mode, id, identityTitle)
+  const eventTitle = useBattleEventTitle()
+  return battleCardName(battleListName(names[id], mode, id, identityTitle), eventTitle(family, id))
 }

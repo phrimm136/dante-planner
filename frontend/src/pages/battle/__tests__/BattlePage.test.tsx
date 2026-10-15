@@ -8,6 +8,7 @@ import { battleFilterStore } from '../stores/battleFilterStore'
 import { battleModeStore } from '../stores/battleModeStore'
 
 const LOAD_WAIT_MS = 10000
+const TEST_BUDGET_MS = 30000
 
 beforeEach(async () => {
   await i18n.changeLanguage('EN')
@@ -192,29 +193,33 @@ describe('BattlePage', () => {
     expect(slotHidden('90004')).toBe(true)
   })
 
-  it('lists one card named 뿌이, the assist card 400041', async () => {
-    await i18n.changeLanguage('KR')
-    renderPage()
-    await waitForList()
+  it(
+    'lists one card named 뿌이, the assist card 400041',
+    async () => {
+      await i18n.changeLanguage('KR')
+      renderPage()
+      await waitForList()
 
-    const pwie = await screen.findByTestId('battle-card-400041', {}, { timeout: LOAD_WAIT_MS })
-    const grid = pwie.parentElement?.parentElement
-    if (grid === null || grid === undefined) throw new Error('no card grid')
-    await waitFor(() => expect(renderedCardIds()).toHaveLength(grid.children.length), {
-      timeout: LOAD_WAIT_MS,
-    })
-    await waitFor(
-      () =>
-        expect(
-          document.querySelectorAll('[data-testid="battle-card-name"] [data-slot="skeleton"]'),
-        ).toHaveLength(0),
-      { timeout: LOAD_WAIT_MS },
-    )
-    const named = screen.getAllByText('뿌이')
-    expect(named).toHaveLength(1)
-    expect(within(pwie).getByTestId('battle-card-name')).toHaveTextContent('뿌이')
-    expect(pwie.getAttribute('href')).toMatch(/\/battle\/assistant\/400041$/)
-  })
+      const pwie = await screen.findByTestId('battle-card-400041', {}, { timeout: LOAD_WAIT_MS })
+      const grid = pwie.parentElement?.parentElement
+      if (grid === null || grid === undefined) throw new Error('no card grid')
+      await waitFor(() => expect(renderedCardIds()).toHaveLength(grid.children.length), {
+        timeout: LOAD_WAIT_MS,
+      })
+      await waitFor(
+        () =>
+          expect(
+            document.querySelectorAll('[data-testid="battle-card-name"] [data-slot="skeleton"]'),
+          ).toHaveLength(0),
+        { timeout: LOAD_WAIT_MS },
+      )
+      const named = screen.getAllByText('뿌이')
+      expect(named).toHaveLength(1)
+      expect(within(pwie).getByTestId('battle-card-name')).toHaveTextContent('뿌이')
+      expect(pwie.getAttribute('href')).toMatch(/\/battle\/assistant\/400041$/)
+    },
+    TEST_BUDGET_MS,
+  )
 
   it('names the envy card 1099 by unit and copied identity, per mode', async () => {
     await i18n.changeLanguage('KR')

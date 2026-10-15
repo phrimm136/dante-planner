@@ -34,7 +34,6 @@ export const BATTLE_SPEC_SHAPE = {
   spriteId: z.string(),
   sprite: BattleSpriteSchema,
   sortKey: z.partialRecord(z.enum(BATTLE_CASES), z.array(z.number())),
-  personalityId: z.number().optional(),
 }
 
 export const BattleNameEntrySchema = z

@@ -3,7 +3,13 @@ import type { EnemyEntity } from '../types/EnemyTypes'
 import type { AssistantEntity } from '../types/AssistantTypes'
 import type { SinnerEventEntity } from '../types/SinnerEventTypes'
 import type { BattleListItem } from './battleFilter'
-import { BATTLE_FAMILIES, ENVY_TITLE_SEPARATOR, type BattleCase } from './battleVocabulary'
+import {
+  BATTLE_FAMILIES,
+  ENVY_TITLE_SEPARATOR,
+  type BattleCase,
+  type BattleFamily,
+} from './battleVocabulary'
+import { chapterLabel, type Translate } from './enemy/enemyFacetOptions'
 
 export type BattleCardItem = BattleListItem<EnemyEntity | AssistantEntity | SinnerEventEntity>
 
@@ -18,6 +24,12 @@ export function battleDisplayName(
   id: string,
 ): string {
   return entry?.byCase?.[mode] ?? entry?.name ?? id
+}
+
+export function cardPersonalityId(item: BattleCardItem): number | undefined {
+  return item.family === 'enemy' && 'personalityId' in item.entity
+    ? item.entity.personalityId
+    : undefined
 }
 
 export function envyIdentityTitle(
@@ -42,6 +54,20 @@ export function battleListName(
   return `${name}${ENVY_TITLE_SEPARATOR}${singleLineTitle(identityTitle)}`
 }
 
+export function battleEventTitle(
+  family: BattleFamily,
+  chapters: readonly string[],
+  chapterNames: Readonly<Record<string, string>>,
+  t: Translate,
+): string | undefined {
+  if (family !== 'sinnerEvent' || chapters.length === 0) return undefined
+  return chapters.map((key) => chapterLabel(key, chapterNames, t)).join(', ')
+}
+
+export function battleCardName(name: string, eventTitle: string | undefined): string {
+  return eventTitle === undefined ? name : `${name} (${eventTitle})`
+}
+
 export interface EnvyHeaderNames {
   name: string
   abnormalityLine: string
@@ -56,10 +82,15 @@ export function buildBattleSearchTerms(
   names: BattleNameList,
   mode: BattleCase,
   identityTitle: string | undefined,
+  eventTitle: string | undefined,
 ): string[] {
   const entry = names[id]
   if (entry === undefined) return ['']
-  const terms = [battleListName(entry, mode, id, identityTitle), entry.name, ...entry.aliases]
+  const terms = [
+    battleCardName(battleListName(entry, mode, id, identityTitle), eventTitle),
+    entry.name,
+    ...entry.aliases,
+  ]
   return [...new Set(terms.map((term) => term.toLowerCase()))]
 }
 
