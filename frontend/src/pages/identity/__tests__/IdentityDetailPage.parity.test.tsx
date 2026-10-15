@@ -92,6 +92,11 @@ function normalize(html: string): string {
   return html.replaceAll(' style="animation-duration: 0s;"', '').replace(/_r_[0-9a-z]+_/g, '_r_')
 }
 
+/** The lightbox button loads through lazy() with a null fallback, so no skeleton marks it pending. */
+async function waitForExpandButton() {
+  await screen.findByAltText('a11y.expandImage')
+}
+
 /** One matrix cell: mount, settle the reveal, drive uptie, return the DOM. */
 async function renderCell(uptie: number): Promise<string> {
   const queryClient = createTestQueryClient()
@@ -108,6 +113,7 @@ async function renderCell(uptie: number): Promise<string> {
 
   fireEvent.click(screen.getByRole('button', { name: new RegExp(`tier ${uptie}`, 'i') }))
   await waitForI18nSettled(container)
+  await waitForExpandButton()
 
   const html = normalize(container.innerHTML)
   unmount()
@@ -161,6 +167,7 @@ describe('IdentityDetailPage DOM parity', () => {
       expect(screen.getByText(`Lv. ${IDENTITY_LEVEL_CAP - 1}`)).toBeDefined()
     })
     await waitForI18nSettled(container)
+    await waitForExpandButton()
 
     expect(normalize(container.innerHTML)).toMatchSnapshot()
   })
