@@ -50,6 +50,9 @@ class MarkerStoreConnectBoundTest {
                         .as("the kernel drops a SYN once the accept queue of a never-accepting listener is full")
                         .isTrue();
                 store.raise(Set.of(new FreshnessScope.PublicCatalog()), SERVER + ":1");
+                await().atMost(MarkerStore.RAISE_CONNECT_TIMEOUT.plus(WAIT_BOUND).plus(MarkerStore.RAISE_MARGIN))
+                        .untilAsserted(() -> assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count())
+                                .isEqualTo(1.0));
                 double failuresBefore = meters.counter(MarkerStore.RAISE_FAILURES).count();
 
                 long start = System.nanoTime();
