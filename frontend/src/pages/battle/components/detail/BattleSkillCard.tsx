@@ -131,7 +131,7 @@ function BattleSkillName({
   return (
     <NamePlate
       kind="skill"
-      name={text === undefined ? skillId : skillLevelName(text.descs, level, text.name)}
+      name={text === undefined ? '' : skillLevelName(text.descs, level, text.name)}
       {...(attributeType !== undefined && { attributeType })}
     />
   )

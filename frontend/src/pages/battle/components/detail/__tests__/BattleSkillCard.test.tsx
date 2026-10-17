@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 
 import assistant400001 from '@static/data/assistant/400001.json'
 import enemy1347 from '@static/data/enemy/1347.json'
+import enemy99001 from '@static/data/enemy/99001.json'
 import i18n from '@/lib/i18n'
 import { SkillIdSchema } from '@/shared/gameData'
 import { renderWithProviders } from '@/test-utils/renderWithProviders'
@@ -25,9 +26,11 @@ const XICHUN_SOURCE = {
 }
 const DESTROY_LEVEL = 85
 const DESTROY_SOURCE = { config: ENEMY_DETAIL, id: '1347', unitId: '1347', phaseId: '1347' }
+const TUTORIAL_SOURCE = { config: ENEMY_DETAIL, id: '99001', unitId: '99001', phaseId: '99001' }
 
 const xichun = AssistantDataSchema.parse(assistant400001).units['400005']?.phases[0]
 const destroyer = EnemyDataSchema.parse(enemy1347).units['1347']?.phases[0]
+const tutorial = EnemyDataSchema.parse(enemy99001).units['99001']?.phases[0]
 
 beforeEach(async () => {
   await i18n.changeLanguage('KR')
@@ -127,6 +130,15 @@ describe('level names', () => {
     expect(container.querySelector('[data-slot="name-plate"]')?.textContent).toBe(
       'Destroy the Sound, Crush Flat the Thought',
     )
+  })
+
+  it('titles tutorial skill 9900101, which has no text row, blank', async () => {
+    const { container } = renderSkill(tutorial, TUTORIAL_SOURCE, '9900101', 1, 1)
+    await waitFor(() => {
+      expect(container.querySelector('[data-slot="name-plate"]')).not.toBeNull()
+    })
+    expect(container.querySelector('[data-slot="name-plate"]')?.textContent).toBe('')
+    expect(screen.queryByText('9900101')).toBeNull()
   })
 })
 
