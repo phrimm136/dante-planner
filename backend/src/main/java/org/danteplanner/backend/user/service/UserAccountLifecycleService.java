@@ -88,7 +88,7 @@ public class UserAccountLifecycleService {
         participants.forEach(participant -> participant.accountReactivated(userId));
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public boolean performHardDelete(Long userId, Instant cutoff) {
         Optional<User> purgeable = userRepository.findWithLockPurgeable(userId, cutoff);
         if (purgeable.isEmpty()) {

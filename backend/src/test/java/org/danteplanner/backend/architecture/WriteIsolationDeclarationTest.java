@@ -1,6 +1,7 @@
 package org.danteplanner.backend.architecture;
 
 import java.util.ArrayDeque;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Map;
@@ -41,9 +42,14 @@ class WriteIsolationDeclarationTest {
     private static final String MODERATOR_UNPUBLISH = "org.danteplanner.backend.moderation.service.PlannerModerationService"
             + ".unpublishPlanner(java.lang.Long, java.util.UUID)";
 
+    private static final String ACCOUNT_PURGE = "org.danteplanner.backend.user.service.UserAccountLifecycleService"
+            + ".performHardDelete(java.lang.Long, java.time.Instant)";
+
+    private static final Set<String> BULK_PROJECTION_DELETES = Set.of("deleteAllByPlannerIds", "deleteViewsByPlannerIds");
+
     @Test
     void filterRowWrites_WhenWalkedUpEveryCallerPath_RunAtReadCommittedOrAccountDeletionsSerializable() {
-        Walk walk = walkFromFilterRowWrites(PRODUCTION);
+        Walk walk = walkFrom(filterRowWrites(PRODUCTION));
 
         assertThat(walk.transactional())
                 .as("the walk reaches the owner and moderator writes, so it cannot pass by finding nothing")
@@ -53,6 +59,21 @@ class WriteIsolationDeclarationTest {
                 .isEqualTo(name.equals(ACCOUNT_DELETION) ? Isolation.SERIALIZABLE : Isolation.READ_COMMITTED));
         assertThat(walk.withoutTransaction())
                 .as("these reach a filter-row write with no transaction above them")
+                .isEmpty();
+    }
+
+    @Test
+    void bulkProjectionDeletes_WhenWalkedUpEveryCallerPath_RunAtReadCommitted() {
+        Walk walk = walkFrom(bulkProjectionDeletes(PRODUCTION));
+
+        assertThat(walk.transactional())
+                .as("the walk reaches the account purge, so it cannot pass by finding nothing")
+                .containsKey(ACCOUNT_PURGE);
+        assertThat(walk.transactional()).allSatisfy((name, isolation) -> assertThat(isolation)
+                .as("%s opens or joins a transaction that bulk-deletes planner projections", name)
+                .isEqualTo(Isolation.READ_COMMITTED));
+        assertThat(walk.withoutTransaction())
+                .as("these reach a projection bulk delete with no transaction above them")
                 .isEmpty();
     }
 
@@ -79,12 +100,21 @@ class WriteIsolationDeclarationTest {
         return writes;
     }
 
-    private static Walk walkFromFilterRowWrites(JavaClasses classes) {
+    private static Set<JavaMethod> bulkProjectionDeletes(JavaClasses classes) {
+        Set<JavaMethod> deletes = new HashSet<>();
+        classes.stream()
+                .flatMap(type -> type.getMethods().stream())
+                .filter(method -> BULK_PROJECTION_DELETES.contains(method.getName()))
+                .forEach(deletes::add);
+        return deletes;
+    }
+
+    private static Walk walkFrom(Collection<? extends JavaCodeUnit> roots) {
         Map<String, Isolation> transactional = new TreeMap<>();
         Set<String> withoutTransaction = new TreeSet<>();
         Set<String> visited = new HashSet<>();
         Deque<Step> pending = new ArrayDeque<>();
-        filterRowWrites(classes).forEach(write -> pending.push(new Step(write, false)));
+        roots.forEach(root -> pending.push(new Step(root, false)));
         while (!pending.isEmpty()) {
             Step step = pending.pop();
             if (!visited.add(step.unit().getFullName() + "/" + step.covered())) {

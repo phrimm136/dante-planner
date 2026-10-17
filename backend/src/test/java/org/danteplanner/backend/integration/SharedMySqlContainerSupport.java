@@ -51,7 +51,9 @@ public abstract class SharedMySqlContainerSupport {
                     "--skip-name-resolve",
                     // Every cached context keeps its pool open, and concurrent classes raise how
                     // many are live at once.
-                    "--max-connections=1000");
+                    "--max-connections=1000",
+                    "--innodb-print-all-deadlocks=ON")
+            .withLogConsumer(frame -> System.out.print("mysqld: " + frame.getUtf8String()));
 
     static {
         MYSQL.start();
