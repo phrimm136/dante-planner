@@ -15,6 +15,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -74,12 +75,14 @@ import org.danteplanner.consistency.Verdict;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.AUTHOR_DEVICES;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.BISECTION_DEPTH_BUDGET;
+import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.COVERAGE_EXTENSION_CAP;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.CREATOR;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.DEFAULT_OPS_PER_SEED;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.DEFAULT_SEED_COUNT;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.DEFAULT_SEED_FROM;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.DEFAULT_STOP_AT_FIRST_VIOLATION;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.DOUBLING_BUDGET;
+import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.EXTENSION_CAP;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.HISTORY_DIRECTORY;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.OPS_PER_SEED;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.PROBE_BATCH_BUDGET;
@@ -90,6 +93,7 @@ import static org.danteplanner.backend.integration.consistency.ConsistencyBudget
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.STOP_AT_FIRST_VIOLATION;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.historyFile;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.minimalHistoryFile;
+import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.uncoveredDescription;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -124,6 +128,7 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
         long seedFrom = Long.getLong(SEED_FROM, DEFAULT_SEED_FROM);
         int seedCount = Integer.getInteger(SEED_COUNT, DEFAULT_SEED_COUNT);
         int budget = Integer.getInteger(OPS_PER_SEED, DEFAULT_OPS_PER_SEED);
+        int extensionCap = Integer.getInteger(EXTENSION_CAP, COVERAGE_EXTENSION_CAP);
         boolean stopAtFirstViolation = Boolean.parseBoolean(
                 System.getProperty(STOP_AT_FIRST_VIOLATION, String.valueOf(DEFAULT_STOP_AT_FIRST_VIOLATION)));
         List<Long> seeds = LongStream.range(seedFrom, seedFrom + seedCount).boxed().toList();
@@ -135,10 +140,20 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
             System.out.println("consistency calibration: " + calibration);
             OregonPrimary oregonPrimary = new HarnessOregonPrimary(toxiproxyControl, oregon.meterRegistry());
             Coverage coverage = new Coverage(target -> count(registry(target, oregon), target));
-            List<SeedResult> results = SeedLoop.run(seeds, replication, oregonPrimary,
-                    seed -> coverage.measure(() -> runSeed(seed, budget, calibration.latencyMillis(), replication,
-                            oregonPrimary, oregon)),
-                    result -> stopAtFirstViolation && !result.verdict().violations().isEmpty());
+            SeedLoop.SeedBody<SeedResult> body = seed -> coverage.measure(() -> runSeed(seed, budget,
+                    calibration.latencyMillis(), replication, oregonPrimary, oregon));
+            Predicate<SeedResult> stopAfter = result -> stopAtFirstViolation
+                    && !result.verdict().violations().isEmpty();
+            List<SeedResult> baseResults = SeedLoop.run(seeds, replication, oregonPrimary, body, stopAfter);
+            boolean stopped = baseResults.stream().anyMatch(stopAfter);
+            List<SeedResult> extraResults = SeedLoop.runUntil(seedFrom + seedCount, extensionCap,
+                    () -> !stopped && !coverage.uncovered().isEmpty(), replication, oregonPrimary, seed -> {
+                        SeedResult result = body.run(seed);
+                        System.out.println("consistency extension: seed " + seed + " → coverage "
+                                + coverage.summary());
+                        return result;
+                    }, stopAfter);
+            List<SeedResult> results = Stream.concat(baseResults.stream(), extraResults.stream()).toList();
 
             results.forEach(result -> {
                 System.out.println("consistency seed " + result.seed() + ": "
@@ -165,7 +180,7 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
                             + "by seed and history file")
                     .isEmpty();
             assertThat(coverage.uncovered())
-                    .as("read-path targets no seed hit (ADR 180), coverage " + coverage.summary())
+                    .as(uncoveredDescription(extraResults.size(), coverage))
                     .isEmpty();
         }
     }

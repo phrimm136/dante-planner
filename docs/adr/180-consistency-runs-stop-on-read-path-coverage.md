@@ -16,6 +16,23 @@ epic: none · pr: none @consistency-checker @generator
   INVARIANT: a passing run hit every target at least once — `ConsistencyRunIT`, through `Coverage`.
   NON-GOAL: tuning toward rare interleavings beyond branch coverage — the seed budget bounds the run
   time, and branch coverage is the claim the run makes.
+- @consistency-checker @generator — When the base seed budget ends with a target unhit, the run
+  continues seed by seed (the next seeds after the base range) until every target is hit or an
+  extension cap is spent, and fails only at the cap. The plans stay random: a key draw resolves
+  against the planner pool at run time and the pool changes under creates and deletes, so a
+  plan-level condition ("publish, unpublish and read the same planner") cannot be stated
+  without a different key model, and a fixed directed round would narrow the random mix the
+  run exists to exercise. The withdrawal-marker target was hit 0, 1 and 3 times in three runs
+  of the same fixed plans, so the hit depends on timing, and more seeds is the honest lever.
+  REJECTED: a directed round per target — covers by construction but replaces the random mix
+  with a script for exactly the branches the random mix is meant to reach.
+  REJECTED: plan conditioning with named keys — guarantees the sequence, costs a key model and
+  a resampling loop, and still leaves the hit to timing unless the sequence is pinned to the
+  stopped-replication phase.
+  REJECTED: a larger fixed budget — pays every run for the rare case.
+  INVARIANT: a passing run hit every target at least once, within the base budget plus at most
+  the extension cap of extra seeds — `ConsistencyRunIT`, through `Coverage` and `SeedLoop`.
+  NON-GOAL: a per-target hit minimum above one — coverage is the claim, not frequency.
 - @consistency-checker @observability — The application counts tombstone hits and withdrawal-marker
   hits, beside the existing gate and promotion counters. Two of the five targets had no counter, so
   the run did not see whether those mechanisms worked. The counters also show production whether

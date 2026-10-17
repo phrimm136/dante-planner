@@ -54,6 +54,20 @@ class CoverageTest {
         assertThat(coverage.uncovered()).containsExactly("oregon read fell back");
     }
 
+    @Test
+    void uncoveredDescription_WhenTheCapIsSpentWithATargetUnhit_NamesTheExtraSeedCount() throws Exception {
+        Map<CoverageTarget, Double> counters = new EnumMap<>(CoverageTarget.class);
+        Coverage coverage = new Coverage(target -> counters.getOrDefault(target, 0.0));
+        for (int seed = 0; seed < ConsistencyBudget.COVERAGE_EXTENSION_CAP; seed++) {
+            coverage.measure(() -> moveAllBut(counters, CoverageTarget.WITHDRAWAL_MARKER_HIT));
+        }
+
+        assertThat(coverage.uncovered()).containsExactly("withdrawal-marker hit");
+        assertThat(ConsistencyBudget.uncoveredDescription(ConsistencyBudget.COVERAGE_EXTENSION_CAP, coverage))
+                .contains("after 10 extra seeds (ADR 180)")
+                .endsWith(coverage.summary());
+    }
+
     private static Void moveAllBut(Map<CoverageTarget, Double> counters, CoverageTarget still) {
         for (CoverageTarget target : CoverageTarget.values()) {
             if (target != still) {
