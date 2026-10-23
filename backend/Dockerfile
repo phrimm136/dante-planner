@@ -44,6 +44,18 @@ WORKDIR /app
 
 RUN apk add --no-cache curl
 
+# CVE-2026-91403: eMudhra roots signed intermediates with weak private keys,
+# so anything chained to them is distrusted outright.
+RUN set -eux; \
+    for alias in \
+      "cn_emsign_ecc_root_ca__c3,o_emudhra_inc,ou_emsign_pki,c_us [jdk]" \
+      "cn_emsign_ecc_root_ca__g3,o_emudhra_technologies_limited,ou_emsign_pki,c_in [jdk]" \
+      "cn_emsign_root_ca__c1,o_emudhra_inc,ou_emsign_pki,c_us [jdk]" \
+      "cn_emsign_root_ca__g1,o_emudhra_technologies_limited,ou_emsign_pki,c_in [jdk]"; do \
+      keytool -delete -noprompt -cacerts -storepass changeit -alias "$alias"; \
+    done; \
+    ! keytool -list -cacerts -storepass changeit | grep -qi emudhra
+
 COPY --from=builder /app/build/libs/*.jar app.jar
 
 # Bake the game domain data so the pod is self-contained; k3s has no host
