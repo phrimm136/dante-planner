@@ -7,19 +7,19 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * The pool-ledger invariant: the connection pools that hit the shared
- * Oregon primary (Oregon primary pool + Seoul write pool), summed across the max pods per ASG, must
- * stay within the db.t4g.micro connection budget minus the reserve. Fed by the production
- * {@link PoolLedger} constants the datasource config itself reads, so the invariant and production
- * share one source of truth.
+ * Every connection that reaches the shared primary, summed across both regions at the maximum pod
+ * count, stays within the primary's connection limit minus the reserve.
  */
 class PoolLedgerConfigTest {
 
     @Test
-    void poolLedger_WhenSummedAcrossMaxPods_StaysWithinConnectionBudget() {
-        int primaryHittingLoad =
-                (PoolLedger.OREGON_PRIMARY_POOL + PoolLedger.SEOUL_PRIMARY_POOL)
-                        * PoolLedger.MAX_PODS_PER_ASG;
+    void poolLedger_WhenEveryPrimaryConnectionSummedAcrossMaxPods_StaysWithinConnectionBudget() {
+        int oregonPerPod = PoolLedger.OREGON_PRIMARY_POOL;
+        int seoulPerPod = PoolLedger.SEOUL_PRIMARY_POOL
+                + PoolLedger.SEOUL_PRIMARY_READ_POOL
+                + PoolLedger.BULKHEAD_POOL;
+        int probes = PoolLedger.PROBE_CONNECTIONS_PER_POD * PoolLedger.MAX_PODS_PER_ASG * PoolLedger.REGIONS;
+        int primaryHittingLoad = (oregonPerPod + seoulPerPod) * PoolLedger.MAX_PODS_PER_ASG + probes;
         int usableConnections =
                 PoolLedger.RDS_MICRO_MAX_CONNECTIONS - PoolLedger.CONNECTION_RESERVE;
 
@@ -28,29 +28,15 @@ class PoolLedgerConfigTest {
 
     @Test
     void poolLedger_WhenRead_MatchesBindingPoolSizes() {
-        assertThat(PoolLedger.OREGON_PRIMARY_POOL).isEqualTo(15);
-        assertThat(PoolLedger.SEOUL_PRIMARY_POOL).isEqualTo(10);
-        assertThat(PoolLedger.SEOUL_REPLICA_POOL).isEqualTo(15);
-        assertThat(PoolLedger.READ_FALLBACK_POOL).isEqualTo(3);
-        assertThat(PoolLedger.SEOUL_PRIMARY_READ_POOL).isEqualTo(6);
-    }
-
-    @Test
-    void poolLedger_WhenBulkheadAndSeoulPrimaryReadPoolIncluded_StaysWithinConnectionBudget() {
-        int primaryHittingLoad =
-                (PoolLedger.OREGON_PRIMARY_POOL
-                                + PoolLedger.SEOUL_PRIMARY_POOL
-                                + PoolLedger.BULKHEAD_POOL
-                                + PoolLedger.SEOUL_PRIMARY_READ_POOL)
-                        * PoolLedger.MAX_PODS_PER_ASG;
-        int usableConnections =
-                PoolLedger.RDS_MICRO_MAX_CONNECTIONS - PoolLedger.CONNECTION_RESERVE;
-
-        assertThat(primaryHittingLoad).isLessThanOrEqualTo(usableConnections);
+        assertThat(PoolLedger.OREGON_PRIMARY_POOL).isEqualTo(6);
+        assertThat(PoolLedger.SEOUL_PRIMARY_POOL).isEqualTo(6);
+        assertThat(PoolLedger.SEOUL_REPLICA_POOL).isEqualTo(6);
+        assertThat(PoolLedger.READ_FALLBACK_POOL).isEqualTo(6);
+        assertThat(PoolLedger.SEOUL_PRIMARY_READ_POOL).isEqualTo(3);
     }
 
     @Test
     void poolLedger_WhenReadBulkhead_MatchesBindingPoolSize() {
-        assertThat(PoolLedger.BULKHEAD_POOL).isEqualTo(3);
+        assertThat(PoolLedger.BULKHEAD_POOL).isEqualTo(2);
     }
 }
