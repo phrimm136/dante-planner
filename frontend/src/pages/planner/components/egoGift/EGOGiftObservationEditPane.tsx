@@ -7,7 +7,7 @@ import { encodeGiftSelection } from '@/pages/egoGift'
 import type { EGOGiftId } from '@/shared/gameData'
 import { useCappedSelection } from '../../hooks/useCappedSelection'
 import { maxObservableGifts } from '../../lib/observationGifts'
-import { usePlannerStore } from '../../stores/usePlannerStore'
+import { usePlannerStore, useStoreSeason } from '../../stores/usePlannerStore'
 import type { EGOGiftEntity } from '@/shared/egoGift'
 import type { SortMode } from '@/shared/filter'
 import { EGOGiftFilterBar } from '@/pages/egoGift'
@@ -21,13 +21,11 @@ import { toEGOGiftEntity } from '@/shared/egoGift'
 interface EGOGiftObservationEditPaneProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  mdVersion: number
 }
 
 export function EGOGiftObservationEditPane({
   open,
   onOpenChange,
-  mdVersion,
 }: EGOGiftObservationEditPaneProps) {
   const selectedGiftIds = usePlannerStore((s) => s.observationGiftIds)
   const setObservationGiftIds = usePlannerStore((s) => s.setObservationGiftIds)
@@ -35,7 +33,8 @@ export function EGOGiftObservationEditPane({
   const setComprehensiveGiftIds = usePlannerStore((s) => s.setComprehensiveGiftIds)
   const { t } = useTranslation(['planner', 'common'])
 
-  const { data: observationData } = useEGOGiftObservationData(mdVersion)
+  const { contentVersion } = useStoreSeason()
+  const { data: observationData } = useEGOGiftObservationData(contentVersion)
   const spec = useEGOGiftListSpec()
   const i18n = useEGOGiftListI18n()
 

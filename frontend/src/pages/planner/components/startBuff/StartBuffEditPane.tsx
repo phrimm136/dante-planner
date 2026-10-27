@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { ENHANCEMENT_LABELS, type MDVersion } from '@/shared/gameData'
+import { ENHANCEMENT_LABELS } from '@/shared/gameData'
 import { CARD_MOBILE_SCALE_DENSE } from '@/lib/constants'
 import { CardSlot, useSlotSizePx } from '@/shared/cardLayout'
 import { START_BUFF_GRID_COLUMNS } from '../../lib/cardLayout'
@@ -10,7 +10,7 @@ import { startBuffSlotSize } from '../../lib/startBuffCardLayout'
 import { useStartBuffCardLayout } from '../../hooks/useStartBuffCardLayout'
 import { getStartBuffEnhancementIconPath } from '@/shared/assets'
 import { useStartBuffSelection } from '../../hooks/useStartBuffSelection'
-import { usePlannerStore } from '../../stores/usePlannerStore'
+import { usePlannerStore, useStoreSeason } from '../../stores/usePlannerStore'
 import { createBuffId, deriveEnhancements, getBaseIdFromBuffId } from '@/shared/gameText'
 import type { EnhancementLevel } from '@/shared/gameText'
 import { StarlightCostDisplay } from '../StarlightCostDisplay'
@@ -19,24 +19,23 @@ import { StartBuffCard } from './StartBuffCard'
 interface StartBuffEditPaneProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  mdVersion: MDVersion
 }
 
-export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEditPaneProps) {
+export function StartBuffEditPane({ open, onOpenChange }: StartBuffEditPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
+  const { contentVersion } = useStoreSeason()
 
   const selectedBuffIds = usePlannerStore((s) => s.selectedBuffIds)
   const setSelectedBuffIds = usePlannerStore((s) => s.setSelectedBuffIds)
 
   const { buffs, i18n, battleKeywords, displayBuffs, handleSelect } = useStartBuffSelection(
-    mdVersion,
     selectedBuffIds,
     setSelectedBuffIds,
   )
 
   const baseBuffIds = displayBuffs.map((buff) => buff.baseId)
 
-  const layout = useStartBuffCardLayout(mdVersion)
+  const layout = useStartBuffCardLayout(contentVersion)
   const slotSize = startBuffSlotSize(layout.canvas)
   const mobileScale = CARD_MOBILE_SCALE_DENSE
   const { widthPx: columnWidth, heightPx: rowHeight } = useSlotSizePx(slotSize, mobileScale)
@@ -195,7 +194,6 @@ export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEd
               return (
                 <CardSlot key={buff.baseId} size={slotSize} mobileScale={mobileScale}>
                   <StartBuffCard
-                    mdVersion={mdVersion}
                     layout={layout}
                     slot={slotSize}
                     buff={buff}

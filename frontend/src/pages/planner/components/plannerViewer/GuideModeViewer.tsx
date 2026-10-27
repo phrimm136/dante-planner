@@ -98,11 +98,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
       node: (
         <>
           <Suspense fallback={<StartBuffSkeleton />}>
-            <StartBuffSection
-              mdVersion={planner.metadata.contentVersion}
-              selectedBuffIds={deserialized.selectedBuffIds}
-              readOnly={true}
-            />
+            <StartBuffSection selectedBuffIds={deserialized.selectedBuffIds} readOnly={true} />
           </Suspense>
           {readOnlyNote(content.sectionNotes.startBuffs)}
         </>
@@ -131,7 +127,6 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
         <>
           <Suspense fallback={<GiftGridSkeleton title={t('pages.plannerMD.egoGiftObservation')} />}>
             <EGOGiftObservationSummary
-              mdVersion={planner.metadata.contentVersion}
               selectedGiftIds={deserialized.observationGiftIds}
               readOnly={true}
             />

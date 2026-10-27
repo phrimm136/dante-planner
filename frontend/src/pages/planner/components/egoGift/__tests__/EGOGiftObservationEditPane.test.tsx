@@ -9,7 +9,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import type { ReactElement } from 'react'
+import type { StoreApi } from 'zustand'
 import { EGOGiftObservationEditPane } from '../EGOGiftObservationEditPane'
+import { usePlannerStoreApi } from '../../../stores/usePlannerStore'
+import type { PlannerStore, PlannerStoreSeed } from '../../../stores/usePlannerStore'
+import { SeededPlannerStore } from '../../../stores/__tests__/plannerStoreHarness'
+import { asEncodedGiftId } from '@/test-utils/fixtures'
 import { buildEgoGiftSpecList } from '@/test-utils'
 import type { EGOGiftNameList } from '@/shared/egoGift'
 
@@ -35,17 +41,28 @@ vi.mock('react-i18next', async (importOriginal) => {
   }
 })
 
-// Mock planner editor store (component uses store directly)
-const mockSetObservationGiftIds = vi.fn()
-vi.mock('../../../stores/usePlannerStore', () => ({
-  usePlannerStore: (selector: (state: Record<string, unknown>) => unknown) => {
-    const mockState = {
-      observationGiftIds: new Set<string>(),
-      setObservationGiftIds: mockSetObservationGiftIds,
-    }
-    return selector(mockState)
-  },
-}))
+function StoreProbe({ onStore }: { onStore: (store: StoreApi<PlannerStore>) => void }) {
+  onStore(usePlannerStoreApi())
+  return null
+}
+
+function renderInStore(ui: ReactElement, seed: PlannerStoreSeed = {}) {
+  let store: StoreApi<PlannerStore> | undefined
+  render(
+    <SeededPlannerStore mdVersion={6} initialState={seed}>
+      {ui}
+      <StoreProbe
+        onStore={(api) => {
+          store = api
+        }}
+      />
+    </SeededPlannerStore>,
+  )
+  return () => {
+    if (store === undefined) throw new Error('the planner store never mounted')
+    return store
+  }
+}
 
 // Mock observation data
 const mockObservationData = {
@@ -136,24 +153,22 @@ describe('EGOGiftObservationEditPane', () => {
   const defaultProps = {
     open: true,
     onOpenChange: vi.fn(),
-    mdVersion: 6,
   }
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockSetObservationGiftIds.mockClear()
   })
 
   describe('dialog visibility', () => {
     it('renders dialog when open=true', () => {
-      render(<EGOGiftObservationEditPane {...defaultProps} />)
+      renderInStore(<EGOGiftObservationEditPane {...defaultProps} />)
 
       expect(screen.getByRole('dialog')).toBeInTheDocument()
       expect(screen.getByText('EGO Gift Observation')).toBeInTheDocument()
     })
 
     it('does not render dialog when open=false', () => {
-      render(<EGOGiftObservationEditPane open={false} onOpenChange={vi.fn()} mdVersion={6} />)
+      renderInStore(<EGOGiftObservationEditPane open={false} onOpenChange={vi.fn()} />)
 
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     })
@@ -161,7 +176,7 @@ describe('EGOGiftObservationEditPane', () => {
 
   describe('cost display', () => {
     it('shows cost 0 for empty selection', () => {
-      render(<EGOGiftObservationEditPane {...defaultProps} />)
+      renderInStore(<EGOGiftObservationEditPane {...defaultProps} />)
 
       const costDisplay = screen.getByTestId('starlight-cost')
       expect(costDisplay).toHaveAttribute('data-cost', '0')
@@ -170,36 +185,36 @@ describe('EGOGiftObservationEditPane', () => {
 
   describe('filter controls', () => {
     it('renders keyword filter', () => {
-      render(<EGOGiftObservationEditPane {...defaultProps} />)
+      renderInStore(<EGOGiftObservationEditPane {...defaultProps} />)
       expect(screen.getByTestId('keyword-filter')).toBeInTheDocument()
     })
 
     it('renders sorter', () => {
-      render(<EGOGiftObservationEditPane {...defaultProps} />)
+      renderInStore(<EGOGiftObservationEditPane {...defaultProps} />)
       expect(screen.getByTestId('sorter')).toBeInTheDocument()
     })
 
     it('renders search bar', () => {
-      render(<EGOGiftObservationEditPane {...defaultProps} />)
+      renderInStore(<EGOGiftObservationEditPane {...defaultProps} />)
       expect(screen.getByTestId('search-bar')).toBeInTheDocument()
     })
   })
 
   describe('selection list layout', () => {
     it('renders selection list', () => {
-      render(<EGOGiftObservationEditPane {...defaultProps} />)
+      renderInStore(<EGOGiftObservationEditPane {...defaultProps} />)
       expect(screen.getByTestId('selection-list')).toBeInTheDocument()
     })
 
     it('renders selected gifts', () => {
-      render(<EGOGiftObservationEditPane {...defaultProps} />)
+      renderInStore(<EGOGiftObservationEditPane {...defaultProps} />)
       expect(screen.getByTestId('selected-gifts')).toBeInTheDocument()
     })
   })
 
   describe('Done button', () => {
     it('renders Done button', () => {
-      render(<EGOGiftObservationEditPane {...defaultProps} />)
+      renderInStore(<EGOGiftObservationEditPane {...defaultProps} />)
       expect(screen.getByRole('button', { name: 'Done' })).toBeInTheDocument()
     })
 
@@ -207,7 +222,7 @@ describe('EGOGiftObservationEditPane', () => {
       const onOpenChange = vi.fn()
       const user = userEvent.setup()
 
-      render(<EGOGiftObservationEditPane open onOpenChange={onOpenChange} mdVersion={6} />)
+      renderInStore(<EGOGiftObservationEditPane open onOpenChange={onOpenChange} />)
       await user.click(screen.getByRole('button', { name: 'Done' }))
 
       expect(onOpenChange).toHaveBeenCalledWith(false)
@@ -216,17 +231,19 @@ describe('EGOGiftObservationEditPane', () => {
 
   describe('Reset button', () => {
     it('renders Reset button', () => {
-      render(<EGOGiftObservationEditPane {...defaultProps} />)
+      renderInStore(<EGOGiftObservationEditPane {...defaultProps} />)
       expect(screen.getByRole('button', { name: 'Reset' })).toBeInTheDocument()
     })
 
-    it('calls setObservationGiftIds with empty Set when Reset is clicked', async () => {
+    it('empties the observation selection when Reset is clicked', async () => {
       const user = userEvent.setup()
 
-      render(<EGOGiftObservationEditPane {...defaultProps} />)
+      const getStore = renderInStore(<EGOGiftObservationEditPane {...defaultProps} />, {
+        observationGiftIds: new Set([asEncodedGiftId('9001')]),
+      })
       await user.click(screen.getByRole('button', { name: 'Reset' }))
 
-      expect(mockSetObservationGiftIds).toHaveBeenCalledWith(new Set())
+      expect(getStore().getState().observationGiftIds).toEqual(new Set())
     })
   })
 })

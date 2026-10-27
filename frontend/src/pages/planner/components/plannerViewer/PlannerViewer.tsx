@@ -1,16 +1,50 @@
 import { useState, startTransition } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { PlannerStoreProvider } from '../../stores/usePlannerStore'
+import { hydrateEditorState } from '../../lib/editorStateCodec'
 import type { MDSaveablePlanner } from '../../types/PlannerTypes'
 
 import { GuideModeViewer } from './GuideModeViewer'
-import { TrackerModeViewer, TrackerStore } from './TrackerModeViewer'
+import { TrackerModeViewer } from './TrackerModeViewer'
 
 type ViewerMode = 'guide' | 'tracker'
 
 interface PlannerViewerProps {
   planner: MDSaveablePlanner
+}
+
+interface PlannerViewerStoreProps {
+  planner: MDSaveablePlanner
+  children: ReactNode
+}
+
+export function PlannerViewerStore({ planner, children }: PlannerViewerStoreProps) {
+  const metadata = {
+    title: planner.metadata.title,
+    category: planner.config.category,
+    isPublished: planner.metadata.published ?? false,
+  }
+  const viewerInitialState = (maxLevel: number) => {
+    const { skillEAState: _plan, ...state } = hydrateEditorState(
+      planner.content,
+      metadata,
+      maxLevel,
+    )
+    return state
+  }
+
+  return (
+    <PlannerStoreProvider
+      key={planner.metadata.id}
+      mdVersion={planner.metadata.contentVersion}
+      initialState={viewerInitialState}
+    >
+      {children}
+    </PlannerStoreProvider>
+  )
 }
 
 export function PlannerViewer({ planner }: PlannerViewerProps) {
@@ -28,7 +62,7 @@ export function PlannerViewer({ planner }: PlannerViewerProps) {
   }
 
   return (
-    <>
+    <PlannerViewerStore planner={planner}>
       <div className="flex justify-center gap-2 pb-4 border-b">
         <Button
           variant={mode === 'guide' ? 'default' : 'outline'}
@@ -52,11 +86,9 @@ export function PlannerViewer({ planner }: PlannerViewerProps) {
 
       {trackerMounted && (
         <div className={cn(mode !== 'tracker' && 'hidden')} aria-hidden={mode !== 'tracker'}>
-          <TrackerStore planner={planner}>
-            <TrackerModeViewer planner={planner} />
-          </TrackerStore>
+          <TrackerModeViewer planner={planner} />
         </div>
       )}
-    </>
+    </PlannerViewerStore>
   )
 }

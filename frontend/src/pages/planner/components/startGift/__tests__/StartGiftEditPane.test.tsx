@@ -8,7 +8,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import type { ReactElement } from 'react'
+import type { StoreApi } from 'zustand'
 import { StartGiftEditPane } from '../StartGiftEditPane'
+import { usePlannerStoreApi } from '../../../stores/usePlannerStore'
+import type { PlannerStore, PlannerStoreSeed } from '../../../stores/usePlannerStore'
+import { SeededPlannerStore } from '../../../stores/__tests__/plannerStoreHarness'
+import { asEncodedGiftId } from '@/test-utils/fixtures'
 import type { EGOGiftSpec, EGOGiftNameList } from '@/shared/egoGift'
 import { PLANNER_CONFIG } from '@/lib/constants'
 import { buildEgoGiftSpecList } from '@/test-utils'
@@ -32,25 +38,30 @@ vi.mock('react-i18next', async (importOriginal) => {
   }
 })
 
-// Mock planner editor store
-const mockSetSelectedGiftKeyword = vi.fn()
-const mockSetSelectedGiftIds = vi.fn()
-let mockSelectedBuffIds = new Set<number>()
-let mockSelectedKeyword: string | null = null
-let mockSelectedGiftIds = new Set<string>()
+let seed: PlannerStoreSeed = {}
 
-vi.mock('../../../stores/usePlannerStore', () => ({
-  usePlannerStore: (selector: (state: Record<string, unknown>) => unknown) => {
-    const mockState = {
-      selectedBuffIds: mockSelectedBuffIds,
-      selectedGiftKeyword: mockSelectedKeyword,
-      selectedGiftIds: mockSelectedGiftIds,
-      setSelectedGiftKeyword: mockSetSelectedGiftKeyword,
-      setSelectedGiftIds: mockSetSelectedGiftIds,
-    }
-    return selector(mockState)
-  },
-}))
+function StoreProbe({ onStore }: { onStore: (store: StoreApi<PlannerStore>) => void }) {
+  onStore(usePlannerStoreApi())
+  return null
+}
+
+function renderInStore(ui: ReactElement) {
+  let store: StoreApi<PlannerStore> | undefined
+  render(
+    <SeededPlannerStore mdVersion={PLANNER_CONFIG.mdCurrentVersion} initialState={seed}>
+      {ui}
+      <StoreProbe
+        onStore={(api) => {
+          store = api
+        }}
+      />
+    </SeededPlannerStore>,
+  )
+  return () => {
+    if (store === undefined) throw new Error('the planner store never mounted')
+    return store
+  }
+}
 
 const mockPools: Record<string, string[]> = {
   Burn: ['9001', '9002', '9003'],
@@ -166,26 +177,23 @@ describe('StartGiftEditPane', () => {
   const defaultProps = {
     open: true,
     onOpenChange: vi.fn(),
-    mdVersion: PLANNER_CONFIG.mdCurrentVersion,
   }
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockSelectedBuffIds = new Set<number>()
-    mockSelectedKeyword = null
-    mockSelectedGiftIds = new Set<string>()
+    seed = {}
   })
 
   describe('dialog visibility (UT5)', () => {
     it('renders dialog when open=true', () => {
-      render(<StartGiftEditPane {...defaultProps} open />)
+      renderInStore(<StartGiftEditPane {...defaultProps} open />)
 
       expect(screen.getByRole('dialog')).toBeInTheDocument()
       expect(screen.getByText('Start EGO Gift')).toBeInTheDocument()
     })
 
     it('does not render dialog when open=false', () => {
-      render(<StartGiftEditPane {...defaultProps} open={false} />)
+      renderInStore(<StartGiftEditPane {...defaultProps} open={false} />)
 
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     })
@@ -193,16 +201,16 @@ describe('StartGiftEditPane', () => {
 
   describe('row rendering (UT6)', () => {
     it('renders keyword rows from pools', () => {
-      render(<StartGiftEditPane {...defaultProps} />)
+      renderInStore(<StartGiftEditPane {...defaultProps} />)
 
       expect(screen.getByTestId('row-Burn')).toBeInTheDocument()
       expect(screen.getByTestId('row-Bleed')).toBeInTheDocument()
     })
 
     it('marks selected keyword row', () => {
-      mockSelectedKeyword = 'Burn'
+      seed = { selectedGiftKeyword: 'Burn' }
 
-      render(<StartGiftEditPane {...defaultProps} />)
+      renderInStore(<StartGiftEditPane {...defaultProps} />)
 
       expect(screen.getByTestId('row-Burn')).toHaveAttribute('data-selected', 'true')
       expect(screen.getByTestId('row-Bleed')).toHaveAttribute('data-selected', 'false')
@@ -211,7 +219,7 @@ describe('StartGiftEditPane', () => {
 
   describe('Done button (UT7)', () => {
     it('renders Done button', () => {
-      render(<StartGiftEditPane {...defaultProps} />)
+      renderInStore(<StartGiftEditPane {...defaultProps} />)
 
       expect(screen.getByRole('button', { name: 'Done' })).toBeInTheDocument()
     })
@@ -220,7 +228,7 @@ describe('StartGiftEditPane', () => {
       const onOpenChange = vi.fn()
       const user = userEvent.setup()
 
-      render(<StartGiftEditPane {...defaultProps} onOpenChange={onOpenChange} />)
+      renderInStore(<StartGiftEditPane {...defaultProps} onOpenChange={onOpenChange} />)
 
       await user.click(screen.getByRole('button', { name: 'Done' }))
 
@@ -230,19 +238,21 @@ describe('StartGiftEditPane', () => {
 
   describe('EA counter', () => {
     it('shows EA counter with correct format', () => {
-      mockSelectedGiftIds = new Set(['9001'])
+      seed = { selectedGiftIds: new Set([asEncodedGiftId('9001')]) }
 
-      render(<StartGiftEditPane {...defaultProps} />)
+      renderInStore(<StartGiftEditPane {...defaultProps} />)
 
       // EA counter is in format "EA: X/Y"
       expect(screen.getByText(/1\/1/)).toBeInTheDocument()
     })
 
     it('shows increased max when buff with ADDITIONAL_START_EGO_GIFT_SELECT is selected', () => {
-      mockSelectedBuffIds = new Set([200])
-      mockSelectedGiftIds = new Set(['9001'])
+      seed = {
+        selectedBuffIds: new Set([200]),
+        selectedGiftIds: new Set([asEncodedGiftId('9001')]),
+      }
 
-      render(<StartGiftEditPane {...defaultProps} />)
+      renderInStore(<StartGiftEditPane {...defaultProps} />)
 
       // Base 1 + 1 from buff effect = 2
       expect(screen.getByText(/1\/2/)).toBeInTheDocument()
@@ -253,11 +263,11 @@ describe('StartGiftEditPane', () => {
     it('calls setSelectedGiftKeyword when row is clicked', async () => {
       const user = userEvent.setup()
 
-      render(<StartGiftEditPane {...defaultProps} />)
+      const getStore = renderInStore(<StartGiftEditPane {...defaultProps} />)
 
       await user.click(screen.getByTestId('row-Burn'))
 
-      expect(mockSetSelectedGiftKeyword).toHaveBeenCalledWith('Burn')
+      expect(getStore().getState().selectedGiftKeyword).toBe('Burn')
     })
   })
 })

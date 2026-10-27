@@ -9,7 +9,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import type { ReactNode } from 'react'
 import { EGOGiftObservationSummary } from '../EGOGiftObservationSummary'
+import { SeededPlannerStore } from '../../../stores/__tests__/plannerStoreHarness'
 import { buildEgoGiftSpecList } from '@/test-utils'
 import type { EGOGiftNameList } from '@/shared/egoGift'
 
@@ -133,7 +135,11 @@ describe('EGOGiftObservationSummary', () => {
   const ENCODED_9999 = asEncodedGiftId('9999')
   const ENCODED_9998 = asEncodedGiftId('9998')
 
-  const defaultProps = { mdVersion: 6, selectedGiftIds: new Set<EncodedGiftId>() }
+  const defaultProps = { selectedGiftIds: new Set<EncodedGiftId>() }
+
+  function InSeason({ children }: { children: ReactNode }) {
+    return <SeededPlannerStore mdVersion={6}>{children}</SeededPlannerStore>
+  }
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -141,17 +147,17 @@ describe('EGOGiftObservationSummary', () => {
 
   describe('empty state', () => {
     it('renders placeholder text when no gifts selected', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} />)
+      render(<EGOGiftObservationSummary {...defaultProps} />, { wrapper: InSeason })
       expect(screen.getByText('Select EGO Gifts')).toBeInTheDocument()
     })
 
     it('renders section title', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} />)
+      render(<EGOGiftObservationSummary {...defaultProps} />, { wrapper: InSeason })
       expect(screen.getByText('EGO Gift Observation')).toBeInTheDocument()
     })
 
     it('shows cost as 0 when no selection', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} />)
+      render(<EGOGiftObservationSummary {...defaultProps} />, { wrapper: InSeason })
       const costDisplay = screen.getByTestId('starlight-cost')
       expect(costDisplay).toHaveAttribute('data-cost', '0')
     })
@@ -161,6 +167,7 @@ describe('EGOGiftObservationSummary', () => {
     it('shows cost 70 for 1 gift', () => {
       render(
         <EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set([ENCODED_9001])} />,
+        { wrapper: InSeason },
       )
       const costDisplay = screen.getByTestId('starlight-cost')
       expect(costDisplay).toHaveAttribute('data-cost', '70')
@@ -172,6 +179,7 @@ describe('EGOGiftObservationSummary', () => {
           {...defaultProps}
           selectedGiftIds={new Set([ENCODED_9001, ENCODED_9002])}
         />,
+        { wrapper: InSeason },
       )
       const costDisplay = screen.getByTestId('starlight-cost')
       expect(costDisplay).toHaveAttribute('data-cost', '160')
@@ -183,6 +191,7 @@ describe('EGOGiftObservationSummary', () => {
           {...defaultProps}
           selectedGiftIds={new Set([ENCODED_9001, ENCODED_9002, ENCODED_9003])}
         />,
+        { wrapper: InSeason },
       )
       const costDisplay = screen.getByTestId('starlight-cost')
       expect(costDisplay).toHaveAttribute('data-cost', '270')
@@ -193,6 +202,7 @@ describe('EGOGiftObservationSummary', () => {
     it('renders gift cards when gifts are selected', () => {
       render(
         <EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set([ENCODED_9001])} />,
+        { wrapper: InSeason },
       )
       expect(screen.getByTestId('gift-card-9001')).toBeInTheDocument()
       expect(screen.getByText('Blazing Gift')).toBeInTheDocument()
@@ -204,6 +214,7 @@ describe('EGOGiftObservationSummary', () => {
           {...defaultProps}
           selectedGiftIds={new Set([ENCODED_9001, ENCODED_9002, ENCODED_9003])}
         />,
+        { wrapper: InSeason },
       )
       expect(screen.getByTestId('gift-card-9001')).toBeInTheDocument()
       expect(screen.getByTestId('gift-card-9002')).toBeInTheDocument()
@@ -213,6 +224,7 @@ describe('EGOGiftObservationSummary', () => {
     it('does not render placeholder when gifts selected', () => {
       render(
         <EGOGiftObservationSummary {...defaultProps} selectedGiftIds={new Set([ENCODED_9001])} />,
+        { wrapper: InSeason },
       )
       expect(screen.queryByText('Select EGO Gifts')).not.toBeInTheDocument()
     })
@@ -223,7 +235,9 @@ describe('EGOGiftObservationSummary', () => {
       const onClick = vi.fn()
       const user = userEvent.setup()
 
-      render(<EGOGiftObservationSummary {...defaultProps} onClick={onClick} />)
+      render(<EGOGiftObservationSummary {...defaultProps} onClick={onClick} />, {
+        wrapper: InSeason,
+      })
 
       const clickableArea = screen.getByRole('button')
       await user.click(clickableArea)
@@ -233,7 +247,7 @@ describe('EGOGiftObservationSummary', () => {
 
     it('survives a click when onClick is undefined', async () => {
       const user = userEvent.setup()
-      render(<EGOGiftObservationSummary {...defaultProps} />)
+      render(<EGOGiftObservationSummary {...defaultProps} />, { wrapper: InSeason })
       const clickableArea = screen.getByRole('button')
 
       await user.click(clickableArea)
@@ -249,6 +263,7 @@ describe('EGOGiftObservationSummary', () => {
           {...defaultProps}
           selectedGiftIds={new Set([ENCODED_9001, ENCODED_9999])}
         />,
+        { wrapper: InSeason },
       )
       // Known gift should render
       expect(screen.getByTestId('gift-card-9001')).toBeInTheDocument()
@@ -263,6 +278,7 @@ describe('EGOGiftObservationSummary', () => {
           {...defaultProps}
           selectedGiftIds={new Set([ENCODED_9001, ENCODED_9002, ENCODED_9003, ENCODED_9998])}
         />,
+        { wrapper: InSeason },
       )
       const costDisplay = screen.getByTestId('starlight-cost')
       expect(costDisplay).toHaveAttribute('data-cost', '0')

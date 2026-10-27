@@ -3,7 +3,7 @@ import { useEGOGiftObservationData } from '@/pages/egoGift'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/shared/egoGift'
 import { getBaseGiftId } from '@/pages/egoGift'
 import type { EncodedGiftId } from '@/shared/gameData'
-import { usePlannerStore } from '../../stores/usePlannerStore'
+import { usePlannerStore, useStoreSeason } from '../../stores/usePlannerStore'
 import { CARD_MOBILE_SCALE } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { EmptyStatePlaceholder } from '@/components/feedback/EmptyStatePlaceholder'
@@ -16,7 +16,6 @@ import { EGOGiftCard } from '@/shared/egoGift'
 import { toEGOGiftEntity } from '@/shared/egoGift'
 
 export interface EGOGiftObservationSummaryProps {
-  mdVersion: number
   selectedGiftIds: ReadonlySet<EncodedGiftId>
   onClick?: () => void
   readOnly?: boolean
@@ -24,7 +23,6 @@ export interface EGOGiftObservationSummaryProps {
 }
 
 export function EGOGiftObservationSummary({
-  mdVersion,
   selectedGiftIds,
   onClick,
   readOnly = false,
@@ -36,7 +34,8 @@ export function EGOGiftObservationSummary({
   const { heightPx: giftSlotHeightPx } = useSlotSizePx(EGO_GIFT_GEOMETRY.size, mobileScale)
   const minHeight = giftRowMinHeightPx(giftSlotHeightPx)
 
-  const { data: observationData } = useEGOGiftObservationData(mdVersion)
+  const { contentVersion } = useStoreSeason()
+  const { data: observationData } = useEGOGiftObservationData(contentVersion)
   const spec = useEGOGiftListSpec()
   const i18n = useEGOGiftListI18n()
 

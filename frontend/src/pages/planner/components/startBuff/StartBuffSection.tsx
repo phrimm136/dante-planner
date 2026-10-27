@@ -1,5 +1,4 @@
 import { useTranslation } from 'react-i18next'
-import type { MDVersion } from '@/shared/gameData'
 import { useStartBuffSelection } from '../../hooks/useStartBuffSelection'
 import { CARD_MOBILE_SCALE_NONE } from '@/lib/constants'
 import { CardSlot, EGO_GIFT_GEOMETRY, useSlotSizePx } from '@/shared/cardLayout'
@@ -14,7 +13,6 @@ import { StartBuffMiniCard } from './StartBuffMiniCard'
 const IGNORE_SELECTION = () => {}
 
 export interface StartBuffSectionProps {
-  mdVersion: MDVersion
   selectedBuffIds: Set<number>
   onClick?: () => void
   readOnly?: boolean
@@ -22,7 +20,6 @@ export interface StartBuffSectionProps {
 }
 
 export function StartBuffSection({
-  mdVersion,
   selectedBuffIds,
   onClick,
   readOnly = false,
@@ -30,7 +27,7 @@ export function StartBuffSection({
 }: StartBuffSectionProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  const { displayBuffs } = useStartBuffSelection(mdVersion, selectedBuffIds, IGNORE_SELECTION)
+  const { displayBuffs } = useStartBuffSelection(selectedBuffIds, IGNORE_SELECTION)
 
   const { heightPx: buffSlotHeightPx } = useSlotSizePx(
     EGO_GIFT_GEOMETRY.size,
@@ -69,11 +66,7 @@ export function StartBuffSection({
                 size={EGO_GIFT_GEOMETRY.size}
                 mobileScale={CARD_MOBILE_SCALE_NONE}
               >
-                <StartBuffMiniCard
-                  buffId={Number(buff.id)}
-                  displayName={buff.name}
-                  mdVersion={mdVersion}
-                />
+                <StartBuffMiniCard buffId={Number(buff.id)} displayName={buff.name} />
               </CardSlot>
             ))}
           </div>

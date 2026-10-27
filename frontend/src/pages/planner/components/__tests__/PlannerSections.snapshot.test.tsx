@@ -216,6 +216,14 @@ function withStore(state: Partial<PlannerStoreState>, ui: ReactElement) {
   return <SeededPlannerStore initialState={state}>{ui}</SeededPlannerStore>
 }
 
+function inSeason(state: Partial<PlannerStoreState>, ui: ReactElement) {
+  return (
+    <SeededPlannerStore mdVersion={MD_VERSION} initialState={state}>
+      {ui}
+    </SeededPlannerStore>
+  )
+}
+
 function StoreDeckBuilderSummary(
   props: Omit<DeckBuilderSummaryProps, 'equipment' | 'deploymentOrder' | 'ownedGiftIds'>,
 ) {
@@ -299,38 +307,30 @@ describe('DeckBuilderSummary DOM', () => {
 
 describe('StartBuffSection DOM', () => {
   const MATRIX: Array<[string, () => ReactElement]> = [
-    [
-      'store-bound, empty store selection',
-      () => withStore({}, <StoreBoundStartBuffSection mdVersion={MD_VERSION} />),
-    ],
+    ['store-bound, empty store selection', () => inSeason({}, <StoreBoundStartBuffSection />)],
     [
       'store-bound, populated store selection',
-      () => withStore(POPULATED_STORE, <StoreBoundStartBuffSection mdVersion={MD_VERSION} />),
+      () => inSeason(POPULATED_STORE, <StoreBoundStartBuffSection />),
     ],
     [
       'explicit empty selection, read-only',
-      () => <StartBuffSection mdVersion={MD_VERSION} selectedBuffIds={new Set()} readOnly />,
+      () => inSeason({}, <StartBuffSection selectedBuffIds={new Set()} readOnly />),
     ],
     [
       'explicit populated selection, read-only with notes',
-      () => (
-        <StartBuffSection
-          mdVersion={MD_VERSION}
-          selectedBuffIds={new Set([1001, 1002])}
-          readOnly
-          onViewNotes={() => {}}
-        />
-      ),
+      () =>
+        inSeason(
+          {},
+          <StartBuffSection
+            selectedBuffIds={new Set([1001, 1002])}
+            readOnly
+            onViewNotes={() => {}}
+          />,
+        ),
     ],
     [
       'explicit populated selection, editable',
-      () => (
-        <StartBuffSection
-          mdVersion={MD_VERSION}
-          selectedBuffIds={new Set([1001])}
-          onClick={() => {}}
-        />
-      ),
+      () => inSeason({}, <StartBuffSection selectedBuffIds={new Set([1001])} onClick={() => {}} />),
     ],
   ]
 
@@ -378,32 +378,27 @@ describe('EGOGiftObservationSummary DOM', () => {
   const MATRIX: Array<[string, () => ReactElement]> = [
     [
       'store-bound, empty store selection',
-      () => withStore({}, <StoreBoundEGOGiftObservationSummary mdVersion={MD_VERSION} />),
+      () => inSeason({}, <StoreBoundEGOGiftObservationSummary />),
     ],
     [
       'store-bound, populated store selection',
-      () =>
-        withStore(
-          POPULATED_STORE,
-          <StoreBoundEGOGiftObservationSummary mdVersion={MD_VERSION} onClick={() => {}} />,
-        ),
+      () => inSeason(POPULATED_STORE, <StoreBoundEGOGiftObservationSummary onClick={() => {}} />),
     ],
     [
       'explicit empty selection, read-only',
-      () => (
-        <EGOGiftObservationSummary mdVersion={MD_VERSION} selectedGiftIds={new Set()} readOnly />
-      ),
+      () => inSeason({}, <EGOGiftObservationSummary selectedGiftIds={new Set()} readOnly />),
     ],
     [
       'explicit populated selection, read-only with notes',
-      () => (
-        <EGOGiftObservationSummary
-          mdVersion={MD_VERSION}
-          selectedGiftIds={new Set([ENCODED_9001, ENCODED_9002])}
-          readOnly
-          onViewNotes={() => {}}
-        />
-      ),
+      () =>
+        inSeason(
+          {},
+          <EGOGiftObservationSummary
+            selectedGiftIds={new Set([ENCODED_9001, ENCODED_9002])}
+            readOnly
+            onViewNotes={() => {}}
+          />,
+        ),
     ],
   ]
 

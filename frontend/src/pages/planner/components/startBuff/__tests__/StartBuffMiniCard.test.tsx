@@ -4,6 +4,7 @@ import { render, screen, fireEvent } from '@/test-utils/renderWithProviders'
 import md6KrNames from '@static/i18n/KR/MD6/startBuffs.json'
 import { getStartBuffSpritePath } from '@/shared/assets'
 import { StartBuffMiniCard } from '../StartBuffMiniCard'
+import { SeededPlannerStore } from '../../../stores/__tests__/plannerStoreHarness'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'KR' } }),
@@ -21,7 +22,9 @@ function nameOf(baseId: number): string {
 
 async function renderMini(buffId: number, baseId: number) {
   const view = render(
-    <StartBuffMiniCard buffId={buffId} displayName={nameOf(baseId)} mdVersion={6} />,
+    <SeededPlannerStore mdVersion={6}>
+      <StartBuffMiniCard buffId={buffId} displayName={nameOf(baseId)} />
+    </SeededPlannerStore>,
   )
   await screen.findByTestId('start-buff-mini-name')
   return view
