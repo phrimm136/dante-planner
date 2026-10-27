@@ -91,7 +91,7 @@ final class MarkerSourceProbe implements AutoCloseable {
             consecutiveFailures++;
             if (consecutiveFailures >= failureThreshold && breaker.getState() != CircuitBreaker.State.OPEN) {
                 breaker.transitionToOpenState();
-                log.warn("Marker source {} failed {} consecutive probes; breaker {} opened",
+                log.info("Marker source {} failed {} consecutive probes; breaker {} opened",
                         source.name(), consecutiveFailures, breaker.getName());
             }
         }

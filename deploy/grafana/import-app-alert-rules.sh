@@ -26,32 +26,60 @@ FOLDER_UID=$(curl -s "${auth[@]}" "${GRAFANA_URL}/api/folders" |
 [ -n "$FOLDER_UID" ] || { echo "folder ${FOLDER} not found — run import-alert-rules.sh first"; exit 1; }
 echo "   folder uid: ${FOLDER_UID}"
 
-# submit_rule TITLE — reads the rule JSON on stdin and POSTs it
+if [ -z "${LOKI_DS_UID:-}" ]; then
+  datasources=$(curl -s -w '\n%{http_code}' "${auth[@]}" "${GRAFANA_URL}/api/datasources") || datasources=$'\n000'
+  code=${datasources##*$'\n'}
+  [ "$code" = 200 ] || { echo "listing datasources failed (HTTP ${code}) — re-run with LOKI_DS_UID=<uid of the Loki datasource>"; exit 1; }
+  LOKI_DS_UID=$(printf '%s' "${datasources%$'\n'*}" | jq -r '[.[] | select(.type=="loki")][0].uid // empty')
+  [ -n "$LOKI_DS_UID" ] || { echo "no datasource of type loki found — re-run with LOKI_DS_UID=<uid of the Loki datasource>"; exit 1; }
+fi
+echo "   loki datasource uid: ${LOKI_DS_UID}"
+
+rules=$(curl -s -w '\n%{http_code}' "${auth[@]}" "${GRAFANA_URL}/api/v1/provisioning/alert-rules") || rules=$'\n000'
+code=${rules##*$'\n'}
+[ "$code" = 200 ] || { echo "listing alert rules failed (HTTP ${code}): ${rules%$'\n'*}"; exit 1; }
+EXISTING=$(printf '%s' "${rules%$'\n'*}" | jq -c --arg f "$FOLDER_UID" '[.[] | select(.folderUID==$f) | {title, uid}]')
+created=0 updated=0
+
+# submit_rule TITLE JSON — PUTs over the folder's rule with that title, else POSTs
 submit_rule() {
-  local title=$1
-  curl -s -w '\n%{http_code}' "${auth[@]}" "${noprov[@]}" -X POST \
-    "${GRAFANA_URL}/api/v1/provisioning/alert-rules" -d @- | {
-    resp=$(cat); code=${resp##*$'\n'}; body=${resp%$'\n'*}
-    if [ "$code" = 201 ]; then
-      printf '%s' "$body" | jq -r '"   created: " + .title + "  (uid " + .uid + ")"'
-    else
-      echo "   FAILED ${title} (HTTP ${code}): ${body}"; exit 1
-    fi
-  }
+  local title=$1 json=$2
+  local uids uid method path want verb resp code body
+  mapfile -t uids < <(printf '%s' "$EXISTING" | jq -r --arg t "$title" '.[] | select(.title==$t) | .uid')
+  if [ "${#uids[@]}" -gt 0 ]; then
+    uid=${uids[0]}
+    for dup in "${uids[@]:1}"; do
+      echo "   warning: ${title} also exists as uid ${dup} — delete that duplicate in the Grafana UI"
+    done
+    method=PUT want=200 verb=updated path="${GRAFANA_URL}/api/v1/provisioning/alert-rules/${uid}"
+    json=$(printf '%s' "$json" | jq -c --arg uid "$uid" '. + {uid: $uid}')
+  else
+    method=POST want=201 verb=created path="${GRAFANA_URL}/api/v1/provisioning/alert-rules"
+  fi
+  resp=$(printf '%s' "$json" |
+    curl -s -w '\n%{http_code}' "${auth[@]}" "${noprov[@]}" -X "$method" "$path" -d @-) || resp=$'\n000'
+  code=${resp##*$'\n'}; body=${resp%$'\n'*}
+  if [ "$code" = "$want" ]; then
+    printf '%s' "$body" | jq -r --arg v "$verb" '"   " + $v + ": " + .title + "  (uid " + .uid + ")"'
+    if [ "$verb" = created ]; then created=$((created + 1)); else updated=$((updated + 1)); fi
+  else
+    echo "   FAILED ${title} (HTTP ${code}): ${body}"; exit 1
+  fi
 }
 
-# post_rule TITLE FOR_DURATION PROMQL
+# post_rule TITLE FOR_DURATION EXPR [DATASOURCE_UID] [SUMMARY]
 post_rule() {
-  local title=$1 for_dur=$2 expr=$3
-  jq -n \
+  local title=$1 for_dur=$2 expr=$3 ds=${4:-$DS_UID} summary=${5:-}
+  submit_rule "$title" "$(jq -n \
     --arg title "$title" --arg for "$for_dur" --arg expr "$expr" \
-    --arg ds "$DS_UID" --arg folder "$FOLDER_UID" '
+    --arg ds "$ds" --arg loki "$LOKI_DS_UID" --arg summary "$summary" --arg folder "$FOLDER_UID" '
     {
       title: $title, ruleGroup: "app-rules", folderUID: $folder,
       condition: "C", for: $for, noDataState: "OK", execErrState: "OK",
       data: [
         { refId: "A", relativeTimeRange: {from: 600, to: 0}, datasourceUid: $ds,
-          model: {refId: "A", expr: $expr, instant: true} },
+          model: ({refId: "A", expr: $expr, instant: true}
+                  + (if $ds == $loki then {queryType: "instant"} else {} end)) },
         { refId: "B", relativeTimeRange: {from: 0, to: 0}, datasourceUid: "__expr__",
           model: {refId: "B", type: "reduce", reducer: "last", expression: "A",
                   datasource: {type: "__expr__", uid: "__expr__"}} },
@@ -60,15 +88,16 @@ post_rule() {
                   conditions: [{evaluator: {type: "gt", params: [0]}}],
                   datasource: {type: "__expr__", uid: "__expr__"}} }
       ]
-    }' |
-  submit_rule "$title"
+    }
+    + (if $summary == "" then {} else
+        {annotations: {summary: $summary, description: "{{ $values.B }} in 5m"}} end)')"
 }
 
 # post_cloudwatch_rule TITLE FOR_DURATION METRIC DBINSTANCE REGION THRESHOLD
 # CloudWatch RDS metric, Maximum over 60 s, alert when the last value >= THRESHOLD.
 post_cloudwatch_rule() {
   local title=$1 for_dur=$2 metric=$3 db=$4 region=$5 threshold=$6
-  jq -n \
+  submit_rule "$title" "$(jq -n \
     --arg title "$title" --arg for "$for_dur" --arg metric "$metric" --arg db "$db" \
     --arg region "$region" --argjson threshold "$threshold" \
     --arg ds "$CW_DS_UID" --arg folder "$FOLDER_UID" '
@@ -89,19 +118,25 @@ post_cloudwatch_rule() {
                   conditions: [{evaluator: {type: "gte", params: [$threshold]}}],
                   datasource: {type: "__expr__", uid: "__expr__"}} }
       ]
-    }' |
-  submit_rule "$title"
+    }')"
 }
 
-echo "== creating app rules (legacy CW parity)"
+echo "== creating or updating app rules (legacy CW parity)"
+
+# shellcheck disable=SC2016
+LOG_SUMMARY='{{ $labels.cluster }} {{ $labels.logger_name }}: {{ $labels.shape }}'
 
 # BackendErrors: any ERROR paged immediately (Sum > 0 over 60s); keep first-occurrence semantics
+# shellcheck disable=SC2016
 post_rule "backend-error-events" "1m" \
-  'sum by (cluster) (increase(logback_events_total{level="error"}[5m])) > 0'
+  'sum by (cluster, logger_name, shape) (count_over_time({app="backend"} | json | level="ERROR" | label_format shape=`{{ regexReplaceAll "[0-9]+" (regexReplaceAll "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" .message "UUID") "N" | trunc 80 }}` [5m])) > 0' \
+  "$LOKI_DS_UID" "$LOG_SUMMARY"
 
 # BackendWarnings: WARN > 0 sustained 5 evaluation periods
+# shellcheck disable=SC2016
 post_rule "backend-warn-sustained" "5m" \
-  'sum by (cluster) (increase(logback_events_total{level="warn"}[5m])) > 0'
+  'sum by (cluster, logger_name, shape) (count_over_time({app="backend"} | json | level="WARN" | label_format shape=`{{ regexReplaceAll "[0-9]+" (regexReplaceAll "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" .message "UUID") "N" | trunc 80 }}` [5m])) > 0' \
+  "$LOKI_DS_UID" "$LOG_SUMMARY"
 
 # BackendSilence: < 1 log event in 5m; kube rules own app-down, this owns pipeline-dead
 post_rule "backend-log-silence" "5m" \
@@ -169,5 +204,5 @@ post_rule "marker-raise-failures" "0s" \
 # Marker TTL is 1 hour (ADR 183): safe only while the Seoul replica lags far below it.
 post_cloudwatch_rule "seoul-replica-lag" "5m" ReplicaLag danteplanner-mysql-seoul ap-northeast-2 60
 
-echo "== done: 20 rules in folder ${FOLDER}, group app-rules"
+echo "== done: ${created} created, ${updated} updated in folder ${FOLDER}, group app-rules"
 echo "   All noDataState=OK except seoul-replica-lag (Alerting) — non-paging while a series is absent; staleness-meta owns absence."

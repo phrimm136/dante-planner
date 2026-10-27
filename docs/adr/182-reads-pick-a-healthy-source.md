@@ -54,6 +54,13 @@ epic: none · pr: none · supersedes: 168 @reads @outage @trigger, 168 @reads @o
   REJECTED: reusing `WRITE_TEMPORARILY_UNAVAILABLE` — the client reads it as a failed write.
   NON-GOAL: availability of a read whose guard needs an unreachable authoritative source — it
   answers 503 until one is reachable.
+- @reads @sources @log — A probe logs a breaker's open and close transitions at INFO. A rolling
+  restart opened the breaker dozens of times in one deploy, each open a WARN, and the generic warn
+  alert turned back on the per-open alert that ADR 168 rejected; a sustained open stays with the
+  breaker metric rule.
+  REJECTED: a WARN once the open state persists — a second, slower copy of the breaker metric rule.
+  INVARIANT: no probe logs a breaker transition above INFO — an `rg 'log\.warn'` over the
+  read-source and marker-source probes prints nothing.
 
 ## Takeaway
 - takeaway: attach a guard to the property of the source it protects, not to the deployment that
