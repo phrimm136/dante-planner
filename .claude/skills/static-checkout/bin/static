@@ -12,6 +12,8 @@ Keeps <repo>/static, the data checkout it points at, and static.lock in agreemen
 
 commands:
   doctor   print the link target, the checkout HEAD and the lock sha; exit 1 on any mismatch
+  check    silent exit 0 when the checkout HEAD equals static.lock; exit 1 on a mismatch,
+           exit 2 with no lock or no checkout; accepts a real directory as well as the link
   link     point <repo>/static at the checkout (default $SIBLING)
   lock     write the checkout's HEAD into static.lock
   sync     check static.lock's sha out in the checkout; refuses a dirty or ahead checkout
@@ -23,7 +25,7 @@ options:
 USAGE
 }
 
-die() { printf 'static: %s\n' "$1" >&2; exit 1; }
+die() { printf 'static: %s\n' "$1" >&2; exit "${2:-1}"; }
 
 checkout_arg=""
 command=""
@@ -33,7 +35,7 @@ while [ $# -gt 0 ]; do
     --checkout)
       [ $# -ge 2 ] || die "--checkout needs a path; see static --help"
       checkout_arg=$2; shift 2 ;;
-    doctor|link|lock|sync)
+    doctor|check|link|lock|sync)
       [ -z "$command" ] || die "one command at a time; see static --help"
       command=$1; shift ;;
     *) die "unknown argument '$1'; see static --help" ;;
@@ -74,6 +76,10 @@ require_clean() {
     || die "checkout is dirty ($1); commit or stash there, then run static $command"
 }
 
+mismatch_line() {
+  printf 'static.lock %s != checkout HEAD %s; run static sync (or static lock to adopt HEAD)\n' "$1" "$2"
+}
+
 cmd_doctor() {
   local lock checkout head status=0
   if [ -L "$link" ]; then
@@ -89,10 +95,22 @@ cmd_doctor() {
   printf 'checkout  %s HEAD %s\n' "$checkout" "$head"
   printf 'lock      static.lock %s\n' "$lock"
   if [ "$head" != "$lock" ]; then
-    printf 'static.lock %s != checkout HEAD %s; run static sync (or static lock to adopt HEAD)\n' "$lock" "$head"
+    mismatch_line "$lock" "$head"
     status=1
   fi
   return "$status"
+}
+
+cmd_check() {
+  local checkout=${checkout_arg:-$link} lock top head
+  lock=$(read_lock) || exit 2
+  top=$(git -C "$checkout" rev-parse --show-toplevel 2>/dev/null) || top=""
+  head=$(git -C "$checkout" rev-parse --verify --quiet HEAD 2>/dev/null) || head=""
+  [ -n "$top" ] && [ "$top" = "$(realpath "$checkout")" ] && [ -n "$head" ] \
+    || die "no data checkout at $checkout; clone $REMOTE there, then run static link" 2
+  [ "$head" != "$lock" ] || return 0
+  mismatch_line "$lock" "$head" >&2
+  return 1
 }
 
 cmd_link() {

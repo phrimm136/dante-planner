@@ -404,7 +404,22 @@ abstract class RandomOrderSeed : CommandLineArgumentProvider {
         listOf("-Djunit.jupiter.execution.order.random.seed=${seed()}")
 }
 
+val staticLockCheckOff = providers.environmentVariable("STATIC_LOCK_CHECK").map { it == "off" }.orElse(false)
+
+val staticLockCheck by tasks.registering(Exec::class) {
+    group = "verification"
+    onlyIf("STATIC_LOCK_CHECK is not off") {
+        if (staticLockCheckOff.get()) {
+            logger.lifecycle("static lock check off")
+        }
+        !staticLockCheckOff.get()
+    }
+    executable = layout.projectDirectory.file("../.claude/skills/static-checkout/bin/static").asFile.path
+    args("check")
+}
+
 tasks.test {
+    dependsOn(staticLockCheck)
     inputs.file(layout.projectDirectory.file("config/architecture-rules-without-fixtures.txt"))
     val randomOrderSeed = objects.newInstance<RandomOrderSeed>()
     randomOrderSeed.fixedSeed.set(providers.gradleProperty("testSeed"))

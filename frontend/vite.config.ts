@@ -5,6 +5,7 @@ import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 import fs from 'fs'
+import { execFileSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import type { Plugin } from 'vite'
 import { hashStaticPlugin } from './vite-plugin-hash-static'
@@ -13,6 +14,32 @@ import { assetNotFoundPlugin } from './vite-plugin-asset-not-found'
 import { buildIdPlugin } from './vite-plugin-build-id'
 
 const BUILD_ID = randomUUID()
+
+const REPO_ROOT = path.resolve(__dirname, '..')
+const STATIC_CLI = path.join(REPO_ROOT, '.claude/skills/static-checkout/bin/static')
+
+declare global {
+  var staticLockChecked: boolean | undefined
+}
+
+function checkStaticLock(): void {
+  if (globalThis.staticLockChecked) {
+    return
+  }
+  globalThis.staticLockChecked = true
+  if (process.env.STATIC_LOCK_CHECK === 'off') {
+    console.warn('static lock check off')
+    return
+  }
+  try {
+    execFileSync(STATIC_CLI, ['check'], { cwd: REPO_ROOT, stdio: 'pipe', encoding: 'utf8' })
+  } catch (error) {
+    const stderr = error instanceof Error && 'stderr' in error ? String(error.stderr).trim() : ''
+    throw new Error(stderr || String(error))
+  }
+}
+
+checkStaticLock()
 
 const STATIC_ROOT = path.resolve(__dirname, '../static')
 const STATIC_WHITELIST = ['images', 'data', 'i18n']
