@@ -51,13 +51,17 @@ epic: none · pr: none
   after the fact.
   REJECTED: a `sys.excepthook` prefix on every `python3 -c` body — a convention each author can
   forget, and a syntax error exits 1 before the hook is set.
-  INVARIANT: no re-check line negates rg, and every clause of a re-check command (split on
-  `&&`, `||`, `;` and `|`, with each `$(…)` a clause of its own) starts with an allowed tool:
-  rg, test, `[`, git, jq, awk, true, false or the ledger CLI — `debt doctor`, which counts
-  every other line as `malformed`, names each entry and exits 1, and the pre-commit hook, which
-  refuses a staged ledger whose `malformed` count is not zero.
-  NON-GOAL: recursing into an allowed tool's arguments (awk's `system()`, git aliases) — the
-  allowlist bounds the first word of each clause only.
+  INVARIANT: every clause of a re-check command (split on `&&`, `||`, `;`, `|` and a lone `&`,
+  with each `$(…)` a clause of its own) starts with an allowed tool and never with `!`: rg,
+  test, `[`, git with a read-only subcommand (ls-files, log, diff, show, rev-parse, cat-file,
+  grep), jq, awk, true, false or the ledger CLI — `debt doctor`, which counts every other line
+  as `malformed`, names each entry and exits 1, and the pre-commit hook, which refuses a staged
+  ledger whose `malformed` count is not zero.
+  NON-GOAL: recursing into an allowed tool's other arguments (awk's `system()`, git's
+  `-c diff.external=…`) — the allowlist bounds the first word of each clause and git's
+  subcommand only.
+  NON-GOAL: sandboxing a re-check — `doctor` is a lint against mistakes, not a sandbox; the 5 s
+  budget and review bound what the lint does not.
 
 ## Takeaway
 - takeaway: a record that cannot be asked by a machine whether it is still true is only pruned
