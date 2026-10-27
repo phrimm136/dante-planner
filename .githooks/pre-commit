@@ -119,15 +119,13 @@ if echo "$staged" | grep -qx 'docs/debt.md'; then
   ledger_dir=$(mktemp -d)
   trap 'rm -rf "$ledger_dir"' EXIT
   git show :docs/debt.md > "$ledger_dir/index.md"
-  git show HEAD:docs/debt.md > "$ledger_dir/head.md" 2>/dev/null || : > "$ledger_dir/head.md"
-  missing_count() { { "$debt_cli" doctor --file "$1" || true; } | sed -n '1s/.*, missing \([0-9]*\),.*/\1/p'; }
-  index_missing=$(missing_count "$ledger_dir/index.md")
-  head_missing=$(missing_count "$ledger_dir/head.md")
-  if [[ -z "$index_missing" || -z "$head_missing" ]]; then
+  index_missing=$({ "$debt_cli" doctor --file "$ledger_dir/index.md" || true; } | sed -n '1s/.*, missing \([0-9]*\),.*/\1/p')
+  if [[ -z "$index_missing" ]]; then
     echo "pre-commit: debt doctor printed no missing count; run $debt_cli doctor --file <ledger> to see why" >&2
     fail=1
-  elif (( index_missing > head_missing )); then
-    echo "pre-commit: docs/debt.md has $index_missing entries without a re-check line, HEAD has $head_missing; add the line or delete the entry" >&2
+  elif (( index_missing > 0 )); then
+    noun=entries; (( index_missing == 1 )) && noun=entry
+    echo "pre-commit: docs/debt.md has $index_missing $noun without a re-check line; add the line or delete the entry" >&2
     fail=1
   fi
   malformed_count=$({ "$debt_cli" doctor --file "$ledger_dir/index.md" || true; } | sed -n '1s/.*, malformed \([0-9]*\)$/\1/p')
