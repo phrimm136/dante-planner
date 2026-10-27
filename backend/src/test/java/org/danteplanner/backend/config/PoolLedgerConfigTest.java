@@ -8,7 +8,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Every connection that reaches the shared primary, summed across both regions at the maximum pod
- * count, stays within the primary's connection limit minus the reserve.
+ * count, stays within the primary's connection limit minus the reserve: the pools, the read-source
+ * probe, and the connection Flyway opens at startup through its own URL.
  */
 class PoolLedgerConfigTest {
 
@@ -18,12 +19,15 @@ class PoolLedgerConfigTest {
         int seoulPerPod = PoolLedger.SEOUL_PRIMARY_POOL
                 + PoolLedger.SEOUL_PRIMARY_READ_POOL
                 + PoolLedger.BULKHEAD_POOL;
-        int probes = PoolLedger.PROBE_CONNECTIONS_PER_POD * PoolLedger.MAX_PODS_PER_ASG * PoolLedger.REGIONS;
-        int primaryHittingLoad = (oregonPerPod + seoulPerPod) * PoolLedger.MAX_PODS_PER_ASG + probes;
+        int transientPerPod = PoolLedger.PROBE_CONNECTIONS_PER_POD + PoolLedger.FLYWAY_CONNECTIONS_PER_POD;
+        int transients = transientPerPod * PoolLedger.MAX_PODS_PER_ASG * PoolLedger.REGIONS;
+        int primaryHittingLoad = (oregonPerPod + seoulPerPod) * PoolLedger.MAX_PODS_PER_ASG + transients;
         int usableConnections =
                 PoolLedger.RDS_MICRO_MAX_CONNECTIONS - PoolLedger.CONNECTION_RESERVE;
 
-        assertThat(primaryHittingLoad).isLessThanOrEqualTo(usableConnections);
+        assertThat(primaryHittingLoad)
+                .as("connections reaching the primary: %d", primaryHittingLoad)
+                .isLessThanOrEqualTo(usableConnections);
     }
 
     @Test

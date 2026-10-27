@@ -18,6 +18,7 @@ public final class PoolLedger {
     public static final int MAX_PODS_PER_ASG = 2;
     public static final int REGIONS = 2;
     public static final int PROBE_CONNECTIONS_PER_POD = 1;
+    public static final int FLYWAY_CONNECTIONS_PER_POD = 1;
     public static final int RDS_MICRO_MAX_CONNECTIONS = 60;
     public static final int CONNECTION_RESERVE = 10;
 
