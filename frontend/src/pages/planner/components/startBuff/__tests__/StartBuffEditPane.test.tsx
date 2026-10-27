@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import type { ReactNode } from 'react'
 import { StartBuffEditPane } from '../StartBuffEditPane'
+import { SeededPlannerStore } from '../../../stores/__tests__/plannerStoreHarness'
+
+function InSeason({ children }: { children: ReactNode }) {
+  return <SeededPlannerStore mdVersion={6}>{children}</SeededPlannerStore>
+}
 
 // Mock react-i18next
 vi.mock('react-i18next', async (importOriginal) => {
@@ -19,18 +25,6 @@ vi.mock('react-i18next', async (importOriginal) => {
     }),
   }
 })
-
-// Mock planner editor store
-const mockSetSelectedBuffIds = vi.fn()
-vi.mock('../../../stores/usePlannerStore', () => ({
-  usePlannerStore: (selector: (state: Record<string, unknown>) => unknown) => {
-    const mockState = {
-      selectedBuffIds: new Set<number>(),
-      setSelectedBuffIds: mockSetSelectedBuffIds,
-    }
-    return selector(mockState)
-  },
-}))
 
 // Mock data hooks
 vi.mock('../../../hooks/useStartBuffSelection', () => ({
@@ -68,7 +62,6 @@ describe('StartBuffEditPane', () => {
   const defaultProps = {
     open: true,
     onOpenChange: vi.fn(),
-    mdVersion: 6,
   }
 
   beforeEach(() => {
@@ -77,7 +70,7 @@ describe('StartBuffEditPane', () => {
 
   describe('dialog visibility', () => {
     it('renders dialog content when open=true', () => {
-      render(<StartBuffEditPane {...defaultProps} open={true} />)
+      render(<StartBuffEditPane {...defaultProps} open={true} />, { wrapper: InSeason })
 
       expect(screen.getByText('Start Buffs')).toBeDefined()
       expect(screen.getAllByTestId('start-buff-card').length).toBeGreaterThan(0)
@@ -85,7 +78,7 @@ describe('StartBuffEditPane', () => {
     })
 
     it('does not render dialog content when open=false', () => {
-      render(<StartBuffEditPane {...defaultProps} open={false} />)
+      render(<StartBuffEditPane {...defaultProps} open={false} />, { wrapper: InSeason })
 
       expect(screen.queryByText('Start Buffs')).toBeNull()
     })
@@ -93,21 +86,21 @@ describe('StartBuffEditPane', () => {
 
   describe('dialog structure (IT1)', () => {
     it('renders with correct title', () => {
-      render(<StartBuffEditPane {...defaultProps} />)
+      render(<StartBuffEditPane {...defaultProps} />, { wrapper: InSeason })
 
       const title = screen.getByRole('heading', { name: 'Start Buffs' })
       expect(title).toBeDefined()
     })
 
     it('renders StartBuffCard for each buff', () => {
-      render(<StartBuffEditPane {...defaultProps} />)
+      render(<StartBuffEditPane {...defaultProps} />, { wrapper: InSeason })
 
       const cards = screen.getAllByTestId('start-buff-card')
       expect(cards.length).toBeGreaterThan(0)
     })
 
     it('renders Done button', () => {
-      render(<StartBuffEditPane {...defaultProps} />)
+      render(<StartBuffEditPane {...defaultProps} />, { wrapper: InSeason })
 
       const doneButton = screen.getByRole('button', { name: 'Done' })
       expect(doneButton).toBeDefined()
@@ -118,7 +111,9 @@ describe('StartBuffEditPane', () => {
     it('calls onOpenChange(false) when Done button clicked', () => {
       const onOpenChange = vi.fn()
 
-      render(<StartBuffEditPane {...defaultProps} onOpenChange={onOpenChange} />)
+      render(<StartBuffEditPane {...defaultProps} onOpenChange={onOpenChange} />, {
+        wrapper: InSeason,
+      })
 
       const doneButton = screen.getByRole('button', { name: 'Done' })
       fireEvent.click(doneButton)

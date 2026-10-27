@@ -4,13 +4,13 @@ import { useTranslation } from 'react-i18next'
 import { getDisplayFontForLanguage } from '@/lib/utils'
 import { EGO_GIFT_GEOMETRY, aspectOf } from '@/shared/cardLayout'
 import { Skeleton } from '@/components/ui/skeleton'
-import type { MDVersion } from '@/shared/gameData'
 import {
   getEnhancementFromBuffId,
   getBaseIdFromBuffId,
   getEnhancementSuffix,
 } from '@/shared/gameText'
 import { useStartBuffMiniCardLayout } from '../../hooks/useStartBuffCardLayout'
+import { useStoreSeason } from '../../stores/usePlannerStore'
 import {
   fitSpace,
   isShown,
@@ -24,7 +24,6 @@ import { CardText } from './StartBuffName'
 interface StartBuffMiniCardProps {
   buffId: number
   displayName: string
-  mdVersion: MDVersion
 }
 
 const SLOT = EGO_GIFT_GEOMETRY.size
@@ -37,9 +36,10 @@ export function StartBuffMiniCard(props: StartBuffMiniCardProps) {
   )
 }
 
-function StartBuffMiniCardBody({ buffId, displayName, mdVersion }: StartBuffMiniCardProps) {
+function StartBuffMiniCardBody({ buffId, displayName }: StartBuffMiniCardProps) {
   const { i18n } = useTranslation()
-  const layout = useStartBuffMiniCardLayout(mdVersion)
+  const { contentVersion } = useStoreSeason()
+  const layout = useStartBuffMiniCardLayout(contentVersion)
   const [hovered, setHovered] = useState(false)
 
   const baseId = getBaseIdFromBuffId(buffId)
@@ -92,7 +92,7 @@ function StartBuffMiniCardBody({ buffId, displayName, mdVersion }: StartBuffMini
           return (
             <CardSprite
               key={key}
-              version={mdVersion}
+              version={contentVersion}
               file={file}
               image={element.image}
               rect={element.rect}

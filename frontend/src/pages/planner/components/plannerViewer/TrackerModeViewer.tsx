@@ -1,5 +1,4 @@
 import { Suspense, useState } from 'react'
-import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { RevealSection } from '../RevealSection'
@@ -17,8 +16,7 @@ import { StartBuffSection } from '../startBuff/StartBuffSection'
 import { StartGiftSummary } from '../startGift/StartGiftSummary'
 import { EGOGiftObservationSummary } from '../egoGift/EGOGiftObservationSummary'
 import { DeckBuilderBlock } from '../deckBuilder/DeckBuilderBlock'
-import { PlannerStoreProvider, usePlannerStore } from '../../stores/usePlannerStore'
-import { hydrateEditorState } from '../../lib/editorStateCodec'
+import { usePlannerStore } from '../../stores/usePlannerStore'
 import { SkillReplacementSection } from '../skillReplacement/SkillReplacementSection'
 import { ComprehensiveGiftGridTracker } from './ComprehensiveGiftGridTracker'
 import { ReadOnlyNote } from '@/shared/noteEditor/components/ReadOnlyNote'
@@ -36,37 +34,6 @@ const SECTION_COUNT = NOTE_SECTIONS.length
 
 interface TrackerModeViewerProps {
   planner: MDSaveablePlanner
-}
-
-interface TrackerStoreProps {
-  planner: MDSaveablePlanner
-  children: ReactNode
-}
-
-export function TrackerStore({ planner, children }: TrackerStoreProps) {
-  const metadata = {
-    title: planner.metadata.title,
-    category: planner.config.category,
-    isPublished: planner.metadata.published ?? false,
-  }
-  const trackerInitialState = (maxLevel: number) => {
-    const { skillEAState: _plan, ...state } = hydrateEditorState(
-      planner.content,
-      metadata,
-      maxLevel,
-    )
-    return state
-  }
-
-  return (
-    <PlannerStoreProvider
-      key={planner.metadata.id}
-      mdVersion={planner.metadata.contentVersion}
-      initialState={trackerInitialState}
-    >
-      {children}
-    </PlannerStoreProvider>
-  )
 }
 
 export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
@@ -128,7 +95,6 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
       node: (
         <Suspense fallback={<StartBuffSkeleton />}>
           <StartBuffSection
-            mdVersion={planner.metadata.contentVersion}
             selectedBuffIds={deserialized.selectedBuffIds}
             readOnly={true}
             onViewNotes={() => setOpenNote('startBuffs')}
@@ -156,7 +122,6 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
       node: (
         <Suspense fallback={<GiftGridSkeleton title={t('pages.plannerMD.egoGiftObservation')} />}>
           <EGOGiftObservationSummary
-            mdVersion={planner.metadata.contentVersion}
             selectedGiftIds={deserialized.observationGiftIds}
             readOnly={true}
             onViewNotes={() => setOpenNote('observation')}

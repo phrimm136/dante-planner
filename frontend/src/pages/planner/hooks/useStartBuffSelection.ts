@@ -2,7 +2,7 @@ import { startTransition } from 'react'
 import { useStartBuffListSpec, useStartBuffListI18n } from './useStartBuffList'
 import { getBaseBuffs, toStartBuffs } from '../lib/startBuffs'
 import { useBattleKeywords } from '@/shared/gameText'
-import type { MDVersion } from '@/shared/gameData'
+import { useStoreSeason } from '../stores/usePlannerStore'
 import type { StartBuff, StartBuffI18n, BattleKeywords } from '@/shared/gameText'
 import { deriveEnhancements, getBaseIdFromBuffId, createBuffId } from '@/shared/gameText'
 import type { EnhancementLevel } from '@/shared/gameText'
@@ -16,12 +16,12 @@ export interface UseStartBuffSelectionResult {
 }
 
 export function useStartBuffSelection(
-  mdVersion: MDVersion,
   selectedBuffIds: Set<number>,
   onSelectionChange: (buffIds: Set<number>) => void,
 ): UseStartBuffSelectionResult {
-  const i18n = useStartBuffListI18n(mdVersion)
-  const buffs = toStartBuffs(useStartBuffListSpec(mdVersion), i18n)
+  const { contentVersion } = useStoreSeason()
+  const i18n = useStartBuffListI18n(contentVersion)
+  const buffs = toStartBuffs(useStartBuffListSpec(contentVersion), i18n)
   const { data: battleKeywords } = useBattleKeywords()
 
   const enhancements = deriveEnhancements(selectedBuffIds)

@@ -3,7 +3,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { TrackerModeViewer, TrackerStore } from '../TrackerModeViewer'
+import { TrackerModeViewer } from '../TrackerModeViewer'
+import { PlannerViewerStore } from '../PlannerViewer'
 import {
   createDefaultSkillEAState,
   useStoreDeck,
@@ -306,14 +307,14 @@ describe('TrackerModeViewer', () => {
   function renderTracker(planner: MDSaveablePlanner) {
     let store: StoreApi<PlannerStore> | undefined
     const result = render(
-      <TrackerStore planner={planner}>
+      <PlannerViewerStore planner={planner}>
         <TrackerModeViewer planner={planner} />
         <StoreProbe
           onStore={(api) => {
             store = api
           }}
         />
-      </TrackerStore>,
+      </PlannerViewerStore>,
       { wrapper: createWrapper() },
     )
     const getStore = () => {

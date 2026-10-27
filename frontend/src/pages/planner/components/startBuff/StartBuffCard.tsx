@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { getStartBuffSpritePath } from '@/shared/assets'
 import { getDisplayFontForLanguage, getDisplayFontForNumeric } from '@/lib/utils'
 import { aspectOf, type CardSizePx } from '@/shared/cardLayout'
-import type { MDVersion } from '@/shared/gameData'
 import type { StartBuff, StartBuffI18n, BattleKeywords, EnhancementLevel } from '@/shared/gameText'
 import { colorRuns, getEnhancementSuffix, createBuffId } from '@/shared/gameText'
 import type { LayoutElement, StartBuffCardLayout } from '../../schemas/StartBuffCardSchemas'
@@ -15,13 +14,13 @@ import {
   spriteFile,
   type CardState,
 } from '../../lib/startBuffCardLayout'
+import { useStoreSeason } from '../../stores/usePlannerStore'
 import { buffDescriptionText } from './formatBuffDescription'
 import { CardSprite } from './CardSprite'
 import { CardText } from './StartBuffName'
 import { StartBuffDescription } from './StartBuffDescription'
 
 interface StartBuffCardProps {
-  mdVersion: MDVersion
   layout: StartBuffCardLayout
   slot: CardSizePx
   buff: StartBuff
@@ -41,7 +40,6 @@ function buttonLevel(buttonIndex: number): 1 | 2 {
 }
 
 export function StartBuffCard({
-  mdVersion,
   layout,
   slot,
   buff,
@@ -54,6 +52,7 @@ export function StartBuffCard({
   onEnhancementChange,
 }: StartBuffCardProps) {
   const { t, i18n: i18next } = useTranslation('database')
+  const { contentVersion } = useStoreSeason()
   const language = i18next.language
 
   const [hovered, setHovered] = useState(false)
@@ -90,7 +89,7 @@ export function StartBuffCard({
         return (
           <StartBuffDescription
             key={key}
-            version={mdVersion}
+            version={contentVersion}
             layout={layout}
             runs={runs}
             language={language}
@@ -134,7 +133,7 @@ export function StartBuffCard({
         const level = buttonLevel(element.buttonIndex)
         const file = spriteFile(element.image, buff.baseId)
         if (file === null) return null
-        const src = getStartBuffSpritePath(mdVersion, file)
+        const src = getStartBuffSpritePath(contentVersion, file)
         return (
           <button
             key={key}
@@ -161,7 +160,7 @@ export function StartBuffCard({
         return (
           <CardSprite
             key={key}
-            version={mdVersion}
+            version={contentVersion}
             file={file}
             image={element.image}
             rect={element.rect}

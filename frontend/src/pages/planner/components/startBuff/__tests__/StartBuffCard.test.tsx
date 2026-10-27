@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import userEvent from '@testing-library/user-event'
 import { render, screen, fireEvent, within } from '@testing-library/react'
+import type { ReactNode } from 'react'
 
 import md7Card from '@static/data/MD7/startBuffCard.json'
 import md7Spec from '@static/data/MD7/startBuffs.json'
@@ -15,6 +16,7 @@ import { startBuffSlotSize } from '../../../lib/startBuffCardLayout'
 import { toStartBuffs, getBaseBuffs } from '../../../lib/startBuffs'
 import { getStartBuffSpritePath } from '@/shared/assets'
 import { StartBuffCard } from '../StartBuffCard'
+import { SeededPlannerStore } from '../../../stores/__tests__/plannerStoreHarness'
 
 const KR_TABLES: Record<FontTableRole, ReturnType<typeof FontAdvanceTableSchema.parse>> = {
   name: FontAdvanceTableSchema.parse(krNameTable),
@@ -39,6 +41,10 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'KR' } }),
   initReactI18next: { type: '3rdParty', init: () => {} },
 }))
+
+function InSeason({ children }: { children: ReactNode }) {
+  return <SeededPlannerStore mdVersion={7}>{children}</SeededPlannerStore>
+}
 
 const MD7 = StartBuffCardLayoutSchema.parse(md7Card)
 const MD7_BUFFS = toStartBuffs(StartBuffDataListSchema.parse(md7Spec), md7KrNames)
@@ -66,7 +72,6 @@ function renderCard(
 ) {
   const { baseId = 109, ...rest } = overrides
   const props = {
-    mdVersion: 7,
     layout: MD7,
     slot: startBuffSlotSize(MD7.canvas),
     buff: baseBuff(baseId),
@@ -78,7 +83,7 @@ function renderCard(
     onEnhancementChange: vi.fn(),
     ...rest,
   }
-  return { props, ...render(<StartBuffCard {...props} />) }
+  return { props, ...render(<StartBuffCard {...props} />, { wrapper: InSeason }) }
 }
 
 function spriteSources(container: HTMLElement): string[] {

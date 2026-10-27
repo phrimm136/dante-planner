@@ -1,12 +1,12 @@
-import type { ReactNode } from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import type { StoreApi } from 'zustand'
 import { PlannerViewer } from '../PlannerViewer'
-import type {
-  MDSaveablePlanner,
-  SaveablePlanner,
-  MDPlannerContent,
-} from '../../../types/PlannerTypes'
+import { usePlannerStoreApi, useStoreSeason } from '../../../stores/usePlannerStore'
+import type { PlannerStore } from '../../../stores/usePlannerStore'
+import { useStartBuffListSpec } from '../../../hooks/useStartBuffList'
+import { useEGOGiftObservationData } from '@/pages/egoGift'
+import type { MDSaveablePlanner, MDPlannerContent } from '../../../types/PlannerTypes'
 
 // Mock react-i18next with initReactI18next for proper module loading
 vi.mock('react-i18next', async (importOriginal) => {
@@ -25,19 +25,74 @@ vi.mock('react-i18next', async (importOriginal) => {
   }
 })
 
-// Mock GuideModeViewer
-vi.mock('../GuideModeViewer', () => ({
-  GuideModeViewer: ({ planner }: { planner: SaveablePlanner }) => (
-    <div data-testid="guide-mode-viewer">Guide Mode - Planner ID: {planner.metadata.id}</div>
+type ViewerMode = 'guide' | 'tracker'
+
+const modeStores = new Map<ViewerMode, StoreApi<PlannerStore>>()
+
+function SeasonProbe({ mode }: { mode: ViewerMode }) {
+  modeStores.set(mode, usePlannerStoreApi())
+  const { contentVersion } = useStoreSeason()
+  return <span data-testid={`season-${mode}`}>{contentVersion}</span>
+}
+
+vi.mock('../GuideModeViewer', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../GuideModeViewer')>()
+  return {
+    GuideModeViewer: ({ planner }: { planner: MDSaveablePlanner }) => (
+      <div data-testid="guide-mode-viewer">
+        <SeasonProbe mode="guide" />
+        <actual.GuideModeViewer planner={planner} />
+      </div>
+    ),
+  }
+})
+
+vi.mock('../TrackerModeViewer', () => ({
+  TrackerModeViewer: ({ planner }: { planner: MDSaveablePlanner }) => (
+    <div data-testid="tracker-mode-viewer">
+      Tracker Mode - Planner ID: {planner.metadata.id}
+      <SeasonProbe mode="tracker" />
+    </div>
   ),
 }))
 
-// Mock TrackerModeViewer
-vi.mock('../TrackerModeViewer', () => ({
-  TrackerModeViewer: ({ planner }: { planner: SaveablePlanner }) => (
-    <div data-testid="tracker-mode-viewer">Tracker Mode - Planner ID: {planner.metadata.id}</div>
-  ),
-  TrackerStore: ({ children }: { children: ReactNode }) => <>{children}</>,
+vi.mock('../../deckBuilder/DeckBuilderSummary', () => ({
+  DeckBuilderSummary: () => <div data-testid="deck-summary" />,
+}))
+vi.mock('../../startGift/StartGiftSummary', () => ({
+  StartGiftSummary: () => <div data-testid="start-gift" />,
+}))
+vi.mock('../../skillReplacement/SkillReplacementSection', () => ({
+  SkillReplacementSection: () => <div data-testid="skill-replacement" />,
+}))
+vi.mock('../ComprehensiveGiftGridTracker', () => ({
+  ComprehensiveGiftGridTracker: () => <div data-testid="comprehensive" />,
+}))
+vi.mock('../FloorGalleryTracker', () => ({
+  FloorGalleryTracker: () => <div data-testid="floor-gallery" />,
+}))
+vi.mock('@/components/hooks/useProgressiveReveal', () => ({
+  useProgressiveReveal: (count: number) => Array.from({ length: count }, () => true),
+}))
+vi.mock('../../../hooks/useMirrorDungeonSeason', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../../hooks/useMirrorDungeonSeason')>()),
+  useIdentityMaxLevel: () => 60,
+}))
+vi.mock('../../../hooks/useStartBuffList', () => ({
+  useStartBuffListSpec: vi.fn(() => ({})),
+  useStartBuffListI18n: vi.fn(() => ({})),
+}))
+vi.mock('@/shared/gameText/hooks/useBattleKeywords', () => ({
+  useBattleKeywords: () => ({ data: {} }),
+}))
+vi.mock('@/pages/egoGift/hooks/useEGOGiftObservationData', () => ({
+  useEGOGiftObservationData: vi.fn(() => ({
+    data: { observationEgoGiftCostDataList: [], observationEgoGiftDataList: [] },
+  })),
+}))
+vi.mock('@/shared/egoGift/hooks/useEGOGiftListData', () => ({
+  useEGOGiftListSpec: () => ({}),
+  useEGOGiftListI18n: () => ({}),
 }))
 
 describe('PlannerViewer', () => {
@@ -83,6 +138,38 @@ describe('PlannerViewer', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    modeStores.clear()
+  })
+
+  describe('Season store', () => {
+    const season7Planner: MDSaveablePlanner = {
+      ...mockPlanner,
+      metadata: { ...mockPlanner.metadata, contentVersion: 7 },
+    }
+
+    it('feeds the guide sections the saved season through the store', () => {
+      render(<PlannerViewer planner={season7Planner} />)
+
+      const buffSeasons = vi.mocked(useStartBuffListSpec).mock.calls.map(([version]) => version)
+      const observationSeasons = vi
+        .mocked(useEGOGiftObservationData)
+        .mock.calls.map(([version]) => version)
+      expect(buffSeasons.length).toBeGreaterThan(0)
+      expect(new Set(buffSeasons)).toEqual(new Set([7]))
+      expect(observationSeasons.length).toBeGreaterThan(0)
+      expect(new Set(observationSeasons)).toEqual(new Set([7]))
+    })
+
+    it('mounts the tracker into the store the guide reads', () => {
+      render(<PlannerViewer planner={season7Planner} />)
+
+      fireEvent.click(screen.getByText('Tracker Mode'))
+
+      expect(screen.getByTestId('season-guide')).toHaveTextContent('7')
+      expect(screen.getByTestId('season-tracker')).toHaveTextContent('7')
+      expect(modeStores.get('tracker')).toBeDefined()
+      expect(modeStores.get('tracker')).toBe(modeStores.get('guide'))
+    })
   })
 
   describe('Planner Loading', () => {

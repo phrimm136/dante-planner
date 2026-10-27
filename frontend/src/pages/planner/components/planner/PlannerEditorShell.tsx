@@ -268,16 +268,11 @@ export function PlannerEditorShell({
       node: (
         <Suspense fallback={<StartBuffSkeleton />}>
           <StoreBoundStartBuffSection
-            mdVersion={mdVersion}
             onClick={() => {
               setIsStartBuffPaneOpen(true)
             }}
           />
-          <StartBuffEditPane
-            open={isStartBuffPaneOpen}
-            onOpenChange={setIsStartBuffPaneOpen}
-            mdVersion={mdVersion}
-          />
+          <StartBuffEditPane open={isStartBuffPaneOpen} onOpenChange={setIsStartBuffPaneOpen} />
           <StoreBoundSectionNote
             sectionKey="startBuffs"
             placeholder={t('pages.plannerMD.noteEditor.placeholder')}
@@ -295,11 +290,7 @@ export function PlannerEditorShell({
               setIsStartGiftPaneOpen(true)
             }}
           />
-          <StartGiftEditPane
-            open={isStartGiftPaneOpen}
-            onOpenChange={setIsStartGiftPaneOpen}
-            mdVersion={mdVersion}
-          />
+          <StartGiftEditPane open={isStartGiftPaneOpen} onOpenChange={setIsStartGiftPaneOpen} />
           <StoreBoundSectionNote
             sectionKey="startGifts"
             placeholder={t('pages.plannerMD.noteEditor.placeholder')}
@@ -314,7 +305,6 @@ export function PlannerEditorShell({
         <>
           <Suspense fallback={<GiftGridSkeleton title={t('pages.plannerMD.egoGiftObservation')} />}>
             <StoreBoundEGOGiftObservationSummary
-              mdVersion={mdVersion}
               onClick={() => {
                 setIsObservationPaneOpen(true)
               }}
@@ -324,7 +314,6 @@ export function PlannerEditorShell({
             <EGOGiftObservationEditPane
               open={isObservationPaneOpen}
               onOpenChange={setIsObservationPaneOpen}
-              mdVersion={mdVersion}
             />
           </Suspense>
           <StoreBoundSectionNote
