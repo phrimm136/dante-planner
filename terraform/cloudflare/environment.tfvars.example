@@ -25,3 +25,7 @@ zone_id    = "REPLACE_WITH_CLOUDFLARE_ZONE_ID"
 # Cutover uses a throwaway hostname first, so both paths are live and production traffic is
 # untouched while the tunnels are verified:
 # api_hostname = "edge-test.dante-planner.com"
+
+# Stage of the non-GET routing rule (ADR 123): off (no rule), probe (x-write-probe: 1 only), all.
+# Advance one stage per apply; off is the rollback.
+write_forwarding = "all"
