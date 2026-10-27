@@ -30,7 +30,9 @@ class LazyConnectingProxyManagerTest {
     private static final int CALLERS = 12;
     private static final Duration FAIL_FAST_BUDGET = Duration.ofMillis(100);
     private static final Duration OUTCOME_WAIT = Duration.ofSeconds(10);
-    private static final long BOUND_EPSILON_MS = 500;
+    // The lower bound is the contract (never fail before the wait); the epsilon only absorbs the
+    // scheduler on a loaded runner, where a waiter settled 600 ms after a 3.3 s bound.
+    private static final long BOUND_EPSILON_MS = 2_000;
     private static final long LATCH_WAIT_SECONDS = 5;
     private static final long RETRY_AFTER_NANOS =
             TimeUnit.MILLISECONDS.toNanos(TimeoutHierarchy.RATE_LIMIT_CONNECT_RETRY_AFTER_MS);
