@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.BucketConfiguration;
+import io.github.bucket4j.distributed.BucketProxy;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -430,11 +431,12 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
     void viewCount_WhenClientExhaustsViewRecordBudget_LeavesPublicReadAndPlannerStatsBudgetsWhole() throws Exception {
         UUID deviceId = UUID.randomUUID();
         Cookie device = AuthCookies.deviceId(deviceId);
-        for (int i = 0; i < VIEW_RECORD_CAPACITY; i++) {
-            mockMvc.perform(post("/api/planner/md/published/{id}/viewcount", published.getId()).with(withCsrf())
-                            .cookie(device))
-                    .andExpect(status().isNoContent());
-        }
+        String viewRecordKey = "device:" + deviceId + ":view-record";
+        mockMvc.perform(post("/api/planner/md/published/{id}/viewcount", published.getId()).with(withCsrf())
+                        .cookie(device))
+                .andExpect(status().isNoContent());
+        assertThat(availableTokens(viewRecordKey, VIEW_RECORD_CAPACITY)).isEqualTo(VIEW_RECORD_CAPACITY - 1);
+        bucket(viewRecordKey, VIEW_RECORD_CAPACITY).tryConsumeAsMuchAsPossible();
 
         mockMvc.perform(post("/api/planner/md/published/{id}/viewcount", published.getId()).with(withCsrf())
                         .cookie(device))
@@ -447,12 +449,15 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
     }
 
     private long availableTokens(String key, long capacity) {
+        return bucket(key, capacity).getAvailableTokens();
+    }
+
+    private BucketProxy bucket(String key, long capacity) {
         BucketConfiguration configuration = BucketConfiguration.builder()
                 .addLimit(Bandwidth.builder().capacity(capacity)
                         .refillGreedy(capacity, Duration.ofSeconds(60)).build())
                 .build();
         return rateLimitProxyManager.builder()
-                .build(key.getBytes(StandardCharsets.UTF_8), () -> configuration)
-                .getAvailableTokens();
+                .build(key.getBytes(StandardCharsets.UTF_8), () -> configuration);
     }
 }

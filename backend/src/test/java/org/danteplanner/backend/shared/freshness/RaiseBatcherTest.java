@@ -120,19 +120,18 @@ class RaiseBatcherTest {
     @Test
     void raise_WhenTheDeadlinePassesBeforeTheWaitIsAwaited_CountsAWaitTimeoutAndReleasesTheBatchAtOnce()
             throws Exception {
-        AtomicLong skew = new AtomicLong();
+        AtomicLong now = new AtomicLong();
         AtomicReference<Thread> worker = new AtomicReference<>();
         try (FakeRedis redis = new FakeRedis(WaitReply.NEVER, true);
                 RaiseBatcher batcher = new RaiseBatcher(() -> {
                     worker.set(Thread.currentThread());
                     return redis.endpoint();
-                }, 1, WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts,
-                        () -> System.nanoTime() + skew.get())) {
+                }, 1, WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, now::get)) {
             CompletableFuture<Boolean> raised = CompletableFuture.supplyAsync(() -> batcher.raise(KEYS, ARGUMENTS));
             assertThat(redis.evalshaReceived.await(BOUND.toMillis(), TimeUnit.MILLISECONDS)).isTrue();
             await().atMost(WAIT_BOUND).until(() -> worker.get().getState() == Thread.State.TIMED_WAITING);
 
-            skew.set(BOUND.multipliedBy(2).toNanos());
+            now.set(BOUND.multipliedBy(2).toNanos());
             long released = System.nanoTime();
             redis.releaseEvalsha.countDown();
             boolean result = raised.get(BOUND.toMillis(), TimeUnit.MILLISECONDS);
@@ -152,11 +151,11 @@ class RaiseBatcherTest {
     void raise_WhenConnectingSpentPartOfTheBound_SendsTheWaitWithTheTimeLeftAndCountsAWaitTimeout()
             throws Exception {
         Duration connectCost = Duration.ofMillis(700);
-        AtomicLong skew = new AtomicLong();
+        AtomicLong now = new AtomicLong();
         try (FakeRedis redis = new FakeRedis(WaitReply.TIMES_OUT, false,
-                () -> skew.set(connectCost.toNanos()));
+                () -> now.addAndGet(connectCost.toNanos()));
                 RaiseBatcher batcher = new RaiseBatcher(redis::endpoint, 1, WAIT_BOUND, MarkerStore.RAISE_MARGIN,
-                        raiseFailures, waitTimeouts, () -> System.nanoTime() + skew.get())) {
+                        raiseFailures, waitTimeouts, now::get)) {
             boolean raised = batcher.raise(KEYS, ARGUMENTS);
 
             assertThat(redis.waitTimeouts())
@@ -172,11 +171,11 @@ class RaiseBatcherTest {
     @Test
     void raise_WhenConnectingLeftNoMoreThanTheMargin_SendsNoWaitAndCountsAWaitTimeout() throws Exception {
         Duration connectCost = WAIT_BOUND.plusMillis(100);
-        AtomicLong skew = new AtomicLong();
+        AtomicLong now = new AtomicLong();
         try (FakeRedis redis = new FakeRedis(WaitReply.TIMES_OUT, false,
-                () -> skew.set(connectCost.toNanos()));
+                () -> now.addAndGet(connectCost.toNanos()));
                 RaiseBatcher batcher = new RaiseBatcher(redis::endpoint, 1, WAIT_BOUND, MarkerStore.RAISE_MARGIN,
-                        raiseFailures, waitTimeouts, () -> System.nanoTime() + skew.get())) {
+                        raiseFailures, waitTimeouts, now::get)) {
             boolean raised = batcher.raise(KEYS, ARGUMENTS);
 
             assertThat(raised).isTrue();
