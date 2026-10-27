@@ -36,11 +36,9 @@ import { isSyncConflict } from '@/lib/apiErrorClassifier'
 import type { MDCategory } from '@/shared/gameData'
 import { isMDPlanner } from '../../types/PlannerTypes'
 import type { SaveablePlanner, ConflictResolutionChoice } from '../../types/PlannerTypes'
-import type { DecodedDeck } from '../../lib/deckCode'
 
 import { usePlannerEditorStore, usePlannerEditorStoreApi } from '../../stores/usePlannerEditorStore'
 
-import { useDeckClipboard } from '../../hooks/useDeckClipboard'
 import { usePlannerSave } from '../../hooks/usePlannerSave'
 import type { SaveOptions } from '../../hooks/usePlannerSave'
 import { usePlannerConfig } from '../../hooks/usePlannerConfig'
@@ -69,7 +67,7 @@ import {
   StartBuffSkeleton,
   StartGiftSkeleton,
 } from '../plannerSkeletons'
-import { DeckImportDialog } from '../deckBuilder/DeckImportDialog'
+import { DeckCodeTransfer } from '../deckBuilder/DeckCodeTransfer'
 import { StoreBoundSectionNote } from './StoreBoundSectionNote'
 import { ConflictResolutionDialog } from './ConflictResolutionDialog'
 import { SyncOffWarningDialog } from '../SyncOffWarningDialog'
@@ -201,18 +199,6 @@ export function PlannerEditorShell({
     clearError()
   }, [saveError, clearError])
 
-  const {
-    handleExport: handleDeckExport,
-    openImport,
-    importDraft,
-    setImportText,
-    closeImport,
-  } = useDeckClipboard({ readDeck: () => storeApi.getState(), mdVersion })
-
-  const handleDeckImport = () => {
-    void openImport()
-  }
-
   const titleByteLength = calculateByteLength(title)
   const isTitleValid = titleByteLength <= MAX_TITLE_BYTES
 
@@ -236,14 +222,6 @@ export function PlannerEditorShell({
 
   const handleResetDeployment = () => {
     setDeploymentOrder([])
-  }
-
-  const handleImportApply = (deck: DecodedDeck) => {
-    setEquipment(deck.equipment)
-    setDeploymentOrder(deck.deploymentOrder)
-
-    closeImport()
-    showSuccess('planner:deckBuilder.importSuccess')
   }
 
   const navigateToViewer = () => {
@@ -301,30 +279,43 @@ export function PlannerEditorShell({
       id: 'deckBuilder',
       node: (
         <>
-          <Suspense fallback={<DeckGridSkeleton />}>
-            <StoreBoundDeckBuilderSummary
-              onToggleDeploy={handleToggleDeploy}
-              onImport={handleDeckImport}
-              onExport={handleDeckExport}
-              onResetOrder={handleResetDeployment}
-              onEditDeck={() => {
-                startTransition(() => setIsDeckPaneOpen(true))
-              }}
-            />
-          </Suspense>
-          <Suspense fallback={null}>
-            <DeckBuilderPane open={isDeckPaneOpen} onOpenChange={setIsDeckPaneOpen}>
-              <StoreBoundDeckBuilderContent
-                isActive={isDeckPaneOpen}
-                onImport={handleDeckImport}
-                onExport={handleDeckExport}
-                onResetOrder={handleResetDeployment}
-                onIdentityChange={(sinnerCode) => {
-                  updateSinnerSkillEA(sinnerCode, { ...DEFAULT_SKILL_EA })
-                }}
-              />
-            </DeckBuilderPane>
-          </Suspense>
+          <DeckCodeTransfer
+            readDeck={() => storeApi.getState()}
+            writeDeck={({ equipment, deploymentOrder }) => {
+              setEquipment(equipment)
+              setDeploymentOrder(deploymentOrder)
+            }}
+            mdVersion={mdVersion}
+          >
+            {({ onImport, onExport }) => (
+              <>
+                <Suspense fallback={<DeckGridSkeleton />}>
+                  <StoreBoundDeckBuilderSummary
+                    onToggleDeploy={handleToggleDeploy}
+                    onImport={onImport}
+                    onExport={onExport}
+                    onResetOrder={handleResetDeployment}
+                    onEditDeck={() => {
+                      startTransition(() => setIsDeckPaneOpen(true))
+                    }}
+                  />
+                </Suspense>
+                <Suspense fallback={null}>
+                  <DeckBuilderPane open={isDeckPaneOpen} onOpenChange={setIsDeckPaneOpen}>
+                    <StoreBoundDeckBuilderContent
+                      isActive={isDeckPaneOpen}
+                      onImport={onImport}
+                      onExport={onExport}
+                      onResetOrder={handleResetDeployment}
+                      onIdentityChange={(sinnerCode) => {
+                        updateSinnerSkillEA(sinnerCode, { ...DEFAULT_SKILL_EA })
+                      }}
+                    />
+                  </DeckBuilderPane>
+                </Suspense>
+              </>
+            )}
+          </DeckCodeTransfer>
           <StoreBoundSectionNote
             sectionKey="deckBuilder"
             placeholder={t('pages.plannerMD.noteEditor.placeholder')}
@@ -615,13 +606,6 @@ export function PlannerEditorShell({
             placeholder={t('pages.plannerMD.noteEditor.placeholder')}
           />
         </PlannerSection>
-
-        <DeckImportDialog
-          draft={importDraft}
-          onTextChange={setImportText}
-          onApply={handleImportApply}
-          onClose={closeImport}
-        />
 
         {sections.map((section, index) => (
           <RevealSection key={section.id} visible={visibleSections >= index + 1}>

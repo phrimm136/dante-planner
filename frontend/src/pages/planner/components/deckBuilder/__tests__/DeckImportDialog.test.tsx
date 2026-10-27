@@ -83,7 +83,7 @@ describe('DeckImportDialog', () => {
     renderDialog(DRAFTS.empty)
 
     expect(screen.queryByText('Invalid deck code')).not.toBeInTheDocument()
-    expect(screen.queryByText('Apply this deck configuration?')).not.toBeInTheDocument()
+    expect(screen.queryByText('Apply this deck code?')).not.toBeInTheDocument()
     expect(applyButton()).toBeDisabled()
   })
 
@@ -97,7 +97,7 @@ describe('DeckImportDialog', () => {
   it('shows the confirmation and an enabled apply for a valid draft', () => {
     renderDialog(DRAFTS.valid)
 
-    expect(screen.getByText('Apply this deck configuration?')).toBeInTheDocument()
+    expect(screen.getByText('Apply this deck code?')).toBeInTheDocument()
     expect(applyButton()).toBeEnabled()
   })
 

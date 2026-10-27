@@ -81,16 +81,6 @@ vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => vi.fn(),
 }))
 
-vi.mock('../../../hooks/useDeckClipboard', () => ({
-  useDeckClipboard: () => ({
-    handleExport: vi.fn(),
-    openImport: vi.fn(),
-    importDraft: null,
-    setImportText: vi.fn(),
-    closeImport: vi.fn(),
-  }),
-}))
-
 vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>()
   return {
@@ -113,8 +103,12 @@ vi.mock('../../deckBuilder/DeckBuilderPane', () => ({ DeckBuilderPane: () => nul
 vi.mock('../../deckBuilder/DeckBuilderContent', () => ({
   StoreBoundDeckBuilderContent: () => null,
 }))
-vi.mock('../../deckBuilder/DeckImportDialog', () => ({
-  DeckImportDialog: () => null,
+vi.mock('../../deckBuilder/DeckCodeTransfer', () => ({
+  DeckCodeTransfer: ({
+    children,
+  }: {
+    children: (actions: { onImport: () => void; onExport: () => void }) => React.ReactNode
+  }) => children({ onImport: vi.fn(), onExport: vi.fn() }),
 }))
 vi.mock('../../startBuff/StartBuffSection', () => ({ StoreBoundStartBuffSection: () => null }))
 vi.mock('../../startBuff/StartBuffEditPane', () => ({ StartBuffEditPane: () => null }))

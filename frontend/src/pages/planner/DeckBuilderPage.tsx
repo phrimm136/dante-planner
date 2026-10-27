@@ -1,10 +1,6 @@
 import { Suspense, useId, useState } from 'react'
 
-import { showSuccess } from '@/lib/errorPresentation'
-
 import { DEFAULT_SKILL_EA } from '@/shared/gameData'
-
-import type { DecodedDeck } from './lib/deckCode'
 
 import {
   PlannerEditorStoreProvider,
@@ -12,13 +8,12 @@ import {
   usePlannerEditorStoreApi,
 } from './stores/usePlannerEditorStore'
 
-import { useDeckClipboard } from './hooks/useDeckClipboard'
 import { useIdentityMaxLevel } from './hooks/useMirrorDungeonSeason'
 
 import { StoreBoundDeckBuilderSummary } from './components/deckBuilder/DeckBuilderSummary'
 import { DeckBuilderPane } from './components/deckBuilder/DeckBuilderPane'
 import { StoreBoundDeckBuilderContent } from './components/deckBuilder/DeckBuilderContent'
-import { DeckImportDialog } from './components/deckBuilder/DeckImportDialog'
+import { DeckCodeTransfer } from './components/deckBuilder/DeckCodeTransfer'
 import { DeckBuilderPageSkeleton } from './components/plannerSkeletons'
 import { PLANNER_CONFIG, SECTION_STYLES } from '@/lib/constants'
 
@@ -31,23 +26,6 @@ function DeckBuilderPageContent() {
   const updateSinnerSkillEA = usePlannerEditorStore((s) => s.updateSinnerSkillEA)
 
   const [isDeckPaneOpen, setIsDeckPaneOpen] = useState(false)
-
-  const { handleExport, openImport, importDraft, setImportText, closeImport } = useDeckClipboard({
-    readDeck: () => storeApi.getState(),
-    mdVersion: PLANNER_CONFIG.mdCurrentVersion,
-  })
-
-  const handleImport = () => {
-    void openImport()
-  }
-
-  const handleImportApply = (deck: DecodedDeck) => {
-    setEquipment(deck.equipment)
-    setDeploymentOrder(deck.deploymentOrder)
-
-    closeImport()
-    showSuccess('planner:deckBuilder.importSuccess')
-  }
 
   const handleResetOrder = () => {
     setDeploymentOrder([])
@@ -66,32 +44,38 @@ function DeckBuilderPageContent() {
 
   return (
     <div className={SECTION_STYLES.LAYOUT.page}>
-      <StoreBoundDeckBuilderSummary
-        onToggleDeploy={handleToggleDeploy}
-        onImport={handleImport}
-        onExport={handleExport}
-        onResetOrder={handleResetOrder}
-        onEditDeck={() => setIsDeckPaneOpen(true)}
-      />
+      <DeckCodeTransfer
+        readDeck={() => storeApi.getState()}
+        writeDeck={({ equipment, deploymentOrder }) => {
+          setEquipment(equipment)
+          setDeploymentOrder(deploymentOrder)
+        }}
+        mdVersion={PLANNER_CONFIG.mdCurrentVersion}
+      >
+        {({ onImport, onExport }) => (
+          <>
+            <StoreBoundDeckBuilderSummary
+              onToggleDeploy={handleToggleDeploy}
+              onImport={onImport}
+              onExport={onExport}
+              onResetOrder={handleResetOrder}
+              onEditDeck={() => setIsDeckPaneOpen(true)}
+            />
 
-      <DeckBuilderPane open={isDeckPaneOpen} onOpenChange={setIsDeckPaneOpen}>
-        <StoreBoundDeckBuilderContent
-          isActive={isDeckPaneOpen}
-          onImport={handleImport}
-          onExport={handleExport}
-          onResetOrder={handleResetOrder}
-          onIdentityChange={(sinnerCode) => {
-            updateSinnerSkillEA(sinnerCode, { ...DEFAULT_SKILL_EA })
-          }}
-        />
-      </DeckBuilderPane>
-
-      <DeckImportDialog
-        draft={importDraft}
-        onTextChange={setImportText}
-        onApply={handleImportApply}
-        onClose={closeImport}
-      />
+            <DeckBuilderPane open={isDeckPaneOpen} onOpenChange={setIsDeckPaneOpen}>
+              <StoreBoundDeckBuilderContent
+                isActive={isDeckPaneOpen}
+                onImport={onImport}
+                onExport={onExport}
+                onResetOrder={handleResetOrder}
+                onIdentityChange={(sinnerCode) => {
+                  updateSinnerSkillEA(sinnerCode, { ...DEFAULT_SKILL_EA })
+                }}
+              />
+            </DeckBuilderPane>
+          </>
+        )}
+      </DeckCodeTransfer>
     </div>
   )
 }

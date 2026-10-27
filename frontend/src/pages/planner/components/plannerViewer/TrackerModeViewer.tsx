@@ -19,13 +19,13 @@ import { DeckTrackerPanel } from './DeckTrackerPanel'
 import { DeckBuilderPane } from '../deckBuilder/DeckBuilderPane'
 import { TrackerDeckBuilderContent } from '../deckBuilder/DeckBuilderContent'
 import { collectOwnedGiftIds } from '../../lib/deckEA'
-import { DeckImportDialog } from '../deckBuilder/DeckImportDialog'
+import { DeckCodeTransfer } from '../deckBuilder/DeckCodeTransfer'
+import type { DeckCodeActions } from '../deckBuilder/DeckCodeTransfer'
 import { SkillReplacementSection } from '../skillReplacement/SkillReplacementSection'
 import { ComprehensiveGiftGridTracker } from './ComprehensiveGiftGridTracker'
 import { ReadOnlyNote } from '@/shared/noteEditor/components/ReadOnlyNote'
 import { HorizontalThemePackGallery } from './HorizontalThemePackGallery'
 import { useTrackerState } from '../../hooks/useTrackerState'
-import { useDeckClipboard } from '../../hooks/useDeckClipboard'
 import { useIdentityMaxLevel } from '../../hooks/useMirrorDungeonSeason'
 import { useProgressiveReveal } from '@/components/hooks/useProgressiveReveal'
 import { DEFAULT_SKILL_EA, floorCount as categoryFloorCount } from '@/shared/gameData'
@@ -34,7 +34,6 @@ import { NOTE_SECTIONS } from './viewerSections'
 import type { NoteSectionId } from './viewerSections'
 import { deserializeSets } from '../../schemas/PlannerSchemas'
 import type { MDSaveablePlanner } from '../../types/PlannerTypes'
-import type { DecodedDeck } from '../../lib/deckCode'
 import type { TrackerDeckBuilderContentProps } from '../deckBuilder/DeckBuilderContent'
 
 const SECTION_COUNT = NOTE_SECTIONS.length
@@ -75,20 +74,6 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
     togglePackDone,
   } = useTrackerState(content.equipment, content.deploymentOrder)
 
-  const {
-    handleExport: handleDeckExport,
-    openImport,
-    importDraft,
-    setImportText,
-    closeImport,
-  } = useDeckClipboard({
-    readDeck: () => ({
-      equipment: trackerState.equipment,
-      deploymentOrder: trackerState.deploymentOrder,
-    }),
-    mdVersion: planner.metadata.contentVersion,
-  })
-
   const deserialized = deserializeSets(
     {
       selectedKeywords: content.selectedKeywords,
@@ -101,23 +86,12 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
     planner.config.category,
   )
 
-  const handleDeckImport = () => {
-    void openImport()
-  }
-
-  const handleImportApply = (deck: DecodedDeck) => {
-    setEquipment(deck.equipment)
-    setDeploymentOrder(deck.deploymentOrder)
-
-    closeImport()
-  }
-
   const handleResetToPreset = () => {
     setDeploymentOrder(content.deploymentOrder)
     setEquipment(content.equipment)
   }
 
-  const sections: RevealSectionSpec[] = [
+  const sectionsFor = ({ onImport, onExport }: DeckCodeActions): RevealSectionSpec[] => [
     {
       id: 'deckBuilder',
       node: (
@@ -129,8 +103,8 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
             setEquipment={setEquipment}
             setDeploymentOrder={setDeploymentOrder}
             onEditDeck={() => setDeckEditPaneOpen(true)}
-            onImport={handleDeckImport}
-            onExport={handleDeckExport}
+            onImport={onImport}
+            onExport={onExport}
             onResetToPreset={handleResetToPreset}
             onViewNotes={() => setOpenNote('deckBuilder')}
           />
@@ -146,8 +120,8 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
             setEquipment={setEquipment}
             deploymentOrder={trackerState.deploymentOrder}
             setDeploymentOrder={setDeploymentOrder}
-            onImport={handleDeckImport}
-            onExport={handleDeckExport}
+            onImport={onImport}
+            onExport={onExport}
             onResetOrder={() => setDeploymentOrder([])}
             onIdentityChange={(sinnerCode) => {
               setCurrentSkillCounts((prev) => ({
@@ -277,14 +251,28 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
         </PlannerSection>
       )}
 
-      {sections.map((section, index) => (
-        <Fragment key={section.id}>
-          <RevealSection mode="fade" visible={visibleSections[index] ?? false}>
-            {section.node}
-          </RevealSection>
-          {section.aside}
-        </Fragment>
-      ))}
+      <DeckCodeTransfer
+        readDeck={() => ({
+          equipment: trackerState.equipment,
+          deploymentOrder: trackerState.deploymentOrder,
+        })}
+        writeDeck={({ equipment, deploymentOrder }) => {
+          setEquipment(equipment)
+          setDeploymentOrder(deploymentOrder)
+        }}
+        mdVersion={planner.metadata.contentVersion}
+      >
+        {(actions) =>
+          sectionsFor(actions).map((section, index) => (
+            <Fragment key={section.id}>
+              <RevealSection mode="fade" visible={visibleSections[index] ?? false}>
+                {section.node}
+              </RevealSection>
+              {section.aside}
+            </Fragment>
+          ))
+        }
+      </DeckCodeTransfer>
 
       {outroNote && !isNoteEmpty(outroNote) && (
         <PlannerSection title={t('pages.plannerMD.closingNotes')}>
@@ -301,13 +289,6 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
           noteContent={content.sectionNotes[section.noteKey]}
         />
       ))}
-
-      <DeckImportDialog
-        draft={importDraft}
-        onTextChange={setImportText}
-        onApply={handleImportApply}
-        onClose={closeImport}
-      />
     </div>
   )
 }

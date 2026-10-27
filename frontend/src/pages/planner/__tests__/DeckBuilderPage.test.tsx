@@ -5,16 +5,6 @@ import { createTestQueryClient } from '@/test-utils/queryClient'
 import { usePlannerEditorStore } from '../stores/usePlannerEditorStore'
 import DeckBuilderPage from '../DeckBuilderPage'
 
-vi.mock('../hooks/useDeckClipboard', () => ({
-  useDeckClipboard: () => ({
-    handleExport: vi.fn(),
-    openImport: vi.fn(),
-    importDraft: null,
-    setImportText: vi.fn(),
-    closeImport: vi.fn(),
-  }),
-}))
-
 vi.mock('../components/deckBuilder/DeckBuilderSummary', () => ({
   StoreBoundDeckBuilderSummary: () => {
     const level = usePlannerEditorStore((s) => s.equipment['1']?.identity.level)
@@ -33,8 +23,12 @@ vi.mock('../components/deckBuilder/DeckBuilderContent', () => ({
   },
 }))
 
-vi.mock('../components/deckBuilder/DeckImportDialog', () => ({
-  DeckImportDialog: () => null,
+vi.mock('../components/deckBuilder/DeckCodeTransfer', () => ({
+  DeckCodeTransfer: ({
+    children,
+  }: {
+    children: (actions: { onImport: () => void; onExport: () => void }) => React.ReactNode
+  }) => children({ onImport: vi.fn(), onExport: vi.fn() }),
 }))
 
 describe('DeckBuilderPage', () => {
