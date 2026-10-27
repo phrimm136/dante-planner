@@ -8,7 +8,7 @@ import { applyGiftToggle } from '../../lib/giftToggle'
 import type { EGOGiftEntity } from '@/shared/egoGift'
 import type { EGOGiftId, EnhancementLevel } from '@/shared/gameData'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/shared/egoGift'
-import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
+import { usePlannerStore } from '../../stores/usePlannerStore'
 import { sortEGOGifts } from '@/pages/egoGift'
 import { EGOGiftFilterBar } from '@/pages/egoGift'
 import { EGOGiftSelectionList } from '@/pages/egoGift'
@@ -25,8 +25,8 @@ export function ComprehensiveGiftSelectorPane({
   open,
   onOpenChange,
 }: ComprehensiveGiftSelectorPaneProps) {
-  const selectedGiftIds = usePlannerEditorStore((s) => s.comprehensiveGiftIds)
-  const setComprehensiveGiftIds = usePlannerEditorStore((s) => s.setComprehensiveGiftIds)
+  const selectedGiftIds = usePlannerStore((s) => s.comprehensiveGiftIds)
+  const setComprehensiveGiftIds = usePlannerStore((s) => s.setComprehensiveGiftIds)
   const { t } = useTranslation(['planner', 'common'])
   const spec = useEGOGiftListSpec()
   const i18n = useEGOGiftListI18n()

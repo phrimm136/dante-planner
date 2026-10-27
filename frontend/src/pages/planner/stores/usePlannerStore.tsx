@@ -14,7 +14,6 @@ import {
   projectEditorState,
 } from '../lib/editorStateCodec'
 import { collectOwnedGiftIds } from '../lib/deckEA'
-import { useIdentityMaxLevel } from '../hooks/useMirrorDungeonSeason'
 
 import type { ReactNode } from 'react'
 import type { StoreApi } from 'zustand'
@@ -60,9 +59,9 @@ interface ColdState {
   sectionNotes: Record<string, NoteContent>
 }
 
-export interface PlannerEditorState extends HotState, WarmState, ColdState {}
+export interface PlannerStoreState extends HotState, WarmState, ColdState {}
 
-export interface PlannerEditorActions {
+export interface PlannerStoreActions {
   setEquipment: (
     equipment:
       | Record<string, SinnerEquipment>
@@ -102,14 +101,14 @@ export interface PlannerEditorActions {
   getPlannerState: () => PlannerState
 }
 
-export type PlannerEditorStore = PlannerEditorState & {
+export type PlannerStore = PlannerStoreState & {
   identityMaxLevel: number
-} & PlannerEditorActions
+} & PlannerStoreActions
 
 const createInitialState = (
   identityMaxLevel: number,
-  overrides?: Partial<PlannerEditorState>,
-): PlannerEditorState => {
+  overrides?: Partial<PlannerStoreState>,
+): PlannerStoreState => {
   const category = overrides?.category ?? '5F'
   return {
     equipment: overrides?.equipment ?? createDefaultEquipment(identityMaxLevel),
@@ -134,13 +133,13 @@ const createInitialState = (
   }
 }
 
-export const createPlannerEditorStore = (
+export const createPlannerStore = (
   identityMaxLevel: number,
-  initialState?: Partial<PlannerEditorState>,
+  initialState?: Partial<PlannerStoreState>,
 ) => {
   const state = createInitialState(identityMaxLevel, initialState)
 
-  return createStore<PlannerEditorStore>()(
+  return createStore<PlannerStore>()(
     devtools(
       (set, get) => ({
         ...state,
@@ -268,108 +267,89 @@ export const createPlannerEditorStore = (
 
         getPlannerState: () => projectEditorState(get()),
       }),
-      { name: 'PlannerEditorStore', enabled: import.meta.env.DEV },
+      { name: 'PlannerStore', enabled: import.meta.env.DEV },
     ),
   )
 }
 
-const PlannerEditorStoreContext = createContext<StoreApi<PlannerEditorStore> | null>(null)
+const PlannerStoreContext = createContext<StoreApi<PlannerStore> | null>(null)
 
-interface PlannerEditorStoreProviderProps {
+interface PlannerStoreProviderProps {
   children: ReactNode
   identityMaxLevel: number
-  initialState?: Partial<PlannerEditorState> | undefined
+  initialState?: Partial<PlannerStoreState> | undefined
 }
 
-export function PlannerEditorStoreProvider({
+export function PlannerStoreProvider({
   children,
   identityMaxLevel,
   initialState,
-}: PlannerEditorStoreProviderProps) {
-  const [store] = useState(() => createPlannerEditorStore(identityMaxLevel, initialState))
+}: PlannerStoreProviderProps) {
+  const [store] = useState(() => createPlannerStore(identityMaxLevel, initialState))
 
-  return (
-    <PlannerEditorStoreContext.Provider value={store}>
-      {children}
-    </PlannerEditorStoreContext.Provider>
-  )
+  return <PlannerStoreContext.Provider value={store}>{children}</PlannerStoreContext.Provider>
 }
 
-export function usePlannerEditorStore<T>(selector: (state: PlannerEditorStore) => T): T {
-  const store = useContext(PlannerEditorStoreContext)
+export function usePlannerStore<T>(selector: (state: PlannerStore) => T): T {
+  const store = useContext(PlannerStoreContext)
 
   if (!store) {
-    throw new Error('usePlannerEditorStore must be used within PlannerEditorStoreProvider')
+    throw new Error('usePlannerStore must be used within PlannerStoreProvider')
   }
 
   return useStore(store, selector)
 }
 
-let placeholderStore: StoreApi<PlannerEditorStore> | null = null
+let placeholderStore: StoreApi<PlannerStore> | null = null
 
-function getPlaceholderStore(): StoreApi<PlannerEditorStore> {
-  placeholderStore ??= createPlannerEditorStore(MIN_LEVEL)
+function getPlaceholderStore(): StoreApi<PlannerStore> {
+  placeholderStore ??= createPlannerStore(MIN_LEVEL)
   return placeholderStore
 }
 
-export function usePlannerEditorStoreSafe<T>(
-  selector: (state: PlannerEditorStore) => T,
-): T | undefined {
-  const store = useContext(PlannerEditorStoreContext)
+export function usePlannerStoreSafe<T>(selector: (state: PlannerStore) => T): T | undefined {
+  const store = useContext(PlannerStoreContext)
   const value = useStore(store ?? getPlaceholderStore(), selector)
 
   return store ? value : undefined
 }
 
-export function usePlannerEditorStoreApiSafe(): StoreApi<PlannerEditorStore> | null {
-  return useContext(PlannerEditorStoreContext)
+export function usePlannerStoreApiSafe(): StoreApi<PlannerStore> | null {
+  return useContext(PlannerStoreContext)
 }
 
-export function usePlannerEditorStoreApi(): StoreApi<PlannerEditorStore> {
-  const store = useContext(PlannerEditorStoreContext)
+export function usePlannerStoreApi(): StoreApi<PlannerStore> {
+  const store = useContext(PlannerStoreContext)
 
   if (!store) {
-    throw new Error('usePlannerEditorStoreApi must be used within PlannerEditorStoreProvider')
+    throw new Error('usePlannerStoreApi must be used within PlannerStoreProvider')
   }
 
   return store
 }
 
-export const useDeckFilterState = () => usePlannerEditorStore((s) => s.deckFilterState)
-export const useDeckVisibleCount = () => usePlannerEditorStore((s) => s.deckVisibleCount)
-export const useSetDeckFilterState = () => usePlannerEditorStore((s) => s.setDeckFilterState)
+export const useDeckFilterState = () => usePlannerStore((s) => s.deckFilterState)
+export const useDeckVisibleCount = () => usePlannerStore((s) => s.deckVisibleCount)
+export const useSetDeckFilterState = () => usePlannerStore((s) => s.setDeckFilterState)
 
 export function useStoreDeck(): DeckBuilderDeck {
-  const equipment = usePlannerEditorStore((s) => s.equipment)
-  const setEquipment = usePlannerEditorStore((s) => s.setEquipment)
-  const deploymentOrder = usePlannerEditorStore((s) => s.deploymentOrder)
-  const setDeploymentOrder = usePlannerEditorStore((s) => s.setDeploymentOrder)
+  const equipment = usePlannerStore((s) => s.equipment)
+  const setEquipment = usePlannerStore((s) => s.setEquipment)
+  const deploymentOrder = usePlannerStore((s) => s.deploymentOrder)
+  const setDeploymentOrder = usePlannerStore((s) => s.setDeploymentOrder)
 
   return { equipment, setEquipment, deploymentOrder, setDeploymentOrder }
 }
 
 export function useStoreOwnedGiftIds(): ReadonlySet<EGOGiftId> {
-  const selectedGiftIds = usePlannerEditorStore((s) => s.selectedGiftIds)
-  const observationGiftIds = usePlannerEditorStore((s) => s.observationGiftIds)
-  const comprehensiveGiftIds = usePlannerEditorStore((s) => s.comprehensiveGiftIds)
-  const floorSelections = usePlannerEditorStore((s) => s.floorSelections)
-  const category = usePlannerEditorStore((s) => s.category)
+  const selectedGiftIds = usePlannerStore((s) => s.selectedGiftIds)
+  const observationGiftIds = usePlannerStore((s) => s.observationGiftIds)
+  const comprehensiveGiftIds = usePlannerStore((s) => s.comprehensiveGiftIds)
+  const floorSelections = usePlannerStore((s) => s.floorSelections)
+  const category = usePlannerStore((s) => s.category)
 
   return collectOwnedGiftIds(
     { selectedGiftIds, observationGiftIds, comprehensiveGiftIds, floorSelections },
     floorCount(category),
-  )
-}
-
-interface SeasonDeckStoreProviderProps {
-  mdVersion: number
-  children: ReactNode
-}
-
-export function SeasonDeckStoreProvider({ mdVersion, children }: SeasonDeckStoreProviderProps) {
-  const maxLevel = useIdentityMaxLevel(mdVersion)
-
-  return (
-    <PlannerEditorStoreProvider identityMaxLevel={maxLevel}>{children}</PlannerEditorStoreProvider>
   )
 }

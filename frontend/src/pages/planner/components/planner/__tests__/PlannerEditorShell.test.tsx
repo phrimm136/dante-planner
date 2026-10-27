@@ -131,31 +131,28 @@ import { PlannerEditorShell } from '../PlannerEditorShell'
 import { toast as sonnerToast } from 'sonner'
 import { ConflictError } from '@/lib/apiErrors'
 import { ThemePackIdSchema } from '@/shared/gameData'
-import {
-  PlannerEditorStoreProvider,
-  usePlannerEditorStoreApi,
-} from '../../../stores/usePlannerEditorStore'
-import type { PlannerEditorStore } from '../../../stores/usePlannerEditorStore'
+import { PlannerStoreProvider, usePlannerStoreApi } from '../../../stores/usePlannerStore'
+import type { PlannerStore } from '../../../stores/usePlannerStore'
 
-function StoreCapture({ onReady }: { onReady: (api: StoreApi<PlannerEditorStore>) => void }) {
-  onReady(usePlannerEditorStoreApi())
+function StoreCapture({ onReady }: { onReady: (api: StoreApi<PlannerStore>) => void }) {
+  onReady(usePlannerStoreApi())
   return null
 }
 
 function renderShell() {
-  let storeApi: StoreApi<PlannerEditorStore> | null = null
+  let storeApi: StoreApi<PlannerStore> | null = null
   const utils = render(
-    <PlannerEditorStoreProvider identityMaxLevel={60}>
+    <PlannerStoreProvider identityMaxLevel={60}>
       <StoreCapture
         onReady={(api) => {
           storeApi = api
         }}
       />
       <PlannerEditorShell contentVersion={7} />
-    </PlannerEditorStoreProvider>,
+    </PlannerStoreProvider>,
   )
   if (!storeApi) throw new Error('store api was not captured')
-  return { ...utils, storeApi: storeApi as StoreApi<PlannerEditorStore> }
+  return { ...utils, storeApi: storeApi as StoreApi<PlannerStore> }
 }
 
 beforeEach(() => {

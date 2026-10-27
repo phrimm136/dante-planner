@@ -3,7 +3,7 @@ import { useEGOGiftObservationData } from '@/pages/egoGift'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/shared/egoGift'
 import { getBaseGiftId } from '@/pages/egoGift'
 import type { EncodedGiftId } from '@/shared/gameData'
-import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
+import { usePlannerStore } from '../../stores/usePlannerStore'
 import { CARD_MOBILE_SCALE } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { EmptyStatePlaceholder } from '@/components/feedback/EmptyStatePlaceholder'
@@ -104,7 +104,7 @@ export type StoreBoundEGOGiftObservationSummaryProps = Omit<
 export function StoreBoundEGOGiftObservationSummary(
   props: StoreBoundEGOGiftObservationSummaryProps,
 ) {
-  const selectedGiftIds = usePlannerEditorStore((s) => s.observationGiftIds)
+  const selectedGiftIds = usePlannerStore((s) => s.observationGiftIds)
 
   return <EGOGiftObservationSummary {...props} selectedGiftIds={selectedGiftIds} />
 }

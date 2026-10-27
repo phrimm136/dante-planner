@@ -1,6 +1,6 @@
 import { NoteEditor } from '@/shared/noteEditor/components/NoteEditor'
 import { MAX_NOTE_BYTES } from '@/lib/constants'
-import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
+import { usePlannerStore } from '../../stores/usePlannerStore'
 import { createEmptyNoteContent } from '@/shared/noteEditor'
 import type { NoteContent } from '@/shared/noteEditor'
 
@@ -12,8 +12,8 @@ interface StoreBoundSectionNoteProps {
 }
 
 export function StoreBoundSectionNote({ sectionKey, placeholder }: StoreBoundSectionNoteProps) {
-  const value = usePlannerEditorStore((s) => s.sectionNotes[sectionKey])
-  const updateSectionNote = usePlannerEditorStore((s) => s.updateSectionNote)
+  const value = usePlannerStore((s) => s.sectionNotes[sectionKey])
+  const updateSectionNote = usePlannerStore((s) => s.updateSectionNote)
 
   return (
     <NoteEditor

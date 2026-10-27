@@ -9,7 +9,7 @@ ignores:
   - '**/*.test.tsx'
   - src/pages/planner/lib/validation/floor/floorRules.ts
   - src/pages/planner/schemas/**
-  - src/pages/planner/stores/usePlannerEditorStore.tsx
+  - src/pages/planner/stores/usePlannerStore.tsx
 rule:
   any:
     - kind: subscript_expression

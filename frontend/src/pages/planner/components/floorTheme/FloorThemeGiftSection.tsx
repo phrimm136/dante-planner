@@ -5,7 +5,7 @@ import { useThemePackListSpec } from '@/pages/themePack'
 import { useThemePackListI18n } from '@/shared/themePack'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/shared/egoGift'
 import { showWarning } from '@/lib/errorPresentation'
-import { usePlannerEditorStoreSafe } from '../../stores/usePlannerEditorStore'
+import { usePlannerStoreSafe } from '../../stores/usePlannerStore'
 import { DifficultyIndicator, getFloorDifficultyLabel } from './DifficultyIndicator'
 import { ThemePackViewer, ThemePackPlaceholder } from './ThemePackViewer'
 import { ThemePackSelectorPane } from './ThemePackSelectorPane'
@@ -61,7 +61,7 @@ export function FloorThemeGiftSection({
   const [isThemePackPaneOpen, setIsThemePackPaneOpen] = useState(false)
   const [isGiftPaneOpen, setIsGiftPaneOpen] = useState(false)
 
-  const storeSlice = usePlannerEditorStoreSafe(
+  const storeSlice = usePlannerStoreSafe(
     useShallow((s) => ({
       selection: s?.floorSelections?.[floorIndex],
       previousHasThemePack: packSelectableAt(s?.floorSelections ?? [], floorIndex),
@@ -73,7 +73,7 @@ export function FloorThemeGiftSection({
   const updateFloorSelection = storeSlice?.updateFloorSelection
   const category = categoryProp ?? storeSlice?.storeCategory ?? '5F'
 
-  const usedThemePackIdsFromStore = usePlannerEditorStoreSafe(
+  const usedThemePackIdsFromStore = usePlannerStoreSafe(
     useShallow((s) =>
       isThemePackPaneOpen && !floorSelectionsOverride
         ? packIdsUsedElsewhere(s.floorSelections, category, floorIndex)
@@ -81,7 +81,7 @@ export function FloorThemeGiftSection({
     ),
   )
 
-  const offeredFromStore = usePlannerEditorStoreSafe(
+  const offeredFromStore = usePlannerStoreSafe(
     useShallow((s) =>
       offeredFloorDifficulties(s?.floorSelections ?? EMPTY_FLOORS, category, floorIndex),
     ),

@@ -19,7 +19,6 @@ import {
 import {
   MD_CATEGORIES,
   PLANNER_KEYWORDS,
-  DEFAULT_SKILL_EA,
   floorCount as categoryFloorCount,
 } from '@/shared/gameData'
 import { SECTION_STYLES } from '@/lib/constants'
@@ -37,12 +36,7 @@ import type { MDCategory } from '@/shared/gameData'
 import { isMDPlanner } from '../../types/PlannerTypes'
 import type { SaveablePlanner, ConflictResolutionChoice } from '../../types/PlannerTypes'
 
-import {
-  usePlannerEditorStore,
-  usePlannerEditorStoreApi,
-  useStoreDeck,
-  useStoreOwnedGiftIds,
-} from '../../stores/usePlannerEditorStore'
+import { usePlannerStore, usePlannerStoreApi } from '../../stores/usePlannerStore'
 
 import { usePlannerSave } from '../../hooks/usePlannerSave'
 import type { SaveOptions } from '../../hooks/usePlannerSave'
@@ -102,22 +96,19 @@ export function PlannerEditorShell({
     void navigate({ to: '/planner/md/$id/edit', params: { id: newPlannerId }, replace: true })
   }
 
-  const storeApi = usePlannerEditorStoreApi()
+  const storeApi = usePlannerStoreApi()
 
-  const title = usePlannerEditorStore((s) => s.title)
-  const setTitle = usePlannerEditorStore((s) => s.setTitle)
-  const category = usePlannerEditorStore((s) => s.category)
-  const setCategory = usePlannerEditorStore((s) => s.setCategory)
-  const isPublished = usePlannerEditorStore((s) => s.isPublished)
-  const visibleSections = usePlannerEditorStore((s) => s.visibleSections)
-  const setVisibleSections = usePlannerEditorStore((s) => s.setVisibleSections)
-  const selectedKeywords = usePlannerEditorStore((s) => s.selectedKeywords)
-  const setSelectedKeywords = usePlannerEditorStore((s) => s.setSelectedKeywords)
+  const title = usePlannerStore((s) => s.title)
+  const setTitle = usePlannerStore((s) => s.setTitle)
+  const category = usePlannerStore((s) => s.category)
+  const setCategory = usePlannerStore((s) => s.setCategory)
+  const isPublished = usePlannerStore((s) => s.isPublished)
+  const visibleSections = usePlannerStore((s) => s.visibleSections)
+  const setVisibleSections = usePlannerStore((s) => s.setVisibleSections)
+  const selectedKeywords = usePlannerStore((s) => s.selectedKeywords)
+  const setSelectedKeywords = usePlannerStore((s) => s.setSelectedKeywords)
 
-  const deck = useStoreDeck()
-  const ownedGiftIds = useStoreOwnedGiftIds()
-  const updateSinnerSkillEA = usePlannerEditorStore((s) => s.updateSinnerSkillEA)
-  const initializeFromPlannerAction = usePlannerEditorStore((s) => s.initializeFromPlanner)
+  const initializeFromPlannerAction = usePlannerStore((s) => s.initializeFromPlanner)
 
   const [isStartBuffPaneOpen, setIsStartBuffPaneOpen] = useState(false)
   const [isStartGiftPaneOpen, setIsStartGiftPaneOpen] = useState(false)
@@ -263,14 +254,7 @@ export function PlannerEditorShell({
       id: 'deckBuilder',
       node: (
         <>
-          <DeckBuilderBlock
-            deck={deck}
-            ownedGiftIds={ownedGiftIds}
-            mdVersion={mdVersion}
-            onIdentityChange={(sinnerCode) => {
-              updateSinnerSkillEA(sinnerCode, { ...DEFAULT_SKILL_EA })
-            }}
-          />
+          <DeckBuilderBlock mdVersion={mdVersion} />
           <StoreBoundSectionNote
             sectionKey="deckBuilder"
             placeholder={t('pages.plannerMD.noteEditor.placeholder')}

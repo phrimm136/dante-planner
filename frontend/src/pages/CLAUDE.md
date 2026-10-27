@@ -22,4 +22,4 @@ One vertical folder per route slice: route components at the slice root plus `co
 ## Client state
 
 - Zustand stores are per-slice (e.g. `pages/planner/stores/`); consume via atomic selectors (`useStore(s => s.field)`), never the bare store. Server data stays in TanStack Query, not Zustand.
-- High-frequency (rAF-driven) UI state goes in a store written imperatively via `storeApi.getState()`, not `useState` — precedent: `deckVisibleCount` in `usePlannerEditorStore`.
+- High-frequency (rAF-driven) UI state goes in a store written imperatively via `storeApi.getState()`, not `useState` — precedent: `deckVisibleCount` in `usePlannerStore`.

@@ -4,7 +4,7 @@ import { EGOGiftCard, toEGOGiftCardProps, toUnknownEGOGiftEntity } from '@/share
 import { getBaseGiftId } from '@/pages/egoGift'
 import type { EncodedGiftId } from '@/shared/gameData'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/shared/egoGift'
-import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
+import { usePlannerStore } from '../../stores/usePlannerStore'
 import { CardSlot, EGO_GIFT_GEOMETRY, useSlotSizePx } from '@/shared/cardLayout'
 import { CARD_MOBILE_SCALE, SECTION_STYLES } from '@/lib/constants'
 import { EmptyStatePlaceholder } from '@/components/feedback/EmptyStatePlaceholder'
@@ -115,8 +115,8 @@ export type StoreBoundStartGiftSummaryProps = Omit<
 >
 
 export function StoreBoundStartGiftSummary(props: StoreBoundStartGiftSummaryProps) {
-  const selectedKeyword = usePlannerEditorStore((s) => s.selectedGiftKeyword)
-  const selectedGiftIds = usePlannerEditorStore((s) => s.selectedGiftIds)
+  const selectedKeyword = usePlannerStore((s) => s.selectedGiftKeyword)
+  const selectedGiftIds = usePlannerStore((s) => s.selectedGiftIds)
 
   return (
     <StartGiftSummary

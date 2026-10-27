@@ -12,13 +12,13 @@ import { render } from '@testing-library/react'
 import type { ReactElement, ReactNode } from 'react'
 
 import {
-  PlannerEditorStoreProvider,
+  PlannerStoreProvider,
   createDefaultEquipment,
   createDefaultSkillEAState,
   useStoreDeck,
   useStoreOwnedGiftIds,
-} from '../../stores/usePlannerEditorStore'
-import type { PlannerEditorState } from '../../stores/usePlannerEditorStore'
+} from '../../stores/usePlannerStore'
+import type { PlannerStoreState } from '../../stores/usePlannerStore'
 
 import { DeckBuilderSummary } from '../deckBuilder/DeckBuilderSummary'
 import type { DeckBuilderSummaryProps } from '../deckBuilder/DeckBuilderSummary'
@@ -212,11 +212,11 @@ const SKILL_EA: Record<string, SkillEAState> = createDefaultSkillEAState()
 const CURRENT_EA: Record<string, SkillEAState> = { '1': { 0: 2, 1: 3, 2: 1 } }
 const MD_VERSION = 7
 
-function withStore(state: Partial<PlannerEditorState>, ui: ReactElement) {
+function withStore(state: Partial<PlannerStoreState>, ui: ReactElement) {
   return (
-    <PlannerEditorStoreProvider identityMaxLevel={60} initialState={state}>
+    <PlannerStoreProvider identityMaxLevel={60} initialState={state}>
       {ui}
-    </PlannerEditorStoreProvider>
+    </PlannerStoreProvider>
   )
 }
 
@@ -244,7 +244,7 @@ function html(ui: ReactElement): string {
 // Matrices
 // ---------------------------------------------------------------------------
 
-const POPULATED_STORE: Partial<PlannerEditorState> = {
+const POPULATED_STORE: Partial<PlannerStoreState> = {
   equipment: DEFAULT_EQUIPMENT,
   deploymentOrder: DEPLOYMENT_ORDER,
   selectedBuffIds: new Set([1001]),
@@ -470,7 +470,7 @@ describe('SkillReplacementSection DOM', () => {
           equipment={DEFAULT_EQUIPMENT}
           plannedEAState={SKILL_EA}
           currentEAState={CURRENT_EA}
-          setSkillEAState={() => {}}
+          onSinnerSkillEAChange={() => {}}
           onViewNotes={() => {}}
         />
       ),

@@ -1,23 +1,12 @@
-/**
- * The tracker's deck pane mounts the real catalog subtree — filter bar and both
- * grids — which read deck UI state from the planner editor store. The tracker
- * viewer itself sits outside any provider, so this file mounts the block inside
- * a season store the way the viewer does and drives a filter through it.
- */
-
 import { describe, it, expect, vi, assert } from 'vitest'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactElement, ReactNode } from 'react'
 
-import {
-  SeasonDeckStoreProvider,
-  createDefaultEquipment,
-} from '../../../stores/usePlannerEditorStore'
+import { PlannerStoreProvider, createDefaultEquipment } from '../../../stores/usePlannerStore'
 import { DeckBuilderBlock } from '../DeckBuilderBlock'
 import { SEASONS } from '@/shared/gameData'
-import type { EGOGiftId } from '@/shared/gameData'
 import { PLANNER_CONFIG } from '@/lib/constants'
 
 vi.mock('react-i18next', async (importOriginal) => {
@@ -45,11 +34,6 @@ vi.mock('@/shared/gameText/hooks/useKeywordListData', () => ({
 
 vi.mock('@/components/hooks/use-is-breakpoint', () => ({
   useIsBreakpoint: () => true,
-}))
-
-vi.mock('../../../hooks/useMirrorDungeonSeason', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('../../../hooks/useMirrorDungeonSeason')>()),
-  useIdentityMaxLevel: () => 60,
 }))
 
 vi.mock('../DeckBuilderPane', () => ({
@@ -118,24 +102,14 @@ vi.mock('@/shared/filter/hooks/useSearchMappings', () => ({
   }),
 }))
 
-const TRACKER_DECK = {
-  equipment: DEFAULT_EQUIPMENT,
-  setEquipment: () => {},
-  deploymentOrder: [0, 3],
-  setDeploymentOrder: () => {},
-}
-
 function TrackerDeckBlock() {
   return (
-    <SeasonDeckStoreProvider mdVersion={PLANNER_CONFIG.mdCurrentVersion}>
+    <PlannerStoreProvider identityMaxLevel={60} initialState={{ deploymentOrder: [0, 3] }}>
       <DeckBuilderBlock
-        deck={TRACKER_DECK}
-        ownedGiftIds={new Set<EGOGiftId>()}
         mdVersion={PLANNER_CONFIG.mdCurrentVersion}
-        onIdentityChange={() => {}}
         tracker={{ onResetToInitial: () => {} }}
       />
-    </SeasonDeckStoreProvider>
+    </PlannerStoreProvider>
   )
 }
 
@@ -152,7 +126,7 @@ function shownIdentityNames(container: HTMLElement): string[] {
 }
 
 describe('tracker deck pane', () => {
-  it('mounts the real catalog subtree inside a season store', async () => {
+  it('mounts the real catalog subtree inside a planner store', async () => {
     const user = userEvent.setup()
     renderPane(<TrackerDeckBlock />)
     await user.click(screen.getByRole('button', { name: 'edit deck' }))

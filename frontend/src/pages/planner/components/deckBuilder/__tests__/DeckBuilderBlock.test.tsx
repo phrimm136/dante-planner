@@ -1,23 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect } from 'react'
 import type { ReactNode } from 'react'
+import type { StoreApi } from 'zustand'
 
 import {
-  PlannerEditorStoreProvider,
+  PlannerStoreProvider,
   createDefaultDeckFilterState,
-  createDefaultEquipment,
-  usePlannerEditorStore,
-} from '../../../stores/usePlannerEditorStore'
-import type { PlannerEditorState } from '../../../stores/usePlannerEditorStore'
+  usePlannerStore,
+  usePlannerStoreApi,
+} from '../../../stores/usePlannerStore'
+import type { PlannerStoreState, PlannerStore } from '../../../stores/usePlannerStore'
 import { DeckBuilderBlock } from '../DeckBuilderBlock'
 import type { TrackerExtras } from '../DeckBuilderBlock'
 import { DeckCodeTransfer } from '../DeckCodeTransfer'
 import type { DeckBuilderContentProps } from '../DeckBuilderContent'
-import { SEASONS } from '@/shared/gameData'
-import type { EGOGiftId } from '@/shared/gameData'
+import { DEFAULT_SKILL_EA, SEASONS } from '@/shared/gameData'
 import { PLANNER_CONFIG } from '@/lib/constants'
 
 const contentProps = vi.hoisted(() => [] as DeckBuilderContentProps[])
@@ -96,51 +96,46 @@ vi.mock('../DeckBuilderContent', async () => {
   }
 })
 
-const DEFAULT_EQUIPMENT = createDefaultEquipment(60)
-const NO_GIFTS = new Set<EGOGiftId>()
 const EGO_FILTER = { ...createDefaultDeckFilterState(), entityMode: 'ego' as const }
 
-interface HarnessProps {
-  initialOrder?: number[]
-  onDeploymentOrder?: (order: number[]) => void
-  tracker?: TrackerExtras
-}
-
-function Harness({ initialOrder = [], onDeploymentOrder = () => {}, tracker }: HarnessProps) {
-  const [equipment, setEquipment] = useState(DEFAULT_EQUIPMENT)
-  const [deploymentOrder, setDeploymentOrder] = useState(initialOrder)
-
+function Harness({ tracker }: { tracker?: TrackerExtras }) {
   return (
     <DeckBuilderBlock
-      deck={{
-        equipment,
-        setEquipment,
-        deploymentOrder,
-        setDeploymentOrder: (order) => {
-          onDeploymentOrder(order)
-          setDeploymentOrder(order)
-        },
-      }}
-      ownedGiftIds={NO_GIFTS}
       mdVersion={PLANNER_CONFIG.mdCurrentVersion}
       {...(tracker !== undefined && { tracker })}
     />
   )
 }
 
+let hostStore: StoreApi<PlannerStore> | undefined
+
+function HostStoreProbe() {
+  const api = usePlannerStoreApi()
+  useEffect(() => {
+    hostStore = api
+  }, [api])
+  return null
+}
+
+function hostState() {
+  if (hostStore === undefined) throw new Error('the host store never mounted')
+  return hostStore.getState()
+}
+
 function HostEntityMode() {
-  const entityMode = usePlannerEditorStore((s) => s.deckFilterState.entityMode)
+  const entityMode = usePlannerStore((s) => s.deckFilterState.entityMode)
   return <output data-testid="host-entity-mode">{entityMode}</output>
 }
 
-function renderBlock(ui: ReactNode, initialState: Partial<PlannerEditorState> = {}) {
+function renderBlock(ui: ReactNode, initialState: Partial<PlannerStoreState> = {}) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={queryClient}>
-      <PlannerEditorStoreProvider identityMaxLevel={60} initialState={initialState}>
+      <PlannerStoreProvider identityMaxLevel={60} initialState={initialState}>
         {ui}
         <HostEntityMode />
-      </PlannerEditorStoreProvider>
+        <HostStoreProbe />
+      </PlannerStoreProvider>
     </QueryClientProvider>,
   )
 }
@@ -153,6 +148,7 @@ function lastContentProps(): DeckBuilderContentProps {
 
 beforeEach(() => {
   contentProps.length = 0
+  hostStore = undefined
   vi.mocked(DeckCodeTransfer).mockClear()
 })
 
@@ -168,16 +164,35 @@ describe('DeckBuilderBlock', () => {
     expect(screen.queryByRole('button', { name: 'viewNotes' })).toBeNull()
   })
 
-  it('writes toggles and the order reset through the deck', async () => {
+  it('writes toggles and the order reset through the store', async () => {
     const user = userEvent.setup()
-    const onDeploymentOrder = vi.fn()
-    renderBlock(<Harness initialOrder={[2]} onDeploymentOrder={onDeploymentOrder} />)
+    renderBlock(<Harness />, { deploymentOrder: [2] })
 
     await user.click(screen.getByRole('button', { name: 'toggle 2' }))
-    await user.click(screen.getByRole('button', { name: 'toggle 5' }))
-    await user.click(screen.getByRole('button', { name: 'deckBuilder.resetOrder' }))
+    expect(hostState().deploymentOrder).toEqual([])
 
-    expect(onDeploymentOrder.mock.calls).toEqual([[[]], [[5]], [[]]])
+    await user.click(screen.getByRole('button', { name: 'toggle 5' }))
+    expect(hostState().deploymentOrder).toEqual([5])
+
+    await user.click(screen.getByRole('button', { name: 'deckBuilder.resetOrder' }))
+    expect(hostState().deploymentOrder).toEqual([])
+  })
+
+  it('needs no deck prop: a toggle and an identity change land in the store', async () => {
+    const user = userEvent.setup()
+    renderBlock(<Harness />, {
+      deploymentOrder: [2],
+      skillEAState: { YiSang: { 0: 1, 1: 1, 2: 4 } },
+    })
+
+    await user.click(screen.getByRole('button', { name: 'toggle 5' }))
+    await user.click(screen.getByRole('button', { name: 'deckBuilder.editDeck' }))
+    act(() => {
+      lastContentProps().onIdentityChange?.('YiSang')
+    })
+
+    expect(hostState().deploymentOrder).toEqual([2, 5])
+    expect(hostState().skillEAState.YiSang).toEqual(DEFAULT_SKILL_EA)
   })
 
   it('opens the pane and activates the content on edit-deck', async () => {

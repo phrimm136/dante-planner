@@ -4,7 +4,7 @@ import { PlannerSection } from '@/components/layout/PlannerSection'
 import { SinnerSkillCard } from './SinnerSkillCard'
 import { SkillExchangeModal } from './SkillExchangeModal'
 import { useIdentityListSpec } from '@/pages/identity'
-import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
+import { usePlannerStore } from '../../stores/usePlannerStore'
 import { CardSlot } from '@/shared/cardLayout'
 import { SINNERS, DEFAULT_SKILL_EA } from '@/shared/gameData'
 import { SINNER_SKILL_GEOMETRY } from '../../lib/cardLayout'
@@ -16,7 +16,7 @@ export interface SkillReplacementSectionProps {
   equipment: Record<string, SinnerEquipment>
   plannedEAState: Record<string, SkillEAState>
   currentEAState?: Record<string, SkillEAState>
-  setSkillEAState?: (state: Record<string, SkillEAState>) => void
+  onSinnerSkillEAChange?: ((sinnerCode: string, state: SkillEAState) => void) | undefined
   readOnly?: boolean
   onViewNotes?: () => void
 }
@@ -25,7 +25,7 @@ export function SkillReplacementSection({
   equipment,
   plannedEAState,
   currentEAState,
-  setSkillEAState,
+  onSinnerSkillEAChange,
   readOnly = false,
   onViewNotes,
 }: SkillReplacementSectionProps) {
@@ -63,21 +63,15 @@ export function SkillReplacementSection({
     const activeEA = ea || { ...DEFAULT_SKILL_EA }
     if (activeEA[sourceSlot] <= 0) return
 
-    setSkillEAState?.({
-      ...plannedEAState,
-      [sinnerCode]: {
-        ...activeEA,
-        [sourceSlot]: activeEA[sourceSlot] - 1,
-        [targetSlot]: activeEA[targetSlot] + 1,
-      },
+    onSinnerSkillEAChange?.(sinnerCode, {
+      ...activeEA,
+      [sourceSlot]: activeEA[sourceSlot] - 1,
+      [targetSlot]: activeEA[targetSlot] + 1,
     })
   }
 
   const handleReset = (sinnerCode: string) => {
-    setSkillEAState?.({
-      ...plannedEAState,
-      [sinnerCode]: { ...DEFAULT_SKILL_EA },
-    })
+    onSinnerSkillEAChange?.(sinnerCode, { ...DEFAULT_SKILL_EA })
   }
 
   const selectedSinnerEquipment = selectedSinner ? equipment[selectedSinner] : null
@@ -143,20 +137,20 @@ export function SkillReplacementSection({
 
 export type StoreBoundSkillReplacementSectionProps = Omit<
   SkillReplacementSectionProps,
-  'equipment' | 'plannedEAState' | 'setSkillEAState'
+  'equipment' | 'plannedEAState' | 'onSinnerSkillEAChange'
 >
 
 export function StoreBoundSkillReplacementSection(props: StoreBoundSkillReplacementSectionProps) {
-  const equipment = usePlannerEditorStore((s) => s.equipment)
-  const plannedEAState = usePlannerEditorStore((s) => s.skillEAState)
-  const setSkillEAState = usePlannerEditorStore((s) => s.setSkillEAState)
+  const equipment = usePlannerStore((s) => s.equipment)
+  const plannedEAState = usePlannerStore((s) => s.skillEAState)
+  const updateSinnerSkillEA = usePlannerStore((s) => s.updateSinnerSkillEA)
 
   return (
     <SkillReplacementSection
       {...props}
       equipment={equipment}
       plannedEAState={plannedEAState}
-      setSkillEAState={setSkillEAState}
+      onSinnerSkillEAChange={updateSinnerSkillEA}
     />
   )
 }

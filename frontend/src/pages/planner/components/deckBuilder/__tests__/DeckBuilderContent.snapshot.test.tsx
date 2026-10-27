@@ -12,15 +12,15 @@ import { render, screen } from '@testing-library/react'
 import type { ReactElement } from 'react'
 
 import {
-  PlannerEditorStoreProvider,
+  PlannerStoreProvider,
   createDefaultEquipment,
   createDefaultDeckFilterState,
   useDeckFilterState,
-  usePlannerEditorStore,
+  usePlannerStore,
   useStoreDeck,
   useStoreOwnedGiftIds,
-} from '../../../stores/usePlannerEditorStore'
-import type { PlannerEditorState } from '../../../stores/usePlannerEditorStore'
+} from '../../../stores/usePlannerStore'
+import type { PlannerStoreState } from '../../../stores/usePlannerStore'
 
 import { DeckBuilderContent } from '../DeckBuilderContent'
 import type { DeckBuilderActions, DeckBuilderContentProps } from '../DeckBuilderContent'
@@ -170,11 +170,11 @@ const TRACKER_DECK = {
   ownedGiftIds: new Set<EGOGiftId>(),
 }
 
-function withStore(state: Partial<PlannerEditorState>, ui: ReactElement) {
+function withStore(state: Partial<PlannerStoreState>, ui: ReactElement) {
   return (
-    <PlannerEditorStoreProvider identityMaxLevel={60} initialState={state}>
+    <PlannerStoreProvider identityMaxLevel={60} initialState={state}>
       {ui}
-    </PlannerEditorStoreProvider>
+    </PlannerStoreProvider>
   )
 }
 
@@ -187,7 +187,7 @@ function StoreFilteredDeckBuilderContent(props: Omit<DeckBuilderContentProps, 'f
 function StoreDeckBuilderContent(props: DeckBuilderActions & { isActive: boolean }) {
   const deck = useStoreDeck()
   const ownedGiftIds = useStoreOwnedGiftIds()
-  const maxLevel = usePlannerEditorStore((s) => s.identityMaxLevel)
+  const maxLevel = usePlannerStore((s) => s.identityMaxLevel)
 
   return (
     <StoreFilteredDeckBuilderContent

@@ -2,7 +2,7 @@ import { memo, type Ref } from 'react'
 
 import { CARD_MOBILE_SCALE } from '@/lib/constants'
 import { getFormationBadgePath } from '@/shared/assets'
-import { useDeckVisibleCount } from '../../stores/usePlannerEditorStore'
+import { useDeckVisibleCount } from '../../stores/usePlannerStore'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 import { CardSlot, IDENTITY_GEOMETRY } from '@/shared/cardLayout'
 import { IdentityCard } from '@/pages/identity'

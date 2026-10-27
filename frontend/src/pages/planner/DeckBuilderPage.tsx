@@ -1,13 +1,6 @@
 import { Suspense, useId } from 'react'
 
-import { DEFAULT_SKILL_EA } from '@/shared/gameData'
-
-import {
-  PlannerEditorStoreProvider,
-  usePlannerEditorStore,
-  useStoreDeck,
-  useStoreOwnedGiftIds,
-} from './stores/usePlannerEditorStore'
+import { PlannerStoreProvider } from './stores/usePlannerStore'
 
 import { useIdentityMaxLevel } from './hooks/useMirrorDungeonSeason'
 
@@ -16,20 +9,9 @@ import { DeckBuilderPageSkeleton } from './components/plannerSkeletons'
 import { PLANNER_CONFIG, SECTION_STYLES } from '@/lib/constants'
 
 function DeckBuilderPageContent() {
-  const deck = useStoreDeck()
-  const ownedGiftIds = useStoreOwnedGiftIds()
-  const updateSinnerSkillEA = usePlannerEditorStore((s) => s.updateSinnerSkillEA)
-
   return (
     <div className={SECTION_STYLES.LAYOUT.page}>
-      <DeckBuilderBlock
-        deck={deck}
-        ownedGiftIds={ownedGiftIds}
-        mdVersion={PLANNER_CONFIG.mdCurrentVersion}
-        onIdentityChange={(sinnerCode) => {
-          updateSinnerSkillEA(sinnerCode, { ...DEFAULT_SKILL_EA })
-        }}
-      />
+      <DeckBuilderBlock mdVersion={PLANNER_CONFIG.mdCurrentVersion} />
     </div>
   )
 }
@@ -39,9 +21,9 @@ function DeckBuilderPageStore() {
   const identityMaxLevel = useIdentityMaxLevel(PLANNER_CONFIG.mdCurrentVersion)
 
   return (
-    <PlannerEditorStoreProvider key={storeKey} identityMaxLevel={identityMaxLevel}>
+    <PlannerStoreProvider key={storeKey} identityMaxLevel={identityMaxLevel}>
       <DeckBuilderPageContent />
-    </PlannerEditorStoreProvider>
+    </PlannerStoreProvider>
   )
 }
 

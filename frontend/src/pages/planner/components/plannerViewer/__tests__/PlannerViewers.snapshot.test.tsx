@@ -10,7 +10,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render } from '@testing-library/react'
 
 import { GuideModeViewer } from '../GuideModeViewer'
-import { TrackerModeViewer } from '../TrackerModeViewer'
+import { TrackerModeViewer, TrackerStore } from '../TrackerModeViewer'
 
 import type { MDSaveablePlanner } from '../../../types/PlannerTypes'
 import type { MDCategory } from '@/shared/gameData'
@@ -166,7 +166,11 @@ describe('GuideModeViewer DOM', () => {
 
 describe('TrackerModeViewer DOM', () => {
   it.each(MATRIX)('renders %s', (_label, planner) => {
-    const next = render(<TrackerModeViewer planner={planner} />)
+    const next = render(
+      <TrackerStore planner={planner}>
+        <TrackerModeViewer planner={planner} />
+      </TrackerStore>,
+    )
 
     expect(next.container.innerHTML).toMatchSnapshot()
   })

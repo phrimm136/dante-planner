@@ -28,8 +28,8 @@ vi.mock('react-i18next', async (importOriginal) => {
 })
 
 const mockSetSelectedBuffIds = vi.fn()
-vi.mock('../../../stores/usePlannerEditorStore', () => ({
-  usePlannerEditorStore: (selector: (state: Record<string, unknown>) => unknown) =>
+vi.mock('../../../stores/usePlannerStore', () => ({
+  usePlannerStore: (selector: (state: Record<string, unknown>) => unknown) =>
     selector({ selectedBuffIds: new Set<number>(), setSelectedBuffIds: mockSetSelectedBuffIds }),
 }))
 

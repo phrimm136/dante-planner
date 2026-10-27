@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import type { MDSaveablePlanner } from '../../types/PlannerTypes'
 
 import { GuideModeViewer } from './GuideModeViewer'
-import { TrackerModeViewer } from './TrackerModeViewer'
+import { TrackerModeViewer, TrackerStore } from './TrackerModeViewer'
 
 type ViewerMode = 'guide' | 'tracker'
 
@@ -52,7 +52,9 @@ export function PlannerViewer({ planner }: PlannerViewerProps) {
 
       {trackerMounted && (
         <div className={cn(mode !== 'tracker' && 'hidden')} aria-hidden={mode !== 'tracker'}>
-          <TrackerModeViewer planner={planner} />
+          <TrackerStore planner={planner}>
+            <TrackerModeViewer planner={planner} />
+          </TrackerStore>
         </div>
       )}
     </>

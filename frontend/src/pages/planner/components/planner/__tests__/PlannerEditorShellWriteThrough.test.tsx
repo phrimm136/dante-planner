@@ -102,11 +102,11 @@ vi.mock('../KeywordSelector', () => ({ KeywordSelector: () => null }))
 
 import { PlannerEditorShell } from '../PlannerEditorShell'
 import {
-  PlannerEditorStoreProvider,
-  usePlannerEditorStoreApi,
+  PlannerStoreProvider,
+  usePlannerStoreApi,
   createDefaultSectionNotes,
-} from '../../../stores/usePlannerEditorStore'
-import type { PlannerEditorStore, PlannerEditorState } from '../../../stores/usePlannerEditorStore'
+} from '../../../stores/usePlannerStore'
+import type { PlannerStore, PlannerStoreState } from '../../../stores/usePlannerStore'
 import type { StoreApi } from 'zustand'
 
 stubRangeRects()
@@ -122,29 +122,29 @@ function typeIntoFirstNote(text: string) {
   pasteIntoNote(container as Element, text)
 }
 
-function StoreCapture({ onReady }: { onReady: (api: StoreApi<PlannerEditorStore>) => void }) {
-  onReady(usePlannerEditorStoreApi())
+function StoreCapture({ onReady }: { onReady: (api: StoreApi<PlannerStore>) => void }) {
+  onReady(usePlannerStoreApi())
   return null
 }
 
-function renderShell(initialState?: Partial<PlannerEditorState>) {
-  let storeApi: StoreApi<PlannerEditorStore> | null = null
+function renderShell(initialState?: Partial<PlannerStoreState>) {
+  let storeApi: StoreApi<PlannerStore> | null = null
   const utils = render(
-    <PlannerEditorStoreProvider identityMaxLevel={60} initialState={initialState}>
+    <PlannerStoreProvider identityMaxLevel={60} initialState={initialState}>
       <StoreCapture
         onReady={(api) => {
           storeApi = api
         }}
       />
       <PlannerEditorShell contentVersion={7} />
-    </PlannerEditorStoreProvider>,
+    </PlannerStoreProvider>,
   )
   if (!storeApi) throw new Error('store api was not captured')
-  return { ...utils, storeApi: storeApi as StoreApi<PlannerEditorStore> }
+  return { ...utils, storeApi: storeApi as StoreApi<PlannerStore> }
 }
 
 /** Every note the shell renders for the store's category: the fixed sections plus one per floor. */
-function expectedNoteCount(storeApi: StoreApi<PlannerEditorStore>): number {
+function expectedNoteCount(storeApi: StoreApi<PlannerStore>): number {
   const fixedNotes = Object.keys(createDefaultSectionNotes()).filter(
     (key) => !key.startsWith('floor-'),
   ).length
@@ -160,7 +160,7 @@ function expectedNoteCount(storeApi: StoreApi<PlannerEditorStore>): number {
  * over synchronously, which is not an edit and must not write; clearing here
  * would throw away the evidence for exactly that.
  */
-async function settleMount(storeApi: StoreApi<PlannerEditorStore>) {
+async function settleMount(storeApi: StoreApi<PlannerStore>) {
   await waitFor(() =>
     expect(document.querySelectorAll('.note-editor-content')).toHaveLength(
       expectedNoteCount(storeApi),
@@ -213,7 +213,7 @@ describe('PlannerEditorShell - write-through with real note editors', () => {
     // exist, and only a cast can reproduce it here.
     const emptied = Object.fromEntries(
       Object.keys(createDefaultSectionNotes()).map((key) => [key, { content: '' }]),
-    ) as unknown as PlannerEditorState['sectionNotes']
+    ) as unknown as PlannerStoreState['sectionNotes']
 
     const { storeApi } = renderShell({ sectionNotes: emptied })
     await settleMount(storeApi)

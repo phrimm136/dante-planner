@@ -7,7 +7,7 @@ import type { EGOGiftId } from '@/shared/gameData'
 import { useStartBuffListSpec, useStartBuffListI18n } from '../../hooks/useStartBuffList'
 import { toStartBuffs } from '../../lib/startBuffs'
 import { useCappedSelection } from '../../hooks/useCappedSelection'
-import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
+import { usePlannerStore } from '../../stores/usePlannerStore'
 import type { MDVersion } from '@/shared/gameData'
 import { calculateMaxGiftSelection } from '../../lib/startGiftCalculator'
 import { SelectorPaneShell } from '../SelectorPaneShell'
@@ -22,13 +22,13 @@ interface StartGiftEditPaneProps {
 }
 
 export function StartGiftEditPane({ open, onOpenChange, mdVersion }: StartGiftEditPaneProps) {
-  const selectedBuffIds = usePlannerEditorStore((s) => s.selectedBuffIds)
-  const selectedKeyword = usePlannerEditorStore((s) => s.selectedGiftKeyword)
-  const selectedGiftIds = usePlannerEditorStore((s) => s.selectedGiftIds)
-  const setSelectedKeyword = usePlannerEditorStore((s) => s.setSelectedGiftKeyword)
-  const setSelectedGiftIds = usePlannerEditorStore((s) => s.setSelectedGiftIds)
-  const comprehensiveGiftIds = usePlannerEditorStore((s) => s.comprehensiveGiftIds)
-  const setComprehensiveGiftIds = usePlannerEditorStore((s) => s.setComprehensiveGiftIds)
+  const selectedBuffIds = usePlannerStore((s) => s.selectedBuffIds)
+  const selectedKeyword = usePlannerStore((s) => s.selectedGiftKeyword)
+  const selectedGiftIds = usePlannerStore((s) => s.selectedGiftIds)
+  const setSelectedKeyword = usePlannerStore((s) => s.setSelectedGiftKeyword)
+  const setSelectedGiftIds = usePlannerStore((s) => s.setSelectedGiftIds)
+  const comprehensiveGiftIds = usePlannerStore((s) => s.comprehensiveGiftIds)
+  const setComprehensiveGiftIds = usePlannerStore((s) => s.setComprehensiveGiftIds)
   const { t } = useTranslation(['planner', 'common'])
 
   const { data: pools } = useStartGiftPools(mdVersion)

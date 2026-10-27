@@ -1,8 +1,18 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { TrackerModeViewer } from '../TrackerModeViewer'
+import { TrackerModeViewer, TrackerStore } from '../TrackerModeViewer'
+import {
+  createDefaultSkillEAState,
+  useStoreDeck,
+  useStoreOwnedGiftIds,
+  usePlannerStoreApi,
+} from '../../../stores/usePlannerStore'
+import type { PlannerStore } from '../../../stores/usePlannerStore'
+import type { StoreApi } from 'zustand'
+import type { SkillEAState } from '../../../types/DeckTypes'
 import { DUNGEON_IDX } from '@/shared/gameData'
 import type { MDSaveablePlanner, MDPlannerContent } from '../../../types/PlannerTypes'
 import { ThemePackIdSchema } from '@/shared/gameData'
@@ -51,27 +61,6 @@ vi.mock('react-i18next', async (importOriginal) => {
   }
 })
 
-// Mock useTrackerState hook
-const mockTrackerState = {
-  state: {
-    equipment: {},
-    deploymentOrder: ['YiSang', 'Faust', 'DonQuixote'],
-    currentSkillCounts: {
-      YiSang: { 0: 3, 1: 2, 2: 1 },
-      Faust: { 0: 3, 1: 2, 2: 1 },
-    },
-    doneMarks: {},
-  },
-  setEquipment: vi.fn(),
-  setDeploymentOrder: vi.fn(),
-  setCurrentSkillCounts: vi.fn(),
-  toggleDoneMark: vi.fn(),
-}
-
-vi.mock('../../../hooks/useTrackerState', () => ({
-  useTrackerState: () => mockTrackerState,
-}))
-
 // Mock deserializeSets
 vi.mock('../../../schemas/PlannerSchemas', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../../schemas/PlannerSchemas')>()),
@@ -90,17 +79,24 @@ vi.mock('../../../schemas/PlannerSchemas', async (importOriginal) => ({
 
 // Mock child components
 vi.mock('../../deckBuilder/DeckBuilderBlock', () => ({
-  DeckBuilderBlock: ({
-    deck,
-    ownedGiftIds,
-  }: {
-    deck: { deploymentOrder: string[] }
-    ownedGiftIds: ReadonlySet<string>
-  }) => (
-    <div data-testid="deck-block" data-owned={[...ownedGiftIds].sort().join(',')}>
-      Deployment: {deck.deploymentOrder.join(', ')}
-    </div>
-  ),
+  DeckBuilderBlock: ({ tracker }: { tracker?: { onResetToInitial: () => void } }) => {
+    const deck = useStoreDeck()
+    const ownedGiftIds = useStoreOwnedGiftIds()
+    return (
+      <div data-testid="deck-block" data-owned={[...ownedGiftIds].sort().join(',')}>
+        Deployment: {deck.deploymentOrder.join(', ')}
+        <button type="button" onClick={() => deck.setDeploymentOrder([4, 2])}>
+          apply order
+        </button>
+        <button type="button" onClick={() => deck.setEquipment(() => ({}))}>
+          clear equipment
+        </button>
+        <button type="button" onClick={() => tracker?.onResetToInitial()}>
+          reset to initial
+        </button>
+      </div>
+    )
+  },
 }))
 
 vi.mock('../../../hooks/useMirrorDungeonSeason', async (importOriginal) => ({
@@ -180,20 +176,45 @@ vi.mock('../ComprehensiveGiftGridTracker', () => ({
 }))
 
 vi.mock('../HorizontalThemePackGallery', () => ({
-  HorizontalThemePackGallery: ({ floorCount }: { floorCount: number }) => (
+  HorizontalThemePackGallery: ({
+    floorCount,
+    doneMarks,
+    onTogglePackDone,
+  }: {
+    floorCount: number
+    doneMarks: Record<number, Set<string>>
+    onTogglePackDone: (floorIndex: number, themePackId: string, giftIds: string[]) => void
+  }) => (
     <div
       data-testid="horizontal-theme-pack-gallery"
       data-unified="true"
       data-floor-count={String(floorCount)}
+      data-done={[...(doneMarks[0] ?? [])].join(',')}
     >
       HorizontalThemePackGallery
+      <button type="button" onClick={() => onTogglePackDone(0, '1001', ['9100'])}>
+        mark pack done
+      </button>
     </div>
   ),
 }))
 
+const CHANGED_SINNER_EA: SkillEAState = { 0: 2, 1: 3, 2: 1 }
+
 vi.mock('../../skillReplacement/SkillReplacementSection', () => ({
-  SkillReplacementSection: () => (
-    <div data-testid="skill-replacement-section">SkillReplacementSection</div>
+  SkillReplacementSection: ({
+    currentEAState,
+    onSinnerSkillEAChange,
+  }: {
+    currentEAState: Record<string, SkillEAState>
+    onSinnerSkillEAChange: (sinnerCode: string, state: SkillEAState) => void
+  }) => (
+    <div data-testid="skill-replacement-section" data-current={JSON.stringify(currentEAState)}>
+      SkillReplacementSection
+      <button type="button" onClick={() => onSinnerSkillEAChange('1', CHANGED_SINNER_EA)}>
+        exchange skill
+      </button>
+    </div>
   ),
 }))
 
@@ -275,13 +296,37 @@ describe('TrackerModeViewer', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockTrackerState.state.deploymentOrder = ['YiSang', 'Faust', 'DonQuixote']
   })
+
+  function StoreProbe({ onStore }: { onStore: (store: StoreApi<PlannerStore>) => void }) {
+    onStore(usePlannerStoreApi())
+    return null
+  }
+
+  function renderTracker(planner: MDSaveablePlanner) {
+    let store: StoreApi<PlannerStore> | undefined
+    const result = render(
+      <TrackerStore planner={planner}>
+        <TrackerModeViewer planner={planner} />
+        <StoreProbe
+          onStore={(api) => {
+            store = api
+          }}
+        />
+      </TrackerStore>,
+      { wrapper: createWrapper() },
+    )
+    const getStore = () => {
+      if (store === undefined) throw new Error('the tracker store never mounted')
+      return store
+    }
+    return { ...result, getStore }
+  }
 
   describe('Section Rendering', () => {
     it('renders all required sections', () => {
       const planner = createMockPlanner(5)
-      render(<TrackerModeViewer planner={planner} />, { wrapper: createWrapper() })
+      renderTracker(planner)
 
       expect(screen.getByTestId('deck-block')).toBeDefined()
       expect(screen.getByTestId('start-buff-section')).toBeDefined()
@@ -292,7 +337,7 @@ describe('TrackerModeViewer', () => {
 
     it('renders unified floor tracker with HorizontalThemePackGallery', () => {
       const planner = createMockPlanner(5)
-      render(<TrackerModeViewer planner={planner} />, { wrapper: createWrapper() })
+      renderTracker(planner)
 
       // Should have HorizontalThemePackGallery for floor/theme pack management
       const gallery = screen.getByTestId('horizontal-theme-pack-gallery')
@@ -301,7 +346,7 @@ describe('TrackerModeViewer', () => {
 
     it('renders unified floor tracker for different floor counts', () => {
       const planner = createMockPlanner(10)
-      render(<TrackerModeViewer planner={planner} />, { wrapper: createWrapper() })
+      renderTracker(planner)
 
       // Should still have gallery regardless of floor count
       const gallery = screen.getByTestId('horizontal-theme-pack-gallery')
@@ -310,21 +355,53 @@ describe('TrackerModeViewer', () => {
   })
 
   describe('Tracker State Integration', () => {
-    it('passes the tracker deployment order to DeckBuilderBlock as its deck', () => {
-      const planner = createMockPlanner(5)
-      render(<TrackerModeViewer planner={planner} />, { wrapper: createWrapper() })
+    it("seeds the deck from the planner's deployment order", () => {
+      renderTracker(createMockPlanner(5))
 
-      const deckPanel = screen.getByTestId('deck-block')
-      expect(deckPanel.textContent).toContain('YiSang, Faust, DonQuixote')
+      expect(screen.getByTestId('deck-block').textContent).toContain('Deployment: 0, 1')
     })
 
-    it('uses tracker deployment order when modified', () => {
-      mockTrackerState.state.deploymentOrder = ['Faust', 'YiSang', 'DonQuixote']
-      const planner = createMockPlanner(5)
-      render(<TrackerModeViewer planner={planner} />, { wrapper: createWrapper() })
+    it('starts the current skill counts at the defaults, not the plan', () => {
+      const { getStore } = renderTracker(createMockPlanner(5))
 
-      const deckPanel = screen.getByTestId('deck-block')
-      expect(deckPanel.textContent).toContain('Faust, YiSang, DonQuixote')
+      expect(getStore().getState().skillEAState).toEqual(createDefaultSkillEAState())
+      expect(
+        JSON.parse(screen.getByTestId('skill-replacement-section').dataset.current ?? ''),
+      ).toEqual(createDefaultSkillEAState())
+    })
+
+    it('reads and writes the deck and the skill counts through the store', async () => {
+      const user = userEvent.setup()
+      const { getStore } = renderTracker(createMockPlanner(5))
+
+      await user.click(screen.getByRole('button', { name: 'apply order' }))
+      await user.click(screen.getByRole('button', { name: 'exchange skill' }))
+
+      expect(getStore().getState().deploymentOrder).toEqual([4, 2])
+      expect(screen.getByTestId('deck-block').textContent).toContain('Deployment: 4, 2')
+      const changed = { ...createDefaultSkillEAState(), '1': CHANGED_SINNER_EA }
+      expect(getStore().getState().skillEAState).toEqual(changed)
+      expect(
+        JSON.parse(screen.getByTestId('skill-replacement-section').dataset.current ?? ''),
+      ).toEqual(changed)
+    })
+
+    it('reset to initial restores the deck and keeps the skill counts and done marks', async () => {
+      const user = userEvent.setup()
+      const planner = createMockPlanner(5)
+      const { getStore } = renderTracker(planner)
+
+      await user.click(screen.getByRole('button', { name: 'apply order' }))
+      await user.click(screen.getByRole('button', { name: 'clear equipment' }))
+      await user.click(screen.getByRole('button', { name: 'exchange skill' }))
+      await user.click(screen.getByRole('button', { name: 'mark pack done' }))
+      await user.click(screen.getByRole('button', { name: 'reset to initial' }))
+
+      const state = getStore().getState()
+      expect(state.equipment).toEqual(planner.content.equipment)
+      expect(state.deploymentOrder).toEqual(planner.content.deploymentOrder)
+      expect(state.skillEAState).toEqual({ ...createDefaultSkillEAState(), '1': CHANGED_SINNER_EA })
+      expect(screen.getByTestId('horizontal-theme-pack-gallery').dataset.done).toBe('1001')
     })
   })
 
@@ -335,14 +412,14 @@ describe('TrackerModeViewer', () => {
     }
 
     it('bounds the gallery and the gift grid by the 5F floor count', () => {
-      render(<TrackerModeViewer planner={fifteenFloorsAs5F()} />, { wrapper: createWrapper() })
+      renderTracker(fifteenFloorsAs5F())
 
       expect(screen.getByTestId('horizontal-theme-pack-gallery').dataset.floorCount).toBe('5')
       expect(screen.getByTestId('comprehensive-gift-grid-tracker').dataset.floorCount).toBe('5')
     })
 
     it('grants the deck only the gifts of the five floors', () => {
-      render(<TrackerModeViewer planner={fifteenFloorsAs5F()} />, { wrapper: createWrapper() })
+      renderTracker(fifteenFloorsAs5F())
 
       const fiveFloorGifts = Array.from({ length: 10 }, (_, i) => String(9100 + i))
       const nonFloorGifts = ['9001', '9002', '9003', '9004', '9005']
@@ -355,7 +432,7 @@ describe('TrackerModeViewer', () => {
   describe('Unified Floor Data', () => {
     it('passes all floor data to unified HorizontalThemePackGallery', () => {
       const planner = createMockPlanner(5)
-      render(<TrackerModeViewer planner={planner} />, { wrapper: createWrapper() })
+      renderTracker(planner)
 
       // Unified section should exist
       const gallery = screen.getByTestId('horizontal-theme-pack-gallery')

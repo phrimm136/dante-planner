@@ -3,7 +3,7 @@
  *
  * Unit tests for EGOGiftObservationEditPane component.
  * Tests dialog visibility and basic rendering.
- * Note: Component uses usePlannerEditorStore for state management.
+ * Note: Component uses usePlannerStore for state management.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -37,8 +37,8 @@ vi.mock('react-i18next', async (importOriginal) => {
 
 // Mock planner editor store (component uses store directly)
 const mockSetObservationGiftIds = vi.fn()
-vi.mock('../../../stores/usePlannerEditorStore', () => ({
-  usePlannerEditorStore: (selector: (state: Record<string, unknown>) => unknown) => {
+vi.mock('../../../stores/usePlannerStore', () => ({
+  usePlannerStore: (selector: (state: Record<string, unknown>) => unknown) => {
     const mockState = {
       observationGiftIds: new Set<string>(),
       setObservationGiftIds: mockSetObservationGiftIds,

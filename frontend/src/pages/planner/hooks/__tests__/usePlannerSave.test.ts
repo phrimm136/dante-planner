@@ -16,7 +16,7 @@ import { renderHook, act, waitFor } from '@testing-library/react'
 import { flushMicrotask } from '@/test-utils'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { queryClient } from '@/lib/queryClient'
-import { createPlannerEditorStore } from '../../stores/usePlannerEditorStore'
+import { createPlannerStore } from '../../stores/usePlannerStore'
 import type { PlannerState, UsePlannerSaveOptions } from '../usePlannerSave'
 import type { AppError } from '@/lib/apiErrorClassifier'
 import type { Result } from '@/lib/result'
@@ -110,7 +110,7 @@ import { usePlannerSave } from '../usePlannerSave'
  * skill EA summing to 6, real Set instances (required by serializeSets).
  */
 function validState(overrides: Partial<PlannerState> = {}): PlannerState {
-  const base = createPlannerEditorStore(60).getState().getPlannerState()
+  const base = createPlannerStore(60).getState().getPlannerState()
   return { ...base, ...overrides }
 }
 

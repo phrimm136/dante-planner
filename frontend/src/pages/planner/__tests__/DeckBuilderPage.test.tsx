@@ -2,13 +2,13 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { createTestQueryClient } from '@/test-utils/queryClient'
-import { usePlannerEditorStore } from '../stores/usePlannerEditorStore'
+import { usePlannerStore, useStoreDeck } from '../stores/usePlannerStore'
 import DeckBuilderPage from '../DeckBuilderPage'
-import type { DeckBuilderDeck } from '../types/DeckTypes'
 
 vi.mock('../components/deckBuilder/DeckBuilderBlock', () => ({
-  DeckBuilderBlock: ({ deck }: { deck: DeckBuilderDeck }) => {
-    const maxLevel = usePlannerEditorStore((s) => s.identityMaxLevel)
+  DeckBuilderBlock: () => {
+    const deck = useStoreDeck()
+    const maxLevel = usePlannerStore((s) => s.identityMaxLevel)
     return (
       <>
         <div data-testid="default-level">{deck.equipment['1']?.identity.level}</div>

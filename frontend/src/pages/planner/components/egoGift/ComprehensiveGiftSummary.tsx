@@ -8,7 +8,7 @@ import { GIFT_ROW_PADDING_PX, giftRowMinHeightPx } from '../../lib/cardLayout'
 import type { EGOGiftEntity } from '@/shared/egoGift'
 import type { EncodedGiftId, EnhancementLevel } from '@/shared/gameData'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/shared/egoGift'
-import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
+import { usePlannerStore } from '../../stores/usePlannerStore'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { CardSlot, EGO_GIFT_GEOMETRY, useSlotSizePx } from '@/shared/cardLayout'
 import { EGOGiftCard } from '@/shared/egoGift'
@@ -114,7 +114,7 @@ export type StoreBoundComprehensiveGiftSummaryProps = Omit<
 >
 
 export function StoreBoundComprehensiveGiftSummary(props: StoreBoundComprehensiveGiftSummaryProps) {
-  const selectedGiftIds = usePlannerEditorStore((s) => s.comprehensiveGiftIds)
+  const selectedGiftIds = usePlannerStore((s) => s.comprehensiveGiftIds)
 
   return <ComprehensiveGiftSummary {...props} selectedGiftIds={selectedGiftIds} />
 }

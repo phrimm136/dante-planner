@@ -39,8 +39,8 @@ let mockSelectedBuffIds = new Set<number>()
 let mockSelectedKeyword: string | null = null
 let mockSelectedGiftIds = new Set<string>()
 
-vi.mock('../../../stores/usePlannerEditorStore', () => ({
-  usePlannerEditorStore: (selector: (state: Record<string, unknown>) => unknown) => {
+vi.mock('../../../stores/usePlannerStore', () => ({
+  usePlannerStore: (selector: (state: Record<string, unknown>) => unknown) => {
     const mockState = {
       selectedBuffIds: mockSelectedBuffIds,
       selectedGiftKeyword: mockSelectedKeyword,

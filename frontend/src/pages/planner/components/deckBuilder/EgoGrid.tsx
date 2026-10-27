@@ -2,7 +2,7 @@ import { memo, type Ref } from 'react'
 import type { EGOId } from '@/shared/gameData'
 
 import { CARD_MOBILE_SCALE } from '@/lib/constants'
-import { useDeckVisibleCount } from '../../stores/usePlannerEditorStore'
+import { useDeckVisibleCount } from '../../stores/usePlannerStore'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 import { CardSlot, EGO_GEOMETRY } from '@/shared/cardLayout'
 import { EGOCard, EGOSelectedTag } from '@/pages/ego'

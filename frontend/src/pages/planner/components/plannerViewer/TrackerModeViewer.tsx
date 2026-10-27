@@ -1,4 +1,5 @@
 import { Suspense, useState } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { RevealSection } from '../RevealSection'
@@ -16,15 +17,16 @@ import { StartBuffSection } from '../startBuff/StartBuffSection'
 import { StartGiftSummary } from '../startGift/StartGiftSummary'
 import { EGOGiftObservationSummary } from '../egoGift/EGOGiftObservationSummary'
 import { DeckBuilderBlock } from '../deckBuilder/DeckBuilderBlock'
-import { SeasonDeckStoreProvider } from '../../stores/usePlannerEditorStore'
-import { collectOwnedGiftIds } from '../../lib/deckEA'
+import { PlannerStoreProvider, usePlannerStore } from '../../stores/usePlannerStore'
+import { hydrateEditorState } from '../../lib/editorStateCodec'
+import { useIdentityMaxLevel } from '../../hooks/useMirrorDungeonSeason'
 import { SkillReplacementSection } from '../skillReplacement/SkillReplacementSection'
 import { ComprehensiveGiftGridTracker } from './ComprehensiveGiftGridTracker'
 import { ReadOnlyNote } from '@/shared/noteEditor/components/ReadOnlyNote'
 import { HorizontalThemePackGallery } from './HorizontalThemePackGallery'
-import { useTrackerState } from '../../hooks/useTrackerState'
+import { useTrackerDoneMarks } from '../../hooks/useTrackerDoneMarks'
 import { useProgressiveReveal } from '@/components/hooks/useProgressiveReveal'
-import { DEFAULT_SKILL_EA, floorCount as categoryFloorCount } from '@/shared/gameData'
+import { floorCount as categoryFloorCount } from '@/shared/gameData'
 import { isNoteEmpty } from '@/shared/noteEditor'
 import { NOTE_SECTIONS } from './viewerSections'
 import type { NoteSectionId } from './viewerSections'
@@ -35,6 +37,35 @@ const SECTION_COUNT = NOTE_SECTIONS.length
 
 interface TrackerModeViewerProps {
   planner: MDSaveablePlanner
+}
+
+interface TrackerStoreProps {
+  planner: MDSaveablePlanner
+  children: ReactNode
+}
+
+export function TrackerStore({ planner, children }: TrackerStoreProps) {
+  const maxLevel = useIdentityMaxLevel(planner.metadata.contentVersion)
+  const metadata = {
+    title: planner.metadata.title,
+    category: planner.config.category,
+    isPublished: planner.metadata.published ?? false,
+  }
+  const { skillEAState: _plan, ...trackerInitialState } = hydrateEditorState(
+    planner.content,
+    metadata,
+    maxLevel,
+  )
+
+  return (
+    <PlannerStoreProvider
+      key={planner.metadata.id}
+      identityMaxLevel={maxLevel}
+      initialState={trackerInitialState}
+    >
+      {children}
+    </PlannerStoreProvider>
+  )
 }
 
 export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
@@ -51,14 +82,13 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
 
   const [openNote, setOpenNote] = useState<NoteSectionId | null>(null)
 
-  const {
-    state: trackerState,
-    setEquipment,
-    setDeploymentOrder,
-    setCurrentSkillCounts,
-    toggleEgoGiftDoneMark,
-    togglePackDone,
-  } = useTrackerState(content.equipment, content.deploymentOrder)
+  const equipment = usePlannerStore((s) => s.equipment)
+  const setEquipment = usePlannerStore((s) => s.setEquipment)
+  const setDeploymentOrder = usePlannerStore((s) => s.setDeploymentOrder)
+  const skillEAState = usePlannerStore((s) => s.skillEAState)
+  const updateSinnerSkillEA = usePlannerStore((s) => s.updateSinnerSkillEA)
+  const { doneMarks, egoGiftDoneMarks, toggleEgoGiftDoneMark, togglePackDone } =
+    useTrackerDoneMarks()
 
   const deserialized = deserializeSets(
     {
@@ -82,28 +112,13 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
       id: 'deckBuilder',
       node: (
         <Suspense fallback={<DeckGridSkeleton />}>
-          <SeasonDeckStoreProvider mdVersion={planner.metadata.contentVersion}>
-            <DeckBuilderBlock
-              deck={{
-                equipment: trackerState.equipment,
-                setEquipment,
-                deploymentOrder: trackerState.deploymentOrder,
-                setDeploymentOrder,
-              }}
-              ownedGiftIds={collectOwnedGiftIds(deserialized, floorCount)}
-              mdVersion={planner.metadata.contentVersion}
-              onIdentityChange={(sinnerCode) => {
-                setCurrentSkillCounts((prev) => ({
-                  ...prev,
-                  [sinnerCode]: { ...DEFAULT_SKILL_EA },
-                }))
-              }}
-              tracker={{
-                onResetToInitial: handleResetToPreset,
-                onViewNotes: () => setOpenNote('deckBuilder'),
-              }}
-            />
-          </SeasonDeckStoreProvider>
+          <DeckBuilderBlock
+            mdVersion={planner.metadata.contentVersion}
+            tracker={{
+              onResetToInitial: handleResetToPreset,
+              onViewNotes: () => setOpenNote('deckBuilder'),
+            }}
+          />
         </Suspense>
       ),
     },
@@ -157,10 +172,10 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
           fallback={<SkillGridSkeleton title={t('pages.plannerMD.skillReplacement.title')} />}
         >
           <SkillReplacementSection
-            equipment={trackerState.equipment}
+            equipment={equipment}
             plannedEAState={content.skillEAState}
-            currentEAState={trackerState.currentSkillCounts}
-            setSkillEAState={setCurrentSkillCounts}
+            currentEAState={skillEAState}
+            onSinnerSkillEAChange={updateSinnerSkillEA}
             onViewNotes={() => setOpenNote('skillReplacement')}
           />
         </Suspense>
@@ -183,7 +198,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
                   floorCount={floorCount}
                   comprehensiveGiftIds={content.comprehensiveGiftIds}
                   hoveredThemePackId={activeThemePackId}
-                  egoGiftDoneMarks={trackerState.egoGiftDoneMarks}
+                  egoGiftDoneMarks={egoGiftDoneMarks}
                   onToggleEgoGiftDone={toggleEgoGiftDoneMark}
                 />
               </Suspense>
@@ -202,7 +217,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
                 floorSelections={content.floorSelections}
                 floorCount={floorCount}
                 sectionNotes={content.sectionNotes}
-                doneMarks={trackerState.doneMarks}
+                doneMarks={doneMarks}
                 onTogglePackDone={togglePackDone}
                 focusedThemePackId={focusedThemePackId}
                 onFocusToggle={(packId) =>

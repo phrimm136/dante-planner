@@ -10,7 +10,7 @@ import { calculateActiveFilterCount } from '@/shared/filter'
 import { LG_BREAKPOINT_PX } from '@/lib/constants'
 import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
 
-import { useDeckFilterState, useSetDeckFilterState } from '../../stores/usePlannerEditorStore'
+import { useDeckFilterState, useSetDeckFilterState } from '../../stores/usePlannerStore'
 import { FILTER_SET_KEYS, createEmptyFilterSets } from '../../types/DeckTypes'
 
 import type { ComponentType } from 'react'

@@ -6,7 +6,7 @@ import { CardSlot, EGO_GIFT_GEOMETRY, useSlotSizePx } from '@/shared/cardLayout'
 import { EmptyStatePlaceholder } from '@/components/feedback/EmptyStatePlaceholder'
 import { GIFT_ROW_PADDING_PX, giftRowMinHeightPx } from '../../lib/cardLayout'
 import { cn } from '@/lib/utils'
-import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
+import { usePlannerStore } from '../../stores/usePlannerStore'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { StarlightCostDisplay } from '../StarlightCostDisplay'
 import { StartBuffMiniCard } from './StartBuffMiniCard'
@@ -97,7 +97,7 @@ export function StartBuffSection({
 export type StoreBoundStartBuffSectionProps = Omit<StartBuffSectionProps, 'selectedBuffIds'>
 
 export function StoreBoundStartBuffSection(props: StoreBoundStartBuffSectionProps) {
-  const selectedBuffIds = usePlannerEditorStore((s) => s.selectedBuffIds)
+  const selectedBuffIds = usePlannerStore((s) => s.selectedBuffIds)
 
   return <StartBuffSection {...props} selectedBuffIds={selectedBuffIds} />
 }

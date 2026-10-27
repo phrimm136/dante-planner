@@ -4,10 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { ErrorBoundary } from '@/components/feedback/ErrorBoundary'
 import { PlannerNotFound } from '@/components/feedback/PlannerNotFound'
-import {
-  PlannerEditorStoreProvider,
-  createDefaultSectionNotes,
-} from './stores/usePlannerEditorStore'
+import { PlannerStoreProvider, createDefaultSectionNotes } from './stores/usePlannerStore'
 import { deserializeSets } from './schemas/PlannerSchemas'
 import { PlannerEditEditor, editorSessionFor } from './components/planner/PlannerEditEditor'
 import { PlannerViewerSkeleton } from './components/plannerSkeletons'
@@ -15,7 +12,7 @@ import { useSavedPlannerQuery } from './hooks/useSavedPlannerQuery'
 import { useIdentityMaxLevel } from './hooks/useMirrorDungeonSeason'
 import { isMDPlanner } from './types/PlannerTypes'
 import type { FloorThemeSelection } from '@/pages/themePack'
-import type { PlannerEditorState } from './stores/usePlannerEditorStore'
+import type { PlannerStoreState } from './stores/usePlannerStore'
 import type { MDSaveablePlanner } from './types/PlannerTypes'
 import { PLANNER_CONFIG, SECTION_STYLES } from '@/lib/constants'
 
@@ -64,7 +61,7 @@ function PlannerEditContent({ id }: { id: string }) {
   const { content } = planner
   const deserialized = deserializeSets(content, planner.config.category)
 
-  const initialState: Partial<PlannerEditorState> = {
+  const initialState: Partial<PlannerStoreState> = {
     title: planner.metadata.title,
     category: planner.config.category,
     isPublished: planner.metadata.published ?? false,
@@ -101,15 +98,15 @@ function PlannerEditStore({
   initialState,
 }: {
   planner: MDSaveablePlanner
-  initialState: Partial<PlannerEditorState>
+  initialState: Partial<PlannerStoreState>
 }) {
   const identityMaxLevel = useIdentityMaxLevel(
     editorSessionFor(planner, PLANNER_CONFIG.mdCurrentVersion).contentVersion,
   )
 
   return (
-    <PlannerEditorStoreProvider identityMaxLevel={identityMaxLevel} initialState={initialState}>
+    <PlannerStoreProvider identityMaxLevel={identityMaxLevel} initialState={initialState}>
       <PlannerEditEditor planner={planner} />
-    </PlannerEditorStoreProvider>
+    </PlannerStoreProvider>
   )
 }

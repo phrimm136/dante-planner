@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { PlannerViewer } from '../PlannerViewer'
@@ -36,6 +37,7 @@ vi.mock('../TrackerModeViewer', () => ({
   TrackerModeViewer: ({ planner }: { planner: SaveablePlanner }) => (
     <div data-testid="tracker-mode-viewer">Tracker Mode - Planner ID: {planner.metadata.id}</div>
   ),
+  TrackerStore: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
 
 describe('PlannerViewer', () => {

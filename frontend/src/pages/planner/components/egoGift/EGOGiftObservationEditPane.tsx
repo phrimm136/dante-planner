@@ -7,7 +7,7 @@ import { encodeGiftSelection } from '@/pages/egoGift'
 import type { EGOGiftId } from '@/shared/gameData'
 import { useCappedSelection } from '../../hooks/useCappedSelection'
 import { maxObservableGifts } from '../../lib/observationGifts'
-import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
+import { usePlannerStore } from '../../stores/usePlannerStore'
 import type { EGOGiftEntity } from '@/shared/egoGift'
 import type { SortMode } from '@/shared/filter'
 import { EGOGiftFilterBar } from '@/pages/egoGift'
@@ -29,10 +29,10 @@ export function EGOGiftObservationEditPane({
   onOpenChange,
   mdVersion,
 }: EGOGiftObservationEditPaneProps) {
-  const selectedGiftIds = usePlannerEditorStore((s) => s.observationGiftIds)
-  const setObservationGiftIds = usePlannerEditorStore((s) => s.setObservationGiftIds)
-  const comprehensiveGiftIds = usePlannerEditorStore((s) => s.comprehensiveGiftIds)
-  const setComprehensiveGiftIds = usePlannerEditorStore((s) => s.setComprehensiveGiftIds)
+  const selectedGiftIds = usePlannerStore((s) => s.observationGiftIds)
+  const setObservationGiftIds = usePlannerStore((s) => s.setObservationGiftIds)
+  const comprehensiveGiftIds = usePlannerStore((s) => s.comprehensiveGiftIds)
+  const setComprehensiveGiftIds = usePlannerStore((s) => s.setComprehensiveGiftIds)
   const { t } = useTranslation(['planner', 'common'])
 
   const { data: observationData } = useEGOGiftObservationData(mdVersion)

@@ -25,12 +25,12 @@ vi.mock('react-i18next', () => ({
 vi.mock('../hooks/useSavedPlannerQuery')
 
 vi.mock('../components/planner/PlannerEditEditor', async (importOriginal) => {
-  const { usePlannerEditorStore } = await import('../stores/usePlannerEditorStore')
+  const { usePlannerStore } = await import('../stores/usePlannerStore')
   return {
     ...(await importOriginal<typeof import('../components/planner/PlannerEditEditor')>()),
     PlannerEditEditor: ({ planner }: { planner?: SaveablePlanner }) => {
-      const reset = usePlannerEditorStore((s) => s.reset)
-      const level = usePlannerEditorStore((s) => s.equipment['1']?.identity.level)
+      const reset = usePlannerStore((s) => s.reset)
+      const level = usePlannerStore((s) => s.equipment['1']?.identity.level)
       return (
         <div data-testid="editor-content">
           EditEditor - Planner ID: {planner?.metadata.id || 'none'}

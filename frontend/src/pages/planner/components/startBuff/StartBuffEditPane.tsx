@@ -10,7 +10,7 @@ import { startBuffSlotSize } from '../../lib/startBuffCardLayout'
 import { useStartBuffCardLayout } from '../../hooks/useStartBuffCardLayout'
 import { getStartBuffEnhancementIconPath } from '@/shared/assets'
 import { useStartBuffSelection } from '../../hooks/useStartBuffSelection'
-import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
+import { usePlannerStore } from '../../stores/usePlannerStore'
 import { createBuffId, deriveEnhancements, getBaseIdFromBuffId } from '@/shared/gameText'
 import type { EnhancementLevel } from '@/shared/gameText'
 import { StarlightCostDisplay } from '../StarlightCostDisplay'
@@ -25,8 +25,8 @@ interface StartBuffEditPaneProps {
 export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEditPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  const selectedBuffIds = usePlannerEditorStore((s) => s.selectedBuffIds)
-  const setSelectedBuffIds = usePlannerEditorStore((s) => s.setSelectedBuffIds)
+  const selectedBuffIds = usePlannerStore((s) => s.selectedBuffIds)
+  const setSelectedBuffIds = usePlannerStore((s) => s.setSelectedBuffIds)
 
   const { buffs, i18n, battleKeywords, displayBuffs, handleSelect } = useStartBuffSelection(
     mdVersion,

@@ -3,7 +3,7 @@ import { useEffect, useState, type Ref } from 'react'
 import { SECTION_STYLES } from '@/lib/constants'
 import { scheduleIdle } from '@/lib/scheduleIdle'
 
-import { usePlannerEditorStoreApiSafe } from '../../stores/usePlannerEditorStore'
+import { usePlannerStoreApiSafe } from '../../stores/usePlannerStore'
 import type { EntityMode, ThreadspinTier, UptieTier } from '../../types/DeckTypes'
 import type { EGOId, IdentityId } from '@/shared/gameData'
 import type { IdentityEntity } from '@/pages/identity'
@@ -52,7 +52,7 @@ export function DeckCatalogSection({
   // Inactive grid renders nothing until after first paint; latches true until close
   const [hasWarmedInactive, setHasWarmedInactive] = useState(false)
 
-  const storeApi = usePlannerEditorStoreApiSafe()
+  const storeApi = usePlannerStoreApiSafe()
 
   // Reset progressive state on unmount so the next mount starts cold.
   // Doing this on unmount (not on mount) ensures the next mount's first

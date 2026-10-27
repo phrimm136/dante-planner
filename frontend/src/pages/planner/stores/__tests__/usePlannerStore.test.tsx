@@ -1,22 +1,29 @@
 /**
- * usePlannerEditorStore.test.tsx
+ * usePlannerStore.test.tsx
  *
  * Characterization (golden-master) tests for the planner editor Zustand store.
  * Pins CURRENT observable behavior of the public actions and the Set<->array
  * serialization edges in initializeFromPlanner / getPlannerState. No mocks:
- * the store is vanilla Zustand, so it is driven directly via createPlannerEditorStore().
+ * the store is vanilla Zustand, so it is driven directly via createPlannerStore().
  */
 
 import { describe, it, expect, assert } from 'vitest'
+import { renderHook } from '@testing-library/react'
+import type { ReactNode } from 'react'
 import {
-  createPlannerEditorStore,
+  PlannerStoreProvider,
+  useStoreOwnedGiftIds,
+  createPlannerStore,
   createDefaultEquipment,
   createDefaultSkillEAState,
   createDefaultFloorSelections,
   createDefaultDeckFilterState,
-} from '../usePlannerEditorStore'
+} from '../usePlannerStore'
 import { createEmptyNoteContent } from '@/shared/noteEditor'
-import { DUNGEON_IDX } from '@/shared/gameData'
+import { DUNGEON_IDX, floorCount } from '@/shared/gameData'
+import { hydrateEditorState } from '../../lib/editorStateCodec'
+import { collectOwnedGiftIds } from '../../lib/deckEA'
+import { deserializeSets } from '../../schemas/PlannerSchemas'
 import type { MDPlannerContent } from '../../types/PlannerTypes'
 import type { SinnerEquipment, SkillEAState } from '../../types/DeckTypes'
 import { ThemePackIdSchema } from '@/shared/gameData'
@@ -29,10 +36,10 @@ const IDENTITY_10101 = asIdentityId('10101')
 const IDENTITY_10199 = asIdentityId('10199')
 const IDENTITY_X = asIdentityId('11298')
 
-describe('usePlannerEditorStore', () => {
+describe('usePlannerStore', () => {
   describe('initial state', () => {
     it('starts with default equipment, skill EA, floor selections, and empty cold fields', () => {
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
       const s = store.getState()
 
       expect(s.equipment).toEqual(createDefaultEquipment(60))
@@ -49,7 +56,7 @@ describe('usePlannerEditorStore', () => {
     })
 
     it('applies initial-state overrides over defaults', () => {
-      const store = createPlannerEditorStore(60, {
+      const store = createPlannerStore(60, {
         title: 'Preset',
         category: '15F',
         isPublished: true,
@@ -68,7 +75,7 @@ describe('usePlannerEditorStore', () => {
 
   describe('equipment actions', () => {
     it('setEquipment replaces the whole equipment map', () => {
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
       const replacement: Record<string, SinnerEquipment> = {
         '1': { identity: { id: IDENTITY_10101, uptie: 4, level: 50 }, egos: {} },
       }
@@ -79,7 +86,7 @@ describe('usePlannerEditorStore', () => {
     })
 
     it('setEquipment accepts an updater function', () => {
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
 
       store.getState().setEquipment((prev) => ({
         ...prev,
@@ -93,7 +100,7 @@ describe('usePlannerEditorStore', () => {
     })
 
     it('updateSinnerEquipment replaces a single sinner entry without dropping others', () => {
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
       const before = store.getState().equipment
       const next: SinnerEquipment = {
         identity: { id: IDENTITY_10199, uptie: 4, level: 1 },
@@ -110,7 +117,7 @@ describe('usePlannerEditorStore', () => {
 
   describe('floor selection actions', () => {
     it('setFloorSelections replaces the array', () => {
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
       const selections = createDefaultFloorSelections('5F')
 
       store.getState().setFloorSelections(selections)
@@ -119,7 +126,7 @@ describe('usePlannerEditorStore', () => {
     })
 
     it('updateFloorSelection replaces a single floor by index', () => {
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
       const updated = {
         themePackId: ThemePackIdSchema.parse('1001'),
         difficulty: DUNGEON_IDX.HARD,
@@ -138,7 +145,7 @@ describe('usePlannerEditorStore', () => {
 
   describe('deployment order action', () => {
     it('setDeploymentOrder replaces the array', () => {
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
 
       store.getState().setDeploymentOrder([2, 0, 1])
 
@@ -148,7 +155,7 @@ describe('usePlannerEditorStore', () => {
 
   describe('warm + cold state setters', () => {
     it('setSelectedKeywords / setComprehensiveGiftIds store Set instances as-is', () => {
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
       const keywords = new Set(['k1', 'k2'])
       const gifts = new Set([ENCODED_9001])
 
@@ -160,7 +167,7 @@ describe('usePlannerEditorStore', () => {
     })
 
     it('setSelectedGiftKeyword accepts null', () => {
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
 
       store.getState().setSelectedGiftKeyword('fire')
       expect(store.getState().selectedGiftKeyword).toBe('fire')
@@ -170,7 +177,7 @@ describe('usePlannerEditorStore', () => {
     })
 
     it('setDeckVisibleCount accepts a value and an updater', () => {
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
 
       store.getState().setDeckVisibleCount(20)
       expect(store.getState().deckVisibleCount).toBe(20)
@@ -180,7 +187,7 @@ describe('usePlannerEditorStore', () => {
     })
 
     it('a fresh planner switched to 10F defaults every floor to HARD', () => {
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
 
       store.getState().setCategory('10F')
 
@@ -193,7 +200,7 @@ describe('usePlannerEditorStore', () => {
     })
 
     it('a category change keeps the difficulty of floors that hold a pack', () => {
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
       store.getState().updateFloorSelection(0, {
         themePackId: ThemePackIdSchema.parse('1001'),
         difficulty: DUNGEON_IDX.NORMAL,
@@ -210,7 +217,7 @@ describe('usePlannerEditorStore', () => {
     })
 
     it('setTitle / setCategory / setIsPublished update cold state', () => {
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
 
       store.getState().setTitle('My Plan')
       store.getState().setCategory('10F')
@@ -223,7 +230,7 @@ describe('usePlannerEditorStore', () => {
     })
 
     it('updateSinnerSkillEA replaces a single sinner skill entry', () => {
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
       const next: SkillEAState = { 0: 4, 1: 1, 2: 1 }
 
       store.getState().updateSinnerSkillEA('1', next)
@@ -232,7 +239,7 @@ describe('usePlannerEditorStore', () => {
     })
 
     it('updateSectionNote replaces a single section note', () => {
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
       const note = { content: { type: 'doc', content: [] } }
 
       store.getState().updateSectionNote('intro', note)
@@ -267,7 +274,7 @@ describe('usePlannerEditorStore', () => {
     }
 
     it('converts serialized arrays into Set instances', () => {
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
 
       store
         .getState()
@@ -289,7 +296,7 @@ describe('usePlannerEditorStore', () => {
     })
 
     it('falls back to defaults when array fields are missing or non-arrays', () => {
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
 
       store.getState().initializeFromPlanner(
         makeContent({
@@ -309,7 +316,7 @@ describe('usePlannerEditorStore', () => {
     })
 
     it('backfills missing section-note keys from defaults and overrides supplied keys', () => {
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
       const defaultEmpty = createEmptyNoteContent()
 
       store.getState().initializeFromPlanner(
@@ -332,7 +339,7 @@ describe('usePlannerEditorStore', () => {
     it('resets deckFilterState to the default regardless of prior value', () => {
       // Warning: initializeFromPlanner hard-resets deckFilterState (no content field
       // feeds it); a non-default filter set before hydrate is discarded.
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
       store.getState().setDeckFilterState({
         ...createDefaultDeckFilterState(),
         entityMode: 'ego',
@@ -350,7 +357,7 @@ describe('usePlannerEditorStore', () => {
 
   describe('getPlannerState (Set round-trip)', () => {
     it('returns Set instances and the live state fields', () => {
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
       store.getState().setSelectedKeywords(new Set(['k1']))
       store.getState().setTitle('Round Trip')
 
@@ -364,7 +371,7 @@ describe('usePlannerEditorStore', () => {
     })
 
     it('preserves floorSelections[i].giftIds as a Set with the original ids', () => {
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
       store.getState().updateFloorSelection(2, {
         themePackId: ThemePackIdSchema.parse('1002'),
         difficulty: DUNGEON_IDX.HARD,
@@ -382,7 +389,7 @@ describe('usePlannerEditorStore', () => {
 
   describe('reset', () => {
     it('restores defaults after mutations', () => {
-      const store = createPlannerEditorStore(60)
+      const store = createPlannerStore(60)
       store.getState().setTitle('Dirty')
       store.getState().setDeploymentOrder([5, 4, 3])
       store.getState().setComprehensiveGiftIds(new Set([ENCODED_9001]))
@@ -394,6 +401,46 @@ describe('usePlannerEditorStore', () => {
       expect(s.deploymentOrder).toEqual([])
       expect(s.comprehensiveGiftIds.size).toBe(0)
       expect(s.equipment).toEqual(createDefaultEquipment(60))
+    })
+  })
+
+  describe('useStoreOwnedGiftIds', () => {
+    it('agrees with the owned gifts derived from the saved content', () => {
+      const content = {
+        selectedKeywords: [],
+        selectedBuffIds: [],
+        selectedGiftKeyword: null,
+        selectedGiftIds: [asEncodedGiftId('9001'), asEncodedGiftId('9002')],
+        observationGiftIds: [asEncodedGiftId('9003')],
+        comprehensiveGiftIds: [asEncodedGiftId('9004'), ENCODED_9005],
+        equipment: createDefaultEquipment(60),
+        deploymentOrder: [0, 1],
+        skillEAState: createDefaultSkillEAState(),
+        floorSelections: Array.from({ length: 15 }, (_, i) => ({
+          themePackId: ThemePackIdSchema.parse(String(1001 + i)),
+          difficulty: DUNGEON_IDX.NORMAL,
+          giftIds: [asEncodedGiftId(String(9100 + i))],
+        })),
+        sectionNotes: {},
+      } as unknown as MDPlannerContent
+      const metadata = { title: 'Owned', category: '5F' as const, isPublished: false }
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <PlannerStoreProvider
+          identityMaxLevel={60}
+          initialState={hydrateEditorState(content, metadata, 60)}
+        >
+          {children}
+        </PlannerStoreProvider>
+      )
+
+      const { result } = renderHook(() => useStoreOwnedGiftIds(), { wrapper })
+
+      const expected = collectOwnedGiftIds(
+        deserializeSets(content, metadata.category),
+        floorCount(metadata.category),
+      )
+      expect(result.current).toEqual(expected)
+      expect(result.current.size).toBe(10)
     })
   })
 })

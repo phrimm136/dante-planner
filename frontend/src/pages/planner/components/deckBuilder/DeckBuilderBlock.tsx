@@ -1,10 +1,14 @@
 import { Suspense, startTransition, useState } from 'react'
 
-import type { EGOGiftId } from '@/shared/gameData'
-import { useDeckFilterState, usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
+import { DEFAULT_SKILL_EA } from '@/shared/gameData'
+import {
+  useDeckFilterState,
+  usePlannerStore,
+  useStoreDeck,
+  useStoreOwnedGiftIds,
+} from '../../stores/usePlannerStore'
 import { DeckGridSkeleton } from '../plannerSkeletons'
 import { DeckBuilderContent } from './DeckBuilderContent'
-import type { DeckBuilderDeck } from '../../types/DeckTypes'
 import { DeckBuilderPane } from './DeckBuilderPane'
 import { DeckBuilderSummary } from './DeckBuilderSummary'
 import { DeckCodeTransfer } from './DeckCodeTransfer'
@@ -15,23 +19,17 @@ export interface TrackerExtras {
 }
 
 export interface DeckBuilderBlockProps {
-  deck: DeckBuilderDeck
-  ownedGiftIds: ReadonlySet<EGOGiftId>
   mdVersion: number
-  onIdentityChange?: ((sinnerCode: string) => void) | undefined
   tracker?: TrackerExtras | undefined
 }
 
-export function DeckBuilderBlock({
-  deck,
-  ownedGiftIds,
-  mdVersion,
-  onIdentityChange,
-  tracker,
-}: DeckBuilderBlockProps) {
+export function DeckBuilderBlock({ mdVersion, tracker }: DeckBuilderBlockProps) {
   const [paneOpen, setPaneOpen] = useState(false)
+  const deck = useStoreDeck()
+  const ownedGiftIds = useStoreOwnedGiftIds()
+  const updateSinnerSkillEA = usePlannerStore((s) => s.updateSinnerSkillEA)
   const filterState = useDeckFilterState()
-  const maxLevel = usePlannerEditorStore((s) => s.identityMaxLevel)
+  const maxLevel = usePlannerStore((s) => s.identityMaxLevel)
 
   const handleToggleDeploy = (sinnerIndex: number) => {
     const currentIndex = deck.deploymentOrder.indexOf(sinnerIndex)
@@ -92,7 +90,9 @@ export function DeckBuilderBlock({
                 onImport={onImport}
                 onExport={onExport}
                 onResetOrder={handleResetOrder}
-                {...(onIdentityChange !== undefined && { onIdentityChange })}
+                onIdentityChange={(sinnerCode) => {
+                  updateSinnerSkillEA(sinnerCode, { ...DEFAULT_SKILL_EA })
+                }}
               />
             </DeckBuilderPane>
           </Suspense>

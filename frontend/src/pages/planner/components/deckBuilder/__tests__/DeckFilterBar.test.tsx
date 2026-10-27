@@ -13,15 +13,12 @@ import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import { DeckFilterBar } from '../DeckFilterBar'
-import {
-  PlannerEditorStoreProvider,
-  usePlannerEditorStoreApi,
-} from '../../../stores/usePlannerEditorStore'
+import { PlannerStoreProvider, usePlannerStoreApi } from '../../../stores/usePlannerStore'
 import { SEASONS } from '@/shared/gameData'
 
 import type { ReactNode } from 'react'
 import type { StoreApi } from 'zustand'
-import type { PlannerEditorStore } from '../../../stores/usePlannerEditorStore'
+import type { PlannerStore } from '../../../stores/usePlannerStore'
 
 // i18n: return fallback text if provided, otherwise the key
 vi.mock('react-i18next', async (importOriginal) => {
@@ -59,8 +56,8 @@ vi.mock('@/components/hooks/use-is-breakpoint', () => ({
  * Captures the store API from within the provider so tests can read/write
  * filter state without rendering the deck builder's heavy children.
  */
-function StoreCapture({ onReady }: { onReady: (api: StoreApi<PlannerEditorStore>) => void }) {
-  const api = usePlannerEditorStoreApi()
+function StoreCapture({ onReady }: { onReady: (api: StoreApi<PlannerStore>) => void }) {
+  const api = usePlannerStoreApi()
   onReady(api)
   return null
 }
@@ -69,18 +66,18 @@ function renderWithStore(ui: ReactNode) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
-  let storeApi: StoreApi<PlannerEditorStore> | null = null
+  let storeApi: StoreApi<PlannerStore> | null = null
 
   const utils = render(
     <QueryClientProvider client={queryClient}>
-      <PlannerEditorStoreProvider identityMaxLevel={60}>
+      <PlannerStoreProvider identityMaxLevel={60}>
         <StoreCapture
           onReady={(api) => {
             storeApi = api
           }}
         />
         {ui}
-      </PlannerEditorStoreProvider>
+      </PlannerStoreProvider>
     </QueryClientProvider>,
   )
 
@@ -88,7 +85,7 @@ function renderWithStore(ui: ReactNode) {
     throw new Error('Store API was not captured')
   }
 
-  return { ...utils, storeApi: storeApi as StoreApi<PlannerEditorStore> }
+  return { ...utils, storeApi: storeApi as StoreApi<PlannerStore> }
 }
 
 describe('DeckFilterBar', () => {
