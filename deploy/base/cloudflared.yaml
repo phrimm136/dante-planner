@@ -47,7 +47,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: cloudflared
-          image: cloudflare/cloudflared:2026.7.3
+          image: cloudflare/cloudflared:2026.10.4
           args:
             - tunnel
             - --no-autoupdate
