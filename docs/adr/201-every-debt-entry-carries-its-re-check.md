@@ -7,10 +7,10 @@ epic: none · pr: none
   and 1 when it is gone; any other exit, or a run past 5 s, marks the command as broken. An entry
   starts at a line beginning `- ` and ends before the next `- `, `## ` or the end of the file;
   `## ` headings only group entries. The command runs from the repository root with `sh -c` and
-  uses read-only tools only (rg, test, git ls-files, git log, jq, the ledger CLI's absent and python
-  commands, shell builtins);
-  gradle, yarn, docker and the network are forbidden, and an absence is checked with the ledger
-  CLI's `absent` command (0 nothing matched, 1 matched, 2 path missing). The old prose form
+  uses read-only tools only: rg, test, `[`, git, jq, awk, true, false and the ledger CLI's absent
+  and python commands; a clause that starts with anything else is malformed. Gradle, yarn,
+  docker and the network are forbidden, and an absence is checked with the ledger CLI's `absent`
+  command (0 nothing matched, 1 matched, 2 path missing). The old prose form
   ("Re-check: … prints nothing") is replaced, never kept beside the line. Without the line, no
   machine can ask whether an entry still holds, so deletions happened only in rare hand sweeps
   and the ledger grew between them.
@@ -51,11 +51,13 @@ epic: none · pr: none
   after the fact.
   REJECTED: a `sys.excepthook` prefix on every `python3 -c` body — a convention each author can
   forget, and a syntax error exits 1 before the hook is set.
-  INVARIANT: no re-check line negates rg or names a python interpreter outside the CLI's
-  `python` command (`rg -c '! rg|(^|[^/])python'` over the re-check lines finds only that
-  command) — `debt doctor`, which counts such lines as `malformed`, names each
-  entry and exits 1, and the pre-commit hook, which refuses a staged ledger whose `malformed`
-  count is not zero.
+  INVARIANT: no re-check line negates rg, and every clause of a re-check command (split on
+  `&&`, `||`, `;` and `|`, with each `$(…)` a clause of its own) starts with an allowed tool:
+  rg, test, `[`, git, jq, awk, true, false or the ledger CLI — `debt doctor`, which counts
+  every other line as `malformed`, names each entry and exits 1, and the pre-commit hook, which
+  refuses a staged ledger whose `malformed` count is not zero.
+  NON-GOAL: recursing into an allowed tool's arguments (awk's `system()`, git aliases) — the
+  allowlist bounds the first word of each clause only.
 
 ## Takeaway
 - takeaway: a record that cannot be asked by a machine whether it is still true is only pruned
