@@ -42,6 +42,17 @@ epic: none · pr: none · supersedes: none
   lock out, refusing a dirty or ahead checkout and naming `static lock` as the next action).
   REJECTED: a paragraph in a runbook — the mismatch it describes is the one a human forgets to
   check.
+- @static @pages — Cloudflare Pages fetches the data itself: its build command runs
+  `frontend/scripts/fetch-static.sh`, which turns `static.lock` into a real directory at
+  `<repo>/static` with a read-only token from the Pages environment, before the frontend build.
+  Pages builds from its own git integration, so it has no data checkout, and without one the
+  build stops at the lock check. Re-check: in a checkout without `static`, `static check` exits 2
+  with `no data checkout at …/static`, and `vite build` fails with that line.
+  REJECTED: a public data repository — the data repository stays private.
+  REJECTED: moving the frontend deploy into the fleet deploy workflow now — that move belongs to
+  the server-rendering change, and the script is the seam it reuses.
+  INVARIANT: the token never appears in build output; the script never prints the URL that
+  carries it — unenforced.
 
 ## Takeaway
 - takeaway: keep the path, change what sits at it; pin by a value the review sees, not by a
