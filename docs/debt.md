@@ -1210,7 +1210,7 @@ two have silently never paged.
   drops the inner error. Worth one more spike (a single-project vitest config for Stryker,
   or a sandbox that carries `../static`) when the PIT ratchet has shown its value on the
   backend; until then under-assertion on the frontend is unmeasured.
-  re-check: `! git ls-files | rg -qi stryker && rg -q 'projects: \[' frontend/vite.config.ts`
+  re-check: `test -z "$(git ls-files | rg -i stryker)" && rg -q 'projects: \[' frontend/vite.config.ts`
 - Three full-run-only failures never reproduced across isolated, `taskset -c 0`, neighbour-combo and
   eight full runs (2026-09-29..10-04): `SseFanoutIT` (a JDBC SSL communications error: MySQL
   connection SSL handshake failure during setup, not the fan-out under test; SSL stays on because
@@ -1420,7 +1420,7 @@ two have silently never paged.
   checked in a real browser, where no synchronous `act()` flush starves the fetch. Worth doing when
   a user reports a frozen EGO detail page after switching tiers during load: reproduce in Chromium
   with throttled static-data requests.
-  re-check: `rg -q 'prefetchDescriptionData' frontend/src/pages/ego/__tests__/EGODetailPage.parity.test.tsx && ! git ls-files e2e | rg -qi ego`
+  re-check: `rg -q 'prefetchDescriptionData' frontend/src/pages/ego/__tests__/EGODetailPage.parity.test.tsx && test -z "$(git ls-files e2e | rg -i ego)"`
 - `tsc --noEmit -p e2e/tsconfig.json` reports 35 TS6142 errors ("`--jsx` is not set"):
   `e2e/tests/schema-portability.contract.spec.ts` imports `PlannerSchemas`, which reaches the barrels
   `pages/themePack/index.ts` and `shared/filter/index.ts` through `editorStateCodec`, and those
@@ -1545,3 +1545,9 @@ two have silently never paged.
   find the file that was running from the log and either split it or raise the worker heap
   (`pr-gate.yml` NODE_OPTIONS) with the measurement that justifies it.
   re-check: `rg -qF '"test:coverage": "NODE_OPTIONS=--max-old-space-size=4096 vitest run --coverage"' frontend/package.json`
+- Three re-check lines assert that no tracked file name matches a pattern through
+  `test -z "$(git ls-files … | rg -i …)"`, which reads HOLDS when `git ls-files` or `rg` fails or
+  the path is gone, the same blind spot `absent` closed for file contents. Worth doing when a
+  fourth such line is written: give the ledger CLI an `untracked <pathspec> <rg args>` sibling of
+  `absent` with the 0/1/2 polarity and rewrite those lines to it.
+  re-check: `test "$(rg -c '^  re-check:.*test -z "\$\(git ls-files' docs/debt.md)" = 3`
