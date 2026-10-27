@@ -16,13 +16,12 @@ const REMOVED_COPY = 'This planner was removed on another device'
 const RECONNECT_WINDOW_MS = COMMENT_SSE_CONNECTION.MAX_DELAY + COMMENT_SSE_CONNECTION.MAX_JITTER
 
 /** Budget for the post-drop reconnect, which backs off and carries up to 5s of jitter. */
-const STREAM_GONE_DEADLINE_MS = 30_000
 
 test.describe.configure({ timeout: 120_000 })
 
 test.afterAll(closeSeedPool)
 
-test('a stream whose planner was deleted reports gone once and stops reconnecting', async ({
+test('a planner deleted under an open stream comes back as removed and opens no stream again', async ({
   page,
   baseURL,
 }) => {
@@ -56,18 +55,10 @@ test('a stream whose planner was deleted reports gone once and stops reconnectin
     const droppedAt = streamStatuses.length
     await page.reload({ waitUntil: 'domcontentloaded' })
 
-    await becomesTrue(async () => streamStatuses.includes(404), {
-      deadlineMs: STREAM_GONE_DEADLINE_MS,
-      what: 'the reconnect reading the planner as gone',
-    })
-    // The page's own heading carries the same copy, so the toast is read as the list item sonner
-    // renders it in.
-    const toast = page.getByRole('listitem').filter({ hasText: REMOVED_COPY })
-    await expect(toast).toBeVisible({ timeout: 20_000 })
-
-    // Either recovery may win the race: the query refetch that tears the stream down, or the
-    // reconnect that reads the planner as gone. Both leave the same trace — the stream learns it
-    // is gone at most once, and never reads anything else afterwards.
+    // The planner query reads the planner as removed and the page shows that state instead of
+    // the thread, so no stream is opened for a gone planner; at most one connect may race the
+    // query and read 404, and nothing else is ever read.
+    await expect(page.getByRole('heading', { name: REMOVED_COPY })).toBeVisible({ timeout: 20_000 })
     await page.waitForTimeout(RECONNECT_WINDOW_MS)
     const afterDrop = streamStatuses.slice(droppedAt)
     expect(afterDrop.filter((status) => status !== 404)).toEqual([])

@@ -1497,8 +1497,11 @@ two have silently never paged.
   hand-style a `<textarea>` against `components/ui/CLAUDE.md`. Worth doing when either is next
   touched: add the shadcn textarea and use it in both.
 - No code completes a planner's comment-stream emitters when the planner is deleted; the stream
-  lingers until the 1 h timeout and the e2e spec has to force the drop with a reload. ADR 183
-  @comments @visibility implies the delete effect should end the stream, after which the client's
-  reconnect reads 404 on its own. Worth doing when the comment stream is next touched.
+  lingers until the 1 h timeout, and the e2e spec pins only what the client does today (a gone
+  planner opens no stream). ADR 183 @comments @visibility implies the removal should end the
+  stream. Streams live on every pod, so an AFTER_COMMIT listener on the committing pod is not
+  enough: the removal needs a `domain_events` row, a dispatcher arm and an SSE envelope that each
+  pod's `PlannerCommentSseService.deliver` turns into `complete()` on that planner's emitters
+  (backend CLAUDE.md:15). Re-check: `rg -n "complete\(\)" backend/src/main/java/org/danteplanner/backend/comment` prints nothing. Worth doing as its own unit; the e2e spec then regains the open-stream incident.
 - After PR #322 deploys: `write_forwarding` goes probe → all (ADR 123), the POST `/batch` handler
   and the top-level `selectedKeywords` copy wait for seven days of zero counters (entries above).
