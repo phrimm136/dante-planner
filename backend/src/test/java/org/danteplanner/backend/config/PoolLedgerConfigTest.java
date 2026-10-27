@@ -28,6 +28,9 @@ class PoolLedgerConfigTest {
         assertThat(primaryHittingLoad)
                 .as("connections reaching the primary: %d", primaryHittingLoad)
                 .isLessThanOrEqualTo(usableConnections);
+        assertThat(primaryHittingLoad)
+                .as("documented budget total of 42 connections reaching the primary")
+                .isEqualTo(42);
     }
 
     @Test
