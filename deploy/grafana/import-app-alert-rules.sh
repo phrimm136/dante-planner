@@ -30,8 +30,10 @@ if [ -z "${LOKI_DS_UID:-}" ]; then
   datasources=$(curl -s -w '\n%{http_code}' "${auth[@]}" "${GRAFANA_URL}/api/datasources") || datasources=$'\n000'
   code=${datasources##*$'\n'}
   [ "$code" = 200 ] || { echo "listing datasources failed (HTTP ${code}) — re-run with LOKI_DS_UID=<uid of the Loki datasource>"; exit 1; }
-  LOKI_DS_UID=$(printf '%s' "${datasources%$'\n'*}" | jq -r '[.[] | select(.type=="loki")][0].uid // empty')
-  [ -n "$LOKI_DS_UID" ] || { echo "no datasource of type loki found — re-run with LOKI_DS_UID=<uid of the Loki datasource>"; exit 1; }
+  mapfile -t lokis < <(printf '%s' "${datasources%$'\n'*}" | jq -r '.[] | select(.type=="loki") | "\(.name)=\(.uid)"')
+  [ "${#lokis[@]}" -gt 0 ] || { echo "no datasource of type loki found — re-run with LOKI_DS_UID=<uid of the Loki datasource>"; exit 1; }
+  [ "${#lokis[@]}" -eq 1 ] || { echo "${#lokis[@]} datasources of type loki found (${lokis[*]}) — set LOKI_DS_UID=<uid of the logs datasource>" >&2; exit 1; }
+  LOKI_DS_UID=${lokis[0]##*=}
 fi
 echo "   loki datasource uid: ${LOKI_DS_UID}"
 
