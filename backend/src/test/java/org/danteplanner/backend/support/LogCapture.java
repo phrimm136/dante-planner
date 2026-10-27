@@ -3,6 +3,7 @@ package org.danteplanner.backend.support;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Predicate;
 
 import org.slf4j.LoggerFactory;
 
@@ -13,19 +14,20 @@ import ch.qos.logback.core.AppenderBase;
 
 public final class LogCapture implements AutoCloseable {
 
-    private final Thread owner = Thread.currentThread();
+    private final Predicate<ILoggingEvent> keeps;
     private final List<Logger> loggers;
     private final List<ILoggingEvent> events = new CopyOnWriteArrayList<>();
     private final AppenderBase<ILoggingEvent> appender = new AppenderBase<>() {
         @Override
         protected void append(ILoggingEvent event) {
-            if (Thread.currentThread() == owner) {
+            if (keeps.test(event)) {
                 events.add(event);
             }
         }
     };
 
-    private LogCapture(Class<?>... loggerOwners) {
+    private LogCapture(Predicate<ILoggingEvent> keeps, Class<?>... loggerOwners) {
+        this.keeps = keeps;
         this.loggers = Arrays.stream(loggerOwners)
                 .map(loggerOwner -> (Logger) LoggerFactory.getLogger(loggerOwner))
                 .toList();
@@ -34,7 +36,12 @@ public final class LogCapture implements AutoCloseable {
     }
 
     public static LogCapture onThisThread(Class<?>... loggerOwners) {
-        return new LogCapture(loggerOwners);
+        Thread owner = Thread.currentThread();
+        return new LogCapture(event -> Thread.currentThread() == owner, loggerOwners);
+    }
+
+    public static LogCapture onThread(String threadName, Class<?> loggerOwner) {
+        return new LogCapture(event -> threadName.equals(event.getThreadName()), loggerOwner);
     }
 
     public static List<ILoggingEvent> during(Runnable action, Level level, Class<?>... loggerOwners) {

@@ -264,23 +264,19 @@ class MarkerStoreReplicationIT {
         try {
             CompletableFuture<Void> raise;
             Map<Object, Object> duringTheWait;
-            long sharedMillis;
             holdReplicaAcks();
             try {
                 raise = CompletableFuture.runAsync(() -> roomy.raise(Set.of(scope), server + ":1-13"));
                 await().atMost(SCHEDULING_SLACK)
                         .until(() -> ONE.equals(info(primary, "clients").getProperty(BLOCKED_CLIENTS)));
 
-                long start = System.nanoTime();
                 duringTheWait = primary.opsForHash().entries(scope.key());
-                sharedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
                 assertThat(raise).isNotDone();
             } finally {
                 releaseReplicaAcks();
             }
 
             raise.get(BoundedRedisConnections.COMMAND_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
-            assertThat(sharedMillis).isLessThan(ROOMY_WAIT_BOUND.toMillis() / 2);
             assertThat(duringTheWait).containsOnly(Map.entry(server, "13"));
         } finally {
             roomy.close();

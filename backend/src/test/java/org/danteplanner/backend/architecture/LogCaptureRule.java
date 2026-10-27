@@ -19,8 +19,7 @@ final class LogCaptureRule {
     static final ArchRule APPENDERS_ATTACH_ONLY_THROUGH_LOG_CAPTURE =
             classes()
                     .should(attachNoAppenderOutsideLogCapture())
-                    .as("only LogCapture attaches a logback appender; a test captures its own thread's"
-                            + " log lines through it");
+                    .as("only LogCapture attaches a logback appender; a test captures log lines through it");
 
     private LogCaptureRule() {
     }

@@ -31,7 +31,7 @@ class LazyConnectingProxyManagerTest {
     private static final Duration FAIL_FAST_BUDGET = Duration.ofMillis(100);
     private static final Duration OUTCOME_WAIT = Duration.ofSeconds(10);
     // The lower bound is the contract (never fail before the wait); the slack only absorbs the
-    // scheduler on a loaded runner, where a waiter settled 600 ms after a 3.3 s bound.
+    // scheduler on a loaded runner.
     private static final long SCHEDULING_SLACK_MS = 5_000;
     private static final long LATCH_WAIT_SECONDS = 5;
     private static final long RETRY_AFTER_NANOS =

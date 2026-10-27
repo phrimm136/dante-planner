@@ -25,7 +25,11 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
+import org.danteplanner.backend.support.LogCapture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -75,9 +79,10 @@ class RaiseBatcherTest {
     }
 
     @Test
-    void raise_WhenTheWorkerDied_StartsANewWorkerAndRaises() throws Exception {
+    void raise_WhenTheWorkerDied_LogsTheDeathAndStartsANewWorkerThatRaises() throws Exception {
         List<Thread> workers = new CopyOnWriteArrayList<>();
-        try (FakeRedis redis = new FakeRedis(WaitReply.ACKNOWLEDGES, false);
+        try (LogCapture logs = LogCapture.onThread(RaiseBatcher.THREAD_NAME, RaiseBatcher.class);
+                FakeRedis redis = new FakeRedis(WaitReply.ACKNOWLEDGES, false);
                 RaiseBatcher batcher = new RaiseBatcher(() -> {
                     workers.add(Thread.currentThread());
                     if (workers.size() == 1) {
@@ -87,14 +92,14 @@ class RaiseBatcherTest {
                 }, 1, WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, System::nanoTime)) {
             boolean first = batcher.raise(KEYS, ARGUMENTS);
             double failuresAfterFirst = raiseFailures.count();
-            // The injected error is the worker's uncaught exception; Awaitility rethrows uncaught
-            // exceptions it sees while waiting, so this wait must not adopt it.
-            await().atMost(SCHEDULING_SLACK).dontCatchUncaughtExceptions().until(() -> !workers.get(0).isAlive());
+            await().atMost(SCHEDULING_SLACK).until(() -> !workers.get(0).isAlive());
 
             boolean second = batcher.raise(KEYS, ARGUMENTS);
 
             assertThat(first).isFalse();
             assertThat(failuresAfterFirst).isEqualTo(1.0);
+            assertThat(logs.at(Level.ERROR)).extracting(ILoggingEvent::getFormattedMessage)
+                    .anySatisfy(message -> assertThat(message).contains("died; the next raise starts a new one"));
             assertThat(second).isTrue();
             assertThat(workers).hasSize(2).doesNotHaveDuplicates();
         }
