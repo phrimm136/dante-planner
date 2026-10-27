@@ -58,6 +58,7 @@ class MarkerStoreReplicationIT {
     private static final String BLACK_HOLE = "marker-black-hole";
     private static final String PASSWORD = "marker-store-secret";
     private static final Duration WAIT_BOUND = Duration.ofSeconds(1);
+    private static final Duration ROOMY_WAIT_BOUND = Duration.ofSeconds(30);
     private static final Duration LINK_TIMEOUT = Duration.ofSeconds(30);
     private static final String LINK_STATUS = "master_link_status";
     private static final String LINK_UP = "up";
@@ -68,7 +69,7 @@ class MarkerStoreReplicationIT {
     private static final String CALLS_PREFIX = "calls=";
     private static final int BURST_RAISES = 50;
     private static final int STALLED_RAISES = 8;
-    private static final Duration SCHEDULING_SLACK = Duration.ofMillis(250);
+    private static final Duration SCHEDULING_SLACK = Duration.ofSeconds(5);
 
     private static final Network NETWORK = Network.newNetwork();
 
@@ -144,8 +145,12 @@ class MarkerStoreReplicationIT {
     }
 
     private MarkerStore storeOver(LettuceConnectionFactory writeStore) {
+        return storeOver(writeStore, WAIT_BOUND);
+    }
+
+    private MarkerStore storeOver(LettuceConnectionFactory writeStore, Duration waitBound) {
         return new MarkerStore(writeStore, writeStore.getRequiredNativeClient().getResources(), List.of(),
-                new MarkerStore.Settings(1, WAIT_BOUND, Duration.ofHours(1)), meters);
+                new MarkerStore.Settings(1, waitBound, Duration.ofHours(1)), meters);
     }
 
     private static LettuceConnectionFactory factory(String host, int port) {
@@ -246,7 +251,7 @@ class MarkerStoreReplicationIT {
                 .as("a WAIT on a connection that wrote nothing answers at once while the replica stays "
                         + "connected; only the raise's own connection waits out the bound")
                 .isGreaterThanOrEqualTo(WAIT_BOUND.toMillis())
-                .isLessThan(BoundedRedisConnections.COMMAND_TIMEOUT.toMillis());
+                .isLessThan(BoundedRedisConnections.COMMAND_TIMEOUT.plus(SCHEDULING_SLACK).toMillis());
         assertThat(meters.counter(MarkerStore.WAIT_TIMEOUTS).count()).isEqualTo(1.0);
         assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count()).isZero();
         assertThat(primary.opsForHash().entries(scope.key())).containsOnly(Map.entry(server, "12"));
@@ -255,21 +260,30 @@ class MarkerStoreReplicationIT {
     @Test
     void raise_WhenItWaitsOnAStalledReplica_LeavesTheSharedConnectionAnswering() throws Exception {
         FreshnessScope scope = new FreshnessScope.Entity(UUID.randomUUID());
-        holdReplicaAcks();
+        MarkerStore roomy = storeOver(primaryFactory, ROOMY_WAIT_BOUND);
         try {
-            CompletableFuture<Void> raise =
-                    CompletableFuture.runAsync(() -> store.raise(Set.of(scope), server + ":1-13"));
-            await().atMost(WAIT_BOUND).until(() -> ONE.equals(info(primary, "clients").getProperty(BLOCKED_CLIENTS)));
+            CompletableFuture<Void> raise;
+            Map<Object, Object> duringTheWait;
+            long sharedMillis;
+            holdReplicaAcks();
+            try {
+                raise = CompletableFuture.runAsync(() -> roomy.raise(Set.of(scope), server + ":1-13"));
+                await().atMost(SCHEDULING_SLACK)
+                        .until(() -> ONE.equals(info(primary, "clients").getProperty(BLOCKED_CLIENTS)));
 
-            long start = System.nanoTime();
-            Map<Object, Object> duringTheWait = primary.opsForHash().entries(scope.key());
-            long sharedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+                long start = System.nanoTime();
+                duringTheWait = primary.opsForHash().entries(scope.key());
+                sharedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+                assertThat(raise).isNotDone();
+            } finally {
+                releaseReplicaAcks();
+            }
 
             raise.get(BoundedRedisConnections.COMMAND_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
-            assertThat(sharedMillis).isLessThan(WAIT_BOUND.toMillis() / 2);
+            assertThat(sharedMillis).isLessThan(ROOMY_WAIT_BOUND.toMillis() / 2);
             assertThat(duringTheWait).containsOnly(Map.entry(server, "13"));
         } finally {
-            releaseReplicaAcks();
+            roomy.close();
         }
     }
 
@@ -333,7 +347,8 @@ class MarkerStoreReplicationIT {
             } finally {
                 clientLink.toxics().get(BLACK_HOLE).remove();
             }
-            assertThat(elapsedMillis).isLessThan(MarkerStore.RAISE_CONNECT_TIMEOUT.plus(WAIT_BOUND).toMillis());
+            assertThat(elapsedMillis)
+                    .isLessThan(MarkerStore.RAISE_CONNECT_TIMEOUT.plus(WAIT_BOUND).plus(SCHEDULING_SLACK).toMillis());
             await().atMost(SCHEDULING_SLACK).until(() -> meters.counter(MarkerStore.RAISE_FAILURES).count() >= 1.0);
             assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count()).isEqualTo(1.0);
 

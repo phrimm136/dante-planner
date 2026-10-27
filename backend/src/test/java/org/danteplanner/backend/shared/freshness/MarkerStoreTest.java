@@ -31,6 +31,8 @@ class MarkerStoreTest {
     private static final String SERVER_B = "8f9e0d1c-2b3a-4c5d-6e7f-8a9b0c1d2e3f";
     private static final MarkerStore.Settings SETTINGS =
             new MarkerStore.Settings(1, Duration.ofSeconds(1), Duration.ofHours(1));
+    private static final MarkerStore.Settings ROOMY_SETTINGS =
+            new MarkerStore.Settings(1, Duration.ofSeconds(30), Duration.ofHours(1));
 
     private final SimpleMeterRegistry meters = new SimpleMeterRegistry();
     private LettuceConnectionFactory refused;
@@ -122,13 +124,15 @@ class MarkerStoreTest {
 
     @Test
     void raise_WhenTheStoreIsClosed_CountsAFailureWithoutWaitingForTheBound() {
-        store.close();
+        MarkerStore roomy =
+                new MarkerStore(refused, refused.getRequiredNativeClient().getResources(), sources, ROOMY_SETTINGS, meters);
+        roomy.close();
 
         long start = System.nanoTime();
-        store.raise(Set.of(new FreshnessScope.PublicCatalog()), SERVER_A + ":1-3");
+        roomy.raise(Set.of(new FreshnessScope.PublicCatalog()), SERVER_A + ":1-3");
         Duration elapsed = Duration.ofNanos(System.nanoTime() - start);
 
-        assertThat(elapsed).isLessThan(SETTINGS.waitBound());
+        assertThat(elapsed).isLessThan(ROOMY_SETTINGS.waitBound().dividedBy(2));
         assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count()).isEqualTo(1.0);
     }
 

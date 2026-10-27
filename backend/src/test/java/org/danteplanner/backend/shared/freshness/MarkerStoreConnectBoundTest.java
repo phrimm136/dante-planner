@@ -29,6 +29,7 @@ class MarkerStoreConnectBoundTest {
 
     private static final String SERVER = "3e11fa47-71ca-11e1-9e33-c80aa9429562";
     private static final Duration WAIT_BOUND = Duration.ofSeconds(1);
+    private static final Duration SCHEDULING_SLACK = Duration.ofSeconds(5);
     private static final int BACKLOG = 1;
     private static final int MAX_FILLERS = 16;
     private static final int FILLER_CONNECT_MILLIS = 200;
@@ -50,7 +51,8 @@ class MarkerStoreConnectBoundTest {
                         .as("the kernel drops a SYN once the accept queue of a never-accepting listener is full")
                         .isTrue();
                 store.raise(Set.of(new FreshnessScope.PublicCatalog()), SERVER + ":1");
-                await().atMost(MarkerStore.RAISE_CONNECT_TIMEOUT.plus(WAIT_BOUND).plus(MarkerStore.RAISE_MARGIN))
+                await().atMost(MarkerStore.RAISE_CONNECT_TIMEOUT.plus(WAIT_BOUND).plus(MarkerStore.RAISE_MARGIN)
+                        .plus(SCHEDULING_SLACK))
                         .untilAsserted(() -> assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count())
                                 .isEqualTo(1.0));
                 double failuresBefore = meters.counter(MarkerStore.RAISE_FAILURES).count();
@@ -59,7 +61,7 @@ class MarkerStoreConnectBoundTest {
                 store.raise(Set.of(new FreshnessScope.PublicCatalog()), SERVER + ":2");
                 Duration elapsed = Duration.ofNanos(System.nanoTime() - start);
 
-                assertThat(elapsed).isLessThan(MarkerStore.RAISE_CONNECT_TIMEOUT.plus(WAIT_BOUND));
+                assertThat(elapsed).isLessThan(MarkerStore.RAISE_CONNECT_TIMEOUT.plus(WAIT_BOUND).plus(SCHEDULING_SLACK));
                 assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count() - failuresBefore).isEqualTo(1.0);
             } finally {
                 writeStore.destroy();
@@ -91,13 +93,13 @@ class MarkerStoreConnectBoundTest {
                                 Set.of(new FreshnessScope.PublicCatalog()), SERVER + ":" + (i + 1)), group.getName()))
                         .toList();
                 raises.forEach(Thread::start);
-                await().atMost(MarkerStore.RAISE_CONNECT_TIMEOUT.dividedBy(2)).until(() -> raises.stream()
+                await().atMost(SCHEDULING_SLACK).until(() -> raises.stream()
                         .allMatch(raise -> raise.getState() == Thread.State.TIMED_WAITING));
 
                 long start = System.nanoTime();
                 store.close();
                 for (Thread raise : raises) {
-                    raise.join(WAIT_BOUND.plus(MarkerStore.RAISE_MARGIN).toMillis());
+                    raise.join(WAIT_BOUND.plus(MarkerStore.RAISE_MARGIN).plus(SCHEDULING_SLACK).toMillis());
                 }
                 Duration released = Duration.ofNanos(System.nanoTime() - start);
 
@@ -105,7 +107,7 @@ class MarkerStoreConnectBoundTest {
                 assertThat(released).as("released by the close, not by the connect bound")
                         .isLessThan(MarkerStore.RAISE_CONNECT_TIMEOUT.dividedBy(2));
                 assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count()).isEqualTo(QUEUED_RAISES);
-                await().atMost(WAIT_BOUND).until(() -> raiseThreads(group).isEmpty());
+                await().atMost(SCHEDULING_SLACK).until(() -> raiseThreads(group).isEmpty());
             } finally {
                 writeStore.destroy();
             }

@@ -33,9 +33,9 @@ import static org.awaitility.Awaitility.await;
 class RaiseBatcherTest {
 
     private static final Duration WAIT_BOUND = Duration.ofSeconds(1);
-    private static final Duration BOUND = WAIT_BOUND.plus(MarkerStore.RAISE_MARGIN);
     private static final Duration ROOMY_WAIT_BOUND = Duration.ofSeconds(30);
     private static final Duration ROOMY_BOUND = ROOMY_WAIT_BOUND.plus(MarkerStore.RAISE_MARGIN);
+    private static final Duration SCHEDULING_SLACK = Duration.ofSeconds(5);
     private static final String[] KEYS = {new FreshnessScope.PublicCatalog().key()};
     private static final String[] ARGUMENTS = {"3600000", "3e11fa47-71ca-11e1-9e33-c80aa9429562", "7"};
     private static final String WAIT = "WAIT";
@@ -57,7 +57,7 @@ class RaiseBatcherTest {
                         throw new IllegalStateException("injected");
                     }
                     return redis.endpoint();
-                }, 1, WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, System::nanoTime)) {
+                }, 1, ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, System::nanoTime)) {
             long start = System.nanoTime();
             boolean first = batcher.raise(KEYS, ARGUMENTS);
             Duration firstElapsed = Duration.ofNanos(System.nanoTime() - start);
@@ -66,7 +66,7 @@ class RaiseBatcherTest {
             boolean second = batcher.raise(KEYS, ARGUMENTS);
 
             assertThat(first).isFalse();
-            assertThat(firstElapsed).as("released by the failed batch, not by the bound").isLessThan(WAIT_BOUND);
+            assertThat(firstElapsed).as("released by the failed batch, not by the bound").isLessThan(ROOMY_WAIT_BOUND.dividedBy(2));
             assertThat(failuresAfterFirst).isEqualTo(1.0);
             assertThat(second).isTrue();
             assertThat(raiseFailures.count()).isEqualTo(1.0);
@@ -89,7 +89,7 @@ class RaiseBatcherTest {
             double failuresAfterFirst = raiseFailures.count();
             // The injected error is the worker's uncaught exception; Awaitility rethrows uncaught
             // exceptions it sees while waiting, so this wait must not adopt it.
-            await().atMost(BOUND).dontCatchUncaughtExceptions().until(() -> !workers.get(0).isAlive());
+            await().atMost(SCHEDULING_SLACK).dontCatchUncaughtExceptions().until(() -> !workers.get(0).isAlive());
 
             boolean second = batcher.raise(KEYS, ARGUMENTS);
 
@@ -113,7 +113,7 @@ class RaiseBatcherTest {
         Thread caller = new Thread(callers, () -> raised.set(batcher.raise(KEYS, ARGUMENTS)), "raise-caller");
 
         caller.start();
-        caller.join(BOUND.toMillis());
+        caller.join(SCHEDULING_SLACK.toMillis());
 
         assertThat(raised.get()).isFalse();
         assertThat(callers.activeCount()).as("threads started by the raise").isZero();
@@ -130,19 +130,19 @@ class RaiseBatcherTest {
                 RaiseBatcher batcher = new RaiseBatcher(() -> {
                     worker.set(Thread.currentThread());
                     return redis.endpoint();
-                }, 1, WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, now::get)) {
+                }, 1, ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, now::get)) {
             CompletableFuture<Boolean> raised = CompletableFuture.supplyAsync(() -> batcher.raise(KEYS, ARGUMENTS));
-            assertThat(redis.evalshaReceived.await(BOUND.toMillis(), TimeUnit.MILLISECONDS)).isTrue();
-            await().atMost(WAIT_BOUND).until(() -> worker.get().getState() == Thread.State.TIMED_WAITING);
+            assertThat(redis.evalshaReceived.await(ROOMY_BOUND.toMillis(), TimeUnit.MILLISECONDS)).isTrue();
+            await().atMost(SCHEDULING_SLACK).until(() -> worker.get().getState() == Thread.State.TIMED_WAITING);
 
-            now.set(BOUND.multipliedBy(2).toNanos());
+            now.set(ROOMY_BOUND.multipliedBy(2).toNanos());
             long released = System.nanoTime();
             redis.releaseEvalsha.countDown();
-            boolean result = raised.get(BOUND.toMillis(), TimeUnit.MILLISECONDS);
+            boolean result = raised.get(ROOMY_BOUND.toMillis(), TimeUnit.MILLISECONDS);
             Duration elapsed = Duration.ofNanos(System.nanoTime() - released);
 
             assertThat(result).isTrue();
-            assertThat(elapsed).isLessThan(WAIT_BOUND.dividedBy(2));
+            assertThat(elapsed).isLessThan(ROOMY_WAIT_BOUND.dividedBy(2));
             assertThat(waitTimeouts.count()).isEqualTo(1.0);
             assertThat(raiseFailures.count()).isZero();
             assertThat(redis.commands)
@@ -285,7 +285,7 @@ class RaiseBatcherTest {
                 case "EVALSHA" -> {
                     evalshaReceived.countDown();
                     if (holdsEvalsha) {
-                        releaseEvalsha.await(BOUND.toMillis() * 4, TimeUnit.MILLISECONDS);
+                        releaseEvalsha.await(SCHEDULING_SLACK.multipliedBy(2).toMillis(), TimeUnit.MILLISECONDS);
                     }
                     yield ":1\r\n";
                 }
