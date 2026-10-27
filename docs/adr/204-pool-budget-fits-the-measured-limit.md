@@ -1,0 +1,17 @@
+# 204 pool-budget-fits-the-measured-limit
+epic: none · pr: none · supersedes: 009 @pools @capacity
+
+## Decisions
+- @pools @budget — The pool ledger's connection limit is the primary's measured `max_connections`, 60, not a figure derived from the instance class. The ledger said 85 and the budget test passed against a limit the server never had. A fleet deploy runs two pods per region, and four pods with every pool full reached 58 to 60 connections on every deploy. Every connection beyond that was refused: the read-source probe's connects raised `Connection_errors_max_connections` into the thousands, and a new pod's Flyway failed with `Too many connections` and started only after a restart. To re-check the limit, run `SHOW VARIABLES LIKE 'max_connections'` on the primary through the sanctioned RDS tunnel script.
+  REJECTED: raising `max_connections` in the parameter group — it adds memory risk on a 1 GiB instance and still needs the budget test.
+  REJECTED: rolling one region at a time — it halves the deploy surge but keeps the wrong ledger.
+  REJECTED: a bigger instance — it pays for capacity the pools leave idle.
+  REJECTED: shrinking only `minimumIdle` — the pool maxima still add up past the limit when load meets a deploy.
+  INVARIANT: every connection that reaches the primary, summed over both regions at two pods each, stays within the limit minus a reserve of 10. Oregon counts its primary pool. Seoul counts its primary, primary-read and bulkhead pools. Each pod adds one transient probe connection. With the current sizes the total is 38 of the 50 usable — enforcer: PoolLedgerConfigTest.
+  NON-GOAL: counting the pools on the replica in the primary budget — the Seoul replica pool and Oregon's read-fallback pool open their connections on the replica. They are sized by the same rule.
+- @pools @sizing — Each pool keeps its bulkhead and is sized at least three times its measured 7-day peak of active connections. Over seven days, no pool had more than 2 active connections in any 5-minute window, and no request waited for a connection. Hikari still fills every pool to its maximum, because `minimumIdle` stays at its default. The measured peaks and resulting sizes are: Oregon primary peak 1, size 6; Oregon read-fallback on the Seoul replica peak 2, size 6; Seoul primary peak 2, size 6; Seoul primary-read peak 0, size 3; Seoul bulkhead peak 0, size 2; Seoul replica peak 2, size 6. The bulkhead pool is built only in a region that reads a replica first, so Oregon has none. The Seoul write pool is now 6 connections, not the ten that the rejected-alternative argument in ADR 182 cites. To re-check the sizes, run `max by (cluster, pool) (max_over_time(hikaricp_connections_active[5m]))` in Mimir over 7 days and compare each pool's peak with a third of its size. `hikaricp_connections_pending` must stay at 0.
+  REJECTED: sizing pools from transaction duration and the WAN hold time — the measured load is a small fraction of what that estimate gave, and the excess capacity is what filled the primary during deploys.
+  INVARIANT: each pool is at least three times its measured 7-day peak — unenforced; re-checked by the Mimir query above.
+
+## Takeaway
+- takeaway: a connection budget is only as true as the limit it divides. Measure the server's limit instead of deriving it from the instance class, and size pools from observed peaks rather than estimates, because a pool that Hikari fills holds its maximum whether or not it is used.

@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <p>The bulkhead datasource is pointed through the Toxiproxy app→primary proxy and slowed with the
  * {@code wan} latency toxic, so every replica-miss re-check holds a bulkhead connection for the
  * toxic's dwell. A flood of junk-UUID reads (each a replica miss that re-checks the wan-slowed
- * bulkhead) saturates the {@link PoolLedger#BULKHEAD_POOL 3-connection} pool and backs its queue up.
+ * bulkhead) saturates the {@link PoolLedger#BULKHEAD_POOL 2-connection} pool and backs its queue up.
  * The write path draws from the separate, un-proxied primary write pool, so a concurrent write must
  * complete without being serialized behind the flood.</p>
  *
