@@ -29,7 +29,7 @@ Package-by-feature: feature roots (`admin`, `auth`, `comment`, `moderation`, `no
 - `@Param` on every `@Query` parameter — never string concatenation.
 - Collections `FetchType.LAZY`; prevent N+1 with `@EntityGraph` or `JOIN FETCH`; explicit `countQuery` on paginated `@Query`.
 - List endpoints take `Pageable` (default size 20, max 100) — never an unbounded `List<Entity>`.
-- Check-then-act races: `@Lock(LockModeType.PESSIMISTIC_WRITE)` repository method. Counters: atomic `@Modifying @Query("... SET x = x + 1")`, not read-modify-write.
+- Check-then-act races: when a PK or unique key can own the invariant, insert against it (`INSERT IGNORE` and read the affected count, or handle the violation); a `@Lock(LockModeType.PESSIMISTIC_WRITE)` repository method only for an invariant no constraint can express. Counters: atomic `@Modifying @Query("... SET x = x + 1")`, not read-modify-write.
 - Method names carry the cardinality: a plural noun returns a collection, `…ById`/`…Of` returns at most one row, a verb prefix (`try…`, `insert…`, `refresh…`, `increment…`) mutates and returns the affected count.
 - Projection interfaces live in the repository package with a `*Row` suffix; repositories never return `*Response` types — a `*Row` is mapped by a static `from(row)` on the DTO.
 - A method returning `boolean`/`Boolean` is named `is…`, never `get…`

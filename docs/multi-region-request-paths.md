@@ -72,6 +72,10 @@ borrows no physical connection.
 
 ---
 
+The load balancer's cookie affinity (`__cflb`) is honored regardless of the client's geography:
+a cookie issued by one region routes that client's later requests to the same region's pool from
+anywhere, so it pins a client to a region without a public bypass of health-based failover.
+
 ## 3. Filter chain: what wraps every `/api/**` request
 
 ```

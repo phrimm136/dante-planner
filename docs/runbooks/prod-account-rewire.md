@@ -122,3 +122,11 @@ retires this runbook: delete it, and delete the management account's state bucke
 rather than leaving a second copy of every credential standing. The copy scripts are generic
 and outlive it; the rollback copies are the only reason to keep the origin account intact, and
 that reason expires the moment the migration is accepted.
+
+## Role ARNs
+
+The provisioning role is `danteplanner-provisioner` in the management and staging accounts and
+`prod-provisioner` in prod (`terraform/iam-bootstrap` sets it per workspace). An ARN naming a role
+that does not exist fails `sts:AssumeRoleWithWebIdentity` with no CloudTrail record in any
+account, so run `aws iam get-role --role-name <name>` in the target account before putting an ARN
+into a secret or `~/.aws/config`.

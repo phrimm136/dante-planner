@@ -10,32 +10,112 @@ record.
 The `static/` submodule keeps its own `static/docs/debt.md` for the data and
 asset pipeline.
 
+
+- Frontend planner content has two shape checks that never meet: the load gate is a deliberately
+  loose `z.record(string, unknown)` (a strict gate mass-discarded saves after the Zod 4 bump,
+  4463accf), strict `MDPlannerContent*Schema`s exist only inside `validateSaveablePlanner`, and the
+  sync-boundary validator re-derives shape by hand. Worth doing when the shared content schema
+  lands: take the sync boundary's shape half from that schema and keep the load gate loose.
+- Planner content is held twice once the typed tree lands: the stored JSON (what the entity
+  writes) and the typed tree (what rules and consumers read). Writing the tree back instead would
+  leave one source, but the serializer must keep every raw sinner key as received, null apart from
+  absent, floors past the category's count untouched, and section notes opaque, or `PlannerChange`
+  sees every resend as a change and ADR 136's hidden floors are lost. Worth doing when a consumer
+  needs a content shape the stored JSON cannot give, or the double hold causes a drift bug.
+- A 429's `Retry-After` is on the wire, but `CorsConfig` does not list it as an exposed header, so
+  the frontend's cross-origin fetches cannot read it (inferred from the config, not checked
+  against prod), and the SSE client waits its own reconnect delay regardless. Worth doing when a
+  client is meant to honor the server's wait: expose the header and read it in the retry paths.
+- Rate-limit changes that bypass `rate-limit.config-version`: an environment variable (relaxed
+  binding, e.g. `RATE_LIMIT_CRUD_CAPACITY`) or a profile override (`application-loadtest.properties`)
+  changes a limit without the version, so live buckets keep the old one; and a rollback past a
+  version bump keeps the newer limits until the bucket TTL, because bucket4j ignores a lower
+  version. `deploy/` sets no rate-limit values today. Worth doing the first time a limit is set
+  outside `application.properties`.
+- ADR 079's @report and @gates decisions are not in the tree: `NotificationType.REPORT_RECEIVED`
+  has no producer, effect arm or `DomainEventType` counterpart (it appears only in the enum), and
+  no matrix test requires every notification type to be wired, so the unwired value compiles as
+  the ADR says it must not. Worth doing before the next notification type is added, or before
+  moderators are expected to hear about reports in-app.
+- The SSE shutdown drain (`AbstractSseService`'s `ContextClosedEvent` listener) completes emitters
+  on the closing thread, and `complete()` takes the same write lock a send holds while blocked on a
+  stalled client's full receive window, so one stalled peer delays shutdown until the socket write
+  times out (the connector's default, unverified). Worth doing if a pod is seen exceeding its
+  termination grace with an SSE send on the closing thread's stack; handing completion to another
+  thread needs an exception to the no-new-pools rule.
+- No workflow renders or validates `deploy/` before ArgoCD syncs it from main: `pr-gate.yml` has
+  no deploy lane and `deploy-fleet.yml` runs `kustomize edit set image` only, so a broken overlay
+  surfaces at sync time. `deploy/overlays/oregon/kustomization.yaml:11` also names a
+  `deploy-oregon.yml` that does not exist (the bumper is `deploy-fleet.yml`). Worth doing the next
+  time a base manifest or overlay patch changes shape: a PR-gate step running `kustomize build`
+  (v5.8.1, as deploy-fleet pins) on both overlays plus a schema check.
+- `frontend/scripts/` sits outside every gate but tests: `yarn lint` and `yarn fmt:check`
+  cover only `src`, and the older scripts (compiler-bailouts, generate-sitemap,
+  detect-hardcoded-text, dev-r2-sync) are in no tsconfig, so they are never typechecked.
+  Worth doing when a script change breaks CI or a deploy.
+- `/planner/md/gesellschaft` and `/planner/md/new` inherit the `/planner/md/:id` rule's `Link`
+  preloads: Pages applies every matching `_headers` rule and a `:id` placeholder matches a
+  static sibling segment, so those pages also fetch the personal viewer's chunks. The dynamic
+  rule keeps its preloads on purpose. Worth doing when `! Link` detach semantics can be
+  verified against a real Pages deploy, or when the sibling pages' load time regresses.
+- `POST /api/auth/apple/callback` is a stub that always answers 400, and a real Apple
+  `form_post` would be rejected by `CsrfDoubleSubmitFilter` (no `X-CSRF-Token`) before the
+  rate limiter runs. Worth doing when Apple sign-in is built: exempt the callback from CSRF
+  and replace the stub.
+- `RateLimitInterceptor.skipCharge`'s fail-closed rethrow (the typed 503) has no production
+  caller since both OAuth callbacks redirect, and no interceptor-level test. Worth doing the
+  next time a fail-closed policy gains a non-navigation endpoint, or when the branch is judged
+  dead.
+- `spring.jpa.properties.hibernate.jdbc.batch_size=30` and `order_inserts=true` have no bulk
+  insert left to serve and no test guarding them since the import endpoint was removed, and
+  `PlannerLimitValidator.requireRoomFor`'s batch count is always 1. Worth doing when either is
+  next touched: drop the settings and the parameter, or add the bulk path that needs them.
+- The migration smoke seed's planner 1 still carries enhanced gift ids (19001, 29004) in its
+  entity filter rows, which `rebuild_planner_filters` has collapsed to base ids since V055, so
+  the seed is not a faithful post-migration state. Worth doing the next time the seed changes.
+- `ContentTombstoneStoreTest`'s two `…WhenRedisFails_LogsAndDoesNotThrow` tests attach a logback
+  `ListAppender` and saw no event once in a parallel unit run (passes alone and on the rerun), which
+  points at another test reconfiguring logback concurrently (unverified). Worth doing when it fails
+  a CI run: diagnose with a repeated parallel run before touching the appender.
+- Rate-limit assertions flake under full-suite load: a charge that times out on the rate-limit
+  Redis fails open, so a test expecting a refusal or a charged bucket sees none
+  (`PublishedPlannerDeviceCookieIT` device bucket, `PlannerCommentSseControllerIT` 429). Both pass
+  alone. Worth doing when either fails a CI run: give rate-limit tests a timeout budget or a
+  dedicated Redis.
+- The PR gate's migration job only replays new `*.sql` files through the Flyway CLI, so a Java
+  migration (`db/migration/V0NN__*.java`; none exists now, the keyword backfill moved to the
+  startup scheduler `PlannerKeywordBackfill`) would never run against the populated seed in CI;
+  a Java migration that calls live `PlannerKeywords` would also change on a later rename, and
+  Java migrations carry no checksum. Worth doing before
+  the next Java migration: run the backend's Flyway (Java included) over the seed in CI, and
+  freeze a migration's logic inside the migration class.
+- `PlannerRepositoryConstraintIT` "Different user same planner allows separate votes" deadlocked
+  once on the `planner_votes` insert during a full suite run and passes alone. Worth doing when it
+  fails a CI run.
+- Coexistence window (ADR 030 @projection): `UpsertPlannerRequest.selectedKeywords`,
+  the `planner_keywords_toplevel_total` metric and the e2e payload's
+  top-level copy are removed once the frontend build that omits the copy
+  (`feat/keyword-policy-c-fe`) is live and the metric's match/mismatch outcomes have read zero for
+  seven consecutive days.
+- The plan-keyword skill (`.claude/skills/plan-keyword/SKILL.md`) is stale: it names
+  `KeywordSetConverter` for the valid set (now `PlannerKeywords`), `frontend/src/lib/constants.ts`
+  (now `shared/gameData/constants.ts`), a SET-migration procedure on a dropped table, and
+  `MySQLIntegrationTest` (now `MySQLIT`), and it predates content-derived keywords. Worth doing
+  before the next keyword is added.
+- `UserAccountLifecycleService.reactivateAccount` loads the user without a lock, so a reactivation
+  racing a deactivation of the same account is unordered (deactivation and publish are serialized by
+  owner-row locks). Worth doing if an account shows planners published while deactivated or
+  markers left after reactivation.
 - `.githooks/commit-msg` lacks the commit type/scope grammar; the local
   `core.hooksPath = .githooks` bypasses the global hook, so duplicate or source
   `~/.config/git/hooks/commit-msg` here.
-- Local `dev` is far ahead of origin on one disk; a push to a ref ArgoCD does not watch
-  (or a second remote) would buy backup durability without triggering deployment.
-- Gift-id fields are traversed twice per content validation — `IdReferenceValidator` and
-  `StartBuffValidator` re-implement the same textual/duplicate checks, so one bad element
-  reports twice. Ruled out of RFC 0002 scope; collapsing it changes observable API output
-  and needs its own argue.
 - No test proves the username-suffix retry survives a real Hibernate session after a
   failed INSERT — only the exception classifier is covered by synthesized exceptions. A
   containerized test driving a live suffix collision through the retry loop would close it.
-- `?login=rate_limited` has no frontend consumer — the redirect code is distinct on the
-  wire but renders as a plain home page; the SPA needs to read the `login` param.
 - `PlannerContentEntityExtractor` keeps the pre-`path()` Jackson null-check idiom (~10
   copies). Ruled out of the validator-traversal conversion (it coerces where validators
-  reject, and lives outside `planner/validation`); local `path()` adoption would collapse
+  reject, and lives in `planner/searchindex`, outside `planner/validation`); local `path()` adoption would collapse
   the checks without publishing the validation helper.
-- Validator sub-rule shape still diverges: extracted `validate*` methods mix
-  boolean-returning gates (false = stop checking this element) with void accumulators.
-  Consolidating to a uniform void return demands removing the error short-circuit, which
-  changes the error-collection strategy and its tests — needs its own pass, not a rider.
-- FE publish makes two sequential round trips (awaited `syncToServer`, then a body-less
-  publish). The intent route accepts a content-carrying body that would collapse it to
-  one, but adopting it moves the draft flush into the publish call and must integrate
-  with the save pipeline's conflict handling — its own pass, ruled a regression to keep.
 - Toggle endpoints flip state instead of converging on it; make them idempotent the way
   planner publish is (repeat calls are no-ops, not inversions).
 - A full review pass on `shared/` and `user/` is outstanding.
@@ -45,10 +125,10 @@ asset pipeline.
 - Stale "a fresh account's syncEnabled is null" comments in `e2e/src/plannerFixture.ts`
   and `e2e/tests/mutation-gestures.spec.ts` — behaviorally fine post-V056, textually
   outdated.
-- The `?login=` gap covers both variants, not just `rate_limited`: the FE reads neither
-  `?login=error` nor `?login=rate_limited` (zero hits for `login=` in `frontend/src`);
-  closing it needs `validateSearch` on the `/` route, a toast in `GlobalLayout`, and
-  `login.*` copy in all 5 locales.
+- The frontend reads no `?login=` value (`error`, `rate_limited`, `unavailable`), so every
+  OAuth failure redirect lands on a plain home page; closing it needs `validateSearch` on
+  the `/` route, a toast in `GlobalLayout`, and `login.*` copy in every locale. Worth doing
+  when a user reports a silent failed login.
 - `CommentEngagementService.toggleUpvote` inserts a `PlannerCommentVote` and then runs
   `incrementUpvoteCount`, which is `@Modifying(clearAutomatically = true)` without
   `flushAutomatically`; whether auto-flush covers the pending vote insert depends on
@@ -56,24 +136,12 @@ asset pipeline.
   not overlap. No IT asserts that a second comment upvote returns 409, so the vote
   row's durability on that path is untested. Add the duplicate-upvote IT (and consider
   `flushAutomatically = true` on the increment).
-- `CsrfDoubleSubmitFilterTest.mutation_WhenTokenTampered_Rejected` is a ~1-in-64 flake:
-  it tampers by prepending `"x" + token.substring(1)`, so a token that already starts
-  with `x` yields an untampered "tampered" token and the filter correctly admits it.
-  Fix by flipping a character instead of overwriting with a constant.
-- The big-bang deployment window needs a runbook once the comment converter lands.
-  Sequence: block traffic → full DB backup via `scripts/ops/access/` → deploy with
-  traffic still blocked (Flyway runs the planner decomposition against prod data for
-  the first time) → verify Flyway schema history and sanity counts on the new planner
-  tables → pre-check `SELECT COUNT(*) FROM planner_comments WHERE content LIKE '<%'`,
-  then run the Node HTML→Tiptap-JSON converter (format-detecting, idempotent, imports
-  the FE extension set) → smoke-check converted-comment render and new-comment
-  round-trip → reopen. Rehearse the entire window first on a prod dump restored
-  locally: Flyway train plus converter against real data.
 - `DegradationIT.evictPooledPrimaryConnections` still cannot evict the primary pool: the
   routing target for PRIMARY is the `GtidCapturingDataSource` wrapper, not a
   `HikariDataSource`, so the helper's instanceof walk skips it. Replica and bulkhead are
   covered since the lazy-proxy descent fix; the primary needs an unwrap step.
-- No circuit breaker fronts any Redis role or the primary datasource; the 3 s command
+- No circuit breaker fronts any Redis role or the primary datasource's writes (one guards
+  Oregon's primary read fallback); the 3 s command
   bound and Hikari's connection timeout cap what one call can hold, so under a dependency
   that stays slow rather than dead every request still pays the full bound before its
   typed 503. Worth doing once throughput under a sustained-latency toxic is measured
@@ -118,25 +186,6 @@ asset pipeline.
   primary, replica-miss re-checks over the WAN, or GC pauses on the 2 GB hosts. Worth
   doing once the request count behind the percentile is known and shows the tail is more
   than a few requests, or when a user reports a stalled detail load.
-- The load balancer's cookie session affinity (`__cflb`) is honored regardless of the
-  client's geography: a cookie issued in one region routes later requests to that
-  region's pool from anywhere. Harmless today (identical code in both regions, writes
-  always reach the single primary) and useful as a measurement instrument (see the entry
-  above). Becomes a decision when regional behavior ever diverges, when affinity is
-  reconsidered, or when a per-region hostname is wanted in prod — the cookie already
-  provides the pin without a public bypass of health-based failover.
-- The `FeatureBoundaryTest` frozen internal edges (34 entries on 2026-09-18) resolve to
-  eight types reached across a boundary, and thaw in three lanes. Mechanical, one commit
-  each, the staleness test deletes the entry: `WebConfig` reaches `planner.entity.MDCategory`
-  for a converter that Boot would register itself as a planner-owned `Converter` bean;
-  `CommentEngagementService` reaches `planner.validation.VoteUniquenessValidator`;
-  `AdminService` builds a `moderation.entity.ModerationAction` that a moderation `record`
-  operation should own. Seam design, an RFC each: two moderation services mutate
-  `comment.entity.PlannerComment` and call `comment.validation.CommentStateValidator`, so
-  comment needs hide, delete and restore operations for moderation; four moderation and
-  comment classes read `planner.entity.Planner`, so planner needs a moderation read model and
-  an access check comment can call. Worth doing when the owning feature's service is next
-  edited for another reason.
 - `user.entity` is a de facto shared domain model: `User`, `UserRole`, `RestrictionState`
   and `UserSettings` are read by 24 frozen origins across every feature, including
   `shared.security` and `auth.token`. The enum half (7 origins reach only `UserRole` or
@@ -146,16 +195,20 @@ asset pipeline.
   it means deciding what a planner knows about its owner, the row or the id — a shared
   kernel the rule permits by design, or the ADR 015 decomposition applied to users. Argue
   that before moving anything; a thaw done to satisfy the rule is the wrong reason.
-- The backend patterns still declared in `.claude/hooks/forbidden-patterns.json` predate
-  ADR 070 and should be audited for migration to checkstyle: field injection
+- Backend patterns with no build rule yet, candidates for checkstyle under ADR 070: field injection
   (`@Autowired private`), entity-typed `ResponseEntity` returns from controllers, `.get()`
   on `Optional`, `@Transactional` on private methods, string concatenation inside `@Query`,
   empty catch blocks, `@RequestBody` without `@Valid`, change-history phrasing in durable
   records, `Boolean.TRUE.equals(...)`, plus the file-specific pairs (`@Transactional` in a
   Controller, `@Query` in a Service). Each needs either a checkstyle equivalent — a
   `RegexpSinglelineJava` id with id-scoped suppressions, or an ArchUnit rule where the check
-  is structural — or a stated reason it is Claude-only working process and belongs in the
-  hook.
+  is structural — or a stated reason it needs no build rule. The frontend patterns the same
+  hook declared are listed for migration to oxlint or ast-grep: `PropTypes` (Zod schemas
+  instead), `useQuery(` (`useSuspenseQuery` instead), hardcoded hex colors outside
+  `constants.ts` and tests, manual memoization (`React.memo`, `useMemo`, `useCallback`), an
+  early `return` of a loading spinner instead of a Suspense boundary, `localStorage` or
+  `sessionStorage` access without a `typeof window` guard, and `useTranslation()` without an
+  explicit namespace (escape comment `// i18n-ok`; `i18n.ts` and `LanguageSync.tsx` excluded).
 - No CI lane asserts query shape: statement-count and EXPLAIN access-path checks against
   seeded, ANALYZE'd data exist only as measurement-form prose in the portfolio catalog. A
   regression in pagination depth cost or FULLTEXT access path ships silently today.
@@ -191,27 +244,12 @@ asset pipeline.
   (`DifficultyLabel`, the MD versions). Keying them by those literal unions would make every
   lookup non-optional at the root and let two consumer widenings be reverted
   (`ThemePackSelectorPane.getDifficultyColor`, `StartBuffCardVariant.description.color`).
-- DOMPurify reports itself unsupported under happy-dom and hands back its input, so any test
-  outside `src/shared/sanitize/**` that asserts on sanitized output is asserting on garbage.
-  `vite.config.ts` routes the sanitizer's own tests to jsdom for exactly this reason; the
-  same hazard applies to every other suite that happens to sanitize.
-- `StartGiftEditPane.handleGiftClick` did not fold into the shared `applyGiftToggle`: it
-  works on unencoded ids, writes three store slices in one update (dropping the old row's
-  gifts, setting the keyword, setting the selection), and its same-row arm is already
-  `useCappedSelection.toggle` with a cap and a mirror. The recipe cascade would be wrong for
-  start gifts. Folding it needs cap, mirror and keyword injection — a different function.
 - `HorizontalThemePackGallery.getFloorIndexForPack` returns `-1` for a pack absent from
   `floorSelections`, which yields the note key `floor--1` and renders "Floor 0".
-- Two deliberate UX regressions taken to make elements keyboard-reachable: `StartBuffCard`'s
-  description sits under a full-card overlay button and can no longer be wheel-scrolled (its
-  scrollbar was already hidden), and `NoteEditor` now activates on focus rather than click,
-  so clicking the byte-counter strip or the border padding no longer reveals the toolbar.
-  Both are reversible if the affordance turns out to matter more than the reach.
 - The full-suite worker OOM is survivable with `vitest run --maxWorkers=1` (green at 216
   files / 7814 tests where `--maxWorkers=2` intermittently loses a worker on a loaded box).
   That is a workaround, not the pool-tuning pass the earlier entry asks for.
-- `DeckFilterBar` renders the Reset All control twice with identical props and children (a
-  desktop `resetAllButton` and an inline mobile copy); `deckFilterFacets.parity.test.ts`
+- `deckFilterFacets.parity.test.ts`
   keeps a fifth hand-written enumeration of the ten filter sets in its `BASE_STATE` fixture,
   which `createDefaultDeckFilterState()` now supersedes.
 - `pages/identity/lib/formatSanityCondition.ts` still exports `formatSanityConditions` with
@@ -223,8 +261,7 @@ asset pipeline.
   `io.sentry:sentry-spring-boot-starter-jakarta`; a browser-side exception reaches nobody.
   Adopting one is deferred rather than forgotten: the natural single capture point is the
   planned `showError` presenter, and wiring an SDK before it exists scatters capture calls
-  across every catch block. `frontend/src/lib/storage.ts:81` meanwhile carries a false
-  `Sentry will auto-capture console.error` comment — delete it when this resolves either way.
+  across every catch block.
 - 2026-08-14 — Two emitted metrics have no consumer: `sse.publish.dropped`
   (`shared/sse/SsePublisher.java`) and `planner_reconciler_drift_total`
   (`planner/service/PlannerDriftReconciler.java`) are read only by their own tests, and
@@ -247,7 +284,7 @@ asset pipeline.
   pipes the RDS master secret through `jq -r .password` although the secret is a plain string;
   it directs the operator to a terraform output that is deliberately null; five steps run
   `docker exec` against a `mysql` container that no compose file defines; and the migration
-  freeze names `V045` as the current head against an actual head of `V057`.
+  freeze names `V045` as the current head against an actual head of `V065`.
 - 2026-08-14 — `runbooks/schema-decomposition-migration.md` contradicts itself and the fleet.
   Its quick-reference table prescribes `argocd app set … --sync-policy none`, which the body
   of the same runbook correctly rules out because this fleet runs ArgoCD in CORE mode; it
@@ -268,12 +305,6 @@ asset pipeline.
   implementations removed, so each now argues against a world that no longer exists. An
   Implemented RFC is not edited for accuracy, so the resolution is a dated note at the head of
   those sections marking them as the pre-implementation state.
-- 2026-08-14 — This file's own entries predate the dating convention and carry no date, so
-  nothing distinguishes a week-old find from a year-old one; date them on the next defrag
-  pass. One is also wrong on the facts: the `PlannerContentEntityExtractor` entry justifies its
-  exclusion partly by the class living outside `planner/validation`, and it does not — the
-  class sits at `backend/src/main/java/org/danteplanner/backend/planner/validation/`. The
-  coercion-versus-rejection half of that reasoning stands on its own.
 - 2026-08-14 — ADR enforcement is a decided practice with nothing implementing it. A subagent
   audit checks four things: each ADR's stated invariants against the code, whether an
   enforcement mechanism exists for each rule that claims one, decisions recorded as done that
@@ -281,39 +312,22 @@ asset pipeline.
   included. It triggers from wrap-up for any session touching `docs/adr/` or backend
   architecture, and emits unstaged supersession edits plus entries in this file, never a
   rewrite of an existing ADR. Closes when the wrap-up skill invokes it.
-- 2026-08-14 — The frontend/backend SSE parity test compares the frontend enum against a
-  hand-transcribed copy of the backend constants in the same file
-  (`frontend/src/shared/sse/schemas/__tests__/SseEnvelopeSchemas.test.ts`), so both sides go
-  stale together and the guard cannot detect the drift it exists for — demonstrated when RFC
-  0003 Stream 3 removed `created`/`updated`/`deleted` server-side and the test stayed green.
-  The frontend listener/schema removal itself is RFC 0004 Stream 5's contract; this entry is
-  only the guard's structural blindness, which survives that removal. A real guard reads the
-  backend enum (generated artifact or shared fixture), not a transcription.
 - 2026-08-14 — Two live docs still describe the planner sync SSE events removed by RFC 0003
   Stream 3: `docs/multi-region-request-paths.md` lists `created`/`updated`/`deleted` as the
   envelope-delivered family, and `docs/testing-evidence.md` quotes
   `rows.put(SseEventType.CREATED, ...)` as its matrix-test exemplar, a constant that no longer
-  compiles. `shared/controller/SseController.java` line 35's `sync:planner` mention was stale
-  before that stream landed and is the same sweep.
-- 2026-08-14 — `KnownConstraint.PLANNER_BOOKMARK` still maps `planner_bookmarks` unique-key
-  violations after RFC 0003 Stream 1 removed the bookmark write path; the application no
-  longer writes that table, so the mapping is unreachable. The table itself also has no
-  writer left — dropping both is one decision, and neither was in Stream 1's change list.
+  compiles.
+- 2026-08-14 — The `planner_bookmarks` table has no writer left after RFC 0003 Stream 1
+  removed the bookmark write path, and the `KnownConstraint.PLANNER_BOOKMARK` mapping is gone.
+  The table is still created (V006), repointed (V052) and never dropped; only tests touch it.
+  Dropping it is one decision that was not in Stream 1's change list.
 - 2026-08-14 — `docs/runbooks/schema-decomposition-migration.md` gates the deprecated-toggle
   retirement on `planner.legacy_toggle` reading ~0, but RFC 0003 Stream 1 removed the counter's
   last emitter, so the metric now reads *no data*, never zero — both gates are unactionable as
   written and the runbook needs its retirement condition restated (arguably: satisfied).
   `docs/multi-region-request-paths.md` §11 also still routes the deleted
   `POST /{id}/bookmark`, and `frontend/scripts/hardcoded-text-report.json` still carries an
-  entry for the deleted `usePlannerBookmark.ts`. `PlannerMDGesellschaftPage.tsx`'s header
-  comment still advertises bookmark functionality.
-- 2026-08-14 — `POST /api/planner/md/batch` (RFC 0003 Stream 1) bypasses `ByIdReadGuard`,
-  which the single-planner GET goes through: on a lagging replica a just-written planner is
-  silently omitted from the batch answer (indistinguishable from "not yours") instead of
-  being re-checked on the primary, and a primary-deleted planner still on the replica is
-  returned unmasked. Faithful to the RFC snippet; whether the sync client (RFC 0004) needs
-  read-your-writes semantics from batch pull is an open design question for that RFC's
-  consumer logic.
+  entry for the deleted `usePlannerBookmark.ts`.
 - 2026-08-14 — Two observer effects remain outside the RFC 0003 outbox: the account-suspension
   push (`moderation/listener/AccountSuspensionEventListener`, after-commit) and the settings
   invalidation published inline from `UserController`. Both lose their push if the process dies
@@ -348,17 +362,12 @@ asset pipeline.
   visibleContentDocuments()'s full documents — and the content-side keyword column is
   redundant with that existing read. Fold the catalog column into the document query or chunk
   when planner counts warrant it.
-- 2026-08-14 — editorStateCodec.ts:217 places a bare '' in a JSONContent slot: a genuine
+- 2026-08-14 — frontend/src/pages/planner/lib/editorStateCodec.ts:216 places a bare '' in a JSONContent slot: a genuine
   production type/runtime mismatch that stream 7b typed around in its test rather than fix
   (production out of that node's scope). Fix the slot's type or its value at the source.
 - 2026-08-14 — buildSaveablePlanner pins id to a UUID via its schema, so the two planner page
   tests asserting on 'test-planner-123' cannot adopt the factory (six assertion sites). Either
   the tests move to schema-valid ids or the factory grows a test-id affordance.
-- 2026-08-14 — the "planner type outside the union" branch in the planner config tests lost
-  direct coverage when the bogus 'ABNORMALITY_ENCOUNTER' fixture became a valid
-  REFRACTED_RAILWAY: the invalid case is now unrepresentable without a cast the lint rules
-  forbid. If that guard matters, it needs a runtime-level probe (e.g. JSON ingest) instead of
-  a typed fixture.
 - 2026-08-14 — RFC 0003 gate debate on the recommended_notification audit, recorded with its
   revisit triggers. Three alternatives were argued and rejected: (1) moving the audit to a
   notification-side reconciler — rejected because the audit encodes the planner's latch
@@ -392,15 +401,9 @@ asset pipeline.
   published flag now patched pointwise). Migrating it needs the interpreter's sided forkCopy plus
   the section's progress UI wired as ops — fold into stream 8's export decode→partition→persist
   split.
-- ArgoCD couples deployment to dev: any push or merge implies a rollout, which blocks
-  routine backup pushes and forces implementation PRs to RFC granularity (one merge per
-  RFC instead of per level). Move the deploy trigger to an explicit act — an annotated
-  release tag ArgoCD tracks, or manifest/image-tag bumps only — so dev merges become
-  safe at any cadence; that unlocks level-sized PRs and retires the
-  push-to-an-unwatched-ref workaround.
-- 2026-08-14 — the batch-conflict epoch can never exceed 1 in production (hasSyncedRef is
-  never reset, one sync per PersonalPlannerList mount), so the multi-batch semantics it
-  encodes are dead until a second sync trigger exists; if one is added, the empty→non-empty
+- 2026-08-14 — the batch-conflict epoch exceeds 1 in production only when `syncKey` changes
+  (`useMDUserPlannersData.ts:143` runs one sync per PersonalPlannerList mount unless `syncKey`
+  changed), so the multi-batch semantics it encodes run rarely; if one is added, the empty→non-empty
   edge must become a batch-identity check or stale choices/outcomes leak across batches.
 - 2026-08-14 — the batch-conflict park is not durable across remount: navigation away and
   back rebuilds the batch and pops the modal uninvited. Persisting the dismissal (per
@@ -431,9 +434,6 @@ asset pipeline.
   it.
 - 2026-08-15 — NoteEditor.handlePaste policy is still inline; only its primitives moved to
   noteUtils. The policy extraction remains open.
-- 2026-08-15 — jsx-a11y ships eight of nine rules; prefer-tag-over-role is off per ADR 083
-  (four correct-ARIA reports the rule cannot express as native tags) — cross-reference, since
-  the acceptance row names this ledger.
 - 2026-08-15 — epic composition audit residue (RFC 0004), accepted as debt: NotificationToast's
   sonner import and toast.info sit outside the written toast law (exemption is real, law text lags); coverage
   thresholds are zero-margin measured values and CI runs the suite without the worker cap or
@@ -450,10 +450,6 @@ asset pipeline.
   the generic error message, so a user who hits the server-side planner cap is not told what
   the cap is or that they hit one. The server carries the current count and the maximum only
   inside an English prose message, with no structured field a translation could interpolate.
-- 2026-08-15 — `PlannerCardContextMenu.test.tsx` builds its duplicate-vote 409 with
-  `CONCURRENT_WRITE`, a code that endpoint cannot emit: `CONCURRENT_WRITE` is written only from
-  the optimistic-locking handler, and `PlannerContent` is the sole `@Version` entity. The codes
-  a duplicate vote actually produces are `VOTE_ALREADY_EXISTS` and `DUPLICATE_ACTION`.
 - 2026-08-15 — `KnownConstraint` omits `planner_comment_votes`, so a raced duplicate comment
   upvote falls to `UNEXPECTED_CONFLICT`: it answers the generic `CONFLICT` code and raises a
   Sentry alert, while the equivalent planner-vote and comment-report races are listed and
@@ -467,18 +463,6 @@ asset pipeline.
   version N and the acknowledgement returns N+k with content unchanged. Ack adoption is covered
   only by the generic version-jump tests in `usePlannerSave.test.ts`, which do not distinguish an
   ack won by no-op arbitration from an ordinary forward version bump.
-- 2026-08-16 — Comment content is HTML at rest by frontend convention alone: `CommentEditor`
-  submits `editor.getHTML()` into `planner_comments.content` (`TEXT`, V015), and the backend
-  acknowledges the format at exactly one site — `Notification`'s
-  `truncate(stripHtml(...), 100)` snippet. Notes carry the opposite guarantee
-  (`planner_content.content` is a MySQL `JSON` column, format DB-enforced since the first
-  save), so the asymmetry is comment-only. Moving comments to tiptap-JSON-at-rest is
-  therefore a real migration, not a flag flip: a `TEXT` column with no DB-side validation,
-  no server-side HTML parser to convert with (an offline pass would need one; the
-  alternative is lazy migrate-on-write through tiptap's polymorphic `setContent`), and
-  coordinated changes to `CommentCard`'s sanitize-and-inject render, the `sanitizeUserHtml`
-  allowlist, and `stripHtml`. No current requirement forces the move; this entry prices the
-  coupling so a future format change is proposed as the project it is.
 - 2026-08-16 — Every compose flavor (default+override, oauth-gtid, multiregion, e2e, loadtest)
   runs under the same default project name, so they all mount the one
   `limbusplanner_mysql-data` volume. MySQL applies env credentials only on first init of an
@@ -486,10 +470,9 @@ asset pipeline.
   and the backend fails at Flyway with error 1045. Found work: isolate the flavors — a
   distinct volume name or an explicit `name:`/`COMPOSE_PROJECT_NAME` per flavor — so a stack
   switch cannot poison dev credentials.
-- 2026-08-16 — Dead client surface found by coverage audit: `plannerApi.import` (no call
-  site), the `settings:invalidated` SSE event constant (declared in `lib/constants/api.ts`,
+- 2026-08-16 — Dead client surface found by coverage audit: the `settings:invalidated` SSE event constant (declared in `lib/constants/api.ts`,
   no registered handler), `usePlannerStorage.clearCorruptedLocal` (no consumer), and the
-  `my-plans` branch of `PlannerCardContextMenu` (never mounted).
+  `my-plans` branch of `pages/planner/components/plannerList/PlannerCardContextMenu.tsx` (never mounted).
 - 2026-08-16 — The pull pass counts purges it did not verify (`purgeLocalPlanners` discards
   `deleteLocal`'s Result) and a failed background sync marks the session synced with no
   retry and no indicator (`hasSyncedRef` set on error; the `isSyncing` consumer is a TODO in
@@ -509,17 +492,11 @@ asset pipeline.
   upgrade) and a per-plan adoption dialog (adoption-by-copy duplicates plans in the
   logged-out view) were both killed in the debate, and unstamped-row visibility is the one
   open sub-question.
-- 2026-08-16 — `stack:down` composes only the base file set, so after `stack:up:rig` it
+- 2026-08-16 — `stack:down` (in `e2e/package.json`) composes only the base file set, so after `stack:up:rig` it
   orphans four running services (`backend-oregon`, `mysql-replica`, `oauth-stub`,
   `toxiproxy`) — verified live by diffing `config --services` against running containers.
   Add a `stack:down:rig` mirroring the rig's file set, or `--remove-orphans` to
   `stack:down`.
-- 2026-08-16 — Every planner update response serializes `lastModifiedAt` before `@PreUpdate`
-  stamps it at flush, so the wire value undersells the stored one by the flush skew (~50ms
-  observed) and the client adopts the stale value into IndexedDB. Harmless today (nothing
-  compares the two), but any future logic trusting response `lastModifiedAt` against a read
-  inherits a guaranteed mismatch; `noop-arbitration.contract.spec.ts` documents the shape by
-  asserting on reads instead.
 - 2026-08-16 — The unread badge can stay wrong for five minutes after a real-time push,
   reproduced on the rig: `notify:comment` invalidates and the refetch races replication (the
   notification row committed on the primary ~40ms earlier, the Seoul replica answered
@@ -540,106 +517,41 @@ asset pipeline.
   fix is the same invalidation call in the reconnect branch, plus a reconnect assertion in
   `notification-push.spec.ts`), or when a user reports a missed notification after a
   network blip.
-- 2026-08-17 — The prod-account RDS move cannot share the snapshot as-is:
-  `terraform/rds/main.tf` sets `storage_encrypted = true` with no `kms_key_id`, so the
-  instance encrypts under the AWS-managed `aws/rds` key, and AWS refuses to share
-  snapshots encrypted with an AWS-managed key across accounts. The documented path is
-  copy-with-CMK in the management account, share the CMK and the copy to
-  danteplanner-prod, and restore there (which re-encrypts again under a prod key) — two
-  extra full-storage snapshot copies of window time that `prod-account-rewire.md` §7's
-  "snapshot-share-and-restore" line does not mention. The staging drill the runbook
-  mandates would hit this on its first attempt; cheaper to provision the CMK and script
-  the copy before the drill.
 - 2026-08-17 — ADR 082 declares it supersedes 071's `@sync @digest` bullets "once the
   arbitration is implemented", but carries no `supersedes:` key and left 071 with no
   `## Superseded` section. The condition is met — `SyncVersionValidator.arbitrate` and
-  `EffectiveNoOpPredicate` are live, `V060` dropped `content_digest`, and no Java or TS
+  `PlannerChange` are live, `V060` dropped `content_digest`, and no Java or TS
   outside those two migrations references a digest — so 071 reads as a live decision for a
   column that does not exist, and the repo's own convention (status derived from structure)
   agrees with the wrong side. `docs/rfcs/0003-sync-identity-and-effect-delivery.md` and
   `0005-server-noop-conflict-arbitration.md` still show the column as target state.
-- 2026-08-17 — Planner moderation authorizes on the URL role rule alone:
-  `SecurityConfig.java:134` gates `/api/moderation/**` on `hasRole("MODERATOR")`, and
-  `PlannerModerationService` (`:49`, `:69`, `:90`, `:113`) reaches
-  `plannerPublishingService` with no actor lookup, so a restricted moderator keeps takedown,
-  unpublish and recommended-listing authority until their token expires. Account restriction
-  goes through `ModerationPolicy.requireCanRestrict`, whose own comment
-  (`ModerationPolicy.java:78-84`) states a restriction withdraws authority precisely because
-  banning a moderator invalidates no token — a rule the planner endpoints never consult.
-- 2026-08-17 — `PlannerPublishingService.java:100` and `:133` pass
-  `upserted(userId, plannerId, content)` as an argument, so the whole upsert — field
+- 2026-08-17 — `PlannerPublishingService.java:73` passes
+  `upserted(userId, deviceId, plannerId, content)` as an argument, so the whole upsert — field
   mutation, `recordSave()`'s version bump, `onVisibleEditCommitted`, and `createAggregate`
   for an id the server has never seen — runs before `applyPublish` reaches `requireOwner`
-  (`:154`), `requireTitle` (`:156`), the `ValidationPolicy.PUBLISH` content gate (`:157`) and
-  the takedown refusal in `Planner.publish()`. The javadoc at `:149-150` claims the opposite
-  ("a refusal leaves the planner in the state the caller found it in rather than relying on
-  the rollback"). A stale `syncVersion` on a taken-down planner answers 409 from arbitration
+  (`:99`), `requireTitle` (`:101`), the `Stage.PUBLISH` content gate (`:102-103`) and
+  the takedown refusal in `Planner.publish()`. A stale `syncVersion` on a taken-down planner answers 409 from arbitration
   before the 403 the state warrants, which opens the client's conflict dialog for a planner
   that can never publish.
-- 2026-08-17 — `PlannerFilterService.onFilterRebuildRequested` (`:53-55`) is an
-  `AFTER_COMMIT` listener writing `planner_entity_filter` / `planner_keyword_filter` under
-  `REQUIRES_NEW` — the shape ADR 072 names and rejects ("REJECTED: `REQUIRES_NEW` writes from
-  after-commit listeners — the crash window above, with no durable record to retry from").
-  A crash between commit and listener leaves a published planner absent from entity and
-  keyword search with no outbox row, no relay, and no alarm; only a manual
-  `CALL rebuild_planner_filters(...)` recovers it. `EffectPlacementTest.java:184-197`
-  implements the dispatcher direction of the ADR's rule (listeners reaching the dispatcher
-  are exactly the eager hop) but not its converse, so this listener passes; `:199-221`
-  likewise enforces "within the notification package" where the ADR says "only by the
-  dispatcher".
-- 2026-08-17 — The restriction gate ADR 078 describes as following the planner's public state
-  exists only in `PlannerCommandService.upsertAggregate` (`:356-358`). `deletePlanner`
-  (`:466-490`) has none while explicitly unpublishing a published planner (`:472-475`) and
-  dropping its catalog row (`:478`), so a banned user can still move a planner out of public
-  view; `importPlanners` (`:503`) and `createAggregate` (`:267`) call `getUser` rather than
-  `checkNotRestricted`. The unreachable `updatePlanner` (`:424-457`, no controller route)
-  carries no gate and a `CarriedWrite` missing `gameContentVersion` and
-  `contentSchemaVersion`, so two conjuncts of the no-op predicate are unconditionally true
-  there the day a caller is added.
-- 2026-08-17 — ADR 085 states the device stamp is compared "like every other field the write
-  path stamps" and that "the biconditional invariant admits no exception", but
-  `PlannerPublishingService.java:136-140` routes publish/unpublish-with-body through the
-  3-arg `upsertAggregate` overload, which hardcodes `deviceId = null`
-  (`PlannerCommandService.java:330`); `applyKeywordsAndDeviceId` then skips the stamp and
-  `EffectiveNoOpPredicate.java:50` reads a null carried value as unchanged. The same stale
-  cross-device resend is a 409 through `PUT /{id}` and an `ACK_NO_OP` through
-  `POST /{id}/publish`, so that client is handed another device's version as an
-  acknowledgement of its own write.
 - 2026-08-17 — Several find-then-insert paths rely on a real database constraint without the
   handled violation ADR 023 pairs it with, so the race answers `UNEXPECTED_CONFLICT` plus a
-  Sentry page instead of a domain outcome: `RecommendedSql.java:42-55` inserts into
+  Sentry page instead of a domain outcome: `RecommendedSql.java:19` inserts into
   `planner_catalog` with no `IGNORE`/`ON DUPLICATE KEY` against its primary key (reached from
-  `PlannerCatalogService.java:88` on unban), `UserSettingsService.java:91-94` (reached from
+  `PlannerCatalogService.java:88` on unban), `UserSettingsService.java:98` (reached from
   login and from every SSE connect), `PlannerSubscriptionService.java:79-85`, and the bare
   `planner_stats` inserts at `PlannerCommandService.java:279-281` and `:520-522`.
-- 2026-08-17 — "Left public view" writes a replica tombstone on one path only. Owner
-  soft-delete registers one after commit and, when no transaction is active, writes it inline
-  before commit (`PlannerCommandService.java:479-488`) — a pre-commit cross-store effect whose
-  rollback leaves an hour-long tombstone for a live planner, and `ContentTombstoneStore.java:62-65`
-  states a positive tombstone is the only gate on a replica hit. Moderator takedown and
-  unpublish (`PlannerPublishingService.withdrawFromPublicView`, `:213-219`) write none, so a
-  taken-down planner is served unmasked from a lagging replica for the replication window.
-- 2026-08-17 — The comment and reply effect arms re-read by bare id rather than with the raise
-  site's predicate: `CommentCommandService.java:60,62` gates the write on
-  `checkNotRestricted` plus `checkPublished`, while `CommentReceivedEffect.java:48-60` and
-  `ReplyReceivedEffect.java:46-58` check only `isDeleted()`. Dropping the published predicate
-  is deliberate for the owner notification and documented at
-  `PublishedPlannerQueryService.java:99-112`, but the same arms also push `COMMENT_ADDED` to
-  the planner's public comment channel, which the raise site would have refused; and
-  `ReplyReceivedEffect.java:68-70` loads the parent comment by bare id with no `isDeleted()`
-  check, so a withdrawn parent still receives its reply notification.
 - 2026-08-17 — A local draft kept through a tombstone can never be saved again. ADR 088 keeps
-  it (`syncPlan.ts:57-60` purges only non-draft rows), the server has no resurrect path —
+  it (`syncPlan.ts:61` purges only non-draft rows), the server has no resurrect path —
   `findAggregateForOwner` filters `deletedAt` (`PlannerRepository.java:65`), the pre-create
-  probe does not (`:131-132`), and `PlannerOwnershipValidator.java:45-49` answers 404 for the
+  probe does not (`:131-132`), and `planner/precondition/PlannerOwnershipValidator.java:24-25` answers 404 for the
   owner's own tombstone, with `deleted_at` never cleared anywhere — and `performSave`
   (`usePlannerSave.ts:477-489`) returns before `storage.saveToLocal` on failure, so the manual
   write is discarded too and `hasUnsyncedChanges` stays true. The 404 classifies as
   `notFound` and presents as the generic resource-not-found message; whether the client should
   drop the row, unlink it, or offer a re-create is undecided on both sides.
-- 2026-08-17 — `status` is read as a per-device local fact by `syncPlan.ts:36,58` and
-  `deriveSaveStatus`, and as a replicated column by the wire (`usePlannerSyncAdapter.ts:158`,
-  adopted on every pull at `:72`, compared by `EffectiveNoOpPredicate.java:40`). The two
+- 2026-08-17 — `status` is read as a per-device local fact by `syncPlan.ts:30,61` and
+  `deriveSaveStatus`, and as a replicated column by the wire (`usePlannerSyncAdapter.ts:96`,
+  adopted on every pull at `:52`, compared by `PlannerChange.java:22`). The two
   readings diverge inside one interpreter: `conflictChoice.keepLocal` (`:168-175`) pushes the
   operand as-is and stamps `saved` only locally, and the list caller supplies a row whose
   status is `draft` by construction (`useMDUserPlannersData.ts:365-374`) where the editor
@@ -656,9 +568,9 @@ asset pipeline.
   `PublishedPlannerHeader.tsx:51`), so a second device can receive published content stamped
   with a `contentVersion` its bytes were never validated against.
 - 2026-08-17 — `BatchConflictDialog` hardcodes the local side as the copy — row labels read
-  `conflict.localPlanner.metadata.title` (`:282`) and the "copy will not be published" notice
-  gates on the local row's flag (`:297-301`) — while the import caller plans with
-  `forkSide: 'incoming'` (`PlannerExportImportSection.tsx:366-375`) and forces `published:
+  `conflict.localPlanner.metadata.title` (`:221`) and the "copy will not be published" notice
+  gates on the local row's flag (`:234-236`) — while the import caller plans with
+  `forkSide: 'incoming'` (`PlannerExportImportSection.tsx:345`) and forces `published:
   false` on the imported side (`:404`). Importing a published planner over a local
   unpublished row silently unpublishes the copy without the notice, and warns about a copy
   whose publication was never at stake; the comment at `:281` also claims a "Server" →
@@ -678,28 +590,14 @@ asset pipeline.
 - 2026-08-17 — ADR 073 removed the SSE planner event family on the grounds that
   "`refetchOnWindowFocus` on the server-backed planner queries becomes the freshness
   mechanism in their place", but every personal-planner query disables it
-  (`useMDUserPlannersData.ts:203,215`, `useSavedPlannerQuery.ts:42`) because the source is
+  (`useMDUserPlannersData.ts:125,134`, `useSavedPlannerQuery.ts:21`) because the source is
   IndexedDB. The only server read on that path is the one-shot sync effect
   (`useMDUserPlannersData.ts:222-288`) gated per mount by `hasSyncedRef`, and the personal
   detail route reads IndexedDB alone (`PlannerMDDetailPage.tsx:57`), so the promised "a delete
   performed on another device surfaces as a 404 when the stale entry is opened" happens only
   on the community route. Freshness is per-mount, not per-focus, on exactly the path SSE
   covered.
-- 2026-08-17 — The denormalized keyword column is written verbatim from the client's copy
-  (`UpsertPlannerRequest.java:51` → `PlannerCommandService.java:192-196`), which ADR 030
-  records as rejected ("derived server-side from the content tree… REJECTED: accepting a
-  client-supplied projection alongside its source"). A null means "leave unchanged"
-  (`:193`), so a save carrying a changed content tree without the copy strands the column;
-  and nothing can detect it, because the drift audit takes its keyword oracle from the stored
-  column itself (`PlannerDriftReconciler.rebuildExpectedIndexes`,
-  `PlannerDriftAuditRepository.java:218-219`) rather than from the content JSON.
-- 2026-08-17 — ADR 030 also records that an unknown keyword is "rejected only when
-  publishing and tolerated on a draft sync", but `PlannerKeywords.normalize` (`:75-88`) drops
-  unknowns at every tier and `PlannerContentValidator` inspects keywords under no
-  `ValidationPolicy`, `PUBLISH` included. Publishing with an unknown keyword succeeds and
-  discards it; the two-tier rule survives only in the client, which the same ADR justifies as
-  the sole defense for guest documents alone.
-- 2026-08-17 — `KeywordParityTest.java:64-71` pins `PlannerKeywords.VALID_KEYWORDS` to the
+- 2026-08-17 — `converter/KeywordParityTest.java:65-71` pins `PlannerKeywords.VALID_KEYWORDS` to the
   members of the latest `ALTER TABLE planners MODIFY COLUMN selected_keywords SET(...)`
   migration, but `V052:116` dropped `planners` and the live column is
   `planner_content.selected_keywords JSON` (`V049:29`). The test passes against a fossil
@@ -709,60 +607,31 @@ asset pipeline.
   true at V049.
 - 2026-08-17 — The base-gift collapse is expressed three times and the frontend copy
   disagrees with the two backend copies on ids outside the enhancement bands:
-  `PlannerContentEntityExtractor.java:129-132` and `V055__normalize_ego_gift_filter_ids.sql:50-52`
-  pass them through and index them, while `egoGiftEncoding.ts:29`'s
+  `planner/searchindex/PlannerContentEntityExtractor.java:129-132` and `V055__normalize_ego_gift_filter_ids.sql:50-52`
+  pass them through and index them, while `pages/egoGift/lib/egoGiftEncoding.ts:29`'s
   `^([12])?(9\d{3})$` drops them. The same filter term answers differently on the published
   list (server index) and in "My Plans" (local predicate,
-  `plannerContentExtractors.ts:199-203`), and each side is pinned by tests to its own
+  `pages/planner/lib/plannerContentExtractors.ts:199-203`), and each side is pinned by tests to its own
   contract. ADR 039 names this population directly — the seed carries gift ids outside every
-  valid band.
+  valid band. The validation branch adds a fourth backend copy (`EncodedGiftId`) beside
+  `GameDataRegistry.GIFT_ENHANCEMENT_PATTERN`, which `PlannerIdMigrations` also reads.
 - 2026-08-17 — `PlannerCoreInfo.absent()` yields a null `createdAt`
-  (`PublishedPlannerQueryService.java:219` uses it whenever the batch core load misses a row)
-  and the global `NON_NULL` Jackson config omits the key, but `PlannerListSchemas.ts:48`
+  (`PublishedPlannerQueryService.java:54` uses it whenever the batch core load misses a row)
+  and the global `NON_NULL` Jackson config omits the key, but `PlannerListSchemas.ts:19`
   declares `createdAt` required, so one catalog row without a core row rejects the entire
   paginated community page rather than one card. The sibling fields on the same DTO are
   correctly `.nullish()` (`:44,46`) and the components already tolerate an absent value.
-- 2026-08-17 — `AbEventSchemas.ts:15-16` types `relatedEgoGifts` as `z.array(z.string())`
+- 2026-08-17 — `AbEventSchemas.ts:5` types `relatedEgoGifts` as `z.array(z.string())`
   rather than `EGOGiftIdSchema`, and 13 ids in `static/data/abEventSpecList.json`
   (`991001`–`993004`, six digits) violate `GIFT_ID_PATTERN`. `EGOGiftGrid.tsx:34-35` renders
   nothing for them, silently; the branded schema would have failed `dataIntegrity.test.ts` on
   the file instead. `giftListItem.ts:28` parses the same values through `EGOGiftIdSchema` and
   would throw.
-- 2026-08-17 — `usePlannerFork.ts:111` still parses the published payload with an unguarded
-  `JSON.parse` and assembles it with `toSaveablePlanner` (`:115-135`), skipping the
+- 2026-08-17 — `usePlannerFork.ts:58` still parses the published payload with an unguarded
+  `JSON.parse` and assembles it with `toSaveablePlanner` (right after it), skipping the
   `validateSaveablePlanner` gate its sibling `usePublishedPlannerQuery.ts:106-133` gained, then
-  writes the unvalidated content to local storage at `:138`. `usePlannerSyncAdapter.ts:61-68`
+  writes the unvalidated content to local storage at `:138`. `usePlannerSyncAdapter.ts:41-46`
   guards the parse but likewise skips the schema gate.
-- 2026-08-17 — Backend content validation refuses string-form buff ids:
-  `StartBuffValidator.java:41` iterates `selectedBuffIds` with `eachNumber`, whose
-  `!element.isNumber()` check (`JsonTraversal.java:119-121`) rejects a textual element, while
-  the sibling `selectedGiftIds` goes through `eachUniqueString` (`:85`). Any move of buff ids
-  to the branded string form the rest of the entity ids use is therefore a two-sided
-  migration with a hard ordering constraint — the server must accept both forms before any
-  client writes strings, and numeric acceptance has to survive until a `contentSchemaVersion`
-  rewrite retires stored numeric arrays, since stored content re-enters validation on a
-  category change.
-- 2026-08-17 — `window-schema-decomposition.yml` drains the regions in the wrong order.
-  Its freeze job loops `"$OREGON_REGION:oregon" "$SEOUL_REGION:seoul"`, so Oregon is
-  drained first, while `docs/runbooks/schema-decomposition-migration.md` B1 step 2 states
-  the opposite and says why: "Freeze Seoul before Oregon. Seoul writes cross-region into
-  Oregon's primary, so stopping the writer before its target leaves no half-applied
-  cross-region work." As written the workflow stops the target before the writer, leaving
-  a window where Seoul pods are still accepting writes aimed at an Oregon primary whose
-  own pods are gone. The bring-up order (Oregon, then Seoul) is correct and matches B4 —
-  only the drain loop is reversed. Fix is reversing that one loop; the same ordering must
-  hold in any local port of the workflow.
-- 2026-08-17 — The stop-the-world drain uses a node label value Kubernetes rejects, so the
-  production window fails at its first step. `docs/runbooks/schema-decomposition-migration.md`
-  B1 and `.github/workflows/window-schema-decomposition.yml` both patch the backend
-  DaemonSet with `nodeSelector: {role: "__migrating__"}`, and the API server refuses it:
-  a label value must begin and end with an alphanumeric character, which `__migrating__`
-  does not. Reproduced against the prod-account fleet: "The DaemonSet backend is invalid:
-  spec.template.spec.nodeSelector: Invalid value: \"__migrating__\"". The workflow is
-  dispatch-only and has never run, which is why this survived. Any value that is legal and
-  matches no real node label works — the nodes carry role=app / data / ingress — so
-  `migrating` is enough. Four call sites: runbook lines 243 and 248 (the second is the gate
-  that greps for the value), workflow lines 96 and 108.
 - 2026-08-20 — The nightly terraform drift check has never been able to run, and its
   schedule is now off until it can. Three independent blockers. (1) Credentials: the job
   assumes `secrets.AWS_PROVISIONER_ROLE_ARN` while declaring no `environment:`, so it mints
@@ -772,8 +641,8 @@ asset pipeline.
   sts:AssumeRoleWithWebIdentity". Declaring `environment: production` would satisfy the
   trust but attaches that environment's required reviewer, which an unattended cron cannot
   clear — an ungated environment plus a matching `sub` condition on the role is the shape
-  that works. (2) Inputs: `TFVARS_OREGON`, `TFVARS_SEOUL`, `TFVARS_RDS` and `TFVARS_SECRETS`
-  do not exist at repository scope or in any environment, and the workflow's own note
+  that works. (2) Inputs: `TFVARS_OREGON`, `TFVARS_SEOUL`, `TFVARS_RDS`, `TFVARS_SECRETS` and
+  `TFVARS_CLOUDFLARE` do not exist at repository scope or in any environment, and the workflow's own note
   explains the consequence — "a partial set is worse than none: variables that gate a
   resource default to empty, so a plan missing one reports the resource's destruction as
   drift". (3) Account: the workflow writes `backend.hcl` as
@@ -783,7 +652,7 @@ asset pipeline.
   holds the rollback addresses for the bake, and `cloudflare` added, which needed workspace
   support in `scripts/ops/terraform-drift-check.sh` — that stack keeps a `prod-fleet`
   workspace alongside `default`, and planning without selecting reports the whole stack as
-  absent. Re-enabling the cron needs the four secrets populated with prod values and the
+  absent. Re-enabling the cron needs the five secrets populated with prod values and the
   credential path settled.
 - 2026-08-20 — infra-suite's `edge-suites` is disabled: it cannot reach the staging origin,
   and the staging edge it drives is unmanaged. Four defects were cleared before the fifth
@@ -837,43 +706,8 @@ asset pipeline.
   edit: `surge-up` declared `needs: [build-push, edge-gate]`, so gating edge-gate off with
   `if: false` would have skipped the surge, the tag bump and the settle in turn, disabling
   deployment rather than one check.
-- 2026-08-20 — A failed dynamic import blanks the whole SPA, so every deploy breaks any tab
-  that was already open. Asset filenames are content-hashed, so a new Pages build has an
-  entirely different chunk set (22 new, 28 gone in the 08-17 build); a shell holding the old
-  index.html then requests chunks that no longer exist. Pages rewrites unknown paths to
-  index.html, so the browser reports "Expected a JavaScript-or-Wasm module script but the
-  server responded with a MIME type of text/html" rather than a 404. `router.tsx:474` does set
-  `defaultErrorComponent: RouteErrorComponent`, but a `lazyRouteComponent` import rejects while
-  the route is still resolving, so it escapes past the route boundary to the single
-  `ErrorBoundary` wrapping `<RouterProvider>` in `main.tsx:16`. Nothing anywhere catches
-  "Failed to fetch dynamically imported module" — grep confirms — so there is no reload
-  recovery. The usual fix is catching the import rejection and calling `location.reload()` once,
-  guarded by a sessionStorage flag so it cannot loop.
 
-- 2026-08-20 — The backend DaemonSet has no `startupProbe`, so its liveness probe polices a JVM
-  that is still legitimately booting. `livenessProbe` is `initialDelaySeconds: 30`,
-  `periodSeconds: 15`, `failureThreshold: 3`, a budget of roughly 75s; during the account
-  cutover Flyway took 51.6s and the app reported `Started BackendApplication in 74.023 seconds`,
-  so probes at 30/45/60s all hit a closed port and the container was killed with exitCode 143 —
-  ten seconds after startup completed. It self-corrected because the second start had no
-  migrations to apply. The dangerous version is a kill landing mid-migration: MySQL DDL is not
-  transactional, so a partially applied V052-class migration would leave the schema wedged, and
-  Flyway's advisory lock protects against concurrent migrators, not against the migrator being
-  killed. A `startupProbe` covering worst-case boot lets liveness go back to detecting real
-  hangs.
 
-- 2026-08-20 — `docs/runbooks/prod-account-cutover.md` step 4 cannot run as written, because
-  `scripts/ops/access/rds-query.sh` forces the read-only user. `SHOW REPLICA STATUS` needs
-  `REPLICATION CLIENT`, which `danteplanner_ro` lacks, so the parity assertion errors with
-  1227. The same user cannot `SHOW EVENTS`, so the documented `mysqldump --events` aborts after
-  writing every table — leaving a 69 MB file with no `-- Dump completed` marker, which is the
-  only reliable completeness check since size looks right. The `--routines` justification is
-  also wrong: the stored procedure comes from
-  `V053__create_rebuild_planner_filters_procedure.sql`, above the V045 dump, so no migration at
-  or below V045 creates any routine, trigger or event. `@@GLOBAL.gtid_executed` is readable
-  without privileges and gives the same parity answer; note RDS's own `mysql.rds_heartbeat2`
-  writes advance it continuously, so exact equality between primary and replica is not a
-  reachable state.
 
 - 2026-08-20 — `terraform/.gitignore:9` ignores `*.tfvars`, which keeps
   `gitops_target_revision` — the value deciding which revision production's ArgoCD syncs — out
@@ -888,22 +722,7 @@ asset pipeline.
   half and an ignored secret half would put the revision under review and shrink the secrets to
   the genuinely secret residue.
 
-- 2026-08-20 — The provisioning role is named `danteplanner-provisioner` in the management and
-  staging accounts and `prod-provisioner` in prod, and the inconsistency has already caused an
-  outage of the deploy path. `~/.aws/config` carried a `prod-provisioner` profile whose
-  `role_arn` named `danteplanner-provisioner`, a role that does not exist in that account; that
-  value was copied into the `AWS_PROVISIONER_ROLE_ARN` GitHub secret on 2026-08-17 and stayed
-  there until 2026-08-19, so every `build-push` failed with "Not authorized to perform
-  sts:AssumeRoleWithWebIdentity" and no CloudTrail record in any account, because an ARN that
-  resolves to no role leaves no account to log the denial. The name is set per workspace in
-  `terraform/iam-bootstrap`, so aligning it is a rename plus a secret update; the cheaper
-  discipline is verifying an ARN with `aws iam get-role` before propagating it anywhere.
 
-- 2026-08-20 — Cloudflare load balancing is at its account limit of two origins, both consumed
-  by the production pools, so no second environment can hold a load balancer. Creating
-  `danteplanner-prod-oregon` and `-seoul` during the cutover required deleting the edge-test
-  build-out. Nothing in the terraform expresses the ceiling: each workspace plans happily in
-  isolation and the constraint appears only as a 400 mid-apply.
 
 - 2026-08-20 — `test-migration` gates nothing in PR Gate: no job declares it in `needs`, so a
   build can publish while it is still running. `e2e` had the same shape and was wired into both
@@ -931,14 +750,6 @@ asset pipeline.
   second ungated environment for the mechanical jobs and extending the role's trust to its
   `sub`.
 
-- 2026-08-20 — `PlannerCatalogLifecycleIT.listRecencySort_WhenBrowsing_NewestFirstFilesortFree`
-  is mitigated, not fixed. Its three rows are stamped one to three hours in the past, so every
-  planner another test publishes sorts above them; the membership assertion now asks for the
-  controller's maximum page (`Math.min(size, 100)`) instead of the default 20, which survives
-  up to a hundred published planners in the suite's shared catalog and fails again past that.
-  The relative-order assertions were already written defensively. Eliminating the coupling means
-  the test not reading a global listing at all — filtering to its own rows, or running against
-  an isolated catalog.
 - 2026-08-20 — Two Grafana alerts stay lit for reasons that are not incidents, and both are
   rule-definition problems rather than infrastructure ones. The ArgoCD drift alert fires on the
   management fleet, whose Applications report `sync_status=OutOfSync, health_status=Missing`
@@ -961,19 +772,6 @@ asset pipeline.
   two reads per write. The rule needs re-pointing at
   `rate(hikaricp_connections_usage_seconds_count[...])`; waiting will not clear it, because the
   gauge it watches will keep reading zero.
-- 2026-08-20 — Requests for a missing `/a/*` asset return the SPA fallback `index.html`
-  with HTTP 200, and the `_headers` rule for `/a/*` stamps `max-age=31536000, immutable`
-  onto that HTML too, so Cloudflare edges and browsers cache HTML under the chunk URL
-  for a year. One poisoned entry served bare `index.html` after the 2026-08-20 FE deploy
-  (module MIME error on `/a/BzVGhZqzEgrm.js`); an edge purge cleared it, but browsers
-  that cached the HTML self-heal only when the chunk's hash changes or on a hard reload.
-  Repro probe: `curl -sS -D - -o /dev/null https://dante-planner.com/a/<any-missing>.js`
-  shows 200 + `text/html` + the immutable header. The durable fix is undecided: make
-  `/a/*` misses real 404s at the serving layer, never cache HTML bodies under `/a/*`, or
-  keep prior releases' assets available across deploys. Deciding requires naming where
-  the site is actually served from — no wrangler config exists in the repo, and
-  `frontend/scripts/dev-r2-sync.ts` references a `frontend/wrangler.jsonc` that is not
-  checked in.
 - vitest full suite: one worker OOMs (ERR_WORKER_OUT_OF_MEMORY) under parallel run while all 220 completed files pass; dataIntegrity.test.ts passes in isolation. Found 2026-08-21 during static keyword-expansion commit validation.
 - 2026-08-24 — `terraform/cloudflare` splits one logical stack across two state buckets with
   inconsistent workspace names, and the stack's resources live in Cloudflare rather than in
@@ -995,14 +793,15 @@ asset pipeline.
   that ran a version before ADR 096; nothing reads it and the planner listing skips one-part
   keys. Delete it inside `onupgradeneeded` at the next database version bump, whatever that
   bump is for.
-- 2026-09-11 — `GlobalExceptionHandler` logs `PLANNER_NOT_FOUND` at WARN for a DELETE of a row
+- 2026-09-11 — `ApiExceptionHandler` logs `PLANNER_NOT_FOUND` at WARN for a DELETE of a row
   the server never received, a routine outcome the client already treats as success (about 5 a
   day). Worth demoting that one method-and-code pair to INFO when the WARN stream is next used
   for alerting, or when an ADR settles a client marker for never-synced rows.
 - The keyword browser builds its own grid rather than `FilteredEntityGrid`, so it still
   renders `useProgressiveCount` batches and loses a deep scroll offset on return from a
-  keyword detail page. `CardGeometry.units` is now `CardUnits | null`, so the shared grid
-  reserves a width-only slot for a card with no fixed height and nothing blocks the fold;
+  keyword detail page. The `CardGeometry.units` field this entry once named no longer exists (`CardGeometry` is `size`,
+  `mobileScale` and `rows`); recheck whether the shared grid now fits a card with no fixed height
+  before folding;
   worth doing when the keyword browser's scroll restoration is next reported or revisited.
 - `images/UI/manifest.json` records `source: null` for every asset no converter claims,
   which is indistinguishable from an asset whose source was never recorded. Worth splitting
@@ -1019,48 +818,72 @@ asset pipeline.
 - The EGO rank word plate measures about 6 percent wider than the game's, inside the
   measurement noise of a 1280-wide reference. Worth revisiting when a higher-resolution
   reference screenshot exists.
-- 2026-09-15 — Account deactivation withdraws only the catalog rows (ADR 034 @visibility,
-  `UserAccountLifecycleService.java:96`); the aggregate visibility predicate in
-  `PlannerRepository.java:88-89` and `:123-125` checks `published` and `content.deleted_at`
-  but never the owner's `users.deleted_at`, so for the 30-day grace window a deactivated
-  owner's published planner still answers `GET /api/planner/md/published/{id}` with full
-  content and the author's name (`PublishedPlannerDetailResponse.java:103-104`), and every
-  caller of `checkPublished` (comment, vote, bookmark, report) still accepts writes against
-  it. The drift audit's two membership queries (`PlannerDriftAuditRepository.java:138`,
-  `:157`) omit the same conjunct, so those planners are reported nightly as
-  `catalog_membership` "row missing" drift for the whole window (inferred from the
-  predicate, not observed in logs). Decided: each predicate joins `users` and adds
-  `deleted_at IS NULL` directly (rejected: deriving detail visibility from catalog-row
-  presence, which the audit cannot use and which would turn a projection drift into a
-  404 for a live planner). `RESTORE_ALL_OWNED_BY` is unaffected (`user_id = :userId` is the
-  owner conjunct). Worth doing before the next account-deletion request lands in
-  production, or before the visibility definition gains another conjunct.
-- 2026-09-15 — A deactivated author's comments read differently across the two deletion
-  stages. During the grace window the body is served in full with only the author fields
-  blanked: `CommentTreeNode.java:72-80` masks `authorEpithet`/`authorSuffix` on
-  `author.isDeleted()`, but `:92` blanks `content` on `comment.isDeleted()` alone, and the
-  listing (`PlannerCommentRepository.java:30-35`) joins no user and filters nothing.
-  After the purge the body is gone (`:71-72`, `SET c.userId = :sentinelId, c.content = ''`).
-  `CommentServiceLayerTest.java:487-488` pins the grace-window body as visible. Decided:
-  the author lifecycle governs the projection only — `fromEntity` blanks `content` under
-  the same author-hidden predicate it already computes for the name fields — and the tree
-  shape stays the comment flag's alone: the `:174` leaf prune keeps `comment.isDeleted()`
-  and never consults the author, so a leaf masked for its author survives and reactivation
-  changes no row's presence. Rejected: extending the unified predicate to the prune (a
-  reactivated author's leaves reappear, and replies under them lose and regain their
-  parent); blanking at soft-delete time (reactivation cannot restore the body). Purge is
-  unchanged. Ships as the `fromEntity` predicate change, the flipped
-  `CommentServiceLayerTest` assertion, an HTTP-level IT asserting a deactivated author's
-  leaf survives with empty body (none exists today; `CommentControllerIT.java:597` covers
-  comment-level deletion only), and an ADR. Worth doing with the deactivation-visibility
-  entry above, since both are the same missing `users.deleted_at` conjunct read from
-  different tiers.
 
-- 2026-09-16 — 119 `<Skeleton>` elements across 48 files still carry their own `w-`/`h-`
+- 2026-09-16 — about 85 `<Skeleton>` elements across 42 files still carry their own `w-`/`h-`
   box (41 of them inline `Suspense fallback={<Skeleton className="h-… w-…" />}` text stubs),
   all outside the `*Skeleton*.tsx` files the size-roots unit converted and therefore outside
   `no-sized-skeleton-tsx`, which scans only those. Condition: when a page carrying one is next
   edited, swap the stub to `TextSkeleton` (for text) or a `CardSlot` (for a card box).
+
+- `CommentModerationService.deleteCommentByPublicId` writes the audit row before it checks whether
+  the comment is already deleted, so a repeated delete leaves a second DELETE_COMMENT record;
+  `deleteComment` by id does not. Worth fixing when the moderation audit trail is read as a count.
+- `CommentReportService.hasReported(Long, Long)` has no main-source caller, only its test. Worth
+  deleting the next time comment reporting changes.
+- `GtidPinExitTest.readGet_WhenReplicaRejectsGtidAsMalformed_ClearsUnpinnedAndWarnsOnceWithoutStack`
+  failed once at full suite size and passed on retry and on a full rerun (2026-10-04, Lane D S4
+  gate). It counts warning log events, so it likely depends on order or logging state. Worth
+  fixing when it fails a second time, or when the retry gate flags it in CI.
+- The MDCategory `Converter<String, MDCategory>` in `planner.config.PlannerWebConfig` has no MVC
+  consumer: no request parameter or path variable of that type exists. Worth deleting the next
+  time planner web config changes.
+- `backend/CLAUDE.md` says an import order is enforced, but checkstyle has no ImportOrder module.
+  Worth settling (add the module in `config/checkstyle/checkstyle.xml` or drop the claim) when an
+  import-order dispute comes up in review or checkstyle config is next touched.
+- Ending all of a user's sessions takes two steps: a per-user cutoff (`invalidateUserTokens`,
+  rejects `iat` below a stamp floored to the second, so a same-second re-login survives) plus a
+  blacklist of the request's own tokens to close that second for the current device. Tokens another
+  device received in the same second still pass. A per-user version claim (bumped on logout-all and
+  deletion, compared on validation) would end every session in one step with no time window. Worth
+  doing when the token format changes for another reason, or when a same-second bypass is reported.
+- `TokenBlacklistService.clearUserInvalidation` has no main-source caller. Worth deleting with the
+  version-claim change above, or the next time the blacklist service changes.
+- `ConventionBaselineTest.DOMAIN_EXCEPTION_HANDLERS_FROZEN` has no staleness check, so an entry can
+  outlive the handler it names. Worth adding the check the next time an exception handler moves.
+- Frontend vitest levers, measured 2026-10-04 on an idle box: default 11 workers 56 s / 2.6 GB peak,
+  6 workers 65 s / 2.3 GB, 4 workers 80 s / 2.1 GB, no OOM at any count. Capping workers trades speed
+  for little memory; not worth it. Still unmeasured: `fs` + `JSON.parse` for static JSON instead of
+  per-worker Vite transforms, a separate project for file-heavy data tests, removing the 20 partial
+  `vi.mock` factories that block `isolate: false`, coverage on main only, TZ and heap in the config.
+  Worth measuring when frontend test time becomes a bottleneck again.
+- `PublishedPlannerSplitReadIT.viewCount_WhenClientExhaustsViewRecordBudget_...` expected 429 and got
+  204 once, then passed on retry (2026-10-04, Lane D S5 gate run 1). The failed attempt took 3.0 s
+  against 1.1 s, so the rate-limit bucket probably refilled mid-loop. Worth fixing with an injected
+  clock for the bucket when it fails again.
+- `AuthController.tokenValidator` and `AuthenticationServiceTest.response` are unused (errorprone
+  UnusedVariable). Worth deleting the next time those files change.
+- Two more retry-only failures at full size with in-fork class concurrency on (measurement runs,
+  2026-10-04): `PlannerPublishEventIT.publish_WhenRolledBack_EmitsNoSseEvent` and a
+  `PlannerResponseContractIT` no-upvotes case. With concurrency off, 0 of 3 runs retried (n too small to
+  conclude). Worth tracing with the in-fork concurrency decision.
+- The published-API rules check imports only. A native query can still read another module's table:
+  `NotificationRepository:78` reads user's `user_settings`. Worth a rule over `@Query(nativeQuery = true)`
+  text with a table-to-module map when the next native query crosses a module, and fixing that site.
+- The published-API rules do not check that every `api` member has a caller outside its module, so an
+  unused member can stay published. Worth an ArchUnit rule when an api package next grows.
+- `.githooks/pre-commit` counts REJECTED only on the `- @` line (awk at lines 85-90), so every
+  multi-line ADR bullet reports "no REJECTED clause". Worth fixing to read continuation lines the next
+  time the hook changes.
+- `PlannerForbiddenException` carries the same code and message for "taken down" and "not the owner",
+  so neither the client nor a test can tell the two refusals apart. Worth splitting when the frontend
+  needs to explain a takedown to its owner.
+- `SseHeartbeatWorkerConfig` builds an 8-thread `ThreadPoolTaskScheduler` that the SSE services
+  inject as a `TaskExecutor`, which the backend Async rule does not describe. Worth settling when
+  the executor rule above is revisited or the SSE fan-out changes.
+- The backend bans executors and `@Async` outside the outbox dispatch, where Spring practice
+  allows one bounded executor with context propagation, a drain on shutdown and AFTER_COMMIT
+  use. Worth revisiting when a request needs work run in parallel before it responds, such as
+  several external calls, which neither the outbox nor a scheduler expresses.
 
 ## Grafana objects are provisioned by bash, invisible to drift detection (2026-08-30)
 
@@ -1084,16 +907,13 @@ Terraform covers only the Grafana side; the checker's metrics half (are
 Design lane by the repo's routing — it moves the provisioning seam and kills
 the import scripts, so `/argue` before any edit.
 
-## import-alert-rules.sh duplicates rules on re-run (2026-08-30)
+## Alert import scripts other than import-alert-rules.sh duplicate rules on re-run (2026-08-30)
 
-The Grafana provisioning API deduplicates by UID, not title, so re-running the
-import against a populated folder creates a second copy of every rule. Adding
-mysql-connectivity-lost to an already provisioned stack therefore needed a
-one-off script with an existence check instead of the import itself. Fix: an
-existence check per title inside post_rule (skip or update when the title is
-already present), after which partial re-runs are safe and one-offs of this
-class never need to exist. Same defect in import-app-alert-rules.sh and
-create-staleness-rules.sh.
+The Grafana provisioning API deduplicates by UID, not title. import-alert-rules.sh now gives
+each rule a fixed uid and updates it in place; import-app-alert-rules.sh and
+create-staleness-rules.sh still POST unconditionally, so re-running either against a populated
+folder creates a second copy of every rule. Worth doing the next time either script must add a
+rule to a provisioned stack: give each rule a fixed uid the same way.
 
 ## Exporter endpoint secrets are hand-maintained addresses (2026-08-30)
 
@@ -1132,11 +952,7 @@ two have silently never paged.
   ingress) on an AMI data-source drift, with the launch template and SSM associations
   following. The upgrade was applied with `-target` on the replica and its parameter
   group; the fleet diff is untouched and still pending.
-- **`terraform/rds` untargeted plan destroys the fleet peering routes and 3306 ingress
-  rules** because `fleet_peering_connection_id`, `fleet_cluster_security_group_id`,
-  `fleet_vpc_cidr`, and `seoul_peering_connection_id` live in no committed var-file for
-  prod. Every prod apply of that stack needs them on the command line or `-target`.
-- **`docs/runbooks/prod-account-cutover.md` still pins `danteplanner-mysql80`** on the
+- **`docs/legacy/runbooks/prod-account-cutover.md` still pins `danteplanner-mysql80`** on the
   restore instruction; the group is now `danteplanner-mysql84`.
 
 ## 2026-09-18 comment sweep follow-ups
@@ -1162,10 +978,6 @@ two have silently never paged.
   each `CLAUDE.md` should resolve against the ArchUnit-imported classes (an `@ArchTest` in the
   architecture package, `Class#method` included); paths and TypeScript symbols need a shell
   half. Worth adding at the next rename that leaves a document stale.
-- **Rules ship without negatives.** `owned_errors_need_no_handler` was negative-checked by a
-  throwaway probe and the probe discarded. Worth keeping a synthetic violator per architecture
-  rule under a `fixtures` package that the production rules exclude, starting with the next rule
-  added.
 
 ## 2026-09-18 problem-details migration (adr/113, adr/114)
 
@@ -1192,18 +1004,9 @@ two have silently never paged.
 
 ## 2026-09-18 gtid gate read-through (shared/gtid)
 
-- **The read-your-writes pin has no exit.** `GtidCookieFilter.handleRead` clears `ryw_gtid`
-  only when the replica probe succeeds; a GTID the replica will never apply (a source UUID
-  from the pre-cutover primary, a rebuilt replica, or a client-supplied value that is only
-  base64-checked in `GtidCookie.decode`) fails every probe, so every GET from that client
-  holds a replica connection for the full 50 ms bound, is served cross-region, and for a
-  malformed set logs a WARN with stack trace per request (`GtidReadGate.isCaughtUp`). The
-  cookie has no max-age, and `gtid.gate{outcome=primary}` cannot tell lag from a token that
-  can never validate. ADR 008 rejects timing constants on correctness paths, and a max-age
-  fails open, so this is a decision to reopen there, not a patch: bounded pin versus
-  fail-open, plus format validation before the value reaches SQL. Worth doing before the
-  next primary cutover (the runbook in this tree), which is the event that mints such tokens
-  for every client holding a cookie at the time.
+- `GtidCookie.decode` accepts untagged GTID sets only; MySQL 8.4's tagged form (`uuid:tag:n`)
+  is treated as unusable and cleared, which drops read-your-writes for that client. The app sets
+  no GTID tags today. Worth doing before anything sets `gtid_next` with a tag.
 - 2026-09-23 — Seoul writes spend most of their WAN round trips on transaction and driver
   chatter. Mimir 7-day means, Seoul against Oregon: Save `PUT /api/planner/md/{id}` (sent on
   an explicit save with sync on; the editor's autosave writes only IndexedDB) 2583 against
@@ -1231,8 +1034,9 @@ two have silently never paged.
   creation against 0.036 s in Oregon, so a Save often lands on a connection that has not
   prepared its statements. The pool's mean acquire (95 ms, one validation ping) and mean hold
   (0.44 s) put the Seoul→Oregon round trip nearer 95 ms than ADR 009's 130 ms. Planner bodies
-  average 7 KB (maximum 29.7 KB), so TCP slow start is at most a minor term. Worth doing as the
-  write round-trip unit that ADR 009's single-round-trip rule already demands.
+  average 7 KB (maximum 29.7 KB), so TCP slow start is at most a minor term. ADR 122 bans the
+  chatter and ADR 123 moves writes beside the primary, where each round trip costs about 1 ms.
+  Worth doing if write forwarding is rolled back, or when ADR 122's command-count test is built.
 - 2026-09-23 — Two read paths take Seoul's primary across the WAN, and together with token
   rotation (about 5,800 a week) they account for the pool's ~80,000 weekly acquisitions against
   ~200 user writes. The view flush runs one primary transaction per detail read (6–8 round
@@ -1240,14 +1044,12 @@ two have silently never paged.
   loads notification settings through `UserSettingsService.getOrCreateEntity`, a read-write
   `@Transactional`, so every per-pod cache miss is a primary transaction (11 round trips when it
   creates the row), up to 27,335 a week. Neither is on a user's critical path, but both hold
-  primary connections from the smaller WAN pool and add replication traffic. Worth doing with
-  the write round-trip unit.
-- **A region flap clears the cookie without the guarantee.** In the replica-disabled region
-  the probe runs against the primary and always succeeds, so a client steered there for one
-  GET has `ryw_gtid` cleared, and its next GET in the replica region reads the lagging
-  replica unguarded. ADR 008 states the read-path contract per region; the later geo-steering
-  decision did not revisit the cookie's lifecycle across regions. Becomes worth deciding when
-  geo steering is changed again or when a stale-read report coincides with a region switch.
+  primary connections from the smaller WAN pool and add replication traffic. The settings load's
+  move to a read-only transaction (commit 90173c61, left on branch `write-forwarding/pr1`) waits on
+  the settings write-through: read from the Seoul replica right after an invalidation, it caches a
+  stale row for up to five minutes, so turned-off notifications keep arriving. The view flush
+  leaves Seoul once ADR 116's `POST .../viewcount` is forwarded under ADR 123. Worth re-measuring
+  the pool's acquisitions after both land.
 - **The gate assumes the probe and the read reach the same replica.** `WAIT_FOR_EXECUTED_
   GTID_SET` runs on one pooled connection and the request's read uses another; sound with
   one replica behind the endpoint, void the day the endpoint resolves to more than one host.
@@ -1260,54 +1062,21 @@ two have silently never paged.
 
 ## 2026-09-18 rate-limit read-through (shared/ratelimit)
 
-- **A lowered limit never reaches a live bucket.** `RateLimitService.tryConsume` passes the
-  bandwidth as a creation-time supplier and `RedisConnectionConfig.buildRateLimitProxyManager`
-  sets no implicit configuration replacement, so an existing key keeps its old bandwidth until
-  it idles for the full hour of TTL. The key you lower a limit for during an incident is the
-  one that never idles. Bucket4j's versioned `withImplicitConfigurationReplacement` is the
-  documented fix; the test is one line in the Redis-backed limiter test (change bandwidth,
-  consume, assert). Worth doing before the next limit change is relied on in an incident.
-- **Every anonymous request mints a device cookie the identity discards.**
-  `RateLimitInterceptor.chargeBucket` resolves the device id before choosing the subject, and
-  `DeviceIdResolver.resolve` sets a one-year cookie when none is present; behind Cloudflare
-  the identifier is the public IP and the id is unused, yet Set-Cookie goes out on every
-  public read, which also defeats any future edge caching of those responses. Move the mint
-  behind the private-IP branch (a `Supplier` parameter). It is one of four blockers measured
-  on an anonymous `GET /api/planner/md/published` response: the same response sets `csrf`
-  (seven days), carries Spring Security's `Cache-Control: no-cache, no-store, max-age=0,
-  must-revalidate`, and is JSON, which Cloudflare caches only under a Cache Rule. Worth doing
-  with the first `Cache-Control` on a public read, or as the sibling edit of a
-  resolver-does-not-write rule.
+- Unit ADR 116: a public read still sets the `csrf` cookie (`CsrfDoubleSubmitFilter` mints it on
+  every cookieless request) and carries Spring Security's `no-store`; the content endpoint must
+  opt out of both before its Cache Rule is enabled.
 - **The forwarded-for fallback trusts the leftmost hop.** `ClientIpResolver.firstHop` takes
   the client-written entry once the direct peer is a trusted proxy;
   `ClientIpResolverTest.resolve_WhenHeaderCarriesAChainOfHops_ReturnsTheLeftmost` pins that
   as the spec. Latent while `CF-Connecting-IP` is always present on the tunnel-only path. Replace
   with the container's rightmost-trusted parser (`ForwardedHeaderFilter` / `RemoteIpValve`) and
   an attacker-framed test. Worth doing before any ingress that bypasses Cloudflare exists.
-- **The 429 carries no Retry-After.** `tryConsume(1)` discards the probe that knows the wait;
-  `SseCapacityExceededException` sets the header on the SSE path and the 503 helper on the
-  degradation path, so the rate-limit 429 is the odd one out. Fix with
-  `tryConsumeAndReturnRemaining` and the one status-to-required-headers contract test that
-  covers all three. Worth doing when the error mapping is next touched.
 - **Bucket configuration is validated per request, not at bind time.** `RateLimitProperties`
-  carries no constraints (three of nine properties classes do: Redis, OAuth, JWT), and
+  is `@Validated` but constrains only `configVersion`, and its `BucketConfig` fields carry none
+  (three of nine properties classes validated: Redis, OAuth, JWT; not re-counted), and
   `buildConfiguration` runs per request, so a zero duration fails on first use. The fix is the
   ArchUnit rule "every `@ConfigurationProperties` class is `@Validated`" and the sibling edits
   it lists; the rule, not the class, is the unit of work.
-- **Rate limiting fails closed on a Redis outage while the blacklist fails open, and no
-  decision chose either for the limiter.** `ApiExceptionHandler.
-  handleRateLimitRedisUnavailable` maps a limiter outage to 503 for every rate-limited
-  handler, `PUBLIC_READ` included, after up to a four-second future timeout. The 503 entered
-  in 38794748 as a fix for an untyped 500, not as a policy; ADR 049 covers endpoint coverage
-  only. ADR 010 rejected fail-closed for the blacklist because a store outage becomes a total
-  outage, and the same Redis loss here takes down anonymous reads that never need Redis. The
-  circuit-breaker entry above covers the mechanism; the per-subject-class policy (open for
-  anonymous reads, closed for writes) needs an ADR beside 010. The limiter store is a
-  per-region ephemeral `redis-ratelimit` pod, so the loss of one region's pod alone turns that
-  region's published-planner reads (`PublishedPlannerController`, `PlannerController`, both
-  `PUBLIC_READ`) into 503 while its database and auth Redis are healthy. Worth deciding at the next
-  rate-limit or degradation design session, or before any document describes the Redis
-  failure behavior as uniform.
 
 ## 2026-09-18 consistency without an LLM (scheduled ratchet)
 
@@ -1318,13 +1087,11 @@ two have silently never paged.
   per-rule violation count against a stored baseline, and opens an issue on any increase
   would make consistency a measurement rather than a per-session hope. ArchUnit's frozen
   stores are the baseline for Java; ast-grep `scan --json` plus a count file is the baseline
-  for the rest. The same run is the home for the declared-but-dormant gates: PIT (declared in
-  `backend/build.gradle.kts`, scored 42 percent against a 50 percent threshold, never in the
-  gate), OWASP dependency-check and Sonar (declared, never run), and the backend patterns in
-  `.claude/hooks/forbidden-patterns.json` whose hook is not wired (entry above). Each is
-  reactivated as a report-mode job with a ratchet, never as a blocking gate on day one. Worth
-  doing as the first rule-into-build session, since it is what makes every later rule
-  measurable before it is enforced.
+  for the rest. The same run is the home for the still-dormant gates: OWASP dependency-check
+  and Sonar (declared, never run), and the backend patterns listed in the entry above. PIT is
+  no longer dormant: it blocks in `check` at its measured score with an up-only ratchet
+  (ADR 137). Worth doing as the first rule-into-build session, since it is what makes every
+  later rule measurable before it is enforced.
 
 - 2026-09-21 — Nothing rolls a failed backend rollout back. `deploy/base/spring-daemonset.yaml`
   sets no `updateStrategy` (default RollingUpdate, `maxUnavailable: 1`), ArgoCD runs
@@ -1342,88 +1109,29 @@ two have silently never paged.
   failed rollout is observed in production.
 - 2026-09-22 — `GET /api/planner/md/published` returns `Page<...>`, so every list request
   issues a `COUNT(*)` over the filtered `planner_catalog` set
-  (`PublishedPlannerQueryService.java:126`), and `recencySorted` orders by
+  (`PublishedPlannerQueryService.java:129`), and `recencySorted` orders by
   `firstPublishedAt DESC` with no unique tiebreaker, so rows sharing a timestamp can shift
   between pages. Worth doing when list p99 becomes a reported problem or a duplicate-across-
   pages report arrives: return a slice (limit+1) and append `plannerId` to the sort.
-- 2026-09-22 — `Planner.java:67-74` declares the three inverse `@OneToOne(mappedBy=...)`
+- 2026-09-22 — `Planner.java:62-69` declares the three inverse `@OneToOne(mappedBy=...)`
   sides without `fetch`, so they default to EAGER; no main-source caller uses an inherited
   `findById`/`findAll` today (every path goes through the `AGGREGATE_LOAD` JOIN FETCH), so
   the cost is latent. Worth pinning with `FetchType.LAZY` or an ArchUnit ban on inherited
   finders the first time a caller of an inherited `PlannerRepository` method lands.
-- 2026-09-23 — `User.settings` (`User.java:96`) is the inverse side of a `@OneToOne`, which
-  Hibernate loads eagerly despite `FetchType.LAZY` because bytecode enhancement is off. Every
-  aggregate load that joins the user runs one extra `user_settings` SELECT: a Save pays it on
-  the primary (in a general-log trace of the causal harness it is one of the draft Save's three
-  reads) and a published detail read pays it on the replica. No main-source code calls
-  `getSettings()` or `setSettings()`. Deleting the association drops the read; the mapping
-  carries `cascade = ALL, orphanRemoval = true`, and V024's `fk_user_settings_user` is
-  `ON DELETE CASCADE`, so user deletion still removes the row, provided no path relies on the
-  JPA cascade before the user row is gone (unchecked). Under write forwarding the Save's copy
-  costs about 1 ms in Oregon and the content cache leaves the read's copy to edge misses. Worth
-  doing on the next touch of `User`, or if write forwarding is rolled back.
 - 2026-09-22 — `TokenBlacklistService.failOpen` increments `blacklist_check_skipped_total`
   and logs warn, but no alert rule references the counter and no rule covers Redis
   availability or command timeouts at all (`deploy/grafana/import-*-alert-rules.sh` grep
   `redis` → none; MySQL has `mysql-connectivity-lost`). A fail-open storm surfaces only via
   `backend-warn-sustained`. Worth doing before the next Redis incident drill: a rule on
   `increase(blacklist_check_skipped_total[5m]) > 0` and one on `redis_up == 0`.
-- 2026-09-22 — `PublishedPlannerQueryService.incrementViewCount` (`:95-100`) has no
-  production caller; the live path is `PlannerViewRecorder`. Kept alive by three tests in
-  `PublishedPlannerQueryServiceTest`. Delete method and tests on the next touch of that
-  service.
-- 2026-09-23 — Reads survive a primary outage only in Seoul. The Oregon overlay sets no
-  `DATASOURCE_REPLICA_ENABLED`, so Oregon reads use the primary, and `/healthz-local` rewrites
-  to `/actuator/health/readiness`, whose group holds `readinessState` alone, so a dead primary
-  leaves Oregon healthy at the load balancer and Oregon-routed reads fail with 503. Either a
-  DB-aware readiness indicator for Oregon (steering clients to Seoul) or Oregon reads on a
-  replica would close it. Worth doing when a primary outage is drilled or observed, or before
-  any document claims read survival without naming the region.
-- 2026-09-22 — Shutdown is graceful but unbounded by anything shorter than the kill. The
-  JVM is PID 1 (BusyBox ash execs a lone `-c` command; checked in
-  `eclipse-temurin:21-jre-alpine`) and Boot 3.5 defaults `server.shutdown=graceful` with a
-  30 s phase timeout, but SSE emitters live 1 h and nothing completes them on context close,
-  so any open stream holds shutdown for the full 30 s, the same as the pod's default
-  `terminationGracePeriodSeconds`; there is no `preStop`. The surge/drain deploy moves traffic
-  first, so this shows only as slow pod termination. Worth doing when a rollout's 5xx or
-  termination time is measured non-zero: complete emitters on `ContextClosedEvent` and set a
-  phase timeout under the grace period.
 - 2026-09-22 — `PlannerDriftAuditRepository.driftedUpvoteCounters` joins `planner_votes`
   without a `deleted_at IS NULL` predicate while `driftedCommentCounters` filters
   `planner_comments.deleted_at IS NULL`; V018 made votes immutable so the asymmetry may be
   correct, but nothing says so. Worth a one-line comment or a shared predicate the next time
   either query changes.
-- 2026-09-22 — `logback-spring.xml:6-9` header still describes "stdout → awslogs →
+- 2026-09-22 — `logback-spring.xml:6` and `:13` header still describes "stdout → awslogs →
   CloudWatch /ecs/danteplanner/backend"; the pipeline is stdout → Alloy → Grafana Cloud Loki
   (`deploy/base/alloy-logs.yaml`). Delete the stale comment on the next touch of that file.
-- 2026-09-23 — The published-detail loader cannot fetch until a dynamically imported 1 KB
-  chunk arrives. `loadPublishedPlanner` starts with
-  `await import('@/pages/planner/hooks/usePublishedPlannerQuery')`; the chunk's dependencies
-  already sit in the entry graph, but it is requested alongside the route component's 31
-  chunks and queues behind them, so the API request starts ~800 ms after the router runs
-  (1342 → 2137 ms in a cold load from Korea). A static import in `routeLoaders.ts` starts the
-  fetch with the router. Worth doing with any detail-page latency work; alone it does not move
-  first content, which the route's own chunks gate (next entry).
-- 2026-09-23 — The read-only detail route bundles interaction-only code at module scope.
-  `PlannerMDGesellschaftDetailPage` statically imports the comment section (`CommentEditor`,
-  so Tiptap and ProseMirror), the full published list with toolbar and filter pills, and the
-  deck-code path (`pako`). The route's second wave is 31 chunks and 1.3 MB uncompressed on top
-  of the 1.4 MB entry graph, and first content waited for its last chunk (3040 ms of a
-  3207 ms cold load from Korea). The viewer renders notes through `NoteEditor`, so Tiptap stays
-  on the critical path until notes render without the editor. The page is three sequential code
-  stages after the HTML: the entry graph (25 chunks, 1.43 MB raw on every page: `react-dom`
-  532 KB, `zod` 251 KB, the router 225 KB, `tailwind-merge` 100 KB), the route (36 chunks,
-  1.32 MB), and game data that render-time hooks `import()` (9 chunks: battle keyword, EGO gift
-  and identity spec lists at 110–162 KB each), each stage starting only after the previous one
-  executes. Alongside them the page requests 216 images (7.2 MB), the largest about 200 KB each
-  for the below-the-fold list. Worth doing when detail-page load time becomes a target: lazy
-  the comment editor, the below-the-fold list and the export path, then decide the note
-  renderer and whether game data joins the route stage.
-- 2026-09-23 — ADR 010 records that the client renders an optimistic view increment;
-  `frontend/src` has none (`viewCount` is only rendered). ADR 116 moves recording to
-  `POST .../viewcount` from the mounted page and keeps the best-effort buffer, so the rest of
-  ADR 010's view clauses stand. Worth doing when the page starts sending that POST: either
-  render the increment there or correct ADR 010's detail in place.
 - 2026-09-23 — The production build's `VITE_API_BASE_URL` ends in a newline: the shipped
   `index.html` carries `href="https://api.dante-planner.com\n"`. URL parsing strips it, so
   fetches and the preconnect work. The value lives in the hosting build environment, not the
@@ -1441,10 +1149,10 @@ two have silently never paged.
   answered 500 does not reproduce against the migrated handler: over MockMvc and over real HTTP,
   with and without `Accept: text/event-stream`, a published planner streams with 200 and a
   missing one answers 404 as `application/problem+json`.
-- 2026-09-23 — Intent preload (`defaultPreload: 'intent'`) is off because the published-detail
+- Unit ADR 116: 2026-09-23 — Intent preload (`defaultPreload: 'intent'`) is off because the published-detail
   loader records a view. It also preloaded route chunks on hover, which hides part of a chunk
   wave per navigation. Worth doing once view recording leaves the loader: restore it.
-- 2026-09-24 — The frontend still pulls planners with `POST /api/planner/md/batch` and still
+- Unit ADR 123: 2026-09-24 — The frontend still pulls planners with `POST /api/planner/md/batch` and still
   declares `upvotes` in `ServerPlannerResponseSchema`. Pages publishes from `main` minutes after a
   merge while `deploy-fleet.yml` waits for PR Gate's push-run, so a frontend change that needs a
   new backend breaks sync until the backend lands: under `.strict()` the schema rejects the old
@@ -1452,45 +1160,17 @@ two have silently never paged.
   Worth doing once the backend serving `GET /api/planner/md/batch?ids=` and omitting `upvotes`
   is live in both regions: switch `plannerApi.batchChunks` to the GET and drop the schema's
   `upvotes` line. ADR 123's `write_forwarding = "all"` waits on this release.
-- 2026-09-24 — `POST /api/planner/md/batch` and its request-body path stay beside the GET for
+- Unit ADR 123: 2026-09-24 — `POST /api/planner/md/batch` and its request-body path stay beside the GET for
   clients that have not switched, including tabs opened before the switching release, which keep
   their old bundle until reloaded. Worth doing once the frontend release using the GET is live and
   `http_server_requests_seconds_count` for that URI with method POST stays at zero for seven days
   in both clusters (label names unverified against the Mimir keep-list): delete the POST handler.
-- 2026-09-24 — `terraform/cloudflare/README.md` "Applying" shows bare `terraform init/plan/apply`
-  with no `-var-file`, against the repo rule that Terraform runs through
-  `scripts/ops/terraform-run.sh` and against `environment.tfvars.example`, and `access.tf` fails
-  `terraform fmt -check` (`duration` misaligned). Worth doing on the next edit of that stack.
-- 2026-09-24 — The `it` profile keeps `spring.main.allow-bean-definition-overriding=true` only
-  because `EffectPlacementIT.OutboxHarness` and `PlannerReconcilerIT.ReconcilerLockHarness`
-  redefine `lockProvider`; with overriding on, any test bean that shadows an application bean by
-  name does so silently, which is how a bare IT-only `ObjectMapper` once hid a serialization
-  defect. `application-test.properties` sets the same flag for reasons not checked. Worth doing
-  the next time either harness changes: give the harness beans distinct names with `@Primary`
-  and drop the flag.
-- 2026-09-24 — `UserService.java:59-61` says a bare derived finder "is readOnly and would hit a
-  replica", but a read-only IT of the comment-SSE path showed a declared repository method
-  (`existsPublishedById`) called outside a transaction counting as undeclared primary access, and
-  an audit of spring-data-commons 3.5.13 found declared methods do not inherit
-  `SimpleJpaRepository`'s `readOnly`. If that holds for derived finders too, the comment's premise
-  is wrong (the recovery lookup still reaches the primary, so behavior is unaffected), and
-  `ModerationAuditService.latestReason` on `GET /api/auth/me` and the first finder in
-  `findOrCreateUser` reach the primary undeclared. Worth settling with a counter assertion the next
-  time either class is touched.
-- 2026-09-23 — ADR 015 skips the filter rebuild when content composition is unchanged, but a
-  harness save of a published planner that re-sent identical content with a new title still ran
-  `CALL rebuild_planner_filters`, on both warm and freshly evicted pools.
-  `PlannerCatalogService.searchableCompositionChanged` compares the raw content strings, so a
-  normalization between the request and the stored value is the likely cause (unverified). Each
-  needless rebuild is a second transaction on the save's request thread. Worth doing through
-  `diagnose` with the write-forwarding rollout, or sooner if publish latency is examined.
-- 2026-09-23 — `X-Served-By` is missing from every response Spring Security writes (CSRF 403,
-  unauthenticated 401, and anything else rejected in the security chain): `ServedByFilter` is a
-  plain `@Component` without `@Order`, so it registers after the security filter chain and never
-  runs for a rejected request. Region attribution for exactly the error responses therefore
-  has to come from `cf-ray` and load-balancer logs instead. Worth doing the next time a 4xx needs
-  attributing to a region: order the filter ahead of security.
-- 2026-09-23 — Whether an origin `Set-Cookie` still blocks caching once a Cache Rule makes a
+- 2026-09-27 — `UserService.findOrCreateUser`'s first lookup (`findByProviderAndProviderId`) runs
+  outside a transaction, so every returning login counts one undeclared primary access and would
+  throw where fail-fast is on (`DeclaredFinderRoutingIT` proves declared finders route this way).
+  Worth deciding when login latency or the undeclared counter is examined: readOnly (replica lag
+  right after a concurrent create) or explicit read-write; then sweep other bare declared finders.
+- Unit ADR 116: 2026-09-23 — Whether an origin `Set-Cookie` still blocks caching once a Cache Rule makes a
   JSON path eligible is unmeasured. Default behavior is measured: through the real edge, origin
   `Set-Cookie`, `no-store`/`no-cache`/`max-age=0` and `private` each bypass the cache on a
   cacheable extension, request cookies stay out of the cache key, and extension-less JSON is
@@ -1498,3 +1178,309 @@ two have silently never paged.
   needs a token with Cache Rules edit on the zone; the staging token gets 403 on zone rulesets.
   Worth doing once the cookieless content endpoint exists, against that endpoint rather than the
   synthetic origin, before the Cache Rule is relied on in production.
+- 2026-09-27 — Until `c54c159e`, a first run of `deploy/grafana/import-alert-rules.sh` created its
+  folder with the literal title `${GRAFANA_ALERT_FOLDER:-danteplanner-alerts}`, so stray folders
+  holding rules may exist (unverified). Worth doing before the next re-import: list the alert
+  folders and rules in Grafana and delete the strays.
+- 2026-09-27 — Unit bookmark retirement: `PlannerConstants.RETIRED_BOOKMARK_FLAG` and the two
+  `isBookmarked()` accessors on `PublicPlannerResponse`/`PublishedPlannerDetailResponse` keep the
+  field on the wire as `false` so frontend bundles cached before the removal still parse. Delete
+  them, and `isBookmarked` from `PlannerResponseContractIT`'s field sets, once the frontend
+  without the field has been in production for a full release.
+## 2026-09-28 landing gate (adr/137)
+
+- The `reference-transaction` hook refuses the whole transaction when `refs/heads/dev` is
+  one of several refs updated together (`git rebase --update-refs` across dev,
+  `update-ref --stdin`), so the other refs' updates are lost with it. Worth handling when
+  someone works with `--update-refs` over dev; until then the single-ref landing is the
+  only path in use.
+- The landing gate's patch-id is empty for a root commit (`diff-tree -p` without `--root`),
+  so an orphan branch merged with `--allow-unrelated-histories` lands unreviewed. Closing it
+  means `--root` in the hook, the reviewer's recipe and the measures script together. Worth
+  doing if an orphan merge ever appears on dev.
+- The release-sync exemption trusts `refs/remotes/origin/main`, and the Bash deny list
+  refuses only direct ref writes; `git remote set-url origin .` followed by a plain fetch
+  moves that ref to local commits. Worth closing (deny `git remote add|set-url` in
+  bash-deny) if the measures script ever shows an unreviewed range hidden this way.
+- FE mutation testing has no working runner: Stryker 10 with the vitest runner fails in
+  project setup against the multi-project `vite.config.ts` on vitest 4.1.2, and its IPC
+  drops the inner error. Worth one more spike (a single-project vitest config for Stryker,
+  or a sandbox that carries `../static`) when the PIT ratchet has shown its value on the
+  backend; until then under-assertion on the frontend is unmeasured.
+- Three full-run-only failures never reproduced across isolated, `taskset -c 0`, neighbour-combo and
+  eight full runs (2026-09-29..10-04): `SseFanoutIT` (a JDBC SSL communications error: MySQL
+  connection SSL handshake failure during setup, not the fan-out under test; SSL stays on because
+  production uses `VERIFY_CA`), `BulkheadIT` INV7 (a timing assertion: `:158` compares two
+  wall-clock durations, which load can invert; a deterministic signal such as the bulkhead pool
+  reaching its active-connection cap would replace it), and `EffectPlacementIT` "A committed write
+  leaves an event, and every effect follows from it" (`:151`, no SSE push within 10 s, once in a
+  136-class run, mid lane-B edit; the SSE publisher mock saw no interaction; it passed 3/3 alone on
+  both the visibility branch and dev). They fail under the full `check` run and pass when run
+  alone. Worth diagnosing if `SseFanoutIT` or `BulkheadIT` fails twice in a phase-close run; until
+  then a phase close re-runs them alone before judging red. Worth doing when the test-retry report
+  names one as flaky or `EffectPlacementIT` fails again in a full run: keep that run's XML and the
+  classes that ran before it in the fork, check whether the outbox eager executor was saturated,
+  then build the loop from them.
+- The adr116-131 brief reserves migration V064 for J6 "drop planner_views", but V064 is taken by
+  the floor-count parameter on `rebuild_planner_filters` (V062 is burned per push-order). J6 must
+  renumber to the next free version when it starts.
+- Refracted Railway planners are refused by `PlannerContentValidator` (`INVALID_CATEGORY`: the
+  validator accepts MD categories only) yet the filter rebuild indexes their non-floor rows with
+  floor count 0, and the drift reconciler skips them as unreadable, so the audit oracle never
+  covers RR. The only path that can index an RR row is the startup keyword backfill
+  (`PlannerKeywordBackfillRepository.keywordRowsAfter` has no planner-type filter); prod held no
+  RR rows on 2026-09-28. Worth resolving when RR content gets rules of its own: either RR content
+  validates and audits, or RR planners stop being indexed.
+- `FloorBoundaryConfinementTest` reads bytecode through Spring's repackaged ASM
+  (`org.springframework.asm`, marked internal) because ArchUnit 1.3 exposes no string
+  constants. Worth moving to a declared `org.ow2.asm` test dependency if a Spring upgrade
+  breaks the package.
+- `rebuild_planner_filters` (one argument, V061's CASE floor table) is kept beside
+  `rebuild_planner_filters_scoped` (V065) so pods on the previous image keep rebuilding during
+  the rollout. Drop the one-argument procedure in a later migration once no pod runs an image
+  older than V065; until then the CASE table is a third copy of the floor counts, held equal to
+  the shared table by `PlannerFilterRebuildIT`.
+- The catalog sync's rebuild (`PlannerCatalogSyncService`) holds a shared lock on the
+  `planner_content` row from the scope read through the procedure, whose `INSERT … SELECT` also
+  takes shared locks on `planner_publication` and `planner_moderation`. A writer holding an
+  exclusive lock on one of those and then updating `planner_content` could deadlock with it
+  (unverified); the sync's rows stay pending and the next pass retries, so the cost is a failed
+  request if the writer is the victim. Worth a deadlock IT if ER_LOCK_DEADLOCK appears in the logs
+  with `rebuild_planner_filters_scoped`.
+- 사영전투 turn-cut planner: up to three formations of up to
+  twelve turns each against an 18/24-turn full-reward cut, phase-specific decks, and bosses that
+  return on rotation, so a plan must render against the data version it was written for. Carry
+  over from the story-battle planner: the turn/constraint model, the sin-resource ledger and run
+  mode. Add: formation boundaries in the turn timeline and the turn budget. The draft spec was written without the in-game data model, so
+  its storage and data-serving parts are not decisions. Worth doing once the story-battle planner
+  ships and its encounter schema holds a second content type.
+- Refraction Railway battle plans: a plan is a sequence of battles whose rules differ per line.
+  Lines 1-3 allow a formation change at every node; from line 4 several nodes form one route
+  with a single formation. Lines 2 and 5 pick a buff after each node's battle; line 6 offers,
+  after each route battle, a choice that removes one of the final boss's passives, which changes
+  the next battle's enemy rules. The `REFRACTED_RAILWAY` planner type is an empty placeholder
+  (`RR_PLACEHOLDER`). Worth doing once the story-battle planner ships: its single-battle schema
+  becomes the element of a line plan, with formation boundaries and between-battle choices per
+  line.
+- The battle planner computes an E.G.O's cost as: an exchanger override (`TryOverwrite*Cost`,
+  E.G.O 21003 and 20205) replaces the base, adders (exchangers 20509 and 21209, `SystemAbility`,
+  buff `GetEgoResourceAdder`) are summed on top, and the result is floored at 0. The order and
+  the floor are assumed: `EgoResourceRequirement.RecalculateEgoResources` reaches them through
+  virtual slots `[rax+0xc58]` and `[rax+0x178]` that were not resolved, and where
+  `GetMpUseCostAdderByEGO` applies is untraced. No shipped E.G.O has both an override and an
+  exchanger adder today. Worth doing when one does, or when a buff adder can land on an overridden
+  cost: resolve the two slots from a vtable dump.
+- The battle planner's turn editor places units on the stage from `team-position` coordinates
+  over the command-view background layers, with a fixed projection. The client's camera rig
+  (static ADR 368: pitch, zoom by aspect, scroll clamps, per-wave `battleCameraInfo`) is not
+  reproduced in the frontend. Worth doing when a stage's fixed projection visibly misplaces units
+  against its background, or when the editor gains pan and zoom.
+- `terraform/rds`'s fleet-state gate (exact-key listing before each `terraform_remote_state`)
+  has no standing test: `mock_provider` rejects the stack's `ephemeral` master-password read, so
+  `terraform test` stops before planning. A copy without that block passed absent, sibling-key,
+  emptied, oregon-only and both-fleet runs, and failed the sibling-key run under a prefix gate.
+  Worth doing when Terraform mocks ephemeral resources, or when the wiring moves into its own
+  module for another reason; either lets the five runs return as a `tests/` file, and a CI step
+  must run `terraform test` for it to guard anything.
+- `PrivilegedRouteCoverageRule` confines to the privileged prefixes only the controllers that call a
+  moderation or admin service directly; a handler reaching one through another feature's service
+  escapes it, and would then act with the token's role instead of the stored one. Worth doing when
+  any non-moderation service starts calling a moderation service: make the rule transitive over the
+  call graph (as `EffectPlacementTest` walks it).
+- `ArchitectureRuleFixtureRatchetTest` counts only `ArchRule` fields and `@ArchTest` members, so a
+  rule written as a plain `@Test` (FailureUnionBoundaryTest, BulkUpdateBoundaryTest,
+  ContentWritersAdmitFloorsTest, SubjectModuleBoundaryTest's factory rules, the frozen-name
+  staleness checks) escapes the fixture requirement. Worth doing when a new architecture test
+  lands as a plain `@Test`: define a rule by what it checks (an ArchUnit `check`/`evaluate` call
+  reached from a test in the architecture package) rather than by its declared type.
+- `RestrictedPrincipalMatrixIT`'s allowed rows address random ids, so most answer 404 at their
+  entity lookup: the matrix proves they clear validation and are not refused with USER_BANNED,
+  not that a ban leaves them working. A ban check placed after the lookup (the order
+  `PlannerCommandService` already uses for upserts) would pass unseen. Worth doing when a guard
+  moves behind a lookup or a new ordinary route takes a restriction check: seed a real resource
+  per allowed row, owned by the banned principal where the route needs it, and assert a 2xx.
+- `ArchitectureRuleFixtureRatchetTest` credits a negative test that reads the failure message, not
+  one that checks the message names the fixture, so `hasMessageContaining("failed to check any
+  classes")` would still earn credit for a rule that rejected nothing. Worth doing if a credited
+  test is found asserting on anything but the fixture: match the message argument against a class
+  from the fixture package at the bytecode level.
+- `PLANNER_CATALOG_CHANGED` rows that reach the dispatch attempt cap stay pending forever: the
+  catalog sync marks only the rows it read and skips capped ones, and the backlog gauge ignores
+  them, so after the cap's Sentry alarm nothing surfaces them again. Worth doing before the cap
+  alarm first fires in production: a runbook step that finds the capped rows, names the failing
+  planner, and resets `attempts` (or marks them once a later sync of that planner succeeded).
+- 2026-10-02 — The frontend reports no errors anywhere: production hides the message, the
+  error screens show only a short code, and nothing reaches Loki or a reporting service, so a
+  failure is known only when a user describes it. Worth doing once a deploy regression must be
+  caught without a user report; Sentry or GlitchTip (source-map stacks, per-browser grouping)
+  beats a home-grown beacon, which would rebuild both.
+- 2026-10-02 — `getDB` (`frontend/src/lib/storage.ts`) clears its cached promise when an open
+  reports `onerror` or `onblocked`, but not when `indexedDB.open` throws synchronously: the
+  rejected promise stays cached for the page's life, so storage cannot recover without a reload.
+  Harmless for a permanent `SecurityError`; worth fixing once a transient synchronous throw is
+  seen in the field.
+- 2026-10-02 — `UNAVAILABLE_ERROR_BY_CODE[body?.code ?? '']` in `frontend/src/lib/api.ts` is a
+  bare object lookup, so a 503 whose code is an inherited property name (`toString`) picks a
+  non-constructor and `new` throws a `TypeError` instead of `BackendUnavailableError`. Inferred,
+  not run. The map now also holds `WRITE_TEMPORARILY_UNAVAILABLE`, `DEADLOCK` and
+  `RATE_LIMIT_*` entries. Worth a `Map` or `Object.hasOwn` guard once the backend's code set is open to anything
+  but its own constants.
+- 2026-10-02 — Queries retry `WriteTemporarilyUnavailableError` once (it extends `Error`, not
+  `RetryableUnavailableError`, so it falls through to `failureCount < 1` in
+  `frontend/src/lib/queryClient.ts`, which retries `RetryableUnavailableError` up to
+  `MAX_RETRYABLE_ATTEMPTS`) while `BackendUnavailableError` is
+  not retried, although both now mean the server cannot serve (the backend's database-down code).
+  Worth aligning when the retry policy is next touched or a DB outage shows doubled request
+  volume.
+- 2026-10-02 — `frontend/tsconfig.test.json` includes only test files, so tests cannot see the
+  ambient globals in `frontend/src/vite-modules.d.ts`; the build-id hook test redeclares
+  `__BUILD_ID__` locally. Worth fixing once a second test needs a global from that file.
+- In ArchUnit 1.3, `getMethodCallsFromSelf()` and `getConstructorCallsFromSelf()` omit method
+  references (`Foo::bar`, `Foo::new`). Only `getAccessesFromSelf()` returns them. A red fixture
+  proved this for `LogCaptureRule`. These rules read only calls, so a method reference passes
+  them: `ContentWritersAdmitFloorsTest:85`, `TestIsolationConventionTest:113,343`,
+  `EffectPlacementTest` (six call-graph walks) and `GuaranteePlacementTest:120`. When one of
+  those rules is next touched, switch it to accesses and add a by-reference violator fixture.
+- `rebuild_planner_filters_scoped` deletes and then inserts under REPEATABLE READ. A DELETE that
+  matches nothing takes a gap lock, so two concurrent rebuilds of planners in the same index gap
+  deadlock (reproduced with two SQL sessions on 2026-10-05:
+  `.claude/reports/logs/overhaul-j8a-gaplock-20261005-213416.log`). `drainPending` absorbs the
+  failure, but each deadlock spends one of the event's 10 attempts. When catalog sync shows
+  exhausted attempts or deadlock errors in prod, try READ COMMITTED on the sync transaction and
+  measure it with the same harness.
+- `SseSubscriberConfig` sets no task executor on the Redis listener container. Spring Data Redis
+  3.5 then uses a `SimpleAsyncTaskExecutor` and dispatches each pub/sub message on a new thread, so
+  two pushes to one stream can reach the browser in the reverse order (reproduced 2026-10-09: 41 of
+  75 rounds of back-to-back pushes had an inversion; 0 of 75 with a single-threaded executor, which
+  delivered no slower; logs `.claude/reports/logs/bug5-*`). No delete event exists and no SSE counter
+  goes down, so the visible effect today is root comments shown in swapped order until refetch, or a
+  reply dropped until refetch when it arrives before its parent. That last case mostly needs the
+  parent's outbox dispatch to be delayed, which a single-threaded listener does not fix. On 2026-10-09
+  a single dispatch thread was built and then rejected. The listener calls `emitter.send`
+  synchronously (`SseRedisSubscriber.onMessage` → `sseService.sendToUser`). So one client with a
+  blocked socket write stalls every SSE delivery on its pod (reasoned, not measured). If a dropped
+  reply is reported, look at outbox ordering for the parent's push first. Then choose between
+  per-stream lanes (one single-thread executor per hash of user or planner id) and early replies
+  held on the frontend. A single thread is acceptable only with a measured emitter write timeout.
+  The executor patch and its regression test are in `.claude/reports/logs/bug5-*` (red without the
+  executor: 20 inversions in round 1). The test goes into `SseFanoutIT` as a method. A new class
+  with its own `@DynamicPropertySource` exceeds the context budget of 15 in
+  `TestIsolationConventionTest`.
+- `RedisConnectionConfig.buildRateLimitProxyManager` creates a `RedisClient` with its own client
+  resources and returns only the `ProxyManager`, so nothing can shut the client down. In tests,
+  `RateLimitServiceIT` (one per test, 26 per run) and `RateLimitBucketLifecycleIT` (one per test)
+  leave about 33 clients per run with live threads that reconnect to stopped containers; a heap dump
+  on 2026-10-06 put the leaked clients at about 98 MiB. Production builds the manager once per
+  context, which also never closes it. When the rate-limit wiring is next touched, or the test heap
+  needs room again, return a closeable handle with the manager and close it in both places.
+
+- `NotificationRepository.hardDeleteOldNotifications` deletes on `deleted_at < :cutoff` and no index
+  leads with `deleted_at`, so the nightly purge likely scans and locks the whole `notifications` table
+  (read from the schema, not EXPLAINed). Worth doing when the table grows past a size where the purge
+  holds locks long enough to stall notification inserts: EXPLAIN it, then add an index or batch it.
+- `PublishedPlannerQueryService.incrementViewCount` has no production caller since views moved to the
+  buffered `PlannerViewRecorder` path; only two `PublishedPlannerQueryServiceTest` tests call it.
+  Delete the method and those tests together when the planner view or query service is next touched.
+- `SentinelUserVerifier.java:15` says verification is skipped in tests because "TestDataInitializer
+  handles it"; that class never loaded and the test overhaul deleted it. Fix the comment when the
+  sentinel-user code is next touched.
+- `PlannerViewLockOrderIT.flush_WhenConcurrentFlushesShareTwoPlanners_AdvancesEveryCounter` fails in a
+  full backend run at a rate of a few percent at most (CannotAcquireLockException on the planner_stats
+  upsert, passing on retry); 26 full runs and 2,400 repetitions on 2026-10-07 did not reproduce it.
+  Worth doing when it next fails: read that run's XML cause chain (the `backend-test-reports`
+  artifact in CI). SQLState 40001 means a deadlock, error 1205 a lock-wait timeout; both failing runs
+  so far took 30-40 s longer than their neighbours, which points at the timeout. Open hypotheses: a
+  third transaction holding a gap lock on the nearly empty `planner_stats`; a scan in byte order
+  against the pods' signed-UUID TreeMap order (the two orders disagree for about half of pairs); a
+  shared context's 500 ms `PlannerViewRecorder` flush as that third party.
+- `EGODetailPage.parity.test.tsx` can exhaust a worker's heap inside a single render (third cell,
+  "threadspin 2 with awaken") when the box is under memory pressure; the run then takes about 350 s
+  instead of 60 s. Seen before and after the test overhaul's snapshot change, so the snapshot size is
+  not the cause. Worth doing when it recurs on an unloaded box or in CI: profile that render's heap.
+- `static/sitemap.xml` is behind the data: the committed file has 758 routes, and `yarn build`
+  regenerates it with about 650 more (629 of them `/battle/*`, also `/identity/10315`). Commit the
+  regenerated file with the next static data change.
+- `.claude/hooks/check-output-redirect.sh` shows `yarn --cwd frontend vitest run > …` as its
+  redirect example, which skips the heap the `test` script sets. Change the example to
+  `yarn --cwd frontend test run` when the hook is next edited.
+- The EGO detail page can livelock in tests: a tier or tab click inside `act()` while the skill and
+  passive description boundaries are still suspended on the keyword-formatter static-data waterfall
+  makes React re-commit with no DOM change and starves the pending fetch (diagnosed 2026-10-08 with a
+  200 ms delayed queryFn and a Profiler commit counter; the parity tests now prefetch the data). Not
+  checked in a real browser, where no synchronous `act()` flush starves the fetch. Worth doing when
+  a user reports a frozen EGO detail page after switching tiers during load: reproduce in Chromium
+  with throttled static-data requests.
+- `tsc --noEmit -p e2e/tsconfig.json` reports 35 TS6142 errors ("`--jsx` is not set"):
+  `e2e/tests/schema-portability.contract.spec.ts` imports `PlannerSchemas`, which reaches the barrels
+  `pages/themePack/index.ts` and `shared/filter/index.ts` through `editorStateCodec`, and those
+  barrels re-export `.tsx` components. Not from
+  the test overhaul (its e2e edits import only node modules and Playwright types). The PR gate does
+  not typecheck e2e, so spec type errors reach CI unseen. Worth doing when an e2e spec needs a
+  type-level guarantee or the e2e typecheck joins a gate: import the needed frontend modules directly instead of through the
+  barrels, or set `jsx` in e2e's tsconfig.
+- Authority has no single owner. The role column and the role-change and last-admin rules are
+  `user`'s (`RoleChangeValidator`, ADR 173), the admin module only orchestrates, the restriction
+  columns are still on `User`, and ADR 148 (user owns role and restriction) and ADR 170 (moderation
+  owns restriction) disagree about who answers "may this actor act?". The target shape is a bottom `authority`
+  module owning role, rank, privileged-route rules and the last-admin rule (and possibly restriction
+  checks), with `user`, `moderation` and the admin endpoints above it; it needs the role column's
+  ownership moved (a `user_roles` table with a dual-write window, or an ADR 169 amendment) and a
+  decision on ADR 170. Worth doing when ADR 170's restriction move is scheduled, since both answer the
+  same question; the analysis with file counts is in the session record of 2026-10-09.
+
+- No ast-grep scan covers `backend/src/consistency/java`: `astGrep` scans `src/main/java` and
+  `astGrepTestSources` scans `src/test/java`. No rule targets the checker today. Worth doing when
+  an ast-grep rule should hold for the checker's source set.
+
+- `PlannerFilterRowsConcurrencyIT.syncFilterRows_WhenTwoNeverSyncedPlannersShareAnIndexGap_BothCommitEveryRound`
+  (then `PlannerCatalogSyncConcurrencyIT.syncPlanner_…`) failed once with "Deadlock found" in
+  `rebuild_planner_filters_scoped` during an integration-package run (seed 5881360375230807038,
+  2026-10-10) and passed on its retry and on the next run. That run predates ADR 185's in-write
+  sync and V067's rebuild by difference. Worth diagnosing when it fails again: replay the seed
+  with `-PtestSeed`.
+
+- 2026-10-13 — The Seoul-to-Oregon failover has never been exercised in production; the
+  portfolio's multi-region piece claims region-outage tolerance with no outcome line for it.
+  Worth doing in a chosen low-traffic window, with the owner's approval: disable the Seoul app's
+  ArgoCD self-heal, scale the Seoul backend to 0, record status code and `X-Served-By` every
+  second from a client, restore, re-enable sync. Load balancer defaults apply: `/healthz-local`
+  every 60 s, `monitor_retries = 2` (read as two failures to drop, not checked against
+  Cloudflare's definition of `retries`), and `NEAS`, `SEAS`, `SAS` and `OC` each steer to
+  `["seoul", "oregon"]`. Session affinity is `cookie`, so record whether the client holds a `__cflb`
+  cookie. Expect 2-3 minutes of errors for Asian users (inferred from the monitor settings).
+- 2026-10-13 — `GtidCapturingDataSource`'s class comment and the 39d9fc41 message say the
+  `afterCommit` lookup ran on a fresh pooled connection; the 2026-10-08 reproduction showed the
+  same connection, with the GTID overwritten by Hibernate's post-commit `SET autocommit=1`. Worth
+  doing whenever that class is next touched.
+
+
+- The backend's start-buff rule parses each season's buff ids with `Long.parseLong` on every check,
+  so a non-numeric key in a season's `startBuffs.json` throws at save time instead of failing
+  startup. Worth moving into the season load when a season file can carry a non-numeric key.
+
+- The frontend id normalizer (`plannerIdNormalize.ts` `migrateArray`) treats `null` as "drop this id",
+  so a `null` element in a planner's gift or start-buff arrays disappears on every load, while the
+  backend reports it as `INVALID_FIELD_TYPE`. The shared content corpus passes only because the
+  frontend replay skips the id normalizer. Worth fixing when a stored planner is found holding a
+  `null` element; the fix turns today's silent heal into a save that the backend refuses.
+
+- Mirror Dungeon run tracking by screen capture (a competitor site offers it) is unbuilt. A web
+  page cannot read game state: the client's `Player.log` carries only errors, and memory or
+  packet reading needs an installed program with terms-of-service risk, so `getDisplayMedia` is
+  the only browser path. Known constraints: a skilled player clears a gift-acquisition popup in
+  about 0.3 s, so capture needs 10-15 fps with each frame handled in under ~66 ms (crop to the
+  icon inside the letterboxed game area, then match a perceptual hash against every gift; OCR is
+  too slow). Fusion removes gifts: recipe gifts can infer their ingredients from the
+  `recipe` field in `EGOGiftSchemas.ts`, but plain fusion cannot. Reading the owned-gift list
+  screen instead of the popup avoids both problems. Theme-pack choice is one click, so manual
+  entry comes first. Open: popup duration and blur (measure from a gameplay video with
+  `ffmpeg -vf fps=15`), how small an icon crop stays distinct, and whether an acquisition sound
+  cue exists. Worth doing when run tracking becomes a planned feature.
+
+- 2026-10-17 — CN localization updates are detected (Discord release alerts) but applied by hand:
+  `static/scripts/update_cn_lang.py`, the CN i18n regeneration, the static commit, the gitlink/lock
+  bump and the deploy are separate manual steps. Full automation needs two things the asset-release
+  unit provides: the raw static-data tables in a bucket CI can read (CN regeneration consumes them)
+  and a data release pointer the backend adopts without a deploy. Worth doing once that unit lands;
+  until then one local command (`static cn-update`) wrapping download, regeneration, commit and
+  lock bump is the cheap form.

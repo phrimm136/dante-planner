@@ -69,7 +69,7 @@ exempt. → [why](testing-evidence.md#6-the-naming-conventions-cost-measured)
 ## 7. Derive the axis, never list it
 
 Read the set from the code: `RequestMappingHandlerMapping`, `UserRole.values()`,
-`ModerationAction.ActionType.values()`, `SseEventType.values()`, `KnownConstraint.values()`.
+`ModerationActionType.values()`, `SseEventType.values()`, `KnownConstraint.values()`.
 
 - **Derive the value too, not just the axis.** → [why](testing-evidence.md#7-deriving-the-axis-and-the-value)
 - **Assert both arms.** The un-applied arm is where a new member lands by default.
@@ -115,6 +115,11 @@ the outcome you wanted.
 - **Rules need this more than assertions do.** A rule that matches nothing passes on every commit.
   Introduce a real violation, put it where a real one would land, read the failure message, and
   re-run after any narrowing.
+
+DOMPurify reports itself unsupported under happy-dom and returns its input unchanged, so a test
+outside `src/shared/sanitize/**` that asserts on sanitized output under happy-dom asserts on the
+raw input. `vite.config.ts` runs the sanitizer's own tests under jsdom; any other suite that
+sanitizes needs the same environment.
 
 ## 12. `@Transactional` is not a cleanup mechanism
 

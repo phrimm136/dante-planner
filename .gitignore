@@ -53,3 +53,8 @@ tmp/
 # Playwright run artifacts
 test-results/
 playwright-report/
+
+# Session debris
+.wt/
+*.hprof
+.claude/.test.lock
