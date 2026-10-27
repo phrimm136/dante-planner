@@ -1,0 +1,192 @@
+#!/usr/bin/env python3
+import os
+import re
+import signal
+import subprocess
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+
+USAGE_TEXT = """usage: debt [--file <path>] <command> [--only <substring>]
+
+Asks every entry of the debt ledger whether its debt still holds.
+
+An entry starts at a line beginning '- ' and ends before the next '- ', '## ' or the end of
+the file. Its last non-empty line is the re-check line:
+  re-check: `<command>`
+(two spaces, then 're-check:', one space and the command in backticks). The command runs from
+the repository root with sh -c and a 5 s budget: exit 0 means the debt still holds, exit 1
+means the debt is gone, anything else means the command is broken.
+
+commands:
+  doctor   print 'entries N, missing M, duplicates D', then one 'missing: <title>' line per
+           entry without a re-check line and one 'duplicates: <title>' line per title used
+           twice; exit 1 when either count is not zero
+  check    run every re-check line and print 'HOLDS', 'GONE' or 'BROKEN' with the title; exit
+           0 when every entry holds, exit 1 with a count line when an entry is gone or a
+           command is broken; entries without a re-check line are skipped (see doctor)
+
+options:
+  --file <path>         read this ledger instead of docs/debt.md in the repository
+  --only <substring>    check: run only the entries whose title contains the substring
+  -h, --help            show this help"""
+
+RECHECK_LINE = re.compile(r"^  re-check: `([^`]+)`$")
+SENTENCE_END = re.compile(r"(?<!e\.g)(?<!i\.e)[.?!](?=\s|$)")
+TIME_BUDGET = 5
+
+
+@dataclass
+class LedgerEntry:
+    entry_title: str
+    recheck_command: str | None
+
+
+def stop_with(error_message, exit_code=2):
+    print(f"debt: {error_message}", file=sys.stderr)
+    sys.exit(exit_code)
+
+
+def find_root():
+    script_dir = Path(__file__).resolve().parent
+    git_result = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=script_dir,
+                                capture_output=True, text=True)
+    if git_result.returncode != 0:
+        stop_with(f"{script_dir} is not inside a git checkout; run debt from the LimbusPlanner repository or a worktree")
+    return Path(git_result.stdout.strip())
+
+
+def title_of(prose_lines):
+    joined_text = " ".join(prose_line.strip() for prose_line in prose_lines)[2:]
+    for sentence_end in SENTENCE_END.finditer(joined_text):
+        if joined_text.count("`", 0, sentence_end.start()) % 2 == 0:
+            return joined_text[:sentence_end.start()]
+    return joined_text
+
+
+def parse_ledger(ledger_text):
+    ledger_entries = []
+    current_lines = None
+
+    def close_entry():
+        if current_lines is None:
+            return
+        filled_lines = [text_line for text_line in current_lines if text_line.strip()]
+        recheck_match = RECHECK_LINE.match(filled_lines[-1]) if len(filled_lines) > 1 else None
+        prose_lines = filled_lines[:-1] if recheck_match else filled_lines
+        ledger_entries.append(LedgerEntry(title_of(prose_lines),
+                                          recheck_match.group(1) if recheck_match else None))
+
+    for text_line in ledger_text.splitlines():
+        if text_line.startswith("- ") or text_line.startswith("## "):
+            close_entry()
+            current_lines = [text_line] if text_line.startswith("- ") else None
+        elif current_lines is not None:
+            current_lines.append(text_line)
+    close_entry()
+    return ledger_entries
+
+
+def count_of(item_count, singular_word, plural_word):
+    return f"{item_count} {singular_word if item_count == 1 else plural_word}"
+
+
+def run_recheck(recheck_command, repo_root):
+    shell_process = subprocess.Popen(["sh", "-c", recheck_command], cwd=repo_root,
+                                     stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True,
+                                     start_new_session=True)
+    try:
+        _, error_text = shell_process.communicate(timeout=TIME_BUDGET)
+    except subprocess.TimeoutExpired:
+        os.killpg(shell_process.pid, signal.SIGKILL)
+        shell_process.communicate()
+        return f"timed out after {TIME_BUDGET} s"
+    if shell_process.returncode in (0, 1):
+        return shell_process.returncode
+    error_lines = [error_line for error_line in error_text.splitlines() if error_line.strip()]
+    first_error = f" — {error_lines[0]}" if error_lines else ""
+    return f"exit {shell_process.returncode}{first_error}"
+
+
+def run_doctor(ledger_entries):
+    title_counts = {}
+    for ledger_entry in ledger_entries:
+        title_counts[ledger_entry.entry_title] = title_counts.get(ledger_entry.entry_title, 0) + 1
+    missing_titles = [ledger_entry.entry_title for ledger_entry in ledger_entries
+                      if ledger_entry.recheck_command is None]
+    duplicate_titles = [entry_title for entry_title, title_count in title_counts.items()
+                        if title_count > 1]
+    print(f"entries {len(ledger_entries)}, missing {len(missing_titles)}, "
+          f"duplicates {len(duplicate_titles)}")
+    for entry_title in missing_titles:
+        print(f"missing: {entry_title}")
+    for entry_title in duplicate_titles:
+        print(f"duplicates: {entry_title}")
+    return 1 if missing_titles or duplicate_titles else 0
+
+
+def run_check(ledger_entries, only_text, repo_root):
+    checked_entries = [ledger_entry for ledger_entry in ledger_entries
+                       if ledger_entry.recheck_command is not None]
+    if only_text is not None:
+        checked_entries = [ledger_entry for ledger_entry in checked_entries
+                           if only_text in ledger_entry.entry_title]
+        if not checked_entries:
+            stop_with(f"no entry matches {only_text}; run debt check without --only to list every title")
+    gone_count = broken_count = 0
+    for ledger_entry in checked_entries:
+        entry_verdict = run_recheck(ledger_entry.recheck_command, repo_root)
+        if entry_verdict == 0:
+            print(f"HOLDS {ledger_entry.entry_title}")
+        elif entry_verdict == 1:
+            gone_count += 1
+            print(f"GONE {ledger_entry.entry_title}")
+        else:
+            broken_count += 1
+            print(f"BROKEN {ledger_entry.entry_title}: {entry_verdict}")
+    if gone_count or broken_count:
+        print(f"{count_of(gone_count, 'entry', 'entries')} to delete, "
+              f"{count_of(broken_count, 'command', 'commands')} to fix")
+        return 1
+    return 0
+
+
+def main():
+    for git_variable in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_COMMON_DIR"):
+        os.environ.pop(git_variable, None)
+    arg_list = sys.argv[1:]
+    command_name = ledger_path = only_text = None
+    while arg_list:
+        current_arg = arg_list.pop(0)
+        if current_arg in ("-h", "--help"):
+            print(USAGE_TEXT)
+            return 0
+        if current_arg in ("--file", "--only"):
+            if not arg_list:
+                stop_with(f"{current_arg} needs a value; see debt --help")
+            if current_arg == "--file":
+                ledger_path = Path(arg_list.pop(0))
+            else:
+                only_text = arg_list.pop(0)
+        elif current_arg in ("doctor", "check"):
+            if command_name is not None:
+                stop_with("one command at a time; see debt --help")
+            command_name = current_arg
+        else:
+            stop_with(f"unknown argument '{current_arg}'; see debt --help")
+    if command_name is None:
+        stop_with("name a command, doctor or check; see debt --help")
+    if only_text is not None and command_name != "check":
+        stop_with("--only works with check alone; run debt check --only <substring>")
+    repo_root = find_root()
+    ledger_path = ledger_path or repo_root / "docs" / "debt.md"
+    if not ledger_path.is_file():
+        stop_with(f"no ledger at {ledger_path}; pass --file <path> to a debt ledger")
+    ledger_entries = parse_ledger(ledger_path.read_text(encoding="utf-8"))
+    if command_name == "doctor":
+        return run_doctor(ledger_entries)
+    return run_check(ledger_entries, only_text, repo_root)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1194,19 +1194,23 @@ two have silently never paged.
   `update-ref --stdin`), so the other refs' updates are lost with it. Worth handling when
   someone works with `--update-refs` over dev; until then the single-ref landing is the
   only path in use.
+  re-check: `rg -q 'refs/heads/dev \] \|\| continue' .githooks/reference-transaction && rg -q '^exit 1$' .githooks/reference-transaction`
 - The landing gate's patch-id is empty for a root commit (`diff-tree -p` without `--root`),
   so an orphan branch merged with `--allow-unrelated-histories` lands unreviewed. Closing it
   means `--root` in the hook, the reviewer's recipe and the measures script together. Worth
   doing if an orphan merge ever appears on dev.
+  re-check: `rg -q 'git diff-tree -p "\$c"' .githooks/reference-transaction && ! rg -q -- '--root' .githooks/reference-transaction`
 - The release-sync exemption trusts `refs/remotes/origin/main`, and the Bash deny list
   refuses only direct ref writes; `git remote set-url origin .` followed by a plain fetch
   moves that ref to local commits. Worth closing (deny `git remote add|set-url` in
   bash-deny) if the measures script ever shows an unreviewed range hidden this way.
+  re-check: `rg -q 'refs/remotes/origin/main' .githooks/reference-transaction`
 - FE mutation testing has no working runner: Stryker 10 with the vitest runner fails in
   project setup against the multi-project `vite.config.ts` on vitest 4.1.2, and its IPC
   drops the inner error. Worth one more spike (a single-project vitest config for Stryker,
   or a sandbox that carries `../static`) when the PIT ratchet has shown its value on the
   backend; until then under-assertion on the frontend is unmeasured.
+  re-check: `! git ls-files | rg -qi stryker && rg -q 'projects: \[' frontend/vite.config.ts`
 - Three full-run-only failures never reproduced across isolated, `taskset -c 0`, neighbour-combo and
   eight full runs (2026-09-29..10-04): `SseFanoutIT` (a JDBC SSL communications error: MySQL
   connection SSL handshake failure during setup, not the fan-out under test; SSL stays on because
@@ -1221,9 +1225,11 @@ two have silently never paged.
   names one as flaky or `EffectPlacementIT` fails again in a full run: keep that run's XML and the
   classes that ran before it in the fork, check whether the outbox eager executor was saturated,
   then build the loop from them.
+  re-check: `d=backend/src/test/java/org/danteplanner/backend/integration; test -f $d/SseFanoutIT.java && test -f $d/EffectPlacementIT.java && rg -q 'isGreaterThan\(singleReCheckMs\)' $d/BulkheadIT.java`
 - The adr116-131 brief reserves migration V064 for J6 "drop planner_views", but V064 is taken by
   the floor-count parameter on `rebuild_planner_filters` (V062 is burned per push-order). J6 must
   renumber to the next free version when it starts.
+  re-check: `test -f backend/src/main/resources/db/migration/V064__rebuild_takes_floor_count.sql && ! rg -qi 'drop table.*planner_views' backend/src/main/resources/db/migration`
 - Refracted Railway planners are refused by `PlannerContentValidator` (`INVALID_CATEGORY`: the
   validator accepts MD categories only) yet the filter rebuild indexes their non-floor rows with
   floor count 0, and the drift reconciler skips them as unreadable, so the audit oracle never
@@ -1231,22 +1237,18 @@ two have silently never paged.
   (`PlannerKeywordBackfillRepository.keywordRowsAfter` has no planner-type filter); prod held no
   RR rows on 2026-09-28. Worth resolving when RR content gets rules of its own: either RR content
   validates and audits, or RR planners stop being indexed.
+  re-check: `rg -q 'MDCategory.isValid\(category\)' backend/src/main/java/org/danteplanner/backend/planner/precondition/PlannerCategoryValidator.java && ! rg -qi 'planner_type' backend/src/main/java/org/danteplanner/backend/planner/repository/PlannerKeywordBackfillRepository.java`
 - `FloorBoundaryConfinementTest` reads bytecode through Spring's repackaged ASM
   (`org.springframework.asm`, marked internal) because ArchUnit 1.3 exposes no string
   constants. Worth moving to a declared `org.ow2.asm` test dependency if a Spring upgrade
   breaks the package.
+  re-check: `rg -q '^import org\.springframework\.asm\.' backend/src/test/java/org/danteplanner/backend/architecture/FloorBoundaryConfinementTest.java`
 - `rebuild_planner_filters` (one argument, V061's CASE floor table) is kept beside
   `rebuild_planner_filters_scoped` (V065) so pods on the previous image keep rebuilding during
   the rollout. Drop the one-argument procedure in a later migration once no pod runs an image
   older than V065; until then the CASE table is a third copy of the floor counts, held equal to
   the shared table by `PlannerFilterRebuildIT`.
-- The catalog sync's rebuild (`PlannerCatalogSyncService`) holds a shared lock on the
-  `planner_content` row from the scope read through the procedure, whose `INSERT … SELECT` also
-  takes shared locks on `planner_publication` and `planner_moderation`. A writer holding an
-  exclusive lock on one of those and then updating `planner_content` could deadlock with it
-  (unverified); the sync's rows stay pending and the next pass retries, so the cost is a failed
-  request if the writer is the victim. Worth a deadlock IT if ER_LOCK_DEADLOCK appears in the logs
-  with `rebuild_planner_filters_scoped`.
+  re-check: `python3 -c "import glob,re,sys; s=sorted((int(re.search(r'/V(\d+)__',f).group(1)),i,m.upper()) for f in glob.glob('backend/src/main/resources/db/migration/V*.sql') for i,m in enumerate(re.findall(r'(?i)\b(create|drop) procedure (?:if exists )?rebuild_planner_filters\b',open(f).read()))); sys.exit(0 if s[-1][2]=='CREATE' else 1)"`
 - 사영전투 turn-cut planner: up to three formations of up to
   twelve turns each against an 18/24-turn full-reward cut, phase-specific decks, and bosses that
   return on rotation, so a plan must render against the data version it was written for. Carry
@@ -1254,6 +1256,7 @@ two have silently never paged.
   mode. Add: formation boundaries in the turn timeline and the turn budget. The draft spec was written without the in-game data model, so
   its storage and data-serving parts are not decisions. Worth doing once the story-battle planner
   ships and its encounter schema holds a second content type.
+  re-check: `test "$(rg -c '^    [A-Z_]+\("' backend/src/main/java/org/danteplanner/backend/planner/entity/PlannerType.java)" = 2`
 - Refraction Railway battle plans: a plan is a sequence of battles whose rules differ per line.
   Lines 1-3 allow a formation change at every node; from line 4 several nodes form one route
   with a single formation. Lines 2 and 5 pick a buff after each node's battle; line 6 offers,
@@ -1262,6 +1265,7 @@ two have silently never paged.
   (`RR_PLACEHOLDER`). Worth doing once the story-battle planner ships: its single-battle schema
   becomes the element of a line plan, with formation boundaries and between-battle choices per
   line.
+  re-check: `test "$(rg -c '^    [A-Z_]+\("' backend/src/main/java/org/danteplanner/backend/planner/entity/RRCategory.java)" = 1 && rg -q 'RR_PLACEHOLDER' backend/src/main/java/org/danteplanner/backend/planner/entity/RRCategory.java`
 - The battle planner computes an E.G.O's cost as: an exchanger override (`TryOverwrite*Cost`,
   E.G.O 21003 and 20205) replaces the base, adders (exchangers 20509 and 21209, `SystemAbility`,
   buff `GetEgoResourceAdder`) are summed on top, and the result is floored at 0. The order and
@@ -1270,11 +1274,13 @@ two have silently never paged.
   `GetMpUseCostAdderByEGO` applies is untraced. No shipped E.G.O has both an override and an
   exchanger adder today. Worth doing when one does, or when a buff adder can land on an overridden
   cost: resolve the two slots from a vtable dump.
+  re-check: `! rg -qi 'RecalculateEgoResources' frontend/src`
 - The battle planner's turn editor places units on the stage from `team-position` coordinates
   over the command-view background layers, with a fixed projection. The client's camera rig
   (static ADR 368: pitch, zoom by aspect, scroll clamps, per-wave `battleCameraInfo`) is not
   reproduced in the frontend. Worth doing when a stage's fixed projection visibly misplaces units
   against its background, or when the editor gains pan and zoom.
+  re-check: `! rg -qi 'battleCameraInfo' frontend/src`
 - `terraform/rds`'s fleet-state gate (exact-key listing before each `terraform_remote_state`)
   has no standing test: `mock_provider` rejects the stack's `ephemeral` master-password read, so
   `terraform test` stops before planning. A copy without that block passed absent, sibling-key,
@@ -1282,49 +1288,52 @@ two have silently never paged.
   Worth doing when Terraform mocks ephemeral resources, or when the wiring moves into its own
   module for another reason; either lets the five runs return as a `tests/` file, and a CI step
   must run `terraform test` for it to guard anything.
+  re-check: `rg -q '^ephemeral ' terraform/rds/main.tf && test -f terraform/rds/remote-state.tf && test -z "$(git ls-files 'terraform/rds/*.tftest.hcl' 'terraform/rds/tests')"`
 - `PrivilegedRouteCoverageRule` confines to the privileged prefixes only the controllers that call a
   moderation or admin service directly; a handler reaching one through another feature's service
   escapes it, and would then act with the token's role instead of the stored one. Worth doing when
   any non-moderation service starts calling a moderation service: make the rule transitive over the
   call graph (as `EffectPlacementTest` walks it).
+  re-check: `rg -q 'getDirectDependenciesFromSelf' backend/src/test/java/org/danteplanner/backend/architecture/PrivilegedRouteCoverageRule.java`
 - `ArchitectureRuleFixtureRatchetTest` counts only `ArchRule` fields and `@ArchTest` members, so a
   rule written as a plain `@Test` (FailureUnionBoundaryTest, BulkUpdateBoundaryTest,
   ContentWritersAdmitFloorsTest, SubjectModuleBoundaryTest's factory rules, the frozen-name
   staleness checks) escapes the fixture requirement. Worth doing when a new architecture test
   lands as a plain `@Test`: define a rule by what it checks (an ArchUnit `check`/`evaluate` call
   reached from a test in the architecture package) rather than by its declared type.
+  re-check: `rg -q 'isAssignableTo\(ArchRule.class\) \|\| field.isAnnotatedWith\(ArchTest.class\)' backend/src/test/java/org/danteplanner/backend/architecture/ArchitectureRuleFixtureRatchetTest.java`
 - `RestrictedPrincipalMatrixIT`'s allowed rows address random ids, so most answer 404 at their
   entity lookup: the matrix proves they clear validation and are not refused with USER_BANNED,
   not that a ban leaves them working. A ban check placed after the lookup (the order
   `PlannerCommandService` already uses for upserts) would pass unseen. Worth doing when a guard
   moves behind a lookup or a new ordinary route takes a restriction check: seed a real resource
   per allowed row, owned by the banned principal where the route needs it, and assert a 2xx.
+  re-check: `rg -q 'publishedPlannerId\(\) : UUID.randomUUID\(\)' backend/src/test/java/org/danteplanner/backend/security/RestrictedPrincipalMatrixIT.java`
 - `ArchitectureRuleFixtureRatchetTest` credits a negative test that reads the failure message, not
   one that checks the message names the fixture, so `hasMessageContaining("failed to check any
   classes")` would still earn credit for a rule that rejected nothing. Worth doing if a credited
   test is found asserting on anything but the fixture: match the message argument against a class
   from the fixture package at the bytecode level.
-- `PLANNER_CATALOG_CHANGED` rows that reach the dispatch attempt cap stay pending forever: the
-  catalog sync marks only the rows it read and skips capped ones, and the backlog gauge ignores
-  them, so after the cap's Sentry alarm nothing surfaces them again. Worth doing before the cap
-  alarm first fires in production: a runbook step that finds the capped rows, names the failing
-  planner, and resets `attempts` (or marks them once a later sync of that planner succeeded).
+  re-check: `rg -q 'method.startsWith\(MESSAGE_ASSERTION_PREFIX\)' backend/src/test/java/org/danteplanner/backend/architecture/ArchitectureRuleFixtureRatchetTest.java`
 - 2026-10-02 — The frontend reports no errors anywhere: production hides the message, the
   error screens show only a short code, and nothing reaches Loki or a reporting service, so a
   failure is known only when a user describes it. Worth doing once a deploy regression must be
   caught without a user report; Sentry or GlitchTip (source-map stacks, per-browser grouping)
   beats a home-grown beacon, which would rebuild both.
+  re-check: `! rg -qi 'sentry|glitchtip' frontend/package.json && ! rg -q 'sendBeacon' frontend/src`
 - 2026-10-02 — `getDB` (`frontend/src/lib/storage.ts`) clears its cached promise when an open
   reports `onerror` or `onblocked`, but not when `indexedDB.open` throws synchronously: the
   rejected promise stays cached for the page's life, so storage cannot recover without a reload.
   Harmless for a permanent `SecurityError`; worth fixing once a transient synchronous throw is
   seen in the field.
+  re-check: `rg -qU 'pending = new Promise\(\(resolve, reject\) => \{\n    const request = indexedDB.open' frontend/src/lib/storage.ts`
 - 2026-10-02 — `UNAVAILABLE_ERROR_BY_CODE[body?.code ?? '']` in `frontend/src/lib/api.ts` is a
   bare object lookup, so a 503 whose code is an inherited property name (`toString`) picks a
   non-constructor and `new` throws a `TypeError` instead of `BackendUnavailableError`. Inferred,
   not run. The map now also holds `WRITE_TEMPORARILY_UNAVAILABLE`, `DEADLOCK` and
   `RATE_LIMIT_*` entries. Worth a `Map` or `Object.hasOwn` guard once the backend's code set is open to anything
   but its own constants.
+  re-check: `rg -qF "UNAVAILABLE_ERROR_BY_CODE[body?.code ?? '']" frontend/src/lib/api.ts`
 - 2026-10-02 — Queries retry `WriteTemporarilyUnavailableError` once (it extends `Error`, not
   `RetryableUnavailableError`, so it falls through to `failureCount < 1` in
   `frontend/src/lib/queryClient.ts`, which retries `RetryableUnavailableError` up to
@@ -1332,22 +1341,18 @@ two have silently never paged.
   not retried, although both now mean the server cannot serve (the backend's database-down code).
   Worth aligning when the retry policy is next touched or a DB outage shows doubled request
   volume.
+  re-check: `rg -q 'class WriteTemporarilyUnavailableError extends Error' frontend/src/lib/apiErrors.ts && ! rg -q 'WriteTemporarilyUnavailableError' frontend/src/lib/queryClient.ts`
 - 2026-10-02 — `frontend/tsconfig.test.json` includes only test files, so tests cannot see the
   ambient globals in `frontend/src/vite-modules.d.ts`; the build-id hook test redeclares
   `__BUILD_ID__` locally. Worth fixing once a second test needs a global from that file.
+  re-check: `! rg -q 'vite-modules' frontend/tsconfig.test.json && rg -q '^declare const __BUILD_ID__' frontend/src/lib/banner/__tests__/useUpdateAvailable.test.tsx`
 - In ArchUnit 1.3, `getMethodCallsFromSelf()` and `getConstructorCallsFromSelf()` omit method
   references (`Foo::bar`, `Foo::new`). Only `getAccessesFromSelf()` returns them. A red fixture
   proved this for `LogCaptureRule`. These rules read only calls, so a method reference passes
   them: `ContentWritersAdmitFloorsTest:85`, `TestIsolationConventionTest:113,343`,
   `EffectPlacementTest` (six call-graph walks) and `GuaranteePlacementTest:120`. When one of
   those rules is next touched, switch it to accesses and add a by-reference violator fixture.
-- `rebuild_planner_filters_scoped` deletes and then inserts under REPEATABLE READ. A DELETE that
-  matches nothing takes a gap lock, so two concurrent rebuilds of planners in the same index gap
-  deadlock (reproduced with two SQL sessions on 2026-10-05:
-  `.claude/reports/logs/overhaul-j8a-gaplock-20261005-213416.log`). `drainPending` absorbs the
-  failure, but each deadlock spends one of the event's 10 attempts. When catalog sync shows
-  exhausted attempts or deadlock errors in prod, try READ COMMITTED on the sync transaction and
-  measure it with the same harness.
+  re-check: `rg -q 'get(Method|Constructor)CallsFromSelf\(\)' backend/src/test/java/org/danteplanner/backend/architecture -g '{ContentWritersAdmitFloors,TestIsolationConvention,EffectPlacement,GuaranteePlacement}Test.java'`
 - `SseSubscriberConfig` sets no task executor on the Redis listener container. Spring Data Redis
   3.5 then uses a `SimpleAsyncTaskExecutor` and dispatches each pub/sub message on a new thread, so
   two pushes to one stream can reach the browser in the reverse order (reproduced 2026-10-09: 41 of
@@ -1366,6 +1371,7 @@ two have silently never paged.
   executor: 20 inversions in round 1). The test goes into `SseFanoutIT` as a method. A new class
   with its own `@DynamicPropertySource` exceeds the context budget of 15 in
   `TestIsolationConventionTest`.
+  re-check: `rg -q 'RedisMessageListenerContainer' backend/src/main/java/org/danteplanner/backend/shared/sse/SseSubscriberConfig.java && ! rg -q 'setTaskExecutor' backend/src/main/java/org/danteplanner/backend/shared/sse/SseSubscriberConfig.java`
 - `RedisConnectionConfig.buildRateLimitProxyManager` creates a `RedisClient` with its own client
   resources and returns only the `ProxyManager`, so nothing can shut the client down. In tests,
   `RateLimitServiceIT` (one per test, 26 per run) and `RateLimitBucketLifecycleIT` (one per test)
@@ -1373,17 +1379,21 @@ two have silently never paged.
   on 2026-10-06 put the leaked clients at about 98 MiB. Production builds the manager once per
   context, which also never closes it. When the rate-limit wiring is next touched, or the test heap
   needs room again, return a closeable handle with the manager and close it in both places.
+  re-check: `rg -q 'public static ProxyManager<byte\[\]> buildRateLimitProxyManager' backend/src/main/java/org/danteplanner/backend/shared/config/RedisConnectionConfig.java`
 
 - `NotificationRepository.hardDeleteOldNotifications` deletes on `deleted_at < :cutoff` and no index
   leads with `deleted_at`, so the nightly purge likely scans and locks the whole `notifications` table
   (read from the schema, not EXPLAINed). Worth doing when the table grows past a size where the purge
   holds locks long enough to stall notification inserts: EXPLAIN it, then add an index or batch it.
+  re-check: `rg -q 'n.deletedAt < :cutoffDate' backend/src/main/java/org/danteplanner/backend/notification/repository/NotificationRepository.java && ! rg -qi 'notifications ?\(deleted_at' backend/src/main/resources/db/migration`
 - `PublishedPlannerQueryService.incrementViewCount` has no production caller since views moved to the
   buffered `PlannerViewRecorder` path; only two `PublishedPlannerQueryServiceTest` tests call it.
   Delete the method and those tests together when the planner view or query service is next touched.
+  re-check: `rg -q 'public void incrementViewCount\(' backend/src/main/java/org/danteplanner/backend/planner/service/PublishedPlannerQueryService.java`
 - `SentinelUserVerifier.java:15` says verification is skipped in tests because "TestDataInitializer
   handles it"; that class never loaded and the test overhaul deleted it. Fix the comment when the
   sentinel-user code is next touched.
+  re-check: `rg -q 'TestDataInitializer' backend/src/main/java/org/danteplanner/backend/user/config/SentinelUserVerifier.java`
 - `PlannerViewLockOrderIT.flush_WhenConcurrentFlushesShareTwoPlanners_AdvancesEveryCounter` fails in a
   full backend run at a rate of a few percent at most (CannotAcquireLockException on the planner_stats
   upsert, passing on retry); 26 full runs and 2,400 repetitions on 2026-10-07 did not reproduce it.
@@ -1393,16 +1403,16 @@ two have silently never paged.
   third transaction holding a gap lock on the nearly empty `planner_stats`; a scan in byte order
   against the pods' signed-UUID TreeMap order (the two orders disagree for about half of pairs); a
   shared context's 500 ms `PlannerViewRecorder` flush as that third party.
+  re-check: `rg -q 'void flush_WhenConcurrentFlushesShareTwoPlanners_AdvancesEveryCounter' backend/src/test/java/org/danteplanner/backend/integration/PlannerViewLockOrderIT.java`
 - `EGODetailPage.parity.test.tsx` can exhaust a worker's heap inside a single render (third cell,
   "threadspin 2 with awaken") when the box is under memory pressure; the run then takes about 350 s
   instead of 60 s. Seen before and after the test overhaul's snapshot change, so the snapshot size is
   not the cause. Worth doing when it recurs on an unloaded box or in CI: profile that render's heap.
-- `static/sitemap.xml` is behind the data: the committed file has 758 routes, and `yarn build`
-  regenerates it with about 650 more (629 of them `/battle/*`, also `/identity/10315`). Commit the
-  regenerated file with the next static data change.
+  re-check: `test -f frontend/src/pages/ego/__tests__/EGODetailPage.parity.test.tsx`
 - `.claude/hooks/check-output-redirect.sh` shows `yarn --cwd frontend vitest run > …` as its
   redirect example, which skips the heap the `test` script sets. Change the example to
   `yarn --cwd frontend test run` when the hook is next edited.
+  re-check: `rg -qF 'yarn --cwd frontend vitest run >' .claude/hooks/check-output-redirect.sh`
 - The EGO detail page can livelock in tests: a tier or tab click inside `act()` while the skill and
   passive description boundaries are still suspended on the keyword-formatter static-data waterfall
   makes React re-commit with no DOM change and starves the pending fetch (diagnosed 2026-10-08 with a
@@ -1410,6 +1420,7 @@ two have silently never paged.
   checked in a real browser, where no synchronous `act()` flush starves the fetch. Worth doing when
   a user reports a frozen EGO detail page after switching tiers during load: reproduce in Chromium
   with throttled static-data requests.
+  re-check: `rg -q 'prefetchDescriptionData' frontend/src/pages/ego/__tests__/EGODetailPage.parity.test.tsx && ! git ls-files e2e | rg -qi ego`
 - `tsc --noEmit -p e2e/tsconfig.json` reports 35 TS6142 errors ("`--jsx` is not set"):
   `e2e/tests/schema-portability.contract.spec.ts` imports `PlannerSchemas`, which reaches the barrels
   `pages/themePack/index.ts` and `shared/filter/index.ts` through `editorStateCodec`, and those
@@ -1418,6 +1429,7 @@ two have silently never paged.
   not typecheck e2e, so spec type errors reach CI unseen. Worth doing when an e2e spec needs a
   type-level guarantee or the e2e typecheck joins a gate: import the needed frontend modules directly instead of through the
   barrels, or set `jsx` in e2e's tsconfig.
+  re-check: `! rg -q '"jsx"' e2e/tsconfig.json && rg -qF "@/pages/planner/schemas/PlannerSchemas'" e2e/tests/schema-portability.contract.spec.ts`
 - Authority has no single owner. The role column and the role-change and last-admin rules are
   `user`'s (`RoleChangeValidator`, ADR 173), the admin module only orchestrates, the restriction
   columns are still on `User`, and ADR 148 (user owns role and restriction) and ADR 170 (moderation
@@ -1427,10 +1439,12 @@ two have silently never paged.
   ownership moved (a `user_roles` table with a dual-write window, or an ADR 169 amendment) and a
   decision on ADR 170. Worth doing when ADR 170's restriction move is scheduled, since both answer the
   same question; the analysis with file counts is in the session record of 2026-10-09.
+  re-check: `test ! -d backend/src/main/java/org/danteplanner/backend/authority && rg -q 'name = "banned_at"' backend/src/main/java/org/danteplanner/backend/user/entity/User.java`
 
 - No ast-grep scan covers `backend/src/consistency/java`: `astGrep` scans `src/main/java` and
   `astGrepTestSources` scans `src/test/java`. No rule targets the checker today. Worth doing when
   an ast-grep rule should hold for the checker's source set.
+  re-check: `test -d backend/src/consistency/java && ! rg -q '"scan", "--error", "src/consistency' backend/build.gradle.kts`
 
 - `PlannerFilterRowsConcurrencyIT.syncFilterRows_WhenTwoNeverSyncedPlannersShareAnIndexGap_BothCommitEveryRound`
   (then `PlannerCatalogSyncConcurrencyIT.syncPlanner_…`) failed once with "Deadlock found" in
@@ -1438,6 +1452,7 @@ two have silently never paged.
   2026-10-10) and passed on its retry and on the next run. That run predates ADR 185's in-write
   sync and V067's rebuild by difference. Worth diagnosing when it fails again: replay the seed
   with `-PtestSeed`.
+  re-check: `rg -q 'void syncFilterRows_WhenTwoNeverSyncedPlannersShareAnIndexGap_BothCommitEveryRound' backend/src/test/java/org/danteplanner/backend/integration/PlannerFilterRowsConcurrencyIT.java`
 
 - 2026-10-13 — The Seoul-to-Oregon failover has never been exercised in production; the
   portfolio's multi-region piece claims region-outage tolerance with no outcome line for it.
@@ -1448,21 +1463,25 @@ two have silently never paged.
   Cloudflare's definition of `retries`), and `NEAS`, `SEAS`, `SAS` and `OC` each steer to
   `["seoul", "oregon"]`. Session affinity is `cookie`, so record whether the client holds a `__cflb`
   cookie. Expect 2-3 minutes of errors for Asian users (inferred from the monitor settings).
+  re-check: `rg -q 'NEAS = \["seoul", "oregon"\]' terraform/cloudflare/variables.tf && ! rg -qi 'scale the Seoul backend' docs/runbooks`
 - 2026-10-13 — `GtidCapturingDataSource`'s class comment and the 39d9fc41 message say the
   `afterCommit` lookup ran on a fresh pooled connection; the 2026-10-08 reproduction showed the
   same connection, with the GTID overwritten by Hibernate's post-commit `SET autocommit=1`. Worth
   doing whenever that class is next touched.
+  re-check: `rg -q 'fresh pooled connection' backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidCapturingDataSource.java`
 
 
 - The backend's start-buff rule parses each season's buff ids with `Long.parseLong` on every check,
   so a non-numeric key in a season's `startBuffs.json` throws at save time instead of failing
   startup. Worth moving into the season load when a season file can carry a non-numeric key.
+  re-check: `rg -q 'mapToLong\(Long::parseLong\)' backend/src/main/java/org/danteplanner/backend/planner/validation/startbuff/StartBuffRules.java`
 
 - The frontend id normalizer (`plannerIdNormalize.ts` `migrateArray`) treats `null` as "drop this id",
   so a `null` element in a planner's gift or start-buff arrays disappears on every load, while the
   backend reports it as `INVALID_FIELD_TYPE`. The shared content corpus passes only because the
   frontend replay skips the id normalizer. Worth fixing when a stored planner is found holding a
   `null` element; the fix turns today's silent heal into a save that the backend refuses.
+  re-check: `rg -q 'if \(result === null\) continue' frontend/src/pages/planner/lib/plannerIdNormalize.ts`
 
 - Mirror Dungeon run tracking by screen capture (a competitor site offers it) is unbuilt. A web
   page cannot read game state: the client's `Player.log` carries only errors, and memory or
@@ -1476,6 +1495,7 @@ two have silently never paged.
   entry comes first. Open: popup duration and blur (measure from a gameplay video with
   `ffmpeg -vf fps=15`), how small an icon crop stays distinct, and whether an acquisition sound
   cue exists. Worth doing when run tracking becomes a planned feature.
+  re-check: `! rg -q 'getDisplayMedia' frontend/src`
 
 - 2026-10-17 — CN localization updates are detected (Discord release alerts) but applied by hand:
   `static/scripts/update_cn_lang.py`, the CN i18n regeneration, the static commit, the gitlink/lock
@@ -1484,24 +1504,44 @@ two have silently never paged.
   and a data release pointer the backend adopts without a deploy. Worth doing once that unit lands;
   until then one local command (`static cn-update`) wrapping download, regeneration, commit and
   lock bump is the cheap form.
+  re-check: `! rg -q 'cn-update' .claude/skills/static-checkout/bin/static && ! rg -qi 'update_cn_lang' .github/workflows`
 
 ## 2026-10-27 trunk hygiene follow-ups (PR #322)
 
-- 58 of 193 ADRs still trigger the pre-commit "no REJECTED clause" note after its parse was fixed (down from 115); whether each is a forced, corollary or summary bullet is unchecked. Re-check: `.githooks/pre-commit` on a no-op commit lists them. Worth doing when an ADR convention pass is next run.
+- 58 of 193 ADRs still trigger the pre-commit "no REJECTED clause" note after its parse was fixed (down from 115); whether each is a forced, corollary or summary bullet is unchecked. Worth doing when an ADR convention pass is next run.
+  re-check: `awk 'function c(){if(o&&!r)b[cur]=1;o=0;r=0} FNR==1{c();cur=FILENAME;s=0} /^## /{c();s=($0~/^## Decisions/);next} s&&/^- @/{c();o=1} o&&/REJECTED/{r=1} END{c();n=0;for(f in b)n++;print n;exit n==0}' docs/adr/[0-9]*.md`
 - `RaiseBatcher.java:91` waits on the real clock for the caller-side bound (waitBound + margin). In a
   fresh JVM under heavy CPU load the first Redis client connect exceeds it and whichever
   `RaiseBatcherTest` connects first fails; the two clock-driven tests now use a 30 s bound, the rest
   still use 1.5 s. Worth doing if the class fails in CI on its first connecting test: warm the
   Lettuce client once per class.
+  re-check: `rg -q 'request.raised\(\).get\(bound.toNanos\(\), TimeUnit.NANOSECONDS\)' backend/src/main/java/org/danteplanner/backend/shared/freshness/RaiseBatcher.java && rg -q 'WAIT_BOUND = Duration.ofSeconds\(1\);' backend/src/test/java/org/danteplanner/backend/shared/freshness/RaiseBatcherTest.java`
 - No `components/ui/textarea` primitive: `DeckImportDialog` and `ModerationReasonDialog` each
   hand-style a `<textarea>` against `components/ui/CLAUDE.md`. Worth doing when either is next
   touched: add the shadcn textarea and use it in both.
+  re-check: `test ! -e frontend/src/components/ui/textarea.tsx || rg -q '<textarea' frontend/src/pages/planner/components/deckBuilder/DeckImportDialog.tsx frontend/src/shared/moderation/components/ModerationReasonDialog.tsx`
 - No code completes a planner's comment-stream emitters when the planner is deleted; the stream
   lingers until the 1 h timeout, and the e2e spec pins only what the client does today (a gone
   planner opens no stream). ADR 183 @comments @visibility implies the removal should end the
   stream. Streams live on every pod, so an AFTER_COMMIT listener on the committing pod is not
   enough: the removal needs a `domain_events` row, a dispatcher arm and an SSE envelope that each
   pod's `PlannerCommentSseService.deliver` turns into `complete()` on that planner's emitters
-  (backend CLAUDE.md:15). Re-check: `rg -n "complete\(\)" backend/src/main/java/org/danteplanner/backend/comment` prints nothing. Worth doing as its own unit; the e2e spec then regains the open-stream incident.
+  (backend CLAUDE.md:15). Worth doing as its own unit; the e2e spec then regains the open-stream incident.
+  re-check: `! rg -q 'complete\(\)' backend/src/main/java/org/danteplanner/backend/comment`
 - After PR #322 deploys: `write_forwarding` goes probe → all (ADR 123), the POST `/batch` handler
   and the top-level `selectedKeywords` copy wait for seven days of zero counters (entries above).
+  re-check: `rg -q '@PostMapping\("/batch"\)' backend/src/main/java/org/danteplanner/backend/planner/controller/PlannerQueryController.java`
+- Two freshness tests keep a sub-second real-clock proof against a production constant:
+  `MarkerStoreConnectBoundTest` proves "released by the close" with
+  `released < RAISE_CONNECT_TIMEOUT / 2` (500 ms), and `LazyConnectingProxyManagerTest` proves
+  fail-fast with `FAIL_FAST_BUDGET` (100 ms). Every other bound in `shared/freshness` and
+  `shared/config` now carries a 5 s slack or runs against a 30 s wait bound. Worth doing
+  if either fails in CI: let `MarkerStore.Settings` carry the connect timeout so the test can
+  make it roomy, and assert the fail-fast path by its call count rather than its clock.
+  re-check: `rg -q 'RAISE_CONNECT_TIMEOUT.dividedBy\(2\)|FAIL_FAST_BUDGET =' backend/src/test`
+- CI `test-frontend` died once with "Worker terminated due to reaching memory limit: JS heap out
+  of memory" on PR #328 (386 of 387 files passed, zero failures) and passed on rerun of the same
+  commit. Worth doing on the second occurrence:
+  find the file that was running from the log and either split it or raise the worker heap
+  (`pr-gate.yml` NODE_OPTIONS) with the measurement that justifies it.
+  re-check: `rg -qF '"test:coverage": "NODE_OPTIONS=--max-old-space-size=4096 vitest run --coverage"' frontend/package.json`

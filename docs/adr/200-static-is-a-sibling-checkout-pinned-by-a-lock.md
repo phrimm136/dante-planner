@@ -53,6 +53,18 @@ epic: none · pr: none · supersedes: none
   the server-rendering change, and the script is the seam it reuses.
   INVARIANT: the token never appears in build output; the script never prints the URL that
   carries it — unenforced.
+- @static @env — The static CLI and the pre-commit hook find the data checkout from paths only,
+  never from the git environment they inherit: the CLI unsets `GIT_DIR`, `GIT_WORK_TREE`,
+  `GIT_INDEX_FILE` and `GIT_COMMON_DIR` before any git call, and the hook runs its one
+  data-checkout command with those variables unset. Git exports `GIT_DIR` to a hook, so inside a
+  commit from a worktree `git -C static rev-parse HEAD` read the code repository's HEAD, and the
+  hook refused a commit whose `static.lock` named the data checkout's HEAD correctly.
+  REJECTED: unsetting the variables for the whole hook — its reads of the index (`git show :…`)
+  must see the commit's own index.
+  INVARIANT: with `GIT_DIR` exported from a worktree, `static check` and `static doctor` report
+  the data checkout's HEAD and exit 0 when it matches the lock, and the hook passes a commit whose
+  `static.lock` is unchanged — the exported-`GIT_DIR` scenario, a manual run that CI does not
+  repeat.
 
 ## Takeaway
 - takeaway: keep the path, change what sits at it; pin by a value the review sees, not by a

@@ -12,8 +12,9 @@ Four kinds of document, four jobs. Putting something in the wrong one is how it 
 Execution tracking lives in GitHub issues, not here.
 
 `debt.md` sits outside all four: a pruned parking lot of found work, written so a discovery stops
-occupying attention, and read only by a deliberate defrag or design session. It is not a queue, and
-nothing is expected to pull from it on a schedule.
+occupying attention, and read only by a deliberate defrag or design session. It is not a queue: the
+weekly Debt Check workflow reports the entries whose re-check line says the debt is gone, and
+nothing pulls work from it.
 
 ## Choosing between them
 
