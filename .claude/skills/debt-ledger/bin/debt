@@ -21,16 +21,21 @@ the repository root with sh -c and a 5 s budget: exit 0 means the debt still hol
 means the debt is gone, anything else means the command is broken. "This must be absent" is
 written '.claude/skills/debt-ledger/bin/debt absent <path> <rg arguments>', never '! rg', which
 reads a missing path as absent. A Python re-check is written
-'.claude/skills/debt-ledger/bin/debt python <body>', never by calling the interpreter directly
-('python3 -c', 'python3 -I -c', 'python3.12 -c'), which exits 1 (gone) when the body fails to
-compile or raises.
+'.claude/skills/debt-ledger/bin/debt python <body>', never by calling an interpreter, which exits
+1 (gone) when the body fails to compile or raises.
+
+Every clause of a re-check command (split on &&, ||, ; and |, outside quotes; a $(...) is a
+clause of its own) starts with an allowed tool, after a leading '!', 'env -C <dir>' and
+'NAME=value' assignments are set aside: rg, test, [, git, jq, awk, true, false or
+.claude/skills/debt-ledger/bin/debt. Only the first word is bounded; the arguments of an allowed
+tool are not inspected. A clause of assignments alone runs no tool and passes.
 
 commands:
   doctor   print 'entries N, missing M, duplicates D, malformed K', then one
            'missing: <title>' line per entry without a re-check line, one 'duplicates: <title>'
            line per title used twice and one 'malformed: <title> — <fix>' line per re-check
-           line that negates rg ('! rg') or names a python interpreter (python, python3,
-           python3.12, ...) anywhere but in 'bin/debt python'; exit 1 when any count is not zero
+           line that negates rg ('! rg') and per line with a clause that starts with a tool off
+           the allowed list above; exit 1 when any count is not zero
   check    run every re-check line and print 'HOLDS', 'GONE' or 'BROKEN' with the title; exit
            0 when every entry holds, exit 1 with a count line when an entry is gone or a
            command is broken; entries without a re-check line are skipped (see doctor)
@@ -48,8 +53,10 @@ options:
 
 RECHECK_LINE = re.compile(r"^  re-check: `([^`]+)`$")
 NEGATED_RG = re.compile(r"(?:^|[\s;&|(])!\s+rg\b")
-PYTHON_TOKEN = re.compile(r"(?<![\w/])python[0-9.]*\b")
-CLI_PYTHON_PREFIX = "bin/debt "
+LEDGER_CLI = ".claude/skills/debt-ledger/bin/debt"
+ALLOWED_TOOLS = frozenset({"rg", "test", "[", "git", "jq", "awk", "true", "false", LEDGER_CLI})
+SHELL_ASSIGNMENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
+SUBSTITUTION_MARK = "$(…)"
 SENTENCE_END = re.compile(r"(?<!e\.g)(?<!i\.e)[.?!](?=\s|$)")
 TIME_BUDGET = 5
 
@@ -143,6 +150,77 @@ def run_python(python_args):
     return 0
 
 
+def split_clauses(shell_command):
+    finished_clauses = []
+    open_frames = [{"clause_chars": [], "quote_char": None, "paren_depth": 0}]
+    char_index = 0
+
+    def finish_clause(clause_frame):
+        finished_clauses.append("".join(clause_frame["clause_chars"]))
+        clause_frame["clause_chars"] = []
+
+    while char_index < len(shell_command):
+        current_frame = open_frames[-1]
+        current_char = shell_command[char_index]
+        if current_frame["quote_char"] == "'":
+            current_frame["clause_chars"].append(current_char)
+            if current_char == "'":
+                current_frame["quote_char"] = None
+            char_index += 1
+        elif current_char == "\\":
+            current_frame["clause_chars"].append(shell_command[char_index:char_index + 2])
+            char_index += 2
+        elif shell_command.startswith("$(", char_index):
+            open_frames.append({"clause_chars": [], "quote_char": None, "paren_depth": 0})
+            char_index += 2
+        elif current_frame["quote_char"] == '"' or current_char in "'\"":
+            current_frame["clause_chars"].append(current_char)
+            if current_frame["quote_char"] == '"' and current_char == '"':
+                current_frame["quote_char"] = None
+            elif current_frame["quote_char"] is None:
+                current_frame["quote_char"] = current_char
+            char_index += 1
+        elif current_char == ")" and current_frame["paren_depth"] == 0 and len(open_frames) > 1:
+            finish_clause(open_frames.pop())
+            open_frames[-1]["clause_chars"].append(SUBSTITUTION_MARK)
+            char_index += 1
+        elif shell_command.startswith(("&&", "||"), char_index):
+            finish_clause(current_frame)
+            char_index += 2
+        elif current_char in ";|":
+            finish_clause(current_frame)
+            char_index += 1
+        else:
+            if current_char == "(":
+                current_frame["paren_depth"] += 1
+            elif current_char == ")":
+                current_frame["paren_depth"] -= 1
+            current_frame["clause_chars"].append(current_char)
+            char_index += 1
+    for remaining_frame in open_frames:
+        finish_clause(remaining_frame)
+    return finished_clauses
+
+
+def clause_tool(clause_text):
+    clause_words = clause_text.split()
+    if clause_words[:1] == ["!"]:
+        clause_words = clause_words[1:]
+    if clause_words[:2] == ["env", "-C"]:
+        clause_words = clause_words[3:]
+    while clause_words and SHELL_ASSIGNMENT.match(clause_words[0]):
+        clause_words = clause_words[1:]
+    return clause_words[0] if clause_words else None
+
+
+def disallowed_tool(shell_command):
+    for clause_text in split_clauses(shell_command):
+        tool_word = clause_tool(clause_text)
+        if tool_word is not None and tool_word not in ALLOWED_TOOLS:
+            return tool_word
+    return None
+
+
 def run_doctor(ledger_entries):
     title_counts = {}
     for ledger_entry in ledger_entries:
@@ -157,10 +235,10 @@ def run_doctor(ledger_entries):
             continue
         if NEGATED_RG.search(ledger_entry.recheck_command):
             malformed_lines.append(f"{ledger_entry.entry_title} — negates rg; use debt absent")
-        if any(not ledger_entry.recheck_command[:token_match.start()].endswith(CLI_PYTHON_PREFIX)
-               for token_match in PYTHON_TOKEN.finditer(ledger_entry.recheck_command)):
-            malformed_lines.append(f"{ledger_entry.entry_title} — calls the interpreter directly; "
-                                   f"use debt python")
+        tool_word = disallowed_tool(ledger_entry.recheck_command)
+        if tool_word is not None:
+            malformed_lines.append(f'{ledger_entry.entry_title} — starts a clause with "{tool_word}", '
+                                   f'which is not an allowed re-check tool; see debt --help')
     print(f"entries {len(ledger_entries)}, missing {len(missing_titles)}, "
           f"duplicates {len(duplicate_titles)}, malformed {len(malformed_lines)}")
     for entry_title in missing_titles:
