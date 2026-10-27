@@ -9,5 +9,9 @@
   The Pages build command is `sh frontend/scripts/fetch-static.sh && yarn --cwd frontend build`,
   and `STATIC_TOKEN` is a Pages environment variable that holds a fine-grained PAT with read-only
   Contents on phrimm136/danteplanner-static only.
+- `grafana-provision.yml` runs the alert-rule and fleet-dashboard imports under `deploy/grafana/`
+  on every push to `main` that touches that directory; a Grafana change lands by merging it there,
+  never by a hand-run. Every script it runs must be idempotent (upsert or overwrite), so
+  `create-staleness-rules.sh` stays out until it upserts.
 - Workflow `run:` blocks must not interpolate untrusted PR input (title/body/branch
   names); use `github.sha` / `github.ref_name` style contexts only.

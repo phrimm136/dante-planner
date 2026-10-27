@@ -1,0 +1,36 @@
+name: Grafana provision
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'deploy/grafana/**'
+      - '.github/workflows/grafana-provision.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: grafana-provision
+  cancel-in-progress: false
+
+jobs:
+  provision:
+    name: Provision Grafana objects
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+
+      - name: Import alert rules and the fleet dashboard
+        env:
+          GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
+          GRAFANA_TOKEN: ${{ secrets.GRAFANA_TOKEN }}
+          ETCD_INTERVAL: ${{ vars.ETCD_INTERVAL }}
+          CW_DS_UID: ${{ vars.CW_DS_UID }}
+          LOKI_DS_UID: ${{ vars.LOKI_DS_UID }}
+        run: |
+          set -euo pipefail
+          bash deploy/grafana/import-alert-rules.sh
+          bash deploy/grafana/import-app-alert-rules.sh
+          bash deploy/grafana/import-fleet-dashboard.sh
