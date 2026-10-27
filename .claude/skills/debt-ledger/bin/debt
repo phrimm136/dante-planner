@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 USAGE_TEXT = """usage: debt [--file <path>] <command> [--only <substring>]
+       debt absent <path> <rg arguments>...
 
 Asks every entry of the debt ledger whether its debt still holds.
 
@@ -16,15 +17,23 @@ the file. Its last non-empty line is the re-check line:
   re-check: `<command>`
 (two spaces, then 're-check:', one space and the command in backticks). The command runs from
 the repository root with sh -c and a 5 s budget: exit 0 means the debt still holds, exit 1
-means the debt is gone, anything else means the command is broken.
+means the debt is gone, anything else means the command is broken. "This must be absent" is
+written '.claude/skills/debt-ledger/bin/debt absent <path> <rg arguments>', never '! rg', which
+reads a missing path as absent. A 'python3 -c' re-check starts with
+  sys.excepthook=lambda t,e,b: (print(f'{t.__name__}: {e}',file=sys.stderr),os._exit(2))
+so an exception exits 2 (broken), not 1 (gone).
 
 commands:
-  doctor   print 'entries N, missing M, duplicates D', then one 'missing: <title>' line per
-           entry without a re-check line and one 'duplicates: <title>' line per title used
-           twice; exit 1 when either count is not zero
+  doctor   print 'entries N, missing M, duplicates D, malformed K', then one
+           'missing: <title>' line per entry without a re-check line, one 'duplicates: <title>'
+           line per title used twice and one 'malformed: <title>' line per re-check line that
+           negates rg ('! rg'); exit 1 when any count is not zero
   check    run every re-check line and print 'HOLDS', 'GONE' or 'BROKEN' with the title; exit
            0 when every entry holds, exit 1 with a count line when an entry is gone or a
            command is broken; entries without a re-check line are skipped (see doctor)
+  absent   run 'rg -q <rg arguments> <path>' from the current directory; exit 0 when the path
+           exists and nothing matches, 1 when something matches, 2 when the path is missing or
+           rg fails
 
 options:
   --file <path>         read this ledger instead of docs/debt.md in the repository
@@ -32,6 +41,7 @@ options:
   -h, --help            show this help"""
 
 RECHECK_LINE = re.compile(r"^  re-check: `([^`]+)`$")
+NEGATED_RG = re.compile(r"(?:^|[\s;&|(])!\s+rg\b")
 SENTENCE_END = re.compile(r"(?<!e\.g)(?<!i\.e)[.?!](?=\s|$)")
 TIME_BUDGET = 5
 
@@ -116,13 +126,35 @@ def run_doctor(ledger_entries):
                       if ledger_entry.recheck_command is None]
     duplicate_titles = [entry_title for entry_title, title_count in title_counts.items()
                         if title_count > 1]
+    malformed_titles = [ledger_entry.entry_title for ledger_entry in ledger_entries
+                        if ledger_entry.recheck_command is not None
+                        and NEGATED_RG.search(ledger_entry.recheck_command)]
     print(f"entries {len(ledger_entries)}, missing {len(missing_titles)}, "
-          f"duplicates {len(duplicate_titles)}")
+          f"duplicates {len(duplicate_titles)}, malformed {len(malformed_titles)}")
     for entry_title in missing_titles:
         print(f"missing: {entry_title}")
     for entry_title in duplicate_titles:
         print(f"duplicates: {entry_title}")
-    return 1 if missing_titles or duplicate_titles else 0
+    for entry_title in malformed_titles:
+        print(f"malformed: {entry_title}")
+    return 1 if missing_titles or duplicate_titles or malformed_titles else 0
+
+
+def run_absent(absent_args):
+    if len(absent_args) < 2:
+        stop_with("absent needs a path and an rg pattern; run debt absent <path> <rg arguments>")
+    search_path, rg_args = absent_args[0], absent_args[1:]
+    if not os.path.exists(search_path):
+        stop_with(f"{search_path} does not exist; point the re-check at the path that holds the code")
+    try:
+        rg_result = subprocess.run(["rg", "-q", *rg_args, search_path])
+    except FileNotFoundError:
+        stop_with("rg is not on PATH; install ripgrep")
+    if rg_result.returncode == 0:
+        return 1
+    if rg_result.returncode == 1:
+        return 0
+    return 2
 
 
 def run_check(ledger_entries, only_text, repo_root):
@@ -168,6 +200,10 @@ def main():
                 ledger_path = Path(arg_list.pop(0))
             else:
                 only_text = arg_list.pop(0)
+        elif current_arg == "absent":
+            if command_name is not None or ledger_path is not None or only_text is not None:
+                stop_with("absent takes no other command or option; run debt absent <path> <rg arguments>")
+            return run_absent(arg_list)
         elif current_arg in ("doctor", "check"):
             if command_name is not None:
                 stop_with("one command at a time; see debt --help")
@@ -175,7 +211,7 @@ def main():
         else:
             stop_with(f"unknown argument '{current_arg}'; see debt --help")
     if command_name is None:
-        stop_with("name a command, doctor or check; see debt --help")
+        stop_with("name a command, doctor, check or absent; see debt --help")
     if only_text is not None and command_name != "check":
         stop_with("--only works with check alone; run debt check --only <substring>")
     repo_root = find_root()
