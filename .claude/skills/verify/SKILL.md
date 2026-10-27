@@ -11,7 +11,7 @@ replace it; run a side-by-side instance.
 
 ## Launch a branch-code instance
 
-1. Build: `docker build -f backend/Dockerfile -t danteplanner-backend:<tag> .` (repo root context).
+1. Build: `docker build -f backend/Dockerfile --build-context static=./static -t danteplanner-backend:<tag> .` (repo root context; the data comes from the named context, ADR 200).
 2. Run it as an extra compose service (overlay file adding a `backend-verify` service, image
    `<tag>`, port `127.0.0.1:18080:8080`, volumes `./static/data:/app/data:ro` and
    `./backend/src/test/resources/test-keys:/app/keys:ro`, joined to `danteplanner-network`), with

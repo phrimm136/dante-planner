@@ -19,6 +19,13 @@ if git diff --cached -U0 | grep '^+' | grep -Eq "$pattern"; then
 fi
 
 staged=$(git diff --cached --name-only --diff-filter=ACM || true)
+
+# The game data is a sibling checkout reached through an untracked symlink (ADR 200); a
+# staged `static` path means the symlink or its target was added by mistake.
+if echo "$staged" | grep -Eq '^static(/|$)'; then
+  echo "pre-commit: 'static' is the data checkout's symlink and never a tracked path (ADR 200); run: git rm --cached -r static" >&2
+  exit 1
+fi
 records=$(echo "$staged" | grep -E '^docs/adr/[0-9]{3}-[a-z0-9-]+\.md$' || true)
 strays=$(echo "$staged" | grep -E '^docs/adr/.+\.md$' \
        | grep -vE '^docs/adr/([0-9]{3}-[a-z0-9-]+|README|CLAUDE)\.md$' || true)

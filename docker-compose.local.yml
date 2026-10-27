@@ -38,11 +38,11 @@ services:
 
   backend:
     image: danteplanner-backend:local
-    # backend/Dockerfile copies static/data, so the context is the repo root rather
-    # than base's ./backend.
     build:
       context: .
       dockerfile: backend/Dockerfile
+      additional_contexts:
+        static: ./static
     logging:
       driver: json-file
       options:

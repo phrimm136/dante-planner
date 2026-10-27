@@ -162,7 +162,7 @@ Never `git add -A` or `git add .` — these risk pulling in unrelated work, secr
 
 ### Include related docs, scripts, and data
 
-Before staging, check `git status` for untracked or modified files under `docs/`for the supermodule and the root for the submodule that were created as part of the same task:
+Before staging, check `git status` for untracked or modified files under `docs/` in the code repository, and at the root of the data checkout behind `static`, that were created as part of the same task:
 | Type | Example |
 |------|---------|
 | `docs` | specs, plans, findings, research, reviews |

@@ -24,7 +24,7 @@ function collectFiles(dir: string): string[] {
 
 async function main() {
   if (!fs.existsSync(STATIC_DIR)) {
-    console.error('static/ not found. Run: git submodule update --init')
+    console.error('static/ not found. Run: .claude/skills/static-checkout/bin/static link')
     process.exit(1)
   }
 
