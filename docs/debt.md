@@ -1248,7 +1248,7 @@ two have silently never paged.
   the rollout. Drop the one-argument procedure in a later migration once no pod runs an image
   older than V065; until then the CASE table is a third copy of the floor counts, held equal to
   the shared table by `PlannerFilterRebuildIT`.
-  re-check: `python3 -c "import glob,os,re,sys; sys.excepthook=lambda t,e,b: (print(f'{t.__name__}: {e}',file=sys.stderr),os._exit(2)); s=sorted((int(re.search(r'/V(\d+)__',f).group(1)),i,m.upper()) for f in glob.glob('backend/src/main/resources/db/migration/V*.sql') for i,m in enumerate(re.findall(r'(?i)\b(create|drop) procedure (?:if exists )?rebuild_planner_filters\b',open(f).read()))); sys.exit(0 if s[-1][2]=='CREATE' else 1)"`
+  re-check: `.claude/skills/debt-ledger/bin/debt python 'import glob,re,sys; s=sorted((int(re.search(r"/V(\d+)__",f).group(1)),i,m.upper()) for f in glob.glob("backend/src/main/resources/db/migration/V*.sql") for i,m in enumerate(re.findall(r"(?i)\b(create|drop) procedure (?:if exists )?rebuild_planner_filters\b",open(f).read()))); sys.exit(0 if s[-1][2]=="CREATE" else 1)'`
 - 사영전투 turn-cut planner: up to three formations of up to
   twelve turns each against an 18/24-turn full-reward cut, phase-specific decks, and bosses that
   return on rotation, so a plan must render against the data version it was written for. Carry

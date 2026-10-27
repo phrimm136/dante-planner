@@ -9,6 +9,7 @@ from pathlib import Path
 
 USAGE_TEXT = """usage: debt [--file <path>] <command> [--only <substring>]
        debt absent <path> <rg arguments>...
+       debt python <body>
 
 Asks every entry of the debt ledger whether its debt still holds.
 
@@ -19,21 +20,25 @@ the file. Its last non-empty line is the re-check line:
 the repository root with sh -c and a 5 s budget: exit 0 means the debt still holds, exit 1
 means the debt is gone, anything else means the command is broken. "This must be absent" is
 written '.claude/skills/debt-ledger/bin/debt absent <path> <rg arguments>', never '! rg', which
-reads a missing path as absent. A 'python3 -c' re-check starts with
-  sys.excepthook=lambda t,e,b: (print(f'{t.__name__}: {e}',file=sys.stderr),os._exit(2))
-so an exception exits 2 (broken), not 1 (gone).
+reads a missing path as absent. A Python re-check is written
+'.claude/skills/debt-ledger/bin/debt python <body>', never 'python3 -c', which exits 1 (gone)
+when the body fails to compile or raises.
 
 commands:
   doctor   print 'entries N, missing M, duplicates D, malformed K', then one
            'missing: <title>' line per entry without a re-check line, one 'duplicates: <title>'
-           line per title used twice and one 'malformed: <title>' line per re-check line that
-           negates rg ('! rg'); exit 1 when any count is not zero
+           line per title used twice and one 'malformed: <title> — <fix>' line per re-check
+           line that negates rg ('! rg') or calls 'python3 -c' or 'python -c'; exit 1 when any
+           count is not zero
   check    run every re-check line and print 'HOLDS', 'GONE' or 'BROKEN' with the title; exit
            0 when every entry holds, exit 1 with a count line when an entry is gone or a
            command is broken; entries without a re-check line are skipped (see doctor)
   absent   run 'rg -q <rg arguments> <path>' from the current directory; exit 0 when the path
            exists and nothing matches, 1 when something matches, 2 when the path is missing or
            rg fails
+  python   compile and run <body> as Python; exit 0 or 1 when the body calls sys.exit with 0
+           or 1 (or ends, or calls sys.exit(), for 0); a compile error, any other exception
+           or any other exit code exits 2 with one '<Type>: <message>' line on stderr
 
 options:
   --file <path>         read this ledger instead of docs/debt.md in the repository
@@ -42,6 +47,7 @@ options:
 
 RECHECK_LINE = re.compile(r"^  re-check: `([^`]+)`$")
 NEGATED_RG = re.compile(r"(?:^|[\s;&|(])!\s+rg\b")
+PYTHON_FLAG = re.compile(r"\bpython3? -c\b")
 SENTENCE_END = re.compile(r"(?<!e\.g)(?<!i\.e)[.?!](?=\s|$)")
 TIME_BUDGET = 5
 
@@ -118,6 +124,23 @@ def run_recheck(recheck_command, repo_root):
     return f"exit {shell_process.returncode}{first_error}"
 
 
+def run_python(python_args):
+    if len(python_args) != 1:
+        stop_with("python takes one body argument; run debt python '<body>'")
+    try:
+        exec(compile(python_args[0], "<re-check>", "exec"), {"__name__": "__re_check__"})
+    except SystemExit as exit_signal:
+        exit_code = 0 if exit_signal.code is None else exit_signal.code
+        if isinstance(exit_code, int) and exit_code in (0, 1):
+            return exit_code
+        print(f"SystemExit: {exit_signal.code}", file=sys.stderr)
+        return 2
+    except Exception as body_error:
+        print(f"{type(body_error).__name__}: {body_error}", file=sys.stderr)
+        return 2
+    return 0
+
+
 def run_doctor(ledger_entries):
     title_counts = {}
     for ledger_entry in ledger_entries:
@@ -126,18 +149,23 @@ def run_doctor(ledger_entries):
                       if ledger_entry.recheck_command is None]
     duplicate_titles = [entry_title for entry_title, title_count in title_counts.items()
                         if title_count > 1]
-    malformed_titles = [ledger_entry.entry_title for ledger_entry in ledger_entries
-                        if ledger_entry.recheck_command is not None
-                        and NEGATED_RG.search(ledger_entry.recheck_command)]
+    malformed_lines = []
+    for ledger_entry in ledger_entries:
+        if ledger_entry.recheck_command is None:
+            continue
+        if NEGATED_RG.search(ledger_entry.recheck_command):
+            malformed_lines.append(f"{ledger_entry.entry_title} — negates rg; use debt absent")
+        if PYTHON_FLAG.search(ledger_entry.recheck_command):
+            malformed_lines.append(f"{ledger_entry.entry_title} — calls python -c; use debt python")
     print(f"entries {len(ledger_entries)}, missing {len(missing_titles)}, "
-          f"duplicates {len(duplicate_titles)}, malformed {len(malformed_titles)}")
+          f"duplicates {len(duplicate_titles)}, malformed {len(malformed_lines)}")
     for entry_title in missing_titles:
         print(f"missing: {entry_title}")
     for entry_title in duplicate_titles:
         print(f"duplicates: {entry_title}")
-    for entry_title in malformed_titles:
-        print(f"malformed: {entry_title}")
-    return 1 if missing_titles or duplicate_titles or malformed_titles else 0
+    for malformed_line in malformed_lines:
+        print(f"malformed: {malformed_line}")
+    return 1 if missing_titles or duplicate_titles or malformed_lines else 0
 
 
 def run_absent(absent_args):
@@ -204,6 +232,10 @@ def main():
             if command_name is not None or ledger_path is not None or only_text is not None:
                 stop_with("absent takes no other command or option; run debt absent <path> <rg arguments>")
             return run_absent(arg_list)
+        elif current_arg == "python":
+            if command_name is not None or ledger_path is not None or only_text is not None:
+                stop_with("python takes no other command or option; run debt python '<body>'")
+            return run_python(arg_list)
         elif current_arg in ("doctor", "check"):
             if command_name is not None:
                 stop_with("one command at a time; see debt --help")
@@ -211,7 +243,7 @@ def main():
         else:
             stop_with(f"unknown argument '{current_arg}'; see debt --help")
     if command_name is None:
-        stop_with("name a command, doctor, check or absent; see debt --help")
+        stop_with("name a command, doctor, check, absent or python; see debt --help")
     if only_text is not None and command_name != "check":
         stop_with("--only works with check alone; run debt check --only <substring>")
     repo_root = find_root()
