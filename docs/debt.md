@@ -1044,12 +1044,12 @@ two have silently never paged.
   loads notification settings through `UserSettingsService.getOrCreateEntity`, a read-write
   `@Transactional`, so every per-pod cache miss is a primary transaction (11 round trips when it
   creates the row), up to 27,335 a week. Neither is on a user's critical path, but both hold
-  primary connections from the smaller WAN pool and add replication traffic. The settings load's
-  move to a read-only transaction (commit 90173c61, left on branch `write-forwarding/pr1`) waits on
-  the settings write-through: read from the Seoul replica right after an invalidation, it caches a
-  stale row for up to five minutes, so turned-off notifications keep arriving. The view flush
-  leaves Seoul once ADR 116's `POST .../viewcount` is forwarded under ADR 123. Worth re-measuring
-  the pool's acquisitions after both land.
+  primary connections from the smaller WAN pool and add replication traffic. The settings load
+  now goes through `UserSettingsService.getSettings` (read-only, creates no row), so that half is
+  closed; whether a Seoul replica read right after an invalidation can cache a stale row for the
+  five-minute TTL is unverified. The view flush leaves Seoul once ADR 116's `POST .../viewcount` is
+  forwarded under ADR 123 (`write_forwarding = all`). Worth re-measuring the pool's acquisitions
+  after that flip.
 - **The gate assumes the probe and the read reach the same replica.** `WAIT_FOR_EXECUTED_
   GTID_SET` runs on one pooled connection and the request's read uses another; sound with
   one replica behind the endpoint, void the day the endpoint resolves to more than one host.
@@ -1484,3 +1484,27 @@ two have silently never paged.
   and a data release pointer the backend adopts without a deploy. Worth doing once that unit lands;
   until then one local command (`static cn-update`) wrapping download, regeneration, commit and
   lock bump is the cheap form.
+
+## 2026-10-27 trunk hygiene follow-ups (PR #322)
+
+- `RaiseBatcher.java:91` waits on the real clock for the caller-side bound (waitBound + margin). In a
+  fresh JVM under heavy CPU load the first Redis client connect exceeds it and whichever
+  `RaiseBatcherTest` connects first fails; the two clock-driven tests now use a 30 s bound, the rest
+  still use 1.5 s. Worth doing if the class fails in CI on its first connecting test: warm the
+  Lettuce client once per class.
+- No `components/ui/textarea` primitive: `DeckImportDialog` and `ModerationReasonDialog` each
+  hand-style a `<textarea>` against `components/ui/CLAUDE.md`. Worth doing when either is next
+  touched: add the shadcn textarea and use it in both.
+- No code completes a planner's comment-stream emitters when the planner is deleted; the stream
+  lingers until the 1 h timeout and the e2e spec has to force the drop with a reload. ADR 183
+  @comments @visibility implies the delete effect should end the stream, after which the client's
+  reconnect reads 404 on its own. Worth doing when the comment stream is next touched.
+- `battleDataCensus.test.ts` "finds every row unit of %s among its units" duplicates the group
+  schema refinement added in 2498b29e. Delete when that file is next touched.
+- The ast-grep rule `no-throw-in-lib` says "return a Result"; the chosen fix (2498b29e) is type
+  narrowing at the schema boundary. Reword when the rule is next touched.
+- The pre-commit ADR check reported "1 decision(s) with no REJECTED clause" on ADR 198 (two
+  REJECTED lines) and "2 decision(s)" on ADR 170; the checker's parse differs from the convention's
+  shape. Worth doing the next time it flags a correct ADR: align the parser with the convention.
+- After PR #322 deploys: `write_forwarding` goes probe → all (ADR 123), the POST `/batch` handler
+  and the top-level `selectedKeywords` copy wait for seven days of zero counters (entries above).
