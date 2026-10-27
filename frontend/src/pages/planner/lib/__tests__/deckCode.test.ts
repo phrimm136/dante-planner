@@ -63,6 +63,14 @@ describe('decodeDeckCode', () => {
     expect(Object.keys(equipment)).toHaveLength(12)
     expect(warnings.length).toBeGreaterThan(0)
   })
+
+  it('names the sinner and the E.G.O grade of each unknown entry, never a string', () => {
+    const { warnings } = decodeDeckCode(KNOWN_CODE, {}, {}, 60)
+
+    expect(warnings).toContainEqual({ kind: 'identity', sinner: 'YiSang' })
+    expect(warnings).toContainEqual({ kind: 'ego', sinner: 'Faust', grade: 'ZAYIN' })
+    expect(warnings.some((warning) => typeof warning === 'string')).toBe(false)
+  })
 })
 
 describe('decodeDeckCode season cap', () => {
@@ -87,7 +95,7 @@ describe('deck code length bound', () => {
     const decoded = decodeDeckCode(overLong, {}, {}, 60)
     expect(decoded.equipment).toEqual({})
     expect(decoded.deploymentOrder).toEqual([])
-    expect(decoded.warnings.length).toBeGreaterThan(0)
+    expect(decoded.warnings).toEqual([])
   })
 
   it('still accepts a code at the cap', () => {

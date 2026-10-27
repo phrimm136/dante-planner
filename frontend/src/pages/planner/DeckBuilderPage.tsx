@@ -4,6 +4,8 @@ import { showSuccess } from '@/lib/errorPresentation'
 
 import { DEFAULT_SKILL_EA } from '@/shared/gameData'
 
+import type { DecodedDeck } from './lib/deckCode'
+
 import {
   PlannerEditorStoreProvider,
   usePlannerEditorStore,
@@ -16,7 +18,7 @@ import { useIdentityMaxLevel } from './hooks/useMirrorDungeonSeason'
 import { StoreBoundDeckBuilderSummary } from './components/deckBuilder/DeckBuilderSummary'
 import { DeckBuilderPane } from './components/deckBuilder/DeckBuilderPane'
 import { StoreBoundDeckBuilderContent } from './components/deckBuilder/DeckBuilderContent'
-import { DeckImportConfirmDialog } from './components/deckBuilder/DeckImportConfirmDialog'
+import { DeckImportDialog } from './components/deckBuilder/DeckImportDialog'
 import { DeckBuilderPageSkeleton } from './components/plannerSkeletons'
 import { PLANNER_CONFIG, SECTION_STYLES } from '@/lib/constants'
 
@@ -30,18 +32,20 @@ function DeckBuilderPageContent() {
 
   const [isDeckPaneOpen, setIsDeckPaneOpen] = useState(false)
 
-  const { handleImport, handleExport, pendingImport, clearPending } = useDeckClipboard({
+  const { handleExport, openImport, importDraft, setImportText, closeImport } = useDeckClipboard({
     readDeck: () => storeApi.getState(),
     mdVersion: PLANNER_CONFIG.mdCurrentVersion,
   })
 
-  const handleImportConfirm = () => {
-    if (!pendingImport) return
+  const handleImport = () => {
+    void openImport()
+  }
 
-    setEquipment(pendingImport.equipment)
-    setDeploymentOrder(pendingImport.deploymentOrder)
+  const handleImportApply = (deck: DecodedDeck) => {
+    setEquipment(deck.equipment)
+    setDeploymentOrder(deck.deploymentOrder)
 
-    clearPending()
+    closeImport()
     showSuccess('planner:deckBuilder.importSuccess')
   }
 
@@ -82,10 +86,11 @@ function DeckBuilderPageContent() {
         />
       </DeckBuilderPane>
 
-      <DeckImportConfirmDialog
-        pendingImport={pendingImport}
-        onConfirm={handleImportConfirm}
-        onCancel={clearPending}
+      <DeckImportDialog
+        draft={importDraft}
+        onTextChange={setImportText}
+        onApply={handleImportApply}
+        onClose={closeImport}
       />
     </div>
   )

@@ -7,10 +7,11 @@ import DeckBuilderPage from '../DeckBuilderPage'
 
 vi.mock('../hooks/useDeckClipboard', () => ({
   useDeckClipboard: () => ({
-    handleImport: vi.fn(),
     handleExport: vi.fn(),
-    pendingImport: null,
-    clearPending: vi.fn(),
+    openImport: vi.fn(),
+    importDraft: null,
+    setImportText: vi.fn(),
+    closeImport: vi.fn(),
   }),
 }))
 
@@ -32,8 +33,8 @@ vi.mock('../components/deckBuilder/DeckBuilderContent', () => ({
   },
 }))
 
-vi.mock('../components/deckBuilder/DeckImportConfirmDialog', () => ({
-  DeckImportConfirmDialog: () => null,
+vi.mock('../components/deckBuilder/DeckImportDialog', () => ({
+  DeckImportDialog: () => null,
 }))
 
 describe('DeckBuilderPage', () => {

@@ -36,6 +36,7 @@ import { isSyncConflict } from '@/lib/apiErrorClassifier'
 import type { MDCategory } from '@/shared/gameData'
 import { isMDPlanner } from '../../types/PlannerTypes'
 import type { SaveablePlanner, ConflictResolutionChoice } from '../../types/PlannerTypes'
+import type { DecodedDeck } from '../../lib/deckCode'
 
 import { usePlannerEditorStore, usePlannerEditorStoreApi } from '../../stores/usePlannerEditorStore'
 
@@ -68,7 +69,7 @@ import {
   StartBuffSkeleton,
   StartGiftSkeleton,
 } from '../plannerSkeletons'
-import { DeckImportConfirmDialog } from '../deckBuilder/DeckImportConfirmDialog'
+import { DeckImportDialog } from '../deckBuilder/DeckImportDialog'
 import { StoreBoundSectionNote } from './StoreBoundSectionNote'
 import { ConflictResolutionDialog } from './ConflictResolutionDialog'
 import { SyncOffWarningDialog } from '../SyncOffWarningDialog'
@@ -201,11 +202,16 @@ export function PlannerEditorShell({
   }, [saveError, clearError])
 
   const {
-    handleImport: handleDeckImport,
     handleExport: handleDeckExport,
-    pendingImport,
-    clearPending,
+    openImport,
+    importDraft,
+    setImportText,
+    closeImport,
   } = useDeckClipboard({ readDeck: () => storeApi.getState(), mdVersion })
+
+  const handleDeckImport = () => {
+    void openImport()
+  }
 
   const titleByteLength = calculateByteLength(title)
   const isTitleValid = titleByteLength <= MAX_TITLE_BYTES
@@ -232,13 +238,11 @@ export function PlannerEditorShell({
     setDeploymentOrder([])
   }
 
-  const handleImportConfirm = () => {
-    if (!pendingImport) return
+  const handleImportApply = (deck: DecodedDeck) => {
+    setEquipment(deck.equipment)
+    setDeploymentOrder(deck.deploymentOrder)
 
-    setEquipment(pendingImport.equipment)
-    setDeploymentOrder(pendingImport.deploymentOrder)
-
-    clearPending()
+    closeImport()
     showSuccess('planner:deckBuilder.importSuccess')
   }
 
@@ -612,10 +616,11 @@ export function PlannerEditorShell({
           />
         </PlannerSection>
 
-        <DeckImportConfirmDialog
-          pendingImport={pendingImport}
-          onConfirm={handleImportConfirm}
-          onCancel={clearPending}
+        <DeckImportDialog
+          draft={importDraft}
+          onTextChange={setImportText}
+          onApply={handleImportApply}
+          onClose={closeImport}
         />
 
         {sections.map((section, index) => (

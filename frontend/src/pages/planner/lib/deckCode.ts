@@ -20,7 +20,7 @@ import { gzip, ungzip } from 'pako'
 import { SINNERS, IdentityIdSchema, EGOIdSchema } from '@/shared/gameData'
 import { DECK_CODE_MAX_LENGTH } from '@/lib/constants'
 import type { SinnerEquipment } from '../types/DeckTypes'
-import type { EgoType, IdentityId, EGOId } from '@/shared/gameData'
+import type { EgoType, IdentityId, EGOId, Sinner } from '@/shared/gameData'
 
 const BITS_PER_SINNER = 46
 const TOTAL_BITS = 560
@@ -43,15 +43,18 @@ export const GZIP_OS_BYTE_OFFSET = 9
  */
 export const GZIP_OS_TOPS20 = 10
 
+export type DeckWarning =
+  | { kind: 'identity'; sinner: Sinner }
+  | { kind: 'ego'; sinner: Sinner; grade: EgoType }
+
 export interface DecodedDeck {
   equipment: Record<string, SinnerEquipment>
   deploymentOrder: number[]
-  warnings: string[]
+  warnings: DeckWarning[]
 }
 
 export interface ValidationResult {
   isValid: boolean
-  warnings: string[]
 }
 
 /**
@@ -146,7 +149,7 @@ export function decodeDeckCode(
   egoSpecMap: Record<string, { maxThreadspin: 4 | 5 }>,
   maxLevel: number,
 ): DecodedDeck {
-  const warnings: string[] = []
+  const warnings: DeckWarning[] = []
 
   // A pasted code reaches atob and then the inflater unbounded; a real code is
   // around 150 characters, so anything past the cap decodes to nothing.
@@ -154,7 +157,7 @@ export function decodeDeckCode(
     return {
       equipment: {},
       deploymentOrder: [],
-      warnings: ['Deck code exceeds the maximum length'],
+      warnings: [],
     }
   }
 
@@ -177,9 +180,8 @@ export function decodeDeckCode(
   const equipment: Record<string, SinnerEquipment> = {}
   const deploymentMap: { position: number; sinnerIndex: number }[] = []
 
-  for (let sinnerIndex = 0; sinnerIndex < 12; sinnerIndex++) {
+  for (const [sinnerIndex, sinnerName] of SINNERS.entries()) {
     const sinnerCode = String(sinnerIndex + 1)
-    const sinnerName = SINNERS[sinnerIndex]
     const offset = sinnerIndex * BITS_PER_SINNER
 
     const identityIndex = fromBinary(binary.slice(offset, offset + 8))
@@ -192,7 +194,7 @@ export function decodeDeckCode(
     const identityId = reconstructIdentityId(sinnerIndex, identityIndex)
 
     if (identityIndex > 0 && !identitySpecMap[identityId]) {
-      warnings.push(`Invalid identity ID ${identityId} for ${sinnerName}`)
+      warnings.push({ kind: 'identity', sinner: sinnerName })
     }
 
     const egos: SinnerEquipment['egos'] = {}
@@ -206,7 +208,7 @@ export function decodeDeckCode(
         const egoId = reconstructEgoId(sinnerIndex, egoIndex)
 
         if (!egoSpecMap[egoId]) {
-          warnings.push(`Invalid EGO ID ${egoId} for ${sinnerName}`)
+          warnings.push({ kind: 'ego', sinner: sinnerName, grade: rank })
         } else {
           egos[rank] = {
             id: egoId,
@@ -266,7 +268,7 @@ export function decodeDeckCode(
 
 export function validateDeckCode(code: string): ValidationResult {
   if (code.length > DECK_CODE_MAX_LENGTH) {
-    return { isValid: false, warnings: ['Invalid deck code format'] }
+    return { isValid: false }
   }
 
   try {
@@ -280,8 +282,8 @@ export function validateDeckCode(code: string): ValidationResult {
 
     atob(firstBase64)
 
-    return { isValid: true, warnings: [] }
+    return { isValid: true }
   } catch {
-    return { isValid: false, warnings: ['Invalid deck code format'] }
+    return { isValid: false }
   }
 }

@@ -83,10 +83,11 @@ vi.mock('@tanstack/react-router', () => ({
 
 vi.mock('../../../hooks/useDeckClipboard', () => ({
   useDeckClipboard: () => ({
-    handleImport: vi.fn(),
     handleExport: vi.fn(),
-    pendingImport: null,
-    clearPending: vi.fn(),
+    openImport: vi.fn(),
+    importDraft: null,
+    setImportText: vi.fn(),
+    closeImport: vi.fn(),
   }),
 }))
 
@@ -112,8 +113,8 @@ vi.mock('../../deckBuilder/DeckBuilderPane', () => ({ DeckBuilderPane: () => nul
 vi.mock('../../deckBuilder/DeckBuilderContent', () => ({
   StoreBoundDeckBuilderContent: () => null,
 }))
-vi.mock('../../deckBuilder/DeckImportConfirmDialog', () => ({
-  DeckImportConfirmDialog: () => null,
+vi.mock('../../deckBuilder/DeckImportDialog', () => ({
+  DeckImportDialog: () => null,
 }))
 vi.mock('../../startBuff/StartBuffSection', () => ({ StoreBoundStartBuffSection: () => null }))
 vi.mock('../../startBuff/StartBuffEditPane', () => ({ StartBuffEditPane: () => null }))

@@ -19,7 +19,7 @@ import { DeckTrackerPanel } from './DeckTrackerPanel'
 import { DeckBuilderPane } from '../deckBuilder/DeckBuilderPane'
 import { TrackerDeckBuilderContent } from '../deckBuilder/DeckBuilderContent'
 import { collectOwnedGiftIds } from '../../lib/deckEA'
-import { DeckImportConfirmDialog } from '../deckBuilder/DeckImportConfirmDialog'
+import { DeckImportDialog } from '../deckBuilder/DeckImportDialog'
 import { SkillReplacementSection } from '../skillReplacement/SkillReplacementSection'
 import { ComprehensiveGiftGridTracker } from './ComprehensiveGiftGridTracker'
 import { ReadOnlyNote } from '@/shared/noteEditor/components/ReadOnlyNote'
@@ -34,6 +34,7 @@ import { NOTE_SECTIONS } from './viewerSections'
 import type { NoteSectionId } from './viewerSections'
 import { deserializeSets } from '../../schemas/PlannerSchemas'
 import type { MDSaveablePlanner } from '../../types/PlannerTypes'
+import type { DecodedDeck } from '../../lib/deckCode'
 import type { TrackerDeckBuilderContentProps } from '../deckBuilder/DeckBuilderContent'
 
 const SECTION_COUNT = NOTE_SECTIONS.length
@@ -75,10 +76,11 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
   } = useTrackerState(content.equipment, content.deploymentOrder)
 
   const {
-    handleImport: handleDeckImport,
     handleExport: handleDeckExport,
-    pendingImport,
-    clearPending,
+    openImport,
+    importDraft,
+    setImportText,
+    closeImport,
   } = useDeckClipboard({
     readDeck: () => ({
       equipment: trackerState.equipment,
@@ -99,13 +101,15 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
     planner.config.category,
   )
 
-  const handleImportConfirm = () => {
-    if (!pendingImport) return
+  const handleDeckImport = () => {
+    void openImport()
+  }
 
-    setEquipment(pendingImport.equipment)
-    setDeploymentOrder(pendingImport.deploymentOrder)
+  const handleImportApply = (deck: DecodedDeck) => {
+    setEquipment(deck.equipment)
+    setDeploymentOrder(deck.deploymentOrder)
 
-    clearPending()
+    closeImport()
   }
 
   const handleResetToPreset = () => {
@@ -298,10 +302,11 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
         />
       ))}
 
-      <DeckImportConfirmDialog
-        pendingImport={pendingImport}
-        onConfirm={handleImportConfirm}
-        onCancel={clearPending}
+      <DeckImportDialog
+        draft={importDraft}
+        onTextChange={setImportText}
+        onApply={handleImportApply}
+        onClose={closeImport}
       />
     </div>
   )
