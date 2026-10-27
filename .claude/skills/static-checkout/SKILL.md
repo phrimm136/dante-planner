@@ -19,7 +19,7 @@ Run `.claude/skills/static-checkout/bin/static` from inside the code checkout.
 
 Cloudflare Pages has no data checkout. Its build command runs
 `frontend/scripts/fetch-static.sh` first, which fetches the sha in `static.lock` into
-`<repo>/static` as a real directory and does nothing when `static check` already passes. It needs
+`<repo>/static` as a real directory and skips the fetch when `static check` already passes. It needs
 `static.lock` at the repo root and `STATIC_TOKEN`, a read-only token for the data repository.
 CI does not run it: the `fetch-static-checkout` action checks the lock out with the deploy key.
 
