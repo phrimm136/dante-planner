@@ -134,15 +134,15 @@ post_rule "node-memory-psi" "5m" \
   'rate(node_pressure_memory_waiting_seconds_total[5m]) > 0.1'
 
 # HighDiskIOWrite: > 500 MiB written per 5m
-post_rule "node-high-disk-write" "0s" \
+post_rule "node-high-disk-write" "15m" \
   'sum by (cluster, instance) (increase(node_disk_written_bytes_total[5m])) > 524288000'
 
 # HighNetworkIn: > 50 MiB received per 5m
-post_rule "node-high-network-in" "0s" \
+post_rule "node-high-network-in" "15m" \
   'sum by (cluster, instance) (increase(node_network_receive_bytes_total{device!="lo"}[5m])) > 52428800'
 
 # HighNetworkOut: > 200 MiB sent per 5m
-post_rule "node-high-network-out" "0s" \
+post_rule "node-high-network-out" "15m" \
   'sum by (cluster, instance) (increase(node_network_transmit_bytes_total{device!="lo"}[5m])) > 209715200'
 
 # TrafficDrop: legacy alarm paged on RequestCount Sum < 1 per 5m for 2 periods —
