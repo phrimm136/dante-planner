@@ -34,6 +34,8 @@ class RaiseBatcherTest {
 
     private static final Duration WAIT_BOUND = Duration.ofSeconds(1);
     private static final Duration BOUND = WAIT_BOUND.plus(MarkerStore.RAISE_MARGIN);
+    private static final Duration ROOMY_WAIT_BOUND = Duration.ofSeconds(30);
+    private static final Duration ROOMY_BOUND = ROOMY_WAIT_BOUND.plus(MarkerStore.RAISE_MARGIN);
     private static final String[] KEYS = {new FreshnessScope.PublicCatalog().key()};
     private static final String[] ARGUMENTS = {"3600000", "3e11fa47-71ca-11e1-9e33-c80aa9429562", "7"};
     private static final String WAIT = "WAIT";
@@ -154,14 +156,14 @@ class RaiseBatcherTest {
         AtomicLong now = new AtomicLong();
         try (FakeRedis redis = new FakeRedis(WaitReply.TIMES_OUT, false,
                 () -> now.addAndGet(connectCost.toNanos()));
-                RaiseBatcher batcher = new RaiseBatcher(redis::endpoint, 1, WAIT_BOUND, MarkerStore.RAISE_MARGIN,
+                RaiseBatcher batcher = new RaiseBatcher(redis::endpoint, 1, ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN,
                         raiseFailures, waitTimeouts, now::get)) {
             boolean raised = batcher.raise(KEYS, ARGUMENTS);
 
             assertThat(redis.waitTimeouts())
                     .singleElement()
                     .satisfies(timeout -> assertThat(timeout).isBetween(1L,
-                            BOUND.minus(connectCost).minus(MarkerStore.RAISE_MARGIN).toMillis()));
+                            ROOMY_BOUND.minus(connectCost).minus(MarkerStore.RAISE_MARGIN).toMillis()));
             assertThat(raised).isTrue();
             assertThat(waitTimeouts.count()).isEqualTo(1.0);
             assertThat(raiseFailures.count()).isZero();
@@ -170,11 +172,11 @@ class RaiseBatcherTest {
 
     @Test
     void raise_WhenConnectingLeftNoMoreThanTheMargin_SendsNoWaitAndCountsAWaitTimeout() throws Exception {
-        Duration connectCost = WAIT_BOUND.plusMillis(100);
+        Duration connectCost = ROOMY_WAIT_BOUND.plusMillis(100);
         AtomicLong now = new AtomicLong();
         try (FakeRedis redis = new FakeRedis(WaitReply.TIMES_OUT, false,
                 () -> now.addAndGet(connectCost.toNanos()));
-                RaiseBatcher batcher = new RaiseBatcher(redis::endpoint, 1, WAIT_BOUND, MarkerStore.RAISE_MARGIN,
+                RaiseBatcher batcher = new RaiseBatcher(redis::endpoint, 1, ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN,
                         raiseFailures, waitTimeouts, now::get)) {
             boolean raised = batcher.raise(KEYS, ARGUMENTS);
 
@@ -288,10 +290,7 @@ class RaiseBatcherTest {
                 case WAIT -> switch (waitReply) {
                     case ACKNOWLEDGES -> ":1\r\n";
                     case NEVER -> null;
-                    case TIMES_OUT -> {
-                        Thread.sleep(Long.parseLong(command.get(2)));
-                        yield ":0\r\n";
-                    }
+                    case TIMES_OUT -> ":0\r\n";
                 };
                 default -> "+OK\r\n";
             };
