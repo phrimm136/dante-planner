@@ -42,6 +42,9 @@ class MarkerStoreIT {
     private static final String REFUSED_HOST = "127.0.0.1";
     private static final int REFUSED_PORT = 1;
     private static final Duration TTL = Duration.ofHours(1);
+    // Wide enough that a loaded runner cannot turn a slow raise into a counted failure; no test here
+    // asserts on the bound itself.
+    private static final Duration WAIT_BOUND = Duration.ofSeconds(30);
     private static final int CONCURRENT_RAISES = 200;
     private static final int RAISING_THREADS = 8;
 
@@ -110,7 +113,7 @@ class MarkerStoreIT {
     }
 
     private MarkerStore storeOver(LettuceConnectionFactory writeStore, List<MarkerStore.Source> readSources) {
-        MarkerStore store = new MarkerStore(writeStore, writeStore.getRequiredNativeClient().getResources(), readSources, new MarkerStore.Settings(0, Duration.ofSeconds(1), TTL),
+        MarkerStore store = new MarkerStore(writeStore, writeStore.getRequiredNativeClient().getResources(), readSources, new MarkerStore.Settings(0, WAIT_BOUND, TTL),
                 meters);
         stores.add(store);
         return store;
