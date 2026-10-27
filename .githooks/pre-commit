@@ -26,6 +26,19 @@ if echo "$staged" | grep -Eq '^static(/|$)'; then
   echo "pre-commit: 'static' is the data checkout's symlink and never a tracked path (ADR 200); run: git rm --cached -r static" >&2
   exit 1
 fi
+
+# The commit's own static.lock (the index copy) must name the data checkout's HEAD, whether the
+# working-tree lock was already rewritten by `static lock` or not (ADR 200 @static @lock).
+static_state=0
+.claude/skills/static-checkout/bin/static check >/dev/null 2>&1 || static_state=$?
+if [ "$static_state" -ne 2 ]; then
+  data_head=$(git -C static rev-parse HEAD 2>/dev/null || true)
+  staged_lock=$(git show :static.lock 2>/dev/null | tr -d '[:space:]' || true)
+  if [ -n "$data_head" ] && [ "$staged_lock" != "$data_head" ]; then
+    echo "pre-commit: the data checkout is at $data_head but the staged static.lock says $staged_lock; run static lock and stage static.lock, or static sync" >&2
+    exit 1
+  fi
+fi
 records=$(echo "$staged" | grep -E '^docs/adr/[0-9]{3}-[a-z0-9-]+\.md$' || true)
 strays=$(echo "$staged" | grep -E '^docs/adr/.+\.md$' \
        | grep -vE '^docs/adr/([0-9]{3}-[a-z0-9-]+|README|CLAUDE)\.md$' || true)
