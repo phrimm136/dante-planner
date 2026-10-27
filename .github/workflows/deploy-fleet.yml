@@ -49,18 +49,9 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
-      # The private data submodule is baked into the backend image; fetch it
-      # with a read-only deploy key.
-      - name: Fetch data submodule
-        env:
-          STATIC_DEPLOY_KEY: ${{ secrets.STATIC_DEPLOY_KEY }}
-        run: |
-          mkdir -p ~/.ssh && chmod 700 ~/.ssh
-          printf '%s\n' "$STATIC_DEPLOY_KEY" > ~/.ssh/static_key
-          chmod 600 ~/.ssh/static_key
-          ssh-keyscan -t ed25519,rsa github.com >> ~/.ssh/known_hosts 2>/dev/null
-          GIT_SSH_COMMAND="ssh -i ~/.ssh/static_key -o IdentitiesOnly=yes" \
-            git submodule update --init --depth 1 static
+      - uses: ./.github/actions/fetch-static-checkout
+        with:
+          static-deploy-key: ${{ secrets.STATIC_DEPLOY_KEY }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c  # v6
@@ -94,6 +85,7 @@ jobs:
         with:
           context: .
           file: ./backend/Dockerfile
+          build-contexts: static=./static
           platforms: linux/arm64
           push: true
           tags: |
@@ -124,7 +116,7 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
-      - uses: ./.github/actions/fetch-static-submodule
+      - uses: ./.github/actions/fetch-static-checkout
         with:
           static-deploy-key: ${{ secrets.STATIC_DEPLOY_KEY }}
       - name: Setup Node

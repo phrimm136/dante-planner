@@ -4,6 +4,8 @@ raw/
 tmux*
 **/dummy
 
+/static
+
 # Environment variables
 .env
 .env.local

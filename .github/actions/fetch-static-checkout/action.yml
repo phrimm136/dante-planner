@@ -1,0 +1,28 @@
+name: Fetch static checkout
+description: >-
+  Check out the data repository at the sha pinned in static.lock into ./static with a
+  read-only deploy key. Run after actions/checkout.
+
+inputs:
+  static-deploy-key:
+    description: Read-only deploy key for the private data repository.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # Never hand the checked-out tree to another job as an artifact: artifact visibility
+    # follows the repository, so on a public repo that publishes the private data.
+    - name: Fetch data checkout
+      shell: bash
+      env:
+        STATIC_DEPLOY_KEY: ${{ inputs.static-deploy-key }}
+      run: |
+        mkdir -p ~/.ssh && chmod 700 ~/.ssh
+        printf '%s\n' "$STATIC_DEPLOY_KEY" > ~/.ssh/static_key
+        chmod 600 ~/.ssh/static_key
+        ssh-keyscan -t ed25519,rsa github.com >> ~/.ssh/known_hosts 2>/dev/null
+        git init -q static
+        GIT_SSH_COMMAND="ssh -i ~/.ssh/static_key -o IdentitiesOnly=yes" \
+          git -C static fetch --depth 1 git@github.com:phrimm136/danteplanner-static.git "$(cat static.lock)"
+        git -C static checkout -q --detach FETCH_HEAD

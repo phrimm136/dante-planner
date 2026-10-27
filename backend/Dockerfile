@@ -61,7 +61,7 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 # Bake the game domain data so the pod is self-contained; k3s has no host
 # bind-mount. The backend reads it via GAME_DATA_PATH (GameDataRegistry).
 # Build context must be repo root.
-COPY static/data /app/data
+COPY --from=static data /app/data
 ENV GAME_DATA_PATH=/app/data
 
 COPY --from=rds-certs /app/certs /app/certs

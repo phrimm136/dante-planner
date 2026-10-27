@@ -141,21 +141,20 @@ Add key `"<id>": { "title": "<jp_title>", "body": "<jp_body>" }`.
 
 ## Step 6 — Commit and Tag
 
-1. **Commit in static submodule** (on `main`):
+1. **Commit in the data checkout** (`static` is a symlink to the sibling checkout, on `main`):
 ```bash
-cd static
-git add data/announcements.json i18n/KR/announcements.json i18n/EN/announcements.json i18n/JP/announcements.json i18n/CN/announcements.json
+git -C static add data/announcements.json i18n/KR/announcements.json i18n/EN/announcements.json i18n/JP/announcements.json i18n/CN/announcements.json
+git -C static commit -m "data: add <date> announcement"
+```
+
+2. **Bump the lock in the code repository** (ADR 200; on a worktree branch):
+```bash
+.claude/skills/static-checkout/bin/static lock
+git add static.lock
 git commit -m "data: add <date> announcement"
 ```
 
-2. **Commit submodule ref in supermodule** (on `dev`):
-```bash
-cd ..
-git add static
-git commit -m "data: add <date> announcement"
-```
-
-3. **Tag the supermodule commit** with format `v{YY}{MM}{DD}`:
+3. **Tag the code commit** with format `v{YY}{MM}{DD}`:
 ```bash
 git tag v<YYMMDD>
 ```
@@ -165,7 +164,7 @@ If the tag already exists (multiple announcements same day), append a sequential
 
 ## Step 7 — Push
 
-Push the static submodule first, then the supermodule `dev` branch, then the tag. Submodule must go first so the pointer resolves for anyone pulling.
+Push the data checkout first, then the code branch, then the tag. The data must go first so the sha in `static.lock` resolves for CI.
 
 ```bash
 git -C static push origin main

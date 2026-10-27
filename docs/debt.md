@@ -7,7 +7,7 @@ leaves when the work landed, when its condition can no longer occur, or when a d
 session judged it not worth doing; retirement is deletion, and the git history is the
 record.
 
-The `static/` submodule keeps its own `static/docs/debt.md` for the data and
+The data checkout behind `static/` keeps its own `static/docs/debt.md` for the data and
 asset pipeline.
 
 

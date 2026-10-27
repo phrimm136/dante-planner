@@ -25,6 +25,9 @@ jobs:
     permissions: { contents: read, id-token: write }
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+      - uses: ./.github/actions/fetch-static-checkout
+        with:
+          static-deploy-key: ${{ secrets.STATIC_DEPLOY_KEY }}
 
       - name: Assume the staging provisioner role
         uses: aws-actions/configure-aws-credentials@25c81205f2d4b9d5cbdbd746d1c72e05494a8f52  # v5
@@ -88,10 +91,10 @@ jobs:
             aws ecr get-login-password --region "$region" | docker login --username AWS --password-stdin \
               "$ACCOUNT.dkr.ecr.$region.amazonaws.com"
           done
-          docker buildx build --platform linux/arm64 -f backend/Dockerfile \
+          docker buildx build --platform linux/arm64 -f backend/Dockerfile --build-context static=./static \
             -t "$ACCOUNT.dkr.ecr.us-west-2.amazonaws.com/danteplanner-backend:gate-${{ github.sha }}" \
             --build-arg "GIT_SHA=${{ github.sha }}" --push .
-          docker buildx build --platform linux/arm64 -f backend/Dockerfile \
+          docker buildx build --platform linux/arm64 -f backend/Dockerfile --build-context static=./static \
             -t "$ACCOUNT.dkr.ecr.ap-northeast-2.amazonaws.com/danteplanner-backend:gate-${{ github.sha }}" \
             --build-arg "GIT_SHA=${{ github.sha }}" --push .
 

@@ -122,7 +122,7 @@ If the old id is still a valid id in another domain (e.g. `AccelBullet` remains 
 keyword used by identities), you are only removing its **planner-keyword registration** —
 leave its battle-keyword data in `static/` untouched.
 
-## Step 4 — Edit the 4 i18n label files by hand  *(static submodule)*
+## Step 4 — Edit the 4 i18n label files by hand  *(the data checkout behind `static`)*
 Add a `"<keyword-id>": { "label": "<exact-bytes-from-Step-2>" }` entry to each:
 - `static/i18n/EN/plannerKeywords.json`
 - `static/i18n/KR/plannerKeywords.json`
@@ -139,9 +139,9 @@ Add a `"<keyword-id>": { "label": "<exact-bytes-from-Step-2>" }` entry to each:
   `utf-8 bytes=NN` the resolver printed in Step 2.
 
 ## Step 6 — Commit
-- Hand off to `commit-process`: **two-repo, submodule-first** (label commit on `static`/`main`,
-  then supermodule commit with the pointer bump). The submodule push must go up too, or
-  the supermodule pointer references a commit nobody else can fetch.
+- Hand off to `commit-process`: **two-repo, data-first** (label commit in the data checkout on
+  `main`, then `static lock` and a code commit with the `static.lock` bump, ADR 200). The data
+  push must go up too, or `static.lock` names a commit CI cannot fetch.
 
 ## Gotchas  *(the reason this skill exists)*
 - **Converter is the real gate — and it now fails *silently*.** `convertToDatabaseColumn` no

@@ -17,7 +17,7 @@ Dante's Planner assists Limbus Company players throughout the game — planning 
 
 ## Repository layout
 
-Monorepo: `frontend/` (React 19 + TypeScript, Vite), `backend/` (Spring Boot 3.5, MySQL 8.4), `static/` (game data submodule), `deploy/` (k3s manifests that ArgoCD syncs), `terraform/` (AWS and Cloudflare), `e2e/` (Playwright).
+Monorepo: `frontend/` (React 19 + TypeScript, Vite), `backend/` (Spring Boot 3.5, MySQL 8.4), `static/` (symlink to the game-data checkout, pinned by `static.lock`), `deploy/` (k3s manifests that ArgoCD syncs), `terraform/` (AWS and Cloudflare), `e2e/` (Playwright).
 
 ```
                                    browser
