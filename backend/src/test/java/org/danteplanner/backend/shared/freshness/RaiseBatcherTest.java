@@ -87,7 +87,9 @@ class RaiseBatcherTest {
                 }, 1, WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, System::nanoTime)) {
             boolean first = batcher.raise(KEYS, ARGUMENTS);
             double failuresAfterFirst = raiseFailures.count();
-            await().atMost(BOUND).until(() -> !workers.get(0).isAlive());
+            // The injected error is the worker's uncaught exception; Awaitility rethrows uncaught
+            // exceptions it sees while waiting, so this wait must not adopt it.
+            await().atMost(BOUND).dontCatchUncaughtExceptions().until(() -> !workers.get(0).isAlive());
 
             boolean second = batcher.raise(KEYS, ARGUMENTS);
 
