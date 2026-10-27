@@ -33,6 +33,29 @@ class LogCaptureTest {
     }
 
     @Test
+    void onThread_WhenAThreadOfThatNameLogs_KeepsItsEvents() throws Exception {
+        try (LogCapture capture = LogCapture.onThread("named-logger", LogCaptureTest.class)) {
+            Thread named = new Thread(() -> LOG.warn("named"), "named-logger");
+            named.start();
+            named.join();
+
+            assertThat(capture.events()).extracting(ILoggingEvent::getFormattedMessage).containsExactly("named");
+        }
+    }
+
+    @Test
+    void onThread_WhenOtherThreadsLog_DropsTheirEvents() throws Exception {
+        try (LogCapture capture = LogCapture.onThread("named-logger", LogCaptureTest.class)) {
+            Thread other = new Thread(() -> LOG.warn("other"), "other-logger");
+            other.start();
+            other.join();
+            LOG.warn("test thread");
+
+            assertThat(capture.events()).isEmpty();
+        }
+    }
+
+    @Test
     void close_WhenCalled_DetachesFromTheLogger() {
         LogCapture capture = LogCapture.onThisThread(LogCaptureTest.class);
         capture.close();
