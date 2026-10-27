@@ -7,7 +7,8 @@ epic: none · pr: none
   and 1 when it is gone; any other exit, or a run past 5 s, marks the command as broken. An entry
   starts at a line beginning `- ` and ends before the next `- `, `## ` or the end of the file;
   `## ` headings only group entries. The command runs from the repository root with `sh -c` and
-  uses read-only tools only (rg, test, git ls-files, git log, jq, python3 -c, shell builtins);
+  uses read-only tools only (rg, test, git ls-files, git log, jq, the ledger CLI's absent and python
+  commands, shell builtins);
   gradle, yarn, docker and the network are forbidden, and an absence is checked with the ledger
   CLI's `absent` command (0 nothing matched, 1 matched, 2 path missing). The old prose form
   ("Re-check: … prints nothing") is replaced, never kept beside the line. Without the line, no
@@ -39,8 +40,8 @@ epic: none · pr: none
   and the re-check answers only whether the debt exists.
 - @debt @absent — "This must be absent" is written with the debt CLI's `absent <path> <rg
   arguments>` command: it exits 0 when the path exists and rg finds nothing, 1 when rg finds a
-  match, and 2 when the path is missing or rg fails. A `python3 -c` re-check sets
-  `sys.excepthook` to exit 2, so an uncaught exception marks the command as broken. The negated
+  match, and 2 when the path is missing or rg fails. Python re-checks run through the CLI's
+  `python <body>` command, which maps any compile or runtime failure to 2. The negated
   form `! rg -q …` turned rg's exit 2 for a missing path into 0, so a renamed path read as a
   debt that still holds, forever; and a `python3 -c` body that raised exited 1, which reads as a
   debt that is gone. Both broke the one-polarity contract.
@@ -48,9 +49,12 @@ epic: none · pr: none
   forget, which is the failure the negated form had.
   REJECTED: `check` detecting `! rg` in the command text — the same convention, enforced only
   after the fact.
-  INVARIANT: no re-check line negates rg (`rg -c '! rg'` over the ledger finds nothing) —
-  `debt doctor`, which counts such lines as `malformed`, names each entry and exits 1, and the
-  pre-commit hook, which refuses a staged ledger whose `malformed` count is not zero.
+  REJECTED: a `sys.excepthook` prefix on every `python3 -c` body — a convention each author can
+  forget, and a syntax error exits 1 before the hook is set.
+  INVARIANT: no re-check line negates rg or calls `python -c` (`rg -c '! rg|python3? -c'` over
+  the ledger finds nothing) — `debt doctor`, which counts such lines as `malformed`, names each
+  entry and exits 1, and the pre-commit hook, which refuses a staged ledger whose `malformed`
+  count is not zero.
 
 ## Takeaway
 - takeaway: a record that cannot be asked by a machine whether it is still true is only pruned

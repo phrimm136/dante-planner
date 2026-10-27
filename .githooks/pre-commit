@@ -135,7 +135,7 @@ if echo "$staged" | grep -qx 'docs/debt.md'; then
     echo "pre-commit: debt doctor printed no malformed count; run $debt_cli doctor --file <ledger> to see why" >&2
     fail=1
   elif (( malformed_count > 0 )); then
-    echo "pre-commit: docs/debt.md has $malformed_count re-check lines that negate rg; use the ledger CLI's absent command" >&2
+    echo "pre-commit: docs/debt.md has $malformed_count re-check lines that negate rg or call python -c; use the ledger CLI's absent or python command" >&2
     fail=1
   fi
   check_state=0
