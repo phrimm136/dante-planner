@@ -4,15 +4,12 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { ErrorBoundary } from '@/components/feedback/ErrorBoundary'
 import { PlannerNotFound } from '@/components/feedback/PlannerNotFound'
-import { PlannerStoreProvider, createDefaultSectionNotes } from './stores/usePlannerStore'
-import { deserializeSets } from './schemas/PlannerSchemas'
+import { PlannerStoreProvider } from './stores/usePlannerStore'
+import { hydrateEditorState } from './lib/editorStateCodec'
 import { PlannerEditEditor, editorSessionFor } from './components/planner/PlannerEditEditor'
 import { PlannerViewerSkeleton } from './components/plannerSkeletons'
 import { useSavedPlannerQuery } from './hooks/useSavedPlannerQuery'
-import { useIdentityMaxLevel } from './hooks/useMirrorDungeonSeason'
 import { isMDPlanner } from './types/PlannerTypes'
-import type { FloorThemeSelection } from '@/pages/themePack'
-import type { PlannerStoreState } from './stores/usePlannerStore'
 import type { MDSaveablePlanner } from './types/PlannerTypes'
 import { PLANNER_CONFIG, SECTION_STYLES } from '@/lib/constants'
 
@@ -58,54 +55,21 @@ function PlannerEditContent({ id }: { id: string }) {
     )
   }
 
-  const { content } = planner
-  const deserialized = deserializeSets(content, planner.config.category)
+  return <PlannerEditStore key={planner.metadata.id} planner={planner} />
+}
 
-  const initialState: Partial<PlannerStoreState> = {
+function PlannerEditStore({ planner }: { planner: MDSaveablePlanner }) {
+  const metadata = {
     title: planner.metadata.title,
     category: planner.config.category,
     isPublished: planner.metadata.published ?? false,
-    equipment: content.equipment,
-    floorSelections: deserialized.floorSelections as FloorThemeSelection[],
-    comprehensiveGiftIds: deserialized.comprehensiveGiftIds,
-    deploymentOrder: content.deploymentOrder,
-    selectedKeywords: deserialized.selectedKeywords,
-    selectedBuffIds: deserialized.selectedBuffIds,
-    selectedGiftIds: deserialized.selectedGiftIds,
-    observationGiftIds: deserialized.observationGiftIds,
-    selectedGiftKeyword: content.selectedGiftKeyword,
-    skillEAState: content.skillEAState,
-    sectionNotes: {
-      ...createDefaultSectionNotes(),
-      ...(content.sectionNotes
-        ? Object.fromEntries(
-            Object.entries(content.sectionNotes).map(([key, note]) => [
-              key,
-              { content: note?.content ?? '' },
-            ]),
-          )
-        : {}),
-    },
   }
 
   return (
-    <PlannerEditStore key={planner.metadata.id} planner={planner} initialState={initialState} />
-  )
-}
-
-function PlannerEditStore({
-  planner,
-  initialState,
-}: {
-  planner: MDSaveablePlanner
-  initialState: Partial<PlannerStoreState>
-}) {
-  const identityMaxLevel = useIdentityMaxLevel(
-    editorSessionFor(planner, PLANNER_CONFIG.mdCurrentVersion).contentVersion,
-  )
-
-  return (
-    <PlannerStoreProvider identityMaxLevel={identityMaxLevel} initialState={initialState}>
+    <PlannerStoreProvider
+      mdVersion={editorSessionFor(planner, PLANNER_CONFIG.mdCurrentVersion).contentVersion}
+      initialState={(maxLevel) => hydrateEditorState(planner.content, metadata, maxLevel)}
+    >
       <PlannerEditEditor planner={planner} />
     </PlannerStoreProvider>
   )

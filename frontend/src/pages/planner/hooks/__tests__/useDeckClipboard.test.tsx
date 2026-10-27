@@ -67,7 +67,7 @@ afterEach(() => {
 async function renderClipboard() {
   const { useDeckClipboard } = await import('../useDeckClipboard')
   return renderHook(() =>
-    useDeckClipboard({ readDeck: () => ({ equipment: {}, deploymentOrder: [] }), mdVersion: 7 }),
+    useDeckClipboard({ readDeck: () => ({ equipment: {}, deploymentOrder: [] }), maxLevel: 60 }),
   )
 }
 

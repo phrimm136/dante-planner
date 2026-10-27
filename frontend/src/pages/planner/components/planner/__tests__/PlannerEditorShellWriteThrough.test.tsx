@@ -101,11 +101,8 @@ vi.mock('../../SyncOffWarningDialog', () => ({ SyncOffWarningDialog: () => null 
 vi.mock('../KeywordSelector', () => ({ KeywordSelector: () => null }))
 
 import { PlannerEditorShell } from '../PlannerEditorShell'
-import {
-  PlannerStoreProvider,
-  usePlannerStoreApi,
-  createDefaultSectionNotes,
-} from '../../../stores/usePlannerStore'
+import { usePlannerStoreApi, createDefaultSectionNotes } from '../../../stores/usePlannerStore'
+import { SeededPlannerStore } from '../../../stores/__tests__/plannerStoreHarness'
 import type { PlannerStore, PlannerStoreState } from '../../../stores/usePlannerStore'
 import type { StoreApi } from 'zustand'
 
@@ -130,14 +127,14 @@ function StoreCapture({ onReady }: { onReady: (api: StoreApi<PlannerStore>) => v
 function renderShell(initialState?: Partial<PlannerStoreState>) {
   let storeApi: StoreApi<PlannerStore> | null = null
   const utils = render(
-    <PlannerStoreProvider identityMaxLevel={60} initialState={initialState}>
+    <SeededPlannerStore initialState={initialState}>
       <StoreCapture
         onReady={(api) => {
           storeApi = api
         }}
       />
       <PlannerEditorShell contentVersion={7} />
-    </PlannerStoreProvider>,
+    </SeededPlannerStore>,
   )
   if (!storeApi) throw new Error('store api was not captured')
   return { ...utils, storeApi: storeApi as StoreApi<PlannerStore> }

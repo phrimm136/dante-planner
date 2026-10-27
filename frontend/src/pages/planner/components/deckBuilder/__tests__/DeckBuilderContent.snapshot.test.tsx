@@ -12,7 +12,6 @@ import { render, screen } from '@testing-library/react'
 import type { ReactElement } from 'react'
 
 import {
-  PlannerStoreProvider,
   createDefaultEquipment,
   createDefaultDeckFilterState,
   useDeckFilterState,
@@ -20,6 +19,7 @@ import {
   useStoreDeck,
   useStoreOwnedGiftIds,
 } from '../../../stores/usePlannerStore'
+import { SeededPlannerStore } from '../../../stores/__tests__/plannerStoreHarness'
 import type { PlannerStoreState } from '../../../stores/usePlannerStore'
 
 import { DeckBuilderContent } from '../DeckBuilderContent'
@@ -171,11 +171,7 @@ const TRACKER_DECK = {
 }
 
 function withStore(state: Partial<PlannerStoreState>, ui: ReactElement) {
-  return (
-    <PlannerStoreProvider identityMaxLevel={60} initialState={state}>
-      {ui}
-    </PlannerStoreProvider>
-  )
+  return <SeededPlannerStore initialState={state}>{ui}</SeededPlannerStore>
 }
 
 function StoreFilteredDeckBuilderContent(props: Omit<DeckBuilderContentProps, 'filterState'>) {

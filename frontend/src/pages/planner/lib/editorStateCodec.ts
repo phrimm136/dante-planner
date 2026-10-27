@@ -24,6 +24,7 @@ import type {
 } from '../types/DeckTypes'
 import type { MDPlannerContent, SerializableFloorSelection } from '../types/PlannerTypes'
 import type { PlannerState } from './saveablePlanner'
+import type { PlannerContentState } from '../stores/plannerState'
 
 const DEFAULT_ZAYIN_MAX_THREADSPIN: Record<string, ThreadspinTier> = (() => {
   const lookup = egoSpecList as Record<string, { maxThreadspin: 4 | 5 }>
@@ -144,43 +145,11 @@ export interface EditorMetadata {
   isPublished: boolean
 }
 
-export interface HydratedEditorState extends EditorMetadata {
-  equipment: Record<string, SinnerEquipment>
-  floorSelections: FloorThemeSelection[]
-  comprehensiveGiftIds: Set<EncodedGiftId>
-  deploymentOrder: number[]
-  selectedKeywords: Set<string>
-  selectedBuffIds: Set<number>
-  selectedGiftIds: Set<EncodedGiftId>
-  observationGiftIds: Set<EncodedGiftId>
-  selectedGiftKeyword: string | null
-  skillEAState: Record<string, SkillEAState>
-  deckFilterState: DeckFilterState
-  sectionNotes: Record<string, NoteContent>
-}
-
-export type ProjectableEditorState = Pick<
-  HydratedEditorState,
-  | 'title'
-  | 'category'
-  | 'selectedKeywords'
-  | 'selectedBuffIds'
-  | 'selectedGiftKeyword'
-  | 'selectedGiftIds'
-  | 'observationGiftIds'
-  | 'comprehensiveGiftIds'
-  | 'equipment'
-  | 'deploymentOrder'
-  | 'skillEAState'
-  | 'floorSelections'
-  | 'sectionNotes'
->
-
 export function hydrateEditorState(
   content: MDPlannerContent,
   metadata: EditorMetadata,
   identityMaxLevel: number,
-): HydratedEditorState {
+): PlannerContentState {
   return {
     title: metadata.title,
     category: metadata.category,
@@ -205,7 +174,6 @@ export function hydrateEditorState(
     ),
     selectedGiftKeyword: content.selectedGiftKeyword ?? null,
     skillEAState: reconcileSkillEAState(content.skillEAState),
-    deckFilterState: createDefaultDeckFilterState(),
 
     sectionNotes: {
       ...createDefaultSectionNotes(),
@@ -221,7 +189,7 @@ export function hydrateEditorState(
   }
 }
 
-export function projectEditorState(state: ProjectableEditorState): PlannerState {
+export function projectEditorState(state: PlannerContentState): PlannerState {
   return {
     title: state.title,
     category: state.category,

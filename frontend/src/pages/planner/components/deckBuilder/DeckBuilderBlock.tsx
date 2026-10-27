@@ -19,11 +19,10 @@ export interface TrackerExtras {
 }
 
 export interface DeckBuilderBlockProps {
-  mdVersion: number
   tracker?: TrackerExtras | undefined
 }
 
-export function DeckBuilderBlock({ mdVersion, tracker }: DeckBuilderBlockProps) {
+export function DeckBuilderBlock({ tracker }: DeckBuilderBlockProps) {
   const [paneOpen, setPaneOpen] = useState(false)
   const deck = useStoreDeck()
   const ownedGiftIds = useStoreOwnedGiftIds()
@@ -53,7 +52,6 @@ export function DeckBuilderBlock({ mdVersion, tracker }: DeckBuilderBlockProps) 
         deck.setEquipment(() => equipment)
         deck.setDeploymentOrder(deploymentOrder)
       }}
-      mdVersion={mdVersion}
     >
       {({ onImport, onExport }) => (
         <>

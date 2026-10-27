@@ -19,7 +19,6 @@ import { EGOGiftObservationSummary } from '../egoGift/EGOGiftObservationSummary'
 import { DeckBuilderBlock } from '../deckBuilder/DeckBuilderBlock'
 import { PlannerStoreProvider, usePlannerStore } from '../../stores/usePlannerStore'
 import { hydrateEditorState } from '../../lib/editorStateCodec'
-import { useIdentityMaxLevel } from '../../hooks/useMirrorDungeonSeason'
 import { SkillReplacementSection } from '../skillReplacement/SkillReplacementSection'
 import { ComprehensiveGiftGridTracker } from './ComprehensiveGiftGridTracker'
 import { ReadOnlyNote } from '@/shared/noteEditor/components/ReadOnlyNote'
@@ -45,22 +44,24 @@ interface TrackerStoreProps {
 }
 
 export function TrackerStore({ planner, children }: TrackerStoreProps) {
-  const maxLevel = useIdentityMaxLevel(planner.metadata.contentVersion)
   const metadata = {
     title: planner.metadata.title,
     category: planner.config.category,
     isPublished: planner.metadata.published ?? false,
   }
-  const { skillEAState: _plan, ...trackerInitialState } = hydrateEditorState(
-    planner.content,
-    metadata,
-    maxLevel,
-  )
+  const trackerInitialState = (maxLevel: number) => {
+    const { skillEAState: _plan, ...state } = hydrateEditorState(
+      planner.content,
+      metadata,
+      maxLevel,
+    )
+    return state
+  }
 
   return (
     <PlannerStoreProvider
       key={planner.metadata.id}
-      identityMaxLevel={maxLevel}
+      mdVersion={planner.metadata.contentVersion}
       initialState={trackerInitialState}
     >
       {children}
@@ -113,7 +114,6 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
       node: (
         <Suspense fallback={<DeckGridSkeleton />}>
           <DeckBuilderBlock
-            mdVersion={planner.metadata.contentVersion}
             tracker={{
               onResetToInitial: handleResetToPreset,
               onViewNotes: () => setOpenNote('deckBuilder'),

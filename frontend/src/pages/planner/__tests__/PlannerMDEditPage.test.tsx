@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import PlannerMDEditPage from '../PlannerMDEditPage'
 import { useSavedPlannerQuery } from '../hooks/useSavedPlannerQuery'
@@ -25,17 +25,15 @@ vi.mock('react-i18next', () => ({
 vi.mock('../hooks/useSavedPlannerQuery')
 
 vi.mock('../components/planner/PlannerEditEditor', async (importOriginal) => {
-  const { usePlannerStore } = await import('../stores/usePlannerStore')
+  const { useStoreSeason } = await import('../stores/usePlannerStore')
   return {
     ...(await importOriginal<typeof import('../components/planner/PlannerEditEditor')>()),
     PlannerEditEditor: ({ planner }: { planner?: SaveablePlanner }) => {
-      const reset = usePlannerStore((s) => s.reset)
-      const level = usePlannerStore((s) => s.equipment['1']?.identity.level)
+      const { identityMaxLevel } = useStoreSeason()
       return (
         <div data-testid="editor-content">
           EditEditor - Planner ID: {planner?.metadata.id || 'none'}
-          <button onClick={reset}>reset deck</button>
-          <span data-testid="default-level">{level}</span>
+          <span data-testid="identity-max-level">{identityMaxLevel}</span>
         </div>
       )
     },
@@ -125,16 +123,14 @@ describe('PlannerMDEditPage', () => {
   })
 
   describe('identity level cap', () => {
-    it("equips a default deck at the MD6 planner's cap of 55", async () => {
+    it("seeds the store with the MD6 planner's cap of 55", async () => {
       render(
         <QueryClientProvider client={queryClient}>
           <PlannerMDEditPage />
         </QueryClientProvider>,
       )
 
-      fireEvent.click(await screen.findByRole('button', { name: 'reset deck' }))
-
-      expect(screen.getByTestId('default-level').textContent).toBe('55')
+      expect((await screen.findByTestId('identity-max-level')).textContent).toBe('55')
     })
   })
 

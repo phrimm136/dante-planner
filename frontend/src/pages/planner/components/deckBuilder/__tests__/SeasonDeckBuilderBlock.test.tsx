@@ -4,10 +4,10 @@ import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactElement, ReactNode } from 'react'
 
-import { PlannerStoreProvider, createDefaultEquipment } from '../../../stores/usePlannerStore'
+import { createDefaultEquipment } from '../../../stores/usePlannerStore'
+import { SeededPlannerStore } from '../../../stores/__tests__/plannerStoreHarness'
 import { DeckBuilderBlock } from '../DeckBuilderBlock'
 import { SEASONS } from '@/shared/gameData'
-import { PLANNER_CONFIG } from '@/lib/constants'
 
 vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>()
@@ -104,12 +104,9 @@ vi.mock('@/shared/filter/hooks/useSearchMappings', () => ({
 
 function TrackerDeckBlock() {
   return (
-    <PlannerStoreProvider identityMaxLevel={60} initialState={{ deploymentOrder: [0, 3] }}>
-      <DeckBuilderBlock
-        mdVersion={PLANNER_CONFIG.mdCurrentVersion}
-        tracker={{ onResetToInitial: () => {} }}
-      />
-    </PlannerStoreProvider>
+    <SeededPlannerStore initialState={{ deploymentOrder: [0, 3] }}>
+      <DeckBuilderBlock tracker={{ onResetToInitial: () => {} }} />
+    </SeededPlannerStore>
   )
 }
 

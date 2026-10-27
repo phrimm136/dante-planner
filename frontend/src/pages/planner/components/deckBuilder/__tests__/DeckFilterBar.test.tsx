@@ -13,7 +13,8 @@ import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import { DeckFilterBar } from '../DeckFilterBar'
-import { PlannerStoreProvider, usePlannerStoreApi } from '../../../stores/usePlannerStore'
+import { usePlannerStoreApi } from '../../../stores/usePlannerStore'
+import { SeededPlannerStore } from '../../../stores/__tests__/plannerStoreHarness'
 import { SEASONS } from '@/shared/gameData'
 
 import type { ReactNode } from 'react'
@@ -70,14 +71,14 @@ function renderWithStore(ui: ReactNode) {
 
   const utils = render(
     <QueryClientProvider client={queryClient}>
-      <PlannerStoreProvider identityMaxLevel={60}>
+      <SeededPlannerStore>
         <StoreCapture
           onReady={(api) => {
             storeApi = api
           }}
         />
         {ui}
-      </PlannerStoreProvider>
+      </SeededPlannerStore>
     </QueryClientProvider>,
   )
 

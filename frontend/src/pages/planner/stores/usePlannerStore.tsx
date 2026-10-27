@@ -2,6 +2,7 @@ import { createContext, useContext, useState } from 'react'
 import { createStore, useStore } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { MIN_LEVEL, floorCount } from '@/shared/gameData'
+import { PLANNER_CONFIG } from '@/lib/constants'
 
 import {
   createDefaultDeckFilterState,
@@ -14,6 +15,7 @@ import {
   projectEditorState,
 } from '../lib/editorStateCodec'
 import { collectOwnedGiftIds } from '../lib/deckEA'
+import { useIdentityMaxLevel } from '../hooks/useMirrorDungeonSeason'
 
 import type { ReactNode } from 'react'
 import type { StoreApi } from 'zustand'
@@ -24,6 +26,9 @@ import type { NoteContent } from '@/shared/noteEditor'
 import type { MDPlannerContent } from '../types/PlannerTypes'
 import type { PlannerState } from '../lib/saveablePlanner'
 import type { DeckBuilderDeck } from '../types/DeckTypes'
+import type { PlannerSessionState, PlannerStoreState } from './plannerState'
+
+export type { PlannerContentState, PlannerSessionState, PlannerStoreState } from './plannerState'
 
 export {
   createDefaultDeckFilterState,
@@ -33,42 +38,12 @@ export {
   createDefaultSkillEAState,
 }
 
-interface HotState {
-  equipment: Record<string, SinnerEquipment>
-  floorSelections: FloorThemeSelection[]
-  comprehensiveGiftIds: Set<EncodedGiftId>
-  deploymentOrder: number[]
-}
-
-interface WarmState {
-  selectedKeywords: Set<string>
-  selectedBuffIds: Set<number>
-  selectedGiftIds: Set<EncodedGiftId>
-  observationGiftIds: Set<EncodedGiftId>
-  selectedGiftKeyword: string | null
-  skillEAState: Record<string, SkillEAState>
-  deckFilterState: DeckFilterState
-  deckVisibleCount: number
-}
-
-interface ColdState {
-  title: string
-  category: MDCategory
-  isPublished: boolean
-  visibleSections: number
-  sectionNotes: Record<string, NoteContent>
-}
-
-export interface PlannerStoreState extends HotState, WarmState, ColdState {}
-
 export interface PlannerStoreActions {
   setEquipment: (
     equipment:
       | Record<string, SinnerEquipment>
       | ((prev: Record<string, SinnerEquipment>) => Record<string, SinnerEquipment>),
   ) => void
-  updateSinnerEquipment: (sinnerId: string, equipment: SinnerEquipment) => void
-  setFloorSelections: (selections: FloorThemeSelection[]) => void
   updateFloorSelection: (floorIndex: number, selection: FloorThemeSelection) => void
   setComprehensiveGiftIds: (ids: Set<EncodedGiftId>) => void
   setDeploymentOrder: (order: number[]) => void
@@ -78,7 +53,6 @@ export interface PlannerStoreActions {
   setSelectedGiftIds: (ids: Set<EncodedGiftId>) => void
   setObservationGiftIds: (ids: Set<EncodedGiftId>) => void
   setSelectedGiftKeyword: (keyword: string | null) => void
-  setSkillEAState: (state: Record<string, SkillEAState>) => void
   updateSinnerSkillEA: (sinnerId: string, state: SkillEAState) => void
   setDeckFilterState: (
     state: DeckFilterState | ((prev: DeckFilterState) => DeckFilterState),
@@ -87,30 +61,31 @@ export interface PlannerStoreActions {
 
   setTitle: (title: string) => void
   setCategory: (category: MDCategory) => void
-  setIsPublished: (published: boolean) => void
   setVisibleSections: (count: number) => void
-  setSectionNotes: (notes: Record<string, NoteContent>) => void
   updateSectionNote: (sectionKey: string, content: NoteContent) => void
 
   initializeFromPlanner: (
     content: MDPlannerContent,
     metadata: { title: string; category: MDCategory; isPublished: boolean },
   ) => void
-  reset: () => void
 
   getPlannerState: () => PlannerState
 }
 
-export type PlannerStore = PlannerStoreState & {
-  identityMaxLevel: number
-} & PlannerStoreActions
+export type PlannerStore = PlannerStoreState & PlannerStoreActions
+
+export type PlannerSeason = Pick<PlannerSessionState, 'contentVersion' | 'identityMaxLevel'>
+
+export type PlannerStoreSeed = Partial<Omit<PlannerStoreState, keyof PlannerSeason>>
 
 const createInitialState = (
-  identityMaxLevel: number,
-  overrides?: Partial<PlannerStoreState>,
+  season: PlannerSeason,
+  overrides?: PlannerStoreSeed,
 ): PlannerStoreState => {
+  const { identityMaxLevel } = season
   const category = overrides?.category ?? '5F'
   return {
+    ...season,
     equipment: overrides?.equipment ?? createDefaultEquipment(identityMaxLevel),
     floorSelections: overrides?.floorSelections ?? createDefaultFloorSelections(category),
     comprehensiveGiftIds: overrides?.comprehensiveGiftIds ?? new Set(),
@@ -134,16 +109,16 @@ const createInitialState = (
 }
 
 export const createPlannerStore = (
+  mdVersion: number,
   identityMaxLevel: number,
-  initialState?: Partial<PlannerStoreState>,
+  initialState?: PlannerStoreSeed,
 ) => {
-  const state = createInitialState(identityMaxLevel, initialState)
+  const state = createInitialState({ contentVersion: mdVersion, identityMaxLevel }, initialState)
 
   return createStore<PlannerStore>()(
     devtools(
       (set, get) => ({
         ...state,
-        identityMaxLevel,
 
         setEquipment: (equipment) => {
           if (typeof equipment === 'function') {
@@ -152,18 +127,6 @@ export const createPlannerStore = (
             set({ equipment }, false, 'setEquipment')
           }
         },
-
-        updateSinnerEquipment: (sinnerId, equipment) =>
-          set(
-            (state) => ({
-              equipment: { ...state.equipment, [sinnerId]: equipment },
-            }),
-            false,
-            'updateSinnerEquipment',
-          ),
-
-        setFloorSelections: (selections) =>
-          set({ floorSelections: selections }, false, 'setFloorSelections'),
 
         updateFloorSelection: (floorIndex, selection) =>
           set(
@@ -193,8 +156,6 @@ export const createPlannerStore = (
 
         setSelectedGiftKeyword: (keyword) =>
           set({ selectedGiftKeyword: keyword }, false, 'setSelectedGiftKeyword'),
-
-        setSkillEAState: (state) => set({ skillEAState: state }, false, 'setSkillEAState'),
 
         updateSinnerSkillEA: (sinnerId, skillEA) =>
           set(
@@ -241,11 +202,7 @@ export const createPlannerStore = (
             'setCategory',
           ),
 
-        setIsPublished: (published) => set({ isPublished: published }, false, 'setIsPublished'),
-
         setVisibleSections: (count) => set({ visibleSections: count }, false, 'setVisibleSections'),
-
-        setSectionNotes: (notes) => set({ sectionNotes: notes }, false, 'setSectionNotes'),
 
         updateSectionNote: (sectionKey, content) =>
           set(
@@ -258,12 +215,13 @@ export const createPlannerStore = (
 
         initializeFromPlanner: (content, metadata) =>
           set(
-            hydrateEditorState(content, metadata, identityMaxLevel),
+            {
+              ...hydrateEditorState(content, metadata, identityMaxLevel),
+              deckFilterState: createDefaultDeckFilterState(),
+            },
             false,
             'initializeFromPlanner',
           ),
-
-        reset: () => set(createInitialState(identityMaxLevel), false, 'reset'),
 
         getPlannerState: () => projectEditorState(get()),
       }),
@@ -272,20 +230,27 @@ export const createPlannerStore = (
   )
 }
 
-const PlannerStoreContext = createContext<StoreApi<PlannerStore> | null>(null)
+export const PlannerStoreContext = createContext<StoreApi<PlannerStore> | null>(null)
 
 interface PlannerStoreProviderProps {
   children: ReactNode
-  identityMaxLevel: number
-  initialState?: Partial<PlannerStoreState> | undefined
+  mdVersion: number
+  initialState?: PlannerStoreSeed | ((identityMaxLevel: number) => PlannerStoreSeed) | undefined
 }
 
 export function PlannerStoreProvider({
   children,
-  identityMaxLevel,
+  mdVersion,
   initialState,
 }: PlannerStoreProviderProps) {
-  const [store] = useState(() => createPlannerStore(identityMaxLevel, initialState))
+  const identityMaxLevel = useIdentityMaxLevel(mdVersion)
+  const [store] = useState(() =>
+    createPlannerStore(
+      mdVersion,
+      identityMaxLevel,
+      typeof initialState === 'function' ? initialState(identityMaxLevel) : initialState,
+    ),
+  )
 
   return <PlannerStoreContext.Provider value={store}>{children}</PlannerStoreContext.Provider>
 }
@@ -303,7 +268,7 @@ export function usePlannerStore<T>(selector: (state: PlannerStore) => T): T {
 let placeholderStore: StoreApi<PlannerStore> | null = null
 
 function getPlaceholderStore(): StoreApi<PlannerStore> {
-  placeholderStore ??= createPlannerStore(MIN_LEVEL)
+  placeholderStore ??= createPlannerStore(PLANNER_CONFIG.mdCurrentVersion, MIN_LEVEL)
   return placeholderStore
 }
 
@@ -331,6 +296,13 @@ export function usePlannerStoreApi(): StoreApi<PlannerStore> {
 export const useDeckFilterState = () => usePlannerStore((s) => s.deckFilterState)
 export const useDeckVisibleCount = () => usePlannerStore((s) => s.deckVisibleCount)
 export const useSetDeckFilterState = () => usePlannerStore((s) => s.setDeckFilterState)
+
+export function useStoreSeason(): PlannerSeason {
+  const contentVersion = usePlannerStore((s) => s.contentVersion)
+  const identityMaxLevel = usePlannerStore((s) => s.identityMaxLevel)
+
+  return { contentVersion, identityMaxLevel }
+}
 
 export function useStoreDeck(): DeckBuilderDeck {
   const equipment = usePlannerStore((s) => s.equipment)

@@ -4,7 +4,6 @@ import { showError, showSuccess } from '@/lib/errorPresentation'
 import { useIdentityListSpec } from '@/pages/identity'
 import { useEGOListSpec } from '@/pages/ego'
 
-import { loadIdentityMaxLevel } from './loadIdentityLevelCaps'
 import type { DecodedDeck } from '../lib/deckCode'
 import type { SinnerEquipment } from '../types/DeckTypes'
 
@@ -15,7 +14,7 @@ export interface DeckSnapshot {
 
 export interface UseDeckClipboardOptions {
   readDeck: () => DeckSnapshot
-  mdVersion: number
+  maxLevel: number
 }
 
 export type ImportVerdict =
@@ -81,13 +80,12 @@ function writeDeckCode({ equipment, deploymentOrder }: DeckSnapshot): Promise<vo
   return navigator.clipboard.write([new ClipboardItem({ 'text/plain': blob })])
 }
 
-export function useDeckClipboard({ readDeck, mdVersion }: UseDeckClipboardOptions): DeckClipboard {
+export function useDeckClipboard({ readDeck, maxLevel }: UseDeckClipboardOptions): DeckClipboard {
   const identitySpec = useIdentityListSpec()
   const egoSpec = useEGOListSpec()
 
   const [importDraft, setImportDraft] = useState<ImportDraft | null>(null)
   const deckCodeRef = useRef<DecodeContext['deckCode'] | null>(null)
-  const maxLevelRef = useRef<number | null>(null)
   const openRequestRef = useRef(0)
 
   const handleExport = async () => {
@@ -101,9 +99,7 @@ export function useDeckClipboard({ readDeck, mdVersion }: UseDeckClipboardOption
 
   const loadDecodeContext = async (): Promise<DecodeContext> => {
     const deckCode = deckCodeRef.current ?? (await loadDeckCode())
-    const maxLevel = maxLevelRef.current ?? (await loadIdentityMaxLevel(mdVersion))
     deckCodeRef.current = deckCode
-    maxLevelRef.current = maxLevel
     return { deckCode, maxLevel, identitySpec, egoSpec }
   }
 
@@ -123,8 +119,7 @@ export function useDeckClipboard({ readDeck, mdVersion }: UseDeckClipboardOption
 
   const setImportText = (text: string) => {
     const deckCode = deckCodeRef.current
-    const maxLevel = maxLevelRef.current
-    if (deckCode === null || maxLevel === null) return
+    if (deckCode === null) return
     const verdict = judgeDeckCode(text, { deckCode, maxLevel, identitySpec, egoSpec })
     setImportDraft({ text, verdict })
   }

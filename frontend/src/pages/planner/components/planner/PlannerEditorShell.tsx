@@ -254,7 +254,7 @@ export function PlannerEditorShell({
       id: 'deckBuilder',
       node: (
         <>
-          <DeckBuilderBlock mdVersion={mdVersion} />
+          <DeckBuilderBlock />
           <StoreBoundSectionNote
             sectionKey="deckBuilder"
             placeholder={t('pages.plannerMD.noteEditor.placeholder')}

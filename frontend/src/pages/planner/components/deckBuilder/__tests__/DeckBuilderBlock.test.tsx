@@ -7,18 +7,17 @@ import type { ReactNode } from 'react'
 import type { StoreApi } from 'zustand'
 
 import {
-  PlannerStoreProvider,
   createDefaultDeckFilterState,
   usePlannerStore,
   usePlannerStoreApi,
 } from '../../../stores/usePlannerStore'
+import { SeededPlannerStore } from '../../../stores/__tests__/plannerStoreHarness'
 import type { PlannerStoreState, PlannerStore } from '../../../stores/usePlannerStore'
 import { DeckBuilderBlock } from '../DeckBuilderBlock'
 import type { TrackerExtras } from '../DeckBuilderBlock'
 import { DeckCodeTransfer } from '../DeckCodeTransfer'
 import type { DeckBuilderContentProps } from '../DeckBuilderContent'
 import { DEFAULT_SKILL_EA, SEASONS } from '@/shared/gameData'
-import { PLANNER_CONFIG } from '@/lib/constants'
 
 const contentProps = vi.hoisted(() => [] as DeckBuilderContentProps[])
 
@@ -99,12 +98,7 @@ vi.mock('../DeckBuilderContent', async () => {
 const EGO_FILTER = { ...createDefaultDeckFilterState(), entityMode: 'ego' as const }
 
 function Harness({ tracker }: { tracker?: TrackerExtras }) {
-  return (
-    <DeckBuilderBlock
-      mdVersion={PLANNER_CONFIG.mdCurrentVersion}
-      {...(tracker !== undefined && { tracker })}
-    />
-  )
+  return <DeckBuilderBlock {...(tracker !== undefined && { tracker })} />
 }
 
 let hostStore: StoreApi<PlannerStore> | undefined
@@ -131,11 +125,11 @@ function renderBlock(ui: ReactNode, initialState: Partial<PlannerStoreState> = {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={queryClient}>
-      <PlannerStoreProvider identityMaxLevel={60} initialState={initialState}>
+      <SeededPlannerStore initialState={initialState}>
         {ui}
         <HostEntityMode />
         <HostStoreProbe />
-      </PlannerStoreProvider>
+      </SeededPlannerStore>
     </QueryClientProvider>,
   )
 }

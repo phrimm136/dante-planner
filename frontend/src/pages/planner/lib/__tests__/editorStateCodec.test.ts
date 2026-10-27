@@ -226,7 +226,7 @@ describe('hydrateEditorState / projectEditorState round trip', () => {
     expect(state.skillEAState).toEqual(createDefaultSkillEAState())
   })
 
-  it('hydrates array fields into Set instances and a reset deck filter', () => {
+  it('hydrates array fields into Set instances', () => {
     const state = hydrateEditorState(makeContent(), METADATA, 60)
 
     expect(state.selectedKeywords).toBeInstanceOf(Set)
@@ -235,8 +235,6 @@ describe('hydrateEditorState / projectEditorState round trip', () => {
     expect(state.observationGiftIds).toBeInstanceOf(Set)
     expect(state.comprehensiveGiftIds).toBeInstanceOf(Set)
     expect(state.floorSelections[0]?.giftIds).toBeInstanceOf(Set)
-    expect(state.deckFilterState.searchQuery).toBe('')
-    expect(state.deckFilterState.entityMode).toBe('identity')
   })
 
   it('carries metadata through hydrate and back out of the projection', () => {

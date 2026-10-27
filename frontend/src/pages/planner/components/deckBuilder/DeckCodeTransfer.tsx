@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { showSuccess } from '@/lib/errorPresentation'
 
 import { useDeckClipboard } from '../../hooks/useDeckClipboard'
+import { useStoreSeason } from '../../stores/usePlannerStore'
 import type { DeckSnapshot } from '../../hooks/useDeckClipboard'
 import type { DecodedDeck } from '../../lib/deckCode'
 import { DeckImportDialog } from './DeckImportDialog'
@@ -15,19 +16,14 @@ export interface DeckCodeActions {
 interface DeckCodeTransferProps {
   readDeck: () => DeckSnapshot
   writeDeck: (deck: DeckSnapshot) => void
-  mdVersion: number
   children: (actions: DeckCodeActions) => ReactNode
 }
 
-export function DeckCodeTransfer({
-  readDeck,
-  writeDeck,
-  mdVersion,
-  children,
-}: DeckCodeTransferProps) {
+export function DeckCodeTransfer({ readDeck, writeDeck, children }: DeckCodeTransferProps) {
+  const { identityMaxLevel } = useStoreSeason()
   const { handleExport, openImport, importDraft, setImportText, closeImport } = useDeckClipboard({
     readDeck,
-    mdVersion,
+    maxLevel: identityMaxLevel,
   })
 
   const onImport = () => {

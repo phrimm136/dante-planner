@@ -131,7 +131,8 @@ import { PlannerEditorShell } from '../PlannerEditorShell'
 import { toast as sonnerToast } from 'sonner'
 import { ConflictError } from '@/lib/apiErrors'
 import { ThemePackIdSchema } from '@/shared/gameData'
-import { PlannerStoreProvider, usePlannerStoreApi } from '../../../stores/usePlannerStore'
+import { usePlannerStoreApi } from '../../../stores/usePlannerStore'
+import { SeededPlannerStore } from '../../../stores/__tests__/plannerStoreHarness'
 import type { PlannerStore } from '../../../stores/usePlannerStore'
 
 function StoreCapture({ onReady }: { onReady: (api: StoreApi<PlannerStore>) => void }) {
@@ -142,14 +143,14 @@ function StoreCapture({ onReady }: { onReady: (api: StoreApi<PlannerStore>) => v
 function renderShell() {
   let storeApi: StoreApi<PlannerStore> | null = null
   const utils = render(
-    <PlannerStoreProvider identityMaxLevel={60}>
+    <SeededPlannerStore>
       <StoreCapture
         onReady={(api) => {
           storeApi = api
         }}
       />
       <PlannerEditorShell contentVersion={7} />
-    </PlannerStoreProvider>,
+    </SeededPlannerStore>,
   )
   if (!storeApi) throw new Error('store api was not captured')
   return { ...utils, storeApi: storeApi as StoreApi<PlannerStore> }
@@ -214,13 +215,13 @@ describe('PlannerEditorShell - a category change', () => {
     const user = userEvent.setup()
     const { storeApi } = renderShell()
     act(() => {
-      storeApi.getState().setFloorSelections(
-        Array.from({ length: 15 }, (_, floorIndex) => ({
+      storeApi.setState({
+        floorSelections: Array.from({ length: 15 }, (_, floorIndex) => ({
           themePackId: ThemePackIdSchema.parse(String(1001 + floorIndex)),
           difficulty: 1,
           giftIds: new Set(),
         })),
-      )
+      })
     })
 
     await user.click(screen.getByRole('button', { name: 'pages.plannerList.mdCategory.5F' }))
