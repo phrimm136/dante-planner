@@ -1,6 +1,5 @@
 package org.danteplanner.backend.integration;
 
-import jakarta.persistence.EntityManagerFactory;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.comment.entity.PlannerComment;
@@ -17,9 +16,8 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserSettingsService;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
+import org.danteplanner.backend.support.ThreadStatementCounter;
 import org.danteplanner.backend.support.TestDataFactory;
-import org.hibernate.SessionFactory;
-import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,13 +100,9 @@ class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
     @Autowired
     private PublishedPlannerQueryService publishedPlannerQueryService;
 
-    @Autowired
-    private EntityManagerFactory entityManagerFactory;
-
     @Value("${planner.recommended-threshold}")
     private int recommendedThreshold;
 
-    private Statistics statistics;
     private Long viewerId;
 
     @BeforeEach
@@ -117,9 +111,6 @@ class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
 
         // A distinct viewer drives the authenticated read-path (vote + comment batches).
         viewerId = TestDataFactory.createTestUser(userRepository, "viewer@example.com").getId();
-
-        statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
-        statistics.setStatisticsEnabled(true);
     }
 
     /** The filter set the {@code /published} endpoint composes for a plain browse. */
@@ -174,18 +165,18 @@ class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
     void userLoad_WhenFoundById_PreparesOneStatement() {
         userSettingsService.getOrCreateEntity(viewerId);
 
-        statistics.clear();
+        ThreadStatementCounter.start();
         assertThat(userRepository.findById(viewerId)).isPresent();
 
-        assertThat(statistics.getPrepareStatementCount())
+        assertThat(ThreadStatementCounter.stop())
                 .as("statements prepared by findById")
                 .isEqualTo(1);
     }
 
     private long measure(CatalogQuery catalogQuery, Pageable pageable) {
-        statistics.clear();
+        ThreadStatementCounter.start();
         publishedPlannerQueryService.searchPlanners(catalogQuery, pageable, viewerId);
-        return statistics.getPrepareStatementCount();
+        return ThreadStatementCounter.stop();
     }
 
     /**
