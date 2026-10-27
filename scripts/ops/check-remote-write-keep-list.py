@@ -23,7 +23,9 @@ PROMQL_KEYWORDS = {
 SHELL_STRING = r"""'([^']*)'|"((?:[^"\\]|\\.)*)\""""
 POST_RULE_CALL = re.compile(
     r'post_rule\s+"[^"]*"\s+"[^"]*"\s*(?:\\\n\s*)?(?:' + SHELL_STRING + r")"
+    r'(?:(?:[ \t]*\\\n\s*|[ \t]+)("[^"]*"|\'[^\']*\'|[^\s\\]+))?'
 )
+LOKI_DATASOURCE_ARGS = {'"$LOKI_DS_UID"', '"${LOKI_DS_UID}"', "$LOKI_DS_UID", "${LOKI_DS_UID}"}
 POST_RULE_SITE = re.compile(r'^\s*post_rule\s+"', re.MULTILINE)
 SHELL_ASSIGNMENT = r"^\s*{name}=(?:" + SHELL_STRING + r")"
 SHELL_VARIABLE = re.compile(r'\$\{?([A-Za-z_][A-Za-z0-9_]*)\}?')
@@ -138,6 +140,8 @@ def exprs_from_script(script_path):
     if len(rule_calls) != len(rule_sites):
         sys.exit(f"{script_path}: {len(rule_sites)} post_rule calls, only {len(rule_calls)} parsed")
     for rule_call in rule_calls:
+        if rule_call.group(3) in LOKI_DATASOURCE_ARGS:
+            continue
         rule_expr = resolve_shell_string(rule_call.group(1), rule_call.group(2), script_text)
         if not rule_expr.strip():
             sys.exit(f"{script_path}: empty expression in {rule_call.group(0)!r}")
