@@ -1487,6 +1487,7 @@ two have silently never paged.
 
 ## 2026-10-27 trunk hygiene follow-ups (PR #322)
 
+- 58 of 193 ADRs still trigger the pre-commit "no REJECTED clause" note after its parse was fixed (down from 115); whether each is a forced, corollary or summary bullet is unchecked. Re-check: `.githooks/pre-commit` on a no-op commit lists them. Worth doing when an ADR convention pass is next run.
 - `RaiseBatcher.java:91` waits on the real clock for the caller-side bound (waitBound + margin). In a
   fresh JVM under heavy CPU load the first Redis client connect exceeds it and whichever
   `RaiseBatcherTest` connects first fails; the two clock-driven tests now use a 30 s bound, the rest
@@ -1499,12 +1500,5 @@ two have silently never paged.
   lingers until the 1 h timeout and the e2e spec has to force the drop with a reload. ADR 183
   @comments @visibility implies the delete effect should end the stream, after which the client's
   reconnect reads 404 on its own. Worth doing when the comment stream is next touched.
-- `battleDataCensus.test.ts` "finds every row unit of %s among its units" duplicates the group
-  schema refinement added in 2498b29e. Delete when that file is next touched.
-- The ast-grep rule `no-throw-in-lib` says "return a Result"; the chosen fix (2498b29e) is type
-  narrowing at the schema boundary. Reword when the rule is next touched.
-- The pre-commit ADR check reported "1 decision(s) with no REJECTED clause" on ADR 198 (two
-  REJECTED lines) and "2 decision(s)" on ADR 170; the checker's parse differs from the convention's
-  shape. Worth doing the next time it flags a correct ADR: align the parser with the convention.
 - After PR #322 deploys: `write_forwarding` goes probe → all (ADR 123), the POST `/batch` handler
   and the top-level `selectedKeywords` copy wait for seven days of zero counters (entries above).
