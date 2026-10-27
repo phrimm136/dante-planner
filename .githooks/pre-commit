@@ -84,9 +84,11 @@ BANNED
     # Reported, never enforced: forced, corollary and summary bullets
     # legitimately carry no rejected alternative.
     bare=$(echo "$body" | awk '
-      /^## Decisions/ {s=1; next}
-      /^## / {s=0}
-      s && /^- @/ && !/REJECTED/' | wc -l || true)
+      function close_bullet() { if (open && !rejected) print 1; open = 0; rejected = 0 }
+      /^## / {close_bullet(); s = ($0 ~ /^## Decisions/); next}
+      s && /^- @/ {close_bullet(); open = 1}
+      open && /REJECTED/ {rejected = 1}
+      END {close_bullet()}' | wc -l || true)
     (( bare == 0 )) || echo "  $f — note: $bare decision(s) with no REJECTED clause" >&2
 
   done <<< "$records"
