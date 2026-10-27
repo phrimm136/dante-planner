@@ -15,6 +15,11 @@ test('the identity detail image keeps its box while the swapped art loads', asyn
   // image swap is the remaining in-app swap, and 10110 is rank 3 with a swapped art.
   await page.goto('/identity/10110', { waitUntil: 'domcontentloaded' })
 
+  // The header's Suspense fallback is a second IdentityHeader with no name; when the i18n query
+  // resolves React unmounts it and mounts the real one, so an observer attached to the fallback's
+  // section reports 0 for a detached node. The h1 exists only in the settled header.
+  await expect(page.locator('[data-slot="detail-header"] h1')).toBeVisible({ timeout: 20_000 })
+
   const swapButton = page.getByRole('button', { name: 'Swap image' })
   await expect(swapButton).toBeEnabled({ timeout: 20_000 })
 
