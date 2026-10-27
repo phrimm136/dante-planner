@@ -11,13 +11,14 @@ holds, exit 1 means the debt is gone, any other exit or a timeout means the comm
 (ADR 201). It uses read-only tools only (rg, test, git ls-files, git log, jq, sh builtins,
 the ledger CLI). "This must be absent" is written `.claude/skills/debt-ledger/bin/debt absent <path>
 <rg arguments>`, never `! rg`, which reads a missing path as absent. A Python re-check is
-written `.claude/skills/debt-ledger/bin/debt python '<body>'`, never `python3 -c`, which exits 1
-(gone) when the body fails to compile or raises.
+written `.claude/skills/debt-ledger/bin/debt python '<body>'`, never by calling the interpreter
+directly (`python3 -c`, `python3 -I -c`, `python3.12 -c`), which exits 1 (gone) when the body
+fails to compile or raises.
 Run `.claude/skills/debt-ledger/bin/debt` from inside the code checkout.
 
 | Command  | Use |
 |----------|-----|
-| `doctor` | First, before any run: entry count, entries without a re-check line, duplicate titles, re-check lines that negate rg or call `python -c` (`malformed`); exit 1 when any list is not empty |
+| `doctor` | First, before any run: entry count, entries without a re-check line, duplicate titles, re-check lines that negate rg or call a python interpreter directly (`malformed`); exit 1 when any list is not empty |
 | `check`  | Run every re-check line: `HOLDS`, `GONE` or `BROKEN` per entry; exit 1 with a count line when an entry is gone or a command is broken. `--only <substring>` runs the entries whose title contains it |
 | `absent` | `absent <path> <rg arguments>`, inside a re-check line: exit 0 when the path exists and rg finds nothing, 1 when rg finds a match, 2 when the path is missing or rg fails |
 | `python` | `python '<body>'`, inside a re-check line: compiles and runs the body; `sys.exit(0)` or `sys.exit(1)` passes through, a compile error, any other exception or any other exit code exits 2 with `<Type>: <message>` |

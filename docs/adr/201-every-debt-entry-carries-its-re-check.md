@@ -51,8 +51,9 @@ epic: none · pr: none
   after the fact.
   REJECTED: a `sys.excepthook` prefix on every `python3 -c` body — a convention each author can
   forget, and a syntax error exits 1 before the hook is set.
-  INVARIANT: no re-check line negates rg or calls `python -c` (`rg -c '! rg|python3? -c'` over
-  the ledger finds nothing) — `debt doctor`, which counts such lines as `malformed`, names each
+  INVARIANT: no re-check line negates rg or names a python interpreter outside the CLI's
+  `python` command (`rg -c '! rg|(^|[^/])python'` over the re-check lines finds only that
+  command) — `debt doctor`, which counts such lines as `malformed`, names each
   entry and exits 1, and the pre-commit hook, which refuses a staged ledger whose `malformed`
   count is not zero.
 

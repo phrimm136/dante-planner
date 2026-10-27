@@ -21,15 +21,16 @@ the repository root with sh -c and a 5 s budget: exit 0 means the debt still hol
 means the debt is gone, anything else means the command is broken. "This must be absent" is
 written '.claude/skills/debt-ledger/bin/debt absent <path> <rg arguments>', never '! rg', which
 reads a missing path as absent. A Python re-check is written
-'.claude/skills/debt-ledger/bin/debt python <body>', never 'python3 -c', which exits 1 (gone)
-when the body fails to compile or raises.
+'.claude/skills/debt-ledger/bin/debt python <body>', never by calling the interpreter directly
+('python3 -c', 'python3 -I -c', 'python3.12 -c'), which exits 1 (gone) when the body fails to
+compile or raises.
 
 commands:
   doctor   print 'entries N, missing M, duplicates D, malformed K', then one
            'missing: <title>' line per entry without a re-check line, one 'duplicates: <title>'
            line per title used twice and one 'malformed: <title> — <fix>' line per re-check
-           line that negates rg ('! rg') or calls 'python3 -c' or 'python -c'; exit 1 when any
-           count is not zero
+           line that negates rg ('! rg') or names a python interpreter (python, python3,
+           python3.12, ...) anywhere but in 'bin/debt python'; exit 1 when any count is not zero
   check    run every re-check line and print 'HOLDS', 'GONE' or 'BROKEN' with the title; exit
            0 when every entry holds, exit 1 with a count line when an entry is gone or a
            command is broken; entries without a re-check line are skipped (see doctor)
@@ -47,7 +48,8 @@ options:
 
 RECHECK_LINE = re.compile(r"^  re-check: `([^`]+)`$")
 NEGATED_RG = re.compile(r"(?:^|[\s;&|(])!\s+rg\b")
-PYTHON_FLAG = re.compile(r"\bpython3? -c\b")
+PYTHON_TOKEN = re.compile(r"(?<![\w/])python[0-9.]*\b")
+CLI_PYTHON_PREFIX = "bin/debt "
 SENTENCE_END = re.compile(r"(?<!e\.g)(?<!i\.e)[.?!](?=\s|$)")
 TIME_BUDGET = 5
 
@@ -155,8 +157,10 @@ def run_doctor(ledger_entries):
             continue
         if NEGATED_RG.search(ledger_entry.recheck_command):
             malformed_lines.append(f"{ledger_entry.entry_title} — negates rg; use debt absent")
-        if PYTHON_FLAG.search(ledger_entry.recheck_command):
-            malformed_lines.append(f"{ledger_entry.entry_title} — calls python -c; use debt python")
+        if any(not ledger_entry.recheck_command[:token_match.start()].endswith(CLI_PYTHON_PREFIX)
+               for token_match in PYTHON_TOKEN.finditer(ledger_entry.recheck_command)):
+            malformed_lines.append(f"{ledger_entry.entry_title} — calls the interpreter directly; "
+                                   f"use debt python")
     print(f"entries {len(ledger_entries)}, missing {len(missing_titles)}, "
           f"duplicates {len(duplicate_titles)}, malformed {len(malformed_lines)}")
     for entry_title in missing_titles:
