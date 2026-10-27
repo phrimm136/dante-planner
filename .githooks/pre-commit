@@ -130,6 +130,14 @@ if echo "$staged" | grep -qx 'docs/debt.md'; then
     echo "pre-commit: docs/debt.md has $index_missing entries without a re-check line, HEAD has $head_missing; add the line or delete the entry" >&2
     fail=1
   fi
+  malformed_count=$({ "$debt_cli" doctor --file "$ledger_dir/index.md" || true; } | sed -n '1s/.*, malformed \([0-9]*\)$/\1/p')
+  if [[ -z "$malformed_count" ]]; then
+    echo "pre-commit: debt doctor printed no malformed count; run $debt_cli doctor --file <ledger> to see why" >&2
+    fail=1
+  elif (( malformed_count > 0 )); then
+    echo "pre-commit: docs/debt.md has $malformed_count re-check lines that negate rg; use the ledger CLI's absent command" >&2
+    fail=1
+  fi
   check_state=0
   check_output=$("$debt_cli" check --file "$ledger_dir/index.md" 2>&1) || check_state=$?
   if (( check_state != 0 )); then

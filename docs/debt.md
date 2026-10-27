@@ -1199,7 +1199,7 @@ two have silently never paged.
   so an orphan branch merged with `--allow-unrelated-histories` lands unreviewed. Closing it
   means `--root` in the hook, the reviewer's recipe and the measures script together. Worth
   doing if an orphan merge ever appears on dev.
-  re-check: `rg -q 'git diff-tree -p "\$c"' .githooks/reference-transaction && ! rg -q -- '--root' .githooks/reference-transaction`
+  re-check: `rg -q 'git diff-tree -p "\$c"' .githooks/reference-transaction && .claude/skills/debt-ledger/bin/debt absent .githooks/reference-transaction -- '--root'`
 - The release-sync exemption trusts `refs/remotes/origin/main`, and the Bash deny list
   refuses only direct ref writes; `git remote set-url origin .` followed by a plain fetch
   moves that ref to local commits. Worth closing (deny `git remote add|set-url` in
@@ -1229,7 +1229,7 @@ two have silently never paged.
 - The adr116-131 brief reserves migration V064 for J6 "drop planner_views", but V064 is taken by
   the floor-count parameter on `rebuild_planner_filters` (V062 is burned per push-order). J6 must
   renumber to the next free version when it starts.
-  re-check: `test -f backend/src/main/resources/db/migration/V064__rebuild_takes_floor_count.sql && ! rg -qi 'drop table.*planner_views' backend/src/main/resources/db/migration`
+  re-check: `test -f backend/src/main/resources/db/migration/V064__rebuild_takes_floor_count.sql && .claude/skills/debt-ledger/bin/debt absent backend/src/main/resources/db/migration -i 'drop table.*planner_views'`
 - Refracted Railway planners are refused by `PlannerContentValidator` (`INVALID_CATEGORY`: the
   validator accepts MD categories only) yet the filter rebuild indexes their non-floor rows with
   floor count 0, and the drift reconciler skips them as unreadable, so the audit oracle never
@@ -1237,7 +1237,7 @@ two have silently never paged.
   (`PlannerKeywordBackfillRepository.keywordRowsAfter` has no planner-type filter); prod held no
   RR rows on 2026-09-28. Worth resolving when RR content gets rules of its own: either RR content
   validates and audits, or RR planners stop being indexed.
-  re-check: `rg -q 'MDCategory.isValid\(category\)' backend/src/main/java/org/danteplanner/backend/planner/precondition/PlannerCategoryValidator.java && ! rg -qi 'planner_type' backend/src/main/java/org/danteplanner/backend/planner/repository/PlannerKeywordBackfillRepository.java`
+  re-check: `rg -q 'MDCategory.isValid\(category\)' backend/src/main/java/org/danteplanner/backend/planner/precondition/PlannerCategoryValidator.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/planner/repository/PlannerKeywordBackfillRepository.java -i 'planner_type'`
 - `FloorBoundaryConfinementTest` reads bytecode through Spring's repackaged ASM
   (`org.springframework.asm`, marked internal) because ArchUnit 1.3 exposes no string
   constants. Worth moving to a declared `org.ow2.asm` test dependency if a Spring upgrade
@@ -1248,7 +1248,7 @@ two have silently never paged.
   the rollout. Drop the one-argument procedure in a later migration once no pod runs an image
   older than V065; until then the CASE table is a third copy of the floor counts, held equal to
   the shared table by `PlannerFilterRebuildIT`.
-  re-check: `python3 -c "import glob,re,sys; s=sorted((int(re.search(r'/V(\d+)__',f).group(1)),i,m.upper()) for f in glob.glob('backend/src/main/resources/db/migration/V*.sql') for i,m in enumerate(re.findall(r'(?i)\b(create|drop) procedure (?:if exists )?rebuild_planner_filters\b',open(f).read()))); sys.exit(0 if s[-1][2]=='CREATE' else 1)"`
+  re-check: `python3 -c "import glob,os,re,sys; sys.excepthook=lambda t,e,b: (print(f'{t.__name__}: {e}',file=sys.stderr),os._exit(2)); s=sorted((int(re.search(r'/V(\d+)__',f).group(1)),i,m.upper()) for f in glob.glob('backend/src/main/resources/db/migration/V*.sql') for i,m in enumerate(re.findall(r'(?i)\b(create|drop) procedure (?:if exists )?rebuild_planner_filters\b',open(f).read()))); sys.exit(0 if s[-1][2]=='CREATE' else 1)"`
 - 사영전투 turn-cut planner: up to three formations of up to
   twelve turns each against an 18/24-turn full-reward cut, phase-specific decks, and bosses that
   return on rotation, so a plan must render against the data version it was written for. Carry
@@ -1274,13 +1274,13 @@ two have silently never paged.
   `GetMpUseCostAdderByEGO` applies is untraced. No shipped E.G.O has both an override and an
   exchanger adder today. Worth doing when one does, or when a buff adder can land on an overridden
   cost: resolve the two slots from a vtable dump.
-  re-check: `! rg -qi 'RecalculateEgoResources' frontend/src`
+  re-check: `.claude/skills/debt-ledger/bin/debt absent frontend/src -i 'RecalculateEgoResources'`
 - The battle planner's turn editor places units on the stage from `team-position` coordinates
   over the command-view background layers, with a fixed projection. The client's camera rig
   (static ADR 368: pitch, zoom by aspect, scroll clamps, per-wave `battleCameraInfo`) is not
   reproduced in the frontend. Worth doing when a stage's fixed projection visibly misplaces units
   against its background, or when the editor gains pan and zoom.
-  re-check: `! rg -qi 'battleCameraInfo' frontend/src`
+  re-check: `.claude/skills/debt-ledger/bin/debt absent frontend/src -i 'battleCameraInfo'`
 - `terraform/rds`'s fleet-state gate (exact-key listing before each `terraform_remote_state`)
   has no standing test: `mock_provider` rejects the stack's `ephemeral` master-password read, so
   `terraform test` stops before planning. A copy without that block passed absent, sibling-key,
@@ -1320,7 +1320,7 @@ two have silently never paged.
   failure is known only when a user describes it. Worth doing once a deploy regression must be
   caught without a user report; Sentry or GlitchTip (source-map stacks, per-browser grouping)
   beats a home-grown beacon, which would rebuild both.
-  re-check: `! rg -qi 'sentry|glitchtip' frontend/package.json && ! rg -q 'sendBeacon' frontend/src`
+  re-check: `.claude/skills/debt-ledger/bin/debt absent frontend/package.json -i 'sentry|glitchtip' && .claude/skills/debt-ledger/bin/debt absent frontend/src 'sendBeacon'`
 - 2026-10-02 — `getDB` (`frontend/src/lib/storage.ts`) clears its cached promise when an open
   reports `onerror` or `onblocked`, but not when `indexedDB.open` throws synchronously: the
   rejected promise stays cached for the page's life, so storage cannot recover without a reload.
@@ -1341,11 +1341,11 @@ two have silently never paged.
   not retried, although both now mean the server cannot serve (the backend's database-down code).
   Worth aligning when the retry policy is next touched or a DB outage shows doubled request
   volume.
-  re-check: `rg -q 'class WriteTemporarilyUnavailableError extends Error' frontend/src/lib/apiErrors.ts && ! rg -q 'WriteTemporarilyUnavailableError' frontend/src/lib/queryClient.ts`
+  re-check: `rg -q 'class WriteTemporarilyUnavailableError extends Error' frontend/src/lib/apiErrors.ts && .claude/skills/debt-ledger/bin/debt absent frontend/src/lib/queryClient.ts 'WriteTemporarilyUnavailableError'`
 - 2026-10-02 — `frontend/tsconfig.test.json` includes only test files, so tests cannot see the
   ambient globals in `frontend/src/vite-modules.d.ts`; the build-id hook test redeclares
   `__BUILD_ID__` locally. Worth fixing once a second test needs a global from that file.
-  re-check: `! rg -q 'vite-modules' frontend/tsconfig.test.json && rg -q '^declare const __BUILD_ID__' frontend/src/lib/banner/__tests__/useUpdateAvailable.test.tsx`
+  re-check: `.claude/skills/debt-ledger/bin/debt absent frontend/tsconfig.test.json 'vite-modules' && rg -q '^declare const __BUILD_ID__' frontend/src/lib/banner/__tests__/useUpdateAvailable.test.tsx`
 - In ArchUnit 1.3, `getMethodCallsFromSelf()` and `getConstructorCallsFromSelf()` omit method
   references (`Foo::bar`, `Foo::new`). Only `getAccessesFromSelf()` returns them. A red fixture
   proved this for `LogCaptureRule`. These rules read only calls, so a method reference passes
@@ -1371,7 +1371,7 @@ two have silently never paged.
   executor: 20 inversions in round 1). The test goes into `SseFanoutIT` as a method. A new class
   with its own `@DynamicPropertySource` exceeds the context budget of 15 in
   `TestIsolationConventionTest`.
-  re-check: `rg -q 'RedisMessageListenerContainer' backend/src/main/java/org/danteplanner/backend/shared/sse/SseSubscriberConfig.java && ! rg -q 'setTaskExecutor' backend/src/main/java/org/danteplanner/backend/shared/sse/SseSubscriberConfig.java`
+  re-check: `rg -q 'RedisMessageListenerContainer' backend/src/main/java/org/danteplanner/backend/shared/sse/SseSubscriberConfig.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/shared/sse/SseSubscriberConfig.java 'setTaskExecutor'`
 - `RedisConnectionConfig.buildRateLimitProxyManager` creates a `RedisClient` with its own client
   resources and returns only the `ProxyManager`, so nothing can shut the client down. In tests,
   `RateLimitServiceIT` (one per test, 26 per run) and `RateLimitBucketLifecycleIT` (one per test)
@@ -1385,7 +1385,7 @@ two have silently never paged.
   leads with `deleted_at`, so the nightly purge likely scans and locks the whole `notifications` table
   (read from the schema, not EXPLAINed). Worth doing when the table grows past a size where the purge
   holds locks long enough to stall notification inserts: EXPLAIN it, then add an index or batch it.
-  re-check: `rg -q 'n.deletedAt < :cutoffDate' backend/src/main/java/org/danteplanner/backend/notification/repository/NotificationRepository.java && ! rg -qi 'notifications ?\(deleted_at' backend/src/main/resources/db/migration`
+  re-check: `rg -q 'n.deletedAt < :cutoffDate' backend/src/main/java/org/danteplanner/backend/notification/repository/NotificationRepository.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/resources/db/migration -i 'notifications ?\(deleted_at'`
 - `PublishedPlannerQueryService.incrementViewCount` has no production caller since views moved to the
   buffered `PlannerViewRecorder` path; only two `PublishedPlannerQueryServiceTest` tests call it.
   Delete the method and those tests together when the planner view or query service is next touched.
@@ -1429,7 +1429,7 @@ two have silently never paged.
   not typecheck e2e, so spec type errors reach CI unseen. Worth doing when an e2e spec needs a
   type-level guarantee or the e2e typecheck joins a gate: import the needed frontend modules directly instead of through the
   barrels, or set `jsx` in e2e's tsconfig.
-  re-check: `! rg -q '"jsx"' e2e/tsconfig.json && rg -qF "@/pages/planner/schemas/PlannerSchemas'" e2e/tests/schema-portability.contract.spec.ts`
+  re-check: `.claude/skills/debt-ledger/bin/debt absent e2e/tsconfig.json '"jsx"' && rg -qF "@/pages/planner/schemas/PlannerSchemas'" e2e/tests/schema-portability.contract.spec.ts`
 - Authority has no single owner. The role column and the role-change and last-admin rules are
   `user`'s (`RoleChangeValidator`, ADR 173), the admin module only orchestrates, the restriction
   columns are still on `User`, and ADR 148 (user owns role and restriction) and ADR 170 (moderation
@@ -1444,7 +1444,7 @@ two have silently never paged.
 - No ast-grep scan covers `backend/src/consistency/java`: `astGrep` scans `src/main/java` and
   `astGrepTestSources` scans `src/test/java`. No rule targets the checker today. Worth doing when
   an ast-grep rule should hold for the checker's source set.
-  re-check: `test -d backend/src/consistency/java && ! rg -q '"scan", "--error", "src/consistency' backend/build.gradle.kts`
+  re-check: `test -d backend/src/consistency/java && .claude/skills/debt-ledger/bin/debt absent backend/build.gradle.kts '"scan", "--error", "src/consistency'`
 
 - `PlannerFilterRowsConcurrencyIT.syncFilterRows_WhenTwoNeverSyncedPlannersShareAnIndexGap_BothCommitEveryRound`
   (then `PlannerCatalogSyncConcurrencyIT.syncPlanner_…`) failed once with "Deadlock found" in
@@ -1463,7 +1463,7 @@ two have silently never paged.
   Cloudflare's definition of `retries`), and `NEAS`, `SEAS`, `SAS` and `OC` each steer to
   `["seoul", "oregon"]`. Session affinity is `cookie`, so record whether the client holds a `__cflb`
   cookie. Expect 2-3 minutes of errors for Asian users (inferred from the monitor settings).
-  re-check: `rg -q 'NEAS = \["seoul", "oregon"\]' terraform/cloudflare/variables.tf && ! rg -qi 'scale the Seoul backend' docs/runbooks`
+  re-check: `rg -q 'NEAS = \["seoul", "oregon"\]' terraform/cloudflare/variables.tf && .claude/skills/debt-ledger/bin/debt absent docs/runbooks -i 'scale the Seoul backend'`
 - 2026-10-13 — `GtidCapturingDataSource`'s class comment and the 39d9fc41 message say the
   `afterCommit` lookup ran on a fresh pooled connection; the 2026-10-08 reproduction showed the
   same connection, with the GTID overwritten by Hibernate's post-commit `SET autocommit=1`. Worth
@@ -1495,7 +1495,7 @@ two have silently never paged.
   entry comes first. Open: popup duration and blur (measure from a gameplay video with
   `ffmpeg -vf fps=15`), how small an icon crop stays distinct, and whether an acquisition sound
   cue exists. Worth doing when run tracking becomes a planned feature.
-  re-check: `! rg -q 'getDisplayMedia' frontend/src`
+  re-check: `.claude/skills/debt-ledger/bin/debt absent frontend/src 'getDisplayMedia'`
 
 - 2026-10-17 — CN localization updates are detected (Discord release alerts) but applied by hand:
   `static/scripts/update_cn_lang.py`, the CN i18n regeneration, the static commit, the gitlink/lock
@@ -1504,7 +1504,7 @@ two have silently never paged.
   and a data release pointer the backend adopts without a deploy. Worth doing once that unit lands;
   until then one local command (`static cn-update`) wrapping download, regeneration, commit and
   lock bump is the cheap form.
-  re-check: `! rg -q 'cn-update' .claude/skills/static-checkout/bin/static && ! rg -qi 'update_cn_lang' .github/workflows`
+  re-check: `.claude/skills/debt-ledger/bin/debt absent .claude/skills/static-checkout/bin/static 'cn-update' && .claude/skills/debt-ledger/bin/debt absent .github/workflows -i 'update_cn_lang'`
 
 ## 2026-10-27 trunk hygiene follow-ups (PR #322)
 
@@ -1527,7 +1527,7 @@ two have silently never paged.
   enough: the removal needs a `domain_events` row, a dispatcher arm and an SSE envelope that each
   pod's `PlannerCommentSseService.deliver` turns into `complete()` on that planner's emitters
   (backend CLAUDE.md:15). Worth doing as its own unit; the e2e spec then regains the open-stream incident.
-  re-check: `! rg -q 'complete\(\)' backend/src/main/java/org/danteplanner/backend/comment`
+  re-check: `.claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/comment 'complete\(\)'`
 - After PR #322 deploys: `write_forwarding` goes probe → all (ADR 123), the POST `/batch` handler
   and the top-level `selectedKeywords` copy wait for seven days of zero counters (entries above).
   re-check: `rg -q '@PostMapping\("/batch"\)' backend/src/main/java/org/danteplanner/backend/planner/controller/PlannerQueryController.java`
