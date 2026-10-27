@@ -1,7 +1,7 @@
 id: no-throw-in-lib-tsx
 language: Tsx
 severity: error
-message: lib is the functional core; return a Result, throw only in boundary adapters.
+message: "lib is the functional core and never throws: refuse the state at the schema boundary so the parsed type cannot carry it, or handle it in a boundary adapter."
 files:
   - src/pages/*/lib/**/*.tsx
   - src/shared/*/lib/**/*.tsx
