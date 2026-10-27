@@ -14,7 +14,7 @@ resources:
 # (terraform/oregon/user-data/cp.sh.tftpl). Git holds only the tag.
 images:
 - name: danteplanner-backend
-  newTag: 04c47e90a1b5bd2c7b920a75be12bb3e7e9a8e6f
+  newTag: 6fd4b38e92e8f602df65a8dc99c77fe59b7a3fea
 
 patches:
 - path: configmap-patch.yaml
