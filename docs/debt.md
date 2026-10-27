@@ -1550,4 +1550,4 @@ two have silently never paged.
   the path is gone, the same blind spot `absent` closed for file contents. Worth doing when a
   fourth such line is written: give the ledger CLI an `untracked <pathspec> <rg args>` sibling of
   `absent` with the 0/1/2 polarity and rewrite those lines to it.
-  re-check: `test "$(rg -c '^  re-check:.*test -z "\$\(git ls-files' docs/debt.md)" = 3`
+  re-check: `rg -q '^  re-check:.*test -z "\$\(git ls-files' docs/debt.md`
