@@ -280,16 +280,17 @@ jobs:
     env:
       GIT_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
     steps:
-      # Owner-scoped fine-grained PAT (contents:write). The bump push must carry
-      # the repository-admin identity: dev/main sit behind a code-scanning
-      # ruleset whose only usable bypass on a personal account is the admin
-      # role — the github-actions app cannot be a bypass actor outside an org.
-      # [skip ci] + the backend-only path filter keep the PAT push from
+      # Write deploy key of this repository. The bump push must come from a
+      # bypass actor: dev/main sit behind rulesets the push does not satisfy,
+      # and the github-actions app cannot be a bypass actor on a personal
+      # account, but a deploy key can. With ssh-key, checkout sets origin to
+      # the SSH URL and persists the key, so the push below uses it.
+      # [skip ci] + the backend-only path filter keep the push from
       # retriggering this workflow.
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
         with:
           ref: ${{ github.ref_name }}
-          token: ${{ secrets.GH_DEPLOY_PAT }}
+          ssh-key: ${{ secrets.DEPLOY_FLEET_KEY }}
 
       # Pinned direct download: the upstream install script resolves "latest"
       # through the GitHub REST API, which shared-runner IPs get rate-limited
