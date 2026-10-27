@@ -130,6 +130,8 @@ final class RaiseBatcher implements AutoCloseable {
         if (worker == null || !worker.isAlive()) {
             worker = new Thread(this::drain, THREAD_NAME);
             worker.setDaemon(true);
+            worker.setUncaughtExceptionHandler((thread, error) ->
+                    log.error("Freshness marker worker {} died; the next raise starts a new one", thread.getName(), error));
             worker.start();
         }
         queue.add(request);
