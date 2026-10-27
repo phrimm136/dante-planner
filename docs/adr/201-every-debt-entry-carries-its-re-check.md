@@ -38,6 +38,17 @@ epic: none · pr: none
   against `HEAD` — the pre-commit hook.
   NON-GOAL: mechanizing the "worth doing when" condition — it is a judgment for a design session,
   and the re-check answers only whether the debt exists.
+- @debt @gate @tightened — The pre-commit hook requires zero entries without a re-check line.
+  The removal condition of @debt @gate is met: every older entry carries the line, the entries
+  whose re-check exited 1 were deleted with their evidence, and `debt doctor` exits 0 on `main`.
+  The hook no longer reads the `HEAD` ledger; it refuses a staged ledger whose missing count is
+  not zero, naming the count.
+  REJECTED: keeping the growth comparison as a safety net — with zero as the floor, "did not
+  grow" and "is zero" are the same test, and the extra `git show HEAD:` read is a second thing
+  to break.
+  INVARIANT: a staged ledger with an entry that lacks a re-check line is refused — the
+  pre-commit hook.
+  NON-GOAL: requiring the line in files other than `docs/debt.md`.
 - @debt @absent — "This must be absent" is written with the debt CLI's `absent <path> <rg
   arguments>` command: it exits 0 when the path exists and rg finds nothing, 1 when rg finds a
   match, and 2 when the path is missing or rg fails. Python re-checks run through the CLI's
