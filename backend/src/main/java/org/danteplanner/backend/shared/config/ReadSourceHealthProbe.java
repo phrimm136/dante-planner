@@ -59,7 +59,7 @@ public class ReadSourceHealthProbe {
             consecutiveFailures++;
             if (consecutiveFailures >= failureThreshold && breaker.getState() != CircuitBreaker.State.OPEN) {
                 breaker.transitionToOpenState();
-                log.warn("Read source {} failed {} consecutive probes; breaker {} opened",
+                log.info("Read source {} failed {} consecutive probes; breaker {} opened",
                         target.name(), consecutiveFailures, breaker.getName());
             }
         }

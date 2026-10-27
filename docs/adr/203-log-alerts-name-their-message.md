@@ -1,0 +1,15 @@
+# 203 log-alerts-name-their-message
+epic: none · pr: none
+
+## Decisions
+- @alerts @logs — `backend-warn-sustained` and `backend-error-events` evaluate a Loki count of WARN and ERROR lines grouped by cluster, logger name and a message shape, and their `summary` annotation renders `{{ $labels.cluster }} {{ $labels.logger_name }}: {{ $labels.shape }}`, so a notification names the logger and the message it fired on. On the logback level counter a notification said only that a WARN existed in a cluster, and finding the line meant opening a dashboard; a counter carries no message, and a log query does. The shape is the message with every UUID replaced by `UUID`, then every digit run by `N`, cut at 80 characters, which bounds the instances to the set of log templates after UUID and digit normalization: one production day of WARN and ERROR lines held 19 distinct logger and shape pairs, where digit replacement alone left 26 because each planner id kept its hex letters. The label is `shape` because `pattern` is a LogQL keyword that `label_format` rejects. Thresholds and pending periods are unchanged.
+  REJECTED: dashboard and panel link annotations alone — the link still has to be opened to learn what fired.
+  REJECTED: the raw message as a label — ids and counts in messages make one instance per occurrence, an unbounded label set.
+  INVARIANT: both log-level rules query Loki with a level filter — enforcer: the re-check `rg -n 'level="(WARN|ERROR)" \| label_format shape'` printing two lines.
+  NON-GOAL: messages sharing their first 80 normalized characters stay apart — they share one instance, which names the template well enough to start from.
+- @alerts @logs — `backend-log-silence` stays on the logback event counter. It detects a dead log pipeline, and a Loki query over that pipeline returns nothing in exactly that case, so it cannot tell silence from an outage of the pipeline it reads.
+- @alerts @provisioning — The app rule import updates a rule whose title already exists in the alert folder and creates the others, keyed by title because the existing app rules carry uids Grafana assigned on their first import. A duplicate title left by an earlier double import updates the first match and prints the duplicate's uid for deletion.
+  REJECTED: a fixed uid per rule, as the cluster rule import does — the live rules already hold assigned uids, so a fixed uid creates a second copy of each one beside them.
+
+## Takeaway
+- takeaway: an alert that has to answer what fired groups by a bounded description of the cause, and the bound is measured on real traffic, because the obvious normalization left identifiers that kept the label set unbounded.
