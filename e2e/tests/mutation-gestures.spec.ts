@@ -70,7 +70,7 @@ test('saving a section note sends the planner and reports it', async ({
   }
 })
 
-test('publishing a planner sends the publish flag and reports it', async ({
+test('publishing a planner sends the planner with the publish request and reports it', async ({
   page,
   context,
   baseURL,
@@ -88,7 +88,9 @@ test('publishing a planner sends the publish flag and reports it', async ({
       () => page.getByRole('button', { name: 'Publish', exact: true }).click(),
     )
 
-    expect(request.postData()).toBeFalsy()
+    // Publish carries the planner so the save and the publish are one request (efea1179).
+    const body = JSON.parse(request.postData() ?? 'null') as { id?: string; status?: string }
+    expect(body.id).toBe(fixture.plannerId)
     await expect(page.getByText('Plan published successfully')).toBeVisible()
   } finally {
     await dropPlanner(fixture)

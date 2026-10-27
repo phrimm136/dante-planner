@@ -24,7 +24,6 @@ test.afterAll(closeSeedPool)
 
 test('a stream whose planner was deleted reports gone once and stops reconnecting', async ({
   page,
-  context,
   baseURL,
 }) => {
   const owner = await seedPublishedPlanner(baseURL!, 'stream-gone')
@@ -52,13 +51,10 @@ test('a stream whose planner was deleted reports gone once and stops reconnectin
     // The delete leaves the open stream untouched, so the client has learned nothing yet.
     expect(streamStatuses).toHaveLength(openedResponses)
 
+    // Chromium's offline emulation never ends an open streaming fetch (only an abort does), so
+    // the drop is forced from the page: the engine's next connect reads the planner as gone.
     const droppedAt = streamStatuses.length
-    const streamFailed = page.waitForEvent('requestfailed', {
-      predicate: (request) => request.url().includes(eventsUrl),
-    })
-    await context.setOffline(true)
-    await streamFailed
-    await context.setOffline(false)
+    await page.reload({ waitUntil: 'domcontentloaded' })
 
     await becomesTrue(async () => streamStatuses.includes(404), {
       deadlineMs: STREAM_GONE_DEADLINE_MS,

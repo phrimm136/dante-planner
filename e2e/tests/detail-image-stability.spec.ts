@@ -5,16 +5,18 @@ import { test, expect } from '@playwright/test'
 // mask the defect on localhost.
 const IMAGE_DELAY_MS = 150
 
-test('the EGO detail image keeps its box while the corrosion CG loads', async ({ page }) => {
+test('the identity detail image keeps its box while the swapped art loads', async ({ page }) => {
   await page.route('**/*.webp', async (route) => {
     await new Promise((resolve) => setTimeout(resolve, IMAGE_DELAY_MS))
     await route.continue()
   })
 
-  await page.goto('/ego/20103', { waitUntil: 'domcontentloaded' })
+  // The E.G.O page lost its awaken/corrosion toggle (ADR 118 @detail @tabs); the identity page's
+  // image swap is the remaining in-app swap, and 10110 is rank 3 with a swapped art.
+  await page.goto('/identity/10110', { waitUntil: 'domcontentloaded' })
 
-  const corrosionTab = page.getByRole('button', { name: 'Corrosion' })
-  await expect(corrosionTab).toBeVisible({ timeout: 20_000 })
+  const swapButton = page.getByRole('button', { name: 'Swap image' })
+  await expect(swapButton).toBeEnabled({ timeout: 20_000 })
 
   const section = page.locator('div.relative.bg-muted').first()
   await expect
@@ -32,9 +34,9 @@ test('the EGO detail image keeps its box while the corrosion CG loads', async ({
   expect(heights[0]).toBeGreaterThan(100)
 
   const image = section.locator('img.object-contain').first()
-  const awakeningSrc = await image.getAttribute('src')
-  await corrosionTab.click()
-  await expect(image).not.toHaveAttribute('src', awakeningSrc ?? '')
+  const beforeSrc = await image.getAttribute('src')
+  await swapButton.click()
+  await expect(image).not.toHaveAttribute('src', beforeSrc ?? '')
   await expect
     .poll(() => image.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0), {
       timeout: 20_000,
