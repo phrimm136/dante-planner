@@ -17,7 +17,8 @@ esac
 [ "$valid" = yes ] || { echo "fetch-static: static.lock is not one 40-hex sha" >&2; exit 1; }
 
 cd "$root"
-if .claude/skills/static-checkout/bin/static check 2>/dev/null; then
+if .claude/skills/static-checkout/bin/static check; then
+  echo "fetch-static: static already at $sha"
   exit 0
 fi
 
@@ -25,3 +26,4 @@ git init -q static
 git -C static fetch --quiet --depth 1 \
   "https://x-access-token:${STATIC_TOKEN}@github.com/phrimm136/danteplanner-static.git" "$sha"
 git -C static checkout -q -f --detach FETCH_HEAD
+echo "fetch-static: fetched $sha into static"
