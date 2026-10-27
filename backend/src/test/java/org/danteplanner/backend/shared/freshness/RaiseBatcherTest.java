@@ -89,7 +89,7 @@ class RaiseBatcherTest {
                         throw new StackOverflowError("injected");
                     }
                     return redis.endpoint();
-                }, 1, WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, System::nanoTime)) {
+                }, 1, ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, System::nanoTime)) {
             boolean first = batcher.raise(KEYS, ARGUMENTS);
             double failuresAfterFirst = raiseFailures.count();
             await().atMost(SCHEDULING_SLACK).until(() -> !workers.get(0).isAlive());
