@@ -15,14 +15,15 @@ import {
   PlannerEditorStoreProvider,
   createDefaultEquipment,
   createDefaultDeckFilterState,
+  useDeckFilterState,
+  usePlannerEditorStore,
+  useStoreDeck,
+  useStoreOwnedGiftIds,
 } from '../../../stores/usePlannerEditorStore'
 import type { PlannerEditorState } from '../../../stores/usePlannerEditorStore'
 
-import {
-  DeckBuilderContent,
-  StoreBoundDeckBuilderContent,
-  TrackerDeckBuilderContent,
-} from '../DeckBuilderContent'
+import { DeckBuilderContent } from '../DeckBuilderContent'
+import type { DeckBuilderActions, DeckBuilderContentProps } from '../DeckBuilderContent'
 
 import type { SinnerEquipment } from '../../../types/DeckTypes'
 import type { EGOGiftId } from '@/shared/gameData'
@@ -177,6 +178,34 @@ function withStore(state: Partial<PlannerEditorState>, ui: ReactElement) {
   )
 }
 
+function StoreFilteredDeckBuilderContent(props: Omit<DeckBuilderContentProps, 'filterState'>) {
+  const filterState = useDeckFilterState()
+
+  return <DeckBuilderContent {...props} filterState={filterState} />
+}
+
+function StoreDeckBuilderContent(props: DeckBuilderActions & { isActive: boolean }) {
+  const deck = useStoreDeck()
+  const ownedGiftIds = useStoreOwnedGiftIds()
+  const maxLevel = usePlannerEditorStore((s) => s.identityMaxLevel)
+
+  return (
+    <StoreFilteredDeckBuilderContent
+      {...props}
+      {...deck}
+      ownedGiftIds={ownedGiftIds}
+      maxLevel={maxLevel}
+    />
+  )
+}
+
+function trackerDeck(isActive: boolean) {
+  return withStore(
+    {},
+    <StoreFilteredDeckBuilderContent isActive={isActive} {...TRACKER_DECK} {...ACTIONS} />,
+  )
+}
+
 function html(ui: ReactElement): string {
   return render(ui).container.innerHTML
 }
@@ -191,18 +220,18 @@ async function warmedHtml(ui: ReactElement): Promise<string> {
 const MATRIX: Array<[string, () => ReactElement]> = [
   [
     'store-bound, identity mode, active',
-    () => withStore({}, <StoreBoundDeckBuilderContent isActive {...ACTIONS} />),
+    () => withStore({}, <StoreDeckBuilderContent isActive {...ACTIONS} />),
   ],
   [
     'store-bound, identity mode, closing dialog',
-    () => withStore({}, <StoreBoundDeckBuilderContent isActive={false} {...ACTIONS} />),
+    () => withStore({}, <StoreDeckBuilderContent isActive={false} {...ACTIONS} />),
   ],
   [
     'store-bound, ego mode, swapped deck',
     () =>
       withStore(
         { equipment: SWAPPED_EQUIPMENT, deploymentOrder: [1, 2], deckFilterState: EGO_FILTER },
-        <StoreBoundDeckBuilderContent isActive {...ACTIONS} />,
+        <StoreDeckBuilderContent isActive {...ACTIONS} />,
       ),
   ],
   [
@@ -210,17 +239,11 @@ const MATRIX: Array<[string, () => ReactElement]> = [
     () =>
       withStore(
         { deckFilterState: SEARCHED_FILTER },
-        <StoreBoundDeckBuilderContent isActive {...ACTIONS} />,
+        <StoreDeckBuilderContent isActive {...ACTIONS} />,
       ),
   ],
-  [
-    'tracker deck, active',
-    () => <TrackerDeckBuilderContent isActive {...TRACKER_DECK} {...ACTIONS} />,
-  ],
-  [
-    'tracker deck, closing dialog',
-    () => <TrackerDeckBuilderContent isActive={false} {...TRACKER_DECK} {...ACTIONS} />,
-  ],
+  ['tracker deck, active', () => trackerDeck(true)],
+  ['tracker deck, closing dialog', () => trackerDeck(false)],
   [
     'explicit ego-mode filter with an empty deck',
     () => (
@@ -247,13 +270,11 @@ describe('DeckBuilderContent DOM', () => {
 describe('DeckBuilderContent DOM after idle warm-up', () => {
   it('renders both grids once the inactive one has warmed', async () => {
     expect(
-      await warmedHtml(withStore({}, <StoreBoundDeckBuilderContent isActive {...ACTIONS} />)),
+      await warmedHtml(withStore({}, <StoreDeckBuilderContent isActive {...ACTIONS} />)),
     ).toMatchSnapshot()
   })
 
   it('renders both grids for a tracker deck once warmed', async () => {
-    expect(
-      await warmedHtml(<TrackerDeckBuilderContent isActive {...TRACKER_DECK} {...ACTIONS} />),
-    ).toMatchSnapshot()
+    expect(await warmedHtml(trackerDeck(true))).toMatchSnapshot()
   })
 })

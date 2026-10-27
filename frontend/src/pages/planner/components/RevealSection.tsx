@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils'
 export interface RevealSectionSpec {
   id: string
   node: ReactNode
-  aside?: ReactNode
 }
 
 export type RevealMode = 'mount' | 'fade'

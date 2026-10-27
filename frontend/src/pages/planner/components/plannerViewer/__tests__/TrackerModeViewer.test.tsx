@@ -89,18 +89,23 @@ vi.mock('../../../schemas/PlannerSchemas', async (importOriginal) => ({
 }))
 
 // Mock child components
-vi.mock('../DeckTrackerPanel', () => ({
-  DeckTrackerPanel: ({
-    deploymentOrder,
+vi.mock('../../deckBuilder/DeckBuilderBlock', () => ({
+  DeckBuilderBlock: ({
+    deck,
     ownedGiftIds,
   }: {
-    deploymentOrder: string[]
+    deck: { deploymentOrder: string[] }
     ownedGiftIds: ReadonlySet<string>
   }) => (
-    <div data-testid="deck-tracker-panel" data-owned={[...ownedGiftIds].sort().join(',')}>
-      Deployment: {deploymentOrder.join(', ')}
+    <div data-testid="deck-block" data-owned={[...ownedGiftIds].sort().join(',')}>
+      Deployment: {deck.deploymentOrder.join(', ')}
     </div>
   ),
+}))
+
+vi.mock('../../../hooks/useMirrorDungeonSeason', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../../hooks/useMirrorDungeonSeason')>()),
+  useIdentityMaxLevel: () => 60,
 }))
 
 vi.mock('../SkillTrackerPanel', () => ({
@@ -278,7 +283,7 @@ describe('TrackerModeViewer', () => {
       const planner = createMockPlanner(5)
       render(<TrackerModeViewer planner={planner} />, { wrapper: createWrapper() })
 
-      expect(screen.getByTestId('deck-tracker-panel')).toBeDefined()
+      expect(screen.getByTestId('deck-block')).toBeDefined()
       expect(screen.getByTestId('start-buff-section')).toBeDefined()
       expect(screen.getByTestId('start-gift-summary')).toBeDefined()
       expect(screen.getByTestId('ego-gift-observation-summary')).toBeDefined()
@@ -305,11 +310,11 @@ describe('TrackerModeViewer', () => {
   })
 
   describe('Tracker State Integration', () => {
-    it('passes deployment order to DeckTrackerPanel', () => {
+    it('passes the tracker deployment order to DeckBuilderBlock as its deck', () => {
       const planner = createMockPlanner(5)
       render(<TrackerModeViewer planner={planner} />, { wrapper: createWrapper() })
 
-      const deckPanel = screen.getByTestId('deck-tracker-panel')
+      const deckPanel = screen.getByTestId('deck-block')
       expect(deckPanel.textContent).toContain('YiSang, Faust, DonQuixote')
     })
 
@@ -318,7 +323,7 @@ describe('TrackerModeViewer', () => {
       const planner = createMockPlanner(5)
       render(<TrackerModeViewer planner={planner} />, { wrapper: createWrapper() })
 
-      const deckPanel = screen.getByTestId('deck-tracker-panel')
+      const deckPanel = screen.getByTestId('deck-block')
       expect(deckPanel.textContent).toContain('Faust, YiSang, DonQuixote')
     })
   })
@@ -341,7 +346,7 @@ describe('TrackerModeViewer', () => {
 
       const fiveFloorGifts = Array.from({ length: 10 }, (_, i) => String(9100 + i))
       const nonFloorGifts = ['9001', '9002', '9003', '9004', '9005']
-      expect(screen.getByTestId('deck-tracker-panel').dataset.owned).toBe(
+      expect(screen.getByTestId('deck-block').dataset.owned).toBe(
         [...nonFloorGifts, ...fiveFloorGifts].sort().join(','),
       )
     })

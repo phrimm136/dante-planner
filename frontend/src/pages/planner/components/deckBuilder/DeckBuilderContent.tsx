@@ -1,20 +1,16 @@
 import { startTransition, useState, useEffect, useRef } from 'react'
-import { EGO_TYPES, EGOIdSchema, floorCount } from '@/shared/gameData'
+import { EGO_TYPES, EGOIdSchema } from '@/shared/gameData'
 import type { EGOGiftId, EGOId, IdentityId } from '@/shared/gameData'
-import {
-  PlannerEditorStoreProvider,
-  usePlannerEditorStore,
-} from '../../stores/usePlannerEditorStore'
 import { useIdentityListSpec, useIdentityListI18n, toIdentityEntity } from '@/pages/identity'
 import { useEGOListSpec, useEGOListI18n, toEGOEntity } from '@/pages/ego'
 import { useSearchMappings } from '@/shared/filter'
 import { matchesDeckFilter } from '../../lib/deckFilter'
-import { collectOwnedGiftIds } from '../../lib/deckEA'
 import type {
   UptieTier,
   ThreadspinTier,
   SinnerEquipment,
   DeckFilterState,
+  DeckBuilderDeck,
 } from '../../types/DeckTypes'
 import type { IdentityEntity } from '@/pages/identity'
 import type { EGOEntity } from '@/pages/ego'
@@ -22,15 +18,6 @@ import { getSinnerCodeFromId } from '@/lib/utils'
 import { type SkillData } from './SinnerGrid'
 import { DeckLoadoutSection } from './DeckLoadoutSection'
 import { DeckCatalogSection } from './DeckCatalogSection'
-
-export interface DeckBuilderDeck {
-  equipment: Record<string, SinnerEquipment>
-  setEquipment: (
-    update: (previous: Record<string, SinnerEquipment>) => Record<string, SinnerEquipment>,
-  ) => void
-  deploymentOrder: number[]
-  setDeploymentOrder: (order: number[]) => void
-}
 
 export interface DeckBuilderActions {
   onImport: () => void
@@ -386,53 +373,4 @@ export function DeckBuilderContent({
       />
     </div>
   )
-}
-
-export type StoreBoundDeckBuilderContentProps = DeckBuilderActions & { isActive: boolean }
-
-export function StoreBoundDeckBuilderContent(props: StoreBoundDeckBuilderContentProps) {
-  const equipment = usePlannerEditorStore((s) => s.equipment)
-  const setEquipment = usePlannerEditorStore((s) => s.setEquipment)
-  const deploymentOrder = usePlannerEditorStore((s) => s.deploymentOrder)
-  const setDeploymentOrder = usePlannerEditorStore((s) => s.setDeploymentOrder)
-  const filterState = usePlannerEditorStore((s) => s.deckFilterState)
-  const selectedGiftIds = usePlannerEditorStore((s) => s.selectedGiftIds)
-  const observationGiftIds = usePlannerEditorStore((s) => s.observationGiftIds)
-  const comprehensiveGiftIds = usePlannerEditorStore((s) => s.comprehensiveGiftIds)
-  const floorSelections = usePlannerEditorStore((s) => s.floorSelections)
-  const category = usePlannerEditorStore((s) => s.category)
-  const maxLevel = usePlannerEditorStore((s) => s.identityMaxLevel)
-  const ownedGiftIds = collectOwnedGiftIds(
-    { selectedGiftIds, observationGiftIds, comprehensiveGiftIds, floorSelections },
-    floorCount(category),
-  )
-
-  return (
-    <DeckBuilderContent
-      {...props}
-      equipment={equipment}
-      setEquipment={setEquipment}
-      deploymentOrder={deploymentOrder}
-      setDeploymentOrder={setDeploymentOrder}
-      filterState={filterState}
-      ownedGiftIds={ownedGiftIds}
-      maxLevel={maxLevel}
-    />
-  )
-}
-
-export type TrackerDeckBuilderContentProps = Omit<DeckBuilderContentProps, 'filterState'>
-
-export function TrackerDeckBuilderContent(props: TrackerDeckBuilderContentProps) {
-  return (
-    <PlannerEditorStoreProvider identityMaxLevel={props.maxLevel}>
-      <StoreFilteredDeckBuilderContent {...props} />
-    </PlannerEditorStoreProvider>
-  )
-}
-
-function StoreFilteredDeckBuilderContent(props: TrackerDeckBuilderContentProps) {
-  const filterState = usePlannerEditorStore((s) => s.deckFilterState)
-
-  return <DeckBuilderContent {...props} filterState={filterState} />
 }

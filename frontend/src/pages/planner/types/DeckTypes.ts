@@ -109,3 +109,12 @@ export function createEmptyFilterSets(): Pick<DeckFilterState, FilterSetKey> {
     FilterSetKey
   >
 }
+
+export interface DeckBuilderDeck {
+  equipment: Record<string, SinnerEquipment>
+  setEquipment: (
+    update: (previous: Record<string, SinnerEquipment>) => Record<string, SinnerEquipment>,
+  ) => void
+  deploymentOrder: number[]
+  setDeploymentOrder: (order: number[]) => void
+}

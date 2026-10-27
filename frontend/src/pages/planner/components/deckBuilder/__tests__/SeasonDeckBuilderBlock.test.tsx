@@ -1,20 +1,24 @@
 /**
  * The tracker's deck pane mounts the real catalog subtree — filter bar and both
  * grids — which read deck UI state from the planner editor store. The tracker
- * viewer itself sits outside any provider, so this file mounts the pane the way
- * the viewer does and drives a filter through it.
+ * viewer itself sits outside any provider, so this file mounts the block inside
+ * a season store the way the viewer does and drives a filter through it.
  */
 
 import { describe, it, expect, vi, assert } from 'vitest'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import type { ReactElement } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 
-import { createDefaultEquipment } from '../../../stores/usePlannerEditorStore'
-import { TrackerDeckBuilderContent } from '../DeckBuilderContent'
+import {
+  SeasonDeckStoreProvider,
+  createDefaultEquipment,
+} from '../../../stores/usePlannerEditorStore'
+import { DeckBuilderBlock } from '../DeckBuilderBlock'
 import { SEASONS } from '@/shared/gameData'
 import type { EGOGiftId } from '@/shared/gameData'
+import { PLANNER_CONFIG } from '@/lib/constants'
 
 vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>()
@@ -41,6 +45,24 @@ vi.mock('@/shared/gameText/hooks/useKeywordListData', () => ({
 
 vi.mock('@/components/hooks/use-is-breakpoint', () => ({
   useIsBreakpoint: () => true,
+}))
+
+vi.mock('../../../hooks/useMirrorDungeonSeason', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../../hooks/useMirrorDungeonSeason')>()),
+  useIdentityMaxLevel: () => 60,
+}))
+
+vi.mock('../DeckBuilderPane', () => ({
+  DeckBuilderPane: ({ open, children }: { open: boolean; children: ReactNode }) =>
+    open ? <div>{children}</div> : null,
+}))
+
+vi.mock('../DeckBuilderSummary', () => ({
+  DeckBuilderSummary: ({ onEditDeck }: { onEditDeck: () => void }) => (
+    <button type="button" onClick={onEditDeck}>
+      edit deck
+    </button>
+  ),
 }))
 
 const DEFAULT_EQUIPMENT = createDefaultEquipment(60)
@@ -101,15 +123,20 @@ const TRACKER_DECK = {
   setEquipment: () => {},
   deploymentOrder: [0, 3],
   setDeploymentOrder: () => {},
-  ownedGiftIds: new Set<EGOGiftId>(),
 }
 
-const ACTIONS = {
-  onImport: () => {},
-  onExport: () => {},
-  onResetOrder: () => {},
-  onIdentityChange: () => {},
-  maxLevel: 60,
+function TrackerDeckBlock() {
+  return (
+    <SeasonDeckStoreProvider mdVersion={PLANNER_CONFIG.mdCurrentVersion}>
+      <DeckBuilderBlock
+        deck={TRACKER_DECK}
+        ownedGiftIds={new Set<EGOGiftId>()}
+        mdVersion={PLANNER_CONFIG.mdCurrentVersion}
+        onIdentityChange={() => {}}
+        tracker={{ onResetToInitial: () => {} }}
+      />
+    </SeasonDeckStoreProvider>
+  )
 }
 
 function renderPane(ui: ReactElement) {
@@ -125,21 +152,22 @@ function shownIdentityNames(container: HTMLElement): string[] {
 }
 
 describe('tracker deck pane', () => {
-  it('mounts the real catalog subtree outside the planner editor provider', () => {
-    expect(() =>
-      renderPane(<TrackerDeckBuilderContent isActive {...TRACKER_DECK} {...ACTIONS} />),
-    ).not.toThrow()
+  it('mounts the real catalog subtree inside a season store', async () => {
+    const user = userEvent.setup()
+    renderPane(<TrackerDeckBlock />)
+    await user.click(screen.getByRole('button', { name: 'edit deck' }))
 
-    expect(screen.getByRole('button', { name: /Reset All/i })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /Reset All/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /identity/i })).toBeInTheDocument()
   })
 
   it('drives its own filter state: switching to EGO mode re-renders the bar', async () => {
     const user = userEvent.setup()
-    renderPane(<TrackerDeckBuilderContent isActive {...TRACKER_DECK} {...ACTIONS} />)
+    renderPane(<TrackerDeckBlock />)
+    await user.click(screen.getByRole('button', { name: 'edit deck' }))
 
     // Identity mode shows Unit Keywords; EGO mode does not.
-    expect(screen.getByText('Unit Keywords')).toBeInTheDocument()
+    expect(await screen.findByText('Unit Keywords')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'deckBuilder.entityToggle.ego' }))
 
@@ -152,29 +180,34 @@ describe('tracker deck pane', () => {
     const { container } = renderPane(
       <div>
         <div data-testid="pane-a">
-          <TrackerDeckBuilderContent isActive {...TRACKER_DECK} {...ACTIONS} />
+          <TrackerDeckBlock />
         </div>
         <div data-testid="pane-b">
-          <TrackerDeckBuilderContent isActive {...TRACKER_DECK} {...ACTIONS} />
+          <TrackerDeckBlock />
         </div>
       </div>,
     )
 
     const paneA = within(screen.getByTestId('pane-a'))
+    const paneB = within(screen.getByTestId('pane-b'))
+    await user.click(paneA.getByRole('button', { name: 'edit deck' }))
+    await user.click(paneB.getByRole('button', { name: 'edit deck' }))
+    await paneB.findByText('Unit Keywords')
     await user.click(paneA.getByRole('button', { name: 'deckBuilder.entityToggle.ego' }))
 
     expect(paneA.queryByText('Unit Keywords')).toBeNull()
-    expect(within(screen.getByTestId('pane-b')).getByText('Unit Keywords')).toBeInTheDocument()
+    expect(paneB.getByText('Unit Keywords')).toBeInTheDocument()
     expect(container).toBeTruthy()
   })
 
   it('feeds its filter state into the grid: a search query hides non-matching cards', async () => {
     const user = userEvent.setup()
-    const { container } = renderPane(
-      <TrackerDeckBuilderContent isActive {...TRACKER_DECK} {...ACTIONS} />,
-    )
+    const { container } = renderPane(<TrackerDeckBlock />)
+    await user.click(screen.getByRole('button', { name: 'edit deck' }))
 
-    expect(shownIdentityNames(container).length).toBeGreaterThan(1)
+    await waitFor(() => {
+      expect(shownIdentityNames(container).length).toBeGreaterThan(1)
+    })
 
     const search = screen.getAllByRole('textbox')[0]
     assert(search, 'the pane renders no search textbox')

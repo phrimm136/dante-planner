@@ -15,10 +15,13 @@ import {
   PlannerEditorStoreProvider,
   createDefaultEquipment,
   createDefaultSkillEAState,
+  useStoreDeck,
+  useStoreOwnedGiftIds,
 } from '../../stores/usePlannerEditorStore'
 import type { PlannerEditorState } from '../../stores/usePlannerEditorStore'
 
-import { DeckBuilderSummary, StoreBoundDeckBuilderSummary } from '../deckBuilder/DeckBuilderSummary'
+import { DeckBuilderSummary } from '../deckBuilder/DeckBuilderSummary'
+import type { DeckBuilderSummaryProps } from '../deckBuilder/DeckBuilderSummary'
 import { StartBuffSection, StoreBoundStartBuffSection } from '../startBuff/StartBuffSection'
 import { StartGiftSummary, StoreBoundStartGiftSummary } from '../startGift/StartGiftSummary'
 import {
@@ -217,6 +220,22 @@ function withStore(state: Partial<PlannerEditorState>, ui: ReactElement) {
   )
 }
 
+function StoreDeckBuilderSummary(
+  props: Omit<DeckBuilderSummaryProps, 'equipment' | 'deploymentOrder' | 'ownedGiftIds'>,
+) {
+  const { equipment, deploymentOrder } = useStoreDeck()
+  const ownedGiftIds = useStoreOwnedGiftIds()
+
+  return (
+    <DeckBuilderSummary
+      {...props}
+      equipment={equipment}
+      deploymentOrder={deploymentOrder}
+      ownedGiftIds={ownedGiftIds}
+    />
+  )
+}
+
 function html(ui: ReactElement): string {
   return render(ui).container.innerHTML
 }
@@ -240,11 +259,11 @@ describe('DeckBuilderSummary DOM', () => {
   const MATRIX: Array<[string, () => ReactElement]> = [
     [
       'store-bound, default store deck',
-      () => withStore({}, <StoreBoundDeckBuilderSummary onEditDeck={() => {}} />),
+      () => withStore({}, <StoreDeckBuilderSummary onEditDeck={() => {}} />),
     ],
     [
       'store-bound, populated store deck, read-only',
-      () => withStore(POPULATED_STORE, <StoreBoundDeckBuilderSummary readOnly />),
+      () => withStore(POPULATED_STORE, <StoreDeckBuilderSummary readOnly />),
     ],
     [
       'explicit empty deck, read-only',

@@ -75,20 +75,7 @@ vi.mock('react-i18next', async (importOriginal) => {
 })
 
 // Everything except the section notes: those are the point of this file.
-vi.mock('../../deckBuilder/DeckBuilderSummary', () => ({
-  StoreBoundDeckBuilderSummary: () => null,
-}))
-vi.mock('../../deckBuilder/DeckBuilderPane', () => ({ DeckBuilderPane: () => null }))
-vi.mock('../../deckBuilder/DeckBuilderContent', () => ({
-  StoreBoundDeckBuilderContent: () => null,
-}))
-vi.mock('../../deckBuilder/DeckCodeTransfer', () => ({
-  DeckCodeTransfer: ({
-    children,
-  }: {
-    children: (actions: { onImport: () => void; onExport: () => void }) => React.ReactNode
-  }) => children({ onImport: vi.fn(), onExport: vi.fn() }),
-}))
+vi.mock('../../deckBuilder/DeckBuilderBlock', () => ({ DeckBuilderBlock: () => null }))
 vi.mock('../../startBuff/StartBuffSection', () => ({ StoreBoundStartBuffSection: () => null }))
 vi.mock('../../startBuff/StartBuffEditPane', () => ({ StartBuffEditPane: () => null }))
 vi.mock('../../startGift/StartGiftSummary', () => ({ StoreBoundStartGiftSummary: () => null }))

@@ -31,9 +31,6 @@ vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 vi.mock('../../deckBuilder/DeckBuilderSummary', () => ({
   DeckBuilderSummary: () => <div data-testid="deck-summary" />,
 }))
-vi.mock('../../deckBuilder/DeckBuilderPane', () => ({
-  DeckBuilderPane: () => <div data-testid="deck-pane" />,
-}))
 vi.mock('../../startBuff/StartBuffSection', () => ({
   StartBuffSection: () => <div data-testid="start-buff" />,
 }))
@@ -55,8 +52,12 @@ vi.mock('../FloorGalleryTracker', () => ({
 vi.mock('../HorizontalThemePackGallery', () => ({
   HorizontalThemePackGallery: () => <div data-testid="theme-gallery" />,
 }))
-vi.mock('../DeckTrackerPanel', () => ({
-  DeckTrackerPanel: () => <div data-testid="deck-tracker" />,
+vi.mock('../../deckBuilder/DeckBuilderBlock', () => ({
+  DeckBuilderBlock: () => <div data-testid="deck-block" />,
+}))
+vi.mock('../../../hooks/useMirrorDungeonSeason', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../../hooks/useMirrorDungeonSeason')>()),
+  useIdentityMaxLevel: () => 60,
 }))
 vi.mock('../../SectionNoteDialog', () => ({
   SectionNoteDialog: ({ open, sectionTitle }: { open: boolean; sectionTitle: string }) =>

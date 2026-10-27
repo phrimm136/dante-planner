@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, Suspense, startTransition } from 'react'
+import { useState, useEffect, useMemo, Suspense } from 'react'
 
 import { useNavigate } from '@tanstack/react-router'
 import { queryClient } from '@/lib/queryClient'
@@ -37,16 +37,19 @@ import type { MDCategory } from '@/shared/gameData'
 import { isMDPlanner } from '../../types/PlannerTypes'
 import type { SaveablePlanner, ConflictResolutionChoice } from '../../types/PlannerTypes'
 
-import { usePlannerEditorStore, usePlannerEditorStoreApi } from '../../stores/usePlannerEditorStore'
+import {
+  usePlannerEditorStore,
+  usePlannerEditorStoreApi,
+  useStoreDeck,
+  useStoreOwnedGiftIds,
+} from '../../stores/usePlannerEditorStore'
 
 import { usePlannerSave } from '../../hooks/usePlannerSave'
 import type { SaveOptions } from '../../hooks/usePlannerSave'
 import { usePlannerConfig } from '../../hooks/usePlannerConfig'
 import { useUserSettingsQuery } from '@/shared/userSettings'
 
-import { StoreBoundDeckBuilderSummary } from '../deckBuilder/DeckBuilderSummary'
-import { DeckBuilderPane } from '../deckBuilder/DeckBuilderPane'
-import { StoreBoundDeckBuilderContent } from '../deckBuilder/DeckBuilderContent'
+import { DeckBuilderBlock } from '../deckBuilder/DeckBuilderBlock'
 import { StoreBoundStartBuffSection } from '../startBuff/StartBuffSection'
 import { StartBuffEditPane } from '../startBuff/StartBuffEditPane'
 import { StoreBoundStartGiftSummary } from '../startGift/StartGiftSummary'
@@ -61,13 +64,11 @@ import { PlannerSection } from '@/components/layout/PlannerSection'
 import { RevealSection } from '../RevealSection'
 import type { RevealSectionSpec } from '../RevealSection'
 import {
-  DeckGridSkeleton,
   GiftGridSkeleton,
   SkillGridSkeleton,
   StartBuffSkeleton,
   StartGiftSkeleton,
 } from '../plannerSkeletons'
-import { DeckCodeTransfer } from '../deckBuilder/DeckCodeTransfer'
 import { StoreBoundSectionNote } from './StoreBoundSectionNote'
 import { ConflictResolutionDialog } from './ConflictResolutionDialog'
 import { SyncOffWarningDialog } from '../SyncOffWarningDialog'
@@ -113,8 +114,8 @@ export function PlannerEditorShell({
   const selectedKeywords = usePlannerEditorStore((s) => s.selectedKeywords)
   const setSelectedKeywords = usePlannerEditorStore((s) => s.setSelectedKeywords)
 
-  const setEquipment = usePlannerEditorStore((s) => s.setEquipment)
-  const setDeploymentOrder = usePlannerEditorStore((s) => s.setDeploymentOrder)
+  const deck = useStoreDeck()
+  const ownedGiftIds = useStoreOwnedGiftIds()
   const updateSinnerSkillEA = usePlannerEditorStore((s) => s.updateSinnerSkillEA)
   const initializeFromPlannerAction = usePlannerEditorStore((s) => s.initializeFromPlanner)
 
@@ -122,7 +123,6 @@ export function PlannerEditorShell({
   const [isStartGiftPaneOpen, setIsStartGiftPaneOpen] = useState(false)
   const [isObservationPaneOpen, setIsObservationPaneOpen] = useState(false)
   const [isComprehensivePaneOpen, setIsComprehensivePaneOpen] = useState(false)
-  const [isDeckPaneOpen, setIsDeckPaneOpen] = useState(false)
   const [showSaveWarning, setShowSaveWarning] = useState(false)
 
   const floorCount = categoryFloorCount(category)
@@ -208,22 +208,6 @@ export function PlannerEditorShell({
     setTitle(e.target.value)
   }
 
-  const handleToggleDeploy = (sinnerIndex: number) => {
-    const { deploymentOrder } = storeApi.getState()
-    const currentIndex = deploymentOrder.indexOf(sinnerIndex)
-    if (currentIndex >= 0) {
-      const newOrder = [...deploymentOrder]
-      newOrder.splice(currentIndex, 1)
-      setDeploymentOrder(newOrder)
-    } else {
-      setDeploymentOrder([...deploymentOrder, sinnerIndex])
-    }
-  }
-
-  const handleResetDeployment = () => {
-    setDeploymentOrder([])
-  }
-
   const navigateToViewer = () => {
     queryClient.removeQueries({ queryKey: plannerQueryKeys.detail(plannerId) })
     if (isPublished) {
@@ -279,43 +263,14 @@ export function PlannerEditorShell({
       id: 'deckBuilder',
       node: (
         <>
-          <DeckCodeTransfer
-            readDeck={() => storeApi.getState()}
-            writeDeck={({ equipment, deploymentOrder }) => {
-              setEquipment(equipment)
-              setDeploymentOrder(deploymentOrder)
-            }}
+          <DeckBuilderBlock
+            deck={deck}
+            ownedGiftIds={ownedGiftIds}
             mdVersion={mdVersion}
-          >
-            {({ onImport, onExport }) => (
-              <>
-                <Suspense fallback={<DeckGridSkeleton />}>
-                  <StoreBoundDeckBuilderSummary
-                    onToggleDeploy={handleToggleDeploy}
-                    onImport={onImport}
-                    onExport={onExport}
-                    onResetOrder={handleResetDeployment}
-                    onEditDeck={() => {
-                      startTransition(() => setIsDeckPaneOpen(true))
-                    }}
-                  />
-                </Suspense>
-                <Suspense fallback={null}>
-                  <DeckBuilderPane open={isDeckPaneOpen} onOpenChange={setIsDeckPaneOpen}>
-                    <StoreBoundDeckBuilderContent
-                      isActive={isDeckPaneOpen}
-                      onImport={onImport}
-                      onExport={onExport}
-                      onResetOrder={handleResetDeployment}
-                      onIdentityChange={(sinnerCode) => {
-                        updateSinnerSkillEA(sinnerCode, { ...DEFAULT_SKILL_EA })
-                      }}
-                    />
-                  </DeckBuilderPane>
-                </Suspense>
-              </>
-            )}
-          </DeckCodeTransfer>
+            onIdentityChange={(sinnerCode) => {
+              updateSinnerSkillEA(sinnerCode, { ...DEFAULT_SKILL_EA })
+            }}
+          />
           <StoreBoundSectionNote
             sectionKey="deckBuilder"
             placeholder={t('pages.plannerMD.noteEditor.placeholder')}

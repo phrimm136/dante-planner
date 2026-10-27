@@ -1,14 +1,12 @@
 import { useTranslation } from 'react-i18next'
-import { DEFAULT_DEPLOYMENT_MAX, floorCount } from '@/shared/gameData'
+import { DEFAULT_DEPLOYMENT_MAX } from '@/shared/gameData'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { useIdentityListSpec, useIdentityListI18n, toIdentityEntity } from '@/pages/identity'
 import { useEGOListSpec } from '@/pages/ego'
-import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import type { EGOGiftId } from '@/shared/gameData'
 import type { SinnerEquipment, DeckState } from '../../types/DeckTypes'
 import type { IdentityEntity } from '@/pages/identity'
 import { SinnerGrid, type SkillData } from './SinnerGrid'
-import { collectOwnedGiftIds } from '../../lib/deckEA'
 import { StatusViewer } from './StatusViewer'
 import { DeckBuilderActionBar } from './DeckBuilderActionBar'
 import type { DeckBuilderActions } from './DeckBuilderContent'
@@ -120,33 +118,5 @@ export function DeckBuilderSummary({
         )}
       </div>
     </PlannerSection>
-  )
-}
-
-export type StoreBoundDeckBuilderSummaryProps = Omit<
-  DeckBuilderSummaryProps,
-  'equipment' | 'deploymentOrder' | 'ownedGiftIds'
->
-
-export function StoreBoundDeckBuilderSummary(props: StoreBoundDeckBuilderSummaryProps) {
-  const equipment = usePlannerEditorStore((s) => s.equipment)
-  const deploymentOrder = usePlannerEditorStore((s) => s.deploymentOrder)
-  const selectedGiftIds = usePlannerEditorStore((s) => s.selectedGiftIds)
-  const observationGiftIds = usePlannerEditorStore((s) => s.observationGiftIds)
-  const comprehensiveGiftIds = usePlannerEditorStore((s) => s.comprehensiveGiftIds)
-  const floorSelections = usePlannerEditorStore((s) => s.floorSelections)
-  const category = usePlannerEditorStore((s) => s.category)
-  const ownedGiftIds = collectOwnedGiftIds(
-    { selectedGiftIds, observationGiftIds, comprehensiveGiftIds, floorSelections },
-    floorCount(category),
-  )
-
-  return (
-    <DeckBuilderSummary
-      {...props}
-      equipment={equipment}
-      deploymentOrder={deploymentOrder}
-      ownedGiftIds={ownedGiftIds}
-    />
   )
 }

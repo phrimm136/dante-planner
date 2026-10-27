@@ -1,4 +1,4 @@
-import { Fragment, Suspense, useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PlannerSection } from '@/components/layout/PlannerSection'
 import { RevealSection } from '../RevealSection'
@@ -15,18 +15,14 @@ import { SectionNoteDialog } from '../SectionNoteDialog'
 import { StartBuffSection } from '../startBuff/StartBuffSection'
 import { StartGiftSummary } from '../startGift/StartGiftSummary'
 import { EGOGiftObservationSummary } from '../egoGift/EGOGiftObservationSummary'
-import { DeckTrackerPanel } from './DeckTrackerPanel'
-import { DeckBuilderPane } from '../deckBuilder/DeckBuilderPane'
-import { TrackerDeckBuilderContent } from '../deckBuilder/DeckBuilderContent'
+import { DeckBuilderBlock } from '../deckBuilder/DeckBuilderBlock'
+import { SeasonDeckStoreProvider } from '../../stores/usePlannerEditorStore'
 import { collectOwnedGiftIds } from '../../lib/deckEA'
-import { DeckCodeTransfer } from '../deckBuilder/DeckCodeTransfer'
-import type { DeckCodeActions } from '../deckBuilder/DeckCodeTransfer'
 import { SkillReplacementSection } from '../skillReplacement/SkillReplacementSection'
 import { ComprehensiveGiftGridTracker } from './ComprehensiveGiftGridTracker'
 import { ReadOnlyNote } from '@/shared/noteEditor/components/ReadOnlyNote'
 import { HorizontalThemePackGallery } from './HorizontalThemePackGallery'
 import { useTrackerState } from '../../hooks/useTrackerState'
-import { useIdentityMaxLevel } from '../../hooks/useMirrorDungeonSeason'
 import { useProgressiveReveal } from '@/components/hooks/useProgressiveReveal'
 import { DEFAULT_SKILL_EA, floorCount as categoryFloorCount } from '@/shared/gameData'
 import { isNoteEmpty } from '@/shared/noteEditor'
@@ -34,17 +30,8 @@ import { NOTE_SECTIONS } from './viewerSections'
 import type { NoteSectionId } from './viewerSections'
 import { deserializeSets } from '../../schemas/PlannerSchemas'
 import type { MDSaveablePlanner } from '../../types/PlannerTypes'
-import type { TrackerDeckBuilderContentProps } from '../deckBuilder/DeckBuilderContent'
 
 const SECTION_COUNT = NOTE_SECTIONS.length
-
-function SeasonTrackerDeckBuilderContent({
-  mdVersion,
-  ...props
-}: Omit<TrackerDeckBuilderContentProps, 'maxLevel'> & { mdVersion: number }) {
-  const maxLevel = useIdentityMaxLevel(mdVersion)
-  return <TrackerDeckBuilderContent {...props} maxLevel={maxLevel} />
-}
 
 interface TrackerModeViewerProps {
   planner: MDSaveablePlanner
@@ -63,7 +50,6 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
   const outroNote = content.sectionNotes?.outro
 
   const [openNote, setOpenNote] = useState<NoteSectionId | null>(null)
-  const [deckEditPaneOpen, setDeckEditPaneOpen] = useState(false)
 
   const {
     state: trackerState,
@@ -91,46 +77,34 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
     setEquipment(content.equipment)
   }
 
-  const sectionsFor = ({ onImport, onExport }: DeckCodeActions): RevealSectionSpec[] => [
+  const sections: RevealSectionSpec[] = [
     {
       id: 'deckBuilder',
       node: (
         <Suspense fallback={<DeckGridSkeleton />}>
-          <DeckTrackerPanel
-            equipment={trackerState.equipment}
-            deploymentOrder={trackerState.deploymentOrder}
-            ownedGiftIds={collectOwnedGiftIds(deserialized, floorCount)}
-            setEquipment={setEquipment}
-            setDeploymentOrder={setDeploymentOrder}
-            onEditDeck={() => setDeckEditPaneOpen(true)}
-            onImport={onImport}
-            onExport={onExport}
-            onResetToPreset={handleResetToPreset}
-            onViewNotes={() => setOpenNote('deckBuilder')}
-          />
+          <SeasonDeckStoreProvider mdVersion={planner.metadata.contentVersion}>
+            <DeckBuilderBlock
+              deck={{
+                equipment: trackerState.equipment,
+                setEquipment,
+                deploymentOrder: trackerState.deploymentOrder,
+                setDeploymentOrder,
+              }}
+              ownedGiftIds={collectOwnedGiftIds(deserialized, floorCount)}
+              mdVersion={planner.metadata.contentVersion}
+              onIdentityChange={(sinnerCode) => {
+                setCurrentSkillCounts((prev) => ({
+                  ...prev,
+                  [sinnerCode]: { ...DEFAULT_SKILL_EA },
+                }))
+              }}
+              tracker={{
+                onResetToInitial: handleResetToPreset,
+                onViewNotes: () => setOpenNote('deckBuilder'),
+              }}
+            />
+          </SeasonDeckStoreProvider>
         </Suspense>
-      ),
-      aside: (
-        <DeckBuilderPane open={deckEditPaneOpen} onOpenChange={setDeckEditPaneOpen}>
-          <SeasonTrackerDeckBuilderContent
-            mdVersion={planner.metadata.contentVersion}
-            isActive={deckEditPaneOpen}
-            ownedGiftIds={collectOwnedGiftIds(deserialized, floorCount)}
-            equipment={trackerState.equipment}
-            setEquipment={setEquipment}
-            deploymentOrder={trackerState.deploymentOrder}
-            setDeploymentOrder={setDeploymentOrder}
-            onImport={onImport}
-            onExport={onExport}
-            onResetOrder={() => setDeploymentOrder([])}
-            onIdentityChange={(sinnerCode) => {
-              setCurrentSkillCounts((prev) => ({
-                ...prev,
-                [sinnerCode]: { ...DEFAULT_SKILL_EA },
-              }))
-            }}
-          />
-        </DeckBuilderPane>
       ),
     },
 
@@ -251,28 +225,11 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
         </PlannerSection>
       )}
 
-      <DeckCodeTransfer
-        readDeck={() => ({
-          equipment: trackerState.equipment,
-          deploymentOrder: trackerState.deploymentOrder,
-        })}
-        writeDeck={({ equipment, deploymentOrder }) => {
-          setEquipment(equipment)
-          setDeploymentOrder(deploymentOrder)
-        }}
-        mdVersion={planner.metadata.contentVersion}
-      >
-        {(actions) =>
-          sectionsFor(actions).map((section, index) => (
-            <Fragment key={section.id}>
-              <RevealSection mode="fade" visible={visibleSections[index] ?? false}>
-                {section.node}
-              </RevealSection>
-              {section.aside}
-            </Fragment>
-          ))
-        }
-      </DeckCodeTransfer>
+      {sections.map((section, index) => (
+        <RevealSection key={section.id} mode="fade" visible={visibleSections[index] ?? false}>
+          {section.node}
+        </RevealSection>
+      ))}
 
       {outroNote && !isNoteEmpty(outroNote) && (
         <PlannerSection title={t('pages.plannerMD.closingNotes')}>

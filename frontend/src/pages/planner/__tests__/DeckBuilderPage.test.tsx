@@ -4,31 +4,18 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { createTestQueryClient } from '@/test-utils/queryClient'
 import { usePlannerEditorStore } from '../stores/usePlannerEditorStore'
 import DeckBuilderPage from '../DeckBuilderPage'
+import type { DeckBuilderDeck } from '../types/DeckTypes'
 
-vi.mock('../components/deckBuilder/DeckBuilderSummary', () => ({
-  StoreBoundDeckBuilderSummary: () => {
-    const level = usePlannerEditorStore((s) => s.equipment['1']?.identity.level)
-    return <div data-testid="default-level">{level}</div>
-  },
-}))
-
-vi.mock('../components/deckBuilder/DeckBuilderPane', () => ({
-  DeckBuilderPane: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}))
-
-vi.mock('../components/deckBuilder/DeckBuilderContent', () => ({
-  StoreBoundDeckBuilderContent: () => {
+vi.mock('../components/deckBuilder/DeckBuilderBlock', () => ({
+  DeckBuilderBlock: ({ deck }: { deck: DeckBuilderDeck }) => {
     const maxLevel = usePlannerEditorStore((s) => s.identityMaxLevel)
-    return <div data-testid="max-level">{maxLevel}</div>
+    return (
+      <>
+        <div data-testid="default-level">{deck.equipment['1']?.identity.level}</div>
+        <div data-testid="max-level">{maxLevel}</div>
+      </>
+    )
   },
-}))
-
-vi.mock('../components/deckBuilder/DeckCodeTransfer', () => ({
-  DeckCodeTransfer: ({
-    children,
-  }: {
-    children: (actions: { onImport: () => void; onExport: () => void }) => React.ReactNode
-  }) => children({ onImport: vi.fn(), onExport: vi.fn() }),
 }))
 
 describe('DeckBuilderPage', () => {

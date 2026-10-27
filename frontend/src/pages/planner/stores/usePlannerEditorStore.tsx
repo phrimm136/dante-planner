@@ -1,7 +1,7 @@
 import { createContext, useContext, useState } from 'react'
 import { createStore, useStore } from 'zustand'
 import { devtools } from 'zustand/middleware'
-import { MIN_LEVEL } from '@/shared/gameData'
+import { MIN_LEVEL, floorCount } from '@/shared/gameData'
 
 import {
   createDefaultDeckFilterState,
@@ -13,15 +13,18 @@ import {
   hydrateEditorState,
   projectEditorState,
 } from '../lib/editorStateCodec'
+import { collectOwnedGiftIds } from '../lib/deckEA'
+import { useIdentityMaxLevel } from '../hooks/useMirrorDungeonSeason'
 
 import type { ReactNode } from 'react'
 import type { StoreApi } from 'zustand'
-import type { EncodedGiftId, MDCategory } from '@/shared/gameData'
+import type { EGOGiftId, EncodedGiftId, MDCategory } from '@/shared/gameData'
 import type { SinnerEquipment, SkillEAState, DeckFilterState } from '../types/DeckTypes'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { NoteContent } from '@/shared/noteEditor'
 import type { MDPlannerContent } from '../types/PlannerTypes'
 import type { PlannerState } from '../lib/saveablePlanner'
+import type { DeckBuilderDeck } from '../types/DeckTypes'
 
 export {
   createDefaultDeckFilterState,
@@ -335,3 +338,38 @@ export function usePlannerEditorStoreApi(): StoreApi<PlannerEditorStore> {
 export const useDeckFilterState = () => usePlannerEditorStore((s) => s.deckFilterState)
 export const useDeckVisibleCount = () => usePlannerEditorStore((s) => s.deckVisibleCount)
 export const useSetDeckFilterState = () => usePlannerEditorStore((s) => s.setDeckFilterState)
+
+export function useStoreDeck(): DeckBuilderDeck {
+  const equipment = usePlannerEditorStore((s) => s.equipment)
+  const setEquipment = usePlannerEditorStore((s) => s.setEquipment)
+  const deploymentOrder = usePlannerEditorStore((s) => s.deploymentOrder)
+  const setDeploymentOrder = usePlannerEditorStore((s) => s.setDeploymentOrder)
+
+  return { equipment, setEquipment, deploymentOrder, setDeploymentOrder }
+}
+
+export function useStoreOwnedGiftIds(): ReadonlySet<EGOGiftId> {
+  const selectedGiftIds = usePlannerEditorStore((s) => s.selectedGiftIds)
+  const observationGiftIds = usePlannerEditorStore((s) => s.observationGiftIds)
+  const comprehensiveGiftIds = usePlannerEditorStore((s) => s.comprehensiveGiftIds)
+  const floorSelections = usePlannerEditorStore((s) => s.floorSelections)
+  const category = usePlannerEditorStore((s) => s.category)
+
+  return collectOwnedGiftIds(
+    { selectedGiftIds, observationGiftIds, comprehensiveGiftIds, floorSelections },
+    floorCount(category),
+  )
+}
+
+interface SeasonDeckStoreProviderProps {
+  mdVersion: number
+  children: ReactNode
+}
+
+export function SeasonDeckStoreProvider({ mdVersion, children }: SeasonDeckStoreProviderProps) {
+  const maxLevel = useIdentityMaxLevel(mdVersion)
+
+  return (
+    <PlannerEditorStoreProvider identityMaxLevel={maxLevel}>{children}</PlannerEditorStoreProvider>
+  )
+}
