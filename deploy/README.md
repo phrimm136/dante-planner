@@ -34,10 +34,26 @@ Build locally: `kubectl kustomize deploy/overlays/oregon`.
 
 ## Image tag flow (CI arm64 → ECR → tag bump)
 
-`overlays/oregon/kustomization.yaml` holds the `images:` transform for `danteplanner-backend`.
-`.github/workflows/deploy-oregon.yml` builds the arm64 image, pushes it to ECR, then runs
-`kustomize edit set image danteplanner-backend=<ecr-host>/danteplanner-backend:<sha>` and commits
-the bump back. ArgoCD sees the commit and rolls the DaemonSet.
+`overlays/oregon/kustomization.yaml` and `overlays/seoul/kustomization.yaml` hold the `images:`
+transform for `danteplanner-backend`. `.github/workflows/deploy-fleet.yml` runs after PR Gate
+passes on `main`, or when you dispatch it by hand. It builds the arm64 image and pushes it to the
+Oregon and Seoul ECR registries. It scales each region's app ASG to two nodes. Then it runs
+`kustomize edit set image danteplanner-backend:<sha>` in both overlays and commits the new tag
+back. The ArgoCD core in each region sees the commit and rolls the DaemonSet. The workflow then
+waits for both rollouts and scales the app ASGs back to one node.
+
+Git holds only the tag. The CP user-data (`terraform/modules/fleet/user-data/cp.sh.tftpl`)
+patches each root Application with a kustomize image override that adds the ECR registry host.
+
+## Pod Security Admission labels
+
+`base/namespace.yaml` labels the `danteplanner` namespace with the `restricted` Pod Security
+Standard in `warn` and `audit` mode. There is no `enforce` label. The API server admits every pod
+as before. In `warn` mode it returns a warning to the client that applies a pod or a workload
+whose pod template breaks the profile. The k3s API server in this repo has no audit log
+configured, so the `audit` label records nothing today. Do not add `enforce` while three workloads
+break the `baseline` profile too. `node-exporter` uses `hostNetwork`, `hostPID` and `hostPath`
+volumes. `traefik` uses `hostNetwork` and `hostPort` 443. `cloudflared` uses `hostNetwork`.
 
 ## Deviations (documented)
 
@@ -50,7 +66,7 @@ the bump back. ArgoCD sees the commit and rolls the DaemonSet.
 
 ## Platform prerequisites (installed unattended by the CP bootstrap)
 
-The CP user-data (`terraform/oregon/user-data/cp.sh.tftpl`) installs these before ArgoCD syncs
+The CP user-data (`terraform/modules/fleet/user-data/cp.sh.tftpl`) installs these before ArgoCD syncs
 the overlay, because the API server rejects a custom resource whose CRD is absent:
 
 - **Gateway API CRDs** (`gateway_api_version`) — k3s ships none and the bundled Traefik is

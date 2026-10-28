@@ -8,10 +8,10 @@ resources:
 - redis-auth-nodeport.yaml
 
 # The CI arm64 workflow bumps only newTag via `kustomize edit set image` and
-# commits back (see .github/workflows/deploy-oregon.yml). The registry host
+# commits back (see .github/workflows/deploy-fleet.yml). The registry host
 # (which carries the account id) is never committed: the ArgoCD Application
 # injects it as a kustomize image override at sync, rendered from Terraform state
-# (terraform/oregon/user-data/cp.sh.tftpl). Git holds only the tag.
+# (terraform/modules/fleet/user-data/cp.sh.tftpl). Git holds only the tag.
 images:
 - name: danteplanner-backend
   newTag: 4f662abe9110c88dd977e853fc9ec91da617ddbb
