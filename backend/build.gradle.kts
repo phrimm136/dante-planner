@@ -330,10 +330,57 @@ tasks.check {
 
 val astGrepBinary = layout.projectDirectory.file("../frontend/node_modules/.bin/ast-grep").asFile.path
 
+val astGrepInstalled by tasks.registering {
+    group = "verification"
+    val binary = file(astGrepBinary)
+    doLast {
+        if (!binary.canExecute()) {
+            throw GradleException(
+                "astGrepInstalled: $binary is missing; run `yarn --cwd frontend install` from the repo root.")
+        }
+    }
+}
+
 val astGrepRuleTests by tasks.registering(Exec::class) {
     group = "verification"
+    dependsOn(astGrepInstalled)
     executable = astGrepBinary
     args("test")
+}
+
+val astGrepStaleIgnores by tasks.registering {
+    group = "verification"
+    dependsOn(astGrepRuleTests)
+    val binary = astGrepBinary
+    val projectDir = layout.projectDirectory.asFile
+    val rulePath = "config/ast-grep/rules/no-wall-clock-wait-in-tests.yml"
+    val rule = layout.projectDirectory.file(rulePath).asFile
+    doLast {
+        val lines = rule.readLines()
+        val item = Regex("""^\s+-\s+(.+)$""")
+        val start = lines.indexOf("ignores:")
+        if (start < 0) {
+            return@doLast
+        }
+        val end = (start + 1 until lines.size).firstOrNull { !item.matches(lines[it]) } ?: lines.size
+        val frozen = lines.subList(start + 1, end).map { item.find(it)!!.groupValues[1] }
+        val unfrozen = (lines.subList(0, start) + lines.subList(end, lines.size)).joinToString("\n")
+        val scan = ProcessBuilder(
+            listOf(binary, "scan", "--inline-rules", unfrozen, "--files-with-matches") + frozen)
+            .directory(projectDir)
+            .redirectError(ProcessBuilder.Redirect.DISCARD)
+            .start()
+        val matched = scan.inputStream.bufferedReader().readLines().toSet()
+        scan.waitFor()
+        val stale = frozen.filterNot { it in matched }
+        if (stale.isNotEmpty()) {
+            throw GradleException(
+                "astGrepStaleIgnores: these entries in backend/$rulePath no longer match the rule, so they " +
+                    "excuse nothing; delete them from its ignores and let the rule cover them again:\n" +
+                    stale.joinToString("\n") { "  $it" })
+        }
+        logger.lifecycle("astGrepStaleIgnores: all ${frozen.size} ignores in backend/$rulePath still match")
+    }
 }
 
 val astGrep by tasks.registering(Exec::class) {
@@ -351,7 +398,7 @@ val astGrepTestSources by tasks.registering(Exec::class) {
 }
 
 tasks.check {
-    dependsOn(astGrep, astGrepTestSources, checkstyleValidation)
+    dependsOn(astGrep, astGrepTestSources, astGrepStaleIgnores, checkstyleValidation)
 }
 
 // Copy-paste detection as a regression ratchet: catch NEW production duplication.
