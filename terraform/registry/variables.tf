@@ -29,3 +29,9 @@ variable "region" {
   type        = string
   default     = "us-west-2"
 }
+
+variable "replica_region" {
+  description = "Region that ECR replication (terraform/oregon) mirrors the registry to. The replica repository there carries its own lifecycle policy, since replication copies images but not policies."
+  type        = string
+  default     = "ap-northeast-2"
+}

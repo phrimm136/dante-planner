@@ -19,7 +19,7 @@ several real dependencies are not of that shape.
 | `state-backend` | One account's Terraform state bucket, and nothing else | `aws_account_id` |
 | `iam-bootstrap` | The GitHub OIDC provider and the provisioning role (and the state bucket in the account that predates `state-backend`) | `trusted_admin_principal_arns`, `aws_account_id` |
 | `log-archive` | The organization trail's destination bucket and its policy | `aws_account_id`, `management_account_id`, `organization_id` |
-| `registry` | Who may pull the backend image, not the repositories themselves | `aws_account_id`, `organization_id` |
+| `registry` | Who may pull the backend image, and how many tagged images its repositories and their cross-region replicas keep; not the repositories themselves | `aws_account_id`, `organization_id` |
 | `secrets` | Secrets Manager **containers** and their cross-region replicas — never the values | `aws_account_id` |
 | `rds` | The MySQL primary, its parameter group, subnet group and security group | `vpc_id`, `db_subnet_ids`, `engine_version`, `aws_account_id` |
 | `oregon` | The primary k3s fleet (`modules/fleet`), peered to the RDS VPC | `ingress_allowed_cidrs`, `rds_vpc_id`, `aws_account_id` |
