@@ -31,10 +31,12 @@ import org.testcontainers.mysql.MySQLContainer;
 @AutoConfigureMockMvc
 public abstract class SharedMySqlContainerSupport {
 
+    static final String MYSQL_IMAGE = "mysql:8.4.11";
+
     // One context replaced six pools of five, and five alone ran out of connections under the merged load.
     private static final int SHARED_CONTEXT_POOL_SIZE = 30;
 
-    static final MySQLContainer MYSQL = new MySQLContainer("mysql:8.0")
+    static final MySQLContainer MYSQL = new MySQLContainer(MYSQL_IMAGE)
             .withDatabaseName("it")
             .withUsername("test")
             .withPassword("test")
