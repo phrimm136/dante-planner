@@ -2,7 +2,7 @@ package org.danteplanner.backend.shared.outbox.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.resilience.annotation.EnableResilientMethods;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -10,7 +10,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 @Configuration
 @EnableAsync
-@EnableRetry
+@EnableResilientMethods
 public class OutboxAsyncConfig {
 
     public static final String OUTBOX_DISPATCH_EXECUTOR = "outboxDispatchExecutor";

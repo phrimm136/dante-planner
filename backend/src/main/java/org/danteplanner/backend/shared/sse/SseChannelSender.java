@@ -4,8 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,10 +20,10 @@ public class SseChannelSender {
 
     private final StringRedisTemplate stringRedisTemplate;
 
-    @Retryable(retryFor = {RedisConnectionFailureException.class, QueryTimeoutException.class},
-            maxAttempts = SseConstants.PUBLISH_MAX_ATTEMPTS,
-            backoff = @Backoff(delay = SseConstants.PUBLISH_RETRY_DELAY_MS,
-                    multiplier = SseConstants.PUBLISH_RETRY_MULTIPLIER))
+    @Retryable(includes = {RedisConnectionFailureException.class, QueryTimeoutException.class},
+            maxRetries = SseConstants.PUBLISH_MAX_ATTEMPTS - 1,
+            delay = SseConstants.PUBLISH_RETRY_DELAY_MS,
+            multiplier = SseConstants.PUBLISH_RETRY_MULTIPLIER)
     public void send(String topic, String json) {
         stringRedisTemplate.convertAndSend(topic, json);
     }
