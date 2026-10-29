@@ -35,3 +35,36 @@ resource "aws_ecr_repository_policy" "organization_pull" {
   repository = each.value
   policy     = data.aws_iam_policy_document.organization_pull.json
 }
+
+locals {
+  lifecycle_policy = jsonencode({
+    rules = [
+      {
+        rulePriority = 1
+        description  = "Keep the 10 most recent tagged images"
+        selection = {
+          tagStatus      = "tagged"
+          tagPatternList = ["*"]
+          countType      = "imageCountMoreThan"
+          countNumber    = 10
+        }
+        action = { type = "expire" }
+      },
+    ]
+  })
+}
+
+resource "aws_ecr_lifecycle_policy" "retention" {
+  for_each = toset(var.pullable_repositories)
+
+  repository = each.value
+  policy     = local.lifecycle_policy
+}
+
+resource "aws_ecr_lifecycle_policy" "replica_retention" {
+  for_each = toset(var.pullable_repositories)
+  provider = aws.replica
+
+  repository = each.value
+  policy     = local.lifecycle_policy
+}

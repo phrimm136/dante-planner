@@ -20,3 +20,5 @@ organization_id = "o-REPLACE_WITH_ORG_ID"
 # pullable_repositories = ["danteplanner-backend"]
 
 # region = "us-west-2"
+
+# replica_region = "ap-northeast-2"

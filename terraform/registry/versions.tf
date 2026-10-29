@@ -18,8 +18,14 @@ terraform {
 }
 
 # Applies in the account that owns the registry. The repositories themselves are created outside
-# Terraform and stay that way; only who may pull from them is managed here.
+# Terraform and stay that way.
 provider "aws" {
   allowed_account_ids = [var.aws_account_id]
   region              = var.region
+}
+
+provider "aws" {
+  alias               = "replica"
+  allowed_account_ids = [var.aws_account_id]
+  region              = var.replica_region
 }
