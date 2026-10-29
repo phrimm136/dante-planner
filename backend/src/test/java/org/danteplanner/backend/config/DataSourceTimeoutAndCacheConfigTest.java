@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceProperties;
 
 import com.zaxxer.hikari.HikariConfig;
 

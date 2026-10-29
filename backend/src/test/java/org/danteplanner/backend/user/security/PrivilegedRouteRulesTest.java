@@ -115,7 +115,7 @@ class PrivilegedRouteRulesTest {
         Authentication moderator = new UsernamePasswordAuthenticationToken(
                 7L, null, List.of(new SimpleGrantedAuthority("ROLE_MODERATOR")));
 
-        assertThatThrownBy(() -> manager.check(() -> moderator,
+        assertThatThrownBy(() -> manager.authorize(() -> moderator,
                         new RequestAuthorizationContext(new MockHttpServletRequest("GET", "/api/moderation/users"))))
                 .isInstanceOf(AccessDeniedException.class)
                 .extracting(Throwable::getCause)

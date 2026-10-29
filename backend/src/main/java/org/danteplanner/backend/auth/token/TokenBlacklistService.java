@@ -17,7 +17,6 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import org.springframework.data.redis.core.RedisCallback;
@@ -28,6 +27,7 @@ import org.danteplanner.backend.shared.redis.RedisKeyScanner;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.jspecify.annotations.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 /**

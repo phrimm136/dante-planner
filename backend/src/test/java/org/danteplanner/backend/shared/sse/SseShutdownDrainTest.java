@@ -30,12 +30,12 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.context.LifecycleAutoConfiguration;
-import org.springframework.boot.autoconfigure.http.HttpMessageConvertersAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
+import org.springframework.boot.http.converter.autoconfigure.HttpMessageConvertersAutoConfiguration;
+import org.springframework.boot.tomcat.autoconfigure.servlet.TomcatServletWebServerAutoConfiguration;
+import org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext;
+import org.springframework.boot.webmvc.autoconfigure.DispatcherServletAutoConfiguration;
+import org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration;
 
 import org.junit.jupiter.api.Test;
 
@@ -200,7 +200,7 @@ class SseShutdownDrainTest {
 
     @ImportAutoConfiguration({
             LifecycleAutoConfiguration.class,
-            ServletWebServerFactoryAutoConfiguration.class,
+            TomcatServletWebServerAutoConfiguration.class,
             DispatcherServletAutoConfiguration.class,
             WebMvcAutoConfiguration.class,
             HttpMessageConvertersAutoConfiguration.class})

@@ -23,10 +23,10 @@ import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceProperties;
 
 import com.mysql.cj.jdbc.Driver;
 import com.zaxxer.hikari.HikariConfig;

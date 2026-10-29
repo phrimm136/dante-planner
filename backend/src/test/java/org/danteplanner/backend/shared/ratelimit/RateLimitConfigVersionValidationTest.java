@@ -2,8 +2,8 @@ package org.danteplanner.backend.shared.ratelimit;
 
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
-import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.boot.validation.autoconfigure.ValidationAutoConfiguration;
 
 import org.junit.jupiter.api.Test;
 

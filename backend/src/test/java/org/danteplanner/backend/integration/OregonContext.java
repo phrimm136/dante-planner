@@ -10,8 +10,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrint;
-import org.springframework.boot.test.autoconfigure.web.servlet.SpringBootMockMvcBuilderCustomizer;
+import org.springframework.boot.webmvc.test.autoconfigure.MockMvcPrint;
+import org.springframework.boot.webmvc.test.autoconfigure.SpringBootMockMvcBuilderCustomizer;
 
 import io.micrometer.core.instrument.MeterRegistry;
 

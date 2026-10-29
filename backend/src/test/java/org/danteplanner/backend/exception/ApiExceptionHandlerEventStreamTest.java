@@ -91,7 +91,7 @@ class ApiExceptionHandlerEventStreamTest {
 
         @GetMapping(value = "/probe/missing", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
         public SseEmitter missing() throws NoResourceFoundException {
-            throw new NoResourceFoundException(HttpMethod.GET, "/probe/missing");
+            throw new NoResourceFoundException(HttpMethod.GET, "/probe/missing", "/probe/missing");
         }
 
         @GetMapping(value = "/probe/unexpected", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

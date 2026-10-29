@@ -9,7 +9,7 @@ Tier follows where the asserted truth lives, not which layer the class sits in.
 
 Repositories belong to the second tier without exception. A repository test against an embedded database asserts against a database this project does not ship; `DataIntegrityViolationException` message text alone differs between H2 and MySQL.
 
-No `@WebMvcTest`, `@MockitoBean`, `@MockitoSpyBean`, Boot's `@MockBean`/`@SpyBean`, or `@DataJpaTest` anywhere; the mock-bean rule (`architecture/TestMockBeanConventionTest`) enforces all but the first and last. Each distinct mock set mints its own application context, and the context cache is what keeps this suite's wall clock down.
+No `@WebMvcTest`, `@MockitoBean`, `@MockitoSpyBean`, or `@DataJpaTest` anywhere; the mock-bean rule (`architecture/TestMockBeanConventionTest`) enforces all but the first and last. Each distinct mock set mints its own application context, and the context cache is what keeps this suite's wall clock down.
 
 Run: default `test` task is both tiers (Docker required); `-PexcludeTags=containerized` is the Docker-free tier.
 
