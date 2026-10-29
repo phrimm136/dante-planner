@@ -37,7 +37,7 @@ epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @
 - @tests @concurrency @contexts — The test classpath shadows spring-test's
   `DefaultCacheAwareContextLoaderDelegate` with a copy whose only change is per-configuration
   locking: a cached context is returned without a lock, and a load blocks only callers of the same
-  configuration. spring-test 6.2.19 holds one monitor on the whole context cache for every lookup
+  configuration. spring-test (6.2.19, and 7.0.10 since the Boot 4 move) holds one monitor on the whole context cache for every lookup
   and load, so while one class booted a context every other class waited, even for a context
   already cached. Measured on one tree: 207 s before, 163–177 s over three runs with the copy,
   0 failures, peak java and Docker 5767–5912 MiB against 6861 MiB.
@@ -45,8 +45,11 @@ epic: none · pr: none @tests @concurrency @deletion @naming @rejections @logs @
   path must be rewritten anyway, every Spring test class needs the annotation, and a class that
   misses it mixes both lock disciplines on one cache.
   INVARIANT: the copy matches the spring-test version on the classpath — a test fails when that
-  version is not 6.2.19, so an upgrade re-derives the copy from its source. The copy goes when
+  version is not the pinned one (7.0.10), so an upgrade re-derives the copy from its source. The copy goes when
   Spring Framework ships per-configuration loading (spring-framework PR 34323).
+  Spring 7's test context pausing is off (`spring.test.context.cache.pause=never`) while the copy
+  exists: upstream guards the context cache's pause set with the global lock the copy removes, so
+  pausing would race; the setting goes with the copy.
 - @tests @concurrency @transactions — No test holds a Spring test-managed transaction: no test class
   or method carries `@Transactional`, so cleanup is ownership of rows, and a test that needs a
   transaction boundary (flush-time constraints, lazy navigation, a rollback under test) opens one

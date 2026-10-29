@@ -5,8 +5,9 @@ import org.danteplanner.backend.shared.config.PoolLedger;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
+@AutoConfigureTestRestTemplate
 class MetricsRegistrationIT extends SharedRoutingSupport {
 
     private static final String CONNECTIONS_MAX = "hikaricp.connections.max";

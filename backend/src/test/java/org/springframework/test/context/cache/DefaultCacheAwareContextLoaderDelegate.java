@@ -21,13 +21,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aot.AotDetector;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.ApplicationContextFailureProcessor;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
@@ -41,7 +41,7 @@ import org.springframework.test.context.aot.TestContextAotException;
 import org.springframework.test.context.util.TestContextSpringFactoriesUtils;
 import org.springframework.util.Assert;
 
-// spring-test 6.2.19's class with per-configuration locking, which goes when Spring Framework ships that (spring-framework PR 34323).
+// spring-test 7.0.10's class with per-configuration locking, which goes when Spring Framework ships that (spring-framework PR 34323).
 /**
  * Default implementation of the {@link CacheAwareContextLoaderDelegate} strategy.
  *
@@ -59,6 +59,11 @@ import org.springframework.util.Assert;
  * feature described in {@link CacheAwareContextLoaderDelegate#loadContext},
  * delegating to {@link ContextCacheUtils#retrieveContextFailureThreshold()} to
  * obtain the threshold value to use.
+ *
+ * <p>As of Spring Framework 7.0, this class provides support for
+ * {@linkplain #registerContextUsage(MergedContextConfiguration, Class) registering} and
+ * {@linkplain #unregisterContextUsage(MergedContextConfiguration, Class) unregistering}
+ * context usage.
  *
  * @author Sam Brannen
  * @since 4.1
@@ -144,34 +149,44 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 		}
 		Object keyLock = keyLocks.computeIfAbsent(mergedConfig, k -> new Object());
 		synchronized (keyLock) {
-			ApplicationContext context = this.contextCache.get(mergedConfig);
 			try {
-				if (context == null) {
-					int failureCount = this.contextCache.getFailureCount(mergedConfig);
-					if (failureCount >= this.failureThreshold) {
-						throw new IllegalStateException("""
-								ApplicationContext failure threshold (%d) exceeded: \
-								skipping repeated attempt to load context for %s"""
-									.formatted(this.failureThreshold, mergedConfig));
+				ApplicationContext context = this.contextCache.get(mergedConfig);
+				if (context != null) {
+					if (logger.isTraceEnabled()) {
+						logger.trace("Retrieved ApplicationContext [%s] from cache with key %s".formatted(
+								System.identityHashCode(context), mergedConfig));
 					}
+					return context;
+				}
+
+				int failureCount = this.contextCache.getFailureCount(mergedConfig);
+				if (failureCount >= this.failureThreshold) {
+					throw new IllegalStateException("""
+							ApplicationContext failure threshold (%d) exceeded: \
+							skipping repeated attempt to load context for %s"""
+								.formatted(this.failureThreshold, mergedConfig));
+				}
+
+				return this.contextCache.put(mergedConfig, key -> {
 					try {
-						if (mergedConfig instanceof AotMergedContextConfiguration aotMergedConfig) {
-							context = loadContextInAotMode(aotMergedConfig);
+						ApplicationContext newContext;
+						if (key instanceof AotMergedContextConfiguration aotMergedConfig) {
+							newContext = loadContextInAotMode(aotMergedConfig);
 						}
 						else {
-							context = loadContextInternal(mergedConfig);
+							newContext = loadContextInternal(key);
 						}
 						if (logger.isTraceEnabled()) {
 							logger.trace("Storing ApplicationContext [%s] in cache under key %s".formatted(
-									System.identityHashCode(context), mergedConfig));
+									System.identityHashCode(newContext), key));
 						}
-						this.contextCache.put(mergedConfig, context);
+						return newContext;
 					}
 					catch (Exception ex) {
 						if (logger.isTraceEnabled()) {
-							logger.trace("Incrementing ApplicationContext failure count for " + mergedConfig);
+							logger.trace("Incrementing ApplicationContext failure count for " + key);
 						}
-						this.contextCache.incrementFailureCount(mergedConfig);
+						this.contextCache.incrementFailureCount(key);
 						Throwable cause = ex;
 						if (ex instanceof ContextLoadException cle) {
 							cause = cle.getCause();
@@ -187,22 +202,13 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 								}
 							}
 						}
-						throw new IllegalStateException(
-								"Failed to load ApplicationContext for " + mergedConfig, cause);
+						throw new IllegalStateException("Failed to load ApplicationContext for " + key, cause);
 					}
-				}
-				else {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Retrieved ApplicationContext [%s] from cache with key %s".formatted(
-								System.identityHashCode(context), mergedConfig));
-					}
-				}
+				});
 			}
 			finally {
 				this.contextCache.logStatistics();
 			}
-
-			return context;
 		}
 	}
 
@@ -211,6 +217,22 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 		mergedConfig = replaceIfNecessary(mergedConfig);
 		synchronized (this.contextCache) {
 			this.contextCache.remove(mergedConfig, hierarchyMode);
+		}
+	}
+
+	@Override
+	public void registerContextUsage(MergedContextConfiguration mergedConfig, Class<?> testClass) {
+		mergedConfig = replaceIfNecessary(mergedConfig);
+		synchronized (this.contextCache) {
+			this.contextCache.registerContextUsage(mergedConfig, testClass);
+		}
+	}
+
+	@Override
+	public void unregisterContextUsage(MergedContextConfiguration mergedConfig, Class<?> testClass) {
+		mergedConfig = replaceIfNecessary(mergedConfig);
+		synchronized (this.contextCache) {
+			this.contextCache.unregisterContextUsage(mergedConfig, testClass);
 		}
 	}
 

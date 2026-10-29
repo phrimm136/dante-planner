@@ -235,7 +235,7 @@ class CookieUtilsTest {
             verify(response).addCookie(cookieCaptor.capture());
 
             assertThat(new Rfc6265CookieProcessor().generateHeader(cookieCaptor.getValue(), null))
-                    .isEqualTo("accessToken=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:10 GMT; Path=/;"
+                    .isEqualTo("accessToken=; Expires=Thu, 01 Jan 1970 00:00:10 GMT; Path=/;"
                             + " Secure; HttpOnly; SameSite=Lax");
         }
 

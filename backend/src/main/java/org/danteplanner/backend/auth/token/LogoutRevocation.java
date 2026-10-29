@@ -3,7 +3,7 @@ package org.danteplanner.backend.auth.token;
 import java.util.Date;
 import java.util.Objects;
 
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 
 public sealed interface LogoutRevocation
         permits LogoutRevocation.TokenRevocation, LogoutRevocation.FamilyRevocation {

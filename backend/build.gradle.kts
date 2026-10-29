@@ -2,7 +2,7 @@ import net.ltgt.gradle.errorprone.errorprone
 
 plugins {
     java
-    id("org.springframework.boot") version "3.5.16"
+    id("org.springframework.boot") version "4.1.2"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.sonarqube") version "7.2.3.7755"
     id("org.owasp.dependencycheck") version "12.2.0"
@@ -55,17 +55,17 @@ dependencyManagement {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+    implementation("org.springframework.boot:spring-boot-starter-security-oauth2-resource-server")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
-    implementation("org.springframework.boot:spring-boot-starter-aop")
-    implementation("org.springframework.retry:spring-retry")
+    implementation("org.springframework.boot:spring-boot-starter-aspectj")
+    implementation("org.springframework.retry:spring-retry:2.0.13")
 
-    implementation("org.flywaydb:flyway-core")
+    implementation("org.springframework.boot:spring-boot-starter-flyway")
     implementation("org.flywaydb:flyway-mysql")
 
     implementation("io.jsonwebtoken:jjwt-api:0.13.0")
@@ -82,6 +82,7 @@ dependencies {
 
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    implementation("org.springframework.boot:spring-boot-jackson2")
 
     implementation("net.javacrumbs.shedlock:shedlock-spring:5.16.0")
     implementation("net.javacrumbs.shedlock:shedlock-provider-redis-spring:5.16.0")
@@ -93,10 +94,11 @@ dependencies {
     implementation("com.bucket4j:bucket4j-redis:8.10.1")
     implementation("org.jsoup:jsoup:1.22.1")
     implementation("com.networknt:json-schema-validator:1.5.1")
-    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.37.1")
+    implementation("io.sentry:sentry-spring-boot-4-starter:8.37.1")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testImplementation("org.springframework.boot:spring-boot-restclient")
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("com.h2database:h2")
     testImplementation("org.testcontainers:testcontainers:2.0.4")
@@ -136,6 +138,7 @@ tasks.withType<Test> {
     // failure lands in an unrelated class at full suite size only. Must stay above the
     // containerized class count; TestIsolationConventionTest budgets the classes that key their own.
     systemProperty("spring.test.context.cache.maxSize", "513")
+    systemProperty("spring.test.context.cache.pause", "never")
     systemProperty("org.springframework.boot.logging.LoggingSystem", "none")
     System.getProperties().stringPropertyNames()
         .filter { it.startsWith("consistency.") }
@@ -196,7 +199,7 @@ pitest {
     targetTests.set(listOf("org.danteplanner.backend.*", "org.danteplanner.consistency.*"))
     excludedTestClasses.set(listOf("*IT", "*IntegrationTest", "*ControllerTest"))
     // The minion does not inherit the test task's system properties.
-    jvmArgs.set(listOf("-Dorg.springframework.boot.logging.LoggingSystem=none"))
+    jvmArgs.set(listOf("-Dorg.springframework.boot.logging.LoggingSystem=none", "-Dspring.test.context.cache.pause=never"))
     junit5PluginVersion.set("1.2.1")
     threads.set(4)
     enableDefaultIncrementalAnalysis.set(true)

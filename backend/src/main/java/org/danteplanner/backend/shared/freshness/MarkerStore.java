@@ -30,6 +30,7 @@ import io.lettuce.core.ClientOptions;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.SocketOptions;
+import io.lettuce.core.StaticCredentialsProvider;
 import io.lettuce.core.resource.ClientResources;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
@@ -155,7 +156,8 @@ public class MarkerStore implements AutoCloseable {
         RedisStandaloneConfiguration configuration = writeStore.getStandaloneConfiguration();
         RedisURI uri = BoundedRedisConnections.redisUri(configuration.getHostName(), configuration.getPort());
         uri.setDatabase(configuration.getDatabase());
-        configuration.getPassword().toOptional().ifPresent(uri::setPassword);
+        configuration.getPassword().toOptional()
+                .ifPresent(password -> uri.setCredentialsProvider(new StaticCredentialsProvider(null, password)));
         RedisClient client = BoundedRedisConnections.redisClient(
                 clientResources, configuration.getHostName(), configuration.getPort());
         client.setOptions(ClientOptions.builder()

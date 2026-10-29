@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class SpringTestShadowVersionTest {
 
-    private static final String SHADOWED_VERSION = "6.2.19";
+    private static final String SHADOWED_VERSION = "7.0.10";
 
     @Test
     void springTestVersion_WhenReadFromJarManifest_MatchesTheShadowedVersion() {

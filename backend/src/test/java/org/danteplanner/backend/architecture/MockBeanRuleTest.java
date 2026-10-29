@@ -24,8 +24,6 @@ class MockBeanRuleTest {
                 .hasMessageContaining(MockitoBeanFieldFixture.class.getName()
                         + " overrides a bean with a Mockito mock")
                 .hasMessageContaining(MockitoBeanFieldFixture.class.getName()
-                        + ".bootMocked overrides a bean with a Mockito mock")
-                .hasMessageContaining(MockitoBeanFieldFixture.class.getName()
                         + ".metaMocked overrides a bean with a Mockito mock");
     }
 

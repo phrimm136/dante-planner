@@ -21,8 +21,8 @@ final class MockBeanRule {
     static final ArchRule NO_MOCKITO_BEAN_OVERRIDES =
             classes()
                     .should(overrideNoBeanWithAMockitoMock())
-                    .as("no Mockito mock-bean override (Spring's @MockitoBean/@MockitoSpyBean"
-                            + " or Boot's @MockBean/@SpyBean, directly or through a meta-annotation);"
+                    .as("no Mockito mock-bean override (Spring's @MockitoBean/@MockitoSpyBean,"
+                            + " directly or through a meta-annotation);"
                             + " a test observes the effect where it leaves the process, and injects a fault"
                             + " through TestBean");
 
@@ -30,11 +30,7 @@ final class MockBeanRule {
             MockitoBean.class.getName(),
             MockitoBeans.class.getName(),
             MockitoSpyBean.class.getName(),
-            MockitoSpyBeans.class.getName(),
-            "org.springframework.boot.test.mock.mockito.MockBean",
-            "org.springframework.boot.test.mock.mockito.MockBeans",
-            "org.springframework.boot.test.mock.mockito.SpyBean",
-            "org.springframework.boot.test.mock.mockito.SpyBeans");
+            MockitoSpyBeans.class.getName());
 
     private MockBeanRule() {
     }
