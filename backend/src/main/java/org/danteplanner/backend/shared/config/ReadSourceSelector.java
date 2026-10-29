@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.SQLTransientConnectionException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +39,8 @@ public class ReadSourceSelector extends AbstractDataSource {
     public record Source(String name, boolean authoritative, DataSource dataSource, CircuitBreaker breaker) {
     }
 
+    private static final ThreadLocal<Set<String>> SKIPPED = new ThreadLocal<>();
+
     private final List<Source> sources;
     private final Source authority;
     private final DataSource authorityReads = new AuthorityReads();
@@ -55,7 +58,20 @@ public class ReadSourceSelector extends AbstractDataSource {
     }
 
     public Optional<Source> current() {
-        return sources.stream().filter(ReadSourceSelector::isHealthy).findFirst();
+        return sources.stream().filter(ReadSourceSelector::isUsable).findFirst();
+    }
+
+    public static void skip(Source source) {
+        Set<String> skipped = SKIPPED.get();
+        if (skipped == null) {
+            skipped = new HashSet<>();
+            SKIPPED.set(skipped);
+        }
+        skipped.add(source.name());
+    }
+
+    public static void clearSkips() {
+        SKIPPED.remove();
     }
 
     public Source authority() {
@@ -94,6 +110,11 @@ public class ReadSourceSelector extends AbstractDataSource {
         return source.breaker().getState() == CircuitBreaker.State.CLOSED;
     }
 
+    private static boolean isUsable(Source source) {
+        Set<String> skipped = SKIPPED.get();
+        return isHealthy(source) && (skipped == null || !skipped.contains(source.name()));
+    }
+
     private static boolean hasConnectionSqlState(Throwable failure) {
         return failure instanceof SQLException sql
                 && sql.getSQLState() != null
@@ -107,7 +128,7 @@ public class ReadSourceSelector extends AbstractDataSource {
     private Connection acquire(ConnectionSource connect) throws SQLException {
         List<Exception> failures = new ArrayList<>();
         for (Source source : sources) {
-            if (!isHealthy(source)) {
+            if (!isUsable(source)) {
                 continue;
             }
             long start = System.nanoTime();
