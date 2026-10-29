@@ -30,6 +30,7 @@ jobs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
       e2e: ${{ steps.filter.outputs.e2e }}
+      deploy: ${{ steps.filter.outputs.deploy }}
       consistency: ${{ steps.filter.outputs.consistency }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
@@ -47,7 +48,7 @@ jobs:
           CONSISTENCY_PATHS='^backend/src/consistency/|^backend/src/test/java/org/danteplanner/consistency/|^backend/src/test/java/org/danteplanner/backend/integration/consistency/|^backend/src/test/java/org/danteplanner/backend/integration/ConsistencyRunIT\.java$|^backend/src/main/java/org/danteplanner/backend/shared/readpath/|^backend/src/main/java/org/danteplanner/backend/shared/gtid/|^backend/src/main/java/org/danteplanner/backend/shared/config/(ReadOnlyRoutingDataSource|ReadSource[A-Za-z]*|RoutingDataSourceConfig|PoolLedger)\.java$|^backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCommandService\.java$|^backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCatalogService\.java$|^backend/src/test/java/org/danteplanner/backend/integration/OregonContext\.java$|^backend/src/test/java/org/danteplanner/backend/integration/ReplicationControl\.java$|^backend/src/test/java/org/danteplanner/backend/integration/CausalHarnessSupport\.java$|^backend/src/test/java/org/danteplanner/backend/integration/ReplicaRoutingHarnessSupport\.java$|^backend/build\.gradle\.kts$|^backend/src/test/resources/consistency/|^scripts/consistency/|^\.github/workflows/pr-gate\.yml$'
 
           if [ "$EVENT_NAME" = "push" ]; then
-            for area in backend frontend e2e; do echo "$area=true" >> "$GITHUB_OUTPUT"; done
+            for area in backend frontend e2e deploy; do echo "$area=true" >> "$GITHUB_OUTPUT"; done
             if [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ] \
               || ! CHANGED=$(git diff --name-only "$BEFORE_SHA"...HEAD); then
               echo "consistency=true" >> "$GITHUB_OUTPUT"
@@ -71,10 +72,12 @@ jobs:
           BACKEND_PATHS=$(lane_paths .github/scripts/backend-test-inputs.sh) || exit 1
           FRONTEND_PATHS=$(lane_paths .github/scripts/frontend-inputs.sh) || exit 1
           E2E_PATHS=$(lane_paths .github/scripts/e2e-inputs.sh) || exit 1
+          DEPLOY_PATHS=$(lane_paths .github/scripts/deploy-test-inputs.sh) || exit 1
 
           echo "backend=$(match "$BACKEND_PATHS")" >> "$GITHUB_OUTPUT"
           echo "frontend=$(match "$FRONTEND_PATHS")" >> "$GITHUB_OUTPUT"
           echo "e2e=$(match "$E2E_PATHS")" >> "$GITHUB_OUTPUT"
+          echo "deploy=$(match "$DEPLOY_PATHS")" >> "$GITHUB_OUTPUT"
           echo "consistency=$(match "$CONSISTENCY_PATHS")" >> "$GITHUB_OUTPUT"
 
   check-keep-list:
@@ -136,6 +139,18 @@ jobs:
             backend/build/test-results/
             backend/build/reports/pitest/
           retention-days: 7
+
+  test-deploy:
+    needs: changes
+    if: needs.changes.outputs.deploy == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+      - name: Render, validate and serve the deploy manifests
+        run: .github/scripts/deploy-test.sh
 
   test-migration:
     needs: changes
