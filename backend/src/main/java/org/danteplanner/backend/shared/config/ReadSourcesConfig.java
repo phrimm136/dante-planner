@@ -141,6 +141,7 @@ public class ReadSourcesConfig {
         scheduler.setPoolSize(1);
         scheduler.setThreadNamePrefix("read-source-probe-");
         scheduler.setRemoveOnCancelPolicy(true);
+        scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
         return scheduler;
     }
 
