@@ -7,14 +7,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
+import org.danteplanner.backend.shared.exception.EntityNotFoundException;
+import org.danteplanner.backend.shared.exception.ReadTemporarilyUnavailableException;
 import org.danteplanner.backend.shared.freshness.MarkerStore.MarkerView;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
+import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 
 public class FreshnessReadGuard {
 
@@ -47,14 +54,45 @@ public class FreshnessReadGuard {
     private final GtidWait gtidWait;
     private final Duration waitBound;
     private final MeterRegistry meterRegistry;
+    private final ReadSourceSelector selector;
     private final Map<String, String> appliedBySource = new ConcurrentHashMap<>();
 
     public FreshnessReadGuard(MarkerReads markers, GtidWait gtidWait, FreshnessReadSettings settings,
-            MeterRegistry meterRegistry) {
+            MeterRegistry meterRegistry, ReadSourceSelector selector) {
         this.markers = markers;
         this.gtidWait = gtidWait;
         this.waitBound = settings.waitBound();
         this.meterRegistry = meterRegistry;
+        this.selector = selector;
+    }
+
+    public <T> T read(Collection<FreshnessScope> missScopes, Supplier<T> load,
+            Function<? super T, Collection<FreshnessScope>> scopesOf) {
+        while (true) {
+            if (TransactionSynchronizationManager.isActualTransactionActive()) {
+                throw new IllegalStateException("a freshness read must run outside a transaction");
+            }
+            ChosenReadSource.clear();
+            T value;
+            try {
+                value = load.get();
+            } catch (EntityNotFoundException miss) {
+                if (decide(missScopes, servedSource()) instanceof Decision.Serve) {
+                    throw miss;
+                }
+                continue;
+            }
+            if (decide(scopesOf.apply(value), servedSource()) instanceof Decision.Serve) {
+                return value;
+            }
+        }
+    }
+
+    private ReadSourceSelector.Source servedSource() {
+        return ChosenReadSource.name()
+                .flatMap(name -> selector.sources().stream().filter(source -> source.name().equals(name)).findFirst())
+                .or(selector::current)
+                .orElseThrow(ReadTemporarilyUnavailableException::new);
     }
 
     public Decision decide(Collection<FreshnessScope> scopes, ReadSourceSelector.Source source) {
