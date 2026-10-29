@@ -68,7 +68,7 @@
    "targets": [
     {
      "refId": "A",
-     "expr": "count(up == 1) by (cluster)",
+     "expr": "count(up{job!=\"kubelet-cadvisor\"} == 1) by (cluster)",
      "legendFormat": "{{cluster}}",
      "instant": true
     }
