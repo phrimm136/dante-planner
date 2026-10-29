@@ -1531,14 +1531,6 @@ two have silently never paged.
 - After PR #322 deploys: `write_forwarding` goes probe → all (ADR 123), the POST `/batch` handler
   and the top-level `selectedKeywords` copy wait for seven days of zero counters (entries above).
   re-check: `rg -q '@PostMapping\("/batch"\)' backend/src/main/java/org/danteplanner/backend/planner/controller/PlannerQueryController.java`
-- Two freshness tests keep a sub-second real-clock proof against a production constant:
-  `MarkerStoreConnectBoundTest` proves "released by the close" with
-  `released < RAISE_CONNECT_TIMEOUT / 2` (500 ms), and `LazyConnectingProxyManagerTest` proves
-  fail-fast with `FAIL_FAST_BUDGET` (100 ms). Every other bound in `shared/freshness` and
-  `shared/config` now carries a 5 s slack or runs against a 30 s wait bound. Worth doing
-  if either fails in CI: let `MarkerStore.Settings` carry the connect timeout so the test can
-  make it roomy, and assert the fail-fast path by its call count rather than its clock.
-  re-check: `rg -q 'RAISE_CONNECT_TIMEOUT.dividedBy\(2\)|FAIL_FAST_BUDGET =' backend/src/test`
 - CI `test-frontend` died once with "Worker terminated due to reaching memory limit: JS heap out
   of memory" on PR #328 (386 of 387 files passed, zero failures) and passed on rerun of the same
   commit. Worth doing on the second occurrence:

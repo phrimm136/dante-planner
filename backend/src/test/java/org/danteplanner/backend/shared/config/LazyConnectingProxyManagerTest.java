@@ -28,8 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class LazyConnectingProxyManagerTest {
 
     private static final int CALLERS = 12;
-    private static final Duration FAIL_FAST_BUDGET = Duration.ofMillis(100);
-    private static final Duration OUTCOME_WAIT = Duration.ofSeconds(10);
+    private static final Duration OUTCOME_WAIT = Duration.ofSeconds(30);
     // The lower bound is the contract (never fail before the wait); the slack only absorbs the
     // scheduler on a loaded runner.
     private static final long SCHEDULING_SLACK_MS = 5_000;
@@ -53,15 +52,15 @@ class LazyConnectingProxyManagerTest {
         });
         List<CompletableFuture<Object>> outcomes = new ArrayList<>();
         outcomes.add(call(manager).outcome());
-        assertThat(connecting.await(LATCH_WAIT_SECONDS, TimeUnit.SECONDS)).isTrue();
-        List<Thread> waiters = new ArrayList<>();
-        for (int i = 1; i < CALLERS; i++) {
-            Caller caller = call(manager);
-            waiters.add(caller.thread());
-            outcomes.add(caller.outcome());
-        }
-
         try {
+            assertThat(connecting.await(LATCH_WAIT_SECONDS, TimeUnit.SECONDS)).isTrue();
+            List<Thread> waiters = new ArrayList<>();
+            for (int i = 1; i < CALLERS; i++) {
+                Caller caller = call(manager);
+                waiters.add(caller.thread());
+                outcomes.add(caller.outcome());
+            }
+
             awaitParkedOrDone(waiters);
         } finally {
             release.countDown();
@@ -117,9 +116,9 @@ class LazyConnectingProxyManagerTest {
             throw new RedisConnectionException("connect refused");
         });
         Caller owner = call(manager);
-        assertThat(connecting.await(LATCH_WAIT_SECONDS, TimeUnit.SECONDS)).isTrue();
-
         try {
+            assertThat(connecting.await(LATCH_WAIT_SECONDS, TimeUnit.SECONDS)).isTrue();
+
             long start = System.nanoTime();
             CompletableFuture<Object> waiter = call(manager).outcome();
 
@@ -147,9 +146,7 @@ class LazyConnectingProxyManagerTest {
                 .hasMessage("connect refused");
         nanoTime.addAndGet(RETRY_AFTER_NANOS - 1);
 
-        assertThat(call(manager).outcome())
-                .succeedsWithin(FAIL_FAST_BUDGET).asInstanceOf(InstanceOfAssertFactories.THROWABLE)
-                .isInstanceOf(RedisConnectionException.class)
+        assertThatThrownBy(manager::builder).isInstanceOf(RedisConnectionException.class)
                 .hasMessage("connect refused");
         assertThat(connectorCalls).hasValue(1);
     }
@@ -214,7 +211,7 @@ class LazyConnectingProxyManagerTest {
 
     private static void awaitQuietly(CountDownLatch latch) {
         try {
-            latch.await(LATCH_WAIT_SECONDS, TimeUnit.SECONDS);
+            latch.await();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

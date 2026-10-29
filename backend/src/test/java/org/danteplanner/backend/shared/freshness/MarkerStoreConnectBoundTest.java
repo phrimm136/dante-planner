@@ -17,7 +17,12 @@ import java.util.stream.IntStream;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 
+import io.lettuce.core.resource.ClientResources;
+import io.lettuce.core.resource.DefaultClientResources;
+import io.lettuce.core.resource.NettyCustomizer;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelOption;
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
@@ -34,6 +39,7 @@ class MarkerStoreConnectBoundTest {
     private static final int MAX_FILLERS = 16;
     private static final int FILLER_CONNECT_MILLIS = 200;
     private static final int QUEUED_RAISES = 6;
+    private static final Duration CONNECT_OUTLASTING_THE_TEST = Duration.ofHours(1);
 
     @Test
     void raise_WhenTheMarkerStoreDropsTheConnect_ReturnsWithinTheConnectBoundPlusTheWaitBoundAndCountsOneFailure()
@@ -83,8 +89,17 @@ class MarkerStoreConnectBoundTest {
                     new RedisStandaloneConfiguration(blackHole.getInetAddress().getHostAddress(),
                             blackHole.getLocalPort()));
             writeStore.afterPropertiesSet();
+            ClientResources connectOutlastingTheTest = DefaultClientResources.builder()
+                    .nettyCustomizer(new NettyCustomizer() {
+                        @Override
+                        public void afterBootstrapInitialized(Bootstrap bootstrap) {
+                            bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
+                                    Math.toIntExact(CONNECT_OUTLASTING_THE_TEST.toMillis()));
+                        }
+                    })
+                    .build();
             try {
-                MarkerStore store = new MarkerStore(writeStore, writeStore.getRequiredNativeClient().getResources(),
+                MarkerStore store = new MarkerStore(writeStore, connectOutlastingTheTest,
                         List.of(), new MarkerStore.Settings(0, WAIT_BOUND, Duration.ofHours(1)), meters);
                 assertThat(fillAcceptQueue(blackHole, fillers)).isTrue();
                 ThreadGroup group = new ThreadGroup("marker-raise-close-" + UUID.randomUUID());
@@ -96,20 +111,17 @@ class MarkerStoreConnectBoundTest {
                 await().atMost(SCHEDULING_SLACK).until(() -> raises.stream()
                         .allMatch(raise -> raise.getState() == Thread.State.TIMED_WAITING));
 
-                long start = System.nanoTime();
                 store.close();
                 for (Thread raise : raises) {
                     raise.join(WAIT_BOUND.plus(MarkerStore.RAISE_MARGIN).plus(SCHEDULING_SLACK).toMillis());
                 }
-                Duration released = Duration.ofNanos(System.nanoTime() - start);
 
                 assertThat(raises).noneMatch(Thread::isAlive);
-                assertThat(released).as("released by the close, not by the connect bound")
-                        .isLessThan(MarkerStore.RAISE_CONNECT_TIMEOUT.dividedBy(2));
-                assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count()).isEqualTo(QUEUED_RAISES);
                 await().atMost(SCHEDULING_SLACK).until(() -> raiseThreads(group).isEmpty());
+                assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count()).isEqualTo(QUEUED_RAISES);
             } finally {
                 writeStore.destroy();
+                connectOutlastingTheTest.shutdown().syncUninterruptibly();
             }
         } finally {
             for (Socket filler : fillers) {
