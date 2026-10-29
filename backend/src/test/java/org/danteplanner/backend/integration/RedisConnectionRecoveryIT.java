@@ -85,7 +85,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(TestConfig.class)
 class RedisConnectionRecoveryIT {
 
-    private static final String MYSQL_IMAGE = "mysql:8.0";
     private static final String REDIS_IMAGE = "redis:7-alpine";
     private static final String TOXIPROXY_IMAGE = "ghcr.io/shopify/toxiproxy:2.5.0";
 
@@ -119,7 +118,7 @@ class RedisConnectionRecoveryIT {
     // Relaxed durability and no performance_schema: throwaway test databases need no
     // crash-safety, and GTID replication depends on neither fsync timing nor
     // performance_schema — the flags cut boot time and per-instance memory.
-    static final MySQLContainer PRIMARY = new MySQLContainer(MYSQL_IMAGE)
+    static final MySQLContainer PRIMARY = new MySQLContainer(SharedMySqlContainerSupport.MYSQL_IMAGE)
             .withTmpFs(java.util.Map.of("/var/lib/mysql", "rw,size=512m"))
             .withNetwork(RECOVERY_NETWORK)
             .withNetworkAliases(PRIMARY_ALIAS)
@@ -141,7 +140,7 @@ class RedisConnectionRecoveryIT {
                     "--performance-schema=OFF",
                     "--skip-name-resolve");
 
-    static final MySQLContainer REPLICA = new MySQLContainer(MYSQL_IMAGE)
+    static final MySQLContainer REPLICA = new MySQLContainer(SharedMySqlContainerSupport.MYSQL_IMAGE)
             .withTmpFs(java.util.Map.of("/var/lib/mysql", "rw,size=512m"))
             .withNetwork(RECOVERY_NETWORK)
             .withDatabaseName("testdb")
@@ -381,7 +380,7 @@ class RedisConnectionRecoveryIT {
 
     private static void wireReplication(JdbcTemplate primary, JdbcTemplate replica) {
         primary.execute("CREATE USER IF NOT EXISTS '" + REPL_USER + "'@'%' "
-                + "IDENTIFIED WITH mysql_native_password BY '" + REPL_PASSWORD + "'");
+                + "IDENTIFIED BY '" + REPL_PASSWORD + "'");
         primary.execute("GRANT REPLICATION SLAVE ON *.* TO '" + REPL_USER + "'@'%'");
         primary.execute("FLUSH PRIVILEGES");
 
@@ -389,7 +388,7 @@ class RedisConnectionRecoveryIT {
 
         replica.execute("STOP REPLICA");
         replica.execute("RESET REPLICA ALL");
-        replica.execute("RESET MASTER");
+        replica.execute("RESET BINARY LOGS AND GTIDS");
         if (primaryGtid != null && !primaryGtid.isBlank()) {
             replica.execute("SET GLOBAL gtid_purged = '" + primaryGtid.replaceAll("\\s+", "") + "'");
         }
@@ -398,6 +397,7 @@ class RedisConnectionRecoveryIT {
                 + "SOURCE_PORT=" + MYSQL_INTERNAL_PORT + ", "
                 + "SOURCE_USER='" + REPL_USER + "', "
                 + "SOURCE_PASSWORD='" + REPL_PASSWORD + "', "
+                + "SOURCE_SSL=1, "
                 + "SOURCE_AUTO_POSITION=1");
         replica.execute("START REPLICA");
     }

@@ -52,7 +52,6 @@ abstract class CausalHarnessSupport {
 
     private static final Logger log = LoggerFactory.getLogger(CausalHarnessSupport.class);
 
-    private static final String MYSQL_IMAGE = "mysql:8.0";
     private static final String PRIMARY_ALIAS = "mysql-primary";
     private static final int MYSQL_INTERNAL_PORT = 3306;
     private static final String ROOT_USER = "root";
@@ -84,7 +83,7 @@ abstract class CausalHarnessSupport {
     // Relaxed durability and no performance_schema: throwaway test databases need no
     // crash-safety, and GTID replication depends on neither fsync timing nor
     // performance_schema — the flags cut boot time and per-instance memory.
-    static final MySQLContainer PRIMARY = new MySQLContainer(MYSQL_IMAGE)
+    static final MySQLContainer PRIMARY = new MySQLContainer(SharedMySqlContainerSupport.MYSQL_IMAGE)
             .withTmpFs(java.util.Map.of("/var/lib/mysql", "rw,size=512m"))
             .withNetwork(NETWORK)
             .withNetworkAliases(PRIMARY_ALIAS)
@@ -107,7 +106,7 @@ abstract class CausalHarnessSupport {
                     "--performance-schema=OFF",
                     "--skip-name-resolve");
 
-    static final MySQLContainer REPLICA = new MySQLContainer(MYSQL_IMAGE)
+    static final MySQLContainer REPLICA = new MySQLContainer(SharedMySqlContainerSupport.MYSQL_IMAGE)
             .withTmpFs(java.util.Map.of("/var/lib/mysql", "rw,size=512m"))
             .withNetwork(NETWORK)
             .withDatabaseName("testdb")
@@ -307,7 +306,7 @@ abstract class CausalHarnessSupport {
      */
     private static void wireReplication(JdbcTemplate primary, JdbcTemplate replica) {
         primary.execute("CREATE USER IF NOT EXISTS '" + REPL_USER + "'@'%' "
-                + "IDENTIFIED WITH mysql_native_password BY '" + REPL_PASSWORD + "'");
+                + "IDENTIFIED BY '" + REPL_PASSWORD + "'");
         primary.execute("GRANT REPLICATION SLAVE ON *.* TO '" + REPL_USER + "'@'%'");
         primary.execute("FLUSH PRIVILEGES");
 
@@ -315,7 +314,7 @@ abstract class CausalHarnessSupport {
 
         replica.execute("STOP REPLICA");
         replica.execute("RESET REPLICA ALL");
-        replica.execute("RESET MASTER");
+        replica.execute("RESET BINARY LOGS AND GTIDS");
         if (primaryGtid != null && !primaryGtid.isBlank()) {
             replica.execute("SET GLOBAL gtid_purged = '" + primaryGtid.replaceAll("\\s+", "") + "'");
         }
@@ -324,6 +323,7 @@ abstract class CausalHarnessSupport {
                 + "SOURCE_PORT=" + REPLICATION_PROXY_LISTEN_PORT + ", "
                 + "SOURCE_USER='" + REPL_USER + "', "
                 + "SOURCE_PASSWORD='" + REPL_PASSWORD + "', "
+                + "SOURCE_SSL=1, "
                 + "SOURCE_AUTO_POSITION=1, "
                 + "SOURCE_CONNECT_RETRY=" + SOURCE_CONNECT_RETRY_SECONDS);
         replica.execute("START REPLICA");
