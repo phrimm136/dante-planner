@@ -77,6 +77,7 @@ class ReadSourceSelectorTest {
     @BeforeEach
     void setUp() {
         ChosenReadSource.clear();
+        ReadSourceSelector.clearSkips();
         selector = new ReadSourceSelector(List.of(
                 new ReadSourceSelector.Source(FIRST, false, firstPool, firstBreaker),
                 new ReadSourceSelector.Source(SECOND, true, secondPool, secondBreaker)));
@@ -85,6 +86,7 @@ class ReadSourceSelectorTest {
     @AfterEach
     void clearChosenSource() {
         ChosenReadSource.clear();
+        ReadSourceSelector.clearSkips();
     }
 
     private static SQLException communicationsLinkFailure() {
@@ -266,6 +268,35 @@ class ReadSourceSelectorTest {
         secondBreaker.transitionToOpenState();
 
         assertThat(selector.isAuthorityHealthy()).isFalse();
+        assertThat(selector.current()).map(ReadSourceSelector.Source::name).contains(FIRST);
+    }
+
+    @Test
+    void skips_WhenEverySourceIsSkipped_AcquireThrowsReadTemporarilyUnavailable() throws SQLException {
+        ReadSourceSelector.skip(selector.sources().get(0));
+        ReadSourceSelector.skip(selector.authority());
+
+        Throwable thrown = catchThrowable(selector::getConnection);
+
+        assertThat(thrown).isInstanceOf(SQLTransientConnectionException.class)
+                .hasCauseInstanceOf(ReadTemporarilyUnavailableException.class);
+        assertThat(((SQLException) thrown).getSQLState()).isEqualTo(UNABLE_TO_CONNECT);
+        assertThat(selector.current()).isEmpty();
+        verify(firstPool, never()).getConnection();
+        verify(secondPool, never()).getConnection();
+    }
+
+    @Test
+    void skips_WhenTheRequestClearsThem_AreGone() throws SQLException {
+        when(secondPool.getConnection()).thenReturn(secondConnection);
+        ReadSourceSelector.skip(selector.sources().get(0));
+
+        assertThat(selector.current()).map(ReadSourceSelector.Source::name).contains(SECOND);
+        assertThat(selector.getConnection()).isSameAs(secondConnection);
+        verify(firstPool, never()).getConnection();
+
+        ReadSourceSelector.clearSkips();
+
         assertThat(selector.current()).map(ReadSourceSelector.Source::name).contains(FIRST);
     }
 

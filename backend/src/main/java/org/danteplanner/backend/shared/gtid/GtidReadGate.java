@@ -2,6 +2,7 @@ package org.danteplanner.backend.shared.gtid;
 
 import lombok.extern.slf4j.Slf4j;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 
@@ -24,6 +25,7 @@ public class GtidReadGate {
     /** Probe bound (seconds), not a correctness window or sleep (mechanics §5, INV4). */
     private static final double PROBE_TIMEOUT_SECONDS = 0.05;
 
+    private static final double NANOS_PER_SECOND = 1_000_000_000d;
     private static final int APPLIED = 0;
     private static final int TIMED_OUT = 1;
     private static final int NOT_SUBSET = 0;
@@ -72,11 +74,24 @@ public class GtidReadGate {
         return verdict;
     }
 
+    public static boolean isApplied(ReadSourceSelector.Source source, String gtidSet, Duration bound) {
+        try {
+            Integer result = waitFor(source, gtidSet, bound.toNanos() / NANOS_PER_SECOND);
+            return result != null && result == APPLIED;
+        } catch (DataAccessException e) {
+            log.warn("GTID wait failed on {} for gtid={}, counting it as not applied", source.name(), gtidSet, e);
+            return false;
+        }
+    }
+
+    private static Integer waitFor(ReadSourceSelector.Source source, String gtid, double timeoutSeconds) {
+        return new JdbcTemplate(source.dataSource()).queryForObject(WAIT_GTID_SQL, Integer.class, gtid, timeoutSeconds);
+    }
+
     private Verdict waitVerdict(ReadSourceSelector.Source source, String gtid) {
         Integer result;
         try {
-            result = new JdbcTemplate(source.dataSource()).queryForObject(
-                    WAIT_GTID_SQL, Integer.class, gtid, PROBE_TIMEOUT_SECONDS);
+            result = waitFor(source, gtid, PROBE_TIMEOUT_SECONDS);
         } catch (DataAccessException e) {
             if (isMalformedGtid(e)) {
                 log.warn("GTID wait rejected gtid={} as malformed, clearing the cookie: {}",

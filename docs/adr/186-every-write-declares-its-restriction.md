@@ -43,6 +43,7 @@ epic: none · pr: none
 - @moderation @readpath — A ban or timeout binds every write that starts after its response: the
   restriction is read inside the write's transaction, which runs on the primary beside it, so
   replication lag cannot let a write through and the read costs a same-region round trip.
+  Moderation lists follow 183 @freshness.
   REJECTED: reading the restriction from a replica — a lagging replica lets a just-restricted user
   write, and closing that with a freshness marker adds machinery to every write for a read that is
   already local to the primary.
