@@ -18,11 +18,21 @@ spec:
         prometheus.io/port: "9104"
         prometheus.io/job: mysqld
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
       nodeSelector:
         role: data
       containers:
         - name: mysqld-exporter
           image: prom/mysqld-exporter:v0.19.0
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
           args:
             - --mysqld.username=$(MYSQL_EXPORTER_USER)
             - --collect.perf_schema.eventsstatements

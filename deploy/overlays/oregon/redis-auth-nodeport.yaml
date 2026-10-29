@@ -10,6 +10,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: redis-auth-nodeport
+  namespace: danteplanner
   labels:
     app: redis-auth
 spec:

@@ -1,6 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+namespace: danteplanner
+
 resources:
   - namespace.yaml
   - spring-daemonset.yaml
@@ -20,7 +22,6 @@ resources:
   - mysqld-exporter.yaml
   - redis-exporter.yaml
   - alloy-logs.yaml
-  - node-exporter.yaml
 
 configMapGenerator:
   - name: mysqld-tls-cnf
