@@ -30,11 +30,13 @@ import {
   ALL_PARTS,
   acquireConditionText,
   displayedUnit,
+  formName,
   headerMapName,
   isIdentityShaped,
   isShownPassive,
   phaseTexts,
   rowParts,
+  shownStageEffects,
   unitName,
   selectedPart,
   skillLevelAdder,
@@ -594,5 +596,58 @@ describe('stage effect entries', () => {
     expect(stageEffectEntries([], [grant('Laceration', 'ally')])).toEqual([
       { keywordId: 'Laceration', stack: 1, side: 'ally' },
     ])
+  })
+})
+
+describe('shown stage effects', () => {
+  const entry = (keywordId: string) => ({ keywordId, stack: undefined, side: undefined })
+  const keyword = (name: string) => ({ name, desc: '', iconId: null, buffType: 'Neutral' })
+  const entries = [entry('Charge'), entry('BuffetShoes')]
+
+  it('drops an entry whose keyword has no text and counts it missing', () => {
+    const { shown, missing } = shownStageEffects(entries, { Charge: keyword('C') })
+
+    expect(shown.map((card) => card.entry.keywordId)).toEqual(['Charge'])
+    expect(missing).toBe(1)
+  })
+
+  it('keeps every entry in order when all keywords have text', () => {
+    const { shown, missing } = shownStageEffects(entries, {
+      Charge: keyword('C'),
+      BuffetShoes: keyword('S'),
+    })
+
+    expect(shown.map((card) => card.entry.keywordId)).toEqual(['Charge', 'BuffetShoes'])
+    expect(missing).toBe(0)
+  })
+
+  it('keeps duplicate entries as given', () => {
+    const { shown } = shownStageEffects([entry('Charge'), entry('Charge')], {
+      Charge: keyword('C'),
+    })
+
+    expect(shown.map((card) => card.entry.keywordId)).toEqual(['Charge', 'Charge'])
+  })
+
+  it('shows nothing and misses nothing without entries', () => {
+    expect(shownStageEffects([], { Charge: keyword('C') })).toEqual({ shown: [], missing: 0 })
+  })
+})
+
+describe('form name', () => {
+  it('reads the form name from the phase texts', () => {
+    expect(formName({ formNames: { shoes: 'S' } }, 'shoes')).toBe('S')
+  })
+
+  it('has no name for a form the phase texts lack', () => {
+    expect(formName({ formNames: { shoes: 'S' } }, 'cape')).toBeUndefined()
+  })
+
+  it('has no name without form names', () => {
+    expect(formName({}, 'shoes')).toBeUndefined()
+  })
+
+  it('has no name without phase texts', () => {
+    expect(formName(undefined, 'shoes')).toBeUndefined()
   })
 })

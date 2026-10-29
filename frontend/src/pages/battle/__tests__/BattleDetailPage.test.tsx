@@ -1078,27 +1078,35 @@ describe('Pwie forms', () => {
   )
 
   it(
-    'drops the Buffet start buffs CN has no text for and keeps Charge on row 11038',
+    'shows Charge once first on row 11038 in CN with a title on every card',
     async () => {
       await i18n.changeLanguage('CN')
       await mountAssistant(PWIE, pwieStage(11038))
 
       await waitFor(() => expect(stageEffectKeywords()[0]).toBe('Charge'))
-      expect(stageEffectKeywords()).not.toContain('BuffetShoes')
-      expect(stageEffectKeywords()).not.toContain('BuffetGoldenClothes')
+      const keywordIds = stageEffectKeywords()
+      expect(keywordIds.filter((keywordId) => keywordId === 'Charge')).toHaveLength(1)
+      expect(new Set(keywordIds).size).toBe(keywordIds.length)
+      const block = within(requireSlot('detail-selector')).getByTestId('battle-stage-effects')
+      const titles = [...block.querySelectorAll('[data-keyword-id]')].map(
+        (card) => card.querySelector('.font-semibold')?.textContent ?? '',
+      )
+      expect(titles).toHaveLength(keywordIds.length)
+      expect(titles.every((title) => title !== '')).toBe(true)
     },
     TEST_BUDGET_MS,
   )
 
   it(
-    'names the CN forms its phase texts lack by the shoes and cape strings',
+    'labels every CN form on row 11044 with base first',
     async () => {
       await i18n.changeLanguage('CN')
       await mountAssistant(PWIE, pwieStage(11044))
 
-      await waitFor(() =>
-        expect(formButtons('形态').map((button) => button.label)).toEqual(['基本', '鞋子', '斗篷']),
-      )
+      await waitFor(() => expect(formButtons('形态')).toHaveLength(3))
+      const labels = formButtons('形态').map((button) => button.label)
+      expect(labels[0]).toBe('基本')
+      expect(labels.every((label) => label !== '')).toBe(true)
     },
     TEST_BUDGET_MS,
   )

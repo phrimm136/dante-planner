@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { SECTION_STYLES } from '@/lib/constants'
 import { getBattleKeywordIconPath } from '@/shared/assets'
 import { FormattedDescription, useBattleKeywords } from '@/shared/gameText'
-import { stageEffectEntries, stageEffectGrants } from '../../lib/battleDetail'
+import { shownStageEffects, stageEffectEntries, stageEffectGrants } from '../../lib/battleDetail'
 import type { EngagementRow, StartBuff } from '../../schemas/BattleDetailSchemas'
 
 interface BattleStageEffectsProps {
@@ -15,12 +15,10 @@ interface BattleStageEffectsProps {
 function StageEffectCards({ row, startBuffs }: BattleStageEffectsProps) {
   const { t } = useTranslation('database')
   const { data: keywords } = useBattleKeywords()
-  const entries = stageEffectEntries(startBuffs, stageEffectGrants(row))
-  const shown = entries.flatMap((entry) => {
-    const keyword = keywords[entry.keywordId]
-    return keyword === undefined ? [] : [{ entry, keyword }]
-  })
-  const missing = entries.length - shown.length
+  const { shown, missing } = shownStageEffects(
+    stageEffectEntries(startBuffs, stageEffectGrants(row)),
+    keywords,
+  )
 
   useEffect(() => {
     if (import.meta.env.DEV && missing > 0) {

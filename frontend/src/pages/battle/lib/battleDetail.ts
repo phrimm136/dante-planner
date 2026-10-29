@@ -1,5 +1,6 @@
 import { ATK_TYPES } from '@/shared/gameData'
 import type { SkillDescEntry, SkillId } from '@/shared/gameData'
+import type { BattleKeywords } from '@/shared/gameText'
 import type { Shown } from '@/shared/unitStatus'
 import type {
   BattleEntityI18n,
@@ -17,7 +18,11 @@ import type {
   UnitEntry,
 } from '../schemas/BattleDetailSchemas'
 import type { SkillLevelAdders } from './battleGrowth'
-import { NEUTRAL_RESISTANCE, SKILL_LEVEL_ADDER_BY_DEF_TYPE } from './battleVocabulary'
+import {
+  NEUTRAL_RESISTANCE,
+  SKILL_LEVEL_ADDER_BY_DEF_TYPE,
+  type BattleForm,
+} from './battleVocabulary'
 
 export const ALL_PARTS = 'all'
 
@@ -114,6 +119,10 @@ export function phaseTexts(
   phaseId: string,
 ): BattlePhaseI18n | undefined {
   return i18n.units[unitId]?.phases?.[phaseId]
+}
+
+export function formName(texts: BattlePhaseI18n | undefined, form: BattleForm): string | undefined {
+  return texts?.formNames?.[form]
 }
 
 export function unitName(i18n: BattleEntityI18n, unitId: string, fallback: string): string {
@@ -355,6 +364,17 @@ export function stageEffectEntries(
       }),
     )
   return [...fromForm, ...fromRow]
+}
+
+export function shownStageEffects(
+  entries: readonly StageEffectEntry[],
+  keywords: BattleKeywords,
+): { shown: { entry: StageEffectEntry; keyword: BattleKeywords[string] }[]; missing: number } {
+  const shown = entries.flatMap((entry) => {
+    const keyword = keywords[entry.keywordId]
+    return keyword === undefined ? [] : [{ entry, keyword }]
+  })
+  return { shown, missing: entries.length - shown.length }
 }
 
 export function stageEffectGrants(row: EngagementRow): StageEffectGrant[] {

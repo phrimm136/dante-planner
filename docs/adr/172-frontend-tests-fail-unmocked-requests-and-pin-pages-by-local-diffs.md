@@ -38,6 +38,20 @@ epic: none · pr: none @tests @frontend @network @parity @naming
   allowed. Sixty-five titles carried it, and the rest of the suite already stated behaviour directly.
   INVARIANT: no test title contains "should" — oxlint `vitest/valid-title` with
   `disallowedWords: ["should"]`.
+- @tests @frontend @i18n — A test that mounts a page over the live static data asserts only what holds
+  for every data version, such as every label being non-empty; a rule for missing translation text is
+  a pure function tested with made-up inputs. Two page tests pinned that CN lacked text for Pwie's
+  Buffet forms, and static c5ce83f6 added the text, so both failed while the code
+  was correct; CN lags new content and catches up on later updates, so every pinned gap fails the
+  same way.
+  REJECTED: page tests that warn instead of fail on a gap — a warning goes unread in CI, and the
+  static pipeline already reports gaps (static ADR 490: CN warns under a ceiling, KR, EN and JP fail).
+  REJECTED: updating the expected text to each new data version — the test then breaks on every
+  catch-up and stops covering the missing-text branch.
+  INVARIANT: the missing-text rules are pinned with made-up inputs — `shownStageEffects` and
+  `formName` tests in `pages/battle/lib/__tests__/battleDetail.test.ts`; that no page test pins a live
+  gap is unenforced.
+  NON-GOAL: a frontend check that reports translation gaps — the static pipeline owns that report.
 
 ## Takeaway
 - takeaway: pin a matrix of renders as one baseline and local differences, so a change inside the
