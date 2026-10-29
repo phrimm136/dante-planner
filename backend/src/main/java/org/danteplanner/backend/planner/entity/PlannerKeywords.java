@@ -1,8 +1,9 @@
 package org.danteplanner.backend.planner.entity;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,7 +39,7 @@ public final class PlannerKeywords {
 
     private static final String CONTENT_FIELD = "selectedKeywords";
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = JsonMapper.builderWithJackson2Defaults().build();
 
     private final Set<String> keywords;
     private final Set<String> dropped;
@@ -59,7 +60,7 @@ public final class PlannerKeywords {
     public static PlannerKeywords fromContent(String contentJson) {
         try {
             return fromContent(MAPPER.readTree(contentJson));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("Planner content is not JSON", e);
         }
     }
@@ -79,8 +80,8 @@ public final class PlannerKeywords {
         List<String> named = new ArrayList<>();
         Set<String> unnamed = new HashSet<>();
         for (JsonNode element : selected) {
-            if (element.isTextual()) {
-                named.add(element.asText());
+            if (element.isString()) {
+                named.add(element.asString());
             } else {
                 unnamed.add(element.toString());
             }

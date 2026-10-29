@@ -1,10 +1,10 @@
 package org.danteplanner.backend.security;
+import org.danteplanner.backend.support.TestJsonMappers;
 import org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter;
 
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import com.jayway.jsonpath.JsonPath;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.Cookie;
@@ -45,7 +45,7 @@ class CsrfDoubleSubmitFilterTest {
         CookieUtils cookieUtils = new CookieUtils(true, "", "Lax");
         filter = new CsrfDoubleSubmitFilter(
                 cookieUtils,
-                new ProblemWriter(Jackson2ObjectMapperBuilder.json().build()),
+                new ProblemWriter(TestJsonMappers.springDefaults()),
                 csrfTokenService);
     }
 

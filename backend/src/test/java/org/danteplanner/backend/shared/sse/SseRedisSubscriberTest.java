@@ -8,19 +8,19 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.task.SyncTaskExecutor;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.data.redis.connection.DefaultMessage;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.support.TestJsonMappers;
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.shared.entity.SseEventType;
 
 class SseRedisSubscriberTest {
 
-    private final ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
-            .serializationInclusion(JsonInclude.Include.NON_NULL)
+    private final ObjectMapper objectMapper = TestJsonMappers.springDefaults().rebuild()
+            .changeDefaultPropertyInclusion(inclusion -> inclusion.withValueInclusion(JsonInclude.Include.NON_NULL))
             .build();
     private final RecordingSseService sseService = new RecordingSseService(objectMapper);
     private final SseRedisSubscriber subscriber =

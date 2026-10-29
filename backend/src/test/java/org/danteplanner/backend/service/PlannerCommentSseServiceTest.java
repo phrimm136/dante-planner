@@ -1,8 +1,8 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.comment.service.PlannerCommentSseService;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.api.PlannerAccess;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
@@ -155,7 +155,7 @@ class PlannerCommentSseServiceTest {
 
         @Test
         void broadcast_WhenSerializationFails_DoesNotThrow() throws Exception {
-            when(failingMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("boom") {});
+            when(failingMapper.writeValueAsString(any())).thenThrow(new JacksonException("boom") {});
             PlannerCommentSseService failingService =
                     new PlannerCommentSseService(failingMapper, plannerAccessGuard, SAME_THREAD);
             failingService.subscribe(plannerId, UUID.randomUUID(), null);

@@ -3,7 +3,7 @@ package org.danteplanner.backend.integration;
 import java.util.Map;
 import java.util.UUID;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.repository.PlannerRepository;

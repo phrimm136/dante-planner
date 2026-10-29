@@ -1,8 +1,8 @@
 package org.danteplanner.backend.auth.oauth;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.OAuthProperties;
@@ -180,16 +180,16 @@ public class GoogleOAuthProvider implements OAuthProvider {
                 );
             }
 
-            String accessToken = accessTokenNode.asText();
-            String refreshToken = json.path("refresh_token").asText(null);
-            String idToken = json.path("id_token").asText(null);
+            String accessToken = accessTokenNode.asString();
+            String refreshToken = json.path("refresh_token").asString(null);
+            String idToken = json.path("id_token").asString(null);
 
             return new OAuthTokens(
                 accessToken,
                 refreshToken,
                 idToken
             );
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new OAuthException(
                 PROVIDER_NAME,
                 "token_parse",
@@ -221,8 +221,8 @@ public class GoogleOAuthProvider implements OAuthProvider {
                 );
             }
 
-            return new OAuthUserInfo(idNode.asText(), emailNode.asText());
-        } catch (JsonProcessingException e) {
+            return new OAuthUserInfo(idNode.asString(), emailNode.asString());
+        } catch (JacksonException e) {
             throw new OAuthException(
                 PROVIDER_NAME,
                 "userinfo_parse",

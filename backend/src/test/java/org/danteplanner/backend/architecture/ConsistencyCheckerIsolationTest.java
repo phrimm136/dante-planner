@@ -28,7 +28,7 @@ class ConsistencyCheckerIsolationTest {
             classes()
                     .that(CHECKER_CLASS)
                     .should().onlyDependOnClassesThat()
-                    .resideInAnyPackage("java..", "com.fasterxml.jackson..", CHECKER + "..")
+                    .resideInAnyPackage("java..", "tools.jackson..", CHECKER + "..")
                     .as("the consistency checker depends only on java.*, Jackson and its own package");
 
     private static final JavaClasses CHECKER_CLASSES = new ClassFileImporter().importPackages(CHECKER);

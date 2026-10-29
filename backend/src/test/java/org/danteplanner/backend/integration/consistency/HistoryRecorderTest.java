@@ -11,9 +11,9 @@ import java.util.function.Consumer;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.support.TestJsonMappers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class HistoryRecorderTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final ObjectMapper PROBLEM_MAPPER = Jackson2ObjectMapperBuilder.json().build();
+    private static final ObjectMapper PROBLEM_MAPPER = TestJsonMappers.springDefaults();
     private static final UUID KEY = UUID.randomUUID();
 
     @Test
@@ -206,10 +206,6 @@ class HistoryRecorderTest {
     }
 
     private static String field(String line, String name) {
-        try {
-            return MAPPER.readTree(line).path(name).textValue();
-        } catch (IOException e) {
-            throw new IllegalStateException(line, e);
-        }
+        return MAPPER.readTree(line).path(name).stringValue(null);
     }
 }

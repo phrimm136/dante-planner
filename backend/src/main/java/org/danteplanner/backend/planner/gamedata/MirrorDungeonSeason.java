@@ -1,6 +1,6 @@
 package org.danteplanner.backend.planner.gamedata;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 
 public record MirrorDungeonSeason(int version, int identityMaxLevel, String nameLocalizeId) {
 
@@ -22,11 +22,11 @@ public record MirrorDungeonSeason(int version, int identityMaxLevel, String name
             throw new IllegalArgumentException("root must be an object");
         }
         JsonNode nameLocalizeId = root.path(NAME_LOCALIZE_ID);
-        if (!nameLocalizeId.isTextual()) {
+        if (!nameLocalizeId.isString()) {
             throw new IllegalArgumentException("'" + NAME_LOCALIZE_ID + "' must be a string");
         }
         return new MirrorDungeonSeason(integer(root, VERSION), integer(root, IDENTITY_MAX_LEVEL),
-                nameLocalizeId.asText());
+                nameLocalizeId.asString());
     }
 
     private static int integer(JsonNode root, String key) {

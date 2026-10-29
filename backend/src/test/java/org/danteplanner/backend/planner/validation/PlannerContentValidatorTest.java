@@ -1,9 +1,8 @@
 package org.danteplanner.backend.planner.validation;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
@@ -22,7 +21,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -137,11 +135,7 @@ class PlannerContentValidatorTest {
     }
 
     private JsonNode readTree(String json) {
-        try {
-            return objectMapper.readTree(json);
-        } catch (JsonProcessingException e) {
-            throw new UncheckedIOException(e);
-        }
+        return objectMapper.readTree(json);
     }
 
     /**

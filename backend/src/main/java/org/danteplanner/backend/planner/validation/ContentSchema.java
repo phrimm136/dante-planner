@@ -1,7 +1,10 @@
 package org.danteplanner.backend.planner.validation;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.JsonNodeType;
+import com.networknt.schema.InputFormat;
 import com.networknt.schema.JsonNodePath;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
@@ -40,6 +43,7 @@ public final class ContentSchema {
     }
 
     private static final String LOCATION = "classpath:planner/planner-content.schema.json";
+    private static final String RESOURCE = "/planner/planner-content.schema.json";
 
     private static final String REQUIRED = "required";
     private static final String ADDITIONAL_PROPERTIES = "additionalProperties";
@@ -47,6 +51,8 @@ public final class ContentSchema {
     private static final String ITEMS = "items";
     private static final Pattern NUMERIC_NAME = Pattern.compile("\\d+");
     private static final int MAX_VALUE_LOG_LENGTH = 100;
+
+    private static final ObjectMapper MAPPER = JsonMapper.builderWithJackson2Defaults().build();
 
     private static final ContentSchema PLANNER = new ContentSchema(JsonSchemaFactory
             .getInstance(SpecVersion.VersionFlag.V202012)
@@ -57,9 +63,15 @@ public final class ContentSchema {
                             .build()));
 
     private final JsonSchema schema;
+    private final JsonNode schemaTree;
 
     private ContentSchema(JsonSchema schema) {
         this.schema = schema;
+        this.schemaTree = readSchemaTree();
+    }
+
+    private static JsonNode readSchemaTree() {
+        return MAPPER.readTree(ContentSchema.class.getResourceAsStream(RESOURCE));
     }
 
     public static ContentSchema planner() {
@@ -67,19 +79,19 @@ public final class ContentSchema {
     }
 
     public List<Violation> violations(JsonNode content) {
-        Map<Found, Violation> found = schema.validate(content).stream()
-                .map(this::violation)
+        Map<Found, Violation> found = schema.validate(content.toString(), InputFormat.JSON).stream()
+                .map(message -> violation(message, content))
                 .collect(Collectors.toMap(violation -> new Found(violation.code(), violation.path()),
                         Function.identity(), (first, later) -> first, LinkedHashMap::new));
         return found.values().stream().sorted(Violation.BY_PATH_THEN_CODE).toList();
     }
 
-    private Violation violation(ValidationMessage message) {
+    private Violation violation(ValidationMessage message, JsonNode content) {
         Cursor at = cursor(message.getInstanceLocation());
         return switch (message.getType()) {
             case REQUIRED -> Violation.missingField(at.then(message.getProperty()).path());
             case ADDITIONAL_PROPERTIES -> Violation.unknownField(at.then(message.getProperty()).path());
-            default -> invalidValue(at.path(), message.getInstanceNode());
+            default -> invalidValue(at.path(), instanceAt(content, message.getInstanceLocation()));
         };
     }
 
@@ -91,7 +103,7 @@ public final class ContentSchema {
     private static String describe(JsonNode actual) {
         return switch (actual.getNodeType()) {
             case NULL -> "null";
-            case STRING -> "string \"" + truncate(actual.asText()) + "\"";
+            case STRING -> "string \"" + truncate(actual.asString()) + "\"";
             case NUMBER -> "number " + actual;
             case BOOLEAN -> "boolean " + actual.asBoolean();
             default -> actual.getNodeType().toString().toLowerCase(Locale.ROOT);
@@ -105,7 +117,20 @@ public final class ContentSchema {
     private Cursor cursor(JsonNodePath location) {
         return IntStream.range(0, location.getNameCount())
                 .mapToObj(location::getElement)
-                .reduce(new Cursor(ContentPath.root(), schema.getSchemaNode()), Cursor::then, (left, right) -> right);
+                .reduce(new Cursor(ContentPath.root(), schemaTree), Cursor::then, (left, right) -> right);
+    }
+
+    private static JsonNode instanceAt(JsonNode content, JsonNodePath location) {
+        return IntStream.range(0, location.getNameCount())
+                .mapToObj(location::getElement)
+                .reduce(content, ContentSchema::child, (left, right) -> right);
+    }
+
+    private static JsonNode child(JsonNode node, Object segment) {
+        return switch (segment) {
+            case Integer index -> node.path(index);
+            default -> node.path(segment.toString());
+        };
     }
 
     private static boolean keyed(JsonNode objectSchema) {

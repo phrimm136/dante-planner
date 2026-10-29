@@ -1,13 +1,11 @@
 package org.danteplanner.backend.planner.validation;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.InjectableValues;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.InjectableValues;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable.CategoryFloors;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.Optional;
 
 final class ContentJson {
@@ -39,7 +37,7 @@ final class ContentJson {
     static Parsed parse(ObjectMapper objectMapper, String content) {
         try {
             return new Tree(objectMapper.readTree(content));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return new Malformed(e.getMessage());
         }
     }
@@ -49,8 +47,8 @@ final class ContentJson {
             return objectMapper.readerFor(PlannerContent.class)
                     .with(new InjectableValues.Std().addValue(CategoryFloors.class, layout))
                     .readValue(admitted);
-        } catch (IOException e) {
-            throw new UncheckedIOException("content the schema admitted did not bind", e);
+        } catch (JacksonException e) {
+            throw new IllegalStateException("content the schema admitted did not bind", e);
         }
     }
 }

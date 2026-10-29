@@ -1,21 +1,13 @@
 package org.danteplanner.backend.shared.sanitize;
 
-import java.io.IOException;
-import java.io.Serial;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.BeanProperty;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.deser.std.StdDeserializer;
+import tools.jackson.databind.deser.jdk.StringDeserializer;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.BeanProperty;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.deser.std.StringDeserializer;
-
-public class SanitizedStringDeserializer extends StdDeserializer<String>
-        implements ContextualDeserializer {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
+public class SanitizedStringDeserializer extends StdDeserializer<String> {
 
     private final SanitizerKind kind;
 
@@ -33,13 +25,13 @@ public class SanitizedStringDeserializer extends StdDeserializer<String>
      * value or a container's element type), where no declaration exists to read.
      */
     @Override
-    public JsonDeserializer<?> createContextual(DeserializationContext context, BeanProperty property) {
+    public ValueDeserializer<?> createContextual(DeserializationContext context, BeanProperty property) {
         Sanitized declaration = property == null ? null : property.getAnnotation(Sanitized.class);
         return new SanitizedStringDeserializer(declaration == null ? null : declaration.value());
     }
 
     @Override
-    public String deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+    public String deserialize(JsonParser parser, DeserializationContext context) {
         String value = StringDeserializer.instance.deserialize(parser, context);
         return kind == null ? value : kind.apply(value);
     }

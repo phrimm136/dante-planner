@@ -1,6 +1,7 @@
 package org.danteplanner.backend.planner.effect;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.support.TestJsonMappers;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
@@ -16,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -45,7 +45,7 @@ class PlannerEffectVisibilityTest {
     private final RecordingSseChannelSender sseChannel = new RecordingSseChannelSender();
 
     private final SsePublisher ssePublisher =
-            new SsePublisher(sseChannel, Jackson2ObjectMapperBuilder.json().build(), new SimpleMeterRegistry());
+            new SsePublisher(sseChannel, TestJsonMappers.springDefaults(), new SimpleMeterRegistry());
 
     private final DomainEventPayloadReader payloads =
             new DomainEventPayloadReader(new ObjectMapper());

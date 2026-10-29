@@ -7,9 +7,9 @@ import java.util.function.Predicate;
 
 import jakarta.servlet.http.Cookie;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
@@ -123,7 +123,7 @@ class SseFanoutIT extends CausalHarnessSupport {
 
             JsonNode data = json(stream.next(SseEventType.NOTIFY_PUBLISHED.getValue(),
                     names(plannerId), DELIVERY_TIMEOUT));
-            assertThat(data.path("plannerId").asText()).isEqualTo(plannerId);
+            assertThat(data.path("plannerId").asString()).isEqualTo(plannerId);
             assertThat(data.has("excludeUserId")).isFalse();
         }
     }
@@ -136,7 +136,7 @@ class SseFanoutIT extends CausalHarnessSupport {
             ssePublisher.publishAccountSuspended(suspended.getId(), "spam", SuspensionType.BAN, null);
 
             JsonNode data = json(stream.next(SseEventType.ACCOUNT_SUSPENDED.getValue(), DELIVERY_TIMEOUT));
-            assertThat(data.path("suspensionType").asText()).isEqualTo("BAN");
+            assertThat(data.path("suspensionType").asString()).isEqualTo("BAN");
         }
     }
 
@@ -210,7 +210,7 @@ class SseFanoutIT extends CausalHarnessSupport {
                     new CreateCommentRequest("A later comment from someone else", null));
 
             assertThat(json(commenterStream.next(SseEventType.COMMENT_ADDED.getValue(), DELIVERY_TIMEOUT))
-                    .path("entityId").asText())
+                    .path("entityId").asString())
                     .as("a planner's subscribers are sent to in registration order, and the commenter's "
                             + "stream registered before the owner's, so its own comment would precede this one")
                     .isEqualTo(marker.id().toString());
@@ -230,17 +230,17 @@ class SseFanoutIT extends CausalHarnessSupport {
     }
 
     private Predicate<String> entity(UUID entityId) {
-        return data -> entityId.toString().equals(json(data).path("entityId").asText());
+        return data -> entityId.toString().equals(json(data).path("entityId").asString());
     }
 
     private Predicate<String> names(String plannerId) {
-        return data -> plannerId.equals(json(data).path("plannerId").asText());
+        return data -> plannerId.equals(json(data).path("plannerId").asString());
     }
 
     private JsonNode json(String data) {
         try {
             return objectMapper.readTree(data);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new AssertionError("the frame data is not JSON: " + data, e);
         }
     }

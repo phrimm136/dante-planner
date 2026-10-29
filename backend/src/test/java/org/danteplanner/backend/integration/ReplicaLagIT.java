@@ -16,8 +16,8 @@ import javax.sql.DataSource;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.PlannerBatchRequest;
@@ -374,7 +374,7 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
             assertThat(response.statusCode())
                     .as("a republished planner must be visible at once: " + response.body())
                     .isEqualTo(200);
-            assertThat(objectMapper.readTree(response.body()).get("id").asText())
+            assertThat(objectMapper.readTree(response.body()).get("id").asString())
                     .isEqualTo(plannerId.toString());
         } finally {
             replicationControl.startReplica();
@@ -531,8 +531,8 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
                 .as("the published read must be masked, not served: " + response.body())
                 .isEqualTo(404);
         JsonNode problem = objectMapper.readTree(response.body());
-        assertThat(problem.path("code").asText()).isEqualTo("NOT_FOUND");
-        assertThat(problem.path("detail").asText()).isEqualTo("planner not found with id: " + plannerId);
+        assertThat(problem.path("code").asString()).isEqualTo("NOT_FOUND");
+        assertThat(problem.path("detail").asString()).isEqualTo("planner not found with id: " + plannerId);
     }
 
     @Test
@@ -559,8 +559,8 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
                 .as("the published read must be masked, not served: " + response.body())
                 .isEqualTo(404);
         JsonNode problem = objectMapper.readTree(response.body());
-        assertThat(problem.path("code").asText()).isEqualTo("PLANNER_NOT_FOUND");
-        assertThat(problem.path("detail").asText()).isEqualTo("Planner not found with id: " + plannerId);
+        assertThat(problem.path("code").asString()).isEqualTo("PLANNER_NOT_FOUND");
+        assertThat(problem.path("detail").asString()).isEqualTo("Planner not found with id: " + plannerId);
     }
 
     private double bulkheadQueries() {
@@ -596,7 +596,7 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
             assertThat(response.statusCode()).as(response.body()).isEqualTo(200);
             List<String> served = new ArrayList<>();
             for (JsonNode planner : objectMapper.readTree(response.body())) {
-                served.add(planner.get("id").asText());
+                served.add(planner.get("id").asString());
             }
             return served;
         }

@@ -1,7 +1,5 @@
 package org.danteplanner.backend.support;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -22,7 +20,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.sse.SseChannel;
@@ -154,11 +152,7 @@ public final class SseTopicRecorder implements AutoCloseable {
             return;
         }
         SseChannel channel = SseChannel.fromTopic(topic);
-        try {
-            envelopes.record(channel, objectMapper.readValue(message.getBody(), SseEnvelope.class));
-        } catch (IOException e) {
-            throw new UncheckedIOException("unreadable SSE envelope on " + topic, e);
-        }
+        envelopes.record(channel, objectMapper.readValue(message.getBody(), SseEnvelope.class));
     }
 
     static final class Envelopes {

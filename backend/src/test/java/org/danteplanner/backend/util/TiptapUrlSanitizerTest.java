@@ -1,7 +1,7 @@
 package org.danteplanner.backend.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import org.danteplanner.backend.shared.util.TiptapUrlSanitizer;
 import org.junit.jupiter.api.Test;
@@ -51,7 +51,7 @@ class TiptapUrlSanitizerTest {
         assertThat(root.path("content").get(0)
                 .path("content").get(0)
                 .path("marks").get(0)
-                .path("attrs").path("href").asText())
+                .path("attrs").path("href").asString())
                 .isEqualTo(expected);
     }
 
@@ -73,7 +73,7 @@ class TiptapUrlSanitizerTest {
 
         JsonNode root = mapper.readTree(TiptapUrlSanitizer.sanitizeJson(input));
 
-        assertThat(root.path("content").get(0).path("attrs").path("src").asText())
+        assertThat(root.path("content").get(0).path("attrs").path("src").asString())
                 .isEqualTo(expected);
     }
 

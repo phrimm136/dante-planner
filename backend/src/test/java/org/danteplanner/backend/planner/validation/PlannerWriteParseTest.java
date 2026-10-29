@@ -1,7 +1,7 @@
 package org.danteplanner.backend.planner.validation;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.moderation.service.RestrictionCheckService;
 import org.danteplanner.backend.moderation.validation.AccountStandingValidator;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
@@ -116,7 +116,7 @@ class PlannerWriteParseTest {
 
     @Test
     void upsertPlanner_WhenAStaleRequestEqualsTheStoredRowInEveryCarriedField_AcknowledgesWithoutAWrite()
-            throws JsonProcessingException {
+            throws JacksonException {
         Planner planner = stored(TestDataFactory.VALID_CONTENT);
         long storedVersion = planner.getSyncVersion();
         String restyled = MAPPER.readTree(planner.getContentJson()).toPrettyString();

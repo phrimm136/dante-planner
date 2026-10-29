@@ -11,10 +11,10 @@ import java.util.function.LongSupplier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
 
@@ -180,7 +180,7 @@ public final class HistoryRecorder implements Closeable {
         try {
             writer.write(MAPPER.writeValueAsString(line));
             writer.write('\n');
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("could not render a history line", e);
         } catch (IOException e) {
             throw new UncheckedIOException(e);

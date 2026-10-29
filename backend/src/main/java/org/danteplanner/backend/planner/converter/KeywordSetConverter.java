@@ -1,8 +1,9 @@
 package org.danteplanner.backend.planner.converter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
@@ -18,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @Converter
 public class KeywordSetConverter implements AttributeConverter<Set<String>, String> {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = JsonMapper.builderWithJackson2Defaults().build();
 
     private static final TypeReference<List<String>> STRING_LIST = new TypeReference<>() {
     };
@@ -38,7 +39,7 @@ public class KeywordSetConverter implements AttributeConverter<Set<String>, Stri
         List<String> sorted = keywords.asSet().stream().sorted().toList();
         try {
             return MAPPER.writeValueAsString(sorted);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.error("Failed to serialize planner keywords {}", sorted, e);
             return null;
         }
@@ -52,7 +53,7 @@ public class KeywordSetConverter implements AttributeConverter<Set<String>, Stri
         List<String> parsed;
         try {
             parsed = MAPPER.readValue(dbData, STRING_LIST);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.warn("Unreadable planner keyword storage, treating as empty: {}", dbData, e);
             return new HashSet<>();
         }

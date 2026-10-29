@@ -9,9 +9,9 @@ import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.shared.sse.SuspensionType;
 import org.danteplanner.backend.support.RecordingSseChannelSender;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.util.Map;
+import org.danteplanner.backend.support.TestJsonMappers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,7 +26,7 @@ class AccountSuspensionEventListenerTest {
     private final RecordingSseChannelSender sseChannel = new RecordingSseChannelSender();
 
     private final SsePublisher ssePublisher =
-            new SsePublisher(sseChannel, Jackson2ObjectMapperBuilder.json().build(), new SimpleMeterRegistry());
+            new SsePublisher(sseChannel, TestJsonMappers.springDefaults(), new SimpleMeterRegistry());
 
     @Test
     void handleAccountSuspended_WhenTimeoutDelivered_ForwardsEveryFieldToThePublisher() {

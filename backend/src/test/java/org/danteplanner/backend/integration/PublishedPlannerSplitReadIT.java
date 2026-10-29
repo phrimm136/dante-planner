@@ -1,7 +1,7 @@
 package org.danteplanner.backend.integration;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.distributed.BucketProxy;
@@ -150,7 +150,7 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
 
     private static Set<String> fieldNames(JsonNode node) {
         return Set.copyOf(StreamSupport.stream(
-                Spliterators.spliteratorUnknownSize(node.fieldNames(), 0), false).toList());
+                Spliterators.spliteratorUnknownSize(node.propertyNames().iterator(), 0), false).toList());
     }
 
     @Test

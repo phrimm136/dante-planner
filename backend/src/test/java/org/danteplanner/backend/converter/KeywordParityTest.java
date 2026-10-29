@@ -1,8 +1,8 @@
 package org.danteplanner.backend.converter;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -44,7 +44,7 @@ class KeywordParityTest {
                 .isTrue();
         JsonNode root = new ObjectMapper().readTree(Files.readString(FE_PLANNER_KEYWORDS, StandardCharsets.UTF_8));
         Set<String> ids = new HashSet<>();
-        root.fieldNames().forEachRemaining(ids::add);
+        ids.addAll(root.propertyNames());
         return ids;
     }
 }

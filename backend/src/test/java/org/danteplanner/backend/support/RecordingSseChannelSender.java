@@ -1,11 +1,9 @@
 package org.danteplanner.backend.support;
 
-import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import org.danteplanner.backend.shared.sse.SseChannel;
 import org.danteplanner.backend.shared.sse.SseChannelSender;
@@ -61,10 +59,6 @@ public class RecordingSseChannelSender extends SseChannelSender {
     }
 
     private SseEnvelope parse(String json) {
-        try {
-            return objectMapper.readValue(json, SseEnvelope.class);
-        } catch (JsonProcessingException e) {
-            throw new UncheckedIOException(e);
-        }
+        return objectMapper.readValue(json, SseEnvelope.class);
     }
 }

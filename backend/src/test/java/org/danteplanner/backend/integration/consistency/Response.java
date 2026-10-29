@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 record Response(int status, String body) {
 
@@ -25,8 +25,8 @@ record Response(int status, String body) {
     Optional<String> code() {
         try {
             JsonNode code = MAPPER.readTree(body).path("code");
-            return code.isTextual() ? Optional.of(code.textValue()) : Optional.empty();
-        } catch (JsonProcessingException e) {
+            return code.isString() ? Optional.of(code.stringValue()) : Optional.empty();
+        } catch (JacksonException e) {
             return Optional.empty();
         }
     }
@@ -35,10 +35,10 @@ record Response(int status, String body) {
         List<String> ids = new ArrayList<>();
         for (JsonNode planner : content()) {
             JsonNode id = planner.path("id");
-            if (!id.isTextual()) {
+            if (!id.isString()) {
                 throw new IllegalStateException("a page entry without a string id: " + planner);
             }
-            ids.add(id.textValue());
+            ids.add(id.stringValue());
         }
         return ids;
     }
@@ -50,7 +50,7 @@ record Response(int status, String body) {
             if (!version.isIntegralNumber()) {
                 throw new IllegalStateException("a page entry without an integral syncVersion: " + planner);
             }
-            versions.put(planner.path("id").textValue(), version.longValue());
+            versions.put(planner.path("id").stringValue(), version.longValue());
         }
         return versions;
     }
@@ -66,7 +66,7 @@ record Response(int status, String body) {
     private JsonNode json() {
         try {
             return MAPPER.readTree(body);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("a " + status + " body is not JSON: " + body, e);
         }
     }

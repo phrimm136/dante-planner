@@ -1,7 +1,7 @@
 package org.danteplanner.backend.integration;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -124,7 +124,7 @@ class PlannerUpsertConflictIT extends SharedMySqlContainerSupport {
                         ? first.response() : second.response();
                 MockHttpServletResponse loser = winner == first.response() ? second.response() : first.response();
                 JsonNode problem = objectMapper.readTree(loser.getContentAsString());
-                assertThat(problem.path("code").asText()).as("attempt %d", attempt).isEqualTo("SYNC_CONFLICT");
+                assertThat(problem.path("code").asString()).as("attempt %d", attempt).isEqualTo("SYNC_CONFLICT");
                 assertThat(problem.path("serverVersion").asLong())
                         .as("attempt %d: the loser is told the winner's new version", attempt)
                         .isEqualTo(objectMapper.readTree(winner.getContentAsString()).path("syncVersion").asLong())

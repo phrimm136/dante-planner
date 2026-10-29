@@ -18,14 +18,14 @@ import org.danteplanner.backend.support.TestJwt;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.backend.support.LogCapture;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.support.TestJsonMappers;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.danteplanner.backend.support.TestDataFactory;
 import com.jayway.jsonpath.JsonPath;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -80,7 +80,7 @@ class JwtAuthenticationFilterTest {
 
     @BeforeEach
     void setUp() {
-        objectMapper = Jackson2ObjectMapperBuilder.json().build();
+        objectMapper = TestJsonMappers.springDefaults();
         filter = filterOver(users);
         SecurityContextHolder.clearContext();
         request = new MockHttpServletRequest("GET", "/test");

@@ -2,9 +2,9 @@ package org.danteplanner.backend.auth.security;
 
 import org.danteplanner.backend.shared.security.AuthDegradationResponder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.support.TestJsonMappers;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import jakarta.servlet.http.Cookie;
 
 import java.time.Duration;
@@ -51,7 +51,7 @@ class JwtAuthenticationFilterLineageTest {
 
     private final RecordingRefreshRotation refreshRotation = new RecordingRefreshRotation(jwt, tokenBlacklist);
 
-    private final ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
+    private final ObjectMapper objectMapper = TestJsonMappers.springDefaults();
     private final CookieUtils cookieUtils = new CookieUtils(true, "", "Lax");
 
     private MockHttpServletRequest request;

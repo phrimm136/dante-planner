@@ -31,7 +31,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 
 import jakarta.servlet.http.Cookie;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -505,7 +505,7 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
                 .content(COMMENT_BODY)
                 .cookie(reader.cookies()));
         UUID commentId = UUID.fromString(objectMapper.readTree(comment.getResponse().getContentAsString())
-                .get("id").asText());
+                .get("id").asString());
         return new Published(plannerId, owner, reader, moderatorSession(), commentId);
     }
 }

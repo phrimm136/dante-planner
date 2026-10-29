@@ -1,6 +1,6 @@
 package org.danteplanner.backend.planner.gamedata;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import org.danteplanner.backend.planner.entity.MDCategory;
 
 import java.util.ArrayList;
@@ -178,11 +178,11 @@ public record FloorRuleTable(
         }
         Set<String> values = new LinkedHashSet<>();
         for (JsonNode value : node) {
-            if (!value.isTextual()) {
+            if (!value.isString()) {
                 throw new IllegalArgumentException("'" + path + "' must hold strings only, got " + value);
             }
-            if (!values.add(value.asText())) {
-                throw new IllegalArgumentException("'" + path + "' repeats '" + value.asText() + "'");
+            if (!values.add(value.asString())) {
+                throw new IllegalArgumentException("'" + path + "' repeats '" + value.asString() + "'");
             }
         }
         return values;

@@ -1,7 +1,7 @@
 package org.danteplanner.backend.integration;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.PlannerBatchRequest;
@@ -96,7 +96,7 @@ class PlannerBatchPullIT extends SharedMySqlContainerSupport {
 
     private static List<String> idsOf(JsonNode array) {
         List<String> ids = new ArrayList<>();
-        array.forEach(element -> ids.add(element.get("id").asText()));
+        array.forEach(element -> ids.add(element.get("id").asString()));
         return ids;
     }
 

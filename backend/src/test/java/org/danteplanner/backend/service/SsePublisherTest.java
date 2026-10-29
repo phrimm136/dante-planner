@@ -5,7 +5,8 @@ import org.danteplanner.backend.shared.sse.SseChannelSender;
 import org.danteplanner.backend.shared.sse.SseConstants;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +43,7 @@ class SsePublisherTest {
     @Mock
     private StringRedisTemplate stringRedisTemplate;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = JsonMapper.builderWithJackson2Defaults().build();
 
     private final SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
 

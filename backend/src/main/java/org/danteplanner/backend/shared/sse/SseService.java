@@ -1,7 +1,7 @@
 package org.danteplanner.backend.shared.sse;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.TaskExecutor;
@@ -67,7 +67,7 @@ public class SseService extends AbstractSseService<Long> {
         String jsonData;
         try {
             jsonData = objectMapper.writeValueAsString(data);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.error("Failed to serialize event data for type {}", eventType, e);
             return;
         }
@@ -91,7 +91,7 @@ public class SseService extends AbstractSseService<Long> {
         String jsonData;
         try {
             jsonData = objectMapper.writeValueAsString(data);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.error("Failed to serialize broadcast data for type {}", eventType, e);
             return;
         }

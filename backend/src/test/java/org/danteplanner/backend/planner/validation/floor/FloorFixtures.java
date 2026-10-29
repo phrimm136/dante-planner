@@ -1,16 +1,14 @@
 package org.danteplanner.backend.planner.validation.floor;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.math.BigInteger;
 import java.nio.file.Path;
 import java.util.List;
@@ -31,7 +29,7 @@ final class FloorFixtures {
     static JsonNode json(String text) {
         try {
             return MAPPER.readTree(text);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException(text, e);
         }
     }
@@ -50,7 +48,7 @@ final class FloorFixtures {
     }
 
     static ObjectNode content(JsonNode floorSelections) {
-        ObjectNode content = BASE.deepCopy();
+        ObjectNode content = (ObjectNode) BASE.deepCopy();
         if (floorSelections.isMissingNode()) {
             content.remove("floorSelections");
         } else {
@@ -73,11 +71,7 @@ final class FloorFixtures {
     }
 
     static JsonNode readCorpus() {
-        try {
-            return MAPPER.readTree(CORPUS_FILE.toFile());
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return MAPPER.readTree(CORPUS_FILE.toFile());
     }
 
     static ArrayNode outcomeFloors(List<FloorSelection> floors) {

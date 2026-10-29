@@ -5,8 +5,8 @@ import org.danteplanner.backend.support.FakeNotificationPreferences;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.UsersContract;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -127,7 +127,7 @@ class SseServiceTest {
 
         @Test
         void sendToUser_WhenSerializationFails_DoesNotThrowNorRemove() throws Exception {
-            when(mockedMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("boom") {});
+            when(mockedMapper.writeValueAsString(any())).thenThrow(new JacksonException("boom") {});
             SseService service = new SseService(mockedMapper, preferenceProvider, SAME_THREAD);
             service.subscribe(USER_ID, UUID.randomUUID());
 
@@ -180,7 +180,7 @@ class SseServiceTest {
 
         @Test
         void broadcastToAll_WhenSerializationFails_DoesNotThrow() throws Exception {
-            when(mockedMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("boom") {});
+            when(mockedMapper.writeValueAsString(any())).thenThrow(new JacksonException("boom") {});
             SseService service = new SseService(mockedMapper, preferenceProvider, SAME_THREAD);
             service.subscribe(USER_ID, UUID.randomUUID());
 

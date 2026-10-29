@@ -5,7 +5,6 @@ import java.time.Duration;
 import java.util.List;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,6 +34,7 @@ import org.assertj.core.api.SoftAssertions;
 import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.danteplanner.backend.support.TestJsonMappers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -230,7 +230,7 @@ class RateLimitBucketLifecycleIT {
                 securityProperties,
                 new DeviceIdResolver(new CookieUtils(false, "", "Lax")),
                 new FrontendProperties("https://planner.example"),
-                new ProblemWriter(Jackson2ObjectMapperBuilder.json().build()),
+                new ProblemWriter(TestJsonMappers.springDefaults()),
                 new SimpleMeterRegistry());
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new DeclaredHandlerFixture())
                 .addInterceptors(interceptor)

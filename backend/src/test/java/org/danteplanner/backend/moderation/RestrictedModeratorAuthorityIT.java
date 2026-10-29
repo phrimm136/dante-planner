@@ -1,7 +1,7 @@
 package org.danteplanner.backend.moderation;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
@@ -346,7 +346,7 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
                 .with(withCsrf())
                 .cookie(moderatorCookie));
 
-        assertThat(ordinary.path("code").asText()).isEqualTo("USER_BANNED");
+        assertThat(ordinary.path("code").asString()).isEqualTo("USER_BANNED");
         assertThat(fieldNames(privileged)).isEqualTo(fieldNames(ordinary));
         for (String field : List.of("type", "title", "status", "detail", "code", "message")) {
             assertThat(privileged.get(field)).as(field).isEqualTo(ordinary.get(field));
@@ -393,7 +393,7 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
 
     private static Set<String> fieldNames(JsonNode body) {
         Set<String> names = new TreeSet<>();
-        body.fieldNames().forEachRemaining(names::add);
+        names.addAll(body.propertyNames());
         return names;
     }
 }

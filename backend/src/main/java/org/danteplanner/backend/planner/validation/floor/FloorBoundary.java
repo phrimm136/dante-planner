@@ -1,6 +1,6 @@
 package org.danteplanner.backend.planner.validation.floor;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable.CategoryFloors;
 import org.danteplanner.backend.planner.validation.ContentPath;
 import org.danteplanner.backend.planner.validation.ContentSchema;
@@ -90,7 +90,7 @@ public final class FloorBoundary {
 
     private static ThemePack themePack(JsonNode node) {
         return switch (node.getNodeType()) {
-            case STRING, NUMBER -> node.asText().isEmpty() ? ThemePack.none() : ThemePack.chosen(node.asText());
+            case STRING, NUMBER -> node.asString().isEmpty() ? ThemePack.none() : ThemePack.chosen(node.asString());
             default -> ThemePack.none();
         };
     }
@@ -128,7 +128,7 @@ public final class FloorBoundary {
 
     private static Optional<String> giftId(JsonNode giftId) {
         return switch (giftId.getNodeType()) {
-            case STRING, NUMBER -> Optional.of(giftId.asText());
+            case STRING, NUMBER -> Optional.of(giftId.asString());
             default -> Optional.empty();
         };
     }

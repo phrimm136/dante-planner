@@ -8,7 +8,6 @@ import java.util.List;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
@@ -46,6 +45,7 @@ import ch.qos.logback.classic.Level;
 import io.lettuce.core.RedisConnectionException;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.danteplanner.backend.support.TestJsonMappers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -202,7 +202,7 @@ class RateLimitStoreOutageTest {
                 securityProperties,
                 deviceIdResolver,
                 frontendProperties,
-                new ProblemWriter(Jackson2ObjectMapperBuilder.json().build()),
+                new ProblemWriter(TestJsonMappers.springDefaults()),
                 meterRegistry);
 
         AuthController authController = new AuthController(

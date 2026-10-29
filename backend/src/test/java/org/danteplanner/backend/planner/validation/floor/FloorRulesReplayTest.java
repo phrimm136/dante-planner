@@ -1,8 +1,8 @@
 package org.danteplanner.backend.planner.validation.floor;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 import net.jqwik.api.Example;
 import net.jqwik.api.lifecycle.AddLifecycleHook;
 import net.jqwik.api.lifecycle.LifecycleContext;
@@ -72,14 +72,14 @@ class FloorRulesReplayTest {
         for (int index = 0; index < cases.size(); index++) {
             JsonNode exchangeCase = cases.get(index);
             JsonNode actual = run(exchangeCase.path("raw"),
-                    MDCategory.fromValue(exchangeCase.path("category").asText()),
-                    Stage.fromTableName(exchangeCase.path("stage").asText()));
+                    MDCategory.fromValue(exchangeCase.path("category").asString()),
+                    Stage.fromTableName(exchangeCase.path("stage").asString()));
             if (!actual.equals(exchangeCase.path("outcome"))) {
                 mismatches.add("case " + index + ": " + exchangeCase + " actual=" + actual);
             }
         }
 
-        assertThat(exchange.path("producer").asText()).isEqualTo("frontend");
+        assertThat(exchange.path("producer").asString()).isEqualTo("frontend");
         assertThat(cases.size()).isPositive();
         assertThat(mismatches).isEmpty();
     }

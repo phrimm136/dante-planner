@@ -33,8 +33,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.MockMvcPrint;
 import org.springframework.boot.webmvc.test.autoconfigure.SpringBootMockMvcBuilderCustomizer;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariDataSource;
 import eu.rekawek.toxiproxy.Proxy;
 import eu.rekawek.toxiproxy.ToxiproxyClient;
@@ -489,9 +489,9 @@ class ReadSourceOutageIT extends ReplicaRoutingHarnessSupport {
         String body = result.getResponse().getContentAsString();
         JsonNode json = body.isBlank() ? objectMapper.nullNode() : objectMapper.readTree(body);
         if (status == 200) {
-            return status + " title=" + json.path("title").asText();
+            return status + " title=" + json.path("title").asString();
         }
-        return status + " code=" + json.path("code").asText()
+        return status + " code=" + json.path("code").asString()
                 + " retryAfter=" + result.getResponse().getHeader(HttpHeaders.RETRY_AFTER);
     }
 

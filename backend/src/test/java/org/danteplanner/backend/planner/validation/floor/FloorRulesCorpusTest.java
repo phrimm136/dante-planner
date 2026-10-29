@@ -1,6 +1,6 @@
 package org.danteplanner.backend.planner.validation.floor;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.validation.ContentPath;
 import org.danteplanner.backend.planner.validation.EncodedGiftId;
@@ -15,8 +15,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -73,7 +71,7 @@ class FloorRulesCorpusTest {
     static Stream<Arguments> corpusCases() {
         return allCases()
                 .flatMap(corpusCase -> Stream.of(Stage.values())
-                        .map(stage -> Arguments.of(corpusCase.path("name").asText(), stage, corpusCase)));
+                        .map(stage -> Arguments.of(corpusCase.path("name").asString(), stage, corpusCase)));
     }
 
     @ParameterizedTest(name = "{0} at {1}")
@@ -83,7 +81,7 @@ class FloorRulesCorpusTest {
         JsonNode expect = corpusCase.path("expect").path(stage.tableName());
         JsonNode floorSelections = corpusCase.path("floorSelections");
         FloorBoundary.Parsed parsed = FloorFixtures.parse(floorSelections,
-                MDCategory.fromValue(corpusCase.path("category").asText()));
+                MDCategory.fromValue(corpusCase.path("category").asString()));
         Admission admission = rules.admit(parsed, stage);
         List<Violation> references = stage == Stage.INDEX ? List.of() : FloorReferences.check(parsed, CORPUS_GAME_DATA);
 
@@ -131,7 +129,7 @@ class FloorRulesCorpusTest {
         JsonNode corpusCase = namedCase(name);
 
         Admission admission = admit(rules, corpusCase.path("floorSelections"),
-                MDCategory.fromValue(corpusCase.path("category").asText()), stage);
+                MDCategory.fromValue(corpusCase.path("category").asString()), stage);
 
         assertThat(admission).isInstanceOfSatisfying(Admission.Rejected.class, rejected ->
                 assertThat(rejected.violations()).extracting(Violation::message).contains(message));
@@ -348,7 +346,7 @@ class FloorRulesCorpusTest {
 
     private static JsonNode namedCase(String name) {
         return allCases()
-                .filter(candidate -> candidate.path("name").asText().equals(name))
+                .filter(candidate -> candidate.path("name").asString().equals(name))
                 .findFirst()
                 .orElseThrow();
     }
@@ -382,7 +380,7 @@ class FloorRulesCorpusTest {
 
     private static FloorReferenceData corpusGameData(JsonNode gameData) {
         Set<String> themePackIds = new HashSet<>();
-        gameData.path("themePackIds").forEach(id -> themePackIds.add(id.asText()));
+        gameData.path("themePackIds").forEach(id -> themePackIds.add(id.asString()));
         Map<String, List<String>> giftThemePacks = new HashMap<>();
         gameData.path("egoGiftThemePacks").properties().forEach(gift -> giftThemePacks.put(gift.getKey(),
                 StreamSupport.stream(gift.getValue().spliterator(), false).map(JsonNode::asText).toList()));
@@ -416,7 +414,7 @@ class FloorRulesCorpusTest {
     private static List<List<String>> pairs(JsonNode violations) {
         List<List<String>> pairs = new ArrayList<>();
         violations.forEach(violation -> pairs.add(
-                List.of(violation.path("code").asText(), violation.path("path").asText())));
+                List.of(violation.path("code").asString(), violation.path("path").asString())));
         return pairs;
     }
 
@@ -429,10 +427,6 @@ class FloorRulesCorpusTest {
     }
 
     private static JsonNode readCorpus() {
-        try {
-            return MAPPER.readTree(CORPUS_FILE.toFile());
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return MAPPER.readTree(CORPUS_FILE.toFile());
     }
 }

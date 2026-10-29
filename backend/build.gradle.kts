@@ -79,9 +79,7 @@ dependencies {
     testCompileOnly("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
 
-    implementation("com.fasterxml.jackson.core:jackson-databind")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-    implementation("org.springframework.boot:spring-boot-jackson2")
+    implementation("tools.jackson.core:jackson-databind")
 
     implementation("net.javacrumbs.shedlock:shedlock-spring:5.16.0")
     implementation("net.javacrumbs.shedlock:shedlock-provider-redis-spring:5.16.0")
@@ -111,7 +109,7 @@ dependencies {
 
     errorprone("com.google.errorprone:error_prone_core:2.36.0")
 
-    "consistencyImplementation"("com.fasterxml.jackson.core:jackson-databind")
+    "consistencyImplementation"("tools.jackson.core:jackson-databind")
 }
 
 tasks.processResources {

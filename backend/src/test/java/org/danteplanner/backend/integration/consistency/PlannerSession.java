@@ -14,8 +14,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.support.UpsertRequests;
@@ -63,7 +63,7 @@ public final class PlannerSession implements OperationPerformer {
     }
 
     @Override
-    public void perform(PlannedOperation operation) throws JsonProcessingException {
+    public void perform(PlannedOperation operation) throws JacksonException {
         switch (operation) {
             case PlannedOperation.Save save -> save(pool.pick(save.key()));
             case PlannedOperation.Create create -> create();
@@ -76,14 +76,14 @@ public final class PlannerSession implements OperationPerformer {
         }
     }
 
-    private void create() throws JsonProcessingException {
+    private void create() throws JacksonException {
         UUID id = UUID.randomUUID();
         if (save(id).isPresent()) {
             pool.add(id);
         }
     }
 
-    private Optional<Response> save(UUID id) throws JsonProcessingException {
+    private Optional<Response> save(UUID id) throws JacksonException {
         saves++;
         String body = objectMapper.writeValueAsString(UpsertRequests.draft()
                 .id(id.toString())
