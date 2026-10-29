@@ -51,6 +51,7 @@ class SseShutdownDrainTest {
     private static final long SHUTDOWN_PHASE_TIMEOUT_MS = 5_000;
     /** Well under the phase timeout, well over a context close with nothing in flight. */
     private static final long PROMPT_CLOSE_MS = 2_000;
+    private static final long WELL_SHORT_OF_SSE_TIMEOUT_MS = AbstractSseService.SSE_TIMEOUT_MS / 120;
     private static final int OPEN_STREAMS = 3;
 
     @Test
@@ -111,7 +112,23 @@ class SseShutdownDrainTest {
     }
 
     @Test
-    void subscribe_WhenTheDrainHasRun_EndsTheStreamAtOnceWithoutRegistering() throws Exception {
+    void subscribe_WhenTheDrainHasRun_ReturnsACompletedEmitterWithoutRegistering() throws Exception {
+        ProbeSseService service = new ProbeSseService();
+        try (GenericApplicationContext context = new GenericApplicationContext()) {
+            service.onApplicationEvent(new ContextClosedEvent(context));
+        }
+
+        SseEmitter emitter = service.subscribe();
+
+        assertThatThrownBy(() -> emitter.send(SseEmitter.event().comment("heartbeat")))
+                .as("a subscription after the drain is completed before it is returned")
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("already completed");
+        assertThat(service.openCount()).as("registry entries after a post-drain subscription").isZero();
+    }
+
+    @Test
+    void streamRequest_WhenTheDrainHasRun_EndsTheResponseInsteadOfHoldingItOpen() throws Exception {
         ServletWebServerApplicationContext context = start();
         ProbeSseService service = context.getBean(ProbeSseService.class);
         service.onApplicationEvent(new ContextClosedEvent(context));
@@ -121,7 +138,7 @@ class SseShutdownDrainTest {
                 HttpClient.newHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString());
 
         assertThat(stream).as("a subscription after the drain ends instead of staying open")
-                .succeedsWithin(Duration.ofMillis(PROMPT_CLOSE_MS));
+                .succeedsWithin(Duration.ofMillis(WELL_SHORT_OF_SSE_TIMEOUT_MS));
         assertThat(service.openCount()).as("registry entries after a post-drain subscription").isZero();
 
         long started = System.nanoTime();
