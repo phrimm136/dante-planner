@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.danteplanner.backend.planner.service.PlannerKeywordBackfillService;
 import org.danteplanner.backend.planner.service.PlannerKeywordBackfillService.BackfillPage;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +21,8 @@ public class PlannerKeywordBackfill {
 
     private final PlannerKeywordBackfillService backfillService;
 
+    private volatile boolean closing;
+
     @Scheduled(initialDelayString = "${planner.keyword-backfill.initial-delay-ms:60000}")
     @SchedulerLock(name = "backfillPlannerKeywords", lockAtMostFor = "PT30M")
     public Integer backfill() {
@@ -29,8 +33,13 @@ public class PlannerKeywordBackfill {
             page = backfillService.backfillPage(after, PAGE_SIZE);
             corrected += page.corrected();
             after = page.lastPlannerId();
-        } while (page.scanned() == PAGE_SIZE);
+        } while (page.scanned() == PAGE_SIZE && !closing);
         log.info("Planner keyword backfill corrected {} planner(s)", corrected);
         return corrected;
+    }
+
+    @EventListener(ContextClosedEvent.class)
+    public void onContextClosed() {
+        closing = true;
     }
 }

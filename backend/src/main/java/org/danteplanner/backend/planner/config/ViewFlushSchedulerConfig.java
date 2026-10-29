@@ -24,6 +24,7 @@ public class ViewFlushSchedulerConfig {
         scheduler.setPoolSize(poolSize);
         scheduler.setThreadNamePrefix("scheduling-");
         scheduler.setRemoveOnCancelPolicy(true);
+        scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
         return scheduler;
     }
 
@@ -33,6 +34,7 @@ public class ViewFlushSchedulerConfig {
         scheduler.setPoolSize(1);
         scheduler.setThreadNamePrefix("view-flush-");
         scheduler.setRemoveOnCancelPolicy(true);
+        scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
         return scheduler;
     }
 }

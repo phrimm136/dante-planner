@@ -15,6 +15,7 @@ public class SseHeartbeatWorkerConfig {
         worker.setPoolSize(SseConstants.HEARTBEAT_WORKER_POOL_SIZE);
         worker.setThreadNamePrefix("sse-heartbeat-");
         worker.setRemoveOnCancelPolicy(true);
+        worker.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
         return worker;
     }
 }
