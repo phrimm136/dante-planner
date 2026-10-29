@@ -18,6 +18,7 @@ Run all checks. A commit that breaks the build wastes everyone's time — catch 
 | FE build | `yarn --cwd <worktree>/frontend build` |
 | BE test | `<worktree>/backend/gradlew -p <worktree>/backend test` |
 | BE build | `<worktree>/backend/gradlew -p <worktree>/backend build` |
+| BE mutation | `<worktree>/backend/gradlew -p <worktree>/backend pitestRatchet` (not part of `build`) |
 | Mock deploy | `docker compose up --build -d` (repo root; auto-merges the gitignored `docker-compose.override.yml`, which supplies the local mysql/backend/nginx/redis stack) |
 
 Output redirection is enforced by the `check-output-redirect.sh` hook — it will block any test/build command that doesn't redirect to `/tmp/` with a date suffix. Follow the hook's required pattern.
