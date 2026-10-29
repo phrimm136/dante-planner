@@ -47,6 +47,7 @@ principle without a corresponding entry is an untested claim rather than a settl
 
 | File | Operation |
 |---|---|
+| `runbooks/backend-image-rollback.md` | Reverting a bad backend release through the deploy pipeline |
 | `runbooks/environment-setup.md` | Standing up a working environment from scratch |
 | `runbooks/prod-account-rewire.md` | Preparing the vended prod account to receive production |
 | `runbooks/rds-migration.md` | Managed-database migration and the decommission gate |
