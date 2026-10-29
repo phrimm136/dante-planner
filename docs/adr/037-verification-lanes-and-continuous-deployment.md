@@ -1,5 +1,5 @@
 # 037 verification-lanes-and-continuous-deployment
-epic: none · pr: none
+epic: none · pr: none · supersedes: 004 @deploy @deploy-fleet @trigger
 
 ## Decisions
 - @testing @lanes — An e2e spec's lane is the set of changes that can break it: application suites, contract suites, and infrastructure suites are distinct Playwright projects selected by filename suffix, with `.infra.spec.ts` joining the existing `.contract.spec.ts` convention. The suffix makes the classification travel with the file and keeps the partition greppable. REJECTED: directory-per-lane — loses the flat listing and makes every reclassification a move that churns imports. REJECTED: in-file tag annotations — invisible in a directory listing, and the runner's project selection would depend on parsing test bodies.
