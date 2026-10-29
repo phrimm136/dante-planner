@@ -45,6 +45,7 @@ public abstract class AbstractSseService<K> implements ApplicationListener<Conte
             return emitter;
         }
 
+        emitter.send(SseEmitter.event().name("connected").data("{}"));
         emitters.compute(key, (k, existing) -> {
             var connections = existing != null ? existing : new CopyOnWriteArrayList<EmitterEntry>();
             connections.removeIf(e -> e.deviceId().equals(deviceId));
@@ -58,7 +59,6 @@ public abstract class AbstractSseService<K> implements ApplicationListener<Conte
         emitter.onTimeout(() -> removeConnection(key, deviceId));
         emitter.onError(e -> removeConnection(key, deviceId));
 
-        emitter.send(SseEmitter.event().name("connected").data("{}"));
         if (closing) {
             emitter.complete();
         }
