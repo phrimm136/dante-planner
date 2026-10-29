@@ -24,7 +24,7 @@ jobs:
 
       - name: Import alert rules and the fleet dashboard
         env:
-          GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
+          GRAFANA_URL: ${{ vars.GRAFANA_URL }}
           GRAFANA_TOKEN: ${{ secrets.GRAFANA_TOKEN }}
           ETCD_INTERVAL: ${{ vars.ETCD_INTERVAL }}
           CW_DS_UID: ${{ vars.CW_DS_UID }}
