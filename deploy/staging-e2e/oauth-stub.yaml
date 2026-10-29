@@ -108,11 +108,21 @@ spec:
       labels:
         app: oauth-stub
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       nodeSelector:
         role: data
       containers:
         - name: oauth-stub
           image: node:20-alpine
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
           command: ["node", "/app/server.js"]
           env:
             - name: CLIENT_ID

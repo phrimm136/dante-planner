@@ -10,7 +10,7 @@ metadata:
 data:
   default.conf: |
     server {
-      listen 80;
+      listen 8080;
       root /usr/share/nginx/html;
       index index.html;
       location / {
@@ -33,11 +33,22 @@ spec:
       labels:
         app: staging-frontend
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
       nodeSelector:
         role: data
       initContainers:
         - name: fetch-dist
           image: curlimages/curl:8.11.1
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
           command: ["sh", "-c", "curl -fsSL \"$DIST_URL\" -o /tmp/dist.tar.gz && tar -xzf /tmp/dist.tar.gz -C /usr/share/nginx/html"]
           env:
             - name: DIST_URL
@@ -48,8 +59,13 @@ spec:
       containers:
         - name: nginx
           image: nginx:1.27-alpine
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
           ports:
-            - containerPort: 80
+            - name: http
+              containerPort: 8080
           volumeMounts:
             - name: html
               mountPath: /usr/share/nginx/html
@@ -57,10 +73,14 @@ spec:
             - name: conf
               mountPath: /etc/nginx/conf.d
               readOnly: true
+            - name: nginx-cache
+              mountPath: /var/cache/nginx
+            - name: nginx-run
+              mountPath: /run
           readinessProbe:
             httpGet:
               path: /index.html
-              port: 80
+              port: http
           resources:
             requests:
               memory: 32Mi
@@ -72,6 +92,10 @@ spec:
         - name: conf
           configMap:
             name: staging-frontend-nginx
+        - name: nginx-cache
+          emptyDir: {}
+        - name: nginx-run
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -83,7 +107,7 @@ spec:
     app: staging-frontend
   ports:
     - port: 80
-      targetPort: 80
+      targetPort: http
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
