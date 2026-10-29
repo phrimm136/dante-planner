@@ -109,11 +109,21 @@ spec:
         app: alloy-logs
     spec:
       serviceAccountName: alloy-logs
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 473
+        runAsGroup: 473
+        seccompProfile:
+          type: RuntimeDefault
       nodeSelector:
         role: data
       containers:
         - name: alloy
           image: grafana/alloy:v1.5.1
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
           args:
             - run
             - /etc/alloy/config.alloy

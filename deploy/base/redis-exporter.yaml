@@ -22,11 +22,19 @@ spec:
         prometheus.io/path: /metrics
         prometheus.io/job: redis-auth
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       nodeSelector:
         role: data
       containers:
         - name: redis-exporter
           image: oliver006/redis_exporter:v1.66.0
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
           env:
             - name: REDIS_ADDR
               value: redis://redis-auth:6379
@@ -64,11 +72,19 @@ spec:
         prometheus.io/path: /metrics
         prometheus.io/job: redis-ratelimit
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       nodeSelector:
         role: data
       containers:
         - name: redis-exporter
           image: oliver006/redis_exporter:v1.66.0
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
           env:
             - name: REDIS_ADDR
               value: redis://redis-ratelimit:6379

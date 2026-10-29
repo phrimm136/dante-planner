@@ -9,7 +9,7 @@ The CP node bootstraps ArgoCD and applies `argocd/root-app.yaml`, which points A
 ```
 deploy/
   argocd/root-app.yaml     ArgoCD Application → overlays/oregon (app-of-apps root)
-  base/                    region-invariant manifests
+  base/                    region-invariant manifests, all in namespace danteplanner
     spring-daemonset.yaml  Spring backend, DaemonSet on role=app nodes
     spring-service.yaml    backend Service + ConfigMap
     traefik-gateway.yaml   Gateway API: Gateway + app HTTPRoute + /healthz-local route
@@ -18,7 +18,8 @@ deploy/
     redis-auth.yaml        auth-state Redis StatefulSet on role=data (AOF, no auto-promote)
     redis-ratelimit.yaml   ephemeral rate-limit Redis on role=data (no durability)
     prometheus.yaml        Prometheus on role=data (local scrape)
-  overlays/oregon/         region-specific values (image, namespace, endpoints)
+  privileged-exporter/     namespace privileged-exporter (enforce: privileged) + node-exporter DaemonSet
+  overlays/oregon/         region-specific values (image, endpoints); lists base/ and privileged-exporter/
 ```
 
 Build locally: `kubectl kustomize deploy/overlays/oregon`.
@@ -51,9 +52,17 @@ patches each root Application with a kustomize image override that adds the ECR 
 Standard in `warn` and `audit` mode. There is no `enforce` label. The API server admits every pod
 as before. In `warn` mode it returns a warning to the client that applies a pod or a workload
 whose pod template breaks the profile. The k3s API server in this repo has no audit log
-configured, so the `audit` label records nothing today. Do not add `enforce` while three workloads
-break the `baseline` profile too. `node-exporter` uses `hostNetwork`, `hostPID` and `hostPath`
-volumes. `traefik` uses `hostNetwork` and `hostPort` 443. `cloudflared` uses `hostNetwork`.
+configured, so the `audit` label records nothing today. Do not add `enforce` while two workloads
+in `danteplanner` break the `baseline` profile too. `traefik` uses `hostNetwork` and `hostPort`
+443. `cloudflared` uses `hostNetwork`. Add `enforce: restricted` only after both stop using
+`hostNetwork` and `traefik` stops using `hostPort`. The staging rehearsal manifests in
+`staging-e2e/` are applied into `danteplanner` by hand and have no `securityContext`, so they
+must pass `restricted` before the flip too.
+
+`node-exporter` needs `hostNetwork`, `hostPID` and `hostPath` volumes to read node metrics, so it
+does not run in `danteplanner`. `privileged-exporter/namespace.yaml` puts it in its own namespace,
+`privileged-exporter`, with `enforce: privileged`. Each overlay lists `privileged-exporter/` next
+to `base/`. Put a workload in `privileged-exporter` only if it needs the host.
 
 ## Deviations (documented)
 

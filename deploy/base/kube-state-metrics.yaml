@@ -77,11 +77,21 @@ spec:
         prometheus.io/job: kube-state-metrics
     spec:
       serviceAccountName: kube-state-metrics
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
       nodeSelector:
         role: data
       containers:
         - name: kube-state-metrics
           image: registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
           args:
             - --resources=nodes,pods,daemonsets
             - --custom-resource-state-config-file=/etc/kube-state-metrics/crs-config.yaml

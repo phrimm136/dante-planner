@@ -20,11 +20,21 @@ spec:
         prometheus.io/path: /actuator/prometheus
     spec:
       enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
       nodeSelector:
         role: app
       containers:
         - name: backend
           image: danteplanner-backend
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
           ports:
             - name: http
               containerPort: 8080

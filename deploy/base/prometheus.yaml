@@ -138,11 +138,22 @@ spec:
         app: prometheus
     spec:
       serviceAccountName: prometheus
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
       nodeSelector:
         role: data
       containers:
         - name: prometheus
           image: prom/prometheus:v2.54.1
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
           args:
             - --config.file=/etc/prometheus/prometheus.yml
             - --storage.tsdb.retention.time=7d
@@ -168,6 +179,10 @@ spec:
               memory: 512Mi
         - name: config-reloader
           image: quay.io/prometheus-operator/prometheus-config-reloader:v0.76.0
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
           args:
             - --watched-dir=/etc/prometheus
           volumeMounts:
