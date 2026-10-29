@@ -1,0 +1,304 @@
+id: no-wall-clock-wait-in-tests
+valid:
+  - |
+    class A {
+      @Test
+      void m() {
+        assertThat(service.openCount()).isZero();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        Clock clock = Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC);
+        assertThat(tokens.isExpired(token, clock)).isTrue();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        String value = map.get(key);
+        Path path = Paths.get("a", "b");
+        User user = future.get();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        long started = System.nanoTime();
+        context.close();
+        assertThat(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started)).isLessThan(BOUND);
+      }
+    }
+  - |
+    class A {
+      void sleep(int ticks) {
+        clock.advance(ticks);
+      }
+
+      @Test
+      void m() {
+        sleep(10);
+        robot.sleep();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        latch.await();
+        LockSupport.park();
+        LockSupport.unpark(worker);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        Object value = queue.poll();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        String name = Optional.of("a").get();
+        cache.put(key, value);
+        Path joined = Path.of("a", "b");
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        verify(repository, atMost(1)).save(any());
+        verify(repository, Mockito.atMost(1)).save(any());
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder(uri).timeout(Duration.ofSeconds(60)).build();
+        proxy.toxics().timeout("cut", ToxicDirection.UPSTREAM, 0);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        Instant later = Instant.now().plus(1, ChronoUnit.HOURS);
+        Long ttl = template.getExpire(key, TimeUnit.SECONDS);
+      }
+    }
+invalid:
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        Thread.sleep(10);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        java.lang.Thread.sleep(10);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        assertThat(future).succeedsWithin(Duration.ofSeconds(1));
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        assertThat(future).failsWithin(Duration.ofSeconds(1));
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        future.orTimeout(1, SECONDS).join();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        future.get(1, SECONDS);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        raise.get(BOUND.toMillis(), TimeUnit.MILLISECONDS);
+      }
+    }
+  - |
+    class A {
+      void awaitSettled(Future<?> attempt, long timeout, TimeUnit unit) throws Exception {
+        attempt.get(timeout, unit);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        TimeUnit.MILLISECONDS.sleep(5);
+      }
+    }
+  - |
+    import static java.util.concurrent.TimeUnit.SECONDS;
+
+    class A {
+      @Test
+      void m() throws Exception {
+        SECONDS.sleep(1);
+      }
+    }
+  - |
+    import static java.lang.Thread.sleep;
+
+    class A {
+      @Test
+      void m() throws Exception {
+        sleep(10);
+      }
+    }
+  - |
+    import static java.lang.Thread.*;
+
+    class A {
+      @Test
+      void m() throws Exception {
+        sleep(10);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        LockSupport.parkNanos(POLL_INTERVAL_NANOS);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        java.util.concurrent.locks.LockSupport.parkUntil(deadline);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        assertThat(latch.await(10, TimeUnit.SECONDS)).isTrue();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        barrier.await(BARRIER_TIMEOUT_SECONDS, SECONDS);
+      }
+    }
+  - |
+    class A {
+      boolean awaitSignal(Condition condition, long timeout, TimeUnit unit) throws Exception {
+        return condition.await(timeout, unit);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        Thread.sleep(10, 500);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        LockSupport.parkNanos(blocker, POLL_INTERVAL_NANOS);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        Object next = queue.poll(timeout, unit);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        pool.awaitTermination(5, TimeUnit.MINUTES);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        assertThat(permits.tryAcquire(1, SECONDS)).isTrue();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        assertThat(lock.tryLock(1, SECONDS)).isTrue();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        assertThat(process.waitFor(5, TimeUnit.SECONDS)).isTrue();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        await().atMost(SCHEDULING_SLACK).until(() -> worker.isDone());
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        await().atMost(5, SECONDS).until(() -> worker.isDone());
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        Awaitility.await().pollDelay(DELAY).atMost(BOUND).until(() -> worker.isDone());
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        with().timeout(BOUND).await().until(() -> worker.isDone());
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        await().timeout(BOUND).until(() -> worker.isDone());
+      }
+    }

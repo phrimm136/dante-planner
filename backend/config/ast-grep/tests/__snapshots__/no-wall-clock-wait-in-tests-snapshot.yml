@@ -1,0 +1,538 @@
+id: no-wall-clock-wait-in-tests
+snapshots:
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        Awaitility.await().pollDelay(DELAY).atMost(BOUND).until(() -> worker.isDone());
+      }
+    }
+  : labels:
+    - source: Awaitility.await().pollDelay(DELAY).atMost(BOUND)
+      style: primary
+      start: 52
+      end: 101
+    - source: Awaitility.await().pollDelay(DELAY)
+      style: secondary
+      start: 52
+      end: 87
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        LockSupport.parkNanos(blocker, POLL_INTERVAL_NANOS);
+      }
+    }
+  : labels:
+    - source: LockSupport.parkNanos(blocker, POLL_INTERVAL_NANOS)
+      style: primary
+      start: 52
+      end: 103
+    - source: LockSupport
+      style: secondary
+      start: 52
+      end: 63
+    - source: parkNanos
+      style: secondary
+      start: 64
+      end: 73
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        Object next = queue.poll(timeout, unit);
+      }
+    }
+  : labels:
+    - source: queue.poll(timeout, unit)
+      style: primary
+      start: 66
+      end: 91
+    - source: unit
+      style: secondary
+      start: 86
+      end: 90
+    - source: unit
+      style: secondary
+      start: 86
+      end: 90
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        Thread.sleep(10);
+      }
+    }
+  : labels:
+    - source: Thread.sleep(10)
+      style: primary
+      start: 52
+      end: 68
+    - source: Thread
+      style: secondary
+      start: 52
+      end: 58
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        Thread.sleep(10, 500);
+      }
+    }
+  : labels:
+    - source: Thread.sleep(10, 500)
+      style: primary
+      start: 52
+      end: 73
+    - source: Thread
+      style: secondary
+      start: 52
+      end: 58
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        TimeUnit.MILLISECONDS.sleep(5);
+      }
+    }
+  : labels:
+    - source: TimeUnit.MILLISECONDS.sleep(5)
+      style: primary
+      start: 52
+      end: 82
+    - source: TimeUnit.MILLISECONDS
+      style: secondary
+      start: 52
+      end: 73
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        assertThat(latch.await(10, TimeUnit.SECONDS)).isTrue();
+      }
+    }
+  : labels:
+    - source: latch.await(10, TimeUnit.SECONDS)
+      style: primary
+      start: 63
+      end: 96
+    - source: TimeUnit.SECONDS
+      style: secondary
+      start: 79
+      end: 95
+    - source: TimeUnit.SECONDS
+      style: secondary
+      start: 79
+      end: 95
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        assertThat(lock.tryLock(1, SECONDS)).isTrue();
+      }
+    }
+  : labels:
+    - source: lock.tryLock(1, SECONDS)
+      style: primary
+      start: 63
+      end: 87
+    - source: SECONDS
+      style: secondary
+      start: 79
+      end: 86
+    - source: SECONDS
+      style: secondary
+      start: 79
+      end: 86
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        assertThat(permits.tryAcquire(1, SECONDS)).isTrue();
+      }
+    }
+  : labels:
+    - source: permits.tryAcquire(1, SECONDS)
+      style: primary
+      start: 63
+      end: 93
+    - source: SECONDS
+      style: secondary
+      start: 85
+      end: 92
+    - source: SECONDS
+      style: secondary
+      start: 85
+      end: 92
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        assertThat(process.waitFor(5, TimeUnit.SECONDS)).isTrue();
+      }
+    }
+  : labels:
+    - source: process.waitFor(5, TimeUnit.SECONDS)
+      style: primary
+      start: 63
+      end: 99
+    - source: TimeUnit.SECONDS
+      style: secondary
+      start: 82
+      end: 98
+    - source: TimeUnit.SECONDS
+      style: secondary
+      start: 82
+      end: 98
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        await().atMost(5, SECONDS).until(() -> worker.isDone());
+      }
+    }
+  : labels:
+    - source: await().atMost(5, SECONDS)
+      style: primary
+      start: 52
+      end: 78
+    - source: await()
+      style: secondary
+      start: 52
+      end: 59
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        await().atMost(SCHEDULING_SLACK).until(() -> worker.isDone());
+      }
+    }
+  : labels:
+    - source: await().atMost(SCHEDULING_SLACK)
+      style: primary
+      start: 52
+      end: 84
+    - source: await()
+      style: secondary
+      start: 52
+      end: 59
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        await().timeout(BOUND).until(() -> worker.isDone());
+      }
+    }
+  : labels:
+    - source: await().timeout(BOUND)
+      style: primary
+      start: 52
+      end: 74
+    - source: await()
+      style: secondary
+      start: 52
+      end: 59
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        barrier.await(BARRIER_TIMEOUT_SECONDS, SECONDS);
+      }
+    }
+  : labels:
+    - source: barrier.await(BARRIER_TIMEOUT_SECONDS, SECONDS)
+      style: primary
+      start: 52
+      end: 99
+    - source: SECONDS
+      style: secondary
+      start: 91
+      end: 98
+    - source: SECONDS
+      style: secondary
+      start: 91
+      end: 98
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        future.get(1, SECONDS);
+      }
+    }
+  : labels:
+    - source: future.get(1, SECONDS)
+      style: primary
+      start: 52
+      end: 74
+    - source: SECONDS
+      style: secondary
+      start: 66
+      end: 73
+    - source: SECONDS
+      style: secondary
+      start: 66
+      end: 73
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        java.lang.Thread.sleep(10);
+      }
+    }
+  : labels:
+    - source: java.lang.Thread.sleep(10)
+      style: primary
+      start: 52
+      end: 78
+    - source: java.lang.Thread
+      style: secondary
+      start: 52
+      end: 68
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        pool.awaitTermination(5, TimeUnit.MINUTES);
+      }
+    }
+  : labels:
+    - source: pool.awaitTermination(5, TimeUnit.MINUTES)
+      style: primary
+      start: 52
+      end: 94
+    - source: TimeUnit.MINUTES
+      style: secondary
+      start: 77
+      end: 93
+    - source: TimeUnit.MINUTES
+      style: secondary
+      start: 77
+      end: 93
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        raise.get(BOUND.toMillis(), TimeUnit.MILLISECONDS);
+      }
+    }
+  : labels:
+    - source: raise.get(BOUND.toMillis(), TimeUnit.MILLISECONDS)
+      style: primary
+      start: 52
+      end: 102
+    - source: TimeUnit.MILLISECONDS
+      style: secondary
+      start: 80
+      end: 101
+    - source: TimeUnit.MILLISECONDS
+      style: secondary
+      start: 80
+      end: 101
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        with().timeout(BOUND).await().until(() -> worker.isDone());
+      }
+    }
+  : labels:
+    - source: with().timeout(BOUND)
+      style: primary
+      start: 52
+      end: 73
+    - source: with()
+      style: secondary
+      start: 52
+      end: 58
+  ? |
+    class A {
+      @Test
+      void m() {
+        LockSupport.parkNanos(POLL_INTERVAL_NANOS);
+      }
+    }
+  : labels:
+    - source: LockSupport.parkNanos(POLL_INTERVAL_NANOS)
+      style: primary
+      start: 35
+      end: 77
+    - source: LockSupport
+      style: secondary
+      start: 35
+      end: 46
+    - source: parkNanos
+      style: secondary
+      start: 47
+      end: 56
+  ? |
+    class A {
+      @Test
+      void m() {
+        assertThat(future).failsWithin(Duration.ofSeconds(1));
+      }
+    }
+  : labels:
+    - source: assertThat(future).failsWithin(Duration.ofSeconds(1))
+      style: primary
+      start: 35
+      end: 88
+  ? |
+    class A {
+      @Test
+      void m() {
+        assertThat(future).succeedsWithin(Duration.ofSeconds(1));
+      }
+    }
+  : labels:
+    - source: assertThat(future).succeedsWithin(Duration.ofSeconds(1))
+      style: primary
+      start: 35
+      end: 91
+  ? |
+    class A {
+      @Test
+      void m() {
+        future.orTimeout(1, SECONDS).join();
+      }
+    }
+  : labels:
+    - source: future.orTimeout(1, SECONDS)
+      style: primary
+      start: 35
+      end: 63
+  ? |
+    class A {
+      @Test
+      void m() {
+        java.util.concurrent.locks.LockSupport.parkUntil(deadline);
+      }
+    }
+  : labels:
+    - source: java.util.concurrent.locks.LockSupport.parkUntil(deadline)
+      style: primary
+      start: 35
+      end: 93
+    - source: java.util.concurrent.locks.LockSupport
+      style: secondary
+      start: 35
+      end: 73
+    - source: parkUntil
+      style: secondary
+      start: 74
+      end: 83
+  ? |
+    class A {
+      boolean awaitSignal(Condition condition, long timeout, TimeUnit unit) throws Exception {
+        return condition.await(timeout, unit);
+      }
+    }
+  : labels:
+    - source: condition.await(timeout, unit)
+      style: primary
+      start: 112
+      end: 142
+    - source: unit
+      style: secondary
+      start: 137
+      end: 141
+    - source: unit
+      style: secondary
+      start: 137
+      end: 141
+  ? |
+    class A {
+      void awaitSettled(Future<?> attempt, long timeout, TimeUnit unit) throws Exception {
+        attempt.get(timeout, unit);
+      }
+    }
+  : labels:
+    - source: attempt.get(timeout, unit)
+      style: primary
+      start: 101
+      end: 127
+    - source: unit
+      style: secondary
+      start: 122
+      end: 126
+    - source: unit
+      style: secondary
+      start: 122
+      end: 126
+  ? |
+    import static java.lang.Thread.*;
+
+    class A {
+      @Test
+      void m() throws Exception {
+        sleep(10);
+      }
+    }
+  : labels:
+    - source: sleep(10)
+      style: primary
+      start: 87
+      end: 96
+    - source: import static java.lang.Thread.*;
+      style: secondary
+      start: 0
+      end: 33
+    - source: |
+        import static java.lang.Thread.*;
+
+        class A {
+          @Test
+          void m() throws Exception {
+            sleep(10);
+          }
+        }
+      style: secondary
+      start: 0
+      end: 104
+  ? |
+    import static java.lang.Thread.sleep;
+
+    class A {
+      @Test
+      void m() throws Exception {
+        sleep(10);
+      }
+    }
+  : labels:
+    - source: sleep(10)
+      style: primary
+      start: 91
+      end: 100
+    - source: import static java.lang.Thread.sleep;
+      style: secondary
+      start: 0
+      end: 37
+    - source: |
+        import static java.lang.Thread.sleep;
+
+        class A {
+          @Test
+          void m() throws Exception {
+            sleep(10);
+          }
+        }
+      style: secondary
+      start: 0
+      end: 108
+  ? |
+    import static java.util.concurrent.TimeUnit.SECONDS;
+
+    class A {
+      @Test
+      void m() throws Exception {
+        SECONDS.sleep(1);
+      }
+    }
+  : labels:
+    - source: SECONDS.sleep(1)
+      style: primary
+      start: 106
+      end: 122
+    - source: SECONDS
+      style: secondary
+      start: 106
+      end: 113
