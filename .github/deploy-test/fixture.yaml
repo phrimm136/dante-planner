@@ -1,0 +1,88 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: web
+  namespace: danteplanner
+spec:
+  gatewayClassName: traefik
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 8000
+      allowedRoutes:
+        namespaces:
+          from: Same
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik
+  namespace: danteplanner
+spec:
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      serviceAccountName: traefik
+      containers:
+        - name: traefik
+          image: TRAEFIK_IMAGE
+          imagePullPolicy: Never
+          args:
+            - --entrypoints.web.address=:8000
+            - --providers.kubernetesgateway=true
+            - --ping=true
+          ports:
+            - name: web
+              containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            periodSeconds: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik-web
+  namespace: danteplanner
+spec:
+  selector:
+    app: traefik
+  ports:
+    - port: 8000
+      targetPort: web
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: whoami
+  namespace: danteplanner
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: whoami
+          image: WHOAMI_IMAGE
+          imagePullPolicy: Never
+          args:
+            - --port
+            - "8080"
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 1
