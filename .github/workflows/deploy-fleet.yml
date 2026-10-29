@@ -9,9 +9,11 @@ name: "Deploy (multi-region k3s)"
 # yet replicated to Seoul).
 # Continuous deployment: the push-run of PR Gate on main triggers this on success, and the
 # deploy checks out the exact SHA that run verified — never main's current head, which may
-# already carry a merge the gate has not blessed. workflow_dispatch stays as the manual
-# escape hatch. The concurrency group holds one running plus one pending run, so rapid
-# merges coalesce and only the newest pending SHA deploys.
+# already carry a merge the gate has not blessed. A green merge whose image inputs did not
+# change since the deployed tag skips the whole chain; the input list lives in
+# .github/scripts/deploy-inputs-changed.sh. workflow_dispatch stays as the manual escape
+# hatch and always deploys. The concurrency group holds one running plus one pending run, so
+# rapid merges coalesce and only the newest pending SHA deploys.
 on:
   workflow_dispatch:
   workflow_run:
@@ -33,11 +35,33 @@ env:
   OVERLAY_DIR_SEOUL: deploy/overlays/seoul
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 5
+    outputs:
+      backend: ${{ steps.detect.outputs.backend }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Detect backend image input changes since the deployed tag
+        id: detect
+        env:
+          VERIFIED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: .github/scripts/deploy-inputs-changed.sh "$VERIFIED_SHA" "$EVENT_NAME"
+
   build-push:
+    needs: changes
     # On workflow_run the trigger fires for red gates too; only a green verdict deploys.
     if: >-
-      github.event_name == 'workflow_dispatch' ||
-      github.event.workflow_run.conclusion == 'success'
+      needs.changes.outputs.backend == 'true' &&
+      (github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     environment: production
     permissions:
