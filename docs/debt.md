@@ -1089,8 +1089,8 @@ two have silently never paged.
   stores are the baseline for Java; ast-grep `scan --json` plus a count file is the baseline
   for the rest. The same run is the home for the still-dormant gates: OWASP dependency-check
   and Sonar (declared, never run), and the backend patterns listed in the entry above. PIT is
-  no longer dormant: it blocks in `check` at its measured score with an up-only ratchet
-  (ADR 137). Worth doing as the first rule-into-build session, since it is what makes every
+  no longer dormant: its surviving-mutant ratchet blocks the PR Gate `test-mutation` job and
+  runs as `pitestRatchet` in the local gate (ADR 146). Worth doing as the first rule-into-build session, since it is what makes every
   later rule measurable before it is enforced.
 
 - 2026-09-21 — Nothing rolls a failed backend rollout back. `deploy/base/spring-daemonset.yaml`

@@ -134,7 +134,49 @@ jobs:
           path: |
             backend/build/reports/tests/
             backend/build/test-results/
-            backend/build/reports/pitest/
+          retention-days: 7
+
+  test-mutation:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+      - uses: ./.github/actions/fetch-static-checkout
+        with:
+          static-deploy-key: ${{ secrets.STATIC_DEPLOY_KEY }}
+      - name: Set up JDK 21
+        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95  # v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+      - name: Restore file permissions
+        run: chmod +x backend/gradlew
+      - name: Restore PIT history
+        if: github.event_name == 'pull_request'
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25  # v5
+        with:
+          path: backend/build/pitHistory.txt
+          key: pit-history-${{ github.sha }}
+          restore-keys: pit-history-
+      - name: BE Mutation Ratchet
+        working-directory: ./backend
+        run: ./gradlew pitestRatchet -q
+      - name: Save PIT history
+        if: github.event_name == 'push'
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25  # v5
+        with:
+          path: backend/build/pitHistory.txt
+          key: pit-history-${{ github.sha }}
+      - name: Upload mutation reports
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: backend-mutation-reports
+          path: backend/build/reports/pitest/
           retention-days: 7
 
   test-migration:
@@ -473,30 +515,3 @@ jobs:
       - name: Dump backend logs
         if: failure()
         run: yarn --cwd e2e stack:logs
-
-  notify-failure:
-    needs: [check-keep-list, test-backend, test-migration, build-backend, test-frontend, build-frontend, e2e, consistency-result]
-    if: failure() && github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      actions: read
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
-        with:
-          sparse-checkout: .github/actions
-      - uses: ./.github/actions/notify-ci-failure
-        with:
-          title: CI Failed — PR Gate
-          pr-number: ${{ github.event.pull_request.number }}
-          jobs-json: |
-            [
-              {"name": "Keep List", "result": "${{ needs.check-keep-list.result }}"},
-              {"name": "BE Test", "result": "${{ needs.test-backend.result }}"},
-              {"name": "Migration", "result": "${{ needs.test-migration.result }}"},
-              {"name": "BE Build", "result": "${{ needs.build-backend.result }}"},
-              {"name": "FE Test", "result": "${{ needs.test-frontend.result }}"},
-              {"name": "FE Build", "result": "${{ needs.build-frontend.result }}"},
-              {"name": "E2E", "result": "${{ needs.e2e.result }}"},
-              {"name": "Consistency", "result": "${{ needs.consistency-result.result }}"}
-            ]
