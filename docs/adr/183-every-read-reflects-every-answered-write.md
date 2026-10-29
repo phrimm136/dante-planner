@@ -1,7 +1,27 @@
 # 183 every-read-reflects-every-answered-write
-epic: none · pr: none
+epic: none · pr: none · supersedes: 008 @ryw @gtid @cookie, 008 @gtid @capture, 008 @replica @miss @byid, 008 @replica @bulkhead, 008 @delete @tombstone, 008 @read-path @contract, 130 @reads @gtid, 130 @reads @gtid @errors, 151 @outbox @tombstone @readpath, 151 @withdraw @tombstone, 151 @comments @visibility
 
 ## Decisions
+- @freshness @contract — A read that starts after a write's response reflects that write, for
+  every reader, in every region, on every read path: by-id reads, lists, filtered lists and their
+  membership, comment threads, the notification inbox, settings and the moderation lists. The only
+  other answer it may give is 503 `READ_TEMPORARILY_UNAVAILABLE`. A read that starts before the
+  response may return either state. Every write a user expects to see the result of is covered:
+  planners, comments, upvotes, notifications, settings and moderation actions.
+  REJECTED: read-your-own-writes for the author only, through a GTID cookie — it misses every
+  other reader, every write the server makes on a user's behalf, and the Oregon fallback path, all
+  measured by the two-region consistency run.
+  REJECTED: masking only removals (delete tombstones and withdrawal markers) — an edit still shows
+  its old text and a new row still misses its list.
+  REJECTED: accepting list absence as eventual — a filtered list then disagrees with the detail
+  page the same reader opens next.
+  INVARIANT: no read that starts after a response returns the state before it — `ConsistencyRunIT`
+  for planners and lists; unenforced for threads, the inbox, settings and moderation until the
+  consistency run judges them.
+  NON-GOAL: view counts — they are buffered in Redis and flushed later (ADR 131), so no reader
+  expects them at once.
+  NON-GOAL: a write that committed but never answered — its writer saw an error, so no reader is
+  promised anything, and it appears when the replica catches up.
 - @freshness @marker — Each scope a write touches holds a marker in Redis: a hash from primary
   server uuid to the highest GTID sequence number of an answered write on that scope. Scopes are
   one entity, one owner's planner list, the public catalog (every public and recommended list and
@@ -41,6 +61,30 @@ epic: none · pr: none
   INVARIANT: every write that changes a planner scope declares that scope — `FreshnessDeclarationIT`
   for the writes it lists; a gate that fails any committing request without a declaration is
   unenforced until every write declares its scopes.
+- @freshness @read — A read on a non-authoritative source (182 @reads @sources) reads the markers of
+  the scopes it touches. No marker: serve. A marker the source has applied: serve. A marker it has
+  not applied: wait on that source for the GTID set, up to a bound set to the cost of the alternative, one
+  statement against the next source (250 ms at the start), and tuned from the exported wait-time
+  histogram, then move to the next source. A marker store that
+  errors or is unhealthy: treat every marker as unknown and read an authoritative source. With no
+  healthy authoritative source the read answers 503 (182 @reads @degrade). A by-id read loads the
+  row without filtering on its visibility (publication, the author's account state) and decides
+  visibility in code after the markers, so it always knows the author whose marker it reads; a
+  list keeps visibility in SQL, since paging needs it there. A by-id miss (no row) with no entity
+  marker is a final 404, because a create raises its entity's marker. Each pod remembers, per
+  source, the highest GTID set it has seen applied, and a marker inside it needs no probe.
+  REJECTED: falling to the primary after a short probe (the cookie gate's 50 ms) — a Seoul read on
+  the primary costs one ocean round trip per statement, so waiting for the replica is cheaper up to
+  that many round trips.
+  REJECTED: filtering by-id visibility in SQL — a row hidden by a lagging author state returns
+  no author id, so the read cannot find the author marker that a reactivation raised, and a
+  second owner lookup on every miss adds a query.
+  REJECTED: re-checking every by-id miss on a primary bulkhead pool — the marker already says
+  whether a recent create exists, and junk ids no longer reach the primary.
+  REJECTED: per-comment markers with an eventual thread membership — a new comment then misses the
+  thread its author's readers open next.
+  INVARIANT: a remembered applied GTID never runs ahead of its source — replica apply is monotonic;
+  unenforced by a test.
 - @freshness @store-health — A marker failure does not fail the write: `WAIT` has an upper bound,
   and the write answers when it passes. The marker store has an ordered source list per region,
   like the database (182 @reads @sources): Seoul reads its Redis replica first and the Oregon Redis
@@ -74,6 +118,17 @@ epic: none · pr: none
   REJECTED: a marker that never expires — keys grow with every entity ever written.
   NON-GOAL: sub-second lag monitoring — the alert needs seconds, and the wait histogram gives
   milliseconds where the bound needs them.
+- @comments @visibility — A comment thread follows its planner's public view: a reader other than
+  the owner gets the planner-not-found answer for an unpublished planner, and the thread's public
+  push fires only while the planner is still published. The owner's own comment notification
+  ignores publication; a reply notification to any other parent author fires only while the
+  planner is published, since it names the planner and quotes the reply to someone who would
+  otherwise get not-found. Thread freshness, including the planner's withdrawal, comes from the
+  thread and catalog markers.
+  REJECTED: a forbidden answer for another reader — it confirms that a private planner exists,
+  which the planner read itself refuses to do.
+  INVARIANT: an unpublished or withdrawn planner's thread is unreadable to non-owners on every read
+  path — the thread contract test and the replica-lag test.
 
 ## Takeaway
 - takeaway: mark what changed with the commit that changed it, and let the replica prove it caught

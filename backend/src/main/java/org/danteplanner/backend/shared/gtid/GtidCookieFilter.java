@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource;
+import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.config.RoutingKey;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.danteplanner.backend.shared.exception.ReadTemporarilyUnavailableException;
@@ -43,6 +44,7 @@ public class GtidCookieFilter extends OncePerRequestFilter {
         writeCapture.begin();
         FreshnessDeclarations.begin();
         ChosenReadSource.clear();
+        ReadSourceSelector.clearSkips();
         try {
             if (isSafeMethod(request)) {
                 handleRead(request, response, filterChain);
@@ -58,6 +60,7 @@ public class GtidCookieFilter extends OncePerRequestFilter {
             writeCapture.clear();
             FreshnessDeclarations.clear();
             ChosenReadSource.clear();
+            ReadSourceSelector.clearSkips();
         }
     }
 
