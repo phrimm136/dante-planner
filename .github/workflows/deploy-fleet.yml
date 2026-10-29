@@ -285,7 +285,7 @@ jobs:
       # and the github-actions app cannot be a bypass actor on a personal
       # account, but a deploy key can. With ssh-key, checkout sets origin to
       # the SSH URL and persists the key, so the push below uses it.
-      # [skip ci] + the backend-only path filter keep the push from
+      # [skip ci] in the bump commit's subject keeps the push from
       # retriggering this workflow.
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
         with:
@@ -319,7 +319,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add "$OVERLAY_DIR/kustomization.yaml" "$OVERLAY_DIR_SEOUL/kustomization.yaml"
-          # [skip ci] + the backend-only path filter keep this from retriggering.
+          # [skip ci] in the subject keeps this push from retriggering the workflow.
           git commit -m "chore(deploy): bump backend image to ${GIT_SHA} (Oregon+Seoul) [skip ci]"
           git push origin "HEAD:${REF_NAME}"
 

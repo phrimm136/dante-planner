@@ -1,14 +1,17 @@
 # deploy/ — GitOps manifests (kustomize base + overlays)
 
-One repo, kustomize `base/` + `overlays/{oregon,...}`, synced by ArgoCD core (per cluster).
-The CP node bootstraps ArgoCD and applies `argocd/root-app.yaml`, which points ArgoCD at
-`overlays/oregon`; from then on the cluster is GitOps-managed.
+One repo, kustomize `base/` + `overlays/{oregon,seoul}`, synced by ArgoCD core (per cluster).
+Each region's CP node bootstraps ArgoCD, applies `argocd/project.yaml`, then applies its root
+Application: `argocd/root-app-oregon.yaml` points ArgoCD at `overlays/oregon`, and
+`argocd/root-app-seoul.yaml` at `overlays/seoul`. From then on the cluster is GitOps-managed.
 
 ## Layout
 
 ```
 deploy/
-  argocd/root-app.yaml     ArgoCD Application → overlays/oregon (app-of-apps root)
+  argocd/project.yaml          AppProject default (ArgoCD core ships none; applied before the roots)
+  argocd/root-app-oregon.yaml  ArgoCD Application → overlays/oregon (app-of-apps root)
+  argocd/root-app-seoul.yaml   ArgoCD Application → overlays/seoul (app-of-apps root)
   base/                    region-invariant manifests, all in namespace danteplanner
     spring-daemonset.yaml  Spring backend, DaemonSet on role=app nodes
     spring-service.yaml    backend Service + ConfigMap
@@ -20,6 +23,7 @@ deploy/
     prometheus.yaml        Prometheus on role=data (local scrape)
   privileged-exporter/     namespace privileged-exporter (enforce: privileged) + node-exporter DaemonSet
   overlays/oregon/         region-specific values (image, endpoints); lists base/ and privileged-exporter/
+  overlays/seoul/          the same for Seoul
 ```
 
 Build locally: `kubectl kustomize deploy/overlays/oregon`.
@@ -56,8 +60,8 @@ configured, so the `audit` label records nothing today. Do not add `enforce` whi
 in `danteplanner` break the `baseline` profile too. `traefik` uses `hostNetwork` and `hostPort`
 443. `cloudflared` uses `hostNetwork`. Add `enforce: restricted` only after both stop using
 `hostNetwork` and `traefik` stops using `hostPort`. The staging rehearsal manifests in
-`staging-e2e/` are applied into `danteplanner` by hand and have no `securityContext`, so they
-must pass `restricted` before the flip too.
+`staging-e2e/` are applied into `danteplanner` by hand, so they must pass `restricted` too; their
+`securityContext` settings follow the base workloads.
 
 `node-exporter` needs `hostNetwork`, `hostPID` and `hostPath` volumes to read node metrics, so it
 does not run in `danteplanner`. `privileged-exporter/namespace.yaml` puts it in its own namespace,
