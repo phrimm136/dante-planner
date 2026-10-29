@@ -15,15 +15,20 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.resilience.annotation.EnableResilientMethods;
 
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -46,7 +51,7 @@ class SsePublisherTest {
      * proxying — an unproxied instance would run the annotation as documentation.
      */
     @Configuration
-    @EnableRetry
+    @EnableResilientMethods
     static class RetryHarness {
 
         @Bean
@@ -201,5 +206,59 @@ class SsePublisherTest {
         assertThat(meterRegistry.find("sse.publish.dropped").counter())
                 .as("nothing reached Redis, so nothing was dropped there")
                 .isNull();
+    }
+
+    @Test
+    void send_WhenEveryCallFailsToConnect_BacksOffFiftyThenOneHundredMillis() {
+        List<Long> invocationNanos = new ArrayList<>();
+        RuntimeException failure = new RedisConnectionFailureException("primary unreachable");
+        when(stringRedisTemplate.convertAndSend(anyString(), any())).thenAnswer(invocation -> {
+            invocationNanos.add(System.nanoTime());
+            throw failure;
+        });
+
+        try (AnnotationConfigApplicationContext context = retryHarness()) {
+            SseChannelSender sender = context.getBean(SseChannelSender.class);
+
+            assertThatThrownBy(() -> sender.send("sse:user", "{}"))
+                    .isSameAs(failure);
+        }
+
+        assertThat(Duration.ofNanos(invocationNanos.get(1) - invocationNanos.get(0)))
+                .isGreaterThanOrEqualTo(Duration.ofMillis(50));
+        assertThat(Duration.ofNanos(invocationNanos.get(2) - invocationNanos.get(1)))
+                .isGreaterThanOrEqualTo(Duration.ofMillis(100));
+    }
+
+    @Test
+    void send_WhenAnUnlistedDataAccessExceptionIsThrown_IsNotRetried() {
+        RuntimeException failure = new InvalidDataAccessApiUsageException("bad command");
+        when(stringRedisTemplate.convertAndSend(anyString(), any())).thenThrow(failure);
+
+        try (AnnotationConfigApplicationContext context = retryHarness()) {
+            SseChannelSender sender = context.getBean(SseChannelSender.class);
+
+            assertThatThrownBy(() -> sender.send("sse:user", "{}"))
+                    .isSameAs(failure);
+        }
+
+        verify(stringRedisTemplate, times(1)).convertAndSend(eq("sse:user"), anyString());
+    }
+
+    @Test
+    void send_WhenTheListedExceptionIsOnlyTheCause_IsRetriedOnTheSameTerms() {
+        RuntimeException failure = new IllegalStateException(
+                new RedisConnectionFailureException("primary unreachable"));
+        when(stringRedisTemplate.convertAndSend(anyString(), any())).thenThrow(failure);
+
+        try (AnnotationConfigApplicationContext context = retryHarness()) {
+            SseChannelSender sender = context.getBean(SseChannelSender.class);
+
+            assertThatThrownBy(() -> sender.send("sse:user", "{}"))
+                    .isSameAs(failure);
+        }
+
+        verify(stringRedisTemplate, times(SseConstants.PUBLISH_MAX_ATTEMPTS))
+                .convertAndSend(eq("sse:user"), anyString());
     }
 }
