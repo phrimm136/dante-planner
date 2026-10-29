@@ -28,7 +28,7 @@ cluster=deploy-test-k3s-$$
 started=$SECONDS
 
 cleanup() {
-  docker rm -f "$cluster" >/dev/null 2>&1 || true
+  docker rm -fv "$cluster" >/dev/null 2>&1 || true
   rm -rf "$work"
 }
 trap cleanup EXIT
