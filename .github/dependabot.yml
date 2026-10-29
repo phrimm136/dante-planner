@@ -6,12 +6,18 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
-    # Labels help your "Dependabot Helper" workflow identify these PRs
     labels:
       - "frontend"
       - "dependencies"
+    cooldown:
+      default-days: 7
     groups:
+      frontend-security:
+        applies-to: security-updates
+        patterns:
+          - "*"
       frontend-deps:
+        applies-to: version-updates
         patterns:
           - "*" # Combines multiple FE updates into one PR to reduce CI load
         update-types:
@@ -27,11 +33,23 @@ updates:
     labels:
       - "backend"
       - "dependencies"
+    cooldown:
+      default-days: 7
     groups:
-      backend-deps:
+      backend-security:
+        applies-to: security-updates
         patterns:
-          - "org.springframework.*"
-          - "com.fasterxml.jackson.*"
+          - "*"
+      spring-boot:
+        applies-to: version-updates
+        patterns:
+          - "org.springframework*"
+        update-types:
+          - "minor"
+          - "patch"
+      backend-deps:
+        applies-to: version-updates
+        patterns:
           - "*"
         update-types:
           - "minor"
@@ -42,6 +60,12 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
+    cooldown:
+      default-days: 7
+    groups:
+      actions-deps:
+        patterns:
+          - "*"
 
   # 4. E2E harness: Playwright suite, its own manifest
   - package-ecosystem: "npm"
@@ -51,6 +75,8 @@ updates:
     labels:
       - "e2e"
       - "dependencies"
+    cooldown:
+      default-days: 7
     groups:
       e2e-deps:
         patterns:
@@ -67,6 +93,8 @@ updates:
     labels:
       - "tooling"
       - "dependencies"
+    cooldown:
+      default-days: 7
     groups:
       hooks-deps:
         patterns:
@@ -80,6 +108,8 @@ updates:
     directory: "/backend"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     labels:
       - "backend"
       - "dependencies"
@@ -93,6 +123,8 @@ updates:
     labels:
       - "infra"
       - "dependencies"
+    cooldown:
+      default-days: 7
     groups:
       terraform-deps:
         patterns:
