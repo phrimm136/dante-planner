@@ -1662,3 +1662,15 @@ guards the parse but likewise skips the schema gate.
   query through it looks like it succeeded. Worth doing when a Loki metric query is next needed
   from this box: branch on `resultType` and print Loki's error text on a non-200.
   re-check: `.claude/skills/debt-ledger/bin/debt absent scripts/ops/access/logs-query.sh 'resultType'`
+- The service runs on an AWS fleet (k3s with embedded etcd on a pet CP node, ArgoCD, app ASG,
+  RDS MySQL, Redis) in two regions, which costs more and needs more operation than the traffic
+  requires. The target is a rewrite onto Cloudflare: a TypeScript backend on Workers that shares
+  the frontend's Zod schemas, Neon Postgres through Hyperdrive (or D1 if the data fits its 10 GB
+  per-database limit), Durable Objects for per-planner serialization and view counts, and R2 for
+  files. Cloudflare has no VM with a persistent disk, so the JVM backend, MySQL, Redis and the k3s
+  CP cannot move as they are, and the fleet terraform, `deploy/` and ArgoCD go away with no
+  successor. Kubernetes practice moves to a separate personal cluster. Unchecked: prod DB size,
+  the current monthly AWS cost, Neon's nearest region to Korea. Worth doing when Spring practice
+  is no longer a reason to keep this backend: move route by route behind a Worker, with one
+  planned cutover for the database.
+  re-check: `test -d terraform/modules/fleet`
