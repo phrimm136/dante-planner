@@ -41,11 +41,14 @@ Build locally: `kubectl kustomize deploy/overlays/oregon`.
 
 `overlays/oregon/kustomization.yaml` and `overlays/seoul/kustomization.yaml` hold the `images:`
 transform for `danteplanner-backend`. `.github/workflows/deploy-fleet.yml` runs after PR Gate
-passes on `main`, or when you dispatch it by hand. It builds the arm64 image and pushes it to the
-Oregon and Seoul ECR registries. It scales each region's app ASG to two nodes. Then it runs
-`kustomize edit set image danteplanner-backend:<sha>` in both overlays and commits the new tag
-back. The ArgoCD core in each region sees the commit and rolls the DaemonSet. The workflow then
-waits for both rollouts and scales the app ASGs back to one node.
+passes on `main`, or when you dispatch it by hand. If the merge did not change an image input
+since the deployed tag, the whole chain skips and nothing deploys. The input list lives in
+`.github/scripts/deploy-inputs-changed.sh`, and a PR Gate step fails when the Dockerfile copies a
+path the list does not cover. A manual dispatch always deploys. Otherwise the workflow builds the
+arm64 image and pushes it to the Oregon and Seoul ECR registries. It scales each region's app ASG
+to two nodes. Then it runs `kustomize edit set image danteplanner-backend:<sha>` in both overlays
+and commits the new tag back. The ArgoCD core in each region sees the commit and rolls the
+DaemonSet. The workflow then waits for both rollouts and scales the app ASGs back to one node.
 
 Git holds only the tag. The CP user-data (`terraform/modules/fleet/user-data/cp.sh.tftpl`)
 patches each root Application with a kustomize image override that adds the ECR registry host.
