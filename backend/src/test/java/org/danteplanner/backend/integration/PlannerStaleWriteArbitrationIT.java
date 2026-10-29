@@ -1,8 +1,8 @@
 package org.danteplanner.backend.integration;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
@@ -163,7 +163,7 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
     private String contentFor(ContentChoice choice, UUID id) throws Exception {
         return switch (choice) {
             case AS_CREATED -> TestDataFactory.VALID_CONTENT;
-            case PULLED_RENDERING -> readBack(id).get("content").asText();
+            case PULLED_RENDERING -> readBack(id).get("content").asString();
             case DIFFERENT -> divergentContent();
         };
     }
@@ -223,7 +223,7 @@ class PlannerStaleWriteArbitrationIT extends SharedMySqlContainerSupport {
         send(id, write(id).build(), true).andExpect(status().isOk());
 
         long stored = storedRow(id).getSyncVersion();
-        String pulled = readBack(id).get("content").asText();
+        String pulled = readBack(id).get("content").asString();
 
         assertThat(pulled)
                 .as("the case only tests anything while the stored rendering differs from the sent bytes")

@@ -1,6 +1,6 @@
 package org.danteplanner.backend.integration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.http.Cookie;
 import java.nio.charset.StandardCharsets;

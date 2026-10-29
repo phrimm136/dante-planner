@@ -27,9 +27,9 @@ import org.danteplanner.backend.shared.exception.ProblemWriter;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import ch.qos.logback.classic.Level;
+import org.danteplanner.backend.support.TestJsonMappers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -61,7 +61,7 @@ class BackstopDeniesWhenTheGateWasSkippedTest {
                 securityProperties,
                 new DeviceIdResolver(new CookieUtils(false, "", "Lax")),
                 new FrontendProperties("https://planner.example"),
-                new ProblemWriter(Jackson2ObjectMapperBuilder.json().build()),
+                new ProblemWriter(TestJsonMappers.springDefaults()),
                 new SimpleMeterRegistry());
 
         mockMvc = MockMvcBuilders.standaloneSetup(bareFixture, new DeclaredHandlerFixture())

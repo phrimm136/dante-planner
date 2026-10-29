@@ -7,13 +7,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.support.TestJsonMappers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -89,7 +89,7 @@ class PublishedPlannerClientBucketTest {
         viewRecorder = new PlannerViewRecorder(plannerViewRepository, plannerStatsRepository);
         PublishedPlannerQueryService queryService = new PublishedPlannerQueryService(null, null, null, null, null,
                 viewRecorder, null, plannerStatsRepository, new PlannerAccessGuard(null, plannerRepository), null);
-        ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
+        ObjectMapper objectMapper = TestJsonMappers.springDefaults();
 
         SecurityProperties securityProperties = new SecurityProperties();
         securityProperties.setTrustedProxyIps(TRUSTED_PROXY_IP);

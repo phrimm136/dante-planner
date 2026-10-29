@@ -1,7 +1,7 @@
 package org.danteplanner.backend.service.oauth;
 import org.danteplanner.backend.auth.oauth.OAuthStateService;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.danteplanner.backend.shared.config.JwtProperties;

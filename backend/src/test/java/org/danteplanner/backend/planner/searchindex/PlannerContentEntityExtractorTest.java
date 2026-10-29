@@ -1,8 +1,8 @@
 package org.danteplanner.backend.planner.searchindex;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.searchindex.PlannerContentEntityExtractor.EntityRef;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
@@ -13,8 +13,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
@@ -45,11 +43,7 @@ class PlannerContentEntityExtractorTest {
             new FloorRules(TestDataFactory.gameDataRegistry()), TestDataFactory.gameDataRegistry());
 
     private static JsonNode readCorpus(Path file) {
-        try {
-            return MAPPER.readTree(file.toFile());
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return MAPPER.readTree(file.toFile());
     }
 
     private Set<EntityRef> extract(String content, MDCategory category) throws Exception {
@@ -102,16 +96,16 @@ class PlannerContentEntityExtractorTest {
 
     static Stream<Arguments> moduleCorpusCases() {
         return StreamSupport.stream(CORPUS.path("cases").spliterator(), false)
-                .map(corpusCase -> Arguments.of(corpusCase.path("name").asText(), corpusCase));
+                .map(corpusCase -> Arguments.of(corpusCase.path("name").asString(), corpusCase));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("moduleCorpusCases")
     void extract_WhenCorpusCaseIsIndexed_YieldsTheRecordedFloorRows(String name, JsonNode corpusCase) {
-        ObjectNode content = CORPUS.path("base").deepCopy();
+        ObjectNode content = (ObjectNode) CORPUS.path("base").deepCopy();
         content.set("floorSelections", corpusCase.path("floorSelections"));
 
-        Set<String> floorRows = extractor.extract(content, MDCategory.fromValue(corpusCase.path("category").asText()))
+        Set<String> floorRows = extractor.extract(content, MDCategory.fromValue(corpusCase.path("category").asString()))
                 .stream()
                 .filter(ref -> ref.type() == ContentEntityType.THEME_PACK || ref.type() == ContentEntityType.EGO_GIFT)
                 .map(ref -> ref.type().name() + ":" + ref.id())
@@ -134,7 +128,7 @@ class PlannerContentEntityExtractorTest {
 
     private static Set<String> textSet(JsonNode array) {
         Set<String> values = new HashSet<>();
-        array.forEach(value -> values.add(value.asText()));
+        array.forEach(value -> values.add(value.asString()));
         return values;
     }
 

@@ -1,6 +1,6 @@
 package org.danteplanner.backend.integration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import org.danteplanner.backend.planner.entity.Planner;

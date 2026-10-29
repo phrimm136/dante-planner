@@ -1,6 +1,6 @@
 package org.danteplanner.backend.auth.oauth;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.auth.exception.OAuthException;
 import org.danteplanner.backend.shared.config.OAuthProperties;
 import org.danteplanner.backend.support.GoogleStub;

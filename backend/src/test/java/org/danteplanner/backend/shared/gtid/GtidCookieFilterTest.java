@@ -19,7 +19,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource;

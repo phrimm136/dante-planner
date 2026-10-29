@@ -1,4 +1,5 @@
 package org.danteplanner.backend.controller;
+import org.danteplanner.backend.support.TestJsonMappers;
 import org.danteplanner.backend.user.controller.UserController;
 
 import jakarta.servlet.http.Cookie;
@@ -31,7 +32,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -84,7 +84,7 @@ class UserControllerTest {
                         new RoleChangeValidator(userRepository), gracePeriodDays),
                 null,
                 new UserSettingsService(userSettingsRepository, userRepository),
-                new SsePublisher(sseChannel, Jackson2ObjectMapperBuilder.json().build(), new SimpleMeterRegistry()),
+                new SsePublisher(sseChannel, TestJsonMappers.springDefaults(), new SimpleMeterRegistry()),
                 null, sessionEndHandler, cookieUtils, gracePeriodDays);
     }
 

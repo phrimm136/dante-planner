@@ -1,10 +1,10 @@
 package org.danteplanner.backend.planner.gamedata;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.IntNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.IntNode;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.StringNode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -96,11 +96,11 @@ public record PlannerIdMigrations(Map<Kind, Map<String, String>> renames, Map<Ki
             throw new IllegalArgumentException("'" + kind.key() + ".rename' must be an object");
         }
         for (Map.Entry<String, JsonNode> rename : node.properties()) {
-            if (!rename.getValue().isTextual() || rename.getValue().asText().isEmpty()) {
+            if (!rename.getValue().isString() || rename.getValue().asString().isEmpty()) {
                 throw new IllegalArgumentException("'" + kind.key() + ".rename." + rename.getKey()
                         + "' must be a non-empty string id");
             }
-            renames.put(rename.getKey(), rename.getValue().asText());
+            renames.put(rename.getKey(), rename.getValue().asString());
         }
         return renames;
     }
@@ -114,10 +114,10 @@ public record PlannerIdMigrations(Map<Kind, Map<String, String>> renames, Map<Ki
             throw new IllegalArgumentException("'" + kind.key() + ".drop' must be an array");
         }
         for (JsonNode id : node) {
-            if (!id.isTextual() || id.asText().isEmpty()) {
+            if (!id.isString() || id.asString().isEmpty()) {
                 throw new IllegalArgumentException("'" + kind.key() + ".drop' must hold non-empty string ids");
             }
-            drops.add(id.asText());
+            drops.add(id.asString());
         }
         return drops;
     }
@@ -193,8 +193,8 @@ public record PlannerIdMigrations(Map<Kind, Map<String, String>> renames, Map<Ki
             for (Map.Entry<String, JsonNode> slot : egos.properties()) {
                 renameIdField(slot.getValue(), Kind.EGO);
                 JsonNode idNode = slot.getValue().path("id");
-                if (!REQUIRED_EGO_TYPE.equals(slot.getKey()) && idNode.isTextual()
-                        && isDropped(Kind.EGO, idNode.asText())) {
+                if (!REQUIRED_EGO_TYPE.equals(slot.getKey()) && idNode.isString()
+                        && isDropped(Kind.EGO, idNode.asString())) {
                     droppedSlots.add(slot.getKey());
                 }
             }
@@ -207,24 +207,24 @@ public record PlannerIdMigrations(Map<Kind, Map<String, String>> renames, Map<Ki
             return;
         }
         JsonNode idNode = owner.path("id");
-        if (idNode.isTextual()) {
-            ((ObjectNode) owner).put("id", renamed(kind, idNode.asText()));
+        if (idNode.isString()) {
+            ((ObjectNode) owner).put("id", renamed(kind, idNode.asString()));
         }
     }
 
     private void normalizeGiftArray(JsonNode array) {
         rewriteArray(array, element -> {
-            if (!element.isTextual()) {
+            if (!element.isString()) {
                 return Optional.of(element);
             }
-            String giftId = element.asText();
+            String giftId = element.asString();
             Matcher matcher = GameDataRegistry.GIFT_ENHANCEMENT_PATTERN.matcher(giftId);
             String base = matcher.matches() ? matcher.group(1) : giftId;
             String enhancement = giftId.substring(0, giftId.length() - base.length());
             if (isDropped(Kind.EGO_GIFT, base)) {
                 return Optional.empty();
             }
-            return Optional.of(TextNode.valueOf(enhancement + renamed(Kind.EGO_GIFT, base)));
+            return Optional.of(StringNode.valueOf(enhancement + renamed(Kind.EGO_GIFT, base)));
         });
     }
 
@@ -277,8 +277,8 @@ public record PlannerIdMigrations(Map<Kind, Map<String, String>> renames, Map<Ki
                 continue;
             }
             JsonNode themePackNode = floor.path("themePackId");
-            if (themePackNode.isTextual()) {
-                ((ObjectNode) floor).put("themePackId", renamed(Kind.THEME_PACK, themePackNode.asText()));
+            if (themePackNode.isString()) {
+                ((ObjectNode) floor).put("themePackId", renamed(Kind.THEME_PACK, themePackNode.asString()));
             }
             normalizeGiftArray(floor.path("giftIds"));
         }
@@ -293,7 +293,7 @@ public record PlannerIdMigrations(Map<Kind, Map<String, String>> renames, Map<Ki
     }
 
     private static Iterable<String> iterable(JsonNode node) {
-        return node::fieldNames;
+        return node.propertyNames();
     }
 
     private static Map<Kind, Map<String, String>> copyRenames(Map<Kind, Map<String, String>> source) {

@@ -1,6 +1,6 @@
 package org.danteplanner.backend.planner.searchindex;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
@@ -58,7 +58,7 @@ public class PlannerContentEntityExtractor {
         if (equipment == null || !equipment.isObject()) {
             return;
         }
-        Iterator<Map.Entry<String, JsonNode>> sinners = equipment.fields();
+        Iterator<Map.Entry<String, JsonNode>> sinners = equipment.properties().iterator();
         while (sinners.hasNext()) {
             JsonNode sinnerData = sinners.next().getValue();
             if (sinnerData == null || !sinnerData.isObject()) {
@@ -70,7 +70,7 @@ public class PlannerContentEntityExtractor {
             }
             JsonNode egos = sinnerData.get("egos");
             if (egos != null && egos.isObject()) {
-                Iterator<Map.Entry<String, JsonNode>> egoTypes = egos.fields();
+                Iterator<Map.Entry<String, JsonNode>> egoTypes = egos.properties().iterator();
                 while (egoTypes.hasNext()) {
                     JsonNode egoData = egoTypes.next().getValue();
                     if (egoData != null && egoData.isObject()) {
@@ -96,10 +96,10 @@ public class PlannerContentEntityExtractor {
     }
 
     private static void addId(JsonNode idNode, ContentEntityType type, Set<EntityRef> refs) {
-        if (idNode == null || idNode.isNull()) {
+        if (idNode == null || idNode.isNull() || !idNode.isValueNode()) {
             return;
         }
-        addId(idNode.asText(), type, refs);
+        addId(idNode.asString(), type, refs);
     }
 
     private static void addId(String raw, ContentEntityType type, Set<EntityRef> refs) {

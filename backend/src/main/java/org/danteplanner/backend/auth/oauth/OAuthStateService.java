@@ -1,7 +1,7 @@
 package org.danteplanner.backend.auth.oauth;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
@@ -12,7 +12,6 @@ import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.auth.token.AesGcmCipher;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
@@ -99,7 +98,7 @@ public class OAuthStateService {
                     .expiration(expiration)
                     .signWith(privateKey, SignatureAlgorithm.RS256)
                     .compact();
-        } catch (GeneralSecurityException | JsonProcessingException e) {
+        } catch (GeneralSecurityException | JacksonException e) {
             throw new IllegalStateException("Failed to seal oauth_tx", e);
         }
     }
@@ -117,7 +116,7 @@ public class OAuthStateService {
             byte[] encrypted = urlDecoder.decode(txClaim);
             byte[] json = aesGcmCipher.decrypt(encryptionKey, encrypted);
             return Optional.of(objectMapper.readValue(json, OAuthTransaction.class));
-        } catch (JwtException | GeneralSecurityException | IOException | IllegalArgumentException e) {
+        } catch (JwtException | GeneralSecurityException | JacksonException | IllegalArgumentException e) {
             log.warn("oauth_tx open rejected [{}]: {}", e.getClass().getSimpleName(), e.getMessage());
             return Optional.empty();
         }

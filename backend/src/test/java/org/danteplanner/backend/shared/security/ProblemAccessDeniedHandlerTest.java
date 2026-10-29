@@ -5,14 +5,14 @@ import java.time.Instant;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.ErrorResponseException;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.support.TestJsonMappers;
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.shared.exception.ProblemWriter;
@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ProblemAccessDeniedHandlerTest {
 
-    private final ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
+    private final ObjectMapper objectMapper = TestJsonMappers.springDefaults();
     private final ProblemAccessDeniedHandler handler = new ProblemAccessDeniedHandler(new ProblemWriter(objectMapper));
 
     @Test
@@ -35,8 +35,8 @@ class ProblemAccessDeniedHandlerTest {
         JsonNode body = objectMapper.readTree(response.getContentAsString());
         assertThat(response.getStatus()).isEqualTo(403);
         assertThat(response.getContentType()).isEqualTo(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
-        assertThat(body.path("code").asText()).isEqualTo("USER_BANNED");
-        assertThat(body.path("instance").asText()).isEqualTo("/api/moderation/users");
+        assertThat(body.path("code").asString()).isEqualTo("USER_BANNED");
+        assertThat(body.path("instance").asString()).isEqualTo("/api/moderation/users");
     }
 
     @Test
@@ -49,7 +49,7 @@ class ProblemAccessDeniedHandlerTest {
         JsonNode body = objectMapper.readTree(response.getContentAsString());
         assertThat(response.getStatus()).isEqualTo(403);
         assertThat(response.getContentType()).isEqualTo(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
-        assertThat(body.path("code").asText()).isEqualTo("FORBIDDEN");
+        assertThat(body.path("code").asString()).isEqualTo("FORBIDDEN");
     }
 
     @Test

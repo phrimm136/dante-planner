@@ -1,8 +1,8 @@
 package org.danteplanner.backend.shared.sanitize;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import org.junit.jupiter.api.Test;
 
@@ -68,6 +68,6 @@ class RequestBoundarySanitizationTest {
 
     private static String linkIn(String document) throws Exception {
         JsonNode parsed = MAPPER.readTree(document);
-        return parsed.at(LINK_PATH).asText();
+        return parsed.at(LINK_PATH).asString();
     }
 }

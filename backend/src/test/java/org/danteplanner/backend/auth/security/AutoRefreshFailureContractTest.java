@@ -4,7 +4,6 @@ import org.danteplanner.backend.shared.security.AuthDegradationResponder;
 import org.danteplanner.backend.shared.security.CustomAuthenticationEntryPoint;
 
 import org.danteplanner.backend.shared.exception.ProblemWriter;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import jakarta.servlet.http.Cookie;
 
 import org.danteplanner.backend.auth.token.RotationResult;
@@ -24,6 +23,7 @@ import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.danteplanner.backend.support.TestJsonMappers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -123,7 +123,7 @@ class AutoRefreshFailureContractTest {
         return new JwtAuthenticationFilter(
                 jwt.service(), tokenBlacklist,
                 new AccessTokenAuthenticator(jwt.service(), tokenBlacklist), cookieUtils, users,
-                new AuthDegradationResponder(new ProblemWriter(Jackson2ObjectMapperBuilder.json().build())), jwt.service(), refreshRotation,
+                new AuthDegradationResponder(new ProblemWriter(TestJsonMappers.springDefaults())), jwt.service(), refreshRotation,
                 new LineageRotationFlag(lineageEnabled), jwt.properties());
     }
 }

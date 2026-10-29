@@ -1,7 +1,7 @@
 package org.danteplanner.backend.planner.sync;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import org.danteplanner.backend.planner.entity.PlannerContent;
 
@@ -51,7 +51,7 @@ public record PlannerChange(
         // so a resend of the pulled document never carries the stored string byte for byte.
         try {
             return !JsonDocuments.sameDocument(mapper.readTree(carried), mapper.readTree(stored));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return true;
         }
     }

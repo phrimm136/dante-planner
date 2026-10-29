@@ -1,7 +1,7 @@
 package org.danteplanner.backend.integration;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -94,7 +94,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
 
     private List<String> fieldNames(JsonNode node) {
         List<String> names = new ArrayList<>();
-        node.fieldNames().forEachRemaining(names::add);
+        names.addAll(node.propertyNames());
         return names;
     }
 
@@ -105,7 +105,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     private JsonNode cardFor(String json, UUID plannerId) throws Exception {
         JsonNode card = null;
         for (JsonNode candidate : objectMapper.readTree(json).get("content")) {
-            if (plannerId.toString().equals(candidate.get("id").asText())) {
+            if (plannerId.toString().equals(candidate.get("id").asString())) {
                 card = candidate;
             }
         }

@@ -1,13 +1,13 @@
 package org.danteplanner.backend.shared.sse;
 
-import java.io.IOException;
 import java.util.UUID;
 
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ public class SseRedisSubscriber implements MessageListener {
         SseEnvelope envelope;
         try {
             envelope = objectMapper.readValue(message.getBody(), SseEnvelope.class);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             log.error("Failed to deserialize SSE envelope from channel {}", new String(message.getChannel(), StandardCharsets.UTF_8), e);
             return;
         }

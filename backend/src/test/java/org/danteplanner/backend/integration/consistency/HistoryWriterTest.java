@@ -11,10 +11,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.support.TestJsonMappers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -48,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class HistoryWriterTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final ObjectMapper PROBLEM_MAPPER = Jackson2ObjectMapperBuilder.json().build();
+    private static final ObjectMapper PROBLEM_MAPPER = TestJsonMappers.springDefaults();
     private static final String K1 = UUID.randomUUID().toString();
     private static final String K2 = UUID.randomUUID().toString();
 
@@ -91,7 +91,7 @@ class HistoryWriterTest {
         HistoryWriter.write(original, written);
 
         assertThat(History.read(written)).isEqualTo(original);
-        assertThat(lines(written)).extracting(line -> line.path("code").textValue())
+        assertThat(lines(written)).extracting(line -> line.path("code").stringValue())
                 .containsExactly(DegradationErrorConstants.READ_UNAVAILABLE.code(),
                         DegradationErrorConstants.READ_UNAVAILABLE.code());
     }
@@ -125,9 +125,9 @@ class HistoryWriterTest {
 
         assertThat(History.read(written)).isEqualTo(original);
         assertThat(lines(written))
-                .filteredOn(line -> "fail".equals(line.path("outcome").textValue())
+                .filteredOn(line -> "fail".equals(line.path("outcome").stringValue())
                         && line.path("status").intValue() == HttpStatus.SERVICE_UNAVAILABLE.value())
-                .extracting(line -> line.path("kind").textValue() + ":" + line.path("code").textValue())
+                .extracting(line -> line.path("kind").stringValue() + ":" + line.path("code").stringValue())
                 .containsExactly(
                         "save:" + DegradationErrorConstants.DB_UNAVAILABLE.code(),
                         "delete:" + DegradationErrorConstants.DB_UNAVAILABLE.code(),

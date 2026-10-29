@@ -1,7 +1,7 @@
 package org.danteplanner.backend.shared.sanitize;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.Test;
 
@@ -59,7 +59,7 @@ class SanitizedStringDeserializerTest {
                 Payload.class);
 
         JsonNode document = MAPPER.readTree(payload.document());
-        assertThat(document.at("/sectionNotes/intro/content/content/0/marks/0/attrs/href").asText())
+        assertThat(document.at("/sectionNotes/intro/content/content/0/marks/0/attrs/href").asString())
                 .isEqualTo("#");
     }
 

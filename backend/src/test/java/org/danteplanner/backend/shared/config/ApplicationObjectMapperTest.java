@@ -5,9 +5,9 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,7 +19,7 @@ class ApplicationObjectMapperTest {
     private ObjectMapper objectMapper;
 
     @Test
-    void response_WhenAFieldIsNull_OmitsIt() throws JsonProcessingException {
+    void response_WhenAFieldIsNull_OmitsIt() throws JacksonException {
         Map<String, Object> json = objectMapper.readValue(
                 objectMapper.writeValueAsString(new Pair("kept", null)), new TypeReference<>() {});
 

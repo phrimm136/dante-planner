@@ -1,8 +1,8 @@
 package org.danteplanner.backend.integration;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerEntityFilter;
@@ -261,16 +261,16 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
         ObjectNode viaTwo = (ObjectNode) objectMapper.readTree(twoBody);
         ObjectNode viaOne = (ObjectNode) objectMapper.readTree(oneBody);
         assertThat(viaOne.get("published").asBoolean()).isTrue();
-        assertThat(viaOne.get("title").asText()).isEqualTo("Edited Title");
+        assertThat(viaOne.get("title").asString()).isEqualTo("Edited Title");
         assertThat(viaOne.get("syncVersion").asLong()).isEqualTo(oneVersion + 1);
-        assertThat(objectMapper.readTree(viaOne.get("content").asText()))
+        assertThat(objectMapper.readTree(viaOne.get("content").asString()))
                 .isEqualTo(objectMapper.readTree(TestDataFactory.VALID_CONTENT));
 
         List<String> perRowFields = List.of("id", "createdAt", "lastModifiedAt", "savedAt");
         viaTwo.remove(perRowFields);
         viaOne.remove(perRowFields);
-        viaTwo.set("content", objectMapper.readTree(viaTwo.get("content").asText()));
-        viaOne.set("content", objectMapper.readTree(viaOne.get("content").asText()));
+        viaTwo.set("content", objectMapper.readTree(viaTwo.get("content").asString()));
+        viaOne.set("content", objectMapper.readTree(viaOne.get("content").asString()));
         assertThat(viaOne).isEqualTo(viaTwo);
     }
 
@@ -347,8 +347,8 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
 
     private void saveBack(JsonNode received, String title, String content) throws Exception {
         UpsertPlannerRequest save = UpsertRequests.draft()
-                .id(received.get("id").asText())
-                .category(received.get("category").asText())
+                .id(received.get("id").asString())
+                .category(received.get("category").asString())
                 .title(title)
                 .status(objectMapper.treeToValue(received.get("status"), PlannerStatus.class))
                 .content(content)
@@ -357,7 +357,7 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
                 .syncVersion(received.get("syncVersion").asLong())
                 .selectedKeywords(null)
                 .build();
-        mockMvc.perform(put("/api/planner/md/{id}", received.get("id").asText())
+        mockMvc.perform(put("/api/planner/md/{id}", received.get("id").asString())
                         .cookie(AuthCookies.accessToken(token))
                         .with(withCsrf())
                         .contentType(APPLICATION_JSON)
@@ -375,7 +375,7 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
         JsonNode received = ownerCopy(planner.getId());
         assertThat(entityFilterRows(planner.getId())).isZero();
 
-        saveBack(received, "Renamed", received.get("content").asText());
+        saveBack(received, "Renamed", received.get("content").asString());
 
         assertThat(entityFilterRows(planner.getId()))
                 .as("no rebuild ran, so the deliberately unbuilt index stays empty")
@@ -393,9 +393,9 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
         PlannerEntityFilterId added = new PlannerEntityFilterId(ContentEntityType.IDENTITY, 10102, planner.getId());
         assertThat(entityFilterRepository.existsById(added)).isFalse();
 
-        ObjectNode edited = (ObjectNode) objectMapper.readTree(received.get("content").asText());
+        ObjectNode edited = (ObjectNode) objectMapper.readTree(received.get("content").asString());
         ((ObjectNode) edited.get("equipment").get("1").get("identity")).put("id", "10102");
-        saveBack(received, received.get("title").asText(), objectMapper.writeValueAsString(edited));
+        saveBack(received, received.get("title").asString(), objectMapper.writeValueAsString(edited));
 
         assertThat(entityFilterRepository.existsById(added))
                 .as("the answered save carries the added identity's filter row")

@@ -10,8 +10,8 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import com.tngtech.archunit.core.domain.AccessTarget;
 import com.tngtech.archunit.core.domain.JavaAccess;
 import com.tngtech.archunit.core.domain.JavaClasses;
@@ -72,9 +72,9 @@ class ErrorCodeVocabularyTest {
                 .collect(Collectors.toSet());
 
         assertThat(codes()).allSatisfy((code, entry) -> {
-            if (RULE.equals(entry.path("kind").asText())) {
-                String prefix = entry.path("problem").asText() + SEPARATOR + entry.path("subject").asText();
-                assertThat(problems).as(code).contains(entry.path("problem").asText());
+            if (RULE.equals(entry.path("kind").asString())) {
+                String prefix = entry.path("problem").asString() + SEPARATOR + entry.path("subject").asString();
+                assertThat(problems).as(code).contains(entry.path("problem").asString());
                 assertThat(code.equals(prefix) || code.startsWith(prefix + SEPARATOR)).as(code).isTrue();
             }
         });

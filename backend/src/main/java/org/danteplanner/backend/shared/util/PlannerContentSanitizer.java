@@ -1,8 +1,9 @@
 package org.danteplanner.backend.shared.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -10,7 +11,7 @@ import java.util.Map;
 @Slf4j
 public final class PlannerContentSanitizer {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.builderWithJackson2Defaults().build();
 
     private PlannerContentSanitizer() {
     }
@@ -37,7 +38,7 @@ public final class PlannerContentSanitizer {
             }
 
             return OBJECT_MAPPER.writeValueAsString(root);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.warn("Failed to parse planner content for sanitization, returning unchanged: {}", e.getMessage());
             return contentJson;
         }

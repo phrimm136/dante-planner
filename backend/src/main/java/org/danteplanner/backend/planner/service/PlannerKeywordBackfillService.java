@@ -1,10 +1,10 @@
 package org.danteplanner.backend.planner.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.MissingNode;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.MissingNode;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.planner.repository.PlannerKeywordBackfillRepository;
@@ -91,7 +91,7 @@ public class PlannerKeywordBackfillService {
         JsonNode selection;
         try {
             selection = selectionJson == null ? MissingNode.getInstance() : objectMapper.readTree(selectionJson);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("MySQL returned an unreadable JSON selection: " + selectionJson, e);
         }
         return serialized(List.copyOf(PlannerKeywords.fromSelection(selection).asSet()));
@@ -104,7 +104,7 @@ public class PlannerKeywordBackfillService {
         try {
             List<String> keywords = objectMapper.readValue(stored, STRING_LIST);
             return keywords == null || keywords.contains(null) ? stored : serialized(keywords);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return stored;
         }
     }
@@ -116,7 +116,7 @@ public class PlannerKeywordBackfillService {
         }
         try {
             return objectMapper.writeValueAsString(sorted);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Keyword list could not be serialized: " + sorted, e);
         }
     }

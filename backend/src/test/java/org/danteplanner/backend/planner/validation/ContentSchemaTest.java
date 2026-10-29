@@ -1,8 +1,8 @@
 package org.danteplanner.backend.planner.validation;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,7 +12,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Consumer;
@@ -44,9 +43,9 @@ class ContentSchemaTest {
                 Arguments.of("an optional E.G.O slot beside ZAYIN", edit(content -> egos(content, "4")
                         .set("TETH", ego("20402", 3)))),
                 Arguments.of("every E.G.O slot", edit(content -> egos(content, "7")
-                        .<ObjectNode>set("TETH", ego("20702", 1))
-                        .<ObjectNode>set("HE", ego("20703", 2))
-                        .<ObjectNode>set("WAW", ego("20704", 3))
+                        .set("TETH", ego("20702", 1))
+                        .set("HE", ego("20703", 2))
+                        .set("WAW", ego("20704", 3))
                         .set("ALEPH", ego("20705", 4)))),
                 Arguments.of("a floor without a theme pack", edit(content -> ((ObjectNode) content
                         .path("floorSelections").path(4)).putNull("themePackId"))),
@@ -175,10 +174,6 @@ class ContentSchemaTest {
     }
 
     private static JsonNode json(String text) {
-        try {
-            return MAPPER.readTree(text);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return MAPPER.readTree(text);
     }
 }

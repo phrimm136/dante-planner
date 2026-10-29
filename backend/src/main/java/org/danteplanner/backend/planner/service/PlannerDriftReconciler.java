@@ -1,10 +1,10 @@
 package org.danteplanner.backend.planner.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.MissingNode;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.MissingNode;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
@@ -156,7 +156,7 @@ public class PlannerDriftReconciler {
         try {
             JsonNode selection = selectionJson == null ? MissingNode.getInstance() : objectMapper.readTree(selectionJson);
             return Optional.of(PlannerKeywords.fromSelection(selection).asSet());
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.warn("Unreadable content keywords for planner {} during reconciliation: {}",
                     plannerId, e.getMessage());
             return Optional.empty();
@@ -210,7 +210,7 @@ public class PlannerDriftReconciler {
         }
         try {
             return Optional.of(objectMapper.readTree(contentJson));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.warn("Unreadable content for planner {} during reconciliation: {}",
                     plannerId, e.getMessage());
             return Optional.empty();
@@ -242,7 +242,7 @@ public class PlannerDriftReconciler {
         try {
             return Optional.of(
                     PlannerKeywords.fromStorage(objectMapper.readValue(keywordsJson, STRING_LIST)).asSet());
-        } catch (JsonProcessingException | IllegalArgumentException e) {
+        } catch (JacksonException | IllegalArgumentException e) {
             log.warn("Unreadable {} keywords for planner {} during reconciliation: {}",
                     side, plannerId, e.getMessage());
             return Optional.empty();

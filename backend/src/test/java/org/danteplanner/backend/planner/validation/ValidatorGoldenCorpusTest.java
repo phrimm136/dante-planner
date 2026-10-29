@@ -15,9 +15,9 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
@@ -109,16 +109,16 @@ class ValidatorGoldenCorpusTest {
     @MethodSource("sharedFloorCorpusCases")
     void contentChain_WhenSharedFloorCorpusCaseReplayed_ReportsTheRecordedCodes(String name, Stage stage,
                                                                                  JsonNode corpusCase) {
-        ObjectNode content = sharedFloorCorpus().path("base").deepCopy();
+        ObjectNode content = (ObjectNode) sharedFloorCorpus().path("base").deepCopy();
         content.set("floorSelections", corpusCase.path("floorSelections"));
         List<String> expected = StreamSupport.stream(
                         corpusCase.path("expect").path(stage.tableName()).path("violations").spliterator(), false)
-                .map(violation -> violation.path("code").asText())
+                .map(violation -> violation.path("code").asString())
                 .sorted()
                 .toList();
 
         assertThat(codesOf(() -> contentValidator.parse(content.toString(),
-                MDCategory.fromValue(corpusCase.path("category").asText()),
+                MDCategory.fromValue(corpusCase.path("category").asString()),
                 contentValidator.season(ValidatorGoldenCorpus.MD_CURRENT_VERSION), stage)))
                 .isEqualTo(expected);
     }
@@ -126,15 +126,11 @@ class ValidatorGoldenCorpusTest {
     private static Stream<Arguments> sharedFloorCorpusCases() {
         return StreamSupport.stream(sharedFloorCorpus().path("cases").spliterator(), false)
                 .flatMap(corpusCase -> Stream.of(Stage.DRAFT, Stage.PUBLISH)
-                        .map(stage -> Arguments.of(corpusCase.path("name").asText(), stage, corpusCase)));
+                        .map(stage -> Arguments.of(corpusCase.path("name").asString(), stage, corpusCase)));
     }
 
     private static JsonNode sharedFloorCorpus() {
-        try {
-            return new ObjectMapper().readTree(SHARED_FLOOR_CORPUS.toFile());
-        } catch (IOException e) {
-            throw new UncheckedIOException("could not read " + SHARED_FLOOR_CORPUS, e);
-        }
+        return new ObjectMapper().readTree(SHARED_FLOOR_CORPUS.toFile());
     }
 
     private static List<String> codesOf(Runnable invocation) {

@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 final class HistoryLine {
 
@@ -43,7 +43,7 @@ final class HistoryLine {
         JsonNode node;
         try {
             node = MAPPER.readTree(text);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new HistoryFormatException(number, "invalid JSON", e);
         }
         if (!node.isObject()) {
@@ -162,7 +162,7 @@ final class HistoryLine {
         return switch (outcome) {
             case "ok" -> Optional.of(new ListRead(session, invokedAt, completedAt, keys()));
             case "fail" -> {
-                if (node.path("status").intValue() == SERVICE_UNAVAILABLE) {
+                if (node.path("status").asInt(0) == SERVICE_UNAVAILABLE) {
                     requireUnavailableCode(READ_UNAVAILABLE_CODE);
                 }
                 yield Optional.empty();
@@ -181,7 +181,7 @@ final class HistoryLine {
     }
 
     private void requireUnavailableCode(String code) {
-        if (!code.equals(node.path("code").textValue())) {
+        if (!code.equals(node.path("code").stringValue(null))) {
             throw failure("fail with status " + SERVICE_UNAVAILABLE + " without code " + code);
         }
     }
@@ -210,10 +210,10 @@ final class HistoryLine {
 
     private String text(String field) {
         JsonNode value = node.path(field);
-        if (!value.isTextual()) {
+        if (!value.isString()) {
             throw failure("missing or non-string " + field);
         }
-        return value.textValue();
+        return value.stringValue();
     }
 
     private long integral(String field) {
@@ -231,10 +231,10 @@ final class HistoryLine {
         }
         List<String> keys = new ArrayList<>();
         for (JsonNode key : value) {
-            if (!key.isTextual()) {
+            if (!key.isString()) {
                 throw failure("non-string entry in keys");
             }
-            keys.add(key.textValue());
+            keys.add(key.stringValue());
         }
         return keys;
     }

@@ -2,8 +2,8 @@ package org.danteplanner.backend.shared.sse;
 
 import java.util.UUID;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
@@ -59,7 +59,7 @@ public class SsePublisher {
         String json;
         try {
             json = objectMapper.writeValueAsString(envelope);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             meterRegistry.counter(UNSERIALIZABLE_COUNTER, "channel", channel.name()).increment();
             log.error("Failed to serialize SSE envelope for channel {} type {}", channel, envelope.type(), e);
             Sentry.captureException(e);

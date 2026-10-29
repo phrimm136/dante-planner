@@ -1,7 +1,8 @@
 package org.danteplanner.backend.planner.gamedata;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -34,7 +35,7 @@ public class GameDataLoader {
         JsonNode root;
         try {
             root = objectMapper.readTree(Files.readString(filePath));
-        } catch (IOException e) {
+        } catch (IOException | JacksonException e) {
             throw new GameDataLoadException(filePath, e);
         }
 
@@ -53,7 +54,7 @@ public class GameDataLoader {
         JsonNode root;
         try {
             root = objectMapper.readTree(Files.readString(filePath));
-        } catch (IOException e) {
+        } catch (IOException | JacksonException e) {
             throw new GameDataLoadException(filePath, e);
         }
 
@@ -72,7 +73,7 @@ public class GameDataLoader {
         JsonNode root;
         try {
             root = objectMapper.readTree(Files.readString(filePath));
-        } catch (IOException e) {
+        } catch (IOException | JacksonException e) {
             throw new GameDataLoadException(filePath, e);
         }
 
@@ -101,7 +102,7 @@ public class GameDataLoader {
 
         try {
             return PlannerIdMigrations.parse(objectMapper.readTree(Files.readString(filePath)));
-        } catch (IOException | IllegalArgumentException e) {
+        } catch (IOException | JacksonException | IllegalArgumentException e) {
             throw new GameDataLoadException(filePath, e);
         }
     }
@@ -149,8 +150,8 @@ public class GameDataLoader {
             List<String> themePacks = new ArrayList<>();
             if (themePackNode != null && themePackNode.isArray()) {
                 for (JsonNode packNode : themePackNode) {
-                    if (packNode.isTextual()) {
-                        themePacks.add(packNode.asText());
+                    if (packNode.isString()) {
+                        themePacks.add(packNode.asString());
                     }
                 }
             }
@@ -192,7 +193,7 @@ public class GameDataLoader {
         JsonNode root;
         try {
             root = objectMapper.readTree(Files.readString(filePath));
-        } catch (IOException e) {
+        } catch (IOException | JacksonException e) {
             throw new GameDataLoadException(filePath, e);
         }
 

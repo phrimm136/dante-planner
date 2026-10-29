@@ -2,7 +2,7 @@ package org.danteplanner.backend.planner.validation.floor;
 
 import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable.CategoryFloors;
 
 import java.util.List;

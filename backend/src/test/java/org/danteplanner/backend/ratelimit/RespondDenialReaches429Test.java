@@ -23,11 +23,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.support.TestJsonMappers;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -50,7 +50,7 @@ class RespondDenialReaches429Test {
 
     @BeforeEach
     void setUp() {
-        ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
+        ObjectMapper objectMapper = TestJsonMappers.springDefaults();
         SecurityProperties securityProperties = new SecurityProperties();
         securityProperties.parseTrustedProxyIps();
 

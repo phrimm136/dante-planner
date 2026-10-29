@@ -1,7 +1,7 @@
 package org.danteplanner.backend.planner.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -167,7 +167,7 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
         }
         try {
             return JsonDocuments.sameDocument(objectMapper.readTree(current), objectMapper.readTree(loaded));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return false;
         }
     }

@@ -6,8 +6,8 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.notification.api.NotificationEventPayload;
 import org.danteplanner.backend.planner.dto.PlannerPublishedPayload;
 import org.danteplanner.backend.shared.entity.SseEventType;
@@ -140,7 +140,7 @@ class EventPayloadShapeTest {
         try {
             return objectMapper.readValue(
                     objectMapper.writeValueAsString(payload), new TypeReference<>() {});
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (tools.jackson.core.JacksonException e) {
             throw new IllegalStateException("payload is not serializable", e);
         }
     }

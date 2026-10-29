@@ -6,8 +6,8 @@ import org.danteplanner.backend.shared.sse.SseChannelHandler;
 import org.danteplanner.backend.shared.sse.SseConstants;
 import org.danteplanner.backend.shared.sse.SseEnvelope;
 import org.danteplanner.backend.shared.sse.SseHeartbeatWorkerConfig;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.api.PlannerAccess;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -81,7 +81,7 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> implement
         String jsonData;
         try {
             jsonData = objectMapper.writeValueAsString(payload);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.error("Failed to serialize comment event {} for planner {}", eventType, plannerId, e);
             return;
         }

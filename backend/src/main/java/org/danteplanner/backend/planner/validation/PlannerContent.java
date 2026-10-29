@@ -1,6 +1,6 @@
 package org.danteplanner.backend.planner.validation;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import org.danteplanner.backend.planner.validation.ego.Ego;
 import org.danteplanner.backend.planner.validation.floor.Floors;
 import org.danteplanner.backend.planner.validation.identity.Identity;

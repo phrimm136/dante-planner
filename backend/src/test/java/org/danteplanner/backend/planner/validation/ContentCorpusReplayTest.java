@@ -1,9 +1,9 @@
 package org.danteplanner.backend.planner.validation;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.gamedata.FloorRuleTable;
@@ -23,7 +23,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -58,7 +57,7 @@ class ContentCorpusReplayTest {
 
     static Stream<Arguments> caseStages() {
         return cases().flatMap(corpusCase -> stagesOf(corpusCase).stream()
-                .map(stage -> Arguments.of(corpusCase.path("name").asText(), stage, corpusCase)));
+                .map(stage -> Arguments.of(corpusCase.path("name").asString(), stage, corpusCase)));
     }
 
     @ParameterizedTest(name = "{0} at {1}")
@@ -81,7 +80,7 @@ class ContentCorpusReplayTest {
 
     @Test
     void parse_WhenALevelIsWrittenAsAnIntegralDouble_StoresItAsTheIntegerAsAMigration() {
-        ObjectNode content = CORPUS.path("base").deepCopy();
+        ObjectNode content = (ObjectNode) CORPUS.path("base").deepCopy();
         ((ObjectNode) content.path("equipment").path("1").path("identity")).put("level", 60.0);
         String raw = content.toString();
 
@@ -96,7 +95,7 @@ class ContentCorpusReplayTest {
     @ParameterizedTest
     @ValueSource(strings = {"identity-level-above", "identity-level-integral-double-above"})
     void parse_WhenALevelAboveTheCapIsReplayed_StoresTheSeasonCap(String name) throws IOException {
-        JsonNode above = cases().filter(corpusCase -> name.equals(corpusCase.path("name").asText()))
+        JsonNode above = cases().filter(corpusCase -> name.equals(corpusCase.path("name").asString()))
                 .findFirst().orElseThrow();
 
         PlannerDocument document = validator.parse(contentOf(above), MDCategory.F5,
@@ -123,7 +122,7 @@ class ContentCorpusReplayTest {
         ArrayNode results = MAPPER.createArrayNode();
         cases().forEach(corpusCase -> stagesOf(corpusCase).forEach(stage -> {
             ObjectNode result = results.addObject()
-                    .put("name", corpusCase.path("name").asText())
+                    .put("name", corpusCase.path("name").asString())
                     .put("stage", stage);
             result.set("outcome", outcome(corpusCase, stage));
         }));
@@ -132,7 +131,7 @@ class ContentCorpusReplayTest {
 
     private ObjectNode outcome(JsonNode corpusCase, String stage) {
         String content = contentOf(corpusCase);
-        String category = corpusCase.path("category").asText();
+        String category = corpusCase.path("category").asString();
         int version = corpusCase.has("version") ? corpusCase.path("version").asInt() : CONTENT_VERSION;
         Stage validatorStage = "publish".equals(stage) ? Stage.PUBLISH : Stage.DRAFT;
         ObjectNode outcome = MAPPER.createObjectNode();
@@ -158,7 +157,7 @@ class ContentCorpusReplayTest {
 
     private static List<List<String>> pairs(JsonNode violations) {
         return StreamSupport.stream(violations.spliterator(), false)
-                .map(violation -> List.of(violation.path("code").asText(), violation.path("path").asText()))
+                .map(violation -> List.of(violation.path("code").asString(), violation.path("path").asString()))
                 .toList();
     }
 
@@ -167,15 +166,15 @@ class ContentCorpusReplayTest {
         return switch (title.getNodeType()) {
             case MISSING -> DEFAULT_TITLE;
             case NULL -> null;
-            default -> title.asText();
+            default -> title.asString();
         };
     }
 
     private static String contentOf(JsonNode corpusCase) {
         if (corpusCase.has("raw")) {
-            return corpusCase.path("raw").asText();
+            return corpusCase.path("raw").asString();
         }
-        ObjectNode content = CORPUS.path("base").deepCopy();
+        ObjectNode content = (ObjectNode) CORPUS.path("base").deepCopy();
         corpusCase.path("edits").forEach(edit -> apply(content, edit));
         return content.toString();
     }
@@ -193,14 +192,14 @@ class ContentCorpusReplayTest {
                 array.set(last.asInt(), edit.path("value").deepCopy());
             }
         } else if (remove) {
-            ((ObjectNode) parent).remove(last.asText());
+            ((ObjectNode) parent).remove(last.asString());
         } else {
-            ((ObjectNode) parent).set(last.asText(), edit.path("value").deepCopy());
+            ((ObjectNode) parent).set(last.asString(), edit.path("value").deepCopy());
         }
     }
 
     private static JsonNode child(JsonNode node, JsonNode segment) {
-        return segment.isNumber() ? node.get(segment.asInt()) : node.get(segment.asText());
+        return segment.isNumber() ? node.get(segment.asInt()) : node.get(segment.asString());
     }
 
     private static Stream<JsonNode> cases() {
@@ -218,11 +217,7 @@ class ContentCorpusReplayTest {
     }
 
     private static JsonNode readCorpus() {
-        try {
-            return MAPPER.readTree(CORPUS_FILE.toFile());
-        } catch (IOException e) {
-            throw new UncheckedIOException("could not read " + CORPUS_FILE, e);
-        }
+        return MAPPER.readTree(CORPUS_FILE.toFile());
     }
 
     private static Set<String> strings(JsonNode array) {

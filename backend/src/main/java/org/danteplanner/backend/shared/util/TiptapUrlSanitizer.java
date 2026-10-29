@@ -1,9 +1,10 @@
 package org.danteplanner.backend.shared.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Set;
@@ -32,7 +33,7 @@ public final class TiptapUrlSanitizer {
 
     private static final String SAFE_PLACEHOLDER = "#";
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.builderWithJackson2Defaults().build();
 
     private TiptapUrlSanitizer() {
     }
@@ -46,7 +47,7 @@ public final class TiptapUrlSanitizer {
             JsonNode root = OBJECT_MAPPER.readTree(jsonString);
             sanitize(root);
             return OBJECT_MAPPER.writeValueAsString(root);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.warn("Failed to parse Tiptap JSON for sanitization, returning unchanged: {}", e.getMessage());
             return jsonString;
         }
@@ -62,12 +63,12 @@ public final class TiptapUrlSanitizer {
 
         ObjectNode objNode = (ObjectNode) node;
 
-        if ("image".equals(objNode.path("type").asText(null))) {
+        if ("image".equals(objNode.path("type").asString(null))) {
             JsonNode attrs = objNode.get("attrs");
             if (attrs != null && attrs.isObject()) {
                 JsonNode src = attrs.get("src");
-                if (src != null && src.isTextual()) {
-                    String sanitized = sanitizeUrl(src.asText());
+                if (src != null && src.isString()) {
+                    String sanitized = sanitizeUrl(src.asString());
                     ((ObjectNode) attrs).put("src", sanitized);
                 }
             }
@@ -76,12 +77,12 @@ public final class TiptapUrlSanitizer {
         JsonNode marks = objNode.get("marks");
         if (marks != null && marks.isArray()) {
             for (JsonNode mark : marks) {
-                if (mark.isObject() && "link".equals(mark.path("type").asText(null))) {
+                if (mark.isObject() && "link".equals(mark.path("type").asString(null))) {
                     JsonNode attrs = mark.get("attrs");
                     if (attrs != null && attrs.isObject()) {
                         JsonNode href = attrs.get("href");
-                        if (href != null && href.isTextual()) {
-                            String sanitized = sanitizeUrl(href.asText());
+                        if (href != null && href.isString()) {
+                            String sanitized = sanitizeUrl(href.asString());
                             ((ObjectNode) attrs).put("href", sanitized);
                         }
                     }
