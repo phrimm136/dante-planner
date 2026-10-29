@@ -10,6 +10,7 @@ import { useBattleDetailI18n, type BattleI18nConfig } from '../../hooks/useBattl
 import {
   ALL_PARTS,
   displayedUnit,
+  formName,
   headerMapName,
   phaseTier,
   phaseTexts,
@@ -78,7 +79,7 @@ function BaseFormName({ form }: { form: BattleForm }) {
 
 function FormName({ config, id, unitId, phaseId, form }: FormLabelProps) {
   const i18n = useBattleDetailI18n(config, id)
-  return phaseTexts(i18n, unitId, phaseId)?.formNames?.[form] ?? <BaseFormName form={form} />
+  return formName(phaseTexts(i18n, unitId, phaseId), form) ?? <BaseFormName form={form} />
 }
 
 function BattleFormLabel(props: FormLabelProps) {
