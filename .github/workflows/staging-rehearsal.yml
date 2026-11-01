@@ -24,13 +24,13 @@ jobs:
     environment: staging
     permissions: { contents: read, id-token: write }
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - uses: ./.github/actions/fetch-static-checkout
         with:
           static-deploy-key: ${{ secrets.STATIC_DEPLOY_KEY }}
 
       - name: Assume the staging provisioner role
-        uses: aws-actions/configure-aws-credentials@25c81205f2d4b9d5cbdbd746d1c72e05494a8f52  # v5
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c  # v5
         with:
           role-to-assume: ${{ secrets.STAGING_PROVISIONER_ROLE_ARN }}
           aws-region: us-west-2
