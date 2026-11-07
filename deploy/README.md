@@ -94,11 +94,11 @@ the overlay, because the API server rejects a custom resource whose CRD is absen
 
 ## Operator-supplied at apply time
 
-- `origin-tls` Secret (Cloudflare Authenticated Origin Pull cert + client CA) referenced by the
+- `origin-tls` Secret (Cloudflare Authenticated Origin Pull cert) referenced by the
   Gateway — populate before serving traffic.
 - `overlays/oregon/configmap-patch.yaml` `MYSQL_HOST` = the terraform/rds `rds_endpoint` output.
-- The JWT material must exist in Secrets Manager: `danteplanner/jwt/rs256-private-key`
-  (private key PEM), `danteplanner/jwt/rs256-public-key` (X.509 public key PEM), and
-  `danteplanner/jwt/encryption-key` (base64 AES-256 string). All three are required — the
+- The JWT material must exist in Secrets Manager as the `danteplanner/jwt/material` JSON
+  bundle with the keys `rs256_private_key` (private key PEM), `rs256_public_key` (X.509 public
+  key PEM), and `encryption_key` (base64 AES-256 string). All three are required — the
   backend fails fast at boot without them.
 - Grafana Cloud remote-write config (two datasources) is layered in the overlay when wired.
