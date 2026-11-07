@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import ts from 'typescript'
+import ts from '@typescript/typescript6'
 import { describe, it, expect } from 'vitest'
 
 import { VALIDATION_CODES } from '../codes'
