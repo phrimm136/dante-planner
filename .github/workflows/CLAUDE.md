@@ -14,5 +14,8 @@
   `deploy/grafana/`; a change to those scripts or to `fleet-dashboard.json` lands by merging it,
   never by a hand-run. Every script it runs must be idempotent (upsert or overwrite), so
   `create-staleness-rules.sh` stays out until it upserts, and a change to it still needs a hand-run.
+- `dependabot-auto-merge.yml` enables rebase auto-merge on a Dependabot PR unless an update in it
+  is a major, and withdraws it when anyone else pushes; `dependency-submission.yml` submits the
+  backend's resolved Gradle graph on every push to `main`.
 - Workflow `run:` blocks must not interpolate untrusted PR input (title/body/branch
   names); use `github.sha` / `github.ref_name` style contexts only.
