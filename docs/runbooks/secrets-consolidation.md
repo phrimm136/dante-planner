@@ -27,8 +27,9 @@ Unchanged: `danteplanner/backend/runtime-config`, `danteplanner/rds/master-passw
 `danteplanner/cloudflare/tunnel-tokens`, `danteplanner/origin-tls`.
 
 Prerequisites: AWS profiles `prod` and `staging`, `jq`, SSM access to both control planes, and a
-checkout of the consolidation branch for steps 1 and 2 that holds the gitignored
-`terraform/secrets/prod.tfvars`. Terraform runs only through `scripts/ops/terraform-run.sh`.
+checkout of the consolidation branch for steps 1 and 2. A worktree lacks the gitignored files, so
+copy them from the main checkout first: `terraform/secrets/prod.tfvars`, `terraform/backend.prod.hcl`
+and `terraform/backend.staging.hcl`. Terraform runs only through `scripts/ops/terraform-run.sh`.
 
 ## The ordering rules
 
@@ -180,8 +181,10 @@ scripts/ops/terraform-run.sh -chdir=terraform/secrets plan -var-file=staging.tfv
 scripts/ops/terraform-run.sh -chdir=terraform/secrets apply -var-file=staging.tfvars
 ```
 
-Gate, per account: the plan reads `4 to import, 0 to add, ..., 0 to destroy`. Any change beyond
-the four imports stops the run (see the header of `terraform/secrets/main.tf`).
+Gate, per account: the plan reads `4 to import, 0 to add, 4 to change, 0 to destroy`. The four
+in-place changes only record `force_overwrite_replica_secret = false` and
+`recovery_window_in_days = 30`, terraform-side defaults an import leaves empty; any other change
+stops the run (see the header of `terraform/secrets/main.tf`).
 
 ## 3. Merge, cut over, and observe `Synced`
 
