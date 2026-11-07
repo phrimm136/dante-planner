@@ -51,6 +51,11 @@ export function DeckCatalogSection({
 }: DeckCatalogSectionProps) {
   // Inactive grid renders nothing until after first paint; latches true until close
   const [hasWarmedInactive, setHasWarmedInactive] = useState(false)
+  const [wasActive, setWasActive] = useState(isActive)
+  if (wasActive !== isActive) {
+    setWasActive(isActive)
+    if (isActive) setHasWarmedInactive(false)
+  }
 
   const storeApi = usePlannerStoreApiSafe()
 
@@ -60,7 +65,6 @@ export function DeckCatalogSection({
   // render before a post-commit reset effect can fire.
   useEffect(() => {
     if (!isActive) return
-    setHasWarmedInactive(false)
     return () => {
       storeApi?.getState().setDeckVisibleCount(BATCH_SIZE)
     }

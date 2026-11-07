@@ -350,19 +350,19 @@ export function stageEffectEntries(
   startBuffs: readonly StartBuff[],
   grants: readonly StageEffectGrant[],
 ): StageEffectEntry[] {
-  const fromForm = startBuffs.map(
-    (buff): StageEffectEntry => ({ keywordId: buff.keywordId, stack: buff.stack, side: undefined }),
-  )
+  const fromForm = startBuffs.map((buff): StageEffectEntry => ({
+    keywordId: buff.keywordId,
+    stack: buff.stack,
+    side: undefined,
+  }))
   const formKeywords = new Set(fromForm.map((entry) => entry.keywordId))
   const fromRow = grants
     .filter((grant) => !formKeywords.has(grant.keywordId))
-    .map(
-      (grant): StageEffectEntry => ({
-        keywordId: grant.keywordId,
-        stack: grant.stack,
-        side: grant.target === 'unknown' ? undefined : grant.target,
-      }),
-    )
+    .map((grant): StageEffectEntry => ({
+      keywordId: grant.keywordId,
+      stack: grant.stack,
+      side: grant.target === 'unknown' ? undefined : grant.target,
+    }))
   return [...fromForm, ...fromRow]
 }
 

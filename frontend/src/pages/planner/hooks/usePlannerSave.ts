@@ -42,6 +42,7 @@ import type { ValidatedPlanner } from '../lib/validation/plannerValidation'
 import type {
   SaveablePlanner,
   ConflictResolutionChoice,
+  ConflictState,
   MDConfig,
   PlannerStatus,
   ServerAck,
@@ -86,6 +87,7 @@ export interface PlannerSaveResult {
   clearError: () => void
   save: (options?: SaveOptions) => Promise<boolean>
   resolveConflict: (choice: ConflictResolutionChoice) => Promise<boolean>
+  conflict: ConflictState | null
   syncVersion: number
   saveStatus: SaveStatusStore
   isRestricted: boolean
@@ -135,8 +137,15 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const createdAtRef = useRef<string | null>(null)
 
   const syncVersionRef = useRef<number>(initialSyncVersion ?? INITIAL_SYNC_VERSION)
+  const [adoptedSyncVersion, setAdoptedSyncVersion] = useState(
+    initialSyncVersion ?? INITIAL_SYNC_VERSION,
+  )
 
-  const [error, setError] = useState<AppError | null>(null)
+  const [failed, setFailed] = useState<{ error: AppError; detectedAt: string } | null>(null)
+  const error = failed?.error ?? null
+  const setError = (next: AppError | null): void => {
+    setFailed(next === null ? null : { error: next, detectedAt: new Date().toISOString() })
+  }
   const [resolutionError, setResolutionError] = useState<AppError | null>(null)
 
   const heldPlan = useRef<HeldResolution | null>(null)
@@ -153,6 +162,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
   const adoptAck = (incoming: ServerAck): void => {
     syncVersionRef.current = incoming.syncVersion
+    setAdoptedSyncVersion(incoming.syncVersion)
   }
 
   const buildSaveable = (
@@ -323,6 +333,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     if (!fetched.ok) return err(fetched.error)
 
     syncVersionRef.current = Math.max(syncVersionRef.current, fetched.value.ack.syncVersion)
+    setAdoptedSyncVersion(syncVersionRef.current)
     return ok(undefined)
   }
 
@@ -469,7 +480,11 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     clearError,
     save,
     resolveConflict,
-    syncVersion: presentedVersion(),
+    conflict:
+      failed !== null && isSyncConflict(failed.error)
+        ? { serverVersion: failed.error.serverVersion, detectedAt: failed.detectedAt }
+        : null,
+    syncVersion: Math.max(adoptedSyncVersion, initialSyncVersion ?? INITIAL_SYNC_VERSION),
     saveStatus,
     isRestricted,
     restrictionReason,
