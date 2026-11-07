@@ -404,7 +404,19 @@ jobs:
         run: yarn typecheck
       - name: FE Test
         working-directory: ./frontend
-        run: yarn test:coverage
+        env:
+          FE_TEST_NODE_DIAG: --heapsnapshot-near-heap-limit=1 --diagnostic-dir=${{ runner.temp }}/fe-heap-snapshots
+        run: |
+          mkdir -p "$RUNNER_TEMP/fe-heap-snapshots"
+          yarn test:coverage
+      - name: Upload FE heap snapshots
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: fe-heap-snapshots
+          path: ${{ runner.temp }}/fe-heap-snapshots
+          retention-days: 7
+          if-no-files-found: ignore
       - name: FE Lint
         working-directory: ./frontend
         run: yarn lint
