@@ -1,6 +1,7 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.admin.service.AdminService;
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.user.api.LastAdministratorException;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -16,7 +17,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -83,7 +83,7 @@ class AdminRoleWriteSkewIT extends ExclusiveDatabaseSupport {
      * predicate reads overlap.
      */
     private Object selfDemote(CyclicBarrier barrier, Long adminId) throws Exception {
-        barrier.await(15, TimeUnit.SECONDS);
+        Hang.await(barrier, "both self-demotions reaching the barrier");
         return adminService.changeRole(adminId, adminId, UserRole.NORMAL);
     }
 
@@ -93,7 +93,7 @@ class AdminRoleWriteSkewIT extends ExclusiveDatabaseSupport {
      */
     private void awaitSettled(Future<?> attempt) throws Exception {
         try {
-            attempt.get(15, TimeUnit.SECONDS);
+            Hang.get(attempt, "a self-demotion settling");
         } catch (ExecutionException losing) {
             assertThat(losing.getCause())
                     .as("a losing self-demotion is refused by the last-admin safeguard or rolled back as a deadlock")

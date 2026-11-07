@@ -6,6 +6,7 @@ import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerVoteId;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -31,7 +32,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -246,7 +246,7 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
         // Start all threads simultaneously
         latch.countDown();
         executor.shutdown();
-        assertThat(executor.awaitTermination(10, TimeUnit.SECONDS)).as("every vote finished").isTrue();
+        Hang.terminated(executor, "every vote");
 
         // Poll for the dispatch to derive the notification instead of a fixed sleep.
         long deadline = System.currentTimeMillis() + 2000;

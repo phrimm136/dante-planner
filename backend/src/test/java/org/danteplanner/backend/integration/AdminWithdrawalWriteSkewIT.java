@@ -1,6 +1,7 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.admin.service.AdminService;
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.api.LastAdministratorException;
 import org.danteplanner.backend.user.api.UserRole;
@@ -17,7 +18,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,11 +50,11 @@ class AdminWithdrawalWriteSkewIT extends ExclusiveDatabaseSupport {
 
                 CyclicBarrier barrier = new CyclicBarrier(2);
                 Future<?> withdrawal = pool.submit(() -> {
-                    barrier.await(15, TimeUnit.SECONDS);
+                    Hang.await(barrier, "the withdrawal and the demotion reaching the barrier");
                     return lifecycleService.deleteAccount(withdrawing);
                 });
                 Future<?> demotion = pool.submit(() -> {
-                    barrier.await(15, TimeUnit.SECONDS);
+                    Hang.await(barrier, "the demotion and the withdrawal reaching the barrier");
                     return adminService.changeRole(demoting, demoting, UserRole.NORMAL);
                 });
 
@@ -74,7 +74,7 @@ class AdminWithdrawalWriteSkewIT extends ExclusiveDatabaseSupport {
 
     private int settle(Future<?> attempt) throws Exception {
         try {
-            attempt.get(15, TimeUnit.SECONDS);
+            Hang.get(attempt, "an attempt settling");
             return 1;
         } catch (ExecutionException losing) {
             assertThat(losing.getCause())

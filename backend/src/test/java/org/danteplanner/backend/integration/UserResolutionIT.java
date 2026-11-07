@@ -1,6 +1,7 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.repository.UserSettingsRepository;
@@ -18,7 +19,6 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import org.danteplanner.backend.user.api.AuthProviderType;
@@ -67,8 +67,8 @@ class UserResolutionIT extends SharedMySqlContainerSupport {
             Future<User> a = pool.submit(() -> raced(barrier, identity));
             Future<User> b = pool.submit(() -> raced(barrier, identity));
 
-            User ra = a.get(15, TimeUnit.SECONDS);
-            User rb = b.get(15, TimeUnit.SECONDS);
+            User ra = Hang.get(a, "the first racing resolve");
+            User rb = Hang.get(b, "the second racing resolve");
 
             assertThat(ra).as("first caller resolves a user").isNotNull();
             assertThat(rb).as("second caller resolves a user").isNotNull();
@@ -87,7 +87,7 @@ class UserResolutionIT extends SharedMySqlContainerSupport {
     }
 
     private User raced(CyclicBarrier barrier, Map<String, String> identity) throws Exception {
-        barrier.await(15, TimeUnit.SECONDS);
+        Hang.await(barrier, "both resolves reaching the barrier");
         return userService.findOrCreateUser("google", identity);
     }
 

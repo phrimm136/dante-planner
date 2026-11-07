@@ -28,8 +28,6 @@ import org.danteplanner.backend.shared.sse.SseEnvelope;
 
 public final class SseTopicRecorder implements AutoCloseable {
 
-    private static final Duration FENCE_TIMEOUT = Duration.ofSeconds(10);
-
     private final Envelopes envelopes = new Envelopes();
     private final Map<String, CountDownLatch> fences = new ConcurrentHashMap<>();
     private final String fenceTopic = "sse:recorder-fence:" + UUID.randomUUID();
@@ -121,12 +119,7 @@ public final class SseTopicRecorder implements AutoCloseable {
         fences.put(marker, arrived);
         try {
             fencePublisher.convertAndSend(fenceTopic, marker);
-            if (!arrived.await(FENCE_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)) {
-                throw new AssertionError("the recorder's fence marker did not come back within " + FENCE_TIMEOUT);
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new AssertionError("interrupted while waiting for the recorder's fence", e);
+            Hang.await(arrived, "the recorder's fence marker coming back");
         } finally {
             fences.remove(marker);
         }

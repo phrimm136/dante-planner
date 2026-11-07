@@ -39,9 +39,9 @@ import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.config.RedisConnectionConfig;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.danteplanner.backend.shared.gtid.GtidGateConfig;
+import org.danteplanner.backend.support.Hang;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 @Tag("containerized")
 @ExtendWith(MockitoExtension.class)
@@ -198,6 +198,6 @@ class MarkerStoreContextIT {
         assertThat(startedWhileOpen.get()).as("the context started Lettuce threads, so the axis is not vacuous")
                 .isPositive();
         assertThat(raises).as("every raise in flight at close returned").noneMatch(Thread::isAlive);
-        await().atMost(SHUTDOWN_BOUND).untilAsserted(() -> assertThat(lettuceAndRaiseThreads(group)).isEmpty());
+        Hang.until(() -> lettuceAndRaiseThreads(group).isEmpty(), "every Lettuce and raise thread ending after close");
     }
 }

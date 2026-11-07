@@ -41,6 +41,8 @@ import org.junit.jupiter.api.Test;
 
 import org.assertj.core.api.SoftAssertions;
 
+import org.danteplanner.backend.support.Hang;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -51,7 +53,6 @@ class SseShutdownDrainTest {
     private static final long SHUTDOWN_PHASE_TIMEOUT_MS = 5_000;
     /** Well under the phase timeout, well over a context close with nothing in flight. */
     private static final long PROMPT_CLOSE_MS = 2_000;
-    private static final long WELL_SHORT_OF_SSE_TIMEOUT_MS = AbstractSseService.SSE_TIMEOUT_MS / 120;
     private static final int OPEN_STREAMS = 3;
 
     @Test
@@ -137,8 +138,7 @@ class SseShutdownDrainTest {
         CompletableFuture<HttpResponse<String>> stream =
                 HttpClient.newHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString());
 
-        assertThat(stream).as("a subscription after the drain ends instead of staying open")
-                .succeedsWithin(Duration.ofMillis(WELL_SHORT_OF_SSE_TIMEOUT_MS));
+        Hang.get(stream, "a subscription after the drain ending instead of staying open for the SSE timeout");
         assertThat(service.openCount()).as("registry entries after a post-drain subscription").isZero();
 
         long started = System.nanoTime();

@@ -6,11 +6,10 @@ import eu.rekawek.toxiproxy.model.Toxic;
 import eu.rekawek.toxiproxy.model.ToxicDirection;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.time.Duration;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.BooleanSupplier;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.sql.DataSource;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
@@ -20,6 +19,7 @@ import org.danteplanner.backend.shared.config.LoginRedirect;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.SseStream;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -105,11 +105,6 @@ class RedisConnectionRecoveryIT {
     private static final String REPL_PASSWORD = "repl-pass";
 
     private static final long ONE_HOUR_MS = 3_600_000L;
-    private static final long RECOVERY_DEADLINE_MS = 30_000L;
-    private static final long POLL_INTERVAL_MS = 250L;
-    private static final int SSE_REPUBLISH_ATTEMPTS = 20;
-    private static final Duration SSE_DELIVERY_WAIT = Duration.ofSeconds(1);
-    private static final Duration SSE_WARMUP_WAIT = Duration.ofSeconds(10);
 
     /** Minimal planner content that passes {@code PlannerContentValidator} (from DegradationIT). */
 
@@ -273,10 +268,9 @@ class RedisConnectionRecoveryIT {
             toxic.remove();
         }
 
-        assertThat(awaitTrue(() -> tokenBlacklistService.isBlacklisted(token)))
-                .as("the fail-open window must close once auth Redis is reachable again: "
-                        + "the blacklisted token is rejected without a pod restart")
-                .isTrue();
+        Hang.until(() -> tokenBlacklistService.isBlacklisted(token),
+                "the fail-open window closing once auth Redis is reachable again: "
+                        + "the blacklisted token is rejected without a pod restart");
     }
 
     @Test
@@ -292,30 +286,21 @@ class RedisConnectionRecoveryIT {
     private void assertResubscribes(SseStream stream, Long userId) throws IOException {
         ssePublisher.publishUserEvent(userId, null, SseEventType.COMMENT_ADDED, "recovery-warmup",
                 Map.of("id", "recovery-warmup"));
-        stream.next("comment:added", data -> data.contains("recovery-warmup"), SSE_WARMUP_WAIT);
+        stream.next("comment:added", data -> data.contains("recovery-warmup"));
 
         SSE_LOCAL_REDIS_PROXY.disable();
         SSE_LOCAL_REDIS_PROXY.enable();
 
         // The listener container's recovery loop re-subscribes on its own schedule, and only
         // events published AFTER the re-subscription are delivered — so publish fresh events
-        // until one arrives, bounded by the attempt budget.
-        boolean delivered = false;
-        for (int attempt = 0; attempt < SSE_REPUBLISH_ATTEMPTS && !delivered; attempt++) {
-            ssePublisher.publishUserEvent(userId, null, SseEventType.COMMENT_ADDED,
-                    "recovery-attempt-" + attempt, Map.of("id", "recovery-attempt-" + attempt));
-            try {
-                stream.next("comment:added", data -> data.contains("recovery-attempt-"), SSE_DELIVERY_WAIT);
-                delivered = true;
-            } catch (AssertionError notYetResubscribed) {
-                delivered = false;
-            }
-        }
-
-        assertThat(delivered)
-                .as("cross-node fan-out must self-heal after a severed subscriber connection — "
-                        + "a dead subscription until pod restart silently disables multi-device sync")
-                .isTrue();
+        // until one arrives.
+        AtomicInteger attempts = new AtomicInteger();
+        Hang.until(() -> {
+            String attempt = "recovery-attempt-" + attempts.getAndIncrement();
+            ssePublisher.publishUserEvent(userId, null, SseEventType.COMMENT_ADDED, attempt, Map.of("id", attempt));
+            return stream.received("comment:added", data -> data.contains("recovery-attempt-"));
+        }, "cross-node fan-out self-healing after a severed subscriber connection: "
+                + "a dead subscription until pod restart silently disables multi-device sync");
     }
 
     @Test
@@ -329,7 +314,7 @@ class RedisConnectionRecoveryIT {
 
         RATE_LIMIT_REDIS_PROXY.enable();
 
-        assertThat(awaitTrue(() -> {
+        Hang.until(() -> {
             try {
                 MockHttpServletResponse response = mockMvc.perform(get("/api/auth/google/callback")
                                 .param("code", "any").param("state", "any"))
@@ -339,30 +324,7 @@ class RedisConnectionRecoveryIT {
             } catch (Exception e) {
                 return false;
             }
-        }))
-                .as("the OAuth callback must redirect again once rate-limit Redis is reachable")
-                .isTrue();
-    }
-
-    /**
-     * Polls the condition until it holds or {@link #RECOVERY_DEADLINE_MS} elapses. Recovery
-     * is asynchronous (Lettuce reconnect, listener-container recovery loop), so the observed
-     * outcome is the only deterministic signal — the poll asserts behavior, never timing.
-     */
-    private static boolean awaitTrue(BooleanSupplier condition) {
-        long deadline = System.nanoTime() + RECOVERY_DEADLINE_MS * 1_000_000L;
-        while (System.nanoTime() < deadline) {
-            if (condition.getAsBoolean()) {
-                return true;
-            }
-            try {
-                Thread.sleep(POLL_INTERVAL_MS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return false;
-            }
-        }
-        return condition.getAsBoolean();
+        }, "the OAuth callback redirecting again once rate-limit Redis is reachable");
     }
 
     private static Proxy createRedisProxy(String name, int listenPort) {

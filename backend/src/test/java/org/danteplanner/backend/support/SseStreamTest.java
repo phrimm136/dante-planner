@@ -54,9 +54,10 @@ class SseStreamTest {
         String reader = SseStream.readerName(
                 URI.create("http://127.0.0.1:" + server.getAddress().getPort() + path));
         try {
-            assertThatThrownBy(() -> SseStream.open(server.getAddress().getPort(), path, Duration.ofMillis(200)))
+            assertThatThrownBy(() -> SseStream.open(server.getAddress().getPort(), path,
+                    new Hang.Bound(Duration.ofMillis(200))))
                     .isInstanceOf(AssertionError.class)
-                    .hasMessageStartingWith("no matching connected frame arrived");
+                    .hasMessage("hang: a matching connected frame did not complete within 200ms");
 
             assertThat(awaitGone(reader, Duration.ofSeconds(5)))
                     .as("the reader thread of a stream that never became ready")

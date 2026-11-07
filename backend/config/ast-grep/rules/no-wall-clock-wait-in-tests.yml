@@ -5,39 +5,14 @@ message: 'A test does not wait on the wall clock: inject a Clock, assert the res
 files:
   - src/test/java/**/*.java
 ignores:
-  - src/test/java/org/danteplanner/backend/auth/token/RefreshRotationServiceIT.java
   - src/test/java/org/danteplanner/backend/controller/CommentControllerIT.java
-  - src/test/java/org/danteplanner/backend/integration/AdminRoleWriteSkewIT.java
-  - src/test/java/org/danteplanner/backend/integration/AdminWithdrawalWriteSkewIT.java
-  - src/test/java/org/danteplanner/backend/integration/CausalHarnessSupport.java
-  - src/test/java/org/danteplanner/backend/integration/ConsistencyRunIT.java
-  - src/test/java/org/danteplanner/backend/integration/DeactivatedOwnerVisibilityIT.java
-  - src/test/java/org/danteplanner/backend/integration/DegradationIT.java
   - src/test/java/org/danteplanner/backend/integration/MySQLIT.java
   - src/test/java/org/danteplanner/backend/integration/OregonReadFallbackIT.java
-  - src/test/java/org/danteplanner/backend/integration/PlannerCatalogRemovalConcurrencyIT.java
-  - src/test/java/org/danteplanner/backend/integration/PlannerFilterRowsConcurrencyIT.java
-  - src/test/java/org/danteplanner/backend/integration/PlannerUpsertConflictIT.java
-  - src/test/java/org/danteplanner/backend/integration/PlannerViewLockOrderIT.java
   - src/test/java/org/danteplanner/backend/integration/PublishedPlannerDetailIT.java
-  - src/test/java/org/danteplanner/backend/integration/ReadSourceOutageIT.java
-  - src/test/java/org/danteplanner/backend/integration/RedisConnectionRecoveryIT.java
-  - src/test/java/org/danteplanner/backend/integration/ReplicationControl.java
   - src/test/java/org/danteplanner/backend/integration/ReplicationProxyIT.java
-  - src/test/java/org/danteplanner/backend/integration/TwoRegionHarnessIT.java
-  - src/test/java/org/danteplanner/backend/integration/UserResolutionIT.java
   - src/test/java/org/danteplanner/backend/integration/VoteNotificationFlowIT.java
-  - src/test/java/org/danteplanner/backend/shared/config/LazyConnectingProxyManagerTest.java
-  - src/test/java/org/danteplanner/backend/shared/freshness/MarkerStoreConnectBoundTest.java
-  - src/test/java/org/danteplanner/backend/shared/freshness/MarkerStoreContextIT.java
-  - src/test/java/org/danteplanner/backend/shared/freshness/MarkerStoreIT.java
-  - src/test/java/org/danteplanner/backend/shared/freshness/MarkerStoreReplicationIT.java
-  - src/test/java/org/danteplanner/backend/shared/freshness/RaiseBatcherTest.java
   - src/test/java/org/danteplanner/backend/shared/gtid/GtidReadGateTest.java
-  - src/test/java/org/danteplanner/backend/shared/sse/SseHeartbeatSweepTest.java
-  - src/test/java/org/danteplanner/backend/shared/sse/SseShutdownDrainTest.java
-  - src/test/java/org/danteplanner/backend/support/SseStream.java
-  - src/test/java/org/danteplanner/backend/support/SseTopicRecorder.java
+  - src/test/java/org/danteplanner/backend/support/Hang.java
 utils:
   awaitility-chain:
     has:

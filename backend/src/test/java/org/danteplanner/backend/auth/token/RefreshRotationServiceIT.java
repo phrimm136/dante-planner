@@ -1,6 +1,7 @@
 package org.danteplanner.backend.auth.token;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.TestJwt;
 import org.danteplanner.backend.integration.SharedRedisContainerSupport;
@@ -25,7 +26,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.danteplanner.backend.user.api.UserRole;
@@ -436,7 +436,7 @@ class RefreshRotationServiceIT {
                 });
             }
 
-            assertThat(done.await(10, TimeUnit.SECONDS)).isTrue();
+            Hang.await(done, "both concurrent rotations");
             pool.shutdownNow();
             assertThat(failure.get()).as(() -> "thread failed: " + failure.get()).isNull();
 

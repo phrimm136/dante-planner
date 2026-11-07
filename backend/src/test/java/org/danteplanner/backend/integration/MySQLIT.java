@@ -8,6 +8,7 @@ import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 
@@ -44,7 +45,6 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -138,9 +138,8 @@ class MySQLIT extends SharedMySqlContainerSupport {
 
             // The writers queue through a Hikari pool of five that concurrent classes on this
             // context also draw from, so this wait covers contention, not the subject.
-            boolean completed = doneLatch.await(30, TimeUnit.SECONDS);
+            Hang.await(doneLatch, "every concurrent vote");
             assertThat(failures).as("every concurrent vote commits").isEmpty();
-            assertThat(completed).isTrue();
 
             executor.shutdown();
 
@@ -202,10 +201,9 @@ class MySQLIT extends SharedMySqlContainerSupport {
             }
 
             startLatch.countDown();
-            boolean completed = doneLatch.await(30, TimeUnit.SECONDS);
+            Hang.await(doneLatch, "every burst vote");
             executor.shutdown();
 
-            assertThat(completed).isTrue();
             assertThat(failures).isEmpty();
 
             // Atomic increment: the denormalized counter equals the real vote-row count (no lost update)

@@ -5,10 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -16,6 +13,7 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerViewRepository;
 import org.danteplanner.backend.planner.service.PlannerViewRecorder;
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -48,7 +46,6 @@ class PlannerViewLockOrderIT extends SharedMySqlContainerSupport {
     private static final LocalDate DAY = LocalDate.of(2026, 5, 20);
     private static final int ROUNDS = 20;
     private static final int PODS = 2;
-    private static final long BARRIER_TIMEOUT_SECONDS = 10;
     private static final long JOIN_TIMEOUT_MS = 60_000;
 
     @Autowired
@@ -118,13 +115,9 @@ class PlannerViewLockOrderIT extends SharedMySqlContainerSupport {
                 String viewerHash = viewerPrefix + round;
                 plannerIds.forEach(plannerId -> recorder.record(plannerId, viewerHash, DAY));
                 try {
-                    eachRound.await(BARRIER_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                    Hang.await(eachRound, "every pod reaching round " + round);
                     transaction.executeWithoutResult(status -> recorder.flush());
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    failures.add(e);
-                    return;
-                } catch (BrokenBarrierException | TimeoutException | RuntimeException e) {
+                } catch (AssertionError | RuntimeException e) {
                     failures.add(e);
                     return;
                 }

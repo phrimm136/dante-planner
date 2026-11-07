@@ -11,6 +11,8 @@ import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerDriftReconciler;
 import org.danteplanner.backend.planner.service.PlannerDriftReconciler.DriftRecord;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
+import org.danteplanner.backend.support.Hang;
+import org.danteplanner.backend.support.LockWaits;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.exception.AccountDeletedException;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -30,15 +32,11 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.function.BooleanSupplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -287,23 +285,6 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
         assertThat(withdrawalMarked(planner.getId())).isFalse();
     }
 
-    private int lockWaits() {
-        return new JdbcTemplate(dataSource).queryForObject(
-                """
-                SELECT COUNT(*) FROM information_schema.innodb_trx t
-                JOIN information_schema.processlist p ON p.id = t.trx_mysql_thread_id
-                WHERE t.trx_state = 'LOCK WAIT' AND p.db = DATABASE()
-                """, Integer.class);
-    }
-
-    private void awaitCondition(BooleanSupplier condition) throws InterruptedException {
-        Instant deadline = Instant.now().plus(Duration.ofSeconds(20));
-        while (!condition.getAsBoolean()) {
-            assertThat(Instant.now()).as("condition not reached before the deadline").isBefore(deadline);
-            TimeUnit.MILLISECONDS.sleep(250);
-        }
-    }
-
     private boolean published(UUID plannerId) {
         return Boolean.TRUE.equals(new JdbcTemplate(dataSource).queryForObject(
                 "SELECT published FROM planner_publication WHERE planner_id = UUID_TO_BIN(?)",
@@ -324,19 +305,21 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
             }
 
             deactivation = CompletableFuture.runAsync(() -> lifecycleService.deleteAccount(owner.getId()));
-            awaitCondition(() -> deactivation.isDone() || lockWaits() >= 1);
+            LockWaits.await(new JdbcTemplate(dataSource), 1, deactivation::isDone,
+                    "the deactivation queueing on the holder's lock");
             assertThat(deactivation).as("the deactivation must be held behind the holder's lock").isNotDone();
 
             publication = CompletableFuture.runAsync(() -> publishingService.publish(owner.getId(), draft.getId()));
-            awaitCondition(() -> publication.isDone() || lockWaits() >= 2);
+            LockWaits.await(new JdbcTemplate(dataSource), 2, publication::isDone,
+                    "the publication queueing on the holder's lock");
 
             holder.commit();
         }
 
-        deactivation.get(30, TimeUnit.SECONDS);
+        Hang.get(deactivation, "the deactivation after the holder commits");
         Throwable publishFailure = null;
         try {
-            publication.get(30, TimeUnit.SECONDS);
+            Hang.get(publication, "the publication after the holder commits");
         } catch (ExecutionException e) {
             publishFailure = e.getCause();
         }

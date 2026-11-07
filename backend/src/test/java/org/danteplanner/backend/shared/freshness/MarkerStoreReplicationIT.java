@@ -38,9 +38,9 @@ import eu.rekawek.toxiproxy.model.ToxicDirection;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
+import org.danteplanner.backend.support.Hang;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 @Tag("containerized")
 class MarkerStoreReplicationIT {
@@ -59,7 +59,6 @@ class MarkerStoreReplicationIT {
     private static final String PASSWORD = "marker-store-secret";
     private static final Duration WAIT_BOUND = Duration.ofSeconds(1);
     private static final Duration ROOMY_WAIT_BOUND = Duration.ofSeconds(30);
-    private static final Duration LINK_TIMEOUT = Duration.ofSeconds(30);
     private static final String LINK_STATUS = "master_link_status";
     private static final String LINK_UP = "up";
     private static final String BLOCKED_CLIENTS = "blocked_clients";
@@ -136,7 +135,7 @@ class MarkerStoreReplicationIT {
     void setUp() {
         server = UUID.randomUUID().toString();
         store = storeOver(primaryFactory);
-        await().atMost(LINK_TIMEOUT).until(() -> LINK_UP.equals(info(replica, "replication").getProperty(LINK_STATUS)));
+        Hang.until(() -> LINK_UP.equals(info(replica, "replication").getProperty(LINK_STATUS)), "the replica linking up");
     }
 
     @AfterEach
@@ -200,8 +199,7 @@ class MarkerStoreReplicationIT {
             start.countDown();
             List<Long> elapsedMillis = new ArrayList<>();
             for (Future<Long> raise : raises) {
-                elapsedMillis.add(raise.get(BoundedRedisConnections.COMMAND_TIMEOUT.toMillis() * 2,
-                        TimeUnit.MILLISECONDS));
+                elapsedMillis.add(Hang.get(raise, "a concurrent raise"));
             }
             return elapsedMillis;
         } finally {
@@ -267,8 +265,8 @@ class MarkerStoreReplicationIT {
             holdReplicaAcks();
             try {
                 raise = CompletableFuture.runAsync(() -> roomy.raise(Set.of(scope), server + ":1-13"));
-                await().atMost(SCHEDULING_SLACK)
-                        .until(() -> ONE.equals(info(primary, "clients").getProperty(BLOCKED_CLIENTS)));
+                Hang.until(() -> ONE.equals(info(primary, "clients").getProperty(BLOCKED_CLIENTS)),
+                        "the raise's WAIT blocking one client on the primary");
 
                 duringTheWait = primary.opsForHash().entries(scope.key());
                 assertThat(raise).isNotDone();
@@ -276,7 +274,7 @@ class MarkerStoreReplicationIT {
                 releaseReplicaAcks();
             }
 
-            raise.get(BoundedRedisConnections.COMMAND_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
+            Hang.get(raise, "the raise after the replica acks are released");
             assertThat(duringTheWait).containsOnly(Map.entry(server, "13"));
         } finally {
             roomy.close();
@@ -345,7 +343,7 @@ class MarkerStoreReplicationIT {
             }
             assertThat(elapsedMillis)
                     .isLessThan(MarkerStore.RAISE_CONNECT_TIMEOUT.plus(WAIT_BOUND).plus(SCHEDULING_SLACK).toMillis());
-            await().atMost(SCHEDULING_SLACK).until(() -> meters.counter(MarkerStore.RAISE_FAILURES).count() >= 1.0);
+            Hang.until(() -> meters.counter(MarkerStore.RAISE_FAILURES).count() >= 1.0, "the raise failure being counted");
             assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count()).isEqualTo(1.0);
 
             proxied.raise(Set.of(afterTheOutage), server + ":1-25");
