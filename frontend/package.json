@@ -20,7 +20,7 @@
     "preview": "vite preview",
     "test": "NODE_OPTIONS=--max-old-space-size=4096 vitest",
     "test:ui": "NODE_OPTIONS=--max-old-space-size=4096 vitest --ui",
-    "test:coverage": "NODE_OPTIONS=\"--max-old-space-size=4096${FE_TEST_NODE_DIAG:+ $FE_TEST_NODE_DIAG}\" vitest run --coverage",
+    "test:coverage": "NODE_OPTIONS=--max-old-space-size=4096 vitest run --coverage",
     "test:watch": "NODE_OPTIONS=--max-old-space-size=4096 vitest watch"
   },
   "resolutions": {
