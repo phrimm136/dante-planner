@@ -1506,11 +1506,6 @@ guards the parse but likewise skips the schema gate.
   against the pods' signed-UUID TreeMap order (the two orders disagree for about half of pairs); a
   shared context's 500 ms `PlannerViewRecorder` flush as that third party.
   re-check: `rg -q 'void flush_WhenConcurrentFlushesShareTwoPlanners_AdvancesEveryCounter' backend/src/test/java/org/danteplanner/backend/integration/PlannerViewLockOrderIT.java`
-- `EGODetailPage.parity.test.tsx` can exhaust a worker's heap inside a single render (third cell,
-  "threadspin 2 with awaken") when the box is under memory pressure; the run then takes about 350 s
-  instead of 60 s. Seen before and after the test overhaul's snapshot change, so the snapshot size is
-  not the cause. Worth doing when it recurs on an unloaded box or in CI: profile that render's heap.
-  re-check: `test -f frontend/src/pages/ego/__tests__/EGODetailPage.parity.test.tsx`
 - `.claude/hooks/check-output-redirect.sh` shows `yarn --cwd frontend vitest run > …` as its
   redirect example, which skips the heap the `test` script sets. Change the example to
   `yarn --cwd frontend test run` when the hook is next edited.
@@ -1518,7 +1513,10 @@ guards the parse but likewise skips the schema gate.
 - The EGO detail page can livelock in tests: a tier or tab click inside `act()` while the skill and
   passive description boundaries are still suspended on the keyword-formatter static-data waterfall
   makes React re-commit with no DOM change and starves the pending fetch (diagnosed 2026-10-08 with a
-  200 ms delayed queryFn and a Profiler commit counter; the parity tests now prefetch the data). Not
+  200 ms delayed queryFn and a Profiler commit counter; the parity tests now prefetch the data). The
+  same drain loops forever when the click re-renders a name plate whose font table is still loading
+  (TanStack suspends by throwing a promise, which the synchronous `act()` drain never exits on); the
+  parity tests now wait for the name plates before each click, and a capped regression test guards it. Not
   checked in a real browser, where no synchronous `act()` flush starves the fetch. Worth doing when
   a user reports a frozen EGO detail page after switching tiers during load: reproduce in Chromium
   with throttled static-data requests.
@@ -1624,15 +1622,6 @@ guards the parse but likewise skips the schema gate.
 - After PR #322 deploys: `write_forwarding` goes probe → all (ADR 123), the POST `/batch` handler
   and the top-level `selectedKeywords` copy wait for seven days of zero counters (entries above).
   re-check: `rg -q '@PostMapping\("/batch"\)' backend/src/main/java/org/danteplanner/backend/planner/controller/PlannerQueryController.java`
-- CI `test-frontend` died twice with `ERR_WORKER_OUT_OF_MEMORY` ("Worker terminated due to
-  reaching memory limit: JS heap out of memory"): PR #328 attempt 1 and PR #373 run 42374442549.
-  Both times `src/pages/ego/__tests__/EGODetailPage.parity.test.tsx` was running in its own
-  worker thread, and only on slow runners. The file normally peaks near 134 MB, so something
-  grows to the 4096 MB limit. It does not reproduce locally. A larger heap and a split of the
-  file are ruled out. The FE Test step now writes a heap snapshot near the limit and uploads it as
-  the `fe-heap-snapshots` artifact on failure (7 days). Worth doing when a snapshot artifact
-  exists: read it.
-  re-check: `rg -qF 'FE_TEST_NODE_DIAG: --heapsnapshot-near-heap-limit=1' .github/workflows/pr-gate.yml`
 - Three re-check lines assert that no tracked file name matches a pattern through
   `test -z "$(git ls-files … | rg -i …)"`, which reads HOLDS when `git ls-files` or `rg` fails or
   the path is gone, the same blind spot `absent` closed for file contents. Worth doing when a
