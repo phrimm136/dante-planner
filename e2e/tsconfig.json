@@ -10,11 +10,17 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "types": ["node"],
-    "baseUrl": ".",
+    "jsx": "react-jsx",
     "paths": {
       "@/*": ["../frontend/src/*"],
       "@static/*": ["../static/*"]
     }
   },
-  "include": ["tests/**/*.ts", "src/**/*.ts", "playwright.config.ts", "global-setup.ts"]
+  "include": [
+    "tests/**/*.ts",
+    "src/**/*.ts",
+    "playwright.config.ts",
+    "global-setup.ts",
+    "../frontend/src/vite-modules.d.ts"
+  ]
 }
