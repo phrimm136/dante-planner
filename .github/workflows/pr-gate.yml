@@ -32,6 +32,7 @@ jobs:
       e2e: ${{ steps.filter.outputs.e2e }}
       deploy: ${{ steps.filter.outputs.deploy }}
       consistency: ${{ steps.filter.outputs.consistency }}
+      terraform: ${{ steps.filter.outputs.terraform }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
@@ -48,7 +49,7 @@ jobs:
           CONSISTENCY_PATHS='^backend/src/consistency/|^backend/src/test/java/org/danteplanner/consistency/|^backend/src/test/java/org/danteplanner/backend/integration/consistency/|^backend/src/test/java/org/danteplanner/backend/integration/ConsistencyRunIT\.java$|^backend/src/main/java/org/danteplanner/backend/shared/readpath/|^backend/src/main/java/org/danteplanner/backend/shared/gtid/|^backend/src/main/java/org/danteplanner/backend/shared/config/(ReadOnlyRoutingDataSource|ReadSource[A-Za-z]*|RoutingDataSourceConfig|PoolLedger)\.java$|^backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCommandService\.java$|^backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCatalogService\.java$|^backend/src/test/java/org/danteplanner/backend/integration/OregonContext\.java$|^backend/src/test/java/org/danteplanner/backend/integration/ReplicationControl\.java$|^backend/src/test/java/org/danteplanner/backend/integration/CausalHarnessSupport\.java$|^backend/src/test/java/org/danteplanner/backend/integration/ReplicaRoutingHarnessSupport\.java$|^backend/build\.gradle\.kts$|^backend/src/test/resources/consistency/|^scripts/consistency/|^\.github/workflows/pr-gate\.yml$'
 
           if [ "$EVENT_NAME" = "push" ]; then
-            for area in backend frontend e2e deploy; do echo "$area=true" >> "$GITHUB_OUTPUT"; done
+            for area in backend frontend e2e deploy terraform; do echo "$area=true" >> "$GITHUB_OUTPUT"; done
             if [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ] \
               || ! CHANGED=$(git diff --name-only "$BEFORE_SHA"...HEAD); then
               echo "consistency=true" >> "$GITHUB_OUTPUT"
@@ -73,11 +74,13 @@ jobs:
           FRONTEND_PATHS=$(lane_paths .github/scripts/frontend-inputs.sh) || exit 1
           E2E_PATHS=$(lane_paths .github/scripts/e2e-inputs.sh) || exit 1
           DEPLOY_PATHS=$(lane_paths .github/scripts/deploy-test-inputs.sh) || exit 1
+          TERRAFORM_PATHS=$(lane_paths .github/scripts/terraform-inputs.sh) || exit 1
 
           echo "backend=$(match "$BACKEND_PATHS")" >> "$GITHUB_OUTPUT"
           echo "frontend=$(match "$FRONTEND_PATHS")" >> "$GITHUB_OUTPUT"
           echo "e2e=$(match "$E2E_PATHS")" >> "$GITHUB_OUTPUT"
           echo "deploy=$(match "$DEPLOY_PATHS")" >> "$GITHUB_OUTPUT"
+          echo "terraform=$(match "$TERRAFORM_PATHS")" >> "$GITHUB_OUTPUT"
           echo "consistency=$(match "$CONSISTENCY_PATHS")" >> "$GITHUB_OUTPUT"
 
   check-keep-list:
@@ -193,6 +196,26 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - name: Render, validate and serve the deploy manifests
         run: .github/scripts/deploy-test.sh
+
+  test-terraform:
+    needs: changes
+    if: needs.changes.outputs.terraform == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      TF_PLUGIN_CACHE_DIR: ${{ github.workspace }}/.terraform-plugin-cache
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e  # v4.0.1
+        with:
+          terraform_version: 1.15.9
+          terraform_wrapper: false
+      - name: Format check, then init without a backend and validate every root stack
+        run: |
+          mkdir -p "$TF_PLUGIN_CACHE_DIR"
+          .github/scripts/terraform-validate.sh
 
   test-migration:
     needs: changes
