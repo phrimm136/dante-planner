@@ -8,6 +8,8 @@ set -euo pipefail
 repo_root=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
 # shellcheck source=../lib/constants.sh
 source "$repo_root/scripts/ops/lib/constants.sh"
+# shellcheck source=../lib/secrets.sh
+source "$repo_root/scripts/ops/lib/secrets.sh"
 region=us-west-2
 
 sm() { aws secretsmanager get-secret-value --region "$region" --secret-id "$1" \
@@ -16,10 +18,12 @@ sm() { aws secretsmanager get-secret-value --region "$region" --secret-id "$1" \
 master_pw=$(sm danteplanner/rds/master-password)
 app_pw=$(python3 -c 'import json,sys; print(json.load(sys.stdin)["MYSQL_PASSWORD"], end="")' \
   <<<"$(sm danteplanner/backend/runtime-config)")
-ro_user=$(sm danteplanner/rds/readonly-username)
-ro_pw=$(sm danteplanner/rds/readonly-password)
-exp_user=$(sm danteplanner/mysqld-exporter/username)
-exp_pw=$(sm danteplanner/mysqld-exporter/password)
+ro=$(sm "$SECRET_RDS_READONLY_BUNDLE")
+ro_user=$(bundle_key "$SECRET_RDS_READONLY_BUNDLE" "$ro" username)
+ro_pw=$(bundle_key "$SECRET_RDS_READONLY_BUNDLE" "$ro" password)
+exp=$(sm "$SECRET_MYSQLD_EXPORTER_BUNDLE")
+exp_user=$(bundle_key "$SECRET_MYSQLD_EXPORTER_BUNDLE" "$exp" username)
+exp_pw=$(bundle_key "$SECRET_MYSQLD_EXPORTER_BUNDLE" "$exp" password)
 
 "$repo_root/scripts/ops/access/rds-tunnel.sh" start oregon
 

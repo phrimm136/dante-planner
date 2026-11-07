@@ -1003,14 +1003,14 @@ guards the parse but likewise skips the schema gate.
   rule to a provisioned stack: look the title up and PUT, the way the app script does.
   re-check: `rg -q -- '-X POST' deploy/grafana/create-staleness-rules.sh && .claude/skills/debt-ledger/bin/debt absent deploy/grafana/create-staleness-rules.sh 'PUT'`
 - **Exporter endpoint secrets are hand-maintained addresses.**
-  danteplanner/mysqld-exporter/primary-endpoint and replica-endpoint are written by hand and
-  nothing ties them to the instances they name; the 2026-08-24 incident was them outliving the
-  management account's databases. The durable shape is the RDS terraform stack writing these
-  secret versions from its own outputs, so an address cannot outlive its instance and account
-  moves cannot strand it. Design call: whether the stack owns the whole secret or only the
-  endpoint keys, and how Seoul's certificate-name constraint (dial the RDS name, not a Route53
-  alias) is encoded.
-  re-check: `rg -q 'put danteplanner/mysqld-exporter/primary-endpoint' scripts/ops/provision/mysqld-secrets.sh && .claude/skills/debt-ledger/bin/debt absent terraform/rds 'mysqld-exporter'`
+  The primary_endpoint and replica_endpoint keys of danteplanner/mysqld-exporter/dsn are written
+  by hand and nothing ties them to the instances they name; the 2026-08-24 incident was them
+  outliving the management account's databases. The durable shape is the RDS terraform stack
+  writing these secret versions from its own outputs, so an address cannot outlive its instance
+  and account moves cannot strand it. Design call: whether the stack owns the whole secret or
+  only the endpoint keys, and how Seoul's certificate-name constraint (dial the RDS name, not a
+  Route53 alias) is encoded.
+  re-check: `rg -q 'primary_endpoint: env.PRIMARY_EP' scripts/ops/provision/mysqld-secrets.sh && .claude/skills/debt-ledger/bin/debt absent terraform/rds 'mysqld-exporter'`
 - **db-observability-check.sh runs only when someone remembers to.** The checker (metric
   families per cluster, connectivity, DB alert-rule health) is a plain script with no
   enforcement. The PR gate is the wrong home — it probes live prod state, not the diff. The fit

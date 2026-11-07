@@ -5,9 +5,10 @@ import { ACCESS_HEADERS } from './staging'
 import { request as playwrightRequest } from '@playwright/test'
 import type { BrowserContext, APIRequestContext } from '@playwright/test'
 
-// The deployed fleet verifies against the public half of this pair, sourced from the same secret
+// The deployed fleet verifies against the public half of this pair, sourced from the same bundle
 // (deploy/base/external-secret.yaml). Fetching it needs an AWS session the runner already holds.
-const PRIVATE_KEY_SECRET_ID = process.env.E2E_JWT_SECRET_ID ?? 'danteplanner/jwt/rs256-private-key'
+const JWT_SECRET_ID = process.env.E2E_JWT_SECRET_ID ?? 'danteplanner/jwt/material'
+const PRIVATE_KEY_PROPERTY = 'rs256_private_key'
 const AWS_PROFILE = process.env.E2E_AWS_PROFILE ?? 'staging'
 const AWS_REGION = process.env.E2E_AWS_REGION ?? 'us-west-2'
 
@@ -31,7 +32,7 @@ function privateKey(): string {
       'secretsmanager',
       'get-secret-value',
       '--secret-id',
-      PRIVATE_KEY_SECRET_ID,
+      JWT_SECRET_ID,
       '--profile',
       AWS_PROFILE,
       '--region',
@@ -42,13 +43,27 @@ function privateKey(): string {
       'text',
     ],
     { encoding: 'utf8' },
-  ).trim()
+  )
+
+  let bundle: unknown
+  try {
+    bundle = JSON.parse(secret)
+  } catch {
+    throw new Error(`${JWT_SECRET_ID} is not a JSON bundle`)
+  }
+  const stored =
+    typeof bundle === 'object' && bundle !== null
+      ? (bundle as Record<string, unknown>)[PRIVATE_KEY_PROPERTY]
+      : undefined
+  if (typeof stored !== 'string') {
+    throw new Error(`${JWT_SECRET_ID} has no string '${PRIVATE_KEY_PROPERTY}' key`)
+  }
 
   // A PEM stored with escaped newlines reads back as literal backslash-n, which createSign rejects
   // with an opaque error rather than a parse failure.
-  const pem = secret.replace(/\\n/g, '\n')
+  const pem = stored.replace(/\\n/g, '\n')
   if (!pem.includes('PRIVATE KEY')) {
-    throw new Error(`${PRIVATE_KEY_SECRET_ID} did not return a PEM private key`)
+    throw new Error(`${JWT_SECRET_ID}.${PRIVATE_KEY_PROPERTY} is not a PEM private key`)
   }
 
   cachedPrivateKey = pem

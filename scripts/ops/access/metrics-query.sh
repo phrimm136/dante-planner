@@ -5,8 +5,8 @@
 # Examples:
 #   metrics-query.sh 'up'
 #   metrics-query.sh 'rate(http_server_requests_seconds_count[5m])' 6h 1m
-# Auth: danteplanner/grafana/remote-write-username (metrics tenant id) +
-# observability-read-token (Secrets Manager), minted with metrics:read.
+# Auth: remote_write_username (metrics tenant id) + observability_read_token from the
+# danteplanner/grafana/cloud bundle (Secrets Manager), minted with metrics:read.
 set -euo pipefail
 
 MIMIR_HOST="https://prometheus-prod-56-prod-us-east-2.grafana.net"
@@ -17,13 +17,16 @@ STEP=${3:-5m}
 START=$(date -u -d "-$(echo "$SINCE" | sed -E 's/m$/ minutes/;s/h$/ hours/;s/d$/ days/')" +%s)
 END=$(date -u +%s)
 
-secret() {
-  aws secretsmanager get-secret-value --region us-west-2 \
-    --secret-id "danteplanner/grafana/$1" --query SecretString --output text
-}
+OPS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../lib/constants.sh
+source "$OPS_DIR/../lib/constants.sh"
+# shellcheck source=../lib/secrets.sh
+source "$OPS_DIR/../lib/secrets.sh"
+BUNDLE=$SECRET_GRAFANA_BUNDLE
 
-MM_USER=$(secret remote-write-username)
-MM_TOKEN=$(secret observability-read-token)
+CREDS=$(read_bundle us-west-2 "$BUNDLE")
+MM_USER=$(bundle_key "$BUNDLE" "$CREDS" remote_write_username)
+MM_TOKEN=$(bundle_key "$BUNDLE" "$CREDS" observability_read_token)
 
 curl -sS -G -K <(printf 'user = "%s:%s"\n' "$MM_USER" "$MM_TOKEN") \
   "${MIMIR_HOST}/api/prom/api/v1/query_range" \
