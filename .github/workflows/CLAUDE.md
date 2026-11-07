@@ -17,5 +17,8 @@
 - `dependabot-auto-merge.yml` enables rebase auto-merge on a Dependabot PR unless an update in it
   is a major, and withdraws it when anyone else pushes; `dependency-submission.yml` submits the
   backend's resolved Gradle graph on every push to `main`.
+- In that graph a dependency is `runtime` when `runtimeClasspath` or `productionRuntimeClasspath`
+  (the boot jar's classpath) resolves it, and `development` when only build tooling or test
+  configurations do, so a Dependabot alert's scope tells whether the vulnerable code ships.
 - Workflow `run:` blocks must not interpolate untrusted PR input (title/body/branch
   names); use `github.sha` / `github.ref_name` style contexts only.
