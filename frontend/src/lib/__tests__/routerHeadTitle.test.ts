@@ -2,8 +2,8 @@
  * The language-change listener reads each match's published `meta` instead of
  * re-deriving head() from the router's private route table. Two things have to
  * hold for that to be sound, and both are pinned here: matches carry the meta
- * their head() produced, and `router.invalidate()` republishes it from freshly
- * re-run loaders.
+ * their head() produced, and `router.invalidate({ sync: true })` republishes it
+ * from freshly re-run loaders.
  */
 
 import { describe, it, expect } from 'vitest'
@@ -81,7 +81,7 @@ describe('router match meta', () => {
     expect(titleFromMatches(router.state.matches)).toBe('EN-42 | suffix')
 
     lang = 'KR'
-    await router.invalidate()
+    await router.invalidate({ sync: true })
 
     expect(titleFromMatches(router.state.matches)).toBe('KR-42 | suffix')
   })
