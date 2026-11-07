@@ -14,7 +14,7 @@ services:
   # danteplanner-network — without it Compose creates a `default` network that grabs
   # 172.18.0.0/16 and collides with the pinned danteplanner-network subnet.
   mysql:
-    image: mysql:8.0
+    image: mysql:8.4.11
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
