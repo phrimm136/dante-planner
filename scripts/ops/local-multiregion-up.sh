@@ -60,10 +60,9 @@ docker run --rm --network container:"$PRIMARY_CT" \
 primary "$db" -N -e "SELECT CONCAT('primary at V', MAX(CAST(version AS UNSIGNED))) FROM flyway_schema_history;" 2>/dev/null
 
 say "3. creating the replication user on the primary"
-# mysql_native_password: caching_sha2 needs either TLS or an RSA key exchange on the
-# replication channel, which is ceremony this rig does not need.
 primary -e "
-  CREATE USER IF NOT EXISTS '$REPL_USER'@'%' IDENTIFIED WITH mysql_native_password BY '$REPL_PW';
+  CREATE USER IF NOT EXISTS '$REPL_USER'@'%' IDENTIFIED BY '$REPL_PW';
+  ALTER USER '$REPL_USER'@'%' IDENTIFIED WITH caching_sha2_password BY '$REPL_PW';
   GRANT REPLICATION SLAVE ON *.* TO '$REPL_USER'@'%';
   FLUSH PRIVILEGES;" 2>/dev/null
 
@@ -71,7 +70,7 @@ say "4. cloning the primary into the replica"
 # The replica's own entrypoint (database, app user) was binlogged, so its gtid_executed is
 # non-empty and the dump's SET @@GLOBAL.GTID_PURGED would be refused. Clearing it first is what
 # makes the clone's position authoritative.
-replica -e "RESET MASTER;" 2>/dev/null
+replica -e "RESET BINARY LOGS AND GTIDS;" 2>/dev/null
 # Only the app schema: --all-databases would carry the primary's mysql.user table over the
 # replica's own, cutting the connection this script is holding.
 # --source-data=2 emits SET @@GLOBAL.GTID_PURGED, so the replica knows what it already contains.
