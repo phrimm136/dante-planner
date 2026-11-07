@@ -162,8 +162,11 @@ scripts/ops/terraform-run.sh -chdir=terraform/secrets plan -var-file=prod.tfvars
 scripts/ops/terraform-run.sh -chdir=terraform/secrets apply -var-file=prod.tfvars
 ```
 
-**Staging:** the rehearsal reads `/danteplanner/staging/tfvars/secrets` from SSM, so fetch it, edit
-it as above, and write it back before planning:
+**Staging:** the rehearsal workflow reads `/danteplanner/staging/tfvars/secrets` from SSM, but on
+2026-11-07 the staging account held no SSM parameter at all and the only copy was the main
+checkout's gitignored `terraform/secrets/staging.tfvars`. Use that file when the parameter is
+absent (copy it into the worktree, edit, plan, apply, copy it back, delete the worktree copy);
+when the parameter exists, fetch it, edit it as above, and write it back before planning:
 
 ```bash
 export AWS_PROFILE=staging
@@ -184,7 +187,10 @@ scripts/ops/terraform-run.sh -chdir=terraform/secrets apply -var-file=staging.tf
 Gate, per account: the plan reads `4 to import, 0 to add, 4 to change, 0 to destroy`. The four
 in-place changes only record `force_overwrite_replica_secret = false` and
 `recovery_window_in_days = 30`, terraform-side defaults an import leaves empty; any other change
-stops the run (see the header of `terraform/secrets/main.tf`).
+stops the run (see the header of `terraform/secrets/main.tf`). Staging's first apply also adds the
+Seoul replica to every existing container (`+ replica { region = "ap-northeast-2" }`) and imports
+`danteplanner/origin-tls`, because staging had never been applied with replicas; that is the
+designed state, and the old containers go away in step 4.
 
 ## 3. Merge, cut over, and observe `Synced`
 
