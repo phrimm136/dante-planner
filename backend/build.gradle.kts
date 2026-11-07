@@ -1,11 +1,24 @@
 import net.ltgt.gradle.errorprone.errorprone
 
+buildscript {
+    dependencies {
+        constraints {
+            classpath("com.google.guava:guava:33.7.2-jre") {
+                because("dependency-check plugin 13.0.0 brings 33.6.0-jre; the advisories are fixed in 33.7.2")
+            }
+            classpath("org.jsoup:jsoup:1.23.2") {
+                because("dependency-check plugin 13.0.0 brings 1.23.1; the advisory is fixed in 1.23.2")
+            }
+        }
+    }
+}
+
 plugins {
     java
     id("org.springframework.boot") version "4.1.2"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.sonarqube") version "7.5.0.8588"
-    id("org.owasp.dependencycheck") version "12.2.0"
+    id("org.owasp.dependencycheck") version "13.0.0"
     id("de.aaschmid.cpd") version "3.5"
     id("net.ltgt.errorprone") version "4.3.0"
     id("info.solidsoft.pitest") version "1.19.0-rc.1"
@@ -49,6 +62,9 @@ dependencyManagement {
         mavenBom("org.apache.logging.log4j:log4j-bom:2.26.1")
         // Override Jackson to fix CVE-2026-54515
         mavenBom("com.fasterxml.jackson:jackson-bom:2.22.4")
+    }
+    dependencies {
+        dependency("com.redis:testcontainers-redis:3.0.1")
     }
 }
 
@@ -102,7 +118,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers-mysql:2.0.5")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter:2.0.5")
     testImplementation("org.testcontainers:testcontainers-toxiproxy:2.0.5")
-    testImplementation("com.redis:testcontainers-redis:2.2.2")
+    testImplementation("com.redis:testcontainers-redis")
     testImplementation("com.tngtech.archunit:archunit-junit5:1.5.1")
     testImplementation("net.jqwik:jqwik:1.10.2")
     testImplementation("org.wiremock:wiremock-standalone:3.13.2")
@@ -291,7 +307,7 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 checkstyle {
-    toolVersion = "10.21.0"
+    toolVersion = "14.4.0"
     configFile = file("config/checkstyle/checkstyle.xml")
     isIgnoreFailures = false
     maxWarnings = 0
@@ -407,7 +423,7 @@ tasks.check {
 // PlannerBookmarkId/SubscriptionId/VoteId composite-key boilerplate (101 tokens).
 cpd {
     language = "java"
-    toolVersion = "7.7.0"
+    toolVersion = "7.29.0"
     minimumTokenCount = 120
 }
 
