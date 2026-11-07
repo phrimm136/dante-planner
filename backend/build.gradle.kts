@@ -273,6 +273,7 @@ tasks.withType<JavaCompile>().configureEach {
     options.errorprone {
         error("StringCaseLocaleUsage", "DefaultCharset", "JavaTimeDefaultTimeZone")
     }
+    options.compilerArgs.add("-XDaddTypeAnnotationsToSymbol=true")
     options.forkOptions.jvmArgs!!.addAll(
         listOf(
             "--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
