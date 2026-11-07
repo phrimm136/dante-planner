@@ -24,6 +24,8 @@ jobs:
         run: chmod +x backend/gradlew
       - name: Submit the backend's resolved dependency graph
         uses: gradle/actions/dependency-submission@8da46b539cd8fe6ab27ca75128919a18d757604c  # v6.4.1
+        env:
+          DEPENDENCY_GRAPH_RUNTIME_INCLUDE_CONFIGURATIONS: 'productionRuntimeClasspath|runtimeClasspath'
         with:
           build-root-directory: backend
           cache-disabled: true
