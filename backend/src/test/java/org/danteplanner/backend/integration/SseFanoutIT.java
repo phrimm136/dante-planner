@@ -1,6 +1,5 @@
 package org.danteplanner.backend.integration;
 
-import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -23,6 +22,7 @@ import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.shared.sse.SseService;
 import org.danteplanner.backend.shared.sse.SuspensionType;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.SseStream;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
@@ -63,9 +63,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import(TestConfig.class)
 class SseFanoutIT extends CausalHarnessSupport {
 
-    private static final Duration DELIVERY_TIMEOUT = Duration.ofSeconds(5);
-    private static final int SETTINGS_REPUBLISH_ATTEMPTS = 20;
-    private static final Duration SETTINGS_DELIVERY_WAIT = Duration.ofMillis(500);
 
     @DynamicPropertySource
     static void sseLocalRedis(DynamicPropertyRegistry registry) {
@@ -106,7 +103,7 @@ class SseFanoutIT extends CausalHarnessSupport {
         try (SseStream stream = SseStream.user(port, session(user))) {
             ssePublisher.publishUserEvent(user.getId(), null, SseEventType.COMMENT_ADDED, entityId, payload);
 
-            assertThat(stream.next(SseEventType.COMMENT_ADDED.getValue(), DELIVERY_TIMEOUT)).contains(entityId);
+            assertThat(stream.next(SseEventType.COMMENT_ADDED.getValue())).contains(entityId);
         }
     }
 
@@ -122,7 +119,7 @@ class SseFanoutIT extends CausalHarnessSupport {
             ssePublisher.publishBroadcast(author.getId(), SseEventType.NOTIFY_PUBLISHED, payload);
 
             JsonNode data = json(stream.next(SseEventType.NOTIFY_PUBLISHED.getValue(),
-                    names(plannerId), DELIVERY_TIMEOUT));
+                    names(plannerId)));
             assertThat(data.path("plannerId").asString()).isEqualTo(plannerId);
             assertThat(data.has("excludeUserId")).isFalse();
         }
@@ -135,7 +132,7 @@ class SseFanoutIT extends CausalHarnessSupport {
         try (SseStream stream = SseStream.user(port, session(suspended))) {
             ssePublisher.publishAccountSuspended(suspended.getId(), "spam", SuspensionType.BAN, null);
 
-            JsonNode data = json(stream.next(SseEventType.ACCOUNT_SUSPENDED.getValue(), DELIVERY_TIMEOUT));
+            JsonNode data = json(stream.next(SseEventType.ACCOUNT_SUSPENDED.getValue()));
             assertThat(data.path("suspensionType").asString()).isEqualTo("BAN");
         }
     }
@@ -151,22 +148,12 @@ class SseFanoutIT extends CausalHarnessSupport {
 
             ssePublisher.publishSettingsInvalidation(user.getId());
 
-            boolean delivered = false;
-            for (int attempt = 0; attempt < SETTINGS_REPUBLISH_ATTEMPTS && !delivered; attempt++) {
+            Hang.until(() -> {
                 ssePublisher.publishBroadcast(author.getId(), SseEventType.NOTIFY_PUBLISHED,
                         Map.of("plannerId", plannerId, "plannerTitle", "Settings probe"));
-                try {
-                    stream.next(SseEventType.NOTIFY_PUBLISHED.getValue(), names(plannerId), SETTINGS_DELIVERY_WAIT);
-                    delivered = true;
-                } catch (AssertionError stillCached) {
-                    delivered = false;
-                }
-            }
-
-            assertThat(delivered)
-                    .as("the stream caches the preferences it registered with, so a publication notice "
-                            + "reaches it only once the invalidation has dropped that cache")
-                    .isTrue();
+                return stream.received(SseEventType.NOTIFY_PUBLISHED.getValue(), names(plannerId));
+            }, "a publication notice reaching the stream, which caches the preferences it registered with "
+                    + "until the invalidation drops that cache");
         }
     }
 
@@ -180,7 +167,7 @@ class SseFanoutIT extends CausalHarnessSupport {
         try (SseStream stream = SseStream.comments(port, planner.getId(), session(owner))) {
             ssePublisher.publishCommentEvent(planner.getId(), SseEventType.COMMENT_ADDED, commentId, null, payload);
 
-            assertThat(stream.next(SseEventType.COMMENT_ADDED.getValue(), DELIVERY_TIMEOUT)).contains(commentId);
+            assertThat(stream.next(SseEventType.COMMENT_ADDED.getValue())).contains(commentId);
         }
     }
 
@@ -200,7 +187,7 @@ class SseFanoutIT extends CausalHarnessSupport {
                     UUID.randomUUID(),
                     new CreateCommentRequest("Great deck, thanks for sharing", null));
 
-            assertThat(stream.next(SseEventType.COMMENT_ADDED.getValue(), entity(own.id()), DELIVERY_TIMEOUT))
+            assertThat(stream.next(SseEventType.COMMENT_ADDED.getValue(), entity(own.id())))
                     .contains(plannerId.toString());
 
             CreateCommentResponse marker = commentCommandService.createComment(
@@ -209,7 +196,7 @@ class SseFanoutIT extends CausalHarnessSupport {
                     UUID.randomUUID(),
                     new CreateCommentRequest("A later comment from someone else", null));
 
-            assertThat(json(commenterStream.next(SseEventType.COMMENT_ADDED.getValue(), DELIVERY_TIMEOUT))
+            assertThat(json(commenterStream.next(SseEventType.COMMENT_ADDED.getValue()))
                     .path("entityId").asString())
                     .as("a planner's subscribers are sent to in registration order, and the commenter's "
                             + "stream registered before the owner's, so its own comment would precede this one")

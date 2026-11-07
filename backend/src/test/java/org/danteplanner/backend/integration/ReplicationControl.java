@@ -4,8 +4,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
+
+import org.danteplanner.backend.support.Hang;
 
 /**
  * Harness control over a primary/replica GTID replication pair.
@@ -16,9 +16,6 @@ import java.util.concurrent.locks.LockSupport;
  * liveness cap are harness internals, not tunable timing windows.</p>
  */
 final class ReplicationControl {
-
-    private static final long POLL_INTERVAL_NANOS = TimeUnit.MILLISECONDS.toNanos(20);
-    private static final int MAX_POLLS = 30_000;
 
     private final JdbcTemplate primary;
     private final JdbcTemplate replica;
@@ -39,16 +36,12 @@ final class ReplicationControl {
         if (target == null || target.isBlank()) {
             return;
         }
-        for (int poll = 0; poll < MAX_POLLS; poll++) {
+        Hang.until(() -> {
             failFastOnReplicationError();
             Integer caughtUp = replica.queryForObject(
                     "SELECT GTID_SUBSET(?, @@GLOBAL.gtid_executed)", Integer.class, target);
-            if (caughtUp != null && caughtUp == 1) {
-                return;
-            }
-            LockSupport.parkNanos(POLL_INTERVAL_NANOS);
-        }
-        throw new IllegalStateException("Replica did not catch up to the primary GTID set");
+            return caughtUp != null && caughtUp == 1;
+        }, "the replica catching up to the primary GTID set");
     }
 
     /**

@@ -20,6 +20,7 @@ import io.github.bucket4j.distributed.proxy.ProxyManager;
 import io.github.bucket4j.distributed.proxy.RemoteBucketBuilder;
 import io.lettuce.core.RedisConnectionException;
 
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.InMemoryProxyManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class LazyConnectingProxyManagerTest {
 
     private static final int CALLERS = 12;
-    private static final Duration OUTCOME_WAIT = Duration.ofSeconds(30);
     // The lower bound is the contract (never fail before the wait); the slack only absorbs the
     // scheduler on a loaded runner.
     private static final long SCHEDULING_SLACK_MS = 5_000;
@@ -47,13 +47,13 @@ class LazyConnectingProxyManagerTest {
         RedisConnectionConfig.LazyConnectingProxyManager manager = manager(() -> {
             connectorCalls.incrementAndGet();
             connecting.countDown();
-            awaitQuietly(release);
+            Hang.await(release, "the test releasing the first connect");
             return connected;
         });
         List<CompletableFuture<Object>> outcomes = new ArrayList<>();
         outcomes.add(call(manager).outcome());
         try {
-            assertThat(connecting.await(LATCH_WAIT_SECONDS, TimeUnit.SECONDS)).isTrue();
+            Hang.await(connecting, "the owner entering the connector");
             List<Thread> waiters = new ArrayList<>();
             for (int i = 1; i < CALLERS; i++) {
                 Caller caller = call(manager);
@@ -66,8 +66,9 @@ class LazyConnectingProxyManagerTest {
             release.countDown();
         }
 
-        assertThat(outcomes).allSatisfy(outcome -> assertThat(outcome).succeedsWithin(OUTCOME_WAIT)
-                .isSameAs(connected.builder()));
+        for (CompletableFuture<Object> outcome : outcomes) {
+            assertThat(Hang.get(outcome, "a caller sharing the first connect")).isSameAs(connected.builder());
+        }
         assertThat(manager.builder()).isSameAs(connected.builder());
         assertThat(connectorCalls).hasValue(1);
     }
@@ -90,9 +91,10 @@ class LazyConnectingProxyManagerTest {
                 callers.add(call(manager));
             }
 
-            assertThat(callers).allSatisfy(caller -> assertThat(caller.outcome())
-                    .succeedsWithin(OUTCOME_WAIT)
-                    .isInstanceOf(RedisConnectionException.class));
+            for (Caller caller : callers) {
+                assertThat(Hang.get(caller.outcome(), "a caller against the silent store"))
+                        .isInstanceOf(RedisConnectionException.class);
+            }
             assertThat(callers).filteredOn(caller -> caller.thread() == owner.get()).singleElement()
                     .satisfies(caller -> assertThat(caller.outcome().join())
                             .asInstanceOf(InstanceOfAssertFactories.THROWABLE)
@@ -112,17 +114,18 @@ class LazyConnectingProxyManagerTest {
         RedisConnectionConfig.LazyConnectingProxyManager manager = manager(() -> {
             connectorCalls.incrementAndGet();
             connecting.countDown();
-            awaitQuietly(release);
+            Hang.await(release, "the test releasing the outlasting connect");
             throw new RedisConnectionException("connect refused");
         });
         Caller owner = call(manager);
         try {
-            assertThat(connecting.await(LATCH_WAIT_SECONDS, TimeUnit.SECONDS)).isTrue();
+            Hang.await(connecting, "the owner entering the connector");
 
             long start = System.nanoTime();
             CompletableFuture<Object> waiter = call(manager).outcome();
 
-            assertThat(waiter).succeedsWithin(OUTCOME_WAIT).asInstanceOf(InstanceOfAssertFactories.THROWABLE)
+            assertThat(Hang.get(waiter, "the waiter at the connect-wait bound"))
+                    .asInstanceOf(InstanceOfAssertFactories.THROWABLE)
                     .isInstanceOf(RedisConnectionException.class)
                     .hasMessage("Rate-limit store connect still in progress");
             assertThat(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start))
@@ -207,13 +210,5 @@ class LazyConnectingProxyManagerTest {
     private static boolean parkedOrDone(Thread thread) {
         Thread.State state = thread.getState();
         return state == Thread.State.TIMED_WAITING || state == Thread.State.TERMINATED;
-    }
-
-    private static void awaitQuietly(CountDownLatch latch) {
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 }

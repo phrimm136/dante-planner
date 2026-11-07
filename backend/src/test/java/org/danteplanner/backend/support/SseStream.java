@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -26,6 +26,7 @@ public final class SseStream implements AutoCloseable {
     private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(10);
     private static final String CONNECTED_EVENT = "connected";
 
+    private final Hang.Bound guard;
     private final HttpClient client;
     private final Stream<String> lines;
     private final BlockingQueue<Frame> frames = new LinkedBlockingQueue<>();
@@ -34,7 +35,8 @@ public final class SseStream implements AutoCloseable {
     public record Frame(String event, String data) {
     }
 
-    private SseStream(HttpClient client, HttpResponse<Stream<String>> response) {
+    private SseStream(Hang.Bound guard, HttpClient client, HttpResponse<Stream<String>> response) {
+        this.guard = guard;
         this.client = client;
         this.lines = response.body();
         Thread reader = new Thread(this::read, readerName(response.uri()));
@@ -51,10 +53,10 @@ public final class SseStream implements AutoCloseable {
     }
 
     private static SseStream open(int port, String path, Cookie... cookies) {
-        return open(port, path, CONNECT_TIMEOUT, cookies);
+        return open(port, path, new Hang.Bound(Hang.GUARD), cookies);
     }
 
-    static SseStream open(int port, String path, Duration readiness, Cookie... cookies) {
+    static SseStream open(int port, String path, Hang.Bound guard, Cookie... cookies) {
         HttpClient client = HttpClient.newBuilder().connectTimeout(CONNECT_TIMEOUT).build();
         HttpRequest.Builder request = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + path))
                 .header("Accept", "text/event-stream")
@@ -80,9 +82,9 @@ public final class SseStream implements AutoCloseable {
             client.shutdownNow();
             throw new AssertionError("the event stream " + path + " answered " + response.statusCode());
         }
-        SseStream stream = new SseStream(client, response);
+        SseStream stream = new SseStream(guard, client, response);
         try {
-            stream.next(CONNECTED_EVENT, readiness);
+            stream.next(CONNECTED_EVENT);
         } catch (RuntimeException | AssertionError notReady) {
             try {
                 stream.close();
@@ -98,28 +100,37 @@ public final class SseStream implements AutoCloseable {
         return "sse-stream-reader " + uri;
     }
 
-    public String next(String event, Duration timeout) {
-        return next(event, data -> true, timeout);
+    public String next(String event) {
+        return next(event, data -> true);
     }
 
-    public String next(String event, Predicate<String> data, Duration timeout) {
-        long deadline = System.nanoTime() + timeout.toNanos();
-        while (true) {
-            long remaining = deadline - System.nanoTime();
-            Frame frame;
-            try {
-                frame = remaining > 0 ? frames.poll(remaining, TimeUnit.NANOSECONDS) : null;
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new AssertionError("interrupted while waiting for a " + event + " frame", e);
+    public String next(String event, Predicate<String> data) {
+        AtomicReference<String> match = new AtomicReference<>();
+        try {
+            guard.until(() -> {
+                take(event, data).ifPresent(match::set);
+                return match.get() != null;
+            }, "a matching " + event + " frame");
+        } catch (AssertionError hang) {
+            if (ended != null) {
+                hang.addSuppressed(ended);
             }
-            if (frame == null) {
-                throw new AssertionError("no matching " + event + " frame arrived within " + timeout, ended);
-            }
+            throw hang;
+        }
+        return match.get();
+    }
+
+    public boolean received(String event, Predicate<String> data) {
+        return take(event, data).isPresent();
+    }
+
+    private Optional<String> take(String event, Predicate<String> data) {
+        for (Frame frame = frames.poll(); frame != null; frame = frames.poll()) {
             if (frame.event().equals(event) && data.test(frame.data())) {
-                return frame.data();
+                return Optional.of(frame.data());
             }
         }
+        return Optional.empty();
     }
 
     @Override

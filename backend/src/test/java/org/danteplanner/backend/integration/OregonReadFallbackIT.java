@@ -21,6 +21,7 @@ import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.config.ReadSourcesConfig;
 import org.danteplanner.backend.shared.gtid.GtidCookie;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -65,8 +66,6 @@ class OregonReadFallbackIT {
 
     private static final int BREAKER_WINDOW = 2;
 
-    private static final long PROBE_DEADLINE_MS = 5_000L;
-    private static final long STATE_POLL_INTERVAL_MS = 100L;
     private static final long RELAPSE_WINDOW_MS = 6_000L;
     private static final long READ_INTERVAL_MS = 250L;
 
@@ -296,13 +295,7 @@ class OregonReadFallbackIT {
     }
 
     private void awaitBreaker(CircuitBreaker.State expected) {
-        long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(PROBE_DEADLINE_MS);
-        while (primaryReadBreaker.getState() != expected && System.nanoTime() < deadline) {
-            LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(STATE_POLL_INTERVAL_MS));
-        }
-        assertThat(primaryReadBreaker.getState())
-                .as("the probe must move the breaker to %s within %d ms", expected, PROBE_DEADLINE_MS)
-                .isEqualTo(expected);
+        Hang.until(() -> primaryReadBreaker.getState() == expected, "the probe moving the breaker to " + expected);
     }
 
     private String readTitle(Session session, UUID plannerId) throws Exception {

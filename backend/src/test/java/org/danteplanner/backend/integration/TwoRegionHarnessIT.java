@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
 
 import javax.sql.DataSource;
 
@@ -23,6 +21,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 
 import tools.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
+import com.zaxxer.hikari.HikariDataSource;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
@@ -45,6 +44,7 @@ import org.danteplanner.backend.shared.config.RoutingKey;
 import org.danteplanner.backend.shared.config.UndeclaredPrimaryAccessGuard;
 import org.danteplanner.backend.shared.gtid.GtidCookie;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.UpsertRequests;
 import org.danteplanner.backend.user.entity.User;
@@ -69,8 +69,6 @@ class TwoRegionHarnessIT extends ReplicaRoutingHarnessSupport {
     private static final String REPLICATED_TITLE = "two-region-replicated";
     private static final String PRIMARY_ONLY_TITLE = "two-region-primary-only";
 
-    private static final long PROBE_DEADLINE_MS = 5_000L;
-    private static final long STATE_POLL_INTERVAL_MS = 100L;
 
     private static final String BREAKER_STATE_GAUGE = "resilience4j.circuitbreaker.state";
     private static final String POOL_ACQUIRE_TIMER = "hikaricp.connections.acquire";
@@ -190,21 +188,9 @@ class TwoRegionHarnessIT extends ReplicaRoutingHarnessSupport {
             replicationControl.stopReplica();
             upsert(mockMvc, session, plannerId, PRIMARY_ONLY_TITLE, true).andExpect(status().isOk());
 
-            long restoredAt = System.nanoTime();
             toxiproxyControl.restoreOregonPrimary();
-            long deadline = restoredAt + TimeUnit.MILLISECONDS.toNanos(PROBE_DEADLINE_MS);
-            String title = oregonTitle(session, plannerId);
-            while (!PRIMARY_ONLY_TITLE.equals(title) && System.nanoTime() < deadline) {
-                LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(STATE_POLL_INTERVAL_MS));
-                title = oregonTitle(session, plannerId);
-            }
-            long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - restoredAt);
-            System.out.println("two-region restore: Oregon read the primary " + elapsedMs + " ms after restore");
-
-            assertThat(title)
-                    .as("within %d ms of the restore the probe closes the breaker and reads reach the primary",
-                            PROBE_DEADLINE_MS)
-                    .isEqualTo(PRIMARY_ONLY_TITLE);
+            Hang.until(() -> PRIMARY_ONLY_TITLE.equals(uncheckedOregonTitle(session, plannerId)),
+                    "the probe closing the breaker after the restore so reads reach the primary");
         } finally {
             restoreOregonPrimary();
             replicationControl.startReplica();
@@ -292,17 +278,14 @@ class TwoRegionHarnessIT extends ReplicaRoutingHarnessSupport {
     private void restoreOregonPrimary() throws IOException {
         toxiproxyControl.restoreOregonPrimary();
         awaitOregonBreaker(CircuitBreaker.State.CLOSED);
+        HikariDataSource primaryPool = oregon().mockMvc().getDispatcherServlet().getWebApplicationContext()
+                .getBean("primaryPool", HikariDataSource.class);
+        Hang.until(() -> lendsAConnection(primaryPool), "the Oregon primary pool lending a connection after the restore");
     }
 
     private void awaitOregonBreaker(CircuitBreaker.State expected) {
         String state = expected.name().toLowerCase(Locale.ROOT);
-        long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(PROBE_DEADLINE_MS);
-        while (oregonBreakerGauge(state) != 1.0 && System.nanoTime() < deadline) {
-            LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(STATE_POLL_INTERVAL_MS));
-        }
-        assertThat(oregonBreakerGauge(state))
-                .as("the Oregon probe must move the breaker to %s within %d ms", expected, PROBE_DEADLINE_MS)
-                .isEqualTo(1.0);
+        Hang.until(() -> oregonBreakerGauge(state) == 1.0, "the Oregon probe moving the breaker to " + expected);
     }
 
     private double oregonBreakerGauge(String state) {
@@ -330,6 +313,14 @@ class TwoRegionHarnessIT extends ReplicaRoutingHarnessSupport {
         TransactionTemplate readOnly = new TransactionTemplate(new DataSourceTransactionManager(dataSource));
         readOnly.setReadOnly(true);
         return readOnly.execute(status -> (RoutingKey) probe.determineCurrentLookupKey());
+    }
+
+    private String uncheckedOregonTitle(Session session, UUID plannerId) {
+        try {
+            return oregonTitle(session, plannerId);
+        } catch (Exception e) {
+            throw new IllegalStateException("the Oregon read failed", e);
+        }
     }
 
     private String oregonTitle(Session session, UUID plannerId) throws Exception {

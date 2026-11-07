@@ -10,6 +10,8 @@ import org.danteplanner.backend.planner.searchindex.PlannerContentEntityExtracto
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.danteplanner.backend.support.FilterRowsSync;
+import org.danteplanner.backend.support.Hang;
+import org.danteplanner.backend.support.LockWaits;
 import org.danteplanner.backend.support.TransactionSpans;
 import org.danteplanner.backend.support.TransactionSpans.Span;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -23,8 +25,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -32,12 +32,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.sql.DataSource;
@@ -48,7 +45,6 @@ class PlannerFilterRowsConcurrencyIT extends ExclusiveDatabaseSupport {
 
     private static final int ROUNDS = 500;
     private static final int MIN_OVERLAPPING_ROUNDS = ROUNDS / 2;
-    private static final long BARRIER_TIMEOUT_SECONDS = 10;
     private static final long JOIN_TIMEOUT_MS = 60_000;
 
     private static final String SECOND_CONTENT = IntStream.rangeClosed(1, 8).boxed().reduce(
@@ -210,10 +206,12 @@ class PlannerFilterRowsConcurrencyIT extends ExclusiveDatabaseSupport {
             CompletableFuture<Void> pass = CompletableFuture.runAsync(
                     () -> publishingService.publish(owner.getId(), planner));
             try {
-                assertThat(waitingIsolationLevel()).isEqualTo("READ COMMITTED");
+                assertThat(LockWaits.await(jdbc, 1, pass::isDone, "the publish waiting on the held content row"))
+                        .as("the write waits on the held content row")
+                        .first().isEqualTo("READ COMMITTED");
             } finally {
                 holder.rollback();
-                pass.get(60, TimeUnit.SECONDS);
+                Hang.get(pass, "the publish after the holder rolls back");
             }
         }
     }
@@ -235,31 +233,11 @@ class PlannerFilterRowsConcurrencyIT extends ExclusiveDatabaseSupport {
 
     private static boolean awaited(CyclicBarrier start, List<Throwable> failures) {
         try {
-            start.await(BARRIER_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            Hang.await(start, "both rebuilds reaching the barrier");
             return true;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        } catch (AssertionError e) {
             failures.add(e);
             return false;
-        } catch (BrokenBarrierException | TimeoutException e) {
-            failures.add(e);
-            return false;
-        }
-    }
-
-    private String waitingIsolationLevel() throws InterruptedException {
-        Instant deadline = Instant.now().plus(Duration.ofSeconds(20));
-        while (true) {
-            List<String> levels = jdbc.queryForList("""
-                    SELECT t.trx_isolation_level FROM information_schema.innodb_trx t
-                    JOIN information_schema.processlist p ON p.id = t.trx_mysql_thread_id
-                    WHERE t.trx_state = 'LOCK WAIT' AND p.db = DATABASE()
-                    """, String.class);
-            if (!levels.isEmpty()) {
-                return levels.getFirst();
-            }
-            assertThat(Instant.now()).as("the write never waited on the held content row").isBefore(deadline);
-            TimeUnit.MILLISECONDS.sleep(100);
         }
     }
 

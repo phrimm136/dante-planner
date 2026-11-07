@@ -12,9 +12,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
-import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -63,6 +60,7 @@ import org.danteplanner.backend.shared.config.PoolLedger;
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.ReadSourcesConfig;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -103,8 +101,6 @@ import static org.danteplanner.backend.integration.consistency.ConsistencyBudget
 class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
 
     private static final KeyDraw ONLY_PLANNER = new KeyDraw(0);
-    private static final long OREGON_DEADLINE_MS = 5_000L;
-    private static final long OREGON_POLL_INTERVAL_MS = 100L;
     private static final String BREAKER_STATE_GAUGE = "resilience4j.circuitbreaker.state";
     private static final String POOL_IDLE_GAUGE = "hikaricp.connections.idle";
 
@@ -302,7 +298,7 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
-            await("the Oregon breaker reads open", () -> breakerGauge(CircuitBreaker.State.OPEN) == 1.0);
+            Hang.until(() -> breakerGauge(CircuitBreaker.State.OPEN) == 1.0, "the Oregon breaker reading open");
         }
 
         @Override
@@ -312,18 +308,8 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
-            await("the Oregon breaker reads closed", () -> breakerGauge(CircuitBreaker.State.CLOSED) == 1.0);
-            await("the Oregon primary pool holds an idle connection", () -> primaryPoolIdle() >= 1.0);
-        }
-
-        private void await(String condition, BooleanSupplier reached) {
-            long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(OREGON_DEADLINE_MS);
-            while (!reached.getAsBoolean()) {
-                if (System.nanoTime() >= deadline) {
-                    throw new IllegalStateException("not within " + OREGON_DEADLINE_MS + " ms: " + condition);
-                }
-                LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(OREGON_POLL_INTERVAL_MS));
-            }
+            Hang.until(() -> breakerGauge(CircuitBreaker.State.CLOSED) == 1.0, "the Oregon breaker reading closed");
+            Hang.until(() -> primaryPoolIdle() >= 1.0, "the Oregon primary pool holding an idle connection");
         }
 
         private double breakerGauge(CircuitBreaker.State state) {

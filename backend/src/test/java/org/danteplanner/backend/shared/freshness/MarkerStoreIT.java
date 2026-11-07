@@ -32,6 +32,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
 import org.danteplanner.backend.shared.config.RedisConnectionConfig;
+import org.danteplanner.backend.support.Hang;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -136,7 +137,7 @@ class MarkerStoreIT {
                             Set.of(scope), serverA + ":1-" + sequence + "," + serverB + ":" + (sequence * 2))))
                     .toList();
             for (Future<?> raise : raises) {
-                raise.get(30, TimeUnit.SECONDS);
+                Hang.get(raise, "a racing raise");
             }
         } finally {
             writers.shutdownNow();

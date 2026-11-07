@@ -9,6 +9,7 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerViewRepository;
 import org.danteplanner.backend.planner.service.PlannerViewRecorder;
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -83,20 +84,16 @@ class PublishedPlannerDetailIT extends ExclusiveDatabaseSupport {
         CountDownLatch release = new CountDownLatch(1);
         ExecutorService pool = Executors.newFixedThreadPool(2);
         try {
-            pool.submit(() -> transactionTemplate.execute(status -> {
+            Future<?> holder = pool.submit(() -> transactionTemplate.execute(status -> {
                 if (entityManager.find(Planner.class, plannerId, LockModeType.PESSIMISTIC_WRITE) == null) {
                     throw new IllegalStateException("planner not found for lock");
                 }
                 locked.countDown();
-                try {
-                    release.await(15, TimeUnit.SECONDS);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
+                Hang.await(release, "the test releasing the row lock");
                 return null;
             }));
 
-            assertThat(locked.await(15, TimeUnit.SECONDS)).isTrue();
+            Hang.await(locked, "the holder taking the row lock");
 
             Future<Integer> reader = pool.submit(this::detailViewCount);
             boolean blockedOnRowLock;
@@ -111,6 +108,8 @@ class PublishedPlannerDetailIT extends ExclusiveDatabaseSupport {
             assertThat(blockedOnRowLock)
                     .as("a detail read must not serialize behind a held row lock")
                     .isFalse();
+            release.countDown();
+            Hang.get(holder, "the lock holder's transaction");
         } finally {
             release.countDown();
             pool.shutdownNow();

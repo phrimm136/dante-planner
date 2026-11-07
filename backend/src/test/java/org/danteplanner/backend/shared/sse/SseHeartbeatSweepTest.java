@@ -3,7 +3,6 @@ package org.danteplanner.backend.shared.sse;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -13,7 +12,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.danteplanner.backend.support.Hang;
 
 /**
  * The heartbeat sweep must survive a peer that never drains its socket.
@@ -26,9 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SseHeartbeatSweepTest {
 
     private static final int STALLED_PEERS = 2;
-
-    /** Generous against CI scheduling noise, and far below the 10s heartbeat interval. */
-    private static final long PROMPT_MS = 2_000;
 
     private final CountDownLatch release = new CountDownLatch(1);
     private final CountDownLatch stalledSends = new CountDownLatch(STALLED_PEERS);
@@ -65,28 +61,20 @@ class SseHeartbeatSweepTest {
             sweepReturned.countDown();
         });
 
-        assertThat(sweepReturned.await(PROMPT_MS, TimeUnit.MILLISECONDS))
-                .as("the tick submits and returns; it must not wait on a peer's socket")
-                .isTrue();
-        assertThat(stalledSends.await(PROMPT_MS, TimeUnit.MILLISECONDS))
-                .as("both stalled sends must be in flight, so the workers are the threads being held")
-                .isTrue();
+        Hang.await(sweepReturned, "the tick submitting and returning without waiting on a peer's socket");
+        Hang.await(stalledSends, "both stalled sends getting in flight, so the workers are the threads being held");
 
         CountDownLatch sentinel = new CountDownLatch(1);
         scheduler.execute(sentinel::countDown);
 
-        assertThat(sentinel.await(PROMPT_MS, TimeUnit.MILLISECONDS))
-                .as("a scheduled task queued behind the sweep must still run while peers are stalled")
-                .isTrue();
+        Hang.await(sentinel, "a scheduled task queued behind the sweep running while peers are stalled");
     }
 
     @Test
     void sweepHeartbeatConnections_WhenPeersStall_StillHeartbeatsTheHealthyConnection() throws Exception {
         scheduler.execute(service::sweepHeartbeatConnections);
 
-        assertThat(healthySend.await(PROMPT_MS, TimeUnit.MILLISECONDS))
-                .as("a stalled peer must not cost the healthy connection its heartbeat")
-                .isTrue();
+        Hang.await(healthySend, "the healthy connection's heartbeat while a peer is stalled");
     }
 
     private static ThreadPoolTaskScheduler pool(int size, String threadNamePrefix) {

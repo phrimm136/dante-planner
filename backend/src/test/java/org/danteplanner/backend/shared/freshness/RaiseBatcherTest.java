@@ -16,7 +16,6 @@ import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -29,10 +28,10 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.LogCapture;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 class RaiseBatcherTest {
 
@@ -92,7 +91,7 @@ class RaiseBatcherTest {
                 }, 1, ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, System::nanoTime)) {
             boolean first = batcher.raise(KEYS, ARGUMENTS);
             double failuresAfterFirst = raiseFailures.count();
-            await().atMost(SCHEDULING_SLACK).until(() -> !workers.get(0).isAlive());
+            Hang.until(() -> !workers.get(0).isAlive(), "the first worker dying");
 
             boolean second = batcher.raise(KEYS, ARGUMENTS);
 
@@ -137,13 +136,13 @@ class RaiseBatcherTest {
                     return redis.endpoint();
                 }, 1, ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, now::get)) {
             CompletableFuture<Boolean> raised = CompletableFuture.supplyAsync(() -> batcher.raise(KEYS, ARGUMENTS));
-            assertThat(redis.evalshaReceived.await(ROOMY_BOUND.toMillis(), TimeUnit.MILLISECONDS)).isTrue();
-            await().atMost(SCHEDULING_SLACK).until(() -> worker.get().getState() == Thread.State.TIMED_WAITING);
+            Hang.await(redis.evalshaReceived, "the fake receiving EVALSHA");
+            Hang.until(() -> worker.get().getState() == Thread.State.TIMED_WAITING, "the worker parking on the reply");
 
             now.set(ROOMY_BOUND.multipliedBy(2).toNanos());
             long released = System.nanoTime();
             redis.releaseEvalsha.countDown();
-            boolean result = raised.get(ROOMY_BOUND.toMillis(), TimeUnit.MILLISECONDS);
+            boolean result = Hang.get(raised, "the held raise after release");
             Duration elapsed = Duration.ofNanos(System.nanoTime() - released);
 
             assertThat(result).isTrue();
@@ -274,12 +273,12 @@ class RaiseBatcherTest {
                     }
                     command = readCommand(in);
                 }
-            } catch (IOException | InterruptedException closed) {
+            } catch (IOException closed) {
                 return;
             }
         }
 
-        private String replyTo(List<String> command) throws InterruptedException {
+        private String replyTo(List<String> command) {
             return switch (command.get(0).toUpperCase(Locale.ROOT)) {
                 case "HELLO" -> "-ERR unknown command 'HELLO'\r\n";
                 case "PING" -> "+PONG\r\n";
@@ -290,7 +289,7 @@ class RaiseBatcherTest {
                 case "EVALSHA" -> {
                     evalshaReceived.countDown();
                     if (holdsEvalsha) {
-                        releaseEvalsha.await(SCHEDULING_SLACK.multipliedBy(2).toMillis(), TimeUnit.MILLISECONDS);
+                        Hang.await(releaseEvalsha, "the test releasing the held EVALSHA");
                     }
                     yield ":1\r\n";
                 }

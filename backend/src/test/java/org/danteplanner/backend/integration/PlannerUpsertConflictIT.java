@@ -6,6 +6,7 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.AuthCookies;
@@ -29,7 +30,6 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -110,8 +110,8 @@ class PlannerUpsertConflictIT extends SharedMySqlContainerSupport {
                 CyclicBarrier barrier = new CyclicBarrier(2);
                 Future<Timed> a = pool.submit(() -> raced(barrier, current, title));
                 Future<Timed> b = pool.submit(() -> raced(barrier, current, title));
-                Timed first = a.get(10, TimeUnit.SECONDS);
-                Timed second = b.get(10, TimeUnit.SECONDS);
+                Timed first = Hang.get(a, "the first racing save");
+                Timed second = Hang.get(b, "the second racing save");
 
                 if (first.span().overlaps(second.span())) {
                     overlapped++;
@@ -143,7 +143,7 @@ class PlannerUpsertConflictIT extends SharedMySqlContainerSupport {
     }
 
     private Timed raced(CyclicBarrier barrier, long syncVersion, String title) throws Exception {
-        barrier.await(10, TimeUnit.SECONDS);
+        Hang.await(barrier, "both saves reaching the barrier");
         Span span = new Span();
         AtomicReference<MockHttpServletResponse> response = new AtomicReference<>();
         TransactionSpans.within(span, () -> {

@@ -2,14 +2,11 @@ package org.danteplanner.backend.integration;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -38,6 +35,7 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.TransactionSpans;
 import org.danteplanner.backend.support.TransactionSpans.Span;
@@ -51,10 +49,8 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 class PlannerCatalogRemovalConcurrencyIT extends ExclusiveDatabaseSupport {
 
     private static final int ROUNDS = 150;
-    private static final long BARRIER_TIMEOUT_SECONDS = 10;
     private static final long JOIN_TIMEOUT_MS = 60_000;
     private static final int MIN_OVERLAPPING_ROUNDS = ROUNDS / 2;
-    private static final long LOCK_WAIT_POLL_MS = 10;
     private static final String CONTENT_LOCK_WAITERS = """
             SELECT COUNT(*) FROM information_schema.processlist
             WHERE db = DATABASE() AND state = 'statistics'
@@ -335,19 +331,18 @@ class PlannerCatalogRemovalConcurrencyIT extends ExclusiveDatabaseSupport {
         }
     }
 
-    private void awaitLockWaits(int expected, int index, Thread started, AtomicReference<Throwable> failure)
-            throws InterruptedException {
-        Instant deadline = Instant.now().plus(Duration.ofSeconds(BARRIER_TIMEOUT_SECONDS));
-        while (contentLockWaiters() < expected) {
-            assertThat(started.isAlive())
-                    .as("round %d: %s ended before it queued on the held content row (failure %s)",
-                            index, started.getName(), failure.get())
-                    .isTrue();
-            assertThat(Instant.now())
-                    .as("round %d: %d statements waiting on the held content row, saw %s",
-                            index, expected, jdbc.queryForList(ACTIVE_STATEMENTS))
-                    .isBefore(deadline);
-            TimeUnit.MILLISECONDS.sleep(LOCK_WAIT_POLL_MS);
+    private void awaitLockWaits(int expected, int index, Thread started, AtomicReference<Throwable> failure) {
+        try {
+            Hang.until(() -> {
+                assertThat(started.isAlive())
+                        .as("round %d: %s ended before it queued on the held content row (failure %s)",
+                                index, started.getName(), failure.get())
+                        .isTrue();
+                return contentLockWaiters() >= expected;
+            }, "round " + index + ": " + expected + " statements waiting on the held content row");
+        } catch (AssertionError notQueued) {
+            notQueued.addSuppressed(new AssertionError("active statements: " + jdbc.queryForList(ACTIVE_STATEMENTS)));
+            throw notQueued;
         }
     }
 
@@ -365,7 +360,7 @@ class PlannerCatalogRemovalConcurrencyIT extends ExclusiveDatabaseSupport {
             Runnable body) {
         Thread thread = new Thread(() -> {
             try {
-                start.await(BARRIER_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                Hang.await(start, "both removers reaching the barrier");
                 TransactionSpans.within(span, body);
             } catch (Throwable e) {
                 failure.set(e);

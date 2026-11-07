@@ -2,14 +2,12 @@ package org.danteplanner.backend.integration;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -56,6 +54,7 @@ import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.config.ReadSourcesConfig;
 import org.danteplanner.backend.shared.gtid.GtidCookie;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.UpsertRequests;
 import org.danteplanner.backend.user.entity.User;
@@ -90,9 +89,6 @@ class ReadSourceOutageIT extends ReplicaRoutingHarnessSupport {
     private static final int MYSQL_INTERNAL_PORT = 3306;
 
     private static final String BREAKER_STATE_GAUGE = "resilience4j.circuitbreaker.state";
-    private static final long PROBE_DEADLINE_MS = 5_000L;
-    private static final long STATE_POLL_INTERVAL_MS = 100L;
-    private static final long RECOVERY_DEADLINE_MS = 10_000L;
 
     private static final Proxy SEOUL_TO_REPLICA_PROXY = createSeoulToReplicaProxy();
 
@@ -261,10 +257,12 @@ class ReadSourceOutageIT extends ReplicaRoutingHarnessSupport {
             assertThat(replicaTitle(plannerId))
                     .as("the stopped replica must hold the title from before the save").isEqualTo(REPLICATED_TITLE);
 
-            holdOregonProbe(probeHeld, releaseProbe);
+            CompletableFuture<Void> heldProbe = holdOregonProbe(probeHeld, releaseProbe);
             cutOregonPrimaryWithoutProbe();
             MvcResult read = perform(oregon().mockMvc(),
                     get(plannerPath(plannerId)).cookie(session.auth(), session.device(), rywCookie));
+            releaseProbe.countDown();
+            Hang.get(heldProbe, "the held Oregon probe thread returning after its release");
 
             assertThat(observed(read)).as("Oregon author read while the closed-breaker primary is cut")
                     .isEqualTo(unavailable(READ_UNAVAILABLE));
@@ -342,26 +340,17 @@ class ReadSourceOutageIT extends ReplicaRoutingHarnessSupport {
         assertThat(anyBreakerOpen(oregon().meterRegistry()))
                 .as("no Oregon breaker may be open before the cut").isFalse();
         toxiproxyControl.cutOregonPrimary();
-        long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(PROBE_DEADLINE_MS);
-        while (!anyBreakerOpen(oregon().meterRegistry()) && System.nanoTime() < deadline) {
-            LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(STATE_POLL_INTERVAL_MS));
-        }
-        assertThat(anyBreakerOpen(oregon().meterRegistry()))
-                .as("the Oregon probe must open a breaker within %d ms of the cut", PROBE_DEADLINE_MS).isTrue();
+        Hang.until(() -> anyBreakerOpen(oregon().meterRegistry()), "the Oregon probe opening a breaker after the cut");
     }
 
-    private static void holdOregonProbe(CountDownLatch held, CountDownLatch release) throws InterruptedException {
+    private static CompletableFuture<Void> holdOregonProbe(CountDownLatch held, CountDownLatch release) {
         ApplicationContext context = oregon().mockMvc().getDispatcherServlet().getWebApplicationContext();
-        context.getBean(ReadSourcesConfig.PROBE_SCHEDULER, ThreadPoolTaskScheduler.class).execute(() -> {
+        CompletableFuture<Void> hold = CompletableFuture.runAsync(() -> {
             held.countDown();
-            try {
-                release.await();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        });
-        assertThat(held.await(PROBE_DEADLINE_MS, TimeUnit.MILLISECONDS))
-                .as("the Oregon probe thread must be held within %d ms", PROBE_DEADLINE_MS).isTrue();
+            Hang.await(release, "the test releasing the held Oregon probe thread");
+        }, context.getBean(ReadSourcesConfig.PROBE_SCHEDULER, ThreadPoolTaskScheduler.class));
+        Hang.await(held, "the Oregon probe thread being held");
+        return hold;
     }
 
     private void cutOregonPrimaryWithoutProbe() throws IOException {
@@ -446,31 +435,13 @@ class ReadSourceOutageIT extends ReplicaRoutingHarnessSupport {
         ApplicationContext context = target.getDispatcherServlet().getWebApplicationContext();
         ReadSourceSelector selector = context.getBean(ReadSourceSelector.class);
         HikariDataSource primaryPool = context.getBean("primaryPool", HikariDataSource.class);
-        long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(RECOVERY_DEADLINE_MS);
-        while (!(allBreakersClosed(selector) && primaryConnects(primaryPool)) && System.nanoTime() < deadline) {
-            LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(STATE_POLL_INTERVAL_MS));
-        }
-        assertThat(selector.sources()).extracting(source -> source.breaker().getState())
-                .as("every %s read-source breaker closes within %d ms of the restore", region, RECOVERY_DEADLINE_MS)
-                .containsOnly(CircuitBreaker.State.CLOSED);
-        assertThat(primaryConnects(primaryPool))
-                .as("the %s primary pool lends a connection within %d ms of the restore", region,
-                        RECOVERY_DEADLINE_MS)
-                .isTrue();
+        Hang.until(() -> allBreakersClosed(selector) && lendsAConnection(primaryPool),
+                "every " + region + " read-source breaker closing and the primary pool lending a connection");
     }
 
     private static boolean allBreakersClosed(ReadSourceSelector selector) {
         return selector.sources().stream()
                 .allMatch(source -> source.breaker().getState() == CircuitBreaker.State.CLOSED);
-    }
-
-    private static boolean primaryConnects(HikariDataSource primaryPool) {
-        try {
-            primaryPool.getConnection().close();
-            return true;
-        } catch (SQLException e) {
-            return false;
-        }
     }
 
     private void resumeReplication() {

@@ -15,7 +15,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.BooleanSupplier;
 import javax.sql.DataSource;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
@@ -27,6 +26,7 @@ import org.danteplanner.backend.shared.config.LoginRedirect;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.shared.ratelimit.RateLimitService;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -122,9 +122,6 @@ class DegradationIT {
     /** A killed socket fails on the first packet, so the retries cost milliseconds, not waiting. */
     private static final int CONNECTION_PROBE_ATTEMPTS = 20;
 
-    /** Matches RedisConnectionRecoveryIT: a client reconnect is not instant, so poll to a deadline. */
-    private static final long REDIS_RECOVERY_DEADLINE_MS = 30_000L;
-    private static final long REDIS_POLL_INTERVAL_MS = 250L;
     private static final String ROOT_USER = "root";
     private static final String REPL_USER = "repl";
     private static final String REPL_PASSWORD = "repl-pass";
@@ -352,9 +349,7 @@ class DegradationIT {
      */
     private void awaitLiveAuthRedis() {
         authRedisConnectionFactory.resetConnection();
-        if (!awaitTrue(this::authRedisAnswers)) {
-            throw new IllegalStateException("the auth Redis never came back after the cut");
-        }
+        Hang.until(this::authRedisAnswers, "the auth Redis coming back after the cut");
     }
 
     private boolean authRedisAnswers() {
@@ -375,9 +370,7 @@ class DegradationIT {
      * 503. The subject comes from a sequence, so no probe ever drains a bucket a test uses.</p>
      */
     private void awaitLiveRateLimitRedis() {
-        if (!awaitTrue(this::rateLimiterAnswers)) {
-            throw new IllegalStateException("the rate limiter never came back after the cut");
-        }
+        Hang.until(this::rateLimiterAnswers, "the rate limiter coming back after the cut");
     }
 
     private boolean rateLimiterAnswers() {
@@ -387,27 +380,6 @@ class DegradationIT {
         } catch (RuntimeException e) {
             return false;
         }
-    }
-
-    /**
-     * Polls to a deadline rather than spinning: a Lettuce client reconnects on its own backoff
-     * schedule, not on the next call, so immediate retries all fail while the client is still
-     * waiting out its delay.
-     */
-    private static boolean awaitTrue(BooleanSupplier condition) {
-        long deadline = System.nanoTime() + REDIS_RECOVERY_DEADLINE_MS * 1_000_000L;
-        while (System.nanoTime() < deadline) {
-            if (condition.getAsBoolean()) {
-                return true;
-            }
-            try {
-                Thread.sleep(REDIS_POLL_INTERVAL_MS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return false;
-            }
-        }
-        return condition.getAsBoolean();
     }
 
     /**

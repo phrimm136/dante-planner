@@ -8,10 +8,8 @@ import eu.rekawek.toxiproxy.model.Toxic;
 import eu.rekawek.toxiproxy.model.ToxicDirection;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.time.Duration;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
-import org.awaitility.core.ConditionTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +25,8 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.mysql.MySQLContainer;
 import org.testcontainers.toxiproxy.ToxiproxyContainer;
 
-import static org.awaitility.Awaitility.await;
+import org.danteplanner.backend.support.Hang;
+
 
 /**
  * Base class for the causal-consistency integration tests: boots a shared MySQL
@@ -63,7 +62,6 @@ abstract class CausalHarnessSupport {
     private static final int REDIS_INTERNAL_PORT = 6379;
     private static final int MARKER_WAIT_REPLICAS = 1;
     private static final String REPLICA_LINK_UP = "master_link_status:up";
-    private static final Duration REPLICA_LINK_TIMEOUT = Duration.ofSeconds(30);
     private static final String AUTH_REDIS_ACK_HOLD = "auth-redis-ack-hold";
 
     private static final String TOXIPROXY_IMAGE = "ghcr.io/shopify/toxiproxy:2.5.0";
@@ -220,12 +218,11 @@ abstract class CausalHarnessSupport {
 
     static void awaitAuthRedisReplicaLinked() {
         try {
-            await().pollInSameThread().atMost(REPLICA_LINK_TIMEOUT)
-                    .until(() -> authRedisReplicaInfo().contains(REPLICA_LINK_UP));
-        } catch (ConditionTimeoutException e) {
-            throw new IllegalStateException("the auth Redis replica did not link within " + REPLICA_LINK_TIMEOUT
-                    + "; INFO replication:\n" + authRedisReplicaInfo() + "\nreplica log:\n"
-                    + AUTH_REDIS_REPLICA.getLogs(), e);
+            Hang.until(() -> authRedisReplicaInfo().contains(REPLICA_LINK_UP), "the auth Redis replica linking");
+        } catch (AssertionError notLinked) {
+            notLinked.addSuppressed(new IllegalStateException("INFO replication:\n" + authRedisReplicaInfo()
+                    + "\nreplica log:\n" + AUTH_REDIS_REPLICA.getLogs()));
+            throw notLinked;
         }
     }
 

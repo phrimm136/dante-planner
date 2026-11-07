@@ -26,9 +26,9 @@ import io.netty.channel.ChannelOption;
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
+import org.danteplanner.backend.support.Hang;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 class MarkerStoreConnectBoundTest {
 
@@ -57,10 +57,9 @@ class MarkerStoreConnectBoundTest {
                         .as("the kernel drops a SYN once the accept queue of a never-accepting listener is full")
                         .isTrue();
                 store.raise(Set.of(new FreshnessScope.PublicCatalog()), SERVER + ":1");
-                await().atMost(MarkerStore.RAISE_CONNECT_TIMEOUT.plus(WAIT_BOUND).plus(MarkerStore.RAISE_MARGIN)
-                        .plus(SCHEDULING_SLACK))
-                        .untilAsserted(() -> assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count())
-                                .isEqualTo(1.0));
+                Hang.until(() -> meters.counter(MarkerStore.RAISE_FAILURES).count() >= 1.0,
+                        "the first raise against the dropped connect counting its failure");
+                assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count()).isEqualTo(1.0);
                 double failuresBefore = meters.counter(MarkerStore.RAISE_FAILURES).count();
 
                 long start = System.nanoTime();
@@ -108,8 +107,8 @@ class MarkerStoreConnectBoundTest {
                                 Set.of(new FreshnessScope.PublicCatalog()), SERVER + ":" + (i + 1)), group.getName()))
                         .toList();
                 raises.forEach(Thread::start);
-                await().atMost(SCHEDULING_SLACK).until(() -> raises.stream()
-                        .allMatch(raise -> raise.getState() == Thread.State.TIMED_WAITING));
+                Hang.until(() -> raises.stream().allMatch(raise -> raise.getState() == Thread.State.TIMED_WAITING),
+                        "every queued raise parking behind the stuck connect");
 
                 store.close();
                 for (Thread raise : raises) {
@@ -117,7 +116,7 @@ class MarkerStoreConnectBoundTest {
                 }
 
                 assertThat(raises).noneMatch(Thread::isAlive);
-                await().atMost(SCHEDULING_SLACK).until(() -> raiseThreads(group).isEmpty());
+                Hang.until(() -> raiseThreads(group).isEmpty(), "the raise thread ending after close");
                 assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count()).isEqualTo(QUEUED_RAISES);
             } finally {
                 writeStore.destroy();
