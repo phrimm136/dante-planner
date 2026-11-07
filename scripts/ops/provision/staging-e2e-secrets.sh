@@ -46,9 +46,9 @@ fi
 openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out "$work/private.pem" 2>/dev/null
 openssl pkey -in "$work/private.pem" -pubout -out "$work/public.pem"
 openssl rand -base64 32 | tr -d '\n' > "$work/enc.key"
-put danteplanner/jwt/rs256-private-key "$work/private.pem"
-put danteplanner/jwt/rs256-public-key  "$work/public.pem"
-put danteplanner/jwt/encryption-key    "$work/enc.key"
+jq -n --rawfile priv "$work/private.pem" --rawfile pub "$work/public.pem" --rawfile enc "$work/enc.key" \
+  '{rs256_private_key: $priv, rs256_public_key: $pub, encryption_key: $enc}' > "$work/jwt.json"
+put "$SECRET_JWT_BUNDLE" "$work/jwt.json"
 
 # Origin TLS: self-signed, SAN = the SNI cloudflared pins (origin_server_name); the
 # certificate serves as its own CA on the cloudflared side. Read from the stored bundle
@@ -75,35 +75,34 @@ if ! secret_exists "$region" "$SECRET_RDS_MASTER_PASSWORD"; then
   put danteplanner/rds/master-password "$work/master.pw"
 fi
 
-gen > "$work/app.pw";      printf danteplanner_ro   > "$work/ro.user"
-gen > "$work/ro.pw";       printf mysqld_exporter   > "$work/exp.user"
-gen > "$work/exp.pw";      gen > "$work/redis.pw";  gen > "$work/stub.secret"
-put danteplanner/rds/readonly-username    "$work/ro.user"
-put danteplanner/rds/readonly-password    "$work/ro.pw"
-put danteplanner/mysqld-exporter/username "$work/exp.user"
-put danteplanner/mysqld-exporter/password "$work/exp.pw"
+gen > "$work/app.pw";      gen > "$work/ro.pw";     gen > "$work/exp.pw"
+gen > "$work/redis.pw";    gen > "$work/stub.secret"
+jq -n --rawfile pw "$work/ro.pw" '{username: "danteplanner_ro", password: $pw}' > "$work/readonly.json"
+put "$SECRET_RDS_READONLY_BUNDLE" "$work/readonly.json"
 
 # Credential-scoped read: the assumed staging role decides which account answers, so a
 # workstation's terraform init state cannot redirect this to the wrong environment.
 endpoint=$(aws rds describe-db-instances --region "$region" --db-instance-identifier danteplanner-mysql \
   --query 'DBInstances[0].Endpoint.Address' --output text)
-printf %s "$endpoint" > "$work/primary.endpoint"
-put danteplanner/mysqld-exporter/primary-endpoint "$work/primary.endpoint"
 
 replica=$(aws rds describe-db-instances --region "$replica_region" \
   --db-instance-identifier danteplanner-mysql-seoul \
   --query 'DBInstances[0].Endpoint.Address' --output text 2>/dev/null || printf placeholder)
+printf %s "$endpoint" > "$work/primary.endpoint"
 printf %s "$replica" > "$work/replica.endpoint"
-put danteplanner/mysqld-exporter/replica-endpoint "$work/replica.endpoint"
+jq -n --rawfile pw "$work/exp.pw" --rawfile primary "$work/primary.endpoint" \
+  --rawfile replica "$work/replica.endpoint" \
+  '{username: "mysqld_exporter", password: $pw, primary_endpoint: $primary, replica_endpoint: $replica}' \
+  > "$work/dsn.json"
+put "$SECRET_MYSQLD_EXPORTER_BUNDLE" "$work/dsn.json"
 
 # Telemetry credentials are placeholders: staging ships no telemetry until real Grafana
 # keys are provisioned by an operator, and the consuming sidecars fail without blocking
 # the app pods.
-printf placeholder > "$work/ph"
-for name in grafana/loki-username grafana/loki-password grafana/remote-write-username \
-            grafana/remote-write-password grafana/observability-read-token; do
-  put "danteplanner/$name" "$work/ph"
-done
+jq -n '{loki_username: "placeholder", loki_password: "placeholder",
+        remote_write_username: "placeholder", remote_write_password: "placeholder",
+        observability_read_token: "placeholder"}' > "$work/grafana.json"
+put "$SECRET_GRAFANA_BUNDLE" "$work/grafana.json"
 
 # The OAuth and CORS URLs derive from the stored endpoint bundle, the same source the
 # suites load — one channel, staging-scoped by the credentials that read it.

@@ -7,8 +7,9 @@
 # Examples:
 #   logs-query.sh '{app="backend"} |= "ERROR"' 6h
 #   logs-query.sh --day 2026-07-23 '{app="backend", cluster="seoul"} |= "RateLimit"'
-# Auth: danteplanner/grafana/loki-username + observability-read-token (Secrets
-# Manager); minted with logs:read + metrics:read via provision/grafana-read-secrets.sh.
+# Auth: loki_username + observability_read_token from the danteplanner/grafana/cloud
+# bundle (Secrets Manager); minted with logs:read + metrics:read, written by
+# provision/grafana-secrets.sh.
 set -euo pipefail
 
 LOKI_HOST="https://logs-prod-036.grafana.net"
@@ -27,13 +28,16 @@ else
   END=$(date -u +%s)000000000
 fi
 
-secret() {
-  aws secretsmanager get-secret-value --region us-west-2 \
-    --secret-id "danteplanner/grafana/$1" --query SecretString --output text
-}
+OPS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../lib/constants.sh
+source "$OPS_DIR/../lib/constants.sh"
+# shellcheck source=../lib/secrets.sh
+source "$OPS_DIR/../lib/secrets.sh"
+BUNDLE=$SECRET_GRAFANA_BUNDLE
 
-LK_USER=$(secret loki-username)
-LK_TOKEN=$(secret observability-read-token)
+CREDS=$(read_bundle us-west-2 "$BUNDLE")
+LK_USER=$(bundle_key "$BUNDLE" "$CREDS" loki_username)
+LK_TOKEN=$(bundle_key "$BUNDLE" "$CREDS" observability_read_token)
 
 curl -sS -G -K <(printf 'user = "%s:%s"\n' "$LK_USER" "$LK_TOKEN") "${LOKI_HOST}/loki/api/v1/query_range" \
   --data-urlencode "query=${QUERY}" \

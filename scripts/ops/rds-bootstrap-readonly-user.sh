@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # One-time: create/converge the read-only MySQL user on the PRIMARY by running
-# rds-readonly-user.sql with the Secrets Manager password substituted for
+# rds-readonly-user.sql with the danteplanner/rds/readonly password substituted for
 # REPLACE_ME (env-only transit, the file on disk is untouched). Admin (master)
 # credentials are fetched, not prompted: username from the RDS API, password
 # from the gitignored terraform/rds var-file (its declared home — the
@@ -11,6 +11,8 @@ set -euo pipefail
 OPS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/constants.sh
 source "$OPS_DIR/lib/constants.sh"
+# shellcheck source=lib/secrets.sh
+source "$OPS_DIR/lib/secrets.sh"
 # One file per environment, so nothing auto-loads and nothing is implicit.
 TFVARS="${TFVARS:-$OPS_DIR/../../terraform/rds/prod.tfvars}"
 
@@ -22,10 +24,8 @@ TFVARS="${TFVARS:-$OPS_DIR/../../terraform/rds/prod.tfvars}"
 TFVARS_MODE=$(stat -c %a "$TFVARS")
 [ "${TFVARS_MODE: -2}" = "00" ] || { echo "refusing: $TFVARS is group/world-readable ($TFVARS_MODE) — chmod 600"; exit 1; }
 
-PW=$(aws secretsmanager get-secret-value --region us-west-2 \
-  --secret-id danteplanner/rds/readonly-password \
-  --query SecretString --output text)
-[ -n "$PW" ] && [ "$PW" != "None" ] || { echo "readonly-password secret is empty"; exit 1; }
+RO_BUNDLE=$(read_bundle us-west-2 "$SECRET_RDS_READONLY_BUNDLE")
+PW=$(bundle_key "$SECRET_RDS_READONLY_BUNDLE" "$RO_BUNDLE" password)
 ADMIN_USER=$(aws rds describe-db-instances --region us-west-2 \
   --db-instance-identifier danteplanner-mysql \
   --query "DBInstances[0].MasterUsername" --output text)

@@ -1,11 +1,11 @@
 # shellcheck shell=bash
 # AWS Secrets Manager plumbing.
 #
-# Contract for every function here: the region is always the first argument, so
-# no call depends on ambient AWS_REGION/AWS_DEFAULT_REGION state. Values travel
-# on stdin (`file:///dev/stdin`) or as a file reference — never on argv, because
-# /proc/PID/cmdline is world-readable. All of them return the underlying aws
-# CLI's status, so they are safe to test in an `if`.
+# Contract for every function here that calls aws: the region is always the first
+# argument, so no call depends on ambient AWS_REGION/AWS_DEFAULT_REGION state. Values
+# travel on stdin (`file:///dev/stdin`, a here-string) or as a file reference — never
+# on argv, because /proc/PID/cmdline is world-readable. All of them return nonzero on
+# failure, so they are safe to test in an `if`.
 
 # secret_exists REGION NAME
 secret_exists() {
@@ -35,4 +35,19 @@ put_secret() {
 put_secret_file() {
     aws secretsmanager put-secret-value --region "$1" --secret-id "$2" \
         --secret-string "file://$3" >/dev/null
+}
+
+read_bundle() {
+    aws secretsmanager get-secret-value --region "$1" --secret-id "$2" \
+        --query SecretString --output text || {
+        echo "cannot read $2 — create it per docs/runbooks/secrets-consolidation.md step 1" >&2
+        return 1
+    }
+}
+
+bundle_key() {
+    local v
+    v=$(jq -r --arg k "$3" '.[$k] // empty' <<<"$2")
+    [ -n "$v" ] || { echo "$1 has no '$3' key" >&2; return 1; }
+    printf %s "$v"
 }

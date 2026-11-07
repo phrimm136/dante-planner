@@ -11,9 +11,11 @@ CLOUDWATCH_NAMESPACE="DantePlanner"
 RDS_DEFAULT_PORT=3306
 
 SECRET_RDS_MASTER_PASSWORD="danteplanner/rds/master-password"
-SECRET_RDS_READONLY_USERNAME="danteplanner/rds/readonly-username"
-SECRET_RDS_READONLY_PASSWORD="danteplanner/rds/readonly-password"
 SECRET_STAGING_E2E_ENDPOINTS="danteplanner/staging/e2e-endpoints"
+SECRET_JWT_BUNDLE="danteplanner/jwt/material"
+SECRET_GRAFANA_BUNDLE="danteplanner/grafana/cloud"
+SECRET_MYSQLD_EXPORTER_BUNDLE="danteplanner/mysqld-exporter/dsn"
+SECRET_RDS_READONLY_BUNDLE="danteplanner/rds/readonly"
 
 # Ops aws calls authenticate through this SSO profile, never static access keys.
 export AWS_PROFILE="${AWS_PROFILE:-danteplanner}"
