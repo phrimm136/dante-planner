@@ -12,6 +12,8 @@ concurrency:
   group: k3s-gitops-deploy
   cancel-in-progress: false
 
+permissions: {}
+
 env:
   OREGON_REGION: us-west-2
   SEOUL_REGION: ap-northeast-2
