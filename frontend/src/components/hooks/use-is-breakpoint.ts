@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 
 type BreakpointMode = 'min' | 'max'
 
@@ -8,22 +8,27 @@ function buildQuery(mode: BreakpointMode, breakpoint: number): string {
   return mode === 'min' ? `(min-width: ${breakpoint}px)` : `(max-width: ${breakpoint - 1}px)`
 }
 
-function getInitialMatches(mode: BreakpointMode, breakpoint: number): boolean {
-  if (typeof window === 'undefined') return false
-  return window.matchMedia(buildQuery(mode, breakpoint)).matches
+function getServerSnapshot(): boolean {
+  return false
+}
+
+function watch(query: string): { query: string; list: MediaQueryList | null } {
+  return { query, list: typeof window === 'undefined' ? null : window.matchMedia(query) }
 }
 
 export function useIsBreakpoint(mode: BreakpointMode = 'max', breakpoint = 768) {
-  const [matches, setMatches] = useState<boolean>(() => getInitialMatches(mode, breakpoint))
+  const query = buildQuery(mode, breakpoint)
+  const [watched, setWatched] = useState(() => watch(query))
+  if (watched.query !== query) {
+    setWatched(watch(query))
+  }
 
-  useEffect(() => {
-    const mql = window.matchMedia(buildQuery(mode, breakpoint))
-    const onChange = (e: MediaQueryListEvent) => setMatches(e.matches)
+  const { list } = watched
+  const subscribe = (onStoreChange: () => void) => {
+    if (!list) return () => {}
+    list.addEventListener('change', onStoreChange)
+    return () => list.removeEventListener('change', onStoreChange)
+  }
 
-    setMatches(mql.matches)
-    mql.addEventListener('change', onChange)
-    return () => mql.removeEventListener('change', onChange)
-  }, [mode, breakpoint])
-
-  return matches
+  return useSyncExternalStore(subscribe, () => list?.matches ?? false, getServerSnapshot)
 }

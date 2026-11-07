@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { act, waitFor } from '@testing-library/react'
-import type { ReactNode } from 'react'
 
 import i18n from '@/lib/i18n'
 import { router } from '@/lib/router'
@@ -16,49 +15,23 @@ const DATABASE_PREFIXES = [
   '/keyword',
 ]
 
-type PageModule = { default: () => ReactNode }
-
-const PAGES: Record<string, { url: string; load: () => Promise<PageModule> }> = {
-  '/identity': { url: '/identity', load: () => import('@/pages/identity/IdentityPage') },
-  '/identity/$id': {
-    url: '/identity/10101',
-    load: () => import('@/pages/identity/IdentityDetailPage'),
-  },
-  '/ego': { url: '/ego', load: () => import('@/pages/ego/EGOPage') },
-  '/ego/$id': { url: '/ego/20101', load: () => import('@/pages/ego/EGODetailPage') },
-  '/ego-gift': { url: '/ego-gift', load: () => import('@/pages/egoGift/EGOGiftPage') },
-  '/ego-gift/$id': {
-    url: '/ego-gift/9001',
-    load: () => import('@/pages/egoGift/EGOGiftDetailPage'),
-  },
-  '/theme-pack': { url: '/theme-pack', load: () => import('@/pages/themePack/ThemePackPage') },
-  '/theme-pack/$id': {
-    url: '/theme-pack/3001',
-    load: () => import('@/pages/themePack/ThemePackDetailPage'),
-  },
-  '/ab-event': { url: '/ab-event', load: () => import('@/pages/abEvent/AbEventPage') },
-  '/ab-event/$id': {
-    url: '/ab-event/901001',
-    load: () => import('@/pages/abEvent/AbEventDetailPage'),
-  },
-  '/battle': { url: '/battle', load: () => import('@/pages/battle/BattlePage') },
-  '/battle/enemy/$id': {
-    url: '/battle/enemy/8063',
-    load: () => import('@/pages/battle/EnemyDetailPage'),
-  },
-  '/battle/assistant/$id': {
-    url: '/battle/assistant/400001',
-    load: () => import('@/pages/battle/AssistantDetailPage'),
-  },
-  '/battle/sinnerEvent/$id': {
-    url: '/battle/sinnerEvent/10101',
-    load: () => import('@/pages/battle/SinnerEventDetailPage'),
-  },
-  '/keyword': { url: '/keyword', load: () => import('@/pages/keyword/KeywordPage') },
-  '/keyword/$id': {
-    url: '/keyword/A1c971a',
-    load: () => import('@/pages/keyword/KeywordDetailPage'),
-  },
+const PAGE_URLS: Record<string, string> = {
+  '/identity': '/identity',
+  '/identity/$id': '/identity/10101',
+  '/ego': '/ego',
+  '/ego/$id': '/ego/20101',
+  '/ego-gift': '/ego-gift',
+  '/ego-gift/$id': '/ego-gift/9001',
+  '/theme-pack': '/theme-pack',
+  '/theme-pack/$id': '/theme-pack/3001',
+  '/ab-event': '/ab-event',
+  '/ab-event/$id': '/ab-event/901001',
+  '/battle': '/battle',
+  '/battle/enemy/$id': '/battle/enemy/8063',
+  '/battle/assistant/$id': '/battle/assistant/400001',
+  '/battle/sinnerEvent/$id': '/battle/sinnerEvent/10101',
+  '/keyword': '/keyword',
+  '/keyword/$id': '/keyword/A1c971a',
 }
 
 const LOAD_WAIT_MS = 5000
@@ -67,6 +40,13 @@ const TEST_BUDGET_MS = 20000
 const databaseRoutes = Object.keys(router.routesByPath).filter((path) =>
   DATABASE_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`)),
 )
+
+async function routeComponent(path: string) {
+  const Page = router.routesByPath[path as keyof typeof router.routesByPath].options.component
+  if (!Page) throw new Error(`route ${path} has no component`)
+  await Page.preload?.()
+  return () => <Page />
+}
 
 function pageSkeletons() {
   return document.querySelectorAll('[data-slot="page-skeleton"]').length
@@ -82,15 +62,15 @@ beforeEach(async () => {
 
 describe('database pages on language change', () => {
   it('registers every database route', () => {
-    expect([...databaseRoutes].sort()).toEqual(Object.keys(PAGES).sort())
+    expect([...databaseRoutes].sort()).toEqual(Object.keys(PAGE_URLS).sort())
   })
 
   it.each(databaseRoutes)(
     '%s shows the page skeleton once, never on language change',
     async (path) => {
-      const page = PAGES[path]
-      if (!page) throw new Error(`unregistered route ${path}`)
-      mountRoute(path, page.url, (await page.load()).default)
+      const url = PAGE_URLS[path]
+      if (!url) throw new Error(`unregistered route ${path}`)
+      mountRoute(path, url, await routeComponent(path))
 
       // Under a contended worker pool the cold JSON transforms behind the card names
       // outlast the default wait, and the page import above counts toward the budget.

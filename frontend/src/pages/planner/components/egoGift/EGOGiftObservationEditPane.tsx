@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { useEGOGiftObservationData } from '@/pages/egoGift'
@@ -41,6 +41,15 @@ export function EGOGiftObservationEditPane({
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState('')
   const [sortMode, setSortMode] = useState<SortMode>('tier-first')
+  const [filtersOpen, setFiltersOpen] = useState(open)
+  if (filtersOpen !== open) {
+    setFiltersOpen(open)
+    if (!open) {
+      setSelectedKeywords(new Set())
+      setSearchQuery('')
+      setSortMode('tier-first')
+    }
+  }
 
   const gifts: EGOGiftEntity[] = (() => {
     return Object.entries(spec).map(([id, entry]) => toEGOGiftEntity(id, entry, i18n[id] || id))
@@ -54,14 +63,6 @@ export function EGOGiftObservationEditPane({
     }
     return sortEGOGifts(filtered, sortMode)
   })()
-
-  useEffect(() => {
-    if (!open) {
-      setSelectedKeywords(new Set())
-      setSearchQuery('')
-      setSortMode('tier-first')
-    }
-  }, [open])
 
   const { toggle, clear } = useCappedSelection({
     cap: maxObservableGifts(observationData.observationEgoGiftCostDataList),

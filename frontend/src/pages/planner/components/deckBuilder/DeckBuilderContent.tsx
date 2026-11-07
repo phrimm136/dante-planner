@@ -81,32 +81,27 @@ export function DeckBuilderContent({
     entityMode: string
   } | null>(null)
 
-  const prevActiveRef = useRef(isActive)
+  const [wasActive, setWasActive] = useState(isActive)
+  const justActivated = isActive && !wasActive
+  if (wasActive !== isActive) {
+    setWasActive(isActive)
+  }
 
-  useEffect(() => {
-    const justActivated = isActive && !prevActiveRef.current
-    prevActiveRef.current = isActive
-
-    if (!isActive) {
-      if (sortingSnapshot !== null) {
-        setSortingSnapshot(null)
-      }
-      return
+  if (!isActive) {
+    if (sortingSnapshot !== null) {
+      setSortingSnapshot(null)
     }
-
-    const needsSnapshot =
-      sortingSnapshot === null ||
-      justActivated ||
-      sortingSnapshot.entityMode !== filterState.entityMode
-
-    if (needsSnapshot) {
-      setSortingSnapshot({
-        identityIds: new Set(equippedIdentityIds),
-        egoIds: new Set(equippedEgoIds),
-        entityMode: filterState.entityMode,
-      })
-    }
-  }, [isActive, filterState.entityMode, equippedIdentityIds, equippedEgoIds, sortingSnapshot])
+  } else if (
+    sortingSnapshot === null ||
+    justActivated ||
+    sortingSnapshot.entityMode !== filterState.entityMode
+  ) {
+    setSortingSnapshot({
+      identityIds: new Set(equippedIdentityIds),
+      egoIds: new Set(equippedEgoIds),
+      entityMode: filterState.entityMode,
+    })
+  }
 
   const sortingIdentityIds = sortingSnapshot?.identityIds ?? equippedIdentityIds
   const sortingEgoIds = sortingSnapshot?.egoIds ?? equippedEgoIds
