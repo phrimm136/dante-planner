@@ -365,13 +365,13 @@ asset pipeline.
 - 2026-08-14 — Outbox operational couplings accepted as specced by RFC 0003, worth revisiting
   together: the relay's ShedLock lease lives in Redis, so a Redis outage disables the component
   that exists to survive push loss (a JDBC lock provider would decouple recovery from the
-  degraded dependency); application-wide `@EnableRetry` rides in `OutboxAsyncConfig`, so
+  degraded dependency); application-wide `@EnableResilientMethods` (the retry switch) rides in `OutboxAsyncConfig`, so
   deleting the outbox would silently un-retry every SSE publish; `INSERT IGNORE` reports any
   suppressed error as "duplicate" (an FK violation from a hard-deleted recipient is
   indistinguishable from dedup — benign today because arm eligibility re-reads filter deleted
   users first); the eager executor's DiscardPolicy has no rejection counter, so pool
   saturation is observable only as relay-late notifications.
-  re-check: `rg -qF 'new RedisLockProvider' backend/src/main/java/org/danteplanner/backend/shared/config/ShedLockConfig.java && rg -q '^@EnableRetry' backend/src/main/java/org/danteplanner/backend/shared/outbox/config/OutboxAsyncConfig.java && rg -qF 'ThreadPoolExecutor.DiscardPolicy()' backend/src/main/java/org/danteplanner/backend/shared/outbox/config/OutboxAsyncConfig.java && rg -qF 'INSERT IGNORE INTO notifications' backend/src/main/java/org/danteplanner/backend/notification/repository/NotificationRepository.java`
+  re-check: `rg -qF 'new RedisLockProvider' backend/src/main/java/org/danteplanner/backend/shared/config/ShedLockConfig.java && rg -q '^@EnableResilientMethods' backend/src/main/java/org/danteplanner/backend/shared/outbox/config/OutboxAsyncConfig.java && rg -qF 'ThreadPoolExecutor.DiscardPolicy()' backend/src/main/java/org/danteplanner/backend/shared/outbox/config/OutboxAsyncConfig.java && rg -qF 'INSERT IGNORE INTO notifications' backend/src/main/java/org/danteplanner/backend/notification/repository/NotificationRepository.java`
 - 2026-08-14 — Outbox pushes leave on the dispatch thread after commit, so a client refetch
   triggered by NOTIFY_* carries no GTID from the write that caused it; on a lagging replica
   the refetch can miss the just-committed notification row until the next natural refetch.
