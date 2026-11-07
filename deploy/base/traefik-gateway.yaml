@@ -70,8 +70,8 @@ spec:
           port: 8080
 ---
 # cloudflared presents no client certificate, so RequireAndVerifyClientCert blackholes every
-# request arriving over the tunnel. origin-client-ca is gated in terraform/secrets (empty var
-# -> count=0), so the Secret it names is normally absent.
+# request arriving over the tunnel. Nothing produces a Secret named origin-client-ca; restoring
+# mutual TLS means committing that public CA as a plain manifest.
 apiVersion: traefik.io/v1alpha1
 kind: TLSOption
 metadata:

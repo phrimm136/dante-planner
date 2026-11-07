@@ -91,13 +91,17 @@ spec:
   data:
     - secretKey: username
       remoteRef:
-        key: danteplanner/mysqld-exporter/username
+        key: danteplanner/mysqld-exporter/dsn
+        property: username
     - secretKey: password
       remoteRef:
-        key: danteplanner/mysqld-exporter/password
+        key: danteplanner/mysqld-exporter/dsn
+        property: password
     - secretKey: primary-endpoint
       remoteRef:
-        key: danteplanner/mysqld-exporter/primary-endpoint
+        key: danteplanner/mysqld-exporter/dsn
+        property: primary_endpoint
     - secretKey: replica-endpoint
       remoteRef:
-        key: danteplanner/mysqld-exporter/replica-endpoint
+        key: danteplanner/mysqld-exporter/dsn
+        property: replica_endpoint

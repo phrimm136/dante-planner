@@ -34,7 +34,9 @@ scripts/ops/access/logs-query.sh --day 2026-07-23 '{app="backend", cluster="seou
 2. Create the MySQL user: `scripts/ops/rds-bootstrap-readonly-user.sh`.
 3. Mint a Grafana Cloud access-policy token with `logs:read` + `metrics:read`
    scopes, then store
-   it: `scripts/ops/provision/grafana-read-secrets.sh`.
+   it with `scripts/ops/provision/grafana-secrets.sh`. That script writes the whole
+   `danteplanner/grafana/cloud` bundle, so every run supplies all five current values, not only
+   the read token.
 4. `scripts/ops/terraform-run.sh -chdir=terraform/secrets apply` — the secret names are enrolled in
    `secret_names`, so apply attaches the Seoul replica to each container.
 
@@ -47,10 +49,11 @@ and one whose directory holds an auto-loaded `terraform.tfvars`, then hands off 
 
 ## Credential handling
 
-Secrets Manager is the only credential store (`danteplanner/rds/readonly-*`,
-`danteplanner/grafana/observability-read-token`). Scripts fetch values per invocation and
-pass them through environment variables only — never argv, never a file. The
-provision scripts prompt with hidden input for the same reason.
+Secrets Manager is the only credential store (the `danteplanner/rds/readonly` bundle with
+`username` and `password`, and `observability_read_token` in the `danteplanner/grafana/cloud`
+bundle). Scripts fetch values per invocation and pass them through environment variables
+only — never argv, never a file. The provision scripts prompt with hidden input for the same
+reason.
 
 ## Adding an access script
 

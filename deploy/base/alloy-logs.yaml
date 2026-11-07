@@ -45,10 +45,12 @@ spec:
   data:
     - secretKey: username
       remoteRef:
-        key: danteplanner/grafana/loki-username
+        key: danteplanner/grafana/cloud
+        property: loki_username
     - secretKey: password
       remoteRef:
-        key: danteplanner/grafana/loki-password
+        key: danteplanner/grafana/cloud
+        property: loki_password
 ---
 apiVersion: v1
 kind: ConfigMap
