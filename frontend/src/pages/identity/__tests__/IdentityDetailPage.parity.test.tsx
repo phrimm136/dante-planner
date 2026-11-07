@@ -111,6 +111,7 @@ async function renderCell(uptie: number): Promise<string> {
 
   await waitForFullReveal()
 
+  await waitForI18nSettled(container)
   fireEvent.click(screen.getByRole('button', { name: new RegExp(`tier ${uptie}`, 'i') }))
   await waitForI18nSettled(container)
   await waitForExpandButton()
