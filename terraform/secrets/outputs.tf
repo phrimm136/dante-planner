@@ -14,9 +14,8 @@ output "replicated_secret_names" {
 }
 
 output "origin_cert_secret_arns" {
-  description = "ARNs of the created + replicated origin TLS secrets (server cert + origin-pull CA). ESO in both regions reads these; Seoul's app-node IAM needs GetSecretValue on their ap-northeast-2 replica ARNs."
+  description = "ARN of the replicated origin TLS secret (server cert). ESO in both regions reads it; Seoul's app-node IAM needs GetSecretValue on its ap-northeast-2 replica ARN."
   value = {
-    origin_tls       = try(aws_secretsmanager_secret.origin_tls["danteplanner/origin-tls"].arn, null)
-    origin_client_ca = one(aws_secretsmanager_secret.origin_client_ca[*].arn)
+    origin_tls = try(aws_secretsmanager_secret.origin_tls["danteplanner/origin-tls"].arn, null)
   }
 }

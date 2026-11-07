@@ -33,12 +33,11 @@ account reproduces the region (Done-When: rebuild proves the bootstrap).
 - A dedicated least-privilege **provisioning identity** assumed via STS (as in `terraform/rds`).
 - `cp environment.tfvars.example prod.tfvars` and set `ingress_allowed_cidrs`
   (Cloudflare + GA-health ranges). `*.tfvars` is gitignored.
-- The JWT material must already exist in **AWS Secrets Manager** (all three required; the
-  backend fails fast at boot without them): the private key at `rs256_private_key_secret_name`
-  (default `danteplanner/jwt/rs256-private-key`), the X.509 public key at
-  `danteplanner/jwt/rs256-public-key`, and the base64 AES-256 encryption key at
-  `danteplanner/jwt/encryption-key`. Terraform never holds this material — only grants the app
-  node role read access.
+- The JWT material must already exist in **AWS Secrets Manager** as one JSON bundle at
+  `danteplanner/jwt/material` with all three keys (the backend fails fast at boot without them):
+  `rs256_private_key` (the PEM private key), `rs256_public_key` (the X.509 public key), and
+  `encryption_key` (the base64 AES-256 key). Terraform never holds this material — only grants
+  the app node role read access.
 
 ## Usage
 
@@ -77,7 +76,8 @@ terraform output backend_ecr_repository_url
 
 ## Not managed here
 
-- **The RS256 private key** (Secrets Manager, operator-populated) — referenced by name only.
+- **The JWT material** (`danteplanner/jwt/material`, Secrets Manager, operator-populated) —
+  referenced by the app node role's name pattern only.
 - **The RDS instance and its SG** (`terraform/rds`) — it reads this stack's state on its next apply after oregon.
 - **State backend:** configure encrypted remote state in your private setup; local state and
   `*.tfvars` are gitignored. Never commit `*.tfstate`.

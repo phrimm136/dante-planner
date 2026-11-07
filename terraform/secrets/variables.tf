@@ -15,29 +15,19 @@ variable "secret_names" {
   type        = set(string)
   default = [
     "danteplanner/backend/runtime-config",
-    "danteplanner/jwt/rs256-private-key",
-    "danteplanner/jwt/rs256-public-key",
-    "danteplanner/jwt/encryption-key",
+    "danteplanner/jwt/material",
     # Telemetry credentials — containers enrolled here; values are injected by
     # scripts/ops/provision/*.sh into the PRIMARY region only (replication
-    # carries the versions to Seoul). Both endpoint entries hold region-invariant
+    # carries the versions to Seoul). Both endpoint keys hold region-invariant
     # RDS hostnames, so replication cannot clobber a region-specific value.
-    "danteplanner/grafana/loki-username",
-    "danteplanner/grafana/loki-password",
-    "danteplanner/grafana/remote-write-username",
-    "danteplanner/grafana/remote-write-password",
-    "danteplanner/mysqld-exporter/username",
-    "danteplanner/mysqld-exporter/password",
-    "danteplanner/mysqld-exporter/primary-endpoint",
-    "danteplanner/mysqld-exporter/replica-endpoint",
-    # Human/agent access credentials — containers created by
+    "danteplanner/grafana/cloud",
+    "danteplanner/mysqld-exporter/dsn",
+    # Human/agent access credentials — container created by
     # scripts/ops/provision/rds-readonly-secrets.sh before enrollment here.
-    "danteplanner/rds/readonly-username",
-    "danteplanner/rds/readonly-password",
+    "danteplanner/rds/readonly",
     # Read by terraform/rds at plan time. Container created by
     # scripts/ops/provision/rds-master-password-secret.sh before enrollment here.
     "danteplanner/rds/master-password",
-    "danteplanner/grafana/observability-read-token",
     # Both regions' tunnel tokens in one entry, keyed by region. Container created by
     # scripts/ops/provision/cloudflare-tunnel-secrets.sh before enrollment here.
     "danteplanner/cloudflare/tunnel-tokens",
