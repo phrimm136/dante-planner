@@ -53,6 +53,7 @@ principle without a corresponding entry is an untested claim rather than a settl
 | `runbooks/rds-migration.md` | Managed-database migration and the decommission gate |
 | `runbooks/redis-auth-password-rollout.md` | Shipping an auth Redis change without cutting its clients off |
 | `runbooks/schema-decomposition-migration.md` | The stop-the-world schema window |
+| `runbooks/secrets-consolidation.md` | Moving the secrets to one bundle per credential set, and retiring the old containers |
 | `runbooks/staging-e2e-park-report.md` | Where the staging end-to-end loop was parked, and what resuming it needs |
 
 ## Legacy

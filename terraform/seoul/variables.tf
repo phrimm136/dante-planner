@@ -161,12 +161,6 @@ variable "ecr_credential_provider_version" {
   default     = "v1.31.0"
 }
 
-variable "rs256_private_key_secret_name" {
-  description = "AWS Secrets Manager secret name holding the RS256 JWT private key. Read by the ESO controller via the node instance profile (no-IRSA deviation, see README)."
-  type        = string
-  default     = "danteplanner/jwt/rs256-private-key"
-}
-
 variable "alarm_sns_topic_arn" {
   description = "Optional SNS topic ARN for instance auto-recovery alarm notifications. Empty = alarms visible in console but send no notification."
   type        = string

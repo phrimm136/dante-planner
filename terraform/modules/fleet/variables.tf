@@ -185,14 +185,6 @@ variable "ecr_credential_provider_version" {
   default     = "v1.31.0"
 }
 
-# --- Secrets (External Secrets Operator source) -----------------------------
-
-variable "rs256_private_key_secret_name" {
-  description = "AWS Secrets Manager secret name holding the RS256 JWT private key. Read by the ESO controller via the node instance profile (no-IRSA deviation, see README)."
-  type        = string
-  default     = "danteplanner/jwt/rs256-private-key"
-}
-
 # --- Observability & ops ----------------------------------------------------
 
 variable "alarm_sns_topic_arn" {
@@ -232,12 +224,11 @@ variable "app_secret_name_patterns" {
   type        = list(string)
   default = [
     "danteplanner/backend/*",
-    "danteplanner/cloudflare/*",
-    "danteplanner/grafana/*",
-    "danteplanner/jwt/*",
-    "danteplanner/mysqld-exporter/*",
-    "danteplanner/origin-client-ca*",
-    "danteplanner/origin-tls*",
+    "danteplanner/cloudflare/tunnel-tokens-*",
+    "danteplanner/grafana/cloud-*",
+    "danteplanner/jwt/material-*",
+    "danteplanner/mysqld-exporter/dsn-*",
+    "danteplanner/origin-tls-*",
   ]
 }
 

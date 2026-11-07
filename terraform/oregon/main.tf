@@ -27,7 +27,6 @@ module "fleet" {
   gateway_api_version             = var.gateway_api_version
   external_secrets_chart_version  = var.external_secrets_chart_version
   ecr_credential_provider_version = var.ecr_credential_provider_version
-  rs256_private_key_secret_name   = var.rs256_private_key_secret_name
   alarm_sns_topic_arn             = var.alarm_sns_topic_arn
   etcd_snapshot_retention         = var.etcd_snapshot_retention
   tags                            = var.tags
