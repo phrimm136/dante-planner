@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -15,14 +15,15 @@ import type { LinkDialogProps } from '../types/NoteEditorTypes'
 export function LinkDialog({ open, onClose, onConfirm, initialText = '' }: LinkDialogProps) {
   const { t } = useTranslation(['planner', 'common'])
   const [url, setUrl] = useState('')
-  const [displayText, setDisplayText] = useState('')
-
-  useEffect(() => {
+  const [displayText, setDisplayText] = useState(open ? initialText : '')
+  const [filledFor, setFilledFor] = useState({ open, initialText })
+  if (filledFor.open !== open || filledFor.initialText !== initialText) {
+    setFilledFor({ open, initialText })
     if (open) {
       setUrl('')
       setDisplayText(initialText)
     }
-  }, [open, initialText])
+  }
 
   const handleConfirm = () => {
     if (!url.trim()) return

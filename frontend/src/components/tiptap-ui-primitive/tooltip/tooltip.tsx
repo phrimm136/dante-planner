@@ -1,5 +1,4 @@
 import {
-  cloneElement,
   createContext,
   forwardRef,
   isValidElement,
@@ -26,6 +25,7 @@ import {
   type ReferenceType,
   FloatingDelayGroup,
 } from '@floating-ui/react'
+import { Slot } from '@radix-ui/react-slot'
 import '@/components/tiptap-ui-primitive/tooltip/tooltip.scss'
 
 interface TooltipProviderProps {
@@ -165,14 +165,10 @@ export const TooltipTrigger = forwardRef<HTMLElement, TooltipTriggerProps>(funct
       'data-tooltip-state': context.open ? 'open' : 'closed',
     }
 
-    return cloneElement(
-      children,
-      context.getReferenceProps({
-        ref,
-        ...props,
-        ...(typeof children.props === 'object' ? children.props : {}),
-        ...dataAttributes,
-      }),
+    return (
+      <Slot ref={ref} {...context.getReferenceProps({ ...props, ...dataAttributes })}>
+        {children}
+      </Slot>
     )
   }
 

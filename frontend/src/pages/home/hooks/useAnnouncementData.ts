@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { createStaticDataQueryOptions } from '@/lib/queryOptions'
@@ -39,16 +40,12 @@ function createI18nQueryOptions(language: string) {
 
 export function useAnnouncementData(): Announcement[] {
   const { i18n } = useTranslation()
+  const [now] = useState(() => new Date())
 
   const { data: specList } = useSuspenseQuery(createSpecQueryOptions())
   const { data: i18nData } = useSuspenseQuery(createI18nQueryOptions(i18n.language))
 
-  const { announcements, missingIds } = mergeAnnouncements(
-    specList,
-    i18nData,
-    i18n.language,
-    new Date(),
-  )
+  const { announcements, missingIds } = mergeAnnouncements(specList, i18nData, i18n.language, now)
 
   for (const id of missingIds) {
     console.error(

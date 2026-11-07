@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { screen, waitFor, within } from '@testing-library/react'
-import type { ReactNode } from 'react'
 
 import enDatabase from '@static/i18n/EN/database.json'
 import identity10310 from '@static/data/identity/10310.json'
@@ -9,6 +8,7 @@ import ego20102 from '@static/data/ego/20102.json'
 import egoI18n20102 from '@static/i18n/EN/ego/20102.json'
 import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
 import i18n from '@/lib/i18n'
+import { router } from '@/lib/router'
 import { EGODataSchema } from '@/pages/ego'
 import { IdentityDataSchema } from '@/pages/identity'
 import { mountRoute } from '@/test-utils/mountRoute'
@@ -24,15 +24,12 @@ vi.mock('@/components/hooks/use-is-breakpoint', () => ({
   useIsBreakpoint: vi.fn(() => false),
 }))
 
-type PageModule = { default: () => ReactNode }
-
 type SectionKey = keyof typeof enDatabase.section
 
 interface EntityLayoutRow {
   entity: string
   path: string
   url: string
-  load: () => Promise<PageModule>
   name: string
   hasEgo: boolean
   hasSanity: boolean
@@ -46,7 +43,6 @@ const ENTITY_ROWS: readonly EntityLayoutRow[] = [
     entity: 'identity 10310',
     path: '/identity/$id',
     url: '/identity/10310',
-    load: () => import('@/pages/identity/IdentityDetailPage'),
     name: identityI18n10310.name,
     hasEgo: false,
     hasSanity: true,
@@ -67,7 +63,6 @@ const ENTITY_ROWS: readonly EntityLayoutRow[] = [
     entity: 'E.G.O 20102',
     path: '/ego/$id',
     url: '/ego/20102',
-    load: () => import('@/pages/ego/EGODetailPage'),
     name: egoI18n20102.name,
     hasEgo: false,
     hasSanity: false,
@@ -79,7 +74,6 @@ const ENTITY_ROWS: readonly EntityLayoutRow[] = [
     entity: 'enemy group 8063',
     path: '/battle/enemy/$id',
     url: '/battle/enemy/8063',
-    load: () => import('@/pages/battle/EnemyDetailPage'),
     name: enemyI18n8063.units['8063'].name,
     hasEgo: false,
     hasSanity: false,
@@ -93,7 +87,6 @@ const ENTITY_ROWS: readonly EntityLayoutRow[] = [
     entity: 'assistant 400001',
     path: '/battle/assistant/$id',
     url: '/battle/assistant/400001',
-    load: () => import('@/pages/battle/AssistantDetailPage'),
     name: assistantI18n400001.units['400001'].name,
     hasEgo: false,
     hasSanity: true,
@@ -107,7 +100,6 @@ const ENTITY_ROWS: readonly EntityLayoutRow[] = [
     entity: 'event sinner 10101',
     path: '/battle/sinnerEvent/$id',
     url: '/battle/sinnerEvent/10101',
-    load: () => import('@/pages/battle/SinnerEventDetailPage'),
     name: sinnerEventI18n10101.units['10101'].name,
     hasEgo: false,
     hasSanity: true,
@@ -142,6 +134,13 @@ function expectedSectionTitles(row: EntityLayoutRow): string[] {
   return keys.map((key) => enDatabase.section[key])
 }
 
+async function routeComponent(path: string) {
+  const Page = router.routesByPath[path as keyof typeof router.routesByPath].options.component
+  if (!Page) throw new Error(`route ${path} has no component`)
+  await Page.preload?.()
+  return () => <Page />
+}
+
 function slot(name: string): HTMLElement | null {
   return document.querySelector<HTMLElement>(`[data-slot="${name}"]`)
 }
@@ -169,7 +168,7 @@ function precedes(first: HTMLElement, second: HTMLElement): boolean {
 }
 
 async function mountSettled(row: EntityLayoutRow) {
-  mountRoute(row.path, row.url, (await row.load()).default)
+  mountRoute(row.path, row.url, await routeComponent(row.path))
   const titles = expectedSectionTitles(row)
   await waitFor(() => expect(sectionTitles()).toEqual(titles), { timeout: LOAD_WAIT_MS })
   await waitFor(() => expect(document.querySelectorAll('[data-slot="skeleton"]').length).toBe(0), {

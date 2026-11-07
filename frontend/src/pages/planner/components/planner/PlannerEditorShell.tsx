@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, Suspense } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 
 import { useNavigate } from '@tanstack/react-router'
 import { queryClient } from '@/lib/queryClient'
@@ -157,6 +157,7 @@ export function PlannerEditorShell({
     clearError,
     save,
     resolveConflict,
+    conflict: conflictState,
     saveStatus,
   } = usePlannerSave({
     getState,
@@ -172,14 +173,6 @@ export function PlannerEditorShell({
     onKeepBothCreated: handleKeepBothCreated,
     syncEnabled,
   })
-
-  const conflictState = useMemo(
-    () =>
-      isSyncConflict(saveError)
-        ? { serverVersion: saveError.serverVersion, detectedAt: new Date().toISOString() }
-        : null,
-    [saveError],
-  )
 
   useEffect(() => {
     if (!saveError) return
