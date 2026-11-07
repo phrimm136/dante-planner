@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import ts from '@typescript/typescript6'
+import { parse } from '@babel/parser'
+import { isDirectiveLiteral, isStringLiteral, isTSType, traverse } from '@babel/types'
 import { describe, it, expect } from 'vitest'
 
 import { VALIDATION_CODES } from '../codes'
@@ -25,24 +26,21 @@ const emittingSources = (): string[] =>
     .map((file) => path.resolve(VALIDATION_DIR, file))
     .filter((file) => file !== CODES_FILE)
 
-const insideType = (node: ts.Node): boolean =>
-  node.parent !== undefined && (ts.isTypeNode(node.parent) || insideType(node.parent))
-
 function codeLiterals(file: string): string[] {
-  const source = ts.createSourceFile(
-    file,
-    fs.readFileSync(file, 'utf-8'),
-    ts.ScriptTarget.Latest,
-    true,
-  )
+  const program = parse(fs.readFileSync(file, 'utf-8'), {
+    sourceType: 'module',
+    plugins: ['typescript'],
+  }).program
   const found: string[] = []
-  const visit = (node: ts.Node): void => {
-    if (ts.isStringLiteral(node) && CODE_LITERAL.test(node.text) && !insideType(node)) {
-      found.push(node.text)
+  traverse(program, (node, ancestors) => {
+    if (
+      (isStringLiteral(node) || isDirectiveLiteral(node)) &&
+      CODE_LITERAL.test(node.value) &&
+      !ancestors.some((ancestor) => isTSType(ancestor.node))
+    ) {
+      found.push(node.value)
     }
-    ts.forEachChild(node, visit)
-  }
-  visit(source)
+  })
   return found
 }
 

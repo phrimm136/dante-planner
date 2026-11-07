@@ -52,10 +52,10 @@ asset pipeline.
   (v5.8.1, as deploy-fleet pins) on both overlays plus a schema check.
   re-check: `.claude/skills/debt-ledger/bin/debt absent .github/workflows -e 'kustomize build' -e 'kubeconform'`
 - `frontend/scripts/` sits outside every gate but tests: `yarn lint` and `yarn fmt:check`
-  cover only `src`, and the older scripts (compiler-bailouts, generate-sitemap,
-  detect-hardcoded-text, dev-r2-sync) are in no tsconfig, so they are never typechecked.
+  cover only `src`, and the older scripts (compiler-bailouts, generate-sitemap, dev-r2-sync)
+  are in no tsconfig, so they are never typechecked.
   Worth doing when a script change breaks CI or a deploy.
-  re-check: `rg -qF '"lint": "oxlint --type-aware --tsconfig tsconfig.app.json src"' frontend/package.json && .claude/skills/debt-ledger/bin/debt absent frontend --max-depth 1 -g 'tsconfig*.json' 'compiler-bailouts|generate-sitemap|detect-hardcoded-text|dev-r2-sync|scripts/\*'`
+  re-check: `rg -qF '"lint": "oxlint --type-aware --tsconfig tsconfig.app.json src"' frontend/package.json && .claude/skills/debt-ledger/bin/debt absent frontend --max-depth 1 -g 'tsconfig*.json' 'compiler-bailouts|generate-sitemap|dev-r2-sync|scripts/\*'`
 - `/planner/md/gesellschaft` and `/planner/md/new` inherit the `/planner/md/:id` rule's `Link`
   preloads: Pages applies every matching `_headers` rule and a `:id` placeholder matches a
   static sibling segment, so those pages also fetch the personal viewer's chunks. The dynamic
@@ -352,9 +352,8 @@ asset pipeline.
   last emitter, so the metric now reads *no data*, never zero — both gates are unactionable as
   written and the runbook needs its retirement condition restated (arguably: satisfied).
   `docs/multi-region-request-paths.md` §11 also still routes the deleted
-  `POST /{id}/bookmark`, and `frontend/scripts/hardcoded-text-report.json` still carries an
-  entry for the deleted `usePlannerBookmark.ts`.
-  re-check: `rg -q 'when .planner.legacy_toggle. reads ~0' docs/runbooks/schema-decomposition-migration.md && .claude/skills/debt-ledger/bin/debt absent backend/src/main 'legacy_toggle' && rg -qF 'POST /{id}/bookmark' docs/multi-region-request-paths.md && rg -q 'usePlannerBookmark' frontend/scripts/hardcoded-text-report.json`
+  `POST /{id}/bookmark`.
+  re-check: `rg -q 'when .planner.legacy_toggle. reads ~0' docs/runbooks/schema-decomposition-migration.md && .claude/skills/debt-ledger/bin/debt absent backend/src/main 'legacy_toggle' && rg -qF 'POST /{id}/bookmark' docs/multi-region-request-paths.md`
 - 2026-08-14 — Two observer effects remain outside the RFC 0003 outbox: the account-suspension
   push (`moderation/listener/AccountSuspensionEventListener`, after-commit) and the settings
   invalidation published inline from `UserController`. Both lose their push if the process dies
@@ -1524,15 +1523,6 @@ guards the parse but likewise skips the schema gate.
   a user reports a frozen EGO detail page after switching tiers during load: reproduce in Chromium
   with throttled static-data requests.
   re-check: `rg -q 'prefetchDescriptionData' frontend/src/pages/ego/__tests__/EGODetailPage.parity.test.tsx && test -z "$(git ls-files e2e | rg -i ego)"`
-- `tsc --noEmit -p e2e/tsconfig.json` reports 35 TS6142 errors ("`--jsx` is not set"):
-  `e2e/tests/schema-portability.contract.spec.ts` imports `PlannerSchemas`, which reaches the barrels
-  `pages/themePack/index.ts` and `shared/filter/index.ts` through `editorStateCodec`, and those
-  barrels re-export `.tsx` components. Not from
-  the test overhaul (its e2e edits import only node modules and Playwright types). The PR gate does
-  not typecheck e2e, so spec type errors reach CI unseen. Worth doing when an e2e spec needs a
-  type-level guarantee or the e2e typecheck joins a gate: import the needed frontend modules directly instead of through the
-  barrels, or set `jsx` in e2e's tsconfig.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent e2e/tsconfig.json '"jsx"' && rg -qF "@/pages/planner/schemas/PlannerSchemas'" e2e/tests/schema-portability.contract.spec.ts`
 - Authority has no single owner. The role column and the role-change and last-admin rules are
   `user`'s (`RoleChangeValidator`, ADR 173), the admin module only orchestrates, the restriction
   columns are still on `User`, and ADR 148 (user owns role and restriction) and ADR 170 (moderation
