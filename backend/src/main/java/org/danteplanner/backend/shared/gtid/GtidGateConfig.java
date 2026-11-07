@@ -98,6 +98,7 @@ public class GtidGateConfig {
         scheduler.setPoolSize(1);
         scheduler.setThreadNamePrefix("marker-source-probe-");
         scheduler.setRemoveOnCancelPolicy(true);
+        scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
         return scheduler;
     }
 

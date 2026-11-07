@@ -30,6 +30,7 @@ jobs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
       e2e: ${{ steps.filter.outputs.e2e }}
+      deploy: ${{ steps.filter.outputs.deploy }}
       consistency: ${{ steps.filter.outputs.consistency }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
@@ -47,7 +48,7 @@ jobs:
           CONSISTENCY_PATHS='^backend/src/consistency/|^backend/src/test/java/org/danteplanner/consistency/|^backend/src/test/java/org/danteplanner/backend/integration/consistency/|^backend/src/test/java/org/danteplanner/backend/integration/ConsistencyRunIT\.java$|^backend/src/main/java/org/danteplanner/backend/shared/readpath/|^backend/src/main/java/org/danteplanner/backend/shared/gtid/|^backend/src/main/java/org/danteplanner/backend/shared/config/(ReadOnlyRoutingDataSource|ReadSource[A-Za-z]*|RoutingDataSourceConfig|PoolLedger)\.java$|^backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCommandService\.java$|^backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCatalogService\.java$|^backend/src/test/java/org/danteplanner/backend/integration/OregonContext\.java$|^backend/src/test/java/org/danteplanner/backend/integration/ReplicationControl\.java$|^backend/src/test/java/org/danteplanner/backend/integration/CausalHarnessSupport\.java$|^backend/src/test/java/org/danteplanner/backend/integration/ReplicaRoutingHarnessSupport\.java$|^backend/build\.gradle\.kts$|^backend/src/test/resources/consistency/|^scripts/consistency/|^\.github/workflows/pr-gate\.yml$'
 
           if [ "$EVENT_NAME" = "push" ]; then
-            for area in backend frontend e2e; do echo "$area=true" >> "$GITHUB_OUTPUT"; done
+            for area in backend frontend e2e deploy; do echo "$area=true" >> "$GITHUB_OUTPUT"; done
             if [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ] \
               || ! CHANGED=$(git diff --name-only "$BEFORE_SHA"...HEAD); then
               echo "consistency=true" >> "$GITHUB_OUTPUT"
@@ -71,10 +72,12 @@ jobs:
           BACKEND_PATHS=$(lane_paths .github/scripts/backend-test-inputs.sh) || exit 1
           FRONTEND_PATHS=$(lane_paths .github/scripts/frontend-inputs.sh) || exit 1
           E2E_PATHS=$(lane_paths .github/scripts/e2e-inputs.sh) || exit 1
+          DEPLOY_PATHS=$(lane_paths .github/scripts/deploy-test-inputs.sh) || exit 1
 
           echo "backend=$(match "$BACKEND_PATHS")" >> "$GITHUB_OUTPUT"
           echo "frontend=$(match "$FRONTEND_PATHS")" >> "$GITHUB_OUTPUT"
           echo "e2e=$(match "$E2E_PATHS")" >> "$GITHUB_OUTPUT"
+          echo "deploy=$(match "$DEPLOY_PATHS")" >> "$GITHUB_OUTPUT"
           echo "consistency=$(match "$CONSISTENCY_PATHS")" >> "$GITHUB_OUTPUT"
 
   check-keep-list:
@@ -134,8 +137,62 @@ jobs:
           path: |
             backend/build/reports/tests/
             backend/build/test-results/
-            backend/build/reports/pitest/
           retention-days: 7
+
+  test-mutation:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+      - uses: ./.github/actions/fetch-static-checkout
+        with:
+          static-deploy-key: ${{ secrets.STATIC_DEPLOY_KEY }}
+      - name: Set up JDK 21
+        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95  # v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+      - name: Restore file permissions
+        run: chmod +x backend/gradlew
+      - name: Restore PIT history
+        if: github.event_name == 'pull_request'
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25  # v5
+        with:
+          path: backend/build/pitHistory.txt
+          key: pit-history-${{ github.sha }}
+          restore-keys: pit-history-
+      - name: BE Mutation Ratchet
+        working-directory: ./backend
+        run: ./gradlew pitestRatchet -q
+      - name: Save PIT history
+        if: github.event_name == 'push'
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25  # v5
+        with:
+          path: backend/build/pitHistory.txt
+          key: pit-history-${{ github.sha }}
+      - name: Upload mutation reports
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: backend-mutation-reports
+          path: backend/build/reports/pitest/
+          retention-days: 7
+
+  test-deploy:
+    needs: changes
+    if: needs.changes.outputs.deploy == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+      - name: Render, validate and serve the deploy manifests
+        run: .github/scripts/deploy-test.sh
 
   test-migration:
     needs: changes
@@ -473,30 +530,3 @@ jobs:
       - name: Dump backend logs
         if: failure()
         run: yarn --cwd e2e stack:logs
-
-  notify-failure:
-    needs: [check-keep-list, test-backend, test-migration, build-backend, test-frontend, build-frontend, e2e, consistency-result]
-    if: failure() && github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      actions: read
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
-        with:
-          sparse-checkout: .github/actions
-      - uses: ./.github/actions/notify-ci-failure
-        with:
-          title: CI Failed — PR Gate
-          pr-number: ${{ github.event.pull_request.number }}
-          jobs-json: |
-            [
-              {"name": "Keep List", "result": "${{ needs.check-keep-list.result }}"},
-              {"name": "BE Test", "result": "${{ needs.test-backend.result }}"},
-              {"name": "Migration", "result": "${{ needs.test-migration.result }}"},
-              {"name": "BE Build", "result": "${{ needs.build-backend.result }}"},
-              {"name": "FE Test", "result": "${{ needs.test-frontend.result }}"},
-              {"name": "FE Build", "result": "${{ needs.build-frontend.result }}"},
-              {"name": "E2E", "result": "${{ needs.e2e.result }}"},
-              {"name": "Consistency", "result": "${{ needs.consistency-result.result }}"}
-            ]

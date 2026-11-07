@@ -257,10 +257,6 @@ val pitestRatchet by tasks.registering {
     }
 }
 
-tasks.check {
-    dependsOn(pitestRatchet)
-}
-
 // Javadoc references are compiler-checked so a comment can cite an invariant test by name and
 // the citation cannot outlive its target. The `missing` group stays off: DTO components and
 // trivial getters are deliberately undocumented.

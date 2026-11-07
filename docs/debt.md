@@ -1193,8 +1193,8 @@ guards the parse but likewise skips the schema gate.
   stores are the baseline for Java; ast-grep `scan --json` plus a count file is the baseline
   for the rest. The same run is the home for the still-dormant gates: OWASP dependency-check
   and Sonar (declared, never run), and the backend patterns listed in the entry above. PIT is
-  no longer dormant: it blocks in `check` at its measured score with an up-only ratchet
-  (ADR 137). Worth doing as the first rule-into-build session, since it is what makes every
+  no longer dormant: its surviving-mutant ratchet blocks the PR Gate `test-mutation` job and
+  runs as `pitestRatchet` in the local gate (ADR 146). Worth doing as the first rule-into-build session, since it is what makes every
   later rule measurable before it is enforced.
   re-check: `rg -q 'org.owasp.dependencycheck' backend/build.gradle.kts && .claude/skills/debt-ledger/bin/debt absent .github/workflows -i -e 'sonar' -e 'dependencyCheck'`
 
@@ -1628,14 +1628,11 @@ guards the parse but likewise skips the schema gate.
   planner opens no stream). ADR 183 @comments @visibility implies the removal should end the
   stream. Streams live on every pod, so an AFTER_COMMIT listener on the committing pod is not
   enough: the removal needs a `domain_events` row, a dispatcher arm and an SSE envelope that each
-  pod's `PlannerCommentSseService.deliver` turns into one terminal `planner_deleted` event followed by
-  `complete()` on that planner's emitters (backend CLAUDE.md:15); the terminal event lets the client
-  close the EventSource instead of reconnecting into 404s (user ruling 2026-10-28). Only the
-  per-planner comment stream is affected; the user and global streams are not keyed by planner.
-  Worth doing as its own unit; the e2e spec then regains the open-stream incident.
+  pod's `PlannerCommentSseService.deliver` turns into `complete()` on that planner's emitters
+  (backend CLAUDE.md:15). Worth doing as its own unit; the e2e spec then regains the open-stream incident.
   re-check: `.claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/comment 'complete\(\)'`
-- With `write_forwarding` at `all` since 2026-10-27, the POST `/batch` handler and the top-level
-  `selectedKeywords` copy wait for seven days of zero counters (entries above) before removal.
+- After PR #322 deploys: `write_forwarding` goes probe → all (ADR 123), the POST `/batch` handler
+  and the top-level `selectedKeywords` copy wait for seven days of zero counters (entries above).
   re-check: `rg -q '@PostMapping\("/batch"\)' backend/src/main/java/org/danteplanner/backend/planner/controller/PlannerQueryController.java`
 - CI `test-frontend` died once with "Worker terminated due to reaching memory limit: JS heap out
   of memory" on PR #328 (386 of 387 files passed, zero failures) and passed on rerun of the same
@@ -1649,28 +1646,3 @@ guards the parse but likewise skips the schema gate.
   fourth such line is written: give the ledger CLI an `untracked <pathspec> <rg args>` sibling of
   `absent` with the 0/1/2 polarity and rewrite those lines to it.
   re-check: `rg -q '^  re-check:.*test -z "\$\(git ls-files' docs/debt.md`
-- During a fleet deploy the read-source probe in freshly started pods fails two consecutive
-  one-second connects to the same-region primary and flaps the breaker (76 opens on 2026-10-27
-  across three deploys, none outside them); the cause is unmeasured (startup CPU contention on
-  the node, image pull, or the drain). Worth doing when a deploy-window open lasts long enough
-  to fire the five-minute breaker rule, or when the probe's bound is next revisited: measure the
-  connect time of the probe under a deploy before changing the bound.
-  re-check: `rg -q 'PROBE_TIMEOUT = Duration.ofSeconds\(1\)' backend/src/main/java/org/danteplanner/backend/shared/config/ReadSourceProperties.java && rg -q 'PROBE_FAILURE_THRESHOLD = 2' backend/src/main/java/org/danteplanner/backend/shared/config/ReadSourceProperties.java`
-- `logs-query.sh` reads every Loki result as a stream: a metric (matrix) result prints the
-  timestamp as seconds (`1970-01-01…`) and drops the labels, and a LogQL syntax error surfaces as
-  `jq: parse error: Invalid numeric literal` because Loki's error body is piped into jq. A metric
-  query through it looks like it succeeded. Worth doing when a Loki metric query is next needed
-  from this box: branch on `resultType` and print Loki's error text on a non-200.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent scripts/ops/access/logs-query.sh 'resultType'`
-- The service runs on an AWS fleet (k3s with embedded etcd on a pet CP node, ArgoCD, app ASG,
-  RDS MySQL, Redis) in two regions, which costs more and needs more operation than the traffic
-  requires. The target is a rewrite onto Cloudflare: a TypeScript backend on Workers that shares
-  the frontend's Zod schemas, Neon Postgres through Hyperdrive (or D1 if the data fits its 10 GB
-  per-database limit), Durable Objects for per-planner serialization and view counts, and R2 for
-  files. Cloudflare has no VM with a persistent disk, so the JVM backend, MySQL, Redis and the k3s
-  CP cannot move as they are, and the fleet terraform, `deploy/` and ArgoCD go away with no
-  successor. Kubernetes practice moves to a separate personal cluster. Unchecked: prod DB size,
-  the current monthly AWS cost, Neon's nearest region to Korea. Worth doing when Spring practice
-  is no longer a reason to keep this backend: move route by route behind a Worker, with one
-  planned cutover for the database.
-  re-check: `test -d terraform/modules/fleet`
