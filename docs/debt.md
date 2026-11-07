@@ -1624,12 +1624,15 @@ guards the parse but likewise skips the schema gate.
 - After PR #322 deploys: `write_forwarding` goes probe → all (ADR 123), the POST `/batch` handler
   and the top-level `selectedKeywords` copy wait for seven days of zero counters (entries above).
   re-check: `rg -q '@PostMapping\("/batch"\)' backend/src/main/java/org/danteplanner/backend/planner/controller/PlannerQueryController.java`
-- CI `test-frontend` died once with "Worker terminated due to reaching memory limit: JS heap out
-  of memory" on PR #328 (386 of 387 files passed, zero failures) and passed on rerun of the same
-  commit. Worth doing on the second occurrence:
-  find the file that was running from the log and either split it or raise the worker heap
-  (`pr-gate.yml` NODE_OPTIONS) with the measurement that justifies it.
-  re-check: `rg -qF '"test:coverage": "NODE_OPTIONS=--max-old-space-size=4096 vitest run --coverage"' frontend/package.json`
+- CI `test-frontend` died twice with `ERR_WORKER_OUT_OF_MEMORY` ("Worker terminated due to
+  reaching memory limit: JS heap out of memory"): PR #328 attempt 1 and PR #373 run 42374442549.
+  Both times `src/pages/ego/__tests__/EGODetailPage.parity.test.tsx` was running in its own
+  worker thread, and only on slow runners. The file normally peaks near 134 MB, so something
+  grows to the 4096 MB limit. It does not reproduce locally. A larger heap and a split of the
+  file are ruled out. The FE Test step now writes a heap snapshot near the limit and uploads it as
+  the `fe-heap-snapshots` artifact on failure (7 days). Worth doing when a snapshot artifact
+  exists: read it.
+  re-check: `rg -qF 'FE_TEST_NODE_DIAG: --heapsnapshot-near-heap-limit=1' .github/workflows/pr-gate.yml`
 - Three re-check lines assert that no tracked file name matches a pattern through
   `test -z "$(git ls-files … | rg -i …)"`, which reads HOLDS when `git ls-files` or `rg` fails or
   the path is gone, the same blind spot `absent` closed for file contents. Worth doing when a
