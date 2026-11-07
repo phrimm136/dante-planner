@@ -1,6 +1,5 @@
-# One named tunnel per region. The tunnel dials out from the cluster, which is what lets the
-# fleet stop accepting public inbound entirely once the accelerator and its security-group CIDR
-# rules are torn down.
+# One named tunnel per region, the only entry plane. The tunnel dials out from the cluster, so
+# the fleet needs no public inbound for it.
 
 resource "cloudflare_zero_trust_tunnel_cloudflared" "region" {
   for_each = var.regions

@@ -37,10 +37,9 @@ variable "regions" {
   description = <<-EOT
     One entry per region, each with the origin cloudflared forwards to.
 
-    The origin is the ingress node's Traefik listener, not the backend Service: the tunnel
-    replaces the accelerator, not the ingress. Traefik terminates TLS with the origin-tls
-    certificate, which is why the service is https and why origin_server_name below must match
-    that certificate.
+    The origin is the ingress node's Traefik listener, not the backend Service. Traefik
+    terminates TLS with the origin-tls certificate, which is why the service is https and why
+    origin_server_name below must match that certificate.
 
     Traefik is a hostNetwork DaemonSet with no Service, so nothing in cluster DNS resolves to it;
     deploy/base/cloudflared.yaml shares that host network and reaches it on the loopback.

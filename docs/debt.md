@@ -306,10 +306,10 @@ asset pipeline.
   re-check: `rg -qF 'jq -r .password' docs/runbooks/rds-migration.md && rg -q 'Current head is .V045.' docs/runbooks/rds-migration.md`
 - 2026-08-14 — `runbooks/schema-decomposition-migration.md` contradicts itself and the fleet.
   Its quick-reference table prescribes `argocd app set … --sync-policy none`, which the body
-  of the same runbook correctly rules out because this fleet runs ArgoCD in CORE mode; it
+  of the same runbook correctly rules out because this fleet runs ArgoCD in CORE mode; and it
   omits `.github/workflows/window-schema-decomposition.yml`, which already automates steps the
-  runbook gives by hand; and it points at `scripts/ops/lib/alarms.sh`, which does not exist.
-  re-check: `rg -q 'sync-policy none' docs/runbooks/schema-decomposition-migration.md && .claude/skills/debt-ledger/bin/debt absent docs/runbooks/schema-decomposition-migration.md 'window-schema-decomposition' && rg -qF 'scripts/ops/lib/alarms.sh' docs/runbooks/schema-decomposition-migration.md && test ! -e scripts/ops/lib/alarms.sh`
+  runbook gives by hand.
+  re-check: `rg -q 'sync-policy none' docs/runbooks/schema-decomposition-migration.md && .claude/skills/debt-ledger/bin/debt absent docs/runbooks/schema-decomposition-migration.md 'window-schema-decomposition'`
 - 2026-08-14 — `runbooks/environment-setup.md` misstates the auth contract. It gives the OAuth
   callback as `/auth/callback/google` at seven sites against the real
   `/api/auth/google/callback`; it lists `JWT_SECRET`, which nothing in the backend or the
@@ -715,8 +715,8 @@ guards the parse but likewise skips the schema gate.
   drift". (3) Account: the workflow writes `backend.hcl` as
   `danteplanner-tfstate-${AWS_ACCOUNT_ID}`, which since the account cutover resolves to the
   prod bucket, so the stack list has to describe prod and only prod. Applied here:
-  `global-accelerator` dropped from `STACKS` because it lives in the management account and
-  holds the rollback addresses for the bake, and `cloudflare` added, which needed workspace
+  `global-accelerator` dropped from `STACKS` because it lived in the management account (the
+  stack is now deleted), and `cloudflare` added, which needed workspace
   support in `scripts/ops/terraform-drift-check.sh` — that stack keeps a `prod-fleet`
   workspace alongside `default`, and planning without selecting reports the whole stack as
   absent. Re-enabling the cron needs the five secrets populated with prod values and the

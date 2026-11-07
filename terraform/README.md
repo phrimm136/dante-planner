@@ -1,6 +1,6 @@
 # Terraform stacks
 
-Eleven root modules, one shared child module (`modules/fleet`). Each stack owns a blast radius: a
+Ten root modules, one shared child module (`modules/fleet`). Each stack owns a blast radius: a
 mistake in one cannot destroy another's resources, and each applies independently.
 
 Four of them are **account-level** and run once per account rather than once: `state-backend` and
@@ -25,7 +25,6 @@ several real dependencies are not of that shape.
 | `oregon` | The primary k3s fleet (`modules/fleet`), peered to the RDS VPC | `ingress_allowed_cidrs`, `rds_vpc_id`, `aws_account_id` |
 | `seoul` | The secondary fleet, the cross-region RDS read replica, cross-region peering | `rds_vpc_id`, `ingress_allowed_cidrs`, `aws_account_id` |
 | `cloudflare` | Tunnels, load balancer, pools, health monitor | `cloudflare_api_token`, `account_id`, `zone_id` |
-| `global-accelerator` | The AWS Global Accelerator entry plane | `aws_account_id` |
 
 ## State
 
@@ -71,8 +70,6 @@ iam-bootstrap
    └─► cloudflare
               │
             seoul                            (reads oregon + rds state)
-              │
-      global-accelerator                     (reads oregon state)
 ```
 
 `secrets`, `oregon` and `cloudflare` are independent of one another and can be applied in any order,
@@ -136,7 +133,7 @@ Then, per environment:
 7. Apply `secrets`, and run the `scripts/ops/provision/` scripts that seed values.
 8. Apply `rds`, `oregon` and `cloudflare`.
 9. Run `cloudflare-tunnel-secrets.sh` now that the tunnel tokens exist.
-10. Apply `seoul`, then `global-accelerator`.
+10. Apply `seoul`.
 
 This provisions infrastructure, not a running system: a fresh `rds` is an empty schema. Data arrives
 from a dump, and the schema from Flyway on first pod boot.

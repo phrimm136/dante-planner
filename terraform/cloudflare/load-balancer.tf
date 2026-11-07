@@ -1,5 +1,5 @@
-# The load balancer is the front door: attaching it to the API hostname IS the cutover, and
-# detaching it is the rollback primitive for as long as the accelerator is still standing.
+# The load balancer is the front door: attaching it to the API hostname puts it in service, and
+# detaching it takes the API off the public internet; no other front door stands behind it.
 
 moved {
   from = cloudflare_load_balancer_monitor.through_tunnel

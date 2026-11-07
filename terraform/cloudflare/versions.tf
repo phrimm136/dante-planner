@@ -23,9 +23,9 @@ terraform {
   }
 }
 
-# The edge stack is global and applied once, like the accelerator stack it replaces:
-# the tunnels and the load balancer are the two-region front door and must survive
-# either region's rebuild, so they live outside the per-region fleet stacks.
+# The edge stack is global and applied once: the tunnels and the load balancer are the
+# two-region front door and must survive either region's rebuild, so they live outside the
+# per-region fleet stacks.
 provider "cloudflare" {
   api_token = var.cloudflare_api_token
 }
