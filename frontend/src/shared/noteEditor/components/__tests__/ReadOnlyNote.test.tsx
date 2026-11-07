@@ -121,6 +121,7 @@ function normalizeClass(value: string): string {
 function normalize(node: Node): unknown {
   if (node.nodeType === Node.TEXT_NODE) return node.textContent
   if (!(node instanceof Element)) return null
+  if (node.matches('img.ProseMirror-separator')) return null
   const attributes: Record<string, string> = {}
   for (const { name, value } of Array.from(node.attributes)) {
     if (IGNORED_ATTRIBUTES.has(name) || name.startsWith('aria-') || name.startsWith('data-pm')) {

@@ -51,14 +51,15 @@ export function FloorGiftSelectorPane({
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState('')
   const [sortMode, setSortMode] = useState<SortMode>('tier-first')
-
-  useEffect(() => {
+  const [filtersOpen, setFiltersOpen] = useState(open)
+  if (filtersOpen !== open) {
+    setFiltersOpen(open)
     if (!open) {
       setSelectedKeywords(new Set())
       setSearchQuery('')
       setSortMode('tier-first')
     }
-  }, [open])
+  }
 
   const gifts: EGOGiftEntity[] = (() => {
     return Object.entries(spec).map(([id, entry]) => toEGOGiftEntity(id, entry, i18n[id] || id))

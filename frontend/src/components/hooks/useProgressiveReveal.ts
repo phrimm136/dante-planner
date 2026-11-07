@@ -28,11 +28,13 @@ export interface ProgressiveCountOptions {
 
 export function useProgressiveCount({ total, step, initial }: ProgressiveCountOptions): number {
   const [count, setCount] = useState(initial)
+  const [countedFor, setCountedFor] = useState({ total, initial })
 
   // Keyed on the size, never on the items' identity: callers derive their array during render,
-  useEffect(() => {
+  if (countedFor.total !== total || countedFor.initial !== initial) {
+    setCountedFor({ total, initial })
     setCount(initial)
-  }, [total, initial])
+  }
 
   useEffect(() => {
     if (count < total) {

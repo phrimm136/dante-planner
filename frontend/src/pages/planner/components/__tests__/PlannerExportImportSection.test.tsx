@@ -51,9 +51,10 @@ const UNKNOWN_IDENTITY_IMPORT: SyncVerdict = {
 }
 
 const validationMocks = vi.hoisted(() => ({
-  validatePlannerForSync: vi.fn(
-    (planner: unknown): SyncVerdict => ({ ok: true, value: planner as ValidatedPlanner }),
-  ),
+  validatePlannerForSync: vi.fn((planner: unknown): SyncVerdict => ({
+    ok: true,
+    value: planner as ValidatedPlanner,
+  })),
 }))
 
 vi.mock('../../lib/validation/plannerValidation', async (importOriginal) => ({

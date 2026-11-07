@@ -1,7 +1,7 @@
 import i18n from '@/lib/i18n'
 
 interface TitleSyncRouter {
-  invalidate: () => Promise<unknown>
+  invalidate: (opts: { sync: true }) => Promise<unknown>
   state: { matches: ReadonlyArray<{ meta?: unknown }> }
 }
 
@@ -31,7 +31,7 @@ export function titleFromMatches(matches: ReadonlyArray<{ meta?: unknown }>): st
  */
 export function syncTitleOnLanguageChange(router: TitleSyncRouter): void {
   i18n.on('languageChanged', async () => {
-    await router.invalidate()
+    await router.invalidate({ sync: true })
 
     const title = titleFromMatches(router.state.matches)
     if (title !== null) {
