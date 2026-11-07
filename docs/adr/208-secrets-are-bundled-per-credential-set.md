@@ -24,8 +24,8 @@ epic: none · pr: none
   REJECTED: leave as is — the saving is small, but every new secret would have copied the
   one-value shape and the cost grows with the set.
   INVARIANT: the staging account holds the same layout as prod, because the release rehearsal
-  proves prod's secrets machinery on it — the one shared `secret_names` default in
-  terraform/secrets and the staging-e2e writers that seed the same bundles.
+  proves prod's secrets machinery on it — the secrets stack's one shared `secret_names`
+  default and the staging seeding script that writes the same bundles.
   INVARIANT: each container has at most one writer script — unenforced; the provision scripts
   are listed by hand.
   NON-GOAL: read-modify-write in the provision scripts — a bundle with one writer keeps the
