@@ -85,25 +85,7 @@ updates:
           - "minor"
           - "patch"
 
-  # 5. Claude Code hooks: tsx/esbuild toolchain the hooks run on
-  - package-ecosystem: "npm"
-    directory: "/.claude/hooks"
-    schedule:
-      interval: "weekly"
-    labels:
-      - "tooling"
-      - "dependencies"
-    cooldown:
-      default-days: 7
-    groups:
-      hooks-deps:
-        patterns:
-          - "*"
-        update-types:
-          - "minor"
-          - "patch"
-
-  # 6. Backend container base images
+  # 5. Backend container base images
   - package-ecosystem: "docker"
     directory: "/backend"
     schedule:
@@ -113,8 +95,20 @@ updates:
     labels:
       - "backend"
       - "dependencies"
+    ignore:
+      - dependency-name: "gradle"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eclipse-temurin"
+        update-types: ["version-update:semver-major"]
+    groups:
+      backend-images:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
-  # 7. Terraform providers, one stack per directory
+  # 6. Terraform providers, one stack per directory
   - package-ecosystem: "terraform"
     directories:
       - "/terraform/*"
@@ -132,3 +126,9 @@ updates:
         update-types:
           - "minor"
           - "patch"
+      terraform-majors:
+        group-by: dependency-name
+        patterns:
+          - "*"
+        update-types:
+          - "major"
