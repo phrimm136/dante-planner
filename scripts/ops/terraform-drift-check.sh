@@ -14,8 +14,6 @@ set -uo pipefail
 REPO_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 GH_REPO="phrimm136/dante-planner"
 ISSUE_LABEL="terraform-drift"
-# global-accelerator is deliberately absent: it lives in the management account, so planning it
-# with these credentials and state bucket reports its resources as destroyable.
 STACKS=(oregon seoul rds secrets cloudflare)
 
 # Every stack names its var-file. A stack with no entry is a configuration error rather than a

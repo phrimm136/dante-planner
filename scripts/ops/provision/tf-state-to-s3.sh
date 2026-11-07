@@ -6,8 +6,8 @@
 # to be appliable with nothing but credentials.
 #
 # Order matters for the stacks that read each other. `init` does not evaluate data sources, so
-# migration order is free, but a `plan` on seoul or global-accelerator resolves oregon/rds
-# state over S3 — so those two go last and only make sense once their upstreams have landed.
+# migration order is free, but a `plan` on seoul resolves oregon/rds state over S3 — so it goes
+# last and only makes sense once its upstreams have landed.
 #
 # terraform prompts before each copy. That is deliberate: answer yes per stack, having read
 # what it says it will move.
@@ -47,7 +47,7 @@ mkdir -p "$backup" "$plans"
 chmod 700 "$backup"
 echo "plan output: $plans"
 
-for stack in rds oregon secrets cloudflare seoul global-accelerator; do
+for stack in rds oregon secrets cloudflare seoul; do
   echo
   echo "=== $stack ==="
 

@@ -9,9 +9,9 @@
 # container to attach the cross-region replica — same philosophy as main.tf's
 # imported prod secrets ("only the container is managed, never a secret_version").
 #
-# Value today = a self-signed test pair (unblocks routing + GA health, which don't
-# validate the chain). For real Cloudflare Full (strict): create an Origin
-# Certificate (dashboard → SSL/TLS → Origin Server), put-secret-value the new
+# Value today = a self-signed test pair (unblocks routing, which doesn't validate the
+# chain). For real Cloudflare Full (strict): create an Origin Certificate
+# (dashboard → SSL/TLS → Origin Server), put-secret-value the new
 # cert+key into danteplanner/origin-tls, revoke the old cert. Terraform (no version)
 # does not fight that update. JSON fields tls_crt/tls_key match the ExternalSecret.
 # Gated for the same reason as the datasource user: an environment with no edge certificate
