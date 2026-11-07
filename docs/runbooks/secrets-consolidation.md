@@ -238,7 +238,7 @@ synced ap-northeast-2 seoul
 
 The gate is the same, now proving the narrowed grants.
 
-**Staging** has no standing clusters: its proof is one rehearsal run on `main` after the merge
+**Staging** has no standing clusters. When the rehearsal is set up, its proof is one run on `main` after the merge
 (`Staging rehearsal (full 1:1 e2e)`, dispatched from the Actions tab). It applies
 `terraform/secrets` with the SSM override, seeds the bundles through `staging-e2e-secrets.sh`,
 and runs the e2e suites, whose auth setup reads `danteplanner/jwt/material`. Gate: the run passes.
@@ -246,11 +246,13 @@ and runs the e2e suites, whose auth setup reads `danteplanner/jwt/material`. Gat
 ## The coexistence window and its removal condition
 
 Between the merge and step 4, the old and new containers both exist with identical values; nothing
-reads the old ones. The window closes when **both** hold:
+reads the old ones. The window closes when every ExternalSecret in both prod clusters reports `SecretSynced` against
+the bundles after the region stacks applied (step 3's second check).
 
-- every ExternalSecret in both prod clusters reports `SecretSynced` against the bundles after the
-  region stacks applied (step 3's second check), and
-- `staging-rehearsal.yml` has passed once on `main` with the new layout.
+The staging rehearsal is not part of the condition for this cut-over (operator ruling,
+2026-11-07): it had never run, and the staging account held none of the SSM tfvars it reads, so it
+could not prove anything here. Its first real run, whenever it happens, is the first proof of
+`e2e/src/auth.ts` against `danteplanner/jwt/material`.
 
 During the window, `scripts/ops/provision/copy-secrets-across-accounts.sh` copies every
 `danteplanner/*` name by prefix, old and new alike. Containers scheduled for deletion in step 4 are
