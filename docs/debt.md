@@ -1628,3 +1628,48 @@ guards the parse but likewise skips the schema gate.
   fourth such line is written: give the ledger CLI an `untracked <pathspec> <rg args>` sibling of
   `absent` with the 0/1/2 polarity and rewrite those lines to it.
   re-check: `rg -q '^  re-check:.*test -z "\$\(git ls-files' docs/debt.md`
+- `cookie.secure` is an operator switch in prod: `application.properties:107` binds it to
+  `${COOKIE_SECURE:true}`, and an environment variable outranks `application-prod.properties`, so a
+  `COOKIE_SECURE=false` key in the runtime-config secret drops Secure from every cookie
+  `CookieUtils` writes (auth, device id, CSRF), while `GtidCookie` hard-codes `secure(true)`.
+  Deleting the flag and always writing Secure removes the state; `http://localhost` is a secure
+  context, but whether Playwright's request context sends Secure cookies over it is unchecked.
+  Worth doing before the next cookie change, or when anyone besides the owner can write the
+  runtime-config secret.
+  re-check: `rg -qF 'cookie.secure=${COOKIE_SECURE:true}' backend/src/main/resources/application.properties`
+- Error Prone 2.51 left 9 new warnings with no bug behind them: 8 `ReferenceEquality` sites that
+  mean identity (`ReadSourcesConfig.java:185,219`, `RedisConnectionConfig.java:169`, and five test
+  sites) and one `PatternMatchingInstanceof` in `AuthController.java:148`. The build promotes only
+  three checks to errors and has no warning baseline, so a compiler bump adds warnings silently.
+  Worth doing with a per-check warning ratchet: suppress the identity sites with a reason and use
+  a pattern variable in `AuthController`.
+  re-check: `rg -qF '!(principal instanceof Long)' backend/src/main/java/org/danteplanner/backend/auth/controller/AuthController.java`
+- `com.redis:testcontainers-redis` is pinned to 3.0.1 (`build.gradle.kts:67`) because Boot 4.1.2
+  (and 4.2.0-RC2) manage 2.2.4, whose POM imports the Boot 3.4.2 BOM and with it a vulnerable
+  Artemis BOM. Worth removing when spring-boot-dependencies manages
+  `testcontainers-redis-module.version` at 3.0.1 or later.
+  re-check: `rg -qF 'dependency("com.redis:testcontainers-redis:3.0.1")' backend/build.gradle.kts`
+- The backend image builds with the builder image's own `gradle`, not the wrapper: the Dockerfile
+  copies only the build scripts, so the shipped jar is built by `gradle:9.8.1` while CI tests with
+  the wrapper's 9.8.2, and two Dependabot ecosystems move the two versions on separate cooldowns.
+  Copying `gradlew` and `gradle/wrapper` into the builder stage leaves one version source. Worth
+  doing when the image and the wrapper differ by a minor version, or before the next Gradle minor.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent backend/Dockerfile 'gradlew'`
+- Dependabot's 72611673 moved the runtime and `rds-certs` base images from
+  `eclipse-temurin:21.0.13_9-jre-alpine-3.24` to `21-jre-alpine-3.21`: an older Alpine release, and
+  a tag that no longer names the JDK patch level. Worth doing now: pin the newest
+  `21.0.x_y-jre-alpine-3.2x` tag by digest and find why the docker updater chose 3.21 before it
+  repeats the move.
+  re-check: `rg -q 'eclipse-temurin:21-jre-alpine-3\.21' backend/Dockerfile`
+- The Identity parity test "renders the stats panel at a lowered level" sends
+  `fireEvent.keyDown` on the level slider before `waitForI18nSettled`, the wait 1edef3cb added
+  before every tier click to avoid a synchronous `act()` re-render of a pending name plate. The
+  snapshot cannot come out wrong, but the livelock window is open. Worth doing the next time the
+  file is touched: move the wait before the key press.
+  re-check: `rg -qUP 'at a lowered level(?:(?!waitForI18nSettled)[\s\S])*?fireEvent\.keyDown' frontend/src/pages/identity/__tests__/IdentityDetailPage.parity.test.tsx`
+- `.github/workflows/window-schema-decomposition.yml` and its only helper
+  `.github/scripts/window-lib.sh` were never run (the workflow has zero runs; the V052 window ran
+  by hand) but keep taking edits from repo-wide sweeps. Worth deleting when the next sweep would
+  touch them and no stop-the-world migration is planned; the runbook entry above then loses its
+  "omits the workflow" clause.
+  re-check: `test -f .github/workflows/window-schema-decomposition.yml`
