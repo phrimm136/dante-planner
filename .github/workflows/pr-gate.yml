@@ -420,30 +420,39 @@ jobs:
           cache: 'yarn'
           cache-dependency-path: frontend/yarn.lock
       - name: FE Install
+        id: fe-install
         working-directory: ./frontend
         run: yarn install --frozen-lockfile
       - name: FE Typecheck
+        if: ${{ !cancelled() && steps.fe-install.outcome == 'success' }}
         working-directory: ./frontend
         run: yarn typecheck
       - name: FE Test
+        if: ${{ !cancelled() && steps.fe-install.outcome == 'success' }}
         working-directory: ./frontend
         run: yarn test:coverage
       - name: FE Lint
+        if: ${{ !cancelled() && steps.fe-install.outcome == 'success' }}
         working-directory: ./frontend
         run: yarn lint
       - name: FE Validation Lint
+        if: ${{ !cancelled() && steps.fe-install.outcome == 'success' }}
         working-directory: ./frontend
         run: yarn lint:validation
       - name: FE False Positive Scan
+        if: ${{ !cancelled() && steps.fe-install.outcome == 'success' }}
         working-directory: ./frontend
         run: yarn check:fp
       - name: FE Rule Tests
+        if: ${{ !cancelled() && steps.fe-install.outcome == 'success' }}
         working-directory: ./frontend
         run: yarn check:rules
       - name: FE Compiler Bailouts
+        if: ${{ !cancelled() && steps.fe-install.outcome == 'success' }}
         working-directory: ./frontend
         run: yarn check:compiler-bailouts
       - name: FE Format Check
+        if: ${{ !cancelled() && steps.fe-install.outcome == 'success' }}
         working-directory: ./frontend
         run: yarn fmt:check
 
