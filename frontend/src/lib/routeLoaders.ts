@@ -116,24 +116,6 @@ export async function loadPlannerTitleRoute({ params }: { params: { id: string }
   return { title }
 }
 
-export async function loadIdentityName({ params }: { params: { id: string } }) {
-  const module = await import(`@static/i18n/${i18n.language}/identity/${params.id}.json`)
-  const name = (module.default as { name?: string }).name?.replace(/\n/g, ' ') ?? params.id
-  return { name }
-}
-
-export async function loadEgoName({ params }: { params: { id: string } }) {
-  const module = await import(`@static/i18n/${i18n.language}/ego/${params.id}.json`)
-  const name = (module.default as { name?: string }).name?.replace(/\n/g, ' ') ?? params.id
-  return { name }
-}
-
-export async function loadEgoGiftName({ params }: { params: { id: string } }) {
-  const module = await import(`@static/i18n/${i18n.language}/egoGift/${params.id}.json`)
-  const name = (module.default as { name?: string }).name ?? params.id
-  return { name }
-}
-
 export async function loadThemePackName({ params }: { params: { id: string } }) {
   const module = await import(`@static/i18n/${i18n.language}/themePack.json`)
   const name = (module.default as Record<string, { name?: string }>)[params.id]?.name ?? params.id
@@ -167,18 +149,6 @@ export async function loadSinnerEventName({ params }: { params: { id: string } }
   return battleGroupName(module, params.id)
 }
 
-export async function loadAbEventTitle({ params }: { params: { id: string } }) {
-  try {
-    const module = await import(`@static/i18n/${i18n.language}/abEvent/${params.id}.json`)
-    const data = module.default as { desc?: string }
-    const raw = (data.desc ?? '').replace(/\n/g, ' ')
-    const snippet = raw.length > 20 ? `${raw.slice(0, 20)}...` : raw
-    return { title: snippet || params.id }
-  } catch {
-    return { title: params.id }
-  }
-}
-
 export async function loadPublishedPlannerRoute(context: {
   params: { id: string }
   abortController: AbortController
@@ -205,7 +175,7 @@ export async function loadIdentityDetail(context: { params: { id: string } }) {
     (m) => m.IDENTITY_DETAIL,
   )
   const [loaded] = await Promise.all([
-    loadIdentityName(context),
+    import('./entityNameLoaders').then((m) => m.loadIdentityName(context)),
     ensureSpecs([
       ensureDetailSpec(identityDetail, context.params.id),
       keywordListSpec(),
@@ -222,7 +192,7 @@ export async function loadEgoList() {
 export async function loadEgoDetail(context: { params: { id: string } }) {
   const egoDetail = import('@/pages/ego/hooks/useEGODetailData').then((m) => m.EGO_DETAIL)
   const [loaded] = await Promise.all([
-    loadEgoName(context),
+    import('./entityNameLoaders').then((m) => m.loadEgoName(context)),
     ensureSpecs([
       ensureDetailSpec(egoDetail, context.params.id),
       keywordListSpec(),
@@ -241,7 +211,7 @@ export async function loadEgoGiftDetail(context: { params: { id: string } }) {
     (m) => m.EGO_GIFT_DETAIL,
   )
   const [loaded] = await Promise.all([
-    loadEgoGiftName(context),
+    import('./entityNameLoaders').then((m) => m.loadEgoGiftName(context)),
     ensureSpecs([
       ensureDetailSpec(egoGiftDetail, context.params.id),
       keywordListSpec(),
@@ -275,7 +245,7 @@ export async function loadAbEventDetail(context: { params: { id: string } }) {
     (m) => m.AB_EVENT_DETAIL,
   )
   const [loaded] = await Promise.all([
-    loadAbEventTitle(context),
+    import('./entityNameLoaders').then((m) => m.loadAbEventTitle(context)),
     ensureSpecs([
       ensureDetailSpec(abEventDetail, context.params.id),
       abEventListSpec(),
