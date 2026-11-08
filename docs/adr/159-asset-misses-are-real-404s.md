@@ -23,7 +23,19 @@ epic: none · pr: none
   that the plugin is registered and that chunk, entry and asset file names share the directory
   it writes `404.html` into.
   NON-GOAL: the one-year immutable header on `/a/*` stays.
-- @frontend — A tab whose lazy chunk fails to load reloads itself from a `vite:preloadError`
+- @frontend @errors — The error screens show a short code under the message in production:
+  `CHUNK_LOAD`, or `UNKNOWN · <error.name>`. A chunk failure is recognised by a symbol the
+  `vite:preloadError` listener sets on the event's payload, which is the same object the route
+  receives; browsers word the rejection differently (`Failed to fetch dynamically imported
+  module`, `error loading dynamically imported module`), so its text cannot classify it. On
+  `CHUNK_LOAD` the retry button reloads the page instead of resetting the router, which would
+  re-run the same failed import.
+  REJECTED: matching the rejection message — differs per browser and WebKit's is unmeasured.
+  NON-GOAL: no client error reporting service; the code exists so a user's screenshot names the
+  failure.
+
+## Superseded
+- @frontend → 212 — A tab whose lazy chunk fails to load reloads itself from a `vite:preloadError`
   listener, unless the current document began within 10 seconds of the listener's last reload
   (it is that reload's result) or sessionStorage cannot hold the timestamp; those fall through to
   the route error screen. Measuring from the document's start rather than the failure keeps a
@@ -43,16 +55,6 @@ epic: none · pr: none
   INVARIANT: the listener never calls `preventDefault()` — a prevented event makes the import
   resolve to `undefined`, replacing the chunk error with an unrelated `TypeError`; the
   stale-chunk e2e reaches the error screen with `CHUNK_LOAD`.
-- @frontend @errors — The error screens show a short code under the message in production:
-  `CHUNK_LOAD`, or `UNKNOWN · <error.name>`. A chunk failure is recognised by a symbol the
-  `vite:preloadError` listener sets on the event's payload, which is the same object the route
-  receives; browsers word the rejection differently (`Failed to fetch dynamically imported
-  module`, `error loading dynamically imported module`), so its text cannot classify it. On
-  `CHUNK_LOAD` the retry button reloads the page instead of resetting the router, which would
-  re-run the same failed import.
-  REJECTED: matching the rejection message — differs per browser and WebKit's is unmeasured.
-  NON-GOAL: no client error reporting service; the code exists so a user's screenshot names the
-  failure.
 
 ## Takeaway
 - takeaway: a path-scoped cache header applies to whatever the server answers on that path,

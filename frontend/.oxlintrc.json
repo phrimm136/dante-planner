@@ -83,6 +83,9 @@
     "no-restricted-imports": [
       "error",
       {
+        "paths": [
+          { "name": "@tanstack/react-router", "importNames": ["lazyRouteComponent"], "message": "Use lazyRoute from @/lib/lazyRoute: lazyRouteComponent reloads the page itself, and the vite:preloadError listener owns the reload." }
+        ],
         "patterns": [
           { "group": ["@/pages/*/**"], "message": "Import a page slice via its public API (@/pages/<name>), not a deep internal path." },
           { "group": ["@/shared/*/**", "!@/shared/noteEditor/**"], "message": "Import a shared concept via its public API (@/shared/<name>), not a deep internal path." },
@@ -98,6 +101,9 @@
         "no-restricted-imports": [
           "error",
           {
+            "paths": [
+              { "name": "@tanstack/react-router", "importNames": ["lazyRouteComponent"], "message": "Use lazyRoute from @/lib/lazyRoute: lazyRouteComponent reloads the page itself, and the vite:preloadError listener owns the reload." }
+            ],
             "patterns": [
               { "group": ["@/pages/*/**"], "message": "Import a page slice via its public API (@/pages/<name>), not a deep internal path." },
               { "group": ["@/shared/*/**", "!@/shared/noteEditor/**"], "message": "Import a shared concept via its public API (@/shared/<name>), not a deep internal path." },
@@ -114,6 +120,9 @@
         "no-restricted-imports": [
           "error",
           {
+            "paths": [
+              { "name": "@tanstack/react-router", "importNames": ["lazyRouteComponent"], "message": "Use lazyRoute from @/lib/lazyRoute: lazyRouteComponent reloads the page itself, and the vite:preloadError listener owns the reload." }
+            ],
             "patterns": [
               { "group": ["@/pages/*", "@/pages/*/**"], "message": "This layer is a dependency sink: it must not import page slices." },
               { "group": ["@/shared/*", "@/shared/*/**"], "message": "lib is the domain-free sink: it must not import shared concepts." },
@@ -129,6 +138,9 @@
         "no-restricted-imports": [
           "error",
           {
+            "paths": [
+              { "name": "@tanstack/react-router", "importNames": ["lazyRouteComponent"], "message": "Use lazyRoute from @/lib/lazyRoute: lazyRouteComponent reloads the page itself, and the vite:preloadError listener owns the reload." }
+            ],
             "patterns": [
               { "group": ["@/pages/*/**"], "message": "Import a page slice via its public API (@/pages/<name>), not a deep internal path." },
               { "group": ["@/shared/*/**", "!@/shared/noteEditor/**"], "message": "Import a shared concept via its public API (@/shared/<name>), not a deep internal path." }
@@ -140,7 +152,14 @@
     {
       "files": ["src/lib/router.tsx", "src/lib/routeLoaders.ts"],
       "rules": {
-        "no-restricted-imports": "off"
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              { "name": "@tanstack/react-router", "importNames": ["lazyRouteComponent"], "message": "Use lazyRoute from @/lib/lazyRoute: lazyRouteComponent reloads the page itself, and the vite:preloadError listener owns the reload." }
+            ]
+          }
+        ]
       }
     },
     {
@@ -149,6 +168,9 @@
         "no-restricted-imports": [
           "error",
           {
+            "paths": [
+              { "name": "@tanstack/react-router", "importNames": ["lazyRouteComponent"], "message": "Use lazyRoute from @/lib/lazyRoute: lazyRouteComponent reloads the page itself, and the vite:preloadError listener owns the reload." }
+            ],
             "patterns": [
               { "group": ["@/pages/*/**"], "message": "Import a page slice via its public API (@/pages/<name>), not a deep internal path." },
               { "group": ["@/shared/*/**", "!@/shared/noteEditor/**"], "message": "Import a shared concept via its public API (@/shared/<name>), not a deep internal path." },
@@ -206,7 +228,14 @@
     ,{
       "files": ["src/shared/sanitize/lib/*.ts"],
       "rules": {
-        "no-restricted-imports": "off"
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              { "name": "@tanstack/react-router", "importNames": ["lazyRouteComponent"], "message": "Use lazyRoute from @/lib/lazyRoute: lazyRouteComponent reloads the page itself, and the vite:preloadError listener owns the reload." }
+            ]
+          }
+        ]
       }
     }
   ]

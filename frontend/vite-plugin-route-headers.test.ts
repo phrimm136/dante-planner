@@ -18,7 +18,8 @@ import {
 } from './vite-plugin-route-headers'
 
 const ROUTER_SOURCE = `
-import { createRootRoute, createRoute, lazyRouteComponent } from '@tanstack/react-router'
+import { createRootRoute, createRoute } from '@tanstack/react-router'
+import { lazyRoute } from '@/lib/lazyRoute'
 import { loadDetail } from '@/lib/routeLoaders'
 
 const rootRoute = createRootRoute({ component: RootLayout })
@@ -26,7 +27,7 @@ const rootRoute = createRootRoute({ component: RootLayout })
 const listRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/gesellschaft',
-  component: lazyRouteComponent(() => import('@/pages/planner/ListPage')),
+  component: lazyRoute(() => import('@/pages/planner/ListPage')),
   pendingComponent: () => (
     <div className="page">
       <Skeleton />
@@ -37,7 +38,7 @@ const listRoute = createRoute({
 const detailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/gesellschaft/$id',
-  component: lazyRouteComponent(() => import('@/pages/planner/DetailPage')),
+  component: lazyRoute(() => import('@/pages/planner/DetailPage')),
   loader: loadDetail,
 })
 
@@ -92,11 +93,11 @@ describe('parseRouteTable', () => {
 
   it('fails on a route whose component is not a literal lazy import', () => {
     const source = ROUTER_SOURCE.replace(
-      "lazyRouteComponent(() => import('@/pages/planner/DetailPage'))",
-      'lazyRouteComponent(() => import(pagePath))',
+      "lazyRoute(() => import('@/pages/planner/DetailPage'))",
+      'lazyRoute(() => import(pagePath))',
     )
     expect(() => parseRouteTable(source)).toThrow(
-      /\/planner\/md\/gesellschaft\/\$id has no lazyRouteComponent/,
+      /\/planner\/md\/gesellschaft\/\$id has no lazyRoute/,
     )
   })
 

@@ -83,7 +83,7 @@ function property(object: AstNode, key: string): unknown {
 
 function lazyImportSpecifier(component: unknown): string | null {
   if (!isNode(component) || component.type !== 'CallExpression') return null
-  if (identifierName(component.callee) !== 'lazyRouteComponent') return null
+  if (identifierName(component.callee) !== 'lazyRoute') return null
   const [thunk] = component.arguments as unknown[]
   if (!isNode(thunk) || thunk.type !== 'ArrowFunctionExpression') return null
   const body = thunk.body
@@ -126,7 +126,7 @@ export function parseRouteTable(source: string, fileName = 'router.tsx'): RouteS
 
     const page = lazyImportSpecifier(property(options, 'component'))
     if (page === null) {
-      fail(`route ${routePath} has no lazyRouteComponent(() => import('<literal>')) component`)
+      fail(`route ${routePath} has no lazyRoute(() => import('<literal>')) component`)
     }
 
     const loaderNode = property(options, 'loader')
