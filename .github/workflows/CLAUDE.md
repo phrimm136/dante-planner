@@ -22,3 +22,7 @@
   configurations do, so a Dependabot alert's scope tells whether the vulnerable code ships.
 - Workflow `run:` blocks must not interpolate untrusted PR input (title/body/branch
   names); use `github.sha` / `github.ref_name` style contexts only.
+- A `workflow_run` workflow runs with secrets and must gate its first job on
+  `github.event.workflow_run.event` and `github.event.workflow_run.head_repository.full_name`:
+  its `branches:` filter matches the triggering run's branch name, which a fork pull request can
+  also carry, and a fork run of PR Gate ends green.

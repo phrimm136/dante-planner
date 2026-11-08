@@ -36,6 +36,14 @@ env:
 
 jobs:
   changes:
+    # The branches filter above matches the triggering run's branch name, which a fork pull
+    # request also carries (a fork branch named main), and a fork run of PR Gate ends green
+    # because check-origin succeeds while the rest skip. Only a push to main in this
+    # repository, or a manual run, may reach the jobs that check out the verified SHA.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-latest
     permissions:
       contents: read
