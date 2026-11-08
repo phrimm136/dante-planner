@@ -1,0 +1,25 @@
+id: no-enter-without-composition-guard
+snapshots:
+  "const onKey = (e: KeyboardEvent) => { if (e.key === 'Enter') submit() }":
+    labels:
+    - source: e.key === 'Enter'
+      style: primary
+      start: 42
+      end: 59
+    - source: "(e: KeyboardEvent) => { if (e.key === 'Enter') submit() }"
+      style: secondary
+      start: 14
+      end: 71
+  "function onKey(e: KeyboardEvent) {\n  if (e.key == 'Enter') submit()\n}\n":
+    labels:
+    - source: e.key == 'Enter'
+      style: primary
+      start: 41
+      end: 57
+    - source: |-
+        function onKey(e: KeyboardEvent) {
+          if (e.key == 'Enter') submit()
+        }
+      style: secondary
+      start: 0
+      end: 69

@@ -1,0 +1,13 @@
+id: input-needs-name
+valid:
+  - "const a = <input type=\"number\" aria-label={t('k')} value={v} />"
+  - "const a = <input type=\"number\" aria-labelledby=\"l\" value={v} />"
+  - "const a = <input id=\"title\" type=\"text\" value={v} />"
+  - "const a = <label>{t('k')}<input type=\"checkbox\" checked={c} /></label>"
+  - "const a = <input type=\"hidden\" value={v} />"
+  - "const a = <input type=\"file\" onChange={f} />"
+  - "const a = <input data-slot=\"input\" {...props} />"
+invalid:
+  - "const a = <input type=\"number\" value={v} />"
+  - "const a = <input type=\"text\" value={v} placeholder={p} />"
+  - "const a = <div><input value={v}></input></div>"

@@ -224,11 +224,39 @@ describe('PlannerEditorShell - a category change', () => {
       })
     })
 
-    await user.click(screen.getByRole('button', { name: 'pages.plannerList.mdCategory.5F' }))
+    await user.click(
+      screen.getByRole('button', {
+        name: 'pages.plannerMD.category pages.plannerList.mdCategory.5F',
+      }),
+    )
     await user.click(screen.getByRole('menuitem', { name: 'pages.plannerList.mdCategory.15F' }))
 
     expect(vi.mocked(sonnerToast.warning).mock.calls).toEqual([
       ['planner:pages.plannerMD.publish.extremeModeOnly'],
     ])
+  })
+})
+
+describe('PlannerEditorShell - control names', () => {
+  it('names the category trigger by its label followed by the current value', () => {
+    renderShell()
+
+    expect(
+      screen.getByRole('button', {
+        name: 'pages.plannerMD.category pages.plannerList.mdCategory.5F',
+      }),
+    ).toBeInTheDocument()
+  })
+
+  it('labels the plan title input', () => {
+    renderShell()
+
+    expect(screen.getByRole('textbox', { name: 'pages.plannerMD.planTitle' })).toBeInTheDocument()
+  })
+
+  it('names the keywords group by its label', () => {
+    renderShell()
+
+    expect(screen.getByRole('group', { name: 'pages.plannerMD.keywords' })).toBeInTheDocument()
   })
 })

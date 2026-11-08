@@ -1,0 +1,30 @@
+id: label-needs-control
+snapshots:
+  "const a = <label className=\"x\">{t('k')}</label>":
+    labels:
+    - source: <label className="x">{t('k')}</label>
+      style: primary
+      start: 10
+      end: 47
+    - source: label
+      style: secondary
+      start: 11
+      end: 16
+    - source: <label className="x">
+      style: secondary
+      start: 10
+      end: 31
+  "const a = <label className=\"x\">{t('k')}<Button /></label>":
+    labels:
+    - source: <label className="x">{t('k')}<Button /></label>
+      style: primary
+      start: 10
+      end: 57
+    - source: label
+      style: secondary
+      start: 11
+      end: 16
+    - source: <label className="x">
+      style: secondary
+      start: 10
+      end: 31

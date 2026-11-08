@@ -1,0 +1,114 @@
+id: no-state-seeded-from-prop
+snapshots:
+  "const C = ({ value = 1 }: Props) => { const [v] = useState(value) }":
+    labels:
+    - source: useState(value)
+      style: primary
+      start: 50
+      end: 65
+    - source: value
+      style: secondary
+      start: 13
+      end: 18
+    - source: value = 1
+      style: secondary
+      start: 13
+      end: 22
+    - source: "{ value = 1 }"
+      style: secondary
+      start: 11
+      end: 24
+    - source: "{ value = 1 }: Props"
+      style: secondary
+      start: 11
+      end: 31
+    - source: "{ value = 1 }: Props"
+      style: secondary
+      start: 11
+      end: 31
+    - source: "({ value = 1 }: Props) => { const [v] = useState(value) }"
+      style: secondary
+      start: 10
+      end: 67
+  "const C = ({ value: seed }: Props) => { const [v] = useState(seed) }":
+    labels:
+    - source: useState(seed)
+      style: primary
+      start: 52
+      end: 66
+    - source: seed
+      style: secondary
+      start: 20
+      end: 24
+    - source: "value: seed"
+      style: secondary
+      start: 13
+      end: 24
+    - source: "{ value: seed }"
+      style: secondary
+      start: 11
+      end: 26
+    - source: "{ value: seed }: Props"
+      style: secondary
+      start: 11
+      end: 33
+    - source: "{ value: seed }: Props"
+      style: secondary
+      start: 11
+      end: 33
+    - source: "({ value: seed }: Props) => { const [v] = useState(seed) }"
+      style: secondary
+      start: 10
+      end: 68
+  "function C({ current }) { const [v] = useState(current) }":
+    labels:
+    - source: useState(current)
+      style: primary
+      start: 38
+      end: 55
+    - source: current
+      style: secondary
+      start: 13
+      end: 20
+    - source: "{ current }"
+      style: secondary
+      start: 11
+      end: 22
+    - source: "{ current }"
+      style: secondary
+      start: 11
+      end: 22
+    - source: "{ current }"
+      style: secondary
+      start: 11
+      end: 22
+    - source: function C({ current }) { const [v] = useState(current) }
+      style: secondary
+      start: 0
+      end: 57
+  "function C({ current }: Props) { const [v] = useState<number>(current) }":
+    labels:
+    - source: useState<number>(current)
+      style: primary
+      start: 45
+      end: 70
+    - source: current
+      style: secondary
+      start: 13
+      end: 20
+    - source: "{ current }"
+      style: secondary
+      start: 11
+      end: 22
+    - source: "{ current }: Props"
+      style: secondary
+      start: 11
+      end: 29
+    - source: "{ current }: Props"
+      style: secondary
+      start: 11
+      end: 29
+    - source: "function C({ current }: Props) { const [v] = useState<number>(current) }"
+      style: secondary
+      start: 0
+      end: 72

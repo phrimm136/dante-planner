@@ -32,6 +32,7 @@ export function LinkDialog({ open, onClose, onConfirm, initialText = '' }: LinkD
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.nativeEvent.isComposing) return
     if (e.key === 'Enter' && url.trim()) {
       e.preventDefault()
       handleConfirm()

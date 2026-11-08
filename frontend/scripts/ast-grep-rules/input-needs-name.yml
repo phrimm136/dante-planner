@@ -1,0 +1,47 @@
+id: input-needs-name
+language: Tsx
+severity: error
+message: An input with no aria-label, aria-labelledby or id, outside any label, has no accessible name; give it aria-label from t(), or an id that a label's htmlFor points at.
+files:
+  - src/**/*.tsx
+ignores:
+  - '**/__tests__/**'
+  - '**/*.test.tsx'
+rule:
+  any:
+    - kind: jsx_self_closing_element
+    - kind: jsx_opening_element
+  has:
+    field: name
+    regex: ^input$
+  all:
+    - not:
+        has:
+          kind: jsx_attribute
+          has:
+            kind: property_identifier
+            regex: ^(aria-label|aria-labelledby|id)$
+    - not:
+        has:
+          kind: jsx_attribute
+          all:
+            - has:
+                kind: property_identifier
+                regex: ^type$
+            - has:
+                kind: string
+                regex: ^['"](hidden|file)['"]$
+    - not:
+        has:
+          kind: jsx_expression
+          has:
+            kind: spread_element
+    - not:
+        inside:
+          stopBy: end
+          kind: jsx_element
+          has:
+            field: open_tag
+            has:
+              field: name
+              regex: ^label$

@@ -1,0 +1,28 @@
+id: no-enter-without-composition-guard-tsx
+valid:
+  - "const a = <input onKeyDown={(e) => { if (e.nativeEvent.isComposing) return; if (e.key === 'Enter') submit() }} />"
+  - |
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.isComposing) return
+      if (e.key === "Enter") submit()
+    }
+  - "const a = <input onKeyDown={(e) => { if (e.key === 'Escape') close() }} />"
+invalid:
+  - "const a = <input onKeyDown={(e) => { if (e.key === 'Enter') submit() }} />"
+  - |
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' && url.trim()) {
+        e.preventDefault()
+        handleConfirm()
+      }
+    }
+  - |
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "Enter") return
+      submit()
+    }
+  - |
+    function Outer(e: KeyboardEvent) {
+      if (e.isComposing) return
+      const inner = () => { if ('Enter' === e.key) submit() }
+    }

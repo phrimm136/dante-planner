@@ -1,0 +1,32 @@
+id: input-needs-name
+snapshots:
+  "const a = <div><input value={v}></input></div>":
+    labels:
+    - source: <input value={v}>
+      style: primary
+      start: 15
+      end: 32
+    - source: input
+      style: secondary
+      start: 16
+      end: 21
+  "const a = <input type=\"number\" value={v} />":
+    labels:
+    - source: <input type="number" value={v} />
+      style: primary
+      start: 10
+      end: 43
+    - source: input
+      style: secondary
+      start: 11
+      end: 16
+  "const a = <input type=\"text\" value={v} placeholder={p} />":
+    labels:
+    - source: <input type="text" value={v} placeholder={p} />
+      style: primary
+      start: 10
+      end: 57
+    - source: input
+      style: secondary
+      start: 11
+      end: 16
