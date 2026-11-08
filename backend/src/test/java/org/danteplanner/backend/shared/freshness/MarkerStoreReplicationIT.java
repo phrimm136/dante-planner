@@ -39,6 +39,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
 import org.danteplanner.backend.support.Hang;
+import org.danteplanner.backend.support.RealClockBounds;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,7 +59,6 @@ class MarkerStoreReplicationIT {
     private static final String BLACK_HOLE = "marker-black-hole";
     private static final String PASSWORD = "marker-store-secret";
     private static final Duration WAIT_BOUND = Duration.ofSeconds(1);
-    private static final Duration ROOMY_WAIT_BOUND = Duration.ofSeconds(30);
     private static final String LINK_STATUS = "master_link_status";
     private static final String LINK_UP = "up";
     private static final String BLOCKED_CLIENTS = "blocked_clients";
@@ -68,7 +68,6 @@ class MarkerStoreReplicationIT {
     private static final String CALLS_PREFIX = "calls=";
     private static final int BURST_RAISES = 50;
     private static final int STALLED_RAISES = 8;
-    private static final Duration SCHEDULING_SLACK = Duration.ofSeconds(5);
 
     private static final Network NETWORK = Network.newNetwork();
 
@@ -249,7 +248,7 @@ class MarkerStoreReplicationIT {
                 .as("a WAIT on a connection that wrote nothing answers at once while the replica stays "
                         + "connected; only the raise's own connection waits out the bound")
                 .isGreaterThanOrEqualTo(WAIT_BOUND.toMillis())
-                .isLessThan(BoundedRedisConnections.COMMAND_TIMEOUT.plus(SCHEDULING_SLACK).toMillis());
+                .isLessThan(BoundedRedisConnections.COMMAND_TIMEOUT.plus(RealClockBounds.SCHEDULING_SLACK).toMillis());
         assertThat(meters.counter(MarkerStore.WAIT_TIMEOUTS).count()).isEqualTo(1.0);
         assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count()).isZero();
         assertThat(primary.opsForHash().entries(scope.key())).containsOnly(Map.entry(server, "12"));
@@ -258,7 +257,7 @@ class MarkerStoreReplicationIT {
     @Test
     void raise_WhenItWaitsOnAStalledReplica_LeavesTheSharedConnectionAnswering() throws Exception {
         FreshnessScope scope = new FreshnessScope.Entity(UUID.randomUUID());
-        MarkerStore roomy = storeOver(primaryFactory, ROOMY_WAIT_BOUND);
+        MarkerStore roomy = storeOver(primaryFactory, RealClockBounds.ROOMY_WAIT_BOUND);
         try {
             CompletableFuture<Void> raise;
             Map<Object, Object> duringTheWait;
@@ -312,7 +311,7 @@ class MarkerStoreReplicationIT {
         }
 
         assertThat(elapsedMillis).allSatisfy(millis -> assertThat(millis)
-                .isLessThan(WAIT_BOUND.plus(MarkerStore.RAISE_MARGIN).plus(SCHEDULING_SLACK).toMillis()));
+                .isLessThan(WAIT_BOUND.plus(MarkerStore.RAISE_MARGIN).plus(RealClockBounds.SCHEDULING_SLACK).toMillis()));
         assertThat(meters.counter(MarkerStore.WAIT_TIMEOUTS).count())
                 .as("one timeout per batch, so fewer than one per raise")
                 .isPositive()
@@ -342,7 +341,7 @@ class MarkerStoreReplicationIT {
                 clientLink.toxics().get(BLACK_HOLE).remove();
             }
             assertThat(elapsedMillis)
-                    .isLessThan(MarkerStore.RAISE_CONNECT_TIMEOUT.plus(WAIT_BOUND).plus(SCHEDULING_SLACK).toMillis());
+                    .isLessThan(MarkerStore.RAISE_CONNECT_TIMEOUT.plus(WAIT_BOUND).plus(RealClockBounds.SCHEDULING_SLACK).toMillis());
             Hang.until(() -> meters.counter(MarkerStore.RAISE_FAILURES).count() >= 1.0, "the raise failure being counted");
             assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count()).isEqualTo(1.0);
 

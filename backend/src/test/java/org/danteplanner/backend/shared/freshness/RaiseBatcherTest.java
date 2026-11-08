@@ -30,15 +30,14 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.LogCapture;
+import org.danteplanner.backend.support.RealClockBounds;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RaiseBatcherTest {
 
     private static final Duration WAIT_BOUND = Duration.ofSeconds(1);
-    private static final Duration ROOMY_WAIT_BOUND = Duration.ofSeconds(30);
-    private static final Duration ROOMY_BOUND = ROOMY_WAIT_BOUND.plus(MarkerStore.RAISE_MARGIN);
-    private static final Duration SCHEDULING_SLACK = Duration.ofSeconds(5);
+    private static final Duration ROOMY_BOUND = RealClockBounds.ROOMY_WAIT_BOUND.plus(MarkerStore.RAISE_MARGIN);
     private static final String[] KEYS = {new FreshnessScope.PublicCatalog().key()};
     private static final String[] ARGUMENTS = {"3600000", "3e11fa47-71ca-11e1-9e33-c80aa9429562", "7"};
     private static final String WAIT = "WAIT";
@@ -60,7 +59,7 @@ class RaiseBatcherTest {
                         throw new IllegalStateException("injected");
                     }
                     return redis.endpoint();
-                }, 1, ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, System::nanoTime)) {
+                }, 1, RealClockBounds.ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, System::nanoTime)) {
             long start = System.nanoTime();
             boolean first = batcher.raise(KEYS, ARGUMENTS);
             Duration firstElapsed = Duration.ofNanos(System.nanoTime() - start);
@@ -69,7 +68,7 @@ class RaiseBatcherTest {
             boolean second = batcher.raise(KEYS, ARGUMENTS);
 
             assertThat(first).isFalse();
-            assertThat(firstElapsed).as("released by the failed batch, not by the bound").isLessThan(ROOMY_WAIT_BOUND.dividedBy(2));
+            assertThat(firstElapsed).as("released by the failed batch, not by the bound").isLessThan(RealClockBounds.ROOMY_WAIT_BOUND.dividedBy(2));
             assertThat(failuresAfterFirst).isEqualTo(1.0);
             assertThat(second).isTrue();
             assertThat(raiseFailures.count()).isEqualTo(1.0);
@@ -88,7 +87,7 @@ class RaiseBatcherTest {
                         throw new StackOverflowError("injected");
                     }
                     return redis.endpoint();
-                }, 1, ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, System::nanoTime)) {
+                }, 1, RealClockBounds.ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, System::nanoTime)) {
             boolean first = batcher.raise(KEYS, ARGUMENTS);
             double failuresAfterFirst = raiseFailures.count();
             Hang.until(() -> !workers.get(0).isAlive(), "the first worker dying");
@@ -117,7 +116,7 @@ class RaiseBatcherTest {
         Thread caller = new Thread(callers, () -> raised.set(batcher.raise(KEYS, ARGUMENTS)), "raise-caller");
 
         caller.start();
-        caller.join(SCHEDULING_SLACK.toMillis());
+        caller.join(RealClockBounds.SCHEDULING_SLACK.toMillis());
 
         assertThat(raised.get()).isFalse();
         assertThat(callers.activeCount()).as("threads started by the raise").isZero();
@@ -134,7 +133,7 @@ class RaiseBatcherTest {
                 RaiseBatcher batcher = new RaiseBatcher(() -> {
                     worker.set(Thread.currentThread());
                     return redis.endpoint();
-                }, 1, ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, now::get)) {
+                }, 1, RealClockBounds.ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, now::get)) {
             CompletableFuture<Boolean> raised = CompletableFuture.supplyAsync(() -> batcher.raise(KEYS, ARGUMENTS));
             Hang.await(redis.evalshaReceived, "the fake receiving EVALSHA");
             Hang.until(() -> worker.get().getState() == Thread.State.TIMED_WAITING, "the worker parking on the reply");
@@ -146,7 +145,7 @@ class RaiseBatcherTest {
             Duration elapsed = Duration.ofNanos(System.nanoTime() - released);
 
             assertThat(result).isTrue();
-            assertThat(elapsed).isLessThan(ROOMY_WAIT_BOUND.dividedBy(2));
+            assertThat(elapsed).isLessThan(RealClockBounds.ROOMY_WAIT_BOUND.dividedBy(2));
             assertThat(waitTimeouts.count()).isEqualTo(1.0);
             assertThat(raiseFailures.count()).isZero();
             assertThat(redis.commands)
@@ -162,7 +161,7 @@ class RaiseBatcherTest {
         AtomicLong now = new AtomicLong();
         try (FakeRedis redis = new FakeRedis(WaitReply.TIMES_OUT, false,
                 () -> now.addAndGet(connectCost.toNanos()));
-                RaiseBatcher batcher = new RaiseBatcher(redis::endpoint, 1, ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN,
+                RaiseBatcher batcher = new RaiseBatcher(redis::endpoint, 1, RealClockBounds.ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN,
                         raiseFailures, waitTimeouts, now::get)) {
             boolean raised = batcher.raise(KEYS, ARGUMENTS);
 
@@ -178,11 +177,11 @@ class RaiseBatcherTest {
 
     @Test
     void raise_WhenConnectingLeftNoMoreThanTheMargin_SendsNoWaitAndCountsAWaitTimeout() throws Exception {
-        Duration connectCost = ROOMY_WAIT_BOUND.plusMillis(100);
+        Duration connectCost = RealClockBounds.ROOMY_WAIT_BOUND.plusMillis(100);
         AtomicLong now = new AtomicLong();
         try (FakeRedis redis = new FakeRedis(WaitReply.TIMES_OUT, false,
                 () -> now.addAndGet(connectCost.toNanos()));
-                RaiseBatcher batcher = new RaiseBatcher(redis::endpoint, 1, ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN,
+                RaiseBatcher batcher = new RaiseBatcher(redis::endpoint, 1, RealClockBounds.ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN,
                         raiseFailures, waitTimeouts, now::get)) {
             boolean raised = batcher.raise(KEYS, ARGUMENTS);
 

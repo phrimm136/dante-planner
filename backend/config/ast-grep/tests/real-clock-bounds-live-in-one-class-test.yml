@@ -1,0 +1,43 @@
+id: real-clock-bounds-live-in-one-class
+valid:
+  - |
+    class A {
+      @Test
+      void m() {
+        long SCHEDULING_SLACK_MS = RealClockBounds.SCHEDULING_SLACK.toMillis();
+        caller.join(SCHEDULING_SLACK_MS);
+      }
+    }
+  - |
+    class A {
+      private static final Duration ROOMY_BOUND = RealClockBounds.ROOMY_WAIT_BOUND.plus(MarkerStore.RAISE_MARGIN);
+    }
+  - |
+    class A {
+      private static final MarkerStore.Settings ROOMY_SETTINGS =
+          new MarkerStore.Settings(1, RealClockBounds.ROOMY_WAIT_BOUND, Duration.ofHours(1));
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        assertThat(elapsed).isLessThan(WAIT_BOUND.plus(RealClockBounds.SCHEDULING_SLACK));
+      }
+    }
+invalid:
+  - |
+    class A {
+      private static final Duration SCHEDULING_SLACK = Duration.ofSeconds(5);
+    }
+  - |
+    class A {
+      private static final long SCHEDULING_SLACK_MS = 5_000;
+    }
+  - |
+    class A {
+      private static final Duration ROOMY_WAIT_BOUND = Duration.ofSeconds(30);
+    }
+  - |
+    class A {
+      private final Duration slack = Duration.ofSeconds(1), RUNNER_SLACK = Duration.ofSeconds(5);
+    }

@@ -1,0 +1,15 @@
+id: real-clock-bounds-live-in-one-class
+language: Java
+severity: error
+message: 'The scheduling slack and the roomy wait bound live only in support/RealClockBounds: import RealClockBounds.SCHEDULING_SLACK or RealClockBounds.ROOMY_WAIT_BOUND instead of declaring a copy (backend/src/test/CLAUDE.md, Mechanics).'
+files:
+  - src/test/java/**/*.java
+ignores:
+  - src/test/java/org/danteplanner/backend/support/RealClockBounds.java
+rule:
+  kind: field_declaration
+  has:
+    kind: variable_declarator
+    has:
+      field: name
+      regex: SLACK|^ROOMY_WAIT_BOUND$
