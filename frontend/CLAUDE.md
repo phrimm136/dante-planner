@@ -19,7 +19,7 @@ Four layers, each module in exactly one: `pages/` (route slices), `shared/` (co-
 
 ## Routing
 
-Code-based routes only, defined in `src/lib/router.tsx` with `lazyRouteComponent` — no file-based routing, no generated route tree, no `_layout`/`__root` file conventions. Internal navigation uses `<Link>`/`useNavigate`, never `<a href>`.
+Code-based routes only, defined in `src/lib/router.tsx` with `lazyRoute` (from `src/lib/lazyRoute.tsx`, which never reloads; the `vite:preloadError` listener owns the reload) — no file-based routing, no generated route tree, no `_layout`/`__root` file conventions. Internal navigation uses `<Link>`/`useNavigate`, never `<a href>`.
 
 ## React Compiler
 

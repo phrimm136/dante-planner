@@ -2,7 +2,6 @@ import {
   createRouter,
   createRootRoute,
   createRoute,
-  lazyRouteComponent,
   stripSearchParams,
   HeadContent,
 } from '@tanstack/react-router'
@@ -11,6 +10,7 @@ import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { z } from 'zod'
 import { zodValidator } from '@tanstack/zod-adapter'
 import { GlobalLayout } from '@/components/layout/GlobalLayout'
+import { lazyRoute } from '@/lib/lazyRoute'
 import i18n from '@/lib/i18n'
 import { untitledPlannerTitle } from '@/pages/planner/lib/loadPlannerTitle'
 import { MD_CATEGORIES } from '@/shared/gameData'
@@ -141,7 +141,7 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: lazyRouteComponent(() => import('@/pages/home/HomePage')),
+  component: lazyRoute(() => import('@/pages/home/HomePage')),
   head: () => ({
     meta: [{ title: "Dante's Planner - Limbus Company Database and Planning Tool" }],
   }),
@@ -150,7 +150,7 @@ const indexRoute = createRoute({
 const plannerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner',
-  component: lazyRouteComponent(() => import('@/pages/planner/PlannerPage')),
+  component: lazyRoute(() => import('@/pages/planner/PlannerPage')),
   head: () => ({
     meta: [{ title: pageTitle('pages.planner.title') }],
   }),
@@ -159,7 +159,7 @@ const plannerRoute = createRoute({
 const plannerMDRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md',
-  component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDPage')),
+  component: lazyRoute(() => import('@/pages/planner/PlannerMDPage')),
   pendingComponent: PlannerMDPageSkeleton,
   validateSearch: zodValidator(mdUserSearchSchema),
   search: {
@@ -173,7 +173,7 @@ const plannerMDRoute = createRoute({
 const plannerMDGesellschaftRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/gesellschaft',
-  component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDGesellschaftPage')),
+  component: lazyRoute(() => import('@/pages/planner/PlannerMDGesellschaftPage')),
   pendingComponent: PlannerMDPageSkeleton,
   validateSearch: zodValidator(mdGesellschaftSearchSchema),
   search: {
@@ -187,7 +187,7 @@ const plannerMDGesellschaftRoute = createRoute({
 const plannerMDGesellschaftDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/gesellschaft/$id',
-  component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDGesellschaftDetailPage')),
+  component: lazyRoute(() => import('@/pages/planner/PlannerMDGesellschaftDetailPage')),
   pendingComponent: () => (
     <div className={SECTION_STYLES.LAYOUT.page}>
       <PlannerViewerSkeleton />
@@ -204,7 +204,7 @@ const plannerMDGesellschaftDetailRoute = createRoute({
 const plannerMDNewRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/new',
-  component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDNewPage')),
+  component: lazyRoute(() => import('@/pages/planner/PlannerMDNewPage')),
   pendingComponent: PlannerMDNewPageSkeleton,
   head: () => ({
     meta: [{ title: pageTitle('pages.plannerMD.newPlan', 'planner') }],
@@ -214,7 +214,7 @@ const plannerMDNewRoute = createRoute({
 const deckBuilderRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/deck',
-  component: lazyRouteComponent(() => import('@/pages/planner/DeckBuilderPage')),
+  component: lazyRoute(() => import('@/pages/planner/DeckBuilderPage')),
   pendingComponent: DeckBuilderPageSkeleton,
   loader: loadDeckBuilder,
   head: () => ({
@@ -225,7 +225,7 @@ const deckBuilderRoute = createRoute({
 const plannerMDDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/$id',
-  component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDDetailPage')),
+  component: lazyRoute(() => import('@/pages/planner/PlannerMDDetailPage')),
   pendingComponent: () => (
     <div className={SECTION_STYLES.LAYOUT.page}>
       <PlannerViewerSkeleton />
@@ -242,7 +242,7 @@ const plannerMDDetailRoute = createRoute({
 const plannerMDEditRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/$id/edit',
-  component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDEditPage')),
+  component: lazyRoute(() => import('@/pages/planner/PlannerMDEditPage')),
   pendingComponent: () => (
     <div className={SECTION_STYLES.LAYOUT.page}>
       <PlannerViewerSkeleton />
@@ -261,7 +261,7 @@ const plannerMDEditRoute = createRoute({
 const extractionPlannerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/extraction',
-  component: lazyRouteComponent(() => import('@/pages/extraction/ExtractionPlannerPage')),
+  component: lazyRoute(() => import('@/pages/extraction/ExtractionPlannerPage')),
   head: () => ({
     meta: [{ title: pageTitle('header.nav.extraction') }],
   }),
@@ -270,7 +270,7 @@ const extractionPlannerRoute = createRoute({
 const identityRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/identity',
-  component: lazyRouteComponent(() => import('@/pages/identity/IdentityPage')),
+  component: lazyRoute(() => import('@/pages/identity/IdentityPage')),
   pendingComponent: () => (
     <div className={SECTION_STYLES.LAYOUT.page}>
       <ListPageSkeleton geometry={IDENTITY_GEOMETRY} />
@@ -286,7 +286,7 @@ const identityRoute = createRoute({
 const identityDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/identity/$id',
-  component: lazyRouteComponent(() => import('@/pages/identity/IdentityDetailPage')),
+  component: lazyRoute(() => import('@/pages/identity/IdentityDetailPage')),
   pendingComponent: IdentityDetailSkeleton,
 
   loader: loadIdentityDetail,
@@ -296,7 +296,7 @@ const identityDetailRoute = createRoute({
 const egoRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego',
-  component: lazyRouteComponent(() => import('@/pages/ego/EGOPage')),
+  component: lazyRoute(() => import('@/pages/ego/EGOPage')),
   pendingComponent: () => (
     <div className={SECTION_STYLES.LAYOUT.page}>
       <EGOListSkeleton />
@@ -312,7 +312,7 @@ const egoRoute = createRoute({
 const egoDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego/$id',
-  component: lazyRouteComponent(() => import('@/pages/ego/EGODetailPage')),
+  component: lazyRoute(() => import('@/pages/ego/EGODetailPage')),
   pendingComponent: EGODetailSkeleton,
 
   loader: loadEgoDetail,
@@ -322,7 +322,7 @@ const egoDetailRoute = createRoute({
 const egoGiftRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego-gift',
-  component: lazyRouteComponent(() => import('@/pages/egoGift/EGOGiftPage')),
+  component: lazyRoute(() => import('@/pages/egoGift/EGOGiftPage')),
   pendingComponent: () => (
     <div className={SECTION_STYLES.LAYOUT.page}>
       <ListPageSkeleton geometry={EGO_GIFT_GEOMETRY} />
@@ -338,7 +338,7 @@ const egoGiftRoute = createRoute({
 const egoGiftDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego-gift/$id',
-  component: lazyRouteComponent(() => import('@/pages/egoGift/EGOGiftDetailPage')),
+  component: lazyRoute(() => import('@/pages/egoGift/EGOGiftDetailPage')),
   pendingComponent: EGOGiftDetailSkeleton,
 
   loader: loadEgoGiftDetail,
@@ -348,7 +348,7 @@ const egoGiftDetailRoute = createRoute({
 const themePackRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/theme-pack',
-  component: lazyRouteComponent(() => import('@/pages/themePack/ThemePackPage')),
+  component: lazyRoute(() => import('@/pages/themePack/ThemePackPage')),
   pendingComponent: () => (
     <div className={SECTION_STYLES.LAYOUT.page}>
       <ListPageSkeleton geometry={THEME_PACK_GEOMETRY} />
@@ -363,7 +363,7 @@ const themePackRoute = createRoute({
 const themePackDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/theme-pack/$id',
-  component: lazyRouteComponent(() => import('@/pages/themePack/ThemePackDetailPage')),
+  component: lazyRoute(() => import('@/pages/themePack/ThemePackDetailPage')),
   pendingComponent: ThemePackDetailSkeleton,
   loader: loadThemePackDetail,
   head: ({ loaderData }) => detailHead(loaderData?.name, 'Theme Pack'),
@@ -372,7 +372,7 @@ const themePackDetailRoute = createRoute({
 const abEventRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ab-event',
-  component: lazyRouteComponent(() => import('@/pages/abEvent/AbEventPage')),
+  component: lazyRoute(() => import('@/pages/abEvent/AbEventPage')),
   pendingComponent: () => (
     <div className={SECTION_STYLES.LAYOUT.page}>
       <ListPageSkeleton geometry={AB_EVENT_GEOMETRY} />
@@ -387,7 +387,7 @@ const abEventRoute = createRoute({
 const abEventDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ab-event/$id',
-  component: lazyRouteComponent(() => import('@/pages/abEvent/AbEventDetailPage')),
+  component: lazyRoute(() => import('@/pages/abEvent/AbEventDetailPage')),
   pendingComponent: AbEventDetailSkeleton,
   loader: loadAbEventDetail,
   head: ({ loaderData }) => detailHead(loaderData?.title, 'Dungeon Event'),
@@ -396,7 +396,7 @@ const abEventDetailRoute = createRoute({
 const battleRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/battle',
-  component: lazyRouteComponent(() => import('@/pages/battle/BattlePage')),
+  component: lazyRoute(() => import('@/pages/battle/BattlePage')),
   pendingComponent: () => (
     <div className={SECTION_STYLES.LAYOUT.page}>
       <ListPageSkeleton geometry={BATTLE_GEOMETRY} />
@@ -412,7 +412,7 @@ const enemyDetailRoute = createRoute({
   path: '/battle/enemy/$id',
   validateSearch: zodValidator(battleDetailSearchSchema),
   remountDeps: battleDetailRemountDeps,
-  component: lazyRouteComponent(() => import('@/pages/battle/EnemyDetailPage')),
+  component: lazyRoute(() => import('@/pages/battle/EnemyDetailPage')),
   pendingComponent: BattleDetailSkeleton,
   loader: loadEnemyName,
   head: ({ loaderData }) => detailHead(loaderData?.name, 'Enemy'),
@@ -423,7 +423,7 @@ const assistantDetailRoute = createRoute({
   path: '/battle/assistant/$id',
   validateSearch: zodValidator(battleDetailSearchSchema),
   remountDeps: battleDetailRemountDeps,
-  component: lazyRouteComponent(() => import('@/pages/battle/AssistantDetailPage')),
+  component: lazyRoute(() => import('@/pages/battle/AssistantDetailPage')),
   pendingComponent: BattleDetailSkeleton,
   loader: loadAssistantName,
   head: ({ loaderData }) => detailHead(loaderData?.name, 'Assist Unit'),
@@ -434,7 +434,7 @@ const sinnerEventDetailRoute = createRoute({
   path: '/battle/sinnerEvent/$id',
   validateSearch: zodValidator(battleDetailSearchSchema),
   remountDeps: battleDetailRemountDeps,
-  component: lazyRouteComponent(() => import('@/pages/battle/SinnerEventDetailPage')),
+  component: lazyRoute(() => import('@/pages/battle/SinnerEventDetailPage')),
   pendingComponent: BattleDetailSkeleton,
   loader: loadSinnerEventName,
   head: ({ loaderData }) => detailHead(loaderData?.name, 'Sinner'),
@@ -443,7 +443,7 @@ const sinnerEventDetailRoute = createRoute({
 const keywordRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/keyword',
-  component: lazyRouteComponent(() => import('@/pages/keyword/KeywordPage')),
+  component: lazyRoute(() => import('@/pages/keyword/KeywordPage')),
   pendingComponent: () => (
     <div className={SECTION_STYLES.LAYOUT.page}>
       <ListPageSkeleton geometry={KEYWORD_GEOMETRY} filterCount={4} />
@@ -458,7 +458,7 @@ const keywordRoute = createRoute({
 const keywordDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/keyword/$id',
-  component: lazyRouteComponent(() => import('@/pages/keyword/KeywordDetailPage')),
+  component: lazyRoute(() => import('@/pages/keyword/KeywordDetailPage')),
   pendingComponent: KeywordDetailSkeleton,
   loader: loadKeywordDetail,
   head: ({ loaderData }) => detailHead(loaderData?.name, 'Keyword'),
@@ -467,7 +467,7 @@ const keywordDetailRoute = createRoute({
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings',
-  component: lazyRouteComponent(() => import('@/pages/settings/SettingsPage')),
+  component: lazyRoute(() => import('@/pages/settings/SettingsPage')),
   pendingComponent: SettingsPageSkeleton,
   head: () => ({
     meta: [{ title: pageTitle('header.settings.settings') }],
@@ -477,7 +477,7 @@ const settingsRoute = createRoute({
 const moderationRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/moderation',
-  component: lazyRouteComponent(() => import('@/pages/moderator/ModeratorPage')),
+  component: lazyRoute(() => import('@/pages/moderator/ModeratorPage')),
   head: () => ({
     meta: [{ title: pageTitle('header.nav.moderator') }],
   }),
@@ -486,7 +486,7 @@ const moderationRoute = createRoute({
 const privacyRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/privacy',
-  component: lazyRouteComponent(() => import('@/pages/legal/PrivacyPage')),
+  component: lazyRoute(() => import('@/pages/legal/PrivacyPage')),
   head: () => ({
     meta: [{ title: pageTitle('pages.privacy.title') }],
   }),
@@ -495,7 +495,7 @@ const privacyRoute = createRoute({
 const termsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/terms',
-  component: lazyRouteComponent(() => import('@/pages/legal/TermsPage')),
+  component: lazyRoute(() => import('@/pages/legal/TermsPage')),
   head: () => ({
     meta: [{ title: pageTitle('pages.terms.title') }],
   }),
@@ -504,7 +504,7 @@ const termsRoute = createRoute({
 const licensesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/licenses',
-  component: lazyRouteComponent(() => import('@/pages/legal/LicensesPage')),
+  component: lazyRoute(() => import('@/pages/legal/LicensesPage')),
   head: () => ({
     meta: [{ title: pageTitle('pages.licenses.title') }],
   }),
