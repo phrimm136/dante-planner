@@ -1,9 +1,10 @@
 import { z } from 'zod'
-import { AbEventIdSchema } from '@/shared/gameData'
+import { AB_EVENT_RESULT_TYPES, AbEventIdSchema } from '@/shared/gameData'
 
 export const AbEventSpecSchema = z.object({
   relatedEgoGifts: z.array(z.string()),
   relatedThemePacks: z.array(z.string()),
+  resultTypes: z.array(z.enum(AB_EVENT_RESULT_TYPES)),
   hasImage: z.boolean(),
   illustId: z.string().optional(),
 })

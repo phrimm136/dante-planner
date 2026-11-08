@@ -47,16 +47,19 @@ const SPEC: AbEventSpecList = {
   [AbEventIdSchema.parse('901001')]: {
     relatedEgoGifts: ['9001'],
     relatedThemePacks: ['1002'],
+    resultTypes: [],
     hasImage: true,
   },
   [AbEventIdSchema.parse('901002')]: {
     relatedEgoGifts: ['9002'],
     relatedThemePacks: ['1002'],
+    resultTypes: [],
     hasImage: true,
   },
   [AbEventIdSchema.parse('901003')]: {
     relatedEgoGifts: [],
     relatedThemePacks: [],
+    resultTypes: [],
     hasImage: false,
   },
 }
@@ -64,6 +67,7 @@ const SPEC: AbEventSpecList = {
 const EMPTY_FACETS: AbEventFacetState = {
   selectedEgoGifts: new Set(),
   selectedThemePacks: new Set(),
+  selectedResultTypes: new Set(),
 }
 
 function makeStore(values: Partial<AbEventFacetState> = {}, searchQuery = '') {

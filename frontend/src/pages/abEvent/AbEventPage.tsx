@@ -11,6 +11,7 @@ import { EGOGiftFilterDropdown } from '@/shared/egoGift'
 import { AbEventList, useAbEventListSpec } from '@/pages/abEvent'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { AB_EVENT_GEOMETRY } from './lib/cardLayout'
+import { AbEventResultFilter } from './components/AbEventResultFilter'
 
 function AbEventPageShell() {
   const { t } = useTranslation('database')
@@ -36,6 +37,14 @@ function AbEventPageShell() {
       Component: EGOGiftFilterDropdown,
       selected: filters.selectedEgoGifts,
       onSelectionChange: setters.selectedEgoGifts,
+    }),
+    filterSection({
+      key: 'selectedResultTypes',
+      titleKey: 'filters.eventResult',
+      titleFallback: 'Event Result',
+      Component: AbEventResultFilter,
+      selected: filters.selectedResultTypes,
+      onSelectionChange: setters.selectedResultTypes,
     }),
   ]
 

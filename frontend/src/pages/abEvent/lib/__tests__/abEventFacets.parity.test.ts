@@ -11,6 +11,7 @@ import { enumerateSelectionStates, findParityMismatches } from '@/test-utils/fac
 import { AB_EVENT_FACETS, type AbEventFacetState } from '../abEventFilter'
 import { toAbEventEntity } from '../abEventEntity'
 import type { AbEventSpec } from '../../schemas/AbEventSchemas'
+import type { AbEventResultType } from '@/shared/gameData'
 
 function legacyRelatedEgoGift(entry: AbEventSpec, selectedEgoGifts: ReadonlySet<string>): boolean {
   if (selectedEgoGifts.size === 0) return true
@@ -25,6 +26,14 @@ function legacyRelatedThemePack(
   return entry.relatedThemePacks.some((packId) => selectedThemePacks.has(packId))
 }
 
+function legacyResultType(
+  entry: AbEventSpec,
+  selectedResultTypes: ReadonlySet<AbEventResultType>,
+): boolean {
+  if (selectedResultTypes.size === 0) return true
+  return entry.resultTypes.some((resultType) => selectedResultTypes.has(resultType))
+}
+
 interface EventFixture {
   id: string
   entry: AbEventSpec
@@ -33,6 +42,7 @@ interface EventFixture {
 function legacyMatches(event: EventFixture, state: AbEventFacetState): boolean {
   if (!legacyRelatedEgoGift(event.entry, state.selectedEgoGifts)) return false
   if (!legacyRelatedThemePack(event.entry, state.selectedThemePacks)) return false
+  if (!legacyResultType(event.entry, state.selectedResultTypes)) return false
   return true
 }
 
@@ -42,6 +52,7 @@ function makeEvent(id: string, overrides: Partial<AbEventSpec> = {}): EventFixtu
     entry: {
       relatedEgoGifts: [],
       relatedThemePacks: [],
+      resultTypes: [],
       hasImage: true,
       ...overrides,
     },
@@ -49,9 +60,21 @@ function makeEvent(id: string, overrides: Partial<AbEventSpec> = {}): EventFixtu
 }
 
 const ITEMS: EventFixture[] = [
-  makeEvent('901101', { relatedEgoGifts: ['9001', '991002'], relatedThemePacks: ['1002', '1003'] }),
-  makeEvent('901102', { relatedEgoGifts: ['9001'], relatedThemePacks: ['1002'] }),
-  makeEvent('901103', { relatedEgoGifts: [], relatedThemePacks: ['1003'] }),
+  makeEvent('901101', {
+    relatedEgoGifts: ['9001', '991002'],
+    relatedThemePacks: ['1002', '1003'],
+    resultTypes: ['hpDamage', 'levelUp'],
+  }),
+  makeEvent('901102', {
+    relatedEgoGifts: ['9001'],
+    relatedThemePacks: ['1002'],
+    resultTypes: ['levelUp'],
+  }),
+  makeEvent('901103', {
+    relatedEgoGifts: [],
+    relatedThemePacks: ['1003'],
+    resultTypes: ['hpDamage'],
+  }),
   makeEvent('901104', { relatedEgoGifts: ['991002'], relatedThemePacks: [] }),
   makeEvent('901105'),
 ]
@@ -59,16 +82,18 @@ const ITEMS: EventFixture[] = [
 const BASE_STATE: AbEventFacetState = {
   selectedEgoGifts: new Set(),
   selectedThemePacks: new Set(),
+  selectedResultTypes: new Set(),
 }
 
 const STATES = enumerateSelectionStates(BASE_STATE, {
   selectedEgoGifts: [[], ['9001'], ['991002'], ['9001', '991002'], ['9999']],
   selectedThemePacks: [[], ['1002'], ['1003'], ['1002', '1003'], ['9999']],
+  selectedResultTypes: [[], ['levelUp'], ['hpDamage'], ['levelUp', 'hpDamage']],
 })
 
 describe('AB_EVENT_FACETS parity', () => {
   it('enumerates every selection combination', () => {
-    expect(STATES.length).toBe(5 ** 2)
+    expect(STATES.length).toBe(5 ** 2 * 4)
   })
 
   it('survives the same ids as the pre-migration predicates', () => {

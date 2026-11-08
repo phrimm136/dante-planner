@@ -6,12 +6,14 @@ import {
   AbEventI18nSchema,
   AbEventSharedSchema,
 } from '../AbEventSchemas'
+import { AB_EVENT_RESULT_TYPES } from '@/shared/gameData'
 
 describe('AbEventSpecSchema', () => {
   it('accepts valid entry', () => {
     const result = AbEventSpecSchema.safeParse({
       relatedEgoGifts: ['9001', '991002'],
       relatedThemePacks: ['1002', '1003'],
+      resultTypes: [],
       hasImage: true,
     })
     expect(result.success).toBe(true)
@@ -21,6 +23,7 @@ describe('AbEventSpecSchema', () => {
     const result = AbEventSpecSchema.safeParse({
       relatedEgoGifts: [],
       relatedThemePacks: [],
+      resultTypes: [],
       hasImage: false,
     })
     expect(result.success).toBe(true)
@@ -30,6 +33,7 @@ describe('AbEventSpecSchema', () => {
     const result = AbEventSpecSchema.safeParse({
       relatedEgoGifts: [],
       relatedThemePacks: [],
+      resultTypes: [],
     })
     expect(result.success).toBe(false)
   })
@@ -38,10 +42,42 @@ describe('AbEventSpecSchema', () => {
     const result = AbEventSpecSchema.strict().safeParse({
       relatedEgoGifts: [],
       relatedThemePacks: [],
+      resultTypes: [],
       hasImage: false,
       unexpectedKey: 'nope',
     })
     expect(result.success).toBe(false)
+  })
+})
+
+describe('AbEventSpecSchema resultTypes', () => {
+  it('refuses an unknown kind', () => {
+    const result = AbEventSpecSchema.safeParse({
+      relatedEgoGifts: [],
+      relatedThemePacks: [],
+      resultTypes: ['fishing'],
+      hasImage: false,
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('refuses an entry without the field', () => {
+    const result = AbEventSpecSchema.safeParse({
+      relatedEgoGifts: [],
+      relatedThemePacks: [],
+      hasImage: false,
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('accepts every kind', () => {
+    const result = AbEventSpecSchema.safeParse({
+      relatedEgoGifts: [],
+      relatedThemePacks: [],
+      resultTypes: [...AB_EVENT_RESULT_TYPES],
+      hasImage: false,
+    })
+    expect(result.success).toBe(true)
   })
 })
 
@@ -51,11 +87,13 @@ describe('AbEventSpecListSchema', () => {
       '901001': {
         relatedEgoGifts: ['9001'],
         relatedThemePacks: ['1002'],
+        resultTypes: [],
         hasImage: true,
       },
       '971055': {
         relatedEgoGifts: [],
         relatedThemePacks: [],
+        resultTypes: [],
         hasImage: false,
       },
     })

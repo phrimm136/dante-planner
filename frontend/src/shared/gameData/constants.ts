@@ -356,6 +356,20 @@ export const EGO_GIFT_DIFFICULTIES = ['normal', 'hard', 'extreme'] as const
 
 export type EGOGiftDifficulty = (typeof EGO_GIFT_DIFFICULTIES)[number]
 
+export const AB_EVENT_RESULT_TYPES = [
+  'hpDamage',
+  'spDamage',
+  'hpRecover',
+  'spRecover',
+  'costGain',
+  'costLoss',
+  'battle',
+  'battleEffect',
+  'levelUp',
+] as const
+
+export type AbEventResultType = (typeof AB_EVENT_RESULT_TYPES)[number]
+
 export const EGO_GIFT_ATTRIBUTE_TYPES = AFFINITIES
 
 export type EGOGiftAttributeType = Affinity
