@@ -1,0 +1,10 @@
+id: label-needs-control
+valid:
+  - "const a = <label htmlFor=\"a\">{t('k')}</label>"
+  - "const a = <label>{t('k')}<input /></label>"
+  - "const a = <label className=\"x\"><span>{t('k')}</span><select value={v}><option /></select></label>"
+  - "const a = <label><span>{t('k')}</span><Input type=\"number\" /></label>"
+  - "const a = <span id=\"g\">{t('k')}</span>"
+invalid:
+  - "const a = <label className=\"x\">{t('k')}</label>"
+  - "const a = <label className=\"x\">{t('k')}<Button /></label>"

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { ModerationReasonDialog } from './ModerationReasonDialog'
@@ -57,6 +57,7 @@ export function TimeoutDialog({
 }: ModerationDialogProps) {
   const { t } = useTranslation(['moderation', 'common'])
   const [duration, setDuration] = useState<number>(DEFAULT_TIMEOUT_MINUTES)
+  const durationLabelId = useId()
 
   return (
     <ModerationReasonDialog
@@ -74,8 +75,10 @@ export function TimeoutDialog({
       {...(isPending !== undefined && { isPending })}
     >
       <div className="space-y-2">
-        <label className="text-sm font-medium">{t('dialogs.timeout.duration')}</label>
-        <div className="grid grid-cols-2 gap-2">
+        <span id={durationLabelId} className="text-sm font-medium">
+          {t('dialogs.timeout.duration')}
+        </span>
+        <div role="group" aria-labelledby={durationLabelId} className="grid grid-cols-2 gap-2">
           {TIMEOUT_PRESETS.map((preset) => (
             <button
               key={preset.value}

@@ -186,8 +186,8 @@ export function IdentityTierSelector({
       selector={
         <IdentityTierSelectorInner
           entityId={entityId}
-          currentUptie={currentUptie}
-          currentLevel={currentLevel ?? maxLevel}
+          initialUptie={currentUptie}
+          initialLevel={currentLevel ?? maxLevel}
           maxLevel={maxLevel}
           onConfirm={onConfirm}
         />
@@ -200,20 +200,20 @@ export function IdentityTierSelector({
 
 function IdentityTierSelectorInner({
   entityId,
-  currentUptie,
-  currentLevel,
+  initialUptie,
+  initialLevel,
   maxLevel,
   onConfirm,
 }: {
   entityId: IdentityId
-  currentUptie: UptieTier
-  currentLevel: number
+  initialUptie: UptieTier
+  initialLevel: number
   maxLevel: number
   onConfirm: (entityId: IdentityId, data: TierSelection) => void
 }) {
   const { t } = useTranslation(['common'])
-  const [uptie, setUptie] = useState<UptieTier>(currentUptie)
-  const [level, setLevel] = useState<number>(currentLevel)
+  const [uptie, setUptie] = useState<UptieTier>(initialUptie)
+  const [level, setLevel] = useState<number>(initialLevel)
 
   const handleLevelChange = (value: string) => {
     const num = parseInt(value, 10)
@@ -229,6 +229,7 @@ function IdentityTierSelectorInner({
       <div className="flex items-center bg-black/70 rounded">
         <input
           type="number"
+          aria-label={t('common:level')}
           value={level}
           onChange={(e) => {
             handleLevelChange(e.target.value)
@@ -276,14 +277,17 @@ export function EgoThreadspinSelector({
   return (
     <LazySelector
       selector={
-        <EgoThreadspinSelectorInner
-          entityId={entityId}
-          currentThreadspin={currentThreadspin}
-          maxThreadspin={maxThreadspin}
-          isSelected={isSelected}
-          onConfirm={onConfirm}
-          onUnequip={onUnequip}
-        />
+        <HoverSelectorShell>
+          <EgoThreadspinSelectorInner
+            key={currentThreadspin}
+            entityId={entityId}
+            initialThreadspin={currentThreadspin}
+            maxThreadspin={maxThreadspin}
+            isSelected={isSelected}
+            onConfirm={onConfirm}
+            onUnequip={onUnequip}
+          />
+        </HoverSelectorShell>
       }
     >
       {children}
@@ -293,32 +297,32 @@ export function EgoThreadspinSelector({
 
 function EgoThreadspinSelectorInner({
   entityId,
-  currentThreadspin,
+  initialThreadspin,
   maxThreadspin,
   isSelected,
   onConfirm,
   onUnequip,
 }: {
   entityId: EGOId
-  currentThreadspin: ThreadspinTier
+  initialThreadspin: ThreadspinTier
   maxThreadspin: ThreadspinTier
   isSelected: boolean
   onConfirm: (entityId: EGOId, data: TierSelection) => void
   onUnequip?: ((entityId: EGOId) => void) | undefined
 }) {
   const { t } = useTranslation(['common'])
-  const [threadspin, setThreadspin] = useState<ThreadspinTier>(currentThreadspin)
+  const [threadspin, setThreadspin] = useState<ThreadspinTier>(initialThreadspin)
 
   const threadspinTiers = Array.from({ length: maxThreadspin }, (_, i) => (i + 1) as ThreadspinTier)
 
   const canUnequip =
     isSelected &&
-    threadspin === currentThreadspin &&
+    threadspin === initialThreadspin &&
     !entityId.endsWith(BASE_EGO_ID_SUFFIX) &&
     !!onUnequip
 
   return (
-    <HoverSelectorShell>
+    <>
       <TierRow tiers={threadspinTiers} selectedTier={threadspin} onSelect={setThreadspin} />
 
       {canUnequip ? (
@@ -340,6 +344,6 @@ function EgoThreadspinSelectorInner({
           }}
         />
       )}
-    </HoverSelectorShell>
+    </>
   )
 }

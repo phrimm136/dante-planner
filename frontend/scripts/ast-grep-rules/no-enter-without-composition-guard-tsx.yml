@@ -1,0 +1,34 @@
+id: no-enter-without-composition-guard-tsx
+language: Tsx
+severity: error
+message: An Enter check that ignores IME composition fires while a Korean, Japanese or Chinese word is still being composed; return early on e.nativeEvent.isComposing (React events) or e.isComposing (DOM events) in the same function.
+files:
+  - src/**/*.tsx
+utils:
+  function-like:
+    any:
+      - kind: function_declaration
+      - kind: arrow_function
+      - kind: function_expression
+      - kind: method_definition
+rule:
+  any:
+    - pattern: $EVENT.key === $KEY
+    - pattern: $EVENT.key !== $KEY
+    - pattern: $EVENT.key == $KEY
+    - pattern: $EVENT.key != $KEY
+    - pattern: $KEY === $EVENT.key
+    - pattern: $KEY !== $EVENT.key
+  inside:
+    stopBy:
+      matches: function-like
+    matches: function-like
+    not:
+      has:
+        stopBy:
+          matches: function-like
+        kind: property_identifier
+        regex: ^isComposing$
+constraints:
+  KEY:
+    regex: ^['"]Enter['"]$

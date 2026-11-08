@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, useId, Suspense } from 'react'
 
 import { useNavigate } from '@tanstack/react-router'
 import { queryClient } from '@/lib/queryClient'
@@ -85,6 +85,10 @@ export function PlannerEditorShell({
   initialSavedAt,
 }: PlannerEditorSession) {
   const { t } = useTranslation(['planner', 'common'])
+  const categoryLabelId = useId()
+  const categoryTriggerId = useId()
+  const keywordsLabelId = useId()
+  const titleInputId = useId()
 
   const config = usePlannerConfig()
   const navigate = useNavigate()
@@ -452,12 +456,17 @@ export function PlannerEditorShell({
       <div className="bg-background rounded-lg space-y-2">
         <div className="flex flex-col sm:flex-row gap-6 sm:gap-4 items-start">
           <div className="flex flex-col sm:flex-row sm:items-start gap-2 h-12">
-            <label className="text-sm font-medium whitespace-nowrap sm:mt-2">
+            <span id={categoryLabelId} className="text-sm font-medium whitespace-nowrap sm:mt-2">
               {t('pages.plannerMD.category')}
-            </label>
+            </span>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-auto min-w-24 h-10 justify-between">
+                <Button
+                  id={categoryTriggerId}
+                  aria-labelledby={`${categoryLabelId} ${categoryTriggerId}`}
+                  variant="outline"
+                  className="w-auto min-w-24 h-10 justify-between"
+                >
                   <MdCategoryLabel category={category} />
                   <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
@@ -478,10 +487,10 @@ export function PlannerEditorShell({
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-start gap-2 w-full sm:w-auto">
-            <label className="text-sm font-medium whitespace-nowrap sm:mt-2">
+            <span id={keywordsLabelId} className="text-sm font-medium whitespace-nowrap sm:mt-2">
               {t('pages.plannerMD.keywords')}
-            </label>
-            <div className="w-full sm:w-80">
+            </span>
+            <div role="group" aria-labelledby={keywordsLabelId} className="w-full sm:w-80">
               <KeywordSelector
                 options={PLANNER_KEYWORDS}
                 selectedOptions={selectedKeywords}
@@ -498,11 +507,12 @@ export function PlannerEditorShell({
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-start gap-2">
-          <label className="text-sm font-medium whitespace-nowrap sm:mt-2">
+          <label htmlFor={titleInputId} className="text-sm font-medium whitespace-nowrap sm:mt-2">
             {t('pages.plannerMD.planTitle')}
           </label>
           <div className="flex flex-col gap-1 flex-1">
             <input
+              id={titleInputId}
               type="text"
               value={title}
               onChange={handleTitleChange}

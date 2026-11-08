@@ -1,0 +1,52 @@
+id: no-enter-without-composition-guard-tsx
+snapshots:
+  "const a = <input onKeyDown={(e) => { if (e.key === 'Enter') submit() }} />":
+    labels:
+    - source: e.key === 'Enter'
+      style: primary
+      start: 41
+      end: 58
+    - source: (e) => { if (e.key === 'Enter') submit() }
+      style: secondary
+      start: 28
+      end: 70
+  "const handleKeyDown = (e: React.KeyboardEvent) => {\n  if (e.key === 'Enter' && url.trim()) {\n    e.preventDefault()\n    handleConfirm()\n  }\n}\n":
+    labels:
+    - source: e.key === 'Enter'
+      style: primary
+      start: 58
+      end: 75
+    - source: |-
+        (e: React.KeyboardEvent) => {
+          if (e.key === 'Enter' && url.trim()) {
+            e.preventDefault()
+            handleConfirm()
+          }
+        }
+      style: secondary
+      start: 22
+      end: 141
+  "function Outer(e: KeyboardEvent) {\n  if (e.isComposing) return\n  const inner = () => { if ('Enter' === e.key) submit() }\n}\n":
+    labels:
+    - source: "'Enter' === e.key"
+      style: primary
+      start: 91
+      end: 108
+    - source: () => { if ('Enter' === e.key) submit() }
+      style: secondary
+      start: 79
+      end: 120
+  "function onKey(e: KeyboardEvent) {\n  if (e.key !== \"Enter\") return\n  submit()\n}\n":
+    labels:
+    - source: e.key !== "Enter"
+      style: primary
+      start: 41
+      end: 58
+    - source: |-
+        function onKey(e: KeyboardEvent) {
+          if (e.key !== "Enter") return
+          submit()
+        }
+      style: secondary
+      start: 0
+      end: 79

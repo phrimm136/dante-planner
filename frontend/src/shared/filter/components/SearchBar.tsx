@@ -73,6 +73,7 @@ export const SearchBar = function SearchBar({
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         placeholder={placeholder}
+        aria-label={placeholder}
         className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground min-w-0"
       />
     </div>

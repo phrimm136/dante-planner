@@ -310,3 +310,45 @@ describe('EgoThreadspinSelector — unequip', () => {
     expect(screen.getByRole('button', { name: /equip/i })).toBeDefined()
   })
 })
+
+describe('EgoThreadspinSelector — equipment changes after mount', () => {
+  it('follows the equipped tier when it changes while mounted', () => {
+    const props = {
+      entityId: EGO_20102,
+      maxThreadspin: 4 as const,
+      isSelected: true,
+      onConfirm: vi.fn(),
+      onUnequip: vi.fn(),
+    }
+    const { container, rerender } = render(
+      <EgoThreadspinSelector {...props} currentThreadspin={4}>
+        <div data-testid="ego-card">card</div>
+      </EgoThreadspinSelector>,
+    )
+
+    openPopover(container)
+
+    rerender(
+      <EgoThreadspinSelector {...props} currentThreadspin={3}>
+        <div data-testid="ego-card">card</div>
+      </EgoThreadspinSelector>,
+    )
+
+    expect(screen.getByRole('button', { name: /tier 3/i })).toHaveAttribute('data-selected', 'true')
+    expect(screen.getByRole('button', { name: /unequip/i })).toBeDefined()
+  })
+})
+
+describe('IdentityTierSelector — level input name', () => {
+  it('names the level input', () => {
+    const { container } = render(
+      <IdentityTierSelector entityId={IDENTITY_10101} maxLevel={60} onConfirm={vi.fn()}>
+        <div data-testid="identity-card">card</div>
+      </IdentityTierSelector>,
+    )
+
+    openPopover(container)
+
+    expect(screen.getByRole('spinbutton', { name: /level/i })).toBeDefined()
+  })
+})

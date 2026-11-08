@@ -1,0 +1,18 @@
+id: no-state-seeded-from-prop
+valid:
+  - "function C({ initialValue }) { const [v] = useState(initialValue) }"
+  - "function C({ defaultOpen }: Props) { const [o] = useState<boolean>(defaultOpen) }"
+  - "function C({ current }) { const [v] = useState(0) }"
+  - "function C({ current }) { const [v] = useState(() => f(current)) }"
+  - "function C(a, { current }) { const [v] = useState(current) }"
+  - "function C({ other }) { const current = 1; const [v] = useState(current) }"
+  - |
+    function C({ open }: Props) {
+      const [wasOpen, setWasOpen] = useState(open)
+      if (wasOpen !== open) setWasOpen(open)
+    }
+invalid:
+  - "function C({ current }) { const [v] = useState(current) }"
+  - "function C({ current }: Props) { const [v] = useState<number>(current) }"
+  - "const C = ({ value = 1 }: Props) => { const [v] = useState(value) }"
+  - "const C = ({ value: seed }: Props) => { const [v] = useState(seed) }"

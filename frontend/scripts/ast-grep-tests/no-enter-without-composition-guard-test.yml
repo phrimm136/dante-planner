@@ -1,0 +1,14 @@
+id: no-enter-without-composition-guard
+valid:
+  - |
+    function onKey(e: KeyboardEvent) {
+      if (e.isComposing) return
+      if (e.key === 'Enter') submit()
+    }
+  - "const onKey = (e: KeyboardEvent) => e.key === 'Tab'"
+invalid:
+  - "const onKey = (e: KeyboardEvent) => { if (e.key === 'Enter') submit() }"
+  - |
+    function onKey(e: KeyboardEvent) {
+      if (e.key == 'Enter') submit()
+    }

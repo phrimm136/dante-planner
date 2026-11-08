@@ -1,0 +1,48 @@
+id: no-state-seeded-from-prop
+language: Tsx
+severity: error
+message: useState seeded from a prop keeps the first value and ignores later ones; rename the prop initialX or defaultX and have the parent remount with key when it must reset, or derive the value from the prop instead of storing it.
+files:
+  - src/**/*.tsx
+ignores:
+  - '**/__tests__/**'
+  - '**/*.test.tsx'
+rule:
+  any:
+    - pattern: useState($PROP)
+    - pattern: useState<$TYPE>($PROP)
+  inside:
+    stopBy: end
+    any:
+      - kind: function_declaration
+      - kind: arrow_function
+      - kind: function_expression
+    has:
+      field: parameters
+      has:
+        nthChild: 1
+        has:
+          field: pattern
+          kind: object_pattern
+          has:
+            any:
+              - kind: shorthand_property_identifier_pattern
+                pattern: $PROP
+              - kind: object_assignment_pattern
+                has:
+                  field: left
+                  pattern: $PROP
+              - kind: pair_pattern
+                has:
+                  field: value
+                  pattern: $PROP
+    not:
+      has:
+        stopBy: end
+        any:
+          - pattern: $PROP !== $OTHER
+          - pattern: $OTHER !== $PROP
+constraints:
+  PROP:
+    not:
+      regex: ^(initial|default)[A-Z]
