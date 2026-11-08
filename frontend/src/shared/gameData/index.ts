@@ -57,6 +57,7 @@ export {
   EGO_GIFT_TIERS,
   EGO_GIFT_TIER_TAGS,
   EGO_GIFT_DIFFICULTIES,
+  AB_EVENT_RESULT_TYPES,
   EGO_GIFT_ATTRIBUTE_TYPES,
   THEME_PACK_DIFFICULTIES,
   THEME_PACK_DIFFICULTY_LABELS,
@@ -97,6 +98,7 @@ export type {
   SanityConditionType,
   EGOGiftTier,
   EGOGiftDifficulty,
+  AbEventResultType,
   EGOGiftAttributeType,
   ThemePackFloor,
 } from './constants'

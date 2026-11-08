@@ -13,3 +13,4 @@ export {
 export { BATTLE_FAMILIES } from './lib/battleVocabulary'
 export { BattleFilterDropdown } from './components/BattleFilterDropdown'
 export { useBattleCardNames } from './hooks/useBattleCardNames'
+export { OptionToggleGroup, type ToggleOption } from './components/OptionToggleGroup'
