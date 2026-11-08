@@ -3,20 +3,7 @@ import { TextSkeleton } from '@/components/feedback/TextSkeleton'
 import { EntityDetailLayout } from '@/components/layout/EntityDetailLayout'
 import { LabeledPanel } from '@/components/layout/LabeledPanel'
 import { BATTLE_DETAIL_SPRITE_ASPECT_RATIO } from '../../lib/cardLayout'
-
-function SkillCardBlock() {
-  return (
-    <div className="p-4">
-      <div className="flex gap-1">
-        <div className="w-24 h-24 rounded bg-muted" />
-        <div className="flex-1">
-          <TextSkeleton lines={3} width="full" />
-        </div>
-      </div>
-      <TextSkeleton lines={3} width="full" />
-    </div>
-  )
-}
+import { SkillCardSkeleton } from '@/shared/skill'
 
 export function BattleDetailSkeleton() {
   return (
@@ -65,9 +52,9 @@ export function BattleDetailSkeleton() {
       >
         <DetailSectionSkeleton>
           <div className="border rounded">
-            <SkillCardBlock />
-            <SkillCardBlock />
-            <SkillCardBlock />
+            <SkillCardSkeleton />
+            <SkillCardSkeleton />
+            <SkillCardSkeleton />
           </div>
         </DetailSectionSkeleton>
         <DetailSectionSkeleton>

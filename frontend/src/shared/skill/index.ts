@@ -1,4 +1,5 @@
 export { SkillCard } from './components/SkillCard'
+export { SkillCardSkeleton } from './components/SkillCardSkeleton'
 export { SkillDescription, getMergedSkillDesc } from './components/SkillDescription'
 export { IdentitySkillCard } from './components/IdentitySkillCard'
 export { EGOSkillCard } from './components/EGOSkillCard'

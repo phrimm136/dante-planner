@@ -5,20 +5,7 @@ import { EntityDetailLayout } from '@/components/layout/EntityDetailLayout'
 import { LabeledPanel } from '@/components/layout/LabeledPanel'
 import { Separator } from '@/components/ui/separator'
 import { DETAIL_IMAGE_ASPECT_RATIO } from '@/lib/constants'
-
-function SkillCardBlock() {
-  return (
-    <div className="p-4">
-      <div className="flex gap-1">
-        <div className="w-24 h-24 rounded bg-muted" />
-        <div className="flex-1">
-          <TextSkeleton lines={3} width="full" />
-        </div>
-      </div>
-      <TextSkeleton lines={3} width="full" />
-    </div>
-  )
-}
+import { SkillCardSkeleton } from '@/shared/skill'
 
 export function EGODetailSkeleton() {
   return (
@@ -79,9 +66,9 @@ export function EGODetailSkeleton() {
       >
         <DetailSectionSkeleton>
           <div className="border rounded">
-            <SkillCardBlock />
+            <SkillCardSkeleton />
             <Separator />
-            <SkillCardBlock />
+            <SkillCardSkeleton />
           </div>
         </DetailSectionSkeleton>
 

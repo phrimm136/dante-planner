@@ -1,19 +1,35 @@
+import { Fragment, type ReactNode } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TextSkeleton } from '@/components/feedback/TextSkeleton'
 import { CARD_GAP_PX, SECTION_STYLES } from '@/lib/constants'
-import { useSlotSizePx, type CardGeometry } from '@/shared/cardLayout'
+import { useSlotSizePx, type CardGeometry, type CardSizePx } from '@/shared/cardLayout'
 import { useViewportFillCount } from '@/components/hooks/useViewportFillCount'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 
 interface ListPageSkeletonProps {
   geometry: CardGeometry
   filterCount?: number
+  card?: (slotSize: CardSizePx) => ReactNode
 }
 
-export function ListPageSkeleton({ geometry, filterCount = 5 }: ListPageSkeletonProps) {
+function defaultCard({ widthPx, heightPx }: CardSizePx) {
+  return (
+    <Skeleton
+      style={{
+        width: widthPx,
+        height: heightPx,
+      }}
+    />
+  )
+}
+
+export function ListPageSkeleton({
+  geometry,
+  filterCount = 5,
+  card = defaultCard,
+}: ListPageSkeletonProps) {
   const { size, mobileScale } = geometry
   const slotSize = useSlotSizePx(size, mobileScale)
-  const { widthPx, heightPx } = slotSize
   const cardCount = useViewportFillCount(slotSize, CARD_GAP_PX)
 
   return (
@@ -51,13 +67,7 @@ export function ListPageSkeleton({ geometry, filterCount = 5 }: ListPageSkeleton
           <div className="pt-4">
             <ResponsiveCardGrid size={size} mobileScale={mobileScale}>
               {Array.from({ length: cardCount }).map((_, i) => (
-                <Skeleton
-                  key={i}
-                  style={{
-                    width: widthPx,
-                    height: heightPx,
-                  }}
-                />
+                <Fragment key={i}>{card(slotSize)}</Fragment>
               ))}
             </ResponsiveCardGrid>
           </div>

@@ -1,19 +1,12 @@
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
-import {
-  getRarityIconPath,
-  getIdentityDetailImagePath,
-  getSinnerIconPath,
-  getSinnerIconRingPath,
-} from '@/shared/assets'
+import { getRarityIconPath, getIdentityDetailImagePath } from '@/shared/assets'
 import { CharacterImageSection } from '@/components/layout/CharacterImageSection'
-import { Skeleton } from '@/components/ui/skeleton'
 import { type Sinner } from '@/shared/gameData'
 import { getSinnerFromId } from '@/shared/gameData'
-import { getDisplayFontForLanguage } from '@/lib/utils'
-import { DETAIL_IMAGE_ASPECT_RATIO, SECTION_STYLES, SINNER_COLORS } from '@/lib/constants'
+import { DETAIL_IMAGE_ASPECT_RATIO } from '@/lib/constants'
 import type { IdentityId } from '@/shared/gameData'
+import { SinnerTitleRow } from '@/shared/sinner'
 
 type ImageVariant = 'normal' | 'gacksung'
 
@@ -25,7 +18,6 @@ interface IdentityHeaderProps {
 }
 
 export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeaderProps) {
-  const { i18n } = useTranslation()
   // Gacksung image only available for rank > 1 AND uptie >= 3
   const canShowGacksung = rank > 1 && uptie >= 3
   const [imageVariant, setImageVariant] = useState<ImageVariant>(
@@ -39,8 +31,6 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
   }
 
   const sinner = getSinnerFromId(identityId) as Sinner
-  const sinnerColor = SINNER_COLORS[sinner] || '#333333'
-  const displayStyle = getDisplayFontForLanguage(i18n.language)
 
   const handleSwapImage = () => {
     setImageVariant((prev: ImageVariant) => (prev === 'gacksung' ? 'normal' : 'gacksung'))
@@ -50,35 +40,13 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
 
   return (
     <div className="space-y-4">
-      <div>
-        <div className="flex justify-end">
-          <img src={getRarityIconPath(rank)} alt={`${rank} rank`} className="h-6 object-contain" />
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="relative w-12 h-12 flex-shrink-0">
-            <img
-              src={getSinnerIconRingPath(rank)}
-              alt=""
-              className="absolute inset-0 w-full h-full object-contain"
-            />
-            <img
-              src={getSinnerIconPath(sinner)}
-              alt={sinner}
-              className="absolute inset-0 w-full h-full object-contain p-1"
-            />
-          </div>
-          {name ? (
-            <h1
-              className={SECTION_STYLES.TEXT.pageTitle}
-              style={{ color: sinnerColor, ...displayStyle }}
-            >
-              {name}
-            </h1>
-          ) : (
-            <Skeleton className="h-8 w-48" style={{ backgroundColor: sinnerColor }} />
-          )}
-        </div>
-      </div>
+      <SinnerTitleRow
+        sinner={sinner}
+        name={name}
+        rank={rank}
+        rankIconSrc={getRarityIconPath(rank)}
+        ringRank={rank}
+      />
 
       <CharacterImageSection
         src={currentImagePath}
