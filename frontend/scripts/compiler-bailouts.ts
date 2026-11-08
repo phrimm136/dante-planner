@@ -129,8 +129,8 @@ async function main() {
   console.log(`Scanned ${files.length} files; ${bailedOut.size} bail out of the React Compiler.`)
 
   if (stale.length > 0) {
-    console.log(`\n${stale.length} allowlist entries no longer bail out — remove them:`)
-    for (const file of stale) console.log(`  ${file}`)
+    console.error(`\n${stale.length} allowlist entries no longer bail out — remove them:`)
+    for (const file of stale) console.error(`  ${file}`)
   }
 
   if (unexpected.length > 0) {
@@ -140,8 +140,9 @@ async function main() {
       for (const bailout of bailedOut.get(file) ?? []) console.error(`      ${bailout}`)
     }
     console.error(`\nFix the file, or add it to ${path.relative(FRONTEND_ROOT, ALLOWLIST_PATH)}.`)
-    process.exit(1)
   }
+
+  if (stale.length > 0 || unexpected.length > 0) process.exit(1)
 
   console.log('\nNo new React Compiler bailouts.')
 }
