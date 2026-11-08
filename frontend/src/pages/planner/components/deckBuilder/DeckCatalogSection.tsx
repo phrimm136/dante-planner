@@ -20,6 +20,7 @@ interface DeckCatalogSectionProps {
   sortedIdentities: IdentityEntity[]
   visibleIdentityIds: Set<string>
   equippedIdentityIds: Set<string>
+  equippedIdentityTierMap: Record<IdentityId, { uptie: UptieTier; level: number }>
   identityScrollRef: Ref<HTMLDivElement>
   onEquipIdentity: (identityId: IdentityId, data: { uptie?: UptieTier; level?: number }) => void
   maxLevel: number
@@ -38,6 +39,7 @@ export function DeckCatalogSection({
   sortedIdentities,
   visibleIdentityIds,
   equippedIdentityIds,
+  equippedIdentityTierMap,
   identityScrollRef,
   onEquipIdentity,
   maxLevel,
@@ -105,6 +107,7 @@ export function DeckCatalogSection({
           sortedIdentities={sortedIdentities}
           visibleIds={visibleIdentityIds}
           equippedIds={equippedIdentityIds}
+          equippedIdentityTierMap={equippedIdentityTierMap}
           onEquip={onEquipIdentity}
           scrollRef={identityScrollRef}
           isActive={entityMode === 'identity'}

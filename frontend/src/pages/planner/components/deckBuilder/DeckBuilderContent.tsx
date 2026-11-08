@@ -65,6 +65,14 @@ export function DeckBuilderContent({
     return ids
   })()
 
+  const equippedIdentityTierMap = (() => {
+    const map: Record<IdentityId, { uptie: UptieTier; level: number }> = {}
+    Object.values(equipment).forEach((eq) => {
+      map[eq.identity.id] = { uptie: eq.identity.uptie, level: eq.identity.level }
+    })
+    return map
+  })()
+
   const equippedThreadspinMap = (() => {
     const map: Record<string, ThreadspinTier> = {}
     Object.values(equipment).forEach((eq) => {
@@ -355,6 +363,7 @@ export function DeckBuilderContent({
         sortedIdentities={sortedIdentities}
         visibleIdentityIds={visibleIdentityIds}
         equippedIdentityIds={equippedIdentityIds}
+        equippedIdentityTierMap={equippedIdentityTierMap}
         identityScrollRef={identityScrollRef}
         onEquipIdentity={handleEquipIdentity}
         maxLevel={maxLevel}

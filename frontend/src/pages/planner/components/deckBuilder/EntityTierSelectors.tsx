@@ -181,16 +181,20 @@ export function IdentityTierSelector({
   onConfirm,
   children,
 }: IdentityTierSelectorProps) {
+  const initialLevel = currentLevel ?? maxLevel
   return (
     <LazySelector
       selector={
-        <IdentityTierSelectorInner
-          entityId={entityId}
-          initialUptie={currentUptie}
-          initialLevel={currentLevel ?? maxLevel}
-          maxLevel={maxLevel}
-          onConfirm={onConfirm}
-        />
+        <HoverSelectorShell>
+          <IdentityTierSelectorInner
+            key={`${String(currentUptie)}-${String(initialLevel)}`}
+            entityId={entityId}
+            initialUptie={currentUptie}
+            initialLevel={initialLevel}
+            maxLevel={maxLevel}
+            onConfirm={onConfirm}
+          />
+        </HoverSelectorShell>
       }
     >
       {children}
@@ -223,7 +227,7 @@ function IdentityTierSelectorInner({
   }
 
   return (
-    <HoverSelectorShell>
+    <>
       <TierRow tiers={UPTIE_TIERS} selectedTier={uptie} onSelect={setUptie} />
 
       <div className="flex items-center bg-black/70 rounded">
@@ -251,7 +255,7 @@ function IdentityTierSelectorInner({
           onConfirm(entityId, { uptie, level })
         }}
       />
-    </HoverSelectorShell>
+    </>
   )
 }
 
