@@ -11,7 +11,7 @@ resources:
 # replicated ECR (terraform/oregon ecr-replication.tf), not Oregon's registry.
 images:
 - name: danteplanner-backend
-  newTag: f003ffee16fb39cd952c8aa618c3d7ce1e56e893
+  newTag: 384f83e97b551758409c894460b2522a8fb9e211
 
 patches:
 - path: configmap-patch.yaml
