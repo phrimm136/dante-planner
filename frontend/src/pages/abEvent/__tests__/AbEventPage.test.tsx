@@ -32,7 +32,7 @@ function sectionTitles(container: HTMLElement): string[] {
 
 describe('AbEventPage', () => {
   it(
-    'wires the result filter under filters.eventResult after the EGO gift section',
+    'wires the result filter under filters.eventResult before the EGO gift section',
     async () => {
       mountRoute('/abEvent', '/abEvent', AbEventPage)
       await waitFor(
@@ -48,7 +48,7 @@ describe('AbEventPage', () => {
       const titles = sectionTitles(aside)
       const giftIndex = titles.indexOf(databaseText('filters.egoGift'))
       expect(giftIndex).toBeGreaterThanOrEqual(0)
-      expect(titles[giftIndex + 1]).toBe(databaseText('filters.eventResult'))
+      expect(titles[giftIndex - 1]).toBe(databaseText('filters.eventResult'))
 
       fireEvent.click(
         desktop().getByRole('button', {

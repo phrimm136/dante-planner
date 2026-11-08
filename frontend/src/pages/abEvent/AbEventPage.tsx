@@ -30,6 +30,14 @@ function AbEventPageShell() {
 
   const PRIMARY_FILTERS = [
     filterSection({
+      key: 'selectedResultTypes',
+      titleKey: 'filters.eventResult',
+      titleFallback: 'Event Result',
+      Component: AbEventResultFilter,
+      selected: filters.selectedResultTypes,
+      onSelectionChange: setters.selectedResultTypes,
+    }),
+    filterSection({
       key: 'selectedEgoGifts',
       titleKey: 'filters.egoGift',
       titleFallback: 'EGO Gift',
@@ -37,14 +45,6 @@ function AbEventPageShell() {
       Component: EGOGiftFilterDropdown,
       selected: filters.selectedEgoGifts,
       onSelectionChange: setters.selectedEgoGifts,
-    }),
-    filterSection({
-      key: 'selectedResultTypes',
-      titleKey: 'filters.eventResult',
-      titleFallback: 'Event Result',
-      Component: AbEventResultFilter,
-      selected: filters.selectedResultTypes,
-      onSelectionChange: setters.selectedResultTypes,
     }),
   ]
 
