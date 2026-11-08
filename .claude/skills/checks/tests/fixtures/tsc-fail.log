@@ -1,0 +1,5 @@
+yarn run v1.22.22
+$ tsc -b
+src/checksPlantedError.ts(1,14): error TS2322: Type 'string' is not assignable to type 'number'.
+error Command failed with exit code 2.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.

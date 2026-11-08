@@ -2,18 +2,18 @@
 
 Playwright driving a running stack over HTTP. Three projects, split by what they need:
 
-| Project | `yarn --cwd e2e …` | Needs |
+| Project | `.claude/skills/checks/bin/checks e2e run …` | Needs |
 |---|---|---|
-| `contract` | `test:contract` | the request fixture only, against the API host |
-| `infra` | `test:infra` | the request fixture, plus Toxiproxy and both regions |
-| `chromium` | `test:app` | a browser, and an SPA build behind nginx |
+| `contract` | `--project contract` | the request fixture only, against the API host |
+| `infra` | `--project infra` | the request fixture, plus Toxiproxy and both regions |
+| `chromium` | (the default) | a browser, and an SPA build behind nginx |
 
 ---
 
 ## Bringing the stack up
 
 ```
-yarn --cwd frontend build          # nginx serves ./frontend/dist; the image ships nothing
+.claude/skills/checks/bin/checks fe build   # nginx serves ./frontend/dist; the image ships nothing
 STUB_CLIENT_SECRET=stub-secret yarn --cwd e2e stack:up:rig
 ```
 
@@ -36,7 +36,7 @@ E2E_DB_HOST=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress
 E2E_DB_USER=$(docker exec limbusplanner-mysql-1 printenv MYSQL_USER) \
 E2E_DB_PASSWORD=$(docker exec limbusplanner-mysql-1 printenv MYSQL_PASSWORD) \
 E2E_STAGING_KEY_FILE=../backend/src/test/resources/test-keys/private_key.pem \
-yarn --cwd e2e test:app
+.claude/skills/checks/bin/checks e2e run
 ```
 
 Three of those are not guessable, and each fails in a way that names something other than itself:
