@@ -54,6 +54,8 @@ export const SINNER_COLORS: Record<string, string> = {
   Gregor: '#886030',
 } as const
 
+export const SINNER_COLOR_FALLBACK = '#333333'
+
 /**
  * Skill frame glow colors for coin power backgrounds
  * Extracted from skill frame BG images - these are bright neon colors
