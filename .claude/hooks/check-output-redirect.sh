@@ -75,9 +75,9 @@ if echo "$scan" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vites
     dir_fix=""
     case "$prefix" in
         fe-*)
-            if ! echo "$command" | grep -qE -- '--cwd[= ]+\S*frontend(/|[" ]|$)'; then
+            if ! echo "$command" | grep -qE -- '--cwd[= ]+\S*(frontend|e2e)(/|[" ]|$)'; then
                 dir_ok=false
-                dir_fix='yarn --cwd frontend <command>'
+                dir_fix='yarn --cwd frontend <command>  (or yarn --cwd e2e <command>)'
             fi
             ;;
         be-*)

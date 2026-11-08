@@ -531,6 +531,15 @@ jobs:
           yarn --cwd frontend install --frozen-lockfile
           yarn --cwd frontend build
 
+      - name: Install e2e dependencies
+        run: yarn --cwd e2e install --frozen-lockfile
+
+      - name: E2E Typecheck
+        run: yarn --cwd e2e typecheck
+
+      - name: E2E Format Check
+        run: yarn --cwd e2e fmt:check
+
       - name: Bring up the two-region rig
         run: |
           yarn --cwd e2e stack:up:rig
@@ -545,7 +554,6 @@ jobs:
           # without this, auth.ts falls back to Secrets Manager via a CLI profile no runner has.
           E2E_STAGING_KEY_FILE: ${{ github.workspace }}/backend/src/test/resources/test-keys/private_key.pem
         run: |
-          yarn --cwd e2e install --frozen-lockfile
           yarn --cwd e2e playwright install chromium
           yarn --cwd e2e test:contract
           yarn --cwd e2e test:app
