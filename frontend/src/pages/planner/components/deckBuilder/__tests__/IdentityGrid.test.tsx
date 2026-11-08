@@ -2,14 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 
 import { toIdentityEntity } from '@/pages/identity'
+import { getUptieFramePath } from '@/shared/assets'
 import { SeededPlannerStore } from '../../../stores/__tests__/plannerStoreHarness'
 import { IdentityGrid } from '../IdentityGrid'
 import type { UptieTier } from '../../../types/DeckTypes'
 import type { IdentityId } from '@/shared/gameData'
 
-vi.mock('@/pages/identity', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/pages/identity')>()),
-  IdentityCard: () => <div data-testid="identity-card" />,
+vi.mock('@/pages/identity/components/IdentityName', () => ({
+  IdentityName: () => <span data-testid="identity-name" />,
 }))
 
 const IDENTITY = toIdentityEntity(
@@ -69,7 +69,9 @@ function grid(equippedIdentityTierMap: Record<IdentityId, { uptie: UptieTier; le
 }
 
 function openPopover(container: HTMLElement) {
-  const target = container.querySelector('div.absolute.inset-0') as HTMLElement
+  const target = container.querySelector(
+    '.inline-block.group > div.absolute.inset-0',
+  ) as HTMLElement
   act(() => {
     fireEvent.mouseEnter(target)
   })
@@ -109,5 +111,34 @@ describe('IdentityGrid — tier selector seeding', () => {
 
     expect(selectedUptie()).toBe('Tier 4')
     expect(screen.getByRole('spinbutton')).toHaveValue(MAX_LEVEL)
+  })
+})
+
+function frameSrc(): string | null {
+  return screen.getByAltText(`${String(IDENTITY.rank)} star frame`).getAttribute('src')
+}
+
+describe('IdentityGrid — card shows the equipped tier', () => {
+  it('shows the equipped uptie and level on the card', () => {
+    render(grid({ [IDENTITY.id]: { uptie: 2, level: 30 } }))
+
+    expect(frameSrc()).toBe(getUptieFramePath(IDENTITY.rank, 2))
+    expect(screen.getByTestId('identity-level')).toHaveTextContent('Lv. 30')
+  })
+
+  it('follows an equipment change while mounted', () => {
+    const { rerender } = render(grid({ [IDENTITY.id]: { uptie: 2, level: 30 } }))
+
+    rerender(grid({ [IDENTITY.id]: { uptie: 3, level: 40 } }))
+
+    expect(frameSrc()).toBe(getUptieFramePath(IDENTITY.rank, 3))
+    expect(screen.getByTestId('identity-level')).toHaveTextContent('Lv. 40')
+  })
+
+  it('shows uptie 4 and the max level for an unequipped identity', () => {
+    render(grid({}))
+
+    expect(frameSrc()).toBe(getUptieFramePath(IDENTITY.rank, 4))
+    expect(screen.getByTestId('identity-level')).toHaveTextContent(`Lv. ${String(MAX_LEVEL)}`)
   })
 })
