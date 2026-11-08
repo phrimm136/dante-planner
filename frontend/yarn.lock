@@ -736,11 +736,6 @@
   resolved "https://registry.yarnpkg.com/@floating-ui/utils/-/utils-0.2.12.tgz#afefe785949f16ac4cdd1e695935a321572dd56a"
   integrity sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==
 
-"@hono/node-server@^1.19.13":
-  version "1.19.18"
-  resolved "https://registry.yarnpkg.com/@hono/node-server/-/node-server-1.19.18.tgz#6f3f6d5300889b9df270466ff476c2b1ea7c8ac0"
-  integrity sha512-609kppIP9GITS+EwPyB6Kiq8z2yXONaYD1VHpo7MMP9celRJYbkFr9KakJncHwK0EK/XYtlogqmrLchDv5HX5w==
-
 "@humanfs/core@^0.19.2":
   version "0.19.2"
   resolved "https://registry.yarnpkg.com/@humanfs/core/-/core-0.19.2.tgz#a8272ca03b2acf492670222b2320b6c421bfde60"
@@ -3830,11 +3825,6 @@ headers-polyfill@^5.0.1:
   dependencies:
     "@types/set-cookie-parser" "^2.4.10"
     set-cookie-parser "^3.0.1"
-
-hono@^4.12.27:
-  version "4.13.17"
-  resolved "https://registry.yarnpkg.com/hono/-/hono-4.13.17.tgz#110b6befd87b9775ed3badd0d63b20da4fe33468"
-  integrity sha512-vZIcbkvjOR5hHRWERbGkr8fGfF0GGM1ooYkuH448iO3b2AdVEr3AXZSw4Z3Kn+1L5z0CVoVeyV29VGYmFh05kQ==
 
 hookified@^1.15.0, hookified@^1.15.1:
   version "1.15.1"
