@@ -3,7 +3,7 @@
  * the suites hand to `vi.mock`, prop-echoing child stubs, and the state matrix.
  */
 
-import { vi } from 'vitest'
+import { vi, type Mock } from 'vitest'
 
 import { makeComment } from './commentSurfaceMatrix'
 import type { CommentNode } from '../../types/CommentTypes'
@@ -62,8 +62,22 @@ export function sseModule() {
   }
 }
 
-export function mutationsModule() {
-  const mutation = () => ({ mutate: vi.fn(), isPending: false })
+interface MutationStub {
+  mutate: Mock
+  isPending: boolean
+}
+
+type UseMutationStub = () => MutationStub
+
+export function mutationsModule(): {
+  useCreateComment: UseMutationStub
+  useEditComment: UseMutationStub
+  useDeleteComment: UseMutationStub
+  useUpvoteComment: UseMutationStub
+  useReportComment: UseMutationStub
+  useToggleCommentNotifications: UseMutationStub
+} {
+  const mutation: UseMutationStub = () => ({ mutate: vi.fn(), isPending: false })
   return {
     useCreateComment: () => ({ mutate: vi.fn(), isPending: sectionState.isCreatePending }),
     useEditComment: mutation,
@@ -74,7 +88,7 @@ export function mutationsModule() {
   }
 }
 
-export function moderatorDeleteModule() {
+export function moderatorDeleteModule(): { useModeratorCommentDelete: UseMutationStub } {
   return {
     useModeratorCommentDelete: () => ({
       mutate: vi.fn(),
