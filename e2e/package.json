@@ -10,6 +10,8 @@
     "stack:up:rig": "bash ../scripts/ops/local-multiregion-up.sh",
     "stack:up:edge": "docker compose --project-directory .. -f ../docker-compose.yml -f ../docker-compose.local.yml -f ../docker-compose.e2e.yml -f ../docker-compose.oauth-gtid.yml -f ../docker-compose.edge.yml -p limbusplanner up -d --build",
     "typecheck": "tsc --noEmit",
+    "fmt": "oxfmt -c ../frontend/.oxfmtrc.json src tests global-setup.ts playwright.config.ts",
+    "fmt:check": "oxfmt -c ../frontend/.oxfmtrc.json --check src tests global-setup.ts playwright.config.ts",
     "test": "playwright test",
     "test:app": "playwright test --project=chromium",
     "test:contract": "playwright test --project=contract",
@@ -22,6 +24,7 @@
     "@playwright/test": "1.64.1",
     "@types/node": "^26.6.6",
     "mysql2": "^3.24.6",
+    "oxfmt": "0.75.0",
     "typescript": "7.0.2"
   }
 }

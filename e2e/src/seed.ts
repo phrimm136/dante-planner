@@ -63,9 +63,10 @@ export interface SeededUser {
 // username_suffix is unique across the table and capped at five characters.
 function randomSuffix(): string {
   const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-  return Array.from({ length: 5 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join(
-    '',
-  )
+  return Array.from(
+    { length: 5 },
+    () => alphabet[Math.floor(Math.random() * alphabet.length)],
+  ).join('')
 }
 
 /**

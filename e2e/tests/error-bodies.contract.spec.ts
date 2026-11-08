@@ -60,9 +60,7 @@ test('a write without the csrf header is refused with its own code', async ({ re
   await expectProblem(response, 403, 'CSRF_TOKEN_INVALID')
 })
 
-test('an unauthenticated read of a protected route answers a problem body', async ({
-  request,
-}) => {
+test('an unauthenticated read of a protected route answers a problem body', async ({ request }) => {
   const response = await request.get('/api/notifications/unread-count')
 
   await expectProblem(response, 401, 'UNAUTHORIZED')

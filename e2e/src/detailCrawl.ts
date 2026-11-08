@@ -130,14 +130,18 @@ export async function pageState(page: Page): Promise<PageState> {
 
 export async function settleImages(page: Page, timeoutMs: number): Promise<void> {
   await page.evaluate(() => {
-    for (const img of Array.from(document.querySelectorAll<HTMLImageElement>('main img[loading=lazy]'))) {
+    for (const img of Array.from(
+      document.querySelectorAll<HTMLImageElement>('main img[loading=lazy]'),
+    )) {
       img.loading = 'eager'
     }
   })
   await page
     .waitForFunction(
       () =>
-        Array.from(document.querySelectorAll<HTMLImageElement>('main img')).every((i) => i.complete),
+        Array.from(document.querySelectorAll<HTMLImageElement>('main img')).every(
+          (i) => i.complete,
+        ),
       null,
       { timeout: timeoutMs },
     )
@@ -208,7 +212,10 @@ function withLock(dir: string, body: () => void): void {
 }
 
 function groupKey(v: Violation): string {
-  return `${v.category}\t${v.detail.replace(/"[^"]*"/, '').replace(/\d+/g, '#').trim()}`
+  return `${v.category}\t${v.detail
+    .replace(/"[^"]*"/, '')
+    .replace(/\d+/g, '#')
+    .trim()}`
 }
 
 function summarize(parts: ChunkPart[], totalRoutes: number) {

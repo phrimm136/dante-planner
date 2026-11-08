@@ -61,7 +61,9 @@ export async function seedLocalPlanner(page: Page, seed: LocalPlannerSeed): Prom
         }
       }
       request.onsuccess = () => {
-        const store = request.result.transaction(script.store, 'readwrite').objectStore(script.store)
+        const store = request.result
+          .transaction(script.store, 'readwrite')
+          .objectStore(script.store)
         // Seed only what is absent: the script re-runs on every navigation, and an
         // unconditional put would clobber whatever the app wrote since the first load.
         const existing = store.get(script.key)

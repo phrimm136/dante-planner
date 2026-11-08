@@ -38,7 +38,11 @@ function tombstoneRows(rows: string[], plannerId: string): string[] {
 
 test('a guest delete writes a tombstone and sends no request', async ({ page }) => {
   const plannerId = randomUUID()
-  await seedLocalPlanner(page, { plannerId, title: `e2e guest draft ${plannerId.slice(0, 8)}`, status: 'draft' })
+  await seedLocalPlanner(page, {
+    plannerId,
+    title: `e2e guest draft ${plannerId.slice(0, 8)}`,
+    status: 'draft',
+  })
 
   await openDetail(page, plannerId)
   await confirmDelete(page, [])
@@ -77,7 +81,9 @@ test('a guest tombstone is swept when the session returns', async ({ page, conte
       })
       .toBe(404)
     await expect
-      .poll(async () => (await readPlannerRows(page)).filter((row) => row.includes(fixture.plannerId)))
+      .poll(async () =>
+        (await readPlannerRows(page)).filter((row) => row.includes(fixture.plannerId)),
+      )
       .toEqual([])
   } finally {
     await dropPlanner(fixture)
