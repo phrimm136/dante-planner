@@ -78,7 +78,10 @@ async function crawlRoute(page: Page, route: CrawlRoute, part: ChunkPart): Promi
     for (const v of textViolations(dom.text)) record(v.category, v.detail)
     return true
   } catch (error) {
-    record('load', `crawl error: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`)
+    record(
+      'load',
+      `crawl error: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`,
+    )
     return false
   } finally {
     page.off('response', onResponse)
@@ -93,13 +96,11 @@ async function setLanguage(context: BrowserContext, lang: string): Promise<void>
 test.describe.configure({ mode: 'parallel' })
 
 test('detectors flag synthetic violators', async ({ page }) => {
-  expect(textViolations('[Combustion] then <color=#fff>x</color> and CRIMSON, HEAD_PLATE').map((v) => v.category)).toEqual([
-    'rawToken',
-    'rawToken',
-    'rawToken',
-    'rawEnum',
-    'rawEnum',
-  ])
+  expect(
+    textViolations('[Combustion] then <color=#fff>x</color> and CRIMSON, HEAD_PLATE').map(
+      (v) => v.category,
+    ),
+  ).toEqual(['rawToken', 'rawToken', 'rawToken', 'rawEnum', 'rawEnum'])
   expect(textViolations('[적중시] Crimsonness HEADS HEAD_PLATEX 3 < 4')).toEqual([])
 
   await page.setContent(
@@ -153,7 +154,11 @@ test('a coin renders at its natural aspect', async ({ page }) => {
   await expect.poll(() => coin.evaluate((i: HTMLImageElement) => i.naturalWidth)).toBeGreaterThan(0)
   const measured = await coin.evaluate((i: HTMLImageElement) => {
     const box = i.getBoundingClientRect()
-    return { rendered: box.width / box.height, natural: i.naturalWidth / i.naturalHeight, src: i.src }
+    return {
+      rendered: box.width / box.height,
+      natural: i.naturalWidth / i.naturalHeight,
+      src: i.src,
+    }
   })
   const deviation = Math.abs(measured.rendered / measured.natural - 1)
   recordCheck('coin-aspect', { ...measured, deviation })

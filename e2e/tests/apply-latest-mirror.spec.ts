@@ -42,10 +42,10 @@ test('applying the latest mirror from the community page keeps local draft edits
     // The server validates submitted content against the game data of its stated version, so a
     // stale mirror cannot be created through the API; the row is aged by seeding instead —
     // exactly the state a real planner reaches when a new mirror ships under it.
-    await sql('UPDATE planner_content SET game_content_version = ? WHERE planner_id = UUID_TO_BIN(?)', [
-      staleMirror,
-      plannerId,
-    ])
+    await sql(
+      'UPDATE planner_content SET game_content_version = ? WHERE planner_id = UUID_TO_BIN(?)',
+      [staleMirror, plannerId],
+    )
 
     await authenticateContext(context, user.id, baseURL!)
     await seedLocalPlanner(page, {

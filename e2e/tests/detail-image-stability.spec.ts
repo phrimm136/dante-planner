@@ -48,13 +48,10 @@ test('the identity detail image keeps its box while the swapped art loads', asyn
     })
     .toBe(true)
   await page.evaluate(
-    () =>
-      new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+    () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
   )
 
-  const trace = await page.evaluate(
-    () => (window as unknown as { __heights: number[] }).__heights,
-  )
+  const trace = await page.evaluate(() => (window as unknown as { __heights: number[] }).__heights)
   const minHeight = Math.min(...trace)
   expect(minHeight, `section height trace across the swap: ${trace.join(', ')}`).toBeGreaterThan(
     100,

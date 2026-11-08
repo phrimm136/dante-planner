@@ -110,9 +110,7 @@ test('the own list hides tombstones and their key until a sync pull asks', async
     await becomesTrue(
       async () => {
         plain = await ownList('')
-        return (
-          plain.some((row) => row.id === liveId) && !plain.some((row) => row.id === deletedId)
-        )
+        return plain.some((row) => row.id === liveId) && !plain.some((row) => row.id === deletedId)
       },
       { what: `${liveId} live and ${deletedId} gone on the default own list` },
     )

@@ -57,9 +57,10 @@ test('note text typed the instant before a renderer crash is in IndexedDB afterw
   await fresh.goto('/planner/md', { waitUntil: 'domcontentloaded' })
   const rows = await readPlannerRows(fresh)
 
-  expect(rows.some((row) => row.includes(marker)), 'the keystroke died with the renderer').toBe(
-    true,
-  )
+  expect(
+    rows.some((row) => row.includes(marker)),
+    'the keystroke died with the renderer',
+  ).toBe(true)
 })
 
 test('a put committed inside a task survives a renderer crash in that same task', async ({

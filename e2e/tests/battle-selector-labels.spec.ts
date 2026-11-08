@@ -22,7 +22,10 @@ for (const width of WIDTHS) {
       })),
     )
     const detail = JSON.stringify(boxes)
-    expect(boxes.map((box) => box.text), detail).toEqual(expect.arrayContaining(REQUIRED_LABELS))
+    expect(
+      boxes.map((box) => box.text),
+      detail,
+    ).toEqual(expect.arrayContaining(REQUIRED_LABELS))
     for (const box of boxes) expect(box.height, detail).toBeLessThanOrEqual(box.lineHeight + 1)
 
     const overflow = await page.evaluate(() => ({

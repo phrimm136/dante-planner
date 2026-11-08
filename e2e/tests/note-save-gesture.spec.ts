@@ -66,8 +66,10 @@ test('a section note edit reaches the server when Save is clicked once', async (
         document.documentElement.scrollHeight - window.innerHeight - window.scrollY,
       ),
     }))
-    expect(viewport.scrollY, 'at offset zero there is nothing for anchoring to shift')
-      .toBeGreaterThan(0)
+    expect(
+      viewport.scrollY,
+      'at offset zero there is nothing for anchoring to shift',
+    ).toBeGreaterThan(0)
     expect(
       viewport.remaining,
       'at the document end the scroll clamps by exactly the toolbar height, which carries the ' +

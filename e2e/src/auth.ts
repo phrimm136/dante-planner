@@ -122,7 +122,10 @@ export async function authenticateContext(
   ])
 }
 
-export function authHeaders(userId: number | bigint, role: Role = 'NORMAL'): Record<string, string> {
+export function authHeaders(
+  userId: number | bigint,
+  role: Role = 'NORMAL',
+): Record<string, string> {
   return { Cookie: `${ACCESS_TOKEN_COOKIE}=${mintAccessToken(userId, role)}` }
 }
 
