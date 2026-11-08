@@ -12,6 +12,7 @@ import { hashStaticPlugin } from './vite-plugin-hash-static'
 import { routeHeadersPlugin } from './vite-plugin-route-headers'
 import { assetNotFoundPlugin } from './vite-plugin-asset-not-found'
 import { buildIdPlugin } from './vite-plugin-build-id'
+import { STATIC_ROOT_FILES, STATIC_SERVED_DIRS } from './static-served'
 
 const BUILD_ID = randomUUID()
 
@@ -42,9 +43,6 @@ function checkStaticLock(): void {
 checkStaticLock()
 
 const STATIC_ROOT = path.resolve(__dirname, '../static')
-const STATIC_WHITELIST = ['images', 'data', 'i18n']
-// Well-known files that must be served at stable root paths, outside the hashed pipeline
-const STATIC_ROOT_FILES = ['sitemap.xml', 'robots.txt', 'favicon.ico', '_headers']
 // font-src in static/_headers allows only 'self', so a font inlined as a data: URI is blocked
 const FONT_ASSET = /\.(ttf|otf|woff2?)$/
 
@@ -84,7 +82,7 @@ function serveWhitelistedStatic(): Plugin {
       server.middlewares.use((req, res, next) => {
         const url = req.url?.split('?')[0] ?? ''
         const segment = url.split('/')[1]
-        if (segment && STATIC_WHITELIST.includes(segment)) {
+        if (segment && STATIC_SERVED_DIRS.includes(segment)) {
           const filePath = path.join(STATIC_ROOT, url)
           if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
             return res.end(fs.readFileSync(filePath))
@@ -98,7 +96,7 @@ function serveWhitelistedStatic(): Plugin {
     },
     async writeBundle() {
       const distRoot = path.resolve(__dirname, 'dist')
-      for (const dir of STATIC_WHITELIST) {
+      for (const dir of STATIC_SERVED_DIRS) {
         const src = path.join(STATIC_ROOT, dir)
         const dst = path.join(distRoot, dir)
         if (fs.existsSync(src)) {

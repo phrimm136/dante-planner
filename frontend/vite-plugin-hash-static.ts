@@ -3,6 +3,7 @@ import path from 'path'
 import { createHash } from 'crypto'
 import type { Plugin } from 'vite'
 import { hashKey } from './src/lib/hashKey'
+import { STATIC_ROOT_FILES, STATIC_SERVED_DIRS } from './static-served'
 
 const VIRTUAL_MODULE_ID = 'virtual:asset-manifest'
 const RESOLVED_VIRTUAL_MODULE_ID = '\0' + VIRTUAL_MODULE_ID
@@ -134,20 +135,25 @@ const CHUNK_HELPER_H = `var $_h=function(s,v){for(var i=0;i<v.length;i++){s^=v.c
 const CHUNK_HELPER_HB = `var $_hb=function(s,b){for(var i=0;i<b.length;i++){s^=b[i];s=Math.imul(s,0x01000193)}return s};`
 const CHUNK_HELPER_HK = `var $_hk=function(h){return(h>>>0).toString(16).padStart(8,"0")};`
 
-function scanFiles(dir: string, base = ''): string[] {
-  const entries = fs.readdirSync(dir, { withFileTypes: true })
+function walkFiles(dir: string, base: string): string[] {
   const files: string[] = []
-  for (const entry of entries) {
-    const rel = base ? `${base}/${entry.name}` : entry.name
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const rel = `${base}/${entry.name}`
     if (entry.isDirectory()) {
-      // Skip scripts (excluded by another plugin) and local tooling like .venv
-      if (entry.name === 'scripts' || entry.name === '.venv') continue
-      files.push(...scanFiles(path.join(dir, entry.name), rel))
+      files.push(...walkFiles(path.join(dir, entry.name), rel))
     } else {
       files.push(rel)
     }
   }
   return files
+}
+
+function scanFiles(staticDir: string): string[] {
+  const rootFiles = STATIC_ROOT_FILES.filter((file) => fs.existsSync(path.join(staticDir, file)))
+  const dirFiles = STATIC_SERVED_DIRS.filter((dir) =>
+    fs.existsSync(path.join(staticDir, dir)),
+  ).flatMap((dir) => walkFiles(path.join(staticDir, dir), dir))
+  return [...rootFiles, ...dirFiles]
 }
 
 /** Maps each non-JSON static file's hashed key to its content-hashed output path. */
@@ -189,7 +195,7 @@ async function buildManifestAsync(staticDir: string): Promise<Record<string, str
 }
 
 // Exported for testing
-export { transformResolveAsset, transformDynamicImportKey, partialHash, toBytes }
+export { buildManifest, transformResolveAsset, transformDynamicImportKey, partialHash, toBytes }
 
 export function hashStaticPlugin(options: HashStaticOptions): Plugin {
   let hasManifest = false
@@ -328,13 +334,7 @@ export function hashStaticPlugin(options: HashStaticOptions): Plugin {
         fs.copyFileSync(src, dest)
       }
 
-      // Delete all top-level directories that came from staticDir
-      const staticTopDirs = fs
-        .readdirSync(options.staticDir, { withFileTypes: true })
-        .filter((e) => e.isDirectory() && e.name !== 'scripts')
-        .map((e) => e.name)
-
-      for (const dir of staticTopDirs) {
+      for (const dir of STATIC_SERVED_DIRS) {
         const dirPath = path.join(distDir, dir)
         if (fs.existsSync(dirPath) && fs.statSync(dirPath).isDirectory()) {
           fs.rmSync(dirPath, { recursive: true, force: true })

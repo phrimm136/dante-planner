@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest'
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
-import { hashStaticPlugin, transformResolveAsset, transformDynamicImportKey, partialHash, toBytes } from './vite-plugin-hash-static'
+import { hashStaticPlugin, buildManifest, transformResolveAsset, transformDynamicImportKey, partialHash, toBytes } from './vite-plugin-hash-static'
 import { hashKey } from './src/lib/hashKey'
 
 function createTempStaticDir(): string {
@@ -692,5 +692,32 @@ describe('regression: numeric expression coercion', () => {
     correctState = Math.imul(correctState, 0x01000193)
 
     expect(brokenState).not.toBe(correctState)
+  })
+})
+
+describe('buildManifest — served set only', () => {
+  let staticDir: string
+  let outsideDir: string
+
+  beforeAll(() => {
+    staticDir = fs.mkdtempSync(path.join(os.tmpdir(), 'hash-served-test-'))
+    outsideDir = fs.mkdtempSync(path.join(os.tmpdir(), 'hash-raw-target-'))
+    fs.mkdirSync(path.join(staticDir, 'images'))
+    fs.mkdirSync(path.join(staticDir, 'data'))
+    fs.mkdirSync(path.join(staticDir, 'logs'))
+    fs.writeFileSync(path.join(staticDir, 'images', 'a.png'), 'png')
+    fs.writeFileSync(path.join(staticDir, 'data', 'x.json'), '{}')
+    fs.writeFileSync(path.join(staticDir, 'logs', 'run.log'), 'log')
+    fs.writeFileSync(path.join(outsideDir, 'big.bin'), 'bin')
+    fs.symlinkSync(outsideDir, path.join(staticDir, 'raw'))
+  })
+
+  afterAll(() => {
+    fs.rmSync(staticDir, { recursive: true, force: true })
+    fs.rmSync(outsideDir, { recursive: true, force: true })
+  })
+
+  it('hashes only served files and does not read a symlinked raw dir', () => {
+    expect(Object.keys(buildManifest(staticDir))).toEqual([hashKey('images/a.png')])
   })
 })

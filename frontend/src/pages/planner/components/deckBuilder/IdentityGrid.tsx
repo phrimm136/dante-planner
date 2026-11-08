@@ -15,6 +15,7 @@ interface IdentityGridProps {
   sortedIdentities: IdentityEntity[]
   visibleIds: Set<string>
   equippedIds: Set<string>
+  equippedIdentityTierMap: Record<IdentityId, { uptie: UptieTier; level: number }>
   onEquip: (identityId: IdentityId, data: { uptie?: UptieTier; level?: number }) => void
   scrollRef: Ref<HTMLDivElement>
   isActive: boolean
@@ -25,6 +26,7 @@ export function IdentityGrid({
   sortedIdentities,
   visibleIds,
   equippedIds,
+  equippedIdentityTierMap,
   onEquip,
   scrollRef,
   isActive,
@@ -48,6 +50,7 @@ export function IdentityGrid({
                 identity={identity}
                 visibleIds={visibleIds}
                 equippedIds={equippedIds}
+                equippedTier={equippedIdentityTierMap[identity.id]}
                 onEquip={onEquip}
                 maxLevel={maxLevel}
               />
@@ -63,6 +66,7 @@ interface IdentityGridCardProps {
   identity: IdentityEntity
   visibleIds: Set<string>
   equippedIds: Set<string>
+  equippedTier: { uptie: UptieTier; level: number } | undefined
   onEquip: (identityId: IdentityId, data: { uptie?: UptieTier; level?: number }) => void
   maxLevel: number
 }
@@ -75,6 +79,7 @@ const IdentityGridCard = memo(function IdentityGridCard({
   identity,
   visibleIds,
   equippedIds,
+  equippedTier,
   onEquip,
   maxLevel,
 }: IdentityGridCardProps) {
@@ -85,7 +90,8 @@ const IdentityGridCard = memo(function IdentityGridCard({
     <div className={isVisible ? '' : 'hidden'}>
       <IdentityTierSelector
         entityId={identity.id}
-        currentUptie={4}
+        currentUptie={equippedTier?.uptie ?? 4}
+        currentLevel={equippedTier?.level ?? maxLevel}
         maxLevel={maxLevel}
         onConfirm={onEquip}
       >
