@@ -1,0 +1,70 @@
+id: real-clock-bounds-live-in-one-class
+snapshots:
+  ? |
+    class A {
+      private final Duration slack = Duration.ofSeconds(1), RUNNER_SLACK = Duration.ofSeconds(5);
+    }
+  : labels:
+    - source: private final Duration slack = Duration.ofSeconds(1), RUNNER_SLACK = Duration.ofSeconds(5);
+      style: primary
+      start: 12
+      end: 103
+    - source: RUNNER_SLACK
+      style: secondary
+      start: 66
+      end: 78
+    - source: RUNNER_SLACK = Duration.ofSeconds(5)
+      style: secondary
+      start: 66
+      end: 102
+  ? |
+    class A {
+      private static final Duration ROOMY_WAIT_BOUND = Duration.ofSeconds(30);
+    }
+  : labels:
+    - source: private static final Duration ROOMY_WAIT_BOUND = Duration.ofSeconds(30);
+      style: primary
+      start: 12
+      end: 84
+    - source: ROOMY_WAIT_BOUND
+      style: secondary
+      start: 42
+      end: 58
+    - source: ROOMY_WAIT_BOUND = Duration.ofSeconds(30)
+      style: secondary
+      start: 42
+      end: 83
+  ? |
+    class A {
+      private static final Duration SCHEDULING_SLACK = Duration.ofSeconds(5);
+    }
+  : labels:
+    - source: private static final Duration SCHEDULING_SLACK = Duration.ofSeconds(5);
+      style: primary
+      start: 12
+      end: 83
+    - source: SCHEDULING_SLACK
+      style: secondary
+      start: 42
+      end: 58
+    - source: SCHEDULING_SLACK = Duration.ofSeconds(5)
+      style: secondary
+      start: 42
+      end: 82
+  ? |
+    class A {
+      private static final long SCHEDULING_SLACK_MS = 5_000;
+    }
+  : labels:
+    - source: private static final long SCHEDULING_SLACK_MS = 5_000;
+      style: primary
+      start: 12
+      end: 66
+    - source: SCHEDULING_SLACK_MS
+      style: secondary
+      start: 38
+      end: 57
+    - source: SCHEDULING_SLACK_MS = 5_000
+      style: secondary
+      start: 38
+      end: 65

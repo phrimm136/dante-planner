@@ -22,6 +22,7 @@ import io.lettuce.core.RedisConnectionException;
 
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.InMemoryProxyManager;
+import org.danteplanner.backend.support.RealClockBounds;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -29,9 +30,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class LazyConnectingProxyManagerTest {
 
     private static final int CALLERS = 12;
-    // The lower bound is the contract (never fail before the wait); the slack only absorbs the
-    // scheduler on a loaded runner.
-    private static final long SCHEDULING_SLACK_MS = 5_000;
     private static final long LATCH_WAIT_SECONDS = 5;
     private static final long RETRY_AFTER_NANOS =
             TimeUnit.MILLISECONDS.toNanos(TimeoutHierarchy.RATE_LIMIT_CONNECT_RETRY_AFTER_MS);
@@ -101,7 +99,7 @@ class LazyConnectingProxyManagerTest {
                             .hasMessageEndingWith(":" + port));
             assertThat(callers).filteredOn(caller -> caller.thread() != owner.get()).hasSize(CALLERS - 1)
                     .allSatisfy(waiter -> assertThat(TimeUnit.NANOSECONDS.toMillis(waiter.finishedAt().get() - start))
-                            .isLessThanOrEqualTo(TimeoutHierarchy.RATE_LIMIT_CONNECT_WAIT_MS + SCHEDULING_SLACK_MS));
+                            .isLessThanOrEqualTo(TimeoutHierarchy.RATE_LIMIT_CONNECT_WAIT_MS + RealClockBounds.SCHEDULING_SLACK.toMillis()));
             assertThat(connectorCalls).hasValue(1);
         }
     }
@@ -130,7 +128,7 @@ class LazyConnectingProxyManagerTest {
                     .hasMessage("Rate-limit store connect still in progress");
             assertThat(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start))
                     .isBetween(TimeoutHierarchy.RATE_LIMIT_CONNECT_WAIT_MS,
-                            TimeoutHierarchy.RATE_LIMIT_CONNECT_WAIT_MS + SCHEDULING_SLACK_MS);
+                            TimeoutHierarchy.RATE_LIMIT_CONNECT_WAIT_MS + RealClockBounds.SCHEDULING_SLACK.toMillis());
             assertThat(connectorCalls).hasValue(1);
         } finally {
             release.countDown();

@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
 import org.danteplanner.backend.support.Hang;
+import org.danteplanner.backend.support.RealClockBounds;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,7 +35,6 @@ class MarkerStoreConnectBoundTest {
 
     private static final String SERVER = "3e11fa47-71ca-11e1-9e33-c80aa9429562";
     private static final Duration WAIT_BOUND = Duration.ofSeconds(1);
-    private static final Duration SCHEDULING_SLACK = Duration.ofSeconds(5);
     private static final int BACKLOG = 1;
     private static final int MAX_FILLERS = 16;
     private static final int FILLER_CONNECT_MILLIS = 200;
@@ -66,7 +66,7 @@ class MarkerStoreConnectBoundTest {
                 store.raise(Set.of(new FreshnessScope.PublicCatalog()), SERVER + ":2");
                 Duration elapsed = Duration.ofNanos(System.nanoTime() - start);
 
-                assertThat(elapsed).isLessThan(MarkerStore.RAISE_CONNECT_TIMEOUT.plus(WAIT_BOUND).plus(SCHEDULING_SLACK));
+                assertThat(elapsed).isLessThan(MarkerStore.RAISE_CONNECT_TIMEOUT.plus(WAIT_BOUND).plus(RealClockBounds.SCHEDULING_SLACK));
                 assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count() - failuresBefore).isEqualTo(1.0);
             } finally {
                 writeStore.destroy();
@@ -112,7 +112,7 @@ class MarkerStoreConnectBoundTest {
 
                 store.close();
                 for (Thread raise : raises) {
-                    raise.join(WAIT_BOUND.plus(MarkerStore.RAISE_MARGIN).plus(SCHEDULING_SLACK).toMillis());
+                    raise.join(WAIT_BOUND.plus(MarkerStore.RAISE_MARGIN).plus(RealClockBounds.SCHEDULING_SLACK).toMillis());
                 }
 
                 assertThat(raises).noneMatch(Thread::isAlive);

@@ -20,6 +20,8 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
 import org.danteplanner.backend.shared.config.RedisConnectionConfig;
+import org.danteplanner.backend.support.Hang;
+import org.danteplanner.backend.support.RealClockBounds;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,7 +34,7 @@ class MarkerStoreTest {
     private static final MarkerStore.Settings SETTINGS =
             new MarkerStore.Settings(1, Duration.ofSeconds(1), Duration.ofHours(1));
     private static final MarkerStore.Settings ROOMY_SETTINGS =
-            new MarkerStore.Settings(1, Duration.ofSeconds(30), Duration.ofHours(1));
+            new MarkerStore.Settings(1, RealClockBounds.ROOMY_WAIT_BOUND, Duration.ofHours(1));
 
     private final SimpleMeterRegistry meters = new SimpleMeterRegistry();
     private LettuceConnectionFactory refused;
@@ -118,6 +120,8 @@ class MarkerStoreTest {
     void raise_WhenTheWriteStoreIsDown_CountsAFailureWithoutThrowing() {
         store.raise(Set.of(new FreshnessScope.PublicCatalog()), SERVER_A + ":1-3");
 
+        Hang.until(() -> meters.counter(MarkerStore.RAISE_FAILURES).count() == 1.0,
+                "the marker-raise worker counting the failed raise");
         assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count()).isEqualTo(1.0);
         assertThat(meters.counter(MarkerStore.WAIT_TIMEOUTS).count()).isZero();
     }
