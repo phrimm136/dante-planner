@@ -85,20 +85,23 @@ const IdentityGridCard = memo(function IdentityGridCard({
 }: IdentityGridCardProps) {
   const isSelected = equippedIds.has(identity.id)
   const isVisible = visibleIds.has(identity.id)
+  const uptie = equippedTier?.uptie ?? 4
+  const level = equippedTier?.level ?? maxLevel
 
   return (
     <div className={isVisible ? '' : 'hidden'}>
       <IdentityTierSelector
         entityId={identity.id}
-        currentUptie={equippedTier?.uptie ?? 4}
-        currentLevel={equippedTier?.level ?? maxLevel}
+        currentUptie={uptie}
+        currentLevel={level}
         maxLevel={maxLevel}
         onConfirm={onEquip}
       >
         <CardSlot size={IDENTITY_GEOMETRY.size}>
           <IdentityCard
             identity={identity}
-            level={maxLevel}
+            uptie={uptie}
+            level={level}
             isSelected={isSelected}
             overlay={
               isSelected ? (
