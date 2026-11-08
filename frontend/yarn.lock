@@ -5355,10 +5355,15 @@ seroval-plugins@~1.6.8:
   resolved "https://registry.yarnpkg.com/seroval-plugins/-/seroval-plugins-1.6.12.tgz#a8f6013fc0fb68f797f53cde12deb25c3e9fbfee"
   integrity sha512-+reiwp/lYxiyctSrdvX7OQ1YLrcbWYgBiZrhSFL+V43b0/DGRLNVSDyZINbQe+tWplPOI2fw2dPrdv6hcc09kQ==
 
-seroval@^1.5.3, seroval@^1.6.7, seroval@~1.6.11:
+seroval@^1.6.7:
   version "1.7.10"
   resolved "https://registry.yarnpkg.com/seroval/-/seroval-1.7.10.tgz#5dd18085081dbd141f114517babded97c6a63e08"
   integrity sha512-6Ya73+E5T7ToU9AJQSAvEt+WsLYfc7jM9C93KVcUGM14REPU9/eLn6Ho6fqBb+QkpjSQMPewWBzxI80WiNl7Mg==
+
+seroval@~1.6.11:
+  version "1.6.12"
+  resolved "https://registry.yarnpkg.com/seroval/-/seroval-1.6.12.tgz#d6ad056e44e52e666a7ca7919a67294eb13ecd3b"
+  integrity sha512-CqbIVfk/7GL3ITwZI55lcPbpQbjHZ2DD5cUj4iH7E9YsCfHNJV1mx7yNp86Z84w5IpmkZZS/2s5vPOWmVWSdQg==
 
 set-cookie-parser@^3.0.1:
   version "3.1.1"
