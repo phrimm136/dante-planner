@@ -1,0 +1,40 @@
+dist/a/DezqrXNBYQTy.js        218.14 kB │ gzip:   9.71 kB
+dist/a/65uBiN4KmxiW.js        218.90 kB │ gzip:  68.35 kB
+dist/a/Cxq1cZO5FelU.js        220.50 kB │ gzip:  27.68 kB
+dist/a/DHR-W4JuY9dJ.js        310.91 kB │ gzip:  45.51 kB
+dist/a/Do0b6nr6yThd.js        346.01 kB │ gzip:  88.20 kB
+dist/a/CjbIKDN2uras.js        355.89 kB │ gzip:  88.33 kB
+dist/a/CfwNQq0ykwUx.js        357.15 kB │ gzip:  87.53 kB
+dist/a/BT_W1or1fEgC.js        380.97 kB │ gzip:  91.19 kB
+dist/a/CDIdl7fgYOjN.js        393.21 kB │ gzip:  27.45 kB
+dist/a/eXXoBRs1kLJY.js        399.18 kB │ gzip: 126.39 kB
+dist/a/Ban4WSRu0Xak.js        399.78 kB │ gzip:  28.40 kB
+dist/a/B2enP_ui-G01.js        432.44 kB │ gzip:  28.74 kB
+dist/a/CbQOyx1qalHO.js        434.70 kB │ gzip:  28.30 kB
+dist/a/Bog84kP8kXCA.js        467.07 kB │ gzip:  84.64 kB
+dist/a/DShU5qlwINvr.js        564.07 kB │ gzip: 230.06 kB
+dist/a/2vtb4Io2v8xJ.js        927.29 kB │ gzip: 191.44 kB
+dist/a/CVOOl1lxePDP.js        927.29 kB │ gzip: 191.44 kB
+dist/a/CNyXy65qZvch.js      2,305.01 kB │ gzip:  80.93 kB
+
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 36.86s
+[33m[PLUGIN_TIMINGS] [0mJavaScript callbacks ran for 37.3s. The build took 36.7s. Callbacks such as `closeBundle` run after the build ends, so callback time can be more than build time.
+The slowest callbacks, timed inside each callback (the wait before a callback starts is excluded, the time it awaits is included):
+  - plugin vite:css transform (38%, 13.9s, 4 calls)
+  - plugin @rolldown/plugin-babel transform (36%, 13.1s, 752 calls)
+  - plugin serve-whitelisted-static writeBundle (30%, 10.9s, 1 call)
+  - plugin hash-static-assets buildStart (11%, 4.1s, 1 call)
+  - plugin hash-static-assets closeBundle (10%, 3.7s, 1 call)
+These rows add up to more than the total. Callbacks can overlap, so the same time counts for more than one row.
+2 callbacks are listed without a time. Their calls overlapped, so the time inside one call includes work from other calls. To find their cost, profile the build with `node --cpu-prof`:
+  - plugin vite:asset load (7 calls)
+  - plugin @tailwindcss/vite:generate:build transform (4 calls)
+See https://rolldown.rs/reference/InputOptions.checks#bundlertimings for more details.
+
+Done in 41.75s.
+

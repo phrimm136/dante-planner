@@ -5,7 +5,7 @@ React 19 + TypeScript + Vite + TanStack Query/Router + Zustand + Zod + Tailwind 
 ## Commands & deploy
 
 - Lint is oxlint: `yarn lint` (type-aware, config `.oxlintrc.json`), which also runs the eslint plugins declared under `jsPlugins` in-process. eslint is never invoked as a runner; the `eslint` devDependency exists only to satisfy `eslint-plugin-react-refresh`'s peer requirement, not react-hooks'. `eslint-plugin-react-hooks` declares a peer range that the installed eslint 10 falls outside of — inert, since nothing loads eslint, so do not downgrade eslint to silence it. Errors fail the command, warnings do not — severity in the config decides what blocks. Format: `yarn fmt` (oxfmt). Typecheck: `yarn typecheck` (`tsc -b`).
-- From the repo root, always target the frontend: run tests only through `yarn --cwd frontend test run [paths]` (the script carries the worker heap through `NODE_OPTIONS`; `vitest.global-setup.ts` pins `TZ=UTC`), never `yarn --cwd frontend vitest …`; typecheck with `yarn --cwd frontend tsc -b`. Bare `vitest`/`tsc` at the repo root creates a stray `node_modules/.vite` there and is blocked by a hook.
+- Run every check through the `checks` CLI: `.claude/skills/checks/bin/checks fe test [paths]` (it calls `yarn test run`, whose script carries the worker heap through `NODE_OPTIONS`; `vitest.global-setup.ts` pins `TZ=UTC`), `checks fe typecheck`, `checks fe lint`, `checks fe gate` for the PR Gate steps. A direct `vitest`/`tsc`/`oxlint`/`oxfmt` or the matching yarn script is refused by a hook.
 - Deploy is Cloudflare Pages serving plain `vite build` output — no Workers, no wrangler config.
 
 ## Layer boundaries (oxlint-enforced)

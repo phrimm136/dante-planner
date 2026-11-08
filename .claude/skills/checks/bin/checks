@@ -1,0 +1,1223 @@
+#!/usr/bin/env python3
+import dataclasses
+import datetime
+import fcntl
+import json
+import os
+import re
+import shlex
+import signal
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+CLI_PATH = ".claude/skills/checks/bin/checks"
+WORKFLOW_PATH = ".github/workflows/pr-gate.yml"
+GATE_JOB = "test-frontend"
+ARCHUNIT_PATTERN = "org.danteplanner.backend.architecture.*"
+GIT_ENV_NAMES = ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_COMMON_DIR")
+PACKAGE_DIRS = {"fe": "frontend", "e2e": "e2e"}
+BUILD_NODE_OPTIONS = "--max-old-space-size=6144"
+SUMMARY_LIMIT = 240
+
+USAGE_TEXT = f"""usage: checks [--root <path>] [--print] <lane> <check> [args]
+       checks [--root <path>] doctor | list
+       checks hook < tool-json
+
+Runs the repo's repeated local checks (frontend, e2e, backend). Every run takes the shared
+test lock (<main checkout>/.claude/.test.lock, exclusive, blocking with a status line while
+another run holds it), writes the tool's whole output to a dated log, and prints one line:
+PASS <log> or FAIL <log>, followed by the tool's own summary (vitest "Test Files", the tsc
+error count, oxlint "Found ...", playwright's counts, gradle "BUILD ..."). The exit code is the
+tool's. Read the log; never re-run a check to see its output again.
+
+repo root:  the checkout this CLI file lives in, whatever the current directory: running
+            <worktree>/.claude/skills/checks/bin/checks checks that worktree. --root <path>
+            points it at another checkout or worktree.
+logs:       <root>/.claude/reports/logs/checks-<lane>-<check>-<YYYYMMDD-HHMMSS>.log when
+            <root>/.claude/reports exists, otherwise the main checkout's .claude/reports/logs.
+--print:    show the working directory, environment and command line of a run without taking
+            the lock or running anything.
+
+`checks list` prints every command with its purpose; `checks doctor` reports the lock holder,
+the static link, node_modules against each lockfile, tool versions, Docker and the JDK.
+CI does not call this CLI: `checks fe gate` reads its steps from {WORKFLOW_PATH}.
+"""
+
+
+class CheckError(Exception):
+    pass
+
+
+@dataclasses.dataclass(frozen=True)
+class CheckSpec:
+    lane_name: str
+    check_name: str
+    arg_hint: str
+    purpose_text: str
+
+
+CHECK_TABLE = (
+    CheckSpec("fe", "typecheck", "", "tsc -b over the frontend (yarn typecheck)"),
+    CheckSpec("fe", "lint", "", "type-aware oxlint over src (yarn lint)"),
+    CheckSpec("fe", "lint-validation", "", "the validation oxlint config (yarn lint:validation)"),
+    CheckSpec("fe", "fmt", "", "rewrite src with oxfmt (yarn fmt)"),
+    CheckSpec("fe", "fmt-check", "", "oxfmt --check over src (yarn fmt:check)"),
+    CheckSpec("fe", "fp", "", "ast-grep false-positive scan (yarn check:fp)"),
+    CheckSpec("fe", "rules", "", "ast-grep rule tests (yarn check:rules)"),
+    CheckSpec("fe", "bailouts", "", "React Compiler bailout allowlist (yarn check:compiler-bailouts)"),
+    CheckSpec("fe", "build", "", "the production build into frontend/dist (yarn build)"),
+    CheckSpec("fe", "budget", "", "bundle budget over frontend/dist (yarn check:bundle-budget)"),
+    CheckSpec("fe", "test", "[vitest args...]", "vitest through yarn test run (heap and TZ pinned by the script)"),
+    CheckSpec("fe", "gate", "", f"every step of {WORKFLOW_PATH} job {GATE_JOB}, in order, under one lock"),
+    CheckSpec("e2e", "typecheck", "", "tsc --noEmit over e2e (yarn typecheck)"),
+    CheckSpec("e2e", "fmt", "", "rewrite e2e sources with oxfmt (yarn fmt)"),
+    CheckSpec("e2e", "fmt-check", "", "oxfmt --check over e2e (yarn fmt:check)"),
+    CheckSpec("e2e", "run", "[spec...] [--base-url URL] [--repeat N] [--jobs N] [--project NAME] [-- playwright args]",
+              "playwright test --config playwright.config.ts --project=chromium (or --project)"),
+    CheckSpec("be", "check", "", "gradle check, what PR Gate's BE Test runs"),
+    CheckSpec("be", "test", "[--tests PATTERN]... [--exclude-tags TAGS]",
+              "gradle test; any --tests also runs the ArchUnit suite"),
+    CheckSpec("be", "checkstyle", "", "checkstyleMain checkstyleTest --rerun-tasks"),
+    CheckSpec("be", "pit", "", "pitestRatchet, the surviving-mutant ratchet"),
+)
+
+TOP_COMMANDS = (
+    ("doctor", "lock holder, static link, node_modules and tool versions, Docker, JDK; runs nothing heavy"),
+    ("list", "this list"),
+    ("hook", "the PreToolUse entry: reads the Bash tool JSON on stdin, exit 2 refuses a hand-assembled check"),
+)
+
+YARN_SCRIPTS = {
+    ("fe", "typecheck"): "typecheck",
+    ("fe", "lint"): "lint",
+    ("fe", "lint-validation"): "lint:validation",
+    ("fe", "fmt"): "fmt",
+    ("fe", "fmt-check"): "fmt:check",
+    ("fe", "fp"): "check:fp",
+    ("fe", "rules"): "check:rules",
+    ("fe", "bailouts"): "check:compiler-bailouts",
+    ("fe", "build"): "build",
+    ("fe", "budget"): "check:bundle-budget",
+    ("e2e", "typecheck"): "typecheck",
+    ("e2e", "fmt"): "fmt",
+    ("e2e", "fmt-check"): "fmt:check",
+}
+
+GRADLE_TASKS = {
+    "check": ("check",),
+    "checkstyle": ("checkstyleMain", "checkstyleTest", "--rerun-tasks"),
+    "pit": ("pitestRatchet",),
+}
+
+TOOL_PACKAGES = {
+    "frontend": ("oxlint", "oxfmt", "vitest"),
+    "e2e": ("oxfmt", "@playwright/test"),
+}
+
+
+def lane_checks(lane_name):
+    return [one_spec for one_spec in CHECK_TABLE if one_spec.lane_name == lane_name]
+
+
+def list_lines():
+    command_rows = [(f"checks {one_spec.lane_name} {one_spec.check_name} {one_spec.arg_hint}".rstrip(),
+                     one_spec.purpose_text) for one_spec in CHECK_TABLE]
+    command_rows += [(f"checks {command_name}", purpose_text) for command_name, purpose_text in TOP_COMMANDS]
+    column_width = max(len(command_text) for command_text, _ in command_rows if len(command_text) <= 40)
+    out_lines = []
+    for command_text, purpose_text in command_rows:
+        if len(command_text) > column_width:
+            out_lines.append(command_text)
+            out_lines.append(" " * (column_width + 2) + purpose_text)
+        else:
+            out_lines.append(command_text.ljust(column_width + 2) + purpose_text)
+    return out_lines
+
+
+def lane_line(lane_name):
+    check_names = ", ".join(one_spec.check_name for one_spec in lane_checks(lane_name))
+    return f"{lane_name} checks: {check_names} (purposes: checks list)"
+
+
+@dataclasses.dataclass(frozen=True)
+class CommandLine:
+    root_arg: str
+    print_only: bool
+    wants_help: bool
+    command_words: tuple
+
+
+def parse_command_line(argv_words):
+    root_arg = ""
+    print_only = False
+    wants_help = False
+    command_words = []
+    word_index = 0
+    after_dashes = False
+    while word_index < len(argv_words):
+        one_word = argv_words[word_index]
+        if after_dashes:
+            command_words.append(one_word)
+        elif one_word == "--":
+            after_dashes = True
+            command_words.append(one_word)
+        elif one_word in ("-h", "--help") and not command_words:
+            wants_help = True
+        elif one_word == "--print":
+            print_only = True
+        elif one_word == "--root" and not command_words:
+            if word_index + 1 >= len(argv_words):
+                raise CheckError("--root needs a path; see checks --help")
+            root_arg = argv_words[word_index + 1]
+            word_index += 1
+        elif one_word.startswith("--root=") and not command_words:
+            root_arg = one_word.split("=", 1)[1]
+        else:
+            command_words.append(one_word)
+        word_index += 1
+    return CommandLine(root_arg, print_only, wants_help, tuple(command_words))
+
+
+def git_environment():
+    return {env_name: env_value for env_name, env_value in os.environ.items()
+            if env_name not in GIT_ENV_NAMES}
+
+
+@dataclasses.dataclass(frozen=True)
+class RepoPaths:
+    repo_root: Path
+    main_root: Path
+
+    @property
+    def log_dir(self):
+        if (self.repo_root / ".claude" / "reports").is_dir():
+            return self.repo_root / ".claude" / "reports" / "logs"
+        return self.main_root / ".claude" / "reports" / "logs"
+
+    @property
+    def lock_path(self):
+        return self.main_root / ".claude" / ".test.lock"
+
+
+def own_checkout_dir():
+    return Path(__file__).resolve().parents[4]
+
+
+def find_paths(root_arg, default_dir):
+    probe_dir = Path(root_arg).resolve() if root_arg else Path(default_dir)
+    if not probe_dir.is_dir():
+        raise CheckError(f"--root {root_arg} is not a directory; pass a checkout or worktree path")
+    top_run = subprocess.run(["git", "-C", str(probe_dir), "rev-parse", "--show-toplevel"],
+                             capture_output=True, text=True, env=git_environment())
+    if top_run.returncode != 0:
+        raise CheckError(f"{probe_dir} is not inside a git checkout; run the CLI of a checkout "
+                         "or pass --root <checkout or worktree>")
+    common_run = subprocess.run(["git", "-C", str(probe_dir), "rev-parse", "--path-format=absolute",
+                                 "--git-common-dir"], capture_output=True, text=True, env=git_environment())
+    repo_root = Path(top_run.stdout.strip())
+    main_root = Path(common_run.stdout.strip()).parent if common_run.returncode == 0 else repo_root
+    return RepoPaths(repo_root, main_root)
+
+
+@dataclasses.dataclass(frozen=True)
+class RunPlan:
+    step_label: str
+    work_dir: Path
+    command_argv: tuple
+    extra_env: tuple = ()
+    module_dir: Path = None
+
+
+class UsageFailure:
+    def __init__(self, prog_name):
+        self.prog_name = prog_name
+
+    def raise_failure(self, message_text):
+        raise CheckError(f"{self.prog_name}: {message_text}; see checks list")
+
+
+def split_passthrough(arg_words):
+    if "--" in arg_words:
+        split_index = arg_words.index("--")
+        return list(arg_words[:split_index]), list(arg_words[split_index + 1:])
+    return list(arg_words), []
+
+
+def take_option(arg_words, word_index, option_name, prog_parser):
+    one_word = arg_words[word_index]
+    if one_word.startswith(option_name + "="):
+        return one_word.split("=", 1)[1], word_index + 1
+    if word_index + 1 >= len(arg_words):
+        prog_parser.raise_failure(f"{option_name} needs a value")
+    return arg_words[word_index + 1], word_index + 2
+
+
+def positive_count(raw_value, option_name, prog_parser):
+    if not raw_value.isdigit() or int(raw_value) < 1:
+        prog_parser.raise_failure(f"{option_name} takes a positive whole number, not '{raw_value}'")
+    return raw_value
+
+
+def e2e_run_plan(repo_paths, arg_words):
+    prog_parser = UsageFailure("checks e2e run")
+    own_words, passthrough_words = split_passthrough(arg_words)
+    spec_paths = []
+    option_values = {"--base-url": "", "--repeat": "", "--jobs": "", "--project": "chromium"}
+    word_index = 0
+    while word_index < len(own_words):
+        one_word = own_words[word_index]
+        option_name = one_word.split("=", 1)[0]
+        if option_name in option_values:
+            option_values[option_name], word_index = take_option(own_words, word_index, option_name, prog_parser)
+        elif one_word.startswith("-"):
+            prog_parser.raise_failure(f"unknown option {one_word}; pass playwright's own flags after --")
+        else:
+            spec_paths.append(one_word)
+            word_index += 1
+    package_dir = repo_paths.repo_root / "e2e"
+    command_argv = [str(package_dir / "node_modules" / ".bin" / "playwright"), "test",
+                    "--config", "playwright.config.ts", f"--project={option_values['--project']}", *spec_paths]
+    if option_values["--repeat"]:
+        command_argv.append(f"--repeat-each={positive_count(option_values['--repeat'], '--repeat', prog_parser)}")
+    if option_values["--jobs"]:
+        command_argv.append(f"--workers={positive_count(option_values['--jobs'], '--jobs', prog_parser)}")
+    command_argv += passthrough_words
+    extra_env = (("E2E_BASE_URL", option_values["--base-url"]),) if option_values["--base-url"] else ()
+    return RunPlan("e2e run", package_dir, tuple(command_argv), extra_env, package_dir)
+
+
+def gradle_argv(repo_paths, task_words):
+    backend_dir = repo_paths.repo_root / "backend"
+    return (str(backend_dir / "gradlew"), "-p", str(backend_dir), "--console=plain", *task_words)
+
+
+def be_test_plan(repo_paths, arg_words):
+    prog_parser = UsageFailure("checks be test")
+    test_patterns = []
+    exclude_tags = ""
+    word_index = 0
+    while word_index < len(arg_words):
+        option_name = arg_words[word_index].split("=", 1)[0]
+        if option_name == "--tests":
+            pattern_text, word_index = take_option(arg_words, word_index, "--tests", prog_parser)
+            test_patterns.append(pattern_text)
+        elif option_name == "--exclude-tags":
+            exclude_tags, word_index = take_option(arg_words, word_index, "--exclude-tags", prog_parser)
+        else:
+            prog_parser.raise_failure(f"unknown argument {arg_words[word_index]}")
+    task_words = ["test"]
+    for pattern_text in test_patterns:
+        task_words += ["--tests", pattern_text]
+    if test_patterns and ARCHUNIT_PATTERN not in test_patterns:
+        task_words += ["--tests", ARCHUNIT_PATTERN]
+    if exclude_tags:
+        task_words.append(f"-PexcludeTags={exclude_tags}")
+    return RunPlan("be test", repo_paths.repo_root, gradle_argv(repo_paths, task_words))
+
+
+def build_plan(repo_paths, lane_name, check_name, arg_words):
+    known_lanes = sorted({one_spec.lane_name for one_spec in CHECK_TABLE})
+    if lane_name not in known_lanes:
+        top_names = ", ".join(command_name for command_name, _ in TOP_COMMANDS)
+        raise CheckError(f"unknown lane '{lane_name}'; lanes: {', '.join(known_lanes)}; "
+                         f"other commands: {top_names}; see checks list")
+    if check_name not in {one_spec.check_name for one_spec in lane_checks(lane_name)}:
+        raise CheckError(f"{lane_name} has no check '{check_name}'; {lane_line(lane_name)}")
+    step_label = f"{lane_name} {check_name}"
+    if (lane_name, check_name) == ("e2e", "run"):
+        return e2e_run_plan(repo_paths, arg_words)
+    if (lane_name, check_name) == ("be", "test"):
+        return be_test_plan(repo_paths, arg_words)
+    if (lane_name, check_name) == ("fe", "test"):
+        package_dir = repo_paths.repo_root / "frontend"
+        return RunPlan(step_label, package_dir, ("yarn", "test", "run", *arg_words), (), package_dir)
+    if arg_words:
+        raise CheckError(f"checks {step_label} takes no arguments, got {shlex.join(arg_words)}; see checks list")
+    if lane_name == "be":
+        return RunPlan(step_label, repo_paths.repo_root, gradle_argv(repo_paths, GRADLE_TASKS[check_name]))
+    package_dir = repo_paths.repo_root / PACKAGE_DIRS[lane_name]
+    extra_env = (("NODE_OPTIONS", BUILD_NODE_OPTIONS),) if (lane_name, check_name) == ("fe", "build") else ()
+    return RunPlan(step_label, package_dir, ("yarn", YARN_SCRIPTS[(lane_name, check_name)]),
+                   extra_env, package_dir)
+
+
+@dataclasses.dataclass(frozen=True)
+class WorkflowStep:
+    step_name: str
+    run_text: str
+    work_dir: str
+    step_env: tuple
+
+
+def line_indent(text_line):
+    return len(text_line) - len(text_line.lstrip(" "))
+
+
+def plain_scalar(raw_value):
+    value_text = raw_value.strip()
+    if value_text[:1] in ("'", '"'):
+        quote_mark = value_text[0]
+        end_index = value_text.rfind(quote_mark)
+        if end_index <= 0:
+            raise CheckError(f"unbalanced quote in workflow value {raw_value!r}")
+        inner_text = value_text[1:end_index]
+        return inner_text.replace("''", "'") if quote_mark == "'" else inner_text
+    return re.split(r"\s+#", value_text, maxsplit=1)[0].strip()
+
+
+def block_scalar(item_lines, start_index, key_indent):
+    block_lines = []
+    line_index = start_index
+    while line_index < len(item_lines):
+        text_line = item_lines[line_index]
+        if text_line.strip() and line_indent(text_line) <= key_indent:
+            break
+        block_lines.append(text_line)
+        line_index += 1
+    while block_lines and not block_lines[-1].strip():
+        block_lines.pop()
+    body_indent = min((line_indent(text_line) for text_line in block_lines if text_line.strip()), default=0)
+    return "\n".join(text_line[body_indent:] for text_line in block_lines), line_index
+
+
+def parse_step(item_lines, key_indent):
+    step_fields = {}
+    env_pairs = []
+    line_index = 0
+    while line_index < len(item_lines):
+        text_line = item_lines[line_index]
+        line_index += 1
+        if not text_line.strip() or text_line.strip().startswith("#") or line_indent(text_line) != key_indent:
+            continue
+        key_name, _, raw_value = text_line.strip().partition(":")
+        if raw_value.strip() in ("|", "|-", ">", ">-"):
+            block_text, line_index = block_scalar(item_lines, line_index, key_indent)
+            step_fields[key_name] = block_text if raw_value.strip().startswith("|") else " ".join(block_text.split())
+        elif key_name == "env" and not raw_value.strip():
+            while line_index < len(item_lines) and (not item_lines[line_index].strip()
+                                                    or line_indent(item_lines[line_index]) > key_indent):
+                env_line = item_lines[line_index].strip()
+                line_index += 1
+                if env_line and not env_line.startswith("#"):
+                    env_name, _, env_value = env_line.partition(":")
+                    env_pairs.append((env_name.strip(), plain_scalar(env_value)))
+        else:
+            step_fields[key_name] = plain_scalar(raw_value) if raw_value.strip() else ""
+    return step_fields, tuple(env_pairs)
+
+
+def workflow_steps(workflow_text, job_name):
+    text_lines = workflow_text.splitlines()
+    try:
+        jobs_index = text_lines.index("jobs:")
+        job_index = text_lines.index(f"  {job_name}:", jobs_index)
+    except ValueError:
+        raise CheckError(f"{WORKFLOW_PATH} has no job '{job_name}'; the gate reads that job's steps") from None
+    job_lines = []
+    for text_line in text_lines[job_index + 1:]:
+        if text_line.strip() and not text_line.lstrip().startswith("#") and line_indent(text_line) <= 2:
+            break
+        job_lines.append(text_line)
+    steps_index = next((line_index for line_index, text_line in enumerate(job_lines)
+                        if text_line.strip() == "steps:"), None)
+    if steps_index is None:
+        raise CheckError(f"job '{job_name}' in {WORKFLOW_PATH} has no steps")
+    steps_indent = line_indent(job_lines[steps_index])
+    item_groups = []
+    dash_indent = None
+    for text_line in job_lines[steps_index + 1:]:
+        if text_line.strip() and line_indent(text_line) <= steps_indent:
+            break
+        if text_line.lstrip().startswith("- ") and dash_indent in (None, line_indent(text_line)):
+            dash_indent = line_indent(text_line)
+            item_groups.append([" " * (dash_indent + 2) + text_line.lstrip()[2:]])
+        elif item_groups:
+            item_groups[-1].append(text_line)
+    parsed_steps = []
+    for item_lines in item_groups:
+        step_fields, env_pairs = parse_step(item_lines, dash_indent + 2)
+        if "run" not in step_fields:
+            continue
+        step_name = step_fields.get("name") or step_fields["run"].splitlines()[0]
+        if "${{" in step_fields["run"] or any("${{" in env_value for _, env_value in env_pairs):
+            raise CheckError(f"step '{step_name}' in {WORKFLOW_PATH} uses a GitHub expression the local gate "
+                             "cannot evaluate; run that step's check directly")
+        parsed_steps.append(WorkflowStep(step_name, step_fields["run"],
+                                         step_fields.get("working-directory", "."), env_pairs))
+    return parsed_steps
+
+
+def is_install_step(workflow_step):
+    first_words = workflow_step.run_text.split()[:2]
+    return first_words in (["yarn", "install"], ["npm", "ci"], ["npm", "install"])
+
+
+def gate_plans(repo_paths):
+    workflow_file = repo_paths.repo_root / WORKFLOW_PATH
+    if not workflow_file.is_file():
+        raise CheckError(f"no {WORKFLOW_PATH} under {repo_paths.repo_root}; pass --root <checkout>")
+    gate_rows = []
+    for workflow_step in workflow_steps(workflow_file.read_text(encoding="utf-8"), GATE_JOB):
+        work_dir = (repo_paths.repo_root / workflow_step.work_dir).resolve()
+        if is_install_step(workflow_step):
+            gate_rows.append((workflow_step, None))
+            continue
+        module_dir = work_dir if work_dir.name in PACKAGE_DIRS.values() else None
+        gate_rows.append((workflow_step, RunPlan(
+            workflow_step.step_name, work_dir,
+            ("bash", "--noprofile", "--norc", "-eo", "pipefail", "-c", workflow_step.run_text),
+            workflow_step.step_env, module_dir)))
+    return gate_rows
+
+
+def slug_text(label_text):
+    return re.sub(r"[^a-z0-9]+", "-", label_text.lower()).strip("-")
+
+
+def log_path_for(log_dir, name_parts, run_moment, suffix_parts=()):
+    stem_text = "-".join(["checks", *[slug_text(one_part) for one_part in name_parts if one_part],
+                          run_moment.strftime("%Y%m%d-%H%M%S"),
+                          *[slug_text(one_part) for one_part in suffix_parts if one_part]])
+    candidate_path = log_dir / f"{stem_text}.log"
+    collision_count = 1
+    while candidate_path.exists():
+        collision_count += 1
+        candidate_path = log_dir / f"{stem_text}-{collision_count}.log"
+    return candidate_path
+
+
+ANSI_PATTERN = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
+TSC_ERROR = re.compile(r"error TS\d+")
+YARN_CHATTER = re.compile(r"^(yarn run v|Done in |info Visit |error Command failed with exit code )")
+LINT_DIAGNOSTIC = re.compile(r"^\S+:\d+:\d+: (warning|error) ")
+PLAYWRIGHT_COUNT = re.compile(r"^\s*\d+ (passed|failed|flaky|skipped|interrupted|did not run)\b")
+
+
+def clip_text(summary_text):
+    return summary_text if len(summary_text) <= SUMMARY_LIMIT else summary_text[:SUMMARY_LIMIT - 3] + "..."
+
+
+def summary_line(log_text):
+    clean_lines = [ANSI_PATTERN.sub("", text_line).rstrip() for text_line in log_text.splitlines()]
+    body_lines = [text_line for text_line in clean_lines
+                  if text_line.strip() and not text_line.startswith(("$ ", "# checks:"))
+                  and not YARN_CHATTER.match(text_line)]
+    vitest_lines = [text_line.strip() for text_line in body_lines if re.match(r"\s*Test Files\s", text_line)]
+    if vitest_lines:
+        return clip_text(vitest_lines[-1])
+    playwright_lines = [text_line.strip() for text_line in body_lines if PLAYWRIGHT_COUNT.match(text_line)]
+    if playwright_lines:
+        return clip_text(", ".join(playwright_lines))
+    tsc_lines = [text_line.strip() for text_line in body_lines if TSC_ERROR.search(text_line)]
+    if tsc_lines:
+        noun_text = "error" if len(tsc_lines) == 1 else "errors"
+        return clip_text(f"{len(tsc_lines)} tsc {noun_text}; first: {tsc_lines[0]}")
+    if any(re.match(r"\$ (\S+/)?tsc\b", text_line) for text_line in clean_lines):
+        return "0 tsc errors"
+    oxlint_lines = [text_line.strip() for text_line in body_lines
+                    if re.match(r"\s*Found \d+ warnings? and \d+ errors?", text_line)]
+    if oxlint_lines:
+        return clip_text(oxlint_lines[-1])
+    diagnostic_kinds = [diagnostic_match.group(1) for diagnostic_match in map(LINT_DIAGNOSTIC.match, body_lines)
+                        if diagnostic_match]
+    if diagnostic_kinds:
+        return f"{diagnostic_kinds.count('warning')} warnings, {diagnostic_kinds.count('error')} errors"
+    vite_lines = [text_line.strip() for text_line in body_lines if re.match(r"\S* ?built in \S+$", text_line)]
+    if vite_lines:
+        return clip_text(vite_lines[-1])
+    gradle_lines = [text_line.strip() for text_line in body_lines if re.match(r"BUILD (SUCCESSFUL|FAILED)", text_line)]
+    if gradle_lines:
+        return clip_text(gradle_lines[-1])
+    if body_lines:
+        return clip_text(body_lines[-1].strip())
+    tool_lines = [text_line[2:] for text_line in clean_lines if text_line.startswith("$ ")]
+    return clip_text(f"(no output from `{tool_lines[-1]}`)") if tool_lines else "(no output)"
+
+
+@dataclasses.dataclass(frozen=True)
+class LockHolder:
+    holder_pid: int
+    lock_mode: str
+    command_text: str
+
+
+def lock_key(lock_path):
+    file_stat = os.stat(lock_path)
+    return f"{os.major(file_stat.st_dev):02x}:{os.minor(file_stat.st_dev):02x}:{file_stat.st_ino}"
+
+
+def process_command(process_id):
+    try:
+        raw_text = Path(f"/proc/{process_id}/cmdline").read_bytes()
+    except OSError:
+        return "(exited)"
+    return raw_text.replace(b"\0", b" ").decode(errors="replace").strip()
+
+
+def lock_holders(locks_text, file_key, command_of=process_command):
+    holder_rows = []
+    for lock_row in locks_text.splitlines():
+        row_fields = lock_row.split()
+        if "->" in row_fields or len(row_fields) < 6 or row_fields[1] != "FLOCK":
+            continue
+        if row_fields[5] == file_key:
+            holder_pid = int(row_fields[4])
+            holder_rows.append(LockHolder(holder_pid, row_fields[3], command_of(holder_pid)))
+    return holder_rows
+
+
+def current_holders(lock_path):
+    if not lock_path.exists():
+        return []
+    try:
+        locks_text = Path("/proc/locks").read_text()
+    except OSError:
+        return []
+    return lock_holders(locks_text, lock_key(lock_path))
+
+
+def ancestor_pids():
+    found_pids = set()
+    process_id = os.getpid()
+    while process_id > 1:
+        try:
+            status_text = Path(f"/proc/{process_id}/status").read_text()
+        except OSError:
+            break
+        parent_match = re.search(r"^PPid:\s+(\d+)", status_text, re.MULTILINE)
+        if not parent_match:
+            break
+        process_id = int(parent_match.group(1))
+        found_pids.add(process_id)
+    return found_pids
+
+
+def describe_holders(holder_rows):
+    if not holder_rows:
+        return "an unidentified process"
+    return "; ".join(f"PID {one_holder.holder_pid} ({one_holder.lock_mode}): {one_holder.command_text}"
+                     for one_holder in holder_rows)
+
+
+class CheckLock:
+    def __init__(self, lock_path):
+        self.lock_path = lock_path
+        self.lock_file = None
+
+    def __enter__(self):
+        self.lock_path.parent.mkdir(parents=True, exist_ok=True)
+        self.lock_file = open(self.lock_path, "a")
+        try:
+            fcntl.flock(self.lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            return self
+        except BlockingIOError:
+            pass
+        holder_rows = current_holders(self.lock_path)
+        own_ancestors = ancestor_pids()
+        if any(one_holder.holder_pid in own_ancestors for one_holder in holder_rows):
+            self.lock_file.close()
+            raise CheckError(f"the test lock {self.lock_path} is held by a parent of this process "
+                             f"({describe_holders(holder_rows)}); run checks without flock, it takes the lock itself")
+        print(f"checks: waiting for the test lock {self.lock_path}, held by {describe_holders(holder_rows)}",
+              file=sys.stderr, flush=True)
+        wait_start = time.monotonic()
+        fcntl.flock(self.lock_file, fcntl.LOCK_EX)
+        print(f"checks: took the test lock after {time.monotonic() - wait_start:.0f}s", file=sys.stderr, flush=True)
+        return self
+
+    def __exit__(self, *exit_info):
+        fcntl.flock(self.lock_file, fcntl.LOCK_UN)
+        self.lock_file.close()
+
+
+def require_modules(run_plan, repo_paths):
+    if run_plan.module_dir is not None and not (run_plan.module_dir / "node_modules").is_dir():
+        package_name = run_plan.module_dir.relative_to(repo_paths.repo_root)
+        raise CheckError(f"{package_name} has no node_modules; run: yarn --cwd {run_plan.module_dir} "
+                         "install --frozen-lockfile")
+
+
+def execute_plan(run_plan, log_path):
+    child_env = {**os.environ, **dict(run_plan.extra_env)}
+    with open(log_path, "w", encoding="utf-8") as log_file:
+        log_file.write(f"$ {shlex.join(run_plan.command_argv)}\n")
+        log_file.write(f"# checks: cwd {run_plan.work_dir}\n")
+        for env_name, env_value in run_plan.extra_env:
+            log_file.write(f"# checks: env {env_name}={env_value}\n")
+        log_file.write(f"# checks: started {datetime.datetime.now().isoformat(timespec='seconds')}\n\n")
+        log_file.flush()
+        try:
+            child_process = subprocess.Popen(run_plan.command_argv, cwd=run_plan.work_dir, env=child_env,
+                                             stdin=subprocess.DEVNULL, stdout=log_file,
+                                             stderr=subprocess.STDOUT, start_new_session=True)
+        except FileNotFoundError:
+            raise CheckError(f"{run_plan.command_argv[0]} is not installed or not on PATH; "
+                             "run checks doctor") from None
+        try:
+            exit_code = child_process.wait()
+        except KeyboardInterrupt:
+            os.killpg(child_process.pid, signal.SIGTERM)
+            child_process.wait()
+            raise
+    verdict_text = "PASS" if exit_code == 0 else "FAIL"
+    summary_text = summary_line(log_path.read_text(encoding="utf-8", errors="replace"))
+    with open(log_path, "a", encoding="utf-8") as log_file:
+        log_file.write(f"\n# checks: exit {exit_code}\n{verdict_text} {summary_text}\n")
+    return exit_code, verdict_text, summary_text
+
+
+def print_plan(run_plan):
+    print(f"cwd  {run_plan.work_dir}")
+    for env_name, env_value in run_plan.extra_env:
+        print(f"env  {env_name}={env_value}")
+    print(f"run  {shlex.join(run_plan.command_argv)}")
+
+
+def run_single(repo_paths, run_plan, name_parts, print_only):
+    if print_only:
+        print_plan(run_plan)
+        return 0
+    require_modules(run_plan, repo_paths)
+    repo_paths.log_dir.mkdir(parents=True, exist_ok=True)
+    print(f"checks: root {repo_paths.repo_root}", file=sys.stderr, flush=True)
+    with CheckLock(repo_paths.lock_path):
+        log_path = log_path_for(repo_paths.log_dir, name_parts, datetime.datetime.now())
+        exit_code, verdict_text, summary_text = execute_plan(run_plan, log_path)
+    print(f"{verdict_text} {log_path}  {summary_text}")
+    return exit_code
+
+
+def run_gate(repo_paths, print_only):
+    gate_rows = gate_plans(repo_paths)
+    if print_only:
+        for workflow_step, run_plan in gate_rows:
+            print(f"# {workflow_step.step_name}")
+            if run_plan is None:
+                print("skip (an install, not a check)")
+            else:
+                print_plan(run_plan)
+        return 0
+    for _, run_plan in gate_rows:
+        if run_plan is not None:
+            require_modules(run_plan, repo_paths)
+    repo_paths.log_dir.mkdir(parents=True, exist_ok=True)
+    print(f"checks: root {repo_paths.repo_root}", file=sys.stderr, flush=True)
+    failed_steps = []
+    with CheckLock(repo_paths.lock_path):
+        gate_moment = datetime.datetime.now()
+        gate_log = log_path_for(repo_paths.log_dir, ("fe", "gate"), gate_moment)
+        gate_lines = []
+        for step_number, (workflow_step, run_plan) in enumerate(gate_rows, start=1):
+            if run_plan is None:
+                step_line = f"SKIP {workflow_step.step_name}  an install, not a check; checks doctor compares node_modules with the lockfile"
+            else:
+                step_log = log_path_for(repo_paths.log_dir, ("fe", "gate"), gate_moment,
+                                        (f"{step_number:02d}", workflow_step.step_name))
+                exit_code, verdict_text, summary_text = execute_plan(run_plan, step_log)
+                if exit_code != 0:
+                    failed_steps.append(workflow_step.step_name)
+                step_line = f"{verdict_text} {workflow_step.step_name}  {step_log}  {summary_text}"
+            print(step_line, flush=True)
+            gate_lines.append(step_line)
+        ran_count = sum(1 for _, run_plan in gate_rows if run_plan is not None)
+        verdict_text = "FAIL" if failed_steps else "PASS"
+        total_text = (f"{len(failed_steps)} of {ran_count} steps failed: {', '.join(failed_steps)}"
+                      if failed_steps else f"{ran_count} of {ran_count} steps passed")
+        gate_log.write_text("\n".join([f"# checks: {WORKFLOW_PATH} job {GATE_JOB}", *gate_lines,
+                                       f"{verdict_text} {total_text}"]) + "\n", encoding="utf-8")
+    print(f"{verdict_text} {gate_log}  {total_text}")
+    return 1 if failed_steps else 0
+
+
+def yarn_lock_versions(lock_text):
+    locked_versions = {}
+    pending_keys = []
+    for text_line in lock_text.splitlines():
+        if text_line and not text_line.startswith((" ", "#")) and text_line.endswith(":"):
+            pending_keys = [one_key.strip().strip('"') for one_key in text_line[:-1].split(",")]
+        elif text_line.startswith("  version ") and pending_keys:
+            version_text = text_line.split(None, 1)[1].strip().strip('"')
+            for one_key in pending_keys:
+                locked_versions[one_key] = version_text
+            pending_keys = []
+    return locked_versions
+
+
+@dataclasses.dataclass(frozen=True)
+class ToolVersion:
+    package_dir: str
+    tool_name: str
+    declared_spec: str
+    locked_version: str
+    installed_version: str
+
+    @property
+    def expected_version(self):
+        return self.locked_version or self.declared_spec
+
+    @property
+    def is_stale(self):
+        return self.installed_version != self.expected_version
+
+
+def tool_versions(package_root, package_dir):
+    manifest_data = json.loads((package_root / "package.json").read_text(encoding="utf-8"))
+    declared_specs = {**manifest_data.get("dependencies", {}), **manifest_data.get("devDependencies", {})}
+    lock_file = package_root / "yarn.lock"
+    locked_versions = yarn_lock_versions(lock_file.read_text(encoding="utf-8")) if lock_file.is_file() else {}
+    version_rows = []
+    for tool_name in TOOL_PACKAGES.get(package_dir, ()):
+        if tool_name not in declared_specs:
+            continue
+        declared_spec = declared_specs[tool_name]
+        installed_manifest = package_root / "node_modules" / tool_name / "package.json"
+        installed_version = (json.loads(installed_manifest.read_text(encoding="utf-8")).get("version", "")
+                             if installed_manifest.is_file() else "(not installed)")
+        version_rows.append(ToolVersion(package_dir, tool_name, declared_spec,
+                                        locked_versions.get(f"{tool_name}@{declared_spec}", ""), installed_version))
+    return version_rows
+
+
+def doctor_lines(repo_paths, run_command=subprocess.run):
+    out_lines = []
+    problem_count = 0
+    out_lines.append(f"root     {repo_paths.repo_root} (main checkout {repo_paths.main_root})")
+    out_lines.append(f"logs     {repo_paths.log_dir}")
+    holder_rows = current_holders(repo_paths.lock_path)
+    out_lines.append(f"lock     {repo_paths.lock_path}: "
+                     + (f"held by {describe_holders(holder_rows)}" if holder_rows else "free"))
+    static_cli = repo_paths.repo_root / ".claude" / "skills" / "static-checkout" / "bin" / "static"
+    if static_cli.is_file():
+        static_run = run_command([str(static_cli), "doctor"], cwd=repo_paths.repo_root, capture_output=True,
+                                 text=True, env=git_environment())
+        static_state = "ok" if static_run.returncode == 0 else "MISMATCH"
+        if static_run.returncode != 0:
+            problem_count += 1
+        out_lines.append(f"static   {static_state}")
+        out_lines += [f"         {text_line}" for text_line in
+                      (static_run.stdout + static_run.stderr).splitlines() if text_line.strip()]
+    else:
+        out_lines.append("static   no static-checkout CLI in this checkout")
+    for package_dir in PACKAGE_DIRS.values():
+        package_root = repo_paths.repo_root / package_dir
+        install_text = f"yarn --cwd {package_root} install --frozen-lockfile"
+        if not (package_root / "package.json").is_file():
+            continue
+        if not (package_root / "node_modules").is_dir():
+            problem_count += 1
+            out_lines.append(f"{package_dir:<8} MISSING node_modules; run {install_text}")
+            continue
+        integrity_run = run_command(["yarn", "--cwd", str(package_root), "check", "--integrity"],
+                                    capture_output=True, text=True)
+        if integrity_run.returncode == 0:
+            out_lines.append(f"{package_dir:<8} ok node_modules matches yarn.lock")
+        else:
+            problem_count += 1
+            out_lines.append(f"{package_dir:<8} STALE node_modules does not match yarn.lock; run {install_text}")
+        for version_row in tool_versions(package_root, package_dir):
+            if version_row.is_stale:
+                problem_count += 1
+                out_lines.append(f"{package_dir:<8} STALE {version_row.tool_name}: package.json "
+                                 f"{version_row.declared_spec}, yarn.lock {version_row.locked_version or '(no entry)'}, "
+                                 f"installed {version_row.installed_version}; run {install_text}")
+            else:
+                out_lines.append(f"{package_dir:<8} ok {version_row.tool_name} {version_row.installed_version}")
+    try:
+        docker_run = run_command(["docker", "version", "--format", "{{.Server.Version}}"],
+                                 capture_output=True, text=True, timeout=10)
+        docker_ok = docker_run.returncode == 0
+        docker_text = docker_run.stdout.strip() if docker_ok else (docker_run.stderr.strip().splitlines() or ["?"])[-1]
+    except (OSError, subprocess.TimeoutExpired) as docker_error:
+        docker_ok, docker_text = False, str(docker_error)
+    if docker_ok:
+        out_lines.append(f"docker   ok server {docker_text}")
+    else:
+        problem_count += 1
+        out_lines.append(f"docker   UNREACHABLE ({docker_text}); containerized backend tests fail; "
+                         "start Docker or run checks be test --exclude-tags containerized")
+    try:
+        java_run = run_command(["java", "-version"], capture_output=True, text=True, timeout=10)
+        java_text = (java_run.stderr or java_run.stdout).strip().splitlines()[0]
+    except (OSError, subprocess.TimeoutExpired, IndexError):
+        java_text = ""
+    build_file = repo_paths.repo_root / "backend" / "build.gradle.kts"
+    toolchain_match = re.search(r"JavaLanguageVersion\.of\((\d+)\)",
+                                build_file.read_text(encoding="utf-8")) if build_file.is_file() else None
+    toolchain_text = f" (toolchain {toolchain_match.group(1)})" if toolchain_match else ""
+    if java_text:
+        out_lines.append(f"jdk      ok {java_text}{toolchain_text}")
+    else:
+        problem_count += 1
+        out_lines.append(f"jdk      MISSING no java on PATH{toolchain_text}; install a JDK")
+    return out_lines, problem_count
+
+
+HEREDOC_PATTERN = re.compile(r"(?<!<)<<(?!<)-?[ \t]*(['\"]?)(\w+)\1([^\n]*)\n.*?\n[ \t]*\2[ \t]*(?=\n|$)", re.DOTALL)
+SEPARATOR_TOKENS = {"|", "||", "&", "&&", ";", ";;", "(", ")", "\n", "|&", ";&"}
+REDIRECT_TOKENS = {">", ">>", "<", ">&", "&>", "<&", ">|", "&>>", "<>"}
+SHELL_KEYWORDS = {"if", "then", "else", "elif", "do", "while", "until", "!", "{", "}", "fi", "done"}
+PLAIN_WRAPPERS = {"command", "exec", "time", "nohup", "setsid", "builtin"}
+VALUE_WRAPPERS = {"nice": {"-n"}, "ionice": {"-c", "-n"}, "stdbuf": {"-i", "-o", "-e"}}
+SHELL_NAMES = {"bash", "sh", "zsh", "dash"}
+ASSIGNMENT_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
+GRADLE_VALUE_FLAGS = {"-p", "--project-dir", "--tests", "-x", "--exclude-task", "-b", "--build-file",
+                      "-c", "--settings-file", "-g", "--gradle-user-home", "-I", "--init-script"}
+GRADLE_CHECK_TASKS = re.compile(r"^(test|check|build|assemble|classes|testClasses|compile\w*|checkstyle\w*|"
+                                r"pitest\w*|jacoco\w*)$")
+FE_SCRIPT_CHECKS = {
+    "typecheck": "typecheck", "lint": "lint", "lint:validation": "lint-validation", "fmt": "fmt",
+    "fmt:check": "fmt-check", "build": "build", "check:fp": "fp", "check:rules": "rules",
+    "check:compiler-bailouts": "bailouts", "check:bundle-budget": "budget",
+}
+E2E_SCRIPT_CHECKS = {"typecheck": "typecheck", "fmt": "fmt", "fmt:check": "fmt-check"}
+E2E_SCRIPT_PROJECTS = {"test": "", "test:app": "", "test:contract": "contract", "test:infra": "infra",
+                       "test:crawl": "crawl", "test:headed": ""}
+CHECK_SCRIPT_PREFIX = re.compile(r"^(test|typecheck|tsc|lint|build|fmt|check:)")
+CHECK_BINARIES = {"vitest", "tsc", "oxlint", "oxfmt", "playwright", "gradlew", "gradle"}
+
+
+def strip_heredocs(command_text):
+    return HEREDOC_PATTERN.sub(lambda heredoc_match: heredoc_match.group(3), command_text)
+
+
+def shell_tokens(command_text):
+    shell_lexer = shlex.shlex(command_text, posix=True, punctuation_chars="|&;()<>\n")
+    shell_lexer.whitespace = " \t\r"
+    shell_lexer.whitespace_split = True
+    shell_lexer.commenters = ""
+    return list(shell_lexer)
+
+
+def substitution_bodies(token_text):
+    found_bodies = re.findall(r"`([^`]*)`", token_text)
+    start_index = token_text.find("$(")
+    while start_index != -1:
+        paren_depth = 0
+        for char_index in range(start_index + 1, len(token_text)):
+            if token_text[char_index] == "(":
+                paren_depth += 1
+            elif token_text[char_index] == ")":
+                paren_depth -= 1
+                if paren_depth == 0:
+                    found_bodies.append(token_text[start_index + 2:char_index])
+                    break
+        else:
+            found_bodies.append(token_text[start_index + 2:])
+        start_index = token_text.find("$(", start_index + 2)
+    return found_bodies
+
+
+def simple_commands(token_list):
+    command_words = []
+    skip_next = False
+    for one_token in token_list:
+        if skip_next:
+            skip_next = False
+        elif one_token in SEPARATOR_TOKENS:
+            if command_words:
+                yield command_words
+            command_words = []
+        elif one_token in REDIRECT_TOKENS or (one_token and set(one_token) <= set("<>&|") and ">" in one_token):
+            if command_words and command_words[-1].isdigit():
+                command_words.pop()
+            skip_next = True
+        else:
+            command_words.append(one_token)
+    if command_words:
+        yield command_words
+
+
+def package_of(dir_hints):
+    for hint_text in reversed(dir_hints):
+        hint_parts = hint_text.split("/")
+        if "e2e" in hint_parts:
+            return "e2e"
+        if "frontend" in hint_parts:
+            return "frontend"
+    return "other" if dir_hints else "frontend"
+
+
+def checks_text(*command_words):
+    return " ".join([CLI_PATH, *[shlex.quote(one_word) for one_word in command_words if one_word]])
+
+
+def non_flag_args(arg_words):
+    return [one_word for one_word in arg_words if not one_word.startswith("-")]
+
+
+def binary_replacement(binary_name, arg_words, package_name):
+    if binary_name == "vitest":
+        test_args = list(arg_words)
+        if test_args[:1] in (["run"], ["watch"], ["related"]):
+            test_args = test_args[1:]
+        return checks_text("fe", "test", *test_args)
+    if binary_name == "tsc":
+        return checks_text("e2e" if package_name == "e2e" else "fe", "typecheck")
+    if binary_name == "oxlint":
+        is_validation = any("validation" in one_word for one_word in arg_words)
+        return checks_text("fe", "lint-validation" if is_validation else "lint")
+    if binary_name == "oxfmt":
+        lane_name = "e2e" if package_name == "e2e" else "fe"
+        return checks_text(lane_name, "fmt-check" if "--check" in arg_words else "fmt")
+    if binary_name == "playwright":
+        if arg_words[:1] != ["test"]:
+            return None
+        return checks_text("e2e", "run", *[one_word for one_word in non_flag_args(arg_words[1:])
+                                           if not one_word.endswith(".config.ts")])
+    if binary_name in ("gradlew", "gradle"):
+        return gradle_replacement(arg_words)
+    return None
+
+
+def gradle_replacement(arg_words):
+    task_names = []
+    test_patterns = []
+    word_index = 0
+    while word_index < len(arg_words):
+        one_word = arg_words[word_index]
+        if one_word in GRADLE_VALUE_FLAGS:
+            if one_word == "--tests" and word_index + 1 < len(arg_words):
+                test_patterns.append(arg_words[word_index + 1])
+            word_index += 2
+            continue
+        if not one_word.startswith("-"):
+            task_names.append(one_word.rsplit(":", 1)[-1])
+        word_index += 1
+    check_tasks = [task_name for task_name in task_names if GRADLE_CHECK_TASKS.match(task_name)]
+    if not check_tasks:
+        return None
+    if any(task_name.startswith("pitest") for task_name in check_tasks):
+        return checks_text("be", "pit")
+    if any(task_name.startswith("checkstyle") for task_name in check_tasks):
+        return checks_text("be", "checkstyle")
+    if "test" in check_tasks:
+        pattern_words = [pattern_word for pattern_text in test_patterns if pattern_text != ARCHUNIT_PATTERN
+                         for pattern_word in ("--tests", pattern_text)]
+        return checks_text("be", "test", *pattern_words)
+    return checks_text("be", "check")
+
+
+def yarn_replacement(arg_words, dir_hints):
+    yarn_dirs = list(dir_hints)
+    script_name = ""
+    script_args = []
+    word_index = 0
+    while word_index < len(arg_words):
+        one_word = arg_words[word_index]
+        if one_word == "--cwd" and word_index + 1 < len(arg_words):
+            yarn_dirs.append(arg_words[word_index + 1])
+            word_index += 2
+            continue
+        if one_word.startswith("--cwd="):
+            yarn_dirs.append(one_word.split("=", 1)[1])
+        elif one_word.startswith("-"):
+            pass
+        elif one_word == "run" and not script_name:
+            pass
+        else:
+            script_name = one_word
+            script_args = arg_words[word_index + 1:]
+            break
+        word_index += 1
+    if not script_name:
+        return None
+    package_name = package_of(yarn_dirs)
+    if package_name == "other":
+        return None
+    if script_name in CHECK_BINARIES:
+        return binary_replacement(script_name, script_args, package_name)
+    if not CHECK_SCRIPT_PREFIX.match(script_name):
+        return None
+    if package_name == "e2e":
+        if script_name in E2E_SCRIPT_CHECKS:
+            return checks_text("e2e", E2E_SCRIPT_CHECKS[script_name])
+        if script_name in E2E_SCRIPT_PROJECTS:
+            project_name = E2E_SCRIPT_PROJECTS[script_name]
+            project_words = ("--project", project_name) if project_name else ()
+            prefix_text = "CRAWL=1 " if script_name == "test:crawl" else ""
+            return prefix_text + checks_text("e2e", "run", *project_words, *non_flag_args(script_args))
+        return f"the matching command from `{CLI_PATH} list`"
+    if script_name.startswith("test"):
+        test_args = list(script_args)
+        if test_args[:1] in (["run"], ["watch"]):
+            test_args = test_args[1:]
+        return checks_text("fe", "test", *test_args)
+    if script_name in FE_SCRIPT_CHECKS:
+        return checks_text("fe", FE_SCRIPT_CHECKS[script_name])
+    return f"the matching command from `{CLI_PATH} list`"
+
+
+def unwrap_command(command_words):
+    dir_hints = []
+    word_index = 0
+    while word_index < len(command_words):
+        one_word = command_words[word_index]
+        if ASSIGNMENT_PATTERN.match(one_word) or one_word in SHELL_KEYWORDS or one_word in PLAIN_WRAPPERS:
+            word_index += 1
+        elif one_word in VALUE_WRAPPERS:
+            word_index += 1
+            while word_index < len(command_words) and command_words[word_index].startswith("-"):
+                word_index += 2 if command_words[word_index] in VALUE_WRAPPERS[one_word] else 1
+        elif one_word == "env":
+            word_index += 1
+            while word_index < len(command_words):
+                env_word = command_words[word_index]
+                if env_word in ("-C", "--chdir", "-u", "--unset", "-S", "--split-string"):
+                    if env_word in ("-C", "--chdir") and word_index + 1 < len(command_words):
+                        dir_hints.append(command_words[word_index + 1])
+                    word_index += 2
+                elif env_word.startswith("--chdir="):
+                    dir_hints.append(env_word.split("=", 1)[1])
+                    word_index += 1
+                elif env_word.startswith("-") or ASSIGNMENT_PATTERN.match(env_word):
+                    word_index += 1
+                else:
+                    break
+        elif one_word == "timeout":
+            word_index += 1
+            while word_index < len(command_words) and command_words[word_index].startswith("-"):
+                word_index += 2 if command_words[word_index] in ("-s", "--signal", "-k", "--kill-after") else 1
+            word_index += 1
+        else:
+            break
+    return command_words[word_index:], dir_hints
+
+
+@dataclasses.dataclass(frozen=True)
+class RefusedCommand:
+    refused_text: str
+    replacement_text: str
+
+
+def nested_scripts(command_words):
+    head_name = os.path.basename(command_words[0])
+    if head_name == "flock":
+        for word_index, one_word in enumerate(command_words[1:-1], start=1):
+            if one_word in ("-c", "--command"):
+                return [command_words[word_index + 1]], []
+        rest_words = command_words[1:]
+        while rest_words and rest_words[0].startswith("-"):
+            rest_words = rest_words[2:] if rest_words[0] in ("-w", "--timeout", "-E", "--conflict-exit-code") \
+                else rest_words[1:]
+        return [], [rest_words[1:]] if len(rest_words) > 1 else []
+    if head_name in SHELL_NAMES:
+        for word_index, one_word in enumerate(command_words[1:-1], start=1):
+            if re.match(r"^-[a-zA-Z]*c[a-zA-Z]*$", one_word):
+                return [command_words[word_index + 1]], []
+    if head_name == "eval":
+        return [" ".join(command_words[1:])], []
+    return [], []
+
+
+def classify_words(command_words, depth_left):
+    found_refusals = []
+    for one_word in command_words:
+        for body_text in substitution_bodies(one_word):
+            found_refusals += classify_command(body_text, depth_left - 1)
+    core_words, dir_hints = unwrap_command(command_words)
+    if not core_words:
+        return found_refusals
+    script_texts, word_lists = nested_scripts(core_words)
+    for script_text in script_texts:
+        found_refusals += classify_command(script_text, depth_left - 1)
+    for inner_words in word_lists:
+        found_refusals += classify_words(inner_words, depth_left - 1)
+    if script_texts or word_lists:
+        return found_refusals
+    head_word = core_words[0]
+    head_name = os.path.basename(head_word)
+    if head_name == "yarn":
+        replacement_text = yarn_replacement(core_words[1:], dir_hints)
+    elif head_name in CHECK_BINARIES:
+        binary_dir = os.path.dirname(head_word)
+        binary_package = package_of([*dir_hints, binary_dir] if binary_dir else dir_hints)
+        replacement_text = binary_replacement(head_name, core_words[1:], binary_package)
+    else:
+        replacement_text = None
+    if replacement_text:
+        found_refusals.append(RefusedCommand(shlex.join(command_words), replacement_text))
+    return found_refusals
+
+
+def classify_command(command_text, depth_left=6):
+    if depth_left <= 0:
+        return []
+    try:
+        token_list = shell_tokens(strip_heredocs(command_text))
+    except ValueError:
+        return []
+    found_refusals = []
+    for command_words in simple_commands(token_list):
+        found_refusals += classify_words(command_words, depth_left)
+    return found_refusals
+
+
+def refusal_message(found_refusals):
+    message_lines = ["checks: a hand-assembled check is refused (ADR 509); run it through the checks CLI,",
+                     "which takes the test lock, writes the dated log and prints PASS/FAIL:"]
+    for one_refusal in found_refusals:
+        message_lines.append(f"  refused  {one_refusal.refused_text}")
+        message_lines.append(f"  run      {one_refusal.replacement_text}")
+    message_lines.append(f"From a worktree run that worktree's own <worktree>/{CLI_PATH}; every command: "
+                         f"{CLI_PATH} list")
+    return "\n".join(message_lines)
+
+
+def hook_main(stdin_text):
+    try:
+        hook_input = json.loads(stdin_text)
+    except json.JSONDecodeError:
+        return 0
+    if hook_input.get("tool_name", "Bash") != "Bash":
+        return 0
+    command_text = (hook_input.get("tool_input") or {}).get("command") or ""
+    found_refusals = classify_command(command_text)
+    if not found_refusals:
+        return 0
+    print(refusal_message(found_refusals), file=sys.stderr)
+    return 2
+
+
+def main(argv_words):
+    command_line = parse_command_line(argv_words)
+    command_words = list(command_line.command_words)
+    if command_line.wants_help:
+        print(USAGE_TEXT, end="")
+        return 0
+    if not command_words:
+        print(USAGE_TEXT, end="", file=sys.stderr)
+        return 2
+    if command_words[0] == "hook":
+        return hook_main(sys.stdin.read())
+    if command_words[0] == "list":
+        print("\n".join(list_lines()))
+        return 0
+    repo_paths = find_paths(command_line.root_arg, own_checkout_dir())
+    if command_words[0] == "doctor":
+        out_lines, problem_count = doctor_lines(repo_paths)
+        print("\n".join(out_lines))
+        if problem_count:
+            print(f"{problem_count} problem(s); each line above names its fix")
+        return 1 if problem_count else 0
+    lane_name = command_words[0]
+    if len(command_words) < 2 and lane_name in {one_spec.lane_name for one_spec in CHECK_TABLE}:
+        raise CheckError(f"{lane_name} needs a check; {lane_line(lane_name)}")
+    check_name, arg_words = (command_words + [""])[1], command_words[2:]
+    if (lane_name, check_name) == ("fe", "gate"):
+        if arg_words:
+            raise CheckError("checks fe gate takes no arguments; see checks list")
+        return run_gate(repo_paths, command_line.print_only)
+    run_plan = build_plan(repo_paths, lane_name, check_name, arg_words)
+    return run_single(repo_paths, run_plan, (lane_name, check_name), command_line.print_only)
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main(sys.argv[1:]))
+    except CheckError as check_error:
+        print(f"checks: {check_error}", file=sys.stderr)
+        sys.exit(2)
+    except KeyboardInterrupt:
+        sys.exit(130)

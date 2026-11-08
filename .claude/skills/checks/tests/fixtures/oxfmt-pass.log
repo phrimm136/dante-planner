@@ -1,0 +1,7 @@
+yarn run v1.22.22
+$ oxfmt --check src
+Checking formatting...
+
+All matched files use the correct format.
+Finished in 225ms on 1234 files using 12 threads.
+Done in 0.41s.

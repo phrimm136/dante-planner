@@ -14,9 +14,10 @@ learning: design
   before any fix; never bypass an error to make a symptom disappear.
 - Prod access (RDS SQL, Loki logs) only via `scripts/ops/access/` — see
   `docs/external-access.md`; never improvise SSH/kubectl paths.
-- Target directories with flags: `yarn --cwd frontend …`,
-  `/home/user/github/LimbusPlanner/backend/gradlew -p backend …`. A bare
-  `vitest`/`tsc`/`gradlew` at the repo root is hook-blocked, and `cd` is deny-listed.
+- Checks (tests, typecheck, lint, format, build, e2e, gradle) run only through the `checks`
+  skill's CLI, `<checkout or worktree>/.claude/skills/checks/bin/checks <lane> <check>`, which
+  checks the checkout it lives in; the hook refuses direct vitest/tsc/oxlint/oxfmt/playwright/gradlew. Other yarn
+  commands target directories with flags (`yarn --cwd frontend install`), and `cd` is deny-listed.
 - Terraform runs through `scripts/ops/terraform-run.sh …`; a bare `terraform` is hook-blocked.
 - No exclamation marks in responses.
 

@@ -13,15 +13,13 @@ Run all checks. A commit that breaks the build wastes everyone's time — catch 
 
 | Check | Command |
 |-------|---------|
-| FE typecheck | `yarn --cwd <worktree>/frontend typecheck` |
-| FE test | `yarn --cwd <worktree>/frontend test` |
-| FE build | `yarn --cwd <worktree>/frontend build` |
-| BE test | `<worktree>/backend/gradlew -p <worktree>/backend test` |
-| BE build | `<worktree>/backend/gradlew -p <worktree>/backend build` |
-| BE mutation | `<worktree>/backend/gradlew -p <worktree>/backend pitestRatchet` (not part of `build`) |
+| FE gate (PR Gate's frontend steps) | `<worktree>/.claude/skills/checks/bin/checks fe gate` |
+| FE build | `<worktree>/.claude/skills/checks/bin/checks fe build` |
+| BE check | `<worktree>/.claude/skills/checks/bin/checks be check` |
+| BE mutation | `<worktree>/.claude/skills/checks/bin/checks be pit` (not part of `check`) |
 | Mock deploy | `docker compose up --build -d` (repo root; auto-merges the gitignored `docker-compose.override.yml`, which supplies the local mysql/backend/nginx/redis stack) |
 
-Output redirection is enforced by the `check-output-redirect.sh` hook — it will block any test/build command that doesn't redirect to `/tmp/` with a date suffix. Follow the hook's required pattern.
+The `checks` CLI takes the test lock, writes each run's log under `.claude/reports/logs/` and prints PASS/FAIL; the `check-output-redirect.sh` hook refuses the hand-assembled equivalents.
 
 **Mock deployment** spins up MySQL + Spring Boot via Docker Compose to validate Flyway migrations and context loading against a real database. After the backend health check passes (`curl -f http://localhost:8080/actuator/health`), tear down:
 ```

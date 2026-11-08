@@ -4,8 +4,8 @@ Spring Boot + Java + JPA/Hibernate + Bean Validation (Jakarta) + MySQL + Redis +
 
 ## Build & Tooling
 
-- Gradle: always `/home/user/github/LimbusPlanner/backend/gradlew -p /home/user/github/LimbusPlanner/backend` — bare `gradlew` without a project dir is hook-blocked, and a relative `-p` resolves against the shell's current directory.
-- Unit tier only (no Docker): `/home/user/github/LimbusPlanner/backend/gradlew -p /home/user/github/LimbusPlanner/backend test -PexcludeTags=containerized`. Add `--tests "<pattern>"` to scope further.
+- Gradle checks run through the `checks` CLI: `<checkout or worktree>/.claude/skills/checks/bin/checks be test|check|checkstyle|pit`; a direct `gradlew` test, check, build, compile, checkstyle or pitest task is hook-refused.
+- Unit tier only (no Docker): `checks be test --exclude-tags containerized`. Add `--tests "<pattern>"` to scope further; the ArchUnit suite is added to any `--tests` run.
 - Full suite (default `test` task) also runs the integration tests (MySQL/Redis Testcontainers, tagged `containerized`), which require Docker.
 - Import order (enforced): java → spring framework → spring boot → spring data jpa → jakarta.validation → jakarta.persistence → third-party → project packages.
 

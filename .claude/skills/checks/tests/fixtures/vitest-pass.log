@@ -1,0 +1,70 @@
+yarn run v1.22.22
+$ NODE_OPTIONS=--max-old-space-size=4096 vitest run src/pages/abEvent
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vite.config.ts:18:32). Use `import.meta.dirname` instead
+  - import "./vite-plugin-hash-static" without a file extension (vite.config.ts:11:34). Add the file extension
+  - import "./vite-plugin-route-headers" without a file extension (vite.config.ts:12:36). Add the file extension
+  - import "./vite-plugin-asset-not-found" without a file extension (vite.config.ts:13:37). Add the file extension
+  - import "./vite-plugin-build-id" without a file extension (vite.config.ts:14:31). Add the file extension
+  - import "./src/lib/constants/app" without a file extension (vite-plugin-build-id.ts:2:35). Add the file extension
+  - import "./src/lib/hashKey" without a file extension (vite-plugin-hash-static.ts:5:25). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vite.config.ts:18:32). Use `import.meta.dirname` instead
+  - import "./vite-plugin-hash-static" without a file extension (vite.config.ts:11:34). Add the file extension
+  - import "./vite-plugin-route-headers" without a file extension (vite.config.ts:12:36). Add the file extension
+  - import "./vite-plugin-asset-not-found" without a file extension (vite.config.ts:13:37). Add the file extension
+  - import "./vite-plugin-build-id" without a file extension (vite.config.ts:14:31). Add the file extension
+  - import "./src/lib/constants/app" without a file extension (vite-plugin-build-id.ts:2:35). Add the file extension
+  - import "./src/lib/hashKey" without a file extension (vite-plugin-hash-static.ts:5:25). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vite.config.ts:18:32). Use `import.meta.dirname` instead
+  - import "./vite-plugin-hash-static" without a file extension (vite.config.ts:11:34). Add the file extension
+  - import "./vite-plugin-route-headers" without a file extension (vite.config.ts:12:36). Add the file extension
+  - import "./vite-plugin-asset-not-found" without a file extension (vite.config.ts:13:37). Add the file extension
+  - import "./vite-plugin-build-id" without a file extension (vite.config.ts:14:31). Add the file extension
+  - import "./src/lib/constants/app" without a file extension (vite-plugin-build-id.ts:2:35). Add the file extension
+  - import "./src/lib/hashKey" without a file extension (vite-plugin-hash-static.ts:5:25). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vite.config.ts:18:32). Use `import.meta.dirname` instead
+  - import "./vite-plugin-hash-static" without a file extension (vite.config.ts:11:34). Add the file extension
+  - import "./vite-plugin-route-headers" without a file extension (vite.config.ts:12:36). Add the file extension
+  - import "./vite-plugin-asset-not-found" without a file extension (vite.config.ts:13:37). Add the file extension
+  - import "./vite-plugin-build-id" without a file extension (vite.config.ts:14:31). Add the file extension
+  - import "./src/lib/constants/app" without a file extension (vite-plugin-build-id.ts:2:35). Add the file extension
+  - import "./src/lib/hashKey" without a file extension (vite-plugin-hash-static.ts:5:25). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.2 /home/user/github/LimbusPlanner/.claude/worktrees/checks-cli/frontend
+
+(node:2186248) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2186248) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2186248) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2186248) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2186248) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2186248) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2186248) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2186248) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2186248) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2186248) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2186248) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ Test Files  11 passed (11)
+      Tests  177 passed (177)
+   Start at  23:31:17
+   Duration  6.84s (transform 19.24s, setup 9.42s, import 29.66s, tests 1.27s, environment 7.45s)
+
+Done in 21.44s.

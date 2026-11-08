@@ -16,6 +16,17 @@ Skills are modular knowledge bases that Claude loads when needed. They provide:
 
 ## Available Skills
 
+### checks
+**Purpose:** The one local CLI for the frontend, e2e and backend checks (ADR 509)
+
+**Use when:**
+- Running any test, typecheck, lint, format, build, e2e or gradle check
+- The Bash hook refuses a hand-assembled check
+
+**[View Skill →](checks/)**
+
+---
+
 ### skill-developer (Meta-Skill)
 **Purpose:** Creating and managing Claude Code skills
 

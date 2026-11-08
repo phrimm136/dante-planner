@@ -65,7 +65,7 @@ export default function globalSetup(config: FullConfig): void {
   )
   if (reason) {
     throw new Error(
-      `${reason}, so nginx cannot serve the current source. Run \`yarn --cwd frontend build\` first.`,
+      `${reason}, so nginx cannot serve the current source. Run \`.claude/skills/checks/bin/checks fe build\` first.`,
     )
   }
 }
