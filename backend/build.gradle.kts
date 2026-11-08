@@ -9,6 +9,12 @@ buildscript {
             classpath("org.jsoup:jsoup:1.23.2") {
                 because("dependency-check plugin 13.0.0 brings 1.23.1; the advisory is fixed in 1.23.2")
             }
+            classpath("com.fasterxml.jackson.core:jackson-databind:2.22.4") {
+                because("dependency-check plugin 13.0.0 brings 2.22.1; 2.22.4 carries the advisory fixes and matches the app's jackson-bom")
+            }
+            classpath("com.fasterxml.jackson.core:jackson-core:2.22.4") {
+                because("dependency-check plugin 13.0.0 brings 2.22.1; 2.22.4 carries the advisory fixes and matches the app's jackson-bom")
+            }
         }
     }
 }
