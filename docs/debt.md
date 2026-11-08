@@ -1655,12 +1655,6 @@ guards the parse but likewise skips the schema gate.
   Copying `gradlew` and `gradle/wrapper` into the builder stage leaves one version source. Worth
   doing when the image and the wrapper differ by a minor version, or before the next Gradle minor.
   re-check: `.claude/skills/debt-ledger/bin/debt absent backend/Dockerfile 'gradlew'`
-- Dependabot's 72611673 moved the runtime and `rds-certs` base images from
-  `eclipse-temurin:21.0.13_9-jre-alpine-3.24` to `21-jre-alpine-3.21`: an older Alpine release, and
-  a tag that no longer names the JDK patch level. Worth doing now: pin the newest
-  `21.0.x_y-jre-alpine-3.2x` tag by digest and find why the docker updater chose 3.21 before it
-  repeats the move.
-  re-check: `rg -q 'eclipse-temurin:21-jre-alpine-3\.21' backend/Dockerfile`
 - The Identity parity test "renders the stats panel at a lowered level" sends
   `fireEvent.keyDown` on the level slider before `waitForI18nSettled`, the wait 1edef3cb added
   before every tier click to avoid a synchronous `act()` re-render of a pending name plate. The
