@@ -20,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -271,30 +270,6 @@ class PlannerSubscriptionServiceTest {
 
             // Assert
             verify(subscriptionRepository, never()).insert(any());
-        }
-    }
-
-    @Nested
-    class GetSubscriberUserIdsTests {
-
-        @Test
-        void getSubscriberUserIds_WhenCalled_ReturnsOnlyEnabled() {
-            // Arrange
-            PlannerSubscription sub1 = new PlannerSubscription(1L, plannerId);
-            PlannerSubscription sub2 = new PlannerSubscription(2L, plannerId);
-            PlannerSubscription sub3 = new PlannerSubscription(3L, plannerId);
-
-            when(subscriptionRepository.findByPlannerIdAndEnabledTrue(plannerId))
-                    .thenReturn(List.of(sub1, sub2, sub3));
-
-            // Act
-            List<Long> result = subscriptionService.getSubscriberUserIds(plannerId);
-
-            // Assert
-            assertThat(result.size()).isEqualTo(3);
-            assertThat(result).contains(1L);
-            assertThat(result).contains(2L);
-            assertThat(result).contains(3L);
         }
     }
 }

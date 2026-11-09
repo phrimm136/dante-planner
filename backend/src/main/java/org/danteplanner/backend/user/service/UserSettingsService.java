@@ -12,6 +12,7 @@ import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.repository.UserSettingsRepository;
 import org.danteplanner.backend.shared.sse.NotificationPreferenceProvider;
+import org.danteplanner.backend.shared.freshness.FreshnessPending;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,7 @@ public class UserSettingsService implements NotificationPreferenceProvider {
     private final UserSettingsRepository userSettingsRepository;
     private final UserRepository userRepository;
 
+    @FreshnessPending(reason = "user settings scope arrives in M2")
     @Transactional(readOnly = true)
     public UserSettingsResponse getSettings(Long userId) {
         return userSettingsRepository.findByUserId(userId)

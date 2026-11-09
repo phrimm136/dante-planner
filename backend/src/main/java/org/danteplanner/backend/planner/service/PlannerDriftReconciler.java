@@ -15,6 +15,7 @@ import org.danteplanner.backend.planner.repository.PlannerDriftAuditRepository.C
 import org.danteplanner.backend.planner.repository.PlannerDriftAuditRepository.EntityFilterRow;
 import org.danteplanner.backend.planner.repository.PlannerDriftAuditRepository.KeywordFilterRow;
 import org.danteplanner.backend.planner.searchindex.PlannerContentEntityExtractor;
+import org.danteplanner.backend.shared.freshness.FreshnessExempt;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -72,6 +73,7 @@ public class PlannerDriftReconciler {
      */
     @Scheduled(cron = "${planner.reconciler.cron:0 0 4 * * *}")
     @SchedulerLock(name = "reconcilePlannerDrift", lockAtMostFor = "PT10M", lockAtLeastFor = "PT30S")
+    @FreshnessExempt(reason = "scheduled drift reconcile runs with no request bound and answers no reader")
     @Transactional(readOnly = true)
     public List<DriftRecord> reconcile() {
         List<DriftRecord> records = Stream.of(

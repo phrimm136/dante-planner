@@ -20,10 +20,9 @@ import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
@@ -175,12 +174,7 @@ public class PlannerPublishingService {
         return planner;
     }
 
-    @Transactional(readOnly = true)
-    public Page<Planner> listHiddenFromRecommended(Pageable pageable) {
-        return plannerRepository.findHiddenFromRecommended(pageable);
-    }
-
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
     public int upvoteCount(UUID plannerId) {
         return plannerStatsRepository.upvotesOf(plannerId);
     }

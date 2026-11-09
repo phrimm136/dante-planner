@@ -5,7 +5,6 @@ import org.danteplanner.backend.planner.entity.PlannerSubscriptionId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,8 +12,6 @@ import java.util.UUID;
 public interface PlannerSubscriptionRepository extends JpaRepository<PlannerSubscription, PlannerSubscriptionId> {
 
     Optional<PlannerSubscription> findByUserIdAndPlannerId(Long userId, UUID plannerId);
-
-    List<PlannerSubscription> findByPlannerIdAndEnabledTrue(UUID plannerId);
 
     boolean existsByUserIdAndPlannerId(Long userId, UUID plannerId);
 
