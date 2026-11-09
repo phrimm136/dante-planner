@@ -6,6 +6,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -350,9 +352,69 @@ class HistoryTest {
 
     @Test
     void listOk_WhenKeysArePresent_IsAListRead() throws IOException {
-        assertThat(only(json("{'session':'s1','kind':'list','invokedAt':10,'completedAt':20,'outcome':'ok',"
-                + "'status':200,'keys':['p1','p2']}")))
-                .isEqualTo(new ListRead("s1", 10, 20, List.of("p1", "p2")));
+        assertThat(only(json("{'session':'s1','kind':'list','list':'owner','invokedAt':10,'completedAt':20,"
+                + "'outcome':'ok','status':200,'page':0,'size':20,'totalElements':2,'keys':['p1','p2']}")))
+                .isEqualTo(new ListRead("s1", ListRead.Listing.OWNER, 10, 20, 0, 20, 2, List.of("p1", "p2")));
+    }
+
+    @Test
+    void listOk_WhenTheListIsTheCatalog_IsACatalogRead() throws IOException {
+        assertThat(only(json("{'session':'anon','kind':'list','list':'catalog','invokedAt':10,'completedAt':20,"
+                + "'outcome':'ok','status':200,'page':1,'size':5,'totalElements':9,'keys':['p1']}")))
+                .isEqualTo(new ListRead("anon", ListRead.Listing.CATALOG, 10, 20, 1, 5, 9, List.of("p1")));
+    }
+
+    @Test
+    void listOk_WhenTheListIsUnnamed_IsMalformed() throws IOException {
+        assertMalformed(1, json("{'session':'s1','kind':'list','list':'inbox','invokedAt':10,'completedAt':20,"
+                + "'outcome':'ok','status':200,'page':0,'size':20,'totalElements':0,'keys':[]}"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"page", "size", "totalElements"})
+    void listOk_WhenAPageFactIsMissing_IsMalformed(String fact) throws IOException {
+        String facts = Stream.of("'page':0", "'size':20", "'totalElements':0")
+                .filter(entry -> !entry.startsWith("'" + fact + "'"))
+                .collect(Collectors.joining(","));
+        assertMalformed(1, json("{'session':'s1','kind':'list','list':'owner','invokedAt':10,'completedAt':20,"
+                + "'outcome':'ok','status':200," + facts + ",'keys':[]}"));
+    }
+
+    @Test
+    void threadReadOk_WhenStatusIs200_IsShown() throws IOException {
+        assertThat(only(line("thread-read", "ok", "'status':200")))
+                .isEqualTo(new ThreadRead("s1", "p1", 10, 20, new Shown()));
+    }
+
+    @Test
+    void threadReadOk_WhenStatusIs404_IsNotFound() throws IOException {
+        assertThat(only(line("thread-read", "ok", "'status':404")))
+                .isEqualTo(new ThreadRead("s1", "p1", 10, 20, new NotFound()));
+    }
+
+    @Test
+    void threadReadFail_WhenStatusIs503WithTheReadUnavailableCode_IsReadFailed503() throws IOException {
+        assertThat(only(line("thread-read", "fail", READ_UNAVAILABLE)))
+                .isEqualTo(new ThreadRead("s1", "p1", 10, 20, new ReadFailed(503)));
+    }
+
+    @Test
+    void deactivateOk_WhenStatusIs200_IsChanged() throws IOException {
+        assertThat(only(json("{'session':'s1','kind':'deactivate','invokedAt':10,'completedAt':20,'outcome':'ok',"
+                + "'status':200}")))
+                .isEqualTo(new Deactivate("s1", 10, 20, new Changed()));
+    }
+
+    @Test
+    void reactivateOk_WhenNoStatusIsRecorded_IsChanged() throws IOException {
+        assertThat(only(json("{'session':'s1','kind':'reactivate','invokedAt':10,'completedAt':20,'outcome':'ok'}")))
+                .isEqualTo(new Reactivate("s1", 10, 20, new Changed()));
+    }
+
+    @Test
+    void reactivate_WhenAStatusIsRecorded_IsMalformed() throws IOException {
+        assertMalformed(1, json("{'session':'s1','kind':'reactivate','invokedAt':10,'completedAt':20,"
+                + "'outcome':'ok','status':200}"));
     }
 
     @ParameterizedTest

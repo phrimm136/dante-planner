@@ -34,8 +34,8 @@ class OperationGeneratorTest {
         assertThat(second.homes()).isEqualTo(first.homes()).hasSize(SESSIONS);
         assertThat(authorOperations(first.phaseA()) + authorOperations(first.phaseB())
                 + authorOperations(first.phaseC()))
-                .as("author operations, plus phase B's delete")
-                .isEqualTo(BUDGET + 1);
+                .as("author operations, plus phase B's delete, the deactivation and the reactivation")
+                .isEqualTo(BUDGET + 3);
     }
 
     @Test
@@ -47,16 +47,18 @@ class OperationGeneratorTest {
     @Test
     void sessions_WhenSeedsRunFromOneToFifty_DrawOnlyTheirOwnKindsAndEveryAuthorKindAppears() {
         Set<Class<?>> authorKinds = new HashSet<>();
+        Set<Class<?>> anonymousKinds = new HashSet<>();
         LongStream.rangeClosed(1, 50).forEach(seed -> {
             Plan plan = OperationGenerator.plan(seed, BUDGET, LATENCY_BOUND);
             for (Phase phase : List.of(plan.phaseA(), plan.phaseB(), plan.phaseC())) {
                 List<List<PlannedOperation>> bySession = bySession(phase);
                 assertThat(bySession.get(ANON)).as("seed %d anon", seed)
                         .isNotEmpty()
-                        .allMatch(PlannedOperation.PublicRead.class::isInstance);
+                        .allMatch(OperationGeneratorTest::anonymous);
                 assertThat(bySession.subList(S1, ANON)).as("seed %d authors", seed)
                         .allSatisfy(operations -> assertThat(operations)
-                                .noneMatch(PlannedOperation.PublicRead.class::isInstance));
+                                .noneMatch(OperationGeneratorTest::anonymous));
+                bySession.get(ANON).forEach(operation -> anonymousKinds.add(operation.getClass()));
                 assertThat(bySession.get(VIEWER)).as("seed %d viewer", seed)
                         .isNotEmpty()
                         .allMatch(operation -> operation instanceof PlannedOperation.Read
@@ -73,6 +75,8 @@ class OperationGeneratorTest {
         assertThat(authorKinds).contains(PlannedOperation.Save.class, PlannedOperation.Read.class,
                 PlannedOperation.ListAll.class, PlannedOperation.Publish.class, PlannedOperation.Unpublish.class,
                 PlannedOperation.Create.class);
+        assertThat(anonymousKinds).containsExactlyInAnyOrder(PlannedOperation.PublicRead.class,
+                PlannedOperation.CatalogList.class, PlannedOperation.ThreadRead.class);
     }
 
     @Test
@@ -103,25 +107,54 @@ class OperationGeneratorTest {
     }
 
     @Test
-    void phaseB_WhenSeedsRunFromOneToFifty_OpensWithARoundOfExactlyOneS1Delete() {
+    void phaseB_WhenSeedsRunFromOneToFifty_OpensWithAnS1ReactivationThenAnS1Delete() {
         LongStream.rangeClosed(1, 50).forEach(seed -> {
             Plan plan = OperationGenerator.plan(seed, BUDGET, LATENCY_BOUND);
 
             List<Round> rounds = plan.phaseB().rounds();
 
-            assertThat(rounds).as("seed %d phase B", seed).hasSize(2);
-            assertThat(rounds.get(0).bySession().get(S1)).as("seed %d opening round, s1", seed)
-                    .singleElement().isInstanceOf(PlannedOperation.Delete.class);
-            assertThat(rounds.get(0).bySession().subList(S1 + 1, rounds.get(0).bySession().size()))
-                    .as("seed %d opening round, other sessions", seed)
-                    .allSatisfy(operations -> assertThat(operations).isEmpty());
-            assertThat(rounds.get(1).bySession().stream().flatMap(List::stream)).as("seed %d second round", seed)
-                    .noneMatch(PlannedOperation.Delete.class::isInstance);
+            assertThat(rounds).as("seed %d phase B", seed).hasSize(3);
+            assertSoleS1Operation(rounds.get(0), PlannedOperation.Reactivate.class, seed);
+            assertSoleS1Operation(rounds.get(1), PlannedOperation.Delete.class, seed);
+            assertThat(rounds.get(2).bySession().stream().flatMap(List::stream)).as("seed %d third round", seed)
+                    .noneMatch(PlannedOperation.Delete.class::isInstance)
+                    .noneMatch(OperationGeneratorTest::accountChange);
             assertThat(bySession(plan.phaseA()).stream().flatMap(List::stream)).as("seed %d phase A", seed)
                     .noneMatch(PlannedOperation.Delete.class::isInstance);
             assertThat(bySession(plan.phaseC()).stream().flatMap(List::stream)).as("seed %d phase C", seed)
-                    .noneMatch(PlannedOperation.Delete.class::isInstance);
+                    .noneMatch(PlannedOperation.Delete.class::isInstance)
+                    .noneMatch(OperationGeneratorTest::accountChange);
         });
+    }
+
+    @Test
+    void phaseA_WhenSeedsRunFromOneToFifty_ClosesWithARoundOfExactlyOneS1Deactivation() {
+        LongStream.rangeClosed(1, 50).forEach(seed -> {
+            List<Round> rounds = OperationGenerator.plan(seed, BUDGET, LATENCY_BOUND).phaseA().rounds();
+
+            assertThat(rounds).as("seed %d phase A", seed).hasSize(2);
+            assertThat(rounds.get(0).bySession().stream().flatMap(List::stream)).as("seed %d first round", seed)
+                    .noneMatch(OperationGeneratorTest::accountChange);
+            assertSoleS1Operation(rounds.get(1), PlannedOperation.Deactivate.class, seed);
+        });
+    }
+
+    private static void assertSoleS1Operation(Round round, Class<?> kind, long seed) {
+        assertThat(round.bySession().get(S1)).as("seed %d %s round, s1", seed, kind.getSimpleName())
+                .singleElement().isInstanceOf(kind);
+        assertThat(round.bySession().subList(S1 + 1, round.bySession().size()))
+                .as("seed %d %s round, other sessions", seed, kind.getSimpleName())
+                .allSatisfy(operations -> assertThat(operations).isEmpty());
+    }
+
+    private static boolean anonymous(PlannedOperation operation) {
+        return operation instanceof PlannedOperation.PublicRead
+                || operation instanceof PlannedOperation.CatalogList
+                || operation instanceof PlannedOperation.ThreadRead;
+    }
+
+    private static boolean accountChange(PlannedOperation operation) {
+        return operation instanceof PlannedOperation.Deactivate || operation instanceof PlannedOperation.Reactivate;
     }
 
     private static int authorOperations(Phase phase) {

@@ -22,19 +22,24 @@ import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
 import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
 import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.consistency.Changed;
+import org.danteplanner.consistency.Deactivate;
 import org.danteplanner.consistency.Delete;
 import org.danteplanner.consistency.Deleted;
 import org.danteplanner.consistency.Found;
 import org.danteplanner.consistency.History;
 import org.danteplanner.consistency.HistoryFormatException;
+import org.danteplanner.consistency.ListRead;
 import org.danteplanner.consistency.NotFound;
 import org.danteplanner.consistency.Operation;
 import org.danteplanner.consistency.PublicRead;
 import org.danteplanner.consistency.Publish;
+import org.danteplanner.consistency.Reactivate;
 import org.danteplanner.consistency.Read;
 import org.danteplanner.consistency.ReadFailed;
 import org.danteplanner.consistency.Rejected;
 import org.danteplanner.consistency.Save;
+import org.danteplanner.consistency.Shown;
+import org.danteplanner.consistency.ThreadRead;
 import org.danteplanner.consistency.Unknown;
 import org.danteplanner.consistency.Unpublish;
 
@@ -105,6 +110,40 @@ class HistoryRecorderTest {
     }
 
     @Test
+    void recorder_WhenThreadAccountAndListResponsesCoverEachOutcome_WritesLinesHistoryReadParses(
+            @TempDir Path directory) throws IOException {
+        Path file = directory.resolve("history.jsonl");
+        AtomicLong clock = new AtomicLong();
+        String key = KEY.toString();
+        String page = "{\"content\":[{\"id\":\"" + key + "\"}],"
+                + "\"page\":{\"size\":5,\"number\":1,\"totalElements\":6,\"totalPages\":2}}";
+
+        try (HistoryRecorder recorder = new HistoryRecorder(Files.newBufferedWriter(file), clock::incrementAndGet)) {
+            recorder.threadRead("anon", key, () -> new Response(200, "[]"));
+            recorder.threadRead("anon", key, () -> new Response(404, ""));
+            recorder.threadRead("anon", key, () -> new Response(429, ""));
+            recorder.deactivate("s1", () -> new Response(200, ""));
+            recorder.deactivate("s1", () -> new Response(401, ""));
+            recorder.reactivate("s1", () -> {
+            });
+            recorder.reactivate("s1", () -> {
+                throw new IllegalStateException("no gtid captured");
+            });
+            recorder.list("anon", ListRead.Listing.CATALOG, () -> new Response(200, page));
+        }
+
+        assertThat(History.read(file).operations()).containsExactly(
+                new ThreadRead("anon", key, 1, 2, new Shown()),
+                new ThreadRead("anon", key, 3, 4, new NotFound()),
+                new ThreadRead("anon", key, 5, 6, new ReadFailed(429)),
+                new Deactivate("s1", 7, 8, new Changed()),
+                new Deactivate("s1", 9, 10, new Rejected(401)),
+                new Reactivate("s1", 11, 12, new Changed()),
+                new Reactivate("s1", 13, 14, new Unknown()),
+                new ListRead("anon", ListRead.Listing.CATALOG, 15, 16, 1, 5, 6, List.of(key)));
+    }
+
+    @Test
     void recorder_When503CarriesTheCodeOfItsKind_RecordsFailWithTheCodeAndHistoryReadParses(
             @TempDir Path directory) throws IOException {
         Path file = directory.resolve("history.jsonl");
@@ -122,7 +161,7 @@ class HistoryRecorderTest {
             recorder.publish("s1", key, () -> new Response(503, writeUnavailable));
             recorder.unpublish("s1", key, () -> new Response(503, writeUnavailable));
             recorder.publicRead("anon", key, () -> new Response(503, readUnavailable));
-            recorder.list("s3", () -> new Response(503, readUnavailable));
+            recorder.list("s3", ListRead.Listing.OWNER, () -> new Response(503, readUnavailable));
             recorder.save("s1", key, () -> new Response(500, writeUnavailable));
         }
 
@@ -161,7 +200,8 @@ class HistoryRecorderTest {
                 new Mismatch("WRITE_TEMPORARILY_UNAVAILABLE",
                         recorder -> recorder.publicRead("anon", key, () -> new Response(503, writeUnavailable))),
                 new Mismatch("WRITE_TEMPORARILY_UNAVAILABLE",
-                        recorder -> recorder.list("s3", () -> new Response(503, writeUnavailable))));
+                        recorder -> recorder.list("s3", ListRead.Listing.CATALOG,
+                                () -> new Response(503, writeUnavailable))));
 
         for (int index = 0; index < mismatches.size(); index++) {
             Mismatch mismatch = mismatches.get(index);

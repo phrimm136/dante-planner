@@ -18,6 +18,9 @@ record ByIdRead(Operation operation, String session, String key, long invokedAt,
                         case ListRead list -> { }
                         case Publish publish -> { }
                         case Unpublish unpublish -> { }
+                        case ThreadRead thread -> { }
+                        case Deactivate deactivate -> { }
+                        case Reactivate reactivate -> { }
                     }
                 })
                 .toList();

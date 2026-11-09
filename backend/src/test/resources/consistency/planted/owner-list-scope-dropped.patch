@@ -1,0 +1,13 @@
+diff --git a/backend/src/main/java/org/danteplanner/backend/planner/service/PlannerQueryService.java b/backend/src/main/java/org/danteplanner/backend/planner/service/PlannerQueryService.java
+index 38e52127..16589dca 100644
+--- a/backend/src/main/java/org/danteplanner/backend/planner/service/PlannerQueryService.java
++++ b/backend/src/main/java/org/danteplanner/backend/planner/service/PlannerQueryService.java
+@@ -36,7 +36,7 @@ public class PlannerQueryService {
+         Page<PlannerSummaryRow> rows = includeDeleted
+                 ? plannerRepository.findOwnerSummariesIncludingDeleted(userId, pageable)
+                 : plannerRepository.findOwnerSummaries(userId, pageable);
+-        return new ScopedRead<>(rows.map(PlannerSummaryResponse::from), Set.of(new FreshnessScope.OwnerList(userId)));
++        return new ScopedRead<>(rows.map(PlannerSummaryResponse::from), Set.of());
+     }
+ 
+     @Transactional(readOnly = true)

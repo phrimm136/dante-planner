@@ -11,7 +11,11 @@ public final class ConsistencyChecker {
             new MonotonicReadRegression(),
             new ReadAfterUnpublish(),
             new ReadAfterPublish(),
-            new ReadAfterCreate());
+            new ReadAfterCreate(),
+            new ListOmitsRemoved(ListRead.Listing.OWNER),
+            new ListOmitsRemoved(ListRead.Listing.CATALOG),
+            new ListHoldsAdded(),
+            new ReadAfterReactivation());
 
     private ConsistencyChecker() {
     }
