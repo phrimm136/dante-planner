@@ -1,4 +1,6 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.planner.api.PlannerThread;
+import java.util.Optional;
 import org.danteplanner.backend.comment.service.PlannerCommentSseService;
 
 import tools.jackson.core.JacksonException;
@@ -41,6 +43,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class PlannerCommentSseServiceTest {
 
+    private static final long PLANNER_OWNER_ID = 41L;
+
     /** Mirrors {@code PlannerCommentSseService.MAX_CONNECTIONS_PER_PLANNER}. */
     private static final int MAX_CONNECTIONS_PER_PLANNER = 500;
 
@@ -64,7 +68,9 @@ class PlannerCommentSseServiceTest {
         plannerAccessGuard = new PlannerAccessGuard(null, plannerRepository);
         service = new PlannerCommentSseService(objectMapper, plannerAccessGuard, SAME_THREAD);
         plannerId = UUID.randomUUID();
-        lenient().when(plannerRepository.existsPublishedById(any(UUID.class))).thenReturn(true);
+        lenient().when(plannerRepository.findThread(any(UUID.class)))
+                .thenAnswer(invocation -> Optional.of(
+                        new PlannerThread(invocation.getArgument(0), PLANNER_OWNER_ID, true, false)));
     }
 
     @Nested

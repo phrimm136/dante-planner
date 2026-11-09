@@ -2,6 +2,7 @@ package org.danteplanner.backend.comment.validation;
 
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.exception.CommentForbiddenException;
+import org.danteplanner.backend.planner.api.PlannerMiss;
 import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.api.PlannerThread;
 import org.springframework.stereotype.Component;
@@ -16,7 +17,7 @@ public class CommentAccessValidator {
             return;
         }
         if (!planner.published() || planner.ownerDeactivated()) {
-            throw new PlannerNotFoundException(planner.id());
+            throw new PlannerNotFoundException(new PlannerMiss.Absent(planner.id()));
         }
     }
 

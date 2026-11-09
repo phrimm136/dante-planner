@@ -1,5 +1,7 @@
 package org.danteplanner.backend.service;
 
+import org.danteplanner.backend.planner.api.PlannerThread;
+import java.util.Optional;
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
 import org.danteplanner.backend.moderation.entity.PlannerReport;
@@ -34,6 +36,8 @@ import org.danteplanner.backend.planner.service.PlannerModerationTargetAdapter;
 @ExtendWith(MockitoExtension.class)
 class PlannerReportServiceTest {
 
+    private static final long PLANNER_OWNER_ID = 41L;
+
     @Mock
     private PlannerReportRepository reportRepository;
 
@@ -64,7 +68,8 @@ class PlannerReportServiceTest {
         @Test
         void createReport_WhenNotReported_CreatesReport() {
             // Arrange
-            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
+            when(plannerRepository.findThread(plannerId))
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
             when(reportRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(false);
             when(reportRepository.insert(any(PlannerReport.class)))
@@ -83,7 +88,8 @@ class PlannerReportServiceTest {
         @Test
         void createReport_WhenAlreadyReported_ThrowsException() {
             // Arrange
-            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
+            when(plannerRepository.findThread(plannerId))
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
             when(reportRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(true);
 
@@ -101,7 +107,7 @@ class PlannerReportServiceTest {
         void createReport_WhenPlannerMissingOrUnpublished_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
-            when(plannerRepository.existsPublishedById(nonExistentId)).thenReturn(false);
+            when(plannerRepository.findThread(nonExistentId)).thenReturn(Optional.empty());
 
             // Act & Assert
             assertRejected(() -> reportService.createReport(testUser.getId(), nonExistentId))

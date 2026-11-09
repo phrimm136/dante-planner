@@ -2,17 +2,22 @@ package org.danteplanner.backend.planner.api;
 
 import java.util.UUID;
 
-import lombok.Getter;
+import org.danteplanner.backend.shared.freshness.ScopedMiss;
 
-import org.danteplanner.backend.shared.exception.EntityNotFoundException;
+public class PlannerNotFoundException extends ScopedMiss {
 
-@Getter
-public class PlannerNotFoundException extends EntityNotFoundException {
+    private final PlannerMiss miss;
 
-    private final UUID plannerId;
+    public PlannerNotFoundException(PlannerMiss miss) {
+        super("PLANNER_NOT_FOUND", "Planner not found with id: " + miss.plannerId(), miss.scopes());
+        this.miss = miss;
+    }
 
-    public PlannerNotFoundException(UUID plannerId) {
-        super("PLANNER_NOT_FOUND", "Planner not found with id: " + plannerId);
-        this.plannerId = plannerId;
+    public PlannerMiss miss() {
+        return miss;
+    }
+
+    public UUID getPlannerId() {
+        return miss.plannerId();
     }
 }

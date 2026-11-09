@@ -8,7 +8,6 @@ import org.danteplanner.backend.planner.dto.PlannerBatchRequest;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
 import org.danteplanner.backend.planner.service.PlannerQueryService;
-import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +31,6 @@ import java.util.UUID;
 public class PlannerQueryController {
 
     private final PlannerQueryService plannerQueryService;
-    private final ByIdReadGuard byIdReadGuard;
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "list")
     @GetMapping
@@ -42,7 +40,7 @@ public class PlannerQueryController {
             @RequestParam(defaultValue = "false") boolean includeDeleted) {
 
         Page<PlannerSummaryResponse> planners =
-                plannerQueryService.getPlanners(userId, pageable, includeDeleted);
+                plannerQueryService.getPlanners(userId, pageable, includeDeleted).value();
         return ResponseEntity.ok(planners);
     }
 
@@ -57,9 +55,7 @@ public class PlannerQueryController {
     }
 
     private List<PlannerResponse> readBatch(Long userId, List<UUID> ids) {
-        return byIdReadGuard.readAll(ByIdReadGuard.PLANNER_ENTITY_TYPE, ids,
-                requested -> plannerQueryService.getPlanners(userId, List.copyOf(requested)),
-                PlannerResponse::id);
+        return plannerQueryService.getPlanners(userId, ids).value();
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "batch")
@@ -76,8 +72,6 @@ public class PlannerQueryController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id) {
 
-        PlannerResponse response = byIdReadGuard.read(ByIdReadGuard.PLANNER_ENTITY_TYPE, id,
-                () -> plannerQueryService.getPlanner(userId, id));
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(plannerQueryService.getPlanner(userId, id).value());
     }
 }

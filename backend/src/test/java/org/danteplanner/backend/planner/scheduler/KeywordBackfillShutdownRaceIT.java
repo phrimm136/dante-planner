@@ -38,7 +38,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.IThrowableProxy;
 import com.redis.testcontainers.RedisContainer;
 
-import org.danteplanner.backend.planner.config.ViewFlushSchedulerConfig;
+import org.danteplanner.backend.shared.config.TaskSchedulerConfig;
 import org.danteplanner.backend.planner.service.PlannerKeywordBackfillService;
 import org.danteplanner.backend.planner.service.PlannerKeywordBackfillService.BackfillPage;
 import org.danteplanner.backend.shared.config.ShedLockConfig;
@@ -211,7 +211,7 @@ class KeywordBackfillShutdownRaceIT {
 
     @Configuration
     @EnableScheduling
-    @Import({ViewFlushSchedulerConfig.class, ShedLockConfig.class})
+    @Import({TaskSchedulerConfig.class, ShedLockConfig.class})
     static class RaceConfig {
 
         @Bean

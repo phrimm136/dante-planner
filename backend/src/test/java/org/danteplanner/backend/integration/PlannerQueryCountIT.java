@@ -188,7 +188,7 @@ class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
      */
     private void assertFixedStatementCount(Supplier<CatalogQuery> catalogQuery, long expected) {
         assertThat(publishedPlannerQueryService
-                .searchPlanners(catalogQuery.get(), ONE_ROW_PAGE, viewerId).getContent())
+                .searchPlanners(catalogQuery.get(), ONE_ROW_PAGE, viewerId).value().getContent())
                 .as("the measured page carries a row")
                 .isNotEmpty();
         long count = measure(catalogQuery.get(), ONE_ROW_PAGE);
