@@ -1648,12 +1648,16 @@ guards the parse but likewise skips the schema gate.
   user reports a 401 right after re-login: add a random `jti` to access tokens, then delete the
   harness wait.
   re-check: `rg -q 'Hang.until\(\(\) -> !minted' backend/src/test/java/org/danteplanner/backend/integration/ConsistencyRunIT.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/auth/token/JwtTokenService.java -U 'TYPE_ACCESS\);\n\s+claims.put\(CLAIM_JTI'`
-- Catalog search (`GET /api/planner/md/published?q=`) uses an ngram FULLTEXT match, which can miss
-  a committed planner while other writes run: a spike on mysql 8.4.11 missed a committed row in
-  4396 of 20000 searches while another session edited its title. So the consistency checker
-  judges catalog lists only for omission, never for "contains after publish". Worth doing when a
-  user reports a published planner missing from search, or when search moves off FULLTEXT: make
-  search consistent with committed rows, then add the catalog "contains" rule.
+- Catalog search (`GET /api/planner/md/published?q=`) can miss a published planner whose title is
+  being changed. InnoDB's full-text state is not versioned: a title change gives the row a new
+  FTS_DOC_ID and marks the old one deleted at once, while the new row version is not yet visible
+  to other sessions, so MATCH drops the old id and cannot see the new row. A spike on mysql 8.4.11
+  missed the row in 3863-4816 of 20000 searches while its title changed (0 for other rows' writes
+  or same-title writes), and in 19960 of 20000 inside a REPEATABLE READ transaction, which
+  `searchPlanners` is. So the consistency checker judges catalog lists only for omission. Worth
+  doing when a user reports a planner missing from search, or before search matters for
+  correctness: pick a search that does not depend on in-place title updates under MATCH, then add
+  the catalog "contains" rule.
   re-check: `rg -qF 'MATCH (?1) AGAINST (?2 IN BOOLEAN MODE)' backend/src/main/java/org/danteplanner/backend/shared/config/MySqlFunctionContributor.java`
 - The consistency run cannot catch a comment-thread read that drops its `Entity(planner)` scope:
   the harness has one author, and in the stopped-replica phases that author's reactivation leaves
@@ -1663,3 +1667,10 @@ guards the parse but likewise skips the schema gate.
   harness gains a second author for another reason: give that author planners that are published,
   unpublished and thread-read in the stopped phases, then restore the planted patch.
   re-check: `.claude/skills/debt-ledger/bin/debt absent backend/src/test/resources/consistency/planted --files -g 'thread-scope-dropped.patch'`
+- The local two-region rig shares the developer's database volume: `local-multiregion-up.sh` fixes
+  the compose project to `limbusplanner`, and `docker-compose.local.yml` mounts `mysql-data`, so
+  bringing the rig up migrates the local dev database and the e2e suites leave their users and
+  planners in it. Worth doing the next time the rig script changes, or when local dev data starts
+  to matter: give the rig its own project name (and with it its own volume) and container names
+  passed to the suites through `E2E_REPLICA_CONTAINER` and its siblings.
+  re-check: `rg -q '^PROJECT=limbusplanner$' scripts/ops/local-multiregion-up.sh && rg -q 'mysql-data:/var/lib/mysql' docker-compose.local.yml`
