@@ -7,6 +7,7 @@ import org.danteplanner.backend.notification.dto.UnreadCountResponse;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.shared.exception.EntityNotFoundException;
+import org.danteplanner.backend.shared.freshness.FreshnessPending;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +28,7 @@ public class NotificationInboxService {
 
     private final NotificationRepository notificationRepository;
 
+    @FreshnessPending(reason = "notification inbox scope arrives in M2")
     @Transactional(readOnly = true)
     public NotificationInboxResponse getInbox(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -46,6 +48,7 @@ public class NotificationInboxService {
         );
     }
 
+    @FreshnessPending(reason = "notification inbox scope arrives in M2")
     @Transactional(readOnly = true)
     public UnreadCountResponse getUnreadCount(Long userId) {
         long count = notificationRepository.countByUserIdAndReadFalseAndDeletedAtIsNull(userId);

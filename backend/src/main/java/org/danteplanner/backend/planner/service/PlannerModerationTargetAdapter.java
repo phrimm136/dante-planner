@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.moderation.api.ModeratedPlanner;
 import org.danteplanner.backend.moderation.api.PlannerModerationTarget;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -42,11 +40,6 @@ public class PlannerModerationTargetAdapter implements PlannerModerationTarget {
     public ModeratedPlanner unhideFromRecommended(UUID plannerId) {
         return moderated(plannerPublishingService.changeRecommendedListing(plannerId,
                 Planner::unhideFromRecommended));
-    }
-
-    @Override
-    public Page<ModeratedPlanner> listHiddenFromRecommended(Pageable pageable) {
-        return plannerPublishingService.listHiddenFromRecommended(pageable).map(this::moderated);
     }
 
     @Override

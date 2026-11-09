@@ -40,9 +40,4 @@ public class CommentReportService implements CommentReports {
 
         return new CommentReportResponse(saved.getCreatedAt());
     }
-
-    @Transactional(readOnly = true)
-    public boolean hasReported(Long userId, Long commentId) {
-        return reportRepository.existsByReporterIdAndCommentId(userId, commentId);
-    }
 }

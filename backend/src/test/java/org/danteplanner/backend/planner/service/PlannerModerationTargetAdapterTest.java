@@ -1,12 +1,6 @@
 package org.danteplanner.backend.planner.service;
 
-import java.util.List;
 import java.util.Optional;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import org.danteplanner.backend.moderation.api.ModeratedPlanner;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -134,18 +128,6 @@ class PlannerModerationTargetAdapterTest {
 
         assertThat(result.id()).isEqualTo(planner.getId());
         assertThat(result.hiddenFromRecommended()).isFalse();
-    }
-
-    @Test
-    void listHiddenFromRecommended_WhenPageHasPlanners_MapsEachPlanner() {
-        Pageable pageable = PageRequest.of(0, 20);
-        when(plannerRepository.findHiddenFromRecommended(pageable))
-                .thenReturn(new PageImpl<>(List.of(planner), pageable, 1));
-
-        Page<ModeratedPlanner> result = adapter.listHiddenFromRecommended(pageable);
-
-        assertThat(result.getContent()).extracting(ModeratedPlanner::id).containsExactly(planner.getId());
-        assertThat(result.getTotalElements()).isEqualTo(1);
     }
 
     @Test
