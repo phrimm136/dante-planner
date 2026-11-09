@@ -9,6 +9,7 @@
 import { describe, it, expect } from 'vitest'
 import { DUNGEON_IDX } from '@/shared/gameData'
 import { ThemePackIdSchema } from '@/shared/gameData'
+import { createEmptyNoteContent } from '@/shared/noteEditor'
 import { asEncodedGiftId, buildFloorSelection, buildSaveablePlanner } from '@/test-utils/fixtures'
 import { createDefaultSectionNotes } from '../stores/usePlannerStore'
 import { PLANNER_CONTENT_KEYS } from '../stores/__tests__/plannerContentKeys'
@@ -43,7 +44,7 @@ function oracle(planner: MDSaveablePlanner): PlannerStoreSeed {
         ? Object.fromEntries(
             Object.entries(content.sectionNotes).map(([key, note]) => [
               key,
-              { content: note?.content ?? '' },
+              note?.content ? { content: note.content } : createEmptyNoteContent(),
             ]),
           )
         : {}),

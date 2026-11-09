@@ -181,7 +181,7 @@ export function hydrateEditorState(
         ? Object.fromEntries(
             Object.entries(content.sectionNotes).map(([key, note]) => [
               key,
-              { content: note?.content ?? '' },
+              note?.content ? { content: note.content } : createEmptyNoteContent(),
             ]),
           )
         : {}),

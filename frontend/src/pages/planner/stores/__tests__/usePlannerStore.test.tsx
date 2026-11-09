@@ -301,19 +301,21 @@ describe('usePlannerStore', () => {
     it('backfills missing section-note keys from defaults and overrides supplied keys', () => {
       const store = createPlannerStore(MD_VERSION, 60)
       const defaultEmpty = createEmptyNoteContent()
+      const introNote = {
+        content: {
+          type: 'doc',
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'only-intro' }] }],
+        },
+      }
 
-      store.getState().initializeFromPlanner(
-        makeContent({
-          sectionNotes: {
-            intro: { content: 'only-intro' },
-          } as unknown as MDPlannerContent['sectionNotes'],
-        }),
-        { title: 'T', category: '5F', isPublished: false },
-      )
+      store.getState().initializeFromPlanner(makeContent({ sectionNotes: { intro: introNote } }), {
+        title: 'T',
+        category: '5F',
+        isPublished: false,
+      })
 
       const notes = store.getState().sectionNotes
-      // Supplied key is taken verbatim (content ?? '')
-      expect(notes.intro).toEqual({ content: 'only-intro' })
+      expect(notes.intro).toEqual(introNote)
       // Missing keys retain the default empty-note backfill
       expect(notes.outro).toEqual(defaultEmpty)
       expect(notes['floor-0']).toEqual(defaultEmpty)

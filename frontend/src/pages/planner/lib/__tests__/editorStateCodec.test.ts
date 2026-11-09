@@ -12,7 +12,7 @@ import { FILTER_SET_KEYS } from '../../types/DeckTypes'
 import { DUNGEON_IDX, FLOOR_RULE_TABLE, MD_CATEGORIES } from '@/shared/gameData'
 import { createEmptyNoteContent } from '@/shared/noteEditor'
 
-import type { JSONContent } from '@tiptap/core'
+import type { NoteContent } from '@/shared/noteEditor'
 import type { EditorMetadata } from '../editorStateCodec'
 import type { MDPlannerContent } from '../../types/PlannerTypes'
 import type { PlannerState } from '../../hooks/usePlannerSave'
@@ -26,17 +26,15 @@ const ENCODED_9004 = asEncodedGiftId('9004')
 const ENCODED_9005 = asEncodedGiftId('9005')
 const ENCODED_9006 = asEncodedGiftId('9006')
 
-// hydrateEditorState substitutes '' for a note body it cannot read, so both the
-// fixtures and the round-tripped map carry a string where the type says JSONContent.
-type LooseNoteMap = Record<string, { content: JSONContent | string }>
+function textNote(text: string): NoteContent {
+  return {
+    content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text }] }] },
+  }
+}
 
 const METADATA: EditorMetadata = { title: 'Round Trip', category: '10F', isPublished: true }
 
-function makeContent(
-  overrides: Partial<Omit<MDPlannerContent, 'sectionNotes'>> & {
-    sectionNotes?: LooseNoteMap
-  } = {},
-): MDPlannerContent {
+function makeContent(overrides: Partial<MDPlannerContent> = {}): MDPlannerContent {
   return {
     selectedKeywords: ['Combustion'],
     selectedBuffIds: [3],
@@ -54,7 +52,7 @@ function makeContent(
         giftIds: [ENCODED_9005, ENCODED_9006],
       },
     ],
-    sectionNotes: { intro: { content: 'note' } },
+    sectionNotes: { intro: textNote('note') },
     ...overrides,
   } as MDPlannerContent
 }
@@ -102,9 +100,7 @@ describe('hydrateEditorState / projectEditorState round trip', () => {
   const cases: {
     name: string
     content: MDPlannerContent
-    expected: Partial<Omit<ReturnType<typeof serialize>, 'sectionNotes'>> & {
-      sectionNotes?: LooseNoteMap
-    }
+    expected: Partial<ReturnType<typeof serialize>>
   }[] = [
     {
       name: 'full content survives the round trip unchanged',
@@ -124,7 +120,7 @@ describe('hydrateEditorState / projectEditorState round trip', () => {
             giftIds: [ENCODED_9005, ENCODED_9006],
           },
         ],
-        sectionNotes: { ...defaultNotes, intro: { content: 'note' } },
+        sectionNotes: { ...defaultNotes, intro: textNote('note') },
       },
     },
     {
@@ -181,13 +177,6 @@ describe('hydrateEditorState / projectEditorState round trip', () => {
       expected: { sectionNotes: defaultNotes },
     },
     {
-      name: 'a note with no content normalizes to an empty string',
-      content: makeContent({
-        sectionNotes: { outro: {} } as unknown as MDPlannerContent['sectionNotes'],
-      }),
-      expected: { sectionNotes: { ...defaultNotes, outro: { content: '' } } },
-    },
-    {
       name: 'floors keep their own defaults per missing field',
       content: makeContent({
         floorSelections: [{}] as unknown as MDPlannerContent['floorSelections'],
@@ -202,12 +191,25 @@ describe('hydrateEditorState / projectEditorState round trip', () => {
     expect(roundTrip(content)).toMatchObject(expected)
   })
 
-  it('keeps the empty-note default for sections the content never mentions', () => {
+  it.each([
+    { name: 'a missing note body', key: 'outro', stored: {} },
+    { name: 'an old empty-string note body', key: 'intro', stored: { content: '' } },
+  ])('decodes $name to empty note content', ({ key, stored }) => {
     const notes = roundTrip(
-      makeContent({ sectionNotes: { intro: { content: 'only-intro' } } }),
+      makeContent({
+        sectionNotes: { [key]: stored } as unknown as MDPlannerContent['sectionNotes'],
+      }),
     ).sectionNotes
 
-    expect(notes.intro).toEqual({ content: 'only-intro' })
+    expect(notes[key]).toEqual(emptyNote)
+  })
+
+  it('keeps the empty-note default for sections the content never mentions', () => {
+    const notes = roundTrip(
+      makeContent({ sectionNotes: { intro: textNote('only-intro') } }),
+    ).sectionNotes
+
+    expect(notes.intro).toEqual(textNote('only-intro'))
     expect(notes.outro).toEqual(emptyNote)
     expect(notes['floor-0']).toEqual(emptyNote)
   })

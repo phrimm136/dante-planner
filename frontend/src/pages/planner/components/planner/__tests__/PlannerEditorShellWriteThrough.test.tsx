@@ -200,24 +200,6 @@ describe('PlannerEditorShell - write-through with real note editors', () => {
     expect(writtenJson()[0]).toContain('typed in a revealed section')
   })
 
-  it('writes nothing when a stored planner whose notes are empty strings is opened', async () => {
-    // What the load path actually hands over: a stored note with no content
-    // becomes `{ content: '' }`, which Tiptap parses into an empty document. That
-    // reparse is not an edit, however little it resembles what was stored.
-    //
-    // The double assertion is the point rather than a shortcut: `''` is not a
-    // JSONContent, so the shape the loader produces is one the type says cannot
-    // exist, and only a cast can reproduce it here.
-    const emptied = Object.fromEntries(
-      Object.keys(createDefaultSectionNotes()).map((key) => [key, { content: '' }]),
-    ) as unknown as PlannerStoreState['sectionNotes']
-
-    const { storeApi } = renderShell({ sectionNotes: emptied })
-    await settleMount(storeApi)
-
-    expect(mockSaveToLocal).not.toHaveBeenCalled()
-  })
-
   it('writes nothing when a planner is only opened', async () => {
     // Opening is not editing. Tiptap reparses every note on mount, and if that
     // travelled as an edit it would rewrite a saved planner as a draft.
