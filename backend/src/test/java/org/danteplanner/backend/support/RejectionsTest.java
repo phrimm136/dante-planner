@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
+import org.danteplanner.backend.planner.api.PlannerMiss;
 import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 
@@ -60,7 +61,7 @@ class RejectionsTest {
     @Test
     void withCode_WhenAnotherDomainExceptionCarriesItInItsBody_Passes() {
         assertThatCode(() -> assertRejected(() -> {
-            throw new PlannerNotFoundException(UUID.randomUUID());
+            throw new PlannerNotFoundException(new PlannerMiss.Absent(UUID.randomUUID()));
         }).withCode("PLANNER_NOT_FOUND"))
                 .doesNotThrowAnyException();
     }
@@ -101,7 +102,7 @@ class RejectionsTest {
     @Test
     void withViolation_WhenTheRejectionIsNotAValidationException_Fails() {
         assertThatThrownBy(() -> assertRejected(() -> {
-            throw new PlannerNotFoundException(UUID.randomUUID());
+            throw new PlannerNotFoundException(new PlannerMiss.Absent(UUID.randomUUID()));
         }).withViolation("PLANNER_NOT_FOUND"))
                 .isInstanceOf(AssertionError.class)
                 .hasMessageContaining("PlannerNotFoundException carries no violations");

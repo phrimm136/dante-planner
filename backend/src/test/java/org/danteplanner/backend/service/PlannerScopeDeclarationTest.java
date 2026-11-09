@@ -309,7 +309,7 @@ class PlannerScopeDeclarationTest {
     @Test
     void castVote_WhenItIsTheFirstVote_DeclaresItsEntityAndTheCatalog() {
         Planner planner = planner(true);
-        when(plannerRepository.findPublishedAggregate(planner.getId()))
+        when(plannerRepository.findAggregateWithAuthor(planner.getId()))
                 .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(owner))));
         PlannerAccessGuard accessGuard = accessGuard();
         PlannerEngagementService engagement = new PlannerEngagementService(voteRepository,

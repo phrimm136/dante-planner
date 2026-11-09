@@ -23,10 +23,10 @@ else — see **Parallelism** for which classes run beside it.
 - **Assert about your rows, never about the table.** `repository.count()`, `findAll()`, and `$.content.length()` are claims about every test's data. Narrow to the id the test created.
 - **When the subject is a per-context singleton** — a write buffer, a cache, a scheduler — extend
   `ExclusiveDatabaseSupport` as well. The point there is not the data but the context: its lock
-  keeps every other class using that bean from running beside this one. Two beans in this
-  codebase hold mutable state: `PlannerViewRecorder`'s flush buffer and `AbstractSseService`'s
-  emitter registry. A new one is found by looking for a collection or atomic assigned inline in a
-  `@Service` or `@Component`; per-call objects do not count.
+  keeps every other class using that bean from running beside this one. One bean in this
+  codebase holds mutable state: `AbstractSseService`'s emitter registry. A new one is found by
+  looking for a collection or atomic assigned inline in a `@Service` or `@Component`; per-call
+  objects do not count.
 - **When the subject genuinely is a whole table or index** — title search, keyword facets, a global rebuild procedure — extend `ExclusiveDatabaseSupport`. Its classes run one at a time on a database of their own, which holds whatever the earlier ones left: truncate what you count at the start of your setup (`emptyPlannerTables` empties the planner tables in raw SQL, whatever shape an earlier class left a planner in), or narrow to your rows. They serialize, so reach for a narrowed assertion first.
 
 ## No test-managed transactions
