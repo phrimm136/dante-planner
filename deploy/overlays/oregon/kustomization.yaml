@@ -13,7 +13,7 @@ resources:
 # (terraform/modules/fleet/user-data/cp.sh.tftpl). Git holds only the tag.
 images:
 - name: danteplanner-backend
-  newTag: 54d0cb26c6624261b63156363accd5e2520ac3e5
+  newTag: 58e1614aba3d591ceccb2873719c751d03c9f032
 
 patches:
 - path: configmap-patch.yaml
