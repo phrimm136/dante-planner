@@ -28,7 +28,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -105,23 +105,23 @@ class CommentThreadNotFoundContractTest {
 
     @Test
     void getCommentTree_WhenStrangerReadsUnpublishedThread_MissesAsHiddenWithTheOwnersAuthorScope() {
-        PlannerNotFoundException miss = catchThrowableOfType(PlannerNotFoundException.class,
-                () -> queryService.getCommentTree(plannerId, STRANGER_ID));
-
-        assertThat(miss.miss()).isEqualTo(new PlannerMiss.Hidden(plannerId, OWNER_ID));
-        assertThat(miss.scopes()).containsExactlyInAnyOrder(
-                new FreshnessScope.Entity(plannerId), new FreshnessScope.Author(OWNER_ID));
+        assertThatThrownBy(() -> queryService.getCommentTree(plannerId, STRANGER_ID))
+                .isInstanceOfSatisfying(PlannerNotFoundException.class, miss -> {
+                    assertThat(miss.miss()).isEqualTo(new PlannerMiss.Hidden(plannerId, OWNER_ID));
+                    assertThat(miss.scopes()).containsExactlyInAnyOrder(
+                            new FreshnessScope.Entity(plannerId), new FreshnessScope.Author(OWNER_ID));
+                });
     }
 
     @Test
     void getCommentTree_WhenThePlannerRowIsAbsent_MissesAsAbsentWithTheEntityScopeOnly() {
         when(plannerRepository.findThread(plannerId)).thenReturn(Optional.empty());
 
-        PlannerNotFoundException miss = catchThrowableOfType(PlannerNotFoundException.class,
-                () -> queryService.getCommentTree(plannerId, STRANGER_ID));
-
-        assertThat(miss.miss()).isEqualTo(new PlannerMiss.Absent(plannerId));
-        assertThat(miss.scopes()).containsExactly(new FreshnessScope.Entity(plannerId));
+        assertThatThrownBy(() -> queryService.getCommentTree(plannerId, STRANGER_ID))
+                .isInstanceOfSatisfying(PlannerNotFoundException.class, miss -> {
+                    assertThat(miss.miss()).isEqualTo(new PlannerMiss.Absent(plannerId));
+                    assertThat(miss.scopes()).containsExactly(new FreshnessScope.Entity(plannerId));
+                });
     }
 
     @Test
