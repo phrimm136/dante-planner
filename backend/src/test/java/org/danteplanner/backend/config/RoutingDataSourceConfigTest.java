@@ -17,8 +17,6 @@ import org.danteplanner.backend.shared.config.RoutingKey;
 import org.danteplanner.backend.shared.config.UndeclaredPrimaryAccessGuard;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -77,35 +75,26 @@ class RoutingDataSourceConfigTest {
         return props;
     }
 
-    private static <T> ObjectProvider<T> provider(Class<T> type, T bean) {
-        StaticListableBeanFactory beans = new StaticListableBeanFactory();
-        if (bean != null) {
-            beans.addBean(type.getName(), bean);
-        }
-        return beans.getBeanProvider(type);
-    }
-
     private static ReadSourceSelector selector() {
         return new ReadSourceSelector(List.of(new ReadSourceSelector.Source(
                 ReadSourceProperties.PRIMARY, true, new HikariDataSource(), CircuitBreaker.ofDefaults("test"))));
     }
 
     private static AbstractRoutingDataSource routing(
-            RoutingDataSourceConfig config, ReadSourceSelector selector, HikariDataSource bulkheadPool) {
+            RoutingDataSourceConfig config, ReadSourceSelector selector) {
         SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
         DataSource dataSource = config.dataSource(
                 new GtidWriteCapture(meterRegistry),
                 new UndeclaredPrimaryAccessGuard(meterRegistry, false),
                 new HikariDataSource(),
-                provider(HikariDataSource.class, bulkheadPool),
                 selector);
         LazyConnectionDataSourceProxy lazy = (LazyConnectionDataSourceProxy) dataSource;
         return (AbstractRoutingDataSource) lazy.getTargetDataSource();
     }
 
     private static Map<Object, DataSource> resolvedTargets(
-            RoutingDataSourceConfig config, ReadSourceSelector selector, HikariDataSource bulkheadPool) {
-        return routing(config, selector, bulkheadPool).getResolvedDataSources();
+            RoutingDataSourceConfig config, ReadSourceSelector selector) {
+        return routing(config, selector).getResolvedDataSources();
     }
 
     @Nested
@@ -125,19 +114,16 @@ class RoutingDataSourceConfigTest {
         void buildHikariConfig_WhenBuilt_NamesEachPoolFromTheLedger() {
             assertThat(config.buildPrimaryHikariConfig().getPoolName())
                     .isEqualTo(PoolLedger.PRIMARY_POOL_NAME);
-            assertThat(config.buildBulkheadHikariConfig().getPoolName())
-                    .isEqualTo(PoolLedger.BULKHEAD_POOL_NAME);
         }
 
         @Test
-        void dataSource_WhenABulkheadPoolExists_RoutesReadsToTheSelectorAndReChecksToTheBulkhead() {
+        void dataSource_WhenBuilt_RoutesReadsToTheSelectorAndHoldsOnlyThePrimaryAndReplicaTargets() {
             ReadSourceSelector selector = selector();
-            HikariDataSource bulkhead = new HikariDataSource();
 
-            Map<Object, DataSource> targets = resolvedTargets(config, selector, bulkhead);
+            Map<Object, DataSource> targets = resolvedTargets(config, selector);
 
+            assertThat(targets).containsOnlyKeys(RoutingKey.PRIMARY, RoutingKey.REPLICA);
             assertThat(targets.get(RoutingKey.REPLICA)).isSameAs(selector);
-            assertThat(targets.get(RoutingKey.BULKHEAD)).isSameAs(bulkhead);
             assertThat(targets.get(RoutingKey.PRIMARY)).isNotSameAs(selector);
         }
 
@@ -150,7 +136,7 @@ class RoutingDataSourceConfigTest {
                             CircuitBreaker.ofDefaults(REPLICA)),
                     new ReadSourceSelector.Source(ReadSourceProperties.PRIMARY, true, primaryReadPool,
                             CircuitBreaker.ofDefaults(ReadSourceProperties.PRIMARY))));
-            AbstractRoutingDataSource routing = routing(config, selector, new HikariDataSource());
+            AbstractRoutingDataSource routing = routing(config, selector);
             TransactionSynchronizationManager.setCurrentTransactionReadOnly(true);
             ReadOnlyRoutingDataSource.pinTo(RoutingKey.PRIMARY);
             try {
@@ -173,16 +159,6 @@ class RoutingDataSourceConfigTest {
             HikariConfig hikari = config.buildPrimaryHikariConfig();
 
             assertThat(hikari.getMaximumPoolSize()).isEqualTo(PoolLedger.OREGON_PRIMARY_POOL);
-        }
-
-        @Test
-        void dataSource_WhenNoBulkheadPoolExists_RoutesReadsToTheSelectorAndHoldsNoBulkheadTarget() {
-            ReadSourceSelector selector = selector();
-
-            Map<Object, DataSource> targets = resolvedTargets(config, selector, null);
-
-            assertThat(targets.get(RoutingKey.REPLICA)).isSameAs(selector);
-            assertThat(targets).doesNotContainKey(RoutingKey.BULKHEAD);
         }
     }
 }

@@ -23,11 +23,6 @@ public final class ChosenReadSource {
         return Optional.ofNullable(CHOSEN.get()).map(Chosen::name);
     }
 
-    public static boolean servedByAuthority() {
-        Chosen chosen = CHOSEN.get();
-        return chosen == null || chosen.authoritative();
-    }
-
     public static void clear() {
         CHOSEN.remove();
     }

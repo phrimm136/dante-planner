@@ -32,8 +32,8 @@ test('a ban refuses a stale write to a published planner before the version chec
 }) => {
   const user = await createUser('gate-ban')
   const api = await createAuthenticatedApi(baseURL!, user.id, 'NORMAL', deviceCookie())
-  // Stored-state reads go to the write region; a Seoul read that finds a stale replica row
-  // returns it without the re-check, which only fires on a miss.
+  // Stored-state reads go to the write region; a Seoul read skips a stale replica row only while
+  // its scope's marker is raised, and serves an unmarked one as-is.
   const reader = await createAuthenticatedApi(OREGON_API, user.id, 'NORMAL', deviceCookie())
   const plannerId = randomUUID()
   const title = `e2e gate-ban ${plannerId.slice(0, 8)}`

@@ -5,73 +5,38 @@ import org.danteplanner.backend.shared.config.PoolLedger;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.resttestclient.TestRestTemplate;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;
 
-import java.util.regex.Pattern;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Observability seam: {@code replica_miss_promoted_total} is registered eagerly at boot,
- * so a freshly booted pod that has served zero promotions still exposes the series at value 0
- * on its first Prometheus scrape. Current {@link org.danteplanner.backend.shared.readpath.PrimaryReCheck}
- * registers the counter lazily on the first promotion, so the boot scrape omits it.
- *
- * <p>The pool series are the same seam one layer down: Boot binds {@code hikaricp_*} meters onto
- * {@code DataSource} beans only, tagged with each pool's name, so all three routing pools have to be
- * beans to appear at all.</p>
- *
- * <p>Enables routing + replica (pointed at the same container) so the {@code PrimaryReCheck}
- * bean instantiates; no promotion is ever triggered.</p>
+ * Boot binds {@code hikaricp_*} meters onto {@code DataSource} beans only, tagged with each pool's
+ * name, so every routing pool has to be a bean to appear at all.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
-@AutoConfigureTestRestTemplate
 class MetricsRegistrationIT extends SharedRoutingSupport {
 
     private static final String CONNECTIONS_MAX = "hikaricp.connections.max";
     private static final String POOL_TAG = "pool";
 
     @Autowired
-    private TestRestTemplate restTemplate;
-
-    @Autowired
     private MeterRegistry meterRegistry;
 
     @Test
-    void promotionCounter_WhenBooted_PresentOnScrape() {
-        ResponseEntity<String> scrape = restTemplate.getForEntity("/actuator/prometheus", String.class);
-
-        assertThat(scrape.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        // Micrometer renders a counter named x_total as either x_total or x_total_total depending
-        // on the naming convention; accept either and require a zero-valued sample line.
-        Pattern series = Pattern.compile(
-                "^replica_miss_promoted_total(_total)?(\\{[^}]*})?\\s+0(\\.0)?\\s*$",
-                Pattern.MULTILINE);
-        assertThat(series.matcher(scrape.getBody()).find())
-                .as("boot scrape must expose replica_miss_promoted_total at 0; body was:%n%s", scrape.getBody())
-                .isTrue();
-    }
-
-    @Test
-    void connectionsMax_WhenBooted_IsExposedForEveryRoutingPool() {
+    void connectionsMax_WhenBooted_IsExposedForExactlyTheRoutingPools() {
         assertThat(meterRegistry.find(CONNECTIONS_MAX).gauges())
                 .extracting(gauge -> gauge.getId().getTag(POOL_TAG))
-                .contains(PoolLedger.PRIMARY_POOL_NAME,
+                .containsExactlyInAnyOrder(PoolLedger.PRIMARY_POOL_NAME,
                         OregonContext.REPLICA_SOURCE,
-                        PoolLedger.BULKHEAD_POOL_NAME);
+                        PoolLedger.PRIMARY_READ_POOL_NAME);
     }
 
     @Test

@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.auth.token.JwtTokenService;
@@ -21,7 +21,8 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.PlannerBatchRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
-import org.danteplanner.backend.planner.service.PlannerCommandService;
+import org.danteplanner.backend.shared.config.PoolLedger;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter;
 import org.danteplanner.backend.shared.security.CsrfTokenService;
 import org.danteplanner.backend.shared.util.CookieConstants;
@@ -29,7 +30,6 @@ import org.danteplanner.backend.shared.util.ViewerHashUtil;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
-import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -49,11 +49,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Tag("containerized")
 @Import(TestConfig.class)
 class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
-
-    private static final String PROMOTED_COUNTER = "replica_miss_promoted_total";
-
-    @Autowired
-    private PlannerCommandService plannerCommandService;
 
     @Autowired
     private PlannerRepository plannerRepository;
@@ -84,33 +79,8 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
-    private UserAccountLifecycleService userAccountLifecycleService;
-
     @LocalServerPort
     private int port;
-
-    @Test
-    void deleteOnPrimary_WhenWritesTombstoneKey_WithBoundedTtl() {
-        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-tombstone-write@example.com");
-
-        Planner p = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
-        UUID plannerId = p.getId();
-
-        plannerCommandService.deletePlanner(owner.getId(), plannerId);
-
-        String key = "del:planner:" + plannerId;
-
-        assertThat(stringRedisTemplate.hasKey(key))
-                .as("a delete must issue the tombstone " + key + " synchronously before returning")
-                .isTrue();
-
-        Long ttl = stringRedisTemplate.getExpire(key, java.util.concurrent.TimeUnit.SECONDS);
-        assertThat(ttl)
-                .as("the tombstone must carry a bounded ~1h TTL (PX 3600000), not persist forever")
-                .isGreaterThan(0L)
-                .isLessThanOrEqualTo(3600L);
-    }
 
     @ParameterizedTest
     @ValueSource(strings = {"moderator-takedown", "moderator-unpublish", "owner-unpublish"})
@@ -164,8 +134,8 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
 
     @ParameterizedTest
     @ValueSource(strings = {"GET", "POST"})
-    void batchPull_WhenAPlannerIsTombstoned_OmitsItWhileKeepingTheLiveOne(String method) throws Exception {
-        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-batch-tombstone-" + method + "@example.com");
+    void batchPull_WhenAPlannerIsDeletedOnPausedReplica_OmitsItWhileKeepingTheLiveOne(String method) throws Exception {
+        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-batch-deleted-" + method + "@example.com");
         Planner live = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
         Planner doomed = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
         replicationControl.awaitCaughtUp();
@@ -180,13 +150,13 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
                     Timestamp.class,
                     doomed.getId().toString());
             assertThat(replicaDeletedAt)
-                    .as("the paused replica must still hold the row un-soft-deleted, so the omission comes from the tombstone")
+                    .as("the paused replica must still hold the row un-soft-deleted, so the omission comes from the read path")
                     .isNull();
 
             List<String> served = batchPull(method, owner, List.of(doomed.getId(), live.getId()));
 
             assertThat(served)
-                    .as("the tombstoned planner must be masked and the live one served")
+                    .as("the deleted planner must be omitted and the live one served")
                     .containsExactly(live.getId().toString());
         } finally {
             replicationControl.startReplica();
@@ -196,15 +166,27 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
 
     @ParameterizedTest
     @ValueSource(strings = {"GET", "POST"})
-    void batchPull_WhenIdsExistNowhere_ReturnsAnEmptyArray(String method) throws Exception {
+    void batchPull_WhenIdsExistNowhereAndCarryNoMarker_ReturnsAnEmptyArrayWithoutReadingThePrimary(String method)
+            throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-batch-unknown-" + method + "@example.com");
         replicationControl.awaitCaughtUp();
-        double before = promotedCount();
+        List<UUID> ids = List.of(UUID.randomUUID(), UUID.randomUUID());
+        long before = primaryReadAcquisitions();
 
-        List<String> served = batchPull(method, owner, List.of(UUID.randomUUID(), UUID.randomUUID()));
+        List<String> served = batchPull(method, owner, ids);
 
         assertThat(served).isEmpty();
-        assertThat(promotedCount() - before).isEqualTo(0.0);
+        assertThat(primaryReadAcquisitions() - before)
+                .as("a miss whose scopes carry no marker is final on the replica, so the primary-read pool lends nothing")
+                .isZero();
+    }
+
+    private long primaryReadAcquisitions() {
+        Timer acquire = meterRegistry.find("hikaricp.connections.acquire")
+                .tag("pool", PoolLedger.PRIMARY_READ_POOL_NAME)
+                .timer();
+        assertThat(acquire).as("the Seoul context builds the primary-read pool").isNotNull();
+        return acquire.count();
     }
 
     private void withdraw(String withdrawal, User owner, User moderator, UUID plannerId) throws Exception {
@@ -280,25 +262,6 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
         return Boolean.TRUE.equals(published) && deletedAt == null;
     }
 
-    @Test
-    void publishedRead_WhenRepublishedAfterWithdrawalOnCaughtUpReplica_IssuesNoBulkheadQuery() throws Exception {
-        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-republish-bulkhead@example.com");
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
-        UUID plannerId = planner.getId();
-
-        send(owner, "POST", "/api/planner/md/" + plannerId + "/unpublish", null);
-        send(owner, "POST", "/api/planner/md/" + plannerId + "/publish", null);
-        replicationControl.awaitCaughtUp();
-        double before = bulkheadQueries();
-
-        HttpResponse<String> response = getPublished(plannerId);
-
-        assertThat(response.statusCode()).as(response.body()).isEqualTo(200);
-        assertThat(bulkheadQueries() - before)
-                .as("a republish must lift the withdrawal marker, so the caught-up replica's hit is served as-is")
-                .isEqualTo(0.0);
-    }
-
     private void assertNotFoundLikeACaughtUpReplica(HttpResponse<String> response, UUID plannerId) throws Exception {
         assertThat(response.statusCode())
                 .as("the published read must be masked, not served: " + response.body())
@@ -306,11 +269,6 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
         JsonNode problem = objectMapper.readTree(response.body());
         assertThat(problem.path("code").asString()).isEqualTo("PLANNER_NOT_FOUND");
         assertThat(problem.path("detail").asString()).isEqualTo("Planner not found with id: " + plannerId);
-    }
-
-    private double bulkheadQueries() {
-        Counter counter = meterRegistry.find("replica_bulkhead_queries_total").counter();
-        return counter == null ? 0.0 : counter.count();
     }
 
     private HttpResponse<String> getPublished(UUID plannerId) throws Exception {
@@ -347,11 +305,6 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
         }
     }
 
-    private double promotedCount() {
-        Counter counter = meterRegistry.find(PROMOTED_COUNTER).counter();
-        return counter == null ? 0.0 : counter.count();
-    }
-
     @Test
     void publishedRead_WhenOwnerDeactivatedOnPausedReplica_Returns404LikeACaughtUpReplica() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-deactivate@example.com");
@@ -377,27 +330,6 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();
         }
-    }
-
-    @Test
-    void publishedRead_WhenOwnerReactivatedOnCaughtUpReplica_IssuesNoBulkheadQuery() throws Exception {
-        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-reactivate@example.com");
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
-
-        userAccountLifecycleService.deleteAccount(owner.getId());
-        assertThat(stringRedisTemplate.hasKey("del:published-planner:" + planner.getId()))
-                .as("the deactivation must have marked the planner, or clearing it proves nothing")
-                .isTrue();
-        userAccountLifecycleService.reactivateAccount(owner.getId());
-        replicationControl.awaitCaughtUp();
-        double before = bulkheadQueries();
-
-        HttpResponse<String> response = getPublished(planner.getId());
-
-        assertThat(response.statusCode()).as(response.body()).isEqualTo(200);
-        assertThat(bulkheadQueries() - before)
-                .as("a reactivation must lift the withdrawal markers, so the caught-up replica's hit is served as-is")
-                .isEqualTo(0.0);
     }
 
     @Test
@@ -460,8 +392,8 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
                     "SELECT deleted_at FROM users WHERE id = ?", Timestamp.class, owner.getId()))
                     .as("the paused replica must still hold the owner active")
                     .isNull();
-            assertThat(stringRedisTemplate.hasKey("del:published-planner:" + plannerId))
-                    .as("the deactivation must have written the withdrawal marker")
+            assertThat(stringRedisTemplate.hasKey(new FreshnessScope.Author(owner.getId()).key()))
+                    .as("the deactivation must have raised the owner's Author marker")
                     .isTrue();
 
             assertNotFoundLikeACaughtUpReplica(getComments(plannerId), plannerId);

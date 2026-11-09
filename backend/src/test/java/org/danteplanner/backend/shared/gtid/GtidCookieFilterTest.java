@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -389,12 +390,12 @@ class GtidCookieFilterTest {
     @Test
     void request_WhenAStaleSourceIsRecordedOnTheThread_StartsWithNoneRecorded() throws Exception {
         ChosenReadSource.record("seoul-replica", false);
-        List<Boolean> servedByAuthority = new ArrayList<>();
+        List<Optional<String>> recorded = new ArrayList<>();
 
         filter.doFilter(new MockHttpServletRequest("GET", "/api/planners"), new MockHttpServletResponse(),
-                (req, res) -> servedByAuthority.add(ChosenReadSource.servedByAuthority()));
+                (req, res) -> recorded.add(ChosenReadSource.name()));
 
-        assertThat(servedByAuthority).containsExactly(true);
+        assertThat(recorded).containsExactly(Optional.empty());
     }
 
     @Test

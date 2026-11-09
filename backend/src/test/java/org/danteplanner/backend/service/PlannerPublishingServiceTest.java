@@ -37,7 +37,6 @@ import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository
 import org.danteplanner.backend.planner.sync.SyncVersionValidator;
 import org.danteplanner.backend.support.MockCalls;
 import org.danteplanner.backend.support.OwnershipRows;
-import org.danteplanner.backend.support.RecordingTombstoneStore;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
@@ -147,7 +146,7 @@ class PlannerPublishingServiceTest {
         PlannerCatalogService catalogService = new PlannerCatalogService(catalogRepository, plannerRepository,
                 plannerStatsRepository, entityFilterRepository,
                 keywordFilterRepository, null,
-                objectMapper, new RecordingTombstoneStore(), RECOMMENDED_THRESHOLD);
+                objectMapper, RECOMMENDED_THRESHOLD);
         PlannerCommandService commandService = new PlannerCommandService(
                 plannerRepository,
                 plannerStatsRepository,

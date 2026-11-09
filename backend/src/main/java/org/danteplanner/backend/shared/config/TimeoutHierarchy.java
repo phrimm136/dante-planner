@@ -15,8 +15,6 @@ public final class TimeoutHierarchy {
 
     public static final long POOL_ACQUIRE_TIMEOUT_MS = 5_000L;
 
-    public static final long BULKHEAD_ACQUIRE_TIMEOUT_MS = 2_000L;
-
     public static final long REQUEST_BUDGET_MS = 30_000L;
 
     /**

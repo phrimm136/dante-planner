@@ -9,7 +9,6 @@ import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository
 import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
-import org.danteplanner.backend.support.RecordingTombstoneStore;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,7 +53,7 @@ class PlannerModerationTargetAdapterTest {
         PlannerCatalogService catalogService = new PlannerCatalogService(catalogRepository, plannerRepository,
                 statsRepository, entityFilterRepository,
                 keywordFilterRepository, null, objectMapper,
-                new RecordingTombstoneStore(), 10);
+                10);
         PlannerPublishingService publishingService = new PlannerPublishingService(plannerRepository,
                 statsRepository, null, null, catalogService, null, accessGuard, null, null, null, null);
         adapter = new PlannerModerationTargetAdapter(publishingService, accessGuard);
