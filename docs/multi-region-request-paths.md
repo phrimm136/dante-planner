@@ -93,7 +93,9 @@ anywhere, so it pins a client to a region without a public bypass of health-base
 `GtidCookieFilter` is registered in `shared/gtid/GtidGateConfig` as a `FilterRegistrationBean` on
 `/api/*` with `LOWEST_PRECEDENCE`, so it is the **innermost** filter — it wraps the controller and
 therefore wraps the transaction. It is registered only when `datasource.routing.enabled=true`,
-i.e. only in Seoul. Oregon reads its own primary and needs no gate.
+which both regions set: Oregon reads its primary first and falls back to the Seoul replica, so it
+needs the gate too. The same flag wires marker raising, so a region running with routing off
+raises no freshness markers for the writes it serves.
 
 ---
 
