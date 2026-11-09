@@ -21,6 +21,9 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
+import org.danteplanner.backend.shared.freshness.FreshnessReadAspect;
+import org.danteplanner.backend.shared.freshness.FreshnessReadGuard;
+import org.danteplanner.backend.shared.freshness.FreshnessReadSettings;
 import org.danteplanner.backend.shared.freshness.MarkerStore;
 import org.danteplanner.backend.shared.redis.RedisRole;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
@@ -35,7 +38,7 @@ import org.danteplanner.backend.shared.redis.RedisRoleHealth;
  */
 @Configuration
 @ConditionalOnProperty(name = "datasource.routing.enabled", havingValue = "true")
-@EnableConfigurationProperties(MarkerStore.Settings.class)
+@EnableConfigurationProperties({MarkerStore.Settings.class, FreshnessReadSettings.class})
 public class GtidGateConfig {
 
     private static final String GATE_URL_PATTERN = "/api/*";
@@ -84,6 +87,18 @@ public class GtidGateConfig {
         return new MarkerStore(authRedisConnectionFactory, redisClientResources,
                 MarkerStore.sourceOrder(readSourceProperties.readsPrimaryFirst(), local, auth),
                 redisRoleHealth, settings, meterRegistry);
+    }
+
+    @Bean
+    public FreshnessReadGuard freshnessReadGuard(MarkerStore markerStore, FreshnessReadSettings settings,
+            MeterRegistry meterRegistry, ReadSourceSelector readSourceSelector) {
+        return new FreshnessReadGuard(markerStore::read, GtidReadGate::isApplied, settings, meterRegistry,
+                readSourceSelector);
+    }
+
+    @Bean
+    public FreshnessReadAspect freshnessReadAspect(FreshnessReadGuard freshnessReadGuard) {
+        return new FreshnessReadAspect(freshnessReadGuard);
     }
 
     @Bean

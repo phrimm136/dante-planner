@@ -1,5 +1,6 @@
 package org.danteplanner.backend.shared.freshness;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,13 +8,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.validation.annotation.Validated;
 
@@ -24,10 +26,20 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 import io.lettuce.core.ClientOptions;
+import io.lettuce.core.LettuceFutures;
 import io.lettuce.core.RedisClient;
+import io.lettuce.core.RedisCommandTimeoutException;
+import io.lettuce.core.RedisException;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.SocketOptions;
 import io.lettuce.core.StaticCredentialsProvider;
+import io.lettuce.core.api.async.RedisAsyncCommands;
+import io.lettuce.core.codec.ByteArrayCodec;
+import io.lettuce.core.output.MapOutput;
+import io.lettuce.core.protocol.AsyncCommand;
+import io.lettuce.core.protocol.Command;
+import io.lettuce.core.protocol.CommandArgs;
+import io.lettuce.core.protocol.CommandType;
 import io.lettuce.core.resource.ClientResources;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
@@ -113,17 +125,22 @@ public class MarkerStore implements AutoCloseable {
     }
 
     public Map<FreshnessScope, MarkerView> read(Collection<FreshnessScope> scopes) {
+        List<FreshnessScope> requested = List.copyOf(scopes);
+        if (requested.isEmpty()) {
+            return Map.of();
+        }
         for (Source source : readSources) {
             if (!roleHealth.isAvailable(source.role())) {
                 continue;
             }
-            Optional<Map<FreshnessScope, MarkerView>> views = readFrom(source, scopes);
-            if (views.isPresent()) {
-                return views.get();
+            try {
+                return readFrom(source, requested);
+            } catch (DataAccessException | RedisException e) {
+                log.warn("Freshness markers not read from {}: trying the next source", source.role().label(), e);
             }
         }
         Map<FreshnessScope, MarkerView> unknown = new LinkedHashMap<>();
-        scopes.forEach(scope -> unknown.put(scope, new MarkerView.Unknown()));
+        requested.forEach(scope -> unknown.put(scope, new MarkerView.Unknown()));
         return unknown;
     }
 
@@ -148,17 +165,35 @@ public class MarkerStore implements AutoCloseable {
         return new RaiseBatcher.Endpoint(client, uri);
     }
 
-    private Optional<Map<FreshnessScope, MarkerView>> readFrom(Source source, Collection<FreshnessScope> scopes) {
-        try {
-            Map<FreshnessScope, MarkerView> views = new LinkedHashMap<>();
-            for (FreshnessScope scope : scopes) {
-                views.put(scope, viewOf(source.store().<String, String>opsForHash().entries(scope.key())));
+    private static Map<FreshnessScope, MarkerView> readFrom(Source source, List<FreshnessScope> scopes) {
+        return source.store().execute((RedisCallback<Map<FreshnessScope, MarkerView>>) connection -> {
+            List<AsyncCommand<byte[], byte[], Map<byte[], byte[]>>> commands =
+                    scopes.stream().map(MarkerStore::markerOf).toList();
+            @SuppressWarnings("unchecked")
+            RedisAsyncCommands<byte[], byte[]> shared = (RedisAsyncCommands<byte[], byte[]>) connection.getNativeConnection();
+            shared.getStatefulConnection().dispatch(commands);
+            if (!LettuceFutures.awaitAll(BoundedRedisConnections.COMMAND_TIMEOUT, commands.toArray(new Future<?>[0]))) {
+                throw new RedisCommandTimeoutException("freshness markers not answered within "
+                        + BoundedRedisConnections.COMMAND_TIMEOUT);
             }
-            return Optional.of(views);
-        } catch (DataAccessException e) {
-            log.warn("Freshness markers not read from {}: trying the next source", source.role().label(), e);
-            return Optional.empty();
-        }
+            Map<FreshnessScope, MarkerView> views = new LinkedHashMap<>();
+            for (int i = 0; i < scopes.size(); i++) {
+                views.put(scopes.get(i), viewOf(decoded(commands.get(i).join())));
+            }
+            return views;
+        });
+    }
+
+    private static AsyncCommand<byte[], byte[], Map<byte[], byte[]>> markerOf(FreshnessScope scope) {
+        return new AsyncCommand<>(new Command<>(CommandType.HGETALL, new MapOutput<>(ByteArrayCodec.INSTANCE),
+                new CommandArgs<>(ByteArrayCodec.INSTANCE).addKey(scope.key().getBytes(StandardCharsets.UTF_8))));
+    }
+
+    private static Map<String, String> decoded(Map<byte[], byte[]> raw) {
+        Map<String, String> fields = new LinkedHashMap<>();
+        raw.forEach((field, value) ->
+                fields.put(new String(field, StandardCharsets.UTF_8), new String(value, StandardCharsets.UTF_8)));
+        return fields;
     }
 
     static MarkerView viewOf(Map<String, String> marker) {

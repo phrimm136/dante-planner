@@ -3,10 +3,13 @@ package org.danteplanner.backend.shared.freshness;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -53,6 +56,8 @@ class MarkerStoreIT {
     private static final Duration WAIT_BOUND = Duration.ofSeconds(30);
     private static final int CONCURRENT_RAISES = 200;
     private static final int RAISING_THREADS = 8;
+    private static final int CATALOG_PAGE_SCOPES = 101;
+    private static final String READS_PROCESSED = "total_reads_processed";
 
     private static LettuceConnectionFactory liveFactory;
     private static StringRedisTemplate live;
@@ -117,6 +122,17 @@ class MarkerStoreIT {
 
     private Map<Object, Object> marker(FreshnessScope scope) {
         return live.opsForHash().entries(scope.key());
+    }
+
+    private static long readsProcessedDuring(Runnable action) {
+        long before = readsProcessed();
+        action.run();
+        return readsProcessed() - before;
+    }
+
+    private static long readsProcessed() {
+        Properties stats = live.execute((RedisCallback<Properties>) connection -> connection.serverCommands().info("stats"));
+        return Long.parseLong(stats.getProperty(READS_PROCESSED));
     }
 
     @Test
@@ -206,6 +222,53 @@ class MarkerStoreIT {
         assertThat(store.read(List.of(raised, untouched))).containsExactly(
                 Map.entry(raised, new MarkerStore.MarkerView.At(serverA + ":1-9")),
                 Map.entry(untouched, new MarkerStore.MarkerView.Absent()));
+    }
+
+    @Test
+    void read_WhenACatalogPageAsksForEveryScope_SendsThemAsOneBatch() {
+        MarkerStore store = storeOver(liveFactory, List.of(new MarkerStore.Source(RedisRole.AUTH, live)));
+        List<FreshnessScope> scopes = new ArrayList<>(List.of(new FreshnessScope.PublicCatalog()));
+        IntStream.range(1, CATALOG_PAGE_SCOPES).forEach(i -> scopes.add(new FreshnessScope.Author(
+                ThreadLocalRandom.current().nextLong(1, Long.MAX_VALUE))));
+        store.raise(Set.of(scopes.get(1)), serverA + ":1-3");
+        readsProcessed();
+
+        long perScope = readsProcessedDuring(() -> scopes.forEach(this::marker));
+        Map<FreshnessScope, MarkerStore.MarkerView> views = new LinkedHashMap<>();
+        long batched = readsProcessedDuring(() -> views.putAll(store.read(scopes)));
+
+        assertThat(perScope).isGreaterThanOrEqualTo(CATALOG_PAGE_SCOPES);
+        assertThat(batched).isLessThan(CATALOG_PAGE_SCOPES);
+        assertThat(views).hasSize(CATALOG_PAGE_SCOPES)
+                .containsEntry(scopes.get(1), new MarkerStore.MarkerView.At(serverA + ":1-3"))
+                .containsEntry(scopes.get(2), new MarkerStore.MarkerView.Absent());
+    }
+
+    @Test
+    void read_WhenTheLocalStoreStallsAfterConnecting_ServesFromTheAuthStore() throws Exception {
+        try (RedisContainer stalling = new RedisContainer("redis:7-alpine")) {
+            stalling.start();
+            LettuceConnectionFactory stallingFactory = factory(stalling.getRedisHost(), stalling.getRedisPort());
+            try {
+                StringRedisTemplate stallingStore = template(stallingFactory);
+                MarkerStore store = storeOver(liveFactory, MarkerStore.sourceOrder(false,
+                        new MarkerStore.Source(RedisRole.AUTH_LOCAL, stallingStore),
+                        new MarkerStore.Source(RedisRole.AUTH, live)));
+                FreshnessScope scope = new FreshnessScope.Entity(UUID.randomUUID());
+                store.raise(Set.of(scope), serverA + ":1-6");
+                stallingStore.opsForHash().entries(scope.key());
+                stalling.getDockerClient().pauseContainerCmd(stalling.getContainerId()).exec();
+                try {
+                    Map<FreshnessScope, MarkerStore.MarkerView> views =
+                            Hang.get(CompletableFuture.supplyAsync(() -> store.read(List.of(scope))), "a stalled read");
+
+                    assertThat(views).containsExactly(Map.entry(scope, new MarkerStore.MarkerView.At(serverA + ":1-6")));                } finally {
+                    stalling.getDockerClient().unpauseContainerCmd(stalling.getContainerId()).exec();
+                }
+            } finally {
+                stallingFactory.destroy();
+            }
+        }
     }
 
     @Test

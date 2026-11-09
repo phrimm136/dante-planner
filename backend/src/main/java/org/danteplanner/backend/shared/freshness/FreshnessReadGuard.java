@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -17,7 +15,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
-import org.danteplanner.backend.shared.exception.EntityNotFoundException;
 import org.danteplanner.backend.shared.exception.ReadTemporarilyUnavailableException;
 import org.danteplanner.backend.shared.freshness.MarkerStore.MarkerView;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
@@ -46,6 +43,11 @@ public class FreshnessReadGuard {
     }
 
     @FunctionalInterface
+    public interface Attempt {
+        ScopedRead<?> run() throws Throwable;
+    }
+
+    @FunctionalInterface
     public interface GtidWait {
         boolean isApplied(ReadSourceSelector.Source source, String gtidSet, Duration bound);
     }
@@ -66,24 +68,23 @@ public class FreshnessReadGuard {
         this.selector = selector;
     }
 
-    public <T> T read(Collection<FreshnessScope> missScopes, Supplier<T> load,
-            Function<? super T, Collection<FreshnessScope>> scopesOf) {
+    public ScopedRead<?> read(Attempt attempt) throws Throwable {
         while (true) {
             if (TransactionSynchronizationManager.isActualTransactionActive()) {
                 throw new IllegalStateException("a freshness read must run outside a transaction");
             }
             ChosenReadSource.clear();
-            T value;
+            ScopedRead<?> read;
             try {
-                value = load.get();
-            } catch (EntityNotFoundException miss) {
-                if (decide(missScopes, servedSource()) instanceof Decision.Serve) {
+                read = attempt.run();
+            } catch (ScopedMiss miss) {
+                if (decide(miss.scopes(), servedSource()) instanceof Decision.Serve) {
                     throw miss;
                 }
                 continue;
             }
-            if (decide(scopesOf.apply(value), servedSource()) instanceof Decision.Serve) {
-                return value;
+            if (decide(read.scopes(), servedSource()) instanceof Decision.Serve) {
+                return read;
             }
         }
     }
