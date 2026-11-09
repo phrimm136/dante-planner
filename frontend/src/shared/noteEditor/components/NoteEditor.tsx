@@ -64,7 +64,7 @@ function NoteEditorInner({
     emitRef.current = emit
   })
 
-  const currentBytes = value.content ? measureDocBytes(value.content) : 0
+  const currentBytes = measureDocBytes(value.content)
 
   const extensions = [
     // StarterKit includes Link by default in Tiptap v3
@@ -178,7 +178,7 @@ function NoteEditorInner({
   }, [editor, readOnly])
 
   useEffect(() => {
-    if (editor && value.content && value.content !== lastEmittedRef.current) {
+    if (editor && value.content !== lastEmittedRef.current) {
       const currentContent = JSON.stringify(editor.getJSON())
       const newContent = JSON.stringify(value.content)
       if (currentContent !== newContent) {
