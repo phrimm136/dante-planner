@@ -1,4 +1,5 @@
 # syntax=docker/dockerfile:1
+ARG JAR_STAGE=builder
 FROM --platform=$BUILDPLATFORM gradle:9.8.1-jdk21-noble@sha256:4e237c5918018409ae6bd4acf3e5145db22157fd5f2af6332a8f9fba88f8e92b AS builder
 
 WORKDIR /app
@@ -16,6 +17,12 @@ ARG GIT_SHA=unknown
 
 RUN --mount=type=cache,target=/root/.gradle \
     gradle bootJar --no-daemon -PgitSha=$GIT_SHA
+
+FROM scratch AS jar-prebuilt
+
+COPY --from=backend-jar --exclude=*-plain.jar build/libs/*.jar /app/build/libs/
+
+FROM ${JAR_STAGE} AS jar
 
 # Bake the public Amazon RDS CA bundle into a PKCS12 truststore so the backend
 # can verify the RDS server certificate (sslMode=VERIFY_CA). The bundle is
@@ -58,7 +65,7 @@ RUN set -eux; \
     done; \
     ! keytool -list -cacerts -storepass changeit | grep -qi emudhra
 
-COPY --from=builder /app/build/libs/*.jar app.jar
+COPY --from=jar /app/build/libs/*.jar app.jar
 
 # Bake the game domain data so the pod is self-contained; k3s has no host
 # bind-mount. The backend reads it via GAME_DATA_PATH (GameDataRegistry).

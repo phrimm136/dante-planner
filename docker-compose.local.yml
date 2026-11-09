@@ -43,6 +43,9 @@ services:
       dockerfile: backend/Dockerfile
       additional_contexts:
         static: ./static
+        backend-jar: ./backend
+      args:
+        JAR_STAGE:
     logging:
       driver: json-file
       options:
