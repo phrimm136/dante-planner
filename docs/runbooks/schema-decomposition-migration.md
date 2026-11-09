@@ -293,10 +293,9 @@ and never re-attached.
 ### C1. Move the load balancer back to the real hostname
 
 ```bash
-cd terraform/cloudflare
-# api_hostname: edge-test.dante-planner.com -> api.dante-planner.com
+# terraform/cloudflare api_hostname: edge-test.dante-planner.com -> api.dante-planner.com
 .claude/skills/ops/bin/ops tf plan cloudflare     # read it: the load balancer is renamed, nothing is destroyed
-scripts/ops/terraform-run.sh apply
+scripts/ops/terraform-run.sh -chdir=terraform/cloudflare apply <plan file printed above>
 ```
 
 Confirm before declaring the window closed:

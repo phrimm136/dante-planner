@@ -3,13 +3,12 @@
 
     <!-- ═══════════════════════════════════════════════════════════
          PRODUCTION:
-           Console (INFO+) → stdout → awslogs → CloudWatch
-                             /ecs/danteplanner/backend
+           Console (INFO+) JSON → stdout → Alloy → Grafana Cloud Loki
          ═══════════════════════════════════════════════════════════ -->
     <springProfile name="prod">
         <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
-        <!-- Console: INFO+ JSON → stdout → awslogs → CloudWatch -->
+        <!-- Console: INFO+ JSON → stdout -->
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
         </appender>

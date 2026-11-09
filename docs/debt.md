@@ -1240,10 +1240,6 @@ guards the parse but likewise skips the schema gate.
   correct, but nothing says so. Worth a one-line comment or a shared predicate the next time
   either query changes.
   re-check: `rg -q 'LEFT JOIN planner_votes v ON v.planner_id = s.planner_id$' backend/src/main/java/org/danteplanner/backend/planner/repository/PlannerDriftAuditRepository.java && rg -qF 'c.planner_id = s.planner_id AND c.deleted_at IS NULL' backend/src/main/java/org/danteplanner/backend/planner/repository/PlannerDriftAuditRepository.java`
-- 2026-09-22 — `logback-spring.xml:6` and `:13` header still describes "stdout → awslogs →
-  CloudWatch /ecs/danteplanner/backend"; the pipeline is stdout → Alloy → Grafana Cloud Loki
-  (`deploy/base/alloy-logs.yaml`). Delete the stale comment on the next touch of that file.
-  re-check: `rg -q 'awslogs' backend/src/main/resources/logback-spring.xml`
 - 2026-09-23 — The production build's `VITE_API_BASE_URL` ends in a newline: the shipped
   `index.html` carries `href="https://api.dante-planner.com\n"`. URL parsing strips it, so
   fetches and the preconnect work. The value lives in the hosting build environment, not the
@@ -1506,10 +1502,6 @@ guards the parse but likewise skips the schema gate.
   against the pods' signed-UUID TreeMap order (the two orders disagree for about half of pairs); a
   shared context's 500 ms `PlannerViewRecorder` flush as that third party.
   re-check: `rg -q 'void flush_WhenConcurrentFlushesShareTwoPlanners_AdvancesEveryCounter' backend/src/test/java/org/danteplanner/backend/integration/PlannerViewLockOrderIT.java`
-- `.claude/hooks/check-output-redirect.sh` shows `yarn --cwd frontend vitest run > …` as its
-  redirect example, which skips the heap the `test` script sets. Change the example to
-  `yarn --cwd frontend test run` when the hook is next edited.
-  re-check: `rg -qF 'yarn --cwd frontend vitest run >' .claude/hooks/check-output-redirect.sh`
 - The EGO detail page can livelock in tests: a tier or tab click inside `act()` while the skill and
   passive description boundaries are still suspended on the keyword-formatter static-data waterfall
   makes React re-commit with no DOM change and starves the pending fetch (diagnosed 2026-10-08 with a
