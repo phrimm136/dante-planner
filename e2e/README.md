@@ -67,9 +67,10 @@ behaviour. Only `stack:up:rig` provisions both.
 Three preconditions cost more debugging time than everything else here, and all three fail as a
 timeout somewhere unrelated:
 
-- **Choose the account's sync preference.** A fresh account's `syncEnabled` is null, and
+- **Choose the account's sync preference.** A fresh account's `syncChoiceMade` is false, and
   `GlobalLayout` answers that with a modal that intercepts every pointer event on the page.
-  `seedPlanner` sets it, which is also what makes a manual save reach the network at all.
+  `seedPlanner` sends `syncEnabled`, which records the choice and is also what makes a manual save
+  reach the network at all.
 - **Seed IndexedDB, not just the server.** `/planner/md/$id` and `/planner/md/$id/edit` read
   `loadFromLocal` with no server fallback, so a planner created through the API alone renders the
   not-found page. `src/localPlanner.ts` writes the row before the app's first script.

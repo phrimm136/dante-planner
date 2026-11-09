@@ -29,7 +29,7 @@ export async function seedPlanner(
   const plannerId = randomUUID()
   const title = `e2e ${label} ${plannerId.slice(0, 8)}`
 
-  // A fresh account's syncEnabled is null, and GlobalLayout answers that with a modal that
+  // A fresh account's syncChoiceMade is false, and GlobalLayout answers that with a modal that
   // intercepts every pointer event on the page. Choosing for it is a precondition of any browser
   // spec, not a detail of the ones that care about sync — and manual save reaches the network
   // only when it is on.

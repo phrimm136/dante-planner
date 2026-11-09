@@ -197,8 +197,8 @@ test('a settings toggle sends the flipped value and reports it', async ({
   const api = await createAuthenticatedApi(baseURL!, user.id)
 
   try {
-    // A fresh account's syncEnabled is null, which raises a blocking first-login dialog over the
-    // page; choosing for it makes the toggle's starting position deterministic too.
+    // A fresh account's syncChoiceMade is false, which raises a blocking first-login dialog over
+    // the page; choosing for it makes the toggle's starting position deterministic too.
     const seeded = await api.put('/api/user/settings', { data: { syncEnabled: false } })
     expect(seeded.status(), await seeded.text()).toBe(200)
 
