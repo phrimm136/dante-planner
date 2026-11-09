@@ -2,6 +2,7 @@ package org.danteplanner.backend.shared.freshness;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,9 @@ public class FreshnessReadGuard {
         }
 
         record Skip(ReadSourceSelector.Source source) implements Decision {
+        }
+
+        record Reload() implements Decision {
         }
     }
 
@@ -69,24 +73,36 @@ public class FreshnessReadGuard {
     }
 
     public ScopedRead<?> read(Attempt attempt) throws Throwable {
+        Set<String> reloaded = new HashSet<>();
         while (true) {
             if (TransactionSynchronizationManager.isActualTransactionActive()) {
                 throw new IllegalStateException("a freshness read must run outside a transaction");
             }
             ChosenReadSource.clear();
+            Map<String, String> appliedAtLoadStart = applied();
             ScopedRead<?> read;
             try {
                 read = attempt.run();
             } catch (ScopedMiss miss) {
-                if (decide(miss.scopes(), servedSource()) instanceof Decision.Serve) {
+                if (decideOnce(miss.scopes(), appliedAtLoadStart, reloaded) instanceof Decision.Serve) {
                     throw miss;
                 }
                 continue;
             }
-            if (decide(read.scopes(), servedSource()) instanceof Decision.Serve) {
+            if (decideOnce(read.scopes(), appliedAtLoadStart, reloaded) instanceof Decision.Serve) {
                 return read;
             }
         }
+    }
+
+    private Decision decideOnce(Collection<FreshnessScope> scopes, Map<String, String> appliedAtLoadStart,
+            Set<String> reloaded) {
+        ReadSourceSelector.Source source = servedSource();
+        Decision decision = decide(scopes, source, appliedAtLoadStart, !reloaded.contains(source.name()));
+        if (decision instanceof Decision.Reload) {
+            reloaded.add(source.name());
+        }
+        return decision;
     }
 
     private ReadSourceSelector.Source servedSource() {
@@ -96,7 +112,12 @@ public class FreshnessReadGuard {
                 .orElseThrow(ReadTemporarilyUnavailableException::new);
     }
 
-    public Decision decide(Collection<FreshnessScope> scopes, ReadSourceSelector.Source source) {
+    public Map<String, String> applied() {
+        return Map.copyOf(appliedBySource);
+    }
+
+    public Decision decide(Collection<FreshnessScope> scopes, ReadSourceSelector.Source source,
+            Map<String, String> appliedAtLoadStart, boolean mayReload) {
         if (source.authoritative()) {
             return new Decision.Serve();
         }
@@ -112,14 +133,16 @@ public class FreshnessReadGuard {
             return new Decision.Serve();
         }
         String required = GtidWriteCapture.unionGtidSets(marked);
-        if (isRemembered(source, required) || await(source, required)) {
+        if (contains(appliedAtLoadStart.get(source.name()), required)) {
             return new Decision.Serve();
+        }
+        if (mayReload && await(source, required)) {
+            return new Decision.Reload();
         }
         return skip(source);
     }
 
-    private boolean isRemembered(ReadSourceSelector.Source source, String required) {
-        String applied = appliedBySource.get(source.name());
+    private static boolean contains(String applied, String required) {
         return applied != null && union(applied, required).equals(applied);
     }
 

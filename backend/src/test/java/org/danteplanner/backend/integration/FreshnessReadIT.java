@@ -20,6 +20,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 
 import jakarta.servlet.http.Cookie;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.JsonNode;
@@ -29,6 +31,7 @@ import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.PlannerBatchRequest;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
+import org.danteplanner.backend.shared.freshness.FreshnessReadGuard;
 import org.danteplanner.backend.shared.freshness.MarkerStore;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 import org.danteplanner.backend.shared.util.ViewerHashUtil;
@@ -65,6 +68,9 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
     private static final int UNAVAILABLE = 503;
     private static final int NO_CONTENT = 204;
     private static final int READS_PER_VIEWER = 3;
+    private static final long REPLICATION_LATENCY_UNDER_THE_WAIT_BOUND_MILLIS = 120;
+    private static final int LAG_UNDER_BOUND_ROUNDS = 20;
+    private static final String SEOUL_REPLICA = "seoul-replica";
     private static final String NEW_EPITHET = "NAIVE";
     private static final String VIEW_BUFFER_KEY = "views:buffer";
     private static final String VIEW_SEEN_KEY_PREFIX = "views:seen:";
@@ -87,6 +93,9 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
 
     @Autowired
     private GtidWriteCapture writeCapture;
+
+    @Autowired
+    private MeterRegistry meterRegistry;
 
     @Autowired
     private MarkerStore markerStore;
@@ -345,6 +354,48 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
     }
 
     @Test
+    void publishedDetail_WhenReplicationLagsUnderTheWaitBound_ServesTheWriteBeforeItsResponse() throws Exception {
+        Cookie[] owner = session("freshness-read-lag-under-bound");
+        UUID plannerId = draft(owner, "lag-under-bound");
+        replicationControl.awaitCaughtUp();
+        List<String> stale = new ArrayList<>();
+        int publishWaitsApplied = 0;
+        int unpublishWaitsApplied = 0;
+        int publishAnswered = 0;
+        int unpublishAnswered = 0;
+        try {
+            toxiproxyControl.applyReplicationLatency(REPLICATION_LATENCY_UNDER_THE_WAIT_BOUND_MILLIS);
+            for (int round = 0; round < LAG_UNDER_BOUND_ROUNDS; round++) {
+                perform(post(PLANNERS + plannerId + "/publish").cookie(owner));
+                double beforePublishRead = seoulWaitsApplied();
+                int afterPublish = status(get(PUBLISHED + plannerId));
+                publishWaitsApplied += seoulWaitsApplied() > beforePublishRead ? 1 : 0;
+                publishAnswered += afterPublish == OK ? 1 : 0;
+                if (afterPublish != OK && afterPublish != UNAVAILABLE) {
+                    stale.add("round " + round + " publish → " + afterPublish);
+                }
+                perform(post(PLANNERS + plannerId + "/unpublish").cookie(owner));
+                double beforeUnpublishRead = seoulWaitsApplied();
+                int afterUnpublish = status(get(PUBLISHED + plannerId));
+                unpublishWaitsApplied += seoulWaitsApplied() > beforeUnpublishRead ? 1 : 0;
+                unpublishAnswered += afterUnpublish == NOT_FOUND ? 1 : 0;
+                if (afterUnpublish != NOT_FOUND && afterUnpublish != UNAVAILABLE) {
+                    stale.add("round " + round + " unpublish → " + afterUnpublish);
+                }
+            }
+        } finally {
+            toxiproxyControl.removeReplicationLatency();
+            replicationControl.awaitCaughtUp();
+        }
+
+        assertThat(publishWaitsApplied).as("reads after a publish whose Seoul wait applied").isPositive();
+        assertThat(unpublishWaitsApplied).as("reads after an unpublish whose Seoul wait applied").isPositive();
+        assertThat(publishAnswered).as("reads after a publish answered 200").isPositive();
+        assertThat(unpublishAnswered).as("reads after an unpublish answered 404").isPositive();
+        assertThat(stale).isEmpty();
+    }
+
+    @Test
     void publishedDetail_WhenHiddenOrAbsent_AnswersTheSameNotFoundBody() throws Exception {
         Cookie[] owner = session("freshness-read-hidden");
         UUID plannerId = published(owner, "hidden-then-absent");
@@ -428,6 +479,14 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
 
     private static String seenKey(LocalDate viewDate, UUID plannerId, String viewerHash) {
         return VIEW_SEEN_KEY_PREFIX + viewDate + ":" + plannerId + ":" + viewerHash;
+    }
+
+    private double seoulWaitsApplied() {
+        Timer waits = meterRegistry.find(FreshnessReadGuard.READ_WAIT)
+                .tag(FreshnessReadGuard.SOURCE_TAG, SEOUL_REPLICA)
+                .tag(FreshnessReadGuard.OUTCOME_TAG, FreshnessReadGuard.APPLIED)
+                .timer();
+        return waits == null ? 0 : waits.count();
     }
 
     private int status(MockHttpServletRequestBuilder request) throws Exception {

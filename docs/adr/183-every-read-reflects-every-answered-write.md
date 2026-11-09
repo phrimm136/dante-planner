@@ -62,17 +62,21 @@ epic: none · pr: none · supersedes: 008 @ryw @gtid @cookie, 008 @gtid @capture
   for the writes it lists; a gate that fails any committing request without a declaration is
   unenforced until every write declares its scopes.
 - @freshness @read — A read on a non-authoritative source (182 @reads @sources) reads the markers of
-  the scopes it touches. No marker: serve. A marker the source has applied: serve. A marker it has
+  the scopes it touches. No marker: serve. A marker the source had applied before the read loaded: serve. A marker it had
   not applied: wait on that source for the GTID set, up to a bound set to the cost of the alternative, one
   statement against the next source (250 ms at the start), and tuned from the exported wait-time
-  histogram, then move to the next source. A marker store that
+  histogram. If the source applies it within the bound, run the read again there, because the first
+  load may predate the write; otherwise move to the next source. A read runs again on one source
+  at most once: a newer marker it has still not applied after that moves the read on without a
+  second wait, so one source costs at most two loads and one wait. A marker store that
   errors or is unhealthy: treat every marker as unknown and read an authoritative source. With no
   healthy authoritative source the read answers 503 (182 @reads @degrade). A by-id read loads the
   row without filtering on its visibility (publication, the author's account state) and decides
   visibility in code after the markers, so it always knows the author whose marker it reads; a
   list keeps visibility in SQL, since paging needs it there. A by-id miss (no row) with no entity
   marker is a final 404, because a create raises its entity's marker. Each pod remembers, per
-  source, the highest GTID set it has seen applied, and a marker inside it needs no probe.
+  source, the highest GTID set it has seen applied, and a marker inside the set remembered before
+  the read loaded needs no probe.
   REJECTED: falling to the primary after a short probe (the cookie gate's 50 ms) — a Seoul read on
   the primary costs one ocean round trip per statement, so waiting for the replica is cheaper up to
   that many round trips.

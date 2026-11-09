@@ -80,6 +80,8 @@ class CausalGateIT extends CausalHarnessSupport {
 
     private static final String REPLICATED_TITLE = "causal-old-replicated";
     private static final String PRIMARY_ONLY_TITLE = "causal-new-primary-only";
+    private static final int OK = 200;
+    private static final int UNAVAILABLE = 503;
 
     /** A GTID interval token: a source UUID followed by a colon and a transaction number. */
     private static final Pattern GTID_VALUE = Pattern.compile(
@@ -115,7 +117,7 @@ class CausalGateIT extends CausalHarnessSupport {
     }
 
     @Test
-    void causalGate_WhenAuthorWriteSetsGtidCookie_ReadYourOwnWriteRoutesPrimaryThenClearsCookieWhenCaughtUp()
+    void causalGate_WhenAuthorWriteSetsGtidCookie_ReadsTheWriteThenClearsCookieWhenCaughtUp()
             throws Exception {
         User author = TestDataFactory.createTestUser(
                 userRepository, "causal-gate-" + UUID.randomUUID() + "@example.com");
@@ -156,10 +158,14 @@ class CausalGateIT extends CausalHarnessSupport {
 
             assertGateCookieNotCleared(laggingRead, freshCookie.name());
 
-            mockMvc.perform(get("/api/planner/md/" + plannerId)
+            MvcResult cookielessRead = mockMvc.perform(get("/api/planner/md/" + plannerId)
                             .cookie(auth, device))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.title", is(REPLICATED_TITLE)));
+                    .andReturn();
+            assertThat(cookielessRead.getResponse().getStatus()).isIn(OK, UNAVAILABLE);
+            if (cookielessRead.getResponse().getStatus() == OK) {
+                assertThat(objectMapper.readTree(cookielessRead.getResponse().getContentAsString())
+                        .path("title").asString()).isEqualTo(PRIMARY_ONLY_TITLE);
+            }
 
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();

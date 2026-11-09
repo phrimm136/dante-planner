@@ -1,6 +1,7 @@
 package org.danteplanner.backend.integration;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -68,6 +69,8 @@ class TwoRegionHarnessIT extends ReplicaRoutingHarnessSupport {
 
     private static final String REPLICATED_TITLE = "two-region-replicated";
     private static final String PRIMARY_ONLY_TITLE = "two-region-primary-only";
+    private static final int OK = 200;
+    private static final String READ_UNAVAILABLE_ANSWER = "503 READ_TEMPORARILY_UNAVAILABLE";
 
 
     private static final String BREAKER_STATE_GAUGE = "resilience4j.circuitbreaker.state";
@@ -189,8 +192,14 @@ class TwoRegionHarnessIT extends ReplicaRoutingHarnessSupport {
             upsert(mockMvc, session, plannerId, PRIMARY_ONLY_TITLE, true).andExpect(status().isOk());
 
             toxiproxyControl.restoreOregonPrimary();
-            Hang.until(() -> PRIMARY_ONLY_TITLE.equals(uncheckedOregonTitle(session, plannerId)),
-                    "the probe closing the breaker after the restore so reads reach the primary");
+            List<String> answers = new ArrayList<>();
+            Hang.until(() -> {
+                answers.add(uncheckedOregonAnswer(session, plannerId));
+                return !answers.getLast().equals(READ_UNAVAILABLE_ANSWER);
+            }, "the probe closing the breaker after the restore so reads reach the primary");
+            assertThat(answers.getLast())
+                    .as("the first Oregon answer after the restore that is not 503, after %s", answers)
+                    .isEqualTo(OK + " " + PRIMARY_ONLY_TITLE);
         } finally {
             restoreOregonPrimary();
             replicationControl.startReplica();
@@ -315,9 +324,14 @@ class TwoRegionHarnessIT extends ReplicaRoutingHarnessSupport {
         return readOnly.execute(status -> (RoutingKey) probe.determineCurrentLookupKey());
     }
 
-    private String uncheckedOregonTitle(Session session, UUID plannerId) {
+    private String uncheckedOregonAnswer(Session session, UUID plannerId) {
         try {
-            return oregonTitle(session, plannerId);
+            MvcResult result = oregon().mockMvc().perform(get(plannerPath(plannerId))
+                            .cookie(session.auth(), session.device()))
+                    .andReturn();
+            int answered = result.getResponse().getStatus();
+            String body = result.getResponse().getContentAsString();
+            return answered + " " + JsonPath.read(body, answered == OK ? "$.title" : "$.code");
         } catch (Exception e) {
             throw new IllegalStateException("the Oregon read failed", e);
         }
