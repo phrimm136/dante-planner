@@ -247,10 +247,23 @@ jobs:
         with:
           terraform_version: 1.15.9
           terraform_wrapper: false
+      - name: Restore Terraform plugin cache
+        id: terraform-plugin-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+          key: terraform-plugins-${{ hashFiles('terraform/**/.terraform.lock.hcl') }}
+          restore-keys: terraform-plugins-
       - name: Format check, then init without a backend and validate every root stack
         run: |
           mkdir -p "$TF_PLUGIN_CACHE_DIR"
           .github/scripts/terraform-validate.sh
+      - name: Save Terraform plugin cache
+        if: github.ref == 'refs/heads/main' && success() && steps.terraform-plugin-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+          key: ${{ steps.terraform-plugin-cache.outputs.cache-primary-key }}
 
   test-migration:
     needs: changes
