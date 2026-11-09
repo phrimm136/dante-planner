@@ -249,7 +249,8 @@ class FreshnessReadAspectTest {
 
     @Test
     void inner_WhenCalledWithNoTransaction_FailsBeforeLoading() throws SQLException {
-        assertThatThrownBy(reads::inner).isInstanceOf(IllegalTransactionStateException.class);
+        assertThatThrownBy(reads::inner).isInstanceOf(IllegalTransactionStateException.class)
+                .hasMessageContaining("No existing transaction found");
         assertThat(reads.attempts()).isEmpty();
         verify(seoulPool, never()).getConnection();
         verify(primaryPool, never()).getConnection();
@@ -280,7 +281,8 @@ class FreshnessReadAspectTest {
     void missing_WhenTheMissHasNoMarker_ThrowsAfterOneAttemptWithoutTouchingTheAuthority() throws SQLException {
         views.put(ENTITY, new MarkerView.Absent());
 
-        assertThatThrownBy(reads::missing).isInstanceOf(MissFixture.class);
+        assertThatThrownBy(reads::missing)
+                .isInstanceOfSatisfying(MissFixture.class, miss -> assertThat(miss.scopes()).containsExactly(ENTITY));
         assertThat(attemptSources()).containsExactly(SEOUL);
         assertThat(markerReads).containsExactly(List.of(ENTITY));
         verify(primaryPool, never()).getConnection();
