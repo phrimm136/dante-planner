@@ -80,6 +80,15 @@ class ListHoldsAddedTest {
                 .isEmpty();
     }
 
+    @Test
+    void ownerList_WhenTheDeleteIsOfAnotherPlannerOrRejected_DoesNotExcuse() {
+        ListRead list = owner(25, 30, 0, 20, 0);
+
+        assertThat(violations(CREATED, new Delete("s2", "p2", 21, 24, new Deleted()),
+                new Delete("s2", "p1", 21, 24, new Rejected(404)), list))
+                .containsExactly(new Violation("owner-list-after-create", "viewer", "p1", list));
+    }
+
     private static ListRead owner(long invokedAt, long completedAt, int page, int size, long total, String... keys) {
         return new ListRead("viewer", ListRead.Listing.OWNER, invokedAt, completedAt, page, size, total,
                 List.of(keys));
