@@ -12,7 +12,9 @@ CLI checks that profile's SSO session before it runs anything. The script's outp
 stdout and to `.claude/reports/logs/ops-<command>-<YYYYMMDD-HHMMSS>.log`; the exit code is the
 script's. No command writes to the cloud: there is no apply and no write command. The
 `ops-redirect.sh` hook refuses direct calls to the scripts it wraps and names the `ops` command.
-CI does not call this CLI.
+CI does not call this CLI. Every line it prints or logs passes one redaction: each `sso_account_id` in
+`~/.aws/config` (or `$AWS_CONFIG_FILE`) becomes `<account:PROFILE>` and any other account number inside
+an ARN becomes `<account>`; `whoami` and `doctor` name the profile and the caller, never the number.
 
 The CLI runs the scripts of the checkout it lives in: from a worktree run
 `<worktree>/.claude/skills/ops/bin/ops`. `tf plan <stack>` and `verify oregon` (unless

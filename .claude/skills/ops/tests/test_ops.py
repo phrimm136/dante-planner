@@ -30,7 +30,15 @@ RUN_MOMENT = datetime.datetime(2026, 11, 9, 12, 30, 5)
 STAMP_TEXT = "20261109-123005"
 CLI_TEXT = ops_cli.CLI_PATH
 EXPIRED_STDERR = ("\nError when retrieving token from sso: Token has expired and refresh failed\n")
-VALID_IDENTITY = json.dumps({"Account": "111122223333", "Arn": "arn:aws:sts::111122223333:assumed-role/x/y"})
+PROFILE_ACCOUNTS = {"prod": "111122223333", "staging": "444455556666", "mgmt": "777788889999"}
+UNMAPPED_ID = "999988887777"
+FAKE_CONFIG_TEXT = "".join(f"[profile {profile_name}]\nsso_session = s\nsso_account_id = {account_id}\n\n"
+                           for profile_name, account_id in PROFILE_ACCOUNTS.items())
+FAKE_CONFIG_TEXT += "[profile prod-provisioner]\nsso_account_id = 111122223333\n"
+
+
+def identity_json(account_id):
+    return json.dumps({"Account": account_id, "Arn": f"arn:aws:sts::{account_id}:assumed-role/AdminRole/caller-x"})
 TABLE_SCRIPTS = {one_spec.script_path for one_spec in ops_cli.DISPATCH_TABLE if one_spec.script_path}
 
 
@@ -43,7 +51,9 @@ def plugin_argv(local_port, remote_host, region_name):
 
 class FakeEffects:
     def __init__(self, session_rows=None, docker_up=True, stream_exit=0, show_text="", process_list=(),
-                 tool_paths=None):
+                 tool_paths=None, stream_text="script output\n", identity_accounts=None):
+        self.stream_text = stream_text
+        self.identity_accounts = identity_accounts or PROFILE_ACCOUNTS
         self.session_rows = session_rows or {}
         self.docker_up = docker_up
         self.stream_exit = stream_exit
@@ -60,7 +70,8 @@ class FakeEffects:
         if command_argv[:3] == ["aws", "sts", "get-caller-identity"]:
             profile_name = command_argv[command_argv.index("--profile") + 1]
             exit_code, stderr_text = self.session_rows.get(profile_name, (0, ""))
-            return subprocess.CompletedProcess(command_argv, exit_code, VALID_IDENTITY if exit_code == 0 else "",
+            identity_text = identity_json(self.identity_accounts.get(profile_name, UNMAPPED_ID))
+            return subprocess.CompletedProcess(command_argv, exit_code, identity_text if exit_code == 0 else "",
                                                stderr_text)
         if command_argv[:2] == ["docker", "version"]:
             return subprocess.CompletedProcess(command_argv, 0 if self.docker_up else 1,
@@ -75,7 +86,9 @@ class FakeEffects:
 
     def run_streamed(self, command_argv, child_env, work_dir, log_file, echo_output):
         self.stream_calls.append((tuple(command_argv), child_env, work_dir, echo_output))
-        log_file.write("script output\n")
+        log_file.write(self.stream_text)
+        if echo_output:
+            sys.stdout.write(self.stream_text)
         return self.stream_exit
 
     def process_rows(self):
@@ -106,9 +119,19 @@ class RepoCase(unittest.TestCase):
         (self.repo_root / "terraform" / "modules").mkdir()
         self.repo_paths = ops_cli.RepoPaths(self.repo_root, self.repo_root)
         self.log_dir = self.repo_root / ".claude" / "reports" / "logs"
+        config_file = self.repo_root / "aws-config"
+        config_file.write_text(FAKE_CONFIG_TEXT)
+        self.env_patch = unittest.mock.patch.dict(os.environ, {"AWS_CONFIG_FILE": str(config_file)})
+        self.env_patch.start()
 
     def tearDown(self):
+        self.env_patch.stop()
         self.temp_handle.cleanup()
+
+    def assert_no_ids(self, *checked_texts):
+        for checked_text in checked_texts:
+            for account_id in (*PROFILE_ACCOUNTS.values(), UNMAPPED_ID):
+                self.assertNotIn(account_id, checked_text)
 
     def run_main(self, argv_words, fake_effects):
         out_buffer, err_buffer = io.StringIO(), io.StringIO()
@@ -285,8 +308,48 @@ class RunTest(RepoCase):
     def test_whoami_prints_the_identity(self):
         exit_code, out_text, _ = self.run_main(["whoami", "--env", "staging"], FakeEffects())
         self.assertEqual(exit_code, 0)
-        self.assertIn("profile staging: account 111122223333", out_text)
+        self.assertIn("profile staging: account <account:staging> as caller-x", out_text)
         self.assertTrue((self.log_dir / f"ops-whoami-{STAMP_TEXT}.log").is_file())
+
+    def test_whoami_hides_the_account(self):
+        exit_code, out_text, err_text = self.run_main(["whoami"], FakeEffects())
+        log_text = (self.log_dir / f"ops-whoami-{STAMP_TEXT}.log").read_text()
+        self.assertEqual(exit_code, 0)
+        self.assertIn("<account:prod>", out_text)
+        self.assertIn("<account:prod>", log_text)
+        self.assert_no_ids(out_text, err_text, log_text)
+
+    def test_an_unmapped_account_prints_no_number(self):
+        _, out_text, _ = self.run_main(["whoami"], FakeEffects(identity_accounts={"prod": UNMAPPED_ID}))
+        self.assertIn("profile prod: account <account> as caller-x", out_text)
+        self.assert_no_ids(out_text, (self.log_dir / f"ops-whoami-{STAMP_TEXT}.log").read_text())
+
+    def test_streamed_script_output_is_redacted_on_stdout_and_in_the_log(self):
+        stream_text = (f"owner {PROFILE_ACCOUNTS['prod']} role arn:aws:iam::{UNMAPPED_ID}:role/q "
+                       f"bucket arn:aws:s3:::x-{PROFILE_ACCOUNTS['staging']}\n")
+        _, out_text, err_text = self.run_main(["metrics", "up"], FakeEffects(stream_text=stream_text))
+        log_text = (self.log_dir / f"ops-metrics-{STAMP_TEXT}.log").read_text()
+        for checked_text in (out_text, log_text):
+            self.assertIn("owner <account:prod> role arn:aws:iam::<account>:role/q bucket "
+                          "arn:aws:s3:::x-<account:staging>", checked_text)
+        self.assert_no_ids(out_text, err_text, log_text)
+
+    def test_the_plan_text_in_the_log_is_redacted(self):
+        stream_text = f"credentials resolve to {PROFILE_ACCOUNTS['prod']}\n"
+        fake_effects = FakeEffects(stream_text=stream_text, stream_exit=1)
+        _, out_text, err_text = self.run_main(["tf", "plan", "rds"], fake_effects)
+        log_text = (self.log_dir / f"ops-tf-rds-{STAMP_TEXT}.log").read_text()
+        self.assertIn("credentials resolve to <account:prod>", log_text)
+        self.assertIn("credentials resolve to <account:prod>", err_text)
+        self.assert_no_ids(out_text, err_text, log_text)
+
+    def test_a_shared_id_maps_to_the_ops_profile(self):
+        self.assertEqual(ops_cli.config_accounts(ops_cli.aws_config_path())[PROFILE_ACCOUNTS["prod"]], "prod")
+
+    def test_no_config_file_redacts_only_arns(self):
+        with unittest.mock.patch.dict(os.environ, {"AWS_CONFIG_FILE": str(self.repo_root / "absent")}):
+            self.assertEqual(ops_cli.redact_text(f"{UNMAPPED_ID} arn:aws:iam::{UNMAPPED_ID}:role/q"),
+                             f"{UNMAPPED_ID} arn:aws:iam::<account>:role/q")
 
     def test_log_names_never_collide(self):
         self.log_dir.mkdir(parents=True)
@@ -496,8 +559,8 @@ class DoctorTest(RepoCase):
         self.assertEqual(exit_code, 1)
         self.assertIn("sso      EXPIRED prod (profile prod): the SSO session for profile 'prod' has expired; run: "
                       "aws sso login --sso-session danteplanner", out_lines)
-        self.assertIn("sso      ok staging (profile staging): account 111122223333 as "
-                      "arn:aws:sts::111122223333:assumed-role/x/y", out_lines)
+        self.assertIn("sso      ok staging (profile staging): account <account:staging> as caller-x", out_lines)
+        self.assert_no_ids(out_text)
         self.assertTrue(any(one_line.startswith("docker   UNREACHABLE") and "start Docker" in one_line
                             for one_line in out_lines))
         self.assertIn("tunnel   open 127.0.0.1:3306 -> danteplanner-mysql.abc123.us-west-2.rds.amazonaws.com "

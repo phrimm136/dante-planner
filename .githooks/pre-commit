@@ -18,6 +18,39 @@ if git diff --cached -U0 | grep '^+' | grep -Eq "$pattern"; then
   fail=1
 fi
 
+aws_config=${AWS_CONFIG_FILE:-$HOME/.aws/config}
+if [[ -f "$aws_config" ]]; then
+  id_hits=$(git diff --cached -U0 --no-color --no-ext-diff | python3 -I -c '
+import re
+import sys
+
+config_text = open(sys.argv[1], encoding="utf-8", errors="replace").read()
+account_ids = set(re.findall(r"(?m)^\s*sso_account_id\s*=\s*(\d+)\s*$", config_text))
+file_path = ""
+line_number = 0
+in_hunk = False
+for diff_line in sys.stdin.read().splitlines():
+    if diff_line.startswith("diff --git "):
+        in_hunk = False
+    elif not in_hunk and diff_line.startswith("+++ "):
+        file_path = diff_line[6:] if diff_line.startswith("+++ b/") else ""
+    elif diff_line.startswith("@@ "):
+        hunk_match = re.match(r"@@ -\S+ \+(\d+)", diff_line)
+        line_number = int(hunk_match.group(1)) if hunk_match else 0
+        in_hunk = True
+    elif in_hunk and diff_line.startswith("+"):
+        if file_path and any(account_id in diff_line for account_id in account_ids):
+            print(f"{file_path}:{line_number}")
+        line_number += 1
+' "$aws_config")
+  if [[ -n "$id_hits" ]]; then
+    echo "pre-commit: staged lines carry an AWS account id listed in $aws_config (the id is not printed):" >&2
+    echo "$id_hits" | sed 's/^/  /' >&2
+    echo "Replace it with <account:PROFILE> in prose or 111122223333 in tests, re-stage, and commit again." >&2
+    fail=1
+  fi
+fi
+
 staged=$(git diff --cached --name-only --diff-filter=ACM || true)
 
 # The game data is a sibling checkout reached through an untracked symlink (ADR 200); a
