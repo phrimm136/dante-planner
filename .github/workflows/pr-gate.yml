@@ -94,15 +94,18 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: '3.13'
-      - name: Install PyYAML
+      - name: Install PyYAML and pytest
         id: pyyaml
-        run: python -m pip install pyyaml==6.0.3
+        run: python -m pip install pyyaml==6.0.3 pytest==9.2.0
       - name: Remote-write keep list covers alerts and panels
         if: ${{ !cancelled() && steps.pyyaml.outcome == 'success' }}
         run: python scripts/ops/check-remote-write-keep-list.py
       - name: Lane input lists cover every Dockerfile COPY source and every ../ path the builds read
         if: ${{ !cancelled() }}
         run: .github/scripts/check-deploy-inputs.sh
+      - name: Skill CLI and git-hook test suites
+        if: ${{ !cancelled() }}
+        run: .github/scripts/tooling-tests.sh
 
   test-backend:
     needs: changes

@@ -15,6 +15,8 @@ from pathlib import Path
 CLI_PATH = ".claude/skills/checks/bin/checks"
 WORKFLOW_PATH = ".github/workflows/pr-gate.yml"
 GATE_JOB = "test-frontend"
+TOOLING_SCRIPT = ".github/scripts/tooling-tests.sh"
+TOOLING_JOB = "check-keep-list"
 ARCHUNIT_PATTERN = "org.danteplanner.backend.architecture.*"
 GIT_ENV_NAMES = ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_COMMON_DIR")
 PACKAGE_DIRS = {"fe": "frontend", "e2e": "e2e"}
@@ -25,12 +27,13 @@ USAGE_TEXT = f"""usage: checks [--root <path>] [--print] <lane> <check> [args]
        checks [--root <path>] doctor | list
        checks hook < tool-json
 
-Runs the repo's repeated local checks (frontend, e2e, backend). Every run takes the shared
-test lock (<main checkout>/.claude/.test.lock, exclusive, blocking with a status line while
-another run holds it), writes the tool's whole output to a dated log, and prints one line:
-PASS <log> or FAIL <log>, followed by the tool's own summary (vitest "Test Files", the tsc
-error count, oxlint "Found ...", playwright's counts, gradle "BUILD ..."). The exit code is the
-tool's. Read the log; never re-run a check to see its output again.
+Runs the repo's repeated local checks (frontend, e2e, backend, the tooling test suites). Every
+run takes the shared test lock (<main checkout>/.claude/.test.lock, exclusive, blocking with a
+status line while another run holds it), writes the tool's whole output to a dated log, and
+prints one line: PASS <log> or FAIL <log>, followed by the tool's own summary (vitest "Test
+Files", the tsc error count, oxlint "Found ...", playwright's counts, gradle "BUILD ...", the
+tooling suite count). The exit code is the tool's. Read the log; never re-run a check to see its
+output again.
 
 repo root:  the checkout this CLI file lives in, whatever the current directory: running
             <worktree>/.claude/skills/checks/bin/checks checks that worktree. --root <path>
@@ -42,7 +45,8 @@ logs:       <root>/.claude/reports/logs/checks-<lane>-<check>-<YYYYMMDD-HHMMSS>.
 
 `checks list` prints every command with its purpose; `checks doctor` reports the lock holder,
 the static link, node_modules against each lockfile, tool versions, Docker and the JDK.
-CI does not call this CLI: `checks fe gate` reads its steps from {WORKFLOW_PATH}.
+CI does not call this CLI: `checks fe gate` reads its steps from {WORKFLOW_PATH}, and
+`checks tools test` runs {TOOLING_SCRIPT}, the script that workflow's job {TOOLING_JOB} runs.
 """
 
 
@@ -81,6 +85,8 @@ CHECK_TABLE = (
               "gradle test; any --tests also runs the ArchUnit suite"),
     CheckSpec("be", "checkstyle", "", "checkstyleMain checkstyleTest --rerun-tasks"),
     CheckSpec("be", "pit", "", "pitestRatchet, the surviving-mutant ratchet"),
+    CheckSpec("tools", "test", "", f"every skill CLI and git-hook test suite ({TOOLING_SCRIPT}, "
+              f"what PR Gate job {TOOLING_JOB} runs)"),
 )
 
 TOP_COMMANDS = (
@@ -337,6 +343,8 @@ def build_plan(repo_paths, lane_name, check_name, arg_words):
         raise CheckError(f"checks {step_label} takes no arguments, got {shlex.join(arg_words)}; see checks list")
     if lane_name == "be":
         return RunPlan(step_label, repo_paths.repo_root, gradle_argv(repo_paths, GRADLE_TASKS[check_name]))
+    if lane_name == "tools":
+        return RunPlan(step_label, repo_paths.repo_root, ("bash", str(repo_paths.repo_root / TOOLING_SCRIPT)))
     package_dir = repo_paths.repo_root / PACKAGE_DIRS[lane_name]
     extra_env = (("NODE_OPTIONS", BUILD_NODE_OPTIONS),) if (lane_name, check_name) == ("fe", "build") else ()
     return RunPlan(step_label, package_dir, ("yarn", YARN_SCRIPTS[(lane_name, check_name)]),
@@ -492,6 +500,7 @@ ANSI_PATTERN = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
 TSC_ERROR = re.compile(r"error TS\d+")
 YARN_CHATTER = re.compile(r"^(yarn run v|Done in |info Visit |error Command failed with exit code )")
 LINT_DIAGNOSTIC = re.compile(r"^\S+:\d+:\d+: (warning|error) ")
+TOOLING_PREFIX = "tooling-tests: "
 PLAYWRIGHT_COUNT = re.compile(r"^\s*\d+ (passed|failed|flaky|skipped|interrupted|did not run)\b")
 
 
@@ -504,6 +513,10 @@ def summary_line(log_text):
     body_lines = [text_line for text_line in clean_lines
                   if text_line.strip() and not text_line.startswith(("$ ", "# checks:"))
                   and not YARN_CHATTER.match(text_line)]
+    tooling_lines = [text_line[len(TOOLING_PREFIX):] for text_line in body_lines
+                     if text_line.startswith(TOOLING_PREFIX)]
+    if tooling_lines:
+        return clip_text(tooling_lines[-1])
     vitest_lines = [text_line.strip() for text_line in body_lines if re.match(r"\s*Test Files\s", text_line)]
     if vitest_lines:
         return clip_text(vitest_lines[-1])
