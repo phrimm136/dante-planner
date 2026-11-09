@@ -1,4 +1,4 @@
-# Auth-state Redis (blacklist, rotation families, tombstones, SSE pub/sub) as a
+# Auth-state Redis (blacklist, rotation families, freshness markers, SSE pub/sub) as a
 # StatefulSet on the data node. AOF everysec + RDB preamble, gp3 PVC, AZ-pinned.
 # NO Sentinel, NO auto-promote — an outage is a typed 503 + auto-recovery + AOF
 # replay (requirements: no autonomous writer promotion).

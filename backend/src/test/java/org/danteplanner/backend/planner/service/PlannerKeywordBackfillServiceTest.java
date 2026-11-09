@@ -20,7 +20,6 @@ import org.danteplanner.backend.planner.repository.PlannerKeywordBackfillReposit
 import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
-import org.danteplanner.backend.support.RecordingTombstoneStore;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
@@ -95,7 +94,7 @@ class PlannerKeywordBackfillServiceTest {
         });
         PlannerCatalogService catalogService = new PlannerCatalogService(catalogRepository, plannerRepository,
                 statsRepository, entityFilterRepository, keywordFilterRepository, null, new ObjectMapper(),
-                new RecordingTombstoneStore(), 10);
+                10);
         return new PlannerKeywordBackfillService(rows, plannerRepository, catalogService, new ObjectMapper())
                 .backfillPage(null, 10);
     }

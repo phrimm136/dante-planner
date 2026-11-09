@@ -8,12 +8,8 @@ import org.danteplanner.backend.shared.config.ReadSourceHealthProbe;
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.config.ReadSourcesConfig;
-import org.danteplanner.backend.shared.config.RoutingDataSourceConfig;
 import org.danteplanner.backend.shared.config.TimeoutHierarchy;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Conditional;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -36,26 +32,15 @@ class ReadSourcesConfigTest {
     private static final String REPLICA_URL = "jdbc:mysql://127.0.0.1:2/planner";
     private static final String REPLICA = "seoul-replica";
     private static final String PROBE_TIMEOUT_MS = "750";
-    private static final String REPLICA_FIRST_MARKER = "replicaFirstMarker";
 
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
-            .withUserConfiguration(ReadSourcesConfig.class, ReplicaFirstMarker.class)
+            .withUserConfiguration(ReadSourcesConfig.class)
             .withBean(DataSourceProperties.class, ReadSourcesConfigTest::primaryProperties)
             .withBean(MeterRegistry.class, SimpleMeterRegistry::new)
             .withBean("primaryPool", HikariDataSource.class, HikariDataSource::new)
             .withPropertyValues(
                     "datasource.routing.enabled=true",
                     "datasource.read-source-probe.timeout=" + PROBE_TIMEOUT_MS + "ms");
-
-    @Configuration(proxyBeanMethods = false)
-    static class ReplicaFirstMarker {
-
-        @Bean(REPLICA_FIRST_MARKER)
-        @Conditional(RoutingDataSourceConfig.ReadsAReplicaFirst.class)
-        String replicaFirstMarker() {
-            return REPLICA_FIRST_MARKER;
-        }
-    }
 
     private static DataSourceProperties primaryProperties() {
         DataSourceProperties properties = new DataSourceProperties();
@@ -154,16 +139,6 @@ class ReadSourcesConfigTest {
             assertThat(context.getBean(ReadSourceSelector.class).authority().dataSource())
                     .isSameAs(context.getBean("primaryPool"));
         });
-    }
-
-    @Test
-    void bulkheadCondition_WhenSeoulPod_Matches() {
-        seoulPod().run(context -> assertThat(context).hasBean(REPLICA_FIRST_MARKER));
-    }
-
-    @Test
-    void bulkheadCondition_WhenOregonPod_DoesNotMatch() {
-        oregonPod().run(context -> assertThat(context).doesNotHaveBean(REPLICA_FIRST_MARKER));
     }
 
     @Test

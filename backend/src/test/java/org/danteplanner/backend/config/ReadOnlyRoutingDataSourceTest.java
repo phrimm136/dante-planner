@@ -173,17 +173,6 @@ class ReadOnlyRoutingDataSourceTest {
     }
 
     @Test
-    void determineCurrentLookupKey_WhenPinnedToBulkhead_ReturnsBulkheadUnguarded() {
-        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(guard(true, true));
-        ReadOnlyRoutingDataSource.pinTo(RoutingKey.BULKHEAD);
-        try {
-            assertThat(routing.determineCurrentLookupKey()).isEqualTo(RoutingKey.BULKHEAD);
-        } finally {
-            ReadOnlyRoutingDataSource.clear();
-        }
-    }
-
-    @Test
     void getConnection_WhenReadOnlyPinnedToPrimaryCannotConnect_ThrowsReadUnavailable() throws SQLException {
         SQLException linkFailure = communicationsLinkFailure();
         ReadOnlyRoutingDataSource routing = routingToPrimaryFailingWith(linkFailure);
@@ -272,7 +261,7 @@ class ReadOnlyRoutingDataSourceTest {
         verify(primary, never()).getConnection();
         verify(replicaPool, never()).getConnection();
         assertThat(ChosenReadSource.name()).contains(ReadSourceProperties.PRIMARY);
-        assertThat(ChosenReadSource.servedByAuthority()).isTrue();
+        assertThat(ChosenReadSource.name()).contains(seoulSelector().authority().name());
     }
 
     @Test
@@ -285,7 +274,7 @@ class ReadOnlyRoutingDataSourceTest {
 
         assertThat(routing.getConnection()).isSameAs(primaryConnection);
         assertThat(ChosenReadSource.name()).contains(ReadSourceProperties.PRIMARY);
-        assertThat(ChosenReadSource.servedByAuthority()).isTrue();
+        assertThat(ChosenReadSource.name()).contains(oregonSelector().authority().name());
     }
 
     @Test

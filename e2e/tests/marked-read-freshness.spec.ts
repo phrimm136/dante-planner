@@ -8,13 +8,12 @@ import { closeSeedPool, createUser, deleteUser, type SeededUser } from '../src/s
 import { OREGON_API, SEOUL_API } from '../src/staging'
 import { edgeContext } from '../src/edge'
 
-// The consistency path for a client that carries no cookie: a by-id dereference that misses on the
-// stale replica is re-checked against the primary through the bulkhead, and a delete is masked by
-// the tombstone so a stale replica hit cannot resurrect the row
-// (docs/multi-region-request-paths.md §5).
+// The consistency path for a client that carries no cookie: a by-id read the stale replica would
+// answer is decided against the freshness markers its write raised, so a just-written planner is read
+// from the primary and a stale replica hit cannot resurrect a deleted one.
 //
 // Writes go to Oregon here precisely so no ryw_gtid exists: Oregon registers no gate, so the reader
-// against Seoul has nothing to present and the re-check is the only thing that can answer.
+// against Seoul has nothing to present and the markers are the only thing that can answer.
 
 test.describe.configure({ mode: 'default' })
 
@@ -52,8 +51,8 @@ async function dropFixture(fixture: Fixture): Promise<void> {
   await deleteUser(fixture.user)
 }
 
-test('a by-id read of a just-created planner is answered by the primary re-check', async () => {
-  const fixture = await createFixture('recheck-owner')
+test('a by-id read of a just-created planner is answered from the primary', async () => {
+  const fixture = await createFixture('marker-owner')
   let owner: APIRequestContext | undefined
 
   try {
@@ -75,7 +74,7 @@ test('a by-id read of a just-created planner is answered by the primary re-check
 })
 
 test('a just-published planner is readable by id anonymously from the replica region', async () => {
-  const fixture = await createFixture('recheck-public')
+  const fixture = await createFixture('marker-public')
   let anonymous: APIRequestContext | undefined
 
   try {
@@ -97,7 +96,7 @@ test(
   'a deleted planner is absent from every read in every region at every instant',
   { tag: '@destructive' },
   async () => {
-    const fixture = await createFixture('recheck-deleted')
+    const fixture = await createFixture('marker-deleted')
     const owners: Array<[string, APIRequestContext]> = []
     const visitors: Array<[string, APIRequestContext]> = []
 

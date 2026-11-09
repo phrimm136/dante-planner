@@ -34,16 +34,11 @@ import org.danteplanner.backend.planner.sync.SyncVersionValidator;
 import org.danteplanner.backend.planner.sync.WriteArbitration;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
-import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
-import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -68,7 +63,6 @@ public class PlannerCommandService {
     private final PlannerOwnershipValidator ownershipValidator;
     private final SyncVersionValidator syncVersionValidator;
     private final ObjectMapper objectMapper;
-    private final Optional<ContentTombstoneStore> tombstoneStore;
     private final MeterRegistry meterRegistry;
 
     private final int maxPlannersPerUser;
@@ -91,7 +85,7 @@ public class PlannerCommandService {
             int currentSchemaVersion) {
         this(plannerRepository, statsRepository, contentValidator, contentVersionValidator,
                 plannerCatalogService, accessGuard, restrictionCheck, categoryValidator, limitValidator, ownershipValidator,
-                syncVersionValidator, objectMapper, Optional.empty(), new SimpleMeterRegistry(),
+                syncVersionValidator, objectMapper, new SimpleMeterRegistry(),
                 maxPlannersPerUser, currentSchemaVersion);
     }
 
@@ -109,13 +103,12 @@ public class PlannerCommandService {
             PlannerOwnershipValidator ownershipValidator,
             SyncVersionValidator syncVersionValidator,
             ObjectMapper objectMapper,
-            Optional<ContentTombstoneStore> tombstoneStore,
             MeterRegistry meterRegistry,
             @Value("${planner.max-per-user}") int maxPlannersPerUser,
             GameDataRegistry gameDataRegistry) {
         this(plannerRepository, statsRepository, contentValidator, contentVersionValidator,
                 plannerCatalogService, accessGuard, restrictionCheck, categoryValidator, limitValidator, ownershipValidator,
-                syncVersionValidator, objectMapper, tombstoneStore, meterRegistry,
+                syncVersionValidator, objectMapper, meterRegistry,
                 maxPlannersPerUser, gameDataRegistry.plannerVersions().schemaVersion());
     }
 
@@ -132,7 +125,6 @@ public class PlannerCommandService {
             PlannerOwnershipValidator ownershipValidator,
             SyncVersionValidator syncVersionValidator,
             ObjectMapper objectMapper,
-            Optional<ContentTombstoneStore> tombstoneStore,
             MeterRegistry meterRegistry,
             int maxPlannersPerUser,
             int currentSchemaVersion) {
@@ -148,7 +140,6 @@ public class PlannerCommandService {
         this.ownershipValidator = ownershipValidator;
         this.syncVersionValidator = syncVersionValidator;
         this.objectMapper = objectMapper;
-        this.tombstoneStore = tombstoneStore;
         this.meterRegistry = meterRegistry;
         this.maxPlannersPerUser = maxPlannersPerUser;
         this.currentSchemaVersion = currentSchemaVersion;
@@ -353,13 +344,6 @@ public class PlannerCommandService {
         plannerCatalogService.onBecameInvisible(id);
         FreshnessDeclarations.declare(new FreshnessScope.Entity(id), new FreshnessScope.OwnerList(planner.getUserId()),
                 new FreshnessScope.PublicCatalog());
-        tombstoneStore.ifPresent(store -> TransactionSynchronizationManager.registerSynchronization(
-                new TransactionSynchronization() {
-                    @Override
-                    public void afterCommit() {
-                        store.writeTombstone(ByIdReadGuard.PLANNER_ENTITY_TYPE, id);
-                    }
-                }));
         log.info("Soft deleted planner {} for user {}", id, userId);
     }
 }

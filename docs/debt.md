@@ -153,7 +153,7 @@ asset pipeline.
   re-check: `rg -qU '@Modifying\(clearAutomatically = true\)\n\s+@Query\("UPDATE PlannerComment c SET c.upvoteCount = c.upvoteCount \+ 1' backend/src/main/java/org/danteplanner/backend/comment/repository/PlannerCommentRepository.java && .claude/skills/debt-ledger/bin/debt absent backend/src/test/java/org/danteplanner/backend/controller/CommentControllerIT.java -i 'upvote_When(Second|Duplicate|Already|Twice|Repeat)'`
 - `DegradationIT.evictPooledPrimaryConnections` still cannot evict the primary pool: the
   routing target for PRIMARY is the `GtidCapturingDataSource` wrapper, not a
-  `HikariDataSource`, so the helper's instanceof walk skips it. Replica and bulkhead are
+  `HikariDataSource`, so the helper's instanceof walk skips it. The replica is
   covered since the lazy-proxy descent fix; the primary needs an unwrap step.
   re-check: `rg -qF 'new GtidCapturingDataSource(primaryPool' backend/src/main/java/org/danteplanner/backend/shared/config/RoutingDataSourceConfig.java && .claude/skills/debt-ledger/bin/debt absent backend/src/test/java/org/danteplanner/backend/integration/DegradationIT.java 'GtidCapturingDataSource|unwrap\('`
 - No circuit breaker fronts the primary datasource's writes or any Redis role but the freshness
@@ -284,7 +284,7 @@ asset pipeline.
   nothing under `deploy/grafana/` panels or alerts on either — a subscriber-drop burst or a
   drift storm is invisible in production. 2026-09-22: neither passes the remote-write
   keep-list in `deploy/base/prometheus.yaml:69` either, nor do `sse.publish.unserializable`,
-  `datasource.primary.undeclared`, `tombstone.check_skipped`; five of the ten custom
+  `datasource.primary.undeclared`; these custom
   counters never reach Grafana Cloud, so a panel alone would not fix it. `sse.publish.unserializable`,
   now emitted by `SsePublisher`, joins them. Closes when all three have a dashboard panel and an alert rule.
   re-check: `rg -q 'DROPPED_COUNTER = "sse.publish.dropped"' backend/src/main/java/org/danteplanner/backend/shared/sse/SsePublisher.java && .claude/skills/debt-ledger/bin/debt absent deploy/grafana -i 'sse_publish|planner_reconciler_drift' && .claude/skills/debt-ledger/bin/debt absent deploy/base/prometheus.yaml -i 'sse_publish|planner_reconciler_drift'`
@@ -908,9 +908,6 @@ guards the parse but likewise skips the schema gate.
   the comment is already deleted, so a repeated delete leaves a second DELETE_COMMENT record;
   `deleteComment` by id does not. Worth fixing when the moderation audit trail is read as a count.
   re-check: `rg -qU 'deleteCommentByPublicId\([^{]*\{[^}]*auditService\.record[^}]*if \(comment\.deleted\(\)\)' backend/src/main/java/org/danteplanner/backend/moderation/service/CommentModerationService.java`
-- `CommentReportService.hasReported(Long, Long)` has no main-source caller, only its test. Worth
-  deleting the next time comment reporting changes.
-  re-check: `rg -q 'public boolean hasReported\(Long userId, Long commentId\)' backend/src/main/java/org/danteplanner/backend/moderation/service/CommentReportService.java && rg -q 'reportService\.hasReported\(userId, plannerId\)' backend/src/main/java/org/danteplanner/backend/planner/service/PublishedPlannerQueryService.java && rg -o '\.hasReported\([^,)]+,' backend/src/main/java | awk 'END{exit NR!=1}'`
 - `GtidPinExitTest.readGet_WhenReplicaRejectsGtidAsMalformed_ClearsUnpinnedAndWarnsOnceWithoutStack`
   failed once at full suite size and passed on retry and on a full rerun (2026-10-04, Lane D S4
   gate). It counts warning log events, so it likely depends on order or logging state. Worth
@@ -1166,8 +1163,8 @@ guards the parse but likewise skips the schema gate.
   re-check: `rg -q 'String claimedIp = firstHop\(forwarded\);' backend/src/main/java/org/danteplanner/backend/shared/util/ClientIpResolver.java && rg -q 'ReturnsTheLeftmost' backend/src/test/java/org/danteplanner/backend/shared/util/ClientIpResolverTest.java`
 - **Bucket configuration is validated per request, not at bind time.** `RateLimitProperties`
   is `@Validated` but constrains only `configVersion`, and its `BucketConfig` fields carry none
-  (six of nine `@ConfigurationProperties` classes are `@Validated`; `HikariTuningProperties`,
-  `SecurityProperties` and `BulkheadDataSourceProperties` are not), and
+  (six of eight `@ConfigurationProperties` classes are `@Validated`; `HikariTuningProperties`
+  and `SecurityProperties` are not), and
   `buildConfiguration` runs per request, so a zero duration fails on first use. The fix is the
   ArchUnit rule "every `@ConfigurationProperties` class is `@Validated`" and the sibling edits
   it lists; the rule, not the class, is the unit of work.
@@ -1303,21 +1300,19 @@ guards the parse but likewise skips the schema gate.
   or a sandbox that carries `../static`) when the PIT ratchet has shown its value on the
   backend; until then under-assertion on the frontend is unmeasured.
   re-check: `test -z "$(git ls-files | rg -i stryker)" && rg -q 'projects: \[' frontend/vite.config.ts`
-- Three full-run-only failures never reproduced across isolated, `taskset -c 0`, neighbour-combo and
+- Two full-run-only failures never reproduced across isolated, `taskset -c 0`, neighbour-combo and
   eight full runs (2026-09-29..10-04): `SseFanoutIT` (a JDBC SSL communications error: MySQL
   connection SSL handshake failure during setup, not the fan-out under test; SSL stays on because
-  production uses `VERIFY_CA`), `BulkheadIT` INV7 (a timing assertion: `:158` compares two
-  wall-clock durations, which load can invert; a deterministic signal such as the bulkhead pool
-  reaching its active-connection cap would replace it), and `EffectPlacementIT` "A committed write
+  production uses `VERIFY_CA`) and `EffectPlacementIT` "A committed write
   leaves an event, and every effect follows from it" (`:151`, no SSE push within 10 s, once in a
   136-class run, mid lane-B edit; the SSE publisher mock saw no interaction; it passed 3/3 alone on
   both the visibility branch and dev). They fail under the full `check` run and pass when run
-  alone. Worth diagnosing if `SseFanoutIT` or `BulkheadIT` fails twice in a phase-close run; until
+  alone. Worth diagnosing if `SseFanoutIT` fails twice in a phase-close run; until
   then a phase close re-runs them alone before judging red. Worth doing when the test-retry report
   names one as flaky or `EffectPlacementIT` fails again in a full run: keep that run's XML and the
   classes that ran before it in the fork, check whether the outbox eager executor was saturated,
   then build the loop from them.
-  re-check: `d=backend/src/test/java/org/danteplanner/backend/integration; test -f $d/SseFanoutIT.java && test -f $d/EffectPlacementIT.java && rg -q 'isGreaterThan\(singleReCheckMs\)' $d/BulkheadIT.java`
+  re-check: `d=backend/src/test/java/org/danteplanner/backend/integration; test -f $d/SseFanoutIT.java && test -f $d/EffectPlacementIT.java`
 - The adr116-131 brief reserves migration V064 for J6 "drop planner_views", but V064 is taken by
   the floor-count parameter on `rebuild_planner_filters` (V062 is burned per push-order). J6 must
   renumber to the next free version when it starts.

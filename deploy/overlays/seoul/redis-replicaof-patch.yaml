@@ -1,5 +1,5 @@
 # Seoul redis-auth = read-only REPLICAOF the Oregon PRIMARY (mechanics #5). It
-# pulls blacklist/rotation/tombstone state from Oregon over the Seoul<->Oregon
+# pulls blacklist/rotation/freshness marker state from Oregon over the Seoul<->Oregon
 # peering and serves Seoul's read-local traffic; it REFUSES local writes
 # (replica-read-only), so a Seoul write correctly routes to the primary via
 # REDIS_AUTH_HOST instead of silently landing on a stale replica.

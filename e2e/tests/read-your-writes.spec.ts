@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 import type { APIRequestContext } from '@playwright/test'
 import { randomUUID } from 'node:crypto'
 import { authHeaders, createAuthenticatedApi } from '../src/auth'
-import { becomesTrue, holdsThroughout } from '../src/consistency'
+import { holdsThroughout } from '../src/consistency'
 import { cookieHeader } from '../src/cookies'
 import {
   RYW_COOKIE,
@@ -101,8 +101,8 @@ test('a write served by Seoul is readable in both regions at every instant, with
   }
 })
 
-test('without the cookie the same listing converges only after the replication lag', async () => {
-  const fixture = await createFixture(SEOUL_API, 'ryw-lag')
+test('without the cookie the listing serves a just-published planner through its catalog marker', async () => {
+  const fixture = await createFixture(SEOUL_API, 'ryw-uncookied')
   let anonymous: APIRequestContext | undefined
 
   try {
@@ -114,18 +114,10 @@ test('without the cookie the same listing converges only after the replication l
     const published = await fixture.api.post(`/api/planner/md/${fixture.plannerId}/publish`)
     expect(published.status(), await published.text()).toBe(200)
 
-    // No cookie, and a listing rather than a by-id read: the by-id path would be answered by the
-    // primary re-check (§5) and show no lag at all.
+    // No cookie: the publish raised the public catalog's marker, so a replica that has not
+    // applied it is skipped and the first listing after the response already carries the row.
     anonymous = await edgeContext({ baseURL: SEOUL_API })
-    const lagMs = await becomesTrue(
-      async () => (await listedIds(anonymous!, 'page=0&size=50')).includes(fixture.plannerId),
-      { what: `${fixture.plannerId} on the ungated ${SEOUL_API} listing` },
-    )
-
-    test.info().annotations.push({
-      type: 'replication-lag',
-      description: `${lagMs}ms for an ungated listing on ${SEOUL_API}`,
-    })
+    expect(await listedIds(anonymous, 'page=0&size=50')).toContain(fixture.plannerId)
   } finally {
     await anonymous?.dispose()
     await dropFixture(fixture)

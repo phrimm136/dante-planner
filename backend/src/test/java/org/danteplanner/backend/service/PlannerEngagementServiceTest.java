@@ -94,7 +94,7 @@ class PlannerEngagementServiceTest {
         engagementService = new PlannerEngagementService(
                 plannerVoteRepository,
                 new PlannerStatsService(statsRepository),
-                new PlannerCatalogService(catalogRepository, null, null, null, null, null, null, null,
+                new PlannerCatalogService(catalogRepository, null, null, null, null, null, null,
                         RECOMMENDED_THRESHOLD),
                 new DomainEventRecorder(domainEventRepository, new ObjectMapper(), event -> { }),
                 accessGuard,

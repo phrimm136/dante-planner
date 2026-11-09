@@ -44,8 +44,6 @@ given my model" — worth what the model is worth.
 "Two concurrent rotations converge on one successor" holds because Redis runs the script atomically.
 A double has no atomicity, so the property passes and the race ships.
 
-`readpath/PrimaryReCheckTest` holds one mock, and that one stands in for Redis.
-
 ---
 
 ## 4. Strict stubs, and what un-asserts them
@@ -63,7 +61,7 @@ weakening.
 
 ## 5. Which behavior lives after commit
 
-Publish notifications, SSE fan-out, the filter-index rebuild, the tombstone write, GTID capture.
+Publish notifications, SSE fan-out, the filter-index rebuild, the freshness marker raise, GTID capture.
 None of it is observable from a test that rolls back.
 
 ---
