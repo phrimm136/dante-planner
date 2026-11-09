@@ -1,7 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
+import { http, HttpResponse } from 'msw'
 
-import type { PublishedPlannerQueryResult } from '../hooks/usePublishedPlannerQuery'
+import { server } from '@/test-utils/mswServer'
+
+import type {
+  PublishedPlannerQueryResult,
+  PublishedPlannerQueryState,
+} from '../hooks/usePublishedPlannerQuery'
 
 const lazyState = vi.hoisted(() => {
   const state = {
@@ -29,6 +35,10 @@ const publishedPlanner = vi.hoisted(
     }) as unknown as PublishedPlannerQueryResult,
 )
 
+const queryState = vi.hoisted(() => ({
+  current: publishedPlanner as PublishedPlannerQueryState,
+}))
+
 const routerLocation = vi.hoisted(() => ({ hash: '' }))
 
 vi.mock('@tanstack/react-router', () => ({
@@ -51,7 +61,7 @@ vi.mock('react-i18next', async (importOriginal) => {
 
 vi.mock('../hooks/usePublishedPlannerQuery', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../hooks/usePublishedPlannerQuery')>()
-  return { ...actual, usePublishedPlannerQuery: () => publishedPlanner }
+  return { ...actual, usePublishedPlannerQuery: () => queryState.current }
 })
 
 vi.mock('../hooks/useMDGesellschaftFilters', () => ({
@@ -146,7 +156,17 @@ async function renderPage() {
   await screen.findByTestId('planner-viewer')
 }
 
+let viewPosts: string[] = []
+
 beforeEach(() => {
+  viewPosts = []
+  server.use(
+    http.post('http://localhost:8080/api/planner/md/published/:id/viewcount', ({ params }) => {
+      viewPosts.push(String(params.id))
+      return new HttpResponse(null, { status: 204 })
+    }),
+  )
+  queryState.current = publishedPlanner
   vi.resetModules()
   lazyState.reset()
   mockLazySections()
@@ -212,5 +232,26 @@ describe('PlannerMDGesellschaftDetailPage comment deep link', () => {
     expect(screen.queryByTestId('comment-section-placeholder')).toBeNull()
     expect(screen.getByTestId('planner-list-placeholder')).toBeDefined()
     expect(lazyState.loaded.list).toBe(false)
+  })
+})
+
+describe('PlannerMDGesellschaftDetailPage view recording', () => {
+  it('records one view for the mounted planner', async () => {
+    await renderPage()
+
+    await waitFor(() => expect(viewPosts).toEqual(['published-planner-1']))
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(viewPosts).toEqual(['published-planner-1'])
+  })
+
+  it('records no view when the planner is removed', async () => {
+    queryState.current = { removed: true }
+    const { default: PlannerMDGesellschaftDetailPage } =
+      await import('../PlannerMDGesellschaftDetailPage')
+    render(<PlannerMDGesellschaftDetailPage />)
+
+    expect(await screen.findByText('sync.removedOnAnotherDevice')).toBeDefined()
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(viewPosts).toEqual([])
   })
 })

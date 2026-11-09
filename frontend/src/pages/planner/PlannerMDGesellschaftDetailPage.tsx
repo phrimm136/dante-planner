@@ -14,6 +14,7 @@ import { PlannerViewerSkeleton } from './components/plannerSkeletons'
 import { PLANNER_GEOMETRY } from '@/shared/cardLayout'
 import { CommunityPlansErrorFallback } from '@/components/feedback/CommunityPlansErrorFallback'
 import { usePublishedPlannerQuery, isPlannerRemoved } from './hooks/usePublishedPlannerQuery'
+import { useRecordPlannerView } from './hooks/useRecordPlannerView'
 import { isMDPlanner } from './types/PlannerTypes'
 import { useAuthQuery } from '@/shared/auth'
 import { useUserSettingsQuery } from '@/shared/userSettings'
@@ -63,6 +64,7 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
   })
 
   const queryState = usePublishedPlannerQuery(plannerId)
+  useRecordPlannerView(isPlannerRemoved(queryState) ? null : plannerId)
 
   const { data: user } = useAuthQuery()
   const isAuthenticated = user !== null
