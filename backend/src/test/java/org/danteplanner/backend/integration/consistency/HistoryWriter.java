@@ -14,6 +14,7 @@ import tools.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
 import org.danteplanner.consistency.Applied;
 import org.danteplanner.consistency.Changed;
+import org.danteplanner.consistency.Deactivate;
 import org.danteplanner.consistency.Delete;
 import org.danteplanner.consistency.DeleteResult;
 import org.danteplanner.consistency.Deleted;
@@ -24,12 +25,16 @@ import org.danteplanner.consistency.NotFound;
 import org.danteplanner.consistency.Operation;
 import org.danteplanner.consistency.PublicRead;
 import org.danteplanner.consistency.Publish;
+import org.danteplanner.consistency.Reactivate;
 import org.danteplanner.consistency.Read;
 import org.danteplanner.consistency.ReadFailed;
 import org.danteplanner.consistency.ReadResult;
 import org.danteplanner.consistency.Rejected;
 import org.danteplanner.consistency.Save;
 import org.danteplanner.consistency.SaveResult;
+import org.danteplanner.consistency.Shown;
+import org.danteplanner.consistency.ThreadRead;
+import org.danteplanner.consistency.ThreadResult;
 import org.danteplanner.consistency.Unknown;
 import org.danteplanner.consistency.Unpublish;
 import org.danteplanner.consistency.VisibilityResult;
@@ -78,6 +83,15 @@ public final class HistoryWriter {
             case PublicRead read -> readResult(
                     keyed(read.session(), "public-read", read.key(), read.invokedAt(), read.completedAt()),
                     read.result());
+            case ThreadRead read -> threadResult(
+                    keyed(read.session(), "thread-read", read.key(), read.invokedAt(), read.completedAt()),
+                    read.result());
+            case Deactivate deactivate -> visibilityResult(
+                    timed(deactivate.session(), "deactivate", deactivate.invokedAt(), deactivate.completedAt()),
+                    deactivate.result());
+            case Reactivate reactivate -> inProcessResult(
+                    timed(reactivate.session(), "reactivate", reactivate.invokedAt(), reactivate.completedAt()),
+                    reactivate.result());
         };
     }
 
@@ -115,8 +129,31 @@ public final class HistoryWriter {
         };
     }
 
+    private static ObjectNode inProcessResult(ObjectNode line, VisibilityResult result) {
+        return switch (result) {
+            case Changed changed -> line.put("outcome", OK);
+            case Rejected rejected -> throw new IllegalArgumentException("an in-process change is never rejected");
+            case Unknown unknown -> line.put("outcome", UNKNOWN);
+        };
+    }
+
+    private static ObjectNode threadResult(ObjectNode line, ThreadResult result) {
+        return switch (result) {
+            case Shown shown -> outcome(line, OK, HttpStatus.OK.value());
+            case NotFound notFound -> outcome(line, OK, HttpStatus.NOT_FOUND.value());
+            case ReadFailed failed -> failed.status() == NO_RESPONSE
+                    ? line.put("outcome", UNKNOWN)
+                    : failed(line, failed.status(), READ_UNAVAILABLE_CODE);
+        };
+    }
+
     private static ObjectNode listResult(ObjectNode line, ListRead list) {
-        ArrayNode keys = outcome(line, OK, HttpStatus.OK.value()).putArray("keys");
+        line.put("list", switch (list.listing()) {
+            case OWNER -> "owner";
+            case CATALOG -> "catalog";
+        });
+        ArrayNode keys = outcome(line, OK, HttpStatus.OK.value()).put("page", list.page()).put("size", list.size())
+                .put("totalElements", list.totalElements()).putArray("keys");
         list.keys().forEach(keys::add);
         return line;
     }

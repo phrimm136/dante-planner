@@ -148,6 +148,39 @@ class ReadAfterPublishTest {
                 .containsExactly(violation(missed));
     }
 
+    @Test
+    void deactivation_WhenItOverlapsThePublishAndTheRead_Excuses() {
+        assertThat(violations(PUBLISHED, new Deactivate("s1", 21, 24, new Changed()), MISSED)).isEmpty();
+    }
+
+    @Test
+    void deactivation_WhenItCompletedBeforeThePublishBegan_DoesNotExcuse() {
+        assertThat(violations(new Deactivate("s1", 1, 5, new Changed()), PUBLISHED, MISSED))
+                .containsExactly(violation(MISSED));
+    }
+
+    @Test
+    void threadNotFound_WhenInvokedAfterThePublishResponse_IsAViolation() {
+        ThreadRead missed = new ThreadRead("anon", "p1", 25, 30, new NotFound());
+
+        assertThat(violations(PUBLISHED, missed))
+                .containsExactly(new Violation("read-after-publish", "anon", "p1", missed));
+    }
+
+    @Test
+    void thread_WhenShownFailedOrOverlappingThePublish_IsClean() {
+        assertThat(violations(PUBLISHED,
+                new ThreadRead("anon", "p1", 25, 30, new Shown()),
+                new ThreadRead("anon", "p1", 25, 30, new ReadFailed(503)),
+                new ThreadRead("anon", "p1", 20, 30, new NotFound()))).isEmpty();
+    }
+
+    @Test
+    void threadNotFound_WhenAnUnpublishMayHaveWithdrawnIt_IsClean() {
+        assertThat(violations(PUBLISHED, new Unpublish("s2", "p1", 26, 35, new Unknown()),
+                new ThreadRead("anon", "p1", 25, 30, new NotFound()))).isEmpty();
+    }
+
     private static Violation violation(PublicRead read) {
         return new Violation("read-after-publish", read.session(), read.key(), read);
     }

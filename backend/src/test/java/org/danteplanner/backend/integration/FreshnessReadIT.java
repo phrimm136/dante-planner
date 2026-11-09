@@ -296,6 +296,38 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
     }
 
     @Test
+    void commentThread_WhenTheReplicaLagsAnUnpublish_NeverShowsTheThread() throws Exception {
+        Cookie[] owner = session("freshness-thread-unpublish");
+        UUID plannerId = published(owner, "thread-unpublished-while-lagging");
+        replicationControl.awaitCaughtUp();
+        try {
+            replicationControl.stopReplica();
+            perform(post(PLANNERS + plannerId + "/unpublish").cookie(owner));
+
+            assertThat(status(get(PLANNERS_ROOT + plannerId + "/comments"))).isIn(NOT_FOUND, UNAVAILABLE);
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @Test
+    void commentThread_WhenTheReplicaLagsAPublish_NeverAnswers404() throws Exception {
+        Cookie[] owner = session("freshness-thread-publish");
+        UUID plannerId = draft(owner, "thread-published-while-lagging");
+        replicationControl.awaitCaughtUp();
+        try {
+            replicationControl.stopReplica();
+            perform(post(PLANNERS + plannerId + "/publish").cookie(owner));
+
+            assertThat(status(get(PLANNERS_ROOT + plannerId + "/comments"))).isIn(OK, UNAVAILABLE);
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @Test
     void publicList_WhenTheReplicaLagsAnUnpublish_OmitsThePlanner() throws Exception {
         Cookie[] owner = session("freshness-read-unpublish");
         UUID plannerId = published(owner, "unpublished-while-lagging");

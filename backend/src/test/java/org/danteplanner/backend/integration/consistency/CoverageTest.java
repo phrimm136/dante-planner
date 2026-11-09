@@ -19,7 +19,7 @@ class CoverageTest {
 
         assertThat(coverage.uncovered()).containsExactly("gate serves the replica");
         assertThat(coverage.summary()).isEqualTo("{gate pins the primary=2, gate serves the replica=0, "
-                + "oregon read fell back=2, oregon breaker opened=2}");
+                + "oregon read fell back=2, oregon breaker opened=2, marker wait applied=2, marker wait timed out=2}");
     }
 
     @Test
@@ -39,7 +39,26 @@ class CoverageTest {
         Coverage coverage = new Coverage(target -> 0.0);
 
         assertThat(coverage.uncovered()).containsExactly("gate pins the primary", "gate serves the replica",
-                "oregon read fell back", "oregon breaker opened");
+                "oregon read fell back", "oregon breaker opened", "marker wait applied", "marker wait timed out");
+    }
+
+    @Test
+    void coverage_WhenNoSeedMakesAMarkerWaitTimeOut_NamesItUncovered() throws Exception {
+        Map<CoverageTarget, Double> counters = new EnumMap<>(CoverageTarget.class);
+        Coverage coverage = new Coverage(target -> counters.getOrDefault(target, 0.0));
+
+        coverage.measure(() -> moveAllBut(counters, CoverageTarget.MARKER_WAIT_TIMED_OUT));
+
+        assertThat(coverage.uncovered()).containsExactly("marker wait timed out");
+    }
+
+    @Test
+    void markerWaitTargets_WhenRead_SelectTheSeoulReplicaWaitByOutcome() {
+        assertThat(CoverageTarget.MARKER_WAIT_APPLIED.tags())
+                .containsExactly("source", "seoul-replica", "outcome", "applied");
+        assertThat(CoverageTarget.MARKER_WAIT_TIMED_OUT.tags())
+                .containsExactly("source", "seoul-replica", "outcome", "timeout");
+        assertThat(CoverageTarget.MARKER_WAIT_APPLIED.meter()).isEqualTo("freshness.read.wait");
     }
 
     @Test

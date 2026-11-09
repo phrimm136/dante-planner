@@ -17,6 +17,7 @@ import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
 import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
+import org.danteplanner.consistency.ListRead;
 
 public final class HistoryRecorder implements Closeable {
 
@@ -49,8 +50,30 @@ public final class HistoryRecorder implements Closeable {
         return record(line(session, "read").put("key", key), exchange, HistoryRecorder::readOutcome);
     }
 
-    Optional<Response> list(String session, Exchange exchange) {
-        return record(line(session, "list"), exchange, HistoryRecorder::listOutcome);
+    Optional<Response> list(String session, ListRead.Listing listing, Exchange exchange) {
+        return record(line(session, "list").put("list", listName(listing)), exchange, HistoryRecorder::listOutcome);
+    }
+
+    Optional<Response> threadRead(String session, String key, Exchange exchange) {
+        return record(line(session, "thread-read").put("key", key), exchange, HistoryRecorder::threadOutcome);
+    }
+
+    Optional<Response> deactivate(String session, Exchange exchange) {
+        return record(line(session, "deactivate"), exchange,
+                (line, response) -> visibilityOutcome("deactivate", line, response));
+    }
+
+    void reactivate(String session, InProcessChange change) {
+        ObjectNode line = line(session, "reactivate");
+        long invokedAt = clock.getAsLong();
+        String outcome;
+        try {
+            change.run();
+            outcome = OK;
+        } catch (Exception e) {
+            outcome = UNKNOWN;
+        }
+        write(line.put("invokedAt", invokedAt).put("completedAt", clock.getAsLong()).put("outcome", outcome));
     }
 
     Optional<Response> publish(String session, String key, Exchange exchange) {
@@ -136,9 +159,28 @@ public final class HistoryRecorder implements Closeable {
         }
     }
 
+    private static void threadOutcome(ObjectNode line, Response response) {
+        if (response.status() == HttpStatus.OK.value() || response.status() == HttpStatus.NOT_FOUND.value()) {
+            outcome(line, OK, response);
+        } else if (HttpStatusCode.valueOf(response.status()).is5xxServerError()) {
+            serverError(line, response, READ_UNAVAILABLE_CODE);
+        } else {
+            outcome(line, FAIL, response);
+        }
+    }
+
+    private static String listName(ListRead.Listing listing) {
+        return switch (listing) {
+            case OWNER -> "owner";
+            case CATALOG -> "catalog";
+        };
+    }
+
     private static void listOutcome(ObjectNode line, Response response) {
         if (response.status() == HttpStatus.OK.value()) {
-            ArrayNode keys = outcome(line, OK, response).putArray("keys");
+            Response.PageFacts page = response.pageFacts();
+            ArrayNode keys = outcome(line, OK, response).put("page", page.number()).put("size", page.size())
+                    .put("totalElements", page.totalElements()).putArray("keys");
             response.plannerIds().forEach(keys::add);
         } else if (HttpStatusCode.valueOf(response.status()).is5xxServerError()) {
             serverError(line, response, READ_UNAVAILABLE_CODE);
@@ -196,5 +238,11 @@ public final class HistoryRecorder implements Closeable {
     interface Exchange {
 
         Response perform() throws Exception;
+    }
+
+    @FunctionalInterface
+    interface InProcessChange {
+
+        void run() throws Exception;
     }
 }
