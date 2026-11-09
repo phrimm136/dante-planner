@@ -19,9 +19,17 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: gradle
       - name: Restore file permissions
         run: chmod +x backend/gradlew
+      - name: Restore Gradle caches
+        id: gradle-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ github.workflow }}-${{ github.job }}-${{ hashFiles('backend/*.gradle.kts', 'backend/gradle/**') }}
+          restore-keys: gradle-${{ github.workflow }}-${{ github.job }}-
       - name: Submit the backend's resolved dependency graph
         uses: gradle/actions/dependency-submission@8da46b539cd8fe6ab27ca75128919a18d757604c  # v6.4.1
         env:
@@ -30,3 +38,11 @@ jobs:
           build-root-directory: backend
           cache-disabled: true
           dependency-graph: generate-and-submit
+      - name: Save Gradle caches
+        if: github.ref == 'refs/heads/main' && success() && steps.gradle-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ steps.gradle-cache.outputs.cache-primary-key }}
