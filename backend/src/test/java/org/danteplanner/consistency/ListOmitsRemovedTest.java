@@ -94,6 +94,35 @@ class ListOmitsRemovedTest {
         assertThat(violations(ListRead.Listing.OWNER, DELETED, catalog(25, 30, "p1"))).isEmpty();
     }
 
+    @Test
+    void catalog_WhenTheUnpublishWasRejected_IsClean() {
+        assertThat(violations(ListRead.Listing.CATALOG, new Unpublish("s1", "p1", 10, 20, new Rejected(403)),
+                catalog(25, 30, "p1"))).isEmpty();
+    }
+
+    @Test
+    void catalog_WhenItStartsAtTheUnpublishCompletion_IsNotJudged() {
+        assertThat(violations(ListRead.Listing.CATALOG, UNPUBLISHED, catalog(20, 30, "p1"))).isEmpty();
+    }
+
+    @Test
+    void catalog_WhenTheLaterPublishIsOfAnotherPlannerOrRejected_DoesNotExcuse() {
+        ListRead list = catalog(25, 30, "p1");
+
+        assertThat(violations(ListRead.Listing.CATALOG, UNPUBLISHED, new Publish("s2", "p2", 22, 24, new Changed()),
+                new Publish("s2", "p1", 22, 24, new Rejected(400)), list))
+                .containsExactly(new Violation("catalog-after-withdrawal", "anon", "p1", list));
+    }
+
+    @Test
+    void catalog_WhenTheRepublishBeginsAtTheReadCompletion_DoesNotExcuse() {
+        ListRead list = catalog(25, 30, "p1");
+
+        assertThat(violations(ListRead.Listing.CATALOG, UNPUBLISHED, list,
+                new Publish("s2", "p1", 30, 35, new Changed())))
+                .containsExactly(new Violation("catalog-after-withdrawal", "anon", "p1", list));
+    }
+
     private static ListRead owner(long invokedAt, long completedAt, String... keys) {
         return new ListRead("viewer", ListRead.Listing.OWNER, invokedAt, completedAt, 0, 20, keys.length,
                 List.of(keys));

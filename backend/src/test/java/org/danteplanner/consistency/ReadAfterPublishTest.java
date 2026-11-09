@@ -181,6 +181,24 @@ class ReadAfterPublishTest {
                 new ThreadRead("anon", "p1", 25, 30, new NotFound()))).isEmpty();
     }
 
+    @Test
+    void deactivation_WhenRejected_DoesNotExcuse() {
+        assertThat(violations(PUBLISHED, new Deactivate("s1", 21, 24, new Rejected(403)), MISSED))
+                .containsExactly(violation(MISSED));
+    }
+
+    @Test
+    void deactivation_WhenItCompletesAsThePublishBegins_DoesNotExcuse() {
+        assertThat(violations(new Deactivate("s1", 5, 10, new Changed()), PUBLISHED, MISSED))
+                .containsExactly(violation(MISSED));
+    }
+
+    @Test
+    void deactivation_WhenItBeginsAtTheReadCompletion_DoesNotExcuse() {
+        assertThat(violations(PUBLISHED, MISSED, new Deactivate("s1", 30, 35, new Changed())))
+                .containsExactly(violation(MISSED));
+    }
+
     private static Violation violation(PublicRead read) {
         return new Violation("read-after-publish", read.session(), read.key(), read);
     }

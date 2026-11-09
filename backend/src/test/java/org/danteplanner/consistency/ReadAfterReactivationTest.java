@@ -102,6 +102,92 @@ class ReadAfterReactivationTest {
                 .isEmpty();
     }
 
+    @Test
+    void read_WhenTheOnlyEarlierDeactivationWasRejected_IsNotJudged() {
+        assertThat(violations(PUBLISHED, new Deactivate("s1", 30, 40, new Rejected(403)), REACTIVATED, MISSED))
+                .isEmpty();
+    }
+
+    @Test
+    void read_WhenTheDeactivationCompletesAsTheReactivationBegins_IsAViolation() {
+        assertThat(violations(PUBLISHED, new Deactivate("s1", 30, 50, new Changed()), REACTIVATED, MISSED))
+                .containsExactly(violation(MISSED));
+    }
+
+    @Test
+    void read_WhenTheOnlyDeactivationBeginsAfterTheRead_IsNotJudged() {
+        assertThat(violations(PUBLISHED, REACTIVATED, MISSED, new Deactivate("s1", 80, 90, new Changed())))
+                .isEmpty();
+    }
+
+    @Test
+    void read_WhenALaterDeactivationWasRejected_IsAViolation() {
+        assertThat(violations(PUBLISHED, DEACTIVATED, REACTIVATED, new Deactivate("s1", 62, 68, new Rejected(403)),
+                MISSED)).containsExactly(violation(MISSED));
+    }
+
+    @Test
+    void read_WhenAnotherDeactivationCompletesAsTheReactivationBegins_IsAViolation() {
+        assertThat(violations(PUBLISHED, DEACTIVATED, new Deactivate("s1", 45, 50, new Changed()), REACTIVATED,
+                MISSED)).containsExactly(violation(MISSED));
+    }
+
+    @Test
+    void read_WhenALaterDeactivationBeginsAtTheReadCompletion_IsAViolation() {
+        assertThat(violations(PUBLISHED, DEACTIVATED, REACTIVATED, MISSED,
+                new Deactivate("s1", 70, 80, new Changed()))).containsExactly(violation(MISSED));
+    }
+
+    @Test
+    void read_WhenThePublishWasRejected_IsNotJudged() {
+        assertThat(violations(new Publish("s1", "p1", 10, 20, new Rejected(400)), DEACTIVATED, REACTIVATED,
+                MISSED)).isEmpty();
+    }
+
+    @Test
+    void read_WhenThePublishCompletesAsTheReactivationBegins_IsNotJudged() {
+        assertThat(violations(new Publish("s1", "p1", 10, 50, new Changed()), DEACTIVATED, REACTIVATED, MISSED))
+                .isEmpty();
+    }
+
+    @Test
+    void read_WhenTheOnlyUnpublishIsOfAnotherPlannerOrRejected_IsAViolation() {
+        assertThat(violations(PUBLISHED, DEACTIVATED, REACTIVATED, new Unpublish("s2", "p2", 62, 65, new Changed()),
+                new Unpublish("s2", "p1", 62, 65, new Rejected(403)), MISSED))
+                .containsExactly(violation(MISSED));
+    }
+
+    @Test
+    void read_WhenTheUnpublishCompletedAsThePublishBeganOrBeganAtTheReadCompletion_IsAViolation() {
+        assertThat(violations(new Unpublish("s2", "p1", 5, 10, new Changed()), PUBLISHED, DEACTIVATED, REACTIVATED,
+                MISSED, new Unpublish("s2", "p1", 70, 75, new Changed()))).containsExactly(violation(MISSED));
+    }
+
+    @Test
+    void read_WhenTheUnpublishCompletedBeforeThePublishBegan_IsAViolation() {
+        assertThat(violations(new Unpublish("s2", "p1", 1, 5, new Changed()), PUBLISHED, DEACTIVATED, REACTIVATED,
+                MISSED)).containsExactly(violation(MISSED));
+    }
+
+    @Test
+    void read_WhenTheOnlyDeleteIsOfAnotherPlannerOrRejected_IsAViolation() {
+        assertThat(violations(PUBLISHED, DEACTIVATED, REACTIVATED, new Delete("s2", "p2", 62, 65, new Deleted()),
+                new Delete("s2", "p1", 62, 65, new Rejected(404)), MISSED))
+                .containsExactly(violation(MISSED));
+    }
+
+    @Test
+    void read_WhenTheDeleteCompletedAsThePublishBeganOrBeganAtTheReadCompletion_IsAViolation() {
+        assertThat(violations(new Delete("s2", "p1", 5, 10, new Deleted()), PUBLISHED, DEACTIVATED, REACTIVATED,
+                MISSED, new Delete("s2", "p1", 70, 75, new Deleted()))).containsExactly(violation(MISSED));
+    }
+
+    @Test
+    void read_WhenTheDeleteCompletedBeforeThePublishBegan_IsAViolation() {
+        assertThat(violations(new Delete("s2", "p1", 1, 5, new Deleted()), PUBLISHED, DEACTIVATED, REACTIVATED,
+                MISSED)).containsExactly(violation(MISSED));
+    }
+
     private static Violation violation(PublicRead read) {
         return new Violation("read-after-reactivation", read.session(), read.key(), read);
     }
