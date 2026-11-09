@@ -414,7 +414,7 @@ class CommentServiceLayerTest {
                     .thenReturn(Collections.emptyList());
 
             // Act
-            List<CommentTreeNode> comments = queryService.getCommentTree(plannerId, testUser.getId());
+            List<CommentTreeNode> comments = queryService.getCommentTree(plannerId, testUser.getId()).value();
 
             // Assert
             assertThat(comments).isEmpty();
@@ -443,7 +443,7 @@ class CommentServiceLayerTest {
                     .thenReturn(List.of(byActive, byDeactivated));
             users.add(deactivated);
 
-            List<CommentTreeNode> comments = queryService.getCommentTree(plannerId, testUser.getId());
+            List<CommentTreeNode> comments = queryService.getCommentTree(plannerId, testUser.getId()).value();
 
             CommentTreeNode active = comments.stream()
                     .filter(c -> c.id().equals(byActive.getPublicId())).findFirst().orElseThrow();

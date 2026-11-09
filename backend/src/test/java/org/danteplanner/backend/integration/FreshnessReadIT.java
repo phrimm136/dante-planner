@@ -54,7 +54,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @Import(TestConfig.class)
 class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
 
-    private static final String PLANNERS = "/api/planner/md/";
+    private static final String PLANNERS_ROOT = "/api/planner/";
+    private static final String PLANNERS = PLANNERS_ROOT + "md/";
     private static final String PUBLISHED = PLANNERS + "published/";
     private static final String CATALOG_PAGE = PLANNERS + "published?size=100";
     private static final String OWNER_LIST_PAGE = "/api/planner/md?size=100";
@@ -247,6 +248,42 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();
         }
+    }
+
+    @Test
+    void commentThread_WhenTheReplicaLagsAnAuthorReactivation_NeverAnswers404() throws Exception {
+        User author = TestDataFactory.createTestUser(userRepository, "freshness-thread-reactivate-" + UUID.randomUUID()
+                + "@example.com");
+        Cookie[] owner = sessionOf(author);
+        UUID plannerId = published(owner, "thread-reactivated");
+        perform(delete("/api/user/me").cookie(owner));
+        replicationControl.awaitCaughtUp();
+        try {
+            replicationControl.stopReplica();
+            reactivateInARequestWindow(author.getId());
+            assertThat(replicaJdbcTemplate.queryForObject(
+                    "SELECT deleted_at IS NOT NULL FROM users WHERE id = ?", Boolean.class, author.getId())).isTrue();
+
+            assertThat(status(get(PLANNERS_ROOT + plannerId + "/comments"))).isIn(OK, UNAVAILABLE);
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @Test
+    void commentThread_WhenHiddenOrAbsent_AnswersTheSameNotFoundBody() throws Exception {
+        Cookie[] owner = session("freshness-thread-hidden");
+        UUID plannerId = published(owner, "thread-hidden-then-absent");
+        perform(post(PLANNERS + plannerId + "/unpublish").cookie(owner));
+        MvcResult hidden = mockMvc.perform(get(PLANNERS_ROOT + plannerId + "/comments")).andReturn();
+
+        perform(delete(PLANNERS + plannerId).cookie(owner));
+        MvcResult absent = mockMvc.perform(get(PLANNERS_ROOT + plannerId + "/comments")).andReturn();
+
+        assertThat(hidden.getResponse().getStatus()).isEqualTo(NOT_FOUND);
+        assertThat(absent.getResponse().getStatus()).isEqualTo(NOT_FOUND);
+        assertThat(hidden.getResponse().getContentAsByteArray()).isEqualTo(absent.getResponse().getContentAsByteArray());
     }
 
     @Test

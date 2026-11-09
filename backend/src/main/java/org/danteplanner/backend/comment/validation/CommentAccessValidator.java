@@ -17,7 +17,7 @@ public class CommentAccessValidator {
             return;
         }
         if (!planner.published() || planner.ownerDeactivated()) {
-            throw new PlannerNotFoundException(new PlannerMiss.Absent(planner.id()));
+            throw new PlannerNotFoundException(new PlannerMiss.Hidden(planner.id(), planner.ownerId()));
         }
     }
 
