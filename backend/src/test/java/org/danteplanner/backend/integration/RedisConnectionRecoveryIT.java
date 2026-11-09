@@ -5,6 +5,7 @@ import eu.rekawek.toxiproxy.ToxiproxyClient;
 import eu.rekawek.toxiproxy.model.Toxic;
 import eu.rekawek.toxiproxy.model.ToxicDirection;
 import java.util.Arrays;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
@@ -36,6 +37,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -216,6 +218,10 @@ class RedisConnectionRecoveryIT {
     @Autowired
     private RedisMessageListenerContainer sseRedisMessageListenerContainer;
 
+    @Autowired
+    @Qualifier("readSourceBreakerRegistry")
+    private CircuitBreakerRegistry readSourceBreakerRegistry;
+
     @DynamicPropertySource
     static void harnessProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", PRIMARY::getJdbcUrl);
@@ -264,6 +270,7 @@ class RedisConnectionRecoveryIT {
         SSE_LOCAL_REDIS_PROXY.enable();
         Hang.until(() -> Arrays.stream(RedisRole.values()).allMatch(roleHealth::isAvailable),
                 "the probe closing every role breaker once the routes are restored");
+        MarkerSourceBreakers.awaitClosed(readSourceBreakerRegistry);
     }
 
     @Test
