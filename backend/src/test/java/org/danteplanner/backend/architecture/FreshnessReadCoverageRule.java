@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.danteplanner.backend.shared.freshness.FreshnessExempt;
 import org.danteplanner.backend.shared.freshness.FreshnessPending;
+import org.danteplanner.backend.shared.freshness.FreshnessReadGuard;
 import org.danteplanner.backend.shared.freshness.ScopedRead;
 
 import com.tngtech.archunit.base.DescribedPredicate;
@@ -26,16 +27,25 @@ final class FreshnessReadCoverageRule {
     private static final String INNER = "propagation = MANDATORY";
     private static final String PENDING = "@FreshnessPending";
     private static final String EXEMPT = "@FreshnessExempt";
+    private static final String FRESHNESS_PACKAGE = FreshnessReadGuard.class.getPackageName();
 
     static final ArchRule READ_ONLY_METHODS_DECLARE_EXACTLY_ONE_FRESHNESS_READ =
             methods()
-                    .that(areReadOnlyTransactionalOrReturnScopedRead())
+                    .that(areAdvisable().and(areReadOnlyTransactionalOrReturnScopedRead()))
                     .should(declareExactlyOneFreshnessRead())
                     .as("every @Transactional(readOnly = true) method declares exactly one of " + SCOPED + ", "
                             + INNER + ", " + PENDING + "(reason) or " + EXEMPT + "(reason), with a non-blank reason")
                     .allowEmptyShould(true);
 
     private FreshnessReadCoverageRule() {
+    }
+
+    private static DescribedPredicate<JavaMethod> areAdvisable() {
+        return DescribedPredicate.describe("are public instance methods of classes outside " + FRESHNESS_PACKAGE,
+                method -> method.getModifiers().contains(JavaModifier.PUBLIC)
+                        && !method.getModifiers().contains(JavaModifier.STATIC)
+                        && !method.getOwner().isInterface()
+                        && !method.getOwner().getPackageName().equals(FRESHNESS_PACKAGE));
     }
 
     private static DescribedPredicate<JavaMethod> areReadOnlyTransactionalOrReturnScopedRead() {
@@ -59,8 +69,7 @@ final class FreshnessReadCoverageRule {
         if (method.isAnnotatedWith(Transactional.class)) {
             return method.getAnnotationOfType(Transactional.class);
         }
-        if (method.getModifiers().contains(JavaModifier.PUBLIC) && !method.getModifiers().contains(JavaModifier.STATIC)
-                && method.getOwner().isAnnotatedWith(Transactional.class)) {
+        if (method.getOwner().isAnnotatedWith(Transactional.class)) {
             return method.getOwner().getAnnotationOfType(Transactional.class);
         }
         return null;
