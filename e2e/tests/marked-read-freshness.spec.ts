@@ -12,8 +12,9 @@ import { edgeContext } from '../src/edge'
 // answer is decided against the freshness markers its write raised, so a just-written planner is read
 // from the primary and a stale replica hit cannot resurrect a deleted one.
 //
-// Writes go to Oregon here precisely so no ryw_gtid exists: Oregon registers no gate, so the reader
-// against Seoul has nothing to present and the markers are the only thing that can answer.
+// The readers are contexts of their own, so the ryw_gtid the write minted stays with the
+// writer: the reader against Seoul has nothing to present and the markers are the only thing
+// that can answer.
 
 test.describe.configure({ mode: 'default' })
 
