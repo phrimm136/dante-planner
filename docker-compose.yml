@@ -58,12 +58,6 @@ services:
       timeout: 5s
       retries: 5
       start_period: 60s
-    logging:
-      driver: awslogs
-      options:
-        awslogs-region: us-west-2
-        awslogs-group: /ecs/danteplanner/backend
-        awslogs-create-group: "true"
 
   nginx:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/danteplanner-nginx:${IMAGE_TAG}
@@ -94,12 +88,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
-    logging:
-      driver: awslogs
-      options:
-        awslogs-region: us-west-2
-        awslogs-group: /ecs/danteplanner/nginx
-        awslogs-create-group: "true"
 
   # Durable auth store (034 mechanics section 1): AOF everysec + RDB preamble,
   # noeviction. Also serves the single-region sse-local subscribe target.
@@ -139,12 +127,6 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
-    logging:
-      driver: awslogs
-      options:
-        awslogs-region: us-west-2
-        awslogs-group: /ecs/danteplanner/redis-auth
-        awslogs-create-group: "true"
 
   redis-ratelimit:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/danteplanner-redis:${IMAGE_TAG}
@@ -168,12 +150,6 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
-    logging:
-      driver: awslogs
-      options:
-        awslogs-region: us-west-2
-        awslogs-group: /ecs/danteplanner/redis-ratelimit
-        awslogs-create-group: "true"
 
 # Not mounted by any service — retained as the only copy of the pre-RDS prod
 # data (the rollback source). Do NOT `docker compose down -v` or prune it; see
