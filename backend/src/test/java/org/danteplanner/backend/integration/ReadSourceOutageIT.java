@@ -122,7 +122,8 @@ class ReadSourceOutageIT extends ReplicaRoutingHarnessSupport {
     }
 
     @Test
-    void oregonOwnerRead_WhenPrimaryCutAndReplicaStillHoldsTheDeletedPlanner_Returns404() throws Exception {
+    void oregonOwnerRead_WhenPrimaryCutAndReplicaStillHoldsTheDeletedPlanner_ReturnsReadUnavailable()
+            throws Exception {
         Session session = newSession("read-source-deleted-");
         UUID plannerId = UUID.randomUUID();
 
@@ -141,7 +142,7 @@ class ReadSourceOutageIT extends ReplicaRoutingHarnessSupport {
                     get(plannerPath(plannerId)).cookie(session.auth(), session.device()));
 
             assertThat(observed(read)).as("Oregon read of a deleted planner during the primary cut")
-                    .startsWith("404 ");
+                    .isEqualTo(unavailable(READ_UNAVAILABLE));
         } finally {
             restoreOregonPrimary();
             resumeReplication();
