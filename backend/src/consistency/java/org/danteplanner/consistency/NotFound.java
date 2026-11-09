@@ -1,4 +1,4 @@
 package org.danteplanner.consistency;
 
-public record NotFound() implements ReadResult {
+public record NotFound() implements ReadResult, ThreadResult {
 }

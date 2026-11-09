@@ -93,13 +93,25 @@ class ConsistencyCheckerTest {
     }
 
     @Test
-    void listRead_WhenItOmitsASavedPlanner_IsNotJudged() {
+    void listRead_WhenAPartialPageOmitsASavedPlanner_IsNotJudged() {
         Verdict verdict = ConsistencyChecker.check(History.of(List.of(
                 new Save("s1", "p1", 10, 20, new Applied(1)),
-                new ListRead("s1", 30, 40, List.of()))));
+                new ListRead("s1", ListRead.Listing.OWNER, 30, 40, 0, 1, 2, List.of("p2")))));
 
         assertThat(verdict.violations()).isEmpty();
         assertThat(verdict.anomalies()).isEmpty();
+    }
+
+    @Test
+    void listRead_WhenTheWholeOwnerListOmitsASavedPlanner_IsAnOwnerListViolation() {
+        ListRead list = new ListRead("viewer", ListRead.Listing.OWNER, 30, 40, 0, 20, 0, List.of());
+
+        Verdict verdict = ConsistencyChecker.check(History.of(List.of(
+                new Save("s1", "p1", 10, 20, new Applied(1)),
+                list)));
+
+        assertThat(verdict.violations())
+                .containsExactly(new Violation("owner-list-after-create", "viewer", "p1", list));
     }
 
     @Test

@@ -73,6 +73,11 @@ final class HistoryLine {
                     new Unpublish(session, text("key"), invokedAt, completedAt, visibilityResult(kind, outcome)));
             case "public-read" ->
                     Optional.of(new PublicRead(session, text("key"), invokedAt, completedAt, readResult(outcome)));
+            case "thread-read" ->
+                    Optional.of(new ThreadRead(session, text("key"), invokedAt, completedAt, threadResult(outcome)));
+            case "deactivate" ->
+                    Optional.of(new Deactivate(session, invokedAt, completedAt, visibilityResult(kind, outcome)));
+            case "reactivate" -> Optional.of(new Reactivate(session, invokedAt, completedAt, inProcessResult(outcome)));
             default -> throw failure("unknown kind " + kind);
         };
     }
@@ -128,6 +133,28 @@ final class HistoryLine {
         };
     }
 
+    private VisibilityResult inProcessResult(String outcome) {
+        if (node.has("status")) {
+            throw failure("an in-process change carries no status");
+        }
+        return switch (outcome) {
+            case "ok" -> new Changed();
+            case "unknown" -> new Unknown();
+            default -> throw unknownOutcome(outcome);
+        };
+    }
+
+    private ThreadResult threadResult(String outcome) {
+        if ("ok".equals(outcome) && status() == OK) {
+            return new Shown();
+        }
+        return switch (readResult(outcome)) {
+            case Found found -> throw failure("a thread read carries no syncVersion");
+            case NotFound notFound -> notFound;
+            case ReadFailed failed -> failed;
+        };
+    }
+
     private ReadResult readResult(String outcome) {
         return switch (outcome) {
             case "ok" -> {
@@ -160,7 +187,8 @@ final class HistoryLine {
 
     private Optional<Operation> listRead(String session, long invokedAt, long completedAt, String outcome) {
         return switch (outcome) {
-            case "ok" -> Optional.of(new ListRead(session, invokedAt, completedAt, keys()));
+            case "ok" -> Optional.of(new ListRead(session, listing(), invokedAt, completedAt, intField("page"),
+                    intField("size"), integral("totalElements"), keys()));
             case "fail" -> {
                 if (node.path("status").asInt(0) == SERVICE_UNAVAILABLE) {
                     requireUnavailableCode(READ_UNAVAILABLE_CODE);
@@ -222,6 +250,22 @@ final class HistoryLine {
             throw failure("missing or non-long " + field);
         }
         return value.longValue();
+    }
+
+    private ListRead.Listing listing() {
+        return switch (text("list")) {
+            case "owner" -> ListRead.Listing.OWNER;
+            case "catalog" -> ListRead.Listing.CATALOG;
+            default -> throw failure("unknown list " + text("list"));
+        };
+    }
+
+    private int intField(String field) {
+        JsonNode value = node.path(field);
+        if (!value.isInt() || value.intValue() < 0) {
+            throw failure("missing or negative " + field);
+        }
+        return value.intValue();
     }
 
     private List<String> keys() {

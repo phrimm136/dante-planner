@@ -43,6 +43,18 @@ record Response(int status, String body) {
         return ids;
     }
 
+    PageFacts pageFacts() {
+        JsonNode page = json().path("page");
+        JsonNode number = page.path("number");
+        JsonNode size = page.path("size");
+        JsonNode total = page.path("totalElements");
+        if (!number.isInt() || !size.isInt() || !total.isIntegralNumber()) {
+            throw new IllegalStateException("no page number, size and totalElements in a " + status + " page body: "
+                    + body);
+        }
+        return new PageFacts(number.intValue(), size.intValue(), total.longValue());
+    }
+
     Map<String, Long> plannerVersions() {
         Map<String, Long> versions = new HashMap<>();
         for (JsonNode planner : content()) {
@@ -69,5 +81,8 @@ record Response(int status, String body) {
         } catch (JacksonException e) {
             throw new IllegalStateException("a " + status + " body is not JSON: " + body, e);
         }
+    }
+
+    record PageFacts(int number, int size, long totalElements) {
     }
 }

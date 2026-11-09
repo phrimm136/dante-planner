@@ -109,6 +109,28 @@ class ReadAfterUnpublishTest {
                 .containsExactly(violation(shown));
     }
 
+    @Test
+    void threadShown_WhenInvokedAfterTheUnpublishResponse_IsAViolation() {
+        ThreadRead shown = new ThreadRead("anon", "p1", 25, 30, new Shown());
+
+        assertThat(violations(UNPUBLISHED, shown))
+                .containsExactly(new Violation("read-after-unpublish", "anon", "p1", shown));
+    }
+
+    @Test
+    void thread_WhenNotFoundFailedOrOverlappingTheUnpublish_IsClean() {
+        assertThat(violations(UNPUBLISHED,
+                new ThreadRead("anon", "p1", 25, 30, new NotFound()),
+                new ThreadRead("anon", "p1", 25, 30, new ReadFailed(503)),
+                new ThreadRead("anon", "p1", 20, 30, new Shown()))).isEmpty();
+    }
+
+    @Test
+    void threadShown_WhenARepublishMayHavePrecededIt_IsClean() {
+        assertThat(violations(UNPUBLISHED, new Publish("s2", "p1", 22, 29, new Unknown()),
+                new ThreadRead("anon", "p1", 25, 30, new Shown()))).isEmpty();
+    }
+
     private static Violation violation(PublicRead read) {
         return new Violation("read-after-unpublish", read.session(), read.key(), read);
     }

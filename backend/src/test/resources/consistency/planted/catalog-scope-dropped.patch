@@ -1,0 +1,12 @@
+diff --git a/backend/src/main/java/org/danteplanner/backend/planner/service/PublishedPlannerQueryService.java b/backend/src/main/java/org/danteplanner/backend/planner/service/PublishedPlannerQueryService.java
+index 7714e4e0..581496ef 100644
+--- a/backend/src/main/java/org/danteplanner/backend/planner/service/PublishedPlannerQueryService.java
++++ b/backend/src/main/java/org/danteplanner/backend/planner/service/PublishedPlannerQueryService.java
+@@ -162,7 +162,6 @@ public class PublishedPlannerQueryService implements PublishedPlanners {
+                     : PublicPlannerResponse.fromCatalog(row, core, stats, upvotedIds.contains(id));
+         });
+         Set<FreshnessScope> scopes = new LinkedHashSet<>();
+-        scopes.add(new FreshnessScope.PublicCatalog());
+         coreInfoMap.values().forEach(core -> scopes.add(new FreshnessScope.Author(core.authorId())));
+         return new ScopedRead<>(page, scopes);
+     }

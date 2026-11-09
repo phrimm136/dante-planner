@@ -18,7 +18,7 @@ final class ReadAfterDelete implements Rule {
         return new Verdict(violations, List.of());
     }
 
-    private static boolean saveOutlivesADelete(String key, History history) {
+    static boolean saveOutlivesADelete(String key, History history) {
         return completedDeletes(key, history).stream()
                 .anyMatch(delete -> history.all(Save.class).stream()
                         .filter(save -> save.key().equals(key))

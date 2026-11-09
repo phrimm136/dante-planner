@@ -1634,3 +1634,32 @@ guards the parse but likewise skips the schema gate.
   touch them and no stop-the-world migration is planned; the runbook entry above then loses its
   "omits the workflow" clause.
   re-check: `test -f .github/workflows/window-schema-decomposition.yml`
+- The `planner_views` table has no writer left: the detail GET stopped recording views, and only
+  `PlannerAccountPurgeService` still deletes its rows. Dropping it in the same release would break
+  old pods, which keep inserting during a rolling deploy. Worth doing once the marker-reading
+  release is live in both regions: a migration drops the table, and the purge's delete and
+  `PlannerViewRepository` go with it.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent backend/src/main/resources/db/migration -i 'drop table[^;]*planner_views'`
+- Access tokens carry no `jti` (`JwtTokenService.generateAccessToken` sets only type and role),
+  so two tokens for the same user and role minted in the same second are byte-identical. Account
+  deletion blacklists the request's access token, so a re-login in that same second gets the
+  blacklisted token and a 401. `ConsistencyRunIT.reactivate` works around it with a `Hang.until`
+  that mints until the token differs. Worth doing the next time token issuance changes, or when a
+  user reports a 401 right after re-login: add a random `jti` to access tokens, then delete the
+  harness wait.
+  re-check: `rg -q 'Hang.until\(\(\) -> !minted' backend/src/test/java/org/danteplanner/backend/integration/ConsistencyRunIT.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/auth/token/JwtTokenService.java -U 'TYPE_ACCESS\);\n\s+claims.put\(CLAIM_JTI'`
+- Catalog search (`GET /api/planner/md/published?q=`) uses an ngram FULLTEXT match, which can miss
+  a committed planner while other writes run: a spike on mysql 8.4.11 missed a committed row in
+  4396 of 20000 searches while another session edited its title. So the consistency checker
+  judges catalog lists only for omission, never for "contains after publish". Worth doing when a
+  user reports a published planner missing from search, or when search moves off FULLTEXT: make
+  search consistent with committed rows, then add the catalog "contains" rule.
+  re-check: `rg -qF 'MATCH (?1) AGAINST (?2 IN BOOLEAN MODE)' backend/src/main/java/org/danteplanner/backend/shared/config/MySqlFunctionContributor.java`
+- The consistency run cannot catch a comment-thread read that drops its `Entity(planner)` scope:
+  the harness has one author, and in the stopped-replica phases that author's reactivation leaves
+  an `Author` marker the replica never applies, so the thread's remaining `Author` scope sends
+  every such read to the primary. A planted patch for it went uncaught in 20 seeds and was
+  removed; `FreshnessReadIT` covers the case deterministically instead. Worth doing when the
+  harness gains a second author for another reason: give that author planners that are published,
+  unpublished and thread-read in the stopped phases, then restore the planted patch.
+  re-check: `test ! -f backend/src/test/resources/consistency/planted/thread-scope-dropped.patch`

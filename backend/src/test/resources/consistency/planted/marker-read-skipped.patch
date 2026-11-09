@@ -1,0 +1,13 @@
+diff --git a/backend/src/main/java/org/danteplanner/backend/shared/freshness/FreshnessReadAspect.java b/backend/src/main/java/org/danteplanner/backend/shared/freshness/FreshnessReadAspect.java
+index 3624b333..bc75ede9 100644
+--- a/backend/src/main/java/org/danteplanner/backend/shared/freshness/FreshnessReadAspect.java
++++ b/backend/src/main/java/org/danteplanner/backend/shared/freshness/FreshnessReadAspect.java
+@@ -28,7 +28,7 @@ public class FreshnessReadAspect {
+             return joinPoint.proceed();
+         }
+         try {
+-            return guard.read(() -> (ScopedRead<?>) joinPoint.proceed());
++            return joinPoint.proceed();
+         } finally {
+             if (RequestContextHolder.getRequestAttributes() == null) {
+                 ReadSourceSelector.clearSkips();
