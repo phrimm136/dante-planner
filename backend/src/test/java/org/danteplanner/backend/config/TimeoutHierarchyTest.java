@@ -27,12 +27,6 @@ class TimeoutHierarchyTest {
     }
 
     @Test
-    void timeoutHierarchy_WhenPoolsCompared_BulkheadAcquireIsShorterThanMainPoolAcquire() {
-        assertThat(TimeoutHierarchy.BULKHEAD_ACQUIRE_TIMEOUT_MS)
-                .isLessThan(TimeoutHierarchy.POOL_ACQUIRE_TIMEOUT_MS);
-    }
-
-    @Test
     void timeoutHierarchy_WhenNested_PoolAcquireExpiresBeforeRequestBudget() {
         assertThat(TimeoutHierarchy.POOL_ACQUIRE_TIMEOUT_MS)
                 .isLessThan(TimeoutHierarchy.REQUEST_BUDGET_MS);
@@ -56,7 +50,6 @@ class TimeoutHierarchyTest {
         assertThat(TimeoutHierarchy.DB_LOCK_WAIT_SECONDS).isEqualTo(10);
         assertThat(TimeoutHierarchy.JDBC_SOCKET_TIMEOUT_MS).isEqualTo(15_000L);
         assertThat(TimeoutHierarchy.POOL_ACQUIRE_TIMEOUT_MS).isEqualTo(5_000L);
-        assertThat(TimeoutHierarchy.BULKHEAD_ACQUIRE_TIMEOUT_MS).isEqualTo(2_000L);
         assertThat(TimeoutHierarchy.REQUEST_BUDGET_MS).isEqualTo(30_000L);
         assertThat(TimeoutHierarchy.RATE_LIMIT_FUTURE_TIMEOUT_MS).isEqualTo(4_000L);
     }

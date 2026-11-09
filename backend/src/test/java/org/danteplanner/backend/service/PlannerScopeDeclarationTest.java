@@ -61,7 +61,6 @@ import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.support.OwnershipRows;
 import org.danteplanner.backend.support.FakeUsers;
-import org.danteplanner.backend.support.RecordingTombstoneStore;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.UpsertRequests;
 import org.danteplanner.backend.user.entity.User;
@@ -138,7 +137,7 @@ class PlannerScopeDeclarationTest {
     private PlannerCatalogService catalogService() {
         return new PlannerCatalogService(catalogRepository, plannerRepository, statsRepository,
                 entityFilterRepository, keywordFilterRepository, null, mapper,
-                new RecordingTombstoneStore(), RECOMMENDED_THRESHOLD);
+                RECOMMENDED_THRESHOLD);
     }
 
     private PlannerCommandService commandService(PlannerContentValidator contentValidator) {

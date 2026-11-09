@@ -15,10 +15,6 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.support.MockCalls;
-import org.danteplanner.backend.support.RecordingTombstoneStore;
-import org.danteplanner.backend.support.RecordingTombstoneStore.Clears;
-import org.danteplanner.backend.support.RecordingTombstoneStore.Write;
-import org.danteplanner.backend.support.RecordingTombstoneStore.Writes;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.junit.jupiter.api.AfterEach;
@@ -30,7 +26,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.nio.file.Path;
@@ -72,8 +67,6 @@ class PlannerCatalogServiceTest {
     @Mock
     private PlannerKeywordFilterRepository keywordFilterRepository;
 
-    private final RecordingTombstoneStore tombstoneStore = new RecordingTombstoneStore();
-
     private PlannerCatalogService catalogService;
 
     @BeforeEach
@@ -81,7 +74,7 @@ class PlannerCatalogServiceTest {
         TransactionSynchronizationManager.initSynchronization();
         catalogService = new PlannerCatalogService(catalogRepository, plannerRepository, statsRepository,
                 entityFilterRepository, keywordFilterRepository, new FloorRules(TestDataFactory.gameDataRegistry()),
-                new ObjectMapper(), tombstoneStore, THRESHOLD);
+                new ObjectMapper(), THRESHOLD);
     }
 
     @AfterEach
@@ -90,33 +83,27 @@ class PlannerCatalogServiceTest {
     }
 
     @Test
-    void onBecameVisible_WhenCommitted_AddsTheRowSyncsTheFiltersAndClearsTheMarker() {
+    void onBecameVisible_WhenCalled_AddsTheRowAndSyncsTheFilters() {
         Planner planner = loadedPlanner();
 
         catalogService.onBecameVisible(planner);
 
         verify(catalogRepository).insert(any(PlannerCatalog.class));
         verifySynced(planner.getId());
-        assertThat(tombstoneStore.calls()).isEmpty();
-        commit();
-        assertThat(tombstoneStore.calls()).containsExactly(new Clears("published-planner", List.of(planner.getId())));
     }
 
     @Test
-    void onBecameInvisible_WhenCommitted_RemovesTheRowClearsTheFiltersAndMarksIt() {
+    void onBecameInvisible_WhenCalled_RemovesTheRowAndClearsTheFilters() {
         UUID plannerId = UUID.randomUUID();
 
         catalogService.onBecameInvisible(plannerId);
 
         verify(catalogRepository).deleteByPlannerId(plannerId);
         verifyCleared(plannerId);
-        assertThat(tombstoneStore.calls()).isEmpty();
-        commit();
-        assertThat(tombstoneStore.calls()).containsExactly(new Write("published-planner", plannerId));
     }
 
     @Test
-    void accountDeactivated_WhenCommitted_WithdrawsClearsEachPlannersFiltersAndMarksThem() {
+    void accountDeactivated_WhenCalled_WithdrawsAndClearsEachPlannersFilters() {
         List<UUID> published = List.of(UUID.randomUUID(), UUID.randomUUID());
         when(plannerRepository.findPublishedIdsOwnedBy(OWNER_ID)).thenReturn(published);
 
@@ -124,13 +111,10 @@ class PlannerCatalogServiceTest {
 
         verify(catalogRepository).withdrawAllOwnedBy(OWNER_ID);
         published.forEach(this::verifyCleared);
-        assertThat(tombstoneStore.calls()).isEmpty();
-        commit();
-        assertThat(tombstoneStore.calls()).containsExactly(new Writes("published-planner", published));
     }
 
     @Test
-    void accountReactivated_WhenCommitted_RestoresRebuildsEachPlannerAndClearsTheirMarkers() {
+    void accountReactivated_WhenCalled_RestoresAndRebuildsEachPlanner() {
         List<UUID> published = List.of(UUID.randomUUID(), UUID.randomUUID());
         when(plannerRepository.findPublishedIdsOwnedBy(OWNER_ID)).thenReturn(published);
         published.forEach(id -> when(plannerRepository.existsPublishedById(id)).thenReturn(true));
@@ -139,9 +123,6 @@ class PlannerCatalogServiceTest {
 
         verify(catalogRepository).restoreAllOwnedBy(OWNER_ID, THRESHOLD);
         published.forEach(id -> verify(entityFilterRepository).rebuildPlannerFilters(id, 0));
-        assertThat(tombstoneStore.calls()).isEmpty();
-        commit();
-        assertThat(tombstoneStore.calls()).containsExactly(new Clears("published-planner", published));
     }
 
     @Test
@@ -346,10 +327,6 @@ class PlannerCatalogServiceTest {
             }
         };
         when(entityFilterRepository.floorScopeOf(plannerId)).thenReturn(Optional.of(scope));
-    }
-
-    private static void commit() {
-        TransactionSynchronizationManager.getSynchronizations().forEach(TransactionSynchronization::afterCommit);
     }
 
     private void verifySynced(UUID plannerId) {

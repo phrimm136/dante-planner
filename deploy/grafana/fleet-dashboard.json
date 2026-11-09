@@ -676,28 +676,6 @@
    ]
   },
   {
-   "id": 18,
-   "type": "timeseries",
-   "title": "Replica misses promoted to primary (read-consistency gate)",
-   "datasource": {
-    "type": "prometheus",
-    "uid": "${DS_PROM}"
-   },
-   "gridPos": {
-    "x": 8,
-    "y": 39,
-    "w": 8,
-    "h": 8
-   },
-   "targets": [
-    {
-     "refId": "A",
-     "expr": "sum(rate(replica_miss_promoted_total[5m])) by (cluster)",
-     "legendFormat": "{{cluster}}"
-    }
-   ]
-  },
-  {
    "id": 19,
    "type": "timeseries",
    "title": "GTID capture fallback share (read-your-writes cookie)",

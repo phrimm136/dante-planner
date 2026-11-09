@@ -23,11 +23,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -40,6 +38,8 @@ import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -77,9 +77,6 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private DataSource dataSource;
-
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
 
     @Autowired
     private PlatformTransactionManager transactionManager;
@@ -176,10 +173,6 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
                 .containsExactly(tuple("row absent", "row present"));
     }
 
-    private boolean withdrawalMarked(UUID plannerId) {
-        return Boolean.TRUE.equals(stringRedisTemplate.hasKey("del:published-planner:" + plannerId));
-    }
-
     @Test
     void commentTree_WhenOwnerDeactivated_Returns404PlannerNotFound() throws Exception {
         lifecycleService.deleteAccount(owner.getId());
@@ -197,42 +190,6 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
 
         mockMvc.perform(get("/api/planner/{id}/comments", planner.getId()))
                 .andExpect(status().isOk());
-    }
-
-    @Test
-    void deleteAccount_WhenCommitted_MarksEachPublishedPlannerWithdrawn() {
-        Planner draft = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
-
-        lifecycleService.deleteAccount(owner.getId());
-
-        assertThat(withdrawalMarked(planner.getId())).isTrue();
-        assertThat(withdrawalMarked(draft.getId())).isFalse();
-    }
-
-    @Test
-    void deleteAccount_WhenRolledBack_WritesNoWithdrawalMarker() {
-        TransactionTemplate transaction = new TransactionTemplate(transactionManager);
-
-        transaction.executeWithoutResult(status -> {
-            lifecycleService.deleteAccount(owner.getId());
-            status.setRollbackOnly();
-        });
-
-        assertThat(withdrawalMarked(planner.getId())).isFalse();
-    }
-
-    @Test
-    void deleteAccount_WhenOwnerHasNoPublishedPlanner_Succeeds() {
-        User empty = TestDataFactory.createTestUser(userRepository, "deactivated-owner-empty@example.com");
-        User draftsOnly = TestDataFactory.createTestUser(userRepository, "deactivated-owner-drafts@example.com");
-        Planner draft = TestDataFactory.createTestPlanner(plannerRepository, draftsOnly, false);
-
-        lifecycleService.deleteAccount(empty.getId());
-        lifecycleService.deleteAccount(draftsOnly.getId());
-        lifecycleService.reactivateAccount(empty.getId());
-        lifecycleService.reactivateAccount(draftsOnly.getId());
-
-        assertThat(withdrawalMarked(draft.getId())).isFalse();
     }
 
     @Test
@@ -275,23 +232,13 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
                 .satisfies(row -> assertThat(row.get("type")).as("each content row by its key").isEqualTo("eq_ref"));
     }
 
-    @Test
-    void reactivateAccount_WhenCommitted_ClearsTheWithdrawalMarkers() {
-        lifecycleService.deleteAccount(owner.getId());
-        assertThat(withdrawalMarked(planner.getId())).isTrue();
-
-        lifecycleService.reactivateAccount(owner.getId());
-
-        assertThat(withdrawalMarked(planner.getId())).isFalse();
-    }
-
     private boolean published(UUID plannerId) {
         return Boolean.TRUE.equals(new JdbcTemplate(dataSource).queryForObject(
                 "SELECT published FROM planner_publication WHERE planner_id = UUID_TO_BIN(?)",
                 Boolean.class, plannerId.toString()));
     }
 
-    private void assertRaceNeverLeavesAPublishedPlannerUnmarked(String holderLock, Object holderKey) throws Exception {
+    private void assertRaceNeverLeavesAPublishedPlannerVisible(String holderLock, Object holderKey) throws Exception {
         Planner draft = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
         subscriptionRepository.insert(new PlannerSubscription(owner.getId(), draft.getId()));
         CompletableFuture<Void> deactivation;
@@ -323,25 +270,27 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
         } catch (ExecutionException e) {
             publishFailure = e.getCause();
         }
-
-        if (published(draft.getId())) {
-            assertThat(withdrawalMarked(draft.getId()))
-                    .as("a planner published around its owner's deactivation must carry the withdrawal marker")
-                    .isTrue();
-        } else {
+        if (!published(draft.getId())) {
             assertThat(publishFailure).isInstanceOf(AccountDeletedException.class);
         }
+
+        mockMvc.perform(get("/api/planner/md/published").param("size", "100"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[*].id", not(hasItem(draft.getId().toString()))));
+        mockMvc.perform(get("/api/planner/md/published/{id}", draft.getId()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"));
     }
 
     @Test
-    void publish_WhenRacingDeactivationBeforeItsIdRead_NeverLeavesAPublishedPlannerUnmarked() throws Exception {
-        assertRaceNeverLeavesAPublishedPlannerUnmarked(
+    void publish_WhenRacingDeactivationBeforeItsIdRead_NeverLeavesAPublishedPlannerVisible() throws Exception {
+        assertRaceNeverLeavesAPublishedPlannerVisible(
                 "SELECT id FROM users WHERE id = ? FOR UPDATE", owner.getId());
     }
 
     @Test
-    void publish_WhenRacingDeactivationAfterItsIdRead_NeverLeavesAPublishedPlannerUnmarked() throws Exception {
-        assertRaceNeverLeavesAPublishedPlannerUnmarked(
+    void publish_WhenRacingDeactivationAfterItsIdRead_NeverLeavesAPublishedPlannerVisible() throws Exception {
+        assertRaceNeverLeavesAPublishedPlannerVisible(
                 "SELECT planner_id FROM planner_catalog WHERE planner_id = UUID_TO_BIN(?) FOR UPDATE",
                 planner.getId().toString());
     }

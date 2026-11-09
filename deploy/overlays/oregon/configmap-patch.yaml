@@ -8,7 +8,7 @@ data:
   REDIS_AUTH_HOST: redis-auth.danteplanner.svc.cluster.local
   REDIS_RATELIMIT_HOST: redis-ratelimit.danteplanner.svc.cluster.local
   # Auth read-local endpoint. Single-region Oregon: == REDIS_AUTH_HOST, so
-  # blacklist/tombstone reads and writes share the one auth store (no-op split).
+  # blacklist/freshness marker reads and writes share the one auth store (no-op split).
   # Seoul repoints this at the local replica. Must be set explicitly: the app's
   # ${AUTH_LOCAL_REDIS_HOST:${AUTH_REDIS_HOST:localhost}} default cannot see the
   # relaxed-bound REDIS_AUTH_HOST, so an unset value resolves to a dead localhost

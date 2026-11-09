@@ -4,7 +4,6 @@ import org.danteplanner.backend.support.AuthReads;
 import java.time.Duration;
 import java.util.Date;
 import java.util.Set;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,7 +24,6 @@ import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -76,9 +74,6 @@ class AuthLocalReadSplitIT {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
-    @Autowired
-    private ContentTombstoneStore contentTombstoneStore;
-
     private LettuceConnectionFactory authLocalFactory;
     private StringRedisTemplate authLocalTemplate;
 
@@ -92,11 +87,6 @@ class AuthLocalReadSplitIT {
         authLocalTemplate.afterPropertiesSet();
 
         tokenBlacklistService.clear();
-
-        Set<String> tombstoneKeys = stringRedisTemplate.keys("del:*");
-        if (tombstoneKeys != null && !tombstoneKeys.isEmpty()) {
-            stringRedisTemplate.delete(tombstoneKeys);
-        }
 
         Set<String> localKeys = authLocalTemplate.keys("*");
         if (localKeys != null && !localKeys.isEmpty()) {
@@ -167,28 +157,6 @@ class AuthLocalReadSplitIT {
     }
 
     @Test
-    void tombstoneRead_WhenAuthLocalStale_ReturnsFalseUntilCaughtUp() {
-        UUID id = UUID.randomUUID();
-
-        contentTombstoneStore.writeTombstone("planner", id);
-
-        assertThat(stringRedisTemplate.keys("del:*"))
-                .as("tombstone write landed on the auth (write/global) store")
-                .isNotNull()
-                .isNotEmpty();
-
-        assertThat(contentTombstoneStore.isTombstoned("planner", id))
-                .as("auth-local has not caught up: the read path must not yet see the tombstone")
-                .isFalse();
-
-        mirror("del:*");
-
-        assertThat(contentTombstoneStore.isTombstoned("planner", id))
-                .as("after auth-local catches up, the read path reflects the tombstone")
-                .isTrue();
-    }
-
-    @Test
     void reads_WhenAuthLocalUnreachable_FailOpen() {
         LettuceConnectionFactory deadFactory = new LettuceConnectionFactory(
                 new RedisStandaloneConfiguration(deadHost, deadPort));
@@ -200,9 +168,6 @@ class AuthLocalReadSplitIT {
             TokenBlacklistService blSvc =
                     new TokenBlacklistService(AuthReads.writesTo(stringRedisTemplate), AuthReads.from(deadTemplate), registry,
                             TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
-            ContentTombstoneStore tsSvc =
-                    new ContentTombstoneStore(AuthReads.writesTo(stringRedisTemplate), AuthReads.from(deadTemplate),
-                            new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
 
             String token = "phase14a-failopen-token";
             Date futureExpiry = new Date(System.currentTimeMillis() + Duration.ofHours(1).toMillis());
@@ -215,13 +180,6 @@ class AuthLocalReadSplitIT {
             assertThat(registry.get("blacklist_check_skipped_total").counter().count())
                     .as("fail-open increments the skip counter")
                     .isGreaterThanOrEqualTo(1.0);
-
-            UUID id = UUID.randomUUID();
-            tsSvc.writeTombstone("planner", id);
-
-            assertThat(tsSvc.isTombstoned("planner", id))
-                    .as("fail-open: tombstone read routed to the unreachable auth-local, not the auth write store")
-                    .isFalse();
         } finally {
             deadFactory.destroy();
         }

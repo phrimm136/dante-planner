@@ -100,30 +100,6 @@ test('an exhausted request pool answers rather than pinning the thread', async (
   }
 })
 
-test('a saturated bulkhead queues re-checks without touching the write path', async () => {
-  requiresChaos(CHAOS_MODES.bulkheadSaturated)
-
-  const fixture = await createFixture('chaos-bulkhead')
-  let owner: APIRequestContext | undefined
-
-  try {
-    const write = await writePlanner(fixture)
-    expect([200, 201], await write.text()).toContain(write.status())
-
-    owner = await edgeContext({
-      baseURL: SEOUL_API,
-      extraHTTPHeaders: authHeaders(fixture.user.id),
-    })
-    await holdsThroughout(async (attempt) => {
-      const read = await owner!.get(`/api/planner/md/${fixture.plannerId}`)
-      expect([200, 404], `by-id read, probe ${attempt}`).toContain(read.status())
-    })
-  } finally {
-    await owner?.dispose()
-    await dropFixture(fixture)
-  }
-})
-
 test('an unreachable auth Redis fails the blacklist check open', async () => {
   requiresChaos(CHAOS_MODES.authRedisDown)
 
