@@ -52,8 +52,27 @@ class ReadAfterReactivationTest {
     }
 
     @Test
-    void read_WhenThePlannerWasPublishedOnlyAfterTheDeactivationBegan_IsNotJudged() {
-        assertThat(violations(new Publish("s1", "p1", 25, 31, new Changed()), DEACTIVATED, REACTIVATED, MISSED))
+    void read_WhenThePublishOverlapsTheDeactivationAndCompletesBeforeTheReactivation_IsAViolation() {
+        PublicRead missed = new PublicRead("anon", "p1", 30, 32, new NotFound());
+        ThreadRead threadMissed = new ThreadRead("anon", "p1", 30, 32, new NotFound());
+
+        assertThat(violations(new Publish("s1", "p1", 10, 22, new Changed()),
+                new Deactivate("s1", 20, 24, new Changed()), new Reactivate("s1", 26, 28, new Changed()),
+                missed, threadMissed))
+                .containsExactly(violation(missed), violation(threadMissed));
+    }
+
+    @Test
+    void read_WhenAnUnpublishMayFollowThePublishThatOverlapsTheDeactivation_IsClean() {
+        assertThat(violations(new Publish("s1", "p1", 10, 22, new Changed()),
+                new Deactivate("s1", 20, 24, new Changed()), new Unpublish("s2", "p1", 23, 25, new Unknown()),
+                new Reactivate("s1", 26, 28, new Changed()),
+                new PublicRead("anon", "p1", 30, 32, new NotFound()))).isEmpty();
+    }
+
+    @Test
+    void read_WhenThePlannerWasPublishedOnlyAfterTheReactivationBegan_IsNotJudged() {
+        assertThat(violations(DEACTIVATED, new Publish("s1", "p1", 55, 58, new Changed()), REACTIVATED, MISSED))
                 .isEmpty();
     }
 

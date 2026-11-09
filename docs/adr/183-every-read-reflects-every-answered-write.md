@@ -1,5 +1,5 @@
 # 183 every-read-reflects-every-answered-write
-epic: none · pr: none · supersedes: 008 @ryw @gtid @cookie, 008 @gtid @capture, 008 @replica @miss @byid, 008 @replica @bulkhead, 008 @delete @tombstone, 008 @read-path @contract, 130 @reads @gtid, 130 @reads @gtid @errors, 151 @outbox @tombstone @readpath, 151 @withdraw @tombstone, 151 @comments @visibility
+epic: none · pr: none · supersedes: 008 @ryw @gtid @cookie, 008 @gtid @capture, 008 @replica @miss @byid, 008 @replica @bulkhead, 008 @delete @tombstone, 008 @read-path @contract, 130 @reads @gtid, 130 @reads @gtid @errors, 151 @outbox @tombstone @readpath, 151 @withdraw @tombstone, 151 @comments @visibility, 180 @consistency-checker @observability
 
 ## Decisions
 - @freshness @contract — A read that starts after a write's response reflects that write, for

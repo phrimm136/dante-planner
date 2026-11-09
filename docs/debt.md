@@ -1662,4 +1662,4 @@ guards the parse but likewise skips the schema gate.
   removed; `FreshnessReadIT` covers the case deterministically instead. Worth doing when the
   harness gains a second author for another reason: give that author planners that are published,
   unpublished and thread-read in the stopped phases, then restore the planted patch.
-  re-check: `test ! -f backend/src/test/resources/consistency/planted/thread-scope-dropped.patch`
+  re-check: `.claude/skills/debt-ledger/bin/debt absent backend/src/test/resources/consistency/planted --files -g 'thread-scope-dropped.patch'`

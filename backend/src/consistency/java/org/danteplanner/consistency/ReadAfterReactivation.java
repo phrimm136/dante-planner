@@ -21,10 +21,10 @@ final class ReadAfterReactivation implements Rule {
                 .filter(reactivate -> Results.changed(reactivate.result()))
                 .filter(reactivate -> reactivate.completedAt() < invokedAt)
                 .filter(reactivate -> !deactivatedAgain(reactivate, completedAt, history))
-                .anyMatch(reactivate -> history.all(Deactivate.class).stream()
+                .filter(reactivate -> history.all(Deactivate.class).stream()
                         .filter(deactivate -> Results.changed(deactivate.result()))
-                        .filter(deactivate -> deactivate.completedAt() <= reactivate.invokedAt())
-                        .anyMatch(deactivate -> publishedThrough(key, deactivate, completedAt, history)));
+                        .anyMatch(deactivate -> deactivate.completedAt() <= reactivate.invokedAt()))
+                .anyMatch(reactivate -> publishedThrough(key, reactivate, completedAt, history));
     }
 
     private static boolean deactivatedAgain(Reactivate reactivate, long readCompletedAt, History history) {
@@ -34,12 +34,12 @@ final class ReadAfterReactivation implements Rule {
                         && deactivate.invokedAt() < readCompletedAt);
     }
 
-    private static boolean publishedThrough(String key, Deactivate deactivate, long readCompletedAt,
+    private static boolean publishedThrough(String key, Reactivate reactivate, long readCompletedAt,
             History history) {
         return history.all(Publish.class).stream()
                 .filter(publish -> publish.key().equals(key))
                 .filter(publish -> Results.changed(publish.result()))
-                .filter(publish -> publish.completedAt() < deactivate.invokedAt())
+                .filter(publish -> publish.completedAt() < reactivate.invokedAt())
                 .anyMatch(publish -> !withdrawnBetween(publish, readCompletedAt, history));
     }
 
