@@ -7,7 +7,9 @@ description: Check and move the game-data checkout that <repo>/static points at,
 
 `static` in every checkout and worktree is an untracked symlink to one data checkout,
 `~/github/LimbusPlanner-static`; `static.lock` pins the sha the code expects (ADR 200).
-Run `.claude/skills/static-checkout/bin/static` from inside the code checkout.
+`<checkout>/.claude/skills/static-checkout/bin/static` acts on the checkout it lives in, whatever the
+current directory; `--root <path>` names another checkout or worktree. `link`, `lock` and `sync`
+print one line naming what they change before changing it.
 
 | Command  | Use |
 |----------|-----|
