@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 
+import org.danteplanner.backend.shared.freshness.FreshnessReadGuard;
 import org.danteplanner.freshnessfixture.BlankReasonFixture;
 import org.danteplanner.freshnessfixture.ClassLevelDeclaredFixture;
 import org.danteplanner.freshnessfixture.ClassLevelReadOnlyFixture;
@@ -13,6 +14,9 @@ import org.danteplanner.freshnessfixture.DeclaredReadsFixture;
 import org.danteplanner.freshnessfixture.DoublyDeclaredReadFixture;
 import org.danteplanner.freshnessfixture.InterfaceScopedRead;
 import org.danteplanner.freshnessfixture.InterfaceScopedReadFixture;
+import org.danteplanner.freshnessfixture.PrivateHelperFixture;
+import org.danteplanner.freshnessfixture.UnannotatedInterfaceScopedRead;
+import org.danteplanner.freshnessfixture.UnannotatedInterfaceScopedReadFixture;
 import org.danteplanner.freshnessfixture.UndeclaredReadFixture;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -86,6 +90,26 @@ class FreshnessReadCoverageRuleTest {
 
         assertThatCode(() -> FreshnessReadCoverageRule.READ_ONLY_METHODS_DECLARE_EXACTLY_ONE_FRESHNESS_READ
                 .check(declared))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void unadvisableMethods_WhenCoverageRuleRuns_AreNotChecked() {
+        JavaClasses unadvisable = new ClassFileImporter().importClasses(PrivateHelperFixture.class,
+                UnannotatedInterfaceScopedRead.class, UnannotatedInterfaceScopedReadFixture.class);
+
+        assertThatCode(() -> FreshnessReadCoverageRule.READ_ONLY_METHODS_DECLARE_EXACTLY_ONE_FRESHNESS_READ
+                .check(unadvisable))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void freshnessPlatform_WhenCoverageRuleRuns_IsNotChecked() {
+        JavaClasses platform = new ClassFileImporter()
+                .importClasses(FreshnessReadGuard.class, FreshnessReadGuard.Attempt.class);
+
+        assertThatCode(() -> FreshnessReadCoverageRule.READ_ONLY_METHODS_DECLARE_EXACTLY_ONE_FRESHNESS_READ
+                .check(platform))
                 .doesNotThrowAnyException();
     }
 }
