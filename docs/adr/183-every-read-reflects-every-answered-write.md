@@ -85,6 +85,25 @@ epic: none · pr: none · supersedes: 008 @ryw @gtid @cookie, 008 @gtid @capture
   thread its author's readers open next.
   INVARIANT: a remembered applied GTID never runs ahead of its source — replica apply is monotonic;
   unenforced by a test.
+- @freshness @read @boundary — The marker decision runs as one around-advice on the outermost
+  `@Transactional(readOnly = true)` service method that returns `ScopedRead`, ordered just outside
+  the transaction interceptor, and it retries the method on the next source when a marker says
+  skip. Each attempt needs its own transaction and connection, so the decision cannot run inside
+  the method. A result type or a not-found exception declares the scopes the read touched. An
+  inner call joins its caller's transaction and never decides. The advice exists only when read
+  routing is on. Marker reads for all scopes go to each marker source as one dispatched batch.
+  REJECTED: a retry loop at each controller call site — nothing enforces it, so a new read skips it
+  without failing anything.
+  REJECTED: Spring's pipelined execution for the marker batch — it opens a dedicated connection on
+  every call, which costs more than one command for the common one- or two-scope read.
+  INVARIANT: every read-only service method declares exactly one of a `ScopedRead` return,
+  mandatory propagation, a pending marker with a reason, or an exemption with a reason, and a
+  `ScopedRead` return carries its read-only annotation on the method itself, where the advice
+  matches it — `FreshnessReadCoverageRule`, proven on fixtures; unenforced on production classes
+  until every read declares one.
+  INVARIANT: the advice runs outside the transaction — `FreshnessReadAspectTest`, which fails when
+  the transaction advisor is ordered first.
+  INVARIANT: one marker read sends one batch per marker source — `MarkerStoreIT`.
 - @freshness @store-health — A marker failure does not fail the write: `WAIT` has an upper bound,
   and the write answers when it passes. The marker store has an ordered source list per region,
   like the database (182 @reads @sources): Seoul reads its Redis replica first and the Oregon Redis
