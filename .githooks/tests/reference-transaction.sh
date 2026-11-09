@@ -24,8 +24,8 @@ check() {  # check <name> <condition...>
   local name=$1; shift
   if "$@"; then printf 'ok    %s\n' "$name"; else printf 'FAIL  %s\n' "$name"; sed 's/^/        /' "$ERR"; fail=1; fi
 }
-has() { rg -qF -- "$1" "$ERR"; }
-lacks() { ! rg -qF -- "$1" "$ERR"; }
+has() { grep -qF -- "$1" "$ERR"; }
+lacks() { ! grep -qF -- "$1" "$ERR"; }
 eq() { [ "$1" = "$2" ]; }
 record() {  # record <file> <section> <sha>...
   local file=$REVIEWS/$1 section=$2; shift 2
@@ -197,7 +197,7 @@ echo f > "$R2/f.txt"; git -C "$R2" add f.txt; git -C "$R2" commit -q -m 'feat: f
 echo g >> "$R2/f.txt"; git -C "$R2" commit -q -am 'feat: fresh two'
 git -C "$R2" branch dev 2>"$ERR"; rc=$?
 check 'creating dev at an unreviewed local-only commit: refused' eq "$(git -C "$R2" rev-parse -q --verify dev):$((rc != 0))" ":1"
-check 'creating dev at an unreviewed local-only commit: names it, not the root' eq "$(rg -c 'feat: fresh' "$ERR"):$(rg -c 'feat: fresh two' "$ERR")" "1:1"
+check 'creating dev at an unreviewed local-only commit: names it, not the root' eq "$(grep -c 'feat: fresh' "$ERR"):$(grep -c 'feat: fresh two' "$ERR")" "1:1"
 git -C "$R2" update-ref refs/remotes/origin/main main
 git -C "$R2" branch dev 2>"$ERR"; rc=$?
 check 'creating dev at a commit reachable from a remote ref: exempt' eq "$(git -C "$R2" rev-parse dev):$rc" "$(git -C "$R2" rev-parse main):0"

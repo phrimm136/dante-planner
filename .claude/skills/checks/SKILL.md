@@ -1,6 +1,6 @@
 ---
 name: checks
-description: Run the repo's frontend, e2e and backend checks (typecheck, lint, format, vitest, playwright, gradle test/check/checkstyle/pitest, the PR Gate frontend steps) through one local CLI that takes the test lock, writes a dated log and prints PASS/FAIL. Use for any test, typecheck, lint, build or format run, when the Bash hook refuses a hand-assembled check, or when a check's tools or node_modules look stale.
+description: Run the repo's frontend, e2e and backend checks (typecheck, lint, format, vitest, playwright, gradle test/check/checkstyle/pitest, the PR Gate frontend steps, the skill CLI and git-hook test suites) through one local CLI that takes the test lock, writes a dated log and prints PASS/FAIL. Use for any test, typecheck, lint, build or format run, when the Bash hook refuses a hand-assembled check, or when a check's tools or node_modules look stale.
 ---
 
 # checks
@@ -25,8 +25,9 @@ in `flock`: it takes the lock itself.
 | `fe gate` | The PR Gate `test-frontend` steps, read from `pr-gate.yml`, under one lock, one line per step |
 | `e2e <check>` | `typecheck`, `fmt`, `fmt-check`, `run [spec...] [--base-url URL] [--repeat N] [--jobs N] [--project NAME] [-- playwright args]` |
 | `be <check>` | `check`, `test [--tests PATTERN] [--exclude-tags containerized]`, `checkstyle`, `pit` |
+| `tools test` | Every `.claude/skills/*/tests/` directory (pytest) and `.githooks/tests/*.sh` script, through `.github/scripts/tooling-tests.sh`, the script PR Gate's `check-keep-list` job runs; one line per suite |
 | `--print` | Show a run's directory, environment and command line without running it |
 
-The CLI's own tests: `pytest -q -p no:cacheprovider .claude/skills/checks/tests`.
+The CLI's own tests run with the other tooling suites: `checks tools test`.
 
 Flags, log location and messages: `checks --help`.

@@ -2,6 +2,7 @@ import datetime
 import importlib.machinery
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -124,6 +125,21 @@ def test_backend_task_checks():
     assert plan_for("be", "check").command_argv[4:] == ("check",)
     assert plan_for("be", "checkstyle").command_argv[4:] == ("checkstyleMain", "checkstyleTest", "--rerun-tasks")
     assert plan_for("be", "pit").command_argv[4:] == ("pitestRatchet",)
+
+
+def test_tools_test_runs_the_shared_tooling_script_from_the_root():
+    run_plan = plan_for("tools", "test")
+    assert run_plan.command_argv == ("bash", "/repo/wt/.github/scripts/tooling-tests.sh")
+    assert run_plan.work_dir == Path("/repo/wt")
+    assert run_plan.module_dir is None
+    with pytest.raises(checks_cli.CheckError, match="takes no arguments"):
+        plan_for("tools", "test", "-k", "x")
+
+
+def test_the_ci_job_runs_the_tooling_script():
+    workflow_text = (REPO_ROOT / checks_cli.WORKFLOW_PATH).read_text()
+    job_steps = checks_cli.workflow_steps(workflow_text, checks_cli.TOOLING_JOB)
+    assert checks_cli.TOOLING_SCRIPT in [one_step.run_text for one_step in job_steps]
 
 
 def test_list_names_every_check_once():
@@ -321,6 +337,11 @@ def test_summary_of_a_vite_build():
     assert checks_cli.summary_line(fixture_text("vite-build-tail.log")) == "\u2713 built in 36.86s"
 
 
+def test_summary_of_a_tooling_run_is_its_suite_count():
+    assert checks_cli.summary_line(fixture_text("tooling-tests-fail.log")) == \
+        "1 of 4 suites failed: .githooks/tests/reference-transaction.sh"
+
+
 def test_summary_of_a_silent_tool_names_the_command():
     assert checks_cli.summary_line("yarn run v1.22.22\n$ ast-grep scan\nDone in 0.29s.\n") == \
         "(no output from `ast-grep scan`)"
@@ -455,3 +476,39 @@ def test_doctor_names_the_stale_package_both_versions_and_the_install(tmp_path):
     assert problem_count == 1
     assert (f"frontend STALE oxlint: package.json 1.90.0, yarn.lock 1.90.0, installed 1.89.0; "
             f"run yarn --cwd {tmp_path / 'frontend'} install --frozen-lockfile") in out_lines
+
+
+TOOLING_FILE = REPO_ROOT / checks_cli.TOOLING_SCRIPT
+
+
+def run_tooling_tree(tree_root, suite_files):
+    script_copy = tree_root / checks_cli.TOOLING_SCRIPT
+    script_copy.parent.mkdir(parents=True)
+    script_copy.write_text(TOOLING_FILE.read_text())
+    for relative_path, file_text in suite_files.items():
+        suite_file = tree_root / relative_path
+        suite_file.parent.mkdir(parents=True, exist_ok=True)
+        suite_file.write_text(file_text)
+    return subprocess.run(["bash", str(script_copy)], capture_output=True, text=True, stdin=subprocess.DEVNULL)
+
+
+def test_the_tooling_script_finds_every_suite_and_runs_past_a_failure(tmp_path):
+    tooling_run = run_tooling_tree(tmp_path, {
+        ".claude/skills/alpha/tests/test_alpha.py": "def test_alpha():\n    assert True\n",
+        ".claude/skills/beta/tests/test_beta.py": "def test_beta():\n    assert False\n",
+        ".claude/skills/gamma/bin/gamma": "",
+        ".githooks/tests/delta.sh": "echo 'delta scenarios done'\n",
+        ".githooks/tests/notes.txt": "",
+    })
+    assert tooling_run.returncode == 1, tooling_run.stdout + tooling_run.stderr
+    result_lines = tooling_run.stdout.splitlines()[-4:]
+    assert re.fullmatch(r"PASS \.claude/skills/alpha/tests  1 passed in \S+", result_lines[0])
+    assert re.fullmatch(r"FAIL \.claude/skills/beta/tests  \(exit 1\) 1 failed in \S+", result_lines[1])
+    assert result_lines[2:] == ["PASS .githooks/tests/delta.sh  delta scenarios done",
+                                "tooling-tests: 1 of 3 suites failed: .claude/skills/beta/tests"]
+
+
+def test_the_tooling_script_fails_when_it_finds_no_suite(tmp_path):
+    tooling_run = run_tooling_tree(tmp_path, {".claude/skills/alpha/bin/alpha": ""})
+    assert tooling_run.returncode == 1
+    assert "no suites found" in tooling_run.stderr

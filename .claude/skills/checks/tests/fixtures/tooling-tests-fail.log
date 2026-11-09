@@ -1,0 +1,88 @@
+== .claude/skills/checks/tests
+/usr/lib/python3.14/site-packages/pytest_asyncio/plugin.py:300: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the "fixture" caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to "function" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [ 67%]
+...................................                                      [100%]
+107 passed in 2.85s
+
+== .claude/skills/ops/tests
+/usr/lib/python3.14/site-packages/pytest_asyncio/plugin.py:300: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the "fixture" caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to "function" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.................................................................                                 [100%]
+65 passed, 47 subtests passed in 1.22s
+
+== .githooks/tests/pre-commit.sh
+ok    staged id: refused
+ok    staged id: names file and line
+ok    staged id: never prints the id
+ok    staged id: names the fix
+ok    no config file: passes
+ok    no config file: silent
+ok    same file without the id: passes
+ok    deleting a line that holds the id: passes
+ok    ADR 12-digit check still refuses
+ok    ADR 12-digit check names the rule
+PASS pre-commit account-id scenarios
+
+== .githooks/tests/reference-transaction.sh
+ok    creating dev at a root commit (empty patch-id): exempt
+ok    unreviewed ff: exit non-zero
+ok    unreviewed ff: ref stays
+ok    unreviewed ff: count line
+ok    unreviewed ff: names the commit
+ok    unreviewed ff: bypass line
+ok    reviewed ff: exit 0
+ok    reviewed ff: ref moves
+ok    rebase: new sha
+ok    rebase: same patch-id
+ok    rebased branch lands on the pre-rebase record
+ok    fix commit without delta: refused
+ok    fix commit without delta: names the fix
+ok    fix commit without delta: reviewed commit not named
+ok    fix commit without delta: counts one
+ok    fix commit with delta: lands
+ok    direct commit on dev: refused
+ok    direct commit on dev: names the commit
+ok    rollback: exempt
+ok    roll forward to reviewed tip: lands
+ok    release sync: exempt
+ok    non-ff merge of unreviewed branch: refused
+ok    non-ff merge: merge commit not counted
+ok    non-ff merge of reviewed branch: lands
+ok    empty commit: counted before its sibling is reviewed
+ok    empty commit: lands without a record entry
+ok    worktree landing reads the main checkout: refused with the record only in the worktree
+ok    worktree landing reads the main checkout: names the commit
+ok    worktree landing reads the main checkout: lands with the record only in the main checkout
+ok    deleting dev: refused
+ok    deleting dev: says so
+ok    deleting dev: bypass line
+ok    other ref refs/heads/feat/x: untouched
+ok    other ref refs/remotes/origin/dev: untouched
+ok    update-ref without old value to an unreviewed commit: refused
+ok    update-ref without old value: names the commit
+ok    branch -f to an unreviewed commit: refused
+ok    checkout -B to an unreviewed commit: refused
+ok    branch -f to a reviewed commit: lands
+ok    local push without the record: refused
+ok    local push without the record: names the commit
+ok    local push with the record: lands
+ok    creating dev at an unreviewed local-only commit: refused
+FAIL  creating dev at an unreviewed local-only commit: names it, not the root
+        landing: 1 commit(s) without a review record
+          f5875d3 feat: fresh two
+        run it yourself: git -c core.hooksPath= <your command>
+        fatal: in 'prepared' phase, update aborted by the reference-transaction hook
+ok    creating dev at a commit reachable from a remote ref: exempt
+ok    absent reviews directory: treated as empty
+FAIL reference-transaction scenarios
+
+PASS .claude/skills/checks/tests  107 passed in 2.85s
+PASS .claude/skills/ops/tests  65 passed, 47 subtests passed in 1.22s
+PASS .githooks/tests/pre-commit.sh  PASS pre-commit account-id scenarios
+FAIL .githooks/tests/reference-transaction.sh  (exit 1) FAIL reference-transaction scenarios
+tooling-tests: 1 of 4 suites failed: .githooks/tests/reference-transaction.sh
