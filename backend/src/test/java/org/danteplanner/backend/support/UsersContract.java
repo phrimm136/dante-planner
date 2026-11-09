@@ -112,13 +112,13 @@ public interface UsersContract {
     default void findOptionalById_WhenTheUserIsDeleted_ReturnsIt() {
         User user = persisted(deletedUser().build());
 
-        assertThat(users().findOptionalById(user.getId())).hasValueSatisfying(
+        assertThat(inTransaction(() -> users().findOptionalById(user.getId()))).hasValueSatisfying(
                 summary -> assertThat(summary.deleted()).isTrue());
     }
 
     @Test
     default void findOptionalById_WhenTheIdIsUnknown_ReturnsEmpty() {
-        assertThat(users().findOptionalById(UNKNOWN_ID)).isEmpty();
+        assertThat(inTransaction(() -> users().findOptionalById(UNKNOWN_ID))).isEmpty();
     }
 
     @Test
@@ -148,7 +148,7 @@ public interface UsersContract {
     default void findActiveBySuffix_WhenTheUserIsLive_ReturnsIt() {
         User user = persisted(newUser().build());
 
-        assertThat(users().findActiveBySuffix(user.getUsernameSuffix()))
+        assertThat(inTransaction(() -> users().findActiveBySuffix(user.getUsernameSuffix())))
                 .map(UserSummary::id).hasValue(user.getId());
     }
 
@@ -156,14 +156,14 @@ public interface UsersContract {
     default void findActiveBySuffix_WhenTheUserIsDeleted_ReturnsEmpty() {
         User user = persisted(deletedUser().build());
 
-        assertThat(users().findActiveBySuffix(user.getUsernameSuffix())).isEmpty();
+        assertThat(inTransaction(() -> users().findActiveBySuffix(user.getUsernameSuffix()))).isEmpty();
     }
 
     @Test
     default void findActiveBySuffix_WhenTheCaseDiffers_StillFindsIt() {
         User user = persisted(newUser().usernameSuffix(TestDataFactory.uniqueSuffix("c")).build());
 
-        assertThat(users().findActiveBySuffix(user.getUsernameSuffix().toUpperCase(Locale.ROOT)))
+        assertThat(inTransaction(() -> users().findActiveBySuffix(user.getUsernameSuffix().toUpperCase(Locale.ROOT))))
                 .map(UserSummary::id).hasValue(user.getId());
     }
 
@@ -208,7 +208,7 @@ public interface UsersContract {
         User live = persisted(newUser().build());
         User deleted = persisted(deletedUser().build());
 
-        assertThat(users().findAllByIds(List.of(live.getId(), deleted.getId(), UNKNOWN_ID)))
+        assertThat(inTransaction(() -> users().findAllByIds(List.of(live.getId(), deleted.getId(), UNKNOWN_ID))))
                 .extracting(UserSummary::id)
                 .containsExactlyInAnyOrder(live.getId(), deleted.getId());
     }
@@ -219,7 +219,7 @@ public interface UsersContract {
         User restricted = persisted(restrictedUser().build());
         User deleted = persisted(deletedUser().build());
 
-        assertThat(users().listActiveAccounts())
+        assertThat(inTransaction(() -> users().listActiveAccounts()))
                 .extracting(UserSummary::id)
                 .contains(live.getId(), restricted.getId())
                 .doesNotContain(deleted.getId());
@@ -230,7 +230,8 @@ public interface UsersContract {
         Long sentinel = liveSentinelId();
 
         assertThat(users().findActiveById(sentinel)).isPresent();
-        assertThat(users().listActiveAccounts()).extracting(UserSummary::id).doesNotContain(sentinel);
+        assertThat(inTransaction(() -> users().listActiveAccounts()))
+                .extracting(UserSummary::id).doesNotContain(sentinel);
     }
 
     @Test
@@ -240,7 +241,7 @@ public interface UsersContract {
         User expired = persisted(newUser().timeoutUntil(now.minus(Duration.ofHours(1))).build());
         User deleted = persisted(deletedUser().timeoutUntil(now.plus(Duration.ofHours(1))).build());
 
-        assertThat(users().listTimedOutAccounts())
+        assertThat(inTransaction(() -> users().listTimedOutAccounts()))
                 .extracting(UserSummary::id)
                 .contains(timedOut.getId())
                 .doesNotContain(expired.getId(), deleted.getId());

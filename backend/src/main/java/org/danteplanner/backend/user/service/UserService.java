@@ -15,6 +15,8 @@ import org.danteplanner.backend.user.api.RestrictionReasonProvider;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.RandomUsernameGenerator.UsernameComponents;
 import org.danteplanner.backend.user.validation.EpithetValidator;
+import org.danteplanner.backend.shared.freshness.FreshnessPending;
+import org.danteplanner.backend.shared.freshness.FreshnessExempt;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -150,16 +152,18 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
     public Optional<User> findOptionalById(Long id) {
         return userRepository.findById(id);
     }
 
+    @FreshnessExempt(reason = "startup sentinel check runs with no request bound")
     @Transactional(readOnly = true)
     public boolean existsById(Long id) {
         return userRepository.existsById(id);
     }
 
+    @FreshnessPending(reason = "auth read: the token refresh account lookup gets its scope in M2")
     @Transactional(readOnly = true)
     public Optional<User> findActiveById(Long userId) {
         return userRepository.findByIdAndDeletedAtIsNull(userId);
@@ -170,32 +174,34 @@ public class UserService {
         return userRepository.findByIdAndDeletedAtIsNull(userId);
     }
 
+    @FreshnessPending(reason = "auth read: the OAuth login lookup gets its scope in M2")
     @Transactional(readOnly = true)
     public Optional<User> findActiveByProvider(AuthProviderType providerType, String providerId) {
         return userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(providerType, providerId);
     }
 
+    @FreshnessPending(reason = "auth read: the OAuth login lookup gets its scope in M2")
     @Transactional(readOnly = true)
     public Optional<User> findByProvider(AuthProviderType providerType, String providerId) {
         return userRepository.findByProviderAndProviderId(providerType, providerId);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
     public Optional<User> findActiveBySuffix(String usernameSuffix) {
         return userRepository.findByUsernameSuffixAndDeletedAtIsNull(usernameSuffix);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
     public List<User> listActiveAccounts() {
         return userRepository.findByDeletedAtIsNullAndIdNot(UserAccountLifecycleService.SENTINEL_USER_ID);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
     public List<User> listTimedOutAccounts() {
         return userRepository.findByTimeoutUntilAfterAndDeletedAtIsNull(Instant.now());
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
     public List<User> findAllByIds(Collection<Long> ids) {
         return userRepository.findAllById(ids);
     }

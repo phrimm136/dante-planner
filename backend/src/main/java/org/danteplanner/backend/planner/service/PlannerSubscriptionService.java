@@ -6,9 +6,9 @@ import org.danteplanner.backend.moderation.api.RestrictionCheck;
 import org.danteplanner.backend.planner.entity.PlannerSubscription;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -53,7 +53,7 @@ public class PlannerSubscriptionService {
         }
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
     public boolean isSubscribed(Long userId, UUID plannerId) {
         return subscriptionRepository.findByUserIdAndPlannerId(userId, plannerId)
                 .map(PlannerSubscription::isEnabled)
@@ -70,13 +70,5 @@ public class PlannerSubscriptionService {
         PlannerSubscription subscription = new PlannerSubscription(userId, plannerId);
         subscriptionRepository.insert(subscription);
         log.debug("Auto-created subscription for user {} on planner {}", userId, plannerId);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Long> getSubscriberUserIds(UUID plannerId) {
-        return subscriptionRepository.findByPlannerIdAndEnabledTrue(plannerId)
-                .stream()
-                .map(PlannerSubscription::getUserId)
-                .toList();
     }
 }

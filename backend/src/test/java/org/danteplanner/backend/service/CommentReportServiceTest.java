@@ -145,49 +145,4 @@ class CommentReportServiceTest {
             verify(reportRepository, never()).insert(any());
         }
     }
-
-    @Nested
-    class HasReportedTests {
-
-        @Test
-        void hasReported_WhenReported_ReturnsTrue() {
-            // Arrange
-            when(reportRepository.existsByReporterIdAndCommentId(REPORTER_ID, COMMENT_INTERNAL_ID))
-                    .thenReturn(true);
-
-            // Act
-            boolean result = service.hasReported(REPORTER_ID, COMMENT_INTERNAL_ID);
-
-            // Assert
-            assertThat(result).isTrue();
-        }
-
-        @Test
-        void hasReported_WhenNotReported_ReturnsFalse() {
-            // Arrange
-            when(reportRepository.existsByReporterIdAndCommentId(REPORTER_ID, COMMENT_INTERNAL_ID))
-                    .thenReturn(false);
-
-            // Act
-            boolean result = service.hasReported(REPORTER_ID, COMMENT_INTERNAL_ID);
-
-            // Assert
-            assertThat(result).isFalse();
-        }
-
-        @Test
-        void hasReported_WhenCalled_ChecksCorrectIds() {
-            // Arrange
-            Long userId = 42L;
-            Long specificCommentId = 999L;
-            when(reportRepository.existsByReporterIdAndCommentId(userId, specificCommentId))
-                    .thenReturn(true);
-
-            // Act
-            service.hasReported(userId, specificCommentId);
-
-            // Assert
-            verify(reportRepository).existsByReporterIdAndCommentId(userId, specificCommentId);
-        }
-    }
 }
