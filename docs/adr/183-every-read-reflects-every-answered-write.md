@@ -99,8 +99,9 @@ epic: none · pr: none · supersedes: 008 @ryw @gtid @cookie, 008 @gtid @capture
   INVARIANT: every read-only service method declares exactly one of a `ScopedRead` return,
   mandatory propagation, a pending marker with a reason, or an exemption with a reason, and a
   `ScopedRead` return carries its read-only annotation on the method itself, where the advice
-  matches it — `FreshnessReadCoverageRule`, proven on fixtures; unenforced on production classes
-  until every read declares one.
+  matches it — `FreshnessReadCoverageTest` over the production classes the advice can advise.
+  INVARIANT: the count of pending reads only goes down; each one leaves when its scope arrives —
+  `FreshnessReadCoverageTest`, which pins the count.
   INVARIANT: the advice runs outside the transaction — `FreshnessReadAspectTest`, which fails when
   the transaction advisor is ordered first.
   INVARIANT: one marker read sends one batch per marker source — `MarkerStoreIT`.
