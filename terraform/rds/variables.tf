@@ -1,5 +1,5 @@
 variable "region" {
-  description = "AWS region (already public in docker-compose awslogs config)."
+  description = "AWS region."
   type        = string
   default     = "us-west-2"
 }
