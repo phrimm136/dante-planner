@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import contextlib
 import dataclasses
 import datetime
 import functools
@@ -49,6 +50,12 @@ DOCKER_TIMEOUT_SECONDS = 10
 ERROR_TAIL_LINES = 20
 GIT_ENV_NAMES = ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_COMMON_DIR")
 ANSI_PATTERN = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
+AWS_CONFIG_ENV = "AWS_CONFIG_FILE"
+DEFAULT_AWS_CONFIG = "~/.aws/config"
+CONFIG_SECTION_PATTERN = re.compile(r"^\s*\[(?:profile\s+)?([^\]]+?)\s*\]")
+ACCOUNT_ID_LINE = re.compile(r"^\s*sso_account_id\s*=\s*(\d+)\s*$")
+ARN_ACCOUNT_PATTERN = re.compile(r"(arn:aws[a-z-]*:[^:\s]*:[^:\s]*:)\d{12}(?=:)")
+UNMAPPED_ACCOUNT = "<account>"
 
 USAGE_TEXT = f"""usage: ops [--env prod|staging|mgmt] <command> [args]
        ops list | doctor
@@ -81,6 +88,76 @@ open RDS tunnels.
 
 class OpsError(Exception):
     pass
+
+
+def aws_config_path():
+    return Path(os.environ.get(AWS_CONFIG_ENV) or Path(DEFAULT_AWS_CONFIG).expanduser())
+
+
+@functools.cache
+def config_accounts(config_file):
+    if not config_file.is_file():
+        return {}
+    account_profiles = {}
+    section_name = ""
+    for text_line in config_file.read_text(encoding="utf-8", errors="replace").splitlines():
+        section_match = CONFIG_SECTION_PATTERN.match(text_line)
+        if section_match:
+            section_name = section_match.group(1)
+            continue
+        id_match = ACCOUNT_ID_LINE.match(text_line)
+        if not id_match or not section_name:
+            continue
+        known_profile = account_profiles.get(id_match.group(1))
+        if known_profile is None or (section_name in ENV_PROFILES.values()
+                                     and known_profile not in ENV_PROFILES.values()):
+            account_profiles[id_match.group(1)] = section_name
+    return account_profiles
+
+
+def redact_text(raw_text):
+    for account_id, profile_name in config_accounts(aws_config_path()).items():
+        raw_text = raw_text.replace(account_id, f"<account:{profile_name}>")
+    return ARN_ACCOUNT_PATTERN.sub(rf"\1{UNMAPPED_ACCOUNT}", raw_text)
+
+
+def account_label(account_id):
+    label_text = redact_text(account_id)
+    return UNMAPPED_ACCOUNT if re.search(r"\d{12}", label_text) else label_text
+
+
+def caller_name(arn_text):
+    return arn_text.rsplit("/", 1)[-1] if "/" in arn_text else arn_text.rsplit(":", 1)[-1]
+
+
+class RedactingWriter:
+    def __init__(self, target_file):
+        self.target_file = target_file
+
+    def write(self, text_chunk):
+        return self.target_file.write(redact_text(text_chunk))
+
+    def flush(self):
+        self.target_file.flush()
+
+    def __getattr__(self, attr_name):
+        return getattr(self.target_file, attr_name)
+
+
+@contextlib.contextmanager
+def redacted_streams():
+    saved_streams = (sys.stdout, sys.stderr)
+    sys.stdout, sys.stderr = RedactingWriter(sys.stdout), RedactingWriter(sys.stderr)
+    try:
+        yield
+    finally:
+        sys.stdout, sys.stderr = saved_streams
+
+
+@contextlib.contextmanager
+def redacted_log(log_path, open_mode):
+    with open(log_path, open_mode, encoding="utf-8") as raw_log:
+        yield RedactingWriter(raw_log)
 
 
 def own_checkout_dir():
@@ -670,7 +747,8 @@ def session_state(system_effects, profile_name):
         except json.JSONDecodeError:
             identity_data = {}
         return SessionState(profile_name, "valid",
-                            f"account {identity_data.get('Account', '?')} as {identity_data.get('Arn', '?')}")
+                            f"account {account_label(str(identity_data.get('Account', '?')))} as "
+                            f"{caller_name(str(identity_data.get('Arn', '?')))}")
     error_text = " ".join((sts_run.stderr or sts_run.stdout).split())
     if any(marker_text in error_text for marker_text in EXPIRED_MARKERS):
         return SessionState(profile_name, "expired", error_text)
@@ -801,7 +879,7 @@ def run_script(repo_paths, script_invocation, profile_name, system_effects, run_
     command_argv = (str(script_file), *script_invocation.script_args)
     repo_paths.log_dir.mkdir(parents=True, exist_ok=True)
     log_path = log_stem(repo_paths.log_dir, script_invocation.log_parts, run_moment).with_suffix(".log")
-    with open(log_path, "w", encoding="utf-8") as log_file:
+    with redacted_log(log_path, "w") as log_file:
         write_header(log_file, command_argv, profile_name, repo_paths.repo_root)
         exit_code = system_effects.run_streamed(command_argv, child_environment(profile_name),
                                                 repo_paths.repo_root, log_file, True)
@@ -815,7 +893,7 @@ def run_whoami(repo_paths, profile_name, system_effects, run_moment):
     repo_paths.log_dir.mkdir(parents=True, exist_ok=True)
     log_path = log_stem(repo_paths.log_dir, ("whoami",), run_moment).with_suffix(".log")
     identity_line = f"profile {profile_name}: {one_state.detail_text}"
-    log_path.write_text(f"$ {shlex.join([*STS_ARGV, '--profile', profile_name])}\n{identity_line}\n",
+    log_path.write_text(redact_text(f"$ {shlex.join([*STS_ARGV, '--profile', profile_name])}\n{identity_line}\n"),
                         encoding="utf-8")
     print(identity_line)
     print(f"ops: exit 0, log {log_path}", file=sys.stderr)
@@ -840,7 +918,7 @@ def run_plan(repo_paths, plan_request, profile_name, system_effects, run_moment)
     runner_path = str(repo_paths.repo_root / TERRAFORM_RUNNER)
     plan_argv = (runner_path, *plan_arguments(plan_request.stack_name, plan_path, plan_request.extra_args))
     child_env = child_environment(profile_name)
-    with open(log_path, "w", encoding="utf-8") as log_file:
+    with redacted_log(log_path, "w") as log_file:
         write_header(log_file, plan_argv, profile_name, repo_paths.repo_root)
         plan_exit = system_effects.run_streamed(plan_argv, child_env, repo_paths.repo_root, log_file, False)
         log_file.write(f"\n# ops: plan exit {plan_exit}\n")
@@ -851,7 +929,7 @@ def run_plan(repo_paths, plan_request, profile_name, system_effects, run_moment)
         return plan_exit
     show_argv = (runner_path, *show_arguments(plan_request.stack_name, plan_path))
     show_run = system_effects.run_captured(list(show_argv), child_env, repo_paths.repo_root)
-    with open(log_path, "a", encoding="utf-8") as log_file:
+    with redacted_log(log_path, "a") as log_file:
         log_file.write(f"$ {shlex.join(show_argv)}\n# ops: show exit {show_run.returncode}\n")
     if show_run.returncode != 0:
         print(show_run.stderr.strip(), file=sys.stderr)
@@ -860,7 +938,7 @@ def run_plan(repo_paths, plan_request, profile_name, system_effects, run_moment)
         return show_run.returncode
     out_lines = summary_lines(plan_summary(json.loads(show_run.stdout)), repo_paths.repo_root,
                               plan_request.stack_name, plan_path)
-    with open(log_path, "a", encoding="utf-8") as log_file:
+    with redacted_log(log_path, "a") as log_file:
         log_file.write("\n".join(out_lines) + "\n")
     print("\n".join(out_lines))
     print(f"ops: exit 0, log {log_path}", file=sys.stderr)
@@ -1067,6 +1145,11 @@ def hook_main(stdin_text):
 
 
 def main(argv_words, system_effects=None, caller_dir=None, run_moment=None, repo_paths=None):
+    with redacted_streams():
+        return run_command(argv_words, system_effects, caller_dir, run_moment, repo_paths)
+
+
+def run_command(argv_words, system_effects, caller_dir, run_moment, repo_paths):
     ops_request = parse_request(argv_words)
     if ops_request.wants_help:
         print(USAGE_TEXT, end="")
@@ -1112,10 +1195,12 @@ def main(argv_words, system_effects=None, caller_dir=None, run_moment=None, repo
 
 
 if __name__ == "__main__":
-    try:
-        sys.exit(main(sys.argv[1:]))
-    except OpsError as ops_error:
-        print(f"ops: {ops_error}", file=sys.stderr)
-        sys.exit(2)
-    except KeyboardInterrupt:
-        sys.exit(130)
+    with redacted_streams():
+        try:
+            exit_code = main(sys.argv[1:])
+        except OpsError as ops_error:
+            print(f"ops: {ops_error}", file=sys.stderr)
+            exit_code = 2
+        except KeyboardInterrupt:
+            exit_code = 130
+    sys.exit(exit_code)
