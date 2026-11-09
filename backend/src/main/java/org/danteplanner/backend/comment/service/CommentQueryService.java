@@ -9,9 +9,12 @@ import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator;
 import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.planner.api.PlannerAccess;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
+import org.danteplanner.backend.shared.freshness.ScopedRead;
 import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.user.api.Users;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
@@ -40,14 +43,16 @@ public class CommentQueryService {
     private final CommentAccessValidator accessValidator;
 
     @Transactional(readOnly = true)
-    public List<CommentTreeNode> getCommentTree(UUID plannerId, Long currentUserId) {
+    public ScopedRead<List<CommentTreeNode>> getCommentTree(UUID plannerId, Long currentUserId) {
         PlannerThread planner = plannerAccess.requireExisting(plannerId);
 
         accessValidator.requireThreadVisible(planner, currentUserId);
 
+        Set<FreshnessScope> scopes = Set.of(
+                new FreshnessScope.Entity(plannerId), new FreshnessScope.Author(planner.ownerId()));
         List<PlannerComment> comments = commentRepository.findByPlannerId(plannerId);
         if (comments.isEmpty()) {
-            return Collections.emptyList();
+            return new ScopedRead<>(Collections.emptyList(), scopes);
         }
 
         Set<Long> userIds = comments.stream()
@@ -65,22 +70,22 @@ public class CommentQueryService {
             upvotedIds = new HashSet<>(commentVoteRepository.findUpvotedCommentIds(commentIds, currentUserId));
         }
 
-        return buildCommentTree(comments, userMap, upvotedIds, currentUserId);
+        return new ScopedRead<>(buildCommentTree(comments, userMap, upvotedIds, currentUserId), scopes);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
     public CommentTreeNode broadcastNode(PlannerComment comment, UUID parentPublicId) {
         UserSummary author = users.findOptionalById(comment.getUserId()).orElse(null);
         return CommentTreeNode.forBroadcast(comment, parentPublicId, author);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
     public PlannerComment requireById(Long commentId) {
         return commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
     public PlannerComment requireByPublicId(UUID commentPublicId) {
         return commentRepository.findByPublicId(commentPublicId)
                 .orElseThrow(() -> new CommentNotFoundException(commentPublicId));
