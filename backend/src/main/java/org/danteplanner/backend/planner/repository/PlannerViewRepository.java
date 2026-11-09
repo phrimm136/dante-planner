@@ -12,8 +12,7 @@ import java.util.Collection;
 import java.util.UUID;
 
 @Repository
-public interface PlannerViewRepository extends JpaRepository<PlannerView, PlannerViewId>,
-        PlannerViewRepositoryCustom {
+public interface PlannerViewRepository extends JpaRepository<PlannerView, PlannerViewId> {
 
     @Modifying
     @Query("DELETE FROM PlannerView v WHERE v.plannerId IN :plannerIds")

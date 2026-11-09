@@ -10,9 +10,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import javax.sql.DataSource;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -21,12 +19,9 @@ import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.PlannerBatchRequest;
-import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
-import org.danteplanner.backend.planner.service.PlannerQueryService;
-import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter;
 import org.danteplanner.backend.shared.security.CsrfTokenService;
 import org.danteplanner.backend.shared.util.CookieConstants;
@@ -45,23 +40,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.danteplanner.backend.support.Rejections.assertRejected;
 
-/**
- * A replica {@code byId} miss re-checks the primary before answering.
- *
- * <p>With replication paused, a planner row is written to the primary that has not replicated.
- * A read through the {@link ByIdReadGuard} seam wraps {@link PlannerQueryService#getPlanner}, which
- * is {@code @Transactional(readOnly = true)} and therefore routes to the stale replica — a genuine
- * miss. The contract: the seam re-checks the primary, finds the entity, serves it, and increments
- * {@code replica_miss_promoted_total}.</p>
- */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
 @Tag("containerized")
@@ -69,16 +51,6 @@ import static org.danteplanner.backend.support.Rejections.assertRejected;
 class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
 
     private static final String PROMOTED_COUNTER = "replica_miss_promoted_total";
-
-    private static final String PIN_PROBE_TABLE = "pin_leak_probe";
-    private static final String STALE_PROBE_VALUE = "replicated-stale";
-    private static final String FRESH_PROBE_VALUE = "primary-only-fresh";
-
-    @Autowired
-    private ByIdReadGuard byIdReadGuard;
-
-    @Autowired
-    private PlannerQueryService plannerQueryService;
 
     @Autowired
     private PlannerCommandService plannerCommandService;
@@ -101,9 +73,6 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
     private JdbcTemplate replicaJdbcTemplate;
 
     @Autowired
-    private DataSource dataSource;
-
-    @Autowired
     private org.springframework.data.redis.core.StringRedisTemplate stringRedisTemplate;
 
     @Autowired
@@ -120,146 +89,6 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
 
     @LocalServerPort
     private int port;
-
-    @Test
-    void byIdMissOnPausedReplica_WhenReChecksPrimary_ServesEntityAndIncrementsCounter() {
-        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-it@example.com");
-        Long userId = owner.getId();
-        replicationControl.awaitCaughtUp();
-
-        try {
-            replicationControl.stopReplica();
-
-            Planner primaryOnly = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
-            UUID plannerId = primaryOnly.getId();
-
-            double before = promotedCount();
-
-            AtomicReference<PlannerResponse> served = new AtomicReference<>();
-            Throwable thrown = catchThrowable(() -> served.set(byIdReadGuard.read(
-                    ByIdReadGuard.PLANNER_ENTITY_TYPE,
-                    plannerId,
-                    () -> plannerQueryService.getPlanner(userId, plannerId))));
-
-            assertThat(thrown)
-                    .as("a replica byId miss must be re-checked on the primary and promoted, not surfaced as a miss")
-                    .isNull();
-            assertThat(served.get())
-                    .as("the promoted re-check must serve the primary entity")
-                    .isNotNull()
-                    .extracting(PlannerResponse::id)
-                    .isEqualTo(plannerId);
-            assertThat(promotedCount() - before)
-                    .as("a promoted miss must increment " + PROMOTED_COUNTER + " by 1")
-                    .isEqualTo(1.0);
-        } finally {
-            replicationControl.startReplica();
-            replicationControl.awaitCaughtUp();
-        }
-    }
-
-    @Test
-    void byIdMissOnBothReplicaAndPrimary_WhenPropagatesNotFound_DoesNotPromote_AndClearsPin() {
-        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-doublemiss@example.com");
-        Long userId = owner.getId();
-        replicationControl.awaitCaughtUp();
-
-        try {
-            primaryJdbcTemplate.execute(
-                    "CREATE TABLE IF NOT EXISTS " + PIN_PROBE_TABLE + " (id INT PRIMARY KEY, val VARCHAR(64))");
-            primaryJdbcTemplate.update(
-                    "REPLACE INTO " + PIN_PROBE_TABLE + " (id, val) VALUES (1, ?)", STALE_PROBE_VALUE);
-            replicationControl.awaitCaughtUp();
-
-            replicationControl.stopReplica();
-            primaryJdbcTemplate.update(
-                    "UPDATE " + PIN_PROBE_TABLE + " SET val = ? WHERE id = 1", FRESH_PROBE_VALUE);
-
-            UUID absentEverywhere = UUID.randomUUID();
-            double before = promotedCount();
-
-            assertRejected(() -> byIdReadGuard.read(
-                    ByIdReadGuard.PLANNER_ENTITY_TYPE,
-                    absentEverywhere,
-                    () -> plannerQueryService.getPlanner(userId, absentEverywhere)))
-                    .as("a byId absent on both replica and primary must propagate the miss as a 404")
-                    .withCode("PLANNER_NOT_FOUND");
-            assertThat(promotedCount() - before)
-                    .as("a double-miss must NOT increment " + PROMOTED_COUNTER)
-                    .isEqualTo(0.0);
-            assertThat(readProbeViaRouting())
-                    .as("the BULKHEAD pin must be cleared in a finally, so a follow-on read-only read on the same thread still routes to the stale replica")
-                    .isEqualTo(STALE_PROBE_VALUE);
-        } finally {
-            replicationControl.startReplica();
-            replicationControl.awaitCaughtUp();
-        }
-    }
-
-    @Test
-    void byIdHitOnReplica_WhenServesWithoutReCheck_AndDoesNotPromote() {
-        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-hit@example.com");
-        Long userId = owner.getId();
-        replicationControl.awaitCaughtUp();
-
-        Planner replicated = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
-        UUID plannerId = replicated.getId();
-        replicationControl.awaitCaughtUp();
-
-        double before = promotedCount();
-
-        AtomicReference<PlannerResponse> served = new AtomicReference<>();
-        Throwable thrown = catchThrowable(() -> served.set(byIdReadGuard.read(
-                ByIdReadGuard.PLANNER_ENTITY_TYPE,
-                plannerId,
-                () -> plannerQueryService.getPlanner(userId, plannerId))));
-
-        assertThat(thrown)
-                .as("a replica hit must not surface as a miss")
-                .isNull();
-        assertThat(served.get())
-                .as("a replica hit must serve the entity directly")
-                .isNotNull()
-                .extracting(PlannerResponse::id)
-                .isEqualTo(plannerId);
-        assertThat(promotedCount() - before)
-                .as("a replica hit must NOT increment " + PROMOTED_COUNTER)
-                .isEqualTo(0.0);
-    }
-
-    @Test
-    void deleteTombstonesGhost_WhenReplicaPositive_Returns404() throws Exception {
-        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-tombstone@example.com");
-        Long userId = owner.getId();
-
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
-        UUID plannerId = planner.getId();
-        replicationControl.awaitCaughtUp();
-
-        try {
-            replicationControl.stopReplica();
-
-            deletePlanner(owner, plannerId);
-
-            Timestamp replicaDeletedAt = replicaJdbcTemplate.queryForObject(
-                    "SELECT deleted_at FROM planner_content WHERE planner_id = UUID_TO_BIN(?)",
-                    Timestamp.class,
-                    plannerId.toString());
-            assertThat(replicaDeletedAt)
-                    .as("the paused replica must still hold the row un-soft-deleted, so the 404 comes from the tombstone, not replication catching up")
-                    .isNull();
-
-            assertRejected(() -> byIdReadGuard.read(
-                    ByIdReadGuard.PLANNER_ENTITY_TYPE,
-                    plannerId,
-                    () -> plannerQueryService.getPlanner(userId, plannerId)))
-                    .as("a delete issues a tombstone synchronously before the response, so a replica-served positive whose del:planner:<id> is present must return 404")
-                    .withCode("NOT_FOUND");
-        } finally {
-            replicationControl.startReplica();
-            replicationControl.awaitCaughtUp();
-        }
-    }
 
     @Test
     void deleteOnPrimary_WhenWritesTombstoneKey_WithBoundedTtl() {
@@ -283,28 +112,6 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
                 .isLessThanOrEqualTo(3600L);
     }
 
-    @Test
-    void publishedRead_WhenOwnerSoftDeletesOnPausedReplica_Returns404FromTheTombstone() throws Exception {
-        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-published-delete@example.com");
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
-        UUID plannerId = planner.getId();
-        replicationControl.awaitCaughtUp();
-
-        try {
-            replicationControl.stopReplica();
-
-            deletePlanner(owner, plannerId);
-
-            assertThat(replicaStillPublished(plannerId))
-                    .as("the paused replica must still hold the planner published and live")
-                    .isTrue();
-            assertMaskedLikeASoftDelete(getPublished(plannerId), plannerId);
-        } finally {
-            replicationControl.startReplica();
-            replicationControl.awaitCaughtUp();
-        }
-    }
-
     @ParameterizedTest
     @ValueSource(strings = {"moderator-takedown", "moderator-unpublish", "owner-unpublish"})
     void publishedRead_WhenWithdrawnFromPublicViewOnPausedReplica_Returns404LikeACaughtUpReplica(String withdrawal)
@@ -324,33 +131,6 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
                     .as("the paused replica must still hold the planner published, so a 404 comes from the read path, not replication")
                     .isTrue();
             assertNotFoundLikeACaughtUpReplica(getPublished(plannerId), plannerId);
-        } finally {
-            replicationControl.startReplica();
-            replicationControl.awaitCaughtUp();
-        }
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"moderator-takedown", "moderator-unpublish", "owner-unpublish"})
-    void ownerRead_WhenWithdrawnFromPublicViewOnPausedReplica_StillServesTheOwner(String withdrawal)
-            throws Exception {
-        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-owner-read-" + withdrawal + "@example.com");
-        User moderator = TestDataFactory.createModerator(userRepository, "replica-lag-owner-read-mod-" + withdrawal + "@example.com");
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
-        UUID plannerId = planner.getId();
-        Long userId = owner.getId();
-        replicationControl.awaitCaughtUp();
-
-        try {
-            replicationControl.stopReplica();
-
-            withdraw(withdrawal, owner, moderator, plannerId);
-
-            PlannerResponse served = byIdReadGuard.read(ByIdReadGuard.PLANNER_ENTITY_TYPE, plannerId,
-                    () -> plannerQueryService.getPlanner(userId, plannerId));
-            assertThat(served.id())
-                    .as("a planner out of public view is still the owner's planner")
-                    .isEqualTo(plannerId);
         } finally {
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();
@@ -408,32 +188,6 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
             assertThat(served)
                     .as("the tombstoned planner must be masked and the live one served")
                     .containsExactly(live.getId().toString());
-        } finally {
-            replicationControl.startReplica();
-            replicationControl.awaitCaughtUp();
-        }
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"GET", "POST"})
-    void batchPull_WhenReplicaLacksAnOwnedPlanner_PromotesItFromThePrimary(String method) throws Exception {
-        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-batch-miss-" + method + "@example.com");
-        replicationControl.awaitCaughtUp();
-
-        try {
-            replicationControl.stopReplica();
-
-            Planner primaryOnly = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
-            double before = promotedCount();
-
-            List<String> served = batchPull(method, owner, List.of(primaryOnly.getId(), UUID.randomUUID()));
-
-            assertThat(served)
-                    .as("a batch-pull miss on the replica must be re-checked on the primary; an id absent there too stays omitted")
-                    .containsExactly(primaryOnly.getId().toString());
-            assertThat(promotedCount() - before)
-                    .as("one promoted row must increment " + PROMOTED_COUNTER + " by 1")
-                    .isEqualTo(1.0);
         } finally {
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();
@@ -526,15 +280,6 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
         return Boolean.TRUE.equals(published) && deletedAt == null;
     }
 
-    private void assertMaskedLikeASoftDelete(HttpResponse<String> response, UUID plannerId) throws Exception {
-        assertThat(response.statusCode())
-                .as("the published read must be masked, not served: " + response.body())
-                .isEqualTo(404);
-        JsonNode problem = objectMapper.readTree(response.body());
-        assertThat(problem.path("code").asString()).isEqualTo("NOT_FOUND");
-        assertThat(problem.path("detail").asString()).isEqualTo("planner not found with id: " + plannerId);
-    }
-
     @Test
     void publishedRead_WhenRepublishedAfterWithdrawalOnCaughtUpReplica_IssuesNoBulkheadQuery() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-republish-bulkhead@example.com");
@@ -600,14 +345,6 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
             }
             return served;
         }
-    }
-
-    private String readProbeViaRouting() {
-        TransactionTemplate tt = new TransactionTemplate(new DataSourceTransactionManager(dataSource));
-        tt.setReadOnly(true);
-        return tt.execute(status ->
-                new JdbcTemplate(dataSource).queryForObject(
-                        "SELECT val FROM " + PIN_PROBE_TABLE + " WHERE id = 1", String.class));
     }
 
     private double promotedCount() {

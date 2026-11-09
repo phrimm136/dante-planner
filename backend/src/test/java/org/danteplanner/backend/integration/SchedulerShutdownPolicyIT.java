@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.config.ViewFlushSchedulerConfig;
 import org.danteplanner.backend.shared.config.ReadSourcesConfig;
 import org.danteplanner.backend.shared.freshness.MarkerStore;
 import org.danteplanner.backend.shared.sse.SseHeartbeatWorkerConfig;
@@ -37,8 +36,7 @@ class SchedulerShutdownPolicyIT extends SharedRoutingSupport {
                 scheduler.getScheduledThreadPoolExecutor().getExecuteExistingDelayedTasksAfterShutdownPolicy()));
 
         assertThat(runsDelayedTasksAfterShutdown)
-                .containsKeys("taskScheduler", ViewFlushSchedulerConfig.VIEW_FLUSH_SCHEDULER,
-                        ReadSourcesConfig.PROBE_SCHEDULER, MarkerStore.PROBE_SCHEDULER,
+                .containsKeys("taskScheduler", ReadSourcesConfig.PROBE_SCHEDULER, MarkerStore.PROBE_SCHEDULER,
                         SseHeartbeatWorkerConfig.SSE_HEARTBEAT_WORKER)
                 .allSatisfy((name, runsAfterShutdown) -> assertThat(runsAfterShutdown).as(name).isFalse());
     }

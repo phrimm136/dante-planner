@@ -15,7 +15,7 @@ import org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfigurati
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-import org.danteplanner.backend.planner.config.ViewFlushSchedulerConfig;
+import org.danteplanner.backend.shared.config.TaskSchedulerConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,24 +44,18 @@ class DegradeByOperationConfigTest {
     }
 
     @Test
-    void schedulerNotStarvedByCrossRegionHang_WhenTaskStalls_PoolHasSpareThreadsAndTheViewFlushHasItsOwn() {
+    void schedulerNotStarvedByCrossRegionHang_WhenTaskStalls_PoolHasSpareThreads() {
         new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(TaskSchedulingAutoConfiguration.class))
-                .withUserConfiguration(ViewFlushSchedulerConfig.class)
+                .withUserConfiguration(TaskSchedulerConfig.class)
                 .withPropertyValues("spring.task.scheduling.pool.size=4")
                 .run(context -> {
                     ThreadPoolTaskScheduler shared = context.getBean("taskScheduler", ThreadPoolTaskScheduler.class);
-                    ThreadPoolTaskScheduler viewFlush = context.getBean(
-                            ViewFlushSchedulerConfig.VIEW_FLUSH_SCHEDULER, ThreadPoolTaskScheduler.class);
 
                     assertThat(shared.getScheduledThreadPoolExecutor().getCorePoolSize())
                             .as("the scheduler shared by every @Scheduled task must have spare threads, "
                                     + "or one task blocked on a cross-region write stops the rest")
                             .isGreaterThanOrEqualTo(MIN_SCHEDULER_POOL);
-                    assertThat(viewFlush)
-                            .as("the 500ms view flush must not share the pool it could exhaust")
-                            .isNotSameAs(shared);
-                    assertThat(viewFlush.getScheduledThreadPoolExecutor().getCorePoolSize()).isEqualTo(1);
                 });
     }
 

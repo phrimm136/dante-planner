@@ -622,7 +622,6 @@ class PlannerCommandServiceTest {
 
             assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false))
                     .withCode("PLANNER_NOT_FOUND");
-            verify(plannerRepository, never()).existsActiveById(any());
             verify(plannerRepository, never()).insert(any());
             verify(plannerRepository, never()).countActiveByUserId(any());
         }
@@ -637,7 +636,6 @@ class PlannerCommandServiceTest {
 
             assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false))
                     .withCode("PLANNER_FORBIDDEN");
-            verify(plannerRepository, never()).existsActiveById(any());
             verify(plannerRepository, never()).insert(any());
         }
 
@@ -659,7 +657,6 @@ class PlannerCommandServiceTest {
                     testUser.getId(), deviceId, plannerId, request, false);
 
             assertThat(result.isCreated()).isTrue();
-            verify(plannerRepository, never()).existsActiveById(any());
         }
     }
 

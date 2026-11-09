@@ -1,5 +1,6 @@
 package org.danteplanner.backend.service;
 
+import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.comment.service.CommentCommandService;
@@ -51,6 +52,8 @@ import static org.mockito.Mockito.when;
  */
 @ExtendWith(MockitoExtension.class)
 class CommentCommandServiceNotificationTest {
+
+    private static final long PLANNER_OWNER_ID = 41L;
 
     private static final UUID PLANNER_ID = UUID.randomUUID();
     private static final UUID PARENT_PUBLIC_ID = UUID.randomUUID();
@@ -146,7 +149,8 @@ class CommentCommandServiceNotificationTest {
 
     private void givenAPublishedPlanner() {
         users.add(TestDataFactory.unsavedUser(COMMENTER_ID));
-        when(plannerRepository.existsPublishedById(PLANNER_ID)).thenReturn(true);
+        when(plannerRepository.findThread(PLANNER_ID))
+                .thenReturn(Optional.of(new PlannerThread(PLANNER_ID, PLANNER_OWNER_ID, true, false)));
     }
 
     private static PlannerComment parent() {

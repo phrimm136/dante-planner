@@ -2,6 +2,7 @@ package org.danteplanner.backend.exception;
 
 import org.danteplanner.backend.auth.exception.SessionRevokedException;
 import org.danteplanner.backend.auth.security.SessionRevokedExceptionAdvice;
+import org.danteplanner.backend.planner.api.PlannerMiss;
 import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.exception.StreamLifecycleExceptionAdvice;
@@ -56,7 +57,7 @@ class ApiExceptionHandlerEventStreamTest {
 
         @GetMapping(value = "/probe/{id}/absent", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
         public SseEmitter absent(@PathVariable UUID id) {
-            throw new PlannerNotFoundException(id);
+            throw new PlannerNotFoundException(new PlannerMiss.Absent(id));
         }
 
         @GetMapping(value = "/probe/{id}/typed", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

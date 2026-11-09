@@ -679,12 +679,12 @@ valid band. The validation branch adds a fourth backend copy (`EncodedGiftId`) b
 `GameDataRegistry.GIFT_ENHANCEMENT_PATTERN`, which `PlannerIdMigrations` also reads.
   re-check: `rg -q 'EncodedGiftIdSchema.safeParse\(id\)' frontend/src/pages/planner/lib/plannerContentExtractors.ts && rg -q 'return enhanced \? id % 10000 : id;' backend/src/main/java/org/danteplanner/backend/planner/searchindex/PlannerContentEntityExtractor.java`
 - 2026-08-17 — `PlannerCoreInfo.absent()` yields a null `createdAt`
-(`PublishedPlannerQueryService.java:54` uses it whenever the batch core load misses a row)
+(`PublishedPlannerQueryService` uses it whenever the batch core load misses a row)
 and the global `NON_NULL` Jackson config omits the key, but `PlannerListSchemas.ts:19`
 declares `createdAt` required, so one catalog row without a core row rejects the entire
 paginated community page rather than one card. The sibling fields on the same DTO are
 correctly `.nullish()` (`:17-18`) and the components already tolerate an absent value.
-  re-check: `rg -q '^  createdAt: z.string\(\),$' frontend/src/pages/planner/schemas/PlannerListSchemas.ts && rg -q 'return new PlannerCoreInfo\(null, null, null, null\);' backend/src/main/java/org/danteplanner/backend/planner/dto/PlannerCoreInfo.java`
+  re-check: `rg -q '^  createdAt: z.string\(\),$' frontend/src/pages/planner/schemas/PlannerListSchemas.ts && rg -q 'return new PlannerCoreInfo\(null, null, null, null, null\);' backend/src/main/java/org/danteplanner/backend/planner/dto/PlannerCoreInfo.java`
 - 2026-08-17 — `AbEventSchemas.ts:5` types `relatedEgoGifts` as `z.array(z.string())`
 rather than `EGOGiftIdSchema`, and 13 ids in `static/data/abEventSpecList.json`
 (`991001`–`993004`, six digits) violate `GIFT_ID_PATTERN`. `EGOGiftGrid.tsx:32-33` renders
@@ -1133,20 +1133,12 @@ guards the parse but likewise skips the schema gate.
   chatter and ADR 123 moves writes beside the primary, where each round trip costs about 1 ms.
   Worth doing if write forwarding is rolled back, or when ADR 122's command-count test is built.
   re-check: `rg -q 'target.isReadOnly\(\)' backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidCapturingDataSource.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/resources 'useLocalSessionState'`
-- 2026-09-23 — Two read paths take Seoul's primary across the WAN, and together with token
-  rotation (about 5,800 a week) they account for the pool's ~80,000 weekly acquisitions against
-  ~200 user writes. The view flush runs one primary transaction per detail read (6–8 round
-  trips; 6 even for a repeat view that inserts nothing), up to 46,928 a week. `/api/sse/subscribe`
-  loads notification settings through `UserSettingsService.getOrCreateEntity`, a read-write
-  `@Transactional`, so every per-pod cache miss is a primary transaction (11 round trips when it
-  creates the row), up to 27,335 a week. Neither is on a user's critical path, but both hold
-  primary connections from the smaller WAN pool and add replication traffic. The settings load
-  now goes through `UserSettingsService.getSettings` (read-only, creates no row), so that half is
-  closed; whether a Seoul replica read right after an invalidation can cache a stale row for the
-  five-minute TTL is unverified. The view flush leaves Seoul once ADR 116's `POST .../viewcount` is
-  forwarded under ADR 123 (`write_forwarding = all`). Worth re-measuring the pool's acquisitions
-  after that flip.
-  re-check: `rg -qF '@PostMapping("/published/{id}/viewcount")' backend/src/main/java/org/danteplanner/backend/planner/controller/PublishedPlannerController.java && rg -q 'public void flush\(\)' backend/src/main/java/org/danteplanner/backend/planner/service/PlannerViewRecorder.java`
+- 2026-09-23 — Whether a Seoul replica read right after a settings invalidation can cache a stale
+  row for the five-minute TTL is unverified: the SSE subscribe path loads notification settings
+  through `UserSettingsService.getSettings`, which is read-only and may land on the replica. The
+  detail GET's view flush, the other Seoul primary path, is gone. Worth re-measuring the Seoul
+  pool's acquisitions after the marker-reading release is live in both regions.
+  re-check: `rg -q 'getSettings\(' backend/src/main/java/org/danteplanner/backend/user/service/UserSettingsService.java`
 - **The gate assumes the probe and the read reach the same replica.** `WAIT_FOR_EXECUTED_
   GTID_SET` runs on one pooled connection and the request's read uses another; sound with
   one replica behind the endpoint, void the day the endpoint resolves to more than one host.
@@ -1247,9 +1239,11 @@ guards the parse but likewise skips the schema gate.
   consumer that does not parse it as a URL.
   re-check: `rg -qF 'href="%VITE_API_BASE_URL%"' frontend/index.html && .claude/skills/debt-ledger/bin/debt absent frontend/src/lib/env.ts 'trim'`
 - Unit ADR 116: 2026-09-23 — Intent preload (`defaultPreload: 'intent'`) is off because the published-detail
-  loader records a view. It also preloaded route chunks on hover, which hides part of a chunk
-  wave per navigation. Worth doing once view recording leaves the loader: restore it.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent frontend/src/lib/router.tsx 'defaultPreload' && rg -qF 'getPublishedPlanner(id, userId, viewerIdentity, userAgent)' backend/src/main/java/org/danteplanner/backend/planner/controller/PublishedPlannerController.java`
+  GET used to record a view, so a hover counted as one. The GET no longer records views; the page
+  posts the view once per mount. Preload also loaded route chunks on hover, which hides part of a
+  chunk wave per navigation. Worth doing once the frontend release that posts the view is live:
+  restore it.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent frontend/src/lib/router.tsx 'defaultPreload'`
 - Unit ADR 123: 2026-09-24 — `POST /api/planner/md/batch` and its request-body path stay beside the GET for
   clients that have not switched, including tabs opened before the switching release, which keep
   their old bundle until reloaded. Worth doing once the frontend release using the GET is live and
@@ -1272,7 +1266,7 @@ guards the parse but likewise skips the schema gate.
   needs a token with Cache Rules edit on the zone; the staging token gets 403 on zone rulesets.
   Worth doing once the cookieless content endpoint exists, against that endpoint rather than the
   synthetic origin, before the Cache Rule is relied on in production.
-  re-check: `rg -qF 'getPublishedPlanner(id, userId, viewerIdentity, userAgent)' backend/src/main/java/org/danteplanner/backend/planner/controller/PublishedPlannerController.java && .claude/skills/debt-ledger/bin/debt absent terraform/cloudflare 'http_request_cache_settings'`
+  re-check: `.claude/skills/debt-ledger/bin/debt absent terraform/cloudflare 'http_request_cache_settings'`
 - 2026-09-27 — Until `c54c159e`, a first run of `deploy/grafana/import-alert-rules.sh` created its
   folder with the literal title `${GRAFANA_ALERT_FOLDER:-danteplanner-alerts}`, so stray folders
   holding rules may exist (unverified). Worth doing before the next re-import: list the alert
@@ -1484,24 +1478,10 @@ guards the parse but likewise skips the schema gate.
   (read from the schema, not EXPLAINed). Worth doing when the table grows past a size where the purge
   holds locks long enough to stall notification inserts: EXPLAIN it, then add an index or batch it.
   re-check: `rg -q 'n.deletedAt < :cutoffDate' backend/src/main/java/org/danteplanner/backend/notification/repository/NotificationRepository.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/resources/db/migration -i 'notifications ?\(deleted_at'`
-- `PublishedPlannerQueryService.incrementViewCount` has no production caller since views moved to the
-  buffered `PlannerViewRecorder` path; only two `PublishedPlannerQueryServiceTest` tests call it.
-  Delete the method and those tests together when the planner view or query service is next touched.
-  re-check: `rg -q 'public void incrementViewCount\(' backend/src/main/java/org/danteplanner/backend/planner/service/PublishedPlannerQueryService.java`
 - `SentinelUserVerifier.java:15` says verification is skipped in tests because "TestDataInitializer
   handles it"; that class never loaded and the test overhaul deleted it. Fix the comment when the
   sentinel-user code is next touched.
   re-check: `rg -q 'TestDataInitializer' backend/src/main/java/org/danteplanner/backend/user/config/SentinelUserVerifier.java`
-- `PlannerViewLockOrderIT.flush_WhenConcurrentFlushesShareTwoPlanners_AdvancesEveryCounter` fails in a
-  full backend run at a rate of a few percent at most (CannotAcquireLockException on the planner_stats
-  upsert, passing on retry); 26 full runs and 2,400 repetitions on 2026-10-07 did not reproduce it.
-  Worth doing when it next fails: read that run's XML cause chain (the `backend-test-reports`
-  artifact in CI). SQLState 40001 means a deadlock, error 1205 a lock-wait timeout; both failing runs
-  so far took 30-40 s longer than their neighbours, which points at the timeout. Open hypotheses: a
-  third transaction holding a gap lock on the nearly empty `planner_stats`; a scan in byte order
-  against the pods' signed-UUID TreeMap order (the two orders disagree for about half of pairs); a
-  shared context's 500 ms `PlannerViewRecorder` flush as that third party.
-  re-check: `rg -q 'void flush_WhenConcurrentFlushesShareTwoPlanners_AdvancesEveryCounter' backend/src/test/java/org/danteplanner/backend/integration/PlannerViewLockOrderIT.java`
 - The EGO detail page can livelock in tests: a tier or tab click inside `act()` while the skill and
   passive description boundaries are still suspended on the keyword-formatter static-data waterfall
   makes React re-commit with no DOM change and starves the pending fetch (diagnosed 2026-10-08 with a

@@ -5,12 +5,13 @@ import java.util.UUID;
 
 public record PlannerCoreInfo(
     UUID plannerId,
+    Long authorId,
     Instant createdAt,
     String authorUsernameEpithet,
     String authorUsernameSuffix
 ) {
 
     public static PlannerCoreInfo absent() {
-        return new PlannerCoreInfo(null, null, null, null);
+        return new PlannerCoreInfo(null, null, null, null, null);
     }
 }

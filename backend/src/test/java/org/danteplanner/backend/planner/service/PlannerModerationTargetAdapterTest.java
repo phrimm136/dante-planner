@@ -78,7 +78,7 @@ class PlannerModerationTargetAdapterTest {
 
     @Test
     void checkPublished_WhenCalled_DelegatesToTheAccessGuard() {
-        when(plannerRepository.existsPublishedById(planner.getId())).thenReturn(false);
+        when(plannerRepository.findThread(planner.getId())).thenReturn(Optional.empty());
 
         assertRejected(() -> adapter.checkPublished(planner.getId())).withCode("PLANNER_NOT_FOUND");
     }

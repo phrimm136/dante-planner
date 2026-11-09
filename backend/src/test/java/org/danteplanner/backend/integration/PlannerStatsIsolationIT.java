@@ -10,7 +10,6 @@ import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
-import org.danteplanner.backend.planner.service.PlannerViewRecorder;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -57,8 +56,6 @@ class PlannerStatsIsolationIT extends ExclusiveDatabaseSupport {
     @Autowired
     private PlannerCatalogService catalogService;
 
-    @Autowired
-    private PlannerViewRecorder viewRecorder;
 
     private User owner;
     private User commenter;
@@ -151,24 +148,5 @@ class PlannerStatsIsolationIT extends ExclusiveDatabaseSupport {
                 .andExpect(jsonPath("$.viewCount").value(42))
                 .andExpect(jsonPath("$.upvotes").value(5))
                 .andExpect(jsonPath("$.commentCount").value(7));
-    }
-
-    // detail-view-count-async
-    @Test
-    void detailViewCountAsync_WhenViewed_PreRequestCountServedThenFlushIncrements() throws Exception {
-        seedStats(10, 0, 0);
-
-        mockMvc.perform(get("/api/planner/md/published/{id}", planner.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.viewCount").value(10));
-
-        viewRecorder.flush();
-
-        int viewCount = statsRepository.findById(planner.getId())
-                .map(PlannerStats::getViewCount)
-                .orElse(-1);
-        assertThat(viewCount)
-                .as("the buffered view increments planner_stats once flushed")
-                .isEqualTo(11);
     }
 }

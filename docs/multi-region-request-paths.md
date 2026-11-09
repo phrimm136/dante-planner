@@ -330,18 +330,15 @@ see §6 for why all three matter.
 
 ## 9. Scheduled work
 
-`planner/config/ViewFlushSchedulerConfig` declares **two** schedulers:
+`shared/config/TaskSchedulerConfig` declares `taskScheduler` (`@Primary`, pool from
+`spring.task.scheduling.pool.size`, default 4). Every `@Scheduled` method that does not name a
+scheduler runs on it.
 
-- `taskScheduler` (`@Primary`, pool from `spring.task.scheduling.pool.size`, default 4) — every
-  `@Scheduled` method that does not name a scheduler, including SSE heartbeats.
-- `viewFlushScheduler` (pool 1) — only `PlannerViewRecorder.flush`, which runs every 500ms and
-  writes cross-region on every tick.
-
-Both are declared explicitly because Spring Boot's `TaskSchedulingAutoConfiguration` is
-`@ConditionalOnMissingBean(TaskScheduler.class)`: declaring *either* scheduler suppresses the
-framework's, leaving `spring.task.scheduling.pool.size` unread and binding every scheduled task to
-whichever single scheduler exists. The isolation matters because a task blocked on a hung
-cross-region write must not stop heartbeats.
+It is declared explicitly because Spring Boot's `TaskSchedulingAutoConfiguration` is
+`@ConditionalOnMissingBean(TaskScheduler.class)`: the probe and heartbeat schedulers are
+`TaskScheduler` beans too, so without this declaration the framework's own pool backs off and
+`spring.task.scheduling.pool.size` goes unread. The pool needs spare threads, so a task blocked on
+a hung cross-region write does not stop the others.
 
 Jobs that must run once per *fleet* rather than once per pod take a `@SchedulerLock` over the
 shared auth Redis: `UserCleanupScheduler.cleanupExpiredUsers`,

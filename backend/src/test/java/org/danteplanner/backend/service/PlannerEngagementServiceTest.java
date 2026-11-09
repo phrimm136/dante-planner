@@ -1,4 +1,5 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.mockito.ArgumentCaptor;
 
@@ -58,6 +59,8 @@ import org.danteplanner.backend.planner.entity.VoteType;
  */
 @ExtendWith(MockitoExtension.class)
 class PlannerEngagementServiceTest {
+
+    private static final long PLANNER_OWNER_ID = 41L;
 
     private static final int RECOMMENDED_THRESHOLD = 10;
 
@@ -130,7 +133,7 @@ class PlannerEngagementServiceTest {
             PlannerVoteId voteId =
                 new PlannerVoteId(testUser.getId(), plannerId);
 
-            when(plannerRepository.findPublishedAggregate(plannerId))
+            when(plannerRepository.findAggregateWithAuthor(plannerId))
                     .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser))));
             when(plannerVoteRepository.existsById(voteId))
                     .thenReturn(true);
@@ -154,7 +157,7 @@ class PlannerEngagementServiceTest {
             PlannerVoteId voteId =
                 new PlannerVoteId(testUser.getId(), plannerId);
 
-            when(plannerRepository.findPublishedAggregate(plannerId))
+            when(plannerRepository.findAggregateWithAuthor(plannerId))
                     .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser))));
             when(plannerVoteRepository.existsById(voteId))
                     .thenReturn(false);
@@ -184,7 +187,7 @@ class PlannerEngagementServiceTest {
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
 
-            when(plannerRepository.findPublishedAggregate(plannerId))
+            when(plannerRepository.findAggregateWithAuthor(plannerId))
                     .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser))));
             when(plannerVoteRepository.existsById(any(PlannerVoteId.class))).thenReturn(false);
             when(plannerVoteRepository.insert(any(PlannerVote.class)))
@@ -212,7 +215,7 @@ class PlannerEngagementServiceTest {
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
 
-            when(plannerRepository.findPublishedAggregate(plannerId))
+            when(plannerRepository.findAggregateWithAuthor(plannerId))
                     .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser))));
             when(plannerVoteRepository.existsById(any(PlannerVoteId.class))).thenReturn(false);
             when(plannerVoteRepository.insert(any(PlannerVote.class)))
@@ -231,7 +234,7 @@ class PlannerEngagementServiceTest {
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
 
-            when(plannerRepository.findPublishedAggregate(plannerId))
+            when(plannerRepository.findAggregateWithAuthor(plannerId))
                     .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser))));
             when(plannerVoteRepository.existsById(any(PlannerVoteId.class))).thenReturn(false);
             when(plannerVoteRepository.insert(any(PlannerVote.class)))
@@ -247,7 +250,8 @@ class PlannerEngagementServiceTest {
     @Test
     void reportPlanner_WhenCalled_CreatesTheReportForTheReporterAndPlanner() {
         UUID plannerId = UUID.randomUUID();
-        when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
+        when(plannerRepository.findThread(plannerId))
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
 
         engagementService.reportPlanner(testUser.getId(), plannerId);
 

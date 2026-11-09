@@ -4,11 +4,7 @@ import tools.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
-import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
-import org.danteplanner.backend.planner.repository.PlannerViewRepository;
-import org.danteplanner.backend.planner.service.PlannerViewRecorder;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -31,9 +27,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 /**
- * Detail read seam: serving a published planner does not take a row lock (so a second reader
- * is not serialized behind a held write lock), and the response returns the pre-request view
- * count while the view row is persisted only when the buffer is later flushed.
+ * Detail read seam: serving a published planner does not take a row lock, so a second reader
+ * is not serialized behind a held write lock.
  */
 class PublishedPlannerDetailIT extends ExclusiveDatabaseSupport {
 
@@ -45,15 +40,6 @@ class PublishedPlannerDetailIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private PlannerRepository plannerRepository;
-
-    @Autowired
-    private PlannerViewRepository plannerViewRepository;
-
-    @Autowired
-    private PlannerStatsRepository plannerStatsRepository;
-
-    @Autowired
-    private PlannerViewRecorder recorder;
 
     @Autowired
     private EntityManager entityManager;
@@ -114,23 +100,5 @@ class PublishedPlannerDetailIT extends ExclusiveDatabaseSupport {
             release.countDown();
             pool.shutdownNow();
         }
-    }
-
-    @Test
-    void detailRead_WhenServed_ReturnsBeforeViewWrite() throws Exception {
-        int before = plannerStatsRepository.findById(plannerId).map(PlannerStats::getViewCount).orElse(0);
-
-        int responseViewCount = detailViewCount();
-
-        assertThat(responseViewCount)
-                .as("the detail response returns the pre-request view count, not a synchronous increment")
-                .isEqualTo(before);
-
-        recorder.flush();
-        assertThat(plannerViewRepository.findAll().stream()
-                        .filter(view -> plannerId.equals(view.getPlannerId()))
-                        .count())
-                .as("the view is persisted by the later flush")
-                .isEqualTo(1L);
     }
 }
