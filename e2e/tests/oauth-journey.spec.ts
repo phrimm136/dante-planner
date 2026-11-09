@@ -75,8 +75,6 @@ test('the callback mints ryw_gtid for the user row it commits', async () => {
     const flow = await startFlow(APP_URL)
     const authorized = await authorizeAtStub(flow.authorizeUrl, email)
 
-    // Served by Seoul on purpose: the GTID gate is registered only where routing is enabled, so
-    // Oregon mints no cookie for the same commit.
     const outcome = await completeCallback(authorized.callbackUrl, flow.oauthTx, {
       host: SEOUL_API,
     })

@@ -22,8 +22,9 @@ import { edgeContext } from '../src/edge'
 // carries the planner was served by the authority after the written scope's marker skipped the
 // replica.
 //
-// Writes go to Oregon so no ryw_gtid exists (docs/multi-region-request-paths.md §3): the reader
-// against Seoul has nothing to present, and the markers are the only thing that can answer.
+// The readers are contexts of their own, so the ryw_gtid the write minted stays with the
+// writer: the reader against Seoul has nothing to present, and the markers are the only thing
+// that can answer.
 
 test.describe.configure({ mode: 'default' })
 test.describe.configure({ timeout: SAFETY_WINDOW_MS * 4 + 60_000 })

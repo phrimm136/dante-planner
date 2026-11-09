@@ -27,10 +27,6 @@ import { edgeContext } from '../src/edge'
 // The read-your-writes gate, exercised across the two regions it exists for: a write served by
 // Seoul commits on the Oregon primary and mints ryw_gtid, and a read carrying that cookie must see
 // the write at every instant of the replication window — never a bare 404 that resolves later.
-//
-// Writes are driven through Seoul because the gate is registered only where routing is enabled
-// (docs/multi-region-request-paths.md §3); an Oregon write mints no cookie because Oregon reads
-// the pool it wrote to.
 
 test.describe.configure({ mode: 'default' })
 
