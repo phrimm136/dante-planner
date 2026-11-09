@@ -43,6 +43,8 @@ Code-based routes only, defined in `src/lib/router.tsx` with `lazyRoute` (from `
 
 - External data (static JSON, API responses) is validated with Zod at the boundary via `validateData` (`src/lib/validation.ts`); schemas use `.strict()`, types come from `z.infer` — never a parallel interface.
 - All user-visible text goes through `t()` (react-i18next).
+  `ui-text/no-hardcoded-text` fails on text in JSX and label sites that `lint/ui-text-baseline.json`
+  does not name. Lower or remove an entry when you translate it, and never add one.
 
 ## Testing
 

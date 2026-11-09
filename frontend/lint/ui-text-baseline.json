@@ -1,0 +1,177 @@
+{
+  "src/components/Footer.tsx": {
+    "Discord": 1
+  },
+  "src/components/feedback/LoadingState.tsx": {
+    "Loading...": 1
+  },
+  "src/components/layout/DetailEntitySelector.tsx": {
+    "Lv. ${}": 1
+  },
+  "src/components/tiptap-node/image-upload-node/image-upload-node.tsx": {
+    "Clear All": 1,
+    "Click to upload": 1,
+    "MB each.": 1,
+    "Maximum": 1,
+    "Uploading": 1,
+    "file": 1,
+    "files": 1,
+    "or drag and drop": 1,
+    "s": 1
+  },
+  "src/components/ui/command.tsx": {
+    "Command Palette": 1,
+    "Search for a command to run...": 1
+  },
+  "src/components/ui/dialog.tsx": {
+    "Close": 1
+  },
+  "src/components/ui/pagination.tsx": {
+    "pagination": 1
+  },
+  "src/components/ui/sheet.tsx": {
+    "Close": 1
+  },
+  "src/lib/router.tsx": {
+    "${} - ${} | Dante's Planner": 1,
+    "${} | Dante's Planner": 1,
+    "Dante's Planner": 1,
+    "Dante's Planner - Limbus Company Database and Planning Tool": 1
+  },
+  "src/pages/abEvent/components/AbEventList.tsx": {
+    "No events found.": 1
+  },
+  "src/pages/battle/components/BattleList.tsx": {
+    "No battle entities found.": 1
+  },
+  "src/pages/battle/components/detail/BattleDetailHeader.tsx": {
+    "${} rank": 1
+  },
+  "src/pages/battle/components/detail/BattleEgoSection.tsx": {
+    "${} rank": 1
+  },
+  "src/pages/battle/components/detail/BattleInfoPane.tsx": {
+    "HP": 1
+  },
+  "src/pages/egoGift/components/EGOGiftKeywordFilter.tsx": {
+    "${} filter": 1
+  },
+  "src/pages/home/components/SideLinkSection.tsx": {
+    "Discord (new!)": 1
+  },
+  "src/pages/identity/components/IdentityCard.tsx": {
+    "${} star frame": 1,
+    "Lv. ${}": 1
+  },
+  "src/pages/identity/components/PassiveI18n.tsx": {
+    "x": 1
+  },
+  "src/pages/moderator/ModeratorPage.tsx": {
+    "${}min": 1,
+    "Banned": 1,
+    "Timed Out": 1
+  },
+  "src/pages/planner/components/deckBuilder/CompactIdentityRow.tsx": {
+    "Lv.${}": 1,
+    "Skill ${}: ${} (${})": 1,
+    "Uptie ${}": 1
+  },
+  "src/pages/planner/components/deckBuilder/DeckFilterBar.tsx": {
+    "Additional Keywords": 1,
+    "Attack Type": 1,
+    "Defense Type": 1,
+    "EGO Type": 1,
+    "Keyword": 1,
+    "Rarity": 1,
+    "Season": 1,
+    "Sinner": 1,
+    "Skill Attribute": 1,
+    "Unit Keywords": 1
+  },
+  "src/pages/planner/components/deckBuilder/EntityTierSelectors.tsx": {
+    "Tier ${}": 1
+  },
+  "src/pages/planner/components/deckBuilder/IdentityGrid.tsx": {
+    "Selected": 1
+  },
+  "src/pages/planner/components/deckBuilder/SinnerDeckCard.tsx": {
+    "Skill ${}: ${} (${})": 1
+  },
+  "src/pages/planner/components/deckBuilder/StatusViewer.tsx": {
+    "x": 1
+  },
+  "src/pages/planner/components/plannerList/PlannerStatusIcon.tsx": {
+    "Draft": 1,
+    "Published": 1,
+    "Saved": 1,
+    "Synced": 1,
+    "Unpublished changes": 1,
+    "Unsynced": 1
+  },
+  "src/pages/planner/components/skillReplacement/SinnerSkillCard.tsx": {
+    "Skill ${}: ${} (${}) - EA: ${}": 1
+  },
+  "src/pages/planner/components/skillReplacement/SkillImageSimple.tsx": {
+    "Missing": 1
+  },
+  "src/pages/settings/components/AccountDeleteDialog.tsx": {
+    "DELETE": 1
+  },
+  "src/pages/themePack/components/ThemePackList.tsx": {
+    "No theme packs found.": 1
+  },
+  "src/shared/egoGift/components/EGOGiftCard.tsx": {
+    "Selected": 1
+  },
+  "src/shared/egoGift/components/EGOGiftIcon.tsx": {
+    "EGO Gift ${}": 1
+  },
+  "src/shared/filter/components/IconFilter.tsx": {
+    "${} filter": 1
+  },
+  "src/shared/filter/components/SearchableMultiSelect.tsx": {
+    "No results found.": 1
+  },
+  "src/shared/filter/components/SeasonDropdown.tsx": {
+    "Season ${}": 1
+  },
+  "src/shared/filter/components/ThemePackDropdown.tsx": {
+    "Theme Pack ${}": 1
+  },
+  "src/shared/moderation/components/BanDialog.tsx": {
+    "1 day": 1,
+    "1 hour": 1,
+    "3 hours": 1,
+    "30 days": 1,
+    "30 minutes": 1,
+    "6 hours": 1,
+    "7 days": 1
+  },
+  "src/shared/passive/components/IdentityPassiveCard.tsx": {
+    "x": 1
+  },
+  "src/shared/sinner/components/SinnerTitleRow.tsx": {
+    "${} rank": 1
+  },
+  "src/shared/skill/components/SkillDescription.tsx": {
+    "Coin ${}": 1
+  },
+  "src/shared/skill/components/SkillImageComposite.tsx": {
+    "Missing": 1
+  },
+  "src/shared/skill/components/SkillInfoPanel.tsx": {
+    "Attack": 1,
+    "Defense": 1
+  },
+  "src/shared/unitStatus/components/ResistancePanel.tsx": {
+    "(x": 1,
+    "Blunt": 1,
+    "Pierce": 1,
+    "Slash": 1
+  },
+  "src/shared/unitStatus/components/StatusPanel.tsx": {
+    "Defense": 1,
+    "HP": 1,
+    "Speed": 1
+  }
+}

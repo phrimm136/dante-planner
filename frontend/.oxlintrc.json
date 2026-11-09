@@ -5,7 +5,8 @@
     "eslint-plugin-react-refresh",
     "eslint-plugin-react-you-might-not-need-an-effect",
     { "name": "reacthooks", "specifier": "eslint-plugin-react-hooks" },
-    "./lint/entity-plugin.js"
+    "./lint/entity-plugin.js",
+    "./lint/ui-text-plugin.js"
   ],
   "categories": {
     "correctness": "error"
@@ -13,6 +14,13 @@
   "rules": {
     "entity/singular-builder": "error",
     "entity/no-plural-builder": "error",
+    "ui-text/no-hardcoded-text": [
+      "error",
+      {
+        "baseline": "lint/ui-text-baseline.json",
+        "allowedStrings": ["English", "日本語", "한국어", "中文"]
+      }
+    ],
     "jsx-a11y/prefer-tag-over-role": "off",
     "react-hooks/rules-of-hooks": "error",
     "reacthooks/capitalized-calls": "error",
@@ -221,10 +229,17 @@
     {
       "files": ["**/*.test.{ts,tsx}", "**/__tests__/**"],
       "rules": {
+        "ui-text/no-hardcoded-text": "off",
         "typescript/unbound-method": "off",
         "vitest/expect-expect": ["error", { "assertFunctionNames": ["expect", "validateFile"] }],
         "vitest/require-mock-type-parameters": "off",
         "vitest/valid-title": ["error", { "disallowedWords": ["should"] }]
+      }
+    },
+    {
+      "files": ["src/test-utils/**"],
+      "rules": {
+        "ui-text/no-hardcoded-text": "off"
       }
     },
     {
