@@ -4,11 +4,13 @@ import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator;
+import org.danteplanner.backend.planner.api.PlannerMiss;
+import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
-import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +27,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -49,15 +53,16 @@ class CommentThreadNotFoundContractTest {
 
     private final FakeUsers users = new FakeUsers();
 
+    private CommentQueryService queryService;
     private MockMvc mockMvc;
     private UUID plannerId;
 
     @BeforeEach
     void setUp() {
-        CommentQueryService queryService = new CommentQueryService(
+        queryService = new CommentQueryService(
                 commentRepository, null, users,
                 new PlannerAccessGuard(users, plannerRepository), new CommentAccessValidator());
-        mockMvc = standaloneSetup(new CommentController(queryService, null, null, new ByIdReadGuard()))
+        mockMvc = standaloneSetup(new CommentController(queryService, null, null))
                 .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
                 .setControllerAdvice(new ApiExceptionHandler())
                 .build();
@@ -96,6 +101,35 @@ class CommentThreadNotFoundContractTest {
 
         mockMvc.perform(get("/api/planner/{id}/comments", plannerId).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void getCommentTree_WhenStrangerReadsUnpublishedThread_MissesAsHiddenWithTheOwnersAuthorScope() {
+        PlannerNotFoundException miss = catchThrowableOfType(PlannerNotFoundException.class,
+                () -> queryService.getCommentTree(plannerId, STRANGER_ID));
+
+        assertThat(miss.miss()).isEqualTo(new PlannerMiss.Hidden(plannerId, OWNER_ID));
+        assertThat(miss.scopes()).containsExactlyInAnyOrder(
+                new FreshnessScope.Entity(plannerId), new FreshnessScope.Author(OWNER_ID));
+    }
+
+    @Test
+    void getCommentTree_WhenThePlannerRowIsAbsent_MissesAsAbsentWithTheEntityScopeOnly() {
+        when(plannerRepository.findThread(plannerId)).thenReturn(Optional.empty());
+
+        PlannerNotFoundException miss = catchThrowableOfType(PlannerNotFoundException.class,
+                () -> queryService.getCommentTree(plannerId, STRANGER_ID));
+
+        assertThat(miss.miss()).isEqualTo(new PlannerMiss.Absent(plannerId));
+        assertThat(miss.scopes()).containsExactly(new FreshnessScope.Entity(plannerId));
+    }
+
+    @Test
+    void getCommentTree_WhenOwnerReadsOwnThread_DeclaresThePlannerAndOwnerScopes() {
+        when(commentRepository.findByPlannerId(plannerId)).thenReturn(List.of());
+
+        assertThat(queryService.getCommentTree(plannerId, OWNER_ID).scopes()).containsExactlyInAnyOrder(
+                new FreshnessScope.Entity(plannerId), new FreshnessScope.Author(OWNER_ID));
     }
 
     private static void signInAs(Long userId) {
