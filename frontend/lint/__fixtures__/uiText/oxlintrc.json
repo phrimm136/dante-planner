@@ -1,0 +1,17 @@
+{
+  "$schema": "../../../node_modules/oxlint/configuration_schema.json",
+  "plugins": [],
+  "jsPlugins": ["../../ui-text-plugin.js"],
+  "categories": {
+    "correctness": "off"
+  },
+  "rules": {
+    "ui-text/no-hardcoded-text": [
+      "error",
+      {
+        "baseline": "lint/__fixtures__/uiText/baseline.json",
+        "allowedStrings": ["English", "日本語", "한국어", "中文"]
+      }
+    ]
+  }
+}

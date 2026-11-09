@@ -1,0 +1,8 @@
+{
+  "lint/__fixtures__/uiText/Seen.tsx": {
+    "Missing": 1
+  },
+  "lint/__fixtures__/uiText/Stale.tsx": {
+    "Timed Out": 2
+  }
+}

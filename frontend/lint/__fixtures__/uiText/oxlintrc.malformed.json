@@ -1,0 +1,14 @@
+{
+  "$schema": "../../../node_modules/oxlint/configuration_schema.json",
+  "plugins": [],
+  "jsPlugins": ["../../ui-text-plugin.js"],
+  "categories": {
+    "correctness": "off"
+  },
+  "rules": {
+    "ui-text/no-hardcoded-text": [
+      "error",
+      { "baseline": "lint/__fixtures__/uiText/malformed-baseline.json" }
+    ]
+  }
+}
