@@ -433,6 +433,10 @@ cpd {
     minimumTokenCount = 120
 }
 
+dependencies {
+    cpd("net.sourceforge.pmd:pmd-java:${cpd.toolVersion}")
+}
+
 tasks.named<de.aaschmid.gradle.plugins.cpd.Cpd>("cpdCheck") {
     source = files("src/main/java").asFileTree
     reports {
