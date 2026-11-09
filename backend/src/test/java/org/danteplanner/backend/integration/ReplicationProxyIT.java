@@ -71,13 +71,14 @@ class ReplicationProxyIT extends CausalHarnessSupport {
     }
 
     private long millisUntilVisibleOnReplica(String marker) {
+        // The primary may ship the binlog event before the client sees its commit acknowledged.
+        long sentAt = System.nanoTime();
         primaryJdbcTemplate.update("INSERT INTO replication_proxy_probe (marker) VALUES (?)", marker);
-        long committedAt = System.nanoTime();
-        while (System.nanoTime() - committedAt < VISIBILITY_DEADLINE_NANOS) {
+        while (System.nanoTime() - sentAt < VISIBILITY_DEADLINE_NANOS) {
             Integer count = replicaJdbcTemplate.queryForObject(
                     "SELECT COUNT(*) FROM replication_proxy_probe WHERE marker = ?", Integer.class, marker);
             if (count != null && count == 1) {
-                return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - committedAt);
+                return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - sentAt);
             }
             LockSupport.parkNanos(POLL_INTERVAL_NANOS);
         }
