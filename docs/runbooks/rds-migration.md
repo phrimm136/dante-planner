@@ -45,10 +45,9 @@ docker exec danteplanner-mysql mysql -uroot -p -e \
       `manage_master_user_password=true`, `deletion_protection=true`, `lifecycle{prevent_destroy=true}`.
 - [ ] SG: permanent EC2→RDS:3306 rule **and** a temporary RDS→source:3306 rule (RDS subnet CIDR only).
 ```bash
-cd terraform/rds
 .claude/skills/ops/bin/ops tf plan rds      # review: creating RDS + SG + subnet group + param group
-scripts/ops/terraform-run.sh apply
-terraform output rds_endpoint     # → put this value into SSM (next step)
+scripts/ops/terraform-run.sh -chdir=terraform/rds apply <plan file printed above>
+scripts/ops/terraform-run.sh -chdir=terraform/rds output rds_endpoint     # → put this value into SSM (next step)
 ```
 - [ ] RDS up. Endpoint: __________________________
 - [ ] **Sizing check (supersession from `docs/legacy/tasks/034`):** decide micro→small BEFORE cutover —
