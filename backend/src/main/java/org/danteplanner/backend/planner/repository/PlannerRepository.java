@@ -106,12 +106,6 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
     @Query("SELECT p.id FROM Planner p WHERE p.userId = :userId")
     List<UUID> findIdsByUserId(@Param("userId") Long userId);
 
-    @Query(value = AGGREGATE_LOAD
-            + "WHERE p.moderation.hiddenFromRecommended = TRUE AND c.deletedAt IS NULL",
-            countQuery = "SELECT COUNT(p) FROM Planner p JOIN p.content c "
-            + "WHERE p.moderation.hiddenFromRecommended = TRUE AND c.deletedAt IS NULL")
-    Page<Planner> findHiddenFromRecommended(Pageable pageable);
-
     /**
      * The id is the client's, so no id-null guard can tell a new aggregate from an existing
      * one: passing one that already exists overwrites it.
