@@ -883,7 +883,27 @@ def strip_heredocs(command_text):
 
 
 def shell_tokens(command_text):
-    shell_lexer = shlex.shlex(command_text, posix=True, punctuation_chars="|&;()<>\n")
+    lexer_parts = []
+    quote_mark = ""
+    char_index = 0
+    while char_index < len(command_text):
+        one_char = command_text[char_index]
+        if one_char == "\\" and quote_mark != "'":
+            lexer_parts.append(command_text[char_index:char_index + 2])
+            char_index += 2
+            continue
+        if quote_mark:
+            quote_mark = "" if one_char == quote_mark else quote_mark
+        elif one_char in "'\"":
+            quote_mark = one_char
+        elif one_char == "`" and command_text.find("`", char_index + 1) != -1:
+            end_index = command_text.find("`", char_index + 1)
+            lexer_parts.append(f" ( {command_text[char_index + 1:end_index]} ) ")
+            char_index = end_index + 1
+            continue
+        lexer_parts.append(one_char)
+        char_index += 1
+    shell_lexer = shlex.shlex("".join(lexer_parts), posix=True, punctuation_chars="|&;()<>\n")
     shell_lexer.whitespace = " \t\r"
     shell_lexer.whitespace_split = True
     shell_lexer.commenters = ""

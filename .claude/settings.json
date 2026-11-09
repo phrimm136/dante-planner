@@ -10,10 +10,7 @@
       "Read(**/.env.*)"
     ],
     "allow": [
-      "Bash(scripts/ops/access/rds-tunnel.sh:*)",
-      "Bash(scripts/ops/access/rds-query.sh:*)",
-      "Bash(scripts/ops/access/logs-query.sh:*)",
-      "Bash(scripts/ops/access/metrics-query.sh:*)"
+      "Bash(.claude/skills/ops/bin/ops *)"
     ],
     "defaultMode": "auto"
   },
@@ -46,6 +43,10 @@
           {
             "type": "command",
             "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-output-redirect.sh"
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/ops-redirect.sh"
           },
           {
             "type": "command",

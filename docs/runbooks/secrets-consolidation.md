@@ -158,7 +158,7 @@ means anything.
 export AWS_PROFILE=prod
 scripts/ops/terraform-run.sh -chdir=terraform/secrets init -backend-config=../backend.prod.hcl -reconfigure
 scripts/ops/terraform-run.sh -chdir=terraform/secrets state list | rg origin_client_ca   # expect nothing
-scripts/ops/terraform-run.sh -chdir=terraform/secrets plan -var-file=prod.tfvars       # READ IT
+.claude/skills/ops/bin/ops tf plan secrets -- -var-file=prod.tfvars       # READ IT
 scripts/ops/terraform-run.sh -chdir=terraform/secrets apply -var-file=prod.tfvars
 ```
 
@@ -180,7 +180,7 @@ scripts/ops/terraform-run.sh -chdir=terraform/secrets state list | rg origin_cli
 # for each address it lists:
 scripts/ops/terraform-run.sh -chdir=terraform/secrets state rm \
   'aws_secretsmanager_secret.origin_client_ca[0]' 'aws_secretsmanager_secret_version.origin_client_ca[0]'
-scripts/ops/terraform-run.sh -chdir=terraform/secrets plan -var-file=staging.tfvars    # READ IT
+.claude/skills/ops/bin/ops --env staging tf plan secrets -- -var-file=staging.tfvars    # READ IT
 scripts/ops/terraform-run.sh -chdir=terraform/secrets apply -var-file=staging.tfvars
 ```
 
@@ -228,9 +228,9 @@ Gate: every row reads `True  SecretSynced`, the KEY and EXTRACT columns name onl
 layout, and no `origin-client-ca` row is left. Then narrow the app-node grants to the bundles:
 
 ```bash
-scripts/ops/terraform-run.sh -chdir=terraform/oregon plan -var-file=prod.tfvars    # READ IT: the app-node secrets policy updates in place, nothing else
+.claude/skills/ops/bin/ops tf plan oregon -- -var-file=prod.tfvars    # READ IT: the app-node secrets policy updates in place, nothing else
 scripts/ops/terraform-run.sh -chdir=terraform/oregon apply -var-file=prod.tfvars
-scripts/ops/terraform-run.sh -chdir=terraform/seoul  plan -var-file=prod.tfvars
+.claude/skills/ops/bin/ops tf plan seoul -- -var-file=prod.tfvars
 scripts/ops/terraform-run.sh -chdir=terraform/seoul  apply -var-file=prod.tfvars
 synced us-west-2 oregon
 synced ap-northeast-2 seoul
@@ -282,7 +282,7 @@ for n in "${old[@]}"; do
   scripts/ops/terraform-run.sh -chdir=terraform/secrets state rm "aws_secretsmanager_secret.replicated[\"$n\"]"
 done
 EOF
-scripts/ops/terraform-run.sh -chdir=terraform/secrets plan -var-file=prod.tfvars       # expect: No changes.
+.claude/skills/ops/bin/ops tf plan secrets -- -var-file=prod.tfvars       # expect: No changes.
 ```
 
 Only after `No changes.`:

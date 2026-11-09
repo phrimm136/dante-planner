@@ -42,4 +42,4 @@ PW_HEX=$(printf '%s' "$PW" | od -An -v -tx1 | tr -d ' \n')
   docker run --rm -i --network host -e MYSQL_PWD "$MYSQL_CLIENT_IMAGE" \
     mysql -h 127.0.0.1 -P "${RDS_TUNNEL_PORT:-3306}" -u "$ADMIN_USER"
 
-echo "read-only user converged — verify: scripts/ops/access/rds-query.sh \"SELECT CURRENT_USER()\""
+echo "read-only user converged — verify: .claude/skills/ops/bin/ops sql \"SELECT CURRENT_USER()\""

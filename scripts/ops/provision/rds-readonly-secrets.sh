@@ -45,4 +45,4 @@ if ! secret_exists "$region" "$name"; then
 fi
 printf %s "$bundle" | put_secret "$region" "$name"
 echo "  updated  $name  (replicates to $replica_region)"
-echo "done — verify: scripts/ops/access/rds-query.sh \"SELECT CURRENT_USER()\""
+echo "done — verify: .claude/skills/ops/bin/ops sql \"SELECT CURRENT_USER()\""

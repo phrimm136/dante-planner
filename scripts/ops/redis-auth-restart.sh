@@ -184,8 +184,8 @@ print_verification() {
     cat <<'EOF'
 
 Verify Seoul caught up (Seoul replica offset should climb above 0, keys-with-expiry should reappear):
-  AWS_PROFILE=prod scripts/ops/access/metrics-query.sh 'max(redis_master_repl_offset{job="redis-auth",cluster="seoul"})' 30m 1m
-  AWS_PROFILE=prod scripts/ops/access/metrics-query.sh 'sum(redis_db_keys_expiring{job="redis-auth"}) by (cluster)' 30m 1m
+  .claude/skills/ops/bin/ops metrics 'max(redis_master_repl_offset{job="redis-auth",cluster="seoul"})' --since 30m --step 1m
+  .claude/skills/ops/bin/ops metrics 'sum(redis_db_keys_expiring{job="redis-auth"}) by (cluster)' --since 30m --step 1m
 EOF
 }
 

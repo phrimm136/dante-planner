@@ -27,7 +27,7 @@ Each environment has its own state bucket and var-file; prod also keeps its stat
 cp terraform/cloudflare/environment.tfvars.example terraform/cloudflare/prod.tfvars   # fill in token, account, zone
 AWS_PROFILE=<prod> scripts/ops/terraform-run.sh -chdir=terraform/cloudflare init -reconfigure -backend-config=../backend.prod.hcl
 AWS_PROFILE=<prod> scripts/ops/terraform-run.sh -chdir=terraform/cloudflare workspace select prod-fleet
-AWS_PROFILE=<prod> scripts/ops/terraform-run.sh -chdir=terraform/cloudflare plan -var-file=prod.tfvars    # expect creates only
+.claude/skills/ops/bin/ops tf plan cloudflare -- -var-file=prod.tfvars    # expect creates only
 AWS_PROFILE=<prod> scripts/ops/terraform-run.sh -chdir=terraform/cloudflare apply -var-file=prod.tfvars
 ```
 

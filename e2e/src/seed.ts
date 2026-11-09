@@ -19,8 +19,9 @@ function db(): mysql.Pool {
   const password = process.env.E2E_DB_PASSWORD
   if (!user || !password) {
     throw new Error(
-      'E2E_DB_USER and E2E_DB_PASSWORD must be set, and scripts/ops/access/rds-tunnel.sh start ' +
-        `must be forwarding ${DB_HOST}:${DB_PORT}`,
+      'E2E_DB_USER and E2E_DB_PASSWORD must be set, and a tunnel must be forwarding ' +
+        `${DB_HOST}:${DB_PORT} (locally .claude/skills/ops/bin/ops --env staging tunnel start, ` +
+        'in CI scripts/ops/access/rds-tunnel.sh start oregon)',
     )
   }
 

@@ -69,7 +69,7 @@ it is the cheapest thing to be holding when something else goes wrong.
    needed, but confirm it actually took:
 
    ```bash
-   scripts/ops/access/rds-query.sh "SELECT @@session_track_gtids"   # expect OWN_GTID
+   .claude/skills/ops/bin/ops sql "SELECT @@session_track_gtids"   # expect OWN_GTID
    ```
 
    It seeds a SESSION variable at connect time, so pooled connections keep the old value until they
@@ -102,7 +102,7 @@ dir (`terraform/oregon`, `terraform/seoul`) and AWS region (`us-west-2`, `ap-nor
 ### A1. Apply — replace the three stateful instances
 
 ```bash
-scripts/ops/terraform-run.sh -chdir=terraform/oregon plan     # READ IT: expect 3 replacements (cp, data, ingress)
+.claude/skills/ops/bin/ops tf plan oregon     # READ IT: expect 3 replacements (cp, data, ingress)
                                            # + launch-template re-render + SSM-document updates.
                                            # Confirm nothing outside that set is touched.
 scripts/ops/terraform-run.sh -chdir=terraform/oregon apply
@@ -179,7 +179,7 @@ Then drain, in this order. None of these steps is padding:
 
    ```bash
    # RDS: the replica has applied everything the primary has
-   scripts/ops/access/rds-query.sh "SHOW REPLICA STATUS\G" | grep -E 'Retrieved_Gtid_Set|Executed_Gtid_Set'
+   .claude/skills/ops/bin/ops sql "SHOW REPLICA STATUS\G" | grep -E 'Retrieved_Gtid_Set|Executed_Gtid_Set'
    # Redis auth: compare master_repl_offset on the primary with slave_repl_offset on the replica
    ```
 
@@ -295,7 +295,7 @@ and never re-attached.
 ```bash
 cd terraform/cloudflare
 # api_hostname: edge-test.dante-planner.com -> api.dante-planner.com
-scripts/ops/terraform-run.sh plan     # read it: the load balancer is renamed, nothing is destroyed
+.claude/skills/ops/bin/ops tf plan cloudflare     # read it: the load balancer is renamed, nothing is destroyed
 scripts/ops/terraform-run.sh apply
 ```
 

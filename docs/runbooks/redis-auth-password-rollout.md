@@ -50,8 +50,8 @@ a second time, outside the sync.
 After the sync, `redis-auth-0` is Ready and requires AUTH, and Seoul's replica catches up:
 
 ```bash
-AWS_PROFILE=prod scripts/ops/access/metrics-query.sh 'max(redis_master_repl_offset{job="redis-auth",cluster="seoul"})' 30m 1m
-AWS_PROFILE=prod scripts/ops/access/metrics-query.sh 'sum(redis_db_keys_expiring{job="redis-auth"}) by (cluster)' 30m 1m
+.claude/skills/ops/bin/ops metrics 'max(redis_master_repl_offset{job="redis-auth",cluster="seoul"})' --since 30m --step 1m
+.claude/skills/ops/bin/ops metrics 'sum(redis_db_keys_expiring{job="redis-auth"}) by (cluster)' --since 30m --step 1m
 ```
 
 The Seoul offset climbs above 0 and keys with expiry reappear. The

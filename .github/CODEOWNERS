@@ -1,6 +1,5 @@
 # CI/CD and infrastructure
 .github/                @phrimm136
-scripts/deploy/         @phrimm136
 docker-compose.yml      @phrimm136
 
 # Package manifests (blocks postinstall/build script injection)
