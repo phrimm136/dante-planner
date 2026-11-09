@@ -624,9 +624,28 @@ jobs:
         if: ${{ !cancelled() && steps.e2e-install.outcome == 'success' }}
         run: yarn --cwd e2e fmt:check
 
+      - name: Set up JDK 21
+        id: setup-java
+        if: ${{ !cancelled() }}
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad  # v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+          cache-read-only: true
+
+      - name: Build the backend jar
+        id: backend-jar
+        if: ${{ !cancelled() && steps.setup-java.outcome == 'success' }}
+        run: |
+          chmod +x backend/gradlew
+          backend/gradlew -p backend bootJar --no-daemon
+
       - name: Bring up the two-region rig
         id: rig
-        if: ${{ !cancelled() && steps.compose-env.outcome == 'success' && steps.build-spa.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.compose-env.outcome == 'success' && steps.build-spa.outcome == 'success' && steps.backend-jar.outcome == 'success' }}
+        env:
+          JAR_STAGE: jar-prebuilt
         run: |
           yarn --cwd e2e stack:up:rig
           # The rig publishes no host port for the primary, so the seeder dials the bridge.

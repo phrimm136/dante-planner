@@ -20,6 +20,9 @@ STUB_CLIENT_SECRET=stub-secret yarn --cwd e2e stack:up:rig
 `stack:up:rig` reads `STUB_CLIENT_SECRET` from the environment rather than from `.env`, and exits
 before starting anything if it is unset.
 
+The backend image compiles the jar from source unless `JAR_STAGE=jar-prebuilt` is set, which
+takes the jar in `backend/build/libs` from a prior `backend/gradlew -p backend bootJar` instead.
+
 Without the frontend build the bind mount in `docker-compose.e2e.yml` is an empty directory,
 nginx's `try_files … /index.html` finds no `index.html`, and every route 404s — which
 `routes.spec.ts` reads as a failure of the route, not of the mount.

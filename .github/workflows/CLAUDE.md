@@ -26,3 +26,10 @@
   `github.event.workflow_run.event` and `github.event.workflow_run.head_repository.full_name`:
   its `branches:` filter matches the triggering run's branch name, which a fork pull request can
   also carry, and a fork run of PR Gate ends green.
+- The PR Gate e2e job builds the backend boot jar on the runner, and its rig image takes that jar
+  through `JAR_STAGE=jar-prebuilt` and the `backend-jar` build context. Every other backend image
+  build (deploy-fleet, staging-rehearsal, window-schema-decomposition, PR Gate `build-backend`,
+  local `stack:up`) passes no `JAR_STAGE`, so it compiles from source.
+  The e2e job restores the setup-java Gradle cache with `cache-read-only: true`: a cache key
+  saves once, so a second writer that runs only bootJar would store a cache without the test
+  dependencies that test-backend needs.
