@@ -7,9 +7,13 @@ REMOTE="git@github.com:phrimm136/danteplanner-static.git"
 
 usage() {
   cat <<USAGE
-usage: static [--checkout <path>] <command>
+usage: static [--root <path>] [--checkout <path>] <command>
 
 Keeps <repo>/static, the data checkout it points at, and static.lock in agreement.
+
+repo:      the checkout this CLI file lives in, whatever the current directory: running
+           <worktree>/.claude/skills/static-checkout/bin/static acts on that worktree.
+           --root <path> names another checkout or worktree.
 
 commands:
   doctor   print the link target, the checkout HEAD and the lock sha; exit 1 on any mismatch
@@ -18,8 +22,10 @@ commands:
   link     point <repo>/static at the checkout (default $SIBLING)
   lock     write the checkout's HEAD into static.lock
   sync     check static.lock's sha out in the checkout; refuses a dirty or ahead checkout
+           link, lock and sync print one line naming what they change before changing it
 
 options:
+  --root <path>      act on this code checkout or worktree instead of the CLI's own
   --checkout <path>  use this data checkout instead of the link target
                      (link: instead of $SIBLING)
   -h, --help         show this help
@@ -28,11 +34,15 @@ USAGE
 
 die() { printf 'static: %s\n' "$1" >&2; exit "${2:-1}"; }
 
+root_arg=""
 checkout_arg=""
 command=""
 while [ $# -gt 0 ]; do
   case $1 in
     -h|--help) usage; exit 0 ;;
+    --root)
+      [ $# -ge 2 ] || die "--root needs a path; see static --help"
+      root_arg=$2; shift 2 ;;
     --checkout)
       [ $# -ge 2 ] || die "--checkout needs a path; see static --help"
       checkout_arg=$2; shift 2 ;;
@@ -44,16 +54,24 @@ while [ $# -gt 0 ]; do
 done
 [ -n "$command" ] || { usage >&2; exit 1; }
 
-repo=$(git rev-parse --show-toplevel 2>/dev/null) \
-  || die "not inside a code checkout; run static from the LimbusPlanner repository or a worktree"
+if [ -n "$root_arg" ]; then
+  repo=$(git -C "$root_arg" rev-parse --show-toplevel 2>/dev/null) \
+    || die "--root $root_arg is not inside a git checkout; pass --root <code checkout or worktree>"
+else
+  own_dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+  repo=$(git -C "$own_dir" rev-parse --show-toplevel 2>/dev/null) \
+    || die "this CLI ($own_dir) is not inside a git checkout; pass --root <code checkout or worktree>"
+fi
+cli="static"
+[ -z "$root_arg" ] || cli="static --root $repo"
 link="$repo/static"
 lock_file="$repo/static.lock"
 
 read_lock() {
-  [ -f "$lock_file" ] || die "no static.lock at $lock_file; run static lock"
+  [ -f "$lock_file" ] || die "no static.lock at $lock_file; run $cli lock"
   local sha
   sha=$(tr -d '[:space:]' < "$lock_file")
-  [[ $sha =~ ^[0-9a-f]{40}$ ]] || die "static.lock is not one 40-hex sha; run static lock"
+  [[ $sha =~ ^[0-9a-f]{40}$ ]] || die "static.lock is not one 40-hex sha; run $cli lock"
   printf '%s' "$sha"
 }
 
@@ -63,22 +81,26 @@ resolve_checkout() {
   elif [ -L "$link" ]; then
     readlink "$link"
   else
-    die "$link is not a symlink; run static link"
+    die "$link is not a symlink; run $cli link"
   fi
 }
 
 require_git_checkout() {
   git -C "$1" rev-parse --verify --quiet HEAD >/dev/null 2>&1 \
-    || die "no data checkout at $1; clone $REMOTE there, then run static link"
+    || die "no data checkout at $1; clone $REMOTE there, then run $cli link"
 }
 
 require_clean() {
   [ -z "$(git -C "$1" status --porcelain --untracked-files=no)" ] \
-    || die "checkout is dirty ($1); commit or stash there, then run static $command"
+    || die "checkout is dirty ($1); commit or stash there, then run $cli $command"
+}
+
+announce() {
+  printf 'static: %s\n' "$1"
 }
 
 mismatch_line() {
-  printf 'static.lock %s != checkout HEAD %s; run static sync (or static lock to adopt HEAD)\n' "$1" "$2"
+  printf 'static.lock %s != checkout HEAD %s; run %s sync (or %s lock to adopt HEAD)\n' "$1" "$2" "$cli" "$cli"
 }
 
 cmd_doctor() {
@@ -86,7 +108,7 @@ cmd_doctor() {
   if [ -L "$link" ]; then
     printf 'link      static -> %s\n' "$(readlink "$link")"
   else
-    printf 'link      static is not a symlink; run static link\n'
+    printf 'link      static is not a symlink; run %s link\n' "$cli"
     status=1
   fi
   checkout=$(resolve_checkout)
@@ -108,7 +130,7 @@ cmd_check() {
   top=$(git -C "$checkout" rev-parse --show-toplevel 2>/dev/null) || top=""
   head=$(git -C "$checkout" rev-parse --verify --quiet HEAD 2>/dev/null) || head=""
   [ -n "$top" ] && [ "$top" = "$(realpath "$checkout")" ] && [ -n "$head" ] \
-    || die "no data checkout at $checkout; clone $REMOTE there, then run static link" 2
+    || die "no data checkout at $checkout; clone $REMOTE there, then run $cli link" 2
   [ "$head" != "$lock" ] || return 0
   mismatch_line "$lock" "$head" >&2
   return 1
@@ -118,8 +140,9 @@ cmd_link() {
   local target=${checkout_arg:-$SIBLING}
   require_git_checkout "$target"
   if [ -e "$link" ] && [ ! -L "$link" ]; then
-    die "$link is a real directory (an old submodule checkout?); move it aside, then run static link"
+    die "$link is a real directory (an old submodule checkout?); move it aside, then run $cli link"
   fi
+  announce "linking in $repo, link $link -> $target"
   ln -sfn "$target" "$link"
   printf 'static -> %s\n' "$target"
 }
@@ -131,7 +154,8 @@ cmd_lock() {
   require_clean "$checkout"
   head=$(git -C "$checkout" rev-parse HEAD)
   git -C "$checkout" merge-base --is-ancestor "$head" origin/main 2>/dev/null \
-    || die "checkout HEAD $head is not on origin/main; push the data repository's main (or fetch it), then run static lock"
+    || die "checkout HEAD $head is not on origin/main; push the data repository's main (or fetch it), then run $cli lock"
+  announce "writing $lock_file <- $head"
   printf '%s\n' "$head" > "$lock_file"
   printf 'static.lock %s\n' "$head"
 }
@@ -142,16 +166,17 @@ cmd_sync() {
   require_git_checkout "$checkout"
   require_clean "$checkout"
   lock=$(read_lock)
+  announce "moving checkout $checkout to $lock (static.lock of $repo)"
   if ! git -C "$checkout" cat-file -e "$lock^{commit}" 2>/dev/null; then
     git -C "$checkout" fetch --quiet origin \
-      || die "fetching origin in $checkout failed; check access to $REMOTE, then run static sync"
+      || die "fetching origin in $checkout failed; check access to $REMOTE, then run $cli sync"
     git -C "$checkout" cat-file -e "$lock^{commit}" 2>/dev/null \
-      || die "static.lock $lock is not on origin; push the data repository's main, then run static sync"
+      || die "static.lock $lock is not on origin; push the data repository's main, then run $cli sync"
   fi
   head=$(git -C "$checkout" rev-parse HEAD)
   [ "$head" != "$lock" ] || { printf 'checkout already at static.lock %s\n' "$lock"; return 0; }
   [ -z "$(git -C "$checkout" rev-list "$lock..$head")" ] \
-    || die "checkout is ahead of static.lock; run static lock"
+    || die "checkout is ahead of static.lock; run $cli lock"
   if git -C "$checkout" symbolic-ref --quiet HEAD >/dev/null; then
     git -C "$checkout" merge --ff-only --quiet "$lock"
   else
