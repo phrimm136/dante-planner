@@ -1,0 +1,1121 @@
+#!/usr/bin/env python3
+import dataclasses
+import datetime
+import functools
+import importlib.machinery
+import importlib.util
+import json
+import os
+import posixpath
+import re
+import shlex
+import shutil
+import signal
+import subprocess
+import sys
+from pathlib import Path
+
+CLI_PATH = ".claude/skills/ops/bin/ops"
+CHECKS_CLI_PATH = ".claude/skills/checks/bin/checks"
+CONSTANTS_PATH = "scripts/ops/lib/constants.sh"
+TERRAFORM_ROOT = "terraform"
+TERRAFORM_RUNNER = "scripts/ops/terraform-run.sh"
+METRICS_SCRIPT = "scripts/ops/access/metrics-query.sh"
+LOGS_SCRIPT = "scripts/ops/access/logs-query.sh"
+SQL_SCRIPT = "scripts/ops/access/rds-query.sh"
+TUNNEL_SCRIPT = "scripts/ops/access/rds-tunnel.sh"
+DB_VERIFY_SCRIPT = "scripts/ops/access/db-observability-check.sh"
+OREGON_VERIFY_SCRIPT = "scripts/ops/oregon-verify.sh"
+OREGON_STACK = "oregon"
+CP_OVERRIDE_ENV = "CP_INSTANCE_ID"
+STS_ARGV = ("aws", "sts", "get-caller-identity", "--output", "json")
+
+ENV_PROFILES = {"prod": "prod", "staging": "staging", "mgmt": "mgmt"}
+FIXED_BACKEND_ENVS = {"backend.management.hcl": "mgmt"}
+MODULES_DIR = "modules"
+LOCAL_STATE_FILE = "terraform.tfstate"
+DEFAULT_ENV = "prod"
+SITE_NAMES = ("oregon", "seoul")
+TUNNEL_MODES = ("start", "stop", "status")
+EXPIRED_MARKERS = ("Token has expired", "SSO session")
+SINCE_PATTERN = re.compile(r"^\d+[mhd]$")
+STEP_PATTERN = re.compile(r"^\d+[smhd]$")
+DAY_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+BACKEND_PATTERN = re.compile(r'^\s*backend\s+"', re.MULTILINE)
+TUNNEL_PLUGIN = "session-manager-plugin"
+TUNNEL_DOCUMENT = "AWS-StartPortForwardingSessionToRemoteHost"
+AWS_TIMEOUT_SECONDS = 30
+DOCKER_TIMEOUT_SECONDS = 10
+ERROR_TAIL_LINES = 20
+GIT_ENV_NAMES = ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_COMMON_DIR")
+ANSI_PATTERN = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
+
+USAGE_TEXT = f"""usage: ops [--env prod|staging|mgmt] <command> [args]
+       ops list | doctor
+       ops hook < tool-json
+
+Runs the repeated workstation reads of production and terraform plans. Nothing it runs
+changes cloud state: there is no write command and no apply. Each command runs one script
+under scripts/ops/ with AWS_PROFILE set from --env (prod, staging or mgmt, the profile names
+in ~/.aws/config; default prod), after checking that profile's SSO session.
+
+output:     the script's output goes to stdout and to a dated log; the exit code is the
+            script's. Errors of ops itself exit 2 and name the next action.
+logs:       <root>/.claude/reports/logs/ops-<command>-<YYYYMMDD-HHMMSS>.log when
+            <root>/.claude/reports exists, otherwise the main checkout's .claude/reports/logs.
+repo root:  the checkout this CLI file lives in, whatever the current directory.
+tf plan:    writes the plan file beside its log (ops-tf-<stack>-<ts>.plan), keeps the full plan
+            text in the log, and prints one line per changed resource (- destroy, -/+ replace,
+            ~ update, + create, <= import, -> move), terraform's counts line, and the `!` apply
+            command for you to run. Words after -- reach terraform plan unchanged; -out and
+            -detailed-exitcode are ops's own. A stack is any directory under terraform/ with
+            *.tf files except modules; a stack whose backend file names a fixed account takes
+            that account's profile (backend.management.hcl: mgmt), and a stack whose fixed
+            account has no ops profile is planned directly through terraform-run.sh.
+
+`ops list` prints every command with its purpose; `ops doctor` reports the SSO session of
+each profile, session-manager-plugin, Docker and the pinned mysql client image, jq, and the
+open RDS tunnels.
+"""
+
+
+class OpsError(Exception):
+    pass
+
+
+def own_checkout_dir():
+    return Path(__file__).resolve().parents[4]
+
+
+@functools.cache
+def shell_helpers():
+    checks_file = own_checkout_dir() / CHECKS_CLI_PATH
+    if not checks_file.is_file():
+        raise OpsError(f"{checks_file} is missing")
+    module_loader = importlib.machinery.SourceFileLoader("checks_cli", str(checks_file))
+    module_spec = importlib.util.spec_from_loader("checks_cli", module_loader)
+    checks_module = importlib.util.module_from_spec(module_spec)
+    module_loader.exec_module(checks_module)
+    return checks_module
+
+
+@dataclasses.dataclass(frozen=True)
+class RepoPaths:
+    repo_root: Path
+    main_root: Path
+
+    @property
+    def log_dir(self):
+        if (self.repo_root / ".claude" / "reports").is_dir():
+            return self.repo_root / ".claude" / "reports" / "logs"
+        return self.main_root / ".claude" / "reports" / "logs"
+
+
+@dataclasses.dataclass(frozen=True)
+class RefusedCommand:
+    refused_text: str
+    replacement_text: str
+
+
+def slug_text(label_text):
+    return re.sub(r"[^a-z0-9]+", "-", label_text.lower()).strip("-")
+
+
+@dataclasses.dataclass(frozen=True)
+class CommandSpec:
+    command_name: str
+    arg_hint: str
+    purpose_text: str
+    script_path: str
+
+
+DISPATCH_TABLE = (
+    CommandSpec("metrics", "'<promql>' [--since D] [--step S]",
+                "Mimir range query (metrics-query.sh); since default 1h, step 5m", METRICS_SCRIPT),
+    CommandSpec("logs", "'<logql>' [--since D] [--limit N] | --day YYYY-MM-DD '<logql>' [--limit N]",
+                "Loki range query (logs-query.sh); since default 24h, limit 500", LOGS_SCRIPT),
+    CommandSpec("sql", "\"<SELECT ...>\" [--site oregon|seoul] | -f FILE [--site ...]",
+                "read-only SQL as the SELECT-only user (rds-query.sh); starts the tunnel when down",
+                SQL_SCRIPT),
+    CommandSpec("tunnel", "start|stop|status [--site oregon|seoul]",
+                "the SSM port-forward to RDS on 127.0.0.1 (rds-tunnel.sh); a local port only",
+                TUNNEL_SCRIPT),
+    CommandSpec("verify db", "", "DB metric families, mysql_up and the DB alert rules (db-observability-check.sh)",
+                DB_VERIFY_SCRIPT),
+    CommandSpec("verify oregon", "", "Oregon nodes, pods, Argo CD apps and RDS reachability (oregon-verify.sh)",
+                OREGON_VERIFY_SCRIPT),
+    CommandSpec("tf plan", "<stack> [-- terraform plan args]",
+                "terraform plan through terraform-run.sh; prints the summary and the apply command for you",
+                TERRAFORM_RUNNER),
+    CommandSpec("whoami", "", "the account and role the selected profile resolves to (aws sts get-caller-identity)",
+                ""),
+    CommandSpec("doctor", "", "SSO session per profile, session-manager-plugin, Docker and the mysql image, jq, "
+                "open tunnels", ""),
+    CommandSpec("list", "", "this list", ""),
+)
+
+HOOK_ROW = ("hook", "the PreToolUse entry: reads the Bash tool JSON on stdin, exit 2 refuses a direct "
+            "call to a script ops wraps")
+
+
+def spec_named(command_name):
+    return next(one_spec for one_spec in DISPATCH_TABLE if one_spec.command_name == command_name)
+
+
+def list_lines():
+    command_rows = [(f"ops {one_spec.command_name} {one_spec.arg_hint}".rstrip(), one_spec.purpose_text)
+                    for one_spec in DISPATCH_TABLE]
+    command_rows.append((f"ops {HOOK_ROW[0]}", HOOK_ROW[1]))
+    command_rows.append(("--env prod|staging|mgmt", "on any command: the AWS profile, default prod "
+                         "(a fixed-account stack defaults to its own)"))
+    column_width = max(len(command_text) for command_text, _ in command_rows if len(command_text) <= 40)
+    out_lines = []
+    for command_text, purpose_text in command_rows:
+        if len(command_text) > column_width:
+            out_lines.append(command_text)
+            out_lines.append(" " * (column_width + 2) + purpose_text)
+        else:
+            out_lines.append(command_text.ljust(column_width + 2) + purpose_text)
+    return out_lines
+
+
+@dataclasses.dataclass(frozen=True)
+class OpsRequest:
+    env_name: str
+    wants_help: bool
+    command_words: tuple
+
+
+def parse_request(argv_words):
+    env_name = ""
+    wants_help = False
+    command_words = []
+    word_index = 0
+    after_dashes = False
+    while word_index < len(argv_words):
+        one_word = argv_words[word_index]
+        if after_dashes:
+            command_words.append(one_word)
+        elif one_word == "--":
+            after_dashes = True
+            command_words.append(one_word)
+        elif one_word in ("-h", "--help") and not command_words:
+            wants_help = True
+        elif one_word == "--env":
+            if word_index + 1 >= len(argv_words):
+                raise OpsError(f"--env needs one of {', '.join(ENV_PROFILES)}; see ops --help")
+            env_name = argv_words[word_index + 1]
+            word_index += 1
+        elif one_word.startswith("--env="):
+            env_name = one_word.split("=", 1)[1]
+        else:
+            command_words.append(one_word)
+        word_index += 1
+    if env_name and env_name not in ENV_PROFILES:
+        raise OpsError(f"--env {env_name} is not an environment; use one of {', '.join(ENV_PROFILES)}")
+    return OpsRequest(env_name, wants_help, tuple(command_words))
+
+
+@dataclasses.dataclass(frozen=True)
+class ScriptInvocation:
+    command_spec: CommandSpec
+    script_args: tuple
+    log_parts: tuple
+    needs_session: bool
+    needs_docker: bool = False
+
+
+class ArgReader:
+    def __init__(self, prog_name, arg_words):
+        self.prog_name = prog_name
+        self.arg_words = list(arg_words)
+
+    def raise_failure(self, message_text):
+        raise OpsError(f"{self.prog_name}: {message_text}; see ops list")
+
+    def split_options(self, option_names):
+        option_values = {}
+        free_words = []
+        word_index = 0
+        while word_index < len(self.arg_words):
+            one_word = self.arg_words[word_index]
+            option_name = one_word.split("=", 1)[0]
+            if option_name in option_names:
+                if "=" in one_word:
+                    option_values[option_name] = one_word.split("=", 1)[1]
+                elif word_index + 1 < len(self.arg_words):
+                    option_values[option_name] = self.arg_words[word_index + 1]
+                    word_index += 1
+                else:
+                    self.raise_failure(f"{option_name} needs a value")
+            elif one_word.startswith("--") and len(one_word) > 2:
+                self.raise_failure(f"unknown option {one_word}")
+            else:
+                free_words.append(one_word)
+            word_index += 1
+        return option_values, free_words
+
+    def matched_value(self, option_values, option_name, value_pattern, shape_text):
+        raw_value = option_values.get(option_name, "")
+        if raw_value and not value_pattern.match(raw_value):
+            self.raise_failure(f"{option_name} takes {shape_text}, not '{raw_value}'")
+        return raw_value
+
+    def site_of(self, option_values):
+        site_name = option_values.get("--site", "")
+        if site_name and site_name not in SITE_NAMES:
+            self.raise_failure(f"--site takes {' or '.join(SITE_NAMES)}, not '{site_name}'")
+        return site_name
+
+    def one_free(self, free_words, shape_text):
+        if len(free_words) != 1:
+            self.raise_failure(f"takes exactly one {shape_text}, got {len(free_words)}")
+        return free_words[0]
+
+
+def positional_tail(head_words, optional_words):
+    kept_words = list(optional_words)
+    while kept_words and not kept_words[-1]:
+        kept_words.pop()
+    return (*head_words, *kept_words)
+
+
+def limit_value(arg_reader, option_values):
+    raw_limit = option_values.get("--limit", "")
+    if raw_limit and (not raw_limit.isdigit() or int(raw_limit) < 1):
+        arg_reader.raise_failure(f"--limit takes a positive whole number, not '{raw_limit}'")
+    return raw_limit
+
+
+def metrics_invocation(arg_words):
+    arg_reader = ArgReader("ops metrics", arg_words)
+    option_values, free_words = arg_reader.split_options({"--since", "--step"})
+    query_text = arg_reader.one_free(free_words, "'<promql>' query")
+    since_text = arg_reader.matched_value(option_values, "--since", SINCE_PATTERN, "a window like 30m, 6h or 2d")
+    step_text = arg_reader.matched_value(option_values, "--step", STEP_PATTERN, "a step like 30s, 1m or 5m")
+    return ScriptInvocation(spec_named("metrics"), positional_tail((query_text,), (since_text, step_text)),
+                            ("metrics",), True)
+
+
+def logs_invocation(arg_words):
+    arg_reader = ArgReader("ops logs", arg_words)
+    option_values, free_words = arg_reader.split_options({"--since", "--limit", "--day"})
+    query_text = arg_reader.one_free(free_words, "'<logql>' query")
+    limit_text = limit_value(arg_reader, option_values)
+    day_text = arg_reader.matched_value(option_values, "--day", DAY_PATTERN, "a date like 2026-07-23")
+    if day_text:
+        if "--since" in option_values:
+            arg_reader.raise_failure("--day and --since are two ways to pick the window; pass one")
+        script_args = positional_tail(("--day", day_text, query_text), (limit_text,))
+    else:
+        since_text = arg_reader.matched_value(option_values, "--since", SINCE_PATTERN, "a window like 30m, 6h or 2d")
+        script_args = positional_tail((query_text,), (since_text, limit_text))
+    return ScriptInvocation(spec_named("logs"), script_args, ("logs",), True)
+
+
+def sql_invocation(arg_words, caller_dir):
+    arg_reader = ArgReader("ops sql", arg_words)
+    option_values, free_words = arg_reader.split_options({"--site"})
+    site_name = arg_reader.site_of(option_values)
+    if free_words[:1] == ["-f"]:
+        file_words = free_words[1:]
+        if len(file_words) != 1:
+            arg_reader.raise_failure("-f takes exactly one SQL file")
+        sql_file = (Path(caller_dir) / file_words[0]).resolve()
+        if not sql_file.is_file():
+            arg_reader.raise_failure(f"no SQL file at {sql_file}")
+        head_words = ("-f", str(sql_file))
+    else:
+        head_words = (arg_reader.one_free(free_words, "\"<SELECT ...>\" statement"),)
+    return ScriptInvocation(spec_named("sql"), positional_tail(head_words, (site_name,)), ("sql",), True, True)
+
+
+def tunnel_invocation(arg_words):
+    arg_reader = ArgReader("ops tunnel", arg_words)
+    option_values, free_words = arg_reader.split_options({"--site"})
+    mode_name = arg_reader.one_free(free_words, "mode (start, stop or status)")
+    if mode_name not in TUNNEL_MODES:
+        arg_reader.raise_failure(f"mode is one of {', '.join(TUNNEL_MODES)}, not '{mode_name}'")
+    site_name = arg_reader.site_of(option_values)
+    return ScriptInvocation(spec_named("tunnel"), positional_tail((mode_name,), (site_name,)),
+                            ("tunnel", mode_name), mode_name == "start")
+
+
+def verify_invocation(arg_words):
+    target_names = [one_spec.command_name.split()[1] for one_spec in DISPATCH_TABLE
+                    if one_spec.command_name.startswith("verify ")]
+    if len(arg_words) != 1 or arg_words[0] not in target_names:
+        raise OpsError(f"ops verify takes one of {', '.join(target_names)}; see ops list")
+    return ScriptInvocation(spec_named(f"verify {arg_words[0]}"), (), ("verify", arg_words[0]), True)
+
+
+def plan_stacks(repo_root):
+    terraform_dir = repo_root / TERRAFORM_ROOT
+    if not terraform_dir.is_dir():
+        return []
+    return [stack_dir.name for stack_dir in sorted(terraform_dir.iterdir())
+            if stack_dir.is_dir() and stack_dir.name != MODULES_DIR and any(stack_dir.glob("*.tf"))]
+
+
+@dataclasses.dataclass(frozen=True)
+class StackInfo:
+    stack_name: str
+    has_backend: bool
+    fixed_backend: str
+
+    @property
+    def is_unmapped(self):
+        return bool(self.fixed_backend) and self.fixed_backend not in FIXED_BACKEND_ENVS
+
+    def default_env(self):
+        return FIXED_BACKEND_ENVS.get(self.fixed_backend, DEFAULT_ENV)
+
+
+def stack_info(repo_root, stack_name):
+    stack_dir = repo_root / TERRAFORM_ROOT / stack_name
+    has_backend = any(BACKEND_PATTERN.search(tf_file.read_text(encoding="utf-8"))
+                      for tf_file in stack_dir.glob("*.tf"))
+    return StackInfo(stack_name, has_backend, backend_file_name(repo_root, stack_name) if has_backend else "")
+
+
+def runner_text(repo_root, stack_name, terraform_words):
+    return (f"{repo_root / TERRAFORM_RUNNER} -chdir={repo_root / TERRAFORM_ROOT / stack_name} "
+            f"{' '.join(terraform_words)}")
+
+
+def plan_env(repo_root, one_stack, requested_env):
+    if one_stack.is_unmapped:
+        raise OpsError(f"{TERRAFORM_ROOT}/{one_stack.stack_name} keeps its state in the account behind "
+                       f"{one_stack.fixed_backend}, which has no ops profile; plan it directly with that "
+                       f"account's profile: AWS_PROFILE=<profile for that account> "
+                       f"{runner_text(repo_root, one_stack.stack_name, ['plan'])}")
+    if one_stack.fixed_backend and requested_env and requested_env != one_stack.default_env():
+        raise OpsError(f"{TERRAFORM_ROOT}/{one_stack.stack_name} keeps its state in the account behind "
+                       f"{one_stack.fixed_backend}; plan it with --env {one_stack.default_env()} or without --env")
+    return requested_env or one_stack.default_env()
+
+
+@dataclasses.dataclass(frozen=True)
+class PlanRequest:
+    stack_name: str
+    extra_args: tuple
+
+
+def apply_text(repo_root):
+    return (f"apply is run by you, never by ops: plan with `{CLI_PATH} tf plan <stack>`, read the summary, "
+            f"then run the printed `! {repo_root / TERRAFORM_RUNNER} -chdir={repo_root / TERRAFORM_ROOT}/<stack> "
+            f"apply <plan file>`")
+
+
+OUT_FLAGS = {"-out", "--out"}
+EXITCODE_FLAGS = {"-detailed-exitcode", "--detailed-exitcode"}
+
+
+def tf_request(repo_root, arg_words):
+    if not arg_words:
+        raise OpsError(f"ops tf takes plan; {apply_text(repo_root)}")
+    if arg_words[0] in ("apply", "destroy"):
+        raise OpsError(apply_text(repo_root))
+    if arg_words[0] != "plan":
+        raise OpsError(f"ops tf has only plan, not '{arg_words[0]}'; init, workspace and state run through "
+                       f"{TERRAFORM_RUNNER} yourself")
+    plan_words = list(arg_words[1:])
+    extra_args = ()
+    if "--" in plan_words:
+        split_index = plan_words.index("--")
+        plan_words, extra_args = plan_words[:split_index], tuple(plan_words[split_index + 1:])
+    stack_names = plan_stacks(repo_root)
+    if len(plan_words) != 1:
+        raise OpsError(f"ops tf plan takes one stack, then -- and terraform's own args; stacks: "
+                       f"{', '.join(stack_names)}")
+    if plan_words[0] not in stack_names:
+        raise OpsError(f"unknown stack '{plan_words[0]}'; the stacks under {TERRAFORM_ROOT}/: "
+                       f"{', '.join(stack_names)}")
+    if any(one_arg.split("=", 1)[0] in OUT_FLAGS for one_arg in extra_args):
+        raise OpsError("ops tf plan writes the plan file itself, beside its log; drop -out")
+    if any(one_arg.split("=", 1)[0] in EXITCODE_FLAGS for one_arg in extra_args):
+        raise OpsError("ops tf plan owns the exit code (0 planned, non-zero failed) and prints the change "
+                       "summary itself; drop -detailed-exitcode")
+    return PlanRequest(plan_words[0], extra_args)
+
+
+BACKEND_FILE_PATTERN = re.compile(r"-backend-config=(?:\.\./)?(backend\.[A-Za-z0-9_.-]+\.hcl)")
+
+
+def backend_file_name(repo_root, stack_name):
+    stack_dir = repo_root / TERRAFORM_ROOT / stack_name
+    env_files = {f"backend.{one_env}.hcl" for one_env in ENV_PROFILES}
+    fixed_names = {name_match.group(1) for doc_file in [*stack_dir.glob("*.tf"), stack_dir / "README.md"]
+                   if doc_file.is_file()
+                   for name_match in BACKEND_FILE_PATTERN.finditer(doc_file.read_text(encoding="utf-8"))
+                   if name_match.group(1) not in env_files}
+    return fixed_names.pop() if len(fixed_names) == 1 else ""
+
+
+def require_init(repo_root, one_stack, env_name):
+    stack_dir = repo_root / TERRAFORM_ROOT / one_stack.stack_name
+    state_dir = stack_dir / ".terraform"
+    if state_dir.is_dir() or (not one_stack.has_backend and (stack_dir / LOCAL_STATE_FILE).is_file()):
+        return
+    init_words = ["init"]
+    missing_note = ""
+    if one_stack.has_backend:
+        backend_file = repo_root / TERRAFORM_ROOT / (one_stack.fixed_backend or f"backend.{env_name}.hcl")
+        init_words.append(f"-backend-config={backend_file}")
+        if not backend_file.is_file():
+            missing_note = (f" ({backend_file.name} is not in this checkout: copy it from the main checkout, or "
+                            f"write it from {TERRAFORM_ROOT}/backend.account.hcl.example)")
+    raise OpsError(f"{TERRAFORM_ROOT}/{one_stack.stack_name} is not initialized in this checkout ({state_dir} is "
+                   f"missing); run, then retry:\n  AWS_PROFILE={ENV_PROFILES[env_name]} "
+                   f"{runner_text(repo_root, one_stack.stack_name, init_words)}{missing_note}")
+
+
+def build_invocation(command_words, caller_dir):
+    command_name, arg_words = command_words[0], list(command_words[1:])
+    if command_name == "metrics":
+        return metrics_invocation(arg_words)
+    if command_name == "logs":
+        return logs_invocation(arg_words)
+    if command_name == "sql":
+        return sql_invocation(arg_words, caller_dir)
+    if command_name == "tunnel":
+        return tunnel_invocation(arg_words)
+    if command_name == "verify":
+        return verify_invocation(arg_words)
+    if command_name == "whoami":
+        if arg_words:
+            raise OpsError("ops whoami takes no arguments besides --env; see ops list")
+        return ScriptInvocation(spec_named("whoami"), (), ("whoami",), True)
+    raise OpsError(f"unknown command '{command_name}'; run ops list")
+
+
+def plan_arguments(stack_name, plan_path, extra_args):
+    return (f"-chdir={TERRAFORM_ROOT}/{stack_name}", "plan", f"-out={plan_path}", *extra_args)
+
+
+def show_arguments(stack_name, plan_path):
+    return (f"-chdir={TERRAFORM_ROOT}/{stack_name}", "show", "-json", str(plan_path))
+
+
+def apply_line(repo_root, stack_name, plan_path):
+    return (f"! {repo_root / TERRAFORM_RUNNER} -chdir={repo_root / TERRAFORM_ROOT / stack_name} "
+            f"apply {plan_path}")
+
+
+SUMMARY_ORDER = (("destroy", "- "), ("replace", "-/+ "), ("update", "~ "), ("create", "+ "), ("import", "<= "),
+                 ("move", "-> "))
+
+
+def change_kind(action_list):
+    action_set = set(action_list)
+    if action_set == {"delete", "create"}:
+        return "replace"
+    if action_list == ["delete"]:
+        return "destroy"
+    if action_list == ["update"]:
+        return "update"
+    if action_list == ["create"]:
+        return "create"
+    return ""
+
+
+@dataclasses.dataclass(frozen=True)
+class PlanSummary:
+    change_lines: tuple
+    add_count: int
+    change_count: int
+    destroy_count: int
+    output_count: int
+    import_count: int
+
+    @property
+    def counts_line(self):
+        import_text = f"{self.import_count} to import, " if self.import_count else ""
+        return (f"Plan: {import_text}{self.add_count} to add, {self.change_count} to change, "
+                f"{self.destroy_count} to destroy.")
+
+
+def plan_summary(show_data):
+    grouped_rows = {kind_name: [] for kind_name, _ in SUMMARY_ORDER}
+    for resource_change in show_data.get("resource_changes") or ():
+        change_data = resource_change.get("change", {})
+        kind_name = change_kind(list(change_data.get("actions", ())))
+        if kind_name:
+            grouped_rows[kind_name].append(resource_change["address"])
+        if change_data.get("importing"):
+            grouped_rows["import"].append(resource_change["address"])
+        previous_address = resource_change.get("previous_address", "")
+        if previous_address and previous_address != resource_change["address"]:
+            grouped_rows["move"].append(f"{previous_address} to {resource_change['address']}")
+    change_lines = tuple(marker_text + resource_address for kind_name, marker_text in SUMMARY_ORDER
+                         for resource_address in grouped_rows[kind_name])
+    replace_count = len(grouped_rows["replace"])
+    output_count = sum(1 for output_change in (show_data.get("output_changes") or {}).values()
+                       if list(output_change.get("actions", ())) != ["no-op"])
+    return PlanSummary(change_lines,
+                       len(grouped_rows["create"]) + replace_count,
+                       len(grouped_rows["update"]),
+                       len(grouped_rows["destroy"]) + replace_count,
+                       output_count,
+                       len(grouped_rows["import"]))
+
+
+def summary_lines(plan_info, repo_root, stack_name, plan_path):
+    if plan_info.change_lines:
+        return [*plan_info.change_lines, plan_info.counts_line, apply_line(repo_root, stack_name, plan_path)]
+    if plan_info.output_count:
+        return [f"Outputs only: {plan_info.output_count} changed.", apply_line(repo_root, stack_name, plan_path)]
+    return ["No changes."]
+
+
+def git_environment():
+    return {env_key: env_value for env_key, env_value in os.environ.items() if env_key not in GIT_ENV_NAMES}
+
+
+def find_repo_paths(checkout_dir):
+    top_run = subprocess.run(["git", "-C", str(checkout_dir), "rev-parse", "--show-toplevel"],
+                             capture_output=True, text=True, env=git_environment())
+    if top_run.returncode != 0:
+        raise OpsError(f"{checkout_dir} is not inside a git checkout; run the ops CLI of a checkout")
+    common_run = subprocess.run(["git", "-C", str(checkout_dir), "rev-parse", "--path-format=absolute",
+                                 "--git-common-dir"], capture_output=True, text=True, env=git_environment())
+    repo_root = Path(top_run.stdout.strip())
+    main_root = Path(common_run.stdout.strip()).parent if common_run.returncode == 0 else repo_root
+    return RepoPaths(repo_root, main_root)
+
+
+def log_stem(log_dir, name_parts, run_moment, file_suffixes=(".log",)):
+    stem_text = "-".join(["ops", *[slug_text(one_part) for one_part in name_parts if one_part],
+                          run_moment.strftime("%Y%m%d-%H%M%S")])
+    candidate_stem = log_dir / stem_text
+    collision_count = 1
+    while any(candidate_stem.with_name(candidate_stem.name + one_suffix).exists() for one_suffix in file_suffixes):
+        collision_count += 1
+        candidate_stem = log_dir / f"{stem_text}-{collision_count}"
+    return candidate_stem
+
+
+def shell_constant(repo_root, constant_name):
+    constants_file = repo_root / CONSTANTS_PATH
+    value_match = re.search(rf'^{constant_name}="([^"]*)"', constants_file.read_text(encoding="utf-8"),
+                            re.MULTILINE) if constants_file.is_file() else None
+    if not value_match:
+        raise OpsError(f"{CONSTANTS_PATH} defines no {constant_name}; restore it from git")
+    return value_match.group(1)
+
+
+def login_command(repo_root):
+    return f"aws sso login --sso-session {shell_constant(repo_root, 'AWS_SSO_SESSION')}"
+
+
+@dataclasses.dataclass(frozen=True)
+class SessionState:
+    profile_name: str
+    state_name: str
+    detail_text: str
+
+
+class SystemEffects:
+    def run_captured(self, command_argv, child_env=None, work_dir=None, timeout_seconds=None):
+        return subprocess.run(command_argv, capture_output=True, text=True, env=child_env, cwd=work_dir,
+                              timeout=timeout_seconds, stdin=subprocess.DEVNULL)
+
+    def run_streamed(self, command_argv, child_env, work_dir, log_file, echo_output):
+        try:
+            child_process = subprocess.Popen(command_argv, cwd=work_dir, env=child_env, stdin=subprocess.DEVNULL,
+                                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                             start_new_session=True)
+        except FileNotFoundError:
+            raise OpsError(f"{command_argv[0]} is not installed or not on PATH; run ops doctor") from None
+        try:
+            for raw_line in child_process.stdout:
+                text_line = raw_line.decode(errors="replace")
+                log_file.write(text_line)
+                if echo_output:
+                    sys.stdout.write(text_line)
+                    sys.stdout.flush()
+            return child_process.wait()
+        except KeyboardInterrupt:
+            os.killpg(child_process.pid, signal.SIGINT)
+            child_process.wait()
+            raise
+
+    def process_rows(self):
+        found_rows = []
+        for proc_dir in Path("/proc").glob("[0-9]*"):
+            try:
+                raw_bytes = (proc_dir / "cmdline").read_bytes()
+            except OSError:
+                continue
+            if raw_bytes:
+                found_rows.append((int(proc_dir.name), tuple(raw_bytes.rstrip(b"\0").decode(errors="replace")
+                                                             .split("\0"))))
+        return found_rows
+
+    def tool_path(self, tool_name):
+        return shutil.which(tool_name) or ""
+
+
+def session_state(system_effects, profile_name):
+    try:
+        sts_run = system_effects.run_captured([*STS_ARGV, "--profile", profile_name],
+                                              timeout_seconds=AWS_TIMEOUT_SECONDS)
+    except FileNotFoundError:
+        return SessionState(profile_name, "missing", "no aws CLI on PATH; install the AWS CLI v2")
+    except subprocess.TimeoutExpired:
+        return SessionState(profile_name, "failed", f"aws sts timed out after {AWS_TIMEOUT_SECONDS}s")
+    if sts_run.returncode == 0:
+        try:
+            identity_data = json.loads(sts_run.stdout)
+        except json.JSONDecodeError:
+            identity_data = {}
+        return SessionState(profile_name, "valid",
+                            f"account {identity_data.get('Account', '?')} as {identity_data.get('Arn', '?')}")
+    error_text = " ".join((sts_run.stderr or sts_run.stdout).split())
+    if any(marker_text in error_text for marker_text in EXPIRED_MARKERS):
+        return SessionState(profile_name, "expired", error_text)
+    return SessionState(profile_name, "failed", error_text or f"aws sts exit {sts_run.returncode}")
+
+
+def session_failure(repo_root, one_state):
+    if one_state.state_name == "expired":
+        return (f"the SSO session for profile '{one_state.profile_name}' has expired; run: "
+                f"{login_command(repo_root)}")
+    return (f"no AWS identity for profile '{one_state.profile_name}' ({one_state.detail_text}); retry with "
+            f"aws sts get-caller-identity --profile {one_state.profile_name}")
+
+
+def docker_state(system_effects):
+    try:
+        docker_run = system_effects.run_captured(["docker", "version", "--format", "{{.Server.Version}}"],
+                                                 timeout_seconds=DOCKER_TIMEOUT_SECONDS)
+    except (OSError, subprocess.TimeoutExpired) as docker_error:
+        return False, str(docker_error)
+    if docker_run.returncode == 0:
+        return True, docker_run.stdout.strip()
+    return False, ((docker_run.stderr or "").strip().splitlines() or ["?"])[-1]
+
+
+DOCKER_FIX = "start Docker (systemctl start docker)"
+
+
+@dataclasses.dataclass(frozen=True)
+class OpenTunnel:
+    process_id: int
+    local_port: str
+    remote_host: str
+    region_name: str
+
+
+def open_tunnels(process_rows):
+    found_tunnels = {}
+    for process_id, argv_words in process_rows:
+        if os.path.basename(argv_words[0]) != TUNNEL_PLUGIN or len(argv_words) < 6:
+            continue
+        try:
+            start_request = json.loads(argv_words[5])
+        except json.JSONDecodeError:
+            continue
+        if start_request.get("DocumentName") != TUNNEL_DOCUMENT:
+            continue
+        forward_params = start_request.get("Parameters") or {}
+        local_port = (forward_params.get("localPortNumber") or ["?"])[0]
+        remote_host = (forward_params.get("host") or ["?"])[0]
+        tunnel_key = (local_port, remote_host)
+        if tunnel_key not in found_tunnels or process_id < found_tunnels[tunnel_key].process_id:
+            found_tunnels[tunnel_key] = OpenTunnel(process_id, local_port, remote_host, argv_words[2])
+    return sorted(found_tunnels.values(), key=lambda one_tunnel: (one_tunnel.local_port, one_tunnel.remote_host))
+
+
+def doctor_lines(repo_paths, system_effects):
+    out_lines = [f"root     {repo_paths.repo_root}", f"logs     {repo_paths.log_dir}"]
+    problem_count = 0
+    for env_name, profile_name in ENV_PROFILES.items():
+        one_state = session_state(system_effects, profile_name)
+        if one_state.state_name == "valid":
+            out_lines.append(f"sso      ok {env_name} (profile {profile_name}): {one_state.detail_text}")
+        else:
+            problem_count += 1
+            out_lines.append(f"sso      {one_state.state_name.upper()} {env_name} (profile {profile_name}): "
+                             f"{session_failure(repo_paths.repo_root, one_state)}")
+    for tool_name, tool_use in ((TUNNEL_PLUGIN, "ops tunnel and ops sql need it; install the AWS "
+                                 "Session Manager plugin"), ("jq", "the access scripts parse JSON with it; "
+                                 "install jq")):
+        tool_path = system_effects.tool_path(tool_name)
+        if tool_path:
+            out_lines.append(f"tool     ok {tool_name} {tool_path}")
+        else:
+            problem_count += 1
+            out_lines.append(f"tool     MISSING {tool_name}; {tool_use}")
+    docker_ok, docker_text = docker_state(system_effects)
+    client_image = shell_constant(repo_paths.repo_root, "MYSQL_CLIENT_IMAGE")
+    if docker_ok:
+        out_lines.append(f"docker   ok server {docker_text}")
+        image_run = system_effects.run_captured(["docker", "image", "inspect", "--format", "{{.Id}}",
+                                                 client_image], timeout_seconds=DOCKER_TIMEOUT_SECONDS)
+        image_state = ("ok pulled" if image_run.returncode == 0
+                       else "not pulled yet; the first ops sql pulls it")
+        out_lines.append(f"image    {image_state} {client_image}")
+    else:
+        problem_count += 1
+        out_lines.append(f"docker   UNREACHABLE ({docker_text}); ops sql runs its client in Docker; {DOCKER_FIX}")
+        out_lines.append(f"image    unknown {client_image} (Docker is down)")
+    tunnel_rows = open_tunnels(system_effects.process_rows())
+    for one_tunnel in tunnel_rows:
+        out_lines.append(f"tunnel   open 127.0.0.1:{one_tunnel.local_port} -> {one_tunnel.remote_host} "
+                         f"({one_tunnel.region_name}, pid {one_tunnel.process_id}); close: "
+                         f"{CLI_PATH} tunnel stop")
+    if not tunnel_rows:
+        out_lines.append("tunnel   none open")
+    return out_lines, problem_count
+
+
+def child_environment(profile_name):
+    return {**os.environ, "AWS_PROFILE": profile_name}
+
+
+def write_header(log_file, command_argv, profile_name, work_dir):
+    log_file.write(f"$ {shlex.join(command_argv)}\n")
+    log_file.write(f"# ops: cwd {work_dir}\n")
+    log_file.write(f"# ops: env AWS_PROFILE={profile_name}\n")
+    log_file.write(f"# ops: started {datetime.datetime.now().isoformat(timespec='seconds')}\n\n")
+    log_file.flush()
+
+
+def require_session(repo_paths, profile_name, system_effects):
+    one_state = session_state(system_effects, profile_name)
+    if one_state.state_name != "valid":
+        raise OpsError(session_failure(repo_paths.repo_root, one_state))
+    return one_state
+
+
+def require_docker(system_effects):
+    docker_ok, docker_text = docker_state(system_effects)
+    if not docker_ok:
+        raise OpsError(f"Docker is unreachable ({docker_text}); ops sql runs its mysql client in Docker; "
+                       f"{DOCKER_FIX}")
+
+
+def run_script(repo_paths, script_invocation, profile_name, system_effects, run_moment):
+    script_file = repo_paths.repo_root / script_invocation.command_spec.script_path
+    command_argv = (str(script_file), *script_invocation.script_args)
+    repo_paths.log_dir.mkdir(parents=True, exist_ok=True)
+    log_path = log_stem(repo_paths.log_dir, script_invocation.log_parts, run_moment).with_suffix(".log")
+    with open(log_path, "w", encoding="utf-8") as log_file:
+        write_header(log_file, command_argv, profile_name, repo_paths.repo_root)
+        exit_code = system_effects.run_streamed(command_argv, child_environment(profile_name),
+                                                repo_paths.repo_root, log_file, True)
+        log_file.write(f"\n# ops: exit {exit_code}\n")
+    print(f"ops: exit {exit_code}, log {log_path}", file=sys.stderr)
+    return exit_code
+
+
+def run_whoami(repo_paths, profile_name, system_effects, run_moment):
+    one_state = require_session(repo_paths, profile_name, system_effects)
+    repo_paths.log_dir.mkdir(parents=True, exist_ok=True)
+    log_path = log_stem(repo_paths.log_dir, ("whoami",), run_moment).with_suffix(".log")
+    identity_line = f"profile {profile_name}: {one_state.detail_text}"
+    log_path.write_text(f"$ {shlex.join([*STS_ARGV, '--profile', profile_name])}\n{identity_line}\n",
+                        encoding="utf-8")
+    print(identity_line)
+    print(f"ops: exit 0, log {log_path}", file=sys.stderr)
+    return 0
+
+
+def error_tail(log_text):
+    clean_lines = [ANSI_PATTERN.sub("", text_line).rstrip() for text_line in log_text.splitlines()]
+    body_lines = [text_line for text_line in clean_lines
+                  if text_line.strip() and not text_line.startswith(("$ ", "# ops:"))]
+    error_index = next((line_index for line_index, text_line in enumerate(body_lines) if "Error:" in text_line),
+                       None)
+    tail_lines = body_lines[error_index:] if error_index is not None else body_lines
+    return tail_lines[-ERROR_TAIL_LINES:]
+
+
+def run_plan(repo_paths, plan_request, profile_name, system_effects, run_moment):
+    repo_paths.log_dir.mkdir(parents=True, exist_ok=True)
+    stem_path = log_stem(repo_paths.log_dir, ("tf", plan_request.stack_name), run_moment, (".log", ".plan"))
+    log_path = stem_path.with_name(stem_path.name + ".log")
+    plan_path = stem_path.with_name(stem_path.name + ".plan")
+    runner_path = str(repo_paths.repo_root / TERRAFORM_RUNNER)
+    plan_argv = (runner_path, *plan_arguments(plan_request.stack_name, plan_path, plan_request.extra_args))
+    child_env = child_environment(profile_name)
+    with open(log_path, "w", encoding="utf-8") as log_file:
+        write_header(log_file, plan_argv, profile_name, repo_paths.repo_root)
+        plan_exit = system_effects.run_streamed(plan_argv, child_env, repo_paths.repo_root, log_file, False)
+        log_file.write(f"\n# ops: plan exit {plan_exit}\n")
+    if plan_exit != 0:
+        print("\n".join(error_tail(log_path.read_text(encoding="utf-8", errors="replace"))), file=sys.stderr)
+        print(f"ops: terraform plan failed (exit {plan_exit}); full output in {log_path}. A stack that needs "
+              f"init or a workspace is prepared with {TERRAFORM_RUNNER} first", file=sys.stderr)
+        return plan_exit
+    show_argv = (runner_path, *show_arguments(plan_request.stack_name, plan_path))
+    show_run = system_effects.run_captured(list(show_argv), child_env, repo_paths.repo_root)
+    with open(log_path, "a", encoding="utf-8") as log_file:
+        log_file.write(f"$ {shlex.join(show_argv)}\n# ops: show exit {show_run.returncode}\n")
+    if show_run.returncode != 0:
+        print(show_run.stderr.strip(), file=sys.stderr)
+        print(f"ops: terraform show -json failed (exit {show_run.returncode}); plan file {plan_path}, "
+              f"log {log_path}", file=sys.stderr)
+        return show_run.returncode
+    out_lines = summary_lines(plan_summary(json.loads(show_run.stdout)), repo_paths.repo_root,
+                              plan_request.stack_name, plan_path)
+    with open(log_path, "a", encoding="utf-8") as log_file:
+        log_file.write("\n".join(out_lines) + "\n")
+    print("\n".join(out_lines))
+    print(f"ops: exit 0, log {log_path}", file=sys.stderr)
+    return 0
+
+
+SHELL_NAMES = {"bash", "sh", "zsh", "dash"}
+WRAPPED_NAMES = tuple(Path(script_path).name for script_path in
+                      (METRICS_SCRIPT, LOGS_SCRIPT, SQL_SCRIPT, TUNNEL_SCRIPT, DB_VERIFY_SCRIPT,
+                       OREGON_VERIFY_SCRIPT, TERRAFORM_RUNNER))
+ACCESS_SCRIPT_NAMES = {Path(script_path).name: script_path for script_path in
+                       (METRICS_SCRIPT, LOGS_SCRIPT, SQL_SCRIPT, TUNNEL_SCRIPT, DB_VERIFY_SCRIPT)}
+
+
+def ops_text(*command_words):
+    return " ".join([CLI_PATH, *[shlex.quote(one_word) for one_word in command_words if one_word]])
+
+
+def assigned_env(assignment_words):
+    profile_names = [one_word.split("=", 1)[1] for one_word in assignment_words
+                     if one_word.startswith("AWS_PROFILE=")]
+    if not profile_names:
+        return ""
+    return next((env_key for env_key, env_profile in ENV_PROFILES.items() if env_profile == profile_names[-1]),
+                None)
+
+
+def env_words(env_name, default_env):
+    return ("--env", env_name) if env_name and env_name != default_env else ()
+
+
+def nth_or_empty(arg_words, word_index):
+    return arg_words[word_index] if word_index < len(arg_words) else ""
+
+
+def wrapped_kind(head_word):
+    head_path = posixpath.normpath(head_word.replace("\\", "/"))
+    head_name = os.path.basename(head_path)
+    if head_name in ACCESS_SCRIPT_NAMES and (head_path == f"access/{head_name}"
+                                             or head_path.endswith(f"/access/{head_name}")):
+        return head_name
+    if head_name in (Path(OREGON_VERIFY_SCRIPT).name, Path(TERRAFORM_RUNNER).name):
+        return head_name
+    return ""
+
+
+def flag_pairs(option_names, option_values):
+    return [pair_word for option_name, option_value in zip(option_names, option_values) if option_value
+            for pair_word in (option_name, option_value)]
+
+
+def access_replacement(kind_name, arg_words):
+    if kind_name == "metrics-query.sh":
+        return ["metrics", nth_or_empty(arg_words, 0) or "<promql>",
+                *flag_pairs(("--since", "--step"), arg_words[1:3])]
+    if kind_name == "logs-query.sh":
+        if arg_words[:1] == ["--day"]:
+            return ["logs", "--day", nth_or_empty(arg_words, 1) or "YYYY-MM-DD",
+                    nth_or_empty(arg_words, 2) or "<logql>", *flag_pairs(("--limit",), arg_words[3:4])]
+        return ["logs", nth_or_empty(arg_words, 0) or "<logql>", *flag_pairs(("--since", "--limit"), arg_words[1:3])]
+    if kind_name == "rds-query.sh":
+        if arg_words[:1] == ["-f"]:
+            return ["sql", "-f", nth_or_empty(arg_words, 1) or "FILE", *flag_pairs(("--site",), arg_words[2:3])]
+        return ["sql", nth_or_empty(arg_words, 0) or "<SELECT ...>", *flag_pairs(("--site",), arg_words[1:2])]
+    if kind_name == "rds-tunnel.sh":
+        return ["tunnel", nth_or_empty(arg_words, 0) or "start|stop|status", *flag_pairs(("--site",), arg_words[1:2])]
+    return ["verify", "db"]
+
+
+def runner_replacement(arg_words, env_name):
+    subcommand_name = next((one_arg for one_arg in arg_words if not one_arg.startswith("-")), "")
+    if subcommand_name != "plan":
+        return None
+    chdir_value = next((one_arg.split("=", 1)[1] for one_arg in arg_words if one_arg.startswith("-chdir=")), "")
+    stack_match = re.search(rf"(?:^|/){TERRAFORM_ROOT}/([^/]+)/?$", posixpath.normpath(chdir_value or "."))
+    stack_name = stack_match.group(1) if stack_match else "<stack>"
+    checkout_dir = own_checkout_dir()
+    default_env = DEFAULT_ENV
+    if stack_name in plan_stacks(checkout_dir):
+        one_stack = stack_info(checkout_dir, stack_name)
+        if one_stack.is_unmapped:
+            return None
+        default_env = one_stack.default_env()
+    rest_args = [one_arg for one_arg in arg_words if not one_arg.startswith(("-chdir=", "-out", "--out"))]
+    rest_args.remove("plan")
+    return [*env_words(env_name, default_env), "tf", "plan", stack_name, *(["--", *rest_args] if rest_args else [])]
+
+
+def replacement_words(head_word, arg_words, env_name):
+    kind_name = wrapped_kind(head_word)
+    if not kind_name or env_name is None:
+        return None
+    if kind_name in ACCESS_SCRIPT_NAMES:
+        return [*env_words(env_name, DEFAULT_ENV), *access_replacement(kind_name, arg_words)]
+    if kind_name == Path(OREGON_VERIFY_SCRIPT).name:
+        return None if "--kubeconfig" in arg_words else [*env_words(env_name, DEFAULT_ENV), "verify", "oregon"]
+    return runner_replacement(arg_words, env_name)
+
+
+SOURCE_WORDS = {"source", "."}
+
+
+def shell_script_words(core_words):
+    if os.path.basename(core_words[0]) not in SHELL_NAMES:
+        return None
+    rest_words = list(core_words[1:])
+    while rest_words and rest_words[0].startswith("-"):
+        rest_words = rest_words[1:]
+    return rest_words or None
+
+
+def classify_words(command_words, depth_left):
+    checks_module = shell_helpers()
+    found_refusals = []
+    for one_word in command_words:
+        for body_text in checks_module.substitution_bodies(one_word):
+            found_refusals += classify_command(body_text, depth_left - 1)
+    core_words, _ = checks_module.unwrap_command(command_words)
+    if not core_words:
+        return found_refusals
+    script_texts, word_lists = checks_module.nested_scripts(core_words)
+    for script_text in script_texts:
+        found_refusals += classify_command(script_text, depth_left - 1)
+    for inner_words in word_lists:
+        found_refusals += classify_words(inner_words, depth_left - 1)
+    if script_texts or word_lists:
+        return found_refusals
+    assignment_words = command_words[:len(command_words) - len(core_words)]
+    script_words = shell_script_words(core_words)
+    if script_words:
+        core_words = script_words
+    elif core_words[0] in SOURCE_WORDS and len(core_words) > 1:
+        core_words = core_words[1:]
+    ops_words = replacement_words(core_words[0], core_words[1:], assigned_env(assignment_words))
+    if ops_words is not None:
+        found_refusals.append(RefusedCommand(shlex.join(command_words), ops_text(*ops_words)))
+    return found_refusals
+
+
+def shell_heredoc_bodies(checks_module, command_text):
+    found_bodies = []
+    for heredoc_match in checks_module.HEREDOC_PATTERN.finditer(command_text):
+        line_start = command_text.rfind("\n", 0, heredoc_match.start()) + 1
+        feeding_line = command_text[line_start:heredoc_match.start()] + " " + heredoc_match.group(3)
+        try:
+            feeding_tokens = checks_module.shell_tokens(feeding_line)
+        except ValueError:
+            continue
+        feeding_heads = [checks_module.unwrap_command(command_words)[0][:1]
+                         for command_words in checks_module.simple_commands(feeding_tokens)]
+        if any(head_words and os.path.basename(head_words[0]) in SHELL_NAMES for head_words in feeding_heads):
+            found_bodies.append("\n".join(heredoc_match.group(0).splitlines()[1:-1]))
+    return found_bodies
+
+
+def classify_command(command_text, depth_left=6):
+    if depth_left <= 0:
+        return []
+    checks_module = shell_helpers()
+    found_refusals = []
+    for body_text in shell_heredoc_bodies(checks_module, command_text):
+        found_refusals += classify_command(body_text, depth_left - 1)
+    try:
+        token_list = checks_module.shell_tokens(checks_module.strip_heredocs(command_text))
+    except ValueError:
+        return found_refusals
+    for command_words in checks_module.simple_commands(token_list):
+        found_refusals += classify_words(command_words, depth_left)
+    return found_refusals
+
+
+def refusal_message(found_refusals):
+    message_lines = ["ops: a direct call to a production script the ops CLI wraps is refused (ADR 512); run the",
+                     "ops command, which selects the AWS profile (--env, default prod), checks the SSO session",
+                     "and writes the dated log:"]
+    for one_refusal in found_refusals:
+        message_lines.append(f"  refused  {one_refusal.refused_text}")
+        message_lines.append(f"  run      {one_refusal.replacement_text}")
+    message_lines.append(f"Every command: {CLI_PATH} list")
+    return "\n".join(message_lines)
+
+
+def hook_main(stdin_text):
+    try:
+        hook_input = json.loads(stdin_text)
+    except json.JSONDecodeError:
+        return 0
+    if hook_input.get("tool_name", "Bash") != "Bash":
+        return 0
+    command_text = (hook_input.get("tool_input") or {}).get("command") or ""
+    try:
+        found_refusals = classify_command(command_text)
+    except Exception as parser_error:
+        if not any(script_name in command_text for script_name in WRAPPED_NAMES):
+            return 0
+        print(f"ops hook: the shell parser borrowed from {CHECKS_CLI_PATH} failed ({parser_error!r}), so a "
+              f"command naming a script ops wraps is refused; restore the parser with: git checkout -- "
+              f"{CHECKS_CLI_PATH}", file=sys.stderr)
+        return 2
+    if not found_refusals:
+        return 0
+    print(refusal_message(found_refusals), file=sys.stderr)
+    return 2
+
+
+def main(argv_words, system_effects=None, caller_dir=None, run_moment=None, repo_paths=None):
+    ops_request = parse_request(argv_words)
+    if ops_request.wants_help:
+        print(USAGE_TEXT, end="")
+        return 0
+    if not ops_request.command_words:
+        print(USAGE_TEXT, end="", file=sys.stderr)
+        return 2
+    command_name = ops_request.command_words[0]
+    if command_name == "hook":
+        return hook_main(sys.stdin.read())
+    if command_name == "list":
+        print("\n".join(list_lines()))
+        return 0
+    system_effects = system_effects or SystemEffects()
+    run_moment = run_moment or datetime.datetime.now()
+    repo_paths = repo_paths or find_repo_paths(own_checkout_dir())
+    profile_name = ENV_PROFILES[ops_request.env_name or DEFAULT_ENV]
+    if command_name == "doctor":
+        out_lines, problem_count = doctor_lines(repo_paths, system_effects)
+        print("\n".join(out_lines))
+        if problem_count:
+            print(f"{problem_count} problem(s); each line above names its fix")
+        return 1 if problem_count else 0
+    if command_name == "tf":
+        plan_request = tf_request(repo_paths.repo_root, list(ops_request.command_words[1:]))
+        one_stack = stack_info(repo_paths.repo_root, plan_request.stack_name)
+        env_name = plan_env(repo_paths.repo_root, one_stack, ops_request.env_name)
+        profile_name = ENV_PROFILES[env_name]
+        require_init(repo_paths.repo_root, one_stack, env_name)
+        require_session(repo_paths, profile_name, system_effects)
+        return run_plan(repo_paths, plan_request, profile_name, system_effects, run_moment)
+    script_invocation = build_invocation(ops_request.command_words, caller_dir or os.getcwd())
+    if script_invocation.command_spec.command_name == "whoami":
+        return run_whoami(repo_paths, profile_name, system_effects, run_moment)
+    if script_invocation.command_spec.command_name == "verify oregon" and not os.environ.get(CP_OVERRIDE_ENV):
+        require_init(repo_paths.repo_root, stack_info(repo_paths.repo_root, OREGON_STACK),
+                     ops_request.env_name or DEFAULT_ENV)
+    if script_invocation.needs_session:
+        require_session(repo_paths, profile_name, system_effects)
+    if script_invocation.needs_docker:
+        require_docker(system_effects)
+    return run_script(repo_paths, script_invocation, profile_name, system_effects, run_moment)
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main(sys.argv[1:]))
+    except OpsError as ops_error:
+        print(f"ops: {ops_error}", file=sys.stderr)
+        sys.exit(2)
+    except KeyboardInterrupt:
+        sys.exit(130)

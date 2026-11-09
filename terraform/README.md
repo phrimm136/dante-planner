@@ -155,10 +155,11 @@ another account's state bucket — reaches a plan unchallenged, because the back
 compares the two, reading the account id out of the `<prefix>-tfstate-<account_id>` bucket name,
 and also refuses a directory holding an auto-loaded `terraform.tfvars`.
 
-**Terraform runs through `scripts/ops/terraform-run.sh`, never the raw binary:**
+**Terraform runs through `scripts/ops/terraform-run.sh`, never the raw binary; plans run as
+`ops tf plan`, which calls it:**
 
 ```bash
-scripts/ops/terraform-run.sh -chdir=terraform/oregon plan -var-file=prod.tfvars
+.claude/skills/ops/bin/ops tf plan oregon -- -var-file=prod.tfvars
 ```
 
 It is transparent, handing off every argument, stdin and the exit status, so it substitutes for

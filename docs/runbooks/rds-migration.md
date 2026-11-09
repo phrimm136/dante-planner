@@ -46,7 +46,7 @@ docker exec danteplanner-mysql mysql -uroot -p -e \
 - [ ] SG: permanent EC2→RDS:3306 rule **and** a temporary RDS→source:3306 rule (RDS subnet CIDR only).
 ```bash
 cd terraform/rds
-scripts/ops/terraform-run.sh plan      # review: creating RDS + SG + subnet group + param group
+.claude/skills/ops/bin/ops tf plan rds      # review: creating RDS + SG + subnet group + param group
 scripts/ops/terraform-run.sh apply
 terraform output rds_endpoint     # → put this value into SSM (next step)
 ```
@@ -55,7 +55,7 @@ terraform output rds_endpoint     # → put this value into SSM (next step)
       buffer pool, not connections, is the constraint at 50k MAU. A resize now is free; after promote
       it costs a failover/restart window.
 - [ ] **Destroy-guard test:** temporarily edit a replace-forcing attr (e.g. instance identifier) and
-      `scripts/ops/terraform-run.sh plan` → it MUST error on `prevent_destroy`. Revert the edit. (proves I4)
+      `.claude/skills/ops/bin/ops tf plan rds` → it MUST error on `prevent_destroy`. Revert the edit. (proves I4)
 
 ### 0.2 Capture the source @@sql_mode into the param group
 ```bash
@@ -92,7 +92,7 @@ GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%';
 - [ ] Publish source MySQL 3306 on the EC2 **private** IP (temporary; torn down in Zone 4). Keep the SG
       rule from 0.1 scoped to the RDS subnet only.
 - [ ] Verify from a host RDS can use: source reachable on `<SOURCE_PRIVATE_IP>:3306`.
-- [ ] `scripts/deploy/setup-env.sh` sources `SOURCE_PRIVATE_IP` into the regenerated `.env` — or rely
+- [ ] The deploy pipeline writes `SOURCE_PRIVATE_IP` into the regenerated `.env` — or rely
       on golden rule 6's deploy freeze. (Without either, the next deploy defaults the publish to
       `127.0.0.1` and replication dies silently until the 0.8 alarm fires.)
 

@@ -38,4 +38,4 @@ unset value
 echo "done. Next:"
 echo "  1. scripts/ops/terraform-run.sh -chdir=terraform/secrets apply   # enrols the container for replication"
 echo "  2. delete the master_password line from the environment's tfvars"
-echo "  3. scripts/ops/terraform-run.sh -chdir=terraform/rds plan -var-file=<env>.tfvars   # must show NO change"
+echo "  3. .claude/skills/ops/bin/ops --env <env> tf plan rds -- -var-file=<env>.tfvars   # must show NO change"

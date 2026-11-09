@@ -1,11 +1,5 @@
 # shellcheck shell=bash
-# ERR-trap installer and the deploy stages' exit codes.
-
-EXIT_PREREQUISITES=10
-EXIT_ENV_SETUP=20
-EXIT_CONTAINER_DEPLOY=30
-EXIT_CRON_SETUP=40
-EXIT_SHELL_SETUP=50
+# ERR-trap installer.
 
 # install_err_trap [exit_code]
 # Reports the failing line on stderr. With an exit code the shell terminates

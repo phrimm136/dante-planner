@@ -98,7 +98,7 @@ body="Drift check from $origin at $(date -Iseconds).
 
 $summary
 Counts only — plan output is never uploaded. Reproduce locally for the reason:
-\`scripts/ops/terraform-run.sh -chdir=terraform/<stack> plan\`"
+\`.claude/skills/ops/bin/ops tf plan <stack>\`"
 
 existing=$(gh issue list --repo "$GH_REPO" --label "$ISSUE_LABEL" --state open \
   --json number --jq '.[0].number' 2>/dev/null)

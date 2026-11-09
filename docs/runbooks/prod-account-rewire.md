@@ -87,7 +87,7 @@ The one stack whose resources live outside AWS entirely, so its state copy IS it
 
 ```bash
 AWS_PROFILE=<prod> terraform -chdir=terraform/cloudflare init -backend-config=../backend.prod.hcl -reconfigure
-AWS_PROFILE=<prod> scripts/ops/terraform-run.sh -chdir=terraform/cloudflare plan -var-file=prod.tfvars
+.claude/skills/ops/bin/ops tf plan cloudflare -- -var-file=prod.tfvars
 ```
 
 Expect one known, benign drift and nothing else: state written before secrets were driven out

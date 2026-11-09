@@ -27,6 +27,18 @@ Skills are modular knowledge bases that Claude loads when needed. They provide:
 
 ---
 
+### ops
+**Purpose:** The one local CLI for production reads and terraform plans (ADR 512)
+
+**Use when:**
+- Reading production metrics, logs or SQL, opening the RDS tunnel, or running a verification check
+- Planning a terraform stack
+- The Bash hook refuses a direct call to a wrapped ops script
+
+**[View Skill →](ops/)**
+
+---
+
 ### skill-developer (Meta-Skill)
 **Purpose:** Creating and managing Claude Code skills
 

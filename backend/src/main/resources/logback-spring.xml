@@ -5,7 +5,6 @@
          PRODUCTION:
            Console (INFO+) → stdout → awslogs → CloudWatch
                              /ecs/danteplanner/backend
-                             exported daily to S3 by export-cloudwatch-logs.sh
          ═══════════════════════════════════════════════════════════ -->
     <springProfile name="prod">
         <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
