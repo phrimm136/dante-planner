@@ -28,9 +28,10 @@ asset pipeline.
   binding, e.g. `RATE_LIMIT_CRUD_CAPACITY`) or a profile override (`application-loadtest.properties`)
   changes a limit without the version, so live buckets keep the old one; and a rollback past a
   version bump keeps the newer limits until the bucket TTL, because bucket4j ignores a lower
-  version. `deploy/` sets no rate-limit values today. Worth doing the first time a limit is set
-  outside `application.properties`.
-  re-check: `rg -q '^rate-limit.config-version=' backend/src/main/resources/application.properties && .claude/skills/debt-ledger/bin/debt absent deploy -e 'RATE_LIMIT_[A-Z_]*(CAPACITY|REFILL|VERSION)' -e 'rate-limit\.'`
+  version. Neither `deploy/` nor the `prod` profile that deployed pods run sets a rate-limit
+  value today. Worth doing the first time a deployed environment sets a limit outside
+  `application.properties`.
+  re-check: `rg -q '^rate-limit.config-version=' backend/src/main/resources/application.properties && .claude/skills/debt-ledger/bin/debt absent deploy -e 'RATE_LIMIT_[A-Z_]*(CAPACITY|REFILL|VERSION)' -e 'rate-limit\.' && .claude/skills/debt-ledger/bin/debt absent backend/src/main/resources/application-prod.properties '^rate-limit\.'`
 - ADR 079's @report and @gates decisions are not in the tree: `NotificationType.REPORT_RECEIVED`
   has no producer, effect arm or `DomainEventType` counterpart (it appears only in the enum), and
   no matrix test requires every notification type to be wired, so the unwired value compiles as
@@ -44,13 +45,6 @@ asset pipeline.
   termination grace with an SSE send on the closing thread's stack; handing completion to another
   thread needs an exception to the no-new-pools rule.
   re-check: `rg -qF 'connections.forEach(AbstractSseService::complete)' backend/src/main/java/org/danteplanner/backend/shared/sse/AbstractSseService.java`
-- No workflow renders or validates `deploy/` before ArgoCD syncs it from main: `pr-gate.yml` has
-  no deploy lane and `deploy-fleet.yml` runs `kustomize edit set image` only, so a broken overlay
-  surfaces at sync time. `deploy/overlays/oregon/kustomization.yaml:11` also names a
-  `deploy-oregon.yml` that does not exist (the bumper is `deploy-fleet.yml`). Worth doing the next
-  time a base manifest or overlay patch changes shape: a PR-gate step running `kustomize build`
-  (v5.8.1, as deploy-fleet pins) on both overlays plus a schema check.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent .github/workflows -e 'kustomize build' -e 'kubeconform'`
 - `frontend/scripts/` sits outside every gate but tests: `yarn lint` and `yarn fmt:check`
   cover only `src`, and the older scripts (compiler-bailouts, generate-sitemap, dev-r2-sync)
   are in no tsconfig, so they are never typechecked.
@@ -127,17 +121,11 @@ asset pipeline.
 - Toggle endpoints flip state instead of converging on it; make them idempotent the way
   planner publish is (repeat calls are no-ops, not inversions).
   re-check: `rg -q 'public PlannerSubscription toggleSubscription\(Long userId, UUID plannerId\)' backend/src/main/java/org/danteplanner/backend/planner/service/PlannerSubscriptionService.java`
-- A full review pass on `shared/` and `user/` is outstanding.
-  re-check: `test -d backend/src/main/java/org/danteplanner/backend/shared && test -d backend/src/main/java/org/danteplanner/backend/user`
 - FE `PublicPlannerSchema.selectedKeywords` (`PlannerListSchemas.ts`) still allows `.nullish()`
   although the two response DTOs now always emit an array; tighten to a plain
   `z.array(z.string())` and drop the now-dead `?? []` fallbacks on `selectedKeywords` in the
   consumers (`PublishedPlannerCard`, `PublishedPlannerHeader`, `PersonalPlannerCard`).
   re-check: `rg -q 'z.array\(z.string\(\)\).nullish\(\)' frontend/src/pages/planner/schemas/PlannerListSchemas.ts`
-- Stale "a fresh account's syncEnabled is null" comments in `e2e/src/plannerFixture.ts`
-  and `e2e/tests/mutation-gestures.spec.ts` — behaviorally fine post-V056, textually
-  outdated.
-  re-check: `rg -q "fresh account's syncEnabled is null" e2e/src/plannerFixture.ts e2e/tests/mutation-gestures.spec.ts`
 - The frontend reads no `?login=` value (`error`, `rate_limited`, `unavailable`), so every
   OAuth failure redirect lands on a plain home page; closing it needs `validateSearch` on
   the `/` route, a toast in `GlobalLayout`, and `login.*` copy in every locale. Worth doing
@@ -393,10 +381,6 @@ asset pipeline.
   redundant with that existing read. Fold the catalog column into the document query or chunk
   when planner counts warrant it.
   re-check: `rg -qF 'public List<CatalogKeywordRow> catalogKeywordPairs()' backend/src/main/java/org/danteplanner/backend/planner/repository/PlannerDriftAuditRepository.java && rg -qF 'c.selected_keywords AS content_keywords' backend/src/main/java/org/danteplanner/backend/planner/repository/PlannerDriftAuditRepository.java`
-- 2026-08-14 — frontend/src/pages/planner/lib/editorStateCodec.ts:184 places a bare '' in a JSONContent slot: a genuine
-  production type/runtime mismatch that stream 7b typed around in its test rather than fix
-  (production out of that node's scope). Fix the slot's type or its value at the source.
-  re-check: `rg -qF "{ content: note?.content ?? '' }" frontend/src/pages/planner/lib/editorStateCodec.ts`
 - 2026-08-14 — buildSaveablePlanner pins id to a UUID via its schema, so the two planner page
   tests asserting on 'test-planner-123' cannot adopt the factory (six assertion sites). Either
   the tests move to schema-valid ids or the factory grows a test-id affordance.
@@ -429,11 +413,6 @@ asset pipeline.
   every refusal to {kind:'unknown'} and the user sees the specific toast plus a generic one.
   Becomes a real gap at the second refusal reason.
   re-check: `rg -qF 'onServerReload?: (planner: SaveablePlanner) => boolean' frontend/src/pages/planner/hooks/usePlannerSave.ts && rg -qF "return failResolution({ kind: 'unknown' })" frontend/src/pages/planner/hooks/usePlannerSave.ts`
-- 2026-08-14 — editorStateCodec.ts coerces a missing note to the string '' under a field typed
-  JSONContent — a value that violates its own declared type and seeded the stream 6 baseline
-  bug. Normalizing to createEmptyNoteContent() at that site deletes the class; the downstream
-  compensation in NoteEditor stands until then.
-  re-check: `rg -qF "{ content: note?.content ?? '' }" frontend/src/pages/planner/lib/editorStateCodec.ts && rg -qF 'value.content && value.content !== lastEmittedRef.current' frontend/src/shared/noteEditor/components/NoteEditor.tsx`
 - 2026-08-14 — PlannerExportImportSection hand-rolls a third ConflictEffect executor (the import
   conflict flow) instead of the interpreter; it predates the interpreter and diverges (inherited
   published flag now patched pointwise). Migrating it needs the interpreter's sided forkCopy plus
@@ -526,9 +505,8 @@ distinct volume name or an explicit `name:`/`COMPOSE_PROJECT_NAME` per flavor �
 switch cannot poison dev credentials.
   re-check: `rg -q -e '- mysql-data:/var/lib/mysql' docker-compose.local.yml && .claude/skills/debt-ledger/bin/debt absent docker-compose.local.yml '^name:' && .claude/skills/debt-ledger/bin/debt absent docker-compose.yml '^name:'`
 - 2026-08-16 — Dead client surface found by coverage audit: the `settings:invalidated` SSE event constant (declared in `lib/constants/api.ts`,
-no registered handler), `usePlannerStorage.clearCorruptedLocal` (no consumer), and the
-`my-plans` branch of `pages/planner/components/plannerList/PlannerCardContextMenu.tsx` (never mounted).
-  re-check: `.claude/skills/debt-ledger/bin/debt python 'import pathlib,sys; P=pathlib.Path; src=[p for p in P("frontend/src").rglob("*.ts*") if "__tests__" not in p.parts]; used=lambda w,h: any(w in p.read_text() for p in src if p.as_posix()!=h); a="frontend/src/lib/constants/api.ts"; s="frontend/src/pages/planner/hooks/usePlannerStorage.ts"; m="frontend/src/pages/planner/components/plannerList/PlannerCardContextMenu.tsx"; dead=["SETTINGS_INVALIDATED" in P(a).read_text() and not used("SETTINGS_INVALIDATED",a), "function clearCorruptedLocal" in P(s).read_text() and not used("clearCorruptedLocal",s), "my-plans" in P(m).read_text() and not used("PlannerCardContextMenu",m)]; sys.exit(0 if any(dead) else 1)'`
+no registered handler) and `usePlannerStorage.clearCorruptedLocal` (no consumer).
+  re-check: `.claude/skills/debt-ledger/bin/debt python 'import pathlib,sys; P=pathlib.Path; src=[p for p in P("frontend/src").rglob("*.ts*") if "__tests__" not in p.parts]; used=lambda w,h: any(w in p.read_text() for p in src if p.as_posix()!=h); a="frontend/src/lib/constants/api.ts"; s="frontend/src/pages/planner/hooks/usePlannerStorage.ts"; dead=["SETTINGS_INVALIDATED" in P(a).read_text() and not used("SETTINGS_INVALIDATED",a), "function clearCorruptedLocal" in P(s).read_text() and not used("clearCorruptedLocal",s)]; sys.exit(0 if any(dead) else 1)'`
 - 2026-08-16 — The pull pass counts purges it did not verify (`purgeLocalPlanners` discards
 `deleteLocal`'s Result) and a failed background sync marks the session synced with no
 retry and no indicator (`hasSyncedRef` set on error; the `isSyncing` consumer is a TODO in
@@ -880,10 +858,6 @@ guards the parse but likewise skips the schema gate.
   before folding;
   worth doing when the keyword browser's scroll restoration is next reported or revisited.
   re-check: `rg -q 'useProgressiveCount' frontend/src/pages/keyword/components/KeywordList.tsx && test -f frontend/src/shared/filter/components/FilteredEntityGrid.tsx && .claude/skills/debt-ledger/bin/debt absent frontend/src/pages/keyword/components/KeywordList.tsx 'FilteredEntityGrid'`
-- `images/UI/manifest.json` records `source: null` for every asset no converter claims,
-  which is indistinguishable from an asset whose source was never recorded. Worth splitting
-  into "hand-made" and "unknown" when an asset's provenance is first disputed.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent frontend/src -i 'hand-made'`
 - The theme pack list popup prefab is 310x450 while the composed art the card draws is
   650x1069, so the list card is laid out at proportions the art was never cut for. Worth
   recomposing the art at the list card's size when that card's proportions are next revisited.
