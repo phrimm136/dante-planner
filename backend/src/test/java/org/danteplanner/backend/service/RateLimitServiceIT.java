@@ -1,4 +1,5 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.shared.ratelimit.RateLimitStore;
 import org.danteplanner.backend.shared.ratelimit.RateLimitProperties;
 import org.danteplanner.backend.support.RateLimitStores;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
@@ -14,6 +15,7 @@ import com.redis.testcontainers.RedisContainer;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -52,6 +54,7 @@ class RateLimitServiceIT {
 
     private RateLimitProperties properties;
     private RateLimitService rateLimitService;
+    private RateLimitStore store;
     private RateLimitProperties.BucketConfig testBucketConfig;
 
     @BeforeAll
@@ -70,6 +73,11 @@ class RateLimitServiceIT {
         AUTH_REDIS.stop();
     }
 
+    @AfterEach
+    void closeStore() {
+        store.close();
+    }
+
     private static StringRedisTemplate buildTemplate(String host, int port) {
         LettuceConnectionFactory f = new LettuceConnectionFactory(new RedisStandaloneConfiguration(host, port));
         f.afterPropertiesSet();
@@ -85,10 +93,9 @@ class RateLimitServiceIT {
         rateLimitTemplate.getConnectionFactory().getConnection().serverCommands().flushDb();
         authTemplate.getConnectionFactory().getConnection().serverCommands().flushDb();
 
-        ProxyManager<byte[]> proxyManager = RateLimitStores.connectedTo(
-                REDIS.getRedisHost(), REDIS.getRedisPort(), Duration.ofSeconds(60));
+        store = RateLimitStores.connectedTo(REDIS.getRedisHost(), REDIS.getRedisPort(), Duration.ofSeconds(60));
         properties = new RateLimitProperties();
-        rateLimitService = new RateLimitService(proxyManager, properties);
+        rateLimitService = new RateLimitService(store, properties);
 
         // Configure a test bucket: 5 requests per 10 seconds
         testBucketConfig = new RateLimitProperties.BucketConfig();
@@ -545,8 +552,13 @@ class RateLimitServiceIT {
 
         @Test
         void rateLimitBucket_WhenConsumed_PersistsInLocalRedisWithTtl() {
-            ProxyManager<byte[]> proxyManager = RateLimitStores.connectedTo(
-                    REDIS.getRedisHost(), REDIS.getRedisPort(), Duration.ofSeconds(2));
+            try (RateLimitStore ttlStore = RateLimitStores.connectedTo(
+                    REDIS.getRedisHost(), REDIS.getRedisPort(), Duration.ofSeconds(2))) {
+                assertPersistsWithTtl(ttlStore);
+            }
+        }
+
+        private void assertPersistsWithTtl(ProxyManager<byte[]> proxyManager) {
 
             RateLimitProperties.BucketConfig cfg = new RateLimitProperties.BucketConfig();
             cfg.setCapacity(5);
@@ -571,8 +583,13 @@ class RateLimitServiceIT {
 
         @Test
         void rateLimitBucket_WhenConsumed_IsAbsentFromAuthRedis() {
-            ProxyManager<byte[]> proxyManager = RateLimitStores.connectedTo(
-                    REDIS.getRedisHost(), REDIS.getRedisPort(), Duration.ofSeconds(2));
+            try (RateLimitStore separateStore = RateLimitStores.connectedTo(
+                    REDIS.getRedisHost(), REDIS.getRedisPort(), Duration.ofSeconds(2))) {
+                assertAbsentFromAuthRedis(separateStore);
+            }
+        }
+
+        private void assertAbsentFromAuthRedis(ProxyManager<byte[]> proxyManager) {
 
             RateLimitProperties.BucketConfig cfg = new RateLimitProperties.BucketConfig();
             cfg.setCapacity(5);
