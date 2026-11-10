@@ -194,8 +194,8 @@ post_rule "read-source-breaker-open-sustained" "5m" \
 post_rule "restriction-undecided-commit" "0s" \
   'sum by (cluster) (increase(restriction_undecided_total[10m])) > 0'
 
-post_rule "marker-store-source-open" "5m" \
-  'max by (cluster, name) (resilience4j_circuitbreaker_state{name=~"marker-source-.+",state="open"}) > 0'
+post_rule "redis-role-breaker-open-sustained" "5m" \
+  'max by (cluster, name) (resilience4j_circuitbreaker_state{name=~"redis-.+",state="open"}) > 0'
 
 post_rule "marker-wait-timeouts" "0s" \
   'sum by (cluster) (increase(freshness_marker_wait_timeouts_total[10m])) > 0'

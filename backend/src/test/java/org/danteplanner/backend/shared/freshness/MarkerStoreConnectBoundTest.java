@@ -26,6 +26,7 @@ import io.netty.channel.ChannelOption;
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.RealClockBounds;
 
@@ -52,7 +53,7 @@ class MarkerStoreConnectBoundTest {
                             blackHole.getLocalPort()));
             writeStore.afterPropertiesSet();
             try (MarkerStore store = new MarkerStore(writeStore, writeStore.getRequiredNativeClient().getResources(), List.of(),
-                    new MarkerStore.Settings(0, WAIT_BOUND, Duration.ofHours(1)), meters)) {
+                    new RedisRoleHealth(), new MarkerStore.Settings(0, WAIT_BOUND, Duration.ofHours(1)), meters)) {
                 assertThat(fillAcceptQueue(blackHole, fillers))
                         .as("the kernel drops a SYN once the accept queue of a never-accepting listener is full")
                         .isTrue();
@@ -99,7 +100,7 @@ class MarkerStoreConnectBoundTest {
                     .build();
             try {
                 MarkerStore store = new MarkerStore(writeStore, connectOutlastingTheTest,
-                        List.of(), new MarkerStore.Settings(0, WAIT_BOUND, Duration.ofHours(1)), meters);
+                        List.of(), new RedisRoleHealth(), new MarkerStore.Settings(0, WAIT_BOUND, Duration.ofHours(1)), meters);
                 assertThat(fillAcceptQueue(blackHole, fillers)).isTrue();
                 ThreadGroup group = new ThreadGroup("marker-raise-close-" + UUID.randomUUID());
                 List<Thread> raises = IntStream.range(0, QUEUED_RAISES)

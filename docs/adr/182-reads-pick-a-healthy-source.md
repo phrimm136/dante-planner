@@ -60,7 +60,7 @@ epic: none · pr: none · supersedes: 168 @reads @outage @trigger, 168 @reads @o
   breaker metric rule.
   REJECTED: a WARN once the open state persists — a second, slower copy of the breaker metric rule.
   INVARIANT: no probe logs a breaker transition above INFO — an `rg 'log\.warn'` over the
-  read-source and marker-source probes prints nothing.
+  read-source and Redis role probes prints nothing.
 
 ## Takeaway
 - takeaway: attach a guard to the property of the source it protects, not to the deployment that

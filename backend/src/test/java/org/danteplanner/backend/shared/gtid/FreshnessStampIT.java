@@ -39,6 +39,7 @@ import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.freshness.MarkerStore;
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -152,7 +153,7 @@ class FreshnessStampIT {
 
     private MarkerStore storeOver(LettuceConnectionFactory writeStore) {
         return new MarkerStore(writeStore, writeStore.getRequiredNativeClient().getResources(), List.of(),
-                new MarkerStore.Settings(0, Duration.ofSeconds(1), Duration.ofHours(1)), meters);
+                new RedisRoleHealth(), new MarkerStore.Settings(0, Duration.ofSeconds(1), Duration.ofHours(1)), meters);
     }
 
     private MockMvc mvc() {

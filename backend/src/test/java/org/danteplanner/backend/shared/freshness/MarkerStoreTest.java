@@ -15,13 +15,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import ch.qos.logback.classic.Level;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
-import org.danteplanner.backend.shared.config.RedisConnectionConfig;
+import org.danteplanner.backend.shared.redis.RedisRole;
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
+import org.danteplanner.backend.shared.redis.RedisRoleProbe;
 import org.danteplanner.backend.support.Hang;
+import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.backend.support.RealClockBounds;
+import org.danteplanner.backend.support.RedisEndpoints;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -47,21 +51,16 @@ class MarkerStoreTest {
         refused.afterPropertiesSet();
         StringRedisTemplate template = new StringRedisTemplate(refused);
         template.afterPropertiesSet();
-        sources = List.of(source(MarkerStore.LOCAL_SOURCE, template), source(MarkerStore.AUTH_SOURCE, template));
-        store = new MarkerStore(refused, refused.getRequiredNativeClient().getResources(), sources, SETTINGS, meters);
+        sources = List.of(new MarkerStore.Source(RedisRole.AUTH_LOCAL, template),
+                new MarkerStore.Source(RedisRole.AUTH, template));
+        store = new MarkerStore(refused, refused.getRequiredNativeClient().getResources(), sources,
+                new RedisRoleHealth(), SETTINGS, meters);
     }
 
     @AfterEach
     void tearDown() {
         store.close();
         refused.destroy();
-    }
-
-    private static MarkerStore.Source source(String name, StringRedisTemplate template) {
-        RedisConnectionConfig.Endpoint endpoint = new RedisConnectionConfig.Endpoint();
-        endpoint.setHost(REFUSED_HOST);
-        endpoint.setPort(REFUSED_PORT);
-        return new MarkerStore.Source(name, template, endpoint, CircuitBreaker.ofDefaults(name + UUID.randomUUID()));
     }
 
     @Test
@@ -95,16 +94,16 @@ class MarkerStoreTest {
 
     @Test
     void sourceOrder_WhenTheRegionReadsAReplicaFirst_ReadsTheLocalStoreThenTheAuthStore() {
-        MarkerStore.Source local = source(MarkerStore.LOCAL_SOURCE, null);
-        MarkerStore.Source auth = source(MarkerStore.AUTH_SOURCE, null);
+        MarkerStore.Source local = new MarkerStore.Source(RedisRole.AUTH_LOCAL, null);
+        MarkerStore.Source auth = new MarkerStore.Source(RedisRole.AUTH, null);
 
         assertThat(MarkerStore.sourceOrder(false, local, auth)).containsExactly(local, auth);
     }
 
     @Test
     void sourceOrder_WhenTheRegionReadsThePrimaryFirst_ReadsOnlyTheAuthStore() {
-        MarkerStore.Source local = source(MarkerStore.LOCAL_SOURCE, null);
-        MarkerStore.Source auth = source(MarkerStore.AUTH_SOURCE, null);
+        MarkerStore.Source local = new MarkerStore.Source(RedisRole.AUTH_LOCAL, null);
+        MarkerStore.Source auth = new MarkerStore.Source(RedisRole.AUTH, null);
 
         assertThat(MarkerStore.sourceOrder(true, local, auth)).containsExactly(auth);
     }
@@ -129,7 +128,8 @@ class MarkerStoreTest {
     @Test
     void raise_WhenTheStoreIsClosed_CountsAFailureWithoutWaitingForTheBound() {
         MarkerStore roomy =
-                new MarkerStore(refused, refused.getRequiredNativeClient().getResources(), sources, ROOMY_SETTINGS, meters);
+                new MarkerStore(refused, refused.getRequiredNativeClient().getResources(), sources,
+                        new RedisRoleHealth(), ROOMY_SETTINGS, meters);
         roomy.close();
 
         long start = System.nanoTime();
@@ -151,18 +151,20 @@ class MarkerStoreTest {
     }
 
     @Test
-    void probe_WhenASourceFailsOnce_KeepsItsBreakerClosed() {
-        store.probe();
+    void read_WhenEverySourcesRoleIsUnavailable_IsUnknownWithoutTryingAStore() {
+        RedisRoleHealth unavailable = new RedisRoleHealth();
+        FreshnessScope scope = new FreshnessScope.Entity(UUID.randomUUID());
+        try (RedisRoleProbe probe = new RedisRoleProbe(refused.getRequiredNativeClient().getResources(),
+                RedisEndpoints.everyRoleAt(REFUSED_HOST, REFUSED_PORT), unavailable);
+                MarkerStore skipping = new MarkerStore(refused, refused.getRequiredNativeClient().getResources(),
+                        sources, unavailable, SETTINGS, meters);
+                LogCapture capture = LogCapture.onThisThread(MarkerStore.class)) {
+            probe.probeAtStartup();
 
-        assertThat(breakerStates()).containsOnly(CircuitBreaker.State.CLOSED);
-    }
-
-    @Test
-    void probe_WhenASourceFailsTwiceInARow_OpensItsBreaker() {
-        store.probe();
-        store.probe();
-
-        assertThat(breakerStates()).containsOnly(CircuitBreaker.State.OPEN);
+            assertThat(skipping.read(List.of(scope)))
+                    .containsExactly(Map.entry(scope, new MarkerStore.MarkerView.Unknown()));
+            assertThat(capture.at(Level.WARN)).as("no store was tried, so none failed").isEmpty();
+        }
     }
 
     @Test
@@ -170,9 +172,5 @@ class MarkerStoreTest {
         assertThat(new MarkerStore.Settings(1, BoundedRedisConnections.COMMAND_TIMEOUT, Duration.ofHours(1))
                 .isWaitBoundUnderTheCommandTimeout()).isFalse();
         assertThat(SETTINGS.isWaitBoundUnderTheCommandTimeout()).isTrue();
-    }
-
-    private List<CircuitBreaker.State> breakerStates() {
-        return sources.stream().map(source -> source.breaker().getState()).toList();
     }
 }

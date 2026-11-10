@@ -758,7 +758,7 @@
   {
    "id": 53,
    "type": "timeseries",
-   "title": "Freshness marker source breaker open (per pod and source)",
+   "title": "Redis role breaker open (per pod and role)",
    "datasource": {
     "type": "prometheus",
     "uid": "${DS_PROM}"
@@ -772,7 +772,7 @@
    "targets": [
     {
      "refId": "A",
-     "expr": "max by (cluster, instance, name) (resilience4j_circuitbreaker_state{name=~\"marker-source-.+\",state=\"open\"})",
+     "expr": "max by (cluster, instance, name) (resilience4j_circuitbreaker_state{name=~\"redis-.+\",state=\"open\"})",
      "legendFormat": "{{cluster}} {{instance}} {{name}}"
     }
    ]

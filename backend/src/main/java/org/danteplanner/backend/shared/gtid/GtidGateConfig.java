@@ -12,19 +12,18 @@ import org.springframework.core.Ordered;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import jakarta.persistence.EntityManagerFactory;
 
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.lettuce.core.resource.ClientResources;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
-import org.danteplanner.backend.shared.config.RedisConnectionConfig;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.danteplanner.backend.shared.freshness.MarkerStore;
+import org.danteplanner.backend.shared.redis.RedisRole;
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 
 /**
  * Wires the read-your-writes GTID gate wherever the routing datasource is present.
@@ -76,30 +75,15 @@ public class GtidGateConfig {
             ClientResources redisClientResources,
             @Qualifier("stringRedisTemplate") StringRedisTemplate authStore,
             @Qualifier("authLocalStringRedisTemplate") StringRedisTemplate authLocalStore,
-            RedisConnectionConfig redisConnectionConfig,
             ReadSourceProperties readSourceProperties,
-            CircuitBreakerRegistry readSourceBreakerRegistry,
+            RedisRoleHealth redisRoleHealth,
             MarkerStore.Settings settings,
             MeterRegistry meterRegistry) {
-        MarkerStore.Source local = new MarkerStore.Source(MarkerStore.LOCAL_SOURCE, authLocalStore,
-                redisConnectionConfig.getAuthLocal(),
-                readSourceBreakerRegistry.circuitBreaker(MarkerStore.BREAKER_NAME_PREFIX + MarkerStore.LOCAL_SOURCE));
-        MarkerStore.Source auth = new MarkerStore.Source(MarkerStore.AUTH_SOURCE, authStore,
-                redisConnectionConfig.getAuth(),
-                readSourceBreakerRegistry.circuitBreaker(MarkerStore.BREAKER_NAME_PREFIX + MarkerStore.AUTH_SOURCE));
+        MarkerStore.Source local = new MarkerStore.Source(RedisRole.AUTH_LOCAL, authLocalStore);
+        MarkerStore.Source auth = new MarkerStore.Source(RedisRole.AUTH, authStore);
         return new MarkerStore(authRedisConnectionFactory, redisClientResources,
                 MarkerStore.sourceOrder(readSourceProperties.readsPrimaryFirst(), local, auth),
-                settings, meterRegistry);
-    }
-
-    @Bean(MarkerStore.PROBE_SCHEDULER)
-    public ThreadPoolTaskScheduler markerSourceProbeScheduler() {
-        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(1);
-        scheduler.setThreadNamePrefix("marker-source-probe-");
-        scheduler.setRemoveOnCancelPolicy(true);
-        scheduler.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
-        return scheduler;
+                redisRoleHealth, settings, meterRegistry);
     }
 
     @Bean

@@ -199,6 +199,7 @@ pitest {
         "org.danteplanner.backend.planner.service.*",
         "org.danteplanner.backend.auth.token.*",
         "org.danteplanner.backend.shared.readpath.*",
+        "org.danteplanner.backend.shared.redis.*",
         "org.danteplanner.backend.planner.validation.floor.*",
         "org.danteplanner.backend.planner.validation.sinner.*",
         "org.danteplanner.backend.planner.validation.identity.*",

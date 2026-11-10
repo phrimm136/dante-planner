@@ -38,6 +38,7 @@ import eu.rekawek.toxiproxy.model.ToxicDirection;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.RealClockBounds;
 
@@ -148,7 +149,7 @@ class MarkerStoreReplicationIT {
 
     private MarkerStore storeOver(LettuceConnectionFactory writeStore, Duration waitBound) {
         return new MarkerStore(writeStore, writeStore.getRequiredNativeClient().getResources(), List.of(),
-                new MarkerStore.Settings(1, waitBound, Duration.ofHours(1)), meters);
+                new RedisRoleHealth(), new MarkerStore.Settings(1, waitBound, Duration.ofHours(1)), meters);
     }
 
     private static LettuceConnectionFactory factory(String host, int port) {

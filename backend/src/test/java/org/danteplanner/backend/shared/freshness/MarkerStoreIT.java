@@ -27,12 +27,17 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.redis.testcontainers.RedisContainer;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import ch.qos.logback.classic.Level;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
 import org.danteplanner.backend.shared.config.RedisConnectionConfig;
+import org.danteplanner.backend.shared.redis.RedisRole;
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
+import org.danteplanner.backend.shared.redis.RedisRoleProbe;
 import org.danteplanner.backend.support.Hang;
+import org.danteplanner.backend.support.LogCapture;
+import org.danteplanner.backend.support.RedisEndpoints;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -98,24 +103,14 @@ class MarkerStoreIT {
         return template;
     }
 
-    private static MarkerStore.Source source(String name, StringRedisTemplate store, String host, int port) {
-        RedisConnectionConfig.Endpoint endpoint = new RedisConnectionConfig.Endpoint();
-        endpoint.setHost(host);
-        endpoint.setPort(port);
-        return new MarkerStore.Source(name, store, endpoint, CircuitBreaker.ofDefaults(name + UUID.randomUUID()));
-    }
-
-    private static MarkerStore.Source liveSource(String name) {
-        return source(name, live, REDIS.getRedisHost(), REDIS.getRedisPort());
-    }
-
-    private static MarkerStore.Source refusedSource(String name) {
-        return source(name, refused, REFUSED_HOST, REFUSED_PORT);
-    }
-
     private MarkerStore storeOver(LettuceConnectionFactory writeStore, List<MarkerStore.Source> readSources) {
-        MarkerStore store = new MarkerStore(writeStore, writeStore.getRequiredNativeClient().getResources(), readSources, new MarkerStore.Settings(0, WAIT_BOUND, TTL),
-                meters);
+        return storeOver(writeStore, readSources, new RedisRoleHealth());
+    }
+
+    private MarkerStore storeOver(
+            LettuceConnectionFactory writeStore, List<MarkerStore.Source> readSources, RedisRoleHealth roleHealth) {
+        MarkerStore store = new MarkerStore(writeStore, writeStore.getRequiredNativeClient().getResources(), readSources,
+                roleHealth, new MarkerStore.Settings(0, WAIT_BOUND, TTL), meters);
         stores.add(store);
         return store;
     }
@@ -203,7 +198,7 @@ class MarkerStoreIT {
 
     @Test
     void read_WhenAScopeHasAMarkerAndAnotherHasNone_IsAtForOneAndAbsentForTheOther() {
-        MarkerStore store = storeOver(liveFactory, List.of(liveSource(MarkerStore.AUTH_SOURCE)));
+        MarkerStore store = storeOver(liveFactory, List.of(new MarkerStore.Source(RedisRole.AUTH, live)));
         FreshnessScope raised = new FreshnessScope.Entity(UUID.randomUUID());
         FreshnessScope untouched = new FreshnessScope.Entity(UUID.randomUUID());
         store.raise(Set.of(raised), serverA + ":1-4:6-9");
@@ -215,37 +210,38 @@ class MarkerStoreIT {
 
     @Test
     void read_WhenTheLocalStoreIsDown_ServesFromTheAuthStore() {
-        MarkerStore.Source local = refusedSource(MarkerStore.LOCAL_SOURCE);
-        MarkerStore store = storeOver(liveFactory, MarkerStore.sourceOrder(false, local, liveSource(MarkerStore.AUTH_SOURCE)));
+        MarkerStore store = storeOver(liveFactory, MarkerStore.sourceOrder(false,
+                new MarkerStore.Source(RedisRole.AUTH_LOCAL, refused), new MarkerStore.Source(RedisRole.AUTH, live)));
         FreshnessScope scope = new FreshnessScope.Entity(UUID.randomUUID());
         store.raise(Set.of(scope), serverA + ":1-5");
 
-        assertThat(store.read(List.of(scope)))
-                .containsExactly(Map.entry(scope, new MarkerStore.MarkerView.At(serverA + ":1-5")));
-        assertThat(local.breaker().getMetrics().getNumberOfFailedCalls()).isEqualTo(1);
+        try (LogCapture capture = LogCapture.onThisThread(MarkerStore.class)) {
+            assertThat(store.read(List.of(scope)))
+                    .containsExactly(Map.entry(scope, new MarkerStore.MarkerView.At(serverA + ":1-5")));
+            assertThat(capture.at(Level.WARN)).as("the local store was tried and failed").hasSize(1);
+        }
     }
 
     @Test
-    void read_WhenTheLocalBreakerIsOpen_ServesFromTheAuthStoreWithoutTryingTheLocalStore() {
-        MarkerStore.Source local = refusedSource(MarkerStore.LOCAL_SOURCE);
-        local.breaker().transitionToOpenState();
-        MarkerStore store = storeOver(liveFactory, MarkerStore.sourceOrder(false, local, liveSource(MarkerStore.AUTH_SOURCE)));
+    void read_WhenTheLocalRoleIsUnavailable_ServesFromTheAuthStoreWithoutTryingTheLocalStore() {
+        RedisConnectionConfig connections = RedisEndpoints.everyRoleAt(REDIS.getRedisHost(), REDIS.getRedisPort());
+        RedisEndpoints.moveRole(connections, RedisRole.AUTH_LOCAL, REFUSED_HOST, REFUSED_PORT);
+        RedisRoleHealth roleHealth = new RedisRoleHealth();
+        try (RedisRoleProbe probe =
+                new RedisRoleProbe(liveFactory.getRequiredNativeClient().getResources(), connections, roleHealth)) {
+            probe.probeAtStartup();
+        }
+        MarkerStore store = storeOver(liveFactory, MarkerStore.sourceOrder(false,
+                new MarkerStore.Source(RedisRole.AUTH_LOCAL, refused), new MarkerStore.Source(RedisRole.AUTH, live)),
+                roleHealth);
         FreshnessScope scope = new FreshnessScope.Entity(UUID.randomUUID());
         store.raise(Set.of(scope), serverA + ":1-5");
 
-        assertThat(store.read(List.of(scope)))
-                .containsExactly(Map.entry(scope, new MarkerStore.MarkerView.At(serverA + ":1-5")));
-        assertThat(local.breaker().getMetrics().getNumberOfFailedCalls()).isZero();
-    }
-
-    @Test
-    void probe_WhenAnOpenSourceAnswersOnce_ClosesItsBreaker() {
-        MarkerStore.Source auth = liveSource(MarkerStore.AUTH_SOURCE);
-        auth.breaker().transitionToOpenState();
-        MarkerStore store = storeOver(liveFactory, List.of(auth));
-
-        store.probe();
-
-        assertThat(auth.breaker().getState()).isEqualTo(CircuitBreaker.State.CLOSED);
+        try (LogCapture capture = LogCapture.onThisThread(MarkerStore.class)) {
+            assertThat(store.read(List.of(scope)))
+                    .containsExactly(Map.entry(scope, new MarkerStore.MarkerView.At(serverA + ":1-5")));
+            assertThat(capture.at(Level.WARN)).as("the local store was not tried").isEmpty();
+        }
+        assertThat(roleHealth.isAvailable(RedisRole.AUTH)).isTrue();
     }
 }
