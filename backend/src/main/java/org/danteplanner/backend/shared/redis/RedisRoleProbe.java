@@ -2,12 +2,13 @@ package org.danteplanner.backend.shared.redis;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.BiFunction;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.StringUtils;
@@ -34,6 +35,7 @@ public class RedisRoleProbe implements AutoCloseable {
     public static final String PROBE_INTERVAL_TEXT = "PT1S";
     public static final Duration PROBE_INTERVAL = Duration.parse(PROBE_INTERVAL_TEXT);
     public static final Duration PROBE_TIMEOUT = Duration.ofSeconds(1);
+    public static final Duration STARTUP_PROBE_TIMEOUT = BoundedRedisConnections.COMMAND_TIMEOUT;
     public static final int FAILURE_THRESHOLD = 2;
 
     private static final String PONG = "PONG";
@@ -45,21 +47,21 @@ public class RedisRoleProbe implements AutoCloseable {
         RedisConnectionConfig.Endpoint auth = RedisRole.AUTH.endpointIn(connections);
         this.client = BoundedRedisConnections.redisClient(clientResources, auth.getHost(), auth.getPort());
         client.setOptions(ClientOptions.builder()
-                .socketOptions(SocketOptions.builder().connectTimeout(PROBE_TIMEOUT).build())
+                .socketOptions(SocketOptions.builder().connectTimeout(STARTUP_PROBE_TIMEOUT).build())
                 .build());
         this.probes = Arrays.stream(RedisRole.values())
-                .map(role -> new RoleProbe(role, probeUri(role.endpointIn(connections)), health.breaker(role)))
+                .map(role -> new RoleProbe(role, probeUris(role.endpointIn(connections)), health.breaker(role)))
                 .toList();
     }
 
     @PostConstruct
     public void probeAtStartup() {
-        probeEveryRole(ProbeStreak::atStartup);
+        probeEveryRole(ProbePhase.STARTUP);
     }
 
     @Scheduled(fixedDelayString = PROBE_INTERVAL_TEXT, scheduler = RedisRoleConfig.PROBE_SCHEDULER)
     public void probe() {
-        probeEveryRole(ProbeStreak::after);
+        probeEveryRole(ProbePhase.RUNTIME);
     }
 
     @Override
@@ -67,13 +69,13 @@ public class RedisRoleProbe implements AutoCloseable {
         client.shutdown();
     }
 
-    private void probeEveryRole(BiFunction<ProbeStreak, Boolean, ProbeStreak.Transition> decide) {
-        long deadline = System.nanoTime() + PROBE_TIMEOUT.toNanos();
-        List<Ping> pings = probes.stream().map(probe -> ping(probe.uri())).toList();
+    private void probeEveryRole(ProbePhase phase) {
+        long deadline = System.nanoTime() + phase.timeout().toNanos();
+        List<Ping> pings = probes.stream().map(probe -> ping(probe.uris().get(phase))).toList();
         try {
             for (int i = 0; i < probes.size(); i++) {
                 RoleProbe probe = probes.get(i);
-                probe.apply(decide.apply(probe.streak(), pings.get(i).answeredBy(deadline)));
+                probe.apply(phase.decide(probe.streak(), pings.get(i).answeredBy(deadline)));
             }
         } finally {
             pings.forEach(Ping::close);
@@ -88,11 +90,19 @@ public class RedisRoleProbe implements AutoCloseable {
         return new Ping(connecting, pong);
     }
 
-    private static RedisURI probeUri(RedisConnectionConfig.Endpoint endpoint) {
+    private static Map<ProbePhase, RedisURI> probeUris(RedisConnectionConfig.Endpoint endpoint) {
+        Map<ProbePhase, RedisURI> uris = new EnumMap<>(ProbePhase.class);
+        for (ProbePhase phase : ProbePhase.values()) {
+            uris.put(phase, probeUri(endpoint, phase.timeout()));
+        }
+        return uris;
+    }
+
+    private static RedisURI probeUri(RedisConnectionConfig.Endpoint endpoint, Duration timeout) {
         RedisURI.Builder uri = RedisURI.builder()
                 .withHost(endpoint.getHost())
                 .withPort(endpoint.getPort())
-                .withTimeout(PROBE_TIMEOUT);
+                .withTimeout(timeout);
         if (StringUtils.hasText(endpoint.getPassword())) {
             uri.withPassword(endpoint.getPassword().toCharArray());
         }
@@ -118,10 +128,11 @@ public class RedisRoleProbe implements AutoCloseable {
         }
     }
 
-    private record RoleProbe(RedisRole role, RedisURI uri, CircuitBreaker breaker, ProbeStreak streak) {
+    private record RoleProbe(
+            RedisRole role, Map<ProbePhase, RedisURI> uris, CircuitBreaker breaker, ProbeStreak streak) {
 
-        private RoleProbe(RedisRole role, RedisURI uri, CircuitBreaker breaker) {
-            this(role, uri, breaker, new ProbeStreak(FAILURE_THRESHOLD));
+        private RoleProbe(RedisRole role, Map<ProbePhase, RedisURI> uris, CircuitBreaker breaker) {
+            this(role, uris, breaker, new ProbeStreak(FAILURE_THRESHOLD));
         }
 
         private void apply(ProbeStreak.Transition transition) {
