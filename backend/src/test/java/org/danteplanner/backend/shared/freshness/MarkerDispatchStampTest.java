@@ -18,6 +18,7 @@ import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 import org.danteplanner.backend.shared.readpath.ChosenReadSource;
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -35,7 +36,7 @@ class MarkerDispatchStampTest {
         private final List<Raise> raises = new ArrayList<>();
 
         RecordingMarkerStore() {
-            super(null, null, List.of(), new Settings(0, Duration.ofSeconds(1), Duration.ofHours(1), false),
+            super(null, null, List.of(), new RedisRoleHealth(), new Settings(0, Duration.ofSeconds(1), Duration.ofHours(1), false),
                     new SimpleMeterRegistry());
         }
 

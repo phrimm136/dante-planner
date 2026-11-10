@@ -4,46 +4,41 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-
-import org.danteplanner.backend.shared.freshness.MarkerStore;
+import org.danteplanner.backend.shared.redis.RedisRole;
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.support.Hang;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 final class MarkerSourceBreakers {
 
-    private static final List<String> NAMES = List.of(
-            MarkerStore.BREAKER_NAME_PREFIX + MarkerStore.LOCAL_SOURCE,
-            MarkerStore.BREAKER_NAME_PREFIX + MarkerStore.AUTH_SOURCE);
+    private static final List<RedisRole> ROLES = List.of(RedisRole.AUTH_LOCAL, RedisRole.AUTH);
 
     private MarkerSourceBreakers() {
     }
 
-    static void awaitClosed(CircuitBreakerRegistry registry) {
-        Hang.until(() -> allIn(registry, CircuitBreaker.State.CLOSED),
-                "the marker probe closing both marker-source breakers after the auth Redis cut");
+    static void awaitClosed(RedisRoleHealth health) {
+        Hang.until(() -> allAvailable(health, true),
+                "the Redis role probe closing both marker-source role breakers after the auth Redis cut");
     }
 
-    static void awaitOpen(CircuitBreakerRegistry registry) {
-        Hang.until(() -> allIn(registry, CircuitBreaker.State.OPEN),
-                "the marker probe opening both marker-source breakers during the auth Redis cut");
+    static void awaitOpen(RedisRoleHealth health) {
+        Hang.until(() -> allAvailable(health, false),
+                "the Redis role probe opening both marker-source role breakers during the auth Redis cut");
     }
 
-    static void assertClosed(CircuitBreakerRegistry registry, String because) {
-        assertThat(states(registry))
+    static void assertClosed(RedisRoleHealth health, String because) {
+        assertThat(availability(health))
                 .as(because)
-                .containsExactlyInAnyOrderEntriesOf(NAMES.stream()
-                        .collect(Collectors.toMap(name -> name, name -> CircuitBreaker.State.CLOSED)));
+                .containsExactlyInAnyOrderEntriesOf(ROLES.stream()
+                        .collect(Collectors.toMap(role -> role, role -> true)));
     }
 
-    private static boolean allIn(CircuitBreakerRegistry registry, CircuitBreaker.State state) {
-        return states(registry).values().stream().allMatch(state::equals);
+    private static boolean allAvailable(RedisRoleHealth health, boolean available) {
+        return availability(health).values().stream().allMatch(value -> value == available);
     }
 
-    private static Map<String, CircuitBreaker.State> states(CircuitBreakerRegistry registry) {
-        return NAMES.stream().collect(Collectors.toMap(name -> name,
-                name -> registry.circuitBreaker(name).getState()));
+    private static Map<RedisRole, Boolean> availability(RedisRoleHealth health) {
+        return ROLES.stream().collect(Collectors.toMap(role -> role, health::isAvailable));
     }
 }

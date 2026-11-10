@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -30,7 +31,7 @@ class MarkerStampTest {
         private final List<Raise> raises = new ArrayList<>();
 
         RecordingMarkerStore() {
-            super(null, null, List.of(), new Settings(0, Duration.ofSeconds(1), Duration.ofHours(1), false),
+            super(null, null, List.of(), new RedisRoleHealth(), new Settings(0, Duration.ofSeconds(1), Duration.ofHours(1), false),
                     new SimpleMeterRegistry());
         }
 
