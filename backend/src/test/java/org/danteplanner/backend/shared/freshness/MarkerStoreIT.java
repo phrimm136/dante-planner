@@ -230,7 +230,12 @@ class MarkerStoreIT {
         try (RedisRoleProbe probe =
                 new RedisRoleProbe(liveFactory.getRequiredNativeClient().getResources(), connections, roleHealth)) {
             probe.probeAtStartup();
+            Hang.until(() -> {
+                probe.probe();
+                return roleHealth.isAvailable(RedisRole.AUTH);
+            }, "the live auth role answering a probe");
         }
+        assertThat(roleHealth.isAvailable(RedisRole.AUTH_LOCAL)).as("the refused local role").isFalse();
         MarkerStore store = storeOver(liveFactory, MarkerStore.sourceOrder(false,
                 new MarkerStore.Source(RedisRole.AUTH_LOCAL, refused), new MarkerStore.Source(RedisRole.AUTH, live)),
                 roleHealth);
@@ -242,6 +247,5 @@ class MarkerStoreIT {
                     .containsExactly(Map.entry(scope, new MarkerStore.MarkerView.At(serverA + ":1-5")));
             assertThat(capture.at(Level.WARN)).as("the local store was not tried").isEmpty();
         }
-        assertThat(roleHealth.isAvailable(RedisRole.AUTH)).isTrue();
     }
 }

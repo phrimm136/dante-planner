@@ -40,7 +40,8 @@ class RedisRoleOutageIT extends CausalHarnessSupport {
             .multipliedBy(RedisRoleProbe.FAILURE_THRESHOLD)
             .plus(RealClockBounds.SCHEDULING_SLACK);
 
-    private static final Duration SERIAL_PROBING = RedisRoleProbe.PROBE_TIMEOUT.multipliedBy(RedisRole.values().length);
+    private static final Duration SERIAL_STARTUP_PROBING =
+            RedisRoleProbe.STARTUP_PROBE_TIMEOUT.multipliedBy(RedisRole.values().length);
 
     @Autowired
     private RedisRoleHealth roleHealth;
@@ -72,7 +73,7 @@ class RedisRoleOutageIT extends CausalHarnessSupport {
     }
 
     @Test
-    void probeAtStartup_WhenEveryRoleIsBlackholed_ReturnsWithinOneProbeTimeoutWithEveryRoleUnavailable()
+    void probeAtStartup_WhenEveryRoleIsBlackholed_ReturnsWithinOneStartupTimeoutWithEveryRoleUnavailable()
             throws IOException {
         RedisRoleHealth blackholed = new RedisRoleHealth();
         blackholeAuthLocal();
@@ -81,7 +82,7 @@ class RedisRoleOutageIT extends CausalHarnessSupport {
             long start = System.nanoTime();
             probe.probeAtStartup();
 
-            assertThat(Duration.ofNanos(System.nanoTime() - start)).isLessThan(SERIAL_PROBING);
+            assertThat(Duration.ofNanos(System.nanoTime() - start)).isLessThan(SERIAL_STARTUP_PROBING);
         } finally {
             healAuthLocal();
         }

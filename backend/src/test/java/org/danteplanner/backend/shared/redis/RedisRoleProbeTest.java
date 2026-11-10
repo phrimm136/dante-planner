@@ -26,8 +26,8 @@ class RedisRoleProbeTest {
     private static final int REFUSED_PORT = 1;
     private static final int REPEATED_FAILURES = 5;
     private static final int ACCEPT_BACKLOG = 16;
-    private static final Duration SERIAL_PROBING =
-            RedisRoleProbe.PROBE_TIMEOUT.multipliedBy(RedisRole.values().length);
+    private static final Duration SERIAL_STARTUP_PROBING =
+            RedisRoleProbe.STARTUP_PROBE_TIMEOUT.multipliedBy(RedisRole.values().length);
 
     private final ClientResources clientResources = DefaultClientResources.create();
     private final RedisRoleHealth health = new RedisRoleHealth();
@@ -48,7 +48,7 @@ class RedisRoleProbeTest {
     }
 
     @Test
-    void probeAtStartup_WhenEveryRoleAcceptsButNeverAnswers_WaitsOneProbeTimeoutForAllRolesTogether()
+    void probeAtStartup_WhenEveryRoleAcceptsButNeverAnswers_WaitsOneStartupTimeoutForAllRolesTogether()
             throws IOException {
         try (ServerSocket neverAnswers = neverAnswering()) {
             RedisRoleHealth hanging = new RedisRoleHealth();
@@ -57,10 +57,24 @@ class RedisRoleProbeTest {
                 hangingProbe.probeAtStartup();
 
                 assertThat(Duration.ofNanos(System.nanoTime() - start))
-                        .isGreaterThanOrEqualTo(RedisRoleProbe.PROBE_TIMEOUT)
-                        .isLessThan(SERIAL_PROBING);
+                        .isGreaterThanOrEqualTo(RedisRoleProbe.STARTUP_PROBE_TIMEOUT)
+                        .isLessThan(SERIAL_STARTUP_PROBING);
             }
             assertThat(RedisRole.values()).noneMatch(hanging::isAvailable);
+        }
+    }
+
+    @Test
+    void probe_WhenEveryRoleAcceptsButNeverAnswers_WaitsOneRuntimeTimeoutNotTheStartupTimeout() throws IOException {
+        try (ServerSocket neverAnswers = neverAnswering()) {
+            try (RedisRoleProbe hangingProbe = probeOver(neverAnswers, new RedisRoleHealth())) {
+                long start = System.nanoTime();
+                hangingProbe.probe();
+
+                assertThat(Duration.ofNanos(System.nanoTime() - start))
+                        .isGreaterThanOrEqualTo(RedisRoleProbe.PROBE_TIMEOUT)
+                        .isLessThan(RedisRoleProbe.STARTUP_PROBE_TIMEOUT);
+            }
         }
     }
 
