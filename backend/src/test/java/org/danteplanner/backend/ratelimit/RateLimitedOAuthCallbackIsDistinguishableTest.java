@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.auth.controller.AuthController;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
@@ -68,7 +69,8 @@ class RateLimitedOAuthCallbackIsDistinguishableTest {
                 new DeviceIdResolver(new CookieUtils(false, "", "Lax")),
                 frontendProperties,
                 new ProblemWriter(TestJsonMappers.springDefaults()),
-                new SimpleMeterRegistry());
+                new SimpleMeterRegistry(),
+                new RedisRoleHealth());
 
         mockMvc = MockMvcBuilders.standaloneSetup(authController)
                 .addInterceptors(interceptor)

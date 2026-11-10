@@ -14,7 +14,6 @@ import java.util.Set;
 
 import jakarta.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -23,6 +22,7 @@ import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 
+import org.danteplanner.backend.shared.redis.AuthReadSources;
 import org.danteplanner.backend.shared.redis.RedisKeyScanner;
 
 import io.micrometer.core.instrument.Counter;
@@ -82,23 +82,19 @@ public class TokenBlacklistService {
 
     private final StringRedisTemplate stringRedisTemplate;
 
-    /**
-     * Auth-local read replica template. Blacklist and user-invalidation READS are
-     * served from here (read-local); WRITES stay on {@link #stringRedisTemplate}.
-     */
-    private final StringRedisTemplate authLocalStringRedisTemplate;
+    private final AuthReadSources authReadSources;
 
     private final MeterRegistry meterRegistry;
 
     public TokenBlacklistService(
             StringRedisTemplate stringRedisTemplate,
-            @Qualifier("authLocalStringRedisTemplate") StringRedisTemplate authLocalStringRedisTemplate,
+            AuthReadSources authReadSources,
             MeterRegistry meterRegistry,
             @Value("${jwt.refresh-token-expiry:" + DEFAULT_REFRESH_TOKEN_EXPIRY_MS + "}")
             long refreshTokenExpiry) {
         this.refreshTokenExpiry = refreshTokenExpiry;
         this.stringRedisTemplate = stringRedisTemplate;
-        this.authLocalStringRedisTemplate = authLocalStringRedisTemplate;
+        this.authReadSources = authReadSources;
         this.meterRegistry = meterRegistry;
     }
 
@@ -175,16 +171,20 @@ public class TokenBlacklistService {
 
     public boolean isBlacklisted(String token) {
         try {
-            String value = authLocalStringRedisTemplate.opsForValue().get(blacklistKey(token));
-            if (value == null) {
-                return false;
-            }
-
-            return BlacklistMode.of(value) == BlacklistMode.IMMEDIATE
-                    || System.currentTimeMillis() - decodeBlacklistedAt(value) >= ROTATION_GRACE_PERIOD_MS;
+            return authReadSources.read(store -> isBlacklistedIn(store, token), this::isRevokedWithoutACheck);
         } catch (DataAccessException e) {
             return failOpen("Blacklist check failed open due to Redis error", e);
         }
+    }
+
+    private boolean isBlacklistedIn(StringRedisTemplate store, String token) {
+        String value = store.opsForValue().get(blacklistKey(token));
+        if (value == null) {
+            return false;
+        }
+
+        return BlacklistMode.of(value) == BlacklistMode.IMMEDIATE
+                || System.currentTimeMillis() - decodeBlacklistedAt(value) >= ROTATION_GRACE_PERIOD_MS;
     }
 
     public void invalidateUserTokens(@NonNull Long userId) {
@@ -201,14 +201,19 @@ public class TokenBlacklistService {
 
     public boolean isUserTokenInvalidated(Long userId, long issuedAt) {
         try {
-            String value = authLocalStringRedisTemplate.opsForValue().get(userInvalidationKey(userId));
-            if (value == null) {
-                return false;
-            }
-            return issuedAt < Long.parseLong(value);
+            return authReadSources.read(
+                    store -> isInvalidatedIn(store, userId, issuedAt), this::isRevokedWithoutACheck);
         } catch (DataAccessException e) {
             return failOpen("User invalidation check failed open due to Redis error", e);
         }
+    }
+
+    private boolean isInvalidatedIn(StringRedisTemplate store, Long userId, long issuedAt) {
+        String value = store.opsForValue().get(userInvalidationKey(userId));
+        if (value == null) {
+            return false;
+        }
+        return issuedAt < Long.parseLong(value);
     }
 
     public void clearUserInvalidation(@NonNull Long userId) {
@@ -237,6 +242,10 @@ public class TokenBlacklistService {
 
     private boolean failOpen(String message, DataAccessException e) {
         log.warn(message, e);
+        return isRevokedWithoutACheck();
+    }
+
+    private boolean isRevokedWithoutACheck() {
         Counter.builder(BLACKLIST_CHECK_SKIPPED_COUNTER).register(meterRegistry).increment();
         return false;
     }

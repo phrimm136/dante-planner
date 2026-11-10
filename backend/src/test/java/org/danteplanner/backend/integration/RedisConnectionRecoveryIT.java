@@ -4,6 +4,7 @@ import eu.rekawek.toxiproxy.Proxy;
 import eu.rekawek.toxiproxy.ToxiproxyClient;
 import eu.rekawek.toxiproxy.model.Toxic;
 import eu.rekawek.toxiproxy.model.ToxicDirection;
+import java.util.Arrays;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Date;
@@ -11,6 +12,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.sql.DataSource;
+import org.danteplanner.backend.shared.redis.RedisRole;
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.config.TestConfig;
@@ -203,6 +206,9 @@ class RedisConnectionRecoveryIT {
     @Autowired
     private FrontendProperties frontendProperties;
 
+    @Autowired
+    private RedisRoleHealth roleHealth;
+
     @DynamicPropertySource
     static void harnessProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", PRIMARY::getJdbcUrl);
@@ -249,6 +255,8 @@ class RedisConnectionRecoveryIT {
         AUTH_REDIS_PROXY.enable();
         RATE_LIMIT_REDIS_PROXY.enable();
         SSE_LOCAL_REDIS_PROXY.enable();
+        Hang.until(() -> Arrays.stream(RedisRole.values()).allMatch(roleHealth::isAvailable),
+                "the probe closing every role breaker once the routes are restored");
     }
 
     @Test

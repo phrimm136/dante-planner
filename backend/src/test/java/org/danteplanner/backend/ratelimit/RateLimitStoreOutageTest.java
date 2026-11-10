@@ -1,9 +1,11 @@
 package org.danteplanner.backend.ratelimit;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +22,6 @@ import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.LoginRedirect;
-import org.danteplanner.backend.shared.config.RedisConnectionConfig;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
@@ -29,12 +30,17 @@ import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.shared.ratelimit.RateLimitProperties;
 import org.danteplanner.backend.shared.ratelimit.RateLimitProperties.BucketConfig;
 import org.danteplanner.backend.shared.ratelimit.RateLimitService;
+import org.danteplanner.backend.shared.ratelimit.RateLimitStore;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
+import org.danteplanner.backend.shared.redis.RedisRole;
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
+import org.danteplanner.backend.shared.redis.RoleOutages;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.backend.support.InMemoryProxyManager;
 import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.ratelimitfixture.DeclaredHandlerFixture;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +49,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import ch.qos.logback.classic.Level;
 import io.lettuce.core.RedisConnectionException;
+import io.lettuce.core.resource.ClientResources;
+import io.lettuce.core.resource.DefaultClientResources;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.support.TestJsonMappers;
@@ -64,9 +72,12 @@ class RateLimitStoreOutageTest {
     private static final String TRUSTED_PROXY_IP = "127.0.0.1";
     private static final Duration BUCKET_TTL = Duration.ofHours(1);
     private static final String FRONTEND_URL = "https://planner.example";
+    private static final String NOT_CONNECTED = "Rate-limit store not connected";
+    private static final ClientResources CLIENT_RESOURCES = DefaultClientResources.create();
 
     private final SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
     private final InMemoryProxyManager rateLimitStore = new InMemoryProxyManager();
+    private RedisRoleHealth roleHealth = new RedisRoleHealth();
 
     @Mock
     private PlannerCatalogRepository catalogRepository;
@@ -76,13 +87,95 @@ class RateLimitStoreOutageTest {
         SecurityContextHolder.clearContext();
     }
 
-    @Test
-    void unreachableStore_WhenProxyManagerBuilt_ThrowsRedisConnectionException() throws IOException {
-        int port = closedPort();
+    @AfterAll
+    static void shutDownClientResources() {
+        CLIENT_RESOURCES.shutdown();
+    }
 
-        assertThatThrownBy(() -> RedisConnectionConfig.buildRateLimitProxyManager(TRUSTED_PROXY_IP, port, BUCKET_TTL))
-                .isInstanceOf(RedisConnectionException.class)
-                .hasMessageEndingWith(":" + port);
+    @Test
+    void rateLimitStore_WhenNeverConnected_FailsEveryCallAtOnceWithoutConnecting() throws IOException {
+        try (RateLimitStore absent = new RateLimitStore(CLIENT_RESOURCES, TRUSTED_PROXY_IP, closedPort(), BUCKET_TTL)) {
+            assertThatThrownBy(absent::builder)
+                    .isInstanceOf(RedisConnectionException.class)
+                    .hasMessage(NOT_CONNECTED);
+            assertThatThrownBy(() -> absent.getProxyConfiguration(new byte[0]))
+                    .isInstanceOf(RedisConnectionException.class).hasMessage(NOT_CONNECTED);
+            assertThatThrownBy(() -> absent.removeProxy(new byte[0]))
+                    .isInstanceOf(RedisConnectionException.class).hasMessage(NOT_CONNECTED);
+            assertThatThrownBy(absent::isAsyncModeSupported)
+                    .isInstanceOf(RedisConnectionException.class).hasMessage(NOT_CONNECTED);
+            assertThatThrownBy(absent::asAsync)
+                    .isInstanceOf(RedisConnectionException.class).hasMessage(NOT_CONNECTED);
+            assertThat(absent.isConnected()).isFalse();
+        }
+    }
+
+    @Test
+    void connect_WhenTheStoreRefuses_FailsWithTheEndpointAndLeavesTheStoreAbsent() throws IOException {
+        int port = closedPort();
+        try (RateLimitStore refused = new RateLimitStore(CLIENT_RESOURCES, TRUSTED_PROXY_IP, port, BUCKET_TTL)) {
+            Throwable failure = catchThrowable(() -> refused.connect().join());
+
+            assertThat(failure).hasRootCauseInstanceOf(ConnectException.class);
+            assertThat(failure.getCause()).isInstanceOf(RedisConnectionException.class)
+                    .hasMessageEndingWith(":" + port);
+            assertThat(refused.isConnected()).isFalse();
+            assertThat(refused.role()).isEqualTo(RedisRole.RATE_LIMIT);
+        }
+    }
+
+    @Test
+    void connect_WhenAnAttemptIsStillRunning_HandsBackThatAttempt() throws IOException {
+        try (ServerSocket neverAnswers = new ServerSocket(0);
+                RateLimitStore hanging = new RateLimitStore(
+                        CLIENT_RESOURCES, TRUSTED_PROXY_IP, neverAnswers.getLocalPort(), BUCKET_TTL)) {
+            CompletableFuture<Void> first = hanging.connect();
+
+            assertThat(hanging.connect()).isSameAs(first);
+            assertThat(first).isNotDone();
+        }
+    }
+
+    @Test
+    void publishedList_WhenTheRateLimitBreakerIsOpen_ServesAtOnceAndCountsTheSkippedChargeWithoutAWarning()
+            throws Exception {
+        roleHealth = RoleOutages.withOpen(RedisRole.RATE_LIMIT);
+        catalogHasNoPlanners();
+
+        try (LogCapture interceptorLog = LogCapture.onThisThread(RateLimitInterceptor.class)) {
+            mvcAgainst().perform(get("/api/planner/md/published")).andExpect(status().isOk());
+
+            assertThat(interceptorLog.events()).isEmpty();
+        }
+        assertThat(skipped(RateLimitPolicy.PUBLIC_READ)).isEqualTo(1.0);
+        assertThat(chargedKeys()).isEmpty();
+    }
+
+    @Test
+    void googleCallback_WhenTheRateLimitBreakerIsOpen_RedirectsToLoginUnavailableWithoutAWarning() throws Exception {
+        roleHealth = RoleOutages.withOpen(RedisRole.RATE_LIMIT);
+
+        try (LogCapture interceptorLog = LogCapture.onThisThread(RateLimitInterceptor.class)) {
+            mvcAgainst().perform(get("/api/auth/google/callback").param("code", "any").param("state", "any"))
+                    .andExpect(status().isFound())
+                    .andExpect(header().string("Location", FRONTEND_URL + LoginRedirect.UNAVAILABLE));
+
+            assertThat(interceptorLog.events()).isEmpty();
+        }
+        assertThat(meterRegistry.find(SKIPPED_COUNTER).counter()).isNull();
+        assertThat(chargedKeys()).isEmpty();
+    }
+
+    @Test
+    void crudHandler_WhenOnlyAnotherRolesBreakerIsOpen_ChargesTheStore() throws Exception {
+        roleHealth = RoleOutages.withOpen(RedisRole.AUTH, RedisRole.AUTH_LOCAL, RedisRole.SSE_LOCAL);
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(7L, null, List.of()));
+
+        mvcAgainst().perform(get("/api/fixture/inherited")).andExpect(status().isOk());
+
+        assertThat(chargedKeys()).singleElement().satisfies(key -> assertThat(key).startsWith("7:"));
+        assertThat(meterRegistry.find(SKIPPED_COUNTER).counter()).isNull();
     }
 
     @Test
@@ -203,7 +296,8 @@ class RateLimitStoreOutageTest {
                 deviceIdResolver,
                 frontendProperties,
                 new ProblemWriter(TestJsonMappers.springDefaults()),
-                meterRegistry);
+                meterRegistry,
+                roleHealth);
 
         AuthController authController = new AuthController(
                 null,
@@ -227,11 +321,11 @@ class RateLimitStoreOutageTest {
     }
 
     private void storeUnreachableOnNextCharge() throws IOException {
-        int port = closedPort();
-        Throwable unreachable = catchThrowable(
-                () -> RedisConnectionConfig.buildRateLimitProxyManager(TRUSTED_PROXY_IP, port, BUCKET_TTL));
-        assertThat(unreachable).isInstanceOf(RedisConnectionException.class);
-        rateLimitStore.failNext((RedisConnectionException) unreachable);
+        try (RateLimitStore absent = new RateLimitStore(CLIENT_RESOURCES, TRUSTED_PROXY_IP, closedPort(), BUCKET_TTL)) {
+            Throwable unreachable = catchThrowable(absent::builder);
+            assertThat(unreachable).isInstanceOf(RedisConnectionException.class);
+            rateLimitStore.failNext((RedisConnectionException) unreachable);
+        }
     }
 
     @SuppressWarnings("unchecked")

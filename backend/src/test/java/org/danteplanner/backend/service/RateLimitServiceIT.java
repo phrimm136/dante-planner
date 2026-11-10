@@ -1,6 +1,6 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.shared.ratelimit.RateLimitProperties;
-import org.danteplanner.backend.shared.config.RedisConnectionConfig;
+import org.danteplanner.backend.support.RateLimitStores;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.shared.ratelimit.RateLimitService;
 
@@ -85,7 +85,7 @@ class RateLimitServiceIT {
         rateLimitTemplate.getConnectionFactory().getConnection().serverCommands().flushDb();
         authTemplate.getConnectionFactory().getConnection().serverCommands().flushDb();
 
-        ProxyManager<byte[]> proxyManager = RedisConnectionConfig.buildRateLimitProxyManager(
+        ProxyManager<byte[]> proxyManager = RateLimitStores.connectedTo(
                 REDIS.getRedisHost(), REDIS.getRedisPort(), Duration.ofSeconds(60));
         properties = new RateLimitProperties();
         rateLimitService = new RateLimitService(proxyManager, properties);
@@ -545,7 +545,7 @@ class RateLimitServiceIT {
 
         @Test
         void rateLimitBucket_WhenConsumed_PersistsInLocalRedisWithTtl() {
-            ProxyManager<byte[]> proxyManager = RedisConnectionConfig.buildRateLimitProxyManager(
+            ProxyManager<byte[]> proxyManager = RateLimitStores.connectedTo(
                     REDIS.getRedisHost(), REDIS.getRedisPort(), Duration.ofSeconds(2));
 
             RateLimitProperties.BucketConfig cfg = new RateLimitProperties.BucketConfig();
@@ -571,7 +571,7 @@ class RateLimitServiceIT {
 
         @Test
         void rateLimitBucket_WhenConsumed_IsAbsentFromAuthRedis() {
-            ProxyManager<byte[]> proxyManager = RedisConnectionConfig.buildRateLimitProxyManager(
+            ProxyManager<byte[]> proxyManager = RateLimitStores.connectedTo(
                     REDIS.getRedisHost(), REDIS.getRedisPort(), Duration.ofSeconds(2));
 
             RateLimitProperties.BucketConfig cfg = new RateLimitProperties.BucketConfig();
