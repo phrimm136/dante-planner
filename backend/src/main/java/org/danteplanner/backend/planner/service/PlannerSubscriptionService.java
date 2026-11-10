@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.moderation.api.RestrictionCheck;
 import org.danteplanner.backend.planner.entity.PlannerSubscription;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +35,7 @@ public class PlannerSubscriptionService {
             PlannerSubscription subscription = existingSubscription.get();
             decideToggle(userId, subscription.isEnabled());
             subscription.toggle();
+            FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId));
             log.debug("User {} toggled subscription for planner {} to enabled={}",
                     userId, plannerId, subscription.isEnabled());
             return subscription;
@@ -40,6 +43,7 @@ public class PlannerSubscriptionService {
             restrictionCheck.requireUnrestricted(userId);
             PlannerSubscription subscription = new PlannerSubscription(userId, plannerId);
             PlannerSubscription saved = subscriptionRepository.insert(subscription);
+            FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId));
             log.debug("User {} created subscription for planner {}", userId, plannerId);
             return saved;
         }

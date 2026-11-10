@@ -7,11 +7,11 @@ public sealed interface FreshnessScope {
 
     String key();
 
-    record Entity(UUID plannerId) implements FreshnessScope {
+    record Planner(UUID plannerId) implements FreshnessScope {
 
         private static final String KEY_PREFIX = "chg:planner:";
 
-        public Entity {
+        public Planner {
             Objects.requireNonNull(plannerId, "plannerId");
         }
 
@@ -21,19 +21,9 @@ public sealed interface FreshnessScope {
         }
     }
 
-    record OwnerList(long userId) implements FreshnessScope {
+    record User(long userId) implements FreshnessScope {
 
-        private static final String KEY_PREFIX = "chg:owner:";
-
-        @Override
-        public String key() {
-            return KEY_PREFIX + userId;
-        }
-    }
-
-    record Author(long userId) implements FreshnessScope {
-
-        private static final String KEY_PREFIX = "chg:author:";
+        private static final String KEY_PREFIX = "chg:user:";
 
         @Override
         public String key() {
@@ -41,9 +31,9 @@ public sealed interface FreshnessScope {
         }
     }
 
-    record PublicCatalog() implements FreshnessScope {
+    record Global() implements FreshnessScope {
 
-        private static final String KEY = "chg:catalog";
+        private static final String KEY = "chg:global";
 
         @Override
         public String key() {

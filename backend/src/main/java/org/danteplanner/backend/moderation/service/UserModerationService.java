@@ -5,6 +5,8 @@ import org.danteplanner.backend.moderation.api.ModerationTargetType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.moderation.event.AccountSuspendedEvent;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.sse.SuspensionType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserNotFoundException;
@@ -109,6 +111,7 @@ public class UserModerationService {
         moderationPolicy.requireCanRestrict(actor, target, action);
 
         mutation.accept(target);
+        FreshnessDeclarations.declare(new FreshnessScope.User(targetId));
 
         auditService.record(actorId, target.getPublicId().toString(), action,
                 ModerationTargetType.USER, reason, durationMinutes);

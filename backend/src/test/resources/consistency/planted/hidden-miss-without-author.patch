@@ -6,8 +6,8 @@ index 63794054..efcf5dae 100644
  
          @Override
          public Set<FreshnessScope> scopes() {
--            return Set.of(new FreshnessScope.Entity(plannerId), new FreshnessScope.Author(ownerId));
-+            return Set.of(new FreshnessScope.Entity(plannerId));
+-            return Set.of(new FreshnessScope.Planner(plannerId), new FreshnessScope.User(ownerId));
++            return Set.of(new FreshnessScope.Planner(plannerId));
          }
      }
  }

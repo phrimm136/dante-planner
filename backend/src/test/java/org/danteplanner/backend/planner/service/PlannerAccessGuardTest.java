@@ -64,7 +64,7 @@ class PlannerAccessGuardTest {
     class CheckPublished {
 
         @Test
-        void checkPublished_WhenVisible_ServesTheEntityAndAuthorScopesWithoutLoadingTheAggregate() {
+        void checkPublished_WhenVisible_ServesThePlannerAndUserScopesWithoutLoadingTheAggregate() {
             when(plannerRepository.findThread(plannerId))
                     .thenReturn(Optional.of(new PlannerThread(plannerId, OWNER_ID, true, false)));
 
@@ -72,7 +72,7 @@ class PlannerAccessGuardTest {
 
             assertThat(read.value()).isEqualTo(plannerId);
             assertThat(read.scopes()).containsExactlyInAnyOrder(
-                    new FreshnessScope.Entity(plannerId), new FreshnessScope.Author(OWNER_ID));
+                    new FreshnessScope.Planner(plannerId), new FreshnessScope.User(OWNER_ID));
             verify(plannerRepository, never()).findAggregateWithAuthor(any());
         }
 
@@ -94,7 +94,7 @@ class PlannerAccessGuardTest {
 
             assertThat(miss.miss()).isEqualTo(new PlannerMiss.Hidden(plannerId, OWNER_ID));
             assertThat(miss.scopes()).containsExactlyInAnyOrder(
-                    new FreshnessScope.Entity(plannerId), new FreshnessScope.Author(OWNER_ID));
+                    new FreshnessScope.Planner(plannerId), new FreshnessScope.User(OWNER_ID));
         }
     }
 

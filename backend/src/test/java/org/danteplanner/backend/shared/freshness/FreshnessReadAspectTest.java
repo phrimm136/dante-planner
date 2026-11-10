@@ -57,7 +57,7 @@ class FreshnessReadAspectTest {
 
     private static final String SEOUL = "seoul-replica";
     private static final String APPLIED_FIVE = "3e11fa47-71ca-11e1-9e33-c80aa9429562:1-5";
-    private static final FreshnessScope ENTITY = new FreshnessScope.Entity(UUID.randomUUID());
+    private static final FreshnessScope ENTITY = new FreshnessScope.Planner(UUID.randomUUID());
 
     @Mock
     private DataSource seoulPool;

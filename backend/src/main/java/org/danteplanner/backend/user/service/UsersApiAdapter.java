@@ -1,6 +1,8 @@
 package org.danteplanner.backend.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.api.RoleChange;
 import org.danteplanner.backend.user.api.UserRole;
@@ -114,6 +116,7 @@ public class UsersApiAdapter implements Users {
         roleChangeValidator.requireCanChangeRole(actor, target, newRole);
 
         target.setRole(newRole);
+        FreshnessDeclarations.declare(new FreshnessScope.User(targetId));
         return new RoleChange(previousRole, toSummary(target));
     }
 }

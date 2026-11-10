@@ -51,7 +51,7 @@ class GtidCookieResponseAdviceTest {
         GtidCookieResponseAdvice advice = new GtidCookieResponseAdvice(new SingleTakeCapture(), markerStore);
         MockHttpServletResponse servletResponse = new MockHttpServletResponse();
         ServletServerHttpResponse response = new ServletServerHttpResponse(servletResponse);
-        FreshnessScope.Entity planner = new FreshnessScope.Entity(UUID.randomUUID());
+        FreshnessScope.Planner planner = new FreshnessScope.Planner(UUID.randomUUID());
         FreshnessDeclarations.begin();
         try {
             FreshnessDeclarations.declare(planner);

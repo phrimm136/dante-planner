@@ -233,7 +233,7 @@ public class PlannerCommandService {
         Planner saved = plannerRepository.insert(
                 buildAggregate(UUID.fromString(request.id()), userId, request, document, deviceId));
         statsRepository.insert(PlannerStats.builder().plannerId(saved.getId()).build());
-        FreshnessDeclarations.declare(new FreshnessScope.Entity(saved.getId()), new FreshnessScope.OwnerList(userId));
+        FreshnessDeclarations.declare(new FreshnessScope.Planner(saved.getId()), new FreshnessScope.User(userId));
         log.info("Created planner {} for user {}", saved.getId(), userId);
 
         PlannerResponse response = PlannerResponse.fromEntity(saved);
@@ -310,10 +310,10 @@ public class PlannerCommandService {
 
             log.info("Updated planner {} via upsert, new syncVersion: {}", id, planner.getSyncVersion());
 
-            FreshnessDeclarations.declare(new FreshnessScope.Entity(id), new FreshnessScope.OwnerList(userId));
+            FreshnessDeclarations.declare(new FreshnessScope.Planner(id), new FreshnessScope.User(userId));
             if (planner.isPublished()) {
                 plannerCatalogService.onVisibleEditCommitted(planner);
-                FreshnessDeclarations.declare(new FreshnessScope.PublicCatalog());
+                FreshnessDeclarations.declare(new FreshnessScope.Global());
             }
 
             PlannerResponse response = PlannerResponse.fromEntity(planner);
@@ -342,8 +342,8 @@ public class PlannerCommandService {
 
         planner.softDelete();
         plannerCatalogService.onBecameInvisible(id);
-        FreshnessDeclarations.declare(new FreshnessScope.Entity(id), new FreshnessScope.OwnerList(planner.getUserId()),
-                new FreshnessScope.PublicCatalog());
+        FreshnessDeclarations.declare(new FreshnessScope.Planner(id), new FreshnessScope.User(planner.getUserId()),
+                new FreshnessScope.Global());
         log.info("Soft deleted planner {} for user {}", id, userId);
     }
 }

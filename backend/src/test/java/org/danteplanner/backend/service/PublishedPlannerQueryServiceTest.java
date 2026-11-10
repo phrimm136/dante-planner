@@ -258,14 +258,14 @@ class PublishedPlannerQueryServiceTest {
         }
 
         @Test
-        void getPublishedPlanner_WhenAnonymous_ServesTheDetailUnderItsEntityAndAuthorScopes() {
+        void getPublishedPlanner_WhenAnonymous_ServesTheDetailUnderItsPlannerAndUserScopes() {
             UUID plannerId = UUID.randomUUID();
             mockPublished(plannerId);
 
             ScopedRead<PublishedPlannerDetailResponse> read = publishedQueryService.getPublishedPlanner(plannerId, null);
 
             assertThat(read.scopes()).containsExactlyInAnyOrder(
-                    new FreshnessScope.Entity(plannerId), new FreshnessScope.Author(testUser.getId()));
+                    new FreshnessScope.Planner(plannerId), new FreshnessScope.User(testUser.getId()));
             assertThat(read.value().viewCount()).isEqualTo(10);
             assertThat(read.value().authorUsernameEpithet()).isEqualTo(testUser.getUsernameEpithet());
             assertThat(read.value().authorUsernameSuffix()).isEqualTo(testUser.getUsernameSuffix());
@@ -311,7 +311,7 @@ class PublishedPlannerQueryServiceTest {
                     .isInstanceOfSatisfying(PlannerNotFoundException.class, thrown -> {
                         assertThat(thrown.miss()).isEqualTo(new PlannerMiss.Hidden(plannerId, testUser.getId()));
                         assertThat(thrown.scopes()).containsExactlyInAnyOrder(
-                                new FreshnessScope.Entity(plannerId), new FreshnessScope.Author(testUser.getId()));
+                                new FreshnessScope.Planner(plannerId), new FreshnessScope.User(testUser.getId()));
                     });
         }
     }
@@ -344,7 +344,7 @@ class PublishedPlannerQueryServiceTest {
             Page<PublicPlannerResponse> result = read.value();
 
             assertThat(read.scopes()).containsExactlyInAnyOrder(
-                    new FreshnessScope.PublicCatalog(), new FreshnessScope.Author(AUTHOR_ID));
+                    new FreshnessScope.Global(), new FreshnessScope.User(AUTHOR_ID));
             assertThat(result.getTotalElements()).isEqualTo(1);
             PublicPlannerResponse card = result.getContent().get(0);
             assertThat(card.id()).isEqualTo(plannerId);

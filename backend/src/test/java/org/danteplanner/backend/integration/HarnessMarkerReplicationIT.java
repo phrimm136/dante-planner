@@ -113,7 +113,7 @@ class HarnessMarkerReplicationIT extends ReplicaRoutingHarnessSupport {
 
     private void assertCreateReachesTheReplicaWithoutATimeout() throws Exception {
         UUID plannerId = UUID.randomUUID();
-        FreshnessScope scope = new FreshnessScope.Entity(plannerId);
+        FreshnessScope scope = new FreshnessScope.Planner(plannerId);
         double timeoutsBefore = waitTimeouts();
 
         create(owner(), plannerId);

@@ -65,7 +65,7 @@ public class UserAccountLifecycleService {
 
         Instant scheduledDeleteAt = Instant.now().plus(Duration.ofDays(gracePeriodDays));
         user.softDelete(scheduledDeleteAt);
-        FreshnessDeclarations.declare(new FreshnessScope.Author(userId));
+        FreshnessDeclarations.declare(new FreshnessScope.User(userId));
 
         participants.forEach(participant -> participant.accountDeactivated(userId));
         sessionEndHandler.endAllSessions(userId);
@@ -84,7 +84,7 @@ public class UserAccountLifecycleService {
         }
 
         user.reactivate();
-        FreshnessDeclarations.declare(new FreshnessScope.Author(userId));
+        FreshnessDeclarations.declare(new FreshnessScope.User(userId));
         participants.forEach(participant -> participant.accountReactivated(userId));
     }
 

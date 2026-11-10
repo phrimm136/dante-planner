@@ -20,7 +20,7 @@ public sealed interface PlannerMiss {
 
         @Override
         public Set<FreshnessScope> scopes() {
-            return Set.of(new FreshnessScope.Entity(plannerId));
+            return Set.of(new FreshnessScope.Planner(plannerId));
         }
     }
 
@@ -32,7 +32,7 @@ public sealed interface PlannerMiss {
 
         @Override
         public Set<FreshnessScope> scopes() {
-            return Set.of(new FreshnessScope.Entity(plannerId), new FreshnessScope.Author(ownerId));
+            return Set.of(new FreshnessScope.Planner(plannerId), new FreshnessScope.User(ownerId));
         }
     }
 }

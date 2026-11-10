@@ -38,7 +38,7 @@ class RaiseBatcherTest {
 
     private static final Duration WAIT_BOUND = Duration.ofSeconds(1);
     private static final Duration ROOMY_BOUND = RealClockBounds.ROOMY_WAIT_BOUND.plus(MarkerStore.RAISE_MARGIN);
-    private static final String[] KEYS = {new FreshnessScope.PublicCatalog().key()};
+    private static final String[] KEYS = {new FreshnessScope.Global().key()};
     private static final String[] ARGUMENTS = {"3600000", "3e11fa47-71ca-11e1-9e33-c80aa9429562", "7"};
     private static final String WAIT = "WAIT";
     private static final String UNBOUNDED_WAIT = "0";

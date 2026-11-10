@@ -9,6 +9,7 @@ import org.danteplanner.backend.moderation.api.dto.CommentReportResponse;
 import org.danteplanner.backend.moderation.entity.PlannerCommentReport;
 import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,7 @@ public class CommentReportService implements CommentReports {
 
         PlannerCommentReport report = new PlannerCommentReport(internalId, userId, request.reason());
         PlannerCommentReport saved = reportRepository.insert(report);
+        FreshnessDeclarations.declareNone("no read renders a comment report");
         log.info("User {} reported comment {} with reason: {}", userId, commentPublicId, request.reason());
 
         return new CommentReportResponse(saved.getCreatedAt());

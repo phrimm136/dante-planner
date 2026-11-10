@@ -209,7 +209,7 @@ class MarkerStoreReplicationIT {
 
     private static List<FreshnessScope> distinctScopes(int count) {
         return IntStream.range(0, count)
-                .<FreshnessScope>mapToObj(i -> new FreshnessScope.Entity(UUID.randomUUID()))
+                .<FreshnessScope>mapToObj(i -> new FreshnessScope.Planner(UUID.randomUUID()))
                 .toList();
     }
 
@@ -223,7 +223,7 @@ class MarkerStoreReplicationIT {
 
     @Test
     void raise_WhenTheReplicaAcknowledges_ReturnsWithTheMarkerAlreadyOnTheReplicaAndCountsNoTimeout() {
-        FreshnessScope scope = new FreshnessScope.Entity(UUID.randomUUID());
+        FreshnessScope scope = new FreshnessScope.Planner(UUID.randomUUID());
 
         store.raise(Set.of(scope), server + ":1-11");
 
@@ -234,7 +234,7 @@ class MarkerStoreReplicationIT {
 
     @Test
     void raise_WhenTheReplicaStopsAcknowledging_ReturnsAfterTheBoundAndCountsOneTimeout() throws IOException {
-        FreshnessScope scope = new FreshnessScope.Entity(UUID.randomUUID());
+        FreshnessScope scope = new FreshnessScope.Planner(UUID.randomUUID());
         holdReplicaAcks();
         long elapsedMillis;
         try {
@@ -257,7 +257,7 @@ class MarkerStoreReplicationIT {
 
     @Test
     void raise_WhenItWaitsOnAStalledReplica_LeavesTheSharedConnectionAnswering() throws Exception {
-        FreshnessScope scope = new FreshnessScope.Entity(UUID.randomUUID());
+        FreshnessScope scope = new FreshnessScope.Planner(UUID.randomUUID());
         MarkerStore roomy = storeOver(primaryFactory, RealClockBounds.ROOMY_WAIT_BOUND);
         try {
             CompletableFuture<Void> raise;
@@ -328,9 +328,9 @@ class MarkerStoreReplicationIT {
     void raise_WhenThePrimaryIsBlackHoledThenReturns_FailsWithinTheBoundThenReconnectsAndRaises() throws Exception {
         MarkerStore proxied = storeOver(proxiedFactory);
         try {
-            FreshnessScope beforeTheOutage = new FreshnessScope.Entity(UUID.randomUUID());
-            FreshnessScope duringTheOutage = new FreshnessScope.Entity(UUID.randomUUID());
-            FreshnessScope afterTheOutage = new FreshnessScope.Entity(UUID.randomUUID());
+            FreshnessScope beforeTheOutage = new FreshnessScope.Planner(UUID.randomUUID());
+            FreshnessScope duringTheOutage = new FreshnessScope.Planner(UUID.randomUUID());
+            FreshnessScope afterTheOutage = new FreshnessScope.Planner(UUID.randomUUID());
             proxied.raise(Set.of(beforeTheOutage), server + ":1-23");
             long elapsedMillis;
             clientLink.toxics().timeout(BLACK_HOLE, ToxicDirection.UPSTREAM, 0);

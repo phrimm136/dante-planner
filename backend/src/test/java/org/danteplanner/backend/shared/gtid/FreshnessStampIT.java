@@ -106,10 +106,10 @@ class FreshnessStampIT {
 
         private void act(String gtid, String plannerId, boolean catalog) {
             if (!plannerId.isEmpty()) {
-                FreshnessDeclarations.declare(new FreshnessScope.Entity(UUID.fromString(plannerId)));
+                FreshnessDeclarations.declare(new FreshnessScope.Planner(UUID.fromString(plannerId)));
             }
             if (catalog) {
-                FreshnessDeclarations.declare(new FreshnessScope.PublicCatalog());
+                FreshnessDeclarations.declare(new FreshnessScope.Global());
             }
             if (!gtid.isEmpty()) {
                 writeCapture.recordCommit(gtid, true);
@@ -194,9 +194,9 @@ class FreshnessStampIT {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        assertThat(marker(new FreshnessScope.Entity(plannerId)))
+        assertThat(marker(new FreshnessScope.Planner(plannerId)))
                 .containsOnly(Map.entry(serverA, "9"), Map.entry(serverB, "4"));
-        assertThat(marker(new FreshnessScope.PublicCatalog()))
+        assertThat(marker(new FreshnessScope.Global()))
                 .contains(Map.entry(serverA, "9"), Map.entry(serverB, "4"));
         assertCookieCarries(result, gtidSet());
     }
@@ -213,9 +213,9 @@ class FreshnessStampIT {
                 .andExpect(status().isNoContent())
                 .andReturn();
 
-        assertThat(marker(new FreshnessScope.Entity(plannerId)))
+        assertThat(marker(new FreshnessScope.Planner(plannerId)))
                 .containsOnly(Map.entry(serverA, "9"), Map.entry(serverB, "4"));
-        assertThat(marker(new FreshnessScope.PublicCatalog()))
+        assertThat(marker(new FreshnessScope.Global()))
                 .contains(Map.entry(serverA, "9"), Map.entry(serverB, "4"));
         assertCookieCarries(result, gtidSet());
     }
@@ -228,7 +228,7 @@ class FreshnessStampIT {
                         .header(PLANNER_HEADER, plannerId.toString()))
                 .andExpect(status().isOk());
 
-        assertThat(marker(new FreshnessScope.Entity(plannerId))).isEmpty();
+        assertThat(marker(new FreshnessScope.Planner(plannerId))).isEmpty();
     }
 
     @Test
@@ -239,7 +239,7 @@ class FreshnessStampIT {
                         .header(PLANNER_HEADER, plannerId.toString()))
                 .andExpect(status().isOk());
 
-        assertThat(marker(new FreshnessScope.Entity(plannerId))).isEmpty();
+        assertThat(marker(new FreshnessScope.Planner(plannerId))).isEmpty();
     }
 
     @Test
@@ -249,7 +249,7 @@ class FreshnessStampIT {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        assertThat(marker(new FreshnessScope.PublicCatalog())).doesNotContainKeys(serverA, serverB);
+        assertThat(marker(new FreshnessScope.Global())).doesNotContainKeys(serverA, serverB);
         assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count()).isZero();
         assertCookieCarries(result, gtidSet());
     }

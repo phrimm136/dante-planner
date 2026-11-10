@@ -117,7 +117,7 @@ class MarkerStoreTest {
 
     @Test
     void raise_WhenTheWriteStoreIsDown_CountsAFailureWithoutThrowing() {
-        store.raise(Set.of(new FreshnessScope.PublicCatalog()), SERVER_A + ":1-3");
+        store.raise(Set.of(new FreshnessScope.Global()), SERVER_A + ":1-3");
 
         Hang.until(() -> meters.counter(MarkerStore.RAISE_FAILURES).count() == 1.0,
                 "the marker-raise worker counting the failed raise");
@@ -133,7 +133,7 @@ class MarkerStoreTest {
         roomy.close();
 
         long start = System.nanoTime();
-        roomy.raise(Set.of(new FreshnessScope.PublicCatalog()), SERVER_A + ":1-3");
+        roomy.raise(Set.of(new FreshnessScope.Global()), SERVER_A + ":1-3");
         Duration elapsed = Duration.ofNanos(System.nanoTime() - start);
 
         assertThat(elapsed).isLessThan(ROOMY_SETTINGS.waitBound().dividedBy(2));
@@ -142,8 +142,8 @@ class MarkerStoreTest {
 
     @Test
     void read_WhenEverySourceErrors_IsUnknownForEveryScope() {
-        FreshnessScope entity = new FreshnessScope.Entity(UUID.randomUUID());
-        FreshnessScope catalog = new FreshnessScope.PublicCatalog();
+        FreshnessScope entity = new FreshnessScope.Planner(UUID.randomUUID());
+        FreshnessScope catalog = new FreshnessScope.Global();
 
         assertThat(store.read(List.of(entity, catalog))).containsExactly(
                 Map.entry(entity, new MarkerStore.MarkerView.Unknown()),
@@ -153,7 +153,7 @@ class MarkerStoreTest {
     @Test
     void read_WhenEverySourcesRoleIsUnavailable_IsUnknownWithoutTryingAStore() {
         RedisRoleHealth unavailable = new RedisRoleHealth();
-        FreshnessScope scope = new FreshnessScope.Entity(UUID.randomUUID());
+        FreshnessScope scope = new FreshnessScope.Planner(UUID.randomUUID());
         try (RedisRoleProbe probe = new RedisRoleProbe(refused.getRequiredNativeClient().getResources(),
                 RedisEndpoints.everyRoleAt(REFUSED_HOST, REFUSED_PORT), unavailable, List.of(),
                 RedisRoleProbe.Timeouts.PRODUCTION);

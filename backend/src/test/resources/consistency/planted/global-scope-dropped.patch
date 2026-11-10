@@ -6,7 +6,7 @@ index 7714e4e0..581496ef 100644
                      : PublicPlannerResponse.fromCatalog(row, core, stats, upvotedIds.contains(id));
          });
          Set<FreshnessScope> scopes = new LinkedHashSet<>();
--        scopes.add(new FreshnessScope.PublicCatalog());
-         coreInfoMap.values().forEach(core -> scopes.add(new FreshnessScope.Author(core.authorId())));
+-        scopes.add(new FreshnessScope.Global());
+         coreInfoMap.values().forEach(core -> scopes.add(new FreshnessScope.User(core.authorId())));
          return new ScopedRead<>(page, scopes);
      }

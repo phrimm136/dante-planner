@@ -183,7 +183,7 @@ class PlannerScopeDeclarationTest {
     }
 
     @Test
-    void upsertAggregate_WhenThePlannerIsNew_DeclaresItsEntityAndItsOwnersList() {
+    void upsertAggregate_WhenThePlannerIsNew_DeclaresItsPlannerAndItsOwner() {
         UUID id = UUID.randomUUID();
         when(plannerRepository.insert(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -191,28 +191,28 @@ class PlannerScopeDeclarationTest {
                 .upsertAggregate(OWNER_ID, null, id, UpsertRequests.draft().build(), false);
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
-                new FreshnessScope.Entity(id), new FreshnessScope.OwnerList(OWNER_ID));
+                new FreshnessScope.Planner(id), new FreshnessScope.User(OWNER_ID));
     }
 
     @Test
-    void upsertAggregate_WhenAPublishedPlannerChanges_DeclaresItsEntityItsOwnersListAndTheCatalog() {
+    void upsertAggregate_WhenAPublishedPlannerChanges_DeclaresItsPlannerItsOwnerAndGlobal() {
         Planner planner = planner(true);
 
         edit(planner);
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
-                new FreshnessScope.Entity(planner.getId()), new FreshnessScope.OwnerList(OWNER_ID),
-                new FreshnessScope.PublicCatalog());
+                new FreshnessScope.Planner(planner.getId()), new FreshnessScope.User(OWNER_ID),
+                new FreshnessScope.Global());
     }
 
     @Test
-    void upsertAggregate_WhenADraftChanges_DeclaresItsEntityAndItsOwnersListOnly() {
+    void upsertAggregate_WhenADraftChanges_DeclaresItsPlannerAndItsOwnerOnly() {
         Planner planner = planner(false);
 
         edit(planner);
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
-                new FreshnessScope.Entity(planner.getId()), new FreshnessScope.OwnerList(OWNER_ID));
+                new FreshnessScope.Planner(planner.getId()), new FreshnessScope.User(OWNER_ID));
     }
 
     private void edit(Planner planner) {
@@ -226,7 +226,7 @@ class PlannerScopeDeclarationTest {
     }
 
     @Test
-    void deletePlanner_WhenItSucceeds_DeclaresItsEntityItsOwnersListAndTheCatalog() {
+    void deletePlanner_WhenItSucceeds_DeclaresItsPlannerItsOwnerAndGlobal() {
         Planner planner = planner(true);
         when(plannerRepository.findAggregateForOwner(planner.getId(), OWNER_ID)).thenReturn(Optional.of(planner));
         lenient().when(plannerRepository.findOwnershipById(planner.getId()))
@@ -235,12 +235,12 @@ class PlannerScopeDeclarationTest {
         commandService(TestDataFactory.contentValidator()).deletePlanner(OWNER_ID, planner.getId());
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
-                new FreshnessScope.Entity(planner.getId()), new FreshnessScope.OwnerList(OWNER_ID),
-                new FreshnessScope.PublicCatalog());
+                new FreshnessScope.Planner(planner.getId()), new FreshnessScope.User(OWNER_ID),
+                new FreshnessScope.Global());
     }
 
     @Test
-    void publish_WhenTheStoredContentMigrates_DeclaresItsEntityItsOwnersListAndTheCatalog() throws IOException {
+    void publish_WhenTheStoredContentMigrates_DeclaresItsPlannerItsOwnerAndGlobal() throws IOException {
         PlannerContentValidator renaming = validatorRenaming("{\"egoGift\":{\"rename\":{\"9247\":\"9002\"}}}");
         Planner planner = stored(TestDataFactory.planner(owner).published(false)
                 .content(TestDataFactory.VALID_CONTENT.replace(
@@ -250,63 +250,63 @@ class PlannerScopeDeclarationTest {
         publishingService(renaming).publish(OWNER_ID, planner.getId());
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
-                new FreshnessScope.Entity(planner.getId()), new FreshnessScope.OwnerList(OWNER_ID),
-                new FreshnessScope.PublicCatalog());
+                new FreshnessScope.Planner(planner.getId()), new FreshnessScope.User(OWNER_ID),
+                new FreshnessScope.Global());
     }
 
     @Test
-    void publish_WhenTheContentNeedsNoMigration_DeclaresItsEntityAndTheCatalog() {
+    void publish_WhenTheContentNeedsNoMigration_DeclaresItsPlannerAndGlobal() {
         Planner planner = stored(planner(false));
 
         publishingService(TestDataFactory.contentValidator()).publish(OWNER_ID, planner.getId());
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
-                new FreshnessScope.Entity(planner.getId()), new FreshnessScope.PublicCatalog());
+                new FreshnessScope.Planner(planner.getId()), new FreshnessScope.Global());
     }
 
     @Test
-    void unpublish_WhenThePlannerWasPublished_DeclaresItsEntityAndTheCatalog() {
+    void unpublish_WhenThePlannerWasPublished_DeclaresItsPlannerAndGlobal() {
         Planner planner = stored(planner(true));
 
         publishingService(TestDataFactory.contentValidator()).unpublish(OWNER_ID, planner.getId());
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
-                new FreshnessScope.Entity(planner.getId()), new FreshnessScope.PublicCatalog());
+                new FreshnessScope.Planner(planner.getId()), new FreshnessScope.Global());
     }
 
     @Test
-    void withdrawFromPublicView_WhenItTakesThePlannerDown_DeclaresItsEntityAndTheCatalog() {
+    void withdrawFromPublicView_WhenItTakesThePlannerDown_DeclaresItsPlannerAndGlobal() {
         Planner planner = stored(planner(true));
 
         publishingService(TestDataFactory.contentValidator()).withdrawFromPublicView(planner.getId(),
                 Planner::takeDown);
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
-                new FreshnessScope.Entity(planner.getId()), new FreshnessScope.PublicCatalog());
+                new FreshnessScope.Planner(planner.getId()), new FreshnessScope.Global());
     }
 
     @Test
-    void changeRecommendedListing_WhenItHidesThePlanner_DeclaresTheCatalogOnly() {
+    void changeRecommendedListing_WhenItHidesThePlanner_DeclaresGlobalOnly() {
         Planner planner = stored(planner(true));
 
         publishingService(TestDataFactory.contentValidator()).changeRecommendedListing(planner.getId(),
                 listed -> listed.hideFromRecommended(READER_ID, "freshness"));
 
-        assertThat(FreshnessDeclarations.declared()).containsExactly(new FreshnessScope.PublicCatalog());
+        assertThat(FreshnessDeclarations.declared()).containsExactly(new FreshnessScope.Global());
     }
 
     @Test
-    void toggleOwnerNotifications_WhenTheOwnerToggles_DeclaresItsEntityOnly() {
+    void toggleOwnerNotifications_WhenTheOwnerToggles_DeclaresItsPlannerOnly() {
         Planner planner = stored(planner(true));
 
         publishingService(TestDataFactory.contentValidator()).toggleOwnerNotifications(OWNER_ID, planner.getId(),
                 false);
 
-        assertThat(FreshnessDeclarations.declared()).containsExactly(new FreshnessScope.Entity(planner.getId()));
+        assertThat(FreshnessDeclarations.declared()).containsExactly(new FreshnessScope.Planner(planner.getId()));
     }
 
     @Test
-    void castVote_WhenItIsTheFirstVote_DeclaresItsEntityAndTheCatalog() {
+    void castVote_WhenItIsTheFirstVote_DeclaresItsPlannerAndGlobal() {
         Planner planner = planner(true);
         when(plannerRepository.findAggregateWithAuthor(planner.getId()))
                 .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(owner))));
@@ -320,26 +320,26 @@ class PlannerScopeDeclarationTest {
         engagement.castVote(READER_ID, planner.getId(), VoteType.UP);
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
-                new FreshnessScope.Entity(planner.getId()), new FreshnessScope.PublicCatalog());
+                new FreshnessScope.Planner(planner.getId()), new FreshnessScope.Global());
     }
 
     @Test
-    void accountDeactivated_WhenTheOwnerHasPublishedPlanners_DeclaresTheCatalogOnly() {
+    void accountDeactivated_WhenTheOwnerHasPublishedPlanners_DeclaresGlobalOnly() {
         when(plannerRepository.findPublishedIdsOwnedBy(OWNER_ID))
                 .thenReturn(List.of(UUID.randomUUID(), UUID.randomUUID()));
 
         catalogService().accountDeactivated(OWNER_ID);
 
-        assertThat(FreshnessDeclarations.declared()).containsExactly(new FreshnessScope.PublicCatalog());
+        assertThat(FreshnessDeclarations.declared()).containsExactly(new FreshnessScope.Global());
     }
 
     @Test
-    void accountReactivated_WhenTheOwnerHasPublishedPlanners_DeclaresTheCatalogOnly() {
+    void accountReactivated_WhenTheOwnerHasPublishedPlanners_DeclaresGlobalOnly() {
         when(plannerRepository.findPublishedIdsOwnedBy(OWNER_ID))
                 .thenReturn(List.of(UUID.randomUUID(), UUID.randomUUID()));
 
         catalogService().accountReactivated(OWNER_ID);
 
-        assertThat(FreshnessDeclarations.declared()).containsExactly(new FreshnessScope.PublicCatalog());
+        assertThat(FreshnessDeclarations.declared()).containsExactly(new FreshnessScope.Global());
     }
 }

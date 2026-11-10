@@ -71,6 +71,7 @@ public class UserService {
     private User createOrRecover(AuthProviderType providerType, Map<String, String> userInfo) {
         User user = createUserWithUniqueUsername(providerType, userInfo);
         userSettingsService.getOrCreateEntity(user.getId());
+        FreshnessDeclarations.declare(new FreshnessScope.User(user.getId()), new FreshnessScope.Global());
         return user;
     }
 
@@ -230,7 +231,7 @@ public class UserService {
             .orElseThrow(() -> new UserNotFoundException(userId));
 
         user.setUsernameEpithet(epithet);
-        FreshnessDeclarations.declare(new FreshnessScope.Author(userId));
+        FreshnessDeclarations.declare(new FreshnessScope.User(userId), new FreshnessScope.Global());
 
         log.info("User {} updated username epithet to {}", userId, epithet);
 

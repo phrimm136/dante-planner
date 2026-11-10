@@ -12,22 +12,17 @@ class FreshnessScopeTest {
     void key_WhenTheScopeIsOnePlanner_IsTheChangeKeyOfThatPlanner() {
         UUID plannerId = UUID.fromString("0b9c7e4e-2f6a-4f7e-9d3c-1a2b3c4d5e6f");
 
-        assertThat(new FreshnessScope.Entity(plannerId).key())
+        assertThat(new FreshnessScope.Planner(plannerId).key())
                 .isEqualTo("chg:planner:0b9c7e4e-2f6a-4f7e-9d3c-1a2b3c4d5e6f");
     }
 
     @Test
-    void key_WhenTheScopeIsAnOwnersList_IsTheChangeKeyOfThatOwner() {
-        assertThat(new FreshnessScope.OwnerList(42L).key()).isEqualTo("chg:owner:42");
+    void key_WhenTheScopeIsOneUser_IsTheChangeKeyOfThatUser() {
+        assertThat(new FreshnessScope.User(42L).key()).isEqualTo("chg:user:42");
     }
 
     @Test
-    void key_WhenTheScopeIsAnAuthor_IsTheChangeKeyOfThatAuthor() {
-        assertThat(new FreshnessScope.Author(42L).key()).isEqualTo("chg:author:42");
-    }
-
-    @Test
-    void key_WhenTheScopeIsThePublicCatalog_IsTheCatalogChangeKey() {
-        assertThat(new FreshnessScope.PublicCatalog().key()).isEqualTo("chg:catalog");
+    void key_WhenTheScopeIsGlobal_IsTheGlobalChangeKey() {
+        assertThat(new FreshnessScope.Global().key()).isEqualTo("chg:global");
     }
 }

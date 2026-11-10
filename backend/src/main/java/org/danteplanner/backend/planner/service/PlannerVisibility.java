@@ -15,6 +15,6 @@ public final class PlannerVisibility {
     }
 
     public static Set<FreshnessScope> scopes(UUID plannerId, long ownerId) {
-        return Set.of(new FreshnessScope.Entity(plannerId), new FreshnessScope.Author(ownerId));
+        return Set.of(new FreshnessScope.Planner(plannerId), new FreshnessScope.User(ownerId));
     }
 }

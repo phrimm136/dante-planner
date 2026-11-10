@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.user.api.RestrictionReasonProvider;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessPending;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +46,7 @@ public class ModerationAuditService implements ModerationAudit, RestrictionReaso
                 .reason(reason)
                 .durationMinutes(durationMinutes)
                 .build());
+        FreshnessDeclarations.declare(new FreshnessScope.Global());
     }
 
     @Override

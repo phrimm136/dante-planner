@@ -85,7 +85,7 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
         int withdrawn = catalogRepository.withdrawAllOwnedBy(userId);
         log.debug("Withdrew {} catalog rows owned by user {}", withdrawn, userId);
         publishedIds.forEach(this::syncFilterRows);
-        FreshnessDeclarations.declare(new FreshnessScope.PublicCatalog());
+        FreshnessDeclarations.declare(new FreshnessScope.Global());
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
@@ -96,7 +96,7 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
         int restored = catalogRepository.restoreAllOwnedBy(userId, recommendedThreshold);
         log.debug("Restored {} catalog rows owned by user {}", restored, userId);
         publishedIds.forEach(this::syncFilterRows);
-        FreshnessDeclarations.declare(new FreshnessScope.PublicCatalog());
+        FreshnessDeclarations.declare(new FreshnessScope.Global());
     }
 
     @Transactional(propagation = Propagation.MANDATORY)

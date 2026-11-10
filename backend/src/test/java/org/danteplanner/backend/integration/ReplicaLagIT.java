@@ -392,7 +392,7 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
                     "SELECT deleted_at FROM users WHERE id = ?", Timestamp.class, owner.getId()))
                     .as("the paused replica must still hold the owner active")
                     .isNull();
-            assertThat(stringRedisTemplate.hasKey(new FreshnessScope.Author(owner.getId()).key()))
+            assertThat(stringRedisTemplate.hasKey(new FreshnessScope.User(owner.getId()).key()))
                     .as("the deactivation must have raised the owner's Author marker")
                     .isTrue();
 
