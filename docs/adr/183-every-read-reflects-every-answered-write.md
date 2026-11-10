@@ -16,28 +16,39 @@ epic: none · pr: none · supersedes: 008 @ryw @gtid @cookie, 008 @gtid @capture
   REJECTED: accepting list absence as eventual — a filtered list then disagrees with the detail
   page the same reader opens next.
   INVARIANT: no read that starts after a response returns the state before it — `ConsistencyRunIT`
-  for planners and lists; unenforced for threads, the inbox, settings and moderation until the
-  consistency run judges them.
+  for planners, lists, comment threads and settings; `FreshnessReadIT` for the inbox, the
+  moderation lists and the role and account reads, which the run's single user cannot exercise.
   NON-GOAL: view counts — they are buffered in Redis and flushed later (ADR 131), so no reader
   expects them at once.
   NON-GOAL: a write that committed but never answered — its writer saw an error, so no reader is
   promised anything, and it appears when the replica catches up.
 - @freshness @marker — Each scope a write touches holds a marker in Redis: a hash from primary
   server uuid to the highest GTID sequence number of an answered write on that scope. Scopes are
-  one entity, one owner's planner list, the public catalog (every public and recommended list and
-  filter), one author (the user row that planners and comments render), one planner's comment
-  thread, one user's inbox, one user's settings, and the moderation lists. A write declares the
-  rows it changed, and a read reads the author marker of every author it renders, so an epithet
-  change or an account change raises one marker however many planners the user has. At response
+  three: one planner (its row and its comment thread), one user (the user row that planners and
+  comments render, and everything only that user lists: their planners, settings and inbox), and
+  Global (every list many users share: the public and recommended lists and their filters, the
+  moderation lists, and the publish notification fan-out, whose recipients the write does not
+  know). A write declares the rows it changed, and a read reads the user marker of every author it
+  renders, so an epithet change or an account change raises one marker however many planners the
+  user has. At response
   time the request raises every touched scope's marker to the GTID union of its
   commits with one Lua call (a max per uuid), then waits for one Redis replica to acknowledge
-  (`WAIT`), and only then answers and sends any push that announces the write. `WAIT` counts only
+  (`WAIT`), and only then answers and sends any push that announces the write. A dispatch of an outbox
+  event is a window of its own: it raises after its commit and before it sends its pushes, and it
+  declares the recipient's scope for a notification row and the scope each push announces, since
+  the request that caused it raises only at its own response, which the dispatch can overtake. `WAIT` counts only
   the writes of the connection it runs on, so each pod raises markers on one dedicated, long-lived
   connection: concurrent requests queue their raises, one thread sends a batch and a single `WAIT`
   for it, then releases every request in the batch. GTIDs are captured
   only when a non-readOnly MySQL transaction commits.
   REJECTED: an author change declaring each of the user's planners — the write's marker count
   grows with the user's planners, and the comment threads that render the author are missed.
+  REJECTED: a scope per screen (owner list, author, thread, inbox, settings and moderation apart)
+  — with about one write in ten minutes and a replica that applies it in milliseconds, a finer
+  split saves no measurable wait, and every extra kind is one more scope a write or a read can
+  forget.
+  REJECTED: one marker for the whole site — while the replica lags past the read wait bound, every
+  Seoul read after any write moves to the primary, whose Seoul read pool holds three connections.
   REJECTED: a marker stored in MySQL — it replicates with the very lag it is meant to reveal.
   REJECTED: reading markers from the Redis primary on every Seoul read — one ocean round trip per
   read, where `WAIT` costs one per write and writes are rare.
@@ -58,9 +69,14 @@ epic: none · pr: none · supersedes: 008 @ryw @gtid @cookie, 008 @gtid @capture
   nothing and appear when replication applies them. The OAuth reactivation answers a request and
   stamps like any write.
   INVARIANT: two writers on one scope never lower its marker — `MarkerStoreIT`.
-  INVARIANT: every write that changes a planner scope declares that scope — `FreshnessDeclarationIT`
-  for the writes it lists; a gate that fails any committing request without a declaration is
-  unenforced until every write declares its scopes.
+  REJECTED: a build rule that every write handler carries a declaration — which scopes a write
+  changed depends on what it found (a published save adds Global, an unchanged publish declares
+  nothing), so a declaration's presence on a method proves little.
+  INVARIANT: every write declares the scopes it changed, or that it changes none —
+  `FreshnessDeclarationIT` for the exact scopes of each write it lists; a stamp window that commits
+  a write MySQL's own GTID tracking reported and holds no declaration throws in the test profile
+  and counts in production. The gate sees only what a window stamps: a write outside any window, and an
+  effect inside a dispatch window, which starts as declared-none for its own bookkeeping, pass it.
 - @freshness @read — A read on a non-authoritative source (182 @reads @sources) reads the markers of
   the scopes it touches. No marker: serve. A marker the source had applied before the read loaded: serve. A marker it had
   not applied: wait on that source for the GTID set, up to a bound set to the cost of the alternative, one
@@ -101,11 +117,9 @@ epic: none · pr: none · supersedes: 008 @ryw @gtid @cookie, 008 @gtid @capture
   REJECTED: Spring's pipelined execution for the marker batch — it opens a dedicated connection on
   every call, which costs more than one command for the common one- or two-scope read.
   INVARIANT: every read-only service method declares exactly one of a `ScopedRead` return,
-  mandatory propagation, a pending marker with a reason, or an exemption with a reason, and a
+  mandatory propagation, or an exemption with a reason, and a
   `ScopedRead` return carries its read-only annotation on the method itself, where the advice
   matches it — `FreshnessReadCoverageTest` over the production classes the advice can advise.
-  INVARIANT: the count of pending reads only goes down; each one leaves when its scope arrives —
-  `FreshnessReadCoverageTest`, which pins the count.
   INVARIANT: the advice runs outside the transaction — `FreshnessReadAspectTest`, which fails when
   the transaction advisor is ordered first.
   INVARIANT: one marker read sends one batch per marker source — `MarkerStoreIT`.
@@ -148,7 +162,7 @@ epic: none · pr: none · supersedes: 008 @ryw @gtid @cookie, 008 @gtid @capture
   ignores publication; a reply notification to any other parent author fires only while the
   planner is published, since it names the planner and quotes the reply to someone who would
   otherwise get not-found. Thread freshness, including the planner's withdrawal, comes from the
-  thread and catalog markers.
+  planner's marker.
   REJECTED: a forbidden answer for another reader — it confirms that a private planner exists,
   which the planner read itself refuses to do.
   INVARIANT: an unpublished or withdrawn planner's thread is unreadable to non-owners on every read

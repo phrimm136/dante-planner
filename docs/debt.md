@@ -1227,14 +1227,6 @@ guards the parse but likewise skips the schema gate.
   `http_server_requests_seconds_count` for that URI with method POST stays at zero for seven days
   in both clusters (label names unverified against the Mimir keep-list): delete the POST handler.
   re-check: `rg -qF '@PostMapping("/batch")' backend/src/main/java/org/danteplanner/backend/planner/controller/PlannerQueryController.java`
-- 2026-09-27 — `UserService.findOrCreateUser`'s first lookup (`findByProviderAndProviderId`) runs
-  outside a transaction, so every returning login counts one undeclared primary access and would
-  throw where fail-fast is on
-  (`UndeclaredPrimaryAccessIT.declaredFinder_WhenCalledOutsideATransaction_IsRejected` proves
-  declared finders route this way).
-  Worth deciding when login latency or the undeclared counter is examined: readOnly (replica lag
-  right after a concurrent create) or explicit read-write; then sweep other bare declared finders.
-  re-check: `rg -qU 'transactionTemplate;\n\n    public User findOrCreateUser' backend/src/main/java/org/danteplanner/backend/user/service/UserService.java && rg -qU 'userInfo.get\("id"\);\n\n        Optional<User> existing = userRepository.findByProviderAndProviderId' backend/src/main/java/org/danteplanner/backend/user/service/UserService.java`
 - Unit ADR 116: 2026-09-23 — Whether an origin `Set-Cookie` still blocks caching once a Cache Rule makes a
   JSON path eligible is unmeasured. Default behavior is measured: through the real edge, origin
   `Set-Cookie`, `no-store`/`no-cache`/`max-age=0` and `private` each bypass the cache on a
@@ -1648,14 +1640,34 @@ guards the parse but likewise skips the schema gate.
   correctness: pick a search that does not depend on in-place title updates under MATCH, then add
   the catalog "contains" rule.
   re-check: `rg -qF 'MATCH (?1) AGAINST (?2 IN BOOLEAN MODE)' backend/src/main/java/org/danteplanner/backend/shared/config/MySqlFunctionContributor.java`
-- The consistency run cannot catch a comment-thread read that drops its `Entity(planner)` scope:
-  the harness has one author, and in the stopped-replica phases that author's reactivation leaves
-  an `Author` marker the replica never applies, so the thread's remaining `Author` scope sends
-  every such read to the primary. A planted patch for it went uncaught in 20 seeds and was
-  removed; `FreshnessReadIT` covers the case deterministically instead. Worth doing when the
-  harness gains a second author for another reason: give that author planners that are published,
-  unpublished and thread-read in the stopped phases, then restore the planted patch.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent backend/src/test/resources/consistency/planted --files -g 'thread-scope-dropped.patch'`
+- The consistency run has one user: its four author devices share an account, and the planner's
+  owner is every commenter. A write that declares the owner's `User` scope where it owes the
+  `Planner` scope goes unseen, because every planner and thread read also names the owner's `User`
+  and that user's next write on any device raises it. The inbox is not judged at all, since a
+  notification needs a second user who comments; `FreshnessReadIT` and the dispatch cases of
+  `FreshnessDeclarationIT` cover it. Worth doing when the harness gains a second account for
+  another reason: let it comment on the first account's planners, judge the inbox, and plant a
+  write that declares the wrong scope.
+  re-check: `rg -q 'AUTHOR_DEVICES' backend/src/test/java/org/danteplanner/backend/integration/consistency/ConsistencyBudget.java`
+- Two pushes leave the request thread before that request raises its freshness markers: the
+  settings invalidation in `UserController` and the suspension push in
+  `AccountSuspensionEventListener`. A receiver that refetches at once can read the state before
+  the write from a lagging replica. Worth doing with the push payloads: a push that carries the
+  saved state needs no refetch, or send both after the stamp.
+  re-check: `rg -q 'publishSettingsInvalidation' backend/src/main/java/org/danteplanner/backend/user/controller/UserController.java`
+- Editing a comment on a deleted planner answers 200: `CommentCommandService.updateComment` loads
+  the comment and never the planner (seen in the consistency run, where an edit followed the
+  planner's delete). Nobody can read the result, since the thread answers 404. Worth doing when
+  the comment write paths are next touched: decide whether the edit answers the planner's
+  not-found.
+  re-check: `.claude/skills/debt-ledger/bin/debt python 'import re,sys; t=open("backend/src/main/java/org/danteplanner/backend/comment/service/CommentCommandService.java").read(); m=re.search(r"updateComment\(.*?\n    }\n", t, re.S); sys.exit(0 if m and "plannerAccess" not in m.group(0) else 1)'`
+- The GTID cookie gate is still served beside the freshness markers. Every read and write now has
+  a scope and a declaration, so the gate protects nothing the markers do not; it stays for one
+  release so that old and new pods never leave a writer unprotected during a rollout. Worth doing
+  once the release that declares every scope serves in both regions: delete `GtidCookie`, the
+  read gate and the primary pin, move the response seam to `shared/freshness`, and re-point the
+  consistency run's calibration and coverage from the gate's counters to the marker wait.
+  re-check: `test -f backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidCookie.java`
 - The local two-region rig shares the developer's database volume: `local-multiregion-up.sh` fixes
   the compose project to `limbusplanner`, and `docker-compose.local.yml` mounts `mysql-data`, so
   bringing the rig up migrates the local dev database and the e2e suites leave their users and
