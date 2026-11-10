@@ -104,12 +104,15 @@ services:
     ports:
       - "8082:8080"
 
-  # Oregon: reads the pool it writes to, so it registers no gate and mints no cookie. Suite C
-  # reads through this instance to prove the cookie carries across regions, not just within one.
+  # Oregon: reads the primary first and falls back to the Seoul replica, as the prod overlay
+  # does, so its writes raise freshness markers and mint ryw_gtid. Suite C reads through this
+  # instance to prove the cookie carries across regions, not just within one.
   backend-oregon:
     image: danteplanner-backend:local
     depends_on:
       mysql:
+        condition: service_healthy
+      mysql-replica:
         condition: service_healthy
     volumes:
       # Same source the dev override mounts for the Seoul backend: both regions must sign and
@@ -122,7 +125,11 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       DEPLOY_REGION: us-west-2
-      DATASOURCE_ROUTING_ENABLED: "false"
+      DATASOURCE_ROUTING_ENABLED: "true"
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true&trackSessionState=true
+      DATASOURCE_READSOURCES_0_NAME: primary
+      DATASOURCE_READSOURCES_1_NAME: seoul-replica
+      DATASOURCE_READSOURCES_1_URL: jdbc:mysql://mysql-replica:3306/${MYSQL_DATABASE}?sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true&trackSessionState=true
       # Flyway already ran on the primary from the Seoul instance; a second migrator would
       # race it for the schema-history lock on boot.
       SPRING_FLYWAY_ENABLED: "false"

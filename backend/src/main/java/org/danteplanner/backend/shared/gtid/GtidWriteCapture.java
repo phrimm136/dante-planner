@@ -73,7 +73,7 @@ public class GtidWriteCapture {
      * adjacent or overlapping ranges from the same source uuid ({@code …:100} ∪ {@code …:101} =
      * {@code …:100-101}) and joins ranges from distinct sources comma-separated.
      */
-    static String unionGtidSets(Set<String> gtids) {
+    public static String unionGtidSets(Set<String> gtids) {
         Map<String, List<long[]>> intervalsByUuid = new TreeMap<>();
         for (String gtidSet : gtids) {
             for (String sourceSet : gtidSet.split(",")) {

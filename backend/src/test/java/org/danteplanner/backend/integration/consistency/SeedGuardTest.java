@@ -32,7 +32,7 @@ class SeedGuardTest {
         List<Operation> operations = List.of(
                 new Save("s1", K1, 1, 2, new Applied(1)),
                 new Read("s2", K1, 3, 4, new Found(1)),
-                new ListRead("s3", 5, 6, List.of(K1)),
+                new ListRead("s3", ListRead.Listing.OWNER, 5, 6, 0, 20, 1, List.of(K1)),
                 new Publish("s1", K1, 7, 8, new Changed()),
                 new PublicRead("anon", K1, 9, 10, new Found(1)),
                 new Unpublish("s2", K1, 11, 12, new Rejected(409)),
@@ -49,7 +49,7 @@ class SeedGuardTest {
                 new Save("s1", K1, 1, 2, new Unknown()),
                 new Delete("s1", K1, 3, 4, new Unknown()),
                 new Read("s2", K1, 5, 6, new ReadFailed(0)),
-                new ListRead("s3", 7, 8, List.of()),
+                new ListRead("s3", ListRead.Listing.OWNER, 7, 8, 0, 20, 0, List.of()),
                 new Publish("s1", K1, 9, 10, new Unknown()),
                 new Unpublish("s2", K1, 11, 12, new Unknown()),
                 new PublicRead("anon", K1, 13, 14, new ReadFailed(0)));

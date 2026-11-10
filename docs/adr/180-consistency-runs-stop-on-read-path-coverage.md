@@ -3,9 +3,11 @@ epic: none · pr: none @consistency-checker @generator
 
 ## Decisions
 - @consistency-checker @generator — The consistency run chooses its faults to cover the read path,
-  not by fixed probabilities. Its targets are the branches that the ADR 008 contract line names:
-  the gate pins the primary, the gate serves the replica, a replica miss is promoted to the primary,
-  a tombstone hit, and a withdrawal-marker hit. The run reads the application's own counters before
+  not by fixed probabilities. Its targets are the read-path branches: the gate pins the primary,
+  the gate serves the replica, an Oregon read falls back to the Seoul replica, the Oregon read-source
+  breaker opens, a freshness-marker wait that the replica satisfies within the bound, and one that
+  times out. Each of the two marker targets must be hit, so a run in which no wait times out also
+  fails. The run reads the application's own counters before
   and after each seed, runs its whole seed budget, and fails unless every target was hit. A calibration step at the start measures the replication latency at which the gate starts
   to pin the primary on every probe. Seeds then draw a latency from zero to that value, and a
   stopped replica stands for the unbounded end.
@@ -33,7 +35,8 @@ epic: none · pr: none @consistency-checker @generator
   INVARIANT: a passing run hit every target at least once, within the base budget plus at most
   the extension cap of extra seeds — `ConsistencyRunIT`, through `Coverage` and `SeedLoop`.
   NON-GOAL: a per-target hit minimum above one — coverage is the claim, not frequency.
-- @consistency-checker @observability — The application counts tombstone hits and withdrawal-marker
+## Superseded
+- @consistency-checker @observability → 183 — The application counts tombstone hits and withdrawal-marker
   hits, beside the existing gate and promotion counters. Two of the five targets had no counter, so
   the run did not see whether those mechanisms worked. The counters also show production whether
   the mechanisms engage.

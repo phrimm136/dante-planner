@@ -18,7 +18,7 @@ Package prefix `org.danteplanner.backend` is omitted from paths below.
 
   Redis auth     PRIMARY (durable)  .............>  regional replica
                  rotation families,                 read-local for blacklist
-                 blacklist, tombstones,             checks; SSE subscribe
+                 blacklist, freshness markers,      checks; SSE subscribe
                  ShedLock, SSE publish
 
   Redis          local ephemeral                    local ephemeral
@@ -37,9 +37,10 @@ elaboration:
 
 Configuration for the split lives in `shared/config/RoutingDataSourceConfig` (pools),
 `shared/config/RedisConnectionConfig` (the four Redis roles), and the per-region ConfigMaps under
-`deploy/overlays/{oregon,seoul}/configmap-patch.yaml`. Seoul turns on
-`datasource.routing.enabled` and `datasource.replica.enabled`; Oregon leaves both off and every
-`RoutingKey` resolves to the primary.
+`deploy/overlays/{oregon,seoul}/configmap-patch.yaml`. Both regions turn on
+`datasource.routing.enabled` and list their read sources in order under
+`datasource.read-sources`: Seoul reads its replica first and the primary second, Oregon the
+primary first and the Seoul replica second (`shared/config/ReadSourcesConfig`).
 
 ---
 
@@ -62,9 +63,9 @@ That is the whole rule, and it has one large implication:
 > Adding it to a service method moves that method's reads to another continent's replica.
 > Removing it moves them back to the primary and adds WAN latency to a read.
 
-Three keys exist (`shared/config/RoutingKey`): `PRIMARY`, `REPLICA`, `BULKHEAD`. The bulkhead is a
-small separate pool to the primary, used only by the replica-miss re-check (§5) so that slow
-re-checks cannot starve ordinary writes. Pool sizes are in `shared/config/PoolLedger`.
+Two keys exist (`shared/config/RoutingKey`): `PRIMARY` and `REPLICA`. A read that the freshness
+markers send past the replica (§5) lands on the next read source, in Seoul the primary-read pool.
+Pool sizes are in `shared/config/PoolLedger`.
 
 The datasource bean is a `LazyConnectionDataSourceProxy` wrapping the router, so the routing
 decision is deferred until the first statement — a transaction that opens and never queries
@@ -92,7 +93,9 @@ anywhere, so it pins a client to a region without a public bypass of health-base
 `GtidCookieFilter` is registered in `shared/gtid/GtidGateConfig` as a `FilterRegistrationBean` on
 `/api/*` with `LOWEST_PRECEDENCE`, so it is the **innermost** filter — it wraps the controller and
 therefore wraps the transaction. It is registered only when `datasource.routing.enabled=true`,
-i.e. only in Seoul. Oregon reads its own primary and needs no gate.
+which both regions set: Oregon reads its primary first and falls back to the Seoul replica, so it
+needs the gate too. The same flag wires marker raising, so a region running with routing off
+raises no freshness markers for the writes it serves.
 
 ---
 
@@ -194,25 +197,32 @@ and an undecided answer routes to the primary, which is always correct, just slo
 
 ---
 
-## 5. The other read-consistency path: replica-miss re-check
+## 5. The other read-consistency path: freshness markers
 
-The GTID cookie only helps a client that just wrote. A different case: a by-id read for a row that
-exists on the primary but has not replicated, from a client with no cookie.
+The GTID cookie only helps the client that just wrote. Every other reader relies on the markers:
+a write raises a marker in auth Redis for each scope it changes (an entity, an owner's list, an
+author, the public catalog), holding the GTID set that made the change.
 
 ```
-PublishedPlannerController / PlannerQueryController
-   └─ ByIdReadGuard.read(entityType, id, dereference)
-        └─ dereference on the REPLICA → empty?
-             └─ PrimaryReCheck.readWithReCheck
-                  ├─ ContentTombstoneStore.isTombstoned(entityType, id)?   (auth Redis)
-                  │     └─ yes → genuinely deleted, return empty. No re-check.
-                  └─ no  → pinTo(BULKHEAD), re-run the same dereference against the primary
+read-only service method returning ScopedRead (planner and comment reads)
+   └─ FreshnessReadAspect (outside the transaction)
+        └─ FreshnessReadGuard.read
+             ├─ load on the chosen source (replica first)
+             └─ decide(scopes, source)
+                  ├─ authoritative source → serve
+                  ├─ no marker, or a marker applied before the load began → serve
+                  ├─ marker not applied → wait up to the bound on that source
+                  │     ├─ applied within the bound → load again there (once per source;
+                  │     │    a newer unapplied marker after that skips without waiting)
+                  │     └─ timeout → skip the source, load on the next one
+                  └─ marker store unreadable → read an authoritative source
 ```
 
-Tombstones are written by `PlannerCommandService` on delete. Their purpose is to stop a *deleted*
-row from generating a primary re-check on every subsequent request — without them, a popular
-deleted planner would send every miss across the WAN. The bulkhead pool exists so a flood of such
-re-checks queues in its own pool instead of exhausting the pool writes need.
+With no healthy authoritative source left, the read answers 503 `READ_TEMPORARILY_UNAVAILABLE`.
+A by-id read loads its row without the visibility filter and decides visibility after the
+markers, so a miss knows whether the row was absent or hidden; both answer the same 404 body.
+Every other read-only service method declares mandatory propagation, a pending marker or an
+exemption, and `FreshnessReadCoverageTest` fails the build otherwise.
 
 ---
 
@@ -329,18 +339,15 @@ see §6 for why all three matter.
 
 ## 9. Scheduled work
 
-`planner/config/ViewFlushSchedulerConfig` declares **two** schedulers:
+`shared/config/TaskSchedulerConfig` declares `taskScheduler` (`@Primary`, pool from
+`spring.task.scheduling.pool.size`, default 4). Every `@Scheduled` method that does not name a
+scheduler runs on it.
 
-- `taskScheduler` (`@Primary`, pool from `spring.task.scheduling.pool.size`, default 4) — every
-  `@Scheduled` method that does not name a scheduler, including SSE heartbeats.
-- `viewFlushScheduler` (pool 1) — only `PlannerViewRecorder.flush`, which runs every 500ms and
-  writes cross-region on every tick.
-
-Both are declared explicitly because Spring Boot's `TaskSchedulingAutoConfiguration` is
-`@ConditionalOnMissingBean(TaskScheduler.class)`: declaring *either* scheduler suppresses the
-framework's, leaving `spring.task.scheduling.pool.size` unread and binding every scheduled task to
-whichever single scheduler exists. The isolation matters because a task blocked on a hung
-cross-region write must not stop heartbeats.
+It is declared explicitly because Spring Boot's `TaskSchedulingAutoConfiguration` is
+`@ConditionalOnMissingBean(TaskScheduler.class)`: the probe and heartbeat schedulers are
+`TaskScheduler` beans too, so without this declaration the framework's own pool backs off and
+`spring.task.scheduling.pool.size` goes unread. The pool needs spare threads, so a task blocked on
+a hung cross-region write does not stop the others.
 
 Jobs that must run once per *fleet* rather than once per pod take a `@SchedulerLock` over the
 shared auth Redis: `UserCleanupScheduler.cleanupExpiredUsers`,
@@ -356,7 +363,6 @@ What happens when the far region is unreachable, and which knob governs it:
 |---|---|---|---|
 | Primary blackholed (connect hangs) | `connectTimeout` / `socketTimeout` 10s | app + replica JDBC urls (`application-prod.properties`) | write → 503 `WRITE_TEMPORARILY_UNAVAILABLE`; reads keep serving from the replica |
 | Request pool exhausted | Hikari `connectionTimeout` 5s | `RoutingDataSourceConfig` (primary, replica) | 503 rather than a pinned thread |
-| Bulkhead saturated by re-checks | Hikari `connectionTimeout` 30s | `RoutingDataSourceConfig` (bulkhead) | re-checks queue; writes unaffected |
 | Auth Redis unreachable | Lettuce command timeout 3s | `RedisConnectionConfig.authRedisConnectionFactory` | blacklist check fails **open**; `blacklist_check_skipped_total` increments |
 | Rate-limit Redis unreachable | — | — | 503 `RATE_LIMIT_TEMPORARILY_UNAVAILABLE` |
 | Flyway migration | deliberately **unbounded** | `spring.flyway.url` has no timeouts | a long migration is not aborted mid-change |
@@ -374,7 +380,7 @@ expected states, not defects.
 | `/api/planner/md` | `PlannerCommandController` (`PUT /{id}` upsert) | write → primary; mints `ryw_gtid` |
 | | `PlannerPublishingController` (`POST /{id}/publish`, `POST /{id}/unpublish`; `PUT /{id}/publish` a deprecated one-release delegate) | §6; publish publishes SSE + notifications after commit |
 | | `PlannerEngagementController` (`POST /{id}/bookmark`, vote, subscribe) | writes → primary; bookmark is state-targeted and idempotent |
-| | `PlannerQueryController`, `PublishedPlannerController` | reads → replica; by-id reads go through `ByIdReadGuard` (§5) |
+| | `PlannerQueryController`, `PublishedPlannerController` | reads → replica; each read is decided by its freshness markers (§5) |
 | | `PlannerSseController` (`GET /events`) | subscribes to local Redis fan-out |
 | `/api/sse` | `SseController` (`GET /subscribe`) | as above |
 | `/api/auth` | `AuthController` (`GET /google/callback`) | a **mutating GET** — commits a user row, so it mints `ryw_gtid` (the capture is transaction-driven, not method-driven) |
@@ -388,8 +394,8 @@ expected states, not defects.
 ## 12. If you change one of these, check the others
 
 - Adding `@Transactional(readOnly = true)` to a service method **moves its reads to the replica**.
-  If any caller depends on reading its own recent write, it needs the GTID cookie, `ByIdReadGuard`,
-  or the primary.
+  If any caller depends on reading its own recent write, it needs a `ScopedRead` return that declares
+  its scopes (§5), or mandatory propagation inside a caller that already decides.
 - Adding a new SSE dispatch call site requires publishing, not dispatching — the boundary test will
   fail the build otherwise — and requires deciding `deliversRawPayload` for the event type.
 - Adding a `@Scheduled` method puts it on the shared scheduler. If it can block on a cross-region

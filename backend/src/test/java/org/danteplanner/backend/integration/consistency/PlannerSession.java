@@ -19,6 +19,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.support.UpsertRequests;
+import org.danteplanner.consistency.ListRead;
 
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.SESSIONS;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
@@ -32,6 +33,8 @@ public final class PlannerSession implements OperationPerformer {
 
     private static final String PLANNERS = "/api/planner/md";
     private static final String PUBLISHED = PLANNERS + "/published";
+    private static final String THREADS = "/api/planner";
+    private static final String ACCOUNT = "/api/user/me";
 
     private final String name;
     private final CookieJar jar;
@@ -40,11 +43,13 @@ public final class PlannerSession implements OperationPerformer {
     private final ObjectMapper objectMapper;
     private final HistoryRecorder recorder;
     private final PlannerPool pool;
+    private final String titleToken;
+    private final AccountControl account;
     private final Map<UUID, Long> seenVersions = new HashMap<>();
     private int saves;
 
     public PlannerSession(String name, CookieJar jar, MockMvc writes, MockMvc reads, ObjectMapper objectMapper,
-            HistoryRecorder recorder, PlannerPool pool) {
+            HistoryRecorder recorder, PlannerPool pool, String titleToken, AccountControl account) {
         this.name = name;
         this.jar = jar;
         this.writes = writes;
@@ -52,13 +57,17 @@ public final class PlannerSession implements OperationPerformer {
         this.objectMapper = objectMapper;
         this.recorder = recorder;
         this.pool = pool;
+        this.titleToken = titleToken;
+        this.account = account;
     }
 
     public static List<PlannerSession> forPlan(Plan plan, List<CookieJar> jars, MockMvc seoul, MockMvc oregon,
-            ObjectMapper objectMapper, HistoryRecorder recorder, PlannerPool pool) {
+            ObjectMapper objectMapper, HistoryRecorder recorder, PlannerPool pool, String titleToken,
+            AccountControl account) {
         return IntStream.range(0, SESSIONS.size())
                 .mapToObj(index -> new PlannerSession(SESSIONS.get(index), jars.get(index), oregon,
-                        plan.homes().get(index) == Region.SEOUL ? seoul : oregon, objectMapper, recorder, pool))
+                        plan.homes().get(index) == Region.SEOUL ? seoul : oregon, objectMapper, recorder, pool,
+                        titleToken, account))
                 .toList();
     }
 
@@ -73,6 +82,10 @@ public final class PlannerSession implements OperationPerformer {
             case PlannedOperation.Unpublish unpublish -> unpublish(pool.pick(unpublish.key()));
             case PlannedOperation.PublicRead read -> publicRead(pool.pick(read.key()));
             case PlannedOperation.Delete delete -> deletePlanner(pool.pick(delete.key()));
+            case PlannedOperation.CatalogList catalog -> catalog();
+            case PlannedOperation.ThreadRead thread -> threadRead(pool.pick(thread.key()));
+            case PlannedOperation.Deactivate deactivate -> deactivate();
+            case PlannedOperation.Reactivate reactivate -> recorder.reactivate(name, account::reactivate);
         }
     }
 
@@ -87,7 +100,7 @@ public final class PlannerSession implements OperationPerformer {
         saves++;
         String body = objectMapper.writeValueAsString(UpsertRequests.draft()
                 .id(id.toString())
-                .title(name + "-" + saves)
+                .title(name + "-" + saves + " " + titleToken)
                 .syncVersion(seenVersions.get(id))
                 .build());
         Optional<Response> applied = recorder.save(name, id.toString(), () -> unsafe(put(PLANNERS + "/" + id)
@@ -105,10 +118,22 @@ public final class PlannerSession implements OperationPerformer {
     }
 
     private void list() {
-        recorder.list(name, () -> safe(get(PLANNERS)))
+        recorder.list(name, ListRead.Listing.OWNER, () -> safe(get(PLANNERS)))
                 .filter(PlannerSession::ok)
                 .ifPresent(response -> response.plannerVersions()
                         .forEach((id, version) -> see(UUID.fromString(id), version)));
+    }
+
+    private void catalog() {
+        recorder.list(name, ListRead.Listing.CATALOG, () -> safe(get(PUBLISHED).param("q", titleToken)));
+    }
+
+    private void threadRead(UUID id) {
+        recorder.threadRead(name, id.toString(), () -> safe(get(THREADS + "/" + id + "/comments")));
+    }
+
+    private void deactivate() {
+        recorder.deactivate(name, () -> unsafe(delete(ACCOUNT)));
     }
 
     private void publish(UUID id) {

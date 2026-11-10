@@ -27,9 +27,12 @@ class EdgeRoutingTest {
     private static final String SESSION_COOKIE = "consistency-session";
     private static final String PLANNERS = "/api/planner/md";
     private static final String VERSION = "{\"syncVersion\":1}";
-    private static final String EMPTY_PAGE = "{\"content\":[]}";
-    private static final Set<String> WRITES = Set.of("save", "delete", "publish", "unpublish");
-    private static final Set<String> READS = Set.of("read", "list", "public-read");
+    private static final String ACCOUNT = "/api/user/me";
+    private static final String EMPTY_PAGE =
+            "{\"content\":[],\"page\":{\"size\":20,\"number\":0,\"totalElements\":0,\"totalPages\":0}}";
+    private static final Set<String> WRITES = Set.of("save", "delete", "publish", "unpublish", "deactivate");
+    private static final Set<String> READS = Set.of("read", "list", "public-read", "catalog", "thread-read");
+    private static final Set<String> PAGES = Set.of("list", "catalog");
 
     @Test
     void plan_WhenSeed42RunsAgainstFakeContexts_SendsEveryWriteToOregonAndEveryReadToTheHomeContext()
@@ -43,8 +46,8 @@ class EdgeRoutingTest {
 
         try (HistoryRecorder recorder = new HistoryRecorder(Writer.nullWriter(), System::nanoTime)) {
             PhaseRunner.runPlan(plan, PlannerSession.forPlan(plan, jars, fakeContext(Region.SEOUL, exchanges),
-                    fakeContext(Region.OREGON, exchanges), new ObjectMapper(), recorder, pool), replication,
-                    replication);
+                    fakeContext(Region.OREGON, exchanges), new ObjectMapper(), recorder, pool, "000000000042", () -> {
+                    }), replication, replication);
         }
 
         assertThat(plan.homes()).contains(Region.SEOUL, Region.OREGON);
@@ -60,19 +63,26 @@ class EdgeRoutingTest {
                 .addFilters((request, response, chain) -> {
                     HttpServletRequest http = (HttpServletRequest) request;
                     HttpServletResponse answer = (HttpServletResponse) response;
-                    String kind = kind(http.getMethod(), http.getRequestURI().substring(PLANNERS.length()));
+                    String kind = kind(http.getMethod(), http.getRequestURI());
                     exchanges.add(new Exchange(session(http), region, kind));
                     if (kind.equals("delete")) {
                         answer.setStatus(HttpStatus.NO_CONTENT.value());
                         return;
                     }
                     answer.setStatus(HttpStatus.OK.value());
-                    answer.getWriter().write(kind.equals("list") ? EMPTY_PAGE : VERSION);
+                    answer.getWriter().write(PAGES.contains(kind) ? EMPTY_PAGE : VERSION);
                 })
                 .build();
     }
 
-    private static String kind(String method, String path) {
+    private static String kind(String method, String uri) {
+        if (uri.equals(ACCOUNT)) {
+            return "deactivate";
+        }
+        if (uri.endsWith("/comments")) {
+            return "thread-read";
+        }
+        String path = uri.substring(PLANNERS.length());
         if (method.equals(HttpMethod.PUT.name())) {
             return "save";
         }
@@ -84,6 +94,9 @@ class EdgeRoutingTest {
         }
         if (path.isEmpty()) {
             return "list";
+        }
+        if (path.equals("/published")) {
+            return "catalog";
         }
         return path.startsWith("/published/") ? "public-read" : "read";
     }

@@ -153,7 +153,7 @@ asset pipeline.
   re-check: `rg -qU '@Modifying\(clearAutomatically = true\)\n\s+@Query\("UPDATE PlannerComment c SET c.upvoteCount = c.upvoteCount \+ 1' backend/src/main/java/org/danteplanner/backend/comment/repository/PlannerCommentRepository.java && .claude/skills/debt-ledger/bin/debt absent backend/src/test/java/org/danteplanner/backend/controller/CommentControllerIT.java -i 'upvote_When(Second|Duplicate|Already|Twice|Repeat)'`
 - `DegradationIT.evictPooledPrimaryConnections` still cannot evict the primary pool: the
   routing target for PRIMARY is the `GtidCapturingDataSource` wrapper, not a
-  `HikariDataSource`, so the helper's instanceof walk skips it. Replica and bulkhead are
+  `HikariDataSource`, so the helper's instanceof walk skips it. The replica is
   covered since the lazy-proxy descent fix; the primary needs an unwrap step.
   re-check: `rg -qF 'new GtidCapturingDataSource(primaryPool' backend/src/main/java/org/danteplanner/backend/shared/config/RoutingDataSourceConfig.java && .claude/skills/debt-ledger/bin/debt absent backend/src/test/java/org/danteplanner/backend/integration/DegradationIT.java 'GtidCapturingDataSource|unwrap\('`
 - No circuit breaker fronts the primary datasource's writes or any Redis role but the freshness
@@ -284,7 +284,7 @@ asset pipeline.
   nothing under `deploy/grafana/` panels or alerts on either — a subscriber-drop burst or a
   drift storm is invisible in production. 2026-09-22: neither passes the remote-write
   keep-list in `deploy/base/prometheus.yaml:69` either, nor do `sse.publish.unserializable`,
-  `datasource.primary.undeclared`, `tombstone.check_skipped`; five of the ten custom
+  `datasource.primary.undeclared`; these custom
   counters never reach Grafana Cloud, so a panel alone would not fix it. `sse.publish.unserializable`,
   now emitted by `SsePublisher`, joins them. Closes when all three have a dashboard panel and an alert rule.
   re-check: `rg -q 'DROPPED_COUNTER = "sse.publish.dropped"' backend/src/main/java/org/danteplanner/backend/shared/sse/SsePublisher.java && .claude/skills/debt-ledger/bin/debt absent deploy/grafana -i 'sse_publish|planner_reconciler_drift' && .claude/skills/debt-ledger/bin/debt absent deploy/base/prometheus.yaml -i 'sse_publish|planner_reconciler_drift'`
@@ -679,12 +679,12 @@ valid band. The validation branch adds a fourth backend copy (`EncodedGiftId`) b
 `GameDataRegistry.GIFT_ENHANCEMENT_PATTERN`, which `PlannerIdMigrations` also reads.
   re-check: `rg -q 'EncodedGiftIdSchema.safeParse\(id\)' frontend/src/pages/planner/lib/plannerContentExtractors.ts && rg -q 'return enhanced \? id % 10000 : id;' backend/src/main/java/org/danteplanner/backend/planner/searchindex/PlannerContentEntityExtractor.java`
 - 2026-08-17 — `PlannerCoreInfo.absent()` yields a null `createdAt`
-(`PublishedPlannerQueryService.java:54` uses it whenever the batch core load misses a row)
+(`PublishedPlannerQueryService` uses it whenever the batch core load misses a row)
 and the global `NON_NULL` Jackson config omits the key, but `PlannerListSchemas.ts:19`
 declares `createdAt` required, so one catalog row without a core row rejects the entire
 paginated community page rather than one card. The sibling fields on the same DTO are
 correctly `.nullish()` (`:17-18`) and the components already tolerate an absent value.
-  re-check: `rg -q '^  createdAt: z.string\(\),$' frontend/src/pages/planner/schemas/PlannerListSchemas.ts && rg -q 'return new PlannerCoreInfo\(null, null, null, null\);' backend/src/main/java/org/danteplanner/backend/planner/dto/PlannerCoreInfo.java`
+  re-check: `rg -q '^  createdAt: z.string\(\),$' frontend/src/pages/planner/schemas/PlannerListSchemas.ts && rg -q 'return new PlannerCoreInfo\(null, null, null, null, null\);' backend/src/main/java/org/danteplanner/backend/planner/dto/PlannerCoreInfo.java`
 - 2026-08-17 — `AbEventSchemas.ts:5` types `relatedEgoGifts` as `z.array(z.string())`
 rather than `EGOGiftIdSchema`, and 13 ids in `static/data/abEventSpecList.json`
 (`991001`–`993004`, six digits) violate `GIFT_ID_PATTERN`. `EGOGiftGrid.tsx:32-33` renders
@@ -908,9 +908,6 @@ guards the parse but likewise skips the schema gate.
   the comment is already deleted, so a repeated delete leaves a second DELETE_COMMENT record;
   `deleteComment` by id does not. Worth fixing when the moderation audit trail is read as a count.
   re-check: `rg -qU 'deleteCommentByPublicId\([^{]*\{[^}]*auditService\.record[^}]*if \(comment\.deleted\(\)\)' backend/src/main/java/org/danteplanner/backend/moderation/service/CommentModerationService.java`
-- `CommentReportService.hasReported(Long, Long)` has no main-source caller, only its test. Worth
-  deleting the next time comment reporting changes.
-  re-check: `rg -q 'public boolean hasReported\(Long userId, Long commentId\)' backend/src/main/java/org/danteplanner/backend/moderation/service/CommentReportService.java && rg -q 'reportService\.hasReported\(userId, plannerId\)' backend/src/main/java/org/danteplanner/backend/planner/service/PublishedPlannerQueryService.java && rg -o '\.hasReported\([^,)]+,' backend/src/main/java | awk 'END{exit NR!=1}'`
 - `GtidPinExitTest.readGet_WhenReplicaRejectsGtidAsMalformed_ClearsUnpinnedAndWarnsOnceWithoutStack`
   failed once at full suite size and passed on retry and on a full rerun (2026-10-04, Lane D S4
   gate). It counts warning log events, so it likely depends on order or logging state. Worth
@@ -1133,20 +1130,12 @@ guards the parse but likewise skips the schema gate.
   chatter and ADR 123 moves writes beside the primary, where each round trip costs about 1 ms.
   Worth doing if write forwarding is rolled back, or when ADR 122's command-count test is built.
   re-check: `rg -q 'target.isReadOnly\(\)' backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidCapturingDataSource.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/resources 'useLocalSessionState'`
-- 2026-09-23 — Two read paths take Seoul's primary across the WAN, and together with token
-  rotation (about 5,800 a week) they account for the pool's ~80,000 weekly acquisitions against
-  ~200 user writes. The view flush runs one primary transaction per detail read (6–8 round
-  trips; 6 even for a repeat view that inserts nothing), up to 46,928 a week. `/api/sse/subscribe`
-  loads notification settings through `UserSettingsService.getOrCreateEntity`, a read-write
-  `@Transactional`, so every per-pod cache miss is a primary transaction (11 round trips when it
-  creates the row), up to 27,335 a week. Neither is on a user's critical path, but both hold
-  primary connections from the smaller WAN pool and add replication traffic. The settings load
-  now goes through `UserSettingsService.getSettings` (read-only, creates no row), so that half is
-  closed; whether a Seoul replica read right after an invalidation can cache a stale row for the
-  five-minute TTL is unverified. The view flush leaves Seoul once ADR 116's `POST .../viewcount` is
-  forwarded under ADR 123 (`write_forwarding = all`). Worth re-measuring the pool's acquisitions
-  after that flip.
-  re-check: `rg -qF '@PostMapping("/published/{id}/viewcount")' backend/src/main/java/org/danteplanner/backend/planner/controller/PublishedPlannerController.java && rg -q 'public void flush\(\)' backend/src/main/java/org/danteplanner/backend/planner/service/PlannerViewRecorder.java`
+- 2026-09-23 — Whether a Seoul replica read right after a settings invalidation can cache a stale
+  row for the five-minute TTL is unverified: the SSE subscribe path loads notification settings
+  through `UserSettingsService.getSettings`, which is read-only and may land on the replica. The
+  detail GET's view flush, the other Seoul primary path, is gone. Worth re-measuring the Seoul
+  pool's acquisitions after the marker-reading release is live in both regions.
+  re-check: `rg -q 'getSettings\(' backend/src/main/java/org/danteplanner/backend/user/service/UserSettingsService.java`
 - **The gate assumes the probe and the read reach the same replica.** `WAIT_FOR_EXECUTED_
   GTID_SET` runs on one pooled connection and the request's read uses another; sound with
   one replica behind the endpoint, void the day the endpoint resolves to more than one host.
@@ -1174,8 +1163,8 @@ guards the parse but likewise skips the schema gate.
   re-check: `rg -q 'String claimedIp = firstHop\(forwarded\);' backend/src/main/java/org/danteplanner/backend/shared/util/ClientIpResolver.java && rg -q 'ReturnsTheLeftmost' backend/src/test/java/org/danteplanner/backend/shared/util/ClientIpResolverTest.java`
 - **Bucket configuration is validated per request, not at bind time.** `RateLimitProperties`
   is `@Validated` but constrains only `configVersion`, and its `BucketConfig` fields carry none
-  (six of nine `@ConfigurationProperties` classes are `@Validated`; `HikariTuningProperties`,
-  `SecurityProperties` and `BulkheadDataSourceProperties` are not), and
+  (six of eight `@ConfigurationProperties` classes are `@Validated`; `HikariTuningProperties`
+  and `SecurityProperties` are not), and
   `buildConfiguration` runs per request, so a zero duration fails on first use. The fix is the
   ArchUnit rule "every `@ConfigurationProperties` class is `@Validated`" and the sibling edits
   it lists; the rule, not the class, is the unit of work.
@@ -1247,9 +1236,11 @@ guards the parse but likewise skips the schema gate.
   consumer that does not parse it as a URL.
   re-check: `rg -qF 'href="%VITE_API_BASE_URL%"' frontend/index.html && .claude/skills/debt-ledger/bin/debt absent frontend/src/lib/env.ts 'trim'`
 - Unit ADR 116: 2026-09-23 — Intent preload (`defaultPreload: 'intent'`) is off because the published-detail
-  loader records a view. It also preloaded route chunks on hover, which hides part of a chunk
-  wave per navigation. Worth doing once view recording leaves the loader: restore it.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent frontend/src/lib/router.tsx 'defaultPreload' && rg -qF 'getPublishedPlanner(id, userId, viewerIdentity, userAgent)' backend/src/main/java/org/danteplanner/backend/planner/controller/PublishedPlannerController.java`
+  GET used to record a view, so a hover counted as one. The GET no longer records views; the page
+  posts the view once per mount. Preload also loaded route chunks on hover, which hides part of a
+  chunk wave per navigation. Worth doing once the frontend release that posts the view is live:
+  restore it.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent frontend/src/lib/router.tsx 'defaultPreload'`
 - Unit ADR 123: 2026-09-24 — `POST /api/planner/md/batch` and its request-body path stay beside the GET for
   clients that have not switched, including tabs opened before the switching release, which keep
   their old bundle until reloaded. Worth doing once the frontend release using the GET is live and
@@ -1272,7 +1263,7 @@ guards the parse but likewise skips the schema gate.
   needs a token with Cache Rules edit on the zone; the staging token gets 403 on zone rulesets.
   Worth doing once the cookieless content endpoint exists, against that endpoint rather than the
   synthetic origin, before the Cache Rule is relied on in production.
-  re-check: `rg -qF 'getPublishedPlanner(id, userId, viewerIdentity, userAgent)' backend/src/main/java/org/danteplanner/backend/planner/controller/PublishedPlannerController.java && .claude/skills/debt-ledger/bin/debt absent terraform/cloudflare 'http_request_cache_settings'`
+  re-check: `.claude/skills/debt-ledger/bin/debt absent terraform/cloudflare 'http_request_cache_settings'`
 - 2026-09-27 — Until `c54c159e`, a first run of `deploy/grafana/import-alert-rules.sh` created its
   folder with the literal title `${GRAFANA_ALERT_FOLDER:-danteplanner-alerts}`, so stray folders
   holding rules may exist (unverified). Worth doing before the next re-import: list the alert
@@ -1309,21 +1300,19 @@ guards the parse but likewise skips the schema gate.
   or a sandbox that carries `../static`) when the PIT ratchet has shown its value on the
   backend; until then under-assertion on the frontend is unmeasured.
   re-check: `test -z "$(git ls-files | rg -i stryker)" && rg -q 'projects: \[' frontend/vite.config.ts`
-- Three full-run-only failures never reproduced across isolated, `taskset -c 0`, neighbour-combo and
+- Two full-run-only failures never reproduced across isolated, `taskset -c 0`, neighbour-combo and
   eight full runs (2026-09-29..10-04): `SseFanoutIT` (a JDBC SSL communications error: MySQL
   connection SSL handshake failure during setup, not the fan-out under test; SSL stays on because
-  production uses `VERIFY_CA`), `BulkheadIT` INV7 (a timing assertion: `:158` compares two
-  wall-clock durations, which load can invert; a deterministic signal such as the bulkhead pool
-  reaching its active-connection cap would replace it), and `EffectPlacementIT` "A committed write
+  production uses `VERIFY_CA`) and `EffectPlacementIT` "A committed write
   leaves an event, and every effect follows from it" (`:151`, no SSE push within 10 s, once in a
   136-class run, mid lane-B edit; the SSE publisher mock saw no interaction; it passed 3/3 alone on
   both the visibility branch and dev). They fail under the full `check` run and pass when run
-  alone. Worth diagnosing if `SseFanoutIT` or `BulkheadIT` fails twice in a phase-close run; until
+  alone. Worth diagnosing if `SseFanoutIT` fails twice in a phase-close run; until
   then a phase close re-runs them alone before judging red. Worth doing when the test-retry report
   names one as flaky or `EffectPlacementIT` fails again in a full run: keep that run's XML and the
   classes that ran before it in the fork, check whether the outbox eager executor was saturated,
   then build the loop from them.
-  re-check: `d=backend/src/test/java/org/danteplanner/backend/integration; test -f $d/SseFanoutIT.java && test -f $d/EffectPlacementIT.java && rg -q 'isGreaterThan\(singleReCheckMs\)' $d/BulkheadIT.java`
+  re-check: `d=backend/src/test/java/org/danteplanner/backend/integration; test -f $d/SseFanoutIT.java && test -f $d/EffectPlacementIT.java`
 - The adr116-131 brief reserves migration V064 for J6 "drop planner_views", but V064 is taken by
   the floor-count parameter on `rebuild_planner_filters` (V062 is burned per push-order). J6 must
   renumber to the next free version when it starts.
@@ -1484,24 +1473,10 @@ guards the parse but likewise skips the schema gate.
   (read from the schema, not EXPLAINed). Worth doing when the table grows past a size where the purge
   holds locks long enough to stall notification inserts: EXPLAIN it, then add an index or batch it.
   re-check: `rg -q 'n.deletedAt < :cutoffDate' backend/src/main/java/org/danteplanner/backend/notification/repository/NotificationRepository.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/resources/db/migration -i 'notifications ?\(deleted_at'`
-- `PublishedPlannerQueryService.incrementViewCount` has no production caller since views moved to the
-  buffered `PlannerViewRecorder` path; only two `PublishedPlannerQueryServiceTest` tests call it.
-  Delete the method and those tests together when the planner view or query service is next touched.
-  re-check: `rg -q 'public void incrementViewCount\(' backend/src/main/java/org/danteplanner/backend/planner/service/PublishedPlannerQueryService.java`
 - `SentinelUserVerifier.java:15` says verification is skipped in tests because "TestDataInitializer
   handles it"; that class never loaded and the test overhaul deleted it. Fix the comment when the
   sentinel-user code is next touched.
   re-check: `rg -q 'TestDataInitializer' backend/src/main/java/org/danteplanner/backend/user/config/SentinelUserVerifier.java`
-- `PlannerViewLockOrderIT.flush_WhenConcurrentFlushesShareTwoPlanners_AdvancesEveryCounter` fails in a
-  full backend run at a rate of a few percent at most (CannotAcquireLockException on the planner_stats
-  upsert, passing on retry); 26 full runs and 2,400 repetitions on 2026-10-07 did not reproduce it.
-  Worth doing when it next fails: read that run's XML cause chain (the `backend-test-reports`
-  artifact in CI). SQLState 40001 means a deadlock, error 1205 a lock-wait timeout; both failing runs
-  so far took 30-40 s longer than their neighbours, which points at the timeout. Open hypotheses: a
-  third transaction holding a gap lock on the nearly empty `planner_stats`; a scan in byte order
-  against the pods' signed-UUID TreeMap order (the two orders disagree for about half of pairs); a
-  shared context's 500 ms `PlannerViewRecorder` flush as that third party.
-  re-check: `rg -q 'void flush_WhenConcurrentFlushesShareTwoPlanners_AdvancesEveryCounter' backend/src/test/java/org/danteplanner/backend/integration/PlannerViewLockOrderIT.java`
 - The EGO detail page can livelock in tests: a tier or tab click inside `act()` while the skill and
   passive description boundaries are still suspended on the keyword-formatter static-data waterfall
   makes React re-commit with no DOM change and starves the pending fetch (diagnosed 2026-10-08 with a
@@ -1659,3 +1634,43 @@ guards the parse but likewise skips the schema gate.
   touch them and no stop-the-world migration is planned; the runbook entry above then loses its
   "omits the workflow" clause.
   re-check: `test -f .github/workflows/window-schema-decomposition.yml`
+- The `planner_views` table has no writer left: the detail GET stopped recording views, and only
+  `PlannerAccountPurgeService` still deletes its rows. Dropping it in the same release would break
+  old pods, which keep inserting during a rolling deploy. Worth doing once the marker-reading
+  release is live in both regions: a migration drops the table, and the purge's delete and
+  `PlannerViewRepository` go with it.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent backend/src/main/resources/db/migration -i 'drop table[^;]*planner_views'`
+- Access tokens carry no `jti` (`JwtTokenService.generateAccessToken` sets only type and role),
+  so two tokens for the same user and role minted in the same second are byte-identical. Account
+  deletion blacklists the request's access token, so a re-login in that same second gets the
+  blacklisted token and a 401. `ConsistencyRunIT.reactivate` works around it with a `Hang.until`
+  that mints until the token differs. Worth doing the next time token issuance changes, or when a
+  user reports a 401 right after re-login: add a random `jti` to access tokens, then delete the
+  harness wait.
+  re-check: `rg -q 'Hang.until\(\(\) -> !minted' backend/src/test/java/org/danteplanner/backend/integration/ConsistencyRunIT.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/auth/token/JwtTokenService.java -U 'TYPE_ACCESS\);\n\s+claims.put\(CLAIM_JTI'`
+- Catalog search (`GET /api/planner/md/published?q=`) can miss a published planner whose title is
+  being changed. InnoDB's full-text state is not versioned: a title change gives the row a new
+  FTS_DOC_ID and marks the old one deleted at once, while the new row version is not yet visible
+  to other sessions, so MATCH drops the old id and cannot see the new row. A spike on mysql 8.4.11
+  missed the row in 3863-4816 of 20000 searches while its title changed (0 for other rows' writes
+  or same-title writes), and in 19960 of 20000 inside a REPEATABLE READ transaction, which
+  `searchPlanners` is. So the consistency checker judges catalog lists only for omission. Worth
+  doing when a user reports a planner missing from search, or before search matters for
+  correctness: pick a search that does not depend on in-place title updates under MATCH, then add
+  the catalog "contains" rule.
+  re-check: `rg -qF 'MATCH (?1) AGAINST (?2 IN BOOLEAN MODE)' backend/src/main/java/org/danteplanner/backend/shared/config/MySqlFunctionContributor.java`
+- The consistency run cannot catch a comment-thread read that drops its `Entity(planner)` scope:
+  the harness has one author, and in the stopped-replica phases that author's reactivation leaves
+  an `Author` marker the replica never applies, so the thread's remaining `Author` scope sends
+  every such read to the primary. A planted patch for it went uncaught in 20 seeds and was
+  removed; `FreshnessReadIT` covers the case deterministically instead. Worth doing when the
+  harness gains a second author for another reason: give that author planners that are published,
+  unpublished and thread-read in the stopped phases, then restore the planted patch.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent backend/src/test/resources/consistency/planted --files -g 'thread-scope-dropped.patch'`
+- The local two-region rig shares the developer's database volume: `local-multiregion-up.sh` fixes
+  the compose project to `limbusplanner`, and `docker-compose.local.yml` mounts `mysql-data`, so
+  bringing the rig up migrates the local dev database and the e2e suites leave their users and
+  planners in it. Worth doing the next time the rig script changes, or when local dev data starts
+  to matter: give the rig its own project name (and with it its own volume) and container names
+  passed to the suites through `E2E_REPLICA_CONTAINER` and its siblings.
+  re-check: `rg -q '^PROJECT=limbusplanner$' scripts/ops/local-multiregion-up.sh && rg -q 'mysql-data:/var/lib/mysql' docker-compose.local.yml`

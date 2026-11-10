@@ -24,7 +24,7 @@ rds_vpc_id = "vpc-REPLACE_WITH_RDS_VPC_ID"
 # --- Count-gated: unsetting these DESTROYS what they created -----------------
 
 # Peer-region fleet CIDR admitted to the auth Redis NodePort over VPC peering, so the Seoul replica
-# can REPLICAOF and Seoul pods can write blacklist/rotation/tombstone state. Empty (the default)
+# can REPLICAOF and Seoul pods can write blacklist/rotation/freshness marker state. Empty (the default)
 # creates NO rule and keeps the auth Redis region-private. This store holds revocation state: set
 # the one peer fleet CIDR, never a broad range.
 #

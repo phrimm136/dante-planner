@@ -13,7 +13,6 @@ import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
-import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.util.ClientIpResolver;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
@@ -44,7 +43,6 @@ public class PublishedPlannerController {
 
     private final PublishedPlannerQueryService publishedPlannerQueryService;
     private final SecurityProperties securityProperties;
-    private final ByIdReadGuard byIdReadGuard;
     private final DeviceIdResolver deviceIdResolver;
 
     @RateLimited(RateLimitPolicy.PUBLIC_READ)
@@ -86,28 +84,15 @@ public class PublishedPlannerController {
     @RateLimited(RateLimitPolicy.PUBLIC_READ)
     @GetMapping("/published/{id}")
     public ResponseEntity<PublishedPlannerDetailResponse> getPublishedPlanner(
-            HttpServletRequest request,
-            HttpServletResponse servletResponse,
             @PathVariable UUID id,
             @AuthenticationPrincipal Long userId) {
-
-        // Cloudflare appends to X-Forwarded-For rather than replacing it, so its leftmost entry is
-        // caller-controlled.
-        String viewerIdentity = ClientIpResolver.resolveClientIdentifier(
-                request, securityProperties, () -> deviceIdResolver.resolve(request, servletResponse));
-        String userAgent = request.getHeader("User-Agent");
-        PublishedPlannerDetailResponse response = byIdReadGuard.readPublicView(ByIdReadGuard.PLANNER_ENTITY_TYPE,
-                ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, id,
-                () -> publishedPlannerQueryService.getPublishedPlanner(id, userId, viewerIdentity, userAgent));
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(publishedPlannerQueryService.getPublishedPlanner(id, userId).value());
     }
 
     @RateLimited(RateLimitPolicy.PLANNER_STATS)
     @GetMapping("/published/{id}/stats")
     public ResponseEntity<PlannerStatsResponse> getPublishedPlannerStats(@PathVariable UUID id) {
-        PlannerStatsResponse response = byIdReadGuard.readPublicView(ByIdReadGuard.PLANNER_ENTITY_TYPE,
-                ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, id,
-                () -> publishedPlannerQueryService.getPublishedPlannerStats(id));
+        PlannerStatsResponse response = publishedPlannerQueryService.getPublishedPlannerStats(id).value();
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(response);
     }
 
@@ -116,9 +101,7 @@ public class PublishedPlannerController {
     public ResponseEntity<PlannerFlagsResponse> getPublishedPlannerFlags(
             @PathVariable UUID id,
             @AuthenticationPrincipal Long userId) {
-        PlannerFlagsResponse response = byIdReadGuard.readPublicView(ByIdReadGuard.PLANNER_ENTITY_TYPE,
-                ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, id,
-                () -> publishedPlannerQueryService.getPublishedPlannerFlags(id, userId));
+        PlannerFlagsResponse response = publishedPlannerQueryService.getPublishedPlannerFlags(id, userId).value();
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(response);
     }
 
@@ -130,9 +113,7 @@ public class PublishedPlannerController {
             HttpServletResponse servletResponse,
             @PathVariable UUID id,
             @AuthenticationPrincipal Long userId) {
-        UUID plannerId = byIdReadGuard.readPublicView(ByIdReadGuard.PLANNER_ENTITY_TYPE,
-                ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, id,
-                () -> publishedPlannerQueryService.requirePublished(id));
+        UUID plannerId = publishedPlannerQueryService.requirePublished(id).value();
         String viewerIdentity = ClientIpResolver.resolveClientIdentifier(
                 request, securityProperties, () -> deviceIdResolver.resolve(request, servletResponse));
         publishedPlannerQueryService.recordView(
@@ -155,7 +136,7 @@ public class PublishedPlannerController {
         CatalogQuery catalogQuery = new CatalogQuery(recommendedOnly, category, q,
                 parseCsv(keyword), entityFilters);
         return ResponseEntity.ok(
-                publishedPlannerQueryService.searchPlanners(catalogQuery, pageable, userId));
+                publishedPlannerQueryService.searchPlanners(catalogQuery, pageable, userId).value());
     }
 
     private Pageable createPageable(int page, int size) {

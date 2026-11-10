@@ -1,0 +1,13 @@
+diff --git a/backend/src/main/java/org/danteplanner/backend/shared/freshness/FreshnessReadAspect.java b/backend/src/main/java/org/danteplanner/backend/shared/freshness/FreshnessReadAspect.java
+index 3624b333..38cdbca0 100644
+--- a/backend/src/main/java/org/danteplanner/backend/shared/freshness/FreshnessReadAspect.java
++++ b/backend/src/main/java/org/danteplanner/backend/shared/freshness/FreshnessReadAspect.java
+@@ -13,7 +13,7 @@ import org.aspectj.lang.annotation.Aspect;
+ import org.danteplanner.backend.shared.config.ReadSourceSelector;
+ 
+ @Aspect
+-@Order(Ordered.LOWEST_PRECEDENCE - 1)
++@Order(Ordered.LOWEST_PRECEDENCE)
+ public class FreshnessReadAspect {
+ 
+     private final FreshnessReadGuard guard;

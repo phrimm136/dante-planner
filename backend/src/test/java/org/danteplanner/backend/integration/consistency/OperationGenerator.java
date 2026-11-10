@@ -25,7 +25,10 @@ public final class OperationGenerator {
         LIST,
         PUBLISH,
         UNPUBLISH,
-        CREATE
+        CREATE,
+        PUBLIC_READ,
+        CATALOG,
+        THREAD_READ
     }
 
     private static final List<Kind> AUTHOR_KINDS =
@@ -33,6 +36,8 @@ public final class OperationGenerator {
     private static final List<Kind> VIEWER_KINDS = List.of(Kind.READ, Kind.LIST);
     private static final List<Kind> CREATOR_KINDS =
             List.of(Kind.SAVE, Kind.READ, Kind.LIST, Kind.PUBLISH, Kind.UNPUBLISH, Kind.CREATE);
+    private static final List<Kind> ANONYMOUS_KINDS =
+            List.of(Kind.PUBLIC_READ, Kind.PUBLIC_READ, Kind.CATALOG, Kind.THREAD_READ);
     private static final int PHASES = 3;
 
     private OperationGenerator() {
@@ -48,10 +53,15 @@ public final class OperationGenerator {
         List<List<PlannedOperation>> phaseB = sessions(random, phaseBudget, phasePublicReads);
         List<List<PlannedOperation>> deleteRound = emptySessions();
         deleteRound.get(CREATOR).add(new PlannedOperation.Delete(draw(random)));
+        List<List<PlannedOperation>> deactivateRound = emptySessions();
+        deactivateRound.get(CREATOR).add(new PlannedOperation.Deactivate());
+        List<List<PlannedOperation>> reactivateRound = emptySessions();
+        reactivateRound.get(CREATOR).add(new PlannedOperation.Reactivate());
         List<List<PlannedOperation>> phaseC = sessions(random, budget - (PHASES - 1) * phaseBudget,
                 PUBLIC_READ_BUDGET - (PHASES - 1) * phasePublicReads);
-        return new Plan(homes, new Phase(List.of(new Round(phaseA)), latency),
-                new Phase(List.of(new Round(deleteRound), new Round(phaseB)), new Stopped()),
+        return new Plan(homes, new Phase(List.of(new Round(phaseA), new Round(deactivateRound)), latency),
+                new Phase(List.of(new Round(reactivateRound), new Round(deleteRound), new Round(phaseB)),
+                        new Stopped()),
                 new Phase(List.of(new Round(phaseC)), new CutOregon()));
     }
 
@@ -73,7 +83,8 @@ public final class OperationGenerator {
             bySession.get(session).add(operation(random, kinds.get(random.nextInt(kinds.size()))));
         }
         for (int read = 0; read < publicReads; read++) {
-            bySession.get(ANONYMOUS).add(new PlannedOperation.PublicRead(draw(random)));
+            bySession.get(ANONYMOUS).add(operation(random,
+                    ANONYMOUS_KINDS.get(random.nextInt(ANONYMOUS_KINDS.size()))));
         }
         return bySession;
     }
@@ -101,6 +112,9 @@ public final class OperationGenerator {
             case PUBLISH -> new PlannedOperation.Publish(draw(random));
             case UNPUBLISH -> new PlannedOperation.Unpublish(draw(random));
             case CREATE -> new PlannedOperation.Create();
+            case PUBLIC_READ -> new PlannedOperation.PublicRead(draw(random));
+            case CATALOG -> new PlannedOperation.CatalogList();
+            case THREAD_READ -> new PlannedOperation.ThreadRead(draw(random));
         };
     }
 

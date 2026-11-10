@@ -6,8 +6,10 @@ import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.user.api.Users;
+import org.danteplanner.backend.shared.freshness.FreshnessPending;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -27,16 +29,18 @@ public class ModerationQueryService {
     private final Users users;
     private final ModerationActionRepository moderationActionRepository;
 
+    @FreshnessPending(reason = "moderation scope arrives in M2")
     @Transactional(readOnly = true)
     public List<UserSummary> getAllUsers() {
         return users.listActiveAccounts();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
     public List<ModerationAction> getModerationActions() {
         return moderationActionRepository.findRecent(PageRequest.ofSize(RECENT_ACTION_LIMIT));
     }
 
+    @FreshnessPending(reason = "moderation scope arrives in M2")
     @Transactional(readOnly = true)
     public List<ModerationActionResponse> getModerationActionsWithActors() {
         List<ModerationAction> actions = getModerationActions();
@@ -59,6 +63,7 @@ public class ModerationQueryService {
                 .toList();
     }
 
+    @FreshnessPending(reason = "moderation scope arrives in M2")
     @Transactional(readOnly = true)
     public List<UserSummary> getTimedOutUsers() {
         return users.listTimedOutAccounts();

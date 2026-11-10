@@ -25,6 +25,7 @@ import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.consistency.Applied;
 import org.danteplanner.consistency.Changed;
 import org.danteplanner.consistency.ConsistencyChecker;
+import org.danteplanner.consistency.Deactivate;
 import org.danteplanner.consistency.Delete;
 import org.danteplanner.consistency.Deleted;
 import org.danteplanner.consistency.Found;
@@ -33,11 +34,14 @@ import org.danteplanner.consistency.ListRead;
 import org.danteplanner.consistency.NotFound;
 import org.danteplanner.consistency.PublicRead;
 import org.danteplanner.consistency.Publish;
+import org.danteplanner.consistency.Reactivate;
 import org.danteplanner.consistency.Read;
 import org.danteplanner.consistency.ReadFailed;
 import org.danteplanner.consistency.Rejected;
 import org.danteplanner.consistency.Save;
+import org.danteplanner.consistency.Shown;
 import org.danteplanner.consistency.Shrinker;
+import org.danteplanner.consistency.ThreadRead;
 import org.danteplanner.consistency.Unknown;
 import org.danteplanner.consistency.Unpublish;
 import org.danteplanner.consistency.Verdict;
@@ -111,14 +115,23 @@ class HistoryWriterTest {
                 new Read("s1", K1, 17, 18, new ReadFailed(429)),
                 new Read("s1", K1, 19, 20, new ReadFailed(503)),
                 new Read("s1", K1, 21, 22, new ReadFailed(0)),
-                new ListRead("s1", 23, 24, List.of(K1, K2)),
+                new ListRead("s1", ListRead.Listing.OWNER, 23, 24, 0, 20, 2, List.of(K1, K2)),
+                new ListRead("anon", ListRead.Listing.CATALOG, 23, 24, 1, 5, 6, List.of(K1)),
                 new Publish("s1", K1, 25, 26, new Changed()),
                 new Publish("s1", K1, 27, 28, new Rejected(503)),
                 new Unpublish("s1", K1, 29, 30, new Rejected(400)),
                 new Unpublish("s1", K1, 31, 32, new Unknown()),
                 new PublicRead("anon", K1, 33, 34, new Found(1)),
                 new PublicRead("anon", K1, 35, 36, new ReadFailed(503)),
-                new PublicRead("anon", K1, 37, 38, new ReadFailed(0))));
+                new PublicRead("anon", K1, 37, 38, new ReadFailed(0)),
+                new ThreadRead("anon", K1, 39, 40, new Shown()),
+                new ThreadRead("anon", K1, 41, 42, new NotFound()),
+                new ThreadRead("anon", K1, 43, 44, new ReadFailed(503)),
+                new ThreadRead("anon", K1, 45, 46, new ReadFailed(0)),
+                new Deactivate("s1", 47, 48, new Changed()),
+                new Deactivate("s1", 49, 50, new Rejected(401)),
+                new Reactivate("s1", 51, 52, new Changed()),
+                new Reactivate("s1", 53, 54, new Unknown())));
         Path written = directory.resolve("seed-1.min.jsonl");
 
         HistoryWriter.write(original, written);
@@ -133,7 +146,8 @@ class HistoryWriterTest {
                         "delete:" + DegradationErrorConstants.DB_UNAVAILABLE.code(),
                         "read:" + DegradationErrorConstants.READ_UNAVAILABLE.code(),
                         "publish:" + DegradationErrorConstants.DB_UNAVAILABLE.code(),
-                        "public-read:" + DegradationErrorConstants.READ_UNAVAILABLE.code());
+                        "public-read:" + DegradationErrorConstants.READ_UNAVAILABLE.code(),
+                        "thread-read:" + DegradationErrorConstants.READ_UNAVAILABLE.code());
     }
 
     private static List<JsonNode> lines(Path file) throws IOException {
@@ -155,15 +169,16 @@ class HistoryWriterTest {
         String readUnavailable = PROBLEM_MAPPER.writeValueAsString(Problems.fill(
                 ProblemDetail.forStatus(HttpStatus.SERVICE_UNAVAILABLE),
                 DegradationErrorConstants.READ_UNAVAILABLE.code(), DegradationErrorConstants.READ_UNAVAILABLE.message()));
-        String page = "{\"content\":[{\"id\":\"" + K1 + "\"},{\"id\":\"" + K2 + "\"}]}";
+        String page = "{\"content\":[{\"id\":\"" + K1 + "\"},{\"id\":\"" + K2 + "\"}],"
+                + "\"page\":{\"size\":20,\"number\":0,\"totalElements\":2,\"totalPages\":1}}";
         try (HistoryRecorder recorder = new HistoryRecorder(Files.newBufferedWriter(file), clock::incrementAndGet)) {
             recorder.save("s1", K1, () -> new Response(201, version1));
             recorder.save("s1", K2, () -> new Response(201, version1));
             recorder.save("s1", K1, () -> new Response(200, version2));
             recorder.save("s2", K2, () -> new Response(409, ""));
             recorder.save("s3", K2, () -> new Response(503, ""));
-            recorder.list("s2", () -> new Response(200, page));
-            recorder.list("s3", () -> new Response(503, ""));
+            recorder.list("s2", ListRead.Listing.OWNER, () -> new Response(200, page));
+            recorder.list("s3", ListRead.Listing.CATALOG, () -> new Response(503, ""));
             recorder.publish("s2", K2, () -> new Response(200, version1));
             recorder.publish("s3", K2, () -> new Response(400, ""));
             recorder.unpublish("s3", K2, () -> {

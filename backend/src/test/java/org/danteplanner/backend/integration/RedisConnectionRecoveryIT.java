@@ -4,6 +4,7 @@ import eu.rekawek.toxiproxy.Proxy;
 import eu.rekawek.toxiproxy.ToxiproxyClient;
 import eu.rekawek.toxiproxy.model.Toxic;
 import eu.rekawek.toxiproxy.model.ToxicDirection;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Date;
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -203,6 +205,10 @@ class RedisConnectionRecoveryIT {
     @Autowired
     private FrontendProperties frontendProperties;
 
+    @Autowired
+    @Qualifier("readSourceBreakerRegistry")
+    private CircuitBreakerRegistry readSourceBreakerRegistry;
+
     @DynamicPropertySource
     static void harnessProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", PRIMARY::getJdbcUrl);
@@ -249,6 +255,7 @@ class RedisConnectionRecoveryIT {
         AUTH_REDIS_PROXY.enable();
         RATE_LIMIT_REDIS_PROXY.enable();
         SSE_LOCAL_REDIS_PROXY.enable();
+        MarkerSourceBreakers.awaitClosed(readSourceBreakerRegistry);
     }
 
     @Test

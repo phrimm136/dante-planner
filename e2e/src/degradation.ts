@@ -17,7 +17,6 @@ export const DEGRADATION_CODES = {
 export const CHAOS_MODES = {
   primaryBlackholed: 'primary',
   poolExhausted: 'pool',
-  bulkheadSaturated: 'bulkhead',
   authRedisDown: 'auth-redis',
   rateLimitRedisDown: 'ratelimit-redis',
   flywayMigrating: 'flyway',

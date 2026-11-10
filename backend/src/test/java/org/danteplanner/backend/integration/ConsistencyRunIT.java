@@ -12,6 +12,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -38,6 +40,7 @@ import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.integration.consistency.AccountControl;
 import org.danteplanner.backend.integration.consistency.Calibration;
 import org.danteplanner.backend.integration.consistency.CookieJar;
 import org.danteplanner.backend.integration.consistency.Coverage;
@@ -59,11 +62,15 @@ import org.danteplanner.backend.integration.consistency.SeedLoop;
 import org.danteplanner.backend.shared.config.PoolLedger;
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.ReadSourcesConfig;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
+import org.danteplanner.backend.shared.freshness.MarkerStore;
+import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.consistency.Anomaly;
 import org.danteplanner.consistency.ConsistencyChecker;
 import org.danteplanner.consistency.History;
@@ -103,6 +110,10 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
     private static final KeyDraw ONLY_PLANNER = new KeyDraw(0);
     private static final String BREAKER_STATE_GAUGE = "resilience4j.circuitbreaker.state";
     private static final String POOL_IDLE_GAUGE = "hikaricp.connections.idle";
+    private static final long TITLE_TOKEN_BOUND = 1_000_000_000_000L;
+    private static final AccountControl NO_ACCOUNT_CHANGES = () -> {
+        throw new IllegalStateException("calibration changes no account");
+    };
 
     @Autowired
     private MockMvc mockMvc;
@@ -118,6 +129,15 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
 
     @Autowired
     private MeterRegistry meterRegistry;
+
+    @Autowired
+    private UserAccountLifecycleService lifecycleService;
+
+    @Autowired
+    private GtidWriteCapture writeCapture;
+
+    @Autowired
+    private MarkerStore markerStore;
 
     @Test
     void plannerHistories_WhenSessionsRunUnderReplicationFaults_KeepTheContract() throws Exception {
@@ -200,7 +220,7 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
         try (HistoryRecorder recorder = new HistoryRecorder(Writer.nullWriter(), System::nanoTime)) {
             PlannerSession session = new PlannerSession(SESSIONS.get(CREATOR),
                     new CookieJar(accessToken, AuthCookies.freshDeviceId()), mockMvc, mockMvc, objectMapper, recorder,
-                    pool);
+                    pool, titleToken(), NO_ACCOUNT_CHANGES);
             session.perform(new PlannedOperation.Create());
             double primaryBefore = count(meterRegistry, CoverageTarget.GATE_PINS_PRIMARY);
             double replicaBefore = count(meterRegistry, CoverageTarget.GATE_SERVES_REPLICA);
@@ -230,8 +250,9 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
                             ? new CookieJar(accessToken, AuthCookies.freshDeviceId())
                             : new CookieJar(AuthCookies.freshDeviceId()))
                     .toList();
+            AccountControl account = () -> reactivate(author, accessToken.getValue(), jars.subList(0, AUTHOR_DEVICES));
             List<PlannerSession> sessions = PlannerSession.forPlan(plan, jars, mockMvc, oregon.mockMvc(),
-                    objectMapper, recorder, pool);
+                    objectMapper, recorder, pool, titleToken(), account);
             for (int planner = 0; planner < SETUP_PLANNERS; planner++) {
                 sessions.get(CREATOR).perform(new PlannedOperation.Create());
             }
@@ -250,6 +271,29 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
             HistoryWriter.write(Shrinker.shrink(recorded, verdict.violations().get(0)), minimalHistoryFile(seed));
         }
         return new SeedResult(seed, plan, history, SeedGuard.failures(recorded.operations()), verdict, phaseC);
+    }
+
+    private void reactivate(User author, String revokedToken, List<CookieJar> authorJars) {
+        writeCapture.begin();
+        FreshnessDeclarations.begin();
+        try {
+            lifecycleService.reactivateAccount(author.getId());
+            String gtid = writeCapture.takeCapturedGtid().orElseThrow();
+            markerStore.raise(FreshnessDeclarations.declared(), gtid);
+        } finally {
+            writeCapture.clear();
+            FreshnessDeclarations.clear();
+        }
+        AtomicReference<String> minted = new AtomicReference<>();
+        Hang.until(() -> !minted.updateAndGet(previous -> TestDataFactory.generateAccessToken(jwtTokenService,
+                author)).equals(revokedToken), "an access token issued in a later second than the revoked one");
+        for (CookieJar jar : authorJars) {
+            jar.put(AuthCookies.accessToken(minted.get()));
+        }
+    }
+
+    private static String titleToken() {
+        return String.format(Locale.ROOT, "%012d", ThreadLocalRandom.current().nextLong(TITLE_TOKEN_BOUND));
     }
 
     private MeterRegistry registry(CoverageTarget target, OregonContext oregon) {

@@ -8,6 +8,7 @@ import org.danteplanner.backend.moderation.entity.PlannerReport;
 import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
@@ -38,7 +39,7 @@ public class PlannerReportService implements PlannerReports {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
     public boolean hasReported(Long userId, UUID plannerId) {
         return reportRepository.existsByUserIdAndPlannerId(userId, plannerId);
     }

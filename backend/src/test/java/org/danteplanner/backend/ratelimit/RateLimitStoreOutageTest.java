@@ -29,7 +29,6 @@ import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.shared.ratelimit.RateLimitProperties;
 import org.danteplanner.backend.shared.ratelimit.RateLimitProperties.BucketConfig;
 import org.danteplanner.backend.shared.ratelimit.RateLimitService;
-import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.backend.support.InMemoryProxyManager;
 import org.danteplanner.backend.support.LogCapture;
@@ -216,9 +215,9 @@ class RateLimitStoreOutageTest {
                 null,
                 frontendProperties);
         PublishedPlannerQueryService queryService = new PublishedPlannerQueryService(
-                null, catalogRepository, null, null, null, null, null, null, null, null);
+                null, catalogRepository, null, null, null, null, null, null, null);
         PublishedPlannerController publishedPlannerController = new PublishedPlannerController(
-                queryService, securityProperties, new ByIdReadGuard(), deviceIdResolver);
+                queryService, securityProperties, deviceIdResolver);
 
         return MockMvcBuilders.standaloneSetup(authController, publishedPlannerController, new DeclaredHandlerFixture())
                 .addInterceptors(interceptor)

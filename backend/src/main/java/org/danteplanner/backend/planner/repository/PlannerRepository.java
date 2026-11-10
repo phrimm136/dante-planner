@@ -61,6 +61,11 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
             + "AND a.deletedAt IS NULL")
     Optional<PublishedPlannerRow> findPublishedAggregate(@Param("id") UUID id);
 
+    @Query("SELECT new org.danteplanner.backend.planner.repository.PublishedPlannerRow(p, a) "
+            + "FROM Planner p " + AGGREGATE_JOINS + "JOIN UserProfile a ON a.id = p.userId "
+            + "WHERE p.id = :id AND c.deletedAt IS NULL")
+    Optional<PublishedPlannerRow> findAggregateWithAuthor(@Param("id") UUID id);
+
     @Query("""
             SELECT new org.danteplanner.backend.planner.api.PlannerThread(
                 p.id, p.userId, pub.published, CASE WHEN a.deletedAt IS NULL THEN FALSE ELSE TRUE END)
@@ -80,9 +85,6 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
     @Query("SELECT COUNT(p) FROM Planner p JOIN p.content c WHERE p.userId = :userId AND c.deletedAt IS NULL")
     long countActiveByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT COUNT(p) > 0 FROM Planner p JOIN p.content c WHERE p.id = :id AND c.deletedAt IS NULL")
-    boolean existsActiveById(@Param("id") UUID id);
-
     @Query("SELECT COUNT(p) > 0 FROM Planner p JOIN p.content c JOIN p.publication pub "
             + "JOIN UserProfile a ON a.id = p.userId "
             + "WHERE p.id = :id AND pub.published = TRUE AND c.deletedAt IS NULL AND a.deletedAt IS NULL")
@@ -97,18 +99,12 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
     Optional<PlannerOwnershipRow> findOwnershipById(@Param("id") UUID id);
 
     @Query("SELECT new org.danteplanner.backend.planner.dto.PlannerCoreInfo("
-            + "p.id, p.createdAt, a.usernameEpithet, a.usernameSuffix) "
+            + "p.id, p.userId, p.createdAt, a.usernameEpithet, a.usernameSuffix) "
             + "FROM Planner p JOIN UserProfile a ON a.id = p.userId WHERE p.id IN :ids")
     List<PlannerCoreInfo> findCoreInfoByIds(@Param("ids") Collection<UUID> ids);
 
     @Query("SELECT p.id FROM Planner p WHERE p.userId = :userId")
     List<UUID> findIdsByUserId(@Param("userId") Long userId);
-
-    @Query(value = AGGREGATE_LOAD
-            + "WHERE p.moderation.hiddenFromRecommended = TRUE AND c.deletedAt IS NULL",
-            countQuery = "SELECT COUNT(p) FROM Planner p JOIN p.content c "
-            + "WHERE p.moderation.hiddenFromRecommended = TRUE AND c.deletedAt IS NULL")
-    Page<Planner> findHiddenFromRecommended(Pageable pageable);
 
     /**
      * The id is the client's, so no id-null guard can tell a new aggregate from an existing

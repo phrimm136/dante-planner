@@ -29,6 +29,10 @@ public final class CookieJar {
         }
     }
 
+    public void put(Cookie cookie) {
+        cookies.put(cookie.getName(), cookie);
+    }
+
     public Cookie[] cookies() {
         return cookies.values().toArray(Cookie[]::new);
     }

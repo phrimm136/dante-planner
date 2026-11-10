@@ -1,0 +1,13 @@
+diff --git a/backend/src/main/java/org/danteplanner/backend/planner/api/PlannerMiss.java b/backend/src/main/java/org/danteplanner/backend/planner/api/PlannerMiss.java
+index 63794054..efcf5dae 100644
+--- a/backend/src/main/java/org/danteplanner/backend/planner/api/PlannerMiss.java
++++ b/backend/src/main/java/org/danteplanner/backend/planner/api/PlannerMiss.java
+@@ -32,7 +32,7 @@ public sealed interface PlannerMiss {
+ 
+         @Override
+         public Set<FreshnessScope> scopes() {
+-            return Set.of(new FreshnessScope.Entity(plannerId), new FreshnessScope.Author(ownerId));
++            return Set.of(new FreshnessScope.Entity(plannerId));
+         }
+     }
+ }

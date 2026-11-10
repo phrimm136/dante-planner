@@ -12,9 +12,7 @@ import org.danteplanner.backend.planner.precondition.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.precondition.PlannerLimitValidator;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator;
-import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.support.OwnershipRows;
-import org.danteplanner.backend.support.RecordingTombstoneStore;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -51,7 +49,6 @@ class PlannerDeleteRestrictionTest {
     private PlannerCatalogRepository catalogRepository;
 
     private final FakeUsers users = new FakeUsers();
-    private final RecordingTombstoneStore tombstoneStore = new RecordingTombstoneStore();
 
     private PlannerAccessGuard accessGuard;
     private PlannerCommandService commandService;
@@ -63,7 +60,7 @@ class PlannerDeleteRestrictionTest {
         ObjectMapper objectMapper = new ObjectMapper();
         PlannerCatalogService catalogService = new PlannerCatalogService(catalogRepository, plannerRepository, null,
                 entityFilterRepository, keywordFilterRepository, null,
-                objectMapper, tombstoneStore, 10);
+                objectMapper, 10);
         commandService = new PlannerCommandService(
                 plannerRepository,
                 null,
@@ -106,7 +103,6 @@ class PlannerDeleteRestrictionTest {
 
     private void assertWithdrawnFromTheCatalog(Planner planner) {
         verify(catalogRepository).deleteByPlannerId(planner.getId());
-        assertThat(tombstoneStore.isTombstoned(ByIdReadGuard.PUBLISHED_PLANNER_SCOPE, planner.getId())).isTrue();
     }
 
     private void ban() {

@@ -9,6 +9,7 @@ import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.user.api.Users;
+import org.danteplanner.backend.shared.freshness.FreshnessPending;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +47,7 @@ public class AdminService {
         return updated;
     }
 
+    @FreshnessPending(reason = "role read: its user scope arrives in M2")
     @Transactional(readOnly = true)
     public UserRole getUserRole(Long userId) {
         UserSummary user = users.findActiveById(userId)

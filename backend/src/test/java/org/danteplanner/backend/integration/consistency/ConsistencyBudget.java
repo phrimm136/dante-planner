@@ -17,7 +17,7 @@ public final class ConsistencyBudget {
     public static final boolean DEFAULT_STOP_AT_FIRST_VIOLATION = false;
     public static final int COVERAGE_EXTENSION_CAP = 10;
 
-    public static final int PUBLIC_READ_BUDGET = 40;
+    public static final int PUBLIC_READ_BUDGET = 60;
     public static final int PROBE_BATCH_BUDGET = 5;
     public static final int DOUBLING_BUDGET = 12;
     public static final int BISECTION_DEPTH_BUDGET = 6;

@@ -28,7 +28,6 @@ import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
-import org.danteplanner.backend.support.RecordingTombstoneStore;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.precondition.ContentVersionValidator;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
@@ -121,7 +120,7 @@ class PlannerCommandServiceTest {
                 new PlannerCatalogService(catalogRepository, plannerRepository, statsRepository,
                         entityFilterRepository, keywordFilterRepository,
                         null, new ObjectMapper(),
-                        new RecordingTombstoneStore(), RECOMMENDED_THRESHOLD),
+                        RECOMMENDED_THRESHOLD),
                 new PlannerAccessGuard(users, plannerRepository),
                 restrictionCheck,
                 new PlannerCategoryValidator(),
@@ -622,7 +621,6 @@ class PlannerCommandServiceTest {
 
             assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false))
                     .withCode("PLANNER_NOT_FOUND");
-            verify(plannerRepository, never()).existsActiveById(any());
             verify(plannerRepository, never()).insert(any());
             verify(plannerRepository, never()).countActiveByUserId(any());
         }
@@ -637,7 +635,6 @@ class PlannerCommandServiceTest {
 
             assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false))
                     .withCode("PLANNER_FORBIDDEN");
-            verify(plannerRepository, never()).existsActiveById(any());
             verify(plannerRepository, never()).insert(any());
         }
 
@@ -659,7 +656,6 @@ class PlannerCommandServiceTest {
                     testUser.getId(), deviceId, plannerId, request, false);
 
             assertThat(result.isCreated()).isTrue();
-            verify(plannerRepository, never()).existsActiveById(any());
         }
     }
 

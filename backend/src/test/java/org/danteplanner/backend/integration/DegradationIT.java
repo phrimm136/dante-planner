@@ -6,6 +6,7 @@ import eu.rekawek.toxiproxy.Proxy;
 import eu.rekawek.toxiproxy.ToxiproxyClient;
 import eu.rekawek.toxiproxy.model.Toxic;
 import eu.rekawek.toxiproxy.model.ToxicDirection;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.http.Cookie;
@@ -257,6 +258,10 @@ class DegradationIT {
     private DataSource appDataSource;
 
     @Autowired
+    @Qualifier("readSourceBreakerRegistry")
+    private CircuitBreakerRegistry readSourceBreakerRegistry;
+
+    @Autowired
     @Qualifier("degradationPrimaryJdbcTemplate")
     private JdbcTemplate degradationPrimaryJdbcTemplate;
 
@@ -337,6 +342,7 @@ class DegradationIT {
         }
         RATE_LIMIT_REDIS_PROXY.enable();
         awaitLiveAuthRedis();
+        MarkerSourceBreakers.awaitClosed(readSourceBreakerRegistry);
         awaitLiveRateLimitRedis();
     }
 
@@ -483,6 +489,8 @@ class DegradationIT {
      */
     @Test
     void primaryDbCut_WhenWriteAttempted_ReturnsWriteTemporarilyUnavailableWhileReadsServe() throws Exception {
+        MarkerSourceBreakers.assertClosed(readSourceBreakerRegistry,
+                "precondition: a marker breaker left open by an earlier auth Redis cut makes the guard skip the replica");
         User author = TestDataFactory.createTestUser(
                 userRepository, "degradation-inv5-" + UUID.randomUUID() + "@example.com");
         Cookie auth = AuthCookies.accessToken(
@@ -536,6 +544,8 @@ class DegradationIT {
     @Test
     void writeHangReadsSurvive_WhenPrimaryBlackholed_WriteFails503WithinTimeoutWhileReadStillServes()
             throws Exception {
+        MarkerSourceBreakers.assertClosed(readSourceBreakerRegistry,
+                "precondition: a marker breaker left open by an earlier auth Redis cut makes the guard skip the replica");
         User author = TestDataFactory.createTestUser(
                 userRepository, "degradation-blackhole-" + UUID.randomUUID() + "@example.com");
         Cookie auth = AuthCookies.accessToken(
@@ -641,6 +651,17 @@ class DegradationIT {
                 .andExpect(status().isNoContent());
 
         assertThat(viewRecordFailedCount() - before).isEqualTo(1.0);
+    }
+
+    @Test
+    void restoreDegradationPaths_WhenAuthRedisCutOpenedTheMarkerBreakers_LeavesThemClosed() throws IOException {
+        cutAuthRedis();
+        MarkerSourceBreakers.awaitOpen(readSourceBreakerRegistry);
+
+        restoreDegradationPaths();
+
+        MarkerSourceBreakers.assertClosed(readSourceBreakerRegistry,
+                "the next test reads through the freshness guard, which skips the replica while a marker breaker is open");
     }
 
     private double viewRecordFailedCount() {

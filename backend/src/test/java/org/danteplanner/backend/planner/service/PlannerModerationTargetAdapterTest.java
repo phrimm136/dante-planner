@@ -1,12 +1,6 @@
 package org.danteplanner.backend.planner.service;
 
-import java.util.List;
 import java.util.Optional;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import org.danteplanner.backend.moderation.api.ModeratedPlanner;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -15,7 +9,6 @@ import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository
 import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
-import org.danteplanner.backend.support.RecordingTombstoneStore;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,7 +53,7 @@ class PlannerModerationTargetAdapterTest {
         PlannerCatalogService catalogService = new PlannerCatalogService(catalogRepository, plannerRepository,
                 statsRepository, entityFilterRepository,
                 keywordFilterRepository, null, objectMapper,
-                new RecordingTombstoneStore(), 10);
+                10);
         PlannerPublishingService publishingService = new PlannerPublishingService(plannerRepository,
                 statsRepository, null, null, catalogService, null, accessGuard, null, null, null, null);
         adapter = new PlannerModerationTargetAdapter(publishingService, accessGuard);
@@ -78,7 +71,7 @@ class PlannerModerationTargetAdapterTest {
 
     @Test
     void checkPublished_WhenCalled_DelegatesToTheAccessGuard() {
-        when(plannerRepository.existsPublishedById(planner.getId())).thenReturn(false);
+        when(plannerRepository.findThread(planner.getId())).thenReturn(Optional.empty());
 
         assertRejected(() -> adapter.checkPublished(planner.getId())).withCode("PLANNER_NOT_FOUND");
     }
@@ -134,18 +127,6 @@ class PlannerModerationTargetAdapterTest {
 
         assertThat(result.id()).isEqualTo(planner.getId());
         assertThat(result.hiddenFromRecommended()).isFalse();
-    }
-
-    @Test
-    void listHiddenFromRecommended_WhenPageHasPlanners_MapsEachPlanner() {
-        Pageable pageable = PageRequest.of(0, 20);
-        when(plannerRepository.findHiddenFromRecommended(pageable))
-                .thenReturn(new PageImpl<>(List.of(planner), pageable, 1));
-
-        Page<ModeratedPlanner> result = adapter.listHiddenFromRecommended(pageable);
-
-        assertThat(result.getContent()).extracting(ModeratedPlanner::id).containsExactly(planner.getId());
-        assertThat(result.getTotalElements()).isEqualTo(1);
     }
 
     @Test

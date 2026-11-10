@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.sql.DataSource;
@@ -77,6 +78,7 @@ class ReadSourceSelectorTest {
     @BeforeEach
     void setUp() {
         ChosenReadSource.clear();
+        ReadSourceSelector.clearSkips();
         selector = new ReadSourceSelector(List.of(
                 new ReadSourceSelector.Source(FIRST, false, firstPool, firstBreaker),
                 new ReadSourceSelector.Source(SECOND, true, secondPool, secondBreaker)));
@@ -85,6 +87,7 @@ class ReadSourceSelectorTest {
     @AfterEach
     void clearChosenSource() {
         ChosenReadSource.clear();
+        ReadSourceSelector.clearSkips();
     }
 
     private static SQLException communicationsLinkFailure() {
@@ -105,7 +108,7 @@ class ReadSourceSelectorTest {
 
         assertThat(selector.getConnection()).isSameAs(firstConnection);
         assertThat(ChosenReadSource.name()).contains(FIRST);
-        assertThat(ChosenReadSource.servedByAuthority()).isFalse();
+        assertThat(ChosenReadSource.name()).isNotEqualTo(Optional.of(selector.authority().name()));
         verify(secondPool, never()).getConnection();
     }
 
@@ -118,8 +121,7 @@ class ReadSourceSelectorTest {
         assertThat(selector.getConnection()).isSameAs(secondConnection);
         assertThat(firstBreaker.getMetrics().getNumberOfFailedCalls()).isEqualTo(1);
         assertThat(firstBreaker.getState()).isEqualTo(CircuitBreaker.State.CLOSED);
-        assertThat(ChosenReadSource.name()).contains(SECOND);
-        assertThat(ChosenReadSource.servedByAuthority()).isTrue();
+        assertThat(ChosenReadSource.name()).contains(selector.authority().name());
     }
 
     @ParameterizedTest
@@ -237,7 +239,7 @@ class ReadSourceSelectorTest {
         selector.getConnection();
 
         assertThat(ChosenReadSource.name()).contains(FIRST);
-        assertThat(ChosenReadSource.servedByAuthority()).isFalse();
+        assertThat(ChosenReadSource.name()).isNotEqualTo(Optional.of(selector.authority().name()));
     }
 
     @Test
@@ -249,7 +251,7 @@ class ReadSourceSelectorTest {
 
         assertThat(oregon.getConnection()).isSameAs(secondConnection);
         assertThat(ChosenReadSource.name()).contains(ReadSourceProperties.PRIMARY);
-        assertThat(ChosenReadSource.servedByAuthority()).isTrue();
+        assertThat(ChosenReadSource.name()).contains(oregon.authority().name());
         verify(firstPool, never()).getConnection();
     }
 
@@ -266,6 +268,35 @@ class ReadSourceSelectorTest {
         secondBreaker.transitionToOpenState();
 
         assertThat(selector.isAuthorityHealthy()).isFalse();
+        assertThat(selector.current()).map(ReadSourceSelector.Source::name).contains(FIRST);
+    }
+
+    @Test
+    void skips_WhenEverySourceIsSkipped_AcquireThrowsReadTemporarilyUnavailable() throws SQLException {
+        ReadSourceSelector.skip(selector.sources().get(0));
+        ReadSourceSelector.skip(selector.authority());
+
+        Throwable thrown = catchThrowable(selector::getConnection);
+
+        assertThat(thrown).isInstanceOf(SQLTransientConnectionException.class)
+                .hasCauseInstanceOf(ReadTemporarilyUnavailableException.class);
+        assertThat(((SQLException) thrown).getSQLState()).isEqualTo(UNABLE_TO_CONNECT);
+        assertThat(selector.current()).isEmpty();
+        verify(firstPool, never()).getConnection();
+        verify(secondPool, never()).getConnection();
+    }
+
+    @Test
+    void skips_WhenTheRequestClearsThem_AreGone() throws SQLException {
+        when(secondPool.getConnection()).thenReturn(secondConnection);
+        ReadSourceSelector.skip(selector.sources().get(0));
+
+        assertThat(selector.current()).map(ReadSourceSelector.Source::name).contains(SECOND);
+        assertThat(selector.getConnection()).isSameAs(secondConnection);
+        verify(firstPool, never()).getConnection();
+
+        ReadSourceSelector.clearSkips();
+
         assertThat(selector.current()).map(ReadSourceSelector.Source::name).contains(FIRST);
     }
 
@@ -299,8 +330,7 @@ class ReadSourceSelectorTest {
         when(secondPool.getConnection()).thenReturn(secondConnection);
 
         assertThat(selector.authorityReads().getConnection()).isSameAs(secondConnection);
-        assertThat(ChosenReadSource.name()).contains(SECOND);
-        assertThat(ChosenReadSource.servedByAuthority()).isTrue();
+        assertThat(ChosenReadSource.name()).contains(selector.authority().name());
         verify(firstPool, never()).getConnection();
     }
 

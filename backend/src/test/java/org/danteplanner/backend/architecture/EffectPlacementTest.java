@@ -6,7 +6,6 @@ import com.tngtech.archunit.core.domain.JavaCodeUnit;
 import com.tngtech.archunit.core.domain.JavaMethod;
 import com.tngtech.archunit.core.domain.JavaMethodCall;
 import com.tngtech.archunit.core.domain.JavaModifier;
-import com.tngtech.archunit.core.importer.ClassFileImporter;
 
 import org.junit.jupiter.api.Test;
 
@@ -408,68 +407,5 @@ class EffectPlacementTest {
 
     private static String qualifiedName(JavaCodeUnit method) {
         return method.getOwner().getFullName() + "." + method.getName();
-    }
-
-    private static final Map<String, Set<String>> TOMBSTONE_WRITES = Map.of(
-            "org.danteplanner.backend.shared.readpath.ContentTombstoneStore",
-            Set.of("writeTombstone", "writeTombstones", "clearTombstones"));
-
-    private static final String FIXTURE_PACKAGE = "org.danteplanner.backend.architecture.fixture";
-
-    private static final JavaClasses FIXTURE_CLASSES = new ClassFileImporter()
-            .importPackages(FIXTURE_PACKAGE);
-
-    @Test
-    void tombstoneWrite_WhenReachedFromATransactionalMethod_IsRejected() {
-        assertThat(tombstoneOffendersIn(MAIN_CLASSES))
-                .as("a tombstone written or cleared before the commit outlives a rollback and masks or "
-                        + "unmasks a row for its whole TTL; register it in an afterCommit synchronization")
-                .isEmpty();
-    }
-
-    @Test
-    void tombstoneWrite_WhenTheRuleRunsOverTheFixture_NamesOnlyThePathsBeforeCommit() {
-        assertThat(tombstoneOffendersIn(FIXTURE_CLASSES))
-                .as("the rule above passes vacuously unless this shows it rejecting a write and a clear")
-                .containsExactly(
-                        FIXTURE_PACKAGE + ".TombstoneWritingService.hideBeforeCommit -> "
-                                + "org.danteplanner.backend.shared.readpath.ContentTombstoneStore.writeTombstone",
-                        FIXTURE_PACKAGE + ".TombstoneWritingService.unhideBeforeCommit -> "
-                                + "org.danteplanner.backend.shared.readpath.ContentTombstoneStore.clearTombstones");
-    }
-
-    private static Set<String> tombstoneOffendersIn(JavaClasses classes) {
-        Set<String> offenders = new TreeSet<>();
-        for (JavaMethod root : transactionalMethodsIn(classes)) {
-            tombstoneWritesReachedFrom(root).forEach(target -> offenders.add(qualifiedName(root) + " -> " + target));
-        }
-        return offenders;
-    }
-
-    private static List<String> tombstoneWritesReachedFrom(JavaMethod root) {
-        List<String> reached = new ArrayList<>();
-        Set<String> visited = new HashSet<>();
-        Deque<JavaCodeUnit> pending = new ArrayDeque<>();
-        pending.push(root);
-        visited.add(qualifiedName(root));
-
-        while (!pending.isEmpty()) {
-            for (JavaMethodCall call : pending.pop().getMethodCallsFromSelf()) {
-                String owner = call.getTargetOwner().getFullName();
-                if (isEffect(TOMBSTONE_WRITES, owner, call.getTarget().getName())) {
-                    reached.add(owner + "." + call.getTarget().getName());
-                    continue;
-                }
-                if (!owner.startsWith("org.danteplanner.backend")) {
-                    continue;
-                }
-                for (JavaMethod callee : calleesOf(call)) {
-                    if (!isTransactional(callee) && visited.add(qualifiedName(callee))) {
-                        pending.push(callee);
-                    }
-                }
-            }
-        }
-        return reached;
     }
 }

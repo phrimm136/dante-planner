@@ -67,7 +67,7 @@ resource "aws_vpc_security_group_ingress_rule" "cluster_self" {
 # Cross-region auth Redis: admit ONLY the peer region's fleet CIDR (over VPC
 # peering) on the redis-auth NodePort published by
 # deploy/overlays/oregon/redis-auth-nodeport.yaml. The auth Redis holds
-# revocation state (blacklist/rotation/tombstones), so exposure is opt-in:
+# revocation state (blacklist/rotation/freshness markers), so exposure is opt-in:
 # the default empty redis_cross_region_cidr renders count=0 and leaves the
 # single-region SG surface unchanged.
 resource "aws_vpc_security_group_ingress_rule" "redis_auth_cross_region" {

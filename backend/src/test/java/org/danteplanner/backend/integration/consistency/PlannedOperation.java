@@ -25,4 +25,16 @@ public sealed interface PlannedOperation {
 
     record Delete(KeyDraw key) implements PlannedOperation {
     }
+
+    record CatalogList() implements PlannedOperation {
+    }
+
+    record ThreadRead(KeyDraw key) implements PlannedOperation {
+    }
+
+    record Deactivate() implements PlannedOperation {
+    }
+
+    record Reactivate() implements PlannedOperation {
+    }
 }

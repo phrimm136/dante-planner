@@ -10,9 +10,8 @@ function origin(configured: string | undefined, fallback: string): string {
 export const APP_URL = origin(process.env.E2E_APP_URL, 'http://localhost')
 export const API_URL = origin(process.env.E2E_API_URL, 'http://localhost')
 
-// Oregon serves reads from the pool it writes to; Seoul serves them from an asynchronously
-// replicated copy and is therefore the only region that registers the GTID gate and the
-// replica-miss re-check (docs/multi-region-request-paths.md §3, §5). The local two-region rig
+// Oregon serves reads from the primary first; Seoul serves them from an asynchronously
+// replicated copy first (docs/multi-region-request-paths.md §3). The local two-region rig
 // publishes them on these ports (docker-compose.multiregion.yml).
 export const OREGON_API = origin(process.env.E2E_API_OREGON_URL, 'http://localhost:8081')
 export const SEOUL_API = origin(process.env.E2E_API_SEOUL_URL, 'http://localhost:8082')

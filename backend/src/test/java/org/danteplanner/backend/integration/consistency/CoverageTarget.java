@@ -5,20 +5,22 @@ import java.util.Locale;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 
 import org.danteplanner.backend.shared.config.ReadSourcesConfig;
+import org.danteplanner.backend.shared.freshness.FreshnessReadGuard;
 
 public enum CoverageTarget {
     GATE_PINS_PRIMARY("gate pins the primary", Region.SEOUL, Instrument.COUNTER, "gtid.gate", "outcome", "primary"),
     GATE_SERVES_REPLICA("gate serves the replica", Region.SEOUL, Instrument.COUNTER, "gtid.gate", "outcome",
             "replica"),
-    REPLICA_MISS_PROMOTED("replica miss promoted", Region.SEOUL, Instrument.COUNTER, "replica_miss_promoted_total",
-            null, null),
-    TOMBSTONE_HIT("tombstone hit", Region.SEOUL, Instrument.COUNTER, "tombstone.hit", "scope", "planner"),
-    WITHDRAWAL_MARKER_HIT("withdrawal-marker hit", Region.SEOUL, Instrument.COUNTER, "tombstone.hit", "scope",
-            "published-planner"),
     OREGON_READ_FELL_BACK("oregon read fell back", Region.OREGON, Instrument.TIMER, "hikaricp.connections.acquire",
             "pool", "seoul-replica"),
     OREGON_BREAKER_OPENED("oregon breaker opened", Region.OREGON, Instrument.COUNTER,
-            ReadSourcesConfig.BREAKER_TRANSITIONS, "to", CircuitBreaker.State.OPEN.name().toLowerCase(Locale.ROOT));
+            ReadSourcesConfig.BREAKER_TRANSITIONS, "to", CircuitBreaker.State.OPEN.name().toLowerCase(Locale.ROOT)),
+    MARKER_WAIT_APPLIED("marker wait applied", Region.SEOUL, Instrument.TIMER, FreshnessReadGuard.READ_WAIT,
+            FreshnessReadGuard.SOURCE_TAG, Sources.SEOUL_REPLICA, FreshnessReadGuard.OUTCOME_TAG,
+            FreshnessReadGuard.APPLIED),
+    MARKER_WAIT_TIMED_OUT("marker wait timed out", Region.SEOUL, Instrument.TIMER, FreshnessReadGuard.READ_WAIT,
+            FreshnessReadGuard.SOURCE_TAG, Sources.SEOUL_REPLICA, FreshnessReadGuard.OUTCOME_TAG,
+            FreshnessReadGuard.TIMEOUT);
 
     public enum Instrument {
         COUNTER,
@@ -29,17 +31,14 @@ public enum CoverageTarget {
     private final Region region;
     private final Instrument instrument;
     private final String meter;
-    private final String tagKey;
-    private final String tagValue;
+    private final String[] tags;
 
-    CoverageTarget(String label, Region region, Instrument instrument, String meter, String tagKey,
-            String tagValue) {
+    CoverageTarget(String label, Region region, Instrument instrument, String meter, String... tags) {
         this.label = label;
         this.region = region;
         this.instrument = instrument;
         this.meter = meter;
-        this.tagKey = tagKey;
-        this.tagValue = tagValue;
+        this.tags = tags.clone();
     }
 
     public String label() {
@@ -59,6 +58,11 @@ public enum CoverageTarget {
     }
 
     public String[] tags() {
-        return tagKey == null ? new String[0] : new String[] {tagKey, tagValue};
+        return tags.clone();
+    }
+
+    private static final class Sources {
+
+        static final String SEOUL_REPLICA = "seoul-replica";
     }
 }

@@ -60,6 +60,8 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 @ExtendWith(MockitoExtension.class)
 class CommentServiceLayerTest {
 
+    private static final long PLANNER_OWNER_ID = 41L;
+
     @Mock
     private PlannerCommentRepository commentRepository;
 
@@ -146,7 +148,8 @@ class CommentServiceLayerTest {
             // Arrange
             CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
             AtomicReference<PlannerComment> persisted = new AtomicReference<>();
-            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
+            when(plannerRepository.findThread(plannerId))
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
             when(commentRepository.insert(any(PlannerComment.class)))
                     .thenAnswer(i -> {
                         PlannerComment c = i.getArgument(0);
@@ -184,7 +187,8 @@ class CommentServiceLayerTest {
 
             CreateCommentRequest request = new CreateCommentRequest("Reply comment", parentPublicId);
             AtomicReference<PlannerComment> persisted = new AtomicReference<>();
-            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
+            when(plannerRepository.findThread(plannerId))
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
             when(commentRepository.findByPublicId(parentPublicId))
                     .thenReturn(Optional.of(parentComment));
             when(commentRepository.insert(any(PlannerComment.class)))
@@ -214,7 +218,7 @@ class CommentServiceLayerTest {
         void createComment_WhenPlannerNotFound_ThrowsException() {
             // Arrange
             CreateCommentRequest request = new CreateCommentRequest("Test", null);
-            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(false);
+            when(plannerRepository.findThread(plannerId)).thenReturn(Optional.empty());
 
             // Act & Assert
             UUID deviceId = UUID.randomUUID();
@@ -227,7 +231,8 @@ class CommentServiceLayerTest {
             // Arrange
             UUID nonExistentParentId = UUID.randomUUID();
             CreateCommentRequest request = new CreateCommentRequest("Reply", nonExistentParentId);
-            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
+            when(plannerRepository.findThread(plannerId))
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
             when(commentRepository.findByPublicId(nonExistentParentId))
                     .thenReturn(Optional.empty());
 
@@ -251,7 +256,8 @@ class CommentServiceLayerTest {
 
             CreateCommentRequest request = new CreateCommentRequest("Very deep reply", parentPublicId);
             AtomicReference<PlannerComment> persisted = new AtomicReference<>();
-            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
+            when(plannerRepository.findThread(plannerId))
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
             when(commentRepository.findByPublicId(parentPublicId))
                     .thenReturn(Optional.of(depth5Parent));
             when(commentRepository.insert(any(PlannerComment.class)))
@@ -408,7 +414,7 @@ class CommentServiceLayerTest {
                     .thenReturn(Collections.emptyList());
 
             // Act
-            List<CommentTreeNode> comments = queryService.getCommentTree(plannerId, testUser.getId());
+            List<CommentTreeNode> comments = queryService.getCommentTree(plannerId, testUser.getId()).value();
 
             // Assert
             assertThat(comments).isEmpty();
@@ -437,7 +443,7 @@ class CommentServiceLayerTest {
                     .thenReturn(List.of(byActive, byDeactivated));
             users.add(deactivated);
 
-            List<CommentTreeNode> comments = queryService.getCommentTree(plannerId, testUser.getId());
+            List<CommentTreeNode> comments = queryService.getCommentTree(plannerId, testUser.getId()).value();
 
             CommentTreeNode active = comments.stream()
                     .filter(c -> c.id().equals(byActive.getPublicId())).findFirst().orElseThrow();

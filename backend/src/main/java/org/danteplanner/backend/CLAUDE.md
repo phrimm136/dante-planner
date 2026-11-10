@@ -4,7 +4,7 @@ Package-by-feature: feature roots (`admin`, `auth`, `comment`, `moderation`, `no
 
 ## Transactions & replica routing (most important)
 
-- `@Transactional(readOnly = true)` is the REPLICA-ROUTING SIGNAL (`ReadOnlyRoutingDataSource`), not a free optimization. Read-after-write paths must use the GTID cookie gate / primary re-check / tombstone layer; never assume a readOnly read sees your own just-committed write.
+- `@Transactional(readOnly = true)` is the REPLICA-ROUTING SIGNAL (`ReadOnlyRoutingDataSource`), not a free optimization. Read-after-write rests on the GTID cookie gate and the freshness markers: a readOnly method returning `ScopedRead` is decided by `FreshnessReadAspect` from its scopes' markers, and every other readOnly method declares `propagation = MANDATORY`, `@FreshnessPending` or `@FreshnessExempt` (`FreshnessReadCoverageTest`); never assume a readOnly read sees your own just-committed write.
 - `@Transactional` at the service layer only, on public methods only. No external API calls inside a transaction.
 - Layering: Controller → Service → Repository, never skip. Cross-module: inject the other module's `api` interface; its services, repositories and entities are internal.
 

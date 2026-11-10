@@ -17,8 +17,7 @@ class PoolLedgerConfigTest {
     void poolLedger_WhenEveryPrimaryConnectionSummedAcrossMaxPods_StaysWithinConnectionBudget() {
         int oregonPerPod = PoolLedger.OREGON_PRIMARY_POOL;
         int seoulPerPod = PoolLedger.SEOUL_PRIMARY_POOL
-                + PoolLedger.SEOUL_PRIMARY_READ_POOL
-                + PoolLedger.BULKHEAD_POOL;
+                + PoolLedger.SEOUL_PRIMARY_READ_POOL;
         int transientPerPod = PoolLedger.PROBE_CONNECTIONS_PER_POD + PoolLedger.FLYWAY_CONNECTIONS_PER_POD;
         int transients = transientPerPod * PoolLedger.MAX_PODS_PER_ASG * PoolLedger.REGIONS;
         int primaryHittingLoad = (oregonPerPod + seoulPerPod) * PoolLedger.MAX_PODS_PER_ASG + transients;
@@ -29,8 +28,8 @@ class PoolLedgerConfigTest {
                 .as("connections reaching the primary: %d", primaryHittingLoad)
                 .isLessThanOrEqualTo(usableConnections);
         assertThat(primaryHittingLoad)
-                .as("documented budget total of 42 connections reaching the primary")
-                .isEqualTo(42);
+                .as("documented budget total of 38 connections reaching the primary")
+                .isEqualTo(38);
     }
 
     @Test
@@ -40,10 +39,5 @@ class PoolLedgerConfigTest {
         assertThat(PoolLedger.SEOUL_REPLICA_POOL).isEqualTo(6);
         assertThat(PoolLedger.READ_FALLBACK_POOL).isEqualTo(6);
         assertThat(PoolLedger.SEOUL_PRIMARY_READ_POOL).isEqualTo(3);
-    }
-
-    @Test
-    void poolLedger_WhenReadBulkhead_MatchesBindingPoolSize() {
-        assertThat(PoolLedger.BULKHEAD_POOL).isEqualTo(2);
     }
 }

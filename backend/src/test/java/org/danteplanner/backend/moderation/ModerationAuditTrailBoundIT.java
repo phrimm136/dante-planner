@@ -10,6 +10,8 @@ import org.danteplanner.backend.moderation.service.ModerationQueryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
 import java.util.Comparator;
@@ -39,6 +41,9 @@ class ModerationAuditTrailBoundIT extends ExclusiveDatabaseSupport {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PlatformTransactionManager transactionManager;
+
     @BeforeEach
     void setUp() {
         // A real actor row: actor_id carries a foreign key, so a literal id only works on a
@@ -58,7 +63,7 @@ class ModerationAuditTrailBoundIT extends ExclusiveDatabaseSupport {
 
     @Test
     void auditTrailPage_WhenRead_IsTruncatedByTheQuery() {
-        List<ModerationAction> page = moderationQueryService.getModerationActions();
+        List<ModerationAction> page = readAuditTrail();
 
         assertThat(page)
                 .as("the whole table came back: the limit is not being applied by the query")
@@ -68,7 +73,7 @@ class ModerationAuditTrailBoundIT extends ExclusiveDatabaseSupport {
 
     @Test
     void auditTrailPage_WhenRead_HoldsNewestRecordsFirst() {
-        List<ModerationAction> page = moderationQueryService.getModerationActions();
+        List<ModerationAction> page = readAuditTrail();
 
         assertThat(isNonIncreasing(page)).as("records are not ordered newest first").isTrue();
 
@@ -88,5 +93,11 @@ class ModerationAuditTrailBoundIT extends ExclusiveDatabaseSupport {
             }
         }
         return true;
+    }
+
+    private List<ModerationAction> readAuditTrail() {
+        TransactionTemplate readOnly = new TransactionTemplate(transactionManager);
+        readOnly.setReadOnly(true);
+        return readOnly.execute(status -> moderationQueryService.getModerationActions());
     }
 }

@@ -34,8 +34,8 @@ test('a retried committed save answers 200 with the stored version and writes no
   const user = await createUser('noop-retry')
   const device = randomUUID()
   const api = await createAuthenticatedApi(baseURL!, user.id, 'NORMAL', deviceCookie(device))
-  // Stored-state reads go to the write region: a Seoul by-id read that FINDS a row on the
-  // stale replica returns it as-is (the re-check fires only on a miss), so a "no write
+  // Stored-state reads go to the write region: a Seoul by-id read skips a stale replica row only
+  // while its scope's marker is raised and serves an unmarked one as-is, so a "no write
   // happened" assertion read through Seoul races replication.
   const reader = await createAuthenticatedApi(OREGON_API, user.id, 'NORMAL', deviceCookie(device))
   const plannerId = randomUUID()

@@ -49,8 +49,6 @@ class ScheduledJobsTest {
                     "cron '0 0 4 * * *' next 2026-01-16T04:00, 2026-01-17T04:00"),
             Map.entry("PlannerKeywordBackfill.backfill",
                     "initialDelay 60000ms"),
-            Map.entry("PlannerViewRecorder.flush",
-                    "fixedDelay 500ms on viewFlushScheduler"),
             Map.entry("ReadSourceHealthProbe.probe",
                     "fixedDelay 1000ms on readSourceProbeScheduler"),
             Map.entry("SseService.cleanupZombieConnections",

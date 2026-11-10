@@ -85,7 +85,6 @@ class DataSourceTimeoutAndCacheConfigTest {
         private List<HikariConfig> allPools() {
             return List.of(
                     config.buildPrimaryHikariConfig(),
-                    config.buildBulkheadHikariConfig(),
                     readSourcesConfig.buildSourceHikariConfig(REPLICA));
         }
 
@@ -95,12 +94,6 @@ class DataSourceTimeoutAndCacheConfigTest {
                     .isEqualTo(TimeoutHierarchy.POOL_ACQUIRE_TIMEOUT_MS);
             assertThat(readSourcesConfig.buildSourceHikariConfig(REPLICA).getConnectionTimeout())
                     .isEqualTo(TimeoutHierarchy.POOL_ACQUIRE_TIMEOUT_MS);
-        }
-
-        @Test
-        void buildBulkheadHikariConfig_WhenBuilt_TakesConnectionTimeoutFromTheBulkheadConstant() {
-            assertThat(config.buildBulkheadHikariConfig().getConnectionTimeout())
-                    .isEqualTo(TimeoutHierarchy.BULKHEAD_ACQUIRE_TIMEOUT_MS);
         }
 
         @Test

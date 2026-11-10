@@ -8,8 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.moderation.dto.HidePlannerRequest;
 import org.danteplanner.backend.moderation.dto.ModerationResponse;
 import org.danteplanner.backend.moderation.api.PlannerModerationTarget;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,12 +72,6 @@ public class PlannerModerationService {
         log.info("Planner {} unhidden from recommended by moderator {}", plannerId, moderatorId);
 
         return describe(saved);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<ModerationResponse> listHiddenPlanners(Pageable pageable) {
-        return plannerTarget.listHiddenFromRecommended(pageable)
-                .map(this::describe);
     }
 
     private ModerationResponse describe(ModeratedPlanner planner) {
