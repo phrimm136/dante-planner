@@ -104,7 +104,7 @@ class MarkerStoreContextIT {
 
     private static void raiseProbeAndConnectEveryFactory(ApplicationContext context) {
         MarkerStore store = context.getBean(MarkerStore.class);
-        store.raise(Set.of(new FreshnessScope.PublicCatalog()), UUID.randomUUID() + ":1");
+        store.raise(Set.of(new FreshnessScope.Global()), UUID.randomUUID() + ":1");
         context.getBean(RedisRoleProbe.class).probe();
         for (LettuceConnectionFactory factory : context.getBeansOfType(LettuceConnectionFactory.class).values()) {
             try (RedisConnection connection = factory.getConnection()) {
@@ -186,7 +186,7 @@ class MarkerStoreContextIT {
             MarkerStore store = context.getBean(MarkerStore.class);
             for (int i = 0; i < RAISES_AT_CLOSE; i++) {
                 Thread raise = new Thread(() -> store.raise(
-                        Set.of(new FreshnessScope.PublicCatalog()), UUID.randomUUID() + ":1"));
+                        Set.of(new FreshnessScope.Global()), UUID.randomUUID() + ":1"));
                 raises.add(raise);
                 raise.start();
             }

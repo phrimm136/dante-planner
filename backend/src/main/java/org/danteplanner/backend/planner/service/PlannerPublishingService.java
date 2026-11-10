@@ -113,8 +113,8 @@ public class PlannerPublishingService {
                 contentValidator.season(planner.getContentVersion()), Stage.PUBLISH);
         if (document.migrated()) {
             planner.getContent().replaceContent(document);
-            FreshnessDeclarations.declare(new FreshnessScope.Entity(plannerId),
-                    new FreshnessScope.OwnerList(planner.getUserId()));
+            FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId),
+                    new FreshnessScope.User(planner.getUserId()));
         }
 
         PublicationChange change = planner.publish();
@@ -123,7 +123,7 @@ public class PlannerPublishingService {
         }
 
         plannerCatalogService.onBecameVisible(planner);
-        FreshnessDeclarations.declare(new FreshnessScope.Entity(plannerId), new FreshnessScope.PublicCatalog());
+        FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId), new FreshnessScope.Global());
         subscriptionService.createSubscription(userId, plannerId);
 
         if (change == PublicationChange.FIRST_PUBLISH) {
@@ -144,7 +144,7 @@ public class PlannerPublishingService {
         }
 
         plannerCatalogService.onBecameInvisible(plannerId);
-        FreshnessDeclarations.declare(new FreshnessScope.Entity(plannerId), new FreshnessScope.PublicCatalog());
+        FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId), new FreshnessScope.Global());
 
         log.info("Unpublished planner {} by user {}", plannerId, userId);
         return PlannerResponse.fromEntity(planner);
@@ -160,7 +160,7 @@ public class PlannerPublishingService {
         }
 
         plannerCatalogService.onBecameInvisible(plannerId);
-        FreshnessDeclarations.declare(new FreshnessScope.Entity(plannerId), new FreshnessScope.PublicCatalog());
+        FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId), new FreshnessScope.Global());
         return planner;
     }
 
@@ -170,7 +170,7 @@ public class PlannerPublishingService {
 
         change.accept(planner);
         plannerCatalogService.refreshRecommended(plannerId);
-        FreshnessDeclarations.declare(new FreshnessScope.PublicCatalog());
+        FreshnessDeclarations.declare(new FreshnessScope.Global());
         return planner;
     }
 
@@ -187,7 +187,7 @@ public class PlannerPublishingService {
         ownershipValidator.requireOwner(planner, userId);
 
         planner.setOwnerNotificationsEnabled(enabled);
-        FreshnessDeclarations.declare(new FreshnessScope.Entity(plannerId));
+        FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId));
 
         log.info("User {} toggled owner notifications for planner {} to {}", userId, plannerId, enabled);
         return new ToggleOwnerNotificationsResponse(enabled);

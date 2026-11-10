@@ -70,7 +70,7 @@ public class PlannerEngagementService {
         plannerVoteRepository.insert(newVote);
 
         plannerStatsService.incrementUpvotes(plannerId);
-        FreshnessDeclarations.declare(new FreshnessScope.Entity(plannerId), new FreshnessScope.PublicCatalog());
+        FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId), new FreshnessScope.Global());
 
         int upvotesAfter = plannerStatsService.upvotesOf(plannerId);
         int upvotesBefore = upvotesAfter - 1;

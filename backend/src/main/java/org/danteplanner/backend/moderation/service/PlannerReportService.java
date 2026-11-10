@@ -7,6 +7,8 @@ import org.danteplanner.backend.moderation.api.PlannerReports;
 import org.danteplanner.backend.moderation.entity.PlannerReport;
 import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +37,7 @@ public class PlannerReportService implements PlannerReports {
 
         PlannerReport report = new PlannerReport(userId, plannerId);
         reportRepository.insert(report);
+        FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId));
         log.info("User {} reported planner {}", userId, plannerId);
     }
 

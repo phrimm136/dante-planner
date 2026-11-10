@@ -120,6 +120,7 @@ public class CommentCommandService {
         authorshipValidator.requireAuthorToEdit(comment, userId);
 
         comment.edit(request.content());
+        FreshnessDeclarations.declare(new FreshnessScope.Planner(comment.getPlannerId()));
         log.info("User {} edited comment {}", userId, commentPublicId);
 
         return new UpdateCommentResponse(comment.getEditedAt());
@@ -135,7 +136,7 @@ public class CommentCommandService {
     }
 
     private static void declareCountChanged(UUID plannerId) {
-        FreshnessDeclarations.declare(new FreshnessScope.Entity(plannerId), new FreshnessScope.PublicCatalog());
+        FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId), new FreshnessScope.Global());
     }
 
     @Transactional

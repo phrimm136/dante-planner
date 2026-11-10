@@ -138,7 +138,7 @@ class MarkerStoreIT {
     @Test
     void raise_WhenWritersRaceOnOneScope_EndsAtTheHighestSequencePerServer() throws Exception {
         MarkerStore store = storeOver(liveFactory, List.of());
-        FreshnessScope scope = new FreshnessScope.Entity(UUID.randomUUID());
+        FreshnessScope scope = new FreshnessScope.Planner(UUID.randomUUID());
         List<Integer> sequences = new ArrayList<>(IntStream.rangeClosed(1, CONCURRENT_RAISES).boxed().toList());
         Collections.shuffle(sequences);
         ExecutorService writers = Executors.newFixedThreadPool(RAISING_THREADS);
@@ -163,7 +163,7 @@ class MarkerStoreIT {
     @Test
     void raise_WhenALowerSequenceFollows_KeepsTheHigherOne() {
         MarkerStore store = storeOver(liveFactory, List.of());
-        FreshnessScope scope = new FreshnessScope.Entity(UUID.randomUUID());
+        FreshnessScope scope = new FreshnessScope.Planner(UUID.randomUUID());
 
         store.raise(Set.of(scope), serverA + ":1-50");
         store.raise(Set.of(scope), serverA + ":1-49");
@@ -174,7 +174,7 @@ class MarkerStoreIT {
     @Test
     void raise_WhenANewServerUuidArrives_AddsItsFieldBesideTheOthers() {
         MarkerStore store = storeOver(liveFactory, List.of());
-        FreshnessScope scope = new FreshnessScope.OwnerList(ThreadLocalRandom.current().nextLong(1, Long.MAX_VALUE));
+        FreshnessScope scope = new FreshnessScope.User(ThreadLocalRandom.current().nextLong(1, Long.MAX_VALUE));
 
         store.raise(Set.of(scope), serverA + ":1-50");
         store.raise(Set.of(scope), serverB + ":1-3");
@@ -185,8 +185,8 @@ class MarkerStoreIT {
     @Test
     void raise_WhenItRaisesSeveralScopes_RaisesEachAndExpiresEachWithinTheTtl() {
         MarkerStore store = storeOver(liveFactory, List.of());
-        FreshnessScope entity = new FreshnessScope.Entity(UUID.randomUUID());
-        FreshnessScope catalog = new FreshnessScope.PublicCatalog();
+        FreshnessScope entity = new FreshnessScope.Planner(UUID.randomUUID());
+        FreshnessScope catalog = new FreshnessScope.Global();
 
         store.raise(Set.of(entity, catalog), serverA + ":1-7");
 
@@ -199,7 +199,7 @@ class MarkerStoreIT {
     @Test
     void raise_WhenTheScriptCacheWasFlushedSinceTheConnectionOpened_ReloadsTheScriptAndRaises() {
         MarkerStore store = storeOver(liveFactory, List.of());
-        FreshnessScope scope = new FreshnessScope.Entity(UUID.randomUUID());
+        FreshnessScope scope = new FreshnessScope.Planner(UUID.randomUUID());
         store.raise(Set.of(scope), serverA + ":1-3");
         live.execute((RedisCallback<Void>) connection -> {
             connection.scriptingCommands().scriptFlush();
@@ -215,8 +215,8 @@ class MarkerStoreIT {
     @Test
     void read_WhenAScopeHasAMarkerAndAnotherHasNone_IsAtForOneAndAbsentForTheOther() {
         MarkerStore store = storeOver(liveFactory, List.of(new MarkerStore.Source(RedisRole.AUTH, live)));
-        FreshnessScope raised = new FreshnessScope.Entity(UUID.randomUUID());
-        FreshnessScope untouched = new FreshnessScope.Entity(UUID.randomUUID());
+        FreshnessScope raised = new FreshnessScope.Planner(UUID.randomUUID());
+        FreshnessScope untouched = new FreshnessScope.Planner(UUID.randomUUID());
         store.raise(Set.of(raised), serverA + ":1-4:6-9");
 
         assertThat(store.read(List.of(raised, untouched))).containsExactly(
@@ -227,8 +227,8 @@ class MarkerStoreIT {
     @Test
     void read_WhenACatalogPageAsksForEveryScope_SendsThemAsOneBatch() {
         MarkerStore store = storeOver(liveFactory, List.of(new MarkerStore.Source(RedisRole.AUTH, live)));
-        List<FreshnessScope> scopes = new ArrayList<>(List.of(new FreshnessScope.PublicCatalog()));
-        IntStream.range(1, CATALOG_PAGE_SCOPES).forEach(i -> scopes.add(new FreshnessScope.Author(
+        List<FreshnessScope> scopes = new ArrayList<>(List.of(new FreshnessScope.Global()));
+        IntStream.range(1, CATALOG_PAGE_SCOPES).forEach(i -> scopes.add(new FreshnessScope.User(
                 ThreadLocalRandom.current().nextLong(1, Long.MAX_VALUE))));
         store.raise(Set.of(scopes.get(1)), serverA + ":1-3");
         readsProcessed();
@@ -254,7 +254,7 @@ class MarkerStoreIT {
                 MarkerStore store = storeOver(liveFactory, MarkerStore.sourceOrder(false,
                         new MarkerStore.Source(RedisRole.AUTH_LOCAL, stallingStore),
                         new MarkerStore.Source(RedisRole.AUTH, live)));
-                FreshnessScope scope = new FreshnessScope.Entity(UUID.randomUUID());
+                FreshnessScope scope = new FreshnessScope.Planner(UUID.randomUUID());
                 store.raise(Set.of(scope), serverA + ":1-6");
                 stallingStore.opsForHash().entries(scope.key());
                 stalling.getDockerClient().pauseContainerCmd(stalling.getContainerId()).exec();
@@ -262,7 +262,8 @@ class MarkerStoreIT {
                     Map<FreshnessScope, MarkerStore.MarkerView> views =
                             Hang.get(CompletableFuture.supplyAsync(() -> store.read(List.of(scope))), "a stalled read");
 
-                    assertThat(views).containsExactly(Map.entry(scope, new MarkerStore.MarkerView.At(serverA + ":1-6")));                } finally {
+                    assertThat(views).containsExactly(Map.entry(scope, new MarkerStore.MarkerView.At(serverA + ":1-6")));
+                } finally {
                     stalling.getDockerClient().unpauseContainerCmd(stalling.getContainerId()).exec();
                 }
             } finally {
@@ -275,7 +276,7 @@ class MarkerStoreIT {
     void read_WhenTheLocalStoreIsDown_ServesFromTheAuthStore() {
         MarkerStore store = storeOver(liveFactory, MarkerStore.sourceOrder(false,
                 new MarkerStore.Source(RedisRole.AUTH_LOCAL, refused), new MarkerStore.Source(RedisRole.AUTH, live)));
-        FreshnessScope scope = new FreshnessScope.Entity(UUID.randomUUID());
+        FreshnessScope scope = new FreshnessScope.Planner(UUID.randomUUID());
         store.raise(Set.of(scope), serverA + ":1-5");
 
         try (LogCapture capture = LogCapture.onThisThread(MarkerStore.class)) {
@@ -303,7 +304,7 @@ class MarkerStoreIT {
         MarkerStore store = storeOver(liveFactory, MarkerStore.sourceOrder(false,
                 new MarkerStore.Source(RedisRole.AUTH_LOCAL, refused), new MarkerStore.Source(RedisRole.AUTH, live)),
                 roleHealth);
-        FreshnessScope scope = new FreshnessScope.Entity(UUID.randomUUID());
+        FreshnessScope scope = new FreshnessScope.Planner(UUID.randomUUID());
         store.raise(Set.of(scope), serverA + ":1-5");
 
         try (LogCapture capture = LogCapture.onThisThread(MarkerStore.class)) {

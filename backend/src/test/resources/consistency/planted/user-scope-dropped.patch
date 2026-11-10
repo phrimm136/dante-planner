@@ -6,7 +6,7 @@ index 38e52127..16589dca 100644
          Page<PlannerSummaryRow> rows = includeDeleted
                  ? plannerRepository.findOwnerSummariesIncludingDeleted(userId, pageable)
                  : plannerRepository.findOwnerSummaries(userId, pageable);
--        return new ScopedRead<>(rows.map(PlannerSummaryResponse::from), Set.of(new FreshnessScope.OwnerList(userId)));
+-        return new ScopedRead<>(rows.map(PlannerSummaryResponse::from), Set.of(new FreshnessScope.User(userId)));
 +        return new ScopedRead<>(rows.map(PlannerSummaryResponse::from), Set.of());
      }
  

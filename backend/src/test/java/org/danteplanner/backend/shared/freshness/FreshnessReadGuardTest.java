@@ -44,8 +44,8 @@ class FreshnessReadGuardTest {
     private static final String APPLIED_TEN = UUID_A + ":1-10";
     private static final String APPLIED_FIVE = UUID_A + ":1-5";
     private static final Duration WAIT_BOUND = Duration.ofMillis(250);
-    private static final FreshnessScope ENTITY = new FreshnessScope.Entity(UUID.randomUUID());
-    private static final FreshnessScope OWNER_LIST = new FreshnessScope.OwnerList(7L);
+    private static final FreshnessScope PLANNER = new FreshnessScope.Planner(UUID.randomUUID());
+    private static final FreshnessScope USER = new FreshnessScope.User(7L);
 
     @Mock
     private DataSource seoulPool;
@@ -122,40 +122,40 @@ class FreshnessReadGuardTest {
 
     @Test
     void decide_WhenEverySourceMarkerIsAbsent_ServesWithoutWaiting() {
-        views.put(ENTITY, new MarkerView.Absent());
-        views.put(OWNER_LIST, new MarkerView.Absent());
+        views.put(PLANNER, new MarkerView.Absent());
+        views.put(USER, new MarkerView.Absent());
 
-        assertThat(guard.decide(List.of(ENTITY, OWNER_LIST), seoul, Map.of(), true))
+        assertThat(guard.decide(List.of(PLANNER, USER), seoul, Map.of(), true))
                 .isEqualTo(new FreshnessReadGuard.Decision.Serve());
-        assertThat(markerReads).containsExactly(List.of(ENTITY, OWNER_LIST));
+        assertThat(markerReads).containsExactly(List.of(PLANNER, USER));
         assertThat(waits).isEmpty();
         assertThat(selector.current()).contains(seoul);
     }
 
     @Test
     void decide_WhenTheMarkerWasAppliedBeforeTheLoadBegan_IssuesNoWait() {
-        views.put(ENTITY, new MarkerView.At(APPLIED_TEN));
+        views.put(PLANNER, new MarkerView.At(APPLIED_TEN));
         waitApplies = true;
-        guard.decide(List.of(ENTITY), seoul, Map.of(), true);
+        guard.decide(List.of(PLANNER), seoul, Map.of(), true);
         Map<String, String> appliedAtLoadStart = guard.applied();
-        views.put(ENTITY, new MarkerView.At(APPLIED_FIVE));
+        views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
         waitApplies = false;
 
-        assertThat(guard.decide(List.of(ENTITY), seoul, appliedAtLoadStart, true))
+        assertThat(guard.decide(List.of(PLANNER), seoul, appliedAtLoadStart, true))
                 .isEqualTo(new FreshnessReadGuard.Decision.Serve());
         assertThat(waits).containsExactly(SEOUL + "|" + UUID_A + ":1-10|" + WAIT_BOUND);
     }
 
     @Test
     void decide_WhenWaitApplies_ReloadsAndRemembersTheSet() {
-        views.put(ENTITY, new MarkerView.At(APPLIED_FIVE));
-        views.put(OWNER_LIST, new MarkerView.At(APPLIED_TEN));
+        views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
+        views.put(USER, new MarkerView.At(APPLIED_TEN));
         waitApplies = true;
 
-        assertThat(guard.decide(List.of(ENTITY, OWNER_LIST), seoul, Map.of(), true))
+        assertThat(guard.decide(List.of(PLANNER, USER), seoul, Map.of(), true))
                 .isEqualTo(new FreshnessReadGuard.Decision.Reload());
         waitApplies = false;
-        assertThat(guard.decide(List.of(ENTITY, OWNER_LIST), seoul, guard.applied(), true))
+        assertThat(guard.decide(List.of(PLANNER, USER), seoul, guard.applied(), true))
                 .isEqualTo(new FreshnessReadGuard.Decision.Serve());
 
         assertThat(waits).containsExactly(SEOUL + "|" + UUID_A + ":1-10|" + WAIT_BOUND);
@@ -166,22 +166,22 @@ class FreshnessReadGuardTest {
 
     @Test
     void decide_WhenTheSetWasRememberedOnlyAfterTheLoadBegan_WaitsAndReloads() {
-        views.put(ENTITY, new MarkerView.At(APPLIED_FIVE));
+        views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
         waitApplies = true;
         Map<String, String> appliedAtLoadStart = guard.applied();
-        guard.decide(List.of(ENTITY), seoul, Map.of(), true);
+        guard.decide(List.of(PLANNER), seoul, Map.of(), true);
 
-        assertThat(guard.decide(List.of(ENTITY), seoul, appliedAtLoadStart, true))
+        assertThat(guard.decide(List.of(PLANNER), seoul, appliedAtLoadStart, true))
                 .isEqualTo(new FreshnessReadGuard.Decision.Reload());
         assertThat(waits).hasSize(2);
     }
 
     @Test
     void decide_WhenWaitTimesOut_SkipsTheSource() {
-        views.put(ENTITY, new MarkerView.At(APPLIED_FIVE));
+        views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
         waitApplies = false;
 
-        assertThat(guard.decide(List.of(ENTITY), seoul, Map.of(), true))
+        assertThat(guard.decide(List.of(PLANNER), seoul, Map.of(), true))
                 .isEqualTo(new FreshnessReadGuard.Decision.Skip(seoul));
         assertThat(waitSamples(FreshnessReadGuard.TIMEOUT)).isEqualTo(1);
         assertThat(waitSamples(FreshnessReadGuard.APPLIED)).isZero();
@@ -192,9 +192,9 @@ class FreshnessReadGuardTest {
     void decide_WhenTheWaitConnectionFails_SkipsTheSourceWithoutThrowing() throws SQLException {
         when(seoulPool.getConnection()).thenThrow(new SQLException("Communications link failure", "08S01"));
         FreshnessReadGuard realWait = guardWaiting(GtidReadGate::isApplied);
-        views.put(ENTITY, new MarkerView.At(APPLIED_FIVE));
+        views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
 
-        assertThat(realWait.decide(List.of(ENTITY), seoul, Map.of(), true))
+        assertThat(realWait.decide(List.of(PLANNER), seoul, Map.of(), true))
                 .isEqualTo(new FreshnessReadGuard.Decision.Skip(seoul));
         assertThat(waitSamples(FreshnessReadGuard.TIMEOUT)).isEqualTo(1);
         assertThat(seoul.breaker().getMetrics().getNumberOfFailedCalls()).isZero();
@@ -203,11 +203,11 @@ class FreshnessReadGuardTest {
 
     @Test
     void decide_WhenAnyViewIsUnknown_SkipsTheSource() {
-        views.put(ENTITY, new MarkerView.At(APPLIED_FIVE));
-        views.put(OWNER_LIST, new MarkerView.Unknown());
+        views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
+        views.put(USER, new MarkerView.Unknown());
         waitApplies = true;
 
-        assertThat(guard.decide(List.of(ENTITY, OWNER_LIST), seoul, Map.of(), true))
+        assertThat(guard.decide(List.of(PLANNER, USER), seoul, Map.of(), true))
                 .isEqualTo(new FreshnessReadGuard.Decision.Skip(seoul));
         assertThat(waits).isEmpty();
         assertThat(selector.current()).contains(primary);
@@ -215,9 +215,9 @@ class FreshnessReadGuardTest {
 
     @Test
     void decide_WhenSourceIsAuthoritative_ServesWithoutReadingMarkers() {
-        views.put(ENTITY, new MarkerView.Unknown());
+        views.put(PLANNER, new MarkerView.Unknown());
 
-        assertThat(guard.decide(List.of(ENTITY), primary, Map.of(), true))
+        assertThat(guard.decide(List.of(PLANNER), primary, Map.of(), true))
                 .isEqualTo(new FreshnessReadGuard.Decision.Serve());
         assertThat(markerReads).isEmpty();
         assertThat(waits).isEmpty();
@@ -227,9 +227,9 @@ class FreshnessReadGuardTest {
     void read_WhenServedByAuthority_ReadsNoMarkers() throws Throwable {
         ReadSourceSelector.skip(seoul);
         List<String> loads = new ArrayList<>();
-        views.put(ENTITY, new MarkerView.Unknown());
+        views.put(PLANNER, new MarkerView.Unknown());
 
-        ScopedRead<?> served = guard.read(() -> scopedLoad(loads, Set.of(ENTITY)));
+        ScopedRead<?> served = guard.read(() -> scopedLoad(loads, Set.of(PLANNER)));
 
         assertThat(served.value()).isEqualTo(ReadSourceProperties.PRIMARY);
         assertThat(loads).containsExactly(ReadSourceProperties.PRIMARY);
@@ -238,52 +238,52 @@ class FreshnessReadGuardTest {
 
     @Test
     void read_WhenMarkersWereAppliedBeforeTheLoadBegan_ReturnsTheFirstLoad() throws Throwable {
-        views.put(ENTITY, new MarkerView.At(APPLIED_FIVE));
+        views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
         waitApplies = true;
-        guard.read(() -> scopedLoad(new ArrayList<>(), Set.of(ENTITY)));
+        guard.read(() -> scopedLoad(new ArrayList<>(), Set.of(PLANNER)));
         List<String> loads = new ArrayList<>();
         markerReads.clear();
         waits.clear();
         waitApplies = false;
 
-        ScopedRead<?> served = guard.read(() -> scopedLoad(loads, Set.of(ENTITY)));
+        ScopedRead<?> served = guard.read(() -> scopedLoad(loads, Set.of(PLANNER)));
 
         assertThat(served.value()).isEqualTo(SEOUL);
         assertThat(loads).containsExactly(SEOUL);
-        assertThat(markerReads).containsExactly(List.of(ENTITY));
+        assertThat(markerReads).containsExactly(List.of(PLANNER));
         assertThat(waits).isEmpty();
     }
 
     @Test
     void read_WhenTheMarkerIsAppliedDuringTheWait_LoadsAgainAndServesTheSecondLoad() throws Throwable {
         AtomicInteger loads = new AtomicInteger();
-        views.put(ENTITY, new MarkerView.At(APPLIED_FIVE));
+        views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
         waitApplies = true;
 
         ScopedRead<?> served = guard.read(() -> {
             loadOnCurrentSource(new ArrayList<>());
-            return new ScopedRead<>(loads.incrementAndGet(), Set.of(ENTITY));
+            return new ScopedRead<>(loads.incrementAndGet(), Set.of(PLANNER));
         });
 
         assertThat(served.value()).isEqualTo(2);
         assertThat(waits).containsExactly(SEOUL + "|" + APPLIED_FIVE + "|" + WAIT_BOUND);
-        assertThat(markerReads).containsExactly(List.of(ENTITY), List.of(ENTITY));
+        assertThat(markerReads).containsExactly(List.of(PLANNER), List.of(PLANNER));
         assertThat(selector.current()).contains(seoul);
     }
 
     @Test
     void read_WhenAnotherWaitRecordsTheSetDuringTheLoad_LoadsAgainAndServesTheSecondLoad() throws Throwable {
         AtomicInteger loads = new AtomicInteger();
-        views.put(ENTITY, new MarkerView.At(APPLIED_FIVE));
+        views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
         waitApplies = true;
 
         ScopedRead<?> served = guard.read(() -> {
             loadOnCurrentSource(new ArrayList<>());
             int load = loads.incrementAndGet();
             if (load == 1) {
-                guard.decide(List.of(ENTITY), seoul, Map.of(), true);
+                guard.decide(List.of(PLANNER), seoul, Map.of(), true);
             }
-            return new ScopedRead<>(load, Set.of(ENTITY));
+            return new ScopedRead<>(load, Set.of(PLANNER));
         });
 
         assertThat(served.value()).isEqualTo(2);
@@ -293,13 +293,13 @@ class FreshnessReadGuardTest {
     @Test
     void read_WhenANewerMarkerIsUnappliedAfterAReload_SkipsTheSourceWithoutASecondWait() throws Throwable {
         List<String> loads = new ArrayList<>();
-        views.put(ENTITY, new MarkerView.At(APPLIED_FIVE));
+        views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
         waitApplies = true;
 
         ScopedRead<?> served = guard.read(() -> {
-            ScopedRead<String> read = scopedLoad(loads, Set.of(ENTITY));
+            ScopedRead<String> read = scopedLoad(loads, Set.of(PLANNER));
             if (loads.size() == 2) {
-                views.put(ENTITY, new MarkerView.At(APPLIED_TEN));
+                views.put(PLANNER, new MarkerView.At(APPLIED_TEN));
             }
             return read;
         });
@@ -312,10 +312,10 @@ class FreshnessReadGuardTest {
 
     @Test
     void decide_WhenTheSourceMayNotReloadAgain_SkipsWithoutWaiting() {
-        views.put(ENTITY, new MarkerView.At(APPLIED_FIVE));
+        views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
         waitApplies = true;
 
-        assertThat(guard.decide(List.of(ENTITY), seoul, Map.of(), false))
+        assertThat(guard.decide(List.of(PLANNER), seoul, Map.of(), false))
                 .isEqualTo(new FreshnessReadGuard.Decision.Skip(seoul));
         assertThat(waits).isEmpty();
         assertThat(selector.current()).contains(primary);
@@ -324,13 +324,13 @@ class FreshnessReadGuardTest {
     @Test
     void read_WhenAMissMarkerIsAppliedDuringTheWait_LoadsAgainAndServesTheSecondLoad() throws Throwable {
         List<String> loads = new ArrayList<>();
-        views.put(ENTITY, new MarkerView.At(APPLIED_FIVE));
+        views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
         waitApplies = true;
 
         ScopedRead<?> served = guard.read(() -> {
-            ScopedRead<String> read = scopedLoad(loads, Set.of(ENTITY));
+            ScopedRead<String> read = scopedLoad(loads, Set.of(PLANNER));
             if (loads.size() == 1) {
-                throw new PlannerMissFixture(Set.of(ENTITY));
+                throw new PlannerMissFixture(Set.of(PLANNER));
             }
             return read;
         });
@@ -343,28 +343,28 @@ class FreshnessReadGuardTest {
     @Test
     void read_WhenTheSourceIsSkipped_LoadsAgainOnTheNextSource() throws Throwable {
         List<String> loads = new ArrayList<>();
-        views.put(ENTITY, new MarkerView.At(APPLIED_FIVE));
+        views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
         waitApplies = false;
 
-        ScopedRead<?> served = guard.read(() -> scopedLoad(loads, Set.of(ENTITY)));
+        ScopedRead<?> served = guard.read(() -> scopedLoad(loads, Set.of(PLANNER)));
 
         assertThat(served.value()).isEqualTo(ReadSourceProperties.PRIMARY);
         assertThat(loads).containsExactly(SEOUL, ReadSourceProperties.PRIMARY);
-        assertThat(markerReads).containsExactly(List.of(ENTITY));
+        assertThat(markerReads).containsExactly(List.of(PLANNER));
     }
 
     @Test
     void read_WhenAMissHasNoMarker_IsAFinal404() {
         List<String> loads = new ArrayList<>();
-        views.put(ENTITY, new MarkerView.Absent());
-        PlannerMissFixture miss = new PlannerMissFixture(Set.of(ENTITY));
+        views.put(PLANNER, new MarkerView.Absent());
+        PlannerMissFixture miss = new PlannerMissFixture(Set.of(PLANNER));
 
         assertThatThrownBy(() -> guard.read(() -> {
             loadOnCurrentSource(loads);
             throw miss;
         })).isSameAs(miss);
         assertThat(loads).containsExactly(SEOUL);
-        assertThat(markerReads).containsExactly(List.of(ENTITY));
+        assertThat(markerReads).containsExactly(List.of(PLANNER));
         assertThat(waits).isEmpty();
         assertThat(selector.current()).contains(seoul);
     }
@@ -372,13 +372,13 @@ class FreshnessReadGuardTest {
     @Test
     void read_WhenAMissHasAnUnappliedMarker_LoadsAgain() throws Throwable {
         List<String> loads = new ArrayList<>();
-        views.put(ENTITY, new MarkerView.At(APPLIED_FIVE));
+        views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
         waitApplies = false;
 
         ScopedRead<?> served = guard.read(() -> {
-            ScopedRead<String> read = scopedLoad(loads, Set.of(ENTITY));
+            ScopedRead<String> read = scopedLoad(loads, Set.of(PLANNER));
             if (read.value().equals(SEOUL)) {
-                throw new PlannerMissFixture(Set.of(ENTITY));
+                throw new PlannerMissFixture(Set.of(PLANNER));
             }
             return read;
         });
@@ -392,7 +392,7 @@ class FreshnessReadGuardTest {
         AtomicInteger loads = new AtomicInteger();
         TransactionSynchronizationManager.setActualTransactionActive(true);
         try {
-            assertThatThrownBy(() -> guard.read(() -> new ScopedRead<>(loads.incrementAndGet(), Set.of(ENTITY))))
+            assertThatThrownBy(() -> guard.read(() -> new ScopedRead<>(loads.incrementAndGet(), Set.of(PLANNER))))
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessage("a freshness read must run outside a transaction");
         } finally {
@@ -404,10 +404,10 @@ class FreshnessReadGuardTest {
     @Test
     void read_WhenTheLoadIssuedNoStatement_DecidesAgainstTheCurrentSource() throws Throwable {
         AtomicInteger loads = new AtomicInteger();
-        views.put(ENTITY, new MarkerView.At(APPLIED_FIVE));
+        views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
         waitApplies = false;
 
-        ScopedRead<?> served = guard.read(() -> new ScopedRead<>(loads.incrementAndGet(), Set.of(ENTITY)));
+        ScopedRead<?> served = guard.read(() -> new ScopedRead<>(loads.incrementAndGet(), Set.of(PLANNER)));
 
         assertThat(served.value()).isEqualTo(2);
         assertThat(waits).containsExactly(SEOUL + "|" + APPLIED_FIVE + "|" + WAIT_BOUND);

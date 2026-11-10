@@ -104,23 +104,23 @@ class CommentThreadNotFoundContractTest {
     }
 
     @Test
-    void getCommentTree_WhenStrangerReadsUnpublishedThread_MissesAsHiddenWithTheOwnersAuthorScope() {
+    void getCommentTree_WhenStrangerReadsUnpublishedThread_MissesAsHiddenWithTheOwnersUserScope() {
         assertThatThrownBy(() -> queryService.getCommentTree(plannerId, STRANGER_ID))
                 .isInstanceOfSatisfying(PlannerNotFoundException.class, miss -> {
                     assertThat(miss.miss()).isEqualTo(new PlannerMiss.Hidden(plannerId, OWNER_ID));
                     assertThat(miss.scopes()).containsExactlyInAnyOrder(
-                            new FreshnessScope.Entity(plannerId), new FreshnessScope.Author(OWNER_ID));
+                            new FreshnessScope.Planner(plannerId), new FreshnessScope.User(OWNER_ID));
                 });
     }
 
     @Test
-    void getCommentTree_WhenThePlannerRowIsAbsent_MissesAsAbsentWithTheEntityScopeOnly() {
+    void getCommentTree_WhenThePlannerRowIsAbsent_MissesAsAbsentWithThePlannerScopeOnly() {
         when(plannerRepository.findThread(plannerId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> queryService.getCommentTree(plannerId, STRANGER_ID))
                 .isInstanceOfSatisfying(PlannerNotFoundException.class, miss -> {
                     assertThat(miss.miss()).isEqualTo(new PlannerMiss.Absent(plannerId));
-                    assertThat(miss.scopes()).containsExactly(new FreshnessScope.Entity(plannerId));
+                    assertThat(miss.scopes()).containsExactly(new FreshnessScope.Planner(plannerId));
                 });
     }
 
@@ -129,7 +129,7 @@ class CommentThreadNotFoundContractTest {
         when(commentRepository.findByPlannerId(plannerId)).thenReturn(List.of());
 
         assertThat(queryService.getCommentTree(plannerId, OWNER_ID).scopes()).containsExactlyInAnyOrder(
-                new FreshnessScope.Entity(plannerId), new FreshnessScope.Author(OWNER_ID));
+                new FreshnessScope.Planner(plannerId), new FreshnessScope.User(OWNER_ID));
     }
 
     private static void signInAs(Long userId) {

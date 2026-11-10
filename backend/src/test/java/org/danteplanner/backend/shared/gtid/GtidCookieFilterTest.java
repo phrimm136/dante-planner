@@ -400,8 +400,8 @@ class GtidCookieFilterTest {
 
     @Test
     void bodilessWrite_WhenItCommitsAndDeclares_RaisesTheDeclaredScopesToItsGtidAndKeepsTheCookie() throws Exception {
-        FreshnessScope entity = new FreshnessScope.Entity(UUID.randomUUID());
-        FreshnessScope catalog = new FreshnessScope.PublicCatalog();
+        FreshnessScope entity = new FreshnessScope.Planner(UUID.randomUUID());
+        FreshnessScope catalog = new FreshnessScope.Global();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         filter.doFilter(new MockHttpServletRequest("DELETE", "/api/planners"), response,
@@ -417,7 +417,7 @@ class GtidCookieFilterTest {
     @Test
     void write_WhenItDeclaresButCommitsNothing_RaisesNothing() throws Exception {
         filter.doFilter(new MockHttpServletRequest("PUT", "/api/planners"), new MockHttpServletResponse(),
-                declaring(null, new FreshnessScope.PublicCatalog()));
+                declaring(null, new FreshnessScope.Global()));
 
         assertThat(markerStore.raises).isEmpty();
     }
@@ -433,17 +433,17 @@ class GtidCookieFilterTest {
     @Test
     void request_WhenItEnds_LeavesNoDeclarationOnTheThread() throws Exception {
         filter.doFilter(new MockHttpServletRequest("POST", "/api/planners"), new MockHttpServletResponse(),
-                declaring(null, new FreshnessScope.PublicCatalog()));
+                declaring(null, new FreshnessScope.Global()));
 
-        FreshnessDeclarations.declare(new FreshnessScope.OwnerList(1L));
+        FreshnessDeclarations.declare(new FreshnessScope.User(1L));
         assertThat(FreshnessDeclarations.declared()).isEmpty();
     }
 
     @Test
     void request_WhenAStaleDeclarationIsOnTheThread_StartsWithNoneDeclared() throws Exception {
         FreshnessDeclarations.begin();
-        FreshnessDeclarations.declare(new FreshnessScope.PublicCatalog());
-        FreshnessScope entity = new FreshnessScope.Entity(UUID.randomUUID());
+        FreshnessDeclarations.declare(new FreshnessScope.Global());
+        FreshnessScope entity = new FreshnessScope.Planner(UUID.randomUUID());
 
         filter.doFilter(new MockHttpServletRequest("POST", "/api/planners"), new MockHttpServletResponse(),
                 declaring(GTID, entity));
@@ -455,7 +455,7 @@ class GtidCookieFilterTest {
     void request_WhenTheChainThrows_ClearsTheDeclarations() {
         RuntimeException boom = new RuntimeException("chain blew up");
         FilterChain throwingChain = (req, res) -> {
-            FreshnessDeclarations.declare(new FreshnessScope.PublicCatalog());
+            FreshnessDeclarations.declare(new FreshnessScope.Global());
             throw boom;
         };
 
@@ -463,7 +463,7 @@ class GtidCookieFilterTest {
                 new MockHttpServletRequest("POST", "/api/planners"), new MockHttpServletResponse(), throwingChain))
                 .isSameAs(boom);
 
-        FreshnessDeclarations.declare(new FreshnessScope.OwnerList(1L));
+        FreshnessDeclarations.declare(new FreshnessScope.User(1L));
         assertThat(FreshnessDeclarations.declared()).isEmpty();
     }
 }

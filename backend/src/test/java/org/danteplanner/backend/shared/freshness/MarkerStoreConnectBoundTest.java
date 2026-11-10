@@ -57,14 +57,14 @@ class MarkerStoreConnectBoundTest {
                 assertThat(fillAcceptQueue(blackHole, fillers))
                         .as("the kernel drops a SYN once the accept queue of a never-accepting listener is full")
                         .isTrue();
-                store.raise(Set.of(new FreshnessScope.PublicCatalog()), SERVER + ":1");
+                store.raise(Set.of(new FreshnessScope.Global()), SERVER + ":1");
                 Hang.until(() -> meters.counter(MarkerStore.RAISE_FAILURES).count() >= 1.0,
                         "the first raise against the dropped connect counting its failure");
                 assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count()).isEqualTo(1.0);
                 double failuresBefore = meters.counter(MarkerStore.RAISE_FAILURES).count();
 
                 long start = System.nanoTime();
-                store.raise(Set.of(new FreshnessScope.PublicCatalog()), SERVER + ":2");
+                store.raise(Set.of(new FreshnessScope.Global()), SERVER + ":2");
                 Duration elapsed = Duration.ofNanos(System.nanoTime() - start);
 
                 assertThat(elapsed).isLessThan(MarkerStore.RAISE_CONNECT_TIMEOUT.plus(WAIT_BOUND).plus(RealClockBounds.SCHEDULING_SLACK));
@@ -105,7 +105,7 @@ class MarkerStoreConnectBoundTest {
                 ThreadGroup group = new ThreadGroup("marker-raise-close-" + UUID.randomUUID());
                 List<Thread> raises = IntStream.range(0, QUEUED_RAISES)
                         .mapToObj(i -> new Thread(group, () -> store.raise(
-                                Set.of(new FreshnessScope.PublicCatalog()), SERVER + ":" + (i + 1)), group.getName()))
+                                Set.of(new FreshnessScope.Global()), SERVER + ":" + (i + 1)), group.getName()))
                         .toList();
                 raises.forEach(Thread::start);
                 Hang.until(() -> raises.stream().allMatch(raise -> raise.getState() == Thread.State.TIMED_WAITING),

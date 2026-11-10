@@ -36,7 +36,7 @@ public class PlannerQueryService {
         Page<PlannerSummaryRow> rows = includeDeleted
                 ? plannerRepository.findOwnerSummariesIncludingDeleted(userId, pageable)
                 : plannerRepository.findOwnerSummaries(userId, pageable);
-        return new ScopedRead<>(rows.map(PlannerSummaryResponse::from), Set.of(new FreshnessScope.OwnerList(userId)));
+        return new ScopedRead<>(rows.map(PlannerSummaryResponse::from), Set.of(new FreshnessScope.User(userId)));
     }
 
     @Transactional(readOnly = true)
@@ -45,7 +45,7 @@ public class PlannerQueryService {
                 .map(PlannerResponse::fromEntity)
                 .toList();
         Set<FreshnessScope> scopes = ids.stream()
-                .map(FreshnessScope.Entity::new)
+                .map(FreshnessScope.Planner::new)
                 .collect(Collectors.toSet());
         return new ScopedRead<>(planners, scopes);
     }
@@ -53,6 +53,6 @@ public class PlannerQueryService {
     @Transactional(readOnly = true)
     public ScopedRead<PlannerResponse> getPlanner(Long userId, UUID id) {
         Planner planner = accessGuard.findPlannerOrThrow(userId, id);
-        return new ScopedRead<>(PlannerResponse.fromEntity(planner), Set.of(new FreshnessScope.Entity(id)));
+        return new ScopedRead<>(PlannerResponse.fromEntity(planner), Set.of(new FreshnessScope.Planner(id)));
     }
 }

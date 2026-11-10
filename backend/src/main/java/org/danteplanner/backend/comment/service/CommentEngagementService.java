@@ -17,6 +17,8 @@ import org.danteplanner.backend.moderation.api.dto.CommentReportRequest;
 import org.danteplanner.backend.moderation.api.dto.CommentReportResponse;
 import org.danteplanner.backend.moderation.api.CommentReports;
 import org.danteplanner.backend.planner.api.PlannerVotes;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,6 +56,7 @@ public class CommentEngagementService {
 
         commentVoteRepository.insert(newVote);
         commentRepository.incrementUpvoteCount(internalId);
+        FreshnessDeclarations.declare(new FreshnessScope.Planner(comment.getPlannerId()));
 
         // The increment clears the persistence context, so this reads the committed counter rather
         // than the pre-increment copy the vote was checked against.
@@ -73,6 +76,7 @@ public class CommentEngagementService {
         authorshipValidator.requireAuthorToToggleNotifications(comment, userId);
 
         comment.setAuthorNotificationsEnabled(enabled);
+        FreshnessDeclarations.declare(new FreshnessScope.Planner(comment.getPlannerId()));
 
         ToggleNotificationResponse response = new ToggleNotificationResponse(enabled);
 

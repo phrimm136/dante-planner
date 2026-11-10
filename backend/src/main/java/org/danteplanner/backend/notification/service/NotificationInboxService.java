@@ -7,7 +7,9 @@ import org.danteplanner.backend.notification.dto.UnreadCountResponse;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.shared.exception.EntityNotFoundException;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessPending;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -60,13 +62,16 @@ public class NotificationInboxService {
         Notification notification = requireOwned(publicId, userId);
 
         notification.markAsRead();
+        FreshnessDeclarations.declare(new FreshnessScope.User(userId));
 
         return NotificationResponse.fromEntity(notification);
     }
 
     @Transactional
     public int markAllAsRead(Long userId) {
-        return notificationRepository.markAllAsRead(userId, Instant.now());
+        int marked = notificationRepository.markAllAsRead(userId, Instant.now());
+        FreshnessDeclarations.declare(new FreshnessScope.User(userId));
+        return marked;
     }
 
     @Transactional
@@ -74,11 +79,14 @@ public class NotificationInboxService {
         Notification notification = requireOwned(publicId, userId);
 
         notification.softDelete();
+        FreshnessDeclarations.declare(new FreshnessScope.User(userId));
     }
 
     @Transactional
     public int deleteAllNotifications(Long userId) {
-        return notificationRepository.softDeleteAllByUserId(userId, Instant.now());
+        int deleted = notificationRepository.softDeleteAllByUserId(userId, Instant.now());
+        FreshnessDeclarations.declare(new FreshnessScope.User(userId));
+        return deleted;
     }
 
     private Notification requireOwned(UUID publicId, Long userId) {

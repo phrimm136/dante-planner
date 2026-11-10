@@ -40,6 +40,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.notification.api.NotificationType;
+import org.danteplanner.backend.notification.entity.Notification;
+import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
@@ -51,6 +54,7 @@ import org.danteplanner.backend.support.UpsertRequests;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
+import org.danteplanner.backend.user.service.UserService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
@@ -75,6 +79,10 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
     private static final String UPVOTE_BODY = "{\"voteType\":\"UP\"}";
     private static final String NOTIFICATIONS_OFF_BODY = "{\"enabled\":false}";
     private static final String EPITHET_BODY = "{\"epithet\":\"NAIVE\"}";
+    private static final String EDITED_COMMENT_BODY = "{\"content\":\"freshness declaration, edited\"}";
+    private static final String SETTINGS_BODY = "{\"syncEnabled\":true}";
+    private static final String TIMEOUT_BODY = "{\"durationMinutes\":10,\"reason\":\"freshness declaration\"}";
+    private static final String ROLE_BODY = "{\"role\":\"MODERATOR\"}";
 
     @Autowired
     private MockMvc mockMvc;
@@ -90,6 +98,12 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
 
     @Autowired
     private UserAccountLifecycleService lifecycleService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @Autowired
     private PlannerCommandService plannerCommandService;
@@ -108,6 +122,10 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
 
         long id() {
             return user.getId();
+        }
+
+        String suffix() {
+            return user.getUsernameSuffix();
         }
     }
 
@@ -128,61 +146,219 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
     }
 
     static Stream<Arguments> writesOnAPublishedPlanner() {
-        Function<Published, Set<FreshnessScope>> entityAndCatalog =
-                published -> Set.of(entity(published), new FreshnessScope.PublicCatalog());
+        Function<Published, Set<FreshnessScope>> plannerAndGlobal =
+                published -> Set.of(planner(published), new FreshnessScope.Global());
         return Stream.of(
                 new Row("owner edit", published -> put(PLANNERS + published.plannerId() + "?force=true")
                         .contentType(APPLICATION_JSON)
                         .content(json(published.plannerId(), "edited-" + UUID.randomUUID()))
                         .cookie(published.owner().cookies()),
-                        published -> Set.of(entity(published), new FreshnessScope.OwnerList(published.owner().id()),
-                                new FreshnessScope.PublicCatalog())),
+                        published -> Set.of(planner(published), new FreshnessScope.User(published.owner().id()),
+                                new FreshnessScope.Global())),
                 new Row("owner delete", published -> delete(PLANNERS + published.plannerId())
                         .cookie(published.owner().cookies()),
-                        published -> Set.of(entity(published), new FreshnessScope.OwnerList(published.owner().id()),
-                                new FreshnessScope.PublicCatalog())),
+                        published -> Set.of(planner(published), new FreshnessScope.User(published.owner().id()),
+                                new FreshnessScope.Global())),
                 new Row("owner unpublish", published -> post(PLANNERS + published.plannerId() + "/unpublish")
-                        .cookie(published.owner().cookies()), entityAndCatalog),
+                        .cookie(published.owner().cookies()), plannerAndGlobal),
                 new Row("owner notification toggle", published -> patch(PLANNERS + published.plannerId()
                         + "/notifications")
                         .contentType(APPLICATION_JSON)
                         .content(NOTIFICATIONS_OFF_BODY)
                         .cookie(published.owner().cookies()),
-                        published -> Set.of(entity(published))),
+                        published -> Set.of(planner(published))),
                 new Row("reader upvote", published -> post(PLANNERS + published.plannerId() + "/upvote")
                         .contentType(APPLICATION_JSON)
                         .content(UPVOTE_BODY)
-                        .cookie(published.reader().cookies()), entityAndCatalog),
+                        .cookie(published.reader().cookies()), plannerAndGlobal),
                 new Row("reader comment", published -> post("/api/planner/" + published.plannerId() + "/comments")
                         .contentType(APPLICATION_JSON)
                         .content(COMMENT_BODY)
-                        .cookie(published.reader().cookies()), entityAndCatalog),
+                        .cookie(published.reader().cookies()), plannerAndGlobal),
                 new Row("reader reply", published -> post("/api/comments/" + published.commentId() + "/replies")
                         .contentType(APPLICATION_JSON)
                         .content(COMMENT_BODY)
-                        .cookie(published.reader().cookies()), entityAndCatalog),
+                        .cookie(published.reader().cookies()), plannerAndGlobal),
                 new Row("author comment delete", published -> delete("/api/comments/" + published.commentId())
-                        .cookie(published.reader().cookies()), entityAndCatalog),
+                        .cookie(published.reader().cookies()), plannerAndGlobal),
                 new Row("moderator comment delete", published -> post("/api/moderation/comments/"
                         + published.commentId() + "/delete")
                         .contentType(APPLICATION_JSON)
                         .content(REASON_BODY)
-                        .cookie(published.moderator().cookies()), entityAndCatalog),
+                        .cookie(published.moderator().cookies()), plannerAndGlobal),
                 new Row("moderator takedown", published -> post("/api/moderation/planner/" + published.plannerId()
                         + "/takedown")
                         .contentType(APPLICATION_JSON)
                         .content(REASON_BODY)
-                        .cookie(published.moderator().cookies()), entityAndCatalog),
+                        .cookie(published.moderator().cookies()), plannerAndGlobal),
                 new Row("moderator unpublish", published -> put("/api/moderation/planner/" + published.plannerId()
                         + "/unpublish")
-                        .cookie(published.moderator().cookies()), entityAndCatalog),
+                        .cookie(published.moderator().cookies()), plannerAndGlobal),
                 new Row("moderator hide from recommended", published -> post("/api/moderation/planner/"
                         + published.plannerId() + "/hide-from-recommended")
                         .contentType(APPLICATION_JSON)
                         .content(REASON_BODY)
                         .cookie(published.moderator().cookies()),
-                        published -> Set.of(new FreshnessScope.PublicCatalog())))
+                        published -> Set.of(new FreshnessScope.Global())),
+                new Row("author comment edit", published -> put("/api/comments/" + published.commentId())
+                        .contentType(APPLICATION_JSON)
+                        .content(EDITED_COMMENT_BODY)
+                        .cookie(published.reader().cookies()),
+                        published -> Set.of(planner(published))),
+                new Row("owner comment vote", published -> post("/api/comments/" + published.commentId() + "/upvote")
+                        .cookie(published.owner().cookies()),
+                        published -> Set.of(planner(published))),
+                new Row("author comment notification toggle", published -> patch("/api/comments/"
+                        + published.commentId() + "/notifications")
+                        .contentType(APPLICATION_JSON)
+                        .content(NOTIFICATIONS_OFF_BODY)
+                        .cookie(published.reader().cookies()),
+                        published -> Set.of(planner(published))),
+                new Row("reader subscribe", published -> post(PLANNERS + published.plannerId() + "/subscribe")
+                        .cookie(published.reader().cookies()),
+                        published -> Set.of(planner(published))),
+                new Row("reader planner report", published -> post(PLANNERS + published.plannerId() + "/report")
+                        .cookie(published.reader().cookies()),
+                        published -> Set.of(planner(published))))
                 .map(Arguments::of);
+    }
+
+    static Stream<Arguments> moderationsRepeatedOnAnUnchangedTarget() {
+        return Stream.of(
+                new Row("moderator takedown", published -> post("/api/moderation/planner/" + published.plannerId()
+                        + "/takedown")
+                        .contentType(APPLICATION_JSON)
+                        .content(REASON_BODY)
+                        .cookie(published.moderator().cookies()),
+                        published -> Set.of(new FreshnessScope.Global())),
+                new Row("moderator unpublish", published -> put("/api/moderation/planner/" + published.plannerId()
+                        + "/unpublish")
+                        .cookie(published.moderator().cookies()),
+                        published -> Set.of(new FreshnessScope.Global())),
+                new Row("moderator hide from recommended", published -> post("/api/moderation/planner/"
+                        + published.plannerId() + "/hide-from-recommended")
+                        .contentType(APPLICATION_JSON)
+                        .content(REASON_BODY)
+                        .cookie(published.moderator().cookies()),
+                        published -> Set.of(new FreshnessScope.Global())),
+                new Row("moderator comment delete", published -> post("/api/moderation/comments/"
+                        + published.commentId() + "/delete")
+                        .contentType(APPLICATION_JSON)
+                        .content(REASON_BODY)
+                        .cookie(published.moderator().cookies()),
+                        published -> Set.of(new FreshnessScope.Global())))
+                .map(Arguments::of);
+    }
+
+    @ParameterizedTest
+    @MethodSource("moderationsRepeatedOnAnUnchangedTarget")
+    void moderation_WhenRepeatedOnAnUnchangedTarget_StampsOnlyGlobalForItsAuditRow(Row row) throws Exception {
+        Published published = publishedPlannerWithAComment();
+        perform(row.request().build(published));
+
+        assertStampsExactly(row.request().build(published), row.scopes().apply(published), candidates(published));
+    }
+
+    private record People(Session subject, Session moderator, Session admin, UUID notificationId) {
+    }
+
+    private interface RequestOn {
+
+        MockHttpServletRequestBuilder build(People people) throws Exception;
+    }
+
+    private record UserRow(String name, RequestOn request, Function<People, Set<FreshnessScope>> scopes) {
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
+
+    static Stream<Arguments> writesOnAUser() {
+        Function<People, Set<FreshnessScope>> subjectOnly =
+                people -> Set.of(new FreshnessScope.User(people.subject().id()));
+        Function<People, Set<FreshnessScope>> subjectAndGlobal =
+                people -> Set.of(new FreshnessScope.User(people.subject().id()), new FreshnessScope.Global());
+        return Stream.of(
+                new UserRow("settings save", people -> put("/api/user/settings")
+                        .contentType(APPLICATION_JSON)
+                        .content(SETTINGS_BODY)
+                        .cookie(people.subject().cookies()), subjectOnly),
+                new UserRow("inbox mark-read", people -> post("/api/notifications/" + people.notificationId()
+                        + "/mark-read")
+                        .cookie(people.subject().cookies()), subjectOnly),
+                new UserRow("inbox mark-all-read", people -> post("/api/notifications/mark-all-read")
+                        .cookie(people.subject().cookies()), subjectOnly),
+                new UserRow("inbox delete", people -> delete("/api/notifications/" + people.notificationId())
+                        .cookie(people.subject().cookies()), subjectOnly),
+                new UserRow("inbox delete-all", people -> delete("/api/notifications/all")
+                        .cookie(people.subject().cookies()), subjectOnly),
+                new UserRow("admin ban", people -> post("/api/moderation/user/" + people.subject().suffix() + "/ban")
+                        .contentType(APPLICATION_JSON)
+                        .content(REASON_BODY)
+                        .cookie(people.admin().cookies()), subjectAndGlobal),
+                new UserRow("admin unban", people -> post("/api/moderation/user/" + people.subject().suffix()
+                        + "/unban")
+                        .contentType(APPLICATION_JSON)
+                        .content(REASON_BODY)
+                        .cookie(people.admin().cookies()), subjectAndGlobal),
+                new UserRow("moderator timeout", people -> post("/api/moderation/user/" + people.subject().suffix()
+                        + "/timeout")
+                        .contentType(APPLICATION_JSON)
+                        .content(TIMEOUT_BODY)
+                        .cookie(people.moderator().cookies()), subjectAndGlobal),
+                new UserRow("moderator clear-timeout", people -> post("/api/moderation/user/"
+                        + people.subject().suffix() + "/clear-timeout")
+                        .contentType(APPLICATION_JSON)
+                        .content(REASON_BODY)
+                        .cookie(people.moderator().cookies()), subjectAndGlobal),
+                new UserRow("admin role change", people -> put("/api/admin/user/" + people.subject().id() + "/role")
+                        .contentType(APPLICATION_JSON)
+                        .content(ROLE_BODY)
+                        .cookie(people.admin().cookies()), subjectAndGlobal))
+                .map(Arguments::of);
+    }
+
+    @ParameterizedTest
+    @MethodSource("writesOnAUser")
+    void writeOnAUser_WhenItCommitsAndAnswers_StampsExactlyItsScopesWithItsGtid(UserRow row) throws Exception {
+        People people = peopleWithANotification();
+
+        assertStampsExactly(row.request().build(people), row.scopes().apply(people), candidates(people));
+    }
+
+    @Test
+    void commentReport_WhenItCommitsAndAnswers_StampsNothing() throws Exception {
+        Published published = publishedPlannerWithAComment();
+        Set<FreshnessScope> candidates = candidates(published);
+        Map<String, Map<String, String>> before = markers(candidates);
+
+        perform(post("/api/comments/" + published.commentId() + "/report")
+                .contentType(APPLICATION_JSON)
+                .content(REASON_BODY)
+                .cookie(published.owner().cookies()));
+
+        assertThat(markers(candidates)).isEqualTo(before);
+    }
+
+    @Test
+    void createAccount_WhenItCommitsInsideARequestWindow_DeclaresItsUserAndGlobal() {
+        writeCapture.begin();
+        FreshnessDeclarations.begin();
+        try {
+            User created = new TransactionTemplate(transactionManager).execute(status ->
+                    userService.findOrCreateUser("google", Map.of(
+                            "id", "freshness-create-" + UUID.randomUUID(),
+                            "email", "freshness-create-" + UUID.randomUUID() + "@example.com")));
+
+            assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
+                    new FreshnessScope.Global(), new FreshnessScope.User(created.getId()));
+            assertThat(writeCapture.takeCapturedGtid()).isPresent();
+        } finally {
+            writeCapture.clear();
+            FreshnessDeclarations.clear();
+        }
     }
 
     @ParameterizedTest
@@ -195,7 +371,7 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
     }
 
     @Test
-    void unhideFromRecommended_WhenItCommitsAndAnswers_StampsOnlyThePublicCatalog() throws Exception {
+    void unhideFromRecommended_WhenItCommitsAndAnswers_StampsOnlyGlobal() throws Exception {
         Published published = publishedPlannerWithAComment();
         perform(post("/api/moderation/planner/" + published.plannerId() + "/hide-from-recommended")
                 .contentType(APPLICATION_JSON)
@@ -204,11 +380,11 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
 
         assertStampsExactly(post("/api/moderation/planner/" + published.plannerId() + "/unhide-from-recommended")
                         .cookie(published.moderator().cookies()),
-                Set.of(new FreshnessScope.PublicCatalog()), candidates(published));
+                Set.of(new FreshnessScope.Global()), candidates(published));
     }
 
     @Test
-    void create_WhenItCommitsAndAnswers_StampsItsEntityAndItsOwnersList() throws Exception {
+    void create_WhenItCommitsAndAnswers_StampsItsPlannerAndItsOwner() throws Exception {
         Session owner = session("freshness-create");
         UUID plannerId = UUID.randomUUID();
 
@@ -216,12 +392,12 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
                         .contentType(APPLICATION_JSON)
                         .content(json(plannerId, "created"))
                         .cookie(owner.cookies()),
-                Set.of(new FreshnessScope.Entity(plannerId), new FreshnessScope.OwnerList(owner.id())),
+                Set.of(new FreshnessScope.Planner(plannerId), new FreshnessScope.User(owner.id())),
                 candidates(owner, plannerId));
     }
 
     @Test
-    void draftEdit_WhenItCommitsAndAnswers_StampsItsEntityAndItsOwnersList() throws Exception {
+    void draftEdit_WhenItCommitsAndAnswers_StampsItsPlannerAndItsOwner() throws Exception {
         Session owner = session("freshness-draft-edit");
         UUID plannerId = draft(owner);
 
@@ -229,33 +405,33 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
                         .contentType(APPLICATION_JSON)
                         .content(json(plannerId, "edited-draft"))
                         .cookie(owner.cookies()),
-                Set.of(new FreshnessScope.Entity(plannerId), new FreshnessScope.OwnerList(owner.id())),
+                Set.of(new FreshnessScope.Planner(plannerId), new FreshnessScope.User(owner.id())),
                 candidates(owner, plannerId));
     }
 
     @Test
-    void draftDelete_WhenItCommitsAndAnswers_StampsItsEntityItsOwnersListAndThePublicCatalog() throws Exception {
+    void draftDelete_WhenItCommitsAndAnswers_StampsItsPlannerItsOwnerAndGlobal() throws Exception {
         Session owner = session("freshness-draft-delete");
         UUID plannerId = draft(owner);
 
         assertStampsExactly(delete(PLANNERS + plannerId).cookie(owner.cookies()),
-                Set.of(new FreshnessScope.Entity(plannerId), new FreshnessScope.OwnerList(owner.id()),
-                        new FreshnessScope.PublicCatalog()),
+                Set.of(new FreshnessScope.Planner(plannerId), new FreshnessScope.User(owner.id()),
+                        new FreshnessScope.Global()),
                 candidates(owner, plannerId));
     }
 
     @Test
-    void publish_WhenItCarriesNoContent_StampsItsEntityAndThePublicCatalog() throws Exception {
+    void publish_WhenItCarriesNoContent_StampsItsPlannerAndGlobal() throws Exception {
         Session owner = session("freshness-publish");
         UUID plannerId = draft(owner);
 
         assertStampsExactly(post(PLANNERS + plannerId + "/publish").cookie(owner.cookies()),
-                Set.of(new FreshnessScope.Entity(plannerId), new FreshnessScope.PublicCatalog()),
+                Set.of(new FreshnessScope.Planner(plannerId), new FreshnessScope.Global()),
                 candidates(owner, plannerId));
     }
 
     @Test
-    void publish_WhenItCarriesChangedContent_AlsoStampsItsOwnersList() throws Exception {
+    void publish_WhenItCarriesChangedContent_AlsoStampsItsOwner() throws Exception {
         Session owner = session("freshness-publish-content");
         UUID plannerId = draft(owner);
 
@@ -267,13 +443,13 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
                                 .syncVersion(1L)
                                 .build()))
                         .cookie(owner.cookies()),
-                Set.of(new FreshnessScope.Entity(plannerId), new FreshnessScope.OwnerList(owner.id()),
-                        new FreshnessScope.PublicCatalog()),
+                Set.of(new FreshnessScope.Planner(plannerId), new FreshnessScope.User(owner.id()),
+                        new FreshnessScope.Global()),
                 candidates(owner, plannerId));
     }
 
     @Test
-    void updateUsernameEpithet_WhenItCommitsAndAnswers_StampsOnlyItsAuthor() throws Exception {
+    void updateUsernameEpithet_WhenItCommitsAndAnswers_StampsItsUserAndGlobal() throws Exception {
         Session owner = session("freshness-epithet");
         UUID first = published(owner);
         UUID second = published(owner);
@@ -283,24 +459,24 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
                         .contentType(APPLICATION_JSON)
                         .content(EPITHET_BODY)
                         .cookie(owner.cookies()),
-                Set.of(new FreshnessScope.Author(owner.id())),
+                Set.of(new FreshnessScope.User(owner.id()), new FreshnessScope.Global()),
                 candidates(owner, first, second, draft));
     }
 
     @Test
-    void deleteAccount_WhenItCommitsAndAnswers_StampsThePublicCatalogAndItsAuthor() throws Exception {
+    void deleteAccount_WhenItCommitsAndAnswers_StampsGlobalAndItsUser() throws Exception {
         Session owner = session("freshness-account-delete");
         UUID first = published(owner);
         UUID second = published(owner);
         UUID draft = draft(owner);
 
         assertStampsExactly(delete("/api/user/me").cookie(owner.cookies()),
-                Set.of(new FreshnessScope.PublicCatalog(), new FreshnessScope.Author(owner.id())),
+                Set.of(new FreshnessScope.Global(), new FreshnessScope.User(owner.id())),
                 candidates(owner, first, second, draft));
     }
 
     @Test
-    void reactivateAccount_WhenItCommitsInsideARequestWindow_DeclaresThePublicCatalogAndItsAuthor()
+    void reactivateAccount_WhenItCommitsInsideARequestWindow_DeclaresGlobalAndItsUser()
             throws Exception {
         Session owner = session("freshness-reactivate");
         published(owner);
@@ -313,7 +489,7 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
             lifecycleService.reactivateAccount(owner.id());
 
             assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
-                    new FreshnessScope.PublicCatalog(), new FreshnessScope.Author(owner.id()));
+                    new FreshnessScope.Global(), new FreshnessScope.User(owner.id()));
             assertThat(writeCapture.takeCapturedGtid()).isPresent();
         } finally {
             writeCapture.clear();
@@ -364,7 +540,7 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
                 status.setRollbackOnly();
             });
 
-            assertThat(FreshnessDeclarations.declared()).contains(new FreshnessScope.Entity(plannerId));
+            assertThat(FreshnessDeclarations.declared()).contains(new FreshnessScope.Planner(plannerId));
             assertThat(writeCapture.takeCapturedGtid()).isEmpty();
 
             transaction.executeWithoutResult(status -> plannerCommandService.deletePlanner(owner.id(), plannerId));
@@ -389,7 +565,7 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
                 .filter(key -> !Objects.equals(before.get(key), after.get(key)))
                 .collect(Collectors.toSet());
         assertThat(changed)
-                .as("the markers of this fixture's planners, users and the catalog that this request changed")
+                .as("the markers of this fixture's planners, users and Global that this request changed")
                 .containsExactlyInAnyOrderElementsOf(scopes.stream().map(FreshnessScope::key).toList());
         scopes.forEach(scope -> assertThat(after.get(scope.key()))
                 .as("marker %s after a request committing %s", scope.key(), requestGtid)
@@ -413,18 +589,25 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
     }
 
     private static Set<FreshnessScope> candidates(Published published) {
-        return Set.of(entity(published), new FreshnessScope.OwnerList(published.owner().id()),
-                new FreshnessScope.OwnerList(published.reader().id()),
-                new FreshnessScope.OwnerList(published.moderator().id()), new FreshnessScope.PublicCatalog());
+        return Set.of(planner(published), new FreshnessScope.User(published.owner().id()),
+                new FreshnessScope.User(published.reader().id()),
+                new FreshnessScope.User(published.moderator().id()), new FreshnessScope.Global());
+    }
+
+    private static Set<FreshnessScope> candidates(People people) {
+        Set<FreshnessScope> candidates = new HashSet<>();
+        Stream.of(people.subject(), people.moderator(), people.admin())
+                .forEach(session -> candidates.add(new FreshnessScope.User(session.id())));
+        candidates.add(new FreshnessScope.Global());
+        return candidates;
     }
 
     private static Set<FreshnessScope> candidates(Session owner, UUID... plannerIds) {
         Set<FreshnessScope> candidates = new HashSet<>();
-        candidates.add(new FreshnessScope.OwnerList(owner.id()));
-        candidates.add(new FreshnessScope.Author(owner.id()));
-        candidates.add(new FreshnessScope.PublicCatalog());
+        candidates.add(new FreshnessScope.User(owner.id()));
+        candidates.add(new FreshnessScope.Global());
         for (UUID plannerId : plannerIds) {
-            candidates.add(new FreshnessScope.Entity(plannerId));
+            candidates.add(new FreshnessScope.Planner(plannerId));
         }
         return candidates;
     }
@@ -455,8 +638,8 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
         return asText;
     }
 
-    private static FreshnessScope entity(Published published) {
-        return new FreshnessScope.Entity(published.plannerId());
+    private static FreshnessScope planner(Published published) {
+        return new FreshnessScope.Planner(published.plannerId());
     }
 
     private static String json(UUID plannerId, String title) throws Exception {
@@ -507,5 +690,14 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
         UUID commentId = UUID.fromString(objectMapper.readTree(comment.getResponse().getContentAsString())
                 .get("id").asString());
         return new Published(plannerId, owner, reader, moderatorSession(), commentId);
+    }
+
+    private People peopleWithANotification() {
+        Session subject = session("freshness-subject");
+        Notification notification = notificationRepository.save(new Notification(
+                subject.id(), "freshness-" + UUID.randomUUID(), NotificationType.COMMENT_RECEIVED));
+        Session admin = sessionOf(TestDataFactory.createAdmin(userRepository, "freshness-admin-" + UUID.randomUUID()
+                + "@example.com"));
+        return new People(subject, moderatorSession(), admin, notification.getPublicId());
     }
 }

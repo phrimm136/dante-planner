@@ -162,8 +162,8 @@ public class PublishedPlannerQueryService implements PublishedPlanners {
                     : PublicPlannerResponse.fromCatalog(row, core, stats, upvotedIds.contains(id));
         });
         Set<FreshnessScope> scopes = new LinkedHashSet<>();
-        scopes.add(new FreshnessScope.PublicCatalog());
-        coreInfoMap.values().forEach(core -> scopes.add(new FreshnessScope.Author(core.authorId())));
+        scopes.add(new FreshnessScope.Global());
+        coreInfoMap.values().forEach(core -> scopes.add(new FreshnessScope.User(core.authorId())));
         return new ScopedRead<>(page, scopes);
     }
 

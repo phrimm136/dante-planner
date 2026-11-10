@@ -49,7 +49,7 @@ public class CommentQueryService {
         accessValidator.requireThreadVisible(planner, currentUserId);
 
         Set<FreshnessScope> scopes = Set.of(
-                new FreshnessScope.Entity(plannerId), new FreshnessScope.Author(planner.ownerId()));
+                new FreshnessScope.Planner(plannerId), new FreshnessScope.User(planner.ownerId()));
         List<PlannerComment> comments = commentRepository.findByPlannerId(plannerId);
         if (comments.isEmpty()) {
             return new ScopedRead<>(Collections.emptyList(), scopes);

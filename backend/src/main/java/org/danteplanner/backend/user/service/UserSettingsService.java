@@ -12,7 +12,9 @@ import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.repository.UserSettingsRepository;
 import org.danteplanner.backend.shared.sse.NotificationPreferenceProvider;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessPending;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,6 +57,7 @@ public class UserSettingsService implements NotificationPreferenceProvider {
         applyIfPresent(request.notifyComments(), settings::setNotifyComments);
         applyIfPresent(request.notifyRecommendations(), settings::setNotifyRecommendations);
         applyIfPresent(request.notifyNewPublications(), settings::setNotifyNewPublications);
+        FreshnessDeclarations.declare(new FreshnessScope.User(userId));
 
         log.debug("Updated settings for user {}", userId);
 
