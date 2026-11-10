@@ -23,7 +23,6 @@ import jakarta.persistence.EntityManagerFactory;
 import tools.jackson.databind.ObjectMapper;
 import com.redis.testcontainers.RedisContainer;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.AfterAll;
@@ -39,6 +38,8 @@ import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.config.RedisConnectionConfig;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.danteplanner.backend.shared.gtid.GtidGateConfig;
+import org.danteplanner.backend.shared.redis.RedisRoleConfig;
+import org.danteplanner.backend.shared.redis.RedisRoleProbe;
 import org.danteplanner.backend.support.Hang;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -76,9 +77,8 @@ class MarkerStoreContextIT {
 
     private ApplicationContextRunner routingContext() {
         ApplicationContextRunner runner = new ApplicationContextRunner()
-                .withUserConfiguration(RedisConnectionConfig.class, GtidGateConfig.class)
+                .withUserConfiguration(RedisConnectionConfig.class, RedisRoleConfig.class, GtidGateConfig.class)
                 .withBean(MeterRegistry.class, SimpleMeterRegistry::new)
-                .withBean(CircuitBreakerRegistry.class, CircuitBreakerRegistry::ofDefaults)
                 .withBean(ReadSourceProperties.class)
                 .withBean(ReadSourceSelector.class, () -> new ReadSourceSelector(List.of(new ReadSourceSelector.Source(
                         ReadSourceProperties.PRIMARY, true, primaryReadSource,
@@ -105,7 +105,7 @@ class MarkerStoreContextIT {
     private static void raiseProbeAndConnectEveryFactory(ApplicationContext context) {
         MarkerStore store = context.getBean(MarkerStore.class);
         store.raise(Set.of(new FreshnessScope.PublicCatalog()), UUID.randomUUID() + ":1");
-        store.probe();
+        context.getBean(RedisRoleProbe.class).probe();
         for (LettuceConnectionFactory factory : context.getBeansOfType(LettuceConnectionFactory.class).values()) {
             try (RedisConnection connection = factory.getConnection()) {
                 assertThat(connection.ping()).isNotNull();
@@ -157,7 +157,7 @@ class MarkerStoreContextIT {
     }
 
     @Test
-    void context_WhenMarkerStoreHasRaisedAndProbed_RunsEveryRedisClientOnOneSetOfLettucePools() throws InterruptedException {
+    void context_WhenMarkerStoreHasRaisedAndTheRolesWereProbed_RunsEveryRedisClientOnOneSetOfLettucePools() throws InterruptedException {
         ThreadGroup group = new ThreadGroup("marker-store-context-" + UUID.randomUUID());
         AtomicReference<Set<String>> pools = new AtomicReference<>();
         runInGroup(group, context -> {

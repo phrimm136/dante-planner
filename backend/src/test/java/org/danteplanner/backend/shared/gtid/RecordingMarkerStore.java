@@ -10,6 +10,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.freshness.MarkerStore;
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 
 final class RecordingMarkerStore extends MarkerStore {
 
@@ -19,7 +20,7 @@ final class RecordingMarkerStore extends MarkerStore {
     final List<Raise> raises = new ArrayList<>();
 
     RecordingMarkerStore() {
-        super(null, null, List.of(), new Settings(0, Duration.ofSeconds(1), Duration.ofHours(1)), new SimpleMeterRegistry());
+        super(null, null, List.of(), new RedisRoleHealth(), new Settings(0, Duration.ofSeconds(1), Duration.ofHours(1)), new SimpleMeterRegistry());
     }
 
     @Override

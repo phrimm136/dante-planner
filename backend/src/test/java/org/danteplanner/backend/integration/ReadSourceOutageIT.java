@@ -451,6 +451,7 @@ class ReadSourceOutageIT extends ReplicaRoutingHarnessSupport {
 
     private static boolean anyBreakerOpen(MeterRegistry registry) {
         return registry.find(BREAKER_STATE_GAUGE).tag("state", "open").gauges().stream()
+                .filter(gauge -> gauge.getId().getTag("name").startsWith(ReadSourcesConfig.BREAKER_NAME_PREFIX))
                 .mapToDouble(Gauge::value)
                 .anyMatch(value -> value == 1.0);
     }

@@ -9,14 +9,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.validation.annotation.Validated;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -25,7 +23,6 @@ import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
@@ -37,23 +34,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.constraints.time.DurationMin;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
-import org.danteplanner.backend.shared.config.RedisConnectionConfig;
+import org.danteplanner.backend.shared.redis.RedisRole;
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 
 @Slf4j
 public class MarkerStore implements AutoCloseable {
 
     public static final String RAISE_FAILURES = "freshness.marker.raise.failures";
     public static final String WAIT_TIMEOUTS = "freshness.marker.wait.timeouts";
-    public static final String PROBE_SCHEDULER = "markerSourceProbeScheduler";
-    public static final String BREAKER_NAME_PREFIX = "marker-source-";
-    public static final String LOCAL_SOURCE = "auth-local";
-    public static final String AUTH_SOURCE = "auth";
 
-    static final String PROBE_INTERVAL_TEXT = "PT1S";
-    static final Duration PROBE_TIMEOUT = Duration.ofSeconds(1);
     static final Duration RAISE_CONNECT_TIMEOUT = Duration.ofSeconds(1);
     static final Duration RAISE_MARGIN = Duration.ofMillis(500);
-    static final int PROBE_FAILURE_THRESHOLD = 2;
 
     private static final String SEQUENCE_RANGE_START = ":1-";
     private static final String SOURCE_SEPARATOR = ",";
@@ -72,11 +63,7 @@ public class MarkerStore implements AutoCloseable {
         }
     }
 
-    public record Source(
-            String name,
-            StringRedisTemplate store,
-            RedisConnectionConfig.Endpoint endpoint,
-            CircuitBreaker breaker) {
+    public record Source(RedisRole role, StringRedisTemplate store) {
     }
 
     @ConfigurationProperties(prefix = "freshness.marker")
@@ -94,20 +81,20 @@ public class MarkerStore implements AutoCloseable {
     }
 
     private final List<Source> readSources;
+    private final RedisRoleHealth roleHealth;
     private final Settings settings;
-    private final MarkerSourceProbe sourceProbe;
     private final RaiseBatcher raiseBatcher;
 
     public MarkerStore(
             LettuceConnectionFactory writeStore,
             ClientResources clientResources,
             List<Source> readSources,
+            RedisRoleHealth roleHealth,
             Settings settings,
             MeterRegistry meterRegistry) {
         this.readSources = List.copyOf(readSources);
+        this.roleHealth = roleHealth;
         this.settings = settings;
-        this.sourceProbe = new MarkerSourceProbe(
-                clientResources, this.readSources, PROBE_TIMEOUT, PROBE_FAILURE_THRESHOLD);
         this.raiseBatcher = new RaiseBatcher(() -> raiseEndpoint(writeStore, clientResources),
                 settings.waitReplicas(), settings.waitBound(), RAISE_MARGIN, meterRegistry.counter(RAISE_FAILURES),
                 meterRegistry.counter(WAIT_TIMEOUTS), System::nanoTime);
@@ -127,7 +114,7 @@ public class MarkerStore implements AutoCloseable {
 
     public Map<FreshnessScope, MarkerView> read(Collection<FreshnessScope> scopes) {
         for (Source source : readSources) {
-            if (source.breaker().getState() != CircuitBreaker.State.CLOSED) {
+            if (!roleHealth.isAvailable(source.role())) {
                 continue;
             }
             Optional<Map<FreshnessScope, MarkerView>> views = readFrom(source, scopes);
@@ -140,14 +127,8 @@ public class MarkerStore implements AutoCloseable {
         return unknown;
     }
 
-    @Scheduled(fixedDelayString = PROBE_INTERVAL_TEXT, scheduler = PROBE_SCHEDULER)
-    public void probe() {
-        sourceProbe.probe();
-    }
-
     @Override
     public void close() {
-        sourceProbe.close();
         raiseBatcher.close();
     }
 
@@ -168,17 +149,14 @@ public class MarkerStore implements AutoCloseable {
     }
 
     private Optional<Map<FreshnessScope, MarkerView>> readFrom(Source source, Collection<FreshnessScope> scopes) {
-        long start = System.nanoTime();
         try {
             Map<FreshnessScope, MarkerView> views = new LinkedHashMap<>();
             for (FreshnessScope scope : scopes) {
                 views.put(scope, viewOf(source.store().<String, String>opsForHash().entries(scope.key())));
             }
-            source.breaker().onSuccess(System.nanoTime() - start, TimeUnit.NANOSECONDS);
             return Optional.of(views);
         } catch (DataAccessException e) {
-            source.breaker().onError(System.nanoTime() - start, TimeUnit.NANOSECONDS, e);
-            log.warn("Freshness markers not read from {}: trying the next source", source.name(), e);
+            log.warn("Freshness markers not read from {}: trying the next source", source.role().label(), e);
             return Optional.empty();
         }
     }

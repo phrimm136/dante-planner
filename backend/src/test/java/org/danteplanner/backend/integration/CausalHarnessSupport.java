@@ -59,6 +59,7 @@ abstract class CausalHarnessSupport {
 
     private static final String REDIS_IMAGE = "redis:7-alpine";
     private static final String AUTH_REDIS_ALIAS = "auth-redis";
+    private static final String AUTH_REDIS_REPLICA_ALIAS = "auth-redis-replica";
     private static final int REDIS_INTERNAL_PORT = 6379;
     private static final int MARKER_WAIT_REPLICAS = 1;
     private static final String REPLICA_LINK_UP = "master_link_status:up";
@@ -74,6 +75,9 @@ abstract class CausalHarnessSupport {
     static final int OREGON_PROXY_LISTEN_PORT = 8668;
     private static final String AUTH_REDIS_REPLICATION_PROXY_NAME = "auth-redis-replication";
     private static final int AUTH_REDIS_REPLICATION_LISTEN_PORT = 8670;
+    private static final String AUTH_LOCAL_PROXY_NAME = "app-to-auth-local";
+    private static final int AUTH_LOCAL_LISTEN_PORT = 8671;
+    private static final String AUTH_LOCAL_BLACKHOLE = "auth-local-blackhole";
     private static final int SOURCE_CONNECT_RETRY_SECONDS = 1;
 
     private static final Network NETWORK = Network.newNetwork();
@@ -131,6 +135,7 @@ abstract class CausalHarnessSupport {
 
     static final RedisContainer AUTH_REDIS_REPLICA = new RedisContainer(REDIS_IMAGE)
             .withNetwork(NETWORK)
+            .withNetworkAliases(AUTH_REDIS_REPLICA_ALIAS)
             .withCommand("redis-server", "--replicaof", TOXIPROXY_ALIAS,
                     String.valueOf(AUTH_REDIS_REPLICATION_LISTEN_PORT));
 
@@ -148,6 +153,8 @@ abstract class CausalHarnessSupport {
 
     static final Proxy AUTH_REDIS_REPLICATION_PROXY;
 
+    static final Proxy AUTH_LOCAL_PROXY;
+
     static {
         PRIMARY.start();
         REPLICA.start();
@@ -160,6 +167,8 @@ abstract class CausalHarnessSupport {
         AUTH_REDIS_REPLICATION_PROXY = createProxy(AUTH_REDIS_REPLICATION_PROXY_NAME,
                 AUTH_REDIS_REPLICATION_LISTEN_PORT, AUTH_REDIS_ALIAS + ":" + REDIS_INTERNAL_PORT);
         AUTH_REDIS_REPLICA.start();
+        AUTH_LOCAL_PROXY = createProxy(AUTH_LOCAL_PROXY_NAME,
+                AUTH_LOCAL_LISTEN_PORT, AUTH_REDIS_REPLICA_ALIAS + ":" + REDIS_INTERNAL_PORT);
         awaitAuthRedisReplicaLinked();
         wireReplication(new JdbcTemplate(adminDataSource(PRIMARY)), new JdbcTemplate(adminDataSource(REPLICA)));
     }
@@ -188,8 +197,8 @@ abstract class CausalHarnessSupport {
         registry.add("spring.flyway.password", PRIMARY::getPassword);
         registry.add("redis.auth.host", AUTH_REDIS::getRedisHost);
         registry.add("redis.auth.port", AUTH_REDIS::getRedisPort);
-        registry.add("redis.auth-local.host", AUTH_REDIS_REPLICA::getRedisHost);
-        registry.add("redis.auth-local.port", AUTH_REDIS_REPLICA::getRedisPort);
+        registry.add("redis.auth-local.host", TOXIPROXY::getHost);
+        registry.add("redis.auth-local.port", CausalHarnessSupport::authLocalProxyPort);
         registry.add("redis.rate-limit.host", RATE_LIMIT_REDIS::getRedisHost);
         registry.add("redis.rate-limit.port", RATE_LIMIT_REDIS::getRedisPort);
         registry.add("freshness.marker.wait-replicas", () -> MARKER_WAIT_REPLICAS);
@@ -204,6 +213,21 @@ abstract class CausalHarnessSupport {
         toxiproxyControl.removeReplicationLatency();
         toxiproxyControl.restoreOregonPrimary();
         releaseAuthRedisReplicaAcks();
+        healAuthLocal();
+    }
+
+    static int authLocalProxyPort() {
+        return TOXIPROXY.getMappedPort(AUTH_LOCAL_LISTEN_PORT);
+    }
+
+    static void blackholeAuthLocal() throws IOException {
+        AUTH_LOCAL_PROXY.toxics().timeout(AUTH_LOCAL_BLACKHOLE, ToxicDirection.UPSTREAM, 0);
+    }
+
+    static void healAuthLocal() throws IOException {
+        for (Toxic toxic : AUTH_LOCAL_PROXY.toxics().getAll()) {
+            toxic.remove();
+        }
     }
 
     static void holdAuthRedisReplicaAcks() throws IOException {
