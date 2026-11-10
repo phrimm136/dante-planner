@@ -126,12 +126,12 @@ epic: none · pr: none · supersedes: 008 @ryw @gtid @cookie, 008 @gtid @capture
 - @freshness @store-health — A marker failure does not fail the write: `WAIT` has an upper bound,
   and the write answers when it passes. The marker store has an ordered source list per region,
   like the database (182 @reads @sources): Seoul reads its Redis replica first and the Oregon Redis
-  primary second; Oregon reads only its own store, the primary. Each pod probes each store every second and opens a breaker
-  on two consecutive failures. A broken replication link does not make markers unknown, because
+  primary second; Oregon reads only its own store, the primary. Each store is a Redis role, and a read
+  skips a store whose role breaker the role's probe has opened (514 @redis @degradation @breaker). A broken replication link does not make markers unknown, because
   every write answered after a successful `WAIT` already reached the Seoul replica. A read answers
   503 only when its marker names a change that no reachable source has applied and no
   authoritative database is reachable, or when no marker store and no authoritative database is
-  reachable. Grafana shows marker-store health per pod and source and `WAIT` timeouts, and both
+  reachable. Grafana shows the Redis role breakers per pod and role and `WAIT` timeouts, and both
   alert.
   REJECTED: failing the write when `WAIT` times out — one lost Redis replica would fail every write
   in both regions, and the client would retry a write that already committed into a version
