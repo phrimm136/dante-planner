@@ -12,6 +12,7 @@ import org.danteplanner.backend.integration.consistency.Plan.Stopped;
 
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.ANONYMOUS;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.AUTHOR_DEVICES;
+import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.COMMENTER;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.CREATOR;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.PUBLIC_READ_BUDGET;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.SESSIONS;
@@ -39,11 +40,16 @@ public final class OperationGenerator {
     private static final List<Kind> ANONYMOUS_KINDS =
             List.of(Kind.PUBLIC_READ, Kind.PUBLIC_READ, Kind.CATALOG, Kind.THREAD_READ);
     private static final int PHASES = 3;
+    private static final KeyDraw PROBE_KEY = new KeyDraw(0);
 
     private OperationGenerator() {
     }
 
     public static Plan plan(long seed, int budget, long latencyBound) {
+        return plan(seed, budget, latencyBound, true);
+    }
+
+    static Plan plan(long seed, int budget, long latencyBound, boolean probes) {
         SplittableRandom random = new SplittableRandom(seed);
         List<Region> homes = homes(random);
         int phaseBudget = budget / PHASES;
@@ -59,10 +65,31 @@ public final class OperationGenerator {
         reactivateRound.get(CREATOR).add(new PlannedOperation.Reactivate());
         List<List<PlannedOperation>> phaseC = sessions(random, budget - (PHASES - 1) * phaseBudget,
                 PUBLIC_READ_BUDGET - (PHASES - 1) * phasePublicReads);
-        return new Plan(homes, new Phase(List.of(new Round(phaseA), new Round(deactivateRound)), latency),
-                new Phase(List.of(new Round(reactivateRound), new Round(deleteRound), new Round(phaseB)),
-                        new Stopped()),
+        List<Round> probeRounds = probes ? probeRounds() : List.of();
+        List<Round> roundsA = new ArrayList<>(List.of(new Round(phaseA)));
+        roundsA.addAll(probeRounds);
+        roundsA.add(new Round(deactivateRound));
+        List<Round> roundsB = new ArrayList<>(List.of(new Round(reactivateRound)));
+        roundsB.addAll(probeRounds);
+        roundsB.addAll(List.of(new Round(deleteRound), new Round(phaseB)));
+        return new Plan(homes, new Phase(roundsA, latency), new Phase(roundsB, new Stopped()),
                 new Phase(List.of(new Round(phaseC)), new CutOregon()));
+    }
+
+    private static List<Round> probeRounds() {
+        List<List<PlannedOperation>> publish = emptySessions();
+        publish.get(CREATOR).add(new PlannedOperation.Publish(PROBE_KEY));
+        List<List<PlannedOperation>> comment = emptySessions();
+        comment.get(COMMENTER).add(new PlannedOperation.Comment(PROBE_KEY));
+        List<List<PlannedOperation>> threads = emptySessions();
+        threads.forEach(operations -> operations.add(new PlannedOperation.ThreadRead(PROBE_KEY)));
+        List<List<PlannedOperation>> settingsSave = emptySessions();
+        settingsSave.get(CREATOR).add(new PlannedOperation.SettingsSave());
+        List<List<PlannedOperation>> settingsReads = emptySessions();
+        settingsReads.subList(CREATOR, ANONYMOUS)
+                .forEach(operations -> operations.add(new PlannedOperation.SettingsRead()));
+        return List.of(new Round(publish), new Round(comment), new Round(threads), new Round(settingsSave),
+                new Round(settingsReads));
     }
 
     private static List<Region> homes(SplittableRandom random) {

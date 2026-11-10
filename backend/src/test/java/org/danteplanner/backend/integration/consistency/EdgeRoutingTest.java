@@ -28,10 +28,17 @@ class EdgeRoutingTest {
     private static final String PLANNERS = "/api/planner/md";
     private static final String VERSION = "{\"syncVersion\":1}";
     private static final String ACCOUNT = "/api/user/me";
+    private static final String SETTINGS = "/api/user/settings";
+    private static final String COMMENTS = "/api/comments/";
+    private static final String POSTED = "{\"id\":\"" + UUID.randomUUID() + "\"}";
+    private static final String EMPTY_THREAD = "[]";
+    private static final String FRESH_SETTINGS = "{\"notifyNewPublications\":false}";
     private static final String EMPTY_PAGE =
             "{\"content\":[],\"page\":{\"size\":20,\"number\":0,\"totalElements\":0,\"totalPages\":0}}";
-    private static final Set<String> WRITES = Set.of("save", "delete", "publish", "unpublish", "deactivate");
-    private static final Set<String> READS = Set.of("read", "list", "public-read", "catalog", "thread-read");
+    private static final Set<String> WRITES = Set.of("save", "delete", "publish", "unpublish", "deactivate",
+            "comment", "comment-edit", "settings-save");
+    private static final Set<String> READS = Set.of("read", "list", "public-read", "catalog", "thread-read",
+            "settings-read");
     private static final Set<String> PAGES = Set.of("list", "catalog");
 
     @Test
@@ -70,17 +77,35 @@ class EdgeRoutingTest {
                         return;
                     }
                     answer.setStatus(HttpStatus.OK.value());
-                    answer.getWriter().write(PAGES.contains(kind) ? EMPTY_PAGE : VERSION);
+                    answer.getWriter().write(body(kind));
                 })
                 .build();
+    }
+
+    private static String body(String kind) {
+        if (PAGES.contains(kind)) {
+            return EMPTY_PAGE;
+        }
+        return switch (kind) {
+            case "comment", "comment-edit" -> POSTED;
+            case "thread-read" -> EMPTY_THREAD;
+            case "settings-save", "settings-read" -> FRESH_SETTINGS;
+            default -> VERSION;
+        };
     }
 
     private static String kind(String method, String uri) {
         if (uri.equals(ACCOUNT)) {
             return "deactivate";
         }
+        if (uri.equals(SETTINGS)) {
+            return method.equals(HttpMethod.PUT.name()) ? "settings-save" : "settings-read";
+        }
+        if (uri.startsWith(COMMENTS)) {
+            return "comment-edit";
+        }
         if (uri.endsWith("/comments")) {
-            return "thread-read";
+            return method.equals(HttpMethod.POST.name()) ? "comment" : "thread-read";
         }
         String path = uri.substring(PLANNERS.length());
         if (method.equals(HttpMethod.PUT.name())) {

@@ -1,6 +1,8 @@
 package org.danteplanner.consistency;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -278,5 +280,26 @@ class ConsistencyCheckerTest {
 
         assertThat(verdict.violations()).isEmpty();
         assertThat(verdict.anomalies()).isEmpty();
+    }
+
+    @Test
+    void check_WhenTheLastRulesAllFire_ReportsReactivationThenThreadThenSettings() {
+        PublicRead hidden = new PublicRead("anon", "p1", 30, 40, new NotFound());
+        ThreadRead thread = new ThreadRead("s2", "p1", ThreadRead.Audience.OWNER,
+                30, 40, new Shown(Map.of(), Set.of()));
+        SettingsRead settings = new SettingsRead("s2", 30, 40, new Seen(false));
+
+        Verdict verdict = ConsistencyChecker.check(History.of(List.of(
+                new Publish("s1", "p1", 1, 2, new Changed()),
+                new Deactivate("s1", 3, 4, new Changed()),
+                new Reactivate("s1", 10, 20, new Changed()),
+                new CommentWrite("s1", "p1", "c1", 1, 10, 20, new Changed()),
+                new SettingsSave("s1", true, 10, 20, new Changed()),
+                settings,
+                thread,
+                hidden)));
+
+        assertThat(verdict.violations()).extracting(Violation::rule).endsWith(
+                "read-after-reactivation", "thread-after-comment-write", "settings-after-save");
     }
 }

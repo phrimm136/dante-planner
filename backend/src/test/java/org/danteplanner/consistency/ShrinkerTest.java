@@ -2,7 +2,9 @@ package org.danteplanner.consistency;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -42,6 +44,28 @@ class ShrinkerTest {
                 new Read("s3", "p2", 40, 50, new Found(1)))), target);
 
         assertThat(shrunk.operations()).containsExactly(resurrected, delete);
+    }
+
+    @Test
+    void shrink_WhenAThreadMissesACommentAmongUnrelatedOperations_KeepsOnlyTheWriteAndTheRead() {
+        CommentWrite write = new CommentWrite("s2", "p1", "c1", 2, 10, 20, new Changed());
+        ThreadRead missed = new ThreadRead("s3", "p1", ThreadRead.Audience.OWNER, 25, 30,
+                new Shown(Map.of("c1", 1L), Set.of()));
+        Violation target = new Violation("thread-after-comment-write", "s3", "p1", missed);
+        History history = History.of(List.of(
+                new Save("s1", "p2", 1, 2, new Applied(1)),
+                write,
+                new SettingsSave("s1", true, 3, 4, new Changed()),
+                new SettingsRead("s2", 5, 6, new Seen(true)),
+                new ThreadRead("anon", "p2", ThreadRead.Audience.PUBLIC, 7, 8, new NotFound()),
+                missed,
+                new Read("s3", "p2", 40, 50, new Found(1))));
+        assertThat(ConsistencyChecker.check(history).violations()).containsExactly(target);
+
+        History shrunk = Shrinker.shrink(history, target);
+
+        assertThat(shrunk.operations()).containsExactly(write, missed);
+        assertThat(ConsistencyChecker.check(shrunk).violations()).containsExactly(target);
     }
 
     @Test

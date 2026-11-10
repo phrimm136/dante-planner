@@ -21,6 +21,9 @@ record ByIdRead(Operation operation, String session, String key, long invokedAt,
                         case ThreadRead thread -> { }
                         case Deactivate deactivate -> { }
                         case Reactivate reactivate -> { }
+                        case CommentWrite comment -> { }
+                        case SettingsSave save -> { }
+                        case SettingsRead read -> { }
                     }
                 })
                 .toList();

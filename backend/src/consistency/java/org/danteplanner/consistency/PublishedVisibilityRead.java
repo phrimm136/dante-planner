@@ -17,8 +17,12 @@ record PublishedVisibilityRead(Operation operation, String session, String key, 
                     switch (operation) {
                         case PublicRead read -> sink.accept(new PublishedVisibilityRead(read, read.session(),
                                 read.key(), read.invokedAt(), read.completedAt(), seen(read.result())));
-                        case ThreadRead read -> sink.accept(new PublishedVisibilityRead(read, read.session(),
-                                read.key(), read.invokedAt(), read.completedAt(), seen(read.result())));
+                        case ThreadRead read -> {
+                            if (read.audience() == ThreadRead.Audience.PUBLIC) {
+                                sink.accept(new PublishedVisibilityRead(read, read.session(), read.key(),
+                                        read.invokedAt(), read.completedAt(), seen(read.result())));
+                            }
+                        }
                         case Save save -> { }
                         case Delete delete -> { }
                         case Read read -> { }
@@ -27,6 +31,9 @@ record PublishedVisibilityRead(Operation operation, String session, String key, 
                         case Unpublish unpublish -> { }
                         case Deactivate deactivate -> { }
                         case Reactivate reactivate -> { }
+                        case CommentWrite comment -> { }
+                        case SettingsSave save -> { }
+                        case SettingsRead read -> { }
                     }
                 })
                 .toList();

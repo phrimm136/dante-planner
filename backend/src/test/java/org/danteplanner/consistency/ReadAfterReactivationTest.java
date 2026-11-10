@@ -1,6 +1,8 @@
 package org.danteplanner.consistency;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +14,8 @@ class ReadAfterReactivationTest {
     private static final Deactivate DEACTIVATED = new Deactivate("s1", 30, 40, new Changed());
     private static final Reactivate REACTIVATED = new Reactivate("s1", 50, 60, new Changed());
     private static final PublicRead MISSED = new PublicRead("anon", "p1", 61, 70, new NotFound());
-    private static final ThreadRead THREAD_MISSED = new ThreadRead("anon", "p1", 61, 70, new NotFound());
+    private static final ThreadRead THREAD_MISSED = new ThreadRead("anon", "p1", ThreadRead.Audience.PUBLIC,
+            61, 70, new NotFound());
 
     @Test
     void publicRead_WhenItStartsAfterTheReactivationResponseAndAnswers404_IsAViolation() {
@@ -30,8 +33,8 @@ class ReadAfterReactivationTest {
         assertThat(violations(PUBLISHED, DEACTIVATED, REACTIVATED,
                 new PublicRead("anon", "p1", 61, 70, new Found(3)),
                 new PublicRead("anon", "p1", 61, 70, new ReadFailed(503)),
-                new ThreadRead("anon", "p1", 61, 70, new Shown()),
-                new ThreadRead("anon", "p1", 61, 70, new ReadFailed(503)))).isEmpty();
+                new ThreadRead("anon", "p1", ThreadRead.Audience.PUBLIC, 61, 70, new Shown(Map.of(), Set.of())),
+                new ThreadRead("anon", "p1", ThreadRead.Audience.PUBLIC, 61, 70, new ReadFailed(503)))).isEmpty();
     }
 
     @Test
@@ -54,7 +57,7 @@ class ReadAfterReactivationTest {
     @Test
     void read_WhenThePublishOverlapsTheDeactivationAndCompletesBeforeTheReactivation_IsAViolation() {
         PublicRead missed = new PublicRead("anon", "p1", 30, 32, new NotFound());
-        ThreadRead threadMissed = new ThreadRead("anon", "p1", 30, 32, new NotFound());
+        ThreadRead threadMissed = new ThreadRead("anon", "p1", ThreadRead.Audience.PUBLIC, 30, 32, new NotFound());
 
         assertThat(violations(new Publish("s1", "p1", 10, 22, new Changed()),
                 new Deactivate("s1", 20, 24, new Changed()), new Reactivate("s1", 26, 28, new Changed()),
@@ -200,5 +203,11 @@ class ReadAfterReactivationTest {
         Verdict verdict = new ReadAfterReactivation().judge(History.of(List.of(operations)));
         assertThat(verdict.anomalies()).isEmpty();
         return verdict.violations();
+    }
+
+    @Test
+    void threadNotFound_WhenTheOwnerReadsAfterTheReactivationResponse_IsNotJudged() {
+        assertThat(violations(PUBLISHED, DEACTIVATED, REACTIVATED,
+                new ThreadRead("s2", "p1", ThreadRead.Audience.OWNER, 61, 70, new NotFound()))).isEmpty();
     }
 }

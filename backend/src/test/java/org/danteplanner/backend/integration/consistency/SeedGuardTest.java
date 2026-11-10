@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import org.danteplanner.consistency.Applied;
 import org.danteplanner.consistency.Changed;
+import org.danteplanner.consistency.CommentWrite;
 import org.danteplanner.consistency.Delete;
 import org.danteplanner.consistency.Deleted;
 import org.danteplanner.consistency.Found;
@@ -18,6 +19,9 @@ import org.danteplanner.consistency.Read;
 import org.danteplanner.consistency.ReadFailed;
 import org.danteplanner.consistency.Rejected;
 import org.danteplanner.consistency.Save;
+import org.danteplanner.consistency.Seen;
+import org.danteplanner.consistency.SettingsRead;
+import org.danteplanner.consistency.SettingsSave;
 import org.danteplanner.consistency.Unknown;
 import org.danteplanner.consistency.Unpublish;
 
@@ -56,5 +60,21 @@ class SeedGuardTest {
 
         assertThat(SeedGuard.failures(operations))
                 .containsExactly("6 operations have an unknown outcome, and the run injects no client-side fault");
+    }
+
+    @Test
+    void guard_WhenACommentWriteSettingsSaveAndSettingsReadAreUnknown_CountsAllThree() {
+        List<Operation> operations = List.of(
+                new CommentWrite("s1", K1, "", 1, 1, 2, new Unknown()),
+                new CommentWrite("s1", K1, "c1", 1, 3, 4, new Changed()),
+                new CommentWrite("s2", K1, "", 1, 5, 6, new Rejected(503)),
+                new SettingsSave("s1", true, 7, 8, new Unknown()),
+                new SettingsSave("s1", true, 9, 10, new Changed()),
+                new SettingsRead("s2", 11, 12, new ReadFailed(0)),
+                new SettingsRead("s2", 13, 14, new ReadFailed(503)),
+                new SettingsRead("s3", 15, 16, new Seen(false)));
+
+        assertThat(SeedGuard.failures(operations))
+                .containsExactly("3 operations have an unknown outcome, and the run injects no client-side fault");
     }
 }

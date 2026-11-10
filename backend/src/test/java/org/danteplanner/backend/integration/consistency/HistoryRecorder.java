@@ -7,6 +7,8 @@ import java.io.Writer;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.LongSupplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -18,8 +20,11 @@ import tools.jackson.databind.node.ObjectNode;
 
 import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
 import org.danteplanner.consistency.ListRead;
+import org.danteplanner.consistency.ThreadRead;
 
 public final class HistoryRecorder implements Closeable {
+
+    static final String NEW_PUBLICATIONS_FLAG = "notifyNewPublications";
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -29,6 +34,7 @@ public final class HistoryRecorder implements Closeable {
     private static final String CODE = "code";
     private static final String WRITE_UNAVAILABLE_CODE = DegradationErrorConstants.DB_UNAVAILABLE.code();
     private static final String READ_UNAVAILABLE_CODE = DegradationErrorConstants.READ_UNAVAILABLE.code();
+    private static final Pattern REVISION = Pattern.compile("^\\S+ r(\\d+)$");
 
     private final Writer writer;
     private final LongSupplier clock;
@@ -54,8 +60,23 @@ public final class HistoryRecorder implements Closeable {
         return record(line(session, "list").put("list", listName(listing)), exchange, HistoryRecorder::listOutcome);
     }
 
-    Optional<Response> threadRead(String session, String key, Exchange exchange) {
-        return record(line(session, "thread-read").put("key", key), exchange, HistoryRecorder::threadOutcome);
+    Optional<Response> threadRead(String session, String key, ThreadRead.Audience audience, Exchange exchange) {
+        return record(line(session, "thread-read").put("key", key)
+                .put("audience", HistoryWriter.audienceName(audience)), exchange, HistoryRecorder::threadOutcome);
+    }
+
+    Optional<Response> comment(String session, String key, String comment, long revision, Exchange exchange) {
+        return record(line(session, "comment").put("key", key).put("comment", comment).put("revision", revision),
+                exchange, HistoryRecorder::commentOutcome);
+    }
+
+    Optional<Response> settingsSave(String session, boolean value, Exchange exchange) {
+        return record(line(session, "settings-save").put("value", value), exchange,
+                (line, response) -> visibilityOutcome("settings-save", line, response));
+    }
+
+    Optional<Response> settingsRead(String session, Exchange exchange) {
+        return record(line(session, "settings-read"), exchange, HistoryRecorder::settingsOutcome);
     }
 
     Optional<Response> deactivate(String session, Exchange exchange) {
@@ -159,8 +180,45 @@ public final class HistoryRecorder implements Closeable {
         }
     }
 
+    private static void commentOutcome(ObjectNode line, Response response) {
+        HttpStatusCode status = HttpStatusCode.valueOf(response.status());
+        if (status.is2xxSuccessful()) {
+            outcome(line, OK, response);
+            if (line.path("comment").stringValue().isEmpty()) {
+                line.put("comment", response.id());
+            }
+        } else if (status.is4xxClientError()) {
+            outcome(line, FAIL, response);
+        } else if (status.is5xxServerError()) {
+            serverError(line, response, WRITE_UNAVAILABLE_CODE);
+        } else {
+            throw unexpected("comment", response);
+        }
+    }
+
+    private static void settingsOutcome(ObjectNode line, Response response) {
+        if (response.status() == HttpStatus.OK.value()) {
+            outcome(line, OK, response).put("value", response.flag(NEW_PUBLICATIONS_FLAG));
+        } else if (HttpStatusCode.valueOf(response.status()).is5xxServerError()) {
+            serverError(line, response, READ_UNAVAILABLE_CODE);
+        } else {
+            outcome(line, FAIL, response);
+        }
+    }
+
     private static void threadOutcome(ObjectNode line, Response response) {
-        if (response.status() == HttpStatus.OK.value() || response.status() == HttpStatus.NOT_FOUND.value()) {
+        if (response.status() == HttpStatus.OK.value()) {
+            ObjectNode comments = outcome(line, OK, response).putObject("comments");
+            ArrayNode masked = line.putArray("masked");
+            for (Response.ThreadComment comment : response.threadComments()) {
+                Matcher revision = REVISION.matcher(comment.content());
+                if (!comment.deleted() && revision.matches()) {
+                    comments.put(comment.id(), Long.parseLong(revision.group(1)));
+                } else {
+                    masked.add(comment.id());
+                }
+            }
+        } else if (response.status() == HttpStatus.NOT_FOUND.value()) {
             outcome(line, OK, response);
         } else if (HttpStatusCode.valueOf(response.status()).is5xxServerError()) {
             serverError(line, response, READ_UNAVAILABLE_CODE);

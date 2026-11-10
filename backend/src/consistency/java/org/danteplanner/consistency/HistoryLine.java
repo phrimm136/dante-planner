@@ -1,8 +1,12 @@
 package org.danteplanner.consistency;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.DeserializationFeature;
@@ -74,10 +78,16 @@ final class HistoryLine {
             case "public-read" ->
                     Optional.of(new PublicRead(session, text("key"), invokedAt, completedAt, readResult(outcome)));
             case "thread-read" ->
-                    Optional.of(new ThreadRead(session, text("key"), invokedAt, completedAt, threadResult(outcome)));
+                    Optional.of(new ThreadRead(session, text("key"), audience(), invokedAt, completedAt,
+                            threadResult(outcome)));
             case "deactivate" ->
                     Optional.of(new Deactivate(session, invokedAt, completedAt, visibilityResult(kind, outcome)));
             case "reactivate" -> Optional.of(new Reactivate(session, invokedAt, completedAt, inProcessResult(outcome)));
+            case "comment" -> Optional.of(commentWrite(session, invokedAt, completedAt, outcome));
+            case "settings-save" -> Optional.of(
+                    new SettingsSave(session, bool("value"), invokedAt, completedAt, visibilityResult(kind, outcome)));
+            case "settings-read" ->
+                    Optional.of(new SettingsRead(session, invokedAt, completedAt, settingsResult(outcome)));
             default -> throw failure("unknown kind " + kind);
         };
     }
@@ -133,6 +143,45 @@ final class HistoryLine {
         };
     }
 
+    private CommentWrite commentWrite(String session, long invokedAt, long completedAt, String outcome) {
+        VisibilityResult result = switch (outcome) {
+            case "ok" -> {
+                statusOfClass(SUCCESS_CLASS);
+                yield new Changed();
+            }
+            case "fail" -> new Rejected(rejectedStatus());
+            case "unknown" -> {
+                requireNoResponseOrServerError();
+                yield new Unknown();
+            }
+            default -> throw unknownOutcome(outcome);
+        };
+        String comment = text("comment");
+        if (result instanceof Changed && comment.isEmpty()) {
+            throw failure("an applied comment write without a comment id");
+        }
+        long revision = integral("revision");
+        if (revision < 1) {
+            throw failure("comment revision " + revision + " is below 1");
+        }
+        return new CommentWrite(session, text("key"), comment, revision, invokedAt, completedAt, result);
+    }
+
+    private SettingsResult settingsResult(String outcome) {
+        if ("ok".equals(outcome)) {
+            int status = status();
+            if (status != OK) {
+                throw failure("settings read ok with status " + status);
+            }
+            return new Seen(bool("value"));
+        }
+        return switch (readResult(outcome)) {
+            case Found found -> throw failure("a settings read carries no syncVersion");
+            case NotFound notFound -> throw failure("a settings read is never not found");
+            case ReadFailed failed -> failed;
+        };
+    }
+
     private VisibilityResult inProcessResult(String outcome) {
         if (node.has("status")) {
             throw failure("an in-process change carries no status");
@@ -146,7 +195,7 @@ final class HistoryLine {
 
     private ThreadResult threadResult(String outcome) {
         if ("ok".equals(outcome) && status() == OK) {
-            return new Shown();
+            return new Shown(revisions(), masked());
         }
         return switch (readResult(outcome)) {
             case Found found -> throw failure("a thread read carries no syncVersion");
@@ -260,6 +309,14 @@ final class HistoryLine {
         };
     }
 
+    private ThreadRead.Audience audience() {
+        return switch (text("audience")) {
+            case "owner" -> ThreadRead.Audience.OWNER;
+            case "public" -> ThreadRead.Audience.PUBLIC;
+            default -> throw failure("unknown audience " + text("audience"));
+        };
+    }
+
     private int intField(String field) {
         JsonNode value = node.path(field);
         if (!value.isInt() || value.intValue() < 0) {
@@ -281,6 +338,45 @@ final class HistoryLine {
             keys.add(key.stringValue());
         }
         return keys;
+    }
+
+    private Map<String, Long> revisions() {
+        JsonNode value = node.path("comments");
+        if (!value.isObject()) {
+            throw failure("missing or non-object comments");
+        }
+        Map<String, Long> revisions = new HashMap<>();
+        for (Map.Entry<String, JsonNode> entry : value.properties()) {
+            JsonNode revision = entry.getValue();
+            if (!revision.isIntegralNumber() || !revision.canConvertToLong()) {
+                throw failure("non-long revision for comment " + entry.getKey());
+            }
+            revisions.put(entry.getKey(), revision.longValue());
+        }
+        return revisions;
+    }
+
+    private Set<String> masked() {
+        JsonNode value = node.path("masked");
+        if (!value.isArray()) {
+            throw failure("missing or non-array masked");
+        }
+        Set<String> masked = new HashSet<>();
+        for (JsonNode comment : value) {
+            if (!comment.isString()) {
+                throw failure("non-string entry in masked");
+            }
+            masked.add(comment.stringValue());
+        }
+        return masked;
+    }
+
+    private boolean bool(String field) {
+        JsonNode value = node.path(field);
+        if (!value.isBoolean()) {
+            throw failure("missing or non-boolean " + field);
+        }
+        return value.booleanValue();
     }
 
     private HistoryFormatException unknownOutcome(String outcome) {

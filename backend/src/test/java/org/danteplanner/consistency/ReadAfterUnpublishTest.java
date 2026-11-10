@@ -1,6 +1,8 @@
 package org.danteplanner.consistency;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -111,7 +113,8 @@ class ReadAfterUnpublishTest {
 
     @Test
     void threadShown_WhenInvokedAfterTheUnpublishResponse_IsAViolation() {
-        ThreadRead shown = new ThreadRead("anon", "p1", 25, 30, new Shown());
+        ThreadRead shown = new ThreadRead("anon", "p1", ThreadRead.Audience.PUBLIC,
+                25, 30, new Shown(Map.of(), Set.of()));
 
         assertThat(violations(UNPUBLISHED, shown))
                 .containsExactly(new Violation("read-after-unpublish", "anon", "p1", shown));
@@ -120,15 +123,17 @@ class ReadAfterUnpublishTest {
     @Test
     void thread_WhenNotFoundFailedOrOverlappingTheUnpublish_IsClean() {
         assertThat(violations(UNPUBLISHED,
-                new ThreadRead("anon", "p1", 25, 30, new NotFound()),
-                new ThreadRead("anon", "p1", 25, 30, new ReadFailed(503)),
-                new ThreadRead("anon", "p1", 20, 30, new Shown()))).isEmpty();
+                new ThreadRead("anon", "p1", ThreadRead.Audience.PUBLIC, 25, 30, new NotFound()),
+                new ThreadRead("anon", "p1", ThreadRead.Audience.PUBLIC, 25, 30, new ReadFailed(503)),
+                new ThreadRead("anon", "p1", ThreadRead.Audience.PUBLIC,
+                        20, 30, new Shown(Map.of(), Set.of())))).isEmpty();
     }
 
     @Test
     void threadShown_WhenARepublishMayHavePrecededIt_IsClean() {
         assertThat(violations(UNPUBLISHED, new Publish("s2", "p1", 22, 29, new Unknown()),
-                new ThreadRead("anon", "p1", 25, 30, new Shown()))).isEmpty();
+                new ThreadRead("anon", "p1", ThreadRead.Audience.PUBLIC,
+                        25, 30, new Shown(Map.of(), Set.of())))).isEmpty();
     }
 
     private static Violation violation(PublicRead read) {
@@ -139,5 +144,11 @@ class ReadAfterUnpublishTest {
         Verdict verdict = new ReadAfterUnpublish().judge(History.of(List.of(operations)));
         assertThat(verdict.anomalies()).isEmpty();
         return verdict.violations();
+    }
+
+    @Test
+    void threadShown_WhenTheOwnerReadsAfterTheUnpublishResponse_IsNotJudged() {
+        assertThat(violations(UNPUBLISHED, new ThreadRead("s2", "p1", ThreadRead.Audience.OWNER, 25, 30,
+                new Shown(Map.of(), Set.of())))).isEmpty();
     }
 }

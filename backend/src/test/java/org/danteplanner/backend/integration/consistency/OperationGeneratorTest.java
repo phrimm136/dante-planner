@@ -1,5 +1,6 @@
 package org.danteplanner.backend.integration.consistency;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,6 +25,9 @@ class OperationGeneratorTest {
     private static final int VIEWER = 3;
     private static final int ANON = 4;
     private static final int SESSIONS = 5;
+    private static final int PROBE_ROUNDS = 5;
+    private static final int PROBE_AUTHOR_OPERATIONS = 11;
+    private static final KeyDraw PROBE_KEY = new KeyDraw(0);
 
     @Test
     void plan_WhenBuiltTwiceFromOneSeedBudgetAndBound_IsEqual() {
@@ -34,8 +38,9 @@ class OperationGeneratorTest {
         assertThat(second.homes()).isEqualTo(first.homes()).hasSize(SESSIONS);
         assertThat(authorOperations(first.phaseA()) + authorOperations(first.phaseB())
                 + authorOperations(first.phaseC()))
-                .as("author operations, plus phase B's delete, the deactivation and the reactivation")
-                .isEqualTo(BUDGET + 3);
+                .as("author operations, plus phase B's delete, the deactivation, the reactivation and two sets of "
+                        + "probe rounds")
+                .isEqualTo(BUDGET + 3 + 2 * PROBE_AUTHOR_OPERATIONS);
     }
 
     @Test
@@ -49,7 +54,7 @@ class OperationGeneratorTest {
         Set<Class<?>> authorKinds = new HashSet<>();
         Set<Class<?>> anonymousKinds = new HashSet<>();
         LongStream.rangeClosed(1, 50).forEach(seed -> {
-            Plan plan = OperationGenerator.plan(seed, BUDGET, LATENCY_BOUND);
+            Plan plan = OperationGenerator.plan(seed, BUDGET, LATENCY_BOUND, false);
             for (Phase phase : List.of(plan.phaseA(), plan.phaseB(), plan.phaseC())) {
                 List<List<PlannedOperation>> bySession = bySession(phase);
                 assertThat(bySession.get(ANON)).as("seed %d anon", seed)
@@ -107,16 +112,17 @@ class OperationGeneratorTest {
     }
 
     @Test
-    void phaseB_WhenSeedsRunFromOneToFifty_OpensWithAnS1ReactivationThenAnS1Delete() {
+    void phaseB_WhenSeedsRunFromOneToFifty_OpensWithAnS1ReactivationAndTheProbesThenAnS1Delete() {
         LongStream.rangeClosed(1, 50).forEach(seed -> {
             Plan plan = OperationGenerator.plan(seed, BUDGET, LATENCY_BOUND);
 
             List<Round> rounds = plan.phaseB().rounds();
 
-            assertThat(rounds).as("seed %d phase B", seed).hasSize(3);
+            assertThat(rounds).as("seed %d phase B", seed).hasSize(3 + PROBE_ROUNDS);
             assertSoleS1Operation(rounds.get(0), PlannedOperation.Reactivate.class, seed);
-            assertSoleS1Operation(rounds.get(1), PlannedOperation.Delete.class, seed);
-            assertThat(rounds.get(2).bySession().stream().flatMap(List::stream)).as("seed %d third round", seed)
+            assertSoleS1Operation(rounds.get(1 + PROBE_ROUNDS), PlannedOperation.Delete.class, seed);
+            assertThat(rounds.get(2 + PROBE_ROUNDS).bySession().stream().flatMap(List::stream))
+                    .as("seed %d random round", seed)
                     .noneMatch(PlannedOperation.Delete.class::isInstance)
                     .noneMatch(OperationGeneratorTest::accountChange);
             assertThat(bySession(plan.phaseA()).stream().flatMap(List::stream)).as("seed %d phase A", seed)
@@ -132,11 +138,57 @@ class OperationGeneratorTest {
         LongStream.rangeClosed(1, 50).forEach(seed -> {
             List<Round> rounds = OperationGenerator.plan(seed, BUDGET, LATENCY_BOUND).phaseA().rounds();
 
-            assertThat(rounds).as("seed %d phase A", seed).hasSize(2);
+            assertThat(rounds).as("seed %d phase A", seed).hasSize(2 + PROBE_ROUNDS);
             assertThat(rounds.get(0).bySession().stream().flatMap(List::stream)).as("seed %d first round", seed)
                     .noneMatch(OperationGeneratorTest::accountChange);
-            assertSoleS1Operation(rounds.get(1), PlannedOperation.Deactivate.class, seed);
+            assertSoleS1Operation(rounds.get(1 + PROBE_ROUNDS), PlannedOperation.Deactivate.class, seed);
         });
+    }
+
+    @Test
+    void probeRounds_WhenSeedsRunFromOneToFifty_FollowPhaseAsOperationsAndPhaseBsOperationsInOrder() {
+        List<Round> probes = List.of(
+                round(List.of(new PlannedOperation.Publish(PROBE_KEY)), List.of(), List.of(), List.of(), List.of()),
+                round(List.of(), List.of(new PlannedOperation.Comment(PROBE_KEY)), List.of(), List.of(), List.of()),
+                round(List.of(new PlannedOperation.ThreadRead(PROBE_KEY)),
+                        List.of(new PlannedOperation.ThreadRead(PROBE_KEY)),
+                        List.of(new PlannedOperation.ThreadRead(PROBE_KEY)),
+                        List.of(new PlannedOperation.ThreadRead(PROBE_KEY)),
+                        List.of(new PlannedOperation.ThreadRead(PROBE_KEY))),
+                round(List.of(new PlannedOperation.SettingsSave()), List.of(), List.of(), List.of(), List.of()),
+                round(List.of(new PlannedOperation.SettingsRead()), List.of(new PlannedOperation.SettingsRead()),
+                        List.of(new PlannedOperation.SettingsRead()), List.of(new PlannedOperation.SettingsRead()),
+                        List.of()));
+        LongStream.rangeClosed(1, 50).forEach(seed -> {
+            Plan plan = OperationGenerator.plan(seed, BUDGET, LATENCY_BOUND);
+
+            assertThat(plan.phaseA().rounds().subList(1, 1 + PROBE_ROUNDS)).as("seed %d phase A", seed)
+                    .isEqualTo(probes);
+            assertThat(plan.phaseB().rounds().subList(1, 1 + PROBE_ROUNDS)).as("seed %d phase B", seed)
+                    .isEqualTo(probes);
+        });
+    }
+
+    @Test
+    void plan_WhenTheProbeRoundsAreRemoved_EqualsThePlanBuiltWithoutThem() {
+        for (long seed : List.of(1L, 2L, 3L, 42L)) {
+            Plan probed = OperationGenerator.plan(seed, BUDGET, LATENCY_BOUND);
+            Plan random = OperationGenerator.plan(seed, BUDGET, LATENCY_BOUND, false);
+            List<Round> roundsA = new ArrayList<>(probed.phaseA().rounds());
+            roundsA.subList(1, 1 + PROBE_ROUNDS).clear();
+            List<Round> roundsB = new ArrayList<>(probed.phaseB().rounds());
+            roundsB.subList(1, 1 + PROBE_ROUNDS).clear();
+
+            assertThat(new Plan(probed.homes(), new Phase(roundsA, probed.phaseA().fault()),
+                    new Phase(roundsB, probed.phaseB().fault()), probed.phaseC()))
+                    .as("seed %d", seed)
+                    .isEqualTo(random);
+        }
+    }
+
+    @SafeVarargs
+    private static Round round(List<PlannedOperation>... bySession) {
+        return new Round(List.of(bySession));
     }
 
     private static void assertSoleS1Operation(Round round, Class<?> kind, long seed) {

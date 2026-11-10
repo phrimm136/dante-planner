@@ -25,6 +25,7 @@ public final class ConsistencyBudget {
     public static final List<String> SESSIONS = List.of("s1", "s2", "s3", "viewer", "anon");
     public static final int AUTHOR_DEVICES = 4;
     public static final int CREATOR = 0;
+    public static final int COMMENTER = 1;
     public static final int VIEWER = 3;
     public static final int ANONYMOUS = 4;
     public static final int SETUP_PLANNERS = 2;
