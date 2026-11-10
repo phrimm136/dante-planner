@@ -3,6 +3,7 @@ package org.danteplanner.backend.integration.consistency;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.danteplanner.consistency.CommentWrite;
 import org.danteplanner.consistency.Deactivate;
 import org.danteplanner.consistency.Delete;
 import org.danteplanner.consistency.ListRead;
@@ -13,6 +14,8 @@ import org.danteplanner.consistency.Reactivate;
 import org.danteplanner.consistency.Read;
 import org.danteplanner.consistency.ReadFailed;
 import org.danteplanner.consistency.Save;
+import org.danteplanner.consistency.SettingsRead;
+import org.danteplanner.consistency.SettingsSave;
 import org.danteplanner.consistency.ThreadRead;
 import org.danteplanner.consistency.Unknown;
 import org.danteplanner.consistency.Unpublish;
@@ -45,6 +48,9 @@ public final class SeedGuard {
             case ThreadRead read -> read.result() instanceof ReadFailed failed && failed.status() == NO_RESPONSE;
             case Deactivate deactivate -> deactivate.result() instanceof Unknown;
             case Reactivate reactivate -> reactivate.result() instanceof Unknown;
+            case CommentWrite comment -> comment.result() instanceof Unknown;
+            case SettingsSave save -> save.result() instanceof Unknown;
+            case SettingsRead read -> read.result() instanceof ReadFailed failed && failed.status() == NO_RESPONSE;
         };
     }
 }

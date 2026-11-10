@@ -20,7 +20,9 @@ import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.support.UpsertRequests;
 import org.danteplanner.consistency.ListRead;
+import org.danteplanner.consistency.ThreadRead;
 
+import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.ANONYMOUS;
 import static org.danteplanner.backend.integration.consistency.ConsistencyBudget.SESSIONS;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -35,6 +37,8 @@ public final class PlannerSession implements OperationPerformer {
     private static final String PUBLISHED = PLANNERS + "/published";
     private static final String THREADS = "/api/planner";
     private static final String ACCOUNT = "/api/user/me";
+    private static final String COMMENTS = "/api/comments";
+    private static final String SETTINGS = "/api/user/settings";
 
     private final String name;
     private final CookieJar jar;
@@ -46,7 +50,9 @@ public final class PlannerSession implements OperationPerformer {
     private final String titleToken;
     private final AccountControl account;
     private final Map<UUID, Long> seenVersions = new HashMap<>();
+    private final Map<UUID, PostedComment> comments = new HashMap<>();
     private int saves;
+    private int settingsSaves;
 
     public PlannerSession(String name, CookieJar jar, MockMvc writes, MockMvc reads, ObjectMapper objectMapper,
             HistoryRecorder recorder, PlannerPool pool, String titleToken, AccountControl account) {
@@ -86,6 +92,9 @@ public final class PlannerSession implements OperationPerformer {
             case PlannedOperation.ThreadRead thread -> threadRead(pool.pick(thread.key()));
             case PlannedOperation.Deactivate deactivate -> deactivate();
             case PlannedOperation.Reactivate reactivate -> recorder.reactivate(name, account::reactivate);
+            case PlannedOperation.Comment comment -> comment(pool.pick(comment.key()));
+            case PlannedOperation.SettingsSave save -> saveSettings();
+            case PlannedOperation.SettingsRead read -> readSettings();
         }
     }
 
@@ -129,7 +138,39 @@ public final class PlannerSession implements OperationPerformer {
     }
 
     private void threadRead(UUID id) {
-        recorder.threadRead(name, id.toString(), () -> safe(get(THREADS + "/" + id + "/comments")));
+        recorder.threadRead(name, id.toString(), audience(), () -> safe(get(THREADS + "/" + id + "/comments")));
+    }
+
+    private void comment(UUID id) throws JacksonException {
+        PostedComment posted = comments.get(id);
+        long revision = posted == null ? 1 : posted.revision() + 1;
+        String body = objectMapper.writeValueAsString(Map.of("content", name + " r" + revision));
+        MockHttpServletRequestBuilder request = (posted == null
+                ? post(THREADS + "/" + id + "/comments")
+                : put(COMMENTS + "/" + posted.id()))
+                .contentType(APPLICATION_JSON)
+                .content(body);
+        recorder.comment(name, id.toString(), posted == null ? "" : posted.id(), revision, () -> unsafe(request))
+                .filter(response -> HttpStatusCode.valueOf(response.status()).is2xxSuccessful())
+                .ifPresent(response -> comments.put(id,
+                        new PostedComment(posted == null ? response.id() : posted.id(), revision)));
+    }
+
+    private void saveSettings() throws JacksonException {
+        settingsSaves++;
+        boolean value = settingsSaves % 2 == 1;
+        String body = objectMapper.writeValueAsString(Map.of(HistoryRecorder.NEW_PUBLICATIONS_FLAG, value));
+        recorder.settingsSave(name, value, () -> unsafe(put(SETTINGS)
+                .contentType(APPLICATION_JSON)
+                .content(body)));
+    }
+
+    private void readSettings() {
+        recorder.settingsRead(name, () -> safe(get(SETTINGS)));
+    }
+
+    private ThreadRead.Audience audience() {
+        return name.equals(SESSIONS.get(ANONYMOUS)) ? ThreadRead.Audience.PUBLIC : ThreadRead.Audience.OWNER;
     }
 
     private void deactivate() {
@@ -178,5 +219,8 @@ public final class PlannerSession implements OperationPerformer {
         MockHttpServletResponse response = context.perform(request).andReturn().getResponse();
         jar.apply(response.getHeaders(HttpHeaders.SET_COOKIE));
         return new Response(response.getStatus(), response.getContentAsString());
+    }
+
+    private record PostedComment(String id, long revision) {
     }
 }

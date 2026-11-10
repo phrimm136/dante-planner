@@ -14,6 +14,7 @@ import tools.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
 import org.danteplanner.consistency.Applied;
 import org.danteplanner.consistency.Changed;
+import org.danteplanner.consistency.CommentWrite;
 import org.danteplanner.consistency.Deactivate;
 import org.danteplanner.consistency.Delete;
 import org.danteplanner.consistency.DeleteResult;
@@ -32,6 +33,10 @@ import org.danteplanner.consistency.ReadResult;
 import org.danteplanner.consistency.Rejected;
 import org.danteplanner.consistency.Save;
 import org.danteplanner.consistency.SaveResult;
+import org.danteplanner.consistency.Seen;
+import org.danteplanner.consistency.SettingsRead;
+import org.danteplanner.consistency.SettingsResult;
+import org.danteplanner.consistency.SettingsSave;
 import org.danteplanner.consistency.Shown;
 import org.danteplanner.consistency.ThreadRead;
 import org.danteplanner.consistency.ThreadResult;
@@ -84,7 +89,8 @@ public final class HistoryWriter {
                     keyed(read.session(), "public-read", read.key(), read.invokedAt(), read.completedAt()),
                     read.result());
             case ThreadRead read -> threadResult(
-                    keyed(read.session(), "thread-read", read.key(), read.invokedAt(), read.completedAt()),
+                    keyed(read.session(), "thread-read", read.key(), read.invokedAt(), read.completedAt())
+                            .put("audience", audienceName(read.audience())),
                     read.result());
             case Deactivate deactivate -> visibilityResult(
                     timed(deactivate.session(), "deactivate", deactivate.invokedAt(), deactivate.completedAt()),
@@ -92,6 +98,16 @@ public final class HistoryWriter {
             case Reactivate reactivate -> inProcessResult(
                     timed(reactivate.session(), "reactivate", reactivate.invokedAt(), reactivate.completedAt()),
                     reactivate.result());
+            case CommentWrite comment -> visibilityResult(
+                    keyed(comment.session(), "comment", comment.key(), comment.invokedAt(), comment.completedAt())
+                            .put("comment", comment.comment()).put("revision", comment.revision()),
+                    comment.result());
+            case SettingsSave save -> visibilityResult(
+                    timed(save.session(), "settings-save", save.invokedAt(), save.completedAt())
+                            .put("value", save.value()),
+                    save.result());
+            case SettingsRead read -> settingsResult(
+                    timed(read.session(), "settings-read", read.invokedAt(), read.completedAt()), read.result());
         };
     }
 
@@ -139,8 +155,30 @@ public final class HistoryWriter {
 
     private static ObjectNode threadResult(ObjectNode line, ThreadResult result) {
         return switch (result) {
-            case Shown shown -> outcome(line, OK, HttpStatus.OK.value());
+            case Shown shown -> {
+                ObjectNode comments = outcome(line, OK, HttpStatus.OK.value()).putObject("comments");
+                shown.revisions().forEach(comments::put);
+                ArrayNode masked = line.putArray("masked");
+                shown.masked().forEach(masked::add);
+                yield line;
+            }
             case NotFound notFound -> outcome(line, OK, HttpStatus.NOT_FOUND.value());
+            case ReadFailed failed -> failed.status() == NO_RESPONSE
+                    ? line.put("outcome", UNKNOWN)
+                    : failed(line, failed.status(), READ_UNAVAILABLE_CODE);
+        };
+    }
+
+    static String audienceName(ThreadRead.Audience audience) {
+        return switch (audience) {
+            case OWNER -> "owner";
+            case PUBLIC -> "public";
+        };
+    }
+
+    private static ObjectNode settingsResult(ObjectNode line, SettingsResult result) {
+        return switch (result) {
+            case Seen seen -> outcome(line, OK, HttpStatus.OK.value()).put("value", seen.value());
             case ReadFailed failed -> failed.status() == NO_RESPONSE
                     ? line.put("outcome", UNKNOWN)
                     : failed(line, failed.status(), READ_UNAVAILABLE_CODE);

@@ -6,6 +6,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -382,20 +384,106 @@ class HistoryTest {
 
     @Test
     void threadReadOk_WhenStatusIs200_IsShown() throws IOException {
-        assertThat(only(line("thread-read", "ok", "'status':200")))
-                .isEqualTo(new ThreadRead("s1", "p1", 10, 20, new Shown()));
+        assertThat(only(line("thread-read", "ok", "'audience':'owner','status':200,'comments':{},'masked':[]")))
+                .isEqualTo(new ThreadRead("s1", "p1", ThreadRead.Audience.OWNER,
+                        10, 20, new Shown(Map.of(), Set.of())));
+    }
+
+    @Test
+    void threadReadOk_WhenItShowsARevisionAndAMaskedComment_CarriesBoth() throws IOException {
+        assertThat(only(line("thread-read", "ok", "'audience':'owner','status':200,'comments':{'c1':3},'masked':['c2']")))
+                .isEqualTo(new ThreadRead("s1", "p1", ThreadRead.Audience.OWNER,
+                        10, 20, new Shown(Map.of("c1", 3L), Set.of("c2"))));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"'masked':[]", "'comments':{}", "'comments':{'c1':'3'},'masked':[]",
+            "'comments':{},'masked':[3]"})
+    void threadReadOk_WhenCommentsOrMaskedAreMissingOrMistyped_IsMalformed(String facts) throws IOException {
+        assertMalformed(1, line("thread-read", "ok", "'audience':'owner','status':200," + facts));
+    }
+
+    @Test
+    void threadRead_WhenTheAudienceIsPublic_IsAPublicRead() throws IOException {
+        assertThat(only(line("thread-read", "ok", "'audience':'public','status':404")))
+                .isEqualTo(new ThreadRead("s1", "p1", ThreadRead.Audience.PUBLIC, 10, 20, new NotFound()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"'status':404", "'audience':'author','status':404"})
+    void threadRead_WhenTheAudienceIsMissingOrUnknown_IsMalformed(String facts) throws IOException {
+        assertMalformed(1, line("thread-read", "ok", facts));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {200, 201})
+    void commentOk_WhenStatusIs2xxWithAnId_IsChanged(int status) throws IOException {
+        assertThat(only(line("comment", "ok", "'status':" + status + ",'comment':'c1','revision':2")))
+                .isEqualTo(new CommentWrite("s1", "p1", "c1", 2, 10, 20, new Changed()));
+    }
+
+    @Test
+    void commentFail_WhenTheCreateWasRefused_IsRejectedWithoutAnId() throws IOException {
+        assertThat(only(line("comment", "fail", "'status':403,'comment':'','revision':1")))
+                .isEqualTo(new CommentWrite("s1", "p1", "", 1, 10, 20, new Rejected(403)));
+    }
+
+    @Test
+    void commentUnknown_WhenNoResponseArrived_IsUnknown() throws IOException {
+        assertThat(only(line("comment", "unknown", "'comment':'','revision':1")))
+                .isEqualTo(new CommentWrite("s1", "p1", "", 1, 10, 20, new Unknown()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"'comment':'','revision':1", "'comment':'c1','revision':0", "'revision':1",
+            "'comment':'c1'"})
+    void commentOk_WhenTheIdOrRevisionIsMissingOrInvalid_IsMalformed(String facts) throws IOException {
+        assertMalformed(1, line("comment", "ok", "'status':200," + facts));
+    }
+
+    @Test
+    void settingsSaveOk_WhenStatusIs200_IsChangedWithItsValue() throws IOException {
+        assertThat(only(json("{'session':'s1','kind':'settings-save','value':true,'invokedAt':10,'completedAt':20,"
+                + "'outcome':'ok','status':200}")))
+                .isEqualTo(new SettingsSave("s1", true, 10, 20, new Changed()));
+    }
+
+    @Test
+    void settingsSave_WhenTheValueIsMissing_IsMalformed() throws IOException {
+        assertMalformed(1, json("{'session':'s1','kind':'settings-save','invokedAt':10,'completedAt':20,"
+                + "'outcome':'ok','status':200}"));
+    }
+
+    @Test
+    void settingsReadOk_WhenStatusIs200_IsSeenWithItsValue() throws IOException {
+        assertThat(only(json("{'session':'s1','kind':'settings-read','invokedAt':10,'completedAt':20,"
+                + "'outcome':'ok','status':200,'value':false}")))
+                .isEqualTo(new SettingsRead("s1", 10, 20, new Seen(false)));
+    }
+
+    @Test
+    void settingsReadFail_WhenStatusIs503WithTheReadUnavailableCode_IsReadFailed503() throws IOException {
+        assertThat(only(json("{'session':'s1','kind':'settings-read','invokedAt':10,'completedAt':20,"
+                + "'outcome':'fail'," + READ_UNAVAILABLE + "}")))
+                .isEqualTo(new SettingsRead("s1", 10, 20, new ReadFailed(503)));
+    }
+
+    @Test
+    void settingsReadOk_WhenTheValueIsMissing_IsMalformed() throws IOException {
+        assertMalformed(1, json("{'session':'s1','kind':'settings-read','invokedAt':10,'completedAt':20,"
+                + "'outcome':'ok','status':200}"));
     }
 
     @Test
     void threadReadOk_WhenStatusIs404_IsNotFound() throws IOException {
-        assertThat(only(line("thread-read", "ok", "'status':404")))
-                .isEqualTo(new ThreadRead("s1", "p1", 10, 20, new NotFound()));
+        assertThat(only(line("thread-read", "ok", "'audience':'owner','status':404")))
+                .isEqualTo(new ThreadRead("s1", "p1", ThreadRead.Audience.OWNER, 10, 20, new NotFound()));
     }
 
     @Test
     void threadReadFail_WhenStatusIs503WithTheReadUnavailableCode_IsReadFailed503() throws IOException {
-        assertThat(only(line("thread-read", "fail", READ_UNAVAILABLE)))
-                .isEqualTo(new ThreadRead("s1", "p1", 10, 20, new ReadFailed(503)));
+        assertThat(only(line("thread-read", "fail", "'audience':'owner'," + READ_UNAVAILABLE)))
+                .isEqualTo(new ThreadRead("s1", "p1", ThreadRead.Audience.OWNER, 10, 20, new ReadFailed(503)));
     }
 
     @Test

@@ -67,6 +67,48 @@ record Response(int status, String body) {
         return versions;
     }
 
+    String id() {
+        JsonNode id = json().path("id");
+        if (!id.isString()) {
+            throw new IllegalStateException("no string id in a " + status + " body: " + body);
+        }
+        return id.stringValue();
+    }
+
+    boolean flag(String field) {
+        JsonNode flag = json().path(field);
+        if (!flag.isBoolean()) {
+            throw new IllegalStateException("no boolean " + field + " in a " + status + " body: " + body);
+        }
+        return flag.booleanValue();
+    }
+
+    List<ThreadComment> threadComments() {
+        JsonNode tree = json();
+        if (!tree.isArray()) {
+            throw new IllegalStateException("no comment array in a " + status + " thread body: " + body);
+        }
+        List<ThreadComment> comments = new ArrayList<>();
+        flatten(tree, comments);
+        return comments;
+    }
+
+    private static void flatten(JsonNode nodes, List<ThreadComment> comments) {
+        for (JsonNode node : nodes) {
+            JsonNode id = node.path("id");
+            if (!id.isString()) {
+                throw new IllegalStateException("a thread entry without a string id: " + node);
+            }
+            JsonNode content = node.path("content");
+            comments.add(new ThreadComment(id.stringValue(), content.isString() ? content.stringValue() : "",
+                    node.path("isDeleted").asBoolean(false)));
+            JsonNode replies = node.path("replies");
+            if (replies.isArray()) {
+                flatten(replies, comments);
+            }
+        }
+    }
+
     private JsonNode content() {
         JsonNode content = json().path("content");
         if (!content.isArray()) {
@@ -84,5 +126,8 @@ record Response(int status, String body) {
     }
 
     record PageFacts(int number, int size, long totalElements) {
+    }
+
+    record ThreadComment(String id, String content, boolean deleted) {
     }
 }

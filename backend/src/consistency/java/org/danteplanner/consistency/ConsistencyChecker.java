@@ -15,7 +15,9 @@ public final class ConsistencyChecker {
             new ListOmitsRemoved(ListRead.Listing.OWNER),
             new ListOmitsRemoved(ListRead.Listing.CATALOG),
             new ListHoldsAdded(),
-            new ReadAfterReactivation());
+            new ReadAfterReactivation(),
+            new ThreadShowsComment(),
+            new SettingsShowSave());
 
     private ConsistencyChecker() {
     }

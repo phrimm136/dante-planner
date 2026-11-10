@@ -5,6 +5,8 @@ import java.net.SocketException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -22,6 +24,7 @@ import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
 import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
 import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.consistency.Changed;
+import org.danteplanner.consistency.CommentWrite;
 import org.danteplanner.consistency.Deactivate;
 import org.danteplanner.consistency.Delete;
 import org.danteplanner.consistency.Deleted;
@@ -38,6 +41,9 @@ import org.danteplanner.consistency.Read;
 import org.danteplanner.consistency.ReadFailed;
 import org.danteplanner.consistency.Rejected;
 import org.danteplanner.consistency.Save;
+import org.danteplanner.consistency.Seen;
+import org.danteplanner.consistency.SettingsRead;
+import org.danteplanner.consistency.SettingsSave;
 import org.danteplanner.consistency.Shown;
 import org.danteplanner.consistency.ThreadRead;
 import org.danteplanner.consistency.Unknown;
@@ -119,9 +125,9 @@ class HistoryRecorderTest {
                 + "\"page\":{\"size\":5,\"number\":1,\"totalElements\":6,\"totalPages\":2}}";
 
         try (HistoryRecorder recorder = new HistoryRecorder(Files.newBufferedWriter(file), clock::incrementAndGet)) {
-            recorder.threadRead("anon", key, () -> new Response(200, "[]"));
-            recorder.threadRead("anon", key, () -> new Response(404, ""));
-            recorder.threadRead("anon", key, () -> new Response(429, ""));
+            recorder.threadRead("anon", key, ThreadRead.Audience.PUBLIC, () -> new Response(200, "[]"));
+            recorder.threadRead("anon", key, ThreadRead.Audience.PUBLIC, () -> new Response(404, ""));
+            recorder.threadRead("anon", key, ThreadRead.Audience.PUBLIC, () -> new Response(429, ""));
             recorder.deactivate("s1", () -> new Response(200, ""));
             recorder.deactivate("s1", () -> new Response(401, ""));
             recorder.reactivate("s1", () -> {
@@ -133,9 +139,9 @@ class HistoryRecorderTest {
         }
 
         assertThat(History.read(file).operations()).containsExactly(
-                new ThreadRead("anon", key, 1, 2, new Shown()),
-                new ThreadRead("anon", key, 3, 4, new NotFound()),
-                new ThreadRead("anon", key, 5, 6, new ReadFailed(429)),
+                new ThreadRead("anon", key, ThreadRead.Audience.PUBLIC, 1, 2, new Shown(Map.of(), Set.of())),
+                new ThreadRead("anon", key, ThreadRead.Audience.PUBLIC, 3, 4, new NotFound()),
+                new ThreadRead("anon", key, ThreadRead.Audience.PUBLIC, 5, 6, new ReadFailed(429)),
                 new Deactivate("s1", 7, 8, new Changed()),
                 new Deactivate("s1", 9, 10, new Rejected(401)),
                 new Reactivate("s1", 11, 12, new Changed()),
@@ -219,6 +225,47 @@ class HistoryRecorderTest {
                     .isInstanceOf(HistoryFormatException.class)
                     .hasMessageContaining("without code");
         }
+    }
+
+    @Test
+    void recorder_WhenCommentSettingsAndThreadResponsesCoverEachOutcome_WritesLinesHistoryReadParses(
+            @TempDir Path directory) throws IOException {
+        Path file = directory.resolve("history.jsonl");
+        AtomicLong clock = new AtomicLong();
+        String key = KEY.toString();
+        String thread = "[{\"id\":\"c1\",\"content\":\"s1 r2\",\"isDeleted\":false,\"replies\":["
+                + "{\"id\":\"c2\",\"content\":\"\",\"isDeleted\":true,\"replies\":[]}]},"
+                + "{\"id\":\"c3\",\"content\":\"not a revision\",\"isDeleted\":false,\"replies\":[]}]";
+        String writeUnavailable = problem(DegradationErrorConstants.DB_UNAVAILABLE.code());
+        String readUnavailable = problem(DegradationErrorConstants.READ_UNAVAILABLE.code());
+
+        try (HistoryRecorder recorder = new HistoryRecorder(Files.newBufferedWriter(file), clock::incrementAndGet)) {
+            recorder.comment("s1", key, "", 1, () -> new Response(201, "{\"id\":\"c1\",\"createdAt\":null}"));
+            recorder.comment("s1", key, "c1", 2, () -> new Response(200, "{\"editedAt\":null}"));
+            recorder.comment("s2", key, "", 1, () -> new Response(403, ""));
+            recorder.comment("s2", key, "", 1, () -> new Response(503, writeUnavailable));
+            recorder.comment("s3", key, "", 1, () -> new Response(500, ""));
+            recorder.threadRead("s2", key, ThreadRead.Audience.OWNER, () -> new Response(200, thread));
+            recorder.settingsSave("s1", true, () -> new Response(200, "{\"notifyNewPublications\":true}"));
+            recorder.settingsSave("s1", false, () -> new Response(401, ""));
+            recorder.settingsRead("s2", () -> new Response(200, "{\"notifyNewPublications\":true}"));
+            recorder.settingsRead("s2", () -> new Response(503, readUnavailable));
+            recorder.settingsRead("s3", () -> new Response(500, ""));
+        }
+
+        assertThat(History.read(file).operations()).containsExactly(
+                new CommentWrite("s1", key, "c1", 1, 1, 2, new Changed()),
+                new CommentWrite("s1", key, "c1", 2, 3, 4, new Changed()),
+                new CommentWrite("s2", key, "", 1, 5, 6, new Rejected(403)),
+                new CommentWrite("s2", key, "", 1, 7, 8, new Rejected(503)),
+                new CommentWrite("s3", key, "", 1, 9, 10, new Unknown()),
+                new ThreadRead("s2", key, ThreadRead.Audience.OWNER,
+                        11, 12, new Shown(Map.of("c1", 2L), Set.of("c2", "c3"))),
+                new SettingsSave("s1", true, 13, 14, new Changed()),
+                new SettingsSave("s1", false, 15, 16, new Rejected(401)),
+                new SettingsRead("s2", 17, 18, new Seen(true)),
+                new SettingsRead("s2", 19, 20, new ReadFailed(503)),
+                new SettingsRead("s3", 21, 22, new ReadFailed(0)));
     }
 
     private record Mismatch(String code, Consumer<HistoryRecorder> records) {

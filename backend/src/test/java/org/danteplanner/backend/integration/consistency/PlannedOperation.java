@@ -37,4 +37,13 @@ public sealed interface PlannedOperation {
 
     record Reactivate() implements PlannedOperation {
     }
+
+    record Comment(KeyDraw key) implements PlannedOperation {
+    }
+
+    record SettingsSave() implements PlannedOperation {
+    }
+
+    record SettingsRead() implements PlannedOperation {
+    }
 }

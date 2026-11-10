@@ -6,6 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -24,6 +26,7 @@ import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
 import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.consistency.Applied;
 import org.danteplanner.consistency.Changed;
+import org.danteplanner.consistency.CommentWrite;
 import org.danteplanner.consistency.ConsistencyChecker;
 import org.danteplanner.consistency.Deactivate;
 import org.danteplanner.consistency.Delete;
@@ -39,6 +42,9 @@ import org.danteplanner.consistency.Read;
 import org.danteplanner.consistency.ReadFailed;
 import org.danteplanner.consistency.Rejected;
 import org.danteplanner.consistency.Save;
+import org.danteplanner.consistency.Seen;
+import org.danteplanner.consistency.SettingsRead;
+import org.danteplanner.consistency.SettingsSave;
 import org.danteplanner.consistency.Shown;
 import org.danteplanner.consistency.Shrinker;
 import org.danteplanner.consistency.ThreadRead;
@@ -124,10 +130,10 @@ class HistoryWriterTest {
                 new PublicRead("anon", K1, 33, 34, new Found(1)),
                 new PublicRead("anon", K1, 35, 36, new ReadFailed(503)),
                 new PublicRead("anon", K1, 37, 38, new ReadFailed(0)),
-                new ThreadRead("anon", K1, 39, 40, new Shown()),
-                new ThreadRead("anon", K1, 41, 42, new NotFound()),
-                new ThreadRead("anon", K1, 43, 44, new ReadFailed(503)),
-                new ThreadRead("anon", K1, 45, 46, new ReadFailed(0)),
+                new ThreadRead("anon", K1, ThreadRead.Audience.PUBLIC, 39, 40, new Shown(Map.of(), Set.of())),
+                new ThreadRead("anon", K1, ThreadRead.Audience.PUBLIC, 41, 42, new NotFound()),
+                new ThreadRead("anon", K1, ThreadRead.Audience.PUBLIC, 43, 44, new ReadFailed(503)),
+                new ThreadRead("anon", K1, ThreadRead.Audience.PUBLIC, 45, 46, new ReadFailed(0)),
                 new Deactivate("s1", 47, 48, new Changed()),
                 new Deactivate("s1", 49, 50, new Rejected(401)),
                 new Reactivate("s1", 51, 52, new Changed()),
@@ -148,6 +154,37 @@ class HistoryWriterTest {
                         "publish:" + DegradationErrorConstants.DB_UNAVAILABLE.code(),
                         "public-read:" + DegradationErrorConstants.READ_UNAVAILABLE.code(),
                         "thread-read:" + DegradationErrorConstants.READ_UNAVAILABLE.code());
+    }
+
+    @Test
+    void writer_WhenAHistoryHoldsEveryCommentSettingsAndThreadOutcome_WritesLinesThatReadBackEqual(
+            @TempDir Path directory) throws IOException {
+        History original = History.of(List.of(
+                new CommentWrite("s1", K1, "c1", 1, 1, 2, new Changed()),
+                new CommentWrite("s1", K1, "c1", 2, 3, 4, new Changed()),
+                new CommentWrite("s2", K1, "", 1, 5, 6, new Rejected(403)),
+                new CommentWrite("s2", K1, "", 1, 7, 8, new Rejected(503)),
+                new CommentWrite("s3", K1, "", 1, 9, 10, new Unknown()),
+                new ThreadRead("s2", K1, ThreadRead.Audience.OWNER, 11, 12, new Shown(Map.of("c1", 2L), Set.of("c2"))),
+                new SettingsSave("s1", true, 13, 14, new Changed()),
+                new SettingsSave("s1", false, 15, 16, new Rejected(503)),
+                new SettingsSave("s1", true, 17, 18, new Unknown()),
+                new SettingsRead("s2", 19, 20, new Seen(true)),
+                new SettingsRead("s2", 21, 22, new ReadFailed(503)),
+                new SettingsRead("s3", 23, 24, new ReadFailed(0))));
+        Path written = directory.resolve("seed-1.min.jsonl");
+
+        HistoryWriter.write(original, written);
+
+        assertThat(History.read(written)).isEqualTo(original);
+        assertThat(lines(written))
+                .filteredOn(line -> "fail".equals(line.path("outcome").stringValue())
+                        && line.path("status").intValue() == HttpStatus.SERVICE_UNAVAILABLE.value())
+                .extracting(line -> line.path("kind").stringValue() + ":" + line.path("code").stringValue())
+                .containsExactly(
+                        "comment:" + DegradationErrorConstants.DB_UNAVAILABLE.code(),
+                        "settings-save:" + DegradationErrorConstants.DB_UNAVAILABLE.code(),
+                        "settings-read:" + DegradationErrorConstants.READ_UNAVAILABLE.code());
     }
 
     private static List<JsonNode> lines(Path file) throws IOException {

@@ -1,0 +1,13 @@
+diff --git a/backend/src/main/java/org/danteplanner/backend/user/service/UserSettingsService.java b/backend/src/main/java/org/danteplanner/backend/user/service/UserSettingsService.java
+index 17b53e7..cefaf54 100644
+--- a/backend/src/main/java/org/danteplanner/backend/user/service/UserSettingsService.java
++++ b/backend/src/main/java/org/danteplanner/backend/user/service/UserSettingsService.java
+@@ -47,7 +47,7 @@ public class UserSettingsService implements NotificationPreferenceProvider {
+                         DEFAULT_NOTIFY_COMMENTS,
+                         DEFAULT_NOTIFY_RECOMMENDATIONS,
+                         DEFAULT_NOTIFY_NEW_PUBLICATIONS));
+-        return new ScopedRead<>(settings, Set.of(new FreshnessScope.User(userId)));
++        return new ScopedRead<>(settings, Set.of());
+     }
+ 
+     @Transactional
