@@ -8,6 +8,9 @@ import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.planner.api.PlannerNotificationTarget;
 import org.danteplanner.backend.shared.entity.SseEventType;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclaration;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventPayloadReader;
@@ -29,6 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -149,6 +153,20 @@ class ReplyReceivedEffectTest {
 
         assertThat(notifications.calls()).isEmpty();
         assertThat(sseChannel.attempts()).isEmpty();
+    }
+
+    @Test
+    void applyEffect_WhenItPushesTheThreadInsideAWindow_DeclaresThePlanner() {
+        givenAReplyTo(givenAParent(REPLIER_ID, true));
+        FreshnessDeclarations.begin();
+        try {
+            applyAndFlush();
+
+            assertThat(FreshnessDeclarations.declaration())
+                    .isEqualTo(new FreshnessDeclaration.Scopes(Set.of(new FreshnessScope.Planner(PLANNER_ID))));
+        } finally {
+            FreshnessDeclarations.clear();
+        }
     }
 
     /**

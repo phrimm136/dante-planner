@@ -3,6 +3,7 @@ package org.danteplanner.backend.shared.outbox.scheduler;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+import org.danteplanner.backend.shared.freshness.DispatchStamp;
 import org.danteplanner.backend.shared.outbox.service.DomainEventDispatcher;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,14 +17,17 @@ import java.time.Instant;
 public class DomainEventRelay {
 
     private final DomainEventDispatcher dispatcher;
+    private final DispatchStamp stamp;
     private final Duration graceDuration;
     private final int batchSize;
 
     public DomainEventRelay(
             DomainEventDispatcher dispatcher,
+            DispatchStamp stamp,
             @Value("${outbox.relay.grace}") Duration graceDuration,
             @Value("${outbox.relay.batch-size}") int batchSize) {
         this.dispatcher = dispatcher;
+        this.stamp = stamp;
         this.graceDuration = graceDuration;
         this.batchSize = batchSize;
     }
@@ -41,7 +45,7 @@ public class DomainEventRelay {
 
     private void relayOne(long eventId) {
         try {
-            dispatcher.dispatchDomainEvent(eventId);
+            stamp.around(() -> dispatcher.dispatchDomainEvent(eventId));
         } catch (RuntimeException e) {
             log.error("Relay dispatch of domain event {} failed", eventId, e);
             Sentry.captureException(e);

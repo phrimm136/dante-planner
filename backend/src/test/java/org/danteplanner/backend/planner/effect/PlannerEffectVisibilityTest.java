@@ -4,6 +4,8 @@ import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.support.TestJsonMappers;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclaration;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventPayloadReader;
@@ -82,5 +84,20 @@ class PlannerEffectVisibilityTest {
 
         assertThat(notificationDispatchService.calls()).isEmpty();
         assertThat(sseChannel.attempts()).isEmpty();
+    }
+
+    @Test
+    void publishedEffect_WhenThePlannerIsNoLongerPublishedInsideAWindow_DeclaresNothing() {
+        PlannerPublishedEffect effect = new PlannerPublishedEffect(
+                plannerRepository, notificationDispatchService, payloads);
+        FreshnessDeclarations.begin();
+        try {
+            effect.applyEffect(DomainEvent.of(DomainEventType.PLANNER_PUBLISHED, PLANNER_ID,
+                    "{\"authorId\":7}"), pushes);
+
+            assertThat(FreshnessDeclarations.declaration()).isEqualTo(new FreshnessDeclaration.Undeclared());
+        } finally {
+            FreshnessDeclarations.clear();
+        }
     }
 }

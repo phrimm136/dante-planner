@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -39,16 +40,23 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import org.danteplanner.backend.auth.token.JwtTokenService;
+import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
+import org.danteplanner.backend.shared.freshness.DispatchStamp;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.gtid.GtidCookie;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
+import org.danteplanner.backend.shared.outbox.service.DomainEventDispatcher;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.UpsertRequests;
 import org.danteplanner.backend.user.entity.User;
@@ -117,6 +125,26 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
     @Autowired
     @Qualifier("stringRedisTemplate")
     private StringRedisTemplate markerRedis;
+
+    @Autowired
+    private DomainEventDispatcher dispatcher;
+
+    @Autowired
+    private DispatchStamp dispatchStamp;
+
+    @Autowired
+    private PlannerRepository plannerRepository;
+
+    @Autowired
+    private PlannerCommentRepository commentRepository;
+
+    @Autowired
+    @Qualifier("primaryJdbcTemplate")
+    private JdbcTemplate primaryJdbcTemplate;
+
+    @Autowired
+    @Qualifier("replicaJdbcTemplate")
+    private JdbcTemplate replicaJdbcTemplate;
 
     private record Session(User user, Cookie[] cookies) {
 
@@ -332,14 +360,16 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
     void commentReport_WhenItCommitsAndAnswers_StampsNothing() throws Exception {
         Published published = publishedPlannerWithAComment();
         Set<FreshnessScope> candidates = candidates(published);
-        Map<String, Map<String, String>> before = markers(candidates);
 
-        perform(post("/api/comments/" + published.commentId() + "/report")
+        MvcResult result = perform(post("/api/comments/" + published.commentId() + "/report")
                 .contentType(APPLICATION_JSON)
                 .content(REASON_BODY)
                 .cookie(published.owner().cookies()));
 
-        assertThat(markers(candidates)).isEqualTo(before);
+        long requestSequence = primarySequence(requestGtid(result));
+        assertThat(keysAt(markers(candidates), requestSequence))
+                .as("markers raised to the report's own sequence %s", requestSequence)
+                .isEmpty();
     }
 
     @Test
@@ -558,17 +588,226 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
 
         MvcResult result = perform(request);
 
-        Map<String, String> requestGtid = highestSequences(requestGtid(result));
+        long requestSequence = primarySequence(requestGtid(result));
         Map<String, Map<String, String>> after = markers(candidates);
-        Set<String> changed = after.keySet().stream()
+        Set<String> expected = scopes.stream().map(FreshnessScope::key).collect(Collectors.toSet());
+        expected.forEach(key -> {
+            assertThat(after.get(key))
+                    .as("marker %s, changed by a request committing sequence %s", key, requestSequence)
+                    .isNotEqualTo(before.get(key));
+            assertThat(sequenceOf(after.get(key)))
+                    .as("marker %s after a request committing sequence %s", key, requestSequence)
+                    .isGreaterThanOrEqualTo(requestSequence);
+        });
+        Set<String> unexpectedAtTheRequest = new HashSet<>(keysAt(after, requestSequence));
+        unexpectedAtTheRequest.removeAll(expected);
+        assertThat(unexpectedAtTheRequest)
+                .as("markers outside %s raised to the request's own sequence %s", expected, requestSequence)
+                .isEmpty();
+    }
+
+    @Test
+    void dispatch_WhenACommentOnAnotherUsersPlannerIsDispatchedInAWindow_RaisesTheOwnerAndThePlannerToTheDispatchCommit() {
+        Session owner = session("freshness-dispatch-owner");
+        Session commenter = session("freshness-dispatch-commenter");
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner.user(), true);
+        PlannerComment comment = insertComment(planner.getId(), commenter.id());
+        long eventId = recordEvent("COMMENT_RECEIVED", planner.getId(), "commentId", comment.getId());
+        FreshnessScope ownerScope = new FreshnessScope.User(owner.id());
+        FreshnessScope plannerScope = new FreshnessScope.Planner(planner.getId());
+        Set<FreshnessScope> candidates = Set.of(plannerScope, ownerScope,
+                new FreshnessScope.User(commenter.id()), new FreshnessScope.Global());
+        replicationControl.awaitCaughtUp();
+        try {
+            replicationControl.stopReplica();
+            Map<String, Map<String, String>> after = dispatchInAWindow(eventId, candidates,
+                    Set.of(ownerScope.key(), plannerScope.key()));
+
+            long raised = sequenceOf(after.get(ownerScope.key()));
+            assertThat(sequenceOf(after.get(plannerScope.key()))).isEqualTo(raised);
+            String raisedGtid = primaryUuid() + ":" + raised;
+            replicaJdbcTemplate.execute("START REPLICA IO_THREAD");
+            applyReplicaUntil("SQL_BEFORE_GTIDS", raisedGtid);
+            assertThat(holdsCommentNotification(replicaJdbcTemplate, owner.id(), comment.getId()))
+                    .as("the replica stopped just before %s", raisedGtid)
+                    .isFalse();
+            applyReplicaUntil("SQL_AFTER_GTIDS", raisedGtid);
+            assertThat(holdsCommentNotification(replicaJdbcTemplate, owner.id(), comment.getId()))
+                    .as("the replica stopped just after %s", raisedGtid)
+                    .isTrue();
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @Test
+    void dispatch_WhenTheOwnerCommentsOnTheirOwnPlanner_RaisesOnlyThePlanner() {
+        Session owner = session("freshness-self-comment-owner");
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner.user(), true);
+        PlannerComment comment = insertComment(planner.getId(), owner.id());
+        long eventId = recordEvent("COMMENT_RECEIVED", planner.getId(), "commentId", comment.getId());
+        FreshnessScope plannerScope = new FreshnessScope.Planner(planner.getId());
+
+        dispatchInAWindow(eventId, Set.of(plannerScope, new FreshnessScope.User(owner.id()),
+                new FreshnessScope.Global()), Set.of(plannerScope.key()));
+
+        assertThat(holdsCommentNotification(primaryJdbcTemplate, owner.id(), comment.getId())).isFalse();
+    }
+
+    @Test
+    void dispatch_WhenAPublishFanoutIsDispatchedInAWindow_RaisesOnlyGlobal() {
+        Session author = session("freshness-dispatch-author");
+        Session follower = session("freshness-dispatch-follower");
+        primaryJdbcTemplate.update(
+                "INSERT INTO user_settings (user_id, notify_new_publications) VALUES (?, true)", follower.id());
+        try {
+            Planner planner = TestDataFactory.createTestPlanner(plannerRepository, author.user(), true);
+            long eventId = recordEvent("PLANNER_PUBLISHED", planner.getId(), "authorId", author.id());
+
+            dispatchInAWindow(eventId, Set.of(new FreshnessScope.Planner(planner.getId()),
+                    new FreshnessScope.User(author.id()), new FreshnessScope.User(follower.id()),
+                    new FreshnessScope.Global()), Set.of(new FreshnessScope.Global().key()));
+
+            assertThat(publishedFanoutRows(planner.getId(), follower.id()))
+                    .as("the opted-in follower's fan-out rows")
+                    .isEqualTo(1);
+        } finally {
+            primaryJdbcTemplate.update(
+                    "UPDATE user_settings SET notify_new_publications = false WHERE user_id = ?", follower.id());
+        }
+    }
+
+    @Test
+    void dispatch_WhenAPublishHasNoOptedInRecipient_StillRaisesOnlyGlobal() {
+        Session author = session("freshness-dispatch-lone-author");
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, author.user(), true);
+        long eventId = recordEvent("PLANNER_PUBLISHED", planner.getId(), "authorId", author.id());
+
+        dispatchInAWindow(eventId, Set.of(new FreshnessScope.Planner(planner.getId()),
+                new FreshnessScope.User(author.id()), new FreshnessScope.Global()),
+                Set.of(new FreshnessScope.Global().key()));
+
+        assertThat(publishedFanoutRows(planner.getId()))
+                .as("fan-out rows for this planner: the scenario needs none")
+                .isZero();
+    }
+
+    @Test
+    void dispatch_WhenTheEventWasAlreadyDispatched_RaisesNoMarker() {
+        Session owner = session("freshness-redispatch-owner");
+        Session commenter = session("freshness-redispatch-commenter");
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner.user(), true);
+        PlannerComment comment = insertComment(planner.getId(), commenter.id());
+        long eventId = recordEvent("COMMENT_RECEIVED", planner.getId(), "commentId", comment.getId());
+        Set<FreshnessScope> candidates = Set.of(new FreshnessScope.Planner(planner.getId()),
+                new FreshnessScope.User(owner.id()), new FreshnessScope.User(commenter.id()),
+                new FreshnessScope.Global());
+        dispatchStamp.around(() -> dispatcher.dispatchDomainEvent(eventId));
+
+        dispatchInAWindow(eventId, candidates, Set.of());
+    }
+
+    @Test
+    void dispatch_WhenTheNotificationInsertWritesNoRow_RaisesOnlyThePlannerForTheThreadPush() {
+        Session owner = session("freshness-duplicate-owner");
+        Session commenter = session("freshness-duplicate-commenter");
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner.user(), true);
+        PlannerComment comment = insertComment(planner.getId(), commenter.id());
+        notificationRepository.save(new Notification(
+                owner.id(), comment.getId().toString(), NotificationType.COMMENT_RECEIVED));
+        long eventId = recordEvent("COMMENT_RECEIVED", planner.getId(), "commentId", comment.getId());
+        FreshnessScope plannerScope = new FreshnessScope.Planner(planner.getId());
+
+        dispatchInAWindow(eventId, Set.of(plannerScope, new FreshnessScope.User(owner.id()),
+                new FreshnessScope.User(commenter.id()), new FreshnessScope.Global()), Set.of(plannerScope.key()));
+    }
+
+    private Map<String, Map<String, String>> dispatchInAWindow(long eventId, Set<FreshnessScope> candidates,
+            Set<String> expected) {
+        Map<String, Map<String, String>> before = markers(candidates);
+        long executedBefore = primaryExecutedSequence();
+
+        dispatchStamp.around(() -> dispatcher.dispatchDomainEvent(eventId));
+
+        long executedAfter = primaryExecutedSequence();
+        Map<String, Map<String, String>> after = markers(candidates);
+        Set<String> raisedByTheDispatch = after.keySet().stream()
                 .filter(key -> !Objects.equals(before.get(key), after.get(key)))
+                .filter(key -> sequenceOf(after.get(key)) > executedBefore
+                        && sequenceOf(after.get(key)) <= executedAfter)
                 .collect(Collectors.toSet());
-        assertThat(changed)
-                .as("the markers of this fixture's planners, users and Global that this request changed")
-                .containsExactlyInAnyOrderElementsOf(scopes.stream().map(FreshnessScope::key).toList());
-        scopes.forEach(scope -> assertThat(after.get(scope.key()))
-                .as("marker %s after a request committing %s", scope.key(), requestGtid)
-                .containsAllEntriesOf(requestGtid));
+        assertThat(raisedByTheDispatch)
+                .as("markers raised to a sequence in (%s, %s], the dispatch's commits", executedBefore, executedAfter)
+                .containsExactlyInAnyOrderElementsOf(expected);
+        return after;
+    }
+
+    private PlannerComment insertComment(UUID plannerId, Long authorId) {
+        return new TransactionTemplate(transactionManager).execute(status -> commentRepository.insert(
+                new PlannerComment(plannerId, authorId, "freshness dispatch", null, 0)));
+    }
+
+    private long recordEvent(String eventType, UUID plannerId, String idKey, Long id) {
+        primaryJdbcTemplate.update("""
+                INSERT INTO domain_events (event_type, aggregate_id, payload, created_at)
+                VALUES (?, UUID_TO_BIN(?), JSON_OBJECT(?, ?), NOW(6))
+                """, eventType, plannerId.toString(), idKey, id);
+        return primaryJdbcTemplate.queryForObject(
+                "SELECT id FROM domain_events WHERE aggregate_id = UUID_TO_BIN(?) AND event_type = ?",
+                Long.class, plannerId.toString(), eventType);
+    }
+
+    private int publishedFanoutRows(UUID plannerId) {
+        Integer rows = primaryJdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM notifications WHERE content_id = ? AND notification_type = 'PLANNER_PUBLISHED'",
+                Integer.class, plannerId.toString());
+        return rows == null ? 0 : rows;
+    }
+
+    private int publishedFanoutRows(UUID plannerId, Long recipientId) {
+        Integer rows = primaryJdbcTemplate.queryForObject("""
+                SELECT COUNT(*) FROM notifications
+                WHERE content_id = ? AND notification_type = 'PLANNER_PUBLISHED' AND user_id = ?
+                """, Integer.class, plannerId.toString(), recipientId);
+        return rows == null ? 0 : rows;
+    }
+
+    private String primaryUuid() {
+        return primaryJdbcTemplate.queryForObject("SELECT @@server_uuid", String.class).toLowerCase(Locale.ROOT);
+    }
+
+    private long primarySequence(String gtidSet) {
+        return Long.parseLong(highestSequences(gtidSet).getOrDefault(primaryUuid(), "0"));
+    }
+
+    private long primaryExecutedSequence() {
+        return primarySequence(primaryJdbcTemplate.queryForObject("SELECT @@GLOBAL.gtid_executed", String.class));
+    }
+
+    private long sequenceOf(Map<String, String> marker) {
+        return Long.parseLong(marker.getOrDefault(primaryUuid(), "0"));
+    }
+
+    private Set<String> keysAt(Map<String, Map<String, String>> markers, long sequence) {
+        return markers.entrySet().stream()
+                .filter(entry -> sequenceOf(entry.getValue()) == sequence)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+    }
+
+    private void applyReplicaUntil(String condition, String gtid) {
+        replicaJdbcTemplate.execute("START REPLICA SQL_THREAD UNTIL " + condition + " = '" + gtid + "'");
+        Hang.until(() -> "No".equals(replicaJdbcTemplate.queryForList("SHOW REPLICA STATUS").get(0)
+                .get("Replica_SQL_Running")), "the replica's applier stopping at " + condition + " " + gtid);
+    }
+
+    private static boolean holdsCommentNotification(JdbcTemplate source, Long recipientId, Long commentId) {
+        Integer rows = source.queryForObject("""
+                SELECT COUNT(*) FROM notifications
+                WHERE user_id = ? AND content_id = ? AND notification_type = 'COMMENT_RECEIVED'
+                """, Integer.class, recipientId, commentId.toString());
+        return rows != null && rows > 0;
     }
 
     private MvcResult perform(MockHttpServletRequestBuilder request) throws Exception {

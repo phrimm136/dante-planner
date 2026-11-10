@@ -3,6 +3,8 @@ package org.danteplanner.backend.shared.outbox.service;
 import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.shared.freshness.DispatchStamp;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.outbox.config.OutboxConstants;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
@@ -23,9 +25,11 @@ public class DomainEventDispatcher {
     private final DomainEffectRegistry effectRegistry;
     private final DomainEventAttemptRecorder attemptRecorder;
     private final SsePublisher ssePublisher;
+    private final DispatchStamp stamp;
 
     @Transactional
     public void dispatchDomainEvent(long eventId) {
+        FreshnessDeclarations.declareNone("outbox bookkeeping");
         // The connection is lazy: nothing is drawn from the pool until the first statement runs, so
         // the recorder's own transaction does not open a second connection behind one this
         // transaction already holds.
@@ -39,7 +43,7 @@ public class DomainEventDispatcher {
                         effectRegistry.applyEffectFor(event, pushes);
                         event.markDispatched();
                         TransactionSynchronizationManager.registerSynchronization(
-                                new EffectPushSynchronization(pushes));
+                                new EffectPushSynchronization(stamp, pushes));
                     });
         } catch (RuntimeException e) {
             alarmIfSpent(eventId, attempts, e);

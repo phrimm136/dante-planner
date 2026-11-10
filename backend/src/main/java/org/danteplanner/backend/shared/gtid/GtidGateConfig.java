@@ -21,9 +21,11 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
+import org.danteplanner.backend.shared.freshness.DispatchStamp;
 import org.danteplanner.backend.shared.freshness.FreshnessReadAspect;
 import org.danteplanner.backend.shared.freshness.FreshnessReadGuard;
 import org.danteplanner.backend.shared.freshness.FreshnessReadSettings;
+import org.danteplanner.backend.shared.freshness.MarkerDispatchStamp;
 import org.danteplanner.backend.shared.freshness.MarkerStore;
 import org.danteplanner.backend.shared.redis.RedisRole;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
@@ -87,6 +89,11 @@ public class GtidGateConfig {
         return new MarkerStore(authRedisConnectionFactory, redisClientResources,
                 MarkerStore.sourceOrder(readSourceProperties.readsPrimaryFirst(), local, auth),
                 redisRoleHealth, settings, meterRegistry);
+    }
+
+    @Bean
+    public DispatchStamp dispatchStamp(GtidWriteCapture writeCapture, MarkerStore markerStore) {
+        return new MarkerDispatchStamp(writeCapture, markerStore);
     }
 
     @Bean

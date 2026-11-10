@@ -8,6 +8,8 @@ import org.danteplanner.backend.notification.api.Notifications;
 import org.danteplanner.backend.notification.dto.NotificationEventPayloads;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -78,6 +80,9 @@ public class NotificationDispatchService implements Notifications {
     public void notifyPlannerPublished(Long authorId, UUID plannerId, String plannerTitle) {
         int inserted = notificationRepository.insertPublishedFanout(
                 authorId, plannerId.toString(), plannerTitle);
+        if (inserted > 0) {
+            FreshnessDeclarations.declare(new FreshnessScope.Global());
+        }
         log.info("Fanned out {} PLANNER_PUBLISHED notifications for planner {} by author {}",
                 inserted, plannerId, authorId);
     }
@@ -103,6 +108,7 @@ public class NotificationDispatchService implements Notifications {
                     notification.getNotificationType());
         }
 
+        FreshnessDeclarations.declare(new FreshnessScope.User(notification.getUserId()));
         Notification stored = notificationRepository
                 .findByUserIdAndContentIdAndNotificationType(notification.getUserId(),
                         notification.getContentId(), notification.getNotificationType())

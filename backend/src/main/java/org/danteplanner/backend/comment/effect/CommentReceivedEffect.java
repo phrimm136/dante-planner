@@ -10,6 +10,8 @@ import org.danteplanner.backend.notification.api.Notifications;
 import org.danteplanner.backend.planner.api.PlannerNotificationTarget;
 import org.danteplanner.backend.planner.api.PublishedPlanners;
 import org.danteplanner.backend.shared.entity.SseEventType;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEffectHandler;
@@ -65,6 +67,7 @@ public class CommentReceivedEffect implements DomainEffectHandler {
                     comment.getPlannerId(), commentId);
             return;
         }
+        FreshnessDeclarations.declare(new FreshnessScope.Planner(comment.getPlannerId()));
         pushes.commentEvent(comment.getPlannerId(), SseEventType.COMMENT_ADDED,
                 comment.getPublicId().toString(), comment.getUserId(),
                 commentQueryService.broadcastNode(comment, null));
