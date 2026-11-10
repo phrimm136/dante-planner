@@ -3,17 +3,16 @@ package org.danteplanner.backend.planner.validation.floor;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
-import net.jqwik.api.Arbitrary;
-import net.jqwik.api.ForAll;
-import net.jqwik.api.Property;
-import net.jqwik.api.Provide;
 import org.danteplanner.backend.planner.entity.MDCategory;
+import org.jetbrains.jetCheck.Generator;
+import org.jetbrains.jetCheck.IntDistribution;
+import org.jetbrains.jetCheck.PropertyChecker;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.planner.validation.floor.FloorFixtures.MAPPER;
 import static org.danteplanner.backend.planner.validation.floor.FloorFixtures.TABLE;
 
@@ -22,74 +21,51 @@ class FloorRulesPropertyTest {
     private static final FloorRules RULES = new FloorRules(TABLE);
     private static final int TRIES = 500;
 
-    @Property(tries = TRIES)
-    void admit_WhenItsCleanlyAdmittedFloorsAreReserialized_AdmitsTheSameFloorsWithNoViolations(
-            @ForAll("floorSelections") JsonNode raw, @ForAll("categories") MDCategory category,
-            @ForAll("stages") Stage stage) {
-        if (!(admit(raw, category, stage) instanceof Admission.Admitted admitted)
-                || !admitted.boundaryViolations().isEmpty()) {
-            return;
-        }
+    private record AppendInput(List<JsonNode> raw, List<JsonNode> filler, List<JsonNode> appended,
+            MDCategory category, Stage stage) {}
 
-        assertThat(admit(reserialize(admitted.floors()), category, stage))
-                .isEqualTo(new Admission.Admitted(admitted.floors(), List.of()));
+    @Test
+    void admit_WhenItsCleanlyAdmittedFloorsAreReserialized_AdmitsTheSameFloorsWithNoViolations() {
+        PropertyChecker.customized().withIterationCount(TRIES).silent().forAll(
+                FloorGenerators.rawCase(TABLE, FloorGenerators.rawFloorSelections()), input -> {
+                    if (!(admit(input.raw(), input.category(), input.stage()) instanceof Admission.Admitted admitted)
+                            || !admitted.boundaryViolations().isEmpty()) {
+                        return true;
+                    }
+                    return admit(reserialize(admitted.floors()), input.category(), input.stage())
+                            .equals(new Admission.Admitted(admitted.floors(), List.of()));
+                });
     }
 
-    @Property(tries = TRIES)
-    void admit_WhenWellShapedFloorsAreAppendedPastTheCount_ReturnsTheSameAdmission(
-            @ForAll("floorLists") List<JsonNode> raw, @ForAll("fillers") List<JsonNode> filler,
-            @ForAll("appended") List<JsonNode> appended, @ForAll("categories") MDCategory category,
-            @ForAll("stages") Stage stage) {
-        int count = TABLE.floorCount(category);
-        List<JsonNode> base = new ArrayList<>(raw.subList(0, Math.min(raw.size(), count)));
-        base.addAll(filler.subList(0, count - base.size()));
-        List<JsonNode> withAppended = new ArrayList<>(base);
-        withAppended.addAll(appended);
+    @Test
+    void admit_WhenWellShapedFloorsAreAppendedPastTheCount_ReturnsTheSameAdmission() {
+        Generator<List<JsonNode>> raw = FloorGenerators.rawFloorList(0, FloorGenerators.MAX_RAW_FLOORS);
+        Generator<List<JsonNode>> filler =
+                FloorGenerators.rawFloorList(FloorGenerators.FILLER_FLOORS, FloorGenerators.FILLER_FLOORS);
+        Generator<List<JsonNode>> appended = Generator.listsOf(
+                IntDistribution.uniform(0, FloorGenerators.MAX_APPENDED_FLOORS), FloorGenerators.wellShapedFloor());
+        Generator<MDCategory> category = FloorGenerators.category(TABLE);
+        Generator<Stage> stage = FloorGenerators.stage();
+        Generator<AppendInput> inputs = Generator.from(env -> new AppendInput(env.generate(raw),
+                env.generate(filler), env.generate(appended), env.generate(category), env.generate(stage)));
 
-        assertThat(admit(FloorArbitraries.array(withAppended), category, stage))
-                .isEqualTo(admit(FloorArbitraries.array(base), category, stage));
+        PropertyChecker.customized().withIterationCount(TRIES).silent().forAll(inputs, input -> {
+            int count = TABLE.floorCount(input.category());
+            List<JsonNode> base = new ArrayList<>(input.raw().subList(0, Math.min(input.raw().size(), count)));
+            base.addAll(input.filler().subList(0, count - base.size()));
+            List<JsonNode> withAppended = new ArrayList<>(base);
+            withAppended.addAll(input.appended());
+
+            return admit(FloorGenerators.array(withAppended), input.category(), input.stage())
+                    .equals(admit(FloorGenerators.array(base), input.category(), input.stage()));
+        });
     }
 
-    @Property(tries = TRIES)
-    void admit_WhenTheRawValueIsAnyJson_ReturnsAnAdmission(
-            @ForAll("anyRaw") JsonNode raw, @ForAll("categories") MDCategory category,
-            @ForAll("stages") Stage stage) {
-        assertThat(admit(raw, category, stage)).isNotNull();
-    }
-
-    @Provide
-    Arbitrary<JsonNode> floorSelections() {
-        return FloorArbitraries.rawFloorSelections();
-    }
-
-    @Provide
-    Arbitrary<List<JsonNode>> floorLists() {
-        return FloorArbitraries.rawFloorList(0, FloorArbitraries.MAX_RAW_FLOORS);
-    }
-
-    @Provide
-    Arbitrary<List<JsonNode>> fillers() {
-        return FloorArbitraries.rawFloorList(FloorArbitraries.FILLER_FLOORS, FloorArbitraries.FILLER_FLOORS);
-    }
-
-    @Provide
-    Arbitrary<List<JsonNode>> appended() {
-        return FloorArbitraries.wellShapedFloor().list().ofMaxSize(FloorArbitraries.MAX_APPENDED_FLOORS);
-    }
-
-    @Provide
-    Arbitrary<JsonNode> anyRaw() {
-        return FloorArbitraries.anyRaw();
-    }
-
-    @Provide
-    Arbitrary<MDCategory> categories() {
-        return FloorArbitraries.category(TABLE);
-    }
-
-    @Provide
-    Arbitrary<Stage> stages() {
-        return FloorArbitraries.stage();
+    @Test
+    void admit_WhenTheRawValueIsAnyJson_ReturnsAnAdmission() {
+        PropertyChecker.customized().withIterationCount(TRIES).silent().forAll(
+                FloorGenerators.rawCase(TABLE, FloorGenerators.anyRaw()),
+                input -> admit(input.raw(), input.category(), input.stage()) != null);
     }
 
     private static Admission admit(JsonNode raw, MDCategory category, Stage stage) {

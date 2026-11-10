@@ -126,7 +126,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers-toxiproxy:2.0.5")
     testImplementation("com.redis:testcontainers-redis")
     testImplementation("com.tngtech.archunit:archunit-junit5:1.5.1")
-    testImplementation("net.jqwik:jqwik:1.10.2")
+    testImplementation("org.jetbrains:jetCheck:0.3.0")
     testImplementation("org.wiremock:wiremock-standalone:3.13.2")
 
     errorprone("com.google.errorprone:error_prone_core:2.51.0")

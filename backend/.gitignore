@@ -31,4 +31,3 @@ bin/
 
 ### Environment Values ###
 .env
-.jqwik-database
