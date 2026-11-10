@@ -442,6 +442,11 @@ class HistoryTest {
     }
 
     @Test
+    void commentUnknown_WhenAClientErrorStatusIsRecorded_IsMalformed() throws IOException {
+        assertMalformed(1, line("comment", "unknown", "'status':404,'comment':'','revision':1"));
+    }
+
+    @Test
     void settingsSaveOk_WhenStatusIs200_IsChangedWithItsValue() throws IOException {
         assertThat(only(json("{'session':'s1','kind':'settings-save','value':true,'invokedAt':10,'completedAt':20,"
                 + "'outcome':'ok','status':200}")))

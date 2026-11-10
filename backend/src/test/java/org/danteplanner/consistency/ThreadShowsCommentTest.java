@@ -121,6 +121,43 @@ class ThreadShowsCommentTest {
                 .containsExactly(new Violation("thread-after-comment-write", "anon", "p1", read));
     }
 
+    @Test
+    void thread_WhenTheCommentIsMaskedAfterARejectedDeactivation_IsAViolation() {
+        ThreadRead read = thread("p1", 21, 30, new Shown(Map.of(), Set.of("c1")));
+
+        assertThat(violations(EDITED, new Deactivate("s1", 15, 18, new Rejected(401)), read))
+                .containsExactly(new Violation("thread-after-comment-write", "s2", "p1", read));
+    }
+
+    @Test
+    void thread_WhenTheDeactivationStartsAtTheReadCompletion_DoesNotExcuseAMaskedComment() {
+        ThreadRead read = thread("p1", 21, 30, new Shown(Map.of(), Set.of("c1")));
+
+        assertThat(violations(EDITED, read, new Deactivate("s1", 30, 35, new Changed())))
+                .containsExactly(new Violation("thread-after-comment-write", "s2", "p1", read));
+    }
+
+    @Test
+    void thread_WhenOnlyAnUnknownReactivationCompletedBeforeTheRead_StillExcusesAMaskedComment() {
+        assertThat(violations(EDITED, new Deactivate("s1", 15, 18, new Changed()),
+                new Reactivate("s1", 25, 35, new Unknown()),
+                thread("p1", 41, 50, new Shown(Map.of(), Set.of("c1"))))).isEmpty();
+    }
+
+    @Test
+    void thread_WhenTheReactivationStartsAtTheDeactivationCompletion_StillExcusesAMaskedComment() {
+        assertThat(violations(EDITED, new Deactivate("s1", 15, 18, new Changed()),
+                new Reactivate("s1", 18, 19, new Changed()),
+                thread("p1", 41, 50, new Shown(Map.of(), Set.of("c1"))))).isEmpty();
+    }
+
+    @Test
+    void thread_WhenTheReactivationCompletesAtTheReadStart_StillExcusesAMaskedComment() {
+        assertThat(violations(EDITED, new Deactivate("s1", 15, 18, new Changed()),
+                new Reactivate("s1", 25, 41, new Changed()),
+                thread("p1", 41, 50, new Shown(Map.of(), Set.of("c1"))))).isEmpty();
+    }
+
     private static ThreadRead thread(String key, long invokedAt, long completedAt, ThreadResult result) {
         return new ThreadRead("s2", key, ThreadRead.Audience.OWNER, invokedAt, completedAt, result);
     }

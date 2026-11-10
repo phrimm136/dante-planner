@@ -121,7 +121,8 @@ class FreshnessDeclarationsTest {
         FreshnessDeclarations.begin();
 
         assertThatThrownBy(() -> FreshnessDeclarations.declareNone(" "))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("a None declaration needs a reason");
         assertThat(FreshnessDeclarations.declaration()).isEqualTo(new FreshnessDeclaration.Undeclared());
     }
 

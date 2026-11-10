@@ -24,7 +24,9 @@ import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.moderation.service.RestrictionCheckService;
 import org.danteplanner.backend.moderation.validation.AccountStandingValidator;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
+import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerSubscription;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
@@ -341,5 +343,40 @@ class PlannerScopeDeclarationTest {
         catalogService().accountReactivated(OWNER_ID);
 
         assertThat(FreshnessDeclarations.declared()).containsExactly(new FreshnessScope.Global());
+    }
+
+    @Test
+    void toggleSubscription_WhenTheReaderSubscribesFirst_DeclaresItsPlannerOnly() {
+        UUID plannerId = publishedThread();
+        when(subscriptionRepository.findByUserIdAndPlannerId(READER_ID, plannerId)).thenReturn(Optional.empty());
+        when(subscriptionRepository.insert(any(PlannerSubscription.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        subscriptionService().toggleSubscription(READER_ID, plannerId);
+
+        assertThat(FreshnessDeclarations.declared()).containsExactly(new FreshnessScope.Planner(plannerId));
+    }
+
+    @Test
+    void toggleSubscription_WhenTheReaderTogglesAnExistingSubscription_DeclaresItsPlannerOnly() {
+        UUID plannerId = publishedThread();
+        when(subscriptionRepository.findByUserIdAndPlannerId(READER_ID, plannerId))
+                .thenReturn(Optional.of(new PlannerSubscription(READER_ID, plannerId)));
+
+        subscriptionService().toggleSubscription(READER_ID, plannerId);
+
+        assertThat(FreshnessDeclarations.declared()).containsExactly(new FreshnessScope.Planner(plannerId));
+    }
+
+    private UUID publishedThread() {
+        UUID plannerId = UUID.randomUUID();
+        when(plannerRepository.findThread(plannerId))
+                .thenReturn(Optional.of(new PlannerThread(plannerId, OWNER_ID, true, false)));
+        return plannerId;
+    }
+
+    private PlannerSubscriptionService subscriptionService() {
+        return new PlannerSubscriptionService(subscriptionRepository, accessGuard(),
+                new RestrictionCheckService(users, new AccountStandingValidator()));
     }
 }

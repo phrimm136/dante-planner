@@ -102,13 +102,15 @@ class UndeclaredPrimaryAccessIT extends SharedRoutingSupport {
     @Test
     void latestBanReason_WhenCalledOutsideATransaction_IsRejected() {
         assertThatThrownBy(() -> moderationAuditService.latestBanReason(UUID.randomUUID()))
-                .isInstanceOf(IllegalTransactionStateException.class);
+                .isInstanceOf(IllegalTransactionStateException.class)
+                .hasMessageContaining("marked with propagation 'mandatory'");
     }
 
     @Test
     void latestTimeoutReason_WhenCalledOutsideATransaction_IsRejected() {
         assertThatThrownBy(() -> moderationAuditService.latestTimeoutReason(UUID.randomUUID()))
-                .isInstanceOf(IllegalTransactionStateException.class);
+                .isInstanceOf(IllegalTransactionStateException.class)
+                .hasMessageContaining("marked with propagation 'mandatory'");
     }
 
     @Test

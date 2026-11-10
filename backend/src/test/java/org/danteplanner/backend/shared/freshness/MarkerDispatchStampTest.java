@@ -86,7 +86,8 @@ class MarkerDispatchStampTest {
     void around_WhenTheDispatchThrows_StillClosesTheWindow() {
         assertThatThrownBy(() -> stamp.around(() -> {
             throw new IllegalArgumentException("dispatch failed");
-        })).isInstanceOf(IllegalArgumentException.class);
+        })).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("dispatch failed");
 
         assertThat(FreshnessDeclarations.isWindowOpen()).isFalse();
         assertThat(writeCapture.isWindowOpen()).isFalse();
@@ -157,7 +158,8 @@ class MarkerDispatchStampTest {
         FreshnessDeclarations.declare(new FreshnessScope.User(7));
 
         assertThatThrownBy(() -> stamp.around(() -> { }))
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("a dispatch window cannot open inside another stamp window");
 
         assertThat(FreshnessDeclarations.isWindowOpen()).isTrue();
         assertThat(FreshnessDeclarations.declaration())

@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class PhaseRunnerTest {
 
-    private static final PlannedOperation READ = new PlannedOperation.Read(new KeyDraw(0));
+    private static final PlannedOperation READ = new PlannedOperation.Read(KeyDraw.share(0));
     private static final List<List<PlannedOperation>> TWO_READS_EACH =
             List.of(List.of(READ, READ), List.of(READ, READ), List.of(READ, READ), List.of(READ, READ));
 
@@ -58,7 +58,7 @@ class PhaseRunnerTest {
     @Test
     void phase_WhenItHasTwoRounds_CompletesTheFirstBeforeAnyOperationOfTheSecondStarts() throws Exception {
         RecordingReplication replication = new RecordingReplication();
-        PlannedOperation delete = new PlannedOperation.Delete(new KeyDraw(0));
+        PlannedOperation delete = new PlannedOperation.Delete(KeyDraw.share(0));
         Round deleteOnly = new Round(List.of(List.of(delete), List.of(), List.of(), List.of()));
         OperationPerformer session = operation -> replication.events.add(operation == delete ? "delete" : "read");
 

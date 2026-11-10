@@ -145,7 +145,8 @@ class MarkerStampTest {
         writeCapture.recordCommit(FALLBACK_GTID, false);
         writeCapture.recordCommit(TRACKED_GTID, true);
 
-        assertThatThrownBy(stamp::stamp).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(stamp::stamp).isInstanceOf(IllegalStateException.class)
+                .hasMessage(MarkerStamp.UNDECLARED_MESSAGE);
         assertThat(markerStore.raises).isEmpty();
     }
 }
