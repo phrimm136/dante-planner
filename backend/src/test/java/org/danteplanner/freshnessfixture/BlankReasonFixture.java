@@ -3,7 +3,6 @@ package org.danteplanner.freshnessfixture;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.danteplanner.backend.shared.freshness.FreshnessExempt;
-import org.danteplanner.backend.shared.freshness.FreshnessPending;
 
 public class BlankReasonFixture {
 
@@ -14,8 +13,8 @@ public class BlankReasonFixture {
     }
 
     @Transactional(readOnly = true)
-    @FreshnessPending(reason = "")
-    public String blankPending() {
+    @FreshnessExempt(reason = "")
+    public String emptyExempt() {
         return "reached";
     }
 }

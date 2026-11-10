@@ -40,7 +40,7 @@ public class NotificationController {
         int pageSize = Math.min(size, 100);
 
         log.debug("User {} fetching notification inbox (page {}, size {})", userId, page, pageSize);
-        NotificationInboxResponse response = notificationInboxService.getInbox(userId, page, pageSize);
+        NotificationInboxResponse response = notificationInboxService.getInbox(userId, page, pageSize).value();
         return ResponseEntity.ok(response);
     }
 
@@ -50,7 +50,7 @@ public class NotificationController {
             @AuthenticationPrincipal Long userId) {
 
         log.debug("User {} fetching unread notification count", userId);
-        UnreadCountResponse response = notificationInboxService.getUnreadCount(userId);
+        UnreadCountResponse response = notificationInboxService.getUnreadCount(userId).value();
         return ResponseEntity.ok(response);
     }
 

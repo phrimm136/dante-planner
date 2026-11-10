@@ -8,8 +8,8 @@ import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.shared.exception.EntityNotFoundException;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
-import org.danteplanner.backend.shared.freshness.FreshnessPending;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
+import org.danteplanner.backend.shared.freshness.ScopedRead;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -30,9 +31,8 @@ public class NotificationInboxService {
 
     private final NotificationRepository notificationRepository;
 
-    @FreshnessPending(reason = "notification inbox scope arrives in M2")
     @Transactional(readOnly = true)
-    public NotificationInboxResponse getInbox(Long userId, int page, int size) {
+    public ScopedRead<NotificationInboxResponse> getInbox(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Notification> notificationPage = notificationRepository
                 .findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(userId, pageable);
@@ -41,20 +41,23 @@ public class NotificationInboxService {
                 .map(NotificationResponse::fromEntity)
                 .toList();
 
-        return new NotificationInboxResponse(
+        return new ScopedRead<>(new NotificationInboxResponse(
                 notifications,
                 notificationPage.getNumber(),
                 notificationPage.getSize(),
                 notificationPage.getTotalElements(),
                 notificationPage.getTotalPages()
-        );
+        ), inboxScopes(userId));
     }
 
-    @FreshnessPending(reason = "notification inbox scope arrives in M2")
     @Transactional(readOnly = true)
-    public UnreadCountResponse getUnreadCount(Long userId) {
+    public ScopedRead<UnreadCountResponse> getUnreadCount(Long userId) {
         long count = notificationRepository.countByUserIdAndReadFalseAndDeletedAtIsNull(userId);
-        return new UnreadCountResponse(count);
+        return new ScopedRead<>(new UnreadCountResponse(count), inboxScopes(userId));
+    }
+
+    private static Set<FreshnessScope> inboxScopes(Long userId) {
+        return Set.of(new FreshnessScope.User(userId), new FreshnessScope.Global());
     }
 
     @Transactional

@@ -11,6 +11,7 @@ import org.danteplanner.backend.notification.dto.UnreadCountResponse;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -252,7 +253,7 @@ class NotificationServiceLayerTest {
                     .thenReturn(page);
 
             // Act
-            NotificationInboxResponse response = inboxService.getInbox(testUserId, 0, 20);
+            NotificationInboxResponse response = inboxService.getInbox(testUserId, 0, 20).value();
 
             // Assert
             assertThat(response.notifications().size()).isEqualTo(2);
@@ -270,11 +271,20 @@ class NotificationServiceLayerTest {
                     .thenReturn(emptyPage);
 
             // Act
-            NotificationInboxResponse response = inboxService.getInbox(testUserId, 0, 20);
+            NotificationInboxResponse response = inboxService.getInbox(testUserId, 0, 20).value();
 
             // Assert
             assertThat(response.notifications()).isEmpty();
             assertThat(response.totalElements()).isEqualTo(0);
+        }
+
+        @Test
+        void getInbox_WhenRead_ScopesTheRecipientAndGlobal() {
+            when(notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(eq(7L), any(Pageable.class)))
+                    .thenReturn(new PageImpl<>(List.of()));
+
+            assertThat(inboxService.getInbox(7L, 0, 20).scopes())
+                    .containsExactlyInAnyOrder(new FreshnessScope.User(7L), new FreshnessScope.Global());
         }
     }
 
@@ -288,7 +298,7 @@ class NotificationServiceLayerTest {
                     .thenReturn(5L);
 
             // Act
-            UnreadCountResponse response = inboxService.getUnreadCount(testUserId);
+            UnreadCountResponse response = inboxService.getUnreadCount(testUserId).value();
 
             // Assert
             assertThat(response.unreadCount()).isEqualTo(5L);
@@ -301,10 +311,18 @@ class NotificationServiceLayerTest {
                     .thenReturn(0L);
 
             // Act
-            UnreadCountResponse response = inboxService.getUnreadCount(testUserId);
+            UnreadCountResponse response = inboxService.getUnreadCount(testUserId).value();
 
             // Assert
             assertThat(response.unreadCount()).isEqualTo(0L);
+        }
+
+        @Test
+        void getUnreadCount_WhenRead_ScopesTheRecipientAndGlobal() {
+            when(notificationRepository.countByUserIdAndReadFalseAndDeletedAtIsNull(7L)).thenReturn(0L);
+
+            assertThat(inboxService.getUnreadCount(7L).scopes())
+                    .containsExactlyInAnyOrder(new FreshnessScope.User(7L), new FreshnessScope.Global());
         }
     }
 

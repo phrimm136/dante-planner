@@ -124,7 +124,7 @@ public class ModerationController {
     @RateLimitExempt
     @GetMapping("/users")
     public ResponseEntity<List<ModeratedUserResponse>> getAllUsers() {
-        List<ModeratedUserResponse> responses = moderationQueryService.getAllUsers().stream()
+        List<ModeratedUserResponse> responses = moderationQueryService.getAllUsers().value().stream()
                 .map(ModeratedUserResponse::fromUser)
                 .toList();
         return ResponseEntity.ok(responses);
@@ -133,7 +133,7 @@ public class ModerationController {
     @RateLimitExempt
     @GetMapping("/users/timed-out")
     public ResponseEntity<List<TimeoutResponse>> getTimedOutUsers() {
-        List<UserSummary> timedOutUsers = moderationQueryService.getTimedOutUsers();
+        List<UserSummary> timedOutUsers = moderationQueryService.getTimedOutUsers().value();
         List<TimeoutResponse> responses = timedOutUsers.stream()
                 .map(TimeoutResponse::fromUser)
                 .toList();
@@ -143,7 +143,7 @@ public class ModerationController {
     @RateLimitExempt
     @GetMapping("/actions")
     public ResponseEntity<List<ModerationActionResponse>> getModerationActions() {
-        List<ModerationActionResponse> actions = moderationQueryService.getModerationActionsWithActors();
+        List<ModerationActionResponse> actions = moderationQueryService.getModerationActionsWithActors().value();
         return ResponseEntity.ok(actions);
     }
 

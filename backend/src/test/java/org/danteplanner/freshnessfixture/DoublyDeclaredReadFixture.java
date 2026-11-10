@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.danteplanner.backend.shared.freshness.FreshnessExempt;
-import org.danteplanner.backend.shared.freshness.FreshnessPending;
 import org.danteplanner.backend.shared.freshness.ScopedRead;
 
 public class DoublyDeclaredReadFixture {
@@ -18,8 +17,8 @@ public class DoublyDeclaredReadFixture {
     }
 
     @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
-    @FreshnessPending(reason = "its scope arrives in M2")
-    public String innerAndPending() {
+    @FreshnessExempt(reason = "runs with no request bound")
+    public String innerAndExempt() {
         return "reached";
     }
 }

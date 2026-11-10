@@ -44,7 +44,7 @@ public class AdminController {
     @RateLimitExempt
     @GetMapping("/user/{targetId}/role")
     public ResponseEntity<UserRoleResponse> getUserRole(@PathVariable Long targetId) {
-        UserRole role = adminService.getUserRole(targetId);
+        UserRole role = adminService.getUserRole(targetId).value();
         return ResponseEntity.ok(UserRoleResponse.builder()
                 .userId(targetId)
                 .role(role)

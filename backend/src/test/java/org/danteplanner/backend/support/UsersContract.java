@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.api.RoleChange;
+import org.danteplanner.backend.user.api.UserMiss;
 import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserSummary;
@@ -305,7 +306,7 @@ public interface UsersContract {
     @Test
     default void describeById_WhenTheIdIsUnknown_ThrowsUserNotFound() {
         assertThatThrownBy(() -> users().describeById(UNKNOWN_ID))
-                .isInstanceOf(UserNotFoundException.class)
+                .isInstanceOf(UserMiss.class)
                 .hasMessage("User not found with id: " + UNKNOWN_ID);
     }
 

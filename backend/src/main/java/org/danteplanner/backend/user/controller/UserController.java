@@ -13,7 +13,6 @@ import org.danteplanner.backend.user.dto.UpdateUsernameEpithetRequest;
 import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
 import org.danteplanner.backend.user.dto.UserDeletionResponse;
 import org.danteplanner.backend.user.dto.UserSettingsResponse;
-import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.user.service.UserSettingsService;
@@ -78,9 +77,7 @@ public class UserController {
     public ResponseEntity<UserResponse> updateUsernameEpithet(
             @AuthenticationPrincipal Long userId,
             @Valid @RequestBody UpdateUsernameEpithetRequest request) {
-        User updatedUser = userService.updateUsernameEpithet(userId, request.epithet());
-
-        return ResponseEntity.ok(userService.toResponse(updatedUser));
+        return ResponseEntity.ok(userService.updateUsernameEpithet(userId, request.epithet()));
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "user-delete")
@@ -110,8 +107,7 @@ public class UserController {
     @RateLimitExempt
     @GetMapping("/settings")
     public ResponseEntity<UserSettingsResponse> getSettings(@AuthenticationPrincipal Long userId) {
-        UserSettingsResponse settings = userSettingsService.getSettings(userId);
-        return ResponseEntity.ok(settings);
+        return ResponseEntity.ok(userSettingsService.getSettings(userId).value());
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "user-settings-update")

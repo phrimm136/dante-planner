@@ -4,6 +4,8 @@ import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.user.api.UserRole;
+import org.danteplanner.backend.user.api.Users;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.service.CommentCommandService;
@@ -41,6 +43,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -456,6 +459,25 @@ class CommentServiceLayerTest {
             assertThat(hidden.content())
                     .as("a deactivated author's body is hidden under the same author-lifecycle rule as the name")
                     .isEqualTo(CommentConstants.DELETED_CONTENT);
+        }
+
+        @Test
+        void getCommentTree_WhenOthersCommented_ScopesThePlannerItsOwnerAndEachCommenterButTheSentinel() {
+            List<PlannerComment> thread = new ArrayList<>();
+            for (Long authorId : List.of(2L, 3L, Users.SENTINEL_USER_ID)) {
+                PlannerComment comment = new PlannerComment(plannerId, authorId, "by " + authorId, null, 0);
+                comment.setId(100L + thread.size());
+                comment.setPublicId(UUID.randomUUID());
+                comment.setCreatedAt(Instant.now());
+                thread.add(comment);
+            }
+            when(plannerRepository.findThread(plannerId))
+                    .thenReturn(Optional.of(new PlannerThread(plannerId, 1L, true, false)));
+            when(commentRepository.findByPlannerId(plannerId)).thenReturn(thread);
+
+            assertThat(queryService.getCommentTree(plannerId, null).scopes()).containsExactlyInAnyOrder(
+                    new FreshnessScope.Planner(plannerId), new FreshnessScope.User(1L),
+                    new FreshnessScope.User(2L), new FreshnessScope.User(3L));
         }
 
         @Test

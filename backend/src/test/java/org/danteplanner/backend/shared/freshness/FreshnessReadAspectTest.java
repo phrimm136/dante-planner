@@ -109,6 +109,7 @@ class FreshnessReadAspectTest {
     void tearDown() {
         context.close();
         RequestContextHolder.resetRequestAttributes();
+        FreshnessDeclarations.clear();
         ReadSourceSelector.clearSkips();
         ChosenReadSource.clear();
     }
@@ -169,12 +170,6 @@ class FreshnessReadAspectTest {
         @Transactional(readOnly = true)
         @FreshnessExempt(reason = "runs with no request bound")
         public String exempt() {
-            return attempt().source();
-        }
-
-        @Transactional(readOnly = true)
-        @FreshnessPending(reason = "its scope arrives in M2")
-        public String pending() {
             return attempt().source();
         }
 
@@ -239,15 +234,6 @@ class FreshnessReadAspectTest {
     }
 
     @Test
-    void pending_WhenServedByTheReplica_ReadsNoMarker() {
-        unappliedMarker();
-
-        assertThat(reads.pending()).isEqualTo(SEOUL);
-        assertThat(attemptSources()).containsExactly(SEOUL);
-        assertThat(markerReads).isEmpty();
-    }
-
-    @Test
     void inner_WhenCalledWithNoTransaction_FailsBeforeLoading() throws SQLException {
         assertThatThrownBy(reads::inner).isInstanceOf(IllegalTransactionStateException.class)
                 .hasMessageContaining("No existing transaction found");
@@ -267,14 +253,25 @@ class FreshnessReadAspectTest {
     }
 
     @Test
-    void scoped_WhenARequestIsBound_KeepsItsSkipsForTheRestOfTheRequest() {
-        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(new MockHttpServletRequest()));
+    void scoped_WhenAStampWindowIsOpen_KeepsItsSkipsForTheRestOfTheWindow() {
+        FreshnessDeclarations.begin();
         unappliedMarker();
 
         reads.scoped();
 
         assertThat(attemptSources()).containsExactly(SEOUL, ReadSourceProperties.PRIMARY);
         assertThat(selector.current()).map(ReadSourceSelector.Source::name).contains(ReadSourceProperties.PRIMARY);
+    }
+
+    @Test
+    void scoped_WhenARequestIsBoundButNoStampWindowIsOpen_ClearsTheSkipsItAdded() {
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(new MockHttpServletRequest()));
+        unappliedMarker();
+
+        reads.scoped();
+
+        assertThat(attemptSources()).containsExactly(SEOUL, ReadSourceProperties.PRIMARY);
+        assertThat(selector.current()).contains(seoul);
     }
 
     @Test

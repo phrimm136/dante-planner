@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,18 +30,25 @@ import tools.jackson.databind.ObjectMapper;
 
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.notification.api.NotificationType;
+import org.danteplanner.backend.notification.entity.Notification;
+import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.planner.dto.PlannerBatchRequest;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessReadGuard;
 import org.danteplanner.backend.shared.freshness.MarkerStore;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
+import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.ViewerHashUtil;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.UpsertRequests;
+import org.danteplanner.backend.user.api.AuthProviderType;
+import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
+import org.danteplanner.backend.user.service.UserService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
@@ -75,6 +83,19 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
     private static final String VIEW_BUFFER_KEY = "views:buffer";
     private static final String VIEW_SEEN_KEY_PREFIX = "views:seen:";
     private static final String DEVICE_IDENTITY_PREFIX = "device:";
+    private static final String SETTINGS = "/api/user/settings";
+    private static final String SYNC_ON_BODY = "{\"syncEnabled\":true}";
+    private static final String SYNC_OFF_BODY = "{\"syncEnabled\":false}";
+    private static final String BAN_REASON = "spam";
+    private static final String BAN_BODY = "{\"reason\":\"" + BAN_REASON + "\"}";
+    private static final String COMMENT_BODY = "{\"content\":\"freshness read\"}";
+    private static final String MODERATOR_ROLE_BODY = "{\"role\":\"MODERATOR\"}";
+
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -468,6 +489,237 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
             assertThat(redisTemplate.hasKey(seenKey(after, plannerId, hash))).isFalse();
         }
         assertThat(redisTemplate.opsForHash().hasKey(VIEW_BUFFER_KEY, plannerId.toString())).isFalse();
+    }
+
+    @Test
+    void settings_WhenTheReplicaLagsASave_ServeTheSavedValue() throws Exception {
+        User user = TestDataFactory.createTestUser(userRepository, "freshness-read-settings-" + UUID.randomUUID()
+                + "@example.com");
+        Cookie[] session = sessionOf(user);
+        perform(put(SETTINGS).contentType(APPLICATION_JSON).content(SYNC_ON_BODY).cookie(session));
+        replicationControl.awaitCaughtUp();
+        try {
+            replicationControl.stopReplica();
+            perform(put(SETTINGS).contentType(APPLICATION_JSON).content(SYNC_OFF_BODY).cookie(session));
+
+            assertThat(json(get(SETTINGS).cookie(session)).path("syncEnabled").asBoolean()).isFalse();
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @Test
+    void settings_WhenReplicationLagsASaveUnderTheWaitBound_ServeTheSavedValueFromTheReplicaAfterTheWait()
+            throws Exception {
+        User user = TestDataFactory.createTestUser(userRepository, "freshness-read-settings-lag-" + UUID.randomUUID()
+                + "@example.com");
+        Cookie[] session = sessionOf(user);
+        perform(put(SETTINGS).contentType(APPLICATION_JSON).content(SYNC_ON_BODY).cookie(session));
+        replicationControl.awaitCaughtUp();
+        boolean syncEnabled;
+        double waitsApplied;
+        try {
+            toxiproxyControl.applyReplicationLatency(REPLICATION_LATENCY_UNDER_THE_WAIT_BOUND_MILLIS);
+            perform(put(SETTINGS).contentType(APPLICATION_JSON).content(SYNC_OFF_BODY).cookie(session));
+            double beforeRead = seoulWaitsApplied();
+            syncEnabled = json(get(SETTINGS).cookie(session)).path("syncEnabled").asBoolean();
+            waitsApplied = seoulWaitsApplied() - beforeRead;
+        } finally {
+            toxiproxyControl.removeReplicationLatency();
+            replicationControl.awaitCaughtUp();
+        }
+
+        assertThat(syncEnabled).isFalse();
+        assertThat(waitsApplied).as("Seoul replica waits that applied during the read").isEqualTo(1);
+    }
+
+    @Test
+    void findActiveById_WhenTheReplicaLagsARoleChange_ServesTheNewRole() throws Exception {
+        User target = TestDataFactory.createTestUser(userRepository, "freshness-read-role-" + UUID.randomUUID()
+                + "@example.com");
+        Cookie[] admin = sessionOf(TestDataFactory.createAdmin(userRepository,
+                "freshness-read-role-admin-" + UUID.randomUUID() + "@example.com"));
+        replicationControl.awaitCaughtUp();
+        try {
+            replicationControl.stopReplica();
+            perform(put("/api/admin/user/" + target.getId() + "/role")
+                    .contentType(APPLICATION_JSON)
+                    .content(MODERATOR_ROLE_BODY)
+                    .cookie(admin));
+
+            assertThat(userService.findActiveById(target.getId()).value())
+                    .hasValueSatisfying(user -> assertThat(user.getRole()).isEqualTo(UserRole.MODERATOR));
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @Test
+    void tokenRefresh_WhenTheReplicaLagsARoleChange_MintsAnAccessTokenWithTheNewRole() throws Exception {
+        User target = TestDataFactory.createTestUser(userRepository, "freshness-read-refresh-" + UUID.randomUUID()
+                + "@example.com");
+        Cookie[] admin = sessionOf(TestDataFactory.createAdmin(userRepository,
+                "freshness-read-refresh-admin-" + UUID.randomUUID() + "@example.com"));
+        Cookie refresh = AuthCookies.refreshToken(jwtTokenService.generateRefreshToken(target.getId()));
+        replicationControl.awaitCaughtUp();
+        try {
+            replicationControl.stopReplica();
+            perform(put("/api/admin/user/" + target.getId() + "/role")
+                    .contentType(APPLICATION_JSON)
+                    .content(MODERATOR_ROLE_BODY)
+                    .cookie(admin));
+
+            MvcResult refreshed = mockMvc.perform(get("/api/auth/me")
+                    .cookie(refresh, AuthCookies.freshDeviceId())).andReturn();
+
+            assertThat(refreshed.getResponse().getStatus()).isEqualTo(OK);
+            Cookie minted = refreshed.getResponse().getCookie(CookieConstants.ACCESS_TOKEN);
+            assertThat(minted).as("access token set by the auto-refresh").isNotNull();
+            assertThat(jwtTokenService.validateAccessToken(minted.getValue()).role()).isEqualTo(UserRole.MODERATOR);
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @Test
+    void providerLookups_WhenTheReplicaLagsAnAccountDeletion_FindNoActiveAccountButTheDeletedRow() throws Exception {
+        User user = TestDataFactory.createTestUser(userRepository, "freshness-read-provider-" + UUID.randomUUID()
+                + "@example.com");
+        Cookie[] session = sessionOf(user);
+        replicationControl.awaitCaughtUp();
+        try {
+            replicationControl.stopReplica();
+            perform(delete("/api/user/me").cookie(session));
+
+            assertThat(userService.findActiveByProvider(AuthProviderType.GOOGLE, user.getProviderId()).value())
+                    .isEmpty();
+            assertThat(userService.findByProvider(AuthProviderType.GOOGLE, user.getProviderId()).value())
+                    .hasValueSatisfying(found -> {
+                        assertThat(found.getId()).isEqualTo(user.getId());
+                        assertThat(found.isDeleted()).isTrue();
+                    });
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @Test
+    void describe_WhenTheUserRowExistsOnlyOnThePrimary_DescribesTheUser() {
+        String email = "freshness-read-describe-" + UUID.randomUUID() + "@example.com";
+        replicationControl.awaitCaughtUp();
+        try {
+            replicationControl.stopReplica();
+            User created = createInARequestWindow(email);
+            assertThat(replicaJdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM users WHERE id = ?", Long.class, created.getId())).isZero();
+
+            assertThat(userService.describe(created.getId()).value().email()).isEqualTo(email);
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @Test
+    void unreadCount_WhenTheReplicaLagsAMarkRead_CountsZero() throws Exception {
+        User user = TestDataFactory.createTestUser(userRepository, "freshness-read-unread-" + UUID.randomUUID()
+                + "@example.com");
+        Cookie[] session = sessionOf(user);
+        Notification notification = notificationRepository.save(new Notification(
+                user.getId(), "freshness-read-" + UUID.randomUUID(), NotificationType.COMMENT_RECEIVED));
+        replicationControl.awaitCaughtUp();
+        try {
+            replicationControl.stopReplica();
+            perform(post("/api/notifications/" + notification.getPublicId() + "/mark-read").cookie(session));
+
+            assertThat(json(get("/api/notifications/unread-count").cookie(session)).path("unreadCount").asLong())
+                    .isZero();
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @Test
+    void rosterAndMe_WhenTheReplicaLagsABan_ShowTheBanAndItsReason() throws Exception {
+        User target = TestDataFactory.createTestUser(userRepository, "freshness-read-ban-" + UUID.randomUUID()
+                + "@example.com");
+        Cookie[] admin = sessionOf(TestDataFactory.createAdmin(userRepository,
+                "freshness-read-ban-admin-" + UUID.randomUUID() + "@example.com"));
+        Cookie[] moderator = sessionOf(TestDataFactory.createModerator(userRepository,
+                "freshness-read-ban-moderator-" + UUID.randomUUID() + "@example.com"));
+        replicationControl.awaitCaughtUp();
+        try {
+            replicationControl.stopReplica();
+            perform(post("/api/moderation/user/" + target.getUsernameSuffix() + "/ban")
+                    .contentType(APPLICATION_JSON)
+                    .content(BAN_BODY)
+                    .cookie(admin));
+
+            List<Boolean> banned = new ArrayList<>();
+            json(get("/api/moderation/users").cookie(moderator)).forEach(row -> {
+                if (row.path("usernameSuffix").asText().equals(target.getUsernameSuffix())) {
+                    banned.add(row.path("isBanned").asBoolean());
+                }
+            });
+            assertThat(banned).containsExactly(true);
+            JsonNode me = json(get("/api/auth/me").cookie(sessionOf(target)));
+            assertThat(me.path("isBanned").asBoolean()).isTrue();
+            assertThat(me.path("banReason").asText()).isEqualTo(BAN_REASON);
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @Test
+    void commentThread_WhenTheReplicaLagsACommenterEpithetChange_ShowsTheNewEpithet() throws Exception {
+        Cookie[] owner = session("freshness-thread-epithet-owner");
+        User commenter = TestDataFactory.createTestUser(userRepository, "freshness-thread-epithet-commenter-"
+                + UUID.randomUUID() + "@example.com");
+        UUID plannerId = published(owner, "thread-epithet");
+        perform(post(PLANNERS_ROOT + plannerId + "/comments")
+                .contentType(APPLICATION_JSON)
+                .content(COMMENT_BODY)
+                .cookie(sessionOf(commenter)));
+        replicationControl.awaitCaughtUp();
+        try {
+            replicationControl.stopReplica();
+            perform(put("/api/user/me/username-epithet")
+                    .contentType(APPLICATION_JSON)
+                    .content("{\"epithet\":\"" + NEW_EPITHET + "\"}")
+                    .cookie(sessionOf(commenter)));
+
+            List<String> epithets = new ArrayList<>();
+            json(get(PLANNERS_ROOT + plannerId + "/comments")).forEach(node -> {
+                if (node.path("authorSuffix").asText().equals(commenter.getUsernameSuffix())) {
+                    epithets.add(node.path("authorEpithet").asText());
+                }
+            });
+            assertThat(epithets).containsExactly(NEW_EPITHET);
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    private User createInARequestWindow(String email) {
+        writeCapture.begin();
+        FreshnessDeclarations.begin();
+        try {
+            User created = userService.findOrCreateUser("google", Map.of(
+                    "id", "freshness-read-describe-" + UUID.randomUUID(), "email", email));
+            String gtid = writeCapture.takeCapturedGtid().orElseThrow();
+            markerStore.raise(FreshnessDeclarations.declared(), gtid);
+            return created;
+        } finally {
+            writeCapture.clear();
+            FreshnessDeclarations.clear();
+        }
     }
 
     private void reactivateInARequestWindow(Long userId) {

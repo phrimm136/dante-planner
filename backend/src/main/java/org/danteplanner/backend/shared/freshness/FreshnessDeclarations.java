@@ -37,6 +37,10 @@ public final class FreshnessDeclarations {
         return declared == null ? new FreshnessDeclaration.Undeclared() : declared;
     }
 
+    public static boolean isWindowOpen() {
+        return DECLARED.get() != null;
+    }
+
     public static void clear() {
         DECLARED.remove();
     }

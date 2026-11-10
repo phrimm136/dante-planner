@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.danteplanner.backend.shared.freshness.FreshnessExempt;
-import org.danteplanner.backend.shared.freshness.FreshnessPending;
 import org.danteplanner.backend.shared.freshness.FreshnessReadGuard;
 import org.danteplanner.backend.shared.freshness.ScopedRead;
 
@@ -25,7 +24,6 @@ final class FreshnessReadCoverageRule {
 
     private static final String SCOPED = "a ScopedRead return";
     private static final String INNER = "propagation = MANDATORY";
-    private static final String PENDING = "@FreshnessPending";
     private static final String EXEMPT = "@FreshnessExempt";
     private static final String FRESHNESS_PACKAGE = FreshnessReadGuard.class.getPackageName();
 
@@ -34,7 +32,7 @@ final class FreshnessReadCoverageRule {
                     .that(areAdvisable().and(areReadOnlyTransactionalOrReturnScopedRead()))
                     .should(declareExactlyOneFreshnessRead())
                     .as("every @Transactional(readOnly = true) method declares exactly one of " + SCOPED + ", "
-                            + INNER + ", " + PENDING + "(reason) or " + EXEMPT + "(reason), with a non-blank reason")
+                            + INNER + " or " + EXEMPT + "(reason), with a non-blank reason")
                     .allowEmptyShould(true);
 
     private FreshnessReadCoverageRule() {
@@ -83,9 +81,6 @@ final class FreshnessReadCoverageRule {
         if (effectiveTransactional(method).propagation() == Propagation.MANDATORY) {
             declared.add(INNER);
         }
-        if (method.isAnnotatedWith(FreshnessPending.class)) {
-            declared.add(PENDING);
-        }
         if (method.isAnnotatedWith(FreshnessExempt.class)) {
             declared.add(EXEMPT);
         }
@@ -93,10 +88,8 @@ final class FreshnessReadCoverageRule {
     }
 
     private static boolean hasBlankReason(JavaMethod method) {
-        return (method.isAnnotatedWith(FreshnessPending.class)
-                        && method.getAnnotationOfType(FreshnessPending.class).reason().isBlank())
-                || (method.isAnnotatedWith(FreshnessExempt.class)
-                        && method.getAnnotationOfType(FreshnessExempt.class).reason().isBlank());
+        return method.isAnnotatedWith(FreshnessExempt.class)
+                && method.getAnnotationOfType(FreshnessExempt.class).reason().isBlank();
     }
 
     private static ArchCondition<JavaMethod> declareExactlyOneFreshnessRead() {
@@ -115,7 +108,7 @@ final class FreshnessReadCoverageRule {
                 if (declared.isEmpty()) {
                     events.add(SimpleConditionEvent.violated(method, method.getFullName()
                             + " declares no freshness read: return a ScopedRead, join with propagation = MANDATORY,"
-                            + " or annotate it with @FreshnessPending(reason) or @FreshnessExempt(reason)"));
+                            + " or annotate it with @FreshnessExempt(reason)"));
                 } else if (declared.size() > 1) {
                     events.add(SimpleConditionEvent.violated(method, method.getFullName()
                             + " declares " + declared + "; a readOnly method declares exactly one"));

@@ -10,13 +10,14 @@ import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.exception.AccountDeletedException;
 import org.danteplanner.backend.user.exception.UsernameGenerationException;
+import org.danteplanner.backend.user.api.UserMiss;
 import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.user.api.RestrictionReasonProvider;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.RandomUsernameGenerator.UsernameComponents;
 import org.danteplanner.backend.user.validation.EpithetValidator;
-import org.danteplanner.backend.shared.freshness.FreshnessPending;
 import org.danteplanner.backend.shared.freshness.FreshnessExempt;
+import org.danteplanner.backend.shared.freshness.ScopedRead;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -28,6 +29,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Service for user account operations.
@@ -53,12 +55,10 @@ public class UserService {
         AuthProviderType providerType = AuthProviderType.fromValue(provider);
         String providerId = userInfo.get("id");
 
-        Optional<User> existing = userRepository.findByProviderAndProviderId(providerType, providerId);
-        if (existing.isPresent()) {
-            return existing.get();
-        }
         try {
-            return transactionTemplate.execute(status -> createOrRecover(providerType, userInfo));
+            return transactionTemplate.execute(status ->
+                    userRepository.findByProviderAndProviderId(providerType, providerId)
+                            .orElseGet(() -> createOrRecover(providerType, userInfo)));
         } catch (DataIntegrityViolationException e) {
             // A declared finder runs in no transaction of its own, so a bare call reaches the
             // primary as undeclared access.
@@ -148,6 +148,13 @@ public class UserService {
         return builder.build();
     }
 
+    @Transactional(readOnly = true)
+    public ScopedRead<UserResponse> describe(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserMiss(userId));
+        return new ScopedRead<>(toResponse(user), Set.of(new FreshnessScope.User(userId)));
+    }
+
     public User findById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
@@ -164,10 +171,10 @@ public class UserService {
         return userRepository.existsById(id);
     }
 
-    @FreshnessPending(reason = "auth read: the token refresh account lookup gets its scope in M2")
     @Transactional(readOnly = true)
-    public Optional<User> findActiveById(Long userId) {
-        return userRepository.findByIdAndDeletedAtIsNull(userId);
+    public ScopedRead<Optional<User>> findActiveById(Long userId) {
+        return new ScopedRead<>(userRepository.findByIdAndDeletedAtIsNull(userId),
+                Set.of(new FreshnessScope.User(userId)));
     }
 
     @Transactional
@@ -175,16 +182,21 @@ public class UserService {
         return userRepository.findByIdAndDeletedAtIsNull(userId);
     }
 
-    @FreshnessPending(reason = "auth read: the OAuth login lookup gets its scope in M2")
     @Transactional(readOnly = true)
-    public Optional<User> findActiveByProvider(AuthProviderType providerType, String providerId) {
-        return userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(providerType, providerId);
+    public ScopedRead<Optional<User>> findActiveByProvider(AuthProviderType providerType, String providerId) {
+        return scopedByFoundUser(
+                userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(providerType, providerId));
     }
 
-    @FreshnessPending(reason = "auth read: the OAuth login lookup gets its scope in M2")
     @Transactional(readOnly = true)
-    public Optional<User> findByProvider(AuthProviderType providerType, String providerId) {
-        return userRepository.findByProviderAndProviderId(providerType, providerId);
+    public ScopedRead<Optional<User>> findByProvider(AuthProviderType providerType, String providerId) {
+        return scopedByFoundUser(userRepository.findByProviderAndProviderId(providerType, providerId));
+    }
+
+    private static ScopedRead<Optional<User>> scopedByFoundUser(Optional<User> found) {
+        return new ScopedRead<>(found, found
+                .<Set<FreshnessScope>>map(user -> Set.of(new FreshnessScope.User(user.getId())))
+                .orElse(Set.of()));
     }
 
     @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
@@ -224,7 +236,7 @@ public class UserService {
     }
 
     @Transactional
-    public User updateUsernameEpithet(Long userId, String epithet) {
+    public UserResponse updateUsernameEpithet(Long userId, String epithet) {
         epithetValidator.requireValidEpithet(epithet);
 
         User user = userRepository.findById(userId)
@@ -235,6 +247,6 @@ public class UserService {
 
         log.info("User {} updated username epithet to {}", userId, epithet);
 
-        return user;
+        return toResponse(user);
     }
 }

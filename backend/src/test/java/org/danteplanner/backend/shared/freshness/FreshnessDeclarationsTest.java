@@ -126,6 +126,18 @@ class FreshnessDeclarationsTest {
     }
 
     @Test
+    void isWindowOpen_WhenAskedBeforeBeginAfterBeginAndAfterClear_IsTrueOnlyBetweenThem() {
+        boolean beforeBegin = FreshnessDeclarations.isWindowOpen();
+        FreshnessDeclarations.begin();
+        boolean afterBegin = FreshnessDeclarations.isWindowOpen();
+        FreshnessDeclarations.clear();
+
+        assertThat(beforeBegin).isFalse();
+        assertThat(afterBegin).isTrue();
+        assertThat(FreshnessDeclarations.isWindowOpen()).isFalse();
+    }
+
+    @Test
     void declareNone_WhenNoRequestWindowIsOpen_DeclaresNothing() {
         FreshnessDeclarations.declareNone("no read renders it");
 
