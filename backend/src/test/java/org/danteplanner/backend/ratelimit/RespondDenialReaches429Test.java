@@ -8,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.SecurityProperties;
@@ -60,7 +61,8 @@ class RespondDenialReaches429Test {
                 new DeviceIdResolver(new CookieUtils(false, "", "Lax")),
                 new FrontendProperties("https://planner.example"),
                 new ProblemWriter(objectMapper),
-                new SimpleMeterRegistry());
+                new SimpleMeterRegistry(),
+                new RedisRoleHealth());
 
         mockMvc = MockMvcBuilders.standaloneSetup(new DeclaredHandlerFixture())
                 .addInterceptors(interceptor)

@@ -1,5 +1,6 @@
 package org.danteplanner.backend.auth.token;
 
+import org.danteplanner.backend.support.AuthReads;
 import java.util.Date;
 import java.util.List;
 
@@ -45,7 +46,7 @@ class TokenBlacklistServiceTest {
     @BeforeEach
     void setUp() {
         blacklistService = new TokenBlacklistService(
-                writeTemplate, readTemplate, new SimpleMeterRegistry(),
+                writeTemplate, AuthReads.from(readTemplate), new SimpleMeterRegistry(),
                 TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
     }
 

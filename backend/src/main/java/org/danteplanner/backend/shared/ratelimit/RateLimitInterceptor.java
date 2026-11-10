@@ -2,6 +2,7 @@ package org.danteplanner.backend.shared.ratelimit;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import io.github.bucket4j.TimeoutException;
+import io.lettuce.core.RedisConnectionException;
 import io.lettuce.core.RedisException;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,8 @@ import org.danteplanner.backend.shared.config.LoginRedirect;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.danteplanner.backend.shared.exception.Problems;
+import org.danteplanner.backend.shared.redis.RedisRole;
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.shared.util.ClientIpResolver;
 
 /**
@@ -41,6 +45,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private static final String UNDECLARED_CODE = "RATE_LIMIT_UNDECLARED";
     private static final String CHARGE_SKIPPED_COUNTER = "rate_limit.charge_skipped";
     private static final String POLICY_TAG = "policy";
+    private static final String BREAKER_OPEN = "Rate-limit store breaker open";
 
     private final RateLimitService rateLimitService;
     private final SecurityProperties securityProperties;
@@ -48,6 +53,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private final FrontendProperties frontendProperties;
     private final ProblemWriter problemWriter;
     private final MeterRegistry meterRegistry;
+    private final RedisRoleHealth roleHealth;
     private final AtomicBoolean storeUnavailable = new AtomicBoolean();
 
     @Override
@@ -89,12 +95,16 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     }
 
     private boolean charge(RateLimited declaration, HttpServletRequest request, HttpServletResponse response) {
+        if (!roleHealth.isAvailable(RedisRole.RATE_LIMIT)) {
+            return withoutStore(declaration, response, () -> new RedisConnectionException(BREAKER_OPEN));
+        }
         try {
             chargeBucket(declaration, request, response);
             markStoreAvailable();
             return true;
         } catch (RedisException | TimeoutException unavailable) {
-            return skipCharge(declaration, response, unavailable);
+            warnStoreUnavailable(declaration, unavailable);
+            return withoutStore(declaration, response, () -> unavailable);
         } catch (RateLimitExceededException refused) {
             if (declaration.denial() != RateLimitDenial.REDIRECT_LOGIN) {
                 throw refused;
@@ -110,23 +120,34 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         return false;
     }
 
-    private boolean skipCharge(RateLimited declaration, HttpServletResponse response, RuntimeException unavailable) {
+    private boolean withoutStore(
+            RateLimited declaration, HttpServletResponse response, Supplier<RuntimeException> unavailable) {
         RateLimitPolicy policy = declaration.value();
         if (policy.failsClosed()) {
             if (declaration.denial() != RateLimitDenial.REDIRECT_LOGIN) {
-                throw unavailable;
+                throw unavailable.get();
             }
-            log.warn("Rate-limit store unavailable on a browser-navigation endpoint: {}", unavailable.getMessage());
             return redirectToLogin(response, LoginRedirect.UNAVAILABLE);
         }
         meterRegistry.counter(CHARGE_SKIPPED_COUNTER, POLICY_TAG, policy.name()).increment();
+        return true;
+    }
+
+    private void warnStoreUnavailable(RateLimited declaration, RuntimeException unavailable) {
+        RateLimitPolicy policy = declaration.value();
+        if (policy.failsClosed()) {
+            if (declaration.denial() == RateLimitDenial.REDIRECT_LOGIN) {
+                log.warn("Rate-limit store unavailable on a browser-navigation endpoint: {}",
+                        unavailable.getMessage());
+            }
+            return;
+        }
         if (storeUnavailable.compareAndSet(false, true)) {
             log.warn("Rate-limit store unavailable, serving fail-open policies unmetered: {}",
                     unavailable.getMessage());
         } else {
             log.debug("Rate-limit store still unavailable, {} charge skipped: {}", policy, unavailable.getMessage());
         }
-        return true;
     }
 
     private void markStoreAvailable() {

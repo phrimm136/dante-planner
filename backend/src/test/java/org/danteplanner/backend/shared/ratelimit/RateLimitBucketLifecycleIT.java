@@ -11,9 +11,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
-import org.danteplanner.backend.shared.config.RedisConnectionConfig;
+import org.danteplanner.backend.support.RateLimitStores;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
@@ -65,7 +66,7 @@ class RateLimitBucketLifecycleIT {
 
     @BeforeEach
     void setUp() {
-        proxyManager = RedisConnectionConfig.buildRateLimitProxyManager(
+        proxyManager = RateLimitStores.connectedTo(
                 REDIS.getRedisHost(), REDIS.getRedisPort(), Duration.ofSeconds(60));
         properties = new RateLimitProperties();
         properties.setConfigVersion(1);
@@ -231,7 +232,8 @@ class RateLimitBucketLifecycleIT {
                 new DeviceIdResolver(new CookieUtils(false, "", "Lax")),
                 new FrontendProperties("https://planner.example"),
                 new ProblemWriter(TestJsonMappers.springDefaults()),
-                new SimpleMeterRegistry());
+                new SimpleMeterRegistry(),
+                new RedisRoleHealth());
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new DeclaredHandlerFixture())
                 .addInterceptors(interceptor)
                 .setControllerAdvice(new ApiExceptionHandler())

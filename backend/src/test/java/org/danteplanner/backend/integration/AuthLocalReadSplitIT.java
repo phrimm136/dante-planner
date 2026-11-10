@@ -1,5 +1,6 @@
 package org.danteplanner.backend.integration;
 
+import org.danteplanner.backend.support.AuthReads;
 import java.time.Duration;
 import java.util.Date;
 import java.util.Set;
@@ -197,10 +198,10 @@ class AuthLocalReadSplitIT {
         try {
             SimpleMeterRegistry registry = new SimpleMeterRegistry();
             TokenBlacklistService blSvc =
-                    new TokenBlacklistService(stringRedisTemplate, deadTemplate, registry,
+                    new TokenBlacklistService(stringRedisTemplate, AuthReads.from(deadTemplate), registry,
                             TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
             ContentTombstoneStore tsSvc =
-                    new ContentTombstoneStore(stringRedisTemplate, deadTemplate,
+                    new ContentTombstoneStore(stringRedisTemplate, AuthReads.from(deadTemplate),
                             new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
 
             String token = "phase14a-failopen-token";

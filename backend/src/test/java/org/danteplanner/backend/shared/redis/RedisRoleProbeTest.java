@@ -1,5 +1,6 @@
 package org.danteplanner.backend.shared.redis;
 
+import java.util.List;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -32,7 +33,7 @@ class RedisRoleProbeTest {
     private final ClientResources clientResources = DefaultClientResources.create();
     private final RedisRoleHealth health = new RedisRoleHealth();
     private final RedisRoleProbe probe = new RedisRoleProbe(
-            clientResources, RedisEndpoints.everyRoleAt(REFUSED_HOST, REFUSED_PORT), health);
+            clientResources, RedisEndpoints.everyRoleAt(REFUSED_HOST, REFUSED_PORT), health, List.of());
 
     @AfterEach
     void tearDown() {
@@ -99,7 +100,7 @@ class RedisRoleProbeTest {
 
     private RedisRoleProbe probeOver(ServerSocket endpoint, RedisRoleHealth roleHealth) {
         return new RedisRoleProbe(clientResources, RedisEndpoints.everyRoleAt(
-                endpoint.getInetAddress().getHostAddress(), endpoint.getLocalPort()), roleHealth);
+                endpoint.getInetAddress().getHostAddress(), endpoint.getLocalPort()), roleHealth, List.of());
     }
 
     @Test

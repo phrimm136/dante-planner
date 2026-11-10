@@ -1,6 +1,7 @@
 package org.danteplanner.backend.integration;
 
 import jakarta.servlet.http.Cookie;
+import org.danteplanner.backend.support.AuthReads;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.config.TestConfig;
@@ -77,7 +78,7 @@ class AccountDeletionGuardIT extends SharedMySqlContainerSupport {
 
         RevocationFailsBlacklist(LettuceConnectionFactory connectionFactory, StringRedisTemplate template,
                 SimpleMeterRegistry meterRegistry, long refreshTokenExpiry) {
-            super(template, template, meterRegistry, refreshTokenExpiry);
+            super(template, AuthReads.from(template), meterRegistry, refreshTokenExpiry);
             this.connectionFactory = connectionFactory;
         }
 

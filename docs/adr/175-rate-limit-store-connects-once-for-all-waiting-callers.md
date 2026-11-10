@@ -2,7 +2,9 @@
 epic: none · pr: none @rate-limit @redis @degradation
 
 ## Decisions
-- @rate-limit @redis @degradation — The rate-limit store connects lazily through one attempt at a time
+
+## Superseded
+- @rate-limit @redis @degradation → 514 — The rate-limit store connects lazily through one attempt at a time
   that every caller arriving meanwhile shares: a caller waits for that attempt's outcome up to the
   command timeout plus 300 ms, and after a failed attempt calls fail at once for five seconds before
   the next attempt may start. Failing fast for every caller during the first connect let eleven of

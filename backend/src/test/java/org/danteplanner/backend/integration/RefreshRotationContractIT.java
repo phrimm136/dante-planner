@@ -1,5 +1,6 @@
 package org.danteplanner.backend.integration;
 
+import org.danteplanner.backend.support.AuthReads;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -49,7 +50,7 @@ class RefreshRotationContractIT implements RefreshRotationContract {
 
     @Override
     public TokenBlacklistService blacklist() {
-        return new TokenBlacklistService(authRedis, authRedis, new SimpleMeterRegistry(),
+        return new TokenBlacklistService(authRedis, AuthReads.from(authRedis), new SimpleMeterRegistry(),
                 jwt.properties().getRefreshTokenExpiry());
     }
 

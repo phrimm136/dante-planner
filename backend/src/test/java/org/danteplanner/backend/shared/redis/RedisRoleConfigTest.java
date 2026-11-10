@@ -1,5 +1,6 @@
 package org.danteplanner.backend.shared.redis;
 
+import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -53,7 +54,7 @@ class RedisRoleConfigTest {
         ClientResources clientResources = DefaultClientResources.create();
         RedisRoleHealth health = config.redisRoleHealth();
         try (RedisRoleProbe probe = config.redisRoleProbe(
-                clientResources, RedisEndpoints.everyRoleAt(REFUSED_HOST, REFUSED_PORT), health)) {
+                clientResources, RedisEndpoints.everyRoleAt(REFUSED_HOST, REFUSED_PORT), health, List.of())) {
             probe.probeAtStartup();
         } finally {
             clientResources.shutdown();

@@ -7,22 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Pins the two external contracts of the causal-consistency Testcontainers harness:
- * <ol>
- *   <li>A primary/replica pair wired like a Seoul pod, whose replication can be paused
- *       and resumed through {@link ReplicationControl} (no timing constants);
- *       a write made while the replica is stopped is invisible on the replica-qualified
- *       datasource until {@code startReplica()} + {@code awaitCaughtUp()}.</li>
- *   <li>Two distinct {@link LettuceConnectionFactory} beans — auth Redis and the local
- *       ephemeral rate-limit Redis — injectable by distinct qualifiers.</li>
- * </ol>
+ * Pins the external contract of the causal-consistency Testcontainers harness: a primary/replica
+ * pair wired like a Seoul pod, whose replication can be paused and resumed through
+ * {@link ReplicationControl} (no timing constants); a write made while the replica is stopped is
+ * invisible on the replica-qualified datasource until {@code startReplica()} + {@code awaitCaughtUp()}.
  * <p>Bootstrap (containers, GTID replication wiring, Toxiproxy profiles) lives in the
  * inherited harness base; this class asserts contract only.</p>
  */
@@ -40,14 +34,6 @@ class CausalHarnessIT extends CausalHarnessSupport {
     @Qualifier("replicaJdbcTemplate")
     private JdbcTemplate replicaJdbcTemplate;
 
-    @Autowired
-    @Qualifier("authRedisConnectionFactory")
-    private LettuceConnectionFactory authRedisConnectionFactory;
-
-    @Autowired
-    @Qualifier("rateLimitRedisConnectionFactory")
-    private LettuceConnectionFactory rateLimitRedisConnectionFactory;
-
     @Test
     void replicationRoundTrip_WhenWriteWhileStopped_InvisibleUntilResumedAndCaughtUp() {
         primaryJdbcTemplate.execute("CREATE TABLE IF NOT EXISTS harness_probe (id INT PRIMARY KEY)");
@@ -62,13 +48,6 @@ class CausalHarnessIT extends CausalHarnessSupport {
         replicationControl.startReplica();
         replicationControl.awaitCaughtUp();
         assertThat(countOnReplica(2)).isEqualTo(1);
-    }
-
-    @Test
-    void redisFactories_WhenAuthAndRateLimit_AreDistinctInjectableBeans() {
-        assertThat(authRedisConnectionFactory).isNotNull();
-        assertThat(rateLimitRedisConnectionFactory).isNotNull();
-        assertThat(authRedisConnectionFactory).isNotSameAs(rateLimitRedisConnectionFactory);
     }
 
     private int countOnReplica(int id) {

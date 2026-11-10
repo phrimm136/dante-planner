@@ -25,6 +25,8 @@ import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.LoginRedirect;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.shared.ratelimit.RateLimitService;
+import org.danteplanner.backend.shared.redis.RedisRole;
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -236,6 +238,9 @@ class DegradationIT {
     private RateLimitService rateLimitService;
 
     @Autowired
+    private RedisRoleHealth roleHealth;
+
+    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
@@ -338,6 +343,8 @@ class DegradationIT {
         RATE_LIMIT_REDIS_PROXY.enable();
         awaitLiveAuthRedis();
         awaitLiveRateLimitRedis();
+        Hang.until(() -> roleHealth.isAvailable(RedisRole.AUTH) && roleHealth.isAvailable(RedisRole.AUTH_LOCAL)
+                && roleHealth.isAvailable(RedisRole.RATE_LIMIT), "the probe closing the cut roles' breakers");
     }
 
     /**

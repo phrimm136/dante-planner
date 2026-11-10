@@ -1,5 +1,5 @@
 # 514 redis-roles-fail-fast-behind-probe-driven-breakers
-epic: none · pr: none
+epic: none · pr: none · supersedes: 175 @rate-limit @redis @degradation
 
 ## Decisions
 - @redis @degradation @breaker — Each Redis role (auth, auth-local, rate-limit, sse-local) has one circuit breaker that only a one-second PING probe opens and closes, and request-path consumers consult it before touching Redis: while it is open a fail-open read is skipped at once and a fail-closed charge is refused at once. With an unresponsive auth-local replica every read waited the full three-second command bound in turn, so an authenticated request took 6 s (9 s with a tombstone check) instead of 13 ms, and once the shared connection was lost requests queued behind its reconnect lock and 11 of 20 had no answer after 90 s; the rate-limit role cost a flat 3 s per request. Fail-open decided what a failure returns, never how long it takes. Re-check: `rg -q 'boolean isAvailable' backend/src/main/java/org/danteplanner/backend/shared/redis/RedisRoleHealth.java` and the outage test that bounds a request's time while the role is unresponsive.

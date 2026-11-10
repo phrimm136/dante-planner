@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import tools.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.support.TestJsonMappers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -102,7 +103,8 @@ class PublishedPlannerClientBucketTest {
                 deviceIdResolver,
                 new FrontendProperties("https://planner.example"),
                 new ProblemWriter(objectMapper),
-                new SimpleMeterRegistry());
+                new SimpleMeterRegistry(),
+                new RedisRoleHealth());
         PublishedPlannerController controller = new PublishedPlannerController(
                 queryService, securityProperties, new ByIdReadGuard(), deviceIdResolver);
 

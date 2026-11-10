@@ -61,11 +61,11 @@ asset pipeline.
   rate limiter runs. Worth doing when Apple sign-in is built: exempt the callback from CSRF
   and replace the stub.
   re-check: `rg -qU 'appleCallback\(\) \{\n\s+return ResponseEntity.badRequest\(\).build\(\);' backend/src/main/java/org/danteplanner/backend/auth/controller/AuthController.java`
-- `RateLimitInterceptor.skipCharge`'s fail-closed rethrow (the typed 503) has no production
+- `RateLimitInterceptor.withoutStore`'s fail-closed rethrow (the typed 503) has no production
   caller since both OAuth callbacks redirect, and no interceptor-level test. Worth doing the
   next time a fail-closed policy gains a non-navigation endpoint, or when the branch is judged
   dead.
-  re-check: `rg -qF 'throw unavailable;' backend/src/main/java/org/danteplanner/backend/shared/ratelimit/RateLimitInterceptor.java && test -z "$(rg 'RateLimitPolicy.AUTH' backend/src/main/java | rg -v 'denial = RateLimitDenial.REDIRECT_LOGIN')"`
+  re-check: `rg -qF 'throw unavailable.get();' backend/src/main/java/org/danteplanner/backend/shared/ratelimit/RateLimitInterceptor.java && test -z "$(rg 'RateLimitPolicy.AUTH' backend/src/main/java | rg -v 'denial = RateLimitDenial.REDIRECT_LOGIN')"`
 - `spring.jpa.properties.hibernate.jdbc.batch_size=30` and `order_inserts=true` have no bulk
   insert left to serve and no test guarding them since the import endpoint was removed, and
   `PlannerLimitValidator.requireRoomFor`'s batch count is always 1. Worth doing when either is
@@ -80,7 +80,7 @@ asset pipeline.
   (`PublishedPlannerDeviceCookieIT` device bucket, `PlannerCommentSseControllerIT` 429). Both pass
   alone. Worth doing when either fails a CI run: give rate-limit tests a timeout budget or a
   dedicated Redis.
-  re-check: `rg -qF 'return skipCharge(declaration, response, unavailable);' backend/src/main/java/org/danteplanner/backend/shared/ratelimit/RateLimitInterceptor.java && test -f backend/src/test/java/org/danteplanner/backend/integration/PublishedPlannerDeviceCookieIT.java && test -f backend/src/test/java/org/danteplanner/backend/controller/PlannerCommentSseControllerIT.java`
+  re-check: `rg -qF 'return withoutStore(declaration, response, () -> unavailable);' backend/src/main/java/org/danteplanner/backend/shared/ratelimit/RateLimitInterceptor.java && test -f backend/src/test/java/org/danteplanner/backend/integration/PublishedPlannerDeviceCookieIT.java && test -f backend/src/test/java/org/danteplanner/backend/controller/PlannerCommentSseControllerIT.java`
 - The PR gate's migration job only replays new `*.sql` files through the Flyway CLI, so a Java
   migration (`db/migration/V0NN__*.java`; none exists now, the keyword backfill moved to the
   startup scheduler `PlannerKeywordBackfill`) would never run against the populated seed in CI;
@@ -144,16 +144,16 @@ asset pipeline.
   `HikariDataSource`, so the helper's instanceof walk skips it. Replica and bulkhead are
   covered since the lazy-proxy descent fix; the primary needs an unwrap step.
   re-check: `rg -qF 'new GtidCapturingDataSource(primaryPool' backend/src/main/java/org/danteplanner/backend/shared/config/RoutingDataSourceConfig.java && .claude/skills/debt-ledger/bin/debt absent backend/src/test/java/org/danteplanner/backend/integration/DegradationIT.java 'GtidCapturingDataSource|unwrap\('`
-- No circuit breaker fronts the primary datasource's writes or any Redis role but the freshness
-  markers (the read-source breakers in `ReadSourcesConfig` guard the database read sources, and
-  `MarkerStore` skips a marker read source whose breaker is open); the 3 s command
-  bound and Hikari's connection timeout cap what one call can hold, so under a dependency
-  that stays slow rather than dead every request still pays the full bound before its
-  typed 503. Worth doing once throughput under a sustained-latency toxic is measured
-  (`DegradationIT` proves the cut and the blackhole, not the slow steady state) and shows
-  request-thread saturation, or once production sees that state; the breaker sits on top
-  of the bound, not in place of it.
-  re-check: `rg -qF 'COMMAND_TIMEOUT = Duration.ofMillis(3_000L)' backend/src/main/java/org/danteplanner/backend/shared/config/BoundedRedisConnections.java && test -z "$(rg -l 'CircuitBreaker' backend/src/main/java -g '!**/shared/freshness/**' -g '!**/shared/config/ReadSource*' -g '!**/shared/gtid/GtidGateConfig.java')"`
+- No circuit breaker fronts the primary datasource's writes or the auth-Redis writes (refresh
+  rotation, revocation, tombstone writes): each still waits its bound (3 s per Redis command,
+  Hikari's connection timeout) before its typed 503. The Redis role breakers cover the revocation,
+  tombstone and rate-limit request paths only, and a probe opens them, so a role that answers PING
+  but stays slow is not opened. The auth writes were held back on purpose: a probe that misjudges a
+  healthy Redis would block token refresh. Worth doing after the read-path breakers have run in
+  production long enough to show the probes do not flap, or once a sustained-latency toxic shows
+  request-thread saturation (`DegradationIT` proves the cut and the blackhole, not the slow steady
+  state); map the open-breaker rejection to a per-role wire code in the same unit.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/auth/token/RefreshRotationService.java 'CircuitBreaker|RedisRoleHealth'`
 - 2026-09-23 — Latency from Korea is the client→edge leg, not the origin. From a Korean ISP,
   `dante-planner.com` and `api.` land on SIN, HKG or NRT, while `www.cloudflare.com` on the
   same network answers from ICN: ICMP 107 ms against 10 ms, TCP connect 194 ms against 18 ms,
@@ -1444,14 +1444,11 @@ guards the parse but likewise skips the schema gate.
   with its own `@DynamicPropertySource` exceeds the context budget of 15 in
   `TestIsolationConventionTest`.
   re-check: `rg -q 'RedisMessageListenerContainer' backend/src/main/java/org/danteplanner/backend/shared/sse/SseSubscriberConfig.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/shared/sse/SseSubscriberConfig.java 'setTaskExecutor'`
-- `RedisConnectionConfig.buildRateLimitProxyManager` creates a `RedisClient` with its own client
-  resources and returns only the `ProxyManager`, so nothing can shut the client down. In tests,
-  `RateLimitServiceIT` (one per test, 26 per run) and `RateLimitBucketLifecycleIT` (one per test)
-  leave about 33 clients per run with live threads that reconnect to stopped containers; a heap dump
-  on 2026-10-06 put the leaked clients at about 98 MiB. Production builds the manager once per
-  context, which also never closes it. When the rate-limit wiring is next touched, or the test heap
-  needs room again, return a closeable handle with the manager and close it in both places.
-  re-check: `rg -q 'public static ProxyManager<byte\[\]> buildRateLimitProxyManager' backend/src/main/java/org/danteplanner/backend/shared/config/RedisConnectionConfig.java`
+- `MarkerStore.Source` and `MarkerStore.sourceOrder` repeat `AuthReadSources.Source` and its
+  `sourceOrder` (same roles, same primary-first rule). Left apart because another open change
+  rewrites the marker read path. Worth doing when that change has landed: make `MarkerStore` read
+  through `AuthReadSources` and delete its own record and ordering.
+  re-check: `rg -q 'static List<Source> sourceOrder' backend/src/main/java/org/danteplanner/backend/shared/freshness/MarkerStore.java`
 
 - `NotificationRepository.hardDeleteOldNotifications` deletes on `deleted_at < :cutoff` and no index
   leads with `deleted_at`, so the nightly purge likely scans and locks the whole `notifications` table
