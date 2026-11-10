@@ -4,18 +4,23 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpHeaders;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 
@@ -29,18 +34,27 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import org.danteplanner.backend.auth.token.JwtTokenService;
+import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.planner.dto.PlannerBatchRequest;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.shared.freshness.DispatchStamp;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessReadGuard;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.freshness.MarkerStore;
+import org.danteplanner.backend.shared.gtid.GtidCookie;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
+import org.danteplanner.backend.shared.outbox.service.DomainEventDispatcher;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.ViewerHashUtil;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.UpsertRequests;
 import org.danteplanner.backend.user.api.AuthProviderType;
@@ -89,6 +103,7 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
     private static final String BAN_REASON = "spam";
     private static final String BAN_BODY = "{\"reason\":\"" + BAN_REASON + "\"}";
     private static final String COMMENT_BODY = "{\"content\":\"freshness read\"}";
+    private static final int EAGER_DISPATCH_ROUNDS = 2;
     private static final String MODERATOR_ROLE_BODY = "{\"role\":\"MODERATOR\"}";
 
     @Autowired
@@ -132,6 +147,21 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
     @Autowired
     @Qualifier("stringRedisTemplate")
     private StringRedisTemplate redisTemplate;
+
+    @Autowired
+    private DomainEventDispatcher dispatcher;
+
+    @Autowired
+    private DispatchStamp dispatchStamp;
+
+    @Autowired
+    private PlannerRepository plannerRepository;
+
+    @Autowired
+    private PlannerCommentRepository commentRepository;
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     @Test
     void publishedDetail_WhenTheReplicaStillHoldsADeletedPlanner_NeverServesIt() throws Exception {
@@ -705,6 +735,119 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();
         }
+    }
+
+    @Test
+    void inbox_WhenTheReplicaLagsADispatchedCommentNotification_HoldsTheNotification() throws Exception {
+        User owner = TestDataFactory.createTestUser(userRepository, "freshness-read-inbox-owner-" + UUID.randomUUID()
+                + "@example.com");
+        User commenter = TestDataFactory.createTestUser(userRepository, "freshness-read-inbox-commenter-"
+                + UUID.randomUUID() + "@example.com");
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        PlannerComment comment = new TransactionTemplate(transactionManager).execute(status -> commentRepository.insert(
+                new PlannerComment(planner.getId(), commenter.getId(), "freshness read inbox", null, 0)));
+        long eventId = recordCommentReceived(planner.getId(), comment.getId());
+        replicationControl.awaitCaughtUp();
+        try {
+            replicationControl.stopReplica();
+            dispatchStamp.around(() -> dispatcher.dispatchDomainEvent(eventId));
+
+            List<String> commentNotifications = new ArrayList<>();
+            json(get("/api/notifications/inbox?size=100").cookie(sessionOf(owner))).path("notifications")
+                    .forEach(node -> {
+                        if (node.path("notificationType").asText().equals(NotificationType.COMMENT_RECEIVED.name())) {
+                            commentNotifications.add(node.path("contentId").asText());
+                        }
+                    });
+            assertThat(commentNotifications).containsExactly(comment.getId().toString());
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @Test
+    void inbox_WhenTheReplicaLagsAnEagerlyDispatchedCommentNotification_HoldsTheNotification() throws Exception {
+        User owner = TestDataFactory.createTestUser(userRepository, "freshness-read-eager-owner-" + UUID.randomUUID()
+                + "@example.com");
+        UUID plannerId = published(sessionOf(owner), "eager-inbox");
+        String ownerMarker = new FreshnessScope.User(owner.getId()).key();
+        replicationControl.awaitCaughtUp();
+        try {
+            replicationControl.stopReplica();
+            for (int round = 0; round < EAGER_DISPATCH_ROUNDS; round++) {
+                User commenter = TestDataFactory.createTestUser(userRepository, "freshness-read-eager-commenter-"
+                        + UUID.randomUUID() + "@example.com");
+                MvcResult comment = mockMvc.perform(post(PLANNERS_ROOT + plannerId + "/comments")
+                                .with(withCsrf())
+                                .contentType(APPLICATION_JSON)
+                                .content(COMMENT_BODY)
+                                .cookie(sessionOf(commenter)))
+                        .andReturn();
+                assertThat(comment.getResponse().getStatus()).isBetween(200, 299);
+                String commentPublicId = objectMapper.readTree(comment.getResponse().getContentAsString())
+                        .path("id").asText();
+                long requestSequence = primarySequence(requestGtid(comment));
+                Hang.until(() -> markerSequence(ownerMarker) > requestSequence,
+                        "the eager dispatch raising " + ownerMarker + " past " + requestSequence);
+
+                List<String> commentNotifications = new ArrayList<>();
+                json(get("/api/notifications/inbox?size=100").cookie(sessionOf(owner))).path("notifications")
+                        .forEach(node -> {
+                            if (node.path("notificationType").asText()
+                                    .equals(NotificationType.COMMENT_RECEIVED.name())) {
+                                commentNotifications.add(node.path("commentPublicId").asText());
+                            }
+                        });
+                assertThat(commentNotifications).as("round %s", round).contains(commentPublicId);
+            }
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    private long markerSequence(String key) {
+        Object sequence = redisTemplate.opsForHash().get(key, primaryUuid());
+        return sequence == null ? 0 : Long.parseLong(sequence.toString());
+    }
+
+    private String primaryUuid() {
+        return primaryJdbcTemplate.queryForObject("SELECT @@server_uuid", String.class).toLowerCase(Locale.ROOT);
+    }
+
+    private long primarySequence(String gtidSet) {
+        long highest = 0;
+        for (String sourceSet : gtidSet.split(",")) {
+            String[] parts = sourceSet.trim().split(":");
+            if (!parts[0].toLowerCase(Locale.ROOT).equals(primaryUuid())) {
+                continue;
+            }
+            for (int i = 1; i < parts.length; i++) {
+                highest = Math.max(highest, Long.parseLong(parts[i].substring(parts[i].indexOf('-') + 1)));
+            }
+        }
+        return highest;
+    }
+
+    private static String requestGtid(MvcResult result) {
+        return result.getResponse().getHeaders(HttpHeaders.SET_COOKIE).stream()
+                .map(header -> header.split(";", 2)[0])
+                .filter(pair -> pair.startsWith(GtidCookie.NAME + "="))
+                .map(pair -> GtidCookie.decode(pair.substring(GtidCookie.NAME.length() + 1)))
+                .flatMap(Optional::stream)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("no GTID cookie on " + result.getRequest().getRequestURI()));
+    }
+
+    private long recordCommentReceived(UUID plannerId, Long commentId) {
+        primaryJdbcTemplate.update("""
+                INSERT INTO domain_events (event_type, aggregate_id, payload, created_at)
+                VALUES ('COMMENT_RECEIVED', UUID_TO_BIN(?), JSON_OBJECT('commentId', ?), NOW(6))
+                """, plannerId.toString(), commentId);
+        return primaryJdbcTemplate.queryForObject(
+                "SELECT id FROM domain_events WHERE aggregate_id = UUID_TO_BIN(?) AND event_type = 'COMMENT_RECEIVED'",
+                Long.class, plannerId.toString());
     }
 
     private User createInARequestWindow(String email) {

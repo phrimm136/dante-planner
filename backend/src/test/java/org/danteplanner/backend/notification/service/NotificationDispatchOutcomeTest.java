@@ -4,7 +4,11 @@ import org.danteplanner.backend.notification.api.NotificationOutcome;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclaration;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -77,6 +82,58 @@ class NotificationDispatchOutcomeTest {
             assertThat(delivered.payload().type())
                     .isEqualTo(NotificationType.PLANNER_RECOMMENDED.name());
         });
+    }
+
+    @AfterEach
+    void closeWindow() {
+        FreshnessDeclarations.clear();
+    }
+
+    @Test
+    void raise_WhenTheInsertWritesARowInsideAWindow_DeclaresExactlyTheRecipient() {
+        FreshnessDeclarations.begin();
+        whenInsertIgnoreYields(1);
+        when(notificationRepository.findByUserIdAndContentIdAndNotificationType(
+                RECIPIENT_ID, PLANNER_ID.toString(), NotificationType.PLANNER_RECOMMENDED))
+                .thenReturn(Optional.of(persisted()));
+
+        dispatchService.notifyPlannerRecommended(PLANNER_ID, TITLE, RECIPIENT_ID);
+
+        assertThat(FreshnessDeclarations.declaration())
+                .isEqualTo(new FreshnessDeclaration.Scopes(Set.of(new FreshnessScope.User(RECIPIENT_ID))));
+    }
+
+    @Test
+    void raise_WhenTheInsertWritesNothingInsideAWindow_LeavesTheWindowUndeclared() {
+        FreshnessDeclarations.begin();
+        whenInsertIgnoreYields(0);
+
+        dispatchService.notifyPlannerRecommended(PLANNER_ID, TITLE, RECIPIENT_ID);
+
+        assertThat(FreshnessDeclarations.declaration()).isEqualTo(new FreshnessDeclaration.Undeclared());
+    }
+
+    @Test
+    void notifyPlannerPublished_WhenTheFanoutWritesRowsInsideAWindow_DeclaresExactlyGlobal() {
+        FreshnessDeclarations.begin();
+        when(notificationRepository.insertPublishedFanout(RECIPIENT_ID, PLANNER_ID.toString(), TITLE))
+                .thenReturn(3);
+
+        dispatchService.notifyPlannerPublished(RECIPIENT_ID, PLANNER_ID, TITLE);
+
+        assertThat(FreshnessDeclarations.declaration())
+                .isEqualTo(new FreshnessDeclaration.Scopes(Set.of(new FreshnessScope.Global())));
+    }
+
+    @Test
+    void notifyPlannerPublished_WhenTheFanoutWritesNothingInsideAWindow_DeclaresNothing() {
+        FreshnessDeclarations.begin();
+        when(notificationRepository.insertPublishedFanout(RECIPIENT_ID, PLANNER_ID.toString(), TITLE))
+                .thenReturn(0);
+
+        dispatchService.notifyPlannerPublished(RECIPIENT_ID, PLANNER_ID, TITLE);
+
+        assertThat(FreshnessDeclarations.declaration()).isEqualTo(new FreshnessDeclaration.Undeclared());
     }
 
     private void whenInsertIgnoreYields(int rows) {

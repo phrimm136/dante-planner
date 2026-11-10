@@ -8,6 +8,8 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
 import org.danteplanner.backend.shared.entity.SseEventType;
+import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEffectHandler;
@@ -43,6 +45,7 @@ public class PlannerPublishedEffect implements DomainEffectHandler {
         Planner planner = found.get().planner();
         long authorId = payloads.requireId(event, "authorId");
         notifications.notifyPlannerPublished(authorId, planner.getId(), planner.getTitle());
+        FreshnessDeclarations.declare(new FreshnessScope.Global());
         pushes.broadcast(authorId, SseEventType.NOTIFY_PUBLISHED,
                 PlannerPublishedPayload.fromEntity(planner, found.get().author()));
     }
