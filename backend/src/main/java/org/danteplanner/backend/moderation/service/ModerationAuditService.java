@@ -8,9 +8,9 @@ import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.user.api.RestrictionReasonProvider;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
-import org.danteplanner.backend.shared.freshness.FreshnessPending;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
@@ -50,15 +50,13 @@ public class ModerationAuditService implements ModerationAudit, RestrictionReaso
     }
 
     @Override
-    @FreshnessPending(reason = "moderation scope arrives in M2")
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
     public Optional<String> latestBanReason(UUID targetPublicId) {
         return latestReason(targetPublicId, ModerationActionType.BAN);
     }
 
     @Override
-    @FreshnessPending(reason = "moderation scope arrives in M2")
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
     public Optional<String> latestTimeoutReason(UUID targetPublicId) {
         return latestReason(targetPublicId, ModerationActionType.TIMEOUT);
     }

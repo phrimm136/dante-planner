@@ -61,6 +61,8 @@ public class CommentQueryService {
                 .collect(Collectors.toSet());
         Map<Long, UserSummary> userMap = users.findAllByIds(userIds).stream()
                 .collect(Collectors.toMap(UserSummary::id, Function.identity()));
+        Set<FreshnessScope> threadScopes = new HashSet<>(scopes);
+        userIds.forEach(id -> threadScopes.add(new FreshnessScope.User(id)));
 
         Set<Long> upvotedIds = Collections.emptySet();
         if (currentUserId != null) {
@@ -70,7 +72,7 @@ public class CommentQueryService {
             upvotedIds = new HashSet<>(commentVoteRepository.findUpvotedCommentIds(commentIds, currentUserId));
         }
 
-        return new ScopedRead<>(buildCommentTree(comments, userMap, upvotedIds, currentUserId), scopes);
+        return new ScopedRead<>(buildCommentTree(comments, userMap, upvotedIds, currentUserId), threadScopes);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.MANDATORY)

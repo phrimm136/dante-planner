@@ -5,6 +5,7 @@ import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.moderation.service.ModerationQueryService;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -17,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,10 +52,19 @@ class ModerationRosterIT extends SharedMySqlContainerSupport {
         removed.softDelete(Instant.now().plus(30, ChronoUnit.DAYS));
         userRepository.save(removed);
 
-        List<Long> roster = moderationQueryService.getAllUsers().stream().map(UserSummary::id).toList();
+        List<Long> roster = moderationQueryService.getAllUsers().value().stream().map(UserSummary::id).toList();
 
         assertThat(roster).contains(active.getId());
         assertThat(roster).doesNotContain(removed.getId());
+    }
+
+    @Test
+    void moderationReads_WhenRead_ScopeGlobalOnly() {
+        Set<FreshnessScope> global = Set.of(new FreshnessScope.Global());
+
+        assertThat(moderationQueryService.getAllUsers().scopes()).isEqualTo(global);
+        assertThat(moderationQueryService.getTimedOutUsers().scopes()).isEqualTo(global);
+        assertThat(moderationQueryService.getModerationActionsWithActors().scopes()).isEqualTo(global);
     }
 
     @Test

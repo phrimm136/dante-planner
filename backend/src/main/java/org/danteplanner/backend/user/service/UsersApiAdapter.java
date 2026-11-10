@@ -43,7 +43,7 @@ public class UsersApiAdapter implements Users {
 
     @Override
     public Optional<UserSummary> findActiveById(Long userId) {
-        return userService.findActiveById(userId).map(UsersApiAdapter::toSummary);
+        return userService.findActiveById(userId).value().map(UsersApiAdapter::toSummary);
     }
 
     @Override
@@ -53,12 +53,12 @@ public class UsersApiAdapter implements Users {
 
     @Override
     public Optional<UserSummary> findByProvider(AuthProviderType providerType, String providerId) {
-        return userService.findByProvider(providerType, providerId).map(UsersApiAdapter::toSummary);
+        return userService.findByProvider(providerType, providerId).value().map(UsersApiAdapter::toSummary);
     }
 
     @Override
     public Optional<UserSummary> findActiveByProvider(AuthProviderType providerType, String providerId) {
-        return userService.findActiveByProvider(providerType, providerId).map(UsersApiAdapter::toSummary);
+        return userService.findActiveByProvider(providerType, providerId).value().map(UsersApiAdapter::toSummary);
     }
 
     @Override
@@ -68,7 +68,7 @@ public class UsersApiAdapter implements Users {
 
     @Override
     public UserResponse describeById(Long id) {
-        return userService.toResponse(userService.findById(id));
+        return userService.describe(id).value();
     }
 
     @Override

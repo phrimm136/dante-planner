@@ -27,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -99,15 +100,15 @@ class UndeclaredPrimaryAccessIT extends SharedRoutingSupport {
     }
 
     @Test
-    void latestBanReason_WhenCalledOutsideATransaction_IsServed() {
-        assertThatCode(() -> moderationAuditService.latestBanReason(UUID.randomUUID()))
-                .doesNotThrowAnyException();
+    void latestBanReason_WhenCalledOutsideATransaction_IsRejected() {
+        assertThatThrownBy(() -> moderationAuditService.latestBanReason(UUID.randomUUID()))
+                .isInstanceOf(IllegalTransactionStateException.class);
     }
 
     @Test
-    void latestTimeoutReason_WhenCalledOutsideATransaction_IsServed() {
-        assertThatCode(() -> moderationAuditService.latestTimeoutReason(UUID.randomUUID()))
-                .doesNotThrowAnyException();
+    void latestTimeoutReason_WhenCalledOutsideATransaction_IsRejected() {
+        assertThatThrownBy(() -> moderationAuditService.latestTimeoutReason(UUID.randomUUID()))
+                .isInstanceOf(IllegalTransactionStateException.class);
     }
 
     @Test

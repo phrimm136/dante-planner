@@ -8,7 +8,11 @@ import org.danteplanner.backend.user.validation.EpithetValidator;
 import org.danteplanner.backend.support.IntegrityViolations;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.api.UserMiss;
 import org.danteplanner.backend.user.api.UserNotFoundException;
+import org.danteplanner.backend.user.api.dto.UserResponse;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
+import org.danteplanner.backend.shared.freshness.ScopedRead;
 import org.danteplanner.backend.user.exception.UsernameGenerationException;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -114,7 +118,7 @@ class UserServiceTest {
                     .thenReturn(Optional.of(testUser));
 
             // Act
-            Optional<User> result = userService.findActiveById(testUser.getId());
+            Optional<User> result = userService.findActiveById(testUser.getId()).value();
 
             // Assert
             assertThat(result).isPresent();
@@ -128,7 +132,7 @@ class UserServiceTest {
                     .thenReturn(Optional.empty());
 
             // Act
-            Optional<User> result = userService.findActiveById(testUser.getId());
+            Optional<User> result = userService.findActiveById(testUser.getId()).value();
 
             // Assert
             assertThat(result).isEmpty();
@@ -142,10 +146,100 @@ class UserServiceTest {
                     .thenReturn(Optional.empty());
 
             // Act
-            Optional<User> result = userService.findActiveById(nonExistentId);
+            Optional<User> result = userService.findActiveById(nonExistentId).value();
 
             // Assert
             assertThat(result).isEmpty();
+        }
+    }
+
+    @Nested
+    class ScopedReadTests {
+
+        private static final String PROVIDER_ID = "google-123";
+
+        @Test
+        void findActiveById_WhenTheUserIsActive_ScopesTheUser() {
+            when(userRepository.findByIdAndDeletedAtIsNull(testUser.getId())).thenReturn(Optional.of(testUser));
+
+            assertThat(userService.findActiveById(testUser.getId()).scopes())
+                    .containsExactly(new FreshnessScope.User(123L));
+        }
+
+        @Test
+        void findActiveById_WhenNoActiveUserMatches_StillScopesTheAskedUser() {
+            when(userRepository.findByIdAndDeletedAtIsNull(999L)).thenReturn(Optional.empty());
+
+            ScopedRead<Optional<User>> read = userService.findActiveById(999L);
+
+            assertThat(read.value()).isEmpty();
+            assertThat(read.scopes()).containsExactly(new FreshnessScope.User(999L));
+        }
+
+        @Test
+        void findActiveByProvider_WhenFound_ScopesTheFoundUser() {
+            when(userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(AuthProviderType.GOOGLE, PROVIDER_ID))
+                    .thenReturn(Optional.of(testUser));
+
+            ScopedRead<Optional<User>> read = userService.findActiveByProvider(AuthProviderType.GOOGLE, PROVIDER_ID);
+
+            assertThat(read.value()).contains(testUser);
+            assertThat(read.scopes()).containsExactly(new FreshnessScope.User(123L));
+        }
+
+        @Test
+        void findActiveByProvider_WhenMissing_ScopesNothing() {
+            when(userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(AuthProviderType.GOOGLE, PROVIDER_ID))
+                    .thenReturn(Optional.empty());
+
+            ScopedRead<Optional<User>> read = userService.findActiveByProvider(AuthProviderType.GOOGLE, PROVIDER_ID);
+
+            assertThat(read.value()).isEmpty();
+            assertThat(read.scopes()).isEmpty();
+        }
+
+        @Test
+        void findByProvider_WhenFound_ScopesTheFoundUser() {
+            when(userRepository.findByProviderAndProviderId(AuthProviderType.GOOGLE, PROVIDER_ID))
+                    .thenReturn(Optional.of(testUser));
+
+            ScopedRead<Optional<User>> read = userService.findByProvider(AuthProviderType.GOOGLE, PROVIDER_ID);
+
+            assertThat(read.value()).contains(testUser);
+            assertThat(read.scopes()).containsExactly(new FreshnessScope.User(123L));
+        }
+
+        @Test
+        void findByProvider_WhenMissing_ScopesNothing() {
+            when(userRepository.findByProviderAndProviderId(AuthProviderType.GOOGLE, PROVIDER_ID))
+                    .thenReturn(Optional.empty());
+
+            ScopedRead<Optional<User>> read = userService.findByProvider(AuthProviderType.GOOGLE, PROVIDER_ID);
+
+            assertThat(read.value()).isEmpty();
+            assertThat(read.scopes()).isEmpty();
+        }
+
+        @Test
+        void describe_WhenTheUserExists_DescribesItScopedToTheUser() {
+            when(userRepository.findById(123L)).thenReturn(Optional.of(testUser));
+
+            ScopedRead<UserResponse> read = userService.describe(123L);
+
+            assertThat(read.value().usernameSuffix()).isEqualTo("test1");
+            assertThat(read.scopes()).containsExactly(new FreshnessScope.User(123L));
+        }
+
+        @Test
+        void describe_WhenNoRowMatches_ThrowsAMissScopedToTheUser() {
+            when(userRepository.findById(999L)).thenReturn(Optional.empty());
+
+            assertRejected(() -> userService.describe(999L))
+                    .withCode("USER_NOT_FOUND")
+                    .isInstanceOfSatisfying(UserMiss.class, miss -> {
+                        assertThat(miss.scopes()).containsExactly(new FreshnessScope.User(999L));
+                        assertThat(miss.getMessage()).isEqualTo("User not found with id: 999");
+                    });
         }
     }
 

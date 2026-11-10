@@ -3,6 +3,7 @@ import org.danteplanner.backend.user.service.UserSettingsService;
 
 import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
 import org.danteplanner.backend.user.dto.UserSettingsResponse;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserSettings;
@@ -66,7 +67,7 @@ class UserSettingsServiceTest {
                     .thenReturn(Optional.of(existingSettings));
 
             // Act
-            UserSettingsResponse result = userSettingsService.getSettings(testUser.getId());
+            UserSettingsResponse result = userSettingsService.getSettings(testUser.getId()).value();
 
             // Assert
             assertThat(result.syncEnabled()).isTrue();
@@ -83,7 +84,7 @@ class UserSettingsServiceTest {
                     .thenReturn(Optional.empty());
 
             // Act
-            UserSettingsResponse result = userSettingsService.getSettings(testUser.getId());
+            UserSettingsResponse result = userSettingsService.getSettings(testUser.getId()).value();
 
             // Assert
             assertThat(result.syncEnabled()).isFalse();
@@ -95,6 +96,13 @@ class UserSettingsServiceTest {
         }
 
         @Test
+        void getSettings_WhenRead_ScopesTheUser() {
+            when(userSettingsRepository.findByUserId(7L)).thenReturn(Optional.empty());
+
+            assertThat(userSettingsService.getSettings(7L).scopes()).containsExactly(new FreshnessScope.User(7L));
+        }
+
+        @Test
         void getSettings_WhenNonExistentUser_ReturnsDefaults() {
             // Arrange
             Long nonExistentId = 999L;
@@ -102,7 +110,7 @@ class UserSettingsServiceTest {
                     .thenReturn(Optional.empty());
 
             // Act
-            UserSettingsResponse result = userSettingsService.getSettings(nonExistentId);
+            UserSettingsResponse result = userSettingsService.getSettings(nonExistentId).value();
 
             // Assert
             assertThat(result.syncEnabled()).isFalse();

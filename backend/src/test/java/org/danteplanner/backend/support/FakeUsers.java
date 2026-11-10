@@ -16,6 +16,7 @@ import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.api.LastAdministratorException;
 import org.danteplanner.backend.user.api.RestrictionReasonProvider;
 import org.danteplanner.backend.user.api.RoleChange;
+import org.danteplanner.backend.user.api.UserMiss;
 import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserSummary;
@@ -115,7 +116,11 @@ public class FakeUsers implements Users {
 
     @Override
     public UserResponse describeById(Long id) {
-        return responses.toResponse(row(id));
+        User user = rows.get(id);
+        if (user == null) {
+            throw new UserMiss(id);
+        }
+        return responses.toResponse(user);
     }
 
     @Override

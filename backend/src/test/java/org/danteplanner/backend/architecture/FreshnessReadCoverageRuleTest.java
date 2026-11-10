@@ -67,7 +67,7 @@ class FreshnessReadCoverageRuleTest {
                         .contains(DoublyDeclaredReadFixture.class.getName()
                                 + ".scopedAndExempt() declares [a ScopedRead return, @FreshnessExempt]")
                         .contains(DoublyDeclaredReadFixture.class.getName()
-                                + ".innerAndPending() declares [propagation = MANDATORY, @FreshnessPending]"));
+                                + ".innerAndExempt() declares [propagation = MANDATORY, @FreshnessExempt]"));
     }
 
     @Test
@@ -80,7 +80,7 @@ class FreshnessReadCoverageRuleTest {
                 .satisfies(failure -> assertThat(failure.getMessage())
                         .contains(BlankReasonFixture.class.getName() + ".blankExempt() names a blank freshness reason")
                         .contains(BlankReasonFixture.class.getName()
-                                + ".blankPending() names a blank freshness reason"));
+                                + ".emptyExempt() names a blank freshness reason"));
     }
 
     @Test

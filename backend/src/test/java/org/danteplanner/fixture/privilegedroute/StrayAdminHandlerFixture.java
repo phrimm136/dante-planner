@@ -17,6 +17,6 @@ public class StrayAdminHandlerFixture {
 
     @GetMapping("/api/fixture/user/{targetId}/role")
     public String role(@PathVariable Long targetId) {
-        return adminService.getUserRole(targetId).getValue();
+        return adminService.getUserRole(targetId).value().getValue();
     }
 }

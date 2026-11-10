@@ -4,7 +4,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.web.context.request.RequestContextHolder;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -30,7 +29,7 @@ public class FreshnessReadAspect {
         try {
             return guard.read(() -> (ScopedRead<?>) joinPoint.proceed());
         } finally {
-            if (RequestContextHolder.getRequestAttributes() == null) {
+            if (!FreshnessDeclarations.isWindowOpen()) {
                 ReadSourceSelector.clearSkips();
             }
         }

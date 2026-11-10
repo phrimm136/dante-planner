@@ -124,7 +124,7 @@ public class UserModerationService {
     }
 
     private User requireActive(Long userId) {
-        return userService.findActiveById(userId)
+        return userService.findActiveById(userId).value()
                 .orElseThrow(() -> new UserNotFoundException(userId));
     }
 

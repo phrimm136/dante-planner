@@ -4,6 +4,8 @@ import org.danteplanner.backend.admin.service.AdminService;
 import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
+import org.danteplanner.backend.user.api.UserMiss;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.support.FakeUsers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -162,7 +164,7 @@ class AdminServiceTest {
         @Test
         void getUserRole_WhenUserExists_ReturnsRole() {
             // Act
-            UserRole result = adminService.getUserRole(adminUser.getId());
+            UserRole result = adminService.getUserRole(adminUser.getId()).value();
 
             // Assert
             assertThat(result).isEqualTo(UserRole.ADMIN);
@@ -175,6 +177,19 @@ class AdminServiceTest {
 
             // Act & Assert
             assertRejected(() -> adminService.getUserRole(nonExistentId)).withCode("USER_NOT_FOUND");
+        }
+
+        @Test
+        void getUserRole_WhenUserExists_ScopesThatUser() {
+            assertThat(adminService.getUserRole(adminUser.getId()).scopes())
+                    .containsExactly(new FreshnessScope.User(adminUser.getId()));
+        }
+
+        @Test
+        void getUserRole_WhenUserNotFound_ThrowsAMissScopedToThatUser() {
+            assertRejected(() -> adminService.getUserRole(999L))
+                    .isInstanceOfSatisfying(UserMiss.class, miss -> assertThat(miss.scopes())
+                            .containsExactly(new FreshnessScope.User(999L)));
         }
     }
 }

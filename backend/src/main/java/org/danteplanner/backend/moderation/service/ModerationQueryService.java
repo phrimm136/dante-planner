@@ -6,7 +6,8 @@ import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.user.api.Users;
-import org.danteplanner.backend.shared.freshness.FreshnessPending;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
+import org.danteplanner.backend.shared.freshness.ScopedRead;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -25,14 +27,14 @@ import java.util.stream.Collectors;
 public class ModerationQueryService {
 
     private static final int RECENT_ACTION_LIMIT = 100;
+    private static final Set<FreshnessScope> GLOBAL = Set.of(new FreshnessScope.Global());
 
     private final Users users;
     private final ModerationActionRepository moderationActionRepository;
 
-    @FreshnessPending(reason = "moderation scope arrives in M2")
     @Transactional(readOnly = true)
-    public List<UserSummary> getAllUsers() {
-        return users.listActiveAccounts();
+    public ScopedRead<List<UserSummary>> getAllUsers() {
+        return new ScopedRead<>(users.listActiveAccounts(), GLOBAL);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
@@ -40,9 +42,8 @@ public class ModerationQueryService {
         return moderationActionRepository.findRecent(PageRequest.ofSize(RECENT_ACTION_LIMIT));
     }
 
-    @FreshnessPending(reason = "moderation scope arrives in M2")
     @Transactional(readOnly = true)
-    public List<ModerationActionResponse> getModerationActionsWithActors() {
+    public ScopedRead<List<ModerationActionResponse>> getModerationActionsWithActors() {
         List<ModerationAction> actions = getModerationActions();
 
         List<Long> actorIds = actions.stream()
@@ -53,19 +54,18 @@ public class ModerationQueryService {
         Map<Long, UserSummary> actorMap = users.findAllByIds(actorIds).stream()
                 .collect(Collectors.toMap(UserSummary::id, user -> user));
 
-        return actions.stream()
+        return new ScopedRead<>(actions.stream()
                 .map(action -> {
                     UserSummary actor = actorMap.get(action.getActorId());
                     String epithet = actor != null ? actor.usernameEpithet() : "Unknown";
                     String suffix = actor != null ? actor.usernameSuffix() : "";
                     return ModerationActionResponse.fromEntity(action, epithet, suffix);
                 })
-                .toList();
+                .toList(), GLOBAL);
     }
 
-    @FreshnessPending(reason = "moderation scope arrives in M2")
     @Transactional(readOnly = true)
-    public List<UserSummary> getTimedOutUsers() {
-        return users.listTimedOutAccounts();
+    public ScopedRead<List<UserSummary>> getTimedOutUsers() {
+        return new ScopedRead<>(users.listTimedOutAccounts(), GLOBAL);
     }
 }

@@ -4,6 +4,7 @@ import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
@@ -65,6 +66,17 @@ class AuthControllerIT extends SharedMySqlContainerSupport {
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.email").value(testUser.getEmail()));
+        }
+
+        @Test
+        void getCurrentUser_WhenTheTokenNamesNoUserRow_AnswersUserNotFound() throws Exception {
+            Cookie orphan = AuthCookies.accessToken(jwtTokenService.generateAccessToken(Long.MAX_VALUE, UserRole.NORMAL));
+
+            mockMvc.perform(get("/api/auth/me").cookie(orphan))
+                    .andExpect(status().isNotFound())
+                    .andExpect(content().string("{\"title\":\"Not Found\",\"status\":404,"
+                            + "\"detail\":\"User not found with id: 9223372036854775807\",\"instance\":\"/api/auth/me\","
+                            + "\"code\":\"USER_NOT_FOUND\",\"message\":\"User not found with id: 9223372036854775807\"}"));
         }
 
         @Test

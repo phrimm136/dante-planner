@@ -1,5 +1,6 @@
 package org.danteplanner.backend.user.service;
 
+import java.util.Set;
 import java.util.function.Consumer;
 
 import lombok.RequiredArgsConstructor;
@@ -13,8 +14,8 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.repository.UserSettingsRepository;
 import org.danteplanner.backend.shared.sse.NotificationPreferenceProvider;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
-import org.danteplanner.backend.shared.freshness.FreshnessPending;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
+import org.danteplanner.backend.shared.freshness.ScopedRead;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,10 +37,9 @@ public class UserSettingsService implements NotificationPreferenceProvider {
     private final UserSettingsRepository userSettingsRepository;
     private final UserRepository userRepository;
 
-    @FreshnessPending(reason = "user settings scope arrives in M2")
     @Transactional(readOnly = true)
-    public UserSettingsResponse getSettings(Long userId) {
-        return userSettingsRepository.findByUserId(userId)
+    public ScopedRead<UserSettingsResponse> getSettings(Long userId) {
+        UserSettingsResponse settings = userSettingsRepository.findByUserId(userId)
                 .map(UserSettingsResponse::fromEntity)
                 .orElseGet(() -> new UserSettingsResponse(
                         DEFAULT_SYNC_ENABLED,
@@ -47,6 +47,7 @@ public class UserSettingsService implements NotificationPreferenceProvider {
                         DEFAULT_NOTIFY_COMMENTS,
                         DEFAULT_NOTIFY_RECOMMENDATIONS,
                         DEFAULT_NOTIFY_NEW_PUBLICATIONS));
+        return new ScopedRead<>(settings, Set.of(new FreshnessScope.User(userId)));
     }
 
     @Transactional

@@ -5,15 +5,18 @@ import org.danteplanner.backend.moderation.api.ModerationTargetType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.user.api.RoleChange;
-import org.danteplanner.backend.user.api.UserNotFoundException;
+import org.danteplanner.backend.user.api.UserMiss;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.user.api.Users;
-import org.danteplanner.backend.shared.freshness.FreshnessPending;
+import org.danteplanner.backend.shared.freshness.FreshnessScope;
+import org.danteplanner.backend.shared.freshness.ScopedRead;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.danteplanner.backend.moderation.api.ModerationAudit;
+
+import java.util.Set;
 
 /**
  * Service for administrative operations.
@@ -47,11 +50,10 @@ public class AdminService {
         return updated;
     }
 
-    @FreshnessPending(reason = "role read: its user scope arrives in M2")
     @Transactional(readOnly = true)
-    public UserRole getUserRole(Long userId) {
+    public ScopedRead<UserRole> getUserRole(Long userId) {
         UserSummary user = users.findActiveById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-        return user.role();
+                .orElseThrow(() -> new UserMiss(userId));
+        return new ScopedRead<>(user.role(), Set.of(new FreshnessScope.User(userId)));
     }
 }
