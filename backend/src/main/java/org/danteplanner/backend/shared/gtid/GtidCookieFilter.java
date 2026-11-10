@@ -20,21 +20,21 @@ import org.danteplanner.backend.shared.config.RoutingKey;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.danteplanner.backend.shared.exception.ReadTemporarilyUnavailableException;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
-import org.danteplanner.backend.shared.freshness.MarkerStore;
+import org.danteplanner.backend.shared.freshness.MarkerStamp;
 import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 
 public class GtidCookieFilter extends OncePerRequestFilter {
 
     private final GtidReadGate readGate;
     private final GtidWriteCapture writeCapture;
-    private final MarkerStore markerStore;
+    private final MarkerStamp markerStamp;
     private final ProblemWriter problemWriter;
 
-    public GtidCookieFilter(GtidReadGate readGate, GtidWriteCapture writeCapture, MarkerStore markerStore,
+    public GtidCookieFilter(GtidReadGate readGate, GtidWriteCapture writeCapture, MarkerStamp markerStamp,
             ProblemWriter problemWriter) {
         this.readGate = readGate;
         this.writeCapture = writeCapture;
-        this.markerStore = markerStore;
+        this.markerStamp = markerStamp;
         this.problemWriter = problemWriter;
     }
 
@@ -52,10 +52,7 @@ public class GtidCookieFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
             }
             // A bodied response is already committed by the converter's flush.
-            writeCapture.takeCapturedGtid().ifPresent(gtid -> {
-                markerStore.raise(FreshnessDeclarations.declared(), gtid);
-                addCookie(response, GtidCookie.of(gtid));
-            });
+            markerStamp.stamp().ifPresent(gtid -> addCookie(response, GtidCookie.of(gtid)));
         } finally {
             writeCapture.clear();
             FreshnessDeclarations.clear();

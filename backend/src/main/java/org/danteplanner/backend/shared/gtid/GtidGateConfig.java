@@ -26,6 +26,7 @@ import org.danteplanner.backend.shared.freshness.FreshnessReadAspect;
 import org.danteplanner.backend.shared.freshness.FreshnessReadGuard;
 import org.danteplanner.backend.shared.freshness.FreshnessReadSettings;
 import org.danteplanner.backend.shared.freshness.MarkerDispatchStamp;
+import org.danteplanner.backend.shared.freshness.MarkerStamp;
 import org.danteplanner.backend.shared.freshness.MarkerStore;
 import org.danteplanner.backend.shared.redis.RedisRole;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
@@ -92,8 +93,14 @@ public class GtidGateConfig {
     }
 
     @Bean
-    public DispatchStamp dispatchStamp(GtidWriteCapture writeCapture, MarkerStore markerStore) {
-        return new MarkerDispatchStamp(writeCapture, markerStore);
+    public MarkerStamp markerStamp(GtidWriteCapture writeCapture, MarkerStore markerStore,
+            MarkerStore.Settings settings, MeterRegistry meterRegistry) {
+        return new MarkerStamp(writeCapture, markerStore, meterRegistry, settings.undeclaredFailFast());
+    }
+
+    @Bean
+    public DispatchStamp dispatchStamp(GtidWriteCapture writeCapture, MarkerStamp markerStamp) {
+        return new MarkerDispatchStamp(writeCapture, markerStamp);
     }
 
     @Bean
@@ -112,10 +119,10 @@ public class GtidGateConfig {
     public FilterRegistrationBean<GtidCookieFilter> gtidCookieFilterRegistration(
             GtidReadGate readGate,
             GtidWriteCapture writeCapture,
-            MarkerStore markerStore,
+            MarkerStamp markerStamp,
             ProblemWriter problemWriter) {
         FilterRegistrationBean<GtidCookieFilter> registration = new FilterRegistrationBean<>(
-                new GtidCookieFilter(readGate, writeCapture, markerStore, problemWriter));
+                new GtidCookieFilter(readGate, writeCapture, markerStamp, problemWriter));
         registration.addUrlPatterns(GATE_URL_PATTERN);
         registration.setOrder(Ordered.LOWEST_PRECEDENCE);
         return registration;

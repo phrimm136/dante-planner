@@ -29,6 +29,7 @@ import org.danteplanner.backend.shared.config.UndeclaredPrimaryAccessGuard;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
+import org.danteplanner.backend.shared.freshness.MarkerStamp;
 import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 
 class GtidCookieFilterTest {
@@ -40,10 +41,12 @@ class GtidCookieFilterTest {
     private final GtidWriteCapture writeCapture = new GtidWriteCapture(new SimpleMeterRegistry());
     private final ProblemWriter problemWriter = new ProblemWriter(new ObjectMapper());
     private final RecordingMarkerStore markerStore = new RecordingMarkerStore();
+    private final MarkerStamp markerStamp =
+            new MarkerStamp(writeCapture, markerStore, new SimpleMeterRegistry(), false);
     private final GtidCookieFilter filter =
-            new GtidCookieFilter(readGate, writeCapture, markerStore, problemWriter);
+            new GtidCookieFilter(readGate, writeCapture, markerStamp, problemWriter);
     private final GtidCookieFilter authorityFilter =
-            new GtidCookieFilter(authorityGate, writeCapture, markerStore, problemWriter);
+            new GtidCookieFilter(authorityGate, writeCapture, markerStamp, problemWriter);
     private final ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(
             new UndeclaredPrimaryAccessGuard(new SimpleMeterRegistry(), true));
     private final List<Object> routedTo = new ArrayList<>();

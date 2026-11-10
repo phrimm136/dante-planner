@@ -39,6 +39,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
+import org.danteplanner.backend.shared.freshness.MarkerStamp;
 import org.danteplanner.backend.support.LogCapture;
 
 @ExtendWith(MockitoExtension.class)
@@ -136,9 +137,14 @@ class GtidPinExitTest {
                 source("primary", true, dataSource))), meters);
     }
 
+    private MarkerStamp stampOver(GtidWriteCapture writeCapture) {
+        return new MarkerStamp(writeCapture, new RecordingMarkerStore(), meters, false);
+    }
+
     private GtidCookieFilter filterOver(DataSource dataSource) {
-        return new GtidCookieFilter(seoulGateOver(dataSource), new GtidWriteCapture(meters),
-                new RecordingMarkerStore(), new ProblemWriter(new ObjectMapper()));
+        GtidWriteCapture writeCapture = new GtidWriteCapture(meters);
+        return new GtidCookieFilter(seoulGateOver(dataSource), writeCapture, stampOver(writeCapture),
+                new ProblemWriter(new ObjectMapper()));
     }
 
     /** Sends the cookie until a response clears it, as a browser does. */
@@ -283,8 +289,9 @@ class GtidPinExitTest {
         GtidReadGate primaryAnsweringGate = new GtidReadGate(new ReadSourceSelector(List.of(
                 source("primary", true, dataSource),
                 source("seoul-replica", false, dataSource))), meters);
+        GtidWriteCapture writeCapture = new GtidWriteCapture(meters);
         GtidCookieFilter filter = new GtidGateConfig().gtidCookieFilterRegistration(
-                primaryAnsweringGate, new GtidWriteCapture(meters), new RecordingMarkerStore(),
+                primaryAnsweringGate, writeCapture, stampOver(writeCapture),
                 new ProblemWriter(new ObjectMapper())).getFilter();
 
         List<MockHttpServletResponse> responses = consecutiveReads(filter, FOREIGN_UUID);
@@ -295,8 +302,9 @@ class GtidPinExitTest {
     @Test
     void registration_WhenTheReplicaReadsFirstAndGateReportsCaughtUp_ClearsCookie() throws Exception {
         GtidReadGate caughtUpGate = seoulGateOver(database(returning(WAIT_APPLIED)));
+        GtidWriteCapture writeCapture = new GtidWriteCapture(meters);
         GtidCookieFilter filter = new GtidGateConfig().gtidCookieFilterRegistration(
-                caughtUpGate, new GtidWriteCapture(meters), new RecordingMarkerStore(),
+                caughtUpGate, writeCapture, stampOver(writeCapture),
                 new ProblemWriter(new ObjectMapper())).getFilter();
 
         List<MockHttpServletResponse> responses = consecutiveReads(filter, FOREIGN_UUID);

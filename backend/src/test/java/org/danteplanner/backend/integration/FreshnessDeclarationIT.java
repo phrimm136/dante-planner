@@ -527,6 +527,50 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
     }
 
     @Test
+    void staleIdenticalSave_WhenItIsAcknowledgedWithoutAWrite_PassesTheGateAndStampsNothing() throws Exception {
+        Session owner = session("freshness-ack-no-op");
+        UUID plannerId = draft(owner);
+        String identical = objectMapper.writeValueAsString(
+                UpsertRequests.draft().id(plannerId.toString()).title("draft").syncVersion(1L).build());
+        MvcResult saved = perform(put(PLANNERS + plannerId)
+                .contentType(APPLICATION_JSON)
+                .content(identical)
+                .cookie(owner.cookies()));
+        long savedVersion = objectMapper.readTree(saved.getResponse().getContentAsString()).get("syncVersion").asLong();
+        Set<FreshnessScope> candidates = Set.of(new FreshnessScope.Planner(plannerId),
+                new FreshnessScope.User(owner.id()));
+        Map<String, Map<String, String>> before = markers(candidates);
+
+        MvcResult acknowledged = perform(put(PLANNERS + plannerId)
+                .contentType(APPLICATION_JSON)
+                .content(identical)
+                .cookie(owner.cookies()));
+
+        assertThat(objectMapper.readTree(acknowledged.getResponse().getContentAsString()).get("syncVersion").asLong())
+                .as("acknowledged at the stored version, so nothing was written")
+                .isEqualTo(savedVersion);
+        assertThat(markers(candidates)).isEqualTo(before);
+        assertThat(acknowledged.getResponse().getHeaders(HttpHeaders.SET_COOKIE))
+                .noneMatch(header -> header.startsWith(GtidCookie.NAME + "="));
+    }
+
+    @Test
+    void publish_WhenThePlannerIsAlreadyPublished_PassesTheGateAndStampsNothing() throws Exception {
+        Session owner = session("freshness-republish");
+        UUID plannerId = published(owner);
+        Set<FreshnessScope> candidates = Set.of(new FreshnessScope.Planner(plannerId),
+                new FreshnessScope.User(owner.id()));
+        Map<String, Map<String, String>> before = markers(candidates);
+
+        MvcResult republished = perform(post(PLANNERS + plannerId + "/publish").cookie(owner.cookies()));
+
+        assertThat(markers(candidates)).isEqualTo(before);
+        assertThat(republished.getResponse().getHeaders(HttpHeaders.SET_COOKIE))
+                .as("no GTID cookie, so the request captured no commit and the stamp raised nothing, Global included")
+                .noneMatch(header -> header.startsWith(GtidCookie.NAME + "="));
+    }
+
+    @Test
     void write_WhenItFailsValidation_StampsNothing() throws Exception {
         Session owner = session("freshness-invalid");
         UUID plannerId = draft(owner);
@@ -679,18 +723,21 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
     }
 
     @Test
-    void dispatch_WhenAPublishHasNoOptedInRecipient_StillRaisesOnlyGlobal() {
+    void dispatch_WhenAPublishFanOutWritesNoRow_StillRaisesOnlyGlobal() {
         Session author = session("freshness-dispatch-lone-author");
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, author.user(), true);
-        long eventId = recordEvent("PLANNER_PUBLISHED", planner.getId(), "authorId", author.id());
+        long firstEventId = recordEvent("PLANNER_PUBLISHED", planner.getId(), "authorId", author.id());
+        dispatchStamp.around(() -> dispatcher.dispatchDomainEvent(firstEventId));
+        int fannedOut = publishedFanoutRows(planner.getId());
+        long secondEventId = recordEvent("PLANNER_PUBLISHED", planner.getId(), "authorId", author.id());
 
-        dispatchInAWindow(eventId, Set.of(new FreshnessScope.Planner(planner.getId()),
+        dispatchInAWindow(secondEventId, Set.of(new FreshnessScope.Planner(planner.getId()),
                 new FreshnessScope.User(author.id()), new FreshnessScope.Global()),
                 Set.of(new FreshnessScope.Global().key()));
 
         assertThat(publishedFanoutRows(planner.getId()))
-                .as("fan-out rows for this planner: the scenario needs none")
-                .isZero();
+                .as("fan-out rows for this planner after uk_notification_dedup absorbed the second publish")
+                .isEqualTo(fannedOut);
     }
 
     @Test
@@ -706,6 +753,16 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
         dispatchStamp.around(() -> dispatcher.dispatchDomainEvent(eventId));
 
         dispatchInAWindow(eventId, candidates, Set.of());
+    }
+
+    @Test
+    void dispatch_WhenTheCommentIsGoneBeforeItIsAnnounced_PassesTheGateAndRaisesNoMarker() {
+        Session owner = session("freshness-gone-comment-owner");
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner.user(), true);
+        long eventId = recordEvent("COMMENT_RECEIVED", planner.getId(), "commentId", Long.MAX_VALUE);
+
+        dispatchInAWindow(eventId, Set.of(new FreshnessScope.Planner(planner.getId()),
+                new FreshnessScope.User(owner.id())), Set.of());
     }
 
     @Test
@@ -754,7 +811,7 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
                 VALUES (?, UUID_TO_BIN(?), JSON_OBJECT(?, ?), NOW(6))
                 """, eventType, plannerId.toString(), idKey, id);
         return primaryJdbcTemplate.queryForObject(
-                "SELECT id FROM domain_events WHERE aggregate_id = UUID_TO_BIN(?) AND event_type = ?",
+                "SELECT MAX(id) FROM domain_events WHERE aggregate_id = UUID_TO_BIN(?) AND event_type = ?",
                 Long.class, plannerId.toString(), eventType);
     }
 

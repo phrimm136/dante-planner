@@ -83,7 +83,8 @@ public class MarkerStore implements AutoCloseable {
     public record Settings(
             @Min(0) int waitReplicas,
             @NotNull @DurationMin(millis = 1) Duration waitBound,
-            @NotNull @DurationMin(millis = 1) Duration ttl) {
+            @NotNull @DurationMin(millis = 1) Duration ttl,
+            boolean undeclaredFailFast) {
 
         @AssertTrue(message = "freshness.marker.wait-bound must stay under the Redis command timeout, "
                 + "or WAIT fails as a raise failure instead of answering")

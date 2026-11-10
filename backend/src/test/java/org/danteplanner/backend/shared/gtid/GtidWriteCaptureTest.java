@@ -83,4 +83,37 @@ class GtidWriteCaptureTest {
         assertThat(meterRegistry.counter("gtid.capture", "source", "fallback").count())
                 .isEqualTo(1.0);
     }
+
+    @Test
+    void takeCapture_WhenOnlyTheFallbackRecorded_IsUntracked() {
+        capture.recordCommit(GLOBAL_GTID, false);
+
+        assertThat(capture.takeCapture()).contains(new GtidWriteCapture.Capture(GLOBAL_GTID, false));
+    }
+
+    @Test
+    void takeCapture_WhenAFallbackAndATrackerCommitRecorded_IsTracked() {
+        capture.recordCommit(GLOBAL_GTID, false);
+        capture.recordCommit(UUID_A + ":201", true);
+
+        assertThat(capture.takeCapture()).contains(new GtidWriteCapture.Capture(UUID_A + ":1-201", true));
+    }
+
+    @Test
+    void takeCapture_WhenTaken_LeavesNothingAndForgetsTheTrackedFlag() {
+        capture.recordCommit(UUID_A + ":100", true);
+        capture.takeCapture();
+
+        assertThat(capture.takeCapture()).isEmpty();
+        capture.recordCommit(GLOBAL_GTID, false);
+        assertThat(capture.takeCapture()).contains(new GtidWriteCapture.Capture(GLOBAL_GTID, false));
+    }
+
+    @Test
+    void takeCapturedGtid_WhenTaken_ReturnsTheCapturedSetOnce() {
+        capture.recordCommit(UUID_A + ":100", true);
+
+        assertThat(capture.takeCapturedGtid()).contains(UUID_A + ":100-100");
+        assertThat(capture.takeCapturedGtid()).isEmpty();
+    }
 }

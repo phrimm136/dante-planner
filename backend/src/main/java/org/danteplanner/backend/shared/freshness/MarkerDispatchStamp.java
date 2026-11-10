@@ -7,11 +7,11 @@ import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 public class MarkerDispatchStamp implements DispatchStamp {
 
     private final GtidWriteCapture writeCapture;
-    private final MarkerStore markerStore;
+    private final MarkerStamp markerStamp;
 
-    public MarkerDispatchStamp(GtidWriteCapture writeCapture, MarkerStore markerStore) {
+    public MarkerDispatchStamp(GtidWriteCapture writeCapture, MarkerStamp markerStamp) {
         this.writeCapture = writeCapture;
-        this.markerStore = markerStore;
+        this.markerStamp = markerStamp;
     }
 
     @Override
@@ -35,7 +35,6 @@ public class MarkerDispatchStamp implements DispatchStamp {
 
     @Override
     public void raise() {
-        writeCapture.takeCapturedGtid()
-                .ifPresent(gtid -> markerStore.raise(FreshnessDeclarations.declared(), gtid));
+        markerStamp.stamp();
     }
 }

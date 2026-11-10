@@ -16,6 +16,9 @@ import io.micrometer.core.instrument.MeterRegistry;
 
 public class GtidWriteCapture {
 
+    public record Capture(String gtidSet, boolean tracked) {
+    }
+
     private final Counter trackerCaptures;
     private final Counter fallbackCaptures;
 
@@ -42,6 +45,7 @@ public class GtidWriteCapture {
         acc.committed = true;
         acc.gtids.add(gtid.replaceAll("\\s+", ""));
         if (fromTracker) {
+            acc.tracked = true;
             trackerCaptures.increment();
         } else {
             fallbackCaptures.increment();
@@ -57,11 +61,17 @@ public class GtidWriteCapture {
     }
 
     public Optional<String> takeCapturedGtid() {
+        return takeCapture().map(Capture::gtidSet);
+    }
+
+    public Optional<Capture> takeCapture() {
+        Accumulator acc = accumulator.get();
         Optional<String> gtid = pollCapturedGtid();
-        if (gtid.isPresent()) {
-            accumulator.set(new Accumulator());
+        if (gtid.isEmpty()) {
+            return Optional.empty();
         }
-        return gtid;
+        accumulator.set(new Accumulator());
+        return Optional.of(new Capture(gtid.get(), acc.tracked));
     }
 
     public void clear() {
@@ -125,6 +135,7 @@ public class GtidWriteCapture {
 
     private static final class Accumulator {
         private boolean committed;
+        private boolean tracked;
         private final Set<String> gtids = new LinkedHashSet<>();
     }
 }

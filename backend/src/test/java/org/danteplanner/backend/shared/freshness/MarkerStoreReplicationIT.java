@@ -149,7 +149,7 @@ class MarkerStoreReplicationIT {
 
     private MarkerStore storeOver(LettuceConnectionFactory writeStore, Duration waitBound) {
         return new MarkerStore(writeStore, writeStore.getRequiredNativeClient().getResources(), List.of(),
-                new RedisRoleHealth(), new MarkerStore.Settings(1, waitBound, Duration.ofHours(1)), meters);
+                new RedisRoleHealth(), new MarkerStore.Settings(1, waitBound, Duration.ofHours(1), false), meters);
     }
 
     private static LettuceConnectionFactory factory(String host, int port) {
