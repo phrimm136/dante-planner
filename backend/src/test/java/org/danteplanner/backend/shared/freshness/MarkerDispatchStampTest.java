@@ -35,7 +35,7 @@ class MarkerDispatchStampTest {
         private final List<Raise> raises = new ArrayList<>();
 
         RecordingMarkerStore() {
-            super(null, null, List.of(), new Settings(0, Duration.ofSeconds(1), Duration.ofHours(1)),
+            super(null, null, List.of(), new Settings(0, Duration.ofSeconds(1), Duration.ofHours(1), false),
                     new SimpleMeterRegistry());
         }
 
@@ -59,7 +59,8 @@ class MarkerDispatchStampTest {
         clearThreadState();
         writeCapture = new GtidWriteCapture(new SimpleMeterRegistry());
         markerStore = new RecordingMarkerStore();
-        stamp = new MarkerDispatchStamp(writeCapture, markerStore);
+        stamp = new MarkerDispatchStamp(writeCapture,
+                new MarkerStamp(writeCapture, markerStore, new SimpleMeterRegistry(), false));
         seoul = new ReadSourceSelector.Source(SEOUL, false, null, breaker(SEOUL));
         selector = new ReadSourceSelector(List.of(seoul, new ReadSourceSelector.Source(
                 ReadSourceProperties.PRIMARY, true, null, breaker(ReadSourceProperties.PRIMARY))));

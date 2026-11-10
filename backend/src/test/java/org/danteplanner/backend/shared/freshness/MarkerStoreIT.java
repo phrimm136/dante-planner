@@ -115,7 +115,7 @@ class MarkerStoreIT {
     private MarkerStore storeOver(
             LettuceConnectionFactory writeStore, List<MarkerStore.Source> readSources, RedisRoleHealth roleHealth) {
         MarkerStore store = new MarkerStore(writeStore, writeStore.getRequiredNativeClient().getResources(), readSources,
-                roleHealth, new MarkerStore.Settings(0, WAIT_BOUND, TTL), meters);
+                roleHealth, new MarkerStore.Settings(0, WAIT_BOUND, TTL, false), meters);
         stores.add(store);
         return store;
     }

@@ -36,9 +36,9 @@ class MarkerStoreTest {
     private static final String SERVER_A = "3e11fa47-71ca-11e1-9e33-c80aa9429562";
     private static final String SERVER_B = "8f9e0d1c-2b3a-4c5d-6e7f-8a9b0c1d2e3f";
     private static final MarkerStore.Settings SETTINGS =
-            new MarkerStore.Settings(1, Duration.ofSeconds(1), Duration.ofHours(1));
+            new MarkerStore.Settings(1, Duration.ofSeconds(1), Duration.ofHours(1), false);
     private static final MarkerStore.Settings ROOMY_SETTINGS =
-            new MarkerStore.Settings(1, RealClockBounds.ROOMY_WAIT_BOUND, Duration.ofHours(1));
+            new MarkerStore.Settings(1, RealClockBounds.ROOMY_WAIT_BOUND, Duration.ofHours(1), false);
 
     private final SimpleMeterRegistry meters = new SimpleMeterRegistry();
     private LettuceConnectionFactory refused;
@@ -170,7 +170,7 @@ class MarkerStoreTest {
 
     @Test
     void settings_WhenTheWaitBoundReachesTheCommandTimeout_AreInvalid() {
-        assertThat(new MarkerStore.Settings(1, BoundedRedisConnections.COMMAND_TIMEOUT, Duration.ofHours(1))
+        assertThat(new MarkerStore.Settings(1, BoundedRedisConnections.COMMAND_TIMEOUT, Duration.ofHours(1), false)
                 .isWaitBoundUnderTheCommandTimeout()).isFalse();
         assertThat(SETTINGS.isWaitBoundUnderTheCommandTimeout()).isTrue();
     }

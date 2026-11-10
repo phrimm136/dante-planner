@@ -38,10 +38,12 @@ import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
+import org.danteplanner.backend.shared.freshness.MarkerStamp;
 import org.danteplanner.backend.shared.freshness.MarkerStore;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -153,16 +155,21 @@ class FreshnessStampIT {
 
     private MarkerStore storeOver(LettuceConnectionFactory writeStore) {
         return new MarkerStore(writeStore, writeStore.getRequiredNativeClient().getResources(), List.of(),
-                new RedisRoleHealth(), new MarkerStore.Settings(0, Duration.ofSeconds(1), Duration.ofHours(1)), meters);
+                new RedisRoleHealth(), new MarkerStore.Settings(0, Duration.ofSeconds(1), Duration.ofHours(1), false), meters);
     }
 
     private MockMvc mvc() {
+        return mvc(true);
+    }
+
+    private MockMvc mvc(boolean undeclaredFailFast) {
         ReadSourceSelector primaryOnly = new ReadSourceSelector(List.of(new ReadSourceSelector.Source(
                 "primary", true, null, CircuitBreaker.ofDefaults("primary-" + UUID.randomUUID()))));
+        MarkerStamp markerStamp = new MarkerStamp(writeCapture, markerStore, meters, undeclaredFailFast);
         GtidCookieFilter filter = new GtidCookieFilter(new GtidReadGate(primaryOnly, meters), writeCapture,
-                markerStore, new ProblemWriter(new ObjectMapper()));
+                markerStamp, new ProblemWriter(new ObjectMapper()));
         return MockMvcBuilders.standaloneSetup(new StampingController(writeCapture))
-                .setControllerAdvice(new GtidCookieResponseAdvice(writeCapture, markerStore))
+                .setControllerAdvice(new GtidCookieResponseAdvice(markerStamp))
                 .addFilters(filter)
                 .build();
     }
@@ -243,14 +250,33 @@ class FreshnessStampIT {
     }
 
     @Test
-    void write_WhenItCommitsButDeclaresNothing_RaisesNoMarkerAndStillMintsTheCookie() throws Exception {
-        MvcResult result = mvc().perform(post("/api/stamp")
+    void write_WhenItCommitsButDeclaresNothingInFailFastMode_FailsWithTheGateAndRaisesNoMarker() {
+        MockMvc mvc = mvc(true);
+
+        assertThatThrownBy(() -> mvc.perform(post("/api/stamp")
+                        .header(GTID_HEADER, gtidSet())))
+                .rootCause()
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage(MarkerStamp.UNDECLARED_MESSAGE);
+
+        assertThat(marker(new FreshnessScope.Global())).doesNotContainKeys(serverA, serverB);
+        assertThat(meters.counter(MarkerStamp.UNDECLARED_COUNTER).count()).isZero();
+    }
+
+    @Test
+    void write_WhenItCommitsButDeclaresNothingOutsideFailFastMode_AnswersUnchangedCountsItAndRaisesNoMarker()
+            throws Exception {
+        MockMvc mvc = mvc(false);
+        double undeclaredBefore = meters.counter(MarkerStamp.UNDECLARED_COUNTER).count();
+
+        MvcResult result = mvc.perform(post("/api/stamp")
                         .header(GTID_HEADER, gtidSet()))
                 .andExpect(status().isOk())
                 .andReturn();
 
         assertThat(marker(new FreshnessScope.Global())).doesNotContainKeys(serverA, serverB);
         assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count()).isZero();
+        assertThat(meters.counter(MarkerStamp.UNDECLARED_COUNTER).count()).isEqualTo(undeclaredBefore + 1);
         assertCookieCarries(result, gtidSet());
     }
 

@@ -1,7 +1,6 @@
 package org.danteplanner.backend.shared.gtid;
 
-import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
-import org.danteplanner.backend.shared.freshness.MarkerStore;
+import org.danteplanner.backend.shared.freshness.MarkerStamp;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
@@ -26,8 +25,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class GtidCookieResponseAdvice implements ResponseBodyAdvice<Object> {
 
-    private final GtidWriteCapture writeCapture;
-    private final MarkerStore markerStore;
+    private final MarkerStamp markerStamp;
 
     @Override
     public boolean supports(
@@ -46,11 +44,8 @@ public class GtidCookieResponseAdvice implements ResponseBodyAdvice<Object> {
         ServerHttpRequest request,
         ServerHttpResponse response
     ) {
-        writeCapture.takeCapturedGtid()
-            .ifPresent(gtid -> {
-                markerStore.raise(FreshnessDeclarations.declared(), gtid);
-                response.getHeaders().add(HttpHeaders.SET_COOKIE, GtidCookie.of(gtid).toString());
-            });
+        markerStamp.stamp()
+            .ifPresent(gtid -> response.getHeaders().add(HttpHeaders.SET_COOKIE, GtidCookie.of(gtid).toString()));
         return body;
     }
 }

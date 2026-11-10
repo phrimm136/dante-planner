@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
+import org.danteplanner.backend.shared.freshness.MarkerStamp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,7 +23,7 @@ class GtidCookieResponseAdviceTest {
 
     private static final class SingleTakeCapture extends GtidWriteCapture {
 
-        private Optional<String> pending = Optional.of(GTID);
+        private Optional<Capture> pending = Optional.of(new Capture(GTID, true));
 
         private SingleTakeCapture() {
             super(new SimpleMeterRegistry());
@@ -30,25 +31,31 @@ class GtidCookieResponseAdviceTest {
 
         @Override
         public Optional<String> pollCapturedGtid() {
-            return takeOnce();
+            return takeOnce().map(Capture::gtidSet);
         }
 
         @Override
         public Optional<String> takeCapturedGtid() {
+            return takeOnce().map(Capture::gtidSet);
+        }
+
+        @Override
+        public Optional<Capture> takeCapture() {
             return takeOnce();
         }
 
-        private Optional<String> takeOnce() {
-            Optional<String> gtid = pending;
+        private Optional<Capture> takeOnce() {
+            Optional<Capture> capture = pending;
             pending = Optional.empty();
-            return gtid;
+            return capture;
         }
     }
 
     @Test
     void beforeBodyWrite_WhenTheCaptureYieldsItsGtidOnlyOnce_RaisesTheDeclaredScopesAndMintsTheCookieFromIt() {
         RecordingMarkerStore markerStore = new RecordingMarkerStore();
-        GtidCookieResponseAdvice advice = new GtidCookieResponseAdvice(new SingleTakeCapture(), markerStore);
+        GtidCookieResponseAdvice advice = new GtidCookieResponseAdvice(
+                new MarkerStamp(new SingleTakeCapture(), markerStore, new SimpleMeterRegistry(), false));
         MockHttpServletResponse servletResponse = new MockHttpServletResponse();
         ServletServerHttpResponse response = new ServletServerHttpResponse(servletResponse);
         FreshnessScope.Planner planner = new FreshnessScope.Planner(UUID.randomUUID());

@@ -20,7 +20,7 @@ final class RecordingMarkerStore extends MarkerStore {
     final List<Raise> raises = new ArrayList<>();
 
     RecordingMarkerStore() {
-        super(null, null, List.of(), new RedisRoleHealth(), new Settings(0, Duration.ofSeconds(1), Duration.ofHours(1)), new SimpleMeterRegistry());
+        super(null, null, List.of(), new RedisRoleHealth(), new Settings(0, Duration.ofSeconds(1), Duration.ofHours(1), false), new SimpleMeterRegistry());
     }
 
     @Override
