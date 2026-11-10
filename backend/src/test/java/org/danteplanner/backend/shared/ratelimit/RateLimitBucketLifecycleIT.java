@@ -33,7 +33,6 @@ import com.redis.testcontainers.RedisContainer;
 import org.assertj.core.api.SoftAssertions;
 
 import io.github.bucket4j.BucketConfiguration;
-import io.github.bucket4j.distributed.proxy.ProxyManager;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.support.TestJsonMappers;
 
@@ -50,7 +49,7 @@ class RateLimitBucketLifecycleIT {
     private static final String ENDPOINT = "fixture";
     private static final Duration REFILL_PERIOD = Duration.ofSeconds(60);
 
-    private ProxyManager<byte[]> proxyManager;
+    private RateLimitStore proxyManager;
     private RateLimitProperties properties;
     private RateLimitService rateLimitService;
 
@@ -78,6 +77,7 @@ class RateLimitBucketLifecycleIT {
     @AfterEach
     void tearDown() {
         SecurityContextHolder.clearContext();
+        proxyManager.close();
     }
 
     private static RateLimitProperties.BucketConfig bucket(int capacity) {

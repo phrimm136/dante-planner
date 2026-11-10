@@ -15,6 +15,7 @@ import io.lettuce.core.RedisConnectionException;
 import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.resource.DefaultClientResources;
 
+import org.danteplanner.backend.support.PongRedis;
 import org.danteplanner.backend.support.RedisEndpoints;
 
 import static org.assertj.core.api.Assertions.assertThat;

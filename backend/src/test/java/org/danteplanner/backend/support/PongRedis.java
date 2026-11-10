@@ -1,4 +1,4 @@
-package org.danteplanner.backend.shared.redis;
+package org.danteplanner.backend.support;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -12,39 +12,51 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
-final class PongRedis implements AutoCloseable {
+public final class PongRedis implements AutoCloseable {
 
     private final ServerSocket listener;
     private final List<Socket> clients = new CopyOnWriteArrayList<>();
+    private final AtomicInteger accepted = new AtomicInteger();
 
-    PongRedis() throws IOException {
+    public PongRedis() throws IOException {
         this.listener = new ServerSocket(0, 0, InetAddress.getLoopbackAddress());
         Thread acceptor = new Thread(this::accept, "pong-redis-accept");
         acceptor.setDaemon(true);
         acceptor.start();
     }
 
-    String host() {
+    public String host() {
         return listener.getInetAddress().getHostAddress();
     }
 
-    int port() {
+    public int port() {
         return listener.getLocalPort();
+    }
+
+    public int acceptedConnections() {
+        return accepted.get();
+    }
+
+    public void dropClients() throws IOException {
+        for (Socket client : clients) {
+            client.close();
+        }
+        clients.clear();
     }
 
     @Override
     public void close() throws IOException {
         listener.close();
-        for (Socket client : clients) {
-            client.close();
-        }
+        dropClients();
     }
 
     private void accept() {
         try {
             while (!listener.isClosed()) {
                 Socket client = listener.accept();
+                accepted.incrementAndGet();
                 clients.add(client);
                 Thread handler = new Thread(() -> serve(client), "pong-redis-client");
                 handler.setDaemon(true);

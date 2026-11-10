@@ -41,6 +41,7 @@ public class RateLimitStore implements ProxyManager<byte[]>, RoleConnector, Auto
         this.uri = BoundedRedisConnections.redisUri(host, port);
         this.client = BoundedRedisConnections.redisClient(clientResources, host, port);
         client.setOptions(ClientOptions.builder()
+                .autoReconnect(false)
                 .socketOptions(SocketOptions.builder().connectTimeout(BoundedRedisConnections.COMMAND_TIMEOUT).build())
                 .build());
         this.bucketTtl = bucketTtl;
@@ -56,9 +57,12 @@ public class RateLimitStore implements ProxyManager<byte[]>, RoleConnector, Auto
         attemptLock.lock();
         try {
             Connection current = connection;
+            if (current != null && current.redis().isOpen()) {
+                return CONNECTED;
+            }
             if (current != null) {
-                return current.redis().isOpen() ? CONNECTED
-                        : CompletableFuture.failedFuture(new RedisConnectionException("Rate-limit store reconnecting"));
+                connection = null;
+                var unused = current.redis().closeAsync();
             }
             if (attempt == null || attempt.isDone()) {
                 attempt = client.connectAsync(ByteArrayCodec.INSTANCE, uri).toCompletableFuture().thenAccept(this::adopt);
@@ -70,7 +74,8 @@ public class RateLimitStore implements ProxyManager<byte[]>, RoleConnector, Auto
     }
 
     public boolean isConnected() {
-        return connection != null;
+        Connection current = connection;
+        return current != null && current.redis().isOpen();
     }
 
     @Override
