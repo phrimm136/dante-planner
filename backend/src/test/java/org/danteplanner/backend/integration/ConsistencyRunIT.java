@@ -107,7 +107,7 @@ import static org.danteplanner.backend.integration.consistency.ConsistencyBudget
 @Import(TestConfig.class)
 class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
 
-    private static final KeyDraw ONLY_PLANNER = new KeyDraw(0);
+    private static final KeyDraw ONLY_PLANNER = KeyDraw.index(0);
     private static final String BREAKER_STATE_GAUGE = "resilience4j.circuitbreaker.state";
     private static final String POOL_IDLE_GAUGE = "hikaricp.connections.idle";
     private static final long TITLE_TOKEN_BOUND = 1_000_000_000_000L;

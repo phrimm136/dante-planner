@@ -49,6 +49,7 @@ class EdgeRoutingTest {
         List<CookieJar> jars = SESSIONS.stream().map(name -> new CookieJar(new Cookie(SESSION_COOKIE, name))).toList();
         PlannerPool pool = new PlannerPool();
         pool.add(UUID.randomUUID());
+        pool.add(UUID.randomUUID());
         RecordingReplication replication = new RecordingReplication();
 
         try (HistoryRecorder recorder = new HistoryRecorder(Writer.nullWriter(), System::nanoTime)) {

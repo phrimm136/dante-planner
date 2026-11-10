@@ -67,6 +67,28 @@ class SettingsShowSaveTest {
                 read(21, 30, false))).isEmpty();
     }
 
+    @Test
+    void read_WhenAnUnappliedSaveCompletedAfterTheLastAppliedOne_IsJudgedAgainstTheAppliedOne() {
+        assertThat(violations(SAVED_TRUE, new SettingsSave("s1", false, 21, 23, new Rejected(503)),
+                new SettingsSave("s1", false, 21, 24, new Unknown()), read(25, 30, true))).isEmpty();
+    }
+
+    @Test
+    void read_WhenTheLaterSaveStartsAtTheSaveCompletion_IsNotExcused() {
+        SettingsRead read = read(21, 30, false);
+
+        assertThat(violations(SAVED_TRUE, new SettingsSave("s1", false, 20, 40, new Unknown()), read))
+                .containsExactly(new Violation("settings-after-save", "s2", "settings", read));
+    }
+
+    @Test
+    void read_WhenTheLaterSaveStartsAtTheReadCompletion_IsNotExcused() {
+        SettingsRead read = read(21, 30, false);
+
+        assertThat(violations(SAVED_TRUE, read, new SettingsSave("s1", false, 30, 40, new Unknown())))
+                .containsExactly(new Violation("settings-after-save", "s2", "settings", read));
+    }
+
     private static SettingsRead read(long invokedAt, long completedAt, boolean value) {
         return new SettingsRead("s2", invokedAt, completedAt, new Seen(value));
     }
