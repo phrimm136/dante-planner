@@ -120,7 +120,7 @@
     "msw": "^2.14.6",
     "oxfmt": "0.76.0",
     "oxlint": "1.91.0",
-    "oxlint-tsgolint": "0.24.0",
+    "oxlint-tsgolint": "7.0.2005",
     "sass-embedded": "^1.107.1",
     "shadcn": "^4.23.0",
     "tailwindcss": "^4.1.17",
