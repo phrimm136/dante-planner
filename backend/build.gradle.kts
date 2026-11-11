@@ -103,7 +103,7 @@ dependencies {
 
     implementation("tools.jackson.core:jackson-databind")
 
-    implementation("net.javacrumbs.shedlock:shedlock-spring:5.16.0")
+    implementation("net.javacrumbs.shedlock:shedlock-spring:7.10.1")
     implementation("net.javacrumbs.shedlock:shedlock-provider-redis-spring:5.16.0")
 
     implementation("io.github.resilience4j:resilience4j-circuitbreaker:2.4.0")
