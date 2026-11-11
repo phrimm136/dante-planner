@@ -3,10 +3,10 @@ import net.ltgt.gradle.errorprone.errorprone
 buildscript {
     dependencies {
         constraints {
-            classpath("com.google.guava:guava:33.7.2-jre") {
+            classpath("com.google.guava:guava:33.8.0-jre") {
                 because("dependency-check plugin 13.0.0 brings 33.6.0-jre; the advisories are fixed in 33.7.2")
             }
-            classpath("org.jsoup:jsoup:1.23.2") {
+            classpath("org.jsoup:jsoup:1.24.1") {
                 because("dependency-check plugin 13.0.0 brings 1.23.1; the advisory is fixed in 1.23.2")
             }
             classpath("com.fasterxml.jackson.core:jackson-databind:2.22.4") {
@@ -111,7 +111,7 @@ dependencies {
 
     implementation("com.bucket4j:bucket4j-core:8.10.1")
     implementation("com.bucket4j:bucket4j-redis:8.10.1")
-    implementation("org.jsoup:jsoup:1.23.2")
+    implementation("org.jsoup:jsoup:1.24.1")
     implementation("com.networknt:json-schema-validator:1.5.1")
     implementation("io.sentry:sentry-spring-boot-4-starter:8.62.0")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
@@ -129,7 +129,7 @@ dependencies {
     testImplementation("org.jetbrains:jetCheck:0.3.0")
     testImplementation("org.wiremock:wiremock-standalone:3.13.2")
 
-    errorprone("com.google.errorprone:error_prone_core:2.51.0")
+    errorprone("com.google.errorprone:error_prone_core:2.52.0")
 
     "consistencyImplementation"("tools.jackson.core:jackson-databind")
 }
