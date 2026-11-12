@@ -84,6 +84,7 @@ describe('enemy facet keys', () => {
       'walpurgis:5',
       'walpurgis:6',
       'walpurgis:8',
+      'walpurgis:10',
       'aprilFools:fools_2025_entrance_popup_title',
       'aprilFools:fools_2026_entrance_popup_title',
     ])
