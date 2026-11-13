@@ -11,9 +11,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
-import org.danteplanner.backend.shared.config.RedisConnectionConfig;
+import org.danteplanner.backend.support.RateLimitStores;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
@@ -32,7 +33,6 @@ import com.redis.testcontainers.RedisContainer;
 import org.assertj.core.api.SoftAssertions;
 
 import io.github.bucket4j.BucketConfiguration;
-import io.github.bucket4j.distributed.proxy.ProxyManager;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.support.TestJsonMappers;
 
@@ -49,7 +49,7 @@ class RateLimitBucketLifecycleIT {
     private static final String ENDPOINT = "fixture";
     private static final Duration REFILL_PERIOD = Duration.ofSeconds(60);
 
-    private ProxyManager<byte[]> proxyManager;
+    private RateLimitStore proxyManager;
     private RateLimitProperties properties;
     private RateLimitService rateLimitService;
 
@@ -65,7 +65,7 @@ class RateLimitBucketLifecycleIT {
 
     @BeforeEach
     void setUp() {
-        proxyManager = RedisConnectionConfig.buildRateLimitProxyManager(
+        proxyManager = RateLimitStores.connectedTo(
                 REDIS.getRedisHost(), REDIS.getRedisPort(), Duration.ofSeconds(60));
         properties = new RateLimitProperties();
         properties.setConfigVersion(1);
@@ -77,6 +77,7 @@ class RateLimitBucketLifecycleIT {
     @AfterEach
     void tearDown() {
         SecurityContextHolder.clearContext();
+        proxyManager.close();
     }
 
     private static RateLimitProperties.BucketConfig bucket(int capacity) {
@@ -231,7 +232,8 @@ class RateLimitBucketLifecycleIT {
                 new DeviceIdResolver(new CookieUtils(false, "", "Lax")),
                 new FrontendProperties("https://planner.example"),
                 new ProblemWriter(TestJsonMappers.springDefaults()),
-                new SimpleMeterRegistry());
+                new SimpleMeterRegistry(),
+                new RedisRoleHealth());
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new DeclaredHandlerFixture())
                 .addInterceptors(interceptor)
                 .setControllerAdvice(new ApiExceptionHandler())

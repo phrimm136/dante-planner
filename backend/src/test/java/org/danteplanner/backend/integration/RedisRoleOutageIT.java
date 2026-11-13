@@ -15,12 +15,14 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.lettuce.core.resource.ClientResources;
 
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.shared.redis.RedisRole;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.shared.redis.RedisRoleProbe;
+import org.danteplanner.backend.shared.redis.RoleOutages;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.backend.support.RealClockBounds;
@@ -54,6 +56,7 @@ class RedisRoleOutageIT extends CausalHarnessSupport {
             throws IOException {
         Hang.until(() -> roleHealth.isAvailable(RedisRole.AUTH_LOCAL) && roleHealth.isAvailable(RedisRole.AUTH),
                 "auth and auth-local answering their probes before the cut");
+        List<CircuitBreaker.StateTransition> authTransitions = RoleOutages.transitionsFrom(roleHealth, RedisRole.AUTH);
         try (LogCapture capture = LogCapture.onThread(PROBE_THREAD, RedisRoleProbe.class)) {
             long cut = System.nanoTime();
             blackholeAuthLocal();
@@ -67,7 +70,7 @@ class RedisRoleOutageIT extends CausalHarnessSupport {
             Hang.until(() -> roleHealth.isAvailable(RedisRole.AUTH_LOCAL), "the probe closing redis-auth-local");
 
             assertThat(transitionsOf(capture.events(), RedisRole.AUTH_LOCAL)).isNotEmpty();
-            assertThat(transitionsOf(capture.events(), RedisRole.AUTH)).isEmpty();
+            assertThat(authTransitions).isEmpty();
             assertThat(roleHealth.isAvailable(RedisRole.AUTH)).isTrue();
         }
     }
@@ -78,7 +81,7 @@ class RedisRoleOutageIT extends CausalHarnessSupport {
         RedisRoleHealth blackholed = new RedisRoleHealth();
         blackholeAuthLocal();
         try (RedisRoleProbe probe = new RedisRoleProbe(redisClientResources,
-                RedisEndpoints.everyRoleAt(TOXIPROXY.getHost(), authLocalProxyPort()), blackholed)) {
+                RedisEndpoints.everyRoleAt(TOXIPROXY.getHost(), authLocalProxyPort()), blackholed, List.of())) {
             long start = System.nanoTime();
             probe.probeAtStartup();
 

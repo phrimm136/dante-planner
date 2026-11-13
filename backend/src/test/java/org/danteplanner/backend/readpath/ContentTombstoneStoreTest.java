@@ -1,5 +1,9 @@
 package org.danteplanner.backend.readpath;
 
+import org.danteplanner.backend.shared.redis.RedisRole;
+import org.danteplanner.backend.shared.redis.RoleOutages;
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
+import org.danteplanner.backend.support.AuthReads;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
@@ -52,7 +56,8 @@ class ContentTombstoneStoreTest {
     @BeforeEach
     void setUp() {
         meterRegistry = new SimpleMeterRegistry();
-        store = new ContentTombstoneStore(sharedTemplate, authLocalTemplate, meterRegistry);
+        store = new ContentTombstoneStore(sharedTemplate,
+                AuthReads.localThenAuth(authLocalTemplate, sharedTemplate, new RedisRoleHealth()), meterRegistry);
     }
 
     @Test
@@ -77,6 +82,59 @@ class ContentTombstoneStoreTest {
 
         assertThat(tombstoned).isEmpty();
         assertThat(meterRegistry.counter("tombstone.check_skipped").count()).isEqualTo(1d);
+    }
+
+    @Test
+    void isTombstoned_WhenAuthLocalIsOpen_IsAnsweredByThePrimary() {
+        when(sharedTemplate.hasKey("del:planner:" + deleted)).thenReturn(true);
+
+        assertThat(storeWith(RoleOutages.withOpen(RedisRole.AUTH_LOCAL)).isTombstoned("planner", deleted)).isTrue();
+
+        verifyNoInteractions(authLocalTemplate);
+        assertThat(meterRegistry.counter("tombstone.check_skipped").count()).isZero();
+    }
+
+    @Test
+    void tombstonedAmong_WhenAuthLocalIsOpen_IsAnsweredByThePrimary() {
+        when(sharedTemplate.opsForValue()).thenReturn(sharedValues);
+        when(sharedValues.multiGet(List.of("del:planner:" + live, "del:planner:" + deleted)))
+                .thenReturn(Arrays.asList(null, "1"));
+
+        assertThat(storeWith(RoleOutages.withOpen(RedisRole.AUTH_LOCAL))
+                .tombstonedAmong("planner", List.of(live, deleted))).containsExactly(deleted);
+
+        verifyNoInteractions(authLocalTemplate);
+    }
+
+    @Test
+    void isTombstoned_WhenBothAuthRolesAreOpen_ServesUnmaskedAtOnceCountingTheSkipWithoutAWarning() {
+        ContentTombstoneStore bothOpen = storeWith(RoleOutages.withOpen(RedisRole.AUTH_LOCAL, RedisRole.AUTH));
+
+        try (LogCapture log = LogCapture.onThisThread(ContentTombstoneStore.class)) {
+            assertThat(bothOpen.isTombstoned("planner", deleted)).isFalse();
+
+            assertThat(log.events()).isEmpty();
+        }
+        verifyNoInteractions(authLocalTemplate, sharedTemplate);
+        assertThat(meterRegistry.counter("tombstone.check_skipped").count()).isEqualTo(1d);
+    }
+
+    @Test
+    void tombstonedAmong_WhenBothAuthRolesAreOpen_ServesUnmaskedAtOnceCountingTheSkipWithoutAWarning() {
+        ContentTombstoneStore bothOpen = storeWith(RoleOutages.withOpen(RedisRole.AUTH_LOCAL, RedisRole.AUTH));
+
+        try (LogCapture log = LogCapture.onThisThread(ContentTombstoneStore.class)) {
+            assertThat(bothOpen.tombstonedAmong("planner", List.of(live, deleted))).isEmpty();
+
+            assertThat(log.events()).isEmpty();
+        }
+        verifyNoInteractions(authLocalTemplate, sharedTemplate);
+        assertThat(meterRegistry.counter("tombstone.check_skipped").count()).isEqualTo(1d);
+    }
+
+    private ContentTombstoneStore storeWith(RedisRoleHealth health) {
+        return new ContentTombstoneStore(sharedTemplate,
+                AuthReads.localThenAuth(authLocalTemplate, sharedTemplate, health), meterRegistry);
     }
 
     @Test

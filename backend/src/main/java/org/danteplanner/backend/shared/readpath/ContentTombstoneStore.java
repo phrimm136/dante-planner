@@ -8,7 +8,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.SessionCallback;
@@ -19,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 
+import org.danteplanner.backend.shared.redis.AuthReadSources;
+
 @Component
 @Slf4j
 public class ContentTombstoneStore {
@@ -27,14 +28,13 @@ public class ContentTombstoneStore {
     private static final String TOMBSTONE_MARKER = "1";
 
     private final StringRedisTemplate stringRedisTemplate;
-    private final StringRedisTemplate authLocalStringRedisTemplate;
+    private final AuthReadSources authReadSources;
     private final Counter skipped;
 
-    public ContentTombstoneStore(StringRedisTemplate stringRedisTemplate,
-            @Qualifier("authLocalStringRedisTemplate") StringRedisTemplate authLocalStringRedisTemplate,
+    public ContentTombstoneStore(StringRedisTemplate stringRedisTemplate, AuthReadSources authReadSources,
             MeterRegistry meterRegistry) {
         this.stringRedisTemplate = stringRedisTemplate;
-        this.authLocalStringRedisTemplate = authLocalStringRedisTemplate;
+        this.authReadSources = authReadSources;
         this.skipped = meterRegistry.counter("tombstone.check_skipped");
     }
 
@@ -84,7 +84,7 @@ public class ContentTombstoneStore {
     public boolean isTombstoned(String entityType, UUID id) {
         String key = tombstoneKey(entityType, id);
         try {
-            return Boolean.TRUE.equals(authLocalStringRedisTemplate.hasKey(key));
+            return authReadSources.read(store -> Boolean.TRUE.equals(store.hasKey(key)), this::isTombstonedWithoutACheck);
         } catch (DataAccessException e) {
             skipped.increment();
             log.warn("tombstone check failed for {}:{} — serving the row unmasked", entityType, id, e);
@@ -99,16 +99,28 @@ public class ContentTombstoneStore {
         List<UUID> ordered = List.copyOf(ids);
         List<String> keys = ordered.stream().map(id -> tombstoneKey(entityType, id)).toList();
         try {
-            List<String> markers = authLocalStringRedisTemplate.opsForValue().multiGet(keys);
-            return IntStream.range(0, ordered.size())
-                    .filter(i -> markers.get(i) != null)
-                    .mapToObj(ordered::get)
-                    .collect(Collectors.toSet());
+            return authReadSources.read(store -> {
+                List<String> markers = store.opsForValue().multiGet(keys);
+                return IntStream.range(0, ordered.size())
+                        .filter(i -> markers.get(i) != null)
+                        .mapToObj(ordered::get)
+                        .collect(Collectors.toSet());
+            }, this::tombstonedAmongWithoutACheck);
         } catch (DataAccessException e) {
             skipped.increment();
             log.warn("tombstone check failed for {} {} ids — serving the rows unmasked", ids.size(), entityType, e);
             return Set.of();
         }
+    }
+
+    private boolean isTombstonedWithoutACheck() {
+        skipped.increment();
+        return false;
+    }
+
+    private Set<UUID> tombstonedAmongWithoutACheck() {
+        skipped.increment();
+        return Set.of();
     }
 
     private String tombstoneKey(String entityType, UUID id) {

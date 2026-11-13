@@ -8,6 +8,7 @@ import eu.rekawek.toxiproxy.model.Toxic;
 import eu.rekawek.toxiproxy.model.ToxicDirection;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.Set;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
@@ -25,6 +26,8 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.mysql.MySQLContainer;
 import org.testcontainers.toxiproxy.ToxiproxyContainer;
 
+import org.danteplanner.backend.shared.redis.RedisRole;
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.support.Hang;
 
 
@@ -79,6 +82,7 @@ abstract class CausalHarnessSupport {
     private static final int AUTH_LOCAL_LISTEN_PORT = 8671;
     private static final String AUTH_LOCAL_BLACKHOLE = "auth-local-blackhole";
     private static final int SOURCE_CONNECT_RETRY_SECONDS = 1;
+    private static final Set<RedisRole> HARNESS_ROLES = Set.of(RedisRole.AUTH, RedisRole.AUTH_LOCAL, RedisRole.RATE_LIMIT);
 
     private static final Network NETWORK = Network.newNetwork();
 
@@ -181,6 +185,9 @@ abstract class CausalHarnessSupport {
     @Qualifier("replicaJdbcTemplate")
     private JdbcTemplate replicaJdbcTemplate;
 
+    @Autowired
+    private RedisRoleHealth roleHealth;
+
     protected ReplicationControl replicationControl;
 
     protected ToxiproxyControl toxiproxyControl;
@@ -214,6 +221,8 @@ abstract class CausalHarnessSupport {
         toxiproxyControl.restoreOregonPrimary();
         releaseAuthRedisReplicaAcks();
         healAuthLocal();
+        Hang.until(() -> HARNESS_ROLES.stream().allMatch(roleHealth::isAvailable),
+                "this context's probe closing the breakers of the Redis roles the harness serves");
     }
 
     static int authLocalProxyPort() {
