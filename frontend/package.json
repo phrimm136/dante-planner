@@ -117,7 +117,7 @@
     "fast-check": "^4.10.2",
     "happy-dom": "^21.0.4",
     "jsdom": "^29.0.1",
-    "msw": "^2.14.6",
+    "msw": "^3.0.3",
     "oxfmt": "0.76.0",
     "oxlint": "1.91.0",
     "oxlint-tsgolint": "0.24.0",
