@@ -26,7 +26,7 @@ plugins {
     id("org.sonarqube") version "7.5.0.8588"
     id("org.owasp.dependencycheck") version "13.0.0"
     id("de.aaschmid.cpd") version "3.5"
-    id("net.ltgt.errorprone") version "4.3.0"
+    id("net.ltgt.errorprone") version "5.2.0"
     id("info.solidsoft.pitest") version "1.19.0-rc.1"
     id("org.gradle.test-retry") version "1.6.6"
     checkstyle
