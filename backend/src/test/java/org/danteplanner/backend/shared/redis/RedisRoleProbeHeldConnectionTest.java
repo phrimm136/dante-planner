@@ -25,8 +25,6 @@ class RedisRoleProbeHeldConnectionTest {
     private static final int REFUSED_PORT = 1;
     private static final RedisRole ROLE = RedisRole.RATE_LIMIT;
     private static final int MANY_ROUNDS = 5;
-    private static final Duration HANDSHAKE_BOUND_LEFT_AFTER_A_ROUND =
-            RedisRoleProbe.STARTUP_PROBE_TIMEOUT.minus(RedisRoleProbe.PROBE_TIMEOUT);
 
     private final ClientResources clientResources = DefaultClientResources.create();
     private final RedisRoleHealth health = new RedisRoleHealth();
@@ -112,9 +110,11 @@ class RedisRoleProbeHeldConnectionTest {
         List<CircuitBreaker.StateTransition> transitions = RoleOutages.transitionsFrom(health, ROLE);
 
         redis.dropClients();
-        for (int round = 0; round < RedisRoleProbe.FAILURE_THRESHOLD; round++) {
+        Hang.until(() -> {
             probe.probe();
-        }
+            return redis.acceptedConnections() == 2;
+        }, "the probe reconnecting once it has noticed the dropped connection");
+        probe.probe();
 
         assertThat(transitions).isEmpty();
         assertThat(health.isAvailable(ROLE)).isTrue();
@@ -181,17 +181,22 @@ class RedisRoleProbeHeldConnectionTest {
     }
 
     @Test
-    void close_WhenAConnectIsStillPending_ClosesItsSocketBeforeTheHandshakeBound() throws IOException {
+    void close_WhenAConnectIsStillPending_ShutsItsSocketWithTheClient() throws IOException {
         probe.probeAtStartup();
+        redis.holdNewConnections();
         redis.dropClients();
-        redis.blackholeNewConnections();
-        probe.probe();
+        Hang.until(() -> {
+            probe.probe();
+            return redis.acceptedConnections() == 2;
+        }, "the probe starting a connect once it has noticed the dropped connection");
+        int pingsBeforeClose = redis.answeredPings();
 
         probe.close();
-        long closed = System.nanoTime();
-        Hang.until(() -> redis.blackholedConnectionsClosedByClients() == 1, "the pending connect's socket closing");
+        redis.releaseNewConnections();
 
-        assertThat(Duration.ofNanos(System.nanoTime() - closed))
-                .isLessThan(HANDSHAKE_BOUND_LEFT_AFTER_A_ROUND.dividedBy(2));
+        Hang.until(() -> redis.connectionsClosedByClients() == 1 || redis.answeredPings() > pingsBeforeClose,
+                "the pending connect's socket closing or finishing its handshake");
+        assertThat(redis.answeredPings()).isEqualTo(pingsBeforeClose);
+        assertThat(redis.connectionsClosedByClients()).isEqualTo(1);
     }
 }

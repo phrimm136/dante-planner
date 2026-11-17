@@ -35,7 +35,7 @@ final class HeldConnection {
 
     synchronized void close() {
         closed = true;
-        discard();
+        discardUnlessConnecting();
     }
 
     private void discard() {
