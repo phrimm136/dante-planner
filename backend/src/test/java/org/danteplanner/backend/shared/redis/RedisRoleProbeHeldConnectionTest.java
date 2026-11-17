@@ -25,6 +25,8 @@ class RedisRoleProbeHeldConnectionTest {
     private static final int REFUSED_PORT = 1;
     private static final RedisRole ROLE = RedisRole.RATE_LIMIT;
     private static final int MANY_ROUNDS = 5;
+    private static final Duration HANDSHAKE_BOUND_LEFT_AFTER_A_ROUND =
+            RedisRoleProbe.STARTUP_PROBE_TIMEOUT.minus(RedisRoleProbe.PROBE_TIMEOUT);
 
     private final ClientResources clientResources = DefaultClientResources.create();
     private final RedisRoleHealth health = new RedisRoleHealth();
@@ -143,6 +145,8 @@ class RedisRoleProbeHeldConnectionTest {
         probe.probe();
         assertThat(health.isAvailable(ROLE)).isFalse();
         assertThat(redis.acceptedConnections()).isEqualTo(1);
+        probe.probe();
+        assertThat(redis.acceptedConnections()).isEqualTo(2);
         Hang.until(() -> redis.blackholedConnectionsClosedByClients() == 1, "the probe closing its silent connection");
 
         redis.releaseNewConnections();
@@ -174,5 +178,20 @@ class RedisRoleProbeHeldConnectionTest {
 
         assertThat(Duration.ofNanos(System.nanoTime() - start)).isLessThan(RedisRoleProbe.PROBE_TIMEOUT);
         assertThat(redis.acceptedConnections()).isEqualTo(1);
+    }
+
+    @Test
+    void close_WhenAConnectIsStillPending_ClosesItsSocketBeforeTheHandshakeBound() throws IOException {
+        probe.probeAtStartup();
+        redis.dropClients();
+        redis.blackholeNewConnections();
+        probe.probe();
+
+        probe.close();
+        long closed = System.nanoTime();
+        Hang.until(() -> redis.blackholedConnectionsClosedByClients() == 1, "the pending connect's socket closing");
+
+        assertThat(Duration.ofNanos(System.nanoTime() - closed))
+                .isLessThan(HANDSHAKE_BOUND_LEFT_AFTER_A_ROUND.dividedBy(2));
     }
 }

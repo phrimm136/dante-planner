@@ -92,12 +92,14 @@ class HeldConnectionTest {
         ClientResources clientResources = DefaultClientResources.create();
         try (PongRedis redis = new PongRedis()) {
             RedisClient client = BoundedRedisConnections.redisClient(clientResources, redis.host(), redis.port());
-            HeldConnection open = new HeldConnection(() -> client.connectAsync(StringCodec.UTF8,
-                    BoundedRedisConnections.redisUri(redis.host(), redis.port())).toCompletableFuture());
+            CompletableFuture<StatefulRedisConnection<String, String>> connecting = client.connectAsync(
+                    StringCodec.UTF8, BoundedRedisConnections.redisUri(redis.host(), redis.port())).toCompletableFuture();
+            HeldConnection open = new HeldConnection(() -> connecting);
             assertThat(Hang.get(open.ping(), "the first PING")).isEqualTo("PONG");
 
             open.close();
 
+            assertThat(connecting.join().isOpen()).isFalse();
             Hang.until(() -> redis.connectionsClosedByClients() == 1, "the held connection closing");
             client.shutdown();
         } finally {
