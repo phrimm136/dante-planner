@@ -228,7 +228,8 @@ class MarkerStoreIT {
         RedisEndpoints.moveRole(connections, RedisRole.AUTH_LOCAL, REFUSED_HOST, REFUSED_PORT);
         RedisRoleHealth roleHealth = new RedisRoleHealth();
         try (RedisRoleProbe probe =
-                new RedisRoleProbe(liveFactory.getRequiredNativeClient().getResources(), connections, roleHealth, List.of())) {
+                new RedisRoleProbe(liveFactory.getRequiredNativeClient().getResources(), connections, roleHealth, List.of(),
+                        RedisRoleProbe.Timeouts.PRODUCTION)) {
             probe.probeAtStartup();
             Hang.until(() -> {
                 probe.probe();

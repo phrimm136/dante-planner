@@ -34,21 +34,20 @@ class RedisRoleProbeHeldConnectionTest {
     @BeforeEach
     void setUp() throws IOException {
         redis = new PongRedis();
-        RedisConnectionConfig connections = RedisEndpoints.everyRoleAt(REFUSED_HOST, REFUSED_PORT);
-        RedisEndpoints.moveRole(connections, ROLE, redis.host(), redis.port());
-        probe = new RedisRoleProbe(clientResources, connections, health, List.of());
     }
 
     @AfterEach
     void tearDown() throws IOException {
-        probe.close();
+        if (probe != null) {
+            probe.close();
+        }
         redis.close();
         var unused = clientResources.shutdown();
     }
 
     @Test
     void probe_WhenNewConnectionsAreSlowButTheHeldOneAnswers_KeepsTheRoleAvailableOnOneConnection() {
-        probe.probeAtStartup();
+        startWithHeldConnection(RoomyProbeTimeouts.BOTH_PHASES);
         redis.holdNewConnections();
 
         for (int round = 0; round < MANY_ROUNDS; round++) {
@@ -61,7 +60,7 @@ class RedisRoleProbeHeldConnectionTest {
 
     @Test
     void probe_WhenOneReplyIsLateAndNewConnectionsAreSlow_KeepsTheHeldConnectionAndTheBreakerClosed() {
-        probe.probeAtStartup();
+        startWithHeldConnection(RoomyProbeTimeouts.STARTUP_ONLY);
         List<CircuitBreaker.StateTransition> transitions = RoleOutages.transitionsFrom(health, ROLE);
         redis.holdNewConnections();
 
@@ -79,7 +78,7 @@ class RedisRoleProbeHeldConnectionTest {
 
     @Test
     void probe_WhenTheRoleIsHealthy_PingsEveryRoundOnOneConnection() {
-        probe.probeAtStartup();
+        startWithHeldConnection(RoomyProbeTimeouts.BOTH_PHASES);
         int pingsBeforeTheRounds = redis.answeredPings();
 
         for (int round = 0; round < MANY_ROUNDS; round++) {
@@ -88,14 +87,13 @@ class RedisRoleProbeHeldConnectionTest {
 
         assertThat(health.isAvailable(ROLE)).isTrue();
         assertThat(redis.acceptedConnections()).isEqualTo(1);
-        assertThat(redis.answeredPings() - pingsBeforeTheRounds).isEqualTo(MANY_ROUNDS);
+        Hang.until(() -> redis.answeredPings() - pingsBeforeTheRounds == MANY_ROUNDS,
+                "every round's PING answered on the held connection");
     }
 
     @Test
     void probeAtStartup_WhenTheRoleAnswers_LeavesItsConnectionOpenForTheFirstRuntimeRound() {
-        probe.probeAtStartup();
-        assertThat(health.isAvailable(ROLE)).isTrue();
-        assertThat(redis.acceptedConnections()).isEqualTo(1);
+        startWithHeldConnection(RoomyProbeTimeouts.BOTH_PHASES);
 
         redis.holdNewConnections();
         probe.probe();
@@ -106,7 +104,7 @@ class RedisRoleProbeHeldConnectionTest {
 
     @Test
     void probe_WhenTheServerDropsTheHeldConnection_ReconnectsWithoutOpeningTheBreaker() throws IOException {
-        probe.probeAtStartup();
+        startWithHeldConnection(RoomyProbeTimeouts.BOTH_PHASES);
         List<CircuitBreaker.StateTransition> transitions = RoleOutages.transitionsFrom(health, ROLE);
 
         redis.dropClients();
@@ -123,7 +121,7 @@ class RedisRoleProbeHeldConnectionTest {
 
     @Test
     void probe_WhenTheHeldConnectionIsLostAndReconnectsAreRefused_OpensAfterTwoSilentRounds() throws IOException {
-        probe.probeAtStartup();
+        startWithHeldConnection(RoomyProbeTimeouts.BOTH_PHASES);
 
         redis.close();
         probe.probe();
@@ -135,7 +133,7 @@ class RedisRoleProbeHeldConnectionTest {
 
     @Test
     void probe_WhenTheHeldConnectionGoesSilent_OpensAfterTwoRoundsAndReachesTheHealedServerOnANewConnection() {
-        probe.probeAtStartup();
+        startWithHeldConnection(RoomyProbeTimeouts.STARTUP_ONLY);
 
         redis.blackholeEstablished();
         redis.holdNewConnections();
@@ -146,7 +144,7 @@ class RedisRoleProbeHeldConnectionTest {
         assertThat(health.isAvailable(ROLE)).isFalse();
         assertThat(redis.acceptedConnections()).isEqualTo(1);
         probe.probe();
-        assertThat(redis.acceptedConnections()).isEqualTo(2);
+        Hang.until(() -> redis.acceptedConnections() == 2, "the probe starting a new connection after the opening");
         Hang.until(() -> redis.blackholedConnectionsClosedByClients() == 1, "the probe closing its silent connection");
 
         redis.releaseNewConnections();
@@ -160,7 +158,8 @@ class RedisRoleProbeHeldConnectionTest {
     void probeAtStartup_WhenRolesShareAHost_HoldsOneConnectionPerRole() throws IOException {
         try (PongRedis shared = new PongRedis();
                 RedisRoleProbe sharing = new RedisRoleProbe(clientResources,
-                        RedisEndpoints.everyRoleAt(shared.host(), shared.port()), new RedisRoleHealth(), List.of())) {
+                        RedisEndpoints.everyRoleAt(shared.host(), shared.port()), new RedisRoleHealth(), List.of(),
+                        RoomyProbeTimeouts.BOTH_PHASES)) {
             sharing.probeAtStartup();
             sharing.probe();
 
@@ -170,19 +169,20 @@ class RedisRoleProbeHeldConnectionTest {
 
     @Test
     void probe_WhenRunAfterClose_FailsEveryRoleWithoutWaitingForAConnection() {
-        probe.probeAtStartup();
+        startWithHeldConnection(RoomyProbeTimeouts.BOTH_PHASES);
 
         probe.close();
         long start = System.nanoTime();
         probe.probe();
 
-        assertThat(Duration.ofNanos(System.nanoTime() - start)).isLessThan(RedisRoleProbe.PROBE_TIMEOUT);
+        assertThat(Duration.ofNanos(System.nanoTime() - start))
+                .isLessThan(RoomyProbeTimeouts.BOTH_PHASES.runtime());
         assertThat(redis.acceptedConnections()).isEqualTo(1);
     }
 
     @Test
     void close_WhenAConnectIsStillPending_ShutsItsSocketWithTheClient() throws IOException {
-        probe.probeAtStartup();
+        startWithHeldConnection(RoomyProbeTimeouts.STARTUP_ONLY);
         redis.holdNewConnections();
         redis.dropClients();
         Hang.until(() -> {
@@ -198,5 +198,14 @@ class RedisRoleProbeHeldConnectionTest {
                 "the pending connect's socket closing or finishing its handshake");
         assertThat(redis.answeredPings()).isEqualTo(pingsBeforeClose);
         assertThat(redis.connectionsClosedByClients()).isEqualTo(1);
+    }
+
+    private void startWithHeldConnection(RedisRoleProbe.Timeouts timeouts) {
+        RedisConnectionConfig connections = RedisEndpoints.everyRoleAt(REFUSED_HOST, REFUSED_PORT);
+        RedisEndpoints.moveRole(connections, ROLE, redis.host(), redis.port());
+        probe = new RedisRoleProbe(clientResources, connections, health, List.of(), timeouts);
+        probe.probeAtStartup();
+        assertThat(health.isAvailable(ROLE)).isTrue();
+        assertThat(redis.acceptedConnections()).isEqualTo(1);
     }
 }

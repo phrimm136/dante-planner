@@ -81,7 +81,8 @@ class RedisRoleOutageIT extends CausalHarnessSupport {
         RedisRoleHealth blackholed = new RedisRoleHealth();
         blackholeAuthLocal();
         try (RedisRoleProbe probe = new RedisRoleProbe(redisClientResources,
-                RedisEndpoints.everyRoleAt(TOXIPROXY.getHost(), authLocalProxyPort()), blackholed, List.of())) {
+                RedisEndpoints.everyRoleAt(TOXIPROXY.getHost(), authLocalProxyPort()), blackholed, List.of(),
+                RedisRoleProbe.Timeouts.PRODUCTION)) {
             long start = System.nanoTime();
             probe.probeAtStartup();
 

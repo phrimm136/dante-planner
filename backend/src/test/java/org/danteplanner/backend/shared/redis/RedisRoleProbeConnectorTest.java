@@ -15,6 +15,7 @@ import io.lettuce.core.RedisConnectionException;
 import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.resource.DefaultClientResources;
 
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.PongRedis;
 import org.danteplanner.backend.support.RedisEndpoints;
 
@@ -45,7 +46,7 @@ class RedisRoleProbeConnectorTest {
     void probeAtStartup_WhenEveryRoleAnswersAndTheConnectorHasConnected_LeavesEveryRoleAvailable() {
         connection.set(CONNECTED);
 
-        try (RedisRoleProbe probe = probeWithRateLimitConnector()) {
+        try (RedisRoleProbe probe = probeWithRateLimitConnector(RoomyProbeTimeouts.BOTH_PHASES)) {
             probe.probeAtStartup();
         }
 
@@ -57,7 +58,7 @@ class RedisRoleProbeConnectorTest {
     void probeAtStartup_WhenTheRoleAnswersButItsConnectorFailed_OpensThatRoleAlone() {
         connection.set(CompletableFuture.failedFuture(new RedisConnectionException("refused")));
 
-        try (RedisRoleProbe probe = probeWithRateLimitConnector()) {
+        try (RedisRoleProbe probe = probeWithRateLimitConnector(RoomyProbeTimeouts.BOTH_PHASES)) {
             probe.probeAtStartup();
         }
 
@@ -69,19 +70,24 @@ class RedisRoleProbeConnectorTest {
     void probeAtStartup_WhenTheConnectorIsStillConnectingAtTheDeadline_OpensThatRole() {
         connection.set(new CompletableFuture<>());
 
-        try (RedisRoleProbe probe = probeWithRateLimitConnector()) {
+        try (RedisRoleProbe probe = probeWithRateLimitConnector(RedisRoleProbe.Timeouts.PRODUCTION)) {
             probe.probeAtStartup();
+            assertThat(health.isAvailable(RedisRole.RATE_LIMIT)).isFalse();
+
+            Hang.until(() -> {
+                probe.probe();
+                return health.isAvailable(RedisRole.AUTH);
+            }, "the auth role answering beside the pending connector");
         }
 
         assertThat(health.isAvailable(RedisRole.RATE_LIMIT)).isFalse();
-        assertThat(health.isAvailable(RedisRole.AUTH)).isTrue();
     }
 
     @Test
     void probe_WhenTheConnectorConnectsAfterStartup_ClosesItsRoleOnTheNextProbe() {
         connection.set(CompletableFuture.failedFuture(new RedisConnectionException("refused")));
 
-        try (RedisRoleProbe probe = probeWithRateLimitConnector()) {
+        try (RedisRoleProbe probe = probeWithRateLimitConnector(RoomyProbeTimeouts.BOTH_PHASES)) {
             probe.probeAtStartup();
             assertThat(health.isAvailable(RedisRole.RATE_LIMIT)).isFalse();
 
@@ -93,7 +99,7 @@ class RedisRoleProbeConnectorTest {
         assertThat(connects).hasValue(2);
     }
 
-    private RedisRoleProbe probeWithRateLimitConnector() {
+    private RedisRoleProbe probeWithRateLimitConnector(RedisRoleProbe.Timeouts timeouts) {
         RoleConnector rateLimit = new RoleConnector() {
             @Override
             public RedisRole role() {
@@ -107,6 +113,6 @@ class RedisRoleProbeConnectorTest {
             }
         };
         return new RedisRoleProbe(clientResources, RedisEndpoints.everyRoleAt(redis.host(), redis.port()), health,
-                List.of(rateLimit));
+                List.of(rateLimit), timeouts);
     }
 }

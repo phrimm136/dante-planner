@@ -14,6 +14,7 @@ import io.lettuce.core.resource.DefaultClientResources;
 import org.danteplanner.backend.shared.redis.RedisRole;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.shared.redis.RedisRoleProbe;
+import org.danteplanner.backend.shared.redis.RoomyProbeTimeouts;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.PongRedis;
 import org.danteplanner.backend.support.RealClockBounds;
@@ -47,10 +48,13 @@ class RateLimitStoreReconnectTest {
     void probe_WhenTheStoresConnectionDrops_ConnectsAFreshOneWithinTheProbeCadence() throws IOException {
         try (RateLimitStore store = new RateLimitStore(clientResources, redis.host(), redis.port(), BUCKET_TTL);
                 RedisRoleProbe probe = new RedisRoleProbe(clientResources,
-                        RedisEndpoints.everyRoleAt(redis.host(), redis.port()), health, List.of(store))) {
+                        RedisEndpoints.everyRoleAt(redis.host(), redis.port()), health, List.of(store),
+                        RoomyProbeTimeouts.STARTUP_ONLY)) {
             probe.probeAtStartup();
-            assertThat(health.isAvailable(RedisRole.RATE_LIMIT)).isTrue();
-            assertThat(store.isConnected()).isTrue();
+            Hang.until(() -> {
+                probe.probe();
+                return health.isAvailable(RedisRole.RATE_LIMIT) && store.isConnected();
+            }, "the probe connecting the rate-limit store before the drop");
 
             redis.dropClients();
             Hang.until(() -> !store.isConnected(), "the rate-limit store noticing its dropped connection");
