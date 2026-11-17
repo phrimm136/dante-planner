@@ -2,7 +2,6 @@ package org.danteplanner.backend.shared.redis;
 
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -21,11 +20,9 @@ import jakarta.annotation.PostConstruct;
 
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.lettuce.core.ClientOptions;
-import io.lettuce.core.ConnectionFuture;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.SocketOptions;
-import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.resource.ClientResources;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +39,7 @@ public class RedisRoleProbe implements AutoCloseable {
     public static final Duration STARTUP_PROBE_TIMEOUT = BoundedRedisConnections.COMMAND_TIMEOUT;
     public static final int FAILURE_THRESHOLD = 2;
 
+    private static final Duration CONNECTION_TIMEOUT = STARTUP_PROBE_TIMEOUT;
     private static final String PONG = "PONG";
     private static final CompletableFuture<Void> NO_CONNECTION_OF_ITS_OWN = CompletableFuture.completedFuture(null);
 
@@ -53,13 +51,14 @@ public class RedisRoleProbe implements AutoCloseable {
         RedisConnectionConfig.Endpoint auth = RedisRole.AUTH.endpointIn(connections);
         this.client = BoundedRedisConnections.redisClient(clientResources, auth.getHost(), auth.getPort());
         client.setOptions(ClientOptions.builder()
-                .socketOptions(SocketOptions.builder().connectTimeout(STARTUP_PROBE_TIMEOUT).build())
+                .autoReconnect(false)
+                .socketOptions(SocketOptions.builder().connectTimeout(CONNECTION_TIMEOUT).build())
                 .build());
         Map<RedisRole, RoleConnector> connectorByRole = connectors.stream()
                 .collect(Collectors.toMap(RoleConnector::role, Function.identity()));
         this.probes = Arrays.stream(RedisRole.values())
-                .map(role -> new RoleProbe(role, probeUris(role.endpointIn(connections)), health.breaker(role),
-                        connectionOf(connectorByRole, role)))
+                .map(role -> new RoleProbe(role, heldConnectionTo(probeUri(role.endpointIn(connections))),
+                        health.breaker(role), connectionOf(connectorByRole, role)))
                 .toList();
     }
 
@@ -75,31 +74,25 @@ public class RedisRoleProbe implements AutoCloseable {
 
     @Override
     public void close() {
+        probes.forEach(probe -> probe.held().close());
         client.shutdown();
     }
 
     private void probeEveryRole(ProbePhase phase) {
         long deadline = System.nanoTime() + phase.timeout().toNanos();
-        List<Ping> pings = probes.stream().map(probe -> ping(probe.uris().get(phase))).toList();
+        List<CompletableFuture<String>> pongs = probes.stream().map(probe -> probe.held().ping()).toList();
         List<CompletableFuture<Void>> connections = probes.stream().map(probe -> probe.connection().get()).toList();
-        try {
-            for (int i = 0; i < probes.size(); i++) {
-                RoleProbe probe = probes.get(i);
-                boolean answered = pings.get(i).answeredBy(deadline)
-                        && completesBy(connections.get(i), deadline, connected -> true);
-                probe.apply(phase.decide(probe.streak(), answered));
-            }
-        } finally {
-            pings.forEach(Ping::close);
+        for (int i = 0; i < probes.size(); i++) {
+            RoleProbe probe = probes.get(i);
+            boolean ponged = completesBy(pongs.get(i), deadline, PONG::equals);
+            probe.held().settle(ponged);
+            boolean answered = ponged && completesBy(connections.get(i), deadline, connected -> true);
+            probe.apply(phase.decide(probe.streak(), answered));
         }
     }
 
-    private Ping ping(RedisURI uri) {
-        ConnectionFuture<StatefulRedisConnection<String, String>> connecting =
-                client.connectAsync(StringCodec.UTF8, uri);
-        CompletableFuture<String> pong = connecting.toCompletableFuture()
-                .thenCompose(connection -> connection.async().ping().toCompletableFuture());
-        return new Ping(connecting, pong);
+    private HeldConnection heldConnectionTo(RedisURI uri) {
+        return new HeldConnection(() -> client.connectAsync(StringCodec.UTF8, uri).toCompletableFuture());
     }
 
     private static Supplier<CompletableFuture<Void>> connectionOf(
@@ -119,47 +112,27 @@ public class RedisRoleProbe implements AutoCloseable {
         }
     }
 
-    private static Map<ProbePhase, RedisURI> probeUris(RedisConnectionConfig.Endpoint endpoint) {
-        Map<ProbePhase, RedisURI> uris = new EnumMap<>(ProbePhase.class);
-        for (ProbePhase phase : ProbePhase.values()) {
-            uris.put(phase, probeUri(endpoint, phase.timeout()));
-        }
-        return uris;
-    }
-
-    private static RedisURI probeUri(RedisConnectionConfig.Endpoint endpoint, Duration timeout) {
+    private static RedisURI probeUri(RedisConnectionConfig.Endpoint endpoint) {
         RedisURI.Builder uri = RedisURI.builder()
                 .withHost(endpoint.getHost())
                 .withPort(endpoint.getPort())
-                .withTimeout(timeout);
+                .withTimeout(CONNECTION_TIMEOUT);
         if (StringUtils.hasText(endpoint.getPassword())) {
             uri.withPassword(endpoint.getPassword().toCharArray());
         }
         return uri.build();
     }
 
-    private record Ping(
-            ConnectionFuture<StatefulRedisConnection<String, String>> connecting, CompletableFuture<String> pong) {
-
-        private boolean answeredBy(long deadline) {
-            return completesBy(pong, deadline, PONG::equals);
-        }
-
-        private void close() {
-            var unused = connecting.thenCompose(StatefulRedisConnection::closeAsync);
-        }
-    }
-
     private record RoleProbe(
             RedisRole role,
-            Map<ProbePhase, RedisURI> uris,
+            HeldConnection held,
             CircuitBreaker breaker,
             Supplier<CompletableFuture<Void>> connection,
             ProbeStreak streak) {
 
-        private RoleProbe(RedisRole role, Map<ProbePhase, RedisURI> uris, CircuitBreaker breaker,
+        private RoleProbe(RedisRole role, HeldConnection held, CircuitBreaker breaker,
                 Supplier<CompletableFuture<Void>> connection) {
-            this(role, uris, breaker, connection, new ProbeStreak(FAILURE_THRESHOLD));
+            this(role, held, breaker, connection, new ProbeStreak(FAILURE_THRESHOLD));
         }
 
         private void apply(ProbeStreak.Transition transition) {
