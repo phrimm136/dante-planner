@@ -26,7 +26,6 @@ public final class PongRedis implements AutoCloseable {
     private final AtomicInteger answeredPings = new AtomicInteger();
     private final AtomicInteger closedByClients = new AtomicInteger();
     private final AtomicInteger blackholedClosedByClients = new AtomicInteger();
-    private volatile boolean newConnectionsBlackholed;
     private volatile CompletableFuture<Void> newConnectionsServed = CompletableFuture.completedFuture(null);
     private final AtomicBoolean nextPingReplyDelayed = new AtomicBoolean();
     private volatile CompletableFuture<Void> delayedPingReplySent = CompletableFuture.completedFuture(null);
@@ -79,10 +78,6 @@ public final class PongRedis implements AutoCloseable {
         delayedPingReplySent.complete(null);
     }
 
-    public void blackholeNewConnections() {
-        newConnectionsBlackholed = true;
-    }
-
     public void blackholeEstablished() {
         for (Client client : clients) {
             client.blackholed = true;
@@ -91,6 +86,7 @@ public final class PongRedis implements AutoCloseable {
 
     public void dropClients() throws IOException {
         for (Client client : clients) {
+            client.droppedByServer = true;
             client.socket.close();
         }
         clients.clear();
@@ -108,7 +104,6 @@ public final class PongRedis implements AutoCloseable {
         try {
             while (!listener.isClosed()) {
                 Client client = new Client(listener.accept());
-                client.blackholed = newConnectionsBlackholed;
                 accepted.incrementAndGet();
                 clients.add(client);
                 CompletableFuture<Void> served = newConnectionsServed;
@@ -123,6 +118,16 @@ public final class PongRedis implements AutoCloseable {
 
     private void serve(Client client, CompletableFuture<Void> served) {
         served.join();
+        exchange(client);
+        if (!client.droppedByServer) {
+            closedByClients.incrementAndGet();
+            if (client.blackholed) {
+                blackholedClosedByClients.incrementAndGet();
+            }
+        }
+    }
+
+    private void exchange(Client client) {
         try (InputStream in = new BufferedInputStream(client.socket.getInputStream());
                 OutputStream out = client.socket.getOutputStream()) {
             String command = readCommandName(in);
@@ -134,10 +139,6 @@ public final class PongRedis implements AutoCloseable {
                     countAnsweredPing(command);
                 }
                 command = readCommandName(in);
-            }
-            closedByClients.incrementAndGet();
-            if (client.blackholed) {
-                blackholedClosedByClients.incrementAndGet();
             }
         } catch (IOException closed) {
             return;
@@ -201,6 +202,7 @@ public final class PongRedis implements AutoCloseable {
 
         private final Socket socket;
         private volatile boolean blackholed;
+        private volatile boolean droppedByServer;
 
         private Client(Socket socket) {
             this.socket = socket;
