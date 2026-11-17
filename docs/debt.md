@@ -1630,3 +1630,12 @@ guards the parse but likewise skips the schema gate.
   touch them and no stop-the-world migration is planned; the runbook entry above then loses its
   "omits the workflow" clause.
   re-check: `test -f .github/workflows/window-schema-decomposition.yml`
+- The Redis role probe holds its own connection, so it does not see a role whose established
+  connections answer while new ones cannot be made (max clients reached, a rule blocking only new
+  connections): if the application's shared connection is dropped in that state, requests on the
+  auth roles wait the 3 s command bound behind the reconnect while the breaker stays closed. The
+  rate-limit role is covered because the probe also checks the store's connection. Accepted on
+  purpose; not seen in production. Worth doing when it is observed, or when the 5xx or latency
+  alerts fire with every role breaker closed: open a role from real command connection failures
+  (passive detection) beside the probe, which reverses a rejected alternative of ADR 514.
+  re-check: `rg -q 'new HeldConnection' backend/src/main/java/org/danteplanner/backend/shared/redis/RedisRoleProbe.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/shared/redis 'onError|recordFailure'`
