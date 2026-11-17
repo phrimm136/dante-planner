@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class PongRedis implements AutoCloseable {
@@ -26,6 +27,8 @@ public final class PongRedis implements AutoCloseable {
     private final AtomicInteger closedByClients = new AtomicInteger();
     private final AtomicInteger blackholedClosedByClients = new AtomicInteger();
     private volatile CompletableFuture<Void> newConnectionsServed = CompletableFuture.completedFuture(null);
+    private final AtomicBoolean nextPingReplyDelayed = new AtomicBoolean();
+    private volatile CompletableFuture<Void> delayedPingReplySent = CompletableFuture.completedFuture(null);
 
     public PongRedis() throws IOException {
         this.listener = new ServerSocket(0, 0, InetAddress.getLoopbackAddress());
@@ -66,6 +69,15 @@ public final class PongRedis implements AutoCloseable {
         newConnectionsServed.complete(null);
     }
 
+    public void delayNextPingReply() {
+        delayedPingReplySent = new CompletableFuture<>();
+        nextPingReplyDelayed.set(true);
+    }
+
+    public void releaseDelayedPingReply() {
+        delayedPingReplySent.complete(null);
+    }
+
     public void blackholeEstablished() {
         for (Client client : clients) {
             client.blackholed = true;
@@ -83,6 +95,7 @@ public final class PongRedis implements AutoCloseable {
     public void close() throws IOException {
         listener.close();
         releaseNewConnections();
+        releaseDelayedPingReply();
         dropClients();
     }
 
@@ -108,6 +121,7 @@ public final class PongRedis implements AutoCloseable {
                 OutputStream out = client.socket.getOutputStream()) {
             String command = readCommandName(in);
             while (command != null) {
+                awaitDelayedReply(command);
                 if (!client.blackholed) {
                     out.write(replyTo(command).getBytes(StandardCharsets.UTF_8));
                     out.flush();
@@ -121,6 +135,12 @@ public final class PongRedis implements AutoCloseable {
             }
         } catch (IOException closed) {
             return;
+        }
+    }
+
+    private void awaitDelayedReply(String command) {
+        if (PING.equalsIgnoreCase(command) && nextPingReplyDelayed.compareAndSet(true, false)) {
+            delayedPingReplySent.join();
         }
     }
 

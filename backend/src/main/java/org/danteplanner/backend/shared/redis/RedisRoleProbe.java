@@ -85,9 +85,11 @@ public class RedisRoleProbe implements AutoCloseable {
         for (int i = 0; i < probes.size(); i++) {
             RoleProbe probe = probes.get(i);
             boolean ponged = completesBy(pongs.get(i), deadline, PONG::equals);
-            probe.held().settle(ponged);
             boolean answered = ponged && completesBy(connections.get(i), deadline, connected -> true);
             probe.apply(phase.decide(probe.streak(), answered));
+            if (!ponged && probe.isOpen()) {
+                probe.held().discardUnlessConnecting();
+            }
         }
     }
 
@@ -133,6 +135,10 @@ public class RedisRoleProbe implements AutoCloseable {
         private RoleProbe(RedisRole role, HeldConnection held, CircuitBreaker breaker,
                 Supplier<CompletableFuture<Void>> connection) {
             this(role, held, breaker, connection, new ProbeStreak(FAILURE_THRESHOLD));
+        }
+
+        private boolean isOpen() {
+            return breaker.getState() != CircuitBreaker.State.CLOSED;
         }
 
         private void apply(ProbeStreak.Transition transition) {

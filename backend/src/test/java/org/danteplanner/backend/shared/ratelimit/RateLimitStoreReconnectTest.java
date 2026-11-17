@@ -74,4 +74,14 @@ class RateLimitStoreReconnectTest {
             assertThat(redis.acceptedConnections()).isEqualTo(1);
         }
     }
+
+    @Test
+    void connect_WhenTheStoreIsClosed_FailsAtOnceWithoutConnecting() {
+        RateLimitStore store = new RateLimitStore(clientResources, redis.host(), redis.port(), BUCKET_TTL);
+
+        store.close();
+
+        assertThat(store.connect()).isCompletedExceptionally();
+        assertThat(redis.acceptedConnections()).isZero();
+    }
 }
