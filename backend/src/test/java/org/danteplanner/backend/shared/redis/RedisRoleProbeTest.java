@@ -33,7 +33,8 @@ class RedisRoleProbeTest {
     private final ClientResources clientResources = DefaultClientResources.create();
     private final RedisRoleHealth health = new RedisRoleHealth();
     private final RedisRoleProbe probe = new RedisRoleProbe(
-            clientResources, RedisEndpoints.everyRoleAt(REFUSED_HOST, REFUSED_PORT), health, List.of());
+            clientResources, RedisEndpoints.everyRoleAt(REFUSED_HOST, REFUSED_PORT), health, List.of(),
+            RedisRoleProbe.Timeouts.PRODUCTION);
 
     @AfterEach
     void tearDown() {
@@ -100,7 +101,8 @@ class RedisRoleProbeTest {
 
     private RedisRoleProbe probeOver(ServerSocket endpoint, RedisRoleHealth roleHealth) {
         return new RedisRoleProbe(clientResources, RedisEndpoints.everyRoleAt(
-                endpoint.getInetAddress().getHostAddress(), endpoint.getLocalPort()), roleHealth, List.of());
+                endpoint.getInetAddress().getHostAddress(), endpoint.getLocalPort()), roleHealth, List.of(),
+                RedisRoleProbe.Timeouts.PRODUCTION);
     }
 
     @Test

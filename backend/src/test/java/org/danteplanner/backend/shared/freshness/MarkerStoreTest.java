@@ -155,7 +155,8 @@ class MarkerStoreTest {
         RedisRoleHealth unavailable = new RedisRoleHealth();
         FreshnessScope scope = new FreshnessScope.Entity(UUID.randomUUID());
         try (RedisRoleProbe probe = new RedisRoleProbe(refused.getRequiredNativeClient().getResources(),
-                RedisEndpoints.everyRoleAt(REFUSED_HOST, REFUSED_PORT), unavailable, List.of());
+                RedisEndpoints.everyRoleAt(REFUSED_HOST, REFUSED_PORT), unavailable, List.of(),
+                RedisRoleProbe.Timeouts.PRODUCTION);
                 MarkerStore skipping = new MarkerStore(refused, refused.getRequiredNativeClient().getResources(),
                         sources, unavailable, SETTINGS, meters);
                 LogCapture capture = LogCapture.onThisThread(MarkerStore.class)) {

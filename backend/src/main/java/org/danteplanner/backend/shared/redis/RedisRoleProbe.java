@@ -39,25 +39,26 @@ public class RedisRoleProbe implements AutoCloseable {
     public static final Duration STARTUP_PROBE_TIMEOUT = BoundedRedisConnections.COMMAND_TIMEOUT;
     public static final int FAILURE_THRESHOLD = 2;
 
-    private static final Duration CONNECTION_TIMEOUT = STARTUP_PROBE_TIMEOUT;
     private static final String PONG = "PONG";
     private static final CompletableFuture<Void> NO_CONNECTION_OF_ITS_OWN = CompletableFuture.completedFuture(null);
 
     private final RedisClient client;
+    private final Timeouts timeouts;
     private final List<RoleProbe> probes;
 
     public RedisRoleProbe(ClientResources clientResources, RedisConnectionConfig connections, RedisRoleHealth health,
-            List<RoleConnector> connectors) {
+            List<RoleConnector> connectors, Timeouts timeouts) {
+        this.timeouts = timeouts;
         RedisConnectionConfig.Endpoint auth = RedisRole.AUTH.endpointIn(connections);
         this.client = BoundedRedisConnections.redisClient(clientResources, auth.getHost(), auth.getPort());
         client.setOptions(ClientOptions.builder()
                 .autoReconnect(false)
-                .socketOptions(SocketOptions.builder().connectTimeout(CONNECTION_TIMEOUT).build())
+                .socketOptions(SocketOptions.builder().connectTimeout(timeouts.startup()).build())
                 .build());
         Map<RedisRole, RoleConnector> connectorByRole = connectors.stream()
                 .collect(Collectors.toMap(RoleConnector::role, Function.identity()));
         this.probes = Arrays.stream(RedisRole.values())
-                .map(role -> new RoleProbe(role, heldConnectionTo(probeUri(role.endpointIn(connections))),
+                .map(role -> new RoleProbe(role, heldConnectionTo(probeUri(role.endpointIn(connections), timeouts)),
                         health.breaker(role), connectionOf(connectorByRole, role)))
                 .toList();
     }
@@ -79,7 +80,7 @@ public class RedisRoleProbe implements AutoCloseable {
     }
 
     private void probeEveryRole(ProbePhase phase) {
-        long deadline = System.nanoTime() + phase.timeout().toNanos();
+        long deadline = System.nanoTime() + phase.timeoutIn(timeouts).toNanos();
         List<CompletableFuture<String>> pongs = probes.stream().map(probe -> probe.held().ping()).toList();
         List<CompletableFuture<Void>> connections = probes.stream().map(probe -> probe.connection().get()).toList();
         for (int i = 0; i < probes.size(); i++) {
@@ -114,15 +115,20 @@ public class RedisRoleProbe implements AutoCloseable {
         }
     }
 
-    private static RedisURI probeUri(RedisConnectionConfig.Endpoint endpoint) {
+    private static RedisURI probeUri(RedisConnectionConfig.Endpoint endpoint, Timeouts timeouts) {
         RedisURI.Builder uri = RedisURI.builder()
                 .withHost(endpoint.getHost())
                 .withPort(endpoint.getPort())
-                .withTimeout(CONNECTION_TIMEOUT);
+                .withTimeout(timeouts.startup());
         if (StringUtils.hasText(endpoint.getPassword())) {
             uri.withPassword(endpoint.getPassword().toCharArray());
         }
         return uri.build();
+    }
+
+    public record Timeouts(Duration startup, Duration runtime) {
+
+        public static final Timeouts PRODUCTION = new Timeouts(STARTUP_PROBE_TIMEOUT, PROBE_TIMEOUT);
     }
 
     private record RoleProbe(

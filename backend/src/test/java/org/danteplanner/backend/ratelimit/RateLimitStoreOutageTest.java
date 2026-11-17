@@ -70,6 +70,7 @@ class RateLimitStoreOutageTest {
 
     private static final String SKIPPED_COUNTER = "rate_limit.charge_skipped";
     private static final String TRUSTED_PROXY_IP = "127.0.0.1";
+    private static final int REFUSED_PORT = 1;
     private static final Duration BUCKET_TTL = Duration.ofHours(1);
     private static final String FRONTEND_URL = "https://planner.example";
     private static final String NOT_CONNECTED = "Rate-limit store not connected";
@@ -93,8 +94,8 @@ class RateLimitStoreOutageTest {
     }
 
     @Test
-    void rateLimitStore_WhenNeverConnected_FailsEveryCallAtOnceWithoutConnecting() throws IOException {
-        try (RateLimitStore absent = new RateLimitStore(CLIENT_RESOURCES, TRUSTED_PROXY_IP, closedPort(), BUCKET_TTL)) {
+    void rateLimitStore_WhenNeverConnected_FailsEveryCallAtOnceWithoutConnecting() {
+        try (RateLimitStore absent = new RateLimitStore(CLIENT_RESOURCES, TRUSTED_PROXY_IP, REFUSED_PORT, BUCKET_TTL)) {
             assertThatThrownBy(absent::builder)
                     .isInstanceOf(RedisConnectionException.class)
                     .hasMessage(NOT_CONNECTED);
@@ -111,14 +112,13 @@ class RateLimitStoreOutageTest {
     }
 
     @Test
-    void connect_WhenTheStoreRefuses_FailsWithTheEndpointAndLeavesTheStoreAbsent() throws IOException {
-        int port = closedPort();
-        try (RateLimitStore refused = new RateLimitStore(CLIENT_RESOURCES, TRUSTED_PROXY_IP, port, BUCKET_TTL)) {
+    void connect_WhenTheStoreRefuses_FailsWithTheEndpointAndLeavesTheStoreAbsent() {
+        try (RateLimitStore refused = new RateLimitStore(CLIENT_RESOURCES, TRUSTED_PROXY_IP, REFUSED_PORT, BUCKET_TTL)) {
             Throwable failure = catchThrowable(() -> refused.connect().join());
 
             assertThat(failure).hasRootCauseInstanceOf(ConnectException.class);
             assertThat(failure.getCause()).isInstanceOf(RedisConnectionException.class)
-                    .hasMessageEndingWith(":" + port);
+                    .hasMessageEndingWith(":" + REFUSED_PORT);
             assertThat(refused.isConnected()).isFalse();
             assertThat(refused.role()).isEqualTo(RedisRole.RATE_LIMIT);
         }
@@ -320,8 +320,8 @@ class RateLimitStoreOutageTest {
                 .build();
     }
 
-    private void storeUnreachableOnNextCharge() throws IOException {
-        try (RateLimitStore absent = new RateLimitStore(CLIENT_RESOURCES, TRUSTED_PROXY_IP, closedPort(), BUCKET_TTL)) {
+    private void storeUnreachableOnNextCharge() {
+        try (RateLimitStore absent = new RateLimitStore(CLIENT_RESOURCES, TRUSTED_PROXY_IP, REFUSED_PORT, BUCKET_TTL)) {
             Throwable unreachable = catchThrowable(absent::builder);
             assertThat(unreachable).isInstanceOf(RedisConnectionException.class);
             rateLimitStore.failNext((RedisConnectionException) unreachable);
@@ -336,12 +336,6 @@ class RateLimitStoreOutageTest {
 
     private List<String> chargedKeys() {
         return rateLimitStore.charges().stream().map(InMemoryProxyManager.Charge::key).toList();
-    }
-
-    private static int closedPort() throws IOException {
-        try (ServerSocket socket = new ServerSocket(0)) {
-            return socket.getLocalPort();
-        }
     }
 
     private static RateLimitProperties bucketProperties() {

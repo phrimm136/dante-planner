@@ -36,7 +36,8 @@ public class RedisRoleConfig {
             RedisConnectionConfig redisConnectionConfig,
             RedisRoleHealth redisRoleHealth,
             List<RoleConnector> roleConnectors) {
-        return new RedisRoleProbe(redisClientResources, redisConnectionConfig, redisRoleHealth, roleConnectors);
+        return new RedisRoleProbe(redisClientResources, redisConnectionConfig, redisRoleHealth, roleConnectors,
+                RedisRoleProbe.Timeouts.PRODUCTION);
     }
 
     @Bean

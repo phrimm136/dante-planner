@@ -1,5 +1,7 @@
 package org.danteplanner.backend.shared.redis;
 
+import java.time.Duration;
+
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
@@ -8,14 +10,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ProbePhaseTest {
 
+    private static final Duration STARTUP = Duration.ofMillis(700);
+    private static final Duration RUNTIME = Duration.ofMillis(300);
+
     @Test
-    void timeout_WhenStartingUp_IsTheConnectionsOwnCommandTimeout() {
-        assertThat(ProbePhase.STARTUP.timeout()).isEqualTo(BoundedRedisConnections.COMMAND_TIMEOUT);
+    void timeoutIn_WhenStartingUpInProduction_IsTheConnectionsOwnCommandTimeout() {
+        assertThat(ProbePhase.STARTUP.timeoutIn(RedisRoleProbe.Timeouts.PRODUCTION))
+                .isEqualTo(BoundedRedisConnections.COMMAND_TIMEOUT);
     }
 
     @Test
-    void timeout_WhenRunning_IsTheOneSecondProbeTimeout() {
-        assertThat(ProbePhase.RUNTIME.timeout()).isEqualTo(RedisRoleProbe.PROBE_TIMEOUT);
+    void timeoutIn_WhenRunningInProduction_IsTheOneSecondProbeTimeout() {
+        assertThat(ProbePhase.RUNTIME.timeoutIn(RedisRoleProbe.Timeouts.PRODUCTION)).isEqualTo(Duration.ofSeconds(1));
+    }
+
+    @Test
+    void timeoutIn_WhenGivenTimeouts_ReadsEachPhaseFromThem() {
+        RedisRoleProbe.Timeouts timeouts = new RedisRoleProbe.Timeouts(STARTUP, RUNTIME);
+
+        assertThat(ProbePhase.STARTUP.timeoutIn(timeouts)).isEqualTo(STARTUP);
+        assertThat(ProbePhase.RUNTIME.timeoutIn(timeouts)).isEqualTo(RUNTIME);
     }
 
     @Test

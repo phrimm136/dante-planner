@@ -349,7 +349,7 @@ class RedisRoleRequestPathIT extends ReplicaRoutingHarnessSupport {
     private RedisRoleProbe probeOf(RateLimitStore store, RedisRoleHealth health) {
         return new RedisRoleProbe(redisClientResources,
                 RedisEndpoints.everyRoleAt(RATE_LIMIT_REDIS.getRedisHost(), RATE_LIMIT_REDIS.getRedisPort()),
-                health, List.of(store));
+                health, List.of(store), RedisRoleProbe.Timeouts.PRODUCTION);
     }
 
     private MockMvc fixtureMvc(RateLimitStore store, RedisRoleHealth health, MeterRegistry meters) {

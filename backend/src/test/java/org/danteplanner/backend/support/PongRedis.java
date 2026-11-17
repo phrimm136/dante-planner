@@ -103,17 +103,20 @@ public final class PongRedis implements AutoCloseable {
     private void accept() {
         try {
             while (!listener.isClosed()) {
-                Client client = new Client(listener.accept());
-                accepted.incrementAndGet();
-                clients.add(client);
-                CompletableFuture<Void> served = newConnectionsServed;
-                Thread handler = new Thread(() -> serve(client, served), "pong-redis-client");
-                handler.setDaemon(true);
-                handler.start();
+                recordThenServe(new Client(listener.accept()));
             }
         } catch (IOException closed) {
             return;
         }
+    }
+
+    private void recordThenServe(Client client) {
+        accepted.incrementAndGet();
+        clients.add(client);
+        CompletableFuture<Void> served = newConnectionsServed;
+        Thread handler = new Thread(() -> serve(client, served), "pong-redis-client");
+        handler.setDaemon(true);
+        handler.start();
     }
 
     private void serve(Client client, CompletableFuture<Void> served) {
@@ -134,9 +137,7 @@ public final class PongRedis implements AutoCloseable {
             while (command != null) {
                 awaitDelayedReply(command);
                 if (!client.blackholed) {
-                    out.write(replyTo(command).getBytes(StandardCharsets.UTF_8));
-                    out.flush();
-                    countAnsweredPing(command);
+                    recordThenReply(out, command);
                 }
                 command = readCommandName(in);
             }
@@ -151,10 +152,12 @@ public final class PongRedis implements AutoCloseable {
         }
     }
 
-    private void countAnsweredPing(String command) {
+    private void recordThenReply(OutputStream out, String command) throws IOException {
         if (PING.equalsIgnoreCase(command)) {
             answeredPings.incrementAndGet();
         }
+        out.write(replyTo(command).getBytes(StandardCharsets.UTF_8));
+        out.flush();
     }
 
     private static String replyTo(String command) {
