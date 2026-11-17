@@ -27,8 +27,8 @@ final class HeldConnection {
         return attempt.thenCompose(connection -> connection.async().ping().toCompletableFuture());
     }
 
-    synchronized void settle(boolean answered) {
-        if (!answered && attempt != null && attempt.isDone()) {
+    synchronized void discardUnlessConnecting() {
+        if (attempt != null && attempt.isDone()) {
             discard();
         }
     }

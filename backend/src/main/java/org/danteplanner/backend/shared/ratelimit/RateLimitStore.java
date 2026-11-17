@@ -36,6 +36,7 @@ public class RateLimitStore implements ProxyManager<byte[]>, RoleConnector, Auto
     private final ReentrantLock attemptLock = new ReentrantLock();
     private volatile Connection connection;
     private CompletableFuture<Void> attempt;
+    private boolean closed;
 
     public RateLimitStore(ClientResources clientResources, String host, int port, Duration bucketTtl) {
         this.uri = BoundedRedisConnections.redisUri(host, port);
@@ -56,6 +57,9 @@ public class RateLimitStore implements ProxyManager<byte[]>, RoleConnector, Auto
     public CompletableFuture<Void> connect() {
         attemptLock.lock();
         try {
+            if (closed) {
+                return CompletableFuture.failedFuture(new RedisConnectionException("Rate-limit store closed"));
+            }
             Connection current = connection;
             if (current != null && current.redis().isOpen()) {
                 return CONNECTED;
@@ -80,6 +84,12 @@ public class RateLimitStore implements ProxyManager<byte[]>, RoleConnector, Auto
 
     @Override
     public void close() {
+        attemptLock.lock();
+        try {
+            closed = true;
+        } finally {
+            attemptLock.unlock();
+        }
         client.shutdown();
     }
 

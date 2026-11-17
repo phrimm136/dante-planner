@@ -34,7 +34,7 @@ class HeldConnectionTest {
         nextAttempt.set(new CompletableFuture<>());
 
         held.ping();
-        held.settle(false);
+        held.discardUnlessConnecting();
         CompletableFuture<String> secondRound = held.ping();
 
         assertThat(connects).hasValue(1);
@@ -47,7 +47,6 @@ class HeldConnectionTest {
 
         for (int round = 0; round < RedisRoleProbe.FAILURE_THRESHOLD; round++) {
             assertThat(held.ping()).isCompletedExceptionally();
-            held.settle(false);
         }
 
         assertThat(connects).hasValue(RedisRoleProbe.FAILURE_THRESHOLD);
@@ -58,7 +57,7 @@ class HeldConnectionTest {
         CompletableFuture<StatefulRedisConnection<String, String>> slow = new CompletableFuture<>();
         nextAttempt.set(slow);
         held.ping();
-        held.settle(false);
+        held.discardUnlessConnecting();
 
         slow.completeExceptionally(new RedisConnectionException("handshake timed out"));
         nextAttempt.set(new CompletableFuture<>());

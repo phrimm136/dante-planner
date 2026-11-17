@@ -60,6 +60,24 @@ class RedisRoleProbeHeldConnectionTest {
     }
 
     @Test
+    void probe_WhenOneReplyIsLateAndNewConnectionsAreSlow_KeepsTheHeldConnectionAndTheBreakerClosed() {
+        probe.probeAtStartup();
+        List<CircuitBreaker.StateTransition> transitions = RoleOutages.transitionsFrom(health, ROLE);
+        redis.holdNewConnections();
+
+        redis.delayNextPingReply();
+        probe.probe();
+        redis.releaseDelayedPingReply();
+        for (int round = 0; round < MANY_ROUNDS; round++) {
+            probe.probe();
+        }
+
+        assertThat(transitions).isEmpty();
+        assertThat(health.isAvailable(ROLE)).isTrue();
+        assertThat(redis.acceptedConnections()).isEqualTo(1);
+    }
+
+    @Test
     void probe_WhenTheRoleIsHealthy_PingsEveryRoundOnOneConnection() {
         probe.probeAtStartup();
         int pingsBeforeTheRounds = redis.answeredPings();
@@ -121,8 +139,10 @@ class RedisRoleProbeHeldConnectionTest {
         redis.holdNewConnections();
         probe.probe();
         assertThat(health.isAvailable(ROLE)).isTrue();
+        assertThat(redis.acceptedConnections()).isEqualTo(1);
         probe.probe();
         assertThat(health.isAvailable(ROLE)).isFalse();
+        assertThat(redis.acceptedConnections()).isEqualTo(1);
         Hang.until(() -> redis.blackholedConnectionsClosedByClients() == 1, "the probe closing its silent connection");
 
         redis.releaseNewConnections();
