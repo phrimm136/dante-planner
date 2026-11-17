@@ -26,6 +26,7 @@ public final class PongRedis implements AutoCloseable {
     private final AtomicInteger answeredPings = new AtomicInteger();
     private final AtomicInteger closedByClients = new AtomicInteger();
     private final AtomicInteger blackholedClosedByClients = new AtomicInteger();
+    private volatile boolean newConnectionsBlackholed;
     private volatile CompletableFuture<Void> newConnectionsServed = CompletableFuture.completedFuture(null);
     private final AtomicBoolean nextPingReplyDelayed = new AtomicBoolean();
     private volatile CompletableFuture<Void> delayedPingReplySent = CompletableFuture.completedFuture(null);
@@ -78,6 +79,10 @@ public final class PongRedis implements AutoCloseable {
         delayedPingReplySent.complete(null);
     }
 
+    public void blackholeNewConnections() {
+        newConnectionsBlackholed = true;
+    }
+
     public void blackholeEstablished() {
         for (Client client : clients) {
             client.blackholed = true;
@@ -103,6 +108,7 @@ public final class PongRedis implements AutoCloseable {
         try {
             while (!listener.isClosed()) {
                 Client client = new Client(listener.accept());
+                client.blackholed = newConnectionsBlackholed;
                 accepted.incrementAndGet();
                 clients.add(client);
                 CompletableFuture<Void> served = newConnectionsServed;
