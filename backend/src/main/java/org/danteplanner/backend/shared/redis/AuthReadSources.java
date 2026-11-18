@@ -8,27 +8,25 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 public final class AuthReadSources {
 
-    public record Source(RedisRole role, StringRedisTemplate store) {
-    }
+    private final List<RoleGated<StringRedisTemplate>> order;
 
-    private final List<Source> order;
-    private final RedisRoleHealth roleHealth;
-
-    public AuthReadSources(List<Source> order, RedisRoleHealth roleHealth) {
+    public AuthReadSources(List<RoleGated<StringRedisTemplate>> order) {
         this.order = List.copyOf(order);
-        this.roleHealth = roleHealth;
     }
 
-    public static List<Source> sourceOrder(boolean readsPrimaryFirst, Source local, Source auth) {
+    public static List<RoleGated<StringRedisTemplate>> sourceOrder(
+            boolean readsPrimaryFirst, RoleGated<StringRedisTemplate> local, RoleGated<StringRedisTemplate> auth) {
         return readsPrimaryFirst ? List.of(auth) : List.of(local, auth);
     }
 
     public <T> T read(Function<StringRedisTemplate, T> read, Supplier<T> noSourceAvailable) {
-        for (Source source : order) {
-            if (roleHealth.isAvailable(source.role())) {
-                return read.apply(source.store());
-            }
+        return readFrom(0, read, noSourceAvailable);
+    }
+
+    private <T> T readFrom(int index, Function<StringRedisTemplate, T> read, Supplier<T> noSourceAvailable) {
+        if (index == order.size()) {
+            return noSourceAvailable.get();
         }
-        return noSourceAvailable.get();
+        return order.get(index).call(read, () -> readFrom(index + 1, read, noSourceAvailable));
     }
 }

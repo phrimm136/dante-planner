@@ -69,6 +69,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class RateLimitStoreOutageTest {
 
     private static final String SKIPPED_COUNTER = "rate_limit.charge_skipped";
+    private static final String GATE_SKIPPED_COUNTER = "redis.role.skipped";
+    private static final String RATE_LIMIT_BREAKER = "redis-rate-limit";
     private static final String TRUSTED_PROXY_IP = "127.0.0.1";
     private static final int REFUSED_PORT = 1;
     private static final Duration BUCKET_TTL = Duration.ofHours(1);
@@ -149,6 +151,7 @@ class RateLimitStoreOutageTest {
         }
         assertThat(skipped(RateLimitPolicy.PUBLIC_READ)).isEqualTo(1.0);
         assertThat(chargedKeys()).isEmpty();
+        assertThat(gateSkipped()).isEqualTo(1.0);
     }
 
     @Test
@@ -164,6 +167,7 @@ class RateLimitStoreOutageTest {
         }
         assertThat(meterRegistry.find(SKIPPED_COUNTER).counter()).isNull();
         assertThat(chargedKeys()).isEmpty();
+        assertThat(gateSkipped()).isEqualTo(1.0);
     }
 
     @Test
@@ -192,6 +196,7 @@ class RateLimitStoreOutageTest {
                 .andExpect(status().isOk());
 
         assertThat(skipped(RateLimitPolicy.PUBLIC_READ)).isEqualTo(1.0);
+        assertThat(gateSkipped()).isEqualTo(0.0);
     }
 
     @Test
@@ -356,6 +361,11 @@ class RateLimitStoreOutageTest {
 
     private double skipped(RateLimitPolicy policy) {
         Counter counter = meterRegistry.find(SKIPPED_COUNTER).tag("policy", policy.name()).counter();
+        return counter == null ? 0.0 : counter.count();
+    }
+
+    private double gateSkipped() {
+        Counter counter = meterRegistry.find(GATE_SKIPPED_COUNTER).tag("role", RATE_LIMIT_BREAKER).counter();
         return counter == null ? 0.0 : counter.count();
     }
 }
