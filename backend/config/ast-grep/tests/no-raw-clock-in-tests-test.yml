@@ -1,0 +1,114 @@
+id: no-raw-clock-in-tests
+valid:
+  - |
+    class A {
+      @Test
+      void m() {
+        Clock clock = Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC);
+        assertThat(tokens.isExpired(token, clock)).isTrue();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        Date expiry = Date.from(Instant.now().plus(LIFETIME));
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        Elapsed elapsed = Elapsed.start();
+        context.close();
+        elapsed.isWithin(BOUND);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        long reading = foo.nanoTime();
+      }
+    }
+  - |
+    class A {
+      long nanoTime() {
+        return ticks;
+      }
+
+      @Test
+      void m() {
+        long reading = nanoTime();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        LongSupplier now = ticker::nanoTime;
+      }
+    }
+invalid:
+  - |
+    class A {
+      @Test
+      void m() {
+        long started = System.nanoTime();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        long started = System.currentTimeMillis();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        long started = java.lang.System.nanoTime();
+      }
+    }
+  - |
+    import static java.lang.System.nanoTime;
+
+    class A {
+      @Test
+      void m() {
+        long started = nanoTime();
+      }
+    }
+  - |
+    import static java.lang.System.currentTimeMillis;
+
+    class A {
+      @Test
+      void m() {
+        long started = currentTimeMillis();
+      }
+    }
+  - |
+    import static java.lang.System.*;
+
+    class A {
+      @Test
+      void m() {
+        long started = nanoTime();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        LongSupplier now = System::nanoTime;
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() {
+        LongSupplier now = java.lang.System::currentTimeMillis;
+      }
+    }

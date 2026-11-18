@@ -1,0 +1,122 @@
+id: no-raw-clock-in-tests
+snapshots:
+  "class A {\n  @Test\n  void m() {\n    LongSupplier now = System::nanoTime;\n  }\n}\n":
+    labels:
+    - source: System::nanoTime
+      style: primary
+      start: 54
+      end: 70
+  "class A {\n  @Test\n  void m() {\n    LongSupplier now = java.lang.System::currentTimeMillis;\n  }\n}\n":
+    labels:
+    - source: java.lang.System::currentTimeMillis
+      style: primary
+      start: 54
+      end: 89
+  "class A {\n  @Test\n  void m() {\n    long started = System.currentTimeMillis();\n  }\n}\n":
+    labels:
+    - source: System.currentTimeMillis()
+      style: primary
+      start: 50
+      end: 76
+    - source: currentTimeMillis
+      style: secondary
+      start: 57
+      end: 74
+    - source: System
+      style: secondary
+      start: 50
+      end: 56
+  "class A {\n  @Test\n  void m() {\n    long started = System.nanoTime();\n  }\n}\n":
+    labels:
+    - source: System.nanoTime()
+      style: primary
+      start: 50
+      end: 67
+    - source: nanoTime
+      style: secondary
+      start: 57
+      end: 65
+    - source: System
+      style: secondary
+      start: 50
+      end: 56
+  "class A {\n  @Test\n  void m() {\n    long started = java.lang.System.nanoTime();\n  }\n}\n":
+    labels:
+    - source: java.lang.System.nanoTime()
+      style: primary
+      start: 50
+      end: 77
+    - source: nanoTime
+      style: secondary
+      start: 67
+      end: 75
+    - source: java.lang.System
+      style: secondary
+      start: 50
+      end: 66
+  "import static java.lang.System.*;\n\nclass A {\n  @Test\n  void m() {\n    long started = nanoTime();\n  }\n}\n":
+    labels:
+    - source: nanoTime()
+      style: primary
+      start: 85
+      end: 95
+    - source: import static java.lang.System.*;
+      style: secondary
+      start: 0
+      end: 33
+    - source: |
+        import static java.lang.System.*;
+        
+        class A {
+          @Test
+          void m() {
+            long started = nanoTime();
+          }
+        }
+      style: secondary
+      start: 0
+      end: 103
+  "import static java.lang.System.currentTimeMillis;\n\nclass A {\n  @Test\n  void m() {\n    long started = currentTimeMillis();\n  }\n}\n":
+    labels:
+    - source: currentTimeMillis()
+      style: primary
+      start: 101
+      end: 120
+    - source: import static java.lang.System.currentTimeMillis;
+      style: secondary
+      start: 0
+      end: 49
+    - source: |
+        import static java.lang.System.currentTimeMillis;
+        
+        class A {
+          @Test
+          void m() {
+            long started = currentTimeMillis();
+          }
+        }
+      style: secondary
+      start: 0
+      end: 128
+  "import static java.lang.System.nanoTime;\n\nclass A {\n  @Test\n  void m() {\n    long started = nanoTime();\n  }\n}\n":
+    labels:
+    - source: nanoTime()
+      style: primary
+      start: 92
+      end: 102
+    - source: import static java.lang.System.nanoTime;
+      style: secondary
+      start: 0
+      end: 40
+    - source: |
+        import static java.lang.System.nanoTime;
+        
+        class A {
+          @Test
+          void m() {
+            long started = nanoTime();
+          }
+        }
+      style: secondary
+      start: 0
+      end: 110

@@ -13,6 +13,7 @@ import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.resource.DefaultClientResources;
 
 import org.danteplanner.backend.shared.config.RedisConnectionConfig;
+import org.danteplanner.backend.support.Elapsed;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.PongRedis;
 import org.danteplanner.backend.support.RedisEndpoints;
@@ -172,11 +173,10 @@ class RedisRoleProbeHeldConnectionTest {
         startWithHeldConnection(RoomyProbeTimeouts.BOTH_PHASES);
 
         probe.close();
-        long start = System.nanoTime();
+        Elapsed elapsed = Elapsed.start();
         probe.probe();
 
-        assertThat(Duration.ofNanos(System.nanoTime() - start))
-                .isLessThan(RoomyProbeTimeouts.BOTH_PHASES.runtime());
+        elapsed.isWithin(Duration.ZERO);
         assertThat(redis.acceptedConnections()).isEqualTo(1);
     }
 

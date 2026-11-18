@@ -4,7 +4,6 @@ import java.util.List;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
-import java.time.Duration;
 
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -16,6 +15,7 @@ import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.resource.DefaultClientResources;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 
+import org.danteplanner.backend.support.Elapsed;
 import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.backend.support.RedisEndpoints;
 
@@ -27,8 +27,6 @@ class RedisRoleProbeTest {
     private static final int REFUSED_PORT = 1;
     private static final int REPEATED_FAILURES = 5;
     private static final int ACCEPT_BACKLOG = 16;
-    private static final Duration SERIAL_STARTUP_PROBING =
-            RedisRoleProbe.STARTUP_PROBE_TIMEOUT.multipliedBy(RedisRole.values().length);
 
     private final ClientResources clientResources = DefaultClientResources.create();
     private final RedisRoleHealth health = new RedisRoleHealth();
@@ -54,13 +52,13 @@ class RedisRoleProbeTest {
             throws IOException {
         try (ServerSocket neverAnswers = neverAnswering()) {
             RedisRoleHealth hanging = new RedisRoleHealth();
-            try (RedisRoleProbe hangingProbe = probeOver(neverAnswers, hanging)) {
-                long start = System.nanoTime();
+            try (RedisRoleProbe hangingProbe =
+                    probeOver(neverAnswers, hanging, RedisRoleProbe.Timeouts.PRODUCTION)) {
+                Elapsed elapsed = Elapsed.start();
                 hangingProbe.probeAtStartup();
 
-                assertThat(Duration.ofNanos(System.nanoTime() - start))
-                        .isGreaterThanOrEqualTo(RedisRoleProbe.STARTUP_PROBE_TIMEOUT)
-                        .isLessThan(SERIAL_STARTUP_PROBING);
+                elapsed.isAtLeast(RedisRoleProbe.STARTUP_PROBE_TIMEOUT);
+                elapsed.isWithin(RedisRoleProbe.STARTUP_PROBE_TIMEOUT);
             }
             assertThat(RedisRole.values()).noneMatch(hanging::isAvailable);
         }
@@ -69,13 +67,13 @@ class RedisRoleProbeTest {
     @Test
     void probe_WhenEveryRoleAcceptsButNeverAnswers_WaitsOneRuntimeTimeoutNotTheStartupTimeout() throws IOException {
         try (ServerSocket neverAnswers = neverAnswering()) {
-            try (RedisRoleProbe hangingProbe = probeOver(neverAnswers, new RedisRoleHealth())) {
-                long start = System.nanoTime();
+            try (RedisRoleProbe hangingProbe =
+                    probeOver(neverAnswers, new RedisRoleHealth(), RoomyProbeTimeouts.STARTUP_ONLY)) {
+                Elapsed elapsed = Elapsed.start();
                 hangingProbe.probe();
 
-                assertThat(Duration.ofNanos(System.nanoTime() - start))
-                        .isGreaterThanOrEqualTo(RedisRoleProbe.PROBE_TIMEOUT)
-                        .isLessThan(RedisRoleProbe.STARTUP_PROBE_TIMEOUT);
+                elapsed.isAtLeast(RedisRoleProbe.PROBE_TIMEOUT);
+                elapsed.isWithin(RedisRoleProbe.PROBE_TIMEOUT);
             }
         }
     }
@@ -85,7 +83,8 @@ class RedisRoleProbeTest {
             throws IOException {
         try (ServerSocket neverAnswers = neverAnswering()) {
             RedisRoleHealth interrupted = new RedisRoleHealth();
-            try (RedisRoleProbe interruptedProbe = probeOver(neverAnswers, interrupted)) {
+            try (RedisRoleProbe interruptedProbe =
+                    probeOver(neverAnswers, interrupted, RedisRoleProbe.Timeouts.PRODUCTION)) {
                 Thread.currentThread().interrupt();
                 interruptedProbe.probeAtStartup();
 
@@ -99,10 +98,11 @@ class RedisRoleProbeTest {
         return new ServerSocket(0, ACCEPT_BACKLOG, InetAddress.getLoopbackAddress());
     }
 
-    private RedisRoleProbe probeOver(ServerSocket endpoint, RedisRoleHealth roleHealth) {
+    private RedisRoleProbe probeOver(ServerSocket endpoint, RedisRoleHealth roleHealth,
+            RedisRoleProbe.Timeouts timeouts) {
         return new RedisRoleProbe(clientResources, RedisEndpoints.everyRoleAt(
                 endpoint.getInetAddress().getHostAddress(), endpoint.getLocalPort()), roleHealth, List.of(),
-                RedisRoleProbe.Timeouts.PRODUCTION);
+                timeouts);
     }
 
     @Test

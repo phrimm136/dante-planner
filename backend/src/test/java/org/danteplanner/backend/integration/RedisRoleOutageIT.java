@@ -23,9 +23,9 @@ import org.danteplanner.backend.shared.redis.RedisRole;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.shared.redis.RedisRoleProbe;
 import org.danteplanner.backend.shared.redis.RoleOutages;
+import org.danteplanner.backend.support.Elapsed;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.LogCapture;
-import org.danteplanner.backend.support.RealClockBounds;
 import org.danteplanner.backend.support.RedisEndpoints;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,11 +39,7 @@ class RedisRoleOutageIT extends CausalHarnessSupport {
     private static final String PROBE_THREAD = "redis-role-probe-1";
 
     private static final Duration OPEN_BOUND = RedisRoleProbe.PROBE_INTERVAL.plus(RedisRoleProbe.PROBE_TIMEOUT)
-            .multipliedBy(RedisRoleProbe.FAILURE_THRESHOLD)
-            .plus(RealClockBounds.SCHEDULING_SLACK);
-
-    private static final Duration SERIAL_STARTUP_PROBING =
-            RedisRoleProbe.STARTUP_PROBE_TIMEOUT.multipliedBy(RedisRole.values().length);
+            .multipliedBy(RedisRoleProbe.FAILURE_THRESHOLD);
 
     @Autowired
     private RedisRoleHealth roleHealth;
@@ -58,11 +54,11 @@ class RedisRoleOutageIT extends CausalHarnessSupport {
                 "auth and auth-local answering their probes before the cut");
         List<CircuitBreaker.StateTransition> authTransitions = RoleOutages.transitionsFrom(roleHealth, RedisRole.AUTH);
         try (LogCapture capture = LogCapture.onThread(PROBE_THREAD, RedisRoleProbe.class)) {
-            long cut = System.nanoTime();
+            Elapsed sinceCut = Elapsed.start();
             blackholeAuthLocal();
             try {
                 Hang.until(() -> !roleHealth.isAvailable(RedisRole.AUTH_LOCAL), "the probe opening redis-auth-local");
-                assertThat(Duration.ofNanos(System.nanoTime() - cut)).isLessThan(OPEN_BOUND);
+                sinceCut.isWithin(OPEN_BOUND);
                 assertThat(roleHealth.isAvailable(RedisRole.AUTH)).isTrue();
             } finally {
                 healAuthLocal();
@@ -83,10 +79,10 @@ class RedisRoleOutageIT extends CausalHarnessSupport {
         try (RedisRoleProbe probe = new RedisRoleProbe(redisClientResources,
                 RedisEndpoints.everyRoleAt(TOXIPROXY.getHost(), authLocalProxyPort()), blackholed, List.of(),
                 RedisRoleProbe.Timeouts.PRODUCTION)) {
-            long start = System.nanoTime();
+            Elapsed elapsed = Elapsed.start();
             probe.probeAtStartup();
 
-            assertThat(Duration.ofNanos(System.nanoTime() - start)).isLessThan(SERIAL_STARTUP_PROBING);
+            elapsed.isWithin(RedisRoleProbe.STARTUP_PROBE_TIMEOUT);
         } finally {
             healAuthLocal();
         }
