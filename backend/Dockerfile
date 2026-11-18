@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 ARG JAR_STAGE=builder
-FROM --platform=$BUILDPLATFORM gradle:9.8.1-jdk21-noble@sha256:4e237c5918018409ae6bd4acf3e5145db22157fd5f2af6332a8f9fba88f8e92b AS builder
+FROM --platform=$BUILDPLATFORM gradle:9.8.2-jdk21-noble@sha256:7b50a8bc3d5dab9db23053c9fd517f8dfc5166eedad236545eca019fb613ebfd AS builder
 
 WORKDIR /app
 
