@@ -1444,10 +1444,13 @@ guards the parse but likewise skips the schema gate.
   with its own `@DynamicPropertySource` exceeds the context budget of 15 in
   `TestIsolationConventionTest`.
   re-check: `rg -q 'RedisMessageListenerContainer' backend/src/main/java/org/danteplanner/backend/shared/sse/SseSubscriberConfig.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/shared/sse/SseSubscriberConfig.java 'setTaskExecutor'`
-- `MarkerStore.Source` and `MarkerStore.sourceOrder` repeat `AuthReadSources.Source` and its
-  `sourceOrder` (same roles, same primary-first rule). Left apart because another open change
-  rewrites the marker read path. Worth doing when that change has landed: make `MarkerStore` read
-  through `AuthReadSources` and delete its own record and ordering.
+- `MarkerStore` keeps its own `Source` record and `sourceOrder` and asks `RedisRoleHealth.isAvailable`
+  itself, where the auth reads go through `RoleGated` (same roles, same primary-first rule); it is
+  the one frozen entry of the role-health rule in `RedisRoleGateRule`. Left apart because another
+  open change rewrites the marker read path. Worth doing when that change has landed: build its
+  sources as `RoleGated` and delete its own record, ordering and availability check. Its read falls
+  through to the next source on a command error and `AuthReadSources.read` does not, so it cannot
+  simply read through `AuthReadSources`.
   re-check: `rg -q 'static List<Source> sourceOrder' backend/src/main/java/org/danteplanner/backend/shared/freshness/MarkerStore.java`
 
 - `NotificationRepository.hardDeleteOldNotifications` deletes on `deleted_at < :cutoff` and no index

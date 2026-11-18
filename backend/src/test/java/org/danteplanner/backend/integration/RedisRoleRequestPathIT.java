@@ -62,7 +62,6 @@ import org.danteplanner.backend.shared.redis.RedisRole;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.shared.redis.RedisRoleProbe;
 import org.danteplanner.backend.shared.util.CookieConstants;
-import org.danteplanner.backend.support.Elapsed;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.RedisEndpoints;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -90,6 +89,10 @@ class RedisRoleRequestPathIT extends ReplicaRoutingHarnessSupport {
     private static final String BLACKLIST_SKIPPED = "blacklist_check_skipped_total";
     private static final String TOMBSTONE_SKIPPED = "tombstone.check_skipped";
     private static final String CHARGE_SKIPPED = "rate_limit.charge_skipped";
+    private static final String GATE_SKIPPED = "redis.role.skipped";
+    private static final String AUTH_LOCAL_GATE = "redis-auth-local";
+    private static final String AUTH_GATE = "redis-auth";
+    private static final String RATE_LIMIT_GATE = "redis-rate-limit";
     private static final String FIXTURE_PATH = "/api/fixture/inherited";
     private static final String FIXTURE_ENDPOINT = "fixture";
     private static final int CONCURRENT_REQUESTS = 20;
@@ -165,10 +168,14 @@ class RedisRoleRequestPathIT extends ReplicaRoutingHarnessSupport {
             double blacklistBefore = counter(BLACKLIST_SKIPPED);
 
             assertThat(send(SETTINGS_PATH, revoked).status()).isEqualTo(401);
+            double localGateBefore = gateSkipped(AUTH_LOCAL_GATE);
+            double authGateBefore = gateSkipped(AUTH_GATE);
             Sample unrevoked = send(SETTINGS_PATH, token);
 
             assertThat(unrevoked.status()).isEqualTo(200);
             assertThat(counter(BLACKLIST_SKIPPED)).isEqualTo(blacklistBefore);
+            assertThat(gateSkipped(AUTH_LOCAL_GATE) - localGateBefore).isEqualTo(2.0);
+            assertThat(gateSkipped(AUTH_GATE) - authGateBefore).isEqualTo(0.0);
         } finally {
             healAuthLocal();
         }
@@ -277,7 +284,7 @@ class RedisRoleRequestPathIT extends ReplicaRoutingHarnessSupport {
     }
 
     @Test
-    void authenticatedReads_WhenBothAuthRolesAreOpen_AnswerWithoutWaitingAndCountEverySkippedCheck()
+    void authenticatedReads_WhenBothAuthRolesAreOpen_SkipEveryReadAndCountEverySkippedCheck()
             throws IOException {
         User user = TestDataFactory.createTestUser(userRepository, "role-both-open@example.com");
         String token = TestDataFactory.generateAccessToken(jwtTokenService, user);
@@ -292,20 +299,24 @@ class RedisRoleRequestPathIT extends ReplicaRoutingHarnessSupport {
                     && !roleHealth.isAvailable(RedisRole.AUTH), "the probe opening both auth role breakers");
 
             double blacklistBefore = counter(BLACKLIST_SKIPPED);
-            Elapsed settingsRead = Elapsed.start();
+            double localGateBefore = gateSkipped(AUTH_LOCAL_GATE);
+            double authGateBefore = gateSkipped(AUTH_GATE);
             Sample settings = send(SETTINGS_PATH, token);
             assertThat(settings.status()).isEqualTo(200);
-            settingsRead.isWithin(Duration.ZERO);
             assertThat(counter(BLACKLIST_SKIPPED) - blacklistBefore).isEqualTo(2.0);
+            assertThat(gateSkipped(AUTH_LOCAL_GATE) - localGateBefore).isEqualTo(2.0);
+            assertThat(gateSkipped(AUTH_GATE) - authGateBefore).isEqualTo(2.0);
 
             blacklistBefore = counter(BLACKLIST_SKIPPED);
             double tombstoneBefore = counter(TOMBSTONE_SKIPPED);
-            Elapsed byIdRead = Elapsed.start();
+            localGateBefore = gateSkipped(AUTH_LOCAL_GATE);
+            authGateBefore = gateSkipped(AUTH_GATE);
             Sample byId = send(PLANNER_PATH + planner.getId(), token);
             assertThat(byId.status()).isEqualTo(200);
-            byIdRead.isWithin(Duration.ZERO);
             assertThat(counter(BLACKLIST_SKIPPED) - blacklistBefore).isEqualTo(2.0);
             assertThat(counter(TOMBSTONE_SKIPPED) - tombstoneBefore).isEqualTo(1.0);
+            assertThat(gateSkipped(AUTH_LOCAL_GATE) - localGateBefore).isEqualTo(3.0);
+            assertThat(gateSkipped(AUTH_GATE) - authGateBefore).isEqualTo(3.0);
         } finally {
             thaw(AUTH_REDIS);
             healAuthLocal();
@@ -323,13 +334,17 @@ class RedisRoleRequestPathIT extends ReplicaRoutingHarnessSupport {
             Hang.until(() -> !roleHealth.isAvailable(RedisRole.RATE_LIMIT), "the probe opening redis-rate-limit");
 
             double skippedBefore = chargeSkipped(RateLimitPolicy.PUBLIC_READ);
+            double gateBefore = gateSkipped(RATE_LIMIT_GATE);
             Sample publicRead = send(PUBLISHED_LIST_PATH, null);
             assertThat(publicRead.status()).isEqualTo(200);
             assertThat(chargeSkipped(RateLimitPolicy.PUBLIC_READ) - skippedBefore).isEqualTo(1.0);
+            assertThat(gateSkipped(RATE_LIMIT_GATE) - gateBefore).isEqualTo(1.0);
 
+            gateBefore = gateSkipped(RATE_LIMIT_GATE);
             Sample login = send(GOOGLE_CALLBACK_PATH, null);
             assertThat(login.status()).isEqualTo(302);
             assertThat(login.location()).endsWith(LoginRedirect.UNAVAILABLE);
+            assertThat(gateSkipped(RATE_LIMIT_GATE) - gateBefore).isEqualTo(1.0);
         } finally {
             thaw(RATE_LIMIT_REDIS);
         }
@@ -414,6 +429,11 @@ class RedisRoleRequestPathIT extends ReplicaRoutingHarnessSupport {
 
     private double counter(String name) {
         return meterRegistry.find(name).counters().stream().mapToDouble(Counter::count).sum();
+    }
+
+    private double gateSkipped(String role) {
+        return meterRegistry.find(GATE_SKIPPED).tag("role", role).counters().stream()
+                .mapToDouble(Counter::count).sum();
     }
 
     private double chargeSkipped(RateLimitPolicy policy) {

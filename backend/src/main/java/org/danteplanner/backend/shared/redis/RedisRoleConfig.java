@@ -11,6 +11,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import io.github.resilience4j.micrometer.tagged.TaggedCircuitBreakerMetrics;
 import io.lettuce.core.resource.ClientResources;
+import io.micrometer.core.instrument.MeterRegistry;
 
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.RedisConnectionConfig;
@@ -45,11 +46,12 @@ public class RedisRoleConfig {
             @Qualifier("authLocalStringRedisTemplate") StringRedisTemplate authLocalStore,
             @Qualifier("stringRedisTemplate") StringRedisTemplate authStore,
             ObjectProvider<ReadSourceProperties> readSourceProperties,
-            RedisRoleHealth redisRoleHealth) {
+            RedisRoleHealth redisRoleHealth,
+            MeterRegistry meterRegistry) {
         boolean readsPrimaryFirst = readSourceProperties.stream().anyMatch(ReadSourceProperties::readsPrimaryFirst);
         return new AuthReadSources(AuthReadSources.sourceOrder(readsPrimaryFirst,
-                new AuthReadSources.Source(RedisRole.AUTH_LOCAL, authLocalStore),
-                new AuthReadSources.Source(RedisRole.AUTH, authStore)), redisRoleHealth);
+                new RoleGated<>(RedisRole.AUTH_LOCAL, authLocalStore, redisRoleHealth, meterRegistry),
+                new RoleGated<>(RedisRole.AUTH, authStore, redisRoleHealth, meterRegistry)));
     }
 
     @Bean(PROBE_SCHEDULER)

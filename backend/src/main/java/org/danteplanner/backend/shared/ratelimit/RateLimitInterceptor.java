@@ -21,7 +21,6 @@ import io.github.bucket4j.TimeoutException;
 import io.lettuce.core.RedisConnectionException;
 import io.lettuce.core.RedisException;
 import io.micrometer.core.instrument.MeterRegistry;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
@@ -31,6 +30,7 @@ import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.backend.shared.redis.RedisRole;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
+import org.danteplanner.backend.shared.redis.RoleGated;
 import org.danteplanner.backend.shared.util.ClientIpResolver;
 
 /**
@@ -38,7 +38,6 @@ import org.danteplanner.backend.shared.util.ClientIpResolver;
  * where the authenticated principal is available.
  */
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class RateLimitInterceptor implements HandlerInterceptor {
 
@@ -47,14 +46,29 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private static final String POLICY_TAG = "policy";
     private static final String BREAKER_OPEN = "Rate-limit store breaker open";
 
-    private final RateLimitService rateLimitService;
+    private final RoleGated<RateLimitService> rateLimit;
     private final SecurityProperties securityProperties;
     private final DeviceIdResolver deviceIdResolver;
     private final FrontendProperties frontendProperties;
     private final ProblemWriter problemWriter;
     private final MeterRegistry meterRegistry;
-    private final RedisRoleHealth roleHealth;
     private final AtomicBoolean storeUnavailable = new AtomicBoolean();
+
+    public RateLimitInterceptor(
+            RateLimitService rateLimitService,
+            SecurityProperties securityProperties,
+            DeviceIdResolver deviceIdResolver,
+            FrontendProperties frontendProperties,
+            ProblemWriter problemWriter,
+            MeterRegistry meterRegistry,
+            RedisRoleHealth roleHealth) {
+        this.rateLimit = new RoleGated<>(RedisRole.RATE_LIMIT, rateLimitService, roleHealth, meterRegistry);
+        this.securityProperties = securityProperties;
+        this.deviceIdResolver = deviceIdResolver;
+        this.frontendProperties = frontendProperties;
+        this.problemWriter = problemWriter;
+        this.meterRegistry = meterRegistry;
+    }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -95,23 +109,22 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     }
 
     private boolean charge(RateLimited declaration, HttpServletRequest request, HttpServletResponse response) {
-        if (!roleHealth.isAvailable(RedisRole.RATE_LIMIT)) {
-            return withoutStore(declaration, response, () -> new RedisConnectionException(BREAKER_OPEN));
-        }
-        try {
-            chargeBucket(declaration, request, response);
-            markStoreAvailable();
-            return true;
-        } catch (RedisException | TimeoutException unavailable) {
-            warnStoreUnavailable(declaration, unavailable);
-            return withoutStore(declaration, response, () -> unavailable);
-        } catch (RateLimitExceededException refused) {
-            if (declaration.denial() != RateLimitDenial.REDIRECT_LOGIN) {
-                throw refused;
+        return rateLimit.call(service -> {
+            try {
+                chargeBucket(service, declaration, request, response);
+                markStoreAvailable();
+                return true;
+            } catch (RedisException | TimeoutException unavailable) {
+                warnStoreUnavailable(declaration, unavailable);
+                return withoutStore(declaration, response, () -> unavailable);
+            } catch (RateLimitExceededException refused) {
+                if (declaration.denial() != RateLimitDenial.REDIRECT_LOGIN) {
+                    throw refused;
+                }
+                log.warn("Rate limit exceeded on a browser-navigation endpoint: {}", refused.getMessage());
+                return redirectToLogin(response, LoginRedirect.RATE_LIMITED);
             }
-            log.warn("Rate limit exceeded on a browser-navigation endpoint: {}", refused.getMessage());
-            return redirectToLogin(response, LoginRedirect.RATE_LIMITED);
-        }
+        }, () -> withoutStore(declaration, response, () -> new RedisConnectionException(BREAKER_OPEN)));
     }
 
     private boolean redirectToLogin(HttpServletResponse response, String loginRedirect) {
@@ -156,7 +169,8 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         }
     }
 
-    private void chargeBucket(RateLimited declaration, HttpServletRequest request, HttpServletResponse response) {
+    private void chargeBucket(RateLimitService rateLimitService, RateLimited declaration, HttpServletRequest request,
+            HttpServletResponse response) {
         RateLimitPolicy policy = declaration.value();
 
         if (policy.subject() == RateLimitPolicy.Subject.CLIENT) {
