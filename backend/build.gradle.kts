@@ -9,10 +9,10 @@ buildscript {
             classpath("org.jsoup:jsoup:1.24.1") {
                 because("dependency-check plugin 13.0.0 brings 1.23.1; the advisory is fixed in 1.23.2")
             }
-            classpath("com.fasterxml.jackson.core:jackson-databind:2.22.4") {
+            classpath("com.fasterxml.jackson.core:jackson-databind:2.23.0") {
                 because("dependency-check plugin 13.0.0 brings 2.22.1; 2.22.4 carries the advisory fixes and matches the app's jackson-bom")
             }
-            classpath("com.fasterxml.jackson.core:jackson-core:2.22.4") {
+            classpath("com.fasterxml.jackson.core:jackson-core:2.23.0") {
                 because("dependency-check plugin 13.0.0 brings 2.22.1; 2.22.4 carries the advisory fixes and matches the app's jackson-bom")
             }
         }
@@ -67,7 +67,7 @@ dependencyManagement {
         // Override log4j to fix CVE-2025-68161
         mavenBom("org.apache.logging.log4j:log4j-bom:2.26.1")
         // Override Jackson to fix CVE-2026-54515
-        mavenBom("com.fasterxml.jackson:jackson-bom:2.22.4")
+        mavenBom("com.fasterxml.jackson:jackson-bom:2.23.0")
     }
     dependencies {
         dependency("com.redis:testcontainers-redis:3.0.1")
@@ -113,7 +113,7 @@ dependencies {
     implementation("com.bucket4j:bucket4j-redis:8.10.1")
     implementation("org.jsoup:jsoup:1.24.1")
     implementation("com.networknt:json-schema-validator:1.5.1")
-    implementation("io.sentry:sentry-spring-boot-4-starter:8.62.0")
+    implementation("io.sentry:sentry-spring-boot-4-starter:8.63.0")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
