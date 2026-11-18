@@ -381,33 +381,37 @@ val astGrepStaleIgnores by tasks.registering {
     dependsOn(astGrepRuleTests)
     val binary = astGrepBinary
     val projectDir = layout.projectDirectory.asFile
-    val rulePath = "config/ast-grep/rules/no-wall-clock-wait-in-tests.yml"
-    val rule = layout.projectDirectory.file(rulePath).asFile
+    val rulePaths = listOf(
+        "config/ast-grep/rules/no-wall-clock-wait-in-tests.yml",
+        "config/ast-grep/rules/no-raw-clock-in-tests.yml",
+    )
     doLast {
-        val lines = rule.readLines()
         val item = Regex("""^\s+-\s+(.+)$""")
-        val start = lines.indexOf("ignores:")
-        if (start < 0) {
-            return@doLast
+        for (rulePath in rulePaths) {
+            val lines = projectDir.resolve(rulePath).readLines()
+            val start = lines.indexOf("ignores:")
+            if (start < 0) {
+                continue
+            }
+            val end = (start + 1 until lines.size).firstOrNull { !item.matches(lines[it]) } ?: lines.size
+            val frozen = lines.subList(start + 1, end).map { item.find(it)!!.groupValues[1] }
+            val unfrozen = (lines.subList(0, start) + lines.subList(end, lines.size)).joinToString("\n")
+            val scan = ProcessBuilder(
+                listOf(binary, "scan", "--inline-rules", unfrozen, "--files-with-matches") + frozen)
+                .directory(projectDir)
+                .redirectError(ProcessBuilder.Redirect.DISCARD)
+                .start()
+            val matched = scan.inputStream.bufferedReader().readLines().toSet()
+            scan.waitFor()
+            val stale = frozen.filterNot { it in matched }
+            if (stale.isNotEmpty()) {
+                throw GradleException(
+                    "astGrepStaleIgnores: these entries in backend/$rulePath no longer match the rule, so they " +
+                        "excuse nothing; delete them from its ignores and let the rule cover them again:\n" +
+                        stale.joinToString("\n") { "  $it" })
+            }
+            logger.lifecycle("astGrepStaleIgnores: all ${frozen.size} ignores in backend/$rulePath still match")
         }
-        val end = (start + 1 until lines.size).firstOrNull { !item.matches(lines[it]) } ?: lines.size
-        val frozen = lines.subList(start + 1, end).map { item.find(it)!!.groupValues[1] }
-        val unfrozen = (lines.subList(0, start) + lines.subList(end, lines.size)).joinToString("\n")
-        val scan = ProcessBuilder(
-            listOf(binary, "scan", "--inline-rules", unfrozen, "--files-with-matches") + frozen)
-            .directory(projectDir)
-            .redirectError(ProcessBuilder.Redirect.DISCARD)
-            .start()
-        val matched = scan.inputStream.bufferedReader().readLines().toSet()
-        scan.waitFor()
-        val stale = frozen.filterNot { it in matched }
-        if (stale.isNotEmpty()) {
-            throw GradleException(
-                "astGrepStaleIgnores: these entries in backend/$rulePath no longer match the rule, so they " +
-                    "excuse nothing; delete them from its ignores and let the rule cover them again:\n" +
-                    stale.joinToString("\n") { "  $it" })
-        }
-        logger.lifecycle("astGrepStaleIgnores: all ${frozen.size} ignores in backend/$rulePath still match")
     }
 }
 

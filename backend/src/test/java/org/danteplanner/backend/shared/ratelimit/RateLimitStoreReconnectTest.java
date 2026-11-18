@@ -15,9 +15,9 @@ import org.danteplanner.backend.shared.redis.RedisRole;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.shared.redis.RedisRoleProbe;
 import org.danteplanner.backend.shared.redis.RoomyProbeTimeouts;
+import org.danteplanner.backend.support.Elapsed;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.PongRedis;
-import org.danteplanner.backend.support.RealClockBounds;
 import org.danteplanner.backend.support.RedisEndpoints;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,9 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RateLimitStoreReconnectTest {
 
     private static final Duration BUCKET_TTL = Duration.ofMinutes(1);
-    private static final Duration RECOVERY_BOUND = RedisRoleProbe.PROBE_INTERVAL
-            .plus(RedisRoleProbe.PROBE_TIMEOUT)
-            .plus(RealClockBounds.SCHEDULING_SLACK);
+    private static final Duration RECOVERY_BOUND = RedisRoleProbe.PROBE_INTERVAL.plus(RedisRoleProbe.PROBE_TIMEOUT);
 
     private final ClientResources clientResources = DefaultClientResources.create();
     private final RedisRoleHealth health = new RedisRoleHealth();
@@ -58,14 +56,14 @@ class RateLimitStoreReconnectTest {
 
             redis.dropClients();
             Hang.until(() -> !store.isConnected(), "the rate-limit store noticing its dropped connection");
-            long dropped = System.nanoTime();
+            Elapsed recovery = Elapsed.start();
 
             Hang.until(() -> {
                 probe.probe();
                 return store.isConnected() && health.isAvailable(RedisRole.RATE_LIMIT);
             }, "the probe connecting the rate-limit store again");
 
-            assertThat(Duration.ofNanos(System.nanoTime() - dropped)).isLessThan(RECOVERY_BOUND);
+            recovery.isWithin(RECOVERY_BOUND);
         }
     }
 

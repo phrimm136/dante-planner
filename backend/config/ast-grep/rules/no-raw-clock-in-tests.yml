@@ -1,0 +1,60 @@
+id: no-raw-clock-in-tests
+language: Java
+severity: error
+message: 'A test does not read the clock to measure elapsed time: measure through support/Elapsed, started before the action it measures, whose isWithin adds the scheduling slack to the contract bound (backend/src/test/CLAUDE.md, Mechanics).'
+files:
+  - src/test/java/**/*.java
+ignores:
+  - src/test/java/org/danteplanner/backend/auth/token/JwtTokenServiceTest.java
+  - src/test/java/org/danteplanner/backend/auth/token/RefreshRotationServiceIT.java
+  - src/test/java/org/danteplanner/backend/auth/token/TokenBlacklistServiceTest.java
+  - src/test/java/org/danteplanner/backend/controller/CommentControllerIT.java
+  - src/test/java/org/danteplanner/backend/controller/NotificationControllerIT.java
+  - src/test/java/org/danteplanner/backend/integration/AuthLocalReadSplitIT.java
+  - src/test/java/org/danteplanner/backend/integration/BulkheadIT.java
+  - src/test/java/org/danteplanner/backend/integration/ConsistencyRunIT.java
+  - src/test/java/org/danteplanner/backend/integration/DegradationIT.java
+  - src/test/java/org/danteplanner/backend/integration/HarnessMarkerReplicationIT.java
+  - src/test/java/org/danteplanner/backend/integration/MySQLIT.java
+  - src/test/java/org/danteplanner/backend/integration/OregonReadFallbackIT.java
+  - src/test/java/org/danteplanner/backend/integration/PlannerOwnershipRowIT.java
+  - src/test/java/org/danteplanner/backend/integration/RedisConnectionRecoveryIT.java
+  - src/test/java/org/danteplanner/backend/integration/ReplicationProxyIT.java
+  - src/test/java/org/danteplanner/backend/integration/VoteNotificationFlowIT.java
+  - src/test/java/org/danteplanner/backend/integration/consistency/EdgeRoutingTest.java
+  - src/test/java/org/danteplanner/backend/integration/consistency/PhaseRunner.java
+  - src/test/java/org/danteplanner/backend/planner/scheduler/KeywordBackfillShutdownRaceIT.java
+  - src/test/java/org/danteplanner/backend/service/SsePublisherTest.java
+  - src/test/java/org/danteplanner/backend/service/oauth/OAuthStateServiceTest.java
+  - src/test/java/org/danteplanner/backend/service/token/TokenBlacklistServiceIT.java
+  - src/test/java/org/danteplanner/backend/shared/freshness/MarkerStoreConnectBoundTest.java
+  - src/test/java/org/danteplanner/backend/shared/freshness/MarkerStoreReplicationIT.java
+  - src/test/java/org/danteplanner/backend/shared/freshness/MarkerStoreTest.java
+  - src/test/java/org/danteplanner/backend/shared/freshness/RaiseBatcherTest.java
+  - src/test/java/org/danteplanner/backend/shared/gtid/GtidReadGateTest.java
+  - src/test/java/org/danteplanner/backend/shared/ratelimit/RateLimitBucketLifecycleIT.java
+  - src/test/java/org/danteplanner/backend/shared/sse/SseShutdownDrainTest.java
+  - src/test/java/org/danteplanner/backend/support/Elapsed.java
+  - src/test/java/org/danteplanner/backend/support/HangTest.java
+  - src/test/java/org/danteplanner/backend/support/SseTopicRecorder.java
+  - src/test/java/org/danteplanner/backend/support/TransactionSpans.java
+rule:
+  any:
+    - kind: method_invocation
+      all:
+        - has:
+            field: name
+            regex: ^(nanoTime|currentTimeMillis)$
+        - has:
+            field: object
+            regex: ^(java\.lang\.)?System$
+    - kind: method_invocation
+      regex: ^(nanoTime|currentTimeMillis)\s*\(
+      inside:
+        kind: program
+        stopBy: end
+        has:
+          kind: import_declaration
+          regex: ^import\s+static\s+java\.lang\.System\.(nanoTime|currentTimeMillis|\*)\s*;$
+    - kind: method_reference
+      regex: ^(java\.lang\.)?System\s*::\s*(nanoTime|currentTimeMillis)$

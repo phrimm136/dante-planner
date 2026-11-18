@@ -28,9 +28,9 @@ valid:
     class A {
       @Test
       void m() {
-        long started = System.nanoTime();
+        Elapsed elapsed = Elapsed.start();
         context.close();
-        assertThat(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started)).isLessThan(BOUND);
+        elapsed.isWithin(BOUND);
       }
     }
   - |
