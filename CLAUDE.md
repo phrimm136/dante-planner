@@ -38,3 +38,5 @@ learning: design
 - Before a unit's first commit, rebase its branch onto `origin/main`
   (`git -C <worktree> fetch origin main`, then `git -C <worktree> rebase origin/main`).
 - Docs and data written for a unit go in the same commit as its code.
+- `git push` refuses a branch that carries a commit no review record names
+  (`.githooks/pre-push`, ADR 519); the `reviewer` agent writes the record.
