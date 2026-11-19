@@ -78,7 +78,7 @@ class AccountDeletionGuardIT extends SharedMySqlContainerSupport {
 
         RevocationFailsBlacklist(LettuceConnectionFactory connectionFactory, StringRedisTemplate template,
                 SimpleMeterRegistry meterRegistry, long refreshTokenExpiry) {
-            super(template, AuthReads.from(template), meterRegistry, refreshTokenExpiry);
+            super(AuthReads.writesTo(template), AuthReads.from(template), meterRegistry, refreshTokenExpiry);
             this.connectionFactory = connectionFactory;
         }
 

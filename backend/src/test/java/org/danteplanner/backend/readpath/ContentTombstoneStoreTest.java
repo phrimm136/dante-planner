@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.dao.QueryTimeoutException;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -56,8 +57,7 @@ class ContentTombstoneStoreTest {
     @BeforeEach
     void setUp() {
         meterRegistry = new SimpleMeterRegistry();
-        store = new ContentTombstoneStore(sharedTemplate,
-                AuthReads.localThenAuth(authLocalTemplate, sharedTemplate, new RedisRoleHealth()), meterRegistry);
+        store = storeWith(new RedisRoleHealth());
     }
 
     @Test
@@ -133,8 +133,48 @@ class ContentTombstoneStoreTest {
     }
 
     private ContentTombstoneStore storeWith(RedisRoleHealth health) {
-        return new ContentTombstoneStore(sharedTemplate,
+        return new ContentTombstoneStore(AuthReads.writesTo(sharedTemplate, health),
                 AuthReads.localThenAuth(authLocalTemplate, sharedTemplate, health), meterRegistry);
+    }
+
+    @Test
+    void writeTombstone_WhenTheAuthRoleIsOpen_LogsTheRefusalWithoutTouchingAStore() {
+        List<ILoggingEvent> warnings = warningsDuring(
+                () -> storeWith(RoleOutages.withOpen(RedisRole.AUTH)).writeTombstone("planner", deleted));
+
+        assertRefusedWithoutAStore(warnings);
+    }
+
+    @Test
+    void writeTombstones_WhenTheAuthRoleIsOpen_LogsTheRefusalWithoutTouchingAStore() {
+        List<ILoggingEvent> warnings = warningsDuring(() -> storeWith(RoleOutages.withOpen(RedisRole.AUTH))
+                .writeTombstones("published-planner", List.of(live, deleted)));
+
+        assertRefusedWithoutAStore(warnings);
+    }
+
+    @Test
+    void clearTombstones_WhenTheAuthRoleIsOpen_LogsTheRefusalWithoutTouchingAStore() {
+        List<ILoggingEvent> warnings = warningsDuring(() -> storeWith(RoleOutages.withOpen(RedisRole.AUTH))
+                .clearTombstones("published-planner", List.of(live, deleted)));
+
+        assertRefusedWithoutAStore(warnings);
+    }
+
+    @Test
+    void isTombstoned_WhenOnlyTheAuthRoleIsOpen_ReadsTheReplica() {
+        when(authLocalTemplate.hasKey("del:planner:" + deleted)).thenReturn(true);
+
+        assertThat(storeWith(RoleOutages.withOpen(RedisRole.AUTH)).isTombstoned("planner", deleted)).isTrue();
+
+        verifyNoInteractions(sharedTemplate);
+    }
+
+    private void assertRefusedWithoutAStore(List<ILoggingEvent> warnings) {
+        assertThat(warnings).hasSize(1);
+        assertThat(warnings.get(0).getThrowableProxy().getClassName())
+                .isEqualTo(RedisConnectionFailureException.class.getName());
+        verifyNoInteractions(sharedTemplate, authLocalTemplate);
     }
 
     @Test
@@ -167,6 +207,8 @@ class ContentTombstoneStoreTest {
 
         assertThat(warnings).hasSize(1);
         assertThat(warnings.get(0).getThrowableProxy().getClassName())
+                .isEqualTo(RedisConnectionFailureException.class.getName());
+        assertThat(warnings.get(0).getThrowableProxy().getCause().getClassName())
                 .isEqualTo(QueryTimeoutException.class.getName());
     }
 
@@ -207,6 +249,8 @@ class ContentTombstoneStoreTest {
 
         assertThat(warnings).hasSize(1);
         assertThat(warnings.get(0).getThrowableProxy().getClassName())
+                .isEqualTo(RedisConnectionFailureException.class.getName());
+        assertThat(warnings.get(0).getThrowableProxy().getCause().getClassName())
                 .isEqualTo(QueryTimeoutException.class.getName());
     }
 
@@ -220,6 +264,8 @@ class ContentTombstoneStoreTest {
 
         assertThat(warnings).hasSize(1);
         assertThat(warnings.get(0).getThrowableProxy().getClassName())
+                .isEqualTo(RedisConnectionFailureException.class.getName());
+        assertThat(warnings.get(0).getThrowableProxy().getCause().getClassName())
                 .isEqualTo(QueryTimeoutException.class.getName());
     }
 

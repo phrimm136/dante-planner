@@ -23,6 +23,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 
 import org.danteplanner.backend.shared.redis.AuthReadSources;
+import org.danteplanner.backend.shared.redis.AuthWrites;
 import org.danteplanner.backend.shared.redis.RedisKeyScanner;
 
 import io.micrometer.core.instrument.Counter;
@@ -80,20 +81,20 @@ public class TokenBlacklistService {
 
     private final long refreshTokenExpiry;
 
-    private final StringRedisTemplate stringRedisTemplate;
+    private final AuthWrites authWrites;
 
     private final AuthReadSources authReadSources;
 
     private final MeterRegistry meterRegistry;
 
     public TokenBlacklistService(
-            StringRedisTemplate stringRedisTemplate,
+            AuthWrites authWrites,
             AuthReadSources authReadSources,
             MeterRegistry meterRegistry,
             @Value("${jwt.refresh-token-expiry:" + DEFAULT_REFRESH_TOKEN_EXPIRY_MS + "}")
             long refreshTokenExpiry) {
         this.refreshTokenExpiry = refreshTokenExpiry;
-        this.stringRedisTemplate = stringRedisTemplate;
+        this.authWrites = authWrites;
         this.authReadSources = authReadSources;
         this.meterRegistry = meterRegistry;
     }
@@ -101,9 +102,9 @@ public class TokenBlacklistService {
     @PostConstruct
     void preloadLogoutRevokeScript() {
         try {
-            stringRedisTemplate.execute((RedisCallback<String>) connection ->
+            authWrites.writeWithoutResult(store -> store.execute((RedisCallback<String>) connection ->
                     connection.scriptingCommands().scriptLoad(
-                            LOGOUT_REVOKE_SCRIPT.getBytes(StandardCharsets.UTF_8)));
+                            LOGOUT_REVOKE_SCRIPT.getBytes(StandardCharsets.UTF_8))));
         } catch (DataAccessException e) {
             log.warn("Could not preload logout revocation script; it loads on first use", e);
         }
@@ -143,7 +144,7 @@ public class TokenBlacklistService {
         args.add(Long.toString(now));
         args.add(Long.toString(refreshTokenExpiry));
 
-        stringRedisTemplate.execute(logoutRevokeScript, keys, args.toArray());
+        authWrites.writeWithoutResult(store -> store.execute(logoutRevokeScript, keys, args.toArray()));
     }
 
     private long remainingMillis(Date expiry, long now) {
@@ -165,8 +166,8 @@ public class TokenBlacklistService {
             return;
         }
 
-        stringRedisTemplate.opsForValue().set(
-                blacklistKey(token), encode(mode, now), Duration.ofMillis(remaining));
+        authWrites.writeWithoutResult(store -> store.opsForValue().set(
+                blacklistKey(token), encode(mode, now), Duration.ofMillis(remaining)));
     }
 
     public boolean isBlacklisted(String token) {
@@ -194,8 +195,8 @@ public class TokenBlacklistService {
         // invalidation, which is exactly the token a user logging straight back in receives.
         long now = System.currentTimeMillis();
         long stamp = now - (now % 1000);
-        stringRedisTemplate.opsForValue().set(
-                userInvalidationKey(userId), String.valueOf(stamp), Duration.ofMillis(refreshTokenExpiry));
+        authWrites.writeWithoutResult(store -> store.opsForValue().set(
+                userInvalidationKey(userId), String.valueOf(stamp), Duration.ofMillis(refreshTokenExpiry)));
         log.info("Invalidated all tokens for user {}", userId);
     }
 
@@ -218,26 +219,28 @@ public class TokenBlacklistService {
 
     public void clearUserInvalidation(@NonNull Long userId) {
         Objects.requireNonNull(userId, "userId");
-        stringRedisTemplate.delete(userInvalidationKey(userId));
+        authWrites.writeWithoutResult(store -> store.delete(userInvalidationKey(userId)));
     }
 
     public int size() {
-        return RedisKeyScanner.scanKeys(stringRedisTemplate, BLACKLIST_KEY_PREFIX + "*").size();
+        return authWrites.write(store -> RedisKeyScanner.scanKeys(store, BLACKLIST_KEY_PREFIX + "*").size());
     }
 
     public int userInvalidationSize() {
-        return RedisKeyScanner.scanKeys(stringRedisTemplate, USER_INVALIDATION_KEY_PREFIX + "*").size();
+        return authWrites.write(store -> RedisKeyScanner.scanKeys(store, USER_INVALIDATION_KEY_PREFIX + "*").size());
     }
 
     public void clear() {
-        Set<String> keys = RedisKeyScanner.scanKeys(stringRedisTemplate, BLACKLIST_KEY_PREFIX + "*");
-        if (!keys.isEmpty()) {
-            stringRedisTemplate.delete(keys);
-        }
-        Set<String> userKeys = RedisKeyScanner.scanKeys(stringRedisTemplate, USER_INVALIDATION_KEY_PREFIX + "*");
-        if (!userKeys.isEmpty()) {
-            stringRedisTemplate.delete(userKeys);
-        }
+        authWrites.writeWithoutResult(store -> {
+            Set<String> keys = RedisKeyScanner.scanKeys(store, BLACKLIST_KEY_PREFIX + "*");
+            if (!keys.isEmpty()) {
+                store.delete(keys);
+            }
+            Set<String> userKeys = RedisKeyScanner.scanKeys(store, USER_INVALIDATION_KEY_PREFIX + "*");
+            if (!userKeys.isEmpty()) {
+                store.delete(userKeys);
+            }
+        });
     }
 
     private boolean failOpen(String message, DataAccessException e) {

@@ -9,8 +9,10 @@ epic: none · pr: none
   INVARIANT: outside the gate, no production class reads a role breaker's state or holds a Redis store handle, except the classes that define the stores and the classes on a frozen list — enforced by an architecture test whose lists fail when an entry no longer needs its exemption.
   INVARIANT: a call through the gate of an open role does not invoke the store and adds one to that role's skip count — enforced by the gate's unit test.
   INVARIANT: a read that goes through a gate does not wait on a role whose breaker is open — enforced by the outage integration test reading the gate's skip count for each request; a read added outside the gate by a class on the frozen list is unenforced.
-  NON-GOAL: gating the auth-Redis writes, the SSE publish and subscription, the scheduler lock, view recording and the freshness marker store — each needs its own answer for an open role; they stay on the frozen list until they have one.
   NON-GOAL: handling a store failure inside the gate — a command that fails behind a closed breaker stays the caller's fail-open or fail-closed decision.
+
+## Superseded
+- @redis @degradation @breaker → 522 — NON-GOAL: gating the auth-Redis writes, the SSE publish and subscription, the scheduler lock, view recording and the freshness marker store — each needs its own answer for an open role; they stay on the frozen list until they have one.
 
 ## Takeaway
 - takeaway: a rule every caller must remember becomes a parameter no caller can omit; then one unit test proves it for all of them and a counter makes it observable.
