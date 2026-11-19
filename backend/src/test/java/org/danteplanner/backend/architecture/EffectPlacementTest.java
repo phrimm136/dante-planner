@@ -414,7 +414,7 @@ class EffectPlacementTest {
             "org.danteplanner.backend.shared.readpath.ContentTombstoneStore",
             Set.of("writeTombstone", "writeTombstones", "clearTombstones"));
 
-    private static final String FIXTURE_PACKAGE = "org.danteplanner.backend.architecture.fixture";
+    private static final String FIXTURE_PACKAGE = "org.danteplanner.fixture.effectplacement";
 
     private static final JavaClasses FIXTURE_CLASSES = new ClassFileImporter()
             .importPackages(FIXTURE_PACKAGE);

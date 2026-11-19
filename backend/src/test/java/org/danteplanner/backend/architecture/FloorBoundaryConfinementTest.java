@@ -7,9 +7,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.danteplanner.backend.architecture.fixture.BoundaryFloorReader;
-import org.danteplanner.backend.architecture.fixture.FloorSelectionOutsideModule;
-import org.danteplanner.backend.architecture.fixture.RawFloorReader;
+import org.danteplanner.fixture.floorboundary.BoundaryFloorReader;
+import org.danteplanner.fixture.floorboundary.FloorSelectionOutsideModule;
+import org.danteplanner.fixture.floorboundary.RawFloorReader;
 import org.danteplanner.backend.planner.validation.floor.FloorSelection;
 import org.springframework.asm.ClassReader;
 import org.springframework.asm.ClassVisitor;

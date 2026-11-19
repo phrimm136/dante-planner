@@ -6,8 +6,8 @@ import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 
 import org.danteplanner.backend.support.LogCapture;
-import org.danteplanner.logcapturefixture.GlobalAppenderFixture;
-import org.danteplanner.logcapturefixture.ScopedCaptureFixture;
+import org.danteplanner.fixture.logcapture.GlobalAppenderFixture;
+import org.danteplanner.fixture.logcapture.ScopedCaptureFixture;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

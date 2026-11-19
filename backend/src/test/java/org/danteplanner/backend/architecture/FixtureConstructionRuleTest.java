@@ -5,11 +5,11 @@ import org.junit.jupiter.api.Test;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 
-import org.danteplanner.fixturefixture.ConstructorReferenceFixture;
-import org.danteplanner.fixturefixture.PlannerConstructorFixture;
-import org.danteplanner.fixturefixture.SupportBuilderFixture;
-import org.danteplanner.fixturefixture.UpsertRequestFixture;
-import org.danteplanner.fixturefixture.UserBuilderFixture;
+import org.danteplanner.fixture.fixtureconstruction.ConstructorReferenceFixture;
+import org.danteplanner.fixture.fixtureconstruction.PlannerConstructorFixture;
+import org.danteplanner.fixture.fixtureconstruction.SupportBuilderFixture;
+import org.danteplanner.fixture.fixtureconstruction.UpsertRequestFixture;
+import org.danteplanner.fixture.fixtureconstruction.UserBuilderFixture;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

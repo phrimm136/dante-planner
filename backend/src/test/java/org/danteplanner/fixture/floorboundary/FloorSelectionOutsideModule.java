@@ -1,0 +1,15 @@
+package org.danteplanner.fixture.floorboundary;
+
+import java.util.List;
+
+import org.danteplanner.backend.planner.validation.floor.Difficulty;
+import org.danteplanner.backend.planner.validation.floor.FloorSelection;
+import org.danteplanner.backend.planner.validation.floor.ThemePack;
+
+/** Builds a floor selection without the parse boundary. */
+public class FloorSelectionOutsideModule {
+
+    public FloorSelection emptyFloor() {
+        return new FloorSelection(ThemePack.none(), Difficulty.unset(), List.of());
+    }
+}

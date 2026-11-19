@@ -1,7 +1,7 @@
 package org.danteplanner.backend.architecture;
 
-import org.danteplanner.backend.architecture.fixture.planner.validation.floor.ServiceReachingFloorModule;
-import org.danteplanner.backend.architecture.fixture.planner.validation.floor.SiblingReachingFloorModule;
+import org.danteplanner.fixture.subjectmodule.planner.validation.floor.ServiceReachingFloorModule;
+import org.danteplanner.fixture.subjectmodule.planner.validation.floor.SiblingReachingFloorModule;
 
 import org.junit.jupiter.api.Test;
 

@@ -8,13 +8,13 @@ import com.tngtech.archunit.lang.ArchRule;
 
 import org.danteplanner.backend.auth.token.RefreshRotationService;
 import org.danteplanner.backend.auth.security.AccessTokenAuthenticator;
-import org.danteplanner.roleclaimfixture.AuthorityNameReferenceFixture;
-import org.danteplanner.roleclaimfixture.AuthorityReaderFixture;
-import org.danteplanner.roleclaimfixture.EffectiveRoleReaderFixture;
-import org.danteplanner.roleclaimfixture.PreAuthorizedHandlerFixture;
-import org.danteplanner.roleclaimfixture.RoleAccessorReaderFixture;
-import org.danteplanner.roleclaimfixture.RoleDslFixture;
-import org.danteplanner.roleclaimfixture.UserInRoleFixture;
+import org.danteplanner.fixture.roleclaim.AuthorityNameReferenceFixture;
+import org.danteplanner.fixture.roleclaim.AuthorityReaderFixture;
+import org.danteplanner.fixture.roleclaim.EffectiveRoleReaderFixture;
+import org.danteplanner.fixture.roleclaim.PreAuthorizedHandlerFixture;
+import org.danteplanner.fixture.roleclaim.RoleAccessorReaderFixture;
+import org.danteplanner.fixture.roleclaim.RoleDslFixture;
+import org.danteplanner.fixture.roleclaim.UserInRoleFixture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;

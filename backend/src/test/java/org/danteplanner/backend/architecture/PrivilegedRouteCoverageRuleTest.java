@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 
-import org.danteplanner.privilegedroutefixture.PrivilegedHandlerFixture;
-import org.danteplanner.privilegedroutefixture.StrayAdminHandlerFixture;
-import org.danteplanner.privilegedroutefixture.StrayModerationHandlerFixture;
+import org.danteplanner.fixture.privilegedroute.PrivilegedHandlerFixture;
+import org.danteplanner.fixture.privilegedroute.StrayAdminHandlerFixture;
+import org.danteplanner.fixture.privilegedroute.StrayModerationHandlerFixture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;

@@ -6,8 +6,8 @@ import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 
 import org.danteplanner.backend.integration.ExclusiveDatabaseSupport;
-import org.danteplanner.exclusivedbfixture.ExclusiveMemberFixture;
-import org.danteplanner.exclusivedbfixture.SharedNeighbourFixture;
+import org.danteplanner.fixture.exclusivedb.ExclusiveMemberFixture;
+import org.danteplanner.fixture.exclusivedb.SharedNeighbourFixture;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

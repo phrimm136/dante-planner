@@ -2,13 +2,13 @@ package org.danteplanner.backend.architecture;
 
 import java.util.Map;
 
-import org.danteplanner.backend.architecture.fixture.planner.validation.ego.EgoSubjectLeak;
-import org.danteplanner.backend.architecture.fixture.planner.validation.egogift.EgoGiftSubjectLeak;
-import org.danteplanner.backend.architecture.fixture.planner.validation.identity.IdentitySubjectLeak;
-import org.danteplanner.backend.architecture.fixture.planner.validation.sinner.SinnerSubjectLeak;
-import org.danteplanner.backend.architecture.fixture.planner.validation.skill.SkillSubjectLeak;
-import org.danteplanner.backend.architecture.fixture.planner.validation.startbuff.StartBuffSubjectLeak;
-import org.danteplanner.backend.architecture.fixture.planner.validation.startgift.StartGiftSubjectLeak;
+import org.danteplanner.fixture.subjectmodule.planner.validation.ego.EgoSubjectLeak;
+import org.danteplanner.fixture.subjectmodule.planner.validation.egogift.EgoGiftSubjectLeak;
+import org.danteplanner.fixture.subjectmodule.planner.validation.identity.IdentitySubjectLeak;
+import org.danteplanner.fixture.subjectmodule.planner.validation.sinner.SinnerSubjectLeak;
+import org.danteplanner.fixture.subjectmodule.planner.validation.skill.SkillSubjectLeak;
+import org.danteplanner.fixture.subjectmodule.planner.validation.startbuff.StartBuffSubjectLeak;
+import org.danteplanner.fixture.subjectmodule.planner.validation.startgift.StartGiftSubjectLeak;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

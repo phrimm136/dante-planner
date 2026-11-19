@@ -8,7 +8,7 @@ import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.lang.ArchRule;
 
-import org.danteplanner.backend.architecture.fixture.consistency.SpringImportingChecker;
+import org.danteplanner.fixture.consistencychecker.SpringImportingChecker;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static org.assertj.core.api.Assertions.assertThat;

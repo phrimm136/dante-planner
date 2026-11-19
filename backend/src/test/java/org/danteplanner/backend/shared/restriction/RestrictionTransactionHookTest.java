@@ -23,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.user.api.UserBannedException;
-import org.danteplanner.restrictionfixture.DeclaredHandlersFixture;
+import org.danteplanner.fixture.restriction.DeclaredHandlersFixture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;

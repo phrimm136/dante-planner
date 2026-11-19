@@ -11,11 +11,11 @@ import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.lang.ArchRule;
 
-import org.danteplanner.backend.architecture.fixture.GatedStoreReadingFixture;
-import org.danteplanner.backend.architecture.fixture.RoleHealthReadingFixture;
-import org.danteplanner.backend.architecture.fixture.RoleHealthReferencingFixture;
-import org.danteplanner.backend.architecture.fixture.StoreHandleHoldingFixture;
-import org.danteplanner.backend.architecture.fixture.StoreHandleInjectedFixture;
+import org.danteplanner.fixture.rolegate.GatedStoreReadingFixture;
+import org.danteplanner.fixture.rolegate.RoleHealthReadingFixture;
+import org.danteplanner.fixture.rolegate.RoleHealthReferencingFixture;
+import org.danteplanner.fixture.rolegate.StoreHandleHoldingFixture;
+import org.danteplanner.fixture.rolegate.StoreHandleInjectedFixture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

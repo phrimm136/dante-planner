@@ -15,12 +15,12 @@ import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.integration.ExclusiveDatabaseSupport;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.danteplanner.backend.shared.redis.RedisKeyScanner;
-import org.danteplanner.testtransactionfixture.InheritingFixture;
-import org.danteplanner.testtransactionfixture.JakartaTransactionalFixture;
-import org.danteplanner.testtransactionfixture.TransactionalBeanFixture;
-import org.danteplanner.testtransactionfixture.TransactionalClassFixture;
-import org.danteplanner.testtransactionfixture.TransactionalMethodFixture;
-import org.danteplanner.testtransactionfixture.TransactionalSupportFixture;
+import org.danteplanner.fixture.testtransaction.InheritingFixture;
+import org.danteplanner.fixture.testtransaction.JakartaTransactionalFixture;
+import org.danteplanner.fixture.testtransaction.TransactionalBeanFixture;
+import org.danteplanner.fixture.testtransaction.TransactionalClassFixture;
+import org.danteplanner.fixture.testtransaction.TransactionalMethodFixture;
+import org.danteplanner.fixture.testtransaction.TransactionalSupportFixture;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -167,7 +167,7 @@ class TestIsolationConventionTest {
 
     @Test
     void keyspaceScan_WhenAFixtureCallsOrReferencesKeys_NamesBoth() {
-        JavaClasses fixtures = new ClassFileImporter().importPackages("org.danteplanner.keyspacefixture");
+        JavaClasses fixtures = new ClassFileImporter().importPackages("org.danteplanner.fixture.keyspace");
 
         assertThat(keyspaceScanners(fixtures))
                 .containsExactly("KeyspaceMethodReferenceFixtureIT", "KeyspaceScanFixtureIT");

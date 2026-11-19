@@ -19,7 +19,7 @@ import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.danteplanner.backend.shared.util.CookieUtils;
-import org.danteplanner.ratelimitfixture.DeclaredHandlerFixture;
+import org.danteplanner.fixture.ratelimit.DeclaredHandlerFixture;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;

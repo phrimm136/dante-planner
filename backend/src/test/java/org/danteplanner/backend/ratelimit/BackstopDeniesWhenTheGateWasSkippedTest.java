@@ -17,8 +17,8 @@ import org.danteplanner.backend.shared.ratelimit.RateLimitService;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.backend.support.InMemoryProxyManager;
 import org.danteplanner.backend.support.LogCapture;
-import org.danteplanner.ratelimitfixture.BareHandlerFixture;
-import org.danteplanner.ratelimitfixture.DeclaredHandlerFixture;
+import org.danteplanner.fixture.ratelimit.BareHandlerFixture;
+import org.danteplanner.fixture.ratelimit.DeclaredHandlerFixture;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

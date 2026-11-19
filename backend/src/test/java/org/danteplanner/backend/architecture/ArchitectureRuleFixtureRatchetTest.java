@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ArchitectureRuleFixtureRatchetTest {
 
     private static final String ARCHITECTURE = "org.danteplanner.backend.architecture";
-    private static final String RATCHET_FIXTURE = "org.danteplanner.ratchetfixture";
+    private static final String RATCHET_FIXTURE = "org.danteplanner.fixture.ratchet";
     private static final String FROZEN_LIST = "backend/config/architecture-rules-without-fixtures.txt";
     private static final Path FROZEN_LIST_PATH = Path.of("config/architecture-rules-without-fixtures.txt");
     private static final String TESTABLE = "org.junit.platform.commons.annotation.Testable";

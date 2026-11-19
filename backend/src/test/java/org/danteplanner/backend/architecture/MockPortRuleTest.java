@@ -5,15 +5,15 @@ import org.junit.jupiter.api.Test;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 
-import org.danteplanner.mockportfixture.BeanMockFixture;
-import org.danteplanner.mockportfixture.FixtureSeam;
-import org.danteplanner.mockportfixture.FixtureService;
-import org.danteplanner.mockportfixture.FixtureValue;
-import org.danteplanner.mockportfixture.OpenMocksFixture;
-import org.danteplanner.mockportfixture.ParameterMockFixture;
-import org.danteplanner.mockportfixture.PortMockFixture;
-import org.danteplanner.mockportfixture.SettingsMockFixture;
-import org.danteplanner.mockportfixture.SpringExtensionMockFixture;
+import org.danteplanner.fixture.mockport.BeanMockFixture;
+import org.danteplanner.fixture.mockport.FixtureSeam;
+import org.danteplanner.fixture.mockport.FixtureService;
+import org.danteplanner.fixture.mockport.FixtureValue;
+import org.danteplanner.fixture.mockport.OpenMocksFixture;
+import org.danteplanner.fixture.mockport.ParameterMockFixture;
+import org.danteplanner.fixture.mockport.PortMockFixture;
+import org.danteplanner.fixture.mockport.SettingsMockFixture;
+import org.danteplanner.fixture.mockport.SpringExtensionMockFixture;
 
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.belongToAnyOf;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class MockPortRuleTest {
 
     private static final JavaClasses FIXTURES =
-            new ClassFileImporter().importPackages("org.danteplanner.mockportfixture");
+            new ClassFileImporter().importPackages("org.danteplanner.fixture.mockport");
 
     @Test
     void mocksOnlyAtPorts_WhenAServiceASeamAndAValueAreMocked_FailsNamingEachFieldAndParameter() {

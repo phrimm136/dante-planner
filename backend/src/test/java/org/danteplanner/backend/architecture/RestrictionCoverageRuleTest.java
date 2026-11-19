@@ -17,11 +17,11 @@ import org.junit.jupiter.api.io.TempDir;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 
-import org.danteplanner.restrictionfixture.BlankExemptionFixture;
-import org.danteplanner.restrictionfixture.DeclaredHandlersFixture;
-import org.danteplanner.restrictionfixture.DoublyDeclaredWriteHandlerFixture;
-import org.danteplanner.restrictionfixture.RestrictedReadHandlerFixture;
-import org.danteplanner.restrictionfixture.UndeclaredWriteHandlerFixture;
+import org.danteplanner.fixture.restriction.BlankExemptionFixture;
+import org.danteplanner.fixture.restriction.DeclaredHandlersFixture;
+import org.danteplanner.fixture.restriction.DoublyDeclaredWriteHandlerFixture;
+import org.danteplanner.fixture.restriction.RestrictedReadHandlerFixture;
+import org.danteplanner.fixture.restriction.UndeclaredWriteHandlerFixture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
