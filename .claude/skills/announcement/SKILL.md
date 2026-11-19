@@ -168,7 +168,7 @@ Push the data checkout first, then the code branch, then the tag. The data must 
 
 ```bash
 git -C static push origin main
-git push origin dev
+git push origin <branch>
 git push origin v<YYMMDD>
 ```
 
