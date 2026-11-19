@@ -8,7 +8,7 @@ Usage: review-measures.py [--repo PATH] [--reviews DIR] [--since SHA] [--self-te
 Reads every *.md record under the reviews directory and the dev reflog, and prints finding
 counts, verdict counts, landed commits whose patch-id is in no record, and files that two fix
 commits touched within 14 days. The reflog walk starts at the first dev entry containing --since,
-or by default the commit that added .githooks/reference-transaction.
+or by default the commit that added .githooks/pre-push.
 """
 
 import argparse
@@ -29,7 +29,7 @@ FIX_SUBJECT = re.compile(r"^fix(\(|:)")
 REFIX_WINDOW_SECONDS = 14 * 24 * 60 * 60
 FIELD_SEP = "\x1f"
 COMMIT_SEP = "\x00"
-LANDING_HOOK = ".githooks/reference-transaction"
+LANDING_HOOK = ".githooks/pre-push"
 
 
 def parse_record(record_text):
