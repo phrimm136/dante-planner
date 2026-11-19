@@ -1272,7 +1272,8 @@ guards the parse but likewise skips the schema gate.
   bash-deny) if the measures script ever shows an unreviewed range hidden this way.
   re-check: `rg -q 'refs/remotes/origin/main' .githooks/pre-push`
 - `scripts/ops/review-measures.py` reads landed commits from `dev`, a branch that no longer
-  exists: without `--since` its `git log dev` fails and the script stops with an error. It must
+  exists: its first step, `git reflog show dev`, fails whatever the arguments, and the script
+  stops with an error. It must
   read the commits of `origin/main` since the push gate landed. Worth doing the next time the
   review measures are wanted.
   re-check: `rg -q 'dev reflog' scripts/ops/review-measures.py`
