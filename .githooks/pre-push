@@ -33,7 +33,11 @@ while read -r _ local_sha remote_ref _; do
   case $remote_ref in refs/heads/*) ;; *) continue ;; esac
   [ "$local_sha" = "$zero" ] && continue
   [ "$loaded" = 1 ] || load_reviewed
-  for c in $(git rev-list --reverse --no-merges "$local_sha" "${landed[@]}"); do
+  commits=$(git rev-list --reverse --no-merges "$local_sha" "${landed[@]}") || {
+    echo "push: cannot list the commits of $remote_ref, so nothing is pushed" >&2
+    exit 1
+  }
+  for c in $commits; do
     id=$(git diff-tree -p "$c" | git patch-id --stable | cut -d' ' -f1)
     [ -n "$id" ] || continue
     printf '%s\n' "$reviewed" | awk -v id="$id" '$0 == id { found = 1 } END { exit !found }' || missing+=("$c")

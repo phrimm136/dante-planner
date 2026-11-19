@@ -118,6 +118,18 @@ g update-ref -d refs/remotes/origin/main
 g switch -q -c feat/noorigin main
 push feat/noorigin; rc=$?
 check 'no origin/main ref: commits on another remote branch pass' eq "$(remote_tip feat/noorigin):$rc" "$(tip feat/noorigin):0"
+change o.txt o 'feat(o): unreviewed without origin/main'
+push feat/noorigin; rc=$?
+check 'no origin/main ref: an unreviewed commit is still refused' eq "$(remote_tip feat/noorigin):$((rc != 0))" "$(tip feat/noorigin^):1"
+
+g switch -q -c feat/broken main
+BAD=$TMP/bad-hook
+sed 's/"\$local_sha" "\${landed\[@\]}"/"$local_sha" --not refs\/remotes\/origin\/gone/' "$HOOK" > "$BAD"
+cmp -s "$HOOK" "$BAD" && { echo 'FAIL  the mutated hook equals the hook'; fail=1; }
+cp "$BAD" "$R/.githooks/pre-push"; chmod +x "$R/.githooks/pre-push"
+push feat/broken; rc=$?
+check 'a failing rev-list refuses the push' eq "$(remote_tip feat/broken):$((rc != 0))" "none:1"
+check 'a failing rev-list says why' has 'push: cannot list the commits of refs/heads/feat/broken, so nothing is pushed'
 
 [ "$fail" = 0 ] && echo "PASS pre-push scenarios" || echo "FAIL pre-push scenarios"
 exit $fail

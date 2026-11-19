@@ -1194,9 +1194,10 @@ guards the parse but likewise skips the schema gate.
   moves that ref to local commits. Worth closing (deny `git remote add|set-url` in
   bash-deny) if the measures script ever shows an unreviewed range hidden this way.
   re-check: `rg -q 'refs/remotes/origin/main' .githooks/pre-push`
-- `scripts/ops/review-measures.py` counts landed commits from the `dev` reflog, a branch that
-  no longer exists, so it measures nothing. It must read the commits of `origin/main` since the
-  push gate landed. Worth doing the next time the review measures are wanted.
+- `scripts/ops/review-measures.py` reads landed commits from `dev`, a branch that no longer
+  exists: without `--since` its `git log dev` fails and the script stops with an error. It must
+  read the commits of `origin/main` since the push gate landed. Worth doing the next time the
+  review measures are wanted.
   re-check: `rg -q 'dev reflog' scripts/ops/review-measures.py`
 - FE mutation testing has no working runner: Stryker 10 with the vitest runner fails in
   project setup against the multi-project `vite.config.ts` on vitest 4.1.2, and its IPC
