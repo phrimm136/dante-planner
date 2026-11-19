@@ -22,6 +22,9 @@ learning: design
   take `--cwd <dir>`.
 - A skill CLI explains itself through `<cli> help`; the hook refuses reading its source unless the
   unit changes that CLI and created `<checkout>/.claude/.cli-edit`.
+- Where a route's or a file's code lives comes from the `map` skill's CLI,
+  `<checkout or worktree>/.claude/skills/map/bin/map` (`map help`): `map show '<route>'` and
+  `map deps <file>` fill a brief's Module placement and Dependents before any search.
 - Terraform plans run as `ops tf plan <stack>`, which prints the `!` apply command for the user;
   other terraform commands run through `scripts/ops/terraform-run.sh …`; a bare `terraform` is
   hook-blocked.

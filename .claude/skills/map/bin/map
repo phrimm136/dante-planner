@@ -1,0 +1,362 @@
+#!/usr/bin/env python3
+import dataclasses
+import os
+import re
+import sys
+from pathlib import Path
+
+USAGE_TEXT = """usage: map [--root <path>] <command>
+
+Answers where a frontend route's code lives, from the code itself. Nothing is stored: every
+answer is computed from frontend/src/lib/router.tsx, the import graph under frontend/src and the
+Spring controllers under backend/src/main, so the map cannot go stale.
+
+commands:
+  list               every route with its page file and how many files it reaches; `own` files
+                     are reached by that route alone
+  show <route>       the route's page, its own files, the files it shares with at most
+                     {narrow} routes (grouped by those routes), the count of wider files, the
+                     endpoints its own and narrowly shared files call (frontend caller, backend
+                     handler) and the tests of its own files
+  show <route> --shared   the same, with every wider file listed
+  for <file>         the routes that reach the file, one per line
+  deps <file>        what the file imports, what imports it, its tests, its routes and the
+                     endpoints it names
+  doctor             what the map could not read: route entries without a page, imports
+                     outside test files that resolve to no file, endpoints the frontend names that no controller maps;
+                     exit 1 when a route page or an import does not resolve
+  help               this text
+
+repo root:  the checkout this CLI file lives in, whatever the current directory. --root <path>
+            points it at another checkout or worktree.
+<route>:    a path exactly as router.tsx writes it, for example '/planner/md/$id'; quote it.
+<file>:     an absolute path, a path from the repo root (frontend/src/...) or from frontend
+            (src/...).
+endpoints:  the frontend side is found by the '/api/...' text in a file, so it carries no HTTP
+            method; a path assembled at run time is not seen.
+"""
+
+NARROW_ROUTES = 4
+SOURCE_SUFFIXES = (".ts", ".tsx")
+RESOLVE_SUFFIXES = ("", ".ts", ".tsx", "/index.ts", "/index.tsx")
+ROUTE_PATTERN = re.compile(r"createRoute\(\{(.*?)\n\}\)", re.S)
+PATH_PATTERN = re.compile(r"\bpath:\s*'([^']+)'")
+PAGE_PATTERN = re.compile(r"import\('(@/[^']+)'\)")
+IMPORT_PATTERN = re.compile(r"""(?:\bfrom|\bimport)\s*\(?\s*['"]([^'"]+)['"]""")
+API_PATTERN = re.compile(r"""[`'"](/api/[^`'"?\s]*)""")
+CLASS_MAPPING = re.compile(r'@RequestMapping\(\s*(?:value\s*=\s*)?"([^"]*)"')
+METHOD_MAPPING = re.compile(r'@(Get|Post|Put|Patch|Delete)Mapping(?:\(\s*(?:value\s*=\s*)?"([^"]*)")?')
+TEMPLATE_PART = re.compile(r"\$\{[^}]*\}|\{[^}]*\}")
+
+
+class MapError(Exception):
+    pass
+
+
+@dataclasses.dataclass(frozen=True)
+class Route:
+    path_text: str
+    page_file: Path
+    router_line: int
+
+
+@dataclasses.dataclass(frozen=True)
+class Endpoint:
+    verb_name: str
+    path_text: str
+    handler_file: Path
+    handler_line: int
+
+
+@dataclasses.dataclass(frozen=True)
+class CodeMap:
+    repo_root: Path
+    source_dir: Path
+    routes: tuple
+    pageless_paths: tuple
+    imports_of: dict
+    unresolved: tuple
+    reach_of: dict
+    api_of: dict
+    endpoints: tuple
+
+    def routes_reaching(self, source_file):
+        return [one_route for one_route in self.routes if source_file in self.reach_of[one_route.path_text]]
+
+    def importers_of(self, source_file):
+        return sorted(one_file for one_file, imported in self.imports_of.items() if source_file in imported)
+
+
+def is_test_file(source_file):
+    return "__tests__" in source_file.parts or ".test." in source_file.name
+
+
+def resolve_import(source_dir, from_file, spec_text):
+    spec_text = spec_text.split("?", 1)[0]
+    if spec_text.startswith("@/"):
+        base_path = source_dir / spec_text[2:]
+    elif spec_text.startswith("."):
+        base_path = Path(os.path.normpath(from_file.parent / spec_text))
+    else:
+        return None, False
+    for one_suffix in RESOLVE_SUFFIXES:
+        candidate = Path(str(base_path) + one_suffix)
+        if candidate.is_file():
+            return candidate, True
+    return None, True
+
+
+def normal_api(path_text):
+    return TEMPLATE_PART.sub(":x", path_text).rstrip("/")
+
+
+def read_endpoints(repo_root):
+    found = []
+    main_dir = repo_root / "backend" / "src" / "main"
+    for controller_file in sorted(main_dir.rglob("*Controller.java")):
+        source_text = controller_file.read_text(errors="replace")
+        class_match = CLASS_MAPPING.search(source_text)
+        base_text = class_match.group(1) if class_match else ""
+        for one_match in METHOD_MAPPING.finditer(source_text):
+            line_number = source_text.count("\n", 0, one_match.start()) + 1
+            found.append(Endpoint(one_match.group(1).upper(), base_text + (one_match.group(2) or ""),
+                                  controller_file, line_number))
+    return tuple(found)
+
+
+def build_map(repo_root):
+    source_dir = repo_root / "frontend" / "src"
+    router_file = source_dir / "lib" / "router.tsx"
+    if not router_file.is_file():
+        raise MapError(f"{router_file} is missing; pass --root <a LimbusPlanner checkout or worktree>")
+    imports_of, api_of, unresolved = {}, {}, []
+    for source_file in sorted(source_dir.rglob("*")):
+        if source_file.suffix not in SOURCE_SUFFIXES or not source_file.is_file():
+            continue
+        source_text = source_file.read_text(errors="replace")
+        imported = set()
+        for spec_text in IMPORT_PATTERN.findall(source_text):
+            target_file, is_local = resolve_import(source_dir, source_file, spec_text)
+            if target_file is not None and target_file.suffix in SOURCE_SUFFIXES:
+                imported.add(target_file)
+            elif target_file is None and is_local and not is_test_file(source_file):
+                unresolved.append((source_file, spec_text))
+        imports_of[source_file] = imported
+        api_paths = sorted({normal_api(one_path) for one_path in API_PATTERN.findall(source_text)})
+        if api_paths and not is_test_file(source_file):
+            api_of[source_file] = api_paths
+    router_text = router_file.read_text()
+    routes, pageless_paths = [], []
+    for block_match in ROUTE_PATTERN.finditer(router_text):
+        path_match = PATH_PATTERN.search(block_match.group(1))
+        if not path_match:
+            continue
+        page_match = PAGE_PATTERN.search(block_match.group(1))
+        page_file = resolve_import(source_dir, router_file, page_match.group(1))[0] if page_match else None
+        if page_file is None:
+            pageless_paths.append(path_match.group(1))
+            continue
+        line_number = router_text.count("\n", 0, block_match.start(1) + path_match.start()) + 1
+        routes.append(Route(path_match.group(1), page_file, line_number))
+    reach_of = {}
+    for one_route in routes:
+        seen, pending = set(), [one_route.page_file]
+        while pending:
+            current_file = pending.pop()
+            if current_file in seen or is_test_file(current_file):
+                continue
+            seen.add(current_file)
+            pending.extend(imports_of.get(current_file, ()))
+        reach_of[one_route.path_text] = frozenset(seen)
+    return CodeMap(repo_root, source_dir, tuple(routes), tuple(pageless_paths), imports_of,
+                   tuple(unresolved), reach_of, api_of, read_endpoints(repo_root))
+
+
+def shown(code_map, one_file):
+    return str(one_file.relative_to(code_map.repo_root))
+
+
+def route_named(code_map, path_text):
+    for one_route in code_map.routes:
+        if one_route.path_text == path_text:
+            return one_route
+    near_paths = [one_route.path_text for one_route in code_map.routes if path_text.strip("/") and
+                  path_text.strip("/").split("/")[0] in one_route.path_text]
+    hint_text = f"; near: {', '.join(near_paths)}" if near_paths else ""
+    raise MapError(f"no route '{path_text}' in router.tsx{hint_text}; run map list")
+
+
+def file_named(code_map, path_text):
+    given_path = Path(path_text)
+    if given_path.is_absolute():
+        full_path = given_path
+    elif given_path.parts[:1] == ("frontend",):
+        full_path = code_map.repo_root / given_path
+    else:
+        full_path = code_map.repo_root / "frontend" / given_path
+    full_path = Path(os.path.normpath(full_path))
+    if full_path not in code_map.imports_of:
+        raise MapError(f"{path_text} is not a .ts or .tsx file under {code_map.source_dir}; "
+                       f"pass an absolute path, frontend/src/... or src/...")
+    return full_path
+
+
+def spread_of(code_map, one_route):
+    """(own files, {route paths: files} for narrowly shared files, wider files) of a route."""
+    own_files, narrow_groups, wide_files = [], {}, []
+    for one_file in sorted(code_map.reach_of[one_route.path_text]):
+        reaching = tuple(other.path_text for other in code_map.routes_reaching(one_file))
+        if len(reaching) == 1:
+            own_files.append(one_file)
+        elif len(reaching) <= NARROW_ROUTES:
+            narrow_groups.setdefault(reaching, []).append(one_file)
+        else:
+            wide_files.append(one_file)
+    return own_files, narrow_groups, wide_files
+
+
+def handlers_for(code_map, api_path):
+    return [one_endpoint for one_endpoint in code_map.endpoints if normal_api(one_endpoint.path_text) == api_path]
+
+
+def tests_of(code_map, source_files):
+    wanted = set(source_files)
+    return sorted(one_file for one_file, imported in code_map.imports_of.items()
+                  if is_test_file(one_file) and wanted & imported)
+
+
+def api_lines(code_map, source_files):
+    callers_of = {}
+    for one_file in source_files:
+        for api_path in code_map.api_of.get(one_file, ()):
+            callers_of.setdefault(api_path, []).append(one_file)
+    out_lines = []
+    for api_path in sorted(callers_of):
+        out_lines.append(f"  {api_path}")
+        for one_file in callers_of[api_path]:
+            out_lines.append(f"    fe  {shown(code_map, one_file)}")
+        handlers = handlers_for(code_map, api_path)
+        for one_endpoint in handlers:
+            out_lines.append(f"    be  {one_endpoint.verb_name:<6} {shown(code_map, one_endpoint.handler_file)}:"
+                             f"{one_endpoint.handler_line}")
+        if not handlers:
+            out_lines.append("    be  no controller maps this path")
+    return out_lines
+
+
+def list_lines(code_map):
+    out_lines = [f"{len(code_map.routes)} routes"]
+    width = max(len(one_route.path_text) for one_route in code_map.routes)
+    for one_route in code_map.routes:
+        own_files, _, _ = spread_of(code_map, one_route)
+        reach_count = len(code_map.reach_of[one_route.path_text])
+        out_lines.append(f"{one_route.path_text:<{width}}  own {len(own_files):>3}  reach {reach_count:>4}  "
+                         f"{shown(code_map, one_route.page_file)}")
+    return out_lines
+
+
+def show_lines(code_map, path_text, with_shared):
+    one_route = route_named(code_map, path_text)
+    own_files, narrow_groups, wide_files = spread_of(code_map, one_route)
+    out_lines = [f"route  {one_route.path_text}  frontend/src/lib/router.tsx:{one_route.router_line}",
+                 f"page   {shown(code_map, one_route.page_file)}",
+                 f"own    {len(own_files)} files reached by this route alone"]
+    out_lines += [f"  {shown(code_map, one_file)}" for one_file in own_files]
+    narrow_files = []
+    for reaching in sorted(narrow_groups, key=lambda group: (len(group), group)):
+        other_paths = [other for other in reaching if other != one_route.path_text]
+        out_lines.append(f"with   {', '.join(other_paths)}  ({len(narrow_groups[reaching])} files)")
+        out_lines += [f"  {shown(code_map, one_file)}" for one_file in narrow_groups[reaching]]
+        narrow_files += narrow_groups[reaching]
+    out_lines.append(f"wider  {len(wide_files)} files reached by more than {NARROW_ROUTES} routes"
+                     + ("" if with_shared or not wide_files else f"; map show '{path_text}' --shared lists them"))
+    if with_shared:
+        out_lines += [f"  {shown(code_map, one_file)}" for one_file in wide_files]
+    out_lines.append("api    endpoints named by the own and narrowly shared files")
+    out_lines += api_lines(code_map, own_files + narrow_files) or ["  none"]
+    out_lines.append("tests  of the own files")
+    out_lines += [f"  {shown(code_map, one_file)}" for one_file in tests_of(code_map, own_files)] or ["  none"]
+    return out_lines
+
+
+def deps_lines(code_map, path_text):
+    source_file = file_named(code_map, path_text)
+    importers = code_map.importers_of(source_file)
+    sections = (
+        ("imports", sorted(code_map.imports_of[source_file])),
+        ("imported by", [one_file for one_file in importers if not is_test_file(one_file)]),
+        ("tests", [one_file for one_file in importers if is_test_file(one_file)]),
+    )
+    out_lines = []
+    for title_text, section_files in sections:
+        out_lines.append(f"{title_text}  ({len(section_files)})")
+        out_lines += [f"  {shown(code_map, one_file)}" for one_file in section_files]
+    reaching = code_map.routes_reaching(source_file)
+    out_lines.append(f"routes  ({len(reaching)})")
+    out_lines += [f"  {one_route.path_text}" for one_route in reaching]
+    out_lines.append("api")
+    out_lines += api_lines(code_map, [source_file]) or ["  none"]
+    return out_lines
+
+
+def for_lines(code_map, path_text):
+    reaching = code_map.routes_reaching(file_named(code_map, path_text))
+    if not reaching:
+        return ["no route reaches this file; map deps <file> shows what imports it"]
+    return [one_route.path_text for one_route in reaching]
+
+
+def doctor_lines(code_map):
+    loose_apis = sorted({api_path for api_paths in code_map.api_of.values() for api_path in api_paths
+                         if not handlers_for(code_map, api_path)})
+    out_lines = [f"routes {len(code_map.routes)}, source files {len(code_map.imports_of)}, "
+                 f"controller endpoints {len(code_map.endpoints)}",
+                 f"route entries without a page: {len(code_map.pageless_paths)}"]
+    out_lines += [f"  {one_path}" for one_path in code_map.pageless_paths]
+    out_lines.append(f"imports that resolve to no file: {len(code_map.unresolved)}")
+    out_lines += [f"  {shown(code_map, one_file)}: {spec_text}" for one_file, spec_text in code_map.unresolved]
+    out_lines.append(f"frontend endpoints no controller maps: {len(loose_apis)}")
+    out_lines += [f"  {api_path}" for api_path in loose_apis]
+    is_broken = bool(code_map.unresolved) or not code_map.routes
+    return out_lines, 1 if is_broken else 0
+
+
+def main(argv_words):
+    arg_words = list(argv_words)
+    repo_root = Path(__file__).resolve().parents[4]
+    if arg_words[:1] == ["--root"]:
+        if len(arg_words) < 2:
+            raise MapError("--root needs a path; see map help")
+        repo_root = Path(arg_words[1]).resolve()
+        arg_words = arg_words[2:]
+    if not arg_words:
+        print(USAGE_TEXT.format(narrow=NARROW_ROUTES), end="", file=sys.stderr)
+        return 2
+    command_name, command_args = arg_words[0], arg_words[1:]
+    if command_name == "help":
+        print(USAGE_TEXT.format(narrow=NARROW_ROUTES), end="")
+        return 0
+    exit_code = 0
+    if command_name == "list" and not command_args:
+        out_lines = list_lines(build_map(repo_root))
+    elif command_name == "show" and len(command_args) in (1, 2) and command_args[1:] in ([], ["--shared"]):
+        out_lines = show_lines(build_map(repo_root), command_args[0], bool(command_args[1:]))
+    elif command_name == "deps" and len(command_args) == 1:
+        out_lines = deps_lines(build_map(repo_root), command_args[0])
+    elif command_name == "for" and len(command_args) == 1:
+        out_lines = for_lines(build_map(repo_root), command_args[0])
+    elif command_name == "doctor" and not command_args:
+        out_lines, exit_code = doctor_lines(build_map(repo_root))
+    else:
+        raise MapError(f"cannot read 'map {' '.join(arg_words)}'; the commands are list, show <route> [--shared], "
+                       f"for <file>, deps <file>, doctor and help; see map help")
+    print("\n".join(out_lines))
+    return exit_code
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main(sys.argv[1:]))
+    except MapError as map_error:
+        print(f"map: {map_error}", file=sys.stderr)
+        sys.exit(2)
