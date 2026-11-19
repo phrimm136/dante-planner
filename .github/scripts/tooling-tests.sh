@@ -7,10 +7,10 @@ cd "$repo_root" || exit 2
 
 suites=()
 for suite_dir in .claude/skills/*/tests/; do suites+=("${suite_dir%/}"); done
-for suite_file in .githooks/tests/*.sh; do suites+=("$suite_file"); done
+for suite_file in .githooks/tests/*.sh .claude/hooks/tests/*.sh; do suites+=("$suite_file"); done
 
 if [ "${#suites[@]}" -eq 0 ]; then
-  echo "tooling-tests: no suites found under .claude/skills/*/tests/ or .githooks/tests/*.sh" >&2
+  echo "tooling-tests: no suites found under .claude/skills/*/tests/, .githooks/tests/*.sh or .claude/hooks/tests/*.sh" >&2
   exit 1
 fi
 
