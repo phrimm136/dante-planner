@@ -12,13 +12,13 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Component;
-import org.springframework.data.redis.core.StringRedisTemplate;
 
 import lombok.extern.slf4j.Slf4j;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 
 import org.danteplanner.backend.shared.redis.AuthReadSources;
+import org.danteplanner.backend.shared.redis.AuthWrites;
 
 @Component
 @Slf4j
@@ -27,13 +27,13 @@ public class ContentTombstoneStore {
     private static final Duration TOMBSTONE_TTL = Duration.ofHours(1);
     private static final String TOMBSTONE_MARKER = "1";
 
-    private final StringRedisTemplate stringRedisTemplate;
+    private final AuthWrites authWrites;
     private final AuthReadSources authReadSources;
     private final Counter skipped;
 
-    public ContentTombstoneStore(StringRedisTemplate stringRedisTemplate, AuthReadSources authReadSources,
+    public ContentTombstoneStore(AuthWrites authWrites, AuthReadSources authReadSources,
             MeterRegistry meterRegistry) {
-        this.stringRedisTemplate = stringRedisTemplate;
+        this.authWrites = authWrites;
         this.authReadSources = authReadSources;
         this.skipped = meterRegistry.counter("tombstone.check_skipped");
     }
@@ -41,7 +41,7 @@ public class ContentTombstoneStore {
     public void writeTombstone(String entityType, UUID id) {
         String key = tombstoneKey(entityType, id);
         try {
-            stringRedisTemplate.opsForValue().set(key, TOMBSTONE_MARKER, TOMBSTONE_TTL);
+            authWrites.writeWithoutResult(store -> store.opsForValue().set(key, TOMBSTONE_MARKER, TOMBSTONE_TTL));
         } catch (DataAccessException e) {
             log.warn("tombstone write failed for {}:{} — falling back to primary re-check gate", entityType, id, e);
         }
@@ -53,7 +53,7 @@ public class ContentTombstoneStore {
         }
         List<String> keys = ids.stream().map(id -> tombstoneKey(entityType, id)).toList();
         try {
-            stringRedisTemplate.executePipelined(new SessionCallback<Object>() {
+            authWrites.writeWithoutResult(store -> store.executePipelined(new SessionCallback<Object>() {
                 @Override
                 @SuppressWarnings("unchecked")
                 public <K, V> Object execute(RedisOperations<K, V> operations) {
@@ -61,7 +61,7 @@ public class ContentTombstoneStore {
                     keys.forEach(key -> strings.opsForValue().set(key, TOMBSTONE_MARKER, TOMBSTONE_TTL));
                     return null;
                 }
-            });
+            }));
         } catch (DataAccessException e) {
             log.warn("tombstone write failed for {} {} ids — falling back to primary re-check gate",
                     ids.size(), entityType, e);
@@ -74,7 +74,7 @@ public class ContentTombstoneStore {
         }
         List<String> keys = ids.stream().map(id -> tombstoneKey(entityType, id)).toList();
         try {
-            stringRedisTemplate.delete(keys);
+            authWrites.writeWithoutResult(store -> store.delete(keys));
         } catch (DataAccessException e) {
             log.warn("tombstone clear failed for {} {} ids — the marker expires with its TTL",
                     ids.size(), entityType, e);

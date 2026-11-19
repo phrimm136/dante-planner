@@ -54,6 +54,14 @@ public class RedisRoleConfig {
                 new RoleGated<>(RedisRole.AUTH, authStore, redisRoleHealth, meterRegistry)));
     }
 
+    @Bean
+    public AuthWrites authWrites(
+            @Qualifier("stringRedisTemplate") StringRedisTemplate authStore,
+            RedisRoleHealth redisRoleHealth,
+            MeterRegistry meterRegistry) {
+        return new AuthWrites(new RoleGated<>(RedisRole.AUTH, authStore, redisRoleHealth, meterRegistry));
+    }
+
     @Bean(PROBE_SCHEDULER)
     public ThreadPoolTaskScheduler redisRoleProbeScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();

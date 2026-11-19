@@ -1,6 +1,7 @@
 package org.danteplanner.backend.auth.token;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.danteplanner.backend.support.AuthReads;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.TestJwt;
@@ -96,7 +97,7 @@ class RefreshRotationServiceIT {
 
     private RefreshRotationService serviceWithReuseWindow(long reuseWindowMs) {
         return new RefreshRotationService(
-                sharedTemplate, tokenService, tokenService, jwtProperties, meterRegistry,
+                AuthReads.writesTo(sharedTemplate), tokenService, tokenService, jwtProperties, meterRegistry,
                 true, reuseWindowMs);
     }
 
@@ -339,7 +340,7 @@ class RefreshRotationServiceIT {
         @Test
         void rotate_WhenAccessTokenClaims_RejectedAndFamilyUntouched() {
             RefreshRotationService svc = new RefreshRotationService(
-                    sharedTemplate, tokenService, tokenService, jwtProperties, meterRegistry,
+                    AuthReads.writesTo(sharedTemplate), tokenService, tokenService, jwtProperties, meterRegistry,
                     true, RETRY_REUSE_WINDOW_MS);
             String accessToken = tokenService.generateAccessToken(userId, UserRole.NORMAL);
 
@@ -467,10 +468,10 @@ class RefreshRotationServiceIT {
             StringRedisTemplate templateB = buildTemplate(SharedRedisContainerSupport.host(), SharedRedisContainerSupport.port());
 
             RefreshRotationService instanceA = new RefreshRotationService(
-                    templateA, tokenService, tokenService, jwtProperties, new SimpleMeterRegistry(),
+                    AuthReads.writesTo(templateA), tokenService, tokenService, jwtProperties, new SimpleMeterRegistry(),
                     true, RETRY_REUSE_WINDOW_MS);
             RefreshRotationService instanceB = new RefreshRotationService(
-                    templateB, tokenService, tokenService, jwtProperties, new SimpleMeterRegistry(),
+                    AuthReads.writesTo(templateB), tokenService, tokenService, jwtProperties, new SimpleMeterRegistry(),
                     true, RETRY_REUSE_WINDOW_MS);
 
             String r1 = freshLoginToken();
@@ -494,7 +495,7 @@ class RefreshRotationServiceIT {
 
         private RefreshRotationService serviceWith(boolean legacyAdmit) {
             return new RefreshRotationService(
-                    sharedTemplate, legacyIssuer.service(), legacyIssuer.service(), jwtProperties, meterRegistry,
+                    AuthReads.writesTo(sharedTemplate), legacyIssuer.service(), legacyIssuer.service(), jwtProperties, meterRegistry,
                     legacyAdmit, RETRY_REUSE_WINDOW_MS);
         }
 

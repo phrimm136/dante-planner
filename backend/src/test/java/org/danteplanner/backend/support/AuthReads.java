@@ -7,6 +7,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.danteplanner.backend.shared.redis.AuthReadSources;
+import org.danteplanner.backend.shared.redis.AuthWrites;
 import org.danteplanner.backend.shared.redis.RedisRole;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.shared.redis.RoleGated;
@@ -19,6 +20,14 @@ public final class AuthReads {
     public static AuthReadSources from(StringRedisTemplate local) {
         return new AuthReadSources(List.of(
                 new RoleGated<>(RedisRole.AUTH_LOCAL, local, new RedisRoleHealth(), new SimpleMeterRegistry())));
+    }
+
+    public static AuthWrites writesTo(StringRedisTemplate auth) {
+        return writesTo(auth, new RedisRoleHealth());
+    }
+
+    public static AuthWrites writesTo(StringRedisTemplate auth, RedisRoleHealth health) {
+        return new AuthWrites(new RoleGated<>(RedisRole.AUTH, auth, health, new SimpleMeterRegistry()));
     }
 
     public static AuthReadSources localThenAuth(

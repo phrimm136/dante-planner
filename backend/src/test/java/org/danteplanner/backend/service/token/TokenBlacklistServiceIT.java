@@ -61,7 +61,7 @@ class TokenBlacklistServiceIT {
 
     @BeforeEach
     void setUp() {
-        blacklistService = new TokenBlacklistService(ownTemplate, AuthReads.from(ownTemplate), new SimpleMeterRegistry(),
+        blacklistService = new TokenBlacklistService(AuthReads.writesTo(ownTemplate), AuthReads.from(ownTemplate), new SimpleMeterRegistry(),
                 TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
         blacklistService.clear();
     }
@@ -292,7 +292,7 @@ class TokenBlacklistServiceIT {
 
             // Act - a second service over a fresh template pointing at the SAME container
             StringRedisTemplate secondTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
-            TokenBlacklistService secondService = new TokenBlacklistService(secondTemplate, AuthReads.from(secondTemplate), new SimpleMeterRegistry(),
+            TokenBlacklistService secondService = new TokenBlacklistService(AuthReads.writesTo(secondTemplate), AuthReads.from(secondTemplate), new SimpleMeterRegistry(),
                     TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
 
             // Assert - externalized revocation is visible across instances
@@ -311,7 +311,7 @@ class TokenBlacklistServiceIT {
 
             // Act - a second service over a fresh template pointing at the SAME container
             StringRedisTemplate secondTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
-            TokenBlacklistService secondService = new TokenBlacklistService(secondTemplate, AuthReads.from(secondTemplate), new SimpleMeterRegistry(),
+            TokenBlacklistService secondService = new TokenBlacklistService(AuthReads.writesTo(secondTemplate), AuthReads.from(secondTemplate), new SimpleMeterRegistry(),
                     TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
 
             // Assert - externalized user invalidation is visible across instances

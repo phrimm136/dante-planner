@@ -4,10 +4,17 @@ import org.danteplanner.backend.support.AuthReads;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.dao.QueryTimeoutException;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.script.RedisScript;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
+import org.danteplanner.backend.shared.redis.RedisRole;
+import org.danteplanner.backend.shared.redis.RedisRoleHealth;
+import org.danteplanner.backend.shared.redis.RoleOutages;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,10 +24,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * Null-boundary behavior of {@link TokenBlacklistService}, over mocked Redis templates so the
@@ -41,12 +52,18 @@ class TokenBlacklistServiceTest {
     @Mock
     private StringRedisTemplate readTemplate;
 
+    @Mock
+    private StringRedisTemplate openAuthTemplate;
+
+    @Mock
+    private ValueOperations<String, String> readValues;
+
     private TokenBlacklistService blacklistService;
 
     @BeforeEach
     void setUp() {
         blacklistService = new TokenBlacklistService(
-                writeTemplate, AuthReads.from(readTemplate), new SimpleMeterRegistry(),
+                AuthReads.writesTo(writeTemplate), AuthReads.from(readTemplate), new SimpleMeterRegistry(),
                 TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
     }
 
@@ -120,6 +137,72 @@ class TokenBlacklistServiceTest {
                 List.of(new LogoutRevocation.TokenRevocation("stale.jwt", lapsed)));
 
         verifyNoInteractions(writeTemplate);
+    }
+
+    @Test
+    void revokeLogoutSession_WhenTheAuthRoleIsOpen_FailsAtOnceWithAConnectionFailure() {
+        Date expiry = new Date(System.currentTimeMillis() + 60_000);
+
+        assertThatThrownBy(() -> serviceWithTheAuthRoleOpen().revokeLogoutSession(List.of(
+                new LogoutRevocation.TokenRevocation("access.jwt", expiry),
+                new LogoutRevocation.FamilyRevocation("fam-1"))))
+                .isExactlyInstanceOf(RedisConnectionFailureException.class)
+                .hasMessageContaining("breaker open");
+        verifyNoInteractions(openAuthTemplate);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void revokeLogoutSession_WhenTheRevocationTimesOut_FailsWithAConnectionFailure() {
+        Date expiry = new Date(System.currentTimeMillis() + 60_000);
+        when(writeTemplate.execute(any(RedisScript.class), anyList(), any(Object[].class)))
+                .thenThrow(new QueryTimeoutException("Redis command timed out"));
+
+        assertThatThrownBy(() -> blacklistService.revokeLogoutSession(List.of(
+                new LogoutRevocation.TokenRevocation("access.jwt", expiry),
+                new LogoutRevocation.FamilyRevocation("fam-1"))))
+                .isExactlyInstanceOf(RedisConnectionFailureException.class)
+                .hasMessageContaining("did not answer in time");
+    }
+
+    @Test
+    void blacklistToken_WhenTheAuthRoleIsOpen_FailsAtOnceWithAConnectionFailure() {
+        Date expiry = new Date(System.currentTimeMillis() + 60_000);
+
+        assertThatThrownBy(() -> serviceWithTheAuthRoleOpen().blacklistToken("access.jwt", expiry))
+                .isExactlyInstanceOf(RedisConnectionFailureException.class)
+                .hasMessageContaining("breaker open");
+        verifyNoInteractions(openAuthTemplate);
+    }
+
+    @Test
+    void invalidateUserTokens_WhenTheAuthRoleIsOpen_FailsAtOnceWithAConnectionFailure() {
+        assertThatThrownBy(() -> serviceWithTheAuthRoleOpen().invalidateUserTokens(1L))
+                .isExactlyInstanceOf(RedisConnectionFailureException.class)
+                .hasMessageContaining("breaker open");
+        verifyNoInteractions(openAuthTemplate);
+    }
+
+    @Test
+    void preloadLogoutRevokeScript_WhenTheAuthRoleIsOpen_DoesNotThrow() {
+        assertThatCode(() -> serviceWithTheAuthRoleOpen().preloadLogoutRevokeScript()).doesNotThrowAnyException();
+        verifyNoInteractions(openAuthTemplate);
+    }
+
+    @Test
+    void isBlacklisted_WhenOnlyTheAuthRoleIsOpen_ReadsTheReplica() {
+        when(readTemplate.opsForValue()).thenReturn(readValues);
+        when(readValues.get(anyString())).thenReturn(IMMEDIATE_MARKER + "0");
+
+        assertThat(serviceWithTheAuthRoleOpen().isBlacklisted("revoked.jwt")).isTrue();
+        verifyNoInteractions(openAuthTemplate);
+    }
+
+    private TokenBlacklistService serviceWithTheAuthRoleOpen() {
+        RedisRoleHealth authOpen = RoleOutages.withOpen(RedisRole.AUTH);
+        return new TokenBlacklistService(AuthReads.writesTo(openAuthTemplate, authOpen),
+                AuthReads.localThenAuth(readTemplate, openAuthTemplate, authOpen), new SimpleMeterRegistry(),
+                TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
     }
 
     @Test

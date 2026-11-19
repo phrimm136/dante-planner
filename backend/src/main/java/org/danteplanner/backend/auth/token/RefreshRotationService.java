@@ -5,8 +5,8 @@ import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
+import org.danteplanner.backend.shared.redis.AuthWrites;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
@@ -123,7 +123,7 @@ public class RefreshRotationService {
             return outcome
             """;
 
-    private final StringRedisTemplate authRedisTemplate;
+    private final AuthWrites authWrites;
     private final TokenValidator tokenValidator;
     private final TokenGenerator tokenGenerator;
     private final JwtProperties jwtProperties;
@@ -134,14 +134,14 @@ public class RefreshRotationService {
     private final DefaultRedisScript<String> rotateScript;
 
     public RefreshRotationService(
-            StringRedisTemplate authRedisTemplate,
+            AuthWrites authWrites,
             TokenValidator tokenValidator,
             TokenGenerator tokenGenerator,
             JwtProperties jwtProperties,
             MeterRegistry meterRegistry,
             @Value("${jwt.rotation.legacy-admit-enabled:true}") boolean legacyAdmitEnabled,
             @Value("${jwt.rotation.retry-reuse-window-ms:30000}") long retryReuseWindowMs) {
-        this.authRedisTemplate = authRedisTemplate;
+        this.authWrites = authWrites;
         this.tokenValidator = tokenValidator;
         this.tokenGenerator = tokenGenerator;
         this.jwtProperties = jwtProperties;
@@ -187,13 +187,15 @@ public class RefreshRotationService {
         long nowMs = System.currentTimeMillis();
         long ttlMs = jwtProperties.getRefreshTokenExpiry();
 
-        String result = authRedisTemplate.execute(
+        List<String> keys = List.of(familyKey(familyId), userInvalidationKey(claims.userId()));
+        String presentedIssuedAtMs = String.valueOf(claims.issuedAt().getTime());
+        String result = authWrites.write(store -> store.execute(
                 rotateScript,
-                List.of(familyKey(familyId), userInvalidationKey(claims.userId())),
+                keys,
                 jti, parentJti, successorJti,
                 String.valueOf(succExpiryMs), String.valueOf(nowMs), String.valueOf(ttlMs),
                 successorJwt, String.valueOf(retryReuseWindowMs),
-                String.valueOf(claims.issuedAt().getTime()));
+                presentedIssuedAtMs));
 
         Outcome outcome = Outcome.of(result);
         return switch (outcome) {
@@ -279,11 +281,12 @@ public class RefreshRotationService {
             return;
         }
         String key = familyKey(familyId);
-        authRedisTemplate.opsForHash().put(
-                key, REVOKED_FIELD, String.valueOf(System.currentTimeMillis()));
-        // Revoking a family that never rotated creates the hash here, where the rotation
-        // script's sliding PEXPIRE has not run and would not run again.
-        authRedisTemplate.expire(key, Duration.ofMillis(jwtProperties.getRefreshTokenExpiry()));
+        authWrites.writeWithoutResult(store -> {
+            store.opsForHash().put(key, REVOKED_FIELD, String.valueOf(System.currentTimeMillis()));
+            // Revoking a family that never rotated creates the hash here, where the rotation
+            // script's sliding PEXPIRE has not run and would not run again.
+            store.expire(key, Duration.ofMillis(jwtProperties.getRefreshTokenExpiry()));
+        });
         log.info("Revoked refresh token family {}", familyId);
     }
 
@@ -304,6 +307,6 @@ public class RefreshRotationService {
 
     boolean isFamilyRevoked(String familyId) {
         return Boolean.TRUE.equals(
-                authRedisTemplate.opsForHash().hasKey(familyKey(familyId), REVOKED_FIELD));
+                authWrites.write(store -> store.opsForHash().hasKey(familyKey(familyId), REVOKED_FIELD)));
     }
 }

@@ -8,7 +8,6 @@ epic: none · pr: none · supersedes: 175 @rate-limit @redis @degradation
   REJECTED: a service mesh — the dependencies speak Redis and MySQL protocols, where a mesh sees connections, not commands, and cannot apply a per-operation fail-open.
   INVARIANT: no request waits on a Redis role whose breaker is open — enforced by the outage integration test.
   INVARIANT: only the probe changes a role breaker's state — enforced by an architecture test on the transition calls.
-  NON-GOAL: auth-Redis writes (rotation, revocation, tombstone writes) — a probe that misjudges would block token refresh; they join after the read paths have run in production.
   NON-GOAL: the requests that arrive between the failure and the breaker opening (two missed probes, each waiting its one-second bound: up to about four seconds) — they still wait the command bound.
 - @redis @probe — The probe holds one connection per role and PINGs on it each second; it opens a new connection only when that one is lost, and a role it cannot reconnect to counts as silent. Opening a fresh connection for every probe measured whether a new connection could be established within a second, which is not what a request experiences: in the first week in production the role breakers opened nineteen times for two to five seconds each, mostly on the cross-region auth role, while requests on the established connections kept succeeding (no store-unavailable warning, no failed marker raise, about fourteen requests a second metered through the rate-limit store during two of the openings). Re-check: `rg -q 'new HeldConnection' backend/src/main/java/org/danteplanner/backend/shared/redis/RedisRoleProbe.java` and `RedisRoleProbeHeldConnectionTest`, which delays new connections while the held one answers.
   REJECTED: raising the miss threshold — it leaves the probe measuring connection setup, so false openings only become rarer, and a real outage is detected a second or more later.
@@ -22,6 +21,7 @@ epic: none · pr: none · supersedes: 175 @rate-limit @redis @degradation
   REJECTED: keeping the lazy shared attempt beside the breaker — two mechanisms would decide the same question with different timings (five seconds against one), and their signals would disagree.
 
 ## Superseded
+- @redis @degradation @breaker → 522 — NON-GOAL: auth-Redis writes (rotation, revocation, tombstone writes) — a probe that misjudges would block token refresh; they join after the read paths have run in production.
 - @sse @redis → 521 — When the sse-local role's breaker closes and the subscriber is not listening, the subscriber starts again. The listener container retries a lost subscription but not its first one, so a pod that started while Redis was unreachable never received other pods' events.
   REJECTED: holding readiness until the subscription is live — every pod in a region shares that Redis, so an outage during a rollout would leave the region's API unready for the sake of live notifications.
   INVARIANT: the subscription state never changes readiness or liveness — enforced by an integration test.

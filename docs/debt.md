@@ -144,16 +144,22 @@ asset pipeline.
   `HikariDataSource`, so the helper's instanceof walk skips it. Replica and bulkhead are
   covered since the lazy-proxy descent fix; the primary needs an unwrap step.
   re-check: `rg -qF 'new GtidCapturingDataSource(primaryPool' backend/src/main/java/org/danteplanner/backend/shared/config/RoutingDataSourceConfig.java && .claude/skills/debt-ledger/bin/debt absent backend/src/test/java/org/danteplanner/backend/integration/DegradationIT.java 'GtidCapturingDataSource|unwrap\('`
-- No circuit breaker fronts the primary datasource's writes or the auth-Redis writes (refresh
-  rotation, revocation, tombstone writes): each still waits its bound (3 s per Redis command,
-  Hikari's connection timeout) before its typed 503. The Redis role breakers cover the revocation,
-  tombstone and rate-limit request paths only, and a probe opens them, so a role that answers PING
-  but stays slow is not opened. The auth writes were held back on purpose: a probe that misjudges a
-  healthy Redis would block token refresh. Worth doing after the read-path breakers have run in
-  production long enough to show the probes do not flap, or once a sustained-latency toxic shows
-  request-thread saturation (`DegradationIT` proves the cut and the blackhole, not the slow steady
-  state); map the open-breaker rejection to a per-role wire code in the same unit.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/auth/token/RefreshRotationService.java 'CircuitBreaker|RedisRoleHealth'`
+- No circuit breaker fronts the primary datasource's writes: each still waits Hikari's connection
+  timeout before its typed 503. The Redis role breakers cover the auth reads and writes and the
+  rate-limit charge, and a probe opens them, so a role that answers PING but stays slow is not
+  opened. Worth doing once a sustained-latency toxic shows request-thread saturation
+  (`DegradationIT` proves the cut and the blackhole, not the slow steady state). The re-check counts
+  breaker registrations: a third one is the moment to read this entry again.
+  re-check: `rg -o --no-filename 'circuitBreaker\(' backend/src/main/java | awk 'END { exit (NR <= 2) ? 0 : 1 }'`
+- The Redis role named `auth` (`RedisRole.AUTH`, `redis.auth.*`, breaker `redis-auth`, wire code
+  `AUTH_TEMPORARILY_UNAVAILABLE`) is the primary Redis every region shares, not an auth store: it
+  also holds content tombstones, the view-count buffer, the SSE publish channel, the scheduler
+  locks and the freshness markers. The name survives because it reaches environment variables,
+  secrets, alert and dashboard filters, metric label values and a wire code the frontend reads.
+  Worth doing when the Redis topology changes anyway (something moves off this instance, or a
+  second shared instance appears): rename the role to what it is and move the label values with
+  the dashboards in one unit.
+  re-check: `rg -q 'AUTH\("auth"\)' backend/src/main/java/org/danteplanner/backend/shared/redis/RedisRole.java`
 - 2026-09-23 — Latency from Korea is the client→edge leg, not the origin. From a Korean ISP,
   `dante-planner.com` and `api.` land on SIN, HKG or NRT, while `www.cloudflare.com` on the
   same network answers from ICN: ICMP 107 ms against 10 ms, TCP connect 194 ms against 18 ms,

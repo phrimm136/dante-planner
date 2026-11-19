@@ -39,14 +39,11 @@ final class RedisRoleGateRule {
             "org.danteplanner.backend.shared.ratelimit.RateLimitStore");
 
     static final Set<String> STORE_HANDLE_HOLDERS = Set.of(
-            "org.danteplanner.backend.auth.token.RefreshRotationService",
-            "org.danteplanner.backend.auth.token.TokenBlacklistService",
             "org.danteplanner.backend.planner.service.RedisViewRecorder",
             "org.danteplanner.backend.shared.config.ShedLockConfig",
             "org.danteplanner.backend.shared.freshness.MarkerStore",
             "org.danteplanner.backend.shared.freshness.RaiseBatcher",
             "org.danteplanner.backend.shared.gtid.GtidGateConfig",
-            "org.danteplanner.backend.shared.readpath.ContentTombstoneStore",
             "org.danteplanner.backend.shared.sse.SseChannelSender",
             "org.danteplanner.backend.shared.sse.SseSubscriberConfig");
 

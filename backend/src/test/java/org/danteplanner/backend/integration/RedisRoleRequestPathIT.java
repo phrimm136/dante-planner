@@ -42,6 +42,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
+import tools.jackson.databind.ObjectMapper;
 
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
@@ -52,6 +53,7 @@ import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.LoginRedirect;
 import org.danteplanner.backend.shared.config.SecurityProperties;
+import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
@@ -61,6 +63,8 @@ import org.danteplanner.backend.shared.ratelimit.RateLimitStore;
 import org.danteplanner.backend.shared.redis.RedisRole;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.shared.redis.RedisRoleProbe;
+import org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter;
+import org.danteplanner.backend.shared.security.CsrfTokenService;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.RedisEndpoints;
@@ -85,6 +89,7 @@ class RedisRoleRequestPathIT extends ReplicaRoutingHarnessSupport {
     private static final String PLANNER_PATH = "/api/planner/md/";
     private static final String PUBLISHED_LIST_PATH = "/api/planner/md/published";
     private static final String GOOGLE_CALLBACK_PATH = "/api/auth/google/callback";
+    private static final String LOGOUT_PATH = "/api/auth/logout";
 
     private static final String BLACKLIST_SKIPPED = "blacklist_check_skipped_total";
     private static final String TOMBSTONE_SKIPPED = "tombstone.check_skipped";
@@ -145,6 +150,9 @@ class RedisRoleRequestPathIT extends ReplicaRoutingHarnessSupport {
 
     @Autowired
     private ProblemWriter problemWriter;
+
+    @Autowired
+    private CsrfTokenService csrfTokenService;
 
     @AfterEach
     void clearPrincipal() {
@@ -326,6 +334,30 @@ class RedisRoleRequestPathIT extends ReplicaRoutingHarnessSupport {
     }
 
     @Test
+    void logout_WhenTheAuthRoleIsOpen_IsRefusedAsAuthUnavailableWithoutAWrite() {
+        User user = TestDataFactory.createTestUser(userRepository, "role-auth-open-logout@example.com");
+        String token = TestDataFactory.generateAccessToken(jwtTokenService, user);
+        awaitAvailable(RedisRole.AUTH_LOCAL, RedisRole.AUTH);
+
+        freeze(AUTH_REDIS);
+        try {
+            Hang.until(() -> !roleHealth.isAvailable(RedisRole.AUTH), "the probe opening redis-auth");
+
+            double authGateBefore = gateSkipped(AUTH_GATE);
+            HttpResponse<String> logout = logout(token);
+
+            assertThat(logout.statusCode()).isEqualTo(503);
+            assertThat(new ObjectMapper().readTree(logout.body()).path("code").asString())
+                    .isEqualTo(DegradationErrorConstants.AUTH_UNAVAILABLE.code());
+            assertThat(gateSkipped(AUTH_GATE) - authGateBefore).isEqualTo(1.0);
+        } finally {
+            thaw(AUTH_REDIS);
+            awaitAuthRedisReplicaLinked();
+        }
+        awaitAvailable(RedisRole.AUTH);
+    }
+
+    @Test
     void rateLimitedRequests_WhenTheRateLimitRoleIsOpen_AreServedUnmeteredOrRefusedByPolicy() {
         awaitAvailable(RedisRole.RATE_LIMIT);
 
@@ -425,6 +457,22 @@ class RedisRoleRequestPathIT extends ReplicaRoutingHarnessSupport {
         return http.sendAsync(request, HttpResponse.BodyHandlers.discarding())
                 .thenApply(response -> new Sample(response.statusCode(),
                         response.headers().firstValue(HttpHeaders.LOCATION).orElse("")));
+    }
+
+    private HttpResponse<String> logout(String token) {
+        String csrf = csrfTokenService.mint();
+        String cookies = CookieConstants.DEVICE_ID + "=" + deviceId + "; " + CookieConstants.ACCESS_TOKEN + "=" + token
+                + "; " + CookieConstants.CSRF + "=" + csrf;
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + LOGOUT_PATH))
+                .header(HttpHeaders.COOKIE, cookies)
+                .header(CsrfDoubleSubmitFilter.CSRF_HEADER, csrf)
+                .POST(HttpRequest.BodyPublishers.noBody())
+                .build();
+        try {
+            return Hang.get(http.sendAsync(request, HttpResponse.BodyHandlers.ofString()), "POST " + LOGOUT_PATH);
+        } catch (ExecutionException e) {
+            throw new IllegalStateException("POST " + LOGOUT_PATH + " failed", e.getCause());
+        }
     }
 
     private double counter(String name) {
