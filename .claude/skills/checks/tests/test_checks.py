@@ -60,6 +60,26 @@ def test_yarn_checks_run_their_script_in_the_package():
     assert plan_for("e2e", "fmt-check").work_dir == Path("/repo/wt/e2e")
 
 
+def test_fe_fmt_without_paths_runs_the_script():
+    assert plan_for("fe", "fmt").command_argv == ("yarn", "fmt")
+
+
+@pytest.mark.parametrize("path_text", [
+    "/repo/wt/frontend/src/lib/a.ts", "frontend/src/lib/a.ts", "src/lib/a.ts", "src/lib/../lib/a.ts"])
+def test_fe_fmt_formats_only_the_given_files(path_text):
+    fmt_plan = plan_for("fe", "fmt", path_text, "src/b.tsx")
+    assert fmt_plan.command_argv == ("yarn", "oxfmt", "src/lib/a.ts", "src/b.tsx")
+    assert fmt_plan.work_dir == Path("/repo/wt/frontend")
+
+
+@pytest.mark.parametrize("path_text", [
+    "/repo/other/frontend/src/a.ts", "e2e/tests/a.spec.ts", "frontend/vite.config.ts", "src/../package.json",
+    "--check"])
+def test_fe_fmt_refuses_a_path_outside_src(path_text):
+    with pytest.raises(checks_cli.CheckError, match="formats files under /repo/wt/frontend/src"):
+        plan_for("fe", "fmt", path_text)
+
+
 def test_build_carries_the_ci_heap():
     assert dict(plan_for("fe", "build").extra_env) == {"NODE_OPTIONS": "--max-old-space-size=6144"}
 
@@ -380,6 +400,8 @@ HOOK_TABLE = [
     ("yarn --cwd frontend lint:validation", f"{CLI_TEXT} fe lint-validation"),
     ("frontend/node_modules/.bin/oxlint -c .oxlintrc.validation.json src", f"{CLI_TEXT} fe lint-validation"),
     ("yarn --cwd frontend fmt", f"{CLI_TEXT} fe fmt"),
+    ("frontend/node_modules/.bin/oxfmt src", f"{CLI_TEXT} fe fmt"),
+    ("frontend/node_modules/.bin/oxfmt src/lib/a.ts src/b.tsx", f"{CLI_TEXT} fe fmt src/lib/a.ts src/b.tsx"),
     ("yarn --cwd frontend check:fp", f"{CLI_TEXT} fe fp"),
     ("yarn --cwd frontend check:bundle-budget", f"{CLI_TEXT} fe budget"),
     ("yarn --cwd frontend build", f"{CLI_TEXT} fe build"),

@@ -21,7 +21,7 @@ in `flock`: it takes the lock itself.
 |---------|-----|
 | `doctor` | First, before any run: lock holder, static link, node_modules against each lockfile, oxlint/oxfmt/vitest/playwright versions, Docker, JDK; each problem names its fix |
 | `list` | Every command with its purpose |
-| `fe <check>` | `typecheck`, `lint`, `lint-validation`, `fmt`, `fmt-check`, `fp`, `rules`, `bailouts`, `build`, `budget`, `test [vitest args]` |
+| `fe <check>` | `typecheck`, `lint`, `lint-validation`, `fmt [path...]`, `fmt-check`, `fp`, `rules`, `bailouts`, `build`, `budget`, `test [vitest args]` |
 | `fe gate` | The PR Gate `test-frontend` steps, read from `pr-gate.yml`, under one lock, one line per step |
 | `e2e <check>` | `typecheck`, `fmt`, `fmt-check`, `run [spec...] [--base-url URL] [--repeat N] [--jobs N] [--project NAME] [-- playwright args]` |
 | `be <check>` | `check`, `test [--tests PATTERN] [--exclude-tags containerized]`, `checkstyle`, `pit` |
