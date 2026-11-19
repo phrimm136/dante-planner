@@ -27,6 +27,7 @@ SUMMARY_LIMIT = 240
 USAGE_TEXT = f"""usage: checks [--root <path>] [--print] [--full REASON] <lane> <check> [args]
        checks [--root <path>] [--print] changed
        checks [--root <path>] doctor | list
+       checks help
        checks hook < tool-json
 
 Runs the repo's repeated local checks (frontend, e2e, backend, the tooling test suites). Every
@@ -105,6 +106,7 @@ TOP_COMMANDS = (
     ("changed", "the checks the change set reaches, before a commit; PR Gate runs the rest"),
     ("doctor", "lock holder, static link, node_modules and tool versions, Docker, JDK; runs nothing heavy"),
     ("list", "this list"),
+    ("help", "the usage text: options, the repo root, logs and the lock"),
     ("hook", "the PreToolUse entry: reads the Bash tool JSON on stdin, exit 2 refuses a hand-assembled check"),
 )
 
@@ -184,8 +186,10 @@ def parse_command_line(argv_words):
         elif one_word == "--":
             after_dashes = True
             command_words.append(one_word)
-        elif one_word in ("-h", "--help") and not command_words:
+        elif one_word == "help" and not command_words:
             wants_help = True
+        elif one_word in ("-h", "--help") and not command_words:
+            raise CheckError(f"{one_word} is not an option; run checks help")
         elif one_word == "--print":
             print_only = True
         elif one_word == "--full":
@@ -195,7 +199,7 @@ def parse_command_line(argv_words):
             word_index += 1
         elif one_word == "--root" and not command_words:
             if word_index + 1 >= len(argv_words):
-                raise CheckError("--root needs a path; see checks --help")
+                raise CheckError("--root needs a path; see checks help")
             root_arg = argv_words[word_index + 1]
             word_index += 1
         elif one_word.startswith("--root=") and not command_words:

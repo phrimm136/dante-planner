@@ -43,7 +43,9 @@ def test_words_after_double_dash_reach_the_check():
 
 
 def test_help_flag_is_seen():
-    assert checks_cli.parse_command_line(["--help"]).wants_help
+    assert checks_cli.parse_command_line(["help"]).wants_help
+    with pytest.raises(checks_cli.CheckError, match="run checks help"):
+        checks_cli.parse_command_line(["--help"])
 
 
 def test_root_without_a_path_names_the_fix():

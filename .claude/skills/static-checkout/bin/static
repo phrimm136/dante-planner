@@ -23,12 +23,12 @@ commands:
   lock     write the checkout's HEAD into static.lock
   sync     check static.lock's sha out in the checkout; refuses a dirty or ahead checkout
            link, lock and sync print one line naming what they change before changing it
+  help     show this text
 
 options:
   --root <path>      act on this code checkout or worktree instead of the CLI's own
   --checkout <path>  use this data checkout instead of the link target
                      (link: instead of $SIBLING)
-  -h, --help         show this help
 USAGE
 }
 
@@ -39,17 +39,18 @@ checkout_arg=""
 command=""
 while [ $# -gt 0 ]; do
   case $1 in
-    -h|--help) usage; exit 0 ;;
+    help) usage; exit 0 ;;
+    -h|--help) die "$1 is not an option; run static help" ;;
     --root)
-      [ $# -ge 2 ] || die "--root needs a path; see static --help"
+      [ $# -ge 2 ] || die "--root needs a path; see static help"
       root_arg=$2; shift 2 ;;
     --checkout)
-      [ $# -ge 2 ] || die "--checkout needs a path; see static --help"
+      [ $# -ge 2 ] || die "--checkout needs a path; see static help"
       checkout_arg=$2; shift 2 ;;
     doctor|check|link|lock|sync)
-      [ -z "$command" ] || die "one command at a time; see static --help"
+      [ -z "$command" ] || die "one command at a time; see static help"
       command=$1; shift ;;
-    *) die "unknown argument '$1'; see static --help" ;;
+    *) die "unknown argument '$1'; see static help" ;;
   esac
 done
 [ -n "$command" ] || { usage >&2; exit 1; }
