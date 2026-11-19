@@ -20,10 +20,11 @@ epic: none · pr: none · supersedes: 175 @rate-limit @redis @degradation
   REJECTED: failing closed — the decision ADR 010 already rejected: a cache outage becomes a total authentication outage.
 - @rate-limit @redis — The rate-limit store's connection is made by the probe side, once at startup with the probe's bound and again whenever the role recovers; a request never starts a connect. The lazy shared attempt existed so a pod's first requests would not each run or await a connect; with the breaker closed only after a connection exists, that window is gone, and an unreachable store at startup leaves the breaker open, which the fail-open and fail-closed policies already handle.
   REJECTED: keeping the lazy shared attempt beside the breaker — two mechanisms would decide the same question with different timings (five seconds against one), and their signals would disagree.
-- @sse @redis — When the sse-local role's breaker closes and the subscriber is not listening, the subscriber starts again. The listener container retries a lost subscription but not its first one, so a pod that started while Redis was unreachable never received other pods' events.
+
+## Superseded
+- @sse @redis → 521 — When the sse-local role's breaker closes and the subscriber is not listening, the subscriber starts again. The listener container retries a lost subscription but not its first one, so a pod that started while Redis was unreachable never received other pods' events.
   REJECTED: holding readiness until the subscription is live — every pod in a region shares that Redis, so an outage during a rollout would leave the region's API unready for the sake of live notifications.
   INVARIANT: the subscription state never changes readiness or liveness — enforced by an integration test.
-
 
 ## Takeaway
 - takeaway: a fail-open path needs a time bound as much as a result; decide "how long until we give up" once per dependency and let every caller read that one answer.
