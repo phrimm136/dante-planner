@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# Refuses a push of a branch that carries a non-merge commit, not on origin/main, whose patch-id
+# is absent from every review record under .claude/reports/reviews/ of the main checkout,
+# whichever worktree pushes. A branch deletion, a tag and an empty commit pass.
+set -euo pipefail
+
+zero=0000000000000000000000000000000000000000
+reviewed=
+loaded=0
+missing=()
+
+load_reviewed() {
+  shopt -s nullglob
+  local main
+  main=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")
+  local records=("$main"/.claude/reports/reviews/*.md)
+  if [ ${#records[@]} -gt 0 ]; then
+    reviewed=$(awk '
+      /^[^ \t]/ { listed = ($0 ~ /^(patch-ids|delta):[ \t]*$/) }
+      listed && $1 == "-" && length($2) == 40 && $2 !~ /[^0-9a-f]/ { print $2 }
+    ' "${records[@]}")
+  fi
+  loaded=1
+}
+
+if git rev-parse -q --verify refs/remotes/origin/main >/dev/null; then
+  landed=(--not refs/remotes/origin/main)
+else
+  landed=(--not --remotes)
+fi
+
+while read -r _ local_sha remote_ref _; do
+  case $remote_ref in refs/heads/*) ;; *) continue ;; esac
+  [ "$local_sha" = "$zero" ] && continue
+  [ "$loaded" = 1 ] || load_reviewed
+  for c in $(git rev-list --reverse --no-merges "$local_sha" "${landed[@]}"); do
+    id=$(git diff-tree -p "$c" | git patch-id --stable | cut -d' ' -f1)
+    [ -n "$id" ] || continue
+    printf '%s\n' "$reviewed" | awk -v id="$id" '$0 == id { found = 1 } END { exit !found }' || missing+=("$c")
+  done
+done
+
+[ ${#missing[@]} -eq 0 ] && exit 0
+
+echo "push: ${#missing[@]} commit(s) without a review record" >&2
+for c in "${missing[@]}"; do
+  git log -1 --format='  %h %s' "$c" >&2
+done
+echo "have the reviewer agent review the range, or run it yourself: git -c core.hooksPath= push <your arguments>" >&2
+exit 1
