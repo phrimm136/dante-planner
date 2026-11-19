@@ -2,7 +2,8 @@ name: PR Gate
 
 # The one verification workflow for code (ADR 517). A pull request runs the fast lanes: the
 # frontend checks and the backend unit tier. A push to main runs the full lanes: the whole
-# backend check, e2e and both builds, and that run's success is the signal deploy-fleet.yml
+# backend check, e2e, both builds and the planted-bug consistency matrix, and that run's success
+# is the signal deploy-fleet.yml
 # consumes. Both events skip a lane whose inputs did not change; on main the diff starts at the
 # last green push run, so a run that a newer push cancelled leaves no change untested, and a
 # burst of merges ends in one run and one deploy. Change detection is a job, not a
@@ -301,7 +302,7 @@ jobs:
 
   consistency-variants:
     needs: changes
-    if: needs.changes.outputs.consistency == 'true'
+    if: github.event_name == 'push' && needs.changes.outputs.consistency == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
