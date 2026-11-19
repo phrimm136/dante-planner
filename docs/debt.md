@@ -1259,24 +1259,24 @@ guards the parse but likewise skips the schema gate.
   without the field has been in production for a full release.
   re-check: `rg -q 'RETIRED_BOOKMARK_FLAG = false' backend/src/main/java/org/danteplanner/backend/shared/util/PlannerConstants.java`
 
-## 2026-09-28 landing gate (adr/137)
+## 2026-09-28 landing gate (adr/137, adr/519)
 
-- The `reference-transaction` hook refuses the whole transaction when `refs/heads/dev` is
-  one of several refs updated together (`git rebase --update-refs` across dev,
-  `update-ref --stdin`), so the other refs' updates are lost with it. Worth handling when
-  someone works with `--update-refs` over dev; until then the single-ref landing is the
-  only path in use.
-  re-check: `rg -q 'refs/heads/dev \] \|\| continue' .githooks/reference-transaction && rg -q '^exit 1$' .githooks/reference-transaction`
-- The landing gate's patch-id is empty for a root commit (`diff-tree -p` without `--root`),
-  so an orphan branch merged with `--allow-unrelated-histories` lands unreviewed. Closing it
+- The push gate's patch-id is empty for a root commit (`diff-tree -p` without `--root`),
+  so an orphan branch merged with `--allow-unrelated-histories` is pushed unreviewed. Closing it
   means `--root` in the hook, the reviewer's recipe and the measures script together. Worth
-  doing if an orphan merge ever appears on dev.
-  re-check: `rg -q 'git diff-tree -p "\$c"' .githooks/reference-transaction && .claude/skills/debt-ledger/bin/debt absent .githooks/reference-transaction -- '--root'`
-- The release-sync exemption trusts `refs/remotes/origin/main`, and the Bash deny list
-  refuses only direct ref writes; `git remote set-url origin .` followed by a plain fetch
+  doing if an orphan merge ever appears.
+  re-check: `rg -q 'git diff-tree -p "\$c"' .githooks/pre-push && .claude/skills/debt-ledger/bin/debt absent .githooks/pre-push -- '--root'`
+- The push gate treats every commit on `refs/remotes/origin/main` as landed, and the Bash deny
+  list refuses only direct ref writes; `git remote set-url origin .` followed by a plain fetch
   moves that ref to local commits. Worth closing (deny `git remote add|set-url` in
   bash-deny) if the measures script ever shows an unreviewed range hidden this way.
-  re-check: `rg -q 'refs/remotes/origin/main' .githooks/reference-transaction`
+  re-check: `rg -q 'refs/remotes/origin/main' .githooks/pre-push`
+- `scripts/ops/review-measures.py` reads landed commits from `dev`, a branch that no longer
+  exists: its first step, `git reflog show dev`, fails whatever the arguments, and the script
+  stops with an error. It must
+  read the commits of `origin/main` since the push gate landed. Worth doing the next time the
+  review measures are wanted.
+  re-check: `rg -q 'dev reflog' scripts/ops/review-measures.py`
 - FE mutation testing has no working runner: Stryker 10 with the vitest runner fails in
   project setup against the multi-project `vite.config.ts` on vitest 4.1.2, and its IPC
   drops the inner error. Worth one more spike (a single-project vitest config for Stryker,
