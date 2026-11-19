@@ -66,7 +66,7 @@ CHECK_TABLE = (
     CheckSpec("fe", "typecheck", "", "tsc -b over the frontend (yarn typecheck)"),
     CheckSpec("fe", "lint", "", "type-aware oxlint over src (yarn lint)"),
     CheckSpec("fe", "lint-validation", "", "the validation oxlint config (yarn lint:validation)"),
-    CheckSpec("fe", "fmt", "", "rewrite src with oxfmt (yarn fmt)"),
+    CheckSpec("fe", "fmt", "[path...]", "rewrite src, or only the given files, with oxfmt (yarn fmt)"),
     CheckSpec("fe", "fmt-check", "", "oxfmt --check over src (yarn fmt:check)"),
     CheckSpec("fe", "fp", "", "ast-grep false-positive scan (yarn check:fp)"),
     CheckSpec("fe", "rules", "", "ast-grep rule tests (yarn check:rules)"),
@@ -323,6 +323,28 @@ def be_test_plan(repo_paths, arg_words):
     return RunPlan("be test", repo_paths.repo_root, gradle_argv(repo_paths, task_words))
 
 
+def fe_fmt_plan(repo_paths, arg_words):
+    package_dir = repo_paths.repo_root / "frontend"
+    if not arg_words:
+        return RunPlan("fe fmt", package_dir, ("yarn", "fmt"), (), package_dir)
+    source_dir = package_dir / "src"
+    source_paths = []
+    for path_text in arg_words:
+        given_path = Path(path_text)
+        if given_path.is_absolute():
+            full_path = given_path
+        elif given_path.parts[:1] == ("frontend",):
+            full_path = repo_paths.repo_root / given_path
+        else:
+            full_path = package_dir / given_path
+        full_path = Path(os.path.normpath(full_path))
+        if path_text.startswith("-") or source_dir not in (full_path, *full_path.parents):
+            raise CheckError(f"checks fe fmt formats files under {source_dir}, got {path_text}; "
+                             f"pass an absolute path, frontend/src/... or src/...")
+        source_paths.append(str(full_path.relative_to(package_dir)))
+    return RunPlan("fe fmt", package_dir, ("yarn", "oxfmt", *source_paths), (), package_dir)
+
+
 def build_plan(repo_paths, lane_name, check_name, arg_words):
     known_lanes = sorted({one_spec.lane_name for one_spec in CHECK_TABLE})
     if lane_name not in known_lanes:
@@ -339,6 +361,8 @@ def build_plan(repo_paths, lane_name, check_name, arg_words):
     if (lane_name, check_name) == ("fe", "test"):
         package_dir = repo_paths.repo_root / "frontend"
         return RunPlan(step_label, package_dir, ("yarn", "test", "run", *arg_words), (), package_dir)
+    if (lane_name, check_name) == ("fe", "fmt"):
+        return fe_fmt_plan(repo_paths, arg_words)
     if arg_words:
         raise CheckError(f"checks {step_label} takes no arguments, got {shlex.join(arg_words)}; see checks list")
     if lane_name == "be":
@@ -993,7 +1017,10 @@ def binary_replacement(binary_name, arg_words, package_name):
         return checks_text("fe", "lint-validation" if is_validation else "lint")
     if binary_name == "oxfmt":
         lane_name = "e2e" if package_name == "e2e" else "fe"
-        return checks_text(lane_name, "fmt-check" if "--check" in arg_words else "fmt")
+        if "--check" in arg_words:
+            return checks_text(lane_name, "fmt-check")
+        file_args = [one_word for one_word in non_flag_args(arg_words) if one_word != "src"] if lane_name == "fe" else []
+        return checks_text(lane_name, "fmt", *file_args)
     if binary_name == "playwright":
         if arg_words[:1] != ["test"]:
             return None
