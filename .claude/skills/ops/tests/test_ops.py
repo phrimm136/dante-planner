@@ -160,7 +160,9 @@ class ParseTest(unittest.TestCase):
             ops_cli.parse_request(["--env", "log-archive", "whoami"])
 
     def test_help_flag_is_seen(self):
-        self.assertTrue(ops_cli.parse_request(["--help"]).wants_help)
+        self.assertTrue(ops_cli.parse_request(["help"]).wants_help)
+        with self.assertRaisesRegex(ops_cli.OpsError, "run ops help"):
+            ops_cli.parse_request(["--help"])
 
     def test_metrics_maps_flags_to_positionals(self):
         self.assertEqual(ops_cli.build_invocation(["metrics", "up"], "/").script_args, ("up",))
@@ -607,7 +609,7 @@ class ChecksMissingTest(unittest.TestCase):
         list_run = self.run_bare("list")
         self.assertEqual((list_run.returncode, list_run.stderr), (0, ""))
         self.assertIn("ops tf plan", list_run.stdout)
-        self.assertEqual(self.run_bare("--help").returncode, 0)
+        self.assertEqual(self.run_bare("help").returncode, 0)
 
     def hook_input(self, command_text):
         return json.dumps({"tool_name": "Bash", "tool_input": {"command": command_text}})

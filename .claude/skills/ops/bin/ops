@@ -58,7 +58,7 @@ ARN_ACCOUNT_PATTERN = re.compile(r"(arn:aws[a-z-]*:[^:\s]*:[^:\s]*:)\d{12}(?=:)"
 UNMAPPED_ACCOUNT = "<account>"
 
 USAGE_TEXT = f"""usage: ops [--env prod|staging|mgmt] <command> [args]
-       ops list | doctor
+       ops list | doctor | help
        ops hook < tool-json
 
 Runs the repeated workstation reads of production and terraform plans. Nothing it runs
@@ -276,11 +276,13 @@ def parse_request(argv_words):
         elif one_word == "--":
             after_dashes = True
             command_words.append(one_word)
-        elif one_word in ("-h", "--help") and not command_words:
+        elif one_word == "help" and not command_words:
             wants_help = True
+        elif one_word in ("-h", "--help") and not command_words:
+            raise OpsError(f"{one_word} is not an option; run ops help")
         elif one_word == "--env":
             if word_index + 1 >= len(argv_words):
-                raise OpsError(f"--env needs one of {', '.join(ENV_PROFILES)}; see ops --help")
+                raise OpsError(f"--env needs one of {', '.join(ENV_PROFILES)}; see ops help")
             env_name = argv_words[word_index + 1]
             word_index += 1
         elif one_word.startswith("--env="):

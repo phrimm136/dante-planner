@@ -31,4 +31,4 @@ A `GONE` entry is deleted. A `BROKEN` command is fixed in the entry. The pre-com
 both commands whenever `docs/debt.md` is staged, and the weekly Debt Check workflow runs `check`
 on `main`.
 
-Flags and messages: `debt --help`.
+Flags and messages: `debt help`.

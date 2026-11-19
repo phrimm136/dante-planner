@@ -25,4 +25,4 @@ Cloudflare Pages has no data checkout. Its build command runs
 `static.lock` at the repo root and `STATIC_TOKEN`, a read-only token for the data repository.
 CI does not run it: the `fetch-static-checkout` action checks the lock out with the deploy key.
 
-Flags and messages: `static --help`.
+Flags and messages: `static help`.

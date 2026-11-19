@@ -37,4 +37,4 @@ names in its header). Worktrees start uninitialized; plan from the main checkout
 
 The CLI's own tests: `python3 -m unittest discover -s .claude/skills/ops/tests`.
 
-Flags, log location and messages: `ops --help`.
+Flags, log location and messages: `ops help`.

@@ -10,6 +10,7 @@ from pathlib import Path
 USAGE_TEXT = """usage: debt [--file <path>] <command> [--only <substring>]
        debt absent <path> <rg arguments>...
        debt python <body>
+       debt help
 
 Asks every entry of the debt ledger whether its debt still holds.
 
@@ -51,8 +52,7 @@ commands:
 
 options:
   --file <path>         read this ledger instead of docs/debt.md in the repository
-  --only <substring>    check: run only the entries whose title contains the substring
-  -h, --help            show this help"""
+  --only <substring>    check: run only the entries whose title contains the substring"""
 
 RECHECK_LINE = re.compile(r"^  re-check: `([^`]+)`$")
 LEDGER_CLI = ".claude/skills/debt-ledger/bin/debt"
@@ -230,11 +230,11 @@ def clause_problem(clause_text):
         return None
     if clause_words[0] not in ALLOWED_TOOLS:
         return (f'starts a clause with "{clause_words[0]}", which is not an allowed re-check tool; '
-                f'see debt --help')
+                f'see debt help')
     if clause_words[0] == "git":
         git_word = git_subcommand(clause_words[1:])
         if git_word not in READ_ONLY_GIT:
-            return f'runs git "{git_word}", which is not a read-only git subcommand; see debt --help'
+            return f'runs git "{git_word}", which is not a read-only git subcommand; see debt help'
     return None
 
 
@@ -322,12 +322,14 @@ def main():
     command_name = ledger_path = only_text = None
     while arg_list:
         current_arg = arg_list.pop(0)
-        if current_arg in ("-h", "--help"):
+        if current_arg == "help" and command_name is None:
             print(USAGE_TEXT)
             return 0
+        if current_arg in ("-h", "--help"):
+            stop_with(f"{current_arg} is not an option; run debt help")
         if current_arg in ("--file", "--only"):
             if not arg_list:
-                stop_with(f"{current_arg} needs a value; see debt --help")
+                stop_with(f"{current_arg} needs a value; see debt help")
             if current_arg == "--file":
                 ledger_path = Path(arg_list.pop(0))
             else:
@@ -342,12 +344,12 @@ def main():
             return run_python(arg_list)
         elif current_arg in ("doctor", "check"):
             if command_name is not None:
-                stop_with("one command at a time; see debt --help")
+                stop_with("one command at a time; see debt help")
             command_name = current_arg
         else:
-            stop_with(f"unknown argument '{current_arg}'; see debt --help")
+            stop_with(f"unknown argument '{current_arg}'; see debt help")
     if command_name is None:
-        stop_with("name a command, doctor, check, absent or python; see debt --help")
+        stop_with("name a command, doctor, check, absent or python; see debt help")
     if only_text is not None and command_name != "check":
         stop_with("--only works with check alone; run debt check --only <substring>")
     repo_root = find_root()

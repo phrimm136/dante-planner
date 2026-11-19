@@ -32,4 +32,4 @@ in `flock`: it takes the lock itself.
 
 The CLI's own tests run with the other tooling suites: `checks tools test`.
 
-Flags, log location and messages: `checks --help`.
+Flags, log location and messages: `checks help`.
