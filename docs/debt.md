@@ -1640,17 +1640,6 @@ guards the parse but likewise skips the schema gate.
   (passive detection) beside the probe, which reverses a rejected alternative of ADR 514.
   re-check: `rg -q 'new HeldConnection' backend/src/main/java/org/danteplanner/backend/shared/redis/RedisRoleProbe.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/shared/redis 'onError|recordFailure'`
 
-## 2026-11-19 merge queue (adr/516)
-
-- PR Gate no longer runs on main, and a cache saved by a pull-request or merge-queue run is
-  readable only from its own ref, so the Gradle and Terraform caches that PR Gate jobs restore
-  stop refreshing: their keys keep falling back by prefix to the last cache main saved, and a
-  change to `backend/*.gradle.kts` or the lock files then downloads the difference on every run.
-  `mutation.yml` refreshes only its own key. Worth doing when a PR Gate job's setup time grows
-  after a dependency change: share one key per tool across the jobs and save it from a workflow
-  that runs on main.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent .github/workflows/pr-gate.yml 'actions/cache/save'`
-
 ## 2026-11-19 tests that need a hand edit after a data refresh
 
 - Tests that assert literal game content break on each data refresh or pin even when no code
