@@ -23,7 +23,8 @@
 - Workflow `run:` blocks must not interpolate untrusted PR input (title/body/branch
   names); use `github.sha` / `github.ref_name` style contexts only.
 - PR Gate runs on `pull_request` and `push` to main (ADR 517). A pull request runs the fast
-  lanes, a push runs the full lanes, and both skip a lane whose inputs did not change. A newer push
+  lanes, a push runs the full lanes (the planted-bug consistency matrix among them), and both skip
+  a lane whose inputs did not change. A newer push
   cancels the running push run, and the push diff starts at the last green push run, so a burst of
   merges ends in one run. `deploy-fleet.yml` deploys only after a green push run, and
   `mutation.yml` runs the mutation ratchet cold once a week. A required check must be a job that
