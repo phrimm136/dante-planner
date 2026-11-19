@@ -8,38 +8,48 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.data.redis.listener.adapter.RedisListenerExecutionFailedException;
-
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 /**
- * A listener container's initial subscription bypasses the recovery backoff, so an unreachable
- * local Redis at startup fails context load unless the failure is caught.
+ * A listener container never retries a failed first subscription, and ignores a second start() until stop().
  */
 @Configuration
-@Slf4j
 public class SseSubscriberConfig {
+
+    public static final String SSE_SUBSCRIPTION_WORKER = "sseSubscriptionWorker";
 
     @Bean
     public RedisMessageListenerContainer sseRedisMessageListenerContainer(
             @Qualifier("sseLocalRedisConnectionFactory") RedisConnectionFactory sseLocalRedisConnectionFactory,
             SseRedisSubscriber sseRedisSubscriber) {
-        RedisMessageListenerContainer container = new RedisMessageListenerContainer() {
-            @Override
-            public void start() {
-                try {
-                    super.start();
-                } catch (RedisListenerExecutionFailedException e) {
-                    log.error("SSE subscriber could not connect to local Redis at startup; "
-                            + "cross-node fan-out is inactive until this pod restarts with Redis reachable", e);
-                }
-            }
-        };
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(sseLocalRedisConnectionFactory);
+        container.setAutoStartup(false);
         container.addMessageListener(sseRedisSubscriber,
                 List.of(new ChannelTopic(SseChannel.USER.topic()),
                         new ChannelTopic(SseChannel.COMMENT.topic()),
                         new ChannelTopic(SseChannel.BROADCAST.topic())));
         return container;
+    }
+
+    @Bean(SSE_SUBSCRIPTION_WORKER)
+    public ThreadPoolTaskScheduler sseSubscriptionWorker() {
+        ThreadPoolTaskScheduler worker = new ThreadPoolTaskScheduler();
+        worker.setPoolSize(1);
+        worker.setThreadNamePrefix("sse-subscription-");
+        worker.setDaemon(true);
+        worker.setWaitForTasksToCompleteOnShutdown(false);
+        worker.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+        return worker;
+    }
+
+    @Bean
+    public SseSubscription sseSubscription(
+            RedisMessageListenerContainer sseRedisMessageListenerContainer,
+            @Qualifier(SSE_SUBSCRIPTION_WORKER) ThreadPoolTaskScheduler sseSubscriptionWorker) {
+        return new SseSubscription(sseRedisMessageListenerContainer::isListening, () -> {
+            sseRedisMessageListenerContainer.stop();
+            sseRedisMessageListenerContainer.start();
+        }, sseSubscriptionWorker);
     }
 }

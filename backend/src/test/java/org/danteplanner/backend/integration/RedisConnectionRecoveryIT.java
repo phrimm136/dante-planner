@@ -7,6 +7,10 @@ import eu.rekawek.toxiproxy.model.ToxicDirection;
 import java.util.Arrays;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
@@ -36,6 +40,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -68,8 +73,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *       blacklisted before the outage must be rejected again once auth Redis returns.</li>
  *   <li><b>SSE pub/sub</b>: the {@code RedisMessageListenerContainer} must re-subscribe
  *       after its subscription connection is severed, or cross-node fan-out silently dies
- *       until the pod restarts (the startup-unreachable case is documented as fatal in
- *       {@code SseSubscriberConfig}; the mid-life case must self-heal).</li>
+ *       until the pod restarts.</li>
  *   <li><b>Rate limiting</b>: the typed 503 an authentication endpoint answers during the
  *       outage must give way to normal request handling, not persist.</li>
  * </ul>
@@ -209,6 +213,9 @@ class RedisConnectionRecoveryIT {
     @Autowired
     private RedisRoleHealth roleHealth;
 
+    @Autowired
+    private RedisMessageListenerContainer sseRedisMessageListenerContainer;
+
     @DynamicPropertySource
     static void harnessProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", PRIMARY::getJdbcUrl);
@@ -309,6 +316,47 @@ class RedisConnectionRecoveryIT {
             return stream.received("comment:added", data -> data.contains("recovery-attempt-"));
         }, "cross-node fan-out self-healing after a severed subscriber connection: "
                 + "a dead subscription until pod restart silently disables multi-device sync");
+    }
+
+    @Test
+    void sseFanout_WhenTheSubscriptionCannotBeMade_KeepsThePodReadyAndIsRestoredByTheProbe() throws Exception {
+        User user = TestDataFactory.createTestUser(userRepository, "recovery-sse-probe-" + UUID.randomUUID() + "@example.com");
+        Long userId = user.getId();
+        try (SseStream stream = SseStream.user(port, AuthCookies.session(
+                TestDataFactory.generateAccessToken(jwtTokenService, user), UUID.randomUUID()));
+                HttpClient http = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build()) {
+            ssePublisher.publishUserEvent(userId, null, SseEventType.COMMENT_ADDED, "recovery-probe-warmup",
+                    Map.of("id", "recovery-probe-warmup"));
+            stream.next("comment:added", data -> data.contains("recovery-probe-warmup"));
+
+            SSE_LOCAL_REDIS_PROXY.disable();
+            sseRedisMessageListenerContainer.stop();
+            Hang.until(() -> !roleHealth.isAvailable(RedisRole.SSE_LOCAL),
+                    "the probe opening sse-local while the subscription cannot be made");
+            assertThat(sseRedisMessageListenerContainer.isListening()).isFalse();
+
+            assertHealthGroupUp(http, "readiness");
+            assertHealthGroupUp(http, "liveness");
+
+            SSE_LOCAL_REDIS_PROXY.enable();
+            Hang.until(() -> sseRedisMessageListenerContainer.isListening()
+                            && roleHealth.isAvailable(RedisRole.SSE_LOCAL),
+                    "the probe subscribing again and closing sse-local once the route is restored");
+            AtomicInteger attempts = new AtomicInteger();
+            Hang.until(() -> {
+                String attempt = "recovery-probe-attempt-" + attempts.getAndIncrement();
+                ssePublisher.publishUserEvent(userId, null, SseEventType.COMMENT_ADDED, attempt, Map.of("id", attempt));
+                return stream.received("comment:added", data -> data.contains("recovery-probe-attempt-"));
+            }, "an event published after the probe restored the subscription reaching the stream");
+        }
+    }
+
+    private void assertHealthGroupUp(HttpClient http, String group) throws IOException, InterruptedException {
+        HttpResponse<String> response = http.send(HttpRequest.newBuilder(
+                URI.create("http://localhost:" + port + "/actuator/health/" + group)).build(),
+                HttpResponse.BodyHandlers.ofString());
+        assertThat(response.statusCode()).as("%s answered %s", group, response.body()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.body()).as(group).contains("\"status\":\"UP\"");
     }
 
     @Test
