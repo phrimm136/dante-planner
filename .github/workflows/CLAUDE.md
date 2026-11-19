@@ -22,12 +22,16 @@
   configurations do, so a Dependabot alert's scope tells whether the vulnerable code ships.
 - Workflow `run:` blocks must not interpolate untrusted PR input (title/body/branch
   names); use `github.sha` / `github.ref_name` style contexts only.
-- PR Gate runs on `pull_request` and `merge_group` (ADR 516). A pull request runs the fast lanes,
-  the merge queue runs the full lanes on the commit it lands, and both skip a lane whose inputs
-  did not change. Main receives only queue-passed commits, so `deploy-fleet.yml` deploys on
-  `push` to main without a second test run, and `mutation.yml` runs the mutation ratchet cold once
-  a week. A required check must be a job that reports on both events; a job that runs on one
-  event only reports skipped on the other.
+- PR Gate runs on `pull_request` and `push` to main (ADR 517). A pull request runs the fast
+  lanes, a push runs the full lanes, and both skip a lane whose inputs did not change. A newer push
+  cancels the running push run, and the push diff starts at the last green push run, so a burst of
+  merges ends in one run. `deploy-fleet.yml` deploys only after a green push run, and
+  `mutation.yml` runs the mutation ratchet cold once a week. A required check must be a job that
+  reports on a pull request; a job that runs only on push reports skipped there.
+- A `workflow_run` workflow runs with secrets and must gate its first job on
+  `github.event.workflow_run.event` and `github.event.workflow_run.head_repository.full_name`:
+  its `branches:` filter matches the triggering run's branch name, which a fork pull request can
+  also carry, and a fork run of PR Gate ends green.
 - The PR Gate e2e job builds the backend boot jar on the runner, and its rig image takes that jar
   through `JAR_STAGE=jar-prebuilt` and the `backend-jar` build context. Every other backend image
   build (deploy-fleet, staging-rehearsal, window-schema-decomposition, PR Gate `build-backend`,
