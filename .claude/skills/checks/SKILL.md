@@ -1,6 +1,6 @@
 ---
 name: checks
-description: Run the repo's frontend, e2e and backend checks (typecheck, lint, format, vitest, playwright, gradle test/check/checkstyle/pitest, the PR Gate frontend steps, the skill CLI and git-hook test suites) through one local CLI that takes the test lock, writes a dated log and prints PASS/FAIL. Use for any test, typecheck, lint, build or format run, when the Bash hook refuses a hand-assembled check, or when a check's tools or node_modules look stale.
+description: Run the repo's frontend, e2e and backend checks (the checks a change reaches before a commit, typecheck, lint, format, vitest, playwright, gradle test/check/checkstyle/pitest, the PR Gate frontend steps, the skill CLI and git-hook test suites) through one local CLI that takes the test lock, writes a dated log and prints PASS/FAIL. Use before a commit (`checks changed`), for any test, typecheck, lint, build or format run, when the Bash hook refuses a hand-assembled check, or when a check's tools or node_modules look stale.
 ---
 
 # checks
@@ -19,6 +19,7 @@ in `flock`: it takes the lock itself.
 
 | Command | Use |
 |---------|-----|
+| `changed` | Before a commit: the checks the change set reaches (ADR 515). The change set is every path that differs from the merge-base with `origin/main`, in the working tree and untracked. PR Gate runs the rest on the pull request |
 | `doctor` | First, before any run: lock holder, static link, node_modules against each lockfile, oxlint/oxfmt/vitest/playwright versions, Docker, JDK; each problem names its fix |
 | `list` | Every command with its purpose |
 | `fe <check>` | `typecheck`, `lint`, `lint-validation`, `fmt [path...]`, `fmt-check`, `fp`, `rules`, `bailouts`, `build`, `budget`, `test [vitest args]` |
@@ -27,6 +28,7 @@ in `flock`: it takes the lock itself.
 | `be <check>` | `check`, `test [--tests PATTERN] [--exclude-tags containerized]`, `checkstyle`, `pit` |
 | `tools test` | Every `.claude/skills/*/tests/` directory (pytest) and `.githooks/tests/*.sh` script, through `.github/scripts/tooling-tests.sh`, the script PR Gate's `check-keep-list` job runs; one line per suite |
 | `--print` | Show a run's directory, environment and command line without running it |
+| `--full REASON` | Required for a whole run that PR Gate already runs: `fe test` or `e2e run` with no file, `be test` with no `--tests`, `be check`, `be pit`, `fe gate` |
 
 The CLI's own tests run with the other tooling suites: `checks tools test`.
 
