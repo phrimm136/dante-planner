@@ -1650,3 +1650,13 @@ guards the parse but likewise skips the schema gate.
   after a dependency change: share one key per tool across the jobs and save it from a workflow
   that runs on main.
   re-check: `.claude/skills/debt-ledger/bin/debt absent .github/workflows/pr-gate.yml 'actions/cache/save'`
+
+## 2026-11-19 tests that need a hand edit after a data refresh
+
+- Tests that assert literal game content break on each data refresh or pin even when no code
+  changed: `enemyFacetOptions.test.ts` lists every chapter facet key, the EGO and identity
+  parity snapshots carry the images' content hashes, and static `dc59e4b6f` rewrote shipped-data
+  tests to follow the new client. Worth doing the next time a pin or a refresh needs a test edit
+  with no code change: list the tests that every refresh and pin commit touched, and make each
+  one assert a rule computed from the data instead of a literal id, count or hash.
+  re-check: `rg -q "'walpurgis:10'" frontend/src/pages/battle/lib/__tests__/enemyFacetOptions.test.ts`
