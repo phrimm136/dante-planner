@@ -60,3 +60,4 @@ playwright-report/
 .wt/
 *.hprof
 .claude/.test.lock
+.claude/.cli-edit
