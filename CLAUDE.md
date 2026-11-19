@@ -7,7 +7,8 @@ learning: design
 
 ## Rules
 
-- Change only what was asked — no drive-by refactors, improvements, or unrelated fixes.
+- No drive-by refactors, improvements, or unrelated fixes. A pattern fix still covers every site
+  sharing the pattern.
 - No hardcoded values; use the constants files.
 - Validate at boundaries: Zod (FE), Jakarta Validation (BE).
 - Bugs route through the `diagnose` skill: red feedback loop first, root cause named
@@ -16,10 +17,11 @@ learning: design
   through the `ops` skill's CLI, `<checkout or worktree>/.claude/skills/ops/bin/ops <command>`
   (`ops list`), which names the AWS profile (`--env`, default prod); the hook refuses direct
   calls to the scripts it wraps. See `docs/external-access.md`; never improvise SSH/kubectl paths.
-- Checks (tests, typecheck, lint, format, build, e2e, gradle) run only through the `checks`
-  skill's CLI, `<checkout or worktree>/.claude/skills/checks/bin/checks <lane> <check>`, which
-  checks the checkout it lives in; the hook refuses direct vitest/tsc/oxlint/oxfmt/playwright/gradlew. Other yarn
-  commands target directories with flags (`yarn --cwd frontend install`), and `cd` is deny-listed.
+- Checks (tests, typecheck, lint, format, build, e2e, gradle) run only through
+  `<checkout or worktree>/.claude/skills/checks/bin/checks` (`checks list`). Other yarn commands
+  take `--cwd <dir>`.
+- A skill CLI explains itself through `<cli> help`; the hook refuses reading its source unless the
+  unit changes that CLI and created `<checkout>/.claude/.cli-edit`.
 - Terraform plans run as `ops tf plan <stack>`, which prints the `!` apply command for the user;
   other terraform commands run through `scripts/ops/terraform-run.sh …`; a bare `terraform` is
   hook-blocked.
