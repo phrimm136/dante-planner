@@ -6,8 +6,8 @@ import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.lang.ArchRule;
 
-import org.danteplanner.backend.architecture.fixture.JacksonAnnotatedRecord;
-import org.danteplanner.backend.architecture.fixture.JacksonTwoMapperFactory;
+import org.danteplanner.fixture.jacksontwo.JacksonAnnotatedRecord;
+import org.danteplanner.fixture.jacksontwo.JacksonTwoMapperFactory;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static org.assertj.core.api.Assertions.assertThatCode;

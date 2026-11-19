@@ -71,7 +71,7 @@ import org.danteplanner.backend.support.RedisEndpoints;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
-import org.danteplanner.ratelimitfixture.DeclaredHandlerFixture;
+import org.danteplanner.fixture.ratelimit.DeclaredHandlerFixture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;

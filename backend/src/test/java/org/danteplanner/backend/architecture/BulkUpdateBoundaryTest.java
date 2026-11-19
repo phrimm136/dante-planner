@@ -49,7 +49,7 @@ class BulkUpdateBoundaryTest {
 
     private static final String QUERY = "org.springframework.data.jpa.repository.Query";
 
-    private static final String FIXTURE_PACKAGE = "org.danteplanner.backend.architecture.fixture";
+    private static final String FIXTURE_PACKAGE = "org.danteplanner.fixture.bulkupdate";
 
     private static final JavaClasses MAIN_CLASSES = ImportedClasses.production();
 

@@ -36,7 +36,7 @@ class FailureUnionBoundaryTest {
 
     private static final String FAILURE_UNION = "org.danteplanner.backend.shared.failure.FailureUnion";
 
-    private static final String FIXTURE_PACKAGE = "org.danteplanner.backend.architecture.fixture";
+    private static final String FIXTURE_PACKAGE = "org.danteplanner.fixture.failureunion";
 
     private static final JavaClasses MAIN_CLASSES = ImportedClasses.production();
 

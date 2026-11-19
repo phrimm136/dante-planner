@@ -7,28 +7,28 @@ import org.junit.jupiter.api.Test;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 
-import org.danteplanner.moduleboundaryfixture.backend.archive.service.ArchivedUserReaderFixture;
-import org.danteplanner.moduleboundaryfixture.backend.comment.service.PlannerCallerFixture;
-import org.danteplanner.moduleboundaryfixture.backend.comment.service.PlannerReaderFixture;
-import org.danteplanner.moduleboundaryfixture.backend.moderation.controller.ModerationController;
-import org.danteplanner.moduleboundaryfixture.backend.moderation.service.ModerationPolicy;
-import org.danteplanner.moduleboundaryfixture.backend.moderation.service.UserModerationService;
-import org.danteplanner.moduleboundaryfixture.backend.planner.entity.LabeledEnumFixture;
-import org.danteplanner.moduleboundaryfixture.backend.planner.entity.LabeledRecordFixture;
-import org.danteplanner.moduleboundaryfixture.backend.planner.service.AbstractFooExtensionFixture;
-import org.danteplanner.moduleboundaryfixture.backend.planner.service.CommentCallerFixture;
-import org.danteplanner.moduleboundaryfixture.backend.planner.service.FooImplementationFixture;
-import org.danteplanner.moduleboundaryfixture.backend.planner.service.FooProviderImplementationFixture;
-import org.danteplanner.moduleboundaryfixture.backend.planner.service.LabeledBeanFixture;
-import org.danteplanner.moduleboundaryfixture.backend.planner.service.UserRepositoryReaderFixture;
-import org.danteplanner.moduleboundaryfixture.backend.planner.service.UsersReaderFixture;
-import org.danteplanner.moduleboundaryfixture.backend.shared.LabelFixture;
-import org.danteplanner.moduleboundaryfixture.backend.shared.PlannerAccessReaderFixture;
-import org.danteplanner.moduleboundaryfixture.backend.user.api.AbstractFoo;
-import org.danteplanner.moduleboundaryfixture.backend.user.api.Foo;
-import org.danteplanner.moduleboundaryfixture.backend.user.api.FooProvider;
-import org.danteplanner.moduleboundaryfixture.backend.user.api.UserEntityLeakFixture;
-import org.danteplanner.moduleboundaryfixture.backend.user.api.UsersApiFixture;
+import org.danteplanner.fixture.moduleboundary.backend.archive.service.ArchivedUserReaderFixture;
+import org.danteplanner.fixture.moduleboundary.backend.comment.service.PlannerCallerFixture;
+import org.danteplanner.fixture.moduleboundary.backend.comment.service.PlannerReaderFixture;
+import org.danteplanner.fixture.moduleboundary.backend.moderation.controller.ModerationController;
+import org.danteplanner.fixture.moduleboundary.backend.moderation.service.ModerationPolicy;
+import org.danteplanner.fixture.moduleboundary.backend.moderation.service.UserModerationService;
+import org.danteplanner.fixture.moduleboundary.backend.planner.entity.LabeledEnumFixture;
+import org.danteplanner.fixture.moduleboundary.backend.planner.entity.LabeledRecordFixture;
+import org.danteplanner.fixture.moduleboundary.backend.planner.service.AbstractFooExtensionFixture;
+import org.danteplanner.fixture.moduleboundary.backend.planner.service.CommentCallerFixture;
+import org.danteplanner.fixture.moduleboundary.backend.planner.service.FooImplementationFixture;
+import org.danteplanner.fixture.moduleboundary.backend.planner.service.FooProviderImplementationFixture;
+import org.danteplanner.fixture.moduleboundary.backend.planner.service.LabeledBeanFixture;
+import org.danteplanner.fixture.moduleboundary.backend.planner.service.UserRepositoryReaderFixture;
+import org.danteplanner.fixture.moduleboundary.backend.planner.service.UsersReaderFixture;
+import org.danteplanner.fixture.moduleboundary.backend.shared.LabelFixture;
+import org.danteplanner.fixture.moduleboundary.backend.shared.PlannerAccessReaderFixture;
+import org.danteplanner.fixture.moduleboundary.backend.user.api.AbstractFoo;
+import org.danteplanner.fixture.moduleboundary.backend.user.api.Foo;
+import org.danteplanner.fixture.moduleboundary.backend.user.api.FooProvider;
+import org.danteplanner.fixture.moduleboundary.backend.user.api.UserEntityLeakFixture;
+import org.danteplanner.fixture.moduleboundary.backend.user.api.UsersApiFixture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -146,7 +146,7 @@ class FeatureBoundaryRuleTest {
     @Test
     void frozenEntry_WhenItsFileReachesOnlyAnotherModulesInternals_FailsNamingTheEntry() {
         JavaClasses fixture = new ClassFileImporter().importClasses(ModerationController.class,
-                org.danteplanner.moduleboundaryfixture.stale.backend.moderation.service.ModerationPolicy.class,
+                org.danteplanner.fixture.moduleboundary.stale.backend.moderation.service.ModerationPolicy.class,
                 UserModerationService.class);
 
         assertThatThrownBy(() -> FeatureBoundaryTest.frozenInternalEdges_WhenScanned_AreStillLive(fixture))

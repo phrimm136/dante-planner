@@ -38,7 +38,7 @@ import org.danteplanner.backend.shared.redis.RoleOutages;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.backend.support.InMemoryProxyManager;
 import org.danteplanner.backend.support.LogCapture;
-import org.danteplanner.ratelimitfixture.DeclaredHandlerFixture;
+import org.danteplanner.fixture.ratelimit.DeclaredHandlerFixture;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;

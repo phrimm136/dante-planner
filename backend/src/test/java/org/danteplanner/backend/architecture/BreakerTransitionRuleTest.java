@@ -5,14 +5,14 @@ import org.junit.jupiter.api.Test;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 
-import org.danteplanner.breakertransitionfixture.BreakerFlippingFixture;
+import org.danteplanner.fixture.breakertransition.BreakerFlippingFixture;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class BreakerTransitionRuleTest {
 
     private static final JavaClasses FIXTURES =
-            new ClassFileImporter().importPackages("org.danteplanner.breakertransitionfixture");
+            new ClassFileImporter().importPackages("org.danteplanner.fixture.breakertransition");
 
     @Test
     void onlyProbesMoveBreakers_WhenAnotherClassOpensAndClosesABreaker_FailsNamingBothCalls() {

@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 
-import org.danteplanner.assertionsfixture.AssertjFixture;
-import org.danteplanner.assertionsfixture.HamcrestAssertFixture;
-import org.danteplanner.assertionsfixture.JunitAssertionsFixture;
+import org.danteplanner.fixture.assertions.AssertjFixture;
+import org.danteplanner.fixture.assertions.HamcrestAssertFixture;
+import org.danteplanner.fixture.assertions.JunitAssertionsFixture;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

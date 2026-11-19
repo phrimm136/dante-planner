@@ -4,7 +4,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Predicate;
 
-import org.danteplanner.backend.architecture.fixture.UnadmittedFilterRebuilder;
+import org.danteplanner.fixture.contentwriters.UnadmittedFilterRebuilder;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.searchindex.PlannerContentEntityExtractor;

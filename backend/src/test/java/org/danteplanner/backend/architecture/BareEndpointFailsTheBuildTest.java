@@ -1,8 +1,8 @@
 package org.danteplanner.backend.architecture;
 
-import org.danteplanner.ratelimitfixture.BareHandlerFixture;
-import org.danteplanner.ratelimitfixture.DeclaredHandlerFixture;
-import org.danteplanner.ratelimitfixture.MisdeclaredHandlerFixture;
+import org.danteplanner.fixture.ratelimit.BareHandlerFixture;
+import org.danteplanner.fixture.ratelimit.DeclaredHandlerFixture;
+import org.danteplanner.fixture.ratelimit.MisdeclaredHandlerFixture;
 
 import org.junit.jupiter.api.Test;
 

@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 
-import org.danteplanner.mockbeanfixture.MockitoBeanFieldFixture;
-import org.danteplanner.mockbeanfixture.TestBeanFixture;
+import org.danteplanner.fixture.mockbean.MockitoBeanFieldFixture;
+import org.danteplanner.fixture.mockbean.TestBeanFixture;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 
-import org.danteplanner.displaynamefixture.DisplayNamedFixture;
-import org.danteplanner.displaynamefixture.UnnamedFixture;
+import org.danteplanner.fixture.displayname.DisplayNamedFixture;
+import org.danteplanner.fixture.displayname.UnnamedFixture;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
