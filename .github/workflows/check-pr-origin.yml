@@ -21,7 +21,7 @@ jobs:
           PR_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
           CURRENT_REPO: ${{ github.repository }}
         run: |
-          if [ "$EVENT_NAME" = "push" ]; then
+          if [ "$EVENT_NAME" = "push" ] || [ "$EVENT_NAME" = "merge_group" ]; then
             echo "is-internal=true" >> "$GITHUB_OUTPUT"
           elif [ "$PR_HEAD_REPO" = "$CURRENT_REPO" ]; then
             echo "is-internal=true" >> "$GITHUB_OUTPUT"
