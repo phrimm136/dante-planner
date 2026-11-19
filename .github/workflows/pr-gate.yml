@@ -1,15 +1,17 @@
 name: PR Gate
 
-# The one verification workflow for code. Pull requests get change-filtered blocking lanes;
-# every push to main runs every lane except the planted-bug lane, which follows its change area,
-# and that run's success is the signal the deploy pipeline consumes. Change detection is a job, not a workflow-level paths filter: a
-# required check whose workflow never triggers wedges the merge at "Expected", while a skipped
-# job satisfies it.
+# The one verification workflow for code (ADR 516). A pull request runs the fast lanes: the
+# frontend checks and the backend unit tier. The merge queue runs the full lanes on the commit it
+# will land: the whole backend check, e2e and both builds. On both events a lane runs only when
+# its inputs changed, and main receives only commits the queue passed, so a push to main is not
+# tested again (deploy-fleet.yml deploys it). Change detection is a job, not a workflow-level
+# paths filter: a required check whose workflow never triggers wedges the merge at "Expected",
+# while a skipped job satisfies it.
 on:
   pull_request:
     branches: [main]
-  push:
-    branches: [main]
+  merge_group:
+    types: [checks_requested]
 
 concurrency:
   group: pr-gate-${{ github.ref }}
@@ -40,25 +42,12 @@ jobs:
       - name: Classify changed paths
         id: filter
         env:
-          EVENT_NAME: ${{ github.event_name }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          BEFORE_SHA: ${{ github.event.before }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
         run: |
           match() { printf '%s\n' "$CHANGED" | grep -qE "$1" && echo true || echo false; }
 
           CONSISTENCY_PATHS='^backend/src/consistency/|^backend/src/test/java/org/danteplanner/consistency/|^backend/src/test/java/org/danteplanner/backend/integration/consistency/|^backend/src/test/java/org/danteplanner/backend/integration/ConsistencyRunIT\.java$|^backend/src/main/java/org/danteplanner/backend/shared/readpath/|^backend/src/main/java/org/danteplanner/backend/shared/gtid/|^backend/src/main/java/org/danteplanner/backend/shared/config/(ReadOnlyRoutingDataSource|ReadSource[A-Za-z]*|RoutingDataSourceConfig|PoolLedger)\.java$|^backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCommandService\.java$|^backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCatalogService\.java$|^backend/src/test/java/org/danteplanner/backend/integration/OregonContext\.java$|^backend/src/test/java/org/danteplanner/backend/integration/ReplicationControl\.java$|^backend/src/test/java/org/danteplanner/backend/integration/CausalHarnessSupport\.java$|^backend/src/test/java/org/danteplanner/backend/integration/ReplicaRoutingHarnessSupport\.java$|^backend/build\.gradle\.kts$|^backend/src/test/resources/consistency/|^scripts/consistency/|^\.github/workflows/pr-gate\.yml$'
 
-          if [ "$EVENT_NAME" = "push" ]; then
-            for area in backend frontend e2e deploy terraform; do echo "$area=true" >> "$GITHUB_OUTPUT"; done
-            if [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ] \
-              || ! CHANGED=$(git diff --name-only "$BEFORE_SHA"...HEAD); then
-              echo "consistency=true" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-            printf '%s\n' "$CHANGED"
-            echo "consistency=$(match "$CONSISTENCY_PATHS")" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
           CHANGED=$(git diff --name-only "$BASE_SHA"...HEAD)
           printf '%s\n' "$CHANGED"
 
@@ -145,15 +134,9 @@ jobs:
         run: yarn install --frozen-lockfile
       - name: BE Test
         working-directory: ./backend
-        run: ./gradlew check -q
-      - name: Save Gradle caches
-        if: github.ref == 'refs/heads/main' && success() && steps.gradle-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ steps.gradle-cache.outputs.cache-primary-key }}
+        env:
+          UNIT_ONLY: ${{ github.event_name == 'pull_request' && '-PexcludeTags=containerized' || '' }}
+        run: ./gradlew check -q $UNIT_ONLY
       - name: Upload test reports
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
@@ -162,65 +145,6 @@ jobs:
           path: |
             backend/build/reports/tests/
             backend/build/test-results/
-          retention-days: 7
-
-  test-mutation:
-    needs: changes
-    if: needs.changes.outputs.backend == 'true'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-      - uses: ./.github/actions/fetch-static-checkout
-        with:
-          static-deploy-key: ${{ secrets.STATIC_DEPLOY_KEY }}
-      - name: Set up JDK 21
-        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad  # v5
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-      - name: Restore file permissions
-        run: chmod +x backend/gradlew
-      - name: Restore Gradle caches
-        id: gradle-cache
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ github.workflow }}-${{ github.job }}-${{ hashFiles('backend/*.gradle.kts', 'backend/gradle/**') }}
-          restore-keys: gradle-${{ github.workflow }}-${{ github.job }}-
-      - name: Restore PIT history
-        if: github.event_name == 'pull_request'
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
-        with:
-          path: backend/build/pitHistory.txt
-          key: pit-history-${{ github.sha }}
-          restore-keys: pit-history-
-      - name: BE Mutation Ratchet
-        working-directory: ./backend
-        run: ./gradlew pitestRatchet -q
-      - name: Save PIT history
-        if: github.event_name == 'push'
-        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
-        with:
-          path: backend/build/pitHistory.txt
-          key: pit-history-${{ github.sha }}
-      - name: Save Gradle caches
-        if: github.ref == 'refs/heads/main' && success() && steps.gradle-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ steps.gradle-cache.outputs.cache-primary-key }}
-      - name: Upload mutation reports
-        if: failure()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
-        with:
-          name: backend-mutation-reports
-          path: backend/build/reports/pitest/
           retention-days: 7
 
   test-deploy:
@@ -261,12 +185,6 @@ jobs:
         run: |
           mkdir -p "$TF_PLUGIN_CACHE_DIR"
           .github/scripts/terraform-validate.sh
-      - name: Save Terraform plugin cache
-        if: github.ref == 'refs/heads/main' && success() && steps.terraform-plugin-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
-        with:
-          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
-          key: ${{ steps.terraform-plugin-cache.outputs.cache-primary-key }}
 
   test-migration:
     needs: changes
@@ -404,14 +322,6 @@ jobs:
           restore-keys: gradle-${{ github.workflow }}-${{ github.job }}-
       - name: Run the variant
         run: scripts/consistency/planted-bugs.sh ${{ matrix.variant }} --seeds 20
-      - name: Save Gradle caches
-        if: github.ref == 'refs/heads/main' && success() && steps.gradle-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ steps.gradle-cache.outputs.cache-primary-key }}
       - name: Upload consistency reports
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
@@ -446,7 +356,7 @@ jobs:
   build-backend:
     # e2e is a superset of both build conditions, so it never skips out from under a build.
     needs: [changes, test-backend, e2e]
-    if: needs.changes.outputs.backend == 'true'
+    if: github.event_name == 'merge_group' && needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -525,7 +435,7 @@ jobs:
 
   build-frontend:
     needs: [changes, test-frontend, e2e]
-    if: needs.changes.outputs.frontend == 'true'
+    if: github.event_name == 'merge_group' && needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -553,9 +463,10 @@ jobs:
   e2e:
     needs: changes
     if: >-
+      github.event_name == 'merge_group' && (
       needs.changes.outputs.backend == 'true' ||
       needs.changes.outputs.frontend == 'true' ||
-      needs.changes.outputs.e2e == 'true'
+      needs.changes.outputs.e2e == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:

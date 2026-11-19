@@ -1,0 +1,104 @@
+name: Mutation
+
+# The surviving-mutant ratchet, cold, once a week on main (ADR 516). No pull request waits on it.
+# A rise or a fall against backend/config/pitest-surviving-mutants.json goes into one open issue
+# with the counts and the commits since the last green run; a rise also fails this run. The
+# baseline is lowered by hand from that issue, because only a cold run counts survivors reliably.
+on:
+  schedule:
+    - cron: '0 18 * * 0'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: mutation
+  cancel-in-progress: false
+
+env:
+  ISSUE_TITLE: Mutation survivors moved against the baseline
+
+jobs:
+  mutation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      actions: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/fetch-static-checkout
+        with:
+          static-deploy-key: ${{ secrets.STATIC_DEPLOY_KEY }}
+      - name: Set up JDK 21
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad  # v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Restore file permissions
+        run: chmod +x backend/gradlew
+      - name: Gradle caches
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ github.workflow }}-${{ github.job }}-${{ hashFiles('backend/*.gradle.kts', 'backend/gradle/**') }}
+          restore-keys: gradle-${{ github.workflow }}-${{ github.job }}-
+      - name: Mutation ratchet, cold
+        id: ratchet
+        continue-on-error: true
+        working-directory: ./backend
+        run: ./gradlew pitestRatchet -q
+      - name: Report a move into the issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          verdict=backend/build/reports/pitest/ratchet.json
+          if [ ! -f "$verdict" ]; then
+            echo "::error::$verdict is missing: pitest did not finish; read the 'Mutation ratchet, cold' step"
+            exit 1
+          fi
+          raised=$(jq -r '.raised | to_entries[] | "- \(.key): \(.value.baseline) → \(.value.current)"' "$verdict")
+          lowered=$(jq -r '.lowered | to_entries[] | "- \(.key): \(.value.baseline) → \(.value.current)"' "$verdict")
+          if [ -z "$raised" ] && [ -z "$lowered" ]; then
+            echo "survivors equal the baseline"
+            exit 0
+          fi
+          last_green=$(gh run list -R "$REPO" --workflow mutation.yml --status success --limit 1 \
+            --json headSha --jq '.[0].headSha // empty')
+          if [ -n "$last_green" ] && git cat-file -e "$last_green^{commit}" 2>/dev/null; then
+            commits=$(git log --oneline "$last_green..HEAD")
+          else
+            commits="(no earlier green run)"
+          fi
+          body_file=$(mktemp)
+          {
+            echo "Cold run of ${GITHUB_SHA::8}: $RUN_URL"
+            if [ -n "$raised" ]; then printf '\n**Rose** (the run failed; find the commit that left the mutants alive):\n%s\n' "$raised"; fi
+            if [ -n "$lowered" ]; then printf '\n**Fell** (set these counts in backend/config/pitest-surviving-mutants.json):\n%s\n' "$lowered"; fi
+            printf '\nCommits since the last green run:\n```\n%s\n```\n' "$commits"
+          } > "$body_file"
+          issue=$(gh issue list -R "$REPO" --state open --search "\"$ISSUE_TITLE\" in:title" \
+            --json number --jq '.[0].number // empty')
+          if [ -n "$issue" ]; then
+            gh issue comment -R "$REPO" "$issue" --body-file "$body_file"
+          else
+            gh issue create -R "$REPO" --title "$ISSUE_TITLE" --body-file "$body_file"
+          fi
+          if [ -n "$raised" ]; then
+            echo "::error::surviving mutants rose; see the issue '$ISSUE_TITLE'"
+            exit 1
+          fi
+      - name: Upload mutation reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: backend-mutation-reports
+          path: backend/build/reports/pitest/
+          retention-days: 14

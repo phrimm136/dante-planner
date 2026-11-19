@@ -7,18 +7,16 @@ name: "Deploy (multi-region k3s)"
 # pulls the image from its LOCAL registry — pushing to both here removes the
 # cross-region ECR-replication race (a bump could otherwise reference a tag not
 # yet replicated to Seoul).
-# Continuous deployment: the push-run of PR Gate on main triggers this on success, and the
-# deploy checks out the exact SHA that run verified — never main's current head, which may
-# already carry a merge the gate has not blessed. A green merge whose image inputs did not
+# Continuous deployment: a push to main triggers this. Main receives only commits that PR
+# Gate's merge-queue run passed (ADR 516), so the pushed SHA is the verified one, and the deploy
+# checks out exactly that SHA, never main's current head. A merge whose image inputs did not
 # change since the deployed tag skips the whole chain; the input list lives in
 # .github/scripts/deploy-inputs-changed.sh. workflow_dispatch stays as the manual escape
 # hatch and always deploys. The concurrency group holds one running plus one pending run, so
 # rapid merges coalesce and only the newest pending SHA deploys.
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows: ["PR Gate"]
-    types: [completed]
+  push:
     branches: [main]
 
 concurrency:
@@ -36,14 +34,6 @@ env:
 
 jobs:
   changes:
-    # The branches filter above matches the triggering run's branch name, which a fork pull
-    # request also carries (a fork branch named main), and a fork run of PR Gate ends green
-    # because check-origin succeeds while the rest skip. Only a push to main in this
-    # repository, or a manual run, may reach the jobs that check out the verified SHA.
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.event == 'push' &&
-      github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -53,23 +43,19 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.sha }}
           fetch-depth: 0
 
       - name: Detect backend image input changes since the deployed tag
         id: detect
         env:
-          VERIFIED_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          VERIFIED_SHA: ${{ github.sha }}
           EVENT_NAME: ${{ github.event_name }}
         run: .github/scripts/deploy-inputs-changed.sh "$VERIFIED_SHA" "$EVENT_NAME"
 
   build-push:
     needs: changes
-    # On workflow_run the trigger fires for red gates too; only a green verdict deploys.
-    if: >-
-      needs.changes.outputs.backend == 'true' &&
-      (github.event_name == 'workflow_dispatch' ||
-      github.event.workflow_run.conclusion == 'success')
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     environment: production
     permissions:
@@ -79,7 +65,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.sha }}
 
       - uses: ./.github/actions/fetch-static-checkout
         with:
@@ -121,10 +107,10 @@ jobs:
           platforms: linux/arm64
           push: true
           tags: |
-            ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_REPO }}:${{ github.event.workflow_run.head_sha || github.sha }}
-            ${{ env.ECR_REGISTRY_SEOUL }}/${{ env.IMAGE_REPO }}:${{ github.event.workflow_run.head_sha || github.sha }}
+            ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_REPO }}:${{ github.sha }}
+            ${{ env.ECR_REGISTRY_SEOUL }}/${{ env.IMAGE_REPO }}:${{ github.sha }}
           build-args: |
-            GIT_SHA=${{ github.event.workflow_run.head_sha || github.sha }}
+            GIT_SHA=${{ github.sha }}
           cache-from: type=gha,scope=backend-arm64
           cache-to: type=gha,mode=max,scope=backend-arm64
 
@@ -147,7 +133,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.sha }}
       - uses: ./.github/actions/fetch-static-checkout
         with:
           static-deploy-key: ${{ secrets.STATIC_DEPLOY_KEY }}
@@ -310,7 +296,7 @@ jobs:
       contents: write
     timeout-minutes: 10
     env:
-      GIT_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      GIT_SHA: ${{ github.sha }}
     steps:
       # Write deploy key of this repository. The bump push must come from a
       # bypass actor: dev/main sit behind rulesets the push does not satisfy,
@@ -368,7 +354,7 @@ jobs:
       id-token: write
     timeout-minutes: 25
     env:
-      GIT_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      GIT_SHA: ${{ github.sha }}
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd  # v6

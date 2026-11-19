@@ -229,9 +229,13 @@ pitest {
     // (UNKNOWN_ERROR) across every pitest core from 1.19.6 to 1.22.1.
 }
 
+// A fall passes and is only reported: a run that reuses PIT's incremental history can count fewer
+// survivors than a cold run of the same commit, so the baseline is lowered by hand from the
+// weekly cold run's issue (mutation.yml).
 val pitestRatchet by tasks.registering {
     dependsOn(tasks.named("pitest"))
     val report = layout.buildDirectory.file("reports/pitest/mutations.xml")
+    val verdictFile = layout.buildDirectory.file("reports/pitest/ratchet.json")
     val baselineFile = layout.projectDirectory.file("config/pitest-surviving-mutants.json")
     inputs.files(report, baselineFile)
     doLast {
@@ -265,18 +269,22 @@ val pitestRatchet by tasks.registering {
                         }
             }
         }
-        if (lowered.isNotEmpty()) {
-            failures += "Surviving mutants fell below $baselinePath in " +
-                lowered.joinToString(", ") { "$it (baseline ${baseline[it]}, current ${current[it] ?: 0})" } +
-                "; lower the counts in $baselinePath to:\n" +
-                groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(current))
-        }
+        fun countsOf(names: List<String>) =
+            names.associateWith { mapOf("baseline" to (baseline[it] ?: 0), "current" to (current[it] ?: 0)) }
+        verdictFile.get().asFile.writeText(groovy.json.JsonOutput.toJson(
+            mapOf("raised" to countsOf(raised), "lowered" to countsOf(lowered))))
         if (failures.isNotEmpty()) {
             throw GradleException("pitestRatchet: " + failures.joinToString("\n"))
         }
+        if (lowered.isNotEmpty()) {
+            logger.lifecycle(
+                "pitestRatchet: fewer survivors than $baselinePath in " +
+                    lowered.joinToString(", ") { "$it (${baseline[it]} -> ${current[it] ?: 0})" } +
+                    "; lower it from the weekly cold run in mutation.yml, not from a run with history")
+        }
         logger.lifecycle(
             "pitestRatchet: ${current.values.sum()} surviving of ${elements.size} mutants across " +
-                "${current.size} packages, equal to $baselinePath")
+                "${current.size} packages, at or below $baselinePath")
     }
 }
 
