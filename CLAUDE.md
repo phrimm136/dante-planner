@@ -35,4 +35,6 @@ learning: design
 
 ## Git
 
-- Commit workflow: the `commit-process` skill.
+- Before a unit's first commit, rebase its branch onto `origin/main`
+  (`git -C <worktree> fetch origin main`, then `git -C <worktree> rebase origin/main`).
+- Docs and data written for a unit go in the same commit as its code.

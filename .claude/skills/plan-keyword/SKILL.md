@@ -139,7 +139,7 @@ Add a `"<keyword-id>": { "label": "<exact-bytes-from-Step-2>" }` entry to each:
   `utf-8 bytes=NN` the resolver printed in Step 2.
 
 ## Step 6 — Commit
-- Hand off to `commit-process`: **two-repo, data-first** (label commit in the data checkout on
+- Commit **two-repo, data-first** (label commit in the data checkout on
   `main`, then `static lock` and a code commit with the `static.lock` bump, ADR 200). The data
   push must go up too, or `static.lock` names a commit CI cannot fetch.
 
