@@ -18,12 +18,14 @@ GATE_JOB = "test-frontend"
 TOOLING_SCRIPT = ".github/scripts/tooling-tests.sh"
 TOOLING_JOB = "check-keep-list"
 ARCHUNIT_PATTERN = "org.danteplanner.backend.architecture.*"
+CI_BASE = "origin/main"
 GIT_ENV_NAMES = ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_COMMON_DIR")
 PACKAGE_DIRS = {"fe": "frontend", "e2e": "e2e"}
 BUILD_NODE_OPTIONS = "--max-old-space-size=6144"
 SUMMARY_LIMIT = 240
 
-USAGE_TEXT = f"""usage: checks [--root <path>] [--print] <lane> <check> [args]
+USAGE_TEXT = f"""usage: checks [--root <path>] [--print] [--full REASON] <lane> <check> [args]
+       checks [--root <path>] [--print] changed
        checks [--root <path>] doctor | list
        checks hook < tool-json
 
@@ -42,6 +44,16 @@ logs:       <root>/.claude/reports/logs/checks-<lane>-<check>-<YYYYMMDD-HHMMSS>.
             <root>/.claude/reports exists, otherwise the main checkout's .claude/reports/logs.
 --print:    show the working directory, environment and command line of a run without taking
             the lock or running anything.
+
+changed:    the checks the change set reaches, before a commit. The change set is every path
+            that differs from the merge-base with {CI_BASE}, in the working tree and untracked.
+            A frontend change runs fe typecheck and the vitest files its import graph reaches
+            (vitest --changed), a static.lock change runs every vitest file, an e2e change runs
+            e2e typecheck, a backend source runs the test classes named after it, a backend
+            build or resource file runs every backend test, and a tooling change runs tools
+            test. A Markdown file runs nothing. PR Gate runs the rest on every pull request.
+--full:     a whole test run that PR Gate already runs (fe test or e2e run with no file, be test
+            with no --tests, be check, be pit, fe gate) takes a stated reason.
 
 `checks list` prints every command with its purpose; `checks doctor` reports the lock holder,
 the static link, node_modules against each lockfile, tool versions, Docker and the JDK.
@@ -90,6 +102,7 @@ CHECK_TABLE = (
 )
 
 TOP_COMMANDS = (
+    ("changed", "the checks the change set reaches, before a commit; PR Gate runs the rest"),
     ("doctor", "lock holder, static link, node_modules and tool versions, Docker, JDK; runs nothing heavy"),
     ("list", "this list"),
     ("hook", "the PreToolUse entry: reads the Bash tool JSON on stdin, exit 2 refuses a hand-assembled check"),
@@ -153,12 +166,14 @@ class CommandLine:
     print_only: bool
     wants_help: bool
     command_words: tuple
+    full_reason: str = ""
 
 
 def parse_command_line(argv_words):
     root_arg = ""
     print_only = False
     wants_help = False
+    full_reason = ""
     command_words = []
     word_index = 0
     after_dashes = False
@@ -173,6 +188,11 @@ def parse_command_line(argv_words):
             wants_help = True
         elif one_word == "--print":
             print_only = True
+        elif one_word == "--full":
+            if word_index + 1 >= len(argv_words) or not argv_words[word_index + 1].strip():
+                raise CheckError("--full needs a reason, for example --full 'the merge touched every page'")
+            full_reason = argv_words[word_index + 1]
+            word_index += 1
         elif one_word == "--root" and not command_words:
             if word_index + 1 >= len(argv_words):
                 raise CheckError("--root needs a path; see checks --help")
@@ -183,7 +203,7 @@ def parse_command_line(argv_words):
         else:
             command_words.append(one_word)
         word_index += 1
-    return CommandLine(root_arg, print_only, wants_help, tuple(command_words))
+    return CommandLine(root_arg, print_only, wants_help, tuple(command_words), full_reason)
 
 
 def git_environment():
@@ -373,6 +393,88 @@ def build_plan(repo_paths, lane_name, check_name, arg_words):
     extra_env = (("NODE_OPTIONS", BUILD_NODE_OPTIONS),) if (lane_name, check_name) == ("fe", "build") else ()
     return RunPlan(step_label, package_dir, ("yarn", YARN_SCRIPTS[(lane_name, check_name)]),
                    extra_env, package_dir)
+
+
+E2E_VALUE_OPTIONS = ("--base-url", "--repeat", "--jobs", "--project")
+FRONTEND_TYPED = (".ts", ".tsx")
+FRONTEND_WHOLE = ("frontend/package.json", "frontend/yarn.lock", "static.lock")
+BACKEND_SOURCES = ("backend/src/main/java/", "backend/src/test/java/")
+TOOLING_DIRS = (".claude/skills/", ".claude/hooks/", ".githooks/", ".github/scripts/")
+
+
+def whole_run(lane_name, check_name, arg_words):
+    """Whether a check runs every test that PR Gate runs, with nothing to narrow it."""
+    if (lane_name, check_name) in (("fe", "gate"), ("be", "check"), ("be", "pit")):
+        return True
+    if (lane_name, check_name) == ("fe", "test"):
+        return not arg_words
+    if (lane_name, check_name) == ("be", "test"):
+        return not any(one_word.split("=", 1)[0] == "--tests" for one_word in arg_words)
+    if (lane_name, check_name) == ("e2e", "run"):
+        option_words, _ = split_passthrough(arg_words)
+        word_index = 0
+        while word_index < len(option_words):
+            one_word = option_words[word_index]
+            if one_word in E2E_VALUE_OPTIONS:
+                word_index += 2
+                continue
+            if not one_word.startswith("-"):
+                return False
+            word_index += 1
+        return True
+    return False
+
+
+def backend_pattern(source_path):
+    """The gradle --tests pattern a changed backend source stands for."""
+    class_name = Path(source_path).stem
+    if source_path.startswith("backend/src/test/java/"):
+        return f"*{class_name}"
+    return f"*{class_name}Test*"
+
+
+def changed_plans(repo_paths, changed_paths, base_commit):
+    """[(RunPlan, reason)] for the checks a change set reaches, in a fixed order."""
+    sorted_paths = sorted(one_path for one_path in changed_paths if not one_path.endswith(".md"))
+    plan_rows = []
+
+    def first_path(path_test):
+        return next((one_path for one_path in sorted_paths if path_test(one_path)), None)
+
+    typed_path = first_path(lambda one_path: one_path.startswith("frontend/")
+                            and one_path.endswith(FRONTEND_TYPED))
+    if typed_path:
+        plan_rows.append((build_plan(repo_paths, "fe", "typecheck", []), f"{typed_path} changed"))
+    whole_path = first_path(lambda one_path: one_path in FRONTEND_WHOLE)
+    frontend_path = first_path(lambda one_path: one_path.startswith("frontend/"))
+    if whole_path:
+        plan_rows.append((build_plan(repo_paths, "fe", "test", []),
+                          f"{whole_path} changed, which every vitest file reads"))
+    elif frontend_path:
+        plan_rows.append((build_plan(repo_paths, "fe", "test", ["--changed", base_commit]),
+                          f"{frontend_path} changed; vitest runs the files its import graph reaches"))
+    e2e_path = first_path(lambda one_path: one_path.startswith("e2e/"))
+    if e2e_path:
+        plan_rows.append((build_plan(repo_paths, "e2e", "typecheck", []), f"{e2e_path} changed"))
+    backend_paths = [one_path for one_path in sorted_paths if one_path.startswith("backend/")]
+    build_path = next((one_path for one_path in backend_paths
+                       if not one_path.startswith(BACKEND_SOURCES)
+                       and not one_path.startswith(("backend/config/", "backend/docs/"))), None)
+    if build_path:
+        plan_rows.append((build_plan(repo_paths, "be", "test", []),
+                          f"{build_path} changed, which every backend test reads"))
+    else:
+        test_patterns = sorted({backend_pattern(one_path) for one_path in backend_paths
+                                if one_path.startswith(BACKEND_SOURCES) and one_path.endswith(".java")})
+        if test_patterns:
+            pattern_words = [pattern_word for test_pattern in test_patterns
+                             for pattern_word in ("--tests", test_pattern)]
+            plan_rows.append((build_plan(repo_paths, "be", "test", pattern_words),
+                              f"{len(test_patterns)} backend source(s) changed; their test classes run"))
+    tooling_path = first_path(lambda one_path: one_path.startswith(TOOLING_DIRS))
+    if tooling_path:
+        plan_rows.append((build_plan(repo_paths, "tools", "test", []), f"{tooling_path} changed"))
+    return plan_rows
 
 
 @dataclasses.dataclass(frozen=True)
@@ -1240,6 +1342,56 @@ def hook_main(stdin_text):
     return 2
 
 
+def git_lines(repo_paths, *git_args):
+    git_run = subprocess.run(["git", "-C", str(repo_paths.repo_root), *git_args], capture_output=True,
+                             text=True, env=git_environment())
+    if git_run.returncode != 0:
+        raise CheckError(f"git {' '.join(git_args)} failed: {git_run.stderr.strip()}; "
+                         f"run git -C {repo_paths.repo_root} fetch origin and retry")
+    return [one_line for one_line in git_run.stdout.splitlines() if one_line]
+
+
+def run_changed(repo_paths, print_only):
+    base_commit = git_lines(repo_paths, "merge-base", "HEAD", CI_BASE)[0]
+    changed_paths = set(git_lines(repo_paths, "diff", "--name-only", base_commit)) | set(
+        git_lines(repo_paths, "ls-files", "--others", "--exclude-standard"))
+    plan_rows = changed_plans(repo_paths, changed_paths, base_commit)
+    for run_plan, reason_text in plan_rows:
+        print(f"# {run_plan.step_label}: {reason_text}")
+        if print_only:
+            print_plan(run_plan)
+    print("# PR Gate runs every other check on the pull request")
+    if print_only or not plan_rows:
+        if not plan_rows:
+            print("no local check is reached")
+        return 0
+    for run_plan, _ in plan_rows:
+        require_modules(run_plan, repo_paths)
+    repo_paths.log_dir.mkdir(parents=True, exist_ok=True)
+    print(f"checks: root {repo_paths.repo_root}", file=sys.stderr, flush=True)
+    failed_steps = []
+    with CheckLock(repo_paths.lock_path):
+        run_moment = datetime.datetime.now()
+        for step_number, (run_plan, _) in enumerate(plan_rows, start=1):
+            step_log = log_path_for(repo_paths.log_dir, ("changed",), run_moment,
+                                    (f"{step_number:02d}", run_plan.step_label))
+            exit_code, verdict_text, summary_text = execute_plan(run_plan, step_log)
+            if exit_code != 0:
+                failed_steps.append(run_plan.step_label)
+            print(f"{verdict_text} {run_plan.step_label}  {step_log}  {summary_text}", flush=True)
+    total_text = (f"{len(failed_steps)} of {len(plan_rows)} failed: {', '.join(failed_steps)}"
+                  if failed_steps else f"{len(plan_rows)} of {len(plan_rows)} passed")
+    print(f"{'FAIL' if failed_steps else 'PASS'} changed  {total_text}")
+    return 1 if failed_steps else 0
+
+
+def refuse_whole(command_line, lane_name, check_name, arg_words):
+    if command_line.full_reason or command_line.print_only or not whole_run(lane_name, check_name, arg_words):
+        return
+    raise CheckError(f"checks {lane_name} {check_name} runs everything PR Gate runs on the pull request; "
+                     f"run checks changed, narrow it (a file, --tests PATTERN), or pass --full REASON")
+
+
 def main(argv_words):
     command_line = parse_command_line(argv_words)
     command_words = list(command_line.command_words)
@@ -1255,6 +1407,10 @@ def main(argv_words):
         print("\n".join(list_lines()))
         return 0
     repo_paths = find_paths(command_line.root_arg, own_checkout_dir())
+    if command_words[0] == "changed":
+        if len(command_words) > 1:
+            raise CheckError("checks changed takes no arguments; see checks list")
+        return run_changed(repo_paths, command_line.print_only)
     if command_words[0] == "doctor":
         out_lines, problem_count = doctor_lines(repo_paths)
         print("\n".join(out_lines))
@@ -1265,6 +1421,9 @@ def main(argv_words):
     if len(command_words) < 2 and lane_name in {one_spec.lane_name for one_spec in CHECK_TABLE}:
         raise CheckError(f"{lane_name} needs a check; {lane_line(lane_name)}")
     check_name, arg_words = (command_words + [""])[1], command_words[2:]
+    refuse_whole(command_line, lane_name, check_name, arg_words)
+    if command_line.full_reason:
+        print(f"checks: a whole run, because {command_line.full_reason}", file=sys.stderr)
     if (lane_name, check_name) == ("fe", "gate"):
         if arg_words:
             raise CheckError("checks fe gate takes no arguments; see checks list")

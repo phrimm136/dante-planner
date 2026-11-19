@@ -2,7 +2,7 @@
 
 Playwright driving a running stack over HTTP. Three projects, split by what they need:
 
-| Project | `.claude/skills/checks/bin/checks e2e run …` | Needs |
+| Project | `.claude/skills/checks/bin/checks --full REASON e2e run …` | Needs |
 |---|---|---|
 | `contract` | `--project contract` | the request fixture only, against the API host |
 | `infra` | `--project infra` | the request fixture, plus Toxiproxy and both regions |
@@ -39,7 +39,7 @@ E2E_DB_HOST=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress
 E2E_DB_USER=$(docker exec limbusplanner-mysql-1 printenv MYSQL_USER) \
 E2E_DB_PASSWORD=$(docker exec limbusplanner-mysql-1 printenv MYSQL_PASSWORD) \
 E2E_STAGING_KEY_FILE=../backend/src/test/resources/test-keys/private_key.pem \
-.claude/skills/checks/bin/checks e2e run
+.claude/skills/checks/bin/checks --full 'the rig is up and the change touches every page' e2e run
 ```
 
 Three of those are not guessable, and each fails in a way that names something other than itself:

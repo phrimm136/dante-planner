@@ -534,3 +534,87 @@ def test_the_tooling_script_fails_when_it_finds_no_suite(tmp_path):
     tooling_run = run_tooling_tree(tmp_path, {".claude/skills/alpha/bin/alpha": ""})
     assert tooling_run.returncode == 1
     assert "no suites found" in tooling_run.stderr
+
+
+def changed_rows(*changed_paths):
+    return [(run_plan.step_label, run_plan.command_argv[-4:], reason_text) for run_plan, reason_text
+            in checks_cli.changed_plans(FAKE_PATHS, set(changed_paths), "abc123")]
+
+
+def test_a_frontend_source_runs_typecheck_and_the_vitest_files_it_reaches():
+    assert changed_rows("frontend/src/lib/deck.ts") == [
+        ("fe typecheck", ("yarn", "typecheck"), "frontend/src/lib/deck.ts changed"),
+        ("fe test", ("test", "run", "--changed", "abc123"),
+         "frontend/src/lib/deck.ts changed; vitest runs the files its import graph reaches")]
+
+
+def test_a_frontend_file_that_is_not_typed_runs_only_the_vitest_files_it_reaches():
+    assert [one_row[0] for one_row in changed_rows("frontend/src/styles/deck.css")] == ["fe test"]
+
+
+def test_a_static_pin_runs_every_vitest_file():
+    assert changed_rows("static.lock") == [
+        ("fe test", ("yarn", "test", "run"), "static.lock changed, which every vitest file reads")]
+
+
+def test_an_e2e_change_runs_the_e2e_typecheck():
+    assert [one_row[0] for one_row in changed_rows("e2e/tests/deck.spec.ts")] == ["e2e typecheck"]
+
+
+def test_backend_sources_run_the_test_classes_named_after_them():
+    run_plan, reason_text = checks_cli.changed_plans(FAKE_PATHS, {
+        "backend/src/main/java/org/x/PlannerService.java",
+        "backend/src/test/java/org/x/DeckControllerTest.java"}, "abc123")[0]
+    assert run_plan.command_argv[4:] == (
+        "test", "--tests", "*DeckControllerTest", "--tests", "*PlannerServiceTest*",
+        "--tests", checks_cli.ARCHUNIT_PATTERN)
+    assert reason_text == "2 backend source(s) changed; their test classes run"
+
+
+def test_a_backend_build_or_resource_file_runs_every_backend_test():
+    assert changed_rows("backend/build.gradle.kts", "backend/src/main/java/org/x/A.java") == [
+        ("be test", ("-p", "/repo/wt/backend", "--console=plain", "test"),
+         "backend/build.gradle.kts changed, which every backend test reads")]
+    assert [one_row[0] for one_row in changed_rows(
+        "backend/src/main/resources/db/migration/V9__deck.sql")] == ["be test"]
+
+
+def test_a_tooling_change_runs_the_tooling_suites():
+    assert [one_row[0] for one_row in changed_rows(".githooks/pre-push")] == ["tools test"]
+
+
+def test_a_path_no_check_reads_reaches_nothing():
+    assert changed_rows("docs/adr/509-x.md", "terraform/main.tf", "backend/README.md",
+                        "frontend/CLAUDE.md", ".claude/skills/checks/SKILL.md") == []
+
+
+@pytest.mark.parametrize("command_words,expected_whole", [
+    (("fe", "test"), True),
+    (("fe", "test", "src/lib/deck.test.ts"), False),
+    (("fe", "gate"), True),
+    (("be", "test"), True),
+    (("be", "test", "--exclude-tags", "containerized"), True),
+    (("be", "test", "--tests", "*Deck*"), False),
+    (("be", "check"), True),
+    (("be", "pit"), True),
+    (("be", "checkstyle"), False),
+    (("e2e", "run"), True),
+    (("e2e", "run", "--project", "firefox", "--repeat", "3"), True),
+    (("e2e", "run", "tests/deck.spec.ts"), False),
+    (("fe", "typecheck"), False),
+    (("tools", "test"), False),
+])
+def test_whole_runs_are_the_ones_pr_gate_runs_with_nothing_to_narrow_them(command_words, expected_whole):
+    assert checks_cli.whole_run(command_words[0], command_words[1], list(command_words[2:])) is expected_whole
+
+
+def test_a_whole_run_without_a_reason_names_the_narrower_commands():
+    with pytest.raises(checks_cli.CheckError, match="run checks changed, narrow it"):
+        checks_cli.main(["fe", "test"])
+
+
+def test_full_takes_its_reason_and_needs_one():
+    assert checks_cli.parse_command_line(["--full", "the merge touched every page", "fe", "test"]).full_reason \
+        == "the merge touched every page"
+    with pytest.raises(checks_cli.CheckError, match="--full needs a reason"):
+        checks_cli.parse_command_line(["fe", "test", "--full"])
