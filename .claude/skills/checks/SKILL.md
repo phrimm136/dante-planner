@@ -28,7 +28,7 @@ in `flock`: it takes the lock itself.
 | `be <check>` | `check`, `test [--tests PATTERN] [--exclude-tags containerized]`, `checkstyle`, `pit` |
 | `tools test` | Every `.claude/skills/*/tests/` directory (pytest) and `.githooks/tests/*.sh` script, through `.github/scripts/tooling-tests.sh`, the script PR Gate's `check-keep-list` job runs; one line per suite |
 | `--print` | Show a run's directory, environment and command line without running it |
-| `--full REASON` | Required for a whole run that PR Gate already runs: `fe test` or `e2e run` with no file, `be test` with no `--tests`, `be check`, `be pit`, `fe gate` |
+| `--full REASON` | Required for a whole run that PR Gate already runs: `fe test` or `e2e run` with no file, `be test` with no `--tests`, `be check`, `be pit`, `fe gate`. The full-run-guard hook refuses it in a session; the user starts a whole run from their own prompt. |
 
 The CLI's own tests run with the other tooling suites: `checks tools test`.
 

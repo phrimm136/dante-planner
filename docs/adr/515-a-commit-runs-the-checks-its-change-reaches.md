@@ -6,6 +6,7 @@ epic: none · pr: none
   REJECTED: a commit hook that checks a stamp of the last `checks changed` run — the user excluded it.
   REJECTED: selecting backend tests through the Gradle dependency graph — Gradle has no test-impact selection, and the PR Gate backend job runs every test before a merge.
   INVARIANT: a whole run of `fe test`, `fe gate`, `be test`, `be check`, `be pit` or `e2e run` states its reason — enforced by `whole_run` in the CLI.
+  INVARIANT: a session starts no whole run, neither through the CLI nor the planted-bug matrix; the user starts one from their own prompt — enforced by the full-run-guard hook and its scenario test.
   NON-GOAL: `checks changed` does not run lint, format, the build, the mutation ratchet, the deploy test or e2e. PR Gate runs them.
 
 ## Takeaway
