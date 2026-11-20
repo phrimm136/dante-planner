@@ -5,6 +5,7 @@ Spring Boot + Java + JPA/Hibernate + Bean Validation (Jakarta) + MySQL + Redis +
 ## Build & Tooling
 
 - Gradle checks run through the `checks` CLI: `<checkout or worktree>/.claude/skills/checks/bin/checks be test|check|checkstyle|pit`; a direct `gradlew` test, check, build, compile, checkstyle or pitest task is hook-refused. Before a commit, `checks changed` runs the test classes named after the changed sources. A whole `be test`, `be check` or `be pit` takes `--full REASON`, because PR Gate runs them (ADR 515).
+- Lint runs locally before a commit that touches Java: `checks changed` does not run it, and PR Gate fails on it before any test starts. The ast-grep scan takes seconds: `env -C <checkout>/backend <checkout>/frontend/node_modules/.bin/ast-grep scan --error src/main/java`, then the same over `src/test/java` (and `ast-grep test` when a rule changed). Checkstyle is `checks be checkstyle`.
 - Unit tier only (no Docker): `checks be test --exclude-tags containerized`. Add `--tests "<pattern>"` to scope further; the ArchUnit suite is added to any `--tests` run.
 - Full suite (default `test` task) also runs the integration tests (MySQL/Redis Testcontainers, tagged `containerized`), which require Docker.
 - Import order (enforced): java → spring framework → spring boot → spring data jpa → jakarta.validation → jakarta.persistence → third-party → project packages.
