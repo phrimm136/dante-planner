@@ -1,0 +1,213 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+shopt -s nullglob
+trap 'echo "config-scan: line $LINENO exited $?" >&2; exit 2' ERR
+
+usage() {
+  echo "usage: $0 [--update] [repo-dir]   (default: the repository this script lives in; needs docker, git and python3)" >&2
+  exit 2
+}
+
+update=false
+if [ "${1:-}" = "--update" ]; then
+  update=true
+  shift
+fi
+[ $# -le 1 ] || usage
+case "${1:-}" in -*) usage ;; esac
+
+fail_tool() {
+  echo "config-scan: $1" >&2
+  [ ! -s "${2:-/dev/null}" ] || cat "$2" >&2
+  exit 2
+}
+
+script_dir=$(cd "$(dirname "$0")" && pwd)
+. "$script_dir/images.sh"
+CHECKOV_IMAGE=${CONFIG_SCAN_CHECKOV_IMAGE:-$CHECKOV_IMAGE}
+repo=$(cd "${1:-$script_dir/../..}" 2>/dev/null && pwd) || fail_tool "repo-dir ${1:-} is not a directory"
+baselines=$repo/.github/config-scan
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+trap 'exit 130' INT
+
+overlays=()
+for overlay_dir in "$repo"/deploy/overlays/*/; do
+  overlays+=("$(basename "$overlay_dir")")
+done
+[ "${#overlays[@]}" -gt 0 ] || fail_tool "no overlay directory under $repo/deploy/overlays"
+
+mkdir -p "$work/terraform" "$work/kubernetes"
+tracked=$(git -C "$repo" ls-files terraform) || fail_tool "git ls-files failed in $repo; the terraform input needs a git checkout"
+[ -n "$tracked" ] || fail_tool "git ls-files terraform in $repo listed nothing"
+git -C "$repo" ls-files -z terraform | tar -C "$repo" --null -T - -cf - | tar -C "$work/terraform" --strip-components=1 -xf - \
+  || fail_tool "copying the tracked terraform files out of $repo failed"
+
+for overlay in "${overlays[@]}"; do
+  if ! docker run --rm --network none -v "$repo/deploy:/deploy:ro" "$KUSTOMIZE_IMAGE" build "/deploy/overlays/$overlay" \
+    >"$work/kubernetes/$overlay.yaml" 2>"$work/kustomize.err"; then
+    fail_tool "kustomize build deploy/overlays/$overlay failed" "$work/kustomize.err"
+  fi
+  [ -s "$work/kubernetes/$overlay.yaml" ] || fail_tool "kustomize build deploy/overlays/$overlay printed nothing" "$work/kustomize.err"
+done
+
+scan() {
+  local input=$1 status=0
+  docker run --rm --network none --user "$(id -u):$(id -g)" -e HOME=/tmp \
+    -v "$work/$input:/scan:ro" "$CHECKOV_IMAGE" \
+    -d /scan --framework "$input" --skip-download --quiet --compact -o json \
+    >"$work/$input.json" 2>"$work/$input.err" || status=$?
+  if [ "$status" -ne 0 ] && [ "$status" -ne 1 ]; then
+    fail_tool "checkov on the $input input exited $status" "$work/$input.err"
+  fi
+}
+scan terraform
+scan kubernetes
+
+compare_status=0
+python3 -I - "$update" \
+  terraform "$work/terraform.json" "$work/terraform.err" "$baselines/terraform.baseline.json" \
+  kubernetes "$work/kubernetes.json" "$work/kubernetes.err" "$baselines/kubernetes.baseline.json" <<'PY' || compare_status=$?
+import json
+import sys
+
+
+class ToolFailure(Exception):
+    pass
+
+
+def read_scan(scan_path):
+    try:
+        with open(scan_path, encoding="utf-8") as scan_file:
+            report = json.load(scan_file)
+    except (OSError, ValueError) as parse_error:
+        raise ToolFailure(f"checkov output {scan_path} is not JSON ({parse_error})") from parse_error
+    if not isinstance(report, dict) or not isinstance(report.get("results"), dict):
+        raise ToolFailure(f"checkov scanned no resources: {json.dumps(report)}")
+    summary = report.get("summary", {})
+    if summary.get("parsing_errors", 0) != 0 or summary.get("resource_count", 0) == 0:
+        raise ToolFailure(f"checkov summary is not a clean scan: {json.dumps(summary)}")
+    return {
+        (finding["file_path"], finding["resource"], finding["check_id"])
+        for finding in report["results"].get("failed_checks", [])
+    }
+
+
+def read_baseline(baseline_path):
+    try:
+        with open(baseline_path, encoding="utf-8") as baseline_file:
+            baseline = json.load(baseline_file)
+    except (OSError, ValueError) as read_error:
+        raise ToolFailure(f"baseline {baseline_path} is unreadable ({read_error})") from read_error
+    try:
+        return {
+            (file_entry["file"], finding["resource"], check_id)
+            for file_entry in baseline["failed_checks"]
+            for finding in file_entry["findings"]
+            for check_id in finding["check_ids"]
+        }
+    except (KeyError, TypeError, AttributeError) as shape_error:
+        raise ToolFailure(f"baseline {baseline_path} is not in Checkov's baseline shape (missing or wrong {shape_error})") from shape_error
+
+
+def render_baseline(entries):
+    by_file = {}
+    for file_path, resource, check_id in entries:
+        by_file.setdefault(file_path, {}).setdefault(resource, []).append(check_id)
+    baseline = {
+        "failed_checks": [
+            {
+                "file": file_path,
+                "findings": [
+                    {"check_ids": sorted(check_ids), "resource": resource}
+                    for resource, check_ids in sorted(by_file[file_path].items())
+                ],
+            }
+            for file_path in sorted(by_file)
+        ]
+    }
+    return json.dumps(baseline, indent=2, sort_keys=True) + "\n"
+
+
+def entry_line(state, entry):
+    file_path, resource, check_id = entry
+    return f"{state} {check_id} {file_path} {resource}"
+
+
+def main(arguments):
+    update_mode = arguments[0] == "true"
+    inputs = [arguments[index:index + 4] for index in range(1, len(arguments), 4)]
+    compared = []
+    try:
+        for input_name, scan_path, error_path, baseline_path in inputs:
+            try:
+                scanned = read_scan(scan_path)
+            except ToolFailure:
+                with open(error_path, encoding="utf-8", errors="replace") as error_file:
+                    sys.stderr.write(error_file.read())
+                raise
+            compared.append((input_name, baseline_path, scanned, read_baseline(baseline_path)))
+    except ToolFailure as failure:
+        print(f"config-scan: {failure}", file=sys.stderr)
+        return 2
+
+    new_lines = [
+        entry_line("NEW", entry)
+        for _, _, scanned, baselined in compared
+        for entry in sorted(scanned - baselined, key=lambda item: (item[2], item[0], item[1]))
+    ]
+    fixed_lines = [
+        entry_line("FIXED", entry)
+        for _, _, scanned, baselined in compared
+        for entry in sorted(baselined - scanned, key=lambda item: (item[2], item[0], item[1]))
+    ]
+    new_advice = (
+        "NEW: fix the finding, or record it where it lives: a '# checkov:skip=<id>:<reason>' comment "
+        "inside the terraform resource, or the annotation 'checkov.io/skip1: <id>=<reason>' on the "
+        "Kubernetes object (kustomize drops YAML comments)"
+    )
+
+    if update_mode:
+        if new_lines:
+            print("\n".join(new_lines))
+            print(new_advice)
+            print("--update changed nothing: it only removes entries")
+            return 1
+        for input_name, baseline_path, scanned, _ in compared:
+            rendered = render_baseline(scanned)
+            with open(baseline_path, encoding="utf-8") as baseline_file:
+                current_text = baseline_file.read()
+            if rendered != current_text:
+                with open(baseline_path, "w", encoding="utf-8") as baseline_file:
+                    baseline_file.write(rendered)
+            print(f"{input_name}: ok - {len(scanned)} baselined findings")
+        return 0
+
+    if not new_lines and not fixed_lines:
+        for input_name, _, scanned, _ in compared:
+            print(f"{input_name}: ok - {len(scanned)} baselined findings")
+        return 0
+    print("\n".join(new_lines + fixed_lines))
+    if new_lines:
+        print(new_advice)
+    if fixed_lines:
+        print("FIXED: run .github/scripts/config-scan.sh --update to drop the fixed entries from the baselines")
+    if new_lines and fixed_lines:
+        print(
+            "MOVED: a renamed or moved resource shows as NEW plus FIXED; "
+            "rename its entries in the baseline file by hand in the same change"
+        )
+    return 1
+
+
+def run_guarded(arguments):
+    try:
+        return main(arguments)
+    except Exception as failure:
+        print(f"config-scan: {type(failure).__name__}: {failure}", file=sys.stderr)
+        return 2
+
+
+sys.exit(run_guarded(sys.argv[1:]))
+PY
+exit "$compare_status"

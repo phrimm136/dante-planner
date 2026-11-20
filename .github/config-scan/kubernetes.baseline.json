@@ -1,0 +1,516 @@
+{
+  "failed_checks": [
+    {
+      "file": "/oregon.yaml",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_22",
+            "CKV_K8S_35",
+            "CKV_K8S_38",
+            "CKV_K8S_43"
+          ],
+          "resource": "DaemonSet.danteplanner.backend"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_19",
+            "CKV_K8S_20",
+            "CKV_K8S_22",
+            "CKV_K8S_23",
+            "CKV_K8S_28",
+            "CKV_K8S_29",
+            "CKV_K8S_30",
+            "CKV_K8S_31",
+            "CKV_K8S_35",
+            "CKV_K8S_37",
+            "CKV_K8S_38",
+            "CKV_K8S_40",
+            "CKV_K8S_43"
+          ],
+          "resource": "DaemonSet.danteplanner.cloudflared"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_19",
+            "CKV_K8S_20",
+            "CKV_K8S_22",
+            "CKV_K8S_23",
+            "CKV_K8S_26",
+            "CKV_K8S_28",
+            "CKV_K8S_29",
+            "CKV_K8S_30",
+            "CKV_K8S_31",
+            "CKV_K8S_37",
+            "CKV_K8S_38",
+            "CKV_K8S_40",
+            "CKV_K8S_43",
+            "CKV_K8S_8"
+          ],
+          "resource": "DaemonSet.danteplanner.traefik"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_17",
+            "CKV_K8S_19",
+            "CKV_K8S_20",
+            "CKV_K8S_22",
+            "CKV_K8S_23",
+            "CKV_K8S_28",
+            "CKV_K8S_29",
+            "CKV_K8S_30",
+            "CKV_K8S_31",
+            "CKV_K8S_37",
+            "CKV_K8S_38",
+            "CKV_K8S_40",
+            "CKV_K8S_43",
+            "CKV_K8S_8",
+            "CKV_K8S_9"
+          ],
+          "resource": "DaemonSet.privileged-exporter.node-exporter"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_22",
+            "CKV_K8S_35",
+            "CKV_K8S_38",
+            "CKV_K8S_40",
+            "CKV_K8S_43",
+            "CKV_K8S_8",
+            "CKV_K8S_9"
+          ],
+          "resource": "Deployment.danteplanner.alloy-logs"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_22",
+            "CKV_K8S_38",
+            "CKV_K8S_43",
+            "CKV_K8S_8",
+            "CKV_K8S_9"
+          ],
+          "resource": "Deployment.danteplanner.kube-state-metrics"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_22",
+            "CKV_K8S_35",
+            "CKV_K8S_38",
+            "CKV_K8S_43",
+            "CKV_K8S_8",
+            "CKV_K8S_9"
+          ],
+          "resource": "Deployment.danteplanner.mysqld-exporter"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_22",
+            "CKV_K8S_38",
+            "CKV_K8S_43",
+            "CKV_K8S_8",
+            "CKV_K8S_9"
+          ],
+          "resource": "Deployment.danteplanner.prometheus"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_22",
+            "CKV_K8S_35",
+            "CKV_K8S_38",
+            "CKV_K8S_40",
+            "CKV_K8S_43",
+            "CKV_K8S_8",
+            "CKV_K8S_9"
+          ],
+          "resource": "Deployment.danteplanner.redis-exporter-auth"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_22",
+            "CKV_K8S_38",
+            "CKV_K8S_40",
+            "CKV_K8S_43",
+            "CKV_K8S_8",
+            "CKV_K8S_9"
+          ],
+          "resource": "Deployment.danteplanner.redis-exporter-ratelimit"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_22",
+            "CKV_K8S_38",
+            "CKV_K8S_40",
+            "CKV_K8S_43",
+            "CKV_K8S_8",
+            "CKV_K8S_9"
+          ],
+          "resource": "Deployment.danteplanner.redis-ratelimit"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.alloy-logs.app-alloy-logs"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.backend.app-backend"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.cloudflared.app-cloudflared"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.kube-state-metrics.app-kube-state-metrics"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.mysqld-exporter.app-mysqld-exporter"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.prometheus.app-prometheus"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.redis-auth.app-redis-auth"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.redis-exporter-auth.app-redis-exporter-auth"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.redis-exporter-ratelimit.app-redis-exporter-ratelimit"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.redis-ratelimit.app-redis-ratelimit"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.traefik.app-traefik"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.privileged-exporter.node-exporter.app-node-exporter"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_22",
+            "CKV_K8S_35",
+            "CKV_K8S_38",
+            "CKV_K8S_40",
+            "CKV_K8S_43",
+            "CKV_K8S_8",
+            "CKV_K8S_9"
+          ],
+          "resource": "StatefulSet.danteplanner.redis-auth"
+        }
+      ]
+    },
+    {
+      "file": "/seoul.yaml",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_22",
+            "CKV_K8S_35",
+            "CKV_K8S_38",
+            "CKV_K8S_43"
+          ],
+          "resource": "DaemonSet.danteplanner.backend"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_19",
+            "CKV_K8S_20",
+            "CKV_K8S_22",
+            "CKV_K8S_23",
+            "CKV_K8S_28",
+            "CKV_K8S_29",
+            "CKV_K8S_30",
+            "CKV_K8S_31",
+            "CKV_K8S_35",
+            "CKV_K8S_37",
+            "CKV_K8S_38",
+            "CKV_K8S_40",
+            "CKV_K8S_43"
+          ],
+          "resource": "DaemonSet.danteplanner.cloudflared"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_19",
+            "CKV_K8S_20",
+            "CKV_K8S_22",
+            "CKV_K8S_23",
+            "CKV_K8S_26",
+            "CKV_K8S_28",
+            "CKV_K8S_29",
+            "CKV_K8S_30",
+            "CKV_K8S_31",
+            "CKV_K8S_37",
+            "CKV_K8S_38",
+            "CKV_K8S_40",
+            "CKV_K8S_43",
+            "CKV_K8S_8"
+          ],
+          "resource": "DaemonSet.danteplanner.traefik"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_17",
+            "CKV_K8S_19",
+            "CKV_K8S_20",
+            "CKV_K8S_22",
+            "CKV_K8S_23",
+            "CKV_K8S_28",
+            "CKV_K8S_29",
+            "CKV_K8S_30",
+            "CKV_K8S_31",
+            "CKV_K8S_37",
+            "CKV_K8S_38",
+            "CKV_K8S_40",
+            "CKV_K8S_43",
+            "CKV_K8S_8",
+            "CKV_K8S_9"
+          ],
+          "resource": "DaemonSet.privileged-exporter.node-exporter"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_22",
+            "CKV_K8S_35",
+            "CKV_K8S_38",
+            "CKV_K8S_40",
+            "CKV_K8S_43",
+            "CKV_K8S_8",
+            "CKV_K8S_9"
+          ],
+          "resource": "Deployment.danteplanner.alloy-logs"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_22",
+            "CKV_K8S_38",
+            "CKV_K8S_43",
+            "CKV_K8S_8",
+            "CKV_K8S_9"
+          ],
+          "resource": "Deployment.danteplanner.kube-state-metrics"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_22",
+            "CKV_K8S_35",
+            "CKV_K8S_38",
+            "CKV_K8S_43",
+            "CKV_K8S_8",
+            "CKV_K8S_9"
+          ],
+          "resource": "Deployment.danteplanner.mysqld-exporter"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_22",
+            "CKV_K8S_38",
+            "CKV_K8S_43",
+            "CKV_K8S_8",
+            "CKV_K8S_9"
+          ],
+          "resource": "Deployment.danteplanner.prometheus"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_22",
+            "CKV_K8S_35",
+            "CKV_K8S_38",
+            "CKV_K8S_40",
+            "CKV_K8S_43",
+            "CKV_K8S_8",
+            "CKV_K8S_9"
+          ],
+          "resource": "Deployment.danteplanner.redis-exporter-auth"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_22",
+            "CKV_K8S_38",
+            "CKV_K8S_40",
+            "CKV_K8S_43",
+            "CKV_K8S_8",
+            "CKV_K8S_9"
+          ],
+          "resource": "Deployment.danteplanner.redis-exporter-ratelimit"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_22",
+            "CKV_K8S_38",
+            "CKV_K8S_40",
+            "CKV_K8S_43",
+            "CKV_K8S_8",
+            "CKV_K8S_9"
+          ],
+          "resource": "Deployment.danteplanner.redis-ratelimit"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.alloy-logs.app-alloy-logs"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.backend.app-backend"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.cloudflared.app-cloudflared"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.kube-state-metrics.app-kube-state-metrics"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.mysqld-exporter.app-mysqld-exporter"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.prometheus.app-prometheus"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.redis-auth.app-redis-auth"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.redis-exporter-auth.app-redis-exporter-auth"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.redis-exporter-ratelimit.app-redis-exporter-ratelimit"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.redis-ratelimit.app-redis-ratelimit"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.traefik.app-traefik"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.privileged-exporter.node-exporter.app-node-exporter"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_22",
+            "CKV_K8S_35",
+            "CKV_K8S_38",
+            "CKV_K8S_40",
+            "CKV_K8S_43",
+            "CKV_K8S_8",
+            "CKV_K8S_9"
+          ],
+          "resource": "StatefulSet.danteplanner.redis-auth"
+        }
+      ]
+    }
+  ]
+}
