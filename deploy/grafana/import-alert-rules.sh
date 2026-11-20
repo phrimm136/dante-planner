@@ -52,9 +52,9 @@ if [ -z "$FOLDER_UID" ]; then
 fi
 echo "   folder uid: ${FOLDER_UID}"
 
-# post_rule TITLE FOR_DURATION PROMQL
-post_rule() {
-  local title=$1 for_dur=$2 expr=$3
+# submit_rule TITLE BODY_JSON
+submit_rule() {
+  local title=$1 body=$2
   local uid method path want verb code
   uid=$(printf '%s' "$title" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9-' '-')
   path="${GRAFANA_URL}/api/v1/provisioning/alert-rules/${uid}"
@@ -64,24 +64,7 @@ post_rule() {
     404) method=POST want=201 verb=created path="${GRAFANA_URL}/api/v1/provisioning/alert-rules" ;;
     *) echo "   FAILED ${title}: looking up uid ${uid} returned HTTP ${code}"; exit 1 ;;
   esac
-  jq -n \
-    --arg uid "$uid" --arg title "$title" --arg for "$for_dur" --arg expr "$expr" \
-    --arg ds "$DS_UID" --arg folder "$FOLDER_UID" '
-    {
-      uid: $uid, title: $title, ruleGroup: "cluster-rules", folderUID: $folder,
-      condition: "C", for: $for, noDataState: "OK", execErrState: "OK",
-      data: [
-        { refId: "A", relativeTimeRange: {from: 600, to: 0}, datasourceUid: $ds,
-          model: {refId: "A", expr: $expr, instant: true} },
-        { refId: "B", relativeTimeRange: {from: 0, to: 0}, datasourceUid: "__expr__",
-          model: {refId: "B", type: "reduce", reducer: "last", expression: "A",
-                  datasource: {type: "__expr__", uid: "__expr__"}} },
-        { refId: "C", relativeTimeRange: {from: 0, to: 0}, datasourceUid: "__expr__",
-          model: {refId: "C", type: "threshold", expression: "B",
-                  conditions: [{evaluator: {type: "gt", params: [0]}}],
-                  datasource: {type: "__expr__", uid: "__expr__"}} }
-      ]
-    }' |
+  printf '%s' "$body" | jq --arg uid "$uid" '{uid: $uid} + .' |
   curl -s -w '\n%{http_code}' "${auth[@]}" "${noprov[@]}" -X "$method" "$path" -d @- | {
     resp=$(cat); code=${resp##*$'\n'}; body=${resp%$'\n'*}
     if [ "$code" = "$want" ]; then
@@ -93,26 +76,12 @@ post_rule() {
 }
 
 echo "== creating or updating rules"
-post_rule "node-not-ready" "15m" \
-  'kube_node_status_condition{condition="Ready",status="true"} == 0'
-post_rule "backend-daemonset-unready" "5m" \
-  'kube_daemonset_status_number_ready{daemonset="backend"} == 0'
-post_rule "container-waiting-backoff" "10m" \
-  'kube_pod_container_status_waiting_reason{reason=~"CrashLoopBackOff|ImagePullBackOff|CreateContainerConfigError"} == 1'
-post_rule "argocd-app-drift" "30m" \
-  'argocd_app_info{sync_status="OutOfSync"} == 1 or argocd_app_info{health_status="Degraded"} == 1'
-post_rule "eso-secret-not-ready" "15m" \
-  'externalsecret_status_condition{condition="Ready",status="False"} == 1'
-post_rule "etcd-snapshot-deadman" "1m" \
-  "(time() - kube_etcd_snapshot_creation_timestamp_seconds) > (1.5 * ${ETCD_INTERVAL})"
-# `== bool`: the threshold node fires on value > 0, so the expression must yield
-# 1 per down exporter rather than filter to the raw 0.
-post_rule "mysql-connectivity-lost" "5m" \
-  'mysql_up == bool 0'
-post_rule "redis-auth-replica-unsynced" "15m" \
-  'max(redis_master_repl_offset{job="redis-auth",cluster="seoul"}) == bool 0'
-post_rule "redis-auth-replica-link-down" "5m" \
-  'max(redis_master_link_up{job="redis-auth",cluster="seoul"}) == bool 0'
+payloads=$(FOLDER_UID="$FOLDER_UID" DS_UID="$DS_UID" python3 "$(dirname "$0")/rules.py" payloads cluster-rules)
+rule_count=0
+while IFS= read -r payload; do
+  submit_rule "$(printf '%s' "$payload" | jq -r .title)" "$(printf '%s' "$payload" | jq -c .body)"
+  rule_count=$((rule_count + 1))
+done <<< "$payloads"
 
-echo "== done: 9 rules in folder ${FOLDER}, group cluster-rules (1m interval)"
+echo "== done: ${rule_count} rules in folder ${FOLDER}, group cluster-rules (1m interval)"
 echo "   All noDataState=OK — non-paging while their series are absent. Staleness rules are created separately by create-staleness-rules.sh."

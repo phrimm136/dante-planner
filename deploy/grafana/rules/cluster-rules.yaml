@@ -1,0 +1,203 @@
+- name: node-not-ready
+  kind: prometheus
+  for: 15m
+  expr: 'kube_node_status_condition{condition="Ready",status="true"} == bool 0'
+  cases:
+    fires:
+      - series:
+          - series: 'kube_node_status_condition{condition="Ready",status="true",node="node-a",cluster="oregon"}'
+            values: '1x4 0x30'
+        at: 25m
+    quiet:
+      - series:
+          - series: 'kube_node_status_condition{condition="Ready",status="true",node="node-a",cluster="oregon"}'
+            values: '1x4 0x30'
+        at: 15m
+      - series:
+          - series: 'kube_node_status_condition{condition="Ready",status="true",node="node-a",cluster="oregon"}'
+            values: '1x30'
+        at: 25m
+
+- name: backend-daemonset-unready
+  kind: prometheus
+  for: 5m
+  expr: 'kube_daemonset_status_number_ready{daemonset="backend"} == bool 0'
+  cases:
+    fires:
+      - series:
+          - series: 'kube_daemonset_status_number_ready{daemonset="backend",namespace="danteplanner",cluster="oregon"}'
+            values: '1x4 0x20'
+        at: 15m
+    quiet:
+      - series:
+          - series: 'kube_daemonset_status_number_ready{daemonset="backend",namespace="danteplanner",cluster="oregon"}'
+            values: '1x4 0x20'
+        at: 8m
+      - series:
+          - series: 'kube_daemonset_status_number_ready{daemonset="backend",namespace="danteplanner",cluster="oregon"}'
+            values: '1x20'
+        at: 15m
+
+- name: container-waiting-backoff
+  kind: prometheus
+  for: 10m
+  expr: 'kube_pod_container_status_waiting_reason{reason=~"CrashLoopBackOff|ImagePullBackOff|CreateContainerConfigError"} == 1'
+  cases:
+    fires:
+      - series:
+          - series: 'kube_pod_container_status_waiting_reason{reason="CrashLoopBackOff",namespace="danteplanner",pod="backend-a",container="backend",cluster="oregon"}'
+            values: '0x4 1x30'
+        at: 20m
+    quiet:
+      - series:
+          - series: 'kube_pod_container_status_waiting_reason{reason="CrashLoopBackOff",namespace="danteplanner",pod="backend-a",container="backend",cluster="oregon"}'
+            values: '0x4 1x30'
+        at: 12m
+      - series:
+          - series: 'kube_pod_container_status_waiting_reason{reason="ContainerCreating",namespace="danteplanner",pod="backend-a",container="backend",cluster="oregon"}'
+            values: '1x30'
+        at: 20m
+
+- name: argocd-app-drift
+  kind: prometheus
+  for: 30m
+  expr: 'argocd_app_info{sync_status="OutOfSync"} == 1 or argocd_app_info{health_status="Degraded"} == 1'
+  cases:
+    fires:
+      - series:
+          - series: 'argocd_app_info{name="danteplanner",sync_status="OutOfSync",health_status="Healthy",cluster="oregon"}'
+            values: '1x60'
+        at: 40m
+      - series:
+          - series: 'argocd_app_info{name="danteplanner",sync_status="Synced",health_status="Degraded",cluster="oregon"}'
+            values: '1x60'
+        at: 40m
+    quiet:
+      - series:
+          - series: 'argocd_app_info{name="danteplanner",sync_status="OutOfSync",health_status="Healthy",cluster="oregon"}'
+            values: '1x60'
+        at: 20m
+      - series:
+          - series: 'argocd_app_info{name="danteplanner",sync_status="Synced",health_status="Healthy",cluster="oregon"}'
+            values: '1x60'
+        at: 40m
+
+- name: eso-secret-not-ready
+  kind: prometheus
+  for: 15m
+  expr: 'externalsecret_status_condition{condition="Ready",status="False"} == 1'
+  cases:
+    fires:
+      - series:
+          - series: 'externalsecret_status_condition{condition="Ready",status="False",name="backend-secrets",namespace="danteplanner",cluster="oregon"}'
+            values: '0x4 1x30'
+        at: 25m
+    quiet:
+      - series:
+          - series: 'externalsecret_status_condition{condition="Ready",status="False",name="backend-secrets",namespace="danteplanner",cluster="oregon"}'
+            values: '0x4 1x30'
+        at: 15m
+      - series:
+          - series: 'externalsecret_status_condition{condition="Ready",status="False",name="backend-secrets",namespace="danteplanner",cluster="oregon"}'
+            values: '0x30'
+        at: 25m
+
+- name: etcd-snapshot-deadman
+  kind: prometheus
+  for: 1m
+  expr: '(time() - kube_etcd_snapshot_creation_timestamp_seconds) > (1.5 * {etcd_interval})'
+  params:
+    etcd_interval: {env: ETCD_INTERVAL, test: 43200}
+  cases:
+    fires:
+      - series:
+          - series: 'kube_etcd_snapshot_creation_timestamp_seconds{cluster="oregon"}'
+            values: '0x1100'
+        at: 1090m
+    quiet:
+      - series:
+          - series: 'kube_etcd_snapshot_creation_timestamp_seconds{cluster="oregon"}'
+            values: '0x1100'
+        at: 1081m
+      - series:
+          - series: 'kube_etcd_snapshot_creation_timestamp_seconds{cluster="oregon"}'
+            values: '0+60x1100'
+        at: 1090m
+
+# `== bool`: the threshold node fires on value > 0, so the expression must yield
+# 1 per down exporter rather than filter to the raw 0.
+- name: mysql-connectivity-lost
+  kind: prometheus
+  for: 5m
+  expr: 'mysql_up == bool 0'
+  cases:
+    fires:
+      - series:
+          - series: 'mysql_up{job="mysqld-exporter",cluster="seoul"}'
+            values: '1x4 0x20'
+        at: 15m
+    quiet:
+      - series:
+          - series: 'mysql_up{job="mysqld-exporter",cluster="seoul"}'
+            values: '1x4 0x20'
+        at: 8m
+      - series:
+          - series: 'mysql_up{job="mysqld-exporter",cluster="seoul"}'
+            values: '1x20'
+        at: 15m
+
+- name: redis-auth-replica-unsynced
+  kind: prometheus
+  for: 15m
+  expr: 'max(redis_master_repl_offset{job="redis-auth",cluster="seoul"}) == bool 0'
+  cases:
+    fires:
+      - series:
+          - series: 'redis_master_repl_offset{job="redis-auth",cluster="seoul",instance="redis-auth-replica"}'
+            values: '0x30'
+        at: 20m
+    quiet:
+      - series:
+          - series: 'redis_master_repl_offset{job="redis-auth",cluster="seoul",instance="redis-auth-replica"}'
+            values: '0x30'
+        at: 10m
+      - series:
+          - series: 'redis_master_repl_offset{job="redis-auth",cluster="seoul",instance="redis-auth-replica"}'
+            values: '0+100x30'
+        at: 20m
+
+- name: redis-auth-replica-link-down
+  kind: prometheus
+  for: 5m
+  expr: 'max(redis_master_link_up{job="redis-auth",cluster="seoul"}) == bool 0'
+  cases:
+    fires:
+      - series:
+          - series: 'redis_master_link_up{job="redis-auth",cluster="seoul",instance="redis-auth-replica"}'
+            values: '1x4 0x20'
+        at: 15m
+    quiet:
+      - series:
+          - series: 'redis_master_link_up{job="redis-auth",cluster="seoul",instance="redis-auth-replica"}'
+            values: '1x4 0x20'
+        at: 8m
+      - series:
+          - series: 'redis_master_link_up{job="redis-auth",cluster="seoul",instance="redis-auth-replica"}'
+            values: '1x20'
+        at: 15m
+
+- name: redis-down
+  kind: prometheus
+  for: 5m
+  expr: 'redis_up == bool 0'
+  cases:
+    fires:
+      - series:
+          - series: 'redis_up{job="redis-auth",cluster="oregon"}'
+            values: '1x4 0x19'
+        at: 12m
+    quiet:
+      - series:
+          - series: 'redis_up{job="redis-auth",cluster="oregon"}'
+            values: '1x4 0x19'
+        at: 8m

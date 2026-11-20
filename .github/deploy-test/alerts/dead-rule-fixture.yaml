@@ -1,0 +1,15 @@
+- name: dead-rule-fixture
+  kind: prometheus
+  for: 5m
+  expr: 'up == 0'
+  cases:
+    fires:
+      - series:
+          - series: 'up{job="fixture",cluster="oregon"}'
+            values: '1x4 0x20'
+        at: 15m
+    quiet:
+      - series:
+          - series: 'up{job="fixture",cluster="oregon"}'
+            values: '1x20'
+        at: 15m

@@ -5,6 +5,7 @@ only series its label drop rules remove."""
 
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -14,21 +15,14 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 PROMETHEUS_CONFIG = REPO_ROOT / "deploy/base/prometheus.yaml"
 GRAFANA_DIR = REPO_ROOT / "deploy/grafana"
 DASHBOARD_FILE = GRAFANA_DIR / "fleet-dashboard.json"
+RULES_PY = GRAFANA_DIR / "rules.py"
+RULES_DIR = GRAFANA_DIR / "rules"
 
 PROMQL_KEYWORDS = {
     "and", "or", "unless", "by", "without", "on", "ignoring",
     "group_left", "group_right", "bool", "offset", "inf", "nan", "atan2",
 }
 
-SHELL_STRING = r"""'([^']*)'|"((?:[^"\\]|\\.)*)\""""
-POST_RULE_CALL = re.compile(
-    r'post_rule\s+"[^"]*"\s+"[^"]*"\s*(?:\\\n\s*)?(?:' + SHELL_STRING + r")"
-    r'(?:(?:[ \t]*\\\n\s*|[ \t]+)("[^"]*"|\'[^\']*\'|[^\s\\]+))?'
-)
-LOKI_DATASOURCE_ARGS = {'"$LOKI_DS_UID"', '"${LOKI_DS_UID}"', "$LOKI_DS_UID", "${LOKI_DS_UID}"}
-POST_RULE_SITE = re.compile(r'^\s*post_rule\s+"', re.MULTILINE)
-SHELL_ASSIGNMENT = r"^\s*{name}=(?:" + SHELL_STRING + r")"
-SHELL_VARIABLE = re.compile(r'\$\{?([A-Za-z_][A-Za-z0-9_]*)\}?')
 JQ_EXPR_LITERAL = re.compile(r'expr:\s*"((?:[^"\\]|\\.)*)"')
 JQ_EXPR_CONCAT = re.compile(r'expr:\s*\(((?:"(?:[^"\\]|\\.)*"|[^()"])*)\)')
 JQ_STRING = re.compile(r'"((?:[^"\\]|\\.)*)"')
@@ -118,34 +112,16 @@ def unescape_double(quoted_body):
     return re.sub(r'\\(.)', r"\1", quoted_body)
 
 
-def resolve_shell_string(single_body, double_body, script_text):
-    if single_body is not None:
-        return single_body
-    expanded_body = unescape_double(double_body)
-    whole_variable = SHELL_VARIABLE.fullmatch(expanded_body)
-    if whole_variable:
-        assignment_match = re.search(
-            SHELL_ASSIGNMENT.format(name=whole_variable.group(1)), script_text, re.MULTILINE
-        )
-        if assignment_match:
-            return resolve_shell_string(assignment_match.group(1), assignment_match.group(2), script_text)
-    return SHELL_VARIABLE.sub("0", expanded_body)
+def exprs_from_rules():
+    rules_run = subprocess.run([sys.executable, str(RULES_PY), "exprs"], capture_output=True, text=True)
+    if rules_run.returncode != 0:
+        sys.exit(f"{RULES_PY} exprs failed: {rules_run.stderr.strip()}")
+    return rules_run.stdout.splitlines()
 
 
 def exprs_from_script(script_path):
     script_text = script_path.read_text()
     found_exprs = []
-    rule_calls = list(POST_RULE_CALL.finditer(script_text))
-    rule_sites = POST_RULE_SITE.findall(script_text)
-    if len(rule_calls) != len(rule_sites):
-        sys.exit(f"{script_path}: {len(rule_sites)} post_rule calls, only {len(rule_calls)} parsed")
-    for rule_call in rule_calls:
-        if rule_call.group(3) in LOKI_DATASOURCE_ARGS:
-            continue
-        rule_expr = resolve_shell_string(rule_call.group(1), rule_call.group(2), script_text)
-        if not rule_expr.strip():
-            sys.exit(f"{script_path}: empty expression in {rule_call.group(0)!r}")
-        found_exprs.append(rule_expr)
     for literal_body in JQ_EXPR_LITERAL.findall(script_text):
         found_exprs.append(unescape_double(literal_body))
     for concat_body in JQ_EXPR_CONCAT.findall(script_text):
@@ -191,7 +167,8 @@ def main():
     config_text = PROMETHEUS_CONFIG.read_text()
     keep_regex = keep_regex_from_config(config_text)
     drop_rules = drop_rules_from_config(config_text)
-    expr_sources = [(script_path, exprs_from_script(script_path)) for script_path in sorted(GRAFANA_DIR.glob("*.sh"))]
+    expr_sources = [(RULES_DIR, exprs_from_rules())]
+    expr_sources += [(script_path, exprs_from_script(script_path)) for script_path in sorted(GRAFANA_DIR.glob("*.sh"))]
     expr_sources.append((DASHBOARD_FILE, exprs_from_dashboard(DASHBOARD_FILE)))
 
     missing_names = {}

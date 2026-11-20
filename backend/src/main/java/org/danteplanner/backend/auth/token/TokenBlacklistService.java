@@ -85,7 +85,7 @@ public class TokenBlacklistService {
 
     private final AuthReadSources authReadSources;
 
-    private final MeterRegistry meterRegistry;
+    private final Counter blacklistCheckSkipped;
 
     public TokenBlacklistService(
             AuthWrites authWrites,
@@ -96,7 +96,7 @@ public class TokenBlacklistService {
         this.refreshTokenExpiry = refreshTokenExpiry;
         this.authWrites = authWrites;
         this.authReadSources = authReadSources;
-        this.meterRegistry = meterRegistry;
+        this.blacklistCheckSkipped = Counter.builder(BLACKLIST_CHECK_SKIPPED_COUNTER).register(meterRegistry);
     }
 
     @PostConstruct
@@ -249,7 +249,7 @@ public class TokenBlacklistService {
     }
 
     private boolean isRevokedWithoutACheck() {
-        Counter.builder(BLACKLIST_CHECK_SKIPPED_COUNTER).register(meterRegistry).increment();
+        blacklistCheckSkipped.increment();
         return false;
     }
 

@@ -829,7 +829,7 @@ guards the parse but likewise skips the schema gate.
   two reads per write. The rule needs re-pointing at
   `rate(hikaricp_connections_usage_seconds_count[...])`; waiting will not clear it, because the
   gauge it watches will keep reading zero.
-  re-check: `rg -qF 'argocd_app_info{sync_status="OutOfSync"} == 1' deploy/grafana/import-alert-rules.sh && .claude/skills/debt-ledger/bin/debt absent deploy/grafana -e 'autosync_enabled' -e 'hikaricp_connections_usage_seconds_count'`
+  re-check: `rg -qF 'argocd_app_info{sync_status="OutOfSync"} == 1' deploy/grafana/rules/cluster-rules.yaml && .claude/skills/debt-ledger/bin/debt absent deploy/grafana -e 'autosync_enabled' -e 'hikaricp_connections_usage_seconds_count'`
 - 2026-08-24 — `terraform/cloudflare` splits one logical stack across two state buckets with
   inconsistent workspace names, and the stack's resources live in Cloudflare rather than in
   any AWS account, so the repo's "state lives in the account whose resources it describes"
@@ -996,13 +996,6 @@ guards the parse but likewise skips the schema gate.
   cannot. Blocked considerations: CI currently resolves its account from GitHub secrets, and no
   Editor-capable Grafana token exists in Secrets Manager yet.
   re-check: `test -f scripts/ops/access/db-observability-check.sh && .claude/skills/debt-ledger/bin/debt absent .github/workflows 'db-observability-check'`
-- **Two cluster alert rules can never fire.** node-not-ready and backend-daemonset-unready use
-  raw comparison filters (`... == 0`), which return the matched series with its original value
-  0; the shared threshold node fires on value > 0, so the condition is unsatisfiable. The `== 1`
-  rules in the same group work, and mysql-connectivity-lost uses `== bool 0` for this reason.
-  Fix is the same one-token change (`== bool 0`) in both expressions, plus re-provisioning; worth
-  a drill afterwards since these two have silently never paged.
-  re-check: `rg -q 'status="true"\} == 0' deploy/grafana/import-alert-rules.sh && rg -q 'daemonset="backend"\} == 0' deploy/grafana/import-alert-rules.sh`
 
 ## 2026-09-02 MySQL 8.4 upgrade (adr/092)
 
@@ -1194,15 +1187,6 @@ guards the parse but likewise skips the schema gate.
   the cost is latent. Worth pinning with `FetchType.LAZY` or an ArchUnit ban on inherited
   finders the first time a caller of an inherited `PlannerRepository` method lands.
   re-check: `rg -q '@OneToOne\(mappedBy = "planner", cascade = CascadeType.ALL, orphanRemoval = true, optional = false\)$' backend/src/main/java/org/danteplanner/backend/planner/entity/Planner.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/planner/entity/Planner.java 'FetchType'`
-- 2026-09-22 — `TokenBlacklistService.failOpen` increments `blacklist_check_skipped_total`
-  and logs warn, but no alert rule references the counter and no rule covers Redis
-  availability or command timeouts at all: the only Redis rules in
-  `deploy/grafana/import-alert-rules.sh` (`redis-auth-replica-unsynced`,
-  `redis-auth-replica-link-down`) watch Seoul's auth-Redis replication, and none uses
-  `redis_up`; MySQL has `mysql-connectivity-lost`. A fail-open storm surfaces only via
-  `backend-warn-sustained`. Worth doing before the next Redis incident drill: a rule on
-  `increase(blacklist_check_skipped_total[5m]) > 0` and one on `redis_up == 0`.
-  re-check: `rg -q 'blacklist_check_skipped_total' backend/src/main/java/org/danteplanner/backend/auth/token/TokenBlacklistService.java && .claude/skills/debt-ledger/bin/debt absent deploy/grafana -e 'blacklist_check_skipped' -e 'redis_up'`
 - 2026-09-22 — `PlannerDriftAuditRepository.driftedUpvoteCounters` joins `planner_votes`
   without a `deleted_at IS NULL` predicate while `driftedCommentCounters` filters
   `planner_comments.deleted_at IS NULL`; V018 made votes immutable so the asymmetry may be

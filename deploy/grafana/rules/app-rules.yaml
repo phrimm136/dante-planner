@@ -1,0 +1,416 @@
+# BackendErrors: any ERROR paged immediately (Sum > 0 over 60s); keep first-occurrence semantics
+- name: backend-error-events
+  kind: loki
+  for: 1m
+  expr: 'sum by (cluster, logger_name, shape) (count_over_time({app="backend"} | json | level="ERROR" | label_format shape=`{{ regexReplaceAll "[0-9]+" (regexReplaceAll "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" .message "UUID") "N" | trunc 80 }}` [5m])) > 0'
+  summary: '{{ $labels.cluster }} {{ $labels.logger_name }}: {{ $labels.shape }}'
+  cases:
+    fires:
+      - lines:
+          - stream: {app: backend, cluster: oregon}
+            line: '{"level":"ERROR","logger_name":"com.danteplanner.planner.PlannerService","message":"planner 42 failed for 1b4e28ba-2fa1-11d2-883f-0016d3cca427"}'
+    quiet:
+      - lines:
+          - stream: {app: backend, cluster: oregon}
+            line: '{"level":"INFO","logger_name":"com.danteplanner.planner.PlannerService","message":"planner 42 saved"}'
+
+# BackendWarnings: WARN > 0 sustained 5 evaluation periods
+- name: backend-warn-sustained
+  kind: loki
+  for: 5m
+  expr: 'sum by (cluster, logger_name, shape) (count_over_time({app="backend"} | json | level="WARN" | label_format shape=`{{ regexReplaceAll "[0-9]+" (regexReplaceAll "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" .message "UUID") "N" | trunc 80 }}` [5m])) > 0'
+  summary: '{{ $labels.cluster }} {{ $labels.logger_name }}: {{ $labels.shape }}'
+  cases:
+    fires:
+      - lines:
+          - stream: {app: backend, cluster: seoul}
+            line: '{"level":"WARN","logger_name":"com.danteplanner.auth.TokenService","message":"refresh 7 retried"}'
+    quiet:
+      - lines:
+          - stream: {app: backend, cluster: seoul}
+            line: '{"level":"INFO","logger_name":"com.danteplanner.auth.TokenService","message":"refresh 7 issued"}'
+
+# BackendSilence: < 1 log event in 20m; kube rules own app-down, this owns pipeline-dead
+- name: backend-log-silence
+  kind: prometheus
+  for: 5m
+  expr: 'sum by (cluster) (increase(logback_events_total[20m])) < bool 1'
+  cases:
+    fires:
+      - series:
+          - series: 'logback_events_total{cluster="oregon",level="info"}'
+            values: '0+10x10 100x50'
+        at: 45m
+    quiet:
+      - series:
+          - series: 'logback_events_total{cluster="oregon",level="info"}'
+            values: '0+10x10 100x50'
+        at: 31m
+      - series:
+          - series: 'logback_events_total{cluster="oregon",level="info"}'
+            values: '0+10x10 100x12 110+10x30'
+        at: 22m
+      - series:
+          - series: 'logback_events_total{cluster="oregon",level="info"}'
+            values: '0+10x10 100x12 110+10x30'
+        at: 30m
+      - series:
+          - series: 'logback_events_total{cluster="oregon",level="info"}'
+            values: '0+10x10 100x12 110+10x30'
+        at: 40m
+      - series:
+          - series: 'logback_events_total{cluster="oregon",level="info"}'
+            values: '0+10x40'
+        at: 30m
+
+# HTTP5xx: > 10 per 5m
+- name: http-5xx-burst
+  kind: prometheus
+  for: 0s
+  expr: 'sum by (cluster) (increase(http_server_requests_seconds_count{status=~"5.."}[5m])) > 10'
+  cases:
+    fires:
+      - series:
+          - series: 'http_server_requests_seconds_count{cluster="oregon",method="GET",status="500",uri="/api/planner"}'
+            values: '0+5x20'
+        at: 15m
+    quiet:
+      - series:
+          - series: 'http_server_requests_seconds_count{cluster="oregon",method="GET",status="500",uri="/api/planner"}'
+            values: '0+1x20'
+        at: 15m
+      - series:
+          - series: 'http_server_requests_seconds_count{cluster="oregon",method="GET",status="200",uri="/api/planner"}'
+            values: '0+50x20'
+        at: 15m
+
+# HTTP429: > 20 per 5m
+- name: http-429-burst
+  kind: prometheus
+  for: 0s
+  expr: 'sum by (cluster) (increase(http_server_requests_seconds_count{status="429"}[5m])) > 20'
+  cases:
+    fires:
+      - series:
+          - series: 'http_server_requests_seconds_count{cluster="oregon",method="GET",status="429",uri="/api/planner"}'
+            values: '0+10x20'
+        at: 15m
+    quiet:
+      - series:
+          - series: 'http_server_requests_seconds_count{cluster="oregon",method="GET",status="429",uri="/api/planner"}'
+            values: '0+2x20'
+        at: 15m
+
+# HighCPU: user-mode CPU avg > 70% over 5m
+- name: node-high-cpu
+  kind: prometheus
+  for: 5m
+  expr: 'avg by (cluster, instance) (rate(node_cpu_seconds_total{mode="user"}[5m])) * 100 > 70'
+  cases:
+    fires:
+      - series:
+          - series: 'node_cpu_seconds_total{cluster="oregon",instance="node-a",cpu="0",mode="user"}'
+            values: '0+12x10 120+48x20'
+        at: 25m
+    quiet:
+      - series:
+          - series: 'node_cpu_seconds_total{cluster="oregon",instance="node-a",cpu="0",mode="user"}'
+            values: '0+12x10 120+48x20'
+        at: 16m
+      - series:
+          - series: 'node_cpu_seconds_total{cluster="oregon",instance="node-a",cpu="0",mode="user"}'
+            values: '0+12x30'
+        at: 25m
+
+# HighDisk: filesystem used > 85%
+- name: node-high-disk
+  kind: prometheus
+  for: 5m
+  expr: '(1 - node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"}) * 100 > 85'
+  cases:
+    fires:
+      - series:
+          - series: 'node_filesystem_size_bytes{cluster="oregon",instance="node-a",fstype="ext4",mountpoint="/"}'
+            values: '100000000000x20'
+          - series: 'node_filesystem_avail_bytes{cluster="oregon",instance="node-a",fstype="ext4",mountpoint="/"}'
+            values: '50000000000x4 10000000000x15'
+        at: 15m
+    quiet:
+      - series:
+          - series: 'node_filesystem_size_bytes{cluster="oregon",instance="node-a",fstype="ext4",mountpoint="/"}'
+            values: '100000000000x20'
+          - series: 'node_filesystem_avail_bytes{cluster="oregon",instance="node-a",fstype="ext4",mountpoint="/"}'
+            values: '50000000000x4 10000000000x15'
+        at: 8m
+      - series:
+          - series: 'node_filesystem_size_bytes{cluster="oregon",instance="node-a",fstype="tmpfs",mountpoint="/run"}'
+            values: '100000000000x20'
+          - series: 'node_filesystem_avail_bytes{cluster="oregon",instance="node-a",fstype="tmpfs",mountpoint="/run"}'
+            values: '10000000000x20'
+        at: 15m
+
+# LowMemory: available < 200 MiB sustained 3 evaluation periods
+- name: node-low-memory
+  kind: prometheus
+  for: 15m
+  expr: 'node_memory_MemAvailable_bytes < 209715200'
+  cases:
+    fires:
+      - series:
+          - series: 'node_memory_MemAvailable_bytes{cluster="oregon",instance="node-a"}'
+            values: '1000000000x4 100000000x30'
+        at: 25m
+    quiet:
+      - series:
+          - series: 'node_memory_MemAvailable_bytes{cluster="oregon",instance="node-a"}'
+            values: '1000000000x4 100000000x30'
+        at: 15m
+      - series:
+          - series: 'node_memory_MemAvailable_bytes{cluster="oregon",instance="node-a"}'
+            values: '1000000000x30'
+        at: 25m
+
+# MemoryPSI: fraction of wall-time with at least one task stalled on memory
+# reclaim ("some" pressure) > 10% sustained. Catches reclaim thrash that
+# MemAvailable alone hides — a host can hang alive without ever OOM-killing.
+- name: node-memory-psi
+  kind: prometheus
+  for: 5m
+  expr: 'rate(node_pressure_memory_waiting_seconds_total[5m]) > 0.1'
+  cases:
+    fires:
+      - series:
+          - series: 'node_pressure_memory_waiting_seconds_total{cluster="oregon",instance="node-a"}'
+            values: '0+1x10 10+12x20'
+        at: 25m
+    quiet:
+      - series:
+          - series: 'node_pressure_memory_waiting_seconds_total{cluster="oregon",instance="node-a"}'
+            values: '0+1x10 10+12x20'
+        at: 16m
+      - series:
+          - series: 'node_pressure_memory_waiting_seconds_total{cluster="oregon",instance="node-a"}'
+            values: '0+3x30'
+        at: 25m
+
+# HighDiskIOWrite: > 500 MiB written per 5m
+- name: node-high-disk-write
+  kind: prometheus
+  for: 15m
+  expr: 'sum by (cluster, instance) (increase(node_disk_written_bytes_total[5m])) > 524288000'
+  cases:
+    fires:
+      - series:
+          - series: 'node_disk_written_bytes_total{cluster="oregon",instance="node-a",device="nvme0n1"}'
+            values: '0+10000000x10 100000000+200000000x30'
+        at: 35m
+    quiet:
+      - series:
+          - series: 'node_disk_written_bytes_total{cluster="oregon",instance="node-a",device="nvme0n1"}'
+            values: '0+10000000x10 100000000+200000000x30'
+        at: 22m
+      - series:
+          - series: 'node_disk_written_bytes_total{cluster="oregon",instance="node-a",device="nvme0n1"}'
+            values: '0+10000000x40'
+        at: 35m
+
+# HighNetworkIn: > 50 MiB received per 5m
+- name: node-high-network-in
+  kind: prometheus
+  for: 15m
+  expr: 'sum by (cluster, instance) (increase(node_network_receive_bytes_total{device!="lo"}[5m])) > 52428800'
+  cases:
+    fires:
+      - series:
+          - series: 'node_network_receive_bytes_total{cluster="oregon",instance="node-a",device="eth0"}'
+            values: '0+1000000x10 10000000+20000000x30'
+        at: 35m
+    quiet:
+      - series:
+          - series: 'node_network_receive_bytes_total{cluster="oregon",instance="node-a",device="eth0"}'
+            values: '0+1000000x10 10000000+20000000x30'
+        at: 22m
+      - series:
+          - series: 'node_network_receive_bytes_total{cluster="oregon",instance="node-a",device="eth0"}'
+            values: '0+1000000x40'
+          - series: 'node_network_receive_bytes_total{cluster="oregon",instance="node-a",device="lo"}'
+            values: '0+20000000x40'
+        at: 35m
+
+# HighNetworkOut: > 200 MiB sent per 5m
+- name: node-high-network-out
+  kind: prometheus
+  for: 15m
+  expr: 'sum by (cluster, instance) (increase(node_network_transmit_bytes_total{device!="lo"}[5m])) > 209715200'
+  cases:
+    fires:
+      - series:
+          - series: 'node_network_transmit_bytes_total{cluster="oregon",instance="node-a",device="eth0"}'
+            values: '0+1000000x10 10000000+60000000x30'
+        at: 35m
+    quiet:
+      - series:
+          - series: 'node_network_transmit_bytes_total{cluster="oregon",instance="node-a",device="eth0"}'
+            values: '0+1000000x10 10000000+60000000x30'
+        at: 22m
+      - series:
+          - series: 'node_network_transmit_bytes_total{cluster="oregon",instance="node-a",device="eth0"}'
+            values: '0+10000000x40'
+          - series: 'node_network_transmit_bytes_total{cluster="oregon",instance="node-a",device="lo"}'
+            values: '0+60000000x40'
+        at: 35m
+
+# TrafficDrop: legacy alarm paged on RequestCount Sum < 1 per 5m for 2 periods —
+# i.e. total silence at the nginx layer of the old host. The fleet-era signal is
+# http_server_requests_seconds_count across two clusters behind Cloudflare, without the
+# /actuator requests that probes and scrapes keep sending while a pod lives.
+- name: traffic-drop
+  kind: prometheus
+  for: 10m
+  expr: 'sum by (cluster) (increase(http_server_requests_seconds_count{uri!~"/actuator.*"}[5m])) < bool 1'
+  cases:
+    fires:
+      - series:
+          - series: 'http_server_requests_seconds_count{cluster="oregon",method="GET",status="200",uri="/actuator/health/**"}'
+            values: '0+10x40'
+          - series: 'http_server_requests_seconds_count{cluster="oregon",method="GET",status="200",uri="/api/planner/md/published"}'
+            values: '0+10x10 100x30'
+        at: 30m
+    quiet:
+      - series:
+          - series: 'http_server_requests_seconds_count{cluster="oregon",method="GET",status="200",uri="/actuator/health/**"}'
+            values: '0+10x40'
+          - series: 'http_server_requests_seconds_count{cluster="oregon",method="GET",status="200",uri="/api/planner/md/published"}'
+            values: '0+10x10 100x30'
+        at: 8m
+      - series:
+          - series: 'http_server_requests_seconds_count{cluster="oregon",method="GET",status="200",uri="/actuator/health/**"}'
+            values: '0+10x40'
+          - series: 'http_server_requests_seconds_count{cluster="oregon",method="GET",status="200",uri="/api/planner/md/published"}'
+            values: '0+10x10 100x30'
+        at: 20m
+      - series:
+          - series: 'http_server_requests_seconds_count{cluster="oregon",method="GET",status="200",uri="/actuator/health/**"}'
+            values: '0+10x40'
+          - series: 'http_server_requests_seconds_count{cluster="oregon",method="GET",status="200",uri="/api/planner/md/published"}'
+            values: '0+10x40'
+        at: 30m
+
+- name: read-source-breaker-open-sustained
+  kind: prometheus
+  for: 5m
+  expr: 'max by (cluster, name) (resilience4j_circuitbreaker_state{name=~"read-source-.+",state="open"}) > 0'
+  cases:
+    fires:
+      - series:
+          - series: 'resilience4j_circuitbreaker_state{cluster="seoul",name="read-source-replica",state="open"}'
+            values: '0x4 1x20'
+        at: 15m
+    quiet:
+      - series:
+          - series: 'resilience4j_circuitbreaker_state{cluster="seoul",name="read-source-replica",state="open"}'
+            values: '0x4 1x20'
+        at: 8m
+      - series:
+          - series: 'resilience4j_circuitbreaker_state{cluster="seoul",name="read-source-replica",state="open"}'
+            values: '0x20'
+          - series: 'resilience4j_circuitbreaker_state{cluster="seoul",name="read-source-replica",state="closed"}'
+            values: '1x20'
+          - series: 'resilience4j_circuitbreaker_state{cluster="seoul",name="redis-auth",state="open"}'
+            values: '1x20'
+        at: 15m
+
+- name: restriction-undecided-commit
+  kind: prometheus
+  for: 0s
+  expr: 'sum by (cluster) (increase(restriction_undecided_total[10m])) > 0'
+  cases:
+    fires:
+      - series:
+          - series: 'restriction_undecided_total{cluster="seoul"}'
+            values: '0x9 3x10'
+        at: 12m
+    quiet:
+      - series:
+          - series: 'restriction_undecided_total{cluster="seoul"}'
+            values: '0x20'
+        at: 12m
+
+- name: blacklist-check-skipped
+  kind: prometheus
+  for: 0s
+  expr: 'sum by (cluster) (increase(blacklist_check_skipped_total[5m])) > 0'
+  cases:
+    fires:
+      - series:
+          - series: 'blacklist_check_skipped_total{cluster="seoul"}'
+            values: '0x9 3x10'
+        at: 12m
+    quiet:
+      - series:
+          - series: 'blacklist_check_skipped_total{cluster="seoul"}'
+            values: '0x20'
+        at: 12m
+
+- name: redis-role-breaker-open-sustained
+  kind: prometheus
+  for: 5m
+  expr: 'max by (cluster, name) (resilience4j_circuitbreaker_state{name=~"redis-.+",state="open"}) > 0'
+  cases:
+    fires:
+      - series:
+          - series: 'resilience4j_circuitbreaker_state{cluster="seoul",name="redis-auth",state="open"}'
+            values: '0x4 1x20'
+        at: 15m
+    quiet:
+      - series:
+          - series: 'resilience4j_circuitbreaker_state{cluster="seoul",name="redis-auth",state="open"}'
+            values: '0x4 1x20'
+        at: 8m
+      - series:
+          - series: 'resilience4j_circuitbreaker_state{cluster="seoul",name="redis-auth",state="open"}'
+            values: '0x20'
+          - series: 'resilience4j_circuitbreaker_state{cluster="seoul",name="read-source-replica",state="open"}'
+            values: '1x20'
+        at: 15m
+
+- name: marker-wait-timeouts
+  kind: prometheus
+  for: 0s
+  expr: 'sum by (cluster) (increase(freshness_marker_wait_timeouts_total[10m])) > 0'
+  cases:
+    fires:
+      - series:
+          - series: 'freshness_marker_wait_timeouts_total{cluster="seoul"}'
+            values: '0x9 2x10'
+        at: 12m
+    quiet:
+      - series:
+          - series: 'freshness_marker_wait_timeouts_total{cluster="seoul"}'
+            values: '0x20'
+        at: 12m
+
+- name: marker-raise-failures
+  kind: prometheus
+  for: 0s
+  expr: 'sum by (cluster) (increase(freshness_marker_raise_failures_total[10m])) > 0'
+  cases:
+    fires:
+      - series:
+          - series: 'freshness_marker_raise_failures_total{cluster="seoul"}'
+            values: '0x9 2x10'
+        at: 12m
+    quiet:
+      - series:
+          - series: 'freshness_marker_raise_failures_total{cluster="seoul"}'
+            values: '0x20'
+        at: 12m
+
+# Marker TTL is 1 hour (ADR 183): safe only while the Seoul replica lags far below it.
+- name: seoul-replica-lag
+  kind: cloudwatch
+  for: 5m
+  metric: ReplicaLag
+  db_instance: danteplanner-mysql-seoul
+  region: ap-northeast-2
+  threshold: 60
