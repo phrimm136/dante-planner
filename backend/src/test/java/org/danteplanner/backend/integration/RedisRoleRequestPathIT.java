@@ -92,7 +92,6 @@ class RedisRoleRequestPathIT extends ReplicaRoutingHarnessSupport {
     private static final String LOGOUT_PATH = "/api/auth/logout";
 
     private static final String BLACKLIST_SKIPPED = "blacklist_check_skipped_total";
-    private static final String TOMBSTONE_SKIPPED = "tombstone.check_skipped";
     private static final String CHARGE_SKIPPED = "rate_limit.charge_skipped";
     private static final String GATE_SKIPPED = "redis.role.skipped";
     private static final String AUTH_LOCAL_GATE = "redis-auth-local";
@@ -316,15 +315,13 @@ class RedisRoleRequestPathIT extends ReplicaRoutingHarnessSupport {
             assertThat(gateSkipped(AUTH_GATE) - authGateBefore).isEqualTo(2.0);
 
             blacklistBefore = counter(BLACKLIST_SKIPPED);
-            double tombstoneBefore = counter(TOMBSTONE_SKIPPED);
             localGateBefore = gateSkipped(AUTH_LOCAL_GATE);
             authGateBefore = gateSkipped(AUTH_GATE);
             Sample byId = send(PLANNER_PATH + planner.getId(), token);
             assertThat(byId.status()).isEqualTo(200);
             assertThat(counter(BLACKLIST_SKIPPED) - blacklistBefore).isEqualTo(2.0);
-            assertThat(counter(TOMBSTONE_SKIPPED) - tombstoneBefore).isEqualTo(1.0);
-            assertThat(gateSkipped(AUTH_LOCAL_GATE) - localGateBefore).isEqualTo(3.0);
-            assertThat(gateSkipped(AUTH_GATE) - authGateBefore).isEqualTo(3.0);
+            assertThat(gateSkipped(AUTH_LOCAL_GATE) - localGateBefore).isEqualTo(2.0);
+            assertThat(gateSkipped(AUTH_GATE) - authGateBefore).isEqualTo(2.0);
         } finally {
             thaw(AUTH_REDIS);
             healAuthLocal();

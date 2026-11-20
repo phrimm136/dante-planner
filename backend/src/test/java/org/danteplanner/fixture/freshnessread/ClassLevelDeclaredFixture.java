@@ -1,4 +1,4 @@
-package org.danteplanner.freshnessfixture;
+package org.danteplanner.fixture.freshnessread;
 
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
