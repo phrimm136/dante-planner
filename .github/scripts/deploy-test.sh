@@ -5,15 +5,18 @@ KUSTOMIZE_IMAGE=registry.k8s.io/kustomize/kustomize:v5.8.1@sha256:899fcd3bc89816
 KUBECONFORM_IMAGE=ghcr.io/yannh/kubeconform:v0.8.0@sha256:faffaf43f95aa6425306e1ab8d6fcad72acb9049158f38e574c085ea1ec0f64e
 K3S_IMAGE=rancher/k3s:v1.36.3-k3s1@sha256:d0f79175794edd9694b4a12bafc5c52ae1977369a2f7cf256264e7bd2dae0be9
 WHOAMI_IMAGE=traefik/whoami:v1.10.2@sha256:1474027c316661cdec87df2623e13a41e7e1ce0ba99c24917631de8f300b5420
+PROMETHEUS_IMAGE=prom/prometheus:v3.5.0@sha256:63805ebb8d2b3920190daf1cb14a60871b16fd38bed42b857a3182bc621f4996
+LOKI_IMAGE=grafana/loki:3.5.3@sha256:3165cecce301ce5b9b6e3530284b080934a05cd5cafac3d3d82edcb887b45ecd
 KUBERNETES_VERSION=1.36.3
 KUBERNETES_SCHEMAS=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/89a35a5e9a1412a692a2603d79c3786f602238a4
 GATEWAY_API_CRDS=https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/690f754646e8326128fd686e3e46117ac479cfdf/config/crd/standard
 OVERLAYS=(oregon seoul)
 ACCEPT_LANGUAGE='ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,ja;q=0.6,zh-CN;q=0.5,zh;q=0.4,de;q=0.3,fr;q=0.2,es;q=0.1,it;q=0.05'
 PROBE_ATTEMPTS=30
+LOKI_READY_ATTEMPTS=90
 
 usage() {
-  echo "usage: $0 [deploy-dir]   (default: the repository's deploy/; needs docker and bash)" >&2
+  echo "usage: $0 [deploy-dir]   (default: the repository's deploy/; needs docker, bash, curl and python3 with PyYAML)" >&2
   exit 2
 }
 
@@ -25,10 +28,12 @@ harness=$repo/.github/deploy-test
 deploy_dir=$(cd "${1:-$repo/deploy}" && pwd)
 work=$(mktemp -d)
 cluster=deploy-test-k3s-$$
+loki=deploy-test-loki-$$
 started=$SECONDS
 
 cleanup() {
   docker rm -fv "$cluster" >/dev/null 2>&1 || true
+  docker rm -fv "$loki" >/dev/null 2>&1 || true
   rm -rf "$work"
 }
 trap cleanup EXIT
@@ -74,6 +79,52 @@ doc_named() {
 
 first_image() {
   awk '$1 == "image:" || ($1 == "-" && $2 == "image:") { print $NF; exit }'
+}
+
+promtool_test() {
+  docker run --rm --user "$(id -u):$(id -g)" -v "$1:/alerts:ro" -w /alerts --entrypoint promtool "$PROMETHEUS_IMAGE" \
+    test rules tests.yaml
+}
+
+failed_cases() {
+  awk '/^ *name: / { sub(/^ *name: /, ""); sub(/,[[:space:]]*$/, ""); print }' | paste -sd ',' - | sed 's/,/, /g'
+}
+
+alerts() {
+  local rules_py=$deploy_dir/grafana/rules.py out written fixture_failures loki_addr loki_summary
+  if ! out=$(python3 -m unittest discover -s "$deploy_dir/grafana/tests" 2>&1); then
+    echo "$out" >&2
+    fail alerts "the rules.py loader tests failed"
+  fi
+  written=$(python3 "$rules_py" promtool "$work/alerts") || fail alerts "rules.py could not build the promtool files"
+  if ! out=$(promtool_test "$work/alerts" 2>&1); then
+    echo "$out" >&2
+    fail alerts "promtool failed these cases: $(printf '%s\n' "$out" | failed_cases); a failed fires case means the rule never yields a value above 0, which Grafana's threshold needs"
+  fi
+
+  python3 "$rules_py" --rules "$harness/alerts/dead-rule-fixture.yaml" promtool "$work/dead-rule" >/dev/null \
+    || fail alerts "rules.py could not build the dead-rule fixture"
+  if out=$(promtool_test "$work/dead-rule" 2>&1); then
+    fail alerts "the dead-rule fixture passed promtool; the wrapper no longer catches an expression that filters to 0"
+  fi
+  fixture_failures=$(printf '%s\n' "$out" | failed_cases)
+  if [ "$fixture_failures" != "dead-rule-fixture fires[0]" ]; then
+    echo "$out" >&2
+    fail alerts "the dead-rule fixture failed with '${fixture_failures:-no named case}', want only 'dead-rule-fixture fires[0]'"
+  fi
+
+  python3 "$rules_py" loki-cases > "$work/loki-cases.jsonl" || fail alerts "rules.py could not list the Loki cases"
+  docker run --rm -d --name "$loki" -p 127.0.0.1::3100 "$LOKI_IMAGE" -config.file=/etc/loki/local-config.yaml >/dev/null
+  loki_addr=$(docker port "$loki" 3100/tcp | awk 'NR == 1')
+  retry "$LOKI_READY_ATTEMPTS" curl -sf "http://$loki_addr/ready" \
+    || fail alerts "Loki ($LOKI_IMAGE) did not become ready within ${LOKI_READY_ATTEMPTS}s"
+  if ! out=$(python3 "$harness/alerts/loki-cases.py" "http://$loki_addr" < "$work/loki-cases.jsonl" 2>&1); then
+    echo "$out" >&2
+    fail alerts "a Loki rule case failed against $LOKI_IMAGE"
+  fi
+  loki_summary=$(printf '%s\n' "$out" | awk 'END { print }')
+  docker rm -fv "$loki" >/dev/null 2>&1 || true
+  pass alerts "${written% written to *}, all pass; the dead-rule fixture fails its fires case; $loki_summary"
 }
 
 render() {
@@ -283,6 +334,7 @@ behavior() {
   pass behavior "every backend rule in ${OVERLAYS[*]} holds its contract"
 }
 
+alerts
 render
 schema
 behavior
