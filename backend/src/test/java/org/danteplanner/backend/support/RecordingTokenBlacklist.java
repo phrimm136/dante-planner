@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import org.danteplanner.backend.auth.token.LogoutRevocation;
@@ -52,7 +53,7 @@ public class RecordingTokenBlacklist extends TokenBlacklistService {
             new ScriptedFailures<>(RecordingTokenBlacklist.class.getSimpleName(), Operation.class);
 
     public RecordingTokenBlacklist(Clock clock) {
-        super(null, null, null, DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
+        super(null, null, new SimpleMeterRegistry(), DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
         this.clock = clock;
     }
 
