@@ -342,7 +342,6 @@ class DegradationIT {
         }
         RATE_LIMIT_REDIS_PROXY.enable();
         awaitLiveAuthRedis();
-        MarkerSourceBreakers.awaitClosed(roleHealth);
         awaitLiveRateLimitRedis();
         Hang.until(() -> roleHealth.isAvailable(RedisRole.AUTH) && roleHealth.isAvailable(RedisRole.AUTH_LOCAL)
                 && roleHealth.isAvailable(RedisRole.RATE_LIMIT), "the probe closing the cut roles' breakers");

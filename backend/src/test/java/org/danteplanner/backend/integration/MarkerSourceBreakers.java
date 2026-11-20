@@ -17,11 +17,6 @@ final class MarkerSourceBreakers {
     private MarkerSourceBreakers() {
     }
 
-    static void awaitClosed(RedisRoleHealth health) {
-        Hang.until(() -> allAvailable(health, true),
-                "the Redis role probe closing both marker-source role breakers after the auth Redis cut");
-    }
-
     static void awaitOpen(RedisRoleHealth health) {
         Hang.until(() -> allAvailable(health, false),
                 "the Redis role probe opening both marker-source role breakers during the auth Redis cut");

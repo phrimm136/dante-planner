@@ -264,7 +264,6 @@ class RedisConnectionRecoveryIT {
         SSE_LOCAL_REDIS_PROXY.enable();
         Hang.until(() -> Arrays.stream(RedisRole.values()).allMatch(roleHealth::isAvailable),
                 "the probe closing every role breaker once the routes are restored");
-        MarkerSourceBreakers.awaitClosed(roleHealth);
     }
 
     @Test

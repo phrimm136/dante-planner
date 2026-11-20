@@ -1,4 +1,4 @@
-package org.danteplanner.freshnessfixture;
+package org.danteplanner.fixture.freshnessread;
 
 import java.util.Set;
 
