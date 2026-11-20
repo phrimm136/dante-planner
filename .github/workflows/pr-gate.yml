@@ -220,6 +220,20 @@ jobs:
           path: ${{ env.TF_PLUGIN_CACHE_DIR }}
           key: ${{ steps.terraform-plugin-cache.outputs.cache-primary-key }}
 
+  scan-config:
+    needs: changes
+    if: needs.changes.outputs.deploy == 'true' || needs.changes.outputs.terraform == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - name: Scan the Terraform and rendered Kubernetes configuration against the baselines
+        run: .github/scripts/config-scan.sh
+      - name: Config scan scenarios
+        run: .github/config-scan/test.sh
+
   test-migration:
     needs: changes
     if: needs.changes.outputs.backend == 'true' && github.event_name == 'pull_request'

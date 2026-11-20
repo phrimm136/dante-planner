@@ -1,0 +1,327 @@
+{
+  "failed_checks": [
+    {
+      "file": "/iam-bootstrap/main.tf",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV_AWS_40"
+          ],
+          "resource": "aws_iam_user_policy_attachment.deploy_surge"
+        }
+      ]
+    },
+    {
+      "file": "/iam-bootstrap/state-backend.tf",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV2_AWS_6",
+            "CKV2_AWS_61",
+            "CKV2_AWS_62",
+            "CKV_AWS_144",
+            "CKV_AWS_145",
+            "CKV_AWS_18",
+            "CKV_AWS_21"
+          ],
+          "resource": "aws_s3_bucket.tf_state[0]"
+        },
+        {
+          "check_ids": [
+            "CKV_AWS_300"
+          ],
+          "resource": "aws_s3_bucket_lifecycle_configuration.tf_state[0]"
+        }
+      ]
+    },
+    {
+      "file": "/log-archive/main.tf",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV2_AWS_61",
+            "CKV2_AWS_62",
+            "CKV_AWS_144",
+            "CKV_AWS_145",
+            "CKV_AWS_18"
+          ],
+          "resource": "aws_s3_bucket.trail"
+        }
+      ]
+    },
+    {
+      "file": "/modules/fleet/cp.tf",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV_AWS_126",
+            "CKV_AWS_135"
+          ],
+          "resource": "module.fleet.aws_instance.cp"
+        },
+        {
+          "check_ids": [
+            "CKV_AWS_337"
+          ],
+          "resource": "module.fleet.aws_ssm_parameter.k3s_token"
+        },
+        {
+          "check_ids": [
+            "CKV_AWS_337"
+          ],
+          "resource": "module.fleet.aws_ssm_parameter.kubeconfig"
+        }
+      ]
+    },
+    {
+      "file": "/modules/fleet/data-node.tf",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV_AWS_126",
+            "CKV_AWS_135"
+          ],
+          "resource": "module.fleet.aws_instance.data"
+        }
+      ]
+    },
+    {
+      "file": "/modules/fleet/ingress.tf",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV_AWS_126",
+            "CKV_AWS_135"
+          ],
+          "resource": "module.fleet.aws_instance.ingress"
+        }
+      ]
+    },
+    {
+      "file": "/modules/fleet/network.tf",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV_AWS_130"
+          ],
+          "resource": "module.fleet.aws_subnet.public[0]"
+        },
+        {
+          "check_ids": [
+            "CKV_AWS_130"
+          ],
+          "resource": "module.fleet.aws_subnet.public[1]"
+        },
+        {
+          "check_ids": [
+            "CKV2_AWS_11",
+            "CKV2_AWS_12"
+          ],
+          "resource": "module.fleet.aws_vpc.this"
+        }
+      ]
+    },
+    {
+      "file": "/modules/fleet/s3.tf",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV2_AWS_62",
+            "CKV_AWS_144",
+            "CKV_AWS_145",
+            "CKV_AWS_18"
+          ],
+          "resource": "module.fleet.aws_s3_bucket.etcd_snapshots"
+        },
+        {
+          "check_ids": [
+            "CKV_AWS_300"
+          ],
+          "resource": "module.fleet.aws_s3_bucket_lifecycle_configuration.etcd_snapshots"
+        }
+      ]
+    },
+    {
+      "file": "/organization/cost-alerts.tf",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV_AWS_26"
+          ],
+          "resource": "aws_sns_topic.cost_alerts"
+        }
+      ]
+    },
+    {
+      "file": "/organization/identity-center.tf",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV_AWS_274"
+          ],
+          "resource": "aws_ssoadmin_managed_policy_attachment.this[\"AdministratorAccess\"]"
+        }
+      ]
+    },
+    {
+      "file": "/organization/trail.tf",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV2_AWS_10",
+            "CKV_AWS_252",
+            "CKV_AWS_35"
+          ],
+          "resource": "aws_cloudtrail.organization"
+        }
+      ]
+    },
+    {
+      "file": "/rds/main.tf",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV2_AWS_60",
+            "CKV_AWS_118",
+            "CKV_AWS_161",
+            "CKV_AWS_226"
+          ],
+          "resource": "aws_db_instance.this"
+        }
+      ]
+    },
+    {
+      "file": "/rds/network.tf",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV2_AWS_11",
+            "CKV2_AWS_12"
+          ],
+          "resource": "aws_vpc.this"
+        }
+      ]
+    },
+    {
+      "file": "/secrets/grafana-datasource-iam.tf",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV_AWS_273"
+          ],
+          "resource": "aws_iam_user.grafana_cloudwatch_readonly[\"grafana-cloudwatch-readonly\"]"
+        },
+        {
+          "check_ids": [
+            "CKV_AWS_355",
+            "CKV_AWS_40"
+          ],
+          "resource": "aws_iam_user_policy.grafana_cloudwatch_readonly[\"grafana-cloudwatch-readonly\"]"
+        }
+      ]
+    },
+    {
+      "file": "/secrets/main.tf",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV2_AWS_57",
+            "CKV_AWS_149"
+          ],
+          "resource": "aws_secretsmanager_secret.replicated[\"danteplanner/backend/runtime-config\"]"
+        },
+        {
+          "check_ids": [
+            "CKV2_AWS_57",
+            "CKV_AWS_149"
+          ],
+          "resource": "aws_secretsmanager_secret.replicated[\"danteplanner/cloudflare/tunnel-tokens\"]"
+        },
+        {
+          "check_ids": [
+            "CKV2_AWS_57",
+            "CKV_AWS_149"
+          ],
+          "resource": "aws_secretsmanager_secret.replicated[\"danteplanner/grafana/cloud\"]"
+        },
+        {
+          "check_ids": [
+            "CKV2_AWS_57",
+            "CKV_AWS_149"
+          ],
+          "resource": "aws_secretsmanager_secret.replicated[\"danteplanner/jwt/material\"]"
+        },
+        {
+          "check_ids": [
+            "CKV2_AWS_57",
+            "CKV_AWS_149"
+          ],
+          "resource": "aws_secretsmanager_secret.replicated[\"danteplanner/mysqld-exporter/dsn\"]"
+        },
+        {
+          "check_ids": [
+            "CKV2_AWS_57",
+            "CKV_AWS_149"
+          ],
+          "resource": "aws_secretsmanager_secret.replicated[\"danteplanner/rds/master-password\"]"
+        },
+        {
+          "check_ids": [
+            "CKV2_AWS_57",
+            "CKV_AWS_149"
+          ],
+          "resource": "aws_secretsmanager_secret.replicated[\"danteplanner/rds/readonly\"]"
+        }
+      ]
+    },
+    {
+      "file": "/secrets/origin-certs.tf",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV2_AWS_57",
+            "CKV_AWS_149"
+          ],
+          "resource": "aws_secretsmanager_secret.origin_tls[\"danteplanner/origin-tls\"]"
+        }
+      ]
+    },
+    {
+      "file": "/seoul/data.tf",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV2_AWS_60",
+            "CKV_AWS_118",
+            "CKV_AWS_129",
+            "CKV_AWS_157",
+            "CKV_AWS_226",
+            "CKV_AWS_293",
+            "CKV_AWS_353"
+          ],
+          "resource": "aws_db_instance.replica"
+        }
+      ]
+    },
+    {
+      "file": "/state-backend/main.tf",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV2_AWS_62",
+            "CKV_AWS_144",
+            "CKV_AWS_145",
+            "CKV_AWS_18"
+          ],
+          "resource": "aws_s3_bucket.tf_state"
+        },
+        {
+          "check_ids": [
+            "CKV_AWS_300"
+          ],
+          "resource": "aws_s3_bucket_lifecycle_configuration.tf_state"
+        }
+      ]
+    }
+  ]
+}
