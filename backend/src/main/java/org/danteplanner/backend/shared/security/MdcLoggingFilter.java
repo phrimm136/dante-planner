@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.danteplanner.backend.shared.util.LogValues;
 
 import java.io.IOException;
 
@@ -41,8 +42,7 @@ public class MdcLoggingFilter extends OncePerRequestFilter {
             MDC.put("userId", "guest");
         }
         MDC.put("method", request.getMethod());
-        // Strip CR/LF to prevent log injection via crafted URIs in the console PatternLayout
-        MDC.put("path", request.getRequestURI().replaceAll("[\r\n]", "_"));
+        MDC.put("path", LogValues.oneLine(request.getRequestURI()));
 
         try {
             filterChain.doFilter(request, response);

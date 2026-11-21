@@ -9,6 +9,8 @@ import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.auth.token.TokenValidator;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.Users;
+import org.danteplanner.backend.shared.util.LogValues;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -90,7 +92,7 @@ public class AccessTokenAuthenticator {
         log.warn("Security event: {} - IP: {}, URI: {}, UA: {}",
                 event,
                 request.getRemoteAddr(),
-                request.getRequestURI(),
-                request.getHeader("User-Agent"));
+                LogValues.oneLine(request.getRequestURI()),
+                LogValues.oneLine(request.getHeader(HttpHeaders.USER_AGENT)));
     }
 }

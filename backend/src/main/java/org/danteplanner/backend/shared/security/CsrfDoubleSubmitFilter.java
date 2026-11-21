@@ -13,6 +13,7 @@ import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.danteplanner.backend.shared.util.LogValues;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -24,6 +25,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Optional;
 import java.util.Set;
+
+import static net.logstash.logback.argument.StructuredArguments.kv;
 
 /**
  * On an unsafe method the cookie must be one this server minted and the {@code X-CSRF-Token}
@@ -39,6 +42,9 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
     static final String CSRF_ERROR_CODE = "CSRF_TOKEN_INVALID";
 
     static final int COOKIE_MAX_AGE_SECONDS = 604800;
+
+    /** INVALID_COOKIE covers a bad MAC and a token past its lifetime alike. */
+    private enum Verdict { ACCEPTED, NO_COOKIE, INVALID_COOKIE, NO_HEADER, MISMATCH }
 
     private static final Set<String> SAFE_METHODS = Set.of("GET", "HEAD", "OPTIONS");
 
@@ -70,10 +76,9 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
         }
 
         if (requiresEnforcement(request)) {
-            String headerToken = request.getHeader(CSRF_HEADER);
-            boolean echoed = cookieToken.map(cookie -> tokensMatch(cookie, headerToken)).orElse(false);
-            if (!serverIssued || !echoed) {
-                reject(request, response);
+            Verdict verdict = verdict(cookieToken, serverIssued, request.getHeader(CSRF_HEADER));
+            if (verdict != Verdict.ACCEPTED) {
+                reject(verdict, request, response);
                 return;
             }
         }
@@ -85,17 +90,29 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
         return !SAFE_METHODS.contains(request.getMethod());
     }
 
-    private boolean tokensMatch(String cookieToken, String headerToken) {
-        if (cookieToken.isEmpty() || headerToken == null || headerToken.isEmpty()) {
-            return false;
+    private static Verdict verdict(Optional<String> cookieToken, boolean serverIssued, String headerToken) {
+        if (cookieToken.isEmpty()) {
+            return Verdict.NO_COOKIE;
         }
-        return MessageDigest.isEqual(
-                cookieToken.getBytes(StandardCharsets.UTF_8),
+        if (!serverIssued) {
+            return Verdict.INVALID_COOKIE;
+        }
+        if (headerToken == null || headerToken.isEmpty()) {
+            return Verdict.NO_HEADER;
+        }
+        boolean echoed = MessageDigest.isEqual(
+                cookieToken.orElseThrow().getBytes(StandardCharsets.UTF_8),
                 headerToken.getBytes(StandardCharsets.UTF_8));
+        return echoed ? Verdict.ACCEPTED : Verdict.MISMATCH;
     }
 
-    private void reject(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        log.warn("CSRF validation failed: missing or mismatched X-CSRF-Token");
+    private void reject(Verdict verdict, HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        log.warn("CSRF validation failed: {} {} {} {}",
+                kv("reason", verdict),
+                kv("method", request.getMethod()),
+                kv("path", LogValues.oneLine(request.getRequestURI())),
+                kv("userAgent", LogValues.oneLine(request.getHeader(HttpHeaders.USER_AGENT))));
         problemWriter.write(request, response,
                 Problems.fill(ProblemDetail.forStatus(HttpStatus.FORBIDDEN), CSRF_ERROR_CODE,
                         "Missing or invalid CSRF token"),
