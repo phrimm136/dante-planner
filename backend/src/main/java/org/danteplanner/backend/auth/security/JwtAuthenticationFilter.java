@@ -22,6 +22,7 @@ import org.danteplanner.backend.auth.token.TokenGenerator;
 import org.danteplanner.backend.auth.token.TokenValidator;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.danteplanner.backend.shared.util.LogValues;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -80,7 +81,7 @@ public class JwtAuthenticationFilter extends ChainAuthenticationFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         MDC.put("method", request.getMethod());
-        MDC.put("path", request.getRequestURI().replaceAll("[\r\n]", "_"));
+        MDC.put("path", LogValues.oneLine(request.getRequestURI()));
 
         if (!establishAuthentication(request, response)) {
             MDC.clear();

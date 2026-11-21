@@ -1,9 +1,11 @@
 package org.danteplanner.backend.security;
+import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.backend.support.TestJsonMappers;
 import org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter;
 
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import com.jayway.jsonpath.JsonPath;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 import jakarta.servlet.DispatcherType;
@@ -21,6 +23,8 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import jakarta.servlet.http.HttpServletResponse;
+
+import ch.qos.logback.classic.Level;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -127,6 +131,69 @@ class CsrfDoubleSubmitFilterTest {
                 assertThat(res.getStatus()).as(method).isEqualTo(HttpServletResponse.SC_FORBIDDEN);
                 assertThat(chain.getRequest()).as(method).isNull();
             }
+        }
+    }
+
+    @Nested
+    class RejectionLog {
+
+        private static final String USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64)";
+
+        private String rejectionLine(MockHttpServletRequest req) throws Exception {
+            return rejectionLine(req, USER_AGENT);
+        }
+
+        private String rejectionLine(MockHttpServletRequest req, String userAgent) throws Exception {
+            req.addHeader(HttpHeaders.USER_AGENT, userAgent);
+            try (LogCapture log = LogCapture.onThisThread(CsrfDoubleSubmitFilter.class)) {
+                filter.doFilter(req, new MockHttpServletResponse(), new MockFilterChain());
+                assertThat(log.at(Level.WARN)).hasSize(1);
+                return log.at(Level.WARN).getFirst().getFormattedMessage();
+            }
+        }
+
+        @Test
+        void mutation_WhenNoCookie_LogsNoCookie() throws Exception {
+            MockHttpServletRequest req = request("PUT", "/api/planner/md/1");
+
+            assertThat(rejectionLine(req)).isEqualTo(
+                    "CSRF validation failed: reason=NO_COOKIE method=PUT path=/api/planner/md/1 userAgent="
+                            + USER_AGENT);
+        }
+
+        @Test
+        void mutation_WhenCookieNotServerIssued_LogsInvalidCookie() throws Exception {
+            MockHttpServletRequest req = request("POST", "/api/planner/md/1");
+            req.setCookies(csrfCookie("attacker-planted-value"));
+            req.addHeader(CsrfDoubleSubmitFilter.CSRF_HEADER, "attacker-planted-value");
+
+            assertThat(rejectionLine(req)).contains("reason=INVALID_COOKIE");
+        }
+
+        @Test
+        void mutation_WhenHeaderMissing_LogsNoHeader() throws Exception {
+            MockHttpServletRequest req = request("POST", "/api/planner/md/1");
+            req.setCookies(csrfCookie(token));
+
+            assertThat(rejectionLine(req)).contains("reason=NO_HEADER");
+        }
+
+        @Test
+        void mutation_WhenHeaderDiffers_LogsMismatch() throws Exception {
+            MockHttpServletRequest req = request("POST", "/api/planner/md/1");
+            req.setCookies(csrfCookie(token));
+            req.addHeader(CsrfDoubleSubmitFilter.CSRF_HEADER, "different-token");
+
+            assertThat(rejectionLine(req)).contains("reason=MISMATCH");
+        }
+
+        @Test
+        void mutation_WhenUserAgentCarriesLineBreaks_LogsOneLine() throws Exception {
+            MockHttpServletRequest req = request("POST", "/api/planner/md/1");
+
+            assertThat(rejectionLine(req, "agent\r\nforged"))
+                    .endsWith("userAgent=agent__forged")
+                    .doesNotContain("\n");
         }
     }
 
