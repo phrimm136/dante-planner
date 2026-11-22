@@ -1,4 +1,3 @@
-import { useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import type { z } from 'zod'
 
@@ -15,7 +14,7 @@ import {
   SsePublishedEventSchema,
   notificationQueryKeys,
 } from '@/shared/notifications'
-import { useAuthQueryNonBlocking } from '@/shared/auth'
+import { authQueryKeys, useAuthQueryNonBlocking } from '@/shared/auth'
 import { useUserSettingsQuery, userSettingsKeys } from '@/shared/userSettings'
 
 import type { SseNotificationEvent, NotificationType } from '@/shared/notifications'
@@ -100,7 +99,7 @@ export function useAppSse(): void {
   const handleAccountSuspended = (event: MessageEvent) => {
     setLastEventTime(Date.now())
 
-    void queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
+    void queryClient.invalidateQueries({ queryKey: authQueryKeys.me })
 
     const data = readPayload(event, SseAccountSuspendedSchema, 'sse account suspended')
     if (!data) return
@@ -134,14 +133,6 @@ export function useAppSse(): void {
     }
   }
 
-  const hasConnectedRef = useRef(false)
-  const handleConnected = () => {
-    if (hasConnectedRef.current) {
-      void queryClient.invalidateQueries({ queryKey: userSettingsKeys.settings() })
-    }
-    hasConnectedRef.current = true
-  }
-
   const handlers = {
     [SSE_EVENTS.NOTIFY_COMMENT]: handleNotification,
     [SSE_EVENTS.NOTIFY_RECOMMENDED]: handleNotification,
@@ -153,6 +144,6 @@ export function useAppSse(): void {
     shouldConnect,
     url: APP_SSE_PATH,
     handlers,
-    onConnected: handleConnected,
+    refetchOnReconnect: [notificationQueryKeys.all, authQueryKeys.me, userSettingsKeys.settings()],
   })
 }

@@ -91,6 +91,7 @@ export function usePlannerCommentsSse(plannerId: string) {
     streamKey: plannerId,
     url: `/api/planner/${plannerId}/comments/events`,
     handlers: { [SSE_EVENTS.COMMENT_ADDED]: handleCommentAdded },
+    refetchOnReconnect: [commentsQueryKeys.list(plannerId)],
     stopOnNotFound: true,
     onStreamGone: handleStreamGone,
     policy: COMMENT_SSE_POLICY,
