@@ -258,7 +258,7 @@ class RefreshRotationServiceIT {
 
             assertThat(result).isInstanceOf(RotationResult.Revoked.class);
             assertThat(((RotationResult.Revoked) result).familyId()).isEqualTo(familyId);
-            assertThat(rotationService.isFamilyRevoked(familyId)).isTrue();
+            assertThat(TokenStoreReads.isFamilyRevoked(sharedTemplate, familyId)).isTrue();
             assertThat(outcomeCount(RefreshRotationService.OUTCOME_THEFT_REVOKED)).isEqualTo(1.0);
         }
 
@@ -274,7 +274,7 @@ class RefreshRotationServiceIT {
             RotationResult result = rotationService.rotate(r1);
 
             assertThat(result).isInstanceOf(RotationResult.Revoked.class);
-            assertThat(rotationService.isFamilyRevoked(claims.familyId())).isTrue();
+            assertThat(TokenStoreReads.isFamilyRevoked(sharedTemplate, claims.familyId())).isTrue();
             assertThat(outcomeCount(RefreshRotationService.OUTCOME_THEFT_REVOKED)).isEqualTo(1.0);
         }
 
@@ -291,7 +291,7 @@ class RefreshRotationServiceIT {
             RotationResult result = noReuse.rotate(r2Superseded);
 
             assertThat(result).isInstanceOf(RotationResult.Revoked.class);
-            assertThat(noReuse.isFamilyRevoked(familyId)).isTrue();
+            assertThat(TokenStoreReads.isFamilyRevoked(sharedTemplate, familyId)).isTrue();
             assertThat(outcomeCount(RefreshRotationService.OUTCOME_THEFT_REVOKED)).isEqualTo(1.0);
         }
     }
@@ -484,7 +484,7 @@ class RefreshRotationServiceIT {
 
             assertThat(replay).isInstanceOf(RotationResult.Revoked.class);
             assertThat(((RotationResult.Revoked) replay).familyId()).isEqualTo(familyId);
-            assertThat(instanceB.isFamilyRevoked(familyId)).isTrue();
+            assertThat(TokenStoreReads.isFamilyRevoked(templateB, familyId)).isTrue();
         }
     }
 
