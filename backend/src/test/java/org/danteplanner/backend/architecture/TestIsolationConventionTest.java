@@ -12,6 +12,7 @@ import com.tngtech.archunit.lang.SimpleConditionEvent;
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
+import org.danteplanner.backend.auth.token.TokenStoreReads;
 import org.danteplanner.backend.integration.ExclusiveDatabaseSupport;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.danteplanner.backend.shared.redis.RedisKeyScanner;
@@ -105,7 +106,7 @@ class TestIsolationConventionTest {
 
     /**
      * Redis calls whose scope is the whole keyspace, as {@code owner#method}: Redis's own key
-     * listings, scans and flushes, plus every production method that reaches one of them.
+     * listings, scans and flushes, plus every production or test-source method that reaches one of them.
      *
      * <p>A blacklist entry is keyed by a hash of its own token, so classes sharing the run's Redis
      * cannot collide on one. A scan is the exception: it counts and deletes keys written by classes
@@ -123,7 +124,7 @@ class TestIsolationConventionTest {
                 "org.springframework.data.redis.connection.RedisServerCommands#flushDb"));
         boolean grew = true;
         while (grew) {
-            java.util.Set<String> reached = ImportedClasses.production().stream()
+            java.util.Set<String> reached = ImportedClasses.everything().stream()
                     .flatMap(clazz -> clazz.getCodeUnitAccessesFromSelf().stream())
                     .filter(access -> reachesKeyspace(access, calls))
                     .map(access -> callKey(access.getOrigin().getOwner().getName(), access.getOrigin().getName()))
@@ -157,12 +158,12 @@ class TestIsolationConventionTest {
     }
 
     @Test
-    void keyspaceWideCalls_WhenDerivedFromProduction_IncludeTheBlacklistScans() {
+    void keyspaceWideCalls_WhenDerivedFromTheSources_IncludeTheBlacklistScans() {
         assertThat(KEYSPACE_WIDE_CALLS).contains(
                 callKey(RedisKeyScanner.class.getName(), "scanKeys"),
                 callKey(TokenBlacklistService.class.getName(), "clear"),
-                callKey(TokenBlacklistService.class.getName(), "size"),
-                callKey(TokenBlacklistService.class.getName(), "userInvalidationSize"));
+                callKey(TokenStoreReads.class.getName(), "blacklistSize"),
+                callKey(TokenStoreReads.class.getName(), "userInvalidationSize"));
     }
 
     @Test

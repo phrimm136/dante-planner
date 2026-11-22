@@ -1,6 +1,7 @@
 package org.danteplanner.backend.service.token;
 import org.danteplanner.backend.support.AuthReads;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
+import org.danteplanner.backend.auth.token.TokenStoreReads;
 import org.danteplanner.backend.support.TestDataFactory;
 
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -27,8 +28,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <p>Tests the Redis-backed token blacklist behavior including
  * add, check, and TTL expiration functionality over a live Redis container.</p>
  *
- * <p>The container is this class's own, not the run's shared one: {@code size()},
- * {@code userInvalidationSize()} and {@code clear()} are the subject here, and all three span the
+ * <p>The container is this class's own, not the run's shared one: {@code clear()} and the blacklist
+ * and invalidation counts read through {@link TokenStoreReads} are the subject here, and all three span the
  * whole keyspace, so there is no id to narrow them to.</p>
  */
 @Tag("containerized")
@@ -80,7 +81,7 @@ class TokenBlacklistServiceIT {
 
             // Assert
             assertThat(blacklistService.isBlacklisted(token)).isTrue();
-            assertThat(blacklistService.size()).isEqualTo(1);
+            assertThat(TokenStoreReads.blacklistSize(ownTemplate)).isEqualTo(1);
         }
 
         @Test
@@ -96,7 +97,7 @@ class TokenBlacklistServiceIT {
 
             // Assert - token still blacklisted, size remains 1
             assertThat(blacklistService.isBlacklisted(token)).isTrue();
-            assertThat(blacklistService.size()).isEqualTo(1);
+            assertThat(TokenStoreReads.blacklistSize(ownTemplate)).isEqualTo(1);
         }
     }
 
@@ -141,7 +142,7 @@ class TokenBlacklistServiceIT {
 
             // Assert - should return false and remove entry (lazy cleanup)
             assertThat(result).isFalse();
-            assertThat(blacklistService.size()).isEqualTo(0); // Entry should be removed
+            assertThat(TokenStoreReads.blacklistSize(ownTemplate)).isEqualTo(0); // Entry should be removed
         }
     }
 
@@ -155,13 +156,13 @@ class TokenBlacklistServiceIT {
             blacklistService.blacklistToken("token1", expiry);
             blacklistService.blacklistToken("token2", expiry);
             blacklistService.blacklistToken("token3", expiry);
-            assertThat(blacklistService.size()).isEqualTo(3);
+            assertThat(TokenStoreReads.blacklistSize(ownTemplate)).isEqualTo(3);
 
             // Act
             blacklistService.clear();
 
             // Assert
-            assertThat(blacklistService.size()).isEqualTo(0);
+            assertThat(TokenStoreReads.blacklistSize(ownTemplate)).isEqualTo(0);
             assertThat(blacklistService.isBlacklisted("token1")).isFalse();
         }
 
@@ -171,14 +172,14 @@ class TokenBlacklistServiceIT {
             Date expiry = new Date(System.currentTimeMillis() + 60000);
 
             // Assert initial
-            assertThat(blacklistService.size()).isEqualTo(0);
+            assertThat(TokenStoreReads.blacklistSize(ownTemplate)).isEqualTo(0);
 
             // Add tokens
             blacklistService.blacklistToken("token1", expiry);
-            assertThat(blacklistService.size()).isEqualTo(1);
+            assertThat(TokenStoreReads.blacklistSize(ownTemplate)).isEqualTo(1);
 
             blacklistService.blacklistToken("token2", expiry);
-            assertThat(blacklistService.size()).isEqualTo(2);
+            assertThat(TokenStoreReads.blacklistSize(ownTemplate)).isEqualTo(2);
         }
     }
 
@@ -319,17 +320,17 @@ class TokenBlacklistServiceIT {
         }
 
         @Test
-        void userInvalidationSize_WhenInvalidatedThenCleared_ReflectsRedis() {
+        void userInvalidations_WhenInvalidatedThenCleared_ReflectRedis() {
             // Arrange
             Long userId = TestDataFactory.nextUserId();
 
             // Act + Assert - one invalidation yields size 1
             blacklistService.invalidateUserTokens(userId);
-            assertThat(blacklistService.userInvalidationSize()).isEqualTo(1);
+            assertThat(TokenStoreReads.userInvalidationSize(ownTemplate)).isEqualTo(1);
 
             // Act + Assert - clear() wipes it back to 0
             blacklistService.clear();
-            assertThat(blacklistService.userInvalidationSize()).isEqualTo(0);
+            assertThat(TokenStoreReads.userInvalidationSize(ownTemplate)).isEqualTo(0);
         }
 
         @Test
@@ -343,7 +344,7 @@ class TokenBlacklistServiceIT {
 
             // Assert
             assertThat(blacklistService.isUserTokenInvalidated(userId, 0L)).isFalse();
-            assertThat(blacklistService.userInvalidationSize()).isEqualTo(0);
+            assertThat(TokenStoreReads.userInvalidationSize(ownTemplate)).isEqualTo(0);
         }
     }
 }

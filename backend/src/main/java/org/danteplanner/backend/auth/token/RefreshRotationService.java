@@ -304,9 +304,4 @@ public class RefreshRotationService {
     private String userInvalidationKey(Long userId) {
         return TokenBlacklistService.USER_INVALIDATION_KEY_PREFIX + userId;
     }
-
-    boolean isFamilyRevoked(String familyId) {
-        return Boolean.TRUE.equals(
-                authWrites.write(store -> store.opsForHash().hasKey(familyKey(familyId), REVOKED_FIELD)));
-    }
 }

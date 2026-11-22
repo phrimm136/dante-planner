@@ -42,7 +42,7 @@ public class TokenBlacklistService {
 
     private static final long ROTATION_GRACE_PERIOD_MS = 5_000;
 
-    private static final String BLACKLIST_KEY_PREFIX = "bl:";
+    static final String BLACKLIST_KEY_PREFIX = "bl:";
 
     static final String USER_INVALIDATION_KEY_PREFIX = "uinv:";
 
@@ -220,14 +220,6 @@ public class TokenBlacklistService {
     public void clearUserInvalidation(@NonNull Long userId) {
         Objects.requireNonNull(userId, "userId");
         authWrites.writeWithoutResult(store -> store.delete(userInvalidationKey(userId)));
-    }
-
-    public int size() {
-        return authWrites.write(store -> RedisKeyScanner.scanKeys(store, BLACKLIST_KEY_PREFIX + "*").size());
-    }
-
-    public int userInvalidationSize() {
-        return authWrites.write(store -> RedisKeyScanner.scanKeys(store, USER_INVALIDATION_KEY_PREFIX + "*").size());
     }
 
     public void clear() {

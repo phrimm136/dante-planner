@@ -135,13 +135,11 @@ public class RecordingTokenBlacklist extends TokenBlacklistService {
         invalidations.remove(userId);
     }
 
-    @Override
     public int size() {
         long now = clock.millis();
         return (int) entries.values().stream().filter(entry -> entry.expiresAt() > now).count();
     }
 
-    @Override
     public int userInvalidationSize() {
         return invalidatedUserIds().size();
     }
