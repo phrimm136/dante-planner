@@ -1103,12 +1103,6 @@ guards the parse but likewise skips the schema gate.
   chatter and ADR 123 moves writes beside the primary, where each round trip costs about 1 ms.
   Worth doing if write forwarding is rolled back, or when ADR 122's command-count test is built.
   re-check: `rg -q 'target.isReadOnly\(\)' backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidCapturingDataSource.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/resources 'useLocalSessionState'`
-- 2026-09-23 — Whether a Seoul replica read right after a settings invalidation can cache a stale
-  row for the five-minute TTL is unverified: the SSE subscribe path loads notification settings
-  through `UserSettingsService.getSettings`, which is read-only and may land on the replica. The
-  detail GET's view flush, the other Seoul primary path, is gone. Worth re-measuring the Seoul
-  pool's acquisitions after the marker-reading release is live in both regions.
-  re-check: `rg -q 'getSettings\(' backend/src/main/java/org/danteplanner/backend/user/service/UserSettingsService.java`
 - **The gate assumes the probe and the read reach the same replica.** `WAIT_FOR_EXECUTED_
   GTID_SET` runs on one pooled connection and the request's read uses another; sound with
   one replica behind the endpoint, void the day the endpoint resolves to more than one host.
@@ -1659,6 +1653,411 @@ guards the parse but likewise skips the schema gate.
   to matter: give the rig its own project name (and with it its own volume) and container names
   passed to the suites through `E2E_REPLICA_CONTAINER` and its siblings.
   re-check: `rg -q '^PROJECT=limbusplanner$' scripts/ops/local-multiregion-up.sh && rg -q 'mysql-data:/var/lib/mysql' docker-compose.local.yml`
+- `SseService.cacheSettingsIfAbsent` pins a virtual thread on JDK 21: Caffeine runs its loader inside
+  `ConcurrentHashMap.compute`, which holds a bin monitor, and the loader runs a read-write MySQL
+  transaction, so every socket wait keeps the carrier. JFR (`jdk.VirtualThreadPinned`, threshold 0)
+  recorded 43 such parks on the SSE subscribe path and none elsewhere; a Seoul pod's cold subscribe
+  would hold a carrier for about 0.5 s against the Oregon primary (inferred from the round trips, not
+  measured). ADR 112's claim that every blocking path unmounts is false for this site. The fix is the
+  JDK upgrade: JEP 491 (JDK 24, and the JDK 25 LTS) lets virtual threads unmount inside monitors.
+  Worth doing with the move off JDK 21; until then, a cache load that does I/O belongs outside the
+  compute call (`getIfPresent` then `put`).
+  re-check: `rg -q 'JavaLanguageVersion.of\(21\)' backend/build.gradle.kts`
+- Request-scoped state lives in separate ThreadLocals (`GtidWriteCapture`, `FreshnessDeclarations`,
+  `ChosenReadSource`, `ReadOnlyRoutingDataSource`, `RestrictionTransactionHook`) and MDC, each with
+  its own begin and clear. No file shows the request lifecycle, and a participant that forgets to
+  clear leaks state onto pooled threads. Worth doing when a new request-scoped participant is added:
+  one request-context type with a single owner of open and close, and routing pins that restore
+  the previous pin instead of clearing it.
+  re-check: `rg -q 'ThreadLocal<' backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidWriteCapture.java`
+- `ChosenReadSource.record` runs on every read-source acquisition (`ReadSourceSelector`), but only
+  `GtidCookieFilter` and the dispatch window in `MarkerDispatchStamp` clear it. On a pooled
+  scheduler thread such as `PlannerDriftReconciler`'s, the value stays for the next run. Whether a
+  stale value changes a decision there is not checked. Worth doing with the request-context entry
+  above, or when a scheduled job starts to read `servedByAuthority`.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/planner/service/PlannerDriftReconciler.java 'ChosenReadSource|MarkerDispatchStamp'`
+- `RateLimitPolicy` constants pass five positional arguments, and the meaning hides in values:
+  `null` endpoint means the caller names the endpoint, `false` means fail open. `subjectPrefix` is
+  `""` in all ten constants, so it does nothing. Worth doing when a policy is added or a key
+  spelling changes: drop `subjectPrefix` and name the endpoint and failure modes as types.
+  re-check: `rg -q 'subjectPrefix' backend/src/main/java/org/danteplanner/backend/shared/ratelimit/RateLimitPolicy.java`
+- `PlannerChange` holds "which fields changed" as seven booleans, so `between`, `isNone` and the
+  constructor repeat one pattern seven times, and a new field must be added in each place by hand.
+  An `EnumSet` of a field enum states the model directly. Worth doing when a synced field is added.
+  re-check: `rg -q 'boolean deviceIdChanged' backend/src/main/java/org/danteplanner/backend/planner/sync/PlannerChange.java`
+- `JwtAuthenticationFilter` passes outcomes between five methods as `boolean`, and `false` means
+  "stop, a 503 is written" in `establishAuthentication` but "continue as guest" in
+  `attemptAutoRefresh`, `rotateRefreshCookie` and `abandonSession`. Its effects (cookies, the
+  security context, the 503 body) are spread across those methods. Worth doing when the refresh
+  path changes: one decision function returns authenticated, guest or outage as a type, and
+  `doFilterInternal` applies the effects in one place.
+  re-check: `rg -q 'private boolean attemptAutoRefresh' backend/src/main/java/org/danteplanner/backend/auth/security/JwtAuthenticationFilter.java`
+- No mechanism stops a `boolean` or `null` from carrying a choice between different follow-up
+  actions (the three entries above). A flag parameter on a public method can be banned by an
+  ArchUnit rule. A `boolean` return used as a control-flow signal cannot be detected statically and
+  needs a line in refactoring briefs. Worth doing before the refactors above start.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent backend/src/test/java/org/danteplanner/backend/architecture -i 'flag ?param|booleanParam'`
+- `GtidCookieFilter.handleRead` mixes four inputs (this pod reads the authority, cookie absent or
+  malformed or valid, the probe verdict, authority health) with the effects (clear the cookie, write
+  a 503, pin PRIMARY, call the chain in three places) in one if-tree. The verdict-to-action mapping
+  is not written in one place. Worth doing when a verdict or read source is added: a decision
+  function returns the read route and the cookie action as types, and the filter applies them once.
+  The probe sends a query, so the decision takes the verdict lazily and only when a valid cookie
+  meets a non-authority source.
+  re-check: `rg -q 'private void handleRead' backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidCookieFilter.java`
+- The planner write lock is implicit. `lockForUpsert` takes it with `lockContent`, a
+  `SELECT COUNT(*) ... FOR UPDATE` whose result is discarded. The global order (content before
+  publication, ADR 185) holds only because each call site calls things in that order, and only the
+  upsert order is tested (`LockOrderTests`, with mocks). Worth doing when another writer of
+  `planner_content` or `planner_publication` is added: a named lock step whose result the
+  aggregate load requires, so the order is enforced by types instead of by call order.
+  re-check: `rg -q 'long lockContent\(' backend/src/main/java/org/danteplanner/backend/planner/repository/PlannerRepository.java`
+- A ban does not survive account deletion: purge removes the `users` row with `banned_at`, so the
+  same Google account signs up again as a clean user, and the ban survives only as
+  `moderation_actions` rows keyed by the old `target_uuid` (inferred from
+  `UserAccountLifecycleService.performHardDelete` and the cascade, not exercised). Worth doing
+  when a banned user is seen re-registering, or a moderation policy requires bans to outlive
+  deletion: keep a provider-identity block list checked at OAuth sign-in.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent backend/src/main -i 'banned_provider|ProviderBlock'`
+- A token signed with the service key but missing `iat` or `exp` fails the `TokenClaims`
+  constructor asserts with an IllegalArgumentException, which
+  `AccessTokenAuthenticator` does not catch (it handles InvalidTokenException), so the request
+  ends as a 500 rather than a rejected token. Only a holder of the private key can mint one, and
+  `generateAccessToken` always sets both. Worth doing when token parsing is reworked (ADR 077's
+  TokenLifecycleService) or a 500 from this path is seen: map missing dates to
+  `InvalidTokenException(MISSING_CLAIMS)` at the parse boundary.
+  re-check: `rg -q 'Assert.notNull\(issuedAt' backend/src/main/java/org/danteplanner/backend/auth/token/TokenClaims.java`
+- `backend/CLAUDE.md` calls the Java import order "enforced", but no checkstyle module
+  (ImportOrder / CustomImportOrder) checks it, and existing files such as
+  `PlannerStatsRepositoryIT` do not follow it. Worth doing when import churn shows up in review:
+  add the checkstyle module with the stated order (and reorder once), or drop the claim.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent backend/config/checkstyle 'ImportOrder'`
+- The catalog keyword- and dense-entity-filter pages let MySQL drive from the filter table and
+  sort, which grows with every match (measured 59 ms at 100x synthetic data; 0.38 ms when forced
+  to walk `idx_catalog_recent` with NO_SEMIJOIN). The title-search count ORs a FULLTEXT MATCH
+  with a keyword EXISTS, so it scans the whole catalog (237 ms at 100x). Both are under 5 ms at
+  prod size today. Worth doing when catalog list p95 rises or the published count passes ~10k:
+  hint or rewrite the filter page, and split the search predicate into a UNION.
+  re-check: `rg -q 'match_against' backend/src/main/java/org/danteplanner/backend/planner/specification/CatalogSpecifications.java`
+- The last-administrator guard runs role changes (`AdminService.changeRole`) and account
+  withdrawal (`UserAccountLifecycleService.deleteAccount`) at SERIALIZABLE (ADR 001, 173), so
+  withdrawal also holds S locks across its planner clear (ADR 185's flush-first order). A guard row
+  (`admin_tally`, `CHECK (active_admins >= 1)`, decremented by a conditional UPDATE before any
+  admin-removing transition) would retire SERIALIZABLE but moves the rank rules into SQL, which
+  ADR 001 rejected for locality. A cheaper variant was measured on MySQL 8.4 (2026-11-03): an UPDATE
+  that joins a derived `SELECT COUNT(*)` of the other active admins takes S locks on the counted rows
+  at READ COMMITTED, so two concurrent self-demotions serialize and the second becomes a no-op (no
+  write skew, no error 1093). Kept on 2026-11-03. Worth doing when these paths deadlock or
+  slow other writers, or when deactivation stops clearing planners (that narrows SERIALIZABLE to
+  users rows first).
+  re-check: `rg -q 'Isolation.SERIALIZABLE' backend/src/main/java/org/danteplanner/backend/admin/service/AdminService.java`
+- Account deactivation and reactivation lock every content row the user owns
+  (`lockContentOwnedBy`, ADR 185 @lock-order) and publish holds a shared lock on the author row
+  (`holdActiveAccount`), because the author's liveness is folded into the catalog and filter
+  projections. Moving the author term to read time (owner id on `planner_catalog`, list queries
+  join `users` on `deleted_at IS NULL`) would drop both locks and the non-idempotent
+  `RESTORE_ALL_OWNED_BY`, but a publish racing a deactivation could then commit as a published
+  planner that stays hidden until reactivation, and the extra join on list queries is unmeasured.
+  Kept on 2026-11-03 (deactivation is rare; prod had 5 deleted users). Worth doing when these
+  locks deadlock or slow saves, or when a deactivated user's planners must reappear without a
+  restore pass.
+  re-check: `rg -q 'lockContentOwnedBy' backend/src/main/java/org/danteplanner/backend/planner/repository/PlannerRepository.java`
+- IT fixtures that bind `java.sql.Timestamp.from(Instant)` over raw JDBC and then compare against a
+  Hibernate read are shifted by the JVM zone offset: `Timestamp` binds in the local zone, the
+  Testcontainers datasource sets no `connectionTimeZone`, and Hibernate reads UTC. A KST machine saw
+  exactly 9 h of drift (2026-11-03, NotificationControllerIT, fixed by going through the
+  repository); a UTC machine such as CI passes. Worth doing when a new IT seeds timestamps over
+  JDBC: pin the IT connection zone, or bind `Instant`/`OffsetDateTime` instead of `Timestamp`.
+  re-check: `rg -q 'Timestamp\.from\(' backend/src/test/java`
+- The comment-report 409 detail names the internal numeric comment id ("User 61 has already
+  reported comment 15"), while every other API surface uses the public UUID. Worth doing when error
+  details are next audited for internal ids: format the public id or drop the id from the detail.
+  re-check: `rg -qF 'already reported comment %d' backend/src/main/java/org/danteplanner/backend/moderation/exception/CommentReportAlreadyExistsException.java`
+- A first publish computes the catalog row's `recommended` from its own earlier read of
+  `hidden_from_recommended` (`PlannerCatalogService.add`), and hide takes no content lock, so a hide
+  that commits between that read and the insert leaves a hidden planner in the recommended list
+  until the reconciler runs. Worth doing when hide takes a lock or the catalog insert computes
+  `recommended` in SQL.
+  re-check: `rg -q 'planner.isHiddenFromRecommended\(\)' backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCatalogService.java`
+- SSE notification preferences (`UserSettingsService.preferencesOf`, reached from
+  `SseService.cacheSettingsIfAbsent` on subscribe and on every event delivery) read the primary, so a
+  secondary-region pod pays one cross-region round trip per cache miss. A read-only (replica) read
+  would cache pre-save preferences for the five-minute TTL whenever an event arrives within replica
+  lag of a settings save, because the delivery path has no GTID cookie. Worth doing if these reads
+  show up as cross-region latency: let `SETTINGS_INVALIDATED` carry the saved values with an
+  ordering key, so pods put rather than refill.
+  re-check: `rg -q 'preferenceProvider::preferencesOf' backend/src/main/java/org/danteplanner/backend/shared/sse/SseService.java`
+- `UserSettingsService.getSettings` still answers the defaults when the settings row is absent,
+  while `preferencesOf` and `updateSettings` treat an absent row as an unknown user; every account
+  is now born with its row, so the defaults branch is unreachable for a real user. Worth doing the
+  next time the settings read changes: answer not found there too and drop the branch.
+  re-check: `rg -q 'orElseGet' backend/src/main/java/org/danteplanner/backend/user/service/UserSettingsService.java`
+- A username-suffix collision during sign-up raises inside the repository insert's transaction
+  interceptor, which marks the shared sign-up transaction rollback-only, so the retry loop in
+  `UserService.createUserWithUniqueUsername` may end in `UnexpectedRollbackException` instead of
+  committing the retried name (inferred; only a mocked-repository unit test covers the loop). Worth
+  doing before username space gets crowded: an IT that forces one collision and expects a commit.
+  re-check: `rg -q 'MAX_USERNAME_RETRIES' backend/src/main/java/org/danteplanner/backend/user/service/UserService.java`
+- Spring starts in 20 to 30 s from a cold JVM, and `backend/Dockerfile` uses no class-data
+  archive. A Spot replacement hides that start behind the scale-to-two drain, so it is not user
+  visible today. Worth doing if a drain path without the surge appears, or at the JDK 25 upgrade:
+  an AppCDS archive from a Spring Boot training run (JDK 21, CPU-independent), then the Leyden AOT
+  cache on JDK 25. CRaC is not the fix: a checkpoint carries JIT code for one CPU generation while
+  the Spot workers mix Graviton2 and Graviton3, and CRIU restore needs capabilities the restricted
+  pod security level forbids.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent backend/Dockerfile 'SharedArchiveFile|AOTCache'`
+- `no-wall-clock-wait-in-tests` matches latch, barrier, future, Awaitility and sleep waits, but not
+  `Thread.join(long)`, `Object.wait(long)` or a hand-written spin-deadline loop, so a wall-clock
+  wait of those shapes still lands unnoticed (several remain in the backend tests: the
+  `JOIN_TIMEOUT_MS` joins, `awaitParkedOrDone`, `SseTopicRecorder`'s envelope wait). Worth doing
+  when one of them flakes in CI: add the patterns to the rule and move the sites to `support/Hang`.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent backend/config/ast-grep/rules/no-wall-clock-wait-in-tests.yml 'Thread.*join|wait\('`
+- The fleet's EC2 instances (`cp`, `data`, `ingress`) take their AMI from the
+  `data.aws_ssm_parameter.node_ami` lookup on every plan and carry no `ignore_changes` for `ami`,
+  so any region-stack apply after Amazon publishes a new image replaces all three nodes at once
+  (a full-region outage): on 2026-11-07 both region plans showed `3 to add, 3 to destroy`, forced by
+  `ami`, alongside the intended IAM change. Until fixed, a region-stack change ships only as a
+  `-target` apply of the resources it means to change. Worth doing in the node design unit: pin the
+  AMI by id with a deliberate bump, or ignore `ami` and roll nodes on purpose.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent terraform/modules/fleet 'ignore_changes.*ami'`
+- `.claude/hooks/tsc-check.sh` runs `yarn typecheck` after every TypeScript edit without the test
+  lock, so it can overlap a locked heavy run (seen 2026-11-08 while building the `checks` CLI).
+  Worth doing when an edit-time typecheck slows or starves a locked run: route it through
+  `checks fe typecheck` or drop it in favour of the gate.
+  re-check: `rg -q 'yarn.*typecheck' .claude/hooks/tsc-check.sh`
+- The served static directories are still listed outside `frontend/static-served.ts`:
+  `staticFile404Plugin` in `frontend/vite.config.ts` keeps its own `['/images/', '/data/', '/i18n/']`,
+  and the unused `frontend/scripts/dev-r2-sync.ts` keeps `DIRS_TO_SYNC`. Worth doing when a served
+  directory is added or renamed: derive the 404 prefixes from the constant and delete the script.
+  re-check: `rg -q "'/images/', '/data/', '/i18n/'" frontend/vite.config.ts`
+- The skill CLIs' own test suites (`checks`, `ops`, `static-checkout`, `debt-ledger`) run only
+  by hand; no workflow or `checks` command runs them, so a rename in the checks tokenizer that
+  `ops hook` borrows would go unnoticed until the hook refuses a command. Planned as its own
+  unit: one `checks` command (and a PR Gate step) that runs every skill CLI's suite.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent .github/workflows 'skills/[a-z-]+/tests'`
+- Auth-Redis writes (refresh rotation, revocation, tombstone writes) are not behind the Redis
+  role breakers: during an unresponsive auth Redis each one still waits the 3 s command bound
+  before its 503. Held back on purpose: a probe that misjudges a healthy Redis would block token
+  refresh. Worth doing after the read-path breakers (blacklist, tombstone, rate limit) have run
+  in production long enough to show the probes do not flap; map the open-breaker rejection to a
+  per-role wire code in the same unit.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/auth/token/RefreshRotationService.java 'CircuitBreaker'`
+
+## 2026-11-19 backend as a Deployment (supersedes adr/006 @nodes)
+
+- **The backend runs as a DaemonSet, and every deploy pays for it in the workflow.** One
+  t4g.small app node (`terraform/modules/fleet/variables.tf:95`) cannot hold two Spring heaps, so
+  `deploy-fleet.yml` scales the app ASGs to 2 (`surge-up`), waits for the rollout, then drains
+  and scales back to 1 (`settle-down`). The node isolation the DaemonSet was chosen for comes
+  from `nodeSelector: role=app`, which a Deployment keeps. Decided 2026-11-19: Deployment plus
+  Cluster Autoscaler on the app ASGs, so a surge pod that cannot fit stays Pending until the
+  autoscaler adds a node and removes it once empty, and the deploy becomes a tag bump. Needs an
+  ADR superseding adr/006's `@nodes` line ("the ASG is the only scaling dial"). Rejected: two
+  app nodes and two replicas all the time (`maxSurge: 0`, doubles app node cost). T4g.medium so
+  the surge fits on one node (the node stays a single point of failure). Open costs: the
+  autoscaler's IAM role and memory on a 2 GiB fleet, and node boot time added to every deploy.
+  Taint the app nodes in the same change if other pods must stay off them. Today only the CP
+  node is tainted (`deploy/README.md:38`). Worth doing at the next change to `surge-up` or
+  `settle-down`, or the next deploy that fails in them. Once the backend runs two or more pods,
+  add a PodDisruptionBudget. With one pod a `minAvailable: 1` budget only blocks node drains,
+  which is why none exists today.
+  re-check: `rg -q '^kind: DaemonSet$' deploy/base/spring-daemonset.yaml`
+- **The JVM's worst case already equals the container's memory limit.** `backend/Dockerfile:80`
+  caps the heap at 768m and metaspace at 256m, which together equal the 1Gi limit in
+  `deploy/base/spring-daemonset.yaml`, before thread stacks, the JIT code cache and direct
+  buffers. Requests are 768Mi, so the pod is Burstable. If both pools fill, the kernel
+  OOM-kills the container instead of the JVM throwing `OutOfMemoryError`. Whether real RSS gets
+  there is not measured. Worth doing with the Deployment entry above, or at the first
+  OOMKilled backend restart: requests equal to limits (Guaranteed), and a limit above heap plus
+  metaspace plus overhead or `-XX:MaxRAMPercentage` instead of `-Xmx`.
+  re-check: `rg -qF -- '-Xmx768m -XX:MaxMetaspaceSize=256m' backend/Dockerfile && rg -q 'memory: 1Gi' deploy/base/spring-daemonset.yaml`
+- **App nodes reserve no memory for the OS.** The agent user-data passes no
+  `--kubelet-arg=system-reserved`, `kube-reserved` or `eviction-hard`, so on a 2 GiB node pods
+  can take memory the OS needs before kubelet evicts anything. Without swap the kernel then
+  drops file-backed pages, executable code included, and the node stalls before any OOM kill.
+  This is the suspected path of the earlier app-node freezes. It is inferred, not reproduced.
+  Worth doing with the Deployment entry above, or when an app node freezes again.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent terraform/modules/fleet/user-data/agent.sh.tftpl 'system-reserved|eviction-hard'`
+- **The backend's PID 1 is a shell.** `backend/Dockerfile:82` starts the JVM through
+  `sh -c "java $JAVA_OPTS -jar app.jar"`, so the shell receives the SIGTERM a pod deletion
+  sends. Whether this image's shell forwards it to the JVM is not checked. If it does not,
+  graceful shutdown never starts and kubelet SIGKILLs the pod after the grace period. Worth
+  doing at any graceful-shutdown work, or if rollout logs show the backend killed instead of
+  stopped: `exec java ...`.
+  re-check: `rg -qF 'ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]' backend/Dockerfile`
+- **Changing `backend-config` does not restart the backend.** The ConfigMap is a plain
+  resource in `deploy/base/spring-service.yaml`, the overlays change it through `patches`, and
+  the backend reads it once at start through `envFrom`. `deploy/` has no reloader or checksum
+  annotation for the backend. A synced value change therefore leaves every running pod on the
+  old value until someone runs a rollout restart (the Redis password runbook does this by hand).
+  The standard fix is a `configMapGenerator` in base and `behavior: merge` generators in the
+  overlays, so a value change renames the ConfigMap and rolls the pods. Do it only with the
+  Deployment entry above: while the backend is a DaemonSet, a config-only merge rolls pods
+  through ArgoCD without the `deploy-fleet` surge node and leave each region without a backend
+  during the swap. Secrets behave the same way: ESO refreshes `backend-runtime-config` and the
+  JWT Secrets every hour (`refreshInterval: 1h`), but the env values stay fixed in running pods,
+  and the mounted JWT key files are read once at boot by `JwtProperties.loadKeys()`, so a
+  rotated secret also needs a restart. Worth doing with the Deployment change, or the first
+  time a config value or a rotated secret is found unapplied in production.
+  re-check: `rg -q '^  name: backend-config$' deploy/base/spring-service.yaml && .claude/skills/debt-ledger/bin/debt absent deploy/base/kustomization.yaml 'name: backend-config'`
+- **One bump commit deploys both regions at once.** `deploy-fleet.yml`'s `bump-tag` step runs
+  `kustomize edit set image` in the Oregon and Seoul overlays and pushes both in one commit, so
+  each region's ArgoCD rolls the same image at about the same time. A bad image therefore takes
+  both regions down together, and the cross-region failover that covers an infrastructure
+  failure cannot cover it. With no automatic rollback (the 2026-09-21 entry), the outage lasts
+  until someone notices. The design did not consider a deploy that breaks both regions. Region
+  redundancy was planned against infrastructure failure only. The fix is two bumps: Oregon
+  first, a health check on its rollout and metrics, then Seoul, with a revert to the previous
+  tag when the check fails. Worth doing with the Deployment entry above, which rewrites the
+  same jobs, or after the first bad image reaches production.
+  re-check: `rg -qF '(cd "$OVERLAY_DIR_SEOUL" && kustomize edit set image' .github/workflows/deploy-fleet.yml && rg -qF '(cd "$OVERLAY_DIR"       && kustomize edit set image' .github/workflows/deploy-fleet.yml`
+- **Schema migrations run inside application boot, in both regions.** `spring.flyway.enabled=true`
+  (`application.properties:41`) makes every new pod migrate before its web server starts, and
+  Seoul's `MYSQL_HOST` is the Oregon primary (`overlays/seoul/configmap-patch.yaml:24-29`). Three
+  failures follow. A migration longer than the startup probe's 240 s (`periodSeconds: 5` ×
+  `failureThreshold: 48`) is SIGKILLed mid-DDL, although the Flyway url is left unbounded on
+  purpose (`application-prod.properties:5-7`). MySQL DDL is not transactional, so the next boot
+  can re-run an applied change and crash-loop. A Seoul pod cannot boot while the Oregon primary
+  or the peering is down, which defeats Seoul as warm DR (adr/006) whenever a pod restarts
+  during the outage (inferred from config, not reproduced). And adr/013's N/N−1 and
+  expand-contract rule is a checklist sentence with no check. Target, decided 2026-11-19:
+  migrations leave the app (`spring.flyway.enabled=false`) and run as an ArgoCD PreSync Job in
+  the Oregon overlay only, reading the in-cluster DB secret so no credential moves to CI. CI
+  gains an N−1 check (the previous release image smoke-tested against a database with the new
+  migrations applied). The deploy bumps Oregon, checks the rollout and its error rate and
+  latency from a workflow step, reverts the tag on failure, and only then bumps Seoul (the
+  region is the canary: one pod per region gives a per-pod canary no statistical power). Tag
+  bumps go to a deploy branch that the Applications track instead of `main`, and the repo is
+  split into an app repo and a config repo only if the branch proves awkward (a split needs a
+  GitHub organization). Worth doing with the Deployment entry above, before the next migration
+  that can run longer than a few minutes, or before Seoul is relied on during an Oregon outage.
+  re-check: `rg -q '^spring.flyway.enabled=true$' backend/src/main/resources/application.properties`
+- **Every pod on an app node can read the backend's secrets.** The SecretStore has no `auth`
+  block (`deploy/base/external-secret.yaml`), so ESO falls back to the app node's EC2 instance
+  profile, which holds `secretsmanager:GetSecretValue`. The file's own comment says any pod on
+  that node inherits the grant. ESO reaches IMDS from the pod network, so the Spring pod can too
+  (inferred: the launch templates set no `http_put_response_hop_limit`, and the AL2023 AMI
+  default of 2 is assumed, not checked). A compromised backend therefore reads every secret the
+  role allows. The fix without EKS is IRSA-style federation: publish the k3s service-account
+  issuer's OIDC discovery document, register it as an IAM OIDC provider, and give ESO's
+  ServiceAccount its own role, then drop the grant from the node role and set the hop limit
+  to 1. Worth doing before any workload that runs untrusted input next to ESO, or when a
+  security review covers the fleet.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent deploy/base/external-secret.yaml '^\s+auth:'`
+- **Kubernetes Secrets are stored unencrypted in etcd and in its S3 snapshots.** The k3s server
+  install in `terraform/modules/fleet/user-data/cp.sh.tftpl` passes no `--secrets-encryption`,
+  so every Secret (DB credentials, Redis password, JWT keys) sits in embedded etcd as base64,
+  and `--etcd-s3` ships the snapshots to S3, so read access to the snapshot bucket is read
+  access to every secret. S3's default server-side encryption protects the disks, not against
+  a reader with access. Worth doing with the ESO entry above, or before anyone else gets read
+  access to the snapshot bucket: enable k3s secrets encryption and rotate the existing secrets.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent terraform/modules/fleet/user-data/cp.sh.tftpl 'secrets-encryption'`
+- **The ingress node still accepts public 443, and the mTLS gate the docs rely on is off.**
+  Every public hostname is a proxied CNAME to a `cfargotunnel.com` tunnel
+  (`terraform/cloudflare/dns.tf`, `load-balancer.tf`), and `tunnels.tf:1-2` states the fleet
+  needs no public inbound. The user confirmed on 2026-11-19 that no A record points at an
+  origin IP. The ingress security group still admits 443 from `ingress_allowed_cidrs`
+  (`terraform/modules/fleet/network.tf:99-107`), a leftover of the Global Accelerator and
+  Authenticated Origin Pull design. The Gateway comment and the `ingress_allowed_cidrs`
+  descriptions call the origin-pull mTLS "the real gate", but the Traefik TLSOption is
+  `VerifyClientCertIfGiven` and its `origin-client-ca` Secret has no producer, so the only
+  control left is the IP allowlist that the entry-plane requirements call spoofable by any
+  Cloudflare tenant. Traefik also listens on `:443` on every interface of a hostNetwork pod, so
+  other nodes and pods in the VPC reach it directly. The fix: delete the `ingress_https` rule
+  and the variable, bind Traefik to `127.0.0.1:443` (cloudflared shares the host network),
+  delete the TLSOption, and rewrite the comments to name the tunnel as the gate. The security
+  group change needs a `terraform apply`. Worth doing at the next change to the ingress
+  stack, or before the next security review.
+  re-check: `rg -q 'resource "aws_vpc_security_group_ingress_rule" "ingress_https"' terraform/modules/fleet/network.tf`
+- **Traefik can read every Secret in the cluster.** Its ClusterRole
+  (`deploy/base/traefik-controller.yaml`) grants get, list and watch on `secrets` in all
+  namespaces, but Traefik needs only `origin-tls` in `danteplanner`. A compromised edge proxy
+  therefore reads the DB credentials and the JWT keys. Move the `secrets` rule into a
+  namespaced Role and RoleBinding and keep the rest in the ClusterRole. Worth doing with the
+  ingress entry above.
+  re-check: `rg -qU 'kind: ClusterRole\nmetadata:\n  name: traefik\nrules:\n  - apiGroups: \[""\]\n    resources: \["services", "endpoints", "secrets", "namespaces"\]' deploy/base/traefik-controller.yaml`
+- **Each region's entry runs on one ingress node.** cloudflared and Traefik are DaemonSets
+  pinned to `role=ingress`, and each region has one such node, so losing it removes the
+  region's entry until the Cloudflare load balancer's tunnel monitor steers traffic away
+  (only while `enable_load_balancer` is true). adr/006 accepts this as region-level failover.
+  The tunnel removes the reason for a dedicated node: it needs no public IP and no open port.
+  cloudflared accepts several connectors for one tunnel and spreads requests over live ones,
+  so moving both DaemonSets to `role=app` gives the entry the same redundancy as the app ASG
+  and drops one t4g.small per region. Worth doing with the Deployment entry above, or when
+  the ingress node's cost or a single-node outage matters. The Traefik image is also pinned by
+  tag only (`traefik:v3.1`), not by digest.
+  re-check: `rg -q 'role: ingress' deploy/base/traefik-controller.yaml && rg -q 'role: ingress' deploy/base/cloudflared.yaml`
+- **Stack boundaries are joined by scripts and README sentences.** `terraform/README.md`
+  ("The edges Terraform cannot enforce") lists the joins by hand, and four of them can move into
+  Terraform. First, the RDS master password: `secrets` creates an empty container,
+  `scripts/ops/provision/rds-master-password-secret.sh` fills it, and `rds` reads it at plan
+  time through an ephemeral resource, so a wrong order fails with an error that does not name
+  the cause, and a rotation needs a manual `master_password_version` bump. RDS-managed master
+  passwords (`manage_master_user_password = true`) remove the container, the script, the edge
+  and the bump. The value already stays out of state today, so state hygiene is not the gain.
+  Why the managed password is off is not recorded, and its default automatic rotation needs a
+  check against every consumer of the master credential. Second, the tunnel tokens leave
+  `terraform/cloudflare` as an output and reach Secrets Manager through
+  `cloudflare-tunnel-secrets.sh`. Writing them with `aws_secretsmanager_secret_version` from the
+  same stack removes the script, and the tokens are already in that state as an output. Third,
+  `terraform/seoul/remote-state.tf` reads the whole Oregon and RDS state files to use a few
+  outputs. Publishing those values as SSM parameters, or reading the VPC by tag with
+  `data "aws_vpc"`, makes the contract explicit and drops the need to read whole states.
+  Fourth, the apply order lives in the README. After the first three, few order rules remain,
+  and one `apply-all` command in a skill CLI can encode them. The stack split itself stays: the
+  account-level stacks cannot merge, and the split keeps one apply's blast radius small. Worth
+  doing at the next change to any of these stacks, or the next time an apply fails on order.
+  re-check: `test -f scripts/ops/provision/rds-master-password-secret.sh && test -f scripts/ops/provision/cloudflare-tunnel-secrets.sh && rg -q 'data "terraform_remote_state"' terraform/seoul/remote-state.tf`
+- **k3s is installed at whatever version the stable channel serves at boot.** The CP and agent
+  user-data (`terraform/modules/fleet/user-data/cp.sh.tftpl:61`, `agent.sh.tftpl:39`) pipe
+  `https://get.k3s.io` to `sh` with neither `INSTALL_K3S_VERSION` nor `INSTALL_K3S_CHANNEL`. The
+  CP keeps the version of its first boot, but every new app node installs the newest stable
+  release, and `deploy-fleet` boots a new app node on every deploy. Kubernetes supports a
+  kubelet older than the API server, not newer, so the first deploy after the stable channel
+  moves to a new minor joins an unsupported node. A rebuilt fleet also does not reproduce the
+  old versions. Pin one version in a Terraform variable, pass it to both templates, and upgrade
+  the CP first. Worth doing now: the next surge node after a channel move hits it.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent terraform/modules/fleet/user-data 'INSTALL_K3S_VERSION'`
+- **The CP runs Helm's installer from the tip of Helm's main branch.**
+  `cp.sh.tftpl:130` pipes `raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3` to
+  `bash`, so the code that runs as root at boot is whatever that branch holds at that moment,
+  with no version and no checksum. The Traefik CRDs in the same file are pinned to
+  `${traefik_version}`, which shows the pattern to follow: download a pinned Helm release
+  tarball and check its published SHA-256. Worth doing with the k3s pin above.
+  re-check: `rg -qF 'helm/helm/main/scripts/get-helm-3' terraform/modules/fleet/user-data/cp.sh.tftpl`
+- **The auth Redis keeps its data only on the data node's disk.** `deploy/base/redis-auth.yaml`
+  is a one-replica StatefulSet on `role=data` with an 8Gi `volumeClaimTemplates` entry and no
+  `storageClassName`, so it gets k3s's default `local-path` volume, a directory on that node.
+  Replacing the data node loses the AOF file, and the AMI entry above shows that any apply after
+  a new AMI replaces it. The auth Redis holds the refresh-token lineage and the revocation
+  state, so an empty one can fail every refresh and accept revoked tokens until they expire
+  (inferred from what the store holds; the app's behavior on an empty store is not checked).
+  Worth doing before the AMI entry is fixed or the data node is replaced for any reason: an
+  EBS-backed volume that survives the node, or a tested restore path.
+  re-check: `rg -q 'volumeClaimTemplates' deploy/base/redis-auth.yaml && .claude/skills/debt-ledger/bin/debt absent deploy/base/redis-auth.yaml 'storageClassName'`
+- **No NetworkPolicy exists.** The rendered overlays hold no `NetworkPolicy`, so every pod in
+  `danteplanner` reaches every other, and a compromised cloudflared or exporter can open a
+  connection to both Redis instances, with `requirepass` as the last control. Start from a
+  default-deny policy per namespace and allow the known paths. k3s ships a network policy
+  controller (assumed from its documentation, not checked on the fleet). Worth doing with the
+  ingress entries above, or at the next security review.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent deploy 'kind: NetworkPolicy'`
+- **Pod Security is warn and audit only.** `deploy/base/namespace.yaml` labels `danteplanner`
+  `restricted` for `warn` and `audit` but sets no `enforce`, so a pod that breaks the
+  restricted profile is still admitted. Which pods break it today is not listed. Worth doing
+  once the warnings are listed and fixed: add `enforce: restricted`.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent deploy/base/namespace.yaml 'pod-security.kubernetes.io/enforce'`
+- **Every image is pinned by tag, and two tags move.** None of the 11 images in the rendered
+  overlays carries a digest. `redis:7-alpine` moves with every Redis 7 release and
+  `traefik:v3.1` with every 3.1 patch, so a replaced node can pull a different version than the
+  one it replaced. Pin by digest, or at least by full version. Worth doing with the k3s pin
+  entry above.
+  re-check: `rg -q 'image: redis:7-alpine' deploy/base/redis-auth.yaml`
+- **The Redis, Prometheus and exporter containers have no readiness probe.** Both Redis
+  instances, Prometheus with its config reloader, kube-state-metrics, the mysqld and Redis
+  exporters, alloy and node-exporter declare none, so a Redis replaying its AOF file counts as
+  Ready and its Service sends it traffic. Worth doing with the auth Redis entry above.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent deploy/base/redis-auth.yaml 'readinessProbe'`
 
 ## 2026-11-19 tests that need a hand edit after a data refresh
 

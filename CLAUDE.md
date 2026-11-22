@@ -3,7 +3,7 @@
 Game planning and management tool for Limbus Company. React + TypeScript + TanStack
 Query frontend, Spring Boot backend, static JSON data validated at runtime.
 
-learning: design
+learning: system-design
 
 ## Rules
 
