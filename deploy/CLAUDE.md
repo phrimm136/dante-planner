@@ -11,6 +11,14 @@
 - RDS/DB endpoints: never commit the PRIMARY (write) endpoint — source it from the Secrets
   Manager runtime-config bundle or an ExternalSecret key. Commit a region-local REPLICA endpoint
   only as its Route53 private-zone name (`*.danteplanner.internal`), and only in the overlay that reads it.
-- Auth-Redis env contract: `AUTH_REDIS_HOST` set fleet-wide; `AUTH_LOCAL_REDIS_HOST` absent
-  means it aliases to auth (read-local no-op). Setting it wrong fails open — revoked tokens
-  get accepted — so treat these two variables as a security surface, not plumbing.
+- Redis env contract: each overlay's `backend-config` sets one host per role, bound by relaxed
+  name to `redis.<role>.host`: `REDIS_AUTH_HOST` (plus `REDIS_AUTH_PORT` where it is not 6379),
+  `REDIS_AUTHLOCAL_HOST`, `REDIS_RATELIMIT_HOST`, `REDIS_SSELOCAL_HOST`. The `AUTH_REDIS_HOST`
+  / `AUTH_LOCAL_REDIS_HOST` placeholders in `application.properties` are not set by the fleet,
+  so an unset role host resolves to `localhost` and never aliases to auth: auth-local then stays
+  open and revocation reads fall back to the auth primary, sse-local never subscribes and
+  cross-pod SSE stops. `AUTH_REDIS_PASSWORD` (from `backend-runtime-config`) is the password of
+  auth, auth-local and sse-local; rate-limit has none. An auth or auth-local host pointed at a
+  reachable store that is not the auth primary or its replica answers "not revoked", and auth
+  plus auth-local both unreachable fails open: either way revoked tokens get accepted, so treat
+  the auth and auth-local hosts as a security surface, not plumbing.
