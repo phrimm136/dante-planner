@@ -7,6 +7,7 @@ import org.danteplanner.backend.support.GoogleStub;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
 
@@ -39,7 +40,7 @@ class GoogleOAuthProviderTest {
         private Jwt verified;
 
         private ScriptedIdTokenVerifier() {
-            super(googleProperties());
+            super(googleProperties(), new RestTemplate());
         }
 
         private static OAuthProperties googleProperties() {
