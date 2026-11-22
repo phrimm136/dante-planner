@@ -20,7 +20,7 @@ FILE_PATH=$(echo "$TOOL_INPUT" | jq -r '.file_path // ""')
 [[ "$FILE_PATH" == *.py ]] || exit 0
 [[ -f "$FILE_PATH" ]] || exit 0
 
-LINTER="$CLAUDE_PROJECT_DIR/static/scripts/lintNames.py"
+LINTER="$CLAUDE_PROJECT_DIR/static/src/limbus_static/lintNames.py"
 [[ -f "$LINTER" ]] || exit 0
 
 PYTHON="$CLAUDE_PROJECT_DIR/static/.venv/bin/python3"
@@ -43,11 +43,11 @@ if [[ -n "$ADDED" ]]; then
     COUNT=$(echo "$ADDED" | grep -c .)
     echo "  name check: $COUNT one-word name(s) added in $(basename "$FILE_PATH")" >&2
     echo "$ADDED" | head -10 | sed 's/^/    /' >&2
-    echo "    every name must be two words — see static/scripts/lintNames.py" >&2
+    echo "    every name must be two words — see static/src/limbus_static/lintNames.py" >&2
 fi
 
 # Inline imports, reported the same way: only the ones this edit added.
-IMPORT_LINTER="$CLAUDE_PROJECT_DIR/static/scripts/lintImports.py"
+IMPORT_LINTER="$CLAUDE_PROJECT_DIR/static/src/limbus_static/lintImports.py"
 if [[ -f "$IMPORT_LINTER" ]]; then
     IMPORT_BASELINE="$BASELINE.imports"
     IMPORT_CURRENT=$("$PYTHON" "$IMPORT_LINTER" "$FILE_PATH" 2>/dev/null | grep ": inline import: " | sed 's/^[^:]*:[0-9]*: //' | sort -u)
@@ -61,7 +61,47 @@ if [[ -f "$IMPORT_LINTER" ]]; then
         IMPORT_COUNT=$(echo "$IMPORT_ADDED" | grep -c .)
         echo "  import check: $IMPORT_COUNT inline import(s) added in $(basename "$FILE_PATH")" >&2
         echo "$IMPORT_ADDED" | head -10 | sed 's/^/    /' >&2
-        echo "    every import is module level, or marked '# inline-import: <reason>' — see static/scripts/lintImports.py" >&2
+        echo "    every import is module level, or marked '# inline-import: <reason>' — see static/src/limbus_static/lintImports.py" >&2
+    fi
+fi
+
+# Terminal output in pipeline-step code that bypasses shared/stepOutput, reported
+# the same way: only the sites this edit added.
+OUTPUT_LINTER="$CLAUDE_PROJECT_DIR/static/src/limbus_static/lintOutput.py"
+if [[ -f "$OUTPUT_LINTER" ]]; then
+    OUTPUT_BASELINE="$BASELINE.output"
+    OUTPUT_CURRENT=$("$PYTHON" "$OUTPUT_LINTER" "$FILE_PATH" 2>/dev/null | grep ": output site: " | sed 's/^[^:]*:[0-9]*: //' | sort -u)
+    if [[ -f "$OUTPUT_BASELINE" ]]; then
+        OUTPUT_ADDED=$(comm -13 "$OUTPUT_BASELINE" <(echo "$OUTPUT_CURRENT"))
+    else
+        OUTPUT_ADDED=""
+    fi
+    echo "$OUTPUT_CURRENT" > "$OUTPUT_BASELINE"
+    if [[ -n "$OUTPUT_ADDED" ]]; then
+        OUTPUT_COUNT=$(echo "$OUTPUT_ADDED" | grep -c .)
+        echo "  output check: $OUTPUT_COUNT output site(s) added in $(basename "$FILE_PATH")" >&2
+        echo "$OUTPUT_ADDED" | head -10 | sed 's/^/    /' >&2
+        echo "    pipeline steps write through shared/stepOutput.py (say_line, warn_line) — see static/src/limbus_static/lintOutput.py" >&2
+    fi
+fi
+
+# Layout sites (lintLayout rules R1 to R7), reported the same way: only the sites this
+# edit added.
+LAYOUT_LINTER="$CLAUDE_PROJECT_DIR/static/src/limbus_static/lintLayout.py"
+if [[ -f "$LAYOUT_LINTER" ]]; then
+    LAYOUT_BASELINE="$BASELINE.layout"
+    LAYOUT_CURRENT=$("$PYTHON" -m limbus_static.lintLayout "$FILE_PATH" 2>/dev/null | grep ": layout R" | sed 's/^[^:]*:[0-9]*: //' | sort -u)
+    if [[ -f "$LAYOUT_BASELINE" ]]; then
+        LAYOUT_ADDED=$(comm -13 "$LAYOUT_BASELINE" <(echo "$LAYOUT_CURRENT"))
+    else
+        LAYOUT_ADDED=""
+    fi
+    echo "$LAYOUT_CURRENT" > "$LAYOUT_BASELINE"
+    if [[ -n "$LAYOUT_ADDED" ]]; then
+        LAYOUT_COUNT=$(echo "$LAYOUT_ADDED" | grep -c .)
+        echo "  layout check: $LAYOUT_COUNT layout site(s) added in $(basename "$FILE_PATH")" >&2
+        echo "$LAYOUT_ADDED" | head -10 | sed 's/^/    /' >&2
+        echo "    see static/src/limbus_static/lintLayout.py for the layer rules R1 to R7" >&2
     fi
 fi
 
