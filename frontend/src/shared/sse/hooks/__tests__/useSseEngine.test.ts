@@ -1,4 +1,6 @@
+import { createElement, type ReactNode } from 'react'
 import { renderHook, act } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest'
 
 import { SSE_CONNECTION, SSE_EVENTS, SSE_TRANSPORT } from '@/lib/constants'
@@ -112,12 +114,27 @@ function makeConfig(overrides: Partial<SseEngineConfig> = {}): SseEngineConfig {
     shouldConnect: true,
     url: STREAM_PATH,
     handlers: {},
+    refetchOnReconnect: [],
     ...overrides,
   }
 }
 
+let queryClient: QueryClient
+
+function wrapper({ children }: { children: ReactNode }) {
+  return createElement(QueryClientProvider, { client: queryClient }, children)
+}
+
+function renderEngine(config: SseEngineConfig) {
+  return renderHook((props: SseEngineConfig) => useSseEngine(props), {
+    initialProps: config,
+    wrapper,
+  })
+}
+
 beforeEach(() => {
   vi.useFakeTimers()
+  queryClient = new QueryClient()
   streams.length = 0
   requests.length = 0
   requestUrls.length = 0
@@ -142,14 +159,14 @@ afterEach(() => {
 
 describe('useSseEngine — gating', () => {
   it('connects after INITIAL_DELAY when shouldConnect is true', async () => {
-    renderHook(() => useSseEngine(makeConfig()))
+    renderEngine(makeConfig())
     expect(globalThis.fetch).not.toHaveBeenCalled()
     await advance(SSE_CONNECTION.INITIAL_DELAY)
     expect(globalThis.fetch).toHaveBeenCalledTimes(1)
   })
 
   it('opens the stream with credentials and the event-stream Accept header', async () => {
-    renderHook(() => useSseEngine(makeConfig()))
+    renderEngine(makeConfig())
     await advance(SSE_CONNECTION.INITIAL_DELAY)
 
     const [firstRequest] = requests
@@ -160,16 +177,14 @@ describe('useSseEngine — gating', () => {
   })
 
   it('does not connect when shouldConnect is false', async () => {
-    renderHook(() => useSseEngine(makeConfig({ shouldConnect: false })))
+    renderEngine(makeConfig({ shouldConnect: false }))
     await advance(SSE_CONNECTION.INITIAL_DELAY)
     expect(globalThis.fetch).not.toHaveBeenCalled()
   })
 
   it('aborts the request and marks disconnected when the gate flips to false', async () => {
     const config = makeConfig()
-    const { rerender } = renderHook((p: SseEngineConfig) => useSseEngine(p), {
-      initialProps: config,
-    })
+    const { rerender } = renderEngine(config)
     await advance(SSE_CONNECTION.INITIAL_DELAY)
     expect(useSseStore.getState().isConnected).toBe(true)
     const stream = lastStream()
@@ -185,7 +200,7 @@ describe('useSseEngine — gating', () => {
 describe('useSseEngine — connection lifecycle', () => {
   it('opening marks connected but does NOT reset attempts on open alone', async () => {
     useSseStore.setState({ reconnectAttempts: 3 })
-    renderHook(() => useSseEngine(makeConfig()))
+    renderEngine(makeConfig())
     await advance(SSE_CONNECTION.INITIAL_DELAY)
 
     expect(useSseStore.getState().isConnected).toBe(true)
@@ -196,9 +211,7 @@ describe('useSseEngine — connection lifecycle', () => {
 
   it('dispatches injected handlers for their event type', async () => {
     const onUpdate = vi.fn<(event: MessageEvent) => void>()
-    renderHook(() =>
-      useSseEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } })),
-    )
+    renderEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } }))
     await advance(SSE_CONNECTION.INITIAL_DELAY)
 
     emit(lastStream(), SSE_EVENTS.COMMENT_ADDED, { plannerId: 'p1' })
@@ -210,9 +223,7 @@ describe('useSseEngine — connection lifecycle', () => {
 
   it('assembles a frame split across chunk boundaries', async () => {
     const onUpdate = vi.fn<(event: MessageEvent) => void>()
-    renderHook(() =>
-      useSseEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } })),
-    )
+    renderEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } }))
     await advance(SSE_CONNECTION.INITIAL_DELAY)
 
     const stream = lastStream()
@@ -232,9 +243,7 @@ describe('useSseEngine — connection lifecycle', () => {
 
   it('joins multiple data lines with a newline and ignores comment lines', async () => {
     const onUpdate = vi.fn<(event: MessageEvent) => void>()
-    renderHook(() =>
-      useSseEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } })),
-    )
+    renderEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } }))
     await advance(SSE_CONNECTION.INITIAL_DELAY)
 
     lastStream().push(`:keep-alive\nevent: ${SSE_EVENTS.COMMENT_ADDED}\ndata: one\ndata: two\n\n`)
@@ -248,9 +257,7 @@ describe('useSseEngine — connection lifecycle', () => {
     // The gate is the engine's, so every consumer inherits it — a server that
     // starts naming an event the client does not know reaches no handler.
     const onUpdate = vi.fn<(event: MessageEvent) => void>()
-    renderHook(() =>
-      useSseEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } })),
-    )
+    renderEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } }))
     await advance(SSE_CONNECTION.INITIAL_DELAY)
 
     emit(lastStream(), 'renamed', { plannerId: 'p1' })
@@ -260,7 +267,7 @@ describe('useSseEngine — connection lifecycle', () => {
   })
 
   it('marks connected on the transport-level connected event', async () => {
-    renderHook(() => useSseEngine(makeConfig()))
+    renderEngine(makeConfig())
     await advance(SSE_CONNECTION.INITIAL_DELAY)
     useSseStore.setState({ isConnected: false })
 
@@ -271,7 +278,7 @@ describe('useSseEngine — connection lifecycle', () => {
   })
 
   it('aborts the request and stops reconnecting on unmount', async () => {
-    const { unmount } = renderHook(() => useSseEngine(makeConfig()))
+    const { unmount } = renderEngine(makeConfig())
     await advance(SSE_CONNECTION.INITIAL_DELAY)
     const stream = lastStream()
 
@@ -288,7 +295,7 @@ describe('useSseEngine — connection lifecycle', () => {
 
 describe('useSseEngine — backoff + reconnect', () => {
   it('reconnects after BASE_DELAY when the stream ends', async () => {
-    renderHook(() => useSseEngine(makeConfig()))
+    renderEngine(makeConfig())
     await advance(SSE_CONNECTION.INITIAL_DELAY)
 
     lastStream().end()
@@ -301,7 +308,7 @@ describe('useSseEngine — backoff + reconnect', () => {
 
   it('applies exponential backoff to a stream that never opens', async () => {
     serveAlways(statusResponse(500))
-    renderHook(() => useSseEngine(makeConfig()))
+    renderEngine(makeConfig())
 
     // First failure → reconnect after BASE_DELAY.
     await advance(SSE_CONNECTION.INITIAL_DELAY)
@@ -319,7 +326,7 @@ describe('useSseEngine — backoff + reconnect', () => {
   it('keeps backing off when connections open but die before the stability floor', async () => {
     // The storm regression: crediting an open as healthy let an
     // open-then-immediately-drop cycle reconnect at BASE_DELAY forever.
-    renderHook(() => useSseEngine(makeConfig()))
+    renderEngine(makeConfig())
     await advance(SSE_CONNECTION.INITIAL_DELAY)
 
     lastStream().end()
@@ -337,7 +344,7 @@ describe('useSseEngine — backoff + reconnect', () => {
 
   it('resets backoff after a connection stays open past the stability floor', async () => {
     useSseStore.setState({ reconnectAttempts: 5 })
-    renderHook(() => useSseEngine(makeConfig()))
+    renderEngine(makeConfig())
     await advance(SSE_CONNECTION.INITIAL_DELAY)
 
     // Stay open past the floor, then drop → healthy connection, counter resets, so
@@ -353,7 +360,7 @@ describe('useSseEngine — backoff + reconnect', () => {
 
   it('adds 0–5s jitter on top of the backoff delay', async () => {
     vi.spyOn(Math, 'random').mockReturnValue(0.5)
-    renderHook(() => useSseEngine(makeConfig()))
+    renderEngine(makeConfig())
     await advance(SSE_CONNECTION.INITIAL_DELAY)
     lastStream().end()
     await settle()
@@ -369,7 +376,7 @@ describe('useSseEngine — backoff + reconnect', () => {
   it('recovers via idle-reset after MAX_ATTEMPTS instead of dying permanently', async () => {
     useSseStore.setState({ reconnectAttempts: SSE_CONNECTION.MAX_ATTEMPTS - 1 })
     serveAlways(statusResponse(500))
-    renderHook(() => useSseEngine(makeConfig()))
+    renderEngine(makeConfig())
 
     // The first failure pushes attempts to MAX and schedules the final reconnect.
     await advance(SSE_CONNECTION.INITIAL_DELAY)
@@ -391,7 +398,7 @@ describe('useSseEngine — backoff + reconnect', () => {
 
   it('never reconnects sooner than the retry interval the stream declared', async () => {
     const serverRetryMs = 20_000
-    renderHook(() => useSseEngine(makeConfig()))
+    renderEngine(makeConfig())
     await advance(SSE_CONNECTION.INITIAL_DELAY)
 
     lastStream().push(`retry: ${serverRetryMs}\n\n`)
@@ -407,7 +414,7 @@ describe('useSseEngine — backoff + reconnect', () => {
   })
 
   it('proactively reconnects before token expiry', async () => {
-    renderHook(() => useSseEngine(makeConfig()))
+    renderEngine(makeConfig())
     await advance(SSE_CONNECTION.INITIAL_DELAY)
     const first = lastStream()
 
@@ -422,7 +429,7 @@ describe('useSseEngine — stream gone', () => {
   it('reports a 404 open exactly once and never reconnects when opted in', async () => {
     serveAlways(statusResponse(SSE_TRANSPORT.STREAM_GONE_STATUS))
     const onStreamGone = vi.fn()
-    renderHook(() => useSseEngine(makeConfig({ stopOnNotFound: true, onStreamGone })))
+    renderEngine(makeConfig({ stopOnNotFound: true, onStreamGone }))
 
     await advance(SSE_CONNECTION.INITIAL_DELAY)
     expect(globalThis.fetch).toHaveBeenCalledTimes(1)
@@ -438,7 +445,7 @@ describe('useSseEngine — stream gone', () => {
 
   it('spends no reconnect attempt on a 404 when opted in', async () => {
     serveAlways(statusResponse(SSE_TRANSPORT.STREAM_GONE_STATUS))
-    renderHook(() => useSseEngine(makeConfig({ stopOnNotFound: true })))
+    renderEngine(makeConfig({ stopOnNotFound: true }))
 
     await advance(SSE_CONNECTION.INITIAL_DELAY)
     await advance(SSE_CONNECTION.IDLE_RESET_TIMEOUT)
@@ -451,7 +458,7 @@ describe('useSseEngine — stream gone', () => {
     // window; stopping there would kill the stream for the whole session.
     serveAlways(statusResponse(SSE_TRANSPORT.STREAM_GONE_STATUS))
     const onStreamGone = vi.fn()
-    renderHook(() => useSseEngine(makeConfig({ onStreamGone })))
+    renderEngine(makeConfig({ onStreamGone }))
 
     await advance(SSE_CONNECTION.INITIAL_DELAY)
     expect(globalThis.fetch).toHaveBeenCalledTimes(1)
@@ -464,7 +471,7 @@ describe('useSseEngine — stream gone', () => {
   it('still reconnects when the open fails with a status that is not 404', async () => {
     serveAlways(statusResponse(500))
     const onStreamGone = vi.fn()
-    renderHook(() => useSseEngine(makeConfig({ stopOnNotFound: true, onStreamGone })))
+    renderEngine(makeConfig({ stopOnNotFound: true, onStreamGone }))
 
     await advance(SSE_CONNECTION.INITIAL_DELAY)
     await advance(SSE_CONNECTION.BASE_DELAY)
@@ -477,7 +484,7 @@ describe('useSseEngine — stream gone', () => {
 describe('useSseEngine — rate limiting', () => {
   it('waits out Retry-After without spending an attempt', async () => {
     serveOnce(rateLimited(RETRY_AFTER_SECONDS))
-    renderHook(() => useSseEngine(makeConfig()))
+    renderEngine(makeConfig())
     await advance(SSE_CONNECTION.INITIAL_DELAY)
 
     expect(globalThis.fetch).toHaveBeenCalledTimes(1)
@@ -494,7 +501,7 @@ describe('useSseEngine — rate limiting', () => {
 
   it('never retries a 429 sooner than the slowest backoff tier', async () => {
     serveOnce(rateLimited(1))
-    renderHook(() => useSseEngine(makeConfig()))
+    renderEngine(makeConfig())
     await advance(SSE_CONNECTION.INITIAL_DELAY)
 
     await advance(SSE_CONNECTION.MAX_DELAY - 1)
@@ -506,11 +513,176 @@ describe('useSseEngine — rate limiting', () => {
 
   it('falls back to the slowest tier when the 429 carries no Retry-After', async () => {
     serveOnce(statusResponse(SSE_TRANSPORT.RATE_LIMITED_STATUS))
-    renderHook(() => useSseEngine(makeConfig()))
+    renderEngine(makeConfig())
     await advance(SSE_CONNECTION.INITIAL_DELAY)
 
     await advance(SSE_CONNECTION.MAX_DELAY)
     expect(globalThis.fetch).toHaveBeenCalledTimes(2)
     expect(useSseStore.getState().reconnectAttempts).toBe(0)
+  })
+})
+
+describe('useSseEngine — refetch on reconnect', () => {
+  const NOTIFICATIONS_KEY = ['notifications'] as const
+  const ME_KEY = ['auth', 'me'] as const
+  const REFETCH_KEYS = [NOTIFICATIONS_KEY, ME_KEY]
+
+  function spyInvalidate() {
+    return vi.spyOn(queryClient, 'invalidateQueries')
+  }
+
+  function expectEachKeyInvalidatedOnce(spy: ReturnType<typeof spyInvalidate>) {
+    expect(spy).toHaveBeenCalledTimes(REFETCH_KEYS.length)
+    for (const queryKey of REFETCH_KEYS) {
+      expect(spy).toHaveBeenCalledWith({ queryKey })
+    }
+  }
+
+  it('invalidates nothing on the first open of a run', async () => {
+    const invalidate = spyInvalidate()
+    renderEngine(makeConfig({ refetchOnReconnect: REFETCH_KEYS }))
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1)
+    expect(invalidate).not.toHaveBeenCalled()
+  })
+
+  it('invalidates every declared key once when a closed stream reopens', async () => {
+    const invalidate = spyInvalidate()
+    renderEngine(makeConfig({ refetchOnReconnect: REFETCH_KEYS }))
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+
+    lastStream().end()
+    await settle()
+    expect(invalidate).not.toHaveBeenCalled()
+
+    await advance(SSE_CONNECTION.BASE_DELAY)
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+    expectEachKeyInvalidatedOnce(invalidate)
+  })
+
+  it('invalidates the declared keys when a proactive reconnect reopens', async () => {
+    const invalidate = spyInvalidate()
+    renderEngine(makeConfig({ refetchOnReconnect: REFETCH_KEYS }))
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+
+    await advance(SSE_CONNECTION.PROACTIVE_RECONNECT_INTERVAL)
+    expect(invalidate).not.toHaveBeenCalled()
+
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+    expectEachKeyInvalidatedOnce(invalidate)
+  })
+
+  it('treats the first open after a streamKey change as a new first open', async () => {
+    const invalidate = spyInvalidate()
+    const config = makeConfig({ streamKey: 'a', refetchOnReconnect: REFETCH_KEYS })
+    const { rerender } = renderEngine(config)
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+
+    rerender({ ...config, streamKey: 'b' })
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+    expect(invalidate).not.toHaveBeenCalled()
+  })
+
+  it('invalidates the declared keys when a stream reopens after a 429', async () => {
+    const invalidate = spyInvalidate()
+    renderEngine(makeConfig({ refetchOnReconnect: REFETCH_KEYS }))
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+
+    serveOnce(rateLimited(1))
+    lastStream().end()
+    await settle()
+    await advance(SSE_CONNECTION.BASE_DELAY)
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+    expect(invalidate).not.toHaveBeenCalled()
+
+    await advance(SSE_CONNECTION.MAX_DELAY)
+    expect(globalThis.fetch).toHaveBeenCalledTimes(3)
+    expectEachKeyInvalidatedOnce(invalidate)
+  })
+
+  it('invalidates nothing when a 429 precedes the first open', async () => {
+    serveOnce(rateLimited(1))
+    const invalidate = spyInvalidate()
+    renderEngine(makeConfig({ refetchOnReconnect: REFETCH_KEYS }))
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+    await advance(SSE_CONNECTION.MAX_DELAY)
+
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+    expect(invalidate).not.toHaveBeenCalled()
+  })
+
+  it('invalidates nothing when unmounted during the reconnect delay', async () => {
+    const invalidate = spyInvalidate()
+    const { unmount } = renderEngine(makeConfig({ refetchOnReconnect: REFETCH_KEYS }))
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+
+    lastStream().end()
+    await settle()
+    act(() => unmount())
+    await advance(SSE_CONNECTION.IDLE_RESET_TIMEOUT)
+
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1)
+    expect(invalidate).not.toHaveBeenCalled()
+  })
+
+  it('invalidates nothing when the gate closes during the reconnect delay', async () => {
+    const invalidate = spyInvalidate()
+    const config = makeConfig({ refetchOnReconnect: REFETCH_KEYS })
+    const { rerender } = renderEngine(config)
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+
+    lastStream().end()
+    await settle()
+    rerender({ ...config, shouldConnect: false })
+    await advance(SSE_CONNECTION.IDLE_RESET_TIMEOUT)
+
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1)
+    expect(invalidate).not.toHaveBeenCalled()
+  })
+
+  it('invalidates nothing when the reopen answers 404 with stopOnNotFound', async () => {
+    const invalidate = spyInvalidate()
+    renderEngine(makeConfig({ stopOnNotFound: true, refetchOnReconnect: REFETCH_KEYS }))
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+
+    serveAlways(statusResponse(SSE_TRANSPORT.STREAM_GONE_STATUS))
+    lastStream().end()
+    await settle()
+    await advance(SSE_CONNECTION.IDLE_RESET_TIMEOUT + SSE_CONNECTION.MAX_DELAY)
+
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+    expect(invalidate).not.toHaveBeenCalled()
+  })
+
+  it('invalidates nothing on a reopen when no key is declared', async () => {
+    const invalidate = spyInvalidate()
+    renderEngine(makeConfig())
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+
+    lastStream().end()
+    await settle()
+    await advance(SSE_CONNECTION.BASE_DELAY)
+
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+    expect(invalidate).not.toHaveBeenCalled()
+  })
+
+  it('invalidates the key list of the latest render', async () => {
+    const invalidate = spyInvalidate()
+    const config = makeConfig({ refetchOnReconnect: [NOTIFICATIONS_KEY] })
+    const { rerender } = renderEngine(config)
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+
+    rerender({ ...config, refetchOnReconnect: [ME_KEY] })
+    lastStream().end()
+    await settle()
+    await advance(SSE_CONNECTION.BASE_DELAY)
+
+    expect(invalidate).toHaveBeenCalledTimes(1)
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ME_KEY })
   })
 })

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useQueryClient, type QueryKey } from '@tanstack/react-query'
 
 import { SSE_CONNECTION, SSE_EVENTS, SSE_TRANSPORT, type SseEventType } from '@/lib/constants'
 import { useSseStore } from '../stores/useSseStore'
@@ -44,7 +45,7 @@ export interface SseEngineConfig {
   streamKey?: string
   url: string
   handlers: Partial<Record<SseEventType, (event: MessageEvent) => void>>
-  onConnected?: () => void
+  refetchOnReconnect: readonly QueryKey[]
   stopOnNotFound?: boolean
   onStreamGone?: () => void
   policy?: SseReconnectPolicy
@@ -56,7 +57,7 @@ export function useSseEngine({
   streamKey = '',
   url,
   handlers,
-  onConnected,
+  refetchOnReconnect,
   stopOnNotFound = false,
   onStreamGone,
   policy = DEFAULT_SSE_POLICY,
@@ -65,7 +66,7 @@ export function useSseEngine({
   const configRef = useRef({
     url,
     handlers,
-    onConnected,
+    refetchOnReconnect,
     stopOnNotFound,
     onStreamGone,
     policy,
@@ -75,7 +76,7 @@ export function useSseEngine({
     configRef.current = {
       url,
       handlers,
-      onConnected,
+      refetchOnReconnect,
       stopOnNotFound,
       onStreamGone,
       policy,
@@ -83,6 +84,7 @@ export function useSseEngine({
     }
   })
 
+  const queryClient = useQueryClient()
   const setConnected = useSseStore((s) => s.setConnected)
   const incrementReconnectAttempts = useSseStore((s) => s.incrementReconnectAttempts)
   const resetReconnectAttempts = useSseStore((s) => s.resetReconnectAttempts)
@@ -103,6 +105,7 @@ export function useSseEngine({
     let connectionStartTime = 0
     let serverRetryMs: number | null = null
     let streamGone = false
+    let hasOpened = false
 
     function clearAllTimers() {
       if (reconnectTimeout) {
@@ -170,7 +173,12 @@ export function useSseEngine({
         }, timings.proactiveReconnectMs)
       }
 
-      configRef.current.onConnected?.()
+      if (hasOpened) {
+        for (const queryKey of configRef.current.refetchOnReconnect) {
+          void queryClient.invalidateQueries({ queryKey })
+        }
+      }
+      hasOpened = true
     }
 
     function handleClosed(status: number | null) {
@@ -293,5 +301,12 @@ export function useSseEngine({
       if (connectTimeout) clearTimeout(connectTimeout)
       disconnect()
     }
-  }, [shouldConnect, streamKey, setConnected, incrementReconnectAttempts, resetReconnectAttempts])
+  }, [
+    shouldConnect,
+    streamKey,
+    queryClient,
+    setConnected,
+    incrementReconnectAttempts,
+    resetReconnectAttempts,
+  ])
 }

@@ -1,7 +1,9 @@
 import { createElement } from 'react'
 import { renderHook, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+
+import { COMMENT_SSE_CONNECTION } from '@/lib/constants'
 
 /**
  * Characterization test for usePlannerCommentsSse — the recipient-update seam:
@@ -31,6 +33,7 @@ const encoder = new TextEncoder()
 
 interface StreamHandle {
   push: (chunk: string) => void
+  end: () => void
 }
 
 const streams: StreamHandle[] = []
@@ -81,7 +84,10 @@ beforeEach(() => {
         controller = c
       },
     })
-    streams.push({ push: (chunk) => controller?.enqueue(encoder.encode(chunk)) })
+    streams.push({
+      push: (chunk) => controller?.enqueue(encoder.encode(chunk)),
+      end: () => controller?.close(),
+    })
     return Promise.resolve({
       ok: true,
       status: 200,
@@ -89,6 +95,10 @@ beforeEach(() => {
       body,
     } as unknown as Response)
   })
+})
+
+afterEach(() => {
+  vi.useRealTimers()
 })
 
 /**
@@ -263,5 +273,27 @@ describe('usePlannerCommentsSse — planner removed elsewhere', () => {
     expect(presenterMocks.showErrorMessage).toHaveBeenCalledWith(
       'planner:sync.removedOnAnotherDevice',
     )
+  })
+})
+
+describe('usePlannerCommentsSse — reconnect catch-up', () => {
+  it("invalidates the planner's comment list when the stream reopens after a drop", async () => {
+    vi.useFakeTimers()
+    vi.spyOn(Math, 'random').mockReturnValue(0)
+    const { queryClient, wrapper } = createWrapper()
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    const { stream } = await mountStream('planner-1', wrapper)
+    expect(invalidateSpy).not.toHaveBeenCalled()
+
+    stream.end()
+    await settle()
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(COMMENT_SSE_CONNECTION.BASE_DELAY)
+    })
+    await settle()
+
+    expect(requestUrls).toHaveLength(2)
+    expect(invalidateSpy).toHaveBeenCalledTimes(1)
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['comments', 'planner-1'] })
   })
 })

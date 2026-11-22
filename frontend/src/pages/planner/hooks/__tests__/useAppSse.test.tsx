@@ -39,6 +39,7 @@ const h = vi.hoisted(() => ({
   isTabHidden: vi.fn(() => false),
   NOTIFICATION_KEYS: { all: ['notifications'] as const },
   SETTINGS_KEYS: { settings: () => ['user', 'settings'] as const },
+  AUTH_KEYS: { me: ['auth', 'me'] as const },
 }))
 
 vi.mock('@/shared/userSettings', () => ({
@@ -48,6 +49,7 @@ vi.mock('@/shared/userSettings', () => ({
 
 vi.mock('@/shared/auth', () => ({
   useAuthQueryNonBlocking: () => ({ data: h.userRef.current }),
+  authQueryKeys: h.AUTH_KEYS,
 }))
 
 vi.mock('@/shared/notifications', () => ({
@@ -292,7 +294,7 @@ describe('useAppSse — event → effect map', () => {
 })
 
 describe('useAppSse — reconnect catch-up', () => {
-  it('does not invalidate settings on the first connection of a session', async () => {
+  it('invalidates nothing on the first connection of a session', async () => {
     h.userRef.current = USER
     h.settingsRef.current = SYNC_ON
     const { queryClient, wrapper } = createWrapper()
@@ -301,10 +303,10 @@ describe('useAppSse — reconnect catch-up', () => {
 
     await flushConnectDelay()
 
-    expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['user', 'settings'] })
+    expect(invalidateSpy).not.toHaveBeenCalled()
   })
 
-  it('invalidates settings once the stream comes back after a drop', async () => {
+  it('invalidates notifications, the session user and settings once the stream comes back after a drop', async () => {
     h.userRef.current = USER
     h.settingsRef.current = SYNC_ON
     const { queryClient, wrapper } = createWrapper()
@@ -317,6 +319,9 @@ describe('useAppSse — reconnect catch-up', () => {
     await advance(SSE_CONNECTION.BASE_DELAY + SSE_CONNECTION.MAX_JITTER)
 
     expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+    expect(invalidateSpy).toHaveBeenCalledTimes(3)
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['notifications'] })
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['auth', 'me'] })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['user', 'settings'] })
   })
 })
