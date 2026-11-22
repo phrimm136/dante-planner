@@ -8,21 +8,30 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.sun.net.httpserver.HttpServer;
+import org.danteplanner.backend.shared.config.HttpClientConfig;
 import org.danteplanner.backend.shared.config.OAuthProperties;
+import org.danteplanner.backend.support.Hang;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.client.RestTemplate;
 
 import java.net.InetSocketAddress;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
@@ -41,11 +50,13 @@ class GoogleIdTokenVerifierTest {
     private static final String ISSUER = "https://accounts.google.com";
     private static final String SUBJECT = "google-subject-1";
     private static final String EMAIL = "person@example.com";
+    private static final Duration SHORT_READ_TIMEOUT = Duration.ofMillis(200);
 
     private static HttpServer jwkServer;
     private static RSAKey signingKey;
     private static RSAKey foreignKey;
     private static GoogleIdTokenVerifier verifier;
+    private static GoogleIdTokenVerifier silentJwksVerifier;
 
     @BeforeAll
     static void startJwkServer() throws Exception {
@@ -61,14 +72,24 @@ class GoogleIdTokenVerifierTest {
             exchange.getResponseBody().write(body);
             exchange.close();
         });
+        jwkServer.createContext("/silent", exchange -> {
+        });
         jwkServer.start();
 
+        verifier = new GoogleIdTokenVerifier(properties("/certs"), new HttpClientConfig().restTemplate());
+
+        SimpleClientHttpRequestFactory shortReadTimeout = new SimpleClientHttpRequestFactory();
+        shortReadTimeout.setReadTimeout(SHORT_READ_TIMEOUT);
+        silentJwksVerifier = new GoogleIdTokenVerifier(properties("/silent"), new RestTemplate(shortReadTimeout));
+    }
+
+    private static OAuthProperties properties(String jwksPath) {
         OAuthProperties properties = new OAuthProperties();
         OAuthProperties.GoogleConfig google = properties.getGoogle();
         google.setClientId(CLIENT_ID);
         google.setIssuer(ISSUER);
-        google.setJwksUri("http://127.0.0.1:" + jwkServer.getAddress().getPort() + "/certs");
-        verifier = new GoogleIdTokenVerifier(properties);
+        google.setJwksUri("http://127.0.0.1:" + jwkServer.getAddress().getPort() + jwksPath);
+        return properties;
     }
 
     @AfterAll
@@ -167,5 +188,20 @@ class GoogleIdTokenVerifierTest {
         assertRejected(() -> verifier.verify(unsigned))
                 .withCode("OAUTH_ERROR")
                 .satisfies(rejection -> assertThat(rejection.getCause()).hasMessageContaining("Unsupported algorithm of none"));
+    }
+
+    @Test
+    void verify_WhenJwksEndpointNeverAnswers_RejectedAfterReadTimeout() throws Exception {
+        String token = genuineToken();
+        ExecutorService caller = Executors.newSingleThreadExecutor();
+        try {
+            Future<?> verification = caller.submit(() -> assertRejected(() -> silentJwksVerifier.verify(token))
+                    .withCode("OAUTH_ERROR")
+                    .satisfies(rejection -> assertThat(rejection).hasRootCauseInstanceOf(SocketTimeoutException.class)));
+
+            Hang.get(verification, "verification against a silent JWKS endpoint");
+        } finally {
+            caller.shutdownNow();
+        }
     }
 }

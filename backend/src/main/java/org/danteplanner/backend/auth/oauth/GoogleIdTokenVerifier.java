@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestOperations;
 
 import java.util.List;
 
@@ -25,9 +26,9 @@ public class GoogleIdTokenVerifier {
 
     private final NimbusJwtDecoder decoder;
 
-    public GoogleIdTokenVerifier(OAuthProperties oAuthProperties) {
+    public GoogleIdTokenVerifier(OAuthProperties oAuthProperties, RestOperations restTemplate) {
         OAuthProperties.GoogleConfig google = oAuthProperties.getGoogle();
-        this.decoder = NimbusJwtDecoder.withJwkSetUri(google.getJwksUri()).build();
+        this.decoder = NimbusJwtDecoder.withJwkSetUri(google.getJwksUri()).restOperations(restTemplate).build();
 
         OAuth2TokenValidator<Jwt> audienceMatchesClient = new JwtClaimValidator<List<String>>(
                 JwtClaimNames.AUD,
