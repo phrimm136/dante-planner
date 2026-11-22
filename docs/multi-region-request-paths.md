@@ -381,8 +381,7 @@ expected states, not defects.
 | | `PlannerPublishingController` (`POST /{id}/publish`, `POST /{id}/unpublish`; `PUT /{id}/publish` a deprecated one-release delegate) | §6; publish publishes SSE + notifications after commit |
 | | `PlannerEngagementController` (`POST /{id}/bookmark`, vote, subscribe) | writes → primary; bookmark is state-targeted and idempotent |
 | | `PlannerQueryController`, `PublishedPlannerController` | reads → replica; each read is decided by its freshness markers (§5) |
-| | `PlannerSseController` (`GET /events`) | subscribes to local Redis fan-out |
-| `/api/sse` | `SseController` (`GET /subscribe`) | as above |
+| `/api/sse` | `SseController` (`GET /subscribe`) | subscribes to local Redis fan-out |
 | `/api/auth` | `AuthController` (`GET /google/callback`) | a **mutating GET** — commits a user row, so it mints `ryw_gtid` (the capture is transaction-driven, not method-driven) |
 | `/api/user` | `UserController` (settings) | write → primary; publishes settings invalidation so other pods drop cached settings |
 | `/api/notifications` | `NotificationController` | inbox reads → replica |
