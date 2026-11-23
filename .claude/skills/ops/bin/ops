@@ -27,8 +27,7 @@ LOGS_SCRIPT = "scripts/ops/access/logs-query.sh"
 SQL_SCRIPT = "scripts/ops/access/rds-query.sh"
 TUNNEL_SCRIPT = "scripts/ops/access/rds-tunnel.sh"
 DB_VERIFY_SCRIPT = "scripts/ops/access/db-observability-check.sh"
-OREGON_VERIFY_SCRIPT = "scripts/ops/oregon-verify.sh"
-OREGON_STACK = "oregon"
+FLEET_VERIFY_SCRIPT = "scripts/ops/fleet-verify.sh"
 CP_OVERRIDE_ENV = "CP_INSTANCE_ID"
 STS_ARGV = ("aws", "sts", "get-caller-identity", "--output", "json")
 
@@ -41,6 +40,7 @@ ACCOUNT_VARIABLE_PATTERN = re.compile(rf'^\s*variable\s+"{ACCOUNT_VARIABLE}"', r
 LOCAL_STATE_FILE = "terraform.tfstate"
 DEFAULT_ENV = "prod"
 SITE_NAMES = ("oregon", "seoul")
+DEFAULT_SITE = "oregon"
 TUNNEL_MODES = ("start", "stop", "status")
 EXPIRED_MARKERS = ("Token has expired", "SSO session")
 SINCE_PATTERN = re.compile(r"^\d+[mhd]$")
@@ -284,8 +284,9 @@ DISPATCH_TABLE = (
                 TUNNEL_SCRIPT),
     CommandSpec("verify db", "", "DB metric families, mysql_up and the DB alert rules (db-observability-check.sh)",
                 DB_VERIFY_SCRIPT),
-    CommandSpec("verify oregon", "", "Oregon nodes, pods, Argo CD apps and RDS reachability (oregon-verify.sh)",
-                OREGON_VERIFY_SCRIPT),
+    CommandSpec("verify fleet", "[--site oregon|seoul]",
+                "a site's nodes, pods, Argo CD apps, RDS reachability and etcd snapshots (fleet-verify.sh); "
+                "site default oregon", FLEET_VERIFY_SCRIPT),
     CommandSpec("tf plan", "<stack> [--expect <address>]... [-- terraform plan args]",
                 "terraform plan through terraform-run.sh; prints the summary, guards replace, destroy and "
                 "instance updates, and prints the apply command for you when the guard passes; a stack with "
@@ -494,9 +495,19 @@ def tunnel_invocation(arg_words):
 def verify_invocation(arg_words):
     target_names = [one_spec.command_name.split()[1] for one_spec in DISPATCH_TABLE
                     if one_spec.command_name.startswith("verify ")]
-    if len(arg_words) != 1 or arg_words[0] not in target_names:
+    if not arg_words or arg_words[0] not in target_names:
         raise OpsError(f"ops verify takes one of {', '.join(target_names)}; see ops list")
-    return ScriptInvocation(spec_named(f"verify {arg_words[0]}"), (), ("verify", arg_words[0]), True)
+    target_name = arg_words[0]
+    arg_reader = ArgReader(f"ops verify {target_name}", arg_words[1:])
+    if target_name != "fleet":
+        if arg_words[1:]:
+            arg_reader.raise_failure("takes no arguments")
+        return ScriptInvocation(spec_named(f"verify {target_name}"), (), ("verify", target_name), True)
+    option_values, free_words = arg_reader.split_options({"--site"})
+    if free_words:
+        arg_reader.raise_failure(f"takes only --site, not '{free_words[0]}'")
+    site_name = arg_reader.site_of(option_values) or DEFAULT_SITE
+    return ScriptInvocation(spec_named("verify fleet"), (site_name,), ("verify", "fleet", site_name), True)
 
 
 def plan_stacks(repo_root):
@@ -1311,7 +1322,7 @@ def run_apply(repo_paths, one_request, requested_env, system_effects, run_moment
 SHELL_NAMES = {"bash", "sh", "zsh", "dash"}
 WRAPPED_NAMES = tuple(Path(script_path).name for script_path in
                       (METRICS_SCRIPT, LOGS_SCRIPT, SQL_SCRIPT, TUNNEL_SCRIPT, DB_VERIFY_SCRIPT,
-                       OREGON_VERIFY_SCRIPT, TERRAFORM_RUNNER))
+                       FLEET_VERIFY_SCRIPT, TERRAFORM_RUNNER))
 ACCESS_SCRIPT_NAMES = {Path(script_path).name: script_path for script_path in
                        (METRICS_SCRIPT, LOGS_SCRIPT, SQL_SCRIPT, TUNNEL_SCRIPT, DB_VERIFY_SCRIPT)}
 
@@ -1343,7 +1354,7 @@ def wrapped_kind(head_word):
     if head_name in ACCESS_SCRIPT_NAMES and (head_path == f"access/{head_name}"
                                              or head_path.endswith(f"/access/{head_name}")):
         return head_name
-    if head_name in (Path(OREGON_VERIFY_SCRIPT).name, Path(TERRAFORM_RUNNER).name):
+    if head_name in (Path(FLEET_VERIFY_SCRIPT).name, Path(TERRAFORM_RUNNER).name):
         return head_name
     return ""
 
@@ -1413,8 +1424,12 @@ def replacement_words(head_word, arg_words, env_name):
         return None
     if kind_name in ACCESS_SCRIPT_NAMES:
         return [*env_words(env_name, DEFAULT_ENV), *access_replacement(kind_name, arg_words)]
-    if kind_name == Path(OREGON_VERIFY_SCRIPT).name:
-        return None if "--kubeconfig" in arg_words else [*env_words(env_name, DEFAULT_ENV), "verify", "oregon"]
+    if kind_name == Path(FLEET_VERIFY_SCRIPT).name:
+        if "--kubeconfig" in arg_words:
+            return None
+        site_name = next((one_word for one_word in arg_words if one_word in SITE_NAMES), "")
+        return [*env_words(env_name, DEFAULT_ENV), "verify", "fleet",
+                *(("--site", site_name) if site_name and site_name != DEFAULT_SITE else ())]
     return runner_replacement(arg_words, env_name)
 
 
@@ -1646,8 +1661,8 @@ def run_command(argv_words, system_effects, caller_dir, run_moment, repo_paths):
     script_invocation = build_invocation(ops_request.command_words, caller_dir or os.getcwd())
     if script_invocation.command_spec.command_name == "whoami":
         return run_whoami(repo_paths, profile_name, system_effects, run_moment)
-    if script_invocation.command_spec.command_name == "verify oregon" and not os.environ.get(CP_OVERRIDE_ENV):
-        require_init(repo_paths.repo_root, stack_info(repo_paths.repo_root, OREGON_STACK),
+    if script_invocation.command_spec.command_name == "verify fleet" and not os.environ.get(CP_OVERRIDE_ENV):
+        require_init(repo_paths.repo_root, stack_info(repo_paths.repo_root, script_invocation.script_args[0]),
                      ops_request.env_name or DEFAULT_ENV)
     if script_invocation.needs_session:
         require_session(repo_paths, profile_name, system_effects)

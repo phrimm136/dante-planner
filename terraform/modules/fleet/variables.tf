@@ -200,9 +200,20 @@ variable "alarm_sns_topic_arn" {
 }
 
 variable "etcd_snapshot_retention" {
-  description = "Number of etcd snapshots k3s retains in S3 before pruning."
+  description = "Number of scheduled etcd snapshots k3s keeps on the CP disk and in S3 before pruning."
   type        = number
   default     = 5
+}
+
+variable "etcd_snapshot_interval_hours" {
+  description = "Hours between scheduled etcd snapshots. The CP boot script writes the cron `0 */<hours> * * *` into /etc/rancher/k3s/config.yaml, and the etcd-snapshot-deadman alert (deploy/grafana/import-alert-rules.sh) and scripts/ops/fleet-verify.sh read this default through scripts/ops/lib/etcd-interval.sh, so it is set here and nowhere else. A running CP keeps the schedule it booted with."
+  type        = number
+  default     = 6
+
+  validation {
+    condition     = contains([1, 2, 3, 4, 6, 8, 12, 24], var.etcd_snapshot_interval_hours)
+    error_message = "etcd_snapshot_interval_hours must divide 24 (1, 2, 3, 4, 6, 8, 12 or 24), so the cron fires at an even interval."
+  }
 }
 
 variable "tags" {

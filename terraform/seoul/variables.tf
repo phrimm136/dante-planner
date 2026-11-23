@@ -168,7 +168,7 @@ variable "alarm_sns_topic_arn" {
 }
 
 variable "etcd_snapshot_retention" {
-  description = "Number of etcd snapshots k3s retains in S3 before pruning."
+  description = "Number of scheduled etcd snapshots k3s keeps on the CP disk and in S3 before pruning."
   type        = number
   default     = 5
 }

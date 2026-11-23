@@ -226,7 +226,7 @@ class DispatchTest(unittest.TestCase):
             ("sql", "scripts/ops/access/rds-query.sh", "read"),
             ("tunnel", "scripts/ops/access/rds-tunnel.sh", "read"),
             ("verify db", "scripts/ops/access/db-observability-check.sh", "read"),
-            ("verify oregon", "scripts/ops/oregon-verify.sh", "read"),
+            ("verify fleet", "scripts/ops/fleet-verify.sh", "read"),
             ("tf plan", "scripts/ops/terraform-run.sh", "plan"),
             ("tf apply", "scripts/ops/terraform-run.sh", "apply"),
             ("whoami", "", "read"),
@@ -254,13 +254,26 @@ class DispatchTest(unittest.TestCase):
 
     def test_every_invocation_runs_a_script_from_the_table(self):
         for command_words in (["metrics", "up"], ["logs", "q"], ["sql", "SELECT 1"], ["tunnel", "status"],
-                              ["verify", "db"], ["verify", "oregon"]):
+                              ["verify", "db"], ["verify", "fleet"], ["verify", "fleet", "--site", "seoul"]):
             self.assertIn(ops_cli.build_invocation(command_words, "/").command_spec.script_path, TABLE_SCRIPTS)
 
-    def test_oregon_verify_never_fetches_the_kubeconfig(self):
-        self.assertEqual(ops_cli.build_invocation(["verify", "oregon"], "/").script_args, ())
-        with self.assertRaisesRegex(ops_cli.OpsError, "ops verify takes one of db, oregon"):
-            ops_cli.build_invocation(["verify", "oregon", "--kubeconfig"], "/")
+    def test_fleet_verify_passes_the_site_and_never_fetches_the_kubeconfig(self):
+        self.assertEqual(ops_cli.build_invocation(["verify", "fleet"], "/").script_args, ("oregon",))
+        seoul_invocation = ops_cli.build_invocation(["verify", "fleet", "--site", "seoul"], "/")
+        self.assertEqual((seoul_invocation.script_args, seoul_invocation.log_parts),
+                         (("seoul",), ("verify", "fleet", "seoul")))
+        with self.assertRaisesRegex(ops_cli.OpsError, "unknown option --kubeconfig"):
+            ops_cli.build_invocation(["verify", "fleet", "--kubeconfig"], "/")
+        with self.assertRaisesRegex(ops_cli.OpsError, "--site takes oregon or seoul"):
+            ops_cli.build_invocation(["verify", "fleet", "--site", "tokyo"], "/")
+        with self.assertRaisesRegex(ops_cli.OpsError, "takes only --site, not 'seoul'"):
+            ops_cli.build_invocation(["verify", "fleet", "seoul"], "/")
+        with self.assertRaisesRegex(ops_cli.OpsError, "ops verify db: takes no arguments"):
+            ops_cli.build_invocation(["verify", "db", "--site", "seoul"], "/")
+
+    def test_verify_oregon_is_gone(self):
+        with self.assertRaisesRegex(ops_cli.OpsError, "ops verify takes one of db, fleet"):
+            ops_cli.build_invocation(["verify", "oregon"], "/")
 
     def test_list_names_every_table_command(self):
         list_text = "\n".join(ops_cli.list_lines())
@@ -302,21 +315,33 @@ class RunTest(RepoCase):
 
     def test_an_expired_session_stops_every_aws_command_before_the_script(self):
         for argv_words in (["metrics", "up"], ["logs", "q"], ["sql", "SELECT 1"], ["tunnel", "start"],
-                           ["verify", "db"], ["verify", "oregon"], ["tf", "plan", "rds"], ["whoami"]):
+                           ["verify", "db"], ["verify", "fleet"], ["tf", "plan", "rds"], ["whoami"]):
             fake_effects = FakeEffects(session_rows={"prod": (255, EXPIRED_STDERR)})
             with self.assertRaisesRegex(ops_cli.OpsError, "aws sso login --sso-session danteplanner"):
                 self.run_main(argv_words, fake_effects)
             self.assertEqual(fake_effects.stream_calls, [], argv_words)
 
-    def test_verify_oregon_needs_the_oregon_stack_initialized(self):
+    def test_verify_fleet_needs_the_site_stack_initialized(self):
         (self.repo_root / "terraform" / "oregon" / ".terraform").rmdir()
         fake_effects = FakeEffects()
         with self.assertRaisesRegex(ops_cli.OpsError, "terraform/oregon is not initialized"):
-            self.run_main(["verify", "oregon"], fake_effects)
+            self.run_main(["verify", "fleet"], fake_effects)
         self.assertEqual(fake_effects.stream_calls, [])
         with unittest.mock.patch.dict(os.environ, {"CP_INSTANCE_ID": "i-0abc"}):
-            self.run_main(["verify", "oregon"], fake_effects)
-        self.assertEqual(fake_effects.stream_calls[0][0], self.script_argv(ops_cli.OREGON_VERIFY_SCRIPT))
+            self.run_main(["verify", "fleet"], fake_effects)
+        self.assertEqual(fake_effects.stream_calls[0][0], self.script_argv(ops_cli.FLEET_VERIFY_SCRIPT, "oregon"))
+
+    def test_verify_fleet_seoul_needs_the_seoul_stack_initialized(self):
+        seoul_dir = self.repo_root / "terraform" / "seoul"
+        seoul_dir.mkdir()
+        (seoul_dir / "versions.tf").write_text('terraform {\n  backend "s3" {}\n}\n')
+        fake_effects = FakeEffects()
+        with self.assertRaisesRegex(ops_cli.OpsError, "terraform/seoul is not initialized"):
+            self.run_main(["verify", "fleet", "--site", "seoul"], fake_effects)
+        (seoul_dir / ".terraform").mkdir()
+        self.run_main(["verify", "fleet", "--site", "seoul"], fake_effects)
+        self.assertEqual(fake_effects.stream_calls[0][0], self.script_argv(ops_cli.FLEET_VERIFY_SCRIPT, "seoul"))
+        self.assertTrue((self.log_dir / f"ops-verify-fleet-seoul-{STAMP_TEXT}.log").is_file())
 
     def test_tunnel_status_runs_without_a_session(self):
         fake_effects = FakeEffects(session_rows={"prod": (255, EXPIRED_STDERR)}, stream_exit=1)
@@ -1134,7 +1159,9 @@ HOOK_CASES = (
     ("scripts/ops/access/rds-query.sh -f q.sql seoul", f"{CLI_TEXT} sql -f q.sql --site seoul"),
     ("scripts/ops/access/rds-tunnel.sh start seoul", f"{CLI_TEXT} tunnel start --site seoul"),
     ("AWS_PROFILE=prod scripts/ops/access/db-observability-check.sh", f"{CLI_TEXT} verify db"),
-    ("scripts/ops/oregon-verify.sh", f"{CLI_TEXT} verify oregon"),
+    ("scripts/ops/fleet-verify.sh", f"{CLI_TEXT} verify fleet"),
+    ("scripts/ops/fleet-verify.sh oregon", f"{CLI_TEXT} verify fleet"),
+    ("AWS_PROFILE=staging scripts/ops/fleet-verify.sh seoul", f"{CLI_TEXT} --env staging verify fleet --site seoul"),
     ("bash scripts/ops/access/rds-tunnel.sh status", f"{CLI_TEXT} tunnel status"),
     ("bash -c 'scripts/ops/access/rds-tunnel.sh stop'", f"{CLI_TEXT} tunnel stop"),
     ("echo $(scripts/ops/access/rds-query.sh 'SELECT 1') > out.txt", f"{CLI_TEXT} sql 'SELECT 1'"),
@@ -1157,7 +1184,7 @@ HOOK_CASES = (
     ("source scripts/ops/access/rds-tunnel.sh start", f"{CLI_TEXT} tunnel start"),
     (". scripts/ops/access/rds-tunnel.sh stop", f"{CLI_TEXT} tunnel stop"),
     ("bash <<EOF\nscripts/ops/access/rds-tunnel.sh status\nEOF", f"{CLI_TEXT} tunnel status"),
-    ("sh <<'EOF'\nscripts/ops/oregon-verify.sh\nEOF", f"{CLI_TEXT} verify oregon"),
+    ("sh <<'EOF'\nscripts/ops/fleet-verify.sh seoul\nEOF", f"{CLI_TEXT} verify fleet --site seoul"),
     ("cat <<EOF | bash\nscripts/ops/access/rds-tunnel.sh status\nEOF", f"{CLI_TEXT} tunnel status"),
     ("git commit -F - <<'EOF'\nscripts/ops/access/rds-tunnel.sh status\nEOF", None),
     ("scripts//ops/access/rds-tunnel.sh status", f"{CLI_TEXT} tunnel status"),
@@ -1171,7 +1198,7 @@ HOOK_CASES = (
     ("scripts/ops/terraform-run.sh -chdir=terraform/rds show x.plan", None),
     (".claude/skills/ops/bin/ops tf plan seoul --expect module.fleet.aws_instance.cp", None),
     ("scripts/ops/provision/grafana-secrets.sh", None),
-    ("scripts/ops/oregon-verify.sh --kubeconfig", None),
+    ("scripts/ops/fleet-verify.sh --kubeconfig seoul", None),
     ("rg -n 'access/rds-query.sh' docs", None),
     ("cat scripts/ops/access/rds-query.sh", None),
     ("scripts/ops/access/staging-env.sh", None),
