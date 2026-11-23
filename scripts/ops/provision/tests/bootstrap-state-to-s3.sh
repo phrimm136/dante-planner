@@ -669,4 +669,30 @@ printf '%s\n' "$out" | grep -q 'holds resources state-backend does not declare, 
 printf '%s\n' "$out" | grep -q 'stub terraform reached' && fail "$name" "it ran terraform"
 pass "$name"
 
+name="the real iam-bootstrap stack refuses a state-backend state by its instance form"
+state_backend_like="$acct/state-backend-like.tfstate"
+python3 - "$applied_in_three" "$state_backend_like" <<'EOF'
+import json, sys
+state = json.load(open(sys.argv[1]))
+caller = [r for r in state["resources"] if r["type"] == "aws_caller_identity"]
+buckets = [{"mode": "managed", "type": bucket_type, "name": "tf_state",
+            "provider": 'provider["registry.terraform.io/hashicorp/aws"]',
+            "instances": [{"schema_version": 0, "sensitive_attributes": [], "attributes": {"id": "fixture"}}]}
+           for bucket_type in ("aws_s3_bucket", "aws_s3_bucket_lifecycle_configuration",
+                               "aws_s3_bucket_public_access_block",
+                               "aws_s3_bucket_server_side_encryption_configuration", "aws_s3_bucket_versioning")]
+state["resources"] = caller + buckets
+json.dump(state, open(sys.argv[2], "w"))
+EOF
+out=$(PATH="$work/stub:$PATH" bash "$script" iam-bootstrap "$acct/backend.three.hcl" "$acct/three.tfvars" \
+  "$state_backend_like" </dev/null 2>&1)
+rc=$?
+[ "$rc" -ne 0 ] || fail "$name" "exit 0"
+printf '%s\n' "$out" | grep -q "declares in another form (count or for_each against a single instance), so it is another stack's state: aws_s3_bucket.tf_state, aws_s3_bucket_lifecycle_configuration.tf_state, aws_s3_bucket_public_access_block.tf_state, aws_s3_bucket_server_side_encryption_configuration.tf_state, aws_s3_bucket_versioning.tf_state; nothing done." ||
+  fail "$name" "does not name the five bucket addresses"
+printf '%s\n' "$out" | grep -qE '^(backup|init|push):' && fail "$name" "it wrote before refusing"
+printf '%s\n' "$out" | grep -q 'stub terraform reached' && fail "$name" "it ran terraform"
+[ ! -e "$XDG_STATE_HOME/danteplanner/tf-state-backup/iam-bootstrap.three.tfstate" ] || fail "$name" "wrote a backup"
+pass "$name"
+
 echo "bootstrap-state-to-s3 tests: $passed passed"
