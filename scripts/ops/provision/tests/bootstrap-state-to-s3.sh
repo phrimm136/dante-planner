@@ -180,7 +180,7 @@ out=$( (push_state state-backend "$s2" acct-s2 remote-s2 "$work/ws1.tfvars" \
   "$pa/terraform.tfstate.d/ws1/terraform.tfstate" -backend-config=path="$work/s2.remote.tfstate") </dev/null 2>&1)
 rc=$?
 [ "$rc" -eq 0 ] || fail "$name" "exit $rc"
-printf '%s\n' "$out" | grep -qx 'push: already done; state-backend/terraform.tfstate in remote-s2 holds the backup'"'"'s state (same lineage, resources and outputs)' ||
+printf '%s\n' "$out" | grep -qx 'push: already done; state-backend/terraform.tfstate in remote-s2 holds the backup'"'"'s resources and outputs (the bucket'"'"'s lineage and serial are not compared)' ||
   fail "$name" "does not say the push was already done"
 printf '%s\n' "$out" | grep -qx 'count: remote 3, file 3' || fail "$name" "no count line"
 printf '%s\n' "$out" | grep -qx 'verified: state-backend remote-s2 3 resources, the bucket holds the backup'"'"'s state' ||
@@ -193,8 +193,9 @@ out=$( (push_state state-backend "$s2" acct-s2b remote-s2 "$work/ws1.tfvars" \
   "$pa/terraform.tfstate.d/ws2/terraform.tfstate" -backend-config=path="$work/s2.remote.tfstate") </dev/null 2>&1)
 rc=$?
 [ "$rc" -ne 0 ] || fail "$name" "other file, exit 0"
-printf '%s\n' "$out" | grep -q 'state-backend/terraform.tfstate in remote-s2 already holds' ||
-  fail "$name" "the refusal for another file does not name the remote key"
+printf '%s\n' "$out" | grep -q 'state-backend/terraform.tfstate in remote-s2 holds 3 resources with other resources or outputs than the backup, under another lineage; nothing pushed.' ||
+  fail "$name" "the refusal for another file does not name the remote key and the other content"
+printf '%s\n' "$out" | grep -q '^push:' && fail "$name" "it pushed"
 [ "$(remote_lineage "$s2")" = "$before" ] || fail "$name" "the remote changed"
 pass "$name"
 
@@ -287,7 +288,7 @@ out=$( (push_state iam-bootstrap "$s5" acct-s5 remote-s5 "$work/missing.tfvars" 
 rc=$?
 name="a plan that fails stops before anything is called verified"
 [ "$rc" -ne 0 ] || fail "$name" "exit 0"
-printf '%s\n' "$out" | grep -q '^state: .* equals the backup' || fail "$name" "the state comparison did not run first"
+printf '%s\n' "$out" | grep -q '^state: .* holds the backup'"'"'s resources and outputs' || fail "$name" "the state comparison did not run first"
 printf '%s\n' "$out" | grep -q 'cannot be planned from the bucket. Pushed but not verified' || fail "$name" "does not say pushed but not verified"
 printf '%s\n' "$out" | grep -q "plan -var-file=$work/missing.tfvars" || fail "$name" "does not name the plan command"
 printf '%s\n' "$out" | grep -q '^verified:' && fail "$name" "printed a verified line"
@@ -555,6 +556,51 @@ rc=$?
 printf '%s\n' "$out" | grep -q "$p11_ws1.backup is behind its own backup $s11_backup" || fail "$name" "does not say the file is behind"
 printf '%s\n' "$out" | grep -qE '^(backup|init|push):' && fail "$name" "it wrote before refusing"
 cmp -s "$s11_backup" "$work/s11-backup-before" || fail "$name" "the backup was replaced"
+pass "$name"
+
+name="a bucket that stores the push under a new lineage at serial 1 still verifies, resumes and allows removal"
+mkdir -p "$work/s3like"
+cat >"$work/s3like/terraform" <<EOF
+#!/bin/sh
+case " \$* " in
+  *" pull "*)
+    "$real_terraform" "\$@" | python3 -c '
+import json, sys
+raw = sys.stdin.read()
+if raw.strip():
+    state = json.loads(raw)
+    state["lineage"] = "00000000-0000-4000-8000-000000000000"
+    state["serial"] = 1
+    json.dump(state, sys.stdout)
+'
+    exit 0 ;;
+esac
+exec "$real_terraform" "\$@"
+EOF
+chmod +x "$work/s3like/terraform"
+p16="$work/producer-16"
+s16="$work/s16"
+p16_ws1="$p16/terraform.tfstate.d/ws1/terraform.tfstate"
+producer "$p16" && apply_in "$p16" ws1 x ws1 || fail "$name" "setup apply"
+target "$s16"
+out=$( (PATH="$work/s3like:$PATH" push_state iam-bootstrap "$s16" acct-s16 remote-s16 "$work/ws1.tfvars" "$p16_ws1" \
+  -backend-config=path="$work/s16.remote.tfstate") </dev/null 2>&1)
+rc=$?
+[ "$rc" -eq 0 ] || fail "$name" "first run, exit $rc"
+printf '%s\n' "$out" | grep -q "^state: .*(content only; bucket lineage other, serial 1)$" || fail "$name" "first run: no content-only state line"
+printf '%s\n' "$out" | grep -qx "verified: iam-bootstrap remote-s16 3 resources, the bucket holds the backup's state" ||
+  fail "$name" "first run: no verified line"
+out=$( (PATH="$work/s3like:$PATH" push_state iam-bootstrap "$s16" acct-s16 remote-s16 "$work/ws1.tfvars" "$p16_ws1" \
+  -backend-config=path="$work/s16.remote.tfstate") </dev/null 2>&1)
+rc=$?
+[ "$rc" -eq 0 ] || fail "$name" "rerun, exit $rc"
+printf '%s\n' "$out" | grep -q '^push: already done' || fail "$name" "the rerun did not resume"
+printf '%s\n' "$out" | grep -qx "verified: iam-bootstrap remote-s16 3 resources, the bucket holds the backup's state" ||
+  fail "$name" "rerun: no verified line"
+out=$( (remove_local iam-bootstrap "$p16_ws1") 2>&1)
+rc=$?
+[ "$rc" -eq 0 ] || fail "$name" "--remove-local, exit $rc"
+[ ! -e "$p16_ws1" ] && [ ! -e "$p16_ws1.backup" ] || fail "$name" "--remove-local left the file or its sibling"
 pass "$name"
 
 echo "bootstrap-state-to-s3 tests: $passed passed"

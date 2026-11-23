@@ -6,9 +6,10 @@
 #
 # <stack> is state-backend or iam-bootstrap. The first form backs the local file up outside the
 # repository, initializes terraform/<stack> against the backend file, pushes the backup as the
-# remote state, and pulls it back: the move is verified when the bucket's state equals the backup
-# in lineage, resources and outputs, with a serial not below the backup's (push rewrites
-# terraform_version, and over an older serial of the same state stores serial + 1). A plan with the
+# remote state, and pulls it back: the move is verified when the bucket's resources and outputs
+# equal the backup's. The bucket's lineage and serial cannot identify the state: terraform's
+# remote state manager stores a push into an empty S3 key under a new lineage at serial 1. A plan
+# with the
 # tfvars file then runs as information; its changes are drift the move did not cause, but a plan
 # that fails stops the move. Verification writes <backup>.verified (lineage, serial and a sha256
 # of the resources and outputs; no account id). The second form deletes the local file only when
@@ -74,12 +75,8 @@ import json, sys
 backup = json.load(open(sys.argv[1]))
 raw = sys.stdin.read()
 remote = json.loads(raw) if raw.strip() else {}
-differs = ["lineage"] if backup.get("lineage") != remote.get("lineage") else []
-if remote.get("serial", -1) < backup.get("serial", 0):
-    differs.append("serial (lower than the backup)")
-if any(backup.get(field, empty) != remote.get(field, empty) for field, empty in (("resources", []), ("outputs", {}))):
-    differs.append("content (resources or outputs)")
-print(" and ".join(differs) or "equal")
+same = all(backup.get(field, empty) == remote.get(field, empty) for field, empty in (("resources", []), ("outputs", {})))
+print("equal" if same else "content (resources or outputs)")
 ' "$1"
 }
 
@@ -221,17 +218,17 @@ push_state() {
   if [[ "$remote_n" -eq 0 ]]; then
     echo "remote: $key is empty"
     push=1
+  elif [[ "$(state_difference "$backup" <<<"$pulled")" == equal ]]; then
+    echo "push: already done; $key holds the backup's resources and outputs (the bucket's lineage and serial are not compared)"
   elif [[ "$remote_lineage" == "$backup_lineage" && "$remote_serial" -lt "$backup_serial" ]]; then
     echo "remote: $key holds an older serial of the same state; pushing the newer local state over it"
     push=1
-  elif [[ "$remote_lineage" == "$backup_lineage" && "$(state_difference "$backup" <<<"$pulled")" == equal ]]; then
-    echo "push: already done; $key holds the backup's state (same lineage, resources and outputs)"
   elif [[ "$remote_lineage" == "$backup_lineage" && "$remote_serial" -gt "$backup_serial" ]]; then
     die "remote: $key holds a newer serial of the same state than $local_file; nothing pushed. The local file is behind the bucket: do not move it."
   elif [[ "$remote_lineage" == "$backup_lineage" ]]; then
     die "remote: $key holds the same lineage and serial as $local_file but different resources or outputs; nothing pushed."
   else
-    die "remote: $key already holds $remote_n resources of another state (a different lineage); nothing pushed."
+    die "remote: $key holds $remote_n resources with other resources or outputs than the backup, under another lineage; nothing pushed."
   fi
   if [[ $push -eq 1 ]]; then
     tf -chdir="$stack_dir" state push "$backup" >>"$init_log" 2>&1 ||
@@ -256,7 +253,10 @@ push_state() {
   difference=$(state_difference "$backup" <<<"$pulled")
   [[ "$difference" == equal ]] ||
     die "state: $key differs from the backup in $difference. Pushed but not verified."
-  echo "state: $key equals the backup (lineage, resources, outputs; serial not below the backup's)"
+  local bucket_lineage bucket_serial
+  read -r _ bucket_lineage bucket_serial <<<"$(state_facts - <<<"$pulled")"
+  [[ "$bucket_lineage" == "$backup_lineage" ]] && bucket_lineage=same || bucket_lineage=other
+  echo "state: $key holds the backup's resources and outputs (content only; bucket lineage $bucket_lineage, serial $bucket_serial)"
 
   local rc=0 counts replaced
   tf -chdir="$stack_dir" plan -var-file="$tfvars" -detailed-exitcode -input=false -no-color >"$plan_log" 2>&1 || rc=$?
