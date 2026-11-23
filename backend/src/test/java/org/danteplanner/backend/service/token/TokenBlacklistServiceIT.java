@@ -1,7 +1,7 @@
 package org.danteplanner.backend.service.token;
 import org.danteplanner.backend.support.AuthReads;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
-import org.danteplanner.backend.auth.token.TokenStoreReads;
+import org.danteplanner.backend.auth.token.TokenStoreKeys;
 import org.danteplanner.backend.support.TestDataFactory;
 
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -28,9 +28,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <p>Tests the Redis-backed token blacklist behavior including
  * add, check, and TTL expiration functionality over a live Redis container.</p>
  *
- * <p>The container is this class's own, not the run's shared one: {@code clear()} and the blacklist
- * and invalidation counts read through {@link TokenStoreReads} are the subject here, and all three span the
- * whole keyspace, so there is no id to narrow them to.</p>
+ * <p>The container is this class's own, not the run's shared one: the setup empties and the tests count
+ * the blacklist and invalidation keys through {@link TokenStoreKeys}, which spans the whole keyspace, so
+ * there is no id to narrow them to.</p>
  */
 @Tag("containerized")
 class TokenBlacklistServiceIT {
@@ -64,7 +64,7 @@ class TokenBlacklistServiceIT {
     void setUp() {
         blacklistService = new TokenBlacklistService(AuthReads.writesTo(ownTemplate), AuthReads.from(ownTemplate), new SimpleMeterRegistry(),
                 TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
-        blacklistService.clear();
+        TokenStoreKeys.deleteBlacklistAndInvalidations(ownTemplate);
     }
 
     @Nested
@@ -81,7 +81,7 @@ class TokenBlacklistServiceIT {
 
             // Assert
             assertThat(blacklistService.isBlacklisted(token)).isTrue();
-            assertThat(TokenStoreReads.blacklistSize(ownTemplate)).isEqualTo(1);
+            assertThat(TokenStoreKeys.blacklistSize(ownTemplate)).isEqualTo(1);
         }
 
         @Test
@@ -97,7 +97,7 @@ class TokenBlacklistServiceIT {
 
             // Assert - token still blacklisted, size remains 1
             assertThat(blacklistService.isBlacklisted(token)).isTrue();
-            assertThat(TokenStoreReads.blacklistSize(ownTemplate)).isEqualTo(1);
+            assertThat(TokenStoreKeys.blacklistSize(ownTemplate)).isEqualTo(1);
         }
     }
 
@@ -142,7 +142,7 @@ class TokenBlacklistServiceIT {
 
             // Assert - should return false and remove entry (lazy cleanup)
             assertThat(result).isFalse();
-            assertThat(TokenStoreReads.blacklistSize(ownTemplate)).isEqualTo(0); // Entry should be removed
+            assertThat(TokenStoreKeys.blacklistSize(ownTemplate)).isEqualTo(0); // Entry should be removed
         }
     }
 
@@ -150,36 +150,19 @@ class TokenBlacklistServiceIT {
     class UtilityMethodsTests {
 
         @Test
-        void clear_WhenCalled_RemovesAllEntries() {
-            // Arrange
-            Date expiry = new Date(System.currentTimeMillis() + 60000);
-            blacklistService.blacklistToken("token1", expiry);
-            blacklistService.blacklistToken("token2", expiry);
-            blacklistService.blacklistToken("token3", expiry);
-            assertThat(TokenStoreReads.blacklistSize(ownTemplate)).isEqualTo(3);
-
-            // Act
-            blacklistService.clear();
-
-            // Assert
-            assertThat(TokenStoreReads.blacklistSize(ownTemplate)).isEqualTo(0);
-            assertThat(blacklistService.isBlacklisted("token1")).isFalse();
-        }
-
-        @Test
         void size_WhenEntriesExist_ReturnsCorrectCount() {
             // Arrange
             Date expiry = new Date(System.currentTimeMillis() + 60000);
 
             // Assert initial
-            assertThat(TokenStoreReads.blacklistSize(ownTemplate)).isEqualTo(0);
+            assertThat(TokenStoreKeys.blacklistSize(ownTemplate)).isEqualTo(0);
 
             // Add tokens
             blacklistService.blacklistToken("token1", expiry);
-            assertThat(TokenStoreReads.blacklistSize(ownTemplate)).isEqualTo(1);
+            assertThat(TokenStoreKeys.blacklistSize(ownTemplate)).isEqualTo(1);
 
             blacklistService.blacklistToken("token2", expiry);
-            assertThat(TokenStoreReads.blacklistSize(ownTemplate)).isEqualTo(2);
+            assertThat(TokenStoreKeys.blacklistSize(ownTemplate)).isEqualTo(2);
         }
     }
 
@@ -320,17 +303,12 @@ class TokenBlacklistServiceIT {
         }
 
         @Test
-        void userInvalidations_WhenInvalidatedThenCleared_ReflectRedis() {
-            // Arrange
+        void invalidateUserTokens_WhenCalled_WritesOneInvalidation() {
             Long userId = TestDataFactory.nextUserId();
 
-            // Act + Assert - one invalidation yields size 1
             blacklistService.invalidateUserTokens(userId);
-            assertThat(TokenStoreReads.userInvalidationSize(ownTemplate)).isEqualTo(1);
 
-            // Act + Assert - clear() wipes it back to 0
-            blacklistService.clear();
-            assertThat(TokenStoreReads.userInvalidationSize(ownTemplate)).isEqualTo(0);
+            assertThat(TokenStoreKeys.userInvalidationSize(ownTemplate)).isEqualTo(1);
         }
 
         @Test
@@ -344,7 +322,7 @@ class TokenBlacklistServiceIT {
 
             // Assert
             assertThat(blacklistService.isUserTokenInvalidated(userId, 0L)).isFalse();
-            assertThat(TokenStoreReads.userInvalidationSize(ownTemplate)).isEqualTo(0);
+            assertThat(TokenStoreKeys.userInvalidationSize(ownTemplate)).isEqualTo(0);
         }
     }
 }
