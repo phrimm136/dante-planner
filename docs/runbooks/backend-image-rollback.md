@@ -99,9 +99,9 @@ Dispatching `deploy-fleet.yml` on an older branch or tag does not roll productio
 - If the push succeeds, `settle-down` waits for an image that never syncs and fails
   (`.github/workflows/deploy-fleet.yml:376-384`). The failure leaves both surge nodes running on
   purpose (`.github/workflows/deploy-fleet.yml:326-330`).
-- If the push is rejected, for example on a tag, `bump-tag` fails. `settle-down` needs `bump-tag`
-  (`.github/workflows/deploy-fleet.yml:332`), so it does not run. `surge-up` already finished
-  (`.github/workflows/deploy-fleet.yml:275`), so both surge nodes stay up in this case too.
+- If the push is rejected, for example on a tag, `bump-tag` fails. `settle-down` still runs, because
+  it runs whenever `surge-up` ran: the DaemonSet did not change, so its rollout wait passes and it
+  drains the surge nodes and returns both app ASGs to 1.
 
 A dispatch on `main` rebuilds the head of `main`, which still holds the bad code. Use it to retry a
 failed deploy of `main`, not to roll back.
