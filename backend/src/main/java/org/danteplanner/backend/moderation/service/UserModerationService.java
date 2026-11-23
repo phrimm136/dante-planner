@@ -1,7 +1,6 @@
 package org.danteplanner.backend.moderation.service;
 
-import org.danteplanner.backend.moderation.api.ModerationActionType;
-import org.danteplanner.backend.moderation.api.ModerationTargetType;
+import org.danteplanner.backend.moderation.service.ModerationAuditService.Suspension;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.moderation.event.AccountSuspendedEvent;
@@ -34,7 +33,7 @@ public class UserModerationService {
 
     @Transactional
     public User timeoutUser(Long actorId, Long targetId, int durationMinutes, String reason) {
-        User saved = restrict(actorId, targetId, ModerationActionType.TIMEOUT, reason, durationMinutes,
+        User saved = restrict(actorId, targetId, new Suspension.Timeout(durationMinutes, reason),
                 target -> target.setTimeoutUntil(timeoutUntil(durationMinutes)));
 
         eventPublisher.publishEvent(new AccountSuspendedEvent(
@@ -46,7 +45,7 @@ public class UserModerationService {
 
     @Transactional
     public User removeTimeout(Long actorId, Long targetId, String reason) {
-        User saved = restrict(actorId, targetId, ModerationActionType.CLEAR_TIMEOUT, reason,
+        User saved = restrict(actorId, targetId, new Suspension.ClearTimeout(reason),
                 target -> target.setTimeoutUntil(null));
 
         log.info("Timeout removed from user {} by moderator {} with reason: {}", targetId, actorId, reason);
@@ -55,7 +54,7 @@ public class UserModerationService {
 
     @Transactional
     public User banUser(Long actorId, Long targetId, String reason) {
-        User saved = restrict(actorId, targetId, ModerationActionType.BAN, reason,
+        User saved = restrict(actorId, targetId, new Suspension.Ban(reason),
                 target -> {
                     target.setBannedAt(Instant.now());
                     target.setBannedBy(actorId);
@@ -69,7 +68,7 @@ public class UserModerationService {
 
     @Transactional
     public User unbanUser(Long actorId, Long targetId, String reason) {
-        User saved = restrict(actorId, targetId, ModerationActionType.UNBAN, reason,
+        User saved = restrict(actorId, targetId, new Suspension.Unban(reason),
                 target -> {
                     target.setBannedAt(null);
                     target.setBannedBy(null);
@@ -99,22 +98,15 @@ public class UserModerationService {
         return unbanUser(actorId, targetIdBySuffix(usernameSuffix), reason);
     }
 
-    private User restrict(Long actorId, Long targetId, ModerationActionType action,
-            String reason, Consumer<User> mutation) {
-        return restrict(actorId, targetId, action, reason, null, mutation);
-    }
-
-    private User restrict(Long actorId, Long targetId, ModerationActionType action,
-            String reason, Integer durationMinutes, Consumer<User> mutation) {
+    private User restrict(Long actorId, Long targetId, Suspension suspension, Consumer<User> mutation) {
         User actor = requireActive(actorId);
         User target = requireActive(targetId);
-        moderationPolicy.requireCanRestrict(actor, target, action);
+        moderationPolicy.requireCanRestrict(actor, target, suspension.action());
 
         mutation.accept(target);
         FreshnessDeclarations.declare(new FreshnessScope.User(targetId));
 
-        auditService.record(actorId, target.getPublicId().toString(), action,
-                ModerationTargetType.USER, reason, durationMinutes);
+        auditService.record(actorId, target.getPublicId().toString(), suspension);
 
         return target;
     }

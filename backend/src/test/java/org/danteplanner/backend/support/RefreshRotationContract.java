@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.auth.token.LogoutRevocation;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
-import org.danteplanner.backend.auth.token.RotationResult;
+import org.danteplanner.backend.auth.token.RotationOutcome;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.user.api.UserRole;
@@ -40,9 +40,9 @@ public interface RefreshRotationContract {
         return jwt().service().validateRefreshToken(token);
     }
 
-    private static RotationResult.Rotated rotated(RotationResult result) {
-        assertThat(result).isInstanceOf(RotationResult.Rotated.class);
-        return (RotationResult.Rotated) result;
+    private static RotationOutcome.Rotated rotated(RotationOutcome result) {
+        assertThat(result).isInstanceOf(RotationOutcome.Rotated.class);
+        return (RotationOutcome.Rotated) result;
     }
 
     @Test
@@ -51,22 +51,22 @@ public interface RefreshRotationContract {
         String login = freshLogin(userId);
         TokenClaims presented = claimsOf(login);
 
-        RotationResult.Rotated result = rotated(rotation().rotate(login));
+        RotationOutcome.Rotated result = rotated(rotation().rotate(login));
 
         assertThat(claimsOf(result.newRefreshJwt())).isEqualTo(result.claims());
         assertThat(result.claims().userId()).isEqualTo(userId);
-        assertThat(result.claims().familyId()).isEqualTo(presented.familyId());
-        assertThat(result.claims().parentJti()).isEqualTo(presented.jti());
-        assertThat(result.claims().jti()).isNotEqualTo(presented.jti());
+        assertThat(TestJwt.familyIdOf(result.claims())).isEqualTo(TestJwt.familyIdOf(presented));
+        assertThat(TestJwt.parentJtiOf(result.claims())).isEqualTo(TestJwt.jtiOf(presented));
+        assertThat(TestJwt.jtiOf(result.claims())).isNotEqualTo(TestJwt.jtiOf(presented));
     }
 
     @Test
     default void rotate_WhenTheSameTokenIsRetriedWithinTheWindow_HandsBackTheSameSuccessor() {
         RefreshRotationService rotation = rotation();
         String login = freshLogin(freshUserId());
-        RotationResult.Rotated first = rotated(rotation.rotate(login));
+        RotationOutcome.Rotated first = rotated(rotation.rotate(login));
 
-        RotationResult.Rotated retry = rotated(rotation.rotate(login));
+        RotationOutcome.Rotated retry = rotated(rotation.rotate(login));
 
         assertThat(retry.newRefreshJwt()).isEqualTo(first.newRefreshJwt());
     }
@@ -75,40 +75,40 @@ public interface RefreshRotationContract {
     default void rotate_WhenTheSameTokenIsRetriedOutsideTheWindow_SupersedesTheFirstSuccessor() {
         RefreshRotationService rotation = rotation(true, NO_REUSE_WINDOW_MS);
         String login = freshLogin(freshUserId());
-        RotationResult.Rotated first = rotated(rotation.rotate(login));
+        RotationOutcome.Rotated first = rotated(rotation.rotate(login));
 
-        RotationResult.Rotated retry = rotated(rotation.rotate(login));
+        RotationOutcome.Rotated retry = rotated(rotation.rotate(login));
 
         assertThat(retry.newRefreshJwt()).isNotEqualTo(first.newRefreshJwt());
         assertThat(rotation.rotate(first.newRefreshJwt()))
-                .isEqualTo(new RotationResult.Revoked(claimsOf(login).familyId()));
+                .isEqualTo(new RotationOutcome.Revoked(TestJwt.familyIdOf(claimsOf(login))));
     }
 
     @Test
     default void rotate_WhenASuccessorIsUsed_LetsItRotateAgain() {
         RefreshRotationService rotation = rotation();
         String login = freshLogin(freshUserId());
-        RotationResult.Rotated second = rotated(rotation.rotate(login));
+        RotationOutcome.Rotated second = rotated(rotation.rotate(login));
 
-        RotationResult.Rotated third = rotated(rotation.rotate(second.newRefreshJwt()));
+        RotationOutcome.Rotated third = rotated(rotation.rotate(second.newRefreshJwt()));
 
-        assertThat(third.claims().parentJti()).isEqualTo(second.claims().jti());
-        assertThat(third.claims().familyId()).isEqualTo(second.claims().familyId());
+        assertThat(TestJwt.parentJtiOf(third.claims())).isEqualTo(TestJwt.jtiOf(second.claims()));
+        assertThat(TestJwt.familyIdOf(third.claims())).isEqualTo(TestJwt.familyIdOf(second.claims()));
     }
 
     @Test
     default void rotate_WhenARetiredParentIsReplayed_RevokesTheWholeFamily() {
         RefreshRotationService rotation = rotation();
         String login = freshLogin(freshUserId());
-        RotationResult.Rotated second = rotated(rotation.rotate(login));
-        RotationResult.Rotated third = rotated(rotation.rotate(second.newRefreshJwt()));
+        RotationOutcome.Rotated second = rotated(rotation.rotate(login));
+        RotationOutcome.Rotated third = rotated(rotation.rotate(second.newRefreshJwt()));
 
-        RotationResult replay = rotation.rotate(login);
+        RotationOutcome replay = rotation.rotate(login);
 
-        String familyId = claimsOf(login).familyId();
-        assertThat(replay).isEqualTo(new RotationResult.Revoked(familyId));
+        String familyId = TestJwt.familyIdOf(claimsOf(login));
+        assertThat(replay).isEqualTo(new RotationOutcome.Revoked(familyId));
         assertThat(rotation.rotate(third.newRefreshJwt()))
-                .isEqualTo(new RotationResult.Rejected(RotationResult.Rejected.Reason.REVOKED_FAMILY));
+                .isEqualTo(new RotationOutcome.Rejected(RotationOutcome.Rejected.Reason.REVOKED_FAMILY));
     }
 
     @Test
@@ -116,10 +116,10 @@ public interface RefreshRotationContract {
         RefreshRotationService rotation = rotation();
         String login = freshLogin(freshUserId());
 
-        rotation.revokeFamily(claimsOf(login).familyId());
+        rotation.revokeFamily(TestJwt.familyIdOf(claimsOf(login)));
 
         assertThat(rotation.rotate(login))
-                .isEqualTo(new RotationResult.Rejected(RotationResult.Rejected.Reason.REVOKED_FAMILY));
+                .isEqualTo(new RotationOutcome.Rejected(RotationOutcome.Rejected.Reason.REVOKED_FAMILY));
     }
 
     @Test
@@ -127,10 +127,10 @@ public interface RefreshRotationContract {
         RefreshRotationService rotation = rotation();
         String login = freshLogin(freshUserId());
 
-        blacklist().revokeLogoutSession(List.of(new LogoutRevocation.FamilyRevocation(claimsOf(login).familyId())));
+        blacklist().revokeLogoutSession(List.of(new LogoutRevocation.FamilyRevocation(TestJwt.familyIdOf(claimsOf(login)))));
 
         assertThat(rotation.rotate(login))
-                .isEqualTo(new RotationResult.Rejected(RotationResult.Rejected.Reason.REVOKED_FAMILY));
+                .isEqualTo(new RotationOutcome.Rejected(RotationOutcome.Rejected.Reason.REVOKED_FAMILY));
     }
 
     @Test
@@ -143,7 +143,7 @@ public interface RefreshRotationContract {
         blacklist().invalidateUserTokens(userId);
 
         assertThat(rotation().rotate(login))
-                .isEqualTo(new RotationResult.Rejected(RotationResult.Rejected.Reason.REVOKED_FAMILY));
+                .isEqualTo(new RotationOutcome.Rejected(RotationOutcome.Rejected.Reason.REVOKED_FAMILY));
     }
 
     @Test
@@ -154,13 +154,13 @@ public interface RefreshRotationContract {
 
         String login = freshLogin(userId);
 
-        assertThat(rotation().rotate(login)).isInstanceOf(RotationResult.Rotated.class);
+        assertThat(rotation().rotate(login)).isInstanceOf(RotationOutcome.Rotated.class);
     }
 
     @Test
     default void rotate_WhenTheTokenIsNotAJwt_RejectsItAsInvalid() {
         assertThat(rotation().rotate("not-a-jwt"))
-                .isEqualTo(new RotationResult.Rejected(RotationResult.Rejected.Reason.INVALID));
+                .isEqualTo(new RotationOutcome.Rejected(RotationOutcome.Rejected.Reason.INVALID));
     }
 
     @Test
@@ -168,7 +168,7 @@ public interface RefreshRotationContract {
         String access = jwt().service().generateAccessToken(freshUserId(), UserRole.NORMAL);
 
         assertThat(rotation().rotate(access))
-                .isEqualTo(new RotationResult.Rejected(RotationResult.Rejected.Reason.INVALID));
+                .isEqualTo(new RotationOutcome.Rejected(RotationOutcome.Rejected.Reason.INVALID));
     }
 
     @Test
@@ -177,10 +177,10 @@ public interface RefreshRotationContract {
         String legacy = jwt().legacyRefreshToken(userId);
         long issuedAtMs = claimsOf(legacy).issuedAt().getTime();
 
-        RotationResult.Rotated result = rotated(rotation().rotate(legacy));
+        RotationOutcome.Rotated result = rotated(rotation().rotate(legacy));
 
-        assertThat(result.claims().familyId()).isEqualTo(RefreshRotationService.legacyFamilyId(userId, issuedAtMs));
-        assertThat(result.claims().parentJti()).isNotNull();
+        assertThat(TestJwt.familyIdOf(result.claims())).isEqualTo(RefreshRotationService.legacyFamilyId(userId, issuedAtMs));
+        assertThat(TestJwt.parentJtiOf(result.claims())).isNotNull();
     }
 
     @Test
@@ -188,6 +188,6 @@ public interface RefreshRotationContract {
         String legacy = jwt().legacyRefreshToken(freshUserId());
 
         assertThat(rotation(false, REUSE_WINDOW_MS).rotate(legacy))
-                .isEqualTo(new RotationResult.Rejected(RotationResult.Rejected.Reason.INVALID));
+                .isEqualTo(new RotationOutcome.Rejected(RotationOutcome.Rejected.Reason.INVALID));
     }
 }

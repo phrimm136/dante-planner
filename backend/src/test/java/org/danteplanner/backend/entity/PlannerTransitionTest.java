@@ -1,6 +1,7 @@
 package org.danteplanner.backend.entity;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PublicationChange;
+import org.danteplanner.backend.planner.entity.PlannerPublication;
+import org.danteplanner.backend.planner.entity.PublicationOutcome;
 
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -17,6 +18,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class PlannerTransitionTest {
 
+    private static final Instant NOW = Instant.parse("2026-11-23T00:00:00Z");
+
+    private static final Instant EARLIER = Instant.parse("2026-01-01T00:00:00Z");
+
     private static TestDataFactory.PlannerBuilder planner() {
         return TestDataFactory.planner(TestDataFactory.unsavedUser(UserRole.NORMAL));
     }
@@ -24,7 +29,7 @@ class PlannerTransitionTest {
     @Test
     void takeDown_WhenPublished_UnpublishesAndStamps() {
         Planner planner = planner().build();
-        planner.publish();
+        planner.publish(NOW);
 
         planner.takeDown();
 
@@ -37,7 +42,7 @@ class PlannerTransitionTest {
         Planner planner = planner().build();
         planner.takeDown();
 
-        assertThatThrownBy(planner::publish)
+        assertThatThrownBy(() -> planner.publish(NOW))
                 .isInstanceOf(PlannerForbiddenException.class)
                 .extracting(ex -> ((PlannerForbiddenException) ex).getPlannerId())
                 .isEqualTo(planner.getId());
@@ -47,7 +52,7 @@ class PlannerTransitionTest {
     void publish_WhenFirstPublish_StampsFirstPublishedAtOnce() {
         Planner planner = planner().build();
 
-        planner.publish();
+        planner.publish(NOW);
         Instant firstStamp = planner.getFirstPublishedAt();
 
         assertThat(planner.isPublished()).isTrue();
@@ -56,7 +61,7 @@ class PlannerTransitionTest {
         planner.unpublish();
         assertThat(planner.isPublished()).isFalse();
 
-        planner.publish();
+        planner.publish(NOW);
         assertThat(planner.isPublished()).isTrue();
         assertThat(planner.getFirstPublishedAt()).isEqualTo(firstStamp);
     }
@@ -65,15 +70,43 @@ class PlannerTransitionTest {
     void publish_WhenAlreadyPublished_ChangesNothing() {
         Planner planner = planner().build();
 
-        planner.publish();
+        planner.publish(NOW);
         Instant firstStamp = planner.getFirstPublishedAt();
 
-        assertThat(planner.publish()).isEqualTo(PublicationChange.NONE);
+        assertThat(planner.publish(NOW)).isEqualTo(PublicationOutcome.NONE);
 
         assertThat(planner.isPublished()).isTrue();
         assertThat(planner.getFirstPublishedAt())
                 .as("re-applying the state a planner already holds is a no-op, stamp included")
                 .isEqualTo(firstStamp);
+    }
+
+    @Test
+    void publish_WhenNeverPublished_StampsNowAsTheFirstPublish() {
+        PlannerPublication.Transition transition = PlannerPublication.publish(false, new PlannerPublication.FirstPublished.Never(), NOW);
+
+        assertThat(transition).isEqualTo(new PlannerPublication.Transition(true, new PlannerPublication.FirstPublished.At(NOW), PublicationOutcome.FIRST_PUBLISH));
+    }
+
+    @Test
+    void publish_WhenPublishedBefore_KeepsTheFirstStampAsARepublish() {
+        PlannerPublication.Transition transition = PlannerPublication.publish(false, new PlannerPublication.FirstPublished.At(EARLIER), NOW);
+
+        assertThat(transition).isEqualTo(new PlannerPublication.Transition(true, new PlannerPublication.FirstPublished.At(EARLIER), PublicationOutcome.REPUBLISH));
+    }
+
+    @Test
+    void takeDown_WhenUnpublishedButNewlyModerated_IsAWithdrawal() {
+        PlannerPublication.Transition transition = PlannerPublication.takeDown(false, new PlannerPublication.FirstPublished.At(EARLIER), true);
+
+        assertThat(transition).isEqualTo(new PlannerPublication.Transition(false, new PlannerPublication.FirstPublished.At(EARLIER), PublicationOutcome.WITHDRAWN));
+    }
+
+    @Test
+    void takeDown_WhenUnpublishedAndAlreadyTakenDown_ChangesNothing() {
+        PlannerPublication.Transition transition = PlannerPublication.takeDown(false, new PlannerPublication.FirstPublished.At(EARLIER), false);
+
+        assertThat(transition.outcome()).isEqualTo(PublicationOutcome.NONE);
     }
 
     @Test
@@ -113,7 +146,7 @@ class PlannerTransitionTest {
     @Test
     void unpublish_WhenTakenDown_KeepsTakenDownAt() {
         Planner planner = planner().build();
-        planner.publish();
+        planner.publish(NOW);
         planner.takeDown();
         Instant takenDownAt = planner.getTakenDownAt();
 

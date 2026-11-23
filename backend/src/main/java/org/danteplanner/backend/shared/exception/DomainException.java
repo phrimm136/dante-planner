@@ -6,18 +6,23 @@ import org.springframework.web.ErrorResponseException;
 
 public abstract class DomainException extends ErrorResponseException {
 
+    private final String detail;
+
     protected DomainException(ErrorKind kind, String code, String detail) {
-        this(kind, code, detail, null);
+        super(statusOf(kind), ProblemDetail.forStatus(statusOf(kind)), null);
+        Problems.fill(getBody(), code, detail);
+        this.detail = detail;
     }
 
     protected DomainException(ErrorKind kind, String code, String detail, Throwable cause) {
         super(statusOf(kind), ProblemDetail.forStatus(statusOf(kind)), cause);
         Problems.fill(getBody(), code, detail);
+        this.detail = detail;
     }
 
     @Override
     public String getMessage() {
-        return getBody().getDetail();
+        return detail;
     }
 
     public boolean reportable() {

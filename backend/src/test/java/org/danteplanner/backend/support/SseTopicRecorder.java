@@ -74,41 +74,41 @@ public final class SseTopicRecorder implements AutoCloseable {
         return recorder;
     }
 
-    public List<SseEnvelope> userEvents(Long userId) {
+    public List<SseEnvelope.Wire> userEvents(Long userId) {
         return envelopes.userEvents(userId);
     }
 
-    public List<SseEnvelope> userEvents(Long userId, SseEventType type) {
+    public List<SseEnvelope.Wire> userEvents(Long userId, SseEventType type) {
         return envelopes.userEvents(userId, type);
     }
 
-    public List<SseEnvelope> commentEvents(UUID plannerId) {
+    public List<SseEnvelope.Wire> commentEvents(UUID plannerId) {
         return envelopes.commentEvents(plannerId);
     }
 
-    public List<SseEnvelope> commentEvents(UUID plannerId, SseEventType type) {
+    public List<SseEnvelope.Wire> commentEvents(UUID plannerId, SseEventType type) {
         return envelopes.commentEvents(plannerId, type);
     }
 
-    public List<SseEnvelope> broadcasts(Predicate<SseEnvelope> envelope) {
+    public List<SseEnvelope.Wire> broadcasts(Predicate<SseEnvelope.Wire> envelope) {
         return envelopes.broadcasts(envelope);
     }
 
-    public List<SseEnvelope> broadcasts(SseEventType type, Predicate<Object> payload) {
+    public List<SseEnvelope.Wire> broadcasts(SseEventType type, Predicate<Object> payload) {
         return envelopes.broadcasts(type, payload);
     }
 
-    public List<SseEnvelope> awaitUserEvents(Long userId, SseEventType type, Duration timeout) {
+    public List<SseEnvelope.Wire> awaitUserEvents(Long userId, SseEventType type, Duration timeout) {
         return envelopes.await(() -> envelopes.userEvents(userId, type), timeout,
                 "a " + type + " envelope for user " + userId);
     }
 
-    public List<SseEnvelope> awaitCommentEvents(UUID plannerId, SseEventType type, Duration timeout) {
+    public List<SseEnvelope.Wire> awaitCommentEvents(UUID plannerId, SseEventType type, Duration timeout) {
         return envelopes.await(() -> envelopes.commentEvents(plannerId, type), timeout,
                 "a " + type + " envelope for planner " + plannerId);
     }
 
-    public List<SseEnvelope> awaitBroadcasts(SseEventType type, Predicate<Object> payload, Duration timeout) {
+    public List<SseEnvelope.Wire> awaitBroadcasts(SseEventType type, Predicate<Object> payload, Duration timeout) {
         return envelopes.await(() -> envelopes.broadcasts(type, payload), timeout,
                 "a matching " + type + " broadcast");
     }
@@ -145,51 +145,51 @@ public final class SseTopicRecorder implements AutoCloseable {
             return;
         }
         SseChannel channel = SseChannel.fromTopic(topic);
-        envelopes.record(channel, objectMapper.readValue(message.getBody(), SseEnvelope.class));
+        envelopes.record(channel, objectMapper.readValue(message.getBody(), SseEnvelope.Wire.class));
     }
 
     static final class Envelopes {
 
-        private record Recorded(SseChannel channel, SseEnvelope envelope) {
+        private record Recorded(SseChannel channel, SseEnvelope.Wire envelope) {
         }
 
         private final List<Recorded> recorded = new ArrayList<>();
 
-        synchronized void record(SseChannel channel, SseEnvelope envelope) {
+        synchronized void record(SseChannel channel, SseEnvelope.Wire envelope) {
             recorded.add(new Recorded(channel, envelope));
             notifyAll();
         }
 
-        List<SseEnvelope> userEvents(Long userId) {
+        List<SseEnvelope.Wire> userEvents(Long userId) {
             return matching(SseChannel.USER, envelope -> Objects.equals(envelope.userId(), userId));
         }
 
-        List<SseEnvelope> userEvents(Long userId, SseEventType type) {
+        List<SseEnvelope.Wire> userEvents(Long userId, SseEventType type) {
             return matching(SseChannel.USER, envelope -> envelope.type() == type
                     && Objects.equals(envelope.userId(), userId));
         }
 
-        List<SseEnvelope> commentEvents(UUID plannerId) {
+        List<SseEnvelope.Wire> commentEvents(UUID plannerId) {
             return matching(SseChannel.COMMENT, envelope -> plannerId.toString().equals(envelope.plannerId()));
         }
 
-        List<SseEnvelope> commentEvents(UUID plannerId, SseEventType type) {
+        List<SseEnvelope.Wire> commentEvents(UUID plannerId, SseEventType type) {
             return matching(SseChannel.COMMENT, envelope -> envelope.type() == type
                     && plannerId.toString().equals(envelope.plannerId()));
         }
 
-        List<SseEnvelope> broadcasts(Predicate<SseEnvelope> envelope) {
+        List<SseEnvelope.Wire> broadcasts(Predicate<SseEnvelope.Wire> envelope) {
             return matching(SseChannel.BROADCAST, envelope);
         }
 
-        List<SseEnvelope> broadcasts(SseEventType type, Predicate<Object> payload) {
+        List<SseEnvelope.Wire> broadcasts(SseEventType type, Predicate<Object> payload) {
             return matching(SseChannel.BROADCAST, envelope -> envelope.type() == type
                     && payload.test(envelope.payload()));
         }
 
-        synchronized List<SseEnvelope> await(Supplier<List<SseEnvelope>> query, Duration timeout, String what) {
+        synchronized List<SseEnvelope.Wire> await(Supplier<List<SseEnvelope.Wire>> query, Duration timeout, String what) {
             long deadline = System.nanoTime() + timeout.toNanos();
-            List<SseEnvelope> found = query.get();
+            List<SseEnvelope.Wire> found = query.get();
             while (found.isEmpty()) {
                 long remainingMillis = TimeUnit.NANOSECONDS.toMillis(deadline - System.nanoTime());
                 if (remainingMillis <= 0) {
@@ -206,7 +206,7 @@ public final class SseTopicRecorder implements AutoCloseable {
             return found;
         }
 
-        private synchronized List<SseEnvelope> matching(SseChannel channel, Predicate<SseEnvelope> filter) {
+        private synchronized List<SseEnvelope.Wire> matching(SseChannel channel, Predicate<SseEnvelope.Wire> filter) {
             return recorded.stream()
                     .filter(entry -> entry.channel() == channel)
                     .map(Recorded::envelope)

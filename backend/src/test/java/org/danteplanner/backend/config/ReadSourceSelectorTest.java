@@ -70,9 +70,9 @@ class ReadSourceSelectorTest {
     private Connection secondConnection;
 
     private final CircuitBreaker firstBreaker =
-            CircuitBreaker.of("first", new ReadSourceProperties.Breaker().circuitBreakerConfig());
+            CircuitBreaker.of("first", ReadSourceProperties.Breaker.defaults().circuitBreakerConfig());
     private final CircuitBreaker secondBreaker =
-            CircuitBreaker.of("second", new ReadSourceProperties.Breaker().circuitBreakerConfig());
+            CircuitBreaker.of("second", ReadSourceProperties.Breaker.defaults().circuitBreakerConfig());
     private ReadSourceSelector selector;
 
     @BeforeEach
@@ -209,7 +209,7 @@ class ReadSourceSelectorTest {
             throws SQLException {
         SteppedClock clock = new SteppedClock();
         CircuitBreaker defaultBreaker = CircuitBreaker.of("default", CircuitBreakerConfig
-                .from(new ReadSourceProperties.Breaker().circuitBreakerConfig())
+                .from(ReadSourceProperties.Breaker.defaults().circuitBreakerConfig())
                 .clock(clock)
                 .build());
         ReadSourceSelector defaults = new ReadSourceSelector(List.of(

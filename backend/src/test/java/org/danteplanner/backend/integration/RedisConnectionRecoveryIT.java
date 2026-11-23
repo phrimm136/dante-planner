@@ -299,7 +299,7 @@ class RedisConnectionRecoveryIT {
     }
 
     private void assertResubscribes(SseStream stream, Long userId) throws IOException {
-        ssePublisher.publishUserEvent(userId, null, SseEventType.COMMENT_ADDED, "recovery-warmup",
+        ssePublisher.publishUserEvent(userId, SseEventType.COMMENT_ADDED, "recovery-warmup",
                 Map.of("id", "recovery-warmup"));
         stream.next("comment:added", data -> data.contains("recovery-warmup"));
 
@@ -312,7 +312,7 @@ class RedisConnectionRecoveryIT {
         AtomicInteger attempts = new AtomicInteger();
         Hang.until(() -> {
             String attempt = "recovery-attempt-" + attempts.getAndIncrement();
-            ssePublisher.publishUserEvent(userId, null, SseEventType.COMMENT_ADDED, attempt, Map.of("id", attempt));
+            ssePublisher.publishUserEvent(userId, SseEventType.COMMENT_ADDED, attempt, Map.of("id", attempt));
             return stream.received("comment:added", data -> data.contains("recovery-attempt-"));
         }, "cross-node fan-out self-healing after a severed subscriber connection: "
                 + "a dead subscription until pod restart silently disables multi-device sync");
@@ -325,7 +325,7 @@ class RedisConnectionRecoveryIT {
         try (SseStream stream = SseStream.user(port, AuthCookies.session(
                 TestDataFactory.generateAccessToken(jwtTokenService, user), UUID.randomUUID()));
                 HttpClient http = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build()) {
-            ssePublisher.publishUserEvent(userId, null, SseEventType.COMMENT_ADDED, "recovery-probe-warmup",
+            ssePublisher.publishUserEvent(userId, SseEventType.COMMENT_ADDED, "recovery-probe-warmup",
                     Map.of("id", "recovery-probe-warmup"));
             stream.next("comment:added", data -> data.contains("recovery-probe-warmup"));
 
@@ -345,7 +345,7 @@ class RedisConnectionRecoveryIT {
             AtomicInteger attempts = new AtomicInteger();
             Hang.until(() -> {
                 String attempt = "recovery-probe-attempt-" + attempts.getAndIncrement();
-                ssePublisher.publishUserEvent(userId, null, SseEventType.COMMENT_ADDED, attempt, Map.of("id", attempt));
+                ssePublisher.publishUserEvent(userId, SseEventType.COMMENT_ADDED, attempt, Map.of("id", attempt));
                 return stream.received("comment:added", data -> data.contains("recovery-probe-attempt-"));
             }, "an event published after the probe restored the subscription reaching the stream");
         }

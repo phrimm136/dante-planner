@@ -62,11 +62,9 @@ final class RaiseBatcher implements AutoCloseable {
     private final Counter waitTimeouts;
     private final LongSupplier clock;
     private final BlockingQueue<RaiseRequest> queue = new LinkedBlockingQueue<>();
-    private Thread worker;
-    private boolean closed;
-    private volatile Endpoint endpoint;
-    private StatefulRedisConnection<String, String> connection;
-    private String scriptSha;
+    private WorkerState workerState = new WorkerState.Idle();
+    private volatile Opened opened = new Opened.None();
+    private Link link = new Link.Unlinked();
 
     RaiseBatcher(Supplier<Endpoint> endpointFactory, int waitReplicas, Duration waitBound, Duration margin,
             Counter raiseFailures, Counter waitTimeouts, LongSupplier clock) {
@@ -99,17 +97,20 @@ final class RaiseBatcher implements AutoCloseable {
 
     @Override
     public void close() {
-        Thread running;
+        WorkerState before;
         synchronized (this) {
-            if (closed) {
+            before = workerState;
+            workerState = new WorkerState.Closed();
+        }
+        switch (before) {
+            case WorkerState.Closed closed -> {
                 return;
             }
-            closed = true;
-            running = worker;
-        }
-        if (running != null) {
-            running.interrupt();
-            join(running);
+            case WorkerState.Started started -> {
+                started.thread().interrupt();
+                join(started.thread());
+            }
+            case WorkerState.Idle idle -> { }
         }
         List<RaiseRequest> pending = new ArrayList<>();
         queue.drainTo(pending);
@@ -117,25 +118,33 @@ final class RaiseBatcher implements AutoCloseable {
             log.warn("Freshness markers of {} requests not raised: marker store closed", pending.size());
         }
         fail(pending);
-        Endpoint opened = endpoint;
-        if (opened != null) {
-            opened.client().shutdown();
+        switch (opened) {
+            case Opened.Endpointed endpointed -> endpointed.endpoint().client().shutdown();
+            case Opened.None none -> { }
         }
     }
 
     private synchronized boolean enqueue(RaiseRequest request) {
-        if (closed) {
-            return false;
-        }
-        if (worker == null || !worker.isAlive()) {
-            worker = new Thread(this::drain, THREAD_NAME);
-            worker.setDaemon(true);
-            worker.setUncaughtExceptionHandler((thread, error) ->
-                    log.error("Freshness marker worker {} died; the next raise starts a new one", thread.getName(), error));
-            worker.start();
+        switch (workerState) {
+            case WorkerState.Closed closed -> {
+                return false;
+            }
+            case WorkerState.Started started when started.thread().isAlive() -> {
+            }
+            case WorkerState.Started started -> startWorker();
+            case WorkerState.Idle idle -> startWorker();
         }
         queue.add(request);
         return true;
+    }
+
+    private void startWorker() {
+        Thread worker = new Thread(this::drain, THREAD_NAME);
+        worker.setDaemon(true);
+        worker.setUncaughtExceptionHandler((thread, error) ->
+                log.error("Freshness marker worker {} died; the next raise starts a new one", thread.getName(), error));
+        worker.start();
+        workerState = new WorkerState.Started(worker);
     }
 
     private void join(Thread running) {
@@ -199,16 +208,19 @@ final class RaiseBatcher implements AutoCloseable {
     }
 
     private long replicate(List<RaiseRequest> batch, long deadline) {
-        StatefulRedisConnection<String, String> open = connection(deadline);
+        Link.Linked linked = linked(deadline);
         try {
-            return pipeline(open.async(), batch, deadline);
+            return pipeline(linked.connection().async(), linked.scriptSha(), batch, deadline);
         } catch (RedisNoScriptException e) {
-            scriptSha = await(open.async().scriptLoad(RAISE_SCRIPT), deadline);
-            return pipeline(open.async(), batch, deadline);
+            Link.Linked reloaded = new Link.Linked(linked.connection(),
+                    await(linked.connection().async().scriptLoad(RAISE_SCRIPT), deadline));
+            link = reloaded;
+            return pipeline(reloaded.connection().async(), reloaded.scriptSha(), batch, deadline);
         }
     }
 
-    private long pipeline(RedisAsyncCommands<String, String> commands, List<RaiseRequest> batch, long deadline) {
+    private long pipeline(RedisAsyncCommands<String, String> commands, String scriptSha, List<RaiseRequest> batch,
+            long deadline) {
         long waitNanos = Math.min(waitBound.toNanos(), deadline - clock.getAsLong() - margin.toNanos());
         List<RedisFuture<Long>> raises = batch.stream()
                 .map(request -> commands.<Long>evalsha(
@@ -224,22 +236,96 @@ final class RaiseBatcher implements AutoCloseable {
         return await(replicated, deadline);
     }
 
-    private StatefulRedisConnection<String, String> connection(long deadline) {
-        if (connection == null || !connection.isOpen()) {
-            closeConnection();
-            if (endpoint == null) {
-                endpoint = endpointFactory.get();
+    private Link.Linked linked(long deadline) {
+        return switch (LinkUse.of(link, isLinkOpen())) {
+            case LinkUse.Keep keep -> keep.linked();
+            case LinkUse.Replace replace -> relink(deadline);
+        };
+    }
+
+    private boolean isLinkOpen() {
+        return switch (link) {
+            case Link.Linked linked -> linked.connection().isOpen();
+            case Link.Unlinked unlinked -> false;
+        };
+    }
+
+    private Link.Linked relink(long deadline) {
+        closeConnection();
+        Endpoint endpoint = switch (opened) {
+            case Opened.Endpointed endpointed -> endpointed.endpoint();
+            case Opened.None none -> {
+                Endpoint created = endpointFactory.get();
+                opened = new Opened.Endpointed(created);
+                yield created;
             }
-            connection = endpoint.client().connect(StringCodec.UTF8, endpoint.uri());
-            scriptSha = await(connection.async().scriptLoad(RAISE_SCRIPT), deadline);
+        };
+        StatefulRedisConnection<String, String> connection = endpoint.client().connect(StringCodec.UTF8, endpoint.uri());
+        try {
+            Link.Linked linked =
+                    new Link.Linked(connection, await(connection.async().scriptLoad(RAISE_SCRIPT), deadline));
+            link = linked;
+            return linked;
+        } catch (RuntimeException | Error e) {
+            connection.closeAsync();
+            throw e;
         }
-        return connection;
     }
 
     private void closeConnection() {
-        if (connection != null) {
-            connection.closeAsync();
-            connection = null;
+        switch (link) {
+            case Link.Linked linked -> {
+                linked.connection().closeAsync();
+                link = new Link.Unlinked();
+            }
+            case Link.Unlinked unlinked -> { }
+        }
+    }
+
+    private sealed interface WorkerState {
+
+        record Idle() implements WorkerState {
+        }
+
+        record Started(Thread thread) implements WorkerState {
+        }
+
+        record Closed() implements WorkerState {
+        }
+    }
+
+    private sealed interface Opened {
+
+        record None() implements Opened {
+        }
+
+        record Endpointed(Endpoint endpoint) implements Opened {
+        }
+    }
+
+    private sealed interface LinkUse {
+
+        record Keep(Link.Linked linked) implements LinkUse {
+        }
+
+        record Replace() implements LinkUse {
+        }
+
+        static LinkUse of(Link link, boolean open) {
+            return switch (link) {
+                case Link.Linked linked when open -> new Keep(linked);
+                case Link.Linked linked -> new Replace();
+                case Link.Unlinked unlinked -> new Replace();
+            };
+        }
+    }
+
+    private sealed interface Link {
+
+        record Unlinked() implements Link {
+        }
+
+        record Linked(StatefulRedisConnection<String, String> connection, String scriptSha) implements Link {
         }
     }
 

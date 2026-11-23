@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Persistable;
 
 import java.time.Instant;
@@ -58,5 +59,5 @@ public class PlannerStats implements Persistable<UUID> {
     private int commentCount;
 
     @Column(name = "recommended_notified_at")
-    private Instant recommendedNotifiedAt;
+    private @Nullable Instant recommendedNotifiedAt;
 }

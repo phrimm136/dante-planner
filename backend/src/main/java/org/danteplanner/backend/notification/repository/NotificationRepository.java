@@ -1,5 +1,7 @@
 package org.danteplanner.backend.notification.repository;
 
+import org.jspecify.annotations.Nullable;
+
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.api.NotificationType;
 import org.springframework.data.domain.Page;
@@ -40,10 +42,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             @Param("userId") Long userId,
             @Param("contentId") String contentId,
             @Param("type") String type,
-            @Param("plannerId") String plannerId,
-            @Param("plannerTitle") String plannerTitle,
-            @Param("commentSnippet") String commentSnippet,
-            @Param("commentPublicId") String commentPublicId);
+            @Param("plannerId") @Nullable String plannerId,
+            @Param("plannerTitle") @Nullable String plannerTitle,
+            @Param("commentSnippet") @Nullable String commentSnippet,
+            @Param("commentPublicId") @Nullable String commentPublicId);
 
     Page<Notification> findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(Long userId, Pageable pageable);
 

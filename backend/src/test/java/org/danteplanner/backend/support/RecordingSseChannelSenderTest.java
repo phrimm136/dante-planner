@@ -49,7 +49,7 @@ class RecordingSseChannelSenderTest {
         publisher.publishUserEvent(USER_ID, SseEventType.NOTIFY_COMMENT, "comment-2", Map.of("title", "Planner"));
 
         assertThat(meterRegistry.get("sse.publish.dropped").counter().count()).isEqualTo(1.0);
-        assertThat(sender.envelopes(SseChannel.USER)).extracting(SseEnvelope::entityId).containsExactly("comment-2");
+        assertThat(sender.envelopes(SseChannel.USER)).extracting(SseEnvelope.Wire::entityId).containsExactly("comment-2");
         assertThat(sender.attempts()).hasSize(2).first().isEqualTo(new Failed(Operation.SEND, down));
     }
 }

@@ -83,7 +83,7 @@ class UserServiceTest {
             when(userRepository.insert(any(User.class))).thenThrow(
                     IntegrityViolations.duplicateEntry("users.uk_provider_provider_id"));
 
-            User resolved = userService.findOrCreateUser("google", IDENTITY);
+            User resolved = userService.findOrCreateUser("google", IDENTITY.get("id"), IDENTITY.get("email"));
 
             assertThat(resolved.getId()).isEqualTo(testUser.getId());
             // A constraint no new suffix can satisfy must not be retried against new suffixes.
@@ -98,7 +98,8 @@ class UserServiceTest {
             when(userRepository.insert(any(User.class))).thenThrow(
                     IntegrityViolations.duplicateEntry("users.uk_users_username_suffix"));
 
-            assertThatThrownBy(() -> userService.findOrCreateUser("google", IDENTITY))
+            assertThatThrownBy(() -> userService.findOrCreateUser(
+                    "google", IDENTITY.get("id"), IDENTITY.get("email")))
                     .isInstanceOf(UsernameGenerationException.class)
                     .hasMessageStartingWith("Failed to generate unique username");
 
@@ -268,7 +269,8 @@ class UserServiceTest {
             assertRejected(() -> userService.findById(nonExistentId))
                     .withCode("USER_NOT_FOUND")
                     .isInstanceOfSatisfying(UserNotFoundException.class,
-                            exception -> assertThat(exception.getUserId()).isEqualTo(nonExistentId));
+                            exception -> assertThat(exception.getMessage())
+                                    .isEqualTo("User not found with id: " + nonExistentId));
         }
     }
 }

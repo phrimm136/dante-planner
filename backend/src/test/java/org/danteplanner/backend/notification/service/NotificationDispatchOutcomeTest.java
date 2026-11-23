@@ -150,14 +150,8 @@ class NotificationDispatchOutcomeTest {
 
     /** The row as the persistence callbacks would hand it back. */
     private static Notification persisted() {
-        Notification notification = new Notification(
-                RECIPIENT_ID,
-                PLANNER_ID.toString(),
-                NotificationType.PLANNER_RECOMMENDED,
-                PLANNER_ID,
-                TITLE,
-                null,
-                null);
+        Notification notification = new Notification(RECIPIENT_ID, PLANNER_ID.toString(), NotificationType.PLANNER_RECOMMENDED,
+                new Notification.Content.PlannerScoped(PLANNER_ID, TITLE));
         notification.setPublicId(SAVED_PUBLIC_ID);
         notification.setCreatedAt(Instant.parse("2026-01-01T00:00:00Z"));
         return notification;

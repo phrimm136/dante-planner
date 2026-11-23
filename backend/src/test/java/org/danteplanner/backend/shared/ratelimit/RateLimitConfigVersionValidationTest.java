@@ -5,7 +5,10 @@ import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAut
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.boot.validation.autoconfigure.ValidationAutoConfiguration;
 
+import java.util.Arrays;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,23 +17,39 @@ class RateLimitConfigVersionValidationTest {
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(
                     ConfigurationPropertiesAutoConfiguration.class, ValidationAutoConfiguration.class))
-            .withUserConfiguration(RateLimitProperties.class);
+            .withUserConfiguration(Binding.class);
+
+    @EnableConfigurationProperties(RateLimitProperties.class)
+    static class Binding {
+    }
+
+    private static final String[] BUCKETS = Stream.of("crud", "sse", "auth", "comment", "report", "moderation",
+                    "public-read", "planner-stats", "view-record")
+            .map(bucket -> "rate-limit." + bucket + ".capacity=1")
+            .toArray(String[]::new);
+
+    @Test
+    void bucket_WhenMissing_FailsStartup() {
+        runner.withPropertyValues("rate-limit.config-version=3")
+                .withPropertyValues(Arrays.copyOf(BUCKETS, BUCKETS.length - 1))
+                .run(context -> assertThat(context).hasFailed());
+    }
 
     @Test
     void configVersion_WhenPositive_Binds() {
-        runner.withPropertyValues("rate-limit.config-version=3")
-                .run(context -> assertThat(context.getBean(RateLimitProperties.class).getConfigVersion())
+        runner.withPropertyValues(BUCKETS).withPropertyValues("rate-limit.config-version=3")
+                .run(context -> assertThat(context.getBean(RateLimitProperties.class).configVersion())
                         .isEqualTo(3));
     }
 
     @Test
     void configVersion_WhenZero_FailsStartup() {
-        runner.withPropertyValues("rate-limit.config-version=0")
+        runner.withPropertyValues(BUCKETS).withPropertyValues("rate-limit.config-version=0")
                 .run(context -> assertThat(context).hasFailed());
     }
 
     @Test
     void configVersion_WhenAbsent_FailsStartup() {
-        runner.run(context -> assertThat(context).hasFailed());
+        runner.withPropertyValues(BUCKETS).run(context -> assertThat(context).hasFailed());
     }
 }

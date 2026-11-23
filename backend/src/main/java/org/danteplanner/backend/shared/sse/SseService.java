@@ -1,5 +1,6 @@
 package org.danteplanner.backend.shared.sse;
 
+import org.danteplanner.backend.shared.security.Viewer;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -44,16 +45,16 @@ public class SseService extends AbstractSseService<Long> {
             .build();
 
     public SseEmitter subscribe(Long userId, UUID deviceId) throws IOException {
-        SseEmitter emitter = register(userId, deviceId);
+        SseEmitter emitter = register(userId, deviceId, new Viewer.Member(userId));
         log.info("SSE subscribed: user={}, device={}", userId, deviceId);
         return emitter;
     }
 
     public void sendToUser(Long userId, String eventType, Object data) {
-        sendToUser(userId, null, eventType, data);
+        sendToUser(userId, new SseEnvelope.DeviceExclusion.None(), eventType, data);
     }
 
-    public void sendToUser(Long userId, UUID excludeDeviceId, String eventType, Object data) {
+    public void sendToUser(Long userId, SseEnvelope.DeviceExclusion exclusion, String eventType, Object data) {
         if (!isEventAllowed(userId, eventType)) {
             log.debug("Event {} blocked by settings for user {}", eventType, userId);
             return;
@@ -73,7 +74,7 @@ public class SseService extends AbstractSseService<Long> {
         }
 
         for (EmitterEntry entry : userEmitters) {
-            if (excludeDeviceId != null && entry.deviceId().equals(excludeDeviceId)) {
+            if (exclusion.excludes(entry.deviceId())) {
                 continue;
             }
 
@@ -87,7 +88,7 @@ public class SseService extends AbstractSseService<Long> {
         }
     }
 
-    public void broadcastToAll(Long excludeUserId, String eventType, Object data) {
+    public void broadcastToAll(SseEnvelope.UserExclusion exclusion, String eventType, Object data) {
         String jsonData;
         try {
             jsonData = objectMapper.writeValueAsString(data);
@@ -100,7 +101,7 @@ public class SseService extends AbstractSseService<Long> {
         for (var entry : emitters.entrySet()) {
             Long userId = entry.getKey();
 
-            if (excludeUserId != null && excludeUserId.equals(userId)) {
+            if (exclusion.excludes(userId)) {
                 continue;
             }
 
@@ -121,7 +122,7 @@ public class SseService extends AbstractSseService<Long> {
         }
 
         log.info("Broadcast {} to {} devices (excluding user {}, total connected users: {})",
-                eventType, sentCount, excludeUserId, emitters.size());
+                eventType, sentCount, exclusion.describe(), emitters.size());
     }
 
     public void notifyAccountSuspended(Long userId, Object payload) {
@@ -172,12 +173,16 @@ public class SseService extends AbstractSseService<Long> {
     }
 
     private boolean isEventAllowed(Long userId, String eventType) {
-        SseEventType type = SseEventType.fromValue(eventType);
-        if (type == null) {
-            log.warn("Unrecognized SSE event type {}, not delivered to user {}", eventType, userId);
-            return false;
-        }
+        return switch (SseEventType.lookup(eventType)) {
+            case SseEventType.Lookup.Known known -> isTypeAllowed(userId, known.type());
+            case SseEventType.Lookup.Unknown unknown -> {
+                log.warn("Unrecognized SSE event type {}, not delivered to user {}", eventType, userId);
+                yield false;
+            }
+        };
+    }
 
+    private boolean isTypeAllowed(Long userId, SseEventType type) {
         NotificationPreferenceProvider.Preferences settings = cacheSettingsIfAbsent(userId);
 
         return switch (type) {

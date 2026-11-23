@@ -15,6 +15,7 @@ import lombok.Setter;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.jspecify.annotations.Nullable;
 
 import org.danteplanner.backend.planner.converter.KeywordSetConverter;
 
@@ -50,7 +51,7 @@ public class PlannerCatalog {
     @Column(name = "selected_keywords", columnDefinition = "JSON")
     @Setter
     @Convert(converter = KeywordSetConverter.class)
-    private Set<String> selectedKeywords;
+    private @Nullable Set<String> selectedKeywords;
 
     @Column(name = "first_published_at", nullable = false)
     private Instant firstPublishedAt;
@@ -58,4 +59,8 @@ public class PlannerCatalog {
     @Column(nullable = false)
     @Builder.Default
     private boolean recommended = false;
+
+    public Set<String> keywordsOrEmpty() {
+        return selectedKeywords == null ? Set.of() : selectedKeywords;
+    }
 }

@@ -6,6 +6,8 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
+
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.shared.config.SecurityProperties.CidrRange;
 
@@ -66,10 +68,11 @@ public final class ClientIpResolver {
             SecurityProperties securityProperties,
             Supplier<UUID> deviceId
     ) {
-        String ip = cloudflareIp(request, securityProperties);
-        if (ip == null) {
-            ip = resolve(request, securityProperties);
-        }
+        String ip = switch (ClientIpEvidence.of(
+                request.getHeader(CF_CONNECTING_IP), securityProperties.isTrustedProxy(request.getRemoteAddr()))) {
+            case ClientIpEvidence.Trusted trusted -> trusted.ip();
+            case ClientIpEvidence.NotEvidence notEvidence -> resolve(request, securityProperties);
+        };
 
         if (isPrivateIp(ip)) {
             UUID resolvedDeviceId = deviceId.get();
@@ -98,20 +101,25 @@ public final class ClientIpResolver {
         return PRIVATE_IPV4_RANGES.stream().anyMatch(range -> range.contains(ip));
     }
 
-    /**
-     * The edge forwards {@code CF-Connecting-IP} verbatim, so it is evidence only when the peer is
-     * the edge. {@code isValidIp} checks shape, never provenance.
-     */
-    private static String cloudflareIp(HttpServletRequest request, SecurityProperties securityProperties) {
-        String header = request.getHeader(CF_CONNECTING_IP);
-        if (header == null || header.isBlank()) {
-            return null;
+    private sealed interface ClientIpEvidence {
+
+        record Trusted(String ip) implements ClientIpEvidence {
         }
-        String claimedIp = header.trim();
-        if (!isValidIp(claimedIp) || !securityProperties.isTrustedProxy(request.getRemoteAddr())) {
-            return null;
+
+        record NotEvidence() implements ClientIpEvidence {
         }
-        return claimedIp;
+
+        /**
+         * The edge forwards {@code CF-Connecting-IP} verbatim, so it is evidence only when the peer is
+         * the edge. {@code isValidIp} checks shape, never provenance.
+         */
+        static ClientIpEvidence of(@Nullable String header, boolean peerIsTrustedProxy) {
+            if (header == null || header.isBlank()) {
+                return new NotEvidence();
+            }
+            String claimedIp = header.trim();
+            return peerIsTrustedProxy && isValidIp(claimedIp) ? new Trusted(claimedIp) : new NotEvidence();
+        }
     }
 
     /** {@code X-Forwarded-For} is {@code client, proxy1, proxy2}; the leftmost hop is the client. */

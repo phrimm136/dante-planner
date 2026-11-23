@@ -84,7 +84,7 @@ class FreshnessReadGuardTest {
     }
 
     private static CircuitBreaker breaker(String name) {
-        return CircuitBreaker.of(name, new ReadSourceProperties.Breaker().circuitBreakerConfig());
+        return CircuitBreaker.of(name, ReadSourceProperties.Breaker.defaults().circuitBreakerConfig());
     }
 
     private FreshnessReadGuard guardWaiting(FreshnessReadGuard.GtidWait gtidWait) {
@@ -121,42 +121,42 @@ class FreshnessReadGuardTest {
     }
 
     @Test
-    void decide_WhenEverySourceMarkerIsAbsent_ServesWithoutWaiting() {
+    void settle_WhenEverySourceMarkerIsAbsent_ServesWithoutWaiting() {
         views.put(PLANNER, new MarkerView.Absent());
         views.put(USER, new MarkerView.Absent());
 
-        assertThat(guard.decide(List.of(PLANNER, USER), seoul, Map.of(), true))
-                .isEqualTo(new FreshnessReadGuard.Decision.Serve());
+        assertThat(guard.settle(List.of(PLANNER, USER), seoul, Map.of(), true))
+                .isEqualTo(new FreshnessReadGuard.SettleOutcome.Serve());
         assertThat(markerReads).containsExactly(List.of(PLANNER, USER));
         assertThat(waits).isEmpty();
         assertThat(selector.current()).contains(seoul);
     }
 
     @Test
-    void decide_WhenTheMarkerWasAppliedBeforeTheLoadBegan_IssuesNoWait() {
+    void settle_WhenTheMarkerWasAppliedBeforeTheLoadBegan_IssuesNoWait() {
         views.put(PLANNER, new MarkerView.At(APPLIED_TEN));
         waitApplies = true;
-        guard.decide(List.of(PLANNER), seoul, Map.of(), true);
+        guard.settle(List.of(PLANNER), seoul, Map.of(), true);
         Map<String, String> appliedAtLoadStart = guard.applied();
         views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
         waitApplies = false;
 
-        assertThat(guard.decide(List.of(PLANNER), seoul, appliedAtLoadStart, true))
-                .isEqualTo(new FreshnessReadGuard.Decision.Serve());
+        assertThat(guard.settle(List.of(PLANNER), seoul, appliedAtLoadStart, true))
+                .isEqualTo(new FreshnessReadGuard.SettleOutcome.Serve());
         assertThat(waits).containsExactly(SEOUL + "|" + UUID_A + ":1-10|" + WAIT_BOUND);
     }
 
     @Test
-    void decide_WhenWaitApplies_ReloadsAndRemembersTheSet() {
+    void settle_WhenWaitApplies_ReloadsAndRemembersTheSet() {
         views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
         views.put(USER, new MarkerView.At(APPLIED_TEN));
         waitApplies = true;
 
-        assertThat(guard.decide(List.of(PLANNER, USER), seoul, Map.of(), true))
-                .isEqualTo(new FreshnessReadGuard.Decision.Reload());
+        assertThat(guard.settle(List.of(PLANNER, USER), seoul, Map.of(), true))
+                .isEqualTo(new FreshnessReadGuard.SettleOutcome.Reload());
         waitApplies = false;
-        assertThat(guard.decide(List.of(PLANNER, USER), seoul, guard.applied(), true))
-                .isEqualTo(new FreshnessReadGuard.Decision.Serve());
+        assertThat(guard.settle(List.of(PLANNER, USER), seoul, guard.applied(), true))
+                .isEqualTo(new FreshnessReadGuard.SettleOutcome.Serve());
 
         assertThat(waits).containsExactly(SEOUL + "|" + UUID_A + ":1-10|" + WAIT_BOUND);
         assertThat(waitSamples(FreshnessReadGuard.APPLIED)).isEqualTo(1);
@@ -165,60 +165,60 @@ class FreshnessReadGuardTest {
     }
 
     @Test
-    void decide_WhenTheSetWasRememberedOnlyAfterTheLoadBegan_WaitsAndReloads() {
+    void settle_WhenTheSetWasRememberedOnlyAfterTheLoadBegan_WaitsAndReloads() {
         views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
         waitApplies = true;
         Map<String, String> appliedAtLoadStart = guard.applied();
-        guard.decide(List.of(PLANNER), seoul, Map.of(), true);
+        guard.settle(List.of(PLANNER), seoul, Map.of(), true);
 
-        assertThat(guard.decide(List.of(PLANNER), seoul, appliedAtLoadStart, true))
-                .isEqualTo(new FreshnessReadGuard.Decision.Reload());
+        assertThat(guard.settle(List.of(PLANNER), seoul, appliedAtLoadStart, true))
+                .isEqualTo(new FreshnessReadGuard.SettleOutcome.Reload());
         assertThat(waits).hasSize(2);
     }
 
     @Test
-    void decide_WhenWaitTimesOut_SkipsTheSource() {
+    void settle_WhenWaitTimesOut_SkipsTheSource() {
         views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
         waitApplies = false;
 
-        assertThat(guard.decide(List.of(PLANNER), seoul, Map.of(), true))
-                .isEqualTo(new FreshnessReadGuard.Decision.Skip(seoul));
+        assertThat(guard.settle(List.of(PLANNER), seoul, Map.of(), true))
+                .isEqualTo(new FreshnessReadGuard.SettleOutcome.Skip(seoul));
         assertThat(waitSamples(FreshnessReadGuard.TIMEOUT)).isEqualTo(1);
         assertThat(waitSamples(FreshnessReadGuard.APPLIED)).isZero();
         assertThat(selector.current()).contains(primary);
     }
 
     @Test
-    void decide_WhenTheWaitConnectionFails_SkipsTheSourceWithoutThrowing() throws SQLException {
+    void settle_WhenTheWaitConnectionFails_SkipsTheSourceWithoutThrowing() throws SQLException {
         when(seoulPool.getConnection()).thenThrow(new SQLException("Communications link failure", "08S01"));
         FreshnessReadGuard realWait = guardWaiting(GtidReadGate::isApplied);
         views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
 
-        assertThat(realWait.decide(List.of(PLANNER), seoul, Map.of(), true))
-                .isEqualTo(new FreshnessReadGuard.Decision.Skip(seoul));
+        assertThat(realWait.settle(List.of(PLANNER), seoul, Map.of(), true))
+                .isEqualTo(new FreshnessReadGuard.SettleOutcome.Skip(seoul));
         assertThat(waitSamples(FreshnessReadGuard.TIMEOUT)).isEqualTo(1);
         assertThat(seoul.breaker().getMetrics().getNumberOfFailedCalls()).isZero();
         assertThat(selector.current()).contains(primary);
     }
 
     @Test
-    void decide_WhenAnyViewIsUnknown_SkipsTheSource() {
+    void settle_WhenAnyViewIsUnknown_SkipsTheSource() {
         views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
         views.put(USER, new MarkerView.Unknown());
         waitApplies = true;
 
-        assertThat(guard.decide(List.of(PLANNER, USER), seoul, Map.of(), true))
-                .isEqualTo(new FreshnessReadGuard.Decision.Skip(seoul));
+        assertThat(guard.settle(List.of(PLANNER, USER), seoul, Map.of(), true))
+                .isEqualTo(new FreshnessReadGuard.SettleOutcome.Skip(seoul));
         assertThat(waits).isEmpty();
         assertThat(selector.current()).contains(primary);
     }
 
     @Test
-    void decide_WhenSourceIsAuthoritative_ServesWithoutReadingMarkers() {
+    void settle_WhenSourceIsAuthoritative_ServesWithoutReadingMarkers() {
         views.put(PLANNER, new MarkerView.Unknown());
 
-        assertThat(guard.decide(List.of(PLANNER), primary, Map.of(), true))
-                .isEqualTo(new FreshnessReadGuard.Decision.Serve());
+        assertThat(guard.settle(List.of(PLANNER), primary, Map.of(), true))
+                .isEqualTo(new FreshnessReadGuard.SettleOutcome.Serve());
         assertThat(markerReads).isEmpty();
         assertThat(waits).isEmpty();
     }
@@ -281,7 +281,7 @@ class FreshnessReadGuardTest {
             loadOnCurrentSource(new ArrayList<>());
             int load = loads.incrementAndGet();
             if (load == 1) {
-                guard.decide(List.of(PLANNER), seoul, Map.of(), true);
+                guard.settle(List.of(PLANNER), seoul, Map.of(), true);
             }
             return new ScopedRead<>(load, Set.of(PLANNER));
         });
@@ -311,12 +311,12 @@ class FreshnessReadGuardTest {
     }
 
     @Test
-    void decide_WhenTheSourceMayNotReloadAgain_SkipsWithoutWaiting() {
+    void settle_WhenTheSourceMayNotReloadAgain_SkipsWithoutWaiting() {
         views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
         waitApplies = true;
 
-        assertThat(guard.decide(List.of(PLANNER), seoul, Map.of(), false))
-                .isEqualTo(new FreshnessReadGuard.Decision.Skip(seoul));
+        assertThat(guard.settle(List.of(PLANNER), seoul, Map.of(), false))
+                .isEqualTo(new FreshnessReadGuard.SettleOutcome.Skip(seoul));
         assertThat(waits).isEmpty();
         assertThat(selector.current()).contains(primary);
     }

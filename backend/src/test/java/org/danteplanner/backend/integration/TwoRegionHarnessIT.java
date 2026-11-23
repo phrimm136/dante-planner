@@ -318,7 +318,7 @@ class TwoRegionHarnessIT extends ReplicaRoutingHarnessSupport {
 
     private RoutingKey readOnlyRoutingKey() {
         ReadOnlyRoutingDataSource probe = new ReadOnlyRoutingDataSource(
-                new UndeclaredPrimaryAccessGuard(new SimpleMeterRegistry(), true));
+                new UndeclaredPrimaryAccessGuard(new SimpleMeterRegistry(), true), null);
         TransactionTemplate readOnly = new TransactionTemplate(new DataSourceTransactionManager(dataSource));
         readOnly.setReadOnly(true);
         return readOnly.execute(status -> (RoutingKey) probe.determineCurrentLookupKey());

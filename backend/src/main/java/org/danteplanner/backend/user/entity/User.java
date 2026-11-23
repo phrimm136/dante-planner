@@ -17,6 +17,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jspecify.annotations.Nullable;
 
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.api.RestrictionState;
@@ -68,10 +69,10 @@ public class User {
     private Instant updatedAt;
 
     @Column(name = "deleted_at")
-    private Instant deletedAt;
+    private @Nullable Instant deletedAt;
 
     @Column(name = "permanent_delete_scheduled_at")
-    private Instant permanentDeleteScheduledAt;
+    private @Nullable Instant permanentDeleteScheduledAt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -81,15 +82,15 @@ public class User {
 
     @Column(name = "timeout_until")
     @Setter
-    private Instant timeoutUntil;
+    private @Nullable Instant timeoutUntil;
 
     @Column(name = "banned_at")
     @Setter
-    private Instant bannedAt;
+    private @Nullable Instant bannedAt;
 
     @Column(name = "banned_by")
     @Setter
-    private Long bannedBy;
+    private @Nullable Long bannedBy;
 
     @PrePersist
     protected void onCreate() {
@@ -118,15 +119,15 @@ public class User {
         this.permanentDeleteScheduledAt = null;
     }
 
-    public RestrictionState restrictionState(Clock clock) {
-        if (timeoutUntil != null && clock.instant().isBefore(timeoutUntil)) {
+    public RestrictionState restrictionState(Instant now) {
+        if (timeoutUntil != null && now.isBefore(timeoutUntil)) {
             return RestrictionState.TIMED_OUT;
         }
         return bannedAt != null ? RestrictionState.BANNED : RestrictionState.ACTIVE;
     }
 
     public boolean isTimedOut() {
-        return restrictionState(Clock.systemUTC()) == RestrictionState.TIMED_OUT;
+        return restrictionState(Clock.systemUTC().instant()) == RestrictionState.TIMED_OUT;
     }
 
     public boolean isBanned() {

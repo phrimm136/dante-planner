@@ -38,7 +38,7 @@ final class ContentJson {
         try {
             return new Tree(objectMapper.readTree(content));
         } catch (JacksonException e) {
-            return new Malformed(e.getMessage());
+            return new Malformed(String.valueOf(e.getMessage()));
         }
     }
 

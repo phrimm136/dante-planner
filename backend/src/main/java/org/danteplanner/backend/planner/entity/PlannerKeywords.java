@@ -75,7 +75,7 @@ public final class PlannerKeywords {
 
     public static PlannerKeywords fromSelection(JsonNode selected) {
         if (!selected.isArray()) {
-            return normalize(null);
+            return new PlannerKeywords(Set.of(), Set.of());
         }
         List<String> named = new ArrayList<>();
         Set<String> unnamed = new HashSet<>();

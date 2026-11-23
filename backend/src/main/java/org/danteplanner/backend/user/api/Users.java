@@ -4,7 +4,6 @@ import org.danteplanner.backend.user.api.dto.UserResponse;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface Users {
@@ -13,7 +12,7 @@ public interface Users {
 
     Optional<UserSummary> findActiveById(Long userId);
 
-    UserSummary findOrCreateUser(String provider, Map<String, String> userInfo);
+    UserSummary findOrCreateUser(String provider, String providerId, String email);
 
     Optional<UserSummary> findByProvider(AuthProviderType providerType, String providerId);
 

@@ -1,5 +1,6 @@
 package org.danteplanner.backend.planner.converter;
 
+import org.jspecify.annotations.Nullable;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
@@ -25,7 +26,7 @@ public class KeywordSetConverter implements AttributeConverter<Set<String>, Stri
     };
 
     @Override
-    public String convertToDatabaseColumn(Set<String> attribute) {
+    public @Nullable String convertToDatabaseColumn(@Nullable Set<String> attribute) {
         if (attribute == null || attribute.isEmpty()) {
             return null;
         }
@@ -46,7 +47,7 @@ public class KeywordSetConverter implements AttributeConverter<Set<String>, Stri
     }
 
     @Override
-    public Set<String> convertToEntityAttribute(String dbData) {
+    public Set<String> convertToEntityAttribute(@Nullable String dbData) {
         if (dbData == null || dbData.isEmpty()) {
             return new HashSet<>();
         }

@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -253,7 +252,7 @@ public interface UsersContract {
         String providerId = "google-" + UUID.randomUUID();
         String email = "created+" + UUID.randomUUID() + "@example.com";
 
-        UserSummary created = users().findOrCreateUser("google", Map.of("id", providerId, "email", email));
+        UserSummary created = users().findOrCreateUser("google", providerId, email);
 
         assertThat(created.email()).isEqualTo(email);
         assertThat(created.role()).isEqualTo(UserRole.NORMAL);
@@ -268,8 +267,7 @@ public interface UsersContract {
     default void findOrCreateUser_WhenTheProviderIdBelongsToADeletedUser_ReturnsThatUserStillDeleted() {
         User deleted = persisted(deletedUser().build());
 
-        UserSummary found = users().findOrCreateUser("google",
-                Map.of("id", deleted.getProviderId(), "email", deleted.getEmail()));
+        UserSummary found = users().findOrCreateUser("google", deleted.getProviderId(), deleted.getEmail());
 
         assertThat(found.id()).isEqualTo(deleted.getId());
         assertThat(found.deleted()).isTrue();

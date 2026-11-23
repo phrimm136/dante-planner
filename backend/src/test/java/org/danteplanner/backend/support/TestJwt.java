@@ -16,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import io.jsonwebtoken.Jwts;
 
 import org.danteplanner.backend.auth.token.JwtTokenService;
+import org.danteplanner.backend.auth.token.RefreshLineage;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.shared.config.JwtProperties;
 
@@ -33,9 +34,8 @@ public final class TestJwt {
 
     public TestJwt(Instant start) {
         this.clock = new SteppedClock(start);
-        this.properties = new JwtProperties();
-        properties.setPrivateKey(KEY_PAIR.getPrivate());
-        properties.setPublicKey(KEY_PAIR.getPublic());
+        this.properties = new JwtProperties(
+                KEY_PAIR.getPrivate(), KEY_PAIR.getPublic(), new byte[0], 900000L, 604800000L);
         try {
             this.service = BeanUtils.instantiateClass(
                     JwtTokenService.class.getDeclaredConstructor(JwtProperties.class, Clock.class), properties, clock);
@@ -65,6 +65,29 @@ public final class TestJwt {
                 .expiration(new Date(issuedAt.getTime() + properties.getRefreshTokenExpiry()))
                 .signWith(KEY_PAIR.getPrivate(), Jwts.SIG.RS256)
                 .compact();
+    }
+
+    public static String jtiOf(TokenClaims claims) {
+        return switch (claims.lineage()) {
+            case RefreshLineage.Root root -> root.jti();
+            case RefreshLineage.Child child -> child.jti();
+            case RefreshLineage.Legacy legacy -> throw new AssertionError("a legacy token carries no jti: " + legacy);
+        };
+    }
+
+    public static String familyIdOf(TokenClaims claims) {
+        return switch (claims.lineage()) {
+            case RefreshLineage.Root root -> root.familyId();
+            case RefreshLineage.Child child -> child.familyId();
+            case RefreshLineage.Legacy legacy -> throw new AssertionError("a legacy token carries no family: " + legacy);
+        };
+    }
+
+    public static String parentJtiOf(TokenClaims claims) {
+        if (claims.lineage() instanceof RefreshLineage.Child child) {
+            return child.parentJti();
+        }
+        throw new AssertionError("only a rotated child carries a parent: " + claims.lineage());
     }
 
     private static KeyPair generateKeyPair() {

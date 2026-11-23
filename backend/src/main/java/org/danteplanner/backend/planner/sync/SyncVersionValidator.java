@@ -9,21 +9,20 @@ public class SyncVersionValidator {
 
     public WriteArbitration arbitrate(
             boolean force,
-            Long requestedVersion,
+            PlannerConflictException.Requested requested,
             long actualVersion,
             PlannerChange change) {
         if (force) {
             return WriteArbitration.WRITE;
         }
-        if (requestedVersion == null) {
-            throw new PlannerConflictException(null, actualVersion);
-        }
-        if (actualVersion == requestedVersion.longValue()) {
-            return WriteArbitration.WRITE;
-        }
-        if (change.isNone()) {
-            return WriteArbitration.ACK_NO_OP;
-        }
-        throw new PlannerConflictException(requestedVersion, actualVersion);
+        return switch (requested) {
+            case PlannerConflictException.Requested.None none ->
+                    throw new PlannerConflictException(none, actualVersion);
+            case PlannerConflictException.Requested.Version named when named.version() == actualVersion ->
+                    WriteArbitration.WRITE;
+            case PlannerConflictException.Requested.Version stale when change.isNone() -> WriteArbitration.ACK_NO_OP;
+            case PlannerConflictException.Requested.Version stale ->
+                    throw new PlannerConflictException(stale, actualVersion);
+        };
     }
 }

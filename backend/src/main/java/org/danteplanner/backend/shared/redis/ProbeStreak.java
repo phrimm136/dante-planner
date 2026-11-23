@@ -1,6 +1,6 @@
 package org.danteplanner.backend.shared.redis;
 
-final class ProbeStreak {
+record ProbeStreak(int failureThreshold, int consecutiveFailures, boolean open) {
 
     enum Transition {
         NONE,
@@ -8,37 +8,28 @@ final class ProbeStreak {
         CLOSE
     }
 
-    private final int failureThreshold;
-    private int consecutiveFailures;
-    private boolean open;
+    record Step(ProbeStreak next, Transition transition) {
+    }
 
     ProbeStreak(int failureThreshold) {
-        this.failureThreshold = failureThreshold;
+        this(failureThreshold, 0, false);
     }
 
-    Transition atStartup(boolean answered) {
+    Step atStartup(boolean answered) {
         if (answered) {
-            return Transition.NONE;
+            return new Step(this, Transition.NONE);
         }
-        consecutiveFailures = failureThreshold;
-        open = true;
-        return Transition.OPEN;
+        return new Step(new ProbeStreak(failureThreshold, failureThreshold, true), Transition.OPEN);
     }
 
-    Transition after(boolean answered) {
+    Step after(boolean answered) {
         if (answered) {
-            consecutiveFailures = 0;
-            if (!open) {
-                return Transition.NONE;
-            }
-            open = false;
-            return Transition.CLOSE;
+            ProbeStreak closed = new ProbeStreak(failureThreshold, 0, false);
+            return new Step(closed, open ? Transition.CLOSE : Transition.NONE);
         }
-        consecutiveFailures++;
-        if (open || consecutiveFailures < failureThreshold) {
-            return Transition.NONE;
-        }
-        open = true;
-        return Transition.OPEN;
+        int failures = consecutiveFailures + 1;
+        boolean opens = !open && failures >= failureThreshold;
+        return new Step(new ProbeStreak(failureThreshold, failures, open || opens),
+                opens ? Transition.OPEN : Transition.NONE);
     }
 }

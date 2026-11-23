@@ -14,6 +14,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -42,20 +43,20 @@ public class PlannerModeration {
 
     @Column(name = "taken_down_at")
     @Setter
-    private Instant takenDownAt;
+    private @Nullable Instant takenDownAt;
 
     @Column(name = "hidden_from_recommended", nullable = false)
     @Builder.Default
     private boolean hiddenFromRecommended = false;
 
     @Column(name = "hidden_by_moderator_id")
-    private Long hiddenByModeratorId;
+    private @Nullable Long hiddenByModeratorId;
 
     @Column(name = "hidden_reason", columnDefinition = "TEXT")
-    private String hiddenReason;
+    private @Nullable String hiddenReason;
 
     @Column(name = "hidden_at")
-    private Instant hiddenAt;
+    private @Nullable Instant hiddenAt;
 
     public boolean isTakenDown() {
         return takenDownAt != null;

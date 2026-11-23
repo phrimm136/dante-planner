@@ -66,6 +66,22 @@ class UserModerationServiceTest {
         normalUser = TestDataFactory.unsavedUser(UserRole.NORMAL);
     }
 
+    @Test
+    void record_WhenTimeoutIsAudited_CarriesItsMinutes() {
+        new ModerationAuditService(moderationActionRepository).record(1L, "target",
+                new ModerationAuditService.Suspension.Timeout(60, "spam"));
+
+        assertThat(persistedAction().getDurationMinutes()).isEqualTo(60);
+    }
+
+    @Test
+    void record_WhenBanIsAudited_CarriesNoMinutes() {
+        new ModerationAuditService(moderationActionRepository).record(1L, "target",
+                new ModerationAuditService.Suspension.Ban("abuse"));
+
+        assertThat(persistedAction().getDurationMinutes()).isNull();
+    }
+
     private ModerationAction persistedAction() {
         ArgumentCaptor<ModerationAction> captor = ArgumentCaptor.forClass(ModerationAction.class);
         verify(moderationActionRepository).insert(captor.capture());
@@ -293,7 +309,7 @@ class UserModerationServiceTest {
             assertThat(action.getReason()).isEqualTo("Test ban reason");
 
             verify(eventPublisher).publishEvent(new AccountSuspendedEvent(
-                    normalUser.getId(), "Test ban reason", SuspensionType.BAN, null));
+                    normalUser.getId(), "Test ban reason", SuspensionType.BAN, 0));
         }
 
         @Test

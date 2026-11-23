@@ -72,8 +72,8 @@ class NotificationServiceLayerTest {
      */
     private UUID whenReadBackYields(
             Long userId, String contentId, NotificationType type, String plannerTitle) {
-        Notification stored = new Notification(
-                userId, contentId, type, testPlannerId, plannerTitle, null, null);
+        Notification stored = new Notification(userId, contentId, type,
+                new Notification.Content.PlannerScoped(testPlannerId, plannerTitle));
         UUID publicId = UUID.randomUUID();
         stored.setPublicId(publicId);
         stored.setCreatedAt(Instant.now());

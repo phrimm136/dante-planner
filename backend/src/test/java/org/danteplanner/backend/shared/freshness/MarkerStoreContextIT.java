@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 import jakarta.persistence.EntityManagerFactory;
 
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import tools.jackson.databind.ObjectMapper;
 import com.redis.testcontainers.RedisContainer;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
@@ -77,9 +78,9 @@ class MarkerStoreContextIT {
 
     private ApplicationContextRunner routingContext() {
         ApplicationContextRunner runner = new ApplicationContextRunner()
-                .withUserConfiguration(RedisConnectionConfig.class, RedisRoleConfig.class, GtidGateConfig.class)
+                .withUserConfiguration(RedisConnectionConfig.class, RedisRoleConfig.class, GtidGateConfig.class,
+                        ReadSourceBinding.class)
                 .withBean(MeterRegistry.class, SimpleMeterRegistry::new)
-                .withBean(ReadSourceProperties.class)
                 .withBean(ReadSourceSelector.class, () -> new ReadSourceSelector(List.of(new ReadSourceSelector.Source(
                         ReadSourceProperties.PRIMARY, true, primaryReadSource,
                         CircuitBreaker.ofDefaults(ReadSourceProperties.PRIMARY + UUID.randomUUID())))))
@@ -100,6 +101,10 @@ class MarkerStoreContextIT {
                     "redis." + endpoint + ".port=" + REDIS.getRedisPort());
         }
         return runner;
+    }
+
+    @EnableConfigurationProperties(ReadSourceProperties.class)
+    static class ReadSourceBinding {
     }
 
     private static void raiseProbeAndConnectEveryFactory(ApplicationContext context) {

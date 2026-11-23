@@ -17,8 +17,7 @@ public final class SseSubscription implements RoleConnector, AutoCloseable {
     private final Runnable resubscribe;
     private final Executor attempts;
     private final ReentrantLock attemptLock = new ReentrantLock();
-    private CompletableFuture<Void> attempt;
-    private boolean closed;
+    private State state = new State.Idle();
 
     public SseSubscription(BooleanSupplier listening, Runnable resubscribe, Executor attempts) {
         this.listening = listening;
@@ -35,16 +34,14 @@ public final class SseSubscription implements RoleConnector, AutoCloseable {
     public CompletableFuture<Void> connect() {
         attemptLock.lock();
         try {
-            if (closed) {
-                return CompletableFuture.failedFuture(new IllegalStateException("SSE subscription closed"));
-            }
-            if (listening.getAsBoolean()) {
-                return LISTENING;
-            }
-            if (attempt == null || attempt.isDone()) {
-                attempt = CompletableFuture.runAsync(resubscribe, attempts);
-            }
-            return attempt;
+            return switch (state) {
+                case State.Closed closed -> CompletableFuture.failedFuture(
+                        new IllegalStateException("SSE subscription closed"));
+                case State.Attempting attempting when listening.getAsBoolean() -> LISTENING;
+                case State.Attempting attempting when !attempting.attempt().isDone() -> attempting.attempt();
+                case State.Attempting attempting -> startAttempt();
+                case State.Idle idle -> listening.getAsBoolean() ? LISTENING : startAttempt();
+            };
         } catch (RejectedExecutionException e) {
             return CompletableFuture.failedFuture(e);
         } finally {
@@ -56,9 +53,27 @@ public final class SseSubscription implements RoleConnector, AutoCloseable {
     public void close() {
         attemptLock.lock();
         try {
-            closed = true;
+            state = new State.Closed();
         } finally {
             attemptLock.unlock();
+        }
+    }
+
+    private CompletableFuture<Void> startAttempt() {
+        CompletableFuture<Void> attempt = CompletableFuture.runAsync(resubscribe, attempts);
+        state = new State.Attempting(attempt);
+        return attempt;
+    }
+
+    private sealed interface State {
+
+        record Idle() implements State {
+        }
+
+        record Attempting(CompletableFuture<Void> attempt) implements State {
+        }
+
+        record Closed() implements State {
         }
     }
 }

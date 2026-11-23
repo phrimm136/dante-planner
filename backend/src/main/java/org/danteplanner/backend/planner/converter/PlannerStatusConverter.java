@@ -3,6 +3,8 @@ package org.danteplanner.backend.planner.converter;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
+import org.jspecify.annotations.Nullable;
+
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 
 /**
@@ -16,12 +18,12 @@ import org.danteplanner.backend.planner.entity.PlannerStatus;
 public class PlannerStatusConverter implements AttributeConverter<PlannerStatus, String> {
 
     @Override
-    public String convertToDatabaseColumn(PlannerStatus attribute) {
+    public @Nullable String convertToDatabaseColumn(@Nullable PlannerStatus attribute) {
         return attribute == null ? null : attribute.getValue();
     }
 
     @Override
-    public PlannerStatus convertToEntityAttribute(String dbData) {
-        return PlannerStatus.fromValue(dbData);
+    public @Nullable PlannerStatus convertToEntityAttribute(@Nullable String dbData) {
+        return dbData == null ? null : PlannerStatus.fromValue(dbData);
     }
 }

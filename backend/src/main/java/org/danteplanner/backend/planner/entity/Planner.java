@@ -21,6 +21,7 @@ import lombok.Setter;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Persistable;
 
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
@@ -132,7 +133,7 @@ public class Planner implements Persistable<UUID> {
         return content.getSyncVersion();
     }
 
-    public UUID getDeviceId() {
+    public @Nullable UUID getDeviceId() {
         return content.getDeviceId();
     }
 
@@ -141,11 +142,15 @@ public class Planner implements Persistable<UUID> {
     }
 
     public Set<String> getSelectedKeywords() {
-        return content.getSelectedKeywords();
+        return orEmpty(content.getSelectedKeywords());
     }
 
     public Set<String> getLoadedKeywords() {
-        return content.getLoadedSelectedKeywords();
+        return orEmpty(content.getLoadedSelectedKeywords());
+    }
+
+    private static Set<String> orEmpty(@Nullable Set<String> column) {
+        return column == null ? Set.of() : column;
     }
 
     public String getLoadedCategory() {
@@ -156,15 +161,23 @@ public class Planner implements Persistable<UUID> {
         return publication.isPublished();
     }
 
-    public Instant getFirstPublishedAt() {
+    public @Nullable Instant getFirstPublishedAt() {
         return publication.getFirstPublishedAt();
+    }
+
+    public Instant requireFirstPublishedAt() {
+        Instant firstPublishedAt = getFirstPublishedAt();
+        if (firstPublishedAt == null) {
+            throw new IllegalStateException("planner " + id + " is listed without a publication time");
+        }
+        return firstPublishedAt;
     }
 
     public boolean isOwnerNotificationsEnabled() {
         return publication.isOwnerNotificationsEnabled();
     }
 
-    public Instant getTakenDownAt() {
+    public @Nullable Instant getTakenDownAt() {
         return moderation.getTakenDownAt();
     }
 
@@ -188,10 +201,8 @@ public class Planner implements Persistable<UUID> {
         content.markDeleted();
     }
 
-    public PublicationChange takeDown() {
-        boolean moderated = moderation.takeDown();
-        PublicationChange withdrawal = publication.unpublish();
-        return moderated ? PublicationChange.WITHDRAWN : withdrawal;
+    public PublicationOutcome takeDown() {
+        return publication.takeDown(moderation.takeDown());
     }
 
     public void hideFromRecommended(Long moderatorId, String reason) {
@@ -206,18 +217,22 @@ public class Planner implements Persistable<UUID> {
         publication.setOwnerNotificationsEnabled(enabled);
     }
 
-    public PublicationChange publish() {
+    public PublicationOutcome publish(Instant now) {
+        requirePublishable();
+        return publication.publish(now);
+    }
+
+    private void requirePublishable() {
         if (moderation.isTakenDown()) {
             throw new PlannerForbiddenException(id);
         }
-        return publication.publish();
     }
 
     public void recordSave() {
         content.recordSave();
     }
 
-    public PublicationChange unpublish() {
+    public PublicationOutcome unpublish() {
         return publication.unpublish();
     }
 }

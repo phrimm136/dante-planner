@@ -1,7 +1,6 @@
 package org.danteplanner.backend.shared.config;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,6 +9,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
@@ -21,15 +21,14 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
-import lombok.Getter;
-import lombok.Setter;
 import org.hibernate.validator.constraints.time.DurationMin;
 
 @ConfigurationProperties(prefix = "datasource")
 @Validated
-@Getter
-@Setter
-public class ReadSourceProperties {
+public record ReadSourceProperties(
+        @NotEmpty @Valid @DefaultValue List<Source> readSources,
+        @Valid @DefaultValue Breaker readSourceBreaker,
+        @Valid @DefaultValue Probe readSourceProbe) {
 
     public static final String PRIMARY = "primary";
 
@@ -38,23 +37,19 @@ public class ReadSourceProperties {
     public static final int SLIDING_WINDOW_CALLS = 20;
     public static final int MINIMUM_CALLS = 10;
     public static final float FAILURE_RATE_PERCENT = 50f;
-    public static final Duration WAIT_IN_OPEN_STATE = Duration.ofHours(1);
+    public static final String WAIT_IN_OPEN_STATE_TEXT = "PT1H";
+    public static final Duration WAIT_IN_OPEN_STATE = Duration.parse(WAIT_IN_OPEN_STATE_TEXT);
 
     public static final String PROBE_INTERVAL_PROPERTY = "datasource.read-source-probe.interval";
     public static final String PROBE_INTERVAL_TEXT = "PT1S";
     public static final Duration PROBE_INTERVAL = Duration.parse(PROBE_INTERVAL_TEXT);
-    public static final Duration PROBE_TIMEOUT = Duration.ofSeconds(1);
     public static final int PROBE_FAILURE_THRESHOLD = 2;
 
-    @NotEmpty
-    @Valid
-    private List<Source> readSources = new ArrayList<>();
-
-    @Valid
-    private Breaker readSourceBreaker = new Breaker();
-
-    @Valid
-    private Probe readSourceProbe = new Probe();
+    private static final String SLIDING_WINDOW_CALLS_TEXT = "" + SLIDING_WINDOW_CALLS;
+    private static final String MINIMUM_CALLS_TEXT = "" + MINIMUM_CALLS;
+    private static final String FAILURE_RATE_PERCENT_TEXT = "" + FAILURE_RATE_PERCENT;
+    private static final String PROBE_TIMEOUT_TEXT = "PT1S";
+    private static final String PROBE_FAILURE_THRESHOLD_TEXT = "" + PROBE_FAILURE_THRESHOLD;
 
     @AssertTrue(message = "datasource.read-sources must hold exactly one entry named \"" + PRIMARY + "\"")
     public boolean isExactlyOnePrimary() {
@@ -64,52 +59,54 @@ public class ReadSourceProperties {
     @AssertTrue(message = "datasource.read-sources must not name two entries alike")
     public boolean isUniquelyNamed() {
         Set<String> names = new HashSet<>();
-        return readSources.stream().allMatch(source -> names.add(source.getName()));
+        return readSources.stream().allMatch(source -> names.add(source.name()));
     }
 
     public boolean readsPrimaryFirst() {
         return !readSources.isEmpty() && readSources.get(0).isPrimary();
     }
 
-    @Getter
-    @Setter
-    public static class Source {
+    public record Source(
+            @NotBlank @DefaultValue("") String name,
+            @DefaultValue("") String url,
+            @DefaultValue("") String username,
+            @DefaultValue("") String password) {
 
-        @NotBlank
-        private String name;
+        public sealed interface Endpoint {
 
-        private String url;
-        private String username;
-        private String password;
+            record Primary() implements Endpoint {
+            }
+
+            record Replica(String url, String username, String password) implements Endpoint {
+            }
+        }
 
         public boolean isPrimary() {
             return PRIMARY.equals(name);
         }
 
+        public Endpoint endpoint() {
+            return isPrimary() ? new Endpoint.Primary() : new Endpoint.Replica(url, username, password);
+        }
+
         @AssertTrue(message = "a read source other than \"" + PRIMARY + "\" needs a url, and \""
                 + PRIMARY + "\" takes none: it reads through the primary pool")
         public boolean isEndpointMatchingItsRole() {
-            return isPrimary() ? url == null && username == null && password == null : StringUtils.hasText(url);
+            return isPrimary()
+                    ? url.isEmpty() && username.isEmpty() && password.isEmpty()
+                    : StringUtils.hasText(url);
         }
     }
 
-    @Getter
-    @Setter
-    public static class Breaker {
+    public record Breaker(
+            @Min(1) @DefaultValue(SLIDING_WINDOW_CALLS_TEXT) int slidingWindowSize,
+            @Min(1) @DefaultValue(MINIMUM_CALLS_TEXT) int minimumNumberOfCalls,
+            @DecimalMin("1") @DecimalMax("100") @DefaultValue(FAILURE_RATE_PERCENT_TEXT) float failureRateThreshold,
+            @NotNull @DurationMin(seconds = 1) @DefaultValue(WAIT_IN_OPEN_STATE_TEXT) Duration waitDurationInOpenState) {
 
-        @Min(1)
-        private int slidingWindowSize = SLIDING_WINDOW_CALLS;
-
-        @Min(1)
-        private int minimumNumberOfCalls = MINIMUM_CALLS;
-
-        @DecimalMin("1")
-        @DecimalMax("100")
-        private float failureRateThreshold = FAILURE_RATE_PERCENT;
-
-        @NotNull
-        @DurationMin(seconds = 1)
-        private Duration waitDurationInOpenState = WAIT_IN_OPEN_STATE;
+        public static Breaker defaults() {
+            return new Breaker(SLIDING_WINDOW_CALLS, MINIMUM_CALLS, FAILURE_RATE_PERCENT, WAIT_IN_OPEN_STATE);
+        }
 
         public CircuitBreakerConfig circuitBreakerConfig() {
             return CircuitBreakerConfig.custom()
@@ -122,19 +119,13 @@ public class ReadSourceProperties {
         }
     }
 
-    @Getter
-    @Setter
-    public static class Probe {
+    public record Probe(
+            @NotNull @DurationMin(millis = 1) @DefaultValue(PROBE_INTERVAL_TEXT) Duration interval,
+            @NotNull @DurationMin(millis = 1) @DefaultValue(PROBE_TIMEOUT_TEXT) Duration timeout,
+            @Min(1) @DefaultValue(PROBE_FAILURE_THRESHOLD_TEXT) int failureThreshold) {
 
-        @NotNull
-        @DurationMin(millis = 1)
-        private Duration interval = PROBE_INTERVAL;
-
-        @NotNull
-        @DurationMin(millis = 1)
-        private Duration timeout = PROBE_TIMEOUT;
-
-        @Min(1)
-        private int failureThreshold = PROBE_FAILURE_THRESHOLD;
+        public static Probe defaults() {
+            return new Probe(PROBE_INTERVAL, Duration.parse(PROBE_TIMEOUT_TEXT), PROBE_FAILURE_THRESHOLD);
+        }
     }
 }

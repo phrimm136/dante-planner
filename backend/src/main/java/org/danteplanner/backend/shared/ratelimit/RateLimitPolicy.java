@@ -10,25 +10,34 @@ import org.danteplanner.backend.shared.ratelimit.RateLimitProperties.BucketConfi
  */
 public enum RateLimitPolicy {
 
-    CRUD(RateLimitProperties::getCrud, null, "", Subject.USER, false),
+    CRUD(RateLimitProperties::crud, new Endpoint.CallerNamed(), "", Subject.USER, false),
 
-    SSE(RateLimitProperties::getSse, "sse", "", Subject.USER, false),
+    SSE(RateLimitProperties::sse, new Endpoint.Fixed("sse"), "", Subject.USER, false),
 
-    COMMENT(RateLimitProperties::getComment, "comment", "", Subject.USER, false),
+    COMMENT(RateLimitProperties::comment, new Endpoint.Fixed("comment"), "", Subject.USER, false),
 
-    REPORT(RateLimitProperties::getReport, "report", "", Subject.USER, false),
+    REPORT(RateLimitProperties::report, new Endpoint.Fixed("report"), "", Subject.USER, false),
 
-    MODERATION(RateLimitProperties::getModeration, "moderation", "", Subject.USER, false),
+    MODERATION(RateLimitProperties::moderation, new Endpoint.Fixed("moderation"), "", Subject.USER, false),
 
-    AUTH(RateLimitProperties::getAuth, "auth", "", Subject.CLIENT, true),
+    AUTH(RateLimitProperties::auth, new Endpoint.Fixed("auth"), "", Subject.CLIENT, true),
 
-    PLANNER_COMMENT_SSE(RateLimitProperties::getSse, "planner-comment-sse", "", Subject.CLIENT, false),
+    PLANNER_COMMENT_SSE(RateLimitProperties::sse, new Endpoint.Fixed("planner-comment-sse"), "", Subject.CLIENT, false),
 
-    PUBLIC_READ(RateLimitProperties::getPublicRead, "public-read", "", Subject.CLIENT, false),
+    PUBLIC_READ(RateLimitProperties::publicRead, new Endpoint.Fixed("public-read"), "", Subject.CLIENT, false),
 
-    PLANNER_STATS(RateLimitProperties::getPlannerStats, "planner-stats", "", Subject.CLIENT, false),
+    PLANNER_STATS(RateLimitProperties::plannerStats, new Endpoint.Fixed("planner-stats"), "", Subject.CLIENT, false),
 
-    VIEW_RECORD(RateLimitProperties::getViewRecord, "view-record", "", Subject.CLIENT, false);
+    VIEW_RECORD(RateLimitProperties::viewRecord, new Endpoint.Fixed("view-record"), "", Subject.CLIENT, false);
+
+    public sealed interface Endpoint {
+
+        record Fixed(String name) implements Endpoint {
+        }
+
+        record CallerNamed() implements Endpoint {
+        }
+    }
 
     public enum Subject {
 
@@ -38,14 +47,14 @@ public enum RateLimitPolicy {
     }
 
     private final Function<RateLimitProperties, BucketConfig> bucket;
-    private final String endpoint;
+    private final Endpoint endpoint;
     private final String subjectPrefix;
     private final Subject subject;
     private final boolean failClosed;
 
     RateLimitPolicy(
             Function<RateLimitProperties, BucketConfig> bucket,
-            String endpoint,
+            Endpoint endpoint,
             String subjectPrefix,
             Subject subject,
             boolean failClosed) {
@@ -65,14 +74,17 @@ public enum RateLimitPolicy {
     }
 
     public boolean requiresCallerNamedEndpoint() {
-        return endpoint == null;
+        return switch (endpoint) {
+            case Endpoint.Fixed fixed -> false;
+            case Endpoint.CallerNamed callerNamed -> true;
+        };
     }
 
     public BucketConfig bucket(RateLimitProperties properties) {
         return bucket.apply(properties);
     }
 
-    String endpoint() {
+    Endpoint endpoint() {
         return endpoint;
     }
 

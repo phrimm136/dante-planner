@@ -52,9 +52,9 @@ class ReadSourceHealthProbeTest {
     private Connection secondConnection;
 
     private final CircuitBreaker firstBreaker =
-            CircuitBreaker.of("first", new ReadSourceProperties.Breaker().circuitBreakerConfig());
+            CircuitBreaker.of("first", ReadSourceProperties.Breaker.defaults().circuitBreakerConfig());
     private final CircuitBreaker secondBreaker =
-            CircuitBreaker.of("second", new ReadSourceProperties.Breaker().circuitBreakerConfig());
+            CircuitBreaker.of("second", ReadSourceProperties.Breaker.defaults().circuitBreakerConfig());
     private final List<CircuitBreakerOnStateTransitionEvent> transitions = new ArrayList<>();
     private ReadSourceHealthProbe probe;
 
@@ -67,10 +67,7 @@ class ReadSourceHealthProbeTest {
     }
 
     private static ReadSourceProperties.Probe settings() {
-        ReadSourceProperties.Probe settings = new ReadSourceProperties.Probe();
-        settings.setFailureThreshold(THRESHOLD);
-        settings.setTimeout(SUB_SECOND_TIMEOUT);
-        return settings;
+        return new ReadSourceProperties.Probe(ReadSourceProperties.PROBE_INTERVAL, SUB_SECOND_TIMEOUT, THRESHOLD);
     }
 
     private void secondAnswers() throws SQLException {

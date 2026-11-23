@@ -25,8 +25,8 @@ public class ReadSourceHealthProbe {
 
     public ReadSourceHealthProbe(List<Target> targets, ReadSourceProperties.Probe settings) {
         this.probes = targets.stream().map(SourceProbe::new).toList();
-        this.failureThreshold = settings.getFailureThreshold();
-        this.validTimeoutSeconds = (int) Math.max(MIN_VALID_TIMEOUT_SECONDS, settings.getTimeout().toSeconds());
+        this.failureThreshold = settings.failureThreshold();
+        this.validTimeoutSeconds = (int) Math.max(MIN_VALID_TIMEOUT_SECONDS, settings.timeout().toSeconds());
     }
 
     @Scheduled(

@@ -148,15 +148,15 @@ class RateLimitBindingFreezeTest {
                 .orElseThrow(() -> new IllegalStateException("application.properties binds no rate-limit.*"));
 
         return Stream.concat(
-                        Stream.of(CONFIG_VERSION_PROPERTY + "=" + properties.getConfigVersion()),
+                        Stream.of(CONFIG_VERSION_PROPERTY + "=" + properties.configVersion()),
                         Arrays.stream(RateLimitPolicy.values())
                                 .map(policy -> limit(policy, policy.bucket(properties))))
                 .toList();
     }
 
     private static String limit(RateLimitPolicy policy, BucketConfig bucket) {
-        return policy.name() + " -> capacity " + bucket.getCapacity()
-                + ", refill " + bucket.getRefillTokens() + " per " + bucket.getRefillDurationSeconds() + "s";
+        return policy.name() + " -> capacity " + bucket.capacity()
+                + ", refill " + bucket.refillTokens() + " per " + bucket.refillDurationSeconds() + "s";
     }
 
     private static List<String> scanBindings() {

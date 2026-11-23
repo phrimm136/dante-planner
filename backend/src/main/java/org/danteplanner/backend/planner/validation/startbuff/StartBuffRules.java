@@ -5,7 +5,6 @@ import org.danteplanner.backend.planner.validation.Positions;
 import org.danteplanner.backend.planner.validation.Violation;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
@@ -57,11 +56,11 @@ public final class StartBuffRules {
                         seasonIds.contains(String.valueOf(buffIds.get(index)))))
                 .toList();
         List<Optional<Long>> countedBases = buffs.stream().map(Buff::countedBase).toList();
-        Map<Optional<Long>, Integer> firstIndex = Positions.firstIndexOf(countedBases);
+        List<Integer> firstIndex = Positions.firstIndexPerPosition(countedBases);
         return IntStream.range(0, buffs.size())
                 .boxed()
                 .flatMap(position -> buffViolation(buffs.get(position),
-                        countedBases.get(position).isPresent() && firstIndex.get(countedBases.get(position)) < position));
+                        countedBases.get(position).isPresent() && firstIndex.get(position) < position));
     }
 
     private static Stream<Violation> buffViolation(Buff buff, boolean repeatsABase) {

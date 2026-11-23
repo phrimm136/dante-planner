@@ -57,8 +57,7 @@ public class RoutingDataSourceConfig {
     public HikariConfig buildPrimaryHikariConfig() {
         HikariConfig config = new HikariConfig();
         config.setPoolName(PoolLedger.PRIMARY_POOL_NAME);
-        applyEndpoint(config, primaryProperties.getUrl(),
-                primaryProperties.getUsername(), primaryProperties.getPassword());
+        applyEndpoint(config, ReadSourcesConfig.Credentials.of(primaryProperties));
         config.setMaximumPoolSize(
                 readSourceProperties.readsPrimaryFirst()
                         ? PoolLedger.OREGON_PRIMARY_POOL
@@ -67,10 +66,10 @@ public class RoutingDataSourceConfig {
         return config;
     }
 
-    static void applyEndpoint(HikariConfig config, String url, String username, String password) {
-        config.setJdbcUrl(url);
-        config.setUsername(username);
-        config.setPassword(password);
+    static void applyEndpoint(HikariConfig config, ReadSourcesConfig.Credentials credentials) {
+        config.setJdbcUrl(credentials.url());
+        config.setUsername(credentials.username());
+        config.setPassword(credentials.password());
         config.setConnectionInitSql(TimeoutHierarchy.LOCK_WAIT_INIT_SQL);
         // Connector/J lets the driver properties win over the same key in the URL query string.
         config.addDataSourceProperty(
@@ -103,9 +102,9 @@ public class RoutingDataSourceConfig {
         Map<Object, Object> targets = new HashMap<>();
         targets.put(RoutingKey.PRIMARY, primary);
         targets.put(RoutingKey.REPLICA, readSourceSelector);
-        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(undeclaredGuard);
+        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(
+                undeclaredGuard, readSourceSelector.authorityReads());
         routing.setTargetDataSources(targets);
-        routing.setAuthorityReadSource(readSourceSelector.authorityReads());
         routing.setDefaultTargetDataSource(primary);
         routing.afterPropertiesSet();
         return new LazyConnectionDataSourceProxy(routing);

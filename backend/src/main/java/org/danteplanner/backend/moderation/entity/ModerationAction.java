@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.moderation.api.ModerationActionType;
 import org.danteplanner.backend.moderation.api.ModerationTargetType;
 
@@ -44,13 +45,13 @@ public class ModerationAction {
     private Long actorId;
 
     @Column(name = "target_uuid", length = 36)
-    private String targetUuid;
+    private @Nullable String targetUuid;
 
     @Column(length = 500)
-    private String reason;
+    private @Nullable String reason;
 
     @Column(name = "duration_minutes")
-    private Integer durationMinutes;
+    private @Nullable Integer durationMinutes;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "target_type", nullable = false, length = 20)

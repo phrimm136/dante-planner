@@ -29,7 +29,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 
 final class RoleClaimAuthorizationRule {
 
-    private static final Set<String> ROLE_CLAIM_READERS = Set.of("getEffectiveRole", "role");
+    private static final Set<String> ROLE_CLAIM_READERS = Set.of("role");
 
     private static final Set<String> ROLE_CLAIM_READING_CLASSES = Set.of(
             AccessTokenAuthenticator.class.getName(),
@@ -60,7 +60,7 @@ final class RoleClaimAuthorizationRule {
                             RoleClaimAuthorizationRule::readsTheRoleClaim,
                             type -> ROLE_CLAIM_READING_CLASSES.contains(type.getName()),
                             "reads the token's role claim outside AccessTokenAuthenticator"))
-                    .as("only AccessTokenAuthenticator reads TokenClaims.role() or getEffectiveRole(),"
+                    .as("only AccessTokenAuthenticator reads TokenClaims.role(),"
                             + " besides RefreshRotationService, which copies the claim into an admitted"
                             + " legacy token without authorizing on it");
 

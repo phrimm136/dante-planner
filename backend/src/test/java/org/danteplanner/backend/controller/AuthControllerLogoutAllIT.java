@@ -100,6 +100,15 @@ class AuthControllerLogoutAllIT extends SharedMySqlContainerSupport {
     class SuccessTests {
 
         @Test
+        void logout_WhenOnlyTheAccessCookieIsPresent_RevokesItAndLeavesTheRefreshToken() throws Exception {
+            mockMvc.perform(post("/api/auth/logout").with(withCsrf()).cookie(accessTokenCookie()))
+                    .andExpect(status().isNoContent());
+
+            assertThat(tokenBlacklistService.isBlacklisted(accessToken)).isTrue();
+            assertThat(tokenBlacklistService.isBlacklisted(refreshToken)).isFalse();
+        }
+
+        @Test
         void logoutAll_WhenAuthenticated_Returns204AndClearsCookies() throws Exception {
             mockMvc.perform(post("/api/auth/logout-all").with(withCsrf())
                             .cookie(accessTokenCookie())

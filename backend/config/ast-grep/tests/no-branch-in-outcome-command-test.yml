@@ -1,0 +1,66 @@
+id: no-branch-in-outcome-command
+valid:
+  - |
+    class A {
+      FooOutcome run(Choice choice) {
+        return switch (choice) {
+          case Choice.Left left -> FooOutcome.LEFT;
+          case Choice.Right right -> FooOutcome.RIGHT;
+        };
+      }
+    }
+  - |
+    class A {
+      FooOutcome run() {
+        try {
+          return FooOutcome.DONE;
+        } catch (IllegalStateException e) {
+          return FooOutcome.FAILED;
+        }
+      }
+    }
+  - |
+    class A {
+      Choice decide(boolean x) {
+        if (x) {
+          return new Choice.Left();
+        }
+        return x ? new Choice.Left() : new Choice.Right();
+      }
+    }
+  - |
+    class A {
+      List<FooOutcome> runAll(boolean x) {
+        if (x) {
+          return List.of();
+        }
+        return List.of(FooOutcome.DONE);
+      }
+    }
+invalid:
+  - |
+    class A {
+      FooOutcome run(boolean x) {
+        if (x) {
+          return FooOutcome.LEFT;
+        }
+        return FooOutcome.RIGHT;
+      }
+    }
+  - |
+    class A {
+      FooOutcome run(boolean x) {
+        return x ? FooOutcome.LEFT : FooOutcome.RIGHT;
+      }
+    }
+  - |
+    class A {
+      Holder.BarOutcome run(boolean x) {
+        Runnable r = () -> {
+          if (x) {
+            log();
+          }
+        };
+        return Holder.BarOutcome.DONE;
+      }
+    }

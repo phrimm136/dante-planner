@@ -18,10 +18,10 @@ class SseTopicRecorderTest {
     @Test
     void userEvents_WhenAnotherUsersEnvelopeShareTheTopic_ReturnsOnlyTheRequestedUsers() {
         SseTopicRecorder.Envelopes envelopes = new SseTopicRecorder.Envelopes();
-        SseEnvelope own = SseEnvelope.userEvent(1L, SseEventType.NOTIFY_COMMENT, "c-1", null, Map.of());
+        SseEnvelope.Wire own = new SseEnvelope.UserEvent(1L, SseEventType.NOTIFY_COMMENT, "c-1", new SseEnvelope.DeviceExclusion.None(), Map.of()).wire();
         envelopes.record(SseChannel.USER, own);
-        envelopes.record(SseChannel.USER, SseEnvelope.userEvent(2L, SseEventType.NOTIFY_COMMENT, "c-2", null, Map.of()));
-        envelopes.record(SseChannel.USER, SseEnvelope.userEvent(1L, SseEventType.NOTIFY_PUBLISHED, "c-3", null, Map.of()));
+        envelopes.record(SseChannel.USER, new SseEnvelope.UserEvent(2L, SseEventType.NOTIFY_COMMENT, "c-2", new SseEnvelope.DeviceExclusion.None(), Map.of()).wire());
+        envelopes.record(SseChannel.USER, new SseEnvelope.UserEvent(1L, SseEventType.NOTIFY_PUBLISHED, "c-3", new SseEnvelope.DeviceExclusion.None(), Map.of()).wire());
 
         assertThat(envelopes.userEvents(1L, SseEventType.NOTIFY_COMMENT)).containsExactly(own);
     }
@@ -30,10 +30,10 @@ class SseTopicRecorderTest {
     void commentEvents_WhenAnotherPlannersEnvelopeSharesTheTopic_ReturnsOnlyTheRequestedPlanners() {
         SseTopicRecorder.Envelopes envelopes = new SseTopicRecorder.Envelopes();
         UUID planner = UUID.randomUUID();
-        SseEnvelope own = SseEnvelope.commentEvent(planner, SseEventType.COMMENT_ADDED, "c-1", 7L, Map.of());
+        SseEnvelope.Wire own = new SseEnvelope.CommentEvent(planner, SseEventType.COMMENT_ADDED, "c-1", new SseEnvelope.UserExclusion.User(7L), Map.of()).wire();
         envelopes.record(SseChannel.COMMENT, own);
         envelopes.record(SseChannel.COMMENT,
-                SseEnvelope.commentEvent(UUID.randomUUID(), SseEventType.COMMENT_ADDED, "c-2", 7L, Map.of()));
+                new SseEnvelope.CommentEvent(UUID.randomUUID(), SseEventType.COMMENT_ADDED, "c-2", new SseEnvelope.UserExclusion.User(7L), Map.of()).wire());
 
         assertThat(envelopes.commentEvents(planner, SseEventType.COMMENT_ADDED)).containsExactly(own);
     }
@@ -41,10 +41,10 @@ class SseTopicRecorderTest {
     @Test
     void broadcasts_WhenThePayloadPredicateRejects_ExcludesTheEnvelope() {
         SseTopicRecorder.Envelopes envelopes = new SseTopicRecorder.Envelopes();
-        SseEnvelope own = SseEnvelope.broadcast(1L, SseEventType.NOTIFY_PUBLISHED, Map.of("plannerId", "p-1"));
+        SseEnvelope.Wire own = new SseEnvelope.Broadcast(new SseEnvelope.UserExclusion.User(1L), SseEventType.NOTIFY_PUBLISHED, Map.of("plannerId", "p-1")).wire();
         envelopes.record(SseChannel.BROADCAST, own);
         envelopes.record(SseChannel.BROADCAST,
-                SseEnvelope.broadcast(1L, SseEventType.NOTIFY_PUBLISHED, Map.of("plannerId", "p-2")));
+                new SseEnvelope.Broadcast(new SseEnvelope.UserExclusion.User(1L), SseEventType.NOTIFY_PUBLISHED, Map.of("plannerId", "p-2")).wire());
 
         assertThat(envelopes.broadcasts(SseEventType.NOTIFY_PUBLISHED,
                 payload -> payload instanceof Map<?, ?> map && "p-1".equals(map.get("plannerId"))))
@@ -54,7 +54,7 @@ class SseTopicRecorderTest {
     @Test
     void await_WhenAnEnvelopeArrivesFromAnotherThread_ReturnsIt() throws Exception {
         SseTopicRecorder.Envelopes envelopes = new SseTopicRecorder.Envelopes();
-        SseEnvelope arriving = SseEnvelope.userEvent(3L, SseEventType.NOTIFY_COMMENT, "c-1", null, Map.of());
+        SseEnvelope.Wire arriving = new SseEnvelope.UserEvent(3L, SseEventType.NOTIFY_COMMENT, "c-1", new SseEnvelope.DeviceExclusion.None(), Map.of()).wire();
         Thread publisher = new Thread(() -> envelopes.record(SseChannel.USER, arriving));
         publisher.start();
 

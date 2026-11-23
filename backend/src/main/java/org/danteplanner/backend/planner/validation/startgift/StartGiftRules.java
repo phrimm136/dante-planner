@@ -7,7 +7,6 @@ import org.danteplanner.backend.planner.validation.Positions;
 import org.danteplanner.backend.planner.validation.Violation;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -37,9 +36,9 @@ public final class StartGiftRules {
     }
 
     private static List<StartGift> gifts(List<String> giftIds) {
-        Map<String, Integer> firstIndex = Positions.firstIndexOf(giftIds);
+        List<Integer> firstIndex = Positions.firstIndexPerPosition(giftIds);
         return IntStream.range(0, giftIds.size())
-                .mapToObj(index -> new StartGift(index, giftIds.get(index), firstIndex.get(giftIds.get(index)) < index))
+                .mapToObj(index -> new StartGift(index, giftIds.get(index), firstIndex.get(index) < index))
                 .toList();
     }
 

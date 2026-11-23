@@ -25,6 +25,7 @@ import org.danteplanner.backend.user.validation.RoleChangeValidator;
 import org.danteplanner.backend.user.service.UserSettingsService;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.danteplanner.backend.user.api.SessionEndHandler.SessionToken;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -144,7 +145,8 @@ class UserControllerTest {
             // both tokens were read from their own cookies.
             assertThat(sessionEndHandler.calls()).containsExactly(
                     new EndAllSessions(TEST_USER_ID),
-                    new EndSession(TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN));
+                    new EndSession(List.of(
+                            new SessionToken.Access(TEST_ACCESS_TOKEN), new SessionToken.Refresh(TEST_REFRESH_TOKEN))));
         }
 
         @Test
@@ -199,7 +201,7 @@ class UserControllerTest {
         void sseSettingsInvalidationCrossPod_WhenSettingsUpdated_PublishesInvalidationForUser() {
             // Arrange
             UpdateUserSettingsRequest updateRequest = new UpdateUserSettingsRequest(true, null, null, null);
-            List<List<SseEnvelope>> invalidationsAtPersist = new ArrayList<>();
+            List<List<SseEnvelope.Wire>> invalidationsAtPersist = new ArrayList<>();
             when(userSettingsRepository.findByUserId(TEST_USER_ID)).thenReturn(Optional.empty());
             when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(TestDataFactory.unsavedUser(TEST_USER_ID)));
             when(userSettingsRepository.insert(any(UserSettings.class))).thenAnswer(invocation -> {
@@ -217,7 +219,7 @@ class UserControllerTest {
             assertThat(result.getBody()).isEqualTo(new UserSettingsResponse(true, true, true, true, false));
             assertThat(invalidationsAtPersist).containsExactly(List.of());
             assertThat(sseChannel.envelopes(SseChannel.USER)).containsExactly(
-                    new SseEnvelope(SseEventType.SETTINGS_INVALIDATED, TEST_USER_ID, null, null, null, null, null));
+                    new SseEnvelope.Wire(SseEventType.SETTINGS_INVALIDATED, TEST_USER_ID, null, null, null, null, null));
         }
     }
 }

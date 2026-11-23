@@ -3,6 +3,8 @@ package org.danteplanner.backend.planner.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.danteplanner.backend.shared.security.Viewer;
+import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.shared.restriction.RestrictionExempt;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
@@ -57,10 +59,10 @@ public class PublishedPlannerController {
             @RequestParam(required = false) String ego,
             @RequestParam(required = false) String gift,
             @RequestParam(required = false) String themePack,
-            @AuthenticationPrincipal Long userId) {
+            @AuthenticationPrincipal @Nullable Long userId) {
 
         return listPlanners(false, page, size, category, q, keyword,
-                entityFilters(identity, ego, gift, themePack), userId);
+                entityFilters(identity, ego, gift, themePack), Viewer.of(userId));
     }
 
     @RateLimited(RateLimitPolicy.PUBLIC_READ)
@@ -75,18 +77,18 @@ public class PublishedPlannerController {
             @RequestParam(required = false) String ego,
             @RequestParam(required = false) String gift,
             @RequestParam(required = false) String themePack,
-            @AuthenticationPrincipal Long userId) {
+            @AuthenticationPrincipal @Nullable Long userId) {
 
         return listPlanners(true, page, size, category, q, keyword,
-                entityFilters(identity, ego, gift, themePack), userId);
+                entityFilters(identity, ego, gift, themePack), Viewer.of(userId));
     }
 
     @RateLimited(RateLimitPolicy.PUBLIC_READ)
     @GetMapping("/published/{id}")
     public ResponseEntity<PublishedPlannerDetailResponse> getPublishedPlanner(
             @PathVariable UUID id,
-            @AuthenticationPrincipal Long userId) {
-        return ResponseEntity.ok(publishedPlannerQueryService.getPublishedPlanner(id, userId).value());
+            @AuthenticationPrincipal @Nullable Long userId) {
+        return ResponseEntity.ok(publishedPlannerQueryService.getPublishedPlanner(id, Viewer.of(userId)).value());
     }
 
     @RateLimited(RateLimitPolicy.PLANNER_STATS)
@@ -100,8 +102,8 @@ public class PublishedPlannerController {
     @GetMapping("/published/{id}/flags")
     public ResponseEntity<PlannerFlagsResponse> getPublishedPlannerFlags(
             @PathVariable UUID id,
-            @AuthenticationPrincipal Long userId) {
-        PlannerFlagsResponse response = publishedPlannerQueryService.getPublishedPlannerFlags(id, userId).value();
+            @AuthenticationPrincipal @Nullable Long userId) {
+        PlannerFlagsResponse response = publishedPlannerQueryService.getPublishedPlannerFlags(id, Viewer.of(userId)).value();
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(response);
     }
 
@@ -112,12 +114,12 @@ public class PublishedPlannerController {
             HttpServletRequest request,
             HttpServletResponse servletResponse,
             @PathVariable UUID id,
-            @AuthenticationPrincipal Long userId) {
+            @AuthenticationPrincipal @Nullable Long userId) {
         UUID plannerId = publishedPlannerQueryService.requirePublished(id).value();
         String viewerIdentity = ClientIpResolver.resolveClientIdentifier(
                 request, securityProperties, () -> deviceIdResolver.resolve(request, servletResponse));
         publishedPlannerQueryService.recordView(
-                plannerId, userId, viewerIdentity, request.getHeader(HttpHeaders.USER_AGENT));
+                plannerId, Viewer.of(userId), viewerIdentity, request.getHeader(HttpHeaders.USER_AGENT));
         return ResponseEntity.noContent().build();
     }
 
@@ -129,14 +131,14 @@ public class PublishedPlannerController {
             String q,
             String keyword,
             Map<ContentEntityType, List<String>> entityFilters,
-            Long userId) {
+            Viewer viewer) {
 
         Pageable pageable = createPageable(page, size);
 
         CatalogQuery catalogQuery = new CatalogQuery(recommendedOnly, category, q,
                 parseCsv(keyword), entityFilters);
         return ResponseEntity.ok(
-                publishedPlannerQueryService.searchPlanners(catalogQuery, pageable, userId).value());
+                publishedPlannerQueryService.searchPlanners(catalogQuery, pageable, viewer).value());
     }
 
     private Pageable createPageable(int page, int size) {

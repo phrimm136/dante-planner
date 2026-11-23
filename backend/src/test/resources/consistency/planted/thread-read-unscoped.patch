@@ -1,23 +1,22 @@
 diff --git a/backend/src/main/java/org/danteplanner/backend/comment/service/CommentQueryService.java b/backend/src/main/java/org/danteplanner/backend/comment/service/CommentQueryService.java
-index fba1233..4525b4f 100644
 --- a/backend/src/main/java/org/danteplanner/backend/comment/service/CommentQueryService.java
 +++ b/backend/src/main/java/org/danteplanner/backend/comment/service/CommentQueryService.java
-@@ -48,8 +48,7 @@ public class CommentQueryService {
+@@ -50,8 +50,7 @@
  
-         accessValidator.requireThreadVisible(planner, currentUserId);
+         accessValidator.requireThreadVisible(planner, viewer);
  
 -        Set<FreshnessScope> scopes = Set.of(
 -                new FreshnessScope.Planner(plannerId), new FreshnessScope.User(planner.ownerId()));
 +        Set<FreshnessScope> scopes = Set.of();
          List<PlannerComment> comments = commentRepository.findByPlannerId(plannerId);
-         if (comments.isEmpty()) {
-             return new ScopedRead<>(Collections.emptyList(), scopes);
-@@ -72,7 +71,7 @@ public class CommentQueryService {
-             upvotedIds = new HashSet<>(commentVoteRepository.findUpvotedCommentIds(commentIds, currentUserId));
-         }
+         return switch (ThreadFill.of(comments)) {
+             case EMPTY -> new ScopedRead<>(Collections.emptyList(), scopes);
+@@ -81,7 +80,7 @@
  
--        return new ScopedRead<>(buildCommentTree(comments, userMap, upvotedIds, currentUserId), threadScopes);
-+        return new ScopedRead<>(buildCommentTree(comments, userMap, upvotedIds, currentUserId), scopes);
+         Set<Long> upvotedIds = upvotedIds(comments, viewer);
+ 
+-        return new ScopedRead<>(buildCommentTree(comments, userMap, upvotedIds, viewer), threadScopes);
++        return new ScopedRead<>(buildCommentTree(comments, userMap, upvotedIds, viewer), scopes);
      }
  
      @Transactional(readOnly = true, propagation = Propagation.MANDATORY)

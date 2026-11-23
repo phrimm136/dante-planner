@@ -1,6 +1,8 @@
 package org.danteplanner.backend.planner.entity;
 
-public enum PublicationChange {
+import org.danteplanner.backend.shared.failure.CommandOutcome;
+
+public enum PublicationOutcome implements CommandOutcome {
 
     NONE,
 

@@ -201,8 +201,8 @@ class RedisRoleProbeHeldConnectionTest {
     }
 
     private void startWithHeldConnection(RedisRoleProbe.Timeouts timeouts) {
-        RedisConnectionConfig connections = RedisEndpoints.everyRoleAt(REFUSED_HOST, REFUSED_PORT);
-        RedisEndpoints.moveRole(connections, ROLE, redis.host(), redis.port());
+        RedisConnectionConfig connections = RedisEndpoints.withRoleAt(
+                RedisEndpoints.everyRoleAt(REFUSED_HOST, REFUSED_PORT), ROLE, redis.host(), redis.port());
         probe = new RedisRoleProbe(clientResources, connections, health, List.of(), timeouts);
         probe.probeAtStartup();
         assertThat(health.isAvailable(ROLE)).isTrue();

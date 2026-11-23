@@ -146,9 +146,9 @@ public class GameDataLoader {
                 return;
             }
 
-            JsonNode themePackNode = giftNode.get("themePack");
+            JsonNode themePackNode = giftNode.path("themePack");
             List<String> themePacks = new ArrayList<>();
-            if (themePackNode != null && themePackNode.isArray()) {
+            if (themePackNode.isArray()) {
                 for (JsonNode packNode : themePackNode) {
                     if (packNode.isString()) {
                         themePacks.add(packNode.asString());
@@ -174,8 +174,8 @@ public class GameDataLoader {
                 return;
             }
 
-            JsonNode maxNode = egoNode.get("maxThreadspin");
-            if (maxNode != null && maxNode.isInt()) {
+            JsonNode maxNode = egoNode.path("maxThreadspin");
+            if (maxNode.isInt()) {
                 maxThreadspinMap.put(egoId, maxNode.asInt());
             }
         });

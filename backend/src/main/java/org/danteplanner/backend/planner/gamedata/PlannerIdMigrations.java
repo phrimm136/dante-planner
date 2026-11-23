@@ -125,7 +125,7 @@ public record PlannerIdMigrations(Map<Kind, Map<String, String>> renames, Map<Ki
     public List<String> inconsistenciesWith(Map<Kind, Predicate<String>> known) {
         List<String> problems = new ArrayList<>();
         for (Kind kind : Kind.values()) {
-            Predicate<String> exists = known.get(kind);
+            Predicate<String> exists = id -> knownOf(kind, known).test(id);
             Map<String, String> kindRenames = renames.getOrDefault(kind, Map.of());
             Set<String> kindDrops = drops.getOrDefault(kind, Set.of());
 
@@ -156,6 +156,14 @@ public record PlannerIdMigrations(Map<Kind, Map<String, String>> renames, Map<Ki
             });
         }
         return problems;
+    }
+
+    private static Predicate<String> knownOf(Kind kind, Map<Kind, Predicate<String>> known) {
+        Predicate<String> ids = known.get(kind);
+        if (ids == null) {
+            throw new IllegalArgumentException("no known ids were supplied for " + kind.key());
+        }
+        return ids;
     }
 
     public JsonNode normalize(JsonNode content) {

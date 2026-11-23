@@ -9,7 +9,6 @@ import org.danteplanner.backend.user.api.AuthProviderType;
 import java.util.concurrent.atomic.AtomicLong;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.entity.PlannerContentLifecycle;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.planner.entity.PlannerModeration;
@@ -443,7 +442,7 @@ public class TestDataFactory {
                     .plannerType(plannerType)
                     .build();
             planner.attach(
-                    PlannerContentLifecycle.asPersisted(StoredPlannerContent.holding(PlannerContent.builder()
+                    PlannerContentLifecycle.asPersisted(StoredPlannerContent.holding(StoredPlannerContent.builder()
                             .title(title)
                             .category(category)
                             .status(status != null ? status
@@ -456,7 +455,7 @@ public class TestDataFactory {
                     PlannerPublication.builder().build(),
                     PlannerModeration.builder().build());
             if (published) {
-                planner.publish();
+                planner.publish(Instant.now());
             }
             if (firstPublishedAt != null) {
                 planner.getPublication().setFirstPublishedAt(firstPublishedAt);

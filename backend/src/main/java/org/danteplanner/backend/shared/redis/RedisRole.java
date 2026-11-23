@@ -25,12 +25,12 @@ public enum RedisRole {
         return BREAKER_NAME_PREFIX + label;
     }
 
-    public RedisConnectionConfig.Endpoint endpointIn(RedisConnectionConfig connections) {
+    public RedisConnectionConfig.Endpoints.Endpoint endpointIn(RedisConnectionConfig connections) {
         return switch (this) {
-            case AUTH -> connections.getAuth();
-            case AUTH_LOCAL -> connections.getAuthLocal();
-            case RATE_LIMIT -> connections.getRateLimit();
-            case SSE_LOCAL -> connections.getSseLocal();
+            case AUTH -> connections.endpoints().auth();
+            case AUTH_LOCAL -> connections.endpoints().authLocal();
+            case RATE_LIMIT -> connections.endpoints().rateLimit();
+            case SSE_LOCAL -> connections.endpoints().sseLocal();
         };
     }
 }

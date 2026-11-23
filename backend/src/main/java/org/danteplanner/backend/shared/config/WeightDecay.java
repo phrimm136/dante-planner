@@ -18,10 +18,6 @@ final class WeightDecay {
     }
 
     static int weightOf(LocalDate addedDate, LocalDate referenceDate) {
-        if (addedDate == null) {
-            return WEIGHT_OLD;
-        }
-
         long daysSinceAdded = ChronoUnit.DAYS.between(addedDate, referenceDate);
         if (daysSinceAdded <= TIER_NEW_DAYS) {
             return WEIGHT_NEW;

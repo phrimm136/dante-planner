@@ -36,14 +36,16 @@ class ProbePhaseTest {
     void decide_WhenStartingUpAndTheRoleIsSilent_OpensAtOnce() {
         ProbeStreak streak = new ProbeStreak(RedisRoleProbe.FAILURE_THRESHOLD);
 
-        assertThat(ProbePhase.STARTUP.decide(streak, false)).isEqualTo(ProbeStreak.Transition.OPEN);
+        assertThat(ProbePhase.STARTUP.decide(streak, false).transition()).isEqualTo(ProbeStreak.Transition.OPEN);
     }
 
     @Test
     void decide_WhenRunningAndTheRoleIsSilentOnce_WaitsForTheThreshold() {
         ProbeStreak streak = new ProbeStreak(RedisRoleProbe.FAILURE_THRESHOLD);
 
-        assertThat(ProbePhase.RUNTIME.decide(streak, false)).isEqualTo(ProbeStreak.Transition.NONE);
-        assertThat(ProbePhase.RUNTIME.decide(streak, false)).isEqualTo(ProbeStreak.Transition.OPEN);
+        ProbeStreak.Step first = ProbePhase.RUNTIME.decide(streak, false);
+
+        assertThat(first.transition()).isEqualTo(ProbeStreak.Transition.NONE);
+        assertThat(ProbePhase.RUNTIME.decide(first.next(), false).transition()).isEqualTo(ProbeStreak.Transition.OPEN);
     }
 }

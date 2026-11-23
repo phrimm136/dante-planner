@@ -162,7 +162,7 @@ class CommentEffectPublicVisibilityTest {
         applyReply();
 
         assertThat(sseChannel.envelopes(SseChannel.COMMENT))
-                .extracting(SseEnvelope::type, SseEnvelope::plannerId, SseEnvelope::excludeUserId)
+                .extracting(SseEnvelope.Wire::type, SseEnvelope.Wire::plannerId, SseEnvelope.Wire::excludeUserId)
                 .containsExactly(tuple(SseEventType.COMMENT_ADDED, PLANNER_ID.toString(), WRITER_ID));
     }
 
@@ -208,7 +208,7 @@ class CommentEffectPublicVisibilityTest {
 
     private void assertNotifyCommentPushedTo(Long recipientId) {
         assertThat(sseChannel.envelopes(SseChannel.USER))
-                .extracting(SseEnvelope::type, SseEnvelope::userId)
+                .extracting(SseEnvelope.Wire::type, SseEnvelope.Wire::userId)
                 .containsExactly(tuple(SseEventType.NOTIFY_COMMENT, recipientId));
     }
 

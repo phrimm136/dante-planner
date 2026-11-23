@@ -1,0 +1,67 @@
+id: no-branch-in-outcome-command
+snapshots:
+  "class A {\n  FooOutcome run(boolean x) {\n    if (x) {\n      return FooOutcome.LEFT;\n    }\n    return FooOutcome.RIGHT;\n  }\n}\n":
+    labels:
+    - source: |-
+        if (x) {
+              return FooOutcome.LEFT;
+            }
+      style: primary
+      start: 44
+      end: 88
+    - source: FooOutcome
+      style: secondary
+      start: 12
+      end: 22
+    - source: |-
+        FooOutcome run(boolean x) {
+            if (x) {
+              return FooOutcome.LEFT;
+            }
+            return FooOutcome.RIGHT;
+          }
+      style: secondary
+      start: 12
+      end: 121
+  "class A {\n  FooOutcome run(boolean x) {\n    return x ? FooOutcome.LEFT : FooOutcome.RIGHT;\n  }\n}\n":
+    labels:
+    - source: "x ? FooOutcome.LEFT : FooOutcome.RIGHT"
+      style: primary
+      start: 51
+      end: 89
+    - source: FooOutcome
+      style: secondary
+      start: 12
+      end: 22
+    - source: |-
+        FooOutcome run(boolean x) {
+            return x ? FooOutcome.LEFT : FooOutcome.RIGHT;
+          }
+      style: secondary
+      start: 12
+      end: 94
+  "class A {\n  Holder.BarOutcome run(boolean x) {\n    Runnable r = () -> {\n      if (x) {\n        log();\n      }\n    };\n    return Holder.BarOutcome.DONE;\n  }\n}\n":
+    labels:
+    - source: |-
+        if (x) {
+                log();
+              }
+      style: primary
+      start: 78
+      end: 109
+    - source: Holder.BarOutcome
+      style: secondary
+      start: 12
+      end: 29
+    - source: |-
+        Holder.BarOutcome run(boolean x) {
+            Runnable r = () -> {
+              if (x) {
+                log();
+              }
+            };
+            return Holder.BarOutcome.DONE;
+          }
+      style: secondary
+      start: 12
+      end: 155

@@ -1,15 +1,24 @@
 package org.danteplanner.backend.auth.oauth;
 
-public record OAuthTokens(
-        String accessToken,
-        String refreshToken,
-        String idToken
-) {
-    public static OAuthTokens accessOnly(String accessToken) {
-        return new OAuthTokens(accessToken, null, null);
+import org.jspecify.annotations.Nullable;
+
+public sealed interface OAuthTokens {
+
+    String accessToken();
+
+    record AccessOnly(String accessToken) implements OAuthTokens {
     }
 
-    public static OAuthTokens withRefresh(String accessToken, String refreshToken) {
-        return new OAuthTokens(accessToken, refreshToken, null);
+    record OpenId(String accessToken, String idToken) implements OAuthTokens {
+    }
+
+    record Response(String accessToken, @Nullable String idToken) {
+    }
+
+    static OAuthTokens of(Response response) {
+        String idToken = response.idToken();
+        return idToken == null
+                ? new AccessOnly(response.accessToken())
+                : new OpenId(response.accessToken(), idToken);
     }
 }

@@ -50,7 +50,8 @@ class UserResolutionIT extends SharedMySqlContainerSupport {
 
     @Test
     void userResolve_WhenNewUser_CreatesSettingsRowAtomically() {
-        User created = userService.findOrCreateUser("google", identity("resolve-new-001"));
+        Map<String, String> identity = identity("resolve-new-001");
+        User created = userService.findOrCreateUser("google", identity.get("id"), identity.get("email"));
 
         assertThat(created.getId()).isNotNull();
         assertThat(userSettingsRepository.findByUserId(created.getId()))
@@ -88,15 +89,14 @@ class UserResolutionIT extends SharedMySqlContainerSupport {
 
     private User raced(CyclicBarrier barrier, Map<String, String> identity) throws Exception {
         Hang.await(barrier, "both resolves reaching the barrier");
-        return userService.findOrCreateUser("google", identity);
+        return userService.findOrCreateUser("google", identity.get("id"), identity.get("email"));
     }
 
     @Test
     void userResolve_WhenReturningUser_NoWrites() {
         User existing = TestDataFactory.createTestUser(userRepository, "returning@example.com");
 
-        User resolved = userService.findOrCreateUser("google", Map.of(
-                "id", existing.getProviderId(), "email", existing.getEmail()));
+        User resolved = userService.findOrCreateUser("google", existing.getProviderId(), existing.getEmail());
 
         assertThat(resolved.getId()).isEqualTo(existing.getId());
         // Counting rows for this provider id rather than the table: a bare count() would also

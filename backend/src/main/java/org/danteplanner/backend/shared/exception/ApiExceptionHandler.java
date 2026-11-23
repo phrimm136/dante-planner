@@ -5,6 +5,7 @@ import io.sentry.Sentry;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ClientAbortException;
+import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.shared.sse.SseCapacityExceededException;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.CannotAcquireLockException;
@@ -53,13 +54,13 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     private static final String CONCURRENT_WRITE_CODE = "CONCURRENT_WRITE";
     private static final String CONCURRENT_WRITE_DETAIL = "The resource was modified concurrently";
 
-    public ResponseEntity<Object> respond(
+    public @Nullable ResponseEntity<Object> respond(
             Exception ex, ProblemDetail body, HttpHeaders headers, WebRequest request) {
         return handleExceptionInternal(ex, body, headers, HttpStatus.valueOf(body.getStatus()), request);
     }
 
     @Override
-    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers,
+    protected @Nullable ResponseEntity<Object> handleExceptionInternal(Exception ex, @Nullable Object body, HttpHeaders headers,
             HttpStatusCode status, WebRequest request) {
 
         request.removeAttribute(
@@ -78,7 +79,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpHeaders headers,
+    protected @Nullable ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpHeaders headers,
             HttpStatusCode status, WebRequest request) {
 
         String name = ex instanceof MethodArgumentTypeMismatchException mismatch
@@ -99,7 +100,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+    protected @Nullable ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
             HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
         String detail = ex.getBindingResult().getFieldErrors().stream()
@@ -111,7 +112,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
+    protected @Nullable ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
             HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
         log.warn("Unreadable request body");
@@ -120,7 +121,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    protected ResponseEntity<Object> handleNoResourceFoundException(NoResourceFoundException ex,
+    protected @Nullable ResponseEntity<Object> handleNoResourceFoundException(NoResourceFoundException ex,
             HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
         log.debug("No handler found: {} {}", ex.getHttpMethod(), ex.getResourcePath());
@@ -129,10 +130,10 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Object> handleDataIntegrityViolation(
+    public @Nullable ResponseEntity<Object> handleDataIntegrityViolation(
             DataIntegrityViolationException ex, WebRequest request) {
 
-        ConstraintViolationOutcome outcome = ConstraintViolationClassifier.classify(ex);
+        ConstraintViolationKind outcome = ConstraintViolationClassifier.classify(ex);
 
         switch (outcome) {
             case UUID_COLLISION -> log.warn("UUID collision detected (race condition): {}", ex.getMessage());
@@ -150,7 +151,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(CannotAcquireLockException.class)
-    public ResponseEntity<Object> handleCannotAcquireLock(CannotAcquireLockException ex, WebRequest request) {
+    public @Nullable ResponseEntity<Object> handleCannotAcquireLock(CannotAcquireLockException ex, WebRequest request) {
         log.warn("Database deadlock detected: {}", ex.getMessage());
         return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.SERVICE_UNAVAILABLE),
                 DEADLOCK_CODE, DEADLOCK_DETAIL), new HttpHeaders(), request);
@@ -167,23 +168,34 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
             DataAccessResourceFailureException.class,
             CannotCreateTransactionException.class
     })
-    public ResponseEntity<Object> handleDatabaseUnavailable(NestedRuntimeException ex, WebRequest request) {
-        ReadTemporarilyUnavailableException read = readUnavailableCause(ex);
-        if (read != null) {
-            return handleErrorResponseException(read, read.getHeaders(), read.getStatusCode(), request);
-        }
-        log.warn("Database unavailable (transient): {}", ex.getMessage());
-        return degraded(ex, DegradationErrorConstants.DB_UNAVAILABLE, request);
+    public @Nullable ResponseEntity<Object> handleDatabaseUnavailable(NestedRuntimeException ex, WebRequest request) {
+        return switch (readUnavailableCause(ex)) {
+            case ReadUnavailableCause.Found found -> handleErrorResponseException(
+                    found.read(), found.read().getHeaders(), found.read().getStatusCode(), request);
+            case ReadUnavailableCause.NotFound notFound -> {
+                log.warn("Database unavailable (transient): {}", ex.getMessage());
+                yield degraded(ex, DegradationErrorConstants.DB_UNAVAILABLE, request);
+            }
+        };
     }
 
-    private static ReadTemporarilyUnavailableException readUnavailableCause(Throwable failure) {
+    private sealed interface ReadUnavailableCause {
+
+        record Found(ReadTemporarilyUnavailableException read) implements ReadUnavailableCause {
+        }
+
+        record NotFound() implements ReadUnavailableCause {
+        }
+    }
+
+    private static ReadUnavailableCause readUnavailableCause(Throwable failure) {
         Set<Throwable> visited = Collections.newSetFromMap(new IdentityHashMap<>());
         for (Throwable link = failure; link != null && visited.add(link); link = link.getCause()) {
             if (link instanceof ReadTemporarilyUnavailableException read) {
-                return read;
+                return new ReadUnavailableCause.Found(read);
             }
         }
-        return null;
+        return new ReadUnavailableCause.NotFound();
     }
 
     /**
@@ -191,7 +203,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
      * of DataAccessResourceFailureException; Spring dispatches it here by type specificity.
      */
     @ExceptionHandler(RedisConnectionFailureException.class)
-    public ResponseEntity<Object> handleRedisUnavailable(
+    public @Nullable ResponseEntity<Object> handleRedisUnavailable(
             RedisConnectionFailureException ex, WebRequest request) {
         log.warn("Redis unavailable during authentication (transient): {}", ex.getMessage());
         return degraded(ex, DegradationErrorConstants.AUTH_UNAVAILABLE, request);
@@ -206,12 +218,12 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
      * timeout fires before Lettuce's equal command timeout.
      */
     @ExceptionHandler({RedisException.class, io.github.bucket4j.TimeoutException.class})
-    public ResponseEntity<Object> handleRateLimitRedisUnavailable(RuntimeException ex, WebRequest request) {
+    public @Nullable ResponseEntity<Object> handleRateLimitRedisUnavailable(RuntimeException ex, WebRequest request) {
         log.warn("Rate-limit Redis unavailable (transient): {}", ex.getMessage());
         return degraded(ex, DegradationErrorConstants.RATE_LIMIT_UNAVAILABLE, request);
     }
 
-    private ResponseEntity<Object> degraded(
+    private @Nullable ResponseEntity<Object> degraded(
             Exception ex, DegradationErrorConstants.Entry entry, WebRequest request) {
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.RETRY_AFTER, DegradationErrorConstants.RETRY_AFTER_SECONDS);
@@ -220,7 +232,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
-    public ResponseEntity<Object> handleOptimisticLocking(
+    public @Nullable ResponseEntity<Object> handleOptimisticLocking(
             ObjectOptimisticLockingFailureException ex, WebRequest request) {
         log.warn("Concurrent write conflict: {}", ex.getMessage());
         return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.CONFLICT),
@@ -228,7 +240,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(IOException.class)
-    public ResponseEntity<Object> handleIOException(
+    public @Nullable ResponseEntity<Object> handleIOException(
             IOException ex, HttpServletResponse response, WebRequest request) {
 
         if (ex instanceof ClientAbortException || carriesDisconnectStrerror(ex)) {
@@ -263,7 +275,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleUnexpected(Exception ex, WebRequest request) {
+    public @Nullable ResponseEntity<Object> handleUnexpected(Exception ex, WebRequest request) {
         Sentry.captureException(ex);
         log.error("Unexpected error", ex);
         return respond(ex, Problems.fill(ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR),

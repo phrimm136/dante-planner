@@ -67,6 +67,28 @@ class HeldConnectionTest {
     }
 
     @Test
+    void discardUnlessConnecting_WhenTheAttemptSettlesAfterClose_ClosesItsConnection() throws Exception {
+        ClientResources clientResources = DefaultClientResources.create();
+        try (PongRedis redis = new PongRedis()) {
+            RedisClient client = BoundedRedisConnections.redisClient(clientResources, redis.host(), redis.port());
+            CompletableFuture<StatefulRedisConnection<String, String>> slow = new CompletableFuture<>();
+            nextAttempt.set(slow);
+            held.ping();
+            held.close();
+            StatefulRedisConnection<String, String> connection = Hang.get(client.connectAsync(StringCodec.UTF8,
+                    BoundedRedisConnections.redisUri(redis.host(), redis.port())).toCompletableFuture(), "the connect");
+
+            slow.complete(connection);
+            held.discardUnlessConnecting();
+
+            assertThat(connection.isOpen()).isFalse();
+            client.shutdown();
+        } finally {
+            var unused = clientResources.shutdown();
+        }
+    }
+
+    @Test
     void ping_WhenThePreviousPingFailedOnAnOpenConnection_ConnectsAgain() throws Exception {
         ClientResources clientResources = DefaultClientResources.create();
         try (PongRedis redis = new PongRedis()) {

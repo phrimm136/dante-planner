@@ -5,7 +5,6 @@ import org.danteplanner.backend.planner.validation.Positions;
 import org.danteplanner.backend.planner.validation.Violation;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -38,10 +37,10 @@ public final class FloorReferences {
 
     private static Stream<Violation> giftViolations(int index, FloorSelection floor, FloorReferenceData data) {
         List<String> giftIds = floor.giftIds();
-        Map<String, Integer> firstIndex = Positions.firstIndexOf(giftIds);
+        List<Integer> firstIndex = Positions.firstIndexPerPosition(giftIds);
         Optional<String> themePack = floor.themePack().chosenId();
         return IntStream.range(0, giftIds.size())
-                .filter(giftIndex -> firstIndex.get(giftIds.get(giftIndex)) == giftIndex)
+                .filter(giftIndex -> firstIndex.get(giftIndex) == giftIndex)
                 .mapToObj(giftIndex -> giftViolation(FloorBoundary.giftIdsPath(index).index(giftIndex),
                         giftIds.get(giftIndex), themePack, data))
                 .flatMap(Optional::stream);

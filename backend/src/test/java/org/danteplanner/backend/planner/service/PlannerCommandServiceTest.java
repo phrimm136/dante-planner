@@ -1,5 +1,9 @@
 package org.danteplanner.backend.planner.service;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.Level;
+import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.backend.planner.dto.UpsertResult;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
@@ -203,7 +207,8 @@ class PlannerCommandServiceTest {
             assertRejected(() -> commandService.createPlanner(nonExistentUserId, deviceId, request))
                     .withCode("USER_NOT_FOUND")
                     .isInstanceOfSatisfying(UserNotFoundException.class, exception -> {
-                        assertThat(exception.getUserId()).isEqualTo(nonExistentUserId);
+                        assertThat(exception.getMessage())
+                                    .isEqualTo("User not found with id: " + nonExistentUserId);
                         assertThat(exception.getMessage()).contains(nonExistentUserId.toString());
                     });
             verify(plannerRepository, never()).insert(any());
@@ -240,6 +245,23 @@ class PlannerCommandServiceTest {
             assertRejected(() -> commandService.createPlanner(testUser.getId(), deviceId, unknownIdentity))
                     .withViolation("UNKNOWN_IDENTITY");
             verify(plannerRepository, never()).insert(any());
+        }
+
+        @Test
+        void createPlanner_WhenTheCategoryIsInvalid_LogsTheRefusal() {
+            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
+            UpsertPlannerRequest request = UpsertRequests.draft()
+                    .plannerType(PlannerType.REFRACTED_RAILWAY)
+                    .category("RR_PLACEHOLDER")
+                    .contentVersion(5)
+                    .build();
+
+            try (LogCapture capture = LogCapture.onThisThread(PlannerCommandService.class)) {
+                assertRejected(() -> commandService.createPlanner(testUser.getId(), deviceId, request))
+                        .withViolation("INVALID_CATEGORY", "");
+                assertThat(capture.at(Level.WARN)).extracting(ILoggingEvent::getFormattedMessage)
+                        .containsExactly("Validation failed: Invalid category: RR_PLACEHOLDER");
+            }
         }
 
         @Test

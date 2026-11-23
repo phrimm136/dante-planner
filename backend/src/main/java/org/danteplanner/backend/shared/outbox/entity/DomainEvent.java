@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -44,7 +45,7 @@ public class DomainEvent {
     private Instant createdAt;
 
     @Column(name = "dispatched_at")
-    private Instant dispatchedAt;
+    private @Nullable Instant dispatchedAt;
 
     @Column(name = "attempts", nullable = false)
     private int attempts;

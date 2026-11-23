@@ -40,7 +40,7 @@ public class PlannerVote implements Persistable<PlannerVoteId> {
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.CHAR)
     @Column(name = "vote_type", nullable = false)
-    private final VoteType voteType;
+    private VoteType voteType;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -49,7 +49,6 @@ public class PlannerVote implements Persistable<PlannerVoteId> {
     private boolean isNew = true;
 
     public PlannerVote() {
-        this.voteType = null;
     }
 
     public PlannerVote(Long userId, UUID plannerId, VoteType voteType) {

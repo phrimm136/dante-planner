@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.danteplanner.backend.shared.security.Viewer;
+import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.shared.restriction.Restricted;
 import org.danteplanner.backend.shared.restriction.RestrictionExempt;
 import org.danteplanner.backend.shared.config.DeviceId;
@@ -50,10 +52,10 @@ public class CommentController {
     @RateLimitExempt
     @GetMapping("/planner/{plannerId}/comments")
     public ResponseEntity<List<CommentTreeNode>> getComments(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal @Nullable Long userId,
             @PathVariable UUID plannerId) {
 
-        return ResponseEntity.ok(commentQueryService.getCommentTree(plannerId, userId).value());
+        return ResponseEntity.ok(commentQueryService.getCommentTree(plannerId, Viewer.of(userId)).value());
     }
 
     @Restricted

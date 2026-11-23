@@ -101,7 +101,7 @@ class SseFanoutIT extends CausalHarnessSupport {
         Map<String, Object> payload = Map.of("plannerId", entityId, "title", "Refactored deck");
 
         try (SseStream stream = SseStream.user(port, session(user))) {
-            ssePublisher.publishUserEvent(user.getId(), null, SseEventType.COMMENT_ADDED, entityId, payload);
+            ssePublisher.publishUserEvent(user.getId(), SseEventType.COMMENT_ADDED, entityId, payload);
 
             assertThat(stream.next(SseEventType.COMMENT_ADDED.getValue())).contains(entityId);
         }
@@ -130,7 +130,7 @@ class SseFanoutIT extends CausalHarnessSupport {
         User suspended = user("sse-suspended");
 
         try (SseStream stream = SseStream.user(port, session(suspended))) {
-            ssePublisher.publishAccountSuspended(suspended.getId(), "spam", SuspensionType.BAN, null);
+            ssePublisher.publishAccountSuspended(suspended.getId(), "spam", SuspensionType.BAN, 0);
 
             JsonNode data = json(stream.next(SseEventType.ACCOUNT_SUSPENDED.getValue()));
             assertThat(data.path("suspensionType").asString()).isEqualTo("BAN");

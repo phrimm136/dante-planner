@@ -11,11 +11,11 @@ import java.util.Optional;
  */
 public enum KnownConstraint {
 
-    PLANNER_ID("planner", "PRIMARY", ConstraintViolationOutcome.UUID_COLLISION),
+    PLANNER_ID("planner", "PRIMARY", ConstraintViolationKind.UUID_COLLISION),
 
-    PLANNER_VOTE("planner_votes", Keys.ANY_UNIQUE, ConstraintViolationOutcome.DUPLICATE_ACTION),
-    PLANNER_REPORT("planner_reports", Keys.ANY_UNIQUE, ConstraintViolationOutcome.DUPLICATE_ACTION),
-    COMMENT_REPORT("planner_comment_reports", Keys.ANY_UNIQUE, ConstraintViolationOutcome.DUPLICATE_ACTION);
+    PLANNER_VOTE("planner_votes", Keys.ANY_UNIQUE, ConstraintViolationKind.DUPLICATE_ACTION),
+    PLANNER_REPORT("planner_reports", Keys.ANY_UNIQUE, ConstraintViolationKind.DUPLICATE_ACTION),
+    COMMENT_REPORT("planner_comment_reports", Keys.ANY_UNIQUE, ConstraintViolationKind.DUPLICATE_ACTION);
 
     /**
      * An enum constant's arguments cannot reference a static field of the enum itself.
@@ -32,9 +32,9 @@ public enum KnownConstraint {
 
     private final String table;
     private final String keyName;
-    private final ConstraintViolationOutcome outcome;
+    private final ConstraintViolationKind outcome;
 
-    KnownConstraint(String table, String keyName, ConstraintViolationOutcome outcome) {
+    KnownConstraint(String table, String keyName, ConstraintViolationKind outcome) {
         this.table = table;
         this.keyName = keyName;
         this.outcome = outcome;
@@ -45,9 +45,6 @@ public enum KnownConstraint {
      * {@code PRIMARY} to a dotless {@code ı}.
      */
     public static Optional<KnownConstraint> matching(String qualifiedConstraintName) {
-        if (qualifiedConstraintName == null) {
-            return Optional.empty();
-        }
         String normalized = qualifiedConstraintName.toLowerCase(Locale.ROOT);
         int separator = normalized.indexOf(QUALIFIER_SEPARATOR);
         if (separator < 0) {
@@ -69,7 +66,7 @@ public enum KnownConstraint {
         return table;
     }
 
-    public ConstraintViolationOutcome outcome() {
+    public ConstraintViolationKind outcome() {
         return outcome;
     }
 }

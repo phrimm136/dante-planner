@@ -84,12 +84,8 @@ class GoogleIdTokenVerifierTest {
     }
 
     private static OAuthProperties properties(String jwksPath) {
-        OAuthProperties properties = new OAuthProperties();
-        OAuthProperties.GoogleConfig google = properties.getGoogle();
-        google.setClientId(CLIENT_ID);
-        google.setIssuer(ISSUER);
-        google.setJwksUri("http://127.0.0.1:" + jwkServer.getAddress().getPort() + jwksPath);
-        return properties;
+        return new OAuthProperties(new OAuthProperties.GoogleConfig(CLIENT_ID, "", "", "", "", "",
+                "http://127.0.0.1:" + jwkServer.getAddress().getPort() + jwksPath, ISSUER));
     }
 
     @AfterAll

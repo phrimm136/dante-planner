@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Immutable;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 
@@ -28,5 +29,5 @@ public class UserProfile {
     private String usernameSuffix;
 
     @Column(name = "deleted_at")
-    private Instant deletedAt;
+    private @Nullable Instant deletedAt;
 }

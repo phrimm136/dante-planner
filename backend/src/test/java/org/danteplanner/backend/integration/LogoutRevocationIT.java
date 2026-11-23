@@ -25,6 +25,8 @@ import io.lettuce.core.metrics.CommandLatencyRecorder;
 import io.lettuce.core.protocol.ProtocolKeyword;
 import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.resource.DefaultClientResources;
+import java.util.List;
+import org.danteplanner.backend.user.api.SessionEndHandler.SessionToken;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -159,7 +161,7 @@ class LogoutRevocationIT {
                 .isEqualTo(1L);
 
         AUTH_COMMAND_COUNT.set(0L);
-        sessionRevocationService.logout(accessToken, refreshToken);
+        sessionRevocationService.logout(List.of(new SessionToken.Access(accessToken), new SessionToken.Refresh(refreshToken)));
         long roundTrips = AUTH_COMMAND_COUNT.get();
 
         assertThat(authStringRedisTemplate.keys("bl:*"))
@@ -190,7 +192,7 @@ class LogoutRevocationIT {
         String accessToken = jwtTokenService.generateAccessToken(userId, UserRole.NORMAL);
 
         AUTH_COMMAND_COUNT.set(0L);
-        sessionRevocationService.logout(accessToken, null);
+        sessionRevocationService.logout(List.of(new SessionToken.Access(accessToken)));
         long roundTrips = AUTH_COMMAND_COUNT.get();
 
         Set<String> blacklistKeys = authStringRedisTemplate.keys("bl:*");

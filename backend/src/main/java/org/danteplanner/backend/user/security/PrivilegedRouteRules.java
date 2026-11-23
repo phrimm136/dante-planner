@@ -19,6 +19,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionException;
 import org.springframework.web.ErrorResponseException;
 
+import org.danteplanner.backend.user.service.UsersApiAdapter;
+
+import org.danteplanner.backend.user.api.UserSummary;
+
 import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
 import org.danteplanner.backend.shared.exception.DomainException;
 import org.danteplanner.backend.shared.exception.Problems;
@@ -67,7 +71,7 @@ public class PrivilegedRouteRules implements SecurityRuleProvider {
             try {
                 actor = userService.findActiveByIdFromPrimary(actorId);
             } catch (DataAccessException | TransactionException failure) {
-                throw new AccessDeniedException(failure.getMessage(), databaseUnavailable(failure));
+                throw new AccessDeniedException(String.valueOf(failure.getMessage()), databaseUnavailable(failure));
             }
             refusal(actor, minimum, clock).ifPresent(refused -> {
                 throw new AccessDeniedException(refused.getMessage(), refused);
@@ -90,11 +94,11 @@ public class PrivilegedRouteRules implements SecurityRuleProvider {
         if (actor.isEmpty()) {
             return Optional.of(belowRole(minimum));
         }
-        User user = actor.get();
-        return switch (user.restrictionState(clock)) {
-            case TIMED_OUT -> Optional.of(new UserTimedOutException(user.getId(), user.getTimeoutUntil()));
-            case BANNED -> Optional.of(new UserBannedException(user.getId(), user.getBannedAt()));
-            case ACTIVE -> user.getRole().hasRankAtLeast(minimum)
+        UserSummary user = UsersApiAdapter.toSummary(actor.get());
+        return switch (user.restrictionState(clock.instant())) {
+            case TIMED_OUT -> Optional.of(new UserTimedOutException(user.id(), user.requireTimeoutUntil()));
+            case BANNED -> Optional.of(new UserBannedException(user.id(), user.requireBannedAt()));
+            case ACTIVE -> user.role().hasRankAtLeast(minimum)
                     ? Optional.empty()
                     : Optional.of(belowRole(minimum));
         };

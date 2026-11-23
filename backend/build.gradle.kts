@@ -130,6 +130,7 @@ dependencies {
     testImplementation("org.wiremock:wiremock-standalone:3.13.2")
 
     errorprone("com.google.errorprone:error_prone_core:2.52.0")
+    errorprone("com.uber.nullaway:nullaway:0.14.3")
 
     "consistencyImplementation"("tools.jackson.core:jackson-databind")
 }
@@ -303,6 +304,7 @@ tasks.withType<JavaCompile>().configureEach {
     // clean, passes CI, and then misbehaves under one locale, one charset, or one region's clock.
     options.errorprone {
         error("StringCaseLocaleUsage", "DefaultCharset", "JavaTimeDefaultTimeZone")
+        disable("NullAway")
     }
     options.compilerArgs.add("-XDaddTypeAnnotationsToSymbol=true")
     options.forkOptions.jvmArgs!!.addAll(
@@ -319,6 +321,29 @@ tasks.withType<JavaCompile>().configureEach {
             "--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED"
         )
     )
+}
+
+tasks.named<JavaCompile>("compileJava") {
+    options.errorprone {
+        error("NullAway")
+        option("NullAway:AnnotatedPackages", "org.danteplanner.backend")
+        option("NullAway:JSpecifyMode", "true")
+        option(
+            "NullAway:ExternalInitAnnotations",
+            "jakarta.persistence.Entity,jakarta.persistence.Embeddable,jakarta.persistence.IdClass"
+        )
+        option("NullAway:CustomInitializerAnnotations", "jakarta.persistence.PrePersist")
+        option("NullAway:ExcludedFieldAnnotations", "jakarta.persistence.Id")
+        option(
+            "NullAway:ExcludedClasses",
+            listOf(
+                "org.danteplanner.backend.shared.gtid.GtidReadGate",
+                "org.danteplanner.backend.shared.gtid.GtidCookieFilter",
+                "org.danteplanner.backend.shared.gtid.GtidCookieResponseAdvice"
+            ).joinToString(",")
+        )
+    }
+    options.compilerArgs.addAll(listOf("-Xmaxwarns", "100000"))
 }
 
 checkstyle {
@@ -504,6 +529,7 @@ val staticLockCheck by tasks.registering(Exec::class) {
 tasks.test {
     dependsOn(staticLockCheck)
     inputs.file(layout.projectDirectory.file("config/architecture-rules-without-fixtures.txt"))
+    inputs.dir(layout.projectDirectory.dir("config/archunit_store"))
     val randomOrderSeed = objects.newInstance<RandomOrderSeed>()
     randomOrderSeed.fixedSeed.set(providers.gradleProperty("testSeed"))
     jvmArgumentProviders.add(randomOrderSeed)

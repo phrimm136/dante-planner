@@ -6,7 +6,7 @@ public interface OAuthProvider {
 
     String buildAuthorizationUrl(String state, String codeChallenge);
 
-    OAuthTokens exchangeCodeForTokens(String code, String redirectUri, String codeVerifier);
+    OAuthTokens.Response exchangeCodeForTokens(String code, String redirectUri, String codeVerifier);
 
     OAuthUserInfo getUserInfo(String accessToken);
 

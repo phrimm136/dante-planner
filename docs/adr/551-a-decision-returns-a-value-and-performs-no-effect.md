@@ -1,0 +1,18 @@
+# 551 a-decision-returns-a-value-and-performs-no-effect
+epic: none · pr: none
+
+## Decisions
+- @decision @archunit — A main method whose return type is a sealed type or an enum of this codebase, and whose type is not a command outcome, is a decision and reaches no effect: no port, no external call outside an allowlist of pure libraries, no clock, randomness or concurrency primitive, no field write, no read of a singleton's or a static's non-final or mutable field, and no logging; the one ThreadLocal read allowed is an accessor with no parameter and no branch that returns a static holder's value. The caller gathers the inputs, calls the decision, and performs what the returned value says. The freshness guard's `decide` waited for a replica, recorded a timer, merged a cache and marked a source skipped while it chose a verdict; its only production callers distinguished two of the three verdicts, and the third carried a field only tests read. Re-check: `checks be test --tests 'org.danteplanner.backend.architecture.DecisionPurityTest' --exclude-tags containerized`.
+  REJECTED: a denylist of effect types — a survey of the decision methods found six effect kinds outside the first draft list (servlet writes, the security context, clock reads, bean-state merges, argument mutation, calls through other beans), so each new kind would pass until someone named it.
+  REJECTED: converting the enums to sealed types so one rule covers both — an enum is already closed for an exhaustive switch, and the conversion would cost the JPA, JSON and `values()` support the enums carry; the rule takes both kinds of return type instead.
+  REJECTED: a marker annotation on effectful methods to exempt them — it lets any method leave the rule by annotation; the command outcome type carries the distinction instead.
+  INVARIANT: every decision is pure by the walk — the rule test over main and its fixtures (a wait, a port, a ThreadLocal accessor that is allowed, a command that may wait).
+  INVARIANT: the exemptions are only the cookie gate's probe and its wait verdict, which the cookie-gate removal deletes — a staleness test fails as soon as either is gone or stops violating.
+  NON-GOAL: decisions returned as a boolean, void, Optional or collection — the shell branch rule covers effectful branching in those methods.
+  NON-GOAL: calls through `java.util.function` and through a private functional interface nested in the caller's class — treated as pure; an effect inside such a lambda is attributed to the method that creates it.
+  NON-GOAL: proving a final collection never changes — it counts as mutable when a method outside its constructor both reads it and calls a mutator on some collection, unless it is static and its runtime value is a JDK immutable collection; a mutation through another method, or through the backing collection of an unmodifiable view, is missed.
+  NON-GOAL: every time read in the pure JDK packages — the clock, randomness and concurrency types are listed, and a read through another class (a calendar) passes.
+  NON-GOAL: mutation of a caller's argument through a JDK collection call — indistinguishable from mutating a local.
+
+## Takeaway
+- takeaway: classify effects by what is allowed, not by what is forbidden; the list of forbidden things is always one kind short.

@@ -1,6 +1,7 @@
 package org.danteplanner.backend.shared.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.danteplanner.backend.shared.security.ChainAuthenticationFilter;
 import org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter;
 import org.danteplanner.backend.shared.security.CustomAuthenticationEntryPoint;
@@ -24,6 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import java.util.List;
 
 @Configuration
+@EnableConfigurationProperties({JwtProperties.class, OAuthProperties.class})
 @RequiredArgsConstructor
 @EnableWebSecurity
 public class SecurityConfig {

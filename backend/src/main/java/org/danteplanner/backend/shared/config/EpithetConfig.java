@@ -50,7 +50,11 @@ public class EpithetConfig implements EpithetProvider {
     }
 
     int getWeight(String keyword, LocalDate referenceDate) {
-        return WeightDecay.weightOf(EPITHETS.get(keyword), referenceDate);
+        LocalDate added = EPITHETS.get(keyword);
+        if (added == null) {
+            throw new IllegalArgumentException("unknown epithet " + keyword);
+        }
+        return WeightDecay.weightOf(added, referenceDate);
     }
 
     public boolean isValidEpithet(String keyword) {

@@ -6,6 +6,10 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 
+import org.danteplanner.backend.notification.entity.Notification;
+import org.danteplanner.backend.notification.api.NotificationType;
+import org.danteplanner.backend.notification.dto.NotificationEventPayloads;
+import java.time.Instant;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.notification.api.NotificationEventPayload;
@@ -42,16 +46,6 @@ class EventPayloadShapeTest {
     }
 
     @Test
-    void accountSuspended_WhenBanCarriesNoReasonOrDuration_SubstitutesEmptyStringAndZero() {
-        Map<String, Object> json = serialize(suspension(SuspensionType.BAN, null, null));
-
-        assertThat(json).containsOnlyKeys("suspensionType", "reason", "durationMinutes");
-        assertThat(json).containsEntry("suspensionType", "BAN");
-        assertThat(json).containsEntry("reason", "");
-        assertThat(json).containsEntry("durationMinutes", 0);
-    }
-
-    @Test
     void plannerPublished_WhenBroadcast_CarriesPlannerAndAuthorIdentity() {
         Map<String, Object> json = serialize(new PlannerPublishedPayload(
                 PLANNER_ID.toString(), "Deck", "NAIVE", "ab12c"));
@@ -81,9 +75,34 @@ class EventPayloadShapeTest {
     }
 
     @Test
+    void notification_WhenCommentScoped_CarriesItsPlannerAndComment() {
+        Map<String, Object> json = serialize(stored(new Notification.Content.CommentScoped(
+                PLANNER_ID, "Title", "hi", COMMENT_PUBLIC_ID)));
+
+        assertThat(json).containsEntry("plannerId", PLANNER_ID.toString())
+                .containsEntry("plannerTitle", "Title")
+                .containsEntry("commentSnippet", "hi")
+                .containsEntry("commentPublicId", COMMENT_PUBLIC_ID.toString());
+    }
+
+    @Test
+    void notification_WhenPlain_CarriesNoPlannerOrComment() {
+        assertThat(serialize(stored(new Notification.Content.Plain())))
+                .containsOnlyKeys("id", "type", "contentId", "createdAt");
+    }
+
+    private static NotificationEventPayload stored(Notification.Content content) {
+        Notification notification = new Notification(7L, "42", NotificationType.COMMENT_RECEIVED, content);
+        notification.setPublicId(NOTIFICATION_PUBLIC_ID);
+        notification.setCreatedAt(Instant.parse("2026-03-04T05:06:07Z"));
+        return NotificationEventPayloads.fromEntity(notification);
+    }
+
+    @Test
     void clientEvent_WhenBuiltFromEnvelope_CarriesRoutingFieldsWithoutFanOutExclusions() {
-        SseEnvelope envelope = SseEnvelope.commentEvent(
-                PLANNER_ID, SseEventType.COMMENT_ADDED, COMMENT_PUBLIC_ID.toString(), 42L,
+        SseEnvelope.CommentEvent envelope = new SseEnvelope.CommentEvent(
+                PLANNER_ID, SseEventType.COMMENT_ADDED, COMMENT_PUBLIC_ID.toString(),
+                new SseEnvelope.UserExclusion.User(42L),
                 Map.of("id", COMMENT_PUBLIC_ID.toString()));
 
         Map<String, Object> json = serialize(ClientSseEvent.from(envelope));
@@ -96,9 +115,10 @@ class EventPayloadShapeTest {
 
     @Test
     void clientEvent_WhenUserTargeted_OmitsTheOriginatingDevice() {
-        SseEnvelope envelope = SseEnvelope.userEvent(
+        SseEnvelope.UserEvent envelope = new SseEnvelope.UserEvent(
                 7L, SseEventType.COMMENT_ADDED, PLANNER_ID.toString(),
-                "88888888-9999-4aaa-8bbb-cccccccccccc", Map.of("id", PLANNER_ID.toString()));
+                new SseEnvelope.DeviceExclusion.Device(UUID.fromString("88888888-9999-4aaa-8bbb-cccccccccccc")),
+                Map.of("id", PLANNER_ID.toString()));
 
         Map<String, Object> json = serialize(ClientSseEvent.from(envelope));
 
@@ -125,8 +145,8 @@ class EventPayloadShapeTest {
     }
 
     private static AccountSuspendedPayload suspension(
-            SuspensionType type, String reason, Integer durationMinutes) {
-        return AccountSuspendedPayload.of(type, reason, durationMinutes);
+            SuspensionType type, String reason, int durationMinutes) {
+        return new AccountSuspendedPayload(type, reason, durationMinutes);
     }
 
     private static NotificationEventPayload notification(String type, String contentId, String plannerId,

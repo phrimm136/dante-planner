@@ -10,10 +10,10 @@ enum ProbePhase {
     RUNTIME(RedisRoleProbe.Timeouts::runtime, ProbeStreak::after);
 
     private final Function<RedisRoleProbe.Timeouts, Duration> timeout;
-    private final BiFunction<ProbeStreak, Boolean, ProbeStreak.Transition> decision;
+    private final BiFunction<ProbeStreak, Boolean, ProbeStreak.Step> decision;
 
     ProbePhase(Function<RedisRoleProbe.Timeouts, Duration> timeout,
-            BiFunction<ProbeStreak, Boolean, ProbeStreak.Transition> decision) {
+            BiFunction<ProbeStreak, Boolean, ProbeStreak.Step> decision) {
         this.timeout = timeout;
         this.decision = decision;
     }
@@ -22,7 +22,7 @@ enum ProbePhase {
         return timeout.apply(timeouts);
     }
 
-    ProbeStreak.Transition decide(ProbeStreak streak, boolean answered) {
+    ProbeStreak.Step decide(ProbeStreak streak, boolean answered) {
         return decision.apply(streak, answered);
     }
 }

@@ -8,30 +8,34 @@ import java.util.Set;
 
 public final class Season implements StartBuffSeason, StartGiftSeason {
 
-    private final GameDataRegistry registry;
+    private final GameDataRegistry.Snapshot data;
     private final int version;
 
-    Season(GameDataRegistry registry, int version) {
-        this.registry = registry;
+    Season(GameDataRegistry.Snapshot data, int version) {
+        this.data = data;
         this.version = version;
     }
 
     public int identityMaxLevel() {
-        return registry.identityMaxLevel(version);
+        return data.identityMaxLevel(version);
     }
 
     @Override
     public Set<String> startBuffIds() {
-        return registry.startBuffIds(version);
+        return data.startBuffIds(version);
     }
 
     @Override
     public boolean hasStartGiftKeyword(String keyword) {
-        return registry.hasStartGiftKeyword(version, keyword);
+        return data.hasStartGiftKeyword(version, keyword);
     }
 
     @Override
     public Set<String> startGiftPool(String keyword) {
-        return registry.getStartGiftPool(version, keyword);
+        return switch (data.startGiftPool(version, keyword)) {
+            case GameDataRegistry.Lookup.Known<Set<String>> known -> known.value();
+            case GameDataRegistry.Lookup.Unknown<Set<String>> unknown -> throw new IllegalArgumentException(
+                    "season " + version + " has no start gift pool for " + keyword);
+        };
     }
 }

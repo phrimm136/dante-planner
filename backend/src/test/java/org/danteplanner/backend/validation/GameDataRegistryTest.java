@@ -1,5 +1,6 @@
 package org.danteplanner.backend.validation;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.gamedata.GameDataLoadException;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
@@ -65,7 +66,7 @@ class GameDataRegistryTest {
 
         registry.init();
 
-        assertThat(registry.idMigrations()).isEqualTo(PlannerIdMigrations.EMPTY);
+        assertThat(registry.snapshot().idMigrations()).isEqualTo(PlannerIdMigrations.EMPTY);
     }
 
     @Test
@@ -78,9 +79,9 @@ class GameDataRegistryTest {
 
         registry.init();
 
-        assertThat(registry.idMigrations().renames().get(PlannerIdMigrations.Kind.EGO_GIFT))
+        assertThat(registry.snapshot().idMigrations().renames().get(PlannerIdMigrations.Kind.EGO_GIFT))
                 .containsEntry("9247", "9001");
-        assertThat(registry.idMigrations().drops().get(PlannerIdMigrations.Kind.EGO))
+        assertThat(registry.snapshot().idMigrations().drops().get(PlannerIdMigrations.Kind.EGO))
                 .containsExactly("20199");
     }
 
@@ -155,9 +156,12 @@ class GameDataRegistryTest {
         assertThat(registry.hasSeason(6)).isTrue();
         assertThat(registry.hasSeason(7)).isTrue();
         assertThat(registry.hasSeason(8)).isFalse();
-        assertThat(registry.startBuffIds(7)).contains("100");
-        assertThat(registry.startBuffIds(8)).doesNotContain("100");
-        assertThat(registry.getStartGiftPool(7, "Combustion")).contains("9001");
+        assertThat(registry.snapshot().startBuffIds(7)).contains("100");
+        assertThat(registry.snapshot().startBuffIds(8)).doesNotContain("100");
+        assertThat(registry.snapshot().startGiftPool(7, "Combustion")).isInstanceOfSatisfying(
+                GameDataRegistry.Lookup.Known.class,
+                known -> assertThat(known.value()).asInstanceOf(InstanceOfAssertFactories.collection(String.class))
+                        .contains("9001"));
     }
 
     @Test
@@ -171,9 +175,9 @@ class GameDataRegistryTest {
         registry.init();
 
         assertThat(registry.hasSeason(6)).isFalse();
-        assertThat(registry.startBuffIds(6)).doesNotContain("100");
-        assertThat(registry.hasStartGiftKeyword(6, "Combustion")).isFalse();
-        assertThat(registry.startBuffIds(7)).contains("100");
+        assertThat(registry.snapshot().startBuffIds(6)).doesNotContain("100");
+        assertThat(registry.snapshot().hasStartGiftKeyword(6, "Combustion")).isFalse();
+        assertThat(registry.snapshot().startBuffIds(7)).contains("100");
     }
 
     @ParameterizedTest
@@ -212,9 +216,9 @@ class GameDataRegistryTest {
 
         registry.init();
 
-        assertThat(registry.identityMaxLevel(6)).isEqualTo(55);
-        assertThat(registry.identityMaxLevel(7)).isEqualTo(60);
-        assertThat(registry.identityMaxLevel(8)).isEqualTo(65);
+        assertThat(registry.snapshot().identityMaxLevel(6)).isEqualTo(55);
+        assertThat(registry.snapshot().identityMaxLevel(7)).isEqualTo(60);
+        assertThat(registry.snapshot().identityMaxLevel(8)).isEqualTo(65);
     }
 
     @Test

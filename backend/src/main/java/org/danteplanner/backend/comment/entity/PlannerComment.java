@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.shared.util.CommentConstants;
 
 import java.time.Instant;
@@ -39,7 +40,7 @@ public class PlannerComment {
     private Long userId;
 
     @Column(name = "parent_comment_id")
-    private Long parentCommentId;
+    private @Nullable Long parentCommentId;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
@@ -55,10 +56,10 @@ public class PlannerComment {
     private Instant createdAt;
 
     @Column(name = "edited_at")
-    private Instant editedAt;
+    private @Nullable Instant editedAt;
 
     @Column(name = "deleted_at")
-    private Instant deletedAt;
+    private @Nullable Instant deletedAt;
 
     @Column(name = "author_notifications_enabled", nullable = false)
     private boolean authorNotificationsEnabled = true;
@@ -66,7 +67,7 @@ public class PlannerComment {
     public PlannerComment() {
     }
 
-    public PlannerComment(UUID plannerId, Long userId, String content, Long parentCommentId, int depth) {
+    public PlannerComment(UUID plannerId, Long userId, String content, @Nullable Long parentCommentId, int depth) {
         this.plannerId = plannerId;
         this.userId = userId;
         this.content = content;
@@ -129,11 +130,11 @@ public class PlannerComment {
         this.userId = userId;
     }
 
-    public Long getParentCommentId() {
+    public @Nullable Long getParentCommentId() {
         return parentCommentId;
     }
 
-    public void setParentCommentId(Long parentCommentId) {
+    public void setParentCommentId(@Nullable Long parentCommentId) {
         this.parentCommentId = parentCommentId;
     }
 
@@ -169,19 +170,19 @@ public class PlannerComment {
         this.createdAt = createdAt;
     }
 
-    public Instant getEditedAt() {
+    public @Nullable Instant getEditedAt() {
         return editedAt;
     }
 
-    public void setEditedAt(Instant editedAt) {
+    public void setEditedAt(@Nullable Instant editedAt) {
         this.editedAt = editedAt;
     }
 
-    public Instant getDeletedAt() {
+    public @Nullable Instant getDeletedAt() {
         return deletedAt;
     }
 
-    public void setDeletedAt(Instant deletedAt) {
+    public void setDeletedAt(@Nullable Instant deletedAt) {
         this.deletedAt = deletedAt;
     }
 

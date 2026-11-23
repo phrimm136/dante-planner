@@ -48,7 +48,7 @@ class OAuthProviderRegistryTest {
             }
 
             @Override
-            public OAuthTokens exchangeCodeForTokens(String code, String redirectUri, String codeVerifier) {
+            public OAuthTokens.Response exchangeCodeForTokens(String code, String redirectUri, String codeVerifier) {
                 throw new UnsupportedOperationException();
             }
 

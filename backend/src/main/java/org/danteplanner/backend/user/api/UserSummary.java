@@ -4,6 +4,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.UUID;
 
+import org.jspecify.annotations.Nullable;
+
 public record UserSummary(
         Long id,
         UUID publicId,
@@ -12,19 +14,33 @@ public record UserSummary(
         String usernameSuffix,
         UserRole role,
         boolean deleted,
-        Instant bannedAt,
-        Instant timeoutUntil
+        @Nullable Instant bannedAt,
+        @Nullable Instant timeoutUntil
 ) {
 
-    public RestrictionState restrictionState(Clock clock) {
-        if (timeoutUntil != null && clock.instant().isBefore(timeoutUntil)) {
+    public Instant requireTimeoutUntil() {
+        if (timeoutUntil == null) {
+            throw new IllegalStateException("user " + id + " is timed out without a timeout end");
+        }
+        return timeoutUntil;
+    }
+
+    public Instant requireBannedAt() {
+        if (bannedAt == null) {
+            throw new IllegalStateException("user " + id + " is banned without a ban time");
+        }
+        return bannedAt;
+    }
+
+    public RestrictionState restrictionState(Instant now) {
+        if (timeoutUntil != null && now.isBefore(timeoutUntil)) {
             return RestrictionState.TIMED_OUT;
         }
         return bannedAt != null ? RestrictionState.BANNED : RestrictionState.ACTIVE;
     }
 
     public boolean isTimedOut() {
-        return restrictionState(Clock.systemUTC()) == RestrictionState.TIMED_OUT;
+        return restrictionState(Clock.systemUTC().instant()) == RestrictionState.TIMED_OUT;
     }
 
     public boolean isBanned() {

@@ -1,6 +1,6 @@
 package org.danteplanner.backend.shared.sse;
 
-import java.util.UUID;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
@@ -11,7 +11,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import java.nio.charset.StandardCharsets;
+import org.jspecify.annotations.Nullable;
 
 @Component
 @RequiredArgsConstructor
@@ -23,50 +23,33 @@ public class SseRedisSubscriber implements MessageListener {
     private final ObjectMapper objectMapper;
 
     @Override
-    public void onMessage(Message message, byte[] pattern) {
+    public void onMessage(Message message, byte @Nullable [] pattern) {
+        String topic = new String(message.getChannel(), StandardCharsets.UTF_8);
         SseEnvelope envelope;
         try {
-            envelope = objectMapper.readValue(message.getBody(), SseEnvelope.class);
-        } catch (JacksonException e) {
-            log.error("Failed to deserialize SSE envelope from channel {}", new String(message.getChannel(), StandardCharsets.UTF_8), e);
+            envelope = objectMapper.readValue(message.getBody(), SseEnvelope.Wire.class)
+                    .on(SseChannel.fromTopic(topic));
+        } catch (JacksonException | IllegalArgumentException e) {
+            log.error("Failed to read SSE envelope from channel {}", topic, e);
             return;
         }
 
-        String topic = new String(message.getChannel(), StandardCharsets.UTF_8);
-        SseChannel channel = SseChannel.fromTopic(topic);
-        if (channel == null) {
-            log.error("SSE envelope arrived on unrecognized channel {}; dropping", topic);
-            return;
-        }
-
-        switch (channel) {
-            case COMMENT -> commentChannelHandler.deliver(envelope, clientPayload(envelope));
-            case BROADCAST -> sseService.broadcastToAll(
-                    envelope.excludeUserId(), envelope.type().getValue(), clientPayload(envelope));
-            case USER -> dispatchUser(envelope);
-        }
-    }
-
-    private void dispatchUser(SseEnvelope envelope) {
-        switch (envelope.type().userDelivery()) {
-            case SETTINGS_CACHE -> sseService.invalidateSettingsCache(envelope.userId());
-            case SUSPENSION_NOTICE -> sseService.notifyAccountSuspended(
-                    envelope.userId(), clientPayload(envelope));
-            case EMITTERS -> sendToEmitters(envelope);
+        switch (envelope) {
+            case SseEnvelope.CommentEvent event -> commentChannelHandler.deliver(event,
+                    clientPayload(event, event.payload(), ClientSseEvent.from(event)));
+            case SseEnvelope.Broadcast broadcast -> sseService.broadcastToAll(broadcast.exclusion(),
+                    broadcast.type().getValue(),
+                    clientPayload(broadcast, broadcast.payload(), ClientSseEvent.from(broadcast)));
+            case SseEnvelope.SettingsInvalidation invalidation ->
+                    sseService.invalidateSettingsCache(invalidation.userId());
+            case SseEnvelope.AccountSuspended suspended -> sseService.notifyAccountSuspended(suspended.userId(),
+                    clientPayload(suspended, suspended.payload(), ClientSseEvent.from(suspended)));
+            case SseEnvelope.UserEvent event -> sseService.sendToUser(event.userId(), event.exclusion(),
+                    event.type().getValue(), clientPayload(event, event.payload(), ClientSseEvent.from(event)));
         }
     }
 
-    private void sendToEmitters(SseEnvelope envelope) {
-        UUID excludeDeviceId = envelope.excludeDeviceId() != null
-                ? UUID.fromString(envelope.excludeDeviceId())
-                : null;
-        sseService.sendToUser(envelope.userId(), excludeDeviceId,
-                envelope.type().getValue(), clientPayload(envelope));
-    }
-
-    private static Object clientPayload(SseEnvelope envelope) {
-        return envelope.type().deliversRawPayload()
-                ? envelope.payload()
-                : ClientSseEvent.from(envelope);
+    private static Object clientPayload(SseEnvelope envelope, Object payload, ClientSseEvent event) {
+        return envelope.type().deliversRawPayload() ? payload : event;
     }
 }

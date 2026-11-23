@@ -9,6 +9,9 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import org.danteplanner.backend.support.RateLimitStores;
+import java.util.Map;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.support.TestJsonMappers;
@@ -147,12 +150,7 @@ class PublishedPlannerClientBucketTest {
     }
 
     private static RateLimitProperties publicReadBucket() {
-        RateLimitProperties.BucketConfig bucket = new RateLimitProperties.BucketConfig();
-        bucket.setCapacity(10);
-        bucket.setRefillTokens(10);
-        bucket.setRefillDurationSeconds(60);
-        RateLimitProperties properties = new RateLimitProperties();
-        properties.setPublicRead(bucket);
-        return properties;
+        RateLimitProperties.BucketConfig bucket = new RateLimitProperties.BucketConfig(10, 10, 60);
+        return RateLimitStores.limits(0, Map.of(RateLimitPolicy.PUBLIC_READ, bucket));
     }
 }

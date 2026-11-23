@@ -6,6 +6,8 @@ import org.danteplanner.backend.support.RecordingTokenBlacklist;
 import org.danteplanner.backend.support.ScriptedFailuresCheck;
 import org.danteplanner.backend.support.TestJwt;
 import org.danteplanner.backend.user.api.UserRole;
+import java.util.List;
+import org.danteplanner.backend.user.api.SessionEndHandler.SessionToken;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -58,7 +60,7 @@ class SessionRevocationServiceTest {
             String refreshToken = refreshToken();
 
             // Act
-            sessionRevocationService.logout(accessToken, refreshToken);
+            sessionRevocationService.logout(List.of(new SessionToken.Access(accessToken), new SessionToken.Refresh(refreshToken)));
 
             // Assert
             assertThat(tokenBlacklist.revocations()).containsExactly(
@@ -67,12 +69,12 @@ class SessionRevocationServiceTest {
         }
 
         @Test
-        void logout_WhenNullAccessToken_BlacklistsOnlyRefresh() {
+        void logout_WhenAccessTokenAbsent_BlacklistsOnlyRefresh() {
             // Arrange
             String refreshToken = refreshToken();
 
             // Act
-            sessionRevocationService.logout(null, refreshToken);
+            sessionRevocationService.logout(List.of(new SessionToken.Refresh(refreshToken)));
 
             // Assert - only refresh token blacklisted
             assertThat(tokenBlacklist.revocations()).containsExactly(
@@ -80,12 +82,12 @@ class SessionRevocationServiceTest {
         }
 
         @Test
-        void logout_WhenNullRefreshToken_BlacklistsOnlyAccess() {
+        void logout_WhenRefreshTokenAbsent_BlacklistsOnlyAccess() {
             // Arrange
             String accessToken = accessToken();
 
             // Act
-            sessionRevocationService.logout(accessToken, null);
+            sessionRevocationService.logout(List.of(new SessionToken.Access(accessToken)));
 
             // Assert - only access token blacklisted
             assertThat(tokenBlacklist.revocations()).containsExactly(
@@ -93,9 +95,9 @@ class SessionRevocationServiceTest {
         }
 
         @Test
-        void logout_WhenBothTokensNull_DoesNothing() {
+        void logout_WhenBothTokensAbsent_DoesNothing() {
             // Act
-            sessionRevocationService.logout(null, null);
+            sessionRevocationService.logout(List.of());
 
             // Assert - nothing present to revoke
             assertThat(tokenBlacklist.revocations()).isEmpty();
@@ -110,7 +112,7 @@ class SessionRevocationServiceTest {
             String validRefreshToken = refreshToken();
 
             // Act
-            sessionRevocationService.logout(invalidAccessToken, validRefreshToken);
+            sessionRevocationService.logout(List.of(new SessionToken.Access(invalidAccessToken), new SessionToken.Refresh(validRefreshToken)));
 
             // Assert - only refresh token blacklisted
             assertThat(tokenBlacklist.revocations()).containsExactly(
@@ -124,7 +126,7 @@ class SessionRevocationServiceTest {
             String invalidRefreshToken = "invalid-refresh";
 
             // Act
-            sessionRevocationService.logout(validAccessToken, invalidRefreshToken);
+            sessionRevocationService.logout(List.of(new SessionToken.Access(validAccessToken), new SessionToken.Refresh(invalidRefreshToken)));
 
             // Assert - only access token blacklisted
             assertThat(tokenBlacklist.revocations()).containsExactly(
@@ -159,7 +161,7 @@ class SessionRevocationServiceTest {
             String accessToken = accessToken();
             String refreshToken = refreshToken();
 
-            sessionRevocationService.endSession(accessToken, refreshToken);
+            sessionRevocationService.endSession(List.of(new SessionToken.Access(accessToken), new SessionToken.Refresh(refreshToken)));
 
             assertThat(tokenBlacklist.revocations()).containsExactly(
                     new LogoutRevocation.TokenRevocation(accessToken, expiryOf(accessToken)),

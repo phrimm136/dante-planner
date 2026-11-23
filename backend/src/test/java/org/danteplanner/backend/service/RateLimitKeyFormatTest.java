@@ -14,6 +14,8 @@ import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.shared.ratelimit.RateLimitService;
 import org.danteplanner.backend.support.InMemoryProxyManager;
 
+import org.danteplanner.backend.support.RateLimitStores;
+import java.util.Map;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
@@ -57,37 +59,37 @@ class RateLimitKeyFormatTest {
             RateLimitPolicy policy,
             String key,
             long capacity,
-            Long rejectedUserId,
+            String rejectedUser,
             String rejectedEndpoint,
             Consumer<RateLimitService> charge) {
     }
 
     private static final List<FrozenKey> FROZEN_KEYS = List.of(
-            new FrozenKey(RateLimitPolicy.CRUD, "7:vote", CRUD_CAPACITY, USER_ID, "vote",
+            new FrozenKey(RateLimitPolicy.CRUD, "7:vote", CRUD_CAPACITY, String.valueOf(USER_ID), "vote",
                     service -> service.check(RateLimitPolicy.CRUD, USER_ID, "vote")),
-            new FrozenKey(RateLimitPolicy.SSE, "7:sse", SSE_CAPACITY, USER_ID, "sse",
+            new FrozenKey(RateLimitPolicy.SSE, "7:sse", SSE_CAPACITY, String.valueOf(USER_ID), "sse",
                     service -> service.check(RateLimitPolicy.SSE, USER_ID)),
-            new FrozenKey(RateLimitPolicy.COMMENT, "7:comment", COMMENT_CAPACITY, USER_ID, "comment",
+            new FrozenKey(RateLimitPolicy.COMMENT, "7:comment", COMMENT_CAPACITY, String.valueOf(USER_ID), "comment",
                     service -> service.check(RateLimitPolicy.COMMENT, USER_ID)),
-            new FrozenKey(RateLimitPolicy.REPORT, "7:report", REPORT_CAPACITY, USER_ID, "report",
+            new FrozenKey(RateLimitPolicy.REPORT, "7:report", REPORT_CAPACITY, String.valueOf(USER_ID), "report",
                     service -> service.check(RateLimitPolicy.REPORT, USER_ID)),
-            new FrozenKey(RateLimitPolicy.MODERATION, "7:moderation", MODERATION_CAPACITY, USER_ID, "moderation",
+            new FrozenKey(RateLimitPolicy.MODERATION, "7:moderation", MODERATION_CAPACITY, String.valueOf(USER_ID), "moderation",
                     service -> service.check(RateLimitPolicy.MODERATION, USER_ID)),
-            new FrozenKey(RateLimitPolicy.AUTH, "ip:203.0.113.9:auth", AUTH_CAPACITY, null, "auth",
+            new FrozenKey(RateLimitPolicy.AUTH, "ip:203.0.113.9:auth", AUTH_CAPACITY, "null", "auth",
                     service -> service.check(RateLimitPolicy.AUTH, "ip:203.0.113.9")),
             new FrozenKey(RateLimitPolicy.PLANNER_COMMENT_SSE,
                     "device:3f2504e0-4f89-41d3-9a0c-0305e82c3301:planner-comment-sse",
-                    SSE_CAPACITY, null, "planner-comment-sse",
+                    SSE_CAPACITY, "null", "planner-comment-sse",
                     service -> service.check(
                             RateLimitPolicy.PLANNER_COMMENT_SSE, "device:" + DEVICE_ID)),
             new FrozenKey(RateLimitPolicy.PUBLIC_READ, "ip:203.0.113.9:public-read",
-                    PUBLIC_READ_CAPACITY, null, "public-read",
+                    PUBLIC_READ_CAPACITY, "null", "public-read",
                     service -> service.check(RateLimitPolicy.PUBLIC_READ, "ip:203.0.113.9")),
             new FrozenKey(RateLimitPolicy.PLANNER_STATS, "ip:203.0.113.9:planner-stats",
-                    PLANNER_STATS_CAPACITY, null, "planner-stats",
+                    PLANNER_STATS_CAPACITY, "null", "planner-stats",
                     service -> service.check(RateLimitPolicy.PLANNER_STATS, "ip:203.0.113.9")),
             new FrozenKey(RateLimitPolicy.VIEW_RECORD, "ip:203.0.113.9:view-record",
-                    VIEW_RECORD_CAPACITY, null, "view-record",
+                    VIEW_RECORD_CAPACITY, "null", "view-record",
                     service -> service.check(RateLimitPolicy.VIEW_RECORD, "ip:203.0.113.9")));
 
     @TestFactory
@@ -109,7 +111,8 @@ class RateLimitKeyFormatTest {
                     .isInstanceOf(RateLimitExceededException.class)
                     .satisfies(thrown -> {
                         RateLimitExceededException exceeded = (RateLimitExceededException) thrown;
-                        assertThat(exceeded.getUserId()).isEqualTo(frozen.rejectedUserId());
+                        assertThat(exceeded.getMessage())
+                                .startsWith("Rate limit exceeded for user " + frozen.rejectedUser() + " on");
                         assertThat(exceeded.getEndpoint()).isEqualTo(frozen.rejectedEndpoint());
                     });
         }));
@@ -142,24 +145,20 @@ class RateLimitKeyFormatTest {
      * than indistinguishable.
      */
     private static RateLimitProperties properties() {
-        RateLimitProperties properties = new RateLimitProperties();
-        properties.setCrud(bucket(CRUD_CAPACITY));
-        properties.setSse(bucket(SSE_CAPACITY));
-        properties.setAuth(bucket(AUTH_CAPACITY));
-        properties.setComment(bucket(COMMENT_CAPACITY));
-        properties.setReport(bucket(REPORT_CAPACITY));
-        properties.setModeration(bucket(MODERATION_CAPACITY));
-        properties.setPublicRead(bucket(PUBLIC_READ_CAPACITY));
-        properties.setPlannerStats(bucket(PLANNER_STATS_CAPACITY));
-        properties.setViewRecord(bucket(VIEW_RECORD_CAPACITY));
-        return properties;
+        return RateLimitStores.limits(0, Map.ofEntries(
+                Map.entry(RateLimitPolicy.CRUD, bucket(CRUD_CAPACITY)),
+                Map.entry(RateLimitPolicy.SSE, bucket(SSE_CAPACITY)),
+                Map.entry(RateLimitPolicy.AUTH, bucket(AUTH_CAPACITY)),
+                Map.entry(RateLimitPolicy.COMMENT, bucket(COMMENT_CAPACITY)),
+                Map.entry(RateLimitPolicy.REPORT, bucket(REPORT_CAPACITY)),
+                Map.entry(RateLimitPolicy.MODERATION, bucket(MODERATION_CAPACITY)),
+                Map.entry(RateLimitPolicy.PUBLIC_READ, bucket(PUBLIC_READ_CAPACITY)),
+                Map.entry(RateLimitPolicy.PLANNER_STATS, bucket(PLANNER_STATS_CAPACITY)),
+                Map.entry(RateLimitPolicy.VIEW_RECORD, bucket(VIEW_RECORD_CAPACITY))));
     }
 
     private static RateLimitProperties.BucketConfig bucket(long capacity) {
-        RateLimitProperties.BucketConfig config = new RateLimitProperties.BucketConfig();
-        config.setCapacity((int) capacity);
-        config.setRefillTokens((int) capacity);
-        config.setRefillDurationSeconds(60);
+        RateLimitProperties.BucketConfig config = new RateLimitProperties.BucketConfig((int) capacity, (int) capacity, 60);
         return config;
     }
 }

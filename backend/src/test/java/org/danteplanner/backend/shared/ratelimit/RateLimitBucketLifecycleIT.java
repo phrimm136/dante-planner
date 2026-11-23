@@ -21,6 +21,7 @@ import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.fixture.ratelimit.DeclaredHandlerFixture;
 
+import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -50,7 +51,7 @@ class RateLimitBucketLifecycleIT {
     private static final Duration REFILL_PERIOD = Duration.ofSeconds(60);
 
     private RateLimitStore proxyManager;
-    private RateLimitProperties properties;
+    private long configVersion;
     private RateLimitService rateLimitService;
 
     @BeforeAll
@@ -67,9 +68,8 @@ class RateLimitBucketLifecycleIT {
     void setUp() {
         proxyManager = RateLimitStores.connectedTo(
                 REDIS.getRedisHost(), REDIS.getRedisPort(), Duration.ofSeconds(60));
-        properties = new RateLimitProperties();
-        properties.setConfigVersion(1);
-        rateLimitService = new RateLimitService(proxyManager, properties);
+        configVersion = 1;
+        limit(1);
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(USER_ID, null, List.of()));
     }
@@ -80,11 +80,13 @@ class RateLimitBucketLifecycleIT {
         proxyManager.close();
     }
 
+    private void limit(int capacity) {
+        rateLimitService = new RateLimitService(proxyManager,
+                RateLimitStores.limits(configVersion, Map.of(RateLimitPolicy.CRUD, bucket(capacity))));
+    }
+
     private static RateLimitProperties.BucketConfig bucket(int capacity) {
-        RateLimitProperties.BucketConfig config = new RateLimitProperties.BucketConfig();
-        config.setCapacity(capacity);
-        config.setRefillTokens(capacity);
-        config.setRefillDurationSeconds((int) REFILL_PERIOD.toSeconds());
+        RateLimitProperties.BucketConfig config = new RateLimitProperties.BucketConfig(capacity, capacity, (int) REFILL_PERIOD.toSeconds());
         return config;
     }
 
@@ -112,11 +114,11 @@ class RateLimitBucketLifecycleIT {
     @Test
     void check_WhenLimitLoweredOnALiveBucket_EnforcesTheLoweredLimit() {
         long userId = 101L;
-        properties.setCrud(bucket(10));
+        limit(10);
         rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT);
 
-        properties.setCrud(bucket(3));
-        properties.setConfigVersion(2);
+        configVersion = 2;
+        limit(3);
         int passed = successfulCharges(userId, 10);
 
         long stored = storedCapacity(userId);
@@ -129,11 +131,11 @@ class RateLimitBucketLifecycleIT {
     @Test
     void check_WhenLimitRaisedOnALiveBucket_StoresTheRaisedLimit() {
         long userId = 102L;
-        properties.setCrud(bucket(3));
+        limit(3);
         rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT);
 
-        properties.setCrud(bucket(10));
-        properties.setConfigVersion(2);
+        configVersion = 2;
+        limit(10);
         rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT);
 
         assertThat(storedCapacity(userId)).as("stored capacity after raising 3 -> 10").isEqualTo(10);
@@ -143,12 +145,12 @@ class RateLimitBucketLifecycleIT {
     void check_WhenLimitRaisedOnALiveBucket_CarriesTheRemainingTokensAsIs() {
         long userId = 105L;
         long startNanos = System.nanoTime();
-        properties.setCrud(bucket(3));
+        limit(3);
         rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT);
         rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT);
 
-        properties.setCrud(bucket(10));
-        properties.setConfigVersion(2);
+        configVersion = 2;
+        limit(10);
         rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT);
         long available = availableTokens(userId);
         long accruable = refillAccruableSince(startNanos, 10);
@@ -162,11 +164,11 @@ class RateLimitBucketLifecycleIT {
     void check_WhenLimitRaisedOnADrainedBucket_CarriesZeroTokens() {
         long userId = 106L;
         long startNanos = System.nanoTime();
-        properties.setCrud(bucket(3));
+        limit(3);
         int drained = successfulCharges(userId, 3);
 
-        properties.setCrud(bucket(10));
-        properties.setConfigVersion(2);
+        configVersion = 2;
+        limit(10);
         int passed = successfulCharges(userId, 1);
         long accruable = refillAccruableSince(startNanos, 10);
 
@@ -193,10 +195,10 @@ class RateLimitBucketLifecycleIT {
     @Test
     void check_WhenLimitChangedWithoutAVersionBump_KeepsTheStoredLimit() {
         long userId = 103L;
-        properties.setCrud(bucket(3));
+        limit(3);
         rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT);
 
-        properties.setCrud(bucket(10));
+        limit(10);
         rateLimitService.check(RateLimitPolicy.CRUD, userId, ENDPOINT);
 
         assertThat(storedCapacity(userId)).as("stored capacity after 3 -> 10 at the same version").isEqualTo(3);
@@ -206,12 +208,12 @@ class RateLimitBucketLifecycleIT {
     void check_WhenStoredBucketPredatesTheVersion_ReplacesItOnTheFirstCharge() {
         long userId = 104L;
         byte[] key = (userId + ":" + ENDPOINT).getBytes(StandardCharsets.UTF_8);
-        properties.setCrud(bucket(10));
+        limit(10);
         proxyManager.builder().build(key, () -> BucketConfiguration.builder()
                 .addLimit(limit -> limit.capacity(10).refillGreedy(10, Duration.ofSeconds(60)))
                 .build()).tryConsume(1);
 
-        properties.setCrud(bucket(3));
+        limit(3);
         int passed = successfulCharges(userId, 10);
 
         long stored = storedCapacity(userId);
@@ -223,7 +225,7 @@ class RateLimitBucketLifecycleIT {
 
     @Test
     void exhaustedBucket_WhenOneMoreRequestArrives_Answers429WithRetryAfter() throws Exception {
-        properties.setCrud(bucket(1));
+        limit(1);
         SecurityProperties securityProperties = new SecurityProperties();
         securityProperties.parseTrustedProxyIps();
         RateLimitInterceptor interceptor = new RateLimitInterceptor(

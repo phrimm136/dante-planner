@@ -1,5 +1,7 @@
 package org.danteplanner.backend.planner.service;
 
+import org.danteplanner.backend.planner.exception.PlannerConflictException;
+import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -18,6 +20,8 @@ import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
+import org.danteplanner.backend.planner.exception.PlannerValidationException;
+import org.danteplanner.backend.planner.validation.ErrorCode;
 import org.danteplanner.backend.planner.validation.floor.Stage;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -145,12 +149,25 @@ public class PlannerCommandService {
         this.currentSchemaVersion = currentSchemaVersion;
     }
 
+    private static void logInvalidCategory(PlannerValidationException refusal) {
+        if (ErrorCode.INVALID_CATEGORY.getCode().equals(refusal.getOriginalCode())) {
+            log.warn("Validation failed: {}", refusal.getOriginalMessage());
+        }
+    }
+
     private void applyUpsertFields(Planner planner, UpsertPlannerRequest request, UUID deviceId,
             PlannerChange change) {
         PlannerContent contentRow = planner.getContent();
-        applyTitleAndStatus(contentRow, request.title(), request.status());
+        contentRow.setTitle(request.titleOr(contentRow.getTitle()));
+        contentRow.setStatus(request.statusOr(contentRow.getStatus()));
 
-        MDCategory category = categoryValidator.requireCategoryForType(planner.getPlannerType(), request.category());
+        MDCategory category;
+        try {
+            category = categoryValidator.requireCategoryForType(planner.getPlannerType(), request.category());
+        } catch (PlannerValidationException refusal) {
+            logInvalidCategory(refusal);
+            throw refusal;
+        }
         PlannerDocument document = change.categoryOnly()
                 ? contentValidator.reparseForCategory(contentRow.getContent(), category,
                         contentValidator.stageOf(planner))
@@ -162,32 +179,34 @@ public class PlannerCommandService {
         }
 
         Set<String> keywords = document.keywords();
-        countTopLevelCopy(request.selectedKeywords(), keywords);
+        countTopLevelCopy(TopLevelCopy.of(request.selectedKeywords(), keywords));
         contentRow.setSelectedKeywords(keywords);
         if (deviceId != null) {
             contentRow.setDeviceId(deviceId);
         }
     }
 
-    private void applyTitleAndStatus(PlannerContent contentRow, String title, PlannerStatus status) {
-        if (title != null) {
-            contentRow.setTitle(title);
+    private enum TopLevelCopy {
+        ABSENT("absent"),
+        MATCH("match"),
+        MISMATCH("mismatch");
+
+        private final String tag;
+
+        TopLevelCopy(String tag) {
+            this.tag = tag;
         }
-        if (status != null) {
-            contentRow.setStatus(status);
+
+        static TopLevelCopy of(@Nullable Set<String> topLevel, Set<String> derived) {
+            if (topLevel == null) {
+                return ABSENT;
+            }
+            return PlannerKeywords.fromClient(topLevel).asSet().equals(derived) ? MATCH : MISMATCH;
         }
     }
 
-    private void countTopLevelCopy(Set<String> topLevel, Set<String> derived) {
-        String outcome;
-        if (topLevel == null) {
-            outcome = "absent";
-        } else if (PlannerKeywords.fromClient(topLevel).asSet().equals(derived)) {
-            outcome = "match";
-        } else {
-            outcome = "mismatch";
-        }
-        meterRegistry.counter(TOP_LEVEL_KEYWORDS_METRIC, "outcome", outcome).increment();
+    private void countTopLevelCopy(TopLevelCopy copy) {
+        meterRegistry.counter(TOP_LEVEL_KEYWORDS_METRIC, "outcome", copy.tag).increment();
     }
 
     private Planner buildAggregate(UUID id, Long userId, UpsertPlannerRequest request, PlannerDocument document,
@@ -198,15 +217,13 @@ public class PlannerCommandService {
                 .plannerType(request.plannerType())
                 .build();
         planner.attach(
-                PlannerContent.builder()
-                        .title(request.title() != null ? request.title() : "Untitled")
-                        .status(request.status() != null ? request.status() : PlannerStatus.DRAFT)
-                        .category(request.category())
-                        .selectedKeywords(document.keywords())
-                        .content(document)
-                        .gameContentVersion(request.contentVersion())
-                        .deviceId(deviceId)
-                        .build(),
+                PlannerContent.of(
+                        request.titleOr("Untitled"),
+                        request.statusOr(PlannerStatus.DRAFT),
+                        request.category(),
+                        document,
+                        request.contentVersion(),
+                        deviceId),
                 PlannerPublication.builder().build(),
                 PlannerModeration.builder().build());
         return planner;
@@ -224,11 +241,17 @@ public class PlannerCommandService {
 
         contentVersionValidator.validateVersionForCreate(request.plannerType(), request.contentVersion());
 
-        MDCategory category = categoryValidator.requireCategoryForType(request.plannerType(), request.category());
+        MDCategory category;
+        try {
+            category = categoryValidator.requireCategoryForType(request.plannerType(), request.category());
+        } catch (PlannerValidationException refusal) {
+            logInvalidCategory(refusal);
+            throw refusal;
+        }
 
         PlannerDocument document = contentValidator.parse(request.content(), category,
                 contentValidator.season(request.contentVersion()), Stage.DRAFT);
-        countTopLevelCopy(request.selectedKeywords(), document.keywords());
+        countTopLevelCopy(TopLevelCopy.of(request.selectedKeywords(), document.keywords()));
 
         Planner saved = plannerRepository.insert(
                 buildAggregate(UUID.fromString(request.id()), userId, request, document, deviceId));
@@ -279,8 +302,8 @@ public class PlannerCommandService {
             }
 
             CarriedWrite carried = CarriedWrite.builder()
-                    .title(request.title())
-                    .status(request.status())
+                    .title(request.titleOr(planner.getTitle()))
+                    .status(request.statusOr(planner.getStatus()))
                     .category(request.category())
                     .content(request.content())
                     .gameContentVersion(request.contentVersion())
@@ -289,13 +312,18 @@ public class PlannerCommandService {
                     .build();
 
             PlannerChange change = PlannerChange.between(planner.getContent(), carried, objectMapper);
+            Long requestedVersion = request.syncVersion();
             WriteArbitration arbitration = syncVersionValidator.arbitrate(
-                    force, request.syncVersion(), planner.getSyncVersion(), change);
+                    force,
+                    requestedVersion == null
+                            ? new PlannerConflictException.Requested.None()
+                            : new PlannerConflictException.Requested.Version(requestedVersion),
+                    planner.getSyncVersion(), change);
             if (arbitration == WriteArbitration.ACK_NO_OP) {
                 log.info("Upsert of planner {} would move no field, acknowledging syncVersion {} without a write",
                         id, planner.getSyncVersion());
-                countTopLevelCopy(request.selectedKeywords(),
-                        PlannerKeywords.fromContent(planner.getContentJson()).asSet());
+                countTopLevelCopy(TopLevelCopy.of(request.selectedKeywords(),
+                        PlannerKeywords.fromContent(planner.getContentJson()).asSet()));
                 PlannerResponse acknowledged =
                         PlannerResponse.fromEntity(planner);
                 return new UpsertedPlanner(planner, acknowledged, false);

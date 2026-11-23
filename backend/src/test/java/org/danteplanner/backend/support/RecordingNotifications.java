@@ -68,8 +68,9 @@ public class RecordingNotifications implements Notifications {
     public NotificationOutcome notifyPlannerRecommended(UUID plannerId, String plannerTitle, Long plannerOwnerId) {
         failIfScripted(Operation.PLANNER_RECOMMENDED);
         calls.add(new PlannerRecommended(plannerId, plannerTitle, plannerOwnerId));
-        return raise(Notification.plannerScoped(plannerOwnerId, plannerId.toString(),
-                NotificationType.PLANNER_RECOMMENDED, plannerId, plannerTitle));
+        return raise(new Notification(plannerOwnerId, plannerId.toString(),
+                NotificationType.PLANNER_RECOMMENDED,
+                new Notification.Content.PlannerScoped(plannerId, plannerTitle)));
     }
 
     @Override
@@ -79,7 +80,7 @@ public class RecordingNotifications implements Notifications {
         calls.add(new CommentReceived(commentId, commentPublicId, plannerId, plannerTitle, commentContent,
                 plannerOwnerId));
         return raise(new Notification(plannerOwnerId, commentId.toString(), NotificationType.COMMENT_RECEIVED,
-                plannerId, plannerTitle, commentContent, commentPublicId));
+                new Notification.Content.CommentScoped(plannerId, plannerTitle, commentContent, commentPublicId)));
     }
 
     @Override
@@ -88,7 +89,7 @@ public class RecordingNotifications implements Notifications {
         failIfScripted(Operation.REPLY_RECEIVED);
         calls.add(new ReplyReceived(replyId, replyPublicId, plannerId, plannerTitle, replyContent, parentAuthorId));
         return raise(new Notification(parentAuthorId, replyId.toString(), NotificationType.REPLY_RECEIVED,
-                plannerId, plannerTitle, replyContent, replyPublicId));
+                new Notification.Content.CommentScoped(plannerId, plannerTitle, replyContent, replyPublicId)));
     }
 
     @Override

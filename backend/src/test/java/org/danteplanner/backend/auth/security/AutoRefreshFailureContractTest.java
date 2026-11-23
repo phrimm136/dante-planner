@@ -6,7 +6,7 @@ import org.danteplanner.backend.shared.security.CustomAuthenticationEntryPoint;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import jakarta.servlet.http.Cookie;
 
-import org.danteplanner.backend.auth.token.RotationResult;
+import org.danteplanner.backend.auth.token.RotationOutcome;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
@@ -95,7 +95,7 @@ class AutoRefreshFailureContractTest {
     private void givenTheTokenIsDead(boolean lineageEnabled) {
         users.add(TestDataFactory.unsavedUser(USER_ID));
         if (lineageEnabled) {
-            RotationResult.Rotated successor = (RotationResult.Rotated) refreshRotation.rotate(deadRefreshToken);
+            RotationOutcome.Rotated successor = (RotationOutcome.Rotated) refreshRotation.rotate(deadRefreshToken);
             refreshRotation.rotate(successor.newRefreshJwt());
         } else {
             tokenBlacklist.blacklistToken(deadRefreshToken,
@@ -107,7 +107,7 @@ class AutoRefreshFailureContractTest {
         if (lineageEnabled) {
             assertThat(refreshRotation.rotations().getLast()).isEqualTo(new RecordingRefreshRotation.Rotation(
                     deadRefreshToken,
-                    new RotationResult.Revoked(jwt.service().validateRefreshToken(deadRefreshToken).familyId())));
+                    new RotationOutcome.Revoked(TestJwt.familyIdOf(jwt.service().validateRefreshToken(deadRefreshToken)))));
         } else {
             assertThat(refreshRotation.calls()).isEmpty();
         }

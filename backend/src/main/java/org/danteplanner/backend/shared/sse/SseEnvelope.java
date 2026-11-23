@@ -2,38 +2,157 @@ package org.danteplanner.backend.shared.sse;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import org.danteplanner.backend.shared.security.Viewer;
+import org.jspecify.annotations.Nullable;
+
 import org.danteplanner.backend.shared.entity.SseEventType;
 
-public record SseEnvelope(
-        SseEventType type,
-        Long userId,
-        String plannerId,
-        String entityId,
-        String excludeDeviceId,
-        Long excludeUserId,
-        Object payload
-) {
-    public static SseEnvelope userEvent(Long userId, SseEventType type, String entityId,
-            String excludeDeviceId, Object payload) {
-        return new SseEnvelope(type, userId, null, entityId, excludeDeviceId, null, payload);
+public sealed interface SseEnvelope {
+
+    SseEventType type();
+
+    @JsonValue
+    default Wire wire() {
+        return Wire.of(this);
     }
 
-    public static SseEnvelope settingsInvalidation(Long userId) {
-        return new SseEnvelope(SseEventType.SETTINGS_INVALIDATED, userId, null, null, null, null, null);
+    record UserEvent(Long userId, SseEventType type, String entityId, DeviceExclusion exclusion, Object payload)
+            implements SseEnvelope {
     }
 
-    public static SseEnvelope commentEvent(UUID plannerId, SseEventType type,
-            String entityId, Long authorUserId, Object payload) {
-        return new SseEnvelope(
-                type, null, plannerId.toString(), entityId, null, authorUserId, payload);
+    record SettingsInvalidation(Long userId) implements SseEnvelope {
+
+        @Override
+        public SseEventType type() {
+            return SseEventType.SETTINGS_INVALIDATED;
+        }
     }
 
-    public static SseEnvelope broadcast(Long excludeUserId, SseEventType type, Object payload) {
-        return new SseEnvelope(type, null, null, null, null, excludeUserId, payload);
+    record CommentEvent(UUID plannerId, SseEventType type, String entityId, UserExclusion exclusion, Object payload)
+            implements SseEnvelope {
     }
 
-    public static SseEnvelope accountSuspended(Long userId, Object payload) {
-        return new SseEnvelope(
-                SseEventType.ACCOUNT_SUSPENDED, userId, null, null, null, null, payload);
+    record Broadcast(UserExclusion exclusion, SseEventType type, Object payload) implements SseEnvelope {
+    }
+
+    record AccountSuspended(Long userId, Object payload) implements SseEnvelope {
+
+        @Override
+        public SseEventType type() {
+            return SseEventType.ACCOUNT_SUSPENDED;
+        }
+    }
+
+    sealed interface DeviceExclusion {
+
+        record None() implements DeviceExclusion {
+        }
+
+        record Device(UUID deviceId) implements DeviceExclusion {
+        }
+
+        default boolean excludes(UUID deviceId) {
+            return switch (this) {
+                case None none -> false;
+                case Device device -> device.deviceId().equals(deviceId);
+            };
+        }
+    }
+
+    sealed interface UserExclusion {
+
+        default String describe() {
+            return switch (this) {
+                case None none -> "null";
+                case User user -> user.userId().toString();
+            };
+        }
+
+        record None() implements UserExclusion {
+        }
+
+        record User(Long userId) implements UserExclusion {
+        }
+
+        default boolean excludes(Viewer viewer) {
+            return switch (this) {
+                case None none -> false;
+                case User user -> viewer.is(user.userId());
+            };
+        }
+
+        default boolean excludes(Long userId) {
+            return switch (this) {
+                case None none -> false;
+                case User user -> user.userId().equals(userId);
+            };
+        }
+    }
+
+    record Wire(
+            SseEventType type,
+            @Nullable Long userId,
+            @Nullable String plannerId,
+            @Nullable String entityId,
+            @Nullable String excludeDeviceId,
+            @Nullable Long excludeUserId,
+            @Nullable Object payload
+    ) {
+
+        static Wire of(SseEnvelope envelope) {
+            return switch (envelope) {
+                case UserEvent event -> new Wire(event.type(), event.userId(), null, event.entityId(),
+                        switch (event.exclusion()) {
+                            case DeviceExclusion.None none -> null;
+                            case DeviceExclusion.Device device -> device.deviceId().toString();
+                        }, null, event.payload());
+                case SettingsInvalidation invalidation ->
+                        new Wire(invalidation.type(), invalidation.userId(), null, null, null, null, null);
+                case CommentEvent event -> new Wire(event.type(), null, event.plannerId().toString(),
+                        event.entityId(), null, excludedUser(event.exclusion()), event.payload());
+                case Broadcast broadcast -> new Wire(broadcast.type(), null, null, null, null,
+                        excludedUser(broadcast.exclusion()), broadcast.payload());
+                case AccountSuspended suspended ->
+                        new Wire(suspended.type(), suspended.userId(), null, null, null, null, suspended.payload());
+            };
+        }
+
+        public SseEnvelope on(SseChannel channel) {
+            return switch (channel) {
+                case COMMENT -> new CommentEvent(UUID.fromString(required(plannerId, "plannerId")), type,
+                        required(entityId, "entityId"), userExclusion(),
+                        required(payload, "payload"));
+                case BROADCAST -> new Broadcast(userExclusion(), type, required(payload, "payload"));
+                case USER -> switch (type.userDelivery()) {
+                    case SETTINGS_CACHE -> new SettingsInvalidation(required(userId, "userId"));
+                    case SUSPENSION_NOTICE ->
+                            new AccountSuspended(required(userId, "userId"), required(payload, "payload"));
+                    case EMITTERS -> new UserEvent(required(userId, "userId"), type, required(entityId, "entityId"),
+                            excludeDeviceId == null
+                                    ? new DeviceExclusion.None()
+                                    : new DeviceExclusion.Device(UUID.fromString(excludeDeviceId)),
+                            required(payload, "payload"));
+                };
+            };
+        }
+
+        private static @Nullable Long excludedUser(UserExclusion exclusion) {
+            return switch (exclusion) {
+                case UserExclusion.None none -> null;
+                case UserExclusion.User user -> user.userId();
+            };
+        }
+
+        private UserExclusion userExclusion() {
+            return excludeUserId == null ? new UserExclusion.None() : new UserExclusion.User(excludeUserId);
+        }
+
+        private <T> T required(@Nullable T slot, String name) {
+            if (slot == null) {
+                throw new IllegalArgumentException(type + " envelope on its channel carries no " + name);
+            }
+            return slot;
+        }
     }
 }

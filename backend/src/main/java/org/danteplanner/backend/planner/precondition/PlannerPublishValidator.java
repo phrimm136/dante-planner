@@ -15,7 +15,7 @@ public class PlannerPublishValidator {
     public void requireTitle(String title) {
         if (title == null || title.isBlank()) {
             throw PlannerValidationException.refusing(new ContentVerdict.Refused(
-                    new Violation(ErrorCode.MISSING_TITLE, TITLE, "Title is required for publishing")), null);
+                    new Violation(ErrorCode.MISSING_TITLE, TITLE, "Title is required for publishing")));
         }
     }
 }

@@ -61,6 +61,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -173,7 +176,8 @@ class PlannerPublishingServiceTest {
                 new PlannerOwnershipValidator(),
                 new PlannerPublishValidator(),
                 new PlannerCategoryValidator(),
-                new DomainEventRecorder(domainEventRepository, new ObjectMapper(), event -> { })
+                new DomainEventRecorder(domainEventRepository, new ObjectMapper(), event -> { }),
+                Clock.fixed(Instant.parse("2026-11-23T00:00:00Z"), ZoneOffset.UTC)
         );
     }
 

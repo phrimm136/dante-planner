@@ -1,5 +1,7 @@
 package org.danteplanner.backend.planner.entity;
 
+import java.time.Instant;
+
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.support.TestDataFactory;
@@ -32,7 +34,7 @@ class PlannerEntityTest {
         assertThat(planner.isPublished()).isFalse();
         assertThat(planner.isTakenDown()).isTrue();
 
-        assertRejected(planner::publish)
+        assertRejected(() -> planner.publish(Instant.now()))
                 .withCode("PLANNER_FORBIDDEN")
                 .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("User is not authorized to modify planner with id: " + planner.getId()));
     }

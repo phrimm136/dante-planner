@@ -32,7 +32,7 @@ class GoogleOAuthProviderTest {
 
     @BeforeEach
     void setUp() {
-        provider = new GoogleOAuthProvider(null, new ObjectMapper(), new OAuthProperties(), idTokenVerifier);
+        provider = new GoogleOAuthProvider(null, new ObjectMapper(), ScriptedIdTokenVerifier.googleProperties(), idTokenVerifier);
     }
 
     private static final class ScriptedIdTokenVerifier extends GoogleIdTokenVerifier {
@@ -44,11 +44,8 @@ class GoogleOAuthProviderTest {
         }
 
         private static OAuthProperties googleProperties() {
-            OAuthProperties properties = new OAuthProperties();
-            properties.getGoogle().setClientId(GoogleStub.CLIENT_ID);
-            properties.getGoogle().setJwksUri("https://www.googleapis.com/oauth2/v3/certs");
-            properties.getGoogle().setIssuer("https://accounts.google.com");
-            return properties;
+            return new OAuthProperties(new OAuthProperties.GoogleConfig(GoogleStub.CLIENT_ID, "", "", "", "", "",
+                    "https://www.googleapis.com/oauth2/v3/certs", "https://accounts.google.com"));
         }
 
         private void verifies(Jwt jwt) {
@@ -69,7 +66,7 @@ class GoogleOAuthProviderTest {
     }
 
     private static OAuthTokens tokensWithIdToken() {
-        return new OAuthTokens("access-token", null, "id-token");
+        return new OAuthTokens.OpenId("access-token", "id-token");
     }
 
     @Test

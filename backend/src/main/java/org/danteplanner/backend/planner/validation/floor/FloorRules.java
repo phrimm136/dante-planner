@@ -96,6 +96,9 @@ public class FloorRules {
 
     public Admission admit(FloorBoundary.Parsed parsed, Stage stage) {
         List<Rule> required = requiredRules.get(stage);
+        if (required == null) {
+            throw new IllegalStateException("no floor rules were built for stage " + stage);
+        }
         if (required.isEmpty()) {
             return admitAsStored(parsed);
         }
@@ -152,11 +155,11 @@ public class FloorRules {
 
     private static List<Violation> notRepeated(Walk walk) {
         List<Optional<String>> packs = walk.indices().mapToObj(walk::chosenPack).toList();
-        Map<Optional<String>, Integer> firstFloorOf = Positions.firstIndexOf(packs);
+        List<Integer> firstFloor = Positions.firstIndexPerPosition(packs);
         return walk.indices()
-                .filter(index -> packs.get(index).isPresent() && firstFloorOf.get(packs.get(index)) < index)
+                .filter(index -> packs.get(index).isPresent() && firstFloor.get(index) < index)
                 .mapToObj(index -> FloorViolations.duplicateThemePack(FloorBoundary.themePackPath(index),
-                        packs.get(index).orElseThrow(), FloorBoundary.floorPath(firstFloorOf.get(packs.get(index)))))
+                        packs.get(index).orElseThrow(), FloorBoundary.floorPath(firstFloor.get(index))))
                 .toList();
     }
 
@@ -213,9 +216,9 @@ public class FloorRules {
 
     private static Optional<String> firstRepeatedGift(List<String> giftIds) {
         List<GiftId> bases = giftIds.stream().map(giftId -> EncodedGiftId.parse(giftId).base()).toList();
-        Map<GiftId, Integer> firstIndex = Positions.firstIndexOf(bases);
+        List<Integer> firstIndex = Positions.firstIndexPerPosition(bases);
         return IntStream.range(0, bases.size())
-                .filter(index -> firstIndex.get(bases.get(index)) < index)
+                .filter(index -> firstIndex.get(index) < index)
                 .mapToObj(giftIds::get)
                 .findFirst();
     }

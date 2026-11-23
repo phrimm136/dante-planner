@@ -31,7 +31,8 @@ public class InvalidTokenException extends DomainException {
     private final Reason reason;
 
     public InvalidTokenException(Reason reason) {
-        this(reason, null);
+        super(ErrorKind.UNAUTHENTICATED, ERROR_CODE, CLIENT_DETAIL);
+        this.reason = reason;
     }
 
     public InvalidTokenException(Reason reason, Throwable cause) {

@@ -18,7 +18,7 @@ public class RecordingSessionEndHandler implements SessionEndHandler {
     public record Failed(Operation operation, RuntimeException failure) implements Call {
     }
 
-    public record EndSession(String accessToken, String refreshToken) implements Call {
+    public record EndSession(List<SessionToken> tokens) implements Call {
     }
 
     public record EndAllSessions(Long userId) implements Call {
@@ -48,10 +48,10 @@ public class RecordingSessionEndHandler implements SessionEndHandler {
     }
 
     @Override
-    public void endSession(String accessToken, String refreshToken) {
+    public void endSession(List<SessionToken> tokens) {
         failures.throwIfScripted(Operation.END_SESSION,
                 failure -> journal.add(new Failed(Operation.END_SESSION, failure)));
-        journal.add(new EndSession(accessToken, refreshToken));
+        journal.add(new EndSession(tokens));
     }
 
     @Override

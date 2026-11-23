@@ -2,12 +2,14 @@ package org.danteplanner.backend.planner.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.planner.validation.ErrorCode;
+import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PublicationChange;
+import org.danteplanner.backend.planner.entity.PublicationOutcome;
 import org.danteplanner.backend.planner.validation.floor.Stage;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -25,6 +27,8 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -48,6 +52,7 @@ public class PlannerPublishingService {
     private final PlannerPublishValidator publishValidator;
     private final PlannerCategoryValidator categoryValidator;
     private final DomainEventRecorder domainEventRecorder;
+    private final Clock clock;
 
     /**
      * A moderator transition that withdraws a planner from public view.
@@ -55,7 +60,7 @@ public class PlannerPublishingService {
     @FunctionalInterface
     public interface Withdrawal {
 
-        PublicationChange apply(Planner planner);
+        PublicationOutcome apply(Planner planner);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -108,7 +113,13 @@ public class PlannerPublishingService {
         ownershipValidator.requireOwner(planner, userId);
 
         publishValidator.requireTitle(planner.getTitle());
-        MDCategory category = categoryValidator.requireCategoryForType(planner.getPlannerType(), planner.getCategory());
+        MDCategory category;
+        try {
+            category = categoryValidator.requireCategoryForType(planner.getPlannerType(), planner.getCategory());
+        } catch (PlannerValidationException refusal) {
+            logInvalidCategory(refusal);
+            throw refusal;
+        }
         PlannerDocument document = contentValidator.parse(planner.getContentJson(), category,
                 contentValidator.season(planner.getContentVersion()), Stage.PUBLISH);
         if (document.migrated()) {
@@ -117,7 +128,7 @@ public class PlannerPublishingService {
                     new FreshnessScope.User(planner.getUserId()));
         }
 
-        PublicationChange change = planner.publish();
+        PublicationOutcome change = planner.publish(Instant.now(clock));
         if (!change.changed()) {
             return PlannerResponse.fromEntity(planner);
         }
@@ -126,13 +137,19 @@ public class PlannerPublishingService {
         FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId), new FreshnessScope.Global());
         subscriptionService.createSubscription(userId, plannerId);
 
-        if (change == PublicationChange.FIRST_PUBLISH) {
+        if (change == PublicationOutcome.FIRST_PUBLISH) {
             domainEventRecorder.recordDomainEvent(DomainEventType.PLANNER_PUBLISHED, plannerId,
                     Map.of("authorId", userId));
         }
 
         log.info("Published planner {} by user {}", plannerId, userId);
         return PlannerResponse.fromEntity(planner);
+    }
+
+    private static void logInvalidCategory(PlannerValidationException refusal) {
+        if (ErrorCode.INVALID_CATEGORY.getCode().equals(refusal.getOriginalCode())) {
+            log.warn("Validation failed: {}", refusal.getOriginalMessage());
+        }
     }
 
     private PlannerResponse applyUnpublish(Long userId, Planner planner) {

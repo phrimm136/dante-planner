@@ -1,5 +1,7 @@
 package org.danteplanner.backend.notification.dto;
 
+import org.jspecify.annotations.Nullable;
+
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.api.NotificationType;
 
@@ -12,11 +14,11 @@ public record NotificationResponse(
     NotificationType notificationType,
     boolean read,
     Instant createdAt,
-    Instant readAt,
-    UUID plannerId,
-    String plannerTitle,
-    String commentSnippet,
-    UUID commentPublicId
+    @Nullable Instant readAt,
+    @Nullable UUID plannerId,
+    @Nullable String plannerTitle,
+    @Nullable String commentSnippet,
+    @Nullable UUID commentPublicId
 ) {
     public static NotificationResponse fromEntity(Notification notification) {
         return new NotificationResponse(
