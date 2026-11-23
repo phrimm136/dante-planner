@@ -21,8 +21,7 @@ public class RecordingTokenBlacklist extends TokenBlacklistService {
     public enum Operation {
         REVOKE_LOGOUT_SESSION,
         BLACKLIST_TOKEN,
-        INVALIDATE_USER_TOKENS,
-        CLEAR_USER_INVALIDATION
+        INVALIDATE_USER_TOKENS
     }
 
     private record Invalidation(long stamp, long expiresAt) {
@@ -103,13 +102,6 @@ public class RecordingTokenBlacklist extends TokenBlacklistService {
     public boolean isUserTokenInvalidated(Long userId, long issuedAt) {
         Invalidation invalidation = invalidations.get(userId);
         return invalidation != null && invalidation.expiresAt() > clock.millis() && issuedAt < invalidation.stamp();
-    }
-
-    @Override
-    public void clearUserInvalidation(Long userId) {
-        Objects.requireNonNull(userId, "userId");
-        failIfScripted(Operation.CLEAR_USER_INVALIDATION);
-        invalidations.remove(userId);
     }
 
     public int size() {

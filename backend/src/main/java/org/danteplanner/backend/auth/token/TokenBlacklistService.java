@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TokenBlacklistService {
 
-    private static final long ROTATION_GRACE_PERIOD_MS = 5_000;
+    private static final String BLACKLIST_VALUE_PREFIX = "1:";
 
     static final String BLACKLIST_KEY_PREFIX = "bl:";
 
@@ -141,7 +141,7 @@ public class TokenBlacklistService {
         keys.addAll(familyKeys);
 
         List<Object> args = new ArrayList<>();
-        args.add(encode(BlacklistMode.IMMEDIATE, now));
+        args.add(encode(now));
         args.add(Long.toString(tokenKeys.size()));
         args.addAll(tokenTtls);
         args.add(Long.toString(now));
@@ -162,7 +162,7 @@ public class TokenBlacklistService {
         }
 
         authWrites.writeWithoutResult(store -> store.opsForValue().set(
-                blacklistKey(token), encode(BlacklistMode.IMMEDIATE, now), Duration.ofMillis(remaining)));
+                blacklistKey(token), encode(now), Duration.ofMillis(remaining)));
     }
 
     public boolean isBlacklisted(String token) {
@@ -174,13 +174,7 @@ public class TokenBlacklistService {
     }
 
     private boolean isBlacklistedIn(StringRedisTemplate store, String token) {
-        String value = store.opsForValue().get(blacklistKey(token));
-        if (value == null) {
-            return false;
-        }
-
-        return BlacklistMode.of(value) == BlacklistMode.IMMEDIATE
-                || clock.millis() - decodeBlacklistedAt(value) >= ROTATION_GRACE_PERIOD_MS;
+        return store.opsForValue().get(blacklistKey(token)) != null;
     }
 
     public void invalidateUserTokens(@NonNull Long userId) {
@@ -212,11 +206,6 @@ public class TokenBlacklistService {
         return issuedAt < Long.parseLong(value);
     }
 
-    public void clearUserInvalidation(@NonNull Long userId) {
-        Objects.requireNonNull(userId, "userId");
-        authWrites.writeWithoutResult(store -> store.delete(userInvalidationKey(userId)));
-    }
-
     private boolean failOpen(String message, DataAccessException e) {
         log.warn(message, e);
         return isRevokedWithoutACheck();
@@ -235,33 +224,8 @@ public class TokenBlacklistService {
         return USER_INVALIDATION_KEY_PREFIX + userId;
     }
 
-    private String encode(BlacklistMode mode, long blacklistedAt) {
-        return mode.marker + ":" + blacklistedAt;
-    }
-
-    private long decodeBlacklistedAt(String value) {
-        return Long.parseLong(value.substring(value.indexOf(':') + 1));
-    }
-
-    /**
-     * When a blacklist entry starts rejecting the token it names. The marker is the entry's
-     * leading character in Redis, so entries written by either mode read back the same way.
-     */
-    private enum BlacklistMode {
-
-        IMMEDIATE('1'),
-
-        ROTATION_GRACE('0');
-
-        private final char marker;
-
-        BlacklistMode(char marker) {
-            this.marker = marker;
-        }
-
-        static BlacklistMode of(String encoded) {
-            return encoded.charAt(0) == IMMEDIATE.marker ? IMMEDIATE : ROTATION_GRACE;
-        }
+    private String encode(long blacklistedAt) {
+        return BLACKLIST_VALUE_PREFIX + blacklistedAt;
     }
 
     private String hashToken(String token) {

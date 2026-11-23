@@ -91,9 +91,6 @@ public class RecordingRefreshRotation extends RefreshRotationService {
 
     @Override
     public void revokeFamily(String familyId) {
-        if (familyId == null) {
-            return;
-        }
         failIfScripted(Operation.REVOKE_FAMILY);
         family(familyId).revoked = true;
         calls.add(new FamilyRevoked(familyId));

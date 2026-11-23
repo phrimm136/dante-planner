@@ -861,9 +861,6 @@ guards the parse but likewise skips the schema gate.
   deletion, compared on validation) would end every session in one step with no time window. Worth
   doing when the token format changes for another reason, or when a same-second bypass is reported.
   re-check: `rg -q 'public void invalidateUserTokens' backend/src/main/java/org/danteplanner/backend/auth/token/TokenBlacklistService.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/auth -i 'tokenVersion|token_version'`
-- `TokenBlacklistService.clearUserInvalidation` has no main-source caller. Worth deleting with the
-  version-claim change above, or the next time the blacklist service changes.
-  re-check: `rg -o 'clearUserInvalidation\(' backend/src/main/java | awk 'END{exit NR!=1}'`
 - `ConventionBaselineTest.DOMAIN_EXCEPTION_HANDLERS_FROZEN` has no staleness check, so an entry can
   outlive the handler it names. Worth adding the check the next time an exception handler moves.
   re-check: `test "$(rg -c 'DOMAIN_EXCEPTION_HANDLERS_FROZEN' backend/src/test/java/org/danteplanner/backend/architecture/ConventionBaselineTest.java)" = 2`
@@ -1664,10 +1661,6 @@ guards the parse but likewise skips the schema gate.
   when a banned user is seen re-registering, or a moderation policy requires bans to outlive
   deletion: keep a provider-identity block list checked at OAuth sign-in.
   re-check: `.claude/skills/debt-ledger/bin/debt absent backend/src/main -i 'banned_provider|ProviderBlock'`
-- The blacklist still reads the rotation-grace marker that pods before the claims split wrote
-  (`BlacklistMode.ROTATION_GRACE` and its 5 s grace period); nothing writes it any more. Worth
-  deleting once the last pod of the previous release has been gone for seven days, the refresh TTL.
-  re-check: `rg -q 'ROTATION_GRACE' backend/src/main/java/org/danteplanner/backend/auth/token/TokenBlacklistService.java`
 - `backend/CLAUDE.md` calls the Java import order "enforced", but no checkstyle module
   (ImportOrder / CustomImportOrder) checks it, and existing files such as
   `PlannerStatsRepositoryIT` do not follow it. Worth doing when import churn shows up in review:

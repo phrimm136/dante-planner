@@ -10,7 +10,6 @@ org.danteplanner.backend.auth.security.JwtAuthenticationFilter.shouldNotFilter(j
 org.danteplanner.backend.auth.service.AuthenticationService.authenticateWithOAuth(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 org.danteplanner.backend.auth.token.AesGcmCipher.decrypt([B, [B)
 org.danteplanner.backend.auth.token.JwtTokenService.generateRefreshToken(java.lang.Long, java.lang.String, java.lang.String)
-org.danteplanner.backend.auth.token.RefreshRotationService.revokeFamily(java.lang.String)
 org.danteplanner.backend.auth.token.TokenBlacklistService.blacklistToken(java.lang.String, java.util.Date)
 org.danteplanner.backend.auth.token.TokenBlacklistService.isBlacklistedIn(org.springframework.data.redis.core.StringRedisTemplate, java.lang.String)
 org.danteplanner.backend.auth.token.TokenBlacklistService.isInvalidatedIn(org.springframework.data.redis.core.StringRedisTemplate, java.lang.Long, long)

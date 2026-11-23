@@ -1,5 +1,5 @@
 # 077 token-lifecycle-consolidation
-epic: none · pr: none
+epic: none · pr: none · supersedes: 038 @auth @legacy
 
 ## Decisions
 
