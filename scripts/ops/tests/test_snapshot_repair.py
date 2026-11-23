@@ -7,6 +7,8 @@ import time
 import unittest
 from pathlib import Path
 
+from shells import FIRST_SHELL, with_second_shell
+
 SCRIPT = Path(__file__).resolve().parents[1] / "provision" / "k3s-snapshot-schedule-repair.sh"
 FIXTURE_DIR = Path(__file__).resolve().parent / "fixtures"
 MALFORMED_LINE = "\t'0 \\*/6 \\* \\* \\*' \\"
@@ -22,25 +24,25 @@ FAKE_MODE = """if ls "$FAKE_DIR"/k3s.service.bak-* >/dev/null 2>&1; then
   [ -n "${FAKE_HANG_POST:-}" ] && exec sleep 30 >/dev/null 2>&1
   [ -n "${FAKE_SLOW_POST:-}" ] && sleep 0.9
 fi
-n=$(cat "$FAKE_DIR/restarts" 2>/dev/null || echo 0)
+n=$(cat "$FAKE_DIR/restarts" 2>/dev/null || printf '%s\\n' 0)
 eval "mode=\\${FAKE_RESTART$n:-ok}"
 """
 
 FAKE_K3S = """#!/bin/sh
-echo "k3s $*" >> "$FAKE_DIR/calls"
+printf '%s\n' "k3s $*" >> "$FAKE_DIR/calls"
 """ + FAKE_MODE + """case "$*" in
   "etcd-snapshot save"*)
     [ -n "${FAKE_SAVE_HANGS:-}" ] && exec sleep 30
     if [ -n "${FAKE_SAVE_FAILS:-}" ]; then
-      echo "level=info msg=Saving etcd snapshot to s3://p-oregon-etcd-snapshots-bucket/k3s"
-      echo "level=fatal msg=AccessDenied: arn:aws:iam::123456789012:role/cp is not allowed on $*" >&2
+      printf '%s\n' "level=info msg=Saving etcd snapshot to s3://p-oregon-etcd-snapshots-bucket/k3s"
+      printf '%s\n' "level=fatal msg=AccessDenied: arn:aws:iam::123456789012:role/cp is not allowed on $*" >&2
       exit 1
     fi
-    echo "saving to s3://$*" >&2
-    echo local >> "$FAKE_DIR/snapshots"
+    printf '%s\n' "saving to s3://$*" >&2
+    printf '%s\n' local >> "$FAKE_DIR/snapshots"
     if [ "$*" = "etcd-snapshot save --etcd-s3 --etcd-s3-bucket p-oregon-etcd-snapshots-bucket --etcd-s3-region us-west-2" ] \
       && [ -z "${FAKE_S3_FAILS:-}" ]; then
-      echo s3 >> "$FAKE_DIR/snapshots"
+      printf '%s\n' s3 >> "$FAKE_DIR/snapshots"
     fi ;;
   "kubectl get etcdsnapshotfiles.k3s.cattle.io -o name --request-timeout=1s")
     [ -n "${FAKE_SLOW_LIST:-}" ] && sleep "$FAKE_SLOW_LIST"
@@ -51,10 +53,10 @@ echo "k3s $*" >> "$FAKE_DIR/calls"
   "kubectl get --raw /readyz --request-timeout=1s")
     if [ -n "${FAKE_TERM_ONCE:-}" ] && [ "$n" -ge 1 ] && [ ! -f "$FAKE_DIR/termed" ]; then
       touch "$FAKE_DIR/termed"
-      kill -TERM -- "-$(ps -o sid= -p $$ | tr -d ' ')"
+      kill -s TERM -- "-$(ps -o sid= -p $$ | tr -d ' ')"
     fi
     case "$mode" in never-active|failed|loop|never-ready) exit 1 ;; esac
-    echo ok ;;
+    printf '%s\n' ok ;;
   "kubectl get nodes --no-headers --request-timeout=1s")
     cat "$FAKE_DIR/nodes" ;;
   "kubectl -n kube-node-lease get leases -o "*)
@@ -69,61 +71,63 @@ esac
 """
 
 FAKE_SYSTEMCTL = """#!/bin/sh
-echo "systemctl $*" >> "$FAKE_DIR/calls"
+printf '%s\n' "systemctl $*" >> "$FAKE_DIR/calls"
 """ + FAKE_MODE + """case "$*" in
   "restart --no-block k3s")
-    echo $((n + 1)) > "$FAKE_DIR/restarts"
+    printf '%s\n' $((n + 1)) > "$FAKE_DIR/restarts"
     [ -z "${FAKE_RESTART_REFUSED:-}" ] ;;
   "show -p KillMode k3s")
-    echo "KillMode=${FAKE_KILL_MODE:-process}" ;;
+    printf '%s\n' "KillMode=${FAKE_KILL_MODE:-process}" ;;
   "show -p NRestarts --value k3s")
-    reads=$(cat "$FAKE_DIR/nrestart-reads-$n" 2>/dev/null || echo 0)
-    echo $((reads + 1)) > "$FAKE_DIR/nrestart-reads-$n"
-    if [ "$n" = 0 ] || [ "$reads" = 0 ]; then echo "${FAKE_PRE_NRESTARTS:-0}"
-    elif [ "$mode" = loop ]; then echo "$reads"
-    else echo 0; fi ;;
+    reads=$(cat "$FAKE_DIR/nrestart-reads-$n" 2>/dev/null || printf '%s\n' 0)
+    printf '%s\n' $((reads + 1)) > "$FAKE_DIR/nrestart-reads-$n"
+    if [ "$n" = 0 ] || [ "$reads" = 0 ]; then printf '%s\n' "${FAKE_PRE_NRESTARTS:-0}"
+    elif [ "$mode" = loop ]; then printf '%s\n' "$reads"
+    else printf '%s\n' 0; fi ;;
   "is-failed --quiet k3s")
     [ "$mode" = failed ] ;;
   "is-active --quiet k3s"|"is-active k3s")
     state=active
     case "$mode" in never-active|loop) state=activating ;; failed) state=failed ;; esac
     [ -n "${FAKE_K3S_DOWN:-}" ] && state=inactive
-    [ "$2" = --quiet ] || echo "$state"
+    [ "$2" = --quiet ] || printf '%s\n' "$state"
     [ "$state" = active ] ;;
 esac
 """
 
 FAKE_AWS = """#!/bin/sh
-echo "aws $*" >> "$FAKE_DIR/aws-calls"
+printf '%s\n' "aws $*" >> "$FAKE_DIR/aws-calls"
 case "$1 $2" in
-  "sts get-caller-identity") echo "acct" ;;
+  "sts get-caller-identity") printf '%s\n' "acct" ;;
   "ssm send-command")
     while [ $# -gt 0 ]; do [ "$1" = --parameters ] && printf '%s' "$2" > "$FAKE_DIR/parameters"; shift; done
-    echo cmd-1 ;;
+    printf '%s\n' cmd-1 ;;
   "ssm get-command-invocation")
     case "$*" in
-      *"--query Status"*) echo "${FAKE_STATUS:-Success}" ;;
+      *"--query Status"*) printf '%s\n' "${FAKE_STATUS:-Success}" ;;
       *) jq -n --arg o "${FAKE_REMOTE_OUT:-REPAIRED}" '{StandardOutputContent: $o, StandardErrorContent: ""}' ;;
     esac ;;
 esac
 """
 
 
-def write_tool(bin_dir, tool_name, tool_text):
+def write_tool(bin_dir, tool_name, tool_text, shell_path):
     tool_path = bin_dir / tool_name
-    tool_path.write_text(tool_text)
+    tool_path.write_text(tool_text.replace("#!/bin/sh\n", f"#!{shell_path}\n", 1))
     tool_path.chmod(0o755)
 
 
 class RepairCase(unittest.TestCase):
+    shell_path = FIRST_SHELL
+
     def setUp(self):
         self.work_handle = tempfile.TemporaryDirectory()
         self.work_dir = Path(self.work_handle.name)
         bin_dir = self.work_dir / "bin"
         bin_dir.mkdir()
-        write_tool(bin_dir, "k3s", FAKE_K3S)
-        write_tool(bin_dir, "systemctl", FAKE_SYSTEMCTL)
-        write_tool(bin_dir, "aws", FAKE_AWS)
+        write_tool(bin_dir, "k3s", FAKE_K3S, self.shell_path)
+        write_tool(bin_dir, "systemctl", FAKE_SYSTEMCTL, self.shell_path)
+        write_tool(bin_dir, "aws", FAKE_AWS, self.shell_path)
         self.unit_path = self.work_dir / "k3s.service"
         self.unit_path.write_text((FIXTURE_DIR / "k3s.service").read_text())
         self.original_text = self.unit_path.read_text()
@@ -146,7 +150,7 @@ class RepairCase(unittest.TestCase):
         return build_run.stdout
 
     def run_remote(self, mode_name, script_text=None, restart_bound=BOUND, ssm_timeout="600", **fake_flags):
-        return subprocess.run(["sh", "-c", script_text or self.remote_text(mode_name, restart_bound, ssm_timeout)],
+        return subprocess.run([self.shell_path, "-c", script_text or self.remote_text(mode_name, restart_bound, ssm_timeout)],
                               capture_output=True, text=True, start_new_session=True,
                               env={**self.base_env, **{flag_name: "1" if flag_value is True else flag_value
                                                        for flag_name, flag_value in fake_flags.items()}})
@@ -460,7 +464,7 @@ def reserve_problem(script_text):
     bodies = function_bodies(script_text)
     call_worst = values["CALL_BOUND"] + values["KILL_GRACE"]
     skipped = {"roll_back", "wait_ready", "end"}
-    steps_text = script_text[script_text.index("time_left="):script_text.index('echo "STEP 5')]
+    steps_text = script_text[script_text.index("time_left="):script_text.index("printf '%s\\n' \"STEP 5")]
     path_calls = (bounded_calls(steps_text, bodies, skipped) + bounded_calls(bodies["roll_back"], bodies, skipped)
                   + bounded_calls(bodies["end"], bodies, set()))
     loop_text = bodies["wait_ready"][bodies["wait_ready"].index("while"):]
@@ -572,6 +576,9 @@ class LocalScriptTest(RepairCase):
             self.assertEqual(bad_run.returncode, 2, bad_args)
             self.assertIn("usage: k3s-snapshot-schedule-repair.sh --site oregon|seoul [--dry-run]", bad_run.stderr)
         self.assertFalse((self.work_dir / "aws-calls").exists())
+
+
+with_second_shell(RemoteScriptTest, globals())
 
 
 if __name__ == "__main__":

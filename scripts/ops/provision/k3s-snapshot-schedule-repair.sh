@@ -82,10 +82,10 @@ bounded() { timeout -k "$KILL_GRACE" "$CALL_BOUND" "$@"; }
 sctl() { bounded systemctl "$@"; }
 kc() { bounded k3s kubectl "$@" "$KUBECTL_TIMEOUT"; }
 release_lock() { if [ "$OWN_LOCK" = 1 ]; then bounded rm -rf "$LOCK_DIR"; OWN_LOCK=0; fi; }
-end() { STATE=finished; release_lock; echo "$2"; exit "$1"; }
+end() { STATE=finished; release_lock; printf '%s\n' "$2"; exit "$1"; }
 snapshot_count() { kc get etcdsnapshotfiles.k3s.cattle.io -o name 2>/dev/null | grep -c . || true; }
 s3_count() { kc get etcdsnapshotfiles.k3s.cattle.io -l etcd.k3s.cattle.io/snapshot-storage-node=s3 -o name 2>/dev/null | grep -c . || true; }
-snapshot_split() { total=$(snapshot_count); in_s3=$(s3_count); echo "snapshots: local $((total - in_s3)), s3 $in_s3"; }
+snapshot_split() { total=$(snapshot_count); in_s3=$(s3_count); printf '%s\n' "snapshots: local $((total - in_s3)), s3 $in_s3"; }
 cron_line() { unit_line=$(bounded sed -n "${value_no}p" "$UNIT"); printf '%s\n' "${unit_line#"${unit_line%%[![:space:]]*}"}"; }
 unit_arg() {
   FLAG="'$1' \\" awk '{ line = $0; sub(/^[[:space:]]+/, "", line) }
@@ -101,9 +101,9 @@ unit_kill_mode() { awk '{ line = $0; sub(/^[[:space:]]+/, "", line) } line ~ /^K
 effective_kill_mode() { sctl show -p KillMode k3s 2>/dev/null || true; }
 api_ready() { [ "$(kc get --raw /readyz 2>/dev/null)" = ok ]; }
 serving_text() {
-  if sctl is-active --quiet k3s && api_ready; then echo "k3s is serving"; else echo "k3s is NOT serving"; fi
+  if sctl is-active --quiet k3s && api_ready; then printf '%s\n' "k3s is serving"; else printf '%s\n' "k3s is NOT serving"; fi
 }
-restart_count() { sctl show -p NRestarts --value k3s 2>/dev/null || echo 0; }
+restart_count() { sctl show -p NRestarts --value k3s 2>/dev/null || printf '%s\n' 0; }
 
 nodes_back() {
   behind=$ready_total
@@ -194,7 +194,7 @@ if [ -d "$LOCK_DIR" ]; then
 else
   lock_state=free
 fi
-echo "lock $LOCK_DIR: $lock_state"
+printf '%s\n' "lock $LOCK_DIR: $lock_state"
 if [ "$MODE" = repair ]; then
   mkdir "$LOCK_DIR" 2>/dev/null || end 3 "NOTHING CHANGED: another repair run holds $LOCK_DIR ($lock_state); wait for it to end, or remove the directory when no repair command is InProgress on this instance"
   OWN_LOCK=1
@@ -206,7 +206,7 @@ flag_count=$(printf '%s\n' "$flag_nos" | grep -c . || true)
 [ "$flag_count" = 1 ] || end 3 "NOTHING CHANGED: $UNIT holds the --etcd-snapshot-schedule-cron argument $flag_count times, not once; $(serving_text)"
 value_no=$((flag_nos + 1))
 found=$(cron_line)
-echo "unit line $value_no as found: $found"
+printf '%s\n' "unit line $value_no as found: $found"
 if [ "$found" = "$repaired" ]; then
   snapshot_split
   if ! sctl is-active --quiet k3s; then
@@ -217,30 +217,30 @@ if [ "$found" = "$repaired" ]; then
 fi
 [ "$found" = "$malformed" ] || end 3 "NOTHING CHANGED: line $value_no is not the known malformed line $malformed; $(serving_text)"
 
-echo "unit KillMode line: $(unit_kill_mode)"
-echo "effective $(effective_kill_mode)"
+printf '%s\n' "unit KillMode line: $(unit_kill_mode)"
+printf '%s\n' "effective $(effective_kill_mode)"
 s3_bucket=$(unit_arg --etcd-s3-bucket)
 s3_region=$(unit_arg --etcd-s3-region)
 bucket_state=missing
 region_state=missing
 [ -n "$s3_bucket" ] && bucket_state=found
 [ -n "$s3_region" ] && region_state=found
-echo "unit S3 arguments: bucket $bucket_state, region $region_state"
+printf '%s\n' "unit S3 arguments: bucket $bucket_state, region $region_state"
 node_rows=$(kc get nodes --no-headers 2>/dev/null) || end 3 "NOTHING CHANGED: listing the nodes failed; $(serving_text)"
 node_total=$(printf '%s\n' "$node_rows" | grep -c . || true)
 ready_before=$(printf '%s\n' "$node_rows" | awk '$2 ~ /^Ready/ { print $1 }')
 ready_total=$(printf '%s\n' "$ready_before" | grep -c . || true)
-echo "nodes Ready before the run: $ready_total of $node_total"
+printf '%s\n' "nodes Ready before the run: $ready_total of $node_total"
 if [ "$ready_total" -lt "$node_total" ]; then
-  echo "nodes not Ready before the run: $((node_total - ready_total)); the run does not check them afterwards"
+  printf '%s\n' "nodes not Ready before the run: $((node_total - ready_total)); the run does not check them afterwards"
 fi
 
 if [ "$MODE" = dry-run ]; then
   if nodes_back "$(( $(date +%s) - 60 ))"; then lease_state="renewed within 60s"; else lease_state="NOT all renewed within 60s"; fi
-  echo "node leases of the Ready nodes: $lease_state"
-  echo "k3s: $(sctl is-active k3s || true)"
+  printf '%s\n' "node leases of the Ready nodes: $lease_state"
+  printf '%s\n' "k3s: $(sctl is-active k3s || true)"
   snapshot_split
-  echo "would: k3s etcd-snapshot save and wait for its S3 copy; copy $UNIT to $UNIT.bak-<timestamp>; replace line $value_no with $repaired; systemctl daemon-reload; systemctl restart --no-block k3s; wait up to ${RESTART_BOUND}s for k3s, /readyz and every node Ready before the run with a new lease"
+  printf '%s\n' "would: k3s etcd-snapshot save and wait for its S3 copy; copy $UNIT to $UNIT.bak-<timestamp>; replace line $value_no with $repaired; systemctl daemon-reload; systemctl restart --no-block k3s; wait up to ${RESTART_BOUND}s for k3s, /readyz and every node Ready before the run with a new lease"
   end 0 "NOTHING CHANGED: dry run"
 fi
 
@@ -248,7 +248,7 @@ fi
 [ -n "$s3_bucket" ] && [ -n "$s3_region" ] || end 3 "NOTHING CHANGED: the unit names no --etcd-s3-bucket or no --etcd-s3-region argument, so the save has no S3 target"
 [ "$(effective_kill_mode)" = KillMode=process ] || end 3 "NOTHING CHANGED: k3s runs with $(effective_kill_mode), not KillMode=process, so a restart stops the running pods"
 
-echo "STEP 1: k3s etcd-snapshot save"
+printf '%s\n' "STEP 1: k3s etcd-snapshot save"
 sctl is-active --quiet k3s || end 3 "NOTHING CHANGED: k3s is not active, and a snapshot needs the running server; start k3s and rerun"
 total_before=$(snapshot_count)
 s3_before=$(s3_count)
@@ -273,16 +273,16 @@ fi
 STATE=snapshot-proven
 snapshot_split
 
-echo "STEP 2: back up the unit"
+printf '%s\n' "STEP 2: back up the unit"
 backup="$UNIT.bak-$(date -u +%Y%m%dT%H%M%SZ)"
 time_left=$(( RUN_START + SSM_TIMEOUT - START_MARGIN - $(date +%s) ))
 [ "$time_left" -ge "$RESERVE" ] \
   || end 3 "NOTHING CHANGED: not enough time left to restart and roll back within this run (${time_left}s left); run again"
 bounded cp -p "$UNIT" "$backup" || end 3 "NOTHING CHANGED: copying $UNIT to $backup failed"
-echo "backup: $backup"
+printf '%s\n' "backup: $backup"
 STATE=unit-edited
 
-echo "STEP 3: replace line $value_no"
+printf '%s\n' "STEP 3: replace line $value_no"
 unit_line=$(bounded sed -n "${value_no}p" "$UNIT") || roll_back "reading line $value_no failed"
 bounded env REPLACEMENT="${unit_line%%[![:space:]]*}$repaired" awk -v n="$value_no" 'NR == n { print ENVIRON["REPLACEMENT"]; next } { print }' \
   "$backup" > "$UNIT.repair" || roll_back "writing $UNIT.repair failed"
@@ -290,18 +290,18 @@ bounded cp "$UNIT.repair" "$UNIT" || roll_back "writing $UNIT failed"
 bounded rm -f "$UNIT.repair"
 [ "$(cron_line)" = "$repaired" ] || roll_back "line $value_no did not read back as $repaired"
 
-echo "STEP 4: systemctl daemon-reload, restart k3s without waiting on systemd"
+printf '%s\n' "STEP 4: systemctl daemon-reload, restart k3s without waiting on systemd"
 sctl daemon-reload || roll_back "systemctl daemon-reload failed"
 start_k3s || roll_back "systemctl restart --no-block k3s was refused"
 
-echo "STEP 5: wait up to ${RESTART_BOUND}s for k3s, /readyz and the nodes"
+printf '%s\n' "STEP 5: wait up to ${RESTART_BOUND}s for k3s, /readyz and the nodes"
 wait_ready "$RESTART_BOUND" "$since_epoch" "$restarts_queued" || roll_back "$restart_reason"
 STATE=restarted-ready
-echo "API server ready, every node Ready before the run is Ready with a new lease"
+printf '%s\n' "API server ready, every node Ready before the run is Ready with a new lease"
 
-echo "STEP 6: result"
+printf '%s\n' "STEP 6: result"
 snapshot_split
-echo "unit cron line: $(cron_line)"
+printf '%s\n' "unit cron line: $(cron_line)"
 end 0 "REPAIRED"
 REMOTE
 }

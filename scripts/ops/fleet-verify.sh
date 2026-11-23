@@ -54,44 +54,44 @@ fetch_kubeconfig() {
 
 remote_checks() {
     cat <<'REMOTE'
-echo "=== NODES ==="
+printf '%s\n' "=== NODES ==="
 k3s kubectl get nodes --no-headers
-echo "=== PODS ==="
+printf '%s\n' "=== PODS ==="
 k3s kubectl -n danteplanner get pods --no-headers
-echo "=== ARGOCD ==="
+printf '%s\n' "=== ARGOCD ==="
 k3s kubectl -n argocd get applications.argoproj.io \
   -o custom-columns=NAME:.metadata.name,SYNC:.status.sync.status,HEALTH:.status.health.status --no-headers
-echo "=== RDS ==="
-k3s kubectl -n danteplanner exec ds/backend -- sh -c 'nc -zv -w5 "$MYSQL_HOST" 3306' 2>&1 || echo RDS_UNREACHABLE
-echo "=== SNAPSHOTS ==="
+printf '%s\n' "=== RDS ==="
+k3s kubectl -n danteplanner exec ds/backend -- sh -c 'nc -zv -w5 "$MYSQL_HOST" 3306' 2>&1 || printf '%s\n' RDS_UNREACHABLE
+printf '%s\n' "=== SNAPSHOTS ==="
 if snapshot_rows=$(k3s kubectl get etcdsnapshotfiles.k3s.cattle.io \
   -o jsonpath='{range .items[*]}{"row "}{.status.creationTime}{"\n"}{end}' 2>&1); then
-  echo "count=$(printf '%s\n' "$snapshot_rows" | grep -c '^row' || true)"
+  printf '%s\n' "count=$(printf '%s\n' "$snapshot_rows" | grep -c '^row' || true)"
   if s3_names=$(k3s kubectl get etcdsnapshotfiles.k3s.cattle.io -l etcd.k3s.cattle.io/snapshot-storage-node=s3 -o name 2>/dev/null); then
-    echo "s3_count=$(printf '%s\n' "$s3_names" | grep -c . || true)"
+    printf '%s\n' "s3_count=$(printf '%s\n' "$s3_names" | grep -c . || true)"
   else
-    echo SNAPSHOT_READ_FAILED
+    printf '%s\n' SNAPSHOT_READ_FAILED
   fi
   newest=$(printf '%s\n' "$snapshot_rows" | sed -n 's/^row //p' | grep . | sort | tail -n 1 || true)
   if [ -n "$newest" ]; then
     if newest_epoch=$(date -d "$newest" +%s 2>/dev/null); then
-      echo "newest_age_seconds=$(( $(date +%s) - newest_epoch ))"
+      printf '%s\n' "newest_age_seconds=$(( $(date +%s) - newest_epoch ))"
     else
-      echo SNAPSHOT_TIME_UNPARSABLE
+      printf '%s\n' SNAPSHOT_TIME_UNPARSABLE
     fi
   fi
 elif printf '%s\n' "$snapshot_rows" | grep -q "doesn't have a resource type"; then
-  echo SNAPSHOT_CRD_MISSING
+  printf '%s\n' SNAPSHOT_CRD_MISSING
 else
-  echo SNAPSHOT_READ_FAILED
+  printf '%s\n' SNAPSHOT_READ_FAILED
 fi
-echo "=== SNAPSHOT METRIC ==="
+printf '%s\n' "=== SNAPSHOT METRIC ==="
 if metric_text=$(k3s kubectl get --raw /api/v1/namespaces/danteplanner/services/kube-state-metrics:8080/proxy/metrics 2>&1); then
-  echo "series=$(printf '%s\n' "$metric_text" | grep -c '^kube_etcd_snapshot_creation_timestamp_seconds[{ ]' || true)"
+  printf '%s\n' "series=$(printf '%s\n' "$metric_text" | grep -c '^kube_etcd_snapshot_creation_timestamp_seconds[{ ]' || true)"
 elif printf '%s\n' "$metric_text" | grep -q 'no endpoints available'; then
-  echo METRIC_SOURCE_DOWN
+  printf '%s\n' METRIC_SOURCE_DOWN
 else
-  echo METRIC_PROXY_FAILED
+  printf '%s\n' METRIC_PROXY_FAILED
 fi
 REMOTE
 }
