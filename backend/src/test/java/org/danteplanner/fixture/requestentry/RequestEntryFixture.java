@@ -1,8 +1,11 @@
 package org.danteplanner.fixture.requestentry;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.security.Principal;
 import java.util.function.Function;
 
+import org.danteplanner.backend.shared.security.Viewer;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.server.ServerHttpRequest;
@@ -13,6 +16,8 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
 
@@ -25,6 +30,14 @@ public class RequestEntryFixture {
 
     @GetMapping("/principal")
     public void principalHandler(@AuthenticationPrincipal Long userId) {
+    }
+
+    @GetMapping("/composed-principal")
+    public void composedPrincipalHandler(@SignedInUser Long userId) {
+    }
+
+    @GetMapping("/viewer")
+    public void viewerHandler(Viewer viewer) {
     }
 
     @GetMapping("/security-context")
@@ -75,6 +88,18 @@ public class RequestEntryFixture {
         return request.getHeaderValues("User-Agent");
     }
 
+    public Object userPrincipalRead(HttpServletRequest request) {
+        return request.getUserPrincipal();
+    }
+
+    public String remoteUserRead(WebRequest request) {
+        return request.getRemoteUser();
+    }
+
+    public Object serverRequestPrincipalRead(ServerHttpRequest request) {
+        return request.getPrincipal();
+    }
+
     public String headerRead(HttpServletRequest request) {
         return request.getHeader("User-Agent");
     }
@@ -94,5 +119,21 @@ public class RequestEntryFixture {
 
     public String responseHeaderRead(HttpServletResponse response) {
         return response.getHeader("Location");
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @AuthenticationPrincipal
+    public @interface SignedInUser {
+    }
+
+    @ControllerAdvice
+    public static class Advice {
+
+        @ModelAttribute
+        public void principalAdvice(@AuthenticationPrincipal Long userId) {
+        }
+
+        public void authenticationOutsideAController(Authentication authentication) {
+        }
     }
 }

@@ -34,8 +34,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RequestEntryRuleTest {
 
-    private static final Set<String> HEADER_READS = Set.of(
-            "getHeader", "getHeaders", "getHeaderNames", "getHeaderValues", "getIntHeader", "getDateHeader");
+    private static final Set<String> REQUEST_READS = Set.of(
+            "getHeader", "getHeaders", "getHeaderNames", "getHeaderValues", "getIntHeader", "getDateHeader",
+            "getUserPrincipal", "getRemoteUser", "getPrincipal");
     private static final List<Class<?>> REQUEST_TYPES =
             List.of(HttpServletRequest.class, ServerHttpRequest.class, WebRequest.class);
     private static final List<Class<? extends Annotation>> BANNED_ANNOTATIONS =
@@ -45,8 +46,8 @@ class RequestEntryRuleTest {
     static final ArchRule REQUESTS_ARE_READ_AT_THE_ENTRY =
             classes()
                     .should(takeTheViewerAndReadHeadersThroughRequestHeaders())
-                    .as("a controller method takes a Viewer, never another form of the signed-in user or of the"
-                            + " request headers, and only RequestHeaders reads a header from a request");
+                    .as("a method takes a Viewer, never another form of the signed-in user or of the request"
+                            + " headers, and only RequestHeaders reads a header or the user from a request");
 
     @Test
     void production_WhenScanned_ReadsRequestsAtTheEntry() {
@@ -59,9 +60,12 @@ class RequestEntryRuleTest {
         String fixture = RequestEntryFixture.class.getName();
 
         assertThatThrownBy(() -> REQUESTS_ARE_READ_AT_THE_ENTRY.check(
-                new ClassFileImporter().importClasses(RequestEntryFixture.class)))
+                new ClassFileImporter().importClasses(
+                        RequestEntryFixture.class, RequestEntryFixture.Advice.class)))
                 .isInstanceOf(AssertionError.class)
                 .hasMessageContaining(fixture + ".principalHandler(java.lang.Long) takes")
+                .hasMessageContaining(fixture + ".composedPrincipalHandler(")
+                .hasMessageContaining(fixture + "$Advice.principalAdvice(")
                 .hasMessageContaining(fixture + ".securityContextHandler(")
                 .hasMessageContaining(fixture + ".authenticationHandler(")
                 .hasMessageContaining(fixture + ".javaPrincipalHandler(")
@@ -78,6 +82,11 @@ class RequestEntryRuleTest {
                 .hasMessageContaining("Method <" + fixture + ".wrappedHeaderRead(")
                 .hasMessageContaining("Method <" + fixture + ".headerReadByReference(")
                 .hasMessageContaining("Method <" + fixture + ".webRequestHeaderRead(")
+                .hasMessageContaining("Method <" + fixture + ".userPrincipalRead(")
+                .hasMessageContaining("Method <" + fixture + ".remoteUserRead(")
+                .hasMessageContaining("Method <" + fixture + ".serverRequestPrincipalRead(")
+                .hasMessageNotContaining("viewerHandler(")
+                .hasMessageNotContaining("authenticationOutsideAController(")
                 .hasMessageNotContaining("responseHeaderRead(");
     }
 
@@ -86,9 +95,8 @@ class RequestEntryRuleTest {
             @Override
             public void check(JavaClass owner, ConditionEvents events) {
                 owner.getMethods().stream()
-                        .filter(method -> owner.isMetaAnnotatedWith(Controller.class))
                         .forEach(method -> method.getParameters().stream()
-                                .filter(RequestEntryRuleTest::bypassesTheEntry)
+                                .filter(parameter -> bypassesTheEntry(owner, parameter))
                                 .forEach(parameter -> events.add(SimpleConditionEvent.violated(method,
                                         method.getFullName() + " takes " + parameter.getDescription()))));
                 if (owner.isEquivalentTo(RequestHeaders.class)) {
@@ -96,21 +104,22 @@ class RequestEntryRuleTest {
                 }
                 Stream.<JavaAccess<?>>concat(
                                 owner.getMethodCallsFromSelf().stream(), owner.getMethodReferencesFromSelf().stream())
-                        .filter(RequestEntryRuleTest::readsARequestHeader)
+                        .filter(RequestEntryRuleTest::readsTheRequest)
                         .forEach(access -> events.add(
                                 SimpleConditionEvent.violated(access, access.getDescription())));
             }
         };
     }
 
-    private static boolean bypassesTheEntry(JavaParameter parameter) {
+    private static boolean bypassesTheEntry(JavaClass owner, JavaParameter parameter) {
         return BANNED_ANNOTATIONS.stream().anyMatch(annotation ->
                         parameter.isAnnotatedWith(annotation) || parameter.isMetaAnnotatedWith(annotation))
-                || BANNED_TYPES.stream().anyMatch(parameter.getRawType()::isAssignableTo);
+                || owner.isMetaAnnotatedWith(Controller.class)
+                        && BANNED_TYPES.stream().anyMatch(parameter.getRawType()::isAssignableTo);
     }
 
-    private static boolean readsARequestHeader(JavaAccess<?> access) {
-        return HEADER_READS.contains(access.getName())
+    private static boolean readsTheRequest(JavaAccess<?> access) {
+        return REQUEST_READS.contains(access.getName())
                 && REQUEST_TYPES.stream().anyMatch(access.getTargetOwner()::isAssignableTo);
     }
 }
