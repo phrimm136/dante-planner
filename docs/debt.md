@@ -1803,15 +1803,6 @@ guards the parse but likewise skips the schema gate.
   add a PodDisruptionBudget. With one pod a `minAvailable: 1` budget only blocks node drains,
   which is why none exists today.
   re-check: `rg -q '^kind: DaemonSet$' deploy/base/spring-daemonset.yaml`
-- **The JVM's worst case already equals the container's memory limit.** `backend/Dockerfile:80`
-  caps the heap at 768m and metaspace at 256m, which together equal the 1Gi limit in
-  `deploy/base/spring-daemonset.yaml`, before thread stacks, the JIT code cache and direct
-  buffers. Requests are 768Mi, so the pod is Burstable. If both pools fill, the kernel
-  OOM-kills the container instead of the JVM throwing `OutOfMemoryError`. Whether real RSS gets
-  there is not measured. Worth doing with the Deployment entry above, or at the first
-  OOMKilled backend restart: requests equal to limits (Guaranteed), and a limit above heap plus
-  metaspace plus overhead or `-XX:MaxRAMPercentage` instead of `-Xmx`.
-  re-check: `rg -qF -- '-Xmx768m -XX:MaxMetaspaceSize=256m' backend/Dockerfile && rg -q 'memory: 1Gi' deploy/base/spring-daemonset.yaml`
 - **App nodes reserve no memory for the OS.** The agent user-data passes no
   `--kubelet-arg=system-reserved`, `kube-reserved` or `eviction-hard`, so on a 2 GiB node pods
   can take memory the OS needs before kubelet evicts anything. Without swap the kernel then
@@ -1819,13 +1810,6 @@ guards the parse but likewise skips the schema gate.
   This is the suspected path of the earlier app-node freezes. It is inferred, not reproduced.
   Worth doing with the Deployment entry above, or when an app node freezes again.
   re-check: `.claude/skills/debt-ledger/bin/debt absent terraform/modules/fleet/user-data/agent.sh.tftpl 'system-reserved|eviction-hard'`
-- **The backend's PID 1 is a shell.** `backend/Dockerfile:82` starts the JVM through
-  `sh -c "java $JAVA_OPTS -jar app.jar"`, so the shell receives the SIGTERM a pod deletion
-  sends. Whether this image's shell forwards it to the JVM is not checked. If it does not,
-  graceful shutdown never starts and kubelet SIGKILLs the pod after the grace period. Worth
-  doing at any graceful-shutdown work, or if rollout logs show the backend killed instead of
-  stopped: `exec java ...`.
-  re-check: `rg -qF 'ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]' backend/Dockerfile`
 - **Changing `backend-config` does not restart the backend.** The ConfigMap is a plain
   resource in `deploy/base/spring-service.yaml`, the overlays change it through `patches`, and
   the backend reads it once at start through `envFrom`. `deploy/` has no reloader or checksum

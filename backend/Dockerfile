@@ -77,6 +77,9 @@ COPY --from=rds-certs /app/certs /app/certs
 
 EXPOSE 8080
 
-ENV JAVA_OPTS="-Xms256m -Xmx768m -XX:MaxMetaspaceSize=256m"
+# The heap ceiling is half of the container's memory limit, not a fixed size: Serial GC grows the
+# committed heap and does not give it back, and resident memory runs about 130 MiB above what the
+# JVM reports as committed, so a 768 MiB heap beside the non-heap pools reached the 1 GiB limit.
+ENV JAVA_OPTS="-Xms256m -XX:MaxRAMPercentage=50 -XX:MaxMetaspaceSize=256m"
 
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar"]
