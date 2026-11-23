@@ -116,7 +116,7 @@ variable "app_asg_min_size" {
 }
 
 variable "app_asg_desired_capacity" {
-  description = "App ASG desired capacity. Bump to 2 for surge deploys."
+  description = "App ASG desired capacity when the group is created. Afterwards the deploy workflow moves it between 1 and 2, and Terraform ignores it."
   type        = number
   default     = 1
 }

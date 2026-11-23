@@ -389,10 +389,18 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           REF_NAME: ${{ github.ref_name }}
+        # A read that fails must fail the step: an empty answer would read as "no bump" and
+        # drain the surge nodes before the rollout that a landed bump starts.
         run: |
+          set -euo pipefail
           landed=true
           for overlay_dir in "$OVERLAY_DIR" "$OVERLAY_DIR_SEOUL"; do
-            overlay=$(gh api "repos/$REPO/contents/$overlay_dir/kustomization.yaml?ref=$REF_NAME" --jq .content | base64 -d)
+            overlay=$(gh api -H "Accept: application/vnd.github.raw+json" \
+              "repos/$REPO/contents/$overlay_dir/kustomization.yaml?ref=$REF_NAME")
+            case "$overlay" in
+              *"kind: Kustomization"*) ;;
+              *) echo "::error::$overlay_dir/kustomization.yaml on $REF_NAME did not read as a kustomization"; exit 1 ;;
+            esac
             case "$overlay" in
               *"newTag: $GIT_SHA"*) ;;
               *) landed=false ;;
@@ -504,7 +512,22 @@ jobs:
               --query 'AutoScalingGroups[0].Instances[?LifecycleState==`InService`].InstanceId' \
               --output text)
             if [ "$(echo "$ids" | wc -w)" -lt 2 ]; then
-              echo "$asg has no surge node to remove"
+              # A surge instance that never reached InService still holds the desired capacity at
+              # 2. It is removed by id, so the serving node is never the one the group picks.
+              late_ids=$(aws autoscaling describe-auto-scaling-groups --region "$region" \
+                --auto-scaling-group-names "$asg" \
+                --query 'AutoScalingGroups[0].Instances[?LifecycleState!=`InService`].InstanceId' \
+                --output text)
+              for late_iid in $late_ids; do
+                aws autoscaling terminate-instance-in-auto-scaling-group --region "$region" \
+                  --instance-id "$late_iid" --should-decrement-desired-capacity >/dev/null
+                echo "$asg: removed $late_iid, which never came into service"
+              done
+              if [ -z "$late_ids" ] && [ "$(echo "$ids" | wc -w)" -eq 1 ]; then
+                aws autoscaling set-desired-capacity --region "$region" \
+                  --auto-scaling-group-name "$asg" --desired-capacity 1
+              fi
+              echo "$asg has no surge node in service to drain"
               return 0
             fi
             surge_iid=$(aws ec2 describe-instances --region "$region" --instance-ids $ids \
