@@ -63,8 +63,8 @@ public class PublishedPlannerController {
             @RequestParam(required = false) @Nullable String themePack,
             @AuthenticationPrincipal @Nullable Long userId) {
 
-        return listPlanners(page, size, new CatalogQuery(false, TextFilter.exactly(category), TextFilter.nonBlank(q),
-                parseCsv(keyword), entityFilters(identity, ego, gift, themePack)), Viewer.of(userId));
+        return listPlanners(false, page, size, category, q, keyword,
+                entityFilters(identity, ego, gift, themePack), userId);
     }
 
     @RateLimited(RateLimitPolicy.PUBLIC_READ)
@@ -81,8 +81,8 @@ public class PublishedPlannerController {
             @RequestParam(required = false) @Nullable String themePack,
             @AuthenticationPrincipal @Nullable Long userId) {
 
-        return listPlanners(page, size, new CatalogQuery(true, TextFilter.exactly(category), TextFilter.nonBlank(q),
-                parseCsv(keyword), entityFilters(identity, ego, gift, themePack)), Viewer.of(userId));
+        return listPlanners(true, page, size, category, q, keyword,
+                entityFilters(identity, ego, gift, themePack), userId);
     }
 
     @RateLimited(RateLimitPolicy.PUBLIC_READ)
@@ -127,15 +127,22 @@ public class PublishedPlannerController {
     }
 
     private ResponseEntity<Page<PublicPlannerResponse>> listPlanners(
+            boolean recommended,
             int page,
             int size,
-            CatalogQuery catalogQuery,
-            Viewer viewer) {
+            @Nullable String category,
+            @Nullable String q,
+            @Nullable String keyword,
+            Map<ContentEntityType, List<String>> entityFilters,
+            @Nullable Long userId) {
+
+        CatalogQuery catalogQuery = new CatalogQuery(recommended, TextFilter.exactly(category), TextFilter.nonBlank(q),
+                parseCsv(keyword), entityFilters);
 
         Pageable pageable = createPageable(page, size);
 
         return ResponseEntity.ok(
-                publishedPlannerQueryService.searchPlanners(catalogQuery, pageable, viewer).value());
+                publishedPlannerQueryService.searchPlanners(catalogQuery, pageable, Viewer.of(userId)).value());
     }
 
     private Pageable createPageable(int page, int size) {
