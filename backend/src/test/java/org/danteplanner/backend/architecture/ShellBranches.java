@@ -39,16 +39,19 @@ final class ShellBranches {
     }
 
     public static void main(String[] arguments) {
-        regenerate(STORE, in(ImportedClasses.production(), MAIN_SOURCES, MAIN_PACKAGE), String.join(" ", arguments));
+        regenerate(STORE, in(ImportedClasses.production(), MAIN_SOURCES, MAIN_PACKAGE), String.join(" ", arguments))
+                .forEach(System.out::println);
     }
 
-    static void regenerate(Path store, SortedMap<String, Integer> counted, String reason) {
+    static List<String> regenerate(Path store, SortedMap<String, Integer> counted, String reason) {
         List<String> raised = raised(read(store), counted);
         if (!raised.isEmpty() && reason.isBlank()) {
             throw new IllegalStateException("refused: " + store + " only shrinks unless `" + REGENERATE
                     + "` states why these lines are added or raised:\n" + String.join("\n", raised));
         }
         write(store, counted);
+        return raised.isEmpty() ? List.of()
+                : Stream.concat(Stream.of("raised, because " + reason + ":"), raised.stream()).toList();
     }
 
     static SortedMap<String, Integer> in(JavaClasses classes, Path sourceRoot, String within) {
@@ -72,13 +75,14 @@ final class ShellBranches {
                 return;
             }
             List<JavaCodeUnit> units = unitsByKey.getOrDefault(key, List.of());
-            if (counts.size() != 1 || units.size() != 1) {
-                throw new IllegalStateException(key + " has branches but is declared " + counts.size()
-                        + " time(s) in " + sourceRoot + " and compiled to " + units);
+            if (units.isEmpty()) {
+                throw new IllegalStateException(key + " has branches in " + sourceRoot + " but was not compiled");
             }
-            JavaCodeUnit unit = units.get(0);
-            if (withItsAnonymousClasses(unit, anonymousUnits).anyMatch(one -> reachesAnEffectButLogging(one, within))) {
-                branches.put(unit.getFullName(), counts.get(0));
+            if (units.stream().flatMap(unit -> withItsAnonymousClasses(unit, anonymousUnits))
+                    .anyMatch(unit -> reachesAnEffectButLogging(unit, within))) {
+                boolean shared = counts.size() != 1 || units.size() != 1;
+                branches.put(shared ? key : units.get(0).getFullName(),
+                        counts.stream().mapToInt(Integer::intValue).sum());
             }
         });
         return branches;

@@ -159,19 +159,24 @@ final class SourceBranches {
 
         @Override
         public Void visitMethod(MethodTree tree, Void unused) {
-            if (branches != OUTSIDE_ANY_MEMBER) {
-                return super.visitMethod(tree, unused);
-            }
             typeVariables.push(bounds(tree.getTypeParameters()));
+            if (branches == OUTSIDE_ANY_MEMBER) {
+                countMember(tree);
+            } else {
+                super.visitMethod(tree, null);
+            }
+            typeVariables.pop();
+            return null;
+        }
+
+        private void countMember(MethodTree tree) {
             String key = classes.peek() + "." + tree.getName() + parameters(tree.getParameters().stream()
                     .map(parameter -> erase(parameter.getType()))
                     .toList());
-            typeVariables.pop();
             branches = 0;
-            super.visitMethod(tree, unused);
+            super.visitMethod(tree, null);
             counts.computeIfAbsent(key, absent -> new ArrayList<>()).add(branches);
             branches = OUTSIDE_ANY_MEMBER;
-            return null;
         }
 
         @Override

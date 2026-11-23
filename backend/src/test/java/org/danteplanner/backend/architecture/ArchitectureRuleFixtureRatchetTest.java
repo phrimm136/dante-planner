@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
@@ -19,10 +20,13 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.assertj.core.api.ListAssert;
 import org.junit.jupiter.api.Test;
 
 import com.tngtech.archunit.core.domain.AccessTarget.MethodCallTarget;
+import com.tngtech.archunit.core.domain.JavaAccess;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.domain.JavaCodeUnit;
@@ -48,6 +52,8 @@ class ArchitectureRuleFixtureRatchetTest {
     private static final Set<String> FAILURE_ASSERTIONS = Set.of(
             "org.assertj.core.api.Assertions.assertThatThrownBy",
             "org.assertj.core.api.Assertions.assertThatExceptionOfType");
+    private static final Set<String> NON_EMPTY_ASSERTIONS = Set.of(
+            "isNotEmpty", "hasSize", "anyMatch", "anySatisfy", "singleElement");
     private static final String MESSAGE_ASSERTION_PREFIX = "hasMessage";
 
     private static final JavaClasses ARCHITECTURE_CLASSES =
@@ -73,7 +79,8 @@ class ArchitectureRuleFixtureRatchetTest {
                         + "this one rule, asserts that checking it throws, and asserts the failure message names "
                         + "the fixture (PrivilegedRouteCoverageRuleTest is the shape); a rule that is a plain test "
                         + "over the project's classes is run by another test in its class on a fixture instead, "
-                        + "through the same method taking JavaClasses or returning the ArchRule. %s only shrinks",
+                        + "through the same method taking JavaClasses or returning the ArchRule, which both call "
+                        + "directly, and asserts what it reports or that it throws. %s only shrinks",
                         ARCHITECTURE, FROZEN_LIST)
                 .isEmpty();
     }
@@ -146,7 +153,7 @@ class ArchitectureRuleFixtureRatchetTest {
     }
 
     @Test
-    void plainRuleScan_WhenRunOverTheRatchetFixture_CountsTheUndeclaredRulesAndCreditsTheOneRunOnAFixture() {
+    void plainRuleScan_WhenRunOverTheRatchetFixture_SkipsLivenessChecksAndCreditsOnlyADirectFailure() {
         JavaClasses fixture = new ClassFileImporter().importPackages(RATCHET_FIXTURE);
 
         PlainRules plain = plainRulesIn(fixture, rulesIn(fixture));
@@ -154,6 +161,11 @@ class ArchitectureRuleFixtureRatchetTest {
         assertThat(plain.ids()).containsExactly(
                 "PlainRatchetFixtureRuleTest.fixturedRule_WhenRunOverProduction_Passes",
                 "PlainRatchetFixtureRuleTest.heldRule_WhenRunOverProduction_Passes",
+                "PlainRatchetFixtureRuleTest.listedRule_WhenRunOverProduction_Passes",
+                "PlainRatchetFixtureRuleTest.passingOnlyRule_WhenRunOverProduction_Passes",
+                "PlainRatchetFixtureRuleTest.ruleCheckingAnEntry_WhenRunOverProduction_Passes",
+                "PlainRatchetFixtureRuleTest.ruleCoveredByTheList_WhenRunOverProduction_Passes",
+                "PlainRatchetFixtureRuleTest.sharedHelperRule_WhenRunOverProduction_Passes",
                 "PlainRatchetFixtureRuleTest.unfixturedRule_WhenRunOverProduction_Passes");
         assertThat(plain.credited()).containsExactly(
                 "PlainRatchetFixtureRuleTest.fixturedRule_WhenRunOverProduction_Passes");
@@ -169,28 +181,85 @@ class ArchitectureRuleFixtureRatchetTest {
         SortedSet<String> ids = new TreeSet<>();
         SortedSet<String> credited = new TreeSet<>();
         for (JavaClass holder : classes) {
-            Map<JavaMethod, Set<JavaCodeUnit>> reachedByRule = new HashMap<>();
-            Set<JavaCodeUnit> runOnFixtures = new LinkedHashSet<>();
+            Set<JavaMethod> ruleTests = new LinkedHashSet<>();
+            Set<JavaCodeUnit> failedOnFixtures = new LinkedHashSet<>();
             for (JavaMethod test : holder.getMethods()) {
                 if (!test.isMetaAnnotatedWith(TESTABLE) || test.isAnnotatedWith(ArchTest.class)) {
                     continue;
                 }
                 Set<JavaCodeUnit> reached = samePackageClosure(test);
                 if (reached.stream().noneMatch(ArchitectureRuleFixtureRatchetTest::readsTheProject)) {
-                    runOnFixtures.addAll(reached);
-                } else if (reached.stream().allMatch(unit -> rulesReferencedBy(unit, rules).isEmpty())) {
-                    reachedByRule.put(test, reached);
+                    if (sameClassClosure(test).stream()
+                            .anyMatch(ArchitectureRuleFixtureRatchetTest::expectsAViolation)) {
+                        failedOnFixtures.addAll(analysesCalledBy(test));
+                    }
+                } else if (!isLivenessCheck(test)
+                        && reached.stream().allMatch(unit -> rulesReferencedBy(unit, rules).isEmpty())) {
+                    ruleTests.add(test);
                 }
             }
-            reachedByRule.forEach((test, reached) -> {
+            ruleTests.forEach(test -> {
                 String id = idOf(holder, test.getName());
                 ids.add(id);
-                if (reached.stream().anyMatch(unit -> isAnalysis(unit) && runOnFixtures.contains(unit))) {
+                if (analysesCalledBy(test).stream().anyMatch(failedOnFixtures::contains)) {
                     credited.add(id);
                 }
             });
         }
         return new PlainRules(ids, credited);
+    }
+
+    private static Set<JavaCodeUnit> analysesCalledBy(JavaMethod test) {
+        return test.getMethodCallsFromSelf().stream()
+                .filter(call -> call.getTargetOwner().getPackageName().equals(test.getOwner().getPackageName()))
+                .flatMap(call -> call.getTarget().resolveMember().stream())
+                .filter(ArchitectureRuleFixtureRatchetTest::isAnalysis)
+                .collect(Collectors.toSet());
+    }
+
+    private static boolean expectsAViolation(JavaCodeUnit unit) {
+        return assertsAFailure(unit) || unit.getMethodCallsFromSelf().stream()
+                .filter(call -> call.getTargetOwner().getPackageName().startsWith("org.assertj."))
+                .anyMatch(call -> call.getName().startsWith("contains") || NON_EMPTY_ASSERTIONS.contains(call.getName()));
+    }
+
+    private static boolean isLivenessCheck(JavaMethod test) {
+        return readsAnAllowlistOfAnotherRule(test)
+                && !calls(test, Set.class, "contains")
+                && (strikesEntriesOffACopy(test) || expectsEveryEntryInAList(test));
+    }
+
+    private static boolean readsAnAllowlistOfAnotherRule(JavaMethod test) {
+        return test.getFieldAccesses().stream()
+                .filter(access -> access.getAccessType() == AccessType.GET)
+                .filter(access -> access.getTarget().getRawType().isEquivalentTo(Set.class))
+                .flatMap(access -> access.getTarget().resolveMember().stream())
+                .anyMatch(field -> field.getAccessesToSelf().stream()
+                        .anyMatch(access -> access.getAccessType() == AccessType.GET
+                                && !access.getOrigin().equals(test)));
+    }
+
+    private static boolean strikesEntriesOffACopy(JavaMethod test) {
+        Set<JavaCodeUnit> reached = sameClassClosure(test);
+        return reached.stream().anyMatch(unit -> calls(unit, Set.class, "remove"))
+                && reached.stream().flatMap(unit -> unit.getConstructorCallsFromSelf().stream())
+                        .anyMatch(call -> call.getTargetOwner().isAssignableTo(Set.class)
+                                && call.getTarget().getRawParameterTypes().stream()
+                                        .anyMatch(type -> type.isEquivalentTo(Collection.class)));
+    }
+
+    private static boolean expectsEveryEntryInAList(JavaMethod test) {
+        return calls(test, ListAssert.class, "containsAll")
+                && test.getMethodCallsFromSelf().stream()
+                        .filter(call -> call.getName().equals("assertThat"))
+                        .allMatch(call -> call.getTarget().getRawParameterTypes().stream()
+                                .allMatch(type -> type.isEquivalentTo(List.class)));
+    }
+
+    private static boolean calls(JavaCodeUnit unit, Class<?> owner, String method) {
+        return Stream.<JavaAccess<?>>concat(
+                        unit.getMethodCallsFromSelf().stream(), unit.getMethodReferencesFromSelf().stream())
+                .anyMatch(access -> access.getName().equals(method) && access.getTargetOwner().isAssignableTo(owner));
     }
 
     private static Set<JavaCodeUnit> samePackageClosure(JavaMethod test) {
@@ -262,7 +331,7 @@ class ArchitectureRuleFixtureRatchetTest {
                     .filter(ArchitectureRuleFixtureRatchetTest::isRuleField)
                     .forEach(ruleFields::add);
             holder.getMethods().stream()
-                    .filter(method -> method.isAnnotatedWith(ArchTest.class))
+                    .filter(method -> method.isAnnotatedWith(ArchTest.class) && !isLivenessCheck(method))
                     .forEach(method -> idByMember.put(memberKey(holder, method.getName()), idOf(holder, method.getName())));
         }
         for (JavaField field : ruleFields) {

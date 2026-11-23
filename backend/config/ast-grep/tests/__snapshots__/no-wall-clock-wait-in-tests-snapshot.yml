@@ -140,6 +140,38 @@ snapshots:
     class A {
       @Test
       void m() throws Exception {
+        Thread.ofPlatform().start(task).join();
+      }
+    }
+  : labels:
+    - source: Thread.ofPlatform().start(task).join()
+      style: primary
+      start: 52
+      end: 90
+    - source: Thread.ofPlatform().start(task)
+      style: secondary
+      start: 52
+      end: 83
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        Thread.ofVirtual().name("worker").start(task).join();
+      }
+    }
+  : labels:
+    - source: Thread.ofVirtual().name("worker").start(task).join()
+      style: primary
+      start: 52
+      end: 104
+    - source: Thread.ofVirtual().name("worker").start(task)
+      style: secondary
+      start: 52
+      end: 97
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
         Thread.sleep(10);
       }
     }
@@ -360,6 +392,26 @@ snapshots:
     class A {
       @Test
       void m() throws Exception {
+        factory.newThread(task).join();
+      }
+    }
+  : labels:
+    - source: factory.newThread(task).join()
+      style: primary
+      start: 52
+      end: 82
+    - source: newThread
+      style: secondary
+      start: 60
+      end: 69
+    - source: factory.newThread(task)
+      style: secondary
+      start: 52
+      end: 75
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
         for (Thread worker : workers) {
           worker.join();
         }
@@ -437,6 +489,22 @@ snapshots:
     class A {
       @Test
       void m() throws Exception {
+        java.lang.Thread.startVirtualThread(task).join();
+      }
+    }
+  : labels:
+    - source: java.lang.Thread.startVirtualThread(task).join()
+      style: primary
+      start: 52
+      end: 100
+    - source: java.lang.Thread.startVirtualThread(task)
+      style: secondary
+      start: 52
+      end: 93
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
         monitor.wait();
       }
     }
@@ -457,6 +525,22 @@ snapshots:
       style: primary
       start: 52
       end: 67
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        new Thread(task).join();
+      }
+    }
+  : labels:
+    - source: new Thread(task).join()
+      style: primary
+      start: 52
+      end: 75
+    - source: new Thread(task)
+      style: secondary
+      start: 52
+      end: 68
   ? |
     class A {
       @Test
@@ -557,6 +641,226 @@ snapshots:
       style: primary
       start: 52
       end: 63
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        var worker = Thread.ofVirtual().start(task);
+        worker.join();
+      }
+    }
+  : labels:
+    - source: worker.join()
+      style: primary
+      start: 101
+      end: 114
+    - source: var
+      style: secondary
+      start: 52
+      end: 55
+    - source: worker
+      style: secondary
+      start: 56
+      end: 62
+    - source: Thread.ofVirtual().start(task)
+      style: secondary
+      start: 65
+      end: 95
+    - source: worker = Thread.ofVirtual().start(task)
+      style: secondary
+      start: 56
+      end: 95
+    - source: var worker = Thread.ofVirtual().start(task);
+      style: secondary
+      start: 52
+      end: 96
+    - source: |
+        class A {
+          @Test
+          void m() throws Exception {
+            var worker = Thread.ofVirtual().start(task);
+            worker.join();
+          }
+        }
+      style: secondary
+      start: 0
+      end: 122
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        var worker = Thread.startVirtualThread(task);
+        assertThat(catchThrowable(worker::join)).isNull();
+      }
+    }
+  : labels:
+    - source: worker::join
+      style: primary
+      start: 128
+      end: 140
+    - source: var
+      style: secondary
+      start: 52
+      end: 55
+    - source: worker
+      style: secondary
+      start: 56
+      end: 62
+    - source: Thread.startVirtualThread(task)
+      style: secondary
+      start: 65
+      end: 96
+    - source: worker = Thread.startVirtualThread(task)
+      style: secondary
+      start: 56
+      end: 96
+    - source: var worker = Thread.startVirtualThread(task);
+      style: secondary
+      start: 52
+      end: 97
+    - source: |
+        class A {
+          @Test
+          void m() throws Exception {
+            var worker = Thread.startVirtualThread(task);
+            assertThat(catchThrowable(worker::join)).isNull();
+          }
+        }
+      style: secondary
+      start: 0
+      end: 159
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        var worker = factory.newThread(task);
+        worker.join();
+      }
+    }
+  : labels:
+    - source: worker.join()
+      style: primary
+      start: 94
+      end: 107
+    - source: var
+      style: secondary
+      start: 52
+      end: 55
+    - source: worker
+      style: secondary
+      start: 56
+      end: 62
+    - source: newThread
+      style: secondary
+      start: 73
+      end: 82
+    - source: factory.newThread(task)
+      style: secondary
+      start: 65
+      end: 88
+    - source: worker = factory.newThread(task)
+      style: secondary
+      start: 56
+      end: 88
+    - source: var worker = factory.newThread(task);
+      style: secondary
+      start: 52
+      end: 89
+    - source: |
+        class A {
+          @Test
+          void m() throws Exception {
+            var worker = factory.newThread(task);
+            worker.join();
+          }
+        }
+      style: secondary
+      start: 0
+      end: 115
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        var worker = new AtomicReference<Thread>();
+        worker.get().join();
+      }
+    }
+  : labels:
+    - source: worker.get().join()
+      style: primary
+      start: 100
+      end: 119
+    - source: worker
+      style: secondary
+      start: 56
+      end: 62
+    - source: AtomicReference<Thread>
+      style: secondary
+      start: 69
+      end: 92
+    - source: new AtomicReference<Thread>()
+      style: secondary
+      start: 65
+      end: 94
+    - source: worker = new AtomicReference<Thread>()
+      style: secondary
+      start: 56
+      end: 94
+    - source: |
+        class A {
+          @Test
+          void m() throws Exception {
+            var worker = new AtomicReference<Thread>();
+            worker.get().join();
+          }
+        }
+      style: secondary
+      start: 0
+      end: 127
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        var worker = new Thread(task);
+        worker.join();
+      }
+    }
+  : labels:
+    - source: worker.join()
+      style: primary
+      start: 87
+      end: 100
+    - source: var
+      style: secondary
+      start: 52
+      end: 55
+    - source: worker
+      style: secondary
+      start: 56
+      end: 62
+    - source: new Thread(task)
+      style: secondary
+      start: 65
+      end: 81
+    - source: worker = new Thread(task)
+      style: secondary
+      start: 56
+      end: 81
+    - source: var worker = new Thread(task);
+      style: secondary
+      start: 52
+      end: 82
+    - source: |
+        class A {
+          @Test
+          void m() throws Exception {
+            var worker = new Thread(task);
+            worker.join();
+          }
+        }
+      style: secondary
+      start: 0
+      end: 108
   ? |
     class A {
       @Test
@@ -770,6 +1074,94 @@ snapshots:
       end: 95
   ? |
     class A {
+      private final AtomicReference<Thread> worker = new AtomicReference<>();
+
+      @Test
+      void m() throws Exception {
+        worker.get().join();
+      }
+    }
+  : labels:
+    - source: worker.get().join()
+      style: primary
+      start: 127
+      end: 146
+    - source: AtomicReference<Thread>
+      style: secondary
+      start: 26
+      end: 49
+    - source: worker
+      style: secondary
+      start: 50
+      end: 56
+    - source: worker
+      style: secondary
+      start: 50
+      end: 56
+    - source: private final AtomicReference<Thread> worker = new AtomicReference<>();
+      style: secondary
+      start: 12
+      end: 83
+    - source: |
+        class A {
+          private final AtomicReference<Thread> worker = new AtomicReference<>();
+
+          @Test
+          void m() throws Exception {
+            worker.get().join();
+          }
+        }
+      style: secondary
+      start: 0
+      end: 154
+  ? |
+    class A {
+      static class Probe {
+        final AtomicReference<Thread> worker = new AtomicReference<>();
+      }
+
+      @Test
+      void m() throws Exception {
+        probe.worker.get().join();
+      }
+    }
+  : labels:
+    - source: probe.worker.get().join()
+      style: primary
+      start: 148
+      end: 173
+    - source: AtomicReference<Thread>
+      style: secondary
+      start: 43
+      end: 66
+    - source: worker
+      style: secondary
+      start: 67
+      end: 73
+    - source: worker
+      style: secondary
+      start: 67
+      end: 73
+    - source: final AtomicReference<Thread> worker = new AtomicReference<>();
+      style: secondary
+      start: 37
+      end: 100
+    - source: |
+        class A {
+          static class Probe {
+            final AtomicReference<Thread> worker = new AtomicReference<>();
+          }
+
+          @Test
+          void m() throws Exception {
+            probe.worker.get().join();
+          }
+        }
+      style: secondary
+      start: 0
+      end: 181
+  ? |
+    class A {
       void awaitSettled(Future<?> attempt, long timeout, TimeUnit unit) throws Exception {
         attempt.get(timeout, unit);
       }
@@ -787,6 +1179,38 @@ snapshots:
       style: secondary
       start: 122
       end: 126
+  ? |
+    class A {
+      void ended(Supplier<java.lang.Thread> worker) throws Exception {
+        worker.get().join();
+      }
+    }
+  : labels:
+    - source: worker.get().join()
+      style: primary
+      start: 81
+      end: 100
+    - source: Supplier<java.lang.Thread>
+      style: secondary
+      start: 23
+      end: 49
+    - source: worker
+      style: secondary
+      start: 50
+      end: 56
+    - source: Supplier<java.lang.Thread> worker
+      style: secondary
+      start: 23
+      end: 56
+    - source: |
+        class A {
+          void ended(Supplier<java.lang.Thread> worker) throws Exception {
+            worker.get().join();
+          }
+        }
+      style: secondary
+      start: 0
+      end: 108
   ? |
     class A {
       void ended(Thread worker) throws Exception {

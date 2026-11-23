@@ -160,6 +160,90 @@ public class BranchShapes<T extends Comparable<T>> {
         new StaticLocal("name");
     }
 
+    public <U> void localClassTakingATypeVariable(U given) {
+        class TypedLocal {
+
+            TypedLocal(U value) {
+                if (value == null) {
+                    port.a();
+                }
+            }
+        }
+        new TypedLocal(given);
+    }
+
+    public enum EffectfulTwins {
+        ONE {
+            @Override
+            void run(Port given, boolean x) {
+                if (x) {
+                    given.a();
+                }
+            }
+        },
+        OTHER {
+            @Override
+            void run(Port given, boolean x) {
+                if (x && given != null) {
+                    given.b();
+                }
+            }
+        };
+
+        abstract void run(Port given, boolean x);
+    }
+
+    public enum PureTwins {
+        ONE {
+            @Override
+            int size(boolean x) {
+                return x ? 1 : 0;
+            }
+        },
+        OTHER {
+            @Override
+            int size(boolean x) {
+                return 0;
+            }
+        };
+
+        abstract int size(boolean x);
+    }
+
+    public static class FieldAndMethod {
+
+        private final Port port;
+        private final Queue<String> queue;
+        private final Runnable inAField = new Runnable() {
+            @Override
+            public void run() {
+                if (queue.isEmpty()) {
+                    port.a();
+                }
+            }
+        };
+
+        public FieldAndMethod(Port port, Queue<String> queue) {
+            this.port = port;
+            this.queue = queue;
+        }
+
+        public Runnable inAMethod(boolean x) {
+            return new Runnable() {
+                @Override
+                public void run() {
+                    if (x) {
+                        port.b();
+                    }
+                }
+            };
+        }
+
+        public void runTheField() {
+            inAField.run();
+        }
+    }
+
     public class Inner {
 
         public Inner(boolean x) {

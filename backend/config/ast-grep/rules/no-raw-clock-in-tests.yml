@@ -9,7 +9,6 @@ files:
 ignores:
   - src/test/java/org/danteplanner/backend/auth/token/JwtTokenServiceTest.java
   - src/test/java/org/danteplanner/backend/auth/token/RefreshRotationServiceIT.java
-  - src/test/java/org/danteplanner/backend/auth/token/TokenBlacklistServiceTest.java
   - src/test/java/org/danteplanner/backend/controller/CommentControllerIT.java
   - src/test/java/org/danteplanner/backend/controller/NotificationControllerIT.java
   - src/test/java/org/danteplanner/backend/integration/AuthLocalReadSplitIT.java
