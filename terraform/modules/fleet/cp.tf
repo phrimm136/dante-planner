@@ -83,6 +83,7 @@ locals {
     kubeconfig_param    = aws_ssm_parameter.kubeconfig.name
     s3_bucket           = aws_s3_bucket.etcd_snapshots.bucket
     snapshot_retention  = var.etcd_snapshot_retention
+    snapshot_hours      = var.etcd_snapshot_interval_hours
     gitops_repo_url     = var.gitops_repo_url
     gitops_revision     = var.gitops_target_revision
     argocd_version      = var.argocd_version

@@ -50,7 +50,8 @@ it is the cheapest thing to be holding when something else goes wrong.
    (including the migrated backend image and the `deploy/` manifests). Push `dev`, merge to `main`,
    wait for CI to build the arm64 image → ECR → kustomize tag bump.
 2. **Safety snapshots.**
-   - Per CP: a manual k3s etcd snapshot over SSM (they also ship to S3 on schedule).
+   - Per CP: a manual k3s etcd snapshot over SSM (the schedule ships one to S3 every
+     `etcd_snapshot_interval_hours`; `ops verify fleet --site <site>` shows the newest age).
    - RDS: a manual snapshot **immediately before** Part B (see that step) — the migration's true
      rollback point.
 3. **Confirm the front door is healthy.** Each tunnel reports **≥4 edge connections** (one
@@ -137,7 +138,7 @@ aws autoscaling start-instance-refresh --region us-west-2 \
 This gate is the reason Part A precedes Part B. Do not proceed until **all** hold:
 
 ```bash
-export KUBECONFIG=~/.kube/dante-oregon          # re-fetch: scripts/ops/oregon-verify.sh --kubeconfig
+export KUBECONFIG=~/.kube/dante-oregon          # re-fetch: scripts/ops/fleet-verify.sh --kubeconfig oregon
 kubectl get nodes -o wide                        # cp, data, ingress, >=1 app — all Ready
 kubectl -n argocd get applications               # root app Synced / Healthy
 kubectl -n argocd get pods -o wide               # argocd + metrics-server land on the *-data node

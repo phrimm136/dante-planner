@@ -9,8 +9,10 @@ from pathlib import Path
 import yaml
 
 RULES_PY = Path(__file__).resolve().parents[1] / "rules.py"
+CLUSTER_RULES = Path(__file__).resolve().parents[1] / "rules" / "cluster-rules.yaml"
+INTERVAL_LIB = Path(__file__).resolve().parents[3] / "scripts" / "ops" / "lib" / "etcd-interval.sh"
 PAYLOAD_ENV = {"FOLDER_UID": "folder-uid", "DS_UID": "prom-uid", "LOKI_DS_UID": "loki-uid", "CW_DS_UID": "cw-uid",
-               "ETCD_INTERVAL": "43200"}
+               "ETCD_INTERVAL": "21600"}
 
 
 def prometheus_rule(rule_name="probe-rule", **field_overrides):
@@ -196,6 +198,13 @@ class RulesCliTest(unittest.TestCase):
         run_result = self.run_rules([rule_file], "payloads", "probe-rules", extra_env={"LOKI_DS_UID": ""})
         self.assertNotEqual(run_result.returncode, 0)
         self.assertIn("rule probe-logs: LOKI_DS_UID is not set", run_result.stderr)
+
+    def test_the_deadman_cases_use_the_fleet_snapshot_interval(self):
+        interval_run = subprocess.run(["bash", "-c", f'source "{INTERVAL_LIB}"; etcd_snapshot_interval_seconds'],
+                                      capture_output=True, text=True, check=True)
+        deadman_rule = next(rule_entry for rule_entry in yaml.safe_load(CLUSTER_RULES.read_text())
+                            if rule_entry["name"] == "etcd-snapshot-deadman")
+        self.assertEqual(deadman_rule["params"]["etcd_interval"]["test"], int(interval_run.stdout))
 
     def test_committed_rules_load(self):
         for group_name in ("cluster-rules", "app-rules"):

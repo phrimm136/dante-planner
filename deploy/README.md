@@ -73,7 +73,11 @@ Moving kube-state-metrics to its chart changed one behavior: the chart's Cluster
 it list and watch CustomResourceDefinitions, which the etcd snapshot metric
 (`kube_etcd_snapshot_creation_timestamp_seconds`) needs and the hand-written role lacked. The
 metric has one series per retained snapshot, so the `etcd-snapshot-deadman` rule reads the
-newest one per cluster.
+newest one per cluster. It fires when that one is older than 1.5 times the snapshot interval
+(`etcd_snapshot_interval_hours` in `terraform/modules/fleet/variables.tf`, which
+`deploy/grafana/import-alert-rules.sh` reads), and when a cluster's kube-state-metrics is up
+but serves no snapshot series. Its `for: 10m` covers a kube-state-metrics restart, whose first
+scrapes can come before the custom-resource series appear.
 
 ## Node placement contract (must match terraform user-data labels/taints)
 
