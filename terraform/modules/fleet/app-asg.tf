@@ -31,7 +31,7 @@ resource "aws_launch_template" "app" {
 
   user_data = base64encode(templatefile("${path.module}/user-data/agent.sh.tftpl", {
     region                = var.region
-    k3s_version           = var.k3s_version
+    k3s_version           = terraform_data.k3s_release.output
     token_param           = aws_ssm_parameter.k3s_token.name
     server_url            = "https://${aws_instance.cp.private_ip}:6443"
     node_label            = "role=app"
@@ -79,5 +79,12 @@ resource "aws_autoscaling_group" "app" {
     key                 = "Role"
     value               = "app"
     propagate_at_launch = true
+  }
+
+  # The deploy workflow raises the desired capacity to 2 for its surge and returns it to 1. A plan
+  # made during a deploy would otherwise set it back to 1 and terminate a node in the middle of
+  # the rollout.
+  lifecycle {
+    ignore_changes = [desired_capacity]
   }
 }

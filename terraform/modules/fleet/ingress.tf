@@ -38,7 +38,7 @@ resource "aws_instance" "ingress" {
 locals {
   ingress_user_data = templatefile("${path.module}/user-data/agent.sh.tftpl", {
     region                = var.region
-    k3s_version           = var.k3s_version
+    k3s_version           = terraform_data.k3s_release.output
     token_param           = aws_ssm_parameter.k3s_token.name
     server_url            = "https://${aws_instance.cp.private_ip}:6443"
     node_label            = "role=ingress"

@@ -363,13 +363,16 @@ jobs:
   settle-down:
     needs: [bump-tag, surge-up]
     # Runs whenever the surge ran, also after a failed or cancelled bump: the job is what returns
-    # the app ASGs to 1. Its first step still waits for the rollout, so a rollout that fails
-    # leaves the surge nodes up, which hold the last healthy pod.
+    # the app ASGs to 1. It reads the overlays on the branch to learn whether the bump landed,
+    # because a cancelled bump job may have pushed. With a bump on the branch it waits for the
+    # rollout first, and a rollout that fails leaves the surge nodes up, which hold the last
+    # healthy pod. With no bump there is no rollout to wait for, and it drains at once.
     if: ${{ always() && needs.surge-up.result != 'skipped' }}
     runs-on: ubuntu-latest
     environment: production
     permissions:
       id-token: write
+      contents: read
     timeout-minutes: 25
     env:
       GIT_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
@@ -380,7 +383,26 @@ jobs:
           role-to-assume: ${{ secrets.AWS_PROVISIONER_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Learn whether the bump is on the branch
+        id: bump
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          landed=true
+          for overlay_dir in "$OVERLAY_DIR" "$OVERLAY_DIR_SEOUL"; do
+            overlay=$(gh api "repos/$REPO/contents/$overlay_dir/kustomization.yaml?ref=$REF_NAME" --jq .content | base64 -d)
+            case "$overlay" in
+              *"newTag: $GIT_SHA"*) ;;
+              *) landed=false ;;
+            esac
+          done
+          echo "landed=$landed" >> "$GITHUB_OUTPUT"
+          echo "bump of $GIT_SHA on $REF_NAME: $landed"
+
       - name: Wait for rollout on both clusters
+        if: steps.bump.outputs.landed == 'true'
         run: |
           ssm_out() {
             local region="$1" iid="$2" cmd="$3" cid status=Pending
@@ -424,6 +446,7 @@ jobs:
           wait_cluster "$SEOUL_REGION" danteplanner-seoul-cp
 
       - name: Annotate Grafana with deploy marker
+        if: steps.bump.outputs.landed == 'true'
         env:
           GRAFANA_TOKEN: ${{ secrets.GRAFANA_ANNOTATIONS_TOKEN }}
           GRAFANA_URL: ${{ vars.GRAFANA_URL }}

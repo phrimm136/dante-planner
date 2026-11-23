@@ -180,7 +180,7 @@ variable "external_secrets_chart_version" {
 }
 
 variable "k3s_version" {
-  description = "The k3s release every node installs. A kubelet may be older than the API server, never newer, and a new app node boots on every deploy, so nodes must not take the newest release on their own. To upgrade, raise this and node_generation.cp in one change and apply it while no deploy runs: the control plane is replaced first, and app nodes follow at their next launch. The data and ingress nodes follow when their generation is raised."
+  description = "The k3s release the nodes install. A kubelet may be older than the API server, never newer, and a new app node boots on every deploy, so the release the fleet installs moves only together with the control plane: a new value here takes effect when node_generation.cp is raised, and until then every plan warns that the two differ. Raising node_generation.cp replaces the control plane with an empty cluster today, so an upgrade waits for a control-plane replacement that restores etcd and keeps its address."
   type        = string
   default     = "v1.36.3+k3s1"
 }
