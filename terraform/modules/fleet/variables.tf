@@ -238,3 +238,11 @@ variable "kubeconfig_seed_version" {
   default     = 1
 }
 
+variable "node_generation" {
+  description = "One number per pet instance. Raising a number replaces that instance, which then boots from the newest AMI and the current boot script. Nothing else replaces a pet for a new image or script."
+  type = object({
+    cp      = number
+    data    = number
+    ingress = number
+  })
+}

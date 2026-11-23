@@ -31,4 +31,6 @@ module "fleet" {
   etcd_snapshot_retention         = var.etcd_snapshot_retention
   tags                            = var.tags
   rds_vpc_id                      = var.rds_vpc_id
+
+  node_generation = { cp = 1, data = 1, ingress = 1 }
 }

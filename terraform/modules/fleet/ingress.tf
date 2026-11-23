@@ -9,14 +9,7 @@ resource "aws_instance" "ingress" {
   iam_instance_profile   = aws_iam_instance_profile.ingress.name
   key_name               = var.ssh_key_name != "" ? var.ssh_key_name : null
 
-  user_data = templatefile("${path.module}/user-data/agent.sh.tftpl", {
-    region                = var.region
-    token_param           = aws_ssm_parameter.k3s_token.name
-    server_url            = "https://${aws_instance.cp.private_ip}:6443"
-    node_label            = "role=ingress"
-    set_nofile            = false
-    cred_provider_version = var.ecr_credential_provider_version
-  })
+  user_data = local.ingress_user_data
 
   metadata_options {
     http_tokens   = "required"
@@ -30,5 +23,26 @@ resource "aws_instance" "ingress" {
   }
 
   tags = merge(var.tags, { Name = "${var.name_prefix}-${var.region_name_suffix}-ingress", Role = "ingress" })
+
+  # A pet takes a new image or a new boot script only when its number in var.node_generation
+  # changes, which replaces that one instance. The AMI lookup returns Amazon's newest image on
+  # every plan, so without ignore_changes any apply after a new image replaces all three pets at
+  # once. A changed user_data is applied in place by stopping and starting the instance, and
+  # cloud-init does not run it again on that boot, so the node would restart and keep its old setup.
+  lifecycle {
+    ignore_changes       = [ami, user_data]
+    replace_triggered_by = [terraform_data.node_generation["ingress"]]
+  }
+}
+
+locals {
+  ingress_user_data = templatefile("${path.module}/user-data/agent.sh.tftpl", {
+    region                = var.region
+    token_param           = aws_ssm_parameter.k3s_token.name
+    server_url            = "https://${aws_instance.cp.private_ip}:6443"
+    node_label            = "role=ingress"
+    set_nofile            = false
+    cred_provider_version = var.ecr_credential_provider_version
+  })
 }
 

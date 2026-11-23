@@ -48,7 +48,34 @@ resource "aws_instance" "cp" {
   iam_instance_profile   = aws_iam_instance_profile.cp.name
   key_name               = var.ssh_key_name != "" ? var.ssh_key_name : null
 
-  user_data = templatefile("${path.module}/user-data/cp.sh.tftpl", {
+  user_data = local.cp_user_data
+
+  metadata_options {
+    http_tokens   = "required" # IMDSv2 only
+    http_endpoint = "enabled"
+  }
+
+  root_block_device {
+    volume_type = "gp3"
+    volume_size = 30
+    encrypted   = true
+  }
+
+  tags = merge(var.tags, { Name = "${var.name_prefix}-${var.region_name_suffix}-cp", Role = "control-plane" })
+
+  # A pet takes a new image or a new boot script only when its number in var.node_generation
+  # changes, which replaces that one instance. The AMI lookup returns Amazon's newest image on
+  # every plan, so without ignore_changes any apply after a new image replaces all three pets at
+  # once. A changed user_data is applied in place by stopping and starting the instance, and
+  # cloud-init does not run it again on that boot, so the node would restart and keep its old setup.
+  lifecycle {
+    ignore_changes       = [ami, user_data]
+    replace_triggered_by = [terraform_data.node_generation["cp"]]
+  }
+}
+
+locals {
+  cp_user_data = templatefile("${path.module}/user-data/cp.sh.tftpl", {
     region              = var.region
     region_suffix       = var.region_name_suffix
     token_param         = aws_ssm_parameter.k3s_token.name
@@ -65,17 +92,4 @@ resource "aws_instance" "cp" {
 
     install_scrape_annotate = file("${path.module}/user-data/scrape-annotate-install.sh")
   })
-
-  metadata_options {
-    http_tokens   = "required" # IMDSv2 only
-    http_endpoint = "enabled"
-  }
-
-  root_block_device {
-    volume_type = "gp3"
-    volume_size = 30
-    encrypted   = true
-  }
-
-  tags = merge(var.tags, { Name = "${var.name_prefix}-${var.region_name_suffix}-cp", Role = "control-plane" })
 }
