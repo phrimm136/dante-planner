@@ -1,3 +1,3 @@
-KUSTOMIZE_IMAGE=registry.k8s.io/kustomize/kustomize:v5.8.1@sha256:899fcd3bc898160e62bcaf82932b0cb29ba38d16272353db2e7acbba82129429
+KUSTOMIZE_IMAGE=registry.k8s.io/kustomize/kustomize:v5.8.3@sha256:429eda4a1c76a7de458d0c4ca3ded9b5d764899ff6bdaeccc1d98b1b6ee873e4
 CHECKOV_IMAGE=bridgecrew/checkov:3.4.6@sha256:b4b7e9d419ddb9ae7a257678ee39cb5d9e5569f604723297dd9cec7fd4571bff
 HELM_IMAGE=alpine/helm:3.22.1@sha256:8191701ad1f82ee3695c87211fcbfe6d7b1bb7df92ac1c8de9ccdb0995a6a2c1
