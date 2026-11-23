@@ -19,17 +19,13 @@ public class RecordingRefreshRotation extends RefreshRotationService {
     public static final long DEFAULT_RETRY_REUSE_WINDOW_MS = 30_000L;
 
     public enum Operation {
-        ROTATE,
-        REVOKE_FAMILY
+        ROTATE
     }
 
-    public sealed interface Call permits Rotation, FamilyRevoked, Failed {
+    public sealed interface Call permits Rotation, Failed {
     }
 
     public record Rotation(String presented, RotationOutcome result) implements Call {
-    }
-
-    public record FamilyRevoked(String familyId) implements Call {
     }
 
     public record Failed(Operation operation, RuntimeException failure) implements Call {
@@ -87,13 +83,6 @@ public class RecordingRefreshRotation extends RefreshRotationService {
         RotationOutcome result = transition(refreshToken);
         calls.add(new Rotation(refreshToken, result));
         return result;
-    }
-
-    @Override
-    public void revokeFamily(String familyId) {
-        failIfScripted(Operation.REVOKE_FAMILY);
-        family(familyId).revoked = true;
-        calls.add(new FamilyRevoked(familyId));
     }
 
     private RotationOutcome transition(String refreshToken) {

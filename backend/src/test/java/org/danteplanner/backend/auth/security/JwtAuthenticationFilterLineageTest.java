@@ -17,6 +17,7 @@ import org.danteplanner.backend.support.RecordingRefreshRotation.Rotation;
 import org.danteplanner.backend.support.RecordingTokenBlacklist;
 import org.danteplanner.backend.support.TestJwt;
 import org.danteplanner.backend.auth.token.AccessClaims;
+import org.danteplanner.backend.auth.token.LogoutRevocation;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
 import org.danteplanner.backend.auth.token.RotationOutcome;
 import org.danteplanner.backend.shared.util.CookieConstants;
@@ -153,7 +154,7 @@ class JwtAuthenticationFilterLineageTest {
         JwtAuthenticationFilter filter = filter();
         Long userId = 23L;
         String refreshToken = freshLogin(userId);
-        refreshRotation.revokeFamily(familyOf(refreshToken));
+        tokenBlacklist.revokeLogoutSession(List.of(new LogoutRevocation.FamilyRevocation(familyOf(refreshToken))));
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
         users.add(TestDataFactory.unsavedUser(userId));
