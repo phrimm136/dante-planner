@@ -2,7 +2,7 @@
 set -euo pipefail
 
 usage() {
-  echo "usage: $0 <deploy-dir> <out-dir>   (writes <out-dir>/chart-<name>.yaml for every Helm Application under <deploy-dir>/apps and prints 'rendered <name>' or 'not rendered <name>: <reason>' per Application; needs docker and python3 with PyYAML)" >&2
+  echo "usage: $0 <deploy-dir> <out-dir>   (writes <out-dir>/chart-<name>.yaml for every Application under <deploy-dir>/apps and prints 'rendered <name>' per Application; needs docker and python3 with PyYAML)" >&2
   exit 2
 }
 
@@ -34,15 +34,13 @@ for path in sorted(apps_dir.glob("*.yaml")):
             sys.exit(f"render-charts: Application {name} ({path.name}) uses spec.sources, which this renderer cannot represent; use a single spec.source")
         source = spec["source"]
         if "chart" not in source:
-            print(f"skip\t{name}\tno Helm chart source")
-            continue
+            sys.exit(f"render-charts: Application {name} ({path.name}) has no spec.source.chart; this renderer handles Helm chart sources only, and every Application under deploy/apps installs a chart")
         helm = source.get("helm", {})
         unsupported = sorted(set(helm) - RENDERED_HELM_FIELDS)
         if unsupported:
             sys.exit(f"render-charts: Application {name} ({path.name}) sets spec.source.helm.{', spec.source.helm.'.join(unsupported)}, which this renderer cannot represent; put the values in spec.source.helm.valuesObject")
         (values_dir / f"{name}.yaml").write_text(json.dumps(helm.get("valuesObject", {})))
         print("\t".join([
-            "chart",
             name,
             source["repoURL"],
             source["chart"],
@@ -53,11 +51,8 @@ for path in sorted(apps_dir.glob("*.yaml")):
 PY
 )
 
-while IFS=$'\t' read -r what name repo_url chart version release namespace; do
-  case "$what" in
-    "") continue ;;
-    skip) echo "not rendered $name: $repo_url"; continue ;;
-  esac
+while IFS=$'\t' read -r name repo_url chart version release namespace; do
+  [ -n "$name" ] || continue
   if ! docker run --rm -v "$values_dir:/values:ro" "$HELM_IMAGE" template "$release" "$chart" \
     --repo "$repo_url" --version "$version" --namespace "$namespace" -f "/values/$name.yaml" \
     >"$out_dir/chart-$name.yaml" 2>"$values_dir/$name.err"; then

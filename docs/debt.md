@@ -1963,8 +1963,8 @@ guards the parse but likewise skips the schema gate.
   once the warnings are listed and fixed: add `enforce: restricted`.
   re-check: `.claude/skills/debt-ledger/bin/debt absent deploy/base/namespace.yaml 'pod-security.kubernetes.io/enforce'`
 - **Every image is pinned by tag, and two tags move.** No image in the rendered overlays
-  carries a digest, and no bot raises one: Renovate reads only the chart versions in
-  `deploy/apps` and the k3s release. `redis:7-alpine` moves with every Redis 7 release and
+  carries a digest, and no bot raises one: Renovate reads the chart versions in
+  `deploy/apps`, the k3s release and the pins in the CI scripts, not the manifests. `redis:7-alpine` moves with every Redis 7 release and
   `traefik:v3.1` with every 3.1 patch, so a replaced node can pull a different version than the
   one it replaced. Pin by digest, or at least by full version, and turn on Renovate's
   manager for the manifests in the same change. An image that moves to an upstream chart leaves

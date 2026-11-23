@@ -105,22 +105,40 @@
 - name: etcd-snapshot-deadman
   kind: prometheus
   for: 1m
-  expr: '(time() - kube_etcd_snapshot_creation_timestamp_seconds) > (1.5 * {etcd_interval})'
+  expr: '(time() - max by (cluster) (kube_etcd_snapshot_creation_timestamp_seconds)) > (1.5 * {etcd_interval})'
   params:
     etcd_interval: {env: ETCD_INTERVAL, test: 43200}
   cases:
     fires:
       - series:
-          - series: 'kube_etcd_snapshot_creation_timestamp_seconds{cluster="oregon"}'
+          - series: 'kube_etcd_snapshot_creation_timestamp_seconds{job="kube-state-metrics",name="s3-etcd-snapshot-cp-1-0",node="cp-1",cluster="oregon"}'
+            values: '0x1100'
+        at: 1090m
+      - series:
+          - series: 'kube_etcd_snapshot_creation_timestamp_seconds{job="kube-state-metrics",name="s3-etcd-snapshot-cp-1-0",node="cp-1",cluster="oregon"}'
+            values: '0x1100'
+          - series: 'kube_etcd_snapshot_creation_timestamp_seconds{job="kube-state-metrics",name="s3-etcd-snapshot-cp-1-600",node="cp-1",cluster="oregon"}'
+            values: '600x1100'
+        at: 1095m
+      - series:
+          - series: 'kube_etcd_snapshot_creation_timestamp_seconds{job="kube-state-metrics",name="s3-etcd-snapshot-cp-1-now",node="cp-1",cluster="oregon"}'
+            values: '0+60x1100'
+          - series: 'kube_etcd_snapshot_creation_timestamp_seconds{job="kube-state-metrics",name="s3-etcd-snapshot-cp-1-0",node="cp-1",cluster="seoul"}'
             values: '0x1100'
         at: 1090m
     quiet:
       - series:
-          - series: 'kube_etcd_snapshot_creation_timestamp_seconds{cluster="oregon"}'
+          - series: 'kube_etcd_snapshot_creation_timestamp_seconds{job="kube-state-metrics",name="s3-etcd-snapshot-cp-1-0",node="cp-1",cluster="oregon"}'
             values: '0x1100'
         at: 1081m
       - series:
-          - series: 'kube_etcd_snapshot_creation_timestamp_seconds{cluster="oregon"}'
+          - series: 'kube_etcd_snapshot_creation_timestamp_seconds{job="kube-state-metrics",name="s3-etcd-snapshot-cp-1-now",node="cp-1",cluster="oregon"}'
+            values: '0+60x1100'
+        at: 1090m
+      - series:
+          - series: 'kube_etcd_snapshot_creation_timestamp_seconds{job="kube-state-metrics",name="s3-etcd-snapshot-cp-1-0",node="cp-1",cluster="oregon"}'
+            values: '0x1100'
+          - series: 'kube_etcd_snapshot_creation_timestamp_seconds{job="kube-state-metrics",name="s3-etcd-snapshot-cp-1-now",node="cp-1",cluster="oregon"}'
             values: '0+60x1100'
         at: 1090m
 

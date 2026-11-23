@@ -7,7 +7,10 @@ K3S_IMAGE=rancher/k3s:v1.36.3-k3s1@sha256:d0f79175794edd9694b4a12bafc5c52ae19773
 WHOAMI_IMAGE=traefik/whoami:v1.10.2@sha256:1474027c316661cdec87df2623e13a41e7e1ce0ba99c24917631de8f300b5420
 PROMETHEUS_IMAGE=prom/prometheus:v3.5.0@sha256:63805ebb8d2b3920190daf1cb14a60871b16fd38bed42b857a3182bc621f4996
 LOKI_IMAGE=grafana/loki:3.5.3@sha256:3165cecce301ce5b9b6e3530284b080934a05cd5cafac3d3d82edcb887b45ecd
-KUBERNETES_VERSION=1.36.3
+K3S_TAG=${K3S_IMAGE#*:}
+K3S_TAG=${K3S_TAG%@*}
+KUBERNETES_VERSION=${K3S_TAG#v}
+KUBERNETES_VERSION=${KUBERNETES_VERSION%%-*}
 KUBERNETES_SCHEMAS=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/89a35a5e9a1412a692a2603d79c3786f602238a4
 GATEWAY_API_CRDS=https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/690f754646e8326128fd686e3e46117ac479cfdf/config/crd/standard
 OVERLAYS=(oregon seoul)
@@ -144,13 +147,13 @@ render() {
 validate() {
   local stage=$1 out
   shift
-  if ! out=$(docker run --rm -v "$harness/schemas:/schemas:ro" -v "$work:/render:ro" -v "$deploy_dir:/deploy:ro" "$KUBECONFORM_IMAGE" \
+  if ! out=$(docker run --rm -v "$harness/schemas:/schemas:ro" -v "$work:/render:ro" "$KUBECONFORM_IMAGE" \
     -strict -summary -kubernetes-version "$KUBERNETES_VERSION" \
     -schema-location "$KUBERNETES_SCHEMAS/{{.NormalizedKubernetesVersion}}-standalone{{.StrictSuffix}}/{{.ResourceKind}}{{.KindSuffix}}.json" \
     -schema-location '/schemas/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
     "$@" 2>&1); then
     echo "$out" >&2
-    fail "$stage" "kubeconform rejected the render; a 'could not find schema' error means a new custom kind: add it to .github/deploy-test/vendor-schemas.py and rerun it"
+    fail "$stage" "kubeconform rejected the render; a 'could not find schema' error on a custom kind means a new CRD: add it to .github/deploy-test/vendor-schemas.py and rerun it; on a built-in kind it means KUBERNETES_SCHEMAS has no v$KUBERNETES_VERSION directory: move it to a commit that has one"
   fi
   printf '%s\n' "$out" | awk '/^Summary:/ { sub(/^Summary: /, ""); print }'
 }
@@ -193,7 +196,11 @@ PY
 }
 
 schema() {
-  local overlay summary files=()
+  local overlay summary fleet_k3s files=()
+  fleet_k3s=$(awk '/^variable "k3s_version"/ { inside = 1 } inside && /^[[:space:]]*default[[:space:]]*=/ { gsub(/^[^"]*"|".*$/, ""); print; exit }' \
+    "$repo/terraform/modules/fleet/variables.tf")
+  [ "${fleet_k3s//+/-}" = "$K3S_TAG" ] \
+    || fail schema "terraform/modules/fleet/variables.tf installs k3s ${fleet_k3s:-(no k3s_version default found)} but .github/scripts/deploy-test.sh tests $K3S_TAG (K3S_IMAGE); raise both to the same release"
   for overlay in "${OVERLAYS[@]}"; do files+=("/render/$overlay.yaml"); done
   summary=$(validate schema "${files[@]}")
   pass schema "$summary"
