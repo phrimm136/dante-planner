@@ -272,26 +272,6 @@ asset pipeline.
 - `vite.config.ts`'s `EDITOR_TESTS` list names `PlannerMDEditorContent.test.tsx` and
   `PlannerEditorShellFlush.test.tsx`, neither of which exists any longer.
   re-check: `rg -qF '__tests__/PlannerMDEditorContent.test.tsx' frontend/vite.config.ts && test ! -e frontend/src/pages/planner/components/planner/__tests__/PlannerMDEditorContent.test.tsx`
-- 2026-08-14 — Two emitted metrics have no consumer: `sse.publish.dropped`
-  (`shared/sse/SsePublisher.java`) and `planner_reconciler_drift_total`
-  (`planner/service/PlannerDriftReconciler.java`) are read only by their own tests, and
-  nothing under `deploy/grafana/` panels or alerts on either — a subscriber-drop burst or a
-  drift storm is invisible in production. 2026-09-22: neither passes the remote-write
-  keep-list in `deploy/base/prometheus.yaml:69` either, nor do `sse.publish.unserializable`,
-  `datasource.primary.undeclared`; these custom
-  counters never reach Grafana Cloud, so a panel alone would not fix it. `sse.publish.unserializable`,
-  now emitted by `SsePublisher`, joins them. Closes when all three have a dashboard panel and an alert rule.
-  re-check: `rg -q 'DROPPED_COUNTER = "sse.publish.dropped"' backend/src/main/java/org/danteplanner/backend/shared/sse/SsePublisher.java && .claude/skills/debt-ledger/bin/debt absent deploy/grafana -i 'sse_publish|planner_reconciler_drift' && .claude/skills/debt-ledger/bin/debt absent deploy/base/prometheus.yaml -i 'sse_publish|planner_reconciler_drift'`
-- 2026-08-14 — `deploy/CLAUDE.md:14-16` inverts a security fact: it states that an absent
-  `AUTH_LOCAL_REDIS_HOST` "aliases to auth (read-local no-op)", while
-  `deploy/overlays/oregon/configmap-patch.yaml` documents the opposite — Spring's relaxed
-  binding cannot see `REDIS_AUTH_HOST` through the
-  `${AUTH_LOCAL_REDIS_HOST:${AUTH_REDIS_HOST:localhost}}` default, so an unset value resolves
-  to a dead localhost and fail-opens every revocation check. The two files also disagree on
-  the variable names (`AUTH_LOCAL_REDIS_HOST`/`AUTH_REDIS_HOST` versus
-  `REDIS_AUTHLOCAL_HOST`/`REDIS_AUTH_HOST`). First of the documentation fixes to make: it is
-  the only one whose reader is misled about a security surface.
-  re-check: `rg -qF 'means it aliases to auth (read-local no-op)' deploy/CLAUDE.md && rg -qF 'resolves to a dead localhost' deploy/overlays/oregon/configmap-patch.yaml`
 - 2026-08-14 — `runbooks/rds-migration.md` cannot be executed as written. The credential step
   pipes the RDS master secret through `jq -r .password` although the secret is a plain string;
   it directs the operator to a terraform output that is deliberately null; five steps run
@@ -552,16 +532,6 @@ notification reads to the primary, or shorten the staleTime and accept the focus
 `notification-push.spec.ts` asserts the push-driven refetch and the fresh-mount render, and
 should grow the push-then-badge assertion once this is decided.
   re-check: `rg -q 'staleTime: STALE_TIME.MEDIUM' frontend/src/shared/notifications/hooks/useUnreadCountQuery.ts`
-- 2026-09-20 — An SSE reconnect refetches nothing for notifications: `useAppSse.ts`
-`handleConnected` invalidates only `userSettingsKeys.settings()` on a re-open, so a
-notification committed while the stream was down (the dispatcher's post-commit push is
-fire-and-forget) stays unseen until `STALE_TIME.MEDIUM` lapses or the page remounts. The
-dispatched row is durable, so nothing is lost; the delivery delay just has no upper bound
-tied to the reconnect. Worth doing when the badge-after-push entry above is decided (the
-fix is the same invalidation call in the reconnect branch, plus a reconnect assertion in
-`notification-push.spec.ts`), or when a user reports a missed notification after a
-network blip.
-  re-check: `rg -qU 'if \(hasConnectedRef.current\) \{\n\s+void queryClient.invalidateQueries\(\{ queryKey: userSettingsKeys.settings\(\) \}\)\n\s+\}' frontend/src/pages/planner/hooks/useAppSse.ts`
 - 2026-08-17 — ADR 082 declares it supersedes 071's `@sync @digest` bullets "once the
 arbitration is implemented", but carries no `supersedes:` key and left 071 with no
 `## Superseded` section. The condition is met — `SyncVersionValidator.arbitrate` and
@@ -999,11 +969,6 @@ guards the parse but likewise skips the schema gate.
 
 ## 2026-09-02 MySQL 8.4 upgrade (adr/092)
 
-- **`terraform/seoul` untargeted plan replaces all three fleet instances** (cp, data,
-  ingress) on an AMI data-source drift, with the launch template and SSM associations
-  following. The upgrade was applied with `-target` on the replica and its parameter
-  group; the fleet diff is untouched and still pending.
-  re-check: `rg -q 'ami += data.aws_ssm_parameter.node_ami.value' terraform/modules/fleet/cp.tf && .claude/skills/debt-ledger/bin/debt absent terraform/modules/fleet 'ignore_changes'`
 - **`docs/legacy/runbooks/prod-account-cutover.md` still pins `danteplanner-mysql80`** on the
   restore instruction; the group is now `danteplanner-mysql84`.
   re-check: `rg -q 'danteplanner-mysql80' docs/legacy/runbooks/prod-account-cutover.md`
@@ -1812,14 +1777,6 @@ guards the parse but likewise skips the schema gate.
   `JOIN_TIMEOUT_MS` joins, `awaitParkedOrDone`, `SseTopicRecorder`'s envelope wait). Worth doing
   when one of them flakes in CI: add the patterns to the rule and move the sites to `support/Hang`.
   re-check: `.claude/skills/debt-ledger/bin/debt absent backend/config/ast-grep/rules/no-wall-clock-wait-in-tests.yml 'Thread.*join|wait\('`
-- The fleet's EC2 instances (`cp`, `data`, `ingress`) take their AMI from the
-  `data.aws_ssm_parameter.node_ami` lookup on every plan and carry no `ignore_changes` for `ami`,
-  so any region-stack apply after Amazon publishes a new image replaces all three nodes at once
-  (a full-region outage): on 2026-11-07 both region plans showed `3 to add, 3 to destroy`, forced by
-  `ami`, alongside the intended IAM change. Until fixed, a region-stack change ships only as a
-  `-target` apply of the resources it means to change. Worth doing in the node design unit: pin the
-  AMI by id with a deliberate bump, or ignore `ami` and roll nodes on purpose.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent terraform/modules/fleet 'ignore_changes.*ami'`
 - `.claude/hooks/tsc-check.sh` runs `yarn typecheck` after every TypeScript edit without the test
   lock, so it can overlap a locked heavy run (seen 2026-11-08 while building the `checks` CLI).
   Worth doing when an edit-time typecheck slows or starves a locked run: route it through
@@ -2028,12 +1985,11 @@ guards the parse but likewise skips the schema gate.
 - **The auth Redis keeps its data only on the data node's disk.** `deploy/base/redis-auth.yaml`
   is a one-replica StatefulSet on `role=data` with an 8Gi `volumeClaimTemplates` entry and no
   `storageClassName`, so it gets k3s's default `local-path` volume, a directory on that node.
-  Replacing the data node loses the AOF file, and the AMI entry above shows that any apply after
-  a new AMI replaces it. The auth Redis holds the refresh-token lineage and the revocation
+  Replacing the data node loses the AOF file. The auth Redis holds the refresh-token lineage and the revocation
   state, so an empty one can fail every refresh and accept revoked tokens until they expire
   (inferred from what the store holds; the app's behavior on an empty store is not checked).
-  Worth doing before the AMI entry is fixed or the data node is replaced for any reason: an
-  EBS-backed volume that survives the node, or a tested restore path.
+  Worth doing before the data node's generation number is raised or the node is replaced for any
+  other reason: an EBS-backed volume that survives the node, or a tested restore path.
   re-check: `rg -q 'volumeClaimTemplates' deploy/base/redis-auth.yaml && .claude/skills/debt-ledger/bin/debt absent deploy/base/redis-auth.yaml 'storageClassName'`
 - **No NetworkPolicy exists.** The rendered overlays hold no `NetworkPolicy`, so every pod in
   `danteplanner` reaches every other, and a compromised cloudflared or exporter can open a

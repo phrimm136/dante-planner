@@ -364,22 +364,11 @@ revocation-window gap, not data loss, and it is the same gap the prep step asks 
 
 ## Post-window hardening
 
-Pin the AMI so drift becomes a **deliberate** upgrade, not a surprise replacement hiding inside an
-unrelated plan (today's near-miss was avoided only with `-target`):
-
-```hcl
-# in the instance resources that were replaced this window:
-lifecycle { ignore_changes = [ami] }   # or pin the SSM parameter version feeding the AMI
-```
-
-**Pinning the AMI turns off the only thing that currently delivers user-data changes.** The fleet
-module sets no `user_data_replace_on_change`, so the AWS provider default (`false`) applies: a
-user-data-only diff is an in-place stop/start and cloud-init never re-runs. Today a drifting AMI
-forces a replacement and the new user-data lands as a side effect. Pin the AMI and a `cp.sh.tftpl`
-edit will plan clean, apply clean, and reach nothing.
-
-Pin the AMI **and** set `user_data_replace_on_change = true` on the pets, or the next control-plane
-bootstrap fix ships to an instance that never executes it.
+Done. The control-plane, data and ingress instances ignore drift in `ami` and `user_data`, so an
+unrelated plan no longer carries their replacement. An instance is replaced by raising its number
+in `node_generation` in `terraform/<region>/main.tf`, one instance per change; it then boots from
+the newest image and the current boot script. A plan warns for each instance that still runs an
+older boot script than the code holds.
 
 ---
 

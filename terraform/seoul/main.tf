@@ -47,6 +47,8 @@ module "fleet" {
   redis_cross_region_cidr = var.redis_cross_region_cidr
 
   tags = var.tags
+
+  node_generation = { cp = 1, data = 1, ingress = 1 }
 }
 
 # Accepter for the cross-region peering, in the RDS region. One apply converges
