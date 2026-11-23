@@ -29,6 +29,7 @@ public final class PongRedis implements AutoCloseable {
     private volatile CompletableFuture<Void> newConnectionsServed = CompletableFuture.completedFuture(null);
     private final AtomicBoolean nextPingReplyDelayed = new AtomicBoolean();
     private volatile CompletableFuture<Void> delayedPingReplySent = CompletableFuture.completedFuture(null);
+    private final AtomicBoolean nextPingRefused = new AtomicBoolean();
 
     public PongRedis() throws IOException {
         this.listener = new ServerSocket(0, 0, InetAddress.getLoopbackAddress());
@@ -72,6 +73,10 @@ public final class PongRedis implements AutoCloseable {
     public void delayNextPingReply() {
         delayedPingReplySent = new CompletableFuture<>();
         nextPingReplyDelayed.set(true);
+    }
+
+    public void refuseNextPing() {
+        nextPingRefused.set(true);
     }
 
     public void releaseDelayedPingReply() {
@@ -156,7 +161,8 @@ public final class PongRedis implements AutoCloseable {
         if (PING.equalsIgnoreCase(command)) {
             answeredPings.incrementAndGet();
         }
-        out.write(replyTo(command).getBytes(StandardCharsets.UTF_8));
+        boolean refused = PING.equalsIgnoreCase(command) && nextPingRefused.compareAndSet(true, false);
+        out.write((refused ? "-ERR ping refused\r\n" : replyTo(command)).getBytes(StandardCharsets.UTF_8));
         out.flush();
     }
 

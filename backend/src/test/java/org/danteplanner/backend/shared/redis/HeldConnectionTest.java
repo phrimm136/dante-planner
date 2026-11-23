@@ -67,6 +67,53 @@ class HeldConnectionTest {
     }
 
     @Test
+    void ping_WhenThePreviousPingFailedOnAnOpenConnection_ConnectsAgain() throws Exception {
+        ClientResources clientResources = DefaultClientResources.create();
+        try (PongRedis redis = new PongRedis()) {
+            RedisClient client = BoundedRedisConnections.redisClient(clientResources, redis.host(), redis.port());
+            HeldConnection connecting = new HeldConnection(() -> client.connectAsync(
+                    StringCodec.UTF8, BoundedRedisConnections.redisUri(redis.host(), redis.port())).toCompletableFuture());
+            assertThat(Hang.get(connecting.ping(), "the first PING")).isEqualTo("PONG");
+            redis.refuseNextPing();
+            Throwable refusal = Hang.get(connecting.ping().handle((pong, failure) -> failure), "the refused PING");
+            assertThat(refusal).isNotNull();
+
+            assertThat(Hang.get(connecting.ping(), "the PING after the refusal")).isEqualTo("PONG");
+
+            assertThat(redis.acceptedConnections()).isEqualTo(2);
+            connecting.close();
+            client.shutdown();
+        } finally {
+            var unused = clientResources.shutdown();
+        }
+    }
+
+    @Test
+    void ping_WhenAPingFailsOnAConnectionAlreadyReplaced_KeepsTheReplacement() throws Exception {
+        ClientResources clientResources = DefaultClientResources.create();
+        try (PongRedis redis = new PongRedis()) {
+            RedisClient client = BoundedRedisConnections.redisClient(clientResources, redis.host(), redis.port());
+            HeldConnection connecting = new HeldConnection(() -> client.connectAsync(
+                    StringCodec.UTF8, BoundedRedisConnections.redisUri(redis.host(), redis.port())).toCompletableFuture());
+            assertThat(Hang.get(connecting.ping(), "the first PING")).isEqualTo("PONG");
+            redis.delayNextPingReply();
+            CompletableFuture<String> late = connecting.ping();
+            connecting.discardUnlessConnecting();
+            assertThat(Hang.get(connecting.ping(), "the PING on the replacement")).isEqualTo("PONG");
+            Hang.get(late.handle((pong, failure) -> failure), "the late PING failing with its closed connection");
+
+            assertThat(Hang.get(connecting.ping(), "the next round's PING")).isEqualTo("PONG");
+
+            assertThat(redis.acceptedConnections()).isEqualTo(2);
+            redis.releaseDelayedPingReply();
+            connecting.close();
+            client.shutdown();
+        } finally {
+            var unused = clientResources.shutdown();
+        }
+    }
+
+    @Test
     void ping_WhenClosed_FailsWithoutConnecting() {
         nextAttempt.set(new CompletableFuture<>());
 

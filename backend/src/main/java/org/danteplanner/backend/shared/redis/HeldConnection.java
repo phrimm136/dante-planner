@@ -10,6 +10,7 @@ final class HeldConnection {
 
     private final Supplier<CompletableFuture<StatefulRedisConnection<String, String>>> connector;
     private CompletableFuture<StatefulRedisConnection<String, String>> attempt;
+    private CompletableFuture<StatefulRedisConnection<String, String>> failedPingAttempt;
     private boolean closed;
 
     HeldConnection(Supplier<CompletableFuture<StatefulRedisConnection<String, String>>> connector) {
@@ -20,11 +21,24 @@ final class HeldConnection {
         if (closed) {
             return CompletableFuture.failedFuture(new RedisException("Redis role probe closed"));
         }
-        if (attempt == null || !isUsable(attempt)) {
+        if (attempt == null || attempt == failedPingAttempt || !isUsable(attempt)) {
             discard();
             attempt = connector.get();
         }
-        return attempt.thenCompose(connection -> connection.async().ping().toCompletableFuture());
+        CompletableFuture<StatefulRedisConnection<String, String>> pinged = attempt;
+        return pinged.thenCompose(connection -> connection.async().ping().toCompletableFuture())
+                .whenComplete((pong, failure) -> {
+                    if (failure != null) {
+                        pingFailedOn(pinged);
+                    }
+                });
+    }
+
+    // Lettuce fails a dropped connection's in-flight command before isOpen() turns false.
+    private synchronized void pingFailedOn(CompletableFuture<StatefulRedisConnection<String, String>> pinged) {
+        if (attempt == pinged) {
+            failedPingAttempt = pinged;
+        }
     }
 
     synchronized void discardUnlessConnecting() {
@@ -42,6 +56,7 @@ final class HeldConnection {
         if (attempt != null) {
             var unused = attempt.thenCompose(StatefulRedisConnection::closeAsync);
             attempt = null;
+            failedPingAttempt = null;
         }
     }
 
