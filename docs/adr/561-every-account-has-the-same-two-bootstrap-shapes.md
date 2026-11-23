@@ -9,8 +9,6 @@ epic: none · pr: none · supersedes: 033 @terraform @state @migration
   INVARIANT: the bucket is never without protection against deletion while it is managed — the release from the old stack happens in a plan limited to the bucket's five addresses, and the plan that removes the old stack is made only after that release; the plan guard refuses the removal plan while it still lists the bucket.
   INVARIANT: `iam-bootstrap` declares no bucket — the move script reads each stack's tracked files and refuses a state with an address the stack does not declare, and its tests pin both directions against the real stacks.
   NON-GOAL: keeping the import and release blocks — they are for this one move, a new account's first plan fails while the import block exists, and they are deleted once every account's states are past them; the ledger holds that condition.
-- @ops @plan @forget — A plan's summary names a resource that a stack releases without deleting it, and counts it. The summary used to drop that kind of change, so a plan that only released resources printed "no changes" and no apply line, and a release was not something the CLI was able to carry out.
-  INVARIANT: a release is not a guarded change — it takes nothing away in the account, so it needs no expectation; a test reads a recorded plan with releases and an update.
 
 ## Takeaway
 - takeaway: an inconsistency that is left to expire needs the event that ends it written down; when the account changed its job in place of being rebuilt, the exception had no owner and outlived its reason.

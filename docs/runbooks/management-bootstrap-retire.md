@@ -28,6 +28,17 @@ Confirm that nothing uses the role. The last use must be older than any deploy y
 AWS_PROFILE=mgmt aws iam get-role --role-name danteplanner-provisioner --query Role.RoleLastUsed
 ```
 
+Step 4 also deletes the account's GitHub OIDC provider. List the roles whose trust policy names
+that provider:
+
+```bash
+AWS_PROFILE=mgmt aws iam list-roles --output text \
+  --query "Roles[?contains(to_string(AssumeRolePolicyDocument), 'token.actions.githubusercontent.com')].RoleName"
+```
+
+It must print `danteplanner-provisioner` and nothing else. Any other role name stops the
+runbook. That role assumes through the provider, and step 4 cuts it off.
+
 You need `terraform/state-backend/management.tfvars` (gitignored). It holds one line,
 `aws_account_id`, with the same value as `terraform/iam-bootstrap/management.tfvars`.
 
@@ -69,7 +80,13 @@ policy, so the update is not needed.
 
 ```bash
 scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap init -reconfigure -backend-config=../backend.management.hcl
-.claude/skills/ops/bin/ops --env mgmt tf plan iam-bootstrap -- -var-file=management.tfvars \
+.claude/skills/ops/bin/ops --env mgmt tf plan iam-bootstrap \
+  --expect 'aws_s3_bucket.tf_state[0]' \
+  --expect 'aws_s3_bucket_lifecycle_configuration.tf_state[0]' \
+  --expect 'aws_s3_bucket_public_access_block.tf_state[0]' \
+  --expect 'aws_s3_bucket_server_side_encryption_configuration.tf_state[0]' \
+  --expect 'aws_s3_bucket_versioning.tf_state[0]' \
+  -- -var-file=management.tfvars \
   -target=aws_s3_bucket.tf_state \
   -target=aws_s3_bucket_public_access_block.tf_state \
   -target=aws_s3_bucket_versioning.tf_state \

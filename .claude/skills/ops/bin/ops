@@ -59,7 +59,7 @@ CONFIG_SECTION_PATTERN = re.compile(r"^\s*\[(?:profile\s+)?([^\]]+?)\s*\]")
 ACCOUNT_ID_LINE = re.compile(r"^\s*sso_account_id\s*=\s*(\d+)\s*$")
 ARN_ACCOUNT_PATTERN = re.compile(r"(arn:aws[a-z-]*:[^:\s]*:[^:\s]*:)\d{12}(?=:)")
 UNMAPPED_ACCOUNT = "<account>"
-GUARDED_KINDS = ("destroy", "replace")
+GUARDED_KINDS = ("destroy", "replace", "forget")
 GUARDED_UPDATE_TYPES = ("aws_instance", "aws_autoscaling_group", "aws_db_instance")
 WARN_CHECK_STATUSES = ("fail", "error")
 VERDICT_SUFFIX = ".verdict.json"
@@ -108,7 +108,7 @@ inputs:     a stack with an {SETTINGS_DIR}/ directory is planned with -var-file=
             per-run value such as apply_immediately) passes. A missing settings file or account
             id stops the plan before terraform runs. Any other stack takes no automatic arguments.
             The hook's suggestion for a direct runner plan of such a stack drops its -var-file.
-guard:     every replace or destroy, and every update of an
+guard:     every replace, destroy or forget, and every update of an
             {', '.join(GUARDED_UPDATE_TYPES[:-1])} or {GUARDED_UPDATE_TYPES[-1]}, must be named with
             --expect <address> (repeatable, before the --), and every expected address must be
             such a change. Otherwise the plan is blocked: UNEXPECTED and ABSENT lines name the
@@ -290,8 +290,8 @@ DISPATCH_TABLE = (
                 "a site's nodes, pods, Argo CD apps, RDS reachability and etcd snapshots (fleet-verify.sh); "
                 "site default oregon", FLEET_VERIFY_SCRIPT),
     CommandSpec("tf plan", "<stack> [--expect <address>]... [-- terraform plan args]",
-                "terraform plan through terraform-run.sh; prints the summary, guards replace, destroy and "
-                "instance updates, and prints the apply command for you when the guard passes; a stack with "
+                "terraform plan through terraform-run.sh; prints the summary, guards replace, destroy, forget "
+                "and instance updates, and prints the apply command for you when the guard passes; a stack with "
                 f"{SETTINGS_DIR}/ takes {SETTINGS_DIR}/<env>.tfvars and the profile's account id itself",
                 TERRAFORM_RUNNER),
     CommandSpec("tf apply", "<plan file>",
