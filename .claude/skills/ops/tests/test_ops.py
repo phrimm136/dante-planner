@@ -35,6 +35,7 @@ UNMAPPED_ID = "999988887777"
 FAKE_CONFIG_TEXT = "".join(f"[profile {profile_name}]\nsso_session = s\nsso_account_id = {account_id}\n\n"
                            for profile_name, account_id in PROFILE_ACCOUNTS.items())
 FAKE_CONFIG_TEXT += "[profile prod-provisioner]\nsso_account_id = 111122223333\n"
+PLAN_BYTES = b"tfplan zip bytes\x00\x01"
 
 
 def identity_json(account_id):
@@ -86,6 +87,9 @@ class FakeEffects:
 
     def run_streamed(self, command_argv, child_env, work_dir, log_file, echo_output):
         self.stream_calls.append((tuple(command_argv), child_env, work_dir, echo_output))
+        for one_arg in command_argv:
+            if one_arg.startswith("-out="):
+                Path(one_arg.split("=", 1)[1]).write_bytes(PLAN_BYTES)
         log_file.write(self.stream_text)
         if echo_output:
             sys.stdout.write(self.stream_text)
@@ -215,19 +219,38 @@ class ParseTest(unittest.TestCase):
 
 
 class DispatchTest(unittest.TestCase):
-    def test_the_dispatch_table_is_the_read_and_plan_set(self):
-        self.assertEqual([(one_spec.command_name, one_spec.script_path) for one_spec in ops_cli.DISPATCH_TABLE], [
-            ("metrics", "scripts/ops/access/metrics-query.sh"),
-            ("logs", "scripts/ops/access/logs-query.sh"),
-            ("sql", "scripts/ops/access/rds-query.sh"),
-            ("tunnel", "scripts/ops/access/rds-tunnel.sh"),
-            ("verify db", "scripts/ops/access/db-observability-check.sh"),
-            ("verify oregon", "scripts/ops/oregon-verify.sh"),
-            ("tf plan", "scripts/ops/terraform-run.sh"),
-            ("whoami", ""),
-            ("doctor", ""),
-            ("list", ""),
-        ])
+    def test_the_dispatch_table_is_the_read_and_plan_set_and_one_apply(self):
+        command_classes = [
+            ("metrics", "scripts/ops/access/metrics-query.sh", "read"),
+            ("logs", "scripts/ops/access/logs-query.sh", "read"),
+            ("sql", "scripts/ops/access/rds-query.sh", "read"),
+            ("tunnel", "scripts/ops/access/rds-tunnel.sh", "read"),
+            ("verify db", "scripts/ops/access/db-observability-check.sh", "read"),
+            ("verify oregon", "scripts/ops/oregon-verify.sh", "read"),
+            ("tf plan", "scripts/ops/terraform-run.sh", "plan"),
+            ("tf apply", "scripts/ops/terraform-run.sh", "apply"),
+            ("whoami", "", "read"),
+            ("doctor", "", "read"),
+            ("list", "", "read"),
+        ]
+        self.assertEqual([(one_spec.command_name, one_spec.script_path) for one_spec in ops_cli.DISPATCH_TABLE],
+                         [(command_name, script_path) for command_name, script_path, _ in command_classes],
+                         "a new ops command must be classified read, plan or apply in command_classes here; "
+                         "an apply also needs the hook to refuse it from the Bash tool")
+        self.assertEqual([command_name for command_name, _, class_name in command_classes if class_name == "apply"],
+                         ["tf apply"])
+
+    def test_list_says_the_user_runs_apply_and_the_hook_refuses_it(self):
+        list_text = "\n".join(ops_cli.list_lines())
+        apply_row = next(one_line for one_line in ops_cli.list_lines() if one_line.startswith("ops tf apply"))
+        self.assertTrue(apply_row.startswith("ops tf apply <plan file>"))
+        self.assertIn("you run it with !, and the hook refuses every form of it that it can see", apply_row)
+        self.assertIn("ops tf plan <stack> [--expect <address>]...", list_text)
+
+    def test_help_says_the_hook_is_not_a_sandbox_and_names_the_known_cost(self):
+        self.assertIn("is not a sandbox", ops_cli.USAGE_TEXT)
+        self.assertIn("put the pattern in a file (rg -f <file>)", ops_cli.USAGE_TEXT)
+        self.assertNotIn("never applies", ops_cli.USAGE_TEXT)
 
     def test_every_invocation_runs_a_script_from_the_table(self):
         for command_words in (["metrics", "up"], ["logs", "q"], ["sql", "SELECT 1"], ["tunnel", "status"],
@@ -367,7 +390,8 @@ class PlanTest(RepoCase):
         return fake_effects, exit_code, out_text.splitlines(), err_text
 
     def test_plan_writes_its_file_beside_the_log_and_hands_off_apply(self):
-        fake_effects, exit_code, out_lines, _ = self.plan_run("terraform-show-mixed.json")
+        fake_effects, exit_code, out_lines, _ = self.plan_run(
+            "terraform-show-mixed.json", ("--expect", "terraform_data.gone", "--expect=terraform_data.swap"))
         plan_path = self.log_dir / f"ops-tf-rds-{STAMP_TEXT}.plan"
         self.assertEqual(exit_code, 0)
         command_argv, child_env, _, echo_output = fake_effects.stream_calls[0]
@@ -385,8 +409,7 @@ class PlanTest(RepoCase):
             "+ terraform_data.new_a",
             "+ terraform_data.new_b",
             "Plan: 3 to add, 1 to change, 2 to destroy.",
-            f"! {self.repo_root / ops_cli.TERRAFORM_RUNNER} -chdir={self.repo_root / 'terraform' / 'rds'} "
-            f"apply {plan_path}",
+            f"! {self.repo_root / CLI_TEXT} tf apply {plan_path}",
         ])
         log_text = (self.log_dir / f"ops-tf-rds-{STAMP_TEXT}.log").read_text()
         self.assertIn("script output", log_text)
@@ -403,9 +426,9 @@ class PlanTest(RepoCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(out_lines, [
             "Outputs only: 1 changed.",
-            f"! {self.repo_root / ops_cli.TERRAFORM_RUNNER} -chdir={self.repo_root / 'terraform' / 'rds'} "
-            f"apply {plan_path}",
+            f"! {self.repo_root / CLI_TEXT} tf apply {plan_path}",
         ])
+        self.assertEqual(json.loads(Path(f"{plan_path}.verdict.json").read_text())["verdict"], "clear")
 
     def test_double_dash_out_is_refused(self):
         for extra_word in ("--out", "--out=x.plan", "-out"):
@@ -484,23 +507,23 @@ class PlanTest(RepoCase):
         self.assertFalse(ops_cli.stack_info(REPO_ROOT, "iam-bootstrap").has_backend)
 
     def test_imports_and_moves_are_changes(self):
-        for fixture_name, expected_lines in (
-                ("terraform-show-import-move-mixed.json", [
+        for fixture_name, expect_words, expected_lines in (
+                ("terraform-show-import-move-mixed.json", ("--expect", "terraform_data.gone"), [
                     "- terraform_data.gone", "+ terraform_data.fresh", "<= terraform_data.imported",
                     "-> terraform_data.old_name to terraform_data.new_name",
                     "Plan: 1 to import, 1 to add, 0 to change, 1 to destroy."]),
-                ("terraform-show-import-only.json", [
+                ("terraform-show-import-only.json", (), [
                     "<= terraform_data.imported", "Plan: 1 to import, 0 to add, 0 to change, 0 to destroy."]),
-                ("terraform-show-move-only.json", [
+                ("terraform-show-move-only.json", (), [
                     "-> terraform_data.old_name to terraform_data.new_name",
                     "Plan: 0 to add, 0 to change, 0 to destroy."])):
             with self.subTest(fixture_name=fixture_name):
                 for stale_file in self.log_dir.glob("*"):
                     stale_file.unlink()
-                _, exit_code, out_lines, _ = self.plan_run(fixture_name)
+                _, exit_code, out_lines, _ = self.plan_run(fixture_name, expect_words)
                 self.assertEqual(exit_code, 0)
                 self.assertEqual(out_lines[:-1], expected_lines)
-                self.assertTrue(out_lines[-1].startswith(f"! {self.repo_root / ops_cli.TERRAFORM_RUNNER} "))
+                self.assertTrue(out_lines[-1].startswith(f"! {self.repo_root / CLI_TEXT} tf apply "))
 
     def test_read_actions_are_not_listed(self):
         show_data = json.loads((FIXTURE_DIR / "terraform-show-mixed.json").read_text())
@@ -515,6 +538,7 @@ class PlanTest(RepoCase):
             {"address": "a.b", "change": {"actions": ["create", "delete"]}}]})
         self.assertEqual(plan_info.change_lines, ("-/+ a.b",))
         self.assertEqual(plan_info.counts_line, "Plan: 1 to add, 0 to change, 1 to destroy.")
+        self.assertEqual(plan_info.guarded_markers, {"a.b": "-/+ "})
 
     def test_extra_args_pass_through_and_out_is_refused(self):
         fake_effects, _, _, _ = self.plan_run("terraform-show-no-changes.json", ("--", "-var-file=prod.tfvars"))
@@ -535,19 +559,254 @@ class PlanTest(RepoCase):
                                     r"unknown stack 'nope'; .*: log-archive, oregon, rds, registry, state-backend$"):
             self.run_main(["tf", "plan", "nope"], FakeEffects())
 
-    def test_there_is_no_apply(self):
-        for argv_words in (["tf", "apply"], ["tf", "apply", "rds"], ["tf", "destroy"]):
-            with self.assertRaises(ops_cli.OpsError) as raised_error:
-                self.run_main(argv_words, FakeEffects())
-            self.assertIn("apply is run by you", str(raised_error.exception))
-            self.assertIn(f"! {self.repo_root / ops_cli.TERRAFORM_RUNNER} "
-                          f"-chdir={self.repo_root / 'terraform'}/<stack> apply <plan file>",
-                          str(raised_error.exception))
+    def test_apply_takes_one_plan_file_and_destroy_is_refused(self):
+        for argv_words, message_pattern in (
+                (["tf", "apply"], "takes one plan file and nothing else"),
+                (["tf", "apply", "x.plan", "-auto-approve"], "takes one plan file and nothing else"),
+                (["tf", "apply", "x.plan", "--", "-var-file=prod.tfvars"], "takes one plan file and nothing else"),
+                (["tf", "apply", "-auto-approve"], "takes one plan file and nothing else"),
+                (["tf", "destroy"], "ops tf has no destroy.*--expect <address> -- -destroy")):
+            fake_effects = FakeEffects()
+            with self.assertRaisesRegex(ops_cli.OpsError, message_pattern):
+                self.run_main(argv_words, fake_effects)
+            self.assertEqual((fake_effects.stream_calls, fake_effects.capture_calls), ([], []))
 
     def test_the_real_tree_stacks_are_the_ones_with_a_backend(self):
         self.assertEqual(ops_cli.plan_stacks(REPO_ROOT), ["cloudflare", "iam-bootstrap", "log-archive", "oregon",
                                                           "organization", "rds", "registry", "secrets", "seoul",
                                                           "state-backend"])
+
+
+CHECK_MESSAGE = ("The cp instance was built from an older boot script than the code holds. It takes the current one "
+                 "when node_generation.cp is raised, which replaces it.")
+
+
+class SeoulCase(RepoCase):
+    def setUp(self):
+        super().setUp()
+        seoul_dir = self.repo_root / "terraform" / "seoul"
+        seoul_dir.mkdir()
+        (seoul_dir / "versions.tf").write_text('terraform {\n  backend "s3" {}\n}\n')
+        (seoul_dir / ".terraform").mkdir()
+
+    def guarded_plan(self, stack_name, fixture_name, *plan_words, show_text=None):
+        fake_effects = FakeEffects(show_text=show_text or (FIXTURE_DIR / fixture_name).read_text())
+        exit_code, out_text, err_text = self.run_main(["tf", "plan", stack_name, *plan_words], fake_effects)
+        plan_path = self.log_dir / f"ops-tf-{stack_name}-{STAMP_TEXT}.plan"
+        verdict_data = json.loads(Path(f"{plan_path}.verdict.json").read_text())
+        return fake_effects, exit_code, out_text.splitlines(), verdict_data, plan_path
+
+
+class GuardTest(SeoulCase):
+    def test_a_plan_with_no_guarded_change_is_clear(self):
+        _, exit_code, out_lines, verdict_data, plan_path = self.guarded_plan("oregon", "terraform-show-guard-clear.json")
+        self.assertEqual(out_lines, [
+            "~ module.fleet.aws_launch_template.app",
+            "+ aws_iam_role.new_a",
+            "+ aws_iam_role_policy.new_b",
+            "Plan: 2 to add, 1 to change, 0 to destroy.",
+            f"! {self.repo_root}/.claude/skills/ops/bin/ops tf apply {plan_path}",
+        ])
+        self.assertEqual(verdict_data, {"stack": "oregon", "env": "prod", "verdict": "clear", "expected": [],
+                                        "guarded": [], "plan_sha256": ops_cli.hashlib.sha256(PLAN_BYTES).hexdigest()})
+        self.assertEqual(exit_code, 0)
+
+    def test_an_unexpected_replacement_blocks_the_plan(self):
+        _, exit_code, out_lines, verdict_data, _ = self.guarded_plan("seoul", "terraform-show-guard-replace.json")
+        self.assertEqual(out_lines, [
+            "-/+ module.fleet.aws_instance.cp",
+            "~ aws_iam_policy.app_node",
+            "Plan: 1 to add, 1 to change, 1 to destroy.",
+            "UNEXPECTED -/+ module.fleet.aws_instance.cp",
+            "blocked: name each change you mean with --expect <address>, before the -- ; no apply command is printed",
+        ])
+        self.assertFalse(any(one_line.startswith("!") for one_line in out_lines))
+        self.assertEqual((verdict_data["verdict"], verdict_data["guarded"]),
+                         ("blocked", ["module.fleet.aws_instance.cp"]))
+        self.assertTrue((self.log_dir / f"ops-tf-seoul-{STAMP_TEXT}.plan").is_file())
+        self.assertEqual(exit_code, 3)
+
+    def test_an_expected_replacement_is_clear(self):
+        _, exit_code, out_lines, verdict_data, plan_path = self.guarded_plan(
+            "seoul", "terraform-show-guard-replace.json", "--expect", "module.fleet.aws_instance.cp")
+        self.assertEqual(out_lines[-1], f"! {self.repo_root / CLI_TEXT} tf apply {plan_path}")
+        self.assertEqual((verdict_data["verdict"], verdict_data["expected"]),
+                         ("clear", ["module.fleet.aws_instance.cp"]))
+        self.assertEqual(exit_code, 0)
+
+    def test_an_expectation_the_plan_does_not_carry_blocks_it(self):
+        _, exit_code, out_lines, verdict_data, _ = self.guarded_plan(
+            "seoul", "terraform-show-create-only.json", "--expect", "module.fleet.aws_instance.cp")
+        self.assertIn("ABSENT module.fleet.aws_instance.cp", out_lines)
+        self.assertFalse(any(one_line.startswith("!") for one_line in out_lines))
+        self.assertEqual(verdict_data["verdict"], "blocked")
+        self.assertEqual(exit_code, 3)
+
+    def test_an_expectation_on_a_plan_without_changes_blocks_it(self):
+        _, exit_code, out_lines, _, _ = self.guarded_plan(
+            "seoul", "terraform-show-no-changes.json", "--expect", "module.fleet.aws_instance.cp")
+        self.assertEqual(out_lines, ["No changes.", "ABSENT module.fleet.aws_instance.cp", ops_cli.BLOCKED_LINE])
+        self.assertEqual(exit_code, 3)
+
+    def test_a_destroy_and_an_instance_update_are_guarded_other_updates_are_not(self):
+        _, exit_code, out_lines, verdict_data, _ = self.guarded_plan(
+            "oregon", "terraform-show-guard-destroy-update.json")
+        unexpected_lines = [one_line for one_line in out_lines if one_line.startswith("UNEXPECTED")]
+        self.assertEqual(unexpected_lines, ["UNEXPECTED - aws_iam_role_policy.old",
+                                            "UNEXPECTED ~ module.fleet.aws_instance.data"])
+        self.assertNotIn("aws_s3_bucket.logs", "\n".join(unexpected_lines))
+        self.assertEqual(verdict_data["guarded"], ["aws_iam_role_policy.old", "module.fleet.aws_instance.data"])
+        self.assertEqual(exit_code, 3)
+
+    def test_a_failed_check_is_in_the_summary(self):
+        _, exit_code, out_lines, verdict_data, plan_path = self.guarded_plan(
+            "seoul", "terraform-show-failed-check.json")
+        self.assertEqual(out_lines, [
+            f"WARN {CHECK_MESSAGE}",
+            "+ aws_iam_role.new_a",
+            "Plan: 1 to add, 0 to change, 0 to destroy.",
+            f"! {self.repo_root / CLI_TEXT} tf apply {plan_path}",
+        ])
+        self.assertEqual((verdict_data["verdict"], exit_code), ("clear", 0))
+
+    def test_the_real_plans_failed_check_is_read(self):
+        _, exit_code, out_lines, verdict_data, _ = self.guarded_plan("seoul", "terraform-show-real-checks.json")
+        self.assertEqual(out_lines, [f"WARN {CHECK_MESSAGE}", "No changes."])
+        self.assertEqual((verdict_data["verdict"], exit_code), ("clear", 0))
+
+    def test_an_errored_check_without_problems_names_its_address_and_unknown_prints_nothing(self):
+        def one_check(check_name, check_status):
+            check_address = {"kind": "check", "name": check_name, "to_display": f"check.{check_name}"}
+            return {"address": check_address, "status": check_status,
+                    "instances": [{"address": {"to_display": f"check.{check_name}"}, "status": check_status}]}
+        show_data = {"checks": [one_check("errored", "error"), one_check("pending", "unknown"),
+                                one_check("fine", "pass"), one_check("failed_silently", "fail")]}
+        self.assertEqual(ops_cli.plan_summary(show_data).check_messages,
+                         ("check.errored error", "check.failed_silently fail"))
+
+    def test_an_update_of_an_autoscaling_group_or_a_database_instance_is_guarded(self):
+        _, exit_code, out_lines, verdict_data, _ = self.guarded_plan(
+            "oregon", "terraform-show-guard-fleet-updates.json")
+        self.assertEqual([one_line for one_line in out_lines if one_line.startswith("UNEXPECTED")],
+                         ["UNEXPECTED ~ aws_db_instance.primary", "UNEXPECTED ~ module.fleet.aws_autoscaling_group.app"])
+        self.assertEqual(verdict_data["guarded"], ["aws_db_instance.primary", "module.fleet.aws_autoscaling_group.app"])
+        self.assertEqual(exit_code, 3)
+
+    def test_expect_after_the_double_dash_belongs_to_terraform(self):
+        fake_effects, exit_code, _, verdict_data, _ = self.guarded_plan(
+            "seoul", "terraform-show-guard-replace.json", "--", "--expect", "module.fleet.aws_instance.cp")
+        self.assertEqual(fake_effects.stream_calls[0][0][-2:], ("--expect", "module.fleet.aws_instance.cp"))
+        self.assertEqual((verdict_data["expected"], verdict_data["verdict"], exit_code), ([], "blocked", 3))
+
+    def test_expect_without_a_value_or_twice_is_an_ops_error(self):
+        for plan_words, message_pattern in (
+                (["--expect"], "--expect needs the address of a change you mean"),
+                (["--expect", "--", "-var-file=x"], "--expect needs the address"),
+                (["--expect="], "--expect needs the address"),
+                (["--expect", "a.b", "--expect=a.b"], "--expect a.b is given twice; name each address once")):
+            fake_effects = FakeEffects()
+            with self.assertRaisesRegex(ops_cli.OpsError, message_pattern):
+                self.run_main(["tf", "plan", "seoul", *plan_words], fake_effects)
+            self.assertEqual(fake_effects.stream_calls, [])
+
+    def test_a_moved_and_updated_instance_is_guarded_by_its_current_address(self):
+        plan_info = ops_cli.plan_summary({"resource_changes": [
+            {"address": "module.fleet.aws_instance.cp_next", "previous_address": "module.fleet.aws_instance.cp",
+             "type": "aws_instance", "change": {"actions": ["update"]}}]})
+        self.assertEqual(plan_info.guarded_markers, {"module.fleet.aws_instance.cp_next": "~ "})
+
+    def test_an_address_holding_an_account_id_is_written_and_compared_redacted(self):
+        show_text = json.dumps({"resource_changes": [
+            {"address": f'aws_s3_bucket.x["logs-{PROFILE_ACCOUNTS["prod"]}"]', "type": "aws_s3_bucket",
+             "change": {"actions": ["delete"]}}]})
+        for expect_text in ('aws_s3_bucket.x["logs-<account:prod>"]',
+                            f'aws_s3_bucket.x["logs-{PROFILE_ACCOUNTS["prod"]}"]'):
+            with self.subTest(expect_text=expect_text):
+                for stale_file in self.log_dir.glob("*"):
+                    stale_file.unlink()
+                _, exit_code, out_lines, verdict_data, plan_path = self.guarded_plan(
+                    "seoul", "", "--expect", expect_text, show_text=show_text)
+                self.assertEqual(verdict_data["guarded"], ['aws_s3_bucket.x["logs-<account:prod>"]'])
+                self.assertEqual(verdict_data["expected"], ['aws_s3_bucket.x["logs-<account:prod>"]'])
+                self.assertEqual(exit_code, 0)
+                self.assert_no_ids(Path(f"{plan_path}.verdict.json").read_text(), "\n".join(out_lines))
+
+
+class ApplyTest(SeoulCase):
+    def cleared_plan(self, fixture_name="terraform-show-guard-replace.json",
+                     plan_words=("--expect", "module.fleet.aws_instance.cp")):
+        _, exit_code, _, _, plan_path = self.guarded_plan("seoul", fixture_name, *plan_words)
+        return exit_code, plan_path
+
+    def test_apply_runs_a_clear_plan_through_the_runner_redacted_and_logged(self):
+        plan_exit, plan_path = self.cleared_plan()
+        self.assertEqual(plan_exit, 0)
+        stream_text = f"aws_instance.cp: Creation complete in account {PROFILE_ACCOUNTS['prod']}\n"
+        fake_effects = FakeEffects(stream_text=stream_text, stream_exit=4)
+        exit_code, out_text, err_text = self.run_main(["tf", "apply", str(plan_path)], fake_effects)
+        self.assertEqual(exit_code, 4)
+        command_argv, child_env, work_dir, echo_output = fake_effects.stream_calls[0]
+        self.assertEqual(command_argv, self.script_argv(ops_cli.TERRAFORM_RUNNER, "-chdir=terraform/seoul", "apply",
+                                                        str(plan_path)))
+        self.assertEqual((child_env["AWS_PROFILE"], work_dir, echo_output), ("prod", self.repo_root, True))
+        self.assertEqual(fake_effects.capture_calls[0][0],
+                         ["aws", "sts", "get-caller-identity", "--output", "json", "--profile", "prod"])
+        log_path = self.log_dir / f"ops-tf-apply-seoul-{STAMP_TEXT}.log"
+        log_text = log_path.read_text()
+        for checked_text in (out_text, log_text):
+            self.assertIn("Creation complete in account <account:prod>", checked_text)
+        self.assertIn(f"log {log_path}", err_text)
+        self.assert_no_ids(out_text, err_text, log_text)
+
+    def test_apply_takes_the_plan_file_by_a_relative_path(self):
+        _, plan_path = self.cleared_plan()
+        fake_effects = FakeEffects()
+        exit_code, _, _ = self.run_main(["tf", "apply", str(plan_path.relative_to(self.repo_root))], fake_effects)
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(fake_effects.stream_calls[0][0][-1], str(plan_path))
+
+    def test_apply_refuses_a_plan_file_without_a_verdict_file(self):
+        bare_plan = self.repo_root / "bare.plan"
+        bare_plan.write_bytes(PLAN_BYTES)
+        fake_effects = FakeEffects()
+        with self.assertRaisesRegex(ops_cli.OpsError, r"is not a plan ops produced.*ops tf plan <stack>"):
+            self.run_main(["tf", "apply", str(bare_plan)], fake_effects)
+        self.assertEqual(fake_effects.stream_calls, [])
+
+    def test_apply_refuses_a_blocked_verdict_and_names_its_addresses(self):
+        _, plan_path = self.cleared_plan("terraform-show-guard-destroy-update.json", ("--expect", "aws_absent.x"))
+        fake_effects = FakeEffects()
+        with self.assertRaises(ops_cli.OpsError) as raised_error:
+            self.run_main(["tf", "apply", str(plan_path)], fake_effects)
+        for named_text in ("UNEXPECTED aws_iam_role_policy.old", "UNEXPECTED module.fleet.aws_instance.data",
+                           "ABSENT aws_absent.x", "the guard blocked"):
+            self.assertIn(named_text, str(raised_error.exception))
+        self.assertEqual(fake_effects.stream_calls, [])
+
+    def test_apply_refuses_a_plan_file_changed_after_it_was_judged(self):
+        _, plan_path = self.cleared_plan()
+        plan_path.write_bytes(PLAN_BYTES + b"changed")
+        fake_effects = FakeEffects()
+        with self.assertRaisesRegex(ops_cli.OpsError, "changed after it was judged"):
+            self.run_main(["tf", "apply", str(plan_path)], fake_effects)
+        self.assertEqual(fake_effects.stream_calls, [])
+
+    def test_apply_refuses_an_env_that_disagrees_with_the_verdict(self):
+        _, plan_path = self.cleared_plan()
+        fake_effects = FakeEffects()
+        with self.assertRaisesRegex(ops_cli.OpsError, "made with --env prod.*drop --env staging"):
+            self.run_main(["--env", "staging", "tf", "apply", str(plan_path)], fake_effects)
+        self.assertEqual(fake_effects.stream_calls, [])
+        self.run_main(["tf", "apply", str(plan_path), "--env", "prod"], fake_effects)
+        self.assertEqual(fake_effects.stream_calls[0][1]["AWS_PROFILE"], "prod")
+
+    def test_apply_needs_the_stack_initialized(self):
+        _, plan_path = self.cleared_plan()
+        (self.repo_root / "terraform" / "seoul" / ".terraform").rmdir()
+        fake_effects = FakeEffects()
+        with self.assertRaisesRegex(ops_cli.OpsError, "terraform/seoul is not initialized"):
+            self.run_main(["tf", "apply", str(plan_path)], fake_effects)
+        self.assertEqual((fake_effects.stream_calls, fake_effects.capture_calls), ([], []))
 
 
 class DoctorTest(RepoCase):
@@ -620,6 +879,9 @@ class ChecksMissingTest(unittest.TestCase):
             hook_run = self.run_bare("hook", stdin_text=self.hook_input(command_text))
             self.assertEqual(hook_run.returncode, 2, command_text)
             self.assertIn(f"git checkout -- {ops_cli.CHECKS_CLI_PATH}", hook_run.stderr)
+        hook_run = self.run_bare("hook", stdin_text=self.hook_input(f"{CLI_TEXT} tf apply x.plan"))
+        self.assertEqual(hook_run.returncode, 2)
+        self.assertIn("together with the word 'apply'", hook_run.stderr)
         hook_run = self.run_bare("hook", stdin_text=self.hook_input("git status && ls scripts"))
         self.assertEqual((hook_run.returncode, hook_run.stdout, hook_run.stderr), (0, "", ""))
 
@@ -696,8 +958,13 @@ HOOK_CASES = (
     ("scripts//ops/access/rds-tunnel.sh status", f"{CLI_TEXT} tunnel status"),
     ("./scripts/ops/./access/rds-tunnel.sh status", f"{CLI_TEXT} tunnel status"),
     ("scripts/ops/terraform-run.sh -chdir=terraform//rds/ plan", f"{CLI_TEXT} tf plan rds"),
-    ("scripts/ops/terraform-run.sh -chdir=terraform/rds apply x.plan", None),
     ("scripts/ops/terraform-run.sh -chdir=terraform/rds init -reconfigure", None),
+    ("scripts/ops/terraform-run.sh -chdir=terraform/rds fmt", None),
+    ("scripts/ops/terraform-run.sh -chdir=terraform/rds validate", None),
+    ("scripts/ops/terraform-run.sh -chdir=terraform/rds workspace list", None),
+    ("scripts/ops/terraform-run.sh -chdir=terraform/rds state list", None),
+    ("scripts/ops/terraform-run.sh -chdir=terraform/rds show x.plan", None),
+    (".claude/skills/ops/bin/ops tf plan seoul --expect module.fleet.aws_instance.cp", None),
     ("scripts/ops/provision/grafana-secrets.sh", None),
     ("scripts/ops/oregon-verify.sh --kubeconfig", None),
     ("rg -n 'access/rds-query.sh' docs", None),
@@ -706,7 +973,120 @@ HOOK_CASES = (
 )
 
 
+ABS_CLI = "/home/u/repo/.claude/worktrees/x/.claude/skills/ops/bin/ops"
+RUNNER_USER_TEXT = f"! {CLI_TEXT} tf apply <plan file>, for a plan file {CLI_TEXT} tf plan <stack> cleared"
+USER_ONLY_CASES = (
+    (".claude/skills/ops/bin/ops tf apply x.plan", "! .claude/skills/ops/bin/ops tf apply x.plan"),
+    (f"{ABS_CLI} tf apply x.plan", f"! {ABS_CLI} tf apply x.plan"),
+    ("./.claude/skills/ops/bin/ops tf apply x.plan", "! ./.claude/skills/ops/bin/ops tf apply x.plan"),
+    (".claude/skills/ops/bin/ops --env prod tf apply x.plan",
+     "! .claude/skills/ops/bin/ops --env prod tf apply x.plan"),
+    (".claude/skills/ops/bin/ops --env=staging tf apply x.plan",
+     "! .claude/skills/ops/bin/ops --env=staging tf apply x.plan"),
+    (".claude/skills/ops/bin/ops tf apply x.plan --env prod",
+     "! .claude/skills/ops/bin/ops tf apply x.plan --env prod"),
+    (f"bash -c '{ABS_CLI} tf apply x.plan'", f"! {ABS_CLI} tf apply x.plan"),
+    (f"bash <<EOF\n{ABS_CLI} tf apply x.plan\nEOF", f"! {ABS_CLI} tf apply x.plan"),
+    (f"git status && {ABS_CLI} tf apply x.plan; echo done", f"! {ABS_CLI} tf apply x.plan"),
+    (f"echo $({ABS_CLI} tf apply x.plan)", f"! {ABS_CLI} tf apply x.plan"),
+    (f"env AWS_PROFILE=prod {ABS_CLI} tf apply x.plan", f"! env AWS_PROFILE=prod {ABS_CLI} tf apply x.plan"),
+    (f"AWS_PROFILE=prod {ABS_CLI} tf apply x.plan", f"! AWS_PROFILE=prod {ABS_CLI} tf apply x.plan"),
+    (f"python3 {ABS_CLI} tf apply x.plan", f"! python3 {ABS_CLI} tf apply x.plan"),
+    (f"python3 -I {ABS_CLI} tf apply x.plan", f"! python3 -I {ABS_CLI} tf apply x.plan"),
+    ("scripts/ops/terraform-run.sh -chdir=terraform/rds apply x.plan", RUNNER_USER_TEXT),
+    ("/abs/repo/scripts/ops/terraform-run.sh -chdir=/abs/repo/terraform/rds apply x.plan", RUNNER_USER_TEXT),
+    ("scripts/ops/terraform-run.sh -chdir=terraform/rds destroy", RUNNER_USER_TEXT),
+    ("/abs/repo/scripts/ops/terraform-run.sh -chdir=terraform/rds destroy -auto-approve", RUNNER_USER_TEXT),
+    ("GUARD=0 scripts/ops/terraform-run.sh -chdir=terraform/rds apply x.plan", RUNNER_USER_TEXT),
+    ("AWS_PROFILE=prod-provisioner scripts/ops/terraform-run.sh -chdir=terraform/rds apply", RUNNER_USER_TEXT),
+    ("bash scripts/ops/terraform-run.sh -chdir=terraform/rds apply x.plan", RUNNER_USER_TEXT),
+)
+
+
+NET_TOOLS = (
+    (ABS_CLI, "tf", "apply"),
+    (CLI_TEXT, "tf", "apply"),
+    ("$CLAUDE_PROJECT_DIR/.claude/skills/ops/bin/ops", "tf", "apply"),
+    ("scripts/ops/terraform-run.sh", "-chdir=terraform/rds", "apply"),
+    ("/abs/repo/scripts/ops/terraform-run.sh", "-chdir=terraform/rds", "destroy"),
+)
+NET_TEMPLATES = (
+    "{path} {pre} {verb} /tmp/x.plan # don't",
+    "{path} {pre} {verb} x.plan\necho \"oops",
+    "run_it() {{ {path} {pre} {verb} x.plan; }}; run_it",
+    "printf '{verb} x.plan' | xargs {path} {pre}",
+    "find . -name '*.plan' -exec {path} {pre} {verb} {{}} ;",
+    "sh -c '\"$0\" {pre} {verb} x.plan' {path}",
+    "bash <<< \"{path} {pre} {verb} x.plan\"",
+    "a={verb}; {path} {pre} $a x.plan",
+    "{path} {pre} {{{verb},}} x.plan",
+    "{path} {pre} $'{verb}' x.plan",
+    "{path} {pre} \\\n{verb} x.plan",
+    "cp {path} /tmp/o && /tmp/o {pre} {verb} x.plan",
+    "python3 -c \"import subprocess; subprocess.run(['{path}','{pre}','{verb}','x.plan'])\"",
+    "python3 -m runpy {path} {pre} {verb} x.plan",
+    "echo {verb}; {path} {pre} x.plan",
+    "({path} {pre} {verb} x.plan)",
+)
+NET_CASES = tuple(one_template.format(path=tool_path, pre=pre_word, verb=verb_word)
+                  for one_template in NET_TEMPLATES for tool_path, pre_word, verb_word in NET_TOOLS)
+ORDINARY_CASES = (
+    f"{CLI_TEXT} tf plan seoul --expect module.fleet.aws_instance.cp -- -var-file=prod.tfvars -destroy",
+    f"{CLI_TEXT} tf plan oregon",
+    f"{CLI_TEXT} list",
+    f"{CLI_TEXT} help",
+    "python3 -m unittest discover -s .claude/skills/ops/tests",
+    'git commit -m "ops tf apply reads the verdict file"',
+    "scripts/ops/terraform-run.sh -chdir=terraform/seoul show -json x.plan",
+    "scripts/ops/terraform-run.sh -chdir=terraform/seoul init -reconfigure",
+    "scripts/ops/terraform-run.sh -chdir=terraform/seoul fmt",
+    "scripts/ops/terraform-run.sh -chdir=terraform/seoul validate",
+    "scripts/ops/terraform-run.sh -chdir=terraform/seoul workspace list",
+    "scripts/ops/terraform-run.sh -chdir=terraform/seoul state list",
+    f"rg -n apply_line {ABS_CLI}",
+    f"{CLI_TEXT} tf plan rds -- -var-file=reapply.tfvars -auto-approve",
+)
+KNOWN_COST_CASES = (f"rg -n apply {CLI_TEXT}",)
+
+
 class HookTest(unittest.TestCase):
+    def test_indirect_and_unreadable_spellings_are_refused(self):
+        for command_text in NET_CASES:
+            with self.subTest(command_text=command_text):
+                refusal_text = ops_cli.hook_refusal(command_text)
+                self.assertIn("only the user", refusal_text)
+                self.assertIn("  user runs  ! ", refusal_text)
+
+    def test_a_command_the_lexer_cannot_read_is_still_refused(self):
+        for command_text in (f"{CLI_TEXT} tf apply /tmp/x.plan # don't",
+                             f"{CLI_TEXT} tf apply /tmp/x.plan\necho \"oops"):
+            with self.subTest(command_text=command_text):
+                self.assertEqual(ops_cli.classify_command(command_text), [])
+                self.assertIn(f"names {ops_cli.NET_NAMES[0]} together with the word 'apply'",
+                              ops_cli.hook_refusal(command_text))
+
+    def test_the_text_net_does_not_refuse_ordinary_work(self):
+        for command_text in ORDINARY_CASES:
+            with self.subTest(command_text=command_text):
+                self.assertEqual(ops_cli.hook_refusal(command_text), "")
+
+    def test_naming_the_cli_with_the_word_is_the_known_cost(self):
+        for command_text in KNOWN_COST_CASES:
+            self.assertIn("rg -f <pattern file>", ops_cli.hook_refusal(command_text))
+
+    def test_the_net_word_is_standalone(self):
+        for word_text, is_match in (("apply;", True), ("apply)", True), ("'apply'", True), ('"apply"', True),
+                                    ("apply\n", True), ("(destroy", True), ("reapply", False),
+                                    ("apply_line", False), ("-destroy", False), ("destroy-x", False),
+                                    ("apply2", False), ("-auto-approve", False)):
+            with self.subTest(word_text=word_text):
+                self.assertEqual(bool(ops_cli.text_net_match(f"{CLI_TEXT} {word_text}")), is_match)
+
+    def test_the_parse_level_refusal_keeps_its_exact_text(self):
+        refusal_text = ops_cli.hook_refusal(f"{CLI_TEXT} tf apply x.plan")
+        self.assertIn(f"  user runs  ! {CLI_TEXT} tf apply x.plan", refusal_text)
+        self.assertNotIn("cannot show it harmless", refusal_text)
+
     def test_hook_classification(self):
         for command_text, expected_replacement in HOOK_CASES:
             with self.subTest(command_text=command_text):
@@ -716,6 +1096,21 @@ class HookTest(unittest.TestCase):
                 else:
                     self.assertEqual([one_refusal.replacement_text for one_refusal in found_refusals],
                                      [expected_replacement])
+
+    def test_an_agent_cannot_apply(self):
+        for command_text, expected_user_text in USER_ONLY_CASES:
+            with self.subTest(command_text=command_text):
+                found_refusals = ops_cli.classify_command(command_text)
+                self.assertEqual([type(one_refusal) for one_refusal in found_refusals], [ops_cli.UserOnlyCommand])
+                self.assertEqual(found_refusals[0].user_text, expected_user_text)
+
+    def test_the_hook_script_refuses_apply_with_the_user_text(self):
+        hook_run = self.run_hook(json.dumps({"tool_name": "Bash", "tool_input": {
+            "command": f"{CLI_TEXT} tf apply x.plan"}}))
+        self.assertEqual(hook_run.returncode, 2)
+        self.assertIn("ops: an apply or destroy is refused from the Bash tool; only the user runs it", hook_run.stderr)
+        self.assertIn(f"  user runs  ! {CLI_TEXT} tf apply x.plan", hook_run.stderr)
+        self.assertNotIn("run      ", hook_run.stderr)
 
     def run_hook(self, hook_input):
         return subprocess.run(["bash", str(HOOK_FILE)], input=hook_input, capture_output=True, text=True)

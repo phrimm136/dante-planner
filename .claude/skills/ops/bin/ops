@@ -3,6 +3,7 @@ import contextlib
 import dataclasses
 import datetime
 import functools
+import hashlib
 import importlib.machinery
 import importlib.util
 import json
@@ -56,13 +57,28 @@ CONFIG_SECTION_PATTERN = re.compile(r"^\s*\[(?:profile\s+)?([^\]]+?)\s*\]")
 ACCOUNT_ID_LINE = re.compile(r"^\s*sso_account_id\s*=\s*(\d+)\s*$")
 ARN_ACCOUNT_PATTERN = re.compile(r"(arn:aws[a-z-]*:[^:\s]*:[^:\s]*:)\d{12}(?=:)")
 UNMAPPED_ACCOUNT = "<account>"
+GUARDED_KINDS = ("destroy", "replace")
+GUARDED_UPDATE_TYPES = ("aws_instance", "aws_autoscaling_group", "aws_db_instance")
+WARN_CHECK_STATUSES = ("fail", "error")
+VERDICT_SUFFIX = ".verdict.json"
+VERDICT_CLEAR = "clear"
+VERDICT_BLOCKED = "blocked"
+BLOCKED_EXIT = 3
+BLOCKED_LINE = ("blocked: name each change you mean with --expect <address>, before the -- ; "
+                "no apply command is printed")
+PYTHON_PATTERN = re.compile(r"^python3?(\.\d+)?$")
+OPS_CLI_NAME = Path(CLI_PATH).name
+USER_ONLY_SUBCOMMANDS = ("apply", "destroy")
+NET_NAMES = ("skills/ops/bin/ops", Path(TERRAFORM_RUNNER).name)
+NET_WORD_PATTERN = re.compile(rf"(?<![A-Za-z0-9_-])({'|'.join(USER_ONLY_SUBCOMMANDS)})(?![A-Za-z0-9_-])")
 
 USAGE_TEXT = f"""usage: ops [--env prod|staging|mgmt] <command> [args]
        ops list | doctor | help
        ops hook < tool-json
 
-Runs the repeated workstation reads of production and terraform plans. Nothing it runs
-changes cloud state: there is no write command and no apply. Each command runs one script
+Runs the repeated workstation reads of production, terraform plans and the apply of a plan it
+cleared. Only tf apply changes cloud state, and you run it as the printed `!` line; the hook
+refuses it from the Bash tool in the forms it can see (hook below). Each command runs one script
 under scripts/ops/ with AWS_PROFILE set from --env (prod, staging or mgmt, the profile names
 in ~/.aws/config; default prod), after checking that profile's SSO session.
 
@@ -79,6 +95,27 @@ tf plan:    writes the plan file beside its log (ops-tf-<stack>-<ts>.plan), keep
             *.tf files except modules; a stack whose backend file names a fixed account takes
             that account's profile (backend.management.hcl: mgmt), and a stack whose fixed
             account has no ops profile is planned directly through terraform-run.sh.
+guard:      every replace or destroy, and every update of an
+            {', '.join(GUARDED_UPDATE_TYPES[:-1])} or {GUARDED_UPDATE_TYPES[-1]}, must be named with
+            --expect <address> (repeatable, before the --), and every expected address must be
+            such a change. Otherwise the plan is blocked: UNEXPECTED and ABSENT lines name the
+            difference, no apply command is printed and tf plan exits {BLOCKED_EXIT}. A check block whose
+            status is {' or '.join(WARN_CHECK_STATUSES)} prints a WARN line per problem message (or its
+            address and status when it has none) and changes nothing else. The plan file gets a
+            <plan file>{VERDICT_SUFFIX} beside it with the stack, the profile, the verdict, both
+            address lists and the plan file's sha256; addresses compare as the summary prints them,
+            account ids redacted.
+tf apply:   takes one plan file and nothing else; the stack and the profile come from its
+            verdict file. It refuses a file without a verdict file, a blocked verdict and a plan
+            file changed since it was judged, then runs terraform-run.sh apply on it with the
+            same session check, output, redaction and log as every other command.
+hook:       exit 2 refuses a direct call to a script ops wraps, every ops tf apply and every
+            terraform-run.sh apply or destroy the shell parser can read, and any command whose raw
+            text names {' or '.join(NET_NAMES)} together with the
+            standalone word apply or destroy, parsed or not. It guards ordinary commands; it
+            is not a sandbox: a process that shares your cloud session can still call AWS itself.
+            Known cost: a search or a message naming the CLI path and the word is refused too;
+            put the pattern in a file (rg -f <file>) or the message in one (git commit -F <file>).
 
 `ops list` prints every command with its purpose; `ops doctor` reports the SSO session of
 each profile, session-manager-plugin, Docker and the pinned mysql client image, jq, and the
@@ -194,6 +231,12 @@ class RefusedCommand:
     replacement_text: str
 
 
+@dataclasses.dataclass(frozen=True)
+class UserOnlyCommand:
+    refused_text: str
+    user_text: str
+
+
 def slug_text(label_text):
     return re.sub(r"[^a-z0-9]+", "-", label_text.lower()).strip("-")
 
@@ -221,9 +264,13 @@ DISPATCH_TABLE = (
                 DB_VERIFY_SCRIPT),
     CommandSpec("verify oregon", "", "Oregon nodes, pods, Argo CD apps and RDS reachability (oregon-verify.sh)",
                 OREGON_VERIFY_SCRIPT),
-    CommandSpec("tf plan", "<stack> [-- terraform plan args]",
-                "terraform plan through terraform-run.sh; prints the summary and the apply command for you",
+    CommandSpec("tf plan", "<stack> [--expect <address>]... [-- terraform plan args]",
+                "terraform plan through terraform-run.sh; prints the summary, guards replace, destroy and "
+                "instance updates, and prints the apply command for you when the guard passes",
                 TERRAFORM_RUNNER),
+    CommandSpec("tf apply", "<plan file>",
+                "applies a plan file tf plan cleared, through terraform-run.sh; you run it with !, and the "
+                "hook refuses every form of it that it can see in a Bash-tool command", TERRAFORM_RUNNER),
     CommandSpec("whoami", "", "the account and role the selected profile resolves to (aws sts get-caller-identity)",
                 ""),
     CommandSpec("doctor", "", "SSO session per profile, session-manager-plugin, Docker and the mysql image, jq, "
@@ -232,7 +279,8 @@ DISPATCH_TABLE = (
 )
 
 HOOK_ROW = ("hook", "the PreToolUse entry: reads the Bash tool JSON on stdin, exit 2 refuses a direct "
-            "call to a script ops wraps")
+            "call to a script ops wraps and any command naming the CLI or runner with apply or destroy; "
+            "not a sandbox")
 
 
 def spec_named(command_name):
@@ -478,31 +526,69 @@ def plan_env(repo_root, one_stack, requested_env):
 class PlanRequest:
     stack_name: str
     extra_args: tuple
+    expected_addresses: tuple = ()
 
 
-def apply_text(repo_root):
-    return (f"apply is run by you, never by ops: plan with `{CLI_PATH} tf plan <stack>`, read the summary, "
-            f"then run the printed `! {repo_root / TERRAFORM_RUNNER} -chdir={repo_root / TERRAFORM_ROOT}/<stack> "
-            f"apply <plan file>`")
+@dataclasses.dataclass(frozen=True)
+class ApplyRequest:
+    plan_path: Path
 
 
 OUT_FLAGS = {"-out", "--out"}
 EXITCODE_FLAGS = {"-detailed-exitcode", "--detailed-exitcode"}
+EXPECT_OPTION = "--expect"
 
 
-def tf_request(repo_root, arg_words):
+def expectation_split(plan_words):
+    expected_addresses = []
+    free_words = []
+    word_index = 0
+    while word_index < len(plan_words):
+        one_word = plan_words[word_index]
+        if one_word == EXPECT_OPTION or one_word.startswith(f"{EXPECT_OPTION}="):
+            if "=" in one_word:
+                one_address = one_word.split("=", 1)[1]
+            elif word_index + 1 < len(plan_words):
+                one_address = plan_words[word_index + 1]
+                word_index += 1
+            else:
+                one_address = ""
+            if not one_address:
+                raise OpsError(f"{EXPECT_OPTION} needs the address of a change you mean, as the plan summary "
+                               f"prints it: {CLI_PATH} tf plan <stack> {EXPECT_OPTION} <address>")
+            if one_address in expected_addresses:
+                raise OpsError(f"{EXPECT_OPTION} {one_address} is given twice; name each address once")
+            expected_addresses.append(one_address)
+        else:
+            free_words.append(one_word)
+        word_index += 1
+    return free_words, tuple(expected_addresses)
+
+
+def apply_request(arg_words, caller_dir):
+    if len(arg_words) != 1 or arg_words[0].startswith("-"):
+        raise OpsError(f"ops tf apply takes one plan file and nothing else: the `!` line "
+                       f"{CLI_PATH} tf plan <stack> prints; terraform's own args belong to the plan")
+    return ApplyRequest(Path(caller_dir, arg_words[0]).resolve())
+
+
+def tf_request(repo_root, arg_words, caller_dir):
     if not arg_words:
-        raise OpsError(f"ops tf takes plan; {apply_text(repo_root)}")
-    if arg_words[0] in ("apply", "destroy"):
-        raise OpsError(apply_text(repo_root))
+        raise OpsError("ops tf takes plan or apply; see ops list")
+    if arg_words[0] == "apply":
+        return apply_request(arg_words[1:], caller_dir)
+    if arg_words[0] == "destroy":
+        raise OpsError(f"ops tf has no destroy: plan it with {CLI_PATH} tf plan <stack> {EXPECT_OPTION} "
+                       f"<address> -- -destroy, naming each address, then run the printed `!` apply line")
     if arg_words[0] != "plan":
-        raise OpsError(f"ops tf has only plan, not '{arg_words[0]}'; init, workspace and state run through "
-                       f"{TERRAFORM_RUNNER} yourself")
+        raise OpsError(f"ops tf has only plan and apply, not '{arg_words[0]}'; init, workspace and state run "
+                       f"through {TERRAFORM_RUNNER} yourself")
     plan_words = list(arg_words[1:])
     extra_args = ()
     if "--" in plan_words:
         split_index = plan_words.index("--")
         plan_words, extra_args = plan_words[:split_index], tuple(plan_words[split_index + 1:])
+    plan_words, expected_addresses = expectation_split(plan_words)
     stack_names = plan_stacks(repo_root)
     if len(plan_words) != 1:
         raise OpsError(f"ops tf plan takes one stack, then -- and terraform's own args; stacks: "
@@ -513,9 +599,9 @@ def tf_request(repo_root, arg_words):
     if any(one_arg.split("=", 1)[0] in OUT_FLAGS for one_arg in extra_args):
         raise OpsError("ops tf plan writes the plan file itself, beside its log; drop -out")
     if any(one_arg.split("=", 1)[0] in EXITCODE_FLAGS for one_arg in extra_args):
-        raise OpsError("ops tf plan owns the exit code (0 planned, non-zero failed) and prints the change "
-                       "summary itself; drop -detailed-exitcode")
-    return PlanRequest(plan_words[0], extra_args)
+        raise OpsError(f"ops tf plan owns the exit code (0 planned, {BLOCKED_EXIT} blocked, other non-zero "
+                       f"failed) and prints the change summary itself; drop -detailed-exitcode")
+    return PlanRequest(plan_words[0], extra_args, expected_addresses)
 
 
 BACKEND_FILE_PATTERN = re.compile(r"-backend-config=(?:\.\./)?(backend\.[A-Za-z0-9_.-]+\.hcl)")
@@ -576,9 +662,12 @@ def show_arguments(stack_name, plan_path):
     return (f"-chdir={TERRAFORM_ROOT}/{stack_name}", "show", "-json", str(plan_path))
 
 
-def apply_line(repo_root, stack_name, plan_path):
-    return (f"! {repo_root / TERRAFORM_RUNNER} -chdir={repo_root / TERRAFORM_ROOT / stack_name} "
-            f"apply {plan_path}")
+def apply_arguments(stack_name, plan_path):
+    return (f"-chdir={TERRAFORM_ROOT}/{stack_name}", "apply", str(plan_path))
+
+
+def apply_line(repo_root, plan_path):
+    return f"! {repo_root / CLI_PATH} tf apply {plan_path}"
 
 
 SUMMARY_ORDER = (("destroy", "- "), ("replace", "-/+ "), ("update", "~ "), ("create", "+ "), ("import", "<= "),
@@ -606,6 +695,8 @@ class PlanSummary:
     destroy_count: int
     output_count: int
     import_count: int
+    guarded_markers: dict = dataclasses.field(default_factory=dict)
+    check_messages: tuple = ()
 
     @property
     def counts_line(self):
@@ -614,13 +705,33 @@ class PlanSummary:
                 f"{self.destroy_count} to destroy.")
 
 
+def is_guarded(kind_name, resource_type):
+    return kind_name in GUARDED_KINDS or (kind_name == "update" and resource_type in GUARDED_UPDATE_TYPES)
+
+
+def check_warnings(show_data):
+    warning_texts = []
+    for one_check in show_data.get("checks") or ():
+        check_status = one_check.get("status", "")
+        if check_status not in WARN_CHECK_STATUSES:
+            continue
+        problem_messages = [one_problem.get("message", "") for one_instance in one_check.get("instances") or ()
+                            for one_problem in one_instance.get("problems") or ()]
+        check_address = (one_check.get("address") or {}).get("to_display", "?")
+        warning_texts += problem_messages or [f"{check_address} {check_status}"]
+    return tuple(warning_texts)
+
+
 def plan_summary(show_data):
     grouped_rows = {kind_name: [] for kind_name, _ in SUMMARY_ORDER}
+    guarded_rows = {kind_name: [] for kind_name in grouped_rows}
     for resource_change in show_data.get("resource_changes") or ():
         change_data = resource_change.get("change", {})
         kind_name = change_kind(list(change_data.get("actions", ())))
         if kind_name:
             grouped_rows[kind_name].append(resource_change["address"])
+        if is_guarded(kind_name, resource_change.get("type", "")):
+            guarded_rows[kind_name].append(resource_change["address"])
         if change_data.get("importing"):
             grouped_rows["import"].append(resource_change["address"])
         previous_address = resource_change.get("previous_address", "")
@@ -631,20 +742,86 @@ def plan_summary(show_data):
     replace_count = len(grouped_rows["replace"])
     output_count = sum(1 for output_change in (show_data.get("output_changes") or {}).values()
                        if list(output_change.get("actions", ())) != ["no-op"])
+    guarded_markers = {resource_address: marker_text for kind_name, marker_text in SUMMARY_ORDER
+                       for resource_address in guarded_rows[kind_name]}
     return PlanSummary(change_lines,
                        len(grouped_rows["create"]) + replace_count,
                        len(grouped_rows["update"]),
                        len(grouped_rows["destroy"]) + replace_count,
                        output_count,
-                       len(grouped_rows["import"]))
+                       len(grouped_rows["import"]),
+                       guarded_markers,
+                       check_warnings(show_data))
 
 
-def summary_lines(plan_info, repo_root, stack_name, plan_path):
+@dataclasses.dataclass(frozen=True)
+class PlanVerdict:
+    stack_name: str
+    profile_name: str
+    expected_addresses: tuple
+    guarded_addresses: tuple
+    plan_sha256: str
+
+    @property
+    def unexpected_addresses(self):
+        return tuple(one_address for one_address in self.guarded_addresses
+                     if one_address not in self.expected_addresses)
+
+    @property
+    def absent_addresses(self):
+        return tuple(one_address for one_address in self.expected_addresses
+                     if one_address not in self.guarded_addresses)
+
+    @property
+    def verdict_name(self):
+        return VERDICT_BLOCKED if self.unexpected_addresses or self.absent_addresses else VERDICT_CLEAR
+
+    def as_document(self):
+        return {"stack": self.stack_name, "env": self.profile_name, "verdict": self.verdict_name,
+                "expected": list(self.expected_addresses), "guarded": list(self.guarded_addresses),
+                "plan_sha256": self.plan_sha256}
+
+
+def file_sha256(file_path):
+    return hashlib.sha256(file_path.read_bytes()).hexdigest()
+
+
+def verdict_path_of(plan_path):
+    return plan_path.with_name(plan_path.name + VERDICT_SUFFIX)
+
+
+def plan_verdict(plan_info, plan_request, profile_name, plan_sha256):
+    return PlanVerdict(plan_request.stack_name, profile_name,
+                       tuple(sorted({redact_text(one_address) for one_address in plan_request.expected_addresses})),
+                       tuple(sorted({redact_text(one_address) for one_address in plan_info.guarded_markers})),
+                       redact_text(plan_sha256))
+
+
+def write_verdict(plan_path, one_verdict):
+    verdict_text = json.dumps(one_verdict.as_document(), indent=2) + "\n"
+    verdict_path_of(plan_path).write_text(redact_text(verdict_text), encoding="utf-8")
+
+
+def guard_lines(plan_info, one_verdict):
+    return [*[f"UNEXPECTED {marker_text}{one_address}"
+              for one_address, marker_text in plan_info.guarded_markers.items()
+              if redact_text(one_address) in one_verdict.unexpected_addresses],
+            *[f"ABSENT {one_address}" for one_address in one_verdict.absent_addresses]]
+
+
+def summary_lines(plan_info, one_verdict, repo_root, plan_path):
+    warn_lines = [f"WARN {message_text}" for message_text in plan_info.check_messages]
     if plan_info.change_lines:
-        return [*plan_info.change_lines, plan_info.counts_line, apply_line(repo_root, stack_name, plan_path)]
-    if plan_info.output_count:
-        return [f"Outputs only: {plan_info.output_count} changed.", apply_line(repo_root, stack_name, plan_path)]
-    return ["No changes."]
+        change_lines = [*plan_info.change_lines, plan_info.counts_line]
+    elif plan_info.output_count:
+        change_lines = [f"Outputs only: {plan_info.output_count} changed."]
+    else:
+        change_lines = ["No changes."]
+    if one_verdict.verdict_name == VERDICT_BLOCKED:
+        return [*warn_lines, *change_lines, *guard_lines(plan_info, one_verdict), BLOCKED_LINE]
+    if plan_info.change_lines or plan_info.output_count:
+        return [*warn_lines, *change_lines, apply_line(repo_root, plan_path)]
+    return [*warn_lines, *change_lines]
 
 
 def git_environment():
@@ -938,13 +1115,70 @@ def run_plan(repo_paths, plan_request, profile_name, system_effects, run_moment)
         print(f"ops: terraform show -json failed (exit {show_run.returncode}); plan file {plan_path}, "
               f"log {log_path}", file=sys.stderr)
         return show_run.returncode
-    out_lines = summary_lines(plan_summary(json.loads(show_run.stdout)), repo_paths.repo_root,
-                              plan_request.stack_name, plan_path)
+    plan_info = plan_summary(json.loads(show_run.stdout))
+    one_verdict = plan_verdict(plan_info, plan_request, profile_name, file_sha256(plan_path))
+    write_verdict(plan_path, one_verdict)
+    out_lines = summary_lines(plan_info, one_verdict, repo_paths.repo_root, plan_path)
     with redacted_log(log_path, "a") as log_file:
         log_file.write("\n".join(out_lines) + "\n")
     print("\n".join(out_lines))
-    print(f"ops: exit 0, log {log_path}", file=sys.stderr)
-    return 0
+    exit_code = BLOCKED_EXIT if one_verdict.verdict_name == VERDICT_BLOCKED else 0
+    print(f"ops: exit {exit_code}, log {log_path}", file=sys.stderr)
+    return exit_code
+
+
+def read_verdict(plan_path):
+    verdict_path = verdict_path_of(plan_path)
+    if not plan_path.is_file():
+        raise OpsError(f"no plan file at {plan_path}; plan with {CLI_PATH} tf plan <stack> and run the `!` line "
+                       f"it prints")
+    if not verdict_path.is_file():
+        raise OpsError(f"{plan_path} is not a plan ops produced (no {verdict_path.name} beside it); plan with "
+                       f"{CLI_PATH} tf plan <stack> and run the `!` line it prints")
+    try:
+        verdict_data = json.loads(verdict_path.read_text(encoding="utf-8"))
+        return verdict_data, PlanVerdict(str(verdict_data["stack"]), str(verdict_data["env"]),
+                                         tuple(verdict_data["expected"]), tuple(verdict_data["guarded"]),
+                                         str(verdict_data["plan_sha256"]))
+    except (json.JSONDecodeError, KeyError, TypeError):
+        raise OpsError(f"{verdict_path} is not a verdict ops wrote; plan again with "
+                       f"{CLI_PATH} tf plan <stack>") from None
+
+
+def cleared_verdict(repo_root, plan_path):
+    verdict_data, one_verdict = read_verdict(plan_path)
+    plan_again = f"plan again with {CLI_PATH} tf plan {one_verdict.stack_name}"
+    if one_verdict.stack_name not in plan_stacks(repo_root) or one_verdict.profile_name not in ENV_PROFILES.values():
+        raise OpsError(f"{verdict_path_of(plan_path)} names stack '{one_verdict.stack_name}' and profile "
+                       f"'{one_verdict.profile_name}', which this checkout does not plan; {plan_again}")
+    if verdict_data.get("verdict") != VERDICT_CLEAR or one_verdict.verdict_name != VERDICT_CLEAR:
+        named_lines = [*[f"UNEXPECTED {one_address}" for one_address in one_verdict.unexpected_addresses],
+                       *[f"ABSENT {one_address}" for one_address in one_verdict.absent_addresses]]
+        raise OpsError(f"the guard blocked {plan_path} ({', '.join(named_lines)}); {plan_again} "
+                       f"{EXPECT_OPTION} <address> for each change you mean")
+    if one_verdict.plan_sha256 != redact_text(file_sha256(plan_path)):
+        raise OpsError(f"the plan file {plan_path} changed after it was judged; {plan_again}")
+    return one_verdict
+
+
+def apply_env(one_verdict, requested_env):
+    env_name = next(env_key for env_key, env_profile in ENV_PROFILES.items()
+                    if env_profile == one_verdict.profile_name)
+    if requested_env and requested_env != env_name:
+        raise OpsError(f"the plan was made with --env {env_name}, and apply takes its profile from the plan; "
+                       f"drop --env {requested_env}")
+    return env_name
+
+
+def run_apply(repo_paths, one_request, requested_env, system_effects, run_moment):
+    one_verdict = cleared_verdict(repo_paths.repo_root, one_request.plan_path)
+    env_name = apply_env(one_verdict, requested_env)
+    require_init(repo_paths.repo_root, stack_info(repo_paths.repo_root, one_verdict.stack_name), env_name)
+    require_session(repo_paths, one_verdict.profile_name, system_effects)
+    script_invocation = ScriptInvocation(spec_named("tf apply"),
+                                         apply_arguments(one_verdict.stack_name, one_request.plan_path),
+                                         ("tf", "apply", one_verdict.stack_name), True)
+    return run_script(repo_paths, script_invocation, one_verdict.profile_name, system_effects, run_moment)
 
 
 SHELL_NAMES = {"bash", "sh", "zsh", "dash"}
@@ -1043,8 +1277,34 @@ def replacement_words(head_word, arg_words, env_name):
 SOURCE_WORDS = {"source", "."}
 
 
+def ops_command_words(arg_words):
+    command_words = []
+    word_index = 0
+    while word_index < len(arg_words) and arg_words[word_index] != "--":
+        one_word = arg_words[word_index]
+        if one_word == "--env":
+            word_index += 1
+        elif not one_word.startswith("--env="):
+            command_words.append(one_word)
+        word_index += 1
+    return command_words
+
+
+def user_only_text(core_words, command_words):
+    head_path = posixpath.normpath(core_words[0].replace("\\", "/"))
+    if os.path.basename(head_path) == OPS_CLI_NAME and ops_command_words(core_words[1:])[:2] == ["tf", "apply"]:
+        return f"! {shlex.join(command_words)}"
+    if wrapped_kind(core_words[0]) != Path(TERRAFORM_RUNNER).name:
+        return ""
+    subcommand_name = next((one_arg for one_arg in core_words[1:] if not one_arg.startswith("-")), "")
+    if subcommand_name not in USER_ONLY_SUBCOMMANDS:
+        return ""
+    return f"! {CLI_PATH} tf apply <plan file>, for a plan file {CLI_PATH} tf plan <stack> cleared"
+
+
 def shell_script_words(core_words):
-    if os.path.basename(core_words[0]) not in SHELL_NAMES:
+    head_name = os.path.basename(core_words[0])
+    if head_name not in SHELL_NAMES and not PYTHON_PATTERN.match(head_name):
         return None
     rest_words = list(core_words[1:])
     while rest_words and rest_words[0].startswith("-"):
@@ -1074,6 +1334,10 @@ def classify_words(command_words, depth_left):
         core_words = script_words
     elif core_words[0] in SOURCE_WORDS and len(core_words) > 1:
         core_words = core_words[1:]
+    user_text = user_only_text(core_words, command_words)
+    if user_text:
+        found_refusals.append(UserOnlyCommand(shlex.join(command_words), user_text))
+        return found_refusals
     ops_words = replacement_words(core_words[0], core_words[1:], assigned_env(assignment_words))
     if ops_words is not None:
         found_refusals.append(RefusedCommand(shlex.join(command_words), ops_text(*ops_words)))
@@ -1113,12 +1377,23 @@ def classify_command(command_text, depth_left=6):
 
 
 def refusal_message(found_refusals):
-    message_lines = ["ops: a direct call to a production script the ops CLI wraps is refused (ADR 512); run the",
-                     "ops command, which selects the AWS profile (--env, default prod), checks the SSO session",
-                     "and writes the dated log:"]
-    for one_refusal in found_refusals:
-        message_lines.append(f"  refused  {one_refusal.refused_text}")
-        message_lines.append(f"  run      {one_refusal.replacement_text}")
+    message_lines = []
+    user_refusals = [one_refusal for one_refusal in found_refusals if isinstance(one_refusal, UserOnlyCommand)]
+    wrapped_refusals = [one_refusal for one_refusal in found_refusals if isinstance(one_refusal, RefusedCommand)]
+    if user_refusals:
+        message_lines += ["ops: an apply or destroy is refused from the Bash tool; only the user runs it, typed",
+                          "outside the tool with a leading !. There is no command for an agent to run instead:"]
+        for one_refusal in user_refusals:
+            message_lines.append(f"  refused    {one_refusal.refused_text}")
+            message_lines.append(f"  user runs  {one_refusal.user_text}")
+    if wrapped_refusals:
+        message_lines += [
+            "ops: a direct call to a production script the ops CLI wraps is refused (ADR 512); run the",
+            "ops command, which selects the AWS profile (--env, default prod), checks the SSO session",
+            "and writes the dated log:"]
+        for one_refusal in wrapped_refusals:
+            message_lines.append(f"  refused  {one_refusal.refused_text}")
+            message_lines.append(f"  run      {one_refusal.replacement_text}")
     message_lines.append(f"Every command: {CLI_PATH} list")
     return "\n".join(message_lines)
 
@@ -1131,19 +1406,55 @@ def hook_main(stdin_text):
     if hook_input.get("tool_name", "Bash") != "Bash":
         return 0
     command_text = (hook_input.get("tool_input") or {}).get("command") or ""
+    refusal_text = hook_refusal(command_text)
+    if not refusal_text:
+        return 0
+    print(refusal_text, file=sys.stderr)
+    return 2
+
+
+@dataclasses.dataclass(frozen=True)
+class TextNetMatch:
+    named_path: str
+    named_word: str
+
+
+def text_net_match(command_text):
+    named_path = next((one_name for one_name in NET_NAMES if one_name in command_text), "")
+    word_match = NET_WORD_PATTERN.search(command_text)
+    if not named_path or not word_match:
+        return None
+    return TextNetMatch(named_path, word_match.group(1))
+
+
+def net_message(net_match):
+    return "\n".join([
+        f"ops: this command names {net_match.named_path} together with the word '{net_match.named_word}', and the "
+        f"hook cannot show it harmless,",
+        "so it is refused from the Bash tool; only the user applies, typed outside the tool with a leading !:",
+        f"  user runs  ! {CLI_PATH} tf apply <plan file>, for a plan file {CLI_PATH} tf plan <stack> cleared",
+        "A command that only mentions them passes with the word in a file: rg -f <pattern file>, "
+        "git commit -F <message file>.",
+        f"Every command: {CLI_PATH} list"])
+
+
+def hook_refusal(command_text):
+    net_match = text_net_match(command_text)
     try:
         found_refusals = classify_command(command_text)
     except Exception as parser_error:
+        if net_match:
+            return net_message(net_match)
         if not any(script_name in command_text for script_name in WRAPPED_NAMES):
-            return 0
-        print(f"ops hook: the shell parser borrowed from {CHECKS_CLI_PATH} failed ({parser_error!r}), so a "
-              f"command naming a script ops wraps is refused; restore the parser with: git checkout -- "
-              f"{CHECKS_CLI_PATH}", file=sys.stderr)
-        return 2
-    if not found_refusals:
-        return 0
-    print(refusal_message(found_refusals), file=sys.stderr)
-    return 2
+            return ""
+        return (f"ops hook: the shell parser borrowed from {CHECKS_CLI_PATH} failed ({parser_error!r}), so a "
+                f"command naming a script ops wraps is refused; restore the parser with: git checkout -- "
+                f"{CHECKS_CLI_PATH}")
+    if any(isinstance(one_refusal, UserOnlyCommand) for one_refusal in found_refusals):
+        return refusal_message(found_refusals)
+    if net_match:
+        return net_message(net_match)
+    return refusal_message(found_refusals) if found_refusals else ""
 
 
 def main(argv_words, system_effects=None, caller_dir=None, run_moment=None, repo_paths=None):
@@ -1176,7 +1487,11 @@ def run_command(argv_words, system_effects, caller_dir, run_moment, repo_paths):
             print(f"{problem_count} problem(s); each line above names its fix")
         return 1 if problem_count else 0
     if command_name == "tf":
-        plan_request = tf_request(repo_paths.repo_root, list(ops_request.command_words[1:]))
+        tf_command = tf_request(repo_paths.repo_root, list(ops_request.command_words[1:]),
+                                caller_dir or os.getcwd())
+        if isinstance(tf_command, ApplyRequest):
+            return run_apply(repo_paths, tf_command, ops_request.env_name, system_effects, run_moment)
+        plan_request = tf_command
         one_stack = stack_info(repo_paths.repo_root, plan_request.stack_name)
         env_name = plan_env(repo_paths.repo_root, one_stack, ops_request.env_name)
         profile_name = ENV_PROFILES[env_name]

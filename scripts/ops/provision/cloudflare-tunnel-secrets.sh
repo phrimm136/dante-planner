@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Inject the cloudflared tunnel token VALUES, read from terraform/cloudflare's outputs. Run after
-# `terraform -chdir=terraform/cloudflare apply` and before the cluster syncs cloudflared.
+# the cloudflare apply (`ops tf plan cloudflare`, then the printed `! … ops tf apply <plan file>`) and
+# before the cluster syncs cloudflared.
 # Creates the container on first run (then enrolled in terraform/secrets secret_names).
 # Usage: cloudflare-tunnel-secrets.sh
 set -euo pipefail

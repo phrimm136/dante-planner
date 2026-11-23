@@ -45,8 +45,8 @@ account reproduces the region (Done-When: rebuild proves the bootstrap).
 export AWS_PROFILE=<your-provisioning-profile>
 terraform init
 terraform validate
-terraform plan        # READ IT
-terraform apply
+.claude/skills/ops/bin/ops tf plan oregon -- -var-file=prod.tfvars   # READ IT
+.claude/skills/ops/bin/ops tf apply <plan file printed above>        # the user, as the printed ! line
 terraform output backend_ecr_repository_url
 ```
 

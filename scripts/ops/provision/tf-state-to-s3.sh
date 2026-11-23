@@ -2,6 +2,8 @@
 # Move each stack's Terraform state from the local disk into the shared S3 bucket.
 #
 # Run once, after `scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap apply` has created the bucket.
+# That apply is run by hand through the runner, not ops, because it runs with admin credentials before
+# any ops profile exists.
 # iam-bootstrap itself stays on local state: it creates the bucket the others use, so it has
 # to be appliable with nothing but credentials.
 #

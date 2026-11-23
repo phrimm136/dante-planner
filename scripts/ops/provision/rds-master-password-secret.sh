@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Seed danteplanner/rds/master-password, which terraform/rds reads at plan time.
-# Run BEFORE `scripts/ops/terraform-run.sh -chdir=terraform/rds apply`, and before enrolling the name in
+# Run BEFORE the rds apply (`ops tf plan rds`, then the printed `! … ops tf apply <plan file>`), and before enrolling the name in
 # terraform/secrets secret_names (that stack imports containers, so the name must exist).
 #
 # Usage:
@@ -36,6 +36,6 @@ printf %s "$value" | put_secret "$region" "$name"
 unset value
 
 echo "done. Next:"
-echo "  1. scripts/ops/terraform-run.sh -chdir=terraform/secrets apply   # enrols the container for replication"
+echo "  1. .claude/skills/ops/bin/ops --env <env> tf plan secrets -- -var-file=<env>.tfvars, then the printed ! ... ops tf apply line   # enrols the container for replication"
 echo "  2. delete the master_password line from the environment's tfvars"
 echo "  3. .claude/skills/ops/bin/ops --env <env> tf plan rds -- -var-file=<env>.tfvars   # must show NO change"

@@ -159,7 +159,7 @@ export AWS_PROFILE=prod
 scripts/ops/terraform-run.sh -chdir=terraform/secrets init -backend-config=../backend.prod.hcl -reconfigure
 scripts/ops/terraform-run.sh -chdir=terraform/secrets state list | rg origin_client_ca   # expect nothing
 .claude/skills/ops/bin/ops tf plan secrets -- -var-file=prod.tfvars       # READ IT
-scripts/ops/terraform-run.sh -chdir=terraform/secrets apply -var-file=prod.tfvars
+.claude/skills/ops/bin/ops tf apply <plan file printed above>    # the user, as the printed ! line
 ```
 
 **Staging:** the rehearsal workflow reads `/danteplanner/staging/tfvars/secrets` from SSM, but on
@@ -181,7 +181,7 @@ scripts/ops/terraform-run.sh -chdir=terraform/secrets state list | rg origin_cli
 scripts/ops/terraform-run.sh -chdir=terraform/secrets state rm \
   'aws_secretsmanager_secret.origin_client_ca[0]' 'aws_secretsmanager_secret_version.origin_client_ca[0]'
 .claude/skills/ops/bin/ops --env staging tf plan secrets -- -var-file=staging.tfvars    # READ IT
-scripts/ops/terraform-run.sh -chdir=terraform/secrets apply -var-file=staging.tfvars
+.claude/skills/ops/bin/ops tf apply <plan file printed above>    # the user, as the printed ! line
 ```
 
 Gate, per account: the plan reads `4 to import, 0 to add, 4 to change, 0 to destroy`. The four
@@ -229,9 +229,9 @@ layout, and no `origin-client-ca` row is left. Then narrow the app-node grants t
 
 ```bash
 .claude/skills/ops/bin/ops tf plan oregon -- -var-file=prod.tfvars    # READ IT: the app-node secrets policy updates in place, nothing else
-scripts/ops/terraform-run.sh -chdir=terraform/oregon apply -var-file=prod.tfvars
+.claude/skills/ops/bin/ops tf apply <oregon plan file printed above>    # the user, as the printed ! line
 .claude/skills/ops/bin/ops tf plan seoul -- -var-file=prod.tfvars
-scripts/ops/terraform-run.sh -chdir=terraform/seoul  apply -var-file=prod.tfvars
+.claude/skills/ops/bin/ops tf apply <seoul plan file printed above>     # the user, as the printed ! line
 synced us-west-2 oregon
 synced ap-northeast-2 seoul
 ```

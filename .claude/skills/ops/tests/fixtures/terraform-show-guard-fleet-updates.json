@@ -1,0 +1,40 @@
+{
+  "resource_changes": [
+    {
+      "address": "aws_db_instance.primary",
+      "type": "aws_db_instance",
+      "change": {
+        "actions": [
+          "update"
+        ]
+      }
+    },
+    {
+      "address": "aws_db_instance.replica",
+      "type": "aws_db_instance",
+      "change": {
+        "actions": [
+          "no-op"
+        ]
+      }
+    },
+    {
+      "address": "data.aws_db_instance.source",
+      "type": "aws_db_instance",
+      "change": {
+        "actions": [
+          "read"
+        ]
+      }
+    },
+    {
+      "address": "module.fleet.aws_autoscaling_group.app",
+      "type": "aws_autoscaling_group",
+      "change": {
+        "actions": [
+          "update"
+        ]
+      }
+    }
+  ]
+}

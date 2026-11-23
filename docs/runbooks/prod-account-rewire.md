@@ -18,7 +18,8 @@ terraform -chdir=terraform/state-backend workspace new danteplanner-prod
 # Create terraform/state-backend/danteplanner-prod.tfvars (gitignored, like its siblings):
 #   aws_account_id  = "<prod account id>"
 #   assume_role_arn = ""        # empty when the profile's credentials already land in prod
-AWS_PROFILE=<prod> scripts/ops/terraform-run.sh -chdir=terraform/state-backend apply -var-file=danteplanner-prod.tfvars
+.claude/skills/ops/bin/ops tf plan state-backend -- -var-file=danteplanner-prod.tfvars
+.claude/skills/ops/bin/ops tf apply <plan file printed above>    # the user, as the printed ! line
 ```
 
 ## 2. Backend config for the prod account
@@ -39,7 +40,8 @@ GitHub `production` environment.
 
 ```bash
 terraform -chdir=terraform/iam-bootstrap workspace new danteplanner-prod
-AWS_PROFILE=<prod> scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap apply -var-file=danteplanner-prod.tfvars
+.claude/skills/ops/bin/ops tf plan iam-bootstrap -- -var-file=danteplanner-prod.tfvars
+.claude/skills/ops/bin/ops tf apply <plan file printed above>    # the user, as the printed ! line
 terraform -chdir=terraform/iam-bootstrap output -raw provisioner_role_arn
 ```
 
