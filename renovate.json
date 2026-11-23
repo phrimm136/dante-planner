@@ -1,28 +1,84 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "dependencyDashboard": { "enabled": true },
-  "enabledManagers": ["argocd", "custom.regex"],
+  "dependencyDashboard": {
+    "enabled": true
+  },
+  "enabledManagers": [
+    "argocd",
+    "custom.regex"
+  ],
   "minimumReleaseAge": "7 days",
   "automerge": false,
   "argocd": {
-    "managerFilePatterns": ["/^deploy/apps/[^/]+\\.yaml$/"]
+    "managerFilePatterns": [
+      "/^deploy/apps/[^/]+\\.yaml$/"
+    ]
   },
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": ["/^terraform/modules/fleet/variables\\.tf$/"],
+      "managerFilePatterns": [
+        "/^terraform/modules/fleet/variables\\.tf$/"
+      ],
       "matchStrings": [
         "variable \"k3s_version\" \\{[^}]*?default\\s*=\\s*\"(?<currentValue>[^\"]+)\""
       ],
       "depNameTemplate": "k3s-io/k3s",
       "datasourceTemplate": "github-releases",
       "versioningTemplate": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)\\+k3s(?<build>\\d+)$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^\\.github/scripts/images\\.sh$/",
+        "/^\\.github/scripts/deploy-test\\.sh$/"
+      ],
+      "matchStrings": [
+        "[A-Z0-9_]+_IMAGE=(?<depName>[^:\\s]+):(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^\\.github/scripts/deploy-test\\.sh$/"
+      ],
+      "matchStrings": [
+        "KUBERNETES_SCHEMAS=https://raw\\.githubusercontent\\.com/yannh/kubernetes-json-schema/(?<currentDigest>[0-9a-f]{40})"
+      ],
+      "currentValueTemplate": "master",
+      "depNameTemplate": "yannh/kubernetes-json-schema",
+      "packageNameTemplate": "https://github.com/yannh/kubernetes-json-schema",
+      "datasourceTemplate": "git-refs"
     }
   ],
   "packageRules": [
     {
-      "matchDatasources": ["github-releases"],
-      "matchDepNames": ["k3s-io/k3s"],
+      "matchDepNames": [
+        "rancher/k3s"
+      ],
+      "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-k3s(?<build>\\d+)$"
+    },
+    {
+      "matchDatasources": [
+        "docker",
+        "git-refs"
+      ],
+      "minimumReleaseAgeBehaviour": "timestamp-optional"
+    },
+    {
+      "matchDepNames": [
+        "alpine/helm"
+      ],
+      "allowedVersions": "<4"
+    },
+    {
+      "matchDepNames": [
+        "k3s-io/k3s",
+        "rancher/k3s",
+        "yannh/kubernetes-json-schema"
+      ],
+      "groupName": "k3s",
       "dependencyDashboardApproval": true
     }
   ]

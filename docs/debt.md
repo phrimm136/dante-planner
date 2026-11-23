@@ -623,13 +623,6 @@ contract. ADR 039 names this population directly — the seed carries gift ids o
 valid band. The validation branch adds a fourth backend copy (`EncodedGiftId`) beside
 `GameDataRegistry.GIFT_ENHANCEMENT_PATTERN`, which `PlannerIdMigrations` also reads.
   re-check: `rg -q 'EncodedGiftIdSchema.safeParse\(id\)' frontend/src/pages/planner/lib/plannerContentExtractors.ts && rg -q 'return enhanced \? id % 10000 : id;' backend/src/main/java/org/danteplanner/backend/planner/searchindex/PlannerContentEntityExtractor.java`
-- 2026-08-17 — `PlannerCoreInfo.absent()` yields a null `createdAt`
-(`PublishedPlannerQueryService` uses it whenever the batch core load misses a row)
-and the global `NON_NULL` Jackson config omits the key, but `PlannerListSchemas.ts:19`
-declares `createdAt` required, so one catalog row without a core row rejects the entire
-paginated community page rather than one card. The sibling fields on the same DTO are
-correctly `.nullish()` (`:17-18`) and the components already tolerate an absent value.
-  re-check: `rg -q '^  createdAt: z.string\(\),$' frontend/src/pages/planner/schemas/PlannerListSchemas.ts && rg -q 'return new PlannerCoreInfo\(null, null, null, null, null\);' backend/src/main/java/org/danteplanner/backend/planner/dto/PlannerCoreInfo.java`
 - 2026-08-17 — `AbEventSchemas.ts:5` types `relatedEgoGifts` as `z.array(z.string())`
 rather than `EGOGiftIdSchema`, and 13 ids in `static/data/abEventSpecList.json`
 (`991001`–`993004`, six digits) violate `GIFT_ID_PATTERN`. `EGOGiftGrid.tsx:32-33` renders
@@ -1076,15 +1069,6 @@ guards the parse but likewise skips the schema gate.
   with the container's rightmost-trusted parser (`ForwardedHeaderFilter` / `RemoteIpValve`) and
   an attacker-framed test. Worth doing before any ingress that bypasses Cloudflare exists.
   re-check: `rg -q 'String claimedIp = firstHop\(forwarded\);' backend/src/main/java/org/danteplanner/backend/shared/util/ClientIpResolver.java && rg -q 'ReturnsTheLeftmost' backend/src/test/java/org/danteplanner/backend/shared/util/ClientIpResolverTest.java`
-- **Bucket configuration is validated per request, not at bind time.** `RateLimitProperties`
-  is `@Validated` but constrains only `configVersion`, and its `BucketConfig` fields carry none
-  (six of eight `@ConfigurationProperties` classes are `@Validated`; `HikariTuningProperties`
-  and `SecurityProperties` are not), and
-  `buildConfiguration` runs per request, so a zero duration fails on first use. The fix is the
-  ArchUnit rule "every `@ConfigurationProperties` class is `@Validated`" and the sibling edits
-  it lists; the rule, not the class, is the unit of work.
-  re-check: `rg -qU 'class BucketConfig \{\s*private int capacity;' backend/src/main/java/org/danteplanner/backend/shared/ratelimit/RateLimitProperties.java`
-
 ## 2026-09-18 consistency without an LLM (scheduled ratchet)
 
 - **No scheduled run measures rule drift.** The gate runs the rule engines already wired
@@ -1501,13 +1485,6 @@ guards the parse but likewise skips the schema gate.
   Worth doing before the next cookie change, or when anyone besides the owner can write the
   runtime-config secret.
   re-check: `rg -qF 'cookie.secure=${COOKIE_SECURE:true}' backend/src/main/resources/application.properties`
-- Error Prone 2.51 left 9 new warnings with no bug behind them: 8 `ReferenceEquality` sites that
-  mean identity (`ReadSourcesConfig.java:185,219`, `RedisConnectionConfig.java:169`, and five test
-  sites) and one `PatternMatchingInstanceof` in `AuthController.java:148`. The build promotes only
-  three checks to errors and has no warning baseline, so a compiler bump adds warnings silently.
-  Worth doing with a per-check warning ratchet: suppress the identity sites with a reason and use
-  a pattern variable in `AuthController`.
-  re-check: `rg -qF '!(principal instanceof Long)' backend/src/main/java/org/danteplanner/backend/auth/controller/AuthController.java`
 - `com.redis:testcontainers-redis` is pinned to 3.0.1 (`build.gradle.kts:67`) because Boot 4.1.2
   (and 4.2.0-RC2) manage 2.2.4, whose POM imports the Boot 3.4.2 BOM and with it a vulnerable
   Artemis BOM. Worth removing when spring-boot-dependencies manages
@@ -1965,8 +1942,8 @@ guards the parse but likewise skips the schema gate.
   once the warnings are listed and fixed: add `enforce: restricted`.
   re-check: `.claude/skills/debt-ledger/bin/debt absent deploy/base/namespace.yaml 'pod-security.kubernetes.io/enforce'`
 - **Every image is pinned by tag, and two tags move.** No image in the rendered overlays
-  carries a digest, and no bot raises one: Renovate reads only the chart versions in
-  `deploy/apps` and the k3s release. `redis:7-alpine` moves with every Redis 7 release and
+  carries a digest, and no bot raises one: Renovate reads the chart versions in
+  `deploy/apps`, the k3s release and the pins in the CI scripts, not the manifests. `redis:7-alpine` moves with every Redis 7 release and
   `traefik:v3.1` with every 3.1 patch, so a replaced node can pull a different version than the
   one it replaced. Pin by digest, or at least by full version, and turn on Renovate's
   manager for the manifests in the same change. An image that moves to an upstream chart leaves
