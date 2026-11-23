@@ -78,8 +78,8 @@ it is the cheapest thing to be holding when something else goes wrong.
    makes the change observable.
 
    Until this is set, the application silently falls back to reading the primary's entire
-   `@@gtid_executed` for every write. That is *correct* but maximally wide, so nearly every
-   subsequent read pins to the primary and pays the cross-region round trip. The application side
+   `@@gtid_executed` for every write. That is *correct*, and a marker keeps only the highest number per
+   server, so the cost is a number that other clients' commits have raised too. The application side
    of the pair (`trackSessionState=true` on the JDBC url) ships in the image; both are required
    before any of it does anything.
 
@@ -329,10 +329,9 @@ back with it until each is observed:
 
 None of this is visible until exercised, and all of it fails silently:
 
-- **A write raises a marker and a logout does not.** After the RDS parameter
-  from prep is live, the raised marker should hold a **short** GTID set. A value covering the
-  primary's entire history means the capture is still falling back — correct, but it pins nearly
-  every following read to the primary and pays the cross-region round trip each time.
+- **The capture uses the tracker.** A marker cannot show it, since it keeps only the highest number
+  per server. After the RDS parameter from prep is live, `gtid_capture_total{source="tracker"}` must
+  rise with writes and `source="fallback"` must not.
 - **`/api/internal/*` answers 404.** The endpoints are gone, and so are the authentication bypass
   and CSRF exemption that used to sit on that path prefix.
 - **A `static` submodule bump on `main` triggers a deploy.** The trigger used to match only paths
@@ -388,5 +387,5 @@ older boot script than the code holds.
 | Tunnel health | ≥4 edge connections per tunnel, always |
 | Quiesce order | detach edge → drain ≥5s → freeze Seoul → freeze Oregon → assert GTID + Redis offset parity |
 | Bring-back order | Oregon (RDS primary + auth Redis) → smoke → Seoul → re-attach the front door |
-| RYW parameter | `SELECT @@session_track_gtids` → `OWN_GTID`, else markers stay maximally wide |
+| RYW parameter | `SELECT @@session_track_gtids` → `OWN_GTID`, else every capture is the fallback |
 | Retire deprecated toggles | when `planner.legacy_toggle` reads ~0 |

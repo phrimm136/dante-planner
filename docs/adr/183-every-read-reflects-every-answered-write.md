@@ -171,8 +171,8 @@ epic: none · pr: none · supersedes: 008 @ryw @gtid @cookie, 008 @gtid @capture
 - @freshness @removal — The GTID cookie, its read gate and the primary pin are removed: a read's
   freshness is decided by the markers alone. Every read and write declares its scopes, so the gate
   added nothing a marker does not answer.
-  REJECTED: keeping the cookie as the writer's cover when a raise fails — it protects only that
-  writer, and only until the cookie is read once.
+  REJECTED: keeping the cookie as the writer's cover when a raise fails — it protects only that writer, and it
+  was kept until the replica had applied the write or the cookie proved unusable.
   INVARIANT: a write whose raise outlived its caller's bound is counted, whether or not the marker
   lands later — `freshness.marker.raise.abandoned`, `RaiseBatcherTest`.
   NON-GOAL: a writer's own reads after a failed or abandoned raise — the answer can be stale until
