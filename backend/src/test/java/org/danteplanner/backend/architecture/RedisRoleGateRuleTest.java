@@ -75,18 +75,21 @@ class RedisRoleGateRuleTest {
     }
 
     @Test
+    @AllowlistLiveness
     void roleHealthReaders_WhenAnEntryIsRemoved_ReportsThatEntry() {
         assertEachEntryIsStillNeeded(RedisRoleGateRule.ROLE_HEALTH_READERS,
                 RedisRoleGateRule::onlyTheGateReadsRoleHealth);
     }
 
     @Test
+    @AllowlistLiveness
     void storeDefinitions_WhenAnEntryIsRemoved_ReportsThatEntry() {
         assertEachEntryIsStillNeeded(RedisRoleGateRule.STORE_DEFINITIONS, definitions ->
                 RedisRoleGateRule.storeHandlesStayBehindTheGate(definitions, RedisRoleGateRule.STORE_HANDLE_HOLDERS));
     }
 
     @Test
+    @AllowlistLiveness
     void storeHandleHolders_WhenAnEntryIsRemoved_ReportsThatEntry() {
         assertEachEntryIsStillNeeded(RedisRoleGateRule.STORE_HANDLE_HOLDERS, holders ->
                 RedisRoleGateRule.storeHandlesStayBehindTheGate(RedisRoleGateRule.STORE_DEFINITIONS, holders));
