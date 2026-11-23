@@ -31,7 +31,7 @@ public class ViewerArgumentResolver implements HandlerMethodArgumentResolver {
             NativeWebRequest webRequest,
             @Nullable WebDataBinderFactory binderFactory) {
 
-        Viewer viewer = Viewer.of(currentPrincipal());
+        Viewer viewer = Viewer.of(userIdOf(currentPrincipal()));
         return switch (Required.by(parameter.getParameterType())) {
             case ANYONE -> viewer;
             case MEMBER -> viewer.requireMember();
@@ -43,6 +43,10 @@ public class ViewerArgumentResolver implements HandlerMethodArgumentResolver {
             case null -> null;
             case Authentication authentication -> authentication.getPrincipal();
         };
+    }
+
+    private static @Nullable Long userIdOf(@Nullable Object principal) {
+        return principal instanceof Long userId ? userId : null;
     }
 
     private enum Required {

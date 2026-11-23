@@ -10,8 +10,8 @@ public sealed interface Viewer {
     record Member(Long userId) implements Viewer {
     }
 
-    static Viewer of(@Nullable Object principal) {
-        return principal instanceof Long userId ? new Member(userId) : new Guest();
+    static Viewer of(@Nullable Long principal) {
+        return principal == null ? new Guest() : new Member(principal);
     }
 
     default Member requireMember() {
