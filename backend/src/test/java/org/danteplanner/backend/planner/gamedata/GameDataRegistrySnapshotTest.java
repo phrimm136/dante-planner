@@ -3,6 +3,8 @@ package org.danteplanner.backend.planner.gamedata;
 import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
+import org.danteplanner.backend.support.Hang;
+
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -29,14 +31,13 @@ class GameDataRegistrySnapshotTest {
     private static final int FIRST_GENERATION = 1;
     private static final int GENERATIONS = 50_000;
     private static final int READ_ROUNDS = 20_000;
-    private static final long JOIN_TIMEOUT_MS = 60_000;
     private static final int SEASON = 7;
     private static final int IDENTITY_MAX_LEVEL = 60;
     private static final int SCHEMA_VERSION = 2;
     private static final int RR_VERSION = 1;
 
     @Test
-    void read_WhenARefreshRunsConcurrently_ObservesOneGeneration() throws InterruptedException {
+    void read_WhenARefreshRunsConcurrently_ObservesOneGeneration() {
         GenerationalGameDataLoader loader = new GenerationalGameDataLoader();
         GameDataRegistry registry = new GameDataRegistry(loader, "generational");
         loader.generation = FIRST_GENERATION;
@@ -71,8 +72,7 @@ class GameDataRegistrySnapshotTest {
         }
 
         reading.set(false);
-        reloads.join(JOIN_TIMEOUT_MS);
-        assertThat(reloads.isAlive()).as("the reloads finished").isFalse();
+        Hang.ended(reloads, "the reloads finishing");
         assertThat(judged).as("no round was judged, so the assertion above never ran").isPositive();
     }
 

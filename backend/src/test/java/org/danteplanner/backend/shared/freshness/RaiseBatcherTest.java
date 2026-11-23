@@ -108,7 +108,7 @@ class RaiseBatcherTest {
     }
 
     @Test
-    void raise_WhenTheBatcherIsClosed_ReturnsFalseAndStartsNoWorker() throws Exception {
+    void raise_WhenTheBatcherIsClosed_ReturnsFalseAndStartsNoWorker() {
         AtomicInteger endpoints = new AtomicInteger();
         RaiseBatcher batcher = new RaiseBatcher(() -> {
             endpoints.incrementAndGet();
@@ -120,7 +120,7 @@ class RaiseBatcherTest {
         Thread caller = new Thread(callers, () -> raised.set(batcher.raise(KEYS, ARGUMENTS)), "raise-caller");
 
         caller.start();
-        caller.join(RealClockBounds.SCHEDULING_SLACK.toMillis());
+        Hang.ended(caller, "the raise after close returning");
 
         assertThat(raised.get()).isFalse();
         assertThat(callers.activeCount()).as("threads started by the raise").isZero();

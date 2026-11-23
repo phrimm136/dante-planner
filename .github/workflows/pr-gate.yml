@@ -151,7 +151,7 @@ jobs:
         working-directory: ./backend
         env:
           UNIT_ONLY: ${{ github.event_name == 'pull_request' && '-PexcludeTags=containerized' || '' }}
-        run: ./gradlew check -q $UNIT_ONLY
+        run: ./gradlew check -q --continue $UNIT_ONLY
       - name: Save Gradle caches
         if: github.ref == 'refs/heads/main' && success() && steps.gradle-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
@@ -166,6 +166,8 @@ jobs:
         with:
           name: backend-test-reports
           path: |
+            backend/build/reports/checkstyle/
+            backend/build/reports/cpd/
             backend/build/reports/tests/
             backend/build/test-results/
           retention-days: 7

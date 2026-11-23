@@ -43,6 +43,10 @@ public final class Hang {
         DEFAULT.terminated(executor, what);
     }
 
+    public static void ended(Thread thread, String what) {
+        DEFAULT.ended(thread, what);
+    }
+
     public static void until(BooleanSupplier condition, String what) {
         DEFAULT.until(condition, what);
     }
@@ -90,6 +94,16 @@ public final class Hang {
         void terminated(ExecutorService executor, String what) {
             try {
                 if (!executor.awaitTermination(limit.toNanos(), TimeUnit.NANOSECONDS)) {
+                    throw expired(what, null);
+                }
+            } catch (InterruptedException e) {
+                throw interrupted(what, e);
+            }
+        }
+
+        void ended(Thread thread, String what) {
+            try {
+                if (!thread.join(limit)) {
                     throw expired(what, null);
                 }
             } catch (InterruptedException e) {

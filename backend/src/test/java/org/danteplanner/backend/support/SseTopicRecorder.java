@@ -9,7 +9,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -157,7 +156,6 @@ public final class SseTopicRecorder implements AutoCloseable {
 
         synchronized void record(SseChannel channel, SseEnvelope.Wire envelope) {
             recorded.add(new Recorded(channel, envelope));
-            notifyAll();
         }
 
         List<SseEnvelope.Wire> userEvents(Long userId) {
@@ -187,23 +185,9 @@ public final class SseTopicRecorder implements AutoCloseable {
                     && payload.test(envelope.payload()));
         }
 
-        synchronized List<SseEnvelope.Wire> await(Supplier<List<SseEnvelope.Wire>> query, Duration timeout, String what) {
-            long deadline = System.nanoTime() + timeout.toNanos();
-            List<SseEnvelope.Wire> found = query.get();
-            while (found.isEmpty()) {
-                long remainingMillis = TimeUnit.NANOSECONDS.toMillis(deadline - System.nanoTime());
-                if (remainingMillis <= 0) {
-                    throw new AssertionError("waited " + timeout + " for " + what + "; none was published");
-                }
-                try {
-                    wait(remainingMillis);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new AssertionError("interrupted while waiting for " + what, e);
-                }
-                found = query.get();
-            }
-            return found;
+        List<SseEnvelope.Wire> await(Supplier<List<SseEnvelope.Wire>> query, Duration timeout, String what) {
+            new Hang.Bound(timeout).until(() -> !query.get().isEmpty(), what);
+            return query.get();
         }
 
         private synchronized List<SseEnvelope.Wire> matching(SseChannel channel, Predicate<SseEnvelope.Wire> filter) {

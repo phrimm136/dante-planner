@@ -21,11 +21,11 @@ class LogCaptureTest {
     private static final Logger LOG = (Logger) LoggerFactory.getLogger(LogCaptureTest.class);
 
     @Test
-    void onThisThread_WhenAnotherThreadLogsThroughTheSameLogger_KeepsOnlyThisThreadsEvents() throws Exception {
+    void onThisThread_WhenAnotherThreadLogsThroughTheSameLogger_KeepsOnlyThisThreadsEvents() {
         try (LogCapture capture = LogCapture.onThisThread(LogCaptureTest.class)) {
             Thread neighbour = new Thread(() -> LOG.warn("neighbour"));
             neighbour.start();
-            neighbour.join();
+            Hang.ended(neighbour, "the neighbour thread ending");
             LOG.warn("own");
 
             assertThat(capture.events()).extracting(ILoggingEvent::getFormattedMessage).containsExactly("own");
@@ -33,22 +33,22 @@ class LogCaptureTest {
     }
 
     @Test
-    void onThread_WhenAThreadOfThatNameLogs_KeepsItsEvents() throws Exception {
+    void onThread_WhenAThreadOfThatNameLogs_KeepsItsEvents() {
         try (LogCapture capture = LogCapture.onThread("named-logger", LogCaptureTest.class)) {
             Thread named = new Thread(() -> LOG.warn("named"), "named-logger");
             named.start();
-            named.join();
+            Hang.ended(named, "the named thread ending");
 
             assertThat(capture.events()).extracting(ILoggingEvent::getFormattedMessage).containsExactly("named");
         }
     }
 
     @Test
-    void onThread_WhenOtherThreadsLog_DropsTheirEvents() throws Exception {
+    void onThread_WhenOtherThreadsLog_DropsTheirEvents() {
         try (LogCapture capture = LogCapture.onThread("named-logger", LogCaptureTest.class)) {
             Thread other = new Thread(() -> LOG.warn("other"), "other-logger");
             other.start();
-            other.join();
+            Hang.ended(other, "the other thread ending");
             LOG.warn("test thread");
 
             assertThat(capture.events()).isEmpty();

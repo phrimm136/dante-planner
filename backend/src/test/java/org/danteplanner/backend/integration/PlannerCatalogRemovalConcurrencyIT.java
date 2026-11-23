@@ -49,7 +49,6 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 class PlannerCatalogRemovalConcurrencyIT extends ExclusiveDatabaseSupport {
 
     private static final int ROUNDS = 150;
-    private static final long JOIN_TIMEOUT_MS = 60_000;
     private static final int MIN_OVERLAPPING_ROUNDS = ROUNDS / 2;
     private static final String CONTENT_LOCK_WAITERS = """
             SELECT COUNT(*) FROM information_schema.processlist
@@ -274,9 +273,8 @@ class PlannerCatalogRemovalConcurrencyIT extends ExclusiveDatabaseSupport {
                     one.start();
                     two.start();
                 }
-                one.join(JOIN_TIMEOUT_MS);
-                two.join(JOIN_TIMEOUT_MS);
-                assertThat(one.isAlive() || two.isAlive()).as("round %d finished", index).isFalse();
+                Hang.ended(one, "round " + index + " finishing its first thread");
+                Hang.ended(two, "round " + index + " finishing its second thread");
                 if (firstSpan.overlaps(secondSpan)) {
                     overlappingRounds++;
                 }

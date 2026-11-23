@@ -59,9 +59,9 @@ class SseStreamTest {
                     .isInstanceOf(AssertionError.class)
                     .hasMessage("hang: a matching connected frame did not complete within 200ms");
 
-            assertThat(awaitGone(reader, Duration.ofSeconds(5)))
-                    .as("the reader thread of a stream that never became ready")
-                    .isTrue();
+            Hang.until(() -> Thread.getAllStackTraces().keySet().stream()
+                    .noneMatch(thread -> thread.getName().equals(reader)),
+                    "the reader thread ending of a stream that never became ready");
         } finally {
             release.countDown();
             server.stop(0);
@@ -79,17 +79,6 @@ class SseStreamTest {
             Thread.currentThread().interrupt();
         }
         exchange.close();
-    }
-
-    private static boolean awaitGone(String threadName, Duration timeout) throws InterruptedException {
-        Optional<Thread> reader = Thread.getAllStackTraces().keySet().stream()
-                .filter(thread -> thread.getName().equals(threadName))
-                .findFirst();
-        if (reader.isEmpty()) {
-            return true;
-        }
-        reader.get().join(timeout.toMillis());
-        return !reader.get().isAlive();
     }
 
     private static String wire(SseEventBuilder event) {

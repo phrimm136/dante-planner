@@ -38,6 +38,7 @@ public class RecordingAccountLifecycleParticipant implements AccountLifecyclePar
         failures.failNext(event, failure);
     }
 
+    @SuppressWarnings("ReferenceEquality")
     public List<Failed> failed() {
         return journal.stream()
                 .filter(Failed.class::isInstance)
@@ -46,6 +47,7 @@ public class RecordingAccountLifecycleParticipant implements AccountLifecyclePar
                 .toList();
     }
 
+    @SuppressWarnings("ReferenceEquality")
     public List<Call> calls() {
         return journal.stream()
                 .filter(Call.class::isInstance)

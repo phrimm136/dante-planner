@@ -45,7 +45,6 @@ class PlannerFilterRowsConcurrencyIT extends ExclusiveDatabaseSupport {
 
     private static final int ROUNDS = 500;
     private static final int MIN_OVERLAPPING_ROUNDS = ROUNDS / 2;
-    private static final long JOIN_TIMEOUT_MS = 60_000;
 
     private static final String SECOND_CONTENT = IntStream.rangeClosed(1, 8).boxed().reduce(
             TestDataFactory.VALID_CONTENT
@@ -115,9 +114,8 @@ class PlannerFilterRowsConcurrencyIT extends ExclusiveDatabaseSupport {
                 Thread two = syncThread(second, start, twoSpan, failures);
                 one.start();
                 two.start();
-                one.join(JOIN_TIMEOUT_MS);
-                two.join(JOIN_TIMEOUT_MS);
-                assertThat(one.isAlive() || two.isAlive()).as("round %d finished", round).isFalse();
+                Hang.ended(one, "round " + round + " finishing its first thread");
+                Hang.ended(two, "round " + round + " finishing its second thread");
                 if (oneSpan.overlaps(twoSpan)) {
                     overlapped++;
                 }
@@ -174,9 +172,8 @@ class PlannerFilterRowsConcurrencyIT extends ExclusiveDatabaseSupport {
                 writeThenSync.setDaemon(true);
                 syncOnly.start();
                 writeThenSync.start();
-                syncOnly.join(JOIN_TIMEOUT_MS);
-                writeThenSync.join(JOIN_TIMEOUT_MS);
-                assertThat(syncOnly.isAlive() || writeThenSync.isAlive()).as("round %d finished", round).isFalse();
+                Hang.ended(syncOnly, "round " + round + " finishing sync-only");
+                Hang.ended(writeThenSync, "round " + round + " finishing write-then-sync");
                 if (syncSpan.overlaps(writeSpan)) {
                     overlapped++;
                 }

@@ -43,6 +43,7 @@ import org.danteplanner.backend.shared.config.TaskSchedulerConfig;
 import org.danteplanner.backend.planner.service.PlannerKeywordBackfillService;
 import org.danteplanner.backend.planner.service.PlannerKeywordBackfillService.BackfillPage;
 import org.danteplanner.backend.shared.config.ShedLockConfig;
+import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.LogCapture;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -84,7 +85,7 @@ class KeywordBackfillShutdownRaceIT {
             context.close();
             closeMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started);
             if (probe.worker.get() != null) {
-                probe.worker.get().join();
+                Hang.ended(probe.worker.get(), "the backfill thread ending");
             }
             errors = capture.at(Level.ERROR);
         }
@@ -114,7 +115,7 @@ class KeywordBackfillShutdownRaceIT {
             long started = System.nanoTime();
             context.close();
             closeMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started);
-            probe.worker.get().join();
+            Hang.ended(probe.worker.get(), "the backfill thread ending");
             errors = capture.at(Level.ERROR);
         }
         Long leftoverTtlSeconds = lockTtlSeconds();

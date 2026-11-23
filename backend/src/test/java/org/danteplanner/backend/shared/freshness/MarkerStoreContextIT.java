@@ -1,6 +1,5 @@
 package org.danteplanner.backend.shared.freshness;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -49,8 +48,6 @@ class MarkerStoreContextIT {
     private static final RedisContainer REDIS = new RedisContainer("redis:7-alpine");
     private static final String LETTUCE_THREAD_PREFIX = "lettuce-";
     private static final String NAME_COUNTER_SEPARATOR = "-";
-    private static final Duration CONTEXT_BOUND = Duration.ofSeconds(60);
-    private static final Duration SHUTDOWN_BOUND = Duration.ofSeconds(10);
     private static final int RAISES_AT_CLOSE = 32;
     private static final List<String> REDIS_ENDPOINTS = List.of("auth", "rate-limit", "sse-local", "auth-local");
 
@@ -114,7 +111,7 @@ class MarkerStoreContextIT {
         }
     }
 
-    private void runInGroup(ThreadGroup group, Consumer<ApplicationContext> whileOpen) throws InterruptedException {
+    private void runInGroup(ThreadGroup group, Consumer<ApplicationContext> whileOpen) {
         AtomicReference<Throwable> failure = new AtomicReference<>();
         Thread contextThread = new Thread(group, () -> {
             try {
@@ -127,8 +124,7 @@ class MarkerStoreContextIT {
             }
         }, group.getName());
         contextThread.start();
-        contextThread.join(CONTEXT_BOUND);
-        assertThat(contextThread.isAlive()).as("context thread finished within the bound").isFalse();
+        Hang.ended(contextThread, "the context thread finishing");
         assertThat(failure.get()).isNull();
     }
 
@@ -158,7 +154,7 @@ class MarkerStoreContextIT {
     }
 
     @Test
-    void context_WhenMarkerStoreHasRaisedAndTheRolesWereProbed_RunsEveryRedisClientOnOneSetOfLettucePools() throws InterruptedException {
+    void context_WhenMarkerStoreHasRaisedAndTheRolesWereProbed_RunsEveryRedisClientOnOneSetOfLettucePools() {
         ThreadGroup group = new ThreadGroup("marker-store-context-" + UUID.randomUUID());
         AtomicReference<Set<String>> pools = new AtomicReference<>();
         runInGroup(group, context -> {
@@ -176,8 +172,7 @@ class MarkerStoreContextIT {
     }
 
     @Test
-    void context_WhenClosedWhileRaisesAreInFlight_ReleasesEveryRaiseAndLeavesNoLettuceOrRaiseThreadAlive()
-            throws InterruptedException {
+    void context_WhenClosedWhileRaisesAreInFlight_ReleasesEveryRaiseAndLeavesNoLettuceOrRaiseThreadAlive() {
         ThreadGroup group = new ThreadGroup("marker-store-context-" + UUID.randomUUID());
         AtomicReference<Integer> startedWhileOpen = new AtomicReference<>();
         List<Thread> raises = new ArrayList<>();
@@ -193,12 +188,11 @@ class MarkerStoreContextIT {
             }
         });
         for (Thread raise : raises) {
-            raise.join(SHUTDOWN_BOUND.toMillis());
+            Hang.ended(raise, "a raise in flight at close returning");
         }
 
         assertThat(startedWhileOpen.get()).as("the context started Lettuce threads, so the axis is not vacuous")
                 .isPositive();
-        assertThat(raises).as("every raise in flight at close returned").noneMatch(Thread::isAlive);
         Hang.until(() -> lettuceAndRaiseThreads(group).isEmpty(), "every Lettuce and raise thread ending after close");
     }
 }

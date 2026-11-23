@@ -25,7 +25,7 @@ in `flock`: it takes the lock itself.
 | `fe <check>` | `typecheck`, `lint`, `lint-validation`, `fmt [path...]`, `fmt-check`, `fp`, `rules`, `bailouts`, `build`, `budget`, `test [vitest args]` |
 | `fe gate` | The PR Gate `test-frontend` steps, read from `pr-gate.yml`, under one lock, one line per step |
 | `e2e <check>` | `typecheck`, `fmt`, `fmt-check`, `run [spec...] [--base-url URL] [--repeat N] [--jobs N] [--project NAME] [-- playwright args]` |
-| `be <check>` | `check`, `test [--tests PATTERN] [--exclude-tags containerized]`, `checkstyle`, `pit` |
+| `be <check>` | `check`, `test [--tests PATTERN] [--exclude-tags containerized]`, `checkstyle`, `lint` (every checkstyle, cpd and ast-grep task of `gradle check`), `pit`, `freeze-branches [--reason REASON]` (rewrites `backend/config/shell-branches.txt`; adding or raising a line needs the reason) |
 | `tools test` | Every `.claude/skills/*/tests/` directory (pytest) and `.githooks/tests/*.sh` script, through `.github/scripts/tooling-tests.sh`, the script PR Gate's `check-keep-list` job runs; one line per suite |
 | `--print` | Show a run's directory, environment and command line without running it |
 | `--full REASON` | Required for a whole run that PR Gate already runs: `fe test` or `e2e run` with no file, `be test` with no `--tests`, `be check`, `be pit`, `fe gate`. The full-run-guard hook refuses it in a session; the user starts a whole run from their own prompt. |

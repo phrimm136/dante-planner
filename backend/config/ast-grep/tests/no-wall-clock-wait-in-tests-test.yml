@@ -94,6 +94,47 @@ valid:
         Long ttl = template.getExpire(key, TimeUnit.SECONDS);
       }
     }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        Supplier<Object> value = future::get;
+        Runnable send = robot::sleep;
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        assertThat(catchThrowable(future::join)).isNull();
+        future.join();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        String text = String.join(",", entries);
+        String other = String.join(separator, entries);
+        Join<Planner, User> owner = root.join("owner");
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        CompletableFuture<Void> served = start();
+        served.join();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        Hang.ended(worker, "the worker");
+        waiter.waitUntilReady(1);
+      }
+    }
 invalid:
   - |
     class A {
@@ -300,5 +341,142 @@ invalid:
       @Test
       void m() throws Exception {
         await().timeout(BOUND).until(() -> worker.isDone());
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        pause.accept(Thread::sleep);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        pause.accept(java.lang.Thread::sleep);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        pause.accept(TimeUnit.SECONDS::sleep);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        pause.accept(LockSupport::parkNanos);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        executor.execute(latch::await);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        executor.execute(monitor::wait);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        monitor.wait();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        monitor.wait(1);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        wait(remainingMillis);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        this.wait();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        worker.join(JOIN_TIMEOUT_MS);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        worker.join(BOUND);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        workers.get(0).join(BOUND.toMillis(), 5);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        Thread worker = start();
+        worker.join();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        for (Thread worker : workers) {
+          worker.join();
+        }
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        Thread worker = start();
+        assertThat(catchThrowable(worker::join)).isNull();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        workers.forEach(Thread::join);
+      }
+    }
+  - |
+    class A {
+      void ended(Thread worker) throws Exception {
+        worker.join();
+      }
+    }
+  - |
+    class A {
+      private Thread worker;
+
+      void ended() throws Exception {
+        worker.join();
       }
     }

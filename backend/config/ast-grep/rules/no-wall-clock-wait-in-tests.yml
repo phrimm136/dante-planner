@@ -12,6 +12,7 @@ ignores:
   - src/test/java/org/danteplanner/backend/integration/ReplicationProxyIT.java
   - src/test/java/org/danteplanner/backend/integration/VoteNotificationFlowIT.java
   - src/test/java/org/danteplanner/backend/support/Hang.java
+  - src/test/java/org/danteplanner/fixture/decisionpurity/DecisionPurityFixtures.java
 utils:
   awaitility-chain:
     has:
@@ -19,6 +20,58 @@ utils:
       regex: ^(org\.awaitility\.)?(Awaitility\.)?(await|with|given)\s*\(
 rule:
   any:
+    - kind: method_reference
+      regex: ^((java\.lang\.)?Thread|([\w.]+\.)?(NANOSECONDS|MICROSECONDS|MILLISECONDS|SECONDS|MINUTES|HOURS|DAYS))::sleep$
+    - kind: method_reference
+      regex: ^(java\.util\.concurrent\.locks\.)?LockSupport::park(Nanos|Until)$
+    - kind: method_reference
+      regex: ::(await|wait)$
+    - kind: method_invocation
+      regex: ^((this|super)\.)?wait\s*\(
+    - pattern: $MONITOR.wait($$$)
+    - pattern: $THREAD.join($MILLIS)
+      not:
+        any:
+          - has:
+              field: object
+              regex: ^(java\.lang\.)?String$
+          - has:
+              field: arguments
+              has:
+                kind: string_literal
+    - pattern: $THREAD.join($MILLIS, $NANOS)
+      not:
+        any:
+          - has:
+              field: object
+              regex: ^(java\.lang\.)?String$
+          - has:
+              field: arguments
+              has:
+                kind: string_literal
+    - kind: method_reference
+      regex: ^(java\.lang\.)?Thread::join$
+    - any:
+        - pattern: $THREAD.join()
+        - pattern: $THREAD::join
+      inside:
+        kind: program
+        stopBy: end
+        has:
+          stopBy: end
+          all:
+            - has:
+                field: type
+                regex: ^(java\.lang\.)?Thread$
+            - any:
+                - has:
+                    field: name
+                    pattern: $THREAD
+                - has:
+                    field: declarator
+                    has:
+                      field: name
+                      pattern: $THREAD
     - pattern: $SLEEPER.sleep($$$)
       has:
         field: object

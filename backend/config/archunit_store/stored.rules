@@ -1,3 +1,0 @@
-#
-#Mon Nov 23 19:02:24 KST 2026
-a\ method\ with\ a\ forward\ conditional\ jump\ other\ than\ a\ loop\ exit\ reaches\ no\ effect\ but\ logging\:\ an\ effectful\ method\ may\ branch\ only\ by\ switching\ on\ a\ decision\ value\ (a\ sealed\ type\ or\ enum)=ff7fbe4f-4bfa-4df2-8800-addf339fd527

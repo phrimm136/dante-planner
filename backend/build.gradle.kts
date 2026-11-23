@@ -303,7 +303,7 @@ tasks.withType<JavaCompile>().configureEach {
     // Environment-dependent behavior is a build failure, not a warning: each of these compiles
     // clean, passes CI, and then misbehaves under one locale, one charset, or one region's clock.
     options.errorprone {
-        error("StringCaseLocaleUsage", "DefaultCharset", "JavaTimeDefaultTimeZone")
+        error("StringCaseLocaleUsage", "DefaultCharset", "JavaTimeDefaultTimeZone", "ReferenceEquality")
         disable("NullAway")
     }
     options.compilerArgs.add("-XDaddTypeAnnotationsToSymbol=true")
@@ -492,6 +492,12 @@ tasks.jacocoTestReport {
     }
 }
 
+val freezeShellBranches by tasks.registering(JavaExec::class) {
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass = "org.danteplanner.backend.architecture.ShellBranches"
+    args(providers.gradleProperty("freezeReason").map { listOf(it) }.getOrElse(emptyList()))
+}
+
 abstract class RandomOrderSeed : CommandLineArgumentProvider {
     @get:Input
     @get:Optional
@@ -525,7 +531,9 @@ val staticLockCheck by tasks.registering(Exec::class) {
 tasks.test {
     dependsOn(staticLockCheck)
     inputs.file(layout.projectDirectory.file("config/architecture-rules-without-fixtures.txt"))
-    inputs.dir(layout.projectDirectory.dir("config/archunit_store"))
+    inputs.file(layout.projectDirectory.file("config/shell-branches.txt"))
+    inputs.dir(layout.projectDirectory.dir("src/main/java"))
+    inputs.dir(layout.projectDirectory.dir("src/test/java/org/danteplanner/fixture/shellbranch"))
     val randomOrderSeed = objects.newInstance<RandomOrderSeed>()
     randomOrderSeed.fixedSeed.set(providers.gradleProperty("testSeed"))
     jvmArgumentProviders.add(randomOrderSeed)

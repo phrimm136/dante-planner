@@ -120,9 +120,9 @@ class PlannerUpsertConflictIT extends SharedMySqlContainerSupport {
                 assertThat(responses).extracting(MockHttpServletResponse::getStatus)
                         .as("attempt %d", attempt)
                         .containsExactlyInAnyOrder(200, 409);
-                MockHttpServletResponse winner = first.response().getStatus() == 200
-                        ? first.response() : second.response();
-                MockHttpServletResponse loser = winner == first.response() ? second.response() : first.response();
+                boolean firstWon = first.response().getStatus() == 200;
+                MockHttpServletResponse winner = firstWon ? first.response() : second.response();
+                MockHttpServletResponse loser = firstWon ? second.response() : first.response();
                 JsonNode problem = objectMapper.readTree(loser.getContentAsString());
                 assertThat(problem.path("code").asString()).as("attempt %d", attempt).isEqualTo("SYNC_CONFLICT");
                 assertThat(problem.path("serverVersion").asLong())

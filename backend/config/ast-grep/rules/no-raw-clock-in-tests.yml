@@ -36,7 +36,6 @@ ignores:
   - src/test/java/org/danteplanner/backend/shared/sse/SseShutdownDrainTest.java
   - src/test/java/org/danteplanner/backend/support/Elapsed.java
   - src/test/java/org/danteplanner/backend/support/HangTest.java
-  - src/test/java/org/danteplanner/backend/support/SseTopicRecorder.java
   - src/test/java/org/danteplanner/backend/support/TransactionSpans.java
 rule:
   any:
