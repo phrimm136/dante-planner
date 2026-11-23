@@ -113,7 +113,7 @@ the request's commits. This section is how those GTIDs are known.
 | 2 | `GtidCapturingDataSource` | wraps the PRIMARY pool; every connection it lends is a proxy that intercepts `commit()` |
 | 3 | `GtidCapturingDataSource.captureCommittedGtid` | on that same physical connection, reads the OWN_GTID the server attributed to the transaction; falls back to `SELECT @@gtid_executed` when the tracker names none |
 | 4 | `GtidWriteCapture.recordCommit(gtid, fromTracker)` | accumulates into the request-scoped `Accumulator` and counts `gtid.capture{source}` |
-| 5 | `FreshnessStampFilter` (after the chain, before the response is sent) | raises the markers of the declared scopes to the captured GTID set, then waits for a Redis replica |
+| 5 | `FreshnessStampAdvice` before a body is written, else `FreshnessStampFilter` after the chain | `MarkerStamp.stamp()`: raises the markers of the declared scopes to the captured GTID set, then waits for a Redis replica |
 | 6 | `FreshnessStampFilter` finally | `writeCapture.clear()` |
 
 Why the datasource and not a transaction-manager synchronization: the GTID lives as session state on
@@ -146,23 +146,23 @@ intervening round trip destroys the GTID — including `Connection.isReadOnly()`
 runs before the read-only check rather than after it.
 
 If any of the three is wrong, every commit takes the fallback below: correct, because the primary's
-executed set is a superset, but maximally wide, so a marked read almost never finds the
-replica caught up. It degrades silently — the `gtid.capture{source=tracker|fallback}` counter is what makes
+executed set is a superset. It degrades silently — the `gtid.capture{source=tracker|fallback}` counter is what makes
 it visible.
 
 ### 4b. The fallback, and what it costs
 
 When the tracker names no GTID for a commit, `GtidCapturingDataSource` reads
 `SELECT @@gtid_executed` on that same connection — the entire primary's GTID set, every transaction
-from every client. That is *correct* (it is a superset of the user's write) but *wide*: a read of that scope will almost never find the replica caught up, so it waits out the
-bound and moves to the primary.
+from every client. That is *correct* (it is a superset of the user's write). A
+marker stores only the highest number per server uuid and reads it back as `uuid:1-N`, so the
+superset costs the numbers other clients have committed by then, plus the uuids of earlier
+primaries.
 
 "The transaction wrote nothing" and "the tracker is off or was clobbered" both present as a
 tracker that names no GTID. The capture tells them apart with one `SELECT @@session_track_gtids`
 probe per physical connection, run strictly AFTER the tracker read (the probe's own OK packet
-would wipe the state it judges): tracker verified active means the commit wrote nothing and no marker is raised — a write-shaped request that commits an empty transaction must not slow
-a follow-up read — while a tracker that is genuinely off takes the superset, since a wide marker
-costs latency but a missing one costs correctness. `gtid.capture{source=fallback}` is the metric
+would wipe the state it judges): tracker verified active means the commit wrote nothing and no marker is raised — a write-shaped request that commits an empty transaction must not slow a follow-up read — while a tracker that is
+genuinely off takes the superset, since a missing marker costs correctness. `gtid.capture{source=fallback}` is the metric
 that says which world you are in; a ratio near 1 means the precise path is not working.
 
 ## 5. Read consistency: freshness markers
@@ -222,7 +222,8 @@ body's `published` flag to one of the two handlers above and is charged against 
 5. AFTER_COMMIT: PlannerPublishingService.onPlannerPublished
      ├─ ssePublisher.publishBroadcast(...)                Redis, cross-region (§7)
      └─ notificationService.notifyPlannerPublished(...)   REQUIRES_NEW, READ COMMITTED (§8)
-6. FreshnessStampFilter raises the markers of the changed scopes for every commit in steps 3–5
+6. FreshnessStampAdvice (or the filter, for a bodiless answer) raises the markers of the changed
+   scopes for every commit in steps 3–5
 ```
 
 Unpublish runs the same shape through `applyUnpublish`, charged against `CRUD:unpublish`: no
