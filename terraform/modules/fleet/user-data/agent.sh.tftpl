@@ -36,7 +36,7 @@ providers:
     apiVersion: credentialprovider.kubelet.k8s.io/v1
 CPCFG
 
-curl -sfL https://get.k3s.io | K3S_TOKEN="$TOKEN" \
+curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="${k3s_version}" K3S_TOKEN="$TOKEN" \
   INSTALL_K3S_EXEC="agent --server ${server_url} --node-label ${node_label} \
     --kubelet-arg=image-credential-provider-config=$CPV/config.yaml \
     --kubelet-arg=image-credential-provider-bin-dir=$CPV/bin" sh -
