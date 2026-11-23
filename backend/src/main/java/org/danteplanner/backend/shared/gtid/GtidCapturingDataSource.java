@@ -16,6 +16,7 @@ import javax.sql.DataSource;
 
 import org.springframework.jdbc.datasource.AbstractDataSource;
 
+import com.mysql.cj.conf.PropertyKey;
 import com.mysql.cj.jdbc.JdbcConnection;
 import com.mysql.cj.protocol.ServerSessionStateController;
 import com.mysql.cj.protocol.ServerSessionStateController.SessionStateChange;
@@ -43,8 +44,8 @@ public class GtidCapturingDataSource extends AbstractDataSource {
     private final GtidWriteCapture capture;
 
     /**
-     * {@code session_track_gtids} is seeded at connect time, so one probe per connection is
-     * authoritative for its lifetime.
+     * {@code session_track_gtids} and the driver's {@code trackSessionState} are both fixed at
+     * connect time, so one probe per connection is authoritative for its lifetime.
      */
     private final Map<JdbcConnection, Boolean> trackerActiveByConnection =
             Collections.synchronizedMap(new WeakHashMap<>());
@@ -156,13 +157,19 @@ public class GtidCapturingDataSource extends AbstractDataSource {
         if (cached != null) {
             return cached;
         }
+        boolean driverTracks =
+                physical.getPropertySet().getBooleanProperty(PropertyKey.trackSessionState).getValue();
         boolean active;
         try (Statement statement = target.createStatement();
                 java.sql.ResultSet rs = statement.executeQuery(TRACKER_PROBE_SQL)) {
-            active = rs.next() && "OWN_GTID".equalsIgnoreCase(rs.getString(1));
+            active = rs.next() && namesOwnGtid(driverTracks, rs.getString(1));
         }
         trackerActiveByConnection.put(physical, active);
         return active;
+    }
+
+    private static boolean namesOwnGtid(boolean driverTracks, String serverTracker) {
+        return driverTracks && "OWN_GTID".equalsIgnoreCase(serverTracker);
     }
 
     private String readGlobalGtidExecuted(Connection target) throws SQLException {
