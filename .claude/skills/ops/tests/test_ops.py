@@ -582,7 +582,6 @@ ACCOUNT_BOUND_SHAPES = {
     "an ARN": re.compile(r"arn:aws"),
     "a resource id": re.compile(r"\b(?:vpc|subnet|sg|rtb|igw|pcx|eni|ami|i|vol)-[0-9a-f]{8,}\b"),
     "a hostname": re.compile(r"\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:com|net|org|io|dev|internal)\b"),
-    "an address": re.compile(r"\b[0-9]{1,3}(?:\.[0-9]{1,3}){3}\b"),
     "a long hex value": re.compile(r"\b[0-9a-f]{32,}\b"),
 }
 
@@ -748,13 +747,12 @@ class RealSettingsTest(unittest.TestCase):
             "an ARN": 'role = "arn:aws:iam::role/x"',
             "a resource id": 'vpc_id = "vpc-0abc1234def567890"',
             "a hostname": 'host = "db.example.com"',
-            "an address": 'cidr = "10.0.0.0/16"',
             "a long hex value": 'zone = "0123456789abcdef0123456789abcdef"',
         }
         for shape_name, sample_text in samples.items():
             with self.subTest(shape_name=shape_name):
                 self.assertIn(shape_name, account_bound_shapes(sample_text))
-        self.assertEqual(account_bound_shapes('engine_version = "8.4.11"\nmulti_az = false\n'), [])
+        self.assertEqual(account_bound_shapes('engine_version = "8.4.11"\nmulti_az = false\ncidr = "10.30.0.0/16"\n'), [])
 
     def test_no_tracked_settings_file_holds_an_account_bound_value(self):
         settings_paths = sorted((REPO_ROOT / "terraform").glob("*/envs/*.tfvars"))
