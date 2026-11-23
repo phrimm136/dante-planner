@@ -43,8 +43,10 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.security.MessageDigest;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Set;
 import java.util.Spliterators;
@@ -175,6 +177,25 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
         assertThat(seen).hasSize(1);
         String key = seen.get(0);
         assertThat(redisTemplate.getExpire(key)).isGreaterThanOrEqualTo(86_400L - 5L);
+    }
+
+    @Test
+    void viewCount_WhenNoUserAgentIsSent_RecordsTheHashOfAnEmptyAgent() throws Exception {
+        UUID plannerId = published.getId();
+        LocalDate before = LocalDate.now(ZoneOffset.UTC);
+
+        mockMvc.perform(post("/api/planner/md/published/{id}/viewcount", plannerId).with(withCsrf())
+                        .with(request -> {
+                            request.setRemoteAddr("203.0.113.7");
+                            return request;
+                        }))
+                .andExpect(status().isNoContent());
+        LocalDate after = LocalDate.now(ZoneOffset.UTC);
+
+        String hash = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
+                .digest(("ip:203.0.113.7::" + plannerId).getBytes(StandardCharsets.UTF_8)));
+        assertThat(Stream.of(seenKey(before, plannerId, hash), seenKey(after, plannerId, hash)))
+                .anyMatch(candidate -> Boolean.TRUE.equals(redisTemplate.hasKey(candidate)));
     }
 
     @Test
