@@ -27,7 +27,7 @@ public class SsePublisher {
 
     public void publishUserEvent(Long userId, SseEventType type, String entityId, Object payload) {
         publish(SseChannel.USER,
-                new SseEnvelope.UserEvent(userId, type, entityId, new SseEnvelope.DeviceExclusion.None(), payload));
+                new SseEnvelope.UserEvent(userId, type, entityId, payload));
     }
 
     public void publishSettingsInvalidation(Long userId) {

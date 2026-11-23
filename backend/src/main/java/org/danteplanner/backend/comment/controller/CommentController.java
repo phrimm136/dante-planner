@@ -6,7 +6,6 @@ import java.util.UUID;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.shared.security.Viewer;
-import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.shared.restriction.Restricted;
 import org.danteplanner.backend.shared.restriction.RestrictionExempt;
 import org.danteplanner.backend.shared.config.DeviceId;
@@ -28,7 +27,6 @@ import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -52,64 +50,64 @@ public class CommentController {
     @RateLimitExempt
     @GetMapping("/planner/{plannerId}/comments")
     public ResponseEntity<List<CommentTreeNode>> getComments(
-            @AuthenticationPrincipal @Nullable Long userId,
+            Viewer viewer,
             @PathVariable UUID plannerId) {
 
-        return ResponseEntity.ok(commentQueryService.getCommentTree(plannerId, Viewer.of(userId)).value());
+        return ResponseEntity.ok(commentQueryService.getCommentTree(plannerId, viewer).value());
     }
 
     @Restricted
     @PostMapping("/planner/{plannerId}/comments")
     public ResponseEntity<CreateCommentResponse> createComment(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             @DeviceId UUID deviceId,
             @PathVariable UUID plannerId,
             @Valid @RequestBody CreateCommentRequest request) {
 
-        CreateCommentResponse response = commentCommandService.createComment(plannerId, userId, deviceId, request);
+        CreateCommentResponse response = commentCommandService.createComment(plannerId, member.userId(), deviceId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Restricted
     @PostMapping("/comments/{parentCommentId}/replies")
     public ResponseEntity<CreateCommentResponse> createReply(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             @DeviceId UUID deviceId,
             @PathVariable UUID parentCommentId,
             @Valid @RequestBody CreateCommentRequest request) {
 
-        CreateCommentResponse response = commentCommandService.createReply(parentCommentId, userId, deviceId, request.content());
+        CreateCommentResponse response = commentCommandService.createReply(parentCommentId, member.userId(), deviceId, request.content());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Restricted
     @PutMapping("/comments/{commentId}")
     public ResponseEntity<UpdateCommentResponse> updateComment(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             @PathVariable UUID commentId,
             @Valid @RequestBody UpdateCommentRequest request) {
 
-        UpdateCommentResponse response = commentCommandService.updateComment(commentId, userId, request);
+        UpdateCommentResponse response = commentCommandService.updateComment(commentId, member.userId(), request);
         return ResponseEntity.ok(response);
     }
 
     @RestrictionExempt(reason = "own comment")
     @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<Void> deleteComment(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             @PathVariable UUID commentId) {
 
-        commentCommandService.deleteComment(commentId, userId);
+        commentCommandService.deleteComment(commentId, member.userId());
         return ResponseEntity.noContent().build();
     }
 
     @Restricted
     @PostMapping("/comments/{commentId}/upvote")
     public ResponseEntity<CommentVoteResponse> toggleUpvote(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             @PathVariable UUID commentId) {
 
-        CommentVoteResponse response = commentEngagementService.toggleUpvote(commentId, userId);
+        CommentVoteResponse response = commentEngagementService.toggleUpvote(commentId, member.userId());
         return ResponseEntity.ok(response);
     }
 
@@ -117,22 +115,22 @@ public class CommentController {
     @Restricted
     @PostMapping("/comments/{commentId}/report")
     public ResponseEntity<CommentReportResponse> reportComment(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             @PathVariable UUID commentId,
             @Valid @RequestBody CommentReportRequest request) {
 
-        CommentReportResponse response = commentEngagementService.reportComment(commentId, userId, request);
+        CommentReportResponse response = commentEngagementService.reportComment(commentId, member.userId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @RestrictionExempt(reason = "own setting")
     @PatchMapping("/comments/{commentId}/notifications")
     public ResponseEntity<ToggleNotificationResponse> toggleNotification(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             @PathVariable UUID commentId,
             @Valid @RequestBody ToggleNotificationRequest request) {
 
-        ToggleNotificationResponse response = commentEngagementService.toggleNotification(commentId, userId, request.enabled());
+        ToggleNotificationResponse response = commentEngagementService.toggleNotification(commentId, member.userId(), request.enabled());
         return ResponseEntity.ok(response);
     }
 }

@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.danteplanner.backend.user.api.SessionEndHandler.SessionToken;
 import org.danteplanner.backend.shared.restriction.RestrictionExempt;
 import org.danteplanner.backend.shared.config.FrontendProperties;
@@ -23,6 +22,7 @@ import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthStateService;
 import org.danteplanner.backend.auth.oauth.OAuthStateService.OAuthTransaction;
 import org.danteplanner.backend.auth.token.TokenValidator;
+import org.danteplanner.backend.shared.security.Viewer;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.backend.shared.ratelimit.RateLimitDenial;
@@ -175,20 +175,13 @@ public class AuthController {
     @RateLimitExempt
     @RestrictionExempt(reason = "authentication")
     @PostMapping("/logout-all")
-    public ResponseEntity<Void> logoutAll(@AuthenticationPrincipal @Nullable Long userId, HttpServletRequest request,
+    public ResponseEntity<Void> logoutAll(Viewer.Member member, HttpServletRequest request,
             HttpServletResponse response) {
-        sessionRevocationService.logoutAll(requirePrincipal(userId), sessionTokens(request));
+        sessionRevocationService.logoutAll(member.userId(), sessionTokens(request));
 
         cookieUtils.clearAuthCookies(response);
 
         return ResponseEntity.noContent().build();
-    }
-
-    private static Long requirePrincipal(@Nullable Long userId) {
-        if (userId == null) {
-            throw new IllegalStateException("logout-all was called without an authenticated principal");
-        }
-        return userId;
     }
 
     private static String typeName(@Nullable Object principal) {

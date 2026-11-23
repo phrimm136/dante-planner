@@ -6,7 +6,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.data.redis.connection.DefaultMessage;
@@ -40,16 +39,14 @@ class SseRedisSubscriberTest {
     }
 
     @Test
-    void userEvent_WhenItExcludesADevice_SendsToTheUserExceptThatDevice() throws Exception {
-        UUID device = UUID.randomUUID();
+    void userEvent_WhenDelivered_SendsToTheUser() throws Exception {
         byte[] body = objectMapper.writeValueAsBytes(new SseEnvelope.UserEvent(7L, SseEventType.NOTIFY_COMMENT, "n1",
-                new SseEnvelope.DeviceExclusion.Device(device), Map.of("id", "n1")));
+                Map.of("id", "n1")));
 
         subscriber.onMessage(
                 new DefaultMessage(SseChannel.USER.topic().getBytes(StandardCharsets.UTF_8), body), null);
 
-        assertThat(sseService.userSends).singleElement().isEqualTo(new UserSend(7L,
-                new SseEnvelope.DeviceExclusion.Device(device), SseEventType.NOTIFY_COMMENT.getValue()));
+        assertThat(sseService.userSends).singleElement().isEqualTo(new UserSend(7L, SseEventType.NOTIFY_COMMENT.getValue()));
     }
 
     @Test
@@ -64,7 +61,7 @@ class SseRedisSubscriberTest {
                 .isEqualTo(new Broadcast(new SseEnvelope.UserExclusion.None(), SseEventType.NOTIFY_PUBLISHED.getValue()));
     }
 
-    private record UserSend(Long userId, SseEnvelope.DeviceExclusion exclusion, String eventType) {
+    private record UserSend(Long userId, String eventType) {
     }
 
     private record Broadcast(SseEnvelope.UserExclusion exclusion, String eventType) {
@@ -86,8 +83,8 @@ class SseRedisSubscriberTest {
         }
 
         @Override
-        public void sendToUser(Long userId, SseEnvelope.DeviceExclusion exclusion, String eventType, Object data) {
-            userSends.add(new UserSend(userId, exclusion, eventType));
+        public void sendToUser(Long userId, String eventType, Object data) {
+            userSends.add(new UserSend(userId, eventType));
         }
     }
 }

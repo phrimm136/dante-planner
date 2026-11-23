@@ -23,6 +23,7 @@ import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.LoginRedirect;
 import org.danteplanner.backend.shared.config.SecurityProperties;
+import org.danteplanner.backend.shared.config.ViewerArgumentResolver;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor;
@@ -321,6 +322,7 @@ class RateLimitStoreOutageTest {
                 queryService, securityProperties, deviceIdResolver);
 
         return MockMvcBuilders.standaloneSetup(authController, publishedPlannerController, new DeclaredHandlerFixture())
+                .setCustomArgumentResolvers(new ViewerArgumentResolver())
                 .addInterceptors(interceptor)
                 .setControllerAdvice(new ApiExceptionHandler())
                 .build();

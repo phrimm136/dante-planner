@@ -44,7 +44,7 @@ public class SseRedisSubscriber implements MessageListener {
                     sseService.invalidateSettingsCache(invalidation.userId());
             case SseEnvelope.AccountSuspended suspended -> sseService.notifyAccountSuspended(suspended.userId(),
                     clientPayload(suspended, suspended.payload(), ClientSseEvent.from(suspended)));
-            case SseEnvelope.UserEvent event -> sseService.sendToUser(event.userId(), event.exclusion(),
+            case SseEnvelope.UserEvent event -> sseService.sendToUser(event.userId(),
                     event.type().getValue(), clientPayload(event, event.payload(), ClientSseEvent.from(event)));
         }
     }

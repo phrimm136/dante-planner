@@ -10,8 +10,15 @@ public sealed interface Viewer {
     record Member(Long userId) implements Viewer {
     }
 
-    static Viewer of(@Nullable Long principal) {
-        return principal == null ? new Guest() : new Member(principal);
+    static Viewer of(@Nullable Object principal) {
+        return principal instanceof Long userId ? new Member(userId) : new Guest();
+    }
+
+    default Member requireMember() {
+        return switch (this) {
+            case Guest guest -> throw new IllegalStateException("a member route was reached without a signed-in user");
+            case Member member -> member;
+        };
     }
 
     default boolean is(Long userId) {

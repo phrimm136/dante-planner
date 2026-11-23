@@ -18,10 +18,10 @@ class SseTopicRecorderTest {
     @Test
     void userEvents_WhenAnotherUsersEnvelopeShareTheTopic_ReturnsOnlyTheRequestedUsers() {
         SseTopicRecorder.Envelopes envelopes = new SseTopicRecorder.Envelopes();
-        SseEnvelope.Wire own = new SseEnvelope.UserEvent(1L, SseEventType.NOTIFY_COMMENT, "c-1", new SseEnvelope.DeviceExclusion.None(), Map.of()).wire();
+        SseEnvelope.Wire own = new SseEnvelope.UserEvent(1L, SseEventType.NOTIFY_COMMENT, "c-1", Map.of()).wire();
         envelopes.record(SseChannel.USER, own);
-        envelopes.record(SseChannel.USER, new SseEnvelope.UserEvent(2L, SseEventType.NOTIFY_COMMENT, "c-2", new SseEnvelope.DeviceExclusion.None(), Map.of()).wire());
-        envelopes.record(SseChannel.USER, new SseEnvelope.UserEvent(1L, SseEventType.NOTIFY_PUBLISHED, "c-3", new SseEnvelope.DeviceExclusion.None(), Map.of()).wire());
+        envelopes.record(SseChannel.USER, new SseEnvelope.UserEvent(2L, SseEventType.NOTIFY_COMMENT, "c-2", Map.of()).wire());
+        envelopes.record(SseChannel.USER, new SseEnvelope.UserEvent(1L, SseEventType.NOTIFY_PUBLISHED, "c-3", Map.of()).wire());
 
         assertThat(envelopes.userEvents(1L, SseEventType.NOTIFY_COMMENT)).containsExactly(own);
     }
@@ -54,7 +54,7 @@ class SseTopicRecorderTest {
     @Test
     void await_WhenAnEnvelopeArrivesFromAnotherThread_ReturnsIt() throws Exception {
         SseTopicRecorder.Envelopes envelopes = new SseTopicRecorder.Envelopes();
-        SseEnvelope.Wire arriving = new SseEnvelope.UserEvent(3L, SseEventType.NOTIFY_COMMENT, "c-1", new SseEnvelope.DeviceExclusion.None(), Map.of()).wire();
+        SseEnvelope.Wire arriving = new SseEnvelope.UserEvent(3L, SseEventType.NOTIFY_COMMENT, "c-1", Map.of()).wire();
         Thread publisher = new Thread(() -> envelopes.record(SseChannel.USER, arriving));
         publisher.start();
 

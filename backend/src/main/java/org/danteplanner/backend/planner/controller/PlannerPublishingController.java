@@ -12,9 +12,9 @@ import org.danteplanner.backend.shared.dto.ToggleNotificationRequest;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
+import org.danteplanner.backend.shared.security.Viewer;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,15 +35,15 @@ public class PlannerPublishingController {
     @Restricted
     @PostMapping("/{id}/publish")
     public ResponseEntity<PlannerResponse> publishPlanner(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             @DeviceId UUID deviceId,
             @PathVariable UUID id,
             @RequestBody(required = false) @Valid @Nullable UpsertPlannerRequest content) {
 
         return ResponseEntity.ok(switch (PublishSource.of(content)) {
-            case PublishSource.Stored stored -> plannerPublishingService.publish(userId, id);
+            case PublishSource.Stored stored -> plannerPublishingService.publish(member.userId(), id);
             case PublishSource.Carried carried ->
-                    plannerPublishingService.publish(userId, deviceId, id, carried.content());
+                    plannerPublishingService.publish(member.userId(), deviceId, id, carried.content());
         });
     }
 
@@ -64,21 +64,21 @@ public class PlannerPublishingController {
     @RestrictionExempt(reason = "withdrawal from public view")
     @PostMapping("/{id}/unpublish")
     public ResponseEntity<PlannerResponse> unpublishPlanner(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             @PathVariable UUID id) {
 
-        return ResponseEntity.ok(plannerPublishingService.unpublish(userId, id));
+        return ResponseEntity.ok(plannerPublishingService.unpublish(member.userId(), id));
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-toggle")
     @RestrictionExempt(reason = "own setting")
     @PatchMapping("/{id}/notifications")
     public ResponseEntity<ToggleOwnerNotificationsResponse> toggleOwnerNotifications(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             @PathVariable UUID id,
             @Valid @RequestBody ToggleNotificationRequest request) {
 
-        ToggleOwnerNotificationsResponse response = plannerPublishingService.toggleOwnerNotifications(userId, id, request.enabled());
+        ToggleOwnerNotificationsResponse response = plannerPublishingService.toggleOwnerNotifications(member.userId(), id, request.enabled());
         return ResponseEntity.ok(response);
     }
 }

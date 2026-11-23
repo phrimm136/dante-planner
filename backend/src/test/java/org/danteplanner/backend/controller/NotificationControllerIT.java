@@ -17,6 +17,8 @@ import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -142,6 +144,17 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.notifications.length()").value(100))
                     .andExpect(jsonPath("$.size").value(100));
+        }
+
+        @ParameterizedTest
+        @CsvSource({"page, -1", "size, 0", "size, -1", "page, x"})
+        void getInbox_WhenPageOrSizeIsNotInRange_Returns400(String parameter, String value) throws Exception {
+            mockMvc.perform(get("/api/notifications/inbox")
+                            .cookie(accessTokenCookie())
+                            .param(parameter, value))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                    .andExpect(jsonPath("$.detail").value("Invalid parameter format"));
         }
 
         @Test

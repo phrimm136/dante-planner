@@ -11,9 +11,9 @@ import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.dto.UpsertResult;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
+import org.danteplanner.backend.shared.security.Viewer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -35,13 +35,13 @@ public class PlannerCommandController {
     @RestrictedByState
     @PutMapping("/{id}")
     public ResponseEntity<PlannerResponse> upsertPlanner(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             @DeviceId UUID deviceId,
             @PathVariable UUID id,
             @Valid @RequestBody UpsertPlannerRequest request,
             @RequestParam(required = false, defaultValue = "false") boolean force) {
 
-        UpsertResult result = plannerCommandService.upsertPlanner(userId, deviceId, id, request, force);
+        UpsertResult result = plannerCommandService.upsertPlanner(member.userId(), deviceId, id, request, force);
 
         HttpStatus status = result.isCreated() ? HttpStatus.CREATED : HttpStatus.OK;
         return ResponseEntity.status(status).body(result.response());
@@ -51,10 +51,10 @@ public class PlannerCommandController {
     @RestrictionExempt(reason = "own planner")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlanner(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             @PathVariable UUID id) {
 
-        plannerCommandService.deletePlanner(userId, id);
+        plannerCommandService.deletePlanner(member.userId(), id);
         return ResponseEntity.noContent().build();
     }
 }

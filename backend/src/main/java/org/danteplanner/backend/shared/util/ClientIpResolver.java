@@ -17,9 +17,6 @@ import org.danteplanner.backend.shared.config.SecurityProperties.CidrRange;
  */
 public final class ClientIpResolver {
 
-    private static final String X_FORWARDED_FOR = "X-Forwarded-For";
-    private static final String CF_CONNECTING_IP = "CF-Connecting-IP";
-
     private static final String IP_IDENTIFIER_PREFIX = "ip:";
     private static final String DEVICE_IDENTIFIER_PREFIX = "device:";
     private static final String UNKNOWN_DEVICE = "unknown";
@@ -50,7 +47,7 @@ public final class ClientIpResolver {
 
     public static String resolve(HttpServletRequest request, SecurityProperties securityProperties) {
         String directIp = request.getRemoteAddr();
-        return clientIp(directIp, securityProperties.isTrustedProxy(directIp), request.getHeader(X_FORWARDED_FOR));
+        return clientIp(directIp, securityProperties.isTrustedProxy(directIp), RequestHeaders.forwardedFor(request));
     }
 
     private static String clientIp(String directIp, boolean peerIsTrustedProxy, @Nullable String forwarded) {
@@ -68,7 +65,7 @@ public final class ClientIpResolver {
             Supplier<UUID> deviceId
     ) {
         String ip = switch (ClientIpEvidence.of(
-                request.getHeader(CF_CONNECTING_IP), securityProperties.isTrustedProxy(request.getRemoteAddr()))) {
+                RequestHeaders.cfConnectingIp(request), securityProperties.isTrustedProxy(request.getRemoteAddr()))) {
             case ClientIpEvidence.Trusted trusted -> trusted.ip();
             case ClientIpEvidence.NotEvidence notEvidence -> resolve(request, securityProperties);
         };

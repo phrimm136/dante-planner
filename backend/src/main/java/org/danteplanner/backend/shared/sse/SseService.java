@@ -51,10 +51,6 @@ public class SseService extends AbstractSseService<Long> {
     }
 
     public void sendToUser(Long userId, String eventType, Object data) {
-        sendToUser(userId, new SseEnvelope.DeviceExclusion.None(), eventType, data);
-    }
-
-    public void sendToUser(Long userId, SseEnvelope.DeviceExclusion exclusion, String eventType, Object data) {
         if (!isEventAllowed(userId, eventType)) {
             log.debug("Event {} blocked by settings for user {}", eventType, userId);
             return;
@@ -74,10 +70,6 @@ public class SseService extends AbstractSseService<Long> {
         }
 
         for (EmitterEntry entry : userEmitters) {
-            if (exclusion.excludes(entry.deviceId())) {
-                continue;
-            }
-
             try {
                 entry.emitter().send(SseEmitter.event().name(eventType).data(jsonData));
                 log.debug("Sent {} to user {} device {}", eventType, userId, entry.deviceId());

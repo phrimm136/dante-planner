@@ -12,9 +12,9 @@ import org.danteplanner.backend.planner.dto.VoteResponse;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
+import org.danteplanner.backend.shared.security.Viewer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,11 +35,11 @@ public class PlannerEngagementController {
     @Restricted
     @PostMapping("/{id}/upvote")
     public ResponseEntity<VoteResponse> castUpvote(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             @PathVariable UUID id,
             @Valid @RequestBody VoteRequest request) {
 
-        VoteResponse response = plannerEngagementService.castVote(userId, id, request.voteType());
+        VoteResponse response = plannerEngagementService.castVote(member.userId(), id, request.voteType());
         return ResponseEntity.ok(response);
     }
 
@@ -47,10 +47,10 @@ public class PlannerEngagementController {
     @RestrictedByState
     @PostMapping("/{id}/subscribe")
     public ResponseEntity<SubscriptionResponse> toggleSubscription(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             @PathVariable UUID id) {
 
-        var subscription = subscriptionService.toggleSubscription(userId, id);
+        var subscription = subscriptionService.toggleSubscription(member.userId(), id);
         SubscriptionResponse response = SubscriptionResponse.builder()
                 .plannerId(id)
                 .subscribed(subscription.isEnabled())
@@ -62,10 +62,10 @@ public class PlannerEngagementController {
     @Restricted
     @PostMapping("/{id}/report")
     public ResponseEntity<PlannerActionResponse> submitReport(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             @PathVariable UUID id) {
 
-        plannerEngagementService.reportPlanner(userId, id);
+        plannerEngagementService.reportPlanner(member.userId(), id);
         PlannerActionResponse response = PlannerActionResponse.builder()
                 .plannerId(id)
                 .message("Report submitted")

@@ -8,8 +8,8 @@ import org.danteplanner.backend.moderation.dto.HidePlannerRequest;
 import org.danteplanner.backend.moderation.dto.ModerationResponse;
 import org.danteplanner.backend.moderation.service.PlannerModerationService;
 import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
+import org.danteplanner.backend.shared.security.Viewer;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,13 +30,13 @@ public class AdminModerationController {
     @RestrictionExempt(reason = "privileged route: PrivilegedRouteRules checks the live actor")
     @PostMapping("/{id}/hide-from-recommended")
     public ResponseEntity<ModerationResponse> hideFromRecommended(
-            @AuthenticationPrincipal Long moderatorId,
+            Viewer.Member moderator,
             @PathVariable("id") UUID plannerId,
             @Valid @RequestBody HidePlannerRequest request) {
 
         log.info("Moderator {} hiding planner {} from recommended (reason: {})",
-                moderatorId, plannerId, request.reason());
-        ModerationResponse response = plannerModerationService.hideFromRecommended(plannerId, moderatorId, request);
+                moderator.userId(), plannerId, request.reason());
+        ModerationResponse response = plannerModerationService.hideFromRecommended(plannerId, moderator.userId(), request);
         return ResponseEntity.ok(response);
     }
 
@@ -44,11 +44,11 @@ public class AdminModerationController {
     @RestrictionExempt(reason = "privileged route: PrivilegedRouteRules checks the live actor")
     @PostMapping("/{id}/unhide-from-recommended")
     public ResponseEntity<ModerationResponse> unhideFromRecommended(
-            @AuthenticationPrincipal Long moderatorId,
+            Viewer.Member moderator,
             @PathVariable("id") UUID plannerId) {
 
-        log.info("Moderator {} unhiding planner {} from recommended", moderatorId, plannerId);
-        ModerationResponse response = plannerModerationService.unhideFromRecommended(plannerId, moderatorId);
+        log.info("Moderator {} unhiding planner {} from recommended", moderator.userId(), plannerId);
+        ModerationResponse response = plannerModerationService.unhideFromRecommended(plannerId, moderator.userId());
         return ResponseEntity.ok(response);
     }
 }

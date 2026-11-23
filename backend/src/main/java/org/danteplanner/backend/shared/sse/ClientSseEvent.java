@@ -5,8 +5,8 @@ import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.shared.entity.SseEventType;
 
 /**
- * The fan-out exclusions ({@code excludeDeviceId}, {@code excludeUserId}) are server-side delivery
- * state and are dropped here, so a comment subscriber never learns the acting account's id.
+ * The fan-out exclusion ({@code excludeUserId}) is server-side delivery
+ * state and is dropped here, so a comment subscriber never learns the acting account's id.
  */
 public record ClientSseEvent(
         SseEventType type,

@@ -27,9 +27,9 @@ import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
+import org.danteplanner.backend.shared.security.Viewer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Clock;
 import java.time.Instant;
 
 @RestController
@@ -50,6 +51,7 @@ public class UserController {
     private final EpithetConfig epithetConfig;
     private final SessionEndHandler sessionEndHandler;
     private final CookieUtils cookieUtils;
+    private final Clock clock;
     private final int gracePeriodDays;
 
     public UserController(
@@ -60,6 +62,7 @@ public class UserController {
             EpithetConfig epithetConfig,
             SessionEndHandler sessionEndHandler,
             CookieUtils cookieUtils,
+            Clock clock,
             @Value("${app.user.deletion.grace-period-days:30}") int gracePeriodDays) {
         this.lifecycleService = lifecycleService;
         this.userService = userService;
@@ -68,6 +71,7 @@ public class UserController {
         this.epithetConfig = epithetConfig;
         this.sessionEndHandler = sessionEndHandler;
         this.cookieUtils = cookieUtils;
+        this.clock = clock;
         this.gracePeriodDays = gracePeriodDays;
     }
 
@@ -81,26 +85,26 @@ public class UserController {
     @RestrictionExempt(reason = "epithet from a fixed list of harmless phrases")
     @PutMapping("/me/username-epithet")
     public ResponseEntity<UserResponse> updateUsernameEpithet(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             @Valid @RequestBody UpdateUsernameEpithetRequest request) {
-        return ResponseEntity.ok(userService.updateUsernameEpithet(userId, request.epithet()));
+        return ResponseEntity.ok(userService.updateUsernameEpithet(member.userId(), request.epithet()));
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "user-delete")
     @RestrictionExempt(reason = "own account")
     @DeleteMapping("/me")
     public ResponseEntity<UserDeletionResponse> deleteMyAccount(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             HttpServletRequest request,
             HttpServletResponse response) {
-        Instant permanentDeleteAt = lifecycleService.deleteAccount(userId);
+        Instant permanentDeleteAt = lifecycleService.deleteAccount(member.userId());
 
         sessionEndHandler.endSession(sessionTokens(request));
         cookieUtils.clearAuthCookies(response);
 
         return ResponseEntity.ok(new UserDeletionResponse(
             "Account scheduled for deletion",
-            Instant.now(),
+            clock.instant(),
             permanentDeleteAt,
             gracePeriodDays
         ));
@@ -108,18 +112,18 @@ public class UserController {
 
     @RateLimitExempt
     @GetMapping("/settings")
-    public ResponseEntity<UserSettingsResponse> getSettings(@AuthenticationPrincipal Long userId) {
-        return ResponseEntity.ok(userSettingsService.getSettings(userId).value());
+    public ResponseEntity<UserSettingsResponse> getSettings(Viewer.Member member) {
+        return ResponseEntity.ok(userSettingsService.getSettings(member.userId()).value());
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "user-settings-update")
     @RestrictionExempt(reason = "own setting")
     @PutMapping("/settings")
     public ResponseEntity<UserSettingsResponse> updateSettings(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             @Valid @RequestBody UpdateUserSettingsRequest request) {
-        UserSettingsResponse settings = userSettingsService.updateSettings(userId, request);
-        ssePublisher.publishSettingsInvalidation(userId);
+        UserSettingsResponse settings = userSettingsService.updateSettings(member.userId(), request);
+        ssePublisher.publishSettingsInvalidation(member.userId());
         return ResponseEntity.ok(settings);
     }
 

@@ -5,8 +5,8 @@ import org.danteplanner.backend.shared.config.DeviceId;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.shared.sse.SseService;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
+import org.danteplanner.backend.shared.security.Viewer;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,9 +25,9 @@ public class SseController {
     @RateLimited(RateLimitPolicy.SSE)
     @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribe(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             @DeviceId UUID deviceId) throws IOException {
 
-        return sseService.subscribe(userId, deviceId);
+        return sseService.subscribe(member.userId(), deviceId);
     }
 }

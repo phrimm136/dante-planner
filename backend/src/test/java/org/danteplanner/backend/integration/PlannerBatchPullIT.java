@@ -178,4 +178,19 @@ class PlannerBatchPullIT extends SharedMySqlContainerSupport {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
+
+    @Test
+    void batchGet_WhenOnlyAHeaderCarriesTheIds_Returns400() throws Exception {
+        performAuthed(mockMvc, get("/api/planner/md/batch").header("Ids", owned.getId().toString()), token)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void batchGet_WhenAnIdIsNotAUuid_AnswersTheParameterFormatBody() throws Exception {
+        performAuthed(mockMvc, get("/api/planner/md/batch").param("ids", "x"), token)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.detail").value("Invalid parameter format"));
+    }
 }

@@ -25,8 +25,8 @@ import org.danteplanner.backend.moderation.service.UserModerationService;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
+import org.danteplanner.backend.shared.security.Viewer;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,14 +50,14 @@ public class ModerationController {
     @RestrictionExempt(reason = "privileged route: PrivilegedRouteRules checks the live actor")
     @PostMapping("/user/{usernameSuffix}/timeout")
     public ResponseEntity<TimeoutResponse> timeoutUser(
-            @AuthenticationPrincipal Long actorId,
+            Viewer.Member actor,
             @PathVariable String usernameSuffix,
             @Valid @RequestBody TimeoutRequest request) {
 
         log.info("Moderator {} timing out user with suffix {} for {} minutes with reason: {}",
-                actorId, usernameSuffix, request.durationMinutes(), request.reason());
+                actor.userId(), usernameSuffix, request.durationMinutes(), request.reason());
 
-        User user = userModerationService.timeoutUserBySuffix(actorId, usernameSuffix, request.durationMinutes(), request.reason());
+        User user = userModerationService.timeoutUserBySuffix(actor.userId(), usernameSuffix, request.durationMinutes(), request.reason());
         return ResponseEntity.ok(TimeoutResponse.builder()
                 .usernameSuffix(user.getUsernameSuffix())
                 .timeoutUntil(user.getTimeoutUntil())
@@ -68,13 +68,13 @@ public class ModerationController {
     @RestrictionExempt(reason = "privileged route: PrivilegedRouteRules checks the live actor")
     @PostMapping("/user/{usernameSuffix}/clear-timeout")
     public ResponseEntity<TimeoutResponse> removeTimeout(
-            @AuthenticationPrincipal Long actorId,
+            Viewer.Member actor,
             @PathVariable String usernameSuffix,
             @Valid @RequestBody BanRequest request) {
 
-        log.info("Moderator {} removing timeout from user with suffix {} with reason: {}", actorId, usernameSuffix, request.reason());
+        log.info("Moderator {} removing timeout from user with suffix {} with reason: {}", actor.userId(), usernameSuffix, request.reason());
 
-        User user = userModerationService.removeTimeoutBySuffix(actorId, usernameSuffix, request.reason());
+        User user = userModerationService.removeTimeoutBySuffix(actor.userId(), usernameSuffix, request.reason());
         return ResponseEntity.ok(TimeoutResponse.builder()
                 .usernameSuffix(user.getUsernameSuffix())
                 .timeoutUntil(user.getTimeoutUntil())
@@ -85,12 +85,12 @@ public class ModerationController {
     @RestrictionExempt(reason = "privileged route: PrivilegedRouteRules checks the live actor")
     @PutMapping("/planner/{plannerId}/unpublish")
     public ResponseEntity<UnpublishPlannerResponse> unpublishPlanner(
-            @AuthenticationPrincipal Long actorId,
+            Viewer.Member actor,
             @PathVariable UUID plannerId) {
 
-        log.info("Moderator {} unpublishing planner {}", actorId, plannerId);
+        log.info("Moderator {} unpublishing planner {}", actor.userId(), plannerId);
 
-        ModeratedPlanner planner = plannerModerationService.unpublishPlanner(actorId, plannerId);
+        ModeratedPlanner planner = plannerModerationService.unpublishPlanner(actor.userId(), plannerId);
         return ResponseEntity.ok(new UnpublishPlannerResponse(
                 planner.id(), planner.published(), "Planner unpublished successfully"));
     }
@@ -98,26 +98,26 @@ public class ModerationController {
     @RestrictionExempt(reason = "privileged route: PrivilegedRouteRules checks the live actor")
     @PostMapping("/user/{usernameSuffix}/ban")
     public ResponseEntity<BanStatusResponse> banUser(
-            @AuthenticationPrincipal Long actorId,
+            Viewer.Member actor,
             @PathVariable String usernameSuffix,
             @Valid @RequestBody BanRequest request) {
 
-        log.info("Admin {} banning user with suffix {} with reason: {}", actorId, usernameSuffix, request.reason());
+        log.info("Admin {} banning user with suffix {} with reason: {}", actor.userId(), usernameSuffix, request.reason());
 
-        User user = userModerationService.banUserBySuffix(actorId, usernameSuffix, request.reason());
+        User user = userModerationService.banUserBySuffix(actor.userId(), usernameSuffix, request.reason());
         return ResponseEntity.ok(new BanStatusResponse(user.isBanned(), "User banned successfully"));
     }
 
     @RestrictionExempt(reason = "privileged route: PrivilegedRouteRules checks the live actor")
     @PostMapping("/user/{usernameSuffix}/unban")
     public ResponseEntity<BanStatusResponse> unbanUser(
-            @AuthenticationPrincipal Long actorId,
+            Viewer.Member actor,
             @PathVariable String usernameSuffix,
             @Valid @RequestBody BanRequest request) {
 
-        log.info("Admin {} unbanning user with suffix {} with reason: {}", actorId, usernameSuffix, request.reason());
+        log.info("Admin {} unbanning user with suffix {} with reason: {}", actor.userId(), usernameSuffix, request.reason());
 
-        User user = userModerationService.unbanUserBySuffix(actorId, usernameSuffix, request.reason());
+        User user = userModerationService.unbanUserBySuffix(actor.userId(), usernameSuffix, request.reason());
         return ResponseEntity.ok(new BanStatusResponse(user.isBanned(), "User unbanned successfully"));
     }
 
@@ -150,13 +150,13 @@ public class ModerationController {
     @RestrictionExempt(reason = "privileged route: PrivilegedRouteRules checks the live actor")
     @PostMapping("/planner/{plannerId}/takedown")
     public ResponseEntity<PlannerActionResponse> takedownPlanner(
-            @AuthenticationPrincipal Long actorId,
+            Viewer.Member actor,
             @PathVariable UUID plannerId,
             @Valid @RequestBody BanRequest request) {
 
-        log.info("Moderator {} taking down planner {} with reason: {}", actorId, plannerId, request.reason());
+        log.info("Moderator {} taking down planner {} with reason: {}", actor.userId(), plannerId, request.reason());
 
-        plannerModerationService.deletePlanner(actorId, plannerId, request.reason());
+        plannerModerationService.deletePlanner(actor.userId(), plannerId, request.reason());
         return ResponseEntity.ok(
                 new PlannerActionResponse(plannerId, "Planner taken down successfully"));
     }
@@ -164,12 +164,12 @@ public class ModerationController {
     @RestrictionExempt(reason = "privileged route: PrivilegedRouteRules checks the live actor")
     @PostMapping("/comments/{commentPublicId}/delete")
     public ResponseEntity<Void> deleteComment(
-            @AuthenticationPrincipal Long actorId,
+            Viewer.Member actor,
             @PathVariable UUID commentPublicId,
             @Valid @RequestBody BanRequest request) {
 
-        log.info("Moderator {} deleting comment {} with reason: {}", actorId, commentPublicId, request.reason());
-        commentModerationService.deleteCommentByPublicId(actorId, commentPublicId, request.reason());
+        log.info("Moderator {} deleting comment {} with reason: {}", actor.userId(), commentPublicId, request.reason());
+        commentModerationService.deleteCommentByPublicId(actor.userId(), commentPublicId, request.reason());
         return ResponseEntity.noContent().build();
     }
 }

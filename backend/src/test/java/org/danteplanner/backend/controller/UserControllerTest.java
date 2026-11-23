@@ -5,6 +5,7 @@ import org.danteplanner.backend.user.controller.UserController;
 import jakarta.servlet.http.Cookie;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.shared.entity.SseEventType;
+import org.danteplanner.backend.shared.security.Viewer;
 import org.danteplanner.backend.shared.sse.SseChannel;
 import org.danteplanner.backend.shared.sse.SseEnvelope;
 import org.danteplanner.backend.shared.sse.SsePublisher;
@@ -36,8 +37,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -69,6 +72,7 @@ class UserControllerTest {
 
     private UserController userController;
 
+    private static final Instant NOW = Instant.parse("2026-11-23T10:15:30Z");
     private static final int GRACE_PERIOD_DAYS = 30;
     private static final Long TEST_USER_ID = 123L;
     private static final String TEST_ACCESS_TOKEN = "test-access-token";
@@ -86,7 +90,7 @@ class UserControllerTest {
                 null,
                 new UserSettingsService(userSettingsRepository, userRepository),
                 new SsePublisher(sseChannel, TestJsonMappers.springDefaults(), new SimpleMeterRegistry()),
-                null, sessionEndHandler, cookieUtils, gracePeriodDays);
+                null, sessionEndHandler, cookieUtils, Clock.fixed(NOW, ZoneOffset.UTC), gracePeriodDays);
     }
 
     private User givenAnAccount(Long userId) {
@@ -111,7 +115,7 @@ class UserControllerTest {
             User account = givenAnAccount(TEST_USER_ID);
 
             // Act
-            ResponseEntity<UserDeletionResponse> result = userController.deleteMyAccount(TEST_USER_ID, request, response);
+            ResponseEntity<UserDeletionResponse> result = userController.deleteMyAccount(new Viewer.Member(TEST_USER_ID), request, response);
 
             // Assert
             assertThat(result).isNotNull();
@@ -120,7 +124,7 @@ class UserControllerTest {
             UserDeletionResponse body = result.getBody();
             assertThat(body).isNotNull();
             assertThat(body.message()).isEqualTo("Account scheduled for deletion");
-            assertThat(body.deletedAt()).isNotNull();
+            assertThat(body.deletedAt()).isEqualTo(NOW);
             assertThat(body.permanentDeleteAt()).isEqualTo(account.getPermanentDeleteScheduledAt());
             assertThat(body.gracePeriodDays()).isEqualTo(GRACE_PERIOD_DAYS);
         }
@@ -131,7 +135,7 @@ class UserControllerTest {
             givenAnAccount(TEST_USER_ID);
 
             // Act
-            userController.deleteMyAccount(TEST_USER_ID, request, response);
+            userController.deleteMyAccount(new Viewer.Member(TEST_USER_ID), request, response);
 
             // Assert - both auth cookies come back expired, so the browser drops them
             Cookie clearedAccess = response.getCookie(CookieConstants.ACCESS_TOKEN);
@@ -156,7 +160,7 @@ class UserControllerTest {
             givenAnAccount(TEST_USER_ID).softDelete(originalScheduledAt);
 
             // Act
-            ResponseEntity<UserDeletionResponse> result = userController.deleteMyAccount(TEST_USER_ID, request, response);
+            ResponseEntity<UserDeletionResponse> result = userController.deleteMyAccount(new Viewer.Member(TEST_USER_ID), request, response);
 
             // Assert
             assertThat(result).isNotNull();
@@ -172,7 +176,7 @@ class UserControllerTest {
 
             // Act
             ResponseEntity<UserDeletionResponse> result =
-                    userController.deleteMyAccount(userId, request, response);
+                    userController.deleteMyAccount(new Viewer.Member(userId), request, response);
 
             // Assert
             assertThat(account.isDeleted()).isTrue();
@@ -187,7 +191,7 @@ class UserControllerTest {
             givenAnAccount(TEST_USER_ID);
 
             // Act
-            ResponseEntity<UserDeletionResponse> result = userController.deleteMyAccount(TEST_USER_ID, request, response);
+            ResponseEntity<UserDeletionResponse> result = userController.deleteMyAccount(new Viewer.Member(TEST_USER_ID), request, response);
 
             // Assert
             assertThat(result.getBody().gracePeriodDays()).isEqualTo(customGracePeriod);
@@ -211,7 +215,7 @@ class UserControllerTest {
 
             // Act
             ResponseEntity<UserSettingsResponse> result =
-                    userController.updateSettings(TEST_USER_ID, updateRequest);
+                    userController.updateSettings(new Viewer.Member(TEST_USER_ID), updateRequest);
 
             // Assert - the invalidation must go out for the updated user, after the persist,
             // so every pod drops its stale settingsCache entry.
@@ -219,7 +223,7 @@ class UserControllerTest {
             assertThat(result.getBody()).isEqualTo(new UserSettingsResponse(true, true, true, true, false));
             assertThat(invalidationsAtPersist).containsExactly(List.of());
             assertThat(sseChannel.envelopes(SseChannel.USER)).containsExactly(
-                    new SseEnvelope.Wire(SseEventType.SETTINGS_INVALIDATED, TEST_USER_ID, null, null, null, null, null));
+                    new SseEnvelope.Wire(SseEventType.SETTINGS_INVALIDATED, TEST_USER_ID, null, null, null, null));
         }
     }
 }

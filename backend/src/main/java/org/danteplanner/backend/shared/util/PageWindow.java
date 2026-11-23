@@ -1,0 +1,68 @@
+package org.danteplanner.backend.shared.util;
+
+import org.jspecify.annotations.Nullable;
+import org.springframework.beans.TypeMismatchException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+public sealed interface PageWindow {
+
+    int DEFAULT_PAGE = 0;
+    int DEFAULT_SIZE = 20;
+    int MAX_SIZE = 100;
+    char REPEATED_VALUE_SEPARATOR = ',';
+
+    record InRange(int page, int size) implements PageWindow {
+    }
+
+    record OutOfRange(String parameter, Object value) implements PageWindow {
+    }
+
+    static PageWindow of(int page, int size) {
+        if (page < 0) {
+            return new OutOfRange("page", page);
+        }
+        return size < 1 ? new OutOfRange("size", size) : new InRange(page, Math.min(size, MAX_SIZE));
+    }
+
+    static PageWindow of(@Nullable String page, @Nullable String size) {
+        Integer pageNumber = integer(page, DEFAULT_PAGE);
+        if (pageNumber == null) {
+            return new OutOfRange("page", String.valueOf(page));
+        }
+        Integer pageSize = integer(size, DEFAULT_SIZE);
+        return pageSize == null ? new OutOfRange("size", String.valueOf(size)) : of(pageNumber, pageSize);
+    }
+
+    private static @Nullable Integer integer(@Nullable String supplied, int absent) {
+        if (supplied == null || supplied.isEmpty()) {
+            return absent;
+        }
+        int separator = supplied.indexOf(REPEATED_VALUE_SEPARATOR);
+        String first = separator < 0 ? supplied : supplied.substring(0, separator);
+        try {
+            return Integer.valueOf(first.strip());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    static Pageable pageable(int page, int size) {
+        return pageable(of(page, size));
+    }
+
+    static Pageable pageable(@Nullable String page, @Nullable String size) {
+        return pageable(of(page, size));
+    }
+
+    private static Pageable pageable(PageWindow requested) {
+        return switch (requested) {
+            case InRange window -> PageRequest.of(window.page(), window.size());
+            case OutOfRange outOfRange -> {
+                TypeMismatchException mismatch = new TypeMismatchException(outOfRange.value(), int.class);
+                mismatch.initPropertyName(outOfRange.parameter());
+                throw mismatch;
+            }
+        };
+    }
+}
