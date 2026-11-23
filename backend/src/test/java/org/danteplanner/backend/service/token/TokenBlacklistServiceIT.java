@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import java.time.Clock;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -63,7 +64,7 @@ class TokenBlacklistServiceIT {
     @BeforeEach
     void setUp() {
         blacklistService = new TokenBlacklistService(AuthReads.writesTo(ownTemplate), AuthReads.from(ownTemplate), new SimpleMeterRegistry(),
-                TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
+                Clock.systemUTC(), TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
         TokenStoreKeys.deleteBlacklistAndInvalidations(ownTemplate);
     }
 
@@ -167,20 +168,7 @@ class TokenBlacklistServiceIT {
     }
 
     @Nested
-    class RotationGracePeriodTests {
-
-        @Test
-        void blacklistTokenForRotation_WhenWithinGracePeriod_Allowed() {
-            // Arrange
-            String token = "rotation.refresh.token";
-            Date expiry = new Date(System.currentTimeMillis() + 60000);
-
-            // Act - blacklist for rotation (grace-eligible)
-            blacklistService.blacklistTokenForRotation(token, expiry);
-
-            // Assert - should NOT be considered blacklisted within the grace window
-            assertThat(blacklistService.isBlacklisted(token)).isFalse();
-        }
+    class ImmediateBlacklistTests {
 
         @Test
         void blacklistToken_WhenBlacklisted_RejectedImmediately() {
@@ -195,39 +183,6 @@ class TokenBlacklistServiceIT {
             assertThat(blacklistService.isBlacklisted(token)).isTrue();
         }
 
-        @Test
-        void blacklistTokenForRotation_WhenAfterGracePeriod_Rejected() throws InterruptedException {
-            // Arrange
-            String token = "rotation.expired.grace.token";
-            Date expiry = new Date(System.currentTimeMillis() + 60000);
-
-            // Act - blacklist for rotation, then wait past the grace period
-            blacklistService.blacklistTokenForRotation(token, expiry);
-
-            // Simulate grace period expiry by re-adding with an old timestamp
-            // We can't easily wait 5 seconds in a test, so we verify the
-            // immediate path works as a proxy for post-grace behavior
-            blacklistService.blacklistToken(token, expiry); // overwrite with immediate
-
-            // Assert - now rejected
-            assertThat(blacklistService.isBlacklisted(token)).isTrue();
-        }
-
-        @Test
-        void blacklistToken_WhenRotationThenLogout_OverridesToImmediate() {
-            // Arrange
-            String token = "rotate.then.logout.token";
-            Date expiry = new Date(System.currentTimeMillis() + 60000);
-
-            // Act - first rotation (grace), then logout (immediate)
-            blacklistService.blacklistTokenForRotation(token, expiry);
-            assertThat(blacklistService.isBlacklisted(token)).isFalse(); // grace allows
-
-            blacklistService.blacklistToken(token, expiry); // logout overrides
-
-            // Assert - now immediately blacklisted
-            assertThat(blacklistService.isBlacklisted(token)).isTrue();
-        }
     }
 
     @Nested
@@ -277,7 +232,7 @@ class TokenBlacklistServiceIT {
             // Act - a second service over a fresh template pointing at the SAME container
             StringRedisTemplate secondTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
             TokenBlacklistService secondService = new TokenBlacklistService(AuthReads.writesTo(secondTemplate), AuthReads.from(secondTemplate), new SimpleMeterRegistry(),
-                    TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
+                    Clock.systemUTC(), TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
 
             // Assert - externalized revocation is visible across instances
             assertThat(secondService.isBlacklisted(token)).isTrue();
@@ -296,7 +251,7 @@ class TokenBlacklistServiceIT {
             // Act - a second service over a fresh template pointing at the SAME container
             StringRedisTemplate secondTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
             TokenBlacklistService secondService = new TokenBlacklistService(AuthReads.writesTo(secondTemplate), AuthReads.from(secondTemplate), new SimpleMeterRegistry(),
-                    TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
+                    Clock.systemUTC(), TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
 
             // Assert - externalized user invalidation is visible across instances
             assertThat(secondService.isUserTokenInvalidated(userId, 0L)).isTrue();

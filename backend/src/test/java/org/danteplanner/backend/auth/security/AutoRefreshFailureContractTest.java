@@ -7,7 +7,6 @@ import org.danteplanner.backend.shared.exception.ProblemWriter;
 import jakarta.servlet.http.Cookie;
 
 import org.danteplanner.backend.auth.token.RotationOutcome;
-import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.backend.support.FakeUsers;
@@ -18,7 +17,7 @@ import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -27,20 +26,12 @@ import org.danteplanner.backend.support.TestJsonMappers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * One contract, both rotation implementations.
- *
- * <p>{@code jwt.rotation.lineage-enabled} selects between two auto-refresh implementations that owe
- * their client the same thing. Tests written per implementation cannot see them diverge, and one
- * did: only the lineage half withdrew the cookies of a token it had just rejected, so under the
- * legacy half a client re-presented dead credentials on every request and the session resolved to
- * neither authenticated nor guest.</p>
- *
- * <p>What each implementation recognizes as a dead token differs, so the arrangement is per branch;
- * the assertion is not. A third implementation added behind this flag gains this contract by
- * appearing in the value source.</p>
- */
 class AutoRefreshFailureContractTest {
+
+    private enum DeadToken {
+        SPENT,
+        BLACKLISTED
+    }
 
     private static final Long USER_ID = 42L;
 
@@ -68,14 +59,13 @@ class AutoRefreshFailureContractTest {
         SecurityContextHolder.clearContext();
     }
 
-    @ParameterizedTest(name = "lineage-enabled={0}")
-    @ValueSource(booleans = {true, false})
-    void autoRefresh_WhenRefreshTokenIsDead_WithdrawsBothCookies(boolean lineageEnabled)
-            throws Exception {
+    @ParameterizedTest
+    @EnumSource(DeadToken.class)
+    void autoRefresh_WhenRefreshTokenIsDead_WithdrawsBothCookies(DeadToken dead) throws Exception {
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, deadRefreshToken));
-        givenTheTokenIsDead(lineageEnabled);
+        givenTheTokenIsDead(dead);
 
-        filterWithFlag(lineageEnabled).doFilterInternal(request, response, filterChain);
+        filter().doFilterInternal(request, response, filterChain);
 
         assertCookieWithdrawn(CookieConstants.ACCESS_TOKEN);
         assertCookieWithdrawn(CookieConstants.REFRESH_TOKEN);
@@ -85,16 +75,12 @@ class AutoRefreshFailureContractTest {
         assertThat(request.getAttribute(CustomAuthenticationEntryPoint.AUTH_ERROR_ATTRIBUTE))
                 .as("the client is owed the reason, so it can stop retrying")
                 .isEqualTo(CustomAuthenticationEntryPoint.SESSION_REVOKED);
-        assertTheDeadTokenWasRefused(lineageEnabled);
+        assertTheDeadTokenWasRefused(dead);
     }
 
-    /**
-     * Each implementation recognizes a spent token its own way: the lineage state machine reports a
-     * revoked family, and the legacy path finds the token on the rotation blacklist.
-     */
-    private void givenTheTokenIsDead(boolean lineageEnabled) {
+    private void givenTheTokenIsDead(DeadToken dead) {
         users.add(TestDataFactory.unsavedUser(USER_ID));
-        if (lineageEnabled) {
+        if (dead == DeadToken.SPENT) {
             RotationOutcome.Rotated successor = (RotationOutcome.Rotated) refreshRotation.rotate(deadRefreshToken);
             refreshRotation.rotate(successor.newRefreshJwt());
         } else {
@@ -103,8 +89,8 @@ class AutoRefreshFailureContractTest {
         }
     }
 
-    private void assertTheDeadTokenWasRefused(boolean lineageEnabled) {
-        if (lineageEnabled) {
+    private void assertTheDeadTokenWasRefused(DeadToken dead) {
+        if (dead == DeadToken.SPENT) {
             assertThat(refreshRotation.rotations().getLast()).isEqualTo(new RecordingRefreshRotation.Rotation(
                     deadRefreshToken,
                     new RotationOutcome.Revoked(TestJwt.familyIdOf(jwt.service().validateRefreshToken(deadRefreshToken)))));
@@ -119,11 +105,11 @@ class AutoRefreshFailureContractTest {
         assertThat(cookie.getMaxAge()).as(name + " must be withdrawn, not reissued").isEqualTo(0);
     }
 
-    private JwtAuthenticationFilter filterWithFlag(boolean lineageEnabled) {
+    private JwtAuthenticationFilter filter() {
         return new JwtAuthenticationFilter(
                 jwt.service(), tokenBlacklist,
                 new AccessTokenAuthenticator(jwt.service(), tokenBlacklist), cookieUtils, users,
                 new AuthDegradationResponder(new ProblemWriter(TestJsonMappers.springDefaults())), jwt.service(), refreshRotation,
-                new LineageRotationFlag(lineageEnabled), jwt.properties());
+                jwt.properties());
     }
 }

@@ -35,7 +35,7 @@ class RefreshRotationServiceOpenRoleTest {
     void rotate_WhenTheAuthRoleIsOpen_FailsAtOnceWithAConnectionFailureWithoutTouchingTheStore() {
         RefreshRotationService refused = new RefreshRotationService(
                 AuthReads.writesTo(authStore, RoleOutages.withOpen(RedisRole.AUTH)), jwt.service(), jwt.service(),
-                jwt.properties(), new SimpleMeterRegistry(), true, RETRY_REUSE_WINDOW_MS);
+                jwt.properties(), new SimpleMeterRegistry(), jwt.clock(), RETRY_REUSE_WINDOW_MS);
         String refreshToken = jwt.service().generateRefreshToken(
                 TestDataFactory.nextUserId(), UUID.randomUUID().toString(), null);
 

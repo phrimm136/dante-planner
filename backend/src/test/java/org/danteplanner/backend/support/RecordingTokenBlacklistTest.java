@@ -24,12 +24,10 @@ class RecordingTokenBlacklistTest {
 
     private static final long USER_ID = 7L;
     private static final long OTHER_USER_ID = 8L;
-    private static final String TOKEN = "refresh";
-    private static final Duration GRACE = Duration.ofSeconds(5);
 
     private final SteppedClock clock = new SteppedClock(Instant.parse("2026-10-07T00:00:00Z"));
     private final RecordingTokenBlacklist blacklist = new RecordingTokenBlacklist(clock);
-    private final SessionRevocationService sessions = new SessionRevocationService(null, blacklist, null);
+    private final SessionRevocationService sessions = new SessionRevocationService(null, blacklist);
 
     @Test
     void isUserTokenInvalidated_WhenTheRealHandlerEndsAllSessions_AnswersForTokensIssuedBefore() {
@@ -51,44 +49,6 @@ class RecordingTokenBlacklistTest {
         assertThat(blacklist.isBlacklisted("expired")).isFalse();
         clock.advance(Duration.ofHours(1));
         assertThat(blacklist.isBlacklisted("access")).isFalse();
-    }
-
-    @Test
-    void isBlacklisted_WhenRotatedAndTheGraceHasNotPassed_AnswersFalse() {
-        blacklist.blacklistTokenForRotation(TOKEN, expiresIn(Duration.ofHours(1)));
-
-        clock.advance(GRACE.minusMillis(1));
-
-        assertThat(blacklist.isBlacklisted(TOKEN)).isFalse();
-    }
-
-    @Test
-    void isBlacklisted_WhenRotatedAndTheGraceHasPassed_AnswersTrue() {
-        blacklist.blacklistTokenForRotation(TOKEN, expiresIn(Duration.ofHours(1)));
-
-        clock.advance(GRACE);
-
-        assertThat(blacklist.isBlacklisted(TOKEN)).isTrue();
-    }
-
-    @Test
-    void isBlacklisted_WhenARotationFollowsAnImmediateBlacklist_ReopensTheGrace() {
-        blacklist.blacklistToken(TOKEN, expiresIn(Duration.ofHours(1)));
-
-        blacklist.blacklistTokenForRotation(TOKEN, expiresIn(Duration.ofHours(1)));
-
-        assertThat(blacklist.isBlacklisted(TOKEN)).isFalse();
-        assertThat(blacklist.size()).isEqualTo(1);
-    }
-
-    @Test
-    void isBlacklisted_WhenAnImmediateBlacklistFollowsARotation_AnswersTrueAtOnce() {
-        blacklist.blacklistTokenForRotation(TOKEN, expiresIn(Duration.ofHours(1)));
-
-        blacklist.blacklistToken(TOKEN, expiresIn(Duration.ofHours(1)));
-
-        assertThat(blacklist.isBlacklisted(TOKEN)).isTrue();
-        assertThat(blacklist.size()).isEqualTo(1);
     }
 
     @Test

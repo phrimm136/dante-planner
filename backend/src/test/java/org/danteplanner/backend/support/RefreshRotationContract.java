@@ -6,10 +6,10 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.auth.token.LogoutRevocation;
+import org.danteplanner.backend.auth.token.RefreshClaims;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
 import org.danteplanner.backend.auth.token.RotationOutcome;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
-import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.user.api.UserRole;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,21 +22,21 @@ public interface RefreshRotationContract {
 
     TestJwt jwt();
 
-    RefreshRotationService rotation(boolean legacyAdmitEnabled, long retryReuseWindowMs);
+    RefreshRotationService rotation(long retryReuseWindowMs);
 
     TokenBlacklistService blacklist();
 
     Long freshUserId();
 
     private RefreshRotationService rotation() {
-        return rotation(true, REUSE_WINDOW_MS);
+        return rotation(REUSE_WINDOW_MS);
     }
 
     private String freshLogin(Long userId) {
         return jwt().service().generateRefreshToken(userId);
     }
 
-    private TokenClaims claimsOf(String token) {
+    private RefreshClaims claimsOf(String token) {
         return jwt().service().validateRefreshToken(token);
     }
 
@@ -49,7 +49,7 @@ public interface RefreshRotationContract {
     default void rotate_WhenAFreshLoginTokenIsPresented_RotatesToASuccessorInTheSameFamily() {
         Long userId = freshUserId();
         String login = freshLogin(userId);
-        TokenClaims presented = claimsOf(login);
+        RefreshClaims presented = claimsOf(login);
 
         RotationOutcome.Rotated result = rotated(rotation().rotate(login));
 
@@ -73,7 +73,7 @@ public interface RefreshRotationContract {
 
     @Test
     default void rotate_WhenTheSameTokenIsRetriedOutsideTheWindow_SupersedesTheFirstSuccessor() {
-        RefreshRotationService rotation = rotation(true, NO_REUSE_WINDOW_MS);
+        RefreshRotationService rotation = rotation(NO_REUSE_WINDOW_MS);
         String login = freshLogin(freshUserId());
         RotationOutcome.Rotated first = rotated(rotation.rotate(login));
 
@@ -172,22 +172,8 @@ public interface RefreshRotationContract {
     }
 
     @Test
-    default void rotate_WhenALegacyTokenIsAdmitted_RotatesIntoItsSynthesizedFamily() {
-        Long userId = freshUserId();
-        String legacy = jwt().legacyRefreshToken(userId);
-        long issuedAtMs = claimsOf(legacy).issuedAt().getTime();
-
-        RotationOutcome.Rotated result = rotated(rotation().rotate(legacy));
-
-        assertThat(TestJwt.familyIdOf(result.claims())).isEqualTo(RefreshRotationService.legacyFamilyId(userId, issuedAtMs));
-        assertThat(TestJwt.parentJtiOf(result.claims())).isNotNull();
-    }
-
-    @Test
-    default void rotate_WhenALegacyTokenIsPresentedWithAdmissionOff_RejectsItAsInvalid() {
-        String legacy = jwt().legacyRefreshToken(freshUserId());
-
-        assertThat(rotation(false, REUSE_WINDOW_MS).rotate(legacy))
+    default void rotate_WhenTheTokenHasNoFamily_RejectsItAsInvalid() {
+        assertThat(rotation().rotate(jwt().refreshTokenWithoutFamily(freshUserId())))
                 .isEqualTo(new RotationOutcome.Rejected(RotationOutcome.Rejected.Reason.INVALID));
     }
 }

@@ -18,6 +18,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
+import java.time.Clock;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Optional;
@@ -49,6 +50,7 @@ public class OAuthStateService {
     private final ObjectMapper objectMapper;
     private final AesGcmCipher aesGcmCipher;
     private final JwtParser jwtParser;
+    private final Clock clock;
     private final SecureRandom secureRandom = new SecureRandom();
     private final Base64.Encoder urlEncoder = Base64.getUrlEncoder().withoutPadding();
     private final Base64.Decoder urlDecoder = Base64.getUrlDecoder();
@@ -56,13 +58,16 @@ public class OAuthStateService {
     public record OAuthTransaction(String state, String codeVerifier, String returnTo) {
     }
 
-    public OAuthStateService(JwtProperties jwtProperties, ObjectMapper objectMapper, AesGcmCipher aesGcmCipher) {
+    public OAuthStateService(
+            JwtProperties jwtProperties, ObjectMapper objectMapper, AesGcmCipher aesGcmCipher, Clock clock) {
+        this.clock = clock;
         this.encryptionKey = jwtProperties.getEncryptionKeyBytes();
         this.privateKey = jwtProperties.getPrivateKey();
         this.objectMapper = objectMapper;
         this.aesGcmCipher = aesGcmCipher;
         this.jwtParser = Jwts.parser()
                 .verifyWith(jwtProperties.getPublicKey())
+                .clock(() -> Date.from(clock.instant()))
                 .build();
     }
 
@@ -90,7 +95,7 @@ public class OAuthStateService {
             byte[] encrypted = aesGcmCipher.encrypt(encryptionKey, json);
             String txClaim = urlEncoder.encodeToString(encrypted);
 
-            Date now = new Date();
+            Date now = Date.from(clock.instant());
             Date expiration = new Date(now.getTime() + OAUTH_TX_EXPIRY_SECONDS * 1000L);
             return Jwts.builder()
                     .claim(CLAIM_TX, txClaim)

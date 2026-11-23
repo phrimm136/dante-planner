@@ -21,8 +21,7 @@ import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
 
-import org.danteplanner.backend.auth.token.RefreshRotationService;
-import org.danteplanner.backend.auth.token.TokenClaims;
+import org.danteplanner.backend.auth.token.AccessClaims;
 import org.danteplanner.backend.auth.security.AccessTokenAuthenticator;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
@@ -31,9 +30,7 @@ final class RoleClaimAuthorizationRule {
 
     private static final Set<String> ROLE_CLAIM_READERS = Set.of("role");
 
-    private static final Set<String> ROLE_CLAIM_READING_CLASSES = Set.of(
-            AccessTokenAuthenticator.class.getName(),
-            RefreshRotationService.class.getName());
+    private static final Set<String> ROLE_CLAIM_READING_CLASSES = Set.of(AccessTokenAuthenticator.class.getName());
 
     private static final String IS_USER_IN_ROLE = "isUserInRole";
 
@@ -60,9 +57,7 @@ final class RoleClaimAuthorizationRule {
                             RoleClaimAuthorizationRule::readsTheRoleClaim,
                             type -> ROLE_CLAIM_READING_CLASSES.contains(type.getName()),
                             "reads the token's role claim outside AccessTokenAuthenticator"))
-                    .as("only AccessTokenAuthenticator reads TokenClaims.role(),"
-                            + " besides RefreshRotationService, which copies the claim into an admitted"
-                            + " legacy token without authorizing on it");
+                    .as("only AccessTokenAuthenticator reads AccessClaims.role()");
 
     static final ArchRule NO_ROLE_CHECK_THROUGH_SPRING_SECURITY =
             classes()
@@ -124,7 +119,7 @@ final class RoleClaimAuthorizationRule {
 
     private static boolean readsTheRoleClaim(AccessTarget target) {
         return target instanceof AccessTarget.CodeUnitAccessTarget
-                && target.getOwner().isEquivalentTo(TokenClaims.class)
+                && target.getOwner().isEquivalentTo(AccessClaims.class)
                 && ROLE_CLAIM_READERS.contains(target.getName());
     }
 

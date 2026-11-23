@@ -17,8 +17,8 @@ class RecordingRefreshRotationContractTest implements RefreshRotationContract {
     }
 
     @Override
-    public RefreshRotationService rotation(boolean legacyAdmitEnabled, long retryReuseWindowMs) {
-        return new RecordingRefreshRotation(jwt, blacklist, legacyAdmitEnabled, retryReuseWindowMs);
+    public RefreshRotationService rotation(long retryReuseWindowMs) {
+        return new RecordingRefreshRotation(jwt, blacklist, retryReuseWindowMs);
     }
 
     @Override

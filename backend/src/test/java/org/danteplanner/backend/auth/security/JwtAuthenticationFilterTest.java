@@ -6,12 +6,12 @@ import org.danteplanner.backend.shared.security.CustomAuthenticationEntryPoint;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.support.FakeUsers;
+import org.danteplanner.backend.support.RecordingRefreshRotation;
 import org.danteplanner.backend.support.RecordingTokenBlacklist;
 import org.danteplanner.backend.support.ScriptedFailuresCheck;
 import org.danteplanner.backend.support.TestJwt;
@@ -67,6 +67,8 @@ class JwtAuthenticationFilterTest {
 
     private final CookieUtils cookieUtils = new CookieUtils(false, "", "Lax");
 
+    private final RecordingRefreshRotation refreshRotation = new RecordingRefreshRotation(jwt, tokenBlacklist);
+
     private final FakeUsers users = new FakeUsers();
 
     @Mock
@@ -103,7 +105,7 @@ class JwtAuthenticationFilterTest {
 
     private JwtAuthenticationFilter filterOver(Users lookup) {
         return new JwtAuthenticationFilter(jwt.service(), tokenBlacklist,
-                new AccessTokenAuthenticator(jwt.service(), tokenBlacklist), cookieUtils, lookup, new AuthDegradationResponder(new ProblemWriter(objectMapper)), jwt.service(), null, new LineageRotationFlag(false), jwt.properties());
+                new AccessTokenAuthenticator(jwt.service(), tokenBlacklist), cookieUtils, lookup, new AuthDegradationResponder(new ProblemWriter(objectMapper)), jwt.service(), refreshRotation, jwt.properties());
     }
 
     private static FakeUsers usersFailingWith(RuntimeException failure) {
@@ -286,7 +288,7 @@ class JwtAuthenticationFilterTest {
 
             request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken(userId)));
             users.add(user);
-            tokenBlacklist.failNext(RecordingTokenBlacklist.Operation.BLACKLIST_TOKEN_FOR_ROTATION, authRedisDown);
+            refreshRotation.failNext(RecordingRefreshRotation.Operation.ROTATE, authRedisDown);
 
             filter.doFilterInternal(request, response, filterChain);
 
@@ -297,8 +299,8 @@ class JwtAuthenticationFilterTest {
             assertThat((String) JsonPath.read(body, "$.code")).isEqualTo("AUTH_TEMPORARILY_UNAVAILABLE");
             assertThat((String) JsonPath.read(body, "$.message")).isEqualTo((String) JsonPath.read(body, "$.detail"));
             assertThat(response.getHeader(HttpHeaders.RETRY_AFTER)).isEqualTo("10");
-            assertThat(tokenBlacklist.failed()).containsExactly(new RecordingTokenBlacklist.Failed(
-                    RecordingTokenBlacklist.Operation.BLACKLIST_TOKEN_FOR_ROTATION, authRedisDown));
+            assertThat(refreshRotation.calls()).containsExactly(new RecordingRefreshRotation.Failed(
+                    RecordingRefreshRotation.Operation.ROTATE, authRedisDown));
         }
 
         @Test
@@ -425,7 +427,21 @@ class JwtAuthenticationFilterTest {
             assertThat(SecurityContextHolder.getContext().getAuthentication())
                     .as("An access-typed token on the refresh path must NOT authenticate")
                     .isNull();
+            assertThat(refreshRotation.calls()).isEmpty();
             assertThat(tokenBlacklist.size()).isEqualTo(0);
+        }
+
+        @Test
+        void doFilterInternal_WhenTheRefreshTokenHasNoFamily_ContinuesAsGuestKeepingTheCookies() throws Exception {
+            request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, jwt.refreshTokenWithoutFamily(123L)));
+
+            filter.doFilterInternal(request, response, filterChain);
+
+            verify(filterChain).doFilter(request, response);
+            assertThat(request.getAttribute(CustomAuthenticationEntryPoint.AUTH_ERROR_ATTRIBUTE)).isNull();
+            assertThat(response.getCookies()).isEmpty();
+            assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+            assertThat(refreshRotation.calls()).isEmpty();
         }
     }
 }

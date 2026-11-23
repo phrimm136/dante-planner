@@ -11,10 +11,10 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 
 /**
  * Tokens are RS256-signed with cleartext claims and {@code sub}=userId.
@@ -33,6 +34,8 @@ import java.util.UUID;
 @Slf4j
 public class JwtTokenService implements TokenGenerator, TokenValidator {
 
+    private static final String TYPE_ACCESS = "access";
+    private static final String TYPE_REFRESH = "refresh";
     private static final String CLAIM_TYPE = "type";
     private static final String CLAIM_ROLE = "role";
     private static final String CLAIM_JTI = "jti";
@@ -42,34 +45,24 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
     private final JwtProperties jwtProperties;
     private final PrivateKey privateKey;
     private final PublicKey publicKey;
-    private final JwtParser neutralParser;
     private final JwtParser accessParser;
     private final JwtParser refreshParser;
     private final Clock clock;
 
-    @Autowired
-    public JwtTokenService(JwtProperties jwtProperties) {
-        this(jwtProperties, Clock.systemUTC());
-    }
-
-    JwtTokenService(JwtProperties jwtProperties, Clock clock) {
+    public JwtTokenService(JwtProperties jwtProperties, Clock clock) {
         this.jwtProperties = jwtProperties;
         this.clock = clock;
         this.privateKey = jwtProperties.getPrivateKey();
         this.publicKey = jwtProperties.getPublicKey();
-        this.neutralParser = Jwts.parser()
-                .verifyWith(publicKey)
-                .clock(() -> Date.from(clock.instant()))
-                .build();
         this.accessParser = Jwts.parser()
                 .verifyWith(publicKey)
                 .clock(() -> Date.from(clock.instant()))
-                .require(CLAIM_TYPE, TokenClaims.TYPE_ACCESS)
+                .require(CLAIM_TYPE, TYPE_ACCESS)
                 .build();
         this.refreshParser = Jwts.parser()
                 .verifyWith(publicKey)
                 .clock(() -> Date.from(clock.instant()))
-                .require(CLAIM_TYPE, TokenClaims.TYPE_REFRESH)
+                .require(CLAIM_TYPE, TYPE_REFRESH)
                 .build();
     }
 
@@ -79,7 +72,7 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
         Assert.notNull(role, "role must not be null");
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put(CLAIM_TYPE, TokenClaims.TYPE_ACCESS);
+        claims.put(CLAIM_TYPE, TYPE_ACCESS);
         claims.put(CLAIM_ROLE, role.getValue());
 
         return buildToken(claims, userId.toString(), jwtProperties.getAccessTokenExpiry());
@@ -100,7 +93,7 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
         Assert.notNull(familyId, "familyId must not be null");
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put(CLAIM_TYPE, TokenClaims.TYPE_REFRESH);
+        claims.put(CLAIM_TYPE, TYPE_REFRESH);
         claims.put(CLAIM_JTI, UUID.randomUUID().toString());
         claims.put(CLAIM_FAMILY_ID, familyId);
         claims.putAll(parentClaim);
@@ -109,72 +102,60 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
     }
 
     @Override
-    public TokenClaims validateToken(String token) {
-        return toTokenClaims(parseToken(neutralParser, token));
+    public AccessClaims validateAccessToken(String token) {
+        return parse(accessParser, token, JwtTokenService::toAccessClaims);
     }
 
     @Override
-    public TokenClaims validateAccessToken(String token) {
-        return toTokenClaims(parseToken(accessParser, token));
+    public RefreshClaims validateRefreshToken(String token) {
+        return parse(refreshParser, token, JwtTokenService::toRefreshClaims);
     }
 
-    @Override
-    public TokenClaims validateRefreshToken(String token) {
-        return toTokenClaims(parseToken(refreshParser, token));
+    private static AccessClaims toAccessClaims(Claims claims) {
+        return new AccessClaims(
+                userIdOf(claims), roleOf(claims), required(claims.getIssuedAt()), expirationOf(claims));
     }
 
-    private TokenClaims toTokenClaims(Claims claims) {
-        String subject = claims.getSubject();
-        if (subject == null) {
-            throw new InvalidTokenException(InvalidTokenException.Reason.MISSING_CLAIMS);
-        }
-        final long userId;
+    private static RefreshClaims toRefreshClaims(Claims claims) {
+        return new RefreshClaims(
+                userIdOf(claims),
+                required(claims.getIssuedAt()),
+                expirationOf(claims),
+                RefreshLineage.of(
+                        required(claims.get(CLAIM_JTI, String.class)),
+                        required(claims.get(CLAIM_FAMILY_ID, String.class)),
+                        claims.get(CLAIM_PARENT_JTI, String.class)));
+    }
+
+    private static Long userIdOf(Claims claims) {
         try {
-            userId = Long.parseLong(subject);
+            return Long.valueOf(required(claims.getSubject()));
         } catch (NumberFormatException e) {
             throw new InvalidTokenException(InvalidTokenException.Reason.MALFORMED, e);
         }
+    }
 
-        String type = claims.get(CLAIM_TYPE, String.class);
+    private static UserRole roleOf(Claims claims) {
         String roleValue = claims.get(CLAIM_ROLE, String.class);
-        String jti = claims.get(CLAIM_JTI, String.class);
-        String familyId = claims.get(CLAIM_FAMILY_ID, String.class);
-        String parentJti = claims.get(CLAIM_PARENT_JTI, String.class);
-
-        UserRole role = UserRole.NORMAL;
         if (roleValue != null && UserRole.isValid(roleValue)) {
-            role = UserRole.fromValue(roleValue);
+            return UserRole.fromValue(roleValue);
         }
-
-        return new TokenClaims(
-                userId,
-                type,
-                role,
-                claims.getIssuedAt(),
-                claims.getExpiration(),
-                RefreshLineage.of(jti, familyId, parentJti, claims.getIssuedAt())
-        );
+        return UserRole.NORMAL;
     }
 
-    @Override
-    public Long getUserIdFromToken(String token) {
-        TokenClaims claims = validateToken(token);
-        return claims.userId();
-    }
-
-    @Override
-    public boolean isTokenExpired(String token) {
-        try {
-            TokenClaims claims = validateToken(token);
-            return claims.isExpired();
-        } catch (InvalidTokenException e) {
-            return true;
+    private static Date expirationOf(Claims claims) {
+        Date expiration = required(claims.getExpiration());
+        if (expiration.before(required(claims.getIssuedAt()))) {
+            throw new InvalidTokenException(InvalidTokenException.Reason.MALFORMED);
         }
+        return expiration;
     }
 
-    public String getTokenType(String token) {
-        TokenClaims claims = validateToken(token);
-        return claims.type();
+    private static <T> T required(@Nullable T claim) {
+        if (claim == null) {
+            throw new InvalidTokenException(InvalidTokenException.Reason.MISSING_CLAIMS);
+        }
+        return claim;
     }
 
     private String buildToken(Map<String, Object> claims, String subject, Long expiryMs) {
@@ -195,12 +176,9 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
         }
     }
 
-    private Claims parseToken(JwtParser parser, String token) {
+    private static <T> T parse(JwtParser parser, String token, Function<Claims, T> toClaims) {
         try {
-            return parser
-                    .parseSignedClaims(token)
-                    .getPayload();
-
+            return toClaims.apply(parser.parseSignedClaims(token).getPayload());
         } catch (ExpiredJwtException e) {
             throw new InvalidTokenException(InvalidTokenException.Reason.EXPIRED, e);
         } catch (MalformedJwtException e) {

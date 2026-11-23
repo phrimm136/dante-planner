@@ -1664,14 +1664,10 @@ guards the parse but likewise skips the schema gate.
   when a banned user is seen re-registering, or a moderation policy requires bans to outlive
   deletion: keep a provider-identity block list checked at OAuth sign-in.
   re-check: `.claude/skills/debt-ledger/bin/debt absent backend/src/main -i 'banned_provider|ProviderBlock'`
-- A token signed with the service key but missing `iat` or `exp` fails the `TokenClaims`
-  constructor asserts with an IllegalArgumentException, which
-  `AccessTokenAuthenticator` does not catch (it handles InvalidTokenException), so the request
-  ends as a 500 rather than a rejected token. Only a holder of the private key can mint one, and
-  `generateAccessToken` always sets both. Worth doing when token parsing is reworked (ADR 077's
-  TokenLifecycleService) or a 500 from this path is seen: map missing dates to
-  `InvalidTokenException(MISSING_CLAIMS)` at the parse boundary.
-  re-check: `rg -q 'Assert.notNull\(issuedAt' backend/src/main/java/org/danteplanner/backend/auth/token/TokenClaims.java`
+- The blacklist still reads the rotation-grace marker that pods before the claims split wrote
+  (`BlacklistMode.ROTATION_GRACE` and its 5 s grace period); nothing writes it any more. Worth
+  deleting once the last pod of the previous release has been gone for seven days, the refresh TTL.
+  re-check: `rg -q 'ROTATION_GRACE' backend/src/main/java/org/danteplanner/backend/auth/token/TokenBlacklistService.java`
 - `backend/CLAUDE.md` calls the Java import order "enforced", but no checkstyle module
   (ImportOrder / CustomImportOrder) checks it, and existing files such as
   `PlannerStatsRepositoryIT` do not follow it. Worth doing when import churn shows up in review:

@@ -6,7 +6,6 @@ import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.lang.ArchRule;
 
-import org.danteplanner.backend.auth.token.RefreshRotationService;
 import org.danteplanner.backend.auth.security.AccessTokenAuthenticator;
 import org.danteplanner.fixture.roleclaim.AuthorityNameReferenceFixture;
 import org.danteplanner.fixture.roleclaim.AuthorityReaderFixture;
@@ -66,14 +65,6 @@ class RoleClaimAuthorizationRuleTest {
             RoleClaimAuthorizationRule.NO_ROLE_CHECK_THROUGH_SPRING_SECURITY.check(authenticator);
             RoleClaimAuthorizationRule.ONLY_THE_SECURITY_CHAIN_READS_GRANTED_AUTHORITIES.check(authenticator);
         }).doesNotThrowAnyException();
-    }
-
-    @Test
-    void refreshRotationService_WhenItCopiesTheRoleClaim_PassesTheRoleClaimRule() {
-        JavaClasses rotation = new ClassFileImporter().importClasses(RefreshRotationService.class);
-
-        assertThatCode(() -> RoleClaimAuthorizationRule.ONLY_THE_AUTHENTICATOR_READS_THE_ROLE_CLAIM.check(rotation))
-                .doesNotThrowAnyException();
     }
 
     private static void assertFailsNaming(ArchRule rule, Class<?> fixture, String member) {

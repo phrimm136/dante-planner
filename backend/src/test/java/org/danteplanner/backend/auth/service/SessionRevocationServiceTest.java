@@ -1,7 +1,6 @@
 package org.danteplanner.backend.auth.service;
 
 import org.danteplanner.backend.auth.token.LogoutRevocation;
-import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.support.RecordingTokenBlacklist;
 import org.danteplanner.backend.support.ScriptedFailuresCheck;
 import org.danteplanner.backend.support.TestJwt;
@@ -33,8 +32,7 @@ class SessionRevocationServiceTest {
 
     @BeforeEach
     void setUp() {
-        sessionRevocationService = new SessionRevocationService(
-                jwt.service(), tokenBlacklist, new LineageRotationFlag(false));
+        sessionRevocationService = new SessionRevocationService(jwt.service(), tokenBlacklist);
     }
 
     private String accessToken() {
@@ -45,8 +43,17 @@ class SessionRevocationServiceTest {
         return jwt.service().generateRefreshToken(USER_ID);
     }
 
-    private Date expiryOf(String token) {
-        return jwt.service().validateToken(token).expiration();
+    private Date accessExpiry(String token) {
+        return jwt.service().validateAccessToken(token).expiration();
+    }
+
+    private LogoutRevocation.TokenRevocation refreshRevocation(String token) {
+        return new LogoutRevocation.TokenRevocation(token, jwt.service().validateRefreshToken(token).expiration());
+    }
+
+    private LogoutRevocation.FamilyRevocation familyRevocation(String token) {
+        return new LogoutRevocation.FamilyRevocation(
+                TestJwt.familyIdOf(jwt.service().validateRefreshToken(token)));
     }
 
     /** logout is void: the revoked-session entry lands in Redis, observable only in a containerized test. */
@@ -64,8 +71,8 @@ class SessionRevocationServiceTest {
 
             // Assert
             assertThat(tokenBlacklist.revocations()).containsExactly(
-                    new LogoutRevocation.TokenRevocation(accessToken, expiryOf(accessToken)),
-                    new LogoutRevocation.TokenRevocation(refreshToken, expiryOf(refreshToken)));
+                    new LogoutRevocation.TokenRevocation(accessToken, accessExpiry(accessToken)),
+                    refreshRevocation(refreshToken), familyRevocation(refreshToken));
         }
 
         @Test
@@ -78,7 +85,7 @@ class SessionRevocationServiceTest {
 
             // Assert - only refresh token blacklisted
             assertThat(tokenBlacklist.revocations()).containsExactly(
-                    new LogoutRevocation.TokenRevocation(refreshToken, expiryOf(refreshToken)));
+                    refreshRevocation(refreshToken), familyRevocation(refreshToken));
         }
 
         @Test
@@ -91,7 +98,26 @@ class SessionRevocationServiceTest {
 
             // Assert - only access token blacklisted
             assertThat(tokenBlacklist.revocations()).containsExactly(
-                    new LogoutRevocation.TokenRevocation(accessToken, expiryOf(accessToken)));
+                    new LogoutRevocation.TokenRevocation(accessToken, accessExpiry(accessToken)));
+        }
+
+        @Test
+        void logout_WhenTheRefreshTokenIsAChild_RevokesItAndItsFamily() {
+            String child = jwt.service().generateRefreshToken(USER_ID, "fam-1", "parent-jti");
+
+            sessionRevocationService.logout(List.of(new SessionToken.Refresh(child)));
+
+            assertThat(tokenBlacklist.revocations()).containsExactly(
+                    refreshRevocation(child), new LogoutRevocation.FamilyRevocation("fam-1"));
+        }
+
+        @Test
+        void logout_WhenTheRefreshTokenHasNoFamily_RevokesNothing() {
+            String withoutFamily = jwt.refreshTokenWithoutFamily(USER_ID);
+
+            sessionRevocationService.logout(List.of(new SessionToken.Refresh(withoutFamily)));
+
+            assertThat(tokenBlacklist.revocations()).isEmpty();
         }
 
         @Test
@@ -116,7 +142,7 @@ class SessionRevocationServiceTest {
 
             // Assert - only refresh token blacklisted
             assertThat(tokenBlacklist.revocations()).containsExactly(
-                    new LogoutRevocation.TokenRevocation(validRefreshToken, expiryOf(validRefreshToken)));
+                    refreshRevocation(validRefreshToken), familyRevocation(validRefreshToken));
         }
 
         @Test
@@ -130,7 +156,7 @@ class SessionRevocationServiceTest {
 
             // Assert - only access token blacklisted
             assertThat(tokenBlacklist.revocations()).containsExactly(
-                    new LogoutRevocation.TokenRevocation(validAccessToken, expiryOf(validAccessToken)));
+                    new LogoutRevocation.TokenRevocation(validAccessToken, accessExpiry(validAccessToken)));
         }
     }
 
@@ -164,8 +190,8 @@ class SessionRevocationServiceTest {
             sessionRevocationService.endSession(List.of(new SessionToken.Access(accessToken), new SessionToken.Refresh(refreshToken)));
 
             assertThat(tokenBlacklist.revocations()).containsExactly(
-                    new LogoutRevocation.TokenRevocation(accessToken, expiryOf(accessToken)),
-                    new LogoutRevocation.TokenRevocation(refreshToken, expiryOf(refreshToken)));
+                    new LogoutRevocation.TokenRevocation(accessToken, accessExpiry(accessToken)),
+                    refreshRevocation(refreshToken), familyRevocation(refreshToken));
         }
     }
 }

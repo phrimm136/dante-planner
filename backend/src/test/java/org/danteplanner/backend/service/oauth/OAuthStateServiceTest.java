@@ -16,6 +16,7 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
+import java.time.Clock;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Optional;
@@ -54,7 +55,7 @@ class OAuthStateServiceTest {
 
         aesGcmCipher = new AesGcmCipher();
         objectMapper = new ObjectMapper();
-        stateService = new OAuthStateService(jwtProperties, objectMapper, aesGcmCipher);
+        stateService = new OAuthStateService(jwtProperties, objectMapper, aesGcmCipher, Clock.systemUTC());
     }
 
     private static KeyPair generateKeyPair() {

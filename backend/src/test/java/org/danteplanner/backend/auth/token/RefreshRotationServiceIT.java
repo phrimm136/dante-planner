@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 
 
 import java.security.SecureRandom;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -84,7 +85,7 @@ class RefreshRotationServiceIT {
         jwtProperties = new JwtProperties(sharedKeys.getPrivateKey(), sharedKeys.getPublicKey(),
                 aesKey, 900000L, REFRESH_TOKEN_EXPIRY);
 
-        tokenService = new JwtTokenService(jwtProperties);
+        tokenService = new JwtTokenService(jwtProperties, Clock.systemUTC());
         meterRegistry = new SimpleMeterRegistry();
 
         rotationService = serviceWithReuseWindow(RETRY_REUSE_WINDOW_MS);
@@ -94,7 +95,7 @@ class RefreshRotationServiceIT {
     private RefreshRotationService serviceWithReuseWindow(long reuseWindowMs) {
         return new RefreshRotationService(
                 AuthReads.writesTo(sharedTemplate), tokenService, tokenService, jwtProperties, meterRegistry,
-                true, reuseWindowMs);
+                Clock.systemUTC(), reuseWindowMs);
     }
 
     private String freshLoginToken() {
@@ -122,11 +123,6 @@ class RefreshRotationServiceIT {
         return total;
     }
 
-    private boolean synthesizedFamilyExists(TokenClaims presented) {
-        String familyId = RefreshRotationService.legacyFamilyId(presented.userId(), presented.issuedAt().getTime());
-        return Boolean.TRUE.equals(sharedTemplate.hasKey(RefreshRotationService.familyKey(familyId)));
-    }
-
     private double outcomeCount(String outcome) {
         var counter = meterRegistry.find(RefreshRotationService.METRIC_OUTCOME)
                 .tag(RefreshRotationService.TAG_OUTCOME, outcome)
@@ -140,8 +136,8 @@ class RefreshRotationServiceIT {
         @Test
         void rotate_WhenFreshLogin_ParentPendingSuccessorUnusedLatest() {
             String r1 = freshLoginToken();
-            String r1Jti = TestJwt.jtiOf(tokenService.validateToken(r1));
-            String familyId = TestJwt.familyIdOf(tokenService.validateToken(r1));
+            String r1Jti = TestJwt.jtiOf(tokenService.validateRefreshToken(r1));
+            String familyId = TestJwt.familyIdOf(tokenService.validateRefreshToken(r1));
 
             RotationOutcome result = rotationService.rotate(r1);
 
@@ -158,7 +154,7 @@ class RefreshRotationServiceIT {
         @Test
         void rotate_WhenSuccessorFirstUse_MarksParentRetiredAndDropsItsMemoizedSuccessor() {
             String r1 = freshLoginToken();
-            String r1Jti = TestJwt.jtiOf(tokenService.validateToken(r1));
+            String r1Jti = TestJwt.jtiOf(tokenService.validateRefreshToken(r1));
 
             RotationOutcome.Rotated first = (RotationOutcome.Rotated) rotationService.rotate(r1);
             String r2 = first.newRefreshJwt();
@@ -183,7 +179,7 @@ class RefreshRotationServiceIT {
 
             // The caller writes this value as the refresh cookie, so it has to be the token the
             // reported claims belong to.
-            assertThat(TestJwt.jtiOf(tokenService.validateToken(rotated.newRefreshJwt()))).isEqualTo(TestJwt.jtiOf(rotated.claims()));
+            assertThat(TestJwt.jtiOf(tokenService.validateRefreshToken(rotated.newRefreshJwt()))).isEqualTo(TestJwt.jtiOf(rotated.claims()));
         }
     }
 
@@ -193,7 +189,7 @@ class RefreshRotationServiceIT {
         @Test
         void rotate_WhenParentRepresentedWithinWindow_ReusesSuccessor() {
             String r1 = freshLoginToken();
-            String familyId = TestJwt.familyIdOf(tokenService.validateToken(r1));
+            String familyId = TestJwt.familyIdOf(tokenService.validateRefreshToken(r1));
 
             RotationOutcome.Rotated firstAttempt = (RotationOutcome.Rotated) rotationService.rotate(r1);
 
@@ -202,7 +198,7 @@ class RefreshRotationServiceIT {
             assertThat(TestJwt.jtiOf(retry.claims())).isEqualTo(TestJwt.jtiOf(firstAttempt.claims()));
             assertThat(retry.newRefreshJwt()).isEqualTo(firstAttempt.newRefreshJwt());
             assertThat(stateIn(familyId, TestJwt.jtiOf(retry.claims()))).isEqualTo(RotationState.UNUSED_LATEST);
-            assertThat(stateIn(familyId, TestJwt.jtiOf(tokenService.validateToken(r1)))).isEqualTo(RotationState.PENDING);
+            assertThat(stateIn(familyId, TestJwt.jtiOf(tokenService.validateRefreshToken(r1)))).isEqualTo(RotationState.PENDING);
             assertThat(outcomeCount(RefreshRotationService.OUTCOME_ROTATED)).isEqualTo(1.0);
             assertThat(outcomeCount(RefreshRotationService.OUTCOME_RETRY_REUSED)).isEqualTo(1.0);
         }
@@ -211,7 +207,7 @@ class RefreshRotationServiceIT {
         void rotate_WhenParentRepresentedOutsideWindow_SupersedesPredecessor() {
             RefreshRotationService noReuse = serviceWithReuseWindow(0L);
             String r1 = freshLoginToken();
-            String familyId = TestJwt.familyIdOf(tokenService.validateToken(r1));
+            String familyId = TestJwt.familyIdOf(tokenService.validateRefreshToken(r1));
 
             RotationOutcome.Rotated firstAttempt = (RotationOutcome.Rotated) noReuse.rotate(r1);
             String r2First = TestJwt.jtiOf(firstAttempt.claims());
@@ -222,7 +218,7 @@ class RefreshRotationServiceIT {
             assertThat(r2Retry).isNotEqualTo(r2First);
             assertThat(stateIn(familyId, r2First)).isEqualTo(RotationState.SUPERSEDED);
             assertThat(stateIn(familyId, r2Retry)).isEqualTo(RotationState.UNUSED_LATEST);
-            assertThat(stateIn(familyId, TestJwt.jtiOf(tokenService.validateToken(r1)))).isEqualTo(RotationState.PENDING);
+            assertThat(stateIn(familyId, TestJwt.jtiOf(tokenService.validateRefreshToken(r1)))).isEqualTo(RotationState.PENDING);
             assertThat(outcomeCount(RefreshRotationService.OUTCOME_ROTATED)).isEqualTo(1.0);
             assertThat(outcomeCount(RefreshRotationService.OUTCOME_RETRY_SUPERSEDED)).isEqualTo(1.0);
         }
@@ -245,7 +241,7 @@ class RefreshRotationServiceIT {
         @Test
         void rotate_WhenRetiredToken_RevokesFamily() {
             String r1 = freshLoginToken();
-            String familyId = TestJwt.familyIdOf(tokenService.validateToken(r1));
+            String familyId = TestJwt.familyIdOf(tokenService.validateRefreshToken(r1));
 
             RotationOutcome.Rotated first = (RotationOutcome.Rotated) rotationService.rotate(r1);
             rotationService.rotate(first.newRefreshJwt()); // R1 -> RETIRED
@@ -261,7 +257,7 @@ class RefreshRotationServiceIT {
         @Test
         void rotate_WhenLegacyUsedSpelling_RevokesFamily() {
             String r1 = freshLoginToken();
-            TokenClaims claims = tokenService.validateToken(r1);
+            RefreshClaims claims = tokenService.validateRefreshToken(r1);
 
             sharedTemplate.opsForHash().put(
                     "rt:fam:{" + TestJwt.familyIdOf(claims) + "}", TestJwt.jtiOf(claims),
@@ -278,7 +274,7 @@ class RefreshRotationServiceIT {
         void rotate_WhenSupersededToken_RevokesFamily() {
             RefreshRotationService noReuse = serviceWithReuseWindow(0L);
             String r1 = freshLoginToken();
-            String familyId = TestJwt.familyIdOf(tokenService.validateToken(r1));
+            String familyId = TestJwt.familyIdOf(tokenService.validateRefreshToken(r1));
 
             RotationOutcome.Rotated attempt1 = (RotationOutcome.Rotated) noReuse.rotate(r1);
             String r2Superseded = attempt1.newRefreshJwt();
@@ -298,7 +294,7 @@ class RefreshRotationServiceIT {
         @Test
         void rotate_WhenRevokedFamily_RejectsAllTokens() {
             String r1 = freshLoginToken();
-            String familyId = TestJwt.familyIdOf(tokenService.validateToken(r1));
+            String familyId = TestJwt.familyIdOf(tokenService.validateRefreshToken(r1));
             RotationOutcome.Rotated rotated = (RotationOutcome.Rotated) rotationService.rotate(r1);
             String r2 = rotated.newRefreshJwt();
 
@@ -322,32 +318,16 @@ class RefreshRotationServiceIT {
         }
 
         @Test
-        void rotate_WhenAccessToken_RejectedEvenWithLegacyAdmit() {
+        void rotate_WhenAccessToken_Rejected() {
             String accessToken = tokenService.generateAccessToken(userId, UserRole.NORMAL);
 
             RotationOutcome result = rotationService.rotate(accessToken);
 
             assertThat(result).isInstanceOf(RotationOutcome.Rejected.class);
             assertThat(((RotationOutcome.Rejected) result).reason()).isEqualTo(RotationOutcome.Rejected.Reason.INVALID);
-            assertThat(synthesizedFamilyExists(tokenService.validateToken(accessToken))).isFalse();
             assertThat(outcomeCount(RefreshRotationService.OUTCOME_REJECTED_INVALID)).isEqualTo(1.0);
         }
 
-        @Test
-        void rotate_WhenAccessTokenClaims_RejectedAndFamilyUntouched() {
-            RefreshRotationService svc = new RefreshRotationService(
-                    AuthReads.writesTo(sharedTemplate), tokenService, tokenService, jwtProperties, meterRegistry,
-                    true, RETRY_REUSE_WINDOW_MS);
-            String accessToken = tokenService.generateAccessToken(userId, UserRole.NORMAL);
-
-            RotationOutcome result = svc.rotate(accessToken);
-
-            assertThat(result).isInstanceOf(RotationOutcome.Rejected.class);
-            assertThat(((RotationOutcome.Rejected) result).reason()).isEqualTo(RotationOutcome.Rejected.Reason.INVALID);
-            assertThat(synthesizedFamilyExists(tokenService.validateToken(accessToken))).isFalse();
-            assertThat(outcomeCount(RefreshRotationService.OUTCOME_ROTATED)).isEqualTo(0.0);
-            assertThat(outcomeCount(RefreshRotationService.OUTCOME_REJECTED_INVALID)).isEqualTo(1.0);
-        }
     }
 
     @Nested
@@ -407,8 +387,8 @@ class RefreshRotationServiceIT {
         @Test
         void rotate_WhenConcurrentSameParent_ConvergesOnOneSuccessor() throws Exception {
             String r1 = freshLoginToken();
-            String r1Jti = TestJwt.jtiOf(tokenService.validateToken(r1));
-            String familyId = TestJwt.familyIdOf(tokenService.validateToken(r1));
+            String r1Jti = TestJwt.jtiOf(tokenService.validateRefreshToken(r1));
+            String familyId = TestJwt.familyIdOf(tokenService.validateRefreshToken(r1));
 
             int threads = 2;
             ExecutorService pool = Executors.newFixedThreadPool(threads);
@@ -465,13 +445,13 @@ class RefreshRotationServiceIT {
 
             RefreshRotationService instanceA = new RefreshRotationService(
                     AuthReads.writesTo(templateA), tokenService, tokenService, jwtProperties, new SimpleMeterRegistry(),
-                    true, RETRY_REUSE_WINDOW_MS);
+                    Clock.systemUTC(), RETRY_REUSE_WINDOW_MS);
             RefreshRotationService instanceB = new RefreshRotationService(
                     AuthReads.writesTo(templateB), tokenService, tokenService, jwtProperties, new SimpleMeterRegistry(),
-                    true, RETRY_REUSE_WINDOW_MS);
+                    Clock.systemUTC(), RETRY_REUSE_WINDOW_MS);
 
             String r1 = freshLoginToken();
-            String familyId = TestJwt.familyIdOf(tokenService.validateToken(r1));
+            String familyId = TestJwt.familyIdOf(tokenService.validateRefreshToken(r1));
 
             RotationOutcome.Rotated first = (RotationOutcome.Rotated) instanceA.rotate(r1);
             instanceA.rotate(first.newRefreshJwt()); // r1 -> RETIRED on A
@@ -481,61 +461,6 @@ class RefreshRotationServiceIT {
             assertThat(replay).isInstanceOf(RotationOutcome.Revoked.class);
             assertThat(((RotationOutcome.Revoked) replay).familyId()).isEqualTo(familyId);
             assertThat(TokenStoreKeys.isFamilyRevoked(templateB, familyId)).isTrue();
-        }
-    }
-
-    @Nested
-    class LegacyAdmission {
-
-        private final TestJwt legacyIssuer = new TestJwt();
-
-        private RefreshRotationService serviceWith(boolean legacyAdmit) {
-            return new RefreshRotationService(
-                    AuthReads.writesTo(sharedTemplate), legacyIssuer.service(), legacyIssuer.service(), jwtProperties, meterRegistry,
-                    legacyAdmit, RETRY_REUSE_WINDOW_MS);
-        }
-
-        @Test
-        void rotate_WhenLegacyAdmitOn_AdmitsAndRotates() {
-            RefreshRotationService svc = serviceWith(true);
-
-            RotationOutcome result = svc.rotate(legacyIssuer.legacyRefreshToken(userId));
-
-            assertThat(result).isInstanceOf(RotationOutcome.Rotated.class);
-            RotationOutcome.Rotated rotated = (RotationOutcome.Rotated) result;
-            assertThat(TestJwt.jtiOf(rotated.claims())).isNotNull();
-            assertThat(TestJwt.familyIdOf(rotated.claims())).isNotNull();
-            assertThat(TestJwt.parentJtiOf(rotated.claims())).isNotNull();
-            assertThat(outcomeCount(RefreshRotationService.OUTCOME_LEGACY_ADMITTED)).isEqualTo(1.0);
-        }
-
-        @Test
-        void rotate_WhenLegacyAdmitOff_Rejects() {
-            RefreshRotationService svc = serviceWith(false);
-
-            String legacyToken = legacyIssuer.legacyRefreshToken(userId);
-
-            RotationOutcome result = svc.rotate(legacyToken);
-
-            assertThat(result).isInstanceOf(RotationOutcome.Rejected.class);
-            assertThat(((RotationOutcome.Rejected) result).reason()).isEqualTo(RotationOutcome.Rejected.Reason.INVALID);
-            assertThat(synthesizedFamilyExists(legacyIssuer.service().validateToken(legacyToken))).isFalse();
-            assertThat(outcomeCount(RefreshRotationService.OUTCOME_REJECTED_INVALID)).isEqualTo(1.0);
-        }
-
-        @Test
-        void rotate_WhenSameLegacyTokenTwice_DeterministicFamily() {
-            String legacyToken = legacyIssuer.legacyRefreshToken(userId);
-            RefreshRotationService svc = serviceWith(true);
-
-            RotationOutcome.Rotated first = (RotationOutcome.Rotated) svc.rotate(legacyToken);
-            RotationOutcome.Rotated second = (RotationOutcome.Rotated) svc.rotate(legacyToken);
-
-            assertThat(TestJwt.familyIdOf(second.claims())).isEqualTo(TestJwt.familyIdOf(first.claims()));
-            assertThat(TestJwt.jtiOf(second.claims())).isEqualTo(TestJwt.jtiOf(first.claims()));
-            assertThat(second.newRefreshJwt()).isEqualTo(first.newRefreshJwt());
-            assertThat(outcomeCount(RefreshRotationService.OUTCOME_LEGACY_ADMITTED)).isEqualTo(1.0);
-            assertThat(outcomeCount(RefreshRotationService.OUTCOME_RETRY_REUSED)).isEqualTo(1.0);
         }
     }
 }

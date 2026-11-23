@@ -3,6 +3,7 @@ package org.danteplanner.backend.auth.security;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,6 +15,8 @@ import org.danteplanner.backend.user.api.UserRole;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -68,6 +71,17 @@ class AccessTokenAuthenticatorTest {
                 .isEqualTo(AccessTokenAuthenticator.AccessTokenOutcome.REVOKED);
         assertThat(blacklistReads).containsExactly("isBlacklisted");
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"iat", "exp"})
+    void verify_WhenTheTokenLacksAClaim_RejectsItWithoutReadingTheBlacklist(String claim) {
+        Map<String, Object> payload = jwt.accessTokenPayload(USER_ID);
+        payload.remove(claim);
+
+        assertThat(authenticator.verify(jwt.sign(payload), request))
+                .isEqualTo(AccessTokenAuthenticator.AccessTokenOutcome.REJECTED);
+        assertThat(blacklistReads).isEmpty();
     }
 
     @Test
