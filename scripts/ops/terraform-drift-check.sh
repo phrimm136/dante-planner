@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Nightly terraform drift detection (stage 1: detect only).
 #
-# Covers the stacks the workflow materializes a var-file for. terraform/iam-bootstrap and
-# terraform/state-backend keep their state in S3 too but get no var-file there, so check those
-# two by hand with `ops tf plan`.
+# Covers the stacks in STACKS below. terraform/iam-bootstrap and terraform/state-backend keep
+# their state in S3 too but have no inputs the workflow can supply, so check those two by hand
+# with `ops tf plan`.
 #
 # Reports ONLY stack names and change counts — the repo is public, so plan bodies (resource
 # ARNs, topology) never reach the issue. Plan logs stay on the machine that ran the check and
