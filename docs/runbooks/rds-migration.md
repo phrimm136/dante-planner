@@ -277,7 +277,7 @@ mysql -h <RDS_ENDPOINT> --ssl-ca=/path/rds-combined-ca-bundle.pem --ssl-mode=VER
 - [ ] Watch p95 latency for N+1 amplification (localhost → network hop). Note any endpoint that regresses.
 - [ ] **Enable Multi-AZ** (supersession from `docs/legacy/tasks/034`: bought, deliberately deferred to
       post-cutover — a sync standby during Zone 0 only slows catch-up and widens the I2 window).
-      `multi_az = true` in `terraform/rds/` → `apply` in a quiet window; expect brief I/O elevation
+      `multi_az = true` in `terraform/rds/envs/prod.tfvars` → `apply` in a quiet window; expect brief I/O elevation
       while the standby builds. Verify: `aws rds describe-db-instances` shows `MultiAZ: true`.
 - [ ] **Retire the temporary `ReplicaLag` alarm** from 0.8 — the metric goes stale after
       `rds_reset_external_master` and a stale-metric alarm is silence dressed as health.

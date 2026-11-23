@@ -577,6 +577,193 @@ class PlanTest(RepoCase):
                                                           "state-backend"])
 
 
+RDS_SETTINGS = {
+    "create_vpc": "true",
+    "engine_version": '"8.4.11"',
+    "multi_az": "false",
+    "sql_mode": '"ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,'
+                'NO_ENGINE_SUBSTITUTION"',
+}
+ASSIGNMENT_LINE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$")
+
+
+class MovedStackTest(RepoCase):
+    def setUp(self):
+        super().setUp()
+        self.rds_dir = self.repo_root / "terraform" / "rds"
+        (self.rds_dir / "variables.tf").write_text('variable "aws_account_id" {\n  type = string\n}\n')
+        (self.rds_dir / "envs").mkdir()
+        (self.rds_dir / "envs" / "prod.tfvars").write_text('engine_version = "8.4.11"\n')
+
+    def moved_plan(self, argv_words):
+        fake_effects = FakeEffects(show_text=(FIXTURE_DIR / "terraform-show-no-changes.json").read_text())
+        exit_code, out_text, err_text = self.run_main(argv_words, fake_effects)
+        stack_name = argv_words[argv_words.index("plan") + 1]
+        plan_path = self.log_dir / f"ops-tf-{stack_name}-{STAMP_TEXT}.plan"
+        log_text = (self.log_dir / f"ops-tf-{stack_name}-{STAMP_TEXT}.log").read_text()
+        return fake_effects, exit_code, plan_path, out_text + err_text, log_text
+
+    def assert_refused(self, argv_words, message_pattern):
+        fake_effects = FakeEffects()
+        with self.assertRaisesRegex(ops_cli.OpsError, message_pattern):
+            self.run_main(argv_words, fake_effects)
+        self.assertEqual((fake_effects.stream_calls, fake_effects.capture_calls), ([], []))
+
+    def test_a_moved_stack_is_planned_with_its_settings_and_the_account(self):
+        fake_effects, exit_code, plan_path, out_text, log_text = self.moved_plan(["tf", "plan", "rds"])
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(fake_effects.stream_calls[0][0], self.script_argv(
+            ops_cli.TERRAFORM_RUNNER, "-chdir=terraform/rds", "plan", f"-out={plan_path}",
+            "-var-file=envs/prod.tfvars", "-var", "aws_account_id=111122223333"))
+        self.assertIn("-var-file=envs/prod.tfvars -var aws_account_id=<account:prod>", log_text.splitlines()[0])
+        self.assert_no_ids(out_text, log_text)
+        show_argv = [capture_argv for capture_argv, _ in fake_effects.capture_calls if "show" in capture_argv][0]
+        self.assertEqual(show_argv, list(self.script_argv(ops_cli.TERRAFORM_RUNNER, "-chdir=terraform/rds", "show",
+                                                          "-json", str(plan_path))))
+
+    def test_staging_takes_its_own_settings_file_and_account(self):
+        (self.rds_dir / "envs" / "staging.tfvars").write_text('engine_version = "8.4.11"\n')
+        fake_effects, _, plan_path, out_text, log_text = self.moved_plan(["--env", "staging", "tf", "plan", "rds"])
+        self.assertEqual(fake_effects.stream_calls[0][0][-4:], (
+            f"-out={plan_path}", "-var-file=envs/staging.tfvars", "-var", "aws_account_id=444455556666"))
+        self.assertEqual(fake_effects.stream_calls[0][1]["AWS_PROFILE"], "staging")
+        self.assertIn("-var-file=envs/staging.tfvars -var aws_account_id=<account:staging>", log_text)
+        self.assert_no_ids(out_text, log_text)
+
+    def test_other_terraform_arguments_follow_the_inputs(self):
+        fake_effects, _, _, _, _ = self.moved_plan(
+            ["tf", "plan", "rds", "--", "-refresh=false", "-target=aws_db_instance.primary"])
+        self.assertEqual(fake_effects.stream_calls[0][0][-5:], (
+            "-var-file=envs/prod.tfvars", "-var", "aws_account_id=111122223333", "-refresh=false",
+            "-target=aws_db_instance.primary"))
+
+    def test_a_moved_stack_refuses_every_var_file(self):
+        for extra_words in (["-var-file=prod.tfvars"], ["-var-file", "prod.tfvars"], ["--var-file=prod.tfvars"],
+                            ["--var-file", "prod.tfvars"], ["-refresh=false", "-var-file=prod.tfvars"]):
+            with self.subTest(extra_words=extra_words):
+                self.assert_refused(["tf", "plan", "rds", "--", *extra_words],
+                                    "never from -var-file; edit terraform/rds/envs/prod.tfvars instead")
+
+    def test_a_moved_stack_refuses_a_var_the_settings_file_assigns(self):
+        for extra_words in (["-var", "engine_version=8.4.12"], ["-var=engine_version=8.4.12"],
+                            ["--var", "engine_version=8.4.12"], ["--var=engine_version=8.4.12"],
+                            ["-var", "apply_immediately=true", "-var", "engine_version=8.4.12"]):
+            with self.subTest(extra_words=extra_words):
+                self.assert_refused(["tf", "plan", "rds", "--", *extra_words],
+                                    "-var engine_version is refused: terraform/rds/envs/prod.tfvars sets it.*"
+                                    "edit that file instead")
+
+    def test_a_moved_stack_refuses_a_var_for_the_account(self):
+        for extra_words in (["-var", "aws_account_id=000000000000"], ["-var=aws_account_id=000000000000"]):
+            with self.subTest(extra_words=extra_words):
+                self.assert_refused(["tf", "plan", "rds", "--", *extra_words],
+                                    "-var aws_account_id is refused: ops passes the account of the selected profile")
+
+    def test_a_per_run_var_follows_the_automatic_arguments(self):
+        for extra_words in (["-var", "apply_immediately=true"], ["-var=apply_immediately=true"],
+                            ["--var", "apply_immediately=true"], ["-var", "no_equals_sign"]):
+            with self.subTest(extra_words=extra_words):
+                for stale_file in self.log_dir.glob("*"):
+                    stale_file.unlink()
+                fake_effects, _, _, _, _ = self.moved_plan(["tf", "plan", "rds", "--", *extra_words])
+                self.assertEqual(fake_effects.stream_calls[0][0][-3 - len(extra_words):], (
+                    "-var-file=envs/prod.tfvars", "-var", "aws_account_id=111122223333", *extra_words))
+
+    def test_assigned_names_are_the_top_level_ones(self):
+        settings_text = "\n".join([
+            "# engine_version = \"commented\"",
+            "create_vpc = true # trailing comment with { brace",
+            "tags = {",
+            "  Project = \"danteplanner\"",
+            "  nested = [\"a\", \"}\"]",
+            "}",
+            "/* block_name = 1",
+            "   still_block = 2 */",
+            "policy = <<EOT",
+            "inner_name = 3",
+            "EOT",
+            "subnet_ids = [",
+            "  \"subnet-a\",",
+            "]",
+            "multi_az=false",
+            "  sql_mode   = \"A,B\"",
+            "// slash_comment = 4",
+        ])
+        self.assertEqual(ops_cli.assigned_names(settings_text),
+                         {"create_vpc", "tags", "policy", "subnet_ids", "multi_az", "sql_mode"})
+
+    def test_a_missing_settings_file_is_named(self):
+        self.assert_refused(["--env", "staging", "tf", "plan", "rds"],
+                            "terraform/rds/envs/staging.tfvars is missing.*--env staging.*create it")
+
+    def test_an_empty_envs_directory_fails_every_plan(self):
+        (self.rds_dir / "envs" / "prod.tfvars").unlink()
+        self.assert_refused(["tf", "plan", "rds"], "terraform/rds/envs/prod.tfvars is missing")
+
+    def test_a_profile_without_an_account_id_is_named_with_the_config_file(self):
+        (self.rds_dir / "envs" / "staging.tfvars").write_text('engine_version = "8.4.11"\n')
+        config_file = self.repo_root / "aws-config-no-staging-id"
+        config_file.write_text(FAKE_CONFIG_TEXT.replace(f"sso_account_id = {PROFILE_ACCOUNTS['staging']}\n", ""))
+        with unittest.mock.patch.dict(os.environ, {"AWS_CONFIG_FILE": str(config_file)}):
+            self.assert_refused(["--env", "staging", "tf", "plan", "rds"],
+                                f"profile 'staging' has no sso_account_id in {re.escape(str(config_file))}")
+
+    def test_a_fixed_account_stack_reads_the_settings_of_its_own_env(self):
+        registry_dir = self.repo_root / "terraform" / "registry"
+        (registry_dir / ".terraform").mkdir()
+        (registry_dir / "variables.tf").write_text('variable "aws_account_id" {}\n')
+        (registry_dir / "envs").mkdir()
+        (registry_dir / "envs" / "mgmt.tfvars").write_text("")
+        fake_effects, _, _, _, _ = self.moved_plan(["tf", "plan", "registry"])
+        self.assertEqual(fake_effects.stream_calls[0][0][-3:],
+                         ("-var-file=envs/mgmt.tfvars", "-var", "aws_account_id=777788889999"))
+
+    def test_a_moved_stack_without_the_account_variable_takes_only_its_settings(self):
+        (self.repo_root / "terraform" / "oregon" / "envs").mkdir()
+        (self.repo_root / "terraform" / "oregon" / "envs" / "prod.tfvars").write_text("")
+        fake_effects, _, plan_path, _, _ = self.moved_plan(["tf", "plan", "oregon"])
+        self.assertEqual(fake_effects.stream_calls[0][0][-2:], (f"-out={plan_path}", "-var-file=envs/prod.tfvars"))
+
+    def test_a_stack_that_is_not_moved_is_planned_as_before(self):
+        fake_effects, _, plan_path, _, _ = self.moved_plan(["tf", "plan", "oregon", "--", "-var-file=prod.tfvars"])
+        self.assertEqual(fake_effects.stream_calls[0][0], self.script_argv(
+            ops_cli.TERRAFORM_RUNNER, "-chdir=terraform/oregon", "plan", f"-out={plan_path}", "-var-file=prod.tfvars"))
+
+    def test_apply_takes_no_variable(self):
+        _, _, plan_path, _, _ = self.moved_plan(["tf", "plan", "rds"])
+        fake_effects = FakeEffects()
+        self.run_main(["tf", "apply", str(plan_path)], fake_effects)
+        self.assertEqual(fake_effects.stream_calls[0][0], self.script_argv(
+            ops_cli.TERRAFORM_RUNNER, "-chdir=terraform/rds", "apply", str(plan_path)))
+
+
+class RealSettingsTest(unittest.TestCase):
+    def settings_of(self, env_name):
+        settings_text = (REPO_ROOT / "terraform" / "rds" / "envs" / f"{env_name}.tfvars").read_text()
+        return dict(ASSIGNMENT_LINE.match(text_line).groups() for text_line in settings_text.splitlines()
+                    if text_line.strip() and not text_line.lstrip().startswith("#"))
+
+    def test_the_rds_settings_files_hold_the_four_settings(self):
+        for env_name in ("prod", "staging"):
+            with self.subTest(env_name=env_name):
+                self.assertEqual(self.settings_of(env_name), RDS_SETTINGS)
+
+    def test_the_real_rds_stack_is_moved_and_takes_the_account(self):
+        rds_stack = ops_cli.stack_info(REPO_ROOT, "rds")
+        self.assertEqual((rds_stack.is_moved, rds_stack.takes_account), (True, True))
+        self.assertFalse(ops_cli.stack_info(REPO_ROOT, "oregon").is_moved)
+
+    def test_settings_files_are_tracked_and_other_tfvars_stay_ignored(self):
+        for relative_path, ignore_exit in (("terraform/rds/envs/prod.tfvars", 1), ("terraform/oregon/envs/prod.tfvars", 1),
+                                           ("terraform/rds/prod.tfvars", 0), ("terraform/rds/envs/x/prod.tfvars", 0),
+                                           ("terraform/rds/environment.tfvars.example", 1)):
+            with self.subTest(relative_path=relative_path):
+                ignore_run = subprocess.run(["git", "-C", str(REPO_ROOT), "check-ignore", "--no-index", "-q",
+                                             relative_path], capture_output=True, text=True,
+                                            env=ops_cli.git_environment())
+                self.assertEqual(ignore_run.returncode, ignore_exit)
+
+
 CHECK_MESSAGE = ("The cp instance was built from an older boot script than the code holds. It takes the current one "
                  "when node_generation.cp is raised, which replaces it.")
 
@@ -920,6 +1107,11 @@ HOOK_CASES = (
     ("AWS_PROFILE=prod scripts/ops/access/rds-query.sh \"SELECT 1\"", f"{CLI_TEXT} sql 'SELECT 1'"),
     ("/abs/path/scripts/ops/access/metrics-query.sh up", f"{CLI_TEXT} metrics up"),
     ("scripts/ops/terraform-run.sh -chdir=terraform/rds plan", f"{CLI_TEXT} tf plan rds"),
+    ("scripts/ops/terraform-run.sh -chdir=terraform/rds plan -var-file=prod.tfvars -refresh=false",
+     f"{CLI_TEXT} tf plan rds -- -refresh=false"),
+    ("scripts/ops/terraform-run.sh -chdir=terraform/rds plan -var-file prod.tfvars", f"{CLI_TEXT} tf plan rds"),
+    ("scripts/ops/terraform-run.sh -chdir=terraform/oregon plan -var-file=prod.tfvars -refresh=false",
+     f"{CLI_TEXT} tf plan oregon -- -var-file=prod.tfvars -refresh=false"),
     ("AWS_PROFILE=staging scripts/ops/terraform-run.sh -chdir=terraform/secrets plan -var-file=staging.tfvars",
      f"{CLI_TEXT} --env staging tf plan secrets -- -var-file=staging.tfvars"),
     ("scripts/ops/access/metrics-query.sh 'rate(x[5m])' 6h 1m",

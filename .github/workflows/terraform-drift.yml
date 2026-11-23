@@ -42,7 +42,6 @@ jobs:
         env:
           TFVARS_OREGON: ${{ secrets.TFVARS_OREGON }}
           TFVARS_SEOUL: ${{ secrets.TFVARS_SEOUL }}
-          TFVARS_RDS: ${{ secrets.TFVARS_RDS }}
           TFVARS_SECRETS: ${{ secrets.TFVARS_SECRETS }}
           TFVARS_CLOUDFLARE: ${{ secrets.TFVARS_CLOUDFLARE }}
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
@@ -50,7 +49,6 @@ jobs:
           set -euo pipefail
           printf '%s' "$TFVARS_OREGON"     > terraform/oregon/prod.tfvars
           printf '%s' "$TFVARS_SEOUL"      > terraform/seoul/prod.tfvars
-          printf '%s' "$TFVARS_RDS"        > terraform/rds/prod.tfvars
           printf '%s' "$TFVARS_SECRETS"    > terraform/secrets/prod.tfvars
           printf '%s' "$TFVARS_CLOUDFLARE" > terraform/cloudflare/prod.tfvars
           printf 'bucket = "danteplanner-tfstate-%s"\n' "$AWS_ACCOUNT_ID" > terraform/backend.prod.hcl

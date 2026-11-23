@@ -35,9 +35,15 @@ jobs:
           role-to-assume: ${{ secrets.STAGING_PROVISIONER_ROLE_ARN }}
           aws-region: us-west-2
 
+      - name: Read the caller's account for terraform/rds
+        run: |
+          account=$(aws sts get-caller-identity --query Account --output text)
+          echo "::add-mask::$account"
+          echo "AWS_ACCOUNT_ID=$account" >> "$GITHUB_ENV"
+
       - name: Fetch tfvars from SSM Parameter Store
         run: |
-          for stack in secrets rds oregon seoul cloudflare; do
+          for stack in secrets oregon seoul cloudflare; do
             aws ssm get-parameter --name "/danteplanner/staging/tfvars/$stack" \
               --with-decryption --query 'Parameter.Value' --output text \
               > "terraform/$stack/staging.tfvars"
@@ -54,19 +60,19 @@ jobs:
       - name: Apply secrets, RDS, and the Oregon fleet
         run: |
           terraform -chdir=terraform/secrets apply -var-file=staging.tfvars -auto-approve -input=false -no-color
-          terraform -chdir=terraform/rds     apply -var-file=staging.tfvars -auto-approve -input=false -no-color
+          terraform -chdir=terraform/rds     apply -var-file=envs/staging.tfvars -var "aws_account_id=$AWS_ACCOUNT_ID" -auto-approve -input=false -no-color
           terraform -chdir=terraform/oregon  apply -var-file=staging.tfvars -auto-approve -input=false -no-color
 
       # Two-pass wiring: the RDS-side return route and 3306 ingress need the fleet's
       # peering id, which exists only after the fleet apply.
       - name: Wire Oregon fleet into RDS
         run: |
-          terraform -chdir=terraform/rds apply -var-file=staging.tfvars -auto-approve -input=false -no-color
+          terraform -chdir=terraform/rds apply -var-file=envs/staging.tfvars -var "aws_account_id=$AWS_ACCOUNT_ID" -auto-approve -input=false -no-color
 
       - name: Apply Seoul fleet and wire its return path
         run: |
           terraform -chdir=terraform/seoul apply -var-file=staging.tfvars -auto-approve -input=false -no-color
-          terraform -chdir=terraform/rds   apply -var-file=staging.tfvars -auto-approve -input=false -no-color
+          terraform -chdir=terraform/rds   apply -var-file=envs/staging.tfvars -var "aws_account_id=$AWS_ACCOUNT_ID" -auto-approve -input=false -no-color
 
       - name: Apply Cloudflare tunnels and store their tokens
         run: |
@@ -138,6 +144,6 @@ jobs:
           terraform -chdir=terraform/cloudflare destroy -var-file=staging.tfvars -auto-approve -input=false -no-color
           terraform -chdir=terraform/seoul      destroy -var-file=staging.tfvars -auto-approve -input=false -no-color
           terraform -chdir=terraform/oregon     destroy -var-file=staging.tfvars -auto-approve -input=false -no-color
-          terraform -chdir=terraform/rds        destroy -var-file=staging.tfvars -auto-approve -input=false -no-color
+          terraform -chdir=terraform/rds        destroy -var-file=envs/staging.tfvars -var "aws_account_id=$AWS_ACCOUNT_ID" -auto-approve -input=false -no-color
           # The secrets stack stays standing: deleted Secrets Manager names enter a recovery
           # window that blocks same-name re-creation, which would break the next run.

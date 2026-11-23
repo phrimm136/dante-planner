@@ -16,16 +16,18 @@ GH_REPO="phrimm136/dante-planner"
 ISSUE_LABEL="terraform-drift"
 STACKS=(oregon seoul rds secrets cloudflare)
 
-# Every stack names its var-file. A stack with no entry is a configuration error rather than a
-# stack that needs no inputs, so the loop below refuses to plan it: a plan missing an input that
-# gates a resource reports that resource's destruction as drift.
+# Every stack without an envs/ directory names its var-file; a stack with one takes envs/prod.tfvars
+# and, when it declares aws_account_id, the caller's account, as `ops tf plan` does. A stack with
+# neither is a configuration error rather than a stack that needs no inputs, so the loop below
+# refuses to plan it: a plan missing an input that gates a resource reports that resource's
+# destruction as drift.
 declare -A VAR_FILE=(
   [oregon]=prod.tfvars
   [seoul]=prod.tfvars
-  [rds]=prod.tfvars
   [secrets]=prod.tfvars
   [cloudflare]=prod.tfvars
 )
+caller_account=""
 
 # Stacks that keep more than one workspace. The default workspace holds different resources, so
 # planning without selecting reports the whole stack as absent.
@@ -42,12 +44,32 @@ for stack in "${STACKS[@]}"; do
   [ -d "$dir" ] || continue
   log="/tmp/tf-drift-$stack-$(date +%Y%m%d).log"
 
-  if [ -z "${VAR_FILE[$stack]:-}" ]; then
+  args=(-detailed-exitcode -input=false -lock=false -no-color)
+  if [ -d "$dir/envs" ]; then
+    if [ ! -f "$dir/envs/prod.tfvars" ]; then
+      failed+=("$stack")
+      summary+="- \`$stack\`: no envs/prod.tfvars — refusing to plan without its settings"$'\n'
+      continue
+    fi
+    args+=(-var-file=envs/prod.tfvars)
+    if grep -Eq '^[[:space:]]*variable[[:space:]]+"aws_account_id"' "$dir"/*.tf; then
+      if [ -z "$caller_account" ]; then
+        caller_account=$(aws sts get-caller-identity --query Account --output text 2>/dev/null) || caller_account=""
+      fi
+      if [ -z "$caller_account" ]; then
+        failed+=("$stack")
+        summary+="- \`$stack\`: the caller's account is unreadable (aws sts get-caller-identity failed)"$'\n'
+        continue
+      fi
+      args+=(-var "aws_account_id=$caller_account")
+    fi
+  elif [ -n "${VAR_FILE[$stack]:-}" ]; then
+    args+=(-var-file="${VAR_FILE[$stack]}")
+  else
     failed+=("$stack")
     summary+="- \`$stack\`: no VAR_FILE entry — refusing to plan without an explicit var-file"$'\n'
     continue
   fi
-  args=(-detailed-exitcode -input=false -lock=false -no-color -var-file="${VAR_FILE[$stack]}")
 
   if [ ! -d "$dir/.terraform" ]; then
     "$REPO_DIR/scripts/ops/terraform-run.sh" -chdir="$dir" init -input=false -no-color \

@@ -2,6 +2,7 @@
 # Restore each stack's staging.tfvars from SSM Parameter Store, which is where the rehearsal
 # workflow reads them from and therefore the source of truth. The local files are gitignored
 # (they carry account ids and a Cloudflare token), so a deleted one is only recoverable here.
+# A stack with a tracked envs/staging.tfvars (rds) has no such file and is not restored.
 #
 # Writes nothing outside terraform/<stack>/staging.tfvars, and refuses to overwrite an
 # existing file unless --force is given: a local edit not yet pushed to SSM would otherwise
@@ -18,7 +19,7 @@ force=false
 
 restored=0
 skipped=0
-for stack in secrets rds oregon seoul cloudflare; do
+for stack in secrets oregon seoul cloudflare; do
   target="$repo_root/terraform/$stack/staging.tfvars"
   if [ -f "$target" ] && ! $force; then
     echo "  skip     $stack (exists; --force to overwrite)"
