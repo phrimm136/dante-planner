@@ -583,27 +583,6 @@ class PlanTest(RepoCase):
                 self.assertEqual(out_lines[:-1], expected_lines)
                 self.assertTrue(out_lines[-1].startswith(f"! {self.repo_root / CLI_TEXT} tf apply "))
 
-    def test_a_forget_is_a_change_the_guard_does_not_hold(self):
-        forget_lines = ["forget aws_s3_bucket.tf_state[0]",
-                        "forget aws_s3_bucket_lifecycle_configuration.tf_state[0]",
-                        "forget aws_s3_bucket_public_access_block.tf_state[0]",
-                        "forget aws_s3_bucket_server_side_encryption_configuration.tf_state[0]",
-                        "forget aws_s3_bucket_versioning.tf_state[0]"]
-        _, exit_code, out_lines, _ = self.plan_run("terraform-show-forget-update.json", ())
-        self.assertEqual(exit_code, 0)
-        self.assertEqual(out_lines[:-1], ["~ aws_iam_policy.provisioning", *forget_lines,
-                                          "Plan: 0 to add, 1 to change, 0 to destroy, 5 to forget."])
-        self.assertTrue(out_lines[-1].startswith(f"! {self.repo_root / CLI_TEXT} tf apply "))
-
-    def test_a_forget_only_plan_prints_its_apply_command(self):
-        show_data = json.loads((FIXTURE_DIR / "terraform-show-forget-update.json").read_text())
-        show_data["resource_changes"] = [resource_change for resource_change in show_data["resource_changes"]
-                                         if resource_change["change"]["actions"] == ["forget"]]
-        plan_info = ops_cli.plan_summary(show_data)
-        self.assertEqual(len(plan_info.change_lines), 5)
-        self.assertEqual(plan_info.counts_line, "Plan: 0 to add, 0 to change, 0 to destroy, 5 to forget.")
-        self.assertEqual(plan_info.guarded_markers, {})
-
     def test_read_actions_are_not_listed(self):
         show_data = json.loads((FIXTURE_DIR / "terraform-show-mixed.json").read_text())
         read_rows = [resource_change["address"] for resource_change in show_data["resource_changes"]
@@ -875,6 +854,59 @@ class SeoulCase(RepoCase):
         plan_path = self.log_dir / f"ops-tf-{stack_name}-{STAMP_TEXT}.plan"
         verdict_data = json.loads(Path(f"{plan_path}.verdict.json").read_text())
         return fake_effects, exit_code, out_text.splitlines(), verdict_data, plan_path
+
+
+FORGOTTEN_ADDRESSES = ("aws_s3_bucket.tf_state[0]", "aws_s3_bucket_lifecycle_configuration.tf_state[0]",
+                       "aws_s3_bucket_public_access_block.tf_state[0]",
+                       "aws_s3_bucket_server_side_encryption_configuration.tf_state[0]",
+                       "aws_s3_bucket_versioning.tf_state[0]")
+FORGET_LINES = [f"forget {one_address}" for one_address in FORGOTTEN_ADDRESSES]
+FORGET_EXPECTATIONS = tuple(word for one_address in FORGOTTEN_ADDRESSES for word in ("--expect", one_address))
+
+
+class ForgetGuardTest(SeoulCase):
+    def test_an_unexpected_forget_blocks_the_plan(self):
+        _, exit_code, out_lines, verdict_data, _ = self.guarded_plan("seoul", "terraform-show-forget-update.json")
+        self.assertEqual(out_lines, [
+            "~ aws_iam_policy.provisioning", *FORGET_LINES,
+            "Plan: 0 to add, 1 to change, 0 to destroy, 5 to forget.",
+            *[f"UNEXPECTED {one_line}" for one_line in FORGET_LINES], ops_cli.BLOCKED_LINE])
+        self.assertEqual((verdict_data["verdict"], verdict_data["guarded"]), ("blocked", list(FORGOTTEN_ADDRESSES)))
+        self.assertEqual(exit_code, 3)
+
+    def test_every_forget_expected_clears_the_plan(self):
+        _, exit_code, out_lines, verdict_data, plan_path = self.guarded_plan(
+            "seoul", "terraform-show-forget-update.json", *FORGET_EXPECTATIONS)
+        self.assertEqual(out_lines, [
+            "~ aws_iam_policy.provisioning", *FORGET_LINES,
+            "Plan: 0 to add, 1 to change, 0 to destroy, 5 to forget.",
+            f"! {self.repo_root / CLI_TEXT} tf apply {plan_path}"])
+        self.assertEqual((verdict_data["verdict"], verdict_data["expected"]), ("clear", list(FORGOTTEN_ADDRESSES)))
+        self.assertEqual(exit_code, 0)
+
+    def test_an_expected_forget_the_plan_lacks_is_absent(self):
+        _, exit_code, out_lines, verdict_data, _ = self.guarded_plan(
+            "seoul", "terraform-show-forget-update.json", *FORGET_EXPECTATIONS, "--expect", "aws_s3_bucket.other[0]")
+        self.assertEqual(out_lines[-2:], ["ABSENT aws_s3_bucket.other[0]", ops_cli.BLOCKED_LINE])
+        self.assertFalse(any(one_line.startswith("UNEXPECTED") for one_line in out_lines))
+        self.assertEqual(verdict_data["verdict"], "blocked")
+        self.assertEqual(exit_code, 3)
+
+    def test_a_forget_only_plan_prints_its_apply_command_once_expected(self):
+        show_data = json.loads((FIXTURE_DIR / "terraform-show-forget-update.json").read_text())
+        show_data["resource_changes"] = [resource_change for resource_change in show_data["resource_changes"]
+                                         if resource_change["change"]["actions"] == ["forget"]]
+        counts_line = "Plan: 0 to add, 0 to change, 0 to destroy, 5 to forget."
+        _, exit_code, out_lines, _, plan_path = self.guarded_plan(
+            "seoul", "", *FORGET_EXPECTATIONS, show_text=json.dumps(show_data))
+        self.assertEqual(out_lines, [*FORGET_LINES, counts_line, f"! {self.repo_root / CLI_TEXT} tf apply {plan_path}"])
+        self.assertEqual(exit_code, 0)
+        for stale_file in self.log_dir.glob("*"):
+            stale_file.unlink()
+        _, exit_code, out_lines, _, _ = self.guarded_plan("seoul", "", show_text=json.dumps(show_data))
+        self.assertEqual(out_lines, [*FORGET_LINES, counts_line,
+                                     *[f"UNEXPECTED {one_line}" for one_line in FORGET_LINES], ops_cli.BLOCKED_LINE])
+        self.assertEqual(exit_code, 3)
 
 
 class GuardTest(SeoulCase):
