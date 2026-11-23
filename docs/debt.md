@@ -783,6 +783,17 @@ guards the parse but likewise skips the schema gate.
   `rate(hikaricp_connections_usage_seconds_count[...])`; waiting will not clear it, because the
   gauge it watches will keep reading zero.
   re-check: `rg -qF 'argocd_app_info{sync_status="OutOfSync"} == 1' deploy/grafana/rules/cluster-rules.yaml && .claude/skills/debt-ledger/bin/debt absent deploy/grafana -e 'autosync_enabled' -e 'hikaricp_connections_usage_seconds_count'`
+- 2026-11-24 — The state bucket moves from `terraform/iam-bootstrap` to
+  `terraform/state-backend` by one-time blocks: `terraform/state-backend/imports.tf` adopts the
+  five bucket resources and `terraform/iam-bootstrap/removed.tf` forgets them. While
+  `imports.tf` exists, a new account's first `state-backend` apply fails with "Cannot import
+  non-existent remote object", because its bucket does not exist yet. The prod, staging and
+  log-archive states already hold the bucket in `state-backend`, so both files are no-ops there.
+  Delete both files once the management account has run
+  `docs/runbooks/management-bootstrap-retire.md`: its `state-backend` state holds
+  `aws_s3_bucket.tf_state` and its `iam-bootstrap` state lists no resource. Delete the runbook
+  with them.
+  re-check: `test -e terraform/state-backend/imports.tf || test -e terraform/iam-bootstrap/removed.tf`
 - 2026-08-24 — `terraform/cloudflare` splits one logical stack across two state buckets with
   inconsistent workspace names, and the stack's resources live in Cloudflare rather than in
   any AWS account, so the repo's "state lives in the account whose resources it describes"

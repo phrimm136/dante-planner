@@ -583,6 +583,27 @@ class PlanTest(RepoCase):
                 self.assertEqual(out_lines[:-1], expected_lines)
                 self.assertTrue(out_lines[-1].startswith(f"! {self.repo_root / CLI_TEXT} tf apply "))
 
+    def test_a_forget_is_a_change_the_guard_does_not_hold(self):
+        forget_lines = ["forget aws_s3_bucket.tf_state[0]",
+                        "forget aws_s3_bucket_lifecycle_configuration.tf_state[0]",
+                        "forget aws_s3_bucket_public_access_block.tf_state[0]",
+                        "forget aws_s3_bucket_server_side_encryption_configuration.tf_state[0]",
+                        "forget aws_s3_bucket_versioning.tf_state[0]"]
+        _, exit_code, out_lines, _ = self.plan_run("terraform-show-forget-update.json", ())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(out_lines[:-1], ["~ aws_iam_policy.provisioning", *forget_lines,
+                                          "Plan: 0 to add, 1 to change, 0 to destroy, 5 to forget."])
+        self.assertTrue(out_lines[-1].startswith(f"! {self.repo_root / CLI_TEXT} tf apply "))
+
+    def test_a_forget_only_plan_prints_its_apply_command(self):
+        show_data = json.loads((FIXTURE_DIR / "terraform-show-forget-update.json").read_text())
+        show_data["resource_changes"] = [resource_change for resource_change in show_data["resource_changes"]
+                                         if resource_change["change"]["actions"] == ["forget"]]
+        plan_info = ops_cli.plan_summary(show_data)
+        self.assertEqual(len(plan_info.change_lines), 5)
+        self.assertEqual(plan_info.counts_line, "Plan: 0 to add, 0 to change, 0 to destroy, 5 to forget.")
+        self.assertEqual(plan_info.guarded_markers, {})
+
     def test_read_actions_are_not_listed(self):
         show_data = json.loads((FIXTURE_DIR / "terraform-show-mixed.json").read_text())
         read_rows = [resource_change["address"] for resource_change in show_data["resource_changes"]

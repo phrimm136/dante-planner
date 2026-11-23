@@ -20,6 +20,7 @@ There is **no instance profile** — neither runner is an EC2 instance.
 |----------|---------|
 | `aws_iam_role.provisioner` | The provisioning role (`var.role_name`, default `danteplanner-provisioner`). |
 | `aws_iam_policy.provisioning` | Service-scoped permissions (EC2 / ASG / ECR / SSM / S3 / RDS / KMS / CloudWatch / Logs + per-region fleet IAM). |
+| `aws_iam_policy.deploy_surge` | Lets the deploy workflow scale the app autoscaling groups during a surge, attached to the same role. |
 | `aws_iam_openid_connect_provider.github` | GitHub Actions OIDC provider (guarded by `create_github_oidc_provider`; only one per account). |
 
 ## Scoping
@@ -55,9 +56,7 @@ scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap output provisioner_r
 
 These run by hand through the runner, not ops: they run with admin credentials before any ops
 profile exists. State goes to the account's bucket, which `terraform/state-backend` created
-first. Only an account whose bucket this stack creates (`create_state_bucket`) applies on local
-state, with a `backend_override.tf`, and moves it right after with
-`scripts/ops/provision/bootstrap-state-to-s3.sh` (see `terraform/README.md`, State).
+first; this stack never runs on local state. Apply it only in an account that runs a fleet.
 
 Then wire the two consumers to that role ARN:
 
@@ -115,6 +114,8 @@ policy then looks the existing provider up as a data source instead of creating 
 ## Not managed here
 
 - **The Oregon fleet** (`terraform/oregon`) — this stack only grants the identity that applies it.
+- **The state bucket:** `terraform/state-backend` owns it. This stack only grants the role access
+  to it by its computed name and outputs that name as `tf_state_bucket`.
 - **State backend:** the account's state bucket, key `iam-bootstrap/terraform.tfstate`, chosen by
   the gitignored `terraform/backend.<account>.hcl`; `*.tfvars` are gitignored too. Never commit
   `*.tfstate`.

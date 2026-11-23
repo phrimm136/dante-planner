@@ -1,10 +1,7 @@
 terraform {
   # terraform init -backend-config=../backend.<account>.hcl
   #
-  # State lives in the account's state bucket. Local state is used only for the first apply in a
-  # new account whose bucket this stack creates (create_state_bucket): apply with a
-  # backend_override.tf holding `terraform { backend "local" {} }`, delete it, then move the state
-  # into the new bucket with scripts/ops/provision/bootstrap-state-to-s3.sh.
+  # State lives in the account's state bucket, which terraform/state-backend creates first.
   backend "s3" {
     key                  = "iam-bootstrap/terraform.tfstate"
     region               = "us-west-2"
@@ -13,7 +10,7 @@ terraform {
     use_lockfile         = true
   }
 
-  required_version = ">= 1.6"
+  required_version = ">= 1.7"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
