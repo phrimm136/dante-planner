@@ -9,7 +9,7 @@ epic: none · pr: none
   REJECTED: passing private values as environment variables set by the CLI — CI and the laptop would each need their own copy of the lookup, and a plan made by hand would see none of them.
   INVARIANT: a moved stack has one source per variable — the CLI refuses any second var-file, and refuses a command-line value for a variable the settings file assigns or for the account id; tests cover each spelling.
   INVARIANT: the account a moved stack plans against is the account of the selected profile — the CLI passes that profile's account id and no other source can set it, so the provider's allowed-account guard catches only a profile entry that names the wrong account.
-  INVARIANT: a tracked settings file holds no account id, ARN, hostname or other account-bound value — unenforced; a reviewer reads the file.
+  INVARIANT: a tracked settings file holds no account id, ARN, resource id, hostname or address — a test reads every tracked settings file for those shapes; a private value of another shape is a reviewer's to catch.
   NON-GOAL: a stack that is not yet moved — it keeps its gitignored var-file until it gains a settings directory, and the CLI tells the two kinds apart by that directory; the old path is removed when the last stack moves.
   NON-GOAL: a per-run value such as "apply now" — it stays a command-line value, because a tracked permanent setting would turn every later change into an unscheduled one.
 
