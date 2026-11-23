@@ -52,7 +52,9 @@ Then it runs these steps:
    is missing. It prints only whether each was found, never the bucket name, which holds the
    account id. It takes one snapshot with
    `k3s etcd-snapshot save --etcd-s3 --etcd-s3-bucket <bucket> --etcd-s3-region <region>`,
-   and it discards the output of that command. It then waits for a new
+   When the save fails, the run prints its last 5 lines with the bucket name replaced by
+   `<bucket>` and any 12-digit number by `<account>`. It ends `NOTHING CHANGED` and names a
+   timeout (exit 124 or 137) apart from a failed save. It then waits for a new
    `ETCDSnapshotFile` with the label `etcd.k3s.cattle.io/snapshot-storage-node=s3`.
    That label marks the S3 copy on the k3s etcd-snapshot page
    (https://docs.k3s.io/cli/etcd-snapshot). An S3 snapshot from before the run does not count.
@@ -92,26 +94,29 @@ So one call takes at most 15 seconds. The save runs under `timeout -k 5 120`.
 
 The script computes the budgets from these limits:
 
-- Reserve after the edit: the worst case of every step on the failure path. That is the
-  300-second restart wait, the 300-second rollback wait, and 17 bounded calls at 15 seconds:
-  5 for the edit, 1 for each of the two `daemon-reload` calls, 2 for each of the two queued
-  restarts, 1 for the restore, 4 for the check after the rollback and 1 for the lock removal.
-  That is 855 seconds.
+- Reserve after the time check: the worst case of every step on the failure path. That is
+  the 300-second restart wait, the 300-second rollback wait, and 18 bounded calls at 15 seconds:
+  1 for the backup copy, 5 for the edit, 1 for each of the two `daemon-reload` calls, 2 for each
+  of the two queued restarts, 1 for the restore, 4 for the check after the rollback and 1 for
+  the lock removal. That is 870 seconds.
 - Run on the CP: 2 x 120 seconds for the save and its S3 copy, 120 seconds for the other calls
-  before the edit, and the 855-second reserve. That is 1215 seconds.
-- SSM command timeout: the run plus 60 seconds, 1275 seconds.
-- Wait on your machine: the SSM timeout plus 60 seconds, 1335 seconds.
+  before the edit, 10 seconds for the gap between the start of the SSM timer and the start of
+  the script, and the 870-second reserve. That is 1240 seconds.
+- SSM command timeout: the run plus 60 seconds, 1300 seconds.
+- Wait on your machine: the SSM timeout plus 60 seconds, 1360 seconds.
 
 Each wait has a fixed end. Before each round of checks it adds the worst case of that round,
 6 calls at 15 seconds and the 5-second pause, to the clock. It starts the round only when that
 sum is at or before the end of the wait. So a wait ends at or before its bound.
 
-SSM can end a run only before step 2 or after the run has ended. Before step 2 the script
-needs 855 seconds left of the 1275-second SSM timeout. When less is left, it ends
+SSM can end a run only before the backup copy of step 2 or after the run has ended. Just
+before the backup copy the script needs 870 seconds left of the 1300-second SSM timeout, after
+it subtracts 10 seconds for the gap between the SSM timer and its own start. When less is
+left, it ends
 `NOTHING CHANGED: not enough time left to restart and roll back within this run (<n>s left); run again`.
 The unit stays untouched, and the snapshot from step 1 stays in place. A test counts the
-bounded calls after the edit in the script that is sent, so a new call without a larger
-reserve fails the tests.
+bounded calls from the time check on in the script that is sent, so a new call without a
+larger reserve fails the tests.
 
 The script prints the SSM command id first. When the wait on your machine ends first, the
 script says so and exits 6. The run on the CP can still be going. Do not run the script again

@@ -30,7 +30,12 @@ FAKE_K3S = """#!/bin/sh
 echo "k3s $*" >> "$FAKE_DIR/calls"
 """ + FAKE_MODE + """case "$*" in
   "etcd-snapshot save"*)
-    [ -n "${FAKE_SAVE_FAILS:-}" ] && exit 1
+    [ -n "${FAKE_SAVE_HANGS:-}" ] && exec sleep 30
+    if [ -n "${FAKE_SAVE_FAILS:-}" ]; then
+      echo "level=info msg=Saving etcd snapshot to s3://p-oregon-etcd-snapshots-bucket/k3s"
+      echo "level=fatal msg=AccessDenied: arn:aws:iam::123456789012:role/cp is not allowed on $*" >&2
+      exit 1
+    fi
     echo "saving to s3://$*" >&2
     echo local >> "$FAKE_DIR/snapshots"
     if [ "$*" = "etcd-snapshot save --etcd-s3 --etcd-s3-bucket p-oregon-etcd-snapshots-bucket --etcd-s3-region us-west-2" ] \
@@ -247,14 +252,27 @@ class RemoteScriptTest(RepairCase):
         self.assertFalse([one_call for one_call in self.calls() if one_call.startswith("k3s etcd-snapshot save")])
 
     def test_a_save_without_the_s3_arguments_makes_no_s3_copy(self):
-        script_text = self.remote_text("repair").replace(
-            'k3s etcd-snapshot save --etcd-s3 --etcd-s3-bucket "$s3_bucket" --etcd-s3-region "$s3_region"',
-            "k3s etcd-snapshot save")
-        self.assertIn("k3s etcd-snapshot save \\\n", script_text)
+        flagged_save = ('k3s etcd-snapshot save --etcd-s3 --etcd-s3-bucket "$s3_bucket" \\\n'
+                        '  --etcd-s3-region "$s3_region"')
+        script_text = self.remote_text("repair")
+        self.assertEqual(script_text.count(flagged_save), 1)
+        script_text = script_text.replace(flagged_save, "k3s etcd-snapshot save")
         self.assert_untouched(self.run_remote("repair", script_text), "the S3 copy is missing")
 
-    def test_a_failed_save_changes_nothing(self):
-        self.assert_untouched(self.run_remote("repair", FAKE_SAVE_FAILS=True), "k3s etcd-snapshot save failed")
+    def test_a_failed_save_changes_nothing_and_shows_its_scrubbed_output(self):
+        failed_run = self.run_remote("repair", FAKE_SAVE_FAILS=True)
+        self.assert_untouched(failed_run, "NOTHING CHANGED: k3s etcd-snapshot save failed (exit 1); its last lines are above")
+        self.assertIn("save output: level=info msg=Saving etcd snapshot to s3://<bucket>/k3s", failed_run.stdout)
+        self.assertIn("save output: level=fatal msg=AccessDenied: arn:aws:iam::<account>:role/cp is not allowed on "
+                      "etcd-snapshot save --etcd-s3 --etcd-s3-bucket <bucket> --etcd-s3-region us-west-2",
+                      failed_run.stdout)
+        self.assertNotIn(BUCKET, failed_run.stdout + failed_run.stderr)
+        self.assertNotIn("123456789012", failed_run.stdout + failed_run.stderr)
+
+    def test_a_save_over_its_bound_is_named_a_timeout(self):
+        hang_run = self.run_remote("repair", FAKE_SAVE_HANGS=True)
+        self.assert_untouched(hang_run, "NOTHING CHANGED: k3s etcd-snapshot save ran over 2s (timeout exit 124)")
+        self.assertNotIn(BUCKET, hang_run.stdout + hang_run.stderr)
 
     def test_a_save_without_an_s3_copy_changes_nothing(self):
         self.assert_untouched(self.run_remote("repair", FAKE_S3_FAILS=True),
@@ -305,10 +323,10 @@ class RemoteScriptTest(RepairCase):
         self.assertEqual(self.final_line(reset_run), "REPAIRED", reset_run.stdout)
 
     def test_a_fast_run_with_the_same_budget_edits_the_unit(self):
-        self.assertEqual(self.final_line(self.run_remote("repair", ssm_timeout="63")), "REPAIRED")
+        self.assertEqual(self.final_line(self.run_remote("repair", ssm_timeout="74")), "REPAIRED")
 
     def test_a_slow_phase_before_the_edit_leaves_no_time_and_changes_nothing(self):
-        slow_run = self.run_remote("repair", ssm_timeout="63", FAKE_SLOW_LIST="0.9")
+        slow_run = self.run_remote("repair", ssm_timeout="74", FAKE_SLOW_LIST="0.9")
         self.assert_untouched(slow_run, "not enough time left to restart and roll back within this run (")
         self.assertTrue(self.final_line(slow_run).endswith("s left); run again"))
         self.assertIn("s3", (self.work_dir / "snapshots").read_text())
@@ -442,7 +460,7 @@ def reserve_problem(script_text):
     bodies = function_bodies(script_text)
     call_worst = values["CALL_BOUND"] + values["KILL_GRACE"]
     skipped = {"roll_back", "wait_ready", "end"}
-    steps_text = script_text[script_text.index('echo "STEP 3'):script_text.index('echo "STEP 5')]
+    steps_text = script_text[script_text.index("time_left="):script_text.index('echo "STEP 5')]
     path_calls = (bounded_calls(steps_text, bodies, skipped) + bounded_calls(bodies["roll_back"], bodies, skipped)
                   + bounded_calls(bodies["end"], bodies, set()))
     loop_text = bodies["wait_ready"][bodies["wait_ready"].index("while"):]
@@ -458,7 +476,7 @@ def reserve_problem(script_text):
 class ReserveTest(RepairCase):
     def test_the_reserve_counts_every_bounded_call_after_the_edit(self):
         problems, path_calls, round_calls = reserve_problem(self.remote_text("repair"))
-        self.assertEqual((problems, path_calls, round_calls), ([], 17, 6))
+        self.assertEqual((problems, path_calls, round_calls), ([], 18, 6))
 
     def test_a_reserve_without_one_term_is_caught(self):
         script_text = SCRIPT.read_text()
@@ -487,7 +505,7 @@ class MutantTest(RepairCase):
     def test_without_the_budget_check_a_slow_run_edits_the_unit(self):
         slow_run = self.run_remote("repair", self.mutant(
             '[ "$time_left" -ge "$RESERVE" ]', "true"),
-            FAKE_SLOW_LIST="0.9", ssm_timeout="63")
+            FAKE_SLOW_LIST="0.9", ssm_timeout="74")
         self.assertNotIn("not enough time left", slow_run.stdout)
         self.assertTrue(self.backups())
 
@@ -530,7 +548,7 @@ class LocalScriptTest(RepairCase):
                                         capture_output=True, text=True, check=True).stdout)
         self.assertEqual((values["SAVE_BOUND"], values["RESTART_BOUND"], values["ROLLBACK_BOUND"], values["CALL_BOUND"],
                           values["KILL_GRACE"], values["RESERVE"], values["SSM_TIMEOUT"], ssm_timeout, local_wait),
-                         (120, 300, 300, 10, 5, 855, 1275, 1275, 1335))
+                         (120, 300, 300, 10, 5, 870, 1300, 1300, 1360))
         self.assertGreater(ssm_timeout, 2 * values["SAVE_BOUND"] + values["RESERVE"])
         self.assertEqual(reserve_problem("\n".join(self.sent_parameters()["commands"]))[0], [])
 

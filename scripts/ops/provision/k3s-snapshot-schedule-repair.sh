@@ -21,7 +21,9 @@ ROLLBACK_BOUND_SECONDS=300
 CALL_BOUND_SECONDS=10
 KILL_GRACE_SECONDS=5
 PRE_EDIT_SECONDS=120
+START_MARGIN_SECONDS=10
 ROUND_CALLS=6
+BACKUP_CALLS=1
 EDIT_CALLS=5
 RELOAD_CALLS=1
 QUEUE_CALLS=2
@@ -32,13 +34,13 @@ UNLOCK_CALLS=1
 call_worst() { echo $(($1 + $2)); }
 round_worst() { echo $((ROUND_CALLS * $(call_worst "$1" "$2") + $3)); }
 reserve_seconds() {
-    echo $(($3 + $4 + (EDIT_CALLS + 2 * RELOAD_CALLS + 2 * QUEUE_CALLS + RESTORE_CALLS + SERVING_CALLS + UNLOCK_CALLS)
-        * $(call_worst "$1" "$2")))
+    echo $(($3 + $4 + (BACKUP_CALLS + EDIT_CALLS + 2 * RELOAD_CALLS + 2 * QUEUE_CALLS + RESTORE_CALLS + SERVING_CALLS
+        + UNLOCK_CALLS) * $(call_worst "$1" "$2")))
 }
 
 RESERVE_SECONDS=$(reserve_seconds "$CALL_BOUND_SECONDS" "$KILL_GRACE_SECONDS" "$RESTART_BOUND_SECONDS" \
     "$ROLLBACK_BOUND_SECONDS")
-REMOTE_WORST_SECONDS=$((2 * SAVE_BOUND_SECONDS + PRE_EDIT_SECONDS + RESERVE_SECONDS))
+REMOTE_WORST_SECONDS=$((2 * SAVE_BOUND_SECONDS + PRE_EDIT_SECONDS + START_MARGIN_SECONDS + RESERVE_SECONDS))
 SSM_TIMEOUT_SECONDS=$((REMOTE_WORST_SECONDS + 60))
 LOCAL_WAIT_SECONDS=$((SSM_TIMEOUT_SECONDS + 60))
 
@@ -62,7 +64,8 @@ remote_script() {
         "$mode" "'$unit'" "'$cron'" "$save_bound" "$restart_bound" "$rollback_bound"
     printf 'SSM_TIMEOUT=%s\nCALL_BOUND=%s\nKILL_GRACE=%s\nPOLL=%s\nLOCK_DIR=%s\n' \
         "$ssm_timeout" "$call_bound" "$kill_grace" "$poll" "'$lock_dir'"
-    printf 'ROUND_WORST=%s\nRESERVE=%s\n' "$(round_worst "$call_bound" "$kill_grace" "$poll")" \
+    printf 'START_MARGIN=%s\nROUND_WORST=%s\nRESERVE=%s\n' "$START_MARGIN_SECONDS" \
+        "$(round_worst "$call_bound" "$kill_grace" "$poll")" \
         "$(reserve_seconds "$call_bound" "$kill_grace" "$restart_bound" "$rollback_bound")"
     cat <<'REMOTE'
 RUN_START=$(date +%s)
@@ -88,6 +91,11 @@ unit_arg() {
   FLAG="'$1' \\" awk '{ line = $0; sub(/^[[:space:]]+/, "", line) }
     found { sub(/ \\$/, "", line); gsub(/^\047|\047$/, "", line); print line; exit }
     line == ENVIRON["FLAG"] { found = 1 }' "$UNIT"
+}
+scrub() {
+  BUCKET="$s3_bucket" awk '{ b = ENVIRON["BUCKET"]
+    if (b != "") { while ((i = index($0, b)) > 0) $0 = substr($0, 1, i - 1) "<bucket>" substr($0, i + length(b)) }
+    gsub(/[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]/, "<account>"); print }'
 }
 unit_kill_mode() { awk '{ line = $0; sub(/^[[:space:]]+/, "", line) } line ~ /^KillMode=/ { print line }' "$UNIT"; }
 effective_kill_mode() { sctl show -p KillMode k3s 2>/dev/null || true; }
@@ -244,8 +252,16 @@ echo "STEP 1: k3s etcd-snapshot save"
 sctl is-active --quiet k3s || end 3 "NOTHING CHANGED: k3s is not active, and a snapshot needs the running server; start k3s and rerun"
 total_before=$(snapshot_count)
 s3_before=$(s3_count)
-timeout -k 5 "$SAVE_BOUND" k3s etcd-snapshot save --etcd-s3 --etcd-s3-bucket "$s3_bucket" --etcd-s3-region "$s3_region" \
-  >/dev/null 2>&1 || end 3 "NOTHING CHANGED: k3s etcd-snapshot save failed or ran over ${SAVE_BOUND}s; $(serving_text)"
+save_output=$(timeout -k "$KILL_GRACE" "$SAVE_BOUND" k3s etcd-snapshot save --etcd-s3 --etcd-s3-bucket "$s3_bucket" \
+  --etcd-s3-region "$s3_region" 2>&1)
+save_code=$?
+if [ "$save_code" != 0 ]; then
+  printf '%s\n' "$save_output" | tail -n 5 | scrub | sed 's/^/save output: /'
+  case "$save_code" in
+    124|137) end 3 "NOTHING CHANGED: k3s etcd-snapshot save ran over ${SAVE_BOUND}s (timeout exit $save_code); its last lines are above; $(serving_text)" ;;
+    *) end 3 "NOTHING CHANGED: k3s etcd-snapshot save failed (exit $save_code); its last lines are above; $(serving_text)" ;;
+  esac
+fi
 deadline=$(( $(date +%s) + SAVE_BOUND ))
 while [ "$(s3_count)" -le "$s3_before" ] && [ "$(date +%s)" -lt "$deadline" ]; do
   sleep "$POLL"
@@ -257,12 +273,11 @@ fi
 STATE=snapshot-proven
 snapshot_split
 
-time_left=$(( RUN_START + SSM_TIMEOUT - $(date +%s) ))
-[ "$time_left" -ge "$RESERVE" ] \
-  || end 3 "NOTHING CHANGED: not enough time left to restart and roll back within this run (${time_left}s left); run again"
-
 echo "STEP 2: back up the unit"
 backup="$UNIT.bak-$(date -u +%Y%m%dT%H%M%SZ)"
+time_left=$(( RUN_START + SSM_TIMEOUT - START_MARGIN - $(date +%s) ))
+[ "$time_left" -ge "$RESERVE" ] \
+  || end 3 "NOTHING CHANGED: not enough time left to restart and roll back within this run (${time_left}s left); run again"
 bounded cp -p "$UNIT" "$backup" || end 3 "NOTHING CHANGED: copying $UNIT to $backup failed"
 echo "backup: $backup"
 STATE=unit-edited
