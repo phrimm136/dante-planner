@@ -86,37 +86,35 @@ anywhere, so it pins a client to a region without a public bypass of health-base
         │                                               consults TokenBlacklistService (auth Redis)
         └─ MdcLoggingFilter
              └─ (Spring Security authorization)
-                  └─ GtidCookieFilter   shared/gtid/    registered separately, LOWEST_PRECEDENCE
+                  └─ FreshnessStampFilter   shared/freshness/    registered separately, LOWEST_PRECEDENCE
                        └─ DispatcherServlet → controller
 ```
 
-`GtidCookieFilter` is registered in `shared/gtid/GtidGateConfig` as a `FilterRegistrationBean` on
+`FreshnessStampFilter` is registered in `shared/freshness/FreshnessConfig` as a `FilterRegistrationBean` on
 `/api/*` with `LOWEST_PRECEDENCE`, so it is the **innermost** filter — it wraps the controller and
 therefore wraps the transaction. It is registered only when `datasource.routing.enabled=true`,
-which both regions set: Oregon reads its primary first and falls back to the Seoul replica, so it
-needs the gate too. The same flag wires marker raising, so a region running with routing off
+which both regions set: Oregon reads its primary first and falls back to the Seoul replica, so it reads markers too. The same flag wires marker raising, so a region running with routing off
 raises no freshness markers for the writes it serves.
 
 ---
 
-## 4. Read-your-writes: the GTID cookie
+## 4. Which commits a response answers for: GTID capture
 
 The problem: a user publishes a planner (write → Oregon primary), then immediately lists their
-planners (read → Seoul replica). Replication has not caught up. The planner appears to have
-vanished.
-
-The mechanism, in the order it executes:
+planners (read → Seoul replica), and replication has not caught up. The answer is the freshness
+markers (§5): the response raises a marker for each scope the request changed, holding the GTIDs of
+the request's commits. This section is how those GTIDs are known.
 
 ### 4a. Capture, on the way out
 
 | Step | Code | What happens |
 |---|---|---|
-| 1 | `GtidCookieFilter.doFilterInternal` | calls `writeCapture.begin()` — opens a capture window on this thread |
+| 1 | `FreshnessStampFilter.doFilterInternal` | calls `writeCapture.begin()` — opens a capture window on this thread |
 | 2 | `GtidCapturingDataSource` | wraps the PRIMARY pool; every connection it lends is a proxy that intercepts `commit()` |
 | 3 | `GtidCapturingDataSource.captureCommittedGtid` | on that same physical connection, reads the OWN_GTID the server attributed to the transaction; falls back to `SELECT @@gtid_executed` when the tracker names none |
 | 4 | `GtidWriteCapture.recordCommit(gtid, fromTracker)` | accumulates into the request-scoped `Accumulator` and counts `gtid.capture{source}` |
-| 5 | `GtidCookieFilter` (after the chain) | `pollCapturedGtid()` → `Set-Cookie: ryw_gtid=<base64url>` |
-| 6 | `GtidCookieFilter` finally | `writeCapture.clear()` |
+| 5 | `FreshnessStampFilter` (after the chain, before the response is sent) | raises the markers of the declared scopes to the captured GTID set, then waits for a Redis replica |
+| 6 | `FreshnessStampFilter` finally | `writeCapture.clear()` |
 
 Why the datasource and not a transaction-manager synchronization: the GTID lives as session state on
 the **physical connection that committed**, and an `afterCommit` callback can only look that
@@ -126,8 +124,8 @@ a connection taken from the `EntityManager`, while the `ConnectionHolder` bound 
 connection carrying no session state. Intercepting `commit()` holds the right connection by
 construction rather than by inference. It also covers every transaction the request commits,
 including the `REQUIRES_NEW` transaction an `AFTER_COMMIT` listener opens: a publish commits twice —
-the main transaction and the filter-index rebuild — and the cookie must cover both or a follow-up
-read gates past only the first.
+the main transaction and the filter-index rebuild — and the marker must cover both or a follow-up
+read waits only for the first.
 
 Why a window rather than a bare ThreadLocal: scheduled tasks and Flyway commit transactions too, on
 threads that never enter the filter. `isWindowOpen()` gates accumulation, so those commits cost
@@ -148,59 +146,28 @@ intervening round trip destroys the GTID — including `Connection.isReadOnly()`
 runs before the read-only check rather than after it.
 
 If any of the three is wrong, every commit takes the fallback below: correct, because the primary's
-executed set is a superset, but maximally wide, so the read gate almost never finds the replica
-caught up. It degrades silently — the `gtid.capture{source=tracker|fallback}` counter is what makes
+executed set is a superset, but maximally wide, so a marked read almost never finds the
+replica caught up. It degrades silently — the `gtid.capture{source=tracker|fallback}` counter is what makes
 it visible.
 
 ### 4b. The fallback, and what it costs
 
 When the tracker names no GTID for a commit, `GtidCapturingDataSource` reads
 `SELECT @@gtid_executed` on that same connection — the entire primary's GTID set, every transaction
-from every client. That is *correct* (it is a superset of the user's write) but *wide*: the read
-gate below will almost never consider the replica caught up, so the next read pins to the primary
-and pays the WAN round trip.
+from every client. That is *correct* (it is a superset of the user's write) but *wide*: a read of that scope will almost never find the replica caught up, so it waits out the
+bound and moves to the primary.
 
 "The transaction wrote nothing" and "the tracker is off or was clobbered" both present as a
 tracker that names no GTID. The capture tells them apart with one `SELECT @@session_track_gtids`
 probe per physical connection, run strictly AFTER the tracker read (the probe's own OK packet
-would wipe the state it judges): tracker verified active means the commit wrote nothing and no
-cookie is minted — a write-shaped request that commits an empty transaction must not pin its
-follow-up read — while a tracker that is genuinely off takes the superset, since a wide gate
+would wipe the state it judges): tracker verified active means the commit wrote nothing and no marker is raised — a write-shaped request that commits an empty transaction must not slow
+a follow-up read — while a tracker that is genuinely off takes the superset, since a wide marker
 costs latency but a missing one costs correctness. `gtid.capture{source=fallback}` is the metric
 that says which world you are in; a ratio near 1 means the precise path is not working.
 
-### 4c. The gate, on the way in
+## 5. Read consistency: freshness markers
 
-`GtidCookieFilter.handleRead` runs for GET/HEAD carrying `ryw_gtid` when the region has a replica
-(a replica-less region skips the gate and keeps the cookie):
-
-```
-decode cookie ── not base64, blank → serve normally, keep the cookie
-    │         └─ base64 but not GTID-set syntax → clear the cookie, serve normally
-    ▼
-GtidReadGate.probe(gtid)
-    │  SELECT WAIT_FOR_EXECUTED_GTID_SET(?, 0.05) in a READ-ONLY tx, so it resolves to the REPLICA
-    ├─ CAUGHT_UP      → clear the cookie (Max-Age=0), serve normally from the replica
-    ├─ UNUSABLE       → the replica rejected the set as malformed (1772/1773/1774):
-    │                   clear the cookie, one WARN without a stack trace, serve normally
-    ├─ NEVER_EXECUTED → the wait timed out and the PRIMARY reports
-    │                   GTID_SUBSET(gtid, @@GLOBAL.gtid_executed) = 0: clear the cookie,
-    │                   serve this read from the primary
-    └─ NOT_CAUGHT_UP  → timed out and the primary executed it (or the check failed):
-                        ReadOnlyRoutingDataSource.pinTo(PRIMARY) for this request only,
-                        keep the cookie, clear the pin in finally
-```
-
-The 50ms bound is a probe timeout, not a correctness window: every exit that clears the cookie
-rests on a causal fact (applied on the replica, unparseable, or never executed on the primary),
-and an undecided answer routes to the primary, which is always correct, just slower.
-
----
-
-## 5. The other read-consistency path: freshness markers
-
-The GTID cookie only helps the client that just wrote. Every other reader relies on the markers:
-a write raises a marker in auth Redis for each scope it changes (an entity, an owner's list, an
+Every reader relies on the markers, the writer included: a write raises a marker in auth Redis for each scope it changes (an entity, an owner's list, an
 author, the public catalog), holding the GTID set that made the change.
 
 ```
@@ -246,7 +213,7 @@ body's `published` flag to one of the two handlers above and is charged against 
              └─ accessGuard.requireExisting(id)            → PRIMARY (write tx), cross-region
 3. applyPublish(userId, planner)
      ├─ title and content validated                        ← before any mutation; a refusal writes nothing
-     ├─ planner.publish() reports NONE → return, NO write   ← idempotent; mints no cookie
+     ├─ planner.publish() reports NONE → return, NO write   ← idempotent; raises no marker
      ├─ plannerRepository.save
      ├─ plannerCatalogService.onBecameVisible
      ├─ subscriptionService.createSubscription
@@ -255,7 +222,7 @@ body's `published` flag to one of the two handlers above and is charged against 
 5. AFTER_COMMIT: PlannerPublishingService.onPlannerPublished
      ├─ ssePublisher.publishBroadcast(...)                Redis, cross-region (§7)
      └─ notificationService.notifyPlannerPublished(...)   REQUIRES_NEW, READ COMMITTED (§8)
-6. GtidCookieFilter mints ryw_gtid covering every commit in steps 3–5
+6. FreshnessStampFilter raises the markers of the changed scopes for every commit in steps 3–5
 ```
 
 Unpublish runs the same shape through `applyUnpublish`, charged against `CRUD:unpublish`: no
@@ -267,7 +234,7 @@ Three design points that are load-bearing:
 - **The aggregate is loaded once.** `upsertAggregate` returns the persisted entity so `applyPublish`
   reuses it. Reading it back by id would be three cross-region round trips for one publish.
 - **Publishability is decided before the aggregate moves.** A planner that fails validation is
-  refused without a write, so a rejected publish mints no `ryw_gtid` cookie. The rollback is not
+  refused without a write, so a rejected publish raises no marker. The rollback is not
   what keeps the stored state intact.
 - **The fan-out runs after commit, not inside.** An `INSERT ... SELECT` nested inside the publish
   transaction takes locks on rows that transaction already holds and self-deadlocks. Running it
@@ -377,12 +344,12 @@ expected states, not defects.
 
 | Base path | Controller | Region-relevant behavior |
 |---|---|---|
-| `/api/planner/md` | `PlannerCommandController` (`PUT /{id}` upsert) | write → primary; mints `ryw_gtid` |
+| `/api/planner/md` | `PlannerCommandController` (`PUT /{id}` upsert) | write → primary; raises its markers |
 | | `PlannerPublishingController` (`POST /{id}/publish`, `POST /{id}/unpublish`; `PUT /{id}/publish` a deprecated one-release delegate) | §6; publish publishes SSE + notifications after commit |
 | | `PlannerEngagementController` (`POST /{id}/bookmark`, vote, subscribe) | writes → primary; bookmark is state-targeted and idempotent |
 | | `PlannerQueryController`, `PublishedPlannerController` | reads → replica; each read is decided by its freshness markers (§5) |
 | `/api/sse` | `SseController` (`GET /subscribe`) | subscribes to local Redis fan-out |
-| `/api/auth` | `AuthController` (`GET /google/callback`) | a **mutating GET** — commits a user row, so it mints `ryw_gtid` (the capture is transaction-driven, not method-driven) |
+| `/api/auth` | `AuthController` (`GET /google/callback`) | a **mutating GET** — commits a user row, so it raises that user's marker (the capture is transaction-driven, not method-driven) |
 | `/api/user` | `UserController` (settings) | write → primary; publishes settings invalidation so other pods drop cached settings |
 | `/api/notifications` | `NotificationController` | inbox reads → replica |
 | `/api/moderation`, `/api/admin` | `ModerationController`, `AdminController` | writes → primary; suspension publishes SSE |

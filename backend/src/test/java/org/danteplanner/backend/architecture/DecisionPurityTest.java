@@ -39,31 +39,17 @@ class DecisionPurityTest {
 
     private static final String OUTCOME_SUFFIX = "Outcome";
 
-    private static final Set<String> EXEMPT = Set.of(
-            "GtidReadGate.probe",
-            "GtidReadGate.waitVerdict");
-
     private static final JavaClasses MAIN_CLASSES = ImportedClasses.production();
 
     private static final JavaClasses FIXTURE_CLASSES = new ClassFileImporter().importPackages(FIXTURE_PACKAGE);
 
     @Test
     void decision_WhenItReachesAnEffect_IsNamed() {
-        Map<String, Set<String>> offenders = offendersIn(MAIN_CLASSES, ROOT);
-        offenders.keySet().removeAll(EXEMPT);
-
-        assertThat(offenders)
+        assertThat(offendersIn(MAIN_CLASSES, ROOT))
                 .as("a method returning a sealed type or an enum is a decision and reaches no effect; "
                         + "return the decision from a pure method and let the caller perform the effect, "
                         + "or make the result a command outcome (implements CommandOutcome, named *Outcome)")
                 .isEmpty();
-    }
-
-    @Test
-    void exemptDecision_WhenItNoLongerReachesAnEffect_LeavesTheList() {
-        assertThat(offendersIn(MAIN_CLASSES, ROOT).keySet())
-                .as("these exemptions are gone or pure now; delete them from EXEMPT")
-                .containsAll(EXEMPT);
     }
 
     @Test

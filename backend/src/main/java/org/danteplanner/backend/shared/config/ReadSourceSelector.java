@@ -42,15 +42,12 @@ public class ReadSourceSelector extends AbstractDataSource {
     private static final ThreadLocal<Set<String>> SKIPPED = new ThreadLocal<>();
 
     private final List<Source> sources;
-    private final Source authority;
-    private final DataSource authorityReads = new AuthorityReads();
 
     public ReadSourceSelector(List<Source> sources) {
         this.sources = List.copyOf(sources);
-        this.authority = this.sources.stream()
-                .filter(Source::authoritative)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("a read source list needs an authoritative source"));
+        if (this.sources.stream().noneMatch(Source::authoritative)) {
+            throw new IllegalArgumentException("a read source list needs an authoritative source");
+        }
     }
 
     public List<Source> sources() {
@@ -72,18 +69,6 @@ public class ReadSourceSelector extends AbstractDataSource {
 
     public static void clearSkips() {
         SKIPPED.remove();
-    }
-
-    public Source authority() {
-        return authority;
-    }
-
-    public boolean isAuthorityHealthy() {
-        return isHealthy(authority);
-    }
-
-    public DataSource authorityReads() {
-        return authorityReads;
     }
 
     @Override
@@ -149,25 +134,6 @@ public class ReadSourceSelector extends AbstractDataSource {
                 NO_SOURCE_LENT_MESSAGE, UNABLE_TO_CONNECT_SQL_STATE, new ReadTemporarilyUnavailableException());
         failures.forEach(unavailable::addSuppressed);
         throw unavailable;
-    }
-
-    private Connection fromAuthority(ConnectionSource connect) throws SQLException {
-        Connection connection = connect.from(authority.dataSource());
-        ChosenReadSource.record(authority.name(), true);
-        return connection;
-    }
-
-    private final class AuthorityReads extends AbstractDataSource {
-
-        @Override
-        public Connection getConnection() throws SQLException {
-            return fromAuthority(DataSource::getConnection);
-        }
-
-        @Override
-        public Connection getConnection(String username, String password) throws SQLException {
-            return fromAuthority(dataSource -> dataSource.getConnection(username, password));
-        }
     }
 
     @FunctionalInterface

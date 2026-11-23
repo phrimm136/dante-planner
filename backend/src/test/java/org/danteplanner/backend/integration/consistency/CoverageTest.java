@@ -10,16 +10,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CoverageTest {
 
     @Test
-    void coverage_WhenTheGateServesReplicaCounterNeverMoves_NamesItUncovered() throws Exception {
+    void coverage_WhenTheMarkerWaitAppliedCounterNeverMoves_NamesItUncovered() throws Exception {
         Map<CoverageTarget, Double> counters = new EnumMap<>(CoverageTarget.class);
         Coverage coverage = new Coverage(target -> counters.getOrDefault(target, 0.0));
 
-        coverage.measure(() -> moveAllBut(counters, CoverageTarget.GATE_SERVES_REPLICA));
-        coverage.measure(() -> moveAllBut(counters, CoverageTarget.GATE_SERVES_REPLICA));
+        coverage.measure(() -> moveAllBut(counters, CoverageTarget.MARKER_WAIT_APPLIED));
+        coverage.measure(() -> moveAllBut(counters, CoverageTarget.MARKER_WAIT_APPLIED));
 
-        assertThat(coverage.uncovered()).containsExactly("gate serves the replica");
-        assertThat(coverage.summary()).isEqualTo("{gate pins the primary=2, gate serves the replica=0, "
-                + "oregon read fell back=2, oregon breaker opened=2, marker wait applied=2, marker wait timed out=2}");
+        assertThat(coverage.uncovered()).containsExactly("marker wait applied");
+        assertThat(coverage.summary()).isEqualTo("{oregon read fell back=2, oregon breaker opened=2, "
+                + "marker wait applied=0, marker wait timed out=2}");
     }
 
     @Test
@@ -38,8 +38,8 @@ class CoverageTest {
     void coverage_WhenNoSeedRan_NamesEveryTargetUncovered() {
         Coverage coverage = new Coverage(target -> 0.0);
 
-        assertThat(coverage.uncovered()).containsExactly("gate pins the primary", "gate serves the replica",
-                "oregon read fell back", "oregon breaker opened", "marker wait applied", "marker wait timed out");
+        assertThat(coverage.uncovered()).containsExactly("oregon read fell back", "oregon breaker opened",
+                "marker wait applied", "marker wait timed out");
     }
 
     @Test
@@ -76,10 +76,10 @@ class CoverageTest {
         Map<CoverageTarget, Double> counters = new EnumMap<>(CoverageTarget.class);
         Coverage coverage = new Coverage(target -> counters.getOrDefault(target, 0.0));
         for (int seed = 0; seed < ConsistencyBudget.COVERAGE_EXTENSION_CAP; seed++) {
-            coverage.measure(() -> moveAllBut(counters, CoverageTarget.GATE_SERVES_REPLICA));
+            coverage.measure(() -> moveAllBut(counters, CoverageTarget.MARKER_WAIT_APPLIED));
         }
 
-        assertThat(coverage.uncovered()).containsExactly("gate serves the replica");
+        assertThat(coverage.uncovered()).containsExactly("marker wait applied");
         assertThat(ConsistencyBudget.uncoveredDescription(ConsistencyBudget.COVERAGE_EXTENSION_CAP, coverage))
                 .contains("after 10 extra seeds (ADR 180)")
                 .endsWith(coverage.summary());

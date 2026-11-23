@@ -13,10 +13,7 @@ epic: none · pr: none · supersedes: 168 @reads @outage @trigger, 168 @reads @o
   the same request reads from the next source. Only a connection failure moves a read; any other
   acquire failure inside a read-only transaction, such as a saturated pool, answers the read code
   (@reads @degrade) on the same source. A source that is not first in its list reads through its
-  own small pool, so a fallback never draws on the pool writes use; Seoul's primary read pool also
-  carries the reads the GTID gate pins to the primary. A request whose GTID cookie is usable while
-  the primary is forecast reads the primary pinned and never falls back, because the breaker
-  forecast can still be closed when the acquire fails. The selection records the chosen source for
+  own small pool, so a fallback never draws on the pool writes use. The selection records the chosen source for
   the transaction, and the read-path guards run whenever that source is not authoritative.
   REJECTED: a replica branch in Seoul and a fallback data source in Oregon — two paths with guards
   keyed to the region flag. Oregon's fallback served deleted planners, missed created ones, and lost
@@ -34,10 +31,8 @@ epic: none · pr: none · supersedes: 168 @reads @outage @trigger, 168 @reads @o
   REJECTED: falling back to the primary through the write pool — a Seoul replica outage would send
   every Seoul read into the ten connections Seoul's writes need, and about 71 requests per second
   saturate them (ADR 008).
-  REJECTED: deciding the GTID gate from the breaker forecast alone — a read forecast for the
-  primary that then fails its acquire fell back to a replica behind the author's save.
-  INVARIANT: an unpinned read whose acquire fails with a connection failure is served by the next
-  healthy source, and the transaction records which source served it; a pinned read never moves —
+  INVARIANT: a read whose acquire fails with a connection failure is served by the next
+  healthy source, and the transaction records which source served it —
   `ReadSourceSelectorTest`, `ReadOnlyRoutingDataSourceTest`, `ReadSourceOutageIT`.
   INVARIANT: every read served by a non-authoritative source passes the read-path guards —
   `ConsistencyRunIT` across both regions.

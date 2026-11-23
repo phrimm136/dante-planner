@@ -75,14 +75,14 @@ class ReadOnlyRoutingDataSourceTest {
     @BeforeEach
     void clearThreadRoutingState() {
         TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
-        ReadOnlyRoutingDataSource.clear();
+        ReadSourceSelector.clearSkips();
         ChosenReadSource.clear();
     }
 
     @AfterEach
     void resetReadOnlyFlag() {
         TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
-        ReadOnlyRoutingDataSource.clear();
+        ReadSourceSelector.clearSkips();
         ChosenReadSource.clear();
     }
 
@@ -91,8 +91,7 @@ class ReadOnlyRoutingDataSourceTest {
     }
 
     private ReadOnlyRoutingDataSource routing(DataSource primaryTarget, ReadSourceSelector selector) {
-        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(
-                guard(false, true), selector.authorityReads());
+        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(guard(false, true));
         routing.setTargetDataSources(Map.of(RoutingKey.PRIMARY, primaryTarget, RoutingKey.REPLICA, selector));
         routing.afterPropertiesSet();
         return routing;
@@ -140,7 +139,7 @@ class ReadOnlyRoutingDataSourceTest {
     void determineCurrentLookupKey_WhenReadOnlyTransaction_ReturnsReplica() {
         TransactionSynchronizationManager.setCurrentTransactionReadOnly(true);
 
-        Object key = new ReadOnlyRoutingDataSource(guard(true, true), null).determineCurrentLookupKey();
+        Object key = new ReadOnlyRoutingDataSource(guard(true, true)).determineCurrentLookupKey();
 
         assertThat(key).isEqualTo(RoutingKey.REPLICA);
     }
@@ -149,7 +148,7 @@ class ReadOnlyRoutingDataSourceTest {
     void determineCurrentLookupKey_WhenWriteTransaction_ReturnsPrimary() {
         TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
 
-        Object key = new ReadOnlyRoutingDataSource(guard(false, true), null).determineCurrentLookupKey();
+        Object key = new ReadOnlyRoutingDataSource(guard(false, true)).determineCurrentLookupKey();
 
         assertThat(key).isEqualTo(RoutingKey.PRIMARY);
         assertThat(undeclaredCount()).isEqualTo(1.0);
@@ -157,7 +156,7 @@ class ReadOnlyRoutingDataSourceTest {
 
     @Test
     void determineCurrentLookupKey_WhenUndeclaredAndFailFast_Throws() {
-        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(guard(true, true), null);
+        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(guard(true, true));
 
         assertThatThrownBy(routing::determineCurrentLookupKey)
                 .isInstanceOf(IllegalStateException.class)
@@ -166,40 +165,35 @@ class ReadOnlyRoutingDataSourceTest {
 
     @Test
     void determineCurrentLookupKey_WhenUndeclaredBeforeApplicationReady_ReturnsPrimaryUncounted() {
-        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(guard(true, false), null);
+        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(guard(true, false));
 
         assertThat(routing.determineCurrentLookupKey()).isEqualTo(RoutingKey.PRIMARY);
         assertThat(undeclaredCount()).isZero();
     }
 
     @Test
-    void getConnection_WhenReadOnlyPinnedToPrimaryCannotConnect_ThrowsReadUnavailable() throws SQLException {
-        SQLException linkFailure = communicationsLinkFailure();
-        ReadOnlyRoutingDataSource routing = routingToPrimaryFailingWith(linkFailure);
+    void getConnection_WhenNoReadSourceCanConnect_ThrowsReadUnavailable() throws SQLException {
+        SQLException primaryFailure = communicationsLinkFailure();
+        SQLException replicaFailure = communicationsLinkFailure();
+        when(replicaPool.getConnection()).thenThrow(replicaFailure);
+        ReadOnlyRoutingDataSource routing = routingToPrimaryFailingWith(primaryFailure);
         TransactionSynchronizationManager.setCurrentTransactionReadOnly(true);
-        ReadOnlyRoutingDataSource.pinTo(RoutingKey.PRIMARY);
-        try {
-            Throwable thrown = catchThrowable(routing::getConnection);
 
-            assertThat(thrown).isInstanceOf(SQLException.class)
-                    .hasCauseInstanceOf(ReadTemporarilyUnavailableException.class);
-            assertThat(thrown.getCause()).hasCause(linkFailure);
-        } finally {
-            ReadOnlyRoutingDataSource.clear();
-        }
+        Throwable thrown = catchThrowable(routing::getConnection);
+
+        assertThat(thrown).isInstanceOf(SQLException.class)
+                .hasCauseInstanceOf(ReadTemporarilyUnavailableException.class);
+        assertThat(thrown.getCause().getCause()).hasSuppressedException(primaryFailure)
+                .hasSuppressedException(replicaFailure);
     }
 
     @Test
-    void getConnection_WhenWritePinnedToPrimaryCannotConnect_ThrowsOriginalFailure() throws SQLException {
+    void getConnection_WhenAWriteCannotConnect_ThrowsOriginalFailure() throws SQLException {
         SQLException linkFailure = communicationsLinkFailure();
         ReadOnlyRoutingDataSource routing = routingToPrimaryFailingWith(linkFailure);
         TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
-        ReadOnlyRoutingDataSource.pinTo(RoutingKey.PRIMARY);
-        try {
-            assertThat(catchThrowable(routing::getConnection)).isSameAs(linkFailure);
-        } finally {
-            ReadOnlyRoutingDataSource.clear();
-        }
+
+        assertThat(catchThrowable(routing::getConnection)).isSameAs(linkFailure);
     }
 
     @Test
@@ -207,32 +201,24 @@ class ReadOnlyRoutingDataSourceTest {
         SQLException accessDenied = new SQLSyntaxErrorException("Access denied for user", "42000");
         ReadOnlyRoutingDataSource routing = routingToPrimaryFailingWith(accessDenied);
         TransactionSynchronizationManager.setCurrentTransactionReadOnly(true);
-        ReadOnlyRoutingDataSource.pinTo(RoutingKey.PRIMARY);
-        try {
-            Throwable thrown = catchThrowable(routing::getConnection);
 
-            assertThat(thrown).hasCauseInstanceOf(ReadTemporarilyUnavailableException.class);
-            assertThat(thrown.getCause()).hasCause(accessDenied);
-        } finally {
-            ReadOnlyRoutingDataSource.clear();
-        }
+        Throwable thrown = catchThrowable(routing::getConnection);
+
+        assertThat(thrown).hasCauseInstanceOf(ReadTemporarilyUnavailableException.class);
+        assertThat(thrown.getCause()).hasCause(accessDenied);
     }
 
     @Test
     void getConnection_WhenTheReadOnlyPoolIsSaturated_ThrowsReadUnavailable() throws SQLException {
         SQLTransientConnectionException saturated = new SQLTransientConnectionException(
-                "seoul-replica - Connection is not available, request timed out after 5000ms", null, 0, null);
+                "primary - Connection is not available, request timed out after 5000ms", null, 0, null);
         ReadOnlyRoutingDataSource routing = routingToPrimaryFailingWith(saturated);
         TransactionSynchronizationManager.setCurrentTransactionReadOnly(true);
-        ReadOnlyRoutingDataSource.pinTo(RoutingKey.PRIMARY);
-        try {
-            Throwable thrown = catchThrowable(routing::getConnection);
 
-            assertThat(thrown).hasCauseInstanceOf(ReadTemporarilyUnavailableException.class);
-            assertThat(thrown.getCause()).hasCause(saturated);
-        } finally {
-            ReadOnlyRoutingDataSource.clear();
-        }
+        Throwable thrown = catchThrowable(routing::getConnection);
+
+        assertThat(thrown).hasCauseInstanceOf(ReadTemporarilyUnavailableException.class);
+        assertThat(thrown.getCause()).hasCause(saturated);
     }
 
     @Test
@@ -241,49 +227,40 @@ class ReadOnlyRoutingDataSourceTest {
                 "primary - Connection is not available, request timed out after 5000ms", null, 0, null);
         ReadOnlyRoutingDataSource routing = routingToPrimaryFailingWith(saturated);
         TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
-        ReadOnlyRoutingDataSource.pinTo(RoutingKey.PRIMARY);
-        try {
-            assertThat(catchThrowable(routing::getConnection)).isSameAs(saturated);
-        } finally {
-            ReadOnlyRoutingDataSource.clear();
-        }
+
+        assertThat(catchThrowable(routing::getConnection)).isSameAs(saturated);
     }
 
     @Test
-    void getConnection_WhenSeoulReadOnlyPinnedToPrimary_LendsFromThePrimaryReadPoolAndRecordsPrimary()
+    void getConnection_WhenASeoulReadSkipsItsReplica_LendsFromThePrimaryReadPoolAndRecordsPrimary()
             throws SQLException {
         when(primaryReadPool.getConnection()).thenReturn(primaryReadConnection);
-        ReadOnlyRoutingDataSource routing = routing(capturing(primary), seoulSelector());
+        ReadSourceSelector seoul = seoulSelector();
+        ReadOnlyRoutingDataSource routing = routing(capturing(primary), seoul);
         TransactionSynchronizationManager.setCurrentTransactionReadOnly(true);
-        ReadOnlyRoutingDataSource.pinTo(RoutingKey.PRIMARY);
+        ReadSourceSelector.skip(seoul.sources().getFirst());
 
         assertThat(routing.getConnection()).isSameAs(primaryReadConnection);
         verify(primary, never()).getConnection();
         verify(replicaPool, never()).getConnection();
         assertThat(ChosenReadSource.name()).contains(ReadSourceProperties.PRIMARY);
-        assertThat(ChosenReadSource.name()).contains(seoulSelector().authority().name());
     }
 
     @Test
-    void getConnection_WhenOregonReadOnlyPinnedToPrimary_LendsFromThePrimaryPoolUncapturedAndRecordsPrimary()
-            throws SQLException {
+    void getConnection_WhenOregonReads_LendsFromThePrimaryPoolUncapturedAndRecordsPrimary() throws SQLException {
         when(primary.getConnection()).thenReturn(primaryConnection);
         ReadOnlyRoutingDataSource routing = routing(capturing(primary), oregonSelector());
         TransactionSynchronizationManager.setCurrentTransactionReadOnly(true);
-        ReadOnlyRoutingDataSource.pinTo(RoutingKey.PRIMARY);
 
         assertThat(routing.getConnection()).isSameAs(primaryConnection);
         assertThat(ChosenReadSource.name()).contains(ReadSourceProperties.PRIMARY);
-        assertThat(ChosenReadSource.name()).contains(oregonSelector().authority().name());
     }
 
     @Test
-    void getConnection_WhenWritePinnedToPrimary_LendsThroughTheCapturingPrimaryAndRecordsNothing()
-            throws SQLException {
+    void getConnection_WhenAWriteConnects_LendsThroughTheCapturingPrimaryAndRecordsNothing() throws SQLException {
         when(primary.getConnection()).thenReturn(primaryConnection);
         ReadOnlyRoutingDataSource routing = routing(capturing(primary), seoulSelector());
         TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
-        ReadOnlyRoutingDataSource.pinTo(RoutingKey.PRIMARY);
 
         Connection lent = routing.getConnection();
 
@@ -295,28 +272,20 @@ class ReadOnlyRoutingDataSourceTest {
     }
 
     @Test
-    void getConnection_WhenSeoulPrimaryReadPoolCannotLend_ThrowsReadUnavailable() throws SQLException {
+    void getConnection_WhenASeoulReadSkipsItsReplicaAndThePrimaryReadPoolCannotLend_ThrowsReadUnavailable()
+            throws SQLException {
         SQLException linkFailure = communicationsLinkFailure();
         when(primaryReadPool.getConnection()).thenThrow(linkFailure);
-        ReadOnlyRoutingDataSource routing = routing(capturing(primary), seoulSelector());
+        ReadSourceSelector seoul = seoulSelector();
+        ReadOnlyRoutingDataSource routing = routing(capturing(primary), seoul);
         TransactionSynchronizationManager.setCurrentTransactionReadOnly(true);
-        ReadOnlyRoutingDataSource.pinTo(RoutingKey.PRIMARY);
+        ReadSourceSelector.skip(seoul.sources().getFirst());
 
         Throwable thrown = catchThrowable(routing::getConnection);
 
         assertThat(thrown).hasCauseInstanceOf(ReadTemporarilyUnavailableException.class);
-        assertThat(thrown.getCause()).hasCause(linkFailure);
+        assertThat(thrown.getCause().getCause()).hasSuppressedException(linkFailure);
         verify(primary, never()).getConnection();
         assertThat(ChosenReadSource.name()).isEmpty();
-    }
-
-    @Test
-    void afterPropertiesSet_WhenNoAuthorityReadSourceIsSet_Throws() {
-        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(guard(false, true), null);
-        routing.setTargetDataSources(Map.of(RoutingKey.PRIMARY, primary));
-
-        assertThatThrownBy(routing::afterPropertiesSet)
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("authority's read source");
     }
 }

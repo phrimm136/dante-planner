@@ -8,13 +8,9 @@ import { closeSeedPool, createUser, deleteUser, type SeededUser } from '../src/s
 import { OREGON_API, SEOUL_API } from '../src/staging'
 import { edgeContext } from '../src/edge'
 
-// The consistency path for a client that carries no cookie: a by-id read the stale replica would
-// answer is decided against the freshness markers its write raised, so a just-written planner is read
-// from the primary and a stale replica hit cannot resurrect a deleted one.
-//
-// The readers are contexts of their own, so the ryw_gtid the write minted stays with the
-// writer: the reader against Seoul has nothing to present and the markers are the only thing
-// that can answer.
+// A by-id read the stale replica would answer is decided against the freshness markers its write
+// raised, so a just-written planner is read from the primary and a stale replica hit cannot
+// resurrect a deleted one.
 
 test.describe.configure({ mode: 'default' })
 

@@ -195,6 +195,7 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
                     .as("seeds whose history cannot show a violation, then violations of the ADR 008 contract, "
                             + "by seed and history file")
                     .isEmpty();
+            assertThat(calibration).isInstanceOf(Calibration.Result.Boundary.class);
             assertThat(coverage.uncovered())
                     .as(uncoveredDescription(extraResults.size(), coverage))
                     .isEmpty();
@@ -203,7 +204,7 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
 
     private Calibration.Result calibrate(Replication replication) throws Exception {
         try {
-            return Calibration.find(this::probePinsPrimary, PROBE_BATCH_BUDGET, DOUBLING_BUDGET,
+            return Calibration.find(this::probeTimesOut, PROBE_BATCH_BUDGET, DOUBLING_BUDGET,
                     BISECTION_DEPTH_BUDGET);
         } finally {
             replication.removeLatency();
@@ -211,7 +212,7 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
         }
     }
 
-    private boolean probePinsPrimary(long latencyMillis) throws Exception {
+    private boolean probeTimesOut(long latencyMillis) throws Exception {
         toxiproxyControl.applyReplicationLatency(latencyMillis);
         User author = TestDataFactory.createTestUser(userRepository,
                 "consistency-calibration-" + UUID.randomUUID() + "@example.com");
@@ -222,15 +223,9 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
                     new CookieJar(accessToken, AuthCookies.freshDeviceId()), mockMvc, mockMvc, objectMapper, recorder,
                     pool, titleToken(), NO_ACCOUNT_CHANGES);
             session.perform(new PlannedOperation.Create());
-            double primaryBefore = count(meterRegistry, CoverageTarget.GATE_PINS_PRIMARY);
-            double replicaBefore = count(meterRegistry, CoverageTarget.GATE_SERVES_REPLICA);
+            double timedOutBefore = count(meterRegistry, CoverageTarget.MARKER_WAIT_TIMED_OUT);
             session.perform(new PlannedOperation.Read(ONLY_PLANNER));
-            boolean pinned = count(meterRegistry, CoverageTarget.GATE_PINS_PRIMARY) > primaryBefore;
-            if (!pinned && count(meterRegistry, CoverageTarget.GATE_SERVES_REPLICA) == replicaBefore) {
-                throw new IllegalStateException("a calibration read at " + latencyMillis
-                        + " ms moved neither gtid.gate counter");
-            }
-            return pinned;
+            return count(meterRegistry, CoverageTarget.MARKER_WAIT_TIMED_OUT) > timedOutBefore;
         } finally {
             replicationControl.awaitCaughtUp();
         }
@@ -278,7 +273,7 @@ class ConsistencyRunIT extends ReplicaRoutingHarnessSupport {
         FreshnessDeclarations.begin();
         try {
             lifecycleService.reactivateAccount(author.getId());
-            String gtid = writeCapture.takeCapturedGtid().orElseThrow();
+            String gtid = writeCapture.takeCapture().orElseThrow().gtidSet();
             markerStore.raise(FreshnessDeclarations.declared(), gtid);
         } finally {
             writeCapture.clear();

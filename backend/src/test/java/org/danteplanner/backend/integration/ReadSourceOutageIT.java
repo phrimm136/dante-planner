@@ -3,7 +3,6 @@ package org.danteplanner.backend.integration;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -52,7 +51,6 @@ import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.config.ReadSourcesConfig;
-import org.danteplanner.backend.shared.gtid.GtidCookie;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -203,36 +201,32 @@ class ReadSourceOutageIT extends ReplicaRoutingHarnessSupport {
     }
 
     @Test
-    void oregonAuthorRead_WhenPrimaryCutAndReplicaBehindTheCookie_ReturnsReadUnavailableUntilTheReplicaApplies()
+    void oregonAuthorRead_WhenPrimaryCutAndReplicaBehindTheSave_ReturnsReadUnavailableUntilTheReplicaApplies()
             throws Exception {
-        Session session = newSession("read-source-cookie-");
+        Session session = newSession("read-source-behind-");
         UUID plannerId = UUID.randomUUID();
 
         try {
             replicationControl.stopReplica();
             MvcResult saved = upsert(oregon().mockMvc(), session, plannerId, PRIMARY_ONLY_TITLE, false);
             assertThat(saved.getResponse().getStatus()).isEqualTo(201);
-            Cookie rywCookie = rywCookie(saved);
             assertThat(replicaPlannerRows(plannerId))
                     .as("the stopped replica must not hold the author's save").isZero();
 
             cutOregonPrimary();
             MvcResult behind = perform(oregon().mockMvc(),
-                    get(plannerPath(plannerId)).cookie(session.auth(), session.device(), rywCookie));
+                    get(plannerPath(plannerId)).cookie(session.auth(), session.device()));
 
             assertThat(observed(behind)).as("Oregon author read while the replica lacks the save")
                     .isEqualTo(unavailable(READ_UNAVAILABLE));
-            assertThat(rywSetCookies(behind)).as("the unavailable read keeps the author's cookie").isEmpty();
 
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();
             MvcResult caughtUp = perform(oregon().mockMvc(),
-                    get(plannerPath(plannerId)).cookie(session.auth(), session.device(), rywCookie));
+                    get(plannerPath(plannerId)).cookie(session.auth(), session.device()));
 
             assertThat(observed(caughtUp)).as("Oregon author read once the replica applied the save")
                     .isEqualTo("200 title=" + PRIMARY_ONLY_TITLE);
-            assertThat(rywSetCookies(caughtUp)).as("the caught-up read clears the author's cookie")
-                    .anyMatch(header -> header.startsWith(GtidCookie.NAME + "=;") && header.contains("Max-Age=0"));
         } finally {
             restoreOregonPrimary();
             resumeReplication();
@@ -240,9 +234,9 @@ class ReadSourceOutageIT extends ReplicaRoutingHarnessSupport {
     }
 
     @Test
-    void oregonAuthorRead_WhenPrimaryCutWithItsBreakerClosedAndReplicaBehindTheCookie_ReturnsReadUnavailable()
+    void oregonAuthorRead_WhenPrimaryCutWithItsBreakerClosedAndReplicaBehindTheSave_ReturnsReadUnavailable()
             throws Exception {
-        Session session = newSession("read-source-cookie-closed-");
+        Session session = newSession("read-source-behind-closed-");
         UUID plannerId = UUID.randomUUID();
         CountDownLatch probeHeld = new CountDownLatch(1);
         CountDownLatch releaseProbe = new CountDownLatch(1);
@@ -254,20 +248,18 @@ class ReadSourceOutageIT extends ReplicaRoutingHarnessSupport {
             replicationControl.stopReplica();
             MvcResult saved = upsert(oregon().mockMvc(), session, plannerId, PRIMARY_ONLY_TITLE, true);
             assertThat(saved.getResponse().getStatus()).isEqualTo(200);
-            Cookie rywCookie = rywCookie(saved);
             assertThat(replicaTitle(plannerId))
                     .as("the stopped replica must hold the title from before the save").isEqualTo(REPLICATED_TITLE);
 
             CompletableFuture<Void> heldProbe = holdOregonProbe(probeHeld, releaseProbe);
             cutOregonPrimaryWithoutProbe();
             MvcResult read = perform(oregon().mockMvc(),
-                    get(plannerPath(plannerId)).cookie(session.auth(), session.device(), rywCookie));
+                    get(plannerPath(plannerId)).cookie(session.auth(), session.device()));
             releaseProbe.countDown();
             Hang.get(heldProbe, "the held Oregon probe thread returning after its release");
 
             assertThat(observed(read)).as("Oregon author read while the closed-breaker primary is cut")
                     .isEqualTo(unavailable(READ_UNAVAILABLE));
-            assertThat(rywSetCookies(read)).as("the unavailable read keeps the author's cookie").isEmpty();
         } finally {
             releaseProbe.countDown();
             restoreOregonPrimary();
@@ -359,8 +351,11 @@ class ReadSourceOutageIT extends ReplicaRoutingHarnessSupport {
         ApplicationContext context = oregon().mockMvc().getDispatcherServlet().getWebApplicationContext();
         context.getBeansOfType(HikariDataSource.class).values()
                 .forEach(pool -> pool.getHikariPoolMXBean().softEvictConnections());
-        assertThat(context.getBean(ReadSourceSelector.class).authority().breaker().getState())
-                .as("the Oregon primary breaker must stay closed through the cut").isEqualTo(CircuitBreaker.State.CLOSED);
+        assertThat(context.getBean(ReadSourceSelector.class).sources())
+                .filteredOn(ReadSourceSelector.Source::authoritative)
+                .extracting(source -> source.breaker().getState())
+                .as("the Oregon primary breaker must stay closed through the cut")
+                .containsExactly(CircuitBreaker.State.CLOSED);
     }
 
     private void restoreOregonPrimary() throws IOException {
@@ -520,18 +515,6 @@ class ReadSourceOutageIT extends ReplicaRoutingHarnessSupport {
 
     private static String plannerPath(UUID plannerId) {
         return PLANNER_PATH + plannerId;
-    }
-
-    private static List<String> rywSetCookies(MvcResult result) {
-        return result.getResponse().getHeaders(HttpHeaders.SET_COOKIE).stream()
-                .filter(header -> header.startsWith(GtidCookie.NAME + "="))
-                .toList();
-    }
-
-    private static Cookie rywCookie(MvcResult written) {
-        String header = rywSetCookies(written).stream().findFirst().orElse(null);
-        assertThat(header).as("the save must mint %s", GtidCookie.NAME).isNotNull();
-        return new Cookie(GtidCookie.NAME, header.split(";", 2)[0].substring(GtidCookie.NAME.length() + 1));
     }
 
     private Session newSession(String emailPrefix) {

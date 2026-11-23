@@ -338,14 +338,6 @@ tasks.named<JavaCompile>("compileJava") {
             "jakarta.persistence.Id,org.springframework.data.annotation.CreatedDate,"
                 + "org.springframework.data.annotation.LastModifiedDate"
         )
-        option(
-            "NullAway:ExcludedClasses",
-            listOf(
-                "org.danteplanner.backend.shared.gtid.GtidReadGate",
-                "org.danteplanner.backend.shared.gtid.GtidCookieFilter",
-                "org.danteplanner.backend.shared.gtid.GtidCookieResponseAdvice"
-            ).joinToString(",")
-        )
     }
     options.compilerArgs.addAll(listOf("-Xmaxwarns", "100000"))
 }

@@ -128,7 +128,8 @@ class ReadSourcesConfigTest {
             assertThat(pool.getPassword()).isEqualTo("primaryPw");
             assertThat(pool.getMaximumPoolSize()).isEqualTo(PoolLedger.SEOUL_PRIMARY_READ_POOL);
             assertThat(pool.getInitializationFailTimeout()).isNegative();
-            assertThat(context.getBean(ReadSourceSelector.class).authority().dataSource()).isSameAs(pool);
+            assertThat(context.getBean(ReadSourceSelector.class).sources()).filteredOn(ReadSourceSelector.Source::authoritative)
+                    .extracting(ReadSourceSelector.Source::dataSource).containsExactly(pool);
         });
     }
 
@@ -136,8 +137,8 @@ class ReadSourcesConfigTest {
     void sourcePool_WhenOregonPodReadsThePrimaryFirst_ReadsThroughThePrimaryPool() {
         oregonPod().run(context -> {
             assertThat(context).doesNotHaveBean(ReadSourcesConfig.poolBeanName(ReadSourceProperties.PRIMARY));
-            assertThat(context.getBean(ReadSourceSelector.class).authority().dataSource())
-                    .isSameAs(context.getBean("primaryPool"));
+            assertThat(context.getBean(ReadSourceSelector.class).sources()).filteredOn(ReadSourceSelector.Source::authoritative)
+                    .extracting(ReadSourceSelector.Source::dataSource).containsExactly(context.getBean("primaryPool", HikariDataSource.class));
         });
     }
 

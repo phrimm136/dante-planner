@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { ACCESS_TOKEN_COOKIE } from '../src/auth'
 import { setCookieValue } from '../src/cookies'
-import { RYW_COOKIE } from '../src/gtid'
 import {
   STUB_DEFAULT_EMAIL,
   authorizeAtStub,
@@ -65,28 +64,6 @@ test('a visitor signs in through the stub IdP and comes back logged in', async (
     await expect(page.getByText(STUB_DEFAULT_EMAIL)).toBeVisible({ timeout: 20_000 })
   } finally {
     await deleteAccountFor(STUB_DEFAULT_EMAIL)
-  }
-})
-
-test('the callback mints ryw_gtid for the user row it commits', async () => {
-  const email = oauthEmail('ryw')
-
-  try {
-    const flow = await startFlow(APP_URL)
-    const authorized = await authorizeAtStub(flow.authorizeUrl, email)
-
-    const outcome = await completeCallback(authorized.callbackUrl, flow.oauthTx, {
-      host: SEOUL_API,
-    })
-
-    expect(outcome.status).toBe(302)
-    expect(landedOnLoginError(outcome), `landed on ${outcome.location}`).toBe(false)
-    expect(setCookieValue(outcome.setCookies, ACCESS_TOKEN_COOKIE)).not.toBeNull()
-    expect(setCookieValue(outcome.setCookies, RYW_COOKIE)).not.toBeNull()
-
-    expect(await findUserByEmail(email)).not.toBeNull()
-  } finally {
-    await deleteAccountFor(email)
   }
 })
 

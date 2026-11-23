@@ -2,37 +2,13 @@ import { test, expect } from '@playwright/test'
 import type { APIRequestContext } from '@playwright/test'
 import { randomUUID } from 'node:crypto'
 import { authHeaders, createAuthenticatedApi } from '../src/auth'
-import { holdsThroughout } from '../src/consistency'
-import { cookieHeader } from '../src/cookies'
-import {
-  RYW_COOKIE,
-  capturedGtid,
-  parseGtidSet,
-  reachesFirstTransaction,
-  rywCookieValue,
-  transactionCount,
-} from '../src/gtid'
 import { gtidFallbackRatio, metricsSourceConfigured } from '../src/metrics'
-import { PLANNER_KEYWORD, plannerPayload } from '../src/plannerContent'
+import { plannerPayload } from '../src/plannerContent'
 import { closeSeedPool, createUser, deleteUser, type SeededUser } from '../src/seed'
-import {
-  MAX_GTID_FALLBACK_RATIO,
-  OREGON_API,
-  OWN_GTID_TRANSACTION_CAP,
-  SEOUL_API,
-  SAFETY_WINDOW_MS,
-} from '../src/staging'
+import { MAX_GTID_FALLBACK_RATIO, OREGON_API, SEOUL_API } from '../src/staging'
 import { edgeContext } from '../src/edge'
 
-// The read-your-writes gate, exercised across the two regions it exists for: a write served by
-// Seoul commits on the Oregon primary and mints ryw_gtid, and a read carrying that cookie must see
-// the write at every instant of the replication window — never a bare 404 that resolves later.
-
 test.describe.configure({ mode: 'default' })
-
-// Safety-window tests hold their probe loop open for SAFETY_WINDOW_MS per region, so the test
-// budget must scale with the window or a widened window times the suite out.
-test.describe.configure({ timeout: SAFETY_WINDOW_MS * 4 + 60_000 })
 
 test.afterAll(closeSeedPool)
 
@@ -56,48 +32,13 @@ async function dropFixture(fixture: Fixture): Promise<void> {
   await deleteUser(fixture.user)
 }
 
-function reader(host: string, cookie: string): Promise<APIRequestContext> {
-  return edgeContext({ baseURL: host, extraHTTPHeaders: { Cookie: cookie } })
-}
-
 async function listedIds(context: APIRequestContext, query: string): Promise<string[]> {
   const response = await context.get(`/api/planner/md/published?${query}`)
   expect(response.status(), await response.text()).toBe(200)
   return ((await response.json()).content as Array<{ id: string }>).map((planner) => planner.id)
 }
 
-test('a write served by Seoul is readable in both regions at every instant, with the cookie', async () => {
-  const fixture = await createFixture(SEOUL_API, 'ryw-read')
-  const readers: Array<[string, APIRequestContext]> = []
-
-  try {
-    const created = await fixture.api.put(`/api/planner/md/${fixture.plannerId}`, {
-      data: plannerPayload(fixture.plannerId, fixture.title),
-    })
-    expect([200, 201], await created.text()).toContain(created.status())
-
-    const minted = rywCookieValue(created)
-    expect(minted, `the write on ${SEOUL_API} minted no ${RYW_COOKIE}`).not.toBeNull()
-
-    const cookie = cookieHeader(authHeaders(fixture.user.id).Cookie, `${RYW_COOKIE}=${minted}`)
-    for (const host of [OREGON_API, SEOUL_API]) {
-      readers.push([host, await reader(host, cookie)])
-    }
-
-    const probes = await holdsThroughout(async (attempt) => {
-      for (const [host, context] of readers) {
-        const read = await context.get(`/api/planner/md/${fixture.plannerId}`)
-        expect(read.status(), `${host}, probe ${attempt}: ${await read.text()}`).toBe(200)
-      }
-    })
-    expect(probes).toBeGreaterThan(1)
-  } finally {
-    for (const [, context] of readers) await context.dispose()
-    await dropFixture(fixture)
-  }
-})
-
-test('without the cookie the listing serves a just-published planner through its catalog marker', async () => {
+test('the listing serves a just-published planner through its catalog marker', async () => {
   const fixture = await createFixture(SEOUL_API, 'ryw-uncookied')
   let anonymous: APIRequestContext | undefined
 
@@ -110,7 +51,7 @@ test('without the cookie the listing serves a just-published planner through its
     const published = await fixture.api.post(`/api/planner/md/${fixture.plannerId}/publish`)
     expect(published.status(), await published.text()).toBe(200)
 
-    // No cookie: the publish raised the public catalog's marker, so a replica that has not
+    // The publish raised the public catalog's marker, so a replica that has not
     // applied it is skipped and the first listing after the response already carries the row.
     anonymous = await edgeContext({ baseURL: SEOUL_API })
     expect(await listedIds(anonymous, 'page=0&size=50')).toContain(fixture.plannerId)
@@ -120,75 +61,26 @@ test('without the cookie the listing serves a just-published planner through its
   }
 })
 
-test('the cookie carries the transaction own GTID rather than the primary executed set', async () => {
-  const fixture = await createFixture(SEOUL_API, 'ryw-shape')
+test('a settings save in one region is read in the other at once', async () => {
+  const user = await createUser('ryw-settings')
+  const writer = await createAuthenticatedApi(OREGON_API, user.id)
+  let reader: APIRequestContext | undefined
 
   try {
-    const created = await fixture.api.put(`/api/planner/md/${fixture.plannerId}`, {
-      data: plannerPayload(fixture.plannerId, fixture.title),
-    })
-    expect([200, 201], await created.text()).toContain(created.status())
+    reader = await edgeContext({ baseURL: SEOUL_API, extraHTTPHeaders: authHeaders(user.id) })
 
-    const gtid = capturedGtid(created)
-    expect(gtid, `the write on ${SEOUL_API} minted no ${RYW_COOKIE}`).not.toBeNull()
+    for (const syncEnabled of [true, false, true]) {
+      const saved = await writer.put('/api/user/settings', { data: { syncEnabled } })
+      expect(saved.status(), await saved.text()).toBe(200)
 
-    const sources = parseGtidSet(gtid!)
-    expect(transactionCount(sources), `wide capture: ${gtid}`).toBeLessThanOrEqual(
-      OWN_GTID_TRANSACTION_CAP,
-    )
-    expect(reachesFirstTransaction(sources), `executed-set capture: ${gtid}`).toBe(false)
+      const read = await reader.get('/api/user/settings')
+      expect(read.status(), await read.text()).toBe(200)
+      expect((await read.json()).syncEnabled).toBe(syncEnabled)
+    }
   } finally {
-    await dropFixture(fixture)
-  }
-})
-
-test('publishing an already-published planner mints no ryw_gtid', async () => {
-  const fixture = await createFixture(SEOUL_API, 'ryw-idem')
-
-  try {
-    const created = await fixture.api.put(`/api/planner/md/${fixture.plannerId}`, {
-      data: plannerPayload(fixture.plannerId, fixture.title),
-    })
-    expect([200, 201], await created.text()).toContain(created.status())
-
-    const published = await fixture.api.post(`/api/planner/md/${fixture.plannerId}/publish`)
-    expect(published.status(), await published.text()).toBe(200)
-    expect(rywCookieValue(published), 'the state change minted no cookie').not.toBeNull()
-
-    const republished = await fixture.api.post(`/api/planner/md/${fixture.plannerId}/publish`)
-    expect(republished.status(), await republished.text()).toBe(200)
-    expect(rywCookieValue(republished), 'a no-op publish committed something').toBeNull()
-  } finally {
-    await dropFixture(fixture)
-  }
-})
-
-test('the cookie covers the filter-index rebuild as well as the publish itself', async () => {
-  const fixture = await createFixture(SEOUL_API, 'ryw-union')
-  let gated: APIRequestContext | undefined
-
-  try {
-    const created = await fixture.api.put(`/api/planner/md/${fixture.plannerId}`, {
-      data: plannerPayload(fixture.plannerId, fixture.title),
-    })
-    expect([200, 201], await created.text()).toContain(created.status())
-
-    const published = await fixture.api.post(`/api/planner/md/${fixture.plannerId}/publish`)
-    expect(published.status(), await published.text()).toBe(200)
-
-    const minted = rywCookieValue(published)
-    expect(minted, `the publish on ${SEOUL_API} minted no ${RYW_COOKIE}`).not.toBeNull()
-
-    // The keyword facet is served by planner_keyword_filter, which the publish rebuilds in a second
-    // transaction after commit. A cookie covering only the first commit gates past that rebuild.
-    gated = await reader(SEOUL_API, `${RYW_COOKIE}=${minted}`)
-    await holdsThroughout(async (attempt) => {
-      const ids = await listedIds(gated!, `page=0&size=50&keyword=${PLANNER_KEYWORD}`)
-      expect(ids, `probe ${attempt}`).toContain(fixture.plannerId)
-    })
-  } finally {
-    await gated?.dispose()
-    await dropFixture(fixture)
+    await reader?.dispose()
+    await writer.dispose()
+    await deleteUser(user)
   }
 })
 

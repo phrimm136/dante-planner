@@ -32,7 +32,6 @@ ignores:
   - src/test/java/org/danteplanner/backend/shared/freshness/MarkerStoreReplicationIT.java
   - src/test/java/org/danteplanner/backend/shared/freshness/MarkerStoreTest.java
   - src/test/java/org/danteplanner/backend/shared/freshness/RaiseBatcherTest.java
-  - src/test/java/org/danteplanner/backend/shared/gtid/GtidReadGateTest.java
   - src/test/java/org/danteplanner/backend/shared/ratelimit/RateLimitBucketLifecycleIT.java
   - src/test/java/org/danteplanner/backend/shared/sse/SseShutdownDrainTest.java
   - src/test/java/org/danteplanner/backend/support/Elapsed.java

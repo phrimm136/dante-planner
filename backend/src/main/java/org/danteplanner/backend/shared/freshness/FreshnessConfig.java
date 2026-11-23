@@ -1,4 +1,4 @@
-package org.danteplanner.backend.shared.gtid;
+package org.danteplanner.backend.shared.freshness;
 
 import javax.sql.DataSource;
 
@@ -20,36 +20,22 @@ import io.lettuce.core.resource.ClientResources;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
-import org.danteplanner.backend.shared.exception.ProblemWriter;
-import org.danteplanner.backend.shared.freshness.DispatchStamp;
-import org.danteplanner.backend.shared.freshness.FreshnessReadAspect;
-import org.danteplanner.backend.shared.freshness.FreshnessReadGuard;
-import org.danteplanner.backend.shared.freshness.FreshnessReadSettings;
-import org.danteplanner.backend.shared.freshness.MarkerDispatchStamp;
-import org.danteplanner.backend.shared.freshness.MarkerStamp;
-import org.danteplanner.backend.shared.freshness.MarkerStore;
+import org.danteplanner.backend.shared.gtid.GtidCapturingDataSource;
+import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 import org.danteplanner.backend.shared.redis.RedisRole;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 
 /**
- * Wires the read-your-writes GTID gate wherever the routing datasource is present.
- *
  * <p>Registered only when {@code datasource.routing.enabled=true} — the same gate as
  * {@link org.danteplanner.backend.shared.config.RoutingDataSourceConfig}. The filter runs after the
- * Spring Security chain and around the MVC dispatch, pinning routing before the controller's
- * read-only transaction.</p>
+ * Spring Security chain and around the MVC dispatch.</p>
  */
 @Configuration
 @ConditionalOnProperty(name = "datasource.routing.enabled", havingValue = "true")
 @EnableConfigurationProperties({MarkerStore.Settings.class, FreshnessReadSettings.class})
-public class GtidGateConfig {
+public class FreshnessConfig {
 
-    private static final String GATE_URL_PATTERN = "/api/*";
-
-    @Bean
-    public GtidReadGate gtidReadGate(ReadSourceSelector readSourceSelector, MeterRegistry meterRegistry) {
-        return new GtidReadGate(readSourceSelector, meterRegistry);
-    }
+    private static final String STAMP_URL_PATTERN = "/api/*";
 
     /**
      * Takes no DataSource: commits are reported by {@link GtidCapturingDataSource} from the
@@ -61,12 +47,6 @@ public class GtidGateConfig {
         return new GtidWriteCapture(meterRegistry);
     }
 
-    /**
-     * Plain JPA transaction management. Capture used to hang off a transaction-manager subclass that
-     * registered an {@code afterCommit} synchronization, which had to find the transaction's
-     * connection again after the fact — and found the wrong one. Interception at commit needs no
-     * transaction-manager involvement at all.
-     */
     @Bean
     public PlatformTransactionManager transactionManager(
             EntityManagerFactory entityManagerFactory, DataSource dataSource) {
@@ -106,7 +86,7 @@ public class GtidGateConfig {
     @Bean
     public FreshnessReadGuard freshnessReadGuard(MarkerStore markerStore, FreshnessReadSettings settings,
             MeterRegistry meterRegistry, ReadSourceSelector readSourceSelector) {
-        return new FreshnessReadGuard(markerStore::read, GtidReadGate::isApplied, settings, meterRegistry,
+        return new FreshnessReadGuard(markerStore::read, ReplicaGtidWait::isApplied, settings, meterRegistry,
                 readSourceSelector);
     }
 
@@ -116,14 +96,11 @@ public class GtidGateConfig {
     }
 
     @Bean
-    public FilterRegistrationBean<GtidCookieFilter> gtidCookieFilterRegistration(
-            GtidReadGate readGate,
-            GtidWriteCapture writeCapture,
-            MarkerStamp markerStamp,
-            ProblemWriter problemWriter) {
-        FilterRegistrationBean<GtidCookieFilter> registration = new FilterRegistrationBean<>(
-                new GtidCookieFilter(readGate, writeCapture, markerStamp, problemWriter));
-        registration.addUrlPatterns(GATE_URL_PATTERN);
+    public FilterRegistrationBean<FreshnessStampFilter> freshnessStampFilterRegistration(
+            GtidWriteCapture writeCapture, MarkerStamp markerStamp) {
+        FilterRegistrationBean<FreshnessStampFilter> registration =
+                new FilterRegistrationBean<>(new FreshnessStampFilter(writeCapture, markerStamp));
+        registration.addUrlPatterns(STAMP_URL_PATTERN);
         registration.setOrder(Ordered.LOWEST_PRECEDENCE);
         return registration;
     }

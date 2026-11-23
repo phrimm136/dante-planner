@@ -8,7 +8,7 @@
 # Prints the environment the e2e suites need. Lag is a knob once this is up:
 #   docker exec limbusplanner-mysql-replica-1 mysql -uroot -p<pw> \
 #     -e "STOP REPLICA SQL_THREAD;"      # freeze the replication window open
-#   ... assert the gate pins reads to the primary ...
+#   ... assert marked reads reach the primary ...
 #     -e "START REPLICA SQL_THREAD;"     # release it
 # or set a deterministic delay with CHANGE REPLICATION SOURCE TO SOURCE_DELAY=5.
 set -euo pipefail

@@ -7,9 +7,9 @@ import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import jakarta.servlet.http.Cookie;
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
@@ -19,7 +19,7 @@ import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.config.ReadSourcesConfig;
-import org.danteplanner.backend.shared.gtid.GtidCookie;
+import org.danteplanner.backend.shared.freshness.FreshnessReadGuard;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -35,7 +35,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpHeaders;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -46,7 +45,6 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
-import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -145,7 +143,7 @@ class OregonReadFallbackIT {
         new ToxiproxyControl(CausalHarnessSupport.APP_TO_PRIMARY_PROXY).restoreOregonPrimary();
         replicationControl = new ReplicationControl(primaryJdbcTemplate, replicaJdbcTemplate);
         replicaJdbcTemplate.execute("START REPLICA");
-        primaryReadBreaker = readSourceSelector.authority().breaker();
+        primaryReadBreaker = readSourceSelector.sources().getFirst().breaker();
         primaryReadBreaker.reset();
         assertThat(primaryPool.getJdbcUrl())
                 .as("the Oregon primary must be reached through the proxy the test cuts")
@@ -153,33 +151,18 @@ class OregonReadFallbackIT {
     }
 
     @Test
-    void rywCookie_WhenTheAuthorityReadsFirstOnAClosedBreaker_WriteMintsCookieAndReadLeavesItUntouchedWithoutTheGate()
-            throws Exception {
-        Session session = newSession("oregon-ryw-");
+    void read_WhenTheAuthorityReadsFirstOnAClosedBreaker_ServesTheWriteWithoutAMarkerWait() throws Exception {
+        Session session = newSession("oregon-authority-");
         UUID plannerId = UUID.randomUUID();
-        double gateRunsBefore = gateRuns();
+        long waitsBefore = markerWaits();
 
         try {
-            upsert(session, plannerId, REPLICATED_TITLE, false).andExpect(status().is2xxSuccessful());
-            replicationControl.awaitCaughtUp();
-            replicationControl.stopReplica();
-            MvcResult written = upsert(session, plannerId, PRIMARY_ONLY_TITLE, true)
-                    .andExpect(status().is2xxSuccessful())
-                    .andReturn();
-            Cookie rywCookie = rywCookie(written);
+            writePrimaryOnlyTitle(session, plannerId);
 
-            MvcResult read = mockMvc.perform(get("/api/planner/md/" + plannerId)
-                            .cookie(session.auth(), session.device(), rywCookie))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.title", is(PRIMARY_ONLY_TITLE)))
-                    .andReturn();
-
-            assertThat(read.getResponse().getHeaders(HttpHeaders.SET_COOKIE))
-                    .as("a read the closed-breaker authority serves first must neither clear nor re-mint the ryw cookie")
-                    .noneMatch(header -> header.startsWith(GtidCookie.NAME + "="));
-            assertThat(gateRuns())
-                    .as("a read the closed-breaker authority serves first never runs the read gate")
-                    .isEqualTo(gateRunsBefore);
+            assertThat(readTitle(session, plannerId)).isEqualTo(PRIMARY_ONLY_TITLE);
+            assertThat(markerWaits())
+                    .as("a read the closed-breaker authority serves first waits for no replica")
+                    .isEqualTo(waitsBefore);
         } finally {
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();
@@ -316,19 +299,6 @@ class OregonReadFallbackIT {
                 .content(objectMapper.writeValueAsString(request)));
     }
 
-    private static Cookie rywCookie(MvcResult written) {
-        List<String> setCookies = written.getResponse().getHeaders(HttpHeaders.SET_COOKIE);
-        String header = setCookies.stream()
-                .filter(candidate -> candidate.startsWith(GtidCookie.NAME + "="))
-                .findFirst()
-                .orElse(null);
-        assertThat(header).as("a write in Oregon must mint %s among %s", GtidCookie.NAME, setCookies)
-                .isNotNull();
-        String value = header.split(";", 2)[0].substring(GtidCookie.NAME.length() + 1);
-        assertThat(GtidCookie.decode(value)).as("the minted cookie carries a GTID").isPresent();
-        return new Cookie(GtidCookie.NAME, value);
-    }
-
     private Session newSession(String emailPrefix) {
         User user = TestDataFactory.createTestUser(
                 userRepository, emailPrefix + UUID.randomUUID() + "@example.com");
@@ -337,8 +307,8 @@ class OregonReadFallbackIT {
                 AuthCookies.freshDeviceId());
     }
 
-    private double gateRuns() {
-        return meterRegistry.find("gtid.gate").counters().stream().mapToDouble(Counter::count).sum();
+    private long markerWaits() {
+        return meterRegistry.find(FreshnessReadGuard.READ_WAIT).timers().stream().mapToLong(Timer::count).sum();
     }
 
     private double transitions(String from, String to) {

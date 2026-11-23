@@ -14,7 +14,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.sql.DataSource;
@@ -108,7 +107,6 @@ class ReadSourceSelectorTest {
 
         assertThat(selector.getConnection()).isSameAs(firstConnection);
         assertThat(ChosenReadSource.name()).contains(FIRST);
-        assertThat(ChosenReadSource.name()).isNotEqualTo(Optional.of(selector.authority().name()));
         verify(secondPool, never()).getConnection();
     }
 
@@ -121,7 +119,7 @@ class ReadSourceSelectorTest {
         assertThat(selector.getConnection()).isSameAs(secondConnection);
         assertThat(firstBreaker.getMetrics().getNumberOfFailedCalls()).isEqualTo(1);
         assertThat(firstBreaker.getState()).isEqualTo(CircuitBreaker.State.CLOSED);
-        assertThat(ChosenReadSource.name()).contains(selector.authority().name());
+        assertThat(ChosenReadSource.name()).contains(SECOND);
     }
 
     @ParameterizedTest
@@ -239,7 +237,6 @@ class ReadSourceSelectorTest {
         selector.getConnection();
 
         assertThat(ChosenReadSource.name()).contains(FIRST);
-        assertThat(ChosenReadSource.name()).isNotEqualTo(Optional.of(selector.authority().name()));
     }
 
     @Test
@@ -251,7 +248,6 @@ class ReadSourceSelectorTest {
 
         assertThat(oregon.getConnection()).isSameAs(secondConnection);
         assertThat(ChosenReadSource.name()).contains(ReadSourceProperties.PRIMARY);
-        assertThat(ChosenReadSource.name()).contains(oregon.authority().name());
         verify(firstPool, never()).getConnection();
     }
 
@@ -260,21 +256,12 @@ class ReadSourceSelectorTest {
         firstBreaker.transitionToOpenState();
 
         assertThat(selector.current()).map(ReadSourceSelector.Source::name).contains(SECOND);
-        assertThat(selector.isAuthorityHealthy()).isTrue();
-    }
-
-    @Test
-    void isAuthorityHealthy_WhenTheAuthorityBreakerIsOpen_IsFalse() {
-        secondBreaker.transitionToOpenState();
-
-        assertThat(selector.isAuthorityHealthy()).isFalse();
-        assertThat(selector.current()).map(ReadSourceSelector.Source::name).contains(FIRST);
     }
 
     @Test
     void skips_WhenEverySourceIsSkipped_AcquireThrowsReadTemporarilyUnavailable() throws SQLException {
         ReadSourceSelector.skip(selector.sources().get(0));
-        ReadSourceSelector.skip(selector.authority());
+        ReadSourceSelector.skip(selector.sources().get(1));
 
         Throwable thrown = catchThrowable(selector::getConnection);
 
@@ -322,25 +309,5 @@ class ReadSourceSelectorTest {
         public Instant instant() {
             return now;
         }
-    }
-
-    @Test
-    void authorityReads_WhenTheAuthorityLends_ServesItAndRecordsItWithoutTouchingTheFirstSource()
-            throws SQLException {
-        when(secondPool.getConnection()).thenReturn(secondConnection);
-
-        assertThat(selector.authorityReads().getConnection()).isSameAs(secondConnection);
-        assertThat(ChosenReadSource.name()).contains(selector.authority().name());
-        verify(firstPool, never()).getConnection();
-    }
-
-    @Test
-    void authorityReads_WhenTheAuthorityCannotLend_ThrowsItsFailureAndRecordsNothing() throws SQLException {
-        SQLException linkFailure = communicationsLinkFailure();
-        when(secondPool.getConnection()).thenThrow(linkFailure);
-
-        assertThat(catchThrowable(() -> selector.authorityReads().getConnection())).isSameAs(linkFailure);
-        assertThat(ChosenReadSource.name()).isEmpty();
-        verify(firstPool, never()).getConnection();
     }
 }

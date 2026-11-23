@@ -7,7 +7,6 @@ epic: none · pr: none
   REJECTED: converting the enums to sealed types so one rule covers both — an enum is already closed for an exhaustive switch, and the conversion would cost the JPA, JSON and `values()` support the enums carry; the rule takes both kinds of return type instead.
   REJECTED: a marker annotation on effectful methods to exempt them — it lets any method leave the rule by annotation; the command outcome type carries the distinction instead.
   INVARIANT: every decision is pure by the walk — the rule test over main and its fixtures (a wait, a port, a ThreadLocal accessor that is allowed, a command that may wait).
-  INVARIANT: the exemptions are only the cookie gate's probe and its wait verdict, which the cookie-gate removal deletes — a staleness test fails as soon as either is gone or stops violating.
   NON-GOAL: decisions returned as a boolean, void, Optional or collection — the shell branch rule covers effectful branching in those methods.
   NON-GOAL: calls through `java.util.function` and through a private functional interface nested in the caller's class — treated as pure; an effect inside such a lambda is attributed to the method that creates it.
   NON-GOAL: proving a final collection never changes — it counts as mutable when a method outside its constructor both reads it and calls a mutator on some collection, unless it is static and its runtime value is a JDK immutable collection; a mutation through another method, or through the backing collection of an unmodifiable view, is missed.

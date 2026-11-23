@@ -21,10 +21,6 @@ import { edgeContext } from '../src/edge'
 // every probe asks the replica itself that it still lacks the row, so each Seoul answer that
 // carries the planner was served by the authority after the written scope's marker skipped the
 // replica.
-//
-// The readers are contexts of their own, so the ryw_gtid the write minted stays with the
-// writer: the reader against Seoul has nothing to present, and the markers are the only thing
-// that can answer.
 
 test.describe.configure({ mode: 'default' })
 test.describe.configure({ timeout: SAFETY_WINDOW_MS * 4 + 60_000 })

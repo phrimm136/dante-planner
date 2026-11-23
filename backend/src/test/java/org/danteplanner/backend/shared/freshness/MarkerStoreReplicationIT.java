@@ -320,6 +320,11 @@ class MarkerStoreReplicationIT {
         assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count())
                 .as("a raise whose batch lands after its caller stopped waiting is not a raise failure")
                 .isZero();
+        assertThat(meters.counter(MarkerStore.RAISE_ABANDONED).count())
+                .as("only a raise that waited out the caller's bound is abandoned, elapsed ms %s", elapsedMillis)
+                .isLessThanOrEqualTo(elapsedMillis.stream()
+                        .filter(millis -> millis >= WAIT_BOUND.plus(MarkerStore.RAISE_MARGIN).toMillis())
+                        .count());
         assertThat(scopes).allSatisfy(scope ->
                 assertThat(primary.opsForHash().entries(scope.key())).containsOnly(Map.entry(server, "22")));
     }

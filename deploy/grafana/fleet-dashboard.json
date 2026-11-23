@@ -678,7 +678,7 @@
   {
    "id": 19,
    "type": "timeseries",
-   "title": "GTID capture fallback share (read-your-writes cookie)",
+   "title": "GTID capture fallback share",
    "datasource": {
     "type": "prometheus",
     "uid": "${DS_PROM}"
@@ -705,9 +705,9 @@
    }
   },
   {
-   "id": 22,
+   "id": 55,
    "type": "timeseries",
-   "title": "RYW gate \u2014 reads pinned to primary (share)",
+   "title": "Freshness marker undeclared writes / abandoned raises (per min)",
    "datasource": {
     "type": "prometheus",
     "uid": "${DS_PROM}"
@@ -721,17 +721,15 @@
    "targets": [
     {
      "refId": "A",
-     "expr": "sum(rate(gtid_gate_total{outcome=\"primary\"}[5m])) by (cluster) / clamp_min(sum(rate(gtid_gate_total[5m])) by (cluster), 1e-9)",
-     "legendFormat": "{{cluster}}"
-    }
-   ],
-   "fieldConfig": {
-    "defaults": {
-     "unit": "percentunit",
-     "max": 1
+     "expr": "sum by (cluster) (rate(freshness_marker_undeclared_total[5m])) * 60",
+     "legendFormat": "{{cluster}} undeclared writes"
     },
-    "overrides": []
-   }
+    {
+     "refId": "B",
+     "expr": "sum by (cluster) (rate(freshness_marker_raise_abandoned_total[5m])) * 60",
+     "legendFormat": "{{cluster}} abandoned raises"
+    }
+   ]
   },
   {
    "id": 53,

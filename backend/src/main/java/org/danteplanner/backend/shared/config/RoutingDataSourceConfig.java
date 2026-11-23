@@ -102,8 +102,7 @@ public class RoutingDataSourceConfig {
         Map<Object, Object> targets = new HashMap<>();
         targets.put(RoutingKey.PRIMARY, primary);
         targets.put(RoutingKey.REPLICA, readSourceSelector);
-        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(
-                undeclaredGuard, readSourceSelector.authorityReads());
+        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(undeclaredGuard);
         routing.setTargetDataSources(targets);
         routing.setDefaultTargetDataSource(primary);
         routing.afterPropertiesSet();

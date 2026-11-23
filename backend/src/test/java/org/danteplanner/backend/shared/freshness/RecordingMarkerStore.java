@@ -1,4 +1,4 @@
-package org.danteplanner.backend.shared.gtid;
+package org.danteplanner.backend.shared.freshness;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -8,8 +8,6 @@ import java.util.Set;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
-import org.danteplanner.backend.shared.freshness.FreshnessScope;
-import org.danteplanner.backend.shared.freshness.MarkerStore;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 
 final class RecordingMarkerStore extends MarkerStore {

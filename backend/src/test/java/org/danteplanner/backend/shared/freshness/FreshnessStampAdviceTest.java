@@ -1,4 +1,4 @@
-package org.danteplanner.backend.shared.gtid;
+package org.danteplanner.backend.shared.freshness;
 
 import java.util.Optional;
 import java.util.Set;
@@ -11,13 +11,12 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 
-import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
-import org.danteplanner.backend.shared.freshness.FreshnessScope;
-import org.danteplanner.backend.shared.freshness.MarkerStamp;
+import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
+
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GtidCookieResponseAdviceTest {
+class FreshnessStampAdviceTest {
 
     private static final String GTID = "3e11fa47-71ca-11e1-9e33-c80aa9429562:1-7";
 
@@ -35,11 +34,6 @@ class GtidCookieResponseAdviceTest {
         }
 
         @Override
-        public Optional<String> takeCapturedGtid() {
-            return takeOnce().map(Capture::gtidSet);
-        }
-
-        @Override
         public Optional<Capture> takeCapture() {
             return takeOnce();
         }
@@ -52,9 +46,9 @@ class GtidCookieResponseAdviceTest {
     }
 
     @Test
-    void beforeBodyWrite_WhenTheCaptureYieldsItsGtidOnlyOnce_RaisesTheDeclaredScopesAndMintsTheCookieFromIt() {
+    void beforeBodyWrite_WhenTheCaptureYieldsItsGtidOnlyOnce_RaisesTheDeclaredScopesFromItAndSetsNoCookie() {
         RecordingMarkerStore markerStore = new RecordingMarkerStore();
-        GtidCookieResponseAdvice advice = new GtidCookieResponseAdvice(
+        FreshnessStampAdvice advice = new FreshnessStampAdvice(
                 new MarkerStamp(new SingleTakeCapture(), markerStore, new SimpleMeterRegistry(), false));
         MockHttpServletResponse servletResponse = new MockHttpServletResponse();
         ServletServerHttpResponse response = new ServletServerHttpResponse(servletResponse);
@@ -69,7 +63,6 @@ class GtidCookieResponseAdviceTest {
         }
 
         assertThat(markerStore.raises).containsExactly(new RecordingMarkerStore.Raise(Set.of(planner), GTID));
-        assertThat(response.getHeaders().get(HttpHeaders.SET_COOKIE))
-                .containsExactly(GtidCookie.of(GTID).toString());
+        assertThat(response.getHeaders().headerNames()).doesNotContain(HttpHeaders.SET_COOKIE);
     }
 }

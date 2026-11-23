@@ -1,0 +1,13 @@
+diff --git a/backend/src/main/java/org/danteplanner/backend/shared/freshness/MarkerStamp.java b/backend/src/main/java/org/danteplanner/backend/shared/freshness/MarkerStamp.java
+--- a/backend/src/main/java/org/danteplanner/backend/shared/freshness/MarkerStamp.java
++++ b/backend/src/main/java/org/danteplanner/backend/shared/freshness/MarkerStamp.java
+@@ -31,7 +31,8 @@
+ 
+     private void stamp(GtidWriteCapture.Capture capture) {
+         switch (FreshnessDeclarations.declaration()) {
+-            case FreshnessDeclaration.Scopes scopes -> markerStore.raise(scopes.scopes(), capture.gtidSet());
++            case FreshnessDeclaration.Scopes scopes -> {
++            }
+             case FreshnessDeclaration.None none -> {
+             }
+             case FreshnessDeclaration.Undeclared nothingDeclared -> judgeUndeclared(capture);

@@ -4,10 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLTransientConnectionException;
 
-import javax.sql.DataSource;
-
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
-import org.springframework.util.Assert;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import org.danteplanner.backend.shared.exception.ReadTemporarilyUnavailableException;
@@ -18,46 +15,17 @@ import org.danteplanner.backend.shared.exception.ReadTemporarilyUnavailableExcep
  */
 public class ReadOnlyRoutingDataSource extends AbstractRoutingDataSource {
 
-    private static final ThreadLocal<RoutingKey> OVERRIDE = new ThreadLocal<>();
     private static final String UNABLE_TO_CONNECT_SQL_STATE = "08001";
     private static final String READ_NOT_LENT_MESSAGE = "The routed source could not lend a read connection";
 
     private final UndeclaredPrimaryAccessGuard undeclaredGuard;
-    private final DataSource authorityReadSource;
 
-    public ReadOnlyRoutingDataSource(UndeclaredPrimaryAccessGuard undeclaredGuard, DataSource authorityReadSource) {
+    public ReadOnlyRoutingDataSource(UndeclaredPrimaryAccessGuard undeclaredGuard) {
         this.undeclaredGuard = undeclaredGuard;
-        this.authorityReadSource = authorityReadSource;
-    }
-
-    public static void pinTo(RoutingKey key) {
-        OVERRIDE.set(key);
-    }
-
-    public static void clear() {
-        OVERRIDE.remove();
-    }
-
-    @Override
-    public void afterPropertiesSet() {
-        Assert.state(authorityReadSource != null, "a routing datasource needs the authority's read source");
-        super.afterPropertiesSet();
-    }
-
-    @Override
-    protected DataSource determineTargetDataSource() {
-        if (OVERRIDE.get() == RoutingKey.PRIMARY && TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
-            return authorityReadSource;
-        }
-        return super.determineTargetDataSource();
     }
 
     @Override
     public Object determineCurrentLookupKey() {
-        RoutingKey override = OVERRIDE.get();
-        if (override != null) {
-            return override;
-        }
         if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
             return RoutingKey.REPLICA;
         }

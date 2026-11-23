@@ -107,14 +107,14 @@ invalid:
   - |
     class A {
       void m() {
-        try (MockedConstruction<GtidReadGate> gates = mockConstruction(GtidReadGate.class)) {
+        try (MockedConstruction<ChosenSource> gates = mockConstruction(ChosenSource.class)) {
         }
       }
     }
   - |
     class A {
       void m() {
-        try (MockedConstruction<GtidReadGate> gates = org.mockito.Mockito.mockConstructionWithAnswer(GtidReadGate.class, RETURNS_DEEP_STUBS)) {
+        try (MockedConstruction<ChosenSource> gates = org.mockito.Mockito.mockConstructionWithAnswer(ChosenSource.class, RETURNS_DEEP_STUBS)) {
         }
       }
     }
@@ -141,7 +141,7 @@ invalid:
   - |
     class A {
       void m() {
-        try (MockedStatic<GtidReadGate> gates = org.mockito.BDDMockito.mockStatic(GtidReadGate.class)) {
+        try (MockedStatic<ChosenSource> gates = org.mockito.BDDMockito.mockStatic(ChosenSource.class)) {
         }
       }
     }

@@ -44,7 +44,7 @@ class GtidWriteCaptureTest {
         capture.recordCommit(GLOBAL_GTID, false);
 
         assertThat(capture.pollCapturedGtid())
-                .as("a union covering only part of the request would gate less than it claims")
+                .as("a union covering only part of the request would raise the marker below a commit")
                 .contains(GLOBAL_GTID);
     }
 
@@ -59,16 +59,16 @@ class GtidWriteCaptureTest {
     }
 
     @Test
-    void publishIdempotentStateTargeted_WhenCommitWroteNothing_MintsNoCookie() {
+    void publishIdempotentStateTargeted_WhenCommitWroteNothing_CapturesNothing() {
         capture.recordCommit(null, true);
 
         assertThat(capture.pollCapturedGtid())
-                .as("an idempotent no-op leaves no trace, so it must gate no read")
+                .as("an idempotent no-op leaves no trace, so it must raise no marker")
                 .isEmpty();
     }
 
     @Test
-    void rywNoCookieOnRedisOnlyWrite_WhenNoTxCommitted_ReturnsEmpty() {
+    void redisOnlyWrite_WhenNoTxCommitted_ReturnsEmpty() {
         assertThat(capture.pollCapturedGtid()).isEmpty();
     }
 
@@ -107,13 +107,5 @@ class GtidWriteCaptureTest {
         assertThat(capture.takeCapture()).isEmpty();
         capture.recordCommit(GLOBAL_GTID, false);
         assertThat(capture.takeCapture()).contains(new GtidWriteCapture.Capture(GLOBAL_GTID, false));
-    }
-
-    @Test
-    void takeCapturedGtid_WhenTaken_ReturnsTheCapturedSetOnce() {
-        capture.recordCommit(UUID_A + ":100", true);
-
-        assertThat(capture.takeCapturedGtid()).contains(UUID_A + ":100-100");
-        assertThat(capture.takeCapturedGtid()).isEmpty();
     }
 }

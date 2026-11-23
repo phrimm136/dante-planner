@@ -1,6 +1,6 @@
 # Stub-OAuth + GTID overlay: what the compose stack needs before the e2e suites can drive
-# it. Runs the OAuth stub IdP beside the app, enables GTID session tracking so the
-# read-your-writes gate can capture and mint, and wires the single-region gate flags. The
+# it. Runs the OAuth stub IdP beside the app, enables GTID session tracking so a
+# write's GTID can be captured, and wires the single-region routing flags. The
 # backend trusts the repo test keypair through docker-compose.local.yml's /app/keys mount, and the
 # suites sign with the same pair (E2E_STAGING_KEY_FILE). The authorize URL is
 # browser-facing (host port), while the token/userinfo URLs are container-facing (service
@@ -9,8 +9,7 @@ services:
   mysql:
     ports:
       - "3306:3306"
-    # GTID tracking is what the read-your-writes gate captures; without it the local server
-    # names no GTID and the cookie can never be minted, so the gate is untestable here.
+    # GTID tracking is what the write capture reads; without it the local server names no GTID.
     command:
       - --gtid-mode=ON
       - --enforce-gtid-consistency=ON
@@ -27,16 +26,16 @@ services:
       GOOGLE_OAUTH_USER_INFO_URL: http://oauth-stub:3000/userinfo
       GOOGLE_OAUTH_JWKS_URI: http://oauth-stub:3000/jwks
       GOOGLE_OAUTH_ISSUER: https://idp-staging.dante-planner.com
-      # Single-region stand-in for Seoul: the gate filter registers on this flag alone, and the
-      # "replica" is the same server, which is enough to exercise capture and cookie minting.
+      # Single-region stand-in for Seoul: the stamp filter registers on this flag alone, and the
+      # "replica" is the same server, which is enough to exercise capture.
       #
       # DO NOT run read-your-writes (suite C) against this overlay. One database means lag is
-      # always zero, so every gate assertion passes without the gate ever engaging — a green
+      # always zero, so every freshness assertion passes without a marker ever engaging — a green
       # tick that proves nothing. Suite C belongs on docker-compose.multiregion.yml, where the
       # replica is real and the lag is a knob (SOURCE_DELAY).
       DATASOURCE_ROUTING_ENABLED: "true"
       # trackSessionState is not optional here: without it Connector/J never exposes the
-      # server's GTID tracking, capture falls to the fallback branch, and the gate is untestable.
+      # server's GTID tracking, capture falls to the fallback branch.
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true&trackSessionState=true
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}

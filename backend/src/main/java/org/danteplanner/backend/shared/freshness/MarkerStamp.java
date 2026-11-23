@@ -1,7 +1,5 @@
 package org.danteplanner.backend.shared.freshness;
 
-import java.util.Optional;
-
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 
@@ -27,19 +25,17 @@ public class MarkerStamp {
         this.failFast = failFast;
     }
 
-    public Optional<String> stamp() {
-        Optional<GtidWriteCapture.Capture> taken = writeCapture.takeCapture();
-        if (taken.isEmpty()) {
-            return Optional.empty();
-        }
-        GtidWriteCapture.Capture capture = taken.get();
+    public void stamp() {
+        writeCapture.takeCapture().ifPresent(this::stamp);
+    }
+
+    private void stamp(GtidWriteCapture.Capture capture) {
         switch (FreshnessDeclarations.declaration()) {
             case FreshnessDeclaration.Scopes scopes -> markerStore.raise(scopes.scopes(), capture.gtidSet());
             case FreshnessDeclaration.None none -> {
             }
             case FreshnessDeclaration.Undeclared nothingDeclared -> judgeUndeclared(capture);
         }
-        return Optional.of(capture.gtidSet());
     }
 
     private void judgeUndeclared(GtidWriteCapture.Capture capture) {

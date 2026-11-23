@@ -199,12 +199,12 @@ snapshots:
   ? |
     class A {
       void m() {
-        try (MockedConstruction<GtidReadGate> gates = mockConstruction(GtidReadGate.class)) {
+        try (MockedConstruction<ChosenSource> gates = mockConstruction(ChosenSource.class)) {
         }
       }
     }
   : labels:
-    - source: mockConstruction(GtidReadGate.class)
+    - source: mockConstruction(ChosenSource.class)
       style: primary
       start: 73
       end: 109
@@ -215,12 +215,12 @@ snapshots:
   ? |
     class A {
       void m() {
-        try (MockedConstruction<GtidReadGate> gates = org.mockito.Mockito.mockConstructionWithAnswer(GtidReadGate.class, RETURNS_DEEP_STUBS)) {
+        try (MockedConstruction<ChosenSource> gates = org.mockito.Mockito.mockConstructionWithAnswer(ChosenSource.class, RETURNS_DEEP_STUBS)) {
         }
       }
     }
   : labels:
-    - source: org.mockito.Mockito.mockConstructionWithAnswer(GtidReadGate.class, RETURNS_DEEP_STUBS)
+    - source: org.mockito.Mockito.mockConstructionWithAnswer(ChosenSource.class, RETURNS_DEEP_STUBS)
       style: primary
       start: 73
       end: 159
@@ -247,12 +247,12 @@ snapshots:
   ? |
     class A {
       void m() {
-        try (MockedStatic<GtidReadGate> gates = org.mockito.BDDMockito.mockStatic(GtidReadGate.class)) {
+        try (MockedStatic<ChosenSource> gates = org.mockito.BDDMockito.mockStatic(ChosenSource.class)) {
         }
       }
     }
   : labels:
-    - source: org.mockito.BDDMockito.mockStatic(GtidReadGate.class)
+    - source: org.mockito.BDDMockito.mockStatic(ChosenSource.class)
       style: primary
       start: 67
       end: 120

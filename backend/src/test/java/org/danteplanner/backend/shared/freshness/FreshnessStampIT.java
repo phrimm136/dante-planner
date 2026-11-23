@@ -1,9 +1,8 @@
-package org.danteplanner.backend.shared.gtid;
+package org.danteplanner.backend.shared.freshness;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -28,18 +27,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import tools.jackson.databind.ObjectMapper;
 import com.redis.testcontainers.RedisContainer;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
-import org.danteplanner.backend.shared.config.ReadSourceSelector;
-import org.danteplanner.backend.shared.exception.ProblemWriter;
-import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
-import org.danteplanner.backend.shared.freshness.FreshnessScope;
-import org.danteplanner.backend.shared.freshness.MarkerStamp;
-import org.danteplanner.backend.shared.freshness.MarkerStore;
+import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -163,14 +155,10 @@ class FreshnessStampIT {
     }
 
     private MockMvc mvc(boolean undeclaredFailFast) {
-        ReadSourceSelector primaryOnly = new ReadSourceSelector(List.of(new ReadSourceSelector.Source(
-                "primary", true, null, CircuitBreaker.ofDefaults("primary-" + UUID.randomUUID()))));
         MarkerStamp markerStamp = new MarkerStamp(writeCapture, markerStore, meters, undeclaredFailFast);
-        GtidCookieFilter filter = new GtidCookieFilter(new GtidReadGate(primaryOnly, meters), writeCapture,
-                markerStamp, new ProblemWriter(new ObjectMapper()));
         return MockMvcBuilders.standaloneSetup(new StampingController(writeCapture))
-                .setControllerAdvice(new GtidCookieResponseAdvice(markerStamp))
-                .addFilters(filter)
+                .setControllerAdvice(new FreshnessStampAdvice(markerStamp))
+                .addFilters(new FreshnessStampFilter(writeCapture, markerStamp))
                 .build();
     }
 
@@ -182,15 +170,12 @@ class FreshnessStampIT {
         return serverA + ":1-5:7-9," + serverB + ":3-4";
     }
 
-    private static void assertCookieCarries(MvcResult result, String gtid) {
-        assertThat(result.getResponse().getHeaders(HttpHeaders.SET_COOKIE))
-                .anySatisfy(header -> assertThat(header)
-                        .contains(GtidCookie.NAME + "=" + GtidCookie.of(GtidWriteCapture.unionGtidSets(
-                                Set.of(gtid))).getValue()));
+    private static void assertSetsNoCookie(MvcResult result) {
+        assertThat(result.getResponse().getHeaders(HttpHeaders.SET_COOKIE)).isEmpty();
     }
 
     @Test
-    void bodiedWrite_WhenItCommitsAndDeclaresAPlannerAndTheCatalog_RaisesBothToItsGtidAndMintsTheCookie()
+    void bodiedWrite_WhenItCommitsAndDeclaresAPlannerAndTheCatalog_RaisesBothToItsGtidAndSetsNoCookie()
             throws Exception {
         UUID plannerId = UUID.randomUUID();
 
@@ -205,11 +190,11 @@ class FreshnessStampIT {
                 .containsOnly(Map.entry(serverA, "9"), Map.entry(serverB, "4"));
         assertThat(marker(new FreshnessScope.Global()))
                 .contains(Map.entry(serverA, "9"), Map.entry(serverB, "4"));
-        assertCookieCarries(result, gtidSet());
+        assertSetsNoCookie(result);
     }
 
     @Test
-    void bodilessWrite_WhenItCommitsAndDeclaresAPlannerAndTheCatalog_RaisesBothToItsGtidAndMintsTheCookie()
+    void bodilessWrite_WhenItCommitsAndDeclaresAPlannerAndTheCatalog_RaisesBothToItsGtidAndSetsNoCookie()
             throws Exception {
         UUID plannerId = UUID.randomUUID();
 
@@ -224,7 +209,7 @@ class FreshnessStampIT {
                 .containsOnly(Map.entry(serverA, "9"), Map.entry(serverB, "4"));
         assertThat(marker(new FreshnessScope.Global()))
                 .contains(Map.entry(serverA, "9"), Map.entry(serverB, "4"));
-        assertCookieCarries(result, gtidSet());
+        assertSetsNoCookie(result);
     }
 
     @Test
@@ -277,7 +262,7 @@ class FreshnessStampIT {
         assertThat(marker(new FreshnessScope.Global())).doesNotContainKeys(serverA, serverB);
         assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count()).isZero();
         assertThat(meters.counter(MarkerStamp.UNDECLARED_COUNTER).count()).isEqualTo(undeclaredBefore + 1);
-        assertCookieCarries(result, gtidSet());
+        assertSetsNoCookie(result);
     }
 
     @Test
@@ -293,6 +278,6 @@ class FreshnessStampIT {
                 .andReturn();
 
         assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count()).isEqualTo(1.0);
-        assertCookieCarries(result, gtidSet());
+        assertSetsNoCookie(result);
     }
 }

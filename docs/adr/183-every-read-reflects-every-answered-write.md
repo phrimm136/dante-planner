@@ -168,6 +168,16 @@ epic: none · pr: none · supersedes: 008 @ryw @gtid @cookie, 008 @gtid @capture
   INVARIANT: an unpublished or withdrawn planner's thread is unreadable to non-owners on every read
   path — the thread contract test and the replica-lag test.
 
+- @freshness @removal — The GTID cookie, its read gate and the primary pin are removed: a read's
+  freshness is decided by the markers alone. Every read and write declares its scopes, so the gate
+  added nothing a marker does not answer.
+  REJECTED: keeping the cookie as the writer's cover when a raise fails — it protects only that
+  writer, and only until the cookie is read once.
+  INVARIANT: a write whose raise outlived its caller's bound is counted, whether or not the marker
+  lands later — `freshness.marker.raise.abandoned`, `RaiseBatcherTest`.
+  NON-GOAL: a writer's own reads after a failed or abandoned raise — the answer can be stale until
+  replication applies the write; the counter shows how often.
+
 ## Takeaway
 - takeaway: mark what changed with the commit that changed it, and let the replica prove it caught
   up. A causal token held by the writer protects only the writer; one held by the data protects

@@ -36,7 +36,6 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.freshness.MarkerStore.MarkerView;
-import org.danteplanner.backend.shared.gtid.GtidGateConfig;
 import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 
 import org.junit.jupiter.api.AfterEach;
@@ -295,9 +294,9 @@ class FreshnessReadAspectTest {
     }
 
     @Test
-    void gtidGateConfig_WhenRoutingIsDisabled_RegistersNoFreshnessReadAspect() {
+    void freshnessConfig_WhenRoutingIsDisabled_RegistersNoFreshnessReadAspect() {
         new ApplicationContextRunner()
-                .withUserConfiguration(GtidGateConfig.class)
+                .withUserConfiguration(FreshnessConfig.class)
                 .withPropertyValues("datasource.routing.enabled=false")
                 .run(disabled -> assertThat(disabled).doesNotHaveBean(FreshnessReadAspect.class));
     }
