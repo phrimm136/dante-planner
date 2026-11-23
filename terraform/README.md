@@ -49,7 +49,10 @@ bucket, before that bucket exists. That apply runs with a `backend_override.tf` 
 shows one left behind: delete it once the apply is done, before the move, whose init against the
 backend file fails while the override still selects the local backend. Then
 `scripts/ops/provision/bootstrap-state-to-s3.sh` moves the state into the new bucket, at
-`<stack>/terraform.tfstate`, and verifies it with a plan that shows no change.
+`<stack>/terraform.tfstate`, and verifies it by pulling the bucket's state back and comparing it
+with the local copy (lineage, resources and outputs). It then plans with the account's tfvars as
+information: a change in that plan is drift between the code and the account that existed before
+the move, not damage done by it, while a plan that fails stops the move unverified.
 
 Locking is `use_lockfile = true` (S3-native, no DynamoDB table), and every stack sets
 `workspace_key_prefix = "env"` — including the `terraform_remote_state` data sources, so a

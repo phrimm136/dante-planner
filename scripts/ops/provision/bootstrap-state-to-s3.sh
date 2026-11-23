@@ -6,9 +6,12 @@
 #
 # <stack> is state-backend or iam-bootstrap. The first form backs the local file up outside the
 # repository, initializes terraform/<stack> against the backend file, pushes the backup as the
-# remote state, compares resource counts and requires a plan with the tfvars file to show no
-# change, then writes <backup>.verified (lineage and serial, no account id). The second form
-# deletes the local file only when that marker matches its backup.
+# remote state, and pulls it back: the move is verified when the bucket's state equals the backup
+# in lineage, resources and outputs, with a serial not below the backup's (push rewrites
+# terraform_version, and over an older serial of the same state stores serial + 1). A plan with the
+# tfvars file then runs as information; its changes are drift the move did not cause, but a plan
+# that fails stops the move. Verification writes <backup>.verified (lineage and serial, no
+# account id). The second form deletes the local file only when that marker matches its backup.
 #
 # Output names the backend file, never the bucket it holds: a bucket name carries the account id,
 # and every line this prints is meant to be safe to paste into a public place.
@@ -61,6 +64,21 @@ if not raw.strip():
 else:
     d = json.loads(raw)
     print(sum(len(r.get("instances", [])) for r in d.get("resources", [])), d.get("lineage") or "-", d.get("serial", 0))
+' "$1"
+}
+
+state_difference() {
+  python3 -c '
+import json, sys
+backup = json.load(open(sys.argv[1]))
+raw = sys.stdin.read()
+remote = json.loads(raw) if raw.strip() else {}
+differs = ["lineage"] if backup.get("lineage") != remote.get("lineage") else []
+if remote.get("serial", -1) < backup.get("serial", 0):
+    differs.append("serial (lower than the backup)")
+if any(backup.get(field, empty) != remote.get(field, empty) for field, empty in (("resources", []), ("outputs", {}))):
+    differs.append("content (resources or outputs)")
+print(" and ".join(differs) or "equal")
 ' "$1"
 }
 
@@ -192,10 +210,12 @@ push_state() {
   elif [[ "$remote_lineage" == "$backup_lineage" && "$remote_serial" -lt "$backup_serial" ]]; then
     echo "remote: $key holds an older serial of the same state; pushing the newer local state over it"
     push=1
-  elif [[ "$remote_lineage" == "$backup_lineage" && "$remote_serial" -eq "$backup_serial" ]]; then
-    echo "push: already done; $key holds the backup's state (same lineage and serial)"
-  elif [[ "$remote_lineage" == "$backup_lineage" ]]; then
+  elif [[ "$remote_lineage" == "$backup_lineage" && "$(state_difference "$backup" <<<"$pulled")" == equal ]]; then
+    echo "push: already done; $key holds the backup's state (same lineage, resources and outputs)"
+  elif [[ "$remote_lineage" == "$backup_lineage" && "$remote_serial" -gt "$backup_serial" ]]; then
     die "remote: $key holds a newer serial of the same state than $local_file; nothing pushed. The local file is behind the bucket: do not move it."
+  elif [[ "$remote_lineage" == "$backup_lineage" ]]; then
+    die "remote: $key holds the same lineage and serial as $local_file but different resources or outputs; nothing pushed."
   else
     die "remote: $key already holds $remote_n resources of another state (a different lineage); nothing pushed."
   fi
@@ -215,16 +235,32 @@ push_state() {
   fi
   echo "count: remote $remote_n, file $file_n"
 
-  local rc=0
+  local difference
+  if ! pulled=$(tf -chdir="$stack_dir" state pull 2>>"$init_log"); then
+    die "state: could not read $key after the push; read $init_log. Pushed but not verified; re-run this command."
+  fi
+  difference=$(state_difference "$backup" <<<"$pulled")
+  [[ "$difference" == equal ]] ||
+    die "state: $key differs from the backup in $difference. Pushed but not verified."
+  echo "state: $key equals the backup (lineage, resources, outputs; serial not below the backup's)"
+
+  local rc=0 counts replaced
   tf -chdir="$stack_dir" plan -var-file="$tfvars" -detailed-exitcode -input=false -no-color >"$plan_log" 2>&1 || rc=$?
   case "$rc" in
-    0) echo "plan: no change (log $plan_log)" ;;
-    2) die "plan: shows changes. The state is pushed but not verified. Read $plan_log, or run: $plan_cmd" ;;
-    *) die "plan: failed (exit $rc). The state is pushed but not verified. Read $plan_log, or run: $plan_cmd" ;;
+    0) echo "plan: no changes (log $plan_log)" ;;
+    2)
+      counts=$(awk '/^Plan: [0-9]+ to add, [0-9]+ to change, [0-9]+ to destroy/ {sub(/\.$/, "", $0); sub(/^Plan: /, "", $0); print; exit}' "$plan_log")
+      echo "plan: ${counts:-changes}; this is a difference between the code and the account that the move did not cause. Read $plan_log."
+      replaced=$(awk '/must be replaced$|will be destroyed$/ {n++} END {print n + 0}' "$plan_log")
+      if [[ "$replaced" -gt 0 ]]; then
+        echo "WARNING: the plan destroys or replaces $replaced resources. Read $plan_log before any apply; the move did not cause this."
+      fi
+      ;;
+    *) die "plan: failed (exit $rc), so the stack cannot be planned from the bucket. Pushed but not verified. Read $plan_log, or run: $plan_cmd" ;;
   esac
 
   (umask 077 && printf '%s %s\n' "$backup_lineage" "$backup_serial" >"$backup.verified")
-  echo "verified: $stack $label $file_n resources, plan shows no change"
+  echo "verified: $stack $label $file_n resources, the bucket holds the backup's state"
   echo "next: $(abs_path "${BASH_SOURCE[0]}") --remove-local $stack $local_file"
 }
 

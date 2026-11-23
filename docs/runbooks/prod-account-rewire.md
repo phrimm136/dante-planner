@@ -34,7 +34,8 @@ terraform -chdir=terraform/state-backend output -raw tf_state_bucket
 rm terraform/state-backend/backend_override.tf
 scripts/ops/provision/bootstrap-state-to-s3.sh state-backend terraform/backend.prod.hcl \
   terraform/state-backend/danteplanner-prod.tfvars terraform/state-backend/terraform.tfstate
-# once it prints verified:
+# once it prints verified: (a plan line with changes before it is drift the move did not cause;
+# read its log before any apply)
 scripts/ops/provision/bootstrap-state-to-s3.sh --remove-local state-backend terraform/state-backend/terraform.tfstate
 ```
 
