@@ -4,16 +4,17 @@
 #   bootstrap-state-to-s3.sh <stack> <backend file> <tfvars file> <local state file>
 #   bootstrap-state-to-s3.sh --remove-local <stack> <local state file>
 #
-# <stack> is state-backend or iam-bootstrap. The first form backs the local file up outside the
-# repository, initializes terraform/<stack> against the backend file, pushes the backup as the
-# remote state, and pulls it back: the move is verified when the bucket's resources and outputs
-# equal the backup's. The bucket's lineage and serial cannot identify the state: terraform's
-# remote state manager stores a push into an empty S3 key under a new lineage at serial 1. A plan
-# with the
-# tfvars file then runs as information; its changes are drift the move did not cause, but a plan
-# that fails stops the move. Verification writes <backup>.verified (lineage, serial and a sha256
-# of the resources and outputs; no account id). The second form deletes the local file only when
-# that marker matches both its backup and the local file.
+# <stack> is state-backend or iam-bootstrap. Before anything is written, the first form requires
+# the three files to name one account and every resource in the state to be declared, in the same
+# single or count/for_each form, by the tracked .tf files of terraform/<stack>. It then backs the
+# local file up outside the repository, initializes terraform/<stack> against the backend file,
+# pushes the backup as the remote state, and pulls it back: the move is verified when the bucket's
+# resources and outputs equal the backup's. The bucket's lineage and serial cannot identify the
+# state: terraform's remote state manager stores a push into an empty S3 key under a new lineage
+# at serial 1. A plan with the tfvars file then runs as information; its changes are drift the
+# move did not cause, but a plan that fails stops the move. Verification writes <backup>.verified
+# (lineage, serial and a sha256 of the resources and outputs; no account id). The second form
+# deletes the local file only when that marker matches both its backup and the local file.
 #
 # Output names the backend file, never the bucket it holds: a bucket name carries the account id,
 # and every line this prints is meant to be safe to paste into a public place.
@@ -78,6 +79,56 @@ remote = json.loads(raw) if raw.strip() else {}
 same = all(backup.get(field, empty) == remote.get(field, empty) for field, empty in (("resources", []), ("outputs", {})))
 print("equal" if same else "content (resources or outputs)")
 ' "$1"
+}
+
+check_declared() {
+  local stack=$1 stack_dir=$2 state_file=$3 verdict
+  verdict=$(python3 -c '
+import json, re, subprocess, sys
+stack_dir, state_file = sys.argv[1:3]
+listing = subprocess.run(["git", "-C", stack_dir, "ls-files", "--", "*.tf"], capture_output=True, text=True)
+if listing.returncode != 0:
+    print("no-tracked-files"); sys.exit()
+block_start = re.compile(r"^(resource|data)\s+\"([^\"]+)\"\s+\"([^\"]+)\"\s*\{", re.M)
+declared = {}
+for tracked in listing.stdout.split():
+    if "/" in tracked:
+        continue
+    text = open(f"{stack_dir}/{tracked}").read()
+    for start in block_start.finditer(text):
+        depth, repeated = 1, False
+        for line in text[start.end():].splitlines():
+            if depth == 1 and re.match(r"\s*(count|for_each)\s*=", line):
+                repeated = True
+            depth += line.count("{") - line.count("}")
+            if depth <= 0:
+                break
+        mode = "managed" if start.group(1) == "resource" else "data"
+        declared[(mode, start.group(2), start.group(3))] = repeated
+undeclared, reshaped = [], []
+for resource in json.load(open(state_file)).get("resources", []):
+    key = (resource.get("mode"), resource.get("type"), resource.get("name"))
+    address = ("data." if key[0] == "data" else "") + f"{key[1]}.{key[2]}"
+    if resource.get("module"):
+        undeclared.append(resource["module"] + "." + address)
+    elif key not in declared:
+        undeclared.append(address)
+    elif any(("index_key" in instance) != declared[key] for instance in resource.get("instances", [])):
+        reshaped.append(address)
+if undeclared:
+    print("undeclared " + ", ".join(sorted(set(undeclared))))
+elif reshaped:
+    print("reshaped " + ", ".join(sorted(set(reshaped))))
+else:
+    print("ok")
+' "$stack_dir" "$state_file")
+  case "$verdict" in
+    ok) echo "stack: every resource in $(basename "$state_file") is declared by $stack" ;;
+    no-tracked-files) die "stack: cannot list the tracked .tf files of $stack_dir; nothing done" ;;
+    undeclared\ *) die "stack: $state_file holds resources $stack does not declare, so it is another stack's state or the code dropped a resource: ${verdict#undeclared }; nothing done." ;;
+    reshaped\ *) die "stack: $state_file holds resources whose instances $stack declares in another form (count or for_each against a single instance), so it is another stack's state: ${verdict#reshaped }; nothing done." ;;
+    *) die "stack: could not compare $state_file with the declarations of $stack; nothing done" ;;
+  esac
 }
 
 state_digest() {
@@ -157,6 +208,11 @@ push_state() {
   fi
   if [[ -s "$stack_dir/terraform.tfstate" ]] && ! is_default_file_of "$local_file" "$stack_dir"; then
     die "$stack_dir/terraform.tfstate exists and is not the file being moved; init would offer to migrate it. Move that one first; nothing done."
+  fi
+  if [[ -s "$local_file" ]]; then
+    check_declared "$stack" "$stack_dir" "$local_file"
+  elif [[ -s "$backup" ]]; then
+    check_declared "$stack" "$stack_dir" "$backup"
   fi
 
   mkdir -p "$backup_dir" "$log_dir"
