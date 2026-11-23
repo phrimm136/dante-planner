@@ -39,8 +39,14 @@ class ContentWritersAdmitFloorsTest {
 
     @Test
     void contentWriters_WhenScanned_IncludeEveryKnownWriter() {
-        assertThat(topLevelNames(PRODUCTION, ContentWritersAdmitFloorsTest::writes)).containsExactlyInAnyOrder(
-                PlannerCatalogService.class.getName());
+        assertThat(contentWriters(PRODUCTION)).containsExactlyInAnyOrder(PlannerCatalogService.class.getName());
+    }
+
+    @Test
+    void unknownContentWriter_WhenScanned_IsCounted() {
+        JavaClasses fixture = new ClassFileImporter().importClasses(UnadmittedFilterRebuilder.class);
+
+        assertThat(contentWriters(fixture)).containsExactly(UnadmittedFilterRebuilder.class.getName());
     }
 
     @Test
@@ -51,9 +57,13 @@ class ContentWritersAdmitFloorsTest {
     }
 
     private static Set<String> unadmittedWriters(JavaClasses classes) {
-        Set<String> writers = topLevelNames(classes, ContentWritersAdmitFloorsTest::writes);
+        Set<String> writers = contentWriters(classes);
         writers.removeAll(topLevelNames(classes, ContentWritersAdmitFloorsTest::dependsOnAdmission));
         return writers;
+    }
+
+    private static Set<String> contentWriters(JavaClasses classes) {
+        return topLevelNames(classes, ContentWritersAdmitFloorsTest::writes);
     }
 
     private static Set<String> topLevelNames(JavaClasses classes, Predicate<JavaClass> predicate) {

@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -31,8 +32,10 @@ class ShellBranchTest {
 
     private static final JavaClasses FIXTURES = new ClassFileImporter().importPackages(FIXTURE_PACKAGE);
 
+    private static final Map<JavaClasses, SortedMap<String, Integer>> COUNTS = new ConcurrentHashMap<>();
+
     private static final SortedMap<String, Integer> COUNTED =
-            ShellBranches.in(FIXTURES, FIXTURE_SOURCES, FIXTURE_PACKAGE);
+            counted(FIXTURES, FIXTURE_SOURCES, FIXTURE_PACKAGE);
 
     private static final String SAVE = SHELLS + ".save(boolean)";
 
@@ -45,7 +48,8 @@ class ShellBranchTest {
 
     @Test
     void mainTree_WhenCounted_RaisesNoLineOfTheStore() {
-        assertThat(ShellBranches.raised(ShellBranches.read(ShellBranches.STORE), mainBranches()))
+        assertThat(ShellBranches.raised(ShellBranches.read(ShellBranches.STORE), counted(ImportedClasses.production(),
+                ShellBranches.MAIN_SOURCES, ShellBranches.MAIN_PACKAGE)))
                 .as("an effectful method may branch only by switching on a decision value (a sealed type or enum);"
                         + " these gained branches")
                 .isEmpty();
@@ -53,7 +57,8 @@ class ShellBranchTest {
 
     @Test
     void mainTree_WhenCounted_LeavesNoLineOfTheStoreStale() {
-        assertThat(ShellBranches.stale(ShellBranches.read(ShellBranches.STORE), mainBranches()))
+        assertThat(ShellBranches.stale(ShellBranches.read(ShellBranches.STORE), counted(ImportedClasses.production(),
+                ShellBranches.MAIN_SOURCES, ShellBranches.MAIN_PACKAGE)))
                 .as("these lost branches, are gone, or no longer reach an effect; run `checks be freeze-branches`"
                         + " so that %s holds the new counts", ShellBranches.STORE)
                 .isEmpty();
@@ -80,7 +85,7 @@ class ShellBranchTest {
     }
 
     @Test
-    void shapes_WhenCounted_MatchOneSourceMethodEach() {
+    void shapes_WhenCounted_MatchTheirSourceMethods() {
         assertThat(countedIn(SHAPES)).containsExactlyInAnyOrderEntriesOf(Map.ofEntries(
                 Map.entry(SHAPES + ".<init>(" + SHELLS + "$Port, java.util.Queue, boolean)", 1),
                 Map.entry(SHAPES + ".inALambda(java.util.List)", 1),
@@ -99,6 +104,10 @@ class ShellBranchTest {
                 Map.entry(SHAPES + "$1Local.<init>(" + SHAPES + ", int, boolean)", 2),
                 Map.entry(SHAPES + "$1Local.run()", 1),
                 Map.entry(SHAPES + "$1StaticLocal.<init>(java.lang.String, boolean, " + SHELLS + "$Port)", 1),
+                Map.entry(SHAPES + "$1TypedLocal.<init>(" + SHAPES + ", java.lang.Object)", 1),
+                Map.entry(SHAPES + "$EffectfulTwins$.run(Port, boolean)", 3),
+                Map.entry(SHAPES + "$FieldAndMethod$.run()", 1),
+                Map.entry(SHAPES + "$FieldAndMethod.inAMethod(boolean)", 1),
                 Map.entry(SHAPES + "$Inner.<init>(" + SHAPES + ", boolean)", 1),
                 Map.entry(SHAPES + "$Level.<init>(java.lang.String, int, " + SHELLS + "$Port)", 1),
                 Map.entry(SHAPES + "$Compact.<init>(" + SHELLS + "$Port, java.util.List)", 1)));
@@ -118,7 +127,8 @@ class ShellBranchTest {
         SortedMap<String, Integer> stored = new TreeMap<>(COUNTED);
         stored.remove(LATE);
 
-        assertThat(ShellBranches.raised(stored, COUNTED)).containsExactly(LATE + " 0 -> 1");
+        assertThat(ShellBranches.raised(stored, counted(FIXTURES, FIXTURE_SOURCES, FIXTURE_PACKAGE)))
+                .containsExactly(LATE + " 0 -> 1");
     }
 
     @Test
@@ -130,24 +140,10 @@ class ShellBranchTest {
 
     @Test
     void stale_WhenAStoredMethodIsGoneOrHasNoBranch_NamesIt() {
-        assertThat(ShellBranches.stale(with(ACT, 1), COUNTED)).containsExactly(ACT + " 1 -> 0");
+        assertThat(ShellBranches.stale(with(ACT, 1), counted(FIXTURES, FIXTURE_SOURCES, FIXTURE_PACKAGE)))
+                .containsExactly(ACT + " 1 -> 0");
         assertThat(ShellBranches.stale(with(SHELLS + ".gone()", 1), COUNTED))
                 .containsExactly(SHELLS + ".gone() 1 -> 0");
-    }
-
-    @Test
-    void in_WhenTwoSourceMethodsShareAKey_FailsNamingIt() throws IOException {
-        Files.writeString(directory.resolve("Twins.java"), """
-                package twins;
-                class Twins {
-                    void one() { class Local { void run(boolean x) { if (x) { one(); } } } }
-                    void two() { class Local { void run(boolean x) { if (x) { two(); } } } }
-                }
-                """);
-
-        assertThatThrownBy(() -> ShellBranches.in(FIXTURES, directory, FIXTURE_PACKAGE))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("twins.Twins$Local.run(boolean) has branches but is declared 2 time(s)");
     }
 
     @Test
@@ -162,7 +158,7 @@ class ShellBranchTest {
         assertThatThrownBy(() -> ShellBranches.in(FIXTURES, directory, FIXTURE_PACKAGE))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("absent.Absent.run(boolean)")
-                .hasMessageContaining("compiled to []");
+                .hasMessageContaining("was not compiled");
     }
 
     @Test
@@ -188,13 +184,13 @@ class ShellBranchTest {
     }
 
     @Test
-    void regenerate_WhenGivenAReason_AddsTheLine() {
+    void regenerate_WhenGivenAReason_AddsTheLineAndReportsItWithTheReason() {
         SortedMap<String, Integer> stored = new TreeMap<>(COUNTED);
         stored.remove(LATE);
         Path store = written(stored);
 
-        ShellBranches.regenerate(store, COUNTED, "the port moved");
-
+        assertThat(ShellBranches.regenerate(store, COUNTED, "the port moved"))
+                .containsExactly("raised, because the port moved:", LATE + " 0 -> 1");
         assertThat(ShellBranches.read(store)).isEqualTo(COUNTED);
     }
 
@@ -202,8 +198,7 @@ class ShellBranchTest {
     void regenerate_WhenLinesOnlyShrink_NeedsNoReason() {
         Path store = written(with(SAVE, 2));
 
-        ShellBranches.regenerate(store, COUNTED, "");
-
+        assertThat(ShellBranches.regenerate(store, COUNTED, "")).isEmpty();
         assertThat(ShellBranches.read(store)).isEqualTo(COUNTED);
     }
 
@@ -225,8 +220,8 @@ class ShellBranchTest {
                 .hasMessageContaining(SAVE + " more than once");
     }
 
-    private static SortedMap<String, Integer> mainBranches() {
-        return Main.BRANCHES;
+    private static SortedMap<String, Integer> counted(JavaClasses classes, Path sourceRoot, String within) {
+        return COUNTS.computeIfAbsent(classes, absent -> ShellBranches.in(classes, sourceRoot, within));
     }
 
     private static SortedMap<String, Integer> with(String method, int count) {
@@ -245,11 +240,5 @@ class ShellBranchTest {
         Path store = directory.resolve("written.txt");
         ShellBranches.write(store, branches);
         return store;
-    }
-
-    private static final class Main {
-
-        private static final SortedMap<String, Integer> BRANCHES = ShellBranches.in(ImportedClasses.production(),
-                ShellBranches.MAIN_SOURCES, ShellBranches.MAIN_PACKAGE);
     }
 }

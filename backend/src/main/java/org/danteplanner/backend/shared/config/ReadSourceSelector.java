@@ -44,10 +44,14 @@ public class ReadSourceSelector extends AbstractDataSource {
     private final List<Source> sources;
 
     public ReadSourceSelector(List<Source> sources) {
-        this.sources = List.copyOf(sources);
-        if (this.sources.stream().noneMatch(Source::authoritative)) {
+        this.sources = withAnAuthority(List.copyOf(sources));
+    }
+
+    private static List<Source> withAnAuthority(List<Source> sources) {
+        if (sources.stream().noneMatch(Source::authoritative)) {
             throw new IllegalArgumentException("a read source list needs an authoritative source");
         }
+        return sources;
     }
 
     public List<Source> sources() {

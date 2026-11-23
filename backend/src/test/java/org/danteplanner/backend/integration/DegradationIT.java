@@ -143,8 +143,6 @@ class DegradationIT {
     private static final long BLACKHOLE_WRITE_FAILURE_FLOOR_MS = 1_000;
     private static final long BLACKHOLE_WRITE_FAILURE_CEILING_MS = 25_000;
 
-    /** Minimal planner content that passes {@code PlannerContentValidator} (from CausalGateIT). */
-
     private static final Network DEGRADATION_NETWORK = Network.newNetwork();
 
     // Relaxed durability and no performance_schema: throwaway test databases need no

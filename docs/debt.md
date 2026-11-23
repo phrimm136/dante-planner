@@ -516,8 +516,9 @@ reproduced on the rig: `notify:comment` invalidates and the refetch races replic
 notification row committed on the primary ~40ms earlier, the Seoul replica answered
 `{"unreadCount":0}`), the answer marks the query fresh, and `useUnreadCountQuery`'s
 `staleTime: STALE_TIME.MEDIUM` (5 min — the constant's own comment files notification
-inbox under SHORT) blocks every focus heal for the window. No ryw_gtid protects the read:
-the write was server-side, so the client never held a cookie for it. Candidate fixes are a
+inbox under SHORT) blocks every focus heal for the window. The dispatch now raises
+the recipient's marker before the push, so the race may be closed; it has not been measured since.
+Candidate fixes are a
 design choice (carry state in the push against the SSE-invalidates-only convention, pin
 notification reads to the primary, or shorten the staleTime and accept the focus heal);
 `notification-push.spec.ts` asserts the push-driven refetch and the fresh-mount render, and
@@ -623,13 +624,6 @@ contract. ADR 039 names this population directly — the seed carries gift ids o
 valid band. The validation branch adds a fourth backend copy (`EncodedGiftId`) beside
 `GameDataRegistry.GIFT_ENHANCEMENT_PATTERN`, which `PlannerIdMigrations` also reads.
   re-check: `rg -q 'EncodedGiftIdSchema.safeParse\(id\)' frontend/src/pages/planner/lib/plannerContentExtractors.ts && rg -q 'return enhanced \? id % 10000 : id;' backend/src/main/java/org/danteplanner/backend/planner/searchindex/PlannerContentEntityExtractor.java`
-- 2026-08-17 — A catalog row whose core row the batch load misses becomes `PlannerCore.Absent`
-(`PublishedPlannerQueryService`), `PublicPlannerResponse` then builds the response without
-`createdAt`, and the global `non_null` Jackson setting omits the key, but
-`PlannerListSchemas.ts:19` declares `createdAt` required, so one such row rejects the entire
-paginated community page rather than one card. The sibling fields on the same DTO are
-correctly `.nullish()` (`:17-18`) and the components already tolerate an absent value.
-  re-check: `rg -q '^  createdAt: z.string\(\),$' frontend/src/pages/planner/schemas/PlannerListSchemas.ts && rg -qF 'PlannerCore.Absent absent -> response.build();' backend/src/main/java/org/danteplanner/backend/planner/dto/PublicPlannerResponse.java`
 - 2026-08-17 — `AbEventSchemas.ts:5` types `relatedEgoGifts` as `z.array(z.string())`
 rather than `EGOGiftIdSchema`, and 13 ids in `static/data/abEventSpecList.json`
 (`991001`–`993004`, six digits) violate `GIFT_ID_PATTERN`. `EGOGiftGrid.tsx:32-33` renders
@@ -841,11 +835,6 @@ guards the parse but likewise skips the schema gate.
   the comment is already deleted, so a repeated delete leaves a second DELETE_COMMENT record;
   `deleteComment` by id does not. Worth fixing when the moderation audit trail is read as a count.
   re-check: `rg -qU 'deleteCommentByPublicId\([^{]*\{[^}]*auditService\.record[^}]*if \(comment\.deleted\(\)\)' backend/src/main/java/org/danteplanner/backend/moderation/service/CommentModerationService.java`
-- `GtidPinExitTest.readGet_WhenReplicaRejectsGtidAsMalformed_ClearsUnpinnedAndWarnsOnceWithoutStack`
-  failed once at full suite size and passed on retry and on a full rerun (2026-10-04, Lane D S4
-  gate). It counts warning log events, so it likely depends on order or logging state. Worth
-  fixing when it fails a second time, or when the retry gate flags it in CI.
-  re-check: `rg -q 'void readGet_WhenReplicaRejectsGtidAsMalformed_ClearsUnpinnedAndWarnsOnceWithoutStack' backend/src/test/java/org/danteplanner/backend/shared/gtid/GtidPinExitTest.java`
 - The MDCategory `Converter<String, MDCategory>` in `planner.config.PlannerWebConfig` has no MVC
   consumer: no request parameter or path variable of that type exists. Worth deleting the next
   time planner web config changes.
@@ -968,10 +957,6 @@ guards the parse but likewise skips the schema gate.
   pinned by `PlannerViewLockOrderIT`; record the second in an ADR or pin it with a test before
   the next change to that file.
   re-check: `rg -q 'LEFT JOIN planner_stats s ON s.planner_id = c.planner_id' backend/src/main/java/org/danteplanner/backend/planner/repository/RecommendedSql.java && .claude/skills/debt-ledger/bin/debt absent docs/adr 'RecommendedSql'`
-- **`shared/gtid/GtidGateConfig.java` and `GtidReadGate.java` were not swept**: both carried
-  uncommitted edits in another checkout at merge time. Sweep them with the same rubric once
-  those edits land.
-  re-check: `rg -q 'Capture used to hang off' backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidGateConfig.java`
 - **Comment discipline has no gate.** Nothing fails when a restating javadoc is added. Worth
   adding when the next sweep-worthy file appears: a hook flagging javadoc whose first sentence
   starts with "Handle", "Returns", "Gets", "Sets", "Creates", or repeats the declaration name,
@@ -1013,10 +998,6 @@ guards the parse but likewise skips the schema gate.
 
 ## 2026-09-18 gtid gate read-through (shared/gtid)
 
-- `GtidCookie.decode` accepts untagged GTID sets only; MySQL 8.4's tagged form (`uuid:tag:n`)
-  is treated as unusable and cleared, which drops read-your-writes for that client. The app sets
-  no GTID tags today. Worth doing before anything sets `gtid_next` with a tag.
-  re-check: `rg -qF 'Pattern.compile("(\\d+)(?:-(\\d+))?")' backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidCookie.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main -i 'gtid_next'`
 - 2026-09-23 — Seoul writes spend most of their WAN round trips on transaction and driver
   chatter. Mimir 7-day means, Seoul against Oregon: Save `PUT /api/planner/md/{id}` (sent on
   an explicit save with sync on; the editor's autosave writes only IndexedDB) 2583 against
@@ -1048,12 +1029,12 @@ guards the parse but likewise skips the schema gate.
   chatter and ADR 123 moves writes beside the primary, where each round trip costs about 1 ms.
   Worth doing if write forwarding is rolled back, or when ADR 122's command-count test is built.
   re-check: `rg -q 'target.isReadOnly\(\)' backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidCapturingDataSource.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/resources 'useLocalSessionState'`
-- **The gate assumes the probe and the read reach the same replica.** `WAIT_FOR_EXECUTED_
-  GTID_SET` runs on one pooled connection and the request's read uses another; sound with
+- **The marker wait assumes the wait and the read reach the same replica.** `WAIT_FOR_EXECUTED_
+GTID_SET` runs on one pooled connection and the request's read uses another; sound with
   one replica behind the endpoint, void the day the endpoint resolves to more than one host.
   No guard and no ADR names the assumption. Worth an ADR line the moment a second replica or
   a reader endpoint is proposed.
-  re-check: `rg -qF 'new JdbcTemplate(source.dataSource()).queryForObject(' backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidReadGate.java && .claude/skills/debt-ledger/bin/debt absent docs/adr -i 'probe and the read'`
+  re-check: `rg -qF 'new JdbcTemplate(source.dataSource())' backend/src/main/java/org/danteplanner/backend/shared/freshness/ReplicaGtidWait.java && .claude/skills/debt-ledger/bin/debt absent docs/adr -i 'probe and the read'`
 - **Tagged GTIDs crash a committed write.** `GtidWriteCapture.parseInterval` parses every
   colon segment as a number; a MySQL 8.3+ tagged GTID (`uuid:tag:1-3`) throws, and the
   exception escapes the filter as a 500 after the commit. Only reachable if something sets a
@@ -1073,14 +1054,6 @@ guards the parse but likewise skips the schema gate.
   with the container's rightmost-trusted parser (`ForwardedHeaderFilter` / `RemoteIpValve`) and
   an attacker-framed test. Worth doing before any ingress that bypasses Cloudflare exists.
   re-check: `rg -q 'String claimedIp = firstHop\(forwarded\);' backend/src/main/java/org/danteplanner/backend/shared/util/ClientIpResolver.java && rg -q 'ReturnsTheLeftmost' backend/src/test/java/org/danteplanner/backend/shared/util/ClientIpResolverTest.java`
-- **Bucket configuration is validated per request, not at bind time.** `RateLimitProperties`
-  is `@Validated` and requires each bucket to be present, but the `BucketConfig` components carry no constraint
-  (seven of nine `@ConfigurationProperties` classes are `@Validated`; `HikariTuningProperties`
-  and `SecurityProperties` are not), and
-  `buildConfiguration` runs per request, so a zero duration fails on first use. The fix is the
-  ArchUnit rule "every `@ConfigurationProperties` class is `@Validated`" and the sibling edits
-  it lists; the rule, not the class, is the unit of work.
-  re-check: `rg -q 'record BucketConfig\(int capacity, int refillTokens, int refillDurationSeconds\)' backend/src/main/java/org/danteplanner/backend/shared/ratelimit/RateLimitProperties.java`
 
 ## 2026-09-18 consistency without an LLM (scheduled ratchet)
 
@@ -1276,13 +1249,6 @@ guards the parse but likewise skips the schema gate.
   any non-moderation service starts calling a moderation service: make the rule transitive over the
   call graph (as `EffectPlacementTest` walks it).
   re-check: `rg -q 'getDirectDependenciesFromSelf' backend/src/test/java/org/danteplanner/backend/architecture/PrivilegedRouteCoverageRule.java`
-- `ArchitectureRuleFixtureRatchetTest` counts only `ArchRule` fields and `@ArchTest` members, so a
-  rule written as a plain `@Test` (FailureUnionBoundaryTest, BulkUpdateBoundaryTest,
-  ContentWritersAdmitFloorsTest, SubjectModuleBoundaryTest's factory rules, the frozen-name
-  staleness checks) escapes the fixture requirement. Worth doing when a new architecture test
-  lands as a plain `@Test`: define a rule by what it checks (an ArchUnit `check`/`evaluate` call
-  reached from a test in the architecture package) rather than by its declared type.
-  re-check: `rg -q 'isAssignableTo\(ArchRule.class\) \|\| field.isAnnotatedWith\(ArchTest.class\)' backend/src/test/java/org/danteplanner/backend/architecture/ArchitectureRuleFixtureRatchetTest.java`
 - `RestrictedPrincipalMatrixIT`'s allowed rows address random ids, so most answer 404 at their
   entity lookup: the matrix proves they clear validation and are not refused with USER_BANNED,
   not that a ban leaves them working. A ban check placed after the lookup (the order
@@ -1492,17 +1458,11 @@ guards the parse but likewise skips the schema gate.
 - `cookie.secure` is an operator switch in prod: `application.properties:107` binds it to
   `${COOKIE_SECURE:true}`, and an environment variable outranks `application-prod.properties`, so a
   `COOKIE_SECURE=false` key in the runtime-config secret drops Secure from every cookie
-  `CookieUtils` writes (auth, device id, CSRF), while `GtidCookie` hard-codes `secure(true)`.
-  Deleting the flag and always writing Secure removes the state; `http://localhost` is a secure
+  `CookieUtils` writes (auth, device id, CSRF). Deleting the flag and always writing Secure removes the state; `http://localhost` is a secure
   context, but whether Playwright's request context sends Secure cookies over it is unchecked.
   Worth doing before the next cookie change, or when anyone besides the owner can write the
   runtime-config secret.
   re-check: `rg -qF 'cookie.secure=${COOKIE_SECURE:true}' backend/src/main/resources/application.properties`
-- Error Prone 2.51 left `ReferenceEquality` warnings with no bug behind them: sites that mean
-  identity (`ReadSourcesConfig.java:185,234` and some test sites, not counted again). The build promotes only three checks to errors and has no
-  warning baseline, so a compiler bump adds warnings silently. Worth doing with a per-check
-  warning ratchet: suppress the identity sites with a reason.
-  re-check: `rg -qF 'readSources().get(0) == source' backend/src/main/java/org/danteplanner/backend/shared/config/ReadSourcesConfig.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/shared/config/ReadSourcesConfig.java 'ReferenceEquality'`
 - `com.redis:testcontainers-redis` is pinned to 3.0.1 (`build.gradle.kts:67`) because Boot 4.1.2
   (and 4.2.0-RC2) manage 2.2.4, whose POM imports the Boot 3.4.2 BOM and with it a vulnerable
   Artemis BOM. Worth removing when spring-boot-dependencies manages
@@ -1581,13 +1541,12 @@ guards the parse but likewise skips the schema gate.
   the comment write paths are next touched: decide whether the edit answers the planner's
   not-found.
   re-check: `.claude/skills/debt-ledger/bin/debt python 'import re,sys; t=open("backend/src/main/java/org/danteplanner/backend/comment/service/CommentCommandService.java").read(); m=re.search(r"updateComment\(.*?\n    }\n", t, re.S); sys.exit(0 if m and "plannerAccess" not in m.group(0) else 1)'`
-- The GTID cookie gate is still served beside the freshness markers. Every read and write now has
-  a scope and a declaration, so the gate protects nothing the markers do not; it stays for one
-  release so that old and new pods never leave a writer unprotected during a rollout. Worth doing
-  once the release that declares every scope serves in both regions: delete `GtidCookie`, the
-  read gate and the primary pin, move the response seam to `shared/freshness`, and re-point the
-  consistency run's calibration and coverage from the gate's counters to the marker wait.
-  re-check: `test -f backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidCookie.java`
+- A marker raise that outlives its caller's bound leaves a window in which the write is answered
+  and no marker says so. A pending marker written before the commit and replaced by the GTID after
+  it would close that window; it was rejected for writes that never answered, and this window is a
+  listed non-goal there, so both lines have to be overturned with a measured rate. Worth doing when
+  `freshness.marker.raise.abandoned` shows abandoned raises in production.
+  re-check: `rg -qF 'raise.abandoned' backend/src/main/java/org/danteplanner/backend/shared/freshness && rg -qF 'a pending entry before commit' docs/adr`
 - The local two-region rig shares the developer's database volume: `local-multiregion-up.sh` fixes
   the compose project to `limbusplanner`, and `docker-compose.local.yml` mounts `mysql-data`, so
   bringing the rig up migrates the local dev database and the e2e suites leave their users and
@@ -1612,8 +1571,7 @@ guards the parse but likewise skips the schema gate.
   one request-context type with a single owner of open and close, and routing pins that restore
   the previous pin instead of clearing it.
   re-check: `rg -q 'ThreadLocal<' backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidWriteCapture.java`
-- `ChosenReadSource.record` runs on every read-source acquisition (`ReadSourceSelector`), but only
-  `GtidCookieFilter` and the dispatch window in `MarkerDispatchStamp` clear it. On a pooled
+- `ChosenReadSource.record` runs on every read-source acquisition (`ReadSourceSelector`), but only `FreshnessStampFilter` and the dispatch window in `MarkerDispatchStamp` clear it. On a pooled
   scheduler thread such as `PlannerDriftReconciler`'s, the value stays for the next run. Whether a
   stale value changes a decision there is not checked. Worth doing with the request-context entry
   above, or when a scheduled job starts to read `servedByAuthority`.
@@ -1639,14 +1597,6 @@ guards the parse but likewise skips the schema gate.
   ArchUnit rule. A `boolean` return used as a control-flow signal cannot be detected statically and
   needs a line in refactoring briefs. Worth doing before the refactors above start.
   re-check: `.claude/skills/debt-ledger/bin/debt absent backend/src/test/java/org/danteplanner/backend/architecture -i 'flag ?param|booleanParam'`
-- `GtidCookieFilter.handleRead` mixes four inputs (this pod reads the authority, cookie absent or
-  malformed or valid, the probe verdict, authority health) with the effects (clear the cookie, write
-  a 503, pin PRIMARY, call the chain in three places) in one if-tree. The verdict-to-action mapping
-  is not written in one place. Worth doing when a verdict or read source is added: a decision
-  function returns the read route and the cookie action as types, and the filter applies them once.
-  The probe sends a query, so the decision takes the verdict lazily and only when a valid cookie
-  meets a non-authority source.
-  re-check: `rg -q 'private void handleRead' backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidCookieFilter.java`
 - The planner write lock is implicit. `lockForUpsert` takes it with `lockContent`, a
   `SELECT COUNT(*) ... FOR UPDATE` whose result is discarded. The global order (content before
   publication, ADR 185) holds only because each call site calls things in that order, and only the
@@ -1740,12 +1690,6 @@ guards the parse but likewise skips the schema gate.
   the Spot workers mix Graviton2 and Graviton3, and CRIU restore needs capabilities the restricted
   pod security level forbids.
   re-check: `.claude/skills/debt-ledger/bin/debt absent backend/Dockerfile 'SharedArchiveFile|AOTCache'`
-- `no-wall-clock-wait-in-tests` matches latch, barrier, future, Awaitility and sleep waits, but not
-  `Thread.join(long)`, `Object.wait(long)` or a hand-written spin-deadline loop, so a wall-clock
-  wait of those shapes still lands unnoticed (several remain in the backend tests: the
-  `JOIN_TIMEOUT_MS` joins, `awaitParkedOrDone`, `SseTopicRecorder`'s envelope wait). Worth doing
-  when one of them flakes in CI: add the patterns to the rule and move the sites to `support/Hang`.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent backend/config/ast-grep/rules/no-wall-clock-wait-in-tests.yml 'Thread.*join|wait\('`
 - `.claude/hooks/tsc-check.sh` runs `yarn typecheck` after every TypeScript edit without the test
   lock, so it can overlap a locked heavy run (seen 2026-11-08 while building the `checks` CLI).
   Worth doing when an edit-time typecheck slows or starves a locked run: route it through

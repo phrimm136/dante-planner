@@ -135,6 +135,40 @@ valid:
         waiter.waitUntilReady(1);
       }
     }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        var served = CompletableFuture.runAsync(() -> factory.newThread(task));
+        served.join();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        AtomicReference<CompletableFuture<Void>> started = new AtomicReference<>();
+        started.get().join();
+        refused.connect().join();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        CompletableFuture.runAsync(task).join();
+        var text = String.join(",", entries);
+        var names = String.join(", ", new Thread(task).getName(), other);
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        Map<Thread, CompletableFuture<Void>> served = serve();
+        served.get(Thread.currentThread()).join();
+      }
+    }
 invalid:
   - |
     class A {
@@ -478,5 +512,106 @@ invalid:
 
       void ended() throws Exception {
         worker.join();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        var worker = Thread.ofVirtual().start(task);
+        worker.join();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        var worker = new Thread(task);
+        worker.join();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        var worker = factory.newThread(task);
+        worker.join();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        var worker = Thread.startVirtualThread(task);
+        assertThat(catchThrowable(worker::join)).isNull();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        Thread.ofPlatform().start(task).join();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        Thread.ofVirtual().name("worker").start(task).join();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        java.lang.Thread.startVirtualThread(task).join();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        new Thread(task).join();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        factory.newThread(task).join();
+      }
+    }
+  - |
+    class A {
+      private final AtomicReference<Thread> worker = new AtomicReference<>();
+
+      @Test
+      void m() throws Exception {
+        worker.get().join();
+      }
+    }
+  - |
+    class A {
+      static class Probe {
+        final AtomicReference<Thread> worker = new AtomicReference<>();
+      }
+
+      @Test
+      void m() throws Exception {
+        probe.worker.get().join();
+      }
+    }
+  - |
+    class A {
+      @Test
+      void m() throws Exception {
+        var worker = new AtomicReference<Thread>();
+        worker.get().join();
+      }
+    }
+  - |
+    class A {
+      void ended(Supplier<java.lang.Thread> worker) throws Exception {
+        worker.get().join();
       }
     }

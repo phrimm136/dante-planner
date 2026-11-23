@@ -18,6 +18,18 @@ utils:
     has:
       field: object
       regex: ^(org\.awaitility\.)?(Awaitility\.)?(await|with|given)\s*\(
+  thread-creation:
+    any:
+      - kind: object_creation_expression
+        regex: ^new\s+(java\.lang\.)?Thread\s*\(
+      - kind: method_invocation
+        regex: ^(java\.lang\.)?Thread\s*\.\s*(ofVirtual|ofPlatform|startVirtualThread)\s*\(
+      - kind: method_invocation
+        has:
+          field: name
+          regex: ^newThread$
+  thread-holder-type:
+    regex: <\s*(java\.lang\.)?Thread\s*>$
 rule:
   any:
     - kind: method_reference
@@ -72,6 +84,65 @@ rule:
                     has:
                       field: name
                       pattern: $THREAD
+    - any:
+        - pattern: $THREAD.join()
+        - pattern: $THREAD::join
+      inside:
+        kind: program
+        stopBy: end
+        has:
+          stopBy: end
+          kind: local_variable_declaration
+          all:
+            - has:
+                field: type
+                regex: ^var$
+            - has:
+                field: declarator
+                all:
+                  - has:
+                      field: name
+                      pattern: $THREAD
+                  - has:
+                      field: value
+                      matches: thread-creation
+    - pattern: $CREATED.join()
+      has:
+        field: object
+        matches: thread-creation
+    - any:
+        - pattern: $OWNER.$HOLDER.get().join()
+        - pattern: $HOLDER.get().join()
+      inside:
+        kind: program
+        stopBy: end
+        has:
+          stopBy: end
+          any:
+            - all:
+                - has:
+                    field: type
+                    matches: thread-holder-type
+                - any:
+                    - has:
+                        field: name
+                        pattern: $HOLDER
+                    - has:
+                        field: declarator
+                        has:
+                          field: name
+                          pattern: $HOLDER
+            - kind: variable_declarator
+              all:
+                - has:
+                    field: name
+                    pattern: $HOLDER
+                - has:
+                    field: value
+                    kind: object_creation_expression
+                    has:
+                      field: type
+                      matches: thread-holder-type
     - pattern: $SLEEPER.sleep($$$)
       has:
         field: object
