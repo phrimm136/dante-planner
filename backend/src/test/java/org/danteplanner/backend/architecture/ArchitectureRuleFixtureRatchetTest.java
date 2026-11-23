@@ -76,8 +76,9 @@ class ArchitectureRuleFixtureRatchetTest {
                         + "the fixture (PrivilegedRouteCoverageRuleTest is the shape); a rule that is a plain test "
                         + "over the project's classes is run by another test in its class on a fixture instead, "
                         + "through the same method taking JavaClasses or returning the ArchRule, which both call "
-                        + "directly, and asserts what it reports or that it throws. %s only shrinks",
-                        ARCHITECTURE, FROZEN_LIST)
+                        + "directly, and asserts what it reports or that it throws; a test that only checks whether "
+                        + "another rule's allowlist entries are still needed carries @%s. %s only shrinks",
+                        ARCHITECTURE, AllowlistLiveness.class.getSimpleName(), FROZEN_LIST)
                 .isEmpty();
     }
 
