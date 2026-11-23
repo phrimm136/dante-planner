@@ -414,11 +414,6 @@ edge must become a batch-identity check or stale choices/outcomes leak across ba
 back rebuilds the batch and pops the modal uninvited. Persisting the dismissal (per
 planner-id set) or opening parked batches collapsed would make park mean park.
   re-check: `rg -q 'const \[dismissed, setDismissed\] = useState\(false\)' frontend/src/pages/planner/components/plannerList/PersonalPlannerList.tsx && .claude/skills/debt-ledger/bin/debt absent frontend/src/pages/planner/components/plannerList/PersonalPlannerList.tsx 'sessionStorage|localStorage'`
-- 2026-08-15 — the api.ts 401 cache-eviction still fires synchronously inside ApiClient.fetch
-(three tests pin the timing); hoisting it to the auth layer needs a registration seam since
-lib may not import @/shared/auth. The api↔queryClient cycle it caused is already broken, so
-this is now ergonomics, not architecture.
-  re-check: `rg -q "^import \{ queryClient \} from './queryClient'" frontend/src/lib/api.ts && rg -qU 'response.status === 401\) \{\n\s+queryClient.setQueryData' frontend/src/lib/api.ts`
 - 2026-08-15 — editorStateCodec still imports the ego spec list statically for maxThreadspin
 (unchecked cast included); injecting it requires deciding where the store provider sits
 relative to Suspense on four pages. Deferred by ruling; option (a) provider-inside-Suspense
@@ -438,10 +433,6 @@ useEntityListSpec/useEntityListI18n config path (useFilterI18nData, useSearchMap
 useSanityConditionData, useColorCodes, usePlannerKeywordsI18n); two of nine migrated before the
 pattern's marginal value flattened.
   re-check: `test "$(rg -l 'createStaticDataQueryOptions' frontend/src/shared/filter/hooks/useFilterI18nData.ts frontend/src/shared/filter/hooks/useSearchMappings.ts frontend/src/shared/gameText/hooks/useSkillTagI18n.ts frontend/src/shared/gameText/hooks/useSanityConditionData.ts frontend/src/shared/gameText/hooks/useColorCodes.ts frontend/src/pages/planner/hooks/usePlannerKeywordsI18n.ts | awk 'END{print NR}')" = 6`
-- 2026-08-15 — the api.ts 401-eviction hoist's stated verification (auth-layer key factory) is
-unreachable from lib/ under the layer rule; the literal ['auth','me'] at the eviction site is
-the residue. Needs the registration seam noted in the earlier eviction entry.
-  re-check: `rg -qF "queryClient.setQueryData(['auth', 'me'], null)" frontend/src/lib/api.ts`
 - 2026-08-15 — FeaturedBoss.unitId is still bare z.string(); the branded-ids rule-1 sweep missed
 it.
   re-check: `rg -q '^    unitId: z.string\(\),$' frontend/src/pages/themePack/schemas/ThemePackSchemas.ts`
@@ -1792,13 +1783,6 @@ guards the parse but likewise skips the schema gate.
   `ops hook` borrows would go unnoticed until the hook refuses a command. Planned as its own
   unit: one `checks` command (and a PR Gate step) that runs every skill CLI's suite.
   re-check: `.claude/skills/debt-ledger/bin/debt absent .github/workflows 'skills/[a-z-]+/tests'`
-- Auth-Redis writes (refresh rotation, revocation, tombstone writes) are not behind the Redis
-  role breakers: during an unresponsive auth Redis each one still waits the 3 s command bound
-  before its 503. Held back on purpose: a probe that misjudges a healthy Redis would block token
-  refresh. Worth doing after the read-path breakers (blacklist, tombstone, rate limit) have run
-  in production long enough to show the probes do not flap; map the open-breaker rejection to a
-  per-role wire code in the same unit.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/auth/token/RefreshRotationService.java 'CircuitBreaker'`
 
 ## 2026-11-19 backend as a Deployment (supersedes adr/006 @nodes)
 
