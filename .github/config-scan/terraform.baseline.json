@@ -1,40 +1,6 @@
 {
   "failed_checks": [
     {
-      "file": "/iam-bootstrap/main.tf",
-      "findings": [
-        {
-          "check_ids": [
-            "CKV_AWS_40"
-          ],
-          "resource": "aws_iam_user_policy_attachment.deploy_surge"
-        }
-      ]
-    },
-    {
-      "file": "/iam-bootstrap/state-backend.tf",
-      "findings": [
-        {
-          "check_ids": [
-            "CKV2_AWS_6",
-            "CKV2_AWS_61",
-            "CKV2_AWS_62",
-            "CKV_AWS_144",
-            "CKV_AWS_145",
-            "CKV_AWS_18",
-            "CKV_AWS_21"
-          ],
-          "resource": "aws_s3_bucket.tf_state[0]"
-        },
-        {
-          "check_ids": [
-            "CKV_AWS_300"
-          ],
-          "resource": "aws_s3_bucket_lifecycle_configuration.tf_state[0]"
-        }
-      ]
-    },
-    {
       "file": "/log-archive/main.tf",
       "findings": [
         {

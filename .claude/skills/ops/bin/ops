@@ -91,7 +91,8 @@ logs:       <root>/.claude/reports/logs/ops-<command>-<YYYYMMDD-HHMMSS>.log when
 repo root:  the checkout this CLI file lives in, whatever the current directory.
 tf plan:    writes the plan file beside its log (ops-tf-<stack>-<ts>.plan), keeps the full plan
             text in the log, and prints one line per changed resource (- destroy, -/+ replace,
-            ~ update, + create, <= import, -> move), terraform's counts line, and the `!` apply
+            ~ update, + create, <= import, -> move, forget: dropped from the state and left in
+            the cloud), terraform's counts line with the forgets added, and the `!` apply
             command for you to run. Words after -- reach terraform plan unchanged; -out and
             -detailed-exitcode are ops's own. A stack is any directory under terraform/ with
             *.tf files except modules; a stack whose backend file names a fixed account takes
@@ -819,7 +820,7 @@ def apply_line(repo_root, plan_path):
 
 
 SUMMARY_ORDER = (("destroy", "- "), ("replace", "-/+ "), ("update", "~ "), ("create", "+ "), ("import", "<= "),
-                 ("move", "-> "))
+                 ("move", "-> "), ("forget", "forget "))
 
 
 def change_kind(action_list):
@@ -832,6 +833,8 @@ def change_kind(action_list):
         return "update"
     if action_list == ["create"]:
         return "create"
+    if action_list == ["forget"]:
+        return "forget"
     return ""
 
 
@@ -843,14 +846,16 @@ class PlanSummary:
     destroy_count: int
     output_count: int
     import_count: int
+    forget_count: int = 0
     guarded_markers: dict = dataclasses.field(default_factory=dict)
     check_messages: tuple = ()
 
     @property
     def counts_line(self):
         import_text = f"{self.import_count} to import, " if self.import_count else ""
+        forget_text = f", {self.forget_count} to forget" if self.forget_count else ""
         return (f"Plan: {import_text}{self.add_count} to add, {self.change_count} to change, "
-                f"{self.destroy_count} to destroy.")
+                f"{self.destroy_count} to destroy{forget_text}.")
 
 
 def is_guarded(kind_name, resource_type):
@@ -898,6 +903,7 @@ def plan_summary(show_data):
                        len(grouped_rows["destroy"]) + replace_count,
                        output_count,
                        len(grouped_rows["import"]),
+                       len(grouped_rows["forget"]),
                        guarded_markers,
                        check_warnings(show_data))
 

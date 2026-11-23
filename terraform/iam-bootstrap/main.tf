@@ -27,8 +27,6 @@ locals {
 
   account_id = data.aws_caller_identity.current.account_id
 
-  # Deterministic, so the grants below hold whether this stack owns the bucket or
-  # terraform/state-backend does.
   tf_state_bucket     = "${var.name_prefix}-tfstate-${data.aws_caller_identity.current.account_id}"
   tf_state_bucket_arn = "arn:aws:s3:::${var.name_prefix}-tfstate-${data.aws_caller_identity.current.account_id}"
 
@@ -377,13 +375,12 @@ resource "aws_iam_role_policy_attachment" "provisioning" {
   policy_arn = aws_iam_policy.provisioning.arn
 }
 
-# --- CI deploy-surge grant (github-actions-deploy user) ----------------------
+# --- CI deploy-surge grant ---------------------------------------------------
 # Zero-downtime deploys on the DaemonSet app tier need a second NODE per region
 # (node count = pod count; two Spring heaps do not fit one 2GiB app node), so
 # the deploy workflow scales each app ASG 1->2 around the rollout and verifies
 # completion over SSM on each region's CP. Scoped to the two app ASGs and to
-# CP instances by Name tag. The user itself predates terraform and stays
-# unmanaged; only this grant is code-managed.
+# CP instances by Name tag.
 data "aws_iam_policy_document" "deploy_surge" {
   statement {
     sid     = "SurgeScale"
@@ -438,28 +435,8 @@ resource "aws_iam_role_policy_attachment" "deploy_surge" {
   policy_arn = aws_iam_policy.deploy_surge.arn
 }
 
-# The user is created by hand; no resource here owns it, so an account without one must set
-# legacy_deploy_user = "" or the apply fails on a missing principal.
-resource "aws_iam_user_policy_attachment" "deploy_surge" {
-  count      = var.legacy_deploy_user == "" ? 0 : 1
-  user       = var.legacy_deploy_user
-  policy_arn = aws_iam_policy.deploy_surge.arn
-}
-
 variable "fleet_region_suffixes" {
   description = "region_name_suffix of every fleet this identity may provision. Each expands to the IAM role and instance-profile name patterns modules/fleet creates."
   type        = list(string)
   default     = ["oregon", "seoul"]
-}
-
-variable "legacy_deploy_user" {
-  description = "IAM user the deploy workflow authenticates as, for the surge-scaling policy. Empty = no user attachment (the role attachment above is the only grant), which is what a fresh account wants."
-  type        = string
-  default     = "github-actions-deploy"
-}
-
-# count moved the address to [0]; without this it plans as destroy-then-create.
-moved {
-  from = aws_iam_user_policy_attachment.deploy_surge
-  to   = aws_iam_user_policy_attachment.deploy_surge[0]
 }

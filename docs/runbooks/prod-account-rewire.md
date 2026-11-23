@@ -128,15 +128,17 @@ disappearing — means the copied state and the live resources disagree. Stop an
 ## When this is done
 
 Production running in the prod account, with the management account holding no workload,
-retires this runbook: delete it, and delete the management account's state bucket and secrets
-rather than leaving a second copy of every credential standing. The copy scripts are generic
+retires this runbook: delete it, and delete the management account's copies of the workload
+secrets rather than leaving a second copy of every credential standing. The management state
+bucket stays: it holds the states of the stacks that live in that account. The copy scripts are generic
 and outlive it; the rollback copies are the only reason to keep the origin account intact, and
 that reason expires the moment the migration is accepted.
 
 ## Role ARNs
 
-The provisioning role is `danteplanner-provisioner` in the management and staging accounts and
-`prod-provisioner` in prod (`terraform/iam-bootstrap` sets it per account tfvars file). An ARN naming a role
+The provisioning role is `danteplanner-provisioner` in the staging account and
+`prod-provisioner` in prod (`terraform/iam-bootstrap` sets it per account tfvars file). The
+management account has none once `docs/runbooks/management-bootstrap-retire.md` has run. An ARN naming a role
 that does not exist fails `sts:AssumeRoleWithWebIdentity` with no CloudTrail record in any
 account, so run `aws iam get-role --role-name <name>` in the target account before putting an ARN
 into a secret or `~/.aws/config`.

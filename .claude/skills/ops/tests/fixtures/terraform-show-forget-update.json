@@ -1,0 +1,80 @@
+{
+  "resource_changes": [
+    {
+      "address": "aws_iam_policy.provisioning",
+      "mode": "managed",
+      "type": "aws_iam_policy",
+      "name": "provisioning",
+      "change": {
+        "actions": [
+          "update"
+        ]
+      }
+    },
+    {
+      "address": "aws_s3_bucket.tf_state[0]",
+      "mode": "managed",
+      "type": "aws_s3_bucket",
+      "name": "tf_state",
+      "index": 0,
+      "change": {
+        "actions": [
+          "forget"
+        ]
+      },
+      "action_reason": "delete_because_no_resource_config"
+    },
+    {
+      "address": "aws_s3_bucket_lifecycle_configuration.tf_state[0]",
+      "mode": "managed",
+      "type": "aws_s3_bucket_lifecycle_configuration",
+      "name": "tf_state",
+      "index": 0,
+      "change": {
+        "actions": [
+          "forget"
+        ]
+      },
+      "action_reason": "delete_because_no_resource_config"
+    },
+    {
+      "address": "aws_s3_bucket_public_access_block.tf_state[0]",
+      "mode": "managed",
+      "type": "aws_s3_bucket_public_access_block",
+      "name": "tf_state",
+      "index": 0,
+      "change": {
+        "actions": [
+          "forget"
+        ]
+      },
+      "action_reason": "delete_because_no_resource_config"
+    },
+    {
+      "address": "aws_s3_bucket_server_side_encryption_configuration.tf_state[0]",
+      "mode": "managed",
+      "type": "aws_s3_bucket_server_side_encryption_configuration",
+      "name": "tf_state",
+      "index": 0,
+      "change": {
+        "actions": [
+          "forget"
+        ]
+      },
+      "action_reason": "delete_because_no_resource_config"
+    },
+    {
+      "address": "aws_s3_bucket_versioning.tf_state[0]",
+      "mode": "managed",
+      "type": "aws_s3_bucket_versioning",
+      "name": "tf_state",
+      "index": 0,
+      "change": {
+        "actions": [
+          "forget"
+        ]
+      },
+      "action_reason": "delete_because_no_resource_config"
+    }
+  ]
+}

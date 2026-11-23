@@ -50,6 +50,7 @@ principle without a corresponding entry is an untested claim rather than a settl
 | `runbooks/backend-image-rollback.md` | Reverting a bad backend release through the deploy pipeline |
 | `runbooks/environment-setup.md` | Standing up a working environment from scratch |
 | `runbooks/etcd-snapshot-repair.md` | Turning on the etcd snapshot schedule of a running control plane |
+| `runbooks/management-bootstrap-retire.md` | Moving the management account's state bucket to `state-backend` and removing its provisioning identity |
 | `runbooks/prod-account-rewire.md` | Preparing the vended prod account to receive production |
 | `runbooks/rds-migration.md` | Managed-database migration and the decommission gate |
 | `runbooks/redis-auth-password-rollout.md` | Shipping an auth Redis change without cutting its clients off |

@@ -17,7 +17,7 @@ several real dependencies are not of that shape.
 |---|---|---|
 | `organization` | The organization, its unit hierarchy, member accounts, guardrail policies, identity-centre permission sets and assignments, the organization trail | `aws_account_id`, `organization_id`, `operator` |
 | `state-backend` | One account's Terraform state bucket, and nothing else | `aws_account_id` |
-| `iam-bootstrap` | The GitHub OIDC provider and the provisioning role (and the state bucket in the account that predates `state-backend`) | `trusted_admin_principal_arns`, `aws_account_id` |
+| `iam-bootstrap` | The GitHub OIDC provider and the provisioning role, in an account that runs a fleet | `trusted_admin_principal_arns`, `aws_account_id` |
 | `log-archive` | The organization trail's destination bucket and its policy | `aws_account_id`, `management_account_id`, `organization_id` |
 | `registry` | Who may pull the backend image, and how many tagged images its repositories and their cross-region replicas keep; not the repositories themselves | `aws_account_id`, `organization_id` |
 | `secrets` | Secrets Manager **containers** and their cross-region replicas — never the values | `aws_account_id` |
@@ -142,7 +142,10 @@ Once per organization, from the management account:
 Once per account, with credentials for that account:
 
 4. Apply `state-backend` on local state, through a `backend_override.tf` (see State). No
-   dependencies.
+   dependencies. While `terraform/state-backend/imports.tf` exists, this plan fails with
+   "Cannot import non-existent remote object": that file adopts the management account's
+   existing bucket (see `docs/debt.md`). Delete it in this account's working copy for this
+   apply only, and restore it with `git checkout -- terraform/state-backend/imports.tf` after.
 5. Write `terraform/backend.<account>.hcl` from its `tf_state_bucket` output.
 6. Delete the override (gitignored, so `git status` will not remind you) and move that state into
    the new bucket:
