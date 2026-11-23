@@ -38,7 +38,7 @@ MODULES_DIR = "modules"
 SETTINGS_DIR = "envs"
 ACCOUNT_VARIABLE = "aws_account_id"
 ACCOUNT_VARIABLE_PATTERN = re.compile(rf'^\s*variable\s+"{ACCOUNT_VARIABLE}"', re.MULTILINE)
-LOCAL_STATE_FILE = "terraform.tfstate"
+ACCOUNT_VARS_EXAMPLE = "account.tfvars.example"
 DEFAULT_ENV = "prod"
 SITE_NAMES = ("oregon", "seoul")
 TUNNEL_MODES = ("start", "stop", "status")
@@ -46,7 +46,6 @@ EXPIRED_MARKERS = ("Token has expired", "SSO session")
 SINCE_PATTERN = re.compile(r"^\d+[mhd]$")
 STEP_PATTERN = re.compile(r"^\d+[smhd]$")
 DAY_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-BACKEND_PATTERN = re.compile(r'^\s*backend\s+"', re.MULTILINE)
 TUNNEL_PLUGIN = "session-manager-plugin"
 TUNNEL_DOCUMENT = "AWS-StartPortForwardingSessionToRemoteHost"
 AWS_TIMEOUT_SECONDS = 30
@@ -97,7 +96,9 @@ tf plan:    writes the plan file beside its log (ops-tf-<stack>-<ts>.plan), keep
             -detailed-exitcode are ops's own. A stack is any directory under terraform/ with
             *.tf files except modules; a stack whose backend file names a fixed account takes
             that account's profile (backend.management.hcl: mgmt), and a stack whose fixed
-            account has no ops profile is planned directly through terraform-run.sh.
+            account has no ops profile is planned directly through terraform-run.sh. A stack
+            applied once per account ({ACCOUNT_VARS_EXAMPLE}, no fixed backend file) takes no
+            default: name --env, and the refusal lists the envs whose backend file is here.
 inputs:     a stack with an {SETTINGS_DIR}/ directory is planned with -var-file={SETTINGS_DIR}/<env>.tfvars for
             the env the plan runs under and, when it declares variable "{ACCOUNT_VARIABLE}", with
             -var {ACCOUNT_VARIABLE}=<that profile's sso_account_id>, both after -out and before
@@ -315,7 +316,7 @@ def list_lines():
                     for one_spec in DISPATCH_TABLE]
     command_rows.append((f"ops {HOOK_ROW[0]}", HOOK_ROW[1]))
     command_rows.append(("--env prod|staging|mgmt", "on any command: the AWS profile, default prod "
-                         "(a fixed-account stack defaults to its own)"))
+                         "(a fixed-account stack defaults to its own; a per-account stack has none)"))
     column_width = max(len(command_text) for command_text, _ in command_rows if len(command_text) <= 40)
     out_lines = []
     for command_text, purpose_text in command_rows:
@@ -510,8 +511,8 @@ def plan_stacks(repo_root):
 @dataclasses.dataclass(frozen=True)
 class StackInfo:
     stack_name: str
-    has_backend: bool
     fixed_backend: str
+    per_account: bool
     is_moved: bool
     takes_account: bool
 
@@ -520,16 +521,21 @@ class StackInfo:
         return bool(self.fixed_backend) and self.fixed_backend not in FIXED_BACKEND_ENVS
 
     def default_env(self):
-        return FIXED_BACKEND_ENVS.get(self.fixed_backend, DEFAULT_ENV)
+        return FIXED_BACKEND_ENVS.get(self.fixed_backend, "" if self.per_account else DEFAULT_ENV)
 
 
 def stack_info(repo_root, stack_name):
     stack_dir = repo_root / TERRAFORM_ROOT / stack_name
+    fixed_backend = backend_file_name(repo_root, stack_name)
+    per_account = not fixed_backend and (stack_dir / ACCOUNT_VARS_EXAMPLE).is_file()
     tf_texts = [tf_file.read_text(encoding="utf-8") for tf_file in stack_dir.glob("*.tf")]
-    has_backend = any(BACKEND_PATTERN.search(tf_text) for tf_text in tf_texts)
-    return StackInfo(stack_name, has_backend, backend_file_name(repo_root, stack_name) if has_backend else "",
-                     (stack_dir / SETTINGS_DIR).is_dir(),
+    return StackInfo(stack_name, fixed_backend, per_account, (stack_dir / SETTINGS_DIR).is_dir(),
                      any(ACCOUNT_VARIABLE_PATTERN.search(tf_text) for tf_text in tf_texts))
+
+
+def env_backend_name(env_name):
+    return next((file_name for file_name, fixed_env in FIXED_BACKEND_ENVS.items() if fixed_env == env_name),
+                f"backend.{env_name}.hcl")
 
 
 def runner_text(repo_root, stack_name, terraform_words):
@@ -546,6 +552,13 @@ def plan_env(repo_root, one_stack, requested_env):
     if one_stack.fixed_backend and requested_env and requested_env != one_stack.default_env():
         raise OpsError(f"{TERRAFORM_ROOT}/{one_stack.stack_name} keeps its state in the account behind "
                        f"{one_stack.fixed_backend}; plan it with --env {one_stack.default_env()} or without --env")
+    if one_stack.per_account and not requested_env:
+        present_envs = [f"--env {one_env} ({env_backend_name(one_env)})" for one_env in ENV_PROFILES
+                        if (repo_root / TERRAFORM_ROOT / env_backend_name(one_env)).is_file()]
+        choice_text = ", ".join(present_envs) or ("no env has its backend file in this checkout; copy them "
+                                                  "from the main checkout")
+        raise OpsError(f"{TERRAFORM_ROOT}/{one_stack.stack_name} is applied once per account, so it takes no "
+                       f"default profile; name the account: {choice_text}")
     return requested_env or one_stack.default_env()
 
 
@@ -746,16 +759,14 @@ def backend_file_name(repo_root, stack_name):
 def require_init(repo_root, one_stack, env_name):
     stack_dir = repo_root / TERRAFORM_ROOT / one_stack.stack_name
     state_dir = stack_dir / ".terraform"
-    if state_dir.is_dir() or (not one_stack.has_backend and (stack_dir / LOCAL_STATE_FILE).is_file()):
+    if state_dir.is_dir():
         return
-    init_words = ["init"]
+    backend_file = repo_root / TERRAFORM_ROOT / (one_stack.fixed_backend or env_backend_name(env_name))
+    init_words = ["init", f"-backend-config={backend_file}"]
     missing_note = ""
-    if one_stack.has_backend:
-        backend_file = repo_root / TERRAFORM_ROOT / (one_stack.fixed_backend or f"backend.{env_name}.hcl")
-        init_words.append(f"-backend-config={backend_file}")
-        if not backend_file.is_file():
-            missing_note = (f" ({backend_file.name} is not in this checkout: copy it from the main checkout, or "
-                            f"write it from {TERRAFORM_ROOT}/backend.account.hcl.example)")
+    if not backend_file.is_file():
+        missing_note = (f" ({backend_file.name} is not in this checkout: copy it from the main checkout, or "
+                        f"write it from {TERRAFORM_ROOT}/backend.account.hcl.example)")
     raise OpsError(f"{TERRAFORM_ROOT}/{one_stack.stack_name} is not initialized in this checkout ({state_dir} is "
                    f"missing); run, then retry:\n  AWS_PROFILE={ENV_PROFILES[env_name]} "
                    f"{runner_text(repo_root, one_stack.stack_name, init_words)}{missing_note}")
@@ -1400,6 +1411,8 @@ def runner_replacement(arg_words, env_name):
             return None
         default_env = one_stack.default_env()
         is_moved = one_stack.is_moved
+        if one_stack.per_account and not env_name:
+            env_name = "<env>"
     rest_args = [one_arg for one_arg in arg_words if not one_arg.startswith(("-chdir=", "-out", "--out"))]
     rest_args.remove("plan")
     if is_moved:

@@ -1,11 +1,13 @@
-# Copy to <account>.tfvars (gitignored) and fill in — one file per account, applied in a workspace
-# of the same name, and passed explicitly:
+# Copy to <account>.tfvars (gitignored) and fill in — one file per account, passed explicitly
+# beside that account's backend file:
 #
-#   terraform -chdir=terraform/state-backend workspace new <account>
-#   scripts/ops/terraform-run.sh -chdir=terraform/state-backend apply -var-file=<account>.tfvars
+#   scripts/ops/terraform-run.sh -chdir=terraform/state-backend init -reconfigure -backend-config=../backend.<account>.hcl
+#   scripts/ops/terraform-run.sh -chdir=terraform/state-backend plan -var-file=<account>.tfvars
 #
-# The apply runs by hand through the runner, not ops: a new account's state bucket comes before ops
-# has a profile for that account.
+# A new account's first apply has no bucket to init against: it runs on local state (see
+# versions.tf), by hand through the runner rather than ops, which has no profile for that account
+# yet, and scripts/ops/provision/bootstrap-state-to-s3.sh moves the state into the new bucket
+# right after.
 #
 # NOT terraform.tfvars: that name auto-loads on every invocation, including ones passing a
 # different -var-file, so one account silently inherits another's values.

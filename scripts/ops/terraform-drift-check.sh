@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 # Nightly terraform drift detection (stage 1: detect only).
 #
-# Covers only stacks whose state lives in S3. terraform/iam-bootstrap and
-# terraform/state-backend keep local state because they create the bucket, so a runner that
-# never held that file would plan a full rebuild and report it as drift. Check those two by
-# hand where the state lives.
+# Covers the stacks the workflow materializes a var-file for. terraform/iam-bootstrap and
+# terraform/state-backend keep their state in S3 too but get no var-file there, so check those
+# two by hand with `ops tf plan`.
 #
 # Reports ONLY stack names and change counts — the repo is public, so plan bodies (resource
 # ARNs, topology) never reach the issue. Plan logs stay on the machine that ran the check and

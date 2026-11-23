@@ -79,5 +79,6 @@ terraform output backend_ecr_repository_url
 - **The JWT material** (`danteplanner/jwt/material`, Secrets Manager, operator-populated) —
   referenced by the app node role's name pattern only.
 - **The RDS instance and its SG** (`terraform/rds`) — it reads this stack's state on its next apply after oregon.
-- **State backend:** configure encrypted remote state in your private setup; local state and
-  `*.tfvars` are gitignored. Never commit `*.tfstate`.
+- **State backend:** the account's state bucket, key `oregon/terraform.tfstate`, chosen by the
+  gitignored `terraform/backend.<account>.hcl`; `*.tfvars` are gitignored too. Never commit
+  `*.tfstate`.

@@ -15,8 +15,8 @@ learning: system-design
   before any fix; never bypass an error to make a symptom disappear.
 - Prod reads (SQL, logs, metrics, the RDS tunnel, verification) and terraform plans run only
   through the `ops` skill's CLI, `<checkout or worktree>/.claude/skills/ops/bin/ops <command>`
-  (`ops list`), which names the AWS profile (`--env`, default prod); the hook refuses direct
-  calls to the scripts it wraps. See `docs/external-access.md`; never improvise SSH/kubectl paths.
+  (`ops list`), which names the AWS profile (`--env`, default prod, none for a stack applied once
+  per account); the hook refuses direct calls to the scripts it wraps. See `docs/external-access.md`; never improvise SSH/kubectl paths.
 - Checks (tests, typecheck, lint, format, build, e2e, gradle) run only through
   `<checkout or worktree>/.claude/skills/checks/bin/checks` (`checks list`). Other yarn commands
   take `--cwd <dir>`.
