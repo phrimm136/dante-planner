@@ -17,8 +17,18 @@ The `etcd-snapshot-deadman` alert stayed quiet for the same reason.
 It fired only on an old snapshot, and no snapshot existed.
 It now also fires when a cluster's kube-state-metrics is up and serves no snapshot series.
 
-New CPs write the schedule into `/etc/rancher/k3s/config.yaml` instead.
+Later that day, `k3s etcd-snapshot save` with no flags wrote a local snapshot only on both CPs.
+The running server has the S3 settings as unit arguments, and the command did not use them.
+The same command with `--etcd-s3 --etcd-s3-bucket <bucket> --etcd-s3-region <region>`,
+the values taken from the unit's argument lines, wrote the S3 copy at once in both regions.
+So the CP can write the snapshot bucket.
+
+New CPs write the schedule and the S3 settings into `/etc/rancher/k3s/config.yaml` instead.
+The `k3s etcd-snapshot` command reads that file, so a plain save there also uploads.
 A running CP keeps its unit file until this repair runs.
+The repair is for CPs whose unit carries the settings as arguments. On a CP from the current
+boot script the unit has no `--etcd-snapshot-schedule-cron` argument, and the repair ends
+`NOTHING CHANGED` before step 1.
 
 ## What the repair does
 
@@ -37,11 +47,16 @@ Before it changes anything, it checks these things:
 
 Then it runs these steps:
 
-1. It takes one snapshot with `k3s etcd-snapshot save`. It then waits for a new
+1. It reads the bucket and the region from the unit's argument lines, the lines after
+   `'--etcd-s3-bucket' \` and `'--etcd-s3-region' \`. It ends `NOTHING CHANGED` when either
+   is missing. It prints only whether each was found, never the bucket name, which holds the
+   account id. It takes one snapshot with
+   `k3s etcd-snapshot save --etcd-s3 --etcd-s3-bucket <bucket> --etcd-s3-region <region>`,
+   and it discards the output of that command. It then waits for a new
    `ETCDSnapshotFile` with the label `etcd.k3s.cattle.io/snapshot-storage-node=s3`.
    That label marks the S3 copy on the k3s etcd-snapshot page
    (https://docs.k3s.io/cli/etcd-snapshot). An S3 snapshot from before the run does not count.
-   This step is the first proof that the CP can write the snapshot bucket.
+   The run fails here when the new S3 copy does not appear.
 2. It copies `/etc/systemd/system/k3s.service` to a dated `.bak-` file beside it.
 3. It replaces the malformed line with `'0 */6 * * *' \`.
 4. It runs `systemctl daemon-reload` and `systemctl restart --no-block k3s`.
@@ -71,20 +86,32 @@ The hours in the cron come from `etcd_snapshot_interval_hours` in
 
 ## Time budgets
 
-The script computes each budget from the one before it:
+Every call on the CP that can block runs under `timeout -k 5 10`: each `systemctl` call, each
+`kubectl` call (which also takes `--request-timeout=10s`) and each file command after the edit.
+So one call takes at most 15 seconds. The save runs under `timeout -k 5 120`.
 
-- Run on the CP: at most 2 x 120 seconds for the save and its S3 copy, 300 seconds for the
-  restart, 300 seconds for the rollback, and 180 seconds for everything else. That is 1020 seconds.
-- SSM command timeout: the run's budget plus 60 seconds, 1080 seconds.
-- Wait on your machine: the SSM timeout plus 60 seconds, 1140 seconds.
+The script computes the budgets from these limits:
 
-Every call on the CP that can block has its own limit: each `kubectl` call takes
-`--request-timeout=10s`, and each `systemctl` call and the save run under `timeout`.
-Before step 2 the script counts the seconds left until the SSM timeout. When fewer than
-300 + 300 + 180 seconds are left, it ends `NOTHING CHANGED: not enough time left to restart
-and roll back within this run (<n>s left); run again`. The unit stays untouched, and the
-snapshot from step 1 stays in place. So SSM does not stop a run during the restart or the
-rollback, unless a single call on the CP runs over its own limit.
+- Reserve after the edit: the worst case of every step on the failure path. That is the
+  300-second restart wait, the 300-second rollback wait, and 17 bounded calls at 15 seconds:
+  5 for the edit, 1 for each of the two `daemon-reload` calls, 2 for each of the two queued
+  restarts, 1 for the restore, 4 for the check after the rollback and 1 for the lock removal.
+  That is 855 seconds.
+- Run on the CP: 2 x 120 seconds for the save and its S3 copy, 120 seconds for the other calls
+  before the edit, and the 855-second reserve. That is 1215 seconds.
+- SSM command timeout: the run plus 60 seconds, 1275 seconds.
+- Wait on your machine: the SSM timeout plus 60 seconds, 1335 seconds.
+
+Each wait has a fixed end. Before each round of checks it adds the worst case of that round,
+6 calls at 15 seconds and the 5-second pause, to the clock. It starts the round only when that
+sum is at or before the end of the wait. So a wait ends at or before its bound.
+
+SSM can end a run only before step 2 or after the run has ended. Before step 2 the script
+needs 855 seconds left of the 1275-second SSM timeout. When less is left, it ends
+`NOTHING CHANGED: not enough time left to restart and roll back within this run (<n>s left); run again`.
+The unit stays untouched, and the snapshot from step 1 stays in place. A test counts the
+bounded calls after the edit in the script that is sent, so a new call without a larger
+reserve fails the tests.
 
 The script prints the SSM command id first. When the wait on your machine ends first, the
 script says so and exits 6. The run on the CP can still be going. Do not run the script again
@@ -138,11 +165,12 @@ Do Seoul first. A failure there shows the problem before Oregon is touched.
    ```
 
    The output names the lock state, the unit line as found, the unit's `KillMode=` line, the
-   value systemd uses, the count of Ready nodes, whether their leases renewed in the last
+   value systemd uses, whether the unit names an S3 bucket and region, the count of Ready
+   nodes, whether their leases renewed in the last
    minute, the k3s state, and the local and S3 snapshot counts. The last line is
    `NOTHING CHANGED: dry run`.
-   Stop when the KillMode lines do not say `KillMode=process`, when the lock is held, or when
-   the leases did not all renew.
+   Stop when the KillMode lines do not say `KillMode=process`, when the bucket or the region is
+   missing, when the lock is held, or when the leases did not all renew.
 
 2. Run the repair on Seoul.
 
