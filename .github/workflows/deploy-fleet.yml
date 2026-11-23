@@ -512,22 +512,16 @@ jobs:
               --query 'AutoScalingGroups[0].Instances[?LifecycleState==`InService`].InstanceId' \
               --output text)
             if [ "$(echo "$ids" | wc -w)" -lt 2 ]; then
-              # A surge instance that never reached InService still holds the desired capacity at
-              # 2. It is removed by id, so the serving node is never the one the group picks.
-              late_ids=$(aws autoscaling describe-auto-scaling-groups --region "$region" \
+              # Nothing here changes the group: with fewer than two nodes in service there is no
+              # way to tell from one reading which instance is safe to remove. A desired capacity
+              # left above 1 is reported, because Terraform ignores that attribute.
+              desired=$(aws autoscaling describe-auto-scaling-groups --region "$region" \
                 --auto-scaling-group-names "$asg" \
-                --query 'AutoScalingGroups[0].Instances[?LifecycleState!=`InService`].InstanceId' \
-                --output text)
-              for late_iid in $late_ids; do
-                aws autoscaling terminate-instance-in-auto-scaling-group --region "$region" \
-                  --instance-id "$late_iid" --should-decrement-desired-capacity >/dev/null
-                echo "$asg: removed $late_iid, which never came into service"
-              done
-              if [ -z "$late_ids" ] && [ "$(echo "$ids" | wc -w)" -eq 1 ]; then
-                aws autoscaling set-desired-capacity --region "$region" \
-                  --auto-scaling-group-name "$asg" --desired-capacity 1
+                --query 'AutoScalingGroups[0].DesiredCapacity' --output text)
+              if [ "$desired" != "1" ]; then
+                echo "::warning::$asg has fewer than two nodes in service and a desired capacity of $desired; set it to 1 by hand once the group is steady"
               fi
-              echo "$asg has no surge node in service to drain"
+              echo "$asg has no surge node to remove"
               return 0
             fi
             surge_iid=$(aws ec2 describe-instances --region "$region" --instance-ids $ids \
