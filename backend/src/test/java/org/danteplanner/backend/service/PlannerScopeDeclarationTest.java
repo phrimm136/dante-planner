@@ -3,6 +3,9 @@ package org.danteplanner.backend.service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -157,7 +160,7 @@ class PlannerScopeDeclarationTest {
                 new PlannerSubscriptionService(subscriptionRepository, accessGuard,
                         new RestrictionCheckService(users, new AccountStandingValidator())),
                 accessGuard, new PlannerOwnershipValidator(), new PlannerPublishValidator(),
-                new PlannerCategoryValidator(), recorder());
+                new PlannerCategoryValidator(), recorder(), Clock.fixed(Instant.parse("2026-11-23T00:00:00Z"), ZoneOffset.UTC));
     }
 
     private PlannerContentValidator validatorRenaming(String idMigrations) throws IOException {

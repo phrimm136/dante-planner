@@ -22,6 +22,6 @@ public enum SseChannel {
                 return channel;
             }
         }
-        return null;
+        throw new IllegalArgumentException("no SSE channel publishes on topic " + topic);
     }
 }

@@ -59,7 +59,11 @@ public record FloorRuleTable(
     }
 
     public CategoryFloors layout(MDCategory category) {
-        return categories.get(category);
+        CategoryFloors layout = categories.get(category);
+        if (layout == null) {
+            throw new IllegalStateException("the floor rule table lacks category " + category);
+        }
+        return layout;
     }
 
     public int floorCount(MDCategory category) {
@@ -71,7 +75,11 @@ public record FloorRuleTable(
     }
 
     public Set<String> stagesFor(RuleName rule) {
-        return rules.get(rule);
+        Set<String> ruleStages = rules.get(rule);
+        if (ruleStages == null) {
+            throw new IllegalStateException("the floor rule table lacks rule " + rule);
+        }
+        return ruleStages;
     }
 
     public static FloorRuleTable parse(JsonNode root) {
@@ -126,7 +134,7 @@ public record FloorRuleTable(
         }
         List<Set<Integer>> floors = new ArrayList<>();
         for (int index = 0; index < difficulties.size(); index++) {
-            floors.add(parseDifficultySet(path + "." + DIFFICULTIES + "[" + index + "]", difficulties.get(index)));
+            floors.add(parseDifficultySet(path + "." + DIFFICULTIES + "[" + index + "]", difficulties.path(index)));
         }
         return new CategoryFloors(floorCount.asInt(), List.copyOf(floors));
     }

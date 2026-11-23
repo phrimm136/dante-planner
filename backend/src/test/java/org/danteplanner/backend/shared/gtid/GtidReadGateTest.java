@@ -71,9 +71,9 @@ class GtidReadGateTest {
     private ResultSetMetaData primaryMetaData;
 
     private final CircuitBreaker replicaBreaker =
-            CircuitBreaker.of("replica", new ReadSourceProperties.Breaker().circuitBreakerConfig());
+            CircuitBreaker.of("replica", ReadSourceProperties.Breaker.defaults().circuitBreakerConfig());
     private final CircuitBreaker primaryBreaker =
-            CircuitBreaker.of("primary", new ReadSourceProperties.Breaker().circuitBreakerConfig());
+            CircuitBreaker.of("primary", ReadSourceProperties.Breaker.defaults().circuitBreakerConfig());
 
     private GtidReadGate oregonGate() {
         return new GtidReadGate(new ReadSourceSelector(List.of(

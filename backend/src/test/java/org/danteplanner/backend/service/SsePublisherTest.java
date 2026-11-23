@@ -76,7 +76,6 @@ class SsePublisherTest {
 
         publisher.publishUserEvent(
                 1L,
-                null,
                 SseEventType.COMMENT_ADDED,
                 "planner-9",
                 Map.of("plannerId", "planner-9", "title", "Deck"));

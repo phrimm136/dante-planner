@@ -51,14 +51,14 @@ public class RecordingSseChannelSender extends SseChannelSender {
         return attempts.stream().filter(Sent.class::isInstance).map(Sent.class::cast).toList();
     }
 
-    public List<SseEnvelope> envelopes(SseChannel channel) {
+    public List<SseEnvelope.Wire> envelopes(SseChannel channel) {
         return sent().stream()
                 .filter(message -> message.topic().equals(channel.topic()))
                 .map(message -> parse(message.json()))
                 .toList();
     }
 
-    private SseEnvelope parse(String json) {
-        return objectMapper.readValue(json, SseEnvelope.class);
+    private SseEnvelope.Wire parse(String json) {
+        return objectMapper.readValue(json, SseEnvelope.Wire.class);
     }
 }

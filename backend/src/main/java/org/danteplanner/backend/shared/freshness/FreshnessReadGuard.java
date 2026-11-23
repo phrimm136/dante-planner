@@ -17,6 +17,7 @@ import io.micrometer.core.instrument.Timer;
 
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.exception.ReadTemporarilyUnavailableException;
+import org.danteplanner.backend.shared.failure.CommandOutcome;
 import org.danteplanner.backend.shared.freshness.MarkerStore.MarkerView;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 import org.danteplanner.backend.shared.readpath.ChosenReadSource;
@@ -29,15 +30,73 @@ public class FreshnessReadGuard {
     public static final String APPLIED = "applied";
     public static final String TIMEOUT = "timeout";
 
-    public sealed interface Decision {
+    private static final String NO_GTIDS = "";
 
-        record Serve() implements Decision {
+    public sealed interface SettleOutcome extends CommandOutcome {
+
+        record Serve() implements SettleOutcome {
         }
 
-        record Skip(ReadSourceSelector.Source source) implements Decision {
+        record Skip(ReadSourceSelector.Source source) implements SettleOutcome {
         }
 
-        record Reload() implements Decision {
+        record Reload() implements SettleOutcome {
+        }
+    }
+
+    public sealed interface Required {
+
+        record None() implements Required {
+        }
+
+        record Unknown() implements Required {
+        }
+
+        record AtLeast(String gtidSet) implements Required {
+        }
+
+        static Required of(Collection<MarkerView> views) {
+            if (views.stream().anyMatch(MarkerView.Unknown.class::isInstance)) {
+                return new Unknown();
+            }
+            Set<String> marked = views.stream()
+                    .filter(MarkerView.At.class::isInstance)
+                    .map(view -> ((MarkerView.At) view).gtidSet())
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            if (marked.isEmpty()) {
+                return new None();
+            }
+            return new AtLeast(GtidWriteCapture.unionGtidSets(marked));
+        }
+    }
+
+    public sealed interface Verdict {
+
+        record Serve() implements Verdict {
+        }
+
+        record NextSource() implements Verdict {
+        }
+
+        record WaitFor(String gtids) implements Verdict {
+        }
+    }
+
+    private enum MarkerNeed {
+        NONE,
+        READ;
+
+        static MarkerNeed of(ReadSourceSelector.Source source) {
+            return source.authoritative() ? NONE : READ;
+        }
+    }
+
+    private enum Waited {
+        APPLIED,
+        TIMED_OUT;
+
+        static Waited of(boolean applied) {
+            return applied ? APPLIED : TIMED_OUT;
         }
     }
 
@@ -84,25 +143,32 @@ public class FreshnessReadGuard {
             try {
                 read = attempt.run();
             } catch (ScopedMiss miss) {
-                if (decideOnce(miss.scopes(), appliedAtLoadStart, reloaded) instanceof Decision.Serve) {
+                if (settleOnce(miss.scopes(), appliedAtLoadStart, reloaded) instanceof SettleOutcome.Serve) {
                     throw miss;
                 }
                 continue;
             }
-            if (decideOnce(read.scopes(), appliedAtLoadStart, reloaded) instanceof Decision.Serve) {
+            if (settleOnce(read.scopes(), appliedAtLoadStart, reloaded) instanceof SettleOutcome.Serve) {
                 return read;
             }
         }
     }
 
-    private Decision decideOnce(Collection<FreshnessScope> scopes, Map<String, String> appliedAtLoadStart,
+    private SettleOutcome settleOnce(Collection<FreshnessScope> scopes, Map<String, String> appliedAtLoadStart,
             Set<String> reloaded) {
         ReadSourceSelector.Source source = servedSource();
-        Decision decision = decide(scopes, source, appliedAtLoadStart, !reloaded.contains(source.name()));
-        if (decision instanceof Decision.Reload) {
-            reloaded.add(source.name());
-        }
-        return decision;
+        return switch (settle(scopes, source, appliedAtLoadStart, mayReload(source, reloaded))) {
+            case SettleOutcome.Reload reload -> {
+                reloaded.add(source.name());
+                yield reload;
+            }
+            case SettleOutcome.Serve serve -> serve;
+            case SettleOutcome.Skip skip -> skip;
+        };
+    }
+
+    private static boolean mayReload(ReadSourceSelector.Source source, Set<String> reloaded) {
+        return !reloaded.contains(source.name());
     }
 
     private ReadSourceSelector.Source servedSource() {
@@ -116,34 +182,42 @@ public class FreshnessReadGuard {
         return Map.copyOf(appliedBySource);
     }
 
-    public Decision decide(Collection<FreshnessScope> scopes, ReadSourceSelector.Source source,
+    public SettleOutcome settle(Collection<FreshnessScope> scopes, ReadSourceSelector.Source source,
             Map<String, String> appliedAtLoadStart, boolean mayReload) {
+        String appliedAtStart = appliedAtLoadStart.getOrDefault(source.name(), NO_GTIDS);
+        return switch (verdict(Required.of(viewsFor(scopes, source)), source, appliedAtStart, mayReload)) {
+            case Verdict.Serve serve -> new SettleOutcome.Serve();
+            case Verdict.NextSource next -> skip(source);
+            case Verdict.WaitFor wait -> switch (Waited.of(await(source, wait.gtids()))) {
+                case APPLIED -> new SettleOutcome.Reload();
+                case TIMED_OUT -> skip(source);
+            };
+        };
+    }
+
+    public static Verdict verdict(Required required, ReadSourceSelector.Source source, String appliedAtStart,
+            boolean mayReload) {
         if (source.authoritative()) {
-            return new Decision.Serve();
+            return new Verdict.Serve();
         }
-        Collection<MarkerView> views = markers.read(scopes).values();
-        if (views.stream().anyMatch(MarkerView.Unknown.class::isInstance)) {
-            return skip(source);
-        }
-        Set<String> marked = views.stream()
-                .filter(MarkerView.At.class::isInstance)
-                .map(view -> ((MarkerView.At) view).gtidSet())
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        if (marked.isEmpty()) {
-            return new Decision.Serve();
-        }
-        String required = GtidWriteCapture.unionGtidSets(marked);
-        if (contains(appliedAtLoadStart.get(source.name()), required)) {
-            return new Decision.Serve();
-        }
-        if (mayReload && await(source, required)) {
-            return new Decision.Reload();
-        }
-        return skip(source);
+        return switch (required) {
+            case Required.None none -> new Verdict.Serve();
+            case Required.Unknown unknown -> new Verdict.NextSource();
+            case Required.AtLeast atLeast when contains(appliedAtStart, atLeast.gtidSet()) -> new Verdict.Serve();
+            case Required.AtLeast atLeast when mayReload -> new Verdict.WaitFor(atLeast.gtidSet());
+            case Required.AtLeast atLeast -> new Verdict.NextSource();
+        };
+    }
+
+    private Collection<MarkerView> viewsFor(Collection<FreshnessScope> scopes, ReadSourceSelector.Source source) {
+        return switch (MarkerNeed.of(source)) {
+            case NONE -> List.of();
+            case READ -> markers.read(scopes).values();
+        };
     }
 
     private static boolean contains(String applied, String required) {
-        return applied != null && union(applied, required).equals(applied);
+        return union(applied, required).equals(applied);
     }
 
     private boolean await(ReadSourceSelector.Source source, String required) {
@@ -161,9 +235,9 @@ public class FreshnessReadGuard {
         return applied;
     }
 
-    private static Decision skip(ReadSourceSelector.Source source) {
+    private static SettleOutcome skip(ReadSourceSelector.Source source) {
         ReadSourceSelector.skip(source);
-        return new Decision.Skip(source);
+        return new SettleOutcome.Skip(source);
     }
 
     private static String union(String left, String right) {

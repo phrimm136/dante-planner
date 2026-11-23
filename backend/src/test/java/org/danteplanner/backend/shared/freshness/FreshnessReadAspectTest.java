@@ -115,7 +115,7 @@ class FreshnessReadAspectTest {
     }
 
     private static CircuitBreaker breaker(String name) {
-        return CircuitBreaker.of(name, new ReadSourceProperties.Breaker().circuitBreakerConfig());
+        return CircuitBreaker.of(name, ReadSourceProperties.Breaker.defaults().circuitBreakerConfig());
     }
 
     @Configuration

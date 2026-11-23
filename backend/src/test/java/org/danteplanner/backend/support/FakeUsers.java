@@ -85,11 +85,10 @@ public class FakeUsers implements Users {
     }
 
     @Override
-    public UserSummary findOrCreateUser(String provider, Map<String, String> userInfo) {
+    public UserSummary findOrCreateUser(String provider, String providerId, String email) {
         AuthProviderType providerType = AuthProviderType.fromValue(provider);
-        String providerId = userInfo.get("id");
         User user = first(byProvider(providerType, providerId)).orElseGet(() -> add(User.builder()
-                .email(userInfo.get("email"))
+                .email(email)
                 .provider(providerType)
                 .providerId(providerId)
                 .usernameEpithet(CREATED_EPITHET)

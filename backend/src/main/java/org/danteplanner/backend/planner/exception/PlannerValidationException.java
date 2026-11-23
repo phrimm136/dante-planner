@@ -1,7 +1,6 @@
 package org.danteplanner.backend.planner.exception;
 
 import lombok.Getter;
-import lombok.Setter;
 import org.danteplanner.backend.planner.validation.ContentVerdict;
 import org.danteplanner.backend.planner.validation.ErrorCode;
 import org.danteplanner.backend.planner.validation.Violation;
@@ -29,8 +28,6 @@ public class PlannerValidationException extends DomainException {
             .map(ErrorCode::getCode)
             .collect(Collectors.toUnmodifiableSet());
 
-    @Setter
-    private String failedContent;
 
     private final String originalCode;
 
@@ -44,30 +41,29 @@ public class PlannerValidationException extends DomainException {
         this(errorCode, message, List.of());
     }
 
-    public static PlannerValidationException refusing(ContentVerdict.Refused refused, String failedContent) {
+    public static PlannerValidationException refusing(ContentVerdict.Refused refused) {
         Violation violation = refused.violation();
-        PlannerValidationException exception = new PlannerValidationException(violation.code().getCode(),
+        return new PlannerValidationException(violation.code().getCode(),
                 violation.message(), List.of(subError(violation)));
-        exception.setFailedContent(failedContent);
-        return exception;
     }
 
-    public static PlannerValidationException rejecting(ContentVerdict.Rejected rejected, String failedContent) {
+    public static PlannerValidationException rejecting(ContentVerdict.Rejected rejected) {
         List<ValidationError> sub = rejected.violations().stream()
                 .map(PlannerValidationException::subError)
                 .toList();
-        PlannerValidationException exception = onlyUnknownKeywords(rejected)
+        return onlyUnknownKeywords(rejected)
                 ? new PlannerValidationException(ErrorCode.UNKNOWN_KEYWORD.getCode(),
                         UNKNOWN_KEYWORDS_DETAIL + rejected.violations().stream()
-                                .map(Violation::value)
+                                .flatMap(violation -> switch (violation.value()) {
+                                    case Violation.Value.WithValue withValue -> Stream.of(withValue.text());
+                                    case Violation.Value.Plain plain -> Stream.<String>empty();
+                                })
                                 .distinct()
                                 .sorted()
                                 .map(keyword -> keyword.isEmpty() ? BLANK_KEYWORD : keyword)
                                 .toList(),
                         sub)
                 : new PlannerValidationException(GENERIC_CODE, joined(sub), sub);
-        exception.setFailedContent(failedContent);
-        return exception;
     }
 
     private static boolean onlyUnknownKeywords(ContentVerdict.Rejected rejected) {

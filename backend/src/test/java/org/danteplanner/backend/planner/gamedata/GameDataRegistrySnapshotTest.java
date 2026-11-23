@@ -56,9 +56,9 @@ class GameDataRegistrySnapshotTest {
 
         int judged = 0;
         for (int round = 0; round < READ_ROUNDS; round++) {
-            int before = registry.getEgoMaxThreadspin(GENERATION_KEY);
+            int before = registry.snapshot().egoMaxThreadspin().get(GENERATION_KEY);
             boolean wholeGeneration = observesWholeGeneration(registry, before);
-            int after = registry.getEgoMaxThreadspin(GENERATION_KEY);
+            int after = registry.snapshot().egoMaxThreadspin().get(GENERATION_KEY);
 
             if (before != after) {
                 continue;
@@ -84,14 +84,15 @@ class GameDataRegistrySnapshotTest {
      * @return true when all eight structures carry that generation
      */
     private static boolean observesWholeGeneration(GameDataRegistry registry, int generation) {
-        return registry.hasIdentity("identity-" + generation)
-                && registry.hasEgo("ego-" + generation)
-                && registry.hasEgoGift("gift-" + generation)
-                && registry.hasThemePack("pack-" + generation)
-                && registry.startBuffIds(SEASON).contains("buff-" + generation)
-                && registry.hasStartGiftKeyword(SEASON, "keyword-" + generation)
-                && registry.getStartGiftPool(SEASON, "keyword-" + generation) != null
-                && registry.isGiftAffordableForThemePack("themed-gift-" + generation, "pack-" + generation)
+        return registry.snapshot().hasIdentity("identity-" + generation)
+                && registry.snapshot().hasEgo("ego-" + generation)
+                && registry.snapshot().hasEgoGift("gift-" + generation)
+                && registry.snapshot().hasThemePack("pack-" + generation)
+                && registry.snapshot().startBuffIds(SEASON).contains("buff-" + generation)
+                && registry.snapshot().hasStartGiftKeyword(SEASON, "keyword-" + generation)
+                && registry.snapshot().startGiftPool(SEASON, "keyword-" + generation)
+                        instanceof GameDataRegistry.Lookup.Known
+                && registry.snapshot().isGiftAffordableForThemePack("themed-gift-" + generation, "pack-" + generation)
                 && registry.isPopulated();
     }
 

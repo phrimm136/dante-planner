@@ -26,6 +26,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import org.springframework.boot.web.server.context.WebServerApplicationContext;
 
+import org.danteplanner.backend.planner.service.PlannerKeywordBackfillService.BackfillCursor;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
@@ -202,10 +203,10 @@ class KeywordBackfillShutdownRaceIT {
             lockAcquired.countDown();
             if (pages.getAndIncrement() == 0 && firstPageFull) {
                 closeObserved.await();
-                return new BackfillPage(UUID.randomUUID(), limit, 0);
+                return new BackfillPage(new BackfillCursor.After(UUID.randomUUID()), limit, 0);
             }
             lettuceStopped.await();
-            return new BackfillPage(null, 0, 0);
+            return new BackfillPage(new BackfillCursor.Start(), 0, 0);
         }
     }
 
@@ -260,12 +261,12 @@ class KeywordBackfillShutdownRaceIT {
         PlannerKeywordBackfill plannerKeywordBackfill(Probe probe) {
             PlannerKeywordBackfillService service = new PlannerKeywordBackfillService(null, null, null, null) {
                 @Override
-                public BackfillPage backfillPage(UUID after, int limit) {
+                public BackfillPage backfillPage(BackfillCursor cursor, int limit) {
                     try {
                         return probe.page(limit);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
-                        return new BackfillPage(null, 0, 0);
+                        return new BackfillPage(new BackfillCursor.Start(), 0, 0);
                     }
                 }
             };

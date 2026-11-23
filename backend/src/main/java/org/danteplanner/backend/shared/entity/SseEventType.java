@@ -47,7 +47,17 @@ public enum SseEventType {
     private static final Map<String, SseEventType> BY_VALUE = Arrays.stream(values())
             .collect(Collectors.toUnmodifiableMap(SseEventType::getValue, Function.identity()));
 
-    public static SseEventType fromValue(String value) {
-        return BY_VALUE.get(value);
+    public sealed interface Lookup {
+
+        record Known(SseEventType type) implements Lookup {
+        }
+
+        record Unknown() implements Lookup {
+        }
+    }
+
+    public static Lookup lookup(String value) {
+        SseEventType type = BY_VALUE.get(value);
+        return type == null ? new Lookup.Unknown() : new Lookup.Known(type);
     }
 }

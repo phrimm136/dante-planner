@@ -20,8 +20,8 @@ public class DomainEventPayloadReader {
         } catch (JacksonException e) {
             throw new IllegalStateException("unreadable payload on domain event " + event.getId(), e);
         }
-        JsonNode value = payload.get(field);
-        if (value == null || !value.canConvertToLong()) {
+        JsonNode value = payload.path(field);
+        if (!value.canConvertToLong()) {
             throw new IllegalStateException(
                     "domain event " + event.getId() + " carries no " + field);
         }

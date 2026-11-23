@@ -24,7 +24,7 @@ public record PlannerChange(
                 contentChanged(carried.content(), stored.getContent(), mapper),
                 changed(carried.gameContentVersion(), stored.getGameContentVersion()),
                 changed(carried.contentSchemaVersion(), stored.getContentSchemaVersion()),
-                changed(carried.deviceId(), stored.getDeviceId()));
+                carried.deviceId() != null && !Objects.equals(carried.deviceId(), stored.getDeviceId()));
     }
 
     public boolean isNone() {

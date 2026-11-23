@@ -7,12 +7,10 @@ import java.util.Properties;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
@@ -36,6 +34,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.micrometer.tagged.TaggedCircuitBreakerMetrics;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.jspecify.annotations.Nullable;
 
 @Configuration
 @ConditionalOnProperty(name = "datasource.routing.enabled", havingValue = "true")
@@ -81,8 +80,8 @@ public class ReadSourcesConfig {
     public HikariConfig buildSourceHikariConfig(String sourceName) {
         ReadSourceProperties.Source source = source(sourceName);
         HikariConfig config = new HikariConfig();
-        config.setPoolName(source.isPrimary() ? PoolLedger.PRIMARY_READ_POOL_NAME : source.getName());
-        RoutingDataSourceConfig.applyEndpoint(config, urlOf(source), usernameOf(source), passwordOf(source));
+        config.setPoolName(source.isPrimary() ? PoolLedger.PRIMARY_READ_POOL_NAME : source.name());
+        RoutingDataSourceConfig.applyEndpoint(config, credentialsOf(source));
         config.setMaximumPoolSize(poolSizeOf(source));
         config.setConnectionTimeout(hikariProperties.getConnectionTimeout());
         config.setInitializationFailTimeout(START_WITHOUT_CONNECTING);
@@ -91,15 +90,16 @@ public class ReadSourcesConfig {
 
     public SimpleDriverDataSource buildProbeDataSource(String sourceName) {
         ReadSourceProperties.Source source = source(sourceName);
-        String timeoutMs = String.valueOf(readSourceProperties.getReadSourceProbe().getTimeout().toMillis());
+        String timeoutMs = String.valueOf(readSourceProperties.readSourceProbe().timeout().toMillis());
         Properties driverProperties = new Properties();
         driverProperties.setProperty(CONNECT_TIMEOUT_PROPERTY, timeoutMs);
         driverProperties.setProperty(TimeoutHierarchy.SOCKET_TIMEOUT_PROPERTY, timeoutMs);
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
         dataSource.setDriverClass(Driver.class);
-        dataSource.setUrl(urlOf(source));
-        dataSource.setUsername(usernameOf(source));
-        dataSource.setPassword(passwordOf(source));
+        Credentials credentials = credentialsOf(source);
+        dataSource.setUrl(credentials.url());
+        dataSource.setUsername(credentials.username());
+        dataSource.setPassword(credentials.password());
         dataSource.setConnectionProperties(driverProperties);
         return dataSource;
     }
@@ -110,7 +110,7 @@ public class ReadSourcesConfig {
 
     @Bean
     public CircuitBreakerRegistry readSourceBreakerRegistry() {
-        return CircuitBreakerRegistry.of(readSourceProperties.getReadSourceBreaker().circuitBreakerConfig());
+        return CircuitBreakerRegistry.of(readSourceProperties.readSourceBreaker().circuitBreakerConfig());
     }
 
     @Bean
@@ -124,14 +124,14 @@ public class ReadSourcesConfig {
             CircuitBreakerRegistry readSourceBreakerRegistry,
             MeterRegistry meterRegistry,
             BeanFactory beanFactory) {
-        return new ReadSourceSelector(readSourceProperties.getReadSources().stream()
+        return new ReadSourceSelector(readSourceProperties.readSources().stream()
                 .map(source -> new ReadSourceSelector.Source(
-                        source.getName(),
+                        source.name(),
                         source.isPrimary(),
                         source.isPrimary() && isReadFirst(source)
                                 ? primaryPool
-                                : beanFactory.getBean(poolBeanName(source.getName()), DataSource.class),
-                        breaker(readSourceBreakerRegistry, meterRegistry, source.getName())))
+                                : beanFactory.getBean(poolBeanName(source.name()), DataSource.class),
+                        breaker(readSourceBreakerRegistry, meterRegistry, source.name())))
                 .toList());
     }
 
@@ -152,7 +152,7 @@ public class ReadSourcesConfig {
                         .map(source -> new ReadSourceHealthProbe.Target(
                                 source.name(), buildProbeDataSource(source.name()), source.breaker()))
                         .toList(),
-                readSourceProperties.getReadSourceProbe());
+                readSourceProperties.readSourceProbe());
     }
 
     private static CircuitBreaker breaker(
@@ -168,8 +168,8 @@ public class ReadSourcesConfig {
     }
 
     private ReadSourceProperties.Source source(String sourceName) {
-        return readSourceProperties.getReadSources().stream()
-                .filter(source -> source.getName().equals(sourceName))
+        return readSourceProperties.readSources().stream()
+                .filter(source -> source.name().equals(sourceName))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("no read source named " + sourceName));
     }
@@ -182,33 +182,48 @@ public class ReadSourcesConfig {
     }
 
     private boolean isReadFirst(ReadSourceProperties.Source source) {
-        return readSourceProperties.getReadSources().get(0) == source;
+        return readSourceProperties.readSources().get(0) == source;
     }
 
-    private String urlOf(ReadSourceProperties.Source source) {
-        return source.isPrimary() ? primaryProperties.getUrl() : source.getUrl();
+    private Credentials credentialsOf(ReadSourceProperties.Source source) {
+        Credentials primary = Credentials.of(primaryProperties);
+        return switch (source.endpoint()) {
+            case ReadSourceProperties.Source.Endpoint.Primary primaryEndpoint -> primary;
+            case ReadSourceProperties.Source.Endpoint.Replica replica -> primary.overriddenBy(replica);
+        };
     }
 
-    private String usernameOf(ReadSourceProperties.Source source) {
-        return source.getUsername() != null ? source.getUsername() : primaryProperties.getUsername();
-    }
+    record Credentials(String url, String username, String password) {
 
-    private String passwordOf(ReadSourceProperties.Source source) {
-        return source.getPassword() != null ? source.getPassword() : primaryProperties.getPassword();
-    }
-
-    static class SourcePoolRegistrar implements ImportBeanDefinitionRegistrar, EnvironmentAware, BeanFactoryAware {
-
-        private Environment environment;
-        private BeanFactory beanFactory;
-
-        @Override
-        public void setEnvironment(Environment environment) {
-            this.environment = environment;
+        static Credentials of(DataSourceProperties properties) {
+            return new Credentials(
+                    configured(properties.getUrl(), "url"),
+                    configured(properties.getUsername(), "username"),
+                    configured(properties.getPassword(), "password"));
         }
 
-        @Override
-        public void setBeanFactory(BeanFactory beanFactory) {
+        Credentials overriddenBy(ReadSourceProperties.Source.Endpoint.Replica replica) {
+            return new Credentials(
+                    replica.url(),
+                    replica.username().isEmpty() ? username : replica.username(),
+                    replica.password().isEmpty() ? password : replica.password());
+        }
+
+        private static String configured(@Nullable String value, String key) {
+            if (value == null) {
+                throw new IllegalStateException("spring.datasource." + key + " is required for routing");
+            }
+            return value;
+        }
+    }
+
+    static class SourcePoolRegistrar implements ImportBeanDefinitionRegistrar {
+
+        private final Environment environment;
+        private final BeanFactory beanFactory;
+
+        SourcePoolRegistrar(Environment environment, BeanFactory beanFactory) {
+            this.environment = environment;
             this.beanFactory = beanFactory;
         }
 
@@ -216,10 +231,10 @@ public class ReadSourcesConfig {
         public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
             List<ReadSourceProperties.Source> sources = boundSources(environment);
             for (ReadSourceProperties.Source source : sources) {
-                if (source.getName() == null || (source.isPrimary() && sources.get(0) == source)) {
+                if (source.name().isEmpty() || (source.isPrimary() && sources.get(0) == source)) {
                     continue;
                 }
-                String name = source.getName();
+                String name = source.name();
                 RootBeanDefinition pool = new RootBeanDefinition(HikariDataSource.class,
                         () -> beanFactory.getBean(ReadSourcesConfig.class).sourcePool(name));
                 pool.setDestroyMethodName(AbstractBeanDefinition.INFER_METHOD);

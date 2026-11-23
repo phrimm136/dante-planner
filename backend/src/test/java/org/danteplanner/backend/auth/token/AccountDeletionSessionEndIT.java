@@ -10,6 +10,8 @@ import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
+import java.util.List;
+import org.danteplanner.backend.user.api.SessionEndHandler.SessionToken;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +54,7 @@ class AccountDeletionSessionEndIT extends SharedMySqlContainerSupport {
         mockMvc.perform(get("/api/auth/me").cookie(AuthCookies.accessToken(sameSecondToken)))
                 .andExpect(status().isOk());
 
-        sessionEndHandler.endSession(sameSecondToken, null);
+        sessionEndHandler.endSession(List.of(new SessionToken.Access(sameSecondToken)));
 
         mockMvc.perform(get("/api/auth/me").cookie(AuthCookies.accessToken(sameSecondToken)))
                 .andExpect(status().isNoContent());

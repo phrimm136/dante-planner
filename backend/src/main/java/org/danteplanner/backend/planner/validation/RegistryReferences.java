@@ -9,17 +9,17 @@ import org.danteplanner.backend.planner.validation.startgift.StartGiftReferenceD
 
 import java.util.Optional;
 
-record RegistryReferences(GameDataRegistry registry, SinnerIdValidator sinnerIds)
+record RegistryReferences(GameDataRegistry.Snapshot data, SinnerIdValidator sinnerIds)
         implements IdentityReferenceData, EgoReferenceData, EgoGiftReferenceData, StartGiftReferenceData {
 
     @Override
     public boolean hasIdentity(String identityId) {
-        return registry.hasIdentity(identityId);
+        return data.hasIdentity(identityId);
     }
 
     @Override
     public boolean hasEgo(String egoId) {
-        return registry.hasEgo(egoId);
+        return data.hasEgo(egoId);
     }
 
     @Override
@@ -29,11 +29,14 @@ record RegistryReferences(GameDataRegistry registry, SinnerIdValidator sinnerIds
 
     @Override
     public Optional<Integer> maxThreadspin(String egoId) {
-        return Optional.ofNullable(registry.getEgoMaxThreadspin(egoId));
+        return switch (data.maxThreadspinOf(egoId)) {
+            case GameDataRegistry.Lookup.Known<Integer> known -> Optional.of(known.value());
+            case GameDataRegistry.Lookup.Unknown<Integer> unknown -> Optional.empty();
+        };
     }
 
     @Override
     public boolean hasEgoGift(String giftId) {
-        return registry.hasEgoGift(giftId);
+        return data.hasEgoGift(giftId);
     }
 }

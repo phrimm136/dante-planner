@@ -20,6 +20,9 @@ import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.fixture.ratelimit.BareHandlerFixture;
 import org.danteplanner.fixture.ratelimit.DeclaredHandlerFixture;
 
+import org.danteplanner.backend.support.RateLimitStores;
+import java.util.Map;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -121,12 +124,7 @@ class BackstopDeniesWhenTheGateWasSkippedTest {
     }
 
     private static RateLimitProperties crudBucket() {
-        RateLimitProperties.BucketConfig bucket = new RateLimitProperties.BucketConfig();
-        bucket.setCapacity(10);
-        bucket.setRefillTokens(10);
-        bucket.setRefillDurationSeconds(60);
-        RateLimitProperties properties = new RateLimitProperties();
-        properties.setCrud(bucket);
-        return properties;
+        RateLimitProperties.BucketConfig bucket = new RateLimitProperties.BucketConfig(10, 10, 60);
+        return RateLimitStores.limits(0, Map.of(RateLimitPolicy.CRUD, bucket));
     }
 }

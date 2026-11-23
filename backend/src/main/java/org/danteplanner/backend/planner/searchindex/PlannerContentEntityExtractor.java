@@ -37,9 +37,9 @@ public class PlannerContentEntityExtractor {
             return refs;
         }
         extractFromEquipment(root, refs);
-        addIdsFromArray(root.get("selectedGiftIds"), ContentEntityType.EGO_GIFT, refs);
-        addIdsFromArray(root.get("observationGiftIds"), ContentEntityType.EGO_GIFT, refs);
-        addIdsFromArray(root.get("comprehensiveGiftIds"), ContentEntityType.EGO_GIFT, refs);
+        addIdsFromArray(root.path("selectedGiftIds"), ContentEntityType.EGO_GIFT, refs);
+        addIdsFromArray(root.path("observationGiftIds"), ContentEntityType.EGO_GIFT, refs);
+        addIdsFromArray(root.path("comprehensiveGiftIds"), ContentEntityType.EGO_GIFT, refs);
         admittedFloors(root, category).forEach(floor -> extractFromFloor(floor, refs));
         return refs;
     }
@@ -54,27 +54,27 @@ public class PlannerContentEntityExtractor {
     }
 
     private static void extractFromEquipment(JsonNode root, Set<EntityRef> refs) {
-        JsonNode equipment = root.get("equipment");
-        if (equipment == null || !equipment.isObject()) {
+        JsonNode equipment = root.path("equipment");
+        if (!equipment.isObject()) {
             return;
         }
         Iterator<Map.Entry<String, JsonNode>> sinners = equipment.properties().iterator();
         while (sinners.hasNext()) {
             JsonNode sinnerData = sinners.next().getValue();
-            if (sinnerData == null || !sinnerData.isObject()) {
+            if (!sinnerData.isObject()) {
                 continue;
             }
-            JsonNode identity = sinnerData.get("identity");
-            if (identity != null && identity.isObject()) {
-                addId(identity.get("id"), ContentEntityType.IDENTITY, refs);
+            JsonNode identity = sinnerData.path("identity");
+            if (identity.isObject()) {
+                addId(identity.path("id"), ContentEntityType.IDENTITY, refs);
             }
-            JsonNode egos = sinnerData.get("egos");
-            if (egos != null && egos.isObject()) {
+            JsonNode egos = sinnerData.path("egos");
+            if (egos.isObject()) {
                 Iterator<Map.Entry<String, JsonNode>> egoTypes = egos.properties().iterator();
                 while (egoTypes.hasNext()) {
                     JsonNode egoData = egoTypes.next().getValue();
-                    if (egoData != null && egoData.isObject()) {
-                        addId(egoData.get("id"), ContentEntityType.EGO, refs);
+                    if (egoData.isObject()) {
+                        addId(egoData.path("id"), ContentEntityType.EGO, refs);
                     }
                 }
             }
@@ -87,7 +87,7 @@ public class PlannerContentEntityExtractor {
     }
 
     private static void addIdsFromArray(JsonNode arrayNode, ContentEntityType type, Set<EntityRef> refs) {
-        if (arrayNode == null || !arrayNode.isArray()) {
+        if (!arrayNode.isArray()) {
             return;
         }
         for (JsonNode element : arrayNode) {
@@ -96,7 +96,7 @@ public class PlannerContentEntityExtractor {
     }
 
     private static void addId(JsonNode idNode, ContentEntityType type, Set<EntityRef> refs) {
-        if (idNode == null || idNode.isNull() || !idNode.isValueNode()) {
+        if (idNode.isNull() || !idNode.isValueNode()) {
             return;
         }
         addId(idNode.asString(), type, refs);

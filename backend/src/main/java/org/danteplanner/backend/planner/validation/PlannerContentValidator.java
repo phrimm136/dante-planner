@@ -46,7 +46,7 @@ public class PlannerContentValidator {
     private final ObjectMapper objectMapper;
     private final DocumentChecks document;
     private final GameDataRegistry gameDataRegistry;
-    private final RegistryReferences references;
+    private final SinnerIdValidator sinnerIdValidator;
     private final FloorRules floorRules;
     private final ContentSchema schema = ContentSchema.planner();
 
@@ -60,77 +60,79 @@ public class PlannerContentValidator {
         this.objectMapper = objectMapper;
         this.document = new DocumentChecks(maxContentSizeBytes, maxNoteSizeBytes);
         this.gameDataRegistry = gameDataRegistry;
-        this.references = new RegistryReferences(gameDataRegistry, sinnerIdValidator);
+        this.sinnerIdValidator = sinnerIdValidator;
         this.floorRules = floorRules;
     }
 
     public PlannerDocument parse(String raw, MDCategory category, Season season, Stage stage) {
-        return accepted(check(raw, category, season, stage), raw);
+        return accepted(check(raw, category, season, stage, gameDataRegistry.snapshot()));
     }
 
     public PlannerDocument reparseForCategory(String stored, MDCategory category, Stage stage) {
-        return accepted(checkFloorRules(stored, category, stage), stored);
+        return accepted(checkFloorRules(stored, category, stage, gameDataRegistry.snapshot()));
     }
 
     public Season season(int version) {
         if (!gameDataRegistry.hasSeason(version)) {
-            throw refusal(new ContentVerdict.Refused(unknownVersion(version)), null);
+            throw refusal(new ContentVerdict.Refused(unknownVersion(version)));
         }
-        return new Season(gameDataRegistry, version);
+        return new Season(gameDataRegistry.snapshot(), version);
     }
 
     public Stage stageOf(Planner planner) {
         return planner.isPublished() ? Stage.PUBLISH : Stage.DRAFT;
     }
 
-    private static PlannerDocument accepted(ContentVerdict verdict, String content) {
+    private static PlannerDocument accepted(ContentVerdict verdict) {
         return switch (verdict) {
             case ContentVerdict.Accepted accepted -> accepted.document();
-            case ContentVerdict.Refused refused -> throw refusal(refused, content);
+            case ContentVerdict.Refused refused -> throw refusal(refused);
             case ContentVerdict.Rejected rejected -> {
                 rejected.violations().forEach(violation ->
                         log.warn("Validation failed at {}: {}", violation.path().render(), violation.message()));
-                throw PlannerValidationException.rejecting(rejected, content);
+                throw PlannerValidationException.rejecting(rejected);
             }
         };
     }
 
-    private static PlannerValidationException refusal(ContentVerdict.Refused refused, String content) {
+    private static PlannerValidationException refusal(ContentVerdict.Refused refused) {
         log.warn("Validation failed: {}", refused.violation().message());
-        return PlannerValidationException.refusing(refused, content);
+        return PlannerValidationException.refusing(refused);
     }
 
-    private ContentVerdict check(String content, MDCategory category, Season season, Stage stage) {
+    private ContentVerdict check(String content, MDCategory category, Season season, Stage stage,
+                                 GameDataRegistry.Snapshot data) {
         return DocumentChecks.emptiness(content)
                 .<ContentVerdict>map(ContentVerdict.Refused::new)
                 .orElseGet(() -> switch (ContentJson.parse(objectMapper, content)) {
                     case ContentJson.Malformed malformed ->
                             new ContentVerdict.Refused(DocumentChecks.malformed(malformed.detail()));
-                    case ContentJson.Tree tree -> checkParsed(content, tree.root(), category, season, stage);
+                    case ContentJson.Tree tree -> checkParsed(content, tree.root(), category, season, stage, data);
                 });
     }
 
     private ContentVerdict checkParsed(String content, JsonNode parsed, MDCategory category, Season season,
-                                       Stage stage) {
+                                       Stage stage, GameDataRegistry.Snapshot data) {
         return document.contentSize(parsed)
                 .or(() -> DocumentChecks.objectRoot(parsed))
                 .<ContentVerdict>map(ContentVerdict.Refused::new)
-                .orElseGet(() -> checkShape(clipped(normalized(content, parsed), season), category,
+                .orElseGet(() -> checkShape(clipped(normalized(content, parsed, data), season), category, data,
                         tree -> document.noteSize(tree.sectionNotes()),
-                        tree -> contentViolations(tree, season, stage)));
+                        tree -> contentViolations(tree, season, stage, data)));
     }
 
-    private ContentVerdict checkFloorRules(String content, MDCategory category, Stage stage) {
+    private ContentVerdict checkFloorRules(String content, MDCategory category, Stage stage,
+                                           GameDataRegistry.Snapshot data) {
         return switch (ContentJson.parse(objectMapper, content)) {
             case ContentJson.Malformed malformed ->
                     new ContentVerdict.Refused(DocumentChecks.malformed(malformed.detail()));
-            case ContentJson.Tree tree -> checkShape(normalized(content, tree.root()), category,
+            case ContentJson.Tree tree -> checkShape(normalized(content, tree.root(), data), category, data,
                     admitted -> Optional.empty(),
                     admitted -> admission(admitted.floorSelections().parsed(), stage));
         };
     }
 
-    private ContentVerdict checkShape(Normalized normalized, MDCategory category,
+    private ContentVerdict checkShape(Normalized normalized, MDCategory category, GameDataRegistry.Snapshot data,
                                       Function<PlannerContent, Optional<Violation>> refusal,
                                       Function<PlannerContent, List<Violation>> rules) {
         List<Violation> shape = schema.violations(normalized.root());
@@ -138,7 +140,7 @@ public class PlannerContentValidator {
             return new ContentVerdict.Rejected(shape);
         }
         PlannerContent tree = ContentJson.bind(objectMapper, normalized.root(),
-                gameDataRegistry.floorRules().layout(category));
+                data.floorRules().layout(category));
         return refusal.apply(tree)
                 .<ContentVerdict>map(ContentVerdict.Refused::new)
                 .orElseGet(() -> {
@@ -149,8 +151,8 @@ public class PlannerContentValidator {
                 });
     }
 
-    private Normalized normalized(String content, JsonNode parsed) {
-        return new Normalized(content, parsed, gameDataRegistry.idMigrations().normalize(parsed));
+    private static Normalized normalized(String content, JsonNode parsed, GameDataRegistry.Snapshot data) {
+        return new Normalized(content, parsed, data.idMigrations().normalize(parsed));
     }
 
     private static Normalized clipped(Normalized normalized, Season season) {
@@ -158,8 +160,10 @@ public class PlannerContentValidator {
                 IdentityLevels.clip(normalized.root(), season.identityMaxLevel()));
     }
 
-    private List<Violation> contentViolations(PlannerContent tree, Season season, Stage stage) {
+    private List<Violation> contentViolations(PlannerContent tree, Season season, Stage stage,
+                                              GameDataRegistry.Snapshot data) {
         FloorBoundary.Parsed floors = tree.floorSelections().parsed();
+        RegistryReferences references = new RegistryReferences(data, sinnerIdValidator);
         return Stream.of(
                         DocumentChecks.selectedKeywords(tree.selectedKeywords(), stage),
                         IdentityRules.check(tree.identities(), references, season.identityMaxLevel()),
@@ -168,7 +172,7 @@ public class PlannerContentValidator {
                         SkillRules.check(tree.skillEAState()),
                         EgoGiftRules.check(tree.observationGiftIds(), tree.comprehensiveGiftIds(), references),
                         admission(floors, stage),
-                        FloorReferences.check(floors, FloorReferenceData.of(gameDataRegistry)),
+                        FloorReferences.check(floors, FloorReferenceData.of(data)),
                         StartBuffRules.check(tree.selectedBuffIds(), season),
                         StartGiftRules.check(Optional.ofNullable(tree.selectedGiftKeyword()), tree.selectedGiftIds(),
                                 references, season))

@@ -13,7 +13,6 @@ import org.danteplanner.backend.auth.oauth.OAuthUserInfo;
 import org.danteplanner.backend.auth.token.TokenGenerator;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -40,7 +39,7 @@ public class AuthenticationService {
 
         OAuthProvider provider = providerRegistry.getProvider(providerName);
 
-        OAuthTokens oauthTokens = provider.exchangeCodeForTokens(code, redirectUri, codeVerifier);
+        OAuthTokens oauthTokens = OAuthTokens.of(provider.exchangeCodeForTokens(code, redirectUri, codeVerifier));
 
         OAuthUserInfo userInfo = provider.getUserInfo(oauthTokens);
 
@@ -64,11 +63,7 @@ public class AuthenticationService {
             } else if (deletedUser.isPresent()) {
                 user = deletedUser.get();
             } else {
-                Map<String, String> userInfoMap = Map.of(
-                        "id", providerId,
-                        "email", userInfo.email()
-                );
-                user = users.findOrCreateUser(providerName, userInfoMap);
+                user = users.findOrCreateUser(providerName, providerId, userInfo.email());
             }
         }
 

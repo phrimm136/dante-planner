@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.auth.token.LogoutRevocation;
+import org.danteplanner.backend.auth.token.RefreshLineage;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
@@ -27,34 +28,14 @@ public class SessionRevocationService implements SessionEndHandler {
     private final TokenBlacklistService tokenBlacklistService;
     private final LineageRotationFlag lineageRotationFlag;
 
-    public void logout(String accessToken, String refreshToken) {
+    public void logout(List<SessionToken> tokens) {
         log.info("Processing logout");
 
         List<LogoutRevocation> revocations = new ArrayList<>();
-
-        if (accessToken != null) {
-            try {
-                revocations.add(new LogoutRevocation.TokenRevocation(
-                        accessToken, tokenValidator.validateAccessToken(accessToken).expiration()));
-            } catch (InvalidTokenException e) {
-                log.debug("Access token already invalid, skipping blacklist");
-            }
-        }
-
-        if (refreshToken != null) {
-            try {
-                TokenClaims refreshClaims = tokenValidator.validateRefreshToken(refreshToken);
-                revocations.add(new LogoutRevocation.TokenRevocation(
-                        refreshToken, refreshClaims.expiration()));
-                if (lineageRotationFlag.isEnabled()) {
-                    String familyId = refreshClaims.familyId() != null
-                            ? refreshClaims.familyId()
-                            : RefreshRotationService.legacyFamilyId(
-                                    refreshClaims.userId(), refreshClaims.issuedAt().getTime());
-                    revocations.add(new LogoutRevocation.FamilyRevocation(familyId));
-                }
-            } catch (InvalidTokenException e) {
-                log.debug("Refresh token already invalid, skipping blacklist");
+        for (SessionToken token : tokens) {
+            switch (token) {
+                case SessionToken.Access access -> revocations.addAll(accessRevocations(access.token()));
+                case SessionToken.Refresh refresh -> revocations.addAll(refreshRevocations(refresh.token()));
             }
         }
 
@@ -63,26 +44,63 @@ public class SessionRevocationService implements SessionEndHandler {
         log.info("Logout completed");
     }
 
-    public void logoutAll(Long userId, String accessToken) {
+    private List<LogoutRevocation> accessRevocations(String accessToken) {
+        try {
+            return List.of(new LogoutRevocation.TokenRevocation(
+                    accessToken, tokenValidator.validateAccessToken(accessToken).expiration()));
+        } catch (InvalidTokenException e) {
+            log.debug("Access token already invalid, skipping blacklist");
+            return List.of();
+        }
+    }
+
+    private List<LogoutRevocation> refreshRevocations(String refreshToken) {
+        try {
+            TokenClaims refreshClaims = tokenValidator.validateRefreshToken(refreshToken);
+            LogoutRevocation token = new LogoutRevocation.TokenRevocation(refreshToken, refreshClaims.expiration());
+            if (!lineageRotationFlag.isEnabled()) {
+                return List.of(token);
+            }
+            String familyId = switch (refreshClaims.lineage()) {
+                case RefreshLineage.Legacy legacy ->
+                        RefreshRotationService.legacyFamilyId(refreshClaims.userId(), legacy.issuedAtMs());
+                case RefreshLineage.Root root -> root.familyId();
+                case RefreshLineage.Child child -> child.familyId();
+            };
+            return List.of(token, new LogoutRevocation.FamilyRevocation(familyId));
+        } catch (InvalidTokenException e) {
+            log.debug("Refresh token already invalid, skipping blacklist");
+            return List.of();
+        }
+    }
+
+    public void logoutAll(Long userId, List<SessionToken> tokens) {
         log.info("Processing logout-all for user: {}", userId);
 
         tokenBlacklistService.invalidateUserTokens(userId);
 
-        if (accessToken != null) {
-            try {
-                TokenClaims accessClaims = tokenValidator.validateAccessToken(accessToken);
-                tokenBlacklistService.blacklistToken(accessToken, accessClaims.expiration());
-            } catch (InvalidTokenException e) {
-                log.debug("Access token already invalid, skipping blacklist");
+        for (SessionToken token : tokens) {
+            switch (token) {
+                case SessionToken.Access access -> blacklist(access.token());
+                case SessionToken.Refresh refresh -> { }
             }
         }
 
         log.info("Logout-all completed for user: {}", userId);
     }
 
+    private void blacklist(String accessToken) {
+        try {
+            TokenClaims accessClaims = tokenValidator.validateAccessToken(accessToken);
+            tokenBlacklistService.blacklistToken(accessToken, accessClaims.expiration());
+        } catch (InvalidTokenException e) {
+            log.debug("Access token already invalid, skipping blacklist");
+        }
+    }
+
     @Override
-    public void endSession(String accessToken, String refreshToken) {
-        logout(accessToken, refreshToken);
+    public void endSession(List<SessionToken> tokens) {
+        logout(tokens);
     }
 
     @Override

@@ -63,16 +63,11 @@ class RoutingDataSourceConfigTest {
     }
 
     private static ReadSourceProperties readSources(String... names) {
-        ReadSourceProperties props = new ReadSourceProperties();
-        props.setReadSources(Arrays.stream(names).map(name -> {
-            ReadSourceProperties.Source source = new ReadSourceProperties.Source();
-            source.setName(name);
-            if (!source.isPrimary()) {
-                source.setUrl("jdbc:mysql://replica:3306/planner");
-            }
-            return source;
-        }).toList());
-        return props;
+        return new ReadSourceProperties(
+                Arrays.stream(names).map(name -> new ReadSourceProperties.Source(name,
+                        name.equals(ReadSourceProperties.PRIMARY) ? "" : "jdbc:mysql://replica:3306/planner",
+                        "", "")).toList(),
+                ReadSourceProperties.Breaker.defaults(), ReadSourceProperties.Probe.defaults());
     }
 
     private static ReadSourceSelector selector() {

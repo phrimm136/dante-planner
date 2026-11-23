@@ -39,10 +39,9 @@ class CsrfDoubleSubmitFilterTest {
 
     @BeforeEach
     void setUp() {
-        JwtProperties jwtProperties = new JwtProperties();
         byte[] key = new byte[32];
         new java.security.SecureRandom().nextBytes(key);
-        jwtProperties.setEncryptionKeyBytes(key);
+        JwtProperties jwtProperties = new JwtProperties(null, null, key, 900000L, 604800000L);
         CsrfTokenService csrfTokenService = new CsrfTokenService(jwtProperties);
         token = csrfTokenService.mint();
 

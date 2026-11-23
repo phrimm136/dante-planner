@@ -2,6 +2,7 @@ package org.danteplanner.backend.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.shared.exception.ConstraintViolationClassifier;
 import org.hibernate.exception.ConstraintViolationException;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
@@ -27,7 +28,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -51,14 +51,13 @@ public class UserService {
     private final UserSettingsService userSettingsService;
     private final TransactionTemplate transactionTemplate;
 
-    public User findOrCreateUser(String provider, Map<String, String> userInfo) {
+    public User findOrCreateUser(String provider, String providerId, String email) {
         AuthProviderType providerType = AuthProviderType.fromValue(provider);
-        String providerId = userInfo.get("id");
 
         try {
             return transactionTemplate.execute(status ->
                     userRepository.findByProviderAndProviderId(providerType, providerId)
-                            .orElseGet(() -> createOrRecover(providerType, userInfo)));
+                            .orElseGet(() -> createOrRecover(providerType, providerId, email)));
         } catch (DataIntegrityViolationException e) {
             // A declared finder runs in no transaction of its own, so a bare call reaches the
             // primary as undeclared access.
@@ -68,21 +67,21 @@ public class UserService {
         }
     }
 
-    private User createOrRecover(AuthProviderType providerType, Map<String, String> userInfo) {
-        User user = createUserWithUniqueUsername(providerType, userInfo);
+    private User createOrRecover(AuthProviderType providerType, String providerId, String email) {
+        User user = createUserWithUniqueUsername(providerType, providerId, email);
         userSettingsService.getOrCreateEntity(user.getId());
         FreshnessDeclarations.declare(new FreshnessScope.User(user.getId()), new FreshnessScope.Global());
         return user;
     }
 
-    private User createUserWithUniqueUsername(AuthProviderType provider, Map<String, String> userInfo) {
+    private User createUserWithUniqueUsername(AuthProviderType provider, String providerId, String email) {
         for (int attempt = 1; attempt <= MAX_USERNAME_RETRIES; attempt++) {
             UsernameComponents username = usernameGenerator.generate();
 
             User newUser = User.builder()
-                    .email(userInfo.get("email"))
+                    .email(email)
                     .provider(provider)
-                    .providerId(userInfo.get("id"))
+                    .providerId(providerId)
                     .usernameEpithet(username.epithet())
                     .usernameSuffix(username.suffix())
                     .build();
@@ -111,7 +110,11 @@ public class UserService {
     static boolean isUsernameSuffixCollision(DataIntegrityViolationException e) {
         for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause()) {
             if (cause instanceof ConstraintViolationException violation) {
-                return USERNAME_SUFFIX_CONSTRAINT.equalsIgnoreCase(keyName(violation.getConstraintName()));
+                return switch (ConstraintViolationClassifier.ConstraintName.of(violation)) {
+                    case ConstraintViolationClassifier.ConstraintName.Named named ->
+                            USERNAME_SUFFIX_CONSTRAINT.equalsIgnoreCase(keyName(named.qualified()));
+                    case ConstraintViolationClassifier.ConstraintName.Unnamed unnamed -> false;
+                };
             }
         }
         return false;
@@ -119,9 +122,7 @@ public class UserService {
 
     /** The key alone: MySQL 8.0.19 and later qualify the key in a duplicate-entry report with its table. */
     private static String keyName(String constraintName) {
-        return constraintName == null
-                ? null
-                : constraintName.substring(constraintName.lastIndexOf('.') + 1);
+        return constraintName.substring(constraintName.lastIndexOf('.') + 1);
     }
 
     public UserResponse toResponse(User user) {

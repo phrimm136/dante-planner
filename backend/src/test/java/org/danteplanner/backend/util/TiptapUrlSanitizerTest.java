@@ -78,6 +78,15 @@ class TiptapUrlSanitizerTest {
     }
 
     @Test
+    void sanitize_WhenImageNodeHasNoAttrs_LeavesTheNodeUnchanged() throws Exception {
+        JsonNode node = mapper.readTree("{\"type\":\"image\"}");
+
+        TiptapUrlSanitizer.sanitize(node);
+
+        assertThat(node).isEqualTo(mapper.readTree("{\"type\":\"image\"}"));
+    }
+
+    @Test
     void sanitizeJson_WhenNullInput_ReturnsNull() {
         assertThat(TiptapUrlSanitizer.sanitizeJson(null)).isNull();
     }

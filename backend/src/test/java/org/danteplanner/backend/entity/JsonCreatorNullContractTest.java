@@ -19,12 +19,12 @@ class JsonCreatorNullContractTest {
 
     @Test
     void plannerStatus_WhenValueIsNull_ReturnsNullRatherThanThrowing() {
-        assertThat(PlannerStatus.fromValue(null)).isNull();
+        assertThat(PlannerStatus.fromJson(null)).isNull();
     }
 
     @Test
     void authProviderType_WhenValueIsNull_ReturnsNullRatherThanThrowing() {
-        assertThat(AuthProviderType.fromValue(null)).isNull();
+        assertThat(AuthProviderType.fromJson(null)).isNull();
     }
 
     @Test

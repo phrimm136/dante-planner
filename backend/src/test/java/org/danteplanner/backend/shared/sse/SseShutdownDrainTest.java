@@ -37,6 +37,7 @@ import org.springframework.boot.web.server.servlet.context.ServletWebServerAppli
 import org.springframework.boot.webmvc.autoconfigure.DispatcherServletAutoConfiguration;
 import org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration;
 
+import org.danteplanner.backend.shared.security.Viewer;
 import org.junit.jupiter.api.Test;
 
 import org.assertj.core.api.SoftAssertions;
@@ -243,7 +244,7 @@ class SseShutdownDrainTest {
         }
 
         SseEmitter subscribe() throws Exception {
-            SseEmitter emitter = register("probe", UUID.randomUUID());
+            SseEmitter emitter = register("probe", UUID.randomUUID(), new Viewer.Guest());
             emitter.onCompletion(completed::countDown);
             return emitter;
         }

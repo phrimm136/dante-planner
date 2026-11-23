@@ -1,8 +1,9 @@
 package org.danteplanner.backend.notification.api;
 
+import org.danteplanner.backend.shared.failure.CommandOutcome;
 import org.danteplanner.backend.shared.failure.FailureUnion;
 
-public sealed interface NotificationOutcome extends FailureUnion
+public sealed interface NotificationOutcome extends FailureUnion, CommandOutcome
         permits NotificationOutcome.Delivered, NotificationOutcome.Suppressed {
 
     record Delivered(Long userId, NotificationEventPayload payload) implements NotificationOutcome {

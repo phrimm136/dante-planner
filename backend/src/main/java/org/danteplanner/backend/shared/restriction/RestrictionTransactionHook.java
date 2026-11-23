@@ -72,9 +72,16 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
         if (state == null || !state.checkPending()) {
             return;
         }
+        switch (state.principal) {
+            case Principal.Authenticated authenticated -> check(state, authenticated.userId(), transaction);
+            case Principal.Anonymous anonymous -> { }
+        }
+    }
+
+    private void check(RequestState state, Long userId, TransactionExecution transaction) {
         state.checked = true;
         try {
-            checkHandler.getObject().requireUnrestricted(state.userId);
+            checkHandler.getObject().requireUnrestricted(userId);
         } catch (RuntimeException refusal) {
             // spring-tx does not catch an exception thrown from afterBegin, so the begun transaction would stay bound.
             transactionManager.getObject().rollback((TransactionStatus) transaction);
@@ -119,8 +126,10 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
                 RequestAttributes.SCOPE_REQUEST) instanceof HandlerMethod handler)) {
             return null;
         }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         RequestState state = new RequestState(declarationOf(handler),
-                handler.getBeanType().getSimpleName() + "." + handler.getMethod().getName(), principalId());
+                handler.getBeanType().getSimpleName() + "." + handler.getMethod().getName(),
+                Principal.of(authentication == null ? null : authentication.getPrincipal()));
         attributes.setAttribute(STATE_ATTRIBUTE, state, RequestAttributes.SCOPE_REQUEST);
         return state;
     }
@@ -135,13 +144,17 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
         return Declaration.NONE;
     }
 
-    @Nullable
-    private static Long principalId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof Long userId) {
-            return userId;
+    private sealed interface Principal {
+
+        record Authenticated(Long userId) implements Principal {
         }
-        return null;
+
+        record Anonymous() implements Principal {
+        }
+
+        static Principal of(@Nullable Object principal) {
+            return principal instanceof Long userId ? new Authenticated(userId) : new Anonymous();
+        }
     }
 
     private enum Declaration {
@@ -154,19 +167,18 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
 
         private final Declaration declaration;
         private final String handlerName;
-        @Nullable
-        private final Long userId;
+        private final Principal principal;
         private boolean checked;
         private boolean decided;
 
-        private RequestState(Declaration declaration, String handlerName, @Nullable Long userId) {
+        private RequestState(Declaration declaration, String handlerName, Principal principal) {
             this.declaration = declaration;
             this.handlerName = handlerName;
-            this.userId = userId;
+            this.principal = principal;
         }
 
         private boolean checkPending() {
-            return declaration == Declaration.RESTRICTED && !checked && userId != null;
+            return declaration == Declaration.RESTRICTED && !checked;
         }
     }
 }

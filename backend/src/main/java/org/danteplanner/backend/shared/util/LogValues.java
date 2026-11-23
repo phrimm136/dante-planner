@@ -2,6 +2,8 @@ package org.danteplanner.backend.shared.util;
 
 import java.util.regex.Pattern;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * A client-supplied value that goes into a log line carries no CR or LF, so the console
  * PatternLayout cannot be made to print a forged line.
@@ -14,7 +16,7 @@ public final class LogValues {
     private LogValues() {
     }
 
-    public static String oneLine(String clientValue) {
+    public static @Nullable String oneLine(@Nullable String clientValue) {
         if (clientValue == null) {
             return null;
         }

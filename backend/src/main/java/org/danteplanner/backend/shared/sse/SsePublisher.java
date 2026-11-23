@@ -26,33 +26,29 @@ public class SsePublisher {
     private final MeterRegistry meterRegistry;
 
     public void publishUserEvent(Long userId, SseEventType type, String entityId, Object payload) {
-        publishUserEvent(userId, null, type, entityId, payload);
-    }
-
-    public void publishUserEvent(Long userId, UUID excludeDeviceId, SseEventType type,
-            String entityId, Object payload) {
-        publish(SseChannel.USER, SseEnvelope.userEvent(userId, type, entityId,
-                excludeDeviceId != null ? excludeDeviceId.toString() : null, payload));
+        publish(SseChannel.USER,
+                new SseEnvelope.UserEvent(userId, type, entityId, new SseEnvelope.DeviceExclusion.None(), payload));
     }
 
     public void publishSettingsInvalidation(Long userId) {
-        publish(SseChannel.USER, SseEnvelope.settingsInvalidation(userId));
+        publish(SseChannel.USER, new SseEnvelope.SettingsInvalidation(userId));
     }
 
     public void publishCommentEvent(UUID plannerId, SseEventType type, String entityId,
             Long authorUserId, Object payload) {
-        publish(SseChannel.COMMENT,
-                SseEnvelope.commentEvent(plannerId, type, entityId, authorUserId, payload));
+        publish(SseChannel.COMMENT, new SseEnvelope.CommentEvent(
+                plannerId, type, entityId, new SseEnvelope.UserExclusion.User(authorUserId), payload));
     }
 
     public void publishBroadcast(Long excludeUserId, SseEventType type, Object payload) {
-        publish(SseChannel.BROADCAST, SseEnvelope.broadcast(excludeUserId, type, payload));
+        publish(SseChannel.BROADCAST, new SseEnvelope.Broadcast(
+                new SseEnvelope.UserExclusion.User(excludeUserId), type, payload));
     }
 
     public void publishAccountSuspended(
-            Long userId, String reason, SuspensionType suspensionType, Integer durationMinutes) {
-        publish(SseChannel.USER, SseEnvelope.accountSuspended(userId,
-                AccountSuspendedPayload.of(suspensionType, reason, durationMinutes)));
+            Long userId, String reason, SuspensionType suspensionType, int durationMinutes) {
+        publish(SseChannel.USER, new SseEnvelope.AccountSuspended(userId,
+                new AccountSuspendedPayload(suspensionType, reason, durationMinutes)));
     }
 
     private void publish(SseChannel channel, SseEnvelope envelope) {

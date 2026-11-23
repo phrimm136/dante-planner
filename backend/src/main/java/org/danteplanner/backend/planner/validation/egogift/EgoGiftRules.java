@@ -6,7 +6,6 @@ import org.danteplanner.backend.planner.validation.Positions;
 import org.danteplanner.backend.planner.validation.Violation;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -28,10 +27,10 @@ public final class EgoGiftRules {
     }
 
     private static Stream<Violation> giftIds(List<String> giftIds, ContentPath path, EgoGiftReferenceData data) {
-        Map<String, Integer> firstIndex = Positions.firstIndexOf(giftIds);
+        List<Integer> firstIndex = Positions.firstIndexPerPosition(giftIds);
         return IntStream.range(0, giftIds.size())
                 .boxed()
-                .flatMap(index -> firstIndex.get(giftIds.get(index)) < index
+                .flatMap(index -> firstIndex.get(index) < index
                         ? Stream.of(Violation.duplicateValue(ErrorCode.DUPLICATE_EGOGIFT, path.index(index),
                                 path.render(), giftIds.get(index)))
                         : unknownGift(path, index, giftIds.get(index), data));

@@ -3,6 +3,12 @@ package org.danteplanner.backend.user.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.util.List;
+
+import java.util.ArrayList;
+
+import org.danteplanner.backend.user.api.SessionEndHandler.SessionToken;
+
 import org.danteplanner.backend.shared.restriction.RestrictionExempt;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.shared.config.EpithetConfig;
@@ -89,11 +95,7 @@ public class UserController {
             HttpServletResponse response) {
         Instant permanentDeleteAt = lifecycleService.deleteAccount(userId);
 
-        String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)
-                .orElse(null);
-        String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)
-                .orElse(null);
-        sessionEndHandler.endSession(accessToken, refreshToken);
+        sessionEndHandler.endSession(sessionTokens(request));
         cookieUtils.clearAuthCookies(response);
 
         return ResponseEntity.ok(new UserDeletionResponse(
@@ -119,5 +121,14 @@ public class UserController {
         UserSettingsResponse settings = userSettingsService.updateSettings(userId, request);
         ssePublisher.publishSettingsInvalidation(userId);
         return ResponseEntity.ok(settings);
+    }
+
+    private List<SessionToken> sessionTokens(HttpServletRequest request) {
+        List<SessionToken> tokens = new ArrayList<>();
+        cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)
+                .ifPresent(token -> tokens.add(new SessionToken.Access(token)));
+        cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)
+                .ifPresent(token -> tokens.add(new SessionToken.Refresh(token)));
+        return List.copyOf(tokens);
     }
 }

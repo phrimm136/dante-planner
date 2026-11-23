@@ -25,7 +25,7 @@ public final class AuthWrites {
     public void writeWithoutResult(Consumer<StringRedisTemplate> write) {
         write(store -> {
             write.accept(store);
-            return null;
+            return Boolean.TRUE;
         });
     }
 

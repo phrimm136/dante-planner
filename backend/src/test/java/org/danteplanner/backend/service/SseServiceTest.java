@@ -5,6 +5,7 @@ import org.danteplanner.backend.support.FakeNotificationPreferences;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.UsersContract;
 
+import org.danteplanner.backend.shared.sse.SseEnvelope;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -160,7 +161,7 @@ class SseServiceTest {
             emitter.complete();
             assertThat(sseService.getActiveConnectionCount(USER_ID)).isEqualTo(1);
 
-            sseService.broadcastToAll(null, "notify:published", Map.of("k", "v"));
+            sseService.broadcastToAll(new SseEnvelope.UserExclusion.None(), "notify:published", Map.of("k", "v"));
 
             assertThat(sseService.getActiveConnectionCount(USER_ID)).isZero();
         }
@@ -172,7 +173,8 @@ class SseServiceTest {
             sseService.subscribe(excludedUser, UUID.randomUUID()).complete();
             sseService.subscribe(otherUser, UUID.randomUUID()).complete();
 
-            sseService.broadcastToAll(excludedUser, "notify:published", Map.of("k", "v"));
+            sseService.broadcastToAll(new SseEnvelope.UserExclusion.User(excludedUser), "notify:published",
+                    Map.of("k", "v"));
 
             assertThat(sseService.getActiveConnectionCount(excludedUser)).isEqualTo(1);
             assertThat(sseService.getActiveConnectionCount(otherUser)).isZero();

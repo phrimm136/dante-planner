@@ -96,7 +96,7 @@ class PlannerKeywordBackfillServiceTest {
                 statsRepository, entityFilterRepository, keywordFilterRepository, null, new ObjectMapper(),
                 10);
         return new PlannerKeywordBackfillService(rows, plannerRepository, catalogService, new ObjectMapper())
-                .backfillPage(null, 10);
+                .backfillPage(new PlannerKeywordBackfillService.BackfillCursor.Start(), 10);
     }
 
     private final class RecordingBackfillRepository extends PlannerKeywordBackfillRepository {
@@ -111,7 +111,7 @@ class PlannerKeywordBackfillServiceTest {
         }
 
         @Override
-        public List<KeywordBackfillRow> keywordRowsAfter(UUID after, int limit) {
+        public List<KeywordBackfillRow> firstKeywordRows(int limit) {
             return List.of(paged);
         }
 

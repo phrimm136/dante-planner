@@ -35,6 +35,7 @@ public class GtidCapturingDataSource extends AbstractDataSource {
 
 
     private static final String GLOBAL_GTID_SQL = "SELECT @@gtid_executed";
+    private static final String NO_GTIDS = "";
     private static final String TRACKER_PROBE_SQL = "SELECT @@session_track_gtids";
     private static final String COMMIT = "commit";
 
@@ -103,10 +104,12 @@ public class GtidCapturingDataSource extends AbstractDataSource {
             // stored session-state changes on EVERY OK packet, so any intervening round trip wipes
             // the tracker — including Connection.isReadOnly(), which queries
             // @@session.transaction_read_only unless useLocalSessionState is on.
-            String ownGtid = readOwnGtid(target);
-            if (ownGtid != null) {
-                capture.recordCommit(ownGtid, true);
-                return;
+            switch (OwnGtid.of(readOwnGtid(target))) {
+                case OwnGtid.Named named -> {
+                    capture.recordCommit(named.gtid(), true);
+                    return;
+                }
+                case OwnGtid.None none -> { }
             }
             if (target.isReadOnly()) {
                 return;
@@ -120,11 +123,20 @@ public class GtidCapturingDataSource extends AbstractDataSource {
         }
     }
 
-    /**
-     * The GTID the server attributed to this transaction, or null when it named none — which means
-     * either that the transaction wrote nothing or that {@code session_track_gtids} is off.
-     */
-    private String readOwnGtid(Connection target) throws SQLException {
+    private sealed interface OwnGtid {
+
+        record Named(String gtid) implements OwnGtid {
+        }
+
+        record None() implements OwnGtid {
+        }
+
+        static OwnGtid of(List<String> values) {
+            return values.isEmpty() ? new None() : new Named(values.getFirst());
+        }
+    }
+
+    private List<String> readOwnGtid(Connection target) throws SQLException {
         ServerSessionStateController controller =
                 target.unwrap(JdbcConnection.class).getServerSessionStateController();
         List<SessionStateChange> changes =
@@ -132,10 +144,10 @@ public class GtidCapturingDataSource extends AbstractDataSource {
         for (SessionStateChange change : changes) {
             if (change.getType() == ServerSessionStateController.SESSION_TRACK_GTIDS
                     && !change.getValues().isEmpty()) {
-                return change.getValues().get(0);
+                return change.getValues();
             }
         }
-        return null;
+        return List.of();
     }
 
     private boolean trackerActive(Connection target) throws SQLException {
@@ -156,7 +168,7 @@ public class GtidCapturingDataSource extends AbstractDataSource {
     private String readGlobalGtidExecuted(Connection target) throws SQLException {
         try (Statement statement = target.createStatement();
                 java.sql.ResultSet rs = statement.executeQuery(GLOBAL_GTID_SQL)) {
-            return rs.next() ? rs.getString(1) : null;
+            return rs.next() ? rs.getString(1) : NO_GTIDS;
         }
     }
 }

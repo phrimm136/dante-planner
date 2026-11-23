@@ -1,6 +1,7 @@
 package org.danteplanner.backend.planner.dto;
 
 import lombok.Builder;
+import org.jspecify.annotations.Nullable;
 
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
@@ -20,7 +21,7 @@ public record PlannerResponse(
     int contentVersion,
     PlannerType plannerType,
     long syncVersion,
-    String deviceId,
+    @Nullable String deviceId,
     Instant createdAt,
     Instant lastModifiedAt,
     Instant savedAt,
@@ -28,6 +29,7 @@ public record PlannerResponse(
 ) {
 
     public static PlannerResponse fromEntity(Planner planner) {
+        UUID deviceId = planner.getDeviceId();
         return PlannerResponse.builder()
                 .id(planner.getId())
                 .title(planner.getTitle())
@@ -38,7 +40,7 @@ public record PlannerResponse(
                 .contentVersion(planner.getContentVersion())
                 .plannerType(planner.getPlannerType())
                 .syncVersion(planner.getSyncVersion())
-                .deviceId(planner.getDeviceId() != null ? planner.getDeviceId().toString() : null)
+                .deviceId(deviceId != null ? deviceId.toString() : null)
                 .createdAt(planner.getCreatedAt())
                 .lastModifiedAt(planner.getLastModifiedAt())
                 .savedAt(planner.getLastModifiedAt())

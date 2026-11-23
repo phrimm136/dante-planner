@@ -184,7 +184,8 @@ class UserAccountLifecycleServiceTest {
             assertRejected(() -> lifecycleService.deleteAccount(nonExistentId))
                     .withCode("USER_NOT_FOUND")
                     .isInstanceOfSatisfying(UserNotFoundException.class,
-                            exception -> assertThat(exception.getUserId()).isEqualTo(nonExistentId));
+                            exception -> assertThat(exception.getMessage())
+                                    .isEqualTo("User not found with id: " + nonExistentId));
         }
     }
 
@@ -222,7 +223,8 @@ class UserAccountLifecycleServiceTest {
             assertRejected(() -> lifecycleService.reactivateAccount(nonExistentId))
                     .withCode("USER_NOT_FOUND")
                     .isInstanceOfSatisfying(UserNotFoundException.class,
-                            exception -> assertThat(exception.getUserId()).isEqualTo(nonExistentId));
+                            exception -> assertThat(exception.getMessage())
+                                    .isEqualTo("User not found with id: " + nonExistentId));
         }
 
         @Test

@@ -1,6 +1,7 @@
 package org.danteplanner.backend.planner.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.shared.security.Viewer;
 import org.danteplanner.backend.moderation.api.PlannerReports;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
 import org.danteplanner.backend.planner.dto.PlannerCoreInfo;
@@ -55,7 +56,6 @@ import java.util.stream.Collectors;
 public class PublishedPlannerQueryService implements PublishedPlanners {
 
     private static final PlannerStats NO_STATS = PlannerStats.builder().build();
-    private static final PlannerCoreInfo NO_CORE = PlannerCoreInfo.absent();
 
     private final PlannerRepository plannerRepository;
     private final PlannerCatalogRepository catalogRepository;
@@ -96,7 +96,7 @@ public class PublishedPlannerQueryService implements PublishedPlanners {
 
     @Transactional(readOnly = true)
     public ScopedRead<Page<PublicPlannerResponse>> searchPlanners(
-            CatalogQuery catalogQuery, Pageable pageable, Long userId) {
+            CatalogQuery catalogQuery, Pageable pageable, Viewer viewer) {
 
         Specification<PlannerCatalog> spec = (root, query, cb) -> cb.conjunction();
 
@@ -121,7 +121,7 @@ public class PublishedPlannerQueryService implements PublishedPlanners {
         }
 
         Page<PlannerCatalog> rows = catalogRepository.findAll(spec, recencySorted(pageable));
-        return mapCatalogWithUserContext(rows, userId);
+        return mapCatalogWithUserContext(rows, viewer);
     }
 
     private static Pageable recencySorted(Pageable pageable) {
@@ -129,37 +129,37 @@ public class PublishedPlannerQueryService implements PublishedPlanners {
                 Sort.by(Sort.Direction.DESC, "firstPublishedAt"));
     }
 
+    private enum PageFill {
+        EMPTY,
+        ROWS;
+
+        static PageFill of(List<UUID> plannerIds) {
+            return plannerIds.isEmpty() ? EMPTY : ROWS;
+        }
+    }
+
     private ScopedRead<Page<PublicPlannerResponse>> mapCatalogWithUserContext(
-            Page<PlannerCatalog> rows, Long userId) {
+            Page<PlannerCatalog> rows, Viewer viewer) {
         List<UUID> plannerIds = rows.getContent().stream()
                 .map(PlannerCatalog::getPlannerId)
                 .toList();
-        Map<UUID, PlannerCoreInfo> coreInfoMap = plannerIds.isEmpty() ? Map.of()
-                : plannerRepository.findCoreInfoByIds(plannerIds).stream()
+        Map<UUID, PlannerCoreInfo> coreInfoMap = switch (PageFill.of(plannerIds)) {
+            case EMPTY -> Map.of();
+            case ROWS -> plannerRepository.findCoreInfoByIds(plannerIds).stream()
                         .collect(Collectors.toMap(PlannerCoreInfo::plannerId, Function.identity()));
-        Map<UUID, PlannerStats> statsMap = plannerIds.isEmpty() ? Map.of()
-                : plannerStatsRepository.findAllById(plannerIds).stream()
+        };
+        Map<UUID, PlannerStats> statsMap = switch (PageFill.of(plannerIds)) {
+            case EMPTY -> Map.of();
+            case ROWS -> plannerStatsRepository.findAllById(plannerIds).stream()
                         .collect(Collectors.toMap(PlannerStats::getPlannerId, Function.identity()));
+        };
 
-        Set<UUID> upvotedIds;
-        if (userId == null) {
-            upvotedIds = Set.of();
-        } else {
-            upvotedIds = plannerVoteRepository
-                    .findByUserIdAndPlannerIdIn(userId, plannerIds)
-                    .stream()
-                    .map(PlannerVote::getPlannerId)
-                    .collect(Collectors.toSet());
-        }
-
-        boolean anonymous = userId == null;
+        Set<UUID> upvotedIds = upvotedIds(viewer, plannerIds);
         Page<PublicPlannerResponse> page = rows.map(row -> {
             UUID id = row.getPlannerId();
-            PlannerCoreInfo core = coreInfoMap.getOrDefault(id, NO_CORE);
+            PlannerCoreInfo.PlannerCore core = PlannerCoreInfo.PlannerCore.of(coreInfoMap.get(id));
             PlannerStats stats = statsMap.getOrDefault(id, NO_STATS);
-            return anonymous
-                    ? PublicPlannerResponse.forAnonymous(row, core, stats)
-                    : PublicPlannerResponse.fromCatalog(row, core, stats, upvotedIds.contains(id));
+            return PublicPlannerResponse.fromCatalog(row, core, stats, upvotedIds.contains(id));
         });
         Set<FreshnessScope> scopes = new LinkedHashSet<>();
         scopes.add(new FreshnessScope.Global());
@@ -167,12 +167,23 @@ public class PublishedPlannerQueryService implements PublishedPlanners {
         return new ScopedRead<>(page, scopes);
     }
 
+    private Set<UUID> upvotedIds(Viewer viewer, List<UUID> plannerIds) {
+        return switch (viewer) {
+            case Viewer.Guest guest -> Set.of();
+            case Viewer.Member member -> plannerVoteRepository
+                    .findByUserIdAndPlannerIdIn(member.userId(), plannerIds)
+                    .stream()
+                    .map(PlannerVote::getPlannerId)
+                    .collect(Collectors.toSet());
+        };
+    }
+
     private boolean hasUpvoted(UUID plannerId, Long userId) {
         return plannerVoteRepository.findByUserIdAndPlannerId(userId, plannerId).isPresent();
     }
 
     @Transactional(readOnly = true)
-    public ScopedRead<PublishedPlannerDetailResponse> getPublishedPlanner(UUID plannerId, Long userId) {
+    public ScopedRead<PublishedPlannerDetailResponse> getPublishedPlanner(UUID plannerId, Viewer viewer) {
         PublishedPlannerRow published = accessGuard.requirePublishedWithAuthor(plannerId);
         Planner planner = published.planner();
         Set<FreshnessScope> scopes = PlannerVisibility.scopes(plannerId, planner.getUserId());
@@ -182,21 +193,18 @@ public class PublishedPlannerQueryService implements PublishedPlanners {
         int upvotes = stats.getUpvotes();
         long commentCount = stats.getCommentCount();
 
-        boolean isOwner = userId != null && planner.isOwnedBy(userId);
-        boolean ownerNotificationsEnabled = isOwner && planner.isOwnerNotificationsEnabled();
+        boolean ownerNotificationsEnabled = ownerNotificationsFor(viewer, planner);
 
-        if (userId == null) {
-            return new ScopedRead<>(PublishedPlannerDetailResponse.forAnonymous(
+        return switch (viewer) {
+            case Viewer.Guest guest -> new ScopedRead<>(PublishedPlannerDetailResponse.forAnonymous(
                     planner, published.author(), commentCount, ownerNotificationsEnabled, viewCount, upvotes), scopes);
-        }
-
-        final boolean hasUpvoted = hasUpvoted(plannerId, userId);
-        final boolean isSubscribed = subscriptionService.isSubscribed(userId, plannerId);
-        final boolean hasReported = reportService.hasReported(userId, plannerId);
-
-        return new ScopedRead<>(PublishedPlannerDetailResponse.fromEntity(
-                planner, published.author(), hasUpvoted, isSubscribed, hasReported,
+            case Viewer.Member member -> new ScopedRead<>(PublishedPlannerDetailResponse.fromEntity(
+                planner, published.author(),
+                hasUpvoted(plannerId, member.userId()),
+                subscriptionService.isSubscribed(member.userId(), plannerId),
+                reportService.hasReported(member.userId(), plannerId),
                 commentCount, ownerNotificationsEnabled, viewCount, upvotes), scopes);
+        };
     }
 
     @Transactional(readOnly = true)
@@ -207,16 +215,25 @@ public class PublishedPlannerQueryService implements PublishedPlanners {
     }
 
     @Transactional(readOnly = true)
-    public ScopedRead<PlannerFlagsResponse> getPublishedPlannerFlags(UUID plannerId, Long userId) {
-        if (userId == null) {
-            return new ScopedRead<>(PlannerFlagsResponse.ANONYMOUS, accessGuard.checkPublished(plannerId).scopes());
-        }
+    public ScopedRead<PlannerFlagsResponse> getPublishedPlannerFlags(UUID plannerId, Viewer viewer) {
+        return switch (viewer) {
+            case Viewer.Guest guest ->
+                    new ScopedRead<>(PlannerFlagsResponse.ANONYMOUS, accessGuard.checkPublished(plannerId).scopes());
+            case Viewer.Member member -> memberFlags(plannerId, member.userId());
+        };
+    }
+
+    private ScopedRead<PlannerFlagsResponse> memberFlags(UUID plannerId, Long userId) {
         Planner planner = accessGuard.requirePublished(plannerId);
         return new ScopedRead<>(new PlannerFlagsResponse(
                 hasUpvoted(plannerId, userId),
                 subscriptionService.isSubscribed(userId, plannerId),
-                planner.isOwnedBy(userId) && planner.isOwnerNotificationsEnabled()),
+                ownerNotificationsFor(new Viewer.Member(userId), planner)),
                 PlannerVisibility.scopes(plannerId, planner.getUserId()));
+    }
+
+    private static boolean ownerNotificationsFor(Viewer viewer, Planner planner) {
+        return viewer.is(planner.getUserId()) && planner.isOwnerNotificationsEnabled();
     }
 
     @Override
@@ -230,10 +247,11 @@ public class PublishedPlannerQueryService implements PublishedPlanners {
         return accessGuard.checkPublished(plannerId);
     }
 
-    public void recordView(UUID plannerId, Long userId, String viewerIdentity, String userAgent) {
-        String viewerHash = userId != null
-                ? ViewerHashUtil.hashForAuthenticatedUser(userId, plannerId)
-                : ViewerHashUtil.hashForAnonymousUser(viewerIdentity, userAgent, plannerId);
+    public void recordView(UUID plannerId, Viewer viewer, String viewerIdentity, String userAgent) {
+        String viewerHash = switch (viewer) {
+            case Viewer.Member member -> ViewerHashUtil.hashForAuthenticatedUser(member.userId(), plannerId);
+            case Viewer.Guest guest -> ViewerHashUtil.hashForAnonymousUser(viewerIdentity, userAgent, plannerId);
+        };
         redisViewRecorder.record(plannerId, viewerHash, LocalDate.now(ZoneOffset.UTC));
     }
 }

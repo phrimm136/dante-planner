@@ -1,6 +1,7 @@
 package org.danteplanner.backend.user.api.dto;
 
 import lombok.Builder;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 
@@ -14,10 +15,10 @@ public record UserResponse(
     String usernameEpithet,
     String usernameSuffix,
     String role,
-    Boolean isBanned,
-    Instant bannedAt,
-    String banReason,
-    Boolean isTimedOut,
-    Instant timeoutUntil,
-    String timeoutReason
+    @Nullable Boolean isBanned,
+    @Nullable Instant bannedAt,
+    @Nullable String banReason,
+    @Nullable Boolean isTimedOut,
+    @Nullable Instant timeoutUntil,
+    @Nullable String timeoutReason
 ) {}

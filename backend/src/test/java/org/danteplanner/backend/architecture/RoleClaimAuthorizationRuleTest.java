@@ -10,7 +10,6 @@ import org.danteplanner.backend.auth.token.RefreshRotationService;
 import org.danteplanner.backend.auth.security.AccessTokenAuthenticator;
 import org.danteplanner.fixture.roleclaim.AuthorityNameReferenceFixture;
 import org.danteplanner.fixture.roleclaim.AuthorityReaderFixture;
-import org.danteplanner.fixture.roleclaim.EffectiveRoleReaderFixture;
 import org.danteplanner.fixture.roleclaim.PreAuthorizedHandlerFixture;
 import org.danteplanner.fixture.roleclaim.RoleAccessorReaderFixture;
 import org.danteplanner.fixture.roleclaim.RoleDslFixture;
@@ -21,12 +20,6 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RoleClaimAuthorizationRuleTest {
-
-    @Test
-    void effectiveRoleReader_WhenOutsideTheAuthenticator_FailsNamingTheClass() {
-        assertFailsNaming(RoleClaimAuthorizationRule.ONLY_THE_AUTHENTICATOR_READS_THE_ROLE_CLAIM,
-                EffectiveRoleReaderFixture.class, "getEffectiveRole");
-    }
 
     @Test
     void roleAccessorReader_WhenOutsideTheAuthenticator_FailsNamingTheClass() {

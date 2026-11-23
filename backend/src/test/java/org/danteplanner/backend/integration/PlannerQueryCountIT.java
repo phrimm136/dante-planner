@@ -18,6 +18,7 @@ import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 import org.danteplanner.backend.support.ThreadStatementCounter;
 import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.shared.security.Viewer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -175,7 +176,7 @@ class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
 
     private long measure(CatalogQuery catalogQuery, Pageable pageable) {
         ThreadStatementCounter.start();
-        publishedPlannerQueryService.searchPlanners(catalogQuery, pageable, viewerId);
+        publishedPlannerQueryService.searchPlanners(catalogQuery, pageable, Viewer.of(viewerId));
         return ThreadStatementCounter.stop();
     }
 
@@ -188,7 +189,7 @@ class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
      */
     private void assertFixedStatementCount(Supplier<CatalogQuery> catalogQuery, long expected) {
         assertThat(publishedPlannerQueryService
-                .searchPlanners(catalogQuery.get(), ONE_ROW_PAGE, viewerId).value().getContent())
+                .searchPlanners(catalogQuery.get(), ONE_ROW_PAGE, Viewer.of(viewerId)).value().getContent())
                 .as("the measured page carries a row")
                 .isNotEmpty();
         long count = measure(catalogQuery.get(), ONE_ROW_PAGE);

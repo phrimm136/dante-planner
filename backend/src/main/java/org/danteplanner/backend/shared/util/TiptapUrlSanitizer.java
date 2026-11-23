@@ -57,31 +57,31 @@ public final class TiptapUrlSanitizer {
      * Tiptap carries link URLs on {@code marks[].attrs.href} and image URLs on {@code attrs.src}.
      */
     public static void sanitize(JsonNode node) {
-        if (node == null || !node.isObject()) {
+        if (!node.isObject()) {
             return;
         }
 
         ObjectNode objNode = (ObjectNode) node;
 
         if ("image".equals(objNode.path("type").asString(null))) {
-            JsonNode attrs = objNode.get("attrs");
-            if (attrs != null && attrs.isObject()) {
-                JsonNode src = attrs.get("src");
-                if (src != null && src.isString()) {
+            JsonNode attrs = objNode.path("attrs");
+            if (attrs.isObject()) {
+                JsonNode src = attrs.path("src");
+                if (src.isString()) {
                     String sanitized = sanitizeUrl(src.asString());
                     ((ObjectNode) attrs).put("src", sanitized);
                 }
             }
         }
 
-        JsonNode marks = objNode.get("marks");
-        if (marks != null && marks.isArray()) {
+        JsonNode marks = objNode.path("marks");
+        if (marks.isArray()) {
             for (JsonNode mark : marks) {
                 if (mark.isObject() && "link".equals(mark.path("type").asString(null))) {
-                    JsonNode attrs = mark.get("attrs");
-                    if (attrs != null && attrs.isObject()) {
-                        JsonNode href = attrs.get("href");
-                        if (href != null && href.isString()) {
+                    JsonNode attrs = mark.path("attrs");
+                    if (attrs.isObject()) {
+                        JsonNode href = attrs.path("href");
+                        if (href.isString()) {
                             String sanitized = sanitizeUrl(href.asString());
                             ((ObjectNode) attrs).put("href", sanitized);
                         }
@@ -90,8 +90,8 @@ public final class TiptapUrlSanitizer {
             }
         }
 
-        JsonNode content = objNode.get("content");
-        if (content != null && content.isArray()) {
+        JsonNode content = objNode.path("content");
+        if (content.isArray()) {
             for (JsonNode child : content) {
                 sanitize(child);
             }

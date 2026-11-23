@@ -54,6 +54,9 @@ public class ContentVersionValidator {
         }
 
         VersionRule rule = rules.get(plannerType);
+        if (rule == null) {
+            throw new IllegalStateException("No content version rule for planner type " + plannerType);
+        }
         List<Integer> accepted = rule.forCreate().apply(gameDataRegistry.plannerVersions());
         if (!accepted.contains(contentVersion)) {
             log.warn("Validation failed: {} create version {} not in {}",

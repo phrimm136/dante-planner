@@ -21,13 +21,13 @@ public class CommentStateValidator {
 
     public void requireReplyable(PlannerComment parent) {
         if (parent.isDeleted() && parent.getDepth() == 0) {
-            throw new CommentForbiddenException(parent.getId(), "Cannot reply to deleted top-level comment");
+            throw new CommentForbiddenException("Cannot reply to deleted top-level comment");
         }
     }
 
     private void requireNotDeleted(PlannerComment comment, String refusal) {
         if (comment.isDeleted()) {
-            throw new CommentForbiddenException(comment.getId(), refusal);
+            throw new CommentForbiddenException(refusal);
         }
     }
 }

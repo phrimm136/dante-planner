@@ -18,11 +18,15 @@ public final class RedisRoleHealth {
     }
 
     public boolean isAvailable(RedisRole role) {
-        return breakers.get(role).getState() == CircuitBreaker.State.CLOSED;
+        return breaker(role).getState() == CircuitBreaker.State.CLOSED;
     }
 
     CircuitBreaker breaker(RedisRole role) {
-        return breakers.get(role);
+        CircuitBreaker breaker = breakers.get(role);
+        if (breaker == null) {
+            throw new IllegalStateException("no breaker registered for Redis role " + role);
+        }
+        return breaker;
     }
 
     CircuitBreakerRegistry registry() {

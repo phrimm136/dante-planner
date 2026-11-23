@@ -49,10 +49,8 @@ class OAuthStateServiceTest {
         aesKey = new byte[32];
         new SecureRandom().nextBytes(aesKey);
 
-        JwtProperties jwtProperties = new JwtProperties();
-        jwtProperties.setPrivateKey(SHARED_KEYS.getPrivateKey());
-        jwtProperties.setPublicKey(SHARED_KEYS.getPublicKey());
-        jwtProperties.setEncryptionKeyBytes(aesKey);
+        JwtProperties jwtProperties = new JwtProperties(SHARED_KEYS.getPrivateKey(), SHARED_KEYS.getPublicKey(),
+                aesKey, 900000L, 604800000L);
 
         aesGcmCipher = new AesGcmCipher();
         objectMapper = new ObjectMapper();

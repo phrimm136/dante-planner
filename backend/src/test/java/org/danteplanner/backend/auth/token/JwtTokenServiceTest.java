@@ -18,6 +18,7 @@ import java.time.ZoneOffset;
 import java.util.Base64;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
 import java.nio.charset.StandardCharsets;
 
@@ -48,12 +49,8 @@ class JwtTokenServiceTest {
         secureRandom.nextBytes(testAesKey);
 
         // Setup JWT properties
-        jwtProperties = new JwtProperties();
-        jwtProperties.setPrivateKey(SHARED_KEYS.getPrivateKey());
-        jwtProperties.setPublicKey(SHARED_KEYS.getPublicKey());
-        jwtProperties.setEncryptionKeyBytes(testAesKey);
-        jwtProperties.setAccessTokenExpiry(ACCESS_TOKEN_EXPIRY);
-        jwtProperties.setRefreshTokenExpiry(REFRESH_TOKEN_EXPIRY);
+        jwtProperties = new JwtProperties(SHARED_KEYS.getPrivateKey(), SHARED_KEYS.getPublicKey(),
+                testAesKey, ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY);
 
         tokenService = new JwtTokenService(jwtProperties);
     }
@@ -189,9 +186,11 @@ class JwtTokenServiceTest {
             String token = tokenService.generateRefreshToken(userId, familyId, parentJti);
 
             TokenClaims claims = tokenService.validateToken(token);
-            assertThat(claims.jti()).isNotNull();
-            assertThat(claims.familyId()).isEqualTo(familyId);
-            assertThat(claims.parentJti()).isEqualTo(parentJti);
+            assertThat(claims.lineage()).isInstanceOfSatisfying(RefreshLineage.Child.class, child -> {
+                assertThat(child.jti()).isNotNull();
+                assertThat(child.familyId()).isEqualTo(familyId);
+                assertThat(child.parentJti()).isEqualTo(parentJti);
+            });
         }
 
         @Test
@@ -199,9 +198,10 @@ class JwtTokenServiceTest {
             String token = tokenService.generateRefreshToken(222L);
 
             TokenClaims claims = tokenService.validateToken(token);
-            assertThat(claims.jti()).isNotNull();
-            assertThat(claims.familyId()).isNotNull();
-            assertThat(claims.parentJti()).isNull();
+            assertThat(claims.lineage()).isInstanceOfSatisfying(RefreshLineage.Root.class, root -> {
+                assertThat(root.jti()).isNotNull();
+                assertThat(root.familyId()).isNotNull();
+            });
         }
 
         @Test
@@ -209,9 +209,22 @@ class JwtTokenServiceTest {
             String token = tokenService.generateAccessToken(333L, UserRole.NORMAL);
 
             TokenClaims claims = tokenService.validateToken(token);
-            assertThat(claims.jti()).isNull();
-            assertThat(claims.familyId()).isNull();
-            assertThat(claims.parentJti()).isNull();
+            assertThat(claims.lineage()).isEqualTo(new RefreshLineage.Legacy(claims.issuedAt().getTime()));
+        }
+
+        @Test
+        void givenRefreshTokenWithoutLineage_WhenValidate_ThenLineageIsLegacyAtItsIssue() {
+            Instant issuedAt = Instant.ofEpochMilli(1_700_000_000_000L);
+            TestJwt legacyJwt = new TestJwt(issuedAt);
+
+            TokenClaims claims = legacyJwt.service().validateRefreshToken(legacyJwt.legacyRefreshToken(1L));
+
+            assertThat(claims.lineage()).isEqualTo(new RefreshLineage.Legacy(1_700_000_000_000L));
+        }
+
+        @Test
+        void givenJtiFamilyAndParent_WhenLineageIsRead_ThenItIsAChildKeepingItsParent() {
+            assertThat(RefreshLineage.of("j2", "f1", "j1", new java.util.Date(0L))).isEqualTo(new RefreshLineage.Child("j2", "f1", "j1"));
         }
     }
 
@@ -254,12 +267,8 @@ class JwtTokenServiceTest {
         @Test
         void givenInvalidSignature_WhenValidate_ThenThrowsInvalidTokenException() throws Exception {
             // Arrange - create token with different RSA keypair
-            JwtProperties differentKeyProps = new JwtProperties();
-            differentKeyProps.setPrivateKey(DIFFERENT_KEY_PAIR.getPrivate());
-            differentKeyProps.setPublicKey(DIFFERENT_KEY_PAIR.getPublic());
-            differentKeyProps.setEncryptionKeyBytes(testAesKey);
-            differentKeyProps.setAccessTokenExpiry(ACCESS_TOKEN_EXPIRY);
-            differentKeyProps.setRefreshTokenExpiry(REFRESH_TOKEN_EXPIRY);
+            JwtProperties differentKeyProps = new JwtProperties(DIFFERENT_KEY_PAIR.getPrivate(), DIFFERENT_KEY_PAIR.getPublic(),
+                    testAesKey, ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY);
             JwtTokenService differentService = new JwtTokenService(differentKeyProps);
 
             String tokenWithDifferentSignature = differentService.generateAccessToken(123L, UserRole.NORMAL);
@@ -311,6 +320,20 @@ class JwtTokenServiceTest {
                     .withCode("UNAUTHORIZED")
                     .isInstanceOfSatisfying(InvalidTokenException.class, rejection -> assertThat(rejection.getReason())
                             .isEqualTo(InvalidTokenException.Reason.MALFORMED));
+        }
+
+        @Test
+        void givenAbsentIssuedAt_WhenValidate_ThenRejectsTheMissingClaim() {
+            String token = io.jsonwebtoken.Jwts.builder()
+                    .subject("1")
+                    .claim("type", TokenClaims.TYPE_REFRESH)
+                    .expiration(new java.util.Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
+                    .signWith(SHARED_KEYS.getPrivateKey(), io.jsonwebtoken.SignatureAlgorithm.RS256)
+                    .compact();
+
+            assertThatThrownBy(() -> tokenService.validateToken(token))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("issuedAt must not be null");
         }
 
         @Test
@@ -582,9 +605,11 @@ class JwtTokenServiceTest {
             assertThat(payload).as("sub should be the numeric userId").contains("\"sub\":\"67890\"");
             assertThat(payload).as("Payload must not contain an encrypted claim blob").doesNotContain("enc");
             assertThat(payload).as("Payload must not contain email").doesNotContain("email");
-            assertThat(claims.jti()).isNotNull();
-            assertThat(claims.familyId()).isEqualTo("fam-1");
-            assertThat(claims.parentJti()).isEqualTo("parent-jti");
+            assertThat(claims.lineage()).isInstanceOfSatisfying(RefreshLineage.Child.class, child -> {
+                assertThat(child.jti()).isNotNull();
+                assertThat(child.familyId()).isEqualTo("fam-1");
+                assertThat(child.parentJti()).isEqualTo("parent-jti");
+            });
         }
     }
 }

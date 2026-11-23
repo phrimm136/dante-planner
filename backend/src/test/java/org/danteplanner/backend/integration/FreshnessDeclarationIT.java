@@ -377,9 +377,8 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
         writeCapture.begin();
         FreshnessDeclarations.begin();
         try {
-            User created = userService.findOrCreateUser("google", Map.of(
-                    "id", "freshness-create-" + UUID.randomUUID(),
-                    "email", "freshness-create-" + UUID.randomUUID() + "@example.com"));
+            User created = userService.findOrCreateUser("google", "freshness-create-" + UUID.randomUUID(),
+                    "freshness-create-" + UUID.randomUUID() + "@example.com");
 
             assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
                     new FreshnessScope.Global(), new FreshnessScope.User(created.getId()));

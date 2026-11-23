@@ -14,6 +14,8 @@ import com.redis.testcontainers.RedisContainer;
 
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 
+import java.util.Map;
+import java.util.EnumMap;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -52,7 +54,7 @@ class RateLimitServiceIT {
     private static StringRedisTemplate rateLimitTemplate;
     private static StringRedisTemplate authTemplate;
 
-    private RateLimitProperties properties;
+    private final Map<RateLimitPolicy, RateLimitProperties.BucketConfig> limits = new EnumMap<>(RateLimitPolicy.class);
     private RateLimitService rateLimitService;
     private RateLimitStore store;
     private RateLimitProperties.BucketConfig testBucketConfig;
@@ -94,28 +96,23 @@ class RateLimitServiceIT {
         authTemplate.getConnectionFactory().getConnection().serverCommands().flushDb();
 
         store = RateLimitStores.connectedTo(REDIS.getRedisHost(), REDIS.getRedisPort(), Duration.ofSeconds(60));
-        properties = new RateLimitProperties();
-        rateLimitService = new RateLimitService(store, properties);
+        limits.clear();
 
         // Configure a test bucket: 5 requests per 10 seconds
-        testBucketConfig = new RateLimitProperties.BucketConfig();
-        testBucketConfig.setCapacity(5);
-        testBucketConfig.setRefillTokens(5);
-        testBucketConfig.setRefillDurationSeconds(10);
+        testBucketConfig = new RateLimitProperties.BucketConfig(5, 5, 10);
 
         // Set up CRUD config for CRUD policy tests
-        RateLimitProperties.BucketConfig crudConfig = new RateLimitProperties.BucketConfig();
-        crudConfig.setCapacity(10);
-        crudConfig.setRefillTokens(10);
-        crudConfig.setRefillDurationSeconds(60);
-        properties.setCrud(crudConfig);
+        RateLimitProperties.BucketConfig crudConfig = new RateLimitProperties.BucketConfig(10, 10, 60);
+        limit(RateLimitPolicy.CRUD, crudConfig);
 
         // Set up SSE config for SSE policy tests
-        RateLimitProperties.BucketConfig sseConfig = new RateLimitProperties.BucketConfig();
-        sseConfig.setCapacity(2);
-        sseConfig.setRefillTokens(2);
-        sseConfig.setRefillDurationSeconds(60);
-        properties.setSse(sseConfig);
+        RateLimitProperties.BucketConfig sseConfig = new RateLimitProperties.BucketConfig(2, 2, 60);
+        limit(RateLimitPolicy.SSE, sseConfig);
+    }
+
+    private void limit(RateLimitPolicy policy, RateLimitProperties.BucketConfig config) {
+        limits.put(policy, config);
+        rateLimitService = new RateLimitService(store, RateLimitStores.limits(0, limits));
     }
 
     @Nested
@@ -125,7 +122,7 @@ class RateLimitServiceIT {
         void checkRateLimit_WhenWithinLimit_Succeeds() {
             Long userId = 1L;
             String endpoint = "test-endpoint";
-            properties.setCrud(testBucketConfig);
+            limit(RateLimitPolicy.CRUD, testBucketConfig);
 
             // Should not throw for 5 requests (capacity = 5)
             for (int i = 0; i < 5; i++) {
@@ -167,7 +164,7 @@ class RateLimitServiceIT {
         void checkRateLimit_WhenExceedsLimit_ThrowsException() {
             Long userId = 1L;
             String endpoint = "test-endpoint";
-            properties.setCrud(testBucketConfig);
+            limit(RateLimitPolicy.CRUD, testBucketConfig);
 
             // Consume all 5 tokens
             for (int i = 0; i < 5; i++) {
@@ -178,7 +175,7 @@ class RateLimitServiceIT {
             assertRejected(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, endpoint))
                     .withCode("RATE_LIMIT_EXCEEDED")
                     .isInstanceOfSatisfying(RateLimitExceededException.class, exception -> {
-                        assertThat(exception.getUserId()).isEqualTo(userId);
+                        assertThat(exception.getMessage()).startsWith("Rate limit exceeded for user " + userId + " on");
                         assertThat(exception.getEndpoint()).isEqualTo(endpoint);
                         assertThat(exception.getMessage()).contains(userId.toString(), endpoint);
                     });
@@ -197,7 +194,7 @@ class RateLimitServiceIT {
             assertRejected(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, "planners"))
                     .withCode("RATE_LIMIT_EXCEEDED")
                     .isInstanceOfSatisfying(RateLimitExceededException.class, exception -> {
-                        assertThat(exception.getUserId()).isEqualTo(userId);
+                        assertThat(exception.getMessage()).startsWith("Rate limit exceeded for user " + userId + " on");
                         assertThat(exception.getEndpoint()).isEqualTo("planners");
                     });
         }
@@ -215,7 +212,7 @@ class RateLimitServiceIT {
             assertRejected(() -> rateLimitService.check(RateLimitPolicy.SSE, userId))
                     .withCode("RATE_LIMIT_EXCEEDED")
                     .isInstanceOfSatisfying(RateLimitExceededException.class, exception -> {
-                        assertThat(exception.getUserId()).isEqualTo(userId);
+                        assertThat(exception.getMessage()).startsWith("Rate limit exceeded for user " + userId + " on");
                         assertThat(exception.getEndpoint()).isEqualTo("sse");
                     });
         }
@@ -227,7 +224,7 @@ class RateLimitServiceIT {
         @Test
         void checkRateLimit_WhenDifferentEndpoints_SeparateBuckets() {
             Long userId = 1L;
-            properties.setCrud(testBucketConfig);
+            limit(RateLimitPolicy.CRUD, testBucketConfig);
 
             // Exhaust capacity for endpoint1
             for (int i = 0; i < 5; i++) {
@@ -266,7 +263,7 @@ class RateLimitServiceIT {
             Long user1 = 1L;
             Long user2 = 2L;
             String endpoint = "test-endpoint";
-            properties.setCrud(testBucketConfig);
+            limit(RateLimitPolicy.CRUD, testBucketConfig);
 
             // Exhaust user1's capacity
             for (int i = 0; i < 5; i++) {
@@ -334,7 +331,7 @@ class RateLimitServiceIT {
             Long user2 = 2L;
             String endpointA = "endpoint-a";
             String endpointB = "endpoint-b";
-            properties.setCrud(testBucketConfig);
+            limit(RateLimitPolicy.CRUD, testBucketConfig);
 
             // Each combination should allow up to 5 requests independently
             for (int i = 0; i < 5; i++) {
@@ -367,26 +364,23 @@ class RateLimitServiceIT {
 
         @Test
         void bucketConfig_WhenCapacity_StoredCorrectly() {
-            RateLimitProperties.BucketConfig config = new RateLimitProperties.BucketConfig();
-            config.setCapacity(100);
+            RateLimitProperties.BucketConfig config = new RateLimitProperties.BucketConfig(100, 0, 0);
 
-            assertThat(config.getCapacity()).isEqualTo(100);
+            assertThat(config.capacity()).isEqualTo(100);
         }
 
         @Test
         void bucketConfig_WhenRefillTokens_StoredCorrectly() {
-            RateLimitProperties.BucketConfig config = new RateLimitProperties.BucketConfig();
-            config.setRefillTokens(50);
+            RateLimitProperties.BucketConfig config = new RateLimitProperties.BucketConfig(0, 50, 0);
 
-            assertThat(config.getRefillTokens()).isEqualTo(50);
+            assertThat(config.refillTokens()).isEqualTo(50);
         }
 
         @Test
         void bucketConfig_WhenRefillDuration_StoredCorrectly() {
-            RateLimitProperties.BucketConfig config = new RateLimitProperties.BucketConfig();
-            config.setRefillDurationSeconds(120);
+            RateLimitProperties.BucketConfig config = new RateLimitProperties.BucketConfig(0, 0, 120);
 
-            assertThat(config.getRefillDurationSeconds()).isEqualTo(120);
+            assertThat(config.refillDurationSeconds()).isEqualTo(120);
         }
     }
 
@@ -396,11 +390,8 @@ class RateLimitServiceIT {
         @Test
         void checkAuthLimit_WhenDifferentIdentifiers_SeparateBuckets() {
             // Set up auth config
-            RateLimitProperties.BucketConfig authConfig = new RateLimitProperties.BucketConfig();
-            authConfig.setCapacity(5);
-            authConfig.setRefillTokens(5);
-            authConfig.setRefillDurationSeconds(60);
-            properties.setAuth(authConfig);
+            RateLimitProperties.BucketConfig authConfig = new RateLimitProperties.BucketConfig(5, 5, 60);
+            limit(RateLimitPolicy.AUTH, authConfig);
 
             String ipIdentifier = "ip:203.0.113.1";
             String deviceIdentifier = "device:abc-123";
@@ -421,11 +412,8 @@ class RateLimitServiceIT {
 
         @Test
         void checkAuthLimit_WhenIpVsDevice_Isolated() {
-            RateLimitProperties.BucketConfig authConfig = new RateLimitProperties.BucketConfig();
-            authConfig.setCapacity(3);
-            authConfig.setRefillTokens(3);
-            authConfig.setRefillDurationSeconds(60);
-            properties.setAuth(authConfig);
+            RateLimitProperties.BucketConfig authConfig = new RateLimitProperties.BucketConfig(3, 3, 60);
+            limit(RateLimitPolicy.AUTH, authConfig);
 
             // Different identifiers should not collide
             rateLimitService.check(RateLimitPolicy.AUTH, "ip:192.168.1.1");
@@ -443,11 +431,8 @@ class RateLimitServiceIT {
 
         @Test
         void checkAuthLimit_WhenBucketKeyFormat_IdentifierColonAuth() {
-            RateLimitProperties.BucketConfig authConfig = new RateLimitProperties.BucketConfig();
-            authConfig.setCapacity(2);
-            authConfig.setRefillTokens(2);
-            authConfig.setRefillDurationSeconds(60);
-            properties.setAuth(authConfig);
+            RateLimitProperties.BucketConfig authConfig = new RateLimitProperties.BucketConfig(2, 2, 60);
+            limit(RateLimitPolicy.AUTH, authConfig);
 
             String identifier = "device:test-device";
 
@@ -462,11 +447,8 @@ class RateLimitServiceIT {
 
         @Test
         void checkAuthLimit_WhenUnknownDevice_Works() {
-            RateLimitProperties.BucketConfig authConfig = new RateLimitProperties.BucketConfig();
-            authConfig.setCapacity(1);
-            authConfig.setRefillTokens(1);
-            authConfig.setRefillDurationSeconds(60);
-            properties.setAuth(authConfig);
+            RateLimitProperties.BucketConfig authConfig = new RateLimitProperties.BucketConfig(1, 1, 60);
+            limit(RateLimitPolicy.AUTH, authConfig);
 
             String unknownIdentifier = "device:unknown";
 
@@ -485,11 +467,8 @@ class RateLimitServiceIT {
 
         @Test
         void checkRateLimit_WhenSingleCapacity_ExhaustsAfterOne() {
-            RateLimitProperties.BucketConfig singleConfig = new RateLimitProperties.BucketConfig();
-            singleConfig.setCapacity(1);
-            singleConfig.setRefillTokens(1);
-            singleConfig.setRefillDurationSeconds(60);
-            properties.setCrud(singleConfig);
+            RateLimitProperties.BucketConfig singleConfig = new RateLimitProperties.BucketConfig(1, 1, 60);
+            limit(RateLimitPolicy.CRUD, singleConfig);
 
             Long userId = 1L;
             String endpoint = "single-test";
@@ -505,11 +484,8 @@ class RateLimitServiceIT {
 
         @Test
         void checkRateLimit_WhenLargeCapacity_HandlesCorrectly() {
-            RateLimitProperties.BucketConfig largeConfig = new RateLimitProperties.BucketConfig();
-            largeConfig.setCapacity(1000);
-            largeConfig.setRefillTokens(1000);
-            largeConfig.setRefillDurationSeconds(86400);
-            properties.setCrud(largeConfig);
+            RateLimitProperties.BucketConfig largeConfig = new RateLimitProperties.BucketConfig(1000, 1000, 86400);
+            limit(RateLimitPolicy.CRUD, largeConfig);
 
             Long userId = 1L;
             String endpoint = "large-test";
@@ -528,7 +504,7 @@ class RateLimitServiceIT {
         void checkRateLimit_WhenSameKey_ReusesBucket() {
             Long userId = 1L;
             String endpoint = "reuse-test";
-            properties.setCrud(testBucketConfig);
+            limit(RateLimitPolicy.CRUD, testBucketConfig);
 
             // Use 3 tokens
             for (int i = 0; i < 3; i++) {
@@ -560,12 +536,9 @@ class RateLimitServiceIT {
 
         private void assertPersistsWithTtl(ProxyManager<byte[]> proxyManager) {
 
-            RateLimitProperties.BucketConfig cfg = new RateLimitProperties.BucketConfig();
-            cfg.setCapacity(5);
-            cfg.setRefillTokens(5);
-            cfg.setRefillDurationSeconds(10);
-            RateLimitProperties ttlProperties = new RateLimitProperties();
-            ttlProperties.setCrud(cfg);
+            RateLimitProperties.BucketConfig cfg = new RateLimitProperties.BucketConfig(5, 5, 10);
+            RateLimitProperties ttlProperties =
+                    RateLimitStores.limits(0, Map.of(RateLimitPolicy.CRUD, cfg));
             RateLimitService service = new RateLimitService(proxyManager, ttlProperties);
 
             // Consume one token for the known key "1:ttl-probe"
@@ -591,12 +564,9 @@ class RateLimitServiceIT {
 
         private void assertAbsentFromAuthRedis(ProxyManager<byte[]> proxyManager) {
 
-            RateLimitProperties.BucketConfig cfg = new RateLimitProperties.BucketConfig();
-            cfg.setCapacity(5);
-            cfg.setRefillTokens(5);
-            cfg.setRefillDurationSeconds(10);
-            RateLimitProperties authProbeProperties = new RateLimitProperties();
-            authProbeProperties.setCrud(cfg);
+            RateLimitProperties.BucketConfig cfg = new RateLimitProperties.BucketConfig(5, 5, 10);
+            RateLimitProperties authProbeProperties =
+                    RateLimitStores.limits(0, Map.of(RateLimitPolicy.CRUD, cfg));
             RateLimitService service = new RateLimitService(proxyManager, authProbeProperties);
 
             // Consume one token for the known key "2:auth-probe"

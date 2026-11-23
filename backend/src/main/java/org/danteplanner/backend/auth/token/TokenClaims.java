@@ -12,9 +12,7 @@ public record TokenClaims(
         UserRole role,
         Date issuedAt,
         Date expiration,
-        String jti,
-        String familyId,
-        String parentJti
+        RefreshLineage lineage
 ) {
     public TokenClaims {
         Assert.notNull(userId, "userId must not be null");
@@ -22,10 +20,7 @@ public record TokenClaims(
         Assert.notNull(issuedAt, "issuedAt must not be null");
         Assert.notNull(expiration, "expiration must not be null");
         Assert.isTrue(!expiration.before(issuedAt), "expiration must be after issuedAt");
-    }
-
-    public TokenClaims(Long userId, String type, UserRole role, Date issuedAt, Date expiration) {
-        this(userId, type, role, issuedAt, expiration, null, null, null);
+        Assert.notNull(lineage, "lineage must not be null");
     }
 
     public static final String TYPE_ACCESS = "access";
@@ -42,9 +37,5 @@ public record TokenClaims(
 
     public boolean isExpired() {
         return expiration.before(new Date());
-    }
-
-    public UserRole getEffectiveRole() {
-        return role != null ? role : UserRole.NORMAL;
     }
 }

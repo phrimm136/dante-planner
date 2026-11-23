@@ -1,38 +1,26 @@
 package org.danteplanner.backend.shared.ratelimit;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Configuration
 @ConfigurationProperties(prefix = "rate-limit")
 @Validated
-@Getter
-@Setter
-public class RateLimitProperties {
+public record RateLimitProperties(
+        @Positive long configVersion,
+        @NotNull BucketConfig crud,
+        @NotNull BucketConfig sse,
+        @NotNull BucketConfig auth,
+        @NotNull BucketConfig comment,
+        @NotNull BucketConfig report,
+        @NotNull BucketConfig moderation,
+        @NotNull BucketConfig publicRead,
+        @NotNull BucketConfig plannerStats,
+        @NotNull BucketConfig viewRecord) {
 
-    @Positive
-    private long configVersion;
-    private BucketConfig crud;
-    private BucketConfig sse;
-    private BucketConfig auth;
-    private BucketConfig comment;
-    private BucketConfig report;
-    private BucketConfig moderation;
-    private BucketConfig publicRead;
-    private BucketConfig plannerStats;
-    private BucketConfig viewRecord;
-
-    @Getter
-    @Setter
-    public static class BucketConfig {
-        private int capacity;
-        private int refillTokens;
-        private int refillDurationSeconds;
+    public record BucketConfig(int capacity, int refillTokens, int refillDurationSeconds) {
     }
 }

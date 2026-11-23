@@ -288,8 +288,8 @@ class MarkerStoreIT {
 
     @Test
     void read_WhenTheLocalRoleIsUnavailable_ServesFromTheAuthStoreWithoutTryingTheLocalStore() {
-        RedisConnectionConfig connections = RedisEndpoints.everyRoleAt(REDIS.getRedisHost(), REDIS.getRedisPort());
-        RedisEndpoints.moveRole(connections, RedisRole.AUTH_LOCAL, REFUSED_HOST, REFUSED_PORT);
+        RedisConnectionConfig connections = RedisEndpoints.withRoleAt(
+                RedisEndpoints.everyRoleAt(REDIS.getRedisHost(), REDIS.getRedisPort()), RedisRole.AUTH_LOCAL, REFUSED_HOST, REFUSED_PORT);
         RedisRoleHealth roleHealth = new RedisRoleHealth();
         try (RedisRoleProbe probe =
                 new RedisRoleProbe(liveFactory.getRequiredNativeClient().getResources(), connections, roleHealth, List.of(),

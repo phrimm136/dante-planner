@@ -6,6 +6,7 @@ import org.danteplanner.backend.shared.sse.SseChannelHandler;
 import org.danteplanner.backend.shared.sse.SseConstants;
 import org.danteplanner.backend.shared.sse.SseEnvelope;
 import org.danteplanner.backend.shared.sse.SseHeartbeatWorkerConfig;
+import org.danteplanner.backend.shared.security.Viewer;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -44,18 +45,18 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> implement
         this.plannerAccess = plannerAccess;
     }
 
-    public SseEmitter subscribe(UUID plannerId, UUID deviceId, Long userId) throws IOException {
+    public SseEmitter subscribe(UUID plannerId, UUID deviceId, Viewer subscriber) throws IOException {
         plannerAccess.checkPublished(plannerId);
-        SseEmitter emitter = register(plannerId, deviceId, userId);
+        SseEmitter emitter = register(plannerId, deviceId, subscriber);
         log.debug("Comment SSE subscribed: planner={}, device={}", plannerId, deviceId);
         return emitter;
     }
 
     private int sendToSubscribers(UUID plannerId, CopyOnWriteArrayList<EmitterEntry> subscribers,
-                                  String eventName, String jsonData, Long excludeUserId) {
+                                  String eventName, String jsonData, SseEnvelope.UserExclusion exclusion) {
         int sent = 0;
         for (EmitterEntry entry : subscribers) {
-            if (excludeUserId != null && excludeUserId.equals(entry.userId())) {
+            if (exclusion.excludes(entry.subscriber())) {
                 continue;
             }
 
@@ -71,7 +72,7 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> implement
         return sent;
     }
 
-    public void broadcast(UUID plannerId, String eventType, Object payload, Long excludeUserId) {
+    public void broadcast(UUID plannerId, String eventType, Object payload, SseEnvelope.UserExclusion exclusion) {
         var subscribers = emitters.get(plannerId);
         if (subscribers == null || subscribers.isEmpty()) {
             log.debug("No subscribers for planner {} comment event {}", plannerId, eventType);
@@ -86,17 +87,13 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> implement
             return;
         }
 
-        sendToSubscribers(plannerId, subscribers, eventType, jsonData, excludeUserId);
+        sendToSubscribers(plannerId, subscribers, eventType, jsonData, exclusion);
     }
 
     @Override
-    public void deliver(SseEnvelope envelope, Object clientPayload) {
-        if (envelope.plannerId() == null || envelope.plannerId().isBlank()) {
-            log.error("Comment SSE envelope missing plannerId; dropping");
-            return;
-        }
-        broadcast(UUID.fromString(envelope.plannerId()), envelope.type().getValue(),
-                clientPayload, envelope.excludeUserId());
+    public void deliver(SseEnvelope.CommentEvent event, Object clientPayload) {
+        broadcast(event.plannerId(), event.type().getValue(), clientPayload,
+                event.exclusion());
     }
 
     public int getSubscriberCount(UUID plannerId) {

@@ -1,5 +1,8 @@
 package org.danteplanner.backend.planner.service;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 import org.danteplanner.backend.moderation.api.ModeratedPlanner;
@@ -55,7 +58,8 @@ class PlannerModerationTargetAdapterTest {
                 keywordFilterRepository, null, objectMapper,
                 10);
         PlannerPublishingService publishingService = new PlannerPublishingService(plannerRepository,
-                statsRepository, null, null, catalogService, null, accessGuard, null, null, null, null);
+                statsRepository, null, null, catalogService, null, accessGuard, null, null, null, null,
+                Clock.fixed(Instant.parse("2026-11-23T00:00:00Z"), ZoneOffset.UTC));
         adapter = new PlannerModerationTargetAdapter(publishingService, accessGuard);
         planner = TestDataFactory.planner(TestDataFactory.unsavedUser(1L))
                 .title("Moderated Planner")

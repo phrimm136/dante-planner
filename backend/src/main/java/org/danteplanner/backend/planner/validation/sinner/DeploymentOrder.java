@@ -5,7 +5,6 @@ import org.danteplanner.backend.planner.validation.Positions;
 import org.danteplanner.backend.planner.validation.Violation;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -44,11 +43,11 @@ public final class DeploymentOrder {
         List<Optional<Long>> deployed = sinnerIndices.stream()
                 .map(sinnerIndex -> Optional.of(sinnerIndex).filter(DeploymentOrder::inRange))
                 .toList();
-        Map<Optional<Long>, Integer> firstPosition = Positions.firstIndexOf(deployed);
+        List<Integer> firstPosition = Positions.firstIndexPerPosition(deployed);
         return IntStream.range(0, deployed.size())
                 .boxed()
                 .flatMap(position -> deployed.get(position)
-                        .filter(sinnerIndex -> firstPosition.get(deployed.get(position)) < position)
+                        .filter(sinnerIndex -> firstPosition.get(position) < position)
                         .map(sinnerIndex -> SinnerViolations.deployedTwice(DEPLOYMENT_ORDER.index(position),
                                 DEPLOYMENT_ORDER, sinnerIndex))
                         .stream());

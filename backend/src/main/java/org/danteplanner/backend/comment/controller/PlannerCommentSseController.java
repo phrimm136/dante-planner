@@ -1,6 +1,8 @@
 package org.danteplanner.backend.comment.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.danteplanner.backend.shared.security.Viewer;
+import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.shared.config.DeviceId;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.comment.service.PlannerCommentSseService;
@@ -28,8 +30,8 @@ public class PlannerCommentSseController {
     public SseEmitter subscribeToComments(
             @PathVariable UUID plannerId,
             @DeviceId UUID deviceId,
-            @AuthenticationPrincipal Long userId) throws IOException {
+            @AuthenticationPrincipal @Nullable Long userId) throws IOException {
 
-        return plannerCommentSseService.subscribe(plannerId, deviceId, userId);
+        return plannerCommentSseService.subscribe(plannerId, deviceId, Viewer.of(userId));
     }
 }

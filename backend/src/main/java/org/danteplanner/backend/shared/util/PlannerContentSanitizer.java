@@ -24,15 +24,12 @@ public final class PlannerContentSanitizer {
         try {
             JsonNode root = OBJECT_MAPPER.readTree(contentJson);
 
-            JsonNode sectionNotes = root.get("sectionNotes");
-            if (sectionNotes != null && sectionNotes.isObject()) {
+            JsonNode sectionNotes = root.path("sectionNotes");
+            if (sectionNotes.isObject()) {
                 for (Map.Entry<String, JsonNode> entry : sectionNotes.properties()) {
                     JsonNode noteValue = entry.getValue();
-                    if (noteValue != null && noteValue.isObject()) {
-                        JsonNode tiptapContent = noteValue.get("content");
-                        if (tiptapContent != null) {
-                            TiptapUrlSanitizer.sanitize(tiptapContent);
-                        }
+                    if (noteValue.isObject()) {
+                        TiptapUrlSanitizer.sanitize(noteValue.path("content"));
                     }
                 }
             }

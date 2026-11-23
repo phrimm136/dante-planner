@@ -21,7 +21,7 @@ public class CommentAuthorshipValidator {
 
     private void requireAuthor(PlannerComment comment, Long userId, String refusal) {
         if (!comment.getUserId().equals(userId)) {
-            throw new CommentForbiddenException(comment.getId(), refusal);
+            throw new CommentForbiddenException(refusal);
         }
     }
 }

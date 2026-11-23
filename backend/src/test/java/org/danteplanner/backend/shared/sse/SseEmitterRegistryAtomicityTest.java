@@ -7,6 +7,7 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CyclicBarrier;
 
+import org.danteplanner.backend.shared.security.Viewer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -81,7 +82,7 @@ class SseEmitterRegistryAtomicityTest {
         }
 
         private void connect(String key, UUID deviceId) throws IOException {
-            register(key, deviceId);
+            register(key, deviceId, new Viewer.Guest());
         }
 
         private boolean isReachable(String key, UUID deviceId) {

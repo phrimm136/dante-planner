@@ -1,5 +1,7 @@
 package org.danteplanner.backend.comment.validation;
 
+import org.danteplanner.backend.shared.security.Viewer;
+
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.exception.CommentForbiddenException;
 import org.danteplanner.backend.planner.api.PlannerMiss;
@@ -12,8 +14,8 @@ import java.util.UUID;
 @Component
 public class CommentAccessValidator {
 
-    public void requireThreadVisible(PlannerThread planner, Long currentUserId) {
-        if (currentUserId != null && planner.isOwnedBy(currentUserId)) {
+    public void requireThreadVisible(PlannerThread planner, Viewer viewer) {
+        if (viewer.is(planner.ownerId())) {
             return;
         }
         if (!planner.published() || planner.ownerDeactivated()) {

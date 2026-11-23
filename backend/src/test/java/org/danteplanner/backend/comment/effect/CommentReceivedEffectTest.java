@@ -95,10 +95,10 @@ class CommentReceivedEffectTest {
         assertThat(notifications.calls()).containsExactly(new CommentReceived(
                 COMMENT_ID, comment.getPublicId(), PLANNER_ID, "Test Planner", "A comment", OWNER_ID));
         assertThat(sseChannel.envelopes(SseChannel.USER))
-                .extracting(SseEnvelope::type, SseEnvelope::userId)
+                .extracting(SseEnvelope.Wire::type, SseEnvelope.Wire::userId)
                 .containsExactly(tuple(SseEventType.NOTIFY_COMMENT, OWNER_ID));
         assertThat(sseChannel.envelopes(SseChannel.COMMENT))
-                .extracting(SseEnvelope::type, SseEnvelope::plannerId, SseEnvelope::excludeUserId)
+                .extracting(SseEnvelope.Wire::type, SseEnvelope.Wire::plannerId, SseEnvelope.Wire::excludeUserId)
                 .containsExactly(tuple(SseEventType.COMMENT_ADDED, PLANNER_ID.toString(), COMMENTER_ID));
     }
 
@@ -112,7 +112,7 @@ class CommentReceivedEffectTest {
         assertThat(notifications.calls()).isEmpty();
         assertThat(sseChannel.envelopes(SseChannel.USER)).isEmpty();
         assertThat(sseChannel.envelopes(SseChannel.COMMENT))
-                .extracting(SseEnvelope::type, SseEnvelope::plannerId, SseEnvelope::excludeUserId)
+                .extracting(SseEnvelope.Wire::type, SseEnvelope.Wire::plannerId, SseEnvelope.Wire::excludeUserId)
                 .containsExactly(tuple(SseEventType.COMMENT_ADDED, PLANNER_ID.toString(), OWNER_ID));
     }
 
@@ -126,7 +126,7 @@ class CommentReceivedEffectTest {
         assertThat(notifications.calls()).isEmpty();
         assertThat(sseChannel.envelopes(SseChannel.USER)).isEmpty();
         assertThat(sseChannel.envelopes(SseChannel.COMMENT))
-                .extracting(SseEnvelope::type, SseEnvelope::plannerId, SseEnvelope::excludeUserId)
+                .extracting(SseEnvelope.Wire::type, SseEnvelope.Wire::plannerId, SseEnvelope.Wire::excludeUserId)
                 .containsExactly(tuple(SseEventType.COMMENT_ADDED, PLANNER_ID.toString(), COMMENTER_ID));
     }
 

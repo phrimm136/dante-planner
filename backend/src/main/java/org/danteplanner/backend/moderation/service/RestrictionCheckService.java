@@ -39,7 +39,7 @@ public class RestrictionCheckService implements RestrictionCheck, RestrictionChe
     @Transactional(propagation = Propagation.MANDATORY)
     public void requireUnrestricted(Long userId) {
         UserSummary user = users.findById(userId);
-        standingValidator.requireUnrestricted(user, user.restrictionState(clock));
+        standingValidator.requireUnrestricted(user, user.restrictionState(clock.instant()));
         RestrictionTransactionHook.recordDecision();
     }
 

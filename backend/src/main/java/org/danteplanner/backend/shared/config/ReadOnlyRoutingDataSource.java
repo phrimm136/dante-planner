@@ -23,13 +23,10 @@ public class ReadOnlyRoutingDataSource extends AbstractRoutingDataSource {
     private static final String READ_NOT_LENT_MESSAGE = "The routed source could not lend a read connection";
 
     private final UndeclaredPrimaryAccessGuard undeclaredGuard;
-    private DataSource authorityReadSource;
+    private final DataSource authorityReadSource;
 
-    public ReadOnlyRoutingDataSource(UndeclaredPrimaryAccessGuard undeclaredGuard) {
+    public ReadOnlyRoutingDataSource(UndeclaredPrimaryAccessGuard undeclaredGuard, DataSource authorityReadSource) {
         this.undeclaredGuard = undeclaredGuard;
-    }
-
-    public void setAuthorityReadSource(DataSource authorityReadSource) {
         this.authorityReadSource = authorityReadSource;
     }
 

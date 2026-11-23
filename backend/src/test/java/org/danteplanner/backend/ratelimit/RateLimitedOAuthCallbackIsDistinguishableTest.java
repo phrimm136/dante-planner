@@ -17,6 +17,9 @@ import org.danteplanner.backend.shared.ratelimit.RateLimitService;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.backend.support.InMemoryProxyManager;
 
+import org.danteplanner.backend.support.RateLimitStores;
+import java.util.Map;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -114,12 +117,7 @@ class RateLimitedOAuthCallbackIsDistinguishableTest {
     }
 
     private static RateLimitProperties authBucket() {
-        RateLimitProperties.BucketConfig bucket = new RateLimitProperties.BucketConfig();
-        bucket.setCapacity(10);
-        bucket.setRefillTokens(10);
-        bucket.setRefillDurationSeconds(60);
-        RateLimitProperties properties = new RateLimitProperties();
-        properties.setAuth(bucket);
-        return properties;
+        RateLimitProperties.BucketConfig bucket = new RateLimitProperties.BucketConfig(10, 10, 60);
+        return RateLimitStores.limits(0, Map.of(RateLimitPolicy.AUTH, bucket));
     }
 }

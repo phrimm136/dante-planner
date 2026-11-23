@@ -2,13 +2,23 @@ package org.danteplanner.backend.planner.validation;
 
 import java.util.Comparator;
 
-public record Violation(ErrorCode code, ContentPath path, String message, String value) {
+public record Violation(ErrorCode code, ContentPath path, String message, Value value) {
+
+    public sealed interface Value {
+
+        record WithValue(String text) implements Value {
+        }
+
+        record Plain() implements Value {
+        }
+    }
+
 
     public static final Comparator<Violation> BY_PATH_THEN_CODE =
             Comparator.comparing(Violation::path).thenComparing(violation -> violation.code().getCode());
 
     public Violation(ErrorCode code, ContentPath path, String message) {
-        this(code, path, message, null);
+        this(code, path, message, new Value.Plain());
     }
 
     public static Violation unknownField(ContentPath path) {
@@ -46,7 +56,7 @@ public record Violation(ErrorCode code, ContentPath path, String message, String
     }
 
     public static Violation unknownValue(ErrorCode code, ContentPath path, String subject, String value) {
-        return new Violation(code, path, unknownIdMessage(subject, value), value);
+        return new Violation(code, path, unknownIdMessage(subject, value), new Value.WithValue(value));
     }
 
     private static String unknownIdMessage(String subject, String id) {

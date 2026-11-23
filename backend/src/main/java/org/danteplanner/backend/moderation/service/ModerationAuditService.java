@@ -25,27 +25,65 @@ public class ModerationAuditService implements ModerationAudit, RestrictionReaso
 
     private final ModerationActionRepository moderationActionRepository;
 
+    public sealed interface Suspension {
+
+        String reason();
+
+        record Timeout(int durationMinutes, String reason) implements Suspension {
+        }
+
+        record ClearTimeout(String reason) implements Suspension {
+        }
+
+        record Ban(String reason) implements Suspension {
+        }
+
+        record Unban(String reason) implements Suspension {
+        }
+
+        default ModerationActionType action() {
+            return switch (this) {
+                case Timeout timeout -> ModerationActionType.TIMEOUT;
+                case ClearTimeout clear -> ModerationActionType.CLEAR_TIMEOUT;
+                case Ban ban -> ModerationActionType.BAN;
+                case Unban unban -> ModerationActionType.UNBAN;
+            };
+        }
+    }
+
     public void record(Long actorId, String targetUuid, ModerationActionType actionType,
             ModerationTargetType targetType) {
-        record(actorId, targetUuid, actionType, targetType, null, null);
+        insert(action(actorId, targetUuid, actionType, targetType));
     }
 
     @Override
     public void record(Long actorId, String targetUuid, ModerationActionType actionType,
             ModerationTargetType targetType, String reason) {
-        record(actorId, targetUuid, actionType, targetType, reason, null);
+        insert(action(actorId, targetUuid, actionType, targetType).reason(reason));
     }
 
-    public void record(Long actorId, String targetUuid, ModerationActionType actionType,
-            ModerationTargetType targetType, String reason, Integer durationMinutes) {
-        moderationActionRepository.insert(ModerationAction.builder()
+    public void record(Long actorId, String targetUuid, Suspension suspension) {
+        ModerationAction.ModerationActionBuilder action =
+                action(actorId, targetUuid, suspension.action(), ModerationTargetType.USER).reason(suspension.reason());
+        insert(switch (suspension) {
+            case Suspension.Timeout timeout -> action.durationMinutes(timeout.durationMinutes());
+            case Suspension.ClearTimeout clear -> action;
+            case Suspension.Ban ban -> action;
+            case Suspension.Unban unban -> action;
+        });
+    }
+
+    private static ModerationAction.ModerationActionBuilder action(Long actorId, String targetUuid,
+            ModerationActionType actionType, ModerationTargetType targetType) {
+        return ModerationAction.builder()
                 .actorId(actorId)
                 .targetUuid(targetUuid)
                 .actionType(actionType)
-                .targetType(targetType)
-                .reason(reason)
-                .durationMinutes(durationMinutes)
-                .build());
+                .targetType(targetType);
+    }
+
+    private void insert(ModerationAction.ModerationActionBuilder action) {
+        moderationActionRepository.insert(action.build());
         FreshnessDeclarations.declare(new FreshnessScope.Global());
     }
 

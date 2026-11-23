@@ -10,7 +10,8 @@ import java.util.UUID;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.auth.token.LogoutRevocation;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
-import org.danteplanner.backend.auth.token.RotationResult;
+import org.danteplanner.backend.auth.token.RefreshLineage;
+import org.danteplanner.backend.auth.token.RotationOutcome;
 import org.danteplanner.backend.auth.token.RotationState;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.auth.token.TokenClaims;
@@ -28,7 +29,7 @@ public class RecordingRefreshRotation extends RefreshRotationService {
     public sealed interface Call permits Rotation, FamilyRevoked, Failed {
     }
 
-    public record Rotation(String presented, RotationResult result) implements Call {
+    public record Rotation(String presented, RotationOutcome result) implements Call {
     }
 
     public record FamilyRevoked(String familyId) implements Call {
@@ -87,8 +88,8 @@ public class RecordingRefreshRotation extends RefreshRotationService {
     }
 
     @Override
-    public RotationResult rotate(String refreshToken) {
-        RotationResult result = transition(refreshToken);
+    public RotationOutcome rotate(String refreshToken) {
+        RotationOutcome result = transition(refreshToken);
         calls.add(new Rotation(refreshToken, result));
         return result;
     }
@@ -103,7 +104,7 @@ public class RecordingRefreshRotation extends RefreshRotationService {
         calls.add(new FamilyRevoked(familyId));
     }
 
-    private RotationResult transition(String refreshToken) {
+    private RotationOutcome transition(String refreshToken) {
         TokenClaims claims;
         try {
             claims = tokens.validateRefreshToken(refreshToken);
@@ -113,56 +114,74 @@ public class RecordingRefreshRotation extends RefreshRotationService {
         if (!claims.isRefreshToken()) {
             return invalid();
         }
-        if (claims.jti() == null || claims.familyId() == null) {
-            if (!legacyAdmitEnabled) {
-                return invalid();
+        String jti;
+        String familyId;
+        String parentJti;
+        switch (claims.lineage()) {
+            case RefreshLineage.Legacy legacy -> {
+                if (!legacyAdmitEnabled) {
+                    return invalid();
+                }
+                jti = UUID.nameUUIDFromBytes(String.format("legacy-jti:%d:%d", claims.userId(), legacy.issuedAtMs())
+                        .getBytes(StandardCharsets.UTF_8)).toString();
+                familyId = legacyFamilyId(claims.userId(), legacy.issuedAtMs());
+                parentJti = null;
             }
-            claims = admitLegacy(claims);
+            case RefreshLineage.Root root -> {
+                jti = root.jti();
+                familyId = root.familyId();
+                parentJti = null;
+            }
+            case RefreshLineage.Child child -> {
+                jti = child.jti();
+                familyId = child.familyId();
+                parentJti = child.parentJti();
+            }
         }
 
-        String successorJwt = tokens.generateRefreshToken(claims.userId(), claims.familyId(), claims.jti());
+        String successorJwt = tokens.generateRefreshToken(claims.userId(), familyId, jti);
         TokenClaims successorClaims = tokens.validateRefreshToken(successorJwt);
         long nowMs = jwt.clock().millis();
         failIfScripted(Operation.ROTATE);
 
         if (blacklist.isUserTokenInvalidated(claims.userId(), claims.issuedAt().getTime())) {
-            return new RotationResult.Rejected(RotationResult.Rejected.Reason.REVOKED_FAMILY);
+            return new RotationOutcome.Rejected(RotationOutcome.Rejected.Reason.REVOKED_FAMILY);
         }
-        Family family = family(claims.familyId());
-        if (family.revoked || revokedAtLogout(claims.familyId())) {
-            return new RotationResult.Rejected(RotationResult.Rejected.Reason.REVOKED_FAMILY);
+        Family family = family(familyId);
+        if (family.revoked || revokedAtLogout(familyId)) {
+            return new RotationOutcome.Rejected(RotationOutcome.Rejected.Reason.REVOKED_FAMILY);
         }
 
-        Entry current = family.entries.get(claims.jti());
+        Entry current = family.entries.get(jti);
         RotationState state = current == null ? RotationState.UNUSED_LATEST : current.state();
         if (state == RotationState.RETIRED || state == RotationState.SUPERSEDED) {
             family.revoked = true;
-            return new RotationResult.Revoked(claims.familyId());
+            return new RotationOutcome.Revoked(familyId);
         }
 
-        if (claims.parentJti() != null) {
-            Entry parent = family.entries.get(claims.parentJti());
+        if (parentJti != null) {
+            Entry parent = family.entries.get(parentJti);
             if (parent != null && parent.state() == RotationState.PENDING) {
-                family.entries.put(claims.parentJti(), new Entry(RotationState.RETIRED, null));
-                family.successors.remove(claims.parentJti());
+                family.entries.put(parentJti, new Entry(RotationState.RETIRED, null));
+                family.successors.remove(parentJti);
             }
         }
 
         if (state == RotationState.PENDING) {
             String previousSuccessor = current.successorJti();
-            MintedSuccessor stored = family.successors.get(claims.jti());
+            MintedSuccessor stored = family.successors.get(jti);
             Entry previous = family.entries.get(previousSuccessor);
             if (stored != null && previous != null && previous.state() == RotationState.UNUSED_LATEST
                     && nowMs - stored.mintedAtMs() < retryReuseWindowMs) {
-                return new RotationResult.Rotated(stored.jwt(), tokens.validateRefreshToken(stored.jwt()));
+                return new RotationOutcome.Rotated(stored.jwt(), tokens.validateRefreshToken(stored.jwt()));
             }
             family.entries.put(previousSuccessor, new Entry(RotationState.SUPERSEDED, null));
         }
 
-        family.entries.put(successorClaims.jti(), new Entry(RotationState.UNUSED_LATEST, null));
-        family.entries.put(claims.jti(), new Entry(RotationState.PENDING, successorClaims.jti()));
-        family.successors.put(claims.jti(), new MintedSuccessor(nowMs, successorJwt));
-        return new RotationResult.Rotated(successorJwt, successorClaims);
+        family.entries.put(TestJwt.jtiOf(successorClaims), new Entry(RotationState.UNUSED_LATEST, null));
+        family.entries.put(jti, new Entry(RotationState.PENDING, TestJwt.jtiOf(successorClaims)));
+        family.successors.put(jti, new MintedSuccessor(nowMs, successorJwt));
+        return new RotationOutcome.Rotated(successorJwt, successorClaims);
     }
 
     private boolean revokedAtLogout(String familyId) {
@@ -173,16 +192,8 @@ public class RecordingRefreshRotation extends RefreshRotationService {
         return families.computeIfAbsent(familyId, id -> new Family());
     }
 
-    private static RotationResult invalid() {
-        return new RotationResult.Rejected(RotationResult.Rejected.Reason.INVALID);
-    }
-
-    private static TokenClaims admitLegacy(TokenClaims legacy) {
-        long issuedAtMs = legacy.issuedAt().getTime();
-        String jti = UUID.nameUUIDFromBytes(String.format("legacy-jti:%d:%d", legacy.userId(), issuedAtMs)
-                .getBytes(StandardCharsets.UTF_8)).toString();
-        return new TokenClaims(legacy.userId(), legacy.type(), legacy.role(), legacy.issuedAt(),
-                legacy.expiration(), jti, legacyFamilyId(legacy.userId(), issuedAtMs), legacy.parentJti());
+    private static RotationOutcome invalid() {
+        return new RotationOutcome.Rejected(RotationOutcome.Rejected.Reason.INVALID);
     }
 
     private void failIfScripted(Operation operation) {

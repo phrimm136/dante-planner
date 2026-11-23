@@ -12,8 +12,8 @@ public class AccountStandingValidator {
 
     public void requireUnrestricted(UserSummary user, RestrictionState state) {
         switch (state) {
-            case TIMED_OUT -> throw new UserTimedOutException(user.id(), user.timeoutUntil());
-            case BANNED -> throw new UserBannedException(user.id(), user.bannedAt());
+            case TIMED_OUT -> throw new UserTimedOutException(user.id(), user.requireTimeoutUntil());
+            case BANNED -> throw new UserBannedException(user.id(), user.requireBannedAt());
             case ACTIVE -> { }
         }
     }

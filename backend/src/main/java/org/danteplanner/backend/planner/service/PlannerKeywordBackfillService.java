@@ -37,12 +37,33 @@ public class PlannerKeywordBackfillService {
     /**
      * One page of the backfill: the last planner it read, how many it read, and how many it corrected.
      */
-    public record BackfillPage(UUID lastPlannerId, int scanned, int corrected) {
+    public record BackfillPage(BackfillCursor next, int scanned, int corrected) {
+    }
+
+    public sealed interface BackfillCursor {
+
+        record Start() implements BackfillCursor {
+        }
+
+        record After(UUID plannerId) implements BackfillCursor {
+        }
+    }
+
+    private sealed interface KeywordColumn {
+
+        record Empty() implements KeywordColumn {
+        }
+
+        record Json(String text) implements KeywordColumn {
+        }
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public BackfillPage backfillPage(UUID after, int limit) {
-        List<KeywordBackfillRow> rows = repository.keywordRowsAfter(after, limit);
+    public BackfillPage backfillPage(BackfillCursor cursor, int limit) {
+        List<KeywordBackfillRow> rows = switch (cursor) {
+            case BackfillCursor.Start start -> repository.firstKeywordRows(limit);
+            case BackfillCursor.After after -> repository.keywordRowsAfter(after.plannerId(), limit);
+        };
         int corrected = 0;
         for (KeywordBackfillRow candidate : rows) {
             if (!correctionOf(candidate).needed()) {
@@ -56,24 +77,32 @@ public class PlannerKeywordBackfillService {
             KeywordBackfillRow row = locked.get();
             Correction correction = correctionOf(row);
             if (correction.columnStale()) {
-                repository.refreshContentKeywords(row.plannerId(), correction.derived());
+                switch (correction.derived()) {
+                    case KeywordColumn.Json json -> repository.refreshContentKeywords(row.plannerId(), json.text());
+                    case KeywordColumn.Empty empty -> repository.clearContentKeywords(row.plannerId());
+                }
                 if (row.published()) {
                     plannerCatalogService.syncFilterRows(row.plannerId());
                 }
             }
             if (correction.catalogStale()) {
-                repository.refreshCatalogKeywords(row.plannerId(), correction.derived());
+                switch (correction.derived()) {
+                    case KeywordColumn.Json json -> repository.refreshCatalogKeywords(row.plannerId(), json.text());
+                    case KeywordColumn.Empty empty -> repository.clearCatalogKeywords(row.plannerId());
+                }
             }
             if (correction.needed()) {
                 corrected++;
             }
         }
-        UUID last = rows.isEmpty() ? after : rows.get(rows.size() - 1).plannerId();
-        return new BackfillPage(last, rows.size(), corrected);
+        BackfillCursor next = rows.isEmpty()
+                ? cursor
+                : new BackfillCursor.After(rows.get(rows.size() - 1).plannerId());
+        return new BackfillPage(next, rows.size(), corrected);
     }
 
 
-    private record Correction(String derived, boolean columnStale, boolean catalogStale) {
+    private record Correction(KeywordColumn derived, boolean columnStale, boolean catalogStale) {
 
         boolean needed() {
             return columnStale || catalogStale;
@@ -81,13 +110,13 @@ public class PlannerKeywordBackfillService {
     }
 
     private Correction correctionOf(KeywordBackfillRow row) {
-        String derived = derivedColumn(row.contentKeywords());
+        KeywordColumn derived = derivedColumn(row.contentKeywords());
         return new Correction(derived,
                 !Objects.equals(derived, canonical(row.columnKeywords())),
                 row.catalogued() && !Objects.equals(derived, canonical(row.catalogKeywords())));
     }
 
-    private String derivedColumn(String selectionJson) {
+    private KeywordColumn derivedColumn(String selectionJson) {
         JsonNode selection;
         try {
             selection = selectionJson == null ? MissingNode.getInstance() : objectMapper.readTree(selectionJson);
@@ -97,25 +126,27 @@ public class PlannerKeywordBackfillService {
         return serialized(List.copyOf(PlannerKeywords.fromSelection(selection).asSet()));
     }
 
-    private String canonical(String stored) {
+    private KeywordColumn canonical(String stored) {
         if (stored == null) {
-            return null;
+            return new KeywordColumn.Empty();
         }
         try {
             List<String> keywords = objectMapper.readValue(stored, STRING_LIST);
-            return keywords == null || keywords.contains(null) ? stored : serialized(keywords);
+            return keywords == null || keywords.contains(null) 
+                    ? new KeywordColumn.Json(stored)
+                    : serialized(keywords);
         } catch (JacksonException e) {
-            return stored;
+            return new KeywordColumn.Json(stored);
         }
     }
 
-    private String serialized(List<String> keywords) {
+    private KeywordColumn serialized(List<String> keywords) {
         List<String> sorted = keywords.stream().sorted().toList();
         if (sorted.isEmpty()) {
-            return null;
+            return new KeywordColumn.Empty();
         }
         try {
-            return objectMapper.writeValueAsString(sorted);
+            return new KeywordColumn.Json(objectMapper.writeValueAsString(sorted));
         } catch (JacksonException e) {
             throw new IllegalStateException("Keyword list could not be serialized: " + sorted, e);
         }

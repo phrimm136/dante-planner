@@ -3,12 +3,15 @@ package org.danteplanner.backend.auth.security;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
+import org.springframework.security.core.Authentication;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.auth.token.TokenValidator;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.Users;
+import org.danteplanner.backend.shared.failure.CommandOutcome;
 import org.danteplanner.backend.shared.util.LogValues;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,7 +30,7 @@ public class AccessTokenAuthenticator {
     private final TokenValidator tokenValidator;
     private final TokenBlacklistService tokenBlacklistService;
 
-    public enum AccessTokenVerdict {
+    public enum AccessTokenOutcome implements CommandOutcome {
         AUTHENTICATED,
         SENTINEL_BLOCKED,
         REVOKED,
@@ -35,40 +38,114 @@ public class AccessTokenAuthenticator {
         REJECTED
     }
 
-    public AccessTokenVerdict verify(String token, HttpServletRequest request) {
-        TokenClaims claims;
-        try {
-            claims = tokenValidator.validateAccessToken(token);
-        } catch (InvalidTokenException e) {
-            return switch (e.getReason()) {
-                case EXPIRED -> AccessTokenVerdict.EXPIRED;
+    sealed interface TokenCheck {
+
+        sealed interface Terminal {
+
+            record Expired() implements Terminal {
+            }
+
+            record Rejected(InvalidTokenException.Reason reason) implements Terminal {
+            }
+
+            record Revoked() implements Terminal {
+            }
+
+            record AlreadyAuthenticated() implements Terminal {
+            }
+
+            record SentinelBlocked() implements Terminal {
+            }
+        }
+
+        record Done(Terminal terminal) implements TokenCheck {
+        }
+
+        record NeedBlacklist(TokenClaims claims) implements TokenCheck {
+        }
+
+        record NeedInvalidation(TokenClaims claims) implements TokenCheck {
+        }
+
+        record Authenticate(TokenClaims claims) implements TokenCheck {
+        }
+
+        static TokenCheck ofValidation(TokenClaims claims) {
+            return new NeedBlacklist(claims);
+        }
+
+        static TokenCheck ofValidationFailure(InvalidTokenException.Reason reason) {
+            return switch (reason) {
+                case EXPIRED -> new Done(new Terminal.Expired());
                 case MALFORMED, INVALID_SIGNATURE, MISSING_CLAIMS, INVALID_TYPE ->
-                        rejected("TOKEN_INVALID", e.getReason(), request);
+                        new Done(new Terminal.Rejected(reason));
             };
         }
 
-        if (tokenBlacklistService.isBlacklisted(token)) {
-            logSecurityEvent("TOKEN_REVOKED", request);
-            return AccessTokenVerdict.REVOKED;
+        static TokenCheck ofBlacklist(TokenClaims claims, boolean blacklisted) {
+            if (blacklisted) {
+                return new Done(new Terminal.Revoked());
+            }
+            return new NeedInvalidation(claims);
         }
 
-        if (tokenBlacklistService.isUserTokenInvalidated(claims.userId(), claims.issuedAt().getTime())) {
-            logSecurityEvent("TOKEN_REVOKED", request);
-            return AccessTokenVerdict.REVOKED;
+        static TokenCheck ofRevocation(TokenClaims claims, boolean invalidated, @Nullable Authentication current) {
+            if (invalidated) {
+                return new Done(new Terminal.Revoked());
+            }
+            if (current != null) {
+                return new Done(new Terminal.AlreadyAuthenticated());
+            }
+            if (claims.userId().equals(Users.SENTINEL_USER_ID)) {
+                return new Done(new Terminal.SentinelBlocked());
+            }
+            return new Authenticate(claims);
         }
+    }
 
-        if (SecurityContextHolder.getContext().getAuthentication() != null) {
-            return AccessTokenVerdict.AUTHENTICATED;
+    public AccessTokenOutcome verify(String token, HttpServletRequest request) {
+        TokenCheck validation;
+        try {
+            validation = TokenCheck.ofValidation(tokenValidator.validateAccessToken(token));
+        } catch (InvalidTokenException e) {
+            validation = TokenCheck.ofValidationFailure(e.getReason());
         }
+        return proceed(validation, token, request);
+    }
 
-        Long userId = claims.userId();
-        if (userId.equals(Users.SENTINEL_USER_ID)) {
-            log.warn("Attempt to authenticate as sentinel user blocked");
-            return AccessTokenVerdict.SENTINEL_BLOCKED;
-        }
+    private AccessTokenOutcome proceed(TokenCheck check, String token, HttpServletRequest request) {
+        return switch (check) {
+            case TokenCheck.Done done -> conclude(done.terminal(), request);
+            case TokenCheck.NeedBlacklist need -> proceed(
+                    TokenCheck.ofBlacklist(need.claims(), tokenBlacklistService.isBlacklisted(token)), token, request);
+            case TokenCheck.NeedInvalidation need -> proceed(TokenCheck.ofRevocation(need.claims(),
+                    tokenBlacklistService.isUserTokenInvalidated(need.claims().userId(),
+                            need.claims().issuedAt().getTime()),
+                    SecurityContextHolder.getContext().getAuthentication()), token, request);
+            case TokenCheck.Authenticate authenticate -> {
+                authenticateAs(authenticate.claims().userId(), authenticate.claims().role(), request);
+                yield AccessTokenOutcome.AUTHENTICATED;
+            }
+        };
+    }
 
-        authenticateAs(userId, claims.getEffectiveRole(), request);
-        return AccessTokenVerdict.AUTHENTICATED;
+    private AccessTokenOutcome conclude(TokenCheck.Terminal terminal, HttpServletRequest request) {
+        return switch (terminal) {
+            case TokenCheck.Terminal.Expired expired -> AccessTokenOutcome.EXPIRED;
+            case TokenCheck.Terminal.Rejected rejected -> {
+                logSecurityEvent("TOKEN_INVALID (" + rejected.reason() + ")", request);
+                yield AccessTokenOutcome.REJECTED;
+            }
+            case TokenCheck.Terminal.Revoked revoked -> {
+                logSecurityEvent("TOKEN_REVOKED", request);
+                yield AccessTokenOutcome.REVOKED;
+            }
+            case TokenCheck.Terminal.AlreadyAuthenticated authenticated -> AccessTokenOutcome.AUTHENTICATED;
+            case TokenCheck.Terminal.SentinelBlocked blocked -> {
+                log.warn("Attempt to authenticate as sentinel user blocked");
+                yield AccessTokenOutcome.SENTINEL_BLOCKED;
+            }
+        };
     }
 
     public void authenticateAs(Long userId, UserRole role, HttpServletRequest request) {
@@ -80,12 +157,6 @@ public class AccessTokenAuthenticator {
                 new UsernamePasswordAuthenticationToken(userId, null, authorities);
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authToken);
-    }
-
-    private AccessTokenVerdict rejected(
-            String errorCode, InvalidTokenException.Reason reason, HttpServletRequest request) {
-        logSecurityEvent(errorCode + " (" + reason + ")", request);
-        return AccessTokenVerdict.REJECTED;
     }
 
     private void logSecurityEvent(String event, HttpServletRequest request) {

@@ -14,14 +14,26 @@ class ProbeStreakTest {
     private static final boolean ANSWERED = true;
     private static final boolean SILENT = false;
 
-    private final ProbeStreak streak = new ProbeStreak(THRESHOLD);
+    private ProbeStreak streak = new ProbeStreak(THRESHOLD);
 
     private List<ProbeStreak.Transition> after(boolean answered, int times) {
         List<ProbeStreak.Transition> transitions = new ArrayList<>();
         for (int i = 0; i < times; i++) {
-            transitions.add(streak.after(answered));
+            transitions.add(after(answered));
         }
         return transitions;
+    }
+
+    private ProbeStreak.Transition after(boolean answered) {
+        ProbeStreak.Step step = streak.after(answered);
+        streak = step.next();
+        return step.transition();
+    }
+
+    private ProbeStreak.Transition atStartup(boolean answered) {
+        ProbeStreak.Step step = streak.atStartup(answered);
+        streak = step.next();
+        return step.transition();
     }
 
     @Test
@@ -33,17 +45,17 @@ class ProbeStreakTest {
     @Test
     void after_WhenASuccessFallsBetweenFailures_RestartsTheCount() {
         after(SILENT, THRESHOLD - 1);
-        streak.after(ANSWERED);
+        after(ANSWERED);
 
         assertThat(after(SILENT, THRESHOLD - 1)).containsOnly(ProbeStreak.Transition.NONE);
-        assertThat(streak.after(SILENT)).isEqualTo(ProbeStreak.Transition.OPEN);
+        assertThat(after(SILENT)).isEqualTo(ProbeStreak.Transition.OPEN);
     }
 
     @Test
     void after_WhenOpenAndASuccessArrives_Closes() {
         after(SILENT, THRESHOLD);
 
-        assertThat(streak.after(ANSWERED)).isEqualTo(ProbeStreak.Transition.CLOSE);
+        assertThat(after(ANSWERED)).isEqualTo(ProbeStreak.Transition.CLOSE);
     }
 
     @Test
@@ -61,7 +73,7 @@ class ProbeStreakTest {
     @Test
     void after_WhenClosedAgainAfterAnOutage_NeedsTheFullThresholdToReopen() {
         after(SILENT, THRESHOLD);
-        streak.after(ANSWERED);
+        after(ANSWERED);
 
         assertThat(after(SILENT, THRESHOLD)).containsExactly(
                 ProbeStreak.Transition.NONE, ProbeStreak.Transition.NONE, ProbeStreak.Transition.OPEN);
@@ -69,20 +81,20 @@ class ProbeStreakTest {
 
     @Test
     void atStartup_WhenTheRoleDoesNotAnswer_OpensAtOnce() {
-        assertThat(streak.atStartup(SILENT)).isEqualTo(ProbeStreak.Transition.OPEN);
+        assertThat(atStartup(SILENT)).isEqualTo(ProbeStreak.Transition.OPEN);
     }
 
     @Test
     void atStartup_WhenTheRoleAnswers_StaysClosed() {
-        assertThat(streak.atStartup(ANSWERED)).isEqualTo(ProbeStreak.Transition.NONE);
-        assertThat(streak.after(ANSWERED)).isEqualTo(ProbeStreak.Transition.NONE);
+        assertThat(atStartup(ANSWERED)).isEqualTo(ProbeStreak.Transition.NONE);
+        assertThat(after(ANSWERED)).isEqualTo(ProbeStreak.Transition.NONE);
     }
 
     @Test
     void after_WhenOpenedAtStartupAndFailuresContinue_ReturnsNoFurtherTransition() {
-        streak.atStartup(SILENT);
+        atStartup(SILENT);
 
         assertThat(after(SILENT, MANY)).containsOnly(ProbeStreak.Transition.NONE);
-        assertThat(streak.after(ANSWERED)).isEqualTo(ProbeStreak.Transition.CLOSE);
+        assertThat(after(ANSWERED)).isEqualTo(ProbeStreak.Transition.CLOSE);
     }
 }

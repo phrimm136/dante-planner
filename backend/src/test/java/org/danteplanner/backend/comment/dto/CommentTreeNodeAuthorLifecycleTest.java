@@ -5,6 +5,7 @@ import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.shared.util.CommentConstants;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.shared.security.Viewer;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
@@ -37,7 +38,10 @@ class CommentTreeNodeAuthorLifecycleTest {
 
     private static CommentTreeNode project(PlannerComment comment, User author) {
         return CommentTreeNode.fromEntity(
-                comment, null, author == null ? null : UsersApiAdapter.toSummary(author), null, false, List.of());
+                comment, null, author == null
+                        ? new CommentTreeNode.Author.Missing()
+                        : new CommentTreeNode.Author.Known(UsersApiAdapter.toSummary(author)),
+                new Viewer.Guest(), false, List.of());
     }
 
     @Test

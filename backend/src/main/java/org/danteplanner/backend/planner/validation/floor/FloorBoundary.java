@@ -56,8 +56,8 @@ public final class FloorBoundary {
                     IntStream.range(0, Math.min(floorSelections.size(), layout.floorCount()))
                             .<ParsedFloor>mapToObj(index -> violations.stream()
                                     .anyMatch(violation -> violation.path().within(floorPath(index)))
-                                    ? new ParsedFloor.Rejected(read(floorSelections.get(index)))
-                                    : new ParsedFloor.Accepted(read(floorSelections.get(index))))
+                                    ? new ParsedFloor.Rejected(read(floorSelections.path(index)))
+                                    : new ParsedFloor.Accepted(read(floorSelections.path(index))))
                             .toList(),
                     violations);
             default -> new Parsed(layout, List.of(), violations);

@@ -1,5 +1,6 @@
 package org.danteplanner.backend.auth.oauth;
 
+import org.jspecify.annotations.Nullable;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -27,6 +28,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Slf4j
 public class GoogleOAuthProvider implements OAuthProvider {
 
+    private static final String EMPTY_BODY = "argument \"content\" is null";
     private static final String PROVIDER_NAME = AuthProviderType.GOOGLE.getValue();
     private static final String SCOPE = "openid email";
 
@@ -42,9 +44,9 @@ public class GoogleOAuthProvider implements OAuthProvider {
 
     @Override
     public String buildAuthorizationUrl(String state, String codeChallenge) {
-        return UriComponentsBuilder.fromUriString(oAuthProperties.getGoogle().getAuthorizeUrl())
-            .queryParam("client_id", oAuthProperties.getGoogle().getClientId())
-            .queryParam("redirect_uri", oAuthProperties.getGoogle().getRedirectUri())
+        return UriComponentsBuilder.fromUriString(oAuthProperties.google().authorizeUrl())
+            .queryParam("client_id", oAuthProperties.google().clientId())
+            .queryParam("redirect_uri", oAuthProperties.google().redirectUri())
             .queryParam("response_type", "code")
             .queryParam("scope", SCOPE)
             .queryParam("state", state)
@@ -56,17 +58,17 @@ public class GoogleOAuthProvider implements OAuthProvider {
     }
 
     @Override
-    public OAuthTokens exchangeCodeForTokens(
+    public OAuthTokens.Response exchangeCodeForTokens(
         String code,
         String redirectUri,
         String codeVerifier
     ) {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("code", code);
-        params.add("client_id", oAuthProperties.getGoogle().getClientId());
+        params.add("client_id", oAuthProperties.google().clientId());
         params.add(
             "client_secret",
-            oAuthProperties.getGoogle().getClientSecret()
+            oAuthProperties.google().clientSecret()
         );
         params.add("redirect_uri", redirectUri);
         params.add("grant_type", "authorization_code");
@@ -86,11 +88,11 @@ public class GoogleOAuthProvider implements OAuthProvider {
                 redirectUri
             );
             ResponseEntity<String> response = restTemplate.postForEntity(
-                oAuthProperties.getGoogle().getTokenUrl(),
+                oAuthProperties.google().tokenUrl(),
                 request,
                 String.class
             );
-            return parseTokenResponse(response.getBody());
+            return parseTokenResponse(requireBody(response.getBody()));
         } catch (HttpStatusCodeException e) {
             log.error(
                 "Google OAuth token exchange failed. Status: {}, Response: {}",
@@ -127,12 +129,12 @@ public class GoogleOAuthProvider implements OAuthProvider {
 
         try {
             ResponseEntity<String> response = restTemplate.exchange(
-                oAuthProperties.getGoogle().getUserInfoUrl(),
+                oAuthProperties.google().userInfoUrl(),
                 HttpMethod.GET,
                 request,
                 String.class
             );
-            return parseUserInfoResponse(response.getBody());
+            return parseUserInfoResponse(requireBody(response.getBody()));
         } catch (RestClientException e) {
             throw new OAuthException(
                 PROVIDER_NAME,
@@ -145,10 +147,14 @@ public class GoogleOAuthProvider implements OAuthProvider {
 
     @Override
     public OAuthUserInfo getUserInfo(OAuthTokens tokens) {
-        if (tokens.idToken() == null) {
-            return getUserInfo(tokens.accessToken());
-        }
-        Jwt verified = idTokenVerifier.verify(tokens.idToken());
+        return switch (tokens) {
+            case OAuthTokens.AccessOnly accessOnly -> getUserInfo(accessOnly.accessToken());
+            case OAuthTokens.OpenId openId -> verifiedUserInfo(openId.idToken());
+        };
+    }
+
+    private OAuthUserInfo verifiedUserInfo(String idToken) {
+        Jwt verified = idTokenVerifier.verify(idToken);
         // Signature validity says nothing about which optional claims the consent screen
         // granted, and both fields are required downstream.
         String subject = requireClaim(verified.getSubject(), "sub");
@@ -156,7 +162,7 @@ public class GoogleOAuthProvider implements OAuthProvider {
         return new OAuthUserInfo(subject, email);
     }
 
-    private String requireClaim(String value, String claim) {
+    private String requireClaim(@Nullable String value, String claim) {
         if (value == null || value.isBlank()) {
             throw new OAuthException(
                 PROVIDER_NAME,
@@ -167,7 +173,14 @@ public class GoogleOAuthProvider implements OAuthProvider {
         return value;
     }
 
-    private OAuthTokens parseTokenResponse(String responseBody) {
+    private static String requireBody(@Nullable String body) {
+        if (body == null) {
+            throw new IllegalArgumentException(EMPTY_BODY);
+        }
+        return body;
+    }
+
+    private OAuthTokens.Response parseTokenResponse(String responseBody) {
         try {
             JsonNode json = objectMapper.readTree(responseBody);
 
@@ -181,14 +194,9 @@ public class GoogleOAuthProvider implements OAuthProvider {
             }
 
             String accessToken = accessTokenNode.asString();
-            String refreshToken = json.path("refresh_token").asString(null);
-            String idToken = json.path("id_token").asString(null);
-
-            return new OAuthTokens(
-                accessToken,
-                refreshToken,
-                idToken
-            );
+            JsonNode idTokenNode = json.path("id_token");
+            boolean absent = idTokenNode.isMissingNode() || idTokenNode.isNull();
+            return new OAuthTokens.Response(accessToken, absent ? null : idTokenNode.asString());
         } catch (JacksonException e) {
             throw new OAuthException(
                 PROVIDER_NAME,

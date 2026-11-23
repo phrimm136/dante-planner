@@ -4,6 +4,8 @@ import java.util.UUID;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.jspecify.annotations.Nullable;
+
 import org.danteplanner.backend.shared.util.CommentConstants;
 
 public record CreateCommentRequest(
@@ -11,5 +13,5 @@ public record CreateCommentRequest(
     @Size(max = CommentConstants.CONTENT_MAX_LENGTH, message = "Comment content must not exceed " + CommentConstants.CONTENT_MAX_LENGTH + " characters")
     String content,
 
-    UUID parentCommentId
+    @Nullable UUID parentCommentId
 ) {}

@@ -27,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -127,7 +126,7 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
 
     private boolean searchableCompositionChanged(Planner planner) {
         return !sameDocument(planner.getContentJson(), planner.getLoadedContentJson())
-                || !orEmpty(planner.getSelectedKeywords()).equals(orEmpty(planner.getLoadedKeywords()))
+                || !planner.getSelectedKeywords().equals(planner.getLoadedKeywords())
                 || !Objects.equals(planner.getCategory(), planner.getLoadedCategory());
     }
 
@@ -142,10 +141,6 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
         }
     }
 
-    private static Set<String> orEmpty(Set<String> keywords) {
-        return keywords != null ? keywords : Set.of();
-    }
-
     @Transactional
     public void add(Planner planner) {
         boolean recommended = RecommendedSql.isRecommended(
@@ -158,7 +153,7 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
                 .category(planner.getCategory())
                 .title(planner.getTitle())
                 .selectedKeywords(planner.getSelectedKeywords())
-                .firstPublishedAt(planner.getFirstPublishedAt())
+                .firstPublishedAt(planner.requireFirstPublishedAt())
                 .recommended(recommended)
                 .build());
         log.debug("Catalog row added for planner {}", planner.getId());

@@ -18,7 +18,8 @@ import org.danteplanner.backend.support.RecordingRefreshRotation.Rotation;
 import org.danteplanner.backend.support.RecordingTokenBlacklist;
 import org.danteplanner.backend.support.TestJwt;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
-import org.danteplanner.backend.auth.token.RotationResult;
+import org.danteplanner.backend.auth.token.RefreshLineage;
+import org.danteplanner.backend.auth.token.RotationOutcome;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.shared.util.CookieConstants;
@@ -91,11 +92,11 @@ class JwtAuthenticationFilterLineageTest {
     }
 
     private String familyOf(String refreshToken) {
-        return jwt.service().validateRefreshToken(refreshToken).familyId();
+        return TestJwt.familyIdOf(jwt.service().validateRefreshToken(refreshToken));
     }
 
-    private RotationResult.Rotated rotateAhead(RefreshRotationService rotation, String refreshToken) {
-        return (RotationResult.Rotated) rotation.rotate(refreshToken);
+    private RotationOutcome.Rotated rotateAhead(RefreshRotationService rotation, String refreshToken) {
+        return (RotationOutcome.Rotated) rotation.rotate(refreshToken);
     }
 
     @Test
@@ -115,9 +116,9 @@ class JwtAuthenticationFilterLineageTest {
         assertAccessCookieFor(userId);
         Cookie refreshCookie = assertRefreshCookieFor(userId);
         assertThat(refreshCookie.getValue()).isNotEqualTo(refreshToken);
-        assertThat(jwt.service().validateRefreshToken(refreshCookie.getValue()).parentJti())
+        assertThat(jwt.service().validateRefreshToken(refreshCookie.getValue()).lineage())
                 .as("the legacy path mints a new family rather than rotating the presented one")
-                .isNull();
+                .isInstanceOf(RefreshLineage.Root.class);
         jwt.clock().advance(Duration.ofSeconds(5));
         assertThat(tokenBlacklist.blacklistedTokens()).containsExactly(refreshToken);
         assertThat(refreshRotation.calls()).isEmpty();
@@ -159,7 +160,7 @@ class JwtAuthenticationFilterLineageTest {
         filter.doFilterInternal(request, response, filterChain);
 
         assertThat(refreshRotation.rotations().getLast())
-                .isEqualTo(new Rotation(refreshToken, new RotationResult.Revoked(familyOf(refreshToken))));
+                .isEqualTo(new Rotation(refreshToken, new RotationOutcome.Revoked(familyOf(refreshToken))));
         assertSessionCleared();
         assertThat(filterChain.getRequest()).isSameAs(request);
         assertThat(filterChain.getResponse()).isSameAs(response);
@@ -181,7 +182,7 @@ class JwtAuthenticationFilterLineageTest {
         filter.doFilterInternal(request, response, filterChain);
 
         assertThat(noReuseWindow.rotations().getLast())
-                .isEqualTo(new Rotation(superseded, new RotationResult.Revoked(familyOf(login))));
+                .isEqualTo(new Rotation(superseded, new RotationOutcome.Revoked(familyOf(login))));
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         assertSessionCleared();
     }
@@ -199,7 +200,7 @@ class JwtAuthenticationFilterLineageTest {
         filter.doFilterInternal(request, response, filterChain);
 
         assertThat(refreshRotation.rotations()).containsExactly(new Rotation(refreshToken,
-                new RotationResult.Rejected(RotationResult.Rejected.Reason.REVOKED_FAMILY)));
+                new RotationOutcome.Rejected(RotationOutcome.Rejected.Reason.REVOKED_FAMILY)));
         assertSessionCleared();
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
     }
@@ -236,7 +237,7 @@ class JwtAuthenticationFilterLineageTest {
         filter.doFilterInternal(request, response, filterChain);
 
         assertThat(legacyAdmitOff.rotations()).containsExactly(new Rotation(refreshToken,
-                new RotationResult.Rejected(RotationResult.Rejected.Reason.INVALID)));
+                new RotationOutcome.Rejected(RotationOutcome.Rejected.Reason.INVALID)));
         assertSessionCleared();
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
     }
@@ -304,7 +305,7 @@ class JwtAuthenticationFilterLineageTest {
     private String rotatedTo(String presented) {
         Rotation rotation = refreshRotation.rotations().getLast();
         assertThat(rotation.presented()).isEqualTo(presented);
-        return ((RotationResult.Rotated) rotation.result()).newRefreshJwt();
+        return ((RotationOutcome.Rotated) rotation.result()).newRefreshJwt();
     }
 
     private Cookie assertAccessCookieFor(Long userId) {

@@ -14,6 +14,7 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.notification.api.NotificationType;
 
 import java.time.Instant;
@@ -31,6 +32,8 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Notification {
+
+    private static final int MAX_TEXT_LENGTH = 100;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,66 +59,65 @@ public class Notification {
     private Instant createdAt;
 
     @Column(name = "read_at")
-    private Instant readAt;
+    private @Nullable Instant readAt;
 
     @Column(name = "deleted_at")
-    private Instant deletedAt;
+    private @Nullable Instant deletedAt;
 
     @Column(name = "planner_id", columnDefinition = "BINARY(16)")
-    private UUID plannerId;
+    private @Nullable UUID plannerId;
 
     @Column(name = "planner_title", length = 100)
-    private String plannerTitle;
+    private @Nullable String plannerTitle;
 
     @Column(name = "comment_snippet", length = 100)
-    private String commentSnippet;
+    private @Nullable String commentSnippet;
 
     @Column(name = "comment_public_id", columnDefinition = "BINARY(16)")
-    private UUID commentPublicId;
+    private @Nullable UUID commentPublicId;
+
+    public sealed interface Content {
+
+        record Plain() implements Content {
+        }
+
+        record PlannerScoped(UUID plannerId, String plannerTitle) implements Content {
+        }
+
+        record CommentScoped(UUID plannerId, String plannerTitle, String snippet, UUID commentPublicId)
+                implements Content {
+        }
+    }
 
     public Notification(Long userId, String contentId, NotificationType notificationType) {
+        this(userId, contentId, notificationType, new Content.Plain());
+    }
+
+    public Notification(Long userId, String contentId, NotificationType notificationType, Content content) {
         this.userId = userId;
         this.contentId = contentId;
         this.notificationType = notificationType;
         this.read = false;
-    }
-
-    public Notification(
-            Long userId,
-            String contentId,
-            NotificationType notificationType,
-            UUID plannerId,
-            String plannerTitle,
-            String commentSnippet,
-            UUID commentPublicId
-    ) {
-        this.userId = userId;
-        this.contentId = contentId;
-        this.notificationType = notificationType;
-        this.plannerId = plannerId;
-        this.plannerTitle = truncate(plannerTitle, 100);
-        this.commentSnippet = truncate(stripHtml(commentSnippet), 100);
-        this.commentPublicId = commentPublicId;
-        this.read = false;
-    }
-
-    public static Notification plannerScoped(
-            Long userId,
-            String contentId,
-            NotificationType notificationType,
-            UUID plannerId,
-            String plannerTitle
-    ) {
-        return new Notification(userId, contentId, notificationType, plannerId, plannerTitle, null, null);
+        switch (content) {
+            case Content.Plain plain -> { }
+            case Content.PlannerScoped planner -> {
+                this.plannerId = planner.plannerId();
+                this.plannerTitle = truncate(planner.plannerTitle(), MAX_TEXT_LENGTH);
+            }
+            case Content.CommentScoped comment -> {
+                this.plannerId = comment.plannerId();
+                this.plannerTitle = truncate(comment.plannerTitle(), MAX_TEXT_LENGTH);
+                this.commentSnippet = truncate(stripHtml(comment.snippet()), MAX_TEXT_LENGTH);
+                this.commentPublicId = comment.commentPublicId();
+            }
+        }
     }
 
     private static String truncate(String s, int maxLen) {
-        if (s == null) return null;
         return s.length() > maxLen ? s.substring(0, maxLen - 3) + "..." : s;
     }
 
     private static String stripHtml(String s) {
-        if (s == null) return null;
         return s.replaceAll("<[^>]*>", "").trim();
     }
 

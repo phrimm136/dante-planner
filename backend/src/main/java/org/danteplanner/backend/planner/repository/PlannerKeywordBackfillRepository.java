@@ -35,18 +35,20 @@ public class PlannerKeywordBackfillRepository {
             LEFT JOIN planner_publication pub ON pub.planner_id = c.planner_id
             """;
 
+    private static final String PAGE_ORDER = "ORDER BY c.planner_id LIMIT ?";
+
     private static final RowMapper<KeywordBackfillRow> KEYWORD_ROW_MAPPER = (rs, rowNum) -> new KeywordBackfillRow(
             UUID.fromString(rs.getString("planner_id")),
             rs.getString("content_keywords"), rs.getString("column_keywords"),
             rs.getBoolean("catalogued"), rs.getString("catalog_keywords"), rs.getBoolean("published"));
 
+    public List<KeywordBackfillRow> firstKeywordRows(int limit) {
+        return jdbc.query(KEYWORD_ROW + PAGE_ORDER, KEYWORD_ROW_MAPPER, limit);
+    }
+
     public List<KeywordBackfillRow> keywordRowsAfter(UUID after, int limit) {
-        String afterId = after == null ? null : after.toString();
-        return jdbc.query(KEYWORD_ROW + """
-                WHERE ? IS NULL OR c.planner_id > UUID_TO_BIN(?)
-                ORDER BY c.planner_id
-                LIMIT ?
-                """, KEYWORD_ROW_MAPPER, afterId, afterId, limit);
+        return jdbc.query(KEYWORD_ROW + "WHERE c.planner_id > UUID_TO_BIN(?) " + PAGE_ORDER, KEYWORD_ROW_MAPPER,
+                after.toString(), limit);
     }
 
     public Optional<KeywordBackfillRow> keywordRowOf(UUID plannerId) {
@@ -62,5 +64,15 @@ public class PlannerKeywordBackfillRepository {
     public int refreshCatalogKeywords(UUID plannerId, String keywords) {
         return jdbc.update("UPDATE planner_catalog SET selected_keywords = ? WHERE planner_id = UUID_TO_BIN(?)",
                 keywords, plannerId.toString());
+    }
+
+    public int clearContentKeywords(UUID plannerId) {
+        return jdbc.update("UPDATE planner_content SET selected_keywords = NULL WHERE planner_id = UUID_TO_BIN(?)",
+                plannerId.toString());
+    }
+
+    public int clearCatalogKeywords(UUID plannerId) {
+        return jdbc.update("UPDATE planner_catalog SET selected_keywords = NULL WHERE planner_id = UUID_TO_BIN(?)",
+                plannerId.toString());
     }
 }

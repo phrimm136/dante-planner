@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
+import org.danteplanner.backend.shared.failure.CommandOutcome;
 import org.danteplanner.backend.shared.security.AuthDegradationResponder;
 import org.danteplanner.backend.shared.security.ChainAuthenticationFilter;
 import org.danteplanner.backend.shared.security.CustomAuthenticationEntryPoint;
@@ -15,7 +16,7 @@ import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.auth.exception.SessionRevokedException;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
-import org.danteplanner.backend.auth.token.RotationResult;
+import org.danteplanner.backend.auth.token.RotationOutcome;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.auth.token.TokenGenerator;
@@ -120,16 +121,28 @@ public class JwtAuthenticationFilter extends ChainAuthenticationFilter {
         return outcome != RefreshOutcome.OUTAGE_REPORTED;
     }
 
-    private enum RefreshOutcome {
+    private enum RefreshOutcome implements CommandOutcome {
         AUTHENTICATED,
         GUEST,
         OUTAGE_REPORTED
     }
 
+    private enum RefreshAttempt {
+        REFRESHED,
+        DECLINED;
+
+        static RefreshAttempt of(boolean refreshed) {
+            return refreshed ? REFRESHED : DECLINED;
+        }
+    }
+
     private RefreshOutcome refreshOrReportOutage(
             HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
-            return attemptAutoRefresh(request, response) ? RefreshOutcome.AUTHENTICATED : RefreshOutcome.GUEST;
+            return switch (RefreshAttempt.of(attemptAutoRefresh(request, response))) {
+                case REFRESHED -> RefreshOutcome.AUTHENTICATED;
+                case DECLINED -> RefreshOutcome.GUEST;
+            };
         } catch (RedisConnectionFailureException | QueryTimeoutException e) {
             degradationResponder.writeAuthUnavailable(request, response);
             return RefreshOutcome.OUTAGE_REPORTED;
@@ -207,7 +220,7 @@ public class JwtAuthenticationFilter extends ChainAuthenticationFilter {
     ) {
         if (lineageRotationFlag.isEnabled()) {
             try {
-                RotationResult.Rotated rotated = refreshRotationService.rotate(refreshToken).orThrow();
+                RotationOutcome.Rotated rotated = refreshRotationService.rotate(refreshToken).orThrow();
                 cookieUtils.setCookie(response, CookieConstants.REFRESH_TOKEN, rotated.newRefreshJwt(),
                         jwtProperties.getRefreshTokenExpirySeconds());
                 return true;

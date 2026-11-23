@@ -10,25 +10,25 @@ public interface FloorReferenceData {
 
     boolean isGiftAffordableForThemePack(String giftId, String themePackId);
 
-    static FloorReferenceData of(GameDataRegistry registry) {
-        return new Registry(registry);
+    static FloorReferenceData of(GameDataRegistry.Snapshot data) {
+        return new Registry(data);
     }
 
-    record Registry(GameDataRegistry registry) implements FloorReferenceData {
+    record Registry(GameDataRegistry.Snapshot data) implements FloorReferenceData {
 
         @Override
         public boolean hasThemePack(String themePackId) {
-            return registry.hasThemePack(themePackId);
+            return data.hasThemePack(themePackId);
         }
 
         @Override
         public boolean hasEgoGift(String giftId) {
-            return registry.hasEgoGift(giftId);
+            return data.hasEgoGift(giftId);
         }
 
         @Override
         public boolean isGiftAffordableForThemePack(String giftId, String themePackId) {
-            return registry.isGiftAffordableForThemePack(giftId, themePackId);
+            return data.isGiftAffordableForThemePack(giftId, themePackId);
         }
     }
 }

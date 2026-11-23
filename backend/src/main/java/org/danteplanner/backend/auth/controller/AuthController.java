@@ -2,8 +2,12 @@ package org.danteplanner.backend.auth.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
+import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.danteplanner.backend.user.api.SessionEndHandler.SessionToken;
 import org.danteplanner.backend.shared.restriction.RestrictionExempt;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.LoginRedirect;
@@ -114,7 +118,7 @@ public class AuthController {
             AuthResult result = authService.authenticateWithOAuth(
                     "google",
                     code,
-                    oAuthProperties.getGoogle().getRedirectUri(),
+                    oAuthProperties.google().redirectUri(),
                     transaction.get().codeVerifier()
             );
 
@@ -145,12 +149,11 @@ public class AuthController {
         }
 
         Object principal = auth.getPrincipal();
-        if (!(principal instanceof Long)) {
-            log.warn("Unexpected principal type: {}", principal.getClass().getName());
+        if (!(principal instanceof Long userId)) {
+            log.warn("Unexpected principal type: {}", principal == null ? "none" : principal.getClass().getName());
             return ResponseEntity.noContent().build();
         }
 
-        Long userId = (Long) principal;
         return ResponseEntity.ok(authService.currentUser(userId));
     }
 
@@ -158,12 +161,7 @@ public class AuthController {
     @RestrictionExempt(reason = "authentication")
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
-        String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)
-                .orElse(null);
-        String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)
-                .orElse(null);
-
-        sessionRevocationService.logout(accessToken, refreshToken);
+        sessionRevocationService.logout(sessionTokens(request));
 
         cookieUtils.clearAuthCookies(response);
 
@@ -173,17 +171,22 @@ public class AuthController {
     @RateLimitExempt
     @RestrictionExempt(reason = "authentication")
     @PostMapping("/logout-all")
-    public ResponseEntity<Void> logoutAll(HttpServletRequest request, HttpServletResponse response) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = (Long) auth.getPrincipal();
-
-        String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)
-                .orElse(null);
-        sessionRevocationService.logoutAll(userId, accessToken);
+    public ResponseEntity<Void> logoutAll(@AuthenticationPrincipal Long userId, HttpServletRequest request,
+            HttpServletResponse response) {
+        sessionRevocationService.logoutAll(userId, sessionTokens(request));
 
         cookieUtils.clearAuthCookies(response);
 
         return ResponseEntity.noContent().build();
+    }
+
+    private List<SessionToken> sessionTokens(HttpServletRequest request) {
+        List<SessionToken> tokens = new ArrayList<>();
+        cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)
+                .ifPresent(token -> tokens.add(new SessionToken.Access(token)));
+        cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)
+                .ifPresent(token -> tokens.add(new SessionToken.Refresh(token)));
+        return List.copyOf(tokens);
     }
 
     /**

@@ -21,28 +21,59 @@ public final class ConstraintViolationClassifier {
     private ConstraintViolationClassifier() {
     }
 
-    public static ConstraintViolationOutcome classify(DataIntegrityViolationException ex) {
-        ConstraintViolationException hibernateViolation = causeOfType(ex, ConstraintViolationException.class);
+    public static ConstraintViolationKind classify(DataIntegrityViolationException ex) {
+        Cause<ConstraintViolationException> hibernateViolation = causeOfType(ex, ConstraintViolationException.class);
         if (!isUniquenessViolation(ex, hibernateViolation)) {
-            return ConstraintViolationOutcome.INVALID_DATA;
+            return ConstraintViolationKind.INVALID_DATA;
         }
-        String constraintName = hibernateViolation == null ? null : hibernateViolation.getConstraintName();
-        return KnownConstraint.matching(constraintName)
-                .map(KnownConstraint::outcome)
-                .orElse(ConstraintViolationOutcome.UNEXPECTED_CONFLICT);
+        return switch (hibernateViolation) {
+            case Cause.Found<ConstraintViolationException> found -> switch (ConstraintName.of(found.cause())) {
+                case ConstraintName.Named named -> KnownConstraint.matching(named.qualified())
+                        .map(KnownConstraint::outcome)
+                        .orElse(ConstraintViolationKind.UNEXPECTED_CONFLICT);
+                case ConstraintName.Unnamed unnamed -> ConstraintViolationKind.UNEXPECTED_CONFLICT;
+            };
+            case Cause.Absent<ConstraintViolationException> absent -> ConstraintViolationKind.UNEXPECTED_CONFLICT;
+        };
+    }
+
+    public sealed interface ConstraintName {
+
+        record Named(String qualified) implements ConstraintName {
+        }
+
+        record Unnamed() implements ConstraintName {
+        }
+
+        static ConstraintName of(ConstraintViolationException violation) {
+            String name = violation.getConstraintName();
+            return name == null ? new Unnamed() : new Named(name);
+        }
+    }
+
+    private sealed interface Cause<T> {
+
+        record Found<T>(T cause) implements Cause<T> {
+        }
+
+        record Absent<T>() implements Cause<T> {
+        }
     }
 
     private static boolean isUniquenessViolation(
-            DataIntegrityViolationException ex, ConstraintViolationException hibernateViolation) {
+            DataIntegrityViolationException ex, Cause<ConstraintViolationException> hibernateViolation) {
         if (ex instanceof DuplicateKeyException) {
             return true;
         }
-        if (hibernateViolation != null
-                && hibernateViolation.getKind() == ConstraintViolationException.ConstraintKind.UNIQUE) {
-            return true;
-        }
-        SQLException sqlException = causeOfType(ex, SQLException.class);
-        return sqlException != null && indicatesDuplicateKey(sqlException);
+        boolean uniqueKind = switch (hibernateViolation) {
+            case Cause.Found<ConstraintViolationException> found ->
+                    found.cause().getKind() == ConstraintViolationException.ConstraintKind.UNIQUE;
+            case Cause.Absent<ConstraintViolationException> absent -> false;
+        };
+        return uniqueKind || switch (causeOfType(ex, SQLException.class)) {
+            case Cause.Found<SQLException> found -> indicatesDuplicateKey(found.cause());
+            case Cause.Absent<SQLException> absent -> false;
+        };
     }
 
     private static boolean indicatesDuplicateKey(SQLException ex) {
@@ -52,14 +83,14 @@ public final class ConstraintViolationClassifier {
                         && ex.getErrorCode() == MYSQL_DUPLICATE_ENTRY_ERROR_CODE);
     }
 
-    private static <T extends Throwable> T causeOfType(Throwable ex, Class<T> type) {
+    private static <T extends Throwable> Cause<T> causeOfType(Throwable ex, Class<T> type) {
         Throwable current = ex;
         for (int depth = 0; current != null && depth < MAX_CAUSE_DEPTH; depth++) {
             if (type.isInstance(current)) {
-                return type.cast(current);
+                return new Cause.Found<>(type.cast(current));
             }
             current = current.getCause();
         }
-        return null;
+        return new Cause.Absent<>();
     }
 }

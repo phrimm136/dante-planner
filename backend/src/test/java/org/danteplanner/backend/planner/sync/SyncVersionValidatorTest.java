@@ -32,7 +32,7 @@ class SyncVersionValidatorTest {
     private final SyncVersionValidator validator = new SyncVersionValidator();
 
     private static PlannerContent storedRow() {
-        return StoredPlannerContent.holding(PlannerContent.builder()
+        return StoredPlannerContent.holding(StoredPlannerContent.builder()
                 .title("Stored Title")
                 .status(PlannerStatus.SAVED)
                 .category("5F")
@@ -73,34 +73,34 @@ class SyncVersionValidatorTest {
 
     @Test
     void arbitrate_WhenVersionsAgree_Writes() {
-        assertThat(validator.arbitrate(false, 4L, 4L, divergentChange()))
+        assertThat(validator.arbitrate(false, new PlannerConflictException.Requested.Version(4L), 4L, divergentChange()))
                 .isEqualTo(WriteArbitration.WRITE);
     }
 
     // force-still-bypasses
     @Test
     void arbitrate_WhenForcedWithAStaleVersion_Writes() {
-        assertThat(validator.arbitrate(true, 4L, 5L, divergentChange()))
+        assertThat(validator.arbitrate(true, new PlannerConflictException.Requested.Version(4L), 5L, divergentChange()))
                 .isEqualTo(WriteArbitration.WRITE);
     }
 
     @Test
     void arbitrate_WhenForcedWithoutAVersion_Writes() {
-        assertThat(validator.arbitrate(true, null, 5L, divergentChange()))
+        assertThat(validator.arbitrate(true, new PlannerConflictException.Requested.None(), 5L, divergentChange()))
                 .isEqualTo(WriteArbitration.WRITE);
     }
 
     // stale-identical-save-acks-current-version
     @Test
     void arbitrate_WhenStaleAndNothingWouldChange_AcknowledgesWithoutWriting() {
-        assertThat(validator.arbitrate(false, 4L, 5L, identicalChange()))
+        assertThat(validator.arbitrate(false, new PlannerConflictException.Requested.Version(4L), 5L, identicalChange()))
                 .isEqualTo(WriteArbitration.ACK_NO_OP);
     }
 
     // stale-different-content-conflicts
     @Test
     void arbitrate_WhenStaleAndAFieldWouldChange_Throws() {
-        assertThatThrownBy(() -> validator.arbitrate(false, 4L, 5L, divergentChange()))
+        assertThatThrownBy(() -> validator.arbitrate(false, new PlannerConflictException.Requested.Version(4L), 5L, divergentChange()))
                 .isInstanceOf(PlannerConflictException.class)
                 .extracting(conflict -> ((PlannerConflictException) conflict).getActualVersion())
                 .isEqualTo(5L);
@@ -109,7 +109,7 @@ class SyncVersionValidatorTest {
     // no-version-still-conflicts
     @Test
     void arbitrate_WhenNoVersionIsNamed_ThrowsWithoutArbitrating() {
-        assertRejected(() -> validator.arbitrate(false, null, 5L, identicalChange()))
+        assertRejected(() -> validator.arbitrate(false, new PlannerConflictException.Requested.None(), 5L, identicalChange()))
                 .withCode("SYNC_CONFLICT")
                 .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Sync version conflict: expected null but found 5"));
     }
@@ -117,7 +117,7 @@ class SyncVersionValidatorTest {
     // unparseable-content-falls-through-to-conflict
     @Test
     void arbitrate_WhenStaleAndTheStoredDocumentIsUnparseable_Throws() {
-        PlannerContent unparseable = StoredPlannerContent.holding(PlannerContent.builder()
+        PlannerContent unparseable = StoredPlannerContent.holding(StoredPlannerContent.builder()
                 .title("Stored Title")
                 .status(PlannerStatus.SAVED)
                 .category("5F")
@@ -125,7 +125,7 @@ class SyncVersionValidatorTest {
                 .gameContentVersion(6)
                 .build(), "{\"equipment\":");
 
-        assertRejected(() -> validator.arbitrate(false, 4L, 5L,
+        assertRejected(() -> validator.arbitrate(false, new PlannerConflictException.Requested.Version(4L), 5L,
                 PlannerChange.between(unparseable, identicalWrite(), MAPPER)))
                 .withCode("SYNC_CONFLICT")
                 .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Sync version conflict: expected 4 but found 5"));

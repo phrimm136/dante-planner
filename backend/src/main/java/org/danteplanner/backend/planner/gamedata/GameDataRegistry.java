@@ -35,7 +35,27 @@ public class GameDataRegistry {
         }
     }
 
-    private record Snapshot(
+    private sealed interface Held {
+
+        record Unloaded() implements Held {
+        }
+    }
+
+    public sealed interface Lookup<T> {
+
+        record Known<T>(T value) implements Lookup<T> {
+        }
+
+        record Unknown<T>() implements Lookup<T> {
+        }
+
+        static <T> Lookup<T> in(Map<String, T> values, String key) {
+            T value = values.get(key);
+            return value == null ? new Unknown<>() : new Known<>(value);
+        }
+    }
+
+    public record Snapshot(
             Set<String> identityIds,
             Set<String> egoIds,
             Set<String> egoGiftIds,
@@ -45,10 +65,7 @@ public class GameDataRegistry {
             Map<String, Integer> egoMaxThreadspin,
             PlannerIdMigrations idMigrations,
             PlannerVersions plannerVersions,
-            FloorRuleTable floorRules) {
-
-        private static final Snapshot EMPTY = new Snapshot(
-                Set.of(), Set.of(), Set.of(), Set.of(), Map.of(), Map.of(), Map.of(), PlannerIdMigrations.EMPTY, null, null);
+            FloorRuleTable floorRules) implements Held {
 
         private boolean isPopulated() {
             return !identityIds.isEmpty()
@@ -63,6 +80,70 @@ public class GameDataRegistry {
         private boolean hasStartBuffInAnySeason(String id) {
             return seasons.values().stream().anyMatch(season -> season.startBuffIds().contains(id));
         }
+
+        public boolean hasIdentity(String id) {
+            return identityIds().contains(id);
+        }
+
+        public boolean hasEgo(String id) {
+            return egoIds().contains(id);
+        }
+
+        public Lookup<Integer> maxThreadspinOf(String id) {
+            return Lookup.in(egoMaxThreadspin(), id);
+        }
+
+        public boolean hasEgoGift(String id) {
+            String baseId = stripGiftEnhancement(id);
+            return egoGiftIds().contains(baseId);
+        }
+
+        public boolean hasThemePack(String id) {
+            return themePackIds().contains(id);
+        }
+
+        public boolean hasSeason(int version) {
+            return seasons().containsKey(version);
+        }
+
+        public Set<String> startBuffIds(int version) {
+            Season season = seasons().get(version);
+            return season == null ? Set.of() : season.startBuffIds();
+        }
+
+        public int identityMaxLevel(int version) {
+            Season season = seasons().get(version);
+            if (season == null) {
+                throw new IllegalArgumentException("No game data for season " + version);
+            }
+            return season.identityMaxLevel();
+        }
+
+        public Lookup<Set<String>> startGiftPool(int version, String keyword) {
+            Season season = seasons().get(version);
+            return season == null ? new Lookup.Unknown<>() : Lookup.in(season.startGiftPools(), keyword);
+        }
+
+        public boolean hasStartGiftKeyword(int version, String keyword) {
+            Season season = seasons().get(version);
+            return season != null && season.startGiftPools().containsKey(keyword);
+        }
+
+        public boolean isGiftAffordableForThemePack(String giftId, String themePackId) {
+            String baseId = stripGiftEnhancement(giftId);
+            List<String> themePacks = egoGiftThemePackMap().get(baseId);
+
+            if (themePacks == null) {
+                return false;
+            }
+
+            return themePacks.isEmpty() || themePacks.contains(themePackId);
+        }
+
+        private static String stripGiftEnhancement(String id) {
+            Matcher matcher = GIFT_ENHANCEMENT_PATTERN.matcher(id);
+            return matcher.matches() ? matcher.group(1) : id;
+        }
     }
 
     private final GameDataLoader loader;
@@ -75,7 +156,7 @@ public class GameDataRegistry {
         this.dataPath = dataPath;
     }
 
-    private volatile Snapshot snapshot = Snapshot.EMPTY;
+    private volatile Held held = new Held.Unloaded();
 
     @PostConstruct
     public void init() {
@@ -126,7 +207,7 @@ public class GameDataRegistry {
 
         requireConsistentMigrations(loaded);
 
-        snapshot = loaded;
+        held = loaded;
 
         log.info("Game data loaded - identities: {}, egos: {}, gifts: {}, themePacks: {}, seasons: {}, giftThemePacks: {}, egoMaxThreadspin: {}, plannerVersions: {}",
                 loaded.identityIds().size(), loaded.egoIds().size(), loaded.egoGiftIds().size(),
@@ -149,83 +230,32 @@ public class GameDataRegistry {
         }
     }
 
-    public boolean hasIdentity(String id) {
-        return snapshot.identityIds().contains(id);
-    }
-
-    public boolean hasEgo(String id) {
-        return snapshot.egoIds().contains(id);
-    }
-
-    public Integer getEgoMaxThreadspin(String id) {
-        return snapshot.egoMaxThreadspin().get(id);
-    }
-
-    public boolean hasEgoGift(String id) {
-        String baseId = stripGiftEnhancement(id);
-        return snapshot.egoGiftIds().contains(baseId);
-    }
-
-    public boolean hasThemePack(String id) {
-        return snapshot.themePackIds().contains(id);
-    }
-
     public boolean hasSeason(int version) {
-        return snapshot.seasons().containsKey(version);
+        return switch (held) {
+            case Snapshot snapshot -> snapshot.hasSeason(version);
+            case Held.Unloaded unloaded -> false;
+        };
     }
 
     public PlannerVersions plannerVersions() {
-        return snapshot.plannerVersions();
+        return snapshot().plannerVersions();
     }
 
     public FloorRuleTable floorRules() {
-        return snapshot.floorRules();
+        return snapshot().floorRules();
     }
 
-    public Set<String> startBuffIds(int version) {
-        Season season = snapshot.seasons().get(version);
-        return season == null ? Set.of() : season.startBuffIds();
-    }
-
-    public int identityMaxLevel(int version) {
-        Season season = snapshot.seasons().get(version);
-        if (season == null) {
-            throw new IllegalArgumentException("No game data for season " + version);
-        }
-        return season.identityMaxLevel();
-    }
-
-    public Set<String> getStartGiftPool(int version, String keyword) {
-        Season season = snapshot.seasons().get(version);
-        return season == null ? null : season.startGiftPools().get(keyword);
-    }
-
-    public boolean hasStartGiftKeyword(int version, String keyword) {
-        Season season = snapshot.seasons().get(version);
-        return season != null && season.startGiftPools().containsKey(keyword);
-    }
-
-    public PlannerIdMigrations idMigrations() {
-        return snapshot.idMigrations();
-    }
-
-    public boolean isGiftAffordableForThemePack(String giftId, String themePackId) {
-        String baseId = stripGiftEnhancement(giftId);
-        List<String> themePacks = snapshot.egoGiftThemePackMap().get(baseId);
-
-        if (themePacks == null) {
-            return false;
-        }
-
-        return themePacks.isEmpty() || themePacks.contains(themePackId);
+    public Snapshot snapshot() {
+        return switch (held) {
+            case Snapshot snapshot -> snapshot;
+            case Held.Unloaded unloaded -> throw new IllegalStateException("game data is not loaded");
+        };
     }
 
     public boolean isPopulated() {
-        return snapshot.isPopulated();
-    }
-
-    private String stripGiftEnhancement(String id) {
-        Matcher matcher = GIFT_ENHANCEMENT_PATTERN.matcher(id);
-        return matcher.matches() ? matcher.group(1) : id;
+        return switch (held) {
+            case Snapshot snapshot -> snapshot.isPopulated();
+            case Held.Unloaded unloaded -> false;
+        };
     }
 }

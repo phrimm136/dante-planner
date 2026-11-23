@@ -13,7 +13,9 @@ public class OAuthException extends DomainException {
     private final String operation;
 
     public OAuthException(String provider, String operation, String message) {
-        this(provider, operation, message, null);
+        super(ErrorKind.INVALID_REQUEST, ERROR_CODE, composed(provider, operation, message));
+        this.provider = provider;
+        this.operation = operation;
     }
 
     public OAuthException(String provider, String operation, String message, Throwable cause) {

@@ -5,7 +5,6 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -854,8 +853,7 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
         writeCapture.begin();
         FreshnessDeclarations.begin();
         try {
-            User created = userService.findOrCreateUser("google", Map.of(
-                    "id", "freshness-read-describe-" + UUID.randomUUID(), "email", email));
+            User created = userService.findOrCreateUser("google", "freshness-read-describe-" + UUID.randomUUID(), email);
             String gtid = writeCapture.takeCapturedGtid().orElseThrow();
             markerStore.raise(FreshnessDeclarations.declared(), gtid);
             return created;

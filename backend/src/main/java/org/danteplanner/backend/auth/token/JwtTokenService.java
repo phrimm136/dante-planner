@@ -87,11 +87,15 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
 
     @Override
     public String generateRefreshToken(Long userId) {
-        return generateRefreshToken(userId, UUID.randomUUID().toString(), null);
+        return buildRefreshToken(userId, UUID.randomUUID().toString(), Map.of());
     }
 
     @Override
     public String generateRefreshToken(Long userId, String familyId, String parentJti) {
+        return buildRefreshToken(userId, familyId, parentJti != null ? Map.of(CLAIM_PARENT_JTI, parentJti) : Map.of());
+    }
+
+    private String buildRefreshToken(Long userId, String familyId, Map<String, Object> parentClaim) {
         Assert.notNull(userId, "userId must not be null");
         Assert.notNull(familyId, "familyId must not be null");
 
@@ -99,9 +103,7 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
         claims.put(CLAIM_TYPE, TokenClaims.TYPE_REFRESH);
         claims.put(CLAIM_JTI, UUID.randomUUID().toString());
         claims.put(CLAIM_FAMILY_ID, familyId);
-        if (parentJti != null) {
-            claims.put(CLAIM_PARENT_JTI, parentJti);
-        }
+        claims.putAll(parentClaim);
 
         return buildToken(claims, userId.toString(), jwtProperties.getRefreshTokenExpiry());
     }
@@ -139,7 +141,7 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
         String familyId = claims.get(CLAIM_FAMILY_ID, String.class);
         String parentJti = claims.get(CLAIM_PARENT_JTI, String.class);
 
-        UserRole role = null;
+        UserRole role = UserRole.NORMAL;
         if (roleValue != null && UserRole.isValid(roleValue)) {
             role = UserRole.fromValue(roleValue);
         }
@@ -150,9 +152,7 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
                 role,
                 claims.getIssuedAt(),
                 claims.getExpiration(),
-                jti,
-                familyId,
-                parentJti
+                RefreshLineage.of(jti, familyId, parentJti, claims.getIssuedAt())
         );
     }
 

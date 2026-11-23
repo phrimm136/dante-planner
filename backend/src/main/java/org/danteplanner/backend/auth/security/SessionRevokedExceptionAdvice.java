@@ -2,6 +2,7 @@ package org.danteplanner.backend.auth.security;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.auth.exception.SessionRevokedException;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.util.CookieUtils;
@@ -21,7 +22,7 @@ public class SessionRevokedExceptionAdvice {
     private final ApiExceptionHandler apiExceptionHandler;
 
     @ExceptionHandler(SessionRevokedException.class)
-    public ResponseEntity<Object> handleSessionRevoked(
+    public @Nullable ResponseEntity<Object> handleSessionRevoked(
             SessionRevokedException ex, HttpServletResponse response, WebRequest request) {
         cookieUtils.clearAuthCookies(response);
         return apiExceptionHandler.respond(ex, ex.getBody(), ex.getHeaders(), request);

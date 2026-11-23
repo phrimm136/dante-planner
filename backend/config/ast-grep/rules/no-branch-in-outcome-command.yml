@@ -1,0 +1,16 @@
+id: no-branch-in-outcome-command
+language: Java
+severity: error
+message: 'A command returning an *Outcome branches only by an exhaustive switch over a decision value; move the condition into a pure method returning a sealed type or enum and switch on it here.'
+files:
+  - src/main/java/**/*.java
+rule:
+  any:
+    - kind: if_statement
+    - kind: ternary_expression
+  inside:
+    kind: method_declaration
+    stopBy: end
+    has:
+      field: type
+      regex: Outcome$

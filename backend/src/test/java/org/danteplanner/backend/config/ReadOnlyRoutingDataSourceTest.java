@@ -91,9 +91,9 @@ class ReadOnlyRoutingDataSourceTest {
     }
 
     private ReadOnlyRoutingDataSource routing(DataSource primaryTarget, ReadSourceSelector selector) {
-        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(guard(false, true));
+        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(
+                guard(false, true), selector.authorityReads());
         routing.setTargetDataSources(Map.of(RoutingKey.PRIMARY, primaryTarget, RoutingKey.REPLICA, selector));
-        routing.setAuthorityReadSource(selector.authorityReads());
         routing.afterPropertiesSet();
         return routing;
     }
@@ -140,7 +140,7 @@ class ReadOnlyRoutingDataSourceTest {
     void determineCurrentLookupKey_WhenReadOnlyTransaction_ReturnsReplica() {
         TransactionSynchronizationManager.setCurrentTransactionReadOnly(true);
 
-        Object key = new ReadOnlyRoutingDataSource(guard(true, true)).determineCurrentLookupKey();
+        Object key = new ReadOnlyRoutingDataSource(guard(true, true), null).determineCurrentLookupKey();
 
         assertThat(key).isEqualTo(RoutingKey.REPLICA);
     }
@@ -149,7 +149,7 @@ class ReadOnlyRoutingDataSourceTest {
     void determineCurrentLookupKey_WhenWriteTransaction_ReturnsPrimary() {
         TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
 
-        Object key = new ReadOnlyRoutingDataSource(guard(false, true)).determineCurrentLookupKey();
+        Object key = new ReadOnlyRoutingDataSource(guard(false, true), null).determineCurrentLookupKey();
 
         assertThat(key).isEqualTo(RoutingKey.PRIMARY);
         assertThat(undeclaredCount()).isEqualTo(1.0);
@@ -157,7 +157,7 @@ class ReadOnlyRoutingDataSourceTest {
 
     @Test
     void determineCurrentLookupKey_WhenUndeclaredAndFailFast_Throws() {
-        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(guard(true, true));
+        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(guard(true, true), null);
 
         assertThatThrownBy(routing::determineCurrentLookupKey)
                 .isInstanceOf(IllegalStateException.class)
@@ -166,7 +166,7 @@ class ReadOnlyRoutingDataSourceTest {
 
     @Test
     void determineCurrentLookupKey_WhenUndeclaredBeforeApplicationReady_ReturnsPrimaryUncounted() {
-        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(guard(true, false));
+        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(guard(true, false), null);
 
         assertThat(routing.determineCurrentLookupKey()).isEqualTo(RoutingKey.PRIMARY);
         assertThat(undeclaredCount()).isZero();
@@ -312,7 +312,7 @@ class ReadOnlyRoutingDataSourceTest {
 
     @Test
     void afterPropertiesSet_WhenNoAuthorityReadSourceIsSet_Throws() {
-        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(guard(false, true));
+        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(guard(false, true), null);
         routing.setTargetDataSources(Map.of(RoutingKey.PRIMARY, primary));
 
         assertThatThrownBy(routing::afterPropertiesSet)

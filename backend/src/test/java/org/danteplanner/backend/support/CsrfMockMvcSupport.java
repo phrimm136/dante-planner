@@ -35,8 +35,8 @@ public final class CsrfMockMvcSupport {
     }
 
     private static CsrfTokenService buildTokenService() {
-        JwtProperties properties = new JwtProperties();
-        properties.setEncryptionKeyBytes(Base64.getDecoder().decode(TEST_ENCRYPTION_KEY));
+        JwtProperties properties = new JwtProperties(
+                null, null, Base64.getDecoder().decode(TEST_ENCRYPTION_KEY), 900000L, 604800000L);
         return new CsrfTokenService(properties);
     }
 

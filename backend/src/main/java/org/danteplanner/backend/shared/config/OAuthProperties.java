@@ -1,49 +1,25 @@
 package org.danteplanner.backend.shared.config;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
-@Configuration
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+
 @ConfigurationProperties(prefix = "oauth")
 @Validated
-@Getter
-@Setter
-public class OAuthProperties {
+public record OAuthProperties(@Valid @DefaultValue GoogleConfig google) {
 
-    @Valid
-    private GoogleConfig google = new GoogleConfig();
-
-    @Getter
-    @Setter
-    public static class GoogleConfig {
-
-        @NotBlank(message = "Google OAuth client ID is required")
-        private String clientId;
-
-        @NotBlank(message = "Google OAuth client secret is required")
-        private String clientSecret;
-
-        @NotBlank(message = "Google OAuth redirect URI is required")
-        private String redirectUri;
-
-        @NotBlank(message = "Google OAuth authorize URL is required")
-        private String authorizeUrl;
-
-        @NotBlank(message = "Google OAuth token URL is required")
-        private String tokenUrl;
-
-        @NotBlank(message = "Google OAuth user info URL is required")
-        private String userInfoUrl;
-
-        @NotBlank(message = "Google OAuth JWKS URI is required")
-        private String jwksUri;
-
-        @NotBlank(message = "Google OAuth issuer is required")
-        private String issuer;
+    public record GoogleConfig(
+            @NotBlank(message = "Google OAuth client ID is required") String clientId,
+            @NotBlank(message = "Google OAuth client secret is required") String clientSecret,
+            @NotBlank(message = "Google OAuth redirect URI is required") String redirectUri,
+            @NotBlank(message = "Google OAuth authorize URL is required") String authorizeUrl,
+            @NotBlank(message = "Google OAuth token URL is required") String tokenUrl,
+            @NotBlank(message = "Google OAuth user info URL is required") String userInfoUrl,
+            @NotBlank(message = "Google OAuth JWKS URI is required") String jwksUri,
+            @NotBlank(message = "Google OAuth issuer is required") String issuer) {
     }
 }

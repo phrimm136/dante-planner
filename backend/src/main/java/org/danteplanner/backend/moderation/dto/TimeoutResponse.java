@@ -3,12 +3,13 @@ package org.danteplanner.backend.moderation.dto;
 import java.time.Instant;
 
 import lombok.Builder;
+import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.user.api.UserSummary;
 
 @Builder
 public record TimeoutResponse(
     String usernameSuffix,
-    Instant timeoutUntil,
+    @Nullable Instant timeoutUntil,
     String message
 ) {
 

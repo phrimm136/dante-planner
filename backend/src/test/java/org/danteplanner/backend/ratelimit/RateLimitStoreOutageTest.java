@@ -39,6 +39,8 @@ import org.danteplanner.backend.support.InMemoryProxyManager;
 import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.fixture.ratelimit.DeclaredHandlerFixture;
 
+import org.danteplanner.backend.support.RateLimitStores;
+import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -343,18 +345,14 @@ class RateLimitStoreOutageTest {
     }
 
     private static RateLimitProperties bucketProperties() {
-        RateLimitProperties properties = new RateLimitProperties();
-        properties.setCrud(bucket());
-        properties.setAuth(bucket());
-        properties.setPublicRead(bucket());
-        return properties;
+        return RateLimitStores.limits(0, Map.ofEntries(
+                Map.entry(RateLimitPolicy.CRUD, bucket()),
+                Map.entry(RateLimitPolicy.AUTH, bucket()),
+                Map.entry(RateLimitPolicy.PUBLIC_READ, bucket())));
     }
 
     private static BucketConfig bucket() {
-        BucketConfig config = new BucketConfig();
-        config.setCapacity(10);
-        config.setRefillTokens(10);
-        config.setRefillDurationSeconds(60);
+        BucketConfig config = new BucketConfig(10, 10, 60);
         return config;
     }
 

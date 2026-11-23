@@ -1,6 +1,7 @@
 package org.danteplanner.backend.shared.sse;
 
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.shared.security.Viewer;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.core.task.TaskExecutor;
@@ -29,28 +30,36 @@ public abstract class AbstractSseService<K> implements ApplicationListener<Conte
     }
 
     /**
-     * {@code deviceId} is client-supplied; {@code userId} comes from the authenticated principal
-     * and is null for a guest, so only it is safe to address or exclude by.
+     * {@code deviceId} is client-supplied; the subscriber comes from the authenticated principal, so
+     * only it is safe to address or exclude by.
      */
-    protected record EmitterEntry(UUID deviceId, Long userId, SseEmitter emitter) {}
+    protected record EmitterEntry(UUID deviceId, Viewer subscriber, SseEmitter emitter) {}
 
-    protected SseEmitter register(K key, UUID deviceId) throws IOException {
-        return register(key, deviceId, null);
+    protected SseEmitter register(K key, UUID deviceId, Viewer subscriber) throws IOException {
+        SseEmitter emitter = new SseEmitter(SSE_TIMEOUT_MS);
+        switch (Phase.of(closing)) {
+            case CLOSING -> emitter.complete();
+            case SERVING -> open(key, deviceId, subscriber, emitter);
+        }
+        return emitter;
     }
 
-    protected SseEmitter register(K key, UUID deviceId, Long userId) throws IOException {
-        SseEmitter emitter = new SseEmitter(SSE_TIMEOUT_MS);
-        if (closing) {
-            emitter.complete();
-            return emitter;
-        }
+    private enum Phase {
+        SERVING,
+        CLOSING;
 
+        static Phase of(boolean closing) {
+            return closing ? CLOSING : SERVING;
+        }
+    }
+
+    private void open(K key, UUID deviceId, Viewer subscriber, SseEmitter emitter) throws IOException {
         emitter.send(SseEmitter.event().name("connected").data("{}"));
         emitters.compute(key, (k, existing) -> {
             var connections = existing != null ? existing : new CopyOnWriteArrayList<EmitterEntry>();
             connections.removeIf(e -> e.deviceId().equals(deviceId));
             beforeRegister(key, connections);
-            connections.add(new EmitterEntry(deviceId, userId, emitter));
+            connections.add(new EmitterEntry(deviceId, subscriber, emitter));
             return connections;
         });
         afterRegister(key);
@@ -59,11 +68,10 @@ public abstract class AbstractSseService<K> implements ApplicationListener<Conte
         emitter.onTimeout(() -> removeConnection(key, deviceId));
         emitter.onError(e -> removeConnection(key, deviceId));
 
-        if (closing) {
-            emitter.complete();
+        switch (Phase.of(closing)) {
+            case CLOSING -> emitter.complete();
+            case SERVING -> { }
         }
-
-        return emitter;
     }
 
     public void removeConnection(K key, UUID deviceId) {

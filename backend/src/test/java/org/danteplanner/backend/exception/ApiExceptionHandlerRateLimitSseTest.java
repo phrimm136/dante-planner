@@ -30,7 +30,7 @@ class ApiExceptionHandlerRateLimitSseTest {
     static class SseThrowingController {
         @GetMapping(value = "/sse/boom", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
         public String rateLimited() {
-            throw new RateLimitExceededException(815L, "sse", 1L);
+            throw new RateLimitExceededException("815", "sse", 1L);
         }
     }
 

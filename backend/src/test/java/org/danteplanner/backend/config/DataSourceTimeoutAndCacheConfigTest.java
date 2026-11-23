@@ -52,14 +52,10 @@ class DataSourceTimeoutAndCacheConfigTest {
     }
 
     private static ReadSourceProperties readSourceProperties() {
-        ReadSourceProperties.Source replica = new ReadSourceProperties.Source();
-        replica.setName(REPLICA);
-        replica.setUrl("jdbc:mysql://seoul-replica:3306/planner");
-        ReadSourceProperties.Source primary = new ReadSourceProperties.Source();
-        primary.setName(ReadSourceProperties.PRIMARY);
-        ReadSourceProperties props = new ReadSourceProperties();
-        props.setReadSources(List.of(replica, primary));
-        return props;
+        return new ReadSourceProperties(
+                List.of(new ReadSourceProperties.Source(REPLICA, "jdbc:mysql://seoul-replica:3306/planner", "", ""),
+                        new ReadSourceProperties.Source(ReadSourceProperties.PRIMARY, "", "", "")),
+                ReadSourceProperties.Breaker.defaults(), ReadSourceProperties.Probe.defaults());
     }
 
     private static Properties load(String resource) {

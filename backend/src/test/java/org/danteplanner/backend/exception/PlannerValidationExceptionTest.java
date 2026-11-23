@@ -14,8 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class PlannerValidationExceptionTest {
 
-    private static final String CONTENT = "{\"equipment\":[]}";
-
     @Test
     void singleErrorConstructor_WhenUsed_HasEmptySubErrors() {
         PlannerValidationException ex = new PlannerValidationException("MY_CODE", "My message");
@@ -31,7 +29,7 @@ class PlannerValidationExceptionTest {
                 new Violation(ErrorCode.MISSING_REQUIRED_FIELD, ContentPath.of("equipment"), "First error"),
                 new Violation(ErrorCode.INVALID_FIELD_TYPE, ContentPath.of("equipment").key("05"), "Second error")));
 
-        PlannerValidationException ex = PlannerValidationException.rejecting(rejected, CONTENT);
+        PlannerValidationException ex = PlannerValidationException.rejecting(rejected);
 
         assertThat(ex.getOriginalCode()).isEqualTo("VALIDATION_ERROR");
         assertThat(ex.getSubErrors()).containsExactly(
@@ -39,13 +37,12 @@ class PlannerValidationExceptionTest {
                 new ValidationError("INVALID_FIELD_TYPE", "equipment[05]", "Second error"));
         assertThat(ex.getMessage())
                 .isEqualTo("[MISSING_REQUIRED_FIELD] First error; [INVALID_FIELD_TYPE] Second error");
-        assertThat(ex.getFailedContent()).isEqualTo(CONTENT);
     }
 
     @Test
     void rejecting_WhenOneViolation_HasExactlyOneSubErrorUnderTheGenericCode() {
         PlannerValidationException ex = PlannerValidationException.rejecting(new ContentVerdict.Rejected(List.of(
-                new Violation(ErrorCode.UNKNOWN_EGO, ContentPath.of("equipment"), "Only message"))), CONTENT);
+                new Violation(ErrorCode.UNKNOWN_EGO, ContentPath.of("equipment"), "Only message"))));
 
         assertThat(ex.getOriginalCode()).isEqualTo("VALIDATION_ERROR");
         assertThat(ex.getSubErrors()).containsExactly(new ValidationError("UNKNOWN_EGO", "equipment", "Only message"));
@@ -54,20 +51,19 @@ class PlannerValidationExceptionTest {
     @Test
     void refusing_WhenAUserFacingViolation_KeepsItsCodeAndMessage() {
         PlannerValidationException ex = PlannerValidationException.refusing(new ContentVerdict.Refused(
-                new Violation(ErrorCode.EMPTY_CONTENT, ContentPath.root(), "Content is empty or null")), CONTENT);
+                new Violation(ErrorCode.EMPTY_CONTENT, ContentPath.root(), "Content is empty or null")));
 
         assertThat(ex.getOriginalCode()).isEqualTo("EMPTY_CONTENT");
         assertThat(ex.getMessage()).isEqualTo("Content is empty or null");
         assertThat(ex.getBody().getProperties().get("code")).isEqualTo("EMPTY_CONTENT");
         assertThat(ex.getSubErrors()).containsExactly(
                 new ValidationError("EMPTY_CONTENT", "", "Content is empty or null"));
-        assertThat(ex.getFailedContent()).isEqualTo(CONTENT);
     }
 
     @Test
     void refusing_WhenACodeIsNotUserFacing_MasksItOnTheWire() {
         PlannerValidationException ex = PlannerValidationException.refusing(new ContentVerdict.Refused(
-                new Violation(ErrorCode.UNKNOWN_FIELD, ContentPath.root(), "Unknown fields: [theme]")), CONTENT);
+                new Violation(ErrorCode.UNKNOWN_FIELD, ContentPath.root(), "Unknown fields: [theme]")));
 
         assertThat(ex.getOriginalCode()).isEqualTo("UNKNOWN_FIELD");
         assertThat(ex.getBody().getProperties().get("code")).isEqualTo("VALIDATION_ERROR");
@@ -78,7 +74,7 @@ class PlannerValidationExceptionTest {
     void refusing_WhenANoteIsOversized_CarriesTheNotePathAndKeepsTheBody() {
         PlannerValidationException ex = PlannerValidationException.refusing(new ContentVerdict.Refused(
                 new Violation(ErrorCode.SIZE_EXCEEDED, ContentPath.of("sectionNotes").key("floor1"),
-                        "Note 'floor1' size 1100 exceeds limit 1024")), CONTENT);
+                        "Note 'floor1' size 1100 exceeds limit 1024")));
 
         assertThat(ex.getSubErrors()).containsExactly(
                 new ValidationError("SIZE_EXCEEDED", "sectionNotes[floor1]", "Note 'floor1' size 1100 exceeds limit 1024"));
@@ -95,8 +91,7 @@ class PlannerValidationExceptionTest {
                 Violation.unknownValue(ErrorCode.UNKNOWN_KEYWORD, ContentPath.of("selectedKeywords").index(1),
                         "selectedKeywords", "Zilch"),
                 Violation.unknownValue(ErrorCode.UNKNOWN_KEYWORD, ContentPath.of("selectedKeywords").index(2),
-                        "selectedKeywords", "Nope"))),
-                "{\"selectedKeywords\":[\"Sinking\",\"Zilch\",\"Nope\",\"AccelBullet\"]}");
+                        "selectedKeywords", "Nope"))));
 
         assertThat(ex.getOriginalCode()).isEqualTo("UNKNOWN_KEYWORD");
         assertThat(ex.getBody().getProperties().get("code")).isEqualTo("UNKNOWN_KEYWORD");
@@ -111,8 +106,7 @@ class PlannerValidationExceptionTest {
         PlannerValidationException ex = PlannerValidationException.rejecting(new ContentVerdict.Rejected(List.of(
                 new Violation(ErrorCode.UNKNOWN_IDENTITY, ContentPath.of("equipment").key("01"), "identity"),
                 Violation.unknownValue(ErrorCode.UNKNOWN_KEYWORD, ContentPath.of("selectedKeywords").index(0),
-                        "selectedKeywords", "Nope"))),
-                "{\"selectedKeywords\":[\"Nope\"]}");
+                        "selectedKeywords", "Nope"))));
 
         assertThat(ex.getBody().getProperties().get("code")).isEqualTo("VALIDATION_ERROR");
         assertThat(ex.getBody().getDetail()).isEqualTo("Invalid planner content structure");

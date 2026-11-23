@@ -3,6 +3,8 @@ package org.danteplanner.backend.shared.config;
 import java.time.Duration;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -20,8 +22,6 @@ import jakarta.validation.constraints.NotBlank;
 
 import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.resource.DefaultClientResources;
-import lombok.Getter;
-import lombok.Setter;
 
 import org.danteplanner.backend.shared.ratelimit.RateLimitStore;
 
@@ -34,23 +34,18 @@ import org.danteplanner.backend.shared.ratelimit.RateLimitStore;
  * exist without a live Redis behind them.</p>
  */
 @Configuration
-@ConfigurationProperties(prefix = "redis")
-@Validated
-@Getter
-@Setter
+@EnableConfigurationProperties(RedisConnectionConfig.Endpoints.class)
 public class RedisConnectionConfig {
 
-    @Valid
-    private Endpoint auth = new Endpoint();
+    private final Endpoints endpoints;
 
-    @Valid
-    private Endpoint rateLimit = new Endpoint();
+    public RedisConnectionConfig(Endpoints endpoints) {
+        this.endpoints = endpoints;
+    }
 
-    @Valid
-    private Endpoint sseLocal = new Endpoint();
-
-    @Valid
-    private Endpoint authLocal = new Endpoint();
+    public Endpoints endpoints() {
+        return endpoints;
+    }
 
     @Bean(destroyMethod = "shutdown")
     public ClientResources redisClientResources() {
@@ -60,24 +55,24 @@ public class RedisConnectionConfig {
     @Bean
     @Primary
     public LettuceConnectionFactory authRedisConnectionFactory() {
-        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(auth), redisClientResources());
+        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(endpoints.auth()), redisClientResources());
     }
 
     @Bean
     public LettuceConnectionFactory sseLocalRedisConnectionFactory() {
-        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(sseLocal), redisClientResources());
+        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(endpoints.sseLocal()), redisClientResources());
     }
 
     @Bean
     public LettuceConnectionFactory authLocalRedisConnectionFactory() {
-        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(authLocal), redisClientResources());
+        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(endpoints.authLocal()), redisClientResources());
     }
 
-    private static RedisStandaloneConfiguration standaloneConfiguration(Endpoint endpoint) {
+    private static RedisStandaloneConfiguration standaloneConfiguration(Endpoints.Endpoint endpoint) {
         RedisStandaloneConfiguration configuration =
-                new RedisStandaloneConfiguration(endpoint.getHost(), endpoint.getPort());
-        if (StringUtils.hasText(endpoint.getPassword())) {
-            configuration.setPassword(RedisPassword.of(endpoint.getPassword()));
+                new RedisStandaloneConfiguration(endpoint.host(), endpoint.port());
+        if (StringUtils.hasText(endpoint.password())) {
+            configuration.setPassword(RedisPassword.of(endpoint.password()));
         }
         return configuration;
     }
@@ -95,25 +90,29 @@ public class RedisConnectionConfig {
 
     @Bean
     public RateLimitStore rateLimitProxyManager() {
-        return new RateLimitStore(redisClientResources(), rateLimit.getHost(), rateLimit.getPort(),
-                Duration.ofSeconds(rateLimit.getBucketTtlSeconds()));
+        return new RateLimitStore(redisClientResources(), endpoints.rateLimit().host(), endpoints.rateLimit().port(),
+                Duration.ofSeconds(endpoints.rateLimit().bucketTtlSeconds()));
     }
 
-    @Getter
-    @Setter
-    public static class Endpoint {
+    @ConfigurationProperties(prefix = "redis")
+    @Validated
+    public record Endpoints(
+            @Valid @DefaultValue Endpoint auth,
+            @Valid @DefaultValue Endpoint rateLimit,
+            @Valid @DefaultValue Endpoint sseLocal,
+            @Valid @DefaultValue Endpoint authLocal) {
 
-        @NotBlank
-        private String host;
+        public record Endpoint(
+                @NotBlank String host,
+                @Min(1) @Max(65535) int port,
+                @Min(1) @DefaultValue(DEFAULT_BUCKET_TTL_SECONDS) int bucketTtlSeconds,
+                @DefaultValue("") String password) {
 
-        @Min(1)
-        @Max(65535)
-        private int port;
+            static final String DEFAULT_BUCKET_TTL_SECONDS = "3600";
 
-        @Min(1)
-        private int bucketTtlSeconds = 3600;
-
-        /** Empty = connect without AUTH; non-empty = the endpoint's requirepass value. */
-        private String password = "";
+            public static Endpoint at(String host, int port) {
+                return new Endpoint(host, port, Integer.parseInt(DEFAULT_BUCKET_TTL_SECONDS), "");
+            }
+        }
     }
 }

@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -47,8 +46,8 @@ public class UsersApiAdapter implements Users {
     }
 
     @Override
-    public UserSummary findOrCreateUser(String provider, Map<String, String> userInfo) {
-        return toSummary(userService.findOrCreateUser(provider, userInfo));
+    public UserSummary findOrCreateUser(String provider, String providerId, String email) {
+        return toSummary(userService.findOrCreateUser(provider, providerId, email));
     }
 
     @Override

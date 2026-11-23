@@ -2,7 +2,7 @@ package org.danteplanner.backend.shared.exception;
 
 import org.springframework.http.HttpStatus;
 
-public enum ConstraintViolationOutcome {
+public enum ConstraintViolationKind {
 
     UUID_COLLISION(HttpStatus.CONFLICT, "UUID_COLLISION",
             "Plan ID already exists. Please retry with a new ID.", Reporting.SILENT),
@@ -23,7 +23,7 @@ public enum ConstraintViolationOutcome {
     private final String clientMessage;
     private final Reporting reporting;
 
-    ConstraintViolationOutcome(HttpStatus status, String code, String clientMessage, Reporting reporting) {
+    ConstraintViolationKind(HttpStatus status, String code, String clientMessage, Reporting reporting) {
         this.status = status;
         this.code = code;
         this.clientMessage = clientMessage;

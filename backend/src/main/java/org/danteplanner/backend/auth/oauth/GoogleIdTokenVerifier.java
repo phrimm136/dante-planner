@@ -27,15 +27,15 @@ public class GoogleIdTokenVerifier {
     private final NimbusJwtDecoder decoder;
 
     public GoogleIdTokenVerifier(OAuthProperties oAuthProperties, RestOperations restTemplate) {
-        OAuthProperties.GoogleConfig google = oAuthProperties.getGoogle();
-        this.decoder = NimbusJwtDecoder.withJwkSetUri(google.getJwksUri()).restOperations(restTemplate).build();
+        OAuthProperties.GoogleConfig google = oAuthProperties.google();
+        this.decoder = NimbusJwtDecoder.withJwkSetUri(google.jwksUri()).restOperations(restTemplate).build();
 
         OAuth2TokenValidator<Jwt> audienceMatchesClient = new JwtClaimValidator<List<String>>(
                 JwtClaimNames.AUD,
-                audience -> audience != null && audience.contains(google.getClientId()));
+                audience -> audience != null && audience.contains(google.clientId()));
 
         this.decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(
-                JwtValidators.createDefaultWithIssuer(google.getIssuer()),
+                JwtValidators.createDefaultWithIssuer(google.issuer()),
                 audienceMatchesClient));
     }
 

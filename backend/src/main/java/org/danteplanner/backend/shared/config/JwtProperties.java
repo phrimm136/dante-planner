@@ -1,12 +1,11 @@
 package org.danteplanner.backend.shared.config;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.Min;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.context.properties.bind.ConstructorBinding;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.validation.annotation.Validated;
 
 import java.io.IOException;
@@ -24,30 +23,70 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.nio.charset.StandardCharsets;
 
-@Configuration
 @ConfigurationProperties(prefix = "jwt")
 @Validated
 @Getter
-@Setter
 @Slf4j
 public class JwtProperties {
 
     private static final int MIN_RSA_KEY_BITS = 2048;
     private static final int AES_256_KEY_BYTES = 32;
 
-    private String privateKeyPath;
-    private String publicKeyPath;
-    private String encryptionKey;
-
-    private PrivateKey privateKey;
-    private PublicKey publicKey;
-    private byte[] encryptionKeyBytes;
+    private final PrivateKey privateKey;
+    private final PublicKey publicKey;
+    private final byte[] encryptionKeyBytes;
 
     @Min(value = 1, message = "Access token expiry must be positive")
-    private long accessTokenExpiry = 900000L;
+    private final long accessTokenExpiry;
 
     @Min(value = 1, message = "Refresh token expiry must be positive")
-    private long refreshTokenExpiry = 604800000L;
+    private final long refreshTokenExpiry;
+
+    @ConstructorBinding
+    public JwtProperties(
+            @DefaultValue("") String privateKeyPath,
+            @DefaultValue("") String publicKeyPath,
+            @DefaultValue("") String encryptionKey,
+            @DefaultValue("900000") long accessTokenExpiry,
+            @DefaultValue("604800000") long refreshTokenExpiry) {
+        requireConfigured(privateKeyPath, "private key path", "JWT_PRIVATE_KEY_PATH");
+        requireConfigured(publicKeyPath, "public key path", "JWT_PUBLIC_KEY_PATH");
+        requireConfigured(encryptionKey, "encryption key", "JWT_ENCRYPTION_KEY");
+
+        try {
+            this.privateKey = loadPrivateKey(privateKeyPath);
+            this.publicKey = loadPublicKey(publicKeyPath);
+            this.encryptionKeyBytes = decodeEncryptionKey(encryptionKey);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to load JWT keys from files", e);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new IllegalStateException("Failed to parse JWT keys", e);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException("Failed to decode encryption key (invalid Base64)", e);
+        }
+        this.accessTokenExpiry = accessTokenExpiry;
+        this.refreshTokenExpiry = refreshTokenExpiry;
+
+        log.info("JWT keys loaded successfully");
+    }
+
+    public JwtProperties(PrivateKey privateKey, PublicKey publicKey, byte[] encryptionKeyBytes,
+            long accessTokenExpiry, long refreshTokenExpiry) {
+        this.privateKey = privateKey;
+        this.publicKey = publicKey;
+        this.encryptionKeyBytes = encryptionKeyBytes;
+        this.accessTokenExpiry = accessTokenExpiry;
+        this.refreshTokenExpiry = refreshTokenExpiry;
+    }
+
+    private static byte[] decodeEncryptionKey(String encryptionKey) {
+        byte[] key = Base64.getDecoder().decode(encryptionKey);
+        if (key.length != AES_256_KEY_BYTES) {
+            throw new IllegalStateException("JWT encryption key must be exactly " + AES_256_KEY_BYTES
+                    + " bytes (256 bits) for AES-256. Got " + key.length + " bytes.");
+        }
+        return key;
+    }
 
     public int getAccessTokenExpirySeconds() {
         return (int) (accessTokenExpiry / 1000);
@@ -61,40 +100,14 @@ public class JwtProperties {
         return (int) (refreshTokenExpiry / 1000);
     }
 
-    @PostConstruct
-    public void loadKeys() {
-        requireConfigured(privateKeyPath, "private key path", "JWT_PRIVATE_KEY_PATH");
-        requireConfigured(publicKeyPath, "public key path", "JWT_PUBLIC_KEY_PATH");
-        requireConfigured(encryptionKey, "encryption key", "JWT_ENCRYPTION_KEY");
-
-        try {
-            this.privateKey = loadPrivateKey(privateKeyPath);
-            this.publicKey = loadPublicKey(publicKeyPath);
-            this.encryptionKeyBytes = Base64.getDecoder().decode(encryptionKey);
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to load JWT keys from files", e);
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new IllegalStateException("Failed to parse JWT keys", e);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalStateException("Failed to decode encryption key (invalid Base64)", e);
-        }
-
-        if (encryptionKeyBytes.length != AES_256_KEY_BYTES) {
-            throw new IllegalStateException("JWT encryption key must be exactly " + AES_256_KEY_BYTES
-                    + " bytes (256 bits) for AES-256. Got " + encryptionKeyBytes.length + " bytes.");
-        }
-
-        log.info("JWT keys loaded successfully");
-    }
-
     private static void requireConfigured(String value, String what, String envVar) {
-        if (value == null || value.isBlank()) {
+        if (value.isBlank()) {
             throw new IllegalStateException(
                     "JWT " + what + " is required. Set " + envVar + " environment variable.");
         }
     }
 
-    private PrivateKey loadPrivateKey(String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+    private static PrivateKey loadPrivateKey(String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         byte[] keyBytes = decodePem(path, "PRIVATE KEY");
         PrivateKey key = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(keyBytes));
 
@@ -104,7 +117,7 @@ public class JwtProperties {
         return key;
     }
 
-    private PublicKey loadPublicKey(String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+    private static PublicKey loadPublicKey(String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         byte[] keyBytes = decodePem(path, "PUBLIC KEY");
         PublicKey key = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(keyBytes));
 

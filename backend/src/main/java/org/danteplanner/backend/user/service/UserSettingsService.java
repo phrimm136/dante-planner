@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
 import org.danteplanner.backend.user.dto.UserSettingsResponse;
 import org.danteplanner.backend.user.entity.User;
@@ -65,7 +66,7 @@ public class UserSettingsService implements NotificationPreferenceProvider {
         return UserSettingsResponse.fromEntity(settings);
     }
 
-    private static <T> void applyIfPresent(T value, Consumer<T> setter) {
+    private static <T> void applyIfPresent(@Nullable T value, Consumer<T> setter) {
         if (value != null) {
             setter.accept(value);
         }

@@ -2,6 +2,7 @@ package org.danteplanner.backend.notification.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.notification.api.NotificationOutcome;
 import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.notification.api.Notifications;
@@ -27,13 +28,8 @@ public class NotificationDispatchService implements Notifications {
     @Override
     public NotificationOutcome notifyPlannerRecommended(
             UUID plannerId, String plannerTitle, Long plannerOwnerId) {
-        return raise(Notification.plannerScoped(
-                plannerOwnerId,
-                plannerId.toString(),
-                NotificationType.PLANNER_RECOMMENDED,
-                plannerId,
-                plannerTitle
-        ));
+        return raise(new Notification(plannerOwnerId, plannerId.toString(), NotificationType.PLANNER_RECOMMENDED,
+                new Notification.Content.PlannerScoped(plannerId, plannerTitle)));
     }
 
     @Override
@@ -45,15 +41,8 @@ public class NotificationDispatchService implements Notifications {
             String commentContent,
             Long plannerOwnerId
     ) {
-        return raise(new Notification(
-                plannerOwnerId,
-                commentId.toString(),
-                NotificationType.COMMENT_RECEIVED,
-                plannerId,
-                plannerTitle,
-                commentContent,
-                commentPublicId
-        ));
+        return raise(new Notification(plannerOwnerId, commentId.toString(), NotificationType.COMMENT_RECEIVED,
+                new Notification.Content.CommentScoped(plannerId, plannerTitle, commentContent, commentPublicId)));
     }
 
     @Override
@@ -65,15 +54,8 @@ public class NotificationDispatchService implements Notifications {
             String replyContent,
             Long parentAuthorId
     ) {
-        return raise(new Notification(
-                parentAuthorId,
-                replyId.toString(),
-                NotificationType.REPLY_RECEIVED,
-                plannerId,
-                plannerTitle,
-                replyContent,
-                replyPublicId
-        ));
+        return raise(new Notification(parentAuthorId, replyId.toString(), NotificationType.REPLY_RECEIVED,
+                new Notification.Content.CommentScoped(plannerId, plannerTitle, replyContent, replyPublicId)));
     }
 
     @Override
@@ -87,27 +69,55 @@ public class NotificationDispatchService implements Notifications {
                 inserted, plannerId, authorId);
     }
 
+    sealed interface Insertion {
+
+        record Duplicate() implements Insertion {
+        }
+
+        record Inserted() implements Insertion {
+        }
+
+        static Insertion of(int written) {
+            if (written == 0) {
+                return new Duplicate();
+            }
+            return new Inserted();
+        }
+    }
+
     private NotificationOutcome raise(Notification notification) {
-        int written = notificationRepository.insertIgnore(
+        return switch (Insertion.of(insert(notification))) {
+            case Insertion.Duplicate duplicate -> suppressed(notification);
+            case Insertion.Inserted inserted -> delivered(notification);
+        };
+    }
+
+    private int insert(Notification notification) {
+        return notificationRepository.insertIgnore(
                 notification.getUserId(),
                 notification.getContentId(),
                 notification.getNotificationType().name(),
-                notification.getPlannerId() == null ? null : notification.getPlannerId().toString(),
+                uuidText(notification.getPlannerId()),
                 notification.getPlannerTitle(),
                 notification.getCommentSnippet(),
-                notification.getCommentPublicId() == null
-                        ? null : notification.getCommentPublicId().toString());
+                uuidText(notification.getCommentPublicId()));
+    }
 
-        if (written == 0) {
-            log.debug("Suppressed {} notification for user {} on content {}: duplicate or inactive recipient",
-                    notification.getNotificationType(), notification.getUserId(),
-                    notification.getContentId());
-            return new NotificationOutcome.Suppressed(
-                    notification.getUserId(),
-                    notification.getContentId(),
-                    notification.getNotificationType());
-        }
+    private static @Nullable String uuidText(@Nullable UUID id) {
+        return id == null ? null : id.toString();
+    }
 
+    private NotificationOutcome suppressed(Notification notification) {
+        log.debug("Suppressed {} notification for user {} on content {}: duplicate or inactive recipient",
+                notification.getNotificationType(), notification.getUserId(),
+                notification.getContentId());
+        return new NotificationOutcome.Suppressed(
+                notification.getUserId(),
+                notification.getContentId(),
+                notification.getNotificationType());
+    }
+
+    private NotificationOutcome delivered(Notification notification) {
         FreshnessDeclarations.declare(new FreshnessScope.User(notification.getUserId()));
         Notification stored = notificationRepository
                 .findByUserIdAndContentIdAndNotificationType(notification.getUserId(),

@@ -12,6 +12,7 @@ import org.danteplanner.backend.auth.oauth.OAuthProvider;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthTokens;
 import org.danteplanner.backend.auth.oauth.OAuthUserInfo;
+import org.danteplanner.backend.auth.token.RefreshLineage;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -54,7 +55,8 @@ class AuthenticationServiceTest {
         assertThat(access.role()).isEqualTo(role);
         TokenClaims refresh = jwt.service().validateRefreshToken(result.refreshToken());
         assertThat(refresh.userId()).isEqualTo(userId);
-        assertThat(refresh.parentJti()).as("a login opens a new refresh family, it does not rotate one").isNull();
+        assertThat(refresh.lineage()).as("a login opens a new refresh family, it does not rotate one")
+                .isInstanceOf(RefreshLineage.Root.class);
     }
 
     @Nested
@@ -68,7 +70,7 @@ class AuthenticationServiceTest {
             String redirectUri = "http://localhost/callback";
             String codeVerifier = "verifier";
 
-            OAuthTokens oauthTokens = new OAuthTokens("oauth-access", "oauth-refresh", null);
+            OAuthTokens.Response oauthTokens = new OAuthTokens.Response("oauth-access", null);
             oauthProvider.answer(oauthTokens, new OAuthUserInfo("google-123", "test@example.com"));
 
             // Act
@@ -98,7 +100,7 @@ class AuthenticationServiceTest {
         @Test
         void authenticateWithOAuth_WhenUserNotFound_CreatesNewUser() {
             // Arrange
-            oauthProvider.answer(new OAuthTokens("access", null, null),
+            oauthProvider.answer(new OAuthTokens.Response("access", null),
                     new OAuthUserInfo("provider-id-123", "user@email.com"));
 
             // Act
@@ -124,7 +126,7 @@ class AuthenticationServiceTest {
             deletedUser.softDelete(java.time.Instant.now().plusSeconds(86400 * 30));
             users.add(deletedUser);
 
-            oauthProvider.answer(new OAuthTokens("access", null, null),
+            oauthProvider.answer(new OAuthTokens.Response("access", null),
                     new OAuthUserInfo("deleted-123", "deleted@example.com"));
 
             // Act
@@ -143,10 +145,10 @@ class AuthenticationServiceTest {
 
         private final List<List<String>> exchanges = new ArrayList<>();
         private final List<String> userInfoRequests = new ArrayList<>();
-        private OAuthTokens tokens;
+        private OAuthTokens.Response tokens;
         private OAuthUserInfo userInfo;
 
-        void answer(OAuthTokens answeredTokens, OAuthUserInfo answeredUserInfo) {
+        void answer(OAuthTokens.Response answeredTokens, OAuthUserInfo answeredUserInfo) {
             this.tokens = answeredTokens;
             this.userInfo = answeredUserInfo;
         }
@@ -162,7 +164,7 @@ class AuthenticationServiceTest {
         }
 
         @Override
-        public OAuthTokens exchangeCodeForTokens(String code, String redirectUri, String codeVerifier) {
+        public OAuthTokens.Response exchangeCodeForTokens(String code, String redirectUri, String codeVerifier) {
             exchanges.add(List.of(code, redirectUri, codeVerifier));
             return tokens;
         }

@@ -83,29 +83,35 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        RateLimited declaration = declarationOn(handlerMethod);
-        if (declaration != null) {
-            return charge(declaration, request, response);
-        }
-        if (isExempt(handlerMethod)) {
-            return true;
-        }
-        return deny(handlerMethod, request, response);
+        return switch (declarationOn(handlerMethod)) {
+            case Declaration.Declared declared -> charge(declared.annotation(), request, response);
+            case Declaration.Exempt exempt -> true;
+            case Declaration.Undeclared undeclared -> deny(handlerMethod, request, response);
+        };
     }
 
-    private RateLimited declarationOn(HandlerMethod handlerMethod) {
+    private sealed interface Declaration {
+
+        record Declared(RateLimited annotation) implements Declaration {
+        }
+
+        record Exempt() implements Declaration {
+        }
+
+        record Undeclared() implements Declaration {
+        }
+    }
+
+    private static Declaration declarationOn(HandlerMethod handlerMethod) {
         RateLimited onMethod = handlerMethod.getMethodAnnotation(RateLimited.class);
         if (onMethod != null) {
-            return onMethod;
+            return new Declaration.Declared(onMethod);
         }
         if (handlerMethod.hasMethodAnnotation(RateLimitExempt.class)) {
-            return null;
+            return new Declaration.Exempt();
         }
-        return handlerMethod.getBeanType().getAnnotation(RateLimited.class);
-    }
-
-    private boolean isExempt(HandlerMethod handlerMethod) {
-        return handlerMethod.hasMethodAnnotation(RateLimitExempt.class);
+        RateLimited onType = handlerMethod.getBeanType().getAnnotation(RateLimited.class);
+        return onType == null ? new Declaration.Undeclared() : new Declaration.Declared(onType);
     }
 
     private boolean charge(RateLimited declaration, HttpServletRequest request, HttpServletResponse response) {

@@ -2,6 +2,8 @@ package org.danteplanner.backend.moderation.dto;
 
 import java.time.Instant;
 
+import org.jspecify.annotations.Nullable;
+
 import org.danteplanner.backend.user.api.UserSummary;
 
 public record ModeratedUserResponse(
@@ -9,9 +11,9 @@ public record ModeratedUserResponse(
     String usernameSuffix,
     String role,
     boolean isBanned,
-    Instant bannedAt,
+    @Nullable Instant bannedAt,
     boolean isTimedOut,
-    Instant timeoutUntil
+    @Nullable Instant timeoutUntil
 ) {
 
     public static ModeratedUserResponse fromUser(UserSummary user) {

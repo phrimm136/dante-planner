@@ -48,7 +48,7 @@ class GtidCookieFilterTest {
     private final GtidCookieFilter authorityFilter =
             new GtidCookieFilter(authorityGate, writeCapture, markerStamp, problemWriter);
     private final ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(
-            new UndeclaredPrimaryAccessGuard(new SimpleMeterRegistry(), true));
+            new UndeclaredPrimaryAccessGuard(new SimpleMeterRegistry(), true), null);
     private final List<Object> routedTo = new ArrayList<>();
 
     private static final class ScriptedReadGate extends GtidReadGate {

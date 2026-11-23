@@ -42,7 +42,7 @@ class PlannerChangeTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static PlannerContent storedRow() {
-        return StoredPlannerContent.holding(PlannerContent.builder()
+        return StoredPlannerContent.holding(StoredPlannerContent.builder()
                 .title("Stored Title")
                 .status(PlannerStatus.SAVED)
                 .category("5F")
@@ -92,7 +92,7 @@ class PlannerChangeTest {
 
     @Test
     void isNone_WhenContentDiffersOnlyInNumberRendering_IsTrue() {
-        PlannerContent stored = StoredPlannerContent.holding(PlannerContent.builder().build(),
+        PlannerContent stored = StoredPlannerContent.holding(StoredPlannerContent.builder().build(),
                 "{\"deploymentOrder\":[5.0],\"equipment\":{}}");
         CarriedWrite carried = CarriedWrite.builder()
                 .content("{\"equipment\":{},\"deploymentOrder\":[5]}")
@@ -120,7 +120,7 @@ class PlannerChangeTest {
     // unparseable-content-falls-through-to-conflict
     @Test
     void isNone_WhenStoredContentIsUnparseable_IsFalse() {
-        PlannerContent stored = StoredPlannerContent.holding(PlannerContent.builder()
+        PlannerContent stored = StoredPlannerContent.holding(StoredPlannerContent.builder()
                 .title("Stored Title")
                 .status(PlannerStatus.SAVED)
                 .category("5F")

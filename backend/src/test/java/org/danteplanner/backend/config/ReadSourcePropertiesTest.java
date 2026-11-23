@@ -41,7 +41,7 @@ class ReadSourcePropertiesTest {
     private ReadSourceProperties bind(Binder binder) {
         validator.afterPropertiesSet();
         return binder.bind(PREFIX, Bindable.of(ReadSourceProperties.class), new ValidationBindHandler(validator))
-                .orElseGet(ReadSourceProperties::new);
+                .get();
     }
 
     private ReadSourceProperties bind(Map<String, String> properties) {
@@ -60,10 +60,10 @@ class ReadSourcePropertiesTest {
     void bind_WhenSeoulListSet_KeepsItsOrderAndReadsTheReplicaFirst() {
         ReadSourceProperties bound = bind(seoulSources());
 
-        assertThat(bound.getReadSources())
-                .extracting(ReadSourceProperties.Source::getName)
+        assertThat(bound.readSources())
+                .extracting(ReadSourceProperties.Source::name)
                 .containsExactly(REPLICA, ReadSourceProperties.PRIMARY);
-        assertThat(bound.getReadSources().get(0).getUrl()).isEqualTo(REPLICA_URL);
+        assertThat(bound.readSources().get(0).url()).isEqualTo(REPLICA_URL);
         assertThat(bound.readsPrimaryFirst()).isFalse();
     }
 
@@ -80,12 +80,12 @@ class ReadSourcePropertiesTest {
 
         ReadSourceProperties bound = bind(new Binder(ConfigurationPropertySources.from(environment)));
 
-        assertThat(bound.getReadSources())
-                .extracting(ReadSourceProperties.Source::getName)
+        assertThat(bound.readSources())
+                .extracting(ReadSourceProperties.Source::name)
                 .containsExactly(ReadSourceProperties.PRIMARY, REPLICA);
-        assertThat(bound.getReadSources().get(1).getUrl()).isEqualTo(REPLICA_URL);
-        assertThat(bound.getReadSources().get(1).getUsername()).isEqualTo("replicaUser");
-        assertThat(bound.getReadSourceBreaker().getMinimumNumberOfCalls()).isEqualTo(4);
+        assertThat(bound.readSources().get(1).url()).isEqualTo(REPLICA_URL);
+        assertThat(bound.readSources().get(1).username()).isEqualTo("replicaUser");
+        assertThat(bound.readSourceBreaker().minimumNumberOfCalls()).isEqualTo(4);
         assertThat(bound.readsPrimaryFirst()).isTrue();
     }
 
@@ -160,7 +160,7 @@ class ReadSourcePropertiesTest {
         properties.put(PREFIX + ".read-source-breaker.minimum-number-of-calls", "4");
         properties.put(PREFIX + ".read-source-breaker.wait-duration-in-open-state", "PT45S");
 
-        CircuitBreakerConfig config = bind(properties).getReadSourceBreaker().circuitBreakerConfig();
+        CircuitBreakerConfig config = bind(properties).readSourceBreaker().circuitBreakerConfig();
 
         assertThat(config.getMinimumNumberOfCalls()).isEqualTo(4);
         assertThat(config.getWaitIntervalFunctionInOpenState().apply(1)).isEqualTo(45_000L);
@@ -179,7 +179,7 @@ class ReadSourcePropertiesTest {
 
     @Test
     void breaker_WhenDefaulted_WaitsAnHourInOpenSoUserReadsNeverHalfOpen() {
-        CircuitBreakerConfig config = new ReadSourceProperties.Breaker().circuitBreakerConfig();
+        CircuitBreakerConfig config = ReadSourceProperties.Breaker.defaults().circuitBreakerConfig();
 
         assertThat(config.getWaitIntervalFunctionInOpenState().apply(1))
                 .isEqualTo(ReadSourceProperties.WAIT_IN_OPEN_STATE.toMillis());

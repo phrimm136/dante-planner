@@ -2,6 +2,7 @@ package org.danteplanner.backend.planner.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
+import org.jspecify.annotations.Nullable;
 
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
@@ -25,7 +26,7 @@ public record PublishedPlannerDetailResponse(
     int upvotes,
     int viewCount,
     Instant createdAt,
-    Instant firstPublishedAt,
+    @Nullable Instant firstPublishedAt,
     Instant lastModifiedAt,
     boolean hasUpvoted,
     String content,
