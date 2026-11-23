@@ -8,6 +8,7 @@ import org.danteplanner.backend.planner.precondition.CatalogReadValidator;
 
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
+import org.danteplanner.backend.planner.dto.CatalogQuery.TextFilter;
 import org.danteplanner.backend.planner.dto.PlannerCoreInfo;
 import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
@@ -137,7 +138,7 @@ class PublishedPlannerQueryServiceTest {
             stubCatalogPage(pageOf(pageable, catalogRow("Planner 1", false), catalogRow("Planner 2", false)));
 
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
-                    new CatalogQuery(false, null, null, null, null), pageable, Viewer.of(null)).value();
+                    new CatalogQuery(false, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, Viewer.of(null)).value();
 
             assertThat(result.getTotalElements()).isEqualTo(2);
             assertThat(result.getContent().size()).isEqualTo(2);
@@ -150,7 +151,7 @@ class PublishedPlannerQueryServiceTest {
             stubCatalogPage(pageOf(pageable, inCategory));
 
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
-                    new CatalogQuery(false, "5F", null, null, null), pageable, Viewer.of(null)).value();
+                    new CatalogQuery(false, TextFilter.exactly("5F"), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, Viewer.of(null)).value();
 
             assertThat(result.getTotalElements()).isEqualTo(1);
             PublicPlannerResponse card = result.getContent().get(0);
@@ -165,7 +166,7 @@ class PublishedPlannerQueryServiceTest {
             stubCatalogPage(new PageImpl<>(List.of(), pageable, 0));
 
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
-                    new CatalogQuery(false, null, null, null, null), pageable, Viewer.of(null)).value();
+                    new CatalogQuery(false, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, Viewer.of(null)).value();
 
             assertThat(result.getTotalElements()).isEqualTo(0);
             assertThat(result.getContent()).isEmpty();
@@ -180,7 +181,7 @@ class PublishedPlannerQueryServiceTest {
             when(plannerStatsRepository.findAllById(List.of(row.getPlannerId()))).thenReturn(List.of());
 
             PublicPlannerResponse card = publishedQueryService.searchPlanners(
-                    new CatalogQuery(false, null, null, null, null), pageable, Viewer.of(null)).value()
+                    new CatalogQuery(false, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, Viewer.of(null)).value()
                     .getContent().get(0);
 
             assertThat(card.upvotes()).isEqualTo(0);
@@ -201,7 +202,7 @@ class PublishedPlannerQueryServiceTest {
             stubCatalogPage(pageOf(pageable, catalogRow("High Votes", true), catalogRow("Medium Votes", true)));
 
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
-                    new CatalogQuery(true, null, null, null, null), pageable, Viewer.of(null)).value();
+                    new CatalogQuery(true, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, Viewer.of(null)).value();
 
             assertThat(result.getTotalElements()).isEqualTo(2);
         }
@@ -213,7 +214,7 @@ class PublishedPlannerQueryServiceTest {
             stubCatalogPage(pageOf(pageable, inCategory));
 
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
-                    new CatalogQuery(true, "10F", null, null, null), pageable, Viewer.of(null)).value();
+                    new CatalogQuery(true, TextFilter.exactly("10F"), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, Viewer.of(null)).value();
 
             assertThat(result.getTotalElements()).isEqualTo(1);
             PublicPlannerResponse card = result.getContent().get(0);
@@ -227,7 +228,7 @@ class PublishedPlannerQueryServiceTest {
             stubCatalogPage(new PageImpl<>(List.of(), pageable, 0));
 
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
-                    new CatalogQuery(true, null, null, null, null), pageable, Viewer.of(null)).value();
+                    new CatalogQuery(true, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, Viewer.of(null)).value();
 
             assertThat(result.getContent()).isEmpty();
         }
@@ -341,7 +342,7 @@ class PublishedPlannerQueryServiceTest {
                             .build()));
 
             ScopedRead<Page<PublicPlannerResponse>> read = publishedQueryService.searchPlanners(
-                    new CatalogQuery(false, null, null, null, null), pageable, Viewer.of(null));
+                    new CatalogQuery(false, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, Viewer.of(null));
             Page<PublicPlannerResponse> result = read.value();
 
             assertThat(read.scopes()).containsExactlyInAnyOrder(
@@ -377,7 +378,7 @@ class PublishedPlannerQueryServiceTest {
 
             // Act
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
-                    new CatalogQuery(false, null, null, null, null), pageable, Viewer.of(null)).value();
+                    new CatalogQuery(false, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, Viewer.of(null)).value();
 
             // Assert
             assertThat(result.getTotalElements()).isEqualTo(1);
@@ -390,7 +391,7 @@ class PublishedPlannerQueryServiceTest {
         @Test
         void malformedEntityFilterId_WhenParsed_IsRejectedNotSilentlyDropped() {
             // Arrange
-            CatalogQuery query = new CatalogQuery(false, null, null, null,
+            CatalogQuery query = new CatalogQuery(false, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(),
                     Map.of(ContentEntityType.THEME_PACK, List.of("not-a-number")));
 
             // Act & Assert
@@ -402,11 +403,11 @@ class PublishedPlannerQueryServiceTest {
     }
 
     @Test
-    void forAnonymous_WhenThePlannerHasNoCoreInfo_LeavesItsCoreFieldsNull() {
+    void fromCatalog_WhenThePlannerHasNoCoreInfo_LeavesItsCoreFieldsNull() {
         PlannerCatalog row = PlannerCatalog.builder().plannerId(UUID.randomUUID()).title("Deck").build();
 
-        PublicPlannerResponse response = PublicPlannerResponse.forAnonymous(
-                row, new PlannerCoreInfo.PlannerCore.Absent(), PlannerStats.builder().build());
+        PublicPlannerResponse response = PublicPlannerResponse.fromCatalog(
+                row, new PlannerCoreInfo.PlannerCore.Absent(), PlannerStats.builder().build(), false);
 
         assertThat(response.authorUsernameEpithet()).isNull();
         assertThat(response.authorUsernameSuffix()).isNull();

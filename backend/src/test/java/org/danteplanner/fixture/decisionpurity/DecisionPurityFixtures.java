@@ -363,4 +363,43 @@ final class DecisionPurityFixtures {
             return base.isLeft() ? new Choice.Left() : new Choice.Right();
         }
     }
+
+    interface Asker {
+        boolean ask();
+    }
+
+    static final class PureAsker implements Asker {
+
+        @Override
+        public boolean ask() {
+            return true;
+        }
+    }
+
+    static class Asking {
+
+        private final Port port;
+
+        Asking(Port port) {
+            this.port = port;
+        }
+
+        public boolean ask() {
+            return port.isOpen();
+        }
+    }
+
+    static final class InheritedAsker extends Asking implements Asker {
+
+        InheritedAsker(Port port) {
+            super(port);
+        }
+    }
+
+    static final class AskerCaller {
+
+        Choice decide(Asker asker) {
+            return asker.ask() ? new Choice.Left() : new Choice.Right();
+        }
+    }
 }

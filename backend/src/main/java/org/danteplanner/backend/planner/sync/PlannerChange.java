@@ -24,7 +24,7 @@ public record PlannerChange(
                 contentChanged(carried.content(), stored.getContent(), mapper),
                 changed(carried.gameContentVersion(), stored.getGameContentVersion()),
                 changed(carried.contentSchemaVersion(), stored.getContentSchemaVersion()),
-                carried.deviceId() != null && !Objects.equals(carried.deviceId(), stored.getDeviceId()));
+                !Objects.equals(carried.deviceId(), stored.getDeviceId()));
     }
 
     public boolean isNone() {
@@ -37,13 +37,10 @@ public record PlannerChange(
     }
 
     private static boolean changed(Object carried, Object stored) {
-        return carried != null && !Objects.equals(carried, stored);
+        return !Objects.equals(carried, stored);
     }
 
     private static boolean contentChanged(String carried, String stored, ObjectMapper mapper) {
-        if (carried == null) {
-            return false;
-        }
         if (stored == null) {
             return true;
         }

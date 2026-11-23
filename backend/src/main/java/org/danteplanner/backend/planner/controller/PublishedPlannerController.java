@@ -8,6 +8,7 @@ import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.shared.restriction.RestrictionExempt;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
+import org.danteplanner.backend.planner.dto.CatalogQuery.TextFilter;
 import org.danteplanner.backend.planner.dto.PlannerFlagsResponse;
 import org.danteplanner.backend.planner.dto.PlannerStatsResponse;
 import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
@@ -16,6 +17,7 @@ import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.util.ClientIpResolver;
+import org.danteplanner.backend.shared.util.ViewerHashUtil;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.springframework.data.domain.Page;
@@ -52,17 +54,17 @@ public class PublishedPlannerController {
     public ResponseEntity<Page<PublicPlannerResponse>> getPublishedPlanners(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) String category,
-            @RequestParam(required = false) String q,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String identity,
-            @RequestParam(required = false) String ego,
-            @RequestParam(required = false) String gift,
-            @RequestParam(required = false) String themePack,
+            @RequestParam(required = false) @Nullable String category,
+            @RequestParam(required = false) @Nullable String q,
+            @RequestParam(required = false) @Nullable String keyword,
+            @RequestParam(required = false) @Nullable String identity,
+            @RequestParam(required = false) @Nullable String ego,
+            @RequestParam(required = false) @Nullable String gift,
+            @RequestParam(required = false) @Nullable String themePack,
             @AuthenticationPrincipal @Nullable Long userId) {
 
-        return listPlanners(false, page, size, category, q, keyword,
-                entityFilters(identity, ego, gift, themePack), Viewer.of(userId));
+        return listPlanners(page, size, new CatalogQuery(false, TextFilter.exactly(category), TextFilter.nonBlank(q),
+                parseCsv(keyword), entityFilters(identity, ego, gift, themePack)), Viewer.of(userId));
     }
 
     @RateLimited(RateLimitPolicy.PUBLIC_READ)
@@ -70,17 +72,17 @@ public class PublishedPlannerController {
     public ResponseEntity<Page<PublicPlannerResponse>> getRecommendedPlanners(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) String category,
-            @RequestParam(required = false) String q,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String identity,
-            @RequestParam(required = false) String ego,
-            @RequestParam(required = false) String gift,
-            @RequestParam(required = false) String themePack,
+            @RequestParam(required = false) @Nullable String category,
+            @RequestParam(required = false) @Nullable String q,
+            @RequestParam(required = false) @Nullable String keyword,
+            @RequestParam(required = false) @Nullable String identity,
+            @RequestParam(required = false) @Nullable String ego,
+            @RequestParam(required = false) @Nullable String gift,
+            @RequestParam(required = false) @Nullable String themePack,
             @AuthenticationPrincipal @Nullable Long userId) {
 
-        return listPlanners(true, page, size, category, q, keyword,
-                entityFilters(identity, ego, gift, themePack), Viewer.of(userId));
+        return listPlanners(page, size, new CatalogQuery(true, TextFilter.exactly(category), TextFilter.nonBlank(q),
+                parseCsv(keyword), entityFilters(identity, ego, gift, themePack)), Viewer.of(userId));
     }
 
     @RateLimited(RateLimitPolicy.PUBLIC_READ)
@@ -119,24 +121,19 @@ public class PublishedPlannerController {
         String viewerIdentity = ClientIpResolver.resolveClientIdentifier(
                 request, securityProperties, () -> deviceIdResolver.resolve(request, servletResponse));
         publishedPlannerQueryService.recordView(
-                plannerId, Viewer.of(userId), viewerIdentity, request.getHeader(HttpHeaders.USER_AGENT));
+                plannerId, Viewer.of(userId), viewerIdentity,
+                ViewerHashUtil.userAgentOrEmpty(request.getHeader(HttpHeaders.USER_AGENT)));
         return ResponseEntity.noContent().build();
     }
 
     private ResponseEntity<Page<PublicPlannerResponse>> listPlanners(
-            boolean recommendedOnly,
             int page,
             int size,
-            String category,
-            String q,
-            String keyword,
-            Map<ContentEntityType, List<String>> entityFilters,
+            CatalogQuery catalogQuery,
             Viewer viewer) {
 
         Pageable pageable = createPageable(page, size);
 
-        CatalogQuery catalogQuery = new CatalogQuery(recommendedOnly, category, q,
-                parseCsv(keyword), entityFilters);
         return ResponseEntity.ok(
                 publishedPlannerQueryService.searchPlanners(catalogQuery, pageable, viewer).value());
     }
@@ -146,7 +143,7 @@ public class PublishedPlannerController {
     }
 
     private Map<ContentEntityType, List<String>> entityFilters(
-            String identity, String ego, String gift, String themePack) {
+            @Nullable String identity, @Nullable String ego, @Nullable String gift, @Nullable String themePack) {
         Map<ContentEntityType, List<String>> filters = new EnumMap<>(ContentEntityType.class);
         putIfSupplied(filters, ContentEntityType.IDENTITY, identity);
         putIfSupplied(filters, ContentEntityType.EGO, ego);
@@ -156,14 +153,14 @@ public class PublishedPlannerController {
     }
 
     private void putIfSupplied(
-            Map<ContentEntityType, List<String>> filters, ContentEntityType type, String value) {
+            Map<ContentEntityType, List<String>> filters, ContentEntityType type, @Nullable String value) {
         List<String> ids = parseCsv(value);
         if (!ids.isEmpty()) {
             filters.put(type, ids);
         }
     }
 
-    private List<String> parseCsv(String value) {
+    private List<String> parseCsv(@Nullable String value) {
         if (value == null || value.isBlank()) {
             return List.of();
         }

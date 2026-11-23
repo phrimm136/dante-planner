@@ -5,6 +5,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
+import org.jspecify.annotations.Nullable;
+
 public final class ViewerHashUtil {
 
     private static final int MAX_USER_AGENT_LENGTH = 256;
@@ -23,10 +25,11 @@ public final class ViewerHashUtil {
         return sha256Hex(input);
     }
 
+    public static String userAgentOrEmpty(@Nullable String header) {
+        return header == null ? "" : header;
+    }
+
     private static String sanitizeUserAgent(String userAgent) {
-        if (userAgent == null) {
-            return "";
-        }
         if (userAgent.length() > MAX_USER_AGENT_LENGTH) {
             return userAgent.substring(0, MAX_USER_AGENT_LENGTH);
         }

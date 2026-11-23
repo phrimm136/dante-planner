@@ -93,6 +93,12 @@ class DecisionPurityTest {
     }
 
     @Test
+    void inheritedImplementation_WhenTheRuleRunsOverTheFixture_IsWalked() {
+        assertThat(offendersIn(FIXTURE_CLASSES, FIXTURE_PACKAGE))
+                .containsEntry("AskerCaller.decide", Set.of("port Port.isOpen"));
+    }
+
+    @Test
     void portReadingDecision_WhenTheRuleRunsOverTheFixture_IsNamedWithThePort() {
         assertThat(offendersIn(FIXTURE_CLASSES, FIXTURE_PACKAGE))
                 .containsEntry("PortReader.decide", Set.of("port Port.isOpen"));
@@ -113,7 +119,8 @@ class DecisionPurityTest {
                 .containsOnlyKeys("Decider.decide", "PortReader.decide", "WindowHolder.windowOrClosed",
                         "Ledger.counted", "PublicPortReader.decide", "ClockReader.decide", "FutureReader.decide",
                         "Minter.decide", "Cache.decide", "Tally.decide", "Seen.decide", "Slots.decide",
-                        "Pool.decide", "Broken.decide", "MonitorWaiter.decide", "BaseCaller.decide");
+                        "Pool.decide", "Broken.decide", "MonitorWaiter.decide", "BaseCaller.decide",
+                        "AskerCaller.decide");
     }
 
     @Test

@@ -50,12 +50,11 @@ public final class ClientIpResolver {
 
     public static String resolve(HttpServletRequest request, SecurityProperties securityProperties) {
         String directIp = request.getRemoteAddr();
-        if (!securityProperties.isTrustedProxy(directIp)) {
-            return directIp;
-        }
+        return clientIp(directIp, securityProperties.isTrustedProxy(directIp), request.getHeader(X_FORWARDED_FOR));
+    }
 
-        String forwarded = request.getHeader(X_FORWARDED_FOR);
-        if (forwarded == null || forwarded.isBlank()) {
+    private static String clientIp(String directIp, boolean peerIsTrustedProxy, @Nullable String forwarded) {
+        if (!peerIsTrustedProxy || forwarded == null || forwarded.isBlank()) {
             return directIp;
         }
 

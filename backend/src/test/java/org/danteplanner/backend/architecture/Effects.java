@@ -111,7 +111,7 @@ final class Effects {
                     if (isLocalFunction(call)) {
                         continue;
                     }
-                    List<JavaCodeUnit> callees = callees(call);
+                    List<JavaCodeUnit> callees = callees(call, within);
                     if (callees.isEmpty() && !OBJECT_METHODS.contains(call.getName())) {
                         effects.putIfAbsent("port " + call.getTargetOwner().getSimpleName() + "." + call.getName(), chain);
                     }
@@ -177,7 +177,7 @@ final class Effects {
         return calls;
     }
 
-    private static List<JavaCodeUnit> callees(JavaAccess<?> call) {
+    private static List<JavaCodeUnit> callees(JavaAccess<?> call, String within) {
         if (!(call.getTarget() instanceof AccessTarget.CodeUnitAccessTarget target)) {
             return List.of();
         }
@@ -202,10 +202,26 @@ final class Effects {
                             .filter(candidate -> candidate.getRawParameterTypes().equals(member.getRawParameterTypes()))
                             .filter(candidate -> !candidate.getModifiers().contains(JavaModifier.ABSTRACT))
                             .forEach(found::add);
+                    inheritedBy(implementation, member, within).ifPresent(found::add);
                 }
             }
         }
         return found;
+    }
+
+    private static Optional<JavaCodeUnit> inheritedBy(JavaClass implementation, JavaCodeUnit member, String within) {
+        return implementation.getAllRawSuperclasses().stream()
+                .filter(superclass -> superclass.getFullName().startsWith(within))
+                .flatMap(superclass -> superclass.getCodeUnits().stream())
+                .filter(candidate -> candidate.getName().equals(member.getName()))
+                .filter(candidate -> candidate.getRawParameterTypes().equals(member.getRawParameterTypes()))
+                .filter(Effects::isInheritable)
+                .findFirst();
+    }
+
+    private static boolean isInheritable(JavaCodeUnit candidate) {
+        return Set.of(JavaModifier.ABSTRACT, JavaModifier.PRIVATE, JavaModifier.STATIC).stream()
+                .noneMatch(candidate.getModifiers()::contains);
     }
 
     private static boolean isOverridable(JavaCodeUnit member) {

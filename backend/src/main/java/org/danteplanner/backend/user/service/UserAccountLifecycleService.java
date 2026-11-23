@@ -55,12 +55,8 @@ public class UserAccountLifecycleService {
         User user = userRepository.findWithLockById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        Instant alreadyScheduled = user.getPermanentDeleteScheduledAt();
         if (user.isDeleted()) {
-            if (alreadyScheduled == null) {
-                throw new IllegalStateException("user " + userId + " is deleted without a permanent deletion time");
-            }
-            return alreadyScheduled;
+            return user.requirePermanentDeleteScheduledAt();
         }
 
         if (user.getRole() == UserRole.ADMIN) {

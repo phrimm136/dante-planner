@@ -109,6 +109,13 @@ public class User {
         return deletedAt != null;
     }
 
+    public Instant requirePermanentDeleteScheduledAt() {
+        if (permanentDeleteScheduledAt == null) {
+            throw new IllegalStateException("user " + id + " is deleted without a permanent deletion time");
+        }
+        return permanentDeleteScheduledAt;
+    }
+
     public void softDelete(Instant scheduledDeleteAt) {
         this.deletedAt = Instant.now();
         this.permanentDeleteScheduledAt = scheduledDeleteAt;

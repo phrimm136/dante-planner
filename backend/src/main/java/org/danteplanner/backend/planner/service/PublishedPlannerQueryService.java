@@ -103,13 +103,14 @@ public class PublishedPlannerQueryService implements PublishedPlanners {
         if (catalogQuery.recommendedOnly()) {
             spec = spec.and(CatalogSpecifications.isRecommended());
         }
-        if (catalogQuery.category() != null) {
-            spec = spec.and(CatalogSpecifications.hasCategory(catalogQuery.category()));
-        }
-        String searchTerm = catalogQuery.searchTerm();
-        if (searchTerm != null && !searchTerm.isBlank()) {
-            spec = spec.and(CatalogSpecifications.matchesQuery(searchTerm.trim()));
-        }
+        spec = switch (catalogQuery.category()) {
+            case CatalogQuery.TextFilter.Any any -> spec;
+            case CatalogQuery.TextFilter.Text text -> spec.and(CatalogSpecifications.hasCategory(text.value()));
+        };
+        spec = switch (catalogQuery.searchTerm()) {
+            case CatalogQuery.TextFilter.Any any -> spec;
+            case CatalogQuery.TextFilter.Text text -> spec.and(CatalogSpecifications.matchesQuery(text.value()));
+        };
         for (String keyword : catalogQuery.keywords()) {
             spec = spec.and(CatalogSpecifications.hasKeyword(PlannerKeywords.filterKeyword(keyword)));
         }

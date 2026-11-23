@@ -1,6 +1,7 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.planner.dto.CatalogQuery;
+import org.danteplanner.backend.planner.dto.CatalogQuery.TextFilter;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -28,6 +29,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
@@ -116,17 +118,17 @@ class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
 
     /** The filter set the {@code /published} endpoint composes for a plain browse. */
     private static CatalogQuery publishedBrowse() {
-        return new CatalogQuery(false, null, null, null, null);
+        return new CatalogQuery(false, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of());
     }
 
     /** The filter set the {@code /recommended} endpoint composes for a plain browse. */
     private static CatalogQuery recommendedBrowse() {
-        return new CatalogQuery(true, null, null, null, null);
+        return new CatalogQuery(true, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of());
     }
 
     /** The filter set either endpoint composes for a title search. */
     private static CatalogQuery titleSearch() {
-        return new CatalogQuery(false, null, SEARCH_MARKER, null, null);
+        return new CatalogQuery(false, TextFilter.exactly(null), TextFilter.nonBlank(SEARCH_MARKER), List.of(), Map.of());
     }
 
     @Test
