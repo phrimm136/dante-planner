@@ -1,12 +1,15 @@
 package org.danteplanner.backend.auth.token;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import org.danteplanner.backend.shared.redis.RedisKeyScanner;
 
-public final class TokenStoreReads {
+public final class TokenStoreKeys {
 
-    private TokenStoreReads() {
+    private TokenStoreKeys() {
     }
 
     public static int blacklistSize(StringRedisTemplate store) {
@@ -15,6 +18,15 @@ public final class TokenStoreReads {
 
     public static int userInvalidationSize(StringRedisTemplate store) {
         return RedisKeyScanner.scanKeys(store, TokenBlacklistService.USER_INVALIDATION_KEY_PREFIX + "*").size();
+    }
+
+    public static void deleteBlacklistAndInvalidations(StringRedisTemplate store) {
+        Set<String> keys = new HashSet<>(
+                RedisKeyScanner.scanKeys(store, TokenBlacklistService.BLACKLIST_KEY_PREFIX + "*"));
+        keys.addAll(RedisKeyScanner.scanKeys(store, TokenBlacklistService.USER_INVALIDATION_KEY_PREFIX + "*"));
+        if (!keys.isEmpty()) {
+            store.delete(keys);
+        }
     }
 
     public static boolean isFamilyRevoked(StringRedisTemplate store, String familyId) {

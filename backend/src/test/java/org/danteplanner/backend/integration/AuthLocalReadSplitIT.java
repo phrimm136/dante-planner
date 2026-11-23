@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
+import org.danteplanner.backend.auth.token.TokenStoreKeys;
 import org.danteplanner.backend.config.TestConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -86,7 +87,7 @@ class AuthLocalReadSplitIT {
         authLocalTemplate = new StringRedisTemplate(authLocalFactory);
         authLocalTemplate.afterPropertiesSet();
 
-        tokenBlacklistService.clear();
+        TokenStoreKeys.deleteBlacklistAndInvalidations(stringRedisTemplate);
 
         Set<String> localKeys = authLocalTemplate.keys("*");
         if (localKeys != null && !localKeys.isEmpty()) {

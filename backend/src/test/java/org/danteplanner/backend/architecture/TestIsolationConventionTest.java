@@ -11,8 +11,7 @@ import com.tngtech.archunit.lang.SimpleConditionEvent;
 
 import org.junit.jupiter.api.Test;
 
-import org.danteplanner.backend.auth.token.TokenBlacklistService;
-import org.danteplanner.backend.auth.token.TokenStoreReads;
+import org.danteplanner.backend.auth.token.TokenStoreKeys;
 import org.danteplanner.backend.integration.ExclusiveDatabaseSupport;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.danteplanner.backend.shared.redis.RedisKeyScanner;
@@ -161,9 +160,9 @@ class TestIsolationConventionTest {
     void keyspaceWideCalls_WhenDerivedFromTheSources_IncludeTheBlacklistScans() {
         assertThat(KEYSPACE_WIDE_CALLS).contains(
                 callKey(RedisKeyScanner.class.getName(), "scanKeys"),
-                callKey(TokenBlacklistService.class.getName(), "clear"),
-                callKey(TokenStoreReads.class.getName(), "blacklistSize"),
-                callKey(TokenStoreReads.class.getName(), "userInvalidationSize"));
+                callKey(TokenStoreKeys.class.getName(), "deleteBlacklistAndInvalidations"),
+                callKey(TokenStoreKeys.class.getName(), "blacklistSize"),
+                callKey(TokenStoreKeys.class.getName(), "userInvalidationSize"));
     }
 
     @Test

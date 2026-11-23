@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import jakarta.annotation.PostConstruct;
 
@@ -24,7 +23,6 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 
 import org.danteplanner.backend.shared.redis.AuthReadSources;
 import org.danteplanner.backend.shared.redis.AuthWrites;
-import org.danteplanner.backend.shared.redis.RedisKeyScanner;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -220,19 +218,6 @@ public class TokenBlacklistService {
     public void clearUserInvalidation(@NonNull Long userId) {
         Objects.requireNonNull(userId, "userId");
         authWrites.writeWithoutResult(store -> store.delete(userInvalidationKey(userId)));
-    }
-
-    public void clear() {
-        authWrites.writeWithoutResult(store -> {
-            Set<String> keys = RedisKeyScanner.scanKeys(store, BLACKLIST_KEY_PREFIX + "*");
-            if (!keys.isEmpty()) {
-                store.delete(keys);
-            }
-            Set<String> userKeys = RedisKeyScanner.scanKeys(store, USER_INVALIDATION_KEY_PREFIX + "*");
-            if (!userKeys.isEmpty()) {
-                store.delete(userKeys);
-            }
-        });
     }
 
     private boolean failOpen(String message, DataAccessException e) {

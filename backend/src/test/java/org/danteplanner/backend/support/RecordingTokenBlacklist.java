@@ -144,12 +144,6 @@ public class RecordingTokenBlacklist extends TokenBlacklistService {
         return invalidatedUserIds().size();
     }
 
-    @Override
-    public void clear() {
-        entries.clear();
-        invalidations.clear();
-    }
-
     private void put(String token, Date expiry, Mode mode) {
         long now = clock.millis();
         if (expiry.getTime() > now) {
