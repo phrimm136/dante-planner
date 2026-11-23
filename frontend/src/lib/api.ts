@@ -16,7 +16,6 @@ import {
 } from './apiErrors'
 import { useServerStatusStore, type ServerStatus } from './banner/serverStatus'
 import { ProblemSchema, type Problem } from './problem'
-import { queryClient } from './queryClient'
 
 export { ProblemSchema, type Problem }
 
@@ -72,6 +71,27 @@ function recordServerStatus(status: ServerStatus): void {
   useServerStatusStore.getState().setStatus(status)
 }
 
+type UnauthorizedListener = () => void
+
+const unauthorizedListeners = new Set<UnauthorizedListener>()
+
+export function onUnauthorized(listener: UnauthorizedListener): () => void {
+  unauthorizedListeners.add(listener)
+  return () => {
+    unauthorizedListeners.delete(listener)
+  }
+}
+
+function announceUnauthorized(): void {
+  for (const listener of unauthorizedListeners) {
+    try {
+      listener()
+    } catch (error) {
+      console.error('Unauthorized listener failed:', error)
+    }
+  }
+}
+
 async function readErrorBody(response: Response): Promise<Problem | null> {
   const parsed = ProblemSchema.safeParse(await response.json().catch(() => null))
   return parsed.success ? parsed.data : null
@@ -112,7 +132,7 @@ export class ApiClient {
     }
 
     if (response.status === 401) {
-      queryClient.setQueryData(['auth', 'me'], null)
+      announceUnauthorized()
       throw new UnauthorizedError('Authentication required')
     }
 

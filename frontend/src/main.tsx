@@ -8,10 +8,12 @@ import { ErrorBoundary } from '@/components/feedback/ErrorBoundary'
 import { installChunkReload } from '@/lib/chunkReload'
 import { queryClient } from '@/lib/queryClient'
 import { router } from '@/lib/router'
+import { clearSessionOnUnauthorized } from '@/shared/auth'
 import { i18nReady } from './lib/i18n'
 import './styles/globals.css'
 
 installChunkReload()
+clearSessionOnUnauthorized(queryClient)
 
 const app = (
   <StrictMode>
