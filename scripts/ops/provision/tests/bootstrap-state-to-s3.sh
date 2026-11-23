@@ -124,7 +124,7 @@ out=$( (push_state state-backend "$s2" acct-s2 remote-s2 "$work/ws1.tfvars" \
 rc=$?
 name="a workspace file is pushed and verified"
 [ "$rc" -eq 0 ] || fail "$name" "exit $rc"
-printf '%s\n' "$out" | grep -qx 'verified: state-backend remote-s2 3 resources, plan shows no change' ||
+printf '%s\n' "$out" | grep -qx 'verified: state-backend remote-s2 3 resources, the bucket holds the backup'"'"'s state' ||
   fail "$name" "no verified line"
 [ "$(remote_count "$s2")" = 3 ] || fail "$name" "remote holds $(remote_count "$s2") resources"
 [ "$(mode_of "$XDG_STATE_HOME/danteplanner/tf-state-backup/state-backend.acct-s2.tfstate")" = 600 ] ||
@@ -180,10 +180,10 @@ out=$( (push_state state-backend "$s2" acct-s2 remote-s2 "$work/ws1.tfvars" \
   "$pa/terraform.tfstate.d/ws1/terraform.tfstate" -backend-config=path="$work/s2.remote.tfstate") </dev/null 2>&1)
 rc=$?
 [ "$rc" -eq 0 ] || fail "$name" "exit $rc"
-printf '%s\n' "$out" | grep -qx 'push: already done; state-backend/terraform.tfstate in remote-s2 holds the backup'"'"'s state (same lineage and serial)' ||
+printf '%s\n' "$out" | grep -qx 'push: already done; state-backend/terraform.tfstate in remote-s2 holds the backup'"'"'s state (same lineage, resources and outputs)' ||
   fail "$name" "does not say the push was already done"
 printf '%s\n' "$out" | grep -qx 'count: remote 3, file 3' || fail "$name" "no count line"
-printf '%s\n' "$out" | grep -qx 'verified: state-backend remote-s2 3 resources, plan shows no change' ||
+printf '%s\n' "$out" | grep -qx 'verified: state-backend remote-s2 3 resources, the bucket holds the backup'"'"'s state' ||
   fail "$name" "no verified line"
 pass "$name"
 
@@ -207,7 +207,7 @@ out=$( (push_state state-backend "$s2" acct-s7 remote-s7 "$work/ws1.tfvars" \
   "$p7/terraform.tfstate.d/ws1/terraform.tfstate" -backend-config=path="$work/s7.remote.tfstate") </dev/null 2>&1)
 rc=$?
 [ "$rc" -eq 0 ] || fail "$name" "exit $rc"
-printf '%s\n' "$out" | grep -qx 'verified: state-backend remote-s7 3 resources, plan shows no change' ||
+printf '%s\n' "$out" | grep -qx 'verified: state-backend remote-s7 3 resources, the bucket holds the backup'"'"'s state' ||
   fail "$name" "no verified line"
 [ "$(remote_lineage "$s2")" = "$(file_lineage "$p7/terraform.tfstate.d/ws1/terraform.tfstate")" ] ||
   fail "$name" "the stack directory does not point at the second remote"
@@ -278,18 +278,60 @@ rc=$?
 no_ids || fail "$name" "printed an account id"
 pass "$name"
 
-# Scenario: a drifted plan stops before anything is called verified
 s5="$work/s5"
 p5="$work/producer-5"
-producer "$p5" && apply_in "$p5" ws1 ws1 || fail "drift setup" "apply"
+producer "$p5" && apply_in "$p5" ws1 ws1 || fail "plan failure setup" "apply"
 target "$s5"
-out=$( (push_state iam-bootstrap "$s5" acct-s5 remote-s5 "$work/other.tfvars" \
+out=$( (push_state iam-bootstrap "$s5" acct-s5 remote-s5 "$work/missing.tfvars" \
   "$p5/terraform.tfstate.d/ws1/terraform.tfstate" -backend-config=path="$work/s5.remote.tfstate") </dev/null 2>&1)
 rc=$?
-name="a drifted plan stops before anything is called verified"
+name="a plan that fails stops before anything is called verified"
 [ "$rc" -ne 0 ] || fail "$name" "exit 0"
-printf '%s\n' "$out" | grep -q 'pushed but not verified' || fail "$name" "does not say pushed but not verified"
-printf '%s\n' "$out" | grep -q "plan -var-file=$work/other.tfvars" || fail "$name" "does not name the plan command"
+printf '%s\n' "$out" | grep -q '^state: .* equals the backup' || fail "$name" "the state comparison did not run first"
+printf '%s\n' "$out" | grep -q 'cannot be planned from the bucket. Pushed but not verified' || fail "$name" "does not say pushed but not verified"
+printf '%s\n' "$out" | grep -q "plan -var-file=$work/missing.tfvars" || fail "$name" "does not name the plan command"
+printf '%s\n' "$out" | grep -q '^verified:' && fail "$name" "printed a verified line"
+pass "$name"
+
+name="drift between the code and the account does not stop the move"
+s12="$work/s12"
+p12="$work/producer-12"
+producer "$p12" && apply_in "$p12" ws1 ws1 || fail "$name" "setup apply"
+target "$s12"
+printf 'variable "v" {\n  type    = string\n  default = "a"\n}\n\nresource "terraform_data" "x" {\n  count = 2\n  input = var.v\n}\n' >"$s12/main.tf"
+out=$( (push_state iam-bootstrap "$s12" acct-s12 remote-s12 "$work/other.tfvars" \
+  "$p12/terraform.tfstate.d/ws1/terraform.tfstate" -backend-config=path="$work/s12.remote.tfstate") </dev/null 2>&1)
+rc=$?
+[ "$rc" -eq 0 ] || fail "$name" "exit $rc"
+printf '%s\n' "$out" | grep -q '^plan: 0 to add, 2 to change, 1 to destroy; this is a difference between the code and the account that the move did not cause. Read ' ||
+  fail "$name" "no drift line"
+printf '%s\n' "$out" | grep -q '^WARNING: the plan destroys or replaces 1 resources. Read ' || fail "$name" "no destroy warning"
+printf '%s\n' "$out" | grep -qx "verified: iam-bootstrap remote-s12 3 resources, the bucket holds the backup's state" ||
+  fail "$name" "no verified line"
+printf '%s\n' "$out" | grep -q 'fixed' && fail "$name" "printed a resource attribute"
+pass "$name"
+
+name="a bucket state that differs from the backup at the same lineage and serial is refused"
+p13="$work/producer-13"
+producer "$p13" && apply_in "$p13" ws1 ws1 || fail "$name" "setup apply"
+command cp -R "$p13" "$work/producer-13b"
+apply_in "$p13" ws1 left && apply_in "$work/producer-13b" ws1 right || fail "$name" "setup diverging applies"
+[ "$(state_facts "$p13/terraform.tfstate.d/ws1/terraform.tfstate" | cut -d' ' -f2-)" = \
+  "$(state_facts "$work/producer-13b/terraform.tfstate.d/ws1/terraform.tfstate" | cut -d' ' -f2-)" ] ||
+  fail "$name" "setup: the copies do not share lineage and serial"
+s13="$work/s13"
+target "$s13"
+printf 'v = "left"\n' >"$work/left.tfvars"
+out=$( (push_state iam-bootstrap "$s13" acct-s13 remote-s13 "$work/left.tfvars" \
+  "$p13/terraform.tfstate.d/ws1/terraform.tfstate" -backend-config=path="$work/s13.remote.tfstate") </dev/null 2>&1) ||
+  fail "$name" "setup move"
+out=$( (push_state iam-bootstrap "$s13" acct-s13 remote-s13 "$work/left.tfvars" \
+  "$work/producer-13b/terraform.tfstate.d/ws1/terraform.tfstate" -backend-config=path="$work/s13.remote.tfstate") </dev/null 2>&1)
+rc=$?
+[ "$rc" -ne 0 ] || fail "$name" "exit 0"
+printf '%s\n' "$out" | grep -q 'holds the same lineage and serial as .* but different resources or outputs; nothing pushed.' ||
+  fail "$name" "does not name the content difference"
+printf '%s\n' "$out" | grep -qE 'left|right' && fail "$name" "printed state content"
 printf '%s\n' "$out" | grep -q '^verified:' && fail "$name" "printed a verified line"
 pass "$name"
 
@@ -407,8 +449,44 @@ rc=$?
 [ "$rc" -eq 0 ] || fail "$name" "exit $rc"
 printf '%s\n' "$out" | grep -q 'holds an older serial of the same state; pushing the newer local state over it' ||
   fail "$name" "does not name the newer-local case"
-printf '%s\n' "$out" | grep -qx 'verified: iam-bootstrap remote-s11 3 resources, plan shows no change' || fail "$name" "no verified line"
+printf '%s\n' "$out" | grep -qx 'verified: iam-bootstrap remote-s11 3 resources, the bucket holds the backup'"'"'s state' || fail "$name" "no verified line"
 [ "$(remote_lineage "$s11")" = "$(file_lineage "$p11_ws1")" ] || fail "$name" "the remote is not the local state"
+out=$( (push_state iam-bootstrap "$s11" acct-s11 remote-s11 "$work/other.tfvars" "$p11_ws1" \
+  -backend-config=path="$work/s11.remote.tfstate") </dev/null 2>&1)
+rc=$?
+[ "$rc" -eq 0 ] || fail "$name" "rerun after the push over an older serial, exit $rc"
+printf '%s\n' "$out" | grep -q '^push: already done' || fail "$name" "the rerun did not resume"
+pass "$name"
+
+name="a bucket state that differs from the backup after the push is not verified"
+mkdir -p "$work/tamper"
+cat >"$work/tamper/terraform" <<EOF
+#!/bin/sh
+case " \$* " in
+  *" push "*)
+    "$real_terraform" "\$@"; rc=\$?; touch "$work/tamper/pushed"; exit \$rc ;;
+  *" pull "*)
+    if [ -e "$work/tamper/pushed" ]; then
+      "$real_terraform" "\$@" | python3 -c 'import json, sys; d = json.load(sys.stdin); d["resources"][0]["instances"][0]["attributes"]["input"] = "tampered"; json.dump(d, sys.stdout)'
+      exit 0
+    fi ;;
+esac
+exec "$real_terraform" "\$@"
+EOF
+chmod +x "$work/tamper/terraform"
+p14="$work/producer-14"
+s14="$work/s14"
+producer "$p14" && apply_in "$p14" ws1 ws1 || fail "$name" "setup apply"
+target "$s14"
+out=$( (PATH="$work/tamper:$PATH" push_state iam-bootstrap "$s14" acct-s14 remote-s14 "$work/ws1.tfvars" \
+  "$p14/terraform.tfstate.d/ws1/terraform.tfstate" -backend-config=path="$work/s14.remote.tfstate") </dev/null 2>&1)
+rc=$?
+[ "$rc" -ne 0 ] || fail "$name" "exit 0"
+printf '%s\n' "$out" | grep -q '^push: ' || fail "$name" "setup: did not push"
+printf '%s\n' "$out" | grep -q 'differs from the backup in content (resources or outputs). Pushed but not verified.' ||
+  fail "$name" "does not name the content difference"
+printf '%s\n' "$out" | grep -q 'tampered' && fail "$name" "printed state content"
+[ ! -e "$XDG_STATE_HOME/danteplanner/tf-state-backup/iam-bootstrap.acct-s14.tfstate.verified" ] || fail "$name" "wrote a marker"
 pass "$name"
 
 name="a rerun with a local file older than the bucket is refused as older"
