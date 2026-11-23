@@ -25,9 +25,10 @@ echo "k3s $*" >> "$FAKE_DIR/calls"
     [ -n "${FAKE_SAVE_FAILS:-}" ] && exit 1
     echo local >> "$FAKE_DIR/snapshots"
     [ -n "${FAKE_S3_FAILS:-}" ] || echo s3 >> "$FAKE_DIR/snapshots" ;;
-  "kubectl get etcdsnapshotfiles.k3s.cattle.io -o name")
+  "kubectl get etcdsnapshotfiles.k3s.cattle.io -o name --request-timeout=5s")
+    [ -n "${FAKE_SLOW_LIST:-}" ] && sleep "$FAKE_SLOW_LIST"
     [ -f "$FAKE_DIR/snapshots" ] && sed 's/^/etcdsnapshotfile.k3s.cattle.io\\/snap-/' "$FAKE_DIR/snapshots" ;;
-  "kubectl get etcdsnapshotfiles.k3s.cattle.io """ + S3_SELECTOR + """ -o name")
+  "kubectl get etcdsnapshotfiles.k3s.cattle.io """ + S3_SELECTOR + """ -o name --request-timeout=5s")
     [ -f "$FAKE_DIR/snapshots" ] && sed -n 's/^s3$/etcdsnapshotfile.k3s.cattle.io\\/snap-s3/p' "$FAKE_DIR/snapshots" ;;
   "kubectl get --raw /readyz --request-timeout=5s")
     if [ -n "${FAKE_TERM_ONCE:-}" ] && [ "$n" -ge 1 ] && [ ! -f "$FAKE_DIR/termed" ]; then
@@ -58,7 +59,11 @@ echo "systemctl $*" >> "$FAKE_DIR/calls"
   "show -p KillMode k3s")
     echo "KillMode=${FAKE_KILL_MODE:-process}" ;;
   "show -p NRestarts --value k3s")
-    if [ "$mode" = loop ]; then echo 5; else echo 0; fi ;;
+    reads=$(cat "$FAKE_DIR/nrestart-reads-$n" 2>/dev/null || echo 0)
+    echo $((reads + 1)) > "$FAKE_DIR/nrestart-reads-$n"
+    if [ "$n" = 0 ] || [ "$reads" = 0 ]; then echo "${FAKE_PRE_NRESTARTS:-0}"
+    elif [ "$mode" = loop ]; then echo "$reads"
+    else echo 0; fi ;;
   "is-failed --quiet k3s")
     [ "$mode" = failed ] ;;
   "is-active --quiet k3s"|"is-active k3s")
@@ -114,15 +119,15 @@ class RepairCase(unittest.TestCase):
     def set_nodes(self, *node_rows):
         (self.work_dir / "nodes").write_text("\n".join(node_rows) + "\n")
 
-    def remote_text(self, mode_name, restart_bound="2"):
+    def remote_text(self, mode_name, restart_bound="2", ssm_timeout="600"):
         build_run = subprocess.run(["bash", "-c", f'source "{SCRIPT}"; remote_script "$@"', "repair-test", mode_name,
-                                    str(self.unit_path), "0 */6 * * *", "2", restart_bound, "2", "1",
-                                    str(self.lock_dir)],
+                                    str(self.unit_path), "0 */6 * * *", "2", restart_bound, "2", "2", ssm_timeout,
+                                    "5", "1", str(self.lock_dir)],
                                    capture_output=True, text=True, check=True)
         return build_run.stdout
 
-    def run_remote(self, mode_name, script_text=None, restart_bound="2", **fake_flags):
-        return subprocess.run(["sh", "-c", script_text or self.remote_text(mode_name, restart_bound)],
+    def run_remote(self, mode_name, script_text=None, restart_bound="2", ssm_timeout="600", **fake_flags):
+        return subprocess.run(["sh", "-c", script_text or self.remote_text(mode_name, restart_bound, ssm_timeout)],
                               capture_output=True, text=True, start_new_session=True,
                               env={**self.base_env, **{flag_name: "1" if flag_value is True else flag_value
                                                        for flag_name, flag_value in fake_flags.items()}})
@@ -257,6 +262,31 @@ class RemoteScriptTest(RepairCase):
         self.assert_rolled_back(self.run_remote("repair", FAKE_RESTART1="never-ready"),
                                 "ROLLED BACK, k3s serving: API /readyz not ok within 2s", 4)
 
+    def test_a_restart_loop_is_seen_when_the_manual_restart_resets_the_counter(self):
+        started = time.monotonic()
+        loop_run = self.run_remote("repair", restart_bound="30", FAKE_RESTART1="loop", FAKE_PRE_NRESTARTS="7")
+        self.assertLess(time.monotonic() - started, 15)
+        self.assert_rolled_back(loop_run, "ROLLED BACK, k3s serving: k3s exited and systemd restarted it", 4)
+
+    def test_a_counter_reset_by_the_manual_restart_is_not_a_loop(self):
+        reset_run = self.run_remote("repair", FAKE_PRE_NRESTARTS="7")
+        self.assertEqual(self.final_line(reset_run), "REPAIRED", reset_run.stdout)
+
+    def test_a_fast_run_with_the_same_budget_edits_the_unit(self):
+        self.assertEqual(self.final_line(self.run_remote("repair", ssm_timeout="9")), "REPAIRED")
+
+    def test_a_slow_phase_before_the_edit_leaves_no_time_and_changes_nothing(self):
+        slow_run = self.run_remote("repair", ssm_timeout="9", FAKE_SLOW_LIST="2")
+        self.assert_untouched(slow_run, "not enough time left to restart and roll back within this run (")
+        self.assertTrue(self.final_line(slow_run).endswith("s left); run again"))
+        self.assertIn("s3", (self.work_dir / "snapshots").read_text())
+
+    def test_a_rollback_with_a_late_lease_but_a_serving_api_ends_serving(self):
+        late_run = self.run_remote("repair", FAKE_RESTART1="never-ready", FAKE_RESTART2="stale",
+                                   FAKE_STALE_NODE="node-b")
+        self.assert_rolled_back(late_run, "ROLLED BACK, k3s serving: API /readyz not ok within 2s; after the rollback "
+                                          "1 of 2 nodes that were Ready before the run have not renewed their lease yet", 4)
+
     def test_a_rollback_that_never_gets_ready_ends_not_serving_and_stops(self):
         not_serving_run = self.run_remote("repair", FAKE_RESTART1="never-ready", FAKE_RESTART2="never-ready")
         self.assert_rolled_back(not_serving_run, "ROLLED BACK, k3s NOT serving: API /readyz not ok within 2s; "
@@ -300,8 +330,8 @@ class RemoteScriptTest(RepairCase):
             "k3s kubectl get nodes --no-headers --request-timeout=5s",
             "k3s kubectl -n kube-node-lease get leases --request-timeout=5s -o "
             "jsonpath={range .items[*]}{.metadata.name}{\" \"}{.spec.renewTime}{\"\\n\"}{end}",
-            "systemctl is-active k3s", "k3s kubectl get etcdsnapshotfiles.k3s.cattle.io -o name",
-            f"k3s kubectl get etcdsnapshotfiles.k3s.cattle.io {S3_SELECTOR} -o name"])
+            "systemctl is-active k3s", "k3s kubectl get etcdsnapshotfiles.k3s.cattle.io -o name --request-timeout=5s",
+            f"k3s kubectl get etcdsnapshotfiles.k3s.cattle.io {S3_SELECTOR} -o name --request-timeout=5s"])
 
     def test_no_ready_node_before_the_run_changes_nothing(self):
         self.set_nodes("node-a   NotReady    control-plane,etcd   1d   v1.36.3+k3s1")
@@ -334,6 +364,19 @@ class MutantTest(RepairCase):
                                                          "    :\n"), FAKE_TERM_ONCE=True)
         self.assertNotEqual(self.unit_path.read_text(), self.original_text, term_run.stdout)
 
+    def test_without_the_budget_check_a_slow_run_edits_the_unit(self):
+        slow_run = self.run_remote("repair", self.mutant(
+            '[ "$time_left" -ge $(( RESTART_BOUND + ROLLBACK_BOUND + SLACK )) ]', "true"),
+            FAKE_SLOW_LIST="2", ssm_timeout="9")
+        self.assertNotIn("not enough time left", slow_run.stdout)
+        self.assertTrue(self.backups())
+
+    def test_comparing_against_the_counter_before_the_restart_misses_a_loop(self):
+        loop_run = self.run_remote("repair", self.mutant('[ "$restarts_now" -lt "$restarts_low" ] && '
+                                                         'restarts_low=$restarts_now\n', ""),
+                                   FAKE_RESTART1="loop", FAKE_PRE_NRESTARTS="7")
+        self.assertNotIn("k3s exited and systemd restarted it", self.final_line(loop_run))
+
     def test_without_the_lease_time_check_a_stale_node_passes(self):
         stale_run = self.run_remote("repair", self.mutant('[ "$renew_epoch" -gt "$1" ]', '[ "$renew_epoch" -gt 0 ]'),
                                     FAKE_RESTART1="stale", FAKE_STALE_NODE="node-b")
@@ -363,8 +406,14 @@ class LocalScriptTest(RepairCase):
         self.run_local("--site", "oregon")
         sent_lines = self.sent_parameters()["commands"]
         bounds = {one_line.split("=")[0]: int(one_line.split("=")[1]) for one_line in sent_lines
-                  if one_line.split("=")[0] in ("SAVE_BOUND", "RESTART_BOUND", "ROLLBACK_BOUND")}
+                  if one_line.split("=")[0] in ("SAVE_BOUND", "RESTART_BOUND", "ROLLBACK_BOUND", "SLACK",
+                                                "SSM_TIMEOUT", "CALL_BOUND")}
         ssm_timeout = int(self.sent_parameters()["executionTimeout"][0])
+        self.assertEqual(bounds["SSM_TIMEOUT"], ssm_timeout)
+        self.assertEqual((bounds["SAVE_BOUND"], bounds["RESTART_BOUND"], bounds["ROLLBACK_BOUND"], bounds["SLACK"],
+                          bounds["CALL_BOUND"], ssm_timeout), (120, 300, 300, 180, 10, 1080))
+        self.assertGreaterEqual(ssm_timeout - bounds["RESTART_BOUND"] - bounds["ROLLBACK_BOUND"] - bounds["SLACK"],
+                                2 * bounds["SAVE_BOUND"])
         local_wait = int(subprocess.run(["bash", "-c", f'source "{SCRIPT}"; echo "$LOCAL_WAIT_SECONDS"'],
                                         capture_output=True, text=True, check=True).stdout)
         self.assertLess(2 * bounds["SAVE_BOUND"] + bounds["RESTART_BOUND"] + bounds["ROLLBACK_BOUND"], ssm_timeout)

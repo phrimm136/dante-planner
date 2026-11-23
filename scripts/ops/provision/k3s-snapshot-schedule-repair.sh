@@ -16,7 +16,8 @@ POLL_SECONDS=5
 SAVE_BOUND_SECONDS=120
 RESTART_BOUND_SECONDS=300
 ROLLBACK_BOUND_SECONDS=300
-REMOTE_SLACK_SECONDS=120
+REMOTE_SLACK_SECONDS=180
+CALL_BOUND_SECONDS=10
 REMOTE_WORST_SECONDS=$((2 * SAVE_BOUND_SECONDS + RESTART_BOUND_SECONDS + ROLLBACK_BOUND_SECONDS + REMOTE_SLACK_SECONDS))
 SSM_TIMEOUT_SECONDS=$((REMOTE_WORST_SECONDS + 60))
 LOCAL_WAIT_SECONDS=$((SSM_TIMEOUT_SECONDS + 60))
@@ -35,10 +36,13 @@ site_region() {
 }
 
 remote_script() {
-    local mode="$1" unit="$2" cron="$3" save_bound="$4" restart_bound="$5" rollback_bound="$6" poll="$7" lock_dir="$8"
-    printf 'MODE=%s\nUNIT=%s\nCRON=%s\nSAVE_BOUND=%s\nRESTART_BOUND=%s\nROLLBACK_BOUND=%s\nPOLL=%s\nLOCK_DIR=%s\n' \
-        "$mode" "'$unit'" "'$cron'" "$save_bound" "$restart_bound" "$rollback_bound" "$poll" "'$lock_dir'"
+    local mode="$1" unit="$2" cron="$3" save_bound="$4" restart_bound="$5" rollback_bound="$6" slack="$7"
+    local ssm_timeout="$8" call_bound="$9" poll="${10}" lock_dir="${11}"
+    printf 'MODE=%s\nUNIT=%s\nCRON=%s\nSAVE_BOUND=%s\nRESTART_BOUND=%s\nROLLBACK_BOUND=%s\nSLACK=%s\n' \
+        "$mode" "'$unit'" "'$cron'" "$save_bound" "$restart_bound" "$rollback_bound" "$slack"
+    printf 'SSM_TIMEOUT=%s\nCALL_BOUND=%s\nPOLL=%s\nLOCK_DIR=%s\n' "$ssm_timeout" "$call_bound" "$poll" "'$lock_dir'"
     cat <<'REMOTE'
+RUN_START=$(date +%s)
 malformed="'0 \\*/6 \\* \\* \\*' \\"
 repaired="'$CRON' \\"
 flag="'--etcd-snapshot-schedule-cron' \\"
@@ -46,23 +50,25 @@ STATE=checked
 OWN_LOCK=0
 backup=""
 restart_reason=""
-KUBECTL_TIMEOUT=--request-timeout=5s
+KUBECTL_TIMEOUT="--request-timeout=${CALL_BOUND}s"
 
 release_lock() { if [ "$OWN_LOCK" = 1 ]; then rm -rf "$LOCK_DIR"; OWN_LOCK=0; fi; }
 end() { STATE=finished; release_lock; echo "$2"; exit "$1"; }
-snapshot_count() { k3s kubectl get etcdsnapshotfiles.k3s.cattle.io -o name 2>/dev/null | grep -c . || true; }
-s3_count() { k3s kubectl get etcdsnapshotfiles.k3s.cattle.io -l etcd.k3s.cattle.io/snapshot-storage-node=s3 -o name 2>/dev/null | grep -c . || true; }
+sctl() { timeout -k 5 "$CALL_BOUND" systemctl "$@"; }
+snapshot_count() { k3s kubectl get etcdsnapshotfiles.k3s.cattle.io -o name "$KUBECTL_TIMEOUT" 2>/dev/null | grep -c . || true; }
+s3_count() { k3s kubectl get etcdsnapshotfiles.k3s.cattle.io -l etcd.k3s.cattle.io/snapshot-storage-node=s3 -o name "$KUBECTL_TIMEOUT" 2>/dev/null | grep -c . || true; }
 snapshot_split() { total=$(snapshot_count); in_s3=$(s3_count); echo "snapshots: local $((total - in_s3)), s3 $in_s3"; }
 cron_line() { sed -n "${value_no}p" "$UNIT" | sed 's/^[[:space:]]*//'; }
 unit_kill_mode() { awk '{ line = $0; sub(/^[[:space:]]+/, "", line) } line ~ /^KillMode=/ { print line }' "$UNIT"; }
-effective_kill_mode() { systemctl show -p KillMode k3s 2>/dev/null || true; }
+effective_kill_mode() { sctl show -p KillMode k3s 2>/dev/null || true; }
 api_ready() { [ "$(k3s kubectl get --raw /readyz "$KUBECTL_TIMEOUT" 2>/dev/null)" = ok ]; }
 serving_text() {
-  if systemctl is-active --quiet k3s && api_ready; then echo "k3s is serving"; else echo "k3s is NOT serving"; fi
+  if sctl is-active --quiet k3s && api_ready; then echo "k3s is serving"; else echo "k3s is NOT serving"; fi
 }
-restart_count() { systemctl show -p NRestarts --value k3s 2>/dev/null || echo 0; }
+restart_count() { sctl show -p NRestarts --value k3s 2>/dev/null || echo 0; }
 
 nodes_back() {
+  behind=$ready_total
   node_rows=$(k3s kubectl get nodes --no-headers "$KUBECTL_TIMEOUT" 2>/dev/null) || return 1
   lease_rows=$(k3s kubectl -n kube-node-lease get leases "$KUBECTL_TIMEOUT" \
     -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.spec.renewTime}{"\n"}{end}' 2>/dev/null) || return 1
@@ -86,16 +92,19 @@ READY
 wait_ready() {
   deadline=$(( $(date +%s) + $1 ))
   restart_reason="not ready within $1s"
+  restarts_low=$3
   while [ "$(date +%s)" -lt "$deadline" ]; do
-    if systemctl is-failed --quiet k3s; then
+    if sctl is-failed --quiet k3s; then
       restart_reason="systemd reports k3s failed"
       return 1
     fi
-    if [ "$(restart_count)" -gt "$3" ]; then
+    restarts_now=$(restart_count)
+    [ "$restarts_now" -lt "$restarts_low" ] && restarts_low=$restarts_now
+    if [ "$restarts_now" -gt "$restarts_low" ]; then
       restart_reason="k3s exited and systemd restarted it"
       return 1
     fi
-    if ! systemctl is-active --quiet k3s; then
+    if ! sctl is-active --quiet k3s; then
       restart_reason="k3s not active within $1s"
     elif ! api_ready; then
       restart_reason="API /readyz not ok within $1s"
@@ -111,8 +120,8 @@ wait_ready() {
 
 start_k3s() {
   since_epoch=$(date +%s)
-  restarts_before=$(restart_count)
-  systemctl restart --no-block k3s
+  sctl restart --no-block k3s || return 1
+  restarts_queued=$(restart_count)
 }
 
 roll_back() {
@@ -122,10 +131,12 @@ roll_back() {
   if ! cp -p "$backup" "$UNIT"; then
     end 5 "ROLLED BACK, k3s NOT serving: $why; copying $backup back to $UNIT failed; run cp -p $backup $UNIT; systemctl daemon-reload; systemctl restart --no-block k3s; then $look"
   fi
-  systemctl daemon-reload || end 5 "ROLLED BACK, k3s NOT serving: $why; systemctl daemon-reload failed after the restore; $look"
+  sctl daemon-reload || end 5 "ROLLED BACK, k3s NOT serving: $why; systemctl daemon-reload failed after the restore; $look"
   start_k3s || end 5 "ROLLED BACK, k3s NOT serving: $why; the rollback restart was refused; $look"
-  if wait_ready "$ROLLBACK_BOUND" "$since_epoch" "$restarts_before"; then
-    end 4 "ROLLED BACK, k3s serving: $why"
+  wait_ready "$ROLLBACK_BOUND" "$since_epoch" "$restarts_queued" && end 4 "ROLLED BACK, k3s serving: $why"
+  if sctl is-active --quiet k3s && api_ready; then
+    nodes_back "$since_epoch" && end 4 "ROLLED BACK, k3s serving: $why"
+    end 4 "ROLLED BACK, k3s serving: $why; after the rollback $behind of $ready_total nodes that were Ready before the run have not renewed their lease yet"
   fi
   end 5 "ROLLED BACK, k3s NOT serving: $why; after the rollback $restart_reason; $look"
 }
@@ -160,8 +171,8 @@ found=$(cron_line)
 echo "unit line $value_no as found: $found"
 if [ "$found" = "$repaired" ]; then
   snapshot_split
-  if ! systemctl is-active --quiet k3s; then
-    end 3 "NOTHING CHANGED: the unit holds the repaired line, but k3s is $(systemctl is-active k3s || true)"
+  if ! sctl is-active --quiet k3s; then
+    end 3 "NOTHING CHANGED: the unit holds the repaired line, but k3s is $(sctl is-active k3s || true)"
   fi
   api_ready || end 3 "NOTHING CHANGED: the unit holds the repaired line and k3s is active, but the API /readyz is not ok"
   end 0 "ALREADY REPAIRED"
@@ -182,7 +193,7 @@ fi
 if [ "$MODE" = dry-run ]; then
   if nodes_back "$(( $(date +%s) - 60 ))"; then lease_state="renewed within 60s"; else lease_state="NOT all renewed within 60s"; fi
   echo "node leases of the Ready nodes: $lease_state"
-  echo "k3s: $(systemctl is-active k3s || true)"
+  echo "k3s: $(sctl is-active k3s || true)"
   snapshot_split
   echo "would: k3s etcd-snapshot save and wait for its S3 copy; copy $UNIT to $UNIT.bak-<timestamp>; replace line $value_no with $repaired; systemctl daemon-reload; systemctl restart --no-block k3s; wait up to ${RESTART_BOUND}s for k3s, /readyz and every node Ready before the run with a new lease"
   end 0 "NOTHING CHANGED: dry run"
@@ -192,10 +203,10 @@ fi
 [ "$(effective_kill_mode)" = KillMode=process ] || end 3 "NOTHING CHANGED: k3s runs with $(effective_kill_mode), not KillMode=process, so a restart stops the running pods"
 
 echo "STEP 1: k3s etcd-snapshot save"
-systemctl is-active --quiet k3s || end 3 "NOTHING CHANGED: k3s is not active, and a snapshot needs the running server; start k3s and rerun"
+sctl is-active --quiet k3s || end 3 "NOTHING CHANGED: k3s is not active, and a snapshot needs the running server; start k3s and rerun"
 total_before=$(snapshot_count)
 s3_before=$(s3_count)
-timeout "$SAVE_BOUND" k3s etcd-snapshot save || end 3 "NOTHING CHANGED: k3s etcd-snapshot save failed or ran over ${SAVE_BOUND}s; $(serving_text)"
+timeout -k 5 "$SAVE_BOUND" k3s etcd-snapshot save || end 3 "NOTHING CHANGED: k3s etcd-snapshot save failed or ran over ${SAVE_BOUND}s; $(serving_text)"
 deadline=$(( $(date +%s) + SAVE_BOUND ))
 while [ "$(s3_count)" -le "$s3_before" ] && [ "$(date +%s)" -lt "$deadline" ]; do
   sleep "$POLL"
@@ -206,6 +217,10 @@ if [ "$(s3_count)" -le "$s3_before" ]; then
 fi
 STATE=snapshot-proven
 snapshot_split
+
+time_left=$(( RUN_START + SSM_TIMEOUT - $(date +%s) ))
+[ "$time_left" -ge $(( RESTART_BOUND + ROLLBACK_BOUND + SLACK )) ] \
+  || end 3 "NOTHING CHANGED: not enough time left to restart and roll back within this run (${time_left}s left); run again"
 
 echo "STEP 2: back up the unit"
 backup="$UNIT.bak-$(date -u +%Y%m%dT%H%M%SZ)"
@@ -222,11 +237,11 @@ rm -f "$UNIT.repair"
 [ "$(cron_line)" = "$repaired" ] || roll_back "line $value_no did not read back as $repaired"
 
 echo "STEP 4: systemctl daemon-reload, restart k3s without waiting on systemd"
-systemctl daemon-reload || roll_back "systemctl daemon-reload failed"
+sctl daemon-reload || roll_back "systemctl daemon-reload failed"
 start_k3s || roll_back "systemctl restart --no-block k3s was refused"
 
 echo "STEP 5: wait up to ${RESTART_BOUND}s for k3s, /readyz and the nodes"
-wait_ready "$RESTART_BOUND" "$since_epoch" "$restarts_before" || roll_back "$restart_reason"
+wait_ready "$RESTART_BOUND" "$since_epoch" "$restarts_queued" || roll_back "$restart_reason"
 STATE=restarted-ready
 echo "API server ready, every node Ready before the run is Ready with a new lease"
 
@@ -303,7 +318,8 @@ main() {
     fi
     echo "== $mode of the $site control plane ($region)"
     run_on_cp "$region" "$cp_id" "$(remote_script "$mode" "$K3S_UNIT" "$cron" "$SAVE_BOUND_SECONDS" \
-        "$RESTART_BOUND_SECONDS" "$ROLLBACK_BOUND_SECONDS" "$POLL_SECONDS" "$LOCK_DIR")" || run_code=$?
+        "$RESTART_BOUND_SECONDS" "$ROLLBACK_BOUND_SECONDS" "$REMOTE_SLACK_SECONDS" "$SSM_TIMEOUT_SECONDS" \
+        "$CALL_BOUND_SECONDS" "$POLL_SECONDS" "$LOCK_DIR")" || run_code=$?
     if [[ "$run_code" -eq 0 && "$mode" == repair ]]; then
         echo "== confirm with .claude/skills/ops/bin/ops verify fleet --site $site"
     fi
