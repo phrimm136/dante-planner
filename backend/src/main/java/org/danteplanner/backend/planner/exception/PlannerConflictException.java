@@ -1,6 +1,7 @@
 package org.danteplanner.backend.planner.exception;
 
 import lombok.Getter;
+import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.shared.exception.DomainException;
 import org.danteplanner.backend.shared.exception.ErrorKind;
 
@@ -16,6 +17,10 @@ public class PlannerConflictException extends DomainException {
         }
 
         record Version(long version) implements Requested {
+        }
+
+        static Requested of(@Nullable Long syncVersion) {
+            return syncVersion == null ? new None() : new Version(syncVersion);
         }
 
         default String describe() {

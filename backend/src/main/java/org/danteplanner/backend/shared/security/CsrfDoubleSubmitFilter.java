@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.danteplanner.backend.shared.exception.Problems;
@@ -90,7 +91,8 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
         return !SAFE_METHODS.contains(request.getMethod());
     }
 
-    private static Verdict verdict(Optional<String> cookieToken, boolean serverIssued, String headerToken) {
+    private static Verdict verdict(Optional<String> cookieToken, boolean serverIssued,
+            @Nullable String headerToken) {
         if (cookieToken.isEmpty()) {
             return Verdict.NO_COOKIE;
         }

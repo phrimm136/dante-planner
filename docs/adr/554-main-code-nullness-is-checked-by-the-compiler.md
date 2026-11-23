@@ -6,6 +6,7 @@ epic: none · pr: none
   REJECTED: review only — it missed those 62 slots.
   REJECTED: `java.util.Optional` for every absent value — rejected as a project preference (taste).
   INVARIANT: a nullable reaching a non-null fails `compileJava` — NullAway at ERROR.
+  INVARIANT: a controller parameter that is optional on the wire and has no default is `@Nullable` — `OptionalParameterRuleTest`; guest principals, header reads and composed annotations are outside it.
   INVARIANT: the cookie-gate classes are outside the check until the cookie gate is removed — the exclusion list in the build file, unenforced.
   INVARIANT: `@Nullable` appears only at those places — unenforced.
   NON-GOAL: unannotated libraries and nullable callback parameters without an annotation — the checker trusts both as non-null.

@@ -126,10 +126,12 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
                 RequestAttributes.SCOPE_REQUEST) instanceof HandlerMethod handler)) {
             return null;
         }
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Principal principal = switch (SignIn.of(SecurityContextHolder.getContext().getAuthentication())) {
+            case SignIn.Present present -> Principal.of(present.authentication().getPrincipal());
+            case SignIn.Absent absent -> new Principal.Anonymous();
+        };
         RequestState state = new RequestState(declarationOf(handler),
-                handler.getBeanType().getSimpleName() + "." + handler.getMethod().getName(),
-                Principal.of(authentication == null ? null : authentication.getPrincipal()));
+                handler.getBeanType().getSimpleName() + "." + handler.getMethod().getName(), principal);
         attributes.setAttribute(STATE_ATTRIBUTE, state, RequestAttributes.SCOPE_REQUEST);
         return state;
     }
@@ -142,6 +144,19 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
             return Declaration.BY_STATE;
         }
         return Declaration.NONE;
+    }
+
+    private sealed interface SignIn {
+
+        record Present(Authentication authentication) implements SignIn {
+        }
+
+        record Absent() implements SignIn {
+        }
+
+        static SignIn of(@Nullable Authentication authentication) {
+            return authentication == null ? new Absent() : new Present(authentication);
+        }
     }
 
     private sealed interface Principal {

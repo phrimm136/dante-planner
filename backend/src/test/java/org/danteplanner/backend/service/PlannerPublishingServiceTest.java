@@ -1,5 +1,7 @@
 package org.danteplanner.backend.service;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.moderation.service.RestrictionCheckService;
@@ -22,6 +24,7 @@ import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
@@ -35,6 +38,7 @@ import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepositor
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator;
+import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.backend.support.MockCalls;
 import org.danteplanner.backend.support.OwnershipRows;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -70,6 +74,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
@@ -693,6 +698,49 @@ class PlannerPublishingServiceTest {
 
             assertThat(result.published()).isTrue();
             assertThat(result.title()).isEqualTo("Stored Title");
+        }
+
+        @Test
+        void publish_WhenTheStoredCategoryIsInvalid_LogsTheRefusalOnce() {
+            Planner planner = refractedRailwayPlanner();
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
+
+            try (LogCapture capture = LogCapture.onThisThread(
+                    PlannerPublishingService.class, PlannerCommandService.class)) {
+                assertRejected(() -> publishingService.publish(testUser.getId(), planner.getId()))
+                        .withViolation("INVALID_CATEGORY", "");
+                assertThat(capture.at(Level.WARN))
+                        .extracting(ILoggingEvent::getLoggerName, ILoggingEvent::getFormattedMessage)
+                        .containsExactly(tuple(PlannerPublishingService.class.getName(),
+                                "Validation failed: Invalid category: RR_PLACEHOLDER"));
+            }
+        }
+
+        @Test
+        void publish_WhenTheCarriedCategoryIsInvalid_LogsTheRefusalOnce() {
+            Planner planner = refractedRailwayPlanner();
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            UpsertPlannerRequest request = UpsertRequests.resending(planner).build();
+
+            try (LogCapture capture = LogCapture.onThisThread(
+                    PlannerPublishingService.class, PlannerCommandService.class)) {
+                assertRejected(() -> publishingService.publish(testUser.getId(), UUID.randomUUID(), planner.getId(),
+                        request))
+                        .withViolation("INVALID_CATEGORY", "");
+                assertThat(capture.at(Level.WARN)).extracting(ILoggingEvent::getFormattedMessage)
+                        .containsExactly("Validation failed: Invalid category: RR_PLACEHOLDER");
+            }
+        }
+
+        private Planner refractedRailwayPlanner() {
+            return testPlannerBuilder()
+                    .plannerType(PlannerType.REFRACTED_RAILWAY)
+                    .category("RR_PLACEHOLDER")
+                    .published(false)
+                    .build();
         }
 
         @Test

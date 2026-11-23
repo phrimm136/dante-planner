@@ -7,6 +7,8 @@ import java.net.URI;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * A client-supplied {@code returnTo} is honored only when its origin is in the configured
  * {@code cors.allowed-origins} allowlist; otherwise the first allowed origin is used.
@@ -37,7 +39,7 @@ public class FrontendProperties {
         return defaultUrl;
     }
 
-    public String resolveReturnTo(String returnTo) {
+    public String resolveReturnTo(@Nullable String returnTo) {
         if (returnTo == null || returnTo.isBlank()) {
             return defaultUrl;
         }

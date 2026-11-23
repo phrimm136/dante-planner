@@ -21,7 +21,6 @@ import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
-import org.danteplanner.backend.planner.validation.ErrorCode;
 import org.danteplanner.backend.planner.validation.floor.Stage;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -149,12 +148,6 @@ public class PlannerCommandService {
         this.currentSchemaVersion = currentSchemaVersion;
     }
 
-    private static void logInvalidCategory(PlannerValidationException refusal) {
-        if (ErrorCode.INVALID_CATEGORY.getCode().equals(refusal.getOriginalCode())) {
-            log.warn("Validation failed: {}", refusal.getOriginalMessage());
-        }
-    }
-
     private void applyUpsertFields(Planner planner, UpsertPlannerRequest request, UUID deviceId,
             PlannerChange change) {
         PlannerContent contentRow = planner.getContent();
@@ -165,7 +158,7 @@ public class PlannerCommandService {
         try {
             category = categoryValidator.requireCategoryForType(planner.getPlannerType(), request.category());
         } catch (PlannerValidationException refusal) {
-            logInvalidCategory(refusal);
+            InvalidCategoryLog.warn(log, refusal);
             throw refusal;
         }
         PlannerDocument document = change.categoryOnly()
@@ -245,7 +238,7 @@ public class PlannerCommandService {
         try {
             category = categoryValidator.requireCategoryForType(request.plannerType(), request.category());
         } catch (PlannerValidationException refusal) {
-            logInvalidCategory(refusal);
+            InvalidCategoryLog.warn(log, refusal);
             throw refusal;
         }
 
@@ -312,12 +305,9 @@ public class PlannerCommandService {
                     .build();
 
             PlannerChange change = PlannerChange.between(planner.getContent(), carried, objectMapper);
-            Long requestedVersion = request.syncVersion();
             WriteArbitration arbitration = syncVersionValidator.arbitrate(
                     force,
-                    requestedVersion == null
-                            ? new PlannerConflictException.Requested.None()
-                            : new PlannerConflictException.Requested.Version(requestedVersion),
+                    PlannerConflictException.Requested.of(request.syncVersion()),
                     planner.getSyncVersion(), change);
             if (arbitration == WriteArbitration.ACK_NO_OP) {
                 log.info("Upsert of planner {} would move no field, acknowledging syncVersion {} without a write",

@@ -47,16 +47,21 @@ public class ContentVersionValidator {
         }
     }
 
+    private VersionRule ruleFor(PlannerType plannerType) {
+        VersionRule rule = rules.get(plannerType);
+        if (rule == null) {
+            throw new IllegalStateException("No content version rule for planner type " + plannerType);
+        }
+        return rule;
+    }
+
     public void validateVersionForCreate(PlannerType plannerType, Integer contentVersion) {
         if (contentVersion == null) {
             log.warn("Validation failed: content version is null");
             throw new PlannerValidationException(CONTENT_VERSION_REQUIRED, "Content version is required");
         }
 
-        VersionRule rule = rules.get(plannerType);
-        if (rule == null) {
-            throw new IllegalStateException("No content version rule for planner type " + plannerType);
-        }
+        VersionRule rule = ruleFor(plannerType);
         List<Integer> accepted = rule.forCreate().apply(gameDataRegistry.plannerVersions());
         if (!accepted.contains(contentVersion)) {
             log.warn("Validation failed: {} create version {} not in {}",

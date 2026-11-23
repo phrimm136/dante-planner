@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.danteplanner.backend.user.api.SessionEndHandler.SessionToken;
 import org.danteplanner.backend.shared.restriction.RestrictionExempt;
@@ -68,7 +69,7 @@ public class AuthController {
     @RateLimitExempt
     @GetMapping("/google/start")
     public ResponseEntity<Void> googleStart(
-            @RequestParam(required = false) String returnTo,
+            @RequestParam(required = false) @Nullable String returnTo,
             HttpServletResponse response) {
         String state = oAuthStateService.generateState();
         String codeVerifier = oAuthStateService.generateCodeVerifier();
@@ -95,9 +96,9 @@ public class AuthController {
     @RateLimited(value = RateLimitPolicy.AUTH, denial = RateLimitDenial.REDIRECT_LOGIN)
     @GetMapping("/google/callback")
     public ResponseEntity<Void> googleCallback(
-            @RequestParam(required = false) String code,
-            @RequestParam(required = false) String state,
-            @RequestParam(required = false) String error,
+            @RequestParam(required = false) @Nullable String code,
+            @RequestParam(required = false) @Nullable String state,
+            @RequestParam(required = false) @Nullable String error,
             HttpServletRequest request,
             HttpServletResponse response) {
 
@@ -105,26 +106,29 @@ public class AuthController {
         cookieUtils.clearCookie(response, CookieConstants.OAUTH_TX);
 
         try {
-            if (error != null || code == null || code.isBlank() || state == null) {
-                return redirect(frontendProperties.getUrl() + LoginRedirect.ERROR);
+            switch (ProviderAnswer.of(code, state, error)) {
+                case ProviderAnswer.Refused refused -> {
+                    return redirect(frontendProperties.getUrl() + LoginRedirect.ERROR);
+                }
+                case ProviderAnswer.Granted granted -> {
+                    Optional<OAuthTransaction> transaction = oauthTx.flatMap(oAuthStateService::open);
+                    if (transaction.isEmpty() || !statesMatch(transaction.get().state(), granted.state())) {
+                        log.warn("OAuth callback rejected: oauth_tx absent/expired/tampered or state mismatch");
+                        return redirect(frontendProperties.getUrl() + LoginRedirect.ERROR);
+                    }
+
+                    AuthResult result = authService.authenticateWithOAuth(
+                            "google",
+                            granted.code(),
+                            oAuthProperties.google().redirectUri(),
+                            transaction.get().codeVerifier()
+                    );
+
+                    setAuthCookies(response, result);
+
+                    return redirect(transaction.get().returnTo());
+                }
             }
-
-            Optional<OAuthTransaction> transaction = oauthTx.flatMap(oAuthStateService::open);
-            if (transaction.isEmpty() || !statesMatch(transaction.get().state(), state)) {
-                log.warn("OAuth callback rejected: oauth_tx absent/expired/tampered or state mismatch");
-                return redirect(frontendProperties.getUrl() + LoginRedirect.ERROR);
-            }
-
-            AuthResult result = authService.authenticateWithOAuth(
-                    "google",
-                    code,
-                    oAuthProperties.google().redirectUri(),
-                    transaction.get().codeVerifier()
-            );
-
-            setAuthCookies(response, result);
-
-            return redirect(transaction.get().returnTo());
         } catch (Exception e) {
             io.sentry.Sentry.captureException(e);
             log.warn("OAuth callback failed: {}", e.getMessage());
@@ -150,7 +154,7 @@ public class AuthController {
 
         Object principal = auth.getPrincipal();
         if (!(principal instanceof Long userId)) {
-            log.warn("Unexpected principal type: {}", principal == null ? "none" : principal.getClass().getName());
+            log.warn("Unexpected principal type: {}", typeName(principal));
             return ResponseEntity.noContent().build();
         }
 
@@ -171,13 +175,39 @@ public class AuthController {
     @RateLimitExempt
     @RestrictionExempt(reason = "authentication")
     @PostMapping("/logout-all")
-    public ResponseEntity<Void> logoutAll(@AuthenticationPrincipal Long userId, HttpServletRequest request,
+    public ResponseEntity<Void> logoutAll(@AuthenticationPrincipal @Nullable Long userId, HttpServletRequest request,
             HttpServletResponse response) {
-        sessionRevocationService.logoutAll(userId, sessionTokens(request));
+        sessionRevocationService.logoutAll(requirePrincipal(userId), sessionTokens(request));
 
         cookieUtils.clearAuthCookies(response);
 
         return ResponseEntity.noContent().build();
+    }
+
+    private static Long requirePrincipal(@Nullable Long userId) {
+        if (userId == null) {
+            throw new IllegalStateException("logout-all was called without an authenticated principal");
+        }
+        return userId;
+    }
+
+    private static String typeName(@Nullable Object principal) {
+        return principal == null ? "none" : principal.getClass().getName();
+    }
+
+    private sealed interface ProviderAnswer {
+
+        record Granted(String code, String state) implements ProviderAnswer {
+        }
+
+        record Refused() implements ProviderAnswer {
+        }
+
+        static ProviderAnswer of(@Nullable String code, @Nullable String state, @Nullable String error) {
+            return error != null || code == null || code.isBlank() || state == null
+                    ? new Refused()
+                    : new Granted(code, state);
+        }
     }
 
     private List<SessionToken> sessionTokens(HttpServletRequest request) {

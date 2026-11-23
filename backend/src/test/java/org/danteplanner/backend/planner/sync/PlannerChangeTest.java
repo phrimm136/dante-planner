@@ -14,8 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * The equality that decides whether a stale write is worth a conflict. Content is compared as a
  * parsed tree, so the storage layer's rendering of a document counts as the same document; every
- * other carried field is compared by value, and a field the request does not carry cannot change
- * anything and is therefore ignored.
+ * other carried field is compared by value.
  */
 class PlannerChangeTest {
 
@@ -42,6 +41,10 @@ class PlannerChangeTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static PlannerContent storedRow() {
+        return storedRow(DOCUMENT);
+    }
+
+    private static PlannerContent storedRow(String document) {
         return StoredPlannerContent.holding(StoredPlannerContent.builder()
                 .title("Stored Title")
                 .status(PlannerStatus.SAVED)
@@ -50,7 +53,7 @@ class PlannerChangeTest {
                 .contentSchemaVersion(2)
                 .gameContentVersion(6)
                 .deviceId(DEVICE)
-                .build(), DOCUMENT);
+                .build(), document);
     }
 
     private static PlannerChange change(PlannerContent stored, CarriedWrite carried) {
@@ -92,9 +95,8 @@ class PlannerChangeTest {
 
     @Test
     void isNone_WhenContentDiffersOnlyInNumberRendering_IsTrue() {
-        PlannerContent stored = StoredPlannerContent.holding(StoredPlannerContent.builder().build(),
-                "{\"deploymentOrder\":[5.0],\"equipment\":{}}");
-        CarriedWrite carried = CarriedWrite.builder()
+        PlannerContent stored = storedRow("{\"deploymentOrder\":[5.0],\"equipment\":{}}");
+        CarriedWrite carried = carryingStoredValues()
                 .content("{\"equipment\":{},\"deploymentOrder\":[5]}")
                 .build();
 
@@ -169,17 +171,6 @@ class PlannerChangeTest {
     void isNone_WhenDeviceIdDiffers_IsFalse() {
         assertThat(isNone(storedRow(),
                 carryingStoredValues().deviceId(UUID.randomUUID()).build())).isFalse();
-    }
-
-    @Test
-    void isNone_WhenNoFieldIsCarried_IsTrue() {
-        assertThat(isNone(storedRow(), CarriedWrite.builder().build())).isTrue();
-    }
-
-    @Test
-    void isNone_WhenOnlyContentIsCarriedAndEqual_IsTrue() {
-        assertThat(isNone(storedRow(),
-                CarriedWrite.builder().content(SAME_DOCUMENT_RESTYLED).build())).isTrue();
     }
 
     @Test

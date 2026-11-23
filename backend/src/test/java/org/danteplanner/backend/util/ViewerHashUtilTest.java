@@ -129,10 +129,13 @@ class ViewerHashUtilTest {
         @Test
         void hashForAnonymousUser_WhenNullUserAgent_TreatedAsEmpty() {
             // Act
-            String hashNull = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, null, PLANNER_ID);
-            String hashEmpty = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, "", PLANNER_ID);
+            String hashNull = ViewerHashUtil.hashForAnonymousUser(
+                    IP_ADDRESS, ViewerHashUtil.userAgentOrEmpty(null), PLANNER_ID);
+            String hashEmpty = ViewerHashUtil.hashForAnonymousUser(
+                    IP_ADDRESS, ViewerHashUtil.userAgentOrEmpty(""), PLANNER_ID);
 
             // Assert
+            assertThat(hashNull).isEqualTo("e8e42ab73376881fa9df4298dc74ba75bc72d00b2bb6dcbe5f284db141c1c2be");
             assertThat(hashEmpty).as("Null User-Agent should be treated as empty string").isEqualTo(hashNull);
         }
 

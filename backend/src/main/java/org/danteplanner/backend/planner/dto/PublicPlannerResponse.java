@@ -38,11 +38,6 @@ public record PublicPlannerResponse(
         return PlannerConstants.RETIRED_BOOKMARK_FLAG;
     }
 
-    public static PublicPlannerResponse forAnonymous(
-            PlannerCatalog row, PlannerCoreInfo.PlannerCore core, PlannerStats stats) {
-        return fromCatalog(row, core, stats, false);
-    }
-
     public static PublicPlannerResponse fromCatalog(
             PlannerCatalog row,
             PlannerCoreInfo.PlannerCore core,

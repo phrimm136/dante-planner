@@ -12,6 +12,7 @@ import org.danteplanner.backend.shared.dto.ToggleNotificationRequest;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -37,11 +38,26 @@ public class PlannerPublishingController {
             @AuthenticationPrincipal Long userId,
             @DeviceId UUID deviceId,
             @PathVariable UUID id,
-            @RequestBody(required = false) @Valid UpsertPlannerRequest content) {
+            @RequestBody(required = false) @Valid @Nullable UpsertPlannerRequest content) {
 
-        return ResponseEntity.ok(content == null
-                ? plannerPublishingService.publish(userId, id)
-                : plannerPublishingService.publish(userId, deviceId, id, content));
+        return ResponseEntity.ok(switch (PublishSource.of(content)) {
+            case PublishSource.Stored stored -> plannerPublishingService.publish(userId, id);
+            case PublishSource.Carried carried ->
+                    plannerPublishingService.publish(userId, deviceId, id, carried.content());
+        });
+    }
+
+    private sealed interface PublishSource {
+
+        record Stored() implements PublishSource {
+        }
+
+        record Carried(UpsertPlannerRequest content) implements PublishSource {
+        }
+
+        static PublishSource of(@Nullable UpsertPlannerRequest content) {
+            return content == null ? new Stored() : new Carried(content);
+        }
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "unpublish")

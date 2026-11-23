@@ -2,7 +2,6 @@ package org.danteplanner.backend.planner.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.planner.validation.ErrorCode;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
@@ -117,7 +116,7 @@ public class PlannerPublishingService {
         try {
             category = categoryValidator.requireCategoryForType(planner.getPlannerType(), planner.getCategory());
         } catch (PlannerValidationException refusal) {
-            logInvalidCategory(refusal);
+            InvalidCategoryLog.warn(log, refusal);
             throw refusal;
         }
         PlannerDocument document = contentValidator.parse(planner.getContentJson(), category,
@@ -144,12 +143,6 @@ public class PlannerPublishingService {
 
         log.info("Published planner {} by user {}", plannerId, userId);
         return PlannerResponse.fromEntity(planner);
-    }
-
-    private static void logInvalidCategory(PlannerValidationException refusal) {
-        if (ErrorCode.INVALID_CATEGORY.getCode().equals(refusal.getOriginalCode())) {
-            log.warn("Validation failed: {}", refusal.getOriginalMessage());
-        }
     }
 
     private PlannerResponse applyUnpublish(Long userId, Planner planner) {

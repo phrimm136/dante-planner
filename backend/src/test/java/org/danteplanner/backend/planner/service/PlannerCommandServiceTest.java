@@ -322,6 +322,48 @@ class PlannerCommandServiceTest {
         }
 
         @Test
+        void upsertPlanner_WhenTheCategoryIsInvalid_LogsTheRefusal() {
+            Planner planner = TestDataFactory.planner(testUser)
+                    .plannerType(PlannerType.REFRACTED_RAILWAY)
+                    .category("RR_PLACEHOLDER")
+                    .content(TestDataFactory.VALID_CONTENT)
+                    .build();
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            UpsertPlannerRequest request = UpsertRequests.resending(planner).build();
+
+            try (LogCapture capture = LogCapture.onThisThread(PlannerCommandService.class)) {
+                assertRejected(() -> commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(),
+                        request, false))
+                        .withViolation("INVALID_CATEGORY", "");
+                assertThat(capture.at(Level.WARN)).extracting(ILoggingEvent::getFormattedMessage)
+                        .containsExactly("Validation failed: Invalid category: RR_PLACEHOLDER");
+            }
+        }
+
+        @Test
+        void upsertPlanner_WhenAStaleResendOmitsTitleAndStatus_AcksKeepingTheStoredOnes() {
+            Planner planner = testPlanner(3L, false, TestDataFactory.VALID_CONTENT);
+            planner.getContent().setStatus(PlannerStatus.SAVED);
+            planner.getContent().setDeviceId(deviceId);
+            planner.getContent().setContentSchemaVersion(CURRENT_SCHEMA_VERSION);
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            UpsertPlannerRequest request = UpsertRequests.resending(planner)
+                    .title(null)
+                    .status(null)
+                    .syncVersion(2L)
+                    .build();
+
+            UpsertResult result = commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(),
+                    request, false);
+
+            assertThat(result.response().syncVersion()).isEqualTo(3L);
+            assertThat(planner.getTitle()).isEqualTo("Test Planner");
+            assertThat(planner.getStatus()).isEqualTo(PlannerStatus.SAVED);
+        }
+
+        @Test
         void upsertPlanner_WhenCategoryIsUnchanged_ValidatesTheContent() {
             Planner planner = testPlanner(1L, false, UNKNOWN_IDENTITY_CONTENT);
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))

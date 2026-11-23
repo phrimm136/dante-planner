@@ -511,7 +511,7 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
                 "SELECT COUNT(*) FROM planner_views WHERE planner_id = UUID_TO_BIN(?)",
                 Long.class, plannerId.toString())).isZero();
         List<String> viewerHashes = List.of(
-                ViewerHashUtil.hashForAnonymousUser(DEVICE_IDENTITY_PREFIX + device, null, plannerId),
+                ViewerHashUtil.hashForAnonymousUser(DEVICE_IDENTITY_PREFIX + device, "", plannerId),
                 ViewerHashUtil.hashForAuthenticatedUser(reader.getId(), plannerId));
         for (String hash : viewerHashes) {
             assertThat(redisTemplate.hasKey(seenKey(before, plannerId, hash))).isFalse();
