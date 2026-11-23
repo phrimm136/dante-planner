@@ -362,6 +362,10 @@ jobs:
   # scale-in; the job failure is the signal to investigate.
   settle-down:
     needs: [bump-tag, surge-up]
+    # Runs whenever the surge ran, also after a failed or cancelled bump: the job is what returns
+    # the app ASGs to 1. Its first step still waits for the rollout, so a rollout that fails
+    # leaves the surge nodes up, which hold the last healthy pod.
+    if: ${{ always() && needs.surge-up.result != 'skipped' }}
     runs-on: ubuntu-latest
     environment: production
     permissions:

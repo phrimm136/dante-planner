@@ -748,14 +748,6 @@ guards the parse but likewise skips the schema gate.
   survives both trigger types, not just an edge.
   re-check: `awk '/^  build-(backend|frontend):$/{b=1} b&&/^    needs:/{n++; if(/test-migration/)f=1; b=0} END{exit !(n==2&&!f)}' .github/workflows/pr-gate.yml && rg -qF "github.event_name == 'pull_request'" .github/workflows/pr-gate.yml`
 
-- 2026-08-20 — `settle-down` only runs on the happy path, so a failure anywhere upstream leaves
-  both app ASGs at 2. It declares `needs: [bump-tag, surge-up]` with no explicit `if`, which
-  means the implicit `if: success()`; a failed `bump-tag` therefore skips the job whose entire
-  purpose is undoing `surge-up`'s temporary scale-out. Cleanup that only happens when nothing
-  went wrong is not cleanup — `if: always()` is the condition that matches the intent. The same
-  job also carries `environment: production`, so it additionally waits on a human before
-  capacity is returned.
-  re-check: `awk '/^  [a-z-]+:$/{j=$1} j=="settle-down:"{s=1; if(/^    if:/)f=1} END{exit !(s&&!f)}' .github/workflows/deploy-fleet.yml`
 
 - 2026-08-20 — Approving a deploy takes up to three reviews, and cannot be reduced by editing
   the workflow. `prod-provisioner` trusts only
@@ -1119,9 +1111,8 @@ guards the parse but likewise skips the schema gate.
   (`:328-330`). The bad image remains on the first node until a human reverts the tag-bump
   commit. Closing it means choosing between a `settle-down` failure branch that reverts the
   image-tag bump commit (Git-driven, matches CORE-mode ArgoCD) and Argo Rollouts with an
-  analysis template on `/actuator/health/readiness`; the former is one workflow step and
-  needs an `if:` on a job that today has none (the 2026-08-20 `settle-down` entry is the same
-  gap). Worth doing before the next deploy that ships a schema-coupled change, or once a
+  analysis template on `/actuator/health/readiness`; the former is one workflow step that
+  runs when the rollout wait fails. Worth doing before the next deploy that ships a schema-coupled change, or once a
   failed rollout is observed in production.
   re-check: `.claude/skills/debt-ledger/bin/debt absent deploy/base/spring-daemonset.yaml 'updateStrategy' && rg -q 'rollout status ds/backend -n danteplanner --timeout=600s' .github/workflows/deploy-fleet.yml && .claude/skills/debt-ledger/bin/debt absent deploy 'kind: Rollout'`
 - 2026-09-22 — `GET /api/planner/md/published` returns `Page<...>`, so every list request

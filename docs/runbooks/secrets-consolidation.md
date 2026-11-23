@@ -268,6 +268,7 @@ replica goes first.
 ```bash
 export AWS_PROFILE=prod        # staging: AWS_PROFILE=staging, backend.staging.hcl, staging.tfvars
 scripts/ops/terraform-run.sh -chdir=terraform/secrets init -backend-config=../backend.prod.hcl -reconfigure
+# staging: scripts/ops/terraform-run.sh -chdir=terraform/secrets init -backend-config=../backend.staging.hcl -reconfigure
 bash -euo pipefail <<'EOF'
 old=(
   danteplanner/jwt/rs256-private-key danteplanner/jwt/rs256-public-key danteplanner/jwt/encryption-key
@@ -282,10 +283,11 @@ for n in "${old[@]}"; do
   scripts/ops/terraform-run.sh -chdir=terraform/secrets state rm "aws_secretsmanager_secret.replicated[\"$n\"]"
 done
 EOF
-.claude/skills/ops/bin/ops tf plan secrets -- -var-file=prod.tfvars       # expect: No changes.
+.claude/skills/ops/bin/ops tf plan secrets -- -var-file=prod.tfvars       # expect: Outputs only, no resource line
 ```
 
-Only after `No changes.`:
+The plan removes the outputs of the forgotten names, so it reads `Outputs only`, not `No changes.`.
+Only after a plan with no resource line:
 
 ```bash
 bash -euo pipefail <<'EOF'
