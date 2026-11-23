@@ -18,7 +18,6 @@ resources:
   - redis-auth.yaml
   - redis-ratelimit.yaml
   - prometheus.yaml
-  - kube-state-metrics.yaml
   - mysqld-exporter.yaml
   - redis-exporter.yaml
   - alloy-logs.yaml

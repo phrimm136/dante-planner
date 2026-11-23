@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
 - ../../base
 - ../../privileged-exporter
+- ../../apps
 
 # Same image contract as Oregon: CI bumps only newTag; the registry host (account
 # id) is injected by the Seoul CP's ArgoCD Application at sync (rendered from

@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
 - ../../base
 - ../../privileged-exporter
+- ../../apps
 - redis-auth-nodeport.yaml
 
 # The CI arm64 workflow bumps only newTag via `kustomize edit set image` and

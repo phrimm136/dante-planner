@@ -4,7 +4,7 @@ shopt -s nullglob
 trap 'echo "config-scan: line $LINENO exited $?" >&2; exit 2' ERR
 
 usage() {
-  echo "usage: $0 [--update] [repo-dir]   (default: the repository this script lives in; needs docker, git and python3)" >&2
+  echo "usage: $0 [--update] [repo-dir]   (default: the repository this script lives in; needs docker, git and python3 with PyYAML)" >&2
   exit 2
 }
 
@@ -50,6 +50,8 @@ for overlay in "${overlays[@]}"; do
   fi
   [ -s "$work/kubernetes/$overlay.yaml" ] || fail_tool "kustomize build deploy/overlays/$overlay printed nothing" "$work/kustomize.err"
 done
+"$script_dir/render-charts.sh" "$repo/deploy" "$work/kubernetes" >/dev/null 2>"$work/charts.err" \
+  || fail_tool "rendering the Helm Applications under deploy/apps failed" "$work/charts.err"
 
 scan() {
   local input=$1 status=0
@@ -66,17 +68,58 @@ scan kubernetes
 
 compare_status=0
 python3 -I - "$update" \
-  terraform "$work/terraform.json" "$work/terraform.err" "$baselines/terraform.baseline.json" \
-  kubernetes "$work/kubernetes.json" "$work/kubernetes.err" "$baselines/kubernetes.baseline.json" <<'PY' || compare_status=$?
+  terraform "$work/terraform.json" "$work/terraform.err" "$baselines/terraform.baseline.json" "$work/terraform" \
+  kubernetes "$work/kubernetes.json" "$work/kubernetes.err" "$baselines/kubernetes.baseline.json" "$work/kubernetes" <<'PY' || compare_status=$?
 import json
+import pathlib
 import sys
+
+import yaml
+
+VERSION_LABELS = ("helm.sh/chart", "app.kubernetes.io/version")
 
 
 class ToolFailure(Exception):
     pass
 
 
-def read_scan(scan_path):
+def pod_template(workload):
+    spec = workload.get("spec") or {}
+    if "jobTemplate" in spec:
+        spec = spec["jobTemplate"].get("spec") or {}
+    return spec.get("template")
+
+
+def version_free_pod_ids(input_dir):
+    pod_ids = {}
+    for manifest in sorted(pathlib.Path(input_dir).glob("*.yaml")):
+        for workload in yaml.safe_load_all(manifest.read_text(encoding="utf-8")):
+            template = pod_template(workload) if isinstance(workload, dict) else None
+            if not template:
+                continue
+            labels = (template.get("metadata") or {}).get("labels") or {}
+            if not any(key in labels for key in VERSION_LABELS):
+                continue
+            metadata = workload["metadata"]
+            prefix = f"Pod.{metadata.get('namespace', 'default')}.{metadata['name']}"
+            checkov_id = prefix + "".join(f".{key}-{value}" for key, value in labels.items())
+            version_free = prefix + "".join(f".{key}-{value}" for key, value in labels.items() if key not in VERSION_LABELS)
+            pod_ids[(f"/{manifest.name}", checkov_id)] = version_free
+    return pod_ids
+
+
+def baseline_key(pod_ids, file_path, resource):
+    if (file_path, resource) in pod_ids:
+        return pod_ids[(file_path, resource)]
+    if resource.startswith("Pod.") and any(f".{key}-" in resource for key in VERSION_LABELS):
+        raise ToolFailure(
+            f"{file_path} {resource} carries a version label but matches no pod template rebuilt from {file_path}; "
+            "Checkov's Pod id format changed, so fix version_free_pod_ids in .github/scripts/config-scan.sh"
+        )
+    return resource
+
+
+def read_scan(scan_path, input_dir):
     try:
         with open(scan_path, encoding="utf-8") as scan_file:
             report = json.load(scan_file)
@@ -87,8 +130,9 @@ def read_scan(scan_path):
     summary = report.get("summary", {})
     if summary.get("parsing_errors", 0) != 0 or summary.get("resource_count", 0) == 0:
         raise ToolFailure(f"checkov summary is not a clean scan: {json.dumps(summary)}")
+    pod_ids = version_free_pod_ids(input_dir)
     return {
-        (finding["file_path"], finding["resource"], finding["check_id"])
+        (finding["file_path"], baseline_key(pod_ids, finding["file_path"], finding["resource"]), finding["check_id"])
         for finding in report["results"].get("failed_checks", [])
     }
 
@@ -136,12 +180,12 @@ def entry_line(state, entry):
 
 def main(arguments):
     update_mode = arguments[0] == "true"
-    inputs = [arguments[index:index + 4] for index in range(1, len(arguments), 4)]
+    inputs = [arguments[index:index + 5] for index in range(1, len(arguments), 5)]
     compared = []
     try:
-        for input_name, scan_path, error_path, baseline_path in inputs:
+        for input_name, scan_path, error_path, baseline_path, input_dir in inputs:
             try:
-                scanned = read_scan(scan_path)
+                scanned = read_scan(scan_path, input_dir)
             except ToolFailure:
                 with open(error_path, encoding="utf-8", errors="replace") as error_file:
                     sys.stderr.write(error_file.read())

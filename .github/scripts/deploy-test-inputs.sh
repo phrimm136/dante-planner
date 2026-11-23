@@ -8,4 +8,4 @@ fi
 
 printf '%s\n' deploy .github/deploy-test \
   .github/scripts/deploy-test.sh .github/scripts/deploy-test-inputs.sh \
-  .github/scripts/config-scan.sh .github/scripts/images.sh .github/config-scan
+  .github/scripts/config-scan.sh .github/scripts/render-charts.sh .github/scripts/images.sh .github/config-scan
