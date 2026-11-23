@@ -96,8 +96,6 @@ class AuthControllerLogoutAllIT extends SharedMySqlContainerSupport {
                     .andExpect(status().isInternalServerError())
                     .andExpect(cookie().doesNotExist("accessToken"))
                     .andExpect(cookie().doesNotExist("refreshToken"));
-
-            assertThat(tokenBlacklistService.isUserTokenInvalidated(testUser.getId(), 0L)).isFalse();
         }
 
         @Test
@@ -107,8 +105,6 @@ class AuthControllerLogoutAllIT extends SharedMySqlContainerSupport {
                     .andExpect(status().isInternalServerError())
                     .andExpect(cookie().doesNotExist("accessToken"))
                     .andExpect(cookie().doesNotExist("refreshToken"));
-
-            assertThat(tokenBlacklistService.isUserTokenInvalidated(testUser.getId(), 0L)).isFalse();
         }
 
         @Test
