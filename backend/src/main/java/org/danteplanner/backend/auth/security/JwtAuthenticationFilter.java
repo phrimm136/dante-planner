@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.shared.failure.CommandOutcome;
 import org.danteplanner.backend.shared.security.AuthDegradationResponder;
 import org.danteplanner.backend.shared.security.ChainAuthenticationFilter;
@@ -15,10 +14,10 @@ import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.auth.exception.SessionRevokedException;
+import org.danteplanner.backend.auth.token.RefreshClaims;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
 import org.danteplanner.backend.auth.token.RotationOutcome;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
-import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.auth.token.TokenGenerator;
 import org.danteplanner.backend.auth.token.TokenValidator;
 import org.danteplanner.backend.shared.util.CookieConstants;
@@ -61,7 +60,6 @@ public class JwtAuthenticationFilter extends ChainAuthenticationFilter {
     private final AuthDegradationResponder degradationResponder;
     private final TokenGenerator tokenGenerator;
     private final RefreshRotationService refreshRotationService;
-    private final LineageRotationFlag lineageRotationFlag;
     private final JwtProperties jwtProperties;
 
     @Override
@@ -165,12 +163,7 @@ public class JwtAuthenticationFilter extends ChainAuthenticationFilter {
             }
 
             String refreshToken = presented.orElseThrow();
-            TokenClaims claims = tokenValidator.validateRefreshToken(refreshToken);
-
-            if (!claims.isRefreshToken()) {
-                log.debug("Invalid token type for refresh: {}", claims.type());
-                return abandonSession(request, response, CustomAuthenticationEntryPoint.INVALID_TOKEN);
-            }
+            RefreshClaims claims = tokenValidator.validateRefreshToken(refreshToken);
 
             if (tokenBlacklistService.isBlacklisted(refreshToken)) {
                 log.warn("Attempted auto-refresh with blacklisted token for user: {}", claims.userId());
@@ -190,7 +183,7 @@ public class JwtAuthenticationFilter extends ChainAuthenticationFilter {
 
             UserSummary user = activeUser.get();
 
-            if (!rotateRefreshCookie(refreshToken, claims, user, request, response)) {
+            if (!rotateRefreshCookie(refreshToken, request, response)) {
                 return false;
             }
 
@@ -213,29 +206,19 @@ public class JwtAuthenticationFilter extends ChainAuthenticationFilter {
 
     private boolean rotateRefreshCookie(
             String refreshToken,
-            TokenClaims claims,
-            UserSummary user,
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        if (lineageRotationFlag.isEnabled()) {
-            try {
-                RotationOutcome.Rotated rotated = refreshRotationService.rotate(refreshToken).orThrow();
-                cookieUtils.setCookie(response, CookieConstants.REFRESH_TOKEN, rotated.newRefreshJwt(),
-                        jwtProperties.getRefreshTokenExpirySeconds());
-                return true;
-            } catch (SessionRevokedException e) {
-                return abandonSession(request, response, CustomAuthenticationEntryPoint.SESSION_REVOKED);
-            } catch (InvalidTokenException e) {
-                return abandonSession(request, response, CustomAuthenticationEntryPoint.INVALID_TOKEN);
-            }
+        try {
+            RotationOutcome.Rotated rotated = refreshRotationService.rotate(refreshToken).orThrow();
+            cookieUtils.setCookie(response, CookieConstants.REFRESH_TOKEN, rotated.newRefreshJwt(),
+                    jwtProperties.getRefreshTokenExpirySeconds());
+            return true;
+        } catch (SessionRevokedException e) {
+            return abandonSession(request, response, CustomAuthenticationEntryPoint.SESSION_REVOKED);
+        } catch (InvalidTokenException e) {
+            return abandonSession(request, response, CustomAuthenticationEntryPoint.INVALID_TOKEN);
         }
-
-        tokenBlacklistService.blacklistTokenForRotation(refreshToken, claims.expiration());
-        cookieUtils.setCookie(response, CookieConstants.REFRESH_TOKEN,
-                tokenGenerator.generateRefreshToken(user.id()),
-                jwtProperties.getRefreshTokenExpirySeconds());
-        return true;
     }
 
     /**

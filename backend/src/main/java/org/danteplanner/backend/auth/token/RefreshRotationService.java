@@ -10,10 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * <p>Family state lives in the auth Redis keyed by {@code rt:fam:{family_id}}: one hash
@@ -28,15 +27,12 @@ import java.util.UUID;
 @Slf4j
 public class RefreshRotationService {
 
-    private static final String LEGACY_FAMILY_SYNTHESIS_FORMAT = "legacy-family:%d:%d";
-    private static final String LEGACY_JTI_SYNTHESIS_FORMAT = "legacy-jti:%d:%d";
-
     static final String FAMILY_KEY_PREFIX = "rt:fam:";
     static final String REVOKED_FIELD = "__revoked__";
     private static final String FIELD_SEPARATOR = "|";
     private static final String REUSED_RESULT_PREFIX = ScriptResult.REUSED.name() + FIELD_SEPARATOR;
     private static final String UNEXPECTED_RESULT_MESSAGE = "Unexpected rotation transition result: ";
-    private static final String UNEXPECTED_SUCCESSOR_MESSAGE = "A minted successor carries no lineage";
+    private static final String NO_PARENT = "";
 
     static final String METRIC_OUTCOME = "jwt_rotation_outcome_total";
     static final String TAG_OUTCOME = "outcome";
@@ -45,7 +41,6 @@ public class RefreshRotationService {
     static final String OUTCOME_RETRY_REUSED = "retry_reused";
     static final String OUTCOME_RETRY_SUPERSEDED = "retry_superseded";
     static final String OUTCOME_THEFT_REVOKED = "theft_revoked";
-    static final String OUTCOME_LEGACY_ADMITTED = "legacy_admitted";
     static final String OUTCOME_REJECTED_REVOKED_FAMILY = "rejected_revoked_family";
     static final String OUTCOME_REJECTED_USER_INVALIDATED = "rejected_user_invalidated";
     static final String OUTCOME_REJECTED_INVALID = "rejected_invalid";
@@ -129,7 +124,7 @@ public class RefreshRotationService {
     private final TokenGenerator tokenGenerator;
     private final JwtProperties jwtProperties;
     private final MeterRegistry meterRegistry;
-    private final boolean legacyAdmitEnabled;
+    private final Clock clock;
     private final long retryReuseWindowMs;
 
     private final DefaultRedisScript<String> rotateScript;
@@ -140,14 +135,14 @@ public class RefreshRotationService {
             TokenGenerator tokenGenerator,
             JwtProperties jwtProperties,
             MeterRegistry meterRegistry,
-            @Value("${jwt.rotation.legacy-admit-enabled:true}") boolean legacyAdmitEnabled,
+            Clock clock,
             @Value("${jwt.rotation.retry-reuse-window-ms:30000}") long retryReuseWindowMs) {
         this.authWrites = authWrites;
         this.tokenValidator = tokenValidator;
         this.tokenGenerator = tokenGenerator;
         this.jwtProperties = jwtProperties;
         this.meterRegistry = meterRegistry;
-        this.legacyAdmitEnabled = legacyAdmitEnabled;
+        this.clock = clock;
         this.retryReuseWindowMs = retryReuseWindowMs;
 
         this.rotateScript = new DefaultRedisScript<>();
@@ -155,55 +150,26 @@ public class RefreshRotationService {
         this.rotateScript.setResultType(String.class);
     }
 
-    sealed interface Admission {
-
-        record Rejected() implements Admission {
-        }
-
-        record Admitted(String jti, String familyId, String parentJti, boolean legacy) implements Admission {
-        }
-
-        static Admission of(TokenClaims claims, boolean legacyAdmitEnabled) {
-            // Defense in depth: reject non-refresh tokens with a type check independent of the
-            // upstream refresh-typed parser, so admission never relies on its configuration alone.
-            if (!claims.isRefreshToken()) {
-                return new Rejected();
-            }
-            return switch (claims.lineage()) {
-                case RefreshLineage.Legacy legacy when !legacyAdmitEnabled -> new Rejected();
-                case RefreshLineage.Legacy legacy -> new Admitted(
-                        legacyJti(claims.userId(), legacy.issuedAtMs()),
-                        legacyFamilyId(claims.userId(), legacy.issuedAtMs()), "", true);
-                case RefreshLineage.Root root -> new Admitted(root.jti(), root.familyId(), "", false);
-                case RefreshLineage.Child child ->
-                        new Admitted(child.jti(), child.familyId(), child.parentJti(), false);
-            };
-        }
-    }
-
     public RotationOutcome rotate(String refreshToken) {
-        TokenClaims claims;
+        RefreshClaims claims;
         try {
             claims = tokenValidator.validateRefreshToken(refreshToken);
         } catch (InvalidTokenException e) {
             return rejectInvalid();
         }
 
-        return switch (Admission.of(claims, legacyAdmitEnabled)) {
-            case Admission.Rejected rejected -> rejectInvalid();
-            case Admission.Admitted admitted -> rotateAdmitted(claims, admitted);
-        };
+        return rotatePresented(claims);
     }
 
-    private RotationOutcome rotateAdmitted(TokenClaims claims, Admission.Admitted admitted) {
-        String jti = admitted.jti();
-        String familyId = admitted.familyId();
+    private RotationOutcome rotatePresented(RefreshClaims claims) {
+        String jti = claims.lineage().jti();
+        String familyId = claims.lineage().familyId();
 
         String successorJwt = tokenGenerator.generateRefreshToken(claims.userId(), familyId, jti);
-        TokenClaims successorClaims = tokenValidator.validateRefreshToken(successorJwt);
-        String successorJti = successorJtiOf(successorClaims);
+        RefreshClaims successorClaims = tokenValidator.validateRefreshToken(successorJwt);
+        String successorJti = successorClaims.lineage().jti();
         long succExpiryMs = successorClaims.expiration().getTime();
-        long nowMs = System.currentTimeMillis();
+        long nowMs = clock.millis();
         long ttlMs = jwtProperties.getRefreshTokenExpiry();
 
         List<String> keys = List.of(familyKey(familyId), userInvalidationKey(claims.userId()));
@@ -211,16 +177,15 @@ public class RefreshRotationService {
         String result = authWrites.write(store -> store.execute(
                 rotateScript,
                 keys,
-                jti, admitted.parentJti(), successorJti,
+                jti, parentJtiOf(claims.lineage()), successorJti,
                 String.valueOf(succExpiryMs), String.valueOf(nowMs), String.valueOf(ttlMs),
                 successorJwt, String.valueOf(retryReuseWindowMs),
                 presentedIssuedAtMs));
 
-        ScriptResult scriptResult = ScriptResult.of(result);
-        return switch (scriptResult) {
+        return switch (ScriptResult.of(result)) {
             case REUSED -> {
                 String storedJwt = result.substring(REUSED_RESULT_PREFIX.length());
-                TokenClaims storedClaims = tokenValidator.validateRefreshToken(storedJwt);
+                RefreshClaims storedClaims = tokenValidator.validateRefreshToken(storedJwt);
                 incrementOutcome(OUTCOME_RETRY_REUSED);
                 yield new RotationOutcome.Rotated(storedJwt, storedClaims);
             }
@@ -236,25 +201,21 @@ public class RefreshRotationService {
                 incrementOutcome(OUTCOME_REJECTED_USER_INVALIDATED);
                 yield new RotationOutcome.Rejected(RotationOutcome.Rejected.Reason.REVOKED_FAMILY);
             }
-            case ROTATED, SUPERSEDED -> {
-                incrementOutcome(rotatedMetricTag(admitted.legacy(), scriptResult));
+            case ROTATED -> {
+                incrementOutcome(OUTCOME_ROTATED);
+                yield new RotationOutcome.Rotated(successorJwt, successorClaims);
+            }
+            case SUPERSEDED -> {
+                incrementOutcome(OUTCOME_RETRY_SUPERSEDED);
                 yield new RotationOutcome.Rotated(successorJwt, successorClaims);
             }
         };
     }
 
-    private static String rotatedMetricTag(boolean legacy, ScriptResult result) {
-        if (legacy) {
-            return OUTCOME_LEGACY_ADMITTED;
-        }
-        return result == ScriptResult.SUPERSEDED ? OUTCOME_RETRY_SUPERSEDED : OUTCOME_ROTATED;
-    }
-
-    private static String successorJtiOf(TokenClaims successorClaims) {
-        return switch (successorClaims.lineage()) {
-            case RefreshLineage.Child child -> child.jti();
-            case RefreshLineage.Root root -> root.jti();
-            case RefreshLineage.Legacy legacy -> throw new IllegalStateException(UNEXPECTED_SUCCESSOR_MESSAGE);
+    private static String parentJtiOf(RefreshLineage lineage) {
+        return switch (lineage) {
+            case RefreshLineage.Root root -> NO_PARENT;
+            case RefreshLineage.Child child -> child.parentJti();
         };
     }
 
@@ -291,25 +252,13 @@ public class RefreshRotationService {
         }
     }
 
-    private static String legacyJti(Long userId, long issuedAtMs) {
-        return UUID.nameUUIDFromBytes(
-                String.format(LEGACY_JTI_SYNTHESIS_FORMAT, userId, issuedAtMs)
-                        .getBytes(StandardCharsets.UTF_8)).toString();
-    }
-
-    public static String legacyFamilyId(Long userId, long issuedAtMs) {
-        return UUID.nameUUIDFromBytes(
-                String.format(LEGACY_FAMILY_SYNTHESIS_FORMAT, userId, issuedAtMs)
-                        .getBytes(StandardCharsets.UTF_8)).toString();
-    }
-
     public void revokeFamily(String familyId) {
         if (familyId == null) {
             return;
         }
         String key = familyKey(familyId);
         authWrites.writeWithoutResult(store -> {
-            store.opsForHash().put(key, REVOKED_FIELD, String.valueOf(System.currentTimeMillis()));
+            store.opsForHash().put(key, REVOKED_FIELD, String.valueOf(clock.millis()));
             // Revoking a family that never rotated creates the hash here, where the rotation
             // script's sliding PEXPIRE has not run and would not run again.
             store.expire(key, Duration.ofMillis(jwtProperties.getRefreshTokenExpiry()));

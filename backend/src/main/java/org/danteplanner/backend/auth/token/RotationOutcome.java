@@ -18,7 +18,7 @@ public sealed interface RotationOutcome extends FailureUnion, CommandOutcome
         };
     }
 
-    record Rotated(String newRefreshJwt, TokenClaims claims) implements RotationOutcome {
+    record Rotated(String newRefreshJwt, RefreshClaims claims) implements RotationOutcome {
     }
 
     record Revoked(String familyId) implements RotationOutcome {

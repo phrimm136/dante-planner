@@ -6,8 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.Authentication;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
+import org.danteplanner.backend.auth.token.AccessClaims;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
-import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.auth.token.TokenValidator;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.Users;
@@ -61,16 +61,16 @@ public class AccessTokenAuthenticator {
         record Done(Terminal terminal) implements TokenCheck {
         }
 
-        record NeedBlacklist(TokenClaims claims) implements TokenCheck {
+        record NeedBlacklist(AccessClaims claims) implements TokenCheck {
         }
 
-        record NeedInvalidation(TokenClaims claims) implements TokenCheck {
+        record NeedInvalidation(AccessClaims claims) implements TokenCheck {
         }
 
-        record Authenticate(TokenClaims claims) implements TokenCheck {
+        record Authenticate(AccessClaims claims) implements TokenCheck {
         }
 
-        static TokenCheck ofValidation(TokenClaims claims) {
+        static TokenCheck ofValidation(AccessClaims claims) {
             return new NeedBlacklist(claims);
         }
 
@@ -82,14 +82,14 @@ public class AccessTokenAuthenticator {
             };
         }
 
-        static TokenCheck ofBlacklist(TokenClaims claims, boolean blacklisted) {
+        static TokenCheck ofBlacklist(AccessClaims claims, boolean blacklisted) {
             if (blacklisted) {
                 return new Done(new Terminal.Revoked());
             }
             return new NeedInvalidation(claims);
         }
 
-        static TokenCheck ofRevocation(TokenClaims claims, boolean invalidated, @Nullable Authentication current) {
+        static TokenCheck ofRevocation(AccessClaims claims, boolean invalidated, @Nullable Authentication current) {
             if (invalidated) {
                 return new Done(new Terminal.Revoked());
             }

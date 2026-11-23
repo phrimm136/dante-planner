@@ -1,24 +1,21 @@
 package org.danteplanner.backend.support;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.auth.token.LogoutRevocation;
+import org.danteplanner.backend.auth.token.RefreshClaims;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
 import org.danteplanner.backend.auth.token.RefreshLineage;
 import org.danteplanner.backend.auth.token.RotationOutcome;
 import org.danteplanner.backend.auth.token.RotationState;
 import org.danteplanner.backend.auth.token.JwtTokenService;
-import org.danteplanner.backend.auth.token.TokenClaims;
 
 public class RecordingRefreshRotation extends RefreshRotationService {
 
-    public static final boolean DEFAULT_LEGACY_ADMIT_ENABLED = true;
     public static final long DEFAULT_RETRY_REUSE_WINDOW_MS = 30_000L;
 
     public enum Operation {
@@ -54,7 +51,6 @@ public class RecordingRefreshRotation extends RefreshRotationService {
     private final TestJwt jwt;
     private final JwtTokenService tokens;
     private final RecordingTokenBlacklist blacklist;
-    private final boolean legacyAdmitEnabled;
     private final long retryReuseWindowMs;
     private final Map<String, Family> families = new HashMap<>();
     private final List<Call> calls = new ArrayList<>();
@@ -62,16 +58,15 @@ public class RecordingRefreshRotation extends RefreshRotationService {
             new ScriptedFailures<>(RecordingRefreshRotation.class.getSimpleName(), Operation.class);
 
     public RecordingRefreshRotation(TestJwt jwt, RecordingTokenBlacklist blacklist) {
-        this(jwt, blacklist, DEFAULT_LEGACY_ADMIT_ENABLED, DEFAULT_RETRY_REUSE_WINDOW_MS);
+        this(jwt, blacklist, DEFAULT_RETRY_REUSE_WINDOW_MS);
     }
 
     public RecordingRefreshRotation(TestJwt jwt, RecordingTokenBlacklist blacklist,
-            boolean legacyAdmitEnabled, long retryReuseWindowMs) {
-        super(null, jwt.service(), jwt.service(), jwt.properties(), null, legacyAdmitEnabled, retryReuseWindowMs);
+            long retryReuseWindowMs) {
+        super(null, jwt.service(), jwt.service(), jwt.properties(), null, jwt.clock(), retryReuseWindowMs);
         this.jwt = jwt;
         this.tokens = jwt.service();
         this.blacklist = blacklist;
-        this.legacyAdmitEnabled = legacyAdmitEnabled;
         this.retryReuseWindowMs = retryReuseWindowMs;
     }
 
@@ -105,42 +100,21 @@ public class RecordingRefreshRotation extends RefreshRotationService {
     }
 
     private RotationOutcome transition(String refreshToken) {
-        TokenClaims claims;
+        RefreshClaims claims;
         try {
             claims = tokens.validateRefreshToken(refreshToken);
         } catch (InvalidTokenException e) {
             return invalid();
         }
-        if (!claims.isRefreshToken()) {
-            return invalid();
-        }
-        String jti;
-        String familyId;
-        String parentJti;
-        switch (claims.lineage()) {
-            case RefreshLineage.Legacy legacy -> {
-                if (!legacyAdmitEnabled) {
-                    return invalid();
-                }
-                jti = UUID.nameUUIDFromBytes(String.format("legacy-jti:%d:%d", claims.userId(), legacy.issuedAtMs())
-                        .getBytes(StandardCharsets.UTF_8)).toString();
-                familyId = legacyFamilyId(claims.userId(), legacy.issuedAtMs());
-                parentJti = null;
-            }
-            case RefreshLineage.Root root -> {
-                jti = root.jti();
-                familyId = root.familyId();
-                parentJti = null;
-            }
-            case RefreshLineage.Child child -> {
-                jti = child.jti();
-                familyId = child.familyId();
-                parentJti = child.parentJti();
-            }
-        }
+        String jti = claims.lineage().jti();
+        String familyId = claims.lineage().familyId();
+        String parentJti = switch (claims.lineage()) {
+            case RefreshLineage.Root root -> null;
+            case RefreshLineage.Child child -> child.parentJti();
+        };
 
         String successorJwt = tokens.generateRefreshToken(claims.userId(), familyId, jti);
-        TokenClaims successorClaims = tokens.validateRefreshToken(successorJwt);
+        RefreshClaims successorClaims = tokens.validateRefreshToken(successorJwt);
         long nowMs = jwt.clock().millis();
         failIfScripted(Operation.ROTATE);
 

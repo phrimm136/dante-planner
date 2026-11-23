@@ -3,6 +3,7 @@ package org.danteplanner.backend.auth.token;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -83,15 +84,19 @@ public class TokenBlacklistService {
 
     private final AuthReadSources authReadSources;
 
+    private final Clock clock;
+
     private final Counter blacklistCheckSkipped;
 
     public TokenBlacklistService(
             AuthWrites authWrites,
             AuthReadSources authReadSources,
             MeterRegistry meterRegistry,
+            Clock clock,
             @Value("${jwt.refresh-token-expiry:" + DEFAULT_REFRESH_TOKEN_EXPIRY_MS + "}")
             long refreshTokenExpiry) {
         this.refreshTokenExpiry = refreshTokenExpiry;
+        this.clock = clock;
         this.authWrites = authWrites;
         this.authReadSources = authReadSources;
         this.blacklistCheckSkipped = Counter.builder(BLACKLIST_CHECK_SKIPPED_COUNTER).register(meterRegistry);
@@ -109,7 +114,7 @@ public class TokenBlacklistService {
     }
 
     public void revokeLogoutSession(@NonNull Collection<LogoutRevocation> revocations) {
-        long now = System.currentTimeMillis();
+        long now = clock.millis();
 
         List<String> tokenKeys = new ArrayList<>();
         List<String> tokenTtls = new ArrayList<>();
@@ -150,22 +155,14 @@ public class TokenBlacklistService {
     }
 
     public void blacklistToken(String token, Date expiry) {
-        addToBlacklist(token, expiry, BlacklistMode.IMMEDIATE);
-    }
-
-    public void blacklistTokenForRotation(String token, Date expiry) {
-        addToBlacklist(token, expiry, BlacklistMode.ROTATION_GRACE);
-    }
-
-    private void addToBlacklist(String token, Date expiry, BlacklistMode mode) {
-        long now = System.currentTimeMillis();
+        long now = clock.millis();
         long remaining = remainingMillis(expiry, now);
         if (remaining == 0) {
             return;
         }
 
         authWrites.writeWithoutResult(store -> store.opsForValue().set(
-                blacklistKey(token), encode(mode, now), Duration.ofMillis(remaining)));
+                blacklistKey(token), encode(BlacklistMode.IMMEDIATE, now), Duration.ofMillis(remaining)));
     }
 
     public boolean isBlacklisted(String token) {
@@ -183,7 +180,7 @@ public class TokenBlacklistService {
         }
 
         return BlacklistMode.of(value) == BlacklistMode.IMMEDIATE
-                || System.currentTimeMillis() - decodeBlacklistedAt(value) >= ROTATION_GRACE_PERIOD_MS;
+                || clock.millis() - decodeBlacklistedAt(value) >= ROTATION_GRACE_PERIOD_MS;
     }
 
     public void invalidateUserTokens(@NonNull Long userId) {
@@ -191,7 +188,7 @@ public class TokenBlacklistService {
         // Floored to the second because a JWT's iat carries no sub-second component: an
         // unfloored stamp would reject a token minted later in the same second as the
         // invalidation, which is exactly the token a user logging straight back in receives.
-        long now = System.currentTimeMillis();
+        long now = clock.millis();
         long stamp = now - (now % 1000);
         authWrites.writeWithoutResult(store -> store.opsForValue().set(
                 userInvalidationKey(userId), String.valueOf(stamp), Duration.ofMillis(refreshTokenExpiry)));

@@ -1,6 +1,7 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.support.AuthReads;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.Date;
 import java.util.Set;
@@ -168,7 +169,7 @@ class AuthLocalReadSplitIT {
             SimpleMeterRegistry registry = new SimpleMeterRegistry();
             TokenBlacklistService blSvc =
                     new TokenBlacklistService(AuthReads.writesTo(stringRedisTemplate), AuthReads.from(deadTemplate), registry,
-                            TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
+                            Clock.systemUTC(), TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
 
             String token = "phase14a-failopen-token";
             Date futureExpiry = new Date(System.currentTimeMillis() + Duration.ofHours(1).toMillis());

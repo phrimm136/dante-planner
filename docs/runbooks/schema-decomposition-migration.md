@@ -83,10 +83,7 @@ it is the cheapest thing to be holding when something else goes wrong.
    of the pair (`trackSessionState=true` on the JDBC url) ships in the image; both are required
    before any of it does anything.
 
-6. **Add the rotation flag to both region ConfigMaps.** `JWT_ROTATION_LINEAGE_ENABLED` is now read
-   from `backend-config` (`deploy/overlays/{oregon,seoul}/configmap-patch.yaml`). It used to be
-   flippable at runtime through an internal endpoint that no longer exists, so a region whose
-   ConfigMap lacks the key falls to the application default instead of whatever was last toggled.
+6. No step: the rotation flag no longer exists.
 
 7. **Decide the auth-Redis question.** The rebuild wipes the in-cluster token blacklist, so
    revocations issued before the window resurrect until natural token expiry. If any specific

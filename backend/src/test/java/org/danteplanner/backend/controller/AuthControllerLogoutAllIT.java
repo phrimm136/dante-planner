@@ -6,7 +6,7 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
-import org.danteplanner.backend.auth.token.TokenClaims;
+import org.danteplanner.backend.auth.token.RefreshClaims;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import java.util.List;
@@ -179,7 +179,7 @@ class AuthControllerLogoutAllIT extends SharedMySqlContainerSupport {
 
         @Test
         void preActionRefreshToken_WhenLoggedOutEverywhere_IsInvalidated() throws Exception {
-            TokenClaims refreshClaims = jwtTokenService.validateToken(refreshToken);
+            RefreshClaims refreshClaims = jwtTokenService.validateRefreshToken(refreshToken);
 
             mockMvc.perform(post("/api/auth/logout-all").with(withCsrf())
                             .cookie(accessTokenCookie())

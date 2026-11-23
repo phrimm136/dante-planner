@@ -10,14 +10,14 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-
-import org.springframework.beans.BeanUtils;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.jsonwebtoken.Jwts;
 
 import org.danteplanner.backend.auth.token.JwtTokenService;
+import org.danteplanner.backend.auth.token.RefreshClaims;
 import org.danteplanner.backend.auth.token.RefreshLineage;
-import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.shared.config.JwtProperties;
 
 public final class TestJwt {
@@ -36,12 +36,7 @@ public final class TestJwt {
         this.clock = new SteppedClock(start);
         this.properties = new JwtProperties(
                 KEY_PAIR.getPrivate(), KEY_PAIR.getPublic(), new byte[0], 900000L, 604800000L);
-        try {
-            this.service = BeanUtils.instantiateClass(
-                    JwtTokenService.class.getDeclaredConstructor(JwtProperties.class, Clock.class), properties, clock);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalStateException(e);
-        }
+        this.service = new JwtTokenService(properties, clock);
     }
 
     public JwtTokenService service() {
@@ -56,34 +51,47 @@ public final class TestJwt {
         return properties;
     }
 
-    public String legacyRefreshToken(Long userId) {
-        Date issuedAt = Date.from(clock.instant());
-        return Jwts.builder()
-                .subject(userId.toString())
-                .claim("type", TokenClaims.TYPE_REFRESH)
-                .issuedAt(issuedAt)
-                .expiration(new Date(issuedAt.getTime() + properties.getRefreshTokenExpiry()))
-                .signWith(KEY_PAIR.getPrivate(), Jwts.SIG.RS256)
-                .compact();
+    public Map<String, Object> accessTokenPayload(Long userId) {
+        Map<String, Object> payload = payload(userId, "access", properties.getAccessTokenExpiry());
+        payload.put("role", "NORMAL");
+        return payload;
     }
 
-    public static String jtiOf(TokenClaims claims) {
-        return switch (claims.lineage()) {
-            case RefreshLineage.Root root -> root.jti();
-            case RefreshLineage.Child child -> child.jti();
-            case RefreshLineage.Legacy legacy -> throw new AssertionError("a legacy token carries no jti: " + legacy);
-        };
+    public Map<String, Object> refreshTokenPayload(Long userId) {
+        Map<String, Object> payload = payload(userId, "refresh", properties.getRefreshTokenExpiry());
+        payload.put("jti", "jti-1");
+        payload.put("family_id", "fam-1");
+        return payload;
     }
 
-    public static String familyIdOf(TokenClaims claims) {
-        return switch (claims.lineage()) {
-            case RefreshLineage.Root root -> root.familyId();
-            case RefreshLineage.Child child -> child.familyId();
-            case RefreshLineage.Legacy legacy -> throw new AssertionError("a legacy token carries no family: " + legacy);
-        };
+    private Map<String, Object> payload(Long userId, String type, long expiryMs) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("sub", userId.toString());
+        payload.put("type", type);
+        payload.put("iat", Date.from(clock.instant()));
+        payload.put("exp", Date.from(clock.instant().plusMillis(expiryMs)));
+        return payload;
     }
 
-    public static String parentJtiOf(TokenClaims claims) {
+    public String sign(Map<String, Object> payload) {
+        return Jwts.builder().claims(payload).signWith(KEY_PAIR.getPrivate(), Jwts.SIG.RS256).compact();
+    }
+
+    public String refreshTokenWithoutFamily(Long userId) {
+        Map<String, Object> payload = refreshTokenPayload(userId);
+        payload.remove("family_id");
+        return sign(payload);
+    }
+
+    public static String jtiOf(RefreshClaims claims) {
+        return claims.lineage().jti();
+    }
+
+    public static String familyIdOf(RefreshClaims claims) {
+        return claims.lineage().familyId();
+    }
+
+    public static String parentJtiOf(RefreshClaims claims) {
         if (claims.lineage() instanceof RefreshLineage.Child child) {
             return child.parentJti();
         }

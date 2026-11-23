@@ -4,9 +4,10 @@ import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.auth.token.AccessClaims;
+import org.danteplanner.backend.auth.token.RefreshClaims;
 import org.danteplanner.backend.auth.oauth.OAuthStateService;
 import org.danteplanner.backend.auth.token.JwtTokenService;
-import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.support.GoogleStub;
 import org.danteplanner.backend.user.api.AuthProviderType;
@@ -87,9 +88,9 @@ class AuthControllerBffIT extends SharedMySqlContainerSupport {
 
         User user = userRepository.findByProviderAndProviderId(AuthProviderType.GOOGLE, subject).orElseThrow();
         assertThat(user.getEmail()).isEqualTo(email);
-        TokenClaims access = jwtTokenService.validateAccessToken(
+        AccessClaims access = jwtTokenService.validateAccessToken(
                 result.getResponse().getCookie(CookieConstants.ACCESS_TOKEN).getValue());
-        TokenClaims refresh = jwtTokenService.validateRefreshToken(
+        RefreshClaims refresh = jwtTokenService.validateRefreshToken(
                 result.getResponse().getCookie(CookieConstants.REFRESH_TOKEN).getValue());
         assertThat(access.userId()).isEqualTo(user.getId());
         assertThat(refresh.userId()).isEqualTo(user.getId());

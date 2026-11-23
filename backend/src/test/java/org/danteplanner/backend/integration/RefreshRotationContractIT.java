@@ -43,15 +43,15 @@ class RefreshRotationContractIT implements RefreshRotationContract {
     }
 
     @Override
-    public RefreshRotationService rotation(boolean legacyAdmitEnabled, long retryReuseWindowMs) {
+    public RefreshRotationService rotation(long retryReuseWindowMs) {
         return new RefreshRotationService(AuthReads.writesTo(authRedis), jwt.service(), jwt.service(), jwt.properties(),
-                new SimpleMeterRegistry(), legacyAdmitEnabled, retryReuseWindowMs);
+                new SimpleMeterRegistry(), jwt.clock(), retryReuseWindowMs);
     }
 
     @Override
     public TokenBlacklistService blacklist() {
         return new TokenBlacklistService(AuthReads.writesTo(authRedis), AuthReads.from(authRedis), new SimpleMeterRegistry(),
-                jwt.properties().getRefreshTokenExpiry());
+                jwt.clock(), jwt.properties().getRefreshTokenExpiry());
     }
 
     @Override

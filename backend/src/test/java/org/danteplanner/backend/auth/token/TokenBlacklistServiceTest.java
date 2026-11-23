@@ -1,6 +1,10 @@
 package org.danteplanner.backend.auth.token;
 
 import org.danteplanner.backend.support.AuthReads;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
 
@@ -19,6 +23,8 @@ import org.danteplanner.backend.shared.redis.RoleOutages;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,6 +35,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -41,10 +49,11 @@ import static org.mockito.Mockito.when;
 class TokenBlacklistServiceTest {
 
     /**
-     * Leading character of an entry written with immediate effect; the grace-period mode spells
-     * it {@code 0}, and the two are indistinguishable in Redis apart from this marker.
+     * Leading character of an entry written with immediate effect.
      */
     private static final String IMMEDIATE_MARKER = "1:";
+
+    private static final Clock CLOCK = Clock.fixed(Instant.ofEpochMilli(1_790_000_000_000L), ZoneOffset.UTC);
 
     @Mock
     private StringRedisTemplate writeTemplate;
@@ -58,13 +67,16 @@ class TokenBlacklistServiceTest {
     @Mock
     private ValueOperations<String, String> readValues;
 
+    @Mock
+    private ValueOperations<String, String> writeValues;
+
     private TokenBlacklistService blacklistService;
 
     @BeforeEach
     void setUp() {
         blacklistService = new TokenBlacklistService(
                 AuthReads.writesTo(writeTemplate), AuthReads.from(readTemplate), new SimpleMeterRegistry(),
-                TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
+                CLOCK, TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
     }
 
     @Test
@@ -87,7 +99,7 @@ class TokenBlacklistServiceTest {
 
     @Test
     void revokeLogoutSession_WhenOnlyATokenRevocation_WritesOneImmediateEntryAndNoFamily() {
-        Date expiry = new Date(System.currentTimeMillis() + 60_000);
+        Date expiry = new Date(CLOCK.millis() + 60_000);
 
         blacklistService.revokeLogoutSession(
                 List.of(new LogoutRevocation.TokenRevocation("access.jwt", expiry)));
@@ -106,7 +118,7 @@ class TokenBlacklistServiceTest {
 
     @Test
     void revokeLogoutSession_WhenAFamilyRevocationIsIncluded_AppendsTheFamilyKeyAfterTheTokenKeys() {
-        Date expiry = new Date(System.currentTimeMillis() + 60_000);
+        Date expiry = new Date(CLOCK.millis() + 60_000);
 
         blacklistService.revokeLogoutSession(List.of(
                 new LogoutRevocation.TokenRevocation("refresh.jwt", expiry),
@@ -131,7 +143,7 @@ class TokenBlacklistServiceTest {
 
     @Test
     void revokeLogoutSession_WhenTheOnlyTokenHasLapsed_IssuesNoRedisCommand() {
-        Date lapsed = new Date(System.currentTimeMillis() - 60_000);
+        Date lapsed = new Date(CLOCK.millis() - 60_000);
 
         blacklistService.revokeLogoutSession(
                 List.of(new LogoutRevocation.TokenRevocation("stale.jwt", lapsed)));
@@ -141,7 +153,7 @@ class TokenBlacklistServiceTest {
 
     @Test
     void revokeLogoutSession_WhenTheAuthRoleIsOpen_FailsAtOnceWithAConnectionFailure() {
-        Date expiry = new Date(System.currentTimeMillis() + 60_000);
+        Date expiry = new Date(CLOCK.millis() + 60_000);
 
         assertThatThrownBy(() -> serviceWithTheAuthRoleOpen().revokeLogoutSession(List.of(
                 new LogoutRevocation.TokenRevocation("access.jwt", expiry),
@@ -154,7 +166,7 @@ class TokenBlacklistServiceTest {
     @Test
     @SuppressWarnings("unchecked")
     void revokeLogoutSession_WhenTheRevocationTimesOut_FailsWithAConnectionFailure() {
-        Date expiry = new Date(System.currentTimeMillis() + 60_000);
+        Date expiry = new Date(CLOCK.millis() + 60_000);
         when(writeTemplate.execute(any(RedisScript.class), anyList(), any(Object[].class)))
                 .thenThrow(new QueryTimeoutException("Redis command timed out"));
 
@@ -167,7 +179,7 @@ class TokenBlacklistServiceTest {
 
     @Test
     void blacklistToken_WhenTheAuthRoleIsOpen_FailsAtOnceWithAConnectionFailure() {
-        Date expiry = new Date(System.currentTimeMillis() + 60_000);
+        Date expiry = new Date(CLOCK.millis() + 60_000);
 
         assertThatThrownBy(() -> serviceWithTheAuthRoleOpen().blacklistToken("access.jwt", expiry))
                 .isExactlyInstanceOf(RedisConnectionFailureException.class)
@@ -198,16 +210,41 @@ class TokenBlacklistServiceTest {
         verifyNoInteractions(openAuthTemplate);
     }
 
+    @ParameterizedTest
+    @CsvSource({
+        "1:1790000000000, true",
+        "1:1789999999000, true",
+        "0:1790000000000, false",
+        "0:1789999995001, false",
+        "0:1789999995000, true",
+        "0:1789999000000, true"
+    })
+    void isBlacklisted_WhenAnOldPodWroteTheValue_AnswersAsTheOldCodeDid(String stored, boolean blacklisted) {
+        when(readTemplate.opsForValue()).thenReturn(readValues);
+        when(readValues.get(anyString())).thenReturn(stored);
+
+        assertThat(blacklistService.isBlacklisted("presented.jwt")).isEqualTo(blacklisted);
+    }
+
+    @Test
+    void blacklistToken_WhenTheTokenIsLive_WritesTheImmediateValueForItsRemainingLife() {
+        when(writeTemplate.opsForValue()).thenReturn(writeValues);
+
+        blacklistService.blacklistToken("access.jwt", new Date(CLOCK.millis() + 60_000));
+
+        verify(writeValues).set(startsWith("bl:"), eq("1:1790000000000"), eq(Duration.ofSeconds(60)));
+    }
+
     private TokenBlacklistService serviceWithTheAuthRoleOpen() {
         RedisRoleHealth authOpen = RoleOutages.withOpen(RedisRole.AUTH);
         return new TokenBlacklistService(AuthReads.writesTo(openAuthTemplate, authOpen),
                 AuthReads.localThenAuth(readTemplate, openAuthTemplate, authOpen), new SimpleMeterRegistry(),
-                TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
+                CLOCK, TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
     }
 
     @Test
     void revocationItems_WhenConstructedWithNull_Throw() {
-        Date expiry = new Date(System.currentTimeMillis() + 60_000);
+        Date expiry = new Date(CLOCK.millis() + 60_000);
 
         assertThatThrownBy(() -> new LogoutRevocation.TokenRevocation(null, expiry))
                 .isInstanceOf(NullPointerException.class)

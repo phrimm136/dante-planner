@@ -8,12 +8,13 @@ import org.danteplanner.backend.support.TestJwt;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserSummary;
+import org.danteplanner.backend.auth.token.AccessClaims;
+import org.danteplanner.backend.auth.token.RefreshClaims;
 import org.danteplanner.backend.auth.oauth.OAuthProvider;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthTokens;
 import org.danteplanner.backend.auth.oauth.OAuthUserInfo;
 import org.danteplanner.backend.auth.token.RefreshLineage;
-import org.danteplanner.backend.auth.token.TokenClaims;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -50,10 +51,10 @@ class AuthenticationServiceTest {
     }
 
     private void assertTokensBelongTo(AuthenticationService.AuthResult result, Long userId, UserRole role) {
-        TokenClaims access = jwt.service().validateAccessToken(result.accessToken());
+        AccessClaims access = jwt.service().validateAccessToken(result.accessToken());
         assertThat(access.userId()).isEqualTo(userId);
         assertThat(access.role()).isEqualTo(role);
-        TokenClaims refresh = jwt.service().validateRefreshToken(result.refreshToken());
+        RefreshClaims refresh = jwt.service().validateRefreshToken(result.refreshToken());
         assertThat(refresh.userId()).isEqualTo(userId);
         assertThat(refresh.lineage()).as("a login opens a new refresh family, it does not rotate one")
                 .isInstanceOf(RefreshLineage.Root.class);

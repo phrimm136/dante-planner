@@ -10,8 +10,7 @@ import java.time.ZoneOffset;
 /**
  * Mints tokens that are well-formed and correctly signed, and whose expiry has already passed.
  *
- * <p>Sits in the service's own package because the clock-taking constructor is package-private,
- * and winding a signer back past the configured lifetime is the only way to produce an expired
+ * <p>Winding a signer back past the configured lifetime is the only way to produce an expired
  * token a test can hand to the live validator — a garbage string exercises the malformed path
  * instead.</p>
  */

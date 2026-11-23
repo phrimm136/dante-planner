@@ -12,30 +12,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import org.danteplanner.backend.auth.token.LogoutRevocation;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 
 public class RecordingTokenBlacklist extends TokenBlacklistService {
 
-    private static final long ROTATION_GRACE_PERIOD_MS =
-            (long) ReflectionTestUtils.getField(TokenBlacklistService.class, "ROTATION_GRACE_PERIOD_MS");
-
     public enum Operation {
         REVOKE_LOGOUT_SESSION,
         BLACKLIST_TOKEN,
-        BLACKLIST_TOKEN_FOR_ROTATION,
         INVALIDATE_USER_TOKENS,
         CLEAR_USER_INVALIDATION
-    }
-
-    private enum Mode {
-        IMMEDIATE,
-        ROTATION_GRACE
-    }
-
-    private record Entry(Mode mode, long blacklistedAt, long expiresAt) {
     }
 
     private record Invalidation(long stamp, long expiresAt) {
@@ -46,14 +33,14 @@ public class RecordingTokenBlacklist extends TokenBlacklistService {
 
     private final Clock clock;
     private final List<LogoutRevocation> revocations = new ArrayList<>();
-    private final Map<String, Entry> entries = new LinkedHashMap<>();
+    private final Map<String, Long> expiries = new LinkedHashMap<>();
     private final Map<Long, Invalidation> invalidations = new LinkedHashMap<>();
     private final List<Failed> failed = new ArrayList<>();
     private final ScriptedFailures<Operation> failures =
             new ScriptedFailures<>(RecordingTokenBlacklist.class.getSimpleName(), Operation.class);
 
     public RecordingTokenBlacklist(Clock clock) {
-        super(null, null, new SimpleMeterRegistry(), DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
+        super(null, null, new SimpleMeterRegistry(), clock, DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
         this.clock = clock;
     }
 
@@ -70,7 +57,7 @@ public class RecordingTokenBlacklist extends TokenBlacklistService {
     }
 
     public Set<String> blacklistedTokens() {
-        return entries.keySet().stream().filter(this::isBlacklisted).collect(Collectors.toUnmodifiableSet());
+        return expiries.keySet().stream().filter(this::isBlacklisted).collect(Collectors.toUnmodifiableSet());
     }
 
     public Set<Long> invalidatedUserIds() {
@@ -87,7 +74,7 @@ public class RecordingTokenBlacklist extends TokenBlacklistService {
         this.revocations.addAll(revocations);
         for (LogoutRevocation revocation : revocations) {
             if (revocation instanceof LogoutRevocation.TokenRevocation token) {
-                put(token.token(), token.expiry(), Mode.IMMEDIATE);
+                put(token.token(), token.expiry());
             }
         }
     }
@@ -95,23 +82,13 @@ public class RecordingTokenBlacklist extends TokenBlacklistService {
     @Override
     public void blacklistToken(String token, Date expiry) {
         failIfScripted(Operation.BLACKLIST_TOKEN);
-        put(token, expiry, Mode.IMMEDIATE);
-    }
-
-    @Override
-    public void blacklistTokenForRotation(String token, Date expiry) {
-        failIfScripted(Operation.BLACKLIST_TOKEN_FOR_ROTATION);
-        put(token, expiry, Mode.ROTATION_GRACE);
+        put(token, expiry);
     }
 
     @Override
     public boolean isBlacklisted(String token) {
-        long now = clock.millis();
-        Entry entry = entries.get(token);
-        if (entry == null || entry.expiresAt() <= now) {
-            return false;
-        }
-        return entry.mode() == Mode.IMMEDIATE || now - entry.blacklistedAt() >= ROTATION_GRACE_PERIOD_MS;
+        Long expiresAt = expiries.get(token);
+        return expiresAt != null && expiresAt > clock.millis();
     }
 
     @Override
@@ -137,17 +114,16 @@ public class RecordingTokenBlacklist extends TokenBlacklistService {
 
     public int size() {
         long now = clock.millis();
-        return (int) entries.values().stream().filter(entry -> entry.expiresAt() > now).count();
+        return (int) expiries.values().stream().filter(expiresAt -> expiresAt > now).count();
     }
 
     public int userInvalidationSize() {
         return invalidatedUserIds().size();
     }
 
-    private void put(String token, Date expiry, Mode mode) {
-        long now = clock.millis();
-        if (expiry.getTime() > now) {
-            entries.put(token, new Entry(mode, now, expiry.getTime()));
+    private void put(String token, Date expiry) {
+        if (expiry.getTime() > clock.millis()) {
+            expiries.put(token, expiry.getTime());
         }
     }
 

@@ -1,5 +1,6 @@
 package org.danteplanner.backend.integration;
 
+import java.time.Clock;
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.support.AuthReads;
 import org.danteplanner.backend.auth.token.JwtTokenService;
@@ -68,7 +69,7 @@ class AccountDeletionGuardIT extends SharedMySqlContainerSupport {
                 SharedRedisContainerSupport.host(), SharedRedisContainerSupport.port()));
         factory.afterPropertiesSet();
         return new RevocationFailsBlacklist(factory, new StringRedisTemplate(factory), new SimpleMeterRegistry(),
-                TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
+                Clock.systemUTC(), TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
     }
 
     static final class RevocationFailsBlacklist extends TokenBlacklistService
@@ -77,8 +78,8 @@ class AccountDeletionGuardIT extends SharedMySqlContainerSupport {
         private final LettuceConnectionFactory connectionFactory;
 
         RevocationFailsBlacklist(LettuceConnectionFactory connectionFactory, StringRedisTemplate template,
-                SimpleMeterRegistry meterRegistry, long refreshTokenExpiry) {
-            super(AuthReads.writesTo(template), AuthReads.from(template), meterRegistry, refreshTokenExpiry);
+                SimpleMeterRegistry meterRegistry, Clock clock, long refreshTokenExpiry) {
+            super(AuthReads.writesTo(template), AuthReads.from(template), meterRegistry, clock, refreshTokenExpiry);
             this.connectionFactory = connectionFactory;
         }
 
