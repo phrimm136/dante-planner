@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
@@ -68,12 +69,12 @@ class PlannerDeleteRestrictionTest {
                 null,
                 catalogService,
                 accessGuard,
-                new RestrictionCheckService(users, new AccountStandingValidator()),
+                new RestrictionCheckService(users, new AccountStandingValidator(), Clock.systemUTC()),
                 new PlannerCategoryValidator(),
                 new PlannerLimitValidator(),
                 new PlannerOwnershipValidator(),
                 new SyncVersionValidator(),
-                objectMapper,
+                objectMapper, Clock.systemUTC(),
                 100,
                 2);
         owner = users.add(TestDataFactory.unsavedUser(1L));

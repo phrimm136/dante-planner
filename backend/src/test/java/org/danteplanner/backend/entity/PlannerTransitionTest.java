@@ -31,7 +31,7 @@ class PlannerTransitionTest {
         Planner planner = planner().build();
         planner.publish(NOW);
 
-        planner.takeDown();
+        planner.takeDown(Instant.now());
 
         assertThat(planner.getTakenDownAt()).isNotNull();
         assertThat(planner.isPublished()).isFalse();
@@ -40,7 +40,7 @@ class PlannerTransitionTest {
     @Test
     void publish_WhenTakenDown_Throws() {
         Planner planner = planner().build();
-        planner.takeDown();
+        planner.takeDown(Instant.now());
 
         assertThatThrownBy(() -> planner.publish(NOW))
                 .isInstanceOf(PlannerForbiddenException.class)
@@ -113,7 +113,7 @@ class PlannerTransitionTest {
     void hideFromRecommended_WhenCalled_SetsAllFourFields() {
         Planner planner = planner().build();
 
-        planner.hideFromRecommended(42L, "spam");
+        planner.hideFromRecommended(42L, "spam", Instant.now());
 
         assertThat(planner.isHiddenFromRecommended()).isTrue();
         assertThat(planner.getModeration().getHiddenByModeratorId()).isEqualTo(42L);
@@ -124,7 +124,7 @@ class PlannerTransitionTest {
     @Test
     void unhideFromRecommended_WhenCalled_ClearsAllFourFields() {
         Planner planner = planner().build();
-        planner.hideFromRecommended(42L, "spam");
+        planner.hideFromRecommended(42L, "spam", Instant.now());
 
         planner.unhideFromRecommended();
 
@@ -147,7 +147,7 @@ class PlannerTransitionTest {
     void unpublish_WhenTakenDown_KeepsTakenDownAt() {
         Planner planner = planner().build();
         planner.publish(NOW);
-        planner.takeDown();
+        planner.takeDown(Instant.now());
         Instant takenDownAt = planner.getTakenDownAt();
 
         planner.unpublish();

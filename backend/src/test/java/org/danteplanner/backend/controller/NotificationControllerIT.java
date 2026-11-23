@@ -189,7 +189,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
         void getInbox_WhenSoftDeleted_ExcludesFromInbox() throws Exception {
             Notification active = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             Notification deleted = createNotification(testUser, NotificationType.REPLY_RECEIVED);
-            deleted.softDelete();
+            deleted.softDelete(Instant.now());
             notificationRepository.save(deleted);
 
             mockMvc.perform(get("/api/notifications/inbox")
@@ -245,7 +245,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
         void getUnreadCount_WhenMixedReadStatus_ReturnsUnreadOnly() throws Exception {
             createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             Notification read = createNotification(testUser, NotificationType.REPLY_RECEIVED);
-            read.markAsRead();
+            read.markAsRead(Instant.now());
             notificationRepository.save(read);
 
             mockMvc.perform(get("/api/notifications/unread-count")
@@ -258,7 +258,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
         void getUnreadCount_WhenSoftDeleted_ExcludesFromCount() throws Exception {
             createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             Notification deleted = createNotification(testUser, NotificationType.REPLY_RECEIVED);
-            deleted.softDelete();
+            deleted.softDelete(Instant.now());
             notificationRepository.save(deleted);
 
             mockMvc.perform(get("/api/notifications/unread-count")
@@ -318,7 +318,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
         @Test
         void markRead_WhenAlreadyRead_IsIdempotent() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
-            notification.markAsRead();
+            notification.markAsRead(Instant.now());
             notificationRepository.save(notification);
             Instant firstReadAt = notification.getReadAt();
 
@@ -390,7 +390,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
         @Test
         void markAllRead_WhenAlreadyRead_Unchanged() throws Exception {
             Notification read = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
-            read.markAsRead();
+            read.markAsRead(Instant.now());
             notificationRepository.save(read);
             Instant firstReadAt = read.getReadAt();
 

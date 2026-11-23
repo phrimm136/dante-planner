@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.annotation.Validated;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -21,6 +22,7 @@ import java.util.Set;
  */
 @Configuration
 @ConfigurationProperties(prefix = "security")
+@Validated
 @Getter
 @Setter
 @Slf4j

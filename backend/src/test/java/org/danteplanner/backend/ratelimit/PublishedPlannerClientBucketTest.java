@@ -1,5 +1,6 @@
 package org.danteplanner.backend.ratelimit;
 
+import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -76,7 +77,7 @@ class PublishedPlannerClientBucketTest {
         when(plannerRepository.findAggregateWithAuthor(PLANNER_ID))
                 .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(owner))));
         PublishedPlannerQueryService queryService = new PublishedPlannerQueryService(null, null, null, null, null,
-                null, plannerStatsRepository, new PlannerAccessGuard(null, plannerRepository), null);
+                null, plannerStatsRepository, new PlannerAccessGuard(null, plannerRepository), null, Clock.systemUTC());
         ObjectMapper objectMapper = TestJsonMappers.springDefaults();
 
         SecurityProperties securityProperties = new SecurityProperties();

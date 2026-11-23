@@ -148,7 +148,7 @@ class NotificationRetentionIT extends ExclusiveDatabaseSupport {
         Notification notification = new Notification(
                 recipientId, "retention-" + UUID.randomUUID(), NotificationType.COMMENT_RECEIVED);
         if (read) {
-            notification.markAsRead();
+            notification.markAsRead(Instant.now());
         }
         Long id = notificationRepository.save(notification).getId();
         transactionTemplate.executeWithoutResult(status -> {

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class DomainEventDispatcher {
     private final DomainEventAttemptRecorder attemptRecorder;
     private final SsePublisher ssePublisher;
     private final DispatchStamp stamp;
+    private final Clock clock;
 
     @Transactional
     public void dispatchDomainEvent(long eventId) {
@@ -41,7 +43,7 @@ public class DomainEventDispatcher {
                     .ifPresent(event -> {
                         EffectPushQueue pushes = new EffectPushQueue(ssePublisher);
                         effectRegistry.applyEffectFor(event, pushes);
-                        event.markDispatched();
+                        event.markDispatched(clock.instant());
                         TransactionSynchronizationManager.registerSynchronization(
                                 new EffectPushSynchronization(stamp, pushes));
                     });

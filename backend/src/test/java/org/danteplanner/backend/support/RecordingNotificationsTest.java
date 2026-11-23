@@ -82,7 +82,7 @@ class RecordingNotificationsTest {
 
     @Test
     void calls_WhenTheOwnerHasDeletedTheAccount_RecordTheCallButPushNothing() {
-        owner.softDelete(Instant.now().plus(Duration.ofDays(30)));
+        owner.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
 
         recommend();
 

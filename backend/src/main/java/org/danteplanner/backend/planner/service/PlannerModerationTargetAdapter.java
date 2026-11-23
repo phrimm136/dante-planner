@@ -6,6 +6,7 @@ import org.danteplanner.backend.moderation.api.PlannerModerationTarget;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.util.UUID;
 
 @Service
@@ -14,6 +15,7 @@ public class PlannerModerationTargetAdapter implements PlannerModerationTarget {
 
     private final PlannerPublishingService plannerPublishingService;
     private final PlannerAccessGuard accessGuard;
+    private final Clock clock;
 
     @Override
     public void checkPublished(UUID plannerId) {
@@ -22,7 +24,8 @@ public class PlannerModerationTargetAdapter implements PlannerModerationTarget {
 
     @Override
     public ModeratedPlanner takeDown(UUID plannerId) {
-        return moderated(plannerPublishingService.withdrawFromPublicView(plannerId, Planner::takeDown));
+        return moderated(plannerPublishingService.withdrawFromPublicView(plannerId,
+                planner -> planner.takeDown(clock.instant())));
     }
 
     @Override
@@ -33,7 +36,7 @@ public class PlannerModerationTargetAdapter implements PlannerModerationTarget {
     @Override
     public ModeratedPlanner hideFromRecommended(UUID plannerId, Long moderatorId, String reason) {
         return moderated(plannerPublishingService.changeRecommendedListing(plannerId,
-                planner -> planner.hideFromRecommended(moderatorId, reason)));
+                planner -> planner.hideFromRecommended(moderatorId, reason, clock.instant())));
     }
 
     @Override

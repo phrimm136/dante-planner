@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.transaction.support.TransactionCallback;
 
+import java.time.Clock;
 import java.util.Map;
 import java.util.Optional;
 
@@ -54,10 +55,10 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        EpithetConfig epithetConfig = new EpithetConfig();
+        EpithetConfig epithetConfig = new EpithetConfig(Clock.systemUTC());
         userService = new UserService(userRepository, new RandomUsernameGenerator(epithetConfig),
                 new EpithetValidator(epithetConfig),
-                null, null, transactionTemplate);
+                null, null, transactionTemplate, Clock.systemUTC());
 
         testUser = TestDataFactory.unsavedUser(123L);
     }

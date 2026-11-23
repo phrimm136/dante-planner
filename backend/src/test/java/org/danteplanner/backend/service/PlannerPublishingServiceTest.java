@@ -150,7 +150,7 @@ class PlannerPublishingServiceTest {
     private PlannerPublishingService publishingServiceWith(PlannerContentValidator contentValidator) {
         ObjectMapper objectMapper = new ObjectMapper();
         PlannerAccessGuard accessGuard = new PlannerAccessGuard(users, plannerRepository);
-        RestrictionCheckService restrictionCheck = new RestrictionCheckService(users, new AccountStandingValidator());
+        RestrictionCheckService restrictionCheck = new RestrictionCheckService(users, new AccountStandingValidator(), Clock.systemUTC());
         PlannerCatalogService catalogService = new PlannerCatalogService(catalogRepository, plannerRepository,
                 plannerStatsRepository, entityFilterRepository,
                 keywordFilterRepository, null,
@@ -167,7 +167,7 @@ class PlannerPublishingServiceTest {
                 new PlannerLimitValidator(),
                 new PlannerOwnershipValidator(),
                 new SyncVersionValidator(),
-                objectMapper,
+                objectMapper, Clock.systemUTC(),
                 MAX_PLANNERS_PER_USER,
                 CURRENT_SCHEMA_VERSION);
         return new PlannerPublishingService(
@@ -355,7 +355,7 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
 
-            Planner result = publishingService.withdrawFromPublicView(planner.getId(), Planner::takeDown);
+            Planner result = publishingService.withdrawFromPublicView(planner.getId(), taken -> taken.takeDown(Instant.now()));
 
             assertThat(result).isSameAs(planner);
             assertThat(result.isTakenDown()).isTrue();
@@ -416,7 +416,7 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().published(true).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
 
-            publishingService.withdrawFromPublicView(planner.getId(), Planner::takeDown);
+            publishingService.withdrawFromPublicView(planner.getId(), taken -> taken.takeDown(Instant.now()));
 
             assertThat(plannerCalls()).startsWith("lockContent");
         }

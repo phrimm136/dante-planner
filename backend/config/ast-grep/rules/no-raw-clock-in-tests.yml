@@ -3,7 +3,9 @@ language: Java
 severity: error
 message: 'A test does not read the clock to measure elapsed time: measure through support/Elapsed, started before the action it measures, whose isWithin adds the scheduling slack to the contract bound (backend/src/test/CLAUDE.md, Mechanics).'
 files:
-  - src/test/java/**/*.java
+  - src/test/java/org/danteplanner/backend/**/*.java
+  - src/test/java/org/danteplanner/consistency/**/*.java
+  - src/test/java/org/springframework/**/*.java
 ignores:
   - src/test/java/org/danteplanner/backend/auth/token/JwtTokenServiceTest.java
   - src/test/java/org/danteplanner/backend/auth/token/RefreshRotationServiceIT.java

@@ -2,6 +2,7 @@ package org.danteplanner.backend.comment.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,12 +13,15 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.jspecify.annotations.Nullable;
+import org.springframework.data.annotation.CreatedDate;
+import org.danteplanner.backend.shared.entity.AuditedTimestampListener;
 import org.danteplanner.backend.shared.util.CommentConstants;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
+@EntityListeners(AuditedTimestampListener.class)
 @Table(name = "planner_comments",
        indexes = {
            @Index(name = "idx_comment_planner", columnList = "planner_id, deleted_at"),
@@ -52,6 +56,7 @@ public class PlannerComment {
     @Column(name = "upvote_count", nullable = false)
     private int upvoteCount;
 
+    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -79,7 +84,6 @@ public class PlannerComment {
     @PrePersist
     protected void onCreate() {
         publicId = UUID.randomUUID();
-        createdAt = Instant.now();
     }
 
 
@@ -87,14 +91,14 @@ public class PlannerComment {
         return deletedAt != null;
     }
 
-    public void softDelete() {
-        this.deletedAt = Instant.now();
+    public void softDelete(Instant now) {
+        this.deletedAt = now;
         this.content = CommentConstants.DELETED_CONTENT;
     }
 
-    public void edit(String newContent) {
+    public void edit(String newContent, Instant now) {
         this.content = newContent;
-        this.editedAt = Instant.now();
+        this.editedAt = now;
     }
 
 

@@ -16,7 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+import java.time.Clock;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -30,6 +30,7 @@ import java.util.UUID;
 public class NotificationInboxService {
 
     private final NotificationRepository notificationRepository;
+    private final Clock clock;
 
     @Transactional(readOnly = true)
     public ScopedRead<NotificationInboxResponse> getInbox(Long userId, int page, int size) {
@@ -64,7 +65,7 @@ public class NotificationInboxService {
     public NotificationResponse markAsRead(UUID publicId, Long userId) {
         Notification notification = requireOwned(publicId, userId);
 
-        notification.markAsRead();
+        notification.markAsRead(clock.instant());
         FreshnessDeclarations.declare(new FreshnessScope.User(userId));
 
         return NotificationResponse.fromEntity(notification);
@@ -72,7 +73,7 @@ public class NotificationInboxService {
 
     @Transactional
     public int markAllAsRead(Long userId) {
-        int marked = notificationRepository.markAllAsRead(userId, Instant.now());
+        int marked = notificationRepository.markAllAsRead(userId, clock.instant());
         FreshnessDeclarations.declare(new FreshnessScope.User(userId));
         return marked;
     }
@@ -81,13 +82,13 @@ public class NotificationInboxService {
     public void deleteNotification(UUID publicId, Long userId) {
         Notification notification = requireOwned(publicId, userId);
 
-        notification.softDelete();
+        notification.softDelete(clock.instant());
         FreshnessDeclarations.declare(new FreshnessScope.User(userId));
     }
 
     @Transactional
     public int deleteAllNotifications(Long userId) {
-        int deleted = notificationRepository.softDeleteAllByUserId(userId, Instant.now());
+        int deleted = notificationRepository.softDeleteAllByUserId(userId, clock.instant());
         FreshnessDeclarations.declare(new FreshnessScope.User(userId));
         return deleted;
     }

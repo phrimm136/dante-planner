@@ -21,6 +21,7 @@ import org.danteplanner.backend.shared.util.CommentConstants;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.util.Map;
 import java.util.UUID;
 
@@ -41,6 +42,7 @@ public class CommentCommandService {
     private final CommentAccessValidator accessValidator;
     private final CommentAuthorshipValidator authorshipValidator;
     private final CommentStateValidator stateValidator;
+    private final Clock clock;
 
     @Transactional
     public CreateCommentResponse createComment(UUID plannerId, Long userId, UUID deviceId, CreateCommentRequest request) {
@@ -119,7 +121,7 @@ public class CommentCommandService {
         stateValidator.requireEditable(comment);
         authorshipValidator.requireAuthorToEdit(comment, userId);
 
-        comment.edit(request.content());
+        comment.edit(request.content(), clock.instant());
         FreshnessDeclarations.declare(new FreshnessScope.Planner(comment.getPlannerId()));
         log.info("User {} edited comment {}", userId, commentPublicId);
 
@@ -130,7 +132,7 @@ public class CommentCommandService {
     public void softDelete(PlannerComment comment) {
         // The withdrawal must precede the counter: decrementing detaches the comment, and a
         // mutation made after it would never reach the row.
-        comment.softDelete();
+        comment.softDelete(clock.instant());
         plannerCommentCounts.decrementCommentCount(comment.getPlannerId());
         declareCountChanged(comment.getPlannerId());
     }

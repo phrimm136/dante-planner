@@ -192,7 +192,7 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
     @Test
     void unhideFromRecommended_WhenActorBanned_Returns403AndPlannerStaysHidden() throws Exception {
         Planner hidden = reloaded();
-        hidden.hideFromRecommended(admin.getId(), "Hidden before the ban");
+        hidden.hideFromRecommended(admin.getId(), "Hidden before the ban", Instant.now());
         plannerRepository.save(hidden);
         ban(moderator);
 
@@ -305,7 +305,7 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
     @Test
     void takedownPlanner_WhenActorAccountDeleted_Returns403Forbidden() throws Exception {
         User row = userRepository.findById(moderator.getId()).orElseThrow();
-        row.softDelete(Instant.now().plus(30, ChronoUnit.DAYS));
+        row.softDelete(Instant.now(), Instant.now().plus(30, ChronoUnit.DAYS));
         userRepository.save(row);
 
         mockMvc.perform(post("/api/moderation/planner/{id}/takedown", planner.getId()).with(withCsrf())
@@ -365,7 +365,7 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("USER_BANNED"));
 
-        assertThat(userRepository.findById(owner.getId()).orElseThrow().isTimedOut()).isTrue();
+        assertThat(userRepository.findById(owner.getId()).orElseThrow().isTimedOut(Instant.now())).isTrue();
     }
 
     @Test

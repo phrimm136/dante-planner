@@ -124,10 +124,7 @@ public class ModerationController {
     @RateLimitExempt
     @GetMapping("/users")
     public ResponseEntity<List<ModeratedUserResponse>> getAllUsers() {
-        List<ModeratedUserResponse> responses = moderationQueryService.getAllUsers().value().stream()
-                .map(ModeratedUserResponse::fromUser)
-                .toList();
-        return ResponseEntity.ok(responses);
+        return ResponseEntity.ok(moderationQueryService.getAllUsers().value());
     }
 
     @RateLimitExempt

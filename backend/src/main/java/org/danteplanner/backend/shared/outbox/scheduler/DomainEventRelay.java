@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 
@@ -18,16 +19,19 @@ public class DomainEventRelay {
 
     private final DomainEventDispatcher dispatcher;
     private final DispatchStamp stamp;
+    private final Clock clock;
     private final Duration graceDuration;
     private final int batchSize;
 
     public DomainEventRelay(
             DomainEventDispatcher dispatcher,
             DispatchStamp stamp,
+            Clock clock,
             @Value("${outbox.relay.grace}") Duration graceDuration,
             @Value("${outbox.relay.batch-size}") int batchSize) {
         this.dispatcher = dispatcher;
         this.stamp = stamp;
+        this.clock = clock;
         this.graceDuration = graceDuration;
         this.batchSize = batchSize;
     }
@@ -39,7 +43,7 @@ public class DomainEventRelay {
             fixedDelayString = "${outbox.relay.fixed-delay-ms:60000}")
     @SchedulerLock(name = "dispatchDomainEvents", lockAtMostFor = "PT30M", lockAtLeastFor = "PT30S")
     public void dispatchPendingEvents() {
-        Instant cutoff = Instant.now().minus(graceDuration);
+        Instant cutoff = clock.instant().minus(graceDuration);
         dispatcher.pendingEventIds(cutoff, batchSize).forEach(this::relayOne);
     }
 

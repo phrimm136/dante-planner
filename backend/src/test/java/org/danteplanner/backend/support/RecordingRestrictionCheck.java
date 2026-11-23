@@ -1,5 +1,6 @@
 package org.danteplanner.backend.support;
 
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +20,7 @@ public class RecordingRestrictionCheck implements RestrictionCheck {
     private final List<Decision> decisions = new ArrayList<>();
 
     public RecordingRestrictionCheck(Users users) {
-        this.check = new RestrictionCheckService(users, new AccountStandingValidator());
+        this.check = new RestrictionCheckService(users, new AccountStandingValidator(), Clock.systemUTC());
     }
 
     public List<Decision> decisions() {

@@ -86,7 +86,7 @@ class UserControllerTest {
     private UserController controllerWithGracePeriod(int gracePeriodDays) {
         return new UserController(
                 new UserAccountLifecycleService(userRepository, List.of(), sessionEndHandler,
-                        new RoleChangeValidator(userRepository), gracePeriodDays),
+                        new RoleChangeValidator(userRepository), Clock.systemUTC(), gracePeriodDays),
                 null,
                 new UserSettingsService(userSettingsRepository, userRepository),
                 new SsePublisher(sseChannel, TestJsonMappers.springDefaults(), new SimpleMeterRegistry()),
@@ -157,7 +157,7 @@ class UserControllerTest {
         void deleteMyAccount_WhenIdempotent_ReturnsExistingScheduledDate() {
             // Arrange - simulate second call returning same scheduled date
             Instant originalScheduledAt = Instant.now().plus(Duration.ofDays(25));
-            givenAnAccount(TEST_USER_ID).softDelete(originalScheduledAt);
+            givenAnAccount(TEST_USER_ID).softDelete(Instant.now(), originalScheduledAt);
 
             // Act
             ResponseEntity<UserDeletionResponse> result = userController.deleteMyAccount(new Viewer.Member(TEST_USER_ID), request, response);

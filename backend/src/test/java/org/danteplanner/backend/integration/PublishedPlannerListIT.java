@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -102,11 +103,11 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
         catalogService.add(p1);
 
         Planner p2 = plannerRepository.save(base("P2").published(true).build());
-        p2.takeDown();
+        p2.takeDown(Instant.now());
         plannerRepository.save(p2);
 
         Planner p3 = base("P3").published(true).build();
-        p3.softDelete();
+        p3.softDelete(Instant.now());
         plannerRepository.save(p3);
 
         plannerRepository.save(base("P4").published(false).build());

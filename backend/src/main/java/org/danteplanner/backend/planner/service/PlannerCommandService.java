@@ -42,6 +42,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.util.Set;
 import java.util.UUID;
 
@@ -66,6 +67,7 @@ public class PlannerCommandService {
     private final PlannerOwnershipValidator ownershipValidator;
     private final SyncVersionValidator syncVersionValidator;
     private final ObjectMapper objectMapper;
+    private final Clock clock;
     private final MeterRegistry meterRegistry;
 
     private final int maxPlannersPerUser;
@@ -84,11 +86,12 @@ public class PlannerCommandService {
             PlannerOwnershipValidator ownershipValidator,
             SyncVersionValidator syncVersionValidator,
             ObjectMapper objectMapper,
+            Clock clock,
             int maxPlannersPerUser,
             int currentSchemaVersion) {
         this(plannerRepository, statsRepository, contentValidator, contentVersionValidator,
                 plannerCatalogService, accessGuard, restrictionCheck, categoryValidator, limitValidator, ownershipValidator,
-                syncVersionValidator, objectMapper, new SimpleMeterRegistry(),
+                syncVersionValidator, objectMapper, clock, new SimpleMeterRegistry(),
                 maxPlannersPerUser, currentSchemaVersion);
     }
 
@@ -106,12 +109,13 @@ public class PlannerCommandService {
             PlannerOwnershipValidator ownershipValidator,
             SyncVersionValidator syncVersionValidator,
             ObjectMapper objectMapper,
+            Clock clock,
             MeterRegistry meterRegistry,
             @Value("${planner.max-per-user}") int maxPlannersPerUser,
             GameDataRegistry gameDataRegistry) {
         this(plannerRepository, statsRepository, contentValidator, contentVersionValidator,
                 plannerCatalogService, accessGuard, restrictionCheck, categoryValidator, limitValidator, ownershipValidator,
-                syncVersionValidator, objectMapper, meterRegistry,
+                syncVersionValidator, objectMapper, clock, meterRegistry,
                 maxPlannersPerUser, gameDataRegistry.plannerVersions().schemaVersion());
     }
 
@@ -128,6 +132,7 @@ public class PlannerCommandService {
             PlannerOwnershipValidator ownershipValidator,
             SyncVersionValidator syncVersionValidator,
             ObjectMapper objectMapper,
+            Clock clock,
             MeterRegistry meterRegistry,
             int maxPlannersPerUser,
             int currentSchemaVersion) {
@@ -143,6 +148,7 @@ public class PlannerCommandService {
         this.ownershipValidator = ownershipValidator;
         this.syncVersionValidator = syncVersionValidator;
         this.objectMapper = objectMapper;
+        this.clock = clock;
         this.meterRegistry = meterRegistry;
         this.maxPlannersPerUser = maxPlannersPerUser;
         this.currentSchemaVersion = currentSchemaVersion;
@@ -358,7 +364,7 @@ public class PlannerCommandService {
             log.info("Auto-unpublished planner {} before deletion", id);
         }
 
-        planner.softDelete();
+        planner.softDelete(clock.instant());
         plannerCatalogService.onBecameInvisible(id);
         FreshnessDeclarations.declare(new FreshnessScope.Planner(id), new FreshnessScope.User(planner.getUserId()),
                 new FreshnessScope.Global());

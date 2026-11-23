@@ -3,13 +3,13 @@ package org.danteplanner.backend.user.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
@@ -18,16 +18,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.jspecify.annotations.Nullable;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
+import org.danteplanner.backend.shared.entity.AuditedTimestampListener;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.api.RestrictionState;
 import org.danteplanner.backend.user.api.UserRole;
 
-import java.time.Clock;
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
+@EntityListeners(AuditedTimestampListener.class)
 @Table(name = "users",
        uniqueConstraints = {
            @UniqueConstraint(columnNames = {"provider", "providerId"})
@@ -62,9 +65,11 @@ public class User {
     @Column(name = "username_suffix", nullable = false, unique = true, length = 5)
     private String usernameSuffix; // Unique 5-character alphanumeric suffix
 
+    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
@@ -95,14 +100,6 @@ public class User {
     @PrePersist
     protected void onCreate() {
         publicId = UUID.randomUUID();
-        Instant now = Instant.now();
-        createdAt = now;
-        updatedAt = now;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = Instant.now();
     }
 
     public boolean isDeleted() {
@@ -116,8 +113,8 @@ public class User {
         return permanentDeleteScheduledAt;
     }
 
-    public void softDelete(Instant scheduledDeleteAt) {
-        this.deletedAt = Instant.now();
+    public void softDelete(Instant now, Instant scheduledDeleteAt) {
+        this.deletedAt = now;
         this.permanentDeleteScheduledAt = scheduledDeleteAt;
     }
 
@@ -133,8 +130,8 @@ public class User {
         return bannedAt != null ? RestrictionState.BANNED : RestrictionState.ACTIVE;
     }
 
-    public boolean isTimedOut() {
-        return restrictionState(Clock.systemUTC().instant()) == RestrictionState.TIMED_OUT;
+    public boolean isTimedOut(Instant now) {
+        return restrictionState(now) == RestrictionState.TIMED_OUT;
     }
 
     public boolean isBanned() {

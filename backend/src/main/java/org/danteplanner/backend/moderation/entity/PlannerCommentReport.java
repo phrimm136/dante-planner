@@ -2,19 +2,23 @@ package org.danteplanner.backend.moderation.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+
+import org.danteplanner.backend.shared.entity.AuditedTimestampListener;
 
 import java.time.Instant;
 
 @Entity
+@EntityListeners(AuditedTimestampListener.class)
 @Table(name = "planner_comment_reports",
        uniqueConstraints = {
            @UniqueConstraint(name = "uk_comment_report_reporter_comment", columnNames = {"reporter_id", "comment_id"})
@@ -36,6 +40,7 @@ public class PlannerCommentReport {
     @Column(name = "reason", nullable = false, length = 50)
     private String reason;
 
+    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -43,11 +48,6 @@ public class PlannerCommentReport {
         this.commentId = commentId;
         this.reporterId = reporterId;
         this.reason = reason;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = Instant.now();
     }
 
     public void setCreatedAt(Instant createdAt) {

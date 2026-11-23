@@ -20,7 +20,7 @@ class PlannerEntityTest {
     void takeDown_WhenInvoked_Unpublishes() {
         Planner planner = TestDataFactory.planner(TestDataFactory.unsavedUser(UserRole.NORMAL)).published(true).build();
 
-        planner.takeDown();
+        planner.takeDown(Instant.now());
 
         assertThat(planner.isPublished()).isFalse();
         assertThat(planner.getTakenDownAt()).isNotNull();
@@ -29,7 +29,7 @@ class PlannerEntityTest {
     @Test
     void publish_WhenTakenDown_Throws() {
         Planner planner = TestDataFactory.planner(TestDataFactory.unsavedUser(UserRole.NORMAL)).published(true).build();
-        planner.takeDown();
+        planner.takeDown(Instant.now());
 
         assertThat(planner.isPublished()).isFalse();
         assertThat(planner.isTakenDown()).isTrue();

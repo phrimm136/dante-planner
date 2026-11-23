@@ -1,5 +1,6 @@
 package org.danteplanner.backend.support;
 
+import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,7 +39,7 @@ class RecordingSessionEndHandlerTest {
         when(userRepository.findWithLockById(USER_ID)).thenReturn(Optional.of(TestDataFactory.unsavedUser(USER_ID)));
 
         new UserAccountLifecycleService(userRepository, List.of(), sessions,
-                new RoleChangeValidator(userRepository), GRACE_PERIOD_DAYS).deleteAccount(USER_ID);
+                new RoleChangeValidator(userRepository), Clock.systemUTC(), GRACE_PERIOD_DAYS).deleteAccount(USER_ID);
 
         assertThat(sessions.calls()).containsExactly(new EndAllSessions(USER_ID));
     }
@@ -50,7 +51,7 @@ class RecordingSessionEndHandlerTest {
         sessions.failNext(Operation.END_ALL_SESSIONS, down);
         UserAccountLifecycleService lifecycle =
                 new UserAccountLifecycleService(userRepository, List.of(), sessions,
-                new RoleChangeValidator(userRepository), GRACE_PERIOD_DAYS);
+                new RoleChangeValidator(userRepository), Clock.systemUTC(), GRACE_PERIOD_DAYS);
 
         assertThatThrownBy(() -> lifecycle.deleteAccount(USER_ID))
                 .isInstanceOf(RedisConnectionFailureException.class)

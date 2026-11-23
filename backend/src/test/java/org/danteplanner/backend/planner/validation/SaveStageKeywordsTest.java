@@ -28,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,12 +70,12 @@ class SaveStageKeywordsTest {
                 null,
                 null,
                 new PlannerAccessGuard(users, plannerRepository),
-                new RestrictionCheckService(users, new AccountStandingValidator()),
+                new RestrictionCheckService(users, new AccountStandingValidator(), Clock.systemUTC()),
                 new PlannerCategoryValidator(),
                 new PlannerLimitValidator(),
                 new PlannerOwnershipValidator(),
                 new SyncVersionValidator(),
-                MAPPER,
+                MAPPER, Clock.systemUTC(),
                 100,
                 2);
     }

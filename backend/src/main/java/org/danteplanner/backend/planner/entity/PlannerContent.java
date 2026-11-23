@@ -3,14 +3,13 @@ package org.danteplanner.backend.planner.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostLoad;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
@@ -18,7 +17,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.jspecify.annotations.Nullable;
+import org.springframework.data.annotation.LastModifiedDate;
 
+import org.danteplanner.backend.shared.entity.AuditedTimestampListener;
 import org.danteplanner.backend.planner.converter.KeywordSetConverter;
 import org.danteplanner.backend.planner.converter.PlannerStatusConverter;
 import org.danteplanner.backend.planner.validation.PlannerDocument;
@@ -28,6 +29,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
+@EntityListeners(AuditedTimestampListener.class)
 @Table(name = "planner_content")
 @Getter
 @NoArgsConstructor
@@ -83,8 +85,8 @@ public class PlannerContent {
     @Setter
     private @Nullable UUID deviceId;
 
+    @LastModifiedDate
     @Column(name = "last_modified_at", nullable = false)
-    @Setter
     private Instant lastModifiedAt;
 
     @Column(name = "deleted_at")
@@ -123,18 +125,6 @@ public class PlannerContent {
         loadedCategory = category;
     }
 
-    @PrePersist
-    protected void onCreate() {
-        if (lastModifiedAt == null) {
-            lastModifiedAt = Instant.now();
-        }
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        lastModifiedAt = Instant.now();
-    }
-
     public void replaceContent(PlannerDocument document) {
         this.content = document.json();
     }
@@ -143,8 +133,8 @@ public class PlannerContent {
         return deletedAt != null;
     }
 
-    public void markDeleted() {
-        this.deletedAt = Instant.now();
+    public void markDeleted(Instant now) {
+        this.deletedAt = now;
     }
 
     public void recordSave() {

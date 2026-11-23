@@ -1,5 +1,6 @@
 package org.danteplanner.backend.support;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -45,7 +46,7 @@ public class FakeUsers implements Users {
     };
 
     private final Map<Long, User> rows = new LinkedHashMap<>();
-    private final UserService responses = new UserService(null, null, null, NO_RECORDED_REASONS, null, null);
+    private final UserService responses = new UserService(null, null, null, NO_RECORDED_REASONS, null, null, Clock.systemUTC());
     private long nextId = 1;
 
     public User add(User user) {

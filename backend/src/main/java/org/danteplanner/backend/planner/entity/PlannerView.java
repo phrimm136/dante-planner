@@ -2,14 +2,17 @@ package org.danteplanner.backend.planner.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.PostPersist;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.domain.Persistable;
+
+import org.danteplanner.backend.shared.entity.AuditedTimestampListener;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -20,6 +23,7 @@ import java.util.UUID;
  * which doesn't insert new entities properly without this interface.
  */
 @Entity
+@EntityListeners(AuditedTimestampListener.class)
 @Table(name = "planner_views")
 @IdClass(PlannerViewId.class)
 public class PlannerView implements Persistable<PlannerViewId> {
@@ -36,6 +40,7 @@ public class PlannerView implements Persistable<PlannerViewId> {
     @Column(name = "view_date", nullable = false)
     private LocalDate viewDate;
 
+    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -60,11 +65,6 @@ public class PlannerView implements Persistable<PlannerViewId> {
     @Override
     public boolean isNew() {
         return isNew;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = Instant.now();
     }
 
     @PostPersist

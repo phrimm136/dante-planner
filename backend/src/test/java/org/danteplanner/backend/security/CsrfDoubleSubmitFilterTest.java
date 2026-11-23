@@ -26,6 +26,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import ch.qos.logback.classic.Level;
 
+import java.time.Clock;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -42,7 +44,7 @@ class CsrfDoubleSubmitFilterTest {
         byte[] key = new byte[32];
         new java.security.SecureRandom().nextBytes(key);
         JwtProperties jwtProperties = new JwtProperties(null, null, key, 900000L, 604800000L);
-        CsrfTokenService csrfTokenService = new CsrfTokenService(jwtProperties);
+        CsrfTokenService csrfTokenService = new CsrfTokenService(jwtProperties, Clock.systemUTC());
         token = csrfTokenService.mint();
 
         CookieUtils cookieUtils = new CookieUtils(true, "", "Lax");

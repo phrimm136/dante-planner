@@ -133,7 +133,7 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
      */
     private void purgeOwner(Long ownerId) {
         User managed = userRepository.findById(ownerId).orElseThrow();
-        managed.softDelete(Instant.now().minusSeconds(60));
+        managed.softDelete(Instant.now(), Instant.now().minusSeconds(60));
         userRepository.save(managed);
         assertThat(lifecycleService.performHardDelete(ownerId, Instant.now())).isTrue();
     }

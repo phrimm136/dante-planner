@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -132,7 +133,7 @@ class CommentReportServiceTest {
         @Test
         void createReport_WhenCommentDeleted_ThrowsException() {
             // Arrange
-            comment.softDelete();
+            comment.softDelete(Instant.now());
             when(commentRepository.findByPublicId(COMMENT_PUBLIC_ID)).thenReturn(Optional.of(comment));
             CommentReportRequest request = new CommentReportRequest(REASON);
 

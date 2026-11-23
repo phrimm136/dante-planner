@@ -1,5 +1,6 @@
 package org.danteplanner.backend.support;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -54,7 +55,7 @@ class RecordingAccountLifecycleParticipantTest {
     @Test
     void calls_WhenTheRealLifecycleReactivatesADeletedAccount_RecordTheReactivation() {
         User user = TestDataFactory.unsavedUser(USER_ID);
-        user.softDelete(Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS)));
+        user.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS)));
         when(userRepository.findWithLockById(USER_ID)).thenReturn(Optional.of(user));
 
         lifecycle().reactivateAccount(USER_ID);
@@ -66,7 +67,7 @@ class RecordingAccountLifecycleParticipantTest {
     @Test
     void failNext_WhenScripted_FailsOneCallAndThenRecovers() {
         User user = TestDataFactory.unsavedUser(USER_ID);
-        user.softDelete(Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS)));
+        user.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS)));
         when(userRepository.findWithLockById(USER_ID)).thenReturn(Optional.of(user));
         IllegalStateException down = new IllegalStateException("participant down");
         second.failNext(Event.REACTIVATED, down);
@@ -85,6 +86,6 @@ class RecordingAccountLifecycleParticipantTest {
 
     private UserAccountLifecycleService lifecycle() {
         return new UserAccountLifecycleService(userRepository, List.of(first, second),
-                new RecordingSessionEndHandler(journal), new RoleChangeValidator(userRepository), GRACE_PERIOD_DAYS);
+                new RecordingSessionEndHandler(journal), new RoleChangeValidator(userRepository), Clock.systemUTC(), GRACE_PERIOD_DAYS);
     }
 }

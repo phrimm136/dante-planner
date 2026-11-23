@@ -46,7 +46,7 @@ class UserCleanupQueryIT extends SharedMySqlContainerSupport {
 
     private Long scheduledFor(String email, Instant permanentDeleteAt) {
         User user = TestDataFactory.createTestUser(userRepository, email);
-        user.softDelete(permanentDeleteAt);
+        user.softDelete(Instant.now(), permanentDeleteAt);
         return userRepository.save(user).getId();
     }
 }

@@ -2,6 +2,7 @@ package org.danteplanner.backend.shared.config;
 
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,12 @@ public class EpithetConfig implements EpithetProvider {
             Map.entry("BLIND", LocalDate.of(2026, 1, 21))
     );
 
+    private final Clock clock;
+
+    public EpithetConfig(Clock clock) {
+        this.clock = clock;
+    }
+
     @Override
     public List<String> getEpithets() {
         return List.copyOf(EPITHETS.keySet());
@@ -46,7 +53,7 @@ public class EpithetConfig implements EpithetProvider {
 
     @Override
     public int getWeight(String keyword) {
-        return getWeight(keyword, LocalDate.now(ZoneOffset.UTC));
+        return getWeight(keyword, LocalDate.ofInstant(clock.instant(), ZoneOffset.UTC));
     }
 
     int getWeight(String keyword, LocalDate referenceDate) {

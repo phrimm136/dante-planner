@@ -4,6 +4,7 @@ import org.springframework.validation.annotation.Validated;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
@@ -11,16 +12,19 @@ import jakarta.validation.constraints.Positive;
 @Validated
 public record RateLimitProperties(
         @Positive long configVersion,
-        @NotNull BucketConfig crud,
-        @NotNull BucketConfig sse,
-        @NotNull BucketConfig auth,
-        @NotNull BucketConfig comment,
-        @NotNull BucketConfig report,
-        @NotNull BucketConfig moderation,
-        @NotNull BucketConfig publicRead,
-        @NotNull BucketConfig plannerStats,
-        @NotNull BucketConfig viewRecord) {
+        @NotNull @Valid BucketConfig crud,
+        @NotNull @Valid BucketConfig sse,
+        @NotNull @Valid BucketConfig auth,
+        @NotNull @Valid BucketConfig comment,
+        @NotNull @Valid BucketConfig report,
+        @NotNull @Valid BucketConfig moderation,
+        @NotNull @Valid BucketConfig publicRead,
+        @NotNull @Valid BucketConfig plannerStats,
+        @NotNull @Valid BucketConfig viewRecord) {
 
-    public record BucketConfig(int capacity, int refillTokens, int refillDurationSeconds) {
+    public record BucketConfig(
+            @Positive int capacity,
+            @Positive int refillTokens,
+            @Positive int refillDurationSeconds) {
     }
 }

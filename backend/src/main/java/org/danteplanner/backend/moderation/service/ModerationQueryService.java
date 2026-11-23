@@ -1,6 +1,7 @@
 package org.danteplanner.backend.moderation.service;
 
 import lombok.RequiredArgsConstructor;
+import org.danteplanner.backend.moderation.dto.ModeratedUserResponse;
 import org.danteplanner.backend.moderation.dto.ModerationActionResponse;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,10 +34,14 @@ public class ModerationQueryService {
 
     private final Users users;
     private final ModerationActionRepository moderationActionRepository;
+    private final Clock clock;
 
     @Transactional(readOnly = true)
-    public ScopedRead<List<UserSummary>> getAllUsers() {
-        return new ScopedRead<>(users.listActiveAccounts(), GLOBAL);
+    public ScopedRead<List<ModeratedUserResponse>> getAllUsers() {
+        Instant now = clock.instant();
+        return new ScopedRead<>(users.listActiveAccounts().stream()
+                .map(user -> ModeratedUserResponse.fromUser(user, now))
+                .toList(), GLOBAL);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.MANDATORY)

@@ -1,6 +1,5 @@
 package org.danteplanner.backend.user.api;
 
-import java.time.Clock;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -39,8 +38,8 @@ public record UserSummary(
         return bannedAt != null ? RestrictionState.BANNED : RestrictionState.ACTIVE;
     }
 
-    public boolean isTimedOut() {
-        return restrictionState(Clock.systemUTC().instant()) == RestrictionState.TIMED_OUT;
+    public boolean isTimedOut(Instant now) {
+        return restrictionState(now) == RestrictionState.TIMED_OUT;
     }
 
     public boolean isBanned() {

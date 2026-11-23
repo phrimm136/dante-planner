@@ -41,6 +41,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -394,7 +395,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             Planner planner2 = createTestPlanner(testUser);
 
             // Soft delete one planner
-            planner2.softDelete();
+            planner2.softDelete(Instant.now());
             plannerRepository.save(planner2);
 
             mockMvc.perform(get("/api/planner/md")
@@ -467,7 +468,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         @Test
         void getPlanner_WhenSoftDeleted_Returns404() throws Exception {
             Planner planner = createTestPlanner(testUser);
-            planner.softDelete();
+            planner.softDelete(Instant.now());
             plannerRepository.save(planner);
 
             mockMvc.perform(get("/api/planner/md/{id}", planner.getId())
@@ -802,7 +803,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
             // Soft delete one
             Planner toDelete = planners.get(0);
-            toDelete.softDelete();
+            toDelete.softDelete(Instant.now());
             plannerRepository.save(toDelete);
 
             // Now should be able to create one more

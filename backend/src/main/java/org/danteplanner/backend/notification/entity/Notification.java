@@ -2,6 +2,7 @@ package org.danteplanner.backend.notification.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -15,12 +16,15 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.jspecify.annotations.Nullable;
+import org.springframework.data.annotation.CreatedDate;
+import org.danteplanner.backend.shared.entity.AuditedTimestampListener;
 import org.danteplanner.backend.notification.api.NotificationType;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
+@EntityListeners(AuditedTimestampListener.class)
 @Table(name = "notifications",
        indexes = {
            @Index(name = "idx_notifications_user_read", columnList = "user_id, `read`, created_at DESC"),
@@ -55,6 +59,7 @@ public class Notification {
     @Column(name = "`read`", nullable = false)
     private boolean read = false;
 
+    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -124,19 +129,18 @@ public class Notification {
     @PrePersist
     protected void onCreate() {
         publicId = UUID.randomUUID();
-        createdAt = Instant.now();
     }
 
 
-    public void markAsRead() {
+    public void markAsRead(Instant now) {
         if (!this.read) {
             this.read = true;
-            this.readAt = Instant.now();
+            this.readAt = now;
         }
     }
 
-    public void softDelete() {
-        this.deletedAt = Instant.now();
+    public void softDelete(Instant now) {
+        this.deletedAt = now;
     }
 
     public boolean isDeleted() {

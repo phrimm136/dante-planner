@@ -129,7 +129,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         void getComments_WhenLeafAuthorDeactivated_ServesTheLeafWithHiddenBodyAndMaskedNameAndKeepsTheRowContent() throws Exception {
             PlannerComment leaf = commentRepository.save(new PlannerComment(
                     publishedPlanner.getId(), otherUser.getId(), "still here", null, 0));
-            otherUser.softDelete(Instant.now().plus(Duration.ofDays(30)));
+            otherUser.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
             userRepository.save(otherUser);
 
             mockMvc.perform(get("/api/planner/{id}/comments", publishedPlanner.getId()))
@@ -150,7 +150,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                     publishedPlanner.getId(), otherUser.getId(), "still here", null, 0));
             PlannerComment reply = commentRepository.save(new PlannerComment(
                     publishedPlanner.getId(), testUser.getId(), "a reply", parent.getId(), 1));
-            otherUser.softDelete(Instant.now().plus(Duration.ofDays(30)));
+            otherUser.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
             userRepository.save(otherUser);
 
             mockMvc.perform(get("/api/planner/{id}/comments", publishedPlanner.getId()))
@@ -534,7 +534,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         @Test
         void reportComment_WhenCommentDeleted_Returns403() throws Exception {
             PlannerComment comment = createComment(null, 0);
-            comment.softDelete();
+            comment.softDelete(Instant.now());
             commentRepository.save(comment);
 
             AuthCookies.performAuthed(mockMvc, report(comment), otherUserAccessToken)
