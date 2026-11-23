@@ -577,14 +577,18 @@ class PlanTest(RepoCase):
                                                           "state-backend"])
 
 
-RDS_SETTINGS = {
-    "create_vpc": "true",
-    "engine_version": '"8.4.11"',
-    "multi_az": "false",
-    "sql_mode": '"ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,'
-                'NO_ENGINE_SUBSTITUTION"',
+ACCOUNT_BOUND_SHAPES = {
+    "an account id": re.compile(r"(?<![0-9.])[0-9]{12}(?![0-9])"),
+    "an ARN": re.compile(r"arn:aws"),
+    "a resource id": re.compile(r"\b(?:vpc|subnet|sg|rtb|igw|pcx|eni|ami|i|vol)-[0-9a-f]{8,}\b"),
+    "a hostname": re.compile(r"\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:com|net|org|io|dev|internal)\b"),
+    "an address": re.compile(r"\b[0-9]{1,3}(?:\.[0-9]{1,3}){3}\b"),
+    "a long hex value": re.compile(r"\b[0-9a-f]{32,}\b"),
 }
-ASSIGNMENT_LINE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$")
+
+
+def account_bound_shapes(settings_text):
+    return sorted(shape_name for shape_name, shape in ACCOUNT_BOUND_SHAPES.items() if shape.search(settings_text))
 
 
 class MovedStackTest(RepoCase):
@@ -738,15 +742,26 @@ class MovedStackTest(RepoCase):
 
 
 class RealSettingsTest(unittest.TestCase):
-    def settings_of(self, env_name):
-        settings_text = (REPO_ROOT / "terraform" / "rds" / "envs" / f"{env_name}.tfvars").read_text()
-        return dict(ASSIGNMENT_LINE.match(text_line).groups() for text_line in settings_text.splitlines()
-                    if text_line.strip() and not text_line.lstrip().startswith("#"))
+    def test_each_account_bound_shape_is_recognized(self):
+        samples = {
+            "an account id": 'aws_account_id = "123456789012"',
+            "an ARN": 'role = "arn:aws:iam::role/x"',
+            "a resource id": 'vpc_id = "vpc-0abc1234def567890"',
+            "a hostname": 'host = "db.example.com"',
+            "an address": 'cidr = "10.0.0.0/16"',
+            "a long hex value": 'zone = "0123456789abcdef0123456789abcdef"',
+        }
+        for shape_name, sample_text in samples.items():
+            with self.subTest(shape_name=shape_name):
+                self.assertIn(shape_name, account_bound_shapes(sample_text))
+        self.assertEqual(account_bound_shapes('engine_version = "8.4.11"\nmulti_az = false\n'), [])
 
-    def test_the_rds_settings_files_hold_the_four_settings(self):
-        for env_name in ("prod", "staging"):
-            with self.subTest(env_name=env_name):
-                self.assertEqual(self.settings_of(env_name), RDS_SETTINGS)
+    def test_no_tracked_settings_file_holds_an_account_bound_value(self):
+        settings_paths = sorted((REPO_ROOT / "terraform").glob("*/envs/*.tfvars"))
+        self.assertTrue(settings_paths)
+        for settings_path in settings_paths:
+            with self.subTest(settings_path=str(settings_path.relative_to(REPO_ROOT))):
+                self.assertEqual(account_bound_shapes(settings_path.read_text()), [])
 
     def test_the_real_rds_stack_is_moved_and_takes_the_account(self):
         rds_stack = ops_cli.stack_info(REPO_ROOT, "rds")
