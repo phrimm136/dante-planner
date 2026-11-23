@@ -205,7 +205,7 @@ class LogoutRevocationIT {
 
         String blacklistKey = blacklistKeys.iterator().next();
         assertThat(authStringRedisTemplate.opsForValue().get(blacklistKey))
-                .as("the entry is written with immediate effect, not the rotation grace mode")
+                .as("the entry carries the value an old pod reads as immediate")
                 .startsWith("1:");
         assertThat(authStringRedisTemplate.getExpire(blacklistKey))
                 .as("the token's own remaining lifetime lands as the entry's TTL")

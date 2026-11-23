@@ -253,9 +253,6 @@ public class RefreshRotationService {
     }
 
     public void revokeFamily(String familyId) {
-        if (familyId == null) {
-            return;
-        }
         String key = familyKey(familyId);
         authWrites.writeWithoutResult(store -> {
             store.opsForHash().put(key, REVOKED_FIELD, String.valueOf(clock.millis()));

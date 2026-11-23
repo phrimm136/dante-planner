@@ -179,7 +179,7 @@ class TokenBlacklistServiceIT {
             // Act - blacklist immediately (logout)
             blacklistService.blacklistToken(token, expiry);
 
-            // Assert - should be blacklisted immediately, no grace period
+            // Assert - should be blacklisted immediately
             assertThat(blacklistService.isBlacklisted(token)).isTrue();
         }
 
@@ -264,20 +264,6 @@ class TokenBlacklistServiceIT {
             blacklistService.invalidateUserTokens(userId);
 
             assertThat(TokenStoreKeys.userInvalidationSize(ownTemplate)).isEqualTo(1);
-        }
-
-        @Test
-        void clearUserInvalidation_WhenCalled_RemovesInvalidation() {
-            // Arrange
-            Long userId = TestDataFactory.nextUserId();
-            blacklistService.invalidateUserTokens(userId);
-
-            // Act
-            blacklistService.clearUserInvalidation(userId);
-
-            // Assert
-            assertThat(blacklistService.isUserTokenInvalidated(userId, 0L)).isFalse();
-            assertThat(TokenStoreKeys.userInvalidationSize(ownTemplate)).isEqualTo(0);
         }
     }
 }

@@ -169,7 +169,7 @@ class AuthControllerLogoutAllIT extends SharedMySqlContainerSupport {
 
             assertThat(tokenBlacklistService.isBlacklisted(accessToken)).isTrue();
 
-            // The current access token was blacklisted immediately (no grace): the filter
+            // The current access token was blacklisted immediately: the filter
             // throws TokenRevokedException, clears the context, and the protected matcher
             // forces a 401 via the authentication entry point.
             mockMvc.perform(post("/api/auth/logout-all").with(withCsrf())
