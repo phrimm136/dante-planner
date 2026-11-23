@@ -2,6 +2,7 @@ package org.danteplanner.backend.comment.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
@@ -9,11 +10,13 @@ import jakarta.persistence.IdClass;
 import jakarta.persistence.Index;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.PostPersist;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.domain.Persistable;
 import org.springframework.util.Assert;
+
+import org.danteplanner.backend.shared.entity.AuditedTimestampListener;
 
 import java.time.Instant;
 
@@ -22,6 +25,7 @@ import java.time.Instant;
  * which doesn't insert new entities properly without this interface.
  */
 @Entity
+@EntityListeners(AuditedTimestampListener.class)
 @Table(name = "planner_comment_votes",
        indexes = {
            @Index(name = "idx_comment_vote_comment", columnList = "comment_id"),
@@ -42,6 +46,7 @@ public class PlannerCommentVote implements Persistable<PlannerCommentVoteId> {
     @Column(name = "vote_type", nullable = false)
     private CommentVoteType voteType;
 
+    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -66,11 +71,6 @@ public class PlannerCommentVote implements Persistable<PlannerCommentVoteId> {
     @Override
     public boolean isNew() {
         return isNew;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = Instant.now();
     }
 
     @PostPersist

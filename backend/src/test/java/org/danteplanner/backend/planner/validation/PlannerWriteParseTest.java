@@ -30,6 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Clock;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,12 +70,12 @@ class PlannerWriteParseTest {
                 null,
                 null,
                 new PlannerAccessGuard(null, plannerRepository),
-                new RestrictionCheckService(null, new AccountStandingValidator()),
+                new RestrictionCheckService(null, new AccountStandingValidator(), Clock.systemUTC()),
                 new PlannerCategoryValidator(),
                 new PlannerLimitValidator(),
                 new PlannerOwnershipValidator(),
                 new SyncVersionValidator(),
-                MAPPER,
+                MAPPER, Clock.systemUTC(),
                 100,
                 SCHEMA_VERSION);
     }

@@ -47,7 +47,7 @@ class CommentTreeNodeAuthorLifecycleTest {
     @Test
     void fromEntity_WhenAuthorDeactivatedInGraceWindow_BlanksTheBody() {
         User author = author("GONE");
-        author.softDelete(Instant.now().plus(Duration.ofDays(30)));
+        author.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
         PlannerComment comment = comment(author.getId());
 
         CommentTreeNode node = project(comment, author);
@@ -63,7 +63,7 @@ class CommentTreeNodeAuthorLifecycleTest {
     @Test
     void fromEntity_WhenAuthorDeactivated_LeavesTheEntityContent() {
         User author = author("GONE");
-        author.softDelete(Instant.now().plus(Duration.ofDays(30)));
+        author.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
         PlannerComment comment = comment(author.getId());
 
         project(comment, author);
@@ -74,7 +74,7 @@ class CommentTreeNodeAuthorLifecycleTest {
     @Test
     void fromEntity_WhenAuthorReactivated_ServesTheBody() {
         User author = author("GONE");
-        author.softDelete(Instant.now().plus(Duration.ofDays(30)));
+        author.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
         PlannerComment comment = comment(author.getId());
         project(comment, author);
 
@@ -106,9 +106,9 @@ class CommentTreeNodeAuthorLifecycleTest {
     @Test
     void fromEntity_WhenCommentDeletedAndAuthorDeactivated_BlanksTheBody() {
         User author = author("GONE");
-        author.softDelete(Instant.now().plus(Duration.ofDays(30)));
+        author.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
         PlannerComment comment = comment(author.getId());
-        comment.softDelete();
+        comment.softDelete(Instant.now());
 
         CommentTreeNode node = project(comment, author);
 

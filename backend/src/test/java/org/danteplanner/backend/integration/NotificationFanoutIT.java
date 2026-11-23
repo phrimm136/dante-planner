@@ -1,5 +1,6 @@
 package org.danteplanner.backend.integration;
 
+import java.time.Instant;
 import java.util.UUID;
 
 import org.danteplanner.backend.config.TestConfig;
@@ -99,7 +100,7 @@ class NotificationFanoutIT extends SharedMySqlContainerSupport {
                 .findByUserIdAndContentIdAndNotificationType(
                         recipient, contentId, NotificationType.PLANNER_RECOMMENDED)
                 .orElseThrow();
-        raised.softDelete();
+        raised.softDelete(Instant.now());
         notificationRepository.saveAndFlush(raised);
 
         assertThat(jdbcTemplate.queryForObject(

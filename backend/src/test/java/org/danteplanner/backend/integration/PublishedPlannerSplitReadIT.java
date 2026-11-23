@@ -392,7 +392,7 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
 
     @Test
     void splitEndpoints_WhenContentSoftDeleted_AnswerTheDetailReadNotFound() throws Exception {
-        published.softDelete();
+        published.softDelete(Instant.now());
         plannerRepository.save(published);
 
         assertHiddenFromEveryReadPath(published.getId());
@@ -412,7 +412,7 @@ class PublishedPlannerSplitReadIT extends SharedMySqlContainerSupport {
 
     @Test
     void splitEndpoints_WhenOwnerDeactivated_AnswerTheDetailReadNotFound() throws Exception {
-        owner.softDelete(Instant.now().plusSeconds(86_400L * 30));
+        owner.softDelete(Instant.now(), Instant.now().plusSeconds(86_400L * 30));
         userRepository.save(owner);
 
         assertHiddenFromEveryReadPath(published.getId());

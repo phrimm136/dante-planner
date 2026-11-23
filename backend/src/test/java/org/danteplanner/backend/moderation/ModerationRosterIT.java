@@ -1,9 +1,9 @@
 package org.danteplanner.backend.moderation;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
+import org.danteplanner.backend.moderation.dto.ModeratedUserResponse;
 import org.danteplanner.backend.moderation.service.ModerationQueryService;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -49,13 +49,15 @@ class ModerationRosterIT extends SharedMySqlContainerSupport {
     void roster_WhenAccountSoftDeleted_OmitsIt() {
         User active = TestDataFactory.createTestUser(userRepository, "active@example.com");
         User removed = TestDataFactory.createTestUser(userRepository, "removed@example.com");
-        removed.softDelete(Instant.now().plus(30, ChronoUnit.DAYS));
+        removed.softDelete(Instant.now(), Instant.now().plus(30, ChronoUnit.DAYS));
         userRepository.save(removed);
 
-        List<Long> roster = moderationQueryService.getAllUsers().value().stream().map(UserSummary::id).toList();
+        List<String> roster = moderationQueryService.getAllUsers().value().stream()
+                .map(ModeratedUserResponse::usernameSuffix)
+                .toList();
 
-        assertThat(roster).contains(active.getId());
-        assertThat(roster).doesNotContain(removed.getId());
+        assertThat(roster).contains(active.getUsernameSuffix());
+        assertThat(roster).doesNotContain(removed.getUsernameSuffix());
     }
 
     @Test

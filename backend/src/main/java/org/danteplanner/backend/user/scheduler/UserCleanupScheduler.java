@@ -9,6 +9,7 @@ import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 
@@ -23,13 +24,14 @@ public class UserCleanupScheduler {
 
     private final UserRepository userRepository;
     private final UserAccountLifecycleService lifecycleService;
+    private final Clock clock;
 
     @Scheduled(cron = "${app.user.cleanup.cron:0 0 3 * * *}")
     @SchedulerLock(name = "cleanupExpiredUsers", lockAtMostFor = "PT10M", lockAtLeastFor = "PT30S")
     public void cleanupExpiredUsers() {
         log.info("Starting scheduled user cleanup job");
 
-        Instant cutoff = Instant.now();
+        Instant cutoff = clock.instant();
         List<Long> candidateIds = userRepository.findByPermanentDeleteScheduledAtBefore(cutoff)
                 .stream()
                 .map(User::getId)

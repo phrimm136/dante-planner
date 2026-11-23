@@ -116,7 +116,7 @@ class CommentEffectPublicVisibilityTest {
     @Test
     void replyReceived_WhenParentWithdrawnBeforeDispatch_NotifiesNobody() {
         PlannerComment parent = comment(PARENT_ID, PARENT_AUTHOR_ID, null);
-        parent.softDelete();
+        parent.softDelete(Instant.now());
         when(commentRepository.findById(PARENT_ID)).thenReturn(Optional.of(parent));
         when(commentRepository.findById(REPLY_ID))
                 .thenReturn(Optional.of(comment(REPLY_ID, WRITER_ID, PARENT_ID)));
@@ -154,7 +154,7 @@ class CommentEffectPublicVisibilityTest {
     @Test
     void replyReceived_WhenParentWithdrawnBeforeDispatch_StillPushesTheReplyToTheThread() {
         PlannerComment parent = comment(PARENT_ID, PARENT_AUTHOR_ID, null);
-        parent.softDelete();
+        parent.softDelete(Instant.now());
         when(commentRepository.findById(PARENT_ID)).thenReturn(Optional.of(parent));
         when(commentRepository.findById(REPLY_ID))
                 .thenReturn(Optional.of(comment(REPLY_ID, WRITER_ID, PARENT_ID)));

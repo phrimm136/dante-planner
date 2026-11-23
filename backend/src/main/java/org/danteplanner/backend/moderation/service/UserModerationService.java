@@ -14,6 +14,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.function.Consumer;
@@ -30,6 +31,7 @@ public class UserModerationService {
     private final ModerationAuditService auditService;
     private final ApplicationEventPublisher eventPublisher;
     private final ModerationPolicy moderationPolicy;
+    private final Clock clock;
 
     @Transactional
     public User timeoutUser(Long actorId, Long targetId, int durationMinutes, String reason) {
@@ -56,7 +58,7 @@ public class UserModerationService {
     public User banUser(Long actorId, Long targetId, String reason) {
         User saved = restrict(actorId, targetId, new Suspension.Ban(reason),
                 target -> {
-                    target.setBannedAt(Instant.now());
+                    target.setBannedAt(clock.instant());
                     target.setBannedBy(actorId);
                 });
 
@@ -112,7 +114,7 @@ public class UserModerationService {
     }
 
     private Instant timeoutUntil(int durationMinutes) {
-        return Instant.now().plus(durationMinutes, ChronoUnit.MINUTES);
+        return clock.instant().plus(durationMinutes, ChronoUnit.MINUTES);
     }
 
     private User requireActive(Long userId) {

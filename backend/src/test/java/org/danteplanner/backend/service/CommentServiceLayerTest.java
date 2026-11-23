@@ -42,6 +42,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -110,7 +111,7 @@ class CommentServiceLayerTest {
                 new PlannerAccessGuard(users, plannerRepository),
                 new PlannerStatsService(plannerStatsRepository),
                 new CommentAccessValidator(), new CommentAuthorshipValidator(),
-                new CommentStateValidator());
+                new CommentStateValidator(), Clock.systemUTC());
         engagementService = new CommentEngagementService(
                 commentRepository, commentVoteRepository, queryService,
                 null, new CommentAuthorshipValidator(),
@@ -336,7 +337,7 @@ class CommentServiceLayerTest {
             PlannerComment comment = new PlannerComment(plannerId, testUser.getId(), "Original", null, 0);
             comment.setId(100L);
             comment.setPublicId(commentPublicId);
-            comment.softDelete();
+            comment.softDelete(Instant.now());
 
             UpdateCommentRequest request = new UpdateCommentRequest("Updated");
             when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(comment));
@@ -394,7 +395,7 @@ class CommentServiceLayerTest {
             PlannerComment comment = new PlannerComment(plannerId, testUser.getId(), null, null, 0);
             comment.setId(100L);
             comment.setPublicId(commentPublicId);
-            comment.softDelete();
+            comment.softDelete(Instant.now());
 
             when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(comment));
 
@@ -427,7 +428,7 @@ class CommentServiceLayerTest {
         @Test
         void getCommentTree_WhenAuthorAccountDeactivated_OmitsTheAuthorName() {
             User deactivated = TestDataFactory.unsavedUser(UserRole.NORMAL);
-            deactivated.softDelete(Instant.now().plus(Duration.ofDays(30)));
+            deactivated.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
 
             PlannerComment byActive =
                     new PlannerComment(plannerId, otherUser.getId(), "still here", null, 0);

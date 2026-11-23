@@ -16,14 +16,14 @@ public record ModeratedUserResponse(
     @Nullable Instant timeoutUntil
 ) {
 
-    public static ModeratedUserResponse fromUser(UserSummary user) {
+    public static ModeratedUserResponse fromUser(UserSummary user, Instant now) {
         return new ModeratedUserResponse(
                 user.usernameEpithet(),
                 user.usernameSuffix(),
                 user.role().name(),
                 user.isBanned(),
                 user.bannedAt(),
-                user.isTimedOut(),
+                user.isTimedOut(now),
                 user.timeoutUntil());
     }
 }

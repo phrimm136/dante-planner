@@ -148,8 +148,8 @@ class PlannerScopeDeclarationTest {
     private PlannerCommandService commandService(PlannerContentValidator contentValidator) {
         return new PlannerCommandService(plannerRepository, statsRepository, contentValidator,
                 new ContentVersionValidator(TestDataFactory.gameDataRegistry()), catalogService(), accessGuard(),
-                new RestrictionCheckService(users, new AccountStandingValidator()), new PlannerCategoryValidator(),
-                new PlannerLimitValidator(), new PlannerOwnershipValidator(), new SyncVersionValidator(), mapper,
+                new RestrictionCheckService(users, new AccountStandingValidator(), Clock.systemUTC()), new PlannerCategoryValidator(),
+                new PlannerLimitValidator(), new PlannerOwnershipValidator(), new SyncVersionValidator(), mapper, Clock.systemUTC(),
                 MAX_PLANNERS, SCHEMA_VERSION);
     }
 
@@ -158,7 +158,7 @@ class PlannerScopeDeclarationTest {
         return new PlannerPublishingService(plannerRepository, statsRepository, commandService(contentValidator),
                 contentValidator, catalogService(),
                 new PlannerSubscriptionService(subscriptionRepository, accessGuard,
-                        new RestrictionCheckService(users, new AccountStandingValidator())),
+                        new RestrictionCheckService(users, new AccountStandingValidator(), Clock.systemUTC())),
                 accessGuard, new PlannerOwnershipValidator(), new PlannerPublishValidator(),
                 new PlannerCategoryValidator(), recorder(), Clock.fixed(Instant.parse("2026-11-23T00:00:00Z"), ZoneOffset.UTC));
     }
@@ -284,7 +284,7 @@ class PlannerScopeDeclarationTest {
         Planner planner = stored(planner(true));
 
         publishingService(TestDataFactory.contentValidator()).withdrawFromPublicView(planner.getId(),
-                Planner::takeDown);
+                taken -> taken.takeDown(Instant.now()));
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
                 new FreshnessScope.Planner(planner.getId()), new FreshnessScope.Global());
@@ -295,7 +295,7 @@ class PlannerScopeDeclarationTest {
         Planner planner = stored(planner(true));
 
         publishingService(TestDataFactory.contentValidator()).changeRecommendedListing(planner.getId(),
-                listed -> listed.hideFromRecommended(READER_ID, "freshness"));
+                listed -> listed.hideFromRecommended(READER_ID, "freshness", Instant.now()));
 
         assertThat(FreshnessDeclarations.declared()).containsExactly(new FreshnessScope.Global());
     }
@@ -318,7 +318,7 @@ class PlannerScopeDeclarationTest {
         PlannerAccessGuard accessGuard = accessGuard();
         PlannerEngagementService engagement = new PlannerEngagementService(voteRepository,
                 new PlannerStatsService(statsRepository), catalogService(), recorder(), accessGuard,
-                new PlannerReportService(reportRepository, new PlannerModerationTargetAdapter(null, accessGuard),
+                new PlannerReportService(reportRepository, new PlannerModerationTargetAdapter(null, accessGuard, Clock.systemUTC()),
                         new ReportUniquenessValidator()),
                 new VoteUniquenessValidator(), RECOMMENDED_THRESHOLD);
 
@@ -380,6 +380,6 @@ class PlannerScopeDeclarationTest {
 
     private PlannerSubscriptionService subscriptionService() {
         return new PlannerSubscriptionService(subscriptionRepository, accessGuard(),
-                new RestrictionCheckService(users, new AccountStandingValidator()));
+                new RestrictionCheckService(users, new AccountStandingValidator(), Clock.systemUTC()));
     }
 }

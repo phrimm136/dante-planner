@@ -2,7 +2,6 @@ package org.danteplanner.backend.moderation.service;
 
 import java.time.Clock;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,12 +23,7 @@ public class RestrictionCheckService implements RestrictionCheck, RestrictionChe
     private final AccountStandingValidator standingValidator;
     private final Clock clock;
 
-    @Autowired
-    public RestrictionCheckService(Users users, AccountStandingValidator standingValidator) {
-        this(users, standingValidator, Clock.systemUTC());
-    }
-
-    RestrictionCheckService(Users users, AccountStandingValidator standingValidator, Clock clock) {
+    public RestrictionCheckService(Users users, AccountStandingValidator standingValidator, Clock clock) {
         this.users = users;
         this.standingValidator = standingValidator;
         this.clock = clock;

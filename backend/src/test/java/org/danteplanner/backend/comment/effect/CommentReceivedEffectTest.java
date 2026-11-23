@@ -146,7 +146,7 @@ class CommentReceivedEffectTest {
         comment.setId(COMMENT_ID);
         comment.setPublicId(UUID.randomUUID());
         comment.setCreatedAt(Instant.now());
-        comment.softDelete();
+        comment.softDelete(Instant.now());
         when(commentRepository.findById(COMMENT_ID)).thenReturn(Optional.of(comment));
 
         applyAndFlush();

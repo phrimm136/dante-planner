@@ -2,23 +2,27 @@ package org.danteplanner.backend.shared.outbox.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.jspecify.annotations.Nullable;
+import org.springframework.data.annotation.CreatedDate;
+
+import org.danteplanner.backend.shared.entity.AuditedTimestampListener;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
+@EntityListeners(AuditedTimestampListener.class)
 @Table(name = "domain_events",
        indexes = {
            @Index(name = "idx_domain_events_undispatched", columnList = "dispatched_at, created_at")
@@ -41,6 +45,7 @@ public class DomainEvent {
     @Column(name = "payload", columnDefinition = "JSON", nullable = false)
     private String payload;
 
+    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -60,16 +65,11 @@ public class DomainEvent {
         return new DomainEvent(eventType, aggregateId, payload);
     }
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = Instant.now();
-    }
-
     public boolean isDispatched() {
         return dispatchedAt != null;
     }
 
-    public void markDispatched() {
-        this.dispatchedAt = Instant.now();
+    public void markDispatched(Instant now) {
+        this.dispatchedAt = now;
     }
 }

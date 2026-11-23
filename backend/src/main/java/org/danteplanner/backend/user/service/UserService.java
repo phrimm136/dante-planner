@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.time.Instant;
+import java.time.Clock;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +50,7 @@ public class UserService {
     private final RestrictionReasonProvider restrictionReasonProvider;
     private final UserSettingsService userSettingsService;
     private final TransactionTemplate transactionTemplate;
+    private final Clock clock;
 
     public User findOrCreateUser(String provider, String providerId, String email) {
         AuthProviderType providerType = AuthProviderType.fromValue(provider);
@@ -139,7 +140,7 @@ public class UserService {
                     .ifPresent(builder::banReason);
         }
 
-        if (user.isTimedOut()) {
+        if (user.isTimedOut(clock.instant())) {
             builder.isTimedOut(true)
                     .timeoutUntil(user.getTimeoutUntil());
             restrictionReasonProvider.latestTimeoutReason(user.getPublicId())
@@ -212,7 +213,7 @@ public class UserService {
 
     @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
     public List<User> listTimedOutAccounts() {
-        return userRepository.findByTimeoutUntilAfterAndDeletedAtIsNull(Instant.now());
+        return userRepository.findByTimeoutUntilAfterAndDeletedAtIsNull(clock.instant());
     }
 
     @Transactional(readOnly = true, propagation = Propagation.MANDATORY)

@@ -107,7 +107,7 @@ class PrivilegedRouteRulesTest {
 
     @Test
     void liveActorAtLeast_WhenActorLookupCannotReachTheDatabase_DeniesWithDbUnavailable() {
-        UserService userService = new UserService(userRepository, null, null, null, null, null);
+        UserService userService = new UserService(userRepository, null, null, null, null, null, Clock.systemUTC());
         when(userRepository.findByIdAndDeletedAtIsNull(7L))
                 .thenThrow(new CannotCreateTransactionException("connection refused"));
         AuthorizationManager<RequestAuthorizationContext> manager =

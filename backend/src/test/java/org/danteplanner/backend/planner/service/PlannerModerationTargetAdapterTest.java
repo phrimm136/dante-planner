@@ -60,7 +60,7 @@ class PlannerModerationTargetAdapterTest {
         PlannerPublishingService publishingService = new PlannerPublishingService(plannerRepository,
                 statsRepository, null, null, catalogService, null, accessGuard, null, null, null, null,
                 Clock.fixed(Instant.parse("2026-11-23T00:00:00Z"), ZoneOffset.UTC));
-        adapter = new PlannerModerationTargetAdapter(publishingService, accessGuard);
+        adapter = new PlannerModerationTargetAdapter(publishingService, accessGuard, Clock.systemUTC());
         planner = TestDataFactory.planner(TestDataFactory.unsavedUser(1L))
                 .title("Moderated Planner")
                 .published(true)
@@ -124,7 +124,7 @@ class PlannerModerationTargetAdapterTest {
 
     @Test
     void unhideFromRecommended_WhenListingChanges_ClearsTheHiddenState() {
-        planner.hideFromRecommended(7L, "spam");
+        planner.hideFromRecommended(7L, "spam", Instant.now());
         when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
 
         ModeratedPlanner result = adapter.unhideFromRecommended(planner.getId());

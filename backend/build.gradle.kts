@@ -333,7 +333,11 @@ tasks.named<JavaCompile>("compileJava") {
             "jakarta.persistence.Entity,jakarta.persistence.Embeddable,jakarta.persistence.IdClass"
         )
         option("NullAway:CustomInitializerAnnotations", "jakarta.persistence.PrePersist")
-        option("NullAway:ExcludedFieldAnnotations", "jakarta.persistence.Id")
+        option(
+            "NullAway:ExcludedFieldAnnotations",
+            "jakarta.persistence.Id,org.springframework.data.annotation.CreatedDate,"
+                + "org.springframework.data.annotation.LastModifiedDate"
+        )
         option(
             "NullAway:ExcludedClasses",
             listOf(

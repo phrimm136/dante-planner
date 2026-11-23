@@ -23,6 +23,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Clock;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,9 +56,9 @@ class UserModerationServiceTest {
 
     @BeforeEach
     void setUp() {
-        moderationService = new UserModerationService(new UserService(userRepository, null, null, null, null, null),
+        moderationService = new UserModerationService(new UserService(userRepository, null, null, null, null, null, Clock.systemUTC()),
                 new ModerationAuditService(moderationActionRepository), eventPublisher,
-                new ModerationPolicy());
+                new ModerationPolicy(), Clock.systemUTC());
 
         adminUser = TestDataFactory.unsavedUser(UserRole.ADMIN);
 

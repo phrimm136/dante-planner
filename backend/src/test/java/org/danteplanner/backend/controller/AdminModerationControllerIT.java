@@ -341,7 +341,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
         @Test
         void unhideFromRecommended_WhenAdminRole_Returns200() throws Exception {
             Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason");
+            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason", Instant.now());
             plannerRepository.save(hidden);
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
@@ -354,7 +354,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void unhideFromRecommended_WhenModeratorRole_Returns200() throws Exception {
-            testPlanner.hideFromRecommended(moderatorUser.getId(), "Test hide reason");
+            testPlanner.hideFromRecommended(moderatorUser.getId(), "Test hide reason", Instant.now());
             plannerRepository.save(testPlanner);
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
@@ -365,7 +365,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
         @Test
         void unhideFromRecommended_WhenRegularUser_Returns403() throws Exception {
             Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason");
+            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason", Instant.now());
             plannerRepository.save(hidden);
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
@@ -376,7 +376,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
         @Test
         void unhideFromRecommended_WhenHiddenPlanner_ClearsHiddenFlag() throws Exception {
             Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason");
+            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason", Instant.now());
             plannerRepository.save(hidden);
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
@@ -390,7 +390,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
         @Test
         void unhideFromRecommended_WhenHiddenPlanner_ClearsHiddenAt() throws Exception {
             Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason");
+            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason", Instant.now());
             plannerRepository.save(hidden);
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
@@ -404,7 +404,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
         @Test
         void unhideFromRecommended_WhenHiddenPlanner_ClearsModeratorId() throws Exception {
             Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason");
+            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason", Instant.now());
             plannerRepository.save(hidden);
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
@@ -418,7 +418,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
         @Test
         void unhideFromRecommended_WhenHiddenPlanner_ClearsHideReason() throws Exception {
             Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason");
+            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason", Instant.now());
             plannerRepository.save(hidden);
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
@@ -431,7 +431,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void unhideFromRecommended_WhenHiddenPlanner_ClearsAllMetadata() throws Exception {
-            testPlanner.hideFromRecommended(adminUser.getId(), "Comprehensive metadata clearing test");
+            testPlanner.hideFromRecommended(adminUser.getId(), "Comprehensive metadata clearing test", Instant.now());
             plannerRepository.save(testPlanner);
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
@@ -460,7 +460,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
         @Test
         void unhideFromRecommended_WhenVotes_PreservesVotes() throws Exception {
             Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason");
+            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason", Instant.now());
             plannerRepository.save(hidden);
 
             PlannerVote vote1 = new PlannerVote(regularUser.getId(), testPlanner.getId(), VoteType.UP);

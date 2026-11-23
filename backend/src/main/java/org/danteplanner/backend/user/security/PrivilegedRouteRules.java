@@ -4,7 +4,6 @@ import java.time.Clock;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -44,12 +43,7 @@ public class PrivilegedRouteRules implements SecurityRuleProvider {
     private final UserService userService;
     private final Clock clock;
 
-    @Autowired
-    public PrivilegedRouteRules(UserService userService) {
-        this(userService, Clock.systemUTC());
-    }
-
-    PrivilegedRouteRules(UserService userService, Clock clock) {
+    public PrivilegedRouteRules(UserService userService, Clock clock) {
         this.userService = userService;
         this.clock = clock;
     }

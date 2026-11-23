@@ -125,7 +125,7 @@ class PlannerViewPurgeIT extends SharedMySqlContainerSupport {
      */
     private void purge(Long userId) {
         User managed = userRepository.findById(userId).orElseThrow();
-        managed.softDelete(Instant.now().minusSeconds(60));
+        managed.softDelete(Instant.now(), Instant.now().minusSeconds(60));
         userRepository.save(managed);
         assertThat(lifecycleService.performHardDelete(userId, Instant.now())).isTrue();
     }

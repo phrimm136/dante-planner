@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +54,7 @@ class UserCleanupSchedulerTest {
     void setUp() {
         scheduler = new UserCleanupScheduler(userRepository, new UserAccountLifecycleService(
                 userRepository, List.of(participant), sessionEndHandler, new RoleChangeValidator(userRepository),
-                GRACE_PERIOD_DAYS));
+                Clock.systemUTC(), GRACE_PERIOD_DAYS), Clock.systemUTC());
     }
 
     private void givenPurgeable(User user) {
@@ -69,7 +70,7 @@ class UserCleanupSchedulerTest {
 
     private User createExpiredUser(Long id) {
         User user = TestDataFactory.unsavedUser(id);
-        user.softDelete(Instant.now().minusSeconds(86400)); // Expired 1 day ago
+        user.softDelete(Instant.now(), Instant.now().minusSeconds(86400)); // Expired 1 day ago
         return user;
     }
 

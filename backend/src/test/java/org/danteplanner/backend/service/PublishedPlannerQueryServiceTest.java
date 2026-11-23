@@ -43,6 +43,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -98,7 +99,8 @@ class PublishedPlannerQueryServiceTest {
                 null,
                 plannerStatsRepository,
                 accessGuard,
-                new CatalogReadValidator()
+                new CatalogReadValidator(),
+                Clock.systemUTC()
         );
 
         testUser = TestDataFactory.unsavedUser(1L);

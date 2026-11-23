@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
+import java.time.Clock;
 import java.util.Base64;
 
 /**
@@ -30,17 +31,19 @@ public class CsrfTokenService {
     static final long CLOCK_SKEW_MS = 60_000L;
 
     private final byte[] signingKey;
+    private final Clock clock;
     private final SecureRandom secureRandom = new SecureRandom();
     private final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
 
-    public CsrfTokenService(JwtProperties jwtProperties) {
+    public CsrfTokenService(JwtProperties jwtProperties, Clock clock) {
         this.signingKey = expand(jwtProperties.getEncryptionKeyBytes());
+        this.clock = clock;
     }
 
     public String mint() {
         byte[] nonce = new byte[NONCE_BYTE_LENGTH];
         secureRandom.nextBytes(nonce);
-        String payload = encoder.encodeToString(nonce) + FIELD_SEPARATOR + System.currentTimeMillis();
+        String payload = encoder.encodeToString(nonce) + FIELD_SEPARATOR + clock.millis();
         return payload + FIELD_SEPARATOR + encoder.encodeToString(mac(payload));
     }
 
@@ -72,7 +75,7 @@ public class CsrfTokenService {
         }
         try {
             long issuedAt = Long.parseLong(payload.substring(timeSeparator + 1));
-            long age = System.currentTimeMillis() - issuedAt;
+            long age = clock.millis() - issuedAt;
             return age >= -CLOCK_SKEW_MS && age <= MAX_AGE_MS;
         } catch (NumberFormatException e) {
             return false;

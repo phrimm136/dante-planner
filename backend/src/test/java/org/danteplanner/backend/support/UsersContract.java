@@ -69,7 +69,7 @@ public interface UsersContract {
 
         assertThat(users().findActiveById(user.getId())).hasValueSatisfying(summary -> {
             assertThat(summary.isBanned()).isTrue();
-            assertThat(summary.isTimedOut()).isTrue();
+            assertThat(summary.isTimedOut(Instant.now())).isTrue();
         });
     }
 

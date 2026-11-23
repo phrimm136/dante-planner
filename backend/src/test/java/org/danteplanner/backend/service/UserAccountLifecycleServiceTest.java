@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.RedisConnectionFailureException;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -67,7 +68,7 @@ class UserAccountLifecycleServiceTest {
                 userRepository,
                 List.of(firstParticipant, secondParticipant),
                 sessionEndHandler,
-                new RoleChangeValidator(userRepository),
+                new RoleChangeValidator(userRepository), Clock.systemUTC(),
                 GRACE_PERIOD_DAYS
         );
 
@@ -111,7 +112,7 @@ class UserAccountLifecycleServiceTest {
         void deleteAccount_WhenIdempotent_ReturnsExistingScheduledDate() {
             // Arrange - user already deleted
             Instant existingScheduledAt = Instant.now().plus(Duration.ofDays(25));
-            testUser.softDelete(existingScheduledAt);
+            testUser.softDelete(Instant.now(), existingScheduledAt);
 
             when(userRepository.findWithLockById(testUser.getId())).thenReturn(Optional.of(testUser));
 
@@ -154,7 +155,7 @@ class UserAccountLifecycleServiceTest {
         void deleteAccount_WhenAWithdrawnAdminWithdrawsAgain_ReturnsBeforeTheGuard() {
             User admin = TestDataFactory.unsavedUser(UserRole.ADMIN);
             Instant existingScheduledAt = Instant.now().plus(Duration.ofDays(25));
-            admin.softDelete(existingScheduledAt);
+            admin.softDelete(Instant.now(), existingScheduledAt);
             when(userRepository.findWithLockById(admin.getId())).thenReturn(Optional.of(admin));
 
             assertThat(lifecycleService.deleteAccount(admin.getId())).isEqualTo(existingScheduledAt);
@@ -195,7 +196,7 @@ class UserAccountLifecycleServiceTest {
         @Test
         void reactivateAccount_WhenSoftDeleted_ClearsDeletedAtAndScheduledDate() {
             // Arrange - user is soft-deleted
-            testUser.softDelete(Instant.now().plus(Duration.ofDays(30)));
+            testUser.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
             assertThat(testUser.isDeleted()).isTrue();
 
             when(userRepository.findWithLockById(testUser.getId())).thenReturn(Optional.of(testUser));

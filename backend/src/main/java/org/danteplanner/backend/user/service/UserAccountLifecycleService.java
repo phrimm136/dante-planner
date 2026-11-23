@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -35,6 +36,7 @@ public class UserAccountLifecycleService {
     private final List<AccountLifecycleParticipant> participants;
     private final SessionEndHandler sessionEndHandler;
     private final RoleChangeValidator roleChangeValidator;
+    private final Clock clock;
     private final int gracePeriodDays;
 
     public UserAccountLifecycleService(
@@ -42,11 +44,13 @@ public class UserAccountLifecycleService {
             List<AccountLifecycleParticipant> participants,
             SessionEndHandler sessionEndHandler,
             RoleChangeValidator roleChangeValidator,
+            Clock clock,
             @Value("${app.user.deletion.grace-period-days:30}") int gracePeriodDays) {
         this.userRepository = userRepository;
         this.participants = participants;
         this.sessionEndHandler = sessionEndHandler;
         this.roleChangeValidator = roleChangeValidator;
+        this.clock = clock;
         this.gracePeriodDays = gracePeriodDays;
     }
 
@@ -63,8 +67,9 @@ public class UserAccountLifecycleService {
             roleChangeValidator.requireAnotherActiveAdministrator();
         }
 
-        Instant scheduledDeleteAt = Instant.now().plus(Duration.ofDays(gracePeriodDays));
-        user.softDelete(scheduledDeleteAt);
+        Instant now = clock.instant();
+        Instant scheduledDeleteAt = now.plus(Duration.ofDays(gracePeriodDays));
+        user.softDelete(now, scheduledDeleteAt);
         FreshnessDeclarations.declare(new FreshnessScope.User(userId));
 
         participants.forEach(participant -> participant.accountDeactivated(userId));

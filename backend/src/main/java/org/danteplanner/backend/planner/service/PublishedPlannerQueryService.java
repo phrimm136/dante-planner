@@ -37,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -66,6 +67,7 @@ public class PublishedPlannerQueryService implements PublishedPlanners {
     private final PlannerStatsRepository plannerStatsRepository;
     private final PlannerAccessGuard accessGuard;
     private final CatalogReadValidator catalogReadValidator;
+    private final Clock clock;
 
     public PublishedPlannerQueryService(
             PlannerRepository plannerRepository,
@@ -76,7 +78,8 @@ public class PublishedPlannerQueryService implements PublishedPlanners {
             RedisViewRecorder redisViewRecorder,
             PlannerStatsRepository plannerStatsRepository,
             PlannerAccessGuard accessGuard,
-            CatalogReadValidator catalogReadValidator) {
+            CatalogReadValidator catalogReadValidator,
+            Clock clock) {
         this.plannerRepository = plannerRepository;
         this.catalogRepository = catalogRepository;
         this.plannerVoteRepository = plannerVoteRepository;
@@ -86,6 +89,7 @@ public class PublishedPlannerQueryService implements PublishedPlanners {
         this.plannerStatsRepository = plannerStatsRepository;
         this.accessGuard = accessGuard;
         this.catalogReadValidator = catalogReadValidator;
+        this.clock = clock;
     }
 
     @Override
@@ -253,6 +257,6 @@ public class PublishedPlannerQueryService implements PublishedPlanners {
             case Viewer.Member member -> ViewerHashUtil.hashForAuthenticatedUser(member.userId(), plannerId);
             case Viewer.Guest guest -> ViewerHashUtil.hashForAnonymousUser(viewerIdentity, userAgent, plannerId);
         };
-        redisViewRecorder.record(plannerId, viewerHash, LocalDate.now(ZoneOffset.UTC));
+        redisViewRecorder.record(plannerId, viewerHash, LocalDate.ofInstant(clock.instant(), ZoneOffset.UTC));
     }
 }

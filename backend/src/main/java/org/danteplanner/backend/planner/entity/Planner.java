@@ -3,13 +3,13 @@ package org.danteplanner.backend.planner.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.PostPersist;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.AccessLevel;
@@ -22,8 +22,10 @@ import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.jspecify.annotations.Nullable;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.domain.Persistable;
 
+import org.danteplanner.backend.shared.entity.AuditedTimestampListener;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 
 import java.time.Instant;
@@ -35,6 +37,7 @@ import java.util.UUID;
  * (batchable INSERTs) instead of merge's SELECT-then-INSERT.
  */
 @Entity
+@EntityListeners(AuditedTimestampListener.class)
 @Table(name = "planner")
 @Getter
 @Builder
@@ -56,8 +59,8 @@ public class Planner implements Persistable<UUID> {
     @Column(name = "planner_type", nullable = false, updatable = false)
     private PlannerType plannerType;
 
+    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    @Setter
     private Instant createdAt;
 
     @OneToOne(mappedBy = "planner", cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
@@ -82,13 +85,6 @@ public class Planner implements Persistable<UUID> {
     @PostLoad
     protected void markNotNew() {
         this.isNew = false;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = Instant.now();
-        }
     }
 
     public void attach(PlannerContent content, PlannerPublication publication, PlannerModeration moderation) {
@@ -197,16 +193,16 @@ public class Planner implements Persistable<UUID> {
         return this.userId.equals(userId);
     }
 
-    public void softDelete() {
-        content.markDeleted();
+    public void softDelete(Instant now) {
+        content.markDeleted(now);
     }
 
-    public PublicationOutcome takeDown() {
-        return publication.takeDown(moderation.takeDown());
+    public PublicationOutcome takeDown(Instant now) {
+        return publication.takeDown(moderation.takeDown(now));
     }
 
-    public void hideFromRecommended(Long moderatorId, String reason) {
-        moderation.hide(moderatorId, reason);
+    public void hideFromRecommended(Long moderatorId, String reason, Instant now) {
+        moderation.hide(moderatorId, reason, now);
     }
 
     public void unhideFromRecommended() {

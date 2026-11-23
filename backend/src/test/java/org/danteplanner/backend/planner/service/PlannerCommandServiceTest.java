@@ -55,6 +55,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -131,7 +132,7 @@ class PlannerCommandServiceTest {
                 new PlannerLimitValidator(),
                 new PlannerOwnershipValidator(),
                 new SyncVersionValidator(),
-                new ObjectMapper(),
+                new ObjectMapper(), Clock.systemUTC(),
                 MAX_PLANNERS_PER_USER,
                 CURRENT_SCHEMA_VERSION
         );
@@ -168,8 +169,6 @@ class PlannerCommandServiceTest {
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(50L);
             when(plannerRepository.insert(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
-                planner.setCreatedAt(Instant.now());
-                planner.getContent().setLastModifiedAt(Instant.now());
                 return PlannerContentLifecycle.asPersisted(planner);
             });
 
@@ -223,8 +222,6 @@ class PlannerCommandServiceTest {
             ArgumentCaptor<Planner> plannerCaptor = ArgumentCaptor.forClass(Planner.class);
             when(plannerRepository.insert(plannerCaptor.capture())).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
-                planner.setCreatedAt(Instant.now());
-                planner.getContent().setLastModifiedAt(Instant.now());
                 return PlannerContentLifecycle.asPersisted(planner);
             });
 
@@ -506,8 +503,6 @@ class PlannerCommandServiceTest {
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) (MAX_PLANNERS_PER_USER - 1));
             when(plannerRepository.insert(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
-                planner.setCreatedAt(Instant.now());
-                planner.getContent().setLastModifiedAt(Instant.now());
                 return PlannerContentLifecycle.asPersisted(planner);
             });
 

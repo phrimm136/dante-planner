@@ -22,6 +22,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -77,7 +78,7 @@ class PlannerBatchPullIT extends SharedMySqlContainerSupport {
         owned = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
         ownedToo = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
         deleted = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
-        deleted.softDelete();
+        deleted.softDelete(Instant.now());
         plannerRepository.save(deleted);
         foreign = TestDataFactory.createTestPlanner(plannerRepository, stranger, false);
     }

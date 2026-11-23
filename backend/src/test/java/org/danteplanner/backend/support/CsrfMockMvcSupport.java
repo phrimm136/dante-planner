@@ -9,6 +9,7 @@ import org.danteplanner.backend.shared.util.CookieConstants;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
+import java.time.Clock;
 import java.util.Base64;
 
 /**
@@ -37,7 +38,7 @@ public final class CsrfMockMvcSupport {
     private static CsrfTokenService buildTokenService() {
         JwtProperties properties = new JwtProperties(
                 null, null, Base64.getDecoder().decode(TEST_ENCRYPTION_KEY), 900000L, 604800000L);
-        return new CsrfTokenService(properties);
+        return new CsrfTokenService(properties, Clock.systemUTC());
     }
 
     /**

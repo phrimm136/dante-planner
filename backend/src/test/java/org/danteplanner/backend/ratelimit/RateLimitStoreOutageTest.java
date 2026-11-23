@@ -3,6 +3,7 @@ package org.danteplanner.backend.ratelimit;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.ServerSocket;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -317,7 +318,7 @@ class RateLimitStoreOutageTest {
                 null,
                 frontendProperties);
         PublishedPlannerQueryService queryService = new PublishedPlannerQueryService(
-                null, catalogRepository, null, null, null, null, null, null, null);
+                null, catalogRepository, null, null, null, null, null, null, null, Clock.systemUTC());
         PublishedPlannerController publishedPlannerController = new PublishedPlannerController(
                 queryService, securityProperties, deviceIdResolver);
 

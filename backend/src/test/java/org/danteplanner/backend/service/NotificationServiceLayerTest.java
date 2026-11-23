@@ -23,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -54,9 +55,9 @@ class NotificationServiceLayerTest {
 
     @BeforeEach
     void setUp() {
-        inboxService = new NotificationInboxService(notificationRepository);
+        inboxService = new NotificationInboxService(notificationRepository, Clock.systemUTC());
         dispatchService = new NotificationDispatchService(notificationRepository);
-        retentionService = new NotificationRetentionService(notificationRepository);
+        retentionService = new NotificationRetentionService(notificationRepository, Clock.systemUTC());
     }
 
     private void whenInsertIgnoreYields(int rows) {
