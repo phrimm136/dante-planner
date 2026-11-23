@@ -56,9 +56,14 @@ add_local_backend() {
   printf 'terraform {\n  backend "local" {}\n}\n' >"$1/backend.tf"
 }
 
+track() {
+  git -C "$1" init -q && git -C "$1" add -- '*.tf'
+}
+
 target() {
   write_config "$1"
   add_local_backend "$1"
+  track "$1"
 }
 
 tfvars() {
@@ -136,6 +141,7 @@ pass "$name"
 s3="$work/s3"
 producer "$s3" && apply_in "$s3" default b a || fail "default-workspace setup" "apply"
 add_local_backend "$s3"
+track "$s3"
 out=$( (push_state iam-bootstrap "$s3" acct-s3 remote-s3 "$work/a.tfvars" \
   "$s3/terraform.tfstate" -backend-config=path="$work/s3.remote.tfstate") </dev/null 2>&1)
 rc=$?
@@ -299,14 +305,14 @@ s12="$work/s12"
 p12="$work/producer-12"
 producer "$p12" && apply_in "$p12" ws1 ws1 || fail "$name" "setup apply"
 target "$s12"
-printf 'variable "v" {\n  type    = string\n  default = "a"\n}\n\nresource "terraform_data" "x" {\n  count = 2\n  input = var.v\n}\n' >"$s12/main.tf"
+printf 'variable "v" {\n  type    = string\n  default = "a"\n}\n\nresource "terraform_data" "x" {\n  count            = 2\n  input            = var.v\n  triggers_replace = var.v\n}\n\nresource "terraform_data" "y" {\n  input = "fixed"\n}\n' >"$s12/main.tf"
 out=$( (push_state iam-bootstrap "$s12" acct-s12 remote-s12 "$work/other.tfvars" \
   "$p12/terraform.tfstate.d/ws1/terraform.tfstate" -backend-config=path="$work/s12.remote.tfstate") </dev/null 2>&1)
 rc=$?
 [ "$rc" -eq 0 ] || fail "$name" "exit $rc"
-printf '%s\n' "$out" | grep -q '^plan: 0 to add, 2 to change, 1 to destroy; this is a difference between the code and the account that the move did not cause. Read ' ||
+printf '%s\n' "$out" | grep -q '^plan: 2 to add, 0 to change, 2 to destroy; this is a difference between the code and the account that the move did not cause. Read ' ||
   fail "$name" "no drift line"
-printf '%s\n' "$out" | grep -q '^WARNING: the plan destroys or replaces 1 resources. Read ' || fail "$name" "no destroy warning"
+printf '%s\n' "$out" | grep -q '^WARNING: the plan destroys or replaces 2 resources. Read ' || fail "$name" "no destroy warning"
 printf '%s\n' "$out" | grep -qx "verified: iam-bootstrap remote-s12 3 resources, the bucket holds the backup's state" ||
   fail "$name" "no verified line"
 printf '%s\n' "$out" | grep -q 'fixed' && fail "$name" "printed a resource attribute"
@@ -601,6 +607,66 @@ out=$( (remove_local iam-bootstrap "$p16_ws1") 2>&1)
 rc=$?
 [ "$rc" -eq 0 ] || fail "$name" "--remove-local, exit $rc"
 [ ! -e "$p16_ws1" ] && [ ! -e "$p16_ws1.backup" ] || fail "$name" "--remove-local left the file or its sibling"
+pass "$name"
+
+p17="$work/producer-17"
+p17_ws1="$p17/terraform.tfstate.d/ws1/terraform.tfstate"
+producer "$p17" && apply_in "$p17" ws1 ws1 || fail "declaration setup" "apply"
+
+name="a state of another stack is refused before backup, init and push"
+s17="$work/s17"
+mkdir -p "$s17"
+printf 'resource "terraform_data" "unrelated" {\n  input = "x"\n}\n' >"$s17/main.tf"
+add_local_backend "$s17"
+track "$s17"
+out=$( (push_state iam-bootstrap "$s17" acct-s17 remote-s17 "$work/ws1.tfvars" "$p17_ws1" \
+  -backend-config=path="$work/s17.remote.tfstate") </dev/null 2>&1)
+rc=$?
+[ "$rc" -ne 0 ] || fail "$name" "exit 0"
+printf '%s\n' "$out" | grep -q "holds resources iam-bootstrap does not declare, so it is another stack's state or the code dropped a resource: terraform_data.x, terraform_data.y; nothing done." ||
+  fail "$name" "does not list the undeclared addresses"
+printf '%s\n' "$out" | grep -qE '^(backup|init|push):' && fail "$name" "it wrote before refusing"
+[ ! -e "$XDG_STATE_HOME/danteplanner/tf-state-backup/iam-bootstrap.acct-s17.tfstate" ] || fail "$name" "wrote a backup"
+[ ! -e "$work/s17.remote.tfstate" ] || fail "$name" "the bucket was written"
+pass "$name"
+
+name="a state holding a resource the code no longer declares is refused and names it"
+s18="$work/s18"
+mkdir -p "$s18"
+printf 'variable "v" {\n  type    = string\n  default = "a"\n}\n\nresource "terraform_data" "x" {\n  count = 2\n  input = var.v\n}\n' >"$s18/main.tf"
+add_local_backend "$s18"
+track "$s18"
+out=$( (push_state iam-bootstrap "$s18" acct-s18 remote-s18 "$work/ws1.tfvars" "$p17_ws1" \
+  -backend-config=path="$work/s18.remote.tfstate") </dev/null 2>&1)
+rc=$?
+[ "$rc" -ne 0 ] || fail "$name" "exit 0"
+printf '%s\n' "$out" | grep -q 'or the code dropped a resource: terraform_data.y; nothing done.' || fail "$name" "does not name terraform_data.y alone"
+[ ! -e "$work/s18.remote.tfstate" ] || fail "$name" "the bucket was written"
+pass "$name"
+
+name="a state whose instances the stack declares in another form is refused"
+s19="$work/s19"
+mkdir -p "$s19"
+printf 'resource "terraform_data" "x" {\n  input = "a"\n}\n\nresource "terraform_data" "y" {\n  input = "fixed"\n}\n' >"$s19/main.tf"
+add_local_backend "$s19"
+track "$s19"
+out=$( (push_state iam-bootstrap "$s19" acct-s19 remote-s19 "$work/ws1.tfvars" "$p17_ws1" \
+  -backend-config=path="$work/s19.remote.tfstate") </dev/null 2>&1)
+rc=$?
+[ "$rc" -ne 0 ] || fail "$name" "exit 0"
+printf '%s\n' "$out" | grep -q 'declares in another form (count or for_each against a single instance), so it is another stack'"'"'s state: terraform_data.x; nothing done.' ||
+  fail "$name" "does not name terraform_data.x"
+[ ! -e "$work/s19.remote.tfstate" ] || fail "$name" "the bucket was written"
+pass "$name"
+
+name="the real state-backend stack refuses a state with resources it does not declare"
+out=$(PATH="$work/stub:$PATH" bash "$script" state-backend "$acct/backend.three.hcl" "$acct/three.tfvars" \
+  "$applied_in_three" </dev/null 2>&1)
+rc=$?
+[ "$rc" -ne 0 ] || fail "$name" "exit 0"
+printf '%s\n' "$out" | grep -q 'holds resources state-backend does not declare, so it is another stack'"'"'s state or the code dropped a resource: terraform_data.x, terraform_data.y; nothing done.' ||
+  fail "$name" "does not name the undeclared addresses"
+printf '%s\n' "$out" | grep -q 'stub terraform reached' && fail "$name" "it ran terraform"
 pass "$name"
 
 echo "bootstrap-state-to-s3 tests: $passed passed"
