@@ -1936,14 +1936,6 @@ guards the parse but likewise skips the schema gate.
   script, a stable address (a fixed private IP or a name the agents resolve), and a rehearsal that
   proves both.
   re-check: `rg -q -- '--cluster-init' terraform/modules/fleet/user-data/cp.sh.tftpl && .claude/skills/debt-ledger/bin/debt absent terraform/modules/fleet/user-data/cp.sh.tftpl -e 'cluster-reset' -e 'cluster-reset-restore-path'`
-- **Nothing raises the pinned k3s version.** `k3s_version` in `terraform/modules/fleet/variables.tf`
-  fixes the release every node installs, and no bot reads a version in a Terraform variable
-  default: Dependabot's terraform ecosystem covers providers and modules only. The release stays
-  where it is, security fixes included, until someone edits it. Renovate's regex manager with
-  the `github-releases` datasource for `k3s-io/k3s` can open that change; it needs the hosted app
-  or a token of the user's. Worth doing with the first Helm chart, which needs the same bot for
-  the chart version in an ArgoCD Application.
-  re-check: `rg -q 'variable "k3s_version"' terraform/modules/fleet/variables.tf && .claude/skills/debt-ledger/bin/debt absent .github -i 'renovate'`
 - **The CP runs Helm's installer from the tip of Helm's main branch.**
   `cp.sh.tftpl:130` pipes `raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3` to
   `bash`, so the code that runs as root at boot is whatever that branch holds at that moment,
@@ -1972,17 +1964,27 @@ guards the parse but likewise skips the schema gate.
   restricted profile is still admitted. Which pods break it today is not listed. Worth doing
   once the warnings are listed and fixed: add `enforce: restricted`.
   re-check: `.claude/skills/debt-ledger/bin/debt absent deploy/base/namespace.yaml 'pod-security.kubernetes.io/enforce'`
-- **Every image is pinned by tag, and two tags move.** None of the 11 images in the rendered
-  overlays carries a digest. `redis:7-alpine` moves with every Redis 7 release and
+- **Every image is pinned by tag, and two tags move.** No image in the rendered overlays
+  carries a digest, and no bot raises one: Renovate reads only the chart versions in
+  `deploy/apps` and the k3s release. `redis:7-alpine` moves with every Redis 7 release and
   `traefik:v3.1` with every 3.1 patch, so a replaced node can pull a different version than the
-  one it replaced. Pin by digest, or at least by full version. Worth doing with the k3s pin
-  entry above.
+  one it replaced. Pin by digest, or at least by full version, and turn on Renovate's
+  manager for the manifests in the same change. An image that moves to an upstream chart leaves
+  this entry. Worth doing with the next component that stays hand-written.
   re-check: `rg -q 'image: redis:7-alpine' deploy/base/redis-auth.yaml`
 - **The Redis, Prometheus and exporter containers have no readiness probe.** Both Redis
-  instances, Prometheus with its config reloader, kube-state-metrics, the mysqld and Redis
+  instances, Prometheus with its config reloader, the mysqld and Redis
   exporters, alloy and node-exporter declare none, so a Redis replaying its AOF file counts as
   Ready and its Service sends it traffic. Worth doing with the auth Redis entry above.
   re-check: `.claude/skills/debt-ledger/bin/debt absent deploy/base/redis-auth.yaml 'readinessProbe'`
+- **Nothing finds a metric that production never emits.** An alert rule's cases feed it series
+  that the case itself writes, and the remote-write keep-list only filters what exists, so a
+  rule over a metric with no series in Mimir passes every gate and never fires. Five alerts were
+  dead this way, the last one because a ClusterRole lacked one rule. The fix is a read-only `ops`
+  command that takes the metric names from `deploy/grafana/rules` and reports each one with no
+  series in either region, run after any change to the rules, the keep-list or an exporter.
+  Worth doing at the next change to the `ops` CLI.
+  re-check: `.claude/skills/debt-ledger/bin/debt absent .claude/skills/ops/SKILL.md -i 'no series'`
 
 ## 2026-11-19 tests that need a hand edit after a data refresh
 

@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  echo "usage: $0 <deploy-dir> <out-dir>   (writes <out-dir>/chart-<name>.yaml for every Helm Application under <deploy-dir>/apps and prints 'rendered <name>' or 'not rendered <name>: <reason>' per Application; needs docker and python3 with PyYAML)" >&2
+  exit 2
+}
+
+[ $# -eq 2 ] || usage
+. "$(dirname "$0")/images.sh"
+
+deploy_dir=$(cd "$1" && pwd)
+out_dir=$(cd "$2" && pwd)
+values_dir=$(mktemp -d)
+trap 'rm -rf "$values_dir"' EXIT
+
+apps=$(python3 - "$deploy_dir/apps" "$values_dir" <<'PY'
+import json
+import pathlib
+import sys
+
+import yaml
+
+RENDERED_HELM_FIELDS = {"releaseName", "valuesObject"}
+
+apps_dir, values_dir = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
+for path in sorted(apps_dir.glob("*.yaml")):
+    for doc in yaml.safe_load_all(path.read_text()):
+        if not doc or doc.get("kind") != "Application":
+            continue
+        name = doc["metadata"]["name"]
+        spec = doc["spec"]
+        if "sources" in spec:
+            sys.exit(f"render-charts: Application {name} ({path.name}) uses spec.sources, which this renderer cannot represent; use a single spec.source")
+        source = spec["source"]
+        if "chart" not in source:
+            print(f"skip\t{name}\tno Helm chart source")
+            continue
+        helm = source.get("helm", {})
+        unsupported = sorted(set(helm) - RENDERED_HELM_FIELDS)
+        if unsupported:
+            sys.exit(f"render-charts: Application {name} ({path.name}) sets spec.source.helm.{', spec.source.helm.'.join(unsupported)}, which this renderer cannot represent; put the values in spec.source.helm.valuesObject")
+        (values_dir / f"{name}.yaml").write_text(json.dumps(helm.get("valuesObject", {})))
+        print("\t".join([
+            "chart",
+            name,
+            source["repoURL"],
+            source["chart"],
+            str(source["targetRevision"]),
+            helm.get("releaseName", name),
+            spec["destination"]["namespace"],
+        ]))
+PY
+)
+
+while IFS=$'\t' read -r what name repo_url chart version release namespace; do
+  case "$what" in
+    "") continue ;;
+    skip) echo "not rendered $name: $repo_url"; continue ;;
+  esac
+  if ! docker run --rm -v "$values_dir:/values:ro" "$HELM_IMAGE" template "$release" "$chart" \
+    --repo "$repo_url" --version "$version" --namespace "$namespace" -f "/values/$name.yaml" \
+    >"$out_dir/chart-$name.yaml" 2>"$values_dir/$name.err"; then
+    cat "$values_dir/$name.err" >&2
+    echo "render-charts: helm template failed for Application $name ($chart $version from $repo_url)" >&2
+    exit 1
+  fi
+  [ -s "$out_dir/chart-$name.yaml" ] || { echo "render-charts: Application $name rendered nothing" >&2; exit 1; }
+  echo "rendered $name"
+done <<<"$apps"

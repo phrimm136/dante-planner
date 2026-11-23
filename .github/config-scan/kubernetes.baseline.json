@@ -1,6 +1,26 @@
 {
   "failed_checks": [
     {
+      "file": "/chart-kube-state-metrics.yaml",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_38",
+            "CKV_K8S_43"
+          ],
+          "resource": "Deployment.danteplanner.kube-state-metrics"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.kube-state-metrics.app.kubernetes.io/managed-by-Helm.app.kubernetes.io/component-metrics.app.kubernetes.io/part-of-kube-state-metrics.app.kubernetes.io/name-kube-state-metrics.app.kubernetes.io/instance-kube-state-metrics"
+        }
+      ]
+    },
+    {
       "file": "/oregon.yaml",
       "findings": [
         {
@@ -96,18 +116,6 @@
             "CKV_K8S_11",
             "CKV_K8S_15",
             "CKV_K8S_22",
-            "CKV_K8S_38",
-            "CKV_K8S_43",
-            "CKV_K8S_8",
-            "CKV_K8S_9"
-          ],
-          "resource": "Deployment.danteplanner.kube-state-metrics"
-        },
-        {
-          "check_ids": [
-            "CKV_K8S_11",
-            "CKV_K8S_15",
-            "CKV_K8S_22",
             "CKV_K8S_35",
             "CKV_K8S_38",
             "CKV_K8S_43",
@@ -185,12 +193,6 @@
             "CKV2_K8S_6"
           ],
           "resource": "Pod.danteplanner.cloudflared.app-cloudflared"
-        },
-        {
-          "check_ids": [
-            "CKV2_K8S_6"
-          ],
-          "resource": "Pod.danteplanner.kube-state-metrics.app-kube-state-metrics"
         },
         {
           "check_ids": [
@@ -352,18 +354,6 @@
             "CKV_K8S_11",
             "CKV_K8S_15",
             "CKV_K8S_22",
-            "CKV_K8S_38",
-            "CKV_K8S_43",
-            "CKV_K8S_8",
-            "CKV_K8S_9"
-          ],
-          "resource": "Deployment.danteplanner.kube-state-metrics"
-        },
-        {
-          "check_ids": [
-            "CKV_K8S_11",
-            "CKV_K8S_15",
-            "CKV_K8S_22",
             "CKV_K8S_35",
             "CKV_K8S_38",
             "CKV_K8S_43",
@@ -441,12 +431,6 @@
             "CKV2_K8S_6"
           ],
           "resource": "Pod.danteplanner.cloudflared.app-cloudflared"
-        },
-        {
-          "check_ids": [
-            "CKV2_K8S_6"
-          ],
-          "resource": "Pod.danteplanner.kube-state-metrics.app-kube-state-metrics"
         },
         {
           "check_ids": [

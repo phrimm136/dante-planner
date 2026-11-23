@@ -1,6 +1,10 @@
-# deploy/ — GitOps manifests (kustomize base + overlays)
+# deploy/ — GitOps manifests (Helm Applications + kustomize base + overlays)
 
 One repo, kustomize `base/` + `overlays/{oregon,seoul}`, synced by ArgoCD core (per cluster).
+Third-party components come from their upstream Helm charts instead: each is one ArgoCD
+Application under `apps/`, and both overlays list `apps/`, so the root Application creates the
+child Applications in namespace `argocd` (app-of-apps). The rest stays kustomize until its own
+chart lands.
 Each region's CP node bootstraps ArgoCD, applies `argocd/project.yaml`, then applies its root
 Application: `argocd/root-app-oregon.yaml` points ArgoCD at `overlays/oregon`, and
 `argocd/root-app-seoul.yaml` at `overlays/seoul`. From then on the cluster is GitOps-managed.
@@ -21,19 +25,37 @@ deploy/
     redis-auth.yaml        auth-state Redis StatefulSet on role=data (AOF, no auto-promote)
     redis-ratelimit.yaml   ephemeral rate-limit Redis on role=data (no durability)
     prometheus.yaml        Prometheus on role=data (local scrape)
+  apps/                    ArgoCD Applications that install an upstream Helm chart (namespace argocd)
+    kube-state-metrics.yaml  kube-state-metrics chart on role=data, scraped locally by Prometheus
   privileged-exporter/     namespace privileged-exporter (enforce: privileged) + node-exporter DaemonSet
-  overlays/oregon/         region-specific values (image, endpoints); lists base/ and privileged-exporter/
+  overlays/oregon/         region-specific values (image, endpoints); lists base/, privileged-exporter/ and apps/
   overlays/seoul/          the same for Seoul
 ```
 
-Build locally: `kubectl kustomize deploy/overlays/oregon`.
+Build locally: `kubectl kustomize deploy/overlays/oregon`. That render holds each chart only as
+its Application; `.github/scripts/render-charts.sh deploy <out-dir>` renders the charts
+themselves with `helm template`, as the deploy lane and the config scan do.
+
+## Chart versions
+
+An Application pins its chart in `spec.source.targetRevision` and carries its values in
+`spec.source.helm.valuesObject`; the release name equals the Application name, because ArgoCD
+tracks resources by the `app.kubernetes.io/instance` label the chart sets to the release name.
+Renovate (`renovate.json`) proposes a newer chart version once it is seven days old. No CI lane
+reads `renovate.json`: Renovate's hosted app reports an invalid file by opening an issue in the
+repository. A values
+change or a version bump lands by merging it: ArgoCD syncs the Application from `main`.
+
+Moving kube-state-metrics to its chart changed one behavior: the chart's ClusterRole also lets
+it list and watch CustomResourceDefinitions, which the etcd snapshot metric
+(`kube_etcd_snapshot_creation_timestamp_seconds`) needs and the hand-written role lacked.
 
 ## Node placement contract (must match terraform user-data labels/taints)
 
 | Workload | placement | set by |
 |----------|-----------|--------|
 | Spring DaemonSet | `nodeSelector: role=app` | app ASG user-data `--node-label role=app` |
-| Redis + Prometheus | `nodeSelector: role=data` | data node user-data `--node-label role=data` |
+| Redis + Prometheus + kube-state-metrics | `nodeSelector: role=data` | data node user-data `--node-label role=data` |
 | Traefik Gateway | ingress node (`role=ingress`) | ingress user-data `--node-label role=ingress` |
 | ArgoCD core | CP node, tolerates `node-role.kubernetes.io/control-plane=true:NoSchedule` | CP user-data `--node-taint` |
 
