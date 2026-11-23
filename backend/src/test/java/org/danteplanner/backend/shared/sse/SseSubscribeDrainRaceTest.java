@@ -9,7 +9,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -26,6 +25,7 @@ import org.danteplanner.backend.shared.config.DeviceId;
 import org.danteplanner.backend.shared.controller.SseController;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.exception.StreamLifecycleExceptionAdvice;
+import org.danteplanner.backend.shared.security.Viewer;
 import org.danteplanner.backend.support.LogCapture;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,7 +55,7 @@ class SseSubscribeDrainRaceTest {
         ApiExceptionHandler apiExceptionHandler = new ApiExceptionHandler();
         MockMvc mockMvc = standaloneSetup(new SseController(service))
                 .setControllerAdvice(apiExceptionHandler, new StreamLifecycleExceptionAdvice())
-                .setCustomArgumentResolvers(new FixedPrincipal(), new FixedDevice())
+                .setCustomArgumentResolvers(new FixedMember(), new FixedDevice())
                 .build();
 
         List<ILoggingEvent> errors;
@@ -91,17 +91,17 @@ class SseSubscribeDrainRaceTest {
         return holder[0];
     }
 
-    private static final class FixedPrincipal implements HandlerMethodArgumentResolver {
+    private static final class FixedMember implements HandlerMethodArgumentResolver {
 
         @Override
         public boolean supportsParameter(MethodParameter parameter) {
-            return parameter.hasParameterAnnotation(AuthenticationPrincipal.class);
+            return parameter.getParameterType() == Viewer.Member.class;
         }
 
         @Override
         public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                 NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
-            return USER_ID;
+            return new Viewer.Member(USER_ID);
         }
     }
 

@@ -36,7 +36,7 @@ class AccountSuspensionEventListenerTest {
                 new AccountSuspendedEvent(7L, "Repeated spam", SuspensionType.TIMED_OUT, 30));
 
         assertThat(sseChannel.envelopes(SseChannel.USER)).containsExactly(new SseEnvelope.Wire(
-                SseEventType.ACCOUNT_SUSPENDED, 7L, null, null, null, null,
+                SseEventType.ACCOUNT_SUSPENDED, 7L, null, null, null,
                 Map.of("suspensionType", "TIMEOUT", "reason", "Repeated spam", "durationMinutes", 30)));
     }
 }

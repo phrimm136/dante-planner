@@ -10,8 +10,8 @@ import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.admin.service.AdminService;
 import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
+import org.danteplanner.backend.shared.security.Viewer;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -31,13 +31,13 @@ public class AdminController {
     @RestrictionExempt(reason = "privileged route: PrivilegedRouteRules checks the live actor")
     @PutMapping("/user/{targetId}/role")
     public ResponseEntity<UserRoleResponse> changeRole(
-            @AuthenticationPrincipal Long actorId,
+            Viewer.Member actor,
             @PathVariable Long targetId,
             @Valid @RequestBody ChangeRoleRequest request) {
 
-        log.info("Admin {} changing role of user {} to {}", actorId, targetId, request.role());
+        log.info("Admin {} changing role of user {} to {}", actor.userId(), targetId, request.role());
 
-        UserSummary updated = adminService.changeRole(actorId, targetId, request.role());
+        UserSummary updated = adminService.changeRole(actor.userId(), targetId, request.role());
         return ResponseEntity.ok(UserRoleResponse.fromUser(updated));
     }
 

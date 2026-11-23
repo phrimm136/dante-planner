@@ -18,6 +18,8 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.entity.SseEventType;
+import org.danteplanner.backend.shared.sse.SseChannel;
+import org.danteplanner.backend.shared.sse.SseChannelSender;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.shared.sse.SseService;
 import org.danteplanner.backend.shared.sse.SuspensionType;
@@ -31,6 +33,8 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserSettingsService;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -77,6 +81,9 @@ class SseFanoutIT extends CausalHarnessSupport {
     private SsePublisher ssePublisher;
 
     @Autowired
+    private SseChannelSender sseChannelSender;
+
+    @Autowired
     private CommentCommandService commentCommandService;
 
     @Autowired
@@ -102,6 +109,26 @@ class SseFanoutIT extends CausalHarnessSupport {
 
         try (SseStream stream = SseStream.user(port, session(user))) {
             ssePublisher.publishUserEvent(user.getId(), SseEventType.COMMENT_ADDED, entityId, payload);
+
+            assertThat(stream.next(SseEventType.COMMENT_ADDED.getValue())).contains(entityId);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "\"excludeDeviceId\":null",
+            "\"excludeDeviceId\":\"88888888-9999-4aaa-8bbb-cccccccccccc\"",
+            "\"slotThisReleaseDoesNotName\":\"x\"",
+    })
+    void userEnvelope_WhenAnotherReleaseAddsASlot_IsDeliveredToTheDeviceItNames(String slot) {
+        User user = user("sse-other-release");
+        UUID namedDevice = UUID.fromString("88888888-9999-4aaa-8bbb-cccccccccccc");
+        String entityId = "planner-" + UUID.randomUUID();
+        String envelope = "{\"type\":\"" + SseEventType.COMMENT_ADDED.getValue() + "\",\"userId\":" + user.getId()
+                + ",\"entityId\":\"" + entityId + "\"," + slot + ",\"payload\":{\"plannerId\":\"" + entityId + "\"}}";
+
+        try (SseStream stream = SseStream.user(port, session(user, namedDevice))) {
+            sseChannelSender.send(SseChannel.USER.topic(), envelope);
 
             assertThat(stream.next(SseEventType.COMMENT_ADDED.getValue())).contains(entityId);
         }
@@ -209,7 +236,11 @@ class SseFanoutIT extends CausalHarnessSupport {
     }
 
     private Cookie[] session(User user) {
-        return AuthCookies.session(TestDataFactory.generateAccessToken(jwtTokenService, user), UUID.randomUUID());
+        return session(user, UUID.randomUUID());
+    }
+
+    private Cookie[] session(User user, UUID deviceId) {
+        return AuthCookies.session(TestDataFactory.generateAccessToken(jwtTokenService, user), deviceId);
     }
 
     private void enableNewPublicationNotices(User user) {

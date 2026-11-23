@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import tools.jackson.databind.ObjectMapper;
 
 import org.danteplanner.backend.shared.entity.SseEventType;
@@ -16,11 +18,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class SseEnvelopeTest {
 
     private static final UUID PLANNER = UUID.fromString("11111111-2222-4333-8444-555555555555");
-    private static final UUID DEVICE = UUID.fromString("88888888-9999-4aaa-8bbb-cccccccccccc");
 
-    private static final String USER_EVENT_EXCLUDING_A_DEVICE = "{\"type\":\"notify:comment\",\"userId\":7,"
-            + "\"entityId\":\"n1\",\"excludeDeviceId\":\"88888888-9999-4aaa-8bbb-cccccccccccc\","
-            + "\"payload\":{\"id\":\"n1\"}}";
     private static final String USER_EVENT = "{\"type\":\"notify:comment\",\"userId\":7,\"entityId\":\"n1\","
             + "\"payload\":{\"id\":\"n1\"}}";
     private static final String SETTINGS_INVALIDATION = "{\"type\":\"settings:invalidated\",\"userId\":7}";
@@ -38,16 +36,9 @@ class SseEnvelopeTest {
             .build();
 
     @Test
-    void userEventExcludingADevice_WhenRoundTripped_MatchesThePreviousReleasesJson() {
-        assertRoundTrip(new SseEnvelope.UserEvent(7L, SseEventType.NOTIFY_COMMENT, "n1",
-                new SseEnvelope.DeviceExclusion.Device(DEVICE), Map.of("id", "n1")),
-                SseChannel.USER, USER_EVENT_EXCLUDING_A_DEVICE);
-    }
-
-    @Test
     void userEvent_WhenRoundTripped_MatchesThePreviousReleasesJson() {
         assertRoundTrip(new SseEnvelope.UserEvent(7L, SseEventType.NOTIFY_COMMENT, "n1",
-                new SseEnvelope.DeviceExclusion.None(), Map.of("id", "n1")), SseChannel.USER, USER_EVENT);
+                Map.of("id", "n1")), SseChannel.USER, USER_EVENT);
     }
 
     @Test
@@ -97,13 +88,15 @@ class SseEnvelopeTest {
                 .hasMessageContaining("plannerId");
     }
 
-    @Test
-    void deviceExclusion_WhenADeviceIsExcluded_ExcludesOnlyThatDevice() {
-        SseEnvelope.DeviceExclusion exclusion = new SseEnvelope.DeviceExclusion.Device(DEVICE);
+    @ParameterizedTest
+    @ValueSource(strings = {"null", "\"88888888-9999-4aaa-8bbb-cccccccccccc\""})
+    void userEvent_WhenThePreviousReleaseCarriesADeviceExclusion_IsReadWithoutIt(String excludeDeviceId) {
+        String previousReleaseJson = USER_EVENT.replace("\"payload\"",
+                "\"excludeDeviceId\":" + excludeDeviceId + ",\"payload\"");
 
-        assertThat(exclusion.excludes(DEVICE)).isTrue();
-        assertThat(exclusion.excludes(UUID.randomUUID())).isFalse();
-        assertThat(new SseEnvelope.DeviceExclusion.None().excludes(DEVICE)).isFalse();
+        assertThat(objectMapper.readValue(previousReleaseJson, SseEnvelope.Wire.class).on(SseChannel.USER))
+                .isEqualTo(new SseEnvelope.UserEvent(
+                        7L, SseEventType.NOTIFY_COMMENT, "n1", Map.of("id", "n1")));
     }
 
     @Test

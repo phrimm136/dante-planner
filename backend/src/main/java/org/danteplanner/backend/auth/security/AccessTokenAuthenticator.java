@@ -13,7 +13,7 @@ import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.shared.failure.CommandOutcome;
 import org.danteplanner.backend.shared.util.LogValues;
-import org.springframework.http.HttpHeaders;
+import org.danteplanner.backend.shared.util.RequestHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -164,6 +164,6 @@ public class AccessTokenAuthenticator {
                 event,
                 request.getRemoteAddr(),
                 LogValues.oneLine(request.getRequestURI()),
-                LogValues.oneLine(request.getHeader(HttpHeaders.USER_AGENT)));
+                LogValues.oneLine(RequestHeaders.userAgent(request)));
     }
 }

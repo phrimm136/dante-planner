@@ -16,7 +16,7 @@ export const PublicPlannerSchema = z.object({
   viewCount: z.number().int().min(0),
   authorUsernameEpithet: z.string().nullish(),
   authorUsernameSuffix: z.string().nullish(),
-  createdAt: z.string(),
+  createdAt: z.string().nullish(),
   firstPublishedAt: z.string(),
   hasUpvoted: z.boolean(),
   commentCount: z.number().int().min(0),
@@ -44,6 +44,7 @@ export const SubscriptionResponseSchema = z
   .strict()
 
 export const PublishedPlannerDetailSchema = PublicPlannerSchema.extend({
+  createdAt: z.string(),
   lastModifiedAt: z.string(),
   content: z.string(),
   schemaVersion: z.number().int().positive(),

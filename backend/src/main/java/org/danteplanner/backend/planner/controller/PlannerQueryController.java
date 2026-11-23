@@ -9,10 +9,10 @@ import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
 import org.danteplanner.backend.planner.service.PlannerQueryService;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
+import org.danteplanner.backend.shared.security.Viewer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,12 +35,12 @@ public class PlannerQueryController {
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "list")
     @GetMapping
     public ResponseEntity<Page<PlannerSummaryResponse>> getPlanners(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             Pageable pageable,
             @RequestParam(defaultValue = "false") boolean includeDeleted) {
 
         Page<PlannerSummaryResponse> planners =
-                plannerQueryService.getPlanners(userId, pageable, includeDeleted).value();
+                plannerQueryService.getPlanners(member.userId(), pageable, includeDeleted).value();
         return ResponseEntity.ok(planners);
     }
 
@@ -48,10 +48,10 @@ public class PlannerQueryController {
     @RestrictionExempt(reason = "read shaped as POST")
     @PostMapping("/batch")
     public ResponseEntity<List<PlannerResponse>> getPlannerBatch(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             @Valid @RequestBody PlannerBatchRequest request) {
 
-        return ResponseEntity.ok(readBatch(userId, request.ids()));
+        return ResponseEntity.ok(readBatch(member.userId(), request.ids()));
     }
 
     private List<PlannerResponse> readBatch(Long userId, List<UUID> ids) {
@@ -61,17 +61,17 @@ public class PlannerQueryController {
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "batch")
     @GetMapping("/batch")
     public ResponseEntity<List<PlannerResponse>> pullPlannerBatch(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             @Valid @ModelAttribute PlannerBatchRequest request) {
-        return ResponseEntity.ok(readBatch(userId, request.ids()));
+        return ResponseEntity.ok(readBatch(member.userId(), request.ids()));
     }
 
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "get")
     @GetMapping("/{id}")
     public ResponseEntity<PlannerResponse> getPlanner(
-            @AuthenticationPrincipal Long userId,
+            Viewer.Member member,
             @PathVariable UUID id) {
 
-        return ResponseEntity.ok(plannerQueryService.getPlanner(userId, id).value());
+        return ResponseEntity.ok(plannerQueryService.getPlanner(member.userId(), id).value());
     }
 }

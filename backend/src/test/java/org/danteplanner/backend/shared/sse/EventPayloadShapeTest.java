@@ -114,10 +114,9 @@ class EventPayloadShapeTest {
     }
 
     @Test
-    void clientEvent_WhenUserTargeted_OmitsTheOriginatingDevice() {
+    void clientEvent_WhenUserTargeted_CarriesTheUserAndNoPlanner() {
         SseEnvelope.UserEvent envelope = new SseEnvelope.UserEvent(
                 7L, SseEventType.COMMENT_ADDED, PLANNER_ID.toString(),
-                new SseEnvelope.DeviceExclusion.Device(UUID.fromString("88888888-9999-4aaa-8bbb-cccccccccccc")),
                 Map.of("id", PLANNER_ID.toString()));
 
         Map<String, Object> json = serialize(ClientSseEvent.from(envelope));

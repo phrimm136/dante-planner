@@ -31,6 +31,7 @@ import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.SecurityProperties;
+import org.danteplanner.backend.shared.config.ViewerArgumentResolver;
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -95,6 +96,7 @@ class PublishedPlannerClientBucketTest {
                 queryService, securityProperties, deviceIdResolver);
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setCustomArgumentResolvers(new ViewerArgumentResolver())
                 .addInterceptors(interceptor)
                 .build();
     }

@@ -9,6 +9,7 @@ import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.danteplanner.backend.shared.config.ViewerArgumentResolver;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.security.Viewer;
@@ -21,7 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -64,7 +64,7 @@ class CommentThreadNotFoundContractTest {
                 commentRepository, null, users,
                 new PlannerAccessGuard(users, plannerRepository), new CommentAccessValidator());
         mockMvc = standaloneSetup(new CommentController(queryService, null, null))
-                .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
+                .setCustomArgumentResolvers(new ViewerArgumentResolver())
                 .setControllerAdvice(new ApiExceptionHandler())
                 .build();
 

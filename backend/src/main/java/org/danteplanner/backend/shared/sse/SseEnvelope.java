@@ -17,7 +17,7 @@ public sealed interface SseEnvelope {
         return Wire.of(this);
     }
 
-    record UserEvent(Long userId, SseEventType type, String entityId, DeviceExclusion exclusion, Object payload)
+    record UserEvent(Long userId, SseEventType type, String entityId, Object payload)
             implements SseEnvelope {
     }
 
@@ -41,22 +41,6 @@ public sealed interface SseEnvelope {
         @Override
         public SseEventType type() {
             return SseEventType.ACCOUNT_SUSPENDED;
-        }
-    }
-
-    sealed interface DeviceExclusion {
-
-        record None() implements DeviceExclusion {
-        }
-
-        record Device(UUID deviceId) implements DeviceExclusion {
-        }
-
-        default boolean excludes(UUID deviceId) {
-            return switch (this) {
-                case None none -> false;
-                case Device device -> device.deviceId().equals(deviceId);
-            };
         }
     }
 
@@ -95,7 +79,6 @@ public sealed interface SseEnvelope {
             @Nullable Long userId,
             @Nullable String plannerId,
             @Nullable String entityId,
-            @Nullable String excludeDeviceId,
             @Nullable Long excludeUserId,
             @Nullable Object payload
     ) {
@@ -103,18 +86,15 @@ public sealed interface SseEnvelope {
         static Wire of(SseEnvelope envelope) {
             return switch (envelope) {
                 case UserEvent event -> new Wire(event.type(), event.userId(), null, event.entityId(),
-                        switch (event.exclusion()) {
-                            case DeviceExclusion.None none -> null;
-                            case DeviceExclusion.Device device -> device.deviceId().toString();
-                        }, null, event.payload());
+                        null, event.payload());
                 case SettingsInvalidation invalidation ->
-                        new Wire(invalidation.type(), invalidation.userId(), null, null, null, null, null);
+                        new Wire(invalidation.type(), invalidation.userId(), null, null, null, null);
                 case CommentEvent event -> new Wire(event.type(), null, event.plannerId().toString(),
-                        event.entityId(), null, excludedUser(event.exclusion()), event.payload());
-                case Broadcast broadcast -> new Wire(broadcast.type(), null, null, null, null,
+                        event.entityId(), excludedUser(event.exclusion()), event.payload());
+                case Broadcast broadcast -> new Wire(broadcast.type(), null, null, null,
                         excludedUser(broadcast.exclusion()), broadcast.payload());
                 case AccountSuspended suspended ->
-                        new Wire(suspended.type(), suspended.userId(), null, null, null, null, suspended.payload());
+                        new Wire(suspended.type(), suspended.userId(), null, null, null, suspended.payload());
             };
         }
 
@@ -129,9 +109,6 @@ public sealed interface SseEnvelope {
                     case SUSPENSION_NOTICE ->
                             new AccountSuspended(required(userId, "userId"), required(payload, "payload"));
                     case EMITTERS -> new UserEvent(required(userId, "userId"), type, required(entityId, "entityId"),
-                            excludeDeviceId == null
-                                    ? new DeviceExclusion.None()
-                                    : new DeviceExclusion.Device(UUID.fromString(excludeDeviceId)),
                             required(payload, "payload"));
                 };
             };

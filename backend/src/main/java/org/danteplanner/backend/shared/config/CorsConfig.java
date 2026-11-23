@@ -7,6 +7,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,7 +27,7 @@ public class CorsConfig {
         configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         // Explicit header whitelist - no wildcards for security
-        configuration.setAllowedHeaders(List.of("Content-Type", "Cache-Control", "X-CSRF-Token"));
+        configuration.setAllowedHeaders(List.of("Content-Type", "Cache-Control", CsrfDoubleSubmitFilter.CSRF_HEADER));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 

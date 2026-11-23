@@ -15,6 +15,7 @@ import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.backend.shared.util.LogValues;
+import org.danteplanner.backend.shared.util.RequestHeaders;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -77,7 +78,7 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
         }
 
         if (requiresEnforcement(request)) {
-            Verdict verdict = verdict(cookieToken, serverIssued, request.getHeader(CSRF_HEADER));
+            Verdict verdict = verdict(cookieToken, serverIssued, RequestHeaders.csrfToken(request));
             if (verdict != Verdict.ACCEPTED) {
                 reject(verdict, request, response);
                 return;
@@ -114,7 +115,7 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
                 kv("reason", verdict),
                 kv("method", request.getMethod()),
                 kv("path", LogValues.oneLine(request.getRequestURI())),
-                kv("userAgent", LogValues.oneLine(request.getHeader(HttpHeaders.USER_AGENT))));
+                kv("userAgent", LogValues.oneLine(RequestHeaders.userAgent(request))));
         problemWriter.write(request, response,
                 Problems.fill(ProblemDetail.forStatus(HttpStatus.FORBIDDEN), CSRF_ERROR_CODE,
                         "Missing or invalid CSRF token"),

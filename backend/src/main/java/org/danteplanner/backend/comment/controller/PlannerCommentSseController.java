@@ -2,13 +2,11 @@ package org.danteplanner.backend.comment.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.shared.security.Viewer;
-import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.shared.config.DeviceId;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.comment.service.PlannerCommentSseService;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,8 +28,8 @@ public class PlannerCommentSseController {
     public SseEmitter subscribeToComments(
             @PathVariable UUID plannerId,
             @DeviceId UUID deviceId,
-            @AuthenticationPrincipal @Nullable Long userId) throws IOException {
+            Viewer viewer) throws IOException {
 
-        return plannerCommentSseService.subscribe(plannerId, deviceId, Viewer.of(userId));
+        return plannerCommentSseService.subscribe(plannerId, deviceId, viewer);
     }
 }

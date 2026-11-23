@@ -116,6 +116,16 @@ class SseServiceTest {
         }
 
         @Test
+        void sendToUser_WhenTheUserHasTwoDevices_SendsToBoth() throws IOException {
+            sseService.subscribe(USER_ID, UUID.randomUUID()).complete();
+            sseService.subscribe(USER_ID, UUID.randomUUID()).complete();
+
+            sseService.sendToUser(USER_ID, "notify:comment", Map.of("k", "v"));
+
+            assertThat(sseService.getActiveConnectionCount(USER_ID)).isZero();
+        }
+
+        @Test
         void sendToUser_WhenCommentNotificationsOff_DoesNotSend() throws IOException {
             preferenceProvider.set(USER_ID, new Preferences(false, true, true));
             SseEmitter emitter = sseService.subscribe(USER_ID, UUID.randomUUID());
