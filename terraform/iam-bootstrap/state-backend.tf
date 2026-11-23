@@ -1,4 +1,4 @@
-# Remote state backend for every other stack. This one stays on local state — it creates the bucket.
+# Remote state backend for every stack, this one included once its first apply has created the bucket.
 #
 # Only the account this stack was originally applied in creates its bucket here; accounts added
 # later use terraform/state-backend, which owns the same five resources and nothing else. The

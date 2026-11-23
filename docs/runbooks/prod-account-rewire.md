@@ -11,14 +11,16 @@ AWS profiles for the management account and the prod account are configured loca
 
 ## 1. State bucket (terraform/state-backend)
 
-Local-state stack, one workspace per account:
+The prod bucket does not exist yet, so this first apply runs on local state through a
+`backend_override.tf`; step 2 moves that state into the bucket it creates:
 
 ```bash
-terraform -chdir=terraform/state-backend workspace new danteplanner-prod
+printf 'terraform {\n  backend "local" {}\n}\n' > terraform/state-backend/backend_override.tf
+scripts/ops/terraform-run.sh -chdir=terraform/state-backend init -reconfigure
 # Create terraform/state-backend/danteplanner-prod.tfvars (gitignored, like its siblings):
 #   aws_account_id  = "<prod account id>"
 #   assume_role_arn = ""        # empty when the profile's credentials already land in prod
-.claude/skills/ops/bin/ops tf plan state-backend -- -var-file=danteplanner-prod.tfvars
+.claude/skills/ops/bin/ops --env prod tf plan state-backend -- -var-file=danteplanner-prod.tfvars
 .claude/skills/ops/bin/ops tf apply <plan file printed above>    # the user, as the printed ! line
 ```
 
@@ -29,18 +31,23 @@ terraform -chdir=terraform/state-backend output -raw tf_state_bucket
 # Copy terraform/backend.account.hcl.example to terraform/backend.prod.hcl (gitignored) and set that
 # bucket. Add assume_role there too if the ambient credentials are not the prod account's —
 # a backend resolves credentials before any provider exists.
+rm terraform/state-backend/backend_override.tf
+scripts/ops/provision/bootstrap-state-to-s3.sh state-backend terraform/backend.prod.hcl \
+  terraform/state-backend/danteplanner-prod.tfvars terraform/state-backend/terraform.tfstate
+# once it prints verified:
+scripts/ops/provision/bootstrap-state-to-s3.sh --remove-local state-backend terraform/state-backend/terraform.tfstate
 ```
 
 ## 3. CI identity (terraform/iam-bootstrap)
 
-Same local-state, workspace-per-account shape. Creates the GitHub OIDC provider and the
+State goes straight to the prod bucket. Creates the GitHub OIDC provider and the
 `prod-provisioner` role inside the prod account. Its trust has exactly two doors: the
 AdministratorAccess permission-set role (a laptop session) and the OIDC subject scoped to the
 GitHub `production` environment.
 
 ```bash
-terraform -chdir=terraform/iam-bootstrap workspace new danteplanner-prod
-.claude/skills/ops/bin/ops tf plan iam-bootstrap -- -var-file=danteplanner-prod.tfvars
+scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap init -reconfigure -backend-config=../backend.prod.hcl
+.claude/skills/ops/bin/ops --env prod tf plan iam-bootstrap -- -var-file=danteplanner-prod.tfvars
 .claude/skills/ops/bin/ops tf apply <plan file printed above>    # the user, as the printed ! line
 terraform -chdir=terraform/iam-bootstrap output -raw provisioner_role_arn
 ```
@@ -128,7 +135,7 @@ that reason expires the moment the migration is accepted.
 ## Role ARNs
 
 The provisioning role is `danteplanner-provisioner` in the management and staging accounts and
-`prod-provisioner` in prod (`terraform/iam-bootstrap` sets it per workspace). An ARN naming a role
+`prod-provisioner` in prod (`terraform/iam-bootstrap` sets it per account tfvars file). An ARN naming a role
 that does not exist fails `sts:AssumeRoleWithWebIdentity` with no CloudTrail record in any
 account, so run `aws iam get-role --role-name <name>` in the target account before putting an ARN
 into a secret or `~/.aws/config`.

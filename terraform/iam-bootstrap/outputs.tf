@@ -4,7 +4,7 @@ output "provisioner_role_arn" {
 }
 
 output "tf_state_bucket" {
-  description = "S3 bucket backing every other stack's state. Use it as the `bucket` in their backend blocks; this stack stays on local state."
+  description = "S3 bucket backing every stack's state in this account, this one included. Use it as the `bucket` in the account's backend file."
   value       = var.create_state_bucket ? aws_s3_bucket.tf_state[0].id : local.tf_state_bucket
 }
 

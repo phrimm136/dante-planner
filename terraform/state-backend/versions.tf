@@ -1,4 +1,18 @@
 terraform {
+  # terraform init -backend-config=../backend.<account>.hcl
+  #
+  # State lives in the bucket this stack creates. Local state is used only for the first apply in
+  # a new account, before that bucket exists: apply with a backend_override.tf holding
+  # `terraform { backend "local" {} }`, delete it, then move the state into the new bucket with
+  # scripts/ops/provision/bootstrap-state-to-s3.sh.
+  backend "s3" {
+    key                  = "state-backend/terraform.tfstate"
+    region               = "us-west-2"
+    workspace_key_prefix = "env"
+    encrypt              = true
+    use_lockfile         = true
+  }
+
   required_version = ">= 1.6"
   required_providers {
     aws = {
@@ -7,10 +21,6 @@ terraform {
     }
   }
 }
-
-# No backend block: this stack creates the bucket every other stack stores state in, so storing
-# its own state there is circular. One workspace per account keeps those local state files apart
-# (terraform.tfstate.d/<account>/terraform.tfstate).
 
 # assume_role is empty when applying with credentials already belonging to the target account, and
 # set when reaching a member account from the management account.

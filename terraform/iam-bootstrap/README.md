@@ -46,15 +46,18 @@ Run once, with **admin** credentials (not the RDS role):
 
 ```bash
 cp account.tfvars.example <account>.tfvars       # set trusted_admin_principal_arn (gitignored)
-scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap init
+scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap init -reconfigure -backend-config=../backend.<account>.hcl
 scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap validate
-scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap plan     # READ IT
-scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap apply
+scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap plan -var-file=<account>.tfvars     # READ IT
+scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap apply -var-file=<account>.tfvars
 scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap output provisioner_role_arn
 ```
 
 These run by hand through the runner, not ops: they run with admin credentials before any ops
-profile exists.
+profile exists. State goes to the account's bucket, which `terraform/state-backend` created
+first. Only an account whose bucket this stack creates (`create_state_bucket`) applies on local
+state, with a `backend_override.tf`, and moves it right after with
+`scripts/ops/provision/bootstrap-state-to-s3.sh` (see `terraform/README.md`, State).
 
 Then wire the two consumers to that role ARN:
 
@@ -112,5 +115,6 @@ policy then looks the existing provider up as a data source instead of creating 
 ## Not managed here
 
 - **The Oregon fleet** (`terraform/oregon`) — this stack only grants the identity that applies it.
-- **State backend:** configure encrypted remote state in your private setup; local state and
-  `*.tfvars` are gitignored. Never commit `*.tfstate`.
+- **State backend:** the account's state bucket, key `iam-bootstrap/terraform.tfstate`, chosen by
+  the gitignored `terraform/backend.<account>.hcl`; `*.tfvars` are gitignored too. Never commit
+  `*.tfstate`.

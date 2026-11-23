@@ -213,6 +213,8 @@ jobs:
         run: |
           mkdir -p "$TF_PLUGIN_CACHE_DIR"
           .github/scripts/terraform-validate.sh
+      - name: Bootstrap state move against throwaway local-backend stacks
+        run: scripts/ops/provision/tests/bootstrap-state-to-s3.sh
       - name: Save Terraform plugin cache
         if: github.ref == 'refs/heads/main' && success() && steps.terraform-plugin-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0

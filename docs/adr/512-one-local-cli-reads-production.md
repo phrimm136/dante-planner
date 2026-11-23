@@ -2,7 +2,7 @@
 epic: none · pr: none
 
 ## Decisions
-- @ops — The AWS profile is chosen explicitly per command (`--env prod|staging`, default prod) and the shared shell constants set no profile. CI authenticates through OIDC environment credentials, which a set but undefined profile would override, and the staging rehearsal sources those constants. Re-check: `rg -n 'AWS_PROFILE=|AWS_PROFILE:-' scripts/ops/lib` finds no assignment.
+- @ops — The AWS profile is chosen explicitly per command (`--env prod|staging`, default prod; a stack applied once per account has no default) and the shared shell constants set no profile. CI authenticates through OIDC environment credentials, which a set but undefined profile would override, and the staging rehearsal sources those constants. Re-check: `rg -n 'AWS_PROFILE=|AWS_PROFILE:-' scripts/ops/lib` finds no assignment.
   REJECTED: fixing the default to `prod` — a script run without thought would reach production silently, and CI would still inherit a profile it does not have.
 
 ## Superseded
