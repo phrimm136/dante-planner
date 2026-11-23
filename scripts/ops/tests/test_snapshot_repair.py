@@ -2,6 +2,7 @@ import json
 import os
 import subprocess
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -9,34 +10,63 @@ SCRIPT = Path(__file__).resolve().parents[1] / "provision" / "k3s-snapshot-sched
 FIXTURE_DIR = Path(__file__).resolve().parent / "fixtures"
 MALFORMED_LINE = "\t'0 \\*/6 \\* \\* \\*' \\"
 REPAIRED_LINE = "\t'0 */6 * * *' \\"
+NODE_ROWS = ("node-a   Ready    control-plane,etcd   1d   v1.36.3+k3s1",
+             "node-b   Ready    <none>               1d   v1.36.3+k3s1")
+S3_SELECTOR = "-l etcd.k3s.cattle.io/snapshot-storage-node=s3"
+
+FAKE_MODE = """n=$(cat "$FAKE_DIR/restarts" 2>/dev/null || echo 0)
+eval "mode=\\${FAKE_RESTART$n:-ok}"
+"""
 
 FAKE_K3S = """#!/bin/sh
 echo "k3s $*" >> "$FAKE_DIR/calls"
-case "$*" in
+""" + FAKE_MODE + """case "$*" in
   "etcd-snapshot save")
     [ -n "${FAKE_SAVE_FAILS:-}" ] && exit 1
     echo local >> "$FAKE_DIR/snapshots"
     [ -n "${FAKE_S3_FAILS:-}" ] || echo s3 >> "$FAKE_DIR/snapshots" ;;
   "kubectl get etcdsnapshotfiles.k3s.cattle.io -o name")
     [ -f "$FAKE_DIR/snapshots" ] && sed 's/^/etcdsnapshotfile.k3s.cattle.io\\/snap-/' "$FAKE_DIR/snapshots" ;;
-  "kubectl get etcdsnapshotfiles.k3s.cattle.io -l etcd.k3s.cattle.io/snapshot-storage-node=s3 -o name")
+  "kubectl get etcdsnapshotfiles.k3s.cattle.io """ + S3_SELECTOR + """ -o name")
     [ -f "$FAKE_DIR/snapshots" ] && sed -n 's/^s3$/etcdsnapshotfile.k3s.cattle.io\\/snap-s3/p' "$FAKE_DIR/snapshots" ;;
-  "kubectl get --raw /readyz")
-    [ -n "${FAKE_NEVER_READY:-}" ] && exit 1
+  "kubectl get --raw /readyz --request-timeout=5s")
+    if [ -n "${FAKE_TERM_ONCE:-}" ] && [ "$n" -ge 1 ] && [ ! -f "$FAKE_DIR/termed" ]; then
+      touch "$FAKE_DIR/termed"
+      kill -TERM 0
+    fi
+    case "$mode" in never-active|failed|loop|never-ready) exit 1 ;; esac
     echo ok ;;
-  "kubectl get nodes --no-headers")
-    echo "node-a   Ready    control-plane,etcd   1d   v1.36.3+k3s1" ;;
+  "kubectl get nodes --no-headers --request-timeout=5s")
+    cat "$FAKE_DIR/nodes" ;;
+  "kubectl -n kube-node-lease get leases --request-timeout=5s -o "*)
+    while read -r node_name rest; do
+      if [ "$mode" = stale ] && [ "$node_name" = "${FAKE_STALE_NODE:-}" ]; then
+        printf '%s %s\\n' "$node_name" "$(date -u -d '-1 hour' +%Y-%m-%dT%H:%M:%S.000000Z)"
+      else
+        printf '%s %s\\n' "$node_name" "$(date -u -d '+5 seconds' +%Y-%m-%dT%H:%M:%S.000000Z)"
+      fi
+    done < "$FAKE_DIR/nodes" ;;
 esac
 """
 
 FAKE_SYSTEMCTL = """#!/bin/sh
 echo "systemctl $*" >> "$FAKE_DIR/calls"
-case "$*" in
-  "is-active"*)
-    [ -n "${FAKE_K3S_DOWN:-}" ] && { echo inactive; exit 3; }
-    echo active ;;
+""" + FAKE_MODE + """case "$*" in
+  "restart --no-block k3s")
+    echo $((n + 1)) > "$FAKE_DIR/restarts"
+    [ -z "${FAKE_RESTART_REFUSED:-}" ] ;;
   "show -p KillMode k3s")
     echo "KillMode=${FAKE_KILL_MODE:-process}" ;;
+  "show -p NRestarts --value k3s")
+    if [ "$mode" = loop ]; then echo 5; else echo 0; fi ;;
+  "is-failed --quiet k3s")
+    [ "$mode" = failed ] ;;
+  "is-active --quiet k3s"|"is-active k3s")
+    state=active
+    case "$mode" in never-active|loop) state=activating ;; failed) state=failed ;; esac
+    [ -n "${FAKE_K3S_DOWN:-}" ] && state=inactive
+    [ "$2" = --quiet ] || echo "$state"
+    [ "$state" = active ] ;;
 esac
 """
 
@@ -50,7 +80,7 @@ case "$1 $2" in
   "ssm get-command-invocation")
     case "$*" in
       *"--query Status"*) echo "${FAKE_STATUS:-Success}" ;;
-      *) printf '{"StandardOutputContent": "remote out", "StandardErrorContent": ""}' ;;
+      *) jq -n --arg o "${FAKE_REMOTE_OUT:-REPAIRED}" '{StandardOutputContent: $o, StandardErrorContent: ""}' ;;
     esac ;;
 esac
 """
@@ -73,146 +103,214 @@ class RepairCase(unittest.TestCase):
         write_tool(bin_dir, "aws", FAKE_AWS)
         self.unit_path = self.work_dir / "k3s.service"
         self.unit_path.write_text((FIXTURE_DIR / "k3s.service").read_text())
+        self.original_text = self.unit_path.read_text()
+        self.lock_dir = self.work_dir / "repair.lock"
+        self.set_nodes(*NODE_ROWS)
         self.base_env = {**os.environ, "PATH": f"{bin_dir}:{os.environ['PATH']}", "FAKE_DIR": str(self.work_dir)}
 
     def tearDown(self):
         self.work_handle.cleanup()
 
-    def remote_text(self, mode_name):
+    def set_nodes(self, *node_rows):
+        (self.work_dir / "nodes").write_text("\n".join(node_rows) + "\n")
+
+    def remote_text(self, mode_name, restart_bound="2"):
         build_run = subprocess.run(["bash", "-c", f'source "{SCRIPT}"; remote_script "$@"', "repair-test", mode_name,
-                                    str(self.unit_path), "0 */6 * * *", "2", "1"],
+                                    str(self.unit_path), "0 */6 * * *", "2", restart_bound, "2", "1",
+                                    str(self.lock_dir)],
                                    capture_output=True, text=True, check=True)
         return build_run.stdout
 
-    def run_remote(self, mode_name, **fake_flags):
-        return subprocess.run(["sh", "-c", self.remote_text(mode_name)], capture_output=True, text=True,
+    def run_remote(self, mode_name, script_text=None, restart_bound="2", **fake_flags):
+        return subprocess.run(["sh", "-c", script_text or self.remote_text(mode_name, restart_bound)],
+                              capture_output=True, text=True, start_new_session=True,
                               env={**self.base_env, **{flag_name: "1" if flag_value is True else flag_value
                                                        for flag_name, flag_value in fake_flags.items()}})
+
+    def final_line(self, remote_run):
+        return [one_line for one_line in remote_run.stdout.splitlines() if one_line.strip()][-1]
 
     def calls(self):
         calls_path = self.work_dir / "calls"
         return calls_path.read_text().splitlines() if calls_path.is_file() else []
 
-    def unit_lines(self):
-        return self.unit_path.read_text().splitlines()
+    def restarts(self):
+        restarts_path = self.work_dir / "restarts"
+        return int(restarts_path.read_text()) if restarts_path.is_file() else 0
 
     def backups(self):
         return sorted(self.work_dir.glob("k3s.service.bak-*"))
 
+    def assert_untouched(self, remote_run, reason_text):
+        self.assertEqual(remote_run.returncode, 3, remote_run.stdout)
+        self.assertTrue(self.final_line(remote_run).startswith("NOTHING CHANGED: "), remote_run.stdout)
+        self.assertIn(reason_text, self.final_line(remote_run))
+        self.assertEqual((self.unit_path.read_text(), self.backups(), self.restarts()), (self.original_text, [], 0))
+
+    def assert_rolled_back(self, remote_run, ending_text, exit_code):
+        self.assertEqual(remote_run.returncode, exit_code, remote_run.stdout)
+        self.assertTrue(self.final_line(remote_run).startswith(ending_text), remote_run.stdout)
+        self.assertEqual(self.unit_path.read_text(), self.original_text)
+        self.assertEqual(self.restarts(), 2)
+        self.assertFalse(self.lock_dir.exists())
+
 
 class RemoteScriptTest(RepairCase):
-    def test_the_repair_saves_backs_up_replaces_restarts_and_reports(self):
-        original_text = self.unit_path.read_text()
+    def test_the_repair_ends_repaired_with_the_counts_and_no_node_names(self):
         repair_run = self.run_remote("repair")
-        self.assertEqual(repair_run.returncode, 0, repair_run.stdout)
-        self.assertEqual([one_line.split(":")[0] for one_line in repair_run.stdout.splitlines()
-                          if one_line.startswith("STEP")], ["STEP 1", "STEP 2", "STEP 3", "STEP 4", "STEP 5", "STEP 6"])
-        self.assertLess(self.calls().index("systemctl is-active --quiet k3s"), self.calls().index("k3s etcd-snapshot save"))
-        self.assertLess(self.calls().index("k3s etcd-snapshot save"), self.calls().index("systemctl daemon-reload"))
-        self.assertLess(self.calls().index("systemctl daemon-reload"), self.calls().index("systemctl restart k3s"))
-        self.assertEqual(original_text.replace(MALFORMED_LINE, REPAIRED_LINE), self.unit_path.read_text())
-        self.assertEqual([one_backup.read_text() for one_backup in self.backups()], [original_text])
+        self.assertEqual((repair_run.returncode, self.final_line(repair_run)), (0, "REPAIRED"), repair_run.stdout)
+        self.assertEqual(self.original_text.replace(MALFORMED_LINE, REPAIRED_LINE), self.unit_path.read_text())
+        self.assertEqual([one_backup.read_text() for one_backup in self.backups()], [self.original_text])
+        self.assertIn("nodes Ready before the run: 2 of 2", repair_run.stdout)
         self.assertIn("snapshots: local 1, s3 1", repair_run.stdout)
-        self.assertNotIn("snap-", repair_run.stdout)
         self.assertIn("unit cron line: '0 */6 * * *' \\", repair_run.stdout)
-        self.assertFalse((self.work_dir / "k3s.service.repair").exists())
+        self.assertNotIn("node-", repair_run.stdout)
+        self.assertNotIn("snap-", repair_run.stdout)
+        self.assertIn("systemctl restart --no-block k3s", self.calls())
+        self.assertNotIn("systemctl restart k3s", self.calls())
+        self.assertFalse(self.lock_dir.exists())
 
-    def test_a_second_run_changes_nothing_and_says_so(self):
-        self.assertEqual(self.run_remote("repair").returncode, 0)
-        repaired_text = self.unit_path.read_text()
-        call_count = len(self.calls())
+    def test_a_second_run_ends_already_repaired(self):
+        self.run_remote("repair")
         rerun = self.run_remote("repair")
-        self.assertEqual(rerun.returncode, 0, rerun.stdout)
-        self.assertIn("ALREADY REPAIRED", rerun.stdout)
-        self.assertEqual(self.unit_path.read_text(), repaired_text)
-        self.assertEqual(len(self.backups()), 1)
-        self.assertNotIn("k3s etcd-snapshot save", self.calls()[call_count:])
-        self.assertNotIn("systemctl restart k3s", self.calls()[call_count:])
+        self.assertEqual((rerun.returncode, self.final_line(rerun)), (0, "ALREADY REPAIRED"))
+        self.assertEqual((len(self.backups()), self.restarts()), (1, 1))
 
-    def test_a_hand_edited_line_is_refused_before_any_change(self):
-        self.unit_path.write_text(self.unit_path.read_text().replace(MALFORMED_LINE, "\t'0 3 * * *' \\"))
-        edited_text = self.unit_path.read_text()
+    def test_already_repaired_with_k3s_down_is_not_a_success(self):
+        self.run_remote("repair")
+        down_run = self.run_remote("repair", FAKE_K3S_DOWN=True)
+        self.assertEqual(down_run.returncode, 3)
+        self.assertEqual(self.final_line(down_run),
+                         "NOTHING CHANGED: the unit holds the repaired line, but k3s is inactive")
+
+    def test_already_repaired_with_the_api_not_ready_is_not_a_success(self):
+        self.run_remote("repair")
+        not_ready_run = self.run_remote("repair", FAKE_RESTART1="never-ready")
+        self.assertEqual(self.final_line(not_ready_run), "NOTHING CHANGED: the unit holds the repaired line and "
+                                                         "k3s is active, but the API /readyz is not ok")
+
+    def test_a_hand_edited_line_is_refused_and_says_whether_k3s_serves(self):
+        self.unit_path.write_text(self.original_text.replace(MALFORMED_LINE, "\t'0 3 * * *' \\"))
+        self.original_text = self.unit_path.read_text()
         refused_run = self.run_remote("repair")
-        self.assertEqual(refused_run.returncode, 1)
-        self.assertIn("FAILED step check: line ", refused_run.stdout)
-        self.assertIn("is not the known malformed line", refused_run.stdout)
-        self.assertEqual((self.unit_path.read_text(), self.backups(), self.calls()), (edited_text, [], []))
+        self.assert_untouched(refused_run, "is not the known malformed line")
+        self.assertTrue(self.final_line(refused_run).endswith("; k3s is serving"))
+        self.assertTrue(self.final_line(self.run_remote("repair", FAKE_K3S_DOWN=True)).endswith("; k3s is NOT serving"))
 
     def test_a_missing_or_doubled_flag_is_refused(self):
-        original_text = self.unit_path.read_text()
-        self.unit_path.write_text(original_text.replace("\t'--etcd-snapshot-schedule-cron' \\\n", ""))
-        self.assertIn("argument 0 times, not once", self.run_remote("repair").stdout)
-        self.unit_path.write_text(original_text + "\t'--etcd-snapshot-schedule-cron' \\\n")
-        self.assertIn("argument 2 times, not once", self.run_remote("repair").stdout)
-        self.assertEqual(self.backups(), [])
+        fixture_text = self.original_text
+        self.unit_path.write_text(fixture_text.replace("\t'--etcd-snapshot-schedule-cron' \\\n", ""))
+        self.original_text = self.unit_path.read_text()
+        self.assert_untouched(self.run_remote("repair"), "argument 0 times, not once")
+        self.unit_path.write_text(fixture_text + "\t'--etcd-snapshot-schedule-cron' \\\n")
+        self.original_text = self.unit_path.read_text()
+        self.assert_untouched(self.run_remote("repair"), "argument 2 times, not once")
 
-    def test_a_missing_unit_is_refused(self):
-        self.unit_path.unlink()
-        self.assertIn("FAILED step check:", self.run_remote("repair").stdout)
+    def test_a_second_run_while_the_lock_is_held_refuses(self):
+        self.lock_dir.mkdir()
+        locked_run = self.run_remote("repair")
+        self.assert_untouched(locked_run, "another repair run holds")
+        self.assertTrue(self.lock_dir.is_dir())
+        self.assertNotIn("k3s etcd-snapshot save", self.calls())
 
-    def test_k3s_down_stops_at_step_one_without_a_change(self):
-        original_text = self.unit_path.read_text()
-        down_run = self.run_remote("repair", FAKE_K3S_DOWN=True)
-        self.assertEqual(down_run.returncode, 1)
-        self.assertIn("FAILED step 1: k3s is not active", down_run.stdout)
-        self.assertEqual((self.unit_path.read_text(), self.backups()), (original_text, []))
+    def test_k3s_down_stops_before_step_one(self):
+        self.assert_untouched(self.run_remote("repair", FAKE_K3S_DOWN=True), "k3s is not active")
 
-    def test_a_save_without_an_s3_copy_stops_at_step_one(self):
-        original_text = self.unit_path.read_text()
-        s3_run = self.run_remote("repair", FAKE_S3_FAILS=True)
-        self.assertEqual(s3_run.returncode, 1)
-        self.assertIn("FAILED step 1: no S3 copy of the new snapshot is listed 2s after the save (1 new local); "
-                      "the local snapshot was written but the S3 copy is missing; read the k3s journal for the "
-                      "upload error", s3_run.stdout)
-        self.assertEqual((self.unit_path.read_text(), self.backups()), (original_text, []))
-        self.assertNotIn("systemctl restart k3s", self.calls())
+    def test_a_failed_save_changes_nothing(self):
+        self.assert_untouched(self.run_remote("repair", FAKE_SAVE_FAILS=True), "k3s etcd-snapshot save failed")
+
+    def test_a_save_without_an_s3_copy_changes_nothing(self):
+        self.assert_untouched(self.run_remote("repair", FAKE_S3_FAILS=True),
+                              "the local snapshot was written but the S3 copy is missing; read the k3s journal")
 
     def test_an_older_s3_snapshot_does_not_count_for_this_save(self):
         (self.work_dir / "snapshots").write_text("local\ns3\n")
-        s3_run = self.run_remote("repair", FAKE_S3_FAILS=True)
-        self.assertIn("the local snapshot was written but the S3 copy is missing", s3_run.stdout)
+        self.assert_untouched(self.run_remote("repair", FAKE_S3_FAILS=True), "the S3 copy is missing")
 
-    def test_a_kill_mode_other_than_process_is_refused_before_any_change(self):
-        original_text = self.unit_path.read_text()
-        mode_run = self.run_remote("repair", FAKE_KILL_MODE="control-group")
-        self.assertEqual(mode_run.returncode, 1)
-        self.assertIn("FAILED step check: k3s runs with KillMode=control-group, not KillMode=process", mode_run.stdout)
-        self.assertEqual((self.unit_path.read_text(), self.backups()), (original_text, []))
+    def test_a_kill_mode_other_than_process_changes_nothing(self):
+        self.assert_untouched(self.run_remote("repair", FAKE_KILL_MODE="control-group"),
+                              "k3s runs with KillMode=control-group, not KillMode=process")
         self.assertNotIn("k3s etcd-snapshot save", self.calls())
 
-    def test_a_failed_save_stops_at_step_one(self):
-        save_run = self.run_remote("repair", FAKE_SAVE_FAILS=True)
-        self.assertIn("FAILED step 1: k3s etcd-snapshot save failed", save_run.stdout)
-        self.assertEqual(self.backups(), [])
+    def test_k3s_never_active_after_the_restart_rolls_back(self):
+        self.assert_rolled_back(self.run_remote("repair", FAKE_RESTART1="never-active"),
+                                "ROLLED BACK, k3s serving: k3s not active within 2s", 4)
 
-    def test_a_cluster_that_never_gets_ready_is_restored_and_restarted(self):
-        original_text = self.unit_path.read_text()
-        never_run = self.run_remote("repair", FAKE_NEVER_READY=True)
-        self.assertEqual(never_run.returncode, 1)
-        self.assertIn("FAILED step 5: the API server or a node was not ready within 2s; restored", never_run.stdout)
-        self.assertEqual(self.unit_path.read_text(), original_text)
-        self.assertEqual(self.calls().count("systemctl restart k3s"), 2)
-        self.assertEqual(self.calls().count("systemctl daemon-reload"), 2)
+    def test_a_refused_restart_rolls_back(self):
+        refused_run = self.run_remote("repair", FAKE_RESTART_REFUSED=True)
+        self.assertEqual(refused_run.returncode, 5, refused_run.stdout)
+        self.assertEqual(self.unit_path.read_text(), self.original_text)
 
-    def test_the_dry_run_only_reads(self):
-        original_text = self.unit_path.read_text()
+    def test_a_failed_unit_rolls_back_before_the_bound(self):
+        started = time.monotonic()
+        failed_run = self.run_remote("repair", restart_bound="30", FAKE_RESTART1="failed")
+        self.assertLess(time.monotonic() - started, 15)
+        self.assert_rolled_back(failed_run, "ROLLED BACK, k3s serving: systemd reports k3s failed", 4)
+
+    def test_a_restart_loop_rolls_back_before_the_bound(self):
+        started = time.monotonic()
+        loop_run = self.run_remote("repair", restart_bound="30", FAKE_RESTART1="loop")
+        self.assertLess(time.monotonic() - started, 15)
+        self.assert_rolled_back(loop_run, "ROLLED BACK, k3s serving: k3s exited and systemd restarted it", 4)
+
+    def test_an_api_never_ready_rolls_back(self):
+        self.assert_rolled_back(self.run_remote("repair", FAKE_RESTART1="never-ready"),
+                                "ROLLED BACK, k3s serving: API /readyz not ok within 2s", 4)
+
+    def test_a_rollback_that_never_gets_ready_ends_not_serving_and_stops(self):
+        not_serving_run = self.run_remote("repair", FAKE_RESTART1="never-ready", FAKE_RESTART2="never-ready")
+        self.assert_rolled_back(not_serving_run, "ROLLED BACK, k3s NOT serving: API /readyz not ok within 2s; "
+                                                 "after the rollback API /readyz not ok within 2s; run journalctl -u k3s", 5)
+
+    def test_a_stale_lease_does_not_pass_as_ready(self):
+        stale_run = self.run_remote("repair", FAKE_RESTART1="stale", FAKE_STALE_NODE="node-b")
+        self.assert_rolled_back(stale_run, "ROLLED BACK, k3s serving: a node that was Ready before the run did not "
+                                           "report Ready with a new lease within 2s", 4)
+
+    def test_a_cordoned_node_counts_as_ready(self):
+        self.set_nodes(NODE_ROWS[0], "node-b   Ready,SchedulingDisabled    <none>   1d   v1.36.3+k3s1")
+        cordoned_run = self.run_remote("repair")
+        self.assertEqual(self.final_line(cordoned_run), "REPAIRED", cordoned_run.stdout)
+        self.assertIn("nodes Ready before the run: 2 of 2", cordoned_run.stdout)
+
+    def test_a_node_not_ready_before_the_run_is_reported_and_does_not_block(self):
+        self.set_nodes(*NODE_ROWS, "node-c   NotReady    <none>   1d   v1.36.3+k3s1")
+        not_ready_run = self.run_remote("repair")
+        self.assertEqual(self.final_line(not_ready_run), "REPAIRED", not_ready_run.stdout)
+        self.assertIn("nodes Ready before the run: 2 of 3", not_ready_run.stdout)
+        self.assertIn("nodes not Ready before the run: 1; the run does not check them afterwards", not_ready_run.stdout)
+
+    def test_a_terminated_run_rolls_back_through_the_exit_trap(self):
+        term_run = self.run_remote("repair", FAKE_TERM_ONCE=True)
+        self.assert_rolled_back(term_run, "ROLLED BACK, k3s serving: the run stopped before it finished", 4)
+
+    def test_the_dry_run_only_reads_and_reports_lock_nodes_and_kill_mode(self):
         dry_run = self.run_remote("dry-run")
-        self.assertEqual(dry_run.returncode, 0, dry_run.stdout)
-        self.assertIn("unit line ", dry_run.stdout)
-        self.assertIn("as found: '0 \\*/6 \\* \\* \\*' \\", dry_run.stdout)
-        self.assertIn("k3s: active", dry_run.stdout)
-        self.assertIn("unit KillMode line: KillMode=process\neffective KillMode=process", dry_run.stdout)
-        self.assertIn("snapshots: local 0, s3 0", dry_run.stdout)
-        self.assertIn("would: k3s etcd-snapshot save;", dry_run.stdout)
-        self.assertEqual((self.unit_path.read_text(), self.backups()), (original_text, []))
-        self.assertEqual(self.calls(), ["systemctl show -p KillMode k3s", "systemctl is-active k3s",
-                                        "k3s kubectl get etcdsnapshotfiles.k3s.cattle.io -o name",
-                                        "k3s kubectl get etcdsnapshotfiles.k3s.cattle.io "
-                                        "-l etcd.k3s.cattle.io/snapshot-storage-node=s3 -o name"])
+        self.assertEqual((dry_run.returncode, self.final_line(dry_run)), (0, "NOTHING CHANGED: dry run"))
+        for expected_text in (f"lock {self.lock_dir}: free", "as found: '0 \\*/6 \\* \\* \\*' \\",
+                              "unit KillMode line: KillMode=process\neffective KillMode=process",
+                              "nodes Ready before the run: 2 of 2",
+                              "node leases of the Ready nodes: renewed within 60s", "k3s: active",
+                              "snapshots: local 0, s3 0"):
+            self.assertIn(expected_text, dry_run.stdout)
+        self.assertEqual((self.unit_path.read_text(), self.backups(), self.lock_dir.exists()),
+                         (self.original_text, [], False))
+        self.assertEqual(self.calls(), [
+            "systemctl show -p KillMode k3s", "k3s kubectl get nodes --no-headers --request-timeout=5s",
+            "k3s kubectl get nodes --no-headers --request-timeout=5s",
+            "k3s kubectl -n kube-node-lease get leases --request-timeout=5s -o "
+            "jsonpath={range .items[*]}{.metadata.name}{\" \"}{.spec.renewTime}{\"\\n\"}{end}",
+            "systemctl is-active k3s", "k3s kubectl get etcdsnapshotfiles.k3s.cattle.io -o name",
+            f"k3s kubectl get etcdsnapshotfiles.k3s.cattle.io {S3_SELECTOR} -o name"])
 
-    def test_the_dry_run_counts_local_and_s3_apart(self):
-        (self.work_dir / "snapshots").write_text("local\nlocal\ns3\n")
-        self.assertIn("snapshots: local 2, s3 1", self.run_remote("dry-run").stdout)
+    def test_no_ready_node_before_the_run_changes_nothing(self):
+        self.set_nodes("node-a   NotReady    control-plane,etcd   1d   v1.36.3+k3s1")
+        self.assert_untouched(self.run_remote("repair"), "no node is Ready before the run")
+
+    def test_the_dry_run_reports_a_held_lock(self):
+        self.lock_dir.mkdir()
+        self.assertIn(f"lock {self.lock_dir}: held since ", self.run_remote("dry-run").stdout)
+        self.assertTrue(self.lock_dir.is_dir())
 
     def test_the_remote_script_is_posix_sh(self):
         for mode_name in ("dry-run", "repair"):
@@ -221,30 +319,70 @@ class RemoteScriptTest(RepairCase):
             self.assertEqual(lint_run.returncode, 0, lint_run.stdout)
 
 
+class MutantTest(RepairCase):
+    def mutant(self, original_text, mutated_text):
+        script_text = self.remote_text("repair")
+        self.assertEqual(script_text.count(original_text), 1)
+        return script_text.replace(original_text, mutated_text)
+
+    def test_without_the_exit_trap_a_terminated_run_leaves_the_edited_unit(self):
+        term_run = self.run_remote("repair", self.mutant("trap on_exit EXIT\n", ""), FAKE_TERM_ONCE=True)
+        self.assertNotEqual(self.unit_path.read_text(), self.original_text, term_run.stdout)
+
+    def test_without_the_rollback_in_the_trap_a_terminated_run_leaves_the_edited_unit(self):
+        term_run = self.run_remote("repair", self.mutant('    roll_back "the run stopped before it finished"\n',
+                                                         "    :\n"), FAKE_TERM_ONCE=True)
+        self.assertNotEqual(self.unit_path.read_text(), self.original_text, term_run.stdout)
+
+    def test_without_the_lease_time_check_a_stale_node_passes(self):
+        stale_run = self.run_remote("repair", self.mutant('[ "$renew_epoch" -gt "$1" ]', '[ "$renew_epoch" -gt 0 ]'),
+                                    FAKE_RESTART1="stale", FAKE_STALE_NODE="node-b")
+        self.assertEqual(self.final_line(stale_run), "REPAIRED")
+
+
 class LocalScriptTest(RepairCase):
     def run_local(self, *script_args, **extra_env):
         return subprocess.run([str(SCRIPT), *script_args], capture_output=True, text=True,
                               env={**self.base_env, "CP_INSTANCE_ID": "i-0test", **extra_env})
 
-    def sent_script(self):
-        return "\n".join(json.loads((self.work_dir / "parameters").read_text())["commands"])
+    def sent_parameters(self):
+        return json.loads((self.work_dir / "parameters").read_text())
 
     def test_the_site_picks_the_region_and_the_mode_reaches_the_cp(self):
-        local_run = self.run_local("--site", "seoul", "--dry-run")
+        local_run = self.run_local("--site", "seoul", "--dry-run", FAKE_REMOTE_OUT="NOTHING CHANGED: dry run")
         self.assertEqual(local_run.returncode, 0, local_run.stderr)
         aws_calls = (self.work_dir / "aws-calls").read_text()
         self.assertIn("ssm send-command --region ap-northeast-2 --instance-ids i-0test", aws_calls)
-        self.assertIn("MODE=dry-run\nUNIT='/etc/systemd/system/k3s.service'\nCRON='0 */6 * * *'", self.sent_script())
-        self.assertIn("remote out", local_run.stdout)
+        self.assertIn("MODE=dry-run\nUNIT='/etc/systemd/system/k3s.service'\nCRON='0 */6 * * *'",
+                      "\n".join(self.sent_parameters()["commands"]))
         self.run_local("--site", "oregon")
         self.assertIn("ssm send-command --region us-west-2", (self.work_dir / "aws-calls").read_text())
-        self.assertIn("MODE=repair", self.sent_script())
+        self.assertIn("MODE=repair", "\n".join(self.sent_parameters()["commands"]))
 
-    def test_a_failed_remote_command_fails_the_run(self):
-        failed_run = self.run_local("--site", "oregon", FAKE_STATUS="Failed")
-        self.assertEqual(failed_run.returncode, 1)
-        self.assertIn("remote out", failed_run.stdout)
-        self.assertIn("FAILED", failed_run.stderr)
+    def test_the_ssm_timeout_covers_the_remote_bounds_and_the_local_wait_covers_the_ssm_timeout(self):
+        self.run_local("--site", "oregon")
+        sent_lines = self.sent_parameters()["commands"]
+        bounds = {one_line.split("=")[0]: int(one_line.split("=")[1]) for one_line in sent_lines
+                  if one_line.split("=")[0] in ("SAVE_BOUND", "RESTART_BOUND", "ROLLBACK_BOUND")}
+        ssm_timeout = int(self.sent_parameters()["executionTimeout"][0])
+        local_wait = int(subprocess.run(["bash", "-c", f'source "{SCRIPT}"; echo "$LOCAL_WAIT_SECONDS"'],
+                                        capture_output=True, text=True, check=True).stdout)
+        self.assertLess(2 * bounds["SAVE_BOUND"] + bounds["RESTART_BOUND"] + bounds["ROLLBACK_BOUND"], ssm_timeout)
+        self.assertLess(ssm_timeout, local_wait)
+
+    def test_the_exit_code_follows_the_final_line(self):
+        for remote_out, exit_code in (("x\nREPAIRED", 0), ("ALREADY REPAIRED", 0), ("NOTHING CHANGED: dry run", 0),
+                                      ("NOTHING CHANGED: lock", 3), ("ROLLED BACK, k3s serving: y", 4),
+                                      ("ROLLED BACK, k3s NOT serving: y; run z", 5), ("half a run", 7)):
+            local_run = self.run_local("--site", "oregon", FAKE_REMOTE_OUT=remote_out)
+            self.assertEqual(local_run.returncode, exit_code, remote_out)
+
+    def test_a_remote_run_longer_than_the_local_wait_says_not_to_rerun(self):
+        wait_run = subprocess.run(["bash", "-c", f'source "{SCRIPT}"; LOCAL_WAIT_SECONDS=1; POLL_SECONDS=1; '
+                                                 'run_on_cp us-west-2 i-0test "echo hi"'],
+                                  capture_output=True, text=True, env={**self.base_env, "FAKE_STATUS": "InProgress"})
+        self.assertEqual(wait_run.returncode, 6)
+        self.assertIn("may still be going; do not rerun until command cmd-1 has ended", wait_run.stderr)
 
     def test_a_bad_site_or_option_prints_the_usage(self):
         for bad_args in ((), ("--site", "tokyo"), ("--site",), ("--force",)):
