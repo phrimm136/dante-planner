@@ -145,9 +145,10 @@ intervening round trip destroys the GTID — including `Connection.isReadOnly()`
 `@@session.transaction_read_only` unless `useLocalSessionState` is on. This is why `readOwnGtid`
 runs before the read-only check rather than after it.
 
-If any of the three is wrong, every commit takes the fallback below: correct, because the primary's
+If either switch is off, every commit takes the fallback below: correct, because the primary's
 executed set is a superset. It degrades silently — the `gtid.capture{source=tracker|fallback}` counter is what makes
-it visible.
+it visible. The capture's place is not covered by that fallback: with both switches on, a capture
+that a round trip preceded reads as a commit that wrote nothing, and raises no marker.
 
 ### 4b. The fallback, and what it costs
 
@@ -158,9 +159,9 @@ marker stores only the highest number per server uuid and reads it back as `uuid
 superset costs the numbers other clients have committed by then, plus the uuids of earlier
 primaries.
 
-"The transaction wrote nothing" and "the tracker is off or was clobbered" both present as a
+"The transaction wrote nothing" and "the tracker is off" both present as a
 tracker that names no GTID. The capture tells them apart with one `SELECT @@session_track_gtids`
-probe per physical connection, run strictly AFTER the tracker read (the probe's own OK packet
+probe per physical connection and the driver's own `trackSessionState`, run strictly AFTER the tracker read (the probe's own OK packet
 would wipe the state it judges): tracker verified active means the commit wrote nothing and no marker is raised — a write-shaped request that commits an empty transaction must not slow a follow-up read — while a tracker that is
 genuinely off takes the superset, since a missing marker costs correctness. `gtid.capture{source=fallback}` is the metric
 that says which world you are in; a ratio near 1 means the precise path is not working.
