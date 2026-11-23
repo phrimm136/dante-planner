@@ -6,6 +6,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from shells import FIRST_SHELL, with_second_shell
+
 SCRIPT = Path(__file__).resolve().parents[1] / "fleet-verify.sh"
 FIXTURE_DIR = Path(__file__).resolve().parent / "fixtures"
 INTERVAL_SECONDS = 21600
@@ -15,16 +17,16 @@ METRIC_PATH = "/api/v1/namespaces/danteplanner/services/kube-state-metrics:8080/
 FAKE_K3S = """#!/bin/sh
 case "$*" in
   *"-l etcd.k3s.cattle.io/snapshot-storage-node=s3 -o name")
-    [ -n "${FAKE_SNAPSHOT_ERROR:-}" ] && { echo "$FAKE_SNAPSHOT_ERROR" >&2; exit 1; }
+    [ -n "${FAKE_SNAPSHOT_ERROR:-}" ] && { printf '%s\n' "$FAKE_SNAPSHOT_ERROR" >&2; exit 1; }
     s3_left=$(cat "$FAKE_DIR/s3-count")
-    while [ "$s3_left" -gt 0 ]; do echo "etcdsnapshotfile.k3s.cattle.io/s3-snap-$s3_left"; s3_left=$((s3_left - 1)); done
+    while [ "$s3_left" -gt 0 ]; do printf '%s\n' "etcdsnapshotfile.k3s.cattle.io/s3-snap-$s3_left"; s3_left=$((s3_left - 1)); done
     exit 0 ;;
   "kubectl get etcdsnapshotfiles.k3s.cattle.io "*)
-    [ -n "${FAKE_SNAPSHOT_ERROR:-}" ] && { echo "$FAKE_SNAPSHOT_ERROR" >&2; exit 1; }
+    [ -n "${FAKE_SNAPSHOT_ERROR:-}" ] && { printf '%s\n' "$FAKE_SNAPSHOT_ERROR" >&2; exit 1; }
     [ -f "$FAKE_DIR/snapshot-times" ] && while IFS= read -r one_time; do printf 'row %s\\n' "$one_time"; done < "$FAKE_DIR/snapshot-times"
     exit 0 ;;
   "kubectl get --raw """ + METRIC_PATH + """")
-    [ -n "${FAKE_METRIC_ERROR:-}" ] && { echo "$FAKE_METRIC_ERROR" >&2; exit 1; }
+    [ -n "${FAKE_METRIC_ERROR:-}" ] && { printf '%s\n' "$FAKE_METRIC_ERROR" >&2; exit 1; }
     cat "$FAKE_DIR/metrics"
     exit 0 ;;
 esac
@@ -51,12 +53,14 @@ def run_bash(script_text, *script_args, extra_env=None):
 
 
 class FleetVerifyTest(unittest.TestCase):
+    shell_path = FIRST_SHELL
+
     def setUp(self):
         self.work_handle = tempfile.TemporaryDirectory()
         self.work_dir = Path(self.work_handle.name)
         fake_bin = self.work_dir / "bin"
         fake_bin.mkdir()
-        (fake_bin / "k3s").write_text(FAKE_K3S)
+        (fake_bin / "k3s").write_text(FAKE_K3S.replace("#!/bin/sh\n", f"#!{self.shell_path}\n", 1))
         (fake_bin / "k3s").chmod(0o755)
         self.base_env = {"PATH": f"{fake_bin}:{os.environ['PATH']}", "FAKE_DIR": str(self.work_dir)}
 
@@ -70,7 +74,7 @@ class FleetVerifyTest(unittest.TestCase):
         (self.work_dir / "s3-count").write_text(str(len(times) if s3_count is None else s3_count))
         (self.work_dir / "metrics").write_text(metric_text(series_count))
         remote_text = run_bash("remote_checks").stdout
-        remote_run = subprocess.run(["sh", "-c", remote_text], capture_output=True, text=True,
+        remote_run = subprocess.run([self.shell_path, "-c", remote_text], capture_output=True, text=True,
                                     env={**os.environ, **self.base_env, **(extra_env or {})})
         return remote_run.stdout
 
@@ -165,11 +169,11 @@ class FleetVerifyTest(unittest.TestCase):
 
 FAKE_AWS = """#!/bin/sh
 case "$1 $2" in
-  "ssm send-command") echo cmd-1 ;;
+  "ssm send-command") printf '%s\n' cmd-1 ;;
   "ssm get-command-invocation")
     case "$*" in
-      *"--query Status"*) echo "$FAKE_STATUS" ;;
-      *) echo "=== NODES ===" ;;
+      *"--query Status"*) printf '%s\n' "$FAKE_STATUS" ;;
+      *) printf '%s\n' "=== NODES ===" ;;
     esac ;;
 esac
 """
@@ -206,6 +210,9 @@ class CommandStatusTest(unittest.TestCase):
         main_run = self.run_main("Success")
         self.assertEqual(main_run.returncode, 1)
         self.assertIn("NODES: none reported", ANSI_PATTERN.sub("", main_run.stdout))
+
+
+with_second_shell(FleetVerifyTest, globals())
 
 
 if __name__ == "__main__":
