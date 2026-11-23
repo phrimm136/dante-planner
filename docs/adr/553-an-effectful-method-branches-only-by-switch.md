@@ -8,7 +8,7 @@ epic: none · pr: none
   REJECTED: a source rule alone (ast-grep over `if`) — source cannot tell an effectful method from a pure one.
   REJECTED: banning loops in shells — a loop that applies an effect to each item decides nothing; the conditions inside it are counted.
   INVARIANT: no effectful method gains a branch — a committed, sorted list holds each such method with its branch count; a method above its line, or with no line, fails, and a line above its method, or of a method that is gone, fails until it is rewritten (`ShellBranchTest`).
-  INVARIANT: the regenerating command refuses to add or raise a line without a stated reason, and prints every line it raised (`ShellBranchTest`, the refusal case). The reason is not stored, and a line raised by hand passes: the diff of the list is where a raise is reviewed.
+  INVARIANT: the regenerating command refuses to add or raise a line without a stated reason (`ShellBranchTest`, the refusal case), and an accepted run prints every line it raised (`ShellBranchTest`, the case given a reason). The reason is not stored, and a line raised by hand passes: the diff of the list is where a raise is reviewed.
   NON-GOAL: fixing the frozen methods — each shrinks in the unit that touches it.
   NON-GOAL: code with no source (Lombok), field and static initializers, and a `switch` whose labels are named constants — uncounted; the effect walk attributes an anonymous class to its enclosing method.
 

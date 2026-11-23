@@ -92,6 +92,7 @@ class ConventionBaselineTest {
                     .as("no @EnableAsync and no ThreadPoolTaskExecutor outside the outbox dispatch");
 
     @ArchTest
+    @AllowlistLiveness
     static void frozenAsyncMethods_WhenScanned_AreStillAnnotated(JavaClasses classes) {
         Set<String> stale = new TreeSet<>(ASYNC_METHODS_FROZEN);
         classes.stream()
@@ -106,6 +107,7 @@ class ConventionBaselineTest {
     }
 
     @ArchTest
+    @AllowlistLiveness
     static void frozenAsyncConfigs_WhenScanned_AreStillLive(JavaClasses classes) {
         Set<String> stale = new TreeSet<>(ASYNC_ENABLEMENT_FROZEN);
         classes.stream()
@@ -244,6 +246,7 @@ class ConventionBaselineTest {
                     .as("controllers exchange DTOs, never mapped entities");
 
     @ArchTest
+    @AllowlistLiveness
     static void frozenEntityControllers_WhenScanned_AreStillLive(JavaClasses classes) {
         Set<String> stale = new TreeSet<>(ENTITY_TOUCHING_CONTROLLERS);
         classes.stream()

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 
+import org.danteplanner.backend.architecture.AllowlistLiveness;
 import org.danteplanner.backend.architecture.ImportedClasses;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,10 +66,9 @@ class PlainRatchetFixtureRuleTest {
     }
 
     @Test
-    void ruleCheckingAnEntry_WhenRunOverProduction_Passes() {
+    void strikingRule_WhenRunOverProduction_Passes() {
         Set<String> offenders = new TreeSet<>(namesIn(PRODUCTION, "Planner"));
-        offenders.remove("NoTypeHasThisName");
-        offenders.removeIf(EXEMPT::contains);
+        EXEMPT.forEach(offenders::remove);
 
         assertThat(offenders).isEmpty();
     }
@@ -79,6 +79,13 @@ class PlainRatchetFixtureRuleTest {
     }
 
     @Test
+    @AllowlistLiveness
+    void markedRule_WhenItReadsNoAllowlist_IsCounted() {
+        assertThat(namesIn(PRODUCTION, "NoTypeHasThisName")).isEmpty();
+    }
+
+    @Test
+    @AllowlistLiveness
     void exemptEntry_WhenStruckOffACopy_IsStillLive() {
         Set<String> stale = new HashSet<>(EXEMPT);
         PRODUCTION.stream().forEach(type -> stale.remove(type.getSimpleName()));
@@ -87,6 +94,7 @@ class PlainRatchetFixtureRuleTest {
     }
 
     @Test
+    @AllowlistLiveness
     void exemptEntry_WhenExpectedInTheScan_IsStillLive() {
         assertThat(namesIn(PRODUCTION, "Planner")).containsAll(EXEMPT);
     }

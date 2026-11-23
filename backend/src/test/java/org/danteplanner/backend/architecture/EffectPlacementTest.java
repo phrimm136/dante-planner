@@ -111,6 +111,7 @@ class EffectPlacementTest {
     }
 
     @Test
+    @AllowlistLiveness
     void guardAllowlist_WhenScanned_NamesOnlyLiveInlineCalls() {
         Set<String> stale = new TreeSet<>(GUARDS_ALLOWED_INLINE);
 

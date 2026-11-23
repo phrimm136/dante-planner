@@ -64,6 +64,7 @@ class SanitizationCoverageTest {
     }
 
     @Test
+    @AllowlistLiveness
     void pendingException_WhenAlreadyResolved_IsRejected() {
         assertThat(undeclaredComponents())
                 .as("a name here that is now annotated, renamed, or deleted makes the exception set "

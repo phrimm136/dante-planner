@@ -1463,6 +1463,10 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   Worth doing before the next cookie change, or when anyone besides the owner can write the
   runtime-config secret.
   re-check: `rg -qF 'cookie.secure=${COOKIE_SECURE:true}' backend/src/main/resources/application.properties`
+- The build promotes four Error Prone checks to errors and has no baseline for the warnings of the
+  rest, so a compiler bump adds warnings silently. Worth doing with a per-check warning ratchet when
+  an Error Prone bump adds a check whose warnings would be bugs here.
+  re-check: `rg -qF 'error("StringCaseLocaleUsage", "DefaultCharset", "JavaTimeDefaultTimeZone", "ReferenceEquality")' backend/build.gradle.kts`
 - `com.redis:testcontainers-redis` is pinned to 3.0.1 (`build.gradle.kts:67`) because Boot 4.1.2
   (and 4.2.0-RC2) manage 2.2.4, whose POM imports the Boot 3.4.2 BOM and with it a vulnerable
   Artemis BOM. Worth removing when spring-boot-dependencies manages
@@ -1543,10 +1547,11 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   re-check: `.claude/skills/debt-ledger/bin/debt python 'import re,sys; t=open("backend/src/main/java/org/danteplanner/backend/comment/service/CommentCommandService.java").read(); m=re.search(r"updateComment\(.*?\n    }\n", t, re.S); sys.exit(0 if m and "plannerAccess" not in m.group(0) else 1)'`
 - A marker raise that outlives its caller's bound leaves a window in which the write is answered
   and no marker says so. A pending marker written before the commit and replaced by the GTID after
-  it would close that window; it was rejected for writes that never answered, and this window is a
-  listed non-goal there, so both lines have to be overturned with a measured rate. Worth doing when
+  it would close that window. ADR 183 rejects it ("a pending entry before commit", for writes that never
+  answered) and lists this window as a non-goal ("a writer's own reads after a failed or abandoned
+  raise"), so both lines have to be overturned with a measured rate. Worth doing when
   `freshness.marker.raise.abandoned` shows abandoned raises in production.
-  re-check: `rg -qF 'raise.abandoned' backend/src/main/java/org/danteplanner/backend/shared/freshness && rg -qF 'a pending entry before commit' docs/adr`
+  re-check: `rg -qF 'raise.abandoned' backend/src/main/java/org/danteplanner/backend/shared/freshness && rg -qF 'a pending entry before commit' docs/adr/183-every-read-reflects-every-answered-write.md`
 - The local two-region rig shares the developer's database volume: `local-multiregion-up.sh` fixes
   the compose project to `limbusplanner`, and `docker-compose.local.yml` mounts `mysql-data`, so
   bringing the rig up migrates the local dev database and the e2e suites leave their users and
@@ -1571,11 +1576,6 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   one request-context type with a single owner of open and close, and routing pins that restore
   the previous pin instead of clearing it.
   re-check: `rg -q 'ThreadLocal<' backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidWriteCapture.java`
-- `ChosenReadSource.record` runs on every read-source acquisition (`ReadSourceSelector`), but only `FreshnessStampFilter` and the dispatch window in `MarkerDispatchStamp` clear it. On a pooled
-  scheduler thread such as `PlannerDriftReconciler`'s, the value stays for the next run. Whether a
-  stale value changes a decision there is not checked. Worth doing with the request-context entry
-  above, or when a scheduled job starts to read `servedByAuthority`.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/planner/service/PlannerDriftReconciler.java 'ChosenReadSource|MarkerDispatchStamp'`
 - `RateLimitPolicy` constants pass five positional arguments, and the meaning hides in values:
   `null` endpoint means the caller names the endpoint, `false` means fail open. `subjectPrefix` is
   `""` in all ten constants, so it does nothing. Worth doing when a policy is added or a key
@@ -1667,7 +1667,8 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   `SseService.cacheSettingsIfAbsent` on subscribe and on every event delivery) read the primary, so a
   secondary-region pod pays one cross-region round trip per cache miss. A read-only (replica) read
   would cache pre-save preferences for the five-minute TTL whenever an event arrives within replica
-  lag of a settings save, because the delivery path has no GTID cookie. Worth doing if these reads
+  lag of a settings save, because the delivery path reads outside a declared freshness scope and so
+  waits for no marker. Worth doing if these reads
   show up as cross-region latency: let `SETTINGS_INVALIDATED` carry the saved values with an
   ordering key, so pods put rather than refill.
   re-check: `rg -q 'preferenceProvider::preferencesOf' backend/src/main/java/org/danteplanner/backend/shared/sse/SseService.java`

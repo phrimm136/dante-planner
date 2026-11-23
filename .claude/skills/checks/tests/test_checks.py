@@ -187,6 +187,14 @@ def test_freezing_the_branches_passes_its_reason_to_gradle():
         plan_for("be", "freeze-branches", "--force")
 
 
+def test_a_freeze_shows_the_raised_lines_and_their_reason():
+    log_text = "\n".join(["> Task :freezeShellBranches", "raised, because the port moved:",
+                          "a.B.run(a.Port) 0 -> 1", "a.C.<init>() 1 -> 12", "", "BUILD SUCCESSFUL in 9s"])
+    assert checks_cli.raised_branch_lines(log_text) == [
+        "raised, because the port moved:", "a.B.run(a.Port) 0 -> 1", "a.C.<init>() 1 -> 12"]
+    assert checks_cli.raised_branch_lines("> Task :freezeShellBranches\nBUILD SUCCESSFUL in 9s") == []
+
+
 def test_tools_test_runs_the_shared_tooling_script_from_the_root():
     run_plan = plan_for("tools", "test")
     assert run_plan.command_argv == ("bash", "/repo/wt/.github/scripts/tooling-tests.sh")

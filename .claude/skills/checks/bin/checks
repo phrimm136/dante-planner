@@ -2,6 +2,7 @@
 import dataclasses
 import datetime
 import fcntl
+import itertools
 import json
 import os
 import re
@@ -713,6 +714,7 @@ def summary_line(log_text):
 
 
 GRADLE_FAILED_TASK = re.compile(r"Execution failed for task ':([^']+)'")
+RAISED_BRANCH = re.compile(r" \d+ -> \d+$")
 
 
 def gradle_failure_lines(log_text):
@@ -730,6 +732,15 @@ def gradle_failure_lines(log_text):
             cause_text = cause_line.lstrip()[2:]
         failure_lines.append(f"  failed {task_match.group(1)}: {cause_text}")
     return failure_lines
+
+
+def raised_branch_lines(log_text):
+    """The block `be freeze-branches` writes for the lines it raised: its reason, then one line per method."""
+    text_lines = log_text.splitlines()
+    for line_index, text_line in enumerate(text_lines):
+        if text_line.startswith("raised, because "):
+            return [text_line, *itertools.takewhile(RAISED_BRANCH.search, text_lines[line_index + 1:])]
+    return []
 
 
 @dataclasses.dataclass(frozen=True)
@@ -882,8 +893,9 @@ def run_single(repo_paths, run_plan, name_parts, print_only):
         log_path = log_path_for(repo_paths.log_dir, name_parts, datetime.datetime.now())
         exit_code, verdict_text, summary_text = execute_plan(run_plan, log_path)
     print(f"{verdict_text} {log_path}  {summary_text}")
-    for failure_line in gradle_failure_lines(log_path.read_text(encoding="utf-8", errors="replace")):
-        print(failure_line)
+    log_text = log_path.read_text(encoding="utf-8", errors="replace")
+    for result_line in gradle_failure_lines(log_text) + raised_branch_lines(log_text):
+        print(result_line)
     return exit_code
 
 

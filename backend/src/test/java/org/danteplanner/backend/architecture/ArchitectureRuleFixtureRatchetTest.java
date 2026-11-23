@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
@@ -20,13 +19,10 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.assertj.core.api.ListAssert;
 import org.junit.jupiter.api.Test;
 
 import com.tngtech.archunit.core.domain.AccessTarget.MethodCallTarget;
-import com.tngtech.archunit.core.domain.JavaAccess;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.domain.JavaCodeUnit;
@@ -162,10 +158,11 @@ class ArchitectureRuleFixtureRatchetTest {
                 "PlainRatchetFixtureRuleTest.fixturedRule_WhenRunOverProduction_Passes",
                 "PlainRatchetFixtureRuleTest.heldRule_WhenRunOverProduction_Passes",
                 "PlainRatchetFixtureRuleTest.listedRule_WhenRunOverProduction_Passes",
+                "PlainRatchetFixtureRuleTest.markedRule_WhenItReadsNoAllowlist_IsCounted",
                 "PlainRatchetFixtureRuleTest.passingOnlyRule_WhenRunOverProduction_Passes",
-                "PlainRatchetFixtureRuleTest.ruleCheckingAnEntry_WhenRunOverProduction_Passes",
                 "PlainRatchetFixtureRuleTest.ruleCoveredByTheList_WhenRunOverProduction_Passes",
                 "PlainRatchetFixtureRuleTest.sharedHelperRule_WhenRunOverProduction_Passes",
+                "PlainRatchetFixtureRuleTest.strikingRule_WhenRunOverProduction_Passes",
                 "PlainRatchetFixtureRuleTest.unfixturedRule_WhenRunOverProduction_Passes");
         assertThat(plain.credited()).containsExactly(
                 "PlainRatchetFixtureRuleTest.fixturedRule_WhenRunOverProduction_Passes");
@@ -224,9 +221,7 @@ class ArchitectureRuleFixtureRatchetTest {
     }
 
     private static boolean isLivenessCheck(JavaMethod test) {
-        return readsAnAllowlistOfAnotherRule(test)
-                && !calls(test, Set.class, "contains")
-                && (strikesEntriesOffACopy(test) || expectsEveryEntryInAList(test));
+        return test.isAnnotatedWith(AllowlistLiveness.class) && readsAnAllowlistOfAnotherRule(test);
     }
 
     private static boolean readsAnAllowlistOfAnotherRule(JavaMethod test) {
@@ -237,29 +232,6 @@ class ArchitectureRuleFixtureRatchetTest {
                 .anyMatch(field -> field.getAccessesToSelf().stream()
                         .anyMatch(access -> access.getAccessType() == AccessType.GET
                                 && !access.getOrigin().equals(test)));
-    }
-
-    private static boolean strikesEntriesOffACopy(JavaMethod test) {
-        Set<JavaCodeUnit> reached = sameClassClosure(test);
-        return reached.stream().anyMatch(unit -> calls(unit, Set.class, "remove"))
-                && reached.stream().flatMap(unit -> unit.getConstructorCallsFromSelf().stream())
-                        .anyMatch(call -> call.getTargetOwner().isAssignableTo(Set.class)
-                                && call.getTarget().getRawParameterTypes().stream()
-                                        .anyMatch(type -> type.isEquivalentTo(Collection.class)));
-    }
-
-    private static boolean expectsEveryEntryInAList(JavaMethod test) {
-        return calls(test, ListAssert.class, "containsAll")
-                && test.getMethodCallsFromSelf().stream()
-                        .filter(call -> call.getName().equals("assertThat"))
-                        .allMatch(call -> call.getTarget().getRawParameterTypes().stream()
-                                .allMatch(type -> type.isEquivalentTo(List.class)));
-    }
-
-    private static boolean calls(JavaCodeUnit unit, Class<?> owner, String method) {
-        return Stream.<JavaAccess<?>>concat(
-                        unit.getMethodCallsFromSelf().stream(), unit.getMethodReferencesFromSelf().stream())
-                .anyMatch(access -> access.getName().equals(method) && access.getTargetOwner().isAssignableTo(owner));
     }
 
     private static Set<JavaCodeUnit> samePackageClosure(JavaMethod test) {
