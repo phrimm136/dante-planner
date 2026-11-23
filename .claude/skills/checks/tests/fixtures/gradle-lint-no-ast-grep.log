@@ -1,0 +1,23 @@
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':astGrepInstalled' (registered in build file 'build.gradle.kts').
+> astGrepInstalled: /repo/wt/frontend/node_modules/.bin/ast-grep is missing; run `yarn --cwd frontend install` from the repo root.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.9.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 11s
+12 actionable tasks: 8 executed, 4 up-to-date
+
+# checks: exit 1
+FAIL BUILD FAILED in 11s

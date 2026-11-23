@@ -182,7 +182,7 @@ public class ReadSourcesConfig {
     }
 
     private boolean isReadFirst(ReadSourceProperties.Source source) {
-        return readSourceProperties.readSources().get(0) == source;
+        return readSourceProperties.readSources().get(0).equals(source);
     }
 
     private Credentials credentialsOf(ReadSourceProperties.Source source) {
@@ -231,7 +231,7 @@ public class ReadSourcesConfig {
         public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
             List<ReadSourceProperties.Source> sources = boundSources(environment);
             for (ReadSourceProperties.Source source : sources) {
-                if (source.name().isEmpty() || (source.isPrimary() && sources.get(0) == source)) {
+                if (source.name().isEmpty() || (source.isPrimary() && sources.get(0).equals(source))) {
                     continue;
                 }
                 String name = source.name();

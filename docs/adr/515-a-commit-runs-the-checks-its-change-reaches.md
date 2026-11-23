@@ -7,7 +7,7 @@ epic: none · pr: none
   REJECTED: selecting backend tests through the Gradle dependency graph — Gradle has no test-impact selection, and the PR Gate backend job runs every test before a merge.
   INVARIANT: a whole run of `fe test`, `fe gate`, `be test`, `be check`, `be pit` or `e2e run` states its reason — enforced by `whole_run` in the CLI.
   INVARIANT: a session starts no whole run, neither through the CLI nor the planted-bug matrix; the user starts one from their own prompt — enforced by the full-run-guard hook and its scenario test.
-  NON-GOAL: `checks changed` does not run lint, format, the build, the mutation ratchet, the deploy test or e2e. PR Gate runs them.
+  NON-GOAL: `checks changed` does not run format, the build, the mutation ratchet, the deploy test or e2e; a Java change runs `checks be lint`. PR Gate runs them.
 
 ## Takeaway
 - takeaway: when CI already runs every check on the pull request, the local run before a commit is the part of it that the change can break.

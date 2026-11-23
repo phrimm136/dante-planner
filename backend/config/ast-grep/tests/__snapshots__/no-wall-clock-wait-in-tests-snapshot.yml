@@ -60,6 +60,86 @@ snapshots:
     class A {
       @Test
       void m() throws Exception {
+        Thread worker = start();
+        assertThat(catchThrowable(worker::join)).isNull();
+      }
+    }
+  : labels:
+    - source: worker::join
+      style: primary
+      start: 107
+      end: 119
+    - source: Thread
+      style: secondary
+      start: 52
+      end: 58
+    - source: worker
+      style: secondary
+      start: 59
+      end: 65
+    - source: worker
+      style: secondary
+      start: 59
+      end: 65
+    - source: Thread worker = start();
+      style: secondary
+      start: 52
+      end: 76
+    - source: |
+        class A {
+          @Test
+          void m() throws Exception {
+            Thread worker = start();
+            assertThat(catchThrowable(worker::join)).isNull();
+          }
+        }
+      style: secondary
+      start: 0
+      end: 138
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        Thread worker = start();
+        worker.join();
+      }
+    }
+  : labels:
+    - source: worker.join()
+      style: primary
+      start: 81
+      end: 94
+    - source: Thread
+      style: secondary
+      start: 52
+      end: 58
+    - source: worker
+      style: secondary
+      start: 59
+      end: 65
+    - source: worker
+      style: secondary
+      start: 59
+      end: 65
+    - source: Thread worker = start();
+      style: secondary
+      start: 52
+      end: 76
+    - source: |
+        class A {
+          @Test
+          void m() throws Exception {
+            Thread worker = start();
+            worker.join();
+          }
+        }
+      style: secondary
+      start: 0
+      end: 102
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
         Thread.sleep(10);
       }
     }
@@ -256,6 +336,71 @@ snapshots:
     class A {
       @Test
       void m() throws Exception {
+        executor.execute(latch::await);
+      }
+    }
+  : labels:
+    - source: latch::await
+      style: primary
+      start: 69
+      end: 81
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        executor.execute(monitor::wait);
+      }
+    }
+  : labels:
+    - source: monitor::wait
+      style: primary
+      start: 69
+      end: 82
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        for (Thread worker : workers) {
+          worker.join();
+        }
+      }
+    }
+  : labels:
+    - source: worker.join()
+      style: primary
+      start: 90
+      end: 103
+    - source: Thread
+      style: secondary
+      start: 57
+      end: 63
+    - source: worker
+      style: secondary
+      start: 64
+      end: 70
+    - source: |-
+        for (Thread worker : workers) {
+              worker.join();
+            }
+      style: secondary
+      start: 52
+      end: 110
+    - source: |
+        class A {
+          @Test
+          void m() throws Exception {
+            for (Thread worker : workers) {
+              worker.join();
+            }
+          }
+        }
+      style: secondary
+      start: 0
+      end: 117
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
         future.get(1, SECONDS);
       }
     }
@@ -288,6 +433,78 @@ snapshots:
       style: secondary
       start: 52
       end: 68
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        monitor.wait();
+      }
+    }
+  : labels:
+    - source: monitor.wait()
+      style: primary
+      start: 52
+      end: 66
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        monitor.wait(1);
+      }
+    }
+  : labels:
+    - source: monitor.wait(1)
+      style: primary
+      start: 52
+      end: 67
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        pause.accept(LockSupport::parkNanos);
+      }
+    }
+  : labels:
+    - source: LockSupport::parkNanos
+      style: primary
+      start: 65
+      end: 87
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        pause.accept(Thread::sleep);
+      }
+    }
+  : labels:
+    - source: Thread::sleep
+      style: primary
+      start: 65
+      end: 78
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        pause.accept(TimeUnit.SECONDS::sleep);
+      }
+    }
+  : labels:
+    - source: TimeUnit.SECONDS::sleep
+      style: primary
+      start: 65
+      end: 88
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        pause.accept(java.lang.Thread::sleep);
+      }
+    }
+  : labels:
+    - source: java.lang.Thread::sleep
+      style: primary
+      start: 65
+      end: 88
   ? |
     class A {
       @Test
@@ -332,6 +549,30 @@ snapshots:
     class A {
       @Test
       void m() throws Exception {
+        this.wait();
+      }
+    }
+  : labels:
+    - source: this.wait()
+      style: primary
+      start: 52
+      end: 63
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        wait(remainingMillis);
+      }
+    }
+  : labels:
+    - source: wait(remainingMillis)
+      style: primary
+      start: 52
+      end: 73
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
         with().timeout(BOUND).await().until(() -> worker.isDone());
       }
     }
@@ -344,6 +585,54 @@ snapshots:
       style: secondary
       start: 52
       end: 58
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        worker.join(BOUND);
+      }
+    }
+  : labels:
+    - source: worker.join(BOUND)
+      style: primary
+      start: 52
+      end: 70
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        worker.join(JOIN_TIMEOUT_MS);
+      }
+    }
+  : labels:
+    - source: worker.join(JOIN_TIMEOUT_MS)
+      style: primary
+      start: 52
+      end: 80
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        workers.forEach(Thread::join);
+      }
+    }
+  : labels:
+    - source: Thread::join
+      style: primary
+      start: 68
+      end: 80
+  ? |
+    class A {
+      @Test
+      void m() throws Exception {
+        workers.get(0).join(BOUND.toMillis(), 5);
+      }
+    }
+  : labels:
+    - source: workers.get(0).join(BOUND.toMillis(), 5)
+      style: primary
+      start: 52
+      end: 92
   ? |
     class A {
       @Test
@@ -441,6 +730,46 @@ snapshots:
       end: 141
   ? |
     class A {
+      private Thread worker;
+
+      void ended() throws Exception {
+        worker.join();
+      }
+    }
+  : labels:
+    - source: worker.join()
+      style: primary
+      start: 74
+      end: 87
+    - source: Thread
+      style: secondary
+      start: 20
+      end: 26
+    - source: worker
+      style: secondary
+      start: 27
+      end: 33
+    - source: worker
+      style: secondary
+      start: 27
+      end: 33
+    - source: private Thread worker;
+      style: secondary
+      start: 12
+      end: 34
+    - source: |
+        class A {
+          private Thread worker;
+
+          void ended() throws Exception {
+            worker.join();
+          }
+        }
+      style: secondary
+      start: 0
+      end: 95
+  ? |
+    class A {
       void awaitSettled(Future<?> attempt, long timeout, TimeUnit unit) throws Exception {
         attempt.get(timeout, unit);
       }
@@ -458,6 +787,38 @@ snapshots:
       style: secondary
       start: 122
       end: 126
+  ? |
+    class A {
+      void ended(Thread worker) throws Exception {
+        worker.join();
+      }
+    }
+  : labels:
+    - source: worker.join()
+      style: primary
+      start: 61
+      end: 74
+    - source: Thread
+      style: secondary
+      start: 23
+      end: 29
+    - source: worker
+      style: secondary
+      start: 30
+      end: 36
+    - source: Thread worker
+      style: secondary
+      start: 23
+      end: 36
+    - source: |
+        class A {
+          void ended(Thread worker) throws Exception {
+            worker.join();
+          }
+        }
+      style: secondary
+      start: 0
+      end: 82
   ? |
     import static java.lang.Thread.*;
 

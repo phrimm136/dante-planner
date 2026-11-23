@@ -52,7 +52,7 @@ class SseTopicRecorderTest {
     }
 
     @Test
-    void await_WhenAnEnvelopeArrivesFromAnotherThread_ReturnsIt() throws Exception {
+    void await_WhenAnEnvelopeArrivesFromAnotherThread_ReturnsIt() {
         SseTopicRecorder.Envelopes envelopes = new SseTopicRecorder.Envelopes();
         SseEnvelope.Wire arriving = new SseEnvelope.UserEvent(3L, SseEventType.NOTIFY_COMMENT, "c-1", Map.of()).wire();
         Thread publisher = new Thread(() -> envelopes.record(SseChannel.USER, arriving));
@@ -60,7 +60,7 @@ class SseTopicRecorderTest {
 
         assertThat(envelopes.await(() -> envelopes.userEvents(3L, SseEventType.NOTIFY_COMMENT),
                 Duration.ofSeconds(5), "the arriving envelope")).containsExactly(arriving);
-        publisher.join();
+        Hang.ended(publisher, "the publisher ending");
     }
 
     @Test
@@ -70,6 +70,6 @@ class SseTopicRecorderTest {
         assertThatThrownBy(() -> envelopes.await(() -> envelopes.userEvents(4L, SseEventType.NOTIFY_COMMENT),
                 Duration.ofMillis(50), "a NOTIFY_COMMENT envelope for user 4"))
                 .isInstanceOf(AssertionError.class)
-                .hasMessage("waited PT0.05S for a NOTIFY_COMMENT envelope for user 4; none was published");
+                .hasMessage("hang: a NOTIFY_COMMENT envelope for user 4 did not complete within 50ms");
     }
 }

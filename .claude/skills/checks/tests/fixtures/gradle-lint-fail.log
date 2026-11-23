@@ -1,0 +1,125 @@
+> Task :astGrepInstalled
+
+> Task :astGrepRuleTests
+Running 16 tests
+
+----------- Case Details -----------
+PASS no-branch-in-outcome-command  .......
+PASS real-clock-bounds-live-in-one-class  ........
+PASS no-index-loop-in-rules  .............
+PASS no-bare-assert-throws  ....................Pass × 50.....................
+PASS no-logging-in-rules  .....
+PASS no-swallowed-exception-in-tests  ...............
+PASS no-catch-throwable-of-type  ......
+PASS no-try-in-rules  .......
+PASS no-wall-clock-wait-in-tests  ....................Pass × 64.....................
+PASS no-raw-clock-in-tests  ..............
+PASS no-violation-collector-parameter  .........
+PASS no-string-content-path  ..........
+PASS no-json-node-in-rules  .........
+PASS no-mock-call  ...........................
+PASS no-node-kind-if-chain  ..........
+PASS no-throw-per-violation  ..........
+
+test result: ok. 16 passed; 0 failed;
+
+> Task :astGrep
+
+> Task :astGrepTestSources FAILED
+error[no-wall-clock-wait-in-tests]: A test does not wait on the wall clock: inject a Clock, assert the resulting state directly, or derive the bound from the alternative it rules out (backend/src/test/CLAUDE.md, Mechanics).
+  ┌─ src/test/java/org/danteplanner/backend/PlantedTest.java:7:9
+  │
+7 │         Thread.sleep(1);
+  │         ^^^^^^^^^^^^^^^
+
+Error: 1 error(s) found in code.
+Help: Scan succeeded and found error level diagnostics in the codebase.
+
+
+> Task :astGrepStaleIgnores
+astGrepStaleIgnores: all 9 ignores in backend/config/ast-grep/rules/no-wall-clock-wait-in-tests.yml still match
+astGrepStaleIgnores: all 31 ignores in backend/config/ast-grep/rules/no-raw-clock-in-tests.yml still match
+
+> Task :cpdCheck FAILED
+
+> Task :checkstyleServiceJavadoc
+[ant:checkstyle] [ERROR] /repo/wt/backend/src/main/java/org/danteplanner/backend/admin/service/PlantedService.java:3:1: Missing a Javadoc comment for 'PlantedService'. [MissingJavadocType]
+
+> Task :checkstyleValidation
+> Task :checkstyleServiceJavadoc FAILED
+
+> Task :checkstyleTest
+[ant:checkstyle] [ERROR] /repo/wt/backend/src/test/java/org/danteplanner/backend/PlantedTest.java:3:8: Unused import - java.util.List. [UnusedImports]
+
+> Task :checkstyleTest FAILED
+
+[Incubating] Problems report is available at: file:///repo/wt/backend/build/reports/problems/problems-report.html
+
+FAILURE: Build completed with 4 failures.
+
+1: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':astGrepTestSources' (registered in build file 'build.gradle.kts').
+> Process 'command '/repo/wt/frontend/node_modules/.bin/ast-grep'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+==============================================================================
+
+2: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':cpdCheck' (registered by plugin 'de.aaschmid.cpd').
+> A failure occurred while executing de.aaschmid.gradle.plugins.cpd.internal.worker.CpdAction
+   > CPD found duplicate code. See the report at file:///repo/wt/backend/build/reports/cpd/cpdCheck.text
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+==============================================================================
+
+3: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':checkstyleServiceJavadoc' (registered in build file 'build.gradle.kts').
+> A failure occurred while executing org.gradle.api.plugins.quality.internal.CheckstyleInvoker
+   > Checkstyle rule violations were found. See the report at: file:///repo/wt/backend/build/reports/checkstyle/serviceJavadoc.html
+     Checkstyle files with violations: 1
+     Checkstyle violations by severity: [error:1]
+
+
+* Try:
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+==============================================================================
+
+4: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':checkstyleTest' (registered by plugin 'org.gradle.checkstyle').
+> A failure occurred while executing org.gradle.api.plugins.quality.internal.CheckstyleInvoker
+   > Checkstyle rule violations were found. See the report at: file:///repo/wt/backend/build/reports/checkstyle/test.html
+     Checkstyle files with violations: 1
+     Checkstyle violations by severity: [error:1]
+
+
+* Try:
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+==============================================================================
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.9.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 56s
+16 actionable tasks: 16 executed
+
+# checks: exit 1
+FAIL BUILD FAILED in 56s

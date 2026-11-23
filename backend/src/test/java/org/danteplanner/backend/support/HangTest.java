@@ -121,6 +121,43 @@ class HangTest {
     }
 
     @Test
+    void ended_WhenTheThreadAlreadyEnded_Returns() {
+        Thread worker = Thread.ofPlatform().start(() -> { });
+
+        Hang.ended(worker, "the idle thread");
+
+        assertThat(worker.isAlive()).isFalse();
+    }
+
+    @Test
+    void ended_WhenTheThreadNeverEnds_FailsNamingWhatItWaitedFor() {
+        CountDownLatch release = new CountDownLatch(1);
+        Thread worker = Thread.ofPlatform().start(() -> Hang.await(release, "the release"));
+        try {
+            assertThatThrownBy(() -> SHORT.ended(worker, "the stuck thread"))
+                    .isInstanceOf(AssertionError.class)
+                    .hasMessage("hang: the stuck thread did not complete within 50ms");
+        } finally {
+            release.countDown();
+        }
+    }
+
+    @Test
+    void ended_WhenInterrupted_FailsAndRestoresTheInterruptFlag() {
+        CountDownLatch release = new CountDownLatch(1);
+        Thread worker = Thread.ofPlatform().start(() -> Hang.await(release, "the release"));
+        Thread.currentThread().interrupt();
+        try {
+            assertThatThrownBy(() -> SHORT.ended(worker, "the interrupted join"))
+                    .isInstanceOf(AssertionError.class)
+                    .hasMessage("hang: interrupted while waiting for the interrupted join");
+            assertThat(Thread.interrupted()).isTrue();
+        } finally {
+            release.countDown();
+        }
+    }
+
+    @Test
     void until_WhenTheConditionAlreadyHolds_ReturnsAfterOneEvaluation() {
         int[] evaluations = {0};
 

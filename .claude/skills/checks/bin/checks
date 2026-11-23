@@ -23,6 +23,8 @@ GIT_ENV_NAMES = ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_COMMON_DIR")
 PACKAGE_DIRS = {"fe": "frontend", "e2e": "e2e"}
 BUILD_NODE_OPTIONS = "--max-old-space-size=6144"
 SUMMARY_LIMIT = 240
+BRANCH_STORE = "backend/config/shell-branches.txt"
+BRANCH_STORE_TEST = "*ShellBranchTest"
 
 USAGE_TEXT = f"""usage: checks [--root <path>] [--print] [--full REASON] <lane> <check> [args]
        checks [--root <path>] [--print] changed
@@ -50,9 +52,9 @@ changed:    the checks the change set reaches, before a commit. The change set i
             that differs from the merge-base with {CI_BASE}, in the working tree and untracked.
             A frontend change runs fe typecheck and the vitest files its import graph reaches
             (vitest --changed), a static.lock change runs every vitest file, an e2e change runs
-            e2e typecheck, a backend source runs the test classes named after it, a backend
-            build or resource file runs every backend test, and a tooling change runs tools
-            test. A Markdown file runs nothing. PR Gate runs the rest on every pull request.
+            e2e typecheck, a Java source or its lint configuration runs be lint, a backend source
+            runs the test classes named after it, a backend build or resource file runs every
+            backend test, and a tooling change runs tools test. A Markdown file runs nothing. PR Gate runs the rest on every pull request.
 --full:     a whole test run that PR Gate already runs (fe test or e2e run with no file, be test
             with no --tests, be check, be pit, fe gate) takes a stated reason.
 
@@ -97,6 +99,9 @@ CHECK_TABLE = (
     CheckSpec("be", "test", "[--tests PATTERN]... [--exclude-tags TAGS]",
               "gradle test; any --tests also runs the ArchUnit suite"),
     CheckSpec("be", "checkstyle", "", "checkstyleMain checkstyleTest --rerun-tasks"),
+    CheckSpec("be", "lint", "", "every checkstyle, cpd and ast-grep task of gradle check, without tests or coverage"),
+    CheckSpec("be", "freeze-branches", "[--reason REASON]",
+              f"rewrite {BRANCH_STORE} from the sources; adding or raising a line needs the reason"),
     CheckSpec("be", "pit", "", "pitestRatchet, the surviving-mutant ratchet"),
     CheckSpec("tools", "test", "", f"every skill CLI and git-hook test suite ({TOOLING_SCRIPT}, "
               f"what PR Gate job {TOOLING_JOB} runs)"),
@@ -129,6 +134,8 @@ YARN_SCRIPTS = {
 GRADLE_TASKS = {
     "check": ("check",),
     "checkstyle": ("checkstyleMain", "checkstyleTest", "--rerun-tasks"),
+    "lint": ("checkstyleMain", "checkstyleTest", "checkstyleServiceJavadoc", "checkstyleValidation", "cpdCheck",
+             "astGrepRuleTests", "astGrep", "astGrepTestSources", "astGrepStaleIgnores", "--continue"),
     "pit": ("pitestRatchet",),
 }
 
@@ -347,6 +354,22 @@ def be_test_plan(repo_paths, arg_words):
     return RunPlan("be test", repo_paths.repo_root, gradle_argv(repo_paths, task_words))
 
 
+def be_freeze_plan(repo_paths, arg_words):
+    prog_parser = UsageFailure("checks be freeze-branches")
+    reason_text = ""
+    word_index = 0
+    while word_index < len(arg_words):
+        if arg_words[word_index].split("=", 1)[0] != "--reason":
+            prog_parser.raise_failure(f"unknown argument {arg_words[word_index]}; the only option is --reason REASON")
+        reason_text, word_index = take_option(arg_words, word_index, "--reason", prog_parser)
+        if not reason_text.strip():
+            prog_parser.raise_failure("--reason needs a reason")
+    task_words = ["freezeShellBranches"]
+    if reason_text:
+        task_words.append(f"-PfreezeReason={reason_text}")
+    return RunPlan("be freeze-branches", repo_paths.repo_root, gradle_argv(repo_paths, task_words))
+
+
 def fe_fmt_plan(repo_paths, arg_words):
     package_dir = repo_paths.repo_root / "frontend"
     if not arg_words:
@@ -382,6 +405,8 @@ def build_plan(repo_paths, lane_name, check_name, arg_words):
         return e2e_run_plan(repo_paths, arg_words)
     if (lane_name, check_name) == ("be", "test"):
         return be_test_plan(repo_paths, arg_words)
+    if (lane_name, check_name) == ("be", "freeze-branches"):
+        return be_freeze_plan(repo_paths, arg_words)
     if (lane_name, check_name) == ("fe", "test"):
         package_dir = repo_paths.repo_root / "frontend"
         return RunPlan(step_label, package_dir, ("yarn", "test", "run", *arg_words), (), package_dir)
@@ -403,6 +428,8 @@ E2E_VALUE_OPTIONS = ("--base-url", "--repeat", "--jobs", "--project")
 FRONTEND_TYPED = (".ts", ".tsx")
 FRONTEND_WHOLE = ("frontend/package.json", "frontend/yarn.lock", "static.lock")
 BACKEND_SOURCES = ("backend/src/main/java/", "backend/src/test/java/")
+BACKEND_LINT_CONFIG = ("backend/config/checkstyle/", "backend/config/ast-grep/", "backend/sgconfig.yml",
+                       "backend/build.gradle.kts")
 TOOLING_DIRS = (".claude/skills/", ".claude/hooks/", ".githooks/", ".github/scripts/")
 
 
@@ -461,6 +488,10 @@ def changed_plans(repo_paths, changed_paths, base_commit):
     if e2e_path:
         plan_rows.append((build_plan(repo_paths, "e2e", "typecheck", []), f"{e2e_path} changed"))
     backend_paths = [one_path for one_path in sorted_paths if one_path.startswith("backend/")]
+    lint_path = next((one_path for one_path in backend_paths
+                      if one_path.endswith(".java") or one_path.startswith(BACKEND_LINT_CONFIG)), None)
+    if lint_path:
+        plan_rows.append((build_plan(repo_paths, "be", "lint", []), f"{lint_path} changed"))
     build_path = next((one_path for one_path in backend_paths
                        if not one_path.startswith(BACKEND_SOURCES)
                        and not one_path.startswith(("backend/config/", "backend/docs/"))), None)
@@ -470,11 +501,13 @@ def changed_plans(repo_paths, changed_paths, base_commit):
     else:
         test_patterns = sorted({backend_pattern(one_path) for one_path in backend_paths
                                 if one_path.startswith(BACKEND_SOURCES) and one_path.endswith(".java")})
+        if BRANCH_STORE in backend_paths:
+            test_patterns = sorted({*test_patterns, BRANCH_STORE_TEST})
         if test_patterns:
             pattern_words = [pattern_word for test_pattern in test_patterns
                              for pattern_word in ("--tests", test_pattern)]
             plan_rows.append((build_plan(repo_paths, "be", "test", pattern_words),
-                              f"{len(test_patterns)} backend source(s) changed; their test classes run"))
+                              f"{len(test_patterns)} backend file(s) changed; their test classes run"))
     tooling_path = first_path(lambda one_path: one_path.startswith(TOOLING_DIRS))
     if tooling_path:
         plan_rows.append((build_plan(repo_paths, "tools", "test", []), f"{tooling_path} changed"))
@@ -679,6 +712,26 @@ def summary_line(log_text):
     return clip_text(f"(no output from `{tool_lines[-1]}`)") if tool_lines else "(no output)"
 
 
+GRADLE_FAILED_TASK = re.compile(r"Execution failed for task ':([^']+)'")
+
+
+def gradle_failure_lines(log_text):
+    """One line per failed gradle task: its name and its innermost cause, which names the report."""
+    failure_lines = []
+    text_lines = log_text.splitlines()
+    for line_index, text_line in enumerate(text_lines):
+        task_match = GRADLE_FAILED_TASK.match(text_line)
+        if not task_match:
+            continue
+        cause_text = ""
+        for cause_line in text_lines[line_index + 1:]:
+            if not cause_line.lstrip().startswith("> "):
+                break
+            cause_text = cause_line.lstrip()[2:]
+        failure_lines.append(f"  failed {task_match.group(1)}: {cause_text}")
+    return failure_lines
+
+
 @dataclasses.dataclass(frozen=True)
 class LockHolder:
     holder_pid: int
@@ -829,6 +882,8 @@ def run_single(repo_paths, run_plan, name_parts, print_only):
         log_path = log_path_for(repo_paths.log_dir, name_parts, datetime.datetime.now())
         exit_code, verdict_text, summary_text = execute_plan(run_plan, log_path)
     print(f"{verdict_text} {log_path}  {summary_text}")
+    for failure_line in gradle_failure_lines(log_path.read_text(encoding="utf-8", errors="replace")):
+        print(failure_line)
     return exit_code
 
 
@@ -1007,8 +1062,9 @@ SHELL_NAMES = {"bash", "sh", "zsh", "dash"}
 ASSIGNMENT_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
 GRADLE_VALUE_FLAGS = {"-p", "--project-dir", "--tests", "-x", "--exclude-task", "-b", "--build-file",
                       "-c", "--settings-file", "-g", "--gradle-user-home", "-I", "--init-script"}
+GRADLE_LINT_TASKS = re.compile(r"^(checkstyleServiceJavadoc|checkstyleValidation|cpd\w*|astGrep\w*)$")
 GRADLE_CHECK_TASKS = re.compile(r"^(test|check|build|assemble|classes|testClasses|compile\w*|checkstyle\w*|"
-                                r"pitest\w*|jacoco\w*)$")
+                                r"pitest\w*|jacoco\w*|cpd\w*|astGrep\w*|freezeShellBranches)$")
 FE_SCRIPT_CHECKS = {
     "typecheck": "typecheck", "lint": "lint", "lint:validation": "lint-validation", "fmt": "fmt",
     "fmt:check": "fmt-check", "build": "build", "check:fp": "fp", "check:rules": "rules",
@@ -1156,6 +1212,10 @@ def gradle_replacement(arg_words):
         return None
     if any(task_name.startswith("pitest") for task_name in check_tasks):
         return checks_text("be", "pit")
+    if "freezeShellBranches" in check_tasks:
+        return checks_text("be", "freeze-branches")
+    if any(GRADLE_LINT_TASKS.match(task_name) for task_name in check_tasks):
+        return checks_text("be", "lint")
     if any(task_name.startswith("checkstyle") for task_name in check_tasks):
         return checks_text("be", "checkstyle")
     if "test" in check_tasks:
@@ -1383,6 +1443,8 @@ def run_changed(repo_paths, print_only):
             if exit_code != 0:
                 failed_steps.append(run_plan.step_label)
             print(f"{verdict_text} {run_plan.step_label}  {step_log}  {summary_text}", flush=True)
+            for failure_line in gradle_failure_lines(step_log.read_text(encoding="utf-8", errors="replace")):
+                print(failure_line, flush=True)
     total_text = (f"{len(failed_steps)} of {len(plan_rows)} failed: {', '.join(failed_steps)}"
                   if failed_steps else f"{len(plan_rows)} of {len(plan_rows)} passed")
     print(f"{'FAIL' if failed_steps else 'PASS'} changed  {total_text}")

@@ -1,240 +1,255 @@
 package org.danteplanner.backend.architecture;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
-import com.tngtech.archunit.core.domain.JavaMethod;
-import com.tngtech.archunit.core.domain.JavaModifier;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
-import com.tngtech.archunit.lang.AbstractClassesTransformer;
-import com.tngtech.archunit.lang.ArchCondition;
-import com.tngtech.archunit.lang.ArchRule;
-import com.tngtech.archunit.lang.ClassesTransformer;
-import com.tngtech.archunit.lang.ConditionEvents;
-import com.tngtech.archunit.lang.SimpleConditionEvent;
-import com.tngtech.archunit.library.freeze.FreezingArchRule;
-import com.tngtech.archunit.library.freeze.TextFileBasedViolationStore;
-import com.tngtech.archunit.library.freeze.ViolationStore;
 
+import org.danteplanner.fixture.shellbranch.BranchShapes;
 import org.danteplanner.fixture.shellbranch.ShellBranchFixtures;
 
-import static com.tngtech.archunit.base.DescribedPredicate.not;
-import static com.tngtech.archunit.core.domain.JavaClass.Predicates.belongToAnyOf;
-import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.all;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ShellBranchTest {
 
-    static final ArchRule EFFECTFUL_METHODS_BRANCH_ONLY_BY_SWITCH =
-            all(methodsThatBranch())
-                    .should(reachNoEffectButLogging())
-                    .as("a method with a forward conditional jump other than a loop exit reaches no effect but"
-                            + " logging: an effectful method may branch only by switching on a decision value"
-                            + " (a sealed type or enum)");
+    private static final String FIXTURE_PACKAGE = "org.danteplanner.fixture.shellbranch";
 
-    private static final Set<JavaModifier> NOT_ROOTS =
-            Set.of(JavaModifier.SYNTHETIC, JavaModifier.BRIDGE, JavaModifier.ABSTRACT);
+    private static final Path FIXTURE_SOURCES = Path.of("src/test/java/org/danteplanner/fixture/shellbranch");
 
-    private static final String FIXTURE = ShellBranchFixtures.class.getName();
+    private static final String SHELLS = ShellBranchFixtures.class.getName();
 
-    private static final Path STORE = Path.of("config/archunit_store");
+    private static final String SHAPES = BranchShapes.class.getName();
 
-    private static final String STORED_RULES = "stored.rules";
+    private static final JavaClasses FIXTURES = new ClassFileImporter().importPackages(FIXTURE_PACKAGE);
 
-    private static final JavaClasses FIXTURES =
-            new ClassFileImporter().importPackages("org.danteplanner.fixture.shellbranch");
+    private static final SortedMap<String, Integer> COUNTED =
+            ShellBranches.in(FIXTURES, FIXTURE_SOURCES, FIXTURE_PACKAGE);
 
-    private static final JavaClasses SHELLS_AND_A_LATE_VIOLATION = FIXTURES;
+    private static final String SAVE = SHELLS + ".save(boolean)";
 
-    private static final JavaClasses SHELLS =
-            FIXTURES.that(not(belongToAnyOf(ShellBranchFixtures.LateViolation.class)));
+    private static final String LATE = ShellBranchFixtures.LateViolation.class.getName() + ".late(boolean)";
+
+    private static final String ACT = SHELLS + ".act(" + SHELLS + "$Verdict)";
 
     @TempDir
-    Path storeDirectory;
+    Path directory;
 
     @Test
-    void rule_WhenRunOverTheShells_NamesOnlyTheEffectfulMethodsWithAForwardConditionalJump() {
-        List<String> named = EFFECTFUL_METHODS_BRANCH_ONLY_BY_SWITCH.evaluate(SHELLS).getFailureReport().getDetails();
-
-        assertThat(named).containsExactly(
-                FIXTURE + ".actGuarded(" + FIXTURE + "$Verdict, boolean)",
-                FIXTURE + ".choose(boolean, boolean, boolean)",
-                FIXTURE + ".drainEitherWay(boolean)",
-                FIXTURE + ".drainSkippingAfterA(boolean)",
-                FIXTURE + ".drainWhenAllowed(boolean)",
-                FIXTURE + ".f(boolean, boolean)",
-                FIXTURE + ".route(java.lang.String)",
-                FIXTURE + ".save(boolean)");
-    }
-
-    @Test
-    void frozenRule_WhenANewViolationJoinsAFrozenStore_FailsNamingIt() {
-        ViolationStore store = storeIn(storeDirectory);
-        FreezingArchRule.freeze(EFFECTFUL_METHODS_BRANCH_ONLY_BY_SWITCH).persistIn(store).check(SHELLS);
-
-        assertThatThrownBy(() -> FreezingArchRule.freeze(EFFECTFUL_METHODS_BRANCH_ONLY_BY_SWITCH)
-                .persistIn(store)
-                .check(SHELLS_AND_A_LATE_VIOLATION))
-                .isInstanceOf(AssertionError.class)
-                .hasMessageContaining(ShellBranchFixtures.LateViolation.class.getName() + ".late(boolean)")
-                .hasMessageNotContaining(FIXTURE + ".save(boolean)");
-    }
-
-    @Test
-    void frozenRule_WhenAStoredMethodNoLongerBranches_RemovesItsEntry() {
-        ViolationStore store = storeIn(storeDirectory);
-        FreezingArchRule.freeze(EFFECTFUL_METHODS_BRANCH_ONLY_BY_SWITCH).persistIn(store).check(SHELLS);
-        List<String> current = store.getViolations(EFFECTFUL_METHODS_BRANCH_ONLY_BY_SWITCH);
-        List<String> withAFixedSite = new ArrayList<>(current);
-        withAFixedSite.add(FIXTURE + ".act(" + FIXTURE + "$Verdict)");
-        store.save(EFFECTFUL_METHODS_BRANCH_ONLY_BY_SWITCH, withAFixedSite);
-
-        FreezingArchRule.freeze(EFFECTFUL_METHODS_BRANCH_ONLY_BY_SWITCH).persistIn(store).check(SHELLS);
-
-        assertThat(store.getViolations(EFFECTFUL_METHODS_BRANCH_ONLY_BY_SWITCH)).isEqualTo(current);
-    }
-
-    @Test
-    void frozenRule_WhenTheMainTreeIsChecked_Passes() {
-        assertThatCode(() -> FreezingArchRule.freeze(EFFECTFUL_METHODS_BRANCH_ONLY_BY_SWITCH)
-                .check(ImportedClasses.production()))
-                .doesNotThrowAnyException();
-    }
-
-    @Test
-    void frozenStore_WhenRead_HoldsOnlyThisRuleUnderItsCurrentDescription() throws IOException {
-        Properties storedRules = new Properties();
-        try (Reader reader = Files.newBufferedReader(STORE.resolve(STORED_RULES))) {
-            storedRules.load(reader);
-        }
-        Set<String> files;
-        try (Stream<Path> listed = Files.list(STORE)) {
-            files = listed.map(file -> file.getFileName().toString()).collect(Collectors.toSet());
-        }
-
-        assertThat(storedRules.stringPropertyNames())
-                .as("%s/%s is keyed by the rule's description, so a reworded rule is stored as a new rule and"
-                        + " its old violations stop excusing anything; refreeze once (freeze.refreeze=true with"
-                        + " freeze.store.default.allowStoreUpdate=true) and delete the old entry", STORE, STORED_RULES)
-                .containsExactly(EFFECTFUL_METHODS_BRANCH_ONLY_BY_SWITCH.getDescription());
-        assertThat(files)
-                .as("%s holds %s and the violation files it names, nothing else", STORE, STORED_RULES)
-                .containsExactlyInAnyOrder(STORED_RULES,
-                        storedRules.getProperty(EFFECTFUL_METHODS_BRANCH_ONLY_BY_SWITCH.getDescription()));
-    }
-
-    @Test
-    void frozenViolations_WhenScanned_AreStillViolations() {
-        Properties properties = new Properties();
-        properties.setProperty("default.path", STORE.toString());
-        properties.setProperty("default.allowStoreCreation", "false");
-        properties.setProperty("default.allowStoreUpdate", "false");
-        TextFileBasedViolationStore store = new TextFileBasedViolationStore();
-        store.initialize(properties);
-        Set<String> stale = new TreeSet<>(store.getViolations(EFFECTFUL_METHODS_BRANCH_ONLY_BY_SWITCH));
-        EFFECTFUL_METHODS_BRANCH_ONLY_BY_SWITCH.evaluate(ImportedClasses.production())
-                .getFailureReport().getDetails()
-                .forEach(stale::remove);
-
-        assertThat(stale)
-                .as("these no longer branch or no longer reach an effect, so the entry now excuses a violation"
-                        + " nobody commits; delete the lines from %s (or refreeze) and let the rule cover the"
-                        + " method again", STORE)
+    void mainTree_WhenCounted_RaisesNoLineOfTheStore() {
+        assertThat(ShellBranches.raised(ShellBranches.read(ShellBranches.STORE), mainBranches()))
+                .as("an effectful method may branch only by switching on a decision value (a sealed type or enum);"
+                        + " these gained branches")
                 .isEmpty();
     }
 
-    private static ViolationStore storeIn(Path directory) {
-        Properties properties = new Properties();
-        properties.setProperty("default.path", directory.toString());
-        properties.setProperty("default.allowStoreCreation", "true");
-        properties.setProperty("default.allowStoreUpdate", "true");
-        TextFileBasedViolationStore store = new TextFileBasedViolationStore();
-        store.initialize(properties);
-        return new PinnedStore(store);
+    @Test
+    void mainTree_WhenCounted_LeavesNoLineOfTheStoreStale() {
+        assertThat(ShellBranches.stale(ShellBranches.read(ShellBranches.STORE), mainBranches()))
+                .as("these lost branches, are gone, or no longer reach an effect; run `checks be freeze-branches`"
+                        + " so that %s holds the new counts", ShellBranches.STORE)
+                .isEmpty();
     }
 
-    private record PinnedStore(ViolationStore delegate) implements ViolationStore {
-
-        @Override
-        public void initialize(Properties properties) {
-        }
-
-        @Override
-        public boolean contains(ArchRule rule) {
-            return delegate.contains(rule);
-        }
-
-        @Override
-        public void save(ArchRule rule, List<String> violations) {
-            delegate.save(rule, violations);
-        }
-
-        @Override
-        public List<String> getViolations(ArchRule rule) {
-            return delegate.getViolations(rule);
-        }
+    @Test
+    void store_WhenRead_IsSorted() {
+        assertThat(ShellBranches.lines(ShellBranches.STORE))
+                .containsExactlyElementsOf(ShellBranches.lines(written(ShellBranches.read(ShellBranches.STORE))));
     }
 
-    private static ClassesTransformer<JavaMethod> methodsThatBranch() {
-        return new AbstractClassesTransformer<>("methods with a forward conditional jump") {
-            @Override
-            public Iterable<JavaMethod> doTransform(JavaClasses classes) {
-                return classes.stream()
-                        .flatMap(ShellBranchTest::methodsThatBranchIn)
-                        .sorted(Comparator.comparing(JavaMethod::getFullName))
-                        .toList();
-            }
-        };
+    @Test
+    void shells_WhenCounted_AreTheEffectfulMethodsWithABranch() {
+        assertThat(countedIn(SHELLS)).containsExactlyInAnyOrderEntriesOf(Map.of(
+                LATE, 1,
+                ACT.replace(".act(", ".actGuarded(").replace(")", ", boolean)"), 1,
+                SHELLS + ".choose(boolean, boolean, boolean)", 1,
+                SHELLS + ".drainEitherWay(boolean)", 1,
+                SHELLS + ".drainSkippingAfterA(boolean)", 1,
+                SHELLS + ".drainWhenAllowed(boolean)", 1,
+                SHELLS + ".f(boolean, boolean)", 1,
+                SHELLS + ".route(java.lang.String)", 1,
+                SAVE, 1));
     }
 
-    private static Stream<JavaMethod> methodsThatBranchIn(JavaClass clazz) {
-        List<JavaMethod> roots = clazz.getMethods().stream()
-                .filter(method -> method.getModifiers().stream().noneMatch(NOT_ROOTS::contains))
-                .toList();
-        if (roots.isEmpty()) {
-            return Stream.empty();
-        }
-        Map<String, Integer> jumps = Branches.forwardConditionalJumps(clazz);
-        return roots.stream().filter(method -> jumpsOf(method, jumps) > 0);
+    @Test
+    void shapes_WhenCounted_MatchOneSourceMethodEach() {
+        assertThat(countedIn(SHAPES)).containsExactlyInAnyOrderEntriesOf(Map.ofEntries(
+                Map.entry(SHAPES + ".<init>(" + SHELLS + "$Port, java.util.Queue, boolean)", 1),
+                Map.entry(SHAPES + ".inALambda(java.util.List)", 1),
+                Map.entry(SHAPES + ".inAnAnonymousClass(boolean)", 1),
+                Map.entry(SHAPES + ".inAnAnonymousClassInALambda(boolean)", 1),
+                Map.entry(SHAPES + ".endingALoopBody(java.util.List, boolean)", 1),
+                Map.entry(SHAPES + ".breakingOutOfALoop(java.util.List, boolean)", 1),
+                Map.entry(SHAPES + ".termsOfALoopCondition(boolean)", 1),
+                Map.entry(SHAPES + ".numberLabels(int)", 1),
+                Map.entry(SHAPES + ".overloaded(java.lang.String)", 1),
+                Map.entry(SHAPES + ".overloaded([Ljava.lang.String;)", 2),
+                Map.entry(SHAPES + ".overloaded([[I)", 3),
+                Map.entry(SHAPES + ".overloaded(java.lang.Comparable)", 4),
+                Map.entry(SHAPES + ".overloaded(java.lang.Object, java.util.Map$Entry)", 1),
+                Map.entry(SHAPES + ".varargs([Ljava.lang.String;)", 1),
+                Map.entry(SHAPES + "$1Local.<init>(" + SHAPES + ", int, boolean)", 2),
+                Map.entry(SHAPES + "$1Local.run()", 1),
+                Map.entry(SHAPES + "$1StaticLocal.<init>(java.lang.String, boolean, " + SHELLS + "$Port)", 1),
+                Map.entry(SHAPES + "$Inner.<init>(" + SHAPES + ", boolean)", 1),
+                Map.entry(SHAPES + "$Level.<init>(java.lang.String, int, " + SHELLS + "$Port)", 1),
+                Map.entry(SHAPES + "$Compact.<init>(" + SHELLS + "$Port, java.util.List)", 1)));
     }
 
-    private static int jumpsOf(JavaMethod method, Map<String, Integer> jumps) {
-        Integer count = jumps.get(Branches.key(method));
-        if (count == null) {
-            throw new IllegalStateException("no bytecode read for " + method.getFullName() + " as "
-                    + Branches.key(method) + "; read " + jumps.keySet());
-        }
-        return count;
+    @Test
+    void raised_WhenAFrozenMethodGainsABranch_NamesItWithBothCounts() {
+        String method = SHAPES + ".overloaded([[I)";
+        SortedMap<String, Integer> stored = with(method, 2);
+
+        assertThat(ShellBranches.raised(stored, COUNTED)).containsExactly(method + " 2 -> 3");
+        assertThat(ShellBranches.stale(stored, COUNTED)).isEmpty();
     }
 
-    private static ArchCondition<JavaMethod> reachNoEffectButLogging() {
-        return new ArchCondition<>("reach no effect but logging") {
-            @Override
-            public void check(JavaMethod method, ConditionEvents events) {
-                boolean effectful = Effects.reachableFrom(method).keySet().stream()
-                        .anyMatch(effect -> !effect.equals("log"));
-                if (effectful) {
-                    events.add(SimpleConditionEvent.violated(method, method.getFullName()));
+    @Test
+    void raised_WhenAnUnlistedMethodBranches_NamesIt() {
+        SortedMap<String, Integer> stored = new TreeMap<>(COUNTED);
+        stored.remove(LATE);
+
+        assertThat(ShellBranches.raised(stored, COUNTED)).containsExactly(LATE + " 0 -> 1");
+    }
+
+    @Test
+    void stale_WhenAFrozenMethodLosesABranch_NamesItUntilTheLineReadsTheNewCount() {
+        assertThat(ShellBranches.stale(with(SAVE, 2), COUNTED)).containsExactly(SAVE + " 2 -> 1");
+        assertThat(ShellBranches.raised(with(SAVE, 2), COUNTED)).isEmpty();
+        assertThat(ShellBranches.stale(with(SAVE, 1), COUNTED)).isEmpty();
+    }
+
+    @Test
+    void stale_WhenAStoredMethodIsGoneOrHasNoBranch_NamesIt() {
+        assertThat(ShellBranches.stale(with(ACT, 1), COUNTED)).containsExactly(ACT + " 1 -> 0");
+        assertThat(ShellBranches.stale(with(SHELLS + ".gone()", 1), COUNTED))
+                .containsExactly(SHELLS + ".gone() 1 -> 0");
+    }
+
+    @Test
+    void in_WhenTwoSourceMethodsShareAKey_FailsNamingIt() throws IOException {
+        Files.writeString(directory.resolve("Twins.java"), """
+                package twins;
+                class Twins {
+                    void one() { class Local { void run(boolean x) { if (x) { one(); } } } }
+                    void two() { class Local { void run(boolean x) { if (x) { two(); } } } }
                 }
-            }
-        };
+                """);
+
+        assertThatThrownBy(() -> ShellBranches.in(FIXTURES, directory, FIXTURE_PACKAGE))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("twins.Twins$Local.run(boolean) has branches but is declared 2 time(s)");
+    }
+
+    @Test
+    void in_WhenASourceMethodWasNotCompiled_FailsNamingIt() throws IOException {
+        Files.writeString(directory.resolve("Absent.java"), """
+                package absent;
+                class Absent {
+                    void run(boolean x) { if (x) { run(false); } }
+                }
+                """);
+
+        assertThatThrownBy(() -> ShellBranches.in(FIXTURES, directory, FIXTURE_PACKAGE))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("absent.Absent.run(boolean)")
+                .hasMessageContaining("compiled to []");
+    }
+
+    @Test
+    void in_WhenASourceDoesNotParse_Fails() throws IOException {
+        Files.writeString(directory.resolve("Broken.java"), "class Broken { void run( }");
+
+        assertThatThrownBy(() -> ShellBranches.in(FIXTURES, directory, FIXTURE_PACKAGE))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("cannot parse");
+    }
+
+    @Test
+    void regenerate_WhenALineWouldBeAddedOrRaisedWithoutAReason_IsRefusedAndWritesNothing() {
+        SortedMap<String, Integer> stored = with(SAVE, 2);
+        stored.remove(LATE);
+        Path store = written(stored);
+
+        assertThatThrownBy(() -> ShellBranches.regenerate(store, COUNTED, " "))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining(LATE + " 0 -> 1")
+                .hasMessageNotContaining(SAVE);
+        assertThat(ShellBranches.read(store)).isEqualTo(stored);
+    }
+
+    @Test
+    void regenerate_WhenGivenAReason_AddsTheLine() {
+        SortedMap<String, Integer> stored = new TreeMap<>(COUNTED);
+        stored.remove(LATE);
+        Path store = written(stored);
+
+        ShellBranches.regenerate(store, COUNTED, "the port moved");
+
+        assertThat(ShellBranches.read(store)).isEqualTo(COUNTED);
+    }
+
+    @Test
+    void regenerate_WhenLinesOnlyShrink_NeedsNoReason() {
+        Path store = written(with(SAVE, 2));
+
+        ShellBranches.regenerate(store, COUNTED, "");
+
+        assertThat(ShellBranches.read(store)).isEqualTo(COUNTED);
+    }
+
+    @Test
+    void read_WhenALineHasNoCount_FailsNamingIt() throws IOException {
+        Path store = Files.writeString(directory.resolve("store.txt"), SAVE + "\n");
+
+        assertThatThrownBy(() -> ShellBranches.read(store))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining(SAVE);
+    }
+
+    @Test
+    void read_WhenAMethodIsListedTwice_FailsNamingIt() throws IOException {
+        Path store = Files.writeString(directory.resolve("store.txt"), SAVE + " # 1\n" + SAVE + " # 2\n");
+
+        assertThatThrownBy(() -> ShellBranches.read(store))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining(SAVE + " more than once");
+    }
+
+    private static SortedMap<String, Integer> mainBranches() {
+        return Main.BRANCHES;
+    }
+
+    private static SortedMap<String, Integer> with(String method, int count) {
+        SortedMap<String, Integer> stored = new TreeMap<>(COUNTED);
+        stored.put(method, count);
+        return stored;
+    }
+
+    private static SortedMap<String, Integer> countedIn(String fixture) {
+        SortedMap<String, Integer> counted = new TreeMap<>(COUNTED);
+        counted.keySet().removeIf(method -> !method.startsWith(fixture));
+        return counted;
+    }
+
+    private Path written(SortedMap<String, Integer> branches) {
+        Path store = directory.resolve("written.txt");
+        ShellBranches.write(store, branches);
+        return store;
+    }
+
+    private static final class Main {
+
+        private static final SortedMap<String, Integer> BRANCHES = ShellBranches.in(ImportedClasses.production(),
+                ShellBranches.MAIN_SOURCES, ShellBranches.MAIN_PACKAGE);
     }
 }

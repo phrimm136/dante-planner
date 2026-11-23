@@ -60,7 +60,7 @@ class PhaseRunnerTest {
         RecordingReplication replication = new RecordingReplication();
         PlannedOperation delete = new PlannedOperation.Delete(KeyDraw.share(0));
         Round deleteOnly = new Round(List.of(List.of(delete), List.of(), List.of(), List.of()));
-        OperationPerformer session = operation -> replication.events.add(operation == delete ? "delete" : "read");
+        OperationPerformer session = operation -> replication.events.add(operation.equals(delete) ? "delete" : "read");
 
         PhaseRunner.run(new Phase(List.of(deleteOnly, new Round(TWO_READS_EACH)), new Stopped()),
                 List.of(session, session, session, session), replication, replication);

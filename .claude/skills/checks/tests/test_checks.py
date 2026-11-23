@@ -149,6 +149,44 @@ def test_backend_task_checks():
     assert plan_for("be", "pit").command_argv[4:] == ("pitestRatchet",)
 
 
+def test_backend_lint_runs_the_lint_tasks_of_check_and_keeps_going():
+    assert plan_for("be", "lint").command_argv[4:] == (
+        "checkstyleMain", "checkstyleTest", "checkstyleServiceJavadoc", "checkstyleValidation", "cpdCheck",
+        "astGrepRuleTests", "astGrep", "astGrepTestSources", "astGrepStaleIgnores", "--continue")
+
+
+def test_a_failed_lint_names_each_failed_task_with_its_report():
+    assert checks_cli.gradle_failure_lines(fixture_text("gradle-lint-fail.log")) == [
+        "  failed astGrepTestSources: Process 'command '/repo/wt/frontend/node_modules/.bin/ast-grep'' "
+        "finished with non-zero exit value 1",
+        "  failed cpdCheck: CPD found duplicate code. See the report at "
+        "file:///repo/wt/backend/build/reports/cpd/cpdCheck.text",
+        "  failed checkstyleServiceJavadoc: Checkstyle rule violations were found. See the report at: "
+        "file:///repo/wt/backend/build/reports/checkstyle/serviceJavadoc.html",
+        "  failed checkstyleTest: Checkstyle rule violations were found. See the report at: "
+        "file:///repo/wt/backend/build/reports/checkstyle/test.html"]
+
+
+def test_a_lint_without_ast_grep_names_the_missing_binary_and_the_install():
+    assert checks_cli.gradle_failure_lines(fixture_text("gradle-lint-no-ast-grep.log")) == [
+        "  failed astGrepInstalled: astGrepInstalled: /repo/wt/frontend/node_modules/.bin/ast-grep is missing; "
+        "run `yarn --cwd frontend install` from the repo root."]
+
+
+def test_a_passing_gradle_run_has_no_failure_lines():
+    assert checks_cli.gradle_failure_lines(fixture_text("gradle-pass.log")) == []
+
+
+def test_freezing_the_branches_passes_its_reason_to_gradle():
+    assert plan_for("be", "freeze-branches").command_argv[4:] == ("freezeShellBranches",)
+    assert plan_for("be", "freeze-branches", "--reason", "the port moved").command_argv[4:] == (
+        "freezeShellBranches", "-PfreezeReason=the port moved")
+    with pytest.raises(checks_cli.CheckError, match="--reason needs a reason"):
+        plan_for("be", "freeze-branches", "--reason", " ")
+    with pytest.raises(checks_cli.CheckError, match="unknown argument --force"):
+        plan_for("be", "freeze-branches", "--force")
+
+
 def test_tools_test_runs_the_shared_tooling_script_from_the_root():
     run_plan = plan_for("tools", "test")
     assert run_plan.command_argv == ("bash", "/repo/wt/.github/scripts/tooling-tests.sh")
@@ -387,6 +425,9 @@ HOOK_TABLE = [
     ("./gradlew -p backend test --tests '*Foo*' > .claude/reports/logs/be.log 2>&1 && echo PASS",
      f"{CLI_TEXT} be test --tests '*Foo*'"),
     ("/r/backend/gradlew -p /r/backend checkstyleMain checkstyleTest", f"{CLI_TEXT} be checkstyle"),
+    ("./gradlew -p backend cpdCheck", f"{CLI_TEXT} be lint"),
+    ("./gradlew -p backend checkstyleServiceJavadoc", f"{CLI_TEXT} be lint"),
+    ("./gradlew -p backend freezeShellBranches", f"{CLI_TEXT} be freeze-branches"),
     ("./gradlew -p backend pitest pitestRatchet", f"{CLI_TEXT} be pit"),
     ("./gradlew -p backend build", f"{CLI_TEXT} be check"),
     ("./gradlew -p backend :compileJava", f"{CLI_TEXT} be check"),
@@ -564,21 +605,41 @@ def test_an_e2e_change_runs_the_e2e_typecheck():
 
 
 def test_backend_sources_run_the_test_classes_named_after_them():
-    run_plan, reason_text = checks_cli.changed_plans(FAKE_PATHS, {
+    (lint_plan, lint_reason), (run_plan, reason_text) = checks_cli.changed_plans(FAKE_PATHS, {
         "backend/src/main/java/org/x/PlannerService.java",
-        "backend/src/test/java/org/x/DeckControllerTest.java"}, "abc123")[0]
+        "backend/src/test/java/org/x/DeckControllerTest.java"}, "abc123")
+    assert (lint_plan.step_label, lint_reason) == (
+        "be lint", "backend/src/main/java/org/x/PlannerService.java changed")
     assert run_plan.command_argv[4:] == (
         "test", "--tests", "*DeckControllerTest", "--tests", "*PlannerServiceTest*",
         "--tests", checks_cli.ARCHUNIT_PATTERN)
-    assert reason_text == "2 backend source(s) changed; their test classes run"
+    assert reason_text == "2 backend file(s) changed; their test classes run"
 
 
 def test_a_backend_build_or_resource_file_runs_every_backend_test():
-    assert changed_rows("backend/build.gradle.kts", "backend/src/main/java/org/x/A.java") == [
+    assert changed_rows("backend/build.gradle.kts", "backend/src/main/java/org/x/A.java")[1:] == [
         ("be test", ("-p", "/repo/wt/backend", "--console=plain", "test"),
          "backend/build.gradle.kts changed, which every backend test reads")]
     assert [one_row[0] for one_row in changed_rows(
         "backend/src/main/resources/db/migration/V9__deck.sql")] == ["be test"]
+
+
+@pytest.mark.parametrize("changed_path", [
+    "backend/src/test/java/org/x/ATest.java", "backend/config/checkstyle/checkstyle.xml",
+    "backend/config/ast-grep/rules/no-x.yml", "backend/sgconfig.yml", "backend/build.gradle.kts"])
+def test_java_and_its_lint_configuration_run_the_lint_lane(changed_path):
+    assert changed_rows(changed_path)[0][0] == "be lint"
+
+
+def test_the_branch_store_alone_runs_its_test():
+    assert changed_rows("backend/config/shell-branches.txt") == [
+        ("be test", ("--tests", "*ShellBranchTest", "--tests", checks_cli.ARCHUNIT_PATTERN),
+         "1 backend file(s) changed; their test classes run")]
+
+
+def test_a_backend_file_no_linter_reads_runs_no_lint_lane():
+    assert "be lint" not in [one_row[0] for one_row in changed_rows(
+        "backend/src/main/resources/db/migration/V9__deck.sql", "backend/config/shell-branches.txt")]
 
 
 def test_a_tooling_change_runs_the_tooling_suites():

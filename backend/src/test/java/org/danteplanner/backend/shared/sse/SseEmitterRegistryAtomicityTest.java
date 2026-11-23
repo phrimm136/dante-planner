@@ -8,6 +8,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CyclicBarrier;
 
 import org.danteplanner.backend.shared.security.Viewer;
+import org.danteplanner.backend.support.Hang;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,10 +27,9 @@ class SseEmitterRegistryAtomicityTest {
 
     private static final String KEY = "key";
     private static final int ROUNDS = 500;
-    private static final long JOIN_TIMEOUT_MS = 30_000;
 
     @Test
-    void registry_WhenTwoDevicesChurnOneKey_KeepsEveryLiveEmitterReachable() throws Exception {
+    void registry_WhenTwoDevicesChurnOneKey_KeepsEveryLiveEmitterReachable() {
         ChurnableSseService service = new ChurnableSseService();
         List<String> unreachable = new CopyOnWriteArrayList<>();
         CyclicBarrier round = new CyclicBarrier(2);
@@ -38,12 +38,9 @@ class SseEmitterRegistryAtomicityTest {
         Thread second = churn(service, round, unreachable);
         first.start();
         second.start();
-        first.join(JOIN_TIMEOUT_MS);
-        second.join(JOIN_TIMEOUT_MS);
+        Hang.ended(first, "the first device's churn (a thread still running means its partner died at the barrier)");
+        Hang.ended(second, "the second device's churn (a thread still running means its partner died at the barrier)");
 
-        assertThat(first.isAlive() || second.isAlive())
-                .as("a thread still running means its partner died at the barrier")
-                .isFalse();
         assertThat(unreachable)
                 .as("each of these registered an emitter the registry could not then find")
                 .isEmpty();

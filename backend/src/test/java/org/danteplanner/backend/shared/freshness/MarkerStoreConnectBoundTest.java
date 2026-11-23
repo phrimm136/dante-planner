@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
+import org.danteplanner.backend.support.Elapsed;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.RealClockBounds;
 
@@ -111,12 +112,13 @@ class MarkerStoreConnectBoundTest {
                 Hang.until(() -> raises.stream().allMatch(raise -> raise.getState() == Thread.State.TIMED_WAITING),
                         "every queued raise parking behind the stuck connect");
 
+                Elapsed released = Elapsed.start();
                 store.close();
                 for (Thread raise : raises) {
-                    raise.join(WAIT_BOUND.plus(MarkerStore.RAISE_MARGIN).plus(RealClockBounds.SCHEDULING_SLACK).toMillis());
+                    Hang.ended(raise, "a raise returning after close");
                 }
 
-                assertThat(raises).noneMatch(Thread::isAlive);
+                released.isWithin(WAIT_BOUND.plus(MarkerStore.RAISE_MARGIN));
                 Hang.until(() -> raiseThreads(group).isEmpty(), "the raise thread ending after close");
                 assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count()).isEqualTo(QUEUED_RAISES);
             } finally {

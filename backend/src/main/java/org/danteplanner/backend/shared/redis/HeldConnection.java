@@ -42,6 +42,7 @@ final class HeldConnection {
     }
 
     // Lettuce fails a dropped connection's in-flight command before isOpen() turns false.
+    @SuppressWarnings("ReferenceEquality")
     private synchronized void pingFailedOn(CompletableFuture<StatefulRedisConnection<String, String>> pinged) {
         switch (state) {
             case State.Held held when held.attempt() == pinged -> state = new State.Held(pinged, true);
