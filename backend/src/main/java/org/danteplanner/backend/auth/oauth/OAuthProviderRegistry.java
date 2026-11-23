@@ -29,8 +29,4 @@ public class OAuthProviderRegistry {
         }
         return provider;
     }
-
-    public boolean hasProvider(String name) {
-        return providers.containsKey(name.toLowerCase(Locale.ROOT));
-    }
 }

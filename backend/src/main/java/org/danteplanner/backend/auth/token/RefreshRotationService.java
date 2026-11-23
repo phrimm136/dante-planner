@@ -2,7 +2,6 @@ package org.danteplanner.backend.auth.token;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.shared.redis.AuthWrites;
@@ -11,7 +10,6 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
-import java.time.Duration;
 import java.util.List;
 
 /**
@@ -24,7 +22,6 @@ import java.util.List;
  * across instances.</p>
  */
 @Service
-@Slf4j
 public class RefreshRotationService {
 
     static final String FAMILY_KEY_PREFIX = "rt:fam:";
@@ -250,17 +247,6 @@ public class RefreshRotationService {
             }
             throw new IllegalStateException(UNEXPECTED_RESULT_MESSAGE + result);
         }
-    }
-
-    public void revokeFamily(String familyId) {
-        String key = familyKey(familyId);
-        authWrites.writeWithoutResult(store -> {
-            store.opsForHash().put(key, REVOKED_FIELD, String.valueOf(clock.millis()));
-            // Revoking a family that never rotated creates the hash here, where the rotation
-            // script's sliding PEXPIRE has not run and would not run again.
-            store.expire(key, Duration.ofMillis(jwtProperties.getRefreshTokenExpiry()));
-        });
-        log.info("Revoked refresh token family {}", familyId);
     }
 
     private void incrementOutcome(String outcome) {

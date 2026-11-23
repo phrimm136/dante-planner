@@ -118,38 +118,6 @@ class OAuthProviderRegistryTest {
     }
 
     @Nested
-    class HasProviderTests {
-
-        @Test
-        void hasProvider_WhenRegistered_ReturnsTrue() {
-            // Act & Assert
-            assertThat(registry.hasProvider("google")).isTrue();
-            assertThat(registry.hasProvider("apple")).isTrue();
-        }
-
-        @Test
-        void hasProvider_WhenUnregistered_ReturnsFalse() {
-            // Act & Assert
-            assertThat(registry.hasProvider("discord")).isFalse();
-            assertThat(registry.hasProvider("facebook")).isFalse();
-        }
-
-        @Test
-        void hasProvider_WhenMixedCase_IsCaseInsensitive() {
-            // Act & Assert
-            assertThat(registry.hasProvider("GOOGLE")).isTrue();
-            assertThat(registry.hasProvider("Google")).isTrue();
-            assertThat(registry.hasProvider("gOoGlE")).isTrue();
-        }
-
-        @Test
-        void hasProvider_WhenEmptyName_ReturnsFalse() {
-            // Act & Assert
-            assertThat(registry.hasProvider("")).isFalse();
-        }
-    }
-
-    @Nested
     class ConstructorTests {
 
         @Test
@@ -159,7 +127,6 @@ class OAuthProviderRegistryTest {
 
             // Assert
             assertRejected(() -> emptyRegistry.getProvider("any")).withCode("UNKNOWN_OAUTH_PROVIDER");
-            assertThat(emptyRegistry.hasProvider("google")).isFalse();
         }
 
         @Test
@@ -169,8 +136,7 @@ class OAuthProviderRegistryTest {
                     new OAuthProviderRegistry(List.of(googleProvider));
 
             // Act & Assert
-            assertThat(singleProviderRegistry.hasProvider("google")).isTrue();
-            assertThat(singleProviderRegistry.hasProvider("apple")).isFalse();
+            assertRejected(() -> singleProviderRegistry.getProvider("apple")).withCode("UNKNOWN_OAUTH_PROVIDER");
             assertThat(singleProviderRegistry.getProvider("google")).isSameAs(googleProvider);
         }
 

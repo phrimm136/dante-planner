@@ -298,7 +298,9 @@ class RefreshRotationServiceIT {
             RotationOutcome.Rotated rotated = (RotationOutcome.Rotated) rotationService.rotate(r1);
             String r2 = rotated.newRefreshJwt();
 
-            rotationService.revokeFamily(familyId);
+            new TokenBlacklistService(AuthReads.writesTo(sharedTemplate), AuthReads.from(sharedTemplate), meterRegistry,
+                    Clock.systemUTC(), REFRESH_TOKEN_EXPIRY)
+                    .revokeLogoutSession(List.of(new LogoutRevocation.FamilyRevocation(familyId)));
 
             RotationOutcome result = rotationService.rotate(r2);
 

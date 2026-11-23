@@ -112,17 +112,6 @@ public interface RefreshRotationContract {
     }
 
     @Test
-    default void rotate_WhenTheFamilyWasRevoked_RejectsItsTokens() {
-        RefreshRotationService rotation = rotation();
-        String login = freshLogin(freshUserId());
-
-        rotation.revokeFamily(TestJwt.familyIdOf(claimsOf(login)));
-
-        assertThat(rotation.rotate(login))
-                .isEqualTo(new RotationOutcome.Rejected(RotationOutcome.Rejected.Reason.REVOKED_FAMILY));
-    }
-
-    @Test
     default void rotate_WhenLogoutRevokedTheFamily_RejectsItsTokens() {
         RefreshRotationService rotation = rotation();
         String login = freshLogin(freshUserId());
