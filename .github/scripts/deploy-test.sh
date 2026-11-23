@@ -141,18 +141,62 @@ render() {
   done | paste -sd ',' - | sed 's/,/, /g')"
 }
 
-schema() {
-  local out overlay files=()
-  for overlay in "${OVERLAYS[@]}"; do files+=("/render/$overlay.yaml"); done
-  if ! out=$(docker run --rm -v "$harness/schemas:/schemas:ro" -v "$work:/render:ro" "$KUBECONFORM_IMAGE" \
+validate() {
+  local stage=$1 out
+  shift
+  if ! out=$(docker run --rm -v "$harness/schemas:/schemas:ro" -v "$work:/render:ro" -v "$deploy_dir:/deploy:ro" "$KUBECONFORM_IMAGE" \
     -strict -summary -kubernetes-version "$KUBERNETES_VERSION" \
     -schema-location "$KUBERNETES_SCHEMAS/{{.NormalizedKubernetesVersion}}-standalone{{.StrictSuffix}}/{{.ResourceKind}}{{.KindSuffix}}.json" \
     -schema-location '/schemas/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
-    "${files[@]}" 2>&1); then
+    "$@" 2>&1); then
     echo "$out" >&2
-    fail schema "kubeconform rejected the render; a 'could not find schema' error means a new custom kind: add it to .github/deploy-test/vendor-schemas.py and rerun it"
+    fail "$stage" "kubeconform rejected the render; a 'could not find schema' error means a new custom kind: add it to .github/deploy-test/vendor-schemas.py and rerun it"
   fi
-  pass schema "$(printf '%s\n' "$out" | awk '/^Summary:/ { sub(/^Summary: /, ""); print }')"
+  printf '%s\n' "$out" | awk '/^Summary:/ { sub(/^Summary: /, ""); print }'
+}
+
+charts() {
+  local report drift chart summary files=()
+  mkdir -p "$work/charts"
+  if ! report=$("$repo/.github/scripts/render-charts.sh" "$deploy_dir" "$work/charts" 2>"$work/charts.err"); then
+    cat "$work/charts.err" >&2
+    fail charts "helm could not render the chart of an Application under deploy/apps"
+  fi
+  drift=$(python3 - "$deploy_dir/apps" "$work" "${OVERLAYS[@]}" <<'PY'
+import pathlib
+import sys
+
+import yaml
+
+
+def applications(docs):
+    return {doc["metadata"]["name"]: doc for doc in docs if doc and doc.get("kind") == "Application"}
+
+
+apps_dir, work = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
+files = {}
+for path in sorted(apps_dir.glob("*.yaml")):
+    files.update(applications(yaml.safe_load_all(path.read_text())))
+for overlay in sys.argv[3:]:
+    for name, rendered in applications(yaml.safe_load_all((work / f"{overlay}.yaml").read_text())).items():
+        if rendered != files.get(name):
+            print(f"overlays/{overlay} Application {name}")
+PY
+  )
+  [ -z "$drift" ] || fail charts "$(printf '%s\n' "$drift" | paste -sd ',' - | sed 's/,/, /g') differs from its file under deploy/apps; the renderer reads that file, not the overlay, so move the change into the file"
+  for chart in "$work"/charts/chart-*.yaml; do
+    [ -e "$chart" ] && files+=("/render/charts/$(basename "$chart")")
+  done
+  [ "${#files[@]}" -gt 0 ] || fail charts "no Application under deploy/apps has a Helm chart source"
+  summary=$(validate charts "${files[@]}")
+  pass charts "$(printf '%s\n' "$report" | paste -sd ',' - | sed 's/,/, /g'); $summary"
+}
+
+schema() {
+  local overlay summary files=()
+  for overlay in "${OVERLAYS[@]}"; do files+=("/render/$overlay.yaml"); done
+  summary=$(validate schema "${files[@]}")
+  pass schema "$summary"
 }
 
 kube() {
@@ -336,6 +380,7 @@ behavior() {
 
 alerts
 render
+charts
 schema
 behavior
 echo "deploy-test: ok in $((SECONDS - started))s"

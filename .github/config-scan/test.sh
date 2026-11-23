@@ -66,6 +66,34 @@ EOF
   sed -i 's/^resources:$/resources:\n  - scan-probe.yaml/' "$1/deploy/base/kustomization.yaml"
 }
 
+add_version_probe() {
+  cat >"$1/deploy/base/version-probe.yaml" <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: version-probe
+spec:
+  selector:
+    matchLabels:
+      app: version-probe
+  template:
+    metadata:
+      labels:
+        app: version-probe
+        helm.sh/chart: version-probe-$2
+        app.kubernetes.io/version: "$2"
+    spec:
+      containers:
+        - name: probe
+          image: busybox
+EOF
+  sed -i 's/^resources:$/resources:\n  - version-probe.yaml/' "$1/deploy/base/kustomization.yaml"
+}
+
+version_probe_key() {
+  sed -n 's|^NEW CKV2_K8S_6 /oregon\.yaml \(Pod\.danteplanner\.version-probe.*\)$|\1|p' "$1"
+}
+
 name="the tree matches its baselines"
 run_scan "$work/plain.out"
 [ "$status" -eq 0 ] || fail "$name" "exit $status" "$work/plain.out"
@@ -100,19 +128,110 @@ echo "PASS $name"
 name="a fixed finding must leave the baseline"
 fixed=$work/fixed
 copy_tree "$fixed"
-awk '{ print } /^          image: registry\.k8s\.io\/kube-state-metrics\// {
-  print "          readinessProbe:"; print "            httpGet:"; print "              path: /healthz"; print "              port: http-metrics"
-}' "$fixed/deploy/base/kube-state-metrics.yaml" >"$work/ksm.yaml"
-mv "$work/ksm.yaml" "$fixed/deploy/base/kube-state-metrics.yaml"
+awk '{ print } /^          image: prom\/mysqld-exporter:/ {
+  print "          readinessProbe:"; print "            httpGet:"; print "              path: /"; print "              port: http-metrics"
+}' "$fixed/deploy/base/mysqld-exporter.yaml" >"$work/mysqld-exporter.yaml"
+mv "$work/mysqld-exporter.yaml" "$fixed/deploy/base/mysqld-exporter.yaml"
 track "$fixed"
 run_scan "$work/fixed.out" "$fixed"
 [ "$status" -eq 1 ] || fail "$name" "exit $status, expected 1" "$work/fixed.out"
 for overlay in oregon seoul; do
-  has_line "$work/fixed.out" "FIXED CKV_K8S_9 /$overlay.yaml Deployment.danteplanner.kube-state-metrics" \
-    || fail "$name" "no FIXED CKV_K8S_9 line for kube-state-metrics in /$overlay.yaml" "$work/fixed.out"
+  has_line "$work/fixed.out" "FIXED CKV_K8S_9 /$overlay.yaml Deployment.danteplanner.mysqld-exporter" \
+    || fail "$name" "no FIXED CKV_K8S_9 line for mysqld-exporter in /$overlay.yaml" "$work/fixed.out"
 done
 grep -q -- '--update' "$work/fixed.out" || fail "$name" "the output does not name --update" "$work/fixed.out"
 ! grep -q '^NEW ' "$work/fixed.out" || fail "$name" "a readiness probe added a NEW finding" "$work/fixed.out"
+echo "PASS $name"
+
+name="a chart value that weakens its security context is a new finding"
+weakened=$work/weakened
+copy_tree "$weakened"
+awk '{ print } /^      valuesObject:$/ {
+  print "        containerSecurityContext:"; print "          allowPrivilegeEscalation: true"
+}' "$weakened/deploy/apps/kube-state-metrics.yaml" >"$work/weakened.yaml"
+mv "$work/weakened.yaml" "$weakened/deploy/apps/kube-state-metrics.yaml"
+grep -qx '          allowPrivilegeEscalation: true' "$weakened/deploy/apps/kube-state-metrics.yaml" || fail "$name" "the values rewrite matched nothing"
+track "$weakened"
+run_scan "$work/weakened.out" "$weakened"
+[ "$status" -eq 1 ] || fail "$name" "exit $status, expected 1" "$work/weakened.out"
+has_line "$work/weakened.out" "NEW CKV_K8S_20 /chart-kube-state-metrics.yaml Deployment.danteplanner.kube-state-metrics" \
+  || fail "$name" "no NEW CKV_K8S_20 line for the chart's Deployment in /chart-kube-state-metrics.yaml" "$work/weakened.out"
+! grep -q '^NEW .* /\(oregon\|seoul\)\.yaml ' "$work/weakened.out" || fail "$name" "a chart value changed an overlay finding" "$work/weakened.out"
+echo "PASS $name"
+
+name="a chart version bump leaves the baseline unchanged"
+pod_key="Pod.danteplanner.kube-state-metrics.app.kubernetes.io/managed-by-Helm.app.kubernetes.io/component-metrics.app.kubernetes.io/part-of-kube-state-metrics.app.kubernetes.io/name-kube-state-metrics.app.kubernetes.io/instance-kube-state-metrics"
+entries_of "$repo/.github/config-scan/kubernetes.baseline.json" >"$work/committed.txt"
+has_line "$work/committed.txt" "CKV2_K8S_6 /chart-kube-state-metrics.yaml $pod_key" \
+  || fail "$name" "the committed baseline holds no version-free Pod key for the chart" "$work/committed.txt"
+! grep -qE 'helm\.sh/chart-|app\.kubernetes\.io/version-' "$work/committed.txt" \
+  || fail "$name" "the committed baseline still holds a version label part" "$work/committed.txt"
+bumped=$work/bumped
+copy_tree "$bumped"
+sed -i 's/^    targetRevision: 8\.3\.1$/    targetRevision: 8.3.0/' "$bumped/deploy/apps/kube-state-metrics.yaml"
+grep -qx '    targetRevision: 8.3.0' "$bumped/deploy/apps/kube-state-metrics.yaml" || fail "$name" "the targetRevision rewrite matched nothing"
+track "$bumped"
+run_scan "$work/bumped.out" "$bumped"
+[ "$status" -eq 0 ] || fail "$name" "chart 8.3.0 against the committed baseline exited $status, expected 0" "$work/bumped.out"
+! grep -qE '^(NEW|FIXED) ' "$work/bumped.out" || fail "$name" "a version bump printed NEW or FIXED lines" "$work/bumped.out"
+echo "PASS $name"
+
+name="a baseline entry that carries a version label is stale: FIXED plus NEW"
+versioned_key="${pod_key/kube-state-metrics.app.kubernetes.io\/managed-by/kube-state-metrics.helm.sh/chart-kube-state-metrics-8.3.1.app.kubernetes.io/managed-by}.app.kubernetes.io/version-2.19.1"
+versioned=$work/versioned
+copy_tree "$versioned"
+sed -i "s|\"$pod_key\"|\"$versioned_key\"|" "$versioned/.github/config-scan/kubernetes.baseline.json"
+grep -qF "$versioned_key" "$versioned/.github/config-scan/kubernetes.baseline.json" || fail "$name" "the baseline rewrite matched nothing"
+track "$versioned"
+run_scan "$work/versioned.out" "$versioned"
+[ "$status" -eq 1 ] || fail "$name" "exit $status, expected 1" "$work/versioned.out"
+has_line "$work/versioned.out" "FIXED CKV2_K8S_6 /chart-kube-state-metrics.yaml $versioned_key" \
+  && has_line "$work/versioned.out" "NEW CKV2_K8S_6 /chart-kube-state-metrics.yaml $pod_key" \
+  || fail "$name" "no FIXED line for the versioned key plus NEW line for the version-free key" "$work/versioned.out"
+echo "PASS $name"
+
+name="a pre-release version label yields the same key as a release"
+for version in 8.3.1 2.20.0-rc.alpha; do
+  probed=$work/probe-$version
+  copy_tree "$probed"
+  add_version_probe "$probed" "$version"
+  track "$probed"
+  run_scan "$work/probe-$version.out" "$probed"
+  [ "$status" -eq 1 ] || fail "$name" "version $version: exit $status, expected 1" "$work/probe-$version.out"
+done
+[ "$(version_probe_key "$work/probe-8.3.1.out")" = "Pod.danteplanner.version-probe.app-version-probe" ] \
+  || fail "$name" "version 8.3.1 did not yield the key Pod.danteplanner.version-probe.app-version-probe" "$work/probe-8.3.1.out"
+[ "$(version_probe_key "$work/probe-2.20.0-rc.alpha.out")" = "Pod.danteplanner.version-probe.app-version-probe" ] \
+  || fail "$name" "version 2.20.0-rc.alpha yielded another key than 8.3.1" "$work/probe-2.20.0-rc.alpha.out"
+echo "PASS $name"
+
+name="a label key that starts with a digit after the version label stays in the key"
+digit=$work/probe-digit
+copy_tree "$digit"
+awk '{ print } /^      valuesObject:$/ { print "        podLabels:"; print "          1password.com/item: probe" }' \
+  "$digit/deploy/apps/kube-state-metrics.yaml" >"$work/digit.yaml"
+mv "$work/digit.yaml" "$digit/deploy/apps/kube-state-metrics.yaml"
+grep -qx '          1password.com/item: probe' "$digit/deploy/apps/kube-state-metrics.yaml" || fail "$name" "the podLabels rewrite matched nothing"
+track "$digit"
+run_scan "$work/probe-digit.out" "$digit"
+[ "$status" -eq 1 ] || fail "$name" "exit $status, expected 1" "$work/probe-digit.out"
+has_line "$work/probe-digit.out" "NEW CKV2_K8S_6 /chart-kube-state-metrics.yaml $pod_key.1password.com/item-probe" \
+  && has_line "$work/probe-digit.out" "FIXED CKV2_K8S_6 /chart-kube-state-metrics.yaml $pod_key" \
+  || fail "$name" "the chart Pod key lost the 1password.com/item label that follows its version label, or kept a version part" "$work/probe-digit.out"
+echo "PASS $name"
+
+name="a Pod key that differs in another label part is still new"
+relabeled=$work/relabeled
+copy_tree "$relabeled"
+sed -i 's|app.kubernetes.io/component-metrics.app.kubernetes.io/part-of|app.kubernetes.io/component-other.app.kubernetes.io/part-of|' \
+  "$relabeled/.github/config-scan/kubernetes.baseline.json"
+grep -q 'component-other' "$relabeled/.github/config-scan/kubernetes.baseline.json" || fail "$name" "the baseline rewrite matched nothing"
+track "$relabeled"
+run_scan "$work/relabeled.out" "$relabeled"
+[ "$status" -eq 1 ] || fail "$name" "exit $status, expected 1" "$work/relabeled.out"
+has_line "$work/relabeled.out" "NEW CKV2_K8S_6 /chart-kube-state-metrics.yaml $pod_key" \
+  && has_line "$work/relabeled.out" "FIXED CKV2_K8S_6 /chart-kube-state-metrics.yaml ${pod_key/component-metrics/component-other}" \
+  || fail "$name" "no NEW plus FIXED pair for the relabeled Pod" "$work/relabeled.out"
 echo "PASS $name"
 
 name="update shrinks and never grows"
@@ -120,8 +239,8 @@ entries_of "$fixed/.github/config-scan/kubernetes.baseline.json" | sort >"$work/
 run_scan "$work/update-fixed.out" --update "$fixed"
 [ "$status" -eq 0 ] || fail "$name" "--update on the fixed copy exited $status" "$work/update-fixed.out"
 entries_of "$fixed/.github/config-scan/kubernetes.baseline.json" | sort >"$work/after.txt"
-printf '%s\n' "CKV_K8S_9 /oregon.yaml Deployment.danteplanner.kube-state-metrics" \
-  "CKV_K8S_9 /seoul.yaml Deployment.danteplanner.kube-state-metrics" >"$work/expected-removed.txt"
+printf '%s\n' "CKV_K8S_9 /oregon.yaml Deployment.danteplanner.mysqld-exporter" \
+  "CKV_K8S_9 /seoul.yaml Deployment.danteplanner.mysqld-exporter" >"$work/expected-removed.txt"
 comm -23 "$work/before.txt" "$work/after.txt" >"$work/removed.txt"
 cmp -s "$work/removed.txt" "$work/expected-removed.txt" || fail "$name" "--update removed other entries than the fixed ones" "$work/removed.txt"
 [ -z "$(comm -13 "$work/before.txt" "$work/after.txt")" ] || fail "$name" "--update added entries"
@@ -200,7 +319,7 @@ grep -qx '    needs: changes' "$work/job.yml" \
   || fail "$name" "pr-gate.yml has no scan-config job needing changes with the deploy-or-terraform condition"
 for lister in deploy-test-inputs.sh terraform-inputs.sh; do
   "$repo/.github/scripts/$lister" --list-inputs >"$work/inputs.txt"
-  for input in .github/scripts/config-scan.sh .github/scripts/images.sh .github/config-scan; do
+  for input in .github/scripts/config-scan.sh .github/scripts/render-charts.sh .github/scripts/images.sh .github/config-scan; do
     has_line "$work/inputs.txt" "$input" || fail "$name" "$lister --list-inputs does not list $input"
   done
 done
@@ -264,15 +383,15 @@ echo "PASS $name"
 name="a renamed resource has a stated way forward"
 renamed=$work/renamed
 copy_tree "$renamed"
-awk 'previous_kind == "kind: Deployment" && /^  name: kube-state-metrics$/ { $0 = "  name: kube-state-metrics-renamed" }
-  /^kind: / { previous_kind = $0 } { print }' "$renamed/deploy/base/kube-state-metrics.yaml" >"$work/renamed.yaml"
-mv "$work/renamed.yaml" "$renamed/deploy/base/kube-state-metrics.yaml"
-grep -qx '  name: kube-state-metrics-renamed' "$renamed/deploy/base/kube-state-metrics.yaml" || fail "$name" "the rename matched nothing"
+awk 'previous_kind == "kind: Deployment" && /^  name: redis-ratelimit$/ { $0 = "  name: redis-ratelimit-renamed" }
+  /^kind: / { previous_kind = $0 } { print }' "$renamed/deploy/base/redis-ratelimit.yaml" >"$work/renamed.yaml"
+mv "$work/renamed.yaml" "$renamed/deploy/base/redis-ratelimit.yaml"
+grep -qx '  name: redis-ratelimit-renamed' "$renamed/deploy/base/redis-ratelimit.yaml" || fail "$name" "the rename matched nothing"
 track "$renamed"
 run_scan "$work/renamed.out" "$renamed"
 [ "$status" -eq 1 ] || fail "$name" "exit $status, expected 1" "$work/renamed.out"
-grep -q '^NEW .* Deployment\.danteplanner\.kube-state-metrics-renamed$' "$work/renamed.out" \
-  && grep -q '^FIXED .* Deployment\.danteplanner\.kube-state-metrics$' "$work/renamed.out" \
+grep -q '^NEW .* Deployment\.danteplanner\.redis-ratelimit-renamed$' "$work/renamed.out" \
+  && grep -q '^FIXED .* Deployment\.danteplanner\.redis-ratelimit$' "$work/renamed.out" \
   || fail "$name" "no NEW and FIXED lines for the renamed Deployment" "$work/renamed.out"
 has_line "$work/renamed.out" "MOVED: a renamed or moved resource shows as NEW plus FIXED; rename its entries in the baseline file by hand in the same change" \
   || fail "$name" "no MOVED line" "$work/renamed.out"

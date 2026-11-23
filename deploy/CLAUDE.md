@@ -4,8 +4,11 @@
   (`base/external-secret.yaml`, `base/jwt-secrets.yaml`). Never hand-author a k8s Secret with
   values, and never use the legacy SSM → host-path → volume-mount flow — it targets the
   retired single-EC2 host and has no effect on the k3s fleet.
-- Structure is kustomize `base/` + per-region `overlays/`; region differences live in
-  overlays, never as conditionals inside base manifests.
+- Third-party components come from their upstream Helm charts, one ArgoCD Application per
+  component under `apps/` (chart version in `targetRevision`, values in `helm.valuesObject`,
+  raised by Renovate); both overlays list `apps/`. The rest stays kustomize `base/` +
+  per-region `overlays/` until its own chart lands; region differences live in overlays, never
+  as conditionals inside base manifests.
 - The backend image tag in kustomize is bumped by `.github/workflows/deploy-fleet.yml`
   (GitOps: ArgoCD syncs from `main`) — never hand-edit the tag to deploy.
 - RDS/DB endpoints: never commit the PRIMARY (write) endpoint — source it from the Secrets

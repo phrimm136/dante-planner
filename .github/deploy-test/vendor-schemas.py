@@ -11,6 +11,7 @@ SOURCES = [
     "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/690f754646e8326128fd686e3e46117ac479cfdf/config/crd/standard/gateway.networking.k8s.io_httproutes.yaml",
     "https://raw.githubusercontent.com/traefik/traefik/e90f4a7cb4e2a457ce72b292c2ce383ae71661eb/docs/content/reference/dynamic-configuration/kubernetes-crd-definition-v1.yml",
     "https://raw.githubusercontent.com/external-secrets/external-secrets/a50dff013c8a6e0fc12f2e6ab78172b7b4ae46bd/deploy/crds/bundle.yaml",
+    "https://raw.githubusercontent.com/argoproj/argo-cd/dc43124058130db9a747d141d86d7c2f4aac7bf9/manifests/crds/application-crd.yaml",
 ]
 
 KINDS = {
@@ -20,6 +21,7 @@ KINDS = {
     ("traefik.io", "TLSOption", "v1alpha1"),
     ("external-secrets.io", "ExternalSecret", "v1beta1"),
     ("external-secrets.io", "SecretStore", "v1beta1"),
+    ("argoproj.io", "Application", "v1alpha1"),
 }
 
 
