@@ -7,7 +7,7 @@
 # replication once Flyway has migrated (the same order RDS creates a read replica in).
 #
 # What this buys over the single-database stack: replication lag becomes a knob
-# (SOURCE_DELAY, or STOP REPLICA SQL_THREAD) rather than a race, so the read-your-writes gate
+# (SOURCE_DELAY, or STOP REPLICA SQL_THREAD) rather than a race, so the marker wait
 # is exercised deterministically instead of passing because the replica happened to keep up.
 #
 # What it still cannot reproduce: the Cloudflare edge, genuine geo steering (the edge derives
@@ -81,8 +81,8 @@ services:
     networks:
       - danteplanner-network
 
-  # Seoul: the region that owns the read-your-writes gate. Writes cross to the primary, reads
-  # go to its local replica, and the gate filter registers because routing is enabled.
+  # Seoul: the region whose reads wait on freshness markers. Writes cross to the primary, reads
+  # go to its local replica, and the stamp filter registers because routing is enabled.
   backend:
     depends_on:
       mysql:
@@ -105,8 +105,7 @@ services:
       - "8082:8080"
 
   # Oregon: reads the primary first and falls back to the Seoul replica, as the prod overlay
-  # does, so its writes raise freshness markers and mint ryw_gtid. Suite C reads through this
-  # instance to prove the cookie carries across regions, not just within one.
+  # does, so its writes raise freshness markers.
   backend-oregon:
     image: danteplanner-backend:local
     depends_on:

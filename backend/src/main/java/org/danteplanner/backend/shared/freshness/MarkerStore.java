@@ -53,6 +53,7 @@ import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 public class MarkerStore implements AutoCloseable {
 
     public static final String RAISE_FAILURES = "freshness.marker.raise.failures";
+    public static final String RAISE_ABANDONED = "freshness.marker.raise.abandoned";
     public static final String WAIT_TIMEOUTS = "freshness.marker.wait.timeouts";
 
     static final Duration RAISE_CONNECT_TIMEOUT = Duration.ofSeconds(1);
@@ -110,7 +111,7 @@ public class MarkerStore implements AutoCloseable {
         this.settings = settings;
         this.raiseBatcher = new RaiseBatcher(() -> raiseEndpoint(writeStore, clientResources),
                 settings.waitReplicas(), settings.waitBound(), RAISE_MARGIN, meterRegistry.counter(RAISE_FAILURES),
-                meterRegistry.counter(WAIT_TIMEOUTS), System::nanoTime);
+                meterRegistry.counter(WAIT_TIMEOUTS), meterRegistry.counter(RAISE_ABANDONED), System::nanoTime);
     }
 
     public static List<Source> sourceOrder(boolean readsPrimaryFirst, Source local, Source auth) {

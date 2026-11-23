@@ -18,7 +18,3 @@ export function setCookieValue(headers: string[], name: string): string | null {
   const value = assignment.slice(`${name}=`.length).split(';')[0]!
   return value.length > 0 ? value : null
 }
-
-export function cookieHeader(...pairs: Array<string | null | undefined>): string {
-  return pairs.filter((pair): pair is string => Boolean(pair)).join('; ')
-}

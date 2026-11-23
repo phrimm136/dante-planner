@@ -2,11 +2,9 @@ package org.danteplanner.backend.integration;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -18,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.HttpHeaders;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -52,8 +49,6 @@ import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.shared.freshness.DispatchStamp;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
-import org.danteplanner.backend.shared.gtid.GtidCookie;
-import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 import org.danteplanner.backend.shared.outbox.service.DomainEventDispatcher;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.Hang;
@@ -78,7 +73,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("it")
 @Tag("containerized")
-@Import(TestConfig.class)
+@Import({TestConfig.class, RecordingGtidWriteCapture.Config.class})
 class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
 
     private static final String PLANNERS = "/api/planner/md/";
@@ -117,7 +112,7 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
     private PlannerCommandService plannerCommandService;
 
     @Autowired
-    private GtidWriteCapture writeCapture;
+    private RecordingGtidWriteCapture writeCapture;
 
     @Autowired
     private PlatformTransactionManager transactionManager;
@@ -361,12 +356,12 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
         Published published = publishedPlannerWithAComment();
         Set<FreshnessScope> candidates = candidates(published);
 
-        MvcResult result = perform(post("/api/comments/" + published.commentId() + "/report")
+        perform(post("/api/comments/" + published.commentId() + "/report")
                 .contentType(APPLICATION_JSON)
                 .content(REASON_BODY)
                 .cookie(published.owner().cookies()));
 
-        long requestSequence = primarySequence(requestGtid(result));
+        long requestSequence = primarySequence(requestGtid());
         assertThat(keysAt(markers(candidates), requestSequence))
                 .as("markers raised to the report's own sequence %s", requestSequence)
                 .isEmpty();
@@ -382,7 +377,7 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
 
             assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
                     new FreshnessScope.Global(), new FreshnessScope.User(created.getId()));
-            assertThat(writeCapture.takeCapturedGtid()).isPresent();
+            assertThat(writeCapture.takeCapture()).isPresent();
         } finally {
             writeCapture.clear();
             FreshnessDeclarations.clear();
@@ -518,7 +513,7 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
 
             assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
                     new FreshnessScope.Global(), new FreshnessScope.User(owner.id()));
-            assertThat(writeCapture.takeCapturedGtid()).isPresent();
+            assertThat(writeCapture.takeCapture()).isPresent();
         } finally {
             writeCapture.clear();
             FreshnessDeclarations.clear();
@@ -549,8 +544,7 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
                 .as("acknowledged at the stored version, so nothing was written")
                 .isEqualTo(savedVersion);
         assertThat(markers(candidates)).isEqualTo(before);
-        assertThat(acknowledged.getResponse().getHeaders(HttpHeaders.SET_COOKIE))
-                .noneMatch(header -> header.startsWith(GtidCookie.NAME + "="));
+        assertThat(writeCapture.taken()).isEmpty();
     }
 
     @Test
@@ -561,12 +555,12 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
                 new FreshnessScope.User(owner.id()));
         Map<String, Map<String, String>> before = markers(candidates);
 
-        MvcResult republished = perform(post(PLANNERS + plannerId + "/publish").cookie(owner.cookies()));
+        perform(post(PLANNERS + plannerId + "/publish").cookie(owner.cookies()));
 
         assertThat(markers(candidates)).isEqualTo(before);
-        assertThat(republished.getResponse().getHeaders(HttpHeaders.SET_COOKIE))
-                .as("no GTID cookie, so the request captured no commit and the stamp raised nothing, Global included")
-                .noneMatch(header -> header.startsWith(GtidCookie.NAME + "="));
+        assertThat(writeCapture.taken())
+                .as("the request captured no commit, so the stamp raised nothing, Global included")
+                .isEmpty();
     }
 
     @Test
@@ -613,11 +607,11 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
             });
 
             assertThat(FreshnessDeclarations.declared()).contains(new FreshnessScope.Planner(plannerId));
-            assertThat(writeCapture.takeCapturedGtid()).isEmpty();
+            assertThat(writeCapture.takeCapture()).isEmpty();
 
             transaction.executeWithoutResult(status -> plannerCommandService.deletePlanner(owner.id(), plannerId));
 
-            assertThat(writeCapture.takeCapturedGtid()).isPresent();
+            assertThat(writeCapture.takeCapture()).isPresent();
         } finally {
             writeCapture.clear();
             FreshnessDeclarations.clear();
@@ -629,9 +623,9 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
         assertThat(candidates).containsAll(scopes);
         Map<String, Map<String, String>> before = markers(candidates);
 
-        MvcResult result = perform(request);
+        perform(request);
 
-        long requestSequence = primarySequence(requestGtid(result));
+        long requestSequence = primarySequence(requestGtid());
         Map<String, Map<String, String>> after = markers(candidates);
         Set<String> expected = scopes.stream().map(FreshnessScope::key).collect(Collectors.toSet());
         expected.forEach(key -> {
@@ -867,6 +861,7 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
     }
 
     private MvcResult perform(MockHttpServletRequestBuilder request) throws Exception {
+        writeCapture.forget();
         MvcResult result = mockMvc.perform(request.with(withCsrf())).andReturn();
         assertThat(result.getResponse().getStatus())
                 .as("%s %s answered %s", result.getRequest().getMethod(), result.getRequest().getRequestURI(),
@@ -906,15 +901,8 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
         return candidates;
     }
 
-    private static String requestGtid(MvcResult result) {
-        List<String> setCookies = result.getResponse().getHeaders(HttpHeaders.SET_COOKIE);
-        return setCookies.stream()
-                .map(header -> header.split(";", 2)[0])
-                .filter(pair -> pair.startsWith(GtidCookie.NAME + "="))
-                .map(pair -> GtidCookie.decode(pair.substring(GtidCookie.NAME.length() + 1)))
-                .flatMap(Optional::stream)
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("no GTID cookie among " + setCookies));
+    private String requestGtid() {
+        return writeCapture.taken().getFirst().gtidSet();
     }
 
     private static Map<String, String> highestSequences(String gtidSet) {

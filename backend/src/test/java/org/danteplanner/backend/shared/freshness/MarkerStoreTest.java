@@ -1,5 +1,8 @@
 package org.danteplanner.backend.shared.freshness;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
@@ -37,6 +40,8 @@ class MarkerStoreTest {
     private static final String SERVER_B = "8f9e0d1c-2b3a-4c5d-6e7f-8a9b0c1d2e3f";
     private static final MarkerStore.Settings SETTINGS =
             new MarkerStore.Settings(1, Duration.ofSeconds(1), Duration.ofHours(1), false);
+    private static final MarkerStore.Settings IMPATIENT_SETTINGS =
+            new MarkerStore.Settings(1, Duration.ofMillis(1), Duration.ofHours(1), false);
     private static final MarkerStore.Settings ROOMY_SETTINGS =
             new MarkerStore.Settings(1, RealClockBounds.ROOMY_WAIT_BOUND, Duration.ofHours(1), false);
 
@@ -122,6 +127,26 @@ class MarkerStoreTest {
         Hang.until(() -> meters.counter(MarkerStore.RAISE_FAILURES).count() == 1.0,
                 "the marker-raise worker counting the failed raise");
         assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count()).isEqualTo(1.0);
+        assertThat(meters.counter(MarkerStore.WAIT_TIMEOUTS).count()).isZero();
+    }
+
+    @Test
+    void raise_WhenTheWriteStoreAcceptsTheConnectAndNeverAnswers_CountsOneAbandonedRaise() throws IOException {
+        try (ServerSocket silent = new ServerSocket(0, 0, InetAddress.getLoopbackAddress())) {
+            LettuceConnectionFactory unanswered = BoundedRedisConnections.connectionFactory(
+                    new RedisStandaloneConfiguration(silent.getInetAddress().getHostAddress(), silent.getLocalPort()));
+            unanswered.afterPropertiesSet();
+            try (MarkerStore slow = new MarkerStore(unanswered, unanswered.getRequiredNativeClient().getResources(),
+                    List.of(), new RedisRoleHealth(), IMPATIENT_SETTINGS, meters)) {
+                slow.raise(Set.of(new FreshnessScope.Global()), SERVER_A + ":1-3");
+
+                assertThat(meters.get("freshness.marker.raise.abandoned").counter().count()).isEqualTo(1.0);
+            } finally {
+                unanswered.destroy();
+            }
+        }
+        assertThat(meters.get("freshness.marker.raise.abandoned").counter().count()).isEqualTo(1.0);
+        assertThat(meters.counter(MarkerStore.RAISE_FAILURES).count()).isLessThanOrEqualTo(1.0);
         assertThat(meters.counter(MarkerStore.WAIT_TIMEOUTS).count()).isZero();
     }
 

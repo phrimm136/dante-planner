@@ -76,8 +76,8 @@ export async function scrapeMetrics(): Promise<MetricSample[]> {
 
 /**
  * The share of GTID captures that fell back to the primary's whole executed set. A ratio near 1
- * means `session_track_gtids` or `trackSessionState` is not in effect and every gated read pays a
- * cross-region round trip (docs/multi-region-request-paths.md §4b).
+ * means `session_track_gtids` or `trackSessionState` is not in effect
+ * (docs/multi-region-request-paths.md §4b).
  *
  * @returns the ratio, or null when the scrape carries no capture samples at all
  */

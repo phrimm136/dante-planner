@@ -119,7 +119,7 @@ public class GtidCapturingDataSource extends AbstractDataSource {
             }
             capture.recordCommit(readGlobalGtidExecuted(target), false);
         } catch (SQLException e) {
-            log.warn("Could not capture the committed GTID for the read-your-writes cookie", e);
+            log.warn("Could not capture the committed GTID for the freshness markers", e);
         }
     }
 

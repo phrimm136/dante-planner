@@ -46,6 +46,7 @@ class RaiseBatcherTest {
     private final SimpleMeterRegistry meters = new SimpleMeterRegistry();
     private final Counter raiseFailures = meters.counter(MarkerStore.RAISE_FAILURES);
     private final Counter waitTimeouts = meters.counter(MarkerStore.WAIT_TIMEOUTS);
+    private final Counter raiseAbandoned = meters.counter(MarkerStore.RAISE_ABANDONED);
 
     @Test
     void raise_WhenABatchThrowsAnUncheckedException_FailsThatBatchAndRaisesTheNextOnTheSameWorker()
@@ -59,7 +60,8 @@ class RaiseBatcherTest {
                         throw new IllegalStateException("injected");
                     }
                     return redis.endpoint();
-                }, 1, RealClockBounds.ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, System::nanoTime)) {
+                }, 1, RealClockBounds.ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures,
+                        waitTimeouts, raiseAbandoned, System::nanoTime)) {
             long start = System.nanoTime();
             boolean first = batcher.raise(KEYS, ARGUMENTS);
             Duration firstElapsed = Duration.ofNanos(System.nanoTime() - start);
@@ -72,6 +74,7 @@ class RaiseBatcherTest {
             assertThat(failuresAfterFirst).isEqualTo(1.0);
             assertThat(second).isTrue();
             assertThat(raiseFailures.count()).isEqualTo(1.0);
+            assertThat(raiseAbandoned.count()).as("a raise that failed or was acknowledged in time").isZero();
             assertThat(workers).hasSize(2).containsOnly(workers.get(0));
         }
     }
@@ -87,7 +90,8 @@ class RaiseBatcherTest {
                         throw new StackOverflowError("injected");
                     }
                     return redis.endpoint();
-                }, 1, RealClockBounds.ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, System::nanoTime)) {
+                }, 1, RealClockBounds.ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures,
+                        waitTimeouts, raiseAbandoned, System::nanoTime)) {
             boolean first = batcher.raise(KEYS, ARGUMENTS);
             double failuresAfterFirst = raiseFailures.count();
             Hang.until(() -> !workers.get(0).isAlive(), "the first worker dying");
@@ -109,7 +113,7 @@ class RaiseBatcherTest {
         RaiseBatcher batcher = new RaiseBatcher(() -> {
             endpoints.incrementAndGet();
             throw new IllegalStateException("no endpoint after close");
-        }, 1, WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, System::nanoTime);
+        }, 1, WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, raiseAbandoned, System::nanoTime);
         batcher.close();
         ThreadGroup callers = new ThreadGroup("raise-after-close");
         AtomicReference<Boolean> raised = new AtomicReference<>();
@@ -133,7 +137,8 @@ class RaiseBatcherTest {
                 RaiseBatcher batcher = new RaiseBatcher(() -> {
                     worker.set(Thread.currentThread());
                     return redis.endpoint();
-                }, 1, RealClockBounds.ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, now::get)) {
+                }, 1, RealClockBounds.ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures,
+                        waitTimeouts, raiseAbandoned, now::get)) {
             CompletableFuture<Boolean> raised = CompletableFuture.supplyAsync(() -> batcher.raise(KEYS, ARGUMENTS));
             Hang.await(redis.evalshaReceived, "the fake receiving EVALSHA");
             Hang.until(() -> worker.get().getState() == Thread.State.TIMED_WAITING, "the worker parking on the reply");
@@ -162,7 +167,7 @@ class RaiseBatcherTest {
         try (FakeRedis redis = new FakeRedis(WaitReply.TIMES_OUT, false,
                 () -> now.addAndGet(connectCost.toNanos()));
                 RaiseBatcher batcher = new RaiseBatcher(redis::endpoint, 1, RealClockBounds.ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN,
-                        raiseFailures, waitTimeouts, now::get)) {
+                        raiseFailures, waitTimeouts, raiseAbandoned, now::get)) {
             boolean raised = batcher.raise(KEYS, ARGUMENTS);
 
             assertThat(redis.waitTimeouts())
@@ -182,7 +187,7 @@ class RaiseBatcherTest {
         try (FakeRedis redis = new FakeRedis(WaitReply.TIMES_OUT, false,
                 () -> now.addAndGet(connectCost.toNanos()));
                 RaiseBatcher batcher = new RaiseBatcher(redis::endpoint, 1, RealClockBounds.ROOMY_WAIT_BOUND, MarkerStore.RAISE_MARGIN,
-                        raiseFailures, waitTimeouts, now::get)) {
+                        raiseFailures, waitTimeouts, raiseAbandoned, now::get)) {
             boolean raised = batcher.raise(KEYS, ARGUMENTS);
 
             assertThat(raised).isTrue();
@@ -190,6 +195,57 @@ class RaiseBatcherTest {
             assertThat(waitTimeouts.count()).isEqualTo(1.0);
             assertThat(raiseFailures.count()).isZero();
         }
+    }
+
+    @Test
+    void raise_WhenTheCallersBoundPassesBeforeItsBatchLands_CountsOneAbandonedRaiseWhoseMarkerStillLands()
+            throws Exception {
+        CountDownLatch connectable = new CountDownLatch(1);
+        try (FakeRedis redis = new FakeRedis(WaitReply.ACKNOWLEDGES, false);
+                RaiseBatcher batcher = new RaiseBatcher(() -> {
+                    Hang.await(connectable, "the caller giving up before the worker connects");
+                    return redis.endpoint();
+                }, 1, WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, raiseAbandoned, () -> 0L)) {
+            boolean abandoned = batcher.raise(KEYS, ARGUMENTS);
+            double abandonedAtTheBound = raiseAbandoned.count();
+            List<List<String>> sentAtTheBound = List.copyOf(redis.commands);
+            connectable.countDown();
+
+            boolean next = batcher.raise(KEYS, ARGUMENTS);
+
+            assertThat(abandoned).isFalse();
+            assertThat(abandonedAtTheBound).isEqualTo(1.0);
+            assertThat(sentAtTheBound).isEmpty();
+            assertThat(next).isTrue();
+            assertThat(redis.commands)
+                    .as("the abandoned raise and the one after it")
+                    .filteredOn(command -> command.get(0).equalsIgnoreCase("EVALSHA"))
+                    .hasSize(2);
+            assertThat(raiseAbandoned.count()).isEqualTo(1.0);
+            assertThat(raiseFailures.count()).isZero();
+            assertThat(waitTimeouts.count()).isZero();
+        }
+    }
+
+    @Test
+    void raise_WhenTheCallersBoundPassesAndItsBatchThenFails_CountsOneAbandonedAndOneFailure() {
+        CountDownLatch connectable = new CountDownLatch(1);
+        try (RaiseBatcher batcher = new RaiseBatcher(() -> {
+            Hang.await(connectable, "the caller giving up before the worker connects");
+            throw new IllegalStateException("injected");
+        }, 1, WAIT_BOUND, MarkerStore.RAISE_MARGIN, raiseFailures, waitTimeouts, raiseAbandoned, () -> 0L)) {
+            boolean raised = batcher.raise(KEYS, ARGUMENTS);
+            double failuresAtTheBound = raiseFailures.count();
+
+            connectable.countDown();
+            Hang.until(() -> raiseFailures.count() >= 1.0, "the worker counting the failed batch");
+
+            assertThat(raised).isFalse();
+            assertThat(failuresAtTheBound).isZero();
+            assertThat(raiseAbandoned.count()).isEqualTo(1.0);
+        }
+        assertThat(raiseFailures.count()).as("after close drained the queue").isEqualTo(1.0);
+        assertThat(raiseAbandoned.count()).as("after close drained the queue").isEqualTo(1.0);
     }
 
     private enum WaitReply {

@@ -406,6 +406,22 @@
             values: '0x20'
         at: 12m
 
+- name: marker-undeclared
+  kind: prometheus
+  for: 0s
+  expr: 'sum by (cluster) (increase(freshness_marker_undeclared_total[10m])) > 0'
+  cases:
+    fires:
+      - series:
+          - series: 'freshness_marker_undeclared_total{cluster="seoul"}'
+            values: '0x9 2x10'
+        at: 12m
+    quiet:
+      - series:
+          - series: 'freshness_marker_undeclared_total{cluster="seoul"}'
+            values: '0x20'
+        at: 12m
+
 # Marker TTL is 1 hour (ADR 183): safe only while the Seoul replica lags far below it.
 - name: seoul-replica-lag
   kind: cloudwatch

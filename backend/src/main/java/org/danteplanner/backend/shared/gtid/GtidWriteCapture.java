@@ -60,10 +60,6 @@ public class GtidWriteCapture {
         return Optional.of(unionGtidSets(acc.gtids));
     }
 
-    public Optional<String> takeCapturedGtid() {
-        return takeCapture().map(Capture::gtidSet);
-    }
-
     public Optional<Capture> takeCapture() {
         Accumulator acc = accumulator.get();
         Optional<String> gtid = pollCapturedGtid();

@@ -79,20 +79,22 @@ class MarkerStampTest {
     }
 
     @Test
-    void stamp_WhenNotFailFastAndATrackedCommitDeclaredNothing_ReturnsTheGtidAndCountsIt() {
+    void stamp_WhenNotFailFastAndATrackedCommitDeclaredNothing_CountsIt() {
         MarkerStamp stamp = stamp(false);
         writeCapture.recordCommit(TRACKED_GTID, true);
 
-        assertThat(stamp.stamp()).contains(SOURCE + ":7-7");
+        stamp.stamp();
+
         assertThat(markerStore.raises).isEmpty();
         assertThat(undeclared()).isEqualTo(1.0);
     }
 
     @Test
-    void stamp_WhenNothingWasCaptured_ReturnsEmptyAndCountsNothing() {
+    void stamp_WhenNothingWasCaptured_RaisesAndCountsNothing() {
         MarkerStamp stamp = stamp(true);
 
-        assertThat(stamp.stamp()).isEmpty();
+        stamp.stamp();
+
         assertThat(markerStore.raises).isEmpty();
         assertThat(undeclared()).isZero();
     }
@@ -104,38 +106,42 @@ class MarkerStampTest {
         writeCapture.recordCommit(TRACKED_GTID, true);
         FreshnessDeclarations.declare(user);
 
-        assertThat(stamp.stamp()).contains(SOURCE + ":7-7");
-        assertThat(stamp.stamp()).isEmpty();
+        stamp.stamp();
+        stamp.stamp();
+
         assertThat(markerStore.raises).containsExactly(new Raise(Set.of(user), SOURCE + ":7-7"));
     }
 
     @Test
-    void stamp_WhenNoneIsDeclaredInFailFast_ReturnsTheGtidAndRaisesNothing() {
+    void stamp_WhenNoneIsDeclaredInFailFast_RaisesNothing() {
         MarkerStamp stamp = stamp(true);
         writeCapture.recordCommit(TRACKED_GTID, true);
         FreshnessDeclarations.declareNone("no read renders it");
 
-        assertThat(stamp.stamp()).contains(SOURCE + ":7-7");
+        stamp.stamp();
+
         assertThat(markerStore.raises).isEmpty();
         assertThat(undeclared()).isZero();
     }
 
     @Test
-    void stamp_WhenOnlyTheFallbackCapturedAndNothingIsDeclaredInFailFast_ReturnsTheGtidAndCountsNothing() {
+    void stamp_WhenOnlyTheFallbackCapturedAndNothingIsDeclaredInFailFast_RaisesAndCountsNothing() {
         MarkerStamp stamp = stamp(true);
         writeCapture.recordCommit(FALLBACK_GTID, false);
 
-        assertThat(stamp.stamp()).contains(FALLBACK_GTID);
+        stamp.stamp();
+
         assertThat(markerStore.raises).isEmpty();
         assertThat(undeclared()).isZero();
     }
 
     @Test
-    void stamp_WhenOnlyTheFallbackCapturedAndNothingIsDeclaredOutsideFailFast_ReturnsTheGtidAndCountsNothing() {
+    void stamp_WhenOnlyTheFallbackCapturedAndNothingIsDeclaredOutsideFailFast_RaisesAndCountsNothing() {
         MarkerStamp stamp = stamp(false);
         writeCapture.recordCommit(FALLBACK_GTID, false);
 
-        assertThat(stamp.stamp()).contains(FALLBACK_GTID);
+        stamp.stamp();
+
         assertThat(markerStore.raises).isEmpty();
         assertThat(undeclared()).isZero();
     }

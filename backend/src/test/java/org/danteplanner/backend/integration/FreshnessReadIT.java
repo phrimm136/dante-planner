@@ -5,14 +5,12 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.HttpHeaders;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -47,8 +45,6 @@ import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessReadGuard;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.freshness.MarkerStore;
-import org.danteplanner.backend.shared.gtid.GtidCookie;
-import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 import org.danteplanner.backend.shared.outbox.service.DomainEventDispatcher;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.ViewerHashUtil;
@@ -75,7 +71,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @AutoConfigureMockMvc
 @ActiveProfiles("it")
 @Tag("containerized")
-@Import(TestConfig.class)
+@Import({TestConfig.class, RecordingGtidWriteCapture.Config.class})
 class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
 
     private static final String PLANNERS_ROOT = "/api/planner/";
@@ -92,6 +88,8 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
     private static final long REPLICATION_LATENCY_UNDER_THE_WAIT_BOUND_MILLIS = 120;
     private static final int LAG_UNDER_BOUND_ROUNDS = 20;
     private static final String SEOUL_REPLICA = "seoul-replica";
+    private static final String LISTED_KEYWORD = "Sinking";
+    private static final String UNLISTED_KEYWORD = "Burst";
     private static final String NEW_EPITHET = "NAIVE";
     private static final String VIEW_BUFFER_KEY = "views:buffer";
     private static final String VIEW_SEEN_KEY_PREFIX = "views:seen:";
@@ -127,7 +125,7 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
     private UserAccountLifecycleService lifecycleService;
 
     @Autowired
-    private GtidWriteCapture writeCapture;
+    private RecordingGtidWriteCapture writeCapture;
 
     @Autowired
     private MeterRegistry meterRegistry;
@@ -371,6 +369,34 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
             perform(post(PLANNERS + plannerId + "/publish").cookie(owner));
 
             assertThat(status(get(PLANNERS_ROOT + plannerId + "/comments"))).isIn(OK, UNAVAILABLE);
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @Test
+    void keywordList_WhenTheReplicaLagsAPublish_ListsThePlanner() throws Exception {
+        Cookie[] owner = session("freshness-read-keyword");
+        UUID plannerId = UUID.randomUUID();
+        perform(put(PLANNERS + plannerId)
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(UpsertRequests.draft()
+                        .id(plannerId.toString())
+                        .title("keyword-published-while-lagging")
+                        .content(TestDataFactory.withSelectedKeywords(TestDataFactory.VALID_CONTENT,
+                                List.of(LISTED_KEYWORD)))
+                        .build()))
+                .cookie(owner));
+        replicationControl.awaitCaughtUp();
+        try {
+            replicationControl.stopReplica();
+            perform(post(PLANNERS + plannerId + "/publish").cookie(owner));
+
+            assertThat(ids(json(get(CATALOG_PAGE).param("keyword", LISTED_KEYWORD)).path("content")))
+                    .contains(plannerId.toString());
+            assertThat(ids(json(get(CATALOG_PAGE).param("keyword", UNLISTED_KEYWORD)).path("content")))
+                    .doesNotContain(plannerId.toString());
         } finally {
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();
@@ -777,6 +803,7 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
             for (int round = 0; round < EAGER_DISPATCH_ROUNDS; round++) {
                 User commenter = TestDataFactory.createTestUser(userRepository, "freshness-read-eager-commenter-"
                         + UUID.randomUUID() + "@example.com");
+                writeCapture.forget();
                 MvcResult comment = mockMvc.perform(post(PLANNERS_ROOT + plannerId + "/comments")
                                 .with(withCsrf())
                                 .contentType(APPLICATION_JSON)
@@ -786,7 +813,7 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
                 assertThat(comment.getResponse().getStatus()).isBetween(200, 299);
                 String commentPublicId = objectMapper.readTree(comment.getResponse().getContentAsString())
                         .path("id").asText();
-                long requestSequence = primarySequence(requestGtid(comment));
+                long requestSequence = primarySequence(requestGtid());
                 Hang.until(() -> markerSequence(ownerMarker) > requestSequence,
                         "the eager dispatch raising " + ownerMarker + " past " + requestSequence);
 
@@ -829,14 +856,8 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
         return highest;
     }
 
-    private static String requestGtid(MvcResult result) {
-        return result.getResponse().getHeaders(HttpHeaders.SET_COOKIE).stream()
-                .map(header -> header.split(";", 2)[0])
-                .filter(pair -> pair.startsWith(GtidCookie.NAME + "="))
-                .map(pair -> GtidCookie.decode(pair.substring(GtidCookie.NAME.length() + 1)))
-                .flatMap(Optional::stream)
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("no GTID cookie on " + result.getRequest().getRequestURI()));
+    private String requestGtid() {
+        return writeCapture.taken().getFirst().gtidSet();
     }
 
     private long recordCommentReceived(UUID plannerId, Long commentId) {
@@ -854,7 +875,7 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
         FreshnessDeclarations.begin();
         try {
             User created = userService.findOrCreateUser("google", "freshness-read-describe-" + UUID.randomUUID(), email);
-            String gtid = writeCapture.takeCapturedGtid().orElseThrow();
+            String gtid = writeCapture.takeCapture().orElseThrow().gtidSet();
             markerStore.raise(FreshnessDeclarations.declared(), gtid);
             return created;
         } finally {
@@ -868,7 +889,7 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
         FreshnessDeclarations.begin();
         try {
             lifecycleService.reactivateAccount(userId);
-            String gtid = writeCapture.takeCapturedGtid().orElseThrow();
+            String gtid = writeCapture.takeCapture().orElseThrow().gtidSet();
             markerStore.raise(FreshnessDeclarations.declared(), gtid);
         } finally {
             writeCapture.clear();

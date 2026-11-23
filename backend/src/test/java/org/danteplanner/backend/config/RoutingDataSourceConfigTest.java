@@ -1,7 +1,5 @@
 package org.danteplanner.backend.config;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +7,6 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.danteplanner.backend.shared.config.PoolLedger;
-import org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource;
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.config.RoutingDataSourceConfig;
@@ -19,7 +16,6 @@ import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import org.springframework.boot.jdbc.autoconfigure.DataSourceProperties;
 
@@ -31,28 +27,17 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 /**
  * The routing datasource config sizes its HikariCP pools
  * from the {@link PoolLedger} constants per region, reading the same ledger production reads rather
  * than copies. Exercises only the connection-free builder methods and the target wiring.
  */
-@ExtendWith(MockitoExtension.class)
 class RoutingDataSourceConfigTest {
 
     private static final String REPLICA = "seoul-replica";
-
-    @Mock
-    private DataSource primaryReadPool;
-
-    @Mock
-    private Connection primaryReadConnection;
 
     private static DataSourceProperties primaryProperties() {
         DataSourceProperties props = new DataSourceProperties();
@@ -120,26 +105,6 @@ class RoutingDataSourceConfigTest {
             assertThat(targets).containsOnlyKeys(RoutingKey.PRIMARY, RoutingKey.REPLICA);
             assertThat(targets.get(RoutingKey.REPLICA)).isSameAs(selector);
             assertThat(targets.get(RoutingKey.PRIMARY)).isNotSameAs(selector);
-        }
-
-        @Test
-        void dataSource_WhenAReadOnlyTransactionIsPinnedToPrimary_LendsFromTheSelectorsAuthority()
-                throws SQLException {
-            when(primaryReadPool.getConnection()).thenReturn(primaryReadConnection);
-            ReadSourceSelector selector = new ReadSourceSelector(List.of(
-                    new ReadSourceSelector.Source(REPLICA, false, new HikariDataSource(),
-                            CircuitBreaker.ofDefaults(REPLICA)),
-                    new ReadSourceSelector.Source(ReadSourceProperties.PRIMARY, true, primaryReadPool,
-                            CircuitBreaker.ofDefaults(ReadSourceProperties.PRIMARY))));
-            AbstractRoutingDataSource routing = routing(config, selector);
-            TransactionSynchronizationManager.setCurrentTransactionReadOnly(true);
-            ReadOnlyRoutingDataSource.pinTo(RoutingKey.PRIMARY);
-            try {
-                assertThat(routing.getConnection()).isSameAs(primaryReadConnection);
-            } finally {
-                ReadOnlyRoutingDataSource.clear();
-                TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
-            }
         }
     }
 

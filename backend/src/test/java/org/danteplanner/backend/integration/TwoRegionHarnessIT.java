@@ -10,13 +10,10 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpHeaders;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 
@@ -28,7 +25,6 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Tag;
@@ -40,10 +36,7 @@ import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.config.ReadSourcesConfig;
-import org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource;
-import org.danteplanner.backend.shared.config.RoutingKey;
-import org.danteplanner.backend.shared.config.UndeclaredPrimaryAccessGuard;
-import org.danteplanner.backend.shared.gtid.GtidCookie;
+import org.danteplanner.backend.shared.freshness.FreshnessReadGuard;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -107,23 +100,23 @@ class TwoRegionHarnessIT extends ReplicaRoutingHarnessSupport {
     }
 
     @Test
-    void oregonWrite_WhenAuthorReadsInSeoulWithTheMintedCookie_ReturnsTheWrittenSyncVersion() throws Exception {
+    void oregonWrite_WhenAuthorReadsInSeoul_ReturnsTheWrittenSyncVersionAfterOneMarkerWait() throws Exception {
         Session session = newSession("two-region-ryw-");
         UUID plannerId = UUID.randomUUID();
 
         try {
             MvcResult written = writePrimaryOnlyTitle(session, plannerId);
             long writtenVersion = syncVersion(written);
-            double pinsBefore = seoulGatePins();
+            long waitsBefore = seoulMarkerTimeouts();
 
             mockMvc.perform(get(plannerPath(plannerId))
-                            .cookie(session.auth(), session.device(), rywCookie(written)))
+                            .cookie(session.auth(), session.device()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.title", is(PRIMARY_ONLY_TITLE)))
                     .andExpect(jsonPath("$.syncVersion").value(writtenVersion));
-            assertThat(seoulGatePins())
-                    .as("the Seoul gate must pin the primary for a cookie its stopped replica has not applied")
-                    .isEqualTo(pinsBefore + 1);
+            assertThat(seoulMarkerTimeouts())
+                    .as("the Seoul read must leave its stopped replica after one marker wait")
+                    .isEqualTo(waitsBefore + 1);
         } finally {
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();
@@ -208,32 +201,32 @@ class TwoRegionHarnessIT extends ReplicaRoutingHarnessSupport {
     }
 
     @Test
-    void routingOverride_WhenSeoulPinnedThePrimaryOnThisThread_IsAbsentAfterTheNextOregonRequest() throws Exception {
-        ReadOnlyRoutingDataSource.pinTo(RoutingKey.PRIMARY);
+    void readSkips_WhenSeoulSkippedItsReplicaOnThisThread_AreAbsentAfterTheRequest() throws Exception {
+        ReadSourceSelector.Source replica = readSourceSelector.sources().getFirst();
+        ReadSourceSelector.skip(replica);
         try {
-            assertThat(readOnlyRoutingKey())
-                    .as("the probe must see an override when one is set")
-                    .isEqualTo(RoutingKey.PRIMARY);
+            assertThat(readSourceSelector.current())
+                    .as("the probe must see a skip when one is set")
+                    .contains(readSourceSelector.sources().getLast());
         } finally {
-            ReadOnlyRoutingDataSource.clear();
+            ReadSourceSelector.clearSkips();
         }
-        Session session = newSession("two-region-override-");
+        Session session = newSession("two-region-skips-");
         UUID plannerId = UUID.randomUUID();
 
         try {
-            MvcResult written = writePrimaryOnlyTitle(session, plannerId);
-            double pinsBefore = seoulGatePins();
-            mockMvc.perform(get(plannerPath(plannerId))
-                            .cookie(session.auth(), session.device(), rywCookie(written)))
+            writePrimaryOnlyTitle(session, plannerId);
+            long waitsBefore = seoulMarkerTimeouts();
+            mockMvc.perform(get(plannerPath(plannerId)).cookie(session.auth(), session.device()))
                     .andExpect(status().isOk());
-            assertThat(seoulGatePins()).as("the Seoul read pinned the primary").isEqualTo(pinsBefore + 1);
+            assertThat(seoulMarkerTimeouts()).as("the Seoul read skipped its replica").isEqualTo(waitsBefore + 1);
 
+            assertThat(readSourceSelector.current())
+                    .as("no skip survives the Seoul request")
+                    .contains(replica);
             oregon().mockMvc().perform(get(plannerPath(plannerId)).cookie(session.auth(), session.device()))
-                    .andExpect(status().isOk());
-
-            assertThat(readOnlyRoutingKey())
-                    .as("no routing override survives from the Seoul request into the Oregon one")
-                    .isEqualTo(RoutingKey.REPLICA);
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.title", is(PRIMARY_ONLY_TITLE)));
         } finally {
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();
@@ -243,7 +236,7 @@ class TwoRegionHarnessIT extends ReplicaRoutingHarnessSupport {
     @Test
     void seoulPrimaryBreaker_WhenOpen_LeavesTheOregonPrimaryBreakerClosed() {
         double oregonOpenedBefore = oregonTransitions("closed", "open");
-        CircuitBreaker seoulPrimary = readSourceSelector.authority().breaker();
+        CircuitBreaker seoulPrimary = readSourceSelector.sources().getLast().breaker();
 
         try {
             seoulPrimary.transitionToOpenState();
@@ -311,17 +304,11 @@ class TwoRegionHarnessIT extends ReplicaRoutingHarnessSupport {
         return timer.count();
     }
 
-    private double seoulGatePins() {
-        Counter counter = meterRegistry.find("gtid.gate").tag("outcome", "primary").counter();
-        return counter == null ? 0.0 : counter.count();
-    }
-
-    private RoutingKey readOnlyRoutingKey() {
-        ReadOnlyRoutingDataSource probe = new ReadOnlyRoutingDataSource(
-                new UndeclaredPrimaryAccessGuard(new SimpleMeterRegistry(), true), null);
-        TransactionTemplate readOnly = new TransactionTemplate(new DataSourceTransactionManager(dataSource));
-        readOnly.setReadOnly(true);
-        return readOnly.execute(status -> (RoutingKey) probe.determineCurrentLookupKey());
+    private long seoulMarkerTimeouts() {
+        Timer timer = meterRegistry.find(FreshnessReadGuard.READ_WAIT)
+                .tag(FreshnessReadGuard.SOURCE_TAG, readSourceSelector.sources().getFirst().name())
+                .tag(FreshnessReadGuard.OUTCOME_TAG, FreshnessReadGuard.TIMEOUT).timer();
+        return timer == null ? 0 : timer.count();
     }
 
     private String uncheckedOregonAnswer(Session session, UUID plannerId) {
@@ -362,17 +349,6 @@ class TwoRegionHarnessIT extends ReplicaRoutingHarnessSupport {
     private static long syncVersion(MvcResult result) throws Exception {
         Number version = JsonPath.read(result.getResponse().getContentAsString(), "$.syncVersion");
         return version.longValue();
-    }
-
-    private static Cookie rywCookie(MvcResult written) {
-        List<String> setCookies = written.getResponse().getHeaders(HttpHeaders.SET_COOKIE);
-        String header = setCookies.stream()
-                .filter(candidate -> candidate.startsWith(GtidCookie.NAME + "="))
-                .findFirst()
-                .orElse(null);
-        assertThat(header).as("an Oregon write must mint %s among %s", GtidCookie.NAME, setCookies)
-                .isNotNull();
-        return new Cookie(GtidCookie.NAME, header.split(";", 2)[0].substring(GtidCookie.NAME.length() + 1));
     }
 
     private Session newSession(String emailPrefix) {

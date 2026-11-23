@@ -60,6 +60,7 @@ final class RaiseBatcher implements AutoCloseable {
     private final Duration bound;
     private final Counter raiseFailures;
     private final Counter waitTimeouts;
+    private final Counter raiseAbandoned;
     private final LongSupplier clock;
     private final BlockingQueue<RaiseRequest> queue = new LinkedBlockingQueue<>();
     private WorkerState workerState = new WorkerState.Idle();
@@ -67,7 +68,7 @@ final class RaiseBatcher implements AutoCloseable {
     private Link link = new Link.Unlinked();
 
     RaiseBatcher(Supplier<Endpoint> endpointFactory, int waitReplicas, Duration waitBound, Duration margin,
-            Counter raiseFailures, Counter waitTimeouts, LongSupplier clock) {
+            Counter raiseFailures, Counter waitTimeouts, Counter raiseAbandoned, LongSupplier clock) {
         this.endpointFactory = endpointFactory;
         this.waitReplicas = waitReplicas;
         this.waitBound = waitBound;
@@ -75,6 +76,7 @@ final class RaiseBatcher implements AutoCloseable {
         this.bound = waitBound.plus(margin);
         this.raiseFailures = raiseFailures;
         this.waitTimeouts = waitTimeouts;
+        this.raiseAbandoned = raiseAbandoned;
         this.clock = clock;
     }
 
@@ -87,7 +89,10 @@ final class RaiseBatcher implements AutoCloseable {
         }
         try {
             return request.raised().get(bound.toNanos(), TimeUnit.NANOSECONDS);
-        } catch (TimeoutException | ExecutionException e) {
+        } catch (TimeoutException e) {
+            raiseAbandoned.increment();
+            return false;
+        } catch (ExecutionException e) {
             return false;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

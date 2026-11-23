@@ -22,7 +22,6 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.freshness.MarkerStore.MarkerView;
-import org.danteplanner.backend.shared.gtid.GtidReadGate;
 import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 
 import org.junit.jupiter.api.AfterEach;
@@ -191,7 +190,7 @@ class FreshnessReadGuardTest {
     @Test
     void settle_WhenTheWaitConnectionFails_SkipsTheSourceWithoutThrowing() throws SQLException {
         when(seoulPool.getConnection()).thenThrow(new SQLException("Communications link failure", "08S01"));
-        FreshnessReadGuard realWait = guardWaiting(GtidReadGate::isApplied);
+        FreshnessReadGuard realWait = guardWaiting(ReplicaGtidWait::isApplied);
         views.put(PLANNER, new MarkerView.At(APPLIED_FIVE));
 
         assertThat(realWait.settle(List.of(PLANNER), seoul, Map.of(), true))

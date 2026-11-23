@@ -8,9 +8,6 @@ import org.danteplanner.backend.shared.config.ReadSourcesConfig;
 import org.danteplanner.backend.shared.freshness.FreshnessReadGuard;
 
 public enum CoverageTarget {
-    GATE_PINS_PRIMARY("gate pins the primary", Region.SEOUL, Instrument.COUNTER, "gtid.gate", "outcome", "primary"),
-    GATE_SERVES_REPLICA("gate serves the replica", Region.SEOUL, Instrument.COUNTER, "gtid.gate", "outcome",
-            "replica"),
     OREGON_READ_FELL_BACK("oregon read fell back", Region.OREGON, Instrument.TIMER, "hikaricp.connections.acquire",
             "pool", "seoul-replica"),
     OREGON_BREAKER_OPENED("oregon breaker opened", Region.OREGON, Instrument.COUNTER,

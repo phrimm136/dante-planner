@@ -1,9 +1,7 @@
-package org.danteplanner.backend.shared.gtid;
+package org.danteplanner.backend.shared.freshness;
 
-import org.danteplanner.backend.shared.freshness.MarkerStamp;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.MethodParameter;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
@@ -12,18 +10,18 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 
 /**
  * <p>A JSON-bodied response is committed DURING serialization — the converter's generator flush
- * propagates to the servlet stream — and a header added to a committed response is silently
- * dropped.</p>
+ * propagates to the servlet stream.</p>
  *
  * <p>MockMvc does not enforce commit semantics.</p>
  */
 @ControllerAdvice
 @ConditionalOnProperty(name = "datasource.routing.enabled", havingValue = "true")
 @RequiredArgsConstructor
-public class GtidCookieResponseAdvice implements ResponseBodyAdvice<Object> {
+public class FreshnessStampAdvice implements ResponseBodyAdvice<Object> {
 
     private final MarkerStamp markerStamp;
 
@@ -36,16 +34,15 @@ public class GtidCookieResponseAdvice implements ResponseBodyAdvice<Object> {
     }
 
     @Override
-    public Object beforeBodyWrite(
-        Object body,
+    public @Nullable Object beforeBodyWrite(
+        @Nullable Object body,
         MethodParameter returnType,
         MediaType selectedContentType,
         Class<? extends HttpMessageConverter<?>> selectedConverterType,
         ServerHttpRequest request,
         ServerHttpResponse response
     ) {
-        markerStamp.stamp()
-            .ifPresent(gtid -> response.getHeaders().add(HttpHeaders.SET_COOKIE, GtidCookie.of(gtid).toString()));
+        markerStamp.stamp();
         return body;
     }
 }

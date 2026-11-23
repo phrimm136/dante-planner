@@ -10,51 +10,64 @@ public final class Calibration {
 
     public static Result find(Probe probe, int batch, int doublingBudget, int bisectionDepthBudget)
             throws Exception {
-        long unpinned = NO_LATENCY_MILLIS;
-        long pinned = FIRST_LATENCY_MILLIS;
+        long applied = NO_LATENCY_MILLIS;
+        long timedOut = FIRST_LATENCY_MILLIS;
         int doublings = 0;
-        while (!batchPins(probe, pinned, batch)) {
+        while (!batchTimesOut(probe, timedOut, batch)) {
             if (doublings == doublingBudget) {
-                throw new IllegalStateException("consistency calibration: no replication latency up to " + pinned
-                        + " ms pinned the primary on a whole batch of " + batch + " probes");
+                return new Result.Unreached(timedOut, batch);
             }
-            unpinned = pinned;
-            pinned *= 2;
+            applied = timedOut;
+            timedOut *= 2;
             doublings++;
         }
         int depth = 0;
-        while (depth < bisectionDepthBudget && pinned - unpinned > 1) {
-            long middle = unpinned + (pinned - unpinned) / 2;
-            if (batchPins(probe, middle, batch)) {
-                pinned = middle;
+        while (depth < bisectionDepthBudget && timedOut - applied > 1) {
+            long middle = applied + (timedOut - applied) / 2;
+            if (batchTimesOut(probe, middle, batch)) {
+                timedOut = middle;
             } else {
-                unpinned = middle;
+                applied = middle;
             }
             depth++;
         }
-        return new Result(pinned, batch, depth);
+        return new Result.Boundary(timedOut, batch, depth);
     }
 
-    private static boolean batchPins(Probe probe, long latencyMillis, int batch) throws Exception {
+    private static boolean batchTimesOut(Probe probe, long latencyMillis, int batch) throws Exception {
         for (int attempt = 0; attempt < batch; attempt++) {
-            if (!probe.pinsPrimary(latencyMillis)) {
+            if (!probe.timesOut(latencyMillis)) {
                 return false;
             }
         }
         return true;
     }
 
-    public record Result(long latencyMillis, int batch, int depth) {
+    public sealed interface Result {
 
-        @Override
-        public String toString() {
-            return "L*=" + latencyMillis + " (batch " + batch + ", depth " + depth + ")";
+        long latencyMillis();
+
+        record Boundary(long latencyMillis, int batch, int depth) implements Result {
+
+            @Override
+            public String toString() {
+                return "L*=" + latencyMillis + " (batch " + batch + ", depth " + depth + ")";
+            }
+        }
+
+        record Unreached(long latencyMillis, int batch) implements Result {
+
+            @Override
+            public String toString() {
+                return "no replication latency up to " + latencyMillis
+                        + " ms timed out the marker wait on a whole batch of " + batch + " probes";
+            }
         }
     }
 
     @FunctionalInterface
     public interface Probe {
 
-        boolean pinsPrimary(long latencyMillis) throws Exception;
+        boolean timesOut(long latencyMillis) throws Exception;
     }
 }

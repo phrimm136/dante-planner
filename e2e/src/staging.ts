@@ -39,11 +39,4 @@ export const SAFETY_PROBE_INTERVAL_MS = Number(process.env.E2E_SAFETY_PROBE_INTE
 export const LIVENESS_DEADLINE_MS = Number(process.env.E2E_LIVENESS_DEADLINE_MS ?? 60_000)
 export const LIVENESS_POLL_INTERVAL_MS = Number(process.env.E2E_LIVENESS_POLL_INTERVAL_MS ?? 250)
 
-/**
- * A request's own GTIDs span the handful of transactions it commits; the fallback capture is the
- * primary's whole executed set. The cap separates the two without depending on an exact count.
- */
-export const OWN_GTID_TRANSACTION_CAP = 16
-
-/** Above this share of fallback captures the read gate is wide enough to cost every read a WAN hop. */
 export const MAX_GTID_FALLBACK_RATIO = 0.05

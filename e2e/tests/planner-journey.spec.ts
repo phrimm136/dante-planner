@@ -27,9 +27,7 @@ test('an owner publishes a planner and it reaches the community list', async ({ 
     const published = await api.post(`/api/planner/md/${plannerId}/publish`)
     expect(published.status(), await published.text()).toBe(200)
 
-    // Anonymous, because the community list is what a visitor sees. A visitor carries no
-    // ryw_gtid, so the replica region serves this listing at whatever replication lag holds:
-    // containment is a liveness property, not an instant one.
+    // Anonymous, because the community list is what a visitor sees.
     const anonymous = await edgeContext({
       baseURL: process.env.E2E_API_URL ?? baseURL!,
     })

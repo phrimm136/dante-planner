@@ -24,10 +24,9 @@ EXPORTER_METRICS=(
   mysql_global_status_slow_queries
   mysql_global_status_sort_merge_passes
 )
-# Exported by the backend (read-your-writes GTID gate panels).
+# Exported by the backend (the GTID capture panel).
 APP_METRICS=(
   gtid_capture_total
-  gtid_gate_total
 )
 DB_ALERT_RULES=(mysql-connectivity-lost staleness-meta-oregon staleness-meta-seoul)
 
@@ -39,7 +38,7 @@ report() { # status check detail
 
 # mysql_* families come from the exporter and vanish together only when the
 # pipeline is broken; gtid_* counters appear once traffic exercises the
-# read-your-writes path, so their absence is tolerable.
+# write path, so their absence is tolerable.
 classify_missing_metric() {
   case $1 in
     mysql_*) echo FAIL ;;

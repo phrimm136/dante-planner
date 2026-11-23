@@ -21,7 +21,6 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import jakarta.persistence.EntityManagerFactory;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import tools.jackson.databind.ObjectMapper;
 import com.redis.testcontainers.RedisContainer;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -37,8 +36,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.config.RedisConnectionConfig;
-import org.danteplanner.backend.shared.exception.ProblemWriter;
-import org.danteplanner.backend.shared.gtid.GtidGateConfig;
 import org.danteplanner.backend.shared.redis.RedisRoleConfig;
 import org.danteplanner.backend.shared.redis.RedisRoleProbe;
 import org.danteplanner.backend.support.Hang;
@@ -78,7 +75,7 @@ class MarkerStoreContextIT {
 
     private ApplicationContextRunner routingContext() {
         ApplicationContextRunner runner = new ApplicationContextRunner()
-                .withUserConfiguration(RedisConnectionConfig.class, RedisRoleConfig.class, GtidGateConfig.class,
+                .withUserConfiguration(RedisConnectionConfig.class, RedisRoleConfig.class, FreshnessConfig.class,
                         ReadSourceBinding.class)
                 .withBean(MeterRegistry.class, SimpleMeterRegistry::new)
                 .withBean(ReadSourceSelector.class, () -> new ReadSourceSelector(List.of(new ReadSourceSelector.Source(
@@ -86,7 +83,6 @@ class MarkerStoreContextIT {
                         CircuitBreaker.ofDefaults(ReadSourceProperties.PRIMARY + UUID.randomUUID())))))
                 .withBean(EntityManagerFactory.class, () -> entityManagerFactory)
                 .withBean(DataSource.class, () -> dataSource)
-                .withBean(ProblemWriter.class, () -> new ProblemWriter(new ObjectMapper()))
                 .withPropertyValues(
                         "datasource.routing.enabled=true",
                         "datasource.read-sources[0].name=seoul-replica",
