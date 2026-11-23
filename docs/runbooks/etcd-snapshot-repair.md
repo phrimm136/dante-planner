@@ -55,7 +55,10 @@ Then it runs these steps:
    changes (https://kubernetes.io/docs/reference/node/node-status/,
    https://kubernetes.io/docs/concepts/architecture/leases/). So a Ready status cached from
    before the restart cannot pass. The wait ends early when systemd reports k3s failed, or
-   when the restart counter of the unit rises, which means k3s exited and systemd restarted it.
+   when the restart counter of the unit (`NRestarts`) rises, which means k3s exited and systemd
+   restarted it. A manual restart sets the counter back to 0. A test with a throwaway unit on
+   systemd 262 showed it go from 3 to 0. So the script compares against the lowest value it
+   has read since it queued the restart, not against the value from before.
 6. It prints the local and S3 snapshot counts and the cron line of the unit.
 
 From step 2 on, every way out of the run that is not success goes through one rollback.
@@ -71,9 +74,17 @@ The hours in the cron come from `etcd_snapshot_interval_hours` in
 The script computes each budget from the one before it:
 
 - Run on the CP: at most 2 x 120 seconds for the save and its S3 copy, 300 seconds for the
-  restart, 300 seconds for the rollback, and 120 seconds for everything else. That is 960 seconds.
-- SSM command timeout: the run's budget plus 60 seconds, 1020 seconds.
-- Wait on your machine: the SSM timeout plus 60 seconds, 1080 seconds.
+  restart, 300 seconds for the rollback, and 180 seconds for everything else. That is 1020 seconds.
+- SSM command timeout: the run's budget plus 60 seconds, 1080 seconds.
+- Wait on your machine: the SSM timeout plus 60 seconds, 1140 seconds.
+
+Every call on the CP that can block has its own limit: each `kubectl` call takes
+`--request-timeout=10s`, and each `systemctl` call and the save run under `timeout`.
+Before step 2 the script counts the seconds left until the SSM timeout. When fewer than
+300 + 300 + 180 seconds are left, it ends `NOTHING CHANGED: not enough time left to restart
+and roll back within this run (<n>s left); run again`. The unit stays untouched, and the
+snapshot from step 1 stays in place. So SSM does not stop a run during the restart or the
+rollback, unless a single call on the CP runs over its own limit.
 
 The script prints the SSM command id first. When the wait on your machine ends first, the
 script says so and exits 6. The run on the CP can still be going. Do not run the script again
@@ -90,8 +101,8 @@ The last line of every run is one of these five. The exit code of the script fol
 | `REPAIRED` | 0 | Verify with `ops verify fleet --site <site>`. |
 | `ALREADY REPAIRED` | 0 | Nothing. The unit holds the repaired line, k3s is active and `/readyz` answers `ok`. |
 | `NOTHING CHANGED: <reason>` | 3 (0 for a dry run) | Read the reason. The unit is unchanged. Fix the cause, then run the dry run again. |
-| `ROLLED BACK, k3s serving: <reason>` | 4 | The unit holds the malformed line again and the cluster serves. Read the k3s journal for the reason, then decide before a new run. |
-| `ROLLED BACK, k3s NOT serving: <reason>; run <commands>` | 5 | A person must act now. Run the printed commands on the CP through SSM. The cluster API is down. |
+| `ROLLED BACK, k3s serving: <reason>` | 4 | The unit holds the malformed line again, k3s is active and `/readyz` answers `ok`. When the reason names nodes whose lease has not renewed yet, check them with `kubectl get nodes` before anything else. Read the k3s journal for the reason, then decide before a new run. |
+| `ROLLED BACK, k3s NOT serving: <reason>; run <commands>` | 5 | A person must act now. k3s is not active, or `/readyz` does not answer `ok`. Run the printed commands on the CP through SSM. |
 
 A run that ends without one of these lines exits 7. Run the dry run before anything else.
 
