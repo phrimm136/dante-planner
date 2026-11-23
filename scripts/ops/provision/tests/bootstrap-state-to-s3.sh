@@ -325,14 +325,62 @@ printf 'v = "left"\n' >"$work/left.tfvars"
 out=$( (push_state iam-bootstrap "$s13" acct-s13 remote-s13 "$work/left.tfvars" \
   "$p13/terraform.tfstate.d/ws1/terraform.tfstate" -backend-config=path="$work/s13.remote.tfstate") </dev/null 2>&1) ||
   fail "$name" "setup move"
+copy_b="$work/producer-13b/terraform.tfstate.d/ws1/terraform.tfstate"
+backup_13="$XDG_STATE_HOME/danteplanner/tf-state-backup/iam-bootstrap.acct-s13.tfstate"
 out=$( (push_state iam-bootstrap "$s13" acct-s13 remote-s13 "$work/left.tfvars" \
-  "$work/producer-13b/terraform.tfstate.d/ws1/terraform.tfstate" -backend-config=path="$work/s13.remote.tfstate") </dev/null 2>&1)
+  "$copy_b" -backend-config=path="$work/s13.remote.tfstate") </dev/null 2>&1)
 rc=$?
-[ "$rc" -ne 0 ] || fail "$name" "exit 0"
+[ "$rc" -ne 0 ] || fail "$name" "same account, exit 0"
+printf '%s\n' "$out" | grep -q "$copy_b and its backup $backup_13 are two different states at one serial" ||
+  fail "$name" "does not refuse at the backup"
+printf '%s\n' "$out" | grep -qE '^(backup|init|push):' && fail "$name" "it wrote before refusing"
+[ "$(state_digest "$backup_13")" = "$(state_digest "$p13/terraform.tfstate.d/ws1/terraform.tfstate")" ] ||
+  fail "$name" "the backup no longer holds copy A"
+out=$( (remove_local iam-bootstrap "$copy_b") 2>&1)
+rc=$?
+[ "$rc" -ne 0 ] || fail "$name" "--remove-local on copy B, exit 0"
+printf '%s\n' "$out" | grep -q "$copy_b has the verified lineage and serial but other resources or outputs" ||
+  fail "$name" "--remove-local does not name the content difference"
+[ -s "$copy_b" ] || fail "$name" "--remove-local deleted copy B"
+out=$( (push_state iam-bootstrap "$s13" acct-s13-b remote-s13 "$work/left.tfvars" \
+  "$copy_b" -backend-config=path="$work/s13.remote.tfstate") </dev/null 2>&1)
+rc=$?
+[ "$rc" -ne 0 ] || fail "$name" "fresh backup, exit 0"
 printf '%s\n' "$out" | grep -q 'holds the same lineage and serial as .* but different resources or outputs; nothing pushed.' ||
-  fail "$name" "does not name the content difference"
+  fail "$name" "the bucket check does not name the content difference"
 printf '%s\n' "$out" | grep -qE 'left|right' && fail "$name" "printed state content"
 printf '%s\n' "$out" | grep -q '^verified:' && fail "$name" "printed a verified line"
+pass "$name"
+
+name="local removal refuses a local file with the verified lineage and serial but other content"
+p15="$work/producer-15"
+producer "$p15" && apply_in "$p15" ws1 ws1 || fail "$name" "setup apply"
+command cp -R "$p15" "$work/producer-15b"
+apply_in "$p15" ws1 left && apply_in "$work/producer-15b" ws1 right || fail "$name" "setup diverging applies"
+s15="$work/s15"
+target "$s15"
+out=$( (push_state iam-bootstrap "$s15" acct-s15 remote-s15 "$work/left.tfvars" \
+  "$p15/terraform.tfstate.d/ws1/terraform.tfstate" -backend-config=path="$work/s15.remote.tfstate") </dev/null 2>&1) ||
+  fail "$name" "setup move"
+copy_15b="$work/producer-15b/terraform.tfstate.d/ws1/terraform.tfstate"
+out=$( (remove_local iam-bootstrap "$copy_15b") 2>&1)
+rc=$?
+[ "$rc" -ne 0 ] || fail "$name" "exit 0"
+printf '%s\n' "$out" | grep -q "Run the move again: bootstrap-state-to-s3.sh iam-bootstrap <path>/backend.acct-s15.hcl" ||
+  fail "$name" "does not name the move command"
+[ -s "$copy_15b" ] || fail "$name" "deleted the file"
+pass "$name"
+
+name="a marker in the old lineage-and-serial format is treated as unverified"
+marker_15="$XDG_STATE_HOME/danteplanner/tf-state-backup/iam-bootstrap.acct-s15.tfstate.verified"
+[ "$(wc -w <"$marker_15" | tr -d ' ')" = 3 ] || fail "$name" "setup: the verified move wrote no three-field marker"
+read -r m_lineage m_serial _ <"$marker_15"
+printf '%s %s\n' "$m_lineage" "$m_serial" >"$marker_15"
+out=$( (remove_local iam-bootstrap "$p15/terraform.tfstate.d/ws1/terraform.tfstate") 2>&1)
+rc=$?
+[ "$rc" -ne 0 ] || fail "$name" "exit 0"
+printf '%s\n' "$out" | grep -q 'was never verified' || fail "$name" "does not call it unverified"
+[ -s "$p15/terraform.tfstate.d/ws1/terraform.tfstate" ] || fail "$name" "deleted the file"
 pass "$name"
 
 # Scenario: local removal needs a verified move
