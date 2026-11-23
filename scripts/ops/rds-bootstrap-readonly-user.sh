@@ -3,7 +3,7 @@
 # rds-readonly-user.sql with the danteplanner/rds/readonly password substituted for
 # REPLACE_ME (env-only transit, the file on disk is untouched). Admin (master)
 # credentials are fetched, not prompted: username from the RDS API, password
-# from the gitignored terraform/rds var-file (its declared home — the
+# from the Secrets Manager entry danteplanner/rds/master-password (the
 # AWS-managed master secret is disabled for cross-region replica support).
 # Run provision/rds-readonly-secrets.sh first.
 # Usage: rds-bootstrap-readonly-user.sh
@@ -13,16 +13,11 @@ OPS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$OPS_DIR/lib/constants.sh"
 # shellcheck source=lib/secrets.sh
 source "$OPS_DIR/lib/secrets.sh"
-# One file per environment, so nothing auto-loads and nothing is implicit.
-TFVARS="${TFVARS:-$OPS_DIR/../../terraform/rds/prod.tfvars}"
 
 # Bring the tunnel up BEFORE the secrets exist in this environment, so the
 # long-lived ssm start-session child never inherits them via /proc/<pid>/environ.
 "$OPS_DIR/access/rds-tunnel.sh" status oregon >/dev/null 2>&1 \
   || "$OPS_DIR/access/rds-tunnel.sh" start oregon
-
-TFVARS_MODE=$(stat -c %a "$TFVARS")
-[ "${TFVARS_MODE: -2}" = "00" ] || { echo "refusing: $TFVARS is group/world-readable ($TFVARS_MODE) — chmod 600"; exit 1; }
 
 RO_BUNDLE=$(read_bundle us-west-2 "$SECRET_RDS_READONLY_BUNDLE")
 PW=$(bundle_key "$SECRET_RDS_READONLY_BUNDLE" "$RO_BUNDLE" password)

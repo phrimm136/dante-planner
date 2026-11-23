@@ -21,7 +21,7 @@ several real dependencies are not of that shape.
 | `log-archive` | The organization trail's destination bucket and its policy | `aws_account_id`, `management_account_id`, `organization_id` |
 | `registry` | Who may pull the backend image, and how many tagged images its repositories and their cross-region replicas keep; not the repositories themselves | `aws_account_id`, `organization_id` |
 | `secrets` | Secrets Manager **containers** and their cross-region replicas — never the values | `aws_account_id` |
-| `rds` | The MySQL primary, its parameter group, subnet group and security group | `vpc_id`, `db_subnet_ids`, `engine_version`, `aws_account_id` |
+| `rds` | The MySQL primary, its parameter group, subnet group and security group | `engine_version` (in `envs/<env>.tfvars`), `aws_account_id` (passed by `ops tf plan`) |
 | `oregon` | The primary k3s fleet (`modules/fleet`), peered to the RDS VPC | `ingress_allowed_cidrs`, `rds_vpc_id`, `aws_account_id` |
 | `seoul` | The secondary fleet, the cross-region RDS read replica, cross-region peering | `rds_vpc_id`, `ingress_allowed_cidrs`, `aws_account_id` |
 | `cloudflare` | Tunnels, load balancer, pools, health monitor | `cloudflare_api_token`, `account_id`, `zone_id` |
@@ -103,13 +103,20 @@ required and they live in different stacks.
 
 ## What must already exist
 
-The RDS VPC is an **input**, not an output. The only `aws_vpc` resource in this repo is the fleet's
-own (`modules/fleet/network.tf`); `rds` takes `vpc_id` and `db_subnet_ids`, and both fleets take
-`rds_vpc_id`, all pointing at a VPC no stack manages. On an account without it there is nothing to
-supply.
+The RDS VPC comes from one of two places. With `create_vpc = true` the `rds` stack creates the VPC
+and its subnets (`rds/network.tf`), which both tracked settings files choose. With `create_vpc = false`
+the stack takes `vpc_id` and `db_subnet_ids` of a VPC that no stack manages. Both fleets take
+`rds_vpc_id` as an input in either case, so `rds` is applied before them.
 
-Every `*.tfvars` is gitignored. Each stack ships a tracked `environment.tfvars.example` or
-`account.tfvars.example`; the auto-loaded name `terraform.tfvars` is not used anywhere.
+A stack with an `envs/` directory (today `rds`) keeps its settings tracked in `envs/<env>.tfvars`,
+one file per environment it is applied in, holding no account id, ARN, hostname or other
+account-bound value. `ops tf plan <stack>` passes the file of the env it plans under and, when the
+stack declares `aws_account_id`, the selected profile's `sso_account_id`. For such a stack it refuses
+`-var-file`, and `-var` for a variable the settings file assigns or for `aws_account_id`, so each
+variable has one source; a `-var` for any other variable, a per-run value, passes.
+
+Every other `*.tfvars` is gitignored. Each other stack ships a tracked `environment.tfvars.example`
+or `account.tfvars.example`; the auto-loaded name `terraform.tfvars` is not used anywhere.
 
 ## From scratch
 
@@ -148,8 +155,11 @@ isolate state and nothing else.
 `deletion_protection`, so a destroy or a replacement errors instead of deleting data. The fleet
 stacks deliberately carry neither, so their destroy-and-rebuild cycle keeps working.
 
-`allowed_account_ids` covers only one direction: credentials that disagree with the var-file. The
-reverse — credentials agreeing with the var-file while the directory is initialized against
+`allowed_account_ids` covers only one direction: credentials that disagree with the `aws_account_id`
+passed in. For a stack with `envs/` that value is the selected profile's `sso_account_id` (in CI,
+the caller's own account), the same profile the credentials come from, so the check there catches
+only a config entry naming the wrong account. The reverse — credentials agreeing with that value
+while the directory is initialized against
 another account's state bucket — reaches a plan unchallenged, because the backend lives in
 `.terraform/terraform.tfstate` and no command names it. `scripts/ops/lib/terraform-guard.sh`
 compares the two, reading the account id out of the `<prefix>-tfstate-<account_id>` bucket name,

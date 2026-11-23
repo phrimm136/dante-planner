@@ -35,6 +35,9 @@ STS_ARGV = ("aws", "sts", "get-caller-identity", "--output", "json")
 ENV_PROFILES = {"prod": "prod", "staging": "staging", "mgmt": "mgmt"}
 FIXED_BACKEND_ENVS = {"backend.management.hcl": "mgmt"}
 MODULES_DIR = "modules"
+SETTINGS_DIR = "envs"
+ACCOUNT_VARIABLE = "aws_account_id"
+ACCOUNT_VARIABLE_PATTERN = re.compile(rf'^\s*variable\s+"{ACCOUNT_VARIABLE}"', re.MULTILINE)
 LOCAL_STATE_FILE = "terraform.tfstate"
 DEFAULT_ENV = "prod"
 SITE_NAMES = ("oregon", "seoul")
@@ -95,7 +98,15 @@ tf plan:    writes the plan file beside its log (ops-tf-<stack>-<ts>.plan), keep
             *.tf files except modules; a stack whose backend file names a fixed account takes
             that account's profile (backend.management.hcl: mgmt), and a stack whose fixed
             account has no ops profile is planned directly through terraform-run.sh.
-guard:      every replace or destroy, and every update of an
+inputs:     a stack with an {SETTINGS_DIR}/ directory is planned with -var-file={SETTINGS_DIR}/<env>.tfvars for
+            the env the plan runs under and, when it declares variable "{ACCOUNT_VARIABLE}", with
+            -var {ACCOUNT_VARIABLE}=<that profile's sso_account_id>, both after -out and before
+            the words after --. Such a stack refuses -var-file after --, and -var for a variable
+            the settings file assigns or for {ACCOUNT_VARIABLE}; a -var for any other variable (a
+            per-run value such as apply_immediately) passes. A missing settings file or account
+            id stops the plan before terraform runs. Any other stack takes no automatic arguments.
+            The hook's suggestion for a direct runner plan of such a stack drops its -var-file.
+guard:     every replace or destroy, and every update of an
             {', '.join(GUARDED_UPDATE_TYPES[:-1])} or {GUARDED_UPDATE_TYPES[-1]}, must be named with
             --expect <address> (repeatable, before the --), and every expected address must be
             such a change. Otherwise the plan is blocked: UNEXPECTED and ABSENT lines name the
@@ -132,10 +143,10 @@ def aws_config_path():
 
 
 @functools.cache
-def config_accounts(config_file):
+def config_profiles(config_file):
     if not config_file.is_file():
-        return {}
-    account_profiles = {}
+        return ()
+    profile_rows = []
     section_name = ""
     for text_line in config_file.read_text(encoding="utf-8", errors="replace").splitlines():
         section_match = CONFIG_SECTION_PATTERN.match(text_line)
@@ -143,13 +154,24 @@ def config_accounts(config_file):
             section_name = section_match.group(1)
             continue
         id_match = ACCOUNT_ID_LINE.match(text_line)
-        if not id_match or not section_name:
-            continue
-        known_profile = account_profiles.get(id_match.group(1))
+        if id_match and section_name:
+            profile_rows.append((section_name, id_match.group(1)))
+    return tuple(profile_rows)
+
+
+@functools.cache
+def config_accounts(config_file):
+    account_profiles = {}
+    for section_name, account_id in config_profiles(config_file):
+        known_profile = account_profiles.get(account_id)
         if known_profile is None or (section_name in ENV_PROFILES.values()
                                      and known_profile not in ENV_PROFILES.values()):
-            account_profiles[id_match.group(1)] = section_name
+            account_profiles[account_id] = section_name
     return account_profiles
+
+
+def profile_account(profile_name):
+    return dict(config_profiles(aws_config_path())).get(profile_name, "")
 
 
 def redact_text(raw_text):
@@ -266,7 +288,8 @@ DISPATCH_TABLE = (
                 OREGON_VERIFY_SCRIPT),
     CommandSpec("tf plan", "<stack> [--expect <address>]... [-- terraform plan args]",
                 "terraform plan through terraform-run.sh; prints the summary, guards replace, destroy and "
-                "instance updates, and prints the apply command for you when the guard passes",
+                "instance updates, and prints the apply command for you when the guard passes; a stack with "
+                f"{SETTINGS_DIR}/ takes {SETTINGS_DIR}/<env>.tfvars and the profile's account id itself",
                 TERRAFORM_RUNNER),
     CommandSpec("tf apply", "<plan file>",
                 "applies a plan file tf plan cleared, through terraform-run.sh; you run it with !, and the "
@@ -489,6 +512,8 @@ class StackInfo:
     stack_name: str
     has_backend: bool
     fixed_backend: str
+    is_moved: bool
+    takes_account: bool
 
     @property
     def is_unmapped(self):
@@ -500,9 +525,11 @@ class StackInfo:
 
 def stack_info(repo_root, stack_name):
     stack_dir = repo_root / TERRAFORM_ROOT / stack_name
-    has_backend = any(BACKEND_PATTERN.search(tf_file.read_text(encoding="utf-8"))
-                      for tf_file in stack_dir.glob("*.tf"))
-    return StackInfo(stack_name, has_backend, backend_file_name(repo_root, stack_name) if has_backend else "")
+    tf_texts = [tf_file.read_text(encoding="utf-8") for tf_file in stack_dir.glob("*.tf")]
+    has_backend = any(BACKEND_PATTERN.search(tf_text) for tf_text in tf_texts)
+    return StackInfo(stack_name, has_backend, backend_file_name(repo_root, stack_name) if has_backend else "",
+                     (stack_dir / SETTINGS_DIR).is_dir(),
+                     any(ACCOUNT_VARIABLE_PATTERN.search(tf_text) for tf_text in tf_texts))
 
 
 def runner_text(repo_root, stack_name, terraform_words):
@@ -527,6 +554,7 @@ class PlanRequest:
     stack_name: str
     extra_args: tuple
     expected_addresses: tuple = ()
+    input_args: tuple = ()
 
 
 @dataclasses.dataclass(frozen=True)
@@ -536,6 +564,7 @@ class ApplyRequest:
 
 OUT_FLAGS = {"-out", "--out"}
 EXITCODE_FLAGS = {"-detailed-exitcode", "--detailed-exitcode"}
+VAR_FILE_FLAGS = {"-var-file", "--var-file"}
 EXPECT_OPTION = "--expect"
 
 
@@ -604,6 +633,103 @@ def tf_request(repo_root, arg_words, caller_dir):
     return PlanRequest(plan_words[0], extra_args, expected_addresses)
 
 
+HEREDOC_START = re.compile(r"<<-?([A-Za-z_][A-Za-z0-9_]*)\s*$")
+ASSIGNED_NAME = re.compile(r"\s*([A-Za-z_][A-Za-z0-9_-]*)\s*=(?!=)")
+
+
+def assigned_names(settings_text):
+    found_names = set()
+    nest_depth = 0
+    heredoc_marker = ""
+    in_block = False
+    for text_line in settings_text.splitlines():
+        if heredoc_marker:
+            if text_line.strip() == heredoc_marker:
+                heredoc_marker = ""
+            continue
+        if nest_depth == 0 and not in_block:
+            name_match = ASSIGNED_NAME.match(text_line)
+            if name_match:
+                found_names.add(name_match.group(1))
+        char_index = 0
+        in_string = False
+        while char_index < len(text_line):
+            line_char = text_line[char_index]
+            char_pair = text_line[char_index:char_index + 2]
+            if in_block:
+                if char_pair == "*/":
+                    in_block = False
+                    char_index += 1
+            elif in_string:
+                if line_char == "\\":
+                    char_index += 1
+                elif line_char == '"':
+                    in_string = False
+            elif line_char == '"':
+                in_string = True
+            elif line_char == "#" or char_pair == "//":
+                break
+            elif char_pair == "/*":
+                in_block = True
+                char_index += 1
+            elif char_pair == "<<":
+                heredoc_match = HEREDOC_START.match(text_line[char_index:])
+                if heredoc_match:
+                    heredoc_marker = heredoc_match.group(1)
+                    break
+            elif line_char in "{[(":
+                nest_depth += 1
+            elif line_char in "}])":
+                nest_depth = max(nest_depth - 1, 0)
+            char_index += 1
+    return found_names
+
+
+def var_names(extra_args):
+    named_vars = []
+    for arg_index, one_arg in enumerate(extra_args):
+        if one_arg in ("-var", "--var"):
+            var_value = extra_args[arg_index + 1] if arg_index + 1 < len(extra_args) else ""
+        elif one_arg.startswith(("-var=", "--var=")):
+            var_value = one_arg.split("=", 1)[1]
+        else:
+            continue
+        if "=" in var_value:
+            named_vars.append(var_value.split("=", 1)[0].strip())
+    return named_vars
+
+
+def stack_inputs(repo_root, one_stack, env_name, extra_args):
+    if not one_stack.is_moved:
+        return ()
+    stack_text = f"{TERRAFORM_ROOT}/{one_stack.stack_name}"
+    settings_name = f"{SETTINGS_DIR}/{env_name}.tfvars"
+    if any(one_arg.split("=", 1)[0] in VAR_FILE_FLAGS for one_arg in extra_args):
+        raise OpsError(f"{stack_text} takes its settings from {settings_name} and the account of the selected "
+                       f"profile, never from -var-file; edit {stack_text}/{settings_name} instead")
+    settings_path = repo_root / stack_text / settings_name
+    if not settings_path.is_file():
+        raise OpsError(f"{stack_text}/{settings_name} is missing; {stack_text} has an {SETTINGS_DIR}/ directory, "
+                       f"so a plan under --env {env_name} reads its settings from that file: create it")
+    settled_names = assigned_names(settings_path.read_text(encoding="utf-8"))
+    for var_name in var_names(extra_args):
+        if one_stack.takes_account and var_name == ACCOUNT_VARIABLE:
+            raise OpsError(f"-var {ACCOUNT_VARIABLE} is refused: ops passes the account of the selected profile "
+                           f"itself; choose the account with --env")
+        if var_name in settled_names:
+            raise OpsError(f"-var {var_name} is refused: {stack_text}/{settings_name} sets it, and a second "
+                           f"source would win silently; edit that file instead")
+    input_args = [f"-var-file={settings_name}"]
+    if one_stack.takes_account:
+        profile_name = ENV_PROFILES[env_name]
+        account_id = profile_account(profile_name)
+        if not account_id:
+            raise OpsError(f"profile '{profile_name}' has no sso_account_id in {aws_config_path()}, and "
+                           f"{stack_text} takes {ACCOUNT_VARIABLE} from it; add the line to that profile")
+        input_args += ["-var", f"{ACCOUNT_VARIABLE}={account_id}"]
+    return tuple(input_args)
+
+
 BACKEND_FILE_PATTERN = re.compile(r"-backend-config=(?:\.\./)?(backend\.[A-Za-z0-9_.-]+\.hcl)")
 
 
@@ -654,8 +780,8 @@ def build_invocation(command_words, caller_dir):
     raise OpsError(f"unknown command '{command_name}'; run ops list")
 
 
-def plan_arguments(stack_name, plan_path, extra_args):
-    return (f"-chdir={TERRAFORM_ROOT}/{stack_name}", "plan", f"-out={plan_path}", *extra_args)
+def plan_arguments(stack_name, plan_path, input_args, extra_args):
+    return (f"-chdir={TERRAFORM_ROOT}/{stack_name}", "plan", f"-out={plan_path}", *input_args, *extra_args)
 
 
 def show_arguments(stack_name, plan_path):
@@ -1095,7 +1221,8 @@ def run_plan(repo_paths, plan_request, profile_name, system_effects, run_moment)
     log_path = stem_path.with_name(stem_path.name + ".log")
     plan_path = stem_path.with_name(stem_path.name + ".plan")
     runner_path = str(repo_paths.repo_root / TERRAFORM_RUNNER)
-    plan_argv = (runner_path, *plan_arguments(plan_request.stack_name, plan_path, plan_request.extra_args))
+    plan_argv = (runner_path, *plan_arguments(plan_request.stack_name, plan_path, plan_request.input_args,
+                                              plan_request.extra_args))
     child_env = child_environment(profile_name)
     with redacted_log(log_path, "w") as log_file:
         write_header(log_file, plan_argv, profile_name, repo_paths.repo_root)
@@ -1244,6 +1371,19 @@ def access_replacement(kind_name, arg_words):
     return ["verify", "db"]
 
 
+def without_var_files(arg_words):
+    kept_args = []
+    skip_next = False
+    for one_arg in arg_words:
+        if skip_next:
+            skip_next = False
+        elif one_arg in VAR_FILE_FLAGS:
+            skip_next = True
+        elif one_arg.split("=", 1)[0] not in VAR_FILE_FLAGS:
+            kept_args.append(one_arg)
+    return kept_args
+
+
 def runner_replacement(arg_words, env_name):
     subcommand_name = next((one_arg for one_arg in arg_words if not one_arg.startswith("-")), "")
     if subcommand_name != "plan":
@@ -1253,13 +1393,17 @@ def runner_replacement(arg_words, env_name):
     stack_name = stack_match.group(1) if stack_match else "<stack>"
     checkout_dir = own_checkout_dir()
     default_env = DEFAULT_ENV
+    is_moved = False
     if stack_name in plan_stacks(checkout_dir):
         one_stack = stack_info(checkout_dir, stack_name)
         if one_stack.is_unmapped:
             return None
         default_env = one_stack.default_env()
+        is_moved = one_stack.is_moved
     rest_args = [one_arg for one_arg in arg_words if not one_arg.startswith(("-chdir=", "-out", "--out"))]
     rest_args.remove("plan")
+    if is_moved:
+        rest_args = without_var_files(rest_args)
     return [*env_words(env_name, default_env), "tf", "plan", stack_name, *(["--", *rest_args] if rest_args else [])]
 
 
@@ -1491,9 +1635,10 @@ def run_command(argv_words, system_effects, caller_dir, run_moment, repo_paths):
                                 caller_dir or os.getcwd())
         if isinstance(tf_command, ApplyRequest):
             return run_apply(repo_paths, tf_command, ops_request.env_name, system_effects, run_moment)
-        plan_request = tf_command
-        one_stack = stack_info(repo_paths.repo_root, plan_request.stack_name)
+        one_stack = stack_info(repo_paths.repo_root, tf_command.stack_name)
         env_name = plan_env(repo_paths.repo_root, one_stack, ops_request.env_name)
+        plan_request = dataclasses.replace(tf_command, input_args=stack_inputs(
+            repo_paths.repo_root, one_stack, env_name, tf_command.extra_args))
         profile_name = ENV_PROFILES[env_name]
         require_init(repo_paths.repo_root, one_stack, env_name)
         require_session(repo_paths, profile_name, system_effects)
