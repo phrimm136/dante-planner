@@ -1861,7 +1861,7 @@ guards the parse but likewise skips the schema gate.
 - **Kubernetes Secrets are stored unencrypted in etcd and in its S3 snapshots.** The k3s server
   install in `terraform/modules/fleet/user-data/cp.sh.tftpl` passes no `--secrets-encryption`,
   so every Secret (DB credentials, Redis password, JWT keys) sits in embedded etcd as base64,
-  and `--etcd-s3` ships the snapshots to S3, so read access to the snapshot bucket is read
+  and its `etcd-s3` setting ships the snapshots to S3, so read access to the snapshot bucket is read
   access to every secret. S3's default server-side encryption protects the disks, not against
   a reader with access. Worth doing with the ESO entry above, or before anyone else gets read
   access to the snapshot bucket: enable k3s secrets encryption and rotate the existing secrets.
@@ -1926,8 +1926,11 @@ guards the parse but likewise skips the schema gate.
   `--cluster-init` and restores no snapshot, and the instance has no fixed private address, while
   the agents' boot scripts carry the address the control plane had when they were built. Raising
   `node_generation.cp` therefore gives a new, empty etcd at a new address and strands the data,
-  ingress and app nodes of that region (read from the scripts, not run). The snapshots in S3 are
-  taken every six hours and nothing reads them back. Until a replacement restores the newest
+  ingress and app nodes of that region (read from the scripts, not run). No snapshot existed in
+  either region on 2026-11-24: the cron the installer wrote into the k3s unit never fired. A
+  running control plane writes one every `etcd_snapshot_interval_hours` only after
+  `docs/runbooks/etcd-snapshot-repair.md` has run on it, a new one from its first boot, and
+  nothing reads them back. Until a replacement restores the newest
   snapshot and keeps its address, the control plane cannot be replaced without rebuilding the
   region, and neither a boot-script fix nor a k3s upgrade can reach it. Worth doing before the
   staging rehearsal that precedes the first control-plane replacement: a restore step in the boot
@@ -1935,7 +1938,7 @@ guards the parse but likewise skips the schema gate.
   proves both.
   re-check: `rg -q -- '--cluster-init' terraform/modules/fleet/user-data/cp.sh.tftpl && .claude/skills/debt-ledger/bin/debt absent terraform/modules/fleet/user-data/cp.sh.tftpl -e 'cluster-reset' -e 'cluster-reset-restore-path'`
 - **The CP runs Helm's installer from the tip of Helm's main branch.**
-  `cp.sh.tftpl:130` pipes `raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3` to
+  `cp.sh.tftpl:135` pipes `raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3` to
   `bash`, so the code that runs as root at boot is whatever that branch holds at that moment,
   with no version and no checksum. The Traefik CRDs in the same file are pinned to
   `${traefik_version}`, which shows the pattern to follow: download a pinned Helm release

@@ -5,15 +5,18 @@
 # Usage:
 #   GRAFANA_URL=https://<slug>.grafana.net \
 #   GRAFANA_TOKEN=<service-account token, Editor role> \
-#   ETCD_INTERVAL=43200 \
 #   bash import-alert-rules.sh
 #
-# Live values (URL, token, interval) arrive only via env vars; nothing is written back.
+# Live values (URL, token) arrive only via env vars; nothing is written back. The etcd
+# snapshot interval comes from etcd_snapshot_interval_hours in terraform/modules/fleet/variables.tf.
 set -euo pipefail
 
 : "${GRAFANA_URL:?set GRAFANA_URL, e.g. https://yourslug.grafana.net (no trailing slash)}"
 : "${GRAFANA_TOKEN:?set GRAFANA_TOKEN (service-account token with Editor role)}"
-: "${ETCD_INTERVAL:?set ETCD_INTERVAL in seconds (k3s etcd-snapshot interval; k3s default 43200)}"
+# shellcheck source=../../scripts/ops/lib/etcd-interval.sh
+source "$(dirname "$0")/../../scripts/ops/lib/etcd-interval.sh"
+ETCD_INTERVAL=$(etcd_snapshot_interval_seconds)
+export ETCD_INTERVAL
 
 auth=(-H "Authorization: Bearer ${GRAFANA_TOKEN}" -H "Content-Type: application/json")
 # X-Disable-Provenance keeps the rules editable in the UI afterwards; without it the

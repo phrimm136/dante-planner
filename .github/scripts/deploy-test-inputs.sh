@@ -6,6 +6,6 @@ if [ "${1:-}" != "--list-inputs" ]; then
   exit 2
 fi
 
-printf '%s\n' deploy .github/deploy-test terraform/modules/fleet/variables.tf \
+printf '%s\n' deploy .github/deploy-test terraform/modules/fleet/variables.tf scripts/ops/lib/etcd-interval.sh \
   .github/scripts/deploy-test.sh .github/scripts/deploy-test-inputs.sh \
   .github/scripts/config-scan.sh .github/scripts/render-charts.sh .github/scripts/images.sh .github/config-scan

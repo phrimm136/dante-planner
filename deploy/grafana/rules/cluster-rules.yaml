@@ -104,43 +104,85 @@
 
 - name: etcd-snapshot-deadman
   kind: prometheus
-  for: 1m
-  expr: '(time() - max by (cluster) (kube_etcd_snapshot_creation_timestamp_seconds)) > (1.5 * {etcd_interval})'
+  for: 10m
+  expr: '((time() - max by (cluster) (kube_etcd_snapshot_creation_timestamp_seconds)) > (1.5 * {etcd_interval})) or (count by (cluster) (up{job="kube-state-metrics"} == 1) unless count by (cluster) (kube_etcd_snapshot_creation_timestamp_seconds))'
   params:
-    etcd_interval: {env: ETCD_INTERVAL, test: 43200}
+    etcd_interval: {env: ETCD_INTERVAL, test: 21600}
   cases:
     fires:
       - series:
           - series: 'kube_etcd_snapshot_creation_timestamp_seconds{job="kube-state-metrics",name="s3-etcd-snapshot-cp-1-0",node="cp-1",cluster="oregon"}'
-            values: '0x1100'
-        at: 1090m
+            values: '0x600'
+          - series: 'up{job="kube-state-metrics",instance="10.42.1.5:8080",cluster="oregon"}'
+            values: '1x600'
+        at: 555m
       - series:
           - series: 'kube_etcd_snapshot_creation_timestamp_seconds{job="kube-state-metrics",name="s3-etcd-snapshot-cp-1-0",node="cp-1",cluster="oregon"}'
-            values: '0x1100'
+            values: '0x600'
           - series: 'kube_etcd_snapshot_creation_timestamp_seconds{job="kube-state-metrics",name="s3-etcd-snapshot-cp-1-600",node="cp-1",cluster="oregon"}'
-            values: '600x1100'
-        at: 1095m
+            values: '600x600'
+          - series: 'up{job="kube-state-metrics",instance="10.42.1.5:8080",cluster="oregon"}'
+            values: '1x600'
+        at: 565m
       - series:
           - series: 'kube_etcd_snapshot_creation_timestamp_seconds{job="kube-state-metrics",name="s3-etcd-snapshot-cp-1-now",node="cp-1",cluster="oregon"}'
-            values: '0+60x1100'
+            values: '0+60x600'
           - series: 'kube_etcd_snapshot_creation_timestamp_seconds{job="kube-state-metrics",name="s3-etcd-snapshot-cp-1-0",node="cp-1",cluster="seoul"}'
-            values: '0x1100'
-        at: 1090m
+            values: '0x600'
+          - series: 'up{job="kube-state-metrics",instance="10.42.1.5:8080",cluster="oregon"}'
+            values: '1x600'
+          - series: 'up{job="kube-state-metrics",instance="10.42.1.5:8080",cluster="seoul"}'
+            values: '1x600'
+        at: 555m
+      - series:
+          - series: 'up{job="kube-state-metrics",instance="10.42.1.5:8080",cluster="oregon"}'
+            values: '1x30'
+        at: 20m
+      - series:
+          - series: 'kube_etcd_snapshot_creation_timestamp_seconds{job="kube-state-metrics",name="s3-etcd-snapshot-cp-1-now",node="cp-1",cluster="oregon"}'
+            values: '0+60x30'
+          - series: 'up{job="kube-state-metrics",instance="10.42.1.5:8080",cluster="oregon"}'
+            values: '1x30'
+          - series: 'up{job="kube-state-metrics",instance="10.42.1.5:8080",cluster="seoul"}'
+            values: '1x30'
+        at: 20m
     quiet:
       - series:
           - series: 'kube_etcd_snapshot_creation_timestamp_seconds{job="kube-state-metrics",name="s3-etcd-snapshot-cp-1-0",node="cp-1",cluster="oregon"}'
-            values: '0x1100'
-        at: 1081m
+            values: '0x600'
+          - series: 'up{job="kube-state-metrics",instance="10.42.1.5:8080",cluster="oregon"}'
+            values: '1x600'
+        at: 548m
       - series:
           - series: 'kube_etcd_snapshot_creation_timestamp_seconds{job="kube-state-metrics",name="s3-etcd-snapshot-cp-1-now",node="cp-1",cluster="oregon"}'
-            values: '0+60x1100'
-        at: 1090m
+            values: '0+60x600'
+          - series: 'up{job="kube-state-metrics",instance="10.42.1.5:8080",cluster="oregon"}'
+            values: '1x600'
+        at: 555m
       - series:
           - series: 'kube_etcd_snapshot_creation_timestamp_seconds{job="kube-state-metrics",name="s3-etcd-snapshot-cp-1-0",node="cp-1",cluster="oregon"}'
-            values: '0x1100'
+            values: '0x600'
           - series: 'kube_etcd_snapshot_creation_timestamp_seconds{job="kube-state-metrics",name="s3-etcd-snapshot-cp-1-now",node="cp-1",cluster="oregon"}'
-            values: '0+60x1100'
-        at: 1090m
+            values: '0+60x600'
+          - series: 'up{job="kube-state-metrics",instance="10.42.1.5:8080",cluster="oregon"}'
+            values: '1x600'
+        at: 555m
+      - series:
+          - series: 'up{job="kube-state-metrics",instance="10.42.1.5:8080",cluster="oregon"}'
+            values: '0x30'
+        at: 20m
+      - series:
+          - series: 'up{job="prometheus",instance="localhost:9090",cluster="oregon"}'
+            values: '1x30'
+        at: 20m
+      - series:
+          - series: 'kube_etcd_snapshot_creation_timestamp_seconds{job="kube-state-metrics",name="s3-etcd-snapshot-cp-1-now",node="cp-1",cluster="oregon"}'
+            values: '0+60x10 stale _x2 840+60x10'
+          - series: 'up{job="kube-state-metrics",instance="10.42.1.5:8080",cluster="oregon"}'
+            values: '1x10 stale'
+          - series: 'up{job="kube-state-metrics",instance="10.42.1.9:8080",cluster="oregon"}'
+            values: '_x11 1x13'
+        at: 13m
 
 # `== bool`: the threshold node fires on value > 0, so the expression must yield
 # 1 per down exporter rather than filter to the raw 0.

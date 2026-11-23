@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'deploy/grafana/**'
+      - 'terraform/modules/fleet/variables.tf'
+      - 'scripts/ops/lib/etcd-interval.sh'
       - '.github/workflows/grafana-provision.yml'
   workflow_dispatch:
 
@@ -31,7 +33,6 @@ jobs:
         env:
           GRAFANA_URL: ${{ vars.GRAFANA_URL }}
           GRAFANA_TOKEN: ${{ secrets.GRAFANA_TOKEN }}
-          ETCD_INTERVAL: ${{ vars.ETCD_INTERVAL }}
           CW_DS_UID: ${{ vars.CW_DS_UID }}
           LOKI_DS_UID: ${{ vars.LOKI_DS_UID }}
         run: |

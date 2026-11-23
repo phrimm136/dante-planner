@@ -44,7 +44,7 @@ output "cp_private_ip" {
 }
 
 output "cp_instance_id" {
-  description = "Control-plane instance id — the `aws ssm send-command` target for scripts/ops/oregon-verify.sh."
+  description = "Control-plane instance id — the `aws ssm send-command` target for scripts/ops/fleet-verify.sh."
   value       = module.fleet.cp_instance_id
 }
 

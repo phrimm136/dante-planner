@@ -54,10 +54,20 @@ cat > /etc/systemd/system/k3s.service.d/gomemlimit.conf <<'EOF'
 Environment=GOMEMLIMIT=800MiB
 EOF
 
+# etcd-s3 uses the CP instance-profile credentials.
+mkdir -p /etc/rancher/k3s
+cat > /etc/rancher/k3s/config.yaml <<'K3SCONFIG'
+etcd-s3: true
+etcd-s3-bucket: "${s3_bucket}"
+etcd-s3-region: "${region}"
+etcd-snapshot-schedule-cron: "0 */${snapshot_hours} * * *"
+etcd-snapshot-retention: ${snapshot_retention}
+K3SCONFIG
+
 # k3s server with EMBEDDED etcd (--cluster-init) so etcd snapshots exist and
 # ship to S3. SQLite default has no etcd and cannot snapshot. Bundled Traefik
 # and servicelb are disabled: Traefik is deployed via kustomize on the ingress
-# node with Gateway API. etcd-s3 uses the CP instance-profile credentials.
+# node with Gateway API.
 curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="${k3s_version}" INSTALL_K3S_EXEC="server \
   --cluster-init \
   --token-file /etc/k3s-token \
@@ -65,12 +75,7 @@ curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="${k3s_version}" INSTALL_K3S_
   --disable traefik \
   --disable servicelb \
   --node-taint node-role.kubernetes.io/control-plane=true:NoSchedule \
-  --etcd-expose-metrics=true \
-  --etcd-s3 \
-  --etcd-s3-bucket ${s3_bucket} \
-  --etcd-s3-region ${region} \
-  --etcd-snapshot-schedule-cron '0 */6 * * *' \
-  --etcd-snapshot-retention ${snapshot_retention}" sh -
+  --etcd-expose-metrics=true" sh -
 
 export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 until kubectl get nodes >/dev/null 2>&1; do sleep 5; done
