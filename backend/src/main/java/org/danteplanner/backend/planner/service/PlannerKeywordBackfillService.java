@@ -40,11 +40,14 @@ public class PlannerKeywordBackfillService {
     public record BackfillPage(BackfillCursor next, int scanned, int corrected) {
     }
 
+    /** Where the next backfill page begins. */
     public sealed interface BackfillCursor {
 
+        /** Before the first planner. */
         record Start() implements BackfillCursor {
         }
 
+        /** After the last planner a page read. */
         record After(UUID plannerId) implements BackfillCursor {
         }
     }

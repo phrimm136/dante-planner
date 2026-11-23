@@ -25,19 +25,24 @@ public class ModerationAuditService implements ModerationAudit, RestrictionReaso
 
     private final ModerationActionRepository moderationActionRepository;
 
+    /** A restriction change on an account, with the reason the moderator gave. */
     public sealed interface Suspension {
 
         String reason();
 
+        /** Restricts the account for a number of minutes. */
         record Timeout(int durationMinutes, String reason) implements Suspension {
         }
 
+        /** Ends a timeout early. */
         record ClearTimeout(String reason) implements Suspension {
         }
 
+        /** Restricts the account until it is unbanned. */
         record Ban(String reason) implements Suspension {
         }
 
+        /** Ends a ban. */
         record Unban(String reason) implements Suspension {
         }
 

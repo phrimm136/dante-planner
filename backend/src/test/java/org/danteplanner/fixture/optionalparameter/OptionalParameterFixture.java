@@ -16,32 +16,27 @@ import org.jspecify.annotations.Nullable;
 public class OptionalParameterFixture {
 
     @GetMapping("/bare-param")
-    public String bareParam(@RequestParam(required = false) String q) {
-        return q;
+    public void bareParam(@RequestParam(required = false) String q) {
     }
 
     @GetMapping("/bare-header")
-    public String bareHeader(@RequestHeader(required = false) String agent) {
-        return agent;
+    public void bareHeader(@RequestHeader(required = false) String agent) {
     }
 
     @GetMapping("/bare-cookie")
-    public String bareCookie(@CookieValue(required = false) String token) {
-        return token;
+    public void bareCookie(@CookieValue(required = false) String token) {
     }
 
     @PostMapping("/bare-body")
-    public String bareBody(@RequestBody(required = false) String content) {
-        return content;
+    public void bareBody(@RequestBody(required = false) String content) {
     }
 
     @GetMapping("/declared")
-    public String declared(
+    public void declared(
             @RequestParam(required = false) @Nullable String q,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false) Optional<String> keyword,
             @RequestParam(required = false, defaultValue = "x") String sort,
             @RequestParam String required) {
-        return q + page + keyword + sort + required;
     }
 }
