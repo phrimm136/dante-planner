@@ -623,6 +623,13 @@ contract. ADR 039 names this population directly — the seed carries gift ids o
 valid band. The validation branch adds a fourth backend copy (`EncodedGiftId`) beside
 `GameDataRegistry.GIFT_ENHANCEMENT_PATTERN`, which `PlannerIdMigrations` also reads.
   re-check: `rg -q 'EncodedGiftIdSchema.safeParse\(id\)' frontend/src/pages/planner/lib/plannerContentExtractors.ts && rg -q 'return enhanced \? id % 10000 : id;' backend/src/main/java/org/danteplanner/backend/planner/searchindex/PlannerContentEntityExtractor.java`
+- 2026-08-17 — A catalog row whose core row the batch load misses becomes `PlannerCore.Absent`
+(`PublishedPlannerQueryService`), `PublicPlannerResponse` then builds the response without
+`createdAt`, and the global `non_null` Jackson setting omits the key, but
+`PlannerListSchemas.ts:19` declares `createdAt` required, so one such row rejects the entire
+paginated community page rather than one card. The sibling fields on the same DTO are
+correctly `.nullish()` (`:17-18`) and the components already tolerate an absent value.
+  re-check: `rg -q '^  createdAt: z.string\(\),$' frontend/src/pages/planner/schemas/PlannerListSchemas.ts && rg -qF 'PlannerCore.Absent absent -> response.build();' backend/src/main/java/org/danteplanner/backend/planner/dto/PublicPlannerResponse.java`
 - 2026-08-17 — `AbEventSchemas.ts:5` types `relatedEgoGifts` as `z.array(z.string())`
 rather than `EGOGiftIdSchema`, and 13 ids in `static/data/abEventSpecList.json`
 (`991001`–`993004`, six digits) violate `GIFT_ID_PATTERN`. `EGOGiftGrid.tsx:32-33` renders
@@ -1069,6 +1076,15 @@ guards the parse but likewise skips the schema gate.
   with the container's rightmost-trusted parser (`ForwardedHeaderFilter` / `RemoteIpValve`) and
   an attacker-framed test. Worth doing before any ingress that bypasses Cloudflare exists.
   re-check: `rg -q 'String claimedIp = firstHop\(forwarded\);' backend/src/main/java/org/danteplanner/backend/shared/util/ClientIpResolver.java && rg -q 'ReturnsTheLeftmost' backend/src/test/java/org/danteplanner/backend/shared/util/ClientIpResolverTest.java`
+- **Bucket configuration is validated per request, not at bind time.** `RateLimitProperties`
+  is `@Validated` and requires each bucket to be present, but the `BucketConfig` components carry no constraint
+  (seven of nine `@ConfigurationProperties` classes are `@Validated`; `HikariTuningProperties`
+  and `SecurityProperties` are not), and
+  `buildConfiguration` runs per request, so a zero duration fails on first use. The fix is the
+  ArchUnit rule "every `@ConfigurationProperties` class is `@Validated`" and the sibling edits
+  it lists; the rule, not the class, is the unit of work.
+  re-check: `rg -q 'record BucketConfig\(int capacity, int refillTokens, int refillDurationSeconds\)' backend/src/main/java/org/danteplanner/backend/shared/ratelimit/RateLimitProperties.java`
+
 ## 2026-09-18 consistency without an LLM (scheduled ratchet)
 
 - **No scheduled run measures rule drift.** The gate runs the rule engines already wired
@@ -1485,6 +1501,11 @@ guards the parse but likewise skips the schema gate.
   Worth doing before the next cookie change, or when anyone besides the owner can write the
   runtime-config secret.
   re-check: `rg -qF 'cookie.secure=${COOKIE_SECURE:true}' backend/src/main/resources/application.properties`
+- Error Prone 2.51 left `ReferenceEquality` warnings with no bug behind them: sites that mean
+  identity (`ReadSourcesConfig.java:185,234` and some test sites, not counted again). The build promotes only three checks to errors and has no
+  warning baseline, so a compiler bump adds warnings silently. Worth doing with a per-check
+  warning ratchet: suppress the identity sites with a reason.
+  re-check: `rg -qF 'readSources().get(0) == source' backend/src/main/java/org/danteplanner/backend/shared/config/ReadSourcesConfig.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/shared/config/ReadSourcesConfig.java 'ReferenceEquality'`
 - `com.redis:testcontainers-redis` is pinned to 3.0.1 (`build.gradle.kts:67`) because Boot 4.1.2
   (and 4.2.0-RC2) manage 2.2.4, whose POM imports the Boot 3.4.2 BOM and with it a vulnerable
   Artemis BOM. Worth removing when spring-boot-dependencies manages
