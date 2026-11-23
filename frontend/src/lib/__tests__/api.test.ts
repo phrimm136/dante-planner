@@ -2,14 +2,14 @@
  * api.test.ts
  *
  * Tests for ApiClient request/response handling.
- * Covers: 204 No Content, 401 refresh flow, 409 Conflict, error propagation
+ * Covers: 204 No Content, 401 listeners, 409 Conflict, error propagation
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { http, HttpResponse, type JsonBodyType } from 'msw'
 
 import { server } from '@/test-utils/mswServer'
-import { ApiClient } from '../api'
+import { ApiClient, onUnauthorized } from '../api'
 import { useServerStatusStore, type ServerStatus } from '../banner/serverStatus'
 import {
   ConflictError,
@@ -28,14 +28,6 @@ import {
 vi.mock('../env', () => ({
   env: {
     VITE_API_BASE_URL: 'http://localhost:8080',
-  },
-}))
-
-// Mock queryClient
-const mockSetQueryData = vi.fn()
-vi.mock('../queryClient', () => ({
-  queryClient: {
-    setQueryData: (...args: unknown[]) => mockSetQueryData(...args),
   },
 }))
 
@@ -135,30 +127,89 @@ describe('ApiClient', () => {
   })
 
   describe('401 Unauthorized handling', () => {
-    it('clears auth state and throws error for 401 response', async () => {
+    const cleanups: (() => void)[] = []
+
+    function listen(listener: () => void) {
+      cleanups.push(onUnauthorized(listener))
+    }
+
+    function listenWithSpy() {
+      const listener = vi.fn()
+      listen(listener)
+      return listener
+    }
+
+    afterEach(() => {
+      cleanups.splice(0).forEach((cleanup) => cleanup())
+    })
+
+    it('calls every listener once and throws for 401 response', async () => {
+      const first = listenWithSpy()
+      const second = listenWithSpy()
       answer(empty(401))
 
       await expect(ApiClient.get('/api/planner/123')).rejects.toBeInstanceOf(UnauthorizedError)
 
-      // Auth state should be cleared so UI shows logged-out state
-      expect(mockSetQueryData).toHaveBeenCalledWith(['auth', 'me'], null)
+      expect(first).toHaveBeenCalledOnce()
+      expect(second).toHaveBeenCalledOnce()
       expect(seen).toHaveLength(1)
     })
 
-    it('clears auth state for 401 on /auth/me', async () => {
+    it('calls the listener for 401 on /auth/me', async () => {
+      const listener = listenWithSpy()
       answer(empty(401))
 
       await expect(ApiClient.get('/api/auth/me')).rejects.toBeInstanceOf(UnauthorizedError)
 
-      expect(mockSetQueryData).toHaveBeenCalledWith(['auth', 'me'], null)
+      expect(listener).toHaveBeenCalledOnce()
     })
 
-    it('clears auth state for 401 on /auth/logout', async () => {
+    it('calls the listener for 401 on /auth/logout', async () => {
+      const listener = listenWithSpy()
       answer(empty(401))
 
       await expect(ApiClient.post('/api/auth/logout')).rejects.toBeInstanceOf(UnauthorizedError)
 
-      expect(mockSetQueryData).toHaveBeenCalledWith(['auth', 'me'], null)
+      expect(listener).toHaveBeenCalledOnce()
+    })
+
+    it('stops calling a listener after it unsubscribes', async () => {
+      const listener = vi.fn()
+      const unsubscribe = onUnauthorized(listener)
+      unsubscribe()
+      answer(empty(401))
+
+      await expect(ApiClient.get('/api/planner/123')).rejects.toBeInstanceOf(UnauthorizedError)
+
+      expect(listener).not.toHaveBeenCalled()
+    })
+
+    it.each([200, 204, 400, 403, 404, 409, 429, 500, 503])(
+      'calls no listener for a %i response',
+      async (code) => {
+        const listener = listenWithSpy()
+        answer(code === 204 ? empty(204) : json(code, {}))
+
+        await ApiClient.get('/api/planner/123').catch(() => undefined)
+
+        expect(listener).not.toHaveBeenCalled()
+      },
+    )
+
+    it('calls the remaining listeners and still throws when a listener throws', async () => {
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+      cleanups.push(() => consoleError.mockRestore())
+      const failure = new Error('listener failed')
+      listen(() => {
+        throw failure
+      })
+      const after = listenWithSpy()
+      answer(empty(401))
+
+      await expect(ApiClient.get('/api/planner/123')).rejects.toBeInstanceOf(UnauthorizedError)
+
+      expect(after).toHaveBeenCalledOnce()
+      expect(consoleError).toHaveBeenCalledWith('Unauthorized listener failed:', failure)
     })
   })
 
