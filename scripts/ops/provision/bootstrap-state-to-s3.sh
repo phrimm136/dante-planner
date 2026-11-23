@@ -10,8 +10,9 @@
 # in lineage, resources and outputs, with a serial not below the backup's (push rewrites
 # terraform_version, and over an older serial of the same state stores serial + 1). A plan with the
 # tfvars file then runs as information; its changes are drift the move did not cause, but a plan
-# that fails stops the move. Verification writes <backup>.verified (lineage and serial, no
-# account id). The second form deletes the local file only when that marker matches its backup.
+# that fails stops the move. Verification writes <backup>.verified (lineage, serial and a sha256
+# of the resources and outputs; no account id). The second form deletes the local file only when
+# that marker matches both its backup and the local file.
 #
 # Output names the backend file, never the bucket it holds: a bucket name carries the account id,
 # and every line this prints is meant to be safe to paste into a public place.
@@ -79,6 +80,16 @@ if remote.get("serial", -1) < backup.get("serial", 0):
 if any(backup.get(field, empty) != remote.get(field, empty) for field, empty in (("resources", []), ("outputs", {}))):
     differs.append("content (resources or outputs)")
 print(" and ".join(differs) or "equal")
+' "$1"
+}
+
+state_digest() {
+  python3 -c '
+import hashlib, json, sys
+state = json.load(open(sys.argv[1]))
+canonical = json.dumps({"resources": state.get("resources", []), "outputs": state.get("outputs", {})},
+                       sort_keys=True, separators=(",", ":"))
+print(hashlib.sha256(canonical.encode()).hexdigest())
 ' "$1"
 }
 
@@ -172,6 +183,9 @@ push_state() {
       read -r _ _ backup_serial_now <<<"$(state_facts "$backup")"
       [[ "$local_serial" -ge "$backup_serial_now" ]] ||
         die "$local_file is behind its own backup $backup (serial $local_serial, backup $backup_serial_now); nothing done."
+      if [[ "$local_serial" -eq "$backup_serial_now" && "$(state_difference "$backup" <"$local_file")" != equal ]]; then
+        die "$local_file and its backup $backup are two different states at one serial ($local_serial): same lineage, other resources or outputs; nothing done."
+      fi
     fi
     if is_default_file_of "$local_file" "$stack_dir"; then
       mv "$local_file" "$backup"
@@ -259,7 +273,7 @@ push_state() {
     *) die "plan: failed (exit $rc), so the stack cannot be planned from the bucket. Pushed but not verified. Read $plan_log, or run: $plan_cmd" ;;
   esac
 
-  (umask 077 && printf '%s %s\n' "$backup_lineage" "$backup_serial" >"$backup.verified")
+  (umask 077 && printf '%s %s %s\n' "$backup_lineage" "$backup_serial" "$(state_digest "$backup")" >"$backup.verified")
   echo "verified: $stack $label $file_n resources, the bucket holds the backup's state"
   echo "next: $(abs_path "${BASH_SOURCE[0]}") --remove-local $stack $local_file"
 }
@@ -293,18 +307,20 @@ remove_local() {
   account=${match##*/"$stack".}
   account=${account%.tfstate}
   read -r _ match_lineage match_serial <<<"$(state_facts "$match")"
-  if [[ ! -f "$marker" ]] || [[ "$(cat "$marker")" != "$match_lineage $match_serial" ]]; then
+  if [[ ! -f "$marker" ]] || [[ "$(cat "$marker")" != "$match_lineage $match_serial $(state_digest "$match")" ]]; then
     die "the move of $probe was never verified (no marker $marker matching its backup); nothing removed. Run the move first: bootstrap-state-to-s3.sh $stack <path>/backend.$account.hcl <tfvars file> $local_file"
   fi
 
   if [[ "$probe" == "$local_file" ]]; then
     local local_lineage local_serial
     read -r _ local_lineage local_serial <<<"$(state_facts "$local_file")"
-    if [[ "$local_lineage $local_serial" != "$(cat "$marker")" ]]; then
+    if [[ "$local_lineage $local_serial" != "$match_lineage $match_serial" ]]; then
       local relation="is newer than"
       [[ "$local_serial" -gt "$match_serial" ]] || relation="differs from"
       die "$local_file $relation the verified copy (serial $local_serial, verified $match_serial); nothing removed. Run the move again: bootstrap-state-to-s3.sh $stack <path>/backend.$account.hcl <tfvars file> $local_file"
     fi
+    [[ "$(state_digest "$local_file")" == "$(state_digest "$match")" ]] ||
+      die "$local_file has the verified lineage and serial but other resources or outputs than the verified copy; nothing removed. Run the move again: bootstrap-state-to-s3.sh $stack <path>/backend.$account.hcl <tfvars file> $local_file"
     command rm -f "$local_file"
     echo "removed: $local_file"
   else
