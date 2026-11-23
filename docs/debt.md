@@ -1924,16 +1924,14 @@ guards the parse but likewise skips the schema gate.
   account-level stacks cannot merge, and the split keeps one apply's blast radius small. Worth
   doing at the next change to any of these stacks, or the next time an apply fails on order.
   re-check: `test -f scripts/ops/provision/rds-master-password-secret.sh && test -f scripts/ops/provision/cloudflare-tunnel-secrets.sh && rg -q 'data "terraform_remote_state"' terraform/seoul/remote-state.tf`
-- **k3s is installed at whatever version the stable channel serves at boot.** The CP and agent
-  user-data (`terraform/modules/fleet/user-data/cp.sh.tftpl:61`, `agent.sh.tftpl:39`) pipe
-  `https://get.k3s.io` to `sh` with neither `INSTALL_K3S_VERSION` nor `INSTALL_K3S_CHANNEL`. The
-  CP keeps the version of its first boot, but every new app node installs the newest stable
-  release, and `deploy-fleet` boots a new app node on every deploy. Kubernetes supports a
-  kubelet older than the API server, not newer, so the first deploy after the stable channel
-  moves to a new minor joins an unsupported node. A rebuilt fleet also does not reproduce the
-  old versions. Pin one version in a Terraform variable, pass it to both templates, and upgrade
-  the CP first. Worth doing now: the next surge node after a channel move hits it.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent terraform/modules/fleet/user-data 'INSTALL_K3S_VERSION'`
+- **Nothing raises the pinned k3s version.** `k3s_version` in `terraform/modules/fleet/variables.tf`
+  fixes the release every node installs, and no bot reads a version in a Terraform variable
+  default: Dependabot's terraform ecosystem covers providers and modules only. The release stays
+  where it is, security fixes included, until someone edits it. Renovate's regex manager with
+  the `github-releases` datasource for `k3s-io/k3s` can open that change; it needs the hosted app
+  or a token of the user's. Worth doing with the first Helm chart, which needs the same bot for
+  the chart version in an ArgoCD Application.
+  re-check: `rg -q 'variable "k3s_version"' terraform/modules/fleet/variables.tf && .claude/skills/debt-ledger/bin/debt absent .github -i 'renovate'`
 - **The CP runs Helm's installer from the tip of Helm's main branch.**
   `cp.sh.tftpl:130` pipes `raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3` to
   `bash`, so the code that runs as root at boot is whatever that branch holds at that moment,

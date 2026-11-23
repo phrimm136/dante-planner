@@ -77,6 +77,7 @@ resource "aws_instance" "cp" {
 locals {
   cp_user_data = templatefile("${path.module}/user-data/cp.sh.tftpl", {
     region              = var.region
+    k3s_version         = var.k3s_version
     region_suffix       = var.region_name_suffix
     token_param         = aws_ssm_parameter.k3s_token.name
     kubeconfig_param    = aws_ssm_parameter.kubeconfig.name

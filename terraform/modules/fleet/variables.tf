@@ -179,6 +179,12 @@ variable "external_secrets_chart_version" {
   default     = "0.10.4"
 }
 
+variable "k3s_version" {
+  description = "The k3s release every node installs. A kubelet may be older than the API server, never newer, and a new app node boots on every deploy, so nodes must not take the newest release on their own. To upgrade, raise this and node_generation.cp in one change and apply it while no deploy runs: the control plane is replaced first, and app nodes follow at their next launch. The data and ingress nodes follow when their generation is raised."
+  type        = string
+  default     = "v1.36.3+k3s1"
+}
+
 variable "ecr_credential_provider_version" {
   description = "Pinned cloud-provider-aws ecr-credential-provider release. The kubelet on app nodes calls this binary to exchange the node instance profile for a short-lived ECR token, so containerd can pull the private backend image (no imagePullSecret)."
   type        = string
