@@ -32,5 +32,6 @@ instance intentionally requires lifting these guards deliberately.
   `master_user_secret_arn` output to retrieve it for admin ops.
 - The **app DB user** `danteplanner` + grants are created by SQL on RDS (runbook 0.6b), not Terraform —
   `mysqldump <db>` does not carry users/grants.
-- The state backend: configure remote state (e.g. encrypted S3) in your private setup; local state and
-  tfvars are gitignored. Never commit `*.tfstate` — it can contain sensitive values.
+- The state backend: the account's state bucket, key `rds/terraform.tfstate`, chosen by the gitignored
+  `terraform/backend.<account>.hcl`; tfvars are gitignored too. Never commit `*.tfstate` — it can
+  contain sensitive values.

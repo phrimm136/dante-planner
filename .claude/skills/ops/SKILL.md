@@ -20,7 +20,7 @@ The CLI runs the scripts of the checkout it lives in: from a worktree run
 `<worktree>/.claude/skills/ops/bin/ops`. `tf plan <stack>` and `verify oregon` (unless
 `CP_INSTANCE_ID` is set) need `terraform/<stack>/.terraform` in that checkout; when it is missing
 they stop before terraform runs and print the `init` command, with absolute paths and the
-stack's backend file (`backend.<env>.hcl` from `--env`, or the fixed file a fixed-account stack
+stack's backend file (`backend.<env>.hcl` from `--env`, `backend.management.hcl` for `mgmt`, or the fixed file a fixed-account stack
 names in its header). Worktrees start uninitialized; plan from the main checkout or run that init.
 
 | Command | Use |
@@ -33,7 +33,7 @@ names in its header). Worktrees start uninitialized; plan from the main checkout
 | `sql "<SELECT …>" [--site oregon\|seoul]` / `sql -f FILE` | Read-only SQL; starts the tunnel when down |
 | `tunnel start\|stop\|status [--site …]` | The SSM port-forward to RDS |
 | `verify db` / `verify oregon` | The DB observability check / the Oregon fleet check |
-| `tf plan <stack> [--expect <address>]… [-- terraform args]` | Plan file and full text to the log; prints one line per changed resource (destroy, replace, update, create, import, move), the counts, and, when every replace, destroy and update of an `aws_instance`, `aws_autoscaling_group` or `aws_db_instance` is named with `--expect <address>`, the `! … ops tf apply <plan file>` command for the user to run. A stack is any `terraform/` directory with `*.tf` files except `modules`. A stack whose backend is the management account (`registry`, `organization`) defaults to `mgmt`; `log-archive`, whose account has no ops profile, is planned directly with `scripts/ops/terraform-run.sh` |
+| `tf plan <stack> [--expect <address>]… [-- terraform args]` | Plan file and full text to the log; prints one line per changed resource (destroy, replace, update, create, import, move), the counts, and, when every replace, destroy and update of an `aws_instance`, `aws_autoscaling_group` or `aws_db_instance` is named with `--expect <address>`, the `! … ops tf apply <plan file>` command for the user to run. A stack is any `terraform/` directory with `*.tf` files except `modules`. A stack whose backend is the management account (`registry`, `organization`) defaults to `mgmt`; `log-archive`, whose account has no ops profile, is planned directly with `scripts/ops/terraform-run.sh`. A stack applied once per account (`account.tfvars.example` and no fixed backend file: `state-backend`, `iam-bootstrap`) takes no default and is refused without `--env` |
 
 The CLI's own tests: `python3 -m unittest discover -s .claude/skills/ops/tests`.
 

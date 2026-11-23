@@ -110,7 +110,8 @@ class RepoCase(unittest.TestCase):
         (self.repo_root / "scripts" / "ops" / "lib").mkdir(parents=True)
         shutil.copy(REPO_ROOT / ops_cli.CONSTANTS_PATH, self.repo_root / ops_cli.CONSTANTS_PATH)
         for stack_name, backend_text in (("rds", 'terraform {\n  backend "s3" {}\n}\n'),
-                                         ("oregon", '  backend "s3" {\n  }\n'), ("state-backend", ""),
+                                         ("oregon", '  backend "s3" {\n  }\n'),
+                                         ("state-backend", 'terraform {\n  backend "s3" {}\n}\n'),
                                          ("registry", '# init -backend-config=../backend.management.hcl\n'
                                                       'terraform {\n  backend "s3" {}\n}\n'),
                                          ("log-archive", '# init -backend-config=../backend.log-archive.hcl\n'
@@ -485,17 +486,6 @@ class PlanTest(RepoCase):
                       f"-chdir={self.repo_root / 'terraform' / 'log-archive'} plan", str(raised_error.exception))
         self.assertEqual((fake_effects.stream_calls, fake_effects.capture_calls), ([], []))
 
-    def test_a_local_state_stack_needs_a_plain_init_or_existing_state(self):
-        with self.assertRaises(ops_cli.OpsError) as raised_error:
-            self.run_main(["tf", "plan", "state-backend"], FakeEffects())
-        self.assertIn(f"AWS_PROFILE=prod {self.repo_root / ops_cli.TERRAFORM_RUNNER} "
-                      f"-chdir={self.repo_root / 'terraform' / 'state-backend'} init", str(raised_error.exception))
-        self.assertNotIn("-backend-config", str(raised_error.exception))
-        (self.repo_root / "terraform" / "state-backend" / "terraform.tfstate").write_text("{}\n")
-        fake_effects = FakeEffects(show_text=(FIXTURE_DIR / "terraform-show-no-changes.json").read_text())
-        exit_code, out_text, _ = self.run_main(["tf", "plan", "state-backend"], fake_effects)
-        self.assertEqual((exit_code, out_text), (0, "No changes.\n"))
-
     def test_the_real_tree_backend_files(self):
         self.assertEqual(ops_cli.backend_file_name(REPO_ROOT, "registry"), "backend.management.hcl")
         self.assertEqual(ops_cli.backend_file_name(REPO_ROOT, "organization"), "backend.management.hcl")
@@ -504,7 +494,38 @@ class PlanTest(RepoCase):
         self.assertEqual(ops_cli.backend_file_name(REPO_ROOT, "cloudflare"), "")
         self.assertEqual(ops_cli.stack_info(REPO_ROOT, "registry").default_env(), "mgmt")
         self.assertTrue(ops_cli.stack_info(REPO_ROOT, "log-archive").is_unmapped)
-        self.assertFalse(ops_cli.stack_info(REPO_ROOT, "iam-bootstrap").has_backend)
+        for stack_name in ("iam-bootstrap", "state-backend"):
+            self.assertEqual(ops_cli.stack_info(REPO_ROOT, stack_name), ops_cli.StackInfo(stack_name, "", True))
+        for stack_name in ("oregon", "rds", "registry", "log-archive"):
+            self.assertFalse(ops_cli.stack_info(REPO_ROOT, stack_name).per_account)
+
+    def test_a_per_account_stack_needs_an_env_and_lists_the_envs_it_can_take(self):
+        (self.repo_root / "terraform" / "state-backend" / ops_cli.ACCOUNT_VARS_EXAMPLE).write_text("")
+        (self.repo_root / "terraform" / "state-backend" / ".terraform").mkdir()
+        for backend_name in ("backend.staging.hcl", "backend.management.hcl"):
+            (self.repo_root / "terraform" / backend_name).write_text("bucket = \"x\"\n")
+        fake_effects = FakeEffects()
+        with self.assertRaises(ops_cli.OpsError) as raised_error:
+            self.run_main(["tf", "plan", "state-backend"], fake_effects)
+        self.assertIn("terraform/state-backend is applied once per account, so it takes no default profile; "
+                      "name the account: --env staging (backend.staging.hcl), --env mgmt (backend.management.hcl)",
+                      str(raised_error.exception))
+        self.assertEqual((fake_effects.stream_calls, fake_effects.capture_calls), ([], []))
+
+    def test_a_per_account_stack_plans_with_the_env_named(self):
+        (self.repo_root / "terraform" / "state-backend" / ops_cli.ACCOUNT_VARS_EXAMPLE).write_text("")
+        (self.repo_root / "terraform" / "state-backend" / ".terraform").mkdir()
+        fake_effects = FakeEffects(show_text=(FIXTURE_DIR / "terraform-show-no-changes.json").read_text())
+        exit_code, _, _ = self.run_main(["--env", "staging", "tf", "plan", "state-backend"], fake_effects)
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(fake_effects.stream_calls[0][1]["AWS_PROFILE"], "staging")
+
+    def test_a_per_account_stack_names_the_mgmt_backend_file_in_its_init_command(self):
+        (self.repo_root / "terraform" / "state-backend" / ops_cli.ACCOUNT_VARS_EXAMPLE).write_text("")
+        with self.assertRaises(ops_cli.OpsError) as raised_error:
+            self.run_main(["--env", "mgmt", "tf", "plan", "state-backend"], FakeEffects())
+        self.assertIn(f"-backend-config={self.repo_root / 'terraform' / 'backend.management.hcl'}",
+                      str(raised_error.exception))
 
     def test_imports_and_moves_are_changes(self):
         for fixture_name, expect_words, expected_lines in (
@@ -944,6 +965,12 @@ HOOK_CASES = (
     ("AWS_PROFILE=mgmt scripts/ops/terraform-run.sh -chdir=terraform/oregon plan",
      f"{CLI_TEXT} --env mgmt tf plan oregon"),
     ("scripts/ops/terraform-run.sh -chdir=terraform/log-archive plan", None),
+    ("scripts/ops/terraform-run.sh -chdir=terraform/state-backend plan",
+     f"{CLI_TEXT} --env '<env>' tf plan state-backend"),
+    ("AWS_PROFILE=staging scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap plan",
+     f"{CLI_TEXT} --env staging tf plan iam-bootstrap"),
+    ("AWS_PROFILE=prod scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap plan",
+     f"{CLI_TEXT} --env prod tf plan iam-bootstrap"),
     ("AWS_PROFILE=prod-provisioner scripts/ops/access/rds-query.sh 'SELECT 1'", None),
     ("AWS_PROFILE=prod-provisioner scripts/ops/terraform-run.sh -chdir=terraform/rds plan", None),
     ("AWS_PROFILE=staging scripts/ops/access/rds-query.sh 'SELECT 1'", f"{CLI_TEXT} --env staging sql 'SELECT 1'"),

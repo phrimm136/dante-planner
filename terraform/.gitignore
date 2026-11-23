@@ -11,4 +11,6 @@
 # No leading slash, so a per-stack backend config is ignored too.
 backend*.hcl
 !backend.account.hcl.example
+override.tf
+*_override.tf
 crash.log

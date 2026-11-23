@@ -29,11 +29,9 @@ several real dependencies are not of that shape.
 ## State
 
 State lives in the account whose resources it describes, so the bucket count tracks the account
-count. `state-backend` and `iam-bootstrap` keep **local** state, because between them they create
-the bucket everything else stores state in; storing their own state there would be circular. Both
-use one workspace per account, so those local files stay apart.
-
-Every other stack declares a partial `backend "s3"` and takes the bucket at init time:
+count. Every stack, `state-backend` and `iam-bootstrap` included, declares a partial
+`backend "s3"` and takes the bucket at init time; the backend file, not a workspace, chooses the
+account:
 
 ```bash
 terraform -chdir=terraform/state-backend output -raw tf_state_bucket   # -> a backend config file
@@ -44,6 +42,14 @@ Those config files are gitignored because a bucket name carries an account id; c
 `backend.account.hcl.example`. One per account, not one shared — and a stack reaching into another account
 needs `assume_role` in **that file** as well as in its provider, because a backend resolves
 credentials before any provider exists and cannot use theirs.
+
+Local state is used once per account: the first apply of the stack that creates the account's
+bucket, before that bucket exists. That apply runs with a `backend_override.tf` holding
+`terraform { backend "local" {} }`. `terraform/.gitignore` ignores override files, so git never
+shows one left behind: delete it once the apply is done, before the move, whose init against the
+backend file fails while the override still selects the local backend. Then
+`scripts/ops/provision/bootstrap-state-to-s3.sh` moves the state into the new bucket, at
+`<stack>/terraform.tfstate`, and verifies it with a plan that shows no change.
 
 Locking is `use_lockfile = true` (S3-native, no DynamoDB table), and every stack sets
 `workspace_key_prefix = "env"` — including the `terraform_remote_state` data sources, so a
@@ -123,17 +129,23 @@ Once per organization, from the management account:
 
 Once per account, with credentials for that account:
 
-4. Apply `state-backend`, in a workspace named for the account. Local state, no dependencies.
+4. Apply `state-backend` on local state, through a `backend_override.tf` (see State). No
+   dependencies.
 5. Write `terraform/backend.<account>.hcl` from its `tf_state_bucket` output.
-6. Apply `iam-bootstrap` for any account that runs a fleet, giving it the provisioning role that
-   applies everything below.
+6. Delete the override (gitignored, so `git status` will not remind you) and move that state into
+   the new bucket:
+   `scripts/ops/provision/bootstrap-state-to-s3.sh state-backend terraform/backend.<account>.hcl terraform/state-backend/<account>.tfvars terraform/state-backend/terraform.tfstate`,
+   then the same script with `--remove-local state-backend terraform/state-backend/terraform.tfstate`
+   once it prints `verified:`.
+7. Apply `iam-bootstrap` for any account that runs a fleet, initialized against the same backend
+   file, giving it the provisioning role that applies everything below.
 
 Then, per environment:
 
-7. Apply `secrets`, and run the `scripts/ops/provision/` scripts that seed values.
-8. Apply `rds`, `oregon` and `cloudflare`.
-9. Run `cloudflare-tunnel-secrets.sh` now that the tunnel tokens exist.
-10. Apply `seoul`.
+8. Apply `secrets`, and run the `scripts/ops/provision/` scripts that seed values.
+9. Apply `rds`, `oregon` and `cloudflare`.
+10. Run `cloudflare-tunnel-secrets.sh` now that the tunnel tokens exist.
+11. Apply `seoul`.
 
 This provisions infrastructure, not a running system: a fresh `rds` is an empty schema. Data arrives
 from a dump, and the schema from Flyway on first pod boot.

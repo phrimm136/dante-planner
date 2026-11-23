@@ -1,5 +1,7 @@
-# Copy to <account>.tfvars (gitignored) and fill in, then pass it explicitly:
-#   terraform -chdir=terraform/iam-bootstrap plan -var-file=management.tfvars
+# Copy to <account>.tfvars (gitignored) and fill in, then pass it explicitly beside that account's
+# backend file:
+#   scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap init -reconfigure -backend-config=../backend.<account>.hcl
+#   scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap plan -var-file=<account>.tfvars
 #
 # NOT terraform.tfvars: that name auto-loads on every invocation, including ones passing a
 # different -var-file, so one environment silently inherits another's values.

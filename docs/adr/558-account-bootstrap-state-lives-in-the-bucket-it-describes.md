@@ -1,0 +1,17 @@
+# 558 account-bootstrap-state-lives-in-the-bucket-it-describes
+epic: none · pr: none · supersedes: 033 @terraform @state @bootstrap @accounts
+
+## Decisions
+- @terraform @state @bootstrap @accounts — The state bucket is created by `state-backend`, applied once per account, and the provisioning identity by `iam-bootstrap`, applied only to accounts that run the fleet. Every account needs a bucket, but only a fleet account needs a role that grants compute, database, registry and key access, and that role carries no `count`, so one bundled stack mints a fleet-shaped role inside an account that only holds audit records.
+  REJECTED: keeping the bundle and deleting the surplus role by hand — nothing re-asserts a manual deletion, so the next apply restores it.
+- @terraform @state @bootstrap — Both bootstrap stacks keep their state in the account's bucket, like every other stack. The first apply in a new account runs on local state through a gitignored override file, because the bucket does not exist yet. The state then moves into the bucket once and the local file is deleted. Local state for these two stacks lived on one laptop, unencrypted, with no lock and no history, and it described the role and the bucket that every other stack depends on. A lost disk meant an import of each resource by hand.
+  REJECTED: keeping local state because storing a stack's state in the bucket it creates is circular — the circle exists only before the first apply, and a stack that must stay appliable "from a laptop holding nothing but credentials" needs that once per account.
+  REJECTED: a second bucket made by hand for the two bootstrap states — one more resource that no code describes, with the same question one level down.
+  REJECTED: letting `init -migrate-state` do the move — it copies the selected workspace only and asks its questions on a terminal, and these stacks held one workspace per account in one directory, so each state had to go to a different account's bucket.
+  INVARIANT: a state is pushed only into the bucket of the account it describes — the move compares the account in the backend file, in the inputs and in the state before any write, and its tests cover a pair that disagrees.
+  INVARIANT: the local copy is deleted only after the bucket holds the same state — the move records that it verified the remote copy, and the delete step refuses without that record; tests cover both orders.
+  INVARIANT: every directory under `terraform/` declares a remote backend — the plan CLI has no path for a stack without one, so such a stack stops at init.
+  NON-GOAL: a copy of these two states outside the bucket — the bucket's own protection is the one every other stack already relies on.
+
+## Takeaway
+- takeaway: a bootstrap exception is true for one moment, the first apply; when it is written as a property of the stack it outlives that moment and keeps the most depended-on state in the least protected place.
