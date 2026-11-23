@@ -3,6 +3,25 @@ resource "terraform_data" "node_generation" {
   input    = each.value
 }
 
+# The release every boot script installs. It follows var.k3s_version only when the control plane is
+# replaced, so an app node launched between two control-plane replacements cannot install a newer
+# release than the API server runs.
+resource "terraform_data" "k3s_release" {
+  input = var.k3s_version
+
+  lifecycle {
+    ignore_changes       = [input]
+    replace_triggered_by = [terraform_data.node_generation["cp"]]
+  }
+}
+
+check "nodes_install_the_declared_k3s_release" {
+  assert {
+    condition     = terraform_data.k3s_release.output == var.k3s_version
+    error_message = "k3s_version names a release the fleet does not install yet. It takes effect when node_generation.cp is raised, which replaces the control plane."
+  }
+}
+
 # The assertions read these flags, not the scripts: a failed assertion prints every value its
 # condition refers to, and a boot script is hundreds of lines and names the account in a bucket.
 locals {

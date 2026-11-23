@@ -1924,6 +1924,18 @@ guards the parse but likewise skips the schema gate.
   account-level stacks cannot merge, and the split keeps one apply's blast radius small. Worth
   doing at the next change to any of these stacks, or the next time an apply fails on order.
   re-check: `test -f scripts/ops/provision/rds-master-password-secret.sh && test -f scripts/ops/provision/cloudflare-tunnel-secrets.sh && rg -q 'data "terraform_remote_state"' terraform/seoul/remote-state.tf`
+- **Replacing the control plane builds an empty cluster.** `cp.sh.tftpl` starts k3s with
+  `--cluster-init` and restores no snapshot, and the instance has no fixed private address, while
+  the agents' boot scripts carry the address the control plane had when they were built. Raising
+  `node_generation.cp` therefore gives a new, empty etcd at a new address and strands the data,
+  ingress and app nodes of that region (read from the scripts, not run). The snapshots in S3 are
+  taken every six hours and nothing reads them back. Until a replacement restores the newest
+  snapshot and keeps its address, the control plane cannot be replaced without rebuilding the
+  region, and neither a boot-script fix nor a k3s upgrade can reach it. Worth doing before the
+  staging rehearsal that precedes the first control-plane replacement: a restore step in the boot
+  script, a stable address (a fixed private IP or a name the agents resolve), and a rehearsal that
+  proves both.
+  re-check: `rg -q -- '--cluster-init' terraform/modules/fleet/user-data/cp.sh.tftpl && .claude/skills/debt-ledger/bin/debt absent terraform/modules/fleet/user-data/cp.sh.tftpl -e 'cluster-reset' -e 'cluster-reset-restore-path'`
 - **Nothing raises the pinned k3s version.** `k3s_version` in `terraform/modules/fleet/variables.tf`
   fixes the release every node installs, and no bot reads a version in a Terraform variable
   default: Dependabot's terraform ecosystem covers providers and modules only. The release stays

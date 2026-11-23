@@ -11,6 +11,7 @@ epic: none · pr: none
   INVARIANT: a pet that runs an older boot script than the code holds is named in every plan — the `check` block beside the generation resources warns per instance; a warning does not stop an apply.
   NON-GOAL: a warning for an older image — the vendor publishes images continuously, so it would warn on every plan; an instance's launch time is the record.
   NON-GOAL: the app launch template — app nodes are replaced by the autoscaling group, so a new template version with the newest image is how they are meant to move.
+  NON-GOAL: making a replacement safe — raising a number replaces the instance and nothing more; a replaced control plane starts an empty cluster at a new address until its boot restores a snapshot and its address is stable, so that number stays where it is until then.
   NON-GOAL: changing a running pet in place — what must reach a running node before its replacement is delivered by a separate, idempotent association, as the scrape annotations are.
 
 ## Takeaway
