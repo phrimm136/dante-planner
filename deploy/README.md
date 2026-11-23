@@ -43,12 +43,37 @@ An Application pins its chart in `spec.source.targetRevision` and carries its va
 tracks resources by the `app.kubernetes.io/instance` label the chart sets to the release name.
 Renovate (`renovate.json`) proposes a newer chart version once it is seven days old. No CI lane
 reads `renovate.json`: Renovate's hosted app reports an invalid file by opening an issue in the
-repository. A values
-change or a version bump lands by merging it: ArgoCD syncs the Application from `main`.
+repository. A values change or a version bump lands by merging it: ArgoCD syncs the Application
+from `main`.
+
+Renovate also raises the pins of the CI scripts:
+
+- The k3s release, in one pull request (group `k3s`) that opens only after it is approved on the
+  dependency dashboard: the `k3s_version` default in `terraform/modules/fleet/variables.tf`,
+  which the nodes install; `K3S_IMAGE` with its digest in `.github/scripts/deploy-test.sh`, which
+  the deploy lane boots and whose tag also sets the Kubernetes version the schemas are checked
+  against; and the `KUBERNETES_SCHEMAS` commit, raised to the tip of yannh/kubernetes-json-schema
+  `master`. The lane's `schema` stage fails when the k3s default and the `K3S_IMAGE` tag name
+  different releases, or when the schema commit has no directory for that Kubernetes version.
+- Every other `<NAME>_IMAGE=<image>:<tag>@sha256:<digest>` line in `.github/scripts/images.sh`
+  and `.github/scripts/deploy-test.sh` (kustomize, Checkov, Helm, kubeconform, whoami,
+  Prometheus, Loki), tag and digest together, one pull request per image, with no approval step.
+  A Checkov raise can add findings, and the scan baseline only shrinks: when `scan-config` fails
+  on a Checkov raise with NEW lines, that pull request fixes each finding or records it with a
+  `checkov.io/skip1` annotation or a `checkov:skip` comment before it merges.
+
+Renovate often has no release date for an image tag and never has one for a commit; such an
+update is proposed without the seven-day wait, while one with a date still waits.
+The Helm image stays on major 3 (`allowedVersions` in `renovate.json`), the major of the Helm
+that ArgoCD renders with; raise the limit together with an ArgoCD release that ships a newer major.
+`GATEWAY_API_CRDS` stays pinned by hand: its commit follows the
+Gateway API release the cluster installs (`gateway_api_version`), not the tip of a branch.
 
 Moving kube-state-metrics to its chart changed one behavior: the chart's ClusterRole also lets
 it list and watch CustomResourceDefinitions, which the etcd snapshot metric
-(`kube_etcd_snapshot_creation_timestamp_seconds`) needs and the hand-written role lacked.
+(`kube_etcd_snapshot_creation_timestamp_seconds`) needs and the hand-written role lacked. The
+metric has one series per retained snapshot, so the `etcd-snapshot-deadman` rule reads the
+newest one per cluster.
 
 ## Node placement contract (must match terraform user-data labels/taints)
 
