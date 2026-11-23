@@ -17,8 +17,8 @@ It does **not** load data and does **not** run the cutover — those are operato
 export AWS_PROFILE=<your-provisioning-profile>
 terraform init
 terraform validate
-terraform plan        # READ IT — provisioning a prod DB; verify no replace/destroy
-terraform apply
+.claude/skills/ops/bin/ops tf plan rds -- -var-file=prod.tfvars   # READ IT — provisioning a prod DB; verify no replace/destroy
+.claude/skills/ops/bin/ops tf apply <plan file printed above>     # the user, as the printed ! line
 terraform output rds_endpoint   # → put the host into SSM MYSQL_HOST (Commit 2)
 ```
 

@@ -25,9 +25,10 @@ learning: system-design
 - Where a route's or a file's code lives comes from the `map` skill's CLI,
   `<checkout or worktree>/.claude/skills/map/bin/map` (`map help`): `map show '<route>'` and
   `map deps <file>` fill a brief's Module placement and Dependents before any search.
-- Terraform plans run as `ops tf plan <stack>`, which prints the `!` apply command for the user;
-  other terraform commands run through `scripts/ops/terraform-run.sh …`; a bare `terraform` is
-  hook-blocked.
+- Terraform plans run as `ops tf plan <stack> [--expect <address>]`, which prints the
+  `! … ops tf apply <plan file>` command only the user runs (the hook refuses every apply or destroy
+  it can see in a Bash-tool command; it is not a sandbox); other terraform commands run through `scripts/ops/terraform-run.sh …`; a
+  bare `terraform` is hook-blocked.
 - No exclamation marks in responses.
 
 ## Docs

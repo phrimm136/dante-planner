@@ -103,5 +103,6 @@ fi
 log_info "PRE-FLIGHT PASSED"
 echo "done. Next:"
 echo "  1. scripts/ops/terraform-run.sh -chdir=terraform/organization apply   # organization, units, policy types"
+echo "     (by hand through the runner, not ops: it runs before Identity Center gives ops an SSO profile)"
 echo "  2. enable IAM Identity Center in the console (no API enables it)"
 echo "  3. scripts/ops/provision/org-verify.sh             # assert the RFC 0001 invariants"

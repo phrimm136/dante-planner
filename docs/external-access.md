@@ -3,9 +3,9 @@
 How to reach production systems from a workstation. Every repeated read and every terraform
 plan runs through one CLI, `.claude/skills/ops/bin/ops` (ADR 512); the access scripts it runs
 live in `scripts/ops/access/`, and one-time credential provisioning lives in
-`scripts/ops/provision/`. All
-current paths are read-only by construction: SQL authenticates as a SELECT-only
-MySQL user, log and metrics queries use a read-scoped observability token.
+`scripts/ops/provision/`. Every read command is read-only by construction: SQL authenticates
+as a SELECT-only MySQL user, log and metrics queries use a read-scoped observability token. The
+one command that writes is `tf apply`, which the user runs.
 
 Transport is SSM Session Manager (port forwarding through an instance), not SSH:
 no inbound ports on any node, IAM controls who can connect, and every session is
@@ -29,7 +29,8 @@ command. `ops list` prints every command, `ops --help` the details.
 | `metrics '<promql>' [--since D] [--step S]` | `access/metrics-query.sh` | Grafana Cloud Mimir | The dashboard's Prometheus panels; CloudWatch panels query via `aws cloudwatch` directly |
 | `verify db` | `access/db-observability-check.sh` | DB observability path | Metric families per cluster, `mysql_up`, the DB alert rules |
 | `verify oregon` | `oregon-verify.sh` | Oregon fleet | Nodes, pods, Argo CD apps, RDS reachability; the kubeconfig fetch (`--kubeconfig`) stays a direct script call |
-| `tf plan <stack> [-- args]` | `terraform-run.sh … plan` | Terraform | Plan file and full text go to the log; prints the summary and the `!` apply command |
+| `tf plan <stack> [-- args]` | `terraform-run.sh … plan` | Terraform | Plan file and full text go to the log; prints the summary and, when every replace, destroy and update of an `aws_instance`, `aws_autoscaling_group` or `aws_db_instance` is named with `--expect`, the `! … ops tf apply <plan file>` command the user runs |
+| `tf apply <plan file>` | `terraform-run.sh … apply` | Terraform | The user runs it with `!`; applies only a plan file `tf plan` cleared and that has not changed since, with the stack and profile from its verdict file |
 | `whoami` | `aws sts get-caller-identity` | AWS identity | The account the selected profile resolves to |
 | `doctor` | — | Workstation | SSO session per profile, `session-manager-plugin`, Docker and the mysql image, `jq`, open tunnels |
 
@@ -52,8 +53,8 @@ command. `ops list` prints every command, `ops --help` the details.
    it with `scripts/ops/provision/grafana-secrets.sh`. That script writes the whole
    `danteplanner/grafana/cloud` bundle, so every run supplies all five current values, not only
    the read token.
-4. `scripts/ops/terraform-run.sh -chdir=terraform/secrets apply` — the secret names are enrolled in
-   `secret_names`, so apply attaches the Seoul replica to each container.
+4. `.claude/skills/ops/bin/ops tf plan secrets`, then the printed `! … ops tf apply <plan file>` — the
+   secret names are enrolled in `secret_names`, so apply attaches the Seoul replica to each container.
 
 Workstation prerequisites: AWS CLI with the `prod` and `staging` SSO profiles,
 `session-manager-plugin`, `docker`, `jq`; `ops doctor` reports each one.
@@ -61,7 +62,9 @@ Workstation prerequisites: AWS CLI with the `prod` and `staging` SSO profiles,
 Terraform is run through `scripts/ops/terraform-run.sh`, never the raw binary. It refuses a
 command whose credentials belong to a different account than the state bucket it would write,
 and one whose directory holds an auto-loaded `terraform.tfvars`, then hands off unchanged.
-Plans run as `ops tf plan <stack>`, which calls it; apply stays a command the user runs.
+Plans run as `ops tf plan <stack>` and applies as `ops tf apply <plan file>`, both of which call it;
+apply is a command only the user runs, typed with `!`, and the hook refuses every form of it that it
+can see in a Bash-tool command, which guards ordinary commands but is no sandbox.
 
 ## Credential handling
 

@@ -46,7 +46,7 @@ docker exec danteplanner-mysql mysql -uroot -p -e \
 - [ ] SG: permanent EC2→RDS:3306 rule **and** a temporary RDS→source:3306 rule (RDS subnet CIDR only).
 ```bash
 .claude/skills/ops/bin/ops tf plan rds      # review: creating RDS + SG + subnet group + param group
-scripts/ops/terraform-run.sh -chdir=terraform/rds apply <plan file printed above>
+.claude/skills/ops/bin/ops tf apply <plan file printed above>    # the user, as the printed ! line
 scripts/ops/terraform-run.sh -chdir=terraform/rds output rds_endpoint     # → put this value into SSM (next step)
 ```
 - [ ] RDS up. Endpoint: __________________________
@@ -310,7 +310,7 @@ on RDS. Only consider reverse-replication (RDS→local) if absolutely required �
 ## One-screen cheat sheet
 
 ```
-Zone 0 (days, live):  scripts/ops/terraform-run.sh apply → enable GTID → repl user → expose source
+Zone 0 (days, live):  ops tf plan rds → ! ops tf apply → enable GTID → repl user → expose source
                       → mysqldump --single-transaction --source-data=2 → load RDS
                       → rds_set_external_master_with_auto_position → wait lag≈0
                       → validate → prep Commit 2 (schema-neutral) → freeze schema

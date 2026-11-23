@@ -50,7 +50,7 @@ locals {
 
 # --- Trust policy: two assumption paths -------------------------------------
 data "aws_iam_policy_document" "assume" {
-  # (1) Human admin from a laptop, for the initial `terraform apply`.
+  # (1) Human admin from a laptop, for the applies the user runs (`ops tf apply`).
   statement {
     sid     = "AdminAssumeFromLaptop"
     effect  = "Allow"

@@ -1,0 +1,40 @@
+{
+  "resource_changes": [
+    {
+      "address": "data.terraform_remote_state.peek",
+      "type": "terraform_remote_state",
+      "change": {
+        "actions": [
+          "read"
+        ]
+      }
+    },
+    {
+      "address": "module.fleet.aws_launch_template.app",
+      "type": "aws_launch_template",
+      "change": {
+        "actions": [
+          "update"
+        ]
+      }
+    },
+    {
+      "address": "aws_iam_role.new_a",
+      "type": "aws_iam_role",
+      "change": {
+        "actions": [
+          "create"
+        ]
+      }
+    },
+    {
+      "address": "aws_iam_role_policy.new_b",
+      "type": "aws_iam_role_policy",
+      "change": {
+        "actions": [
+          "create"
+        ]
+      }
+    }
+  ]
+}

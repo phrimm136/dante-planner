@@ -1,0 +1,23 @@
+{
+  "resource_changes": [
+    {
+      "address": "aws_iam_policy.app_node",
+      "type": "aws_iam_policy",
+      "change": {
+        "actions": [
+          "update"
+        ]
+      }
+    },
+    {
+      "address": "module.fleet.aws_instance.cp",
+      "type": "aws_instance",
+      "change": {
+        "actions": [
+          "delete",
+          "create"
+        ]
+      }
+    }
+  ]
+}

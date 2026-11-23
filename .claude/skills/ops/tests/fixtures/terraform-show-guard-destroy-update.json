@@ -1,0 +1,31 @@
+{
+  "resource_changes": [
+    {
+      "address": "aws_iam_role_policy.old",
+      "type": "aws_iam_role_policy",
+      "change": {
+        "actions": [
+          "delete"
+        ]
+      }
+    },
+    {
+      "address": "aws_s3_bucket.logs",
+      "type": "aws_s3_bucket",
+      "change": {
+        "actions": [
+          "update"
+        ]
+      }
+    },
+    {
+      "address": "module.fleet.aws_instance.data",
+      "type": "aws_instance",
+      "change": {
+        "actions": [
+          "update"
+        ]
+      }
+    }
+  ]
+}

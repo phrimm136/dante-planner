@@ -28,7 +28,7 @@ cp terraform/cloudflare/environment.tfvars.example terraform/cloudflare/prod.tfv
 AWS_PROFILE=<prod> scripts/ops/terraform-run.sh -chdir=terraform/cloudflare init -reconfigure -backend-config=../backend.prod.hcl
 AWS_PROFILE=<prod> scripts/ops/terraform-run.sh -chdir=terraform/cloudflare workspace select prod-fleet
 .claude/skills/ops/bin/ops tf plan cloudflare -- -var-file=prod.tfvars    # expect creates only
-AWS_PROFILE=<prod> scripts/ops/terraform-run.sh -chdir=terraform/cloudflare apply -var-file=prod.tfvars
+.claude/skills/ops/bin/ops tf apply <plan file printed above>    # the user, as the printed ! line
 ```
 
 Staging uses `backend.staging.hcl`, the default workspace, and `-var-file=staging.tfvars`.

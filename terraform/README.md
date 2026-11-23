@@ -156,7 +156,8 @@ compares the two, reading the account id out of the `<prefix>-tfstate-<account_i
 and also refuses a directory holding an auto-loaded `terraform.tfvars`.
 
 **Terraform runs through `scripts/ops/terraform-run.sh`, never the raw binary; plans run as
-`ops tf plan`, which calls it:**
+`ops tf plan` and the user applies them with the `! … ops tf apply <plan file>` line it prints, both
+of which call it:**
 
 ```bash
 .claude/skills/ops/bin/ops tf plan oregon -- -var-file=prod.tfvars

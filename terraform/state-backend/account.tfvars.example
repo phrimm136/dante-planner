@@ -2,7 +2,10 @@
 # of the same name, and passed explicitly:
 #
 #   terraform -chdir=terraform/state-backend workspace new <account>
-#   terraform -chdir=terraform/state-backend apply -var-file=<account>.tfvars
+#   scripts/ops/terraform-run.sh -chdir=terraform/state-backend apply -var-file=<account>.tfvars
+#
+# The apply runs by hand through the runner, not ops: a new account's state bucket comes before ops
+# has a profile for that account.
 #
 # NOT terraform.tfvars: that name auto-loads on every invocation, including ones passing a
 # different -var-file, so one account silently inherits another's values.

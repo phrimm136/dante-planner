@@ -1,0 +1,93 @@
+{
+ "format_version": "1.2",
+ "terraform_version": "1.15.9",
+ "checks": [
+  {
+   "address": {
+    "kind": "check",
+    "module": "module.fleet",
+    "name": "pets_run_the_current_boot_script",
+    "to_display": "module.fleet.check.pets_run_the_current_boot_script"
+   },
+   "status": "fail",
+   "instances": [
+    {
+     "address": {
+      "module": "module.fleet",
+      "to_display": "module.fleet.check.pets_run_the_current_boot_script"
+     },
+     "status": "fail",
+     "problems": [
+      {
+       "message": "The cp instance was built from an older boot script than the code holds. It takes the current one when node_generation.cp is raised, which replaces it."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "address": {
+    "kind": "var",
+    "module": "module.fleet",
+    "name": "availability_zones",
+    "to_display": "module.fleet.var.availability_zones"
+   },
+   "status": "pass",
+   "instances": [
+    {
+     "address": {
+      "module": "module.fleet",
+      "to_display": "module.fleet.var.availability_zones"
+     },
+     "status": "pass"
+    }
+   ]
+  },
+  {
+   "address": {
+    "kind": "var",
+    "module": "module.fleet",
+    "name": "redis_cross_region_cidr",
+    "to_display": "module.fleet.var.redis_cross_region_cidr"
+   },
+   "status": "pass",
+   "instances": [
+    {
+     "address": {
+      "module": "module.fleet",
+      "to_display": "module.fleet.var.redis_cross_region_cidr"
+     },
+     "status": "pass"
+    }
+   ]
+  },
+  {
+   "address": {
+    "kind": "var",
+    "name": "aws_account_id",
+    "to_display": "var.aws_account_id"
+   },
+   "status": "pass",
+   "instances": [
+    {
+     "address": {
+      "to_display": "var.aws_account_id"
+     },
+     "status": "pass"
+    }
+   ]
+  }
+ ],
+ "resource_changes": [
+  {
+   "address": "aws_iam_role.new_a",
+   "type": "aws_iam_role",
+   "change": {
+    "actions": [
+     "create"
+    ]
+   }
+  }
+ ],
+ "output_changes": {}
+}

@@ -4,7 +4,7 @@ Operational guide for the maintenance window that lands the **planner god-table 
 (`V049`→`V052`) on the multi-region k3s fleet. Three operations share the window and must run **in
 order**, with a hard verification gate between them:
 
-1. **Pod reposition** — a `scripts/ops/terraform-run.sh apply` per region that **replaces** the CP, data, and ingress
+1. **Pod reposition** — an `ops tf apply` per region that **replaces** the CP, data, and ingress
    instances (a new AMI forces replacement) and rebuilds them from the updated `user-data`, baking
    in swap, `GOMEMLIMIT`, and the ArgoCD-on-data placement as first-boot behavior instead of
    hand-applied live patches.
@@ -65,7 +65,7 @@ it is the cheapest thing to be holding when something else goes wrong.
 5. **Apply the RDS parameter that makes read-your-writes precise.** `session_track_gtids = OWN_GTID`
    is declared in `terraform/rds/main.tf`'s `aws_db_parameter_group`; apply that stack. Do **not**
    set it by hand in the console — `aws_db_parameter_group` reconciles the whole group, so the next
-   `scripts/ops/terraform-run.sh apply` would revert an out-of-band value. It is a dynamic parameter, so no reboot is
+   `ops tf apply` of that stack would revert an out-of-band value. It is a dynamic parameter, so no reboot is
    needed, but confirm it actually took:
 
    ```bash
@@ -102,10 +102,12 @@ dir (`terraform/oregon`, `terraform/seoul`) and AWS region (`us-west-2`, `ap-nor
 ### A1. Apply — replace the three stateful instances
 
 ```bash
-.claude/skills/ops/bin/ops tf plan oregon     # READ IT: expect 3 replacements (cp, data, ingress)
+.claude/skills/ops/bin/ops tf plan oregon --expect module.fleet.aws_instance.cp \
+  --expect module.fleet.aws_instance.data --expect module.fleet.aws_instance.ingress
+                                           # READ IT: expect 3 replacements (cp, data, ingress)
                                            # + launch-template re-render + SSM-document updates.
                                            # Confirm nothing outside that set is touched.
-scripts/ops/terraform-run.sh -chdir=terraform/oregon apply
+.claude/skills/ops/bin/ops tf apply <plan file printed above>    # the user, as the printed ! line
 ```
 
 All three instances go down together — **the region goes dark**, which is fine; the window exists
@@ -295,7 +297,7 @@ and never re-attached.
 ```bash
 # terraform/cloudflare api_hostname: edge-test.dante-planner.com -> api.dante-planner.com
 .claude/skills/ops/bin/ops tf plan cloudflare     # read it: the load balancer is renamed, nothing is destroyed
-scripts/ops/terraform-run.sh -chdir=terraform/cloudflare apply <plan file printed above>
+.claude/skills/ops/bin/ops tf apply <plan file printed above>    # the user, as the printed ! line
 ```
 
 Confirm before declaring the window closed:
@@ -376,7 +378,7 @@ older boot script than the code holds.
 
 | Need | Command |
 |---|---|
-| Rebuild a region | `scripts/ops/terraform-run.sh -chdir=terraform/oregon apply` (expect 3 replacements) |
+| Rebuild a region | `ops tf plan oregon --expect` each of the 3 instances, then the printed `! … ops tf apply <plan file>` |
 | Refresh app nodes | `aws autoscaling start-instance-refresh --region us-west-2 --auto-scaling-group-name danteplanner-oregon-app` |
 | Fleet gate | nodes Ready · ArgoCD Synced/Healthy · argocd+metrics-server on `*-data` · swap+GOMEMLIMIT first-boot |
 | Freeze writes | scale `ds/backend` to 0 (nodeSelector) + `argocd app set … --sync-policy none` |

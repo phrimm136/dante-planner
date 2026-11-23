@@ -46,12 +46,15 @@ Run once, with **admin** credentials (not the RDS role):
 
 ```bash
 cp account.tfvars.example <account>.tfvars       # set trusted_admin_principal_arn (gitignored)
-terraform -chdir=terraform/iam-bootstrap init
-terraform -chdir=terraform/iam-bootstrap validate
-terraform -chdir=terraform/iam-bootstrap plan     # READ IT
-terraform -chdir=terraform/iam-bootstrap apply
-terraform -chdir=terraform/iam-bootstrap output provisioner_role_arn
+scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap init
+scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap validate
+scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap plan     # READ IT
+scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap apply
+scripts/ops/terraform-run.sh -chdir=terraform/iam-bootstrap output provisioner_role_arn
 ```
+
+These run by hand through the runner, not ops: they run with admin credentials before any ops
+profile exists.
 
 Then wire the two consumers to that role ARN:
 
@@ -69,7 +72,8 @@ region      = us-west-2
 ```
 
 ```bash
-AWS_PROFILE=danteplanner-provisioner terraform -chdir=terraform/oregon apply
+.claude/skills/ops/bin/ops tf plan oregon -- -var-file=prod.tfvars
+.claude/skills/ops/bin/ops tf apply <plan file printed above>    # the user, as the printed ! line
 ```
 
 **(b) Oregon CI workflow** — replace static access keys with OIDC. The job needs

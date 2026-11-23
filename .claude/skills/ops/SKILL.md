@@ -1,6 +1,6 @@
 ---
 name: ops
-description: Read production (Mimir metrics, Loki logs, read-only SQL, the RDS tunnel, the DB and Oregon verification checks) and run terraform plans through one local CLI that names the AWS profile, checks the SSO session, writes a dated log and changes no cloud state. Use for any production read or terraform plan, when the Bash hook refuses a direct call to scripts/ops/access/*, oregon-verify.sh or terraform-run.sh plan, or when an AWS session, Docker or a tunnel looks wrong.
+description: Read production (Mimir metrics, Loki logs, read-only SQL, the RDS tunnel, the DB and Oregon verification checks) and run terraform plans through one local CLI that names the AWS profile, checks the SSO session, writes a dated log and changes cloud state only through `tf apply`, which the user runs and the hook refuses in every form it can see in a Bash-tool command. Use for any production read or terraform plan, when the Bash hook refuses a direct call to scripts/ops/access/*, oregon-verify.sh or terraform-run.sh plan, or when an AWS session, Docker or a tunnel looks wrong.
 ---
 
 # ops
@@ -10,7 +10,7 @@ Every repeated workstation read of production and every terraform plan runs as
 wrapped script (`prod`, `staging` or `mgmt`, the profiles in `~/.aws/config`; default `prod`), and the
 CLI checks that profile's SSO session before it runs anything. The script's output goes to
 stdout and to `.claude/reports/logs/ops-<command>-<YYYYMMDD-HHMMSS>.log`; the exit code is the
-script's. No command writes to the cloud: there is no apply and no write command. The
+script's. Only `tf apply <plan file>` writes to the cloud: it applies a plan `tf plan` cleared and the user runs it with `!`; the hook refuses its direct forms and any command whose text names the CLI or `terraform-run.sh` together with the word `apply` or `destroy`, which guards ordinary commands but is no sandbox against a process sharing the user's cloud session. The
 `ops-redirect.sh` hook refuses direct calls to the scripts it wraps and names the `ops` command.
 CI does not call this CLI. Every line it prints or logs passes one redaction: each `sso_account_id` in
 `~/.aws/config` (or `$AWS_CONFIG_FILE`) becomes `<account:PROFILE>` and any other account number inside
@@ -33,7 +33,7 @@ names in its header). Worktrees start uninitialized; plan from the main checkout
 | `sql "<SELECT …>" [--site oregon\|seoul]` / `sql -f FILE` | Read-only SQL; starts the tunnel when down |
 | `tunnel start\|stop\|status [--site …]` | The SSM port-forward to RDS |
 | `verify db` / `verify oregon` | The DB observability check / the Oregon fleet check |
-| `tf plan <stack> [-- terraform args]` | Plan file and full text to the log; prints one line per changed resource (destroy, replace, update, create, import, move), the counts, and the `!` apply command for the user to run. A stack is any `terraform/` directory with `*.tf` files except `modules`. A stack whose backend is the management account (`registry`, `organization`) defaults to `mgmt`; `log-archive`, whose account has no ops profile, is planned directly with `scripts/ops/terraform-run.sh` |
+| `tf plan <stack> [--expect <address>]… [-- terraform args]` | Plan file and full text to the log; prints one line per changed resource (destroy, replace, update, create, import, move), the counts, and, when every replace, destroy and update of an `aws_instance`, `aws_autoscaling_group` or `aws_db_instance` is named with `--expect <address>`, the `! … ops tf apply <plan file>` command for the user to run. A stack is any `terraform/` directory with `*.tf` files except `modules`. A stack whose backend is the management account (`registry`, `organization`) defaults to `mgmt`; `log-archive`, whose account has no ops profile, is planned directly with `scripts/ops/terraform-run.sh` |
 
 The CLI's own tests: `python3 -m unittest discover -s .claude/skills/ops/tests`.
 
