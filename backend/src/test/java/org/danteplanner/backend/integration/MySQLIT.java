@@ -355,7 +355,7 @@ class MySQLIT extends SharedMySqlContainerSupport {
 
         @Test
         void timestamp_WhenMicrosecondPrecision_Preserved() {
-            // created_at is @PrePersist-assigned and updatable=false, so set
+            // created_at is stamped by JPA auditing and updatable=false, so set
             // deterministic microsecond-spaced values via native SQL to verify the
             // TIMESTAMP(6) column preserves sub-second ordering (V042).
             Instant base = Instant.now().truncatedTo(ChronoUnit.MILLIS);

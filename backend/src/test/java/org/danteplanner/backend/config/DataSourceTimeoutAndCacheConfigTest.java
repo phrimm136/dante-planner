@@ -7,10 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.bind.validation.BindValidationException;
 import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
 import org.springframework.boot.jdbc.autoconfigure.DataSourceProperties;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.boot.validation.autoconfigure.ValidationAutoConfiguration;
 
 import com.zaxxer.hikari.HikariConfig;
 
@@ -214,6 +220,37 @@ class DataSourceTimeoutAndCacheConfigTest {
             assertThat(bound.getConnectionTimeout())
                     .isEqualTo(TimeoutHierarchy.POOL_ACQUIRE_TIMEOUT_MS);
         }
+    }
+
+    @Nested
+    class StartupValidation {
+
+        private final ApplicationContextRunner runner = new ApplicationContextRunner()
+                .withConfiguration(AutoConfigurations.of(
+                        ConfigurationPropertiesAutoConfiguration.class, ValidationAutoConfiguration.class))
+                .withUserConfiguration(HikariBinding.class);
+
+        @Test
+        void connectionTimeout_WhenPositive_Binds() {
+            runner.withPropertyValues("spring.datasource.hikari.connection-timeout=1")
+                    .run(context -> assertThat(context.getBean(HikariTuningProperties.class).getConnectionTimeout())
+                            .isEqualTo(1));
+        }
+
+        @Test
+        void connectionTimeout_WhenZero_FailsStartupNamingIt() {
+            runner.withPropertyValues("spring.datasource.hikari.connection-timeout=0")
+                    .run(context -> {
+                        assertThat(context).hasFailed();
+                        assertThat(context.getStartupFailure()).rootCause()
+                                .isInstanceOf(BindValidationException.class)
+                                .hasMessageContaining("connectionTimeout");
+                    });
+        }
+    }
+
+    @EnableConfigurationProperties(HikariTuningProperties.class)
+    static class HikariBinding {
     }
 
     @Nested
