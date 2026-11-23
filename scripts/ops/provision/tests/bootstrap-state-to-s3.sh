@@ -222,9 +222,24 @@ printf 'bucket = "danteplanner-tfstate-111111111111"\nregion = "us-west-2"\n' >"
 printf 'aws_account_id = "222222222222"\n' >"$acct/two.tfvars"
 printf 'aws_account_id="111111111111"   # the account this stack applies into\n' >"$acct/one.tfvars"
 printf 'region = "us-west-2"\n' >"$acct/none.tfvars"
+printf 'bucket = "danteplanner-tfstate-333333333333"\n' >"$acct/backend.three.hcl"
+printf 'aws_account_id = "333333333333"\n' >"$acct/three.tfvars"
 p8="$work/producer-8"
-producer "$p8" && apply_in "$p8" ws1 "arn:aws:iam::333333333333:role/a arn:aws:iam::111111111111:role/b" ||
+producer "$p8" && apply_in "$p8" ws1 "arn:aws:iam::111111111111:role/trusted-admin" ||
   fail "$name" "setup apply"
+applied_in_three="$acct/applied-in-333.tfstate"
+python3 - "$p8/terraform.tfstate.d/ws1/terraform.tfstate" "$applied_in_three" 333333333333 <<'EOF'
+import json, sys
+state = json.load(open(sys.argv[1]))
+account = sys.argv[3]
+state["resources"].append({
+    "mode": "data", "type": "aws_caller_identity", "name": "current",
+    "provider": 'provider["registry.terraform.io/hashicorp/aws"]',
+    "instances": [{"schema_version": 0, "sensitive_attributes": [],
+                   "attributes": {"account_id": account, "id": account,
+                                  "arn": f"arn:aws:iam::{account}:user/applier", "user_id": "AIDAEXAMPLE"}}]})
+json.dump(state, open(sys.argv[2], "w"))
+EOF
 no_ids() { ! printf '%s\n' "$out" | grep -qE '111111111111|222222222222|333333333333'; }
 
 mkdir -p "$work/stub"
@@ -239,21 +254,27 @@ printf '%s\n' "$out" | grep -q "$acct/backend.one.hcl and $acct/two.tfvars name 
 no_ids || fail "$name" "printed an account id"
 [ ! -e "$XDG_STATE_HOME/danteplanner/tf-plan-logs/state-backend.one.init.log" ] || fail "$name" "it ran init"
 
-out=$( (check_accounts "$acct/backend.one.hcl" "$acct/one.tfvars" "$pa/terraform.tfstate.d/ws2/terraform.tfstate") 2>&1)
+out=$( (check_accounts "$acct/backend.one.hcl" "$acct/one.tfvars" "$applied_in_three") 2>&1)
 rc=$?
-[ "$rc" -ne 0 ] || fail "$name" "state of another account, exit 0"
-printf '%s\n' "$out" | grep -q "$pa/terraform.tfstate.d/ws2/terraform.tfstate never mentions the account $acct/backend.one.hcl names" ||
+[ "$rc" -ne 0 ] || fail "$name" "a state that only names the account in an ARN, exit 0"
+printf '%s\n' "$out" | grep -q "$applied_in_three was applied in another account than the one $acct/backend.one.hcl names" ||
   fail "$name" "does not name the state file and the backend file"
 no_ids || fail "$name" "printed an account id"
 
-out=$( (check_accounts "$acct/backend.one.hcl" "$acct/none.tfvars" "$p8/terraform.tfstate.d/ws1/terraform.tfstate") 2>&1)
+out=$( (check_accounts "$acct/backend.one.hcl" "$acct/one.tfvars" "$pa/terraform.tfstate.d/ws2/terraform.tfstate") 2>&1)
+rc=$?
+[ "$rc" -ne 0 ] || fail "$name" "a state without the caller identity, exit 0"
+printf '%s\n' "$out" | grep -q "$pa/terraform.tfstate.d/ws2/terraform.tfstate holds no data.aws_caller_identity.current account_id" ||
+  fail "$name" "does not name what the state lacks"
+
+out=$( (check_accounts "$acct/backend.one.hcl" "$acct/none.tfvars" "$applied_in_three") 2>&1)
 rc=$?
 [ "$rc" -ne 0 ] || fail "$name" "tfvars without aws_account_id, exit 0"
 printf '%s\n' "$out" | grep -q "$acct/none.tfvars sets no aws_account_id" || fail "$name" "does not name the tfvars file"
 
-out=$( (check_accounts "$acct/backend.one.hcl" "$acct/one.tfvars" "$p8/terraform.tfstate.d/ws1/terraform.tfstate") 2>&1)
+out=$( (check_accounts "$acct/backend.three.hcl" "$acct/three.tfvars" "$applied_in_three") 2>&1)
 rc=$?
-[ "$rc" -eq 0 ] || fail "$name" "matching files, exit $rc"
+[ "$rc" -eq 0 ] || fail "$name" "the account the state was applied in, exit $rc"
 no_ids || fail "$name" "printed an account id"
 pass "$name"
 
@@ -331,6 +352,83 @@ out=$( (remove_local iam-bootstrap "$s3/terraform.tfstate") 2>&1)
 rc=$?
 [ "$rc" -eq 0 ] || fail "$name" "moved default file, exit $rc"
 printf '%s\n' "$out" | grep -qx "removed: $s3/terraform.tfstate.backup" || fail "$name" "moved default file: sibling not removed"
+pass "$name"
+
+name="a failed push prints the script's message and no bucket name"
+real_terraform=$(command -v terraform)
+mkdir -p "$work/pushfail"
+cat >"$work/pushfail/terraform" <<EOF
+#!/bin/sh
+case " \$* " in
+  *" push "*)
+    echo "Lock Info: Path: danteplanner-tfstate-999999999999/state-backend/terraform.tfstate"
+    echo "Error acquiring the state lock: s3://danteplanner-tfstate-999999999999" >&2
+    exit 1 ;;
+esac
+exec "$real_terraform" "\$@"
+EOF
+chmod +x "$work/pushfail/terraform"
+p10="$work/producer-10"
+s10="$work/s10"
+producer "$p10" && apply_in "$p10" ws1 ws1 || fail "$name" "setup apply"
+target "$s10"
+out=$( (PATH="$work/pushfail:$PATH" push_state state-backend "$s10" acct-s10 remote-s10 "$work/ws1.tfvars" \
+  "$p10/terraform.tfstate.d/ws1/terraform.tfstate" -backend-config=path="$work/s10.remote.tfstate") </dev/null 2>&1)
+rc=$?
+[ "$rc" -ne 0 ] || fail "$name" "exit 0"
+printf '%s\n' "$out" | grep -q '^push: failed; the remote may be unchanged. Read ' || fail "$name" "no push failure line"
+printf '%s\n' "$out" | grep -q '999999999999' && fail "$name" "the bucket name reached the output"
+pass "$name"
+
+p11="$work/producer-11"
+s11="$work/s11"
+p11_ws1="$p11/terraform.tfstate.d/ws1/terraform.tfstate"
+producer "$p11" && apply_in "$p11" ws1 ws1 || fail "p11 setup" "apply"
+target "$s11"
+out=$( (push_state iam-bootstrap "$s11" acct-s11 remote-s11 "$work/ws1.tfvars" "$p11_ws1" \
+  -backend-config=path="$work/s11.remote.tfstate") </dev/null 2>&1) || fail "p11 setup" "first move"
+apply_in "$p11" ws1 other || fail "p11 setup" "second apply"
+
+name="local removal refuses a local file that moved on at the same count"
+[ "$(file_count "$p11_ws1")" = 3 ] || fail "$name" "setup: the count changed"
+out=$( (remove_local iam-bootstrap "$p11_ws1") 2>&1)
+rc=$?
+[ "$rc" -ne 0 ] || fail "$name" "exit 0"
+printf '%s\n' "$out" | grep -q "$p11_ws1 is newer than the verified copy" || fail "$name" "does not say the local file is newer"
+printf '%s\n' "$out" | grep -q "Run the move again: bootstrap-state-to-s3.sh iam-bootstrap <path>/backend.acct-s11.hcl" ||
+  fail "$name" "does not name the move command"
+[ -s "$p11_ws1" ] || fail "$name" "removed the newer file"
+pass "$name"
+
+name="a rerun with a local file newer than the bucket pushes it as a move"
+out=$( (push_state iam-bootstrap "$s11" acct-s11 remote-s11 "$work/other.tfvars" "$p11_ws1" \
+  -backend-config=path="$work/s11.remote.tfstate") </dev/null 2>&1)
+rc=$?
+[ "$rc" -eq 0 ] || fail "$name" "exit $rc"
+printf '%s\n' "$out" | grep -q 'holds an older serial of the same state; pushing the newer local state over it' ||
+  fail "$name" "does not name the newer-local case"
+printf '%s\n' "$out" | grep -qx 'verified: iam-bootstrap remote-s11 3 resources, plan shows no change' || fail "$name" "no verified line"
+[ "$(remote_lineage "$s11")" = "$(file_lineage "$p11_ws1")" ] || fail "$name" "the remote is not the local state"
+pass "$name"
+
+name="a rerun with a local file older than the bucket is refused as older"
+out=$( (push_state iam-bootstrap "$s11" acct-s11-old remote-s11 "$work/ws1.tfvars" "$p11_ws1.backup" \
+  -backend-config=path="$work/s11.remote.tfstate") </dev/null 2>&1)
+rc=$?
+[ "$rc" -ne 0 ] || fail "$name" "exit 0"
+printf '%s\n' "$out" | grep -q 'holds a newer serial of the same state than' || fail "$name" "does not name the older-local case"
+pass "$name"
+
+name="a local file behind its own backup does not replace it"
+s11_backup="$XDG_STATE_HOME/danteplanner/tf-state-backup/iam-bootstrap.acct-s11.tfstate"
+command cp -f "$s11_backup" "$work/s11-backup-before"
+out=$( (push_state iam-bootstrap "$s11" acct-s11 remote-s11 "$work/ws1.tfvars" "$p11_ws1.backup" \
+  -backend-config=path="$work/s11.remote.tfstate") </dev/null 2>&1)
+rc=$?
+[ "$rc" -ne 0 ] || fail "$name" "exit 0"
+printf '%s\n' "$out" | grep -q "$p11_ws1.backup is behind its own backup $s11_backup" || fail "$name" "does not say the file is behind"
+printf '%s\n' "$out" | grep -qE '^(backup|init|push):' && fail "$name" "it wrote before refusing"
+cmp -s "$s11_backup" "$work/s11-backup-before" || fail "$name" "the backup was replaced"
 pass "$name"
 
 echo "bootstrap-state-to-s3 tests: $passed passed"

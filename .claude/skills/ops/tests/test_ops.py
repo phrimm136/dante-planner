@@ -30,6 +30,17 @@ RUN_MOMENT = datetime.datetime(2026, 11, 9, 12, 30, 5)
 STAMP_TEXT = "20261109-123005"
 CLI_TEXT = ops_cli.CLI_PATH
 EXPIRED_STDERR = ("\nError when retrieving token from sso: Token has expired and refresh failed\n")
+S3_BACKEND_PATTERN = re.compile(r'^\s*backend\s+"s3"\s*\{', re.MULTILINE)
+
+
+def stacks_without_s3_backend(repo_root):
+    tracked_paths = subprocess.run(["git", "-C", str(repo_root), "ls-files", "--", "terraform"],
+                                   capture_output=True, text=True, check=True).stdout.split()
+    return [stack_name for stack_name in ops_cli.plan_stacks(repo_root)
+            if not any(S3_BACKEND_PATTERN.search((repo_root / tracked_path).read_text(encoding="utf-8"))
+                       for tracked_path in tracked_paths
+                       if tracked_path.startswith(f"terraform/{stack_name}/") and tracked_path.count("/") == 2
+                       and tracked_path.endswith(".tf"))]
 PROFILE_ACCOUNTS = {"prod": "111122223333", "staging": "444455556666", "mgmt": "777788889999"}
 UNMAPPED_ID = "999988887777"
 FAKE_CONFIG_TEXT = "".join(f"[profile {profile_name}]\nsso_session = s\nsso_account_id = {account_id}\n\n"
@@ -597,6 +608,7 @@ class PlanTest(RepoCase):
         self.assertEqual(ops_cli.plan_stacks(REPO_ROOT), ["cloudflare", "iam-bootstrap", "log-archive", "oregon",
                                                           "organization", "rds", "registry", "secrets", "seoul",
                                                           "state-backend"])
+        self.assertEqual(stacks_without_s3_backend(REPO_ROOT), [])
 
 
 ACCOUNT_BOUND_SHAPES = {

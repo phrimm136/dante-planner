@@ -8,9 +8,9 @@ epic: none · pr: none · supersedes: 033 @terraform @state @bootstrap @accounts
   REJECTED: keeping local state because storing a stack's state in the bucket it creates is circular — the circle exists only before the first apply, and a stack that must stay appliable "from a laptop holding nothing but credentials" needs that once per account.
   REJECTED: a second bucket made by hand for the two bootstrap states — one more resource that no code describes, with the same question one level down.
   REJECTED: letting `init -migrate-state` do the move — it copies the selected workspace only and asks its questions on a terminal, and these stacks held one workspace per account in one directory, so each state had to go to a different account's bucket.
-  INVARIANT: a state is pushed only into the bucket of the account it describes — the move compares the account in the backend file, in the inputs and in the state before any write, and its tests cover a pair that disagrees.
-  INVARIANT: the local copy is deleted only after the bucket holds the same state — the move records that it verified the remote copy, and the delete step refuses without that record; tests cover both orders.
-  INVARIANT: every directory under `terraform/` declares a remote backend — the plan CLI has no path for a stack without one, so such a stack stops at init.
+  INVARIANT: a state is pushed only into the bucket of the account it describes — the move compares the account the backend file names, the account in the inputs and the account the state was last applied in before any write; its tests cover each pair that disagrees, and a state that only mentions the other account.
+  INVARIANT: the local copy is deleted only after the bucket holds the same state — the move records the lineage and serial it verified in the bucket, and the delete step refuses a local file whose lineage and serial differ from that record; tests cover a missing record and a local file that changed after the move.
+  INVARIANT: every directory under `terraform/` declares a remote backend — a test reads the tracked files of every stack directory and fails on one without the block, so the override file of a first run cannot satisfy it.
   NON-GOAL: a copy of these two states outside the bucket — the bucket's own protection is the one every other stack already relies on.
 
 ## Takeaway
