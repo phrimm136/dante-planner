@@ -1,9 +1,8 @@
 terraform {
   # terraform init -backend-config=../backend.management.hcl
   #
-  # This stack applies in the management account, which is the account that already owns
-  # the state bucket, so it has none of iam-bootstrap's circularity and stores state
-  # remotely like every other stack.
+  # This stack applies in the management account, which already owns the state bucket it
+  # stores state in.
   backend "s3" {
     key                  = "organization/terraform.tfstate"
     region               = "us-west-2"

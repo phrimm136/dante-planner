@@ -79,7 +79,7 @@ file_lineage() {
 check_accounts() {
   local backend_file=$1 tfvars=$2 state_file=$3 verdict
   verdict=$(python3 -c '
-import re, sys
+import json, re, sys
 backend, tfvars, state = (open(path).read() for path in sys.argv[1:4])
 bucket = re.search(r"^\s*bucket\s*=\s*\"[^\"]*?(\d{12})\"", backend, re.M)
 if not bucket:
@@ -89,14 +89,22 @@ if not declared:
     print("no-tfvars-id"); sys.exit()
 if declared.group(1) != bucket.group(1):
     print("tfvars-differs"); sys.exit()
-print("ok" if bucket.group(1) in state else "state-differs")
+applied = [instance.get("attributes", {}).get("account_id")
+           for resource in json.loads(state).get("resources", [])
+           if (resource.get("mode"), resource.get("type"), resource.get("name"), resource.get("module"))
+           == ("data", "aws_caller_identity", "current", None)
+           for instance in resource.get("instances", [])]
+if len(applied) != 1 or not applied[0]:
+    print("no-caller-identity"); sys.exit()
+print("ok" if applied[0] == bucket.group(1) else "state-differs")
 ' "$backend_file" "$tfvars" "$state_file")
   case "$verdict" in
     ok) echo "accounts: $(basename "$backend_file"), $(basename "$tfvars") and $(basename "$state_file") name the same account" ;;
     no-bucket-id) die "accounts: the bucket in $backend_file does not end in an account id; nothing done" ;;
     no-tfvars-id) die "accounts: $tfvars sets no aws_account_id; nothing done" ;;
     tfvars-differs) die "accounts: $backend_file and $tfvars name different accounts; nothing done" ;;
-    state-differs) die "accounts: $state_file never mentions the account $backend_file names; nothing done" ;;
+    no-caller-identity) die "accounts: $state_file holds no data.aws_caller_identity.current account_id, so the account it was applied in is unknown; nothing done" ;;
+    state-differs) die "accounts: $state_file was applied in another account than the one $backend_file names; nothing done" ;;
     *) die "accounts: could not compare $backend_file, $tfvars and $state_file; nothing done" ;;
   esac
 }
@@ -140,6 +148,13 @@ push_state() {
     if [[ -s "$backup" ]] && [[ "$(file_lineage "$backup")" != "$(file_lineage "$local_file")" ]]; then
       die "$backup already holds a different state (another lineage); nothing done. Move it away if it is stale, then re-run."
     fi
+    if [[ -s "$backup" ]]; then
+      local local_serial backup_serial_now
+      read -r _ _ local_serial <<<"$(state_facts "$local_file")"
+      read -r _ _ backup_serial_now <<<"$(state_facts "$backup")"
+      [[ "$local_serial" -ge "$backup_serial_now" ]] ||
+        die "$local_file is behind its own backup $backup (serial $local_serial, backup $backup_serial_now); nothing done."
+    fi
     if is_default_file_of "$local_file" "$stack_dir"; then
       mv "$local_file" "$backup"
       moved=1
@@ -170,15 +185,24 @@ push_state() {
   fi
   read -r remote_n remote_lineage remote_serial <<<"$(state_facts - <<<"$pulled")"
   read -r _ backup_lineage backup_serial <<<"$(state_facts "$backup")"
+  local push=0
   if [[ "$remote_n" -eq 0 ]]; then
     echo "remote: $key is empty"
-    tf -chdir="$stack_dir" state push "$backup" ||
-      die "push: failed; the remote may be unchanged. Read the error above, then re-run this command."
-    echo "push: $file_n resources from $backup to $key"
-  elif [[ "$remote_lineage" == "$backup_lineage" && "$remote_serial" == "$backup_serial" ]]; then
+    push=1
+  elif [[ "$remote_lineage" == "$backup_lineage" && "$remote_serial" -lt "$backup_serial" ]]; then
+    echo "remote: $key holds an older serial of the same state; pushing the newer local state over it"
+    push=1
+  elif [[ "$remote_lineage" == "$backup_lineage" && "$remote_serial" -eq "$backup_serial" ]]; then
     echo "push: already done; $key holds the backup's state (same lineage and serial)"
+  elif [[ "$remote_lineage" == "$backup_lineage" ]]; then
+    die "remote: $key holds a newer serial of the same state than $local_file; nothing pushed. The local file is behind the bucket: do not move it."
   else
-    die "remote: $key already holds $remote_n resources of another state; nothing pushed."
+    die "remote: $key already holds $remote_n resources of another state (a different lineage); nothing pushed."
+  fi
+  if [[ $push -eq 1 ]]; then
+    tf -chdir="$stack_dir" state push "$backup" >>"$init_log" 2>&1 ||
+      die "push: failed; the remote may be unchanged. Read $init_log, then re-run this command."
+    echo "push: $file_n resources from $backup to $key"
   fi
 
   local listed
@@ -238,11 +262,13 @@ remove_local() {
   fi
 
   if [[ "$probe" == "$local_file" ]]; then
-    local local_n backup_n
-    local_n=$(file_count "$local_file")
-    backup_n=$(file_count "$match")
-    [[ "$local_n" -eq "$backup_n" ]] ||
-      die "$local_file holds $local_n resources but its backup $match holds $backup_n; nothing removed. Push the current file first."
+    local local_lineage local_serial
+    read -r _ local_lineage local_serial <<<"$(state_facts "$local_file")"
+    if [[ "$local_lineage $local_serial" != "$(cat "$marker")" ]]; then
+      local relation="is newer than"
+      [[ "$local_serial" -gt "$match_serial" ]] || relation="differs from"
+      die "$local_file $relation the verified copy (serial $local_serial, verified $match_serial); nothing removed. Run the move again: bootstrap-state-to-s3.sh $stack <path>/backend.$account.hcl <tfvars file> $local_file"
+    fi
     command rm -f "$local_file"
     echo "removed: $local_file"
   else
