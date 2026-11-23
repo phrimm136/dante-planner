@@ -9,6 +9,7 @@ import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -23,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 import org.danteplanner.backend.user.repository.UserRepository;
 
@@ -84,6 +87,28 @@ class AuthControllerLogoutAllIT extends SharedMySqlContainerSupport {
         void logoutAll_WhenUnauthenticated_Returns401() throws Exception {
             mockMvc.perform(post("/api/auth/logout-all").with(withCsrf()))
                     .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        void logoutAll_WhenTheAuthenticationCarriesNoPrincipal_FailsWithoutClearingCookies() throws Exception {
+            mockMvc.perform(post("/api/auth/logout-all").with(withCsrf())
+                            .with(authentication(new UsernamePasswordAuthenticationToken(null, null, List.of()))))
+                    .andExpect(status().isInternalServerError())
+                    .andExpect(cookie().doesNotExist("accessToken"))
+                    .andExpect(cookie().doesNotExist("refreshToken"));
+
+            assertThat(tokenBlacklistService.isUserTokenInvalidated(testUser.getId(), 0L)).isFalse();
+        }
+
+        @Test
+        void logoutAll_WhenThePrincipalIsNotAUserId_FailsWithoutClearingCookies() throws Exception {
+            mockMvc.perform(post("/api/auth/logout-all").with(withCsrf())
+                            .with(authentication(new UsernamePasswordAuthenticationToken("someone", null, List.of()))))
+                    .andExpect(status().isInternalServerError())
+                    .andExpect(cookie().doesNotExist("accessToken"))
+                    .andExpect(cookie().doesNotExist("refreshToken"));
+
+            assertThat(tokenBlacklistService.isUserTokenInvalidated(testUser.getId(), 0L)).isFalse();
         }
 
         @Test
