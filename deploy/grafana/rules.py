@@ -12,6 +12,8 @@ from pathlib import Path
 import yaml
 
 RULES_DIR = Path(__file__).resolve().parent / "rules"
+# Rules create-staleness-rules.sh owns.
+STALENESS_TITLES = ("staleness-meta-oregon", "staleness-meta-seoul")
 DEFAULT_FILES = [RULES_DIR / "cluster-rules.yaml", RULES_DIR / "app-rules.yaml"]
 
 KIND_FIELDS = {
@@ -324,6 +326,39 @@ def emit_exprs(loaded_rules):
             print(rule_entry.test_expr())
 
 
+def audit_problems(loaded_rules, live_rules, managed_folder):
+    declared_titles = {rule_entry.rule_name for rule_entry in loaded_rules} | set(STALENESS_TITLES)
+    live_by_title = {}
+    for live_rule in live_rules:
+        live_by_title.setdefault(live_rule["title"], []).append(live_rule)
+    problem_lines = []
+    for rule_title, same_title in sorted(live_by_title.items()):
+        if rule_title in declared_titles and len(same_title) > 1:
+            live_places = ", ".join(f"uid {live_rule['uid']} in {'the managed' if live_rule['folderUID'] == managed_folder else 'another'} folder {live_rule['folderUID']}"
+                for live_rule in same_title)
+            problem_lines.append(f"duplicate: {rule_title} exists {len(same_title)} times ({live_places}); "
+                                 "in the managed folder keep the copy whose uid is the title, or any one when none is, "
+                                 "delete the rest, then run the script that owns the rule again, which rewrites the kept copy")
+        elif rule_title not in declared_titles:
+            problem_lines.extend(
+                f"undeclared: {rule_title} (uid {live_rule['uid']}) is in a managed folder and in no rule file; delete it or declare it"
+                for live_rule in same_title if live_rule["folderUID"] == managed_folder)
+    return problem_lines
+
+
+def audit_live_rules(loaded_rules, managed_folder):
+    try:
+        live_rules = json.load(sys.stdin)
+        problem_lines = audit_problems(loaded_rules, live_rules, managed_folder)
+    except (ValueError, KeyError, TypeError) as listing_problem:
+        raise RuleError(f"the live rule listing is not a list of Grafana rules: {listing_problem!r}") from listing_problem
+    if not live_rules:
+        raise RuleError("the live rule listing is empty")
+    if problem_lines:
+        raise RuleError("the live alert rules differ from the declared ones\n" + "\n".join(problem_lines))
+    print(f"{len(live_rules)} live rules, no duplicate and no undeclared rule")
+
+
 def main():
     arg_parser = argparse.ArgumentParser(description=__doc__)
     arg_parser.add_argument("--rules", action="append", type=Path, metavar="FILE",
@@ -335,6 +370,8 @@ def main():
     promtool_parser.add_argument("out_dir")
     command_parsers.add_parser("loki-cases", help="one JSON line per Loki case")
     command_parsers.add_parser("exprs", help="every Prometheus expression, params at their test values")
+    audit_parser = command_parsers.add_parser("audit", help="read the live rule listing on stdin, fail on a duplicate or undeclared rule")
+    audit_parser.add_argument("folder_uid")
     parsed_args = arg_parser.parse_args()
     try:
         loaded_rules = load_rules(parsed_args.rules or DEFAULT_FILES)
@@ -344,6 +381,8 @@ def main():
             emit_promtool(loaded_rules, parsed_args.out_dir)
         elif parsed_args.command == "loki-cases":
             emit_loki_cases(loaded_rules)
+        elif parsed_args.command == "audit":
+            audit_live_rules(loaded_rules, parsed_args.folder_uid)
         else:
             emit_exprs(loaded_rules)
     except RuleError as rule_problem:

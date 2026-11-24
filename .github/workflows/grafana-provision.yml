@@ -40,3 +40,9 @@ jobs:
           bash deploy/grafana/import-alert-rules.sh
           bash deploy/grafana/import-app-alert-rules.sh
           bash deploy/grafana/import-fleet-dashboard.sh
+
+      - name: Refuse duplicate and undeclared live alert rules
+        env:
+          GRAFANA_URL: ${{ vars.GRAFANA_URL }}
+          GRAFANA_TOKEN: ${{ secrets.GRAFANA_TOKEN }}
+        run: bash deploy/grafana/check-alert-rules.sh

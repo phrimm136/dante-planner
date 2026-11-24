@@ -13,8 +13,10 @@
   `import-app-alert-rules.sh`, `import-fleet-dashboard.sh`) on every push to `main` that touches
   `deploy/grafana/` or the etcd snapshot interval (`terraform/modules/fleet/variables.tf`,
   `scripts/ops/lib/etcd-interval.sh`), which sets an alert threshold; a change to those scripts or to `fleet-dashboard.json` lands by merging it,
-  never by a hand-run. Every script it runs must be idempotent (upsert or overwrite), so
-  `create-staleness-rules.sh` stays out until it upserts, and a change to it still needs a hand-run.
+  never by a hand-run. Every script it runs must be idempotent (upsert or overwrite).
+  `create-staleness-rules.sh` upserts but stays out, because it refuses to run before both clusters
+  send metrics; a change to it needs a hand-run. The last step, `check-alert-rules.sh`, fails the
+  run when a declared rule exists twice or a managed folder holds a rule no file declares.
 - `dependabot-auto-merge.yml` enables rebase auto-merge on a Dependabot PR unless an update in it
   is a major, and withdraws it when anyone else pushes; `dependency-submission.yml` submits the
   backend's resolved Gradle graph on every push to `main`.
