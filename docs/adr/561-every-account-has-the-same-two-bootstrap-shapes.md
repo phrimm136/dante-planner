@@ -8,7 +8,7 @@ epic: none · pr: none · supersedes: 033 @terraform @state @migration
   REJECTED: keeping the earlier refusal to move a protected resource between states — the move is now declared in code with an import on one side and a release without deletion on the other, so each side shows as a plan before it happens, and nothing in the account changes but one tag.
   INVARIANT: the bucket is never without protection against deletion while it is managed — the release from the old stack happens in a plan limited to the bucket's five addresses, and the plan that removes the old stack is made only after that release; the plan guard refuses the removal plan while it still lists the bucket.
   INVARIANT: `iam-bootstrap` declares no bucket — the move script reads each stack's tracked files and refuses a state with an address the stack does not declare, and its tests pin both directions against the real stacks.
-  NON-GOAL: keeping the import and release blocks — they are for this one move, a new account's first plan fails while the import block exists, and they are deleted once every account's states are past them; the ledger holds that condition.
+  NON-GOAL: keeping the import and release blocks — they are for this one move, a new account's first plan fails while the import block exists, so they left the code once every account's states were past them.
 
 ## Takeaway
 - takeaway: an inconsistency that is left to expire needs the event that ends it written down; when the account changed its job in place of being rebuilt, the exception had no owner and outlived its reason.

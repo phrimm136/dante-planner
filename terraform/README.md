@@ -142,10 +142,7 @@ Once per organization, from the management account:
 Once per account, with credentials for that account:
 
 4. Apply `state-backend` on local state, through a `backend_override.tf` (see State). No
-   dependencies. While `terraform/state-backend/imports.tf` exists, this plan fails with
-   "Cannot import non-existent remote object": that file adopts the management account's
-   existing bucket (see `docs/debt.md`). Delete it in this account's working copy for this
-   apply only, and restore it with `git checkout -- terraform/state-backend/imports.tf` after.
+   dependencies.
 5. Write `terraform/backend.<account>.hcl` from its `tf_state_bucket` output.
 6. Delete the override (gitignored, so `git status` will not remind you) and move that state into
    the new bucket:

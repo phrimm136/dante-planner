@@ -1,11 +1,7 @@
 data "aws_caller_identity" "current" {}
 
-locals {
-  tf_state_bucket = "${var.name_prefix}-tfstate-${data.aws_caller_identity.current.account_id}"
-}
-
 resource "aws_s3_bucket" "tf_state" {
-  bucket = local.tf_state_bucket
+  bucket = "${var.name_prefix}-tfstate-${data.aws_caller_identity.current.account_id}"
   tags   = merge(var.tags, { Name = "${var.name_prefix}-tfstate" })
 
   lifecycle {
