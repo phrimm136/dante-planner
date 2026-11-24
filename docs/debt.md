@@ -911,13 +911,6 @@ guards the parse but likewise skips the schema gate.
   every merge that touches `deploy/grafana/`, so a rule change no longer waits for a hand-run
   with the datasource uids typed in; the Terraform stack remains the target state.
   re-check: `test -f deploy/grafana/import-alert-rules.sh && .claude/skills/debt-ledger/bin/debt absent terraform -e 'grafana/grafana' -e 'grafana_rule_group'`
-- **Alert import scripts other than import-alert-rules.sh duplicate rules on re-run.** The
-  Grafana provisioning API deduplicates by UID, not title. import-alert-rules.sh now gives each
-  rule a fixed uid and updates it in place, and import-app-alert-rules.sh updates by title;
-  create-staleness-rules.sh still POSTs unconditionally, so re-running it against a populated
-  folder creates a second copy of every rule. Worth doing the next time that script must add a
-  rule to a provisioned stack: look the title up and PUT, the way the app script does.
-  re-check: `rg -q -- '-X POST' deploy/grafana/create-staleness-rules.sh && .claude/skills/debt-ledger/bin/debt absent deploy/grafana/create-staleness-rules.sh 'PUT'`
 - **Exporter endpoint secrets are hand-maintained addresses.**
   The primary_endpoint and replica_endpoint keys of danteplanner/mysqld-exporter/dsn are written
   by hand and nothing ties them to the instances they name; the 2026-08-24 incident was them

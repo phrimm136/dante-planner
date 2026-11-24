@@ -2,7 +2,7 @@
 # create rule M (per-cluster staleness meta) — ONLY after
 # remote_write data is confirmed flowing, because an absent-detector fires on
 # the pre-wiring absence itself.
-# Usage: GRAFANA_URL=... GRAFANA_TOKEN=... h2-create-rule-m.sh
+# Usage: GRAFANA_URL=... GRAFANA_TOKEN=... create-staleness-rules.sh
 set -euo pipefail
 : "${GRAFANA_URL:?set GRAFANA_URL}"
 : "${GRAFANA_TOKEN:?set GRAFANA_TOKEN}"
@@ -34,7 +34,15 @@ FOLDER_UID=$(curl -s "${auth[@]}" "${GRAFANA_URL}/api/folders" |
   jq -r --arg t "${GRAFANA_ALERT_FOLDER:-danteplanner-alerts}" '[.[] | select(.title==$t)][0].uid // empty')
 [ -n "$FOLDER_UID" ] || { echo "folder ${GRAFANA_ALERT_FOLDER:-danteplanner-alerts} not found"; exit 1; }
 
+live=$(curl -s -w '\n%{http_code}' "${auth[@]}" "${GRAFANA_URL}/api/v1/provisioning/alert-rules")
+[ "${live##*$'\n'}" = 200 ] || { echo "listing alert rules failed: ${live%$'\n'*}"; exit 1; }
+
 for c in oregon seoul; do
+  uid=$(printf '%s' "${live%$'\n'*}" | jq -r --arg t "staleness-meta-$c" '[.[] | select(.title==$t)] |
+    if length > 1 then "DUPLICATE" else (.[0].uid // empty) end')
+  [ "$uid" != DUPLICATE ] || { echo "staleness-meta-${c} exists more than once; delete all copies but one"; exit 1; }
+  path="${GRAFANA_URL}/api/v1/provisioning/alert-rules" method=POST want=201
+  [ -z "$uid" ] || { path="$path/$uid"; method=PUT; want=200; }
   resp=$(jq -n --arg ds "${DS_UID:-grafanacloud-prom}" --arg folder "$FOLDER_UID" --arg c "$c" '
     { title:("staleness-meta-" + $c), ruleGroup:"cluster-rules", folderUID:$folder,
       condition:"C", for:"2m", noDataState:"OK", execErrState:"OK",
@@ -48,11 +56,10 @@ for c in oregon seoul; do
          model:{refId:"C", type:"threshold", expression:"B",
                 conditions:[{evaluator:{type:"gt",params:[0]}}],
                 datasource:{type:"__expr__",uid:"__expr__"}}}]}' |
-    curl -s -w '\n%{http_code}' "${auth[@]}" "${noprov[@]}" -X POST \
-      "${GRAFANA_URL}/api/v1/provisioning/alert-rules" -d @-)
+    curl -s -w '\n%{http_code}' "${auth[@]}" "${noprov[@]}" -X "$method" "$path" -d @-)
   code=${resp##*$'\n'}; body=${resp%$'\n'*}
-  if [ "$code" = 201 ]; then
-    printf '%s' "$body" | jq -r '"   created: " + .title + "  (uid " + .uid + ")"'
+  if [ "$code" = "$want" ]; then
+    printf '%s' "$body" | jq -r '"   provisioned: " + .title + "  (uid " + .uid + ")"'
   else
     echo "   FAILED staleness-meta-${c} (HTTP ${code}): ${body}"; exit 1
   fi

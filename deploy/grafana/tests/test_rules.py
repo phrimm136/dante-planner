@@ -206,12 +206,64 @@ class RulesCliTest(unittest.TestCase):
                             if rule_entry["name"] == "etcd-snapshot-deadman")
         self.assertEqual(deadman_rule["params"]["etcd_interval"]["test"], int(interval_run.stdout))
 
+    def test_the_snapshot_age_panel_turns_red_when_the_deadman_fires(self):
+        interval_run = subprocess.run(["bash", "-c", f'source "{INTERVAL_LIB}"; etcd_snapshot_interval_hours'],
+                                      capture_output=True, text=True, check=True)
+        dashboard_text = (CLUSTER_RULES.parents[1] / "fleet-dashboard.json").read_text()
+        age_panel = next(panel_entry for panel_entry in json.loads(dashboard_text)["panels"]
+                         if panel_entry["title"] == "etcd snapshot age (hours)")
+        red_step = next(step_entry for step_entry in age_panel["fieldConfig"]["defaults"]["thresholds"]["steps"]
+                        if step_entry["color"] == "red")
+        self.assertEqual(red_step["value"], 1.5 * int(interval_run.stdout))
+
     def test_committed_rules_load(self):
         for group_name in ("cluster-rules", "app-rules"):
             run_result = subprocess.run([sys.executable, str(RULES_PY), "payloads", group_name], capture_output=True,
                                         text=True, env={**os.environ, **PAYLOAD_ENV})
             self.assertEqual(run_result.returncode, 0, run_result.stderr)
             self.assertTrue(run_result.stdout.strip())
+
+    def run_audit(self, *live_rules):
+        rule_file = self.rules_file("probe-rules.yaml", [prometheus_rule()])
+        return subprocess.run([sys.executable, str(RULES_PY), "--rules", str(rule_file), "audit", "managed"],
+                              input=json.dumps(live_rules), capture_output=True, text=True)
+
+    def live_rule(self, rule_title, rule_uid, folder_uid="managed"):
+        return {"title": rule_title, "uid": rule_uid, "folderUID": folder_uid}
+
+    def test_audit_passes_one_copy_of_each_declared_rule_and_the_staleness_rules(self):
+        run_result = self.run_audit(self.live_rule("probe-rule", "a"), self.live_rule("staleness-meta-oregon", "b"),
+                                    self.live_rule("staleness-meta-seoul", "c"))
+        self.assertEqual(run_result.returncode, 0, run_result.stderr)
+
+    def test_audit_fails_on_a_second_copy_and_names_both_uids(self):
+        run_result = self.run_audit(self.live_rule("probe-rule", "probe-rule"), self.live_rule("probe-rule", "old-uid"))
+        self.assertEqual(run_result.returncode, 1)
+        self.assertIn("uid probe-rule in the managed folder managed, uid old-uid in the managed folder managed", run_result.stderr)
+        self.assertIn("keep the copy whose uid is the title", run_result.stderr)
+
+    def test_audit_fails_on_a_second_copy_in_another_folder(self):
+        run_result = self.run_audit(self.live_rule("probe-rule", "a"), self.live_rule("probe-rule", "b", "stray"))
+        self.assertEqual(run_result.returncode, 1)
+        self.assertIn("uid a in the managed folder managed, uid b in another folder stray", run_result.stderr)
+
+    def test_audit_fails_on_an_undeclared_rule_in_the_managed_folder(self):
+        run_result = self.run_audit(self.live_rule("renamed-away", "a"))
+        self.assertEqual(run_result.returncode, 1)
+        self.assertIn("undeclared: renamed-away (uid a)", run_result.stderr)
+
+    def test_audit_leaves_an_undeclared_rule_of_another_folder_alone(self):
+        run_result = self.run_audit(self.live_rule("probe-rule", "a"), self.live_rule("someone-elses", "b", "other"))
+        self.assertEqual(run_result.returncode, 0, run_result.stderr)
+
+    def test_audit_refuses_a_listing_that_holds_no_rules(self):
+        self.assertEqual(self.run_audit().returncode, 1)
+
+    def test_audit_refuses_an_error_body(self):
+        run_result = subprocess.run([sys.executable, str(RULES_PY), "audit", "managed"], input='{"message":"denied"}',
+                                    capture_output=True, text=True)
+        self.assertEqual(run_result.returncode, 1)
+        self.assertIn("not a list of Grafana rules", run_result.stderr)
 
 
 if __name__ == "__main__":
