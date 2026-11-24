@@ -138,7 +138,7 @@ that reason expires the moment the migration is accepted.
 
 The provisioning role is `danteplanner-provisioner` in the staging account and
 `prod-provisioner` in prod (`terraform/iam-bootstrap` sets it per account tfvars file). The
-management account has none once `docs/runbooks/management-bootstrap-retire.md` has run. An ARN naming a role
+management account has none: it runs no fleet. An ARN naming a role
 that does not exist fails `sts:AssumeRoleWithWebIdentity` with no CloudTrail record in any
 account, so run `aws iam get-role --role-name <name>` in the target account before putting an ARN
 into a secret or `~/.aws/config`.
