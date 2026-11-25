@@ -1,6 +1,6 @@
 import { test, expect } from '../src/browser'
 import { randomUUID } from 'node:crypto'
-import { authenticateContext } from '../src/auth'
+import { ACCESS_TOKEN_COOKIE, authenticateContext } from '../src/auth'
 import { producesRequest } from '../src/gestures'
 import { seedLocalPlanner, readPlannerRows } from '../src/localPlanner'
 import { dropPlanner, seedPlanner } from '../src/plannerFixture'
@@ -98,7 +98,7 @@ test('a 401 delete ends in a tombstone', async ({ page, context, baseURL }) => {
     await expect(page.getByText(fixture.title)).toBeVisible({ timeout: 30_000 })
     await openDetail(page, fixture.plannerId)
 
-    await context.clearCookies()
+    await context.clearCookies({ name: ACCESS_TOKEN_COOKIE })
     await confirmDelete(page, [401])
 
     expect(tombstoneRows(await readPlannerRows(page), fixture.plannerId)).toHaveLength(1)
