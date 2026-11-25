@@ -52,7 +52,7 @@ public class CommentCommandService {
         plannerAccess.checkPublished(plannerId);
 
         Placement placement = switch (Addressee.of(request.parentCommentId())) {
-            case Addressee.Thread thread -> new Placement.TopLevel();
+            case Addressee.Thread thread -> new Placement.Parentless(0);
             case Addressee.Parent(UUID parentPublicId) -> Placement.under(stateValidator.requireReplyable(
                     accessValidator.requireParentInPlanner(
                             commentQueryService.requireByPublicId(parentPublicId), plannerId)));
@@ -74,7 +74,8 @@ public class CommentCommandService {
 
         plannerAccess.checkPublished(plannerId);
 
-        Placement placement = Placement.under(stateValidator.requireReplyable(parent));
+        Placement placement = Placement.under(stateValidator.requireReplyable(
+                accessValidator.requireParentInPlanner(parent, plannerId)));
 
         PlannerComment saved = insert(placement.row(plannerId, userId, content), Announcement.REPLY);
 
@@ -120,9 +121,6 @@ public class CommentCommandService {
 
     private sealed interface Placement {
 
-        record TopLevel() implements Placement {
-        }
-
         record UnderParent(Long parentId, int depth) implements Placement {
         }
 
@@ -140,7 +138,6 @@ public class CommentCommandService {
 
         default PlannerComment row(UUID plannerId, Long userId, String content) {
             return switch (this) {
-                case TopLevel topLevel -> new PlannerComment(plannerId, userId, content, null, 0);
                 case UnderParent(Long parentId, int depth) ->
                         new PlannerComment(plannerId, userId, content, parentId, depth);
                 case Parentless(int depth) -> new PlannerComment(plannerId, userId, content, null, depth);
@@ -149,7 +146,6 @@ public class CommentCommandService {
 
         default Announcement announcement() {
             return switch (this) {
-                case TopLevel topLevel -> Announcement.COMMENT;
                 case UnderParent underParent -> Announcement.REPLY;
                 case Parentless parentless -> Announcement.COMMENT;
             };
