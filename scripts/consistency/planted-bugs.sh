@@ -294,6 +294,9 @@ run_variant() {
     gradle_args+=(--tests "$package.$cls")
   done
   gradle_args+=("-Dconsistency.seedCount=$seeds" "-Dconsistency.stopAtFirstViolation=$stop")
+  if [ "$name" != clean ]; then
+    gradle_args+=(-PplantedBug)
+  fi
 
   if ! rm -f -- "$repo"/backend/build/test-results/test/TEST-*.xml; then
     abort_variant "$name" "stale test results could not be deleted"

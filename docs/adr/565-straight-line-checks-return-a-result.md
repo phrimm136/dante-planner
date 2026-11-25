@@ -13,6 +13,7 @@ epic: none · pr: none
   INVARIANT: a method that returns a Result performs no effect, in its lambdas included — `DecisionPurityTest` (fixture `ChainedPortReader`).
   NON-GOAL: an `Err` arm that does nothing — no check sees intent.
   NON-GOAL: a local named `unused…` or under `@SuppressWarnings("unused")` — Error Prone takes the name as a deliberate discard; the diff is where it is reviewed.
+  NON-GOAL: a planted-bug build — `-PplantedBug` lowers `UnusedVariable` to a warning, because a planted bug deletes a use of something and must still compile.
   NON-GOAL: test sources — `compileTestJava` does not raise the two checks.
 
 ## Takeaway
