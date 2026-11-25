@@ -30,6 +30,7 @@ deploy/
     mysqld-exporter-config.yaml  ConfigMap with the RDS CA bundle that mysqld-exporter mounts
     redis-exporter.yaml    ArgoCD Applications of the redis-exporter chart, one per Redis, on role=data
     alloy-logs.yaml        ArgoCD Application `alloy` (namespace argocd) that installs the Alloy chart on role=data, and the config and Loki credentials it reads; its config reloader applies a changed config without a restart
+    external-secrets.yaml  ArgoCD Application (namespace argocd) that installs the External Secrets chart in namespace external-secrets on role=app
     privileged-exporter-namespace.yaml, node-exporter.yaml  namespace privileged-exporter (enforce: privileged) + ArgoCD Application of the node-exporter chart, a DaemonSet on every node
   chart/values.yaml        values common to both regions
   chart/values-oregon.yaml region-specific values (image tag, endpoints)
@@ -69,6 +70,21 @@ Helm ignores a value that a chart raise renamed, so the `charts` stage also runs
 annotations or `app` label, the args of node-exporter or mysqld-exporter, mysqld-exporter's
 endpoint, credentials, my.cnf or CA mount, the Secret keys and CA file behind them, or a Redis
 exporter's args or env are no longer rendered as the metrics need them.
+
+External Secrets is the exception: Renovate does not raise it (`enabled: false` for
+`external-secrets` in `renovate.json`), because the CP boot script installs the same chart and the
+version of the Application must equal the `external_secrets_chart_version` defaults in
+`terraform/modules/fleet`, `terraform/oregon` and `terraform/seoul`.
+`scripts/ops/tests/test_external_secrets_application.py` fails when they differ. Raise all of them in one
+change, one minor version at a time.
+
+The values of the External Secrets Application are the flags of the boot script plus the scrape
+annotations that `/usr/local/bin/scrape-annotate.sh` writes on the controller's pod template; the
+same test fails when they differ. Its live objects carry `app.kubernetes.io/instance: external-secrets`,
+so ArgoCD counts them as the Application's own even before the first sync. The Application has no
+automated sync: it reports OutOfSync until a person syncs it, and then a change to it waits for the
+next sync by hand. It has no finalizer either, so removing it from the chart deletes the Application
+and leaves the operator running.
 
 Renovate also raises the pins of the CI scripts:
 
@@ -162,7 +178,8 @@ the chart, because the API server rejects a custom resource whose CRD is absent:
 
 - **Gateway API CRDs** (`gateway_api_version`) — k3s ships none and the bundled Traefik is
   disabled; the authored `Gateway`/`HTTPRoute`/`GatewayClass` need these kinds.
-- **External Secrets Operator** (`external_secrets_chart_version`, Helm) — CRDs + controller,
+- **External Secrets Operator** (`external_secrets_chart_version`, Helm) — CRDs + controller, the
+  same chart and release that `chart/templates/external-secrets.yaml` then manages,
   pinned `nodeSelector.role=app` so its credential resolves to the app node instance profile
   (the role granted `secretsmanager:GetSecretValue`). This is what makes the ESO no-IRSA
   boundary work.
