@@ -10,6 +10,14 @@ Spring Boot + Java + JPA/Hibernate + Bean Validation (Jakarta) + MySQL + Redis +
 - Full suite (default `test` task) also runs the integration tests (MySQL/Redis Testcontainers, tagged `containerized`), which require Docker.
 - Import order (enforced): java → spring framework → spring boot → spring data jpa → jakarta.validation → jakarta.persistence → third-party → project packages.
 
+## Checked facts, decisions and effects
+
+- Check at construction and keep the result: a fact later code relies on is a type annotated `@Parsed` with a static factory that returns it or throws, and the code after it takes that type (`ParsedTypeRuleTest`). A new `void requireX` fails `VoidCheckRuleTest`.
+- A fact about a row holds under the lock or transaction it was read in. Parse it again after taking a lock.
+- A decision is a pure method returning a sealed type or enum; the method that performs effects only switches on it (`DecisionPurityTest`, `ShellBranchTest`). A type ending in `Outcome` reports what a command did.
+- A public method takes no `boolean`: use an enum or two methods (`FlagParameterRuleTest`).
+- The lists `backend/config/void-checks.txt`, `flag-parameters.txt` and `shell-branches.txt` only shrink: delete the line your change ended.
+
 ## Async model
 
 - The async model is `@Scheduled` + `@TransactionalEventListener(AFTER_COMMIT)` + Redis pub/sub + the outbox dispatch executor. `@Async`, `@EnableAsync` and `ThreadPoolTaskExecutor` are banned everywhere else; the single exception is frozen by name in `ConventionBaselineTest` and paired with a staleness check.

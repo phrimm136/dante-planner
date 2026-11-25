@@ -1585,11 +1585,6 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   path changes: one decision function returns authenticated, guest or outage as a type, and
   `doFilterInternal` applies the effects in one place.
   re-check: `rg -q 'private boolean attemptAutoRefresh' backend/src/main/java/org/danteplanner/backend/auth/security/JwtAuthenticationFilter.java`
-- No mechanism stops a `boolean` or `null` from carrying a choice between different follow-up
-  actions (the three entries above). A flag parameter on a public method can be banned by an
-  ArchUnit rule. A `boolean` return used as a control-flow signal cannot be detected statically and
-  needs a line in refactoring briefs. Worth doing before the refactors above start.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent backend/src/test/java/org/danteplanner/backend/architecture -i 'flag ?param|booleanParam'`
 - The planner write lock is implicit. `lockForUpsert` takes it with `lockContent`, a
   `SELECT COUNT(*) ... FOR UPDATE` whose result is discarded. The global order (content before
   publication, ADR 185) holds only because each call site calls things in that order, and only the
