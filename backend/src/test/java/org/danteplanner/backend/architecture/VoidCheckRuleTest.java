@@ -54,12 +54,12 @@ class VoidCheckRuleTest {
     void fixture_WhenAVoidCheckIsNotListed_FailsNamingEachSiteOnce() {
         assertThatThrownBy(() -> voidChecksAreExactly(List.of()).check(fixtureClasses()))
                 .isInstanceOf(AssertionError.class)
-                .hasMessageContaining("add " + FIXTURE + "$Checks.requireDeclared(java.lang.String)")
-                .hasMessageContaining("add " + FIXTURE + "$VoidChecks.requirePresent(java.lang.String)")
-                .hasMessageContaining("add " + FIXTURE + "$VoidChecks.checkRange(int)")
-                .hasMessageContaining("add " + FIXTURE + "$VoidChecks.validateName(java.lang.String)")
-                .hasMessageContaining("add " + FIXTURE + "$VoidChecks.ensureOpen()")
-                .hasMessageContaining("add " + FIXTURE + "$VoidChecks.verifyOwner()")
+                .hasMessageContaining("unlisted " + FIXTURE + "$Checks.requireDeclared(java.lang.String)")
+                .hasMessageContaining("unlisted " + FIXTURE + "$VoidChecks.requirePresent(java.lang.String)")
+                .hasMessageContaining("unlisted " + FIXTURE + "$VoidChecks.checkRange(int)")
+                .hasMessageContaining("unlisted " + FIXTURE + "$VoidChecks.validateName(java.lang.String)")
+                .hasMessageContaining("unlisted " + FIXTURE + "$VoidChecks.ensureOpen()")
+                .hasMessageContaining("unlisted " + FIXTURE + "$VoidChecks.verifyOwner()")
                 .hasMessageContaining("(6 times)");
     }
 
@@ -80,7 +80,7 @@ class VoidCheckRuleTest {
                 String site = method.getFullName();
                 found.add(site);
                 if (!listed.contains(site)) {
-                    events.add(SimpleConditionEvent.violated(method, "add " + site));
+                    events.add(SimpleConditionEvent.violated(method, "unlisted " + site));
                 }
             }
 
@@ -123,7 +123,8 @@ class VoidCheckRuleTest {
                 .should(beExactly(listed))
                 .allowEmptyShould(true)
                 .as("a check returns a @Parsed type that carries its fact; the void checks left are exactly"
-                        + " the lines of backend/config/void-checks.txt, which only shrinks");
+                        + " the lines of backend/config/void-checks.txt, which only shrinks: an unlisted check is changed to"
+                        + " return its fact, not added");
     }
 
     private static Stream<JavaMethod> bridgesTo(JavaMethod method) {

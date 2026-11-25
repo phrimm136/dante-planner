@@ -67,10 +67,9 @@ asset pipeline.
   dead.
   re-check: `rg -qF 'throw unavailable.get();' backend/src/main/java/org/danteplanner/backend/shared/ratelimit/RateLimitInterceptor.java && test -z "$(rg 'RateLimitPolicy.AUTH' backend/src/main/java | rg -v 'denial = RateLimitDenial.REDIRECT_LOGIN')"`
 - `spring.jpa.properties.hibernate.jdbc.batch_size=30` and `order_inserts=true` have no bulk
-  insert left to serve and no test guarding them since the import endpoint was removed, and
-  `PlannerLimitValidator.requireRoomFor`'s batch count is always 1. Worth doing when either is
-  next touched: drop the settings and the parameter, or add the bulk path that needs them.
-  re-check: `rg -q '^spring.jpa.properties.hibernate.jdbc.batch_size=' backend/src/main/resources/application.properties || rg -q 'int requestedCount' backend/src/main/java/org/danteplanner/backend/planner/precondition/PlannerLimitValidator.java`
+  insert left to serve and no test guarding them since the import endpoint was removed. Worth doing when they are
+  next touched: drop the settings, or add the bulk path that needs them.
+  re-check: `rg -q '^spring.jpa.properties.hibernate.jdbc.batch_size=' backend/src/main/resources/application.properties`
 - The migration smoke seed's planner 1 still carries enhanced gift ids (19001, 29004) in its
   entity filter rows, which `rebuild_planner_filters` has collapsed to base ids since V055, so
   the seed is not a faithful post-migration state. Worth doing the next time the seed changes.
@@ -543,7 +542,7 @@ login and from every SSE connect), `PlannerSubscriptionService.java:65-71`, and 
 - 2026-08-17 — A local draft kept through a tombstone can never be saved again. ADR 088 keeps
 it (`syncPlan.ts:61` purges only non-draft rows), the server has no resurrect path —
 `findAggregateForOwner` filters `deletedAt` (`PlannerRepository.java:48`), the pre-create
-probe does not (`:95-97`), and `planner/precondition/PlannerOwnershipValidator.java:38-40` answers 404 for the
+probe does not (`:95-97`), and `PlannerOwnershipValidator.AvailableId` answers 404 for the
 owner's own tombstone, with `deleted_at` never cleared anywhere — and `performSave`
 (`usePlannerSave.ts:229-240`) returns before `storage.saveToLocal` on failure, so the manual
 write is discarded too and `hasUnsyncedChanges` stays true. The 404 classifies as
@@ -591,7 +590,7 @@ correctly and `presentedVersion` maxes it back up against the stale prop, so the
 presents an old version against a row at 1 and takes a 409 for a planner nobody else
 touched. Reachable through any id the server has re-created, and through the import fork
 above.
-  re-check: `rg -q 'Math.max\(syncVersionRef.current, initialSyncVersion \?\? INITIAL_SYNC_VERSION\)' frontend/src/pages/planner/hooks/usePlannerSave.ts && rg -q 'record Create\(' backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCommandService.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCommandService.java '\.syncVersion\(attempt|\.syncVersion\(request'`
+  re-check: `rg -q 'Math.max\(syncVersionRef.current, initialSyncVersion \?\? INITIAL_SYNC_VERSION\)' frontend/src/pages/planner/hooks/usePlannerSave.ts && rg -qU 'public static PlannerContent of\(String title, PlannerStatus status, String category, PlannerDocument document,\s*int gameContentVersion, UUID deviceId\)' backend/src/main/java/org/danteplanner/backend/planner/entity/PlannerContent.java`
 - 2026-08-17 — ADR 073 removed the SSE planner event family on the grounds that
 "`refetchOnWindowFocus` on the server-backed planner queries becomes the freshness
 mechanism in their place", but every personal-planner query disables it

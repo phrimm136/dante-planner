@@ -42,14 +42,14 @@ class FlagParameterRuleTest {
     void fixture_WhenAFlagParameterIsNotListed_FailsNamingEachSiteOnce() {
         assertThatThrownBy(() -> flagParametersAreExactly(List.of()).check(VoidCheckRuleTest.fixtureClasses()))
                 .isInstanceOf(AssertionError.class)
-                .hasMessageContaining("add " + FIXTURE + "$Flagged.declaredFlag(boolean)")
-                .hasMessageContaining("add " + FIXTURE + "$PublicFlags.widenedFlag(boolean)")
-                .hasMessageContaining("add " + FIXTURE + "$PublicFlags.primitiveFlag(java.lang.String, boolean)")
-                .hasMessageContaining("add " + FIXTURE + "$PublicFlags.boxedFlag(java.lang.Boolean)")
-                .hasMessageContaining("add " + FIXTURE + "$PublicFlags.setTwo(boolean, java.lang.String)")
-                .hasMessageContaining("add " + FIXTURE + "$PublicFlags.settle(boolean)")
+                .hasMessageContaining("unlisted " + FIXTURE + "$Flagged.declaredFlag(boolean)")
+                .hasMessageContaining("unlisted " + FIXTURE + "$PublicFlags.widenedFlag(boolean)")
+                .hasMessageContaining("unlisted " + FIXTURE + "$PublicFlags.primitiveFlag(java.lang.String, boolean)")
+                .hasMessageContaining("unlisted " + FIXTURE + "$PublicFlags.boxedFlag(java.lang.Boolean)")
+                .hasMessageContaining("unlisted " + FIXTURE + "$PublicFlags.setTwo(boolean, java.lang.String)")
+                .hasMessageContaining("unlisted " + FIXTURE + "$PublicFlags.settle(boolean)")
                 .hasMessageContaining(
-                        "add " + FIXTURE + "$LibraryConsumer.accept(java.lang.Integer, java.lang.Boolean)")
+                        "unlisted " + FIXTURE + "$LibraryConsumer.accept(java.lang.Integer, java.lang.Boolean)")
                 .hasMessageContaining("(7 times)");
     }
 
@@ -67,7 +67,8 @@ class FlagParameterRuleTest {
                 .should(VoidCheckRuleTest.beExactly(listed))
                 .allowEmptyShould(true)
                 .as("a public method takes an enum, or is two methods, instead of a boolean; the flag parameters left"
-                        + " are exactly the lines of backend/config/flag-parameters.txt, which only shrinks");
+                        + " are exactly the lines of backend/config/flag-parameters.txt, which only shrinks:"
+                        + " an unlisted one becomes an enum or two methods, not a line");
     }
 
     private static boolean takesABoolean(JavaMethod method) {
