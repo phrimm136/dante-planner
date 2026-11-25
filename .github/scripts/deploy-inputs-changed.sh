@@ -5,7 +5,7 @@ verified=${1:-}
 event=${2:-}
 values_file=${3:-deploy/chart/values-oregon.yaml}
 set -- backend/Dockerfile backend/build.gradle.kts backend/settings.gradle.kts backend/src \
-  .dockerignore static.lock testdata/planner-content.schema.json
+  backend/gradlew backend/gradle backend/lombok.config .dockerignore static.lock testdata/planner-content.schema.json
 
 if [ "$verified" = "--list-inputs" ]; then
   printf '%s\n' "$@"
