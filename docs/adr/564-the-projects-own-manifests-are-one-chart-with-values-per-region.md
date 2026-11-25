@@ -12,7 +12,8 @@ epic: none · pr: none
 - @deploy @release @tag — Every reader of a deployed image tag accepts exactly one tag line of 40 hex digits in the region's values file, and anything else is a failure. The readers used to treat a file they could not read as "no tag": one then deployed every merge, and the other counted a release as not landed and drained the surge nodes before the rollout.
   REJECTED: a default for an unreadable file — each default is an action nobody asked for, and both hide that the file moved.
   INVARIANT: a missing file, a missing or second tag line and a malformed tag each fail the reader — the tests run the script and the workflow steps on each.
-  INVARIANT: the backend image takes the registry parameter and the region's tag, and the Pod of mysqld-exporter carries a checksum of the configuration it mounts, because its ConfigMaps keep one name and a new CA bundle would not restart it — the render stage of the deploy test.
+  INVARIANT: the backend image takes the registry parameter and the region's tag — the render stage of the deploy test.
+  NON-GOAL: a restart of mysqld-exporter on a changed mount — its chart's Application holds no template expression and so no checksum. It reads the CA bundle at each scrape; a changed my.cnf needs a rollout restart.
   NON-GOAL: two regions on two tags — a release still writes both in one commit.
 
 ## Superseded

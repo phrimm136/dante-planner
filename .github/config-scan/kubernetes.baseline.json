@@ -21,6 +21,108 @@
       ]
     },
     {
+      "file": "/chart-mysqld-exporter.yaml",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_22",
+            "CKV_K8S_35",
+            "CKV_K8S_38",
+            "CKV_K8S_43"
+          ],
+          "resource": "Deployment.danteplanner.mysqld-exporter"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.mysqld-exporter.app.kubernetes.io/name-prometheus-mysql-exporter.app.kubernetes.io/instance-mysqld-exporter.app-mysqld-exporter"
+        }
+      ]
+    },
+    {
+      "file": "/chart-node-exporter.yaml",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_17",
+            "CKV_K8S_19",
+            "CKV_K8S_43"
+          ],
+          "resource": "DaemonSet.privileged-exporter.node-exporter"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.privileged-exporter.node-exporter.app.kubernetes.io/component-metrics.app.kubernetes.io/instance-node-exporter.app.kubernetes.io/managed-by-Helm.app.kubernetes.io/name-prometheus-node-exporter.app.kubernetes.io/part-of-prometheus-node-exporter.app-node-exporter"
+        }
+      ]
+    },
+    {
+      "file": "/chart-redis-exporter-auth.yaml",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_21",
+            "CKV_K8S_22",
+            "CKV_K8S_35",
+            "CKV_K8S_38",
+            "CKV_K8S_40",
+            "CKV_K8S_43"
+          ],
+          "resource": "Deployment.default.redis-exporter-auth"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.default.redis-exporter-auth.app.kubernetes.io/name-prometheus-redis-exporter.app.kubernetes.io/instance-redis-exporter-auth.app.kubernetes.io/managed-by-Helm.app-redis-exporter-auth"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_21"
+          ],
+          "resource": "Service.default.redis-exporter-auth"
+        }
+      ]
+    },
+    {
+      "file": "/chart-redis-exporter-ratelimit.yaml",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_21",
+            "CKV_K8S_22",
+            "CKV_K8S_38",
+            "CKV_K8S_40",
+            "CKV_K8S_43"
+          ],
+          "resource": "Deployment.default.redis-exporter-ratelimit"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.default.redis-exporter-ratelimit.app.kubernetes.io/name-prometheus-redis-exporter.app.kubernetes.io/instance-redis-exporter-ratelimit.app.kubernetes.io/managed-by-Helm.app-redis-exporter-ratelimit"
+        },
+        {
+          "check_ids": [
+            "CKV_K8S_21"
+          ],
+          "resource": "Service.default.redis-exporter-ratelimit"
+        }
+      ]
+    },
+    {
       "file": "/oregon.yaml",
       "findings": [
         {
@@ -79,28 +181,6 @@
           "check_ids": [
             "CKV_K8S_11",
             "CKV_K8S_15",
-            "CKV_K8S_17",
-            "CKV_K8S_19",
-            "CKV_K8S_20",
-            "CKV_K8S_22",
-            "CKV_K8S_23",
-            "CKV_K8S_28",
-            "CKV_K8S_29",
-            "CKV_K8S_30",
-            "CKV_K8S_31",
-            "CKV_K8S_37",
-            "CKV_K8S_38",
-            "CKV_K8S_40",
-            "CKV_K8S_43",
-            "CKV_K8S_8",
-            "CKV_K8S_9"
-          ],
-          "resource": "DaemonSet.privileged-exporter.node-exporter"
-        },
-        {
-          "check_ids": [
-            "CKV_K8S_11",
-            "CKV_K8S_15",
             "CKV_K8S_22",
             "CKV_K8S_35",
             "CKV_K8S_38",
@@ -116,52 +196,12 @@
             "CKV_K8S_11",
             "CKV_K8S_15",
             "CKV_K8S_22",
-            "CKV_K8S_35",
-            "CKV_K8S_38",
-            "CKV_K8S_43",
-            "CKV_K8S_8",
-            "CKV_K8S_9"
-          ],
-          "resource": "Deployment.danteplanner.mysqld-exporter"
-        },
-        {
-          "check_ids": [
-            "CKV_K8S_11",
-            "CKV_K8S_15",
-            "CKV_K8S_22",
             "CKV_K8S_38",
             "CKV_K8S_43",
             "CKV_K8S_8",
             "CKV_K8S_9"
           ],
           "resource": "Deployment.danteplanner.prometheus"
-        },
-        {
-          "check_ids": [
-            "CKV_K8S_11",
-            "CKV_K8S_15",
-            "CKV_K8S_22",
-            "CKV_K8S_35",
-            "CKV_K8S_38",
-            "CKV_K8S_40",
-            "CKV_K8S_43",
-            "CKV_K8S_8",
-            "CKV_K8S_9"
-          ],
-          "resource": "Deployment.danteplanner.redis-exporter-auth"
-        },
-        {
-          "check_ids": [
-            "CKV_K8S_11",
-            "CKV_K8S_15",
-            "CKV_K8S_22",
-            "CKV_K8S_38",
-            "CKV_K8S_40",
-            "CKV_K8S_43",
-            "CKV_K8S_8",
-            "CKV_K8S_9"
-          ],
-          "resource": "Deployment.danteplanner.redis-exporter-ratelimit"
         },
         {
           "check_ids": [
@@ -198,12 +238,6 @@
           "check_ids": [
             "CKV2_K8S_6"
           ],
-          "resource": "Pod.danteplanner.mysqld-exporter.app-mysqld-exporter"
-        },
-        {
-          "check_ids": [
-            "CKV2_K8S_6"
-          ],
           "resource": "Pod.danteplanner.prometheus.app-prometheus"
         },
         {
@@ -216,18 +250,6 @@
           "check_ids": [
             "CKV2_K8S_6"
           ],
-          "resource": "Pod.danteplanner.redis-exporter-auth.app-redis-exporter-auth"
-        },
-        {
-          "check_ids": [
-            "CKV2_K8S_6"
-          ],
-          "resource": "Pod.danteplanner.redis-exporter-ratelimit.app-redis-exporter-ratelimit"
-        },
-        {
-          "check_ids": [
-            "CKV2_K8S_6"
-          ],
           "resource": "Pod.danteplanner.redis-ratelimit.app-redis-ratelimit"
         },
         {
@@ -235,12 +257,6 @@
             "CKV2_K8S_6"
           ],
           "resource": "Pod.danteplanner.traefik.app-traefik"
-        },
-        {
-          "check_ids": [
-            "CKV2_K8S_6"
-          ],
-          "resource": "Pod.privileged-exporter.node-exporter.app-node-exporter"
         },
         {
           "check_ids": [
@@ -317,28 +333,6 @@
           "check_ids": [
             "CKV_K8S_11",
             "CKV_K8S_15",
-            "CKV_K8S_17",
-            "CKV_K8S_19",
-            "CKV_K8S_20",
-            "CKV_K8S_22",
-            "CKV_K8S_23",
-            "CKV_K8S_28",
-            "CKV_K8S_29",
-            "CKV_K8S_30",
-            "CKV_K8S_31",
-            "CKV_K8S_37",
-            "CKV_K8S_38",
-            "CKV_K8S_40",
-            "CKV_K8S_43",
-            "CKV_K8S_8",
-            "CKV_K8S_9"
-          ],
-          "resource": "DaemonSet.privileged-exporter.node-exporter"
-        },
-        {
-          "check_ids": [
-            "CKV_K8S_11",
-            "CKV_K8S_15",
             "CKV_K8S_22",
             "CKV_K8S_35",
             "CKV_K8S_38",
@@ -354,52 +348,12 @@
             "CKV_K8S_11",
             "CKV_K8S_15",
             "CKV_K8S_22",
-            "CKV_K8S_35",
-            "CKV_K8S_38",
-            "CKV_K8S_43",
-            "CKV_K8S_8",
-            "CKV_K8S_9"
-          ],
-          "resource": "Deployment.danteplanner.mysqld-exporter"
-        },
-        {
-          "check_ids": [
-            "CKV_K8S_11",
-            "CKV_K8S_15",
-            "CKV_K8S_22",
             "CKV_K8S_38",
             "CKV_K8S_43",
             "CKV_K8S_8",
             "CKV_K8S_9"
           ],
           "resource": "Deployment.danteplanner.prometheus"
-        },
-        {
-          "check_ids": [
-            "CKV_K8S_11",
-            "CKV_K8S_15",
-            "CKV_K8S_22",
-            "CKV_K8S_35",
-            "CKV_K8S_38",
-            "CKV_K8S_40",
-            "CKV_K8S_43",
-            "CKV_K8S_8",
-            "CKV_K8S_9"
-          ],
-          "resource": "Deployment.danteplanner.redis-exporter-auth"
-        },
-        {
-          "check_ids": [
-            "CKV_K8S_11",
-            "CKV_K8S_15",
-            "CKV_K8S_22",
-            "CKV_K8S_38",
-            "CKV_K8S_40",
-            "CKV_K8S_43",
-            "CKV_K8S_8",
-            "CKV_K8S_9"
-          ],
-          "resource": "Deployment.danteplanner.redis-exporter-ratelimit"
         },
         {
           "check_ids": [
@@ -436,12 +390,6 @@
           "check_ids": [
             "CKV2_K8S_6"
           ],
-          "resource": "Pod.danteplanner.mysqld-exporter.app-mysqld-exporter"
-        },
-        {
-          "check_ids": [
-            "CKV2_K8S_6"
-          ],
           "resource": "Pod.danteplanner.prometheus.app-prometheus"
         },
         {
@@ -454,18 +402,6 @@
           "check_ids": [
             "CKV2_K8S_6"
           ],
-          "resource": "Pod.danteplanner.redis-exporter-auth.app-redis-exporter-auth"
-        },
-        {
-          "check_ids": [
-            "CKV2_K8S_6"
-          ],
-          "resource": "Pod.danteplanner.redis-exporter-ratelimit.app-redis-exporter-ratelimit"
-        },
-        {
-          "check_ids": [
-            "CKV2_K8S_6"
-          ],
           "resource": "Pod.danteplanner.redis-ratelimit.app-redis-ratelimit"
         },
         {
@@ -473,12 +409,6 @@
             "CKV2_K8S_6"
           ],
           "resource": "Pod.danteplanner.traefik.app-traefik"
-        },
-        {
-          "check_ids": [
-            "CKV2_K8S_6"
-          ],
-          "resource": "Pod.privileged-exporter.node-exporter.app-node-exporter"
         },
         {
           "check_ids": [

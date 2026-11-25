@@ -6,7 +6,7 @@
     "region",
     "image",
     "awsRegion",
-    "mysqldEndpointKey",
+    "mysqldEndpointProperty",
     "redisAuth",
     "backendConfig"
   ],
@@ -42,7 +42,7 @@
       "type": "string",
       "minLength": 1
     },
-    "mysqldEndpointKey": {
+    "mysqldEndpointProperty": {
       "type": "string",
       "minLength": 1
     },
@@ -78,8 +78,8 @@
         "awsRegion": {
           "const": "us-west-2"
         },
-        "mysqldEndpointKey": {
-          "const": "primary-endpoint"
+        "mysqldEndpointProperty": {
+          "const": "primary_endpoint"
         },
         "redisAuth": {
           "type": "object",
@@ -130,8 +130,8 @@
         "awsRegion": {
           "const": "ap-northeast-2"
         },
-        "mysqldEndpointKey": {
-          "const": "replica-endpoint"
+        "mysqldEndpointProperty": {
+          "const": "replica_endpoint"
         },
         "redisAuth": {
           "type": "object",

@@ -7,7 +7,7 @@ image:
 # replication (chunk 2). With us-west-2 here Seoul's ESO would pull cross-region
 # from us-west-2, paying the latency and coupling Seoul's boot to Oregon.
 awsRegion: ap-northeast-2
-mysqldEndpointKey: replica-endpoint
+mysqldEndpointProperty: replica_endpoint
 # Seoul redis-auth = read-only REPLICAOF the Oregon PRIMARY (mechanics #5). It
 # pulls blacklist/rotation/freshness marker state from Oregon over the Seoul<->Oregon
 # peering and serves Seoul's read-local traffic; it REFUSES local writes

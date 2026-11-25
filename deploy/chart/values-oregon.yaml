@@ -3,7 +3,7 @@ region: oregon
 image:
   tag: "e1291c912ef849782f239b6121797e1e9c6ce03d"
 awsRegion: us-west-2
-mysqldEndpointKey: primary-endpoint
+mysqldEndpointProperty: primary_endpoint
 redisAuth:
   nodePort: 31637
 backendConfig:

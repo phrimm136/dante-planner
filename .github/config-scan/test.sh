@@ -128,16 +128,16 @@ echo "PASS $name"
 name="a fixed finding must leave the baseline"
 fixed=$work/fixed
 copy_tree "$fixed"
-awk '{ print } /^          image: prom\/mysqld-exporter:/ {
-  print "          readinessProbe:"; print "            httpGet:"; print "              path: /"; print "              port: http-metrics"
-}' "$fixed/deploy/chart/templates/mysqld-exporter.yaml" >"$work/mysqld-exporter.yaml"
-mv "$work/mysqld-exporter.yaml" "$fixed/deploy/chart/templates/mysqld-exporter.yaml"
+awk '{ print } /^          image: redis:7-alpine$/ {
+  print "          readinessProbe:"; print "            httpGet:"; print "              path: /"; print "              port: redis"
+}' "$fixed/deploy/chart/templates/redis-ratelimit.yaml" >"$work/redis-ratelimit.yaml"
+mv "$work/redis-ratelimit.yaml" "$fixed/deploy/chart/templates/redis-ratelimit.yaml"
 track "$fixed"
 run_scan "$work/fixed.out" "$fixed"
 [ "$status" -eq 1 ] || fail "$name" "exit $status, expected 1" "$work/fixed.out"
 for region in oregon seoul; do
-  has_line "$work/fixed.out" "FIXED CKV_K8S_9 /$region.yaml Deployment.danteplanner.mysqld-exporter" \
-    || fail "$name" "no FIXED CKV_K8S_9 line for mysqld-exporter in /$region.yaml" "$work/fixed.out"
+  has_line "$work/fixed.out" "FIXED CKV_K8S_9 /$region.yaml Deployment.danteplanner.redis-ratelimit" \
+    || fail "$name" "no FIXED CKV_K8S_9 line for redis-ratelimit in /$region.yaml" "$work/fixed.out"
 done
 grep -q -- '--update' "$work/fixed.out" || fail "$name" "the output does not name --update" "$work/fixed.out"
 ! grep -q '^NEW ' "$work/fixed.out" || fail "$name" "a readiness probe added a NEW finding" "$work/fixed.out"
@@ -239,8 +239,8 @@ entries_of "$fixed/.github/config-scan/kubernetes.baseline.json" | sort >"$work/
 run_scan "$work/update-fixed.out" --update "$fixed"
 [ "$status" -eq 0 ] || fail "$name" "--update on the fixed copy exited $status" "$work/update-fixed.out"
 entries_of "$fixed/.github/config-scan/kubernetes.baseline.json" | sort >"$work/after.txt"
-printf '%s\n' "CKV_K8S_9 /oregon.yaml Deployment.danteplanner.mysqld-exporter" \
-  "CKV_K8S_9 /seoul.yaml Deployment.danteplanner.mysqld-exporter" >"$work/expected-removed.txt"
+printf '%s\n' "CKV_K8S_9 /oregon.yaml Deployment.danteplanner.redis-ratelimit" \
+  "CKV_K8S_9 /seoul.yaml Deployment.danteplanner.redis-ratelimit" >"$work/expected-removed.txt"
 comm -23 "$work/before.txt" "$work/after.txt" >"$work/removed.txt"
 cmp -s "$work/removed.txt" "$work/expected-removed.txt" || fail "$name" "--update removed other entries than the fixed ones" "$work/removed.txt"
 [ -z "$(comm -13 "$work/before.txt" "$work/after.txt")" ] || fail "$name" "--update added entries"

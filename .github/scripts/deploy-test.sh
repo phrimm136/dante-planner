@@ -154,9 +154,6 @@ rendered_contract() {
   image=$(doc_named DaemonSet backend < "$work/$region.yaml" | first_image)
   { [ -n "$tag" ] && [ "$image" = "registry.example/danteplanner-backend:$tag" ]; } \
     || fail render "the backend image of $region is '${image:-(none)}', want registry.example/danteplanner-backend:${tag:-(no tag in values-$region.yaml)}; it must take image.repository and image.tag"
-  doc_named Deployment mysqld-exporter < "$work/$region.yaml" \
-    | awk '/^  template:/ { pod = 1 } pod && $1 == "checksum/config:" && $2 ~ /^[0-9a-f]+$/ && length($2) == 64 { found = 1 } END { exit !found }' \
-    || fail render "the Pod template of Deployment mysqld-exporter in $region carries no checksum/config, so a new CA bundle would not restart it"
 }
 
 render() {
@@ -194,7 +191,7 @@ validate() {
 }
 
 charts() {
-  local report drift region chart crds summary files=() renders=()
+  local report drift region chart crds exporters summary files=() renders=()
   for region in "${regions[@]}"; do renders+=("$work/$region.yaml"); done
   drift=$(python3 - "${renders[@]}" <<'PY'
 import pathlib
@@ -231,9 +228,13 @@ PY
     echo "$crds" >&2
     fail charts "the custom kinds in use and the rendered CRDs do not match. A CRD that a chart stops rendering is pruned, and its removal deletes every object of its kind: if it was removed by accident, restore it; if on purpose, remove the objects that use it in the same merge. The removal of a whole Application leaves its CRDs in the cluster, to be deleted by hand. An OUTSIDE_GROUPS line above is an entry to remove from .github/scripts/rendered-crds.py"
   fi
+  if ! exporters=$(python3 "$repo/.github/scripts/rendered-exporters.py" --regions "${renders[@]}" --charts "$work"/charts/chart-*.yaml 2>&1); then
+    echo "$exporters" >&2
+    fail charts "the exporters no longer render what their metrics depend on (listed above): the scrape annotations and the app label that name the series and logs, the args of node-exporter and mysqld-exporter, the mysqld-exporter endpoint, credentials, my.cnf and CA, the args, address and password of the Redis exporters, or the Secret and CA ConfigMap that mysqld-exporter reads from a region render. Helm ignores a value that a chart raise renamed: set the new name in the Application under deploy/chart/templates"
+  fi
   # The schema set holds none for CustomResourceDefinition.
   summary=$(validate charts -skip CustomResourceDefinition "${files[@]}")
-  pass charts "$(printf '%s\n' "$report" | paste -sd ',' - | sed 's/,/, /g'); every custom kind in use has its CRD; $summary"
+  pass charts "$(printf '%s\n' "$report" | paste -sd ',' - | sed 's/,/, /g'); every custom kind in use has its CRD; the exporters keep their contract; $summary"
 }
 
 schema() {

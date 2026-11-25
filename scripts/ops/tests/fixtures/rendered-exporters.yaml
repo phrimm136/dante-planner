@@ -1,0 +1,480 @@
+---
+# Source: prometheus-mysql-exporter/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysqld-exporter
+  namespace: danteplanner
+  labels:
+    helm.sh/chart: prometheus-mysql-exporter-2.17.1
+    app.kubernetes.io/name: prometheus-mysql-exporter
+    app.kubernetes.io/instance: mysqld-exporter
+    app.kubernetes.io/version: "v0.21.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9104
+      targetPort: 9104
+      protocol: TCP
+      name: mysql-exporter
+  selector:
+    app.kubernetes.io/name: prometheus-mysql-exporter
+    app.kubernetes.io/instance: mysqld-exporter
+---
+# Source: prometheus-mysql-exporter/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysqld-exporter
+  namespace: danteplanner
+  labels:
+    helm.sh/chart: prometheus-mysql-exporter-2.17.1
+    app.kubernetes.io/name: prometheus-mysql-exporter
+    app.kubernetes.io/instance: mysqld-exporter
+    app.kubernetes.io/version: "v0.21.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus-mysql-exporter
+      app.kubernetes.io/instance: mysqld-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: prometheus-mysql-exporter
+        app.kubernetes.io/instance: mysqld-exporter
+        app: mysqld-exporter
+      annotations:
+        checksum/credentials: 01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+        prometheus.io/job: mysqld
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9104"
+        prometheus.io/scrape: "true"
+    spec:
+      serviceAccountName: default
+      securityContext:
+        runAsGroup: 65534
+        runAsNonRoot: true
+        runAsUser: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: prometheus-mysql-exporter
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+          image: "quay.io/prometheus/mysqld-exporter:v0.21.0"
+          imagePullPolicy: IfNotPresent
+          args:
+            - "--config.my-cnf=/etc/cnf/my.cnf"
+            - --mysqld.address=$(MYSQLD_ADDRESS)
+            - --mysqld.username=$(MYSQL_EXPORTER_USER)
+            - "--collect.perf_schema.eventsstatements"
+            - "--collect.perf_schema.tableiowaits"
+          env:
+            - name: GOMEMLIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+            - name: MYSQLD_ADDRESS
+              valueFrom:
+                secretKeyRef:
+                  key: endpoint
+                  name: mysqld-exporter-dsn
+            - name: MYSQL_EXPORTER_USER
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: mysqld-exporter-dsn
+            - name: MYSQLD_EXPORTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: mysqld-exporter-dsn
+          resources:
+            limits:
+              memory: 64Mi
+            requests:
+              cpu: 10m
+              memory: 32Mi
+          ports:
+            - containerPort: 9104
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 9104
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 9104
+          volumeMounts:
+            - name: secret-config
+              mountPath: /etc/cnf/
+              readOnly: true
+            - mountPath: /etc/mysqld-certs
+              name: rds-ca
+              readOnly: true
+      nodeSelector:
+        role: data
+      volumes:
+        - name: secret-config
+          secret:
+            secretName: mysqld-exporter-dsn
+        - configMap:
+            name: rds-ca-bundle
+          name: rds-ca
+---
+# Source: prometheus-node-exporter/templates/daemonset.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+  namespace: privileged-exporter
+  labels:
+    helm.sh/chart: prometheus-node-exporter-5.1.0
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: metrics
+    app.kubernetes.io/part-of: prometheus-node-exporter
+    app.kubernetes.io/name: prometheus-node-exporter
+    app.kubernetes.io/instance: node-exporter
+    app.kubernetes.io/version: "1.12.1"
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus-node-exporter
+      app.kubernetes.io/instance: node-exporter
+  revisionHistoryLimit: 10
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+        prometheus.io/job: node
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9100"
+        prometheus.io/scrape: "true"
+      labels:
+        app.kubernetes.io/component: metrics
+        app.kubernetes.io/instance: node-exporter
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: prometheus-node-exporter
+        app.kubernetes.io/part-of: prometheus-node-exporter
+        app.kubernetes.io/version: 1.12.1
+        app: node-exporter
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 65534
+        runAsGroup: 65534
+        runAsNonRoot: true
+        runAsUser: 65534
+      serviceAccountName: default
+      containers:
+        - name: node-exporter
+          image: quay.io/prometheus/node-exporter:v1.12.1
+          imagePullPolicy: IfNotPresent
+          args:
+            - --path.procfs=/host/proc
+            - --path.sysfs=/host/sys
+            - --web.listen-address=[$(HOST_IP)]:9100
+            - --collector.disable-defaults
+            - --collector.meminfo
+            - --collector.cpu
+            - --collector.pressure
+            - --collector.filesystem
+            - --collector.loadavg
+            - --collector.conntrack
+            - --collector.diskstats
+            - --collector.netdev
+            - --collector.netdev.device-exclude=^(lo|veth.*|cni.*|flannel.*)$
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            seccompProfile:
+              type: RuntimeDefault
+          env:
+            - name: HOST_IP
+              value: 0.0.0.0
+          ports:
+            - name: metrics
+              containerPort: 9100
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              httpHeaders:
+              path: /
+              port: metrics
+              scheme: HTTP
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              httpHeaders:
+              path: /
+              port: metrics
+              scheme: HTTP
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources:
+            limits:
+              memory: 48Mi
+            requests:
+              cpu: 10m
+              memory: 24Mi
+          volumeMounts:
+            - name: proc
+              mountPath: /host/proc
+              readOnly:  true
+            - name: sys
+              mountPath: /host/sys
+              readOnly: true
+      hostNetwork: true
+      hostPID: true
+      hostIPC: false
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: eks.amazonaws.com/compute-type
+                operator: NotIn
+                values:
+                - fargate
+              - key: type
+                operator: NotIn
+                values:
+                - virtual-kubelet
+      nodeSelector:
+        kubernetes.io/os: linux
+      tolerations:
+        - operator: Exists
+      volumes:
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys
+---
+# Source: prometheus-redis-exporter/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-exporter-auth
+  labels:
+    helm.sh/chart: prometheus-redis-exporter-6.37.0
+    app.kubernetes.io/name: prometheus-redis-exporter
+    app.kubernetes.io/instance: redis-exporter-auth
+    app.kubernetes.io/version: "v1.97.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    {}
+spec:
+  type: ClusterIP
+  ports:
+    - name: redis-exporter
+      port: 9121
+      targetPort: exporter-port
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: prometheus-redis-exporter
+    app.kubernetes.io/instance: redis-exporter-auth
+---
+# Source: prometheus-redis-exporter/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-exporter-auth
+  labels:
+    helm.sh/chart: prometheus-redis-exporter-6.37.0
+    app.kubernetes.io/name: prometheus-redis-exporter
+    app.kubernetes.io/instance: redis-exporter-auth
+    app.kubernetes.io/version: "v1.97.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    prometheus.io/job: redis-auth
+    prometheus.io/path: /metrics
+    prometheus.io/port: "9121"
+    prometheus.io/scrape: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus-redis-exporter
+      app.kubernetes.io/instance: redis-exporter-auth
+  template:
+    metadata:
+      annotations:
+        prometheus.io/job: redis-auth
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9121"
+        prometheus.io/scrape: "true"
+      labels:
+        helm.sh/chart: prometheus-redis-exporter-6.37.0
+        app.kubernetes.io/name: prometheus-redis-exporter
+        app.kubernetes.io/instance: redis-exporter-auth
+        app.kubernetes.io/version: "v1.97.0"
+        app.kubernetes.io/managed-by: Helm
+        app: redis-exporter-auth
+    spec:
+      serviceAccountName: default
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: prometheus-redis-exporter
+          image: "oliver006/redis_exporter:v1.97.0"
+          imagePullPolicy: IfNotPresent
+          args:
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+          ports:
+            - name: exporter-port
+              containerPort: 9121
+          env:
+            - name: REDIS_ADDR
+              value: redis://redis-auth:6379
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-runtime-config
+                  key: AUTH_REDIS_PASSWORD
+          volumeMounts:
+          livenessProbe:
+            httpGet:
+              path: /
+              port: exporter-port
+          readinessProbe:
+            httpGet:
+              path: /
+              port: exporter-port
+          resources:
+            limits:
+              memory: 64Mi
+            requests:
+              cpu: 10m
+              memory: 32Mi
+      volumes:
+      nodeSelector:
+        role: data
+---
+# Source: prometheus-redis-exporter/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-exporter-ratelimit
+  labels:
+    helm.sh/chart: prometheus-redis-exporter-6.37.0
+    app.kubernetes.io/name: prometheus-redis-exporter
+    app.kubernetes.io/instance: redis-exporter-ratelimit
+    app.kubernetes.io/version: "v1.97.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    {}
+spec:
+  type: ClusterIP
+  ports:
+    - name: redis-exporter
+      port: 9121
+      targetPort: exporter-port
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: prometheus-redis-exporter
+    app.kubernetes.io/instance: redis-exporter-ratelimit
+---
+# Source: prometheus-redis-exporter/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-exporter-ratelimit
+  labels:
+    helm.sh/chart: prometheus-redis-exporter-6.37.0
+    app.kubernetes.io/name: prometheus-redis-exporter
+    app.kubernetes.io/instance: redis-exporter-ratelimit
+    app.kubernetes.io/version: "v1.97.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    prometheus.io/job: redis-ratelimit
+    prometheus.io/path: /metrics
+    prometheus.io/port: "9121"
+    prometheus.io/scrape: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus-redis-exporter
+      app.kubernetes.io/instance: redis-exporter-ratelimit
+  template:
+    metadata:
+      annotations:
+        prometheus.io/job: redis-ratelimit
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9121"
+        prometheus.io/scrape: "true"
+      labels:
+        helm.sh/chart: prometheus-redis-exporter-6.37.0
+        app.kubernetes.io/name: prometheus-redis-exporter
+        app.kubernetes.io/instance: redis-exporter-ratelimit
+        app.kubernetes.io/version: "v1.97.0"
+        app.kubernetes.io/managed-by: Helm
+        app: redis-exporter-ratelimit
+    spec:
+      serviceAccountName: default
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: prometheus-redis-exporter
+          image: "oliver006/redis_exporter:v1.97.0"
+          imagePullPolicy: IfNotPresent
+          args:
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+          ports:
+            - name: exporter-port
+              containerPort: 9121
+          env:
+            - name: REDIS_ADDR
+              value: redis://redis-ratelimit:6379
+          volumeMounts:
+          livenessProbe:
+            httpGet:
+              path: /
+              port: exporter-port
+          readinessProbe:
+            httpGet:
+              path: /
+              port: exporter-port
+          resources:
+            limits:
+              memory: 64Mi
+            requests:
+              cpu: 10m
+              memory: 32Mi
+      volumes:
+      nodeSelector:
+        role: data
