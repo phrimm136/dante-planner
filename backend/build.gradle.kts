@@ -42,7 +42,7 @@ java {
     }
 }
 
-// -PgitSha is supplied by backend/Dockerfile's GIT_SHA build arg.
+// -PgitSha is supplied by deploy-fleet.yml's build-jar job and by backend/Dockerfile's GIT_SHA build arg.
 springBoot {
     buildInfo {
         properties {

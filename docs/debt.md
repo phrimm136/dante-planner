@@ -1438,11 +1438,11 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   Artemis BOM. Worth removing when spring-boot-dependencies manages
   `testcontainers-redis-module.version` at 3.0.1 or later.
   re-check: `rg -qF 'dependency("com.redis:testcontainers-redis:3.0.1")' backend/build.gradle.kts`
-- The backend image builds with the builder image's own `gradle`, not the wrapper: the Dockerfile
-  copies only the build scripts, so the shipped jar is built by `gradle:9.8.1` while CI tests with
-  the wrapper's 9.8.2, and two Dependabot ecosystems move the two versions on separate cooldowns.
-  Copying `gradlew` and `gradle/wrapper` into the builder stage leaves one version source. Worth
-  doing when the image and the wrapper differ by a minor version, or before the next Gradle minor.
+- A backend image compiled from source (staging-rehearsal, window-schema-decomposition, PR Gate
+  `build-backend`, local `stack:up`) uses the builder image's own `gradle`, while the released jar
+  and CI use the wrapper, and two Dependabot ecosystems move the two versions on separate cooldowns.
+  The rehearsal therefore runs a jar another Gradle built. Copying `gradlew` and `gradle/wrapper`
+  into the builder stage leaves one version source. Worth doing before the staging rehearsal runs.
   re-check: `.claude/skills/debt-ledger/bin/debt absent backend/Dockerfile 'gradlew'`
 - The Identity parity test "renders the stats panel at a lowered level" sends
   `fireEvent.keyDown` on the level slider before `waitForI18nSettled`, the wait 1edef3cb added

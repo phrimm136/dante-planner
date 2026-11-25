@@ -10,6 +10,7 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEPLOY_INPUTS = REPO_ROOT / ".github" / "scripts" / "deploy-inputs-changed.sh"
 WORKFLOW = yaml.safe_load((REPO_ROOT / ".github" / "workflows" / "deploy-fleet.yml").read_text(encoding="utf-8"))
+PR_GATE = yaml.safe_load((REPO_ROOT / ".github" / "workflows" / "pr-gate.yml").read_text(encoding="utf-8"))
 VALUES_FILES = ("deploy/chart/values-oregon.yaml", "deploy/chart/values-seoul.yaml")
 TAG_LINE = re.compile(r'^  tag: "[0-9a-f]{40}"$', re.MULTILINE)
 TAG = "0123456789abcdef0123456789abcdef01234567"
@@ -199,6 +200,62 @@ class BumpTest(WorkflowStepCase):
         self.assertEqual(steps[1:], ["Bump image tag in BOTH values files", "Commit the tag bump"])
         self.assertEqual(WORKFLOW["env"]["VALUES_FILES"].split(), list(VALUES_FILES))
         self.assertIn("git add $VALUES_FILES\n", step_script("bump-tag", "Commit the tag bump"))
+
+
+class ReleaseJarTest(unittest.TestCase):
+    def test_the_release_image_takes_the_runner_built_jar(self):
+        job = WORKFLOW["jobs"]["build-push"]
+        self.assertIn("build-jar", job["needs"])
+        builds = [step["with"] for step in job["steps"]
+                  if step.get("uses", "").startswith("docker/build-push-action@")]
+        self.assertEqual(len(builds), 1)
+        self.assertIn("JAR_STAGE=jar-prebuilt", builds[0].get("build-args", "").splitlines())
+        self.assertIn("backend-jar=./backend", builds[0]["build-contexts"].splitlines())
+
+    def test_the_job_that_runs_gradle_holds_no_credentials(self):
+        gradle_jobs = [name for name, job in WORKFLOW["jobs"].items() if "gradlew" in yaml.safe_dump(job)]
+        self.assertEqual(gradle_jobs, ["build-jar"])
+        job = WORKFLOW["jobs"]["build-jar"]
+        self.assertEqual(job["permissions"], {"contents": "read"})
+        self.assertNotIn("environment", job)
+        self.assertNotIn("secrets.", yaml.safe_dump(job))
+        self.assertNotIn("secrets.", yaml.safe_dump(WORKFLOW["env"]))
+
+    def test_the_jar_and_the_image_tag_carry_the_same_verified_commit(self):
+        verified = "${{ github.event.workflow_run.head_sha || github.sha }}"
+        refs = [step["with"].get("ref") for job in ("build-jar", "build-push")
+                for step in WORKFLOW["jobs"][job]["steps"] if step.get("uses", "").startswith("actions/checkout@")]
+        self.assertEqual(refs, [verified, verified])
+        gradle_step, = [step for step in WORKFLOW["jobs"]["build-jar"]["steps"] if "gradlew -p" in step.get("run", "")]
+        self.assertEqual(gradle_step["env"], {"GIT_SHA": verified})
+        self.assertIn('"-PgitSha=$GIT_SHA"', gradle_step["run"])
+        image, = [step["with"] for step in WORKFLOW["jobs"]["build-push"]["steps"]
+                  if step.get("uses", "").startswith("docker/build-push-action@")]
+        self.assertEqual([tag.split(":", 1)[1] for tag in image["tags"].split("\n") if tag], [verified, verified])
+
+    def test_the_jar_job_restores_the_test_backend_gradle_cache_and_saves_none(self):
+        def restores(workflow, job):
+            return [step["with"] for step in workflow["jobs"][job]["steps"]
+                    if step.get("uses", "").startswith("actions/cache/restore@")]
+
+        saved_by, = restores(PR_GATE, "test-backend")
+        restored, = restores(WORKFLOW, "build-jar")
+        for field in ("key", "restore-keys"):
+            expected = saved_by[field].replace("${{ github.workflow }}", PR_GATE["name"])
+            expected = expected.replace("${{ github.job }}", "test-backend")
+            self.assertEqual(restored[field], expected)
+        self.assertEqual(restored["path"], saved_by["path"])
+        saves = [step for step in PR_GATE["jobs"]["test-backend"]["steps"]
+                 if step.get("uses", "").startswith("actions/cache/save@")]
+        self.assertEqual([step["with"]["path"] for step in saves], [restored["path"]])
+        self.assertNotRegex(yaml.safe_dump(WORKFLOW["jobs"]["build-jar"]), r"actions/cache(/save)?@")
+
+    def test_every_file_the_runner_jar_build_reads_is_a_deploy_input(self):
+        inputs = subprocess.run([str(DEPLOY_INPUTS), "--list-inputs"], check=True, capture_output=True,
+                                text=True).stdout.splitlines()
+        for path in ("backend/gradlew", "backend/gradle", "backend/lombok.config"):
+            with self.subTest(path):
+                self.assertIn(path, inputs)
 
 
 if __name__ == "__main__":
