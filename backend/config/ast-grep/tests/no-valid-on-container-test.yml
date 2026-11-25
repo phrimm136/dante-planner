@@ -1,0 +1,39 @@
+id: no-valid-on-container
+valid:
+  - |
+    record A(@NotEmpty List<@Valid Source> sources) {}
+  - |
+    record A(@Valid Source source, List<Source> sources) {}
+  - |
+    class A {
+      void m(@Valid @RequestBody CreateRequest request, List<String> names) {}
+    }
+  - |
+    class A {
+      private Map<String, @Valid Source> sources;
+    }
+  - |
+    class A {
+      private @Valid Holder<List<Source>> sources;
+    }
+invalid:
+  - |
+    record A(@NotEmpty @Valid @DefaultValue List<Source> sources) {}
+  - |
+    class A {
+      void m(@Valid @RequestBody List<CreateRequest> requests) {}
+    }
+  - |
+    class A {
+      @Valid
+      private final Set<Source> sources = Set.of();
+    }
+  - |
+    class A {
+      @Valid
+      public Map<String, Source> sources() { return map; }
+    }
+  - |
+    class A {
+      void m(@jakarta.validation.Valid java.util.List<Source> sources) {}
+    }

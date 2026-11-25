@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
+import org.danteplanner.backend.support.LogCapture;
 
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.SystemEnvironmentPropertySource;
@@ -16,7 +17,9 @@ import org.springframework.boot.context.properties.bind.validation.ValidationBin
 import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
 import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
 
+import ch.qos.logback.classic.Level;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
+import org.hibernate.validator.internal.metadata.aggregated.CascadingMetaDataBuilder;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -87,6 +90,11 @@ class ReadSourcePropertiesTest {
         assertThat(bound.readSources().get(1).username()).isEqualTo("replicaUser");
         assertThat(bound.readSourceBreaker().minimumNumberOfCalls()).isEqualTo(4);
         assertThat(bound.readsPrimaryFirst()).isTrue();
+    }
+
+    @Test
+    void bind_WhenTheListIsValidated_UsesNoDeprecatedCascade() {
+        assertThat(LogCapture.during(() -> bind(seoulSources()), Level.WARN, CascadingMetaDataBuilder.class)).isEmpty();
     }
 
     @Test

@@ -1,0 +1,140 @@
+id: no-valid-on-container
+snapshots:
+  "class A {\n  @Valid\n  private final Set<Source> sources = Set.of();\n}\n":
+    labels:
+    - source: |-
+        @Valid
+          private final Set<Source> sources = Set.of();
+      style: primary
+      start: 12
+      end: 66
+    - source: Valid
+      style: secondary
+      start: 13
+      end: 18
+    - source: "@Valid"
+      style: secondary
+      start: 12
+      end: 18
+    - source: |-
+        @Valid
+          private final
+      style: secondary
+      start: 12
+      end: 34
+    - source: Set
+      style: secondary
+      start: 35
+      end: 38
+    - source: Set<Source>
+      style: secondary
+      start: 35
+      end: 46
+  "class A {\n  @Valid\n  public Map<String, Source> sources() { return map; }\n}\n":
+    labels:
+    - source: |-
+        @Valid
+          public Map<String, Source> sources() { return map; }
+      style: primary
+      start: 12
+      end: 73
+    - source: Valid
+      style: secondary
+      start: 13
+      end: 18
+    - source: "@Valid"
+      style: secondary
+      start: 12
+      end: 18
+    - source: |-
+        @Valid
+          public
+      style: secondary
+      start: 12
+      end: 27
+    - source: Map
+      style: secondary
+      start: 28
+      end: 31
+    - source: Map<String, Source>
+      style: secondary
+      start: 28
+      end: 47
+  "class A {\n  void m(@Valid @RequestBody List<CreateRequest> requests) {}\n}\n":
+    labels:
+    - source: "@Valid @RequestBody List<CreateRequest> requests"
+      style: primary
+      start: 19
+      end: 67
+    - source: Valid
+      style: secondary
+      start: 20
+      end: 25
+    - source: "@Valid"
+      style: secondary
+      start: 19
+      end: 25
+    - source: "@Valid @RequestBody"
+      style: secondary
+      start: 19
+      end: 38
+    - source: List
+      style: secondary
+      start: 39
+      end: 43
+    - source: List<CreateRequest>
+      style: secondary
+      start: 39
+      end: 58
+  "class A {\n  void m(@jakarta.validation.Valid java.util.List<Source> sources) {}\n}\n":
+    labels:
+    - source: "@jakarta.validation.Valid java.util.List<Source> sources"
+      style: primary
+      start: 19
+      end: 75
+    - source: jakarta.validation.Valid
+      style: secondary
+      start: 20
+      end: 44
+    - source: "@jakarta.validation.Valid"
+      style: secondary
+      start: 19
+      end: 44
+    - source: "@jakarta.validation.Valid"
+      style: secondary
+      start: 19
+      end: 44
+    - source: java.util.List
+      style: secondary
+      start: 45
+      end: 59
+    - source: java.util.List<Source>
+      style: secondary
+      start: 45
+      end: 67
+  "record A(@NotEmpty @Valid @DefaultValue List<Source> sources) {}\n":
+    labels:
+    - source: "@NotEmpty @Valid @DefaultValue List<Source> sources"
+      style: primary
+      start: 9
+      end: 60
+    - source: Valid
+      style: secondary
+      start: 20
+      end: 25
+    - source: "@Valid"
+      style: secondary
+      start: 19
+      end: 25
+    - source: "@NotEmpty @Valid @DefaultValue"
+      style: secondary
+      start: 9
+      end: 39
+    - source: List
+      style: secondary
+      start: 40
+      end: 44
+    - source: List<Source>
+      style: secondary
+      start: 40
+      end: 52
