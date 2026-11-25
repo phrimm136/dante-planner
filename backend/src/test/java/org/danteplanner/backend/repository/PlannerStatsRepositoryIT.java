@@ -3,6 +3,7 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
 
 
@@ -10,6 +11,8 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
+import org.danteplanner.backend.planner.entity.PlannerVote;
+import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +38,9 @@ class PlannerStatsRepositoryIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private PlannerStatsRepository statsRepository;
+
+    @Autowired
+    private PlannerVoteRepository voteRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -80,6 +86,50 @@ class PlannerStatsRepositoryIT extends SharedMySqlContainerSupport {
         // Assert
         PlannerStats updated = statsRepository.findById(testPlanner.getId()).orElseThrow();
         assertThat(updated.getUpvotes()).isEqualTo(1);
+    }
+
+    @Test
+    void upvotesOf_WhenTheRowWasLoadedBeforeTheCounterMoved_ReadsTheMovedCounter() {
+        transactionTemplate.executeWithoutResult(status -> {
+            assertThat(statsRepository.findById(testPlanner.getId()).orElseThrow().getUpvotes()).isZero();
+
+            statsRepository.incrementUpvotes(testPlanner.getId());
+
+            assertThat(statsRepository.upvotesOf(testPlanner.getId())).isEqualTo(1);
+        });
+    }
+
+    @Test
+    void upvotesOf_WhenNoRowExists_ReadsZeroAndTheFirstIncrementInsertsIt() {
+        UUID plannerId = testPlanner.getId();
+        statsRepository.deleteById(plannerId);
+
+        transactionTemplate.executeWithoutResult(status -> {
+            assertThat(statsRepository.upvotesOf(plannerId)).isZero();
+
+            statsRepository.incrementUpvotes(plannerId);
+
+            assertThat(statsRepository.upvotesOf(plannerId)).isEqualTo(1);
+        });
+    }
+
+    @Test
+    void incrementUpvotes_WhenAVoteInsertIsPending_KeepsTheVoteAndCountsIt() {
+        transactionTemplate.executeWithoutResult(status -> {
+            voteRepository.insert(new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP));
+            statsRepository.incrementUpvotes(testPlanner.getId());
+        });
+
+        assertThat(voteRepository.findByUserIdAndPlannerId(testUser.getId(), testPlanner.getId())).isPresent();
+        assertThat(statsRepository.upvotesOf(testPlanner.getId())).isEqualTo(1);
+    }
+
+    @Test
+    void decrementCommentCount_WhenAtZero_StaysAtZero() {
+        transactionTemplate.executeWithoutResult(status ->
+                statsRepository.decrementCommentCount(testPlanner.getId()));
+
+        assertThat(statsRepository.findById(testPlanner.getId()).orElseThrow().getCommentCount()).isZero();
     }
 
     // ==================== Atomic Notification Flag Tests ====================

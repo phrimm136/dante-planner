@@ -4,6 +4,7 @@ import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.freshness.DispatchStamp;
+import org.danteplanner.backend.shared.failure.WriteOutcome;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.outbox.config.OutboxConstants;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
@@ -38,19 +39,21 @@ public class DomainEventDispatcher {
         int attempts = attemptRecorder.recordAttempt(eventId);
 
         try {
-            events.findForDispatch(eventId)
-                    .filter(event -> !event.isDispatched())
-                    .ifPresent(event -> {
-                        EffectPushQueue pushes = new EffectPushQueue(ssePublisher);
-                        effectRegistry.applyEffectFor(event, pushes);
-                        event.markDispatched(clock.instant());
-                        TransactionSynchronizationManager.registerSynchronization(
-                                new EffectPushSynchronization(stamp, pushes));
-                    });
+            switch (WriteOutcome.of(events.claim(eventId, clock.instant()))) {
+                case APPLIED -> applyEffectOf(eventId);
+                case NOTHING -> { }
+            }
         } catch (RuntimeException e) {
             alarmIfSpent(eventId, attempts, e);
             throw e;
         }
+    }
+
+    private void applyEffectOf(long eventId) {
+        EffectPushQueue pushes = new EffectPushQueue(ssePublisher);
+        effectRegistry.applyEffectFor(events.findById(eventId).orElseThrow(), pushes);
+        TransactionSynchronizationManager.registerSynchronization(
+                new EffectPushSynchronization(stamp, pushes));
     }
 
     private void alarmIfSpent(long eventId, int attempts, RuntimeException cause) {

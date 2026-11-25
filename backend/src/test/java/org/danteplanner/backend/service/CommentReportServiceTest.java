@@ -21,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -80,7 +81,7 @@ class CommentReportServiceTest {
             when(reportRepository.insert(any(PlannerCommentReport.class)))
                     .thenAnswer(inv -> {
                         PlannerCommentReport r = inv.getArgument(0);
-                        r.setCreatedAt(java.time.Instant.now());
+                        ReflectionTestUtils.setField(r, "createdAt", java.time.Instant.now());
                         return r;
                     });
 

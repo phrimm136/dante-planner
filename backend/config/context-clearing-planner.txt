@@ -1,5 +1,0 @@
-org.danteplanner.backend.planner.repository.PlannerStatsRepository.decrementCommentCount(java.util.UUID)
-org.danteplanner.backend.planner.repository.PlannerStatsRepository.incrementCommentCount(java.util.UUID)
-org.danteplanner.backend.planner.repository.PlannerStatsRepository.incrementUpvotes(java.util.UUID)
-org.danteplanner.backend.planner.repository.PlannerStatsRepository.incrementViewCountBy(java.util.UUID, int)
-org.danteplanner.backend.planner.repository.PlannerVoteRepository.deleteVotesCollidingWithSentinel(java.lang.Long, java.lang.Long)

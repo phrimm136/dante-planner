@@ -1,3 +1,0 @@
-org.danteplanner.backend.moderation.entity.ModerationAction
-org.danteplanner.backend.moderation.entity.PlannerCommentReport
-org.danteplanner.backend.moderation.entity.PlannerReport

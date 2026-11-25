@@ -1,1 +1,0 @@
-org.danteplanner.backend.shared.outbox.entity.DomainEvent

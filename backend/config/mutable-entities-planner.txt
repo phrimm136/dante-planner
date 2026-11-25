@@ -1,9 +1,3 @@
 org.danteplanner.backend.planner.entity.Planner
 org.danteplanner.backend.planner.entity.PlannerCatalog
 org.danteplanner.backend.planner.entity.PlannerContent
-org.danteplanner.backend.planner.entity.PlannerEntityFilter
-org.danteplanner.backend.planner.entity.PlannerKeywordFilter
-org.danteplanner.backend.planner.entity.PlannerStats
-org.danteplanner.backend.planner.entity.PlannerView
-org.danteplanner.backend.planner.entity.PlannerVote
-org.danteplanner.backend.planner.entity.ViewFlushBatch
