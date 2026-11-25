@@ -326,6 +326,10 @@ tasks.withType<JavaCompile>().configureEach {
 tasks.named<JavaCompile>("compileJava") {
     options.errorprone {
         error("NullAway", "CheckReturnValue", "UnusedVariable")
+        // A planted bug deletes a use of something and must still compile.
+        if (providers.gradleProperty("plantedBug").isPresent) {
+            warn("UnusedVariable")
+        }
         option("NullAway:AnnotatedPackages", "org.danteplanner.backend")
         option("NullAway:JSpecifyMode", "true")
         option(
