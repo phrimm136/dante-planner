@@ -3,12 +3,7 @@ org.danteplanner.backend.auth.controller.AuthController.getCurrentUser() # 3
 org.danteplanner.backend.auth.controller.AuthController.googleCallback(java.lang.String, java.lang.String, java.lang.String, jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse) # 2
 org.danteplanner.backend.auth.oauth.GoogleIdTokenVerifier.<init>(org.danteplanner.backend.shared.config.OAuthProperties, org.springframework.web.client.RestOperations) # 1
 org.danteplanner.backend.auth.oauth.OAuthStateService.open(java.lang.String) # 3
-org.danteplanner.backend.auth.security.JwtAuthenticationFilter.attemptAutoRefresh(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse) # 5
-org.danteplanner.backend.auth.security.JwtAuthenticationFilter.doFilterInternal(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse, jakarta.servlet.FilterChain) # 1
-org.danteplanner.backend.auth.security.JwtAuthenticationFilter.establishAuthentication(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse) # 1
-org.danteplanner.backend.auth.security.JwtAuthenticationFilter.refreshExpiredSession(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse) # 1
 org.danteplanner.backend.auth.security.JwtAuthenticationFilter.shouldNotFilter(jakarta.servlet.http.HttpServletRequest) # 1
-org.danteplanner.backend.auth.service.AuthenticationService.authenticateWithOAuth(java.lang.String, java.lang.String, java.lang.String, java.lang.String) # 4
 org.danteplanner.backend.auth.token.AesGcmCipher.decrypt([B, [B) # 1
 org.danteplanner.backend.auth.token.JwtTokenService.generateRefreshToken(java.lang.Long, java.lang.String, java.lang.String) # 1
 org.danteplanner.backend.auth.token.TokenBlacklistService.blacklistToken(java.lang.String, java.util.Date) # 1
@@ -173,5 +168,3 @@ org.danteplanner.backend.user.service.UserAccountLifecycleService.reactivateAcco
 org.danteplanner.backend.user.service.UserService.createUserWithUniqueUsername(org.danteplanner.backend.user.api.AuthProviderType, java.lang.String, java.lang.String) # 2
 org.danteplanner.backend.user.service.UserService.isUsernameSuffixCollision(org.springframework.dao.DataIntegrityViolationException) # 1
 org.danteplanner.backend.user.service.UserService.toResponse(org.danteplanner.backend.user.entity.User) # 2
-org.danteplanner.backend.user.validation.RoleChangeValidator.requireAnotherActiveAdministrator() # 1
-org.danteplanner.backend.user.validation.RoleChangeValidator.requireCanChangeRole(org.danteplanner.backend.user.entity.User, org.danteplanner.backend.user.entity.User, org.danteplanner.backend.user.api.UserRole) # 5

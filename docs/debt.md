@@ -1560,13 +1560,6 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   `""` in all ten constants, so it does nothing. Worth doing when a policy is added or a key
   spelling changes: drop `subjectPrefix` and name the endpoint and failure modes as types.
   re-check: `rg -q 'subjectPrefix' backend/src/main/java/org/danteplanner/backend/shared/ratelimit/RateLimitPolicy.java`
-- `JwtAuthenticationFilter` passes outcomes between five methods as `boolean`, and `false` means
-  "stop, a 503 is written" in `establishAuthentication` but "continue as guest" in
-  `attemptAutoRefresh`, `rotateRefreshCookie` and `abandonSession`. Its effects (cookies, the
-  security context, the 503 body) are spread across those methods. Worth doing when the refresh
-  path changes: one decision function returns authenticated, guest or outage as a type, and
-  `doFilterInternal` applies the effects in one place.
-  re-check: `rg -q 'private boolean attemptAutoRefresh' backend/src/main/java/org/danteplanner/backend/auth/security/JwtAuthenticationFilter.java`
 - The planner write lock is implicit. `lockForUpsert` takes it with `lockContent`, a
   `SELECT COUNT(*) ... FOR UPDATE` whose result is discarded. The global order (content before
   publication, ADR 185) holds only because each call site calls things in that order, and only the

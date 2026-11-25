@@ -33,6 +33,39 @@ public class AuthenticationService {
     public record AuthResult(UserSummary user, String accessToken, String refreshToken, boolean reactivated) {
     }
 
+    private record Login(String providerName, AuthProviderType providerType, OAuthUserInfo userInfo) {
+    }
+
+    private record Account(UserSummary user, boolean reactivated) {
+    }
+
+    private sealed interface AccountCheck {
+
+        record SignIn(UserSummary user) implements AccountCheck {
+        }
+
+        record NeedAnyAccount() implements AccountCheck {
+        }
+
+        record Reactivate(UserSummary user) implements AccountCheck {
+        }
+
+        record Create() implements AccountCheck {
+        }
+
+        static AccountCheck ofActive(Optional<UserSummary> active) {
+            return active.<AccountCheck>map(SignIn::new).orElseGet(NeedAnyAccount::new);
+        }
+
+        static AccountCheck ofAny(Optional<UserSummary> any) {
+            return any.map(AccountCheck::ofExisting).orElseGet(Create::new);
+        }
+
+        private static AccountCheck ofExisting(UserSummary user) {
+            return user.deleted() ? new Reactivate(user) : new SignIn(user);
+        }
+    }
+
     public AuthResult authenticateWithOAuth(String providerName, String code,
                                             String redirectUri, String codeVerifier) {
         log.info("Processing OAuth authentication for provider: {}", providerName);
@@ -45,34 +78,34 @@ public class AuthenticationService {
 
         String providerId = userInfo.providerId();
         AuthProviderType providerType = AuthProviderType.fromValue(providerName);
-        boolean reactivated = false;
 
-        Optional<UserSummary> activeUser = users.findActiveByProvider(providerType, providerId);
-
-        UserSummary user;
-        if (activeUser.isPresent()) {
-            user = activeUser.get();
-        } else {
-            Optional<UserSummary> deletedUser = users.findByProvider(providerType, providerId);
-
-            if (deletedUser.isPresent() && deletedUser.get().deleted()) {
-                user = deletedUser.get();
-                users.reactivateAccount(user.id());
-                reactivated = true;
-                log.info("Reactivated soft-deleted account for user: {}", user.id());
-            } else if (deletedUser.isPresent()) {
-                user = deletedUser.get();
-            } else {
-                user = users.findOrCreateUser(providerName, providerId, userInfo.email());
-            }
-        }
+        Account account = openAccount(
+                AccountCheck.ofActive(users.findActiveByProvider(providerType, providerId)),
+                new Login(providerName, providerType, userInfo));
+        UserSummary user = account.user();
 
         String accessToken = tokenGenerator.generateAccessToken(user.id(), user.role());
         String refreshToken = tokenGenerator.generateRefreshToken(user.id());
 
         log.info("User authenticated successfully via {}: userId={} (reactivated: {})",
-                providerName, user.id(), reactivated);
-        return new AuthResult(user, accessToken, refreshToken, reactivated);
+                providerName, user.id(), account.reactivated());
+        return new AuthResult(user, accessToken, refreshToken, account.reactivated());
+    }
+
+    private Account openAccount(AccountCheck check, Login login) {
+        return switch (check) {
+            case AccountCheck.SignIn signIn -> new Account(signIn.user(), false);
+            case AccountCheck.NeedAnyAccount need -> openAccount(AccountCheck.ofAny(
+                    users.findByProvider(login.providerType(), login.userInfo().providerId())), login);
+            case AccountCheck.Reactivate reactivate -> {
+                UserSummary user = reactivate.user();
+                users.reactivateAccount(user.id());
+                log.info("Reactivated soft-deleted account for user: {}", user.id());
+                yield new Account(user, true);
+            }
+            case AccountCheck.Create create -> new Account(users.findOrCreateUser(
+                    login.providerName(), login.userInfo().providerId(), login.userInfo().email()), false);
+        };
     }
 
     public UserResponse currentUser(Long userId) {

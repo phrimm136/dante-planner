@@ -5,6 +5,9 @@ import org.danteplanner.backend.shared.entity.ValuedEnum;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 public enum UserRole implements ValuedEnum {
     NORMAL("NORMAL", 1),
     MODERATOR("MODERATOR", 2),
@@ -32,8 +35,10 @@ public enum UserRole implements ValuedEnum {
         return EnumLookup.fromValue(UserRole.class, value);
     }
 
-    public static boolean isValid(String value) {
-        return EnumLookup.isValid(UserRole.class, value);
+    public static Optional<UserRole> parse(String value) {
+        return Arrays.stream(values())
+                .filter(role -> role.value.equals(value))
+                .findFirst();
     }
 
     public boolean hasRankAtLeast(UserRole other) {

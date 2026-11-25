@@ -82,156 +82,221 @@ public class JwtAuthenticationFilter extends ChainAuthenticationFilter {
         MDC.put("method", request.getMethod());
         MDC.put("path", LogValues.oneLine(request.getRequestURI()));
 
-        if (!establishAuthentication(request, response)) {
-            MDC.clear();
-            return;
+        switch (establishAuthentication(request, response)) {
+            case SessionOutcome.Authenticated authenticated -> filterChain.doFilter(request, response);
+            case SessionOutcome.Guest guest -> filterChain.doFilter(request, response);
+            case SessionOutcome.Abandoned abandoned -> filterChain.doFilter(request, response);
+            case SessionOutcome.OutageReported outage -> MDC.clear();
         }
-
-        filterChain.doFilter(request, response);
     }
 
-    private boolean establishAuthentication(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-        Optional<String> accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
+    private sealed interface SessionOutcome extends CommandOutcome {
 
-        if (accessToken.isEmpty()) {
-            return refreshOrReportOutage(request, response) != RefreshOutcome.OUTAGE_REPORTED;
+        record Authenticated() implements SessionOutcome {
         }
 
-        return switch (accessTokenAuthenticator.verify(accessToken.orElseThrow(), request)) {
-            case AUTHENTICATED -> true;
-            case EXPIRED -> refreshExpiredSession(request, response);
-            case SENTINEL_BLOCKED, REVOKED, REJECTED -> {
-                SecurityContextHolder.clearContext();
-                yield true;
-            }
+        record Guest() implements SessionOutcome {
+        }
+
+        record Abandoned(AbandonReason reason) implements SessionOutcome {
+        }
+
+        record OutageReported() implements SessionOutcome {
+        }
+    }
+
+    private enum AbandonReason {
+        BLACKLISTED(CustomAuthenticationEntryPoint.SESSION_REVOKED),
+        USER_INVALIDATED(CustomAuthenticationEntryPoint.SESSION_REVOKED),
+        USER_GONE(CustomAuthenticationEntryPoint.SESSION_REVOKED),
+        ROTATION_REVOKED(CustomAuthenticationEntryPoint.SESSION_REVOKED),
+        ROTATION_INVALID(CustomAuthenticationEntryPoint.INVALID_TOKEN);
+
+        private final String errorCode;
+
+        AbandonReason(String errorCode) {
+            this.errorCode = errorCode;
+        }
+    }
+
+    private sealed interface CookieToken {
+
+        record Absent() implements CookieToken {
+        }
+
+        record Presented(String token) implements CookieToken {
+        }
+
+        static CookieToken of(Optional<String> cookie) {
+            return cookie.<CookieToken>map(Presented::new).orElseGet(Absent::new);
+        }
+    }
+
+    private record RefreshToken(String token, RefreshClaims claims) {
+    }
+
+    private sealed interface RefreshCheck {
+
+        record NeedBlacklist(RefreshToken presented) implements RefreshCheck {
+        }
+
+        record NeedInvalidation(RefreshToken presented) implements RefreshCheck {
+        }
+
+        record NeedUser(RefreshToken presented) implements RefreshCheck {
+        }
+
+        record NeedRotation(RefreshToken presented, UserSummary user) implements RefreshCheck {
+        }
+
+        record Authenticate(UserSummary user, RotationOutcome.Rotated rotated) implements RefreshCheck {
+        }
+
+        record Abandon(Long userId, AbandonReason reason) implements RefreshCheck {
+        }
+
+        private static RefreshCheck ofBlacklist(RefreshToken presented, boolean blacklisted) {
+            return blacklisted
+                    ? new Abandon(presented.claims().userId(), AbandonReason.BLACKLISTED)
+                    : new NeedInvalidation(presented);
+        }
+
+        private static RefreshCheck ofInvalidation(RefreshToken presented, boolean invalidated) {
+            return invalidated
+                    ? new Abandon(presented.claims().userId(), AbandonReason.USER_INVALIDATED)
+                    : new NeedUser(presented);
+        }
+
+        private static RefreshCheck ofUser(RefreshToken presented, Optional<UserSummary> active) {
+            return active.<RefreshCheck>map(user -> new NeedRotation(presented, user))
+                    .orElseGet(() -> new Abandon(presented.claims().userId(), AbandonReason.USER_GONE));
+        }
+    }
+
+    private SessionOutcome establishAuthentication(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        return switch (CookieToken.of(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN))) {
+            case CookieToken.Absent absent -> refreshOrReportOutage(request, response);
+            case CookieToken.Presented access -> switch (accessTokenAuthenticator.verify(access.token(), request)) {
+                case AUTHENTICATED -> new SessionOutcome.Authenticated();
+                case EXPIRED -> refreshExpiredSession(request, response);
+                case SENTINEL_BLOCKED, REVOKED, REJECTED -> {
+                    SecurityContextHolder.clearContext();
+                    yield new SessionOutcome.Guest();
+                }
+            };
         };
     }
 
-    private boolean refreshExpiredSession(HttpServletRequest request, HttpServletResponse response)
+    private SessionOutcome refreshExpiredSession(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         log.debug("Access token expired, attempting auto-refresh");
 
-        RefreshOutcome outcome = refreshOrReportOutage(request, response);
-        if (outcome == RefreshOutcome.GUEST) {
-            SecurityContextHolder.clearContext();
+        SessionOutcome outcome = refreshOrReportOutage(request, response);
+        switch (outcome) {
+            case SessionOutcome.Guest guest -> SecurityContextHolder.clearContext();
+            case SessionOutcome.Abandoned abandoned -> SecurityContextHolder.clearContext();
+            case SessionOutcome.Authenticated authenticated -> { }
+            case SessionOutcome.OutageReported outage -> { }
         }
-        return outcome != RefreshOutcome.OUTAGE_REPORTED;
+        return outcome;
     }
 
-    private enum RefreshOutcome implements CommandOutcome {
-        AUTHENTICATED,
-        GUEST,
-        OUTAGE_REPORTED
-    }
-
-    private enum RefreshAttempt {
-        REFRESHED,
-        DECLINED;
-
-        static RefreshAttempt of(boolean refreshed) {
-            return refreshed ? REFRESHED : DECLINED;
-        }
-    }
-
-    private RefreshOutcome refreshOrReportOutage(
+    private SessionOutcome refreshOrReportOutage(
             HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
-            return switch (RefreshAttempt.of(attemptAutoRefresh(request, response))) {
-                case REFRESHED -> RefreshOutcome.AUTHENTICATED;
-                case DECLINED -> RefreshOutcome.GUEST;
-            };
+            return attemptAutoRefresh(request, response);
         } catch (RedisConnectionFailureException | QueryTimeoutException e) {
             degradationResponder.writeAuthUnavailable(request, response);
-            return RefreshOutcome.OUTAGE_REPORTED;
+            return new SessionOutcome.OutageReported();
         } catch (DataAccessException | TransactionException e) {
             degradationResponder.writeDbUnavailable(request, response);
-            return RefreshOutcome.OUTAGE_REPORTED;
+            return new SessionOutcome.OutageReported();
         }
     }
 
-    private boolean attemptAutoRefresh(
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) {
+    private SessionOutcome attemptAutoRefresh(HttpServletRequest request, HttpServletResponse response) {
         try {
-            Optional<String> presented = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
-
-            if (presented.isEmpty()) {
-                log.debug("No refresh token available for auto-refresh");
-                return false;
-            }
-
-            String refreshToken = presented.orElseThrow();
-            RefreshClaims claims = tokenValidator.validateRefreshToken(refreshToken);
-
-            if (tokenBlacklistService.isBlacklisted(refreshToken)) {
-                log.warn("Attempted auto-refresh with blacklisted token for user: {}", claims.userId());
-                return abandonSession(request, response, CustomAuthenticationEntryPoint.SESSION_REVOKED);
-            }
-
-            if (tokenBlacklistService.isUserTokenInvalidated(claims.userId(), claims.issuedAt().getTime())) {
-                log.warn("Attempted auto-refresh for user with invalidated tokens: {}", claims.userId());
-                return abandonSession(request, response, CustomAuthenticationEntryPoint.SESSION_REVOKED);
-            }
-
-            Optional<UserSummary> activeUser = users.findActiveById(claims.userId());
-            if (activeUser.isEmpty()) {
-                log.warn("Attempted auto-refresh for non-existent or deleted user: {}", claims.userId());
-                return abandonSession(request, response, CustomAuthenticationEntryPoint.SESSION_REVOKED);
-            }
-
-            UserSummary user = activeUser.get();
-
-            if (!rotateRefreshCookie(refreshToken, request, response)) {
-                return false;
-            }
-
-            String newAccessToken = tokenGenerator.generateAccessToken(user.id(), user.role());
-            cookieUtils.setCookie(response, CookieConstants.ACCESS_TOKEN, newAccessToken,
-                    jwtProperties.getAccessTokenExpirySeconds());
-
-            accessTokenAuthenticator.authenticateAs(user.id(), user.role(), request);
-
-            log.debug("Auto-refreshed tokens for user: {}", user.email());
-            return true;
-
+            return switch (CookieToken.of(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN))) {
+                case CookieToken.Absent absent -> {
+                    log.debug("No refresh token available for auto-refresh");
+                    yield new SessionOutcome.Guest();
+                }
+                case CookieToken.Presented refresh -> {
+                    RefreshClaims claims = tokenValidator.validateRefreshToken(refresh.token());
+                    yield proceed(new RefreshCheck.NeedBlacklist(new RefreshToken(refresh.token(), claims)),
+                            request, response);
+                }
+            };
         } catch (DataAccessException | TransactionException e) {
             throw e;
         } catch (Exception e) {
             log.debug("Auto-refresh failed: {}", e.getMessage());
-            return false;
+            return new SessionOutcome.Guest();
         }
     }
 
-    private boolean rotateRefreshCookie(
-            String refreshToken,
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) {
+    private SessionOutcome proceed(RefreshCheck check, HttpServletRequest request, HttpServletResponse response) {
+        return switch (check) {
+            case RefreshCheck.NeedBlacklist need -> proceed(RefreshCheck.ofBlacklist(need.presented(),
+                    tokenBlacklistService.isBlacklisted(need.presented().token())), request, response);
+            case RefreshCheck.NeedInvalidation need -> proceed(RefreshCheck.ofInvalidation(need.presented(),
+                    tokenBlacklistService.isUserTokenInvalidated(need.presented().claims().userId(),
+                            need.presented().claims().issuedAt().getTime())), request, response);
+            case RefreshCheck.NeedUser need -> proceed(RefreshCheck.ofUser(need.presented(),
+                    users.findActiveById(need.presented().claims().userId())), request, response);
+            case RefreshCheck.NeedRotation need -> rotate(need, request, response);
+            case RefreshCheck.Authenticate authenticate -> authenticate(authenticate, request, response);
+            case RefreshCheck.Abandon abandon -> abandonSession(abandon, request, response);
+        };
+    }
+
+    private SessionOutcome rotate(
+            RefreshCheck.NeedRotation need, HttpServletRequest request, HttpServletResponse response) {
+        RefreshCheck rotation;
         try {
-            RotationOutcome.Rotated rotated = refreshRotationService.rotate(refreshToken).orThrow();
-            cookieUtils.setCookie(response, CookieConstants.REFRESH_TOKEN, rotated.newRefreshJwt(),
-                    jwtProperties.getRefreshTokenExpirySeconds());
-            return true;
+            rotation = new RefreshCheck.Authenticate(need.user(),
+                    refreshRotationService.rotate(need.presented().token()).orThrow());
         } catch (SessionRevokedException e) {
-            return abandonSession(request, response, CustomAuthenticationEntryPoint.SESSION_REVOKED);
+            rotation = new RefreshCheck.Abandon(need.user().id(), AbandonReason.ROTATION_REVOKED);
         } catch (InvalidTokenException e) {
-            return abandonSession(request, response, CustomAuthenticationEntryPoint.INVALID_TOKEN);
+            rotation = new RefreshCheck.Abandon(need.user().id(), AbandonReason.ROTATION_INVALID);
         }
+        return proceed(rotation, request, response);
+    }
+
+    private SessionOutcome authenticate(
+            RefreshCheck.Authenticate authenticate, HttpServletRequest request, HttpServletResponse response) {
+        UserSummary user = authenticate.user();
+        cookieUtils.setCookie(response, CookieConstants.REFRESH_TOKEN, authenticate.rotated().newRefreshJwt(),
+                jwtProperties.getRefreshTokenExpirySeconds());
+        cookieUtils.setCookie(response, CookieConstants.ACCESS_TOKEN,
+                tokenGenerator.generateAccessToken(user.id(), user.role()),
+                jwtProperties.getAccessTokenExpirySeconds());
+
+        accessTokenAuthenticator.authenticateAs(user.id(), user.role(), request);
+
+        log.debug("Auto-refreshed tokens for user: {}", user.email());
+        return new SessionOutcome.Authenticated();
     }
 
     /**
      * An exception thrown inside the filter chain leaves it entirely, missing both the entry point
      * and every {@code @ControllerAdvice}.
      */
-    private boolean abandonSession(
-            HttpServletRequest request, HttpServletResponse response, String errorCode) {
-        request.setAttribute(CustomAuthenticationEntryPoint.AUTH_ERROR_ATTRIBUTE, errorCode);
+    private SessionOutcome abandonSession(
+            RefreshCheck.Abandon abandon, HttpServletRequest request, HttpServletResponse response) {
+        switch (abandon.reason()) {
+            case BLACKLISTED ->
+                    log.warn("Attempted auto-refresh with blacklisted token for user: {}", abandon.userId());
+            case USER_INVALIDATED ->
+                    log.warn("Attempted auto-refresh for user with invalidated tokens: {}", abandon.userId());
+            case USER_GONE ->
+                    log.warn("Attempted auto-refresh for non-existent or deleted user: {}", abandon.userId());
+            case ROTATION_REVOKED, ROTATION_INVALID -> { }
+        }
+        request.setAttribute(CustomAuthenticationEntryPoint.AUTH_ERROR_ATTRIBUTE, abandon.reason().errorCode);
         cookieUtils.clearAuthCookies(response);
-        return false;
+        return new SessionOutcome.Abandoned(abandon.reason());
     }
-
-
-
 }
