@@ -532,6 +532,8 @@ tasks.test {
     dependsOn(staticLockCheck)
     inputs.file(layout.projectDirectory.file("config/architecture-rules-without-fixtures.txt"))
     inputs.file(layout.projectDirectory.file("config/shell-branches.txt"))
+    inputs.file(layout.projectDirectory.file("config/void-checks.txt"))
+    inputs.file(layout.projectDirectory.file("config/flag-parameters.txt"))
     inputs.dir(layout.projectDirectory.dir("src/main/java"))
     inputs.dir(layout.projectDirectory.dir("src/test/java/org/danteplanner/fixture/shellbranch"))
     val randomOrderSeed = objects.newInstance<RandomOrderSeed>()
