@@ -335,10 +335,16 @@ jobs:
           tar -xzf kustomize.tar.gz kustomize
           sudo mv kustomize /usr/local/bin/
 
-      - name: Bump image tag in BOTH overlays
+      - name: Bump image tag in BOTH overlays and BOTH chart values
         run: |
+          set -euo pipefail
           (cd "$OVERLAY_DIR"       && kustomize edit set image "${IMAGE_REPO}:${GIT_SHA}")
           (cd "$OVERLAY_DIR_SEOUL" && kustomize edit set image "${IMAGE_REPO}:${GIT_SHA}")
+          for values in deploy/chart/values-oregon.yaml deploy/chart/values-seoul.yaml; do
+            sed -i "s/^  tag: \".*\"$/  tag: \"${GIT_SHA}\"/" "$values"
+            [ "$(grep -cx "  tag: \"${GIT_SHA}\"" "$values")" = 1 ] \
+              || { echo "::error::$values does not carry the tag exactly once"; exit 1; }
+          done
 
       - name: Commit the tag bump
         env:
@@ -350,7 +356,8 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add "$OVERLAY_DIR/kustomization.yaml" "$OVERLAY_DIR_SEOUL/kustomization.yaml"
+          git add "$OVERLAY_DIR/kustomization.yaml" "$OVERLAY_DIR_SEOUL/kustomization.yaml" \
+            deploy/chart/values-oregon.yaml deploy/chart/values-seoul.yaml
           # [skip ci] in the subject keeps this push from retriggering the workflow.
           git commit -m "chore(deploy): bump backend image to ${GIT_SHA} (Oregon+Seoul) [skip ci]"
           git push origin "HEAD:${REF_NAME}"
