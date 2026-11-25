@@ -7,6 +7,8 @@ import org.danteplanner.backend.moderation.api.PlannerReports;
 import org.danteplanner.backend.moderation.entity.PlannerReport;
 import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
+import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator.FirstPlannerReport;
+import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator.PriorReport;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.springframework.stereotype.Service;
@@ -32,13 +34,17 @@ public class PlannerReportService implements PlannerReports {
     public void createReport(Long userId, UUID plannerId) {
         plannerTarget.checkPublished(plannerId);
 
-        reportUniquenessValidator.requireFirstPlannerReport(
-                reportRepository.existsByUserIdAndPlannerId(userId, plannerId), plannerId, userId);
+        FirstPlannerReport first = reportUniquenessValidator.requireFirstPlannerReport(
+                priorReport(reportRepository.existsByUserIdAndPlannerId(userId, plannerId)), plannerId, userId);
 
-        PlannerReport report = new PlannerReport(userId, plannerId);
+        PlannerReport report = new PlannerReport(first.reporterId(), first.plannerId());
         reportRepository.insert(report);
         FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId));
         log.info("User {} reported planner {}", userId, plannerId);
+    }
+
+    private static PriorReport priorReport(boolean filed) {
+        return filed ? PriorReport.FILED : PriorReport.NONE;
     }
 
     @Override

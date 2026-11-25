@@ -14,14 +14,6 @@ org.danteplanner.backend.auth.token.JwtTokenService.generateRefreshToken(java.la
 org.danteplanner.backend.auth.token.TokenBlacklistService.blacklistToken(java.lang.String, java.util.Date) # 1
 org.danteplanner.backend.auth.token.TokenBlacklistService.isInvalidatedIn(org.springframework.data.redis.core.StringRedisTemplate, java.lang.Long, long) # 1
 org.danteplanner.backend.auth.token.TokenBlacklistService.revokeLogoutSession(java.util.Collection) # 3
-org.danteplanner.backend.comment.effect.CommentReceivedEffect.applyEffect(org.danteplanner.backend.shared.outbox.entity.DomainEvent, org.danteplanner.backend.shared.outbox.service.EffectPushQueue) # 4
-org.danteplanner.backend.comment.effect.CommentReceivedEffect.notifyOwner(org.danteplanner.backend.comment.entity.PlannerComment, org.danteplanner.backend.planner.api.PlannerNotificationTarget, org.danteplanner.backend.shared.outbox.service.EffectPushQueue) # 3
-org.danteplanner.backend.comment.effect.ReplyReceivedEffect.applyEffect(org.danteplanner.backend.shared.outbox.entity.DomainEvent, org.danteplanner.backend.shared.outbox.service.EffectPushQueue) # 5
-org.danteplanner.backend.comment.effect.ReplyReceivedEffect.notifyParentAuthor(org.danteplanner.backend.comment.entity.PlannerComment, org.danteplanner.backend.comment.entity.PlannerComment, org.danteplanner.backend.planner.api.PlannerNotificationTarget, org.danteplanner.backend.shared.outbox.service.EffectPushQueue) # 3
-org.danteplanner.backend.comment.service.CommentCommandService.createComment(java.util.UUID, java.lang.Long, java.util.UUID, org.danteplanner.backend.comment.dto.CreateCommentRequest) # 3
-org.danteplanner.backend.comment.service.CommentCommandService.createReply(java.util.UUID, java.lang.Long, java.util.UUID, java.lang.String) # 1
-org.danteplanner.backend.comment.service.CommentCommandService.deleteComment(java.util.UUID, java.lang.Long) # 1
-org.danteplanner.backend.comment.service.CommentEngagementService.toggleNotification(java.util.UUID, java.lang.Long, boolean) # 1
 org.danteplanner.backend.comment.service.PlannerCommentSseService.beforeRegister(java.util.UUID, java.util.concurrent.CopyOnWriteArrayList) # 1
 org.danteplanner.backend.comment.service.PlannerCommentSseService.broadcast(java.util.UUID, java.lang.String, java.lang.Object, org.danteplanner.backend.shared.sse.SseEnvelope$UserExclusion) # 2
 org.danteplanner.backend.comment.service.PlannerCommentSseService.cleanupZombieConnections() # 1

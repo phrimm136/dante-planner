@@ -10,7 +10,9 @@ import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator;
 import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
+import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator.AuthoredComment;
 import org.danteplanner.backend.comment.validation.CommentStateValidator;
+import org.danteplanner.backend.comment.validation.CommentStateValidator.ReplyableParent;
 import org.danteplanner.backend.planner.api.PlannerAccess;
 import org.danteplanner.backend.planner.api.PlannerCommentCounts;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
@@ -18,6 +20,7 @@ import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import org.danteplanner.backend.shared.util.CommentConstants;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,36 +51,15 @@ public class CommentCommandService {
     public CreateCommentResponse createComment(UUID plannerId, Long userId, UUID deviceId, CreateCommentRequest request) {
         plannerAccess.checkPublished(plannerId);
 
-        int depth = 0;
-        Long effectiveParentId = null;
+        Placement placement = switch (Addressee.of(request.parentCommentId())) {
+            case Addressee.Thread thread -> new Placement.TopLevel();
+            case Addressee.Parent(UUID parentPublicId) -> Placement.under(stateValidator.requireReplyable(
+                    accessValidator.requireParentInPlanner(
+                            commentQueryService.requireByPublicId(parentPublicId), plannerId)));
+        };
 
-        if (request.parentCommentId() != null) {
-            final UUID parentPublicId = request.parentCommentId();
-            PlannerComment parent = commentQueryService.requireByPublicId(parentPublicId);
-            effectiveParentId = parent.getId();
-
-            accessValidator.requireParentInPlanner(parent, plannerId);
-            stateValidator.requireReplyable(parent);
-
-            depth = Math.min(parent.getDepth() + 1, CommentConstants.MAX_DEPTH);
-
-            if (parent.getDepth() >= CommentConstants.MAX_DEPTH) {
-                effectiveParentId = parent.getParentCommentId();
-            }
-        }
-
-        PlannerComment comment = new PlannerComment(plannerId, userId, request.content(), effectiveParentId, depth);
-        PlannerComment saved = commentRepository.insert(comment);
-        plannerCommentCounts.incrementCommentCount(plannerId);
-        declareCountChanged(plannerId);
-
-        if (effectiveParentId == null) {
-            domainEventRecorder.recordDomainEvent(DomainEventType.COMMENT_RECEIVED, plannerId,
-                    Map.of("commentId", saved.getId()));
-        } else {
-            domainEventRecorder.recordDomainEvent(DomainEventType.REPLY_RECEIVED, plannerId,
-                    Map.of("replyId", saved.getId()));
-        }
+        PlannerComment saved = insert(
+                placement.row(plannerId, userId, request.content()), placement.announcement());
 
         log.info("User {} created comment {} on planner {}", userId, saved.getId(), plannerId);
 
@@ -92,40 +74,98 @@ public class CommentCommandService {
 
         plannerAccess.checkPublished(plannerId);
 
-        stateValidator.requireReplyable(parent);
+        Placement placement = Placement.under(stateValidator.requireReplyable(parent));
 
-        int depth = Math.min(parent.getDepth() + 1, CommentConstants.MAX_DEPTH);
-
-        Long effectiveParentId = parent.getId();
-        if (parent.getDepth() >= CommentConstants.MAX_DEPTH) {
-            effectiveParentId = parent.getParentCommentId();
-        }
-
-        PlannerComment reply = new PlannerComment(plannerId, userId, content, effectiveParentId, depth);
-        PlannerComment saved = commentRepository.insert(reply);
-        plannerCommentCounts.incrementCommentCount(plannerId);
-        declareCountChanged(plannerId);
-
-        domainEventRecorder.recordDomainEvent(DomainEventType.REPLY_RECEIVED, plannerId,
-                Map.of("replyId", saved.getId()));
+        PlannerComment saved = insert(placement.row(plannerId, userId, content), Announcement.REPLY);
 
         log.info("User {} created reply {} to comment {} on planner {}", userId, saved.getId(), parent.getId(), plannerId);
 
         return new CreateCommentResponse(saved.getPublicId(), saved.getCreatedAt());
     }
 
+    private PlannerComment insert(PlannerComment row, Announcement announcement) {
+        PlannerComment saved = commentRepository.insert(row);
+        plannerCommentCounts.incrementCommentCount(row.getPlannerId());
+        declareCountChanged(row.getPlannerId());
+        domainEventRecorder.recordDomainEvent(announcement.event, row.getPlannerId(),
+                Map.of(announcement.idKey, saved.getId()));
+        return saved;
+    }
+
+    private sealed interface Addressee {
+
+        record Thread() implements Addressee {
+        }
+
+        record Parent(UUID publicId) implements Addressee {
+        }
+
+        static Addressee of(@Nullable UUID parentPublicId) {
+            return parentPublicId == null ? new Thread() : new Parent(parentPublicId);
+        }
+    }
+
+    private enum Announcement {
+        COMMENT(DomainEventType.COMMENT_RECEIVED, "commentId"),
+        REPLY(DomainEventType.REPLY_RECEIVED, "replyId");
+
+        private final DomainEventType event;
+        private final String idKey;
+
+        Announcement(DomainEventType event, String idKey) {
+            this.event = event;
+            this.idKey = idKey;
+        }
+    }
+
+    private sealed interface Placement {
+
+        record TopLevel() implements Placement {
+        }
+
+        record UnderParent(Long parentId, int depth) implements Placement {
+        }
+
+        record Parentless(int depth) implements Placement {
+        }
+
+        static Placement under(ReplyableParent replyable) {
+            PlannerComment parent = replyable.comment();
+            int depth = Math.min(parent.getDepth() + 1, CommentConstants.MAX_DEPTH);
+            Long effectiveParentId = parent.getDepth() >= CommentConstants.MAX_DEPTH
+                    ? parent.getParentCommentId()
+                    : parent.getId();
+            return effectiveParentId == null ? new Parentless(depth) : new UnderParent(effectiveParentId, depth);
+        }
+
+        default PlannerComment row(UUID plannerId, Long userId, String content) {
+            return switch (this) {
+                case TopLevel topLevel -> new PlannerComment(plannerId, userId, content, null, 0);
+                case UnderParent(Long parentId, int depth) ->
+                        new PlannerComment(plannerId, userId, content, parentId, depth);
+                case Parentless(int depth) -> new PlannerComment(plannerId, userId, content, null, depth);
+            };
+        }
+
+        default Announcement announcement() {
+            return switch (this) {
+                case TopLevel topLevel -> Announcement.COMMENT;
+                case UnderParent underParent -> Announcement.REPLY;
+                case Parentless parentless -> Announcement.COMMENT;
+            };
+        }
+    }
+
     @Transactional
     public UpdateCommentResponse updateComment(UUID commentPublicId, Long userId, UpdateCommentRequest request) {
-        PlannerComment comment = commentQueryService.requireByPublicId(commentPublicId);
+        AuthoredComment authored = authorshipValidator.requireAuthorToEdit(
+                stateValidator.requireEditable(commentQueryService.requireByPublicId(commentPublicId)), userId);
 
-        stateValidator.requireEditable(comment);
-        authorshipValidator.requireAuthorToEdit(comment, userId);
-
-        comment.edit(request.content(), clock.instant());
-        FreshnessDeclarations.declare(new FreshnessScope.Planner(comment.getPlannerId()));
+        authored.comment().edit(request.content(), clock.instant());
+        FreshnessDeclarations.declare(new FreshnessScope.Planner(authored.comment().getPlannerId()));
         log.info("User {} edited comment {}", userId, commentPublicId);
 
-        return new UpdateCommentResponse(comment.getEditedAt());
+        return new UpdateCommentResponse(authored.comment().getEditedAt());
     }
 
     @Transactional
@@ -145,14 +185,22 @@ public class CommentCommandService {
     public void deleteComment(UUID commentPublicId, Long userId) {
         PlannerComment comment = commentQueryService.requireByPublicId(commentPublicId);
 
-        if (comment.isDeleted()) {
-            return;
+        switch (Withdrawal.of(comment)) {
+            case ALREADY_DONE -> { }
+            case DUE -> {
+                AuthoredComment authored = authorshipValidator.requireAuthorToDelete(comment, userId);
+                softDelete(authored.comment());
+                log.info("User {} deleted comment {}", userId, commentPublicId);
+            }
         }
-
-        authorshipValidator.requireAuthorToDelete(comment, userId);
-
-        softDelete(comment);
-        log.info("User {} deleted comment {}", userId, commentPublicId);
     }
 
+    private enum Withdrawal {
+        ALREADY_DONE,
+        DUE;
+
+        static Withdrawal of(PlannerComment comment) {
+            return comment.isDeleted() ? ALREADY_DONE : DUE;
+        }
+    }
 }

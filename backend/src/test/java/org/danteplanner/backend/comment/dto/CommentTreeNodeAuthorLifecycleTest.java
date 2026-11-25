@@ -38,7 +38,7 @@ class CommentTreeNodeAuthorLifecycleTest {
 
     private static CommentTreeNode project(PlannerComment comment, User author) {
         return CommentTreeNode.fromEntity(
-                comment, null, author == null
+                comment, new CommentTreeNode.Parent.Thread(), author == null
                         ? new CommentTreeNode.Author.Missing()
                         : new CommentTreeNode.Author.Known(UsersApiAdapter.toSummary(author)),
                 new Viewer.Guest(), false, List.of());

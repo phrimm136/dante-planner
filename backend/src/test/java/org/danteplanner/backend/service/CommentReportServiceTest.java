@@ -13,12 +13,14 @@ import org.danteplanner.backend.moderation.repository.PlannerCommentReportReposi
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.comment.service.CommentModerationTargetAdapter;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
+import org.danteplanner.backend.support.IntegrityViolations;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -27,6 +29,7 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
@@ -128,6 +131,17 @@ class CommentReportServiceTest {
                         assertThat(exception.getUserId()).isEqualTo(REPORTER_ID);
                     });
             verify(reportRepository, never()).insert(any());
+        }
+
+        @Test
+        void createReport_WhenAConcurrentReportWins_SurfacesTheConstraint() {
+            DataIntegrityViolationException duplicate =
+                    IntegrityViolations.duplicateEntry("planner_comment_reports.uk_comment_report_reporter_comment");
+            when(commentRepository.findByPublicId(COMMENT_PUBLIC_ID)).thenReturn(Optional.of(comment));
+            when(reportRepository.insert(any(PlannerCommentReport.class))).thenThrow(duplicate);
+
+            assertThatThrownBy(() -> service.createReport(
+                    COMMENT_PUBLIC_ID, REPORTER_ID, new CommentReportRequest(REASON))).isSameAs(duplicate);
         }
 
         @Test

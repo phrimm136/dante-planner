@@ -2,6 +2,7 @@ package org.danteplanner.backend.moderation.service;
 
 import org.danteplanner.backend.moderation.api.ModerationActionType;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
+import org.danteplanner.backend.shared.failure.Parsed;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
 import org.springframework.stereotype.Service;
@@ -29,18 +30,36 @@ public class ModerationPolicy {
             UserRole.MODERATOR, "moderators",
             UserRole.ADMIN, "administrators");
 
-    public void requireCanRestrict(User actor, User target, ModerationActionType action) {
-        Authority authority = AUTHORITIES.get(action);
-        Assert.notNull(authority, () -> "Not an account restriction: " + action);
+    @Parsed
+    public record PermittedRestriction(User target) {
 
-        if (!actor.getRole().hasRankAtLeast(authority.minimumActorRole())) {
-            throw new ModerationForbiddenException("Only %s can %s"
-                    .formatted(ROLE_PLURAL.get(authority.minimumActorRole()), authority.power()));
-        }
+        private static PermittedRestriction of(User actor, User target, ModerationActionType action) {
+            Authority authority = AUTHORITIES.get(action);
+            Assert.notNull(authority, () -> "Not an account restriction: " + action);
 
-        if (!actor.getRole().outranks(target.getRole())) {
-            throw new ModerationForbiddenException(
-                    "Cannot %s a user of equal or higher rank".formatted(authority.verb()));
+            if (!actor.getRole().hasRankAtLeast(authority.minimumActorRole())) {
+                throw rankTooLow(authority);
+            }
+
+            if (!actor.getRole().outranks(target.getRole())) {
+                throw targetNotOutranked(authority);
+            }
+
+            return new PermittedRestriction(target);
         }
+    }
+
+    public PermittedRestriction requireCanRestrict(User actor, User target, ModerationActionType action) {
+        return PermittedRestriction.of(actor, target, action);
+    }
+
+    private static ModerationForbiddenException rankTooLow(Authority authority) {
+        return new ModerationForbiddenException("Only %s can %s"
+                .formatted(ROLE_PLURAL.get(authority.minimumActorRole()), authority.power()));
+    }
+
+    private static ModerationForbiddenException targetNotOutranked(Authority authority) {
+        return new ModerationForbiddenException(
+                "Cannot %s a user of equal or higher rank".formatted(authority.verb()));
     }
 }

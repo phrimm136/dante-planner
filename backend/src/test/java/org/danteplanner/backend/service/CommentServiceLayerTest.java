@@ -35,12 +35,16 @@ import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.support.LogCapture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -515,6 +519,52 @@ class CommentServiceLayerTest {
 
             assertThat(response.upvoteCount()).isEqualTo(8);
             verify(commentRepository).incrementUpvoteCount(10L);
+        }
+
+        @Test
+        void toggleUpvote_WhenCommentDeleted_IsRefusedBeforeTheVoteIsRead() {
+            UUID commentPublicId = UUID.randomUUID();
+            PlannerComment comment = new PlannerComment(plannerId, otherUser.getId(), "text", null, 0);
+            comment.softDelete(Instant.now());
+            when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(comment));
+
+            assertRejected(() -> engagementService.toggleUpvote(commentPublicId, testUser.getId()))
+                    .withCode("COMMENT_FORBIDDEN")
+                    .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Cannot vote on a deleted comment"));
+            verifyNoInteractions(commentVoteRepository);
+        }
+    }
+
+    @Nested
+    class ToggleNotificationTests {
+
+        @Test
+        void toggleNotification_WhenByNonAuthor_IsRefused() {
+            UUID commentPublicId = UUID.randomUUID();
+            PlannerComment comment = new PlannerComment(plannerId, testUser.getId(), "text", null, 0);
+            when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(comment));
+
+            assertRejected(() -> engagementService.toggleNotification(commentPublicId, otherUser.getId(), false))
+                    .withCode("COMMENT_FORBIDDEN")
+                    .satisfies(rejection -> assertThat(rejection.getMessage())
+                            .isEqualTo("Only the author can toggle notification settings"));
+            assertThat(comment.isAuthorNotificationsEnabled()).isTrue();
+        }
+
+        @Test
+        void toggleNotification_WhenTheAuthorsCommentIsDeleted_StillStoresTheChoiceAndLogsIt() {
+            UUID commentPublicId = UUID.randomUUID();
+            PlannerComment comment = new PlannerComment(plannerId, testUser.getId(), "text", null, 0);
+            comment.softDelete(Instant.now());
+            when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(comment));
+
+            List<ILoggingEvent> logged = LogCapture.during(
+                    () -> engagementService.toggleNotification(commentPublicId, testUser.getId(), false),
+                    Level.INFO, CommentEngagementService.class);
+
+            assertThat(comment.isAuthorNotificationsEnabled()).isFalse();
+            assertThat(logged).extracting(ILoggingEvent::getFormattedMessage).containsExactly(
+                    "User " + testUser.getId() + " toggled notifications off for comment " + commentPublicId);
         }
     }
 }

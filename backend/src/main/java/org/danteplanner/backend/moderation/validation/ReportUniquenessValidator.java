@@ -2,6 +2,7 @@ package org.danteplanner.backend.moderation.validation;
 
 import org.danteplanner.backend.moderation.exception.CommentReportAlreadyExistsException;
 import org.danteplanner.backend.moderation.exception.ReportAlreadyExistsException;
+import org.danteplanner.backend.shared.failure.Parsed;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -9,15 +10,38 @@ import java.util.UUID;
 @Component
 public class ReportUniquenessValidator {
 
-    public void requireFirstCommentReport(boolean alreadyReported, Long commentId, Long reporterId) {
-        if (alreadyReported) {
-            throw new CommentReportAlreadyExistsException(commentId, reporterId);
+    public enum PriorReport {
+        NONE,
+        FILED
+    }
+
+    @Parsed
+    public record FirstCommentReport(Long commentId, Long reporterId) {
+
+        private static FirstCommentReport of(PriorReport prior, Long commentId, Long reporterId) {
+            return switch (prior) {
+                case FILED -> throw new CommentReportAlreadyExistsException(commentId, reporterId);
+                case NONE -> new FirstCommentReport(commentId, reporterId);
+            };
         }
     }
 
-    public void requireFirstPlannerReport(boolean alreadyReported, UUID plannerId, Long reporterId) {
-        if (alreadyReported) {
-            throw new ReportAlreadyExistsException(plannerId, reporterId);
+    @Parsed
+    public record FirstPlannerReport(UUID plannerId, Long reporterId) {
+
+        private static FirstPlannerReport of(PriorReport prior, UUID plannerId, Long reporterId) {
+            return switch (prior) {
+                case FILED -> throw new ReportAlreadyExistsException(plannerId, reporterId);
+                case NONE -> new FirstPlannerReport(plannerId, reporterId);
+            };
         }
+    }
+
+    public FirstCommentReport requireFirstCommentReport(PriorReport prior, Long commentId, Long reporterId) {
+        return FirstCommentReport.of(prior, commentId, reporterId);
+    }
+
+    public FirstPlannerReport requireFirstPlannerReport(PriorReport prior, UUID plannerId, Long reporterId) {
+        return FirstPlannerReport.of(prior, plannerId, reporterId);
     }
 }

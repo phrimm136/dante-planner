@@ -20,6 +20,7 @@ import org.danteplanner.backend.shared.sse.SseEnvelope;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.support.FakePublishedPlanners;
 import org.danteplanner.backend.support.FakeUsers;
+import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.backend.support.RecordingNotifications;
 import org.danteplanner.backend.support.RecordingNotifications.ReplyReceived;
 import org.danteplanner.backend.support.RecordingSseChannelSender;
@@ -30,7 +31,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+
 import java.time.Instant;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -139,7 +144,7 @@ class ReplyReceivedEffectTest {
         reply.softDelete(Instant.now());
         when(commentRepository.findById(REPLY_ID)).thenReturn(Optional.of(reply));
 
-        applyAndFlush();
+        assertLogs("Reply 101 was withdrawn before it was announced");
 
         assertThat(notifications.calls()).isEmpty();
         assertThat(sseChannel.attempts()).isEmpty();
@@ -149,7 +154,7 @@ class ReplyReceivedEffectTest {
     void applyEffect_WhenTheReplyIsGone_AnnouncesNothing() {
         when(commentRepository.findById(REPLY_ID)).thenReturn(Optional.empty());
 
-        applyAndFlush();
+        assertLogs("Reply 101 is gone before it was announced");
 
         assertThat(notifications.calls()).isEmpty();
         assertThat(sseChannel.attempts()).isEmpty();
@@ -167,6 +172,77 @@ class ReplyReceivedEffectTest {
         } finally {
             FreshnessDeclarations.clear();
         }
+    }
+
+    @Test
+    void applyEffect_WhenTheNotificationIsSuppressed_PushesOnlyTheThread() {
+        givenAReplyTo(givenAParent(PARENT_AUTHOR_ID, true));
+
+        applyAndFlush();
+        applyAndFlush();
+
+        assertThat(notifications.calls()).hasSize(2);
+        assertThat(sseChannel.envelopes(SseChannel.USER)).hasSize(1);
+        assertThat(sseChannel.envelopes(SseChannel.COMMENT)).hasSize(2);
+    }
+
+    @Test
+    void applyEffect_WhenTheParentIsKnown_PushesItsPublicId() {
+        givenAReplyTo(givenAParent(PARENT_AUTHOR_ID, true));
+
+        applyAndFlush();
+
+        assertPushedParent(PARENT_PUBLIC_ID.toString());
+    }
+
+    @Test
+    void applyEffect_WhenTheParentRowIsGone_NotifiesNobodyAndPushesNoParent() {
+        givenAReplyTo(parent(PARENT_AUTHOR_ID, true));
+        when(commentRepository.findById(PARENT_ID)).thenReturn(Optional.empty());
+
+        applyAndFlush();
+
+        assertThat(notifications.calls()).isEmpty();
+        assertPushedParent(null);
+    }
+
+    @Test
+    void applyEffect_WhenTheReplyHasNoParent_NotifiesNobodyAndPushesNoParent() {
+        givenAReplyTo(parent(PARENT_AUTHOR_ID, true)).setParentCommentId(null);
+
+        applyAndFlush();
+
+        assertThat(notifications.calls()).isEmpty();
+        assertPushedParent(null);
+    }
+
+    @Test
+    void applyEffect_WhenThePlannerIsGone_AnnouncesNothing() {
+        UUID gonePlannerId = UUID.randomUUID();
+        givenAReplyTo(parent(PARENT_AUTHOR_ID, true)).setPlannerId(gonePlannerId);
+
+        assertLogs("Planner " + gonePlannerId + " is gone before reply 101 was announced");
+        assertThat(notifications.calls()).isEmpty();
+        assertThat(sseChannel.attempts()).isEmpty();
+    }
+
+    @Test
+    void applyEffect_WhenThePlannerIsUnpublished_LogsThatTheThreadMissedIt() {
+        givenAReplyTo(givenAParent(PARENT_AUTHOR_ID, true));
+        publishedPlanners.add(new PlannerNotificationTarget(PLANNER_ID, "Test Planner", OWNER_ID, true), false);
+
+        assertLogs("Planner " + PLANNER_ID + " left public view before reply 101 was announced to its thread");
+    }
+
+    private void assertPushedParent(String parentPublicId) {
+        assertThat(sseChannel.envelopes(SseChannel.COMMENT)).singleElement().satisfies(envelope ->
+                assertThat(((Map<?, ?>) envelope.payload()).get("parentCommentId")).isEqualTo(parentPublicId));
+    }
+
+    private void assertLogs(String message) {
+        assertThat(LogCapture.during(this::applyAndFlush, Level.INFO, ReplyReceivedEffect.class))
+                .extracting(ILoggingEvent::getFormattedMessage)
+                .containsExactly(message);
     }
 
     /**

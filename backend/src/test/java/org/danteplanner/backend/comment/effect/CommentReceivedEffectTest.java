@@ -20,6 +20,7 @@ import org.danteplanner.backend.shared.sse.SseEnvelope;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.support.FakePublishedPlanners;
 import org.danteplanner.backend.support.FakeUsers;
+import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.backend.support.RecordingNotifications;
 import org.danteplanner.backend.support.RecordingNotifications.CommentReceived;
 import org.danteplanner.backend.support.RecordingSseChannelSender;
@@ -30,7 +31,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+
 import java.time.Instant;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -134,7 +139,7 @@ class CommentReceivedEffectTest {
     void applyEffect_WhenTheCommentIsGone_AnnouncesNothing() {
         when(commentRepository.findById(COMMENT_ID)).thenReturn(Optional.empty());
 
-        applyAndFlush();
+        assertLogs("Comment 77 is gone before it was announced");
 
         assertThat(notifications.calls()).isEmpty();
         assertThat(sseChannel.attempts()).isEmpty();
@@ -149,7 +154,7 @@ class CommentReceivedEffectTest {
         comment.softDelete(Instant.now());
         when(commentRepository.findById(COMMENT_ID)).thenReturn(Optional.of(comment));
 
-        applyAndFlush();
+        assertLogs("Comment 77 was withdrawn before it was announced");
 
         assertThat(notifications.calls()).isEmpty();
         assertThat(sseChannel.attempts()).isEmpty();
@@ -159,7 +164,7 @@ class CommentReceivedEffectTest {
     void applyEffect_WhenThePlannerIsGone_AnnouncesNothing() {
         givenAComment(COMMENTER_ID);
 
-        applyAndFlush();
+        assertLogs("Planner " + PLANNER_ID + " is gone before comment 77 was announced");
 
         assertThat(notifications.calls()).isEmpty();
         assertThat(sseChannel.attempts()).isEmpty();
@@ -178,6 +183,44 @@ class CommentReceivedEffectTest {
         } finally {
             FreshnessDeclarations.clear();
         }
+    }
+
+    @Test
+    void applyEffect_WhenTheNotificationIsSuppressed_PushesOnlyTheThread() {
+        givenAComment(COMMENTER_ID);
+        givenAPlanner(true);
+
+        applyAndFlush();
+        applyAndFlush();
+
+        assertThat(notifications.calls()).hasSize(2);
+        assertThat(sseChannel.envelopes(SseChannel.USER)).hasSize(1);
+        assertThat(sseChannel.envelopes(SseChannel.COMMENT)).hasSize(2);
+    }
+
+    @Test
+    void applyEffect_WhenItPushesTheThread_CarriesNoParent() {
+        givenAComment(COMMENTER_ID);
+        givenAPlanner(true);
+
+        applyAndFlush();
+
+        assertThat(sseChannel.envelopes(SseChannel.COMMENT)).singleElement().satisfies(envelope ->
+                assertThat(((Map<?, ?>) envelope.payload()).get("parentCommentId")).isNull());
+    }
+
+    @Test
+    void applyEffect_WhenThePlannerIsUnpublished_LogsThatTheThreadMissedIt() {
+        givenAComment(COMMENTER_ID);
+        publishedPlanners.add(new PlannerNotificationTarget(PLANNER_ID, "Test Planner", OWNER_ID, true), false);
+
+        assertLogs("Planner " + PLANNER_ID + " left public view before comment 77 was announced to its thread");
+    }
+
+    private void assertLogs(String message) {
+        assertThat(LogCapture.during(this::applyAndFlush, Level.INFO, CommentReceivedEffect.class))
+                .extracting(ILoggingEvent::getFormattedMessage)
+                .containsExactly(message);
     }
 
     /**

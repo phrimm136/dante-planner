@@ -1,6 +1,7 @@
 package org.danteplanner.backend.moderation.service;
 
 import org.danteplanner.backend.moderation.service.ModerationAuditService.Suspension;
+import org.danteplanner.backend.moderation.service.ModerationPolicy.PermittedRestriction;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.moderation.event.AccountSuspendedEvent;
@@ -102,8 +103,9 @@ public class UserModerationService {
 
     private User restrict(Long actorId, Long targetId, Suspension suspension, Consumer<User> mutation) {
         User actor = requireActive(actorId);
-        User target = requireActive(targetId);
-        moderationPolicy.requireCanRestrict(actor, target, suspension.action());
+        PermittedRestriction permitted = moderationPolicy.requireCanRestrict(
+                actor, requireActive(targetId), suspension.action());
+        User target = permitted.target();
 
         mutation.accept(target);
         FreshnessDeclarations.declare(new FreshnessScope.User(targetId));

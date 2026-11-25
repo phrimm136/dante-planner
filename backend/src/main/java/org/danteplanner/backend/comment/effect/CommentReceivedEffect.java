@@ -2,6 +2,7 @@ package org.danteplanner.backend.comment.effect;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.comment.dto.CommentTreeNode;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
@@ -40,56 +41,111 @@ public class CommentReceivedEffect implements DomainEffectHandler {
     @Override
     public void applyEffect(DomainEvent event, EffectPushQueue pushes) {
         long commentId = payloads.requireId(event, "commentId");
-        Optional<PlannerComment> found = commentRepository.findById(commentId);
-        if (found.isEmpty()) {
-            log.info("Comment {} is gone before it was announced", commentId);
-            return;
+        switch (Subject.of(commentRepository.findById(commentId))) {
+            case Subject.Gone gone -> log.info("Comment {} is gone before it was announced", commentId);
+            case Subject.Withdrawn withdrawn ->
+                    log.info("Comment {} was withdrawn before it was announced", commentId);
+            case Subject.Live(PlannerComment comment) -> announce(comment, pushes);
         }
+    }
 
-        PlannerComment comment = found.get();
-        if (comment.isDeleted()) {
-            log.info("Comment {} was withdrawn before it was announced", commentId);
-            return;
+    private void announce(PlannerComment comment, EffectPushQueue pushes) {
+        switch (Destination.of(publishedPlanners.notificationTargetOf(comment.getPlannerId()))) {
+            case Destination.Gone gone -> log.info("Planner {} is gone before comment {} was announced",
+                    comment.getPlannerId(), comment.getId());
+            case Destination.Known(PlannerNotificationTarget target) -> {
+                notifyOwner(comment, target, pushes);
+                pushToThread(comment, pushes);
+            }
         }
-
-        Optional<PlannerNotificationTarget> target =
-                publishedPlanners.notificationTargetOf(comment.getPlannerId());
-        if (target.isEmpty()) {
-            log.info("Planner {} is gone before comment {} was announced",
-                    comment.getPlannerId(), commentId);
-            return;
-        }
-
-        notifyOwner(comment, target.get(), pushes);
-
-        if (!publishedPlanners.isPublished(comment.getPlannerId())) {
-            log.info("Planner {} left public view before comment {} was announced to its thread",
-                    comment.getPlannerId(), commentId);
-            return;
-        }
-        FreshnessDeclarations.declare(new FreshnessScope.Planner(comment.getPlannerId()));
-        pushes.commentEvent(comment.getPlannerId(), SseEventType.COMMENT_ADDED,
-                comment.getPublicId().toString(), comment.getUserId(),
-                commentQueryService.broadcastNode(comment, null));
     }
 
     private void notifyOwner(PlannerComment comment, PlannerNotificationTarget target,
             EffectPushQueue pushes) {
-        if (comment.getUserId().equals(target.ownerId()) || !target.ownerNotificationsEnabled()) {
-            return;
+        switch (Recipient.of(comment, target)) {
+            case Recipient.Nobody nobody -> { }
+            case Recipient.Member(Long ownerId) -> pushIfDelivered(notifications.notifyCommentReceived(
+                    comment.getId(),
+                    comment.getPublicId(),
+                    target.plannerId(),
+                    target.title(),
+                    comment.getContent(),
+                    ownerId), pushes);
+        }
+    }
+
+    private void pushToThread(PlannerComment comment, EffectPushQueue pushes) {
+        switch (Visibility.of(publishedPlanners.isPublished(comment.getPlannerId()))) {
+            case HIDDEN -> log.info("Planner {} left public view before comment {} was announced to its thread",
+                    comment.getPlannerId(), comment.getId());
+            case PUBLIC -> {
+                FreshnessDeclarations.declare(new FreshnessScope.Planner(comment.getPlannerId()));
+                pushes.commentEvent(comment.getPlannerId(), SseEventType.COMMENT_ADDED,
+                        comment.getPublicId().toString(), comment.getUserId(),
+                        commentQueryService.broadcastNode(comment, new CommentTreeNode.Parent.Thread()));
+            }
+        }
+    }
+
+    static void pushIfDelivered(NotificationOutcome outcome, EffectPushQueue pushes) {
+        switch (outcome) {
+            case NotificationOutcome.Delivered delivered -> pushes.userEvent(delivered.userId(),
+                    SseEventType.NOTIFY_COMMENT, delivered.payload().id(), delivered.payload());
+            case NotificationOutcome.Suppressed suppressed -> { }
+        }
+    }
+
+    sealed interface Subject {
+
+        record Gone() implements Subject {
         }
 
-        NotificationOutcome outcome = notifications.notifyCommentReceived(
-                comment.getId(),
-                comment.getPublicId(),
-                target.plannerId(),
-                target.title(),
-                comment.getContent(),
-                target.ownerId());
+        record Withdrawn() implements Subject {
+        }
 
-        if (outcome instanceof NotificationOutcome.Delivered delivered) {
-            pushes.userEvent(delivered.userId(), SseEventType.NOTIFY_COMMENT,
-                    delivered.payload().id(), delivered.payload());
+        record Live(PlannerComment comment) implements Subject {
+        }
+
+        static Subject of(Optional<PlannerComment> found) {
+            return found.<Subject>map(comment -> comment.isDeleted() ? new Withdrawn() : new Live(comment))
+                    .orElseGet(Gone::new);
+        }
+    }
+
+    sealed interface Destination {
+
+        record Gone() implements Destination {
+        }
+
+        record Known(PlannerNotificationTarget target) implements Destination {
+        }
+
+        static Destination of(Optional<PlannerNotificationTarget> target) {
+            return target.<Destination>map(Known::new).orElseGet(Gone::new);
+        }
+    }
+
+    sealed interface Recipient {
+
+        record Nobody() implements Recipient {
+        }
+
+        record Member(Long userId) implements Recipient {
+        }
+
+        private static Recipient of(PlannerComment comment, PlannerNotificationTarget target) {
+            return comment.getUserId().equals(target.ownerId()) || !target.ownerNotificationsEnabled()
+                    ? new Nobody()
+                    : new Member(target.ownerId());
+        }
+    }
+
+    enum Visibility {
+        PUBLIC,
+        HIDDEN;
+
+        static Visibility of(boolean published) {
+            return published ? PUBLIC : HIDDEN;
         }
     }
 }

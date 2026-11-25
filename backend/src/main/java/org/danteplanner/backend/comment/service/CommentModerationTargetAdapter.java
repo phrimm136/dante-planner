@@ -3,6 +3,7 @@ package org.danteplanner.backend.comment.service;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.validation.CommentStateValidator;
+import org.danteplanner.backend.comment.validation.CommentStateValidator.LiveComment;
 import org.danteplanner.backend.moderation.api.CommentModerationTarget;
 import org.danteplanner.backend.moderation.api.ModeratedComment;
 import org.springframework.stereotype.Service;
@@ -34,10 +35,9 @@ public class CommentModerationTargetAdapter implements CommentModerationTarget {
 
     @Override
     public Long requireReportable(UUID commentPublicId) {
-        PlannerComment comment = commentQueryService.requireByPublicId(commentPublicId);
-        Long internalId = comment.getId();
-        commentStateValidator.requireReportable(comment);
-        return internalId;
+        LiveComment live = commentStateValidator.requireReportable(
+                commentQueryService.requireByPublicId(commentPublicId));
+        return live.comment().getId();
     }
 
     private static ModeratedComment moderated(PlannerComment comment) {

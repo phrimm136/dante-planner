@@ -2,10 +2,14 @@ package org.danteplanner.backend.comment.effect;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.comment.dto.CommentTreeNode;
+import org.danteplanner.backend.comment.effect.CommentReceivedEffect.Destination;
+import org.danteplanner.backend.comment.effect.CommentReceivedEffect.Recipient;
+import org.danteplanner.backend.comment.effect.CommentReceivedEffect.Subject;
+import org.danteplanner.backend.comment.effect.CommentReceivedEffect.Visibility;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
-import org.danteplanner.backend.notification.api.NotificationOutcome;
 import org.danteplanner.backend.notification.api.Notifications;
 import org.danteplanner.backend.planner.api.PlannerNotificationTarget;
 import org.danteplanner.backend.planner.api.PublishedPlanners;
@@ -20,7 +24,6 @@ import org.danteplanner.backend.shared.outbox.service.EffectPushQueue;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -41,62 +44,66 @@ public class ReplyReceivedEffect implements DomainEffectHandler {
     @Override
     public void applyEffect(DomainEvent event, EffectPushQueue pushes) {
         long replyId = payloads.requireId(event, "replyId");
-        Optional<PlannerComment> found = commentRepository.findById(replyId);
-        if (found.isEmpty()) {
-            log.info("Reply {} is gone before it was announced", replyId);
-            return;
+        switch (Subject.of(commentRepository.findById(replyId))) {
+            case Subject.Gone gone -> log.info("Reply {} is gone before it was announced", replyId);
+            case Subject.Withdrawn withdrawn -> log.info("Reply {} was withdrawn before it was announced", replyId);
+            case Subject.Live(PlannerComment reply) -> announce(reply, pushes);
         }
-
-        PlannerComment reply = found.get();
-        if (reply.isDeleted()) {
-            log.info("Reply {} was withdrawn before it was announced", replyId);
-            return;
-        }
-
-        Optional<PlannerNotificationTarget> target =
-                publishedPlanners.notificationTargetOf(reply.getPlannerId());
-        if (target.isEmpty()) {
-            log.info("Planner {} is gone before reply {} was announced",
-                    reply.getPlannerId(), replyId);
-            return;
-        }
-
-        Optional<PlannerComment> parent = Optional.ofNullable(reply.getParentCommentId())
-                .flatMap(commentRepository::findById);
-        boolean published = publishedPlanners.isPublished(reply.getPlannerId());
-        parent.filter(it -> !it.isDeleted())
-                .filter(it -> published || it.getUserId().equals(target.get().ownerId()))
-                .ifPresent(it -> notifyParentAuthor(reply, it, target.get(), pushes));
-
-        if (!published) {
-            log.info("Planner {} left public view before reply {} was announced to its thread",
-                    reply.getPlannerId(), replyId);
-            return;
-        }
-        UUID parentPublicId = parent.map(PlannerComment::getPublicId).orElse(null);
-        FreshnessDeclarations.declare(new FreshnessScope.Planner(reply.getPlannerId()));
-        pushes.commentEvent(reply.getPlannerId(), SseEventType.COMMENT_ADDED,
-                reply.getPublicId().toString(), reply.getUserId(),
-                commentQueryService.broadcastNode(reply, parentPublicId));
     }
 
-    private void notifyParentAuthor(PlannerComment reply, PlannerComment parent,
+    private void announce(PlannerComment reply, EffectPushQueue pushes) {
+        switch (Destination.of(publishedPlanners.notificationTargetOf(reply.getPlannerId()))) {
+            case Destination.Gone gone -> log.info("Planner {} is gone before reply {} was announced",
+                    reply.getPlannerId(), reply.getId());
+            case Destination.Known(PlannerNotificationTarget target) -> announceOn(target, reply, pushes);
+        }
+    }
+
+    private void announceOn(PlannerNotificationTarget target, PlannerComment reply, EffectPushQueue pushes) {
+        Optional<PlannerComment> parent = Optional.ofNullable(reply.getParentCommentId())
+                .flatMap(commentRepository::findById);
+        Visibility visibility = Visibility.of(publishedPlanners.isPublished(reply.getPlannerId()));
+
+        notifyParentAuthor(recipientOf(reply, parent, target, visibility), reply, target, pushes);
+
+        switch (visibility) {
+            case HIDDEN -> log.info("Planner {} left public view before reply {} was announced to its thread",
+                    reply.getPlannerId(), reply.getId());
+            case PUBLIC -> {
+                FreshnessDeclarations.declare(new FreshnessScope.Planner(reply.getPlannerId()));
+                pushes.commentEvent(reply.getPlannerId(), SseEventType.COMMENT_ADDED,
+                        reply.getPublicId().toString(), reply.getUserId(),
+                        commentQueryService.broadcastNode(reply, nodeParentOf(parent)));
+            }
+        }
+    }
+
+    private void notifyParentAuthor(Recipient recipient, PlannerComment reply,
             PlannerNotificationTarget target, EffectPushQueue pushes) {
-        if (reply.getUserId().equals(parent.getUserId()) || !parent.isAuthorNotificationsEnabled()) {
-            return;
+        switch (recipient) {
+            case Recipient.Nobody nobody -> { }
+            case Recipient.Member(Long parentAuthorId) -> CommentReceivedEffect.pushIfDelivered(
+                    notifications.notifyReplyReceived(
+                            reply.getId(),
+                            reply.getPublicId(),
+                            target.plannerId(),
+                            target.title(),
+                            reply.getContent(),
+                            parentAuthorId), pushes);
         }
+    }
 
-        NotificationOutcome outcome = notifications.notifyReplyReceived(
-                reply.getId(),
-                reply.getPublicId(),
-                target.plannerId(),
-                target.title(),
-                reply.getContent(),
-                parent.getUserId());
+    private static Recipient recipientOf(PlannerComment reply, Optional<PlannerComment> parent,
+            PlannerNotificationTarget target, Visibility visibility) {
+        return parent.filter(it -> !it.isDeleted())
+                .filter(it -> visibility == Visibility.PUBLIC || it.getUserId().equals(target.ownerId()))
+                .filter(it -> !reply.getUserId().equals(it.getUserId()) && it.isAuthorNotificationsEnabled())
+                .<Recipient>map(it -> new Recipient.Member(it.getUserId()))
+                .orElseGet(Recipient.Nobody::new);
+    }
 
-        if (outcome instanceof NotificationOutcome.Delivered delivered) {
-            pushes.userEvent(delivered.userId(), SseEventType.NOTIFY_COMMENT,
-                    delivered.payload().id(), delivered.payload());
-        }
+    private static CommentTreeNode.Parent nodeParentOf(Optional<PlannerComment> parent) {
+        return parent.<CommentTreeNode.Parent>map(it -> new CommentTreeNode.Parent.Comment(it.getPublicId()))
+                .orElseGet(CommentTreeNode.Parent.Thread::new);
     }
 }
