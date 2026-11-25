@@ -17,7 +17,8 @@ Spring Boot + Java + JPA/Hibernate + Bean Validation (Jakarta) + MySQL + Redis +
 - A fact about a row holds under the lock or transaction it was read in. Parse it again after taking a lock.
 - A decision is a pure method returning a sealed type or enum; the method that performs effects only switches on it (`DecisionPurityTest`, `ShellBranchTest`). A type ending in `Outcome` reports what a command did.
 - A public method takes no `boolean`: use an enum or two methods (`FlagParameterRuleTest`).
-- The lists `backend/config/void-checks.txt`, `flag-parameters.txt` and `shell-branches.txt` only shrink: delete the line your change ended.
+- A write is an insert or a conditional `UPDATE` or `DELETE` decided by its matched-row count (`WriteOutcome`); an entity is `@Immutable` (`ImmutableEntityRuleTest`), and no `@Modifying` query clears the persistence context (`PersistenceContextClearingTest`).
+- The lists `backend/config/void-checks.txt`, `flag-parameters.txt`, `shell-branches.txt`, `mutable-entities-*.txt` and `context-clearing-*.txt` only shrink: delete the line your change ended.
 
 ## Async model
 

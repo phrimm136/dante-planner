@@ -72,4 +72,25 @@ class UserProfileImmutableIT extends SharedMySqlContainerSupport {
                 .containsEntry("username_epithet", epithet)
                 .containsEntry("username_suffix", suffix);
     }
+
+    @Test
+    void userProfile_WhenUpdatedByJpql_ChangesExactlyTheMatchedRow() {
+        User user = TestDataFactory.createTestUser(userRepository, "profile-jpql-update@example.com");
+        User other = TestDataFactory.createTestUser(userRepository, "profile-jpql-other@example.com");
+
+        Integer matched = transactionTemplate.execute(status -> entityManager
+                .createQuery("UPDATE UserProfile p SET p.usernameEpithet = :epithet WHERE p.id = :id")
+                .setParameter("epithet", "JPQL_CHANGED")
+                .setParameter("id", user.getId())
+                .executeUpdate());
+
+        assertThat(matched).isOne();
+        assertThat(epithetOf(user)).isEqualTo("JPQL_CHANGED");
+        assertThat(epithetOf(other)).isEqualTo(other.getUsernameEpithet());
+    }
+
+    private String epithetOf(User user) {
+        return jdbcTemplate.queryForObject(
+                "SELECT username_epithet FROM users WHERE id = ?", String.class, user.getId());
+    }
 }
