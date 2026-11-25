@@ -74,6 +74,12 @@
     },
     {
       "matchDepNames": [
+        "external-secrets"
+      ],
+      "enabled": false
+    },
+    {
+      "matchDepNames": [
         "k3s-io/k3s",
         "rancher/k3s",
         "yannh/kubernetes-json-schema"

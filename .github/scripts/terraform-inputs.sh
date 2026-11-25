@@ -12,4 +12,4 @@ printf '%s\n' terraform scripts/ops/terraform-run.sh scripts/ops/lib/terraform-g
   .github/scripts/terraform-validate.sh .github/scripts/terraform-inputs.sh .github/workflows/pr-gate.yml \
   .github/scripts/config-scan.sh .github/scripts/render-charts.sh .github/scripts/rendered-crds.py .github/scripts/rendered-exporters.py .github/scripts/images.sh .github/config-scan \
   .github/scripts/deploy-inputs-changed.sh .github/workflows/deploy-fleet.yml deploy/argocd \
-  deploy/chart/values-oregon.yaml deploy/chart/values-seoul.yaml
+  deploy/chart/templates/external-secrets.yaml deploy/chart/values-oregon.yaml deploy/chart/values-seoul.yaml
