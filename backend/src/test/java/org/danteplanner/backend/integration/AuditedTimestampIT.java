@@ -43,6 +43,7 @@ import org.danteplanner.backend.shared.config.JpaAuditingConfig;
 import org.danteplanner.backend.shared.entity.AuditedTimestampListener;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
+import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
 import org.danteplanner.backend.shared.util.ViewerHashUtil;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -110,6 +111,9 @@ class AuditedTimestampIT extends SharedMySqlContainerSupport {
     private PlannerCommentRepository commentRepository;
 
     @Autowired
+    private DomainEventRepository domainEventRepository;
+
+    @Autowired
     private AutowireCapableBeanFactory beanFactory;
 
     @Autowired
@@ -168,6 +172,18 @@ class AuditedTimestampIT extends SharedMySqlContainerSupport {
         assertThat(storedCreatedAt(report)).isEqualTo(T);
     }
 
+    @Test
+    void newDomainEvent_WhenTheClockIsFixed_IsStampedWithItsInstantAndKeepsItAcrossAClaim() {
+        DomainEvent event = DomainEvent.of(DomainEventType.PLANNER_PUBLISHED, planner.getId(), "{}");
+
+        transactionTemplate.executeWithoutResult(status -> {
+            entityManager.persist(event);
+            assertThat(domainEventRepository.claim(event.getId(), LATER)).isEqualTo(1);
+        });
+
+        assertThat(storedCreatedAt(event)).isEqualTo(T);
+    }
+
     private static Stream<Named<BiFunction<Long, Planner, Object>>> auditedRows() {
         return Stream.of(
                 Named.of("vote", (userId, planner) -> new PlannerVote(userId, planner.getId(), VoteType.UP)),
@@ -176,19 +192,12 @@ class AuditedTimestampIT extends SharedMySqlContainerSupport {
                 Named.of("report", (userId, planner) -> new PlannerReport(userId, planner.getId())),
                 Named.of("notification", (userId, planner) -> new Notification(
                         userId, planner.getId().toString(), NotificationType.COMMENT_RECEIVED)),
-                Named.of("domain event", (userId, planner) -> dispatchedEvent(planner)),
                 Named.of("moderation action", (userId, planner) -> ModerationAction.builder()
                         .actionType(ModerationActionType.TIMEOUT)
                         .actorId(userId)
                         .targetUuid(planner.getId().toString())
                         .targetType(ModerationTargetType.USER)
                         .build()));
-    }
-
-    private static DomainEvent dispatchedEvent(Planner planner) {
-        DomainEvent event = DomainEvent.of(DomainEventType.PLANNER_PUBLISHED, planner.getId(), "{}");
-        event.markDispatched(T);
-        return event;
     }
 
     private Object storedCreatedAt(Object row) {

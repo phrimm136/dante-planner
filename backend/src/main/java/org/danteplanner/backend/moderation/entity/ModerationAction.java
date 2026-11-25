@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.annotation.CreatedDate;
 import org.danteplanner.backend.shared.entity.AuditedTimestampListener;
@@ -23,6 +24,7 @@ import org.danteplanner.backend.moderation.api.ModerationTargetType;
 import java.time.Instant;
 
 @Entity
+@Immutable
 @EntityListeners(AuditedTimestampListener.class)
 @Table(name = "moderation_actions",
        indexes = {

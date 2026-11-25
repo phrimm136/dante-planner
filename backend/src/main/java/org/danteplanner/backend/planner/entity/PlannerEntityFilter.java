@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import org.springframework.data.domain.Persistable;
 
+import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -24,6 +25,7 @@ import java.util.UUID;
  * which doesn't insert new entities properly without this interface.
  */
 @Entity
+@Immutable
 @Table(name = "planner_entity_filter")
 @IdClass(PlannerEntityFilterId.class)
 public class PlannerEntityFilter implements Persistable<PlannerEntityFilterId> {

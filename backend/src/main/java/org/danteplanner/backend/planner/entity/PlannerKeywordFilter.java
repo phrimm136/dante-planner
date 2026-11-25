@@ -10,6 +10,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import org.springframework.data.domain.Persistable;
 
+import org.hibernate.annotations.Immutable;
+
 import java.util.UUID;
 
 /**
@@ -17,6 +19,7 @@ import java.util.UUID;
  * which doesn't insert new entities properly without this interface.
  */
 @Entity
+@Immutable
 @Table(name = "planner_keyword_filter")
 @IdClass(PlannerKeywordFilterId.class)
 public class PlannerKeywordFilter implements Persistable<PlannerKeywordFilterId> {
