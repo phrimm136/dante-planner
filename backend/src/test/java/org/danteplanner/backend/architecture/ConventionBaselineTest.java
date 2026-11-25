@@ -231,7 +231,6 @@ class ConventionBaselineTest {
      * mapping in a local rather than through a DTO, which is why no signature carries it.
      */
     private static final Set<String> ENTITY_TOUCHING_CONTROLLERS = Set.of(
-            "org.danteplanner.backend.moderation.controller.ModerationController",
             "org.danteplanner.backend.planner.controller.PlannerEngagementController");
 
     /**

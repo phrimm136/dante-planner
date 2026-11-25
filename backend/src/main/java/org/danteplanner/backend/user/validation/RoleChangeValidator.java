@@ -5,8 +5,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.shared.failure.Parsed;
 import org.danteplanner.backend.user.api.LastAdministratorException;
+import org.danteplanner.backend.user.api.RoleShift;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.exception.RoleUnchangedException;
 import org.danteplanner.backend.user.exception.UserForbiddenException;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.springframework.stereotype.Component;
@@ -51,6 +53,9 @@ public class RoleChangeValidator {
         record Refused(RankRefusal refusal) implements RankDecision {
         }
 
+        record Unchanged(UserRole role) implements RankDecision {
+        }
+
         record Allowed(User target, UserRole newRole) implements RankDecision {
         }
 
@@ -65,16 +70,20 @@ public class RoleChangeValidator {
             if (!self && target.getRole().hasRankAtLeast(actor.getRole())) {
                 return new Refused(RankRefusal.TARGET_NOT_BELOW);
             }
-            if (target.getRole() == UserRole.ADMIN && newRole != UserRole.ADMIN) {
-                return new DemotesAdministrator(target, newRole);
-            }
-            return new Allowed(target, newRole);
+            return switch (RoleShift.of(target.getRole(), newRole)) {
+                case SAME -> new Unchanged(newRole);
+                case PROMOTED -> new Allowed(target, newRole);
+                case DEMOTED -> target.getRole() == UserRole.ADMIN
+                        ? new DemotesAdministrator(target, newRole)
+                        : new Allowed(target, newRole);
+            };
         }
     }
 
     public AllowedRoleChange requireCanChangeRole(User actor, User target, UserRole newRole) {
         return switch (RankDecision.of(actor, target, newRole)) {
             case RankDecision.Refused refused -> throw new UserForbiddenException(refused.refusal().message);
+            case RankDecision.Unchanged unchanged -> throw new RoleUnchangedException(unchanged.role());
             case RankDecision.Allowed allowed -> AllowedRoleChange.of(allowed);
             case RankDecision.DemotesAdministrator demotion ->
                     AllowedRoleChange.of(demotion, activeAdministrators());

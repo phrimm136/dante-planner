@@ -25,6 +25,7 @@ import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.user.api.dto.UserResponse;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.exception.AccountDeletedException;
+import org.danteplanner.backend.user.exception.RoleUnchangedException;
 import org.danteplanner.backend.user.exception.UserForbiddenException;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.user.service.UsersApiAdapter;
@@ -165,7 +166,7 @@ public class FakeUsers implements Users {
     public void reactivateAccount(Long userId) {
         User user = row(userId);
         if (user.isDeleted()) {
-            user.reactivate();
+            TestDataFactory.reactivate(user);
         }
     }
 
@@ -181,13 +182,16 @@ public class FakeUsers implements Users {
         if (!actor.getId().equals(target.getId()) && target.getRole().hasRankAtLeast(actor.getRole())) {
             throw new UserForbiddenException("Cannot modify user of equal or higher rank");
         }
+        if (newRole == previousRole) {
+            throw new RoleUnchangedException(newRole);
+        }
         if (previousRole == UserRole.ADMIN && newRole != UserRole.ADMIN
                 && rows.values().stream().filter(user -> !user.isDeleted() && user.getRole() == UserRole.ADMIN)
                         .count() <= 1) {
             throw new LastAdministratorException();
         }
 
-        target.setRole(newRole);
+        ReflectionTestUtils.setField(target, "role", newRole);
         return new RoleChange(previousRole, UsersApiAdapter.toSummary(target));
     }
 

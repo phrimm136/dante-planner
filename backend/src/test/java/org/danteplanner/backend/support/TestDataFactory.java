@@ -181,6 +181,25 @@ public class TestDataFactory {
                 .build();
     }
 
+    public static void ban(User user, Instant at, Long by) {
+        ReflectionTestUtils.setField(user, "bannedAt", at);
+        ReflectionTestUtils.setField(user, "bannedBy", by);
+    }
+
+    public static void timeOut(User user, Instant until) {
+        ReflectionTestUtils.setField(user, "timeoutUntil", until);
+    }
+
+    public static void softDelete(User user, Instant at, Instant scheduledAt) {
+        ReflectionTestUtils.setField(user, "deletedAt", at);
+        ReflectionTestUtils.setField(user, "permanentDeleteScheduledAt", scheduledAt);
+    }
+
+    public static void reactivate(User user) {
+        ReflectionTestUtils.setField(user, "deletedAt", null);
+        ReflectionTestUtils.setField(user, "permanentDeleteScheduledAt", null);
+    }
+
     public static UserProfile profileOf(User user) {
         UserProfile profile = BeanUtils.instantiateClass(UserProfile.class);
         ReflectionTestUtils.setField(profile, "id", user.getId());

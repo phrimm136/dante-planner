@@ -10,7 +10,6 @@ import com.tngtech.archunit.core.importer.ClassFileImporter;
 import org.danteplanner.fixture.moduleboundary.backend.archive.service.ArchivedUserReaderFixture;
 import org.danteplanner.fixture.moduleboundary.backend.comment.service.PlannerCallerFixture;
 import org.danteplanner.fixture.moduleboundary.backend.comment.service.PlannerReaderFixture;
-import org.danteplanner.fixture.moduleboundary.backend.moderation.controller.ModerationController;
 import org.danteplanner.fixture.moduleboundary.backend.moderation.service.ModerationPolicy;
 import org.danteplanner.fixture.moduleboundary.backend.moderation.service.UserModerationService;
 import org.danteplanner.fixture.moduleboundary.backend.planner.entity.LabeledEnumFixture;
@@ -56,11 +55,13 @@ class FeatureBoundaryRuleTest {
 
     @Test
     void frozenClass_WhenItReachesAnotherModulesInternals_FailsNamingTheEdge() {
-        JavaClasses fixture = new ClassFileImporter().importClasses(ModerationController.class);
+        JavaClasses fixture = new ClassFileImporter().importClasses(
+                org.danteplanner.fixture.moduleboundary.mixed.backend.moderation.service.UserModerationService.class);
 
         assertThatThrownBy(() -> FeatureBoundaryTest.modules_meet_only_through_published_apis.check(fixture))
                 .isInstanceOf(AssertionError.class)
-                .hasMessageContaining(ModerationController.class.getName())
+                .hasMessageContaining(org.danteplanner.fixture.moduleboundary.mixed.backend.moderation.service.UserModerationService
+                        .class.getName())
                 .hasMessageContaining("org.danteplanner.backend.planner.repository.PlannerRepository")
                 .hasMessageNotContaining("type <org.danteplanner.backend.user.entity.User>");
     }
@@ -140,26 +141,25 @@ class FeatureBoundaryRuleTest {
 
         assertThatThrownBy(() -> FeatureBoundaryTest.frozenInternalEdges_WhenScanned_AreStillLive(fixture))
                 .isInstanceOf(AssertionError.class)
-                .hasMessageContaining("moderation.controller.ModerationController");
+                .hasMessageContaining("moderation.service.ModerationPolicy");
     }
 
     @Test
     void frozenEntry_WhenItsFileReachesOnlyAnotherModulesInternals_FailsNamingTheEntry() {
-        JavaClasses fixture = new ClassFileImporter().importClasses(ModerationController.class,
+        JavaClasses fixture = new ClassFileImporter().importClasses(
                 org.danteplanner.fixture.moduleboundary.stale.backend.moderation.service.ModerationPolicy.class,
                 UserModerationService.class);
 
         assertThatThrownBy(() -> FeatureBoundaryTest.frozenInternalEdges_WhenScanned_AreStillLive(fixture))
                 .isInstanceOf(AssertionError.class)
                 .hasMessageContaining("moderation.service.ModerationPolicy")
-                .hasMessageNotContaining("moderation.controller.ModerationController")
                 .hasMessageNotContaining("moderation.service.UserModerationService");
     }
 
     @Test
     void frozenEntries_WhenEachFileStillReachesTheFrozenModule_Pass() {
         JavaClasses fixture = new ClassFileImporter().importClasses(
-                ModerationController.class, ModerationPolicy.class, UserModerationService.class);
+                ModerationPolicy.class, UserModerationService.class);
 
         assertThatCode(() -> FeatureBoundaryTest.frozenInternalEdges_WhenScanned_AreStillLive(fixture))
                 .doesNotThrowAnyException();

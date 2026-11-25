@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 import java.time.Instant;
@@ -41,6 +42,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Tag("containerized")
 @Import(TestConfig.class)
 class PlannerViewPurgeIT extends SharedMySqlContainerSupport {
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Autowired
     private UserRepository userRepository;
@@ -124,9 +128,8 @@ class PlannerViewPurgeIT extends SharedMySqlContainerSupport {
      * eligibility under a lock, so a live account is skipped rather than deleted.
      */
     private void purge(Long userId) {
-        User managed = userRepository.findById(userId).orElseThrow();
-        managed.softDelete(Instant.now(), Instant.now().minusSeconds(60));
-        userRepository.save(managed);
+        transactionTemplate.executeWithoutResult(status ->
+                userRepository.softDelete(userId, Instant.now(), Instant.now().minusSeconds(60)));
         assertThat(lifecycleService.performHardDelete(userId, Instant.now())).isTrue();
     }
 

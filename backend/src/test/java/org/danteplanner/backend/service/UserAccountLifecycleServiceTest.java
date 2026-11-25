@@ -86,15 +86,14 @@ class UserAccountLifecycleServiceTest {
         void deleteAccount_WhenFirstDeletion_SetsDeletedAtAndScheduledDate() {
             // Arrange
             when(userRepository.findWithLockById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(userRepository.softDelete(eq(testUser.getId()), any(), any())).thenReturn(1);
 
             // Act
             Instant scheduledDate = lifecycleService.deleteAccount(testUser.getId());
 
             // Assert
             assertThat(scheduledDate).isNotNull();
-            assertThat(testUser.isDeleted()).isTrue();
-            assertThat(testUser.getDeletedAt()).isNotNull();
-            assertThat(testUser.getPermanentDeleteScheduledAt()).isNotNull();
+            verify(userRepository).softDelete(eq(testUser.getId()), any(Instant.class), eq(scheduledDate));
 
             // Verify scheduled date is approximately 30 days from now
             Instant expectedScheduleMin = Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS - 1));
@@ -112,7 +111,7 @@ class UserAccountLifecycleServiceTest {
         void deleteAccount_WhenIdempotent_ReturnsExistingScheduledDate() {
             // Arrange - user already deleted
             Instant existingScheduledAt = Instant.now().plus(Duration.ofDays(25));
-            testUser.softDelete(Instant.now(), existingScheduledAt);
+            TestDataFactory.softDelete(testUser, Instant.now(), existingScheduledAt);
 
             when(userRepository.findWithLockById(testUser.getId())).thenReturn(Optional.of(testUser));
 
@@ -132,7 +131,7 @@ class UserAccountLifecycleServiceTest {
 
             assertRejected(() -> lifecycleService.deleteAccount(admin.getId())).withCode("LAST_ADMINISTRATOR");
 
-            assertThat(admin.isDeleted()).isFalse();
+            verify(userRepository, never()).softDelete(any(), any(), any());
             assertThat(journal).isEmpty();
         }
 
@@ -141,10 +140,11 @@ class UserAccountLifecycleServiceTest {
             User admin = TestDataFactory.unsavedUser(UserRole.ADMIN);
             when(userRepository.findWithLockById(admin.getId())).thenReturn(Optional.of(admin));
             when(userRepository.countByRoleAndDeletedAtIsNull(UserRole.ADMIN)).thenReturn(2L);
+            when(userRepository.softDelete(eq(admin.getId()), any(), any())).thenReturn(1);
 
             lifecycleService.deleteAccount(admin.getId());
 
-            assertThat(admin.isDeleted()).isTrue();
+            verify(userRepository).softDelete(eq(admin.getId()), any(), any());
             assertThat(journal).containsExactly(
                     new Call(firstParticipant, Event.DEACTIVATED, admin.getId(), null),
                     new Call(secondParticipant, Event.DEACTIVATED, admin.getId(), null),
@@ -155,7 +155,7 @@ class UserAccountLifecycleServiceTest {
         void deleteAccount_WhenAWithdrawnAdminWithdrawsAgain_ReturnsBeforeTheGuard() {
             User admin = TestDataFactory.unsavedUser(UserRole.ADMIN);
             Instant existingScheduledAt = Instant.now().plus(Duration.ofDays(25));
-            admin.softDelete(Instant.now(), existingScheduledAt);
+            TestDataFactory.softDelete(admin, Instant.now(), existingScheduledAt);
             when(userRepository.findWithLockById(admin.getId())).thenReturn(Optional.of(admin));
 
             assertThat(lifecycleService.deleteAccount(admin.getId())).isEqualTo(existingScheduledAt);
@@ -165,6 +165,7 @@ class UserAccountLifecycleServiceTest {
         @Test
         void deleteAccount_WhenEndingSessionsFails_Propagates() {
             when(userRepository.findWithLockById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(userRepository.softDelete(eq(testUser.getId()), any(), any())).thenReturn(1);
             RedisConnectionFailureException unreachable = new RedisConnectionFailureException("token store unreachable");
             sessionEndHandler.failNext(RecordingSessionEndHandler.Operation.END_ALL_SESSIONS, unreachable);
 
@@ -196,18 +197,17 @@ class UserAccountLifecycleServiceTest {
         @Test
         void reactivateAccount_WhenSoftDeleted_ClearsDeletedAtAndScheduledDate() {
             // Arrange - user is soft-deleted
-            testUser.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
+            TestDataFactory.softDelete(testUser, Instant.now(), Instant.now().plus(Duration.ofDays(30)));
             assertThat(testUser.isDeleted()).isTrue();
 
             when(userRepository.findWithLockById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(userRepository.reactivate(eq(testUser.getId()), any())).thenReturn(1);
 
             // Act
             lifecycleService.reactivateAccount(testUser.getId());
 
             // Assert
-            assertThat(testUser.isDeleted()).isFalse();
-            assertThat(testUser.getDeletedAt()).isNull();
-            assertThat(testUser.getPermanentDeleteScheduledAt()).isNull();
+            verify(userRepository).reactivate(eq(testUser.getId()), any(Instant.class));
             assertThat(firstParticipant.calls())
                     .containsExactly(new Call(firstParticipant, Event.REACTIVATED, testUser.getId(), null));
             assertThat(secondParticipant.calls())
@@ -239,7 +239,7 @@ class UserAccountLifecycleServiceTest {
             lifecycleService.reactivateAccount(testUser.getId());
 
             // Assert
-            assertThat(testUser.isDeleted()).isFalse();
+            verify(userRepository, never()).reactivate(any(), any());
             assertThat(journal).isEmpty();
         }
     }

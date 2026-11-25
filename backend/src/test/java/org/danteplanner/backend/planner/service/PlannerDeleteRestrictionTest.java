@@ -107,12 +107,11 @@ class PlannerDeleteRestrictionTest {
     }
 
     private void ban() {
-        owner.setBannedAt(Instant.now());
-        owner.setBannedBy(2L);
+        TestDataFactory.ban(owner, Instant.now(), 2L);
     }
 
     private void timeOut() {
-        owner.setTimeoutUntil(Instant.now().plus(Duration.ofHours(1)));
+        TestDataFactory.timeOut(owner, Instant.now().plus(Duration.ofHours(1)));
     }
 
     @Test

@@ -40,7 +40,6 @@ class FeatureBoundaryTest {
     private static final List<String> ROLE_WORDS = List.of("Provider", "Participant", "Target", "Handler");
 
     private static final Map<String, String> FROZEN = Map.of(
-            "moderation.controller.ModerationController", "user",
             "moderation.service.ModerationPolicy", "user",
             "moderation.service.UserModerationService", "user");
 

@@ -145,7 +145,7 @@ class PlannerSubscriptionServiceTest {
 
         @Test
         void toggleSubscription_WhenBannedAndNotSubscribed_RefusesAndInsertsNothing() {
-            testUser.setBannedAt(Instant.now());
+            TestDataFactory.ban(testUser, Instant.now(), null);
             when(plannerRepository.findThread(plannerId))
                 .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
             when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
@@ -159,7 +159,7 @@ class PlannerSubscriptionServiceTest {
 
         @Test
         void toggleSubscription_WhenTimedOutAndDisabled_RefusesAndLeavesItDisabled() {
-            testUser.setTimeoutUntil(Instant.now().plusSeconds(3600));
+            TestDataFactory.timeOut(testUser, Instant.now().plusSeconds(3600));
             PlannerSubscription disabledSubscription = new PlannerSubscription(testUser.getId(), plannerId);
             disabledSubscription.toggle();
             when(plannerRepository.findThread(plannerId))
@@ -175,7 +175,7 @@ class PlannerSubscriptionServiceTest {
 
         @Test
         void toggleSubscription_WhenBannedAndSubscribed_TurnsItOffAsAPrivateDecision() {
-            testUser.setBannedAt(Instant.now());
+            TestDataFactory.ban(testUser, Instant.now(), null);
             PlannerSubscription existingSubscription = new PlannerSubscription(testUser.getId(), plannerId);
             when(plannerRepository.findThread(plannerId))
                 .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));

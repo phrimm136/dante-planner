@@ -9,6 +9,9 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.user.api.UserSummary;
+import org.danteplanner.backend.user.api.UserRole;
+import org.danteplanner.backend.user.api.Restriction;
 import org.danteplanner.backend.moderation.dto.BanStatusResponse;
 import org.danteplanner.backend.moderation.dto.ModeratedUserResponse;
 import org.danteplanner.backend.moderation.api.dto.PlannerActionResponse;
@@ -45,7 +48,7 @@ class ModerationResponseShapeTest {
 
     @Test
     void banUser_WhenAdminBans_CarriesBannedAndMessage() {
-        Map<String, Object> json = serialize(new BanStatusResponse(true, "User banned successfully"));
+        Map<String, Object> json = serialize(BanStatusResponse.of(new Restriction.Banned(BANNED_AT), "User banned successfully"));
 
         assertThat(json).containsOnlyKeys("banned", "message");
         assertThat(json).containsEntry("banned", true);
@@ -54,7 +57,7 @@ class ModerationResponseShapeTest {
 
     @Test
     void unbanUser_WhenAdminUnbans_CarriesBannedAndMessage() {
-        Map<String, Object> json = serialize(new BanStatusResponse(false, "User unbanned successfully"));
+        Map<String, Object> json = serialize(BanStatusResponse.of(new Restriction.TimedOut(TIMEOUT_UNTIL), "User unbanned successfully"));
 
         assertThat(json).containsOnlyKeys("banned", "message");
         assertThat(json).containsEntry("banned", false);
@@ -72,9 +75,9 @@ class ModerationResponseShapeTest {
     }
 
     @Test
-    void getAllUsers_WhenUserIsRestricted_CarriesRosterFieldsWithIsoTimestamps() {
+    void getAllUsers_WhenUserIsBannedAndTimedOut_MarksBothAndCarriesRosterFieldsWithIsoTimestamps() {
         Map<String, Object> json = serialize(roster("Naive", "ab12c", "NORMAL",
-                true, BANNED_AT, true, TIMEOUT_UNTIL));
+                BANNED_AT, TIMEOUT_UNTIL));
 
         assertThat(json).containsOnlyKeys("usernameEpithet", "usernameSuffix", "role",
                 "isBanned", "bannedAt", "isTimedOut", "timeoutUntil");
@@ -88,9 +91,24 @@ class ModerationResponseShapeTest {
     }
 
     @Test
+    void getAllUsers_WhenUserIsOnlyTimedOut_MarksTheTimeout() {
+        Map<String, Object> json = serialize(roster("Naive", "ab12c", "NORMAL", null, TIMEOUT_UNTIL));
+
+        assertThat(json).containsEntry("isBanned", false);
+        assertThat(json).containsEntry("isTimedOut", true);
+        assertThat(json).containsEntry("timeoutUntil", "2026-03-05T06:07:08Z");
+    }
+
+    @Test
+    void getAllUsers_WhenTheTimeoutEndsExactlyNow_IsNotTimedOut() {
+        assertThat(ModeratedUserResponse.fromUser(new UserSummary(1L, PLANNER_ID, "roster@example.com", "Naive",
+                "ab12c", UserRole.NORMAL, false, null, TIMEOUT_UNTIL), TIMEOUT_UNTIL).isTimedOut()).isFalse();
+    }
+
+    @Test
     void getAllUsers_WhenUserIsUnrestricted_OmitsBothRestrictionTimestamps() {
         Map<String, Object> json = serialize(roster("Naive", "ab12c", "NORMAL",
-                false, null, false, null));
+                null, null));
 
         assertThat(json).containsOnlyKeys("usernameEpithet", "usernameSuffix", "role",
                 "isBanned", "isTimedOut");
@@ -99,8 +117,9 @@ class ModerationResponseShapeTest {
     }
 
     private static ModeratedUserResponse roster(String epithet, String suffix, String role,
-            boolean banned, Instant bannedAt, boolean timedOut, Instant timeoutUntil) {
-        return new ModeratedUserResponse(epithet, suffix, role, banned, bannedAt, timedOut, timeoutUntil);
+            Instant bannedAt, Instant timeoutUntil) {
+        return ModeratedUserResponse.fromUser(new UserSummary(1L, PLANNER_ID, "roster@example.com", epithet, suffix,
+                UserRole.valueOf(role), false, bannedAt, timeoutUntil), TIMEOUT_UNTIL.minusSeconds(60));
     }
 
     private Map<String, Object> serialize(Object response) {

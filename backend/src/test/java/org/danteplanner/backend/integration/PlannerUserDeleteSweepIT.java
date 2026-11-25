@@ -16,6 +16,7 @@ import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -39,6 +40,9 @@ import java.time.ZoneOffset;
  * that the users row would otherwise carry them off with.</p>
  */
 class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Autowired
     private UserRepository userRepository;
@@ -135,9 +139,8 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
      * eligibility under a lock, so a live account is skipped rather than deleted.
      */
     private void purgeOwner(Long ownerId) {
-        User managed = userRepository.findById(ownerId).orElseThrow();
-        managed.softDelete(Instant.now(), Instant.now().minusSeconds(60));
-        userRepository.save(managed);
+        transactionTemplate.executeWithoutResult(status ->
+                userRepository.softDelete(ownerId, Instant.now(), Instant.now().minusSeconds(60)));
         assertThat(lifecycleService.performHardDelete(ownerId, Instant.now())).isTrue();
     }
 

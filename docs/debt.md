@@ -1886,3 +1886,7 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   which needs a `hostPath` and so a privileged namespace, and memory on every node. Worth deciding
   when Alloy moves to its upstream chart.
   re-check: `rg -q 'loki.source.kubernetes' deploy/chart/templates/alloy-logs.yaml`
+- `UserRepository.changeEpithet` does not require `deleted_at IS NULL`, so an account scheduled for
+  deletion can still change its epithet with a live token. Worth deciding when account deletion is next
+  changed.
+  re-check: `rg -qF 'u.usernameEpithet = :epithet, u.updatedAt = :now WHERE u.id = :id"' backend/src/main/java/org/danteplanner/backend/user/repository/UserRepository.java`

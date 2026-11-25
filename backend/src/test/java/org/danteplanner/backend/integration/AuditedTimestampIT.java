@@ -232,7 +232,7 @@ class AuditedTimestampIT extends SharedMySqlContainerSupport {
         clock.set(LATER);
 
         transactionTemplate.executeWithoutResult(status ->
-                userRepository.findById(owner.getId()).orElseThrow().setUsernameEpithet("ASTUTE"));
+                userRepository.changeEpithet(owner.getId(), "ASTUTE", clock.instant()));
 
         User stored = userRepository.findById(owner.getId()).orElseThrow();
         assertThat(stored.getCreatedAt()).isEqualTo(T);
@@ -245,16 +245,6 @@ class AuditedTimestampIT extends SharedMySqlContainerSupport {
 
         assertThat(stored.getCreatedAt()).isEqualTo(T);
         assertThat(stored.getUpdatedAt()).isEqualTo(T);
-    }
-
-    @Test
-    void userRow_WhenNothingChanges_KeepsUpdatedAt() {
-        clock.set(LATER);
-
-        transactionTemplate.executeWithoutResult(status ->
-                userRepository.save(userRepository.findById(owner.getId()).orElseThrow()));
-
-        assertThat(userRepository.findById(owner.getId()).orElseThrow().getUpdatedAt()).isEqualTo(T);
     }
 
     @Test

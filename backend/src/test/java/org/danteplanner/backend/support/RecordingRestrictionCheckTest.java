@@ -18,7 +18,7 @@ class RecordingRestrictionCheckTest {
     @Test
     void requireUnrestricted_WhenTheUserIsBanned_RecordsTheCheckAndRefusesAsTheRealCheckDoes() {
         User banned = users.add(TestDataFactory.unsavedUser(1L));
-        banned.setBannedAt(Instant.now());
+        TestDataFactory.ban(banned, Instant.now(), null);
 
         assertRejected(() -> check.requireUnrestricted(banned.getId())).withCode("USER_BANNED");
 

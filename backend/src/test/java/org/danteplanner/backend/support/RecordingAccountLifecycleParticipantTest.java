@@ -23,6 +23,8 @@ import org.danteplanner.backend.user.validation.RoleChangeValidator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +44,7 @@ class RecordingAccountLifecycleParticipantTest {
     @Test
     void calls_WhenTheRealLifecycleDeletesAnAccount_RecordEachParticipantBeforeTheSessionsEnd() {
         when(userRepository.findWithLockById(USER_ID)).thenReturn(Optional.of(TestDataFactory.unsavedUser(USER_ID)));
+        when(userRepository.softDelete(eq(USER_ID), any(), any())).thenReturn(1);
 
         lifecycle().deleteAccount(USER_ID);
 
@@ -55,8 +58,9 @@ class RecordingAccountLifecycleParticipantTest {
     @Test
     void calls_WhenTheRealLifecycleReactivatesADeletedAccount_RecordTheReactivation() {
         User user = TestDataFactory.unsavedUser(USER_ID);
-        user.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS)));
+        TestDataFactory.softDelete(user, Instant.now(), Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS)));
         when(userRepository.findWithLockById(USER_ID)).thenReturn(Optional.of(user));
+        when(userRepository.reactivate(eq(USER_ID), any())).thenReturn(1);
 
         lifecycle().reactivateAccount(USER_ID);
 
@@ -67,8 +71,9 @@ class RecordingAccountLifecycleParticipantTest {
     @Test
     void failNext_WhenScripted_FailsOneCallAndThenRecovers() {
         User user = TestDataFactory.unsavedUser(USER_ID);
-        user.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS)));
+        TestDataFactory.softDelete(user, Instant.now(), Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS)));
         when(userRepository.findWithLockById(USER_ID)).thenReturn(Optional.of(user));
+        when(userRepository.reactivate(eq(USER_ID), any())).thenReturn(1);
         IllegalStateException down = new IllegalStateException("participant down");
         second.failNext(Event.REACTIVATED, down);
 

@@ -20,6 +20,7 @@ import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.user.api.dto.UserResponse;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.exception.AccountDeletedException;
+import org.danteplanner.backend.user.exception.RoleUnchangedException;
 import org.danteplanner.backend.user.exception.UserForbiddenException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,8 +69,8 @@ public interface UsersContract {
         User user = persisted(restrictedUser().build());
 
         assertThat(users().findActiveById(user.getId())).hasValueSatisfying(summary -> {
-            assertThat(summary.isBanned()).isTrue();
-            assertThat(summary.isTimedOut(Instant.now())).isTrue();
+            assertThat(summary.bannedAt()).isEqualTo(user.getBannedAt());
+            assertThat(summary.timeoutUntil()).isEqualTo(user.getTimeoutUntil());
         });
     }
 
@@ -288,7 +289,7 @@ public interface UsersContract {
     }
 
     @Test
-    default void describeById_WhenTheUserIsBannedAndTimedOut_ReportsBothWithoutARecordedReason() {
+    default void describeById_WhenTheUserIsBannedAndTimedOut_ReportsOnlyTheBan() {
         User user = persisted(restrictedUser().build());
 
         UserResponse response = users().describeById(user.getId());
@@ -296,8 +297,8 @@ public interface UsersContract {
         assertThat(response.isBanned()).isTrue();
         assertThat(response.bannedAt()).isNotNull();
         assertThat(response.banReason()).isNull();
-        assertThat(response.isTimedOut()).isTrue();
-        assertThat(response.timeoutUntil()).isNotNull();
+        assertThat(response.isTimedOut()).isNull();
+        assertThat(response.timeoutUntil()).isNull();
         assertThat(response.timeoutReason()).isNull();
     }
 
@@ -381,6 +382,28 @@ public interface UsersContract {
                 .isInstanceOf(UserForbiddenException.class)
                 .hasMessage("Cannot modify user of equal or higher rank");
         assertThat(users().findById(otherModerator.getId()).role()).isEqualTo(UserRole.MODERATOR);
+    }
+
+    @Test
+    default void changeRole_WhenTheRoleIsUnchanged_ThrowsRoleUnchanged() {
+        User admin = persisted(newUser().role(UserRole.ADMIN).build());
+        User user = persisted(newUser().build());
+
+        assertThatThrownBy(() -> inTransaction(
+                () -> users().changeRole(admin.getId(), user.getId(), UserRole.NORMAL)))
+                .isInstanceOf(RoleUnchangedException.class)
+                .hasMessage("User already has the role NORMAL");
+    }
+
+    @Test
+    default void changeRole_WhenTheRankIsRefusedAndTheRoleUnchanged_ThrowsUserForbidden() {
+        User moderator = persisted(newUser().role(UserRole.MODERATOR).build());
+        User otherModerator = persisted(newUser().role(UserRole.MODERATOR).build());
+
+        assertThatThrownBy(() -> inTransaction(
+                () -> users().changeRole(moderator.getId(), otherModerator.getId(), UserRole.MODERATOR)))
+                .isInstanceOf(UserForbiddenException.class)
+                .hasMessage("Cannot modify user of equal or higher rank");
     }
 
     static User.UserBuilder newUser() {

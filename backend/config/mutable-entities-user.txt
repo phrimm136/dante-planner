@@ -1,2 +1,0 @@
-org.danteplanner.backend.user.entity.User
-org.danteplanner.backend.user.entity.UserSettings
