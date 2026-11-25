@@ -2,10 +2,11 @@
 # Deploy the staging-only in-cluster workloads that ArgoCD deliberately does not manage:
 # cloudflared (both regions), the OAuth stub IdP, and the SPA server. Manifests travel to
 # each control plane as a presigned S3 bundle and are applied with kubectl over SSM —
-# see docs/adr/035 for why this bypasses GitOps.  Requires frontend/dist to be built.
+# see docs/adr/035 for why this bypasses GitOps.  Requires frontend/dist to be built, and docker.
 set -euo pipefail
 
 repo_root=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
+. "$repo_root/.github/scripts/images.sh"
 region=us-west-2
 seoul_region=ap-northeast-2
 account=$(aws sts get-caller-identity --query Account --output text)
@@ -29,10 +30,11 @@ r = work/"render"
 (r/"frontend.yaml").write_text(
     (repo/"deploy/staging-e2e/frontend.yaml").read_text().replace("DIST_URL_PLACEHOLDER", url))
 (r/"oauth-stub.yaml").write_text((repo/"deploy/staging-e2e/oauth-stub.yaml").read_text())
-cf = (repo/"deploy/base/cloudflared.yaml").read_text()
-(r/"cloudflared-oregon.yaml").write_text(cf)
-(r/"cloudflared-seoul.yaml").write_text(cf.replace("key: oregon", "key: seoul"))
 EOF
+for site in oregon seoul; do
+  docker run --rm --network none -v "$repo_root/deploy/chart:/chart:ro" "$HELM_IMAGE" template "danteplanner-$site" /chart \
+    -f "/chart/values-$site.yaml" -s templates/cloudflared.yaml > "$work/render/cloudflared-$site.yaml"
+done
 
 tar -czf "$work/k8s.tar.gz" -C "$work/render" .
 aws s3 cp "$work/k8s.tar.gz" "s3://$bucket/k8s-staging-e2e.tar.gz" --region "$region" >/dev/null
@@ -73,14 +75,14 @@ seoul_cp=$(cp_instance "$seoul_region" danteplanner-seoul-cp)
 apply_on "$region"       "$oregon_cp" cloudflared-oregon.yaml oauth-stub.yaml frontend.yaml
 apply_on "$seoul_region" "$seoul_cp"  cloudflared-seoul.yaml
 
-# Pin the backend tag through the ArgoCD Application's kustomize override — the ONLY
+# Pin the backend tag through the ArgoCD Application's Helm parameters — the ONLY
 # mechanism that survives selfHeal; a direct `kubectl set image` is reverted within one
 # sync loop.
 if [[ -n "${BACKEND_IMAGE_TAG:-}" ]]; then
   pin_on() { # region instance-id app  — the fleet pulls from ITS region's registry
-    local image="danteplanner-backend=$account.dkr.ecr.$1.amazonaws.com/danteplanner-backend:$BACKEND_IMAGE_TAG"
     local patch params cmd_id
-    patch=$(IMAGE="$image" python3 -c "import json,os;print(json.dumps({'spec':{'source':{'kustomize':{'images':[os.environ['IMAGE']]}}}}))")
+    patch=$(jq -cn --arg repository "$account.dkr.ecr.$1.amazonaws.com/danteplanner-backend" --arg tag "$BACKEND_IMAGE_TAG" \
+      '{spec: {source: {helm: {parameters: [{name: "image.repository", value: $repository}, {name: "image.tag", value: $tag}]}}}}')
     params=$(jq -n --arg patch "$patch" --arg app "$3" '
       {commands: [
         "kubectl -n argocd patch application \($app | @sh) --type merge -p \($patch | @sh)",

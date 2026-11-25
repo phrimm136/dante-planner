@@ -2,13 +2,13 @@
 epic: none · pr: none
 
 ## Decisions
-- @deploy @helm @third-party — A component the project does not write is installed from its upstream Helm chart: one ArgoCD Application per component, pinned to a chart version, with its values inline in the Application. The project's own manifests stay as they are until they move into one chart of their own, and kustomize is removed when the last of them moves. The hand-written copies drifted from upstream without anyone seeing it. The copy of kube-state-metrics lacked a permission that upstream grants, so one metric never existed and the alert built on it could never fire. No image in these copies had a digest or anything that raised its version.
+- @deploy @helm @third-party — A component the project does not write is installed from its upstream Helm chart: one ArgoCD Application per component, pinned to a chart version, with its values inline in the Application. The project's own manifests are one chart of their own. The hand-written copies drifted from upstream without anyone seeing it. The copy of kube-state-metrics lacked a permission that upstream grants, so one metric never existed and the alert built on it could never fire. No image in these copies had a digest or anything that raised its version.
   REJECTED: kustomize's Helm inflation inside the overlays — ArgoCD and CI each need a flag to allow it, and the chart then renders inside the root Application, so one broken chart blocks every other resource.
   REJECTED: rendering each chart once and committing the output — a version raise becomes a regenerate step someone must remember, and the diff of a raise is the whole manifest.
   REJECTED: keeping the hand-written manifests and pinning image digests — a bot then raises the image, but the permissions, arguments and probes that change with a release stay ours to copy.
   REJECTED: values in a separate file — ArgoCD reads a values file from the chart's own repository unless a second source is added, and a second source is a field the CI renderer does not model.
-  INVARIANT: CI renders every chart with the values the Application carries, validates the output against schemas and scans it like any other manifest — the renderer reads the Application file, and fails on any Helm field other than the release name and inline values.
-  INVARIANT: an Application is identical in both regions — the test stage compares each overlay's rendered Application with its file and fails on a difference.
+  INVARIANT: CI renders every chart with the values the Application carries, validates the output against schemas and scans it like any other manifest — the renderer reads the rendered Application, and fails on any Helm field other than the release name and inline values.
+  INVARIANT: an Application is identical in both regions — the test stage compares the Applications of the two regions' renders and fails on a difference.
   INVARIANT: a chart that cannot sync stops retrying — the Application's retry is bounded, so a broken chart ends in a failed sync and does not retry forever.
   NON-GOAL: values per region — no installed chart needs them; the comparison above must change when one does.
   NON-GOAL: a cluster test of the chart's objects before merge — the behavior stage covers the project's own manifests only, and the first proof of a chart raise is the sync in production.

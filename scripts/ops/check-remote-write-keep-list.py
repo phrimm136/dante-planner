@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Fail when a Grafana alert rule or fleet-dashboard panel queries a metric the
-remote_write keep regex in deploy/base/prometheus.yaml does not admit, or selects
+remote_write keep regex in deploy/chart/templates/prometheus.yaml does not admit, or selects
 only series its label drop rules remove."""
 
 import json
@@ -12,7 +12,7 @@ from pathlib import Path
 import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-PROMETHEUS_CONFIG = REPO_ROOT / "deploy/base/prometheus.yaml"
+PROMETHEUS_CONFIG = REPO_ROOT / "deploy/chart/templates/prometheus.yaml"
 GRAFANA_DIR = REPO_ROOT / "deploy/grafana"
 DASHBOARD_FILE = GRAFANA_DIR / "fleet-dashboard.json"
 RULES_PY = GRAFANA_DIR / "rules.py"
@@ -34,9 +34,9 @@ REGEX_METACHARACTERS = set(".^$*+?()[]{}\\")
 def relabel_configs_from_config(config_text):
     config_docs = [
         config_doc
-        for manifest_doc in yaml.safe_load_all(config_text)
-        if manifest_doc and manifest_doc.get("kind") == "ConfigMap"
-        for config_doc in (yaml.safe_load(data_value) for data_value in manifest_doc.get("data", {}).values())
+        for manifest_text in re.split(r"^---\s*$", config_text, flags=re.MULTILINE)
+        if re.search(r"^kind: ConfigMap$", manifest_text, re.MULTILINE)
+        for config_doc in map(yaml.safe_load, yaml.safe_load(manifest_text).get("data", {}).values())
         if isinstance(config_doc, dict) and "remote_write" in config_doc
     ]
     if len(config_docs) != 1:

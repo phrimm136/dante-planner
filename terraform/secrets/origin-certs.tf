@@ -1,5 +1,5 @@
 # Origin TLS material for the Traefik Gateway, replicated to Seoul so both regions'
-# ESO read a local copy. The ExternalSecrets in deploy/base/origin-tls-secrets.yaml
+# ESO read a local copy. The ExternalSecrets in deploy/chart/templates/origin-tls-secrets.yaml
 # sync these into the cluster; without them the HTTPS listener is
 # InvalidCertificateRef and every route 404s.
 #

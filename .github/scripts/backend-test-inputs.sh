@@ -8,4 +8,4 @@ fi
 
 "$(dirname "$0")/deploy-inputs-changed.sh" --list-inputs
 printf '%s\n' backend testdata .claude/skills/static-checkout \
-  frontend/package.json frontend/yarn.lock deploy/overlays
+  frontend/package.json frontend/yarn.lock deploy/chart/values-oregon.yaml deploy/chart/values-seoul.yaml

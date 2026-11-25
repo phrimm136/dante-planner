@@ -17,6 +17,8 @@ FORBIDDEN_EXEC_CHARS = set("'\"*?[")
 SNAPSHOT_KEYS = ("etcd-s3", "etcd-s3-bucket", "etcd-s3-region", "etcd-snapshot-schedule-cron",
                  "etcd-snapshot-retention")
 SNAPSHOT_FLAG_PREFIXES = ("etcd-s3", "etcd-snapshot")
+ROOT_PATCH_PATTERN = re.compile(
+    r"^kubectl -n argocd patch application danteplanner-(\S+) --type merge -p '(.*)'$", re.MULTILINE)
 CRON_PATTERN = re.compile(r"[^\s\\]+( [^\s\\]+){4}")
 
 SAMPLE_VARS = {
@@ -25,7 +27,7 @@ SAMPLE_VARS = {
     "s3_bucket": "p-oregon-etcd-snapshots-bucket", "snapshot_retention": 5,
     "gitops_repo_url": "https://example.invalid/repo.git", "gitops_revision": "main",
     "argocd_version": "v3.0.0", "gateway_api_version": "v1.3.0", "traefik_version": "v3.1.0",
-    "eso_chart_version": "0.10.4", "ecr_image": "danteplanner-backend=registry.invalid/backend:*",
+    "eso_chart_version": "0.10.4", "image_repository": "registry.invalid/backend",
     "install_scrape_annotate": "echo scrape-annotate",
     "server_url": "https://10.0.0.1:6443", "node_label": "role=app", "cred_provider_version": "v1.31.0",
     "set_nofile": True,
@@ -64,6 +66,46 @@ def boot_problems(script_text):
     return problem_texts
 
 
+def merged(target, patch):
+    if not isinstance(patch, dict):
+        return patch
+    result = dict(target) if isinstance(target, dict) else {}
+    for key, value in patch.items():
+        if value is None:
+            result.pop(key, None)
+        else:
+            result[key] = merged(result.get(key), value)
+    return result
+
+
+def booted_source(script_text, region_suffix):
+    (patched_suffix, patch_text), = ROOT_PATCH_PATTERN.findall(script_text)
+    root_file = REPO_ROOT / "deploy" / "argocd" / f"root-app-{region_suffix}.yaml"
+    root_app = yaml.safe_load(root_file.read_text(encoding="utf-8"))
+    if root_app["metadata"]["name"] != f"danteplanner-{patched_suffix}":
+        raise AssertionError(f"the patch names danteplanner-{patched_suffix}, {root_file.name} {root_app['metadata']['name']}")
+    return merged(root_app, json.loads(patch_text))["spec"]["source"]
+
+
+def source_problems(source, region_suffix):
+    expected_helm = {
+        "valueFiles": [f"values-{region_suffix}.yaml"],
+        "parameters": [{"name": "image.repository", "value": SAMPLE_VARS["image_repository"]}],
+    }
+    problem_texts = []
+    if source.get("path") != "deploy/chart":
+        problem_texts.append(f"path is {source.get('path')}")
+    if source.get("helm") != expected_helm:
+        problem_texts.append(f"helm is {source.get('helm')}")
+    if set(source) != {"repoURL", "targetRevision", "path", "helm"}:
+        problem_texts.append(f"the source holds {sorted(source)}")
+    if source.get("targetRevision") != SAMPLE_VARS["gitops_revision"]:
+        problem_texts.append(f"targetRevision is {source.get('targetRevision')}")
+    if not (REPO_ROOT / "deploy" / "chart" / f"values-{region_suffix}.yaml").is_file():
+        problem_texts.append(f"values-{region_suffix}.yaml is missing")
+    return problem_texts
+
+
 def config_problems(script_text):
     config_matches = CONFIG_PATTERN.findall(script_text)
     if len(config_matches) != 1:
@@ -98,6 +140,21 @@ class BootTemplateTest(unittest.TestCase):
 
     def test_the_config_is_written_before_the_installer_starts_k3s(self):
         self.assertLess(self.cp_text.index("/etc/rancher/k3s/config.yaml"), self.cp_text.index("get.k3s.io"))
+
+    def test_the_boot_patch_gives_each_root_application_its_chart_source(self):
+        for region_suffix in ("oregon", "seoul"):
+            with self.subTest(region_suffix):
+                cp_text = render(USER_DATA_DIR / "cp.sh.tftpl",
+                                 {**SAMPLE_VARS, "snapshot_hours": interval_hours(), "region_suffix": region_suffix})
+                self.assertEqual(source_problems(booted_source(cp_text, region_suffix), region_suffix), [])
+
+    def test_a_boot_patch_that_sets_a_second_tool_or_replaces_the_values_files_fails(self):
+        second_tool_text = self.cp_text.replace('"helm":{"parameters"', '"plugin":{},"helm":{"parameters"')
+        self.assertEqual(source_problems(booted_source(second_tool_text, "oregon"), "oregon"),
+                         ["the source holds ['helm', 'path', 'plugin', 'repoURL', 'targetRevision']"])
+        values_text = self.cp_text.replace('"helm":{"parameters"', '"helm":{"valueFiles":[],"parameters"')
+        (problem_text,) = source_problems(booted_source(values_text, "oregon"), "oregon")
+        self.assertIn("'valueFiles': []", problem_text)
 
     def test_a_quoted_cron_in_the_exec_string_fails(self):
         broken_text = self.cp_text.replace('--etcd-expose-metrics=true"',

@@ -11,7 +11,7 @@
   "automerge": false,
   "argocd": {
     "managerFilePatterns": [
-      "/^deploy/apps/[^/]+\\.yaml$/"
+      "/^deploy/chart/templates/[^/]+\\.yaml$/"
     ]
   },
   "customManagers": [

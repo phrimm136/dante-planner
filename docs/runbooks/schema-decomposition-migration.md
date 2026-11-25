@@ -48,7 +48,7 @@ it is the cheapest thing to be holding when something else goes wrong.
 1. **Get the code onto `main`.** The applies read your local checkout, but the ArgoCD root apps
    track `main` — the rebuilt cluster must converge from a `main` that contains current reality
    (including the migrated backend image and the `deploy/` manifests). Push `dev`, merge to `main`,
-   wait for CI to build the arm64 image → ECR → kustomize tag bump.
+   wait for CI to build the arm64 image → ECR → chart tag bump.
 2. **Safety snapshots.**
    - Per CP: a manual k3s etcd snapshot over SSM (the schedule ships one to S3 every
      `etcd_snapshot_interval_hours`; `ops verify fleet --site <site>` shows the newest age).
@@ -237,7 +237,7 @@ aws rds restore-db-instance-from-db-snapshot --region us-west-2 \
   --db-subnet-group-name danteplanner-rds \
   --vpc-security-group-ids <rds-sg-id> \
   --multi-az
-# Then repoint MYSQL_HOST in both overlays and restart the app pods. session_track_gtids seeds a
+# Then repoint MYSQL_HOST in the runtime-config bundle (Secrets Manager) and restart the app pods. session_track_gtids seeds a
 # SESSION variable at connect time, so pooled connections opened against the old instance keep the
 # old value; without a restart the capture silently runs on the wide @@gtid_executed fallback.
 # gtid.capture{source=fallback} is the check.
