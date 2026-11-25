@@ -1,0 +1,9 @@
+# Page renders call the rest of /api, and a blocked call there shows the server-down banner.
+User-agent: *
+Disallow: /api/auth/google/
+Disallow: /api/auth/apple/
+Disallow: /api/admin/
+Disallow: /api/moderation/
+Disallow: /api/sse/
+Disallow: /api/planner/*/comments/events
+Disallow: /actuator/
