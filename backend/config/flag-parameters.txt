@@ -1,5 +1,3 @@
-org.danteplanner.backend.auth.security.AccessTokenAuthenticator$TokenCheck.ofBlacklist(org.danteplanner.backend.auth.token.AccessClaims, boolean)
-org.danteplanner.backend.auth.security.AccessTokenAuthenticator$TokenCheck.ofRevocation(org.danteplanner.backend.auth.token.AccessClaims, boolean, org.springframework.security.core.Authentication)
 org.danteplanner.backend.comment.dto.CommentTreeNode.fromEntity(org.danteplanner.backend.comment.entity.PlannerComment, org.danteplanner.backend.comment.dto.CommentTreeNode$Parent, org.danteplanner.backend.comment.dto.CommentTreeNode$Author, org.danteplanner.backend.shared.security.Viewer, boolean, java.util.List)
 org.danteplanner.backend.comment.service.CommentEngagementService.toggleNotification(java.util.UUID, java.lang.Long, boolean)
 org.danteplanner.backend.planner.api.PlannerVotes.requireFirstVote(boolean, java.util.UUID, java.lang.Long)

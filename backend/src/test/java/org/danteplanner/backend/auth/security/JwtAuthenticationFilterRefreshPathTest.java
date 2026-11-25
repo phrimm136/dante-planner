@@ -33,6 +33,7 @@ import org.danteplanner.backend.user.api.UserSummary;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -46,7 +47,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ResourceLock(JwtAuthenticationFilterRefreshPathTest.FILTER_LOG_LEVEL)
 class JwtAuthenticationFilterRefreshPathTest {
+
+    /** This class raises the level of a logger the whole JVM shares. */
+    static final String FILTER_LOG_LEVEL = "jwt-authentication-filter-log-level";
 
     private static final Long USER_ID = 42L;
 

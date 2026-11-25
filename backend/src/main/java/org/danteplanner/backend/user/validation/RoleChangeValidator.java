@@ -29,21 +29,9 @@ public class RoleChangeValidator {
             return new AllowedRoleChange(allowed.target(), allowed.newRole());
         }
 
-        private static AllowedRoleChange of(
-                RankDecision.DemotesAdministrator demotion, AnotherActiveAdministrator remaining) {
+        private static AllowedRoleChange of(RankDecision.DemotesAdministrator demotion, long activeAdministrators) {
+            refuseLastAdministrator(activeAdministrators);
             return new AllowedRoleChange(demotion.target(), demotion.newRole());
-        }
-    }
-
-    @Parsed
-    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-    public static final class AnotherActiveAdministrator {
-
-        private static AnotherActiveAdministrator of(long activeAdministrators) {
-            if (activeAdministrators <= 1) {
-                throw new LastAdministratorException();
-            }
-            return new AnotherActiveAdministrator();
         }
     }
 
@@ -89,11 +77,21 @@ public class RoleChangeValidator {
             case RankDecision.Refused refused -> throw new UserForbiddenException(refused.refusal().message);
             case RankDecision.Allowed allowed -> AllowedRoleChange.of(allowed);
             case RankDecision.DemotesAdministrator demotion ->
-                    AllowedRoleChange.of(demotion, requireAnotherActiveAdministrator());
+                    AllowedRoleChange.of(demotion, activeAdministrators());
         };
     }
 
-    public AnotherActiveAdministrator requireAnotherActiveAdministrator() {
-        return AnotherActiveAdministrator.of(userRepository.countByRoleAndDeletedAtIsNull(UserRole.ADMIN));
+    public void requireAnotherActiveAdministrator() {
+        refuseLastAdministrator(activeAdministrators());
+    }
+
+    private long activeAdministrators() {
+        return userRepository.countByRoleAndDeletedAtIsNull(UserRole.ADMIN);
+    }
+
+    private static void refuseLastAdministrator(long activeAdministrators) {
+        if (activeAdministrators <= 1) {
+            throw new LastAdministratorException();
+        }
     }
 }
