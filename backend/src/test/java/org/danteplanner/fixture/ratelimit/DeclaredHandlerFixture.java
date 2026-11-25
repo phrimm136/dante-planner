@@ -25,6 +25,12 @@ public class DeclaredHandlerFixture {
         return "reached";
     }
 
+    @GetMapping("/fail-closed")
+    @RateLimited(RateLimitPolicy.AUTH)
+    public String failsClosedWithAResponse() {
+        return "reached";
+    }
+
     @GetMapping("/exempt")
     @RateLimitExempt
     public String overridesWithAnExemption() {

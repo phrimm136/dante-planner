@@ -1555,11 +1555,6 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   one request-context type with a single owner of open and close, and routing pins that restore
   the previous pin instead of clearing it.
   re-check: `rg -q 'ThreadLocal<' backend/src/main/java/org/danteplanner/backend/shared/gtid/GtidWriteCapture.java`
-- `RateLimitPolicy` constants pass five positional arguments, and the meaning hides in values:
-  `null` endpoint means the caller names the endpoint, `false` means fail open. `subjectPrefix` is
-  `""` in all ten constants, so it does nothing. Worth doing when a policy is added or a key
-  spelling changes: drop `subjectPrefix` and name the endpoint and failure modes as types.
-  re-check: `rg -q 'subjectPrefix' backend/src/main/java/org/danteplanner/backend/shared/ratelimit/RateLimitPolicy.java`
 - The planner write lock is implicit. `lockForUpsert` takes it with `lockContent`, a
   `SELECT COUNT(*) ... FOR UPDATE` whose result is discarded. The global order (content before
   publication, ADR 185) holds only because each call site calls things in that order, and only the

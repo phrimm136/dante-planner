@@ -2,6 +2,7 @@ package org.danteplanner.backend.shared.security;
 
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.JwtProperties;
+import org.danteplanner.backend.shared.failure.CommandOutcome;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Mac;
@@ -47,38 +48,73 @@ public class CsrfTokenService {
         return payload + FIELD_SEPARATOR + encoder.encodeToString(mac(payload));
     }
 
-    public boolean isValid(String token) {
-        if (token == null || token.isEmpty()) {
-            return false;
+    public sealed interface TokenOutcome extends CommandOutcome {
+
+        record ServerIssued(String value) implements TokenOutcome {
         }
-        int macSeparator = token.lastIndexOf(FIELD_SEPARATOR);
-        if (macSeparator <= 0) {
-            return false;
+
+        record Unrecognized() implements TokenOutcome {
         }
-        String payload = token.substring(0, macSeparator);
-        byte[] presented;
-        try {
-            presented = Base64.getUrlDecoder().decode(token.substring(macSeparator + 1));
-        } catch (IllegalArgumentException e) {
-            return false;
+
+        record Absent() implements TokenOutcome {
         }
-        if (!MessageDigest.isEqual(mac(payload), presented)) {
-            return false;
-        }
-        return withinLifetime(payload);
     }
 
-    private boolean withinLifetime(String payload) {
-        int timeSeparator = payload.lastIndexOf(FIELD_SEPARATOR);
-        if (timeSeparator < 0) {
-            return false;
+    public TokenOutcome parse(String token) {
+        return switch (Fields.of(token)) {
+            case Fields.Malformed malformed -> new TokenOutcome.Unrecognized();
+            case Fields.Signed signed -> switch (Standing.of(signed, mac(signed.payload()), clock.millis())) {
+                case CURRENT -> new TokenOutcome.ServerIssued(token);
+                case FORGED, OUTSIDE_LIFETIME -> new TokenOutcome.Unrecognized();
+            };
+        };
+    }
+
+    private sealed interface Fields {
+
+        record Signed(String payload, byte[] presentedMac) implements Fields {
         }
-        try {
-            long issuedAt = Long.parseLong(payload.substring(timeSeparator + 1));
-            long age = clock.millis() - issuedAt;
-            return age >= -CLOCK_SKEW_MS && age <= MAX_AGE_MS;
-        } catch (NumberFormatException e) {
-            return false;
+
+        record Malformed() implements Fields {
+        }
+
+        static Fields of(String token) {
+            int macSeparator = token.lastIndexOf(FIELD_SEPARATOR);
+            if (macSeparator <= 0) {
+                return new Malformed();
+            }
+            try {
+                return new Signed(token.substring(0, macSeparator),
+                        Base64.getUrlDecoder().decode(token.substring(macSeparator + 1)));
+            } catch (IllegalArgumentException e) {
+                return new Malformed();
+            }
+        }
+    }
+
+    private enum Standing {
+        CURRENT,
+        FORGED,
+        OUTSIDE_LIFETIME;
+
+        static Standing of(Fields.Signed signed, byte[] expectedMac, long nowMs) {
+            if (!MessageDigest.isEqual(expectedMac, signed.presentedMac())) {
+                return FORGED;
+            }
+            return ofGenuine(signed.payload(), nowMs);
+        }
+
+        private static Standing ofGenuine(String payload, long nowMs) {
+            int timeSeparator = payload.lastIndexOf(FIELD_SEPARATOR);
+            if (timeSeparator < 0) {
+                return OUTSIDE_LIFETIME;
+            }
+            try {
+                long age = nowMs - Long.parseLong(payload.substring(timeSeparator + 1));
+                return age >= -CLOCK_SKEW_MS && age <= MAX_AGE_MS ? CURRENT : OUTSIDE_LIFETIME;
+            } catch (NumberFormatException e) {
+                return OUTSIDE_LIFETIME;
+            }
         }
     }
 

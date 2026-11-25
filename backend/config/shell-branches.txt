@@ -58,8 +58,6 @@ org.danteplanner.backend.planner.service.ViewCountFlushService.applyBatch(java.u
 org.danteplanner.backend.planner.validation.PlannerContentValidator.season(int) # 1
 org.danteplanner.backend.shared.config.DeviceIdArgumentResolver.resolveArgument(org.springframework.core.MethodParameter, org.springframework.web.method.support.ModelAndViewContainer, org.springframework.web.context.request.NativeWebRequest, org.springframework.web.bind.support.WebDataBinderFactory) # 2
 org.danteplanner.backend.shared.config.DeviceIdResolver.resolve(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse) # 1
-org.danteplanner.backend.shared.config.FrontendProperties.originOf(java.net.URI) # 1
-org.danteplanner.backend.shared.config.FrontendProperties.resolveReturnTo(java.lang.String) # 5
 org.danteplanner.backend.shared.config.JwtProperties.loadPrivateKey(java.lang.String) # 1
 org.danteplanner.backend.shared.config.JwtProperties.loadPublicKey(java.lang.String) # 1
 org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource.acquire(org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource$Acquisition) # 1
@@ -112,13 +110,10 @@ org.danteplanner.backend.shared.gtid.GtidWriteCapture.pollCapturedGtid() # 2
 org.danteplanner.backend.shared.gtid.GtidWriteCapture.recordCommit(java.lang.String, boolean) # 3
 org.danteplanner.backend.shared.gtid.GtidWriteCapture.takeCapture() # 1
 org.danteplanner.backend.shared.outbox.service.DomainEventDispatcher.alarmIfSpent(long, int, java.lang.RuntimeException) # 1
-org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor.authenticatedUserId() # 2
 org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor.charge(org.danteplanner.backend.shared.ratelimit.RateLimited, jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse) # 1
 org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor.chargeBucket(org.danteplanner.backend.shared.ratelimit.RateLimitService, org.danteplanner.backend.shared.ratelimit.RateLimited, jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse) # 2
 org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor.markStoreAvailable() # 1
 org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor.preHandle(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse, java.lang.Object) # 2
-org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor.warnStoreUnavailable(org.danteplanner.backend.shared.ratelimit.RateLimited, java.lang.RuntimeException) # 3
-org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor.withoutStore(org.danteplanner.backend.shared.ratelimit.RateLimited, jakarta.servlet.http.HttpServletResponse, java.util.function.Supplier) # 2
 org.danteplanner.backend.shared.ratelimit.RateLimitStore.connect() # 3
 org.danteplanner.backend.shared.ratelimit.RateLimitStore.proxyManager() # 1
 org.danteplanner.backend.shared.readpath.ChosenReadSource.record(java.lang.String, boolean) # 3
@@ -132,16 +127,8 @@ org.danteplanner.backend.shared.redis.RedisRoleProbe.connectionOf(java.util.Map,
 org.danteplanner.backend.shared.redis.RedisRoleProbe.probeEveryRole(org.danteplanner.backend.shared.redis.ProbePhase) # 3
 org.danteplanner.backend.shared.redis.RedisRoleProbe.probeUri(org.danteplanner.backend.shared.config.RedisConnectionConfig$Endpoints$Endpoint, org.danteplanner.backend.shared.redis.RedisRoleProbe$Timeouts) # 1
 org.danteplanner.backend.shared.redis.RoleGated.call(java.util.function.Function, java.util.function.Supplier) # 1
-org.danteplanner.backend.shared.restriction.RestrictionTransactionHook.afterBegin(org.springframework.transaction.TransactionExecution, java.lang.Throwable) # 4
 org.danteplanner.backend.shared.restriction.RestrictionTransactionHook.afterSingletonsInstantiated() # 2
-org.danteplanner.backend.shared.restriction.RestrictionTransactionHook.beforeCommit(org.springframework.transaction.TransactionExecution) # 4
-org.danteplanner.backend.shared.restriction.RestrictionTransactionHook.currentState() # 3
-org.danteplanner.backend.shared.restriction.RestrictionTransactionHook.recordDecision() # 1
-org.danteplanner.backend.shared.restriction.RestrictionTransactionHook.reportUndecided(org.danteplanner.backend.shared.restriction.RestrictionTransactionHook$RequestState) # 1
 org.danteplanner.backend.shared.sanitize.SanitizedStringDeserializer.createContextual(tools.jackson.databind.DeserializationContext, tools.jackson.databind.BeanProperty) # 2
-org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter.doFilterInternal(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse, jakarta.servlet.FilterChain) # 3
-org.danteplanner.backend.shared.security.CsrfTokenService.isValid(java.lang.String) # 4
-org.danteplanner.backend.shared.security.CsrfTokenService.withinLifetime(java.lang.String) # 2
 org.danteplanner.backend.shared.security.CustomAuthenticationEntryPoint.commence(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse, org.springframework.security.core.AuthenticationException) # 1
 org.danteplanner.backend.shared.security.MdcLoggingFilter.doFilterInternal(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse, jakarta.servlet.FilterChain) # 2
 org.danteplanner.backend.shared.security.ProblemAccessDeniedHandler.handle(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse, org.springframework.security.access.AccessDeniedException) # 1

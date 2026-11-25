@@ -26,24 +26,34 @@ public sealed interface PageWindow {
     }
 
     static PageWindow of(@Nullable String page, @Nullable String size) {
-        Integer pageNumber = integer(page, DEFAULT_PAGE);
-        if (pageNumber == null) {
-            return new OutOfRange("page", String.valueOf(page));
-        }
-        Integer pageSize = integer(size, DEFAULT_SIZE);
-        return pageSize == null ? new OutOfRange("size", String.valueOf(size)) : of(pageNumber, pageSize);
+        return switch (WholeNumber.parse(page, DEFAULT_PAGE)) {
+            case WholeNumber.Unreadable unreadable -> new OutOfRange("page", unreadable.supplied());
+            case WholeNumber.Read pageNumber -> switch (WholeNumber.parse(size, DEFAULT_SIZE)) {
+                case WholeNumber.Unreadable unreadable -> new OutOfRange("size", unreadable.supplied());
+                case WholeNumber.Read pageSize -> of(pageNumber.value(), pageSize.value());
+            };
+        };
     }
 
-    private static @Nullable Integer integer(@Nullable String supplied, int absent) {
-        if (supplied == null || supplied.isEmpty()) {
-            return absent;
+    sealed interface WholeNumber {
+
+        record Read(int value) implements WholeNumber {
         }
-        int separator = supplied.indexOf(REPEATED_VALUE_SEPARATOR);
-        String first = separator < 0 ? supplied : supplied.substring(0, separator);
-        try {
-            return Integer.valueOf(first.strip());
-        } catch (NumberFormatException e) {
-            return null;
+
+        record Unreadable(String supplied) implements WholeNumber {
+        }
+
+        private static WholeNumber parse(@Nullable String supplied, int absent) {
+            if (supplied == null || supplied.isEmpty()) {
+                return new Read(absent);
+            }
+            int separator = supplied.indexOf(REPEATED_VALUE_SEPARATOR);
+            String first = separator < 0 ? supplied : supplied.substring(0, separator);
+            try {
+                return new Read(Integer.parseInt(first.strip()));
+            } catch (NumberFormatException e) {
+                return new Unreadable(supplied);
+            }
         }
     }
 

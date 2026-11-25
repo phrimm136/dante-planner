@@ -10,6 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.DefaultTransactionStatus;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.method.HandlerMethod;
@@ -21,7 +22,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.backend.user.api.UserBannedException;
 import org.danteplanner.fixture.restriction.DeclaredHandlersFixture;
 
@@ -167,6 +171,63 @@ class RestrictionTransactionHookTest {
         bindRequest("byState", PRINCIPAL);
 
         assertThatCode(() -> hook(true).beforeCommit(transaction(true))).doesNotThrowAnyException();
+    }
+
+    @Test
+    void beforeCommit_WhenUndecidedWithoutFailFast_WarnsWithTheHandler() {
+        bindRequest("byState", PRINCIPAL);
+
+        assertThat(LogCapture.during(() -> hook(false).beforeCommit(writeTransaction()), Level.WARN,
+                RestrictionTransactionHook.class))
+                .extracting(ILoggingEvent::getFormattedMessage)
+                .containsExactly("DeclaredHandlersFixture.byState is @RestrictedByState but committed a write without "
+                        + "calling RestrictionCheck.requireUnrestricted or RestrictionCheck.recordPrivate");
+    }
+
+    @Test
+    void hook_WhenNoRequestIsBound_DoesNothing() {
+        assertThatCode(() -> {
+            RestrictionTransactionHook.recordDecision();
+            hook(true).afterBegin(writeTransaction(), null);
+            hook(true).beforeCommit(writeTransaction());
+        }).doesNotThrowAnyException();
+
+        assertThat(checkedUsers).isEmpty();
+    }
+
+    @Test
+    void hook_WhenTheRequestHasNoHandler_DoesNothingAndStoresNothing() {
+        ServletRequestAttributes attributes = new ServletRequestAttributes(new MockHttpServletRequest());
+        RequestContextHolder.setRequestAttributes(attributes);
+
+        assertThatCode(() -> {
+            RestrictionTransactionHook.recordDecision();
+            hook(true).afterBegin(writeTransaction(), null);
+            hook(true).beforeCommit(writeTransaction());
+        }).doesNotThrowAnyException();
+
+        assertThat(checkedUsers).isEmpty();
+        assertThat(attributes.getAttributeNames(RequestAttributes.SCOPE_REQUEST)).isEmpty();
+    }
+
+    @Test
+    void readOnlyTransaction_WhenARestrictedRequestRunsIt_StoresNothing() {
+        bindRequest("restricted", PRINCIPAL);
+        RestrictionTransactionHook hook = hook(true);
+
+        hook.afterBegin(transaction(true), null);
+        hook.beforeCommit(transaction(true));
+
+        assertThat(RequestContextHolder.currentRequestAttributes()
+                .getAttributeNames(RequestAttributes.SCOPE_REQUEST))
+                .containsExactly(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE);
+    }
+
+    @Test
+    void beforeCommit_WhenARestrictedRequestCommits_Passes() {
+        bindRequest("restricted", PRINCIPAL);
+
+        assertThatCode(() -> hook(true).beforeCommit(writeTransaction())).doesNotThrowAnyException();
     }
 
     @Test

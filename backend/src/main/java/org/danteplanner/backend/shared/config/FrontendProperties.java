@@ -5,8 +5,10 @@ import org.springframework.stereotype.Component;
 
 import java.net.URI;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 
+import org.danteplanner.backend.shared.failure.Parsed;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -40,26 +42,37 @@ public class FrontendProperties {
     }
 
     public String resolveReturnTo(@Nullable String returnTo) {
-        if (returnTo == null || returnTo.isBlank()) {
-            return defaultUrl;
-        }
-        try {
-            URI uri = URI.create(returnTo);
-            if (uri.getScheme() != null && uri.getHost() != null
-                    && allowedOrigins.contains(originOf(uri))) {
-                return returnTo;
-            }
-        } catch (IllegalArgumentException ignored) {
-        }
-        return defaultUrl;
+        return ReturnUrl.parse(returnTo, allowedOrigins, defaultUrl).value();
     }
 
-    private static String originOf(URI uri) {
-        String origin = uri.getScheme() + "://" + uri.getHost();
-        if (uri.getPort() != -1) {
-            origin += ":" + uri.getPort();
+    @Parsed
+    private record ReturnUrl(String value) {
+
+        static ReturnUrl parse(@Nullable String supplied, Set<String> allowedOrigins, String defaultUrl) {
+            String candidate = Objects.requireNonNullElse(supplied, "");
+            try {
+                URI uri = URI.create(candidate);
+                return switch (Origin.of(uri.getScheme(), uri.getHost(), uri.getPort(), allowedOrigins)) {
+                    case ALLOWED -> new ReturnUrl(candidate);
+                    case FOREIGN -> new ReturnUrl(defaultUrl);
+                };
+            } catch (IllegalArgumentException unparsable) {
+                return new ReturnUrl(defaultUrl);
+            }
         }
-        return origin;
+    }
+
+    private enum Origin {
+        ALLOWED,
+        FOREIGN;
+
+        static Origin of(@Nullable String scheme, @Nullable String host, int port, Set<String> allowedOrigins) {
+            if (scheme == null || host == null) {
+                return FOREIGN;
+            }
+            String origin = scheme + "://" + host + (port == -1 ? "" : ":" + port);
+            return allowedOrigins.contains(origin) ? ALLOWED : FOREIGN;
+        }
     }
 
     private static String stripTrailingSlash(String value) {
