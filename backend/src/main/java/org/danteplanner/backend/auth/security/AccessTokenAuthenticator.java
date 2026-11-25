@@ -7,6 +7,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.Authentication;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.auth.token.AccessClaims;
+import org.danteplanner.backend.auth.token.RevocationOutcome;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenValidator;
 import org.danteplanner.backend.user.api.UserRole;
@@ -82,17 +83,22 @@ public class AccessTokenAuthenticator {
             };
         }
 
-        private static TokenCheck ofBlacklist(AccessClaims claims, boolean blacklisted) {
-            if (blacklisted) {
-                return new Done(new Terminal.Revoked());
-            }
-            return new NeedInvalidation(claims);
+        private static TokenCheck ofBlacklist(AccessClaims claims, RevocationOutcome blacklist) {
+            return switch (blacklist) {
+                case REVOKED -> new Done(new Terminal.Revoked());
+                case CLEAR, SKIPPED -> new NeedInvalidation(claims);
+            };
         }
 
-        private static TokenCheck ofRevocation(AccessClaims claims, boolean invalidated, @Nullable Authentication current) {
-            if (invalidated) {
-                return new Done(new Terminal.Revoked());
-            }
+        private static TokenCheck ofRevocation(
+                AccessClaims claims, RevocationOutcome invalidation, @Nullable Authentication current) {
+            return switch (invalidation) {
+                case REVOKED -> new Done(new Terminal.Revoked());
+                case CLEAR, SKIPPED -> ofUnrevoked(claims, current);
+            };
+        }
+
+        private static TokenCheck ofUnrevoked(AccessClaims claims, @Nullable Authentication current) {
             if (current != null) {
                 return new Done(new Terminal.AlreadyAuthenticated());
             }
@@ -117,9 +123,9 @@ public class AccessTokenAuthenticator {
         return switch (check) {
             case TokenCheck.Done done -> conclude(done.terminal(), request);
             case TokenCheck.NeedBlacklist need -> proceed(
-                    TokenCheck.ofBlacklist(need.claims(), tokenBlacklistService.isBlacklisted(token)), token, request);
+                    TokenCheck.ofBlacklist(need.claims(), tokenBlacklistService.blacklistCheck(token)), token, request);
             case TokenCheck.NeedInvalidation need -> proceed(TokenCheck.ofRevocation(need.claims(),
-                    tokenBlacklistService.isUserTokenInvalidated(need.claims().userId(),
+                    tokenBlacklistService.invalidationCheck(need.claims().userId(),
                             need.claims().issuedAt().getTime()),
                     SecurityContextHolder.getContext().getAuthentication()), token, request);
             case TokenCheck.Authenticate authenticate -> {

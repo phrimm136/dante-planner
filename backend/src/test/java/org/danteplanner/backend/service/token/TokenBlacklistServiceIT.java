@@ -1,5 +1,6 @@
 package org.danteplanner.backend.service.token;
 import org.danteplanner.backend.support.AuthReads;
+import org.danteplanner.backend.auth.token.RevocationOutcome;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenStoreKeys;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -81,7 +82,7 @@ class TokenBlacklistServiceIT {
             blacklistService.blacklistToken(token, expiry);
 
             // Assert
-            assertThat(blacklistService.isBlacklisted(token)).isTrue();
+            assertThat(blacklistService.blacklistCheck(token)).isEqualTo(RevocationOutcome.REVOKED);
             assertThat(TokenStoreKeys.blacklistSize(ownTemplate)).isEqualTo(1);
         }
 
@@ -97,52 +98,52 @@ class TokenBlacklistServiceIT {
             blacklistService.blacklistToken(token, expiry2);
 
             // Assert - token still blacklisted, size remains 1
-            assertThat(blacklistService.isBlacklisted(token)).isTrue();
+            assertThat(blacklistService.blacklistCheck(token)).isEqualTo(RevocationOutcome.REVOKED);
             assertThat(TokenStoreKeys.blacklistSize(ownTemplate)).isEqualTo(1);
         }
     }
 
     @Nested
-    class IsBlacklistedTests {
+    class BlacklistCheckTests {
 
         @Test
-        void isBlacklisted_WhenBlacklisted_ReturnsTrue() {
+        void blacklistCheck_WhenBlacklisted_ReturnsRevoked() {
             // Arrange
             String token = "blacklisted.jwt.token";
             Date expiry = new Date(System.currentTimeMillis() + 60000);
             blacklistService.blacklistToken(token, expiry);
 
             // Act
-            boolean result = blacklistService.isBlacklisted(token);
+            RevocationOutcome result = blacklistService.blacklistCheck(token);
 
             // Assert
-            assertThat(result).isTrue();
+            assertThat(result).isEqualTo(RevocationOutcome.REVOKED);
         }
 
         @Test
-        void isBlacklisted_WhenNotBlacklisted_ReturnsFalse() {
+        void blacklistCheck_WhenNotBlacklisted_ReturnsClear() {
             // Arrange
             String unknownToken = "unknown.jwt.token";
 
             // Act
-            boolean result = blacklistService.isBlacklisted(unknownToken);
+            RevocationOutcome result = blacklistService.blacklistCheck(unknownToken);
 
             // Assert
-            assertThat(result).isFalse();
+            assertThat(result).isEqualTo(RevocationOutcome.CLEAR);
         }
 
         @Test
-        void isBlacklisted_WhenEntryExpired_ReturnsFalse() {
+        void blacklistCheck_WhenEntryExpired_ReturnsClear() {
             // Arrange - token with expiry in the past
             String token = "expired.jwt.token";
             Date expiry = new Date(System.currentTimeMillis() - 1000); // 1 second ago
             blacklistService.blacklistToken(token, expiry);
 
             // Act
-            boolean result = blacklistService.isBlacklisted(token);
+            RevocationOutcome result = blacklistService.blacklistCheck(token);
 
             // Assert - should return false and remove entry (lazy cleanup)
-            assertThat(result).isFalse();
+            assertThat(result).isEqualTo(RevocationOutcome.CLEAR);
             assertThat(TokenStoreKeys.blacklistSize(ownTemplate)).isEqualTo(0); // Entry should be removed
         }
     }
@@ -180,7 +181,7 @@ class TokenBlacklistServiceIT {
             blacklistService.blacklistToken(token, expiry);
 
             // Assert - should be blacklisted immediately
-            assertThat(blacklistService.isBlacklisted(token)).isTrue();
+            assertThat(blacklistService.blacklistCheck(token)).isEqualTo(RevocationOutcome.REVOKED);
         }
 
     }
@@ -199,12 +200,12 @@ class TokenBlacklistServiceIT {
             blacklistService.blacklistToken(token1, expiry);
 
             // Assert
-            assertThat(blacklistService.isBlacklisted(token1)).isTrue();
-            assertThat(blacklistService.isBlacklisted(token2)).isFalse();
+            assertThat(blacklistService.blacklistCheck(token1)).isEqualTo(RevocationOutcome.REVOKED);
+            assertThat(blacklistService.blacklistCheck(token2)).isEqualTo(RevocationOutcome.CLEAR);
         }
 
         @Test
-        void isBlacklisted_WhenSameToken_AlwaysMatches() {
+        void blacklistCheck_WhenSameToken_AlwaysMatches() {
             // Arrange
             Date expiry = new Date(System.currentTimeMillis() + 60000);
             String token = "consistent.token.value";
@@ -213,9 +214,9 @@ class TokenBlacklistServiceIT {
             blacklistService.blacklistToken(token, expiry);
 
             // Assert - check multiple times to verify consistent hashing
-            assertThat(blacklistService.isBlacklisted(token)).isTrue();
-            assertThat(blacklistService.isBlacklisted(token)).isTrue();
-            assertThat(blacklistService.isBlacklisted(token)).isTrue();
+            assertThat(blacklistService.blacklistCheck(token)).isEqualTo(RevocationOutcome.REVOKED);
+            assertThat(blacklistService.blacklistCheck(token)).isEqualTo(RevocationOutcome.REVOKED);
+            assertThat(blacklistService.blacklistCheck(token)).isEqualTo(RevocationOutcome.REVOKED);
         }
     }
 
@@ -235,7 +236,7 @@ class TokenBlacklistServiceIT {
                     Clock.systemUTC(), TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
 
             // Assert - externalized revocation is visible across instances
-            assertThat(secondService.isBlacklisted(token)).isTrue();
+            assertThat(secondService.blacklistCheck(token)).isEqualTo(RevocationOutcome.REVOKED);
         }
     }
 
@@ -254,7 +255,7 @@ class TokenBlacklistServiceIT {
                     Clock.systemUTC(), TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
 
             // Assert - externalized user invalidation is visible across instances
-            assertThat(secondService.isUserTokenInvalidated(userId, 0L)).isTrue();
+            assertThat(secondService.invalidationCheck(userId, 0L)).isEqualTo(RevocationOutcome.REVOKED);
         }
 
         @Test

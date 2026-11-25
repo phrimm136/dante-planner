@@ -55,7 +55,7 @@ import static org.mockito.Mockito.*;
  *
  * <p>The filter authenticates from token claims alone (no per-request DB lookup): a valid
  * token authenticates without touching {@code Users}; deleted/demoted users are rejected
- * via the in-memory {@code isUserTokenInvalidated} check; and a DB outage during the refresh
+ * via the in-memory {@code invalidationCheck} check; and a DB outage during the refresh
  * path returns 503 rather than a 500 or a silent guest downgrade.</p>
  */
 @ExtendWith(MockitoExtension.class)

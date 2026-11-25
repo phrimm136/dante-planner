@@ -193,11 +193,11 @@ class TokenBlacklistServiceTest {
     }
 
     @Test
-    void isBlacklisted_WhenOnlyTheAuthRoleIsOpen_ReadsTheReplica() {
+    void blacklistCheck_WhenOnlyTheAuthRoleIsOpen_ReadsTheReplica() {
         when(readTemplate.opsForValue()).thenReturn(readValues);
         when(readValues.get(anyString())).thenReturn(IMMEDIATE_MARKER + "0");
 
-        assertThat(serviceWithTheAuthRoleOpen().isBlacklisted("revoked.jwt")).isTrue();
+        assertThat(serviceWithTheAuthRoleOpen().blacklistCheck("revoked.jwt")).isEqualTo(RevocationOutcome.REVOKED);
         verifyNoInteractions(openAuthTemplate);
     }
 
@@ -206,11 +206,11 @@ class TokenBlacklistServiceTest {
         "1:1790000000000",
         "1:1789999999000"
     })
-    void isBlacklisted_WhenAnOldPodWroteTheValue_AnswersTrue(String stored) {
+    void blacklistCheck_WhenAnOldPodWroteTheValue_AnswersRevoked(String stored) {
         when(readTemplate.opsForValue()).thenReturn(readValues);
         when(readValues.get(anyString())).thenReturn(stored);
 
-        assertThat(blacklistService.isBlacklisted("presented.jwt")).isTrue();
+        assertThat(blacklistService.blacklistCheck("presented.jwt")).isEqualTo(RevocationOutcome.REVOKED);
     }
 
     @Test

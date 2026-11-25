@@ -10,6 +10,7 @@ import org.danteplanner.backend.auth.token.LogoutRevocation;
 import org.danteplanner.backend.auth.token.RefreshClaims;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
 import org.danteplanner.backend.auth.token.RefreshLineage;
+import org.danteplanner.backend.auth.token.RevocationOutcome;
 import org.danteplanner.backend.auth.token.RotationOutcome;
 import org.danteplanner.backend.auth.token.RotationState;
 import org.danteplanner.backend.auth.token.JwtTokenService;
@@ -104,7 +105,7 @@ public class RecordingRefreshRotation extends RefreshRotationService {
         long nowMs = jwt.clock().millis();
         failIfScripted(Operation.ROTATE);
 
-        if (blacklist.isUserTokenInvalidated(claims.userId(), claims.issuedAt().getTime())) {
+        if (blacklist.invalidationCheck(claims.userId(), claims.issuedAt().getTime()) == RevocationOutcome.REVOKED) {
             return new RotationOutcome.Rejected(RotationOutcome.Rejected.Reason.REVOKED_FAMILY);
         }
         Family family = family(familyId);

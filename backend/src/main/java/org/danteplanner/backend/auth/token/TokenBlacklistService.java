@@ -19,7 +19,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 
 import org.danteplanner.backend.shared.redis.AuthReadSources;
@@ -28,6 +27,7 @@ import org.danteplanner.backend.shared.redis.AuthWrites;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -38,6 +38,19 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class TokenBlacklistService {
+
+    private enum StoredMark {
+        NONE,
+        REVOKES;
+
+        private static StoredMark ofBlacklistEntry(@Nullable String entry) {
+            return entry == null ? NONE : REVOKES;
+        }
+
+        private static StoredMark ofInvalidationStamp(@Nullable String stamp, long issuedAt) {
+            return stamp != null && issuedAt < Long.parseLong(stamp) ? REVOKES : NONE;
+        }
+    }
 
     private static final String BLACKLIST_VALUE_PREFIX = "1:";
 
@@ -165,16 +178,15 @@ public class TokenBlacklistService {
                 blacklistKey(token), encode(now), Duration.ofMillis(remaining)));
     }
 
-    public boolean isBlacklisted(String token) {
+    public RevocationOutcome blacklistCheck(String token) {
         try {
-            return authReadSources.read(store -> isBlacklistedIn(store, token), this::isRevokedWithoutACheck);
+            return authReadSources.read(
+                    store -> outcomeOf(StoredMark.ofBlacklistEntry(store.opsForValue().get(blacklistKey(token)))),
+                    this::skipped);
         } catch (DataAccessException e) {
-            return failOpen("Blacklist check failed open due to Redis error", e);
+            log.warn("Blacklist check failed open due to Redis error", e);
+            return skipped();
         }
-    }
-
-    private boolean isBlacklistedIn(StringRedisTemplate store, String token) {
-        return store.opsForValue().get(blacklistKey(token)) != null;
     }
 
     public void invalidateUserTokens(@NonNull Long userId) {
@@ -189,31 +201,28 @@ public class TokenBlacklistService {
         log.info("Invalidated all tokens for user {}", userId);
     }
 
-    public boolean isUserTokenInvalidated(Long userId, long issuedAt) {
+    public RevocationOutcome invalidationCheck(Long userId, long issuedAt) {
         try {
             return authReadSources.read(
-                    store -> isInvalidatedIn(store, userId, issuedAt), this::isRevokedWithoutACheck);
+                    store -> outcomeOf(StoredMark.ofInvalidationStamp(
+                            store.opsForValue().get(userInvalidationKey(userId)), issuedAt)),
+                    this::skipped);
         } catch (DataAccessException e) {
-            return failOpen("User invalidation check failed open due to Redis error", e);
+            log.warn("User invalidation check failed open due to Redis error", e);
+            return skipped();
         }
     }
 
-    private boolean isInvalidatedIn(StringRedisTemplate store, Long userId, long issuedAt) {
-        String value = store.opsForValue().get(userInvalidationKey(userId));
-        if (value == null) {
-            return false;
-        }
-        return issuedAt < Long.parseLong(value);
+    private static RevocationOutcome outcomeOf(StoredMark mark) {
+        return switch (mark) {
+            case NONE -> RevocationOutcome.CLEAR;
+            case REVOKES -> RevocationOutcome.REVOKED;
+        };
     }
 
-    private boolean failOpen(String message, DataAccessException e) {
-        log.warn(message, e);
-        return isRevokedWithoutACheck();
-    }
-
-    private boolean isRevokedWithoutACheck() {
+    private RevocationOutcome skipped() {
         blacklistCheckSkipped.increment();
-        return false;
+        return RevocationOutcome.SKIPPED;
     }
 
     private String blacklistKey(String token) {

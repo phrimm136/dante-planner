@@ -19,6 +19,7 @@ import javax.sql.DataSource;
 import org.danteplanner.backend.shared.redis.RedisRole;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.auth.token.JwtTokenService;
+import org.danteplanner.backend.auth.token.RevocationOutcome;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.shared.config.FrontendProperties;
@@ -270,20 +271,20 @@ class RedisConnectionRecoveryIT {
     void blacklistedToken_WhenAuthRedisRestored_IsRejectedAgain() throws IOException {
         String token = "recovery-blacklist-token-" + UUID.randomUUID();
         tokenBlacklistService.blacklistToken(token, new Date(System.currentTimeMillis() + ONE_HOUR_MS));
-        assertThat(tokenBlacklistService.isBlacklisted(token))
+        assertThat(tokenBlacklistService.blacklistCheck(token))
                 .as("precondition: the token is rejected while auth Redis is UP")
-                .isTrue();
+                .isEqualTo(RevocationOutcome.REVOKED);
 
         AUTH_REDIS_PROXY.toxics().timeout("recovery-auth-redis-cut", ToxicDirection.UPSTREAM, 0);
-        assertThat(tokenBlacklistService.isBlacklisted(token))
+        assertThat(tokenBlacklistService.blacklistCheck(token))
                 .as("fail-open during the outage: the check must not deny")
-                .isFalse();
+                .isEqualTo(RevocationOutcome.SKIPPED);
 
         for (Toxic toxic : AUTH_REDIS_PROXY.toxics().getAll()) {
             toxic.remove();
         }
 
-        Hang.until(() -> tokenBlacklistService.isBlacklisted(token),
+        Hang.until(() -> tokenBlacklistService.blacklistCheck(token) == RevocationOutcome.REVOKED,
                 "the fail-open window closing once auth Redis is reachable again: "
                         + "the blacklisted token is rejected without a pod restart");
     }

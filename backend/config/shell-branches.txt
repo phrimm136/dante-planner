@@ -7,7 +7,6 @@ org.danteplanner.backend.auth.security.JwtAuthenticationFilter.shouldNotFilter(j
 org.danteplanner.backend.auth.token.AesGcmCipher.decrypt([B, [B) # 1
 org.danteplanner.backend.auth.token.JwtTokenService.generateRefreshToken(java.lang.Long, java.lang.String, java.lang.String) # 1
 org.danteplanner.backend.auth.token.TokenBlacklistService.blacklistToken(java.lang.String, java.util.Date) # 1
-org.danteplanner.backend.auth.token.TokenBlacklistService.isInvalidatedIn(org.springframework.data.redis.core.StringRedisTemplate, java.lang.Long, long) # 1
 org.danteplanner.backend.auth.token.TokenBlacklistService.revokeLogoutSession(java.util.Collection) # 3
 org.danteplanner.backend.comment.service.PlannerCommentSseService.beforeRegister(java.util.UUID, java.util.concurrent.CopyOnWriteArrayList) # 1
 org.danteplanner.backend.comment.service.PlannerCommentSseService.broadcast(java.util.UUID, java.lang.String, java.lang.Object, org.danteplanner.backend.shared.sse.SseEnvelope$UserExclusion) # 2

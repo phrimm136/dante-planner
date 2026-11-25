@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import org.danteplanner.backend.auth.token.RevocationOutcome;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenStoreKeys;
 import org.danteplanner.backend.config.TestConfig;
@@ -33,8 +34,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Acceptance test for the auth-Redis read-local / write-global split.
  *
  * <p>Blacklist writes ({@code blacklistToken}, {@code invalidateUserTokens}) land on the
- * {@code @Primary} <em>auth</em> store; their reads ({@code isBlacklisted},
- * {@code isUserTokenInvalidated}) are served from the <em>auth-local</em> replica. A value
+ * {@code @Primary} <em>auth</em> store; their reads ({@code blacklistCheck},
+ * {@code invalidationCheck}) are served from the <em>auth-local</em> replica. A value
  * written through the service is present on auth yet invisible via the read path until the
  * same key also exists on auth-local ("caught up").</p>
  */
@@ -127,15 +128,15 @@ class AuthLocalReadSplitIT {
                 .isNotNull()
                 .isNotEmpty();
 
-        assertThat(tokenBlacklistService.isBlacklisted(token))
+        assertThat(tokenBlacklistService.blacklistCheck(token))
                 .as("auth-local has not caught up: the read path must not yet see the blacklisted token")
-                .isFalse();
+                .isEqualTo(RevocationOutcome.CLEAR);
 
         mirror("bl:*");
 
-        assertThat(tokenBlacklistService.isBlacklisted(token))
+        assertThat(tokenBlacklistService.blacklistCheck(token))
                 .as("after auth-local catches up, the read path reflects the blacklist")
-                .isTrue();
+                .isEqualTo(RevocationOutcome.REVOKED);
 
         // uinv: half
         long userId = 4242L;
@@ -147,15 +148,15 @@ class AuthLocalReadSplitIT {
                 .isNotNull()
                 .isNotEmpty();
 
-        assertThat(tokenBlacklistService.isUserTokenInvalidated(userId, 0L))
+        assertThat(tokenBlacklistService.invalidationCheck(userId, 0L))
                 .as("auth-local has not caught up: the read path must not yet see the user invalidation")
-                .isFalse();
+                .isEqualTo(RevocationOutcome.CLEAR);
 
         mirror("uinv:*");
 
-        assertThat(tokenBlacklistService.isUserTokenInvalidated(userId, 0L))
+        assertThat(tokenBlacklistService.invalidationCheck(userId, 0L))
                 .as("after auth-local catches up, the read path reflects the user invalidation")
-                .isTrue();
+                .isEqualTo(RevocationOutcome.REVOKED);
     }
 
     @Test
@@ -175,9 +176,9 @@ class AuthLocalReadSplitIT {
             Date futureExpiry = new Date(System.currentTimeMillis() + Duration.ofHours(1).toMillis());
             blSvc.blacklistToken(token, futureExpiry);
 
-            assertThat(blSvc.isBlacklisted(token))
+            assertThat(blSvc.blacklistCheck(token))
                     .as("fail-open: read routed to the unreachable auth-local, not the auth write store")
-                    .isFalse();
+                    .isEqualTo(RevocationOutcome.SKIPPED);
 
             assertThat(registry.get("blacklist_check_skipped_total").counter().count())
                     .as("fail-open increments the skip counter")

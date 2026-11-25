@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.danteplanner.backend.auth.service.SessionRevocationService;
+import org.danteplanner.backend.auth.token.RevocationOutcome;
 import org.danteplanner.backend.support.RecordingTokenBlacklist.Failed;
 import org.danteplanner.backend.support.RecordingTokenBlacklist.Operation;
 
@@ -30,25 +31,25 @@ class RecordingTokenBlacklistTest {
     private final SessionRevocationService sessions = new SessionRevocationService(null, blacklist);
 
     @Test
-    void isUserTokenInvalidated_WhenTheRealHandlerEndsAllSessions_AnswersForTokensIssuedBefore() {
+    void invalidationCheck_WhenTheRealHandlerEndsAllSessions_AnswersForTokensIssuedBefore() {
         long issuedBefore = clock.millis() - Duration.ofMinutes(1).toMillis();
 
         sessions.endAllSessions(USER_ID);
 
         assertThat(blacklist.invalidatedUserIds()).containsExactly(USER_ID);
-        assertThat(blacklist.isUserTokenInvalidated(USER_ID, issuedBefore)).isTrue();
-        assertThat(blacklist.isUserTokenInvalidated(OTHER_USER_ID, issuedBefore)).isFalse();
+        assertThat(blacklist.invalidationCheck(USER_ID, issuedBefore)).isEqualTo(RevocationOutcome.REVOKED);
+        assertThat(blacklist.invalidationCheck(OTHER_USER_ID, issuedBefore)).isEqualTo(RevocationOutcome.CLEAR);
     }
 
     @Test
-    void isBlacklisted_WhenATokenIsBlacklistedBeforeItExpires_AnswersTrueUntilItExpires() {
+    void blacklistCheck_WhenATokenIsBlacklistedBeforeItExpires_AnswersRevokedUntilItExpires() {
         blacklist.blacklistToken("access", expiresIn(Duration.ofHours(1)));
         blacklist.blacklistToken("expired", expiresIn(Duration.ofHours(-1)));
 
-        assertThat(blacklist.isBlacklisted("access")).isTrue();
-        assertThat(blacklist.isBlacklisted("expired")).isFalse();
+        assertThat(blacklist.blacklistCheck("access")).isEqualTo(RevocationOutcome.REVOKED);
+        assertThat(blacklist.blacklistCheck("expired")).isEqualTo(RevocationOutcome.CLEAR);
         clock.advance(Duration.ofHours(1));
-        assertThat(blacklist.isBlacklisted("access")).isFalse();
+        assertThat(blacklist.blacklistCheck("access")).isEqualTo(RevocationOutcome.CLEAR);
     }
 
     @Test
