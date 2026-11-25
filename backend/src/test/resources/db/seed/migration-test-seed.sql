@@ -342,11 +342,11 @@ VALUES
 -- notifications
 -- ============================================================================
 
-INSERT IGNORE INTO notifications (id, public_id, user_id, content_id, notification_type, `read`, created_at, planner_id, planner_title, comment_snippet, comment_public_id)
+INSERT IGNORE INTO notifications (id, public_id, user_id, content_id, notification_type, read_at, created_at, planner_id, planner_title, comment_snippet, comment_public_id)
 VALUES
-    (1, UNHEX('BB000001000000000000000000000001'), 1, 'comment:1', 'NEW_COMMENT', FALSE, NOW(),
+    (1, UNHEX('BB000001000000000000000000000001'), 1, 'comment:1', 'NEW_COMMENT', NULL, NOW(),
      UNHEX('AAAA0001000000000000000000000001'), 'Seed MD Planner - Status Effects', 'Great planner build.', UNHEX('CC000001000000000000000000000001')),
-    (2, UNHEX('BB000002000000000000000000000002'), 1, 'milestone:upvotes:5', 'UPVOTE_MILESTONE', TRUE, NOW(),
+    (2, UNHEX('BB000002000000000000000000000002'), 1, 'milestone:upvotes:5', 'UPVOTE_MILESTONE', NOW(6), NOW(),
      UNHEX('AAAA0001000000000000000000000001'), 'Seed MD Planner - Status Effects', NULL, NULL);
 
 -- ============================================================================

@@ -15,7 +15,6 @@ org.danteplanner.backend.moderation.dto.ModerationActionResponse.fromEntity(org.
 org.danteplanner.backend.moderation.service.CommentModerationService.deleteComment(java.lang.Long, java.lang.Long) # 1
 org.danteplanner.backend.moderation.service.CommentModerationService.deleteCommentByPublicId(java.lang.Long, java.util.UUID, java.lang.String) # 1
 org.danteplanner.backend.moderation.service.ModerationQueryService.getModerationActionsWithActors() # 2
-org.danteplanner.backend.notification.entity.Notification.markAsRead(java.time.Instant) # 1
 org.danteplanner.backend.notification.service.NotificationDispatchService.notifyPlannerPublished(java.lang.Long, java.util.UUID, java.lang.String) # 1
 org.danteplanner.backend.planner.controller.PlannerCommandController.upsertPlanner(org.danteplanner.backend.shared.security.Viewer$Member, java.util.UUID, java.util.UUID, org.danteplanner.backend.planner.dto.UpsertPlannerRequest, boolean) # 1
 org.danteplanner.backend.planner.effect.PlannerPublishedEffect.applyEffect(org.danteplanner.backend.shared.outbox.entity.DomainEvent, org.danteplanner.backend.shared.outbox.service.EffectPushQueue) # 1

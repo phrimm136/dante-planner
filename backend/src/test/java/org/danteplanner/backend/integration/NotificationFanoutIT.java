@@ -73,13 +73,9 @@ class NotificationFanoutIT extends SharedMySqlContainerSupport {
     /**
      * {@code uk_notification_dedup} is what makes a re-dispatch write nothing the second time, and
      * the property the relay depends on is that no preceding read is involved.
-     *
-     * <p>The soft-deleted case is the one that can drift: the key does not include
-     * {@code deleted_at}, so a soft-deleted row still occupies it and a replayed dispatch must
-     * still write nothing.</p>
      */
     @Test
-    void dedupKey_WhenARowAlreadyOccupiesIt_RefusesTheSecondWriteIncludingSoftDeleted() {
+    void dedupKey_WhenARowAlreadyOccupiesIt_RefusesTheSecondWriteIncludingRead() {
         Long recipient = enabledUser("dedup").getId();
         UUID plannerId = UUID.randomUUID();
         String contentId = plannerId.toString();
@@ -100,16 +96,12 @@ class NotificationFanoutIT extends SharedMySqlContainerSupport {
                 .findByUserIdAndContentIdAndNotificationType(
                         recipient, contentId, NotificationType.PLANNER_RECOMMENDED)
                 .orElseThrow();
-        raised.softDelete(Instant.now());
-        notificationRepository.saveAndFlush(raised);
-
-        assertThat(jdbcTemplate.queryForObject(
-                "SELECT deleted_at FROM notifications WHERE id = ?", java.sql.Timestamp.class, raised.getId()))
-                .as("the row reached the database soft-deleted, so the assertion below is not vacuous")
-                .isNotNull();
+        assertThat(transactionTemplate.<Integer>execute(status -> notificationRepository.markAsRead(
+                raised.getPublicId(), recipient, Instant.now())))
+                .isEqualTo(1);
 
         assertThat(raise(recipient, contentId, NotificationType.PLANNER_RECOMMENDED, plannerId))
-                .as("a soft-deleted row still occupies the key, so it still refuses the write")
+                .as("a read row still occupies the key, so it still refuses the write")
                 .isZero();
     }
 
@@ -126,7 +118,7 @@ class NotificationFanoutIT extends SharedMySqlContainerSupport {
     private long published(Long userId, UUID plannerId) {
         return jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM notifications WHERE user_id = ? AND content_id = ? "
-                        + "AND notification_type = ? AND `read` = FALSE AND deleted_at IS NULL",
+                        + "AND notification_type = ? AND read_at IS NULL",
                 Long.class, userId, plannerId.toString(), NotificationType.PLANNER_PUBLISHED.name());
     }
 

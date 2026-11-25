@@ -3,8 +3,6 @@ package org.danteplanner.backend.controller;
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
-import java.time.temporal.ChronoUnit;
-import static org.assertj.core.api.Assertions.within;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.api.NotificationType;
@@ -79,6 +77,32 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
                 type
         );
         return notificationRepository.save(notification);
+    }
+
+    private Notification createRead(User recipient, NotificationType type) {
+        Notification notification = createNotification(recipient, type);
+        jdbcTemplate.update("UPDATE notifications SET read_at = '2026-01-02 03:04:05.678901' WHERE id = ?",
+                notification.getId());
+        return stored(notification);
+    }
+
+    private Notification stored(Notification notification) {
+        return notificationRepository.findById(notification.getId()).orElseThrow();
+    }
+
+    private void assertLeftTheInbox(Notification... marked) throws Exception {
+        for (Notification notification : marked) {
+            assertThat(stored(notification).getReadAt()).isNotNull();
+        }
+        mockMvc.perform(get("/api/notifications/inbox")
+                        .cookie(accessTokenCookie()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.notifications").isEmpty())
+                .andExpect(jsonPath("$.totalElements").value(0));
+        mockMvc.perform(get("/api/notifications/unread-count")
+                        .cookie(accessTokenCookie()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.unreadCount").value(0));
     }
 
     private void setCreatedAt(Notification notification, Instant timestamp) {
@@ -186,16 +210,22 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        void getInbox_WhenSoftDeleted_ExcludesFromInbox() throws Exception {
+        void getInbox_WhenRead_ExcludesFromInbox() throws Exception {
             Notification active = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
-            Notification deleted = createNotification(testUser, NotificationType.REPLY_RECEIVED);
-            deleted.softDelete(Instant.now());
-            notificationRepository.save(deleted);
+            createRead(testUser, NotificationType.REPLY_RECEIVED);
 
+            mockMvc.perform(get("/api/notifications/inbox")
+                            .cookie(accessTokenCookie())
+                            .param("page", "1"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.notifications").isEmpty())
+                    .andExpect(jsonPath("$.totalElements").value(1));
             mockMvc.perform(get("/api/notifications/inbox")
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.notifications.length()").value(1))
+                    .andExpect(jsonPath("$.notifications[0].read").value(false))
+                    .andExpect(jsonPath("$.notifications[0].readAt").doesNotExist())
                     .andExpect(jsonPath("$.notifications[0].id").value(active.getPublicId().toString()));
         }
 
@@ -244,22 +274,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
         @Test
         void getUnreadCount_WhenMixedReadStatus_ReturnsUnreadOnly() throws Exception {
             createNotification(testUser, NotificationType.COMMENT_RECEIVED);
-            Notification read = createNotification(testUser, NotificationType.REPLY_RECEIVED);
-            read.markAsRead(Instant.now());
-            notificationRepository.save(read);
-
-            mockMvc.perform(get("/api/notifications/unread-count")
-                            .cookie(accessTokenCookie()))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.unreadCount").value(1));
-        }
-
-        @Test
-        void getUnreadCount_WhenSoftDeleted_ExcludesFromCount() throws Exception {
-            createNotification(testUser, NotificationType.COMMENT_RECEIVED);
-            Notification deleted = createNotification(testUser, NotificationType.REPLY_RECEIVED);
-            deleted.softDelete(Instant.now());
-            notificationRepository.save(deleted);
+            createRead(testUser, NotificationType.REPLY_RECEIVED);
 
             mockMvc.perform(get("/api/notifications/unread-count")
                             .cookie(accessTokenCookie()))
@@ -292,7 +307,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
         @Test
         void markRead_WhenUnreadNotification_Returns200() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
-            assertThat(notification.isRead()).isFalse();
+            assertThat(notification.getReadAt()).isNull();
 
             mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getPublicId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
@@ -312,25 +327,25 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
             Notification updated = notificationRepository.findById(notification.getId()).orElseThrow();
             assertThat(updated.getReadAt()).isNotNull();
-            assertThat(updated.isRead()).isTrue();
         }
 
         @Test
-        void markRead_WhenAlreadyRead_IsIdempotent() throws Exception {
+        void markRead_WhenRepeated_AnswersTheFirstReadAt() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
-            notification.markAsRead(Instant.now());
-            notificationRepository.save(notification);
-            Instant firstReadAt = notification.getReadAt();
+            mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getPublicId()).with(withCsrf())
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isOk());
+            jdbcTemplate.update("UPDATE notifications SET read_at = DATE_SUB(read_at, INTERVAL 1 DAY) WHERE id = ?",
+                    notification.getId());
+            Instant firstReadAt = stored(notification).getReadAt();
 
             mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getPublicId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.read").value(true));
+                    .andExpect(jsonPath("$.read").value(true))
+                    .andExpect(jsonPath("$.readAt").value(firstReadAt.toString()));
 
-            Notification updated = notificationRepository.findById(notification.getId()).orElseThrow();
-            // MySQL DATETIME(6) truncates the nanoseconds an in-memory Instant carries; with no
-            // test transaction the value round-trips instead of coming back from the session.
-            assertThat(updated.getReadAt()).isCloseTo(firstReadAt, within(1, ChronoUnit.MILLIS));
+            assertThat(stored(notification).getReadAt()).isEqualTo(firstReadAt);
         }
 
         @Test
@@ -372,7 +387,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.affected").value(3));
 
-            long unreadCount = notificationRepository.countByUserIdAndReadFalseAndDeletedAtIsNull(testUser.getId());
+            long unreadCount = notificationRepository.countByUserIdAndReadAtIsNull(testUser.getId());
             assertThat(unreadCount).isZero();
         }
 
@@ -389,11 +404,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void markAllRead_WhenAlreadyRead_Unchanged() throws Exception {
-            Notification read = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
-            read.markAsRead(Instant.now());
-            notificationRepository.save(read);
-            Instant firstReadAt = read.getReadAt();
-
+            Notification read = createRead(testUser, NotificationType.COMMENT_RECEIVED);
             createNotification(testUser, NotificationType.REPLY_RECEIVED);
 
             mockMvc.perform(post("/api/notifications/mark-all-read").with(withCsrf())
@@ -401,11 +412,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.affected").value(1));
 
-            Notification unchanged = notificationRepository.findById(read.getId()).orElseThrow();
-            // Compared at millisecond precision: with no test transaction the entity is
-            // re-read from MySQL, whose DATETIME(6) does not carry the nanoseconds an
-            // in-memory Instant holds.
-            assertThat(unchanged.getReadAt()).isCloseTo(firstReadAt, within(1, ChronoUnit.MILLIS));
+            assertThat(stored(read).getReadAt()).isEqualTo(read.getReadAt());
         }
 
         @Test
@@ -418,7 +425,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.affected").value(1));
 
-            long otherUserUnreadCount = notificationRepository.countByUserIdAndReadFalseAndDeletedAtIsNull(otherUser.getId());
+            long otherUserUnreadCount = notificationRepository.countByUserIdAndReadAtIsNull(otherUser.getId());
             assertThat(otherUserUnreadCount).isEqualTo(1);
         }
 
@@ -448,47 +455,52 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isNoContent());
 
-            Notification deleted = notificationRepository.findById(notification.getId()).orElseThrow();
-            assertThat(deleted.getDeletedAt()).isNotNull();
-            assertThat(deleted.isDeleted()).isTrue();
+            assertLeftTheInbox(notification);
         }
 
         @Test
-        void deleteNotification_WhenNotOwner_Returns404() throws Exception {
+        void deleteNotification_WhenRepeated_Returns204AndKeepsTheFirstReadAt() throws Exception {
+            Notification read = createRead(testUser, NotificationType.COMMENT_RECEIVED);
+
+            for (int repeat = 0; repeat < 2; repeat++) {
+                mockMvc.perform(delete("/api/notifications/{id}", read.getPublicId()).with(withCsrf())
+                                .cookie(accessTokenCookie()))
+                        .andExpect(status().isNoContent());
+            }
+
+            assertThat(stored(read).getReadAt()).isEqualTo(read.getReadAt());
+        }
+
+        @Test
+        void deleteNotification_WhenNotOwner_Returns404AndLeavesItUnread() throws Exception {
             Notification otherUserNotification = createNotification(otherUser, NotificationType.COMMENT_RECEIVED);
 
             mockMvc.perform(delete("/api/notifications/{id}", otherUserNotification.getPublicId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isNotFound());
+
+            assertThat(stored(otherUserNotification).getReadAt()).isNull();
         }
 
         @Test
-        void deleteNotification_WhenDeleted_ExcludesFromInbox() throws Exception {
-            Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
+        void deleteAll_WhenSomeAreReadOrForeign_MarksOwnUnreadAndAnswersTheirCount() throws Exception {
+            Notification first = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
+            Notification second = createNotification(testUser, NotificationType.REPLY_RECEIVED);
+            Notification read = createRead(testUser, NotificationType.COMMENT_RECEIVED);
+            Notification foreign = createNotification(otherUser, NotificationType.COMMENT_RECEIVED);
 
-            mockMvc.perform(delete("/api/notifications/{id}", notification.getPublicId()).with(withCsrf())
-                            .cookie(accessTokenCookie()))
-                    .andExpect(status().isNoContent());
-
-            mockMvc.perform(get("/api/notifications/inbox")
-                            .cookie(accessTokenCookie()))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.notifications").isEmpty())
-                    .andExpect(jsonPath("$.totalElements").value(0));
-        }
-
-        @Test
-        void deleteNotification_WhenDeleted_ExcludesFromUnreadCount() throws Exception {
-            Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
-
-            mockMvc.perform(delete("/api/notifications/{id}", notification.getPublicId()).with(withCsrf())
-                            .cookie(accessTokenCookie()))
-                    .andExpect(status().isNoContent());
-
-            mockMvc.perform(get("/api/notifications/unread-count")
+            mockMvc.perform(delete("/api/notifications/all").with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.unreadCount").value(0));
+                    .andExpect(jsonPath("$.affected").value(2));
+
+            assertLeftTheInbox(first, second);
+            assertThat(stored(read).getReadAt()).isEqualTo(read.getReadAt());
+            assertThat(stored(foreign).getReadAt()).isNull();
+            mockMvc.perform(delete("/api/notifications/all").with(withCsrf())
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.affected").value(0));
         }
 
         @Test

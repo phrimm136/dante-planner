@@ -22,8 +22,8 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * A recipient's own view of their notifications: reading them, and marking or clearing what they
- * have seen.
+ * A recipient's own view of their notifications: reading them, and marking what they have
+ * seen.
  */
 @Service
 @RequiredArgsConstructor
@@ -36,7 +36,7 @@ public class NotificationInboxService {
     public ScopedRead<NotificationInboxResponse> getInbox(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Notification> notificationPage = notificationRepository
-                .findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(userId, pageable);
+                .findByUserIdAndReadAtIsNullOrderByCreatedAtDesc(userId, pageable);
 
         List<NotificationResponse> notifications = notificationPage.getContent().stream()
                 .map(NotificationResponse::fromEntity)
@@ -53,7 +53,7 @@ public class NotificationInboxService {
 
     @Transactional(readOnly = true)
     public ScopedRead<UnreadCountResponse> getUnreadCount(Long userId) {
-        long count = notificationRepository.countByUserIdAndReadFalseAndDeletedAtIsNull(userId);
+        long count = notificationRepository.countByUserIdAndReadAtIsNull(userId);
         return new ScopedRead<>(new UnreadCountResponse(count), inboxScopes(userId));
     }
 
@@ -63,9 +63,9 @@ public class NotificationInboxService {
 
     @Transactional
     public NotificationResponse markAsRead(UUID publicId, Long userId) {
-        Notification notification = requireOwned(publicId, userId);
-
-        notification.markAsRead(clock.instant());
+        notificationRepository.markAsRead(publicId, userId, clock.instant());
+        Notification notification = notificationRepository.findByPublicIdAndUserId(publicId, userId)
+                .orElseThrow(() -> new EntityNotFoundException("Notification", publicId));
         FreshnessDeclarations.declare(new FreshnessScope.User(userId));
 
         return NotificationResponse.fromEntity(notification);
@@ -73,29 +73,9 @@ public class NotificationInboxService {
 
     @Transactional
     public int markAllAsRead(Long userId) {
-        int marked = notificationRepository.markAllAsRead(userId, clock.instant());
+        int marked = notificationRepository.markAllAsRead(
+                notificationRepository.unreadIdsOf(userId), clock.instant());
         FreshnessDeclarations.declare(new FreshnessScope.User(userId));
         return marked;
-    }
-
-    @Transactional
-    public void deleteNotification(UUID publicId, Long userId) {
-        Notification notification = requireOwned(publicId, userId);
-
-        notification.softDelete(clock.instant());
-        FreshnessDeclarations.declare(new FreshnessScope.User(userId));
-    }
-
-    @Transactional
-    public int deleteAllNotifications(Long userId) {
-        int deleted = notificationRepository.softDeleteAllByUserId(userId, clock.instant());
-        FreshnessDeclarations.declare(new FreshnessScope.User(userId));
-        return deleted;
-    }
-
-    private Notification requireOwned(UUID publicId, Long userId) {
-        return notificationRepository.findByPublicId(publicId)
-                .filter(notification -> notification.getUserId().equals(userId))
-                .orElseThrow(() -> new EntityNotFoundException("Notification", publicId));
     }
 }

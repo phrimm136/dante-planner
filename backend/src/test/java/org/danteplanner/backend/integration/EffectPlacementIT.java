@@ -208,7 +208,7 @@ class EffectPlacementIT extends ExclusiveDatabaseSupport {
 
     private List<Notification> notificationsFor(User recipient) {
         return notificationRepository
-                .findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(recipient.getId(), PageRequest.of(0, 10))
+                .findByUserIdAndReadAtIsNullOrderByCreatedAtDesc(recipient.getId(), PageRequest.of(0, 10))
                 .getContent();
     }
 }

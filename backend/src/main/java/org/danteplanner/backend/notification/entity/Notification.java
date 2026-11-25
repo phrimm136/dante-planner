@@ -15,6 +15,7 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.annotation.CreatedDate;
 import org.danteplanner.backend.shared.entity.AuditedTimestampListener;
@@ -24,10 +25,10 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
+@Immutable
 @EntityListeners(AuditedTimestampListener.class)
 @Table(name = "notifications",
        indexes = {
-           @Index(name = "idx_notifications_user_read", columnList = "user_id, `read`, created_at DESC"),
            @Index(name = "idx_notifications_created", columnList = "created_at")
        },
        uniqueConstraints = {
@@ -56,18 +57,12 @@ public class Notification {
     @Column(name = "notification_type", nullable = false, length = 50)
     private NotificationType notificationType;
 
-    @Column(name = "`read`", nullable = false)
-    private boolean read = false;
-
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     @Column(name = "read_at")
     private @Nullable Instant readAt;
-
-    @Column(name = "deleted_at")
-    private @Nullable Instant deletedAt;
 
     @Column(name = "planner_id", columnDefinition = "BINARY(16)")
     private @Nullable UUID plannerId;
@@ -102,7 +97,6 @@ public class Notification {
         this.userId = userId;
         this.contentId = contentId;
         this.notificationType = notificationType;
-        this.read = false;
         switch (content) {
             case Content.Plain plain -> { }
             case Content.PlannerScoped planner -> {
@@ -129,29 +123,5 @@ public class Notification {
     @PrePersist
     protected void onCreate() {
         publicId = UUID.randomUUID();
-    }
-
-
-    public void markAsRead(Instant now) {
-        if (!this.read) {
-            this.read = true;
-            this.readAt = now;
-        }
-    }
-
-    public void softDelete(Instant now) {
-        this.deletedAt = now;
-    }
-
-    public boolean isDeleted() {
-        return deletedAt != null;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public void setPublicId(UUID publicId) {
-        this.publicId = publicId;
     }
 }

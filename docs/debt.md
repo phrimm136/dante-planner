@@ -1294,11 +1294,11 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   simply read through `AuthReadSources`.
   re-check: `rg -q 'static List<Source> sourceOrder' backend/src/main/java/org/danteplanner/backend/shared/freshness/MarkerStore.java`
 
-- `NotificationRepository.hardDeleteOldNotifications` deletes on `deleted_at < :cutoff` and no index
-  leads with `deleted_at`, so the nightly purge likely scans and locks the whole `notifications` table
+- `NotificationRepository.deleteReadBefore` deletes on `read_at < :cutoff` and no index leads with
+  `read_at`, so the nightly purge likely scans and locks the whole `notifications` table
   (read from the schema, not EXPLAINed). Worth doing when the table grows past a size where the purge
   holds locks long enough to stall notification inserts: EXPLAIN it, then add an index or batch it.
-  re-check: `rg -q 'n.deletedAt < :cutoffDate' backend/src/main/java/org/danteplanner/backend/notification/repository/NotificationRepository.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/resources/db/migration -i 'notifications ?\(deleted_at'`
+  re-check: `rg -q 'n.readAt < :cutoff' backend/src/main/java/org/danteplanner/backend/notification/repository/NotificationRepository.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/resources/db/migration -i 'notifications ?\(read_at'`
 - `SentinelUserVerifier.java:15` says verification is skipped in tests because "TestDataInitializer
   handles it"; that class never loaded and the test overhaul deleted it. Fix the comment when the
   sentinel-user code is next touched.

@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.api.NotificationType;
@@ -93,8 +94,8 @@ class EventPayloadShapeTest {
 
     private static NotificationEventPayload stored(Notification.Content content) {
         Notification notification = new Notification(7L, "42", NotificationType.COMMENT_RECEIVED, content);
-        notification.setPublicId(NOTIFICATION_PUBLIC_ID);
-        notification.setCreatedAt(Instant.parse("2026-03-04T05:06:07Z"));
+        ReflectionTestUtils.setField(notification, "publicId", NOTIFICATION_PUBLIC_ID);
+        ReflectionTestUtils.setField(notification, "createdAt", Instant.parse("2026-03-04T05:06:07Z"));
         return NotificationEventPayloads.fromEntity(notification);
     }
 
