@@ -83,10 +83,9 @@ change, one minor version at a time.
 The values of the External Secrets Application are the flags of the boot script plus the scrape
 annotations that `/usr/local/bin/scrape-annotate.sh` writes on the controller's pod template; the
 same test fails when they differ. Its live objects carry `app.kubernetes.io/instance: external-secrets`,
-so ArgoCD counts them as the Application's own even before the first sync. The Application has no
-automated sync: it reports OutOfSync until a person syncs it, and then a change to it waits for the
-next sync by hand. It has no finalizer either, so removing it from the chart deletes the Application
-and leaves the operator running.
+so ArgoCD counts them as the Application's own. Its finalizer deletes the operator, but not its CRDs,
+when the Application is removed from the chart. To stop managing the operator and keep it, remove the
+finalizer in one merge, wait until both regions have synced it, and remove the Application in the next.
 
 The `render` stage runs `.github/scripts/rendered-redis-probes.py` over the region renders: it fails
 when redis-auth or redis-ratelimit loses its TCP liveness probe or its readiness probe that passes
