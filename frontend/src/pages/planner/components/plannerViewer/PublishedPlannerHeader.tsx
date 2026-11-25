@@ -143,7 +143,7 @@ export function PublishedPlannerHeader({
         ) : null
       }
       category={planner.category}
-      keywords={planner.selectedKeywords ?? []}
+      keywords={planner.selectedKeywords}
       title={planner.title}
       meta={
         <>

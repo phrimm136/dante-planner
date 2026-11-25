@@ -12,10 +12,13 @@ import org.danteplanner.backend.planner.entity.PublicationOutcome;
 import org.danteplanner.backend.planner.validation.floor.Stage;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.sync.SyncVersionValidator.WriteMode;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.planner.validation.PlannerDocument;
 import org.danteplanner.backend.planner.precondition.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
+import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator.LiveOwner;
+import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator.OwnedPlanner;
 import org.danteplanner.backend.planner.precondition.PlannerPublishValidator;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
@@ -65,10 +68,9 @@ public class PlannerPublishingService {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public PlannerResponse publish(Long userId, UUID plannerId) {
         accessGuard.holdActiveAccount(userId);
-        requireOwnerBeforeLock(userId, plannerId);
-        plannerRepository.lockContent(plannerId);
+        lockAsOwner(userId, plannerId);
 
-        return applyPublish(userId, accessGuard.requireAggregate(plannerId));
+        return applyPublish(ownershipValidator.requireOwner(accessGuard.requireAggregate(plannerId), userId));
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
@@ -77,18 +79,20 @@ public class PlannerPublishingService {
         plannerCommandService.lockForUpsert(userId, plannerId);
         requireTitleAfterUpsert(userId, plannerId, content);
 
-        return applyPublish(userId, upserted(userId, deviceId, plannerId, content));
+        return applyPublish(ownershipValidator.requireOwner(
+                upserted(userId, deviceId, plannerId, content), userId));
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public PlannerResponse unpublish(Long userId, UUID plannerId) {
-        requireOwnerBeforeLock(userId, plannerId);
-        plannerRepository.lockContent(plannerId);
-        return applyUnpublish(userId, accessGuard.requireAggregate(plannerId));
+        lockAsOwner(userId, plannerId);
+        return applyUnpublish(ownershipValidator.requireOwner(accessGuard.requireAggregate(plannerId), userId));
     }
 
-    private void requireOwnerBeforeLock(Long userId, UUID plannerId) {
-        ownershipValidator.requireLiveOwner(plannerId, userId, plannerRepository.findOwnershipById(plannerId));
+    private void lockAsOwner(Long userId, UUID plannerId) {
+        LiveOwner owner = ownershipValidator.requireLiveOwner(
+                plannerId, userId, plannerRepository.findOwnershipById(plannerId));
+        plannerRepository.lockContent(owner.plannerId());
     }
 
     private void requireTitleAfterUpsert(Long userId, UUID plannerId, UpsertPlannerRequest content) {
@@ -103,13 +107,12 @@ public class PlannerPublishingService {
 
     private Planner upserted(Long userId, UUID deviceId, UUID plannerId, UpsertPlannerRequest content) {
         return plannerCommandService
-                .upsertAggregate(userId, deviceId, plannerId, content, false)
+                .upsertAggregate(userId, deviceId, plannerId, content, WriteMode.CHECKED)
                 .planner();
     }
 
-    private PlannerResponse applyPublish(Long userId, Planner planner) {
-        UUID plannerId = planner.getId();
-        ownershipValidator.requireOwner(planner, userId);
+    private PlannerResponse applyPublish(OwnedPlanner owned) {
+        Planner planner = owned.planner();
 
         publishValidator.requireTitle(planner.getTitle());
         MDCategory category;
@@ -121,42 +124,61 @@ public class PlannerPublishingService {
         }
         PlannerDocument document = contentValidator.parse(planner.getContentJson(), category,
                 contentValidator.season(planner.getContentVersion()), Stage.PUBLISH);
-        if (document.migrated()) {
-            planner.getContent().replaceContent(document);
-            FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId),
-                    new FreshnessScope.User(planner.getUserId()));
+        switch (ParsedContent.of(document)) {
+            case MIGRATED -> {
+                planner.getContent().replaceContent(document);
+                FreshnessDeclarations.declare(new FreshnessScope.Planner(planner.getId()),
+                        new FreshnessScope.User(planner.getUserId()));
+            }
+            case AS_STORED -> { }
         }
 
-        PublicationOutcome change = planner.publish(Instant.now(clock));
-        if (!change.changed()) {
-            return PlannerResponse.fromEntity(planner);
+        switch (planner.publish(Instant.now(clock))) {
+            case NONE -> { }
+            case FIRST_PUBLISH -> {
+                list(planner);
+                domainEventRecorder.recordDomainEvent(DomainEventType.PLANNER_PUBLISHED, planner.getId(),
+                        Map.of("authorId", planner.getUserId()));
+                logPublished(planner);
+            }
+            case REPUBLISH, WITHDRAWN -> {
+                list(planner);
+                logPublished(planner);
+            }
         }
-
-        plannerCatalogService.onBecameVisible(planner);
-        FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId), new FreshnessScope.Global());
-        subscriptionService.createSubscription(userId, plannerId);
-
-        if (change == PublicationOutcome.FIRST_PUBLISH) {
-            domainEventRecorder.recordDomainEvent(DomainEventType.PLANNER_PUBLISHED, plannerId,
-                    Map.of("authorId", userId));
-        }
-
-        log.info("Published planner {} by user {}", plannerId, userId);
         return PlannerResponse.fromEntity(planner);
     }
 
-    private PlannerResponse applyUnpublish(Long userId, Planner planner) {
-        UUID plannerId = planner.getId();
-        ownershipValidator.requireOwner(planner, userId);
+    private enum ParsedContent {
+        AS_STORED,
+        MIGRATED;
 
-        if (!planner.unpublish().changed()) {
-            return PlannerResponse.fromEntity(planner);
+        static ParsedContent of(PlannerDocument document) {
+            return document.migrated() ? MIGRATED : AS_STORED;
         }
+    }
 
-        plannerCatalogService.onBecameInvisible(plannerId);
-        FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId), new FreshnessScope.Global());
+    private void list(Planner planner) {
+        plannerCatalogService.onBecameVisible(planner);
+        FreshnessDeclarations.declare(new FreshnessScope.Planner(planner.getId()), new FreshnessScope.Global());
+        subscriptionService.createSubscription(planner.getUserId(), planner.getId());
+    }
 
-        log.info("Unpublished planner {} by user {}", plannerId, userId);
+    private static void logPublished(Planner planner) {
+        log.info("Published planner {} by user {}", planner.getId(), planner.getUserId());
+    }
+
+    private PlannerResponse applyUnpublish(OwnedPlanner owned) {
+        Planner planner = owned.planner();
+        switch (planner.unpublish()) {
+            case NONE -> { }
+            case FIRST_PUBLISH, REPUBLISH, WITHDRAWN -> {
+                plannerCatalogService.onBecameInvisible(planner.getId());
+                FreshnessDeclarations.declare(new FreshnessScope.Planner(planner.getId()),
+                        new FreshnessScope.Global());
+                log.info("Unpublished planner {} by user {}", planner.getId(), planner.getUserId());
+            }
+        }
         return PlannerResponse.fromEntity(planner);
     }
 
@@ -192,11 +214,9 @@ public class PlannerPublishingService {
 
     @Transactional
     public ToggleOwnerNotificationsResponse toggleOwnerNotifications(Long userId, UUID plannerId, boolean enabled) {
-        Planner planner = accessGuard.requireAggregate(plannerId);
+        OwnedPlanner owned = ownershipValidator.requireOwner(accessGuard.requireAggregate(plannerId), userId);
 
-        ownershipValidator.requireOwner(planner, userId);
-
-        planner.setOwnerNotificationsEnabled(enabled);
+        owned.planner().setOwnerNotificationsEnabled(enabled);
         FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId));
 
         log.info("User {} toggled owner notifications for planner {} to {}", userId, plannerId, enabled);

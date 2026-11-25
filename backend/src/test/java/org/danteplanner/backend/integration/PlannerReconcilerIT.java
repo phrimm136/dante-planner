@@ -20,6 +20,7 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.FilterRowsSync;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.UpsertRequests;
+import org.danteplanner.backend.planner.sync.SyncVersionValidator.WriteMode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -487,7 +488,7 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
 
         jdbc.execute("DROP PROCEDURE rebuild_planner_filters_scoped");
         try {
-            assertThatThrownBy(() -> commandService.upsertPlanner(owner.getId(), null, plannerId, save, false))
+            assertThatThrownBy(() -> commandService.upsertPlanner(owner.getId(), null, plannerId, save, WriteMode.CHECKED))
                     .isInstanceOf(DataAccessException.class)
                     .hasStackTraceContaining("rebuild_planner_filters_scoped does not exist");
         } finally {

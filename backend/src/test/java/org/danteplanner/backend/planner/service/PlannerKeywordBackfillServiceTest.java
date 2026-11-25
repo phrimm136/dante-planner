@@ -23,7 +23,6 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PlannerKeywordBackfillServiceTest {
@@ -82,9 +81,66 @@ class PlannerKeywordBackfillServiceTest {
         assertThat(page.corrected()).isZero();
     }
 
+    @Test
+    void backfillPage_WhenTheRowIsCurrent_TakesNoLock() {
+        UUID plannerId = UUID.randomUUID();
+        KeywordBackfillRow current = new KeywordBackfillRow(
+                plannerId, "[\"Burst\"]", "[\"Burst\"]", false, null, false);
+
+        PlannerKeywordBackfillService.BackfillPage page = backfill(new RecordingBackfillRepository(current, current));
+
+        assertThat(calls).isEmpty();
+        assertThat(page).isEqualTo(new PlannerKeywordBackfillService.BackfillPage(
+                new PlannerKeywordBackfillService.BackfillCursor.After(plannerId), 1, 0));
+    }
+
+    @Test
+    void backfillPage_WhenOnlyTheColumnOfAPrivatePlannerIsStale_RewritesTheColumnAlone() {
+        KeywordBackfillRow stale = new KeywordBackfillRow(
+                UUID.randomUUID(), "[\"Burst\"]", "unreadable", false, null, false);
+
+        PlannerKeywordBackfillService.BackfillPage page = backfill(new RecordingBackfillRepository(stale, stale));
+
+        assertThat(calls).containsExactly("lockContent", "keywordRowOf", "refreshContentKeywords [\"Burst\"]");
+        assertThat(page.corrected()).isOne();
+    }
+
+    @Test
+    void backfillPage_WhenOnlyTheCatalogCopyIsStale_RewritesTheCatalogAlone() {
+        KeywordBackfillRow stale = new KeywordBackfillRow(
+                UUID.randomUUID(), "[\"Burst\"]", "[\"Burst\"]", true, null, true);
+
+        PlannerKeywordBackfillService.BackfillPage page = backfill(new RecordingBackfillRepository(stale, stale));
+
+        assertThat(calls).containsExactly("lockContent", "keywordRowOf", "refreshCatalogKeywords [\"Burst\"]");
+        assertThat(page.corrected()).isOne();
+    }
+
+    @Test
+    void backfillPage_WhenTheContentSelectsNothing_ClearsBothCopies() {
+        KeywordBackfillRow stale = new KeywordBackfillRow(
+                UUID.randomUUID(), null, "[\"Burst\"]", true, "[\"Burst\"]", true);
+
+        backfill(new RecordingBackfillRepository(stale, stale));
+
+        assertThat(calls).containsExactly("lockContent", "keywordRowOf", "clearContentKeywords", "syncFilterRows",
+                "clearCatalogKeywords");
+    }
+
+    @Test
+    void backfillPage_WhenTheRowIsGoneUnderTheLock_CountsNoCorrection() {
+        KeywordBackfillRow stale = new KeywordBackfillRow(UUID.randomUUID(), "[\"Burst\"]", null, true, null, true);
+
+        PlannerKeywordBackfillService.BackfillPage page = backfill(new RecordingBackfillRepository(stale, null));
+
+        assertThat(calls).containsExactly("lockContent", "keywordRowOf");
+        assertThat(page.scanned()).isOne();
+        assertThat(page.corrected()).isZero();
+    }
+
     private PlannerKeywordBackfillService.BackfillPage backfill(RecordingBackfillRepository rows) {
         UUID plannerId = rows.paged.plannerId();
-        when(plannerRepository.lockContent(plannerId)).thenAnswer(invocation -> {
+        lenient().when(plannerRepository.lockContent(plannerId)).thenAnswer(invocation -> {
             calls.add("lockContent");
             return 1L;
         });
@@ -118,12 +174,24 @@ class PlannerKeywordBackfillServiceTest {
         @Override
         public Optional<KeywordBackfillRow> keywordRowOf(UUID plannerId) {
             calls.add("keywordRowOf");
-            return Optional.of(locked);
+            return Optional.ofNullable(locked);
         }
 
         @Override
         public int refreshContentKeywords(UUID plannerId, String keywords) {
             calls.add("refreshContentKeywords " + keywords);
+            return 1;
+        }
+
+        @Override
+        public int clearContentKeywords(UUID plannerId) {
+            calls.add("clearContentKeywords");
+            return 1;
+        }
+
+        @Override
+        public int clearCatalogKeywords(UUID plannerId) {
+            calls.add("clearCatalogKeywords");
             return 1;
         }
 

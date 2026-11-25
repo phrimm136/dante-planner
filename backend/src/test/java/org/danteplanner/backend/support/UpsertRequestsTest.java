@@ -26,7 +26,7 @@ class UpsertRequestsTest {
         UpsertPlannerRequest request = UpsertRequests.valid();
 
         assertThatCode(() -> new ContentVersionValidator(registry)
-                .validateVersionForCreate(request.plannerType(), request.contentVersion()))
+                .requireCreatableVersion(request.plannerType(), request.contentVersion()))
                 .doesNotThrowAnyException();
     }
 

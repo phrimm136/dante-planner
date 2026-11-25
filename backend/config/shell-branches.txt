@@ -48,29 +48,18 @@ org.danteplanner.backend.planner.gamedata.GameDataLoader.loadStartGiftPools(java
 org.danteplanner.backend.planner.gamedata.GameDataLoader.seasonDirectory(java.nio.file.Path, int) # 1
 org.danteplanner.backend.planner.gamedata.GameDataRegistry.init() # 1
 org.danteplanner.backend.planner.gamedata.GameDataRegistry.refresh() # 1
-org.danteplanner.backend.planner.precondition.ContentVersionValidator.validateVersionForCreate(org.danteplanner.backend.planner.entity.PlannerType, java.lang.Integer) # 2
-org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator.requireIdAvailable(java.util.UUID, java.lang.Long, org.danteplanner.backend.planner.repository.PlannerOwnershipRow) # 2
-org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator.requireLiveOwnedBy(java.util.UUID, java.lang.Long, java.util.Optional) # 2
-org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator.requireLiveOwner(java.util.UUID, java.lang.Long, java.util.Optional) # 1
 org.danteplanner.backend.planner.scheduler.PlannerKeywordBackfill.backfill() # 1
 org.danteplanner.backend.planner.scheduler.ViewCountFlushJob.flush() # 1
-org.danteplanner.backend.planner.searchindex.PlannerContentEntityExtractor.extract(tools.jackson.databind.JsonNode, org.danteplanner.backend.planner.entity.MDCategory) # 2
+org.danteplanner.backend.planner.searchindex.PlannerContentEntityExtractor.extract(tools.jackson.databind.JsonNode, org.danteplanner.backend.planner.entity.MDCategory) # 1
 org.danteplanner.backend.planner.service.PlannerAccountPurgeService.deleteOwnedData(java.lang.Long) # 1
 org.danteplanner.backend.planner.service.PlannerCatalogService.floorCountOf(org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository$FloorScopeRow) # 1
 org.danteplanner.backend.planner.service.PlannerCatalogService.onVisibleEditCommitted(org.danteplanner.backend.planner.entity.Planner) # 1
 org.danteplanner.backend.planner.service.PlannerCatalogService.syncFilterRows(java.util.UUID) # 1
-org.danteplanner.backend.planner.service.PlannerCommandService.applyUpsertFields(org.danteplanner.backend.planner.entity.Planner, org.danteplanner.backend.planner.dto.UpsertPlannerRequest, java.util.UUID, org.danteplanner.backend.planner.sync.PlannerChange) # 3
 org.danteplanner.backend.planner.service.PlannerCommandService.deletePlanner(java.lang.Long, java.util.UUID) # 1
-org.danteplanner.backend.planner.service.PlannerCommandService.lockForUpsert(java.lang.Long, java.util.UUID) # 1
-org.danteplanner.backend.planner.service.PlannerCommandService.upsertAggregate(java.lang.Long, java.util.UUID, java.util.UUID, org.danteplanner.backend.planner.dto.UpsertPlannerRequest, boolean) # 4
-org.danteplanner.backend.planner.service.PlannerCommandService.upsertPlanner(java.lang.Long, java.util.UUID, java.util.UUID, org.danteplanner.backend.planner.dto.UpsertPlannerRequest, boolean) # 1
 org.danteplanner.backend.planner.service.PlannerDriftReconciler.auditCatalogKeywords() # 1
 org.danteplanner.backend.planner.service.PlannerDriftReconciler.extractEntityKeys(java.util.UUID, java.lang.String, tools.jackson.databind.JsonNode) # 1
 org.danteplanner.backend.planner.service.PlannerDriftReconciler.rebuildExpectedIndexes() # 2
 org.danteplanner.backend.planner.service.PlannerEngagementService.castVote(java.lang.Long, java.util.UUID, org.danteplanner.backend.planner.entity.VoteType) # 3
-org.danteplanner.backend.planner.service.PlannerKeywordBackfillService.backfillPage(org.danteplanner.backend.planner.service.PlannerKeywordBackfillService$BackfillCursor, int) # 7
-org.danteplanner.backend.planner.service.PlannerPublishingService.applyPublish(java.lang.Long, org.danteplanner.backend.planner.entity.Planner) # 3
-org.danteplanner.backend.planner.service.PlannerPublishingService.applyUnpublish(java.lang.Long, org.danteplanner.backend.planner.entity.Planner) # 1
 org.danteplanner.backend.planner.service.PlannerPublishingService.requireTitleAfterUpsert(java.lang.Long, java.util.UUID, org.danteplanner.backend.planner.dto.UpsertPlannerRequest) # 1
 org.danteplanner.backend.planner.service.PlannerPublishingService.withdrawFromPublicView(java.util.UUID, org.danteplanner.backend.planner.service.PlannerPublishingService$Withdrawal) # 1
 org.danteplanner.backend.planner.service.PlannerQueryService.getPlanners(java.lang.Long, org.springframework.data.domain.Pageable, boolean) # 1

@@ -5,39 +5,59 @@ import tools.jackson.databind.ObjectMapper;
 
 import org.danteplanner.backend.planner.entity.PlannerContent;
 
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Objects;
+import java.util.Set;
 
-public record PlannerChange(
-        boolean titleChanged,
-        boolean statusChanged,
-        boolean categoryChanged,
-        boolean contentChanged,
-        boolean gameContentVersionChanged,
-        boolean contentSchemaVersionChanged,
-        boolean deviceIdChanged) {
+public record PlannerChange(Set<Field> fields) {
+
+    public enum Field {
+        TITLE,
+        STATUS,
+        CATEGORY,
+        CONTENT,
+        GAME_CONTENT_VERSION,
+        CONTENT_SCHEMA_VERSION,
+        DEVICE_ID
+    }
+
+    public enum ContentSource {
+        CARRIED,
+        STORED
+    }
 
     public static PlannerChange between(PlannerContent stored, CarriedWrite carried, ObjectMapper mapper) {
-        return new PlannerChange(
-                changed(carried.title(), stored.getTitle()),
-                changed(carried.status(), stored.getStatus()),
-                changed(carried.category(), stored.getCategory()),
-                contentChanged(carried.content(), stored.getContent(), mapper),
-                changed(carried.gameContentVersion(), stored.getGameContentVersion()),
-                changed(carried.contentSchemaVersion(), stored.getContentSchemaVersion()),
-                !Objects.equals(carried.deviceId(), stored.getDeviceId()));
+        Set<Field> fields = EnumSet.allOf(Field.class);
+        fields.removeIf(field -> !moved(field, stored, carried, mapper));
+        return new PlannerChange(Collections.unmodifiableSet(fields));
     }
 
     public boolean isNone() {
-        return !titleChanged && !statusChanged && !categoryChanged && !contentChanged
-                && !gameContentVersionChanged && !contentSchemaVersionChanged && !deviceIdChanged;
+        return fields.isEmpty();
     }
 
     public boolean categoryOnly() {
-        return categoryChanged && !gameContentVersionChanged && !contentChanged;
+        return fields.contains(Field.CATEGORY)
+                && !fields.contains(Field.GAME_CONTENT_VERSION) && !fields.contains(Field.CONTENT);
     }
 
-    private static boolean changed(Object carried, Object stored) {
-        return !Objects.equals(carried, stored);
+    public ContentSource contentSource() {
+        return categoryOnly() ? ContentSource.STORED : ContentSource.CARRIED;
+    }
+
+    private static boolean moved(Field field, PlannerContent stored, CarriedWrite carried, ObjectMapper mapper) {
+        return switch (field) {
+            case TITLE -> !Objects.equals(carried.title(), stored.getTitle());
+            case STATUS -> !Objects.equals(carried.status(), stored.getStatus());
+            case CATEGORY -> !Objects.equals(carried.category(), stored.getCategory());
+            case CONTENT -> contentChanged(carried.content(), stored.getContent(), mapper);
+            case GAME_CONTENT_VERSION ->
+                    !Objects.equals(carried.gameContentVersion(), stored.getGameContentVersion());
+            case CONTENT_SCHEMA_VERSION ->
+                    !Objects.equals(carried.contentSchemaVersion(), stored.getContentSchemaVersion());
+            case DEVICE_ID -> !Objects.equals(carried.deviceId(), stored.getDeviceId());
+        };
     }
 
     private static boolean contentChanged(String carried, String stored, ObjectMapper mapper) {

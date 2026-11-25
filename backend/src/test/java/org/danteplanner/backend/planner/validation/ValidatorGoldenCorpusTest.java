@@ -99,7 +99,7 @@ class ValidatorGoldenCorpusTest {
     void contentVersion_WhenCorpusEntryReplayed_MatchesSnapshot(String name) {
         ValidatorGoldenCorpus.VersionEntry entry = VERSION_ENTRIES.get(name);
 
-        assertThat(outcomeOf(() -> versionValidator.validateVersionForCreate(
+        assertThat(outcomeOf(() -> versionValidator.requireCreatableVersion(
                 entry.plannerType(), entry.contentVersion())))
                 .as(OUTPUT_CHANGED, name)
                 .isEqualTo(snapshot().get(name));
@@ -168,7 +168,7 @@ class ValidatorGoldenCorpusTest {
                     contentValidator.season(ValidatorGoldenCorpus.MD_CURRENT_VERSION), entry.stage())));
         }
         for (ValidatorGoldenCorpus.VersionEntry entry : ValidatorGoldenCorpus.versionEntries()) {
-            appendSection(file, entry.name(), outcomeOf(() -> versionValidator.validateVersionForCreate(
+            appendSection(file, entry.name(), outcomeOf(() -> versionValidator.requireCreatableVersion(
                     entry.plannerType(), entry.contentVersion())));
         }
 

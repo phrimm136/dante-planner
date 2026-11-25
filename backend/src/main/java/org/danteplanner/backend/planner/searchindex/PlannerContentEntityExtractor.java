@@ -33,7 +33,7 @@ public class PlannerContentEntityExtractor {
 
     public Set<EntityRef> extract(JsonNode root, MDCategory category) {
         Set<EntityRef> refs = new LinkedHashSet<>();
-        if (root == null || !root.isObject()) {
+        if (!root.isObject()) {
             return refs;
         }
         extractFromEquipment(root, refs);

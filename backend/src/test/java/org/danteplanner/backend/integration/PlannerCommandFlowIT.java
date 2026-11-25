@@ -26,6 +26,7 @@ import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.UpsertRequests;
+import org.danteplanner.backend.planner.sync.SyncVersionValidator.WriteMode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -194,7 +195,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
         Set<String> entityIndexBefore = entityIndex(plannerId);
 
         commandService.upsertPlanner(owner.getId(), deviceId, plannerId,
-                edit(planner, "After Edit", null), false);
+                edit(planner, "After Edit", null), WriteMode.CHECKED);
 
         PlannerCatalog catalogRow = catalogRepository.findById(plannerId).orElseThrow();
         assertThat(catalogRow.getTitle())
@@ -222,7 +223,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
         // instance returned by publishedPlanner() is already stale by the time the edit is built.
         planner = plannerRepository.findById(plannerId).orElseThrow();
         commandService.upsertPlanner(owner.getId(), deviceId, plannerId,
-                edit(planner, "Keyword Edit", Set.of("Combustion", "Burst")), false);
+                edit(planner, "Keyword Edit", Set.of("Combustion", "Burst")), WriteMode.CHECKED);
 
         assertThat(keywordIndex(plannerId))
                 .as("the keyword index is re-extracted from the committed keyword set")
@@ -273,7 +274,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
         commandService.upsertPlanner(owner.getId(), deviceId, plannerId, UpsertRequests.resending(planner)
                 .status(PlannerStatus.SAVED)
                 .content(SIX_FLOOR_CONTENT)
-                .build(), false);
+                .build(), WriteMode.CHECKED);
 
         Planner saved = plannerRepository.findById(plannerId).orElseThrow();
         assertThat(saved.getContentJson()).contains("1006");
@@ -313,7 +314,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
         commandService.upsertPlanner(owner.getId(), deviceId, planner.getId(), UpsertRequests.resending(planner)
                 .category(category)
                 .status(PlannerStatus.SAVED)
-                .build(), false);
+                .build(), WriteMode.CHECKED);
     }
 
     @Test

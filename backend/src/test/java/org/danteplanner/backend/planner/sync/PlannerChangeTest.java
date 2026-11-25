@@ -177,14 +177,14 @@ class PlannerChangeTest {
     void contentChanged_WhenCarriedContentIsTheSameDocumentWithDifferentWhitespace_IsFalse() {
         CarriedWrite carried = carryingStoredValues().content(SAME_DOCUMENT_RESTYLED).build();
 
-        assertThat(change(storedRow(), carried).contentChanged()).isFalse();
+        assertThat(change(storedRow(), carried).fields()).doesNotContain(PlannerChange.Field.CONTENT);
     }
 
     @Test
     void contentChanged_WhenCarriedContentIsUnparseable_IsTrue() {
         CarriedWrite carried = carryingStoredValues().content("{\"equipment\":").build();
 
-        assertThat(change(storedRow(), carried).contentChanged()).isTrue();
+        assertThat(change(storedRow(), carried).fields()).contains(PlannerChange.Field.CONTENT);
     }
 
     @Test

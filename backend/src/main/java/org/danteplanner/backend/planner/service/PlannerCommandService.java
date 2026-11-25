@@ -26,14 +26,20 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.sync.CarriedWrite;
 import org.danteplanner.backend.planner.precondition.ContentVersionValidator;
+import org.danteplanner.backend.planner.precondition.ContentVersionValidator.CreatableVersion;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
 import org.danteplanner.backend.planner.precondition.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.planner.validation.PlannerDocument;
 import org.danteplanner.backend.planner.precondition.PlannerLimitValidator;
+import org.danteplanner.backend.planner.precondition.PlannerLimitValidator.Room;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
+import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator.AvailableId;
+import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator.LiveOwned;
+import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator.UpsertableId;
 import org.danteplanner.backend.planner.sync.PlannerChange;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator;
+import org.danteplanner.backend.planner.sync.SyncVersionValidator.WriteMode;
 import org.danteplanner.backend.planner.sync.WriteArbitration;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
@@ -43,6 +49,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -154,6 +161,82 @@ public class PlannerCommandService {
         this.currentSchemaVersion = currentSchemaVersion;
     }
 
+    private sealed interface UpsertTarget {
+
+        record Absent() implements UpsertTarget {
+        }
+
+        record Private(Planner planner) implements UpsertTarget {
+        }
+
+        record Published(Planner planner) implements UpsertTarget {
+        }
+
+        static UpsertTarget of(Optional<Planner> existing) {
+            return existing.map(UpsertTarget::held).orElseGet(Absent::new);
+        }
+
+        private static UpsertTarget held(Planner planner) {
+            return planner.isPublished() ? new Published(planner) : new Private(planner);
+        }
+    }
+
+    private record SaveAttempt(UpsertPlannerRequest request, UUID deviceId, WriteMode mode, int schemaVersion) {
+
+        PlannerChange changeTo(Planner planner, ObjectMapper mapper) {
+            CarriedWrite carried = new CarriedWrite(
+                    request.titleOr(planner.getTitle()),
+                    request.statusOr(planner.getStatus()),
+                    request.category(),
+                    request.content(),
+                    request.contentVersion(),
+                    schemaVersion,
+                    deviceId);
+            return PlannerChange.between(planner.getContent(), carried, mapper);
+        }
+    }
+
+    private sealed interface UpsertDecision {
+
+        record Create() implements UpsertDecision {
+        }
+
+        record Acknowledge(Planner planner) implements UpsertDecision {
+        }
+
+        record UpdatePrivate(Planner planner, PlannerChange change) implements UpsertDecision {
+        }
+
+        record UpdatePublished(Planner planner, PlannerChange change) implements UpsertDecision {
+        }
+
+        static UpsertDecision of(UpsertTarget target, SaveAttempt attempt, SyncVersionValidator versions,
+                ObjectMapper mapper) {
+            return switch (target) {
+                case UpsertTarget.Absent absent -> new Create();
+                case UpsertTarget.Private(Planner planner) -> {
+                    PlannerChange change = attempt.changeTo(planner, mapper);
+                    yield arbitrated(planner, change, attempt, versions, new UpdatePrivate(planner, change));
+                }
+                case UpsertTarget.Published(Planner planner) -> {
+                    PlannerChange change = attempt.changeTo(planner, mapper);
+                    yield arbitrated(planner, change, attempt, versions, new UpdatePublished(planner, change));
+                }
+            };
+        }
+
+        private static UpsertDecision arbitrated(Planner planner, PlannerChange change, SaveAttempt attempt,
+                SyncVersionValidator versions, UpsertDecision update) {
+            WriteArbitration arbitration = versions.arbitrate(attempt.mode(),
+                    PlannerConflictException.Requested.of(attempt.request().syncVersion()),
+                    planner.getSyncVersion(), change);
+            return switch (arbitration) {
+                case ACK_NO_OP -> new Acknowledge(planner);
+                case WRITE -> update;
+            };
+        }
+    }
+
     private void applyUpsertFields(Planner planner, UpsertPlannerRequest request, UUID deviceId,
             PlannerChange change) {
         PlannerContent contentRow = planner.getContent();
@@ -167,22 +250,25 @@ public class PlannerCommandService {
             InvalidCategoryLog.warn(log, refusal);
             throw refusal;
         }
-        PlannerDocument document = change.categoryOnly()
-                ? contentValidator.reparseForCategory(contentRow.getContent(), category,
-                        contentValidator.stageOf(planner))
-                : contentValidator.parse(request.content(), category,
-                        contentValidator.season(request.contentVersion()), contentValidator.stageOf(planner));
+        PlannerDocument document = switch (change.contentSource()) {
+            case STORED -> contentValidator.reparseForCategory(contentRow.getContent(), category,
+                    contentValidator.stageOf(planner));
+            case CARRIED -> contentValidator.parse(request.content(), category,
+                    contentValidator.season(request.contentVersion()), contentValidator.stageOf(planner));
+        };
         contentRow.replaceContent(document);
-        if (change.categoryChanged()) {
-            contentRow.setCategory(request.category());
-        }
+        contentRow.setCategory(category.getValue());
 
         Set<String> keywords = document.keywords();
         countTopLevelCopy(TopLevelCopy.of(request.selectedKeywords(), keywords));
         contentRow.setSelectedKeywords(keywords);
-        if (deviceId != null) {
-            contentRow.setDeviceId(deviceId);
-        }
+        contentRow.setDeviceId(deviceIdOr(deviceId, contentRow.getDeviceId()));
+        contentRow.setGameContentVersion(request.contentVersion());
+        contentRow.setContentSchemaVersion(currentSchemaVersion);
+    }
+
+    private static @Nullable UUID deviceIdOr(@Nullable UUID carried, @Nullable UUID stored) {
+        return carried == null ? stored : carried;
     }
 
     private enum TopLevelCopy {
@@ -208,20 +294,20 @@ public class PlannerCommandService {
         meterRegistry.counter(TOP_LEVEL_KEYWORDS_METRIC, "outcome", copy.tag).increment();
     }
 
-    private Planner buildAggregate(UUID id, Long userId, UpsertPlannerRequest request, PlannerDocument document,
-            UUID deviceId) {
+    private Planner buildAggregate(UUID id, Room room, CreatableVersion version, MDCategory category,
+            PlannerDocument document, UpsertPlannerRequest request, UUID deviceId) {
         Planner planner = Planner.builder()
                 .id(id)
-                .userId(userId)
-                .plannerType(request.plannerType())
+                .userId(room.userId())
+                .plannerType(version.plannerType())
                 .build();
         planner.attach(
                 PlannerContent.of(
                         request.titleOr("Untitled"),
                         request.statusOr(PlannerStatus.DRAFT),
-                        request.category(),
+                        category.getValue(),
                         document,
-                        request.contentVersion(),
+                        version.value(),
                         deviceId),
                 PlannerPublication.builder().build(),
                 PlannerModeration.builder().build());
@@ -230,30 +316,30 @@ public class PlannerCommandService {
 
     @Transactional
     PlannerResponse createPlanner(Long userId, UUID deviceId, UpsertPlannerRequest request) {
-        return createAggregate(userId, deviceId, request).response();
+        return createAggregate(userId, deviceId, UUID.fromString(request.id()), request).response();
     }
 
-    UpsertedPlanner createAggregate(Long userId, UUID deviceId, UpsertPlannerRequest request) {
+    UpsertedPlanner createAggregate(Long userId, UUID deviceId, UUID id, UpsertPlannerRequest request) {
         accessGuard.requireUser(userId);
 
-        limitValidator.requireRoomFor(plannerRepository.countActiveByUserId(userId), 1, maxPlannersPerUser);
-
-        contentVersionValidator.validateVersionForCreate(request.plannerType(), request.contentVersion());
-
+        Room room = limitValidator.requireRoom(userId, plannerRepository.countActiveByUserId(userId),
+                maxPlannersPerUser);
+        CreatableVersion version = contentVersionValidator.requireCreatableVersion(
+                request.plannerType(), request.contentVersion());
         MDCategory category;
         try {
-            category = categoryValidator.requireCategoryForType(request.plannerType(), request.category());
+            category = categoryValidator.requireCategoryForType(version.plannerType(), request.category());
         } catch (PlannerValidationException refusal) {
             InvalidCategoryLog.warn(log, refusal);
             throw refusal;
         }
 
         PlannerDocument document = contentValidator.parse(request.content(), category,
-                contentValidator.season(request.contentVersion()), Stage.DRAFT);
+                contentValidator.season(version.value()), Stage.DRAFT);
         countTopLevelCopy(TopLevelCopy.of(request.selectedKeywords(), document.keywords()));
 
         Planner saved = plannerRepository.insert(
-                buildAggregate(UUID.fromString(request.id()), userId, request, document, deviceId));
+                buildAggregate(id, room, version, category, document, request, deviceId));
         statsRepository.insert(PlannerStats.builder().plannerId(saved.getId()).build());
         FreshnessDeclarations.declare(new FreshnessScope.Planner(saved.getId()), new FreshnessScope.User(userId));
         log.info("Created planner {} for user {}", saved.getId(), userId);
@@ -270,93 +356,95 @@ public class PlannerCommandService {
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public UpsertResult upsertPlanner(Long userId, UUID deviceId, UUID id, UpsertPlannerRequest request, boolean force) {
+    public UpsertResult upsertPlanner(Long userId, UUID deviceId, UUID id, UpsertPlannerRequest request,
+            WriteMode mode) {
         lockForUpsert(userId, id);
-        UpsertedPlanner upserted = upsertAggregate(userId, deviceId, id, request, force);
-        return upserted.created()
-                ? UpsertResult.created(upserted.response())
-                : UpsertResult.updated(upserted.response());
+        UpsertedPlanner upserted = upsertAggregate(userId, deviceId, id, request, mode);
+        return new UpsertResult(upserted.response(), upserted.created());
     }
 
     void lockForUpsert(Long userId, UUID id) {
-        plannerRepository.findOwnershipById(id)
-                .filter(existing -> !existing.getUserId().equals(userId) || existing.getDeletedAt() != null)
-                .ifPresent(existing -> ownershipValidator.requireIdAvailable(id, userId, existing));
-        plannerRepository.lockContent(id);
+        UpsertableId upsertable =
+                ownershipValidator.requireUpsertableId(id, userId, plannerRepository.findOwnershipById(id));
+        plannerRepository.lockContent(upsertable.plannerId());
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
     public UpsertedPlanner upsertAggregate(
-            Long userId, UUID deviceId, UUID id, UpsertPlannerRequest request, boolean force) {
-        var existingPlanner = plannerRepository.findAggregateForOwner(id, userId);
-
-        if (existingPlanner.isPresent()) {
-            log.info("Planner {} exists for user {}, updating (force={})", id, userId, force);
-            Planner planner = existingPlanner.get();
-
-            if (planner.isPublished()) {
-                restrictionCheck.requireUnrestricted(userId);
-            } else {
-                restrictionCheck.recordPrivate();
+            Long userId, UUID deviceId, UUID id, UpsertPlannerRequest request, WriteMode mode) {
+        UpsertTarget target = UpsertTarget.of(plannerRepository.findAggregateForOwner(id, userId));
+        admit(target, mode);
+        SaveAttempt attempt = new SaveAttempt(request, deviceId, mode, currentSchemaVersion);
+        return switch (UpsertDecision.of(target, attempt, syncVersionValidator, objectMapper)) {
+            case UpsertDecision.Create create -> createAtAvailableId(userId, deviceId, id, request);
+            case UpsertDecision.Acknowledge(Planner planner) -> acknowledge(planner, request);
+            case UpsertDecision.UpdatePrivate(Planner planner, PlannerChange change) -> {
+                update(planner, attempt, change);
+                yield updated(planner);
             }
-
-            CarriedWrite carried = CarriedWrite.builder()
-                    .title(request.titleOr(planner.getTitle()))
-                    .status(request.statusOr(planner.getStatus()))
-                    .category(request.category())
-                    .content(request.content())
-                    .gameContentVersion(request.contentVersion())
-                    .contentSchemaVersion(currentSchemaVersion)
-                    .deviceId(deviceId)
-                    .build();
-
-            PlannerChange change = PlannerChange.between(planner.getContent(), carried, objectMapper);
-            WriteArbitration arbitration = syncVersionValidator.arbitrate(
-                    force,
-                    PlannerConflictException.Requested.of(request.syncVersion()),
-                    planner.getSyncVersion(), change);
-            if (arbitration == WriteArbitration.ACK_NO_OP) {
-                log.info("Upsert of planner {} would move no field, acknowledging syncVersion {} without a write",
-                        id, planner.getSyncVersion());
-                countTopLevelCopy(TopLevelCopy.of(request.selectedKeywords(),
-                        PlannerKeywords.fromContent(planner.getContentJson()).asSet()));
-                PlannerResponse acknowledged =
-                        PlannerResponse.fromEntity(planner);
-                return new UpsertedPlanner(planner, acknowledged, false);
-            }
-
-            applyUpsertFields(planner, request, deviceId, change);
-
-            planner.getContent().setGameContentVersion(request.contentVersion());
-
-            planner.getContent().setContentSchemaVersion(currentSchemaVersion);
-            planner.recordSave();
-
-            log.info("Updated planner {} via upsert, new syncVersion: {}", id, planner.getSyncVersion());
-
-            FreshnessDeclarations.declare(new FreshnessScope.Planner(id), new FreshnessScope.User(userId));
-            if (planner.isPublished()) {
+            case UpsertDecision.UpdatePublished(Planner planner, PlannerChange change) -> {
+                update(planner, attempt, change);
                 plannerCatalogService.onVisibleEditCommitted(planner);
                 FreshnessDeclarations.declare(new FreshnessScope.Global());
+                yield updated(planner);
             }
+        };
+    }
 
-            PlannerResponse response = PlannerResponse.fromEntity(planner);
-            return new UpsertedPlanner(planner, response, false);
+    private void admit(UpsertTarget target, WriteMode mode) {
+        switch (target) {
+            case UpsertTarget.Absent absent -> { }
+            case UpsertTarget.Private(Planner planner) -> {
+                logFound(planner, mode);
+                restrictionCheck.recordPrivate();
+            }
+            case UpsertTarget.Published(Planner planner) -> {
+                logFound(planner, mode);
+                restrictionCheck.requireUnrestricted(planner.getUserId());
+            }
         }
+    }
 
-        plannerRepository.findOwnershipById(id)
-                .ifPresent(existing -> ownershipValidator.requireIdAvailable(id, userId, existing));
+    private static void logFound(Planner planner, WriteMode mode) {
+        log.info("Planner {} exists for user {}, updating (force={})",
+                planner.getId(), planner.getUserId(), mode == WriteMode.FORCED);
+    }
 
+    private UpsertedPlanner createAtAvailableId(Long userId, UUID deviceId, UUID id, UpsertPlannerRequest request) {
+        AvailableId available =
+                ownershipValidator.requireIdAvailable(id, userId, plannerRepository.findOwnershipById(id));
         log.info("Planner {} not found, creating for user {}", id, userId);
 
         restrictionCheck.recordPrivate();
-        return createAggregate(userId, deviceId, request.withId(id.toString()));
+        return createAggregate(userId, deviceId, available.plannerId(), request);
+    }
+
+    private UpsertedPlanner acknowledge(Planner planner, UpsertPlannerRequest request) {
+        log.info("Upsert of planner {} would move no field, acknowledging syncVersion {} without a write",
+                planner.getId(), planner.getSyncVersion());
+        countTopLevelCopy(TopLevelCopy.of(request.selectedKeywords(),
+                PlannerKeywords.fromContent(planner.getContentJson()).asSet()));
+        return updated(planner);
+    }
+
+    private void update(Planner planner, SaveAttempt attempt, PlannerChange change) {
+        applyUpsertFields(planner, attempt.request(), attempt.deviceId(), change);
+        planner.recordSave();
+
+        log.info("Updated planner {} via upsert, new syncVersion: {}", planner.getId(), planner.getSyncVersion());
+
+        FreshnessDeclarations.declare(new FreshnessScope.Planner(planner.getId()),
+                new FreshnessScope.User(planner.getUserId()));
+    }
+
+    private static UpsertedPlanner updated(Planner planner) {
+        return new UpsertedPlanner(planner, PlannerResponse.fromEntity(planner), false);
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deletePlanner(Long userId, UUID id) {
-        ownershipValidator.requireLiveOwnedBy(id, userId, plannerRepository.findOwnershipById(id));
-        plannerRepository.lockContent(id);
+        LiveOwned owned = ownershipValidator.requireLiveOwnedBy(id, userId, plannerRepository.findOwnershipById(id));
+        plannerRepository.lockContent(owned.plannerId());
         Planner planner = accessGuard.findPlannerOrThrow(userId, id);
 
         if (planner.isPublished()) {

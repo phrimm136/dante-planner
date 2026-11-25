@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import { migrateKeywords } from '@/shared/gameData'
 import { pagedModelSchema } from '@/lib/validation'
 import { PlannerCategorySchema, PlannerTypeSchema, PlannerStatusSchema } from './PlannerSchemas'
 
@@ -8,10 +7,7 @@ export const PublicPlannerSchema = z.object({
   title: z.string(),
   plannerType: PlannerTypeSchema,
   category: PlannerCategorySchema,
-  selectedKeywords: z.preprocess(
-    (v) => (v == null ? v : migrateKeywords(v)),
-    z.array(z.string()).nullish(),
-  ),
+  selectedKeywords: z.array(z.string()),
   upvotes: z.number().int().min(0),
   viewCount: z.number().int().min(0),
   authorUsernameEpithet: z.string().nullish(),

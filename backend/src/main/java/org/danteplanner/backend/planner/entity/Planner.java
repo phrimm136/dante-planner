@@ -27,6 +27,7 @@ import org.springframework.data.domain.Persistable;
 
 import org.danteplanner.backend.shared.entity.AuditedTimestampListener;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
+import org.danteplanner.backend.shared.failure.Parsed;
 
 import java.time.Instant;
 import java.util.Set;
@@ -214,13 +215,17 @@ public class Planner implements Persistable<UUID> {
     }
 
     public PublicationOutcome publish(Instant now) {
-        requirePublishable();
-        return publication.publish(now);
+        return Publishable.parse(this).publication().publish(now);
     }
 
-    private void requirePublishable() {
-        if (moderation.isTakenDown()) {
-            throw new PlannerForbiddenException(id);
+    @Parsed
+    private record Publishable(PlannerPublication publication) {
+
+        private static Publishable parse(Planner planner) {
+            if (planner.moderation.isTakenDown()) {
+                throw new PlannerForbiddenException(planner.id);
+            }
+            return new Publishable(planner.publication);
         }
     }
 

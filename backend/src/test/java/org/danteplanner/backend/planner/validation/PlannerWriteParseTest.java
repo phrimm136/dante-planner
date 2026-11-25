@@ -24,6 +24,7 @@ import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.support.UpsertRequests;
+import org.danteplanner.backend.planner.sync.SyncVersionValidator.WriteMode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -88,7 +89,7 @@ class PlannerWriteParseTest {
     }
 
     private UpsertResult upsert(Planner planner, UpsertPlannerRequest request) {
-        return commandService.upsertPlanner(owner.getId(), null, planner.getId(), request, false);
+        return commandService.upsertPlanner(owner.getId(), null, planner.getId(), request, WriteMode.CHECKED);
     }
 
     @Test

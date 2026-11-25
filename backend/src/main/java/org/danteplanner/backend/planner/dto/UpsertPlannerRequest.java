@@ -50,9 +50,4 @@ public record UpsertPlannerRequest(
     public PlannerStatus statusOr(PlannerStatus fallback) {
         return status == null ? fallback : status;
     }
-
-    public UpsertPlannerRequest withId(String id) {
-        return new UpsertPlannerRequest(id, category, title, status, content, contentVersion,
-                plannerType, null, selectedKeywords);
-    }
 }

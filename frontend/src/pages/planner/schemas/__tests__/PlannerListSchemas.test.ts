@@ -1,11 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { PaginatedPlannersSchema, PublishedPlannerDetailSchema } from '../PlannerListSchemas'
+import {
+  PaginatedPlannersSchema,
+  PublicPlannerSchema,
+  PublishedPlannerDetailSchema,
+} from '../PlannerListSchemas'
 
 const listedWithoutCreatedAt = {
   id: '550e8400-e29b-41d4-a716-446655440000',
   title: 'Test Planner',
   plannerType: 'MIRROR_DUNGEON',
   category: '5F',
+  selectedKeywords: ['Combustion'],
   upvotes: 0,
   viewCount: 0,
   firstPublishedAt: '2026-01-01T00:00:00Z',
@@ -43,6 +48,19 @@ describe('PaginatedPlannersSchema', () => {
     const parsed = PaginatedPlannersSchema.parse(page(rows))
 
     expect(parsed.content.map((row) => row.createdAt)).toEqual([undefined, null, createdAt])
+  })
+})
+
+describe('PublicPlannerSchema', () => {
+  it('requires selectedKeywords, which the server always emits as an array', () => {
+    expect(PublicPlannerSchema.safeParse(listedWithoutCreatedAt).success).toBe(true)
+    expect(
+      PublicPlannerSchema.safeParse({ ...listedWithoutCreatedAt, selectedKeywords: undefined })
+        .success,
+    ).toBe(false)
+    expect(
+      PublicPlannerSchema.safeParse({ ...listedWithoutCreatedAt, selectedKeywords: null }).success,
+    ).toBe(false)
   })
 })
 

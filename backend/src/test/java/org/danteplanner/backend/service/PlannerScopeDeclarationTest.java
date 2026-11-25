@@ -69,6 +69,7 @@ import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.UpsertRequests;
 import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.planner.sync.SyncVersionValidator.WriteMode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -193,7 +194,7 @@ class PlannerScopeDeclarationTest {
         when(plannerRepository.insert(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         commandService(TestDataFactory.contentValidator())
-                .upsertAggregate(OWNER_ID, null, id, UpsertRequests.draft().build(), false);
+                .upsertAggregate(OWNER_ID, null, id, UpsertRequests.draft().build(), WriteMode.CHECKED);
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
                 new FreshnessScope.Planner(id), new FreshnessScope.User(OWNER_ID));
@@ -227,7 +228,7 @@ class PlannerScopeDeclarationTest {
 
         commandService(TestDataFactory.contentValidator()).upsertAggregate(OWNER_ID, null, planner.getId(),
                 UpsertRequests.draft().id(planner.getId().toString()).title("edited-" + UUID.randomUUID()).build(),
-                true);
+                WriteMode.FORCED);
     }
 
     @Test

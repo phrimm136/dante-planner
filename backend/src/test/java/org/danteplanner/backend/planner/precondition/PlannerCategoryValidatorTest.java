@@ -35,6 +35,17 @@ class PlannerCategoryValidatorTest {
                         ex -> assertThat(ex.getOriginalCode()).isEqualTo("MISMATCHED_CATEGORY"));
     }
 
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {"5F", "10F", "15F", "XX"})
+    void requireCategoryForType_WhenARefractedRailwayCategoryIsUnknown_ThrowsMismatchedCategory(String category) {
+        assertRejected(() -> validator.requireCategoryForType(PlannerType.REFRACTED_RAILWAY, category))
+                .withViolation("MISMATCHED_CATEGORY")
+                .isInstanceOfSatisfying(PlannerValidationException.class,
+                        ex -> assertThat(ex.getOriginalMessage()).isEqualTo(
+                                "Invalid category '" + category + "' for planner type REFRACTED_RAILWAY"));
+    }
+
     @Test
     void requireCategoryForType_WhenTheTypeAcceptsACategoryTheContentParseCannotUse_ThrowsInvalidCategoryAlone() {
         assertRejected(() -> validator.requireCategoryForType(PlannerType.REFRACTED_RAILWAY, "RR_PLACEHOLDER"))
