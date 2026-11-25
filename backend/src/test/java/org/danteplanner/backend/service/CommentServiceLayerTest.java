@@ -12,8 +12,6 @@ import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.comment.service.CommentEngagementService;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator;
-import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
-import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
@@ -114,12 +112,10 @@ class CommentServiceLayerTest {
                 new DomainEventRecorder(domainEventRepository, new ObjectMapper(), event -> { }),
                 new PlannerAccessGuard(users, plannerRepository),
                 new PlannerStatsService(plannerStatsRepository),
-                new CommentAccessValidator(), new CommentAuthorshipValidator(),
-                new CommentStateValidator(), Clock.systemUTC());
+                Clock.systemUTC());
         engagementService = new CommentEngagementService(
                 commentRepository, commentVoteRepository, queryService,
-                null, new CommentAuthorshipValidator(),
-                new CommentStateValidator(), new VoteUniquenessValidator());
+                null, new VoteUniquenessValidator());
 
         testUser = TestDataFactory.unsavedUser(UserRole.NORMAL);
 
@@ -350,6 +346,8 @@ class CommentServiceLayerTest {
             assertRejected(() -> commandService.updateComment(commentPublicId, testUser.getId(), request))
                     .withCode("COMMENT_FORBIDDEN")
                     .satisfies(rejection -> assertThat(rejection.getMessage()).isEqualTo("Cannot edit a deleted comment"));
+            assertThat(comment.getContent()).isEmpty();
+            assertThat(comment.getEditedAt()).isNull();
         }
     }
 

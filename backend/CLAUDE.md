@@ -12,7 +12,8 @@ Spring Boot + Java + JPA/Hibernate + Bean Validation (Jakarta) + MySQL + Redis +
 
 ## Checked facts, decisions and effects
 
-- Check at construction and keep the result: a fact later code relies on is a type annotated `@Parsed` with a static factory that returns it or throws, and the code after it takes that type (`ParsedTypeRuleTest`). A new `void requireX` fails `VoidCheckRuleTest`.
+- Check at construction and keep the result: a fact later code relies on is a type annotated `@Parsed` with a static factory that returns it, returns a `Result` of it, or throws, and the code after it takes that type (`ParsedTypeRuleTest`). A new `void requireX` fails `VoidCheckRuleTest`.
+- Checks that run one after another with no read between them return `Result` and are joined with `flatMap`; the service unwraps with `orElseThrow` or a `switch`. A method returning `Result` sits under `@CheckReturnValue` (`ResultRuleTest`), and no `@Transactional` method returns one (`FailureUnionBoundaryTest`).
 - A fact about a row holds under the lock or transaction it was read in. Parse it again after taking a lock.
 - A decision is a pure method returning a sealed type or enum; the method that performs effects only switches on it (`DecisionPurityTest`, `ShellBranchTest`). A type ending in `Outcome` reports what a command did.
 - A public method takes no `boolean`: use an enum or two methods (`FlagParameterRuleTest`).

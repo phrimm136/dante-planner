@@ -854,9 +854,6 @@ guards the parse but likewise skips the schema gate.
   against 1.1 s, so the rate-limit bucket probably refilled mid-loop. Worth fixing with an injected
   clock for the bucket when it fails again.
   re-check: `rg -q 'void viewCount_WhenClientExhaustsViewRecordBudget_' backend/src/test/java/org/danteplanner/backend/integration/PublishedPlannerSplitReadIT.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/shared/ratelimit -i -e 'clock' -e 'TimeMeter'`
-- `AuthController.tokenValidator` is unused (errorprone
-  UnusedVariable). Worth deleting the next time that file changes.
-  re-check: `test "$(rg -c 'tokenValidator' backend/src/main/java/org/danteplanner/backend/auth/controller/AuthController.java)" = 1`
 - Two more retry-only failures at full size with in-fork class concurrency on (measurement runs,
   2026-10-04): `PlannerPublishEventIT.publish_WhenRolledBack_EmitsNoSseEvent` and a
   `PlannerResponseContractIT` no-upvotes case. With concurrency off, 0 of 3 runs retried (n too small to

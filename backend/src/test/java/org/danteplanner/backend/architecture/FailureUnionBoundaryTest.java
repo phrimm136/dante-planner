@@ -60,6 +60,7 @@ class FailureUnionBoundaryTest {
                         + "half of the condition")
                 .containsExactly(
                         FIXTURE_PACKAGE + ".ClassTransactionalUnionReturner.settle",
+                        FIXTURE_PACKAGE + ".ResultReturners$TransactionalReturner.settle",
                         FIXTURE_PACKAGE + ".TransactionalUnionReturner.settle");
     }
 

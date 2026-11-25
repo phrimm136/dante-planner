@@ -2,7 +2,6 @@ package org.danteplanner.backend.service;
 
 import org.danteplanner.backend.moderation.service.CommentReportService;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
-import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.mockito.ArgumentCaptor;
 import org.danteplanner.backend.moderation.api.dto.CommentReportRequest;
 import org.danteplanner.backend.moderation.api.dto.CommentReportResponse;
@@ -57,7 +56,7 @@ class CommentReportServiceTest {
     void setUp() {
         service = new CommentReportService(reportRepository,
                 new CommentModerationTargetAdapter(new CommentQueryService(commentRepository, null, null, null, null),
-                        null, new CommentStateValidator()),
+                        null),
                 new ReportUniquenessValidator());
     }
 

@@ -59,7 +59,6 @@ class RateLimitedOAuthCallbackIsDistinguishableTest {
                 null,
                 null,
                 null,
-                null,
                 new CookieUtils(false, "", "Lax"),
                 null,
                 null,

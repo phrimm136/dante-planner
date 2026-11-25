@@ -6,8 +6,6 @@ import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator;
-import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
-import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -86,8 +84,7 @@ class CommentCommandServicePlacementTest {
         service = new CommentCommandService(commentRepository, queryService,
                 new DomainEventRecorder(domainEventRepository, new ObjectMapper(), event -> { }),
                 accessGuard, new PlannerStatsService(plannerStatsRepository),
-                new CommentAccessValidator(), new CommentAuthorshipValidator(),
-                new CommentStateValidator(), Clock.systemUTC());
+                Clock.systemUTC());
     }
 
     @Test

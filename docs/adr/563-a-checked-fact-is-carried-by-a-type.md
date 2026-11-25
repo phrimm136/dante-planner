@@ -2,7 +2,7 @@
 epic: none · pr: none
 
 ## Decisions
-- @parse @types @archunit — A fact that code after the check relies on is carried by a type annotated `@Parsed`, which only its own factory creates; the factory returns it or throws the refusal, and later code takes the type instead of the raw value. A void check leaves nothing behind, so a caller that skipped it compiles like one that did not.
+- @parse @types @archunit — A fact that code after the check relies on is carried by a type annotated `@Parsed`, which only its own factory creates; the factory returns it, returns a `Result` of it, or throws the refusal, and later code takes the type instead of the raw value. A void check leaves nothing behind, so a caller that skipped it compiles like one that did not.
   REJECTED: void checks kept in order by review — nothing in a signature says a check has run.
   NON-GOAL: refusing a line added to either list by hand — the diff of the list is where it is reviewed.
   REJECTED: a private record constructor instead of a rule — a record's canonical constructor is as visible as the record.

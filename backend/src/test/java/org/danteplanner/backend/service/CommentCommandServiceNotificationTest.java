@@ -6,8 +6,6 @@ import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator;
-import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
-import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
@@ -90,8 +88,7 @@ class CommentCommandServiceNotificationTest {
                 new DomainEventRecorder(domainEventRepository, new ObjectMapper(), event -> { }),
                 new PlannerAccessGuard(users, plannerRepository),
                 new PlannerStatsService(plannerStatsRepository),
-                new CommentAccessValidator(), new CommentAuthorshipValidator(),
-                new CommentStateValidator(), Clock.systemUTC());
+                Clock.systemUTC());
     }
 
     @Test
