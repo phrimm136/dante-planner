@@ -25,6 +25,7 @@ const API_BASE_URL = env.VITE_API_BASE_URL
 const CSRF_COOKIE_NAME = 'csrf'
 /** Request header that must echo the CSRF cookie on state-changing requests. */
 const CSRF_HEADER_NAME = 'X-CSRF-Token'
+const CSRF_ERROR_CODE = 'CSRF_TOKEN_INVALID'
 
 /**
  * Read the readable `csrf` cookie for double-submit CSRF protection.
@@ -97,6 +98,23 @@ async function readErrorBody(response: Response): Promise<Problem | null> {
   return parsed.success ? parsed.data : null
 }
 
+/**
+ * The server mints a token for every response to a request without the cookie, so the cookie can
+ * change between the read and the send. A client that sent no token gets no second try, so a
+ * refusal never becomes the first accepted write of a client that did not echo the cookie.
+ */
+function replacedCsrfToken(sentToken: string): string | null {
+  const currentToken = readCsrfToken()
+  return currentToken === sentToken ? null : currentToken
+}
+
+/** The CSRF filter answers before any handler runs, so a request it refused changed nothing. */
+async function isCsrfRejection(response: Response): Promise<boolean> {
+  return (
+    response.status === 403 && (await readErrorBody(response.clone()))?.code === CSRF_ERROR_CODE
+  )
+}
+
 export class ApiClient {
   static async fetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const method = (options.method ?? 'GET').toUpperCase()
@@ -112,23 +130,32 @@ export class ApiClient {
     }
 
     // Double-submit CSRF: echo the readable `csrf` cookie on state-changing
-    if (!isBodylessMethod) {
-      const csrfToken = readCsrfToken()
-      if (csrfToken) {
-        headers.set(CSRF_HEADER_NAME, csrfToken)
+    const sentToken = isBodylessMethod ? null : readCsrfToken()
+    if (sentToken) {
+      headers.set(CSRF_HEADER_NAME, sentToken)
+    }
+
+    const send = async (): Promise<Response> => {
+      try {
+        return await fetch(`${API_BASE_URL}${endpoint}`, {
+          ...options,
+          headers,
+          credentials: 'include', // Include HttpOnly cookies
+        })
+      } catch (error) {
+        if (options.signal?.aborted !== true) recordServerStatus('down')
+        throw error
       }
     }
 
-    let response: Response
-    try {
-      response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        ...options,
-        headers,
-        credentials: 'include', // Include HttpOnly cookies
-      })
-    } catch (error) {
-      if (options.signal?.aborted !== true) recordServerStatus('down')
-      throw error
+    let response = await send()
+
+    if (sentToken && (await isCsrfRejection(response))) {
+      const currentToken = replacedCsrfToken(sentToken)
+      if (currentToken) {
+        headers.set(CSRF_HEADER_NAME, currentToken)
+        response = await send()
+      }
     }
 
     if (response.status === 401) {

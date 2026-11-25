@@ -520,6 +520,79 @@ describe('ApiClient', () => {
 
       expect(sentHeaders().get('X-CSRF-Token')).toBe('abc=def==')
     })
+
+    describe('a rejected token', () => {
+      const rejection = { code: 'CSRF_TOKEN_INVALID', detail: 'Missing or invalid CSRF token' }
+      const tokensSent = () => seen.map((request) => request.headers.get('X-CSRF-Token'))
+
+      /** The server rejects `rejected` requests; `onReject` is what the browser stores meanwhile. */
+      function rejectThenAccept(rejected: number, onReject: () => void) {
+        answer(() => {
+          if (seen.length > rejected) return HttpResponse.json({ stored: true })
+          onReject()
+          return HttpResponse.json(rejection, { status: 403 })
+        })
+      }
+
+      it('is sent again once when another response replaced the cookie', async () => {
+        cookieValue = 'csrf=first'
+        rejectThenAccept(1, () => {
+          cookieValue = 'csrf=second'
+        })
+
+        const result = await ApiClient.post('/api/planner', { name: 'Test' })
+
+        expect(result).toEqual({ stored: true })
+        expect(tokensSent()).toEqual(['first', 'second'])
+        expect(seen.map((request) => request.body)).toEqual(['{"name":"Test"}', '{"name":"Test"}'])
+      })
+
+      it('is given up after the one retry', async () => {
+        cookieValue = 'csrf=first'
+        rejectThenAccept(2, () => {
+          cookieValue = `csrf=after-${seen.length}`
+        })
+
+        await expect(ApiClient.post('/api/planner', { name: 'Test' })).rejects.toThrow(
+          ForbiddenError,
+        )
+        expect(tokensSent()).toEqual(['first', 'after-1'])
+      })
+
+      it('is not sent again when the cookie did not change', async () => {
+        cookieValue = 'csrf=same'
+        rejectThenAccept(1, () => undefined)
+
+        await expect(ApiClient.post('/api/planner', { name: 'Test' })).rejects.toThrow(
+          ForbiddenError,
+        )
+        expect(seen).toHaveLength(1)
+      })
+
+      it('is not sent again when the client sent no token', async () => {
+        rejectThenAccept(1, () => {
+          cookieValue = 'csrf=issued-with-the-rejection'
+        })
+
+        await expect(ApiClient.post('/api/planner', { name: 'Test' })).rejects.toThrow(
+          ForbiddenError,
+        )
+        expect(seen).toHaveLength(1)
+      })
+
+      it('is not sent again on another 403', async () => {
+        cookieValue = 'csrf=first'
+        answer(() => {
+          cookieValue = 'csrf=second'
+          return HttpResponse.json({ code: 'OWN_PLANNER', detail: 'no' }, { status: 403 })
+        })
+
+        await expect(ApiClient.post('/api/planner', { name: 'Test' })).rejects.toThrow(
+          ForbiddenError,
+        )
+        expect(seen).toHaveLength(1)
+      })
+    })
   })
 
   describe('server status recording', () => {
