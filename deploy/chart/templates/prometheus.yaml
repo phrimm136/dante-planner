@@ -1,0 +1,253 @@
+# Prometheus per region on the data node, local scrape only. Remote-write to
+# Grafana Cloud (survives Oregon's death) is configured below.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus
+  namespace: danteplanner
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prometheus
+rules:
+  - apiGroups: [""]
+    resources: ["nodes", "nodes/metrics", "services", "endpoints", "pods"]
+    verbs: ["get", "list", "watch"]
+  - nonResourceURLs: ["/metrics"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus
+subjects:
+  - kind: ServiceAccount
+    name: prometheus
+    namespace: danteplanner
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: danteplanner
+data:
+  rules.yml: |
+    groups:
+      - name: remote-write-aggregations
+        interval: 60s
+        rules:
+          # Pod- and method/status-merged latency histogram per endpoint: the raw
+          # per-pod buckets stay local-only; only these aggregates are shipped
+          # (remote_write keep-list admits the uri: prefix). SSE endpoints hold
+          # connections open for their lifetime and are excluded as non-latency.
+          - record: uri:http_server_requests_seconds_bucket:rate5m
+            expr: sum by (uri, le) (rate(http_server_requests_seconds_bucket{uri!~".*/events|.*/subscribe|/api/sse/.*|UNKNOWN"}[5m]))
+          - record: uri:http_server_requests_seconds_count:rate5m
+            expr: sum by (uri) (rate(http_server_requests_seconds_count{uri!~".*/events|.*/subscribe|/api/sse/.*|UNKNOWN"}[5m]))
+  prometheus.yml: |
+    global:
+      scrape_interval: 60s
+      external_labels:
+        cluster: ${CLUSTER_NAME}
+    rule_files:
+      - /etc/prometheus/rules.yml
+    remote_write:
+      - url: https://prometheus-prod-56-prod-us-east-2.grafana.net/api/prom/push
+        basic_auth:
+          username_file: /etc/prometheus/remote-write/username
+          password_file: /etc/prometheus/remote-write/password
+        # Ship only the series the Grafana-managed alerts and the fleet dashboard
+        # query — the free-plan active-series budget cannot absorb full-fidelity
+        # apiserver/argocd/micrometer output. Local TSDB keeps everything for 7d;
+        # any metric a new cloud alert or panel needs must be added here.
+        write_relabel_configs:
+          - source_labels: [__name__]
+            action: keep
+            regex: up|uri:.+|node_memory_MemAvailable_bytes|node_memory_MemTotal_bytes|node_pressure_.+|node_load1|node_cpu_seconds_total|node_filesystem_(avail|size)_bytes|node_disk_written_bytes_total|node_network_(receive|transmit)_bytes_total|prometheus_tsdb_head_series|prometheus_remote_storage_samples_total|prometheus_remote_storage_samples_failed_total|kube_.+|http_server_requests_seconds_(count|sum|max)|logback_events_total|hikaricp_connections(|_active|_idle|_pending|_max|_min|_timeout_total|_creation_seconds_(count|sum|max)|_acquire_seconds_(count|sum|max)|_usage_seconds_(count|sum|max))|jvm_memory_used_bytes|jvm_memory_committed_bytes|jvm_memory_max_bytes|jvm_buffer_memory_used_bytes|jvm_buffer_count_buffers|jvm_gc_pause_seconds_(sum|count)|jvm_threads_states_threads|jvm_threads_live_threads|blacklist_check_skipped_total|redis_role_skipped_total|rate_limit_charge_skipped_total|views_record_failed_total|sse_publish_dropped_total|jwt_rotation_outcome_total|resilience4j_circuitbreaker_state|resilience4j_circuitbreaker_calls_seconds_(count|sum|max)|resilience4j_circuitbreaker_not_permitted_calls_total|resilience4j_circuitbreaker_failure_rate|resilience4j_circuitbreaker_buffered_calls|datasource_read_source_breaker_transitions_total|gtid_capture_total|restriction_undecided_total|freshness_marker_(raise_abandoned|raise_failures|undeclared|wait_timeouts)_total|mysql_up|mysql_global_status_slow_queries|mysql_global_status_threads_running|mysql_global_status_created_tmp_disk_tables|mysql_global_status_created_tmp_tables|mysql_global_status_sort_merge_passes|mysql_global_status_select_full_join|mysql_global_status_select_scan|mysql_global_status_handlers_total|mysql_perf_schema_events_statements_(seconds|rows_examined|rows_sent)_total|mysql_perf_schema_table_io_waits_seconds_total|redis_up|redis_memory_used_bytes|redis_memory_max_bytes|redis_mem_fragmentation_ratio|redis_keyspace_(hits|misses)_total|redis_connected_clients|redis_blocked_clients|redis_db_keys_expiring|redis_master_repl_offset|redis_master_link_up|redis_connected_slaves|argocd_app_info|externalsecret_status_condition|etcd_disk_wal_fsync_duration_seconds_(sum|count)|etcd_disk_backend_commit_duration_seconds_(sum|count)|etcd_server_has_leader|apiserver_current_inflight_requests|coredns_dns_requests_total|coredns_dns_response_rcode_count_total|container_memory_working_set_bytes|container_memory_rss|container_memory_cache|container_cpu_usage_seconds_total
+          - source_labels: [__name__, mode]
+            action: drop
+            regex: node_cpu_seconds_total;(nice|system|idle|iowait|irq|softirq|steal)
+          - source_labels: [__name__, fstype]
+            action: drop
+            regex: node_filesystem_(avail|size)_bytes;(tmpfs|overlay)
+    scrape_configs:
+      - job_name: backend
+        metrics_path: /actuator/prometheus
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: "true"
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_job]
+            action: replace
+            target_label: job
+            regex: (.+)
+      - job_name: prometheus
+        static_configs:
+          - targets: ['localhost:9090']
+      - job_name: apiserver
+        kubernetes_sd_configs:
+          - role: endpoints
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+            action: keep
+            regex: default;kubernetes;https
+      - job_name: etcd
+        kubernetes_sd_configs:
+          - role: node
+        scheme: http
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_node_label_node_role_kubernetes_io_control_plane]
+            action: keep
+            regex: .+
+          - source_labels: [__meta_kubernetes_node_address_InternalIP]
+            action: replace
+            regex: (.+)
+            replacement: $1:2381
+            target_label: __address__
+      - job_name: kubelet-cadvisor
+        kubernetes_sd_configs:
+          - role: node
+        scheme: https
+        metrics_path: /metrics/cadvisor
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_node_address_InternalIP]
+            action: replace
+            regex: (.+)
+            replacement: $1:10250
+            target_label: __address__
+          - source_labels: [__meta_kubernetes_node_name]
+            action: replace
+            target_label: node
+        metric_relabel_configs:
+          - source_labels: [__name__]
+            action: keep
+            regex: container_memory_working_set_bytes|container_memory_rss|container_memory_cache|container_cpu_usage_seconds_total
+          - source_labels: [container]
+            action: drop
+            regex: "|POD"
+          - action: labeldrop
+            regex: id|image|cpu
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: danteplanner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      serviceAccountName: prometheus
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      nodeSelector:
+        role: data
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v2.54.1
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          args:
+            - --config.file=/etc/prometheus/prometheus.yml
+            - --storage.tsdb.retention.time=7d
+            - --enable-feature=expand-external-labels
+            # Required by the config-reloader sidecar's POST /-/reload.
+            - --web.enable-lifecycle
+          env:
+            - name: CLUSTER_NAME
+              value: {{ .Values.region }}
+          ports:
+            - name: web
+              containerPort: 9090
+          volumeMounts:
+            - name: config
+              mountPath: /etc/prometheus
+            - name: remote-write-auth
+              mountPath: /etc/prometheus/remote-write
+              readOnly: true
+            - name: data
+              mountPath: /prometheus
+          resources:
+            requests:
+              cpu: 100m
+              memory: 384Mi
+            limits:
+              memory: 512Mi
+        - name: config-reloader
+          image: quay.io/prometheus-operator/prometheus-config-reloader:v0.76.0
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          args:
+            - --watched-dir=/etc/prometheus
+          volumeMounts:
+            - name: config
+              mountPath: /etc/prometheus
+              readOnly: true
+          resources:
+            requests:
+              cpu: 5m
+              memory: 16Mi
+            limits:
+              memory: 32Mi
+      volumes:
+        - name: config
+          configMap:
+            name: prometheus-config
+        - name: remote-write-auth
+          secret:
+            secretName: grafana-remote-write
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: danteplanner
+  labels:
+    app: prometheus
+spec:
+  selector:
+    app: prometheus
+  ports:
+    - name: web
+      port: 9090
+      targetPort: web

@@ -144,6 +144,46 @@ render() {
   done | paste -sd ',' - | sed 's/,/, /g')"
 }
 
+helm_chart() {
+  docker run --rm --network none -v "$deploy_dir/chart:/chart:ro" "$HELM_IMAGE" template "danteplanner-$1" /chart \
+    -f "/chart/values-$1.yaml" --set image.repository=registry.example/danteplanner-backend "${@:2}"
+}
+
+chart_refuses() {
+  local overlay=$1
+  ! helm_chart "$@" >/dev/null 2>"$work/refusal.err" \
+    || fail chart "values-$overlay.yaml with ${*:2} rendered; values.schema.json no longer refuses it"
+  grep -q "don't meet the specifications of the schema" "$work/refusal.err" \
+    || fail chart "values-$overlay.yaml with ${*:2} failed for another reason than the schema: $(cat "$work/refusal.err")"
+}
+
+chart() {
+  local overlay out counts=()
+  for overlay in "${OVERLAYS[@]}"; do
+    if ! helm_chart "$overlay" > "$work/chart-$overlay.yaml" 2> "$work/chart-$overlay.err"; then
+      cat "$work/chart-$overlay.err" >&2
+      fail chart "helm could not render deploy/chart with values-$overlay.yaml"
+    fi
+    sed 's#image: danteplanner-backend:#image: registry.example/danteplanner-backend:#' "$work/$overlay.yaml" > "$work/registry-$overlay.yaml"
+    if ! out=$("$repo/.github/scripts/compare-chart.py" "$work/registry-$overlay.yaml" "$work/chart-$overlay.yaml" 2>&1); then
+      echo "$out" >&2
+      fail chart "deploy/chart with values-$overlay.yaml renders other objects than overlays/$overlay; make the same change in both until the overlays are gone"
+    fi
+    counts+=("$overlay: $out objects")
+    sed 's/--appendfsync everysec/--appendfsync no/' "$work/chart-$overlay.yaml" > "$work/tampered.yaml"
+    ! cmp -s "$work/chart-$overlay.yaml" "$work/tampered.yaml" || fail chart "the tampered render of $overlay equals the original"
+    ! "$repo/.github/scripts/compare-chart.py" "$work/registry-$overlay.yaml" "$work/tampered.yaml" >/dev/null 2>&1 \
+      || fail chart "the comparison passed a render of $overlay with one changed field"
+  done
+  chart_refuses seoul --set region=null
+  chart_refuses seoul --set region=oregon
+  chart_refuses seoul --set backendConfig.DEPLOY_REGION=us-west-2
+  chart_refuses seoul --set backendConfig.REDIS_AUTHLOCAL_HOST=null
+  chart_refuses seoul --set redisAuth.replicaOf.host=
+  chart_refuses oregon --set image.tag=latest
+  pass chart "$(printf '%s\n' "${counts[@]}" | paste -sd ',' - | sed 's/,/, /g') equal the overlays, a changed field is seen, 6 wrong values are refused"
+}
+
 validate() {
   local stage=$1 out
   shift
@@ -387,6 +427,7 @@ behavior() {
 
 alerts
 render
+chart
 charts
 schema
 behavior

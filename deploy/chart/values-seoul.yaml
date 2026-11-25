@@ -1,0 +1,62 @@
+# Names the cluster on metrics and logs, and selects the Cloudflare tunnel token.
+region: seoul
+image:
+  tag: "d6b92800879ec9665be03e3e03400fed3d2ce686"
+# Seoul reads the LOCAL (ap-northeast-2) secret replicas, not Oregon's us-west-2
+# originals — that is the whole point of terraform/secrets multi-region
+# replication (chunk 2). With us-west-2 here Seoul's ESO would pull cross-region
+# from us-west-2, paying the latency and coupling Seoul's boot to Oregon.
+awsRegion: ap-northeast-2
+mysqldEndpointKey: replica-endpoint
+# Seoul redis-auth = read-only REPLICAOF the Oregon PRIMARY (mechanics #5). It
+# pulls blacklist/rotation/freshness marker state from Oregon over the Seoul<->Oregon
+# peering and serves Seoul's read-local traffic; it REFUSES local writes
+# (replica-read-only), so a Seoul write correctly routes to the primary via
+# REDIS_AUTH_HOST instead of silently landing on a stale replica.
+#
+# The replicaof target redis-auth.oregon.danteplanner.internal:31637 is the
+# same host and port as backendConfig's REDIS_AUTH_HOST/REDIS_AUTH_PORT;
+# the name resolves over the peering through Oregon's private zone
+# (terraform/seoul/internal-dns.tf).
+#
+# OREGON-SIDE PREREQUISITE: Oregon exposes redis-auth at a peering-reachable
+# endpoint (redisAuth.nodePort in values-oregon.yaml) and
+# its cluster SG admits ONLY Seoul's fleet CIDR on that port
+# (terraform/modules/fleet/network.tf, redis_cross_region_cidr — never
+# 0.0.0.0/0). The auth Redis holds revocation state, so the exposed primary
+# requires AUTH: this replica sends --masterauth to replicate from it and sets
+# its own --requirepass so the Seoul copy of that state is equally protected.
+# Both come from the same AUTH_REDIS_PASSWORD key (Secrets Manager replicates
+# the runtime-config bundle to Seoul).
+redisAuth:
+  replicaOf:
+    host: redis-auth.oregon.danteplanner.internal
+    port: 31637
+backendConfig:
+  DEPLOY_REGION: ap-northeast-2
+  # Read-local / write-global auth Redis (Phase 14a split, live). WRITES (blacklist
+  # add, rotation, freshness marker raise) reach the OREGON PRIMARY redis-auth over the
+  # peering by its stable internal name (Route53 private zone, terraform/oregon
+  # internal-dns.tf; resolves to the data node over the peering), on the NodePort.
+  # A Seoul-local write would hit the read-only REPLICAOF replica and fail.
+  REDIS_AUTH_HOST: redis-auth.oregon.danteplanner.internal
+  REDIS_AUTH_PORT: "31637"
+  # READS resolve against the Seoul-LOCAL replica (in-cluster redis-auth, a
+  # read-only REPLICAOF of the Oregon primary). This is the whole point of the
+  # split: blacklist/freshness marker reads stay in-region instead of ~130ms to Oregon.
+  REDIS_AUTHLOCAL_HOST: redis-auth.danteplanner.svc.cluster.local
+  # Per-region ephemeral rate-limit store — local, never replicated.
+  REDIS_RATELIMIT_HOST: redis-ratelimit.danteplanner.svc.cluster.local
+  # SSE subscribe target — the Seoul-local replica (a pod subscribes to the store
+  # its region publishes fan-out to). Same relaxed-binding trap as auth-local:
+  # unset resolves to a dead localhost.
+  REDIS_SSELOCAL_HOST: redis-auth.danteplanner.svc.cluster.local
+  # MYSQL_HOST + secrets come from the backend-runtime-config Secrets Manager
+  # bundle, read from the ap-northeast-2 REPLICA (terraform/secrets replication).
+  # That bundle is a byte-copy of Oregon's, so it can only carry the PRIMARY
+  # endpoint — the Seoul-local replica must be wired here, the region-scoped
+  # surface. Reads route to the local RDS replica; writes keep crossing the
+  # peering to the Oregon primary (read-local / write-global, mechanics §5).
+  DATASOURCE_READSOURCES_0_NAME: seoul-replica
+  DATASOURCE_READSOURCES_0_URL: "jdbc:mysql://mysql-replica.seoul.danteplanner.internal:${MYSQL_PORT:3306}/${MYSQL_DATABASE:danteplanner}?sslMode=VERIFY_CA&serverTimezone=UTC&connectTimeout=${DB_CONNECT_TIMEOUT_MS:10000}&socketTimeout=15000&trackSessionState=true&trustCertificateKeyStoreUrl=file:/app/certs/rds-truststore.p12&trustCertificateKeyStoreType=PKCS12&trustCertificateKeyStorePassword=changeit"
+  DATASOURCE_READSOURCES_1_NAME: primary
