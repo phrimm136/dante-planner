@@ -194,7 +194,7 @@ validate() {
 }
 
 charts() {
-  local report drift region chart summary files=() renders=()
+  local report drift region chart crds summary files=() renders=()
   for region in "${regions[@]}"; do renders+=("$work/$region.yaml"); done
   drift=$(python3 - "${renders[@]}" <<'PY'
 import pathlib
@@ -227,8 +227,13 @@ PY
     [ -e "$chart" ] && files+=("/render/charts/$(basename "$chart")")
   done
   [ "${#files[@]}" -gt 0 ] || fail charts "deploy/chart renders no Application with a Helm chart source"
-  summary=$(validate charts "${files[@]}")
-  pass charts "$(printf '%s\n' "$report" | paste -sd ',' - | sed 's/,/, /g'); $summary"
+  if ! crds=$(python3 "$repo/.github/scripts/rendered-crds.py" "${renders[@]}" "$work"/charts/chart-*.yaml 2>&1); then
+    echo "$crds" >&2
+    fail charts "the custom kinds in use and the rendered CRDs do not match. A CRD that a chart stops rendering is pruned, and its removal deletes every object of its kind: if it was removed by accident, restore it; if on purpose, remove the objects that use it in the same merge. The removal of a whole Application leaves its CRDs in the cluster, to be deleted by hand. An OUTSIDE_GROUPS line above is an entry to remove from .github/scripts/rendered-crds.py"
+  fi
+  # The schema set holds none for CustomResourceDefinition.
+  summary=$(validate charts -skip CustomResourceDefinition "${files[@]}")
+  pass charts "$(printf '%s\n' "$report" | paste -sd ',' - | sed 's/,/, /g'); every custom kind in use has its CRD; $summary"
 }
 
 schema() {

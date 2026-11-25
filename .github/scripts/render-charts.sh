@@ -60,7 +60,7 @@ PY
 while IFS=$'\t' read -r name repo_url chart version release namespace; do
   [ -n "$name" ] || continue
   if ! docker run --rm -v "$values_dir:/values:ro" "$HELM_IMAGE" template "$release" "$chart" \
-    --repo "$repo_url" --version "$version" --namespace "$namespace" -f "/values/$name.yaml" \
+    --repo "$repo_url" --version "$version" --namespace "$namespace" --include-crds -f "/values/$name.yaml" \
     >"$out_dir/chart-$name.yaml" 2>"$values_dir/$name.err"; then
     cat "$values_dir/$name.err" >&2
     echo "render-charts: helm template failed for Application $name ($chart $version from $repo_url)" >&2

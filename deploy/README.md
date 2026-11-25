@@ -24,6 +24,7 @@ deploy/
     redis-auth.yaml        auth-state Redis StatefulSet on role=data (AOF, no auto-promote)
     redis-ratelimit.yaml   ephemeral rate-limit Redis on role=data (no durability)
     prometheus.yaml        Prometheus on role=data (local scrape)
+    cluster-identity.yaml  ConfigMap that holds the region name as CLUSTER_NAME, for charts (their Applications are identical in both regions)
     kube-state-metrics.yaml  ArgoCD Application (namespace argocd) that installs the kube-state-metrics chart on role=data, scraped locally by Prometheus
     privileged-exporter-namespace.yaml, node-exporter.yaml  namespace privileged-exporter (enforce: privileged) + node-exporter DaemonSet
   chart/values.yaml        values common to both regions
@@ -35,7 +36,19 @@ deploy/
 Build locally: `helm template danteplanner-oregon deploy/chart -f deploy/chart/values-oregon.yaml`.
 That render holds each upstream chart only as its Application;
 `.github/scripts/render-charts.sh <out-dir> <rendered.yaml>` renders the charts themselves with
-`helm template`, as the deploy lane and the config scan do.
+`helm template --include-crds`, as the deploy lane and the config scan do. ArgoCD includes a chart's
+`crds/` directory too.
+
+## CRDs
+
+ArgoCD prunes what a chart stops rendering, and deleting a CRD deletes every object of its kind. (The
+removal of a whole Application leaves its CRDs in the cluster.) The deploy
+lane's `charts` stage runs `.github/scripts/rendered-crds.py` over both region renders and all chart
+renders: a custom kind in use must have its CRD rendered, in a version that CRD serves, or its group
+must be in `OUTSIDE_GROUPS` in that script, the groups whose CRDs something other than an
+Application installs. So a CRD that leaves while its objects stay fails, and a CRD and its
+objects leaving in one merge pass. An entry whose CRD is rendered, or whose group no rendered object
+uses, fails.
 
 ## Chart versions
 
