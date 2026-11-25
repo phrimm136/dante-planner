@@ -54,7 +54,7 @@ output "kubeconfig_ssm_parameter" {
 }
 
 output "backend_ecr_repository_url" {
-  description = "ECR repository URL for the backend image. Feed into the CI workflow's push target and the kustomize overlay image newName."
+  description = "ECR repository URL for the backend image. Feed into the CI workflow's push target and the chart's image.repository parameter."
   value       = local.backend_ecr_repository_url
 }
 

@@ -84,7 +84,7 @@ jobs:
 
 # The gate tests the code being promoted, so the image is BUILT from this checkout — a
       # mirror of main's tag would validate the wrong build. The tag is pinned through the
-      # ArgoCD Application's kustomize image override (staging-e2e-workloads.sh): a bare
+      # ArgoCD Application's Helm parameters (staging-e2e-workloads.sh): a bare
       # `kubectl set image` is reverted by self-heal within one sync loop.
       - name: Build and push the candidate backend image
         run: |
@@ -98,10 +98,10 @@ jobs:
               "$ACCOUNT.dkr.ecr.$region.amazonaws.com"
           done
           docker buildx build --platform linux/arm64 -f backend/Dockerfile --build-context static=./static \
-            -t "$ACCOUNT.dkr.ecr.us-west-2.amazonaws.com/danteplanner-backend:gate-${{ github.sha }}" \
+            -t "$ACCOUNT.dkr.ecr.us-west-2.amazonaws.com/danteplanner-backend:${{ github.sha }}" \
             --build-arg "GIT_SHA=${{ github.sha }}" --push .
           docker buildx build --platform linux/arm64 -f backend/Dockerfile --build-context static=./static \
-            -t "$ACCOUNT.dkr.ecr.ap-northeast-2.amazonaws.com/danteplanner-backend:gate-${{ github.sha }}" \
+            -t "$ACCOUNT.dkr.ecr.ap-northeast-2.amazonaws.com/danteplanner-backend:${{ github.sha }}" \
             --build-arg "GIT_SHA=${{ github.sha }}" --push .
 
       - name: Provision runtime secrets
@@ -115,7 +115,7 @@ jobs:
           eval "$(scripts/ops/access/staging-env.sh)"
           VITE_API_BASE_URL="$E2E_API_URL" yarn --cwd frontend install --frozen-lockfile
           VITE_API_BASE_URL="$E2E_API_URL" yarn --cwd frontend build
-          BACKEND_IMAGE_TAG="gate-${{ github.sha }}" bash scripts/ops/provision/staging-e2e-workloads.sh
+          BACKEND_IMAGE_TAG="${{ github.sha }}" bash scripts/ops/provision/staging-e2e-workloads.sh
 
       - name: Wait for the environment to serve
         run: |

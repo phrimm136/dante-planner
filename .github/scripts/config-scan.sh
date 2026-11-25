@@ -31,11 +31,12 @@ work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 trap 'exit 130' INT
 
-overlays=()
-for overlay_dir in "$repo"/deploy/overlays/*/; do
-  overlays+=("$(basename "$overlay_dir")")
+regions=()
+for values_file in "$repo"/deploy/chart/values-*.yaml; do
+  region=$(basename "$values_file" .yaml)
+  regions+=("${region#values-}")
 done
-[ "${#overlays[@]}" -gt 0 ] || fail_tool "no overlay directory under $repo/deploy/overlays"
+[ "${#regions[@]}" -gt 0 ] || fail_tool "no values-<region>.yaml under $repo/deploy/chart"
 
 mkdir -p "$work/terraform" "$work/kubernetes"
 tracked=$(git -C "$repo" ls-files terraform) || fail_tool "git ls-files failed in $repo; the terraform input needs a git checkout"
@@ -43,15 +44,17 @@ tracked=$(git -C "$repo" ls-files terraform) || fail_tool "git ls-files failed i
 git -C "$repo" ls-files -z terraform | tar -C "$repo" --null -T - -cf - | tar -C "$work/terraform" --strip-components=1 -xf - \
   || fail_tool "copying the tracked terraform files out of $repo failed"
 
-for overlay in "${overlays[@]}"; do
-  if ! docker run --rm --network none -v "$repo/deploy:/deploy:ro" "$KUSTOMIZE_IMAGE" build "/deploy/overlays/$overlay" \
-    >"$work/kubernetes/$overlay.yaml" 2>"$work/kustomize.err"; then
-    fail_tool "kustomize build deploy/overlays/$overlay failed" "$work/kustomize.err"
+rendered=()
+for region in "${regions[@]}"; do
+  if ! docker run --rm --network none -v "$repo/deploy/chart:/chart:ro" "$HELM_IMAGE" template "danteplanner-$region" /chart \
+    -f "/chart/values-$region.yaml" >"$work/kubernetes/$region.yaml" 2>"$work/helm.err"; then
+    fail_tool "helm template deploy/chart with values-$region.yaml failed" "$work/helm.err"
   fi
-  [ -s "$work/kubernetes/$overlay.yaml" ] || fail_tool "kustomize build deploy/overlays/$overlay printed nothing" "$work/kustomize.err"
+  [ -s "$work/kubernetes/$region.yaml" ] || fail_tool "helm template deploy/chart with values-$region.yaml printed nothing" "$work/helm.err"
+  rendered+=("$work/kubernetes/$region.yaml")
 done
-"$script_dir/render-charts.sh" "$repo/deploy" "$work/kubernetes" >/dev/null 2>"$work/charts.err" \
-  || fail_tool "rendering the Helm Applications under deploy/apps failed" "$work/charts.err"
+"$script_dir/render-charts.sh" "$work/kubernetes" "${rendered[@]}" >/dev/null 2>"$work/charts.err" \
+  || fail_tool "rendering the charts of the rendered Applications failed" "$work/charts.err"
 
 scan() {
   local input=$1 status=0
@@ -208,7 +211,7 @@ def main(arguments):
     new_advice = (
         "NEW: fix the finding, or record it where it lives: a '# checkov:skip=<id>:<reason>' comment "
         "inside the terraform resource, or the annotation 'checkov.io/skip1: <id>=<reason>' on the "
-        "Kubernetes object (kustomize drops YAML comments)"
+        "Kubernetes object"
     )
 
     if update_mode:

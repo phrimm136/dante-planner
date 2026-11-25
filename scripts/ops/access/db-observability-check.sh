@@ -12,7 +12,7 @@ set -euo pipefail
 DIR=$(dirname "$0")
 CLUSTERS=(oregon seoul)
 
-# Exported by mysqld_exporter (deploy/base/mysqld-exporter.yaml); the set the
+# Exported by mysqld_exporter (deploy/chart/templates/mysqld-exporter.yaml); the set the
 # fleet dashboard's DB panels query.
 EXPORTER_METRICS=(
   mysql_up

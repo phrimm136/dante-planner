@@ -757,7 +757,7 @@ guards the parse but likewise skips the schema gate.
   cannot be scoped by tenant — whichever one it lives in sees management's paused apps.
 
   The replica alert was never a real condition. Only `hikaricp_connections_(active|pending)`
-  passed the remote-write keep-list in `deploy/base/prometheus.yaml`, and both are instantaneous
+  passed the remote-write keep-list in `deploy/chart/templates/prometheus.yaml`, and both are instantaneous
   gauges; at Seoul's read rate a gauge samples zero almost every scrape whether or not the pool
   is serving, so a rule written against one reads as a silent replica permanently. The keep-list
   now admits the full Hikari set and the counters confirm the opposite of silence — Seoul's
@@ -1050,7 +1050,7 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   later rule measurable before it is enforced.
   re-check: `rg -q 'org.owasp.dependencycheck' backend/build.gradle.kts && .claude/skills/debt-ledger/bin/debt absent .github/workflows -i -e 'sonar' -e 'dependencyCheck'`
 
-- 2026-09-21 — Nothing rolls a failed backend rollout back. `deploy/base/spring-daemonset.yaml`
+- 2026-09-21 — Nothing rolls a failed backend rollout back. `deploy/chart/templates/spring-daemonset.yaml`
   sets no `updateStrategy` (default RollingUpdate, `maxUnavailable: 1`), ArgoCD runs
   `automated` + `selfHeal` (which converges on Git, never on the previous image, and refuses
   `argocd app rollback` while automated sync is on), and no Argo Rollouts or analysis step
@@ -1063,7 +1063,7 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   analysis template on `/actuator/health/readiness`; the former is one workflow step that
   runs when the rollout wait fails. Worth doing before the next deploy that ships a schema-coupled change, or once a
   failed rollout is observed in production.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent deploy/base/spring-daemonset.yaml 'updateStrategy' && rg -q 'rollout status ds/backend -n danteplanner --timeout=600s' .github/workflows/deploy-fleet.yml && .claude/skills/debt-ledger/bin/debt absent deploy 'kind: Rollout'`
+  re-check: `.claude/skills/debt-ledger/bin/debt absent deploy/chart/templates/spring-daemonset.yaml 'updateStrategy' && rg -q 'rollout status ds/backend -n danteplanner --timeout=600s' .github/workflows/deploy-fleet.yml && .claude/skills/debt-ledger/bin/debt absent deploy 'kind: Rollout'`
 - 2026-09-22 — `GET /api/planner/md/published` returns `Page<...>`, so every list request
   issues a `COUNT(*)` over the filtered `planner_catalog` set
   (`PublishedPlannerQueryService.java:129`), and `recencySorted` orders by
@@ -1683,7 +1683,7 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   `settle-down`, or the next deploy that fails in them. Once the backend runs two or more pods,
   add a PodDisruptionBudget. With one pod a `minAvailable: 1` budget only blocks node drains,
   which is why none exists today.
-  re-check: `rg -q '^kind: DaemonSet$' deploy/base/spring-daemonset.yaml`
+  re-check: `rg -q '^kind: DaemonSet$' deploy/chart/templates/spring-daemonset.yaml`
 - **App nodes reserve no memory for the OS.** The agent user-data passes no
   `--kubelet-arg=system-reserved`, `kube-reserved` or `eviction-hard`, so on a 2 GiB node pods
   can take memory the OS needs before kubelet evicts anything. Without swap the kernel then
@@ -1692,12 +1692,12 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   Worth doing with the Deployment entry above, or when an app node freezes again.
   re-check: `.claude/skills/debt-ledger/bin/debt absent terraform/modules/fleet/user-data/agent.sh.tftpl 'system-reserved|eviction-hard'`
 - **Changing `backend-config` does not restart the backend.** The ConfigMap is a plain
-  resource in `deploy/base/spring-service.yaml`, the overlays change it through `patches`, and
+  resource in `deploy/chart/templates/spring-service.yaml`, the values of a region fill it, and
   the backend reads it once at start through `envFrom`. `deploy/` has no reloader or checksum
   annotation for the backend. A synced value change therefore leaves every running pod on the
   old value until someone runs a rollout restart (the Redis password runbook does this by hand).
-  The standard fix is a `configMapGenerator` in base and `behavior: merge` generators in the
-  overlays, so a value change renames the ConfigMap and rolls the pods. Do it only with the
+  The standard fix is a checksum annotation on the Pod template, so a value change rolls the
+  pods. `alloy-logs-config` has none either, and whether Alloy reloads its file was not checked. Do it only with the
   Deployment entry above: while the backend is a DaemonSet, a config-only merge rolls pods
   through ArgoCD without the `deploy-fleet` surge node and leave each region without a backend
   during the swap. Secrets behave the same way: ESO refreshes `backend-runtime-config` and the
@@ -1705,9 +1705,9 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   and the mounted JWT key files are read once at boot by `JwtProperties.loadKeys()`, so a
   rotated secret also needs a restart. Worth doing with the Deployment change, or the first
   time a config value or a rotated secret is found unapplied in production.
-  re-check: `rg -q '^  name: backend-config$' deploy/base/spring-service.yaml && .claude/skills/debt-ledger/bin/debt absent deploy/base/kustomization.yaml 'name: backend-config'`
+  re-check: `rg -q '^  name: backend-config$' deploy/chart/templates/spring-service.yaml && .claude/skills/debt-ledger/bin/debt absent deploy/chart/templates/spring-daemonset.yaml 'checksum/'`
 - **One bump commit deploys both regions at once.** `deploy-fleet.yml`'s `bump-tag` step runs
-  `kustomize edit set image` in the Oregon and Seoul overlays and pushes both in one commit, so
+  `sed` on the values files of Oregon and Seoul and pushes both in one commit, so
   each region's ArgoCD rolls the same image at about the same time. A bad image therefore takes
   both regions down together, and the cross-region failover that covers an infrastructure
   failure cannot cover it. With no automatic rollback (the 2026-09-21 entry), the outage lasts
@@ -1716,10 +1716,10 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   first, a health check on its rollout and metrics, then Seoul, with a revert to the previous
   tag when the check fails. Worth doing with the Deployment entry above, which rewrites the
   same jobs, or after the first bad image reaches production.
-  re-check: `rg -qF '(cd "$OVERLAY_DIR_SEOUL" && kustomize edit set image' .github/workflows/deploy-fleet.yml && rg -qF '(cd "$OVERLAY_DIR"       && kustomize edit set image' .github/workflows/deploy-fleet.yml`
+  re-check: `rg -qF 'VALUES_FILES: deploy/chart/values-oregon.yaml deploy/chart/values-seoul.yaml' .github/workflows/deploy-fleet.yml && rg -qF 'git add $VALUES_FILES' .github/workflows/deploy-fleet.yml`
 - **Schema migrations run inside application boot, in both regions.** `spring.flyway.enabled=true`
   (`application.properties:41`) makes every new pod migrate before its web server starts, and
-  Seoul's `MYSQL_HOST` is the Oregon primary (`overlays/seoul/configmap-patch.yaml:24-29`). Three
+  Seoul's `MYSQL_HOST` is the Oregon primary (`deploy/chart/values-seoul.yaml`). Three
   failures follow. A migration longer than the startup probe's 240 s (`periodSeconds: 5` ×
   `failureThreshold: 48`) is SIGKILLed mid-DDL, although the Flyway url is left unbounded on
   purpose (`application-prod.properties:5-7`). MySQL DDL is not transactional, so the next boot
@@ -1728,7 +1728,7 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   during the outage (inferred from config, not reproduced). And adr/013's N/N−1 and
   expand-contract rule is a checklist sentence with no check. Target, decided 2026-11-19:
   migrations leave the app (`spring.flyway.enabled=false`) and run as an ArgoCD PreSync Job in
-  the Oregon overlay only, reading the in-cluster DB secret so no credential moves to CI. CI
+  the Oregon values only, reading the in-cluster DB secret so no credential moves to CI. CI
   gains an N−1 check (the previous release image smoke-tested against a database with the new
   migrations applied). The deploy bumps Oregon, checks the rollout and its error rate and
   latency from a workflow step, reverts the tag on failure, and only then bumps Seoul (the
@@ -1739,7 +1739,7 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   that can run longer than a few minutes, or before Seoul is relied on during an Oregon outage.
   re-check: `rg -q '^spring.flyway.enabled=true$' backend/src/main/resources/application.properties`
 - **Every pod on an app node can read the backend's secrets.** The SecretStore has no `auth`
-  block (`deploy/base/external-secret.yaml`), so ESO falls back to the app node's EC2 instance
+  block (`deploy/chart/templates/external-secret.yaml`), so ESO falls back to the app node's EC2 instance
   profile, which holds `secretsmanager:GetSecretValue`. The file's own comment says any pod on
   that node inherits the grant. ESO reaches IMDS from the pod network, so the Spring pod can too
   (inferred: the launch templates set no `http_put_response_hop_limit`, and the AL2023 AMI
@@ -1749,7 +1749,7 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   ServiceAccount its own role, then drop the grant from the node role and set the hop limit
   to 1. Worth doing before any workload that runs untrusted input next to ESO, or when a
   security review covers the fleet.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent deploy/base/external-secret.yaml '^\s+auth:'`
+  re-check: `.claude/skills/debt-ledger/bin/debt absent deploy/chart/templates/external-secret.yaml '^\s+auth:'`
 - **Kubernetes Secrets are stored unencrypted in etcd and in its S3 snapshots.** The k3s server
   install in `terraform/modules/fleet/user-data/cp.sh.tftpl` passes no `--secrets-encryption`,
   so every Secret (DB credentials, Redis password, JWT keys) sits in embedded etcd as base64,
@@ -1776,12 +1776,12 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   stack, or before the next security review.
   re-check: `rg -q 'resource "aws_vpc_security_group_ingress_rule" "ingress_https"' terraform/modules/fleet/network.tf`
 - **Traefik can read every Secret in the cluster.** Its ClusterRole
-  (`deploy/base/traefik-controller.yaml`) grants get, list and watch on `secrets` in all
+  (`deploy/chart/templates/traefik-controller.yaml`) grants get, list and watch on `secrets` in all
   namespaces, but Traefik needs only `origin-tls` in `danteplanner`. A compromised edge proxy
   therefore reads the DB credentials and the JWT keys. Move the `secrets` rule into a
   namespaced Role and RoleBinding and keep the rest in the ClusterRole. Worth doing with the
   ingress entry above.
-  re-check: `rg -qU 'kind: ClusterRole\nmetadata:\n  name: traefik\nrules:\n  - apiGroups: \[""\]\n    resources: \["services", "endpoints", "secrets", "namespaces"\]' deploy/base/traefik-controller.yaml`
+  re-check: `rg -qU 'kind: ClusterRole\nmetadata:\n  name: traefik\nrules:\n  - apiGroups: \[""\]\n    resources: \["services", "endpoints", "secrets", "namespaces"\]' deploy/chart/templates/traefik-controller.yaml`
 - **Each region's entry runs on one ingress node.** cloudflared and Traefik are DaemonSets
   pinned to `role=ingress`, and each region has one such node, so losing it removes the
   region's entry until the Cloudflare load balancer's tunnel monitor steers traffic away
@@ -1792,7 +1792,7 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   and drops one t4g.small per region. Worth doing with the Deployment entry above, or when
   the ingress node's cost or a single-node outage matters. The Traefik image is also pinned by
   tag only (`traefik:v3.1`), not by digest.
-  re-check: `rg -q 'role: ingress' deploy/base/traefik-controller.yaml && rg -q 'role: ingress' deploy/base/cloudflared.yaml`
+  re-check: `rg -q 'role: ingress' deploy/chart/templates/traefik-controller.yaml && rg -q 'role: ingress' deploy/chart/templates/cloudflared.yaml`
 - **Stack boundaries are joined by scripts and README sentences.** `terraform/README.md`
   ("The edges Terraform cannot enforce") lists the joins by hand, and four of them can move into
   Terraform. First, the RDS master password: `secrets` creates an empty container,
@@ -1836,7 +1836,7 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   `${traefik_version}`, which shows the pattern to follow: download a pinned Helm release
   tarball and check its published SHA-256. Worth doing with the k3s pin above.
   re-check: `rg -qF 'helm/helm/main/scripts/get-helm-3' terraform/modules/fleet/user-data/cp.sh.tftpl`
-- **The auth Redis keeps its data only on the data node's disk.** `deploy/base/redis-auth.yaml`
+- **The auth Redis keeps its data only on the data node's disk.** `deploy/chart/templates/redis-auth.yaml`
   is a one-replica StatefulSet on `role=data` with an 8Gi `volumeClaimTemplates` entry and no
   `storageClassName`, so it gets k3s's default `local-path` volume, a directory on that node.
   Replacing the data node loses the AOF file. The auth Redis holds the refresh-token lineage and the revocation
@@ -1844,32 +1844,32 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   (inferred from what the store holds; the app's behavior on an empty store is not checked).
   Worth doing before the data node's generation number is raised or the node is replaced for any
   other reason: an EBS-backed volume that survives the node, or a tested restore path.
-  re-check: `rg -q 'volumeClaimTemplates' deploy/base/redis-auth.yaml && .claude/skills/debt-ledger/bin/debt absent deploy/base/redis-auth.yaml 'storageClassName'`
-- **No NetworkPolicy exists.** The rendered overlays hold no `NetworkPolicy`, so every pod in
+  re-check: `rg -q 'volumeClaimTemplates' deploy/chart/templates/redis-auth.yaml && .claude/skills/debt-ledger/bin/debt absent deploy/chart/templates/redis-auth.yaml 'storageClassName'`
+- **No NetworkPolicy exists.** The rendered chart holds no `NetworkPolicy`, so every pod in
   `danteplanner` reaches every other, and a compromised cloudflared or exporter can open a
   connection to both Redis instances, with `requirepass` as the last control. Start from a
   default-deny policy per namespace and allow the known paths. k3s ships a network policy
   controller (assumed from its documentation, not checked on the fleet). Worth doing with the
   ingress entries above, or at the next security review.
   re-check: `.claude/skills/debt-ledger/bin/debt absent deploy 'kind: NetworkPolicy'`
-- **Pod Security is warn and audit only.** `deploy/base/namespace.yaml` labels `danteplanner`
+- **Pod Security is warn and audit only.** `deploy/chart/templates/namespace.yaml` labels `danteplanner`
   `restricted` for `warn` and `audit` but sets no `enforce`, so a pod that breaks the
   restricted profile is still admitted. Which pods break it today is not listed. Worth doing
   once the warnings are listed and fixed: add `enforce: restricted`.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent deploy/base/namespace.yaml 'pod-security.kubernetes.io/enforce'`
-- **Every image is pinned by tag, and two tags move.** No image in the rendered overlays
+  re-check: `.claude/skills/debt-ledger/bin/debt absent deploy/chart/templates/namespace.yaml 'pod-security.kubernetes.io/enforce'`
+- **Every image is pinned by tag, and two tags move.** No image in the rendered chart
   carries a digest, and no bot raises one: Renovate reads the chart versions in
-  `deploy/apps`, the k3s release and the pins in the CI scripts, not the manifests. `redis:7-alpine` moves with every Redis 7 release and
+  the chart's Applications, the k3s release and the pins in the CI scripts, not the manifests. `redis:7-alpine` moves with every Redis 7 release and
   `traefik:v3.1` with every 3.1 patch, so a replaced node can pull a different version than the
   one it replaced. Pin by digest, or at least by full version, and turn on Renovate's
   manager for the manifests in the same change. An image that moves to an upstream chart leaves
   this entry. Worth doing with the next component that stays hand-written.
-  re-check: `rg -q 'image: redis:7-alpine' deploy/base/redis-auth.yaml`
+  re-check: `rg -q 'image: redis:7-alpine' deploy/chart/templates/redis-auth.yaml`
 - **The Redis, Prometheus and exporter containers have no readiness probe.** Both Redis
   instances, Prometheus with its config reloader, the mysqld and Redis
   exporters, alloy and node-exporter declare none, so a Redis replaying its AOF file counts as
   Ready and its Service sends it traffic. Worth doing with the auth Redis entry above.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent deploy/base/redis-auth.yaml 'readinessProbe'`
+  re-check: `.claude/skills/debt-ledger/bin/debt absent deploy/chart/templates/redis-auth.yaml 'readinessProbe'`
 - **Nothing finds a metric that production never emits.** An alert rule's cases feed it series
   that the case itself writes, and the remote-write keep-list only filters what exists, so a
   rule over a metric with no series in Mimir passes every gate and never fires. Five alerts were
@@ -1888,3 +1888,14 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   with no code change: list the tests that every refresh and pin commit touched, and make each
   one assert a rule computed from the data instead of a literal id, count or hash.
   re-check: `rg -q "'walpurgis:10'" frontend/src/pages/battle/lib/__tests__/enemyFacetOptions.test.ts`
+
+## 2026-11-25 logs of a Pod that ends
+
+- **The last log lines of a Pod that ends are missing in Loki.** In the releases of 2026-11-25 most
+  ending backend Pods kept only the line `Commencing graceful shutdown`, and a few kept the whole
+  shutdown. One Alloy on the data node streams logs through the Kubernetes API
+  (`loki.source.kubernetes`); that the stream ends with the Pod is an inference. A fault during a
+  shutdown can therefore leave no trace. The fix is an Alloy on every node that reads the log files,
+  which needs a `hostPath` and so a privileged namespace, and memory on every node. Worth deciding
+  when Alloy moves to its upstream chart.
+  re-check: `rg -q 'loki.source.kubernetes' deploy/chart/templates/alloy-logs.yaml`

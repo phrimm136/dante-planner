@@ -36,8 +36,8 @@ elaboration:
   a write the same user just made.
 
 Configuration for the split lives in `shared/config/RoutingDataSourceConfig` (pools),
-`shared/config/RedisConnectionConfig` (the four Redis roles), and the per-region ConfigMaps under
-`deploy/overlays/{oregon,seoul}/configmap-patch.yaml`. Both regions turn on
+`shared/config/RedisConnectionConfig` (the four Redis roles), and `backendConfig` in
+`deploy/chart/values-{oregon,seoul}.yaml`. Both regions turn on
 `datasource.routing.enabled` and list their read sources in order under
 `datasource.read-sources`: Seoul reads its replica first and the primary second, Oregon the
 primary first and the Seoul replica second (`shared/config/ReadSourcesConfig`).

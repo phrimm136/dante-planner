@@ -1,5 +1,5 @@
 # --- Data node (pet): auth Redis StatefulSet + local rate-limit Redis + Prometheus
-# Joins as a k3s agent labeled role=data. The stateful workloads (deploy/base)
+# Joins as a k3s agent labeled role=data. The stateful workloads (deploy/chart)
 # are pinned here. No Sentinel, no auto-promote — Redis outage is a typed 503 +
 # auto-recovery + AOF replay (requirements: no autonomous writer promotion).
 resource "aws_instance" "data" {

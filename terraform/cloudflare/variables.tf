@@ -42,7 +42,7 @@ variable "regions" {
     origin_server_name below must match that certificate.
 
     Traefik is a hostNetwork DaemonSet with no Service, so nothing in cluster DNS resolves to it;
-    deploy/base/cloudflared.yaml shares that host network and reaches it on the loopback.
+    deploy/chart/templates/cloudflared.yaml shares that host network and reaches it on the loopback.
   EOT
   type = map(object({
     origin_service = string

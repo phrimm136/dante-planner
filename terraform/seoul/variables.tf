@@ -132,7 +132,7 @@ variable "backend_image_repo" {
 }
 
 variable "gitops_repo_url" {
-  description = "Git repository ArgoCD syncs from (this repo). The CP clones it at boot to apply the root Application, which then points ArgoCD at deploy/overlays/oregon."
+  description = "Git repository ArgoCD syncs from (this repo). The CP clones it at boot to apply the root Application, which then points ArgoCD at deploy/chart with values-seoul.yaml."
   type        = string
   default     = "https://github.com/phrimm136/dante-planner.git"
 }

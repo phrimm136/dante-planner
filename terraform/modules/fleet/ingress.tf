@@ -1,5 +1,5 @@
 # --- Ingress node (pet): Traefik only, the Global Accelerator endpoint ------
-# Joins as a k3s agent labeled role=ingress; the Traefik Gateway (deploy/base)
+# Joins as a k3s agent labeled role=ingress; the Traefik Gateway (deploy/chart)
 # is pinned here. Carries the public-443 ingress SG. GA itself is Phase 14.
 resource "aws_instance" "ingress" {
   ami                    = data.aws_ssm_parameter.node_ami.value
