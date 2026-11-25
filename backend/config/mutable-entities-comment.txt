@@ -1,0 +1,2 @@
+org.danteplanner.backend.comment.entity.PlannerComment
+org.danteplanner.backend.comment.entity.PlannerCommentVote
