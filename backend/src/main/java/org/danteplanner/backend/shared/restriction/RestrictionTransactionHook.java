@@ -227,7 +227,7 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
         record Pass() implements BeginStep {
         }
 
-        static BeginStep of(Declaration declaration, boolean checked, Principal principal) {
+        private static BeginStep of(Declaration declaration, boolean checked, Principal principal) {
             if (declaration != Declaration.RESTRICTED || checked) {
                 return new Pass();
             }

@@ -3,6 +3,7 @@ package org.danteplanner.backend.shared.security;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.shared.failure.CommandOutcome;
+import org.danteplanner.backend.shared.failure.Parsed;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Mac;
@@ -50,7 +51,15 @@ public class CsrfTokenService {
 
     public sealed interface TokenOutcome extends CommandOutcome {
 
+        @Parsed
         record ServerIssued(String value) implements TokenOutcome {
+
+            private static TokenOutcome of(String token, Fields.Signed signed, byte[] expectedMac, long nowMs) {
+                return switch (Standing.of(signed, expectedMac, nowMs)) {
+                    case CURRENT -> new ServerIssued(token);
+                    case FORGED, OUTSIDE_LIFETIME -> new Unrecognized();
+                };
+            }
         }
 
         record Unrecognized() implements TokenOutcome {
@@ -63,10 +72,8 @@ public class CsrfTokenService {
     public TokenOutcome parse(String token) {
         return switch (Fields.of(token)) {
             case Fields.Malformed malformed -> new TokenOutcome.Unrecognized();
-            case Fields.Signed signed -> switch (Standing.of(signed, mac(signed.payload()), clock.millis())) {
-                case CURRENT -> new TokenOutcome.ServerIssued(token);
-                case FORGED, OUTSIDE_LIFETIME -> new TokenOutcome.Unrecognized();
-            };
+            case Fields.Signed signed ->
+                    TokenOutcome.ServerIssued.of(token, signed, mac(signed.payload()), clock.millis());
         };
     }
 
