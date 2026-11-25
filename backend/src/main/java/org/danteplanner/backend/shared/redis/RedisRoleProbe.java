@@ -75,7 +75,10 @@ public class RedisRoleProbe implements AutoCloseable {
 
     @Override
     public void close() {
-        probes.forEach(probe -> probe.held().close());
+        CompletableFuture<?>[] closing =
+                probes.stream().map(probe -> probe.held().close()).toArray(CompletableFuture[]::new);
+        completesBy(CompletableFuture.allOf(closing), System.nanoTime() + timeouts.runtime().toNanos(),
+                closed -> true);
         client.shutdown();
     }
 
@@ -89,7 +92,7 @@ public class RedisRoleProbe implements AutoCloseable {
             boolean answered = ponged && completesBy(connections.get(i), deadline, connected -> true);
             probe.advance(phase, answered);
             if (!ponged && probe.isOpen()) {
-                probe.held().discardUnlessConnecting();
+                var unused = probe.held().discardUnlessConnecting();
             }
         }
     }

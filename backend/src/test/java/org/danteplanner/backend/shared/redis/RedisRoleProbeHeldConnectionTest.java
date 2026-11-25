@@ -8,13 +8,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import ch.qos.logback.classic.Level;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.lettuce.core.RedisChannelHandler;
 import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.resource.DefaultClientResources;
 
 import org.danteplanner.backend.shared.config.RedisConnectionConfig;
 import org.danteplanner.backend.support.Elapsed;
 import org.danteplanner.backend.support.Hang;
+import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.backend.support.PongRedis;
 import org.danteplanner.backend.support.RedisEndpoints;
 
@@ -198,6 +201,23 @@ class RedisRoleProbeHeldConnectionTest {
                 "the pending connect's socket closing or finishing its handshake");
         assertThat(redis.answeredPings()).isEqualTo(pingsBeforeClose);
         assertThat(redis.connectionsClosedByClients()).isEqualTo(1);
+    }
+
+    @Test
+    void close_WhenEveryRoleHoldsAConnection_ClosesEachOnce() throws IOException {
+        for (int round = 0; round < MANY_ROUNDS; round++) {
+            try (PongRedis shared = new PongRedis()) {
+                RedisRoleProbe holding = new RedisRoleProbe(clientResources,
+                        RedisEndpoints.everyRoleAt(shared.host(), shared.port()), new RedisRoleHealth(), List.of(),
+                        RoomyProbeTimeouts.BOTH_PHASES);
+                holding.probeAtStartup();
+
+                assertThat(LogCapture.during(holding::close, Level.WARN, RedisChannelHandler.class))
+                        .as("round %d", round).isEmpty();
+                Hang.until(() -> shared.connectionsClosedByClients() == RedisRole.values().length,
+                        "every role's connection closing");
+            }
+        }
     }
 
     private void startWithHeldConnection(RedisRoleProbe.Timeouts timeouts) {
