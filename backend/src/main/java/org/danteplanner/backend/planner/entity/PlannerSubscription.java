@@ -2,30 +2,24 @@ package org.danteplanner.backend.planner.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
-import jakarta.persistence.PostLoad;
-import jakarta.persistence.PostPersist;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.domain.Persistable;
-
-import org.danteplanner.backend.shared.entity.AuditedTimestampListener;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Immutable;
 
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * JPA's save() uses merge() for entities with composite keys where IDs are set,
- * which doesn't insert new entities properly without this interface.
- */
 @Entity
-@EntityListeners(AuditedTimestampListener.class)
+@Immutable
 @Table(name = "planner_subscriptions")
 @IdClass(PlannerSubscriptionId.class)
-public class PlannerSubscription implements Persistable<PlannerSubscriptionId> {
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class PlannerSubscription {
 
     @Id
     @Column(name = "user_id", nullable = false)
@@ -36,60 +30,8 @@ public class PlannerSubscription implements Persistable<PlannerSubscriptionId> {
     private UUID plannerId;
 
     @Column(name = "enabled", nullable = false)
-    private boolean enabled = true;
+    private boolean enabled;
 
-    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
-
-    @Transient
-    private boolean isNew = true;
-
-    protected PlannerSubscription() {
-    }
-
-    public PlannerSubscription(Long userId, UUID plannerId) {
-        this.userId = userId;
-        this.plannerId = plannerId;
-        this.enabled = true;
-        this.isNew = true;
-    }
-
-    @Override
-    public PlannerSubscriptionId getId() {
-        return new PlannerSubscriptionId(userId, plannerId);
-    }
-
-    @Override
-    public boolean isNew() {
-        return isNew;
-    }
-
-    @PostPersist
-    @PostLoad
-    protected void markNotNew() {
-        this.isNew = false;
-    }
-
-
-    public void toggle() {
-        this.enabled = !this.enabled;
-    }
-
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public UUID getPlannerId() {
-        return plannerId;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
 }

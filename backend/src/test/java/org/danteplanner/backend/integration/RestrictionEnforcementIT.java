@@ -45,7 +45,6 @@ import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerSubscription;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
 import org.danteplanner.backend.support.AuthCookies;
@@ -166,7 +165,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value(BANNED_CODE));
 
-        assertThat(subscriptionRepository.findByUserIdAndPlannerId(reader.getId(), publishedPlanner.getId()))
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.getId()))
                 .isEmpty();
     }
 
@@ -178,7 +177,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value(TIMED_OUT_CODE));
 
-        assertThat(subscriptionRepository.findByUserIdAndPlannerId(reader.getId(), publishedPlanner.getId()))
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.getId()))
                 .isEmpty();
     }
 
@@ -194,9 +193,107 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.subscribed").value(false));
 
-        assertThat(subscriptionRepository.findByUserIdAndPlannerId(reader.getId(), publishedPlanner.getId()))
-                .map(PlannerSubscription::isEnabled)
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.getId()))
                 .contains(false);
+    }
+
+    @Test
+    void setSubscription_WhenRepeatedAndRemovedTwice_AnswersTheRequestedStateEachTime() throws Exception {
+        User reader = reader();
+
+        for (int repeat = 0; repeat < 2; repeat++) {
+            perform(put("/api/planner/md/{id}/subscription", publishedPlanner.getId()), reader)
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.plannerId").value(publishedPlanner.getId().toString()))
+                    .andExpect(jsonPath("$.subscribed").value(true));
+            assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.getId())).contains(true);
+        }
+        for (int repeat = 0; repeat < 2; repeat++) {
+            perform(delete("/api/planner/md/{id}/subscription", publishedPlanner.getId()), reader)
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.plannerId").value(publishedPlanner.getId().toString()))
+                    .andExpect(jsonPath("$.subscribed").value(false));
+            assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.getId())).contains(false);
+        }
+    }
+
+    @Test
+    void removeSubscription_WhenNoneExists_AnswersUnsubscribedAndWritesNoRow() throws Exception {
+        User reader = reader();
+
+        perform(delete("/api/planner/md/{id}/subscription", publishedPlanner.getId()), reader)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.subscribed").value(false));
+
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.getId())).isEmpty();
+    }
+
+    @Test
+    void setSubscription_WhenBannedOrTimedOut_Returns403AndWritesNoRow() throws Exception {
+        User banned = banned(reader());
+        User timedOut = timedOut(reader());
+
+        perform(put("/api/planner/md/{id}/subscription", publishedPlanner.getId()), banned)
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value(BANNED_CODE));
+        perform(put("/api/planner/md/{id}/subscription", publishedPlanner.getId()), timedOut)
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value(TIMED_OUT_CODE));
+
+        assertThat(subscriptionRepository.findEnabledOf(banned.getId(), publishedPlanner.getId())).isEmpty();
+        assertThat(subscriptionRepository.findEnabledOf(timedOut.getId(), publishedPlanner.getId())).isEmpty();
+    }
+
+    @Test
+    void removeSubscription_WhenSubscribedAndBanned_Returns200AndTurnsTheSubscriptionOff() throws Exception {
+        User reader = reader();
+        perform(put("/api/planner/md/{id}/subscription", publishedPlanner.getId()), reader)
+                .andExpect(status().isOk());
+        banned(reader);
+
+        perform(delete("/api/planner/md/{id}/subscription", publishedPlanner.getId()), reader)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.subscribed").value(false));
+
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.getId())).contains(false);
+    }
+
+    @Test
+    void subscriptionRequests_WhenThePlannerIsMissingOrUnpublished_AnswerAsTheToggleDoes() throws Exception {
+        User reader = reader();
+        UUID unpublished = TestDataFactory.createTestPlanner(plannerRepository, author, false).getId();
+
+        for (UUID id : List.of(UUID.randomUUID(), unpublished)) {
+            for (MockHttpServletRequestBuilder request : subscriptionRequests(id)) {
+                perform(request, reader)
+                        .andExpect(status().isNotFound())
+                        .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"));
+            }
+            assertThat(subscriptionRepository.findEnabledOf(reader.getId(), id)).isEmpty();
+        }
+    }
+
+    @Test
+    void subscriptionRequests_WhenSentByAGuest_AnswerAsTheToggleDoes() throws Exception {
+        for (MockHttpServletRequestBuilder request : subscriptionRequests(publishedPlanner.getId())) {
+            mockMvc.perform(request.with(withCsrf())).andExpect(status().isUnauthorized());
+        }
+    }
+
+    @Test
+    void subscriptionRequests_WhenSentWithoutACsrfToken_AreRefusedAsTheToggleIs() throws Exception {
+        User reader = reader();
+        for (MockHttpServletRequestBuilder request : subscriptionRequests(publishedPlanner.getId())) {
+            mockMvc.perform(request.cookie(AuthCookies.accessToken(
+                            TestDataFactory.generateAccessToken(jwtTokenService, reader))))
+                    .andExpect(status().isForbidden());
+        }
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.getId())).isEmpty();
+    }
+
+    private static List<MockHttpServletRequestBuilder> subscriptionRequests(UUID id) {
+        return List.of(post("/api/planner/md/{id}/subscribe", id), put("/api/planner/md/{id}/subscription", id),
+                delete("/api/planner/md/{id}/subscription", id));
     }
 
     @Test
@@ -315,13 +412,13 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
         User reader = reader();
 
         Throwable undecided = withinRequest("toggleSubscription", reader, () -> new TransactionTemplate(
-                transactionManager).executeWithoutResult(status -> subscriptionRepository.insert(
-                        new PlannerSubscription(reader.getId(), publishedPlanner.getId()))));
+                transactionManager).executeWithoutResult(status -> subscriptionRepository.insertIfAbsent(
+                        reader.getId(), publishedPlanner.getId(), Instant.now())));
 
         assertThat(undecided)
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("PlannerEngagementController.toggleSubscription is @RestrictedByState");
-        assertThat(subscriptionRepository.findByUserIdAndPlannerId(reader.getId(), publishedPlanner.getId()))
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.getId()))
                 .isEmpty();
     }
 
@@ -332,15 +429,15 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
         TransactionTemplate writes = new TransactionTemplate(transactionManager);
 
         Throwable failure = withinRequest("createComment", reader, () -> {
-            writes.executeWithoutResult(status -> subscriptionRepository.insert(
-                    new PlannerSubscription(reader.getId(), publishedPlanner.getId())));
+            writes.executeWithoutResult(status -> subscriptionRepository.insertIfAbsent(
+                        reader.getId(), publishedPlanner.getId(), Instant.now()));
             banned(reader);
-            writes.executeWithoutResult(status -> subscriptionRepository.insert(
-                    new PlannerSubscription(reader.getId(), second.getId())));
+            writes.executeWithoutResult(status -> subscriptionRepository.insertIfAbsent(
+                        reader.getId(), second.getId(), Instant.now()));
         });
 
         assertThat(failure).isNull();
-        assertThat(subscriptionRepository.findByUserIdAndPlannerId(reader.getId(), second.getId())).isPresent();
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), second.getId())).isPresent();
     }
 
     @Test
@@ -348,8 +445,8 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
         User reader = banned(reader());
 
         Throwable refused = withinRequest("createComment", reader, () -> new TransactionTemplate(transactionManager)
-                .executeWithoutResult(status -> subscriptionRepository.insert(
-                        new PlannerSubscription(reader.getId(), publishedPlanner.getId()))));
+                .executeWithoutResult(status -> subscriptionRepository.insertIfAbsent(
+                        reader.getId(), publishedPlanner.getId(), Instant.now())));
 
         assertRejected(() -> {
             if (refused != null) {
@@ -358,7 +455,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
         }).withCode(BANNED_CODE);
         assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
         assertThat(TransactionSynchronizationManager.getResourceMap()).isEmpty();
-        assertThat(subscriptionRepository.findByUserIdAndPlannerId(reader.getId(), publishedPlanner.getId()))
+        assertThat(subscriptionRepository.findEnabledOf(reader.getId(), publishedPlanner.getId()))
                 .isEmpty();
     }
 

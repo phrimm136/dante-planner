@@ -32,7 +32,6 @@ import org.danteplanner.backend.shared.outbox.service.DomainEventRecorder;
 import tools.jackson.databind.ObjectMapper;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.time.Clock;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -100,7 +99,7 @@ class PlannerEngagementServiceTest {
                 new DomainEventRecorder(domainEventRepository, new ObjectMapper(), event -> { }),
                 accessGuard,
                 new PlannerReportService(reportRepository,
-                        new PlannerModerationTargetAdapter(null, accessGuard, Clock.systemUTC()), new ReportUniquenessValidator()),
+                        new PlannerModerationTargetAdapter(null, accessGuard), new ReportUniquenessValidator()),
                 new VoteUniquenessValidator(),
                 RECOMMENDED_THRESHOLD
         );

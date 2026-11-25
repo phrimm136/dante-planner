@@ -241,6 +241,13 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
                 new Row("reader subscribe", published -> post(PLANNERS + published.plannerId() + "/subscribe")
                         .cookie(published.reader().cookies()),
                         published -> Set.of(planner(published))),
+                new Row("reader subscription set", published -> put(PLANNERS + published.plannerId() + "/subscription")
+                        .cookie(published.reader().cookies()),
+                        published -> Set.of(planner(published))),
+                new Row("owner subscription removed", published -> delete(PLANNERS + published.plannerId()
+                        + "/subscription")
+                        .cookie(published.owner().cookies()),
+                        published -> Set.of(planner(published))),
                 new Row("reader planner report", published -> post(PLANNERS + published.plannerId() + "/report")
                         .cookie(published.reader().cookies()),
                         published -> Set.of(planner(published))))

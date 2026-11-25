@@ -20,8 +20,11 @@ import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
+import org.danteplanner.backend.planner.entity.Publication;
+import org.danteplanner.backend.planner.entity.WithdrawalOutcome;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.validation.floor.Stage;
+import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.sync.CarriedWrite;
@@ -42,6 +45,7 @@ import org.danteplanner.backend.planner.sync.SyncVersionValidator;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator.WriteMode;
 import org.danteplanner.backend.planner.sync.WriteArbitration;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
+import org.danteplanner.backend.shared.failure.WriteOutcome;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -64,6 +68,7 @@ public class PlannerCommandService {
 
     private final PlannerRepository plannerRepository;
     private final PlannerStatsRepository statsRepository;
+    private final PlannerPublicationRepository publicationRepository;
     private final PlannerContentValidator contentValidator;
     private final ContentVersionValidator contentVersionValidator;
     private final PlannerCatalogService plannerCatalogService;
@@ -83,6 +88,7 @@ public class PlannerCommandService {
     public PlannerCommandService(
             PlannerRepository plannerRepository,
             PlannerStatsRepository statsRepository,
+            PlannerPublicationRepository publicationRepository,
             PlannerContentValidator contentValidator,
             ContentVersionValidator contentVersionValidator,
             PlannerCatalogService plannerCatalogService,
@@ -96,7 +102,7 @@ public class PlannerCommandService {
             Clock clock,
             int maxPlannersPerUser,
             int currentSchemaVersion) {
-        this(plannerRepository, statsRepository, contentValidator, contentVersionValidator,
+        this(plannerRepository, statsRepository, publicationRepository, contentValidator, contentVersionValidator,
                 plannerCatalogService, accessGuard, restrictionCheck, categoryValidator, limitValidator, ownershipValidator,
                 syncVersionValidator, objectMapper, clock, new SimpleMeterRegistry(),
                 maxPlannersPerUser, currentSchemaVersion);
@@ -106,6 +112,7 @@ public class PlannerCommandService {
     public PlannerCommandService(
             PlannerRepository plannerRepository,
             PlannerStatsRepository statsRepository,
+            PlannerPublicationRepository publicationRepository,
             PlannerContentValidator contentValidator,
             ContentVersionValidator contentVersionValidator,
             PlannerCatalogService plannerCatalogService,
@@ -120,7 +127,7 @@ public class PlannerCommandService {
             MeterRegistry meterRegistry,
             @Value("${planner.max-per-user}") int maxPlannersPerUser,
             GameDataRegistry gameDataRegistry) {
-        this(plannerRepository, statsRepository, contentValidator, contentVersionValidator,
+        this(plannerRepository, statsRepository, publicationRepository, contentValidator, contentVersionValidator,
                 plannerCatalogService, accessGuard, restrictionCheck, categoryValidator, limitValidator, ownershipValidator,
                 syncVersionValidator, objectMapper, clock, meterRegistry,
                 maxPlannersPerUser, gameDataRegistry.plannerVersions().schemaVersion());
@@ -129,6 +136,7 @@ public class PlannerCommandService {
     private PlannerCommandService(
             PlannerRepository plannerRepository,
             PlannerStatsRepository statsRepository,
+            PlannerPublicationRepository publicationRepository,
             PlannerContentValidator contentValidator,
             ContentVersionValidator contentVersionValidator,
             PlannerCatalogService plannerCatalogService,
@@ -145,6 +153,7 @@ public class PlannerCommandService {
             int currentSchemaVersion) {
         this.plannerRepository = plannerRepository;
         this.statsRepository = statsRepository;
+        this.publicationRepository = publicationRepository;
         this.contentValidator = contentValidator;
         this.contentVersionValidator = contentVersionValidator;
         this.plannerCatalogService = plannerCatalogService;
@@ -309,8 +318,8 @@ public class PlannerCommandService {
                         document,
                         version.value(),
                         deviceId),
-                PlannerPublication.builder().build(),
-                PlannerModeration.builder().build());
+                PlannerPublication.builder().planner(planner).build(),
+                PlannerModeration.builder().planner(planner).build());
         return planner;
     }
 
@@ -361,6 +370,15 @@ public class PlannerCommandService {
         lockForUpsert(userId, id);
         UpsertedPlanner upserted = upsertAggregate(userId, deviceId, id, request, mode);
         return new UpsertResult(upserted.response(), upserted.created());
+    }
+
+    WithdrawalOutcome withdraw(Planner planner) {
+        return switch (planner.publicationState()) {
+            case Publication.Draft draft -> WithdrawalOutcome.NONE;
+            case Publication.Unpublished unpublished -> WithdrawalOutcome.NONE;
+            case Publication.Published published ->
+                    WithdrawalOutcome.of(WriteOutcome.of(publicationRepository.unpublish(planner.getId())));
+        };
     }
 
     void lockForUpsert(Long userId, UUID id) {
@@ -447,9 +465,9 @@ public class PlannerCommandService {
         plannerRepository.lockContent(owned.plannerId());
         Planner planner = accessGuard.findPlannerOrThrow(userId, id);
 
-        if (planner.isPublished()) {
-            planner.unpublish();
-            log.info("Auto-unpublished planner {} before deletion", id);
+        switch (withdraw(planner)) {
+            case NONE -> { }
+            case WITHDRAWN -> log.info("Auto-unpublished planner {} before deletion", id);
         }
 
         planner.softDelete(clock.instant());

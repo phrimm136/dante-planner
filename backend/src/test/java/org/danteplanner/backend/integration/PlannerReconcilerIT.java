@@ -4,6 +4,7 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.danteplanner.backend.support.StoredComments;
+import org.danteplanner.backend.planner.entity.Publication;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -101,7 +102,8 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         FilterRowsSync.readCommitted(transactionManager)
-                .executeWithoutResult(status -> catalogService.onBecameVisible(planner));
+                .executeWithoutResult(status -> catalogService.onBecameVisible(planner,
+                        (Publication.Published) planner.publicationState(), planner.listing()));
         return planner;
     }
 
@@ -391,7 +393,8 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         FilterRowsSync.readCommitted(transactionManager)
-                .executeWithoutResult(status -> catalogService.onBecameVisible(planner));
+                .executeWithoutResult(status -> catalogService.onBecameVisible(planner,
+                        (Publication.Published) planner.publicationState(), planner.listing()));
 
         assertThat(kindsFor(reconciler.reconcile(), planner.getId())).doesNotContain("entity_filter");
     }
@@ -407,7 +410,8 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         FilterRowsSync.readCommitted(transactionManager)
-                .executeWithoutResult(status -> catalogService.onBecameVisible(planner));
+                .executeWithoutResult(status -> catalogService.onBecameVisible(planner,
+                        (Publication.Published) planner.publicationState(), planner.listing()));
 
         assertThat(kindsFor(reconciler.reconcile(), planner.getId()))
                 .doesNotContain("entity_filter", "keyword_filter");

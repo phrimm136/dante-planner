@@ -230,8 +230,7 @@ class ConventionBaselineTest {
      * The controllers that dereference a mapped entity a service handed back — state read from the
      * mapping in a local rather than through a DTO, which is why no signature carries it.
      */
-    private static final Set<String> ENTITY_TOUCHING_CONTROLLERS = Set.of(
-            "org.danteplanner.backend.planner.controller.PlannerEngagementController");
+    private static final Set<String> ENTITY_TOUCHING_CONTROLLERS = Set.of();
 
     /**
      * Identified by {@code @Entity} rather than by package: {@code shared.entity} holds enums that

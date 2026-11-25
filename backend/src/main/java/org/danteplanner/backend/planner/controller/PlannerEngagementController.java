@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.shared.restriction.Restricted;
 import org.danteplanner.backend.shared.restriction.RestrictedByState;
+import org.danteplanner.backend.shared.restriction.RestrictionExempt;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.moderation.api.dto.PlannerActionResponse;
 import org.danteplanner.backend.planner.dto.SubscriptionResponse;
@@ -15,8 +16,10 @@ import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.danteplanner.backend.shared.security.Viewer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,12 +53,30 @@ public class PlannerEngagementController {
             Viewer.Member member,
             @PathVariable UUID id) {
 
-        var subscription = subscriptionService.toggleSubscription(member.userId(), id);
-        SubscriptionResponse response = SubscriptionResponse.builder()
-                .plannerId(id)
-                .subscribed(subscription.isEnabled())
-                .build();
-        return ResponseEntity.ok(response);
+        boolean subscribed = subscriptionService.toggleSubscription(member.userId(), id);
+        return ResponseEntity.ok(new SubscriptionResponse(id, subscribed));
+    }
+
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "subscribe")
+    @Restricted
+    @PutMapping("/{id}/subscription")
+    public ResponseEntity<SubscriptionResponse> subscribe(
+            Viewer.Member member,
+            @PathVariable UUID id) {
+
+        subscriptionService.subscribe(member.userId(), id);
+        return ResponseEntity.ok(new SubscriptionResponse(id, true));
+    }
+
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "subscribe")
+    @RestrictionExempt(reason = "own setting")
+    @DeleteMapping("/{id}/subscription")
+    public ResponseEntity<SubscriptionResponse> unsubscribe(
+            Viewer.Member member,
+            @PathVariable UUID id) {
+
+        subscriptionService.unsubscribe(member.userId(), id);
+        return ResponseEntity.ok(new SubscriptionResponse(id, false));
     }
 
     @RateLimited(RateLimitPolicy.REPORT)

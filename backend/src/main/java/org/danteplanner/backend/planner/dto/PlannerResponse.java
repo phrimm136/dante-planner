@@ -6,6 +6,7 @@ import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.planner.entity.Publication;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -29,7 +30,14 @@ public record PlannerResponse(
 ) {
 
     public static PlannerResponse fromEntity(Planner planner) {
-        UUID deviceId = planner.getDeviceId();
+        return fromEntity(planner, planner.isPublished());
+    }
+
+    public static PlannerResponse fromEntity(Planner planner, Publication publication) {
+        return fromEntity(planner, publication.isPublished());
+    }
+
+    private static PlannerResponse fromEntity(Planner planner, boolean published) {
         return PlannerResponse.builder()
                 .id(planner.getId())
                 .title(planner.getTitle())
@@ -40,11 +48,15 @@ public record PlannerResponse(
                 .contentVersion(planner.getContentVersion())
                 .plannerType(planner.getPlannerType())
                 .syncVersion(planner.getSyncVersion())
-                .deviceId(deviceId != null ? deviceId.toString() : null)
+                .deviceId(textOf(planner.getDeviceId()))
                 .createdAt(planner.getCreatedAt())
                 .lastModifiedAt(planner.getLastModifiedAt())
                 .savedAt(planner.getLastModifiedAt())
-                .published(planner.isPublished())
+                .published(published)
                 .build();
+    }
+
+    private static @Nullable String textOf(@Nullable UUID id) {
+        return id != null ? id.toString() : null;
     }
 }

@@ -1,6 +1,7 @@
 package org.danteplanner.backend.planner.service;
 
 import tools.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import org.danteplanner.backend.moderation.service.RestrictionCheckService;
 import org.danteplanner.backend.moderation.validation.AccountStandingValidator;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -49,6 +50,9 @@ class PlannerDeleteRestrictionTest {
     @Mock
     private PlannerCatalogRepository catalogRepository;
 
+    @Mock
+    private PlannerPublicationRepository publicationRepository;
+
     private final FakeUsers users = new FakeUsers();
 
     private PlannerAccessGuard accessGuard;
@@ -65,6 +69,7 @@ class PlannerDeleteRestrictionTest {
         commandService = new PlannerCommandService(
                 plannerRepository,
                 null,
+                publicationRepository,
                 null,
                 null,
                 catalogService,
@@ -121,7 +126,7 @@ class PlannerDeleteRestrictionTest {
 
         deleteAndCommit(planner);
 
-        assertThat(planner.isPublished()).isFalse();
+        verify(publicationRepository).unpublish(planner.getId());
         assertThat(planner.getContent().getDeletedAt()).isNotNull();
         assertWithdrawnFromTheCatalog(planner);
     }
@@ -133,7 +138,7 @@ class PlannerDeleteRestrictionTest {
 
         deleteAndCommit(planner);
 
-        assertThat(planner.isPublished()).isFalse();
+        verify(publicationRepository).unpublish(planner.getId());
         assertThat(planner.getContent().getDeletedAt()).isNotNull();
         assertWithdrawnFromTheCatalog(planner);
     }
@@ -154,7 +159,7 @@ class PlannerDeleteRestrictionTest {
 
         deleteAndCommit(planner);
 
-        assertThat(planner.isPublished()).isFalse();
+        verify(publicationRepository).unpublish(planner.getId());
         assertThat(planner.getContent().getDeletedAt()).isNotNull();
         assertWithdrawnFromTheCatalog(planner);
     }

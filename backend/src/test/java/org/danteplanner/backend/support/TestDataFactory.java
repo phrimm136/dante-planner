@@ -5,6 +5,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
+import org.danteplanner.backend.planner.entity.Publication;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import java.util.concurrent.atomic.AtomicLong;
 import org.danteplanner.backend.planner.entity.MDCategory;
@@ -229,6 +230,10 @@ public class TestDataFactory {
         return planner(owner).published(published).save(plannerRepository);
     }
 
+    public static void addToCatalog(PlannerCatalogService catalogService, Planner planner) {
+        catalogService.add(planner, (Publication.Published) planner.publicationState(), planner.listing());
+    }
+
     public static PlannerBuilder planner(User owner) {
         return new PlannerBuilder(owner);
     }
@@ -376,6 +381,7 @@ public class TestDataFactory {
         private Set<String> selectedKeywords;
         private boolean published;
         private Instant firstPublishedAt;
+        private Instant takenDownAt;
         private int upvotes;
         private long syncVersion = 1L;
 
@@ -443,6 +449,11 @@ public class TestDataFactory {
             return this;
         }
 
+        public PlannerBuilder takenDownAt(Instant takenDownAt) {
+            this.takenDownAt = takenDownAt;
+            return this;
+        }
+
         public PlannerBuilder upvotes(int upvotes) {
             this.upvotes = upvotes;
             return this;
@@ -471,14 +482,12 @@ public class TestDataFactory {
                             .syncVersion(syncVersion)
                             .selectedKeywords(PlannerKeywords.fromContent(document).asSet())
                             .build(), document)),
-                    PlannerPublication.builder().build(),
-                    PlannerModeration.builder().build());
-            if (published) {
-                planner.publish(Instant.now());
-            }
-            if (firstPublishedAt != null) {
-                planner.getPublication().setFirstPublishedAt(firstPublishedAt);
-            }
+                    PlannerPublication.builder()
+                            .planner(planner)
+                            .published(published)
+                            .firstPublishedAt(firstPublishedAt != null || !published ? firstPublishedAt : Instant.now())
+                            .build(),
+                    PlannerModeration.builder().planner(planner).takenDownAt(takenDownAt).build());
             return planner;
         }
 
@@ -494,7 +503,7 @@ public class TestDataFactory {
                     .plannerId(planner.getId())
                     .upvotes(upvotes)
                     .build());
-            catalogService.add(planner);
+            addToCatalog(catalogService, planner);
             return planner;
         }
     }

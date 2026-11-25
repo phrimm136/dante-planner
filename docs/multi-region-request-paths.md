@@ -348,7 +348,7 @@ expected states, not defects.
 |---|---|---|
 | `/api/planner/md` | `PlannerCommandController` (`PUT /{id}` upsert) | write → primary; raises its markers |
 | | `PlannerPublishingController` (`POST /{id}/publish`, `POST /{id}/unpublish`; `PUT /{id}/publish` a deprecated one-release delegate) | §6; publish publishes SSE + notifications after commit |
-| | `PlannerEngagementController` (`POST /{id}/bookmark`, vote, subscribe) | writes → primary; bookmark is state-targeted and idempotent |
+| | `PlannerEngagementController` (vote, `PUT` and `DELETE /{id}/subscription`; `POST /{id}/subscribe` until the frontend stops calling it) | writes → primary; the subscription requests are state-targeted and idempotent |
 | | `PlannerQueryController`, `PublishedPlannerController` | reads → replica; each read is decided by its freshness markers (§5) |
 | `/api/sse` | `SseController` (`GET /subscribe`) | subscribes to local Redis fan-out |
 | `/api/auth` | `AuthController` (`GET /google/callback`) | a **mutating GET** — commits a user row, so it raises that user's marker (the capture is transaction-driven, not method-driven) |

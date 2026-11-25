@@ -112,7 +112,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-        catalogService.add(planner);
+        TestDataFactory.addToCatalog(catalogService, planner);
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
         return planner;
     }
@@ -129,7 +129,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(empty.getId()).build());
-        catalogService.add(empty);
+        TestDataFactory.addToCatalog(catalogService, empty);
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, empty.getId());
 
         mockMvc.perform(get("/api/planner/md/published").param("identity", "10101"))
@@ -350,7 +350,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-        catalogService.add(planner);
+        TestDataFactory.addToCatalog(catalogService, planner);
         clearColumns(planner.getId());
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
         return planner;

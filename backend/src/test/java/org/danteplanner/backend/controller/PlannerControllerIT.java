@@ -154,7 +154,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                 .plannerId(planner.getId())
                 .upvotes(upvotes)
                 .build());
-        catalogService.add(planner);
+        TestDataFactory.addToCatalog(catalogService, planner);
         return planner;
     }
 
@@ -641,7 +641,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                     .published(true)
                     .save(plannerRepository);
             statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-            catalogService.add(planner);
+            TestDataFactory.addToCatalog(catalogService, planner);
             UpsertPlannerRequest request = UpsertRequests.resending(planner).title(null).category("15F").build();
 
             mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())

@@ -5,7 +5,6 @@ import org.danteplanner.backend.support.RecordingRestrictionCheck;
 import org.danteplanner.backend.support.RecordingRestrictionCheck.Decision;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 
-import org.danteplanner.backend.planner.entity.PlannerSubscription;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
@@ -15,16 +14,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
 
@@ -35,6 +34,8 @@ import static org.danteplanner.backend.support.Rejections.assertRejected;
  */
 @ExtendWith(MockitoExtension.class)
 class PlannerSubscriptionServiceTest {
+
+    private static final Instant NOW = Instant.parse("2026-11-23T00:00:00Z");
 
     private static final long PLANNER_OWNER_ID = 41L;
 
@@ -56,137 +57,115 @@ class PlannerSubscriptionServiceTest {
         FakeUsers users = new FakeUsers();
         restrictionCheck = new RecordingRestrictionCheck(users);
         subscriptionService = new PlannerSubscriptionService(
-                subscriptionRepository, new PlannerAccessGuard(null, plannerRepository), restrictionCheck);
+                subscriptionRepository, new PlannerAccessGuard(null, plannerRepository), restrictionCheck,
+                Clock.fixed(NOW, ZoneOffset.UTC));
 
         testUser = users.add(TestDataFactory.unsavedUser(1L));
 
         plannerId = UUID.randomUUID();
     }
 
+    private void published() {
+        when(plannerRepository.findThread(plannerId))
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
+    }
+
+    private void toggles(int affectedRows, boolean entered) {
+        published();
+        when(subscriptionRepository.toggle(testUser.getId(), plannerId, NOW)).thenReturn(affectedRows);
+        when(subscriptionRepository.findEnabledOf(testUser.getId(), plannerId)).thenReturn(Optional.of(entered));
+    }
+
     @Nested
     class ToggleSubscriptionTests {
 
         @Test
-        void toggleSubscription_WhenNotSubscribed_CreatesNewSubscription() {
-            // Arrange
-            when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
-            when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(Optional.empty());
-            when(subscriptionRepository.insert(any(PlannerSubscription.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
+        void toggleSubscription_WhenTheRowEndsOn_ChecksTheRestriction() {
+            toggles(1, true);
 
-            // Act
-            PlannerSubscription result = subscriptionService.toggleSubscription(testUser.getId(), plannerId);
+            assertThat(subscriptionService.toggleSubscription(testUser.getId(), plannerId)).isTrue();
 
-            // Assert
-            assertThat(result).isNotNull();
-            assertThat(result.isEnabled()).isTrue();
-            assertThat(result.getUserId()).isEqualTo(testUser.getId());
-            assertThat(result.getPlannerId()).isEqualTo(plannerId);
-
-            ArgumentCaptor<PlannerSubscription> captor = ArgumentCaptor.forClass(PlannerSubscription.class);
-            verify(subscriptionRepository).insert(captor.capture());
-            assertThat(captor.getValue().isEnabled()).isTrue();
+            assertThat(restrictionCheck.decisions()).containsExactly(Decision.CHECKED);
         }
 
         @Test
-        void toggleSubscription_WhenSubscribed_TogglesEnabled() {
-            // Arrange
-            PlannerSubscription existingSubscription = new PlannerSubscription(testUser.getId(), plannerId);
-            // existingSubscription is enabled by default
+        void toggleSubscription_WhenTheRowEndsOff_IsAPrivateDecision() {
+            toggles(2, false);
 
-            when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
-            when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(Optional.of(existingSubscription));
+            assertThat(subscriptionService.toggleSubscription(testUser.getId(), plannerId)).isFalse();
 
-            // Act
-            PlannerSubscription result = subscriptionService.toggleSubscription(testUser.getId(), plannerId);
-
-            // Assert
-            assertThat(result).isNotNull();
-            assertThat(result.isEnabled()).isFalse(); // Was enabled, now disabled
-            assertThat(result).isSameAs(existingSubscription);
+            assertThat(restrictionCheck.decisions()).containsExactly(Decision.PRIVATE);
         }
 
         @Test
-        void toggleSubscription_WhenDisabled_TogglesBackToEnabled() {
-            // Arrange
-            PlannerSubscription disabledSubscription = new PlannerSubscription(testUser.getId(), plannerId);
-            disabledSubscription.toggle(); // Now disabled
-
-            when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
-            when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(Optional.of(disabledSubscription));
-
-            // Act
-            PlannerSubscription result = subscriptionService.toggleSubscription(testUser.getId(), plannerId);
-
-            // Assert
-            assertThat(result).isNotNull();
-            assertThat(result.isEnabled()).isTrue(); // Was disabled, now enabled
-        }
-
-        @Test
-        void toggleSubscription_WhenPlannerMissingOrUnpublished_ThrowsException() {
-            // Arrange
+        void toggleSubscription_WhenPlannerMissingOrUnpublished_WritesNothing() {
             UUID nonExistentId = UUID.randomUUID();
             when(plannerRepository.findThread(nonExistentId)).thenReturn(Optional.empty());
 
-            // Act & Assert
             assertRejected(() -> subscriptionService.toggleSubscription(testUser.getId(), nonExistentId))
                     .withCode("PLANNER_NOT_FOUND");
 
-            verify(subscriptionRepository, never()).findByUserIdAndPlannerId(any(), any());
-            verify(subscriptionRepository, never()).insert(any());
+            verifyNoInteractions(subscriptionRepository);
         }
 
         @Test
-        void toggleSubscription_WhenBannedAndNotSubscribed_RefusesAndInsertsNothing() {
+        void toggleSubscription_WhenBannedAndTurningOn_Refuses() {
             TestDataFactory.ban(testUser, Instant.now(), null);
-            when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
-            when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(Optional.empty());
+            toggles(1, true);
 
             assertRejected(() -> subscriptionService.toggleSubscription(testUser.getId(), plannerId))
                     .withCode("USER_BANNED");
-
-            verify(subscriptionRepository, never()).insert(any());
         }
 
         @Test
-        void toggleSubscription_WhenTimedOutAndDisabled_RefusesAndLeavesItDisabled() {
+        void toggleSubscription_WhenTimedOutAndTurningOn_Refuses() {
             TestDataFactory.timeOut(testUser, Instant.now().plusSeconds(3600));
-            PlannerSubscription disabledSubscription = new PlannerSubscription(testUser.getId(), plannerId);
-            disabledSubscription.toggle();
-            when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
-            when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(Optional.of(disabledSubscription));
+            toggles(2, true);
 
             assertRejected(() -> subscriptionService.toggleSubscription(testUser.getId(), plannerId))
                     .withCode("USER_TIMED_OUT");
-
-            assertThat(disabledSubscription.isEnabled()).isFalse();
         }
 
         @Test
-        void toggleSubscription_WhenBannedAndSubscribed_TurnsItOffAsAPrivateDecision() {
+        void toggleSubscription_WhenBannedAndTurningOff_IsAllowedAsAPrivateDecision() {
             TestDataFactory.ban(testUser, Instant.now(), null);
-            PlannerSubscription existingSubscription = new PlannerSubscription(testUser.getId(), plannerId);
-            when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
-            when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(Optional.of(existingSubscription));
+            toggles(2, false);
 
-            PlannerSubscription result = subscriptionService.toggleSubscription(testUser.getId(), plannerId);
+            assertThat(subscriptionService.toggleSubscription(testUser.getId(), plannerId)).isFalse();
 
-            assertThat(result.isEnabled()).isFalse();
             assertThat(restrictionCheck.decisions()).containsExactly(Decision.PRIVATE);
         }
+    }
+
+    @Test
+    void subscribe_WhenPublished_WritesTheSubscribedState() {
+        published();
+
+        subscriptionService.subscribe(testUser.getId(), plannerId);
+
+        verify(subscriptionRepository).subscribe(testUser.getId(), plannerId, NOW);
+        verifyNoMoreInteractions(subscriptionRepository);
+    }
+
+    @Test
+    void unsubscribe_WhenPublished_WritesTheUnsubscribedStateWhetherOrNotARowMatched() {
+        published();
+
+        subscriptionService.unsubscribe(testUser.getId(), plannerId);
+
+        verify(subscriptionRepository).unsubscribe(testUser.getId(), plannerId);
+        verifyNoMoreInteractions(subscriptionRepository);
+    }
+
+    @Test
+    void subscribeAndUnsubscribe_WhenPlannerMissing_WriteNothing() {
+        when(plannerRepository.findThread(plannerId)).thenReturn(Optional.empty());
+
+        assertRejected(() -> subscriptionService.subscribe(testUser.getId(), plannerId)).withCode("PLANNER_NOT_FOUND");
+        assertRejected(() -> subscriptionService.unsubscribe(testUser.getId(), plannerId))
+                .withCode("PLANNER_NOT_FOUND");
+
+        verifyNoInteractions(subscriptionRepository);
     }
 
     @Nested
@@ -194,82 +173,31 @@ class PlannerSubscriptionServiceTest {
 
         @Test
         void isSubscribed_WhenSubscribedAndEnabled_ReturnsTrue() {
-            // Arrange
-            PlannerSubscription enabledSubscription = new PlannerSubscription(testUser.getId(), plannerId);
+            when(subscriptionRepository.findEnabledOf(testUser.getId(), plannerId)).thenReturn(Optional.of(true));
 
-            when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(Optional.of(enabledSubscription));
-
-            // Act
-            boolean result = subscriptionService.isSubscribed(testUser.getId(), plannerId);
-
-            // Assert
-            assertThat(result).isTrue();
+            assertThat(subscriptionService.isSubscribed(testUser.getId(), plannerId)).isTrue();
         }
 
         @Test
         void isSubscribed_WhenSubscribedButDisabled_ReturnsFalse() {
-            // Arrange
-            PlannerSubscription disabledSubscription = new PlannerSubscription(testUser.getId(), plannerId);
-            disabledSubscription.toggle(); // Now disabled
+            when(subscriptionRepository.findEnabledOf(testUser.getId(), plannerId)).thenReturn(Optional.of(false));
 
-            when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(Optional.of(disabledSubscription));
-
-            // Act
-            boolean result = subscriptionService.isSubscribed(testUser.getId(), plannerId);
-
-            // Assert
-            assertThat(result).isFalse();
+            assertThat(subscriptionService.isSubscribed(testUser.getId(), plannerId)).isFalse();
         }
 
         @Test
         void isSubscribed_WhenNotSubscribed_ReturnsFalse() {
-            // Arrange
-            when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(Optional.empty());
+            when(subscriptionRepository.findEnabledOf(testUser.getId(), plannerId)).thenReturn(Optional.empty());
 
-            // Act
-            boolean result = subscriptionService.isSubscribed(testUser.getId(), plannerId);
-
-            // Assert
-            assertThat(result).isFalse();
+            assertThat(subscriptionService.isSubscribed(testUser.getId(), plannerId)).isFalse();
         }
     }
 
-    @Nested
-    class CreateSubscriptionTests {
+    @Test
+    void createSubscription_WhenCalled_InsertsOnlyIfAbsent() {
+        subscriptionService.createSubscription(testUser.getId(), plannerId);
 
-        @Test
-        void createSubscription_WhenNotExists_CreatesSubscription() {
-            // Arrange
-            when(subscriptionRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(false);
-
-            // Act
-            subscriptionService.createSubscription(testUser.getId(), plannerId);
-
-            // Assert
-            ArgumentCaptor<PlannerSubscription> captor = ArgumentCaptor.forClass(PlannerSubscription.class);
-            verify(subscriptionRepository).insert(captor.capture());
-
-            PlannerSubscription saved = captor.getValue();
-            assertThat(saved.getUserId()).isEqualTo(testUser.getId());
-            assertThat(saved.getPlannerId()).isEqualTo(plannerId);
-            assertThat(saved.isEnabled()).isTrue();
-        }
-
-        @Test
-        void createSubscription_WhenExists_DoesNothing() {
-            // Arrange
-            when(subscriptionRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(true);
-
-            // Act
-            subscriptionService.createSubscription(testUser.getId(), plannerId);
-
-            // Assert
-            verify(subscriptionRepository, never()).insert(any());
-        }
+        verify(subscriptionRepository).insertIfAbsent(testUser.getId(), plannerId, NOW);
+        verifyNoMoreInteractions(subscriptionRepository);
     }
 }

@@ -112,9 +112,11 @@ asset pipeline.
   failed INSERT — only the exception classifier is covered by synthesized exceptions. A
   containerized test driving a live suffix collision through the retry loop would close it.
   re-check: `rg -qF 'isUsernameSuffixCollision(e)' backend/src/main/java/org/danteplanner/backend/user/service/UserService.java && .claude/skills/debt-ledger/bin/debt absent backend/src/test -g '*IT.java' -i 'suffix.?collision'`
-- Toggle endpoints flip state instead of converging on it; make them idempotent the way
-  planner publish is (repeat calls are no-ops, not inversions).
-  re-check: `rg -q 'public PlannerSubscription toggleSubscription\(Long userId, UUID plannerId\)' backend/src/main/java/org/danteplanner/backend/planner/service/PlannerSubscriptionService.java`
+- `POST /api/planner/md/{id}/subscribe` flips the subscription and stays for the frontend's rollout:
+  move the frontend to `PUT` and `DELETE /{id}/subscription`, and once that release is live and the old
+  route has had no call for 24 h after it, delete the handler, `toggleSubscription`, the repository's
+  `toggle` and its line in `backend/config/self-flip-queries.txt`.
+  re-check: `rg -q 'PlannerSubscriptionRepository.toggle' backend/config/self-flip-queries.txt`
 - The frontend reads no `?login=` value (`error`, `rate_limited`, `unavailable`), so every
   OAuth failure redirect lands on a plain home page; closing it needs `validateSearch` on
   the `/` route, a toast in `GlobalLayout`, and `login.*` copy in every locale. Worth doing
@@ -306,9 +308,7 @@ asset pipeline.
   retirement on `planner.legacy_toggle` reading ~0, but RFC 0003 Stream 1 removed the counter's
   last emitter, so the metric now reads *no data*, never zero — both gates are unactionable as
   written and the runbook needs its retirement condition restated (arguably: satisfied).
-  `docs/multi-region-request-paths.md` §11 also still routes the deleted
-  `POST /{id}/bookmark`.
-  re-check: `rg -q 'when .planner.legacy_toggle. reads ~0' docs/runbooks/schema-decomposition-migration.md && .claude/skills/debt-ledger/bin/debt absent backend/src/main 'legacy_toggle' && rg -qF 'POST /{id}/bookmark' docs/multi-region-request-paths.md`
+  re-check: `rg -q 'when .planner.legacy_toggle. reads ~0' docs/runbooks/schema-decomposition-migration.md && .claude/skills/debt-ledger/bin/debt absent backend/src/main 'legacy_toggle'`
 - 2026-08-14 — Two observer effects remain outside the RFC 0003 outbox: the account-suspension
   push (`moderation/listener/AccountSuspensionEventListener`, after-commit) and the settings
   invalidation published inline from `UserController`. Both lose their push if the process dies
@@ -1607,7 +1607,7 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   that commits between that read and the insert leaves a hidden planner in the recommended list
   until the reconciler runs. Worth doing when hide takes a lock or the catalog insert computes
   `recommended` in SQL.
-  re-check: `rg -q 'planner.isHiddenFromRecommended\(\)' backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCatalogService.java`
+  re-check: `rg -q 'boolean recommended = RecommendedSql.isRecommended\(' backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCatalogService.java`
 - SSE notification preferences (`UserSettingsService.preferencesOf`, reached from
   `SseService.cacheSettingsIfAbsent` on subscribe and on every event delivery) read the primary, so a
   secondary-region pod pays one cross-region round trip per cache miss. A read-only (replica) read

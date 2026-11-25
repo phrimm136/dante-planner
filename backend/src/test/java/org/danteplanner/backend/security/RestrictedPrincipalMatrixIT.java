@@ -81,6 +81,7 @@ class RestrictedPrincipalMatrixIT extends SharedMySqlContainerSupport {
      */
     private static final Map<String, String> BLOCKED_FOR_BANNED = Map.of(
             SUBSCRIBE, "",
+            "PUT /api/planner/md/{id}/subscription", "",
             "POST /api/planner/md/{id}/publish", "",
             "POST /api/planner/md/{id}/upvote", "{\"voteType\":\"UP\"}",
             "POST /api/planner/md/{id}/report", "{}",

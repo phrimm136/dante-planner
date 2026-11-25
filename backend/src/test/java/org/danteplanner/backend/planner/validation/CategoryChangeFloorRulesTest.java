@@ -77,6 +77,7 @@ class CategoryChangeFloorRulesTest {
         commandService = new PlannerCommandService(
                 plannerRepository,
                 statsRepository,
+                null,
                 contentValidator,
                 null,
                 null,

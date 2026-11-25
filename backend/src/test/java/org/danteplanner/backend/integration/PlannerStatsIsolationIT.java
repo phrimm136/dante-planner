@@ -76,7 +76,7 @@ class PlannerStatsIsolationIT extends ExclusiveDatabaseSupport {
         commenter = TestDataFactory.createTestUser(userRepository, "stats-commenter@example.com");
         admin = TestDataFactory.createAdmin(userRepository, "stats-admin@example.com");
         planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
-        catalogService.add(planner);
+        TestDataFactory.addToCatalog(catalogService, planner);
     }
 
     @AfterEach

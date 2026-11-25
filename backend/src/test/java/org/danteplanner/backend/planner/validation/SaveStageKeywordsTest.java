@@ -67,6 +67,7 @@ class SaveStageKeywordsTest {
         commandService = new PlannerCommandService(
                 plannerRepository,
                 statsRepository,
+                null,
                 contentValidator,
                 null,
                 null,

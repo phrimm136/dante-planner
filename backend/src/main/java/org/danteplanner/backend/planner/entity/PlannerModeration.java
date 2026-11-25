@@ -13,7 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import org.hibernate.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
@@ -24,6 +24,7 @@ import java.util.UUID;
  * moderator account was deleted (FK ON DELETE SET NULL).
  */
 @Entity
+@Immutable
 @Table(name = "planner_moderation")
 @Getter
 @Builder
@@ -38,11 +39,9 @@ public class PlannerModeration {
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "planner_id")
-    @Setter
     private Planner planner;
 
     @Column(name = "taken_down_at")
-    @Setter
     private @Nullable Instant takenDownAt;
 
     @Column(name = "hidden_from_recommended", nullable = false)
@@ -60,27 +59,5 @@ public class PlannerModeration {
 
     public boolean isTakenDown() {
         return takenDownAt != null;
-    }
-
-    boolean takeDown(Instant now) {
-        if (takenDownAt != null) {
-            return false;
-        }
-        this.takenDownAt = now;
-        return true;
-    }
-
-    void hide(Long moderatorId, String reason, Instant now) {
-        this.hiddenFromRecommended = true;
-        this.hiddenByModeratorId = moderatorId;
-        this.hiddenReason = reason;
-        this.hiddenAt = now;
-    }
-
-    void unhide() {
-        this.hiddenFromRecommended = false;
-        this.hiddenByModeratorId = null;
-        this.hiddenReason = null;
-        this.hiddenAt = null;
     }
 }
