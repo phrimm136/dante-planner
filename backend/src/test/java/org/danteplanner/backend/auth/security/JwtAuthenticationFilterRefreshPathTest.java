@@ -13,6 +13,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
+import org.danteplanner.backend.auth.token.RevocationOutcome;
 import org.danteplanner.backend.auth.token.RotationOutcome;
 import org.danteplanner.backend.auth.token.TokenGenerationException;
 import org.danteplanner.backend.auth.token.TokenGenerator;
@@ -63,15 +64,15 @@ class JwtAuthenticationFilterRefreshPathTest {
 
     private final RecordingTokenBlacklist tokenBlacklist = new RecordingTokenBlacklist(jwt.clock()) {
         @Override
-        public boolean isBlacklisted(String token) {
+        public RevocationOutcome blacklistCheck(String token) {
             fetches.add("blacklist");
-            return super.isBlacklisted(token);
+            return checksSkipped ? RevocationOutcome.SKIPPED : super.blacklistCheck(token);
         }
 
         @Override
-        public boolean isUserTokenInvalidated(Long userId, long issuedAt) {
+        public RevocationOutcome invalidationCheck(Long userId, long issuedAt) {
             fetches.add("invalidation");
-            return super.isUserTokenInvalidated(userId, issuedAt);
+            return checksSkipped ? RevocationOutcome.SKIPPED : super.invalidationCheck(userId, issuedAt);
         }
     };
 
@@ -87,6 +88,7 @@ class JwtAuthenticationFilterRefreshPathTest {
 
     private final Logger filterLogger = (Logger) LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
+    private boolean checksSkipped;
     private String refreshToken;
     private MockHttpServletRequest request;
     private MockHttpServletResponse response;
@@ -126,6 +128,20 @@ class JwtAuthenticationFilterRefreshPathTest {
         assertThat(writtenCookies()).containsExactly(CookieConstants.REFRESH_TOKEN, CookieConstants.ACCESS_TOKEN);
         assertThat(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).isEqualTo(USER_ID);
         assertThat(logged()).containsExactly("DEBUG Auto-refreshed tokens for user: test@example.com");
+        assertTheChainRan();
+    }
+
+    @Test
+    void doFilterInternal_WhenBothChecksAreSkipped_StillAsksForTheInvalidationAndRefreshes() throws Exception {
+        checksSkipped = true;
+        users.add(TestDataFactory.unsavedUser(USER_ID));
+        present(refreshToken);
+
+        filter(rotatingTo(new RotationOutcome.Rotated("successor", jwt.service().validateRefreshToken(refreshToken))))
+                .doFilterInternal(request, response, filterChain);
+
+        assertThat(fetches).containsExactly("blacklist", "invalidation", "user", "rotation");
+        assertThat(writtenCookies()).containsExactly(CookieConstants.REFRESH_TOKEN, CookieConstants.ACCESS_TOKEN);
         assertTheChainRan();
     }
 

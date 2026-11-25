@@ -5,6 +5,7 @@ import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.auth.token.JwtTokenService;
+import org.danteplanner.backend.auth.token.RevocationOutcome;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.RefreshClaims;
 import org.danteplanner.backend.support.AuthCookies;
@@ -125,8 +126,8 @@ class AuthControllerLogoutAllIT extends SharedMySqlContainerSupport {
             mockMvc.perform(post("/api/auth/logout").with(withCsrf()).cookie(accessTokenCookie()))
                     .andExpect(status().isNoContent());
 
-            assertThat(tokenBlacklistService.isBlacklisted(accessToken)).isTrue();
-            assertThat(tokenBlacklistService.isBlacklisted(refreshToken)).isFalse();
+            assertThat(tokenBlacklistService.blacklistCheck(accessToken)).isEqualTo(RevocationOutcome.REVOKED);
+            assertThat(tokenBlacklistService.blacklistCheck(refreshToken)).isEqualTo(RevocationOutcome.CLEAR);
         }
 
         @Test
@@ -143,17 +144,17 @@ class AuthControllerLogoutAllIT extends SharedMySqlContainerSupport {
 
         @Test
         void logoutAll_WhenAuthenticated_InvalidatesUserTokens() throws Exception {
-            assertThat(tokenBlacklistService.isUserTokenInvalidated(testUser.getId(), 0L)).isFalse();
+            assertThat(tokenBlacklistService.invalidationCheck(testUser.getId(), 0L)).isEqualTo(RevocationOutcome.CLEAR);
 
             mockMvc.perform(post("/api/auth/logout-all").with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(refreshTokenCookie()))
                     .andExpect(status().isNoContent());
 
-            assertThat(tokenBlacklistService.isUserTokenInvalidated(testUser.getId(), 0L)).isTrue();
-            assertThat(tokenBlacklistService.isUserTokenInvalidated(bystander.getId(), 0L))
+            assertThat(tokenBlacklistService.invalidationCheck(testUser.getId(), 0L)).isEqualTo(RevocationOutcome.REVOKED);
+            assertThat(tokenBlacklistService.invalidationCheck(bystander.getId(), 0L))
                     .as("invalidation is scoped to the acting user")
-                    .isFalse();
+                    .isEqualTo(RevocationOutcome.CLEAR);
         }
     }
 
@@ -167,7 +168,7 @@ class AuthControllerLogoutAllIT extends SharedMySqlContainerSupport {
                             .cookie(refreshTokenCookie()))
                     .andExpect(status().isNoContent());
 
-            assertThat(tokenBlacklistService.isBlacklisted(accessToken)).isTrue();
+            assertThat(tokenBlacklistService.blacklistCheck(accessToken)).isEqualTo(RevocationOutcome.REVOKED);
 
             mockMvc.perform(post("/api/auth/logout-all").with(withCsrf())
                             .cookie(accessTokenCookie()))
@@ -183,10 +184,10 @@ class AuthControllerLogoutAllIT extends SharedMySqlContainerSupport {
                             .cookie(refreshTokenCookie()))
                     .andExpect(status().isNoContent());
 
-            // Auto-refresh (filter) and lineage rotation both consult isUserTokenInvalidated,
+            // Auto-refresh (filter) and lineage rotation both consult invalidationCheck,
             // which now rejects any token issued at or before the invalidation timestamp.
-            assertThat(tokenBlacklistService.isUserTokenInvalidated(
-                    testUser.getId(), refreshClaims.issuedAt().getTime() - 1)).isTrue();
+            assertThat(tokenBlacklistService.invalidationCheck(
+                    testUser.getId(), refreshClaims.issuedAt().getTime() - 1)).isEqualTo(RevocationOutcome.REVOKED);
         }
     }
 }

@@ -16,6 +16,7 @@ import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.auth.exception.SessionRevokedException;
 import org.danteplanner.backend.auth.token.RefreshClaims;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
+import org.danteplanner.backend.auth.token.RevocationOutcome;
 import org.danteplanner.backend.auth.token.RotationOutcome;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenGenerator;
@@ -155,16 +156,18 @@ public class JwtAuthenticationFilter extends ChainAuthenticationFilter {
         record Abandon(Long userId, AbandonReason reason) implements RefreshCheck {
         }
 
-        private static RefreshCheck ofBlacklist(RefreshToken presented, boolean blacklisted) {
-            return blacklisted
-                    ? new Abandon(presented.claims().userId(), AbandonReason.BLACKLISTED)
-                    : new NeedInvalidation(presented);
+        private static RefreshCheck ofBlacklist(RefreshToken presented, RevocationOutcome blacklist) {
+            return switch (blacklist) {
+                case REVOKED -> new Abandon(presented.claims().userId(), AbandonReason.BLACKLISTED);
+                case CLEAR, SKIPPED -> new NeedInvalidation(presented);
+            };
         }
 
-        private static RefreshCheck ofInvalidation(RefreshToken presented, boolean invalidated) {
-            return invalidated
-                    ? new Abandon(presented.claims().userId(), AbandonReason.USER_INVALIDATED)
-                    : new NeedUser(presented);
+        private static RefreshCheck ofInvalidation(RefreshToken presented, RevocationOutcome invalidation) {
+            return switch (invalidation) {
+                case REVOKED -> new Abandon(presented.claims().userId(), AbandonReason.USER_INVALIDATED);
+                case CLEAR, SKIPPED -> new NeedUser(presented);
+            };
         }
 
         private static RefreshCheck ofUser(RefreshToken presented, Optional<UserSummary> active) {
@@ -239,9 +242,9 @@ public class JwtAuthenticationFilter extends ChainAuthenticationFilter {
     private SessionOutcome proceed(RefreshCheck check, HttpServletRequest request, HttpServletResponse response) {
         return switch (check) {
             case RefreshCheck.NeedBlacklist need -> proceed(RefreshCheck.ofBlacklist(need.presented(),
-                    tokenBlacklistService.isBlacklisted(need.presented().token())), request, response);
+                    tokenBlacklistService.blacklistCheck(need.presented().token())), request, response);
             case RefreshCheck.NeedInvalidation need -> proceed(RefreshCheck.ofInvalidation(need.presented(),
-                    tokenBlacklistService.isUserTokenInvalidated(need.presented().claims().userId(),
+                    tokenBlacklistService.invalidationCheck(need.presented().claims().userId(),
                             need.presented().claims().issuedAt().getTime())), request, response);
             case RefreshCheck.NeedUser need -> proceed(RefreshCheck.ofUser(need.presented(),
                     users.findActiveById(need.presented().claims().userId())), request, response);

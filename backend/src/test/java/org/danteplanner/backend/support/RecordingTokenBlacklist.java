@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.danteplanner.backend.auth.token.LogoutRevocation;
+import org.danteplanner.backend.auth.token.RevocationOutcome;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 
 public class RecordingTokenBlacklist extends TokenBlacklistService {
@@ -56,7 +57,9 @@ public class RecordingTokenBlacklist extends TokenBlacklistService {
     }
 
     public Set<String> blacklistedTokens() {
-        return expiries.keySet().stream().filter(this::isBlacklisted).collect(Collectors.toUnmodifiableSet());
+        return expiries.keySet().stream()
+                .filter(token -> blacklistCheck(token) == RevocationOutcome.REVOKED)
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     public Set<Long> invalidatedUserIds() {
@@ -85,9 +88,9 @@ public class RecordingTokenBlacklist extends TokenBlacklistService {
     }
 
     @Override
-    public boolean isBlacklisted(String token) {
+    public RevocationOutcome blacklistCheck(String token) {
         Long expiresAt = expiries.get(token);
-        return expiresAt != null && expiresAt > clock.millis();
+        return expiresAt != null && expiresAt > clock.millis() ? RevocationOutcome.REVOKED : RevocationOutcome.CLEAR;
     }
 
     @Override
@@ -99,9 +102,11 @@ public class RecordingTokenBlacklist extends TokenBlacklistService {
     }
 
     @Override
-    public boolean isUserTokenInvalidated(Long userId, long issuedAt) {
+    public RevocationOutcome invalidationCheck(Long userId, long issuedAt) {
         Invalidation invalidation = invalidations.get(userId);
-        return invalidation != null && invalidation.expiresAt() > clock.millis() && issuedAt < invalidation.stamp();
+        return invalidation != null && invalidation.expiresAt() > clock.millis() && issuedAt < invalidation.stamp()
+                ? RevocationOutcome.REVOKED
+                : RevocationOutcome.CLEAR;
     }
 
     public int size() {

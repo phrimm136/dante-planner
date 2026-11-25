@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 import javax.sql.DataSource;
 import org.danteplanner.backend.auth.token.JwtTokenService;
+import org.danteplanner.backend.auth.token.RevocationOutcome;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
@@ -450,12 +451,12 @@ class DegradationIT {
         double before = skipCounterValue();
         cutAuthRedis();
 
-        boolean blacklisted = tokenBlacklistService.isBlacklisted(token);
+        RevocationOutcome blacklisted = tokenBlacklistService.blacklistCheck(token);
         double after = skipCounterValue();
 
         assertThat(blacklisted)
                 .as("fail-open: an unrevoked token must not be denied when auth Redis is unreachable")
-                .isFalse();
+                .isEqualTo(RevocationOutcome.SKIPPED);
         assertThat(after - before)
                 .as("fail-open must increment " + COUNTER_NAME)
                 .isEqualTo(1.0);
@@ -467,15 +468,15 @@ class DegradationIT {
         Date expiry = new Date(System.currentTimeMillis() + ONE_HOUR_MS);
 
         tokenBlacklistService.blacklistToken(token, expiry);
-        assertThat(tokenBlacklistService.isBlacklisted(token))
+        assertThat(tokenBlacklistService.blacklistCheck(token))
                 .as("precondition: the token is rejected while auth Redis is UP")
-                .isTrue();
+                .isEqualTo(RevocationOutcome.REVOKED);
 
         reloadAuthRedisFromAof();
 
-        assertThat(tokenBlacklistService.isBlacklisted(token))
+        assertThat(tokenBlacklistService.blacklistCheck(token))
                 .as("AOF-replay integrity: the blacklist entry must survive DEBUG LOADAOF and stay rejected")
-                .isTrue();
+                .isEqualTo(RevocationOutcome.REVOKED);
     }
 
     /**

@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import org.danteplanner.backend.auth.token.RevocationOutcome;
 import org.danteplanner.backend.support.RecordingTokenBlacklist;
 import org.danteplanner.backend.support.TestJwt;
 import org.danteplanner.backend.user.api.UserRole;
@@ -28,15 +29,15 @@ class AccessTokenAuthenticatorTest {
     private final List<String> blacklistReads = new ArrayList<>();
     private final RecordingTokenBlacklist blacklist = new RecordingTokenBlacklist(jwt.clock()) {
         @Override
-        public boolean isBlacklisted(String token) {
-            blacklistReads.add("isBlacklisted");
-            return super.isBlacklisted(token);
+        public RevocationOutcome blacklistCheck(String token) {
+            blacklistReads.add("blacklistCheck");
+            return super.blacklistCheck(token);
         }
 
         @Override
-        public boolean isUserTokenInvalidated(Long userId, long issuedAt) {
-            blacklistReads.add("isUserTokenInvalidated");
-            return super.isUserTokenInvalidated(userId, issuedAt);
+        public RevocationOutcome invalidationCheck(Long userId, long issuedAt) {
+            blacklistReads.add("invalidationCheck");
+            return super.invalidationCheck(userId, issuedAt);
         }
     };
     private final AccessTokenAuthenticator authenticator = new AccessTokenAuthenticator(jwt.service(), blacklist);
@@ -69,7 +70,7 @@ class AccessTokenAuthenticatorTest {
 
         assertThat(authenticator.verify(token, request))
                 .isEqualTo(AccessTokenAuthenticator.AccessTokenOutcome.REVOKED);
-        assertThat(blacklistReads).containsExactly("isBlacklisted");
+        assertThat(blacklistReads).containsExactly("blacklistCheck");
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
     }
 
@@ -90,7 +91,44 @@ class AccessTokenAuthenticatorTest {
 
         assertThat(authenticator.verify(token, request))
                 .isEqualTo(AccessTokenAuthenticator.AccessTokenOutcome.AUTHENTICATED);
-        assertThat(blacklistReads).containsExactly("isBlacklisted", "isUserTokenInvalidated");
+        assertThat(blacklistReads).containsExactly("blacklistCheck", "invalidationCheck");
+        assertThat(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).isEqualTo(USER_ID);
+    }
+
+    @Test
+    void verify_WhenTheUserIsInvalidated_RevokesAfterBothReads() {
+        String token = jwt.service().generateAccessToken(USER_ID, UserRole.NORMAL);
+        jwt.clock().advance(Duration.ofSeconds(2));
+        blacklist.invalidateUserTokens(USER_ID);
+
+        assertThat(authenticator.verify(token, request))
+                .isEqualTo(AccessTokenAuthenticator.AccessTokenOutcome.REVOKED);
+        assertThat(blacklistReads).containsExactly("blacklistCheck", "invalidationCheck");
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+    }
+
+    @Test
+    void verify_WhenBothChecksAreSkipped_AuthenticatesAfterBothReads() {
+        String token = jwt.service().generateAccessToken(USER_ID, UserRole.NORMAL);
+        List<String> skippedReads = new ArrayList<>();
+        AccessTokenAuthenticator degraded = new AccessTokenAuthenticator(jwt.service(),
+                new RecordingTokenBlacklist(jwt.clock()) {
+                    @Override
+                    public RevocationOutcome blacklistCheck(String presented) {
+                        skippedReads.add("blacklistCheck");
+                        return RevocationOutcome.SKIPPED;
+                    }
+
+                    @Override
+                    public RevocationOutcome invalidationCheck(Long userId, long issuedAt) {
+                        skippedReads.add("invalidationCheck");
+                        return RevocationOutcome.SKIPPED;
+                    }
+                });
+
+        assertThat(degraded.verify(token, request))
+                .isEqualTo(AccessTokenAuthenticator.AccessTokenOutcome.AUTHENTICATED);
+        assertThat(skippedReads).containsExactly("blacklistCheck", "invalidationCheck");
         assertThat(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).isEqualTo(USER_ID);
     }
 }
