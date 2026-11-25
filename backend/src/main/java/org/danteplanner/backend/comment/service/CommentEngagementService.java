@@ -12,7 +12,9 @@ import org.danteplanner.backend.comment.exception.CommentNotFoundException;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
+import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator.AuthoredComment;
 import org.danteplanner.backend.comment.validation.CommentStateValidator;
+import org.danteplanner.backend.comment.validation.CommentStateValidator.LiveComment;
 import org.danteplanner.backend.moderation.api.dto.CommentReportRequest;
 import org.danteplanner.backend.moderation.api.dto.CommentReportResponse;
 import org.danteplanner.backend.moderation.api.CommentReports;
@@ -43,20 +45,18 @@ public class CommentEngagementService {
 
     @Transactional
     public CommentVoteResponse toggleUpvote(UUID commentPublicId, Long userId) {
-        PlannerComment comment = commentQueryService.requireByPublicId(commentPublicId);
-        Long internalId = comment.getId();
-
-        stateValidator.requireVotable(comment);
+        LiveComment live = stateValidator.requireVotable(commentQueryService.requireByPublicId(commentPublicId));
+        Long internalId = live.comment().getId();
 
         PlannerCommentVoteId voteId = new PlannerCommentVoteId(internalId, userId);
         plannerVotes.requireFirstVote(
-                commentVoteRepository.existsById(voteId), comment.getPlannerId(), userId);
+                commentVoteRepository.existsById(voteId), live.comment().getPlannerId(), userId);
 
         PlannerCommentVote newVote = new PlannerCommentVote(internalId, userId, CommentVoteType.UP);
 
         commentVoteRepository.insert(newVote);
         commentRepository.incrementUpvoteCount(internalId);
-        FreshnessDeclarations.declare(new FreshnessScope.Planner(comment.getPlannerId()));
+        FreshnessDeclarations.declare(new FreshnessScope.Planner(live.comment().getPlannerId()));
 
         // The increment clears the persistence context, so this reads the committed counter rather
         // than the pre-increment copy the vote was checked against.
@@ -71,18 +71,21 @@ public class CommentEngagementService {
 
     @Transactional
     public ToggleNotificationResponse toggleNotification(UUID commentPublicId, Long userId, boolean enabled) {
-        PlannerComment comment = commentQueryService.requireByPublicId(commentPublicId);
+        AuthoredComment authored = authorshipValidator.requireAuthorToToggleNotifications(
+                commentQueryService.requireByPublicId(commentPublicId), userId);
 
-        authorshipValidator.requireAuthorToToggleNotifications(comment, userId);
-
-        comment.setAuthorNotificationsEnabled(enabled);
-        FreshnessDeclarations.declare(new FreshnessScope.Planner(comment.getPlannerId()));
+        authored.comment().setAuthorNotificationsEnabled(enabled);
+        FreshnessDeclarations.declare(new FreshnessScope.Planner(authored.comment().getPlannerId()));
 
         ToggleNotificationResponse response = new ToggleNotificationResponse(enabled);
 
-        log.info("User {} toggled notifications {} for comment {}", userId, enabled ? "on" : "off", commentPublicId);
+        log.info("User {} toggled notifications {} for comment {}", userId, onOrOff(enabled), commentPublicId);
 
         return response;
+    }
+
+    private static String onOrOff(boolean enabled) {
+        return enabled ? "on" : "off";
     }
 
     public CommentReportResponse reportComment(UUID commentPublicId, Long userId, CommentReportRequest request) {

@@ -11,6 +11,7 @@ import org.danteplanner.backend.moderation.exception.ReportAlreadyExistsExceptio
 import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.FakeUsers;
+import org.danteplanner.backend.support.IntegrityViolations;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -19,10 +20,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
@@ -102,6 +105,17 @@ class PlannerReportServiceTest {
                         assertThat(exception.getUserId()).isEqualTo(testUser.getId());
                     });
             verify(reportRepository, never()).insert(any());
+        }
+
+        @Test
+        void createReport_WhenAConcurrentReportWins_SurfacesTheConstraint() {
+            DataIntegrityViolationException duplicate =
+                    IntegrityViolations.duplicateEntry("planner_reports.uk_planner_report_user_planner");
+            when(plannerRepository.findThread(plannerId))
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
+            when(reportRepository.insert(any(PlannerReport.class))).thenThrow(duplicate);
+
+            assertThatThrownBy(() -> reportService.createReport(testUser.getId(), plannerId)).isSameAs(duplicate);
         }
 
         @Test

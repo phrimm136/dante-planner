@@ -36,29 +36,38 @@ public record CommentTreeNode(
         }
     }
 
+    public sealed interface Parent {
+
+        record Thread() implements Parent {
+        }
+
+        record Comment(UUID publicId) implements Parent {
+        }
+    }
+
     public static CommentTreeNode forBroadcast(
             PlannerComment comment,
-            @Nullable UUID parentPublicId,
+            Parent parent,
             Author author
     ) {
-        return node(comment, parentPublicId, author, false, false, List.of());
+        return node(comment, parent, author, false, false, List.of());
     }
 
     public static CommentTreeNode fromEntity(
             PlannerComment comment,
-            @Nullable UUID parentPublicId,
+            Parent parent,
             Author author,
             Viewer viewer,
             boolean hasUpvoted,
             List<CommentTreeNode> replies
     ) {
         boolean isAuthor = viewer.is(comment.getUserId());
-        return node(comment, parentPublicId, author, isAuthor, hasUpvoted, replies);
+        return node(comment, parent, author, isAuthor, hasUpvoted, replies);
     }
 
     private static CommentTreeNode node(
             PlannerComment comment,
-            @Nullable UUID parentPublicId,
+            Parent parent,
             Author author,
             boolean isAuthor,
             boolean hasUpvoted,
@@ -90,7 +99,10 @@ public record CommentTreeNode(
 
         return new CommentTreeNode(
                 comment.getPublicId(),
-                parentPublicId,
+                switch (parent) {
+                    case Parent.Thread thread -> null;
+                    case Parent.Comment(UUID publicId) -> publicId;
+                },
                 content,
                 authorEpithet,
                 authorSuffix,

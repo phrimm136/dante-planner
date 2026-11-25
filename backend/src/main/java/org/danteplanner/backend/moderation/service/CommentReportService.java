@@ -9,6 +9,8 @@ import org.danteplanner.backend.moderation.api.dto.CommentReportResponse;
 import org.danteplanner.backend.moderation.entity.PlannerCommentReport;
 import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
+import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator.FirstCommentReport;
+import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator.PriorReport;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,14 +34,19 @@ public class CommentReportService implements CommentReports {
     public CommentReportResponse createReport(UUID commentPublicId, Long userId, CommentReportRequest request) {
         Long internalId = commentTarget.requireReportable(commentPublicId);
 
-        reportUniquenessValidator.requireFirstCommentReport(
-                reportRepository.existsByReporterIdAndCommentId(userId, internalId), internalId, userId);
+        FirstCommentReport first = reportUniquenessValidator.requireFirstCommentReport(
+                priorReport(reportRepository.existsByReporterIdAndCommentId(userId, internalId)), internalId, userId);
 
-        PlannerCommentReport report = new PlannerCommentReport(internalId, userId, request.reason());
+        PlannerCommentReport report = new PlannerCommentReport(
+                first.commentId(), first.reporterId(), request.reason());
         PlannerCommentReport saved = reportRepository.insert(report);
         FreshnessDeclarations.declareNone("no read renders a comment report");
         log.info("User {} reported comment {} with reason: {}", userId, commentPublicId, request.reason());
 
         return new CommentReportResponse(saved.getCreatedAt());
+    }
+
+    private static PriorReport priorReport(boolean filed) {
+        return filed ? PriorReport.FILED : PriorReport.NONE;
     }
 }
