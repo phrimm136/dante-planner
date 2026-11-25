@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,15 +17,22 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerMapping;
 
+import org.springframework.boot.convert.ApplicationConversionService;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.danteplanner.backend.shared.failure.OnUndeclared;
 import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.backend.user.api.UserBannedException;
 import org.danteplanner.fixture.restriction.DeclaredHandlersFixture;
@@ -38,6 +46,7 @@ import static org.mockito.Mockito.verify;
 class RestrictionTransactionHookTest {
 
     private static final long PRINCIPAL = 42L;
+    private static final String ON_UNDECIDED = "restriction.on-undecided";
 
     @Mock
     private PlatformTransactionManager transactionManager;
@@ -56,7 +65,7 @@ class RestrictionTransactionHookTest {
     void afterBegin_WhenARestrictedRequestBeginsAWriteTransaction_ChecksThePrincipal() {
         bindRequest("restricted", PRINCIPAL);
 
-        hook(true).afterBegin(writeTransaction(), null);
+        hook(OnUndeclared.FAIL).afterBegin(writeTransaction(), null);
 
         assertThat(checkedUsers).containsExactly(PRINCIPAL);
     }
@@ -64,7 +73,7 @@ class RestrictionTransactionHookTest {
     @Test
     void afterBegin_WhenTheRequestBeginsASecondWriteTransaction_DoesNotCheckAgain() {
         bindRequest("restricted", PRINCIPAL);
-        RestrictionTransactionHook hook = hook(true);
+        RestrictionTransactionHook hook = hook(OnUndeclared.FAIL);
 
         hook.afterBegin(writeTransaction(), null);
         hook.afterBegin(writeTransaction(), null);
@@ -75,7 +84,7 @@ class RestrictionTransactionHookTest {
     @Test
     void afterBegin_WhenTheTransactionIsReadOnly_DoesNotCheck() {
         bindRequest("restricted", PRINCIPAL);
-        RestrictionTransactionHook hook = hook(true);
+        RestrictionTransactionHook hook = hook(OnUndeclared.FAIL);
 
         hook.afterBegin(transaction(true), null);
 
@@ -86,7 +95,7 @@ class RestrictionTransactionHookTest {
 
     @Test
     void afterBegin_WhenNoRequestIsBound_DoesNotCheck() {
-        hook(true).afterBegin(writeTransaction(), null);
+        hook(OnUndeclared.FAIL).afterBegin(writeTransaction(), null);
 
         assertThat(checkedUsers).isEmpty();
     }
@@ -95,7 +104,7 @@ class RestrictionTransactionHookTest {
     void afterBegin_WhenTheHandlerIsExempt_DoesNotCheck() {
         bindRequest("exempt", PRINCIPAL);
 
-        hook(true).afterBegin(writeTransaction(), null);
+        hook(OnUndeclared.FAIL).afterBegin(writeTransaction(), null);
 
         assertThat(checkedUsers).isEmpty();
     }
@@ -104,7 +113,7 @@ class RestrictionTransactionHookTest {
     void afterBegin_WhenTheHandlerIsRestrictedByState_LeavesTheCheckToTheService() {
         bindRequest("byState", PRINCIPAL);
 
-        hook(true).afterBegin(writeTransaction(), null);
+        hook(OnUndeclared.FAIL).afterBegin(writeTransaction(), null);
 
         assertThat(checkedUsers).isEmpty();
     }
@@ -113,7 +122,7 @@ class RestrictionTransactionHookTest {
     void afterBegin_WhenTheRequestHasNoAuthenticatedPrincipal_DoesNotCheck() {
         bindRequest("restricted", null);
 
-        hook(true).afterBegin(writeTransaction(), null);
+        hook(OnUndeclared.FAIL).afterBegin(writeTransaction(), null);
 
         assertThat(checkedUsers).isEmpty();
     }
@@ -122,7 +131,7 @@ class RestrictionTransactionHookTest {
     void afterBegin_WhenTheTransactionFailedToBegin_DoesNotCheck() {
         bindRequest("restricted", PRINCIPAL);
 
-        hook(true).afterBegin(writeTransaction(), new IllegalStateException("no connection"));
+        hook(OnUndeclared.FAIL).afterBegin(writeTransaction(), new IllegalStateException("no connection"));
 
         assertThat(checkedUsers).isEmpty();
     }
@@ -133,7 +142,7 @@ class RestrictionTransactionHookTest {
         refusal = new UserBannedException(PRINCIPAL, null);
         DefaultTransactionStatus transaction = writeTransaction();
 
-        assertThatThrownBy(() -> hook(true).afterBegin(transaction, null)).isSameAs(refusal);
+        assertThatThrownBy(() -> hook(OnUndeclared.FAIL).afterBegin(transaction, null)).isSameAs(refusal);
 
         verify(transactionManager).rollback(transaction);
     }
@@ -142,7 +151,7 @@ class RestrictionTransactionHookTest {
     void beforeCommit_WhenARestrictedByStateRequestCommitsWithoutADecision_ThrowsUnderFailFast() {
         bindRequest("byState", PRINCIPAL);
 
-        assertThatThrownBy(() -> hook(true).beforeCommit(writeTransaction()))
+        assertThatThrownBy(() -> hook(OnUndeclared.FAIL).beforeCommit(writeTransaction()))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("DeclaredHandlersFixture.byState is @RestrictedByState");
     }
@@ -151,7 +160,7 @@ class RestrictionTransactionHookTest {
     void beforeCommit_WhenARestrictedByStateRequestCommitsWithoutADecision_CountsItWithoutFailFast() {
         bindRequest("byState", PRINCIPAL);
 
-        hook(false).beforeCommit(writeTransaction());
+        hook(OnUndeclared.COUNT).beforeCommit(writeTransaction());
 
         assertThat(meterRegistry.counter(RestrictionTransactionHook.UNDECIDED_COUNTER).count()).isEqualTo(1.0);
     }
@@ -159,7 +168,7 @@ class RestrictionTransactionHookTest {
     @Test
     void beforeCommit_WhenTheServiceRecordedADecision_Passes() {
         bindRequest("byState", PRINCIPAL);
-        RestrictionTransactionHook hook = hook(true);
+        RestrictionTransactionHook hook = hook(OnUndeclared.FAIL);
 
         RestrictionTransactionHook.recordDecision();
 
@@ -170,14 +179,14 @@ class RestrictionTransactionHookTest {
     void beforeCommit_WhenTheUndecidedTransactionIsReadOnly_Passes() {
         bindRequest("byState", PRINCIPAL);
 
-        assertThatCode(() -> hook(true).beforeCommit(transaction(true))).doesNotThrowAnyException();
+        assertThatCode(() -> hook(OnUndeclared.FAIL).beforeCommit(transaction(true))).doesNotThrowAnyException();
     }
 
     @Test
     void beforeCommit_WhenUndecidedWithoutFailFast_WarnsWithTheHandler() {
         bindRequest("byState", PRINCIPAL);
 
-        assertThat(LogCapture.during(() -> hook(false).beforeCommit(writeTransaction()), Level.WARN,
+        assertThat(LogCapture.during(() -> hook(OnUndeclared.COUNT).beforeCommit(writeTransaction()), Level.WARN,
                 RestrictionTransactionHook.class))
                 .extracting(ILoggingEvent::getFormattedMessage)
                 .containsExactly("DeclaredHandlersFixture.byState is @RestrictedByState but committed a write without "
@@ -188,8 +197,8 @@ class RestrictionTransactionHookTest {
     void hook_WhenNoRequestIsBound_DoesNothing() {
         assertThatCode(() -> {
             RestrictionTransactionHook.recordDecision();
-            hook(true).afterBegin(writeTransaction(), null);
-            hook(true).beforeCommit(writeTransaction());
+            hook(OnUndeclared.FAIL).afterBegin(writeTransaction(), null);
+            hook(OnUndeclared.FAIL).beforeCommit(writeTransaction());
         }).doesNotThrowAnyException();
 
         assertThat(checkedUsers).isEmpty();
@@ -202,8 +211,8 @@ class RestrictionTransactionHookTest {
 
         assertThatCode(() -> {
             RestrictionTransactionHook.recordDecision();
-            hook(true).afterBegin(writeTransaction(), null);
-            hook(true).beforeCommit(writeTransaction());
+            hook(OnUndeclared.FAIL).afterBegin(writeTransaction(), null);
+            hook(OnUndeclared.FAIL).beforeCommit(writeTransaction());
         }).doesNotThrowAnyException();
 
         assertThat(checkedUsers).isEmpty();
@@ -213,7 +222,7 @@ class RestrictionTransactionHookTest {
     @Test
     void readOnlyTransaction_WhenARestrictedRequestRunsIt_StoresNothing() {
         bindRequest("restricted", PRINCIPAL);
-        RestrictionTransactionHook hook = hook(true);
+        RestrictionTransactionHook hook = hook(OnUndeclared.FAIL);
 
         hook.afterBegin(transaction(true), null);
         hook.beforeCommit(transaction(true));
@@ -227,13 +236,13 @@ class RestrictionTransactionHookTest {
     void beforeCommit_WhenARestrictedRequestCommits_Passes() {
         bindRequest("restricted", PRINCIPAL);
 
-        assertThatCode(() -> hook(true).beforeCommit(writeTransaction())).doesNotThrowAnyException();
+        assertThatCode(() -> hook(OnUndeclared.FAIL).beforeCommit(writeTransaction())).doesNotThrowAnyException();
     }
 
     @Test
     void afterSingletonsInstantiated_WhenRunTwice_RegistersTheHookOnTheTransactionManagerOnce() {
         DataSourceTransactionManager manager = new DataSourceTransactionManager();
-        RestrictionTransactionHook hook = hookOn(manager, true);
+        RestrictionTransactionHook hook = hookOn(manager, OnUndeclared.FAIL);
 
         hook.afterSingletonsInstantiated();
         hook.afterSingletonsInstantiated();
@@ -241,11 +250,50 @@ class RestrictionTransactionHookTest {
         assertThat(manager.getTransactionExecutionListeners()).containsExactly(hook);
     }
 
-    private RestrictionTransactionHook hook(boolean failFast) {
-        return hookOn(transactionManager, failFast);
+    private ApplicationContextRunner bound(String onUndecided) {
+        return new ApplicationContextRunner()
+                .withInitializer(context -> context.getBeanFactory()
+                        .setConversionService(ApplicationConversionService.getSharedInstance()))
+                .withUserConfiguration(RestrictionTransactionHook.class)
+                .withBean(MeterRegistry.class, () -> meterRegistry)
+                .withBean(PlatformTransactionManager.class,
+                        () -> new DataSourceTransactionManager(new SimpleDriverDataSource()))
+                .withPropertyValues(ON_UNDECIDED + "=" + onUndecided);
     }
 
-    private RestrictionTransactionHook hookOn(PlatformTransactionManager manager, boolean failFast) {
+    @Test
+    void onUndecided_WhenThePropertyIsFail_Throws() {
+        bound("fail").run(context -> {
+            bindRequest("byState", PRINCIPAL);
+
+            assertThatThrownBy(() -> context.getBean(RestrictionTransactionHook.class).beforeCommit(writeTransaction()))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("DeclaredHandlersFixture.byState is @RestrictedByState");
+        });
+    }
+
+    @Test
+    void onUndecided_WhenThePropertyIsCount_Counts() {
+        bound("count").run(context -> {
+            bindRequest("byState", PRINCIPAL);
+
+            context.getBean(RestrictionTransactionHook.class).beforeCommit(writeTransaction());
+
+            assertThat(meterRegistry.counter(RestrictionTransactionHook.UNDECIDED_COUNTER).count()).isEqualTo(1.0);
+        });
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "true", "yes", "refuse"})
+    void onUndecided_WhenThePropertyNamesNoPolicy_FailsStartup(String value) {
+        bound(value).run(context -> assertThat(context).hasFailed());
+    }
+
+    private RestrictionTransactionHook hook(OnUndeclared onUndecided) {
+        return hookOn(transactionManager, onUndecided);
+    }
+
+    private RestrictionTransactionHook hookOn(PlatformTransactionManager manager, OnUndeclared onUndecided) {
         StaticListableBeanFactory beans = new StaticListableBeanFactory();
         RestrictionCheckHandler handler = userId -> {
             checkedUsers.add(userId);
@@ -256,7 +304,7 @@ class RestrictionTransactionHookTest {
         beans.addBean("restrictionCheckHandler", handler);
         beans.addBean("transactionManager", manager);
         return new RestrictionTransactionHook(beans.getBeanProvider(RestrictionCheckHandler.class),
-                beans.getBeanProvider(PlatformTransactionManager.class), meterRegistry, failFast);
+                beans.getBeanProvider(PlatformTransactionManager.class), meterRegistry, onUndecided);
     }
 
     private static DefaultTransactionStatus writeTransaction() {

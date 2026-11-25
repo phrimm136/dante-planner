@@ -20,6 +20,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import org.danteplanner.backend.shared.failure.OnUndeclared;
 import org.danteplanner.backend.shared.gtid.GtidCapturingDataSource;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 
@@ -86,8 +87,8 @@ public class RoutingDataSourceConfig {
     @Bean
     public UndeclaredPrimaryAccessGuard undeclaredPrimaryAccessGuard(
             MeterRegistry meterRegistry,
-            @Value("${datasource.routing.undeclared-primary-fail-fast}") boolean failFast) {
-        return new UndeclaredPrimaryAccessGuard(meterRegistry, failFast);
+            @Value("${datasource.routing.on-undeclared-primary}") OnUndeclared onUndeclared) {
+        return new UndeclaredPrimaryAccessGuard(meterRegistry, onUndeclared);
     }
 
     @Bean

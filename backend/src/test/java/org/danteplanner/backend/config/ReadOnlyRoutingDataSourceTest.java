@@ -17,6 +17,7 @@ import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.config.RoutingKey;
 import org.danteplanner.backend.shared.config.UndeclaredPrimaryAccessGuard;
 import org.danteplanner.backend.shared.exception.ReadTemporarilyUnavailableException;
+import org.danteplanner.backend.shared.failure.OnUndeclared;
 import org.danteplanner.backend.shared.gtid.GtidCapturingDataSource;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 import org.danteplanner.backend.shared.readpath.ChosenReadSource;
@@ -91,7 +92,7 @@ class ReadOnlyRoutingDataSourceTest {
     }
 
     private ReadOnlyRoutingDataSource routing(DataSource primaryTarget, ReadSourceSelector selector) {
-        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(guard(false, true));
+        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(guard(OnUndeclared.COUNT, true));
         routing.setTargetDataSources(Map.of(RoutingKey.PRIMARY, primaryTarget, RoutingKey.REPLICA, selector));
         routing.afterPropertiesSet();
         return routing;
@@ -113,8 +114,8 @@ class ReadOnlyRoutingDataSourceTest {
         return new GtidCapturingDataSource(pool, new GtidWriteCapture(new SimpleMeterRegistry()));
     }
 
-    private UndeclaredPrimaryAccessGuard guard(boolean failFast, boolean armed) {
-        UndeclaredPrimaryAccessGuard created = new UndeclaredPrimaryAccessGuard(meterRegistry, failFast);
+    private UndeclaredPrimaryAccessGuard guard(OnUndeclared onUndeclared, boolean armed) {
+        UndeclaredPrimaryAccessGuard created = new UndeclaredPrimaryAccessGuard(meterRegistry, onUndeclared);
         if (armed) {
             created.onApplicationEvent(
                     new ApplicationReadyEvent(new SpringApplication(), new String[0], null, Duration.ZERO));
@@ -139,7 +140,7 @@ class ReadOnlyRoutingDataSourceTest {
     void determineCurrentLookupKey_WhenReadOnlyTransaction_ReturnsReplica() {
         TransactionSynchronizationManager.setCurrentTransactionReadOnly(true);
 
-        Object key = new ReadOnlyRoutingDataSource(guard(true, true)).determineCurrentLookupKey();
+        Object key = new ReadOnlyRoutingDataSource(guard(OnUndeclared.FAIL, true)).determineCurrentLookupKey();
 
         assertThat(key).isEqualTo(RoutingKey.REPLICA);
     }
@@ -148,7 +149,7 @@ class ReadOnlyRoutingDataSourceTest {
     void determineCurrentLookupKey_WhenWriteTransaction_ReturnsPrimary() {
         TransactionSynchronizationManager.setCurrentTransactionReadOnly(false);
 
-        Object key = new ReadOnlyRoutingDataSource(guard(false, true)).determineCurrentLookupKey();
+        Object key = new ReadOnlyRoutingDataSource(guard(OnUndeclared.COUNT, true)).determineCurrentLookupKey();
 
         assertThat(key).isEqualTo(RoutingKey.PRIMARY);
         assertThat(undeclaredCount()).isEqualTo(1.0);
@@ -156,7 +157,7 @@ class ReadOnlyRoutingDataSourceTest {
 
     @Test
     void determineCurrentLookupKey_WhenUndeclaredAndFailFast_Throws() {
-        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(guard(true, true));
+        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(guard(OnUndeclared.FAIL, true));
 
         assertThatThrownBy(routing::determineCurrentLookupKey)
                 .isInstanceOf(IllegalStateException.class)
@@ -165,7 +166,7 @@ class ReadOnlyRoutingDataSourceTest {
 
     @Test
     void determineCurrentLookupKey_WhenUndeclaredBeforeApplicationReady_ReturnsPrimaryUncounted() {
-        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(guard(true, false));
+        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(guard(OnUndeclared.FAIL, false));
 
         assertThat(routing.determineCurrentLookupKey()).isEqualTo(RoutingKey.PRIMARY);
         assertThat(undeclaredCount()).isZero();

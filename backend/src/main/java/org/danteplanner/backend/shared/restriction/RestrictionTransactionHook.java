@@ -1,5 +1,7 @@
 package org.danteplanner.backend.shared.restriction;
 
+import java.util.Objects;
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +22,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.failure.CommandOutcome;
+import org.danteplanner.backend.shared.failure.OnUndeclared;
 import org.jspecify.annotations.Nullable;
 
 @Component
@@ -32,23 +35,23 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
     private final ObjectProvider<RestrictionCheckHandler> checkHandler;
     private final ObjectProvider<PlatformTransactionManager> transactionManager;
     private final Counter undecidedCounter;
-    private final boolean undecidedFailFast;
+    private final OnUndeclared onUndecided;
 
     public RestrictionTransactionHook(
             ObjectProvider<RestrictionCheckHandler> checkHandler,
             ObjectProvider<PlatformTransactionManager> transactionManager,
             MeterRegistry meterRegistry,
-            @Value("${restriction.undecided-fail-fast}") boolean undecidedFailFast) {
+            @Value("${restriction.on-undecided}") OnUndeclared onUndecided) {
         this.checkHandler = checkHandler;
         this.transactionManager = transactionManager;
         this.undecidedCounter = Counter.builder(UNDECIDED_COUNTER).register(meterRegistry);
-        this.undecidedFailFast = undecidedFailFast;
+        this.onUndecided = Objects.requireNonNull(onUndecided, "restriction.on-undecided");
     }
 
     public static void recordDecision() {
         switch (currentState()) {
             case RequestStateOutcome.None none -> { }
-            case RequestStateOutcome.Tracked tracked -> tracked.state().decided = true;
+            case RequestStateOutcome.Tracked tracked -> tracked.state().decided = Decided.DECIDED;
         }
     }
 
@@ -66,7 +69,7 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
 
     @Override
     public void afterBegin(TransactionExecution transaction, @Nullable Throwable beginFailure) {
-        switch (Guard.begun(beginFailure, transaction.isReadOnly())) {
+        switch (Guard.begun(beginFailure, Access.of(transaction.isReadOnly()))) {
             case UNGUARDED -> { }
             case GUARDED -> beginGuarded(transaction);
         }
@@ -86,7 +89,7 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
     }
 
     private void check(RequestState state, Long userId, TransactionExecution transaction) {
-        state.checked = true;
+        state.checked = Checked.CHECKED;
         try {
             checkHandler.getObject().requireUnrestricted(userId);
         } catch (RuntimeException refusal) {
@@ -98,7 +101,7 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
 
     @Override
     public void beforeCommit(TransactionExecution transaction) {
-        switch (Guard.committing(transaction.isReadOnly())) {
+        switch (Guard.committing(Access.of(transaction.isReadOnly()))) {
             case UNGUARDED -> { }
             case GUARDED -> commitGuarded();
         }
@@ -109,7 +112,7 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
             case RequestStateOutcome.None none -> { }
             case RequestStateOutcome.Tracked tracked -> {
                 RequestState state = tracked.state();
-                switch (CommitStep.of(state.declaration, state.decided, undecidedFailFast)) {
+                switch (CommitStep.of(state.declaration, state.decided, onUndecided)) {
                     case PASS -> { }
                     case FAIL -> throw new IllegalStateException(undecidedMessage(state));
                     case COUNT -> {
@@ -206,16 +209,28 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
         }
     }
 
+    private enum Access {
+        READ_ONLY,
+        READ_WRITE;
+
+        static Access of(boolean readOnly) {
+            return readOnly ? READ_ONLY : READ_WRITE;
+        }
+    }
+
     private enum Guard {
         GUARDED,
         UNGUARDED;
 
-        static Guard begun(@Nullable Throwable beginFailure, boolean readOnly) {
-            return beginFailure == null ? committing(readOnly) : UNGUARDED;
+        static Guard begun(@Nullable Throwable beginFailure, Access access) {
+            return beginFailure == null ? committing(access) : UNGUARDED;
         }
 
-        static Guard committing(boolean readOnly) {
-            return readOnly ? UNGUARDED : GUARDED;
+        static Guard committing(Access access) {
+            return switch (access) {
+                case READ_ONLY -> UNGUARDED;
+                case READ_WRITE -> GUARDED;
+            };
         }
     }
 
@@ -227,8 +242,8 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
         record Pass() implements BeginStep {
         }
 
-        private static BeginStep of(Declaration declaration, boolean checked, Principal principal) {
-            if (declaration != Declaration.RESTRICTED || checked) {
+        private static BeginStep of(Declaration declaration, Checked checked, Principal principal) {
+            if (declaration != Declaration.RESTRICTED || checked == Checked.CHECKED) {
                 return new Pass();
             }
             return switch (principal) {
@@ -243,11 +258,14 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
         FAIL,
         COUNT;
 
-        static CommitStep of(Declaration declaration, boolean decided, boolean failFast) {
-            if (declaration != Declaration.BY_STATE || decided) {
+        static CommitStep of(Declaration declaration, Decided decided, OnUndeclared onUndecided) {
+            if (declaration != Declaration.BY_STATE || decided == Decided.DECIDED) {
                 return PASS;
             }
-            return failFast ? FAIL : COUNT;
+            return switch (onUndecided) {
+                case FAIL -> FAIL;
+                case COUNT -> COUNT;
+            };
         }
     }
 
@@ -283,13 +301,23 @@ public class RestrictionTransactionHook implements TransactionExecutionListener,
         NONE
     }
 
+    private enum Checked {
+        PENDING,
+        CHECKED
+    }
+
+    private enum Decided {
+        UNDECIDED,
+        DECIDED
+    }
+
     private static final class RequestState {
 
         private final Declaration declaration;
         private final String handlerName;
         private final Principal principal;
-        private boolean checked;
-        private boolean decided;
+        private Checked checked = Checked.PENDING;
+        private Decided decided = Decided.UNDECIDED;
 
         private RequestState(Declaration declaration, String handlerName, Principal principal) {
             this.declaration = declaration;

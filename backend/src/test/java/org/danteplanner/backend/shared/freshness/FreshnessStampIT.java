@@ -31,6 +31,7 @@ import com.redis.testcontainers.RedisContainer;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
+import org.danteplanner.backend.shared.failure.OnUndeclared;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 
@@ -147,15 +148,15 @@ class FreshnessStampIT {
 
     private MarkerStore storeOver(LettuceConnectionFactory writeStore) {
         return new MarkerStore(writeStore, writeStore.getRequiredNativeClient().getResources(), List.of(),
-                new RedisRoleHealth(), new MarkerStore.Settings(0, Duration.ofSeconds(1), Duration.ofHours(1), false), meters);
+                new RedisRoleHealth(), new MarkerStore.Settings(0, Duration.ofSeconds(1), Duration.ofHours(1), OnUndeclared.COUNT), meters);
     }
 
     private MockMvc mvc() {
-        return mvc(true);
+        return mvc(OnUndeclared.FAIL);
     }
 
-    private MockMvc mvc(boolean undeclaredFailFast) {
-        MarkerStamp markerStamp = new MarkerStamp(writeCapture, markerStore, meters, undeclaredFailFast);
+    private MockMvc mvc(OnUndeclared onUndeclared) {
+        MarkerStamp markerStamp = new MarkerStamp(writeCapture, markerStore, meters, onUndeclared);
         return MockMvcBuilders.standaloneSetup(new StampingController(writeCapture))
                 .setControllerAdvice(new FreshnessStampAdvice(markerStamp))
                 .addFilters(new FreshnessStampFilter(writeCapture, markerStamp))
@@ -236,7 +237,7 @@ class FreshnessStampIT {
 
     @Test
     void write_WhenItCommitsButDeclaresNothingInFailFastMode_FailsWithTheGateAndRaisesNoMarker() {
-        MockMvc mvc = mvc(true);
+        MockMvc mvc = mvc(OnUndeclared.FAIL);
 
         assertThatThrownBy(() -> mvc.perform(post("/api/stamp")
                         .header(GTID_HEADER, gtidSet())))
@@ -251,7 +252,7 @@ class FreshnessStampIT {
     @Test
     void write_WhenItCommitsButDeclaresNothingOutsideFailFastMode_AnswersUnchangedCountsItAndRaisesNoMarker()
             throws Exception {
-        MockMvc mvc = mvc(false);
+        MockMvc mvc = mvc(OnUndeclared.COUNT);
         double undeclaredBefore = meters.counter(MarkerStamp.UNDECLARED_COUNTER).count();
 
         MvcResult result = mvc.perform(post("/api/stamp")

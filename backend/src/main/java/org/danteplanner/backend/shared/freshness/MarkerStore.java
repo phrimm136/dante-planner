@@ -20,6 +20,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.validation.annotation.Validated;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
@@ -46,6 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.constraints.time.DurationMin;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
+import org.danteplanner.backend.shared.failure.OnUndeclared;
 import org.danteplanner.backend.shared.redis.RedisRole;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 
@@ -85,7 +87,7 @@ public class MarkerStore implements AutoCloseable {
             @Min(0) int waitReplicas,
             @NotNull @DurationMin(millis = 1) Duration waitBound,
             @NotNull @DurationMin(millis = 1) Duration ttl,
-            boolean undeclaredFailFast) {
+            @DefaultValue("count") OnUndeclared onUndeclared) {
 
         @AssertTrue(message = "freshness.marker.wait-bound must stay under the Redis command timeout, "
                 + "or WAIT fails as a raise failure instead of answering")
