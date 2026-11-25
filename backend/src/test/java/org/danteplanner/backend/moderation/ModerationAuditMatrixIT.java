@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
+import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.admin.service.AdminService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
@@ -112,7 +113,7 @@ class ModerationAuditMatrixIT extends SharedMySqlContainerSupport {
         User moderator = TestDataFactory.createModerator(userRepository, "audit-matrix-mod@example.com");
         User member = TestDataFactory.createTestUser(userRepository, "audit-matrix-member@example.com");
         UUID plannerId = TestDataFactory.createTestPlanner(plannerRepository, member, true).getId();
-        PlannerComment comment = commentRepository.save(new PlannerComment(plannerId, member.getId(), "text", null, 0));
+        PlannerComment comment = StoredComments.save(commentRepository, jdbcTemplate, new PlannerComment(plannerId, member.getId(), "text", null, 0));
         return new Scene(actor, moderator, member, plannerId, comment.getId());
     }
 

@@ -1,6 +1,9 @@
 package org.danteplanner.backend.controller;
 
+import javax.sql.DataSource;
+
 import jakarta.servlet.http.Cookie;
+import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import static org.hamcrest.Matchers.hasItem;
@@ -18,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
@@ -52,6 +56,9 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private DataSource dataSource;
 
     @Autowired
     private UserRepository userRepository;
@@ -491,7 +498,7 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
         private PlannerComment createComment() {
             PlannerComment comment = new PlannerComment(
                     testPlanner.getId(), regularUser.getId(), "A comment to be moderated", null, 0);
-            return plannerCommentRepository.save(comment);
+            return StoredComments.save(plannerCommentRepository, new JdbcTemplate(dataSource), comment);
         }
 
         @Test

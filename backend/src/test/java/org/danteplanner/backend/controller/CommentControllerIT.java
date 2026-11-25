@@ -1,7 +1,11 @@
 package org.danteplanner.backend.controller;
 
 
+import javax.sql.DataSource;
+
 import jakarta.servlet.http.Cookie;
+import org.danteplanner.backend.comment.repository.CommentRow;
+import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
@@ -23,6 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -47,6 +52,9 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private DataSource dataSource;
 
     @Autowired
     private UserRepository userRepository;
@@ -101,7 +109,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                 parentId,
                 expectedDepth
         );
-        return commentRepository.save(comment);
+        return StoredComments.save(commentRepository, new JdbcTemplate(dataSource), comment);
     }
 
     @Nested
@@ -127,7 +135,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void getComments_WhenLeafAuthorDeactivated_ServesTheLeafWithHiddenBodyAndMaskedNameAndKeepsTheRowContent() throws Exception {
-            PlannerComment leaf = commentRepository.save(new PlannerComment(
+            PlannerComment leaf = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(
                     publishedPlanner.getId(), otherUser.getId(), "still here", null, 0));
             otherUser.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
             userRepository.save(otherUser);
@@ -140,15 +148,15 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(jsonPath("$[0].authorEpithet").value(CommentConstants.DELETED_CONTENT))
                     .andExpect(jsonPath("$[0].authorSuffix").value(CommentConstants.DELETED_CONTENT));
 
-            assertThat(commentRepository.findById(leaf.getId()).orElseThrow().getContent())
+            assertThat(commentRepository.findRowById(leaf.getId()).orElseThrow().content())
                     .isEqualTo("still here");
         }
 
         @Test
         void getComments_WhenParentAuthorDeactivated_ServesTheReply() throws Exception {
-            PlannerComment parent = commentRepository.save(new PlannerComment(
+            PlannerComment parent = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(
                     publishedPlanner.getId(), otherUser.getId(), "still here", null, 0));
-            PlannerComment reply = commentRepository.save(new PlannerComment(
+            PlannerComment reply = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(
                     publishedPlanner.getId(), testUser.getId(), "a reply", parent.getId(), 1));
             otherUser.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
             userRepository.save(otherUser);
@@ -200,12 +208,12 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(jsonPath("$.id").exists());
 
             // Verify depth in database
-            List<PlannerComment> comments = commentRepository.findByPlannerId(publishedPlanner.getId());
-            PlannerComment reply = comments.stream()
-                    .filter(c -> c.getParentCommentId() != null)
+            List<CommentRow> comments = commentRepository.findByPlannerId(publishedPlanner.getId());
+            CommentRow reply = comments.stream()
+                    .filter(c -> c.parentCommentId() != null)
                     .findFirst()
                     .orElseThrow();
-            assertThat(reply.getDepth()).isEqualTo(1);
+            assertThat(reply.depth()).isEqualTo(1);
         }
 
         @Test
@@ -252,9 +260,9 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(jsonPath("$.id").exists());
 
             // Verify depth in database
-            List<PlannerComment> comments = commentRepository.findByPlannerId(publishedPlanner.getId());
+            List<CommentRow> comments = commentRepository.findByPlannerId(publishedPlanner.getId());
             assertThat(comments).hasSize(1);
-            assertThat(comments.get(0).getDepth()).isEqualTo(0);
+            assertThat(comments.get(0).depth()).isEqualTo(0);
         }
 
         @Test
@@ -270,12 +278,12 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(jsonPath("$.id").exists());
 
             // Verify depth in database
-            List<PlannerComment> comments = commentRepository.findByPlannerId(publishedPlanner.getId());
-            PlannerComment reply = comments.stream()
-                    .filter(c -> c.getParentCommentId() != null)
+            List<CommentRow> comments = commentRepository.findByPlannerId(publishedPlanner.getId());
+            CommentRow reply = comments.stream()
+                    .filter(c -> c.parentCommentId() != null)
                     .findFirst()
                     .orElseThrow();
-            assertThat(reply.getDepth()).isEqualTo(1);
+            assertThat(reply.depth()).isEqualTo(1);
         }
 
         @Test
@@ -297,13 +305,13 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(jsonPath("$.id").exists());
 
             // Verify depth in database - no flattening with MAX_DEPTH=MAX_VALUE
-            List<PlannerComment> allComments = commentRepository.findByPlannerId(publishedPlanner.getId());
-            PlannerComment reply = allComments.stream()
-                    .filter(c -> c.getContent().equals("Depth 6 reply"))
+            List<CommentRow> allComments = commentRepository.findByPlannerId(publishedPlanner.getId());
+            CommentRow reply = allComments.stream()
+                    .filter(c -> c.content().equals("Depth 6 reply"))
                     .findFirst()
                     .orElseThrow();
-            assertThat(reply.getDepth()).isEqualTo(6);
-            assertThat(reply.getParentCommentId()).isEqualTo(depth5.getId());
+            assertThat(reply.depth()).isEqualTo(6);
+            assertThat(reply.parentCommentId()).isEqualTo(depth5.getId());
         }
 
         @Test
@@ -324,9 +332,9 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.id").exists());
 
-            List<PlannerComment> allComments = commentRepository.findByPlannerId(publishedPlanner.getId());
+            List<CommentRow> allComments = commentRepository.findByPlannerId(publishedPlanner.getId());
             // With MAX_DEPTH=MAX_VALUE, there's 1 comment at each depth 0-6
-            long depth6Count = allComments.stream().filter(c -> c.getDepth() == 6).count();
+            long depth6Count = allComments.stream().filter(c -> c.depth() == 6).count();
             assertThat(depth6Count).isEqualTo(1);
         }
 
@@ -380,8 +388,8 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(jsonPath("$.editedAt").exists());
 
             // Verify content updated in database
-            PlannerComment updated = commentRepository.findById(comment.getId()).orElseThrow();
-            assertThat(updated.getContent()).isEqualTo("Updated content");
+            CommentRow updated = commentRepository.findRowById(comment.getId()).orElseThrow();
+            assertThat(updated.content()).isEqualTo("Updated content");
         }
 
         @Test
@@ -409,9 +417,9 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                             .content(requestBody))
                     .andExpect(status().isOk());
 
-            PlannerComment updated = commentRepository.findById(comment.getId()).orElseThrow();
-            assertThat(updated.getContent()).isEqualTo("Persisted update");
-            assertThat(updated.getEditedAt()).isNotNull();
+            CommentRow updated = commentRepository.findRowById(comment.getId()).orElseThrow();
+            assertThat(updated.content()).isEqualTo("Persisted update");
+            assertThat(updated.editedAt()).isNotNull();
         }
     }
 
@@ -461,8 +469,8 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk());
 
-            PlannerComment updated = commentRepository.findById(comment.getId()).orElseThrow();
-            assertThat(updated.getUpvoteCount()).isEqualTo(1);
+            CommentRow updated = commentRepository.findRowById(comment.getId()).orElseThrow();
+            assertThat(updated.upvoteCount()).isEqualTo(1);
         }
 
         @Test
@@ -534,8 +542,9 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         @Test
         void reportComment_WhenCommentDeleted_Returns403() throws Exception {
             PlannerComment comment = createComment(null, 0);
-            comment.softDelete(Instant.now());
-            commentRepository.save(comment);
+            AuthCookies.performAuthed(mockMvc, delete("/api/comments/{id}", comment.getPublicId()).with(withCsrf()),
+                            accessToken)
+                    .andExpect(status().isNoContent());
 
             AuthCookies.performAuthed(mockMvc, report(comment), otherUserAccessToken)
                     .andExpect(status().isForbidden());

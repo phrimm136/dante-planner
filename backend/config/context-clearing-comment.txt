@@ -1,3 +1,0 @@
-org.danteplanner.backend.comment.repository.PlannerCommentRepository.decrementUpvoteCount(java.lang.Long)
-org.danteplanner.backend.comment.repository.PlannerCommentRepository.incrementUpvoteCount(java.lang.Long)
-org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository.deleteVotesCollidingWithSentinel(java.lang.Long, java.lang.Long)

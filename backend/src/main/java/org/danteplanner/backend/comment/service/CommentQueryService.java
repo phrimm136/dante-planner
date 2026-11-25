@@ -3,7 +3,7 @@ package org.danteplanner.backend.comment.service;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.shared.security.Viewer;
 import org.danteplanner.backend.comment.dto.CommentTreeNode;
-import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.comment.repository.CommentRow;
 import org.danteplanner.backend.comment.exception.CommentNotFoundException;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
@@ -49,7 +49,7 @@ public class CommentQueryService {
 
         Set<FreshnessScope> scopes = Set.of(
                 new FreshnessScope.Planner(plannerId), new FreshnessScope.User(thread.planner().ownerId()));
-        List<PlannerComment> comments = commentRepository.findByPlannerId(plannerId);
+        List<CommentRow> comments = commentRepository.findByPlannerId(plannerId);
         return switch (ThreadFill.of(comments)) {
             case EMPTY -> new ScopedRead<>(Collections.emptyList(), scopes);
             case COMMENTED -> commentedTree(comments, scopes, viewer);
@@ -60,15 +60,15 @@ public class CommentQueryService {
         EMPTY,
         COMMENTED;
 
-        static ThreadFill of(List<PlannerComment> comments) {
+        static ThreadFill of(List<CommentRow> comments) {
             return comments.isEmpty() ? EMPTY : COMMENTED;
         }
     }
 
     private ScopedRead<List<CommentTreeNode>> commentedTree(
-            List<PlannerComment> comments, Set<FreshnessScope> scopes, Viewer viewer) {
+            List<CommentRow> comments, Set<FreshnessScope> scopes, Viewer viewer) {
         Set<Long> userIds = comments.stream()
-                .map(PlannerComment::getUserId)
+                .map(CommentRow::userId)
                 .filter(id -> !Users.SENTINEL_USER_ID.equals(id))
                 .collect(Collectors.toSet());
         Map<Long, UserSummary> userMap = users.findAllByIds(userIds).stream()
@@ -82,46 +82,46 @@ public class CommentQueryService {
     }
 
     @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
-    public CommentTreeNode broadcastNode(PlannerComment comment, CommentTreeNode.Parent parent) {
-        CommentTreeNode.Author author = users.findOptionalById(comment.getUserId())
+    public CommentTreeNode broadcastNode(CommentRow comment, CommentTreeNode.Parent parent) {
+        CommentTreeNode.Author author = users.findOptionalById(comment.userId())
                 .<CommentTreeNode.Author>map(CommentTreeNode.Author.Known::new)
                 .orElseGet(CommentTreeNode.Author.Missing::new);
         return CommentTreeNode.forBroadcast(comment, parent, author);
     }
 
     @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
-    public PlannerComment requireById(Long commentId) {
-        return commentRepository.findById(commentId)
+    public CommentRow requireById(Long commentId) {
+        return commentRepository.findRowById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
     }
 
     @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
-    public PlannerComment requireByPublicId(UUID commentPublicId) {
+    public CommentRow requireByPublicId(UUID commentPublicId) {
         return commentRepository.findByPublicId(commentPublicId)
                 .orElseThrow(() -> new CommentNotFoundException(commentPublicId));
     }
 
-    private Set<Long> upvotedIds(List<PlannerComment> comments, Viewer viewer) {
+    private Set<Long> upvotedIds(List<CommentRow> comments, Viewer viewer) {
         return switch (viewer) {
             case Viewer.Guest guest -> Set.of();
             case Viewer.Member member -> new HashSet<>(commentVoteRepository.findUpvotedCommentIds(
-                    comments.stream().map(PlannerComment::getId).toList(), member.userId()));
+                    comments.stream().map(CommentRow::id).toList(), member.userId()));
         };
     }
 
     private List<CommentTreeNode> buildCommentTree(
-            List<PlannerComment> comments,
+            List<CommentRow> comments,
             Map<Long, UserSummary> userMap,
             Set<Long> upvotedIds,
             Viewer viewer
     ) {
-        Map<Long, List<PlannerComment>> childrenMap = comments.stream()
-                .filter(c -> c.getParentCommentId() != null)
-                .collect(Collectors.groupingBy(PlannerComment::getParentCommentId));
+        Map<Long, List<CommentRow>> childrenMap = comments.stream()
+                .filter(c -> c.parentCommentId() != null)
+                .collect(Collectors.groupingBy(CommentRow::parentCommentId));
 
-        List<PlannerComment> topLevel = comments.stream()
-                .filter(c -> c.getParentCommentId() == null)
-                .sorted(Comparator.comparing(PlannerComment::getCreatedAt))
+        List<CommentRow> topLevel = comments.stream()
+                .filter(c -> c.parentCommentId() == null)
+                .sorted(Comparator.comparing(CommentRow::createdAt))
                 .toList();
 
         return topLevel.stream()
@@ -131,17 +131,17 @@ public class CommentQueryService {
     }
 
     private Optional<CommentTreeNode> buildNode(
-            PlannerComment comment,
+            CommentRow comment,
             CommentTreeNode.Parent parent,
-            Map<Long, List<PlannerComment>> childrenMap,
+            Map<Long, List<CommentRow>> childrenMap,
             Map<Long, UserSummary> userMap,
             Set<Long> upvotedIds,
             Viewer viewer
     ) {
-        List<PlannerComment> children = childrenMap.getOrDefault(comment.getId(), Collections.emptyList());
-        CommentTreeNode.Parent self = new CommentTreeNode.Parent.Comment(comment.getPublicId());
+        List<CommentRow> children = childrenMap.getOrDefault(comment.id(), Collections.emptyList());
+        CommentTreeNode.Parent self = new CommentTreeNode.Parent.Comment(comment.publicId());
         List<CommentTreeNode> childNodes = children.stream()
-                .sorted(Comparator.comparing(PlannerComment::getCreatedAt))
+                .sorted(Comparator.comparing(CommentRow::createdAt))
                 .map(c -> buildNode(c, self, childrenMap, userMap, upvotedIds, viewer))
                 .flatMap(Optional::stream)
                 .toList();
@@ -150,13 +150,15 @@ public class CommentQueryService {
             return Optional.empty();
         }
 
-        UserSummary summary = userMap.get(comment.getUserId());
+        UserSummary summary = userMap.get(comment.userId());
         CommentTreeNode.Author author = summary == null
                 ? new CommentTreeNode.Author.Missing()
                 : new CommentTreeNode.Author.Known(summary);
-        boolean hasUpvoted = upvotedIds.contains(comment.getId());
+        CommentTreeNode.Upvote upvote = upvotedIds.contains(comment.id())
+                ? CommentTreeNode.Upvote.CAST
+                : CommentTreeNode.Upvote.NONE;
 
         return Optional.of(CommentTreeNode.fromEntity(
-                comment, parent, author, viewer, hasUpvoted, childNodes));
+                comment, parent, author, viewer, upvote, childNodes));
     }
 }

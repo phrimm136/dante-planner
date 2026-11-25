@@ -17,9 +17,7 @@ import java.util.stream.Stream;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
-import org.danteplanner.backend.comment.entity.CommentVoteType;
 import org.danteplanner.backend.comment.entity.PlannerComment;
-import org.danteplanner.backend.comment.entity.PlannerCommentVote;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.moderation.api.ModerationActionType;
@@ -137,18 +135,13 @@ class AuditedTimestampIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    void newCommentVote_WhenTheClockIsFixed_IsStampedWithItsInstant() {
+    void newCommentReport_WhenTheClockIsFixed_IsStampedWithItsInstant() {
         PlannerComment comment = commentRepository.save(
-                new PlannerComment(planner.getId(), owner.getId(), "voted", null, 0));
-        PlannerCommentVote vote = new PlannerCommentVote(comment.getId(), owner.getId(), CommentVoteType.UP);
+                new PlannerComment(planner.getId(), owner.getId(), "reported", null, 0));
         PlannerCommentReport report = new PlannerCommentReport(comment.getId(), owner.getId(), "SPAM");
 
-        transactionTemplate.executeWithoutResult(status -> {
-            entityManager.persist(vote);
-            entityManager.persist(report);
-        });
+        transactionTemplate.executeWithoutResult(status -> entityManager.persist(report));
 
-        assertThat(storedCreatedAt(vote)).isEqualTo(T);
         assertThat(storedCreatedAt(report)).isEqualTo(T);
     }
 
@@ -303,18 +296,18 @@ class AuditedTimestampIT extends SharedMySqlContainerSupport {
 
     @Test
     void changedRow_WhenTheContextHasNoAuditing_FailsTheSave() {
-        PlannerComment stored = commentRepository.save(
-                new PlannerComment(planner.getId(), owner.getId(), "unmoved", null, 0));
+        PlannerSubscription stored = new PlannerSubscription(owner.getId(), planner.getId());
+        transactionTemplate.executeWithoutResult(status -> entityManager.persist(stored));
         try (AnnotationConfigApplicationContext unaudited = jpaContext(SUBJECT_TIME, () -> { })) {
             EntityManagerFactory factory = unaudited.getBean(EntityManagerFactory.class);
 
             assertThatThrownBy(() -> factory.runInTransaction(manager ->
-                    manager.find(PlannerComment.class, stored.getId()).edit("moved", T)))
+                    manager.find(PlannerSubscription.class, stored.getId()).toggle()))
                     .satisfies(failure -> assertThat(NestedExceptionUtils.getMostSpecificCause(failure))
                             .isInstanceOf(NoSuchBeanDefinitionException.class)
                             .hasMessageContaining("AuditingHandler"));
         }
-        assertThat(commentRepository.findById(stored.getId()).orElseThrow().getContent()).isEqualTo("unmoved");
+        assertThat(entityManager.find(PlannerSubscription.class, stored.getId()).isEnabled()).isTrue();
     }
 
     @Test

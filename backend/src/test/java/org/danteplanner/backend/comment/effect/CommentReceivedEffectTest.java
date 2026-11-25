@@ -1,9 +1,10 @@
 package org.danteplanner.backend.comment.effect;
 
 import tools.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.support.CommentRows;
+import org.danteplanner.backend.comment.repository.CommentRow;
 import org.danteplanner.backend.support.TestJsonMappers;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.planner.api.PlannerNotificationTarget;
@@ -92,13 +93,13 @@ class CommentReceivedEffectTest {
 
     @Test
     void applyEffect_WhenTheOwnerIsEligible_NotifiesAndPushesBoth() {
-        PlannerComment comment = givenAComment(COMMENTER_ID);
+        CommentRow comment = givenAComment(COMMENTER_ID);
         givenAPlanner(true);
 
         applyAndFlush();
 
         assertThat(notifications.calls()).containsExactly(new CommentReceived(
-                COMMENT_ID, comment.getPublicId(), PLANNER_ID, "Test Planner", "A comment", OWNER_ID));
+                COMMENT_ID, comment.publicId(), PLANNER_ID, "Test Planner", "A comment", OWNER_ID));
         assertThat(sseChannel.envelopes(SseChannel.USER))
                 .extracting(SseEnvelope.Wire::type, SseEnvelope.Wire::userId)
                 .containsExactly(tuple(SseEventType.NOTIFY_COMMENT, OWNER_ID));
@@ -137,7 +138,7 @@ class CommentReceivedEffectTest {
 
     @Test
     void applyEffect_WhenTheCommentIsGone_AnnouncesNothing() {
-        when(commentRepository.findById(COMMENT_ID)).thenReturn(Optional.empty());
+        when(commentRepository.findRowById(COMMENT_ID)).thenReturn(Optional.empty());
 
         assertLogs("Comment 77 is gone before it was announced");
 
@@ -147,12 +148,8 @@ class CommentReceivedEffectTest {
 
     @Test
     void applyEffect_WhenTheCommentWasWithdrawn_AnnouncesNothing() {
-        PlannerComment comment = new PlannerComment(PLANNER_ID, COMMENTER_ID, "A comment", null, 0);
-        comment.setId(COMMENT_ID);
-        comment.setPublicId(UUID.randomUUID());
-        comment.setCreatedAt(Instant.now());
-        comment.softDelete(Instant.now());
-        when(commentRepository.findById(COMMENT_ID)).thenReturn(Optional.of(comment));
+        CommentRow comment = CommentRows.deleted(row(COMMENTER_ID), Instant.now());
+        when(commentRepository.findRowById(COMMENT_ID)).thenReturn(Optional.of(comment));
 
         assertLogs("Comment 77 was withdrawn before it was announced");
 
@@ -232,13 +229,14 @@ class CommentReceivedEffectTest {
         pushes.flush();
     }
 
-    private PlannerComment givenAComment(Long authorId) {
-        PlannerComment comment = new PlannerComment(PLANNER_ID, authorId, "A comment", null, 0);
-        comment.setId(COMMENT_ID);
-        comment.setPublicId(UUID.randomUUID());
-        comment.setCreatedAt(Instant.now());
-        when(commentRepository.findById(COMMENT_ID)).thenReturn(Optional.of(comment));
+    private CommentRow givenAComment(Long authorId) {
+        CommentRow comment = row(authorId);
+        when(commentRepository.findRowById(COMMENT_ID)).thenReturn(Optional.of(comment));
         return comment;
+    }
+
+    private static CommentRow row(Long authorId) {
+        return CommentRows.live(COMMENT_ID, UUID.randomUUID(), PLANNER_ID, authorId, "A comment", null, 0);
     }
 
     private void givenAPlanner(boolean ownerNotificationsEnabled) {

@@ -7,7 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.support.CommentRows;
+import org.danteplanner.backend.comment.repository.CommentRow;
 import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
 import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator.AuthoredComment;
 import org.danteplanner.backend.comment.validation.CommentRefusal;
@@ -27,7 +28,7 @@ class CommentCheckChainTest {
 
     @Test
     void editableBy_WhenLiveAndByItsAuthor_HoldsTheComment() {
-        PlannerComment comment = live(0);
+        CommentRow comment = live(0);
 
         assertThat(CommentAuthorshipValidator.editableBy(comment, AUTHOR_ID)
                 .orElseThrow(CommentRefusal::toException).comment()).isSameAs(comment);
@@ -61,7 +62,7 @@ class CommentCheckChainTest {
 
     @Test
     void replyableIn_WhenTheParentIsADeletedReplyInThisPlanner_HoldsTheParent() {
-        PlannerComment parent = deleted(1);
+        CommentRow parent = deleted(1);
 
         assertThat(CommentStateValidator.replyableIn(parent, PLANNER_ID)
                 .orElseThrow(CommentRefusal::toException).comment()).isSameAs(parent);
@@ -99,13 +100,11 @@ class CommentCheckChainTest {
         }).withCode("COMMENT_FORBIDDEN").satisfies(refused -> assertThat(refused).hasMessage(message));
     }
 
-    private static PlannerComment live(int depth) {
-        return new PlannerComment(PLANNER_ID, AUTHOR_ID, "text", depth == 0 ? null : 40L, depth);
+    private static CommentRow live(int depth) {
+        return CommentRows.live(50L, UUID.randomUUID(), PLANNER_ID, AUTHOR_ID, "text", depth == 0 ? null : 40L, depth);
     }
 
-    private static PlannerComment deleted(int depth) {
-        PlannerComment comment = live(depth);
-        comment.softDelete(Instant.EPOCH);
-        return comment;
+    private static CommentRow deleted(int depth) {
+        return CommentRows.deleted(live(depth), Instant.EPOCH);
     }
 }

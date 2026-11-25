@@ -1,7 +1,7 @@
 package org.danteplanner.backend.comment.service;
 
 import lombok.RequiredArgsConstructor;
-import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.comment.repository.CommentRow;
 import org.danteplanner.backend.comment.validation.CommentRefusal;
 import org.danteplanner.backend.comment.validation.CommentStateValidator.LiveComment;
 import org.danteplanner.backend.moderation.api.CommentModerationTarget;
@@ -37,10 +37,10 @@ public class CommentModerationTargetAdapter implements CommentModerationTarget {
         LiveComment live = LiveComment
                 .of(commentQueryService.requireByPublicId(commentPublicId), CommentRefusal.REPORT_DELETED)
                 .orElseThrow(CommentRefusal::toException);
-        return live.comment().getId();
+        return live.comment().id();
     }
 
-    private static ModeratedComment moderated(PlannerComment comment) {
-        return new ModeratedComment(comment.getId(), comment.getPublicId(), comment.isDeleted());
+    private static ModeratedComment moderated(CommentRow comment) {
+        return new ModeratedComment(comment.id(), comment.publicId(), comment.isDeleted());
     }
 }

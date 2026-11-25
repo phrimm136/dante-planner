@@ -27,7 +27,8 @@ public abstract class ExclusiveDatabaseSupport {
 
     private static final List<String> PLANNER_TABLES = List.of(
             "planner_comment_reports", "planner_reports", "planner_subscriptions", "planner_bookmarks",
-            "planner_comment_votes", "planner_comments", "planner_views", "planner_votes",
+            "planner_comment_votes", "planner_comment_content", "planner_comment_stats", "planner_comments",
+            "planner_views", "planner_votes",
             "planner_entity_filter", "planner_keyword_filter", "planner_catalog",
             "planner_stats", "planner_moderation", "planner_publication",
             "planner_content", "planner");

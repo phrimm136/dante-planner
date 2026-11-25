@@ -1,5 +1,9 @@
 package org.danteplanner.backend.service;
 
+import org.danteplanner.backend.comment.repository.PlannerCommentStatsRepository;
+import org.danteplanner.backend.comment.repository.PlannerCommentContentRepository;
+import org.danteplanner.backend.support.CommentRows;
+import org.danteplanner.backend.comment.repository.CommentRow;
 import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.support.FakeUsers;
@@ -26,11 +30,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Clock;
-import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -63,6 +65,12 @@ class CommentCommandServiceNotificationTest {
     private PlannerCommentRepository commentRepository;
 
     @Mock
+    private PlannerCommentContentRepository contentRepository;
+
+    @Mock
+    private PlannerCommentStatsRepository statsRepository;
+
+    @Mock
     private PlannerCommentVoteRepository commentVoteRepository;
 
     @Mock
@@ -81,7 +89,7 @@ class CommentCommandServiceNotificationTest {
     @BeforeEach
     void setUp() {
         service = new CommentCommandService(
-                commentRepository,
+                commentRepository, contentRepository, statsRepository,
                 new CommentQueryService(commentRepository, commentVoteRepository, users,
                         new PlannerAccessGuard(users, plannerRepository),
                         new CommentAccessValidator()),
@@ -95,7 +103,7 @@ class CommentCommandServiceNotificationTest {
     void createComment_WhenTopLevel_RecordsOneCommentReceivedEvent() {
         givenAPublishedPlanner();
         givenEventRowsAreStored();
-        when(commentRepository.insert(any(PlannerComment.class))).thenAnswer(savedComment(1L));
+        when(commentRepository.insert(any(PlannerComment.class))).thenAnswer(CommentRows.insertedAs(1L));
 
         service.createComment(PLANNER_ID, COMMENTER_ID, UUID.randomUUID(),
                 new CreateCommentRequest("Top level", null));
@@ -108,7 +116,7 @@ class CommentCommandServiceNotificationTest {
         givenAPublishedPlanner();
         givenEventRowsAreStored();
         when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parent()));
-        when(commentRepository.insert(any(PlannerComment.class))).thenAnswer(savedComment(101L));
+        when(commentRepository.insert(any(PlannerComment.class))).thenAnswer(CommentRows.insertedAs(101L));
 
         service.createComment(PLANNER_ID, COMMENTER_ID, UUID.randomUUID(),
                 new CreateCommentRequest("Reply", PARENT_PUBLIC_ID));
@@ -121,7 +129,7 @@ class CommentCommandServiceNotificationTest {
         givenAPublishedPlanner();
         givenEventRowsAreStored();
         when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parent()));
-        when(commentRepository.insert(any(PlannerComment.class))).thenAnswer(savedComment(101L));
+        when(commentRepository.insert(any(PlannerComment.class))).thenAnswer(CommentRows.insertedAs(101L));
 
         service.createReply(PARENT_PUBLIC_ID, COMMENTER_ID, UUID.randomUUID(), "Reply");
 
@@ -151,21 +159,7 @@ class CommentCommandServiceNotificationTest {
                 .thenReturn(Optional.of(new PlannerThread(PLANNER_ID, PLANNER_OWNER_ID, true, false)));
     }
 
-    private static PlannerComment parent() {
-        PlannerComment parent = new PlannerComment(PLANNER_ID, PARENT_AUTHOR_ID, "Parent", null, 0);
-        parent.setId(50L);
-        parent.setPublicId(PARENT_PUBLIC_ID);
-        parent.setCreatedAt(Instant.now());
-        return parent;
-    }
-
-    private static Answer<PlannerComment> savedComment(Long id) {
-        return inv -> {
-            PlannerComment c = inv.getArgument(0);
-            c.setId(id);
-            c.setPublicId(UUID.randomUUID());
-            c.setCreatedAt(Instant.now());
-            return c;
-        };
+    private static CommentRow parent() {
+        return CommentRows.live(50L, PARENT_PUBLIC_ID, PLANNER_ID, PARENT_AUTHOR_ID, "Parent", null, 0);
     }
 }

@@ -36,6 +36,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
@@ -794,8 +795,8 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
     }
 
     private PlannerComment insertComment(UUID plannerId, Long authorId) {
-        return new TransactionTemplate(transactionManager).execute(status -> commentRepository.insert(
-                new PlannerComment(plannerId, authorId, "freshness dispatch", null, 0)));
+        return StoredComments.save(commentRepository, primaryJdbcTemplate,
+                new PlannerComment(plannerId, authorId, "freshness dispatch", null, 0));
     }
 
     private long recordEvent(String eventType, UUID plannerId, String idKey, Long id) {

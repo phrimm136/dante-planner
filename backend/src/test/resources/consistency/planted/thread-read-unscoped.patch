@@ -8,7 +8,7 @@ diff --git a/backend/src/main/java/org/danteplanner/backend/comment/service/Comm
 -        Set<FreshnessScope> scopes = Set.of(
 -                new FreshnessScope.Planner(plannerId), new FreshnessScope.User(thread.planner().ownerId()));
 +        Set<FreshnessScope> scopes = Set.of();
-         List<PlannerComment> comments = commentRepository.findByPlannerId(plannerId);
+         List<CommentRow> comments = commentRepository.findByPlannerId(plannerId);
          return switch (ThreadFill.of(comments)) {
              case EMPTY -> new ScopedRead<>(Collections.emptyList(), scopes);
 @@ -78,7 +77,7 @@ public class CommentQueryService {

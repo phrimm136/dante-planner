@@ -1,5 +1,9 @@
 package org.danteplanner.backend.comment.service;
 
+import org.danteplanner.backend.comment.repository.PlannerCommentStatsRepository;
+import org.danteplanner.backend.comment.repository.PlannerCommentContentRepository;
+import org.danteplanner.backend.support.CommentRows;
+import org.danteplanner.backend.comment.repository.CommentRow;
 import org.danteplanner.backend.comment.dto.CommentTreeNode;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.entity.PlannerComment;
@@ -61,6 +65,12 @@ class CommentCommandServicePlacementTest {
     private PlannerCommentRepository commentRepository;
 
     @Mock
+    private PlannerCommentContentRepository contentRepository;
+
+    @Mock
+    private PlannerCommentStatsRepository statsRepository;
+
+    @Mock
     private PlannerCommentVoteRepository commentVoteRepository;
 
     @Mock
@@ -81,7 +91,7 @@ class CommentCommandServicePlacementTest {
         PlannerAccessGuard accessGuard = new PlannerAccessGuard(users, plannerRepository);
         queryService = new CommentQueryService(commentRepository, commentVoteRepository, users, accessGuard,
                 new CommentAccessValidator());
-        service = new CommentCommandService(commentRepository, queryService,
+        service = new CommentCommandService(commentRepository, contentRepository, statsRepository, queryService,
                 new DomainEventRecorder(domainEventRepository, new ObjectMapper(), event -> { }),
                 accessGuard, new PlannerStatsService(plannerStatsRepository),
                 Clock.systemUTC());
@@ -176,7 +186,7 @@ class CommentCommandServicePlacementTest {
     void createReply_WhenTheParentIsADeletedReply_IsPlacedUnderIt() {
         givenThePlanner(true);
         givenRowsAreStored();
-        givenParent(PLANNER_ID, GRANDPARENT_ID, 1).softDelete(Instant.now());
+        givenDeletedParent(PLANNER_ID, GRANDPARENT_ID, 1);
 
         reply();
 
@@ -187,7 +197,7 @@ class CommentCommandServicePlacementTest {
     void createComment_WhenTheParentIsADeletedReply_IsPlacedUnderIt() {
         givenThePlanner(true);
         givenRowsAreStored();
-        givenParent(PLANNER_ID, GRANDPARENT_ID, 1).softDelete(Instant.now());
+        givenDeletedParent(PLANNER_ID, GRANDPARENT_ID, 1);
 
         comment(PARENT_PUBLIC_ID);
 
@@ -197,7 +207,7 @@ class CommentCommandServicePlacementTest {
     @Test
     void createComment_WhenTheParentIsADeletedTopLevelComment_IsRefused() {
         givenThePlanner(true);
-        givenParent(PLANNER_ID, null, 0).softDelete(Instant.now());
+        givenDeletedParent(PLANNER_ID, null, 0);
 
         assertForbidden(assertRejected(() -> comment(PARENT_PUBLIC_ID)), "Cannot reply to deleted top-level comment");
     }
@@ -205,7 +215,7 @@ class CommentCommandServicePlacementTest {
     @Test
     void createReply_WhenTheParentIsADeletedTopLevelComment_IsRefused() {
         givenThePlanner(true);
-        givenParent(PLANNER_ID, null, 0).softDelete(Instant.now());
+        givenDeletedParent(PLANNER_ID, null, 0);
 
         assertForbidden(assertRejected(this::reply), "Cannot reply to deleted top-level comment");
     }
@@ -213,7 +223,7 @@ class CommentCommandServicePlacementTest {
     @Test
     void createComment_WhenTheParentIsDeletedAndInAnotherPlanner_IsRefusedForThePlanner() {
         givenThePlanner(true);
-        givenParent(OTHER_PLANNER_ID, null, 0).softDelete(Instant.now());
+        givenDeletedParent(OTHER_PLANNER_ID, null, 0);
 
         assertForbidden(assertRejected(() -> comment(PARENT_PUBLIC_ID)),
                 "Parent comment belongs to a different planner");
@@ -238,14 +248,14 @@ class CommentCommandServicePlacementTest {
     @Test
     void createReply_WhenTheParentIsDeletedAndThePlannerUnpublished_IsRefusedForThePlanner() {
         givenThePlanner(false);
-        givenParent(PLANNER_ID, null, 0).softDelete(Instant.now());
+        givenDeletedParent(PLANNER_ID, null, 0);
 
         assertRejected(this::reply).withCode("PLANNER_NOT_FOUND");
     }
 
     @Test
     void updateComment_WhenDeletedAndByANonAuthor_IsRefusedForTheDeletion() {
-        givenParent(PLANNER_ID, null, 0).softDelete(Instant.now());
+        givenDeletedParent(PLANNER_ID, null, 0);
 
         assertForbidden(assertRejected(() -> service.updateComment(PARENT_PUBLIC_ID, USER_ID, null)),
                 "Cannot edit a deleted comment");
@@ -253,24 +263,20 @@ class CommentCommandServicePlacementTest {
 
     @Test
     void deleteComment_WhenAlreadyDeletedAndByANonAuthor_ChangesNothing() {
-        PlannerComment comment = givenParent(PLANNER_ID, null, 0);
-        Instant deletedAt = Instant.EPOCH;
-        comment.softDelete(deletedAt);
+        givenDeletedParent(PLANNER_ID, null, 0);
 
         List<ILoggingEvent> logged = LogCapture.during(() -> service.deleteComment(PARENT_PUBLIC_ID, USER_ID),
                 Level.INFO, CommentCommandService.class);
 
-        assertThat(comment.getDeletedAt()).isEqualTo(deletedAt);
         assertThat(logged).isEmpty();
-        verifyNoInteractions(plannerStatsRepository);
+        verifyNoInteractions(contentRepository, plannerStatsRepository);
     }
 
     @Test
     void getCommentTree_WhenADeletedCommentHasALiveReply_KeepsBothWithTheirParents() {
         givenThePlanner(true);
-        PlannerComment root = row(PARENT_ID, PARENT_PUBLIC_ID, PLANNER_ID, null, 0);
-        root.softDelete(Instant.now());
-        PlannerComment reply = row(SAVED_ID, UUID.randomUUID(), PLANNER_ID, PARENT_ID, 1);
+        CommentRow root = CommentRows.deleted(row(PARENT_ID, PARENT_PUBLIC_ID, PLANNER_ID, null, 0), Instant.now());
+        CommentRow reply = row(SAVED_ID, UUID.randomUUID(), PLANNER_ID, PARENT_ID, 1);
         when(commentRepository.findByPlannerId(PLANNER_ID)).thenReturn(List.of(root, reply));
 
         List<CommentTreeNode> tree = queryService.getCommentTree(PLANNER_ID, new Viewer.Guest()).value();
@@ -295,28 +301,25 @@ class CommentCommandServicePlacementTest {
                 .thenReturn(Optional.of(new PlannerThread(PLANNER_ID, 41L, published, false)));
     }
 
-    private PlannerComment givenParent(UUID plannerId, Long parentCommentId, int depth) {
-        PlannerComment parent = row(PARENT_ID, PARENT_PUBLIC_ID, plannerId, parentCommentId, depth);
-        when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parent));
-        return parent;
+    private void givenParent(UUID plannerId, Long parentCommentId, int depth) {
+        givenParent(row(PARENT_ID, PARENT_PUBLIC_ID, plannerId, parentCommentId, depth));
     }
 
-    private static PlannerComment row(Long id, UUID publicId, UUID plannerId, Long parentCommentId, int depth) {
-        PlannerComment comment = new PlannerComment(plannerId, 3L, "text", parentCommentId, depth);
-        comment.setId(id);
-        comment.setPublicId(publicId);
-        comment.setCreatedAt(Instant.now());
-        return comment;
+    private void givenDeletedParent(UUID plannerId, Long parentCommentId, int depth) {
+        givenParent(CommentRows.deleted(
+                row(PARENT_ID, PARENT_PUBLIC_ID, plannerId, parentCommentId, depth), Instant.now()));
+    }
+
+    private void givenParent(CommentRow parent) {
+        when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parent));
+    }
+
+    private static CommentRow row(Long id, UUID publicId, UUID plannerId, Long parentCommentId, int depth) {
+        return CommentRows.live(id, publicId, plannerId, 3L, "text", parentCommentId, depth);
     }
 
     private void givenRowsAreStored() {
-        when(commentRepository.insert(any(PlannerComment.class))).thenAnswer(invocation -> {
-            PlannerComment saved = invocation.getArgument(0);
-            saved.setId(SAVED_ID);
-            saved.setPublicId(UUID.randomUUID());
-            saved.setCreatedAt(Instant.now());
-            return saved;
-        });
+        when(commentRepository.insert(any(PlannerComment.class))).thenAnswer(CommentRows.insertedAs(SAVED_ID));
         when(domainEventRepository.insert(any(DomainEvent.class))).thenAnswer(invocation -> {
             DomainEvent row = invocation.getArgument(0);
             ReflectionTestUtils.setField(row, "id", 1L);
@@ -332,6 +335,8 @@ class CommentCommandServicePlacementTest {
         assertThat(stored.getValue().getContent()).isEqualTo("text");
         assertThat(stored.getValue().getParentCommentId()).isEqualTo(parentCommentId);
         assertThat(stored.getValue().getDepth()).isEqualTo(depth);
+        verify(contentRepository).insertContent(SAVED_ID, "text");
+        verify(statsRepository).insertStats(SAVED_ID);
     }
 
     private void assertRecorded(DomainEventType type, String payload) {

@@ -1,11 +1,12 @@
 package org.danteplanner.backend.service;
 
+import org.danteplanner.backend.support.CommentRows;
+import org.danteplanner.backend.comment.repository.CommentRow;
 import org.danteplanner.backend.moderation.service.CommentReportService;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
 import org.mockito.ArgumentCaptor;
 import org.danteplanner.backend.moderation.api.dto.CommentReportRequest;
 import org.danteplanner.backend.moderation.api.dto.CommentReportResponse;
-import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.moderation.entity.PlannerCommentReport;
 import org.danteplanner.backend.moderation.exception.CommentReportAlreadyExistsException;
 import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
@@ -63,13 +64,11 @@ class CommentReportServiceTest {
     @Nested
     class CreateReportTests {
 
-        private PlannerComment comment;
+        private CommentRow comment;
 
         @BeforeEach
         void setUp() {
-            comment = new PlannerComment(PLANNER_ID, 50L, "content", null, 0);
-            comment.setId(COMMENT_INTERNAL_ID);
-            comment.setPublicId(COMMENT_PUBLIC_ID);
+            comment = CommentRows.live(COMMENT_INTERNAL_ID, COMMENT_PUBLIC_ID, PLANNER_ID, 50L, "content", null, 0);
         }
 
         @Test
@@ -146,8 +145,8 @@ class CommentReportServiceTest {
         @Test
         void createReport_WhenCommentDeleted_ThrowsException() {
             // Arrange
-            comment.softDelete(Instant.now());
-            when(commentRepository.findByPublicId(COMMENT_PUBLIC_ID)).thenReturn(Optional.of(comment));
+            when(commentRepository.findByPublicId(COMMENT_PUBLIC_ID))
+                    .thenReturn(Optional.of(CommentRows.deleted(comment, Instant.now())));
             CommentReportRequest request = new CommentReportRequest(REASON);
 
             // Act & Assert

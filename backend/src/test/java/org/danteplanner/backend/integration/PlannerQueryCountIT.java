@@ -1,5 +1,8 @@
 package org.danteplanner.backend.integration;
 
+import javax.sql.DataSource;
+
+import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
 import org.danteplanner.backend.planner.dto.CatalogQuery.TextFilter;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -8,7 +11,10 @@ import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.entity.PlannerVote;
+import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
+import org.danteplanner.backend.comment.service.CommentCommandService;
+import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -23,6 +29,7 @@ import org.danteplanner.backend.shared.security.Viewer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -75,6 +82,7 @@ class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
     private static final long PUBLISHED_LIST_STATEMENTS = 5;
     private static final long RECOMMENDED_LIST_STATEMENTS = 5;
     private static final long SEARCH_LIST_STATEMENTS = 5;
+    private static final long THREAD_STATEMENTS = 4;
 
     @Autowired
     private PlannerRepository plannerRepository;
@@ -84,6 +92,15 @@ class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private PlannerCommentRepository plannerCommentRepository;
+
+    @Autowired
+    private CommentCommandService commentCommandService;
+
+    @Autowired
+    private CommentQueryService commentQueryService;
+
+    @Autowired
+    private DataSource dataSource;
 
     @Autowired
     private UserRepository userRepository;
@@ -176,6 +193,31 @@ class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
                 .isEqualTo(1);
     }
 
+    @Test
+    void commentThread_WhenTheNumberOfCommentsVaries_IssuesFixedStatementCount() {
+        User author = TestDataFactory.createTestUser(userRepository, "thread-author@example.com");
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        comment(planner, author);
+        long unusedWarmUp = measureThread(planner);
+
+        assertThat(measureThread(planner)).as("statements for one comment").isEqualTo(THREAD_STATEMENTS);
+        for (int added = 1; added < LARGE_SET; added++) {
+            comment(planner, author);
+        }
+        assertThat(measureThread(planner)).as("statements for many comments").isEqualTo(THREAD_STATEMENTS);
+    }
+
+    private void comment(Planner planner, User author) {
+        commentCommandService.createComment(planner.getId(), author.getId(), UUID.randomUUID(),
+                new CreateCommentRequest("counted", null));
+    }
+
+    private long measureThread(Planner planner) {
+        ThreadStatementCounter.start();
+        commentQueryService.getCommentTree(planner.getId(), Viewer.of(viewerId));
+        return ThreadStatementCounter.stop();
+    }
+
     private long measure(CatalogQuery catalogQuery, Pageable pageable) {
         ThreadStatementCounter.start();
         publishedPlannerQueryService.searchPlanners(catalogQuery, pageable, Viewer.of(viewerId));
@@ -239,8 +281,7 @@ class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
             seededIds.add(planner.getId());
 
             plannerVoteRepository.save(new PlannerVote(viewerId, planner.getId(), VoteType.UP));
-            plannerCommentRepository.save(
-                    new PlannerComment(planner.getId(), viewerId, "context comment", null, 0));
+            StoredComments.save(plannerCommentRepository, new JdbcTemplate(dataSource), new PlannerComment(planner.getId(), viewerId, "context comment", null, 0));
         }
 
         if (crossRecommendedThreshold) {

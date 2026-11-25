@@ -3,7 +3,7 @@ package org.danteplanner.backend.comment.effect;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.comment.dto.CommentTreeNode;
-import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.comment.repository.CommentRow;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.notification.api.NotificationOutcome;
@@ -41,18 +41,18 @@ public class CommentReceivedEffect implements DomainEffectHandler {
     @Override
     public void applyEffect(DomainEvent event, EffectPushQueue pushes) {
         long commentId = payloads.requireId(event, "commentId");
-        switch (Subject.of(commentRepository.findById(commentId))) {
+        switch (Subject.of(commentRepository.findRowById(commentId))) {
             case Subject.Gone gone -> log.info("Comment {} is gone before it was announced", commentId);
             case Subject.Withdrawn withdrawn ->
                     log.info("Comment {} was withdrawn before it was announced", commentId);
-            case Subject.Live(PlannerComment comment) -> announce(comment, pushes);
+            case Subject.Live(CommentRow comment) -> announce(comment, pushes);
         }
     }
 
-    private void announce(PlannerComment comment, EffectPushQueue pushes) {
-        switch (Destination.of(publishedPlanners.notificationTargetOf(comment.getPlannerId()))) {
+    private void announce(CommentRow comment, EffectPushQueue pushes) {
+        switch (Destination.of(publishedPlanners.notificationTargetOf(comment.plannerId()))) {
             case Destination.Gone gone -> log.info("Planner {} is gone before comment {} was announced",
-                    comment.getPlannerId(), comment.getId());
+                    comment.plannerId(), comment.id());
             case Destination.Known(PlannerNotificationTarget target) -> {
                 notifyOwner(comment, target, pushes);
                 pushToThread(comment, pushes);
@@ -60,28 +60,28 @@ public class CommentReceivedEffect implements DomainEffectHandler {
         }
     }
 
-    private void notifyOwner(PlannerComment comment, PlannerNotificationTarget target,
+    private void notifyOwner(CommentRow comment, PlannerNotificationTarget target,
             EffectPushQueue pushes) {
         switch (Recipient.of(comment, target)) {
             case Recipient.Nobody nobody -> { }
             case Recipient.Member(Long ownerId) -> pushIfDelivered(notifications.notifyCommentReceived(
-                    comment.getId(),
-                    comment.getPublicId(),
+                    comment.id(),
+                    comment.publicId(),
                     target.plannerId(),
                     target.title(),
-                    comment.getContent(),
+                    comment.content(),
                     ownerId), pushes);
         }
     }
 
-    private void pushToThread(PlannerComment comment, EffectPushQueue pushes) {
-        switch (Visibility.of(publishedPlanners.isPublished(comment.getPlannerId()))) {
+    private void pushToThread(CommentRow comment, EffectPushQueue pushes) {
+        switch (Visibility.of(publishedPlanners.isPublished(comment.plannerId()))) {
             case HIDDEN -> log.info("Planner {} left public view before comment {} was announced to its thread",
-                    comment.getPlannerId(), comment.getId());
+                    comment.plannerId(), comment.id());
             case PUBLIC -> {
-                FreshnessDeclarations.declare(new FreshnessScope.Planner(comment.getPlannerId()));
-                pushes.commentEvent(comment.getPlannerId(), SseEventType.COMMENT_ADDED,
-                        comment.getPublicId().toString(), comment.getUserId(),
+                FreshnessDeclarations.declare(new FreshnessScope.Planner(comment.plannerId()));
+                pushes.commentEvent(comment.plannerId(), SseEventType.COMMENT_ADDED,
+                        comment.publicId().toString(), comment.userId(),
                         commentQueryService.broadcastNode(comment, new CommentTreeNode.Parent.Thread()));
             }
         }
@@ -103,10 +103,10 @@ public class CommentReceivedEffect implements DomainEffectHandler {
         record Withdrawn() implements Subject {
         }
 
-        record Live(PlannerComment comment) implements Subject {
+        record Live(CommentRow comment) implements Subject {
         }
 
-        static Subject of(Optional<PlannerComment> found) {
+        static Subject of(Optional<CommentRow> found) {
             return found.<Subject>map(comment -> comment.isDeleted() ? new Withdrawn() : new Live(comment))
                     .orElseGet(Gone::new);
         }
@@ -133,8 +133,8 @@ public class CommentReceivedEffect implements DomainEffectHandler {
         record Member(Long userId) implements Recipient {
         }
 
-        private static Recipient of(PlannerComment comment, PlannerNotificationTarget target) {
-            return comment.getUserId().equals(target.ownerId()) || !target.ownerNotificationsEnabled()
+        private static Recipient of(CommentRow comment, PlannerNotificationTarget target) {
+            return comment.userId().equals(target.ownerId()) || !target.ownerNotificationsEnabled()
                     ? new Nobody()
                     : new Member(target.ownerId());
         }

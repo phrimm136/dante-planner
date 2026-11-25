@@ -15,28 +15,23 @@ import java.util.UUID;
 @Repository
 public interface PlannerCommentRepository extends JpaRepository<PlannerComment, Long> {
 
-    @Query("""
-        SELECT c FROM PlannerComment c
-        WHERE c.plannerId = :plannerId
-        ORDER BY c.createdAt ASC
-        """)
-    List<PlannerComment> findByPlannerId(@Param("plannerId") UUID plannerId);
+    @Query(CommentRow.SELECT + "WHERE c.plannerId = :plannerId ORDER BY c.createdAt ASC")
+    List<CommentRow> findByPlannerId(@Param("plannerId") UUID plannerId);
 
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE PlannerComment c SET c.upvoteCount = c.upvoteCount + 1 WHERE c.id = :commentId")
-    int incrementUpvoteCount(@Param("commentId") Long commentId);
+    @Query(CommentRow.SELECT + "WHERE c.publicId = :publicId")
+    Optional<CommentRow> findByPublicId(@Param("publicId") UUID publicId);
 
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE PlannerComment c SET c.upvoteCount = c.upvoteCount - 1 WHERE c.id = :commentId AND c.upvoteCount > 0")
-    int decrementUpvoteCount(@Param("commentId") Long commentId);
+    @Query(CommentRow.SELECT + "WHERE c.id = :commentId")
+    Optional<CommentRow> findRowById(@Param("commentId") Long commentId);
 
     @Modifying
-    @Query("UPDATE PlannerComment c SET c.userId = :sentinelId, c.content = '' WHERE c.userId = :userId")
-    int anonymizeCommentsToSentinel(@Param("userId") Long userId, @Param("sentinelId") Long sentinelId);
-
-    long countByPlannerIdAndDeletedAtIsNull(UUID plannerId);
-
-    Optional<PlannerComment> findByPublicId(UUID publicId);
+    @Query(value = "UPDATE planner_comments c "
+            + "LEFT JOIN planner_comment_content t ON t.comment_id = c.id "
+            + "SET c.user_id = :sentinelId, c.content = :deletedContent, t.content = :deletedContent "
+            + "WHERE c.user_id = :userId",
+            nativeQuery = true)
+    int anonymizeCommentsToSentinel(@Param("userId") Long userId, @Param("sentinelId") Long sentinelId,
+            @Param("deletedContent") String deletedContent);
 
     default PlannerComment insert(PlannerComment comment) {
         Assert.isNull(comment.getId(), "insert() takes new rows only");

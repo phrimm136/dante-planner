@@ -403,22 +403,5 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
             PlannerStats saved = statsRepository.findById(planner.getId()).orElseThrow();
             assertThat(saved.getUpvotes()).isZero();
         }
-
-        @Test
-        void notNullConstraint_WhenDefaultValueApplied_CommentUpvoteCountZero() {
-            Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
-
-            PlannerComment comment = new PlannerComment(
-                    planner.getId(),
-                    testUser.getId(),
-                    "Test content",
-                    null,
-                    0
-            );
-            commentRepository.save(comment);
-
-            PlannerComment saved = commentRepository.findById(comment.getId()).orElseThrow();
-            assertThat(saved.getUpvoteCount()).isZero();
-        }
     }
 }

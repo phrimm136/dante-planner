@@ -29,7 +29,7 @@ public interface PlannerCommentVoteRepository extends JpaRepository<PlannerComme
      * MySQL forbids a subquery on the delete target table (error 1093), which a JPQL
      * {@code DELETE ... WHERE commentId IN (SELECT ...)} would emit.
      */
-    @Modifying(clearAutomatically = true)
+    @Modifying
     @Query(value = "DELETE v FROM planner_comment_votes v "
             + "JOIN planner_comment_votes s ON v.comment_id = s.comment_id "
             + "WHERE v.user_id = :userId AND s.user_id = :sentinelId",
@@ -40,11 +40,10 @@ public interface PlannerCommentVoteRepository extends JpaRepository<PlannerComme
     @Query("UPDATE PlannerCommentVote v SET v.userId = :sentinelId WHERE v.userId = :userId")
     int reassignUserVotes(@Param("userId") Long userId, @Param("sentinelId") Long sentinelId);
 
-    /**
-     * The key is the (comment, user) pair the caller supplies, so no id-null guard can tell a new
-     * row from an existing one: passing a row that already exists overwrites it.
-     */
-    default PlannerCommentVote insert(PlannerCommentVote vote) {
-        return save(vote);
-    }
+    @Modifying
+    @Query(value = "INSERT IGNORE INTO planner_comment_votes (comment_id, user_id, vote_type) "
+            + "VALUES (:commentId, :userId, :voteType)",
+            nativeQuery = true)
+    int insertIgnore(@Param("commentId") Long commentId, @Param("userId") Long userId,
+            @Param("voteType") String voteType);
 }

@@ -1,5 +1,6 @@
 package org.danteplanner.backend.comment.service;
 
+import org.danteplanner.backend.shared.util.CommentConstants;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,7 @@ class CommentAccountPurgeServiceTest {
         var inOrder = inOrder(plannerCommentVoteRepository, plannerCommentRepository);
         inOrder.verify(plannerCommentVoteRepository).deleteVotesCollidingWithSentinel(USER_ID, SENTINEL_ID);
         inOrder.verify(plannerCommentVoteRepository).reassignUserVotes(USER_ID, SENTINEL_ID);
-        inOrder.verify(plannerCommentRepository).anonymizeCommentsToSentinel(USER_ID, SENTINEL_ID);
+        inOrder.verify(plannerCommentRepository).anonymizeCommentsToSentinel(
+                USER_ID, SENTINEL_ID, CommentConstants.DELETED_CONTENT);
     }
 }
