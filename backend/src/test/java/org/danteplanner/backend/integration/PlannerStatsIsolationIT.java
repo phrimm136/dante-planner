@@ -130,7 +130,7 @@ class PlannerStatsIsolationIT extends ExclusiveDatabaseSupport {
 
         // Floor: a live comment row the counter never accounted for (drift) must
         // not push the counter below zero on delete
-        PlannerComment drifted = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(planner.getId(), commenter.getId(), "drifted", null, 0));
+        PlannerComment drifted = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(planner.getId(), commenter.getId(), null, 0), "drifted");
         commentCommandService.deleteComment(drifted.getPublicId(), commenter.getId());
         assertThat(commentCount()).as("decrement floors at zero").isEqualTo(0);
     }

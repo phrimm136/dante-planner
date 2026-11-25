@@ -46,9 +46,6 @@ public class PlannerComment {
     @Column(name = "parent_comment_id")
     private @Nullable Long parentCommentId;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
-    private String content;
-
     @Column(nullable = false)
     @JdbcTypeCode(SqlTypes.TINYINT)
     private int depth;
@@ -60,10 +57,9 @@ public class PlannerComment {
     protected PlannerComment() {
     }
 
-    public PlannerComment(UUID plannerId, Long userId, String content, @Nullable Long parentCommentId, int depth) {
+    public PlannerComment(UUID plannerId, Long userId, @Nullable Long parentCommentId, int depth) {
         this.plannerId = plannerId;
         this.userId = userId;
-        this.content = content;
         this.parentCommentId = parentCommentId;
         this.depth = depth;
     }
@@ -91,10 +87,6 @@ public class PlannerComment {
 
     public @Nullable Long getParentCommentId() {
         return parentCommentId;
-    }
-
-    public String getContent() {
-        return content;
     }
 
     public int getDepth() {

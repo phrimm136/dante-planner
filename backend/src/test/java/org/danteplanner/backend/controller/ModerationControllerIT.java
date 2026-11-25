@@ -497,8 +497,9 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
 
         private PlannerComment createComment() {
             PlannerComment comment = new PlannerComment(
-                    testPlanner.getId(), regularUser.getId(), "A comment to be moderated", null, 0);
-            return StoredComments.save(plannerCommentRepository, new JdbcTemplate(dataSource), comment);
+                    testPlanner.getId(), regularUser.getId(), null, 0);
+            return StoredComments.save(plannerCommentRepository, new JdbcTemplate(dataSource), comment,
+                    "A comment to be moderated");
         }
 
         @Test

@@ -63,7 +63,7 @@ public class CommentCommandService {
         };
 
         PlannerComment saved = insert(
-                placement.row(plannerId, userId, request.content()), placement.announcement());
+                placement.row(plannerId, userId), request.content(), placement.announcement());
 
         log.info("User {} created comment {} on planner {}", userId, saved.getId(), plannerId);
 
@@ -81,16 +81,16 @@ public class CommentCommandService {
         Placement placement = Placement.under(CommentStateValidator.replyableIn(parent, plannerId)
                 .orElseThrow(CommentRefusal::toException));
 
-        PlannerComment saved = insert(placement.row(plannerId, userId, content), Announcement.REPLY);
+        PlannerComment saved = insert(placement.row(plannerId, userId), content, Announcement.REPLY);
 
         log.info("User {} created reply {} to comment {} on planner {}", userId, saved.getId(), parent.id(), plannerId);
 
         return new CreateCommentResponse(saved.getPublicId(), saved.getCreatedAt());
     }
 
-    private PlannerComment insert(PlannerComment row, Announcement announcement) {
+    private PlannerComment insert(PlannerComment row, String content, Announcement announcement) {
         PlannerComment saved = commentRepository.insert(row);
-        contentRepository.insertContent(saved.getId(), saved.getContent());
+        contentRepository.insertContent(saved.getId(), content);
         statsRepository.insertStats(saved.getId());
         plannerCommentCounts.incrementCommentCount(row.getPlannerId());
         declareCountChanged(row.getPlannerId());
@@ -142,11 +142,11 @@ public class CommentCommandService {
             return effectiveParentId == null ? new Parentless(depth) : new UnderParent(effectiveParentId, depth);
         }
 
-        default PlannerComment row(UUID plannerId, Long userId, String content) {
+        default PlannerComment row(UUID plannerId, Long userId) {
             return switch (this) {
                 case UnderParent(Long parentId, int depth) ->
-                        new PlannerComment(plannerId, userId, content, parentId, depth);
-                case Parentless(int depth) -> new PlannerComment(plannerId, userId, content, null, depth);
+                        new PlannerComment(plannerId, userId, parentId, depth);
+                case Parentless(int depth) -> new PlannerComment(plannerId, userId, null, depth);
             };
         }
 

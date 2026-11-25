@@ -11,6 +11,7 @@ import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.comment.repository.PlannerCommentContentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 
 import org.danteplanner.backend.user.api.AuthProviderType;
@@ -61,6 +62,9 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
     private PlannerCommentRepository commentRepository;
 
     @Autowired
+    private PlannerCommentContentRepository contentRepository;
+
+    @Autowired
     private EntityManager entityManager;
 
     @Autowired
@@ -103,7 +107,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
                 PlannerComment comment = new PlannerComment(
                         UUID.randomUUID(),
                         testUser.getId(),
-                        "Test comment",
                         null,
                         0
                 );
@@ -120,7 +123,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
                 PlannerComment comment = new PlannerComment(
                         planner.getId(),
                         99999L,
-                        "Test comment",
                         null,
                         0
                 );
@@ -151,7 +153,6 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
             PlannerComment comment = new PlannerComment(
                     planner.getId(),
                     testUser.getId(),
-                    "Test comment",
                     null,
                     0
             );
@@ -318,15 +319,13 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
             Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
 
             assertThatThrownBy(() -> inTransaction(() -> {
-                PlannerComment comment = new PlannerComment(
+                PlannerComment comment = commentRepository.save(new PlannerComment(
                         planner.getId(),
                         testUser.getId(),
                         null,
-                        null,
                         0
-                );
-                commentRepository.save(comment);
-                entityManager.flush();
+                ));
+                contentRepository.insertContent(comment.getId(), null);
             })).isInstanceOf(DataIntegrityViolationException.class)
                     .hasMessageContaining("Column 'content' cannot be null");
         }

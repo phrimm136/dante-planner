@@ -117,7 +117,7 @@ class AuditedTimestampIT extends SharedMySqlContainerSupport {
     @Test
     void newComment_WhenTheClockIsFixed_IsStampedWithItsInstant() {
         Long id = transactionTemplate.execute(status -> commentRepository.insert(
-                new PlannerComment(planner.getId(), owner.getId(), "stamped", null, 0)).getId());
+                new PlannerComment(planner.getId(), owner.getId(), null, 0)).getId());
 
         PlannerComment stored = commentRepository.findById(id).orElseThrow();
 
@@ -137,7 +137,7 @@ class AuditedTimestampIT extends SharedMySqlContainerSupport {
     @Test
     void newCommentReport_WhenTheClockIsFixed_IsStampedWithItsInstant() {
         PlannerComment comment = commentRepository.save(
-                new PlannerComment(planner.getId(), owner.getId(), "reported", null, 0));
+                new PlannerComment(planner.getId(), owner.getId(), null, 0));
         PlannerCommentReport report = new PlannerCommentReport(comment.getId(), owner.getId(), "SPAM");
 
         transactionTemplate.executeWithoutResult(status -> entityManager.persist(report));
@@ -353,7 +353,7 @@ class AuditedTimestampIT extends SharedMySqlContainerSupport {
 
     private PlannerComment commentSavedThrough(AnnotationConfigApplicationContext context) {
         EntityManagerFactory factory = context.getBean(EntityManagerFactory.class);
-        PlannerComment comment = new PlannerComment(planner.getId(), owner.getId(), "isolated", null, 0);
+        PlannerComment comment = new PlannerComment(planner.getId(), owner.getId(), null, 0);
         factory.runInTransaction(manager -> manager.persist(comment));
         return commentRepository.findById(comment.getId()).orElseThrow();
     }

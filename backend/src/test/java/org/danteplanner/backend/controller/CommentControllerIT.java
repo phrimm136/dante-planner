@@ -105,11 +105,10 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         PlannerComment comment = new PlannerComment(
                 publishedPlanner.getId(),
                 testUser.getId(),
-                "Test comment content",
                 parentId,
                 expectedDepth
         );
-        return StoredComments.save(commentRepository, new JdbcTemplate(dataSource), comment);
+        return StoredComments.save(commentRepository, new JdbcTemplate(dataSource), comment, "Test comment content");
     }
 
     @Nested
@@ -136,7 +135,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         @Test
         void getComments_WhenLeafAuthorDeactivated_ServesTheLeafWithHiddenBodyAndMaskedNameAndKeepsTheRowContent() throws Exception {
             PlannerComment leaf = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(
-                    publishedPlanner.getId(), otherUser.getId(), "still here", null, 0));
+                    publishedPlanner.getId(), otherUser.getId(), null, 0), "still here");
             otherUser.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
             userRepository.save(otherUser);
 
@@ -155,9 +154,9 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         @Test
         void getComments_WhenParentAuthorDeactivated_ServesTheReply() throws Exception {
             PlannerComment parent = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(
-                    publishedPlanner.getId(), otherUser.getId(), "still here", null, 0));
+                    publishedPlanner.getId(), otherUser.getId(), null, 0), "still here");
             PlannerComment reply = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(
-                    publishedPlanner.getId(), testUser.getId(), "a reply", parent.getId(), 1));
+                    publishedPlanner.getId(), testUser.getId(), parent.getId(), 1), "a reply");
             otherUser.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
             userRepository.save(otherUser);
 

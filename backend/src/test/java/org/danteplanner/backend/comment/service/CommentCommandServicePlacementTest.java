@@ -332,7 +332,6 @@ class CommentCommandServicePlacementTest {
         verify(commentRepository).insert(stored.capture());
         assertThat(stored.getValue().getPlannerId()).isEqualTo(PLANNER_ID);
         assertThat(stored.getValue().getUserId()).isEqualTo(USER_ID);
-        assertThat(stored.getValue().getContent()).isEqualTo("text");
         assertThat(stored.getValue().getParentCommentId()).isEqualTo(parentCommentId);
         assertThat(stored.getValue().getDepth()).isEqualTo(depth);
         verify(contentRepository).insertContent(SAVED_ID, "text");

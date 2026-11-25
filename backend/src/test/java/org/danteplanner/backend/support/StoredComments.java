@@ -11,9 +11,11 @@ public final class StoredComments {
     }
 
     public static PlannerComment save(PlannerCommentRepository repository, JdbcOperations jdbc,
-            PlannerComment comment) {
+            PlannerComment comment, String content) {
         PlannerComment saved = repository.saveAndFlush(comment);
-        split(jdbc, saved.getId());
+        jdbc.update("INSERT INTO planner_comment_content (comment_id, content) VALUES (?, ?)",
+                saved.getId(), content);
+        jdbc.update("INSERT INTO planner_comment_stats (comment_id) VALUES (?)", saved.getId());
         return saved;
     }
 

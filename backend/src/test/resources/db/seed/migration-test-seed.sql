@@ -208,7 +208,7 @@ VALUES
     (UNHEX('AAAA0005000000000000000000000005'), NULL, FALSE);
 
 -- ============================================================================
--- planner_stats — comment_count matches the live planner_comments rows below
+-- planner_stats — comment_count matches the live planner_comment_content rows below
 -- ============================================================================
 
 INSERT IGNORE INTO planner_stats (planner_id, view_count, upvotes, comment_count)
@@ -310,7 +310,8 @@ VALUES
 INSERT IGNORE INTO planner_comments (id, public_id, planner_id, user_id, parent_comment_id, content, depth, upvote_count, created_at)
 VALUES
     (1, UNHEX('CC000001000000000000000000000001'), UNHEX('AAAA0001000000000000000000000001'), 2, NULL, 'Great planner build.', 0, 2, NOW()),
-    (2, UNHEX('CC000002000000000000000000000002'), UNHEX('AAAA0001000000000000000000000001'), 3, 1, 'Agreed, very effective.', 1, 0, NOW());
+    (2, UNHEX('CC000002000000000000000000000002'), UNHEX('AAAA0001000000000000000000000001'), 3, 1, NULL, 1, 0, NOW()),
+    (3, UNHEX('CC000003000000000000000000000003'), UNHEX('AAAA0001000000000000000000000001'), 3, 1, NULL, 1, 0, NOW());
 
 -- ============================================================================
 -- planner_comment_content, planner_comment_stats
@@ -319,12 +320,14 @@ VALUES
 INSERT IGNORE INTO planner_comment_content (comment_id, content, edited_at, deleted_at, author_notifications_enabled)
 VALUES
     (1, 'Great planner build.', NULL, NULL, TRUE),
-    (2, 'Agreed, very effective.', NULL, NULL, TRUE);
+    (2, 'Agreed, very effective.', NULL, NULL, TRUE),
+    (3, '', NULL, NOW(), TRUE);
 
 INSERT IGNORE INTO planner_comment_stats (comment_id, upvote_count)
 VALUES
     (1, 2),
-    (2, 0);
+    (2, 0),
+    (3, 0);
 
 -- ============================================================================
 -- planner_comment_votes

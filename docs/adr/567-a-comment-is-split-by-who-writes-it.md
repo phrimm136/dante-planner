@@ -10,9 +10,13 @@ epic: none · pr: none
   INVARIANT: one vote per user and comment, stored before it is counted — the primary key and `CommentVoteRaceIT`.
 - @comment @rollout — The first deploy copies the rows and the server also fills the old content column on insert, until a second deploy on the same day copies again, copies withdrawals, blanks the text of withdrawn and of erased accounts' comments in both places, recounts `planner_stats.comment_count`, and stops; old and new servers run together for minutes while comments arrive a few a day.
   REJECTED: writing both places from every command, with reads moved later — three deploys and code written to be deleted, for an overlap that expects well under one comment.
+  REJECTED: a recount in one statement — it locks `planner_stats` before it reads `planner_comments`, the reverse of a comment insert, and deadlocked in 3 of 3 rounds on MySQL 8.4.11 with the migration as the victim, which leaves a failed migration that no server starts past.
+  REJECTED: one statement per correction, which holds every row it touches until it commits — blanking old text against a reply insert, and correcting counts against the view flush, each deadlocked in 3 of 3 runs on MySQL 8.4.11; selecting without locks and committing one row at a time gave 0 errors in 21 runs over 7 races.
   REJECTED: a trigger that mirrors old writes — hidden writes, and the privilege is not known to exist on the production database.
   REJECTED: stopping writes during the migration — an outage for every user.
   NON-GOAL: an edit or a vote made by an old server during the overlap — it may be lost.
+  NON-GOAL: the text of a comment withdrawn during or after the second deploy, or made by a first-deploy server and withdrawn later — it stays in `planner_comments.content`, which nothing reads, until the column is dropped.
+  NON-GOAL: the count of a planner that gains or loses a comment while the recount runs — it is left as it was, and the drift audit reports it.
   NON-GOAL: a notification for a comment an old server made just before it stopped — a new server finds no split row, reads the comment as gone and closes the event.
 
 ## Takeaway

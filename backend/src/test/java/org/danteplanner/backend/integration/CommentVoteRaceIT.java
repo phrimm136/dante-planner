@@ -261,12 +261,15 @@ class CommentVoteRaceIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    void createComment_WhenAnOldServerReadsIt_FindsTheContentInThePlaceRow() {
+    void createComment_WhenStored_KeepsItsTextOnlyInTheContentRow() {
         UUID comment = comment();
+        UUID reply = commandService.createReply(comment, second.getId(), UUID.randomUUID(), "a reply").id();
 
-        assertThat(jdbc.queryForObject("SELECT content FROM planner_comments WHERE public_id = UUID_TO_BIN(?) "
-                + "AND deleted_at IS NULL AND edited_at IS NULL AND upvote_count = 0 "
-                + "AND author_notifications_enabled", String.class, comment.toString())).isEqualTo("original");
+        assertThat(jdbc.queryForList("SELECT content FROM planner_comments "
+                + "WHERE public_id IN (UUID_TO_BIN(?), UUID_TO_BIN(?))", String.class,
+                comment.toString(), reply.toString())).containsExactly(null, null);
+        assertThat(shown(comment, author).content()).isEqualTo("original");
+        assertThat(shown(comment, author).replies()).extracting(CommentTreeNode::content).containsExactly("a reply");
     }
 
     private List<Throwable> atOnce(UUID comment, CommentAction one, CommentAction other) throws Exception {

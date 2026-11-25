@@ -184,7 +184,7 @@ class CommentServiceLayerTest {
             PlannerComment stored = persisted.get();
             assertThat(stored.getPlannerId()).isEqualTo(plannerId);
             assertThat(stored.getUserId()).isEqualTo(testUser.getId());
-            assertThat(stored.getContent()).isEqualTo("Test comment");
+            verify(contentRepository).insertContent(stored.getId(), "Test comment");
             assertThat(stored.getDepth()).isEqualTo(0);
             assertThat(stored.getParentCommentId()).isNull();
             assertThat(response.id()).isEqualTo(stored.getPublicId());
@@ -217,7 +217,7 @@ class CommentServiceLayerTest {
 
             // Assert
             PlannerComment stored = persisted.get();
-            assertThat(stored.getContent()).isEqualTo("Reply comment");
+            verify(contentRepository).insertContent(stored.getId(), "Reply comment");
             assertThat(stored.getDepth()).isEqualTo(1);
             assertThat(stored.getParentCommentId()).isEqualTo(50L);
             assertThat(response.id()).isEqualTo(stored.getPublicId());

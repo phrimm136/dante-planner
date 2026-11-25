@@ -214,7 +214,7 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
     @Test
     void deleteComment_WhenActorBanned_Returns403AndCommentSurvives() throws Exception {
         PlannerComment comment = StoredComments.save(plannerCommentRepository, new JdbcTemplate(dataSource), new PlannerComment(
-                planner.getId(), owner.getId(), "A comment to be moderated", null, 0));
+                planner.getId(), owner.getId(), null, 0), "A comment to be moderated");
         ban(moderator);
 
         mockMvc.perform(post("/api/moderation/comments/{publicId}/delete", comment.getPublicId()).with(withCsrf())
