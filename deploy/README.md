@@ -29,6 +29,7 @@ deploy/
     mysqld-exporter.yaml   ArgoCD Application of the mysqld-exporter chart on role=data + the ExternalSecret that gives it the region's endpoint under one key
     mysqld-exporter-config.yaml  ConfigMap with the RDS CA bundle that mysqld-exporter mounts
     redis-exporter.yaml    ArgoCD Applications of the redis-exporter chart, one per Redis, on role=data
+    alloy-logs.yaml        ArgoCD Application `alloy` (namespace argocd) that installs the Alloy chart on role=data, and the config and Loki credentials it reads; its config reloader applies a changed config without a restart
     privileged-exporter-namespace.yaml, node-exporter.yaml  namespace privileged-exporter (enforce: privileged) + ArgoCD Application of the node-exporter chart, a DaemonSet on every node
   chart/values.yaml        values common to both regions
   chart/values-oregon.yaml region-specific values (image tag, endpoints)
@@ -107,7 +108,7 @@ scrapes can come before the custom-resource series appear.
 | Workload | placement | set by |
 |----------|-----------|--------|
 | Spring DaemonSet | `nodeSelector: role=app` | app ASG user-data `--node-label role=app` |
-| Redis + Prometheus + kube-state-metrics | `nodeSelector: role=data` | data node user-data `--node-label role=data` |
+| Redis + Prometheus + kube-state-metrics + Alloy | `nodeSelector: role=data` | data node user-data `--node-label role=data` |
 | Traefik Gateway | ingress node (`role=ingress`) | ingress user-data `--node-label role=ingress` |
 | ArgoCD core | CP node, tolerates `node-role.kubernetes.io/control-plane=true:NoSchedule` | CP user-data `--node-taint` |
 

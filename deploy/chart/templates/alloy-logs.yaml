@@ -3,33 +3,106 @@
 # with logs:write) arrive via Secrets Manager -> ESO -> file mounts — the logs id
 # is account-identifying and this repo is public, so only the shared push URL is
 # committed. One Deployment per cluster on the data node, like the other observers.
-apiVersion: v1
-kind: ServiceAccount
+apiVersion: argoproj.io/v1alpha1
+kind: Application
 metadata:
-  name: alloy-logs
-  namespace: danteplanner
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: alloy-logs
-rules:
-  - apiGroups: [""]
-    resources: ["nodes", "nodes/proxy", "services", "endpoints", "pods", "pods/log"]
-    verbs: ["get", "list", "watch"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: alloy-logs
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: alloy-logs
-subjects:
-  - kind: ServiceAccount
-    name: alloy-logs
+  name: alloy
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://grafana.github.io/helm-charts
+    chart: alloy
+    targetRevision: 1.16.0
+    helm:
+      releaseName: alloy
+      valuesObject:
+        fullnameOverride: alloy
+        crds:
+          create: false
+        global:
+          podSecurityContext:
+            runAsNonRoot: true
+            runAsUser: 473
+            runAsGroup: 473
+            seccompProfile:
+              type: RuntimeDefault
+        alloy:
+          configMap:
+            create: false
+            name: alloy-logs-config
+            key: config.alloy
+          listenAddr: 127.0.0.1
+          enableHttpServerPort: false
+          enableReporting: false
+          envFrom:
+            - configMapRef:
+                name: cluster-identity
+          extraEnv:
+            - name: LOKI_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-loki-write
+                  key: username
+          mounts:
+            extra:
+              - name: loki-auth
+                mountPath: /etc/alloy/loki
+                readOnly: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          resources:
+            requests:
+              cpu: 20m
+              memory: 96Mi
+            limits:
+              memory: 128Mi
+        configReloader:
+          resources:
+            requests:
+              cpu: 5m
+              memory: 16Mi
+            limits:
+              memory: 32Mi
+        controller:
+          podLabels:
+            app: alloy-logs
+          type: deployment
+          nodeSelector:
+            role: data
+          volumes:
+            extra:
+              - name: loki-auth
+                secret:
+                  secretName: grafana-loki-write
+        rbac:
+          rules:
+            - apiGroups: [""]
+              resources: ["pods"]
+              verbs: ["get", "list", "watch"]
+          clusterRules:
+            - apiGroups: [""]
+              resources: ["pods/log"]
+              verbs: ["get"]
+        service:
+          enabled: false
+  destination:
+    server: https://kubernetes.default.svc
     namespace: danteplanner
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m
 ---
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
@@ -90,74 +163,11 @@ data:
       endpoint {
         url = "https://logs-prod-036.grafana.net/loki/api/v1/push"
         basic_auth {
-          username      = env("LOKI_USERNAME")
+          username      = sys.env("LOKI_USERNAME")
           password_file = "/etc/alloy/loki/password"
         }
       }
       external_labels = {
-        cluster = env("CLUSTER_NAME"),
+        cluster = sys.env("CLUSTER_NAME"),
       }
     }
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: alloy-logs
-  namespace: danteplanner
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: alloy-logs
-  template:
-    metadata:
-      labels:
-        app: alloy-logs
-    spec:
-      serviceAccountName: alloy-logs
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 473
-        runAsGroup: 473
-        seccompProfile:
-          type: RuntimeDefault
-      nodeSelector:
-        role: data
-      containers:
-        - name: alloy
-          image: grafana/alloy:v1.5.1
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: [ALL]
-          args:
-            - run
-            - /etc/alloy/config.alloy
-            - --storage.path=/tmp/alloy
-          env:
-            - name: CLUSTER_NAME
-              value: {{ .Values.region }}
-            - name: LOKI_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: grafana-loki-write
-                  key: username
-          volumeMounts:
-            - name: config
-              mountPath: /etc/alloy
-            - name: loki-auth
-              mountPath: /etc/alloy/loki
-              readOnly: true
-          resources:
-            requests:
-              cpu: 20m
-              memory: 96Mi
-            limits:
-              memory: 128Mi
-      volumes:
-        - name: config
-          configMap:
-            name: alloy-logs-config
-        - name: loki-auth
-          secret:
-            secretName: grafana-loki-write

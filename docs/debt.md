@@ -1684,7 +1684,7 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   annotation for the backend. A synced value change therefore leaves every running pod on the
   old value until someone runs a rollout restart (the Redis password runbook does this by hand).
   The standard fix is a checksum annotation on the Pod template, so a value change rolls the
-  pods. `alloy-logs-config` has none either, and whether Alloy reloads its file was not checked. Do it only with the
+  pods. Do it only with the
   Deployment entry above: while the backend is a DaemonSet, a config-only merge rolls pods
   through ArgoCD without the `deploy-fleet` surge node and leave each region without a backend
   during the swap. Secrets behave the same way: ESO refreshes `backend-runtime-config` and the
@@ -1882,8 +1882,9 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   shutdown. One Alloy on the data node streams logs through the Kubernetes API
   (`loki.source.kubernetes`); that the stream ends with the Pod is an inference. A fault during a
   shutdown can therefore leave no trace. The fix is an Alloy on every node that reads the log files,
-  which needs a `hostPath` and so a privileged namespace, and memory on every node. Worth deciding
-  when Alloy moves to its upstream chart.
+  which needs a `hostPath` and so a privileged namespace, and memory on every node. The Alloy chart
+  can run so (`controller.type: daemonset`, `alloy.mounts.varlog`). Worth deciding when a fault
+  during a shutdown has to be explained and its log lines are missing.
   re-check: `rg -q 'loki.source.kubernetes' deploy/chart/templates/alloy-logs.yaml`
 - `UserRepository.changeEpithet` does not require `deleted_at IS NULL`, so an account scheduled for
   deletion can still change its epithet with a live token. Worth deciding when account deletion is next
