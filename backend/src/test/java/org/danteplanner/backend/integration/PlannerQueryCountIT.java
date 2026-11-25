@@ -281,7 +281,7 @@ class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
             seededIds.add(planner.getId());
 
             plannerVoteRepository.save(new PlannerVote(viewerId, planner.getId(), VoteType.UP));
-            StoredComments.save(plannerCommentRepository, new JdbcTemplate(dataSource), new PlannerComment(planner.getId(), viewerId, "context comment", null, 0));
+            StoredComments.save(plannerCommentRepository, new JdbcTemplate(dataSource), new PlannerComment(planner.getId(), viewerId, null, 0), "context comment");
         }
 
         if (crossRecommendedThreshold) {

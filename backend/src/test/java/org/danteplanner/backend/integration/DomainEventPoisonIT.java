@@ -157,7 +157,7 @@ class DomainEventPoisonIT extends ExclusiveDatabaseSupport {
      */
     private long dispatchableEvent(int attempts) {
         PlannerComment comment = StoredComments.save(commentRepository, jdbcTemplate,
-                new PlannerComment(planner.getId(), commenter.getId(), "A comment", null, 0));
+                new PlannerComment(planner.getId(), commenter.getId(), null, 0), "A comment");
         return transaction().execute(status -> {
             jdbcTemplate.update("""
                     INSERT INTO domain_events (event_type, aggregate_id, payload, created_at, attempts)

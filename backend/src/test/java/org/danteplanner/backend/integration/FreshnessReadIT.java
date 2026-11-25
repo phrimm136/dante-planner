@@ -770,7 +770,7 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
                 + UUID.randomUUID() + "@example.com");
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
         PlannerComment comment = StoredComments.save(commentRepository, primaryJdbcTemplate,
-                new PlannerComment(planner.getId(), commenter.getId(), "freshness read inbox", null, 0));
+                new PlannerComment(planner.getId(), commenter.getId(), null, 0), "freshness read inbox");
         long eventId = recordCommentReceived(planner.getId(), comment.getId());
         replicationControl.awaitCaughtUp();
         try {

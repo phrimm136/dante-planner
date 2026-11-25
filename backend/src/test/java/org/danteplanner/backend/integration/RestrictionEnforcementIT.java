@@ -112,7 +112,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
         author = TestDataFactory.createTestUser(userRepository, "restriction-author@example.com");
         publishedPlanner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
         comment = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(
-                publishedPlanner.getId(), author.getId(), "a comment to engage with", null, 0));
+                publishedPlanner.getId(), author.getId(), null, 0), "a comment to engage with");
     }
 
     @AfterEach
@@ -233,7 +233,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     void deleteOwnComment_WhenBanned_Succeeds() throws Exception {
         User reader = reader();
         PlannerComment own = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(
-                publishedPlanner.getId(), reader.getId(), "my own words", null, 0));
+                publishedPlanner.getId(), reader.getId(), null, 0), "my own words");
         banned(reader);
 
         perform(delete("/api/comments/{id}", own.getPublicId()), reader)

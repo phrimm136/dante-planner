@@ -144,7 +144,7 @@ class EffectPlacementIT extends ExclusiveDatabaseSupport {
     @Test
     void crashWindow_WhenTheEagerHopNeverRuns_TheRelayStillDerivesTheEffect() {
         PlannerComment comment = StoredComments.save(commentRepository, jdbcTemplate,
-                new PlannerComment(planner.getId(), commenter.getId(), "A comment nobody announced", null, 0));
+                new PlannerComment(planner.getId(), commenter.getId(), null, 0), "A comment nobody announced");
 
         recordEventDirectly(comment.getId());
 

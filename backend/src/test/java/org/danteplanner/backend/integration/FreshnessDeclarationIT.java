@@ -796,7 +796,7 @@ class FreshnessDeclarationIT extends ReplicaRoutingHarnessSupport {
 
     private PlannerComment insertComment(UUID plannerId, Long authorId) {
         return StoredComments.save(commentRepository, primaryJdbcTemplate,
-                new PlannerComment(plannerId, authorId, "freshness dispatch", null, 0));
+                new PlannerComment(plannerId, authorId, null, 0), "freshness dispatch");
     }
 
     private long recordEvent(String eventType, UUID plannerId, String idKey, Long id) {
