@@ -37,6 +37,7 @@ resource "aws_launch_template" "app" {
     node_label            = "role=app"
     set_nofile            = true
     cred_provider_version = var.ecr_credential_provider_version
+    boot_lib              = file("${path.module}/user-data/boot-lib.sh")
   }))
 
   tag_specifications {

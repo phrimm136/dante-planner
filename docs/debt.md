@@ -1817,8 +1817,8 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   proves both.
   re-check: `rg -q -- '--cluster-init' terraform/modules/fleet/user-data/cp.sh.tftpl && .claude/skills/debt-ledger/bin/debt absent terraform/modules/fleet/user-data/cp.sh.tftpl -e 'cluster-reset' -e 'cluster-reset-restore-path'`
 - **The CP runs Helm's installer from the tip of Helm's main branch.**
-  `cp.sh.tftpl:135` pipes `raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3` to
-  `bash`, so the code that runs as root at boot is whatever that branch holds at that moment,
+  `cp.sh.tftpl` downloads `raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3` and runs
+  it, so the code that runs as root at boot is whatever that branch holds at that moment,
   with no version and no checksum. The Traefik CRDs in the same file are pinned to
   `${traefik_version}`, which shows the pattern to follow: download a pinned Helm release
   tarball and check its published SHA-256. Worth doing with the k3s pin above.
