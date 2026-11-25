@@ -89,6 +89,27 @@
       ]
     },
     {
+      "file": "/chart-prometheus.yaml",
+      "findings": [
+        {
+          "check_ids": [
+            "CKV_K8S_11",
+            "CKV_K8S_15",
+            "CKV_K8S_22",
+            "CKV_K8S_38",
+            "CKV_K8S_43"
+          ],
+          "resource": "Deployment.danteplanner.prometheus"
+        },
+        {
+          "check_ids": [
+            "CKV2_K8S_6"
+          ],
+          "resource": "Pod.danteplanner.prometheus.app.kubernetes.io/component-server.app.kubernetes.io/instance-prometheus.app.kubernetes.io/name-prometheus.app.kubernetes.io/part-of-prometheus.app-prometheus"
+        }
+      ]
+    },
+    {
       "file": "/chart-redis-exporter-auth.yaml",
       "findings": [
         {
@@ -208,18 +229,6 @@
             "CKV_K8S_15",
             "CKV_K8S_22",
             "CKV_K8S_38",
-            "CKV_K8S_43",
-            "CKV_K8S_8",
-            "CKV_K8S_9"
-          ],
-          "resource": "Deployment.danteplanner.prometheus"
-        },
-        {
-          "check_ids": [
-            "CKV_K8S_11",
-            "CKV_K8S_15",
-            "CKV_K8S_22",
-            "CKV_K8S_38",
             "CKV_K8S_40",
             "CKV_K8S_43",
             "CKV_K8S_8",
@@ -238,12 +247,6 @@
             "CKV2_K8S_6"
           ],
           "resource": "Pod.danteplanner.cloudflared.app-cloudflared"
-        },
-        {
-          "check_ids": [
-            "CKV2_K8S_6"
-          ],
-          "resource": "Pod.danteplanner.prometheus.app-prometheus"
         },
         {
           "check_ids": [
@@ -340,18 +343,6 @@
             "CKV_K8S_15",
             "CKV_K8S_22",
             "CKV_K8S_38",
-            "CKV_K8S_43",
-            "CKV_K8S_8",
-            "CKV_K8S_9"
-          ],
-          "resource": "Deployment.danteplanner.prometheus"
-        },
-        {
-          "check_ids": [
-            "CKV_K8S_11",
-            "CKV_K8S_15",
-            "CKV_K8S_22",
-            "CKV_K8S_38",
             "CKV_K8S_40",
             "CKV_K8S_43",
             "CKV_K8S_8",
@@ -370,12 +361,6 @@
             "CKV2_K8S_6"
           ],
           "resource": "Pod.danteplanner.cloudflared.app-cloudflared"
-        },
-        {
-          "check_ids": [
-            "CKV2_K8S_6"
-          ],
-          "resource": "Pod.danteplanner.prometheus.app-prometheus"
         },
         {
           "check_ids": [

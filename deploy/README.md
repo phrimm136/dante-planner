@@ -23,7 +23,7 @@ deploy/
     jwt-secrets.yaml       ExternalSecrets: RS256 public key + AES-256 encryption key ← Secrets Manager
     redis-auth.yaml        auth-state Redis StatefulSet on role=data (AOF, no auto-promote)
     redis-ratelimit.yaml   ephemeral rate-limit Redis on role=data (no durability)
-    prometheus.yaml        Prometheus on role=data (local scrape)
+    prometheus.yaml        ConfigMap with the scrape config, rules and remote write, the ClusterRole, and the ArgoCD Application (namespace argocd) that installs the prometheus chart on role=data
     cluster-identity.yaml  ConfigMap that holds the region name as CLUSTER_NAME, for charts (their Applications are identical in both regions)
     kube-state-metrics.yaml  ArgoCD Application (namespace argocd) that installs the kube-state-metrics chart on role=data, scraped locally by Prometheus
     mysqld-exporter.yaml   ArgoCD Application of the mysqld-exporter chart on role=data + the ExternalSecret that gives it the region's endpoint under one key
