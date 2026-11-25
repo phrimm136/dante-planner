@@ -9,6 +9,9 @@
   raised by Renovate); both overlays list `apps/`. The rest stays kustomize `base/` +
   per-region `overlays/` until its own chart lands; region differences live in overlays, never
   as conditionals inside base manifests.
+- `chart/` (one Helm chart, `values-<region>.yaml` per region) and `base/` + `overlays/` hold the same
+  objects until both root Applications render the chart. Make every change in both; the `chart`
+  stage of the deploy test fails on a difference. The overlays go when both are switched.
 - The backend image tag in kustomize is bumped by `.github/workflows/deploy-fleet.yml`
   (GitOps: ArgoCD syncs from `main`) — never hand-edit the tag to deploy.
 - RDS/DB endpoints: never commit the PRIMARY (write) endpoint — source it from the Secrets

@@ -1,0 +1,8 @@
+image:
+  # The registry host carries the account id and is never committed: the root
+  # Application sets image.repository as a Helm parameter.
+  repository: danteplanner-backend
+backendConfig:
+  SPRING_PROFILES_ACTIVE: prod
+  FRESHNESS_MARKER_WAIT_REPLICAS: "1"
+  DATASOURCE_ROUTING_ENABLED: "true"

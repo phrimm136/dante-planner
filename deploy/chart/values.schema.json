@@ -1,0 +1,191 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "region",
+    "image",
+    "awsRegion",
+    "mysqldEndpointKey",
+    "redisAuth",
+    "backendConfig"
+  ],
+  "properties": {
+    "global": {
+      "type": "object"
+    },
+    "region": {
+      "enum": [
+        "oregon",
+        "seoul"
+      ]
+    },
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "tag"
+      ],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tag": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    "awsRegion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mysqldEndpointKey": {
+      "type": "string",
+      "minLength": 1
+    },
+    "redisAuth": {
+      "type": "object"
+    },
+    "backendConfig": {
+      "type": "object",
+      "required": [
+        "SPRING_PROFILES_ACTIVE",
+        "FRESHNESS_MARKER_WAIT_REPLICAS",
+        "DATASOURCE_ROUTING_ENABLED",
+        "DEPLOY_REGION",
+        "REDIS_AUTH_HOST",
+        "REDIS_AUTHLOCAL_HOST",
+        "REDIS_RATELIMIT_HOST",
+        "REDIS_SSELOCAL_HOST",
+        "DATASOURCE_READSOURCES_0_NAME",
+        "DATASOURCE_READSOURCES_1_NAME"
+      ],
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "region": {
+          "const": "oregon"
+        },
+        "awsRegion": {
+          "const": "us-west-2"
+        },
+        "mysqldEndpointKey": {
+          "const": "primary-endpoint"
+        },
+        "redisAuth": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "nodePort"
+          ],
+          "properties": {
+            "nodePort": {
+              "type": "integer",
+              "minimum": 30000,
+              "maximum": 32767
+            }
+          }
+        },
+        "backendConfig": {
+          "required": [
+            "DATASOURCE_READSOURCES_1_URL"
+          ],
+          "properties": {
+            "DEPLOY_REGION": {
+              "const": "us-west-2"
+            },
+            "REDIS_AUTH_HOST": {
+              "const": "redis-auth.danteplanner.svc.cluster.local"
+            },
+            "DATASOURCE_READSOURCES_0_NAME": {
+              "const": "primary"
+            },
+            "REDIS_AUTHLOCAL_HOST": {
+              "const": "redis-auth.danteplanner.svc.cluster.local"
+            },
+            "REDIS_SSELOCAL_HOST": {
+              "const": "redis-auth.danteplanner.svc.cluster.local"
+            },
+            "REDIS_RATELIMIT_HOST": {
+              "const": "redis-ratelimit.danteplanner.svc.cluster.local"
+            }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "region": {
+          "const": "seoul"
+        },
+        "awsRegion": {
+          "const": "ap-northeast-2"
+        },
+        "mysqldEndpointKey": {
+          "const": "replica-endpoint"
+        },
+        "redisAuth": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "replicaOf"
+          ],
+          "properties": {
+            "replicaOf": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "host",
+                "port"
+              ],
+              "properties": {
+                "host": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "port": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "backendConfig": {
+          "required": [
+            "REDIS_AUTH_PORT",
+            "DATASOURCE_READSOURCES_0_URL"
+          ],
+          "properties": {
+            "DEPLOY_REGION": {
+              "const": "ap-northeast-2"
+            },
+            "REDIS_AUTH_HOST": {
+              "const": "redis-auth.oregon.danteplanner.internal"
+            },
+            "DATASOURCE_READSOURCES_0_NAME": {
+              "const": "seoul-replica"
+            },
+            "REDIS_AUTHLOCAL_HOST": {
+              "const": "redis-auth.danteplanner.svc.cluster.local"
+            },
+            "REDIS_SSELOCAL_HOST": {
+              "const": "redis-auth.danteplanner.svc.cluster.local"
+            },
+            "REDIS_RATELIMIT_HOST": {
+              "const": "redis-ratelimit.danteplanner.svc.cluster.local"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

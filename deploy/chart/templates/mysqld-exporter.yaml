@@ -1,0 +1,116 @@
+# mysqld_exporter per region on the data node, scraped locally by Prometheus.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysqld-exporter
+  namespace: danteplanner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysqld-exporter
+  template:
+    metadata:
+      labels:
+        app: mysqld-exporter
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9104"
+        prometheus.io/job: mysqld
+        checksum/config: {{ include (print $.Template.BasePath "/mysqld-exporter-config.yaml") . | sha256sum }}
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      nodeSelector:
+        role: data
+      containers:
+        - name: mysqld-exporter
+          image: prom/mysqld-exporter:v0.19.0
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          args:
+            - --mysqld.username=$(MYSQL_EXPORTER_USER)
+            - --collect.perf_schema.eventsstatements
+            - --collect.perf_schema.tableiowaits
+            - --mysqld.address=$(MYSQLD_ADDRESS)
+            # RDS enforces require_secure_transport; the flag mode has no TLS
+            # knob, so ssl-ca arrives via cnf — flags still win for address/user.
+            - --config.my-cnf=/etc/mysqld/mysqld-tls.cnf
+          volumeMounts:
+            - name: tls-cnf
+              mountPath: /etc/mysqld
+              readOnly: true
+            - name: rds-ca
+              mountPath: /etc/mysqld-certs
+              readOnly: true
+          env:
+            # Must dial the name on the server certificate, not the Route53 alias.
+            - name: MYSQLD_ADDRESS
+              valueFrom:
+                secretKeyRef:
+                  name: mysqld-exporter-dsn
+                  key: {{ .Values.mysqldEndpointKey }}
+            - name: MYSQL_EXPORTER_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysqld-exporter-dsn
+                  key: username
+            - name: MYSQLD_EXPORTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysqld-exporter-dsn
+                  key: password
+          ports:
+            - name: http-metrics
+              containerPort: 9104
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+      volumes:
+        - name: tls-cnf
+          configMap:
+            name: mysqld-tls-cnf
+        - name: rds-ca
+          configMap:
+            name: rds-ca-bundle
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: mysqld-exporter-dsn
+  namespace: danteplanner
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: aws-secrets-manager
+    kind: SecretStore
+  target:
+    name: mysqld-exporter-dsn
+    creationPolicy: Owner
+  data:
+    - secretKey: username
+      remoteRef:
+        key: danteplanner/mysqld-exporter/dsn
+        property: username
+    - secretKey: password
+      remoteRef:
+        key: danteplanner/mysqld-exporter/dsn
+        property: password
+    - secretKey: primary-endpoint
+      remoteRef:
+        key: danteplanner/mysqld-exporter/dsn
+        property: primary_endpoint
+    - secretKey: replica-endpoint
+      remoteRef:
+        key: danteplanner/mysqld-exporter/dsn
+        property: replica_endpoint
