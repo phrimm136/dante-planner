@@ -325,7 +325,7 @@ tasks.withType<JavaCompile>().configureEach {
 
 tasks.named<JavaCompile>("compileJava") {
     options.errorprone {
-        error("NullAway")
+        error("NullAway", "CheckReturnValue", "UnusedVariable")
         option("NullAway:AnnotatedPackages", "org.danteplanner.backend")
         option("NullAway:JSpecifyMode", "true")
         option(

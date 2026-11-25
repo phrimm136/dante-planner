@@ -1,50 +1,39 @@
 package org.danteplanner.backend.comment.validation;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 import org.danteplanner.backend.comment.entity.PlannerComment;
-import org.danteplanner.backend.comment.exception.CommentForbiddenException;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator.ParentInPlanner;
 import org.danteplanner.backend.shared.failure.Parsed;
-import org.springframework.stereotype.Component;
+import org.danteplanner.backend.shared.failure.Result;
 
-@Component
-public class CommentStateValidator {
+import java.util.UUID;
+
+@CheckReturnValue
+public final class CommentStateValidator {
+
+    private CommentStateValidator() {
+    }
 
     @Parsed
     public record LiveComment(PlannerComment comment) {
 
-        private static LiveComment of(PlannerComment comment, String refusal) {
-            if (comment.isDeleted()) {
-                throw new CommentForbiddenException(refusal);
-            }
-            return new LiveComment(comment);
+        public static Result<LiveComment, CommentRefusal> of(PlannerComment comment, CommentRefusal refusal) {
+            return comment.isDeleted() ? Result.err(refusal) : Result.ok(new LiveComment(comment));
         }
     }
 
     @Parsed
     public record ReplyableParent(PlannerComment comment) {
 
-        private static ReplyableParent of(ParentInPlanner placed) {
+        public static Result<ReplyableParent, CommentRefusal> of(ParentInPlanner placed) {
             PlannerComment parent = placed.comment();
-            if (parent.isDeleted() && parent.getDepth() == 0) {
-                throw new CommentForbiddenException("Cannot reply to deleted top-level comment");
-            }
-            return new ReplyableParent(parent);
+            return parent.isDeleted() && parent.getDepth() == 0
+                    ? Result.err(CommentRefusal.REPLY_DELETED)
+                    : Result.ok(new ReplyableParent(parent));
         }
     }
 
-    public LiveComment requireEditable(PlannerComment comment) {
-        return LiveComment.of(comment, "Cannot edit a deleted comment");
-    }
-
-    public LiveComment requireVotable(PlannerComment comment) {
-        return LiveComment.of(comment, "Cannot vote on a deleted comment");
-    }
-
-    public LiveComment requireReportable(PlannerComment comment) {
-        return LiveComment.of(comment, "Cannot report a deleted comment");
-    }
-
-    public ReplyableParent requireReplyable(ParentInPlanner parent) {
-        return ReplyableParent.of(parent);
+    public static Result<ReplyableParent, CommentRefusal> replyableIn(PlannerComment parent, UUID plannerId) {
+        return ParentInPlanner.of(parent, plannerId).flatMap(ReplyableParent::of);
     }
 }

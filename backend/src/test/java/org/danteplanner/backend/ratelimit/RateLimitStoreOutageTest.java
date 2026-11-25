@@ -311,7 +311,6 @@ class RateLimitStoreOutageTest {
                 null,
                 null,
                 null,
-                null,
                 cookieUtils,
                 null,
                 null,

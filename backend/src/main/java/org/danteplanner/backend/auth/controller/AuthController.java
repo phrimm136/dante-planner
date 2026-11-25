@@ -21,7 +21,6 @@ import org.danteplanner.backend.auth.service.SessionRevocationService;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthStateService;
 import org.danteplanner.backend.auth.oauth.OAuthStateService.OAuthTransaction;
-import org.danteplanner.backend.auth.token.TokenValidator;
 import org.danteplanner.backend.shared.security.Viewer;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
@@ -52,7 +51,6 @@ public class AuthController {
 
     private final AuthenticationService authService;
     private final SessionRevocationService sessionRevocationService;
-    private final TokenValidator tokenValidator;
     private final OAuthProperties oAuthProperties;
     private final CookieUtils cookieUtils;
     private final JwtProperties jwtProperties;

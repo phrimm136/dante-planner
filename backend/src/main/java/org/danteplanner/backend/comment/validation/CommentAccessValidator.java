@@ -1,18 +1,20 @@
 package org.danteplanner.backend.comment.validation;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 import org.danteplanner.backend.shared.security.Viewer;
 
 import org.danteplanner.backend.comment.entity.PlannerComment;
-import org.danteplanner.backend.comment.exception.CommentForbiddenException;
 import org.danteplanner.backend.planner.api.PlannerMiss;
 import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.shared.failure.Parsed;
+import org.danteplanner.backend.shared.failure.Result;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
 @Component
+@CheckReturnValue
 public class CommentAccessValidator {
 
     @Parsed
@@ -29,19 +31,14 @@ public class CommentAccessValidator {
     @Parsed
     public record ParentInPlanner(PlannerComment comment) {
 
-        private static ParentInPlanner of(PlannerComment parent, UUID plannerId) {
-            if (!parent.getPlannerId().equals(plannerId)) {
-                throw new CommentForbiddenException("Parent comment belongs to a different planner");
-            }
-            return new ParentInPlanner(parent);
+        public static Result<ParentInPlanner, CommentRefusal> of(PlannerComment parent, UUID plannerId) {
+            return parent.getPlannerId().equals(plannerId)
+                    ? Result.ok(new ParentInPlanner(parent))
+                    : Result.err(CommentRefusal.OTHER_PLANNER);
         }
     }
 
     public VisibleThread requireThreadVisible(PlannerThread planner, Viewer viewer) {
         return VisibleThread.of(planner, viewer);
-    }
-
-    public ParentInPlanner requireParentInPlanner(PlannerComment parent, UUID plannerId) {
-        return ParentInPlanner.of(parent, plannerId);
     }
 }

@@ -37,6 +37,8 @@ class DecisionPurityTest {
 
     private static final String FIXTURE_PACKAGE = "org.danteplanner.fixture.decisionpurity";
 
+    private static final String PROJECT = "org.danteplanner";
+
     private static final String OUTCOME_SUFFIX = "Outcome";
 
     private static final JavaClasses MAIN_CLASSES = ImportedClasses.production();
@@ -88,6 +90,14 @@ class DecisionPurityTest {
     void portReadingDecision_WhenTheRuleRunsOverTheFixture_IsNamedWithThePort() {
         assertThat(offendersIn(FIXTURE_CLASSES, FIXTURE_PACKAGE))
                 .containsEntry("PortReader.decide", Set.of("port Port.isOpen"));
+    }
+
+    @Test
+    void resultChain_WhenTheRuleRunsOverTheFixture_IsNamedWithTheEffectInItsLambda() {
+        Map<String, Set<String>> offenders = offendersIn(FIXTURE_CLASSES, PROJECT);
+
+        assertThat(offenders).containsEntry("ChainedPortReader.chain", Set.of("port Port.isOpen"));
+        assertThat(offenders).doesNotContainKey("ChainedPortReader.pureChain");
     }
 
     @Test

@@ -8,9 +8,9 @@ import org.danteplanner.backend.comment.dto.UpdateCommentRequest;
 import org.danteplanner.backend.comment.dto.UpdateCommentResponse;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
-import org.danteplanner.backend.comment.validation.CommentAccessValidator;
 import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
 import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator.AuthoredComment;
+import org.danteplanner.backend.comment.validation.CommentRefusal;
 import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.danteplanner.backend.comment.validation.CommentStateValidator.ReplyableParent;
 import org.danteplanner.backend.planner.api.PlannerAccess;
@@ -42,9 +42,6 @@ public class CommentCommandService {
     private final DomainEventRecorder domainEventRecorder;
     private final PlannerAccess plannerAccess;
     private final PlannerCommentCounts plannerCommentCounts;
-    private final CommentAccessValidator accessValidator;
-    private final CommentAuthorshipValidator authorshipValidator;
-    private final CommentStateValidator stateValidator;
     private final Clock clock;
 
     @Transactional
@@ -53,9 +50,9 @@ public class CommentCommandService {
 
         Placement placement = switch (Addressee.of(request.parentCommentId())) {
             case Addressee.Thread thread -> new Placement.Parentless(0);
-            case Addressee.Parent(UUID parentPublicId) -> Placement.under(stateValidator.requireReplyable(
-                    accessValidator.requireParentInPlanner(
-                            commentQueryService.requireByPublicId(parentPublicId), plannerId)));
+            case Addressee.Parent(UUID parentPublicId) -> Placement.under(CommentStateValidator
+                    .replyableIn(commentQueryService.requireByPublicId(parentPublicId), plannerId)
+                    .orElseThrow(CommentRefusal::toException));
         };
 
         PlannerComment saved = insert(
@@ -74,8 +71,8 @@ public class CommentCommandService {
 
         plannerAccess.checkPublished(plannerId);
 
-        Placement placement = Placement.under(stateValidator.requireReplyable(
-                accessValidator.requireParentInPlanner(parent, plannerId)));
+        Placement placement = Placement.under(CommentStateValidator.replyableIn(parent, plannerId)
+                .orElseThrow(CommentRefusal::toException));
 
         PlannerComment saved = insert(placement.row(plannerId, userId, content), Announcement.REPLY);
 
@@ -154,8 +151,9 @@ public class CommentCommandService {
 
     @Transactional
     public UpdateCommentResponse updateComment(UUID commentPublicId, Long userId, UpdateCommentRequest request) {
-        AuthoredComment authored = authorshipValidator.requireAuthorToEdit(
-                stateValidator.requireEditable(commentQueryService.requireByPublicId(commentPublicId)), userId);
+        AuthoredComment authored = CommentAuthorshipValidator
+                .editableBy(commentQueryService.requireByPublicId(commentPublicId), userId)
+                .orElseThrow(CommentRefusal::toException);
 
         authored.comment().edit(request.content(), clock.instant());
         FreshnessDeclarations.declare(new FreshnessScope.Planner(authored.comment().getPlannerId()));
@@ -184,7 +182,8 @@ public class CommentCommandService {
         switch (Withdrawal.of(comment)) {
             case ALREADY_DONE -> { }
             case DUE -> {
-                AuthoredComment authored = authorshipValidator.requireAuthorToDelete(comment, userId);
+                AuthoredComment authored = AuthoredComment.of(comment, userId, CommentRefusal.DELETE_NOT_AUTHOR)
+                        .orElseThrow(CommentRefusal::toException);
                 softDelete(authored.comment());
                 log.info("User {} deleted comment {}", userId, commentPublicId);
             }

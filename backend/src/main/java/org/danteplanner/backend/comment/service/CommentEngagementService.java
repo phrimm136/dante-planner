@@ -11,9 +11,8 @@ import org.danteplanner.backend.comment.entity.PlannerCommentVoteId;
 import org.danteplanner.backend.comment.exception.CommentNotFoundException;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
-import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
 import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator.AuthoredComment;
-import org.danteplanner.backend.comment.validation.CommentStateValidator;
+import org.danteplanner.backend.comment.validation.CommentRefusal;
 import org.danteplanner.backend.comment.validation.CommentStateValidator.LiveComment;
 import org.danteplanner.backend.moderation.api.dto.CommentReportRequest;
 import org.danteplanner.backend.moderation.api.dto.CommentReportResponse;
@@ -39,13 +38,13 @@ public class CommentEngagementService {
     private final PlannerCommentVoteRepository commentVoteRepository;
     private final CommentQueryService commentQueryService;
     private final CommentReports reportService;
-    private final CommentAuthorshipValidator authorshipValidator;
-    private final CommentStateValidator stateValidator;
     private final PlannerVotes plannerVotes;
 
     @Transactional
     public CommentVoteResponse toggleUpvote(UUID commentPublicId, Long userId) {
-        LiveComment live = stateValidator.requireVotable(commentQueryService.requireByPublicId(commentPublicId));
+        LiveComment live = LiveComment
+                .of(commentQueryService.requireByPublicId(commentPublicId), CommentRefusal.VOTE_DELETED)
+                .orElseThrow(CommentRefusal::toException);
         Long internalId = live.comment().getId();
 
         PlannerCommentVoteId voteId = new PlannerCommentVoteId(internalId, userId);
@@ -71,8 +70,9 @@ public class CommentEngagementService {
 
     @Transactional
     public ToggleNotificationResponse toggleNotification(UUID commentPublicId, Long userId, boolean enabled) {
-        AuthoredComment authored = authorshipValidator.requireAuthorToToggleNotifications(
-                commentQueryService.requireByPublicId(commentPublicId), userId);
+        AuthoredComment authored = AuthoredComment
+                .of(commentQueryService.requireByPublicId(commentPublicId), userId, CommentRefusal.TOGGLE_NOT_AUTHOR)
+                .orElseThrow(CommentRefusal::toException);
 
         authored.comment().setAuthorNotificationsEnabled(enabled);
         FreshnessDeclarations.declare(new FreshnessScope.Planner(authored.comment().getPlannerId()));

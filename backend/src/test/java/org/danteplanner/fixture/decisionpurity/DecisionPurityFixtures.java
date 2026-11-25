@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import org.danteplanner.backend.shared.failure.CommandOutcome;
+import org.danteplanner.backend.shared.failure.Result;
 
 final class DecisionPurityFixtures {
 
@@ -58,6 +59,25 @@ final class DecisionPurityFixtures {
                 case Boolean open when open -> new Choice.Left();
                 default -> new Choice.Right();
             };
+        }
+    }
+
+    static final class ChainedPortReader {
+
+        private final Port port;
+
+        ChainedPortReader(Port port) {
+            this.port = port;
+        }
+
+        Result<String, String> chain(String value) {
+            return Result.<String, String>ok(value)
+                    .flatMap(kept -> port.isOpen() ? Result.ok(kept) : Result.err(kept));
+        }
+
+        Result<String, String> pureChain(String value) {
+            return Result.<String, String>ok(value)
+                    .flatMap(kept -> kept.isEmpty() ? Result.err(kept) : Result.ok(kept));
         }
     }
 
