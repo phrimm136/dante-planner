@@ -23,7 +23,8 @@ public class CommentStateValidator {
     @Parsed
     public record ReplyableParent(PlannerComment comment) {
 
-        private static ReplyableParent of(PlannerComment parent) {
+        private static ReplyableParent of(ParentInPlanner placed) {
+            PlannerComment parent = placed.comment();
             if (parent.isDeleted() && parent.getDepth() == 0) {
                 throw new CommentForbiddenException("Cannot reply to deleted top-level comment");
             }
@@ -43,11 +44,7 @@ public class CommentStateValidator {
         return LiveComment.of(comment, "Cannot report a deleted comment");
     }
 
-    public ReplyableParent requireReplyable(PlannerComment parent) {
-        return ReplyableParent.of(parent);
-    }
-
     public ReplyableParent requireReplyable(ParentInPlanner parent) {
-        return ReplyableParent.of(parent.comment());
+        return ReplyableParent.of(parent);
     }
 }
