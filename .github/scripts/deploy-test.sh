@@ -13,7 +13,6 @@ KUBERNETES_VERSION=${K3S_TAG#v}
 KUBERNETES_VERSION=${KUBERNETES_VERSION%%-*}
 KUBERNETES_SCHEMAS=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/89a35a5e9a1412a692a2603d79c3786f602238a4
 GATEWAY_API_CRDS=https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/690f754646e8326128fd686e3e46117ac479cfdf/config/crd/standard
-OVERLAYS=(oregon seoul)
 ACCEPT_LANGUAGE='ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,ja;q=0.6,zh-CN;q=0.5,zh;q=0.4,de;q=0.3,fr;q=0.2,es;q=0.1,it;q=0.05'
 PROBE_ATTEMPTS=30
 LOKI_READY_ATTEMPTS=90
@@ -29,6 +28,12 @@ case "${1:-}" in -*) usage ;; esac
 repo=$(cd "$(dirname "$0")/../.." && pwd)
 harness=$repo/.github/deploy-test
 deploy_dir=$(cd "${1:-$repo/deploy}" && pwd)
+regions=()
+for values_file in "$deploy_dir"/chart/values-*.yaml; do
+  [ -e "$values_file" ] || continue
+  region=$(basename "$values_file" .yaml)
+  regions+=("${region#values-}")
+done
 work=$(mktemp -d)
 cluster=deploy-test-k3s-$$
 loki=deploy-test-loki-$$
@@ -130,50 +135,40 @@ alerts() {
   pass alerts "${written% written to *}, all pass; the dead-rule fixture fails its fires case; $loki_summary"
 }
 
-render() {
-  local overlay
-  for overlay in "${OVERLAYS[@]}"; do
-    if ! docker run --rm -v "$deploy_dir:/deploy:ro" "$KUSTOMIZE_IMAGE" build "/deploy/overlays/$overlay" \
-      > "$work/$overlay.yaml" 2> "$work/$overlay.render.err"; then
-      cat "$work/$overlay.render.err" >&2
-      fail render "kustomize could not build overlays/$overlay"
-    fi
-  done
-  pass render "$(for overlay in "${OVERLAYS[@]}"; do
-    printf '%s: %s resources\n' "$overlay" "$(awk '/^kind:/ { n++ } END { print n + 0 }' "$work/$overlay.yaml")"
-  done | paste -sd ',' - | sed 's/,/, /g')"
-}
-
 helm_chart() {
   docker run --rm --network none -v "$deploy_dir/chart:/chart:ro" "$HELM_IMAGE" template "danteplanner-$1" /chart \
     -f "/chart/values-$1.yaml" --set image.repository=registry.example/danteplanner-backend "${@:2}"
 }
 
 chart_refuses() {
-  local overlay=$1
+  local region=$1
   ! helm_chart "$@" >/dev/null 2>"$work/refusal.err" \
-    || fail chart "values-$overlay.yaml with ${*:2} rendered; values.schema.json no longer refuses it"
+    || fail render "values-$region.yaml with ${*:2} rendered; values.schema.json no longer refuses it"
   grep -q "don't meet the specifications of the schema" "$work/refusal.err" \
-    || fail chart "values-$overlay.yaml with ${*:2} failed for another reason than the schema: $(cat "$work/refusal.err")"
+    || fail render "values-$region.yaml with ${*:2} failed for another reason than the schema: $(cat "$work/refusal.err")"
 }
 
-chart() {
-  local overlay out counts=()
-  for overlay in "${OVERLAYS[@]}"; do
-    if ! helm_chart "$overlay" > "$work/chart-$overlay.yaml" 2> "$work/chart-$overlay.err"; then
-      cat "$work/chart-$overlay.err" >&2
-      fail chart "helm could not render deploy/chart with values-$overlay.yaml"
+rendered_contract() {
+  local region=$1 tag image
+  tag=$(sed -n 's/^  tag: "\([0-9a-f]\{40\}\)"$/\1/p' "$deploy_dir/chart/values-$region.yaml")
+  image=$(doc_named DaemonSet backend < "$work/$region.yaml" | first_image)
+  { [ -n "$tag" ] && [ "$image" = "registry.example/danteplanner-backend:$tag" ]; } \
+    || fail render "the backend image of $region is '${image:-(none)}', want registry.example/danteplanner-backend:${tag:-(no tag in values-$region.yaml)}; it must take image.repository and image.tag"
+  doc_named Deployment mysqld-exporter < "$work/$region.yaml" \
+    | awk '/^  template:/ { pod = 1 } pod && $1 == "checksum/config:" && $2 ~ /^[0-9a-f]+$/ && length($2) == 64 { found = 1 } END { exit !found }' \
+    || fail render "the Pod template of Deployment mysqld-exporter in $region carries no checksum/config, so a new CA bundle would not restart it"
+}
+
+render() {
+  local region counts=()
+  [ "${#regions[@]}" -gt 0 ] || fail render "no values-<region>.yaml under $deploy_dir/chart"
+  for region in "${regions[@]}"; do
+    if ! helm_chart "$region" > "$work/$region.yaml" 2> "$work/$region.render.err"; then
+      cat "$work/$region.render.err" >&2
+      fail render "helm could not render deploy/chart with values-$region.yaml"
     fi
-    sed 's#image: danteplanner-backend:#image: registry.example/danteplanner-backend:#' "$work/$overlay.yaml" > "$work/registry-$overlay.yaml"
-    if ! out=$("$repo/.github/scripts/compare-chart.py" "$work/registry-$overlay.yaml" "$work/chart-$overlay.yaml" 2>&1); then
-      echo "$out" >&2
-      fail chart "deploy/chart with values-$overlay.yaml renders other objects than overlays/$overlay; make the same change in both until the overlays are gone"
-    fi
-    counts+=("$overlay: $out objects")
-    sed 's/--appendfsync everysec/--appendfsync no/' "$work/chart-$overlay.yaml" > "$work/tampered.yaml"
-    ! cmp -s "$work/chart-$overlay.yaml" "$work/tampered.yaml" || fail chart "the tampered render of $overlay equals the original"
-    ! "$repo/.github/scripts/compare-chart.py" "$work/registry-$overlay.yaml" "$work/tampered.yaml" >/dev/null 2>&1 \
-      || fail chart "the comparison passed a render of $overlay with one changed field"
+    rendered_contract "$region"
+    counts+=("$region: $(awk '/^kind:/ { n++ } END { print n + 0 }' "$work/$region.yaml") resources")
   done
   chart_refuses seoul --set region=null
   chart_refuses seoul --set region=oregon
@@ -181,7 +176,7 @@ chart() {
   chart_refuses seoul --set backendConfig.REDIS_AUTHLOCAL_HOST=null
   chart_refuses seoul --set redisAuth.replicaOf.host=
   chart_refuses oregon --set image.tag=latest
-  pass chart "$(printf '%s\n' "${counts[@]}" | paste -sd ',' - | sed 's/,/, /g') equal the overlays, a changed field is seen, 6 wrong values are refused"
+  pass render "$(printf '%s\n' "${counts[@]}" | paste -sd ',' - | sed 's/,/, /g'), 6 wrong values are refused"
 }
 
 validate() {
@@ -199,49 +194,50 @@ validate() {
 }
 
 charts() {
-  local report drift chart summary files=()
-  mkdir -p "$work/charts"
-  if ! report=$("$repo/.github/scripts/render-charts.sh" "$deploy_dir" "$work/charts" 2>"$work/charts.err"); then
-    cat "$work/charts.err" >&2
-    fail charts "helm could not render the chart of an Application under deploy/apps"
-  fi
-  drift=$(python3 - "$deploy_dir/apps" "$work" "${OVERLAYS[@]}" <<'PY'
+  local report drift region chart summary files=() renders=()
+  for region in "${regions[@]}"; do renders+=("$work/$region.yaml"); done
+  drift=$(python3 - "${renders[@]}" <<'PY'
 import pathlib
 import sys
 
 import yaml
 
 
-def applications(docs):
+def applications(path):
+    docs = yaml.safe_load_all(path.read_text())
     return {doc["metadata"]["name"]: doc for doc in docs if doc and doc.get("kind") == "Application"}
 
 
-apps_dir, work = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
-files = {}
-for path in sorted(apps_dir.glob("*.yaml")):
-    files.update(applications(yaml.safe_load_all(path.read_text())))
-for overlay in sys.argv[3:]:
-    for name, rendered in applications(yaml.safe_load_all((work / f"{overlay}.yaml").read_text())).items():
-        if rendered != files.get(name):
-            print(f"overlays/{overlay} Application {name}")
+first, *others = map(pathlib.Path, sys.argv[1:])
+expected = applications(first)
+for path in others:
+    found = applications(path)
+    for name in sorted(set(expected) | set(found)):
+        if expected.get(name) != found.get(name):
+            print(f"Application {name} differs between {first.stem} and {path.stem}")
 PY
   )
-  [ -z "$drift" ] || fail charts "$(printf '%s\n' "$drift" | paste -sd ',' - | sed 's/,/, /g') differs from its file under deploy/apps; the renderer reads that file, not the overlay, so move the change into the file"
+  [ -z "$drift" ] || fail charts "$(printf '%s\n' "$drift" | paste -sd ',' - | sed 's/,/, /g'); an Application is identical in every region"
+  mkdir -p "$work/charts"
+  if ! report=$("$repo/.github/scripts/render-charts.sh" "$work/charts" "${renders[@]}" 2>"$work/charts.err"); then
+    cat "$work/charts.err" >&2
+    fail charts "helm could not render the chart of an Application that deploy/chart renders"
+  fi
   for chart in "$work"/charts/chart-*.yaml; do
     [ -e "$chart" ] && files+=("/render/charts/$(basename "$chart")")
   done
-  [ "${#files[@]}" -gt 0 ] || fail charts "no Application under deploy/apps has a Helm chart source"
+  [ "${#files[@]}" -gt 0 ] || fail charts "deploy/chart renders no Application with a Helm chart source"
   summary=$(validate charts "${files[@]}")
   pass charts "$(printf '%s\n' "$report" | paste -sd ',' - | sed 's/,/, /g'); $summary"
 }
 
 schema() {
-  local overlay summary fleet_k3s files=()
+  local region summary fleet_k3s files=()
   fleet_k3s=$(awk '/^variable "k3s_version"/ { inside = 1 } inside && /^[[:space:]]*default[[:space:]]*=/ { gsub(/^[^"]*"|".*$/, ""); print; exit }' \
     "$repo/terraform/modules/fleet/variables.tf")
   [ "${fleet_k3s//+/-}" = "$K3S_TAG" ] \
     || fail schema "terraform/modules/fleet/variables.tf installs k3s ${fleet_k3s:-(no k3s_version default found)} but .github/scripts/deploy-test.sh tests $K3S_TAG (K3S_IMAGE); raise both to the same release"
-  for overlay in "${OVERLAYS[@]}"; do files+=("/render/$overlay.yaml"); done
+  for region in "${regions[@]}"; do files+=("/render/$region.yaml"); done
   summary=$(validate schema "${files[@]}")
   pass schema "$summary"
 }
@@ -369,10 +365,10 @@ check_route() {
   return 1
 }
 
-behavior_overlay() {
-  local overlay=$1 rendered=$work/$1.yaml traefik_image route rule request_path backend_path present absent
+behavior_region() {
+  local region=$1 rendered=$work/$1.yaml traefik_image route rule request_path backend_path present absent
   traefik_image=$(doc_named DaemonSet traefik < "$rendered" | first_image)
-  [ -n "$traefik_image" ] || fail behavior "overlays/$overlay renders no DaemonSet traefik with an image"
+  [ -n "$traefik_image" ] || fail behavior "$region renders no DaemonSet traefik with an image"
   load_image "$traefik_image"
 
   kube -n danteplanner delete httproute --all --ignore-not-found >/dev/null
@@ -388,46 +384,45 @@ behavior_overlay() {
     sed -e "s|TRAEFIK_IMAGE|$traefik_image|" -e "s|WHOAMI_IMAGE|${WHOAMI_IMAGE%@*}|" "$harness/fixture.yaml"
   } | docker exec -i "$cluster" kubectl -n danteplanner apply -f - >/dev/null
   kube -n danteplanner rollout status deployment/traefik --timeout=120s >/dev/null \
-    || fail behavior "overlays/$overlay: Traefik ($traefik_image) did not become ready within 120s"
+    || fail behavior "$region: Traefik ($traefik_image) did not become ready within 120s"
   kube -n danteplanner rollout status deployment/whoami --timeout=120s >/dev/null \
-    || fail behavior "overlays/$overlay: the whoami backend did not become ready within 120s"
+    || fail behavior "$region: the whoami backend did not become ready within 120s"
   kube -n danteplanner wait httproute --all --timeout=60s \
     --for=jsonpath='{.status.parents[0].conditions[?(@.type=="Accepted")].status}'=True >/dev/null \
-    || fail behavior "overlays/$overlay: an HTTPRoute was not Accepted by the Gateway within 60s"
+    || fail behavior "$region: an HTTPRoute was not Accepted by the Gateway within 60s"
   gateway_ip=$(kube -n danteplanner get service traefik-web -o jsonpath='{.spec.clusterIP}')
 
   local known rendered_rules unknown stale unsupported unserved
   known=$(contract_rows | cut -f 1,2)
-  backend_rules > "$work/$overlay.rules"
-  rendered_rules=$(cut -f 1,2 "$work/$overlay.rules" | awk '!seen[$0]++')
+  backend_rules > "$work/$region.rules"
+  rendered_rules=$(cut -f 1,2 "$work/$region.rules" | awk '!seen[$0]++')
   unknown=$(printf '%s\n' "$rendered_rules" | awk 'NR == FNR { k[$0] = 1; next } NF && !($0 in k)' <(printf '%s\n' "$known") -)
-  [ -z "$unknown" ] || fail behavior "overlays/$overlay: $(printf '%s\n' "$unknown" | awk -F '\t' '{ printf "%sHTTPRoute %s rule %s", (NR > 1 ? ", " : ""), $1, $2 }') targets Service backend but has no row in .github/deploy-test/route-contract.tsv; add its contract there"
+  [ -z "$unknown" ] || fail behavior "$region: $(printf '%s\n' "$unknown" | awk -F '\t' '{ printf "%sHTTPRoute %s rule %s", (NR > 1 ? ", " : ""), $1, $2 }') targets Service backend but has no row in .github/deploy-test/route-contract.tsv; add its contract there"
   stale=$(printf '%s\n' "$known" | awk 'NR == FNR { r[$0] = 1; next } NF && !($0 in r)' <(printf '%s\n' "$rendered_rules") -)
-  [ -z "$stale" ] || fail behavior "overlays/$overlay renders no backend rule $(printf '%s\n' "$stale" | awk -F '\t' '{ printf "%s%s rule %s", (NR > 1 ? ", " : ""), $1, $2 }') that route-contract.tsv lists; remove its row or restore the rule"
-  unsupported=$(unsupported_matches < "$work/$overlay.rules")
-  [ -z "$unsupported" ] || fail behavior "overlays/$overlay: $unsupported, which the contract check cannot evaluate; only PathPrefix and Exact path matches without headers, queryParams or method are supported"
-  unserved=$(contract_rows | unserved_rows "$work/$overlay.rules")
-  [ -z "$unserved" ] || fail behavior "overlays/$overlay: route-contract.tsv row $unserved is not served by that rule; set request_path to a path under one of its matches"
+  [ -z "$stale" ] || fail behavior "$region renders no backend rule $(printf '%s\n' "$stale" | awk -F '\t' '{ printf "%s%s rule %s", (NR > 1 ? ", " : ""), $1, $2 }') that route-contract.tsv lists; remove its row or restore the rule"
+  unsupported=$(unsupported_matches < "$work/$region.rules")
+  [ -z "$unsupported" ] || fail behavior "$region: $unsupported, which the contract check cannot evaluate; only PathPrefix and Exact path matches without headers, queryParams or method are supported"
+  unserved=$(contract_rows | unserved_rows "$work/$region.rules")
+  [ -z "$unserved" ] || fail behavior "$region: route-contract.tsv row $unserved is not served by that rule; set request_path to a path under one of its matches"
 
   while IFS=$'\t' read -r route rule request_path backend_path present absent; do
     check_route "$route rule $rule" "$request_path" "$backend_path" "$present" "$absent" \
-      || fail behavior "overlays/$overlay: route $route rule $rule broke its contract"
+      || fail behavior "$region: route $route rule $rule broke its contract"
   done < <(contract_rows)
-  echo "  $overlay: $(contract_rows | wc -l | tr -d ' ') backend rules hold their contract through $traefik_image"
+  echo "  $region: $(contract_rows | wc -l | tr -d ' ') backend rules hold their contract through $traefik_image"
 }
 
 behavior() {
   start_cluster
-  local overlay
-  for overlay in "${OVERLAYS[@]}"; do
-    behavior_overlay "$overlay"
+  local region
+  for region in "${regions[@]}"; do
+    behavior_region "$region"
   done
-  pass behavior "every backend rule in ${OVERLAYS[*]} holds its contract"
+  pass behavior "every backend rule in ${regions[*]} holds its contract"
 }
 
 alerts
 render
-chart
 charts
 schema
 behavior

@@ -3,7 +3,7 @@ set -eu
 
 verified=${1:-}
 event=${2:-}
-kustomization=${3:-deploy/overlays/oregon/kustomization.yaml}
+values_file=${3:-deploy/chart/values-oregon.yaml}
 set -- backend/Dockerfile backend/build.gradle.kts backend/settings.gradle.kts backend/src \
   .dockerignore static.lock testdata/planner-content.schema.json
 
@@ -13,7 +13,7 @@ if [ "$verified" = "--list-inputs" ]; then
 fi
 
 if [ -z "$verified" ] || [ -z "$event" ]; then
-  echo "usage: $0 <verified-sha> <event-name> [kustomization-path] | --list-inputs" >&2
+  echo "usage: $0 <verified-sha> <event-name> [values-path] | --list-inputs" >&2
   exit 2
 fi
 
@@ -30,10 +30,18 @@ if [ "$event" = "workflow_dispatch" ]; then
   exit 0
 fi
 
-deployed=$(git show "$verified:$kustomization" 2>/dev/null \
-  | sed -n 's/^[[:space:]]*newTag:[[:space:]]*//p' | tr -d "\"' \r" | head -n 1)
+values=$(git show "$verified:$values_file") || {
+  echo "cannot read $values_file at $verified" >&2
+  exit 1
+}
+tag_lines=$(printf '%s\n' "$values" | sed -n '/^[[:space:]]*tag:/p')
+deployed=$(printf '%s\n' "$tag_lines" | sed -n 's/^  tag: "\([0-9a-f]\{40\}\)"$/\1/p')
+if [ -z "$deployed" ] || [ "$tag_lines" != "  tag: \"$deployed\"" ]; then
+  echo "$values_file at $verified does not hold exactly one tag line with 40 hex in double quotes" >&2
+  exit 1
+fi
 
-if [ -z "$deployed" ] || ! git cat-file -e "$deployed^{commit}" 2>/dev/null; then
+if ! git cat-file -e "$deployed^{commit}" 2>/dev/null; then
   echo "deployed tag '$deployed' is not a commit in this history: deploying $verified"
   emit true
   exit 0

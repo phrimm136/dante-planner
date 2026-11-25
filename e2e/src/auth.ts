@@ -6,7 +6,7 @@ import { request as playwrightRequest } from '@playwright/test'
 import type { BrowserContext, APIRequestContext } from '@playwright/test'
 
 // The deployed fleet verifies against the public half of this pair, sourced from the same bundle
-// (deploy/base/external-secret.yaml). Fetching it needs an AWS session the runner already holds.
+// (deploy/chart/templates/external-secret.yaml). Fetching it needs an AWS session the runner already holds.
 const JWT_SECRET_ID = process.env.E2E_JWT_SECRET_ID ?? 'danteplanner/jwt/material'
 const PRIVATE_KEY_PROPERTY = 'rs256_private_key'
 const AWS_PROFILE = process.env.E2E_AWS_PROFILE ?? 'staging'

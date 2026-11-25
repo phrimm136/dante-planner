@@ -2,8 +2,8 @@ name: "Deploy (multi-region k3s)"
 
 # Production GitOps deploy for the two-region k3s fleet (supersedes the legacy
 # single-EC2 deploy.yml). Build the arm64 backend image once, push it to BOTH
-# regional ECR registries (Oregon primary + Seoul), then bump the kustomize image
-# tag in BOTH overlays and commit. Each region's ArgoCD core syncs the commit and
+# regional ECR registries (Oregon primary + Seoul), then bump the image tag in
+# BOTH values files of deploy/chart and commit. Each region's ArgoCD core syncs the commit and
 # pulls the image from its LOCAL registry — pushing to both here removes the
 # cross-region ECR-replication race (a bump could otherwise reference a tag not
 # yet replicated to Seoul).
@@ -31,8 +31,7 @@ env:
   SEOUL_REGION: ap-northeast-2
   ECR_REGISTRY_SEOUL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-northeast-2.amazonaws.com
   IMAGE_REPO: danteplanner-backend
-  OVERLAY_DIR: deploy/overlays/oregon
-  OVERLAY_DIR_SEOUL: deploy/overlays/seoul
+  VALUES_FILES: deploy/chart/values-oregon.yaml deploy/chart/values-seoul.yaml
 
 jobs:
   changes:
@@ -111,7 +110,7 @@ jobs:
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069  # v4.4.1
 
       # One build, pushed to both regional registries under the same tag, so each
-      # region pulls locally and the tags in both overlays resolve.
+      # region pulls locally and the tags in both values files resolve.
       - name: Build and Push Backend (arm64) to both regions
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc  # v7
         with:
@@ -324,25 +323,12 @@ jobs:
           ref: ${{ github.ref_name }}
           ssh-key: ${{ secrets.DEPLOY_FLEET_KEY }}
 
-      # Pinned direct download: the upstream install script resolves "latest"
-      # through the GitHub REST API, which shared-runner IPs get rate-limited
-      # on; release-asset URLs carry no API rate limit.
-      - name: Install kustomize
-        env:
-          KUSTOMIZE_VERSION: v5.8.1
-        run: |
-          curl -sfLo kustomize.tar.gz "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_amd64.tar.gz"
-          tar -xzf kustomize.tar.gz kustomize
-          sudo mv kustomize /usr/local/bin/
-
-      - name: Bump image tag in BOTH overlays and BOTH chart values
+      - name: Bump image tag in BOTH values files
         run: |
           set -euo pipefail
-          (cd "$OVERLAY_DIR"       && kustomize edit set image "${IMAGE_REPO}:${GIT_SHA}")
-          (cd "$OVERLAY_DIR_SEOUL" && kustomize edit set image "${IMAGE_REPO}:${GIT_SHA}")
-          for values in deploy/chart/values-oregon.yaml deploy/chart/values-seoul.yaml; do
+          for values in $VALUES_FILES; do
             sed -i "s/^  tag: \".*\"$/  tag: \"${GIT_SHA}\"/" "$values"
-            [ "$(grep -cx "  tag: \"${GIT_SHA}\"" "$values")" = 1 ] \
+            [ "$(sed -n '/^[[:space:]]*tag:/p' "$values")" = "  tag: \"${GIT_SHA}\"" ] \
               || { echo "::error::$values does not carry the tag exactly once"; exit 1; }
           done
 
@@ -356,8 +342,7 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add "$OVERLAY_DIR/kustomization.yaml" "$OVERLAY_DIR_SEOUL/kustomization.yaml" \
-            deploy/chart/values-oregon.yaml deploy/chart/values-seoul.yaml
+          git add $VALUES_FILES
           # [skip ci] in the subject keeps this push from retriggering the workflow.
           git commit -m "chore(deploy): bump backend image to ${GIT_SHA} (Oregon+Seoul) [skip ci]"
           git push origin "HEAD:${REF_NAME}"
@@ -370,7 +355,7 @@ jobs:
   settle-down:
     needs: [bump-tag, surge-up]
     # Runs whenever the surge ran, also after a failed or cancelled bump: the job is what returns
-    # the app ASGs to 1. It reads the overlays on the branch to learn whether the bump landed,
+    # the app ASGs to 1. It reads the values files on the branch to learn whether the bump landed,
     # because a cancelled bump job may have pushed. With a bump on the branch it waits for the
     # rollout first, and a rollout that fails leaves the surge nodes up, which hold the last
     # healthy pod. With no bump there is no rollout to wait for, and it drains at once.
@@ -401,17 +386,13 @@ jobs:
         run: |
           set -euo pipefail
           landed=true
-          for overlay_dir in "$OVERLAY_DIR" "$OVERLAY_DIR_SEOUL"; do
-            overlay=$(gh api -H "Accept: application/vnd.github.raw+json" \
-              "repos/$REPO/contents/$overlay_dir/kustomization.yaml?ref=$REF_NAME")
-            case "$overlay" in
-              *"kind: Kustomization"*) ;;
-              *) echo "::error::$overlay_dir/kustomization.yaml on $REF_NAME did not read as a kustomization"; exit 1 ;;
-            esac
-            case "$overlay" in
-              *"newTag: $GIT_SHA"*) ;;
-              *) landed=false ;;
-            esac
+          for values_file in $VALUES_FILES; do
+            values=$(gh api -H "Accept: application/vnd.github.raw+json" \
+              "repos/$REPO/contents/$values_file?ref=$REF_NAME")
+            tag_lines=$(sed -n '/^[[:space:]]*tag:/p' <<<"$values")
+            [[ "$tag_lines" =~ ^\ \ tag:\ \"([0-9a-f]{40})\"$ ]] \
+              || { echo "::error::$values_file on $REF_NAME does not hold exactly one tag line with 40 hex in double quotes"; exit 1; }
+            [ "${BASH_REMATCH[1]}" = "$GIT_SHA" ] || landed=false
           done
           echo "landed=$landed" >> "$GITHUB_OUTPUT"
           echo "bump of $GIT_SHA on $REF_NAME: $landed"

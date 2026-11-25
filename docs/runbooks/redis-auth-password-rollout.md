@@ -1,6 +1,6 @@
 # Rolling out a change to the auth Redis
 
-Ships a change to Oregon's auth Redis (`deploy/base/redis-auth.yaml`) without cutting its clients
+Ships a change to Oregon's auth Redis (`deploy/chart/templates/redis-auth.yaml`) without cutting its clients
 off. The server always starts with `--requirepass` from `AUTH_REDIS_PASSWORD`, so every restart
 leaves it refusing any client that does not hold the password. The restart itself is not a step
 here: ArgoCD syncs from `main`, and a sync that changes the StatefulSet's pod template restarts

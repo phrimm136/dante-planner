@@ -82,7 +82,7 @@ variable "redis_cross_region_cidr" {
 }
 
 variable "redis_auth_nodeport" {
-  description = "NodePort exposing the auth Redis primary on the fleet nodes. MUST match the nodePort in deploy/overlays/oregon/redis-auth-nodeport.yaml."
+  description = "NodePort exposing the auth Redis primary on the fleet nodes. MUST match redisAuth.nodePort in deploy/chart/values-oregon.yaml."
   type        = number
   default     = 31637
 }
@@ -144,7 +144,7 @@ variable "backend_image_repo" {
 # --- GitOps (ArgoCD core bootstrap on the CP node) --------------------------
 
 variable "gitops_repo_url" {
-  description = "Git repository ArgoCD syncs from (this repo). The CP clones it at boot to apply the root Application, which then points ArgoCD at deploy/overlays/oregon."
+  description = "Git repository ArgoCD syncs from (this repo). The CP clones it at boot to apply the root Application, which then points ArgoCD at deploy/chart with values-<region>.yaml."
   type        = string
   default     = "https://github.com/phrimm136/dante-planner.git"
 }
@@ -168,7 +168,7 @@ variable "gateway_api_version" {
 }
 
 variable "traefik_version" {
-  description = "Pinned Traefik release tag for the traefik.io CRDs installed at CP bootstrap (must match the traefik:<tag> image in deploy/base/traefik-controller.yaml). Enables the mTLS TLSOption."
+  description = "Pinned Traefik release tag for the traefik.io CRDs installed at CP bootstrap (must match the traefik:<tag> image in deploy/chart/templates/traefik-controller.yaml). Enables the mTLS TLSOption."
   type        = string
   default     = "v3.1"
 }

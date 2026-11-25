@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Read metrics from Grafana Cloud Mimir (the query side of deploy/base/prometheus.yaml).
+# Read metrics from Grafana Cloud Mimir (the query side of deploy/chart/templates/prometheus.yaml).
 # Usage: metrics-query.sh '<promql>' [since] [step]
 #   since: relative window like 24h/2d (default 1h); step default 5m.
 # Examples:

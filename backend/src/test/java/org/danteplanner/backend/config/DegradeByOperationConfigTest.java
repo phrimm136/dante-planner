@@ -28,9 +28,9 @@ class DegradeByOperationConfigTest {
 
     private static final int MIN_SCHEDULER_POOL = 4;
     private static final int MAX_SOCKET_TIMEOUT_MS = 15_000;
-    private static final List<Path> REGION_CONFIGMAPS = List.of(
-            Path.of("../deploy/overlays/seoul/configmap-patch.yaml"),
-            Path.of("../deploy/overlays/oregon/configmap-patch.yaml"));
+    private static final List<Path> REGION_VALUES = List.of(
+            Path.of("../deploy/chart/values-seoul.yaml"),
+            Path.of("../deploy/chart/values-oregon.yaml"));
     private static final Pattern READ_SOURCE_URL =
             Pattern.compile("^\\s*DATASOURCE_READSOURCES_\\d+_URL:\\s*\"?([^\"]*)\"?\\s*$", Pattern.MULTILINE);
 
@@ -72,9 +72,9 @@ class DegradeByOperationConfigTest {
                 .isLessThanOrEqualTo(MAX_SOCKET_TIMEOUT_MS);
         assertThat(appUrl).as("the application url must bound the connect wait").contains("connectTimeout=");
 
-        for (Path configmap : REGION_CONFIGMAPS) {
-            Matcher readSourceUrls = READ_SOURCE_URL.matcher(Files.readString(configmap));
-            assertThat(readSourceUrls.find()).as("%s must set a read-source url", configmap).isTrue();
+        for (Path values : REGION_VALUES) {
+            Matcher readSourceUrls = READ_SOURCE_URL.matcher(Files.readString(values));
+            assertThat(readSourceUrls.find()).as("%s must set a read-source url", values).isTrue();
             do {
                 assertThat(socketTimeoutOf(readSourceUrls.group(1)))
                         .as("the replica url must bound the socket wait too")

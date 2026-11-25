@@ -1,2 +1,0 @@
-[client]
-ssl-ca=/etc/mysqld-certs/rds-global-bundle.pem

@@ -51,11 +51,12 @@ PY
 }
 
 add_probe_pod() {
-  cat >"$1/deploy/base/scan-probe.yaml" <<EOF
+  cat >"$1/deploy/chart/templates/scan-probe.yaml" <<EOF
 apiVersion: v1
 kind: Pod
 metadata:
   name: scan-probe
+  namespace: danteplanner
 $2
 spec:
   hostNetwork: true
@@ -63,15 +64,15 @@ spec:
     - name: probe
       image: busybox
 EOF
-  sed -i 's/^resources:$/resources:\n  - scan-probe.yaml/' "$1/deploy/base/kustomization.yaml"
 }
 
 add_version_probe() {
-  cat >"$1/deploy/base/version-probe.yaml" <<EOF
+  cat >"$1/deploy/chart/templates/version-probe.yaml" <<EOF
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: version-probe
+  namespace: danteplanner
 spec:
   selector:
     matchLabels:
@@ -87,7 +88,6 @@ spec:
         - name: probe
           image: busybox
 EOF
-  sed -i 's/^resources:$/resources:\n  - version-probe.yaml/' "$1/deploy/base/kustomization.yaml"
 }
 
 version_probe_key() {
@@ -108,9 +108,9 @@ add_probe_pod "$pod" ""
 track "$pod"
 run_scan "$work/pod.out" "$pod"
 [ "$status" -eq 1 ] || fail "$name" "exit $status, expected 1" "$work/pod.out"
-for overlay in oregon seoul; do
-  has_line "$work/pod.out" "NEW CKV_K8S_19 /$overlay.yaml Pod.danteplanner.scan-probe" \
-    || fail "$name" "no NEW CKV_K8S_19 line for Pod.danteplanner.scan-probe in /$overlay.yaml" "$work/pod.out"
+for region in oregon seoul; do
+  has_line "$work/pod.out" "NEW CKV_K8S_19 /$region.yaml Pod.danteplanner.scan-probe" \
+    || fail "$name" "no NEW CKV_K8S_19 line for Pod.danteplanner.scan-probe in /$region.yaml" "$work/pod.out"
 done
 echo "PASS $name"
 
@@ -130,14 +130,14 @@ fixed=$work/fixed
 copy_tree "$fixed"
 awk '{ print } /^          image: prom\/mysqld-exporter:/ {
   print "          readinessProbe:"; print "            httpGet:"; print "              path: /"; print "              port: http-metrics"
-}' "$fixed/deploy/base/mysqld-exporter.yaml" >"$work/mysqld-exporter.yaml"
-mv "$work/mysqld-exporter.yaml" "$fixed/deploy/base/mysqld-exporter.yaml"
+}' "$fixed/deploy/chart/templates/mysqld-exporter.yaml" >"$work/mysqld-exporter.yaml"
+mv "$work/mysqld-exporter.yaml" "$fixed/deploy/chart/templates/mysqld-exporter.yaml"
 track "$fixed"
 run_scan "$work/fixed.out" "$fixed"
 [ "$status" -eq 1 ] || fail "$name" "exit $status, expected 1" "$work/fixed.out"
-for overlay in oregon seoul; do
-  has_line "$work/fixed.out" "FIXED CKV_K8S_9 /$overlay.yaml Deployment.danteplanner.mysqld-exporter" \
-    || fail "$name" "no FIXED CKV_K8S_9 line for mysqld-exporter in /$overlay.yaml" "$work/fixed.out"
+for region in oregon seoul; do
+  has_line "$work/fixed.out" "FIXED CKV_K8S_9 /$region.yaml Deployment.danteplanner.mysqld-exporter" \
+    || fail "$name" "no FIXED CKV_K8S_9 line for mysqld-exporter in /$region.yaml" "$work/fixed.out"
 done
 grep -q -- '--update' "$work/fixed.out" || fail "$name" "the output does not name --update" "$work/fixed.out"
 ! grep -q '^NEW ' "$work/fixed.out" || fail "$name" "a readiness probe added a NEW finding" "$work/fixed.out"
@@ -148,15 +148,15 @@ weakened=$work/weakened
 copy_tree "$weakened"
 awk '{ print } /^      valuesObject:$/ {
   print "        containerSecurityContext:"; print "          allowPrivilegeEscalation: true"
-}' "$weakened/deploy/apps/kube-state-metrics.yaml" >"$work/weakened.yaml"
-mv "$work/weakened.yaml" "$weakened/deploy/apps/kube-state-metrics.yaml"
-grep -qx '          allowPrivilegeEscalation: true' "$weakened/deploy/apps/kube-state-metrics.yaml" || fail "$name" "the values rewrite matched nothing"
+}' "$weakened/deploy/chart/templates/kube-state-metrics.yaml" >"$work/weakened.yaml"
+mv "$work/weakened.yaml" "$weakened/deploy/chart/templates/kube-state-metrics.yaml"
+grep -qx '          allowPrivilegeEscalation: true' "$weakened/deploy/chart/templates/kube-state-metrics.yaml" || fail "$name" "the values rewrite matched nothing"
 track "$weakened"
 run_scan "$work/weakened.out" "$weakened"
 [ "$status" -eq 1 ] || fail "$name" "exit $status, expected 1" "$work/weakened.out"
 has_line "$work/weakened.out" "NEW CKV_K8S_20 /chart-kube-state-metrics.yaml Deployment.danteplanner.kube-state-metrics" \
   || fail "$name" "no NEW CKV_K8S_20 line for the chart's Deployment in /chart-kube-state-metrics.yaml" "$work/weakened.out"
-! grep -q '^NEW .* /\(oregon\|seoul\)\.yaml ' "$work/weakened.out" || fail "$name" "a chart value changed an overlay finding" "$work/weakened.out"
+! grep -q '^NEW .* /\(oregon\|seoul\)\.yaml ' "$work/weakened.out" || fail "$name" "a chart value changed a finding of a region" "$work/weakened.out"
 echo "PASS $name"
 
 name="a chart version bump leaves the baseline unchanged"
@@ -168,8 +168,8 @@ has_line "$work/committed.txt" "CKV2_K8S_6 /chart-kube-state-metrics.yaml $pod_k
   || fail "$name" "the committed baseline still holds a version label part" "$work/committed.txt"
 bumped=$work/bumped
 copy_tree "$bumped"
-sed -i 's/^    targetRevision: 8\.3\.1$/    targetRevision: 8.3.0/' "$bumped/deploy/apps/kube-state-metrics.yaml"
-grep -qx '    targetRevision: 8.3.0' "$bumped/deploy/apps/kube-state-metrics.yaml" || fail "$name" "the targetRevision rewrite matched nothing"
+sed -i 's/^    targetRevision: 8\.3\.1$/    targetRevision: 8.3.0/' "$bumped/deploy/chart/templates/kube-state-metrics.yaml"
+grep -qx '    targetRevision: 8.3.0' "$bumped/deploy/chart/templates/kube-state-metrics.yaml" || fail "$name" "the targetRevision rewrite matched nothing"
 track "$bumped"
 run_scan "$work/bumped.out" "$bumped"
 [ "$status" -eq 0 ] || fail "$name" "chart 8.3.0 against the committed baseline exited $status, expected 0" "$work/bumped.out"
@@ -209,9 +209,9 @@ name="a label key that starts with a digit after the version label stays in the 
 digit=$work/probe-digit
 copy_tree "$digit"
 awk '{ print } /^      valuesObject:$/ { print "        podLabels:"; print "          1password.com/item: probe" }' \
-  "$digit/deploy/apps/kube-state-metrics.yaml" >"$work/digit.yaml"
-mv "$work/digit.yaml" "$digit/deploy/apps/kube-state-metrics.yaml"
-grep -qx '          1password.com/item: probe' "$digit/deploy/apps/kube-state-metrics.yaml" || fail "$name" "the podLabels rewrite matched nothing"
+  "$digit/deploy/chart/templates/kube-state-metrics.yaml" >"$work/digit.yaml"
+mv "$work/digit.yaml" "$digit/deploy/chart/templates/kube-state-metrics.yaml"
+grep -qx '          1password.com/item: probe' "$digit/deploy/chart/templates/kube-state-metrics.yaml" || fail "$name" "the podLabels rewrite matched nothing"
 track "$digit"
 run_scan "$work/probe-digit.out" "$digit"
 [ "$status" -eq 1 ] || fail "$name" "exit $status, expected 1" "$work/probe-digit.out"
@@ -279,10 +279,11 @@ echo "PASS $name"
 name="a new image tag and a no-op --update leave the baselines byte-identical"
 retagged=$work/retagged
 copy_tree "$retagged"
-sed -i 's/^\(  newTag: \).*/\10123456789abcdef0123456789abcdef01234567/' \
-  "$retagged/deploy/overlays/oregon/kustomization.yaml" "$retagged/deploy/overlays/seoul/kustomization.yaml"
-grep -q 'newTag: 0123456789abcdef0123456789abcdef01234567' "$retagged/deploy/overlays/oregon/kustomization.yaml" \
-  || fail "$name" "the newTag rewrite matched nothing"
+for region in oregon seoul; do
+  sed -i 's/^\(  tag: \).*/\1"0123456789abcdef0123456789abcdef01234567"/' "$retagged/deploy/chart/values-$region.yaml"
+  has_line "$retagged/deploy/chart/values-$region.yaml" '  tag: "0123456789abcdef0123456789abcdef01234567"' \
+    || fail "$name" "the tag rewrite matched nothing in values-$region.yaml"
+done
 track "$retagged"
 run_scan "$work/retagged.out" --update "$retagged"
 [ "$status" -eq 0 ] || fail "$name" "exit $status" "$work/retagged.out"
@@ -334,37 +335,28 @@ run_scan "$work/unparsable.out" "$unparsable"
 [ "$status" -eq 2 ] || fail "$name" "exit $status, expected 2" "$work/unparsable.out"
 echo "PASS $name"
 
-name="an overlay that does not render is not a pass"
+name="a region that does not render is not a pass"
 unrendered=$work/unrendered
 copy_tree "$unrendered"
-sed -i 's/^resources:$/resources:\n  - missing-probe.yaml/' "$unrendered/deploy/overlays/seoul/kustomization.yaml"
-grep -qx '  - missing-probe.yaml' "$unrendered/deploy/overlays/seoul/kustomization.yaml" || fail "$name" "the resources rewrite matched nothing"
+printf '{{ if eq .Values.region "seoul" }}{{ fail "render probe" }}{{ end }}\n' >"$unrendered/deploy/chart/templates/render-probe.yaml"
 track "$unrendered"
 run_scan "$work/unrendered.out" "$unrendered"
 [ "$status" -eq 2 ] || fail "$name" "exit $status, expected 2" "$work/unrendered.out"
+grep -qF "values-seoul.yaml failed" "$work/unrendered.out" && grep -qF "render probe" "$work/unrendered.out" \
+  || fail "$name" "the output does not name seoul and the render failure" "$work/unrendered.out"
 echo "PASS $name"
 
-name="every overlay directory is scanned"
-third=$work/third-overlay
+name="an unknown region is not a pass"
+third=$work/third-region
 copy_tree "$third"
-mkdir -p "$third/deploy/overlays/probe"
-printf 'resources:\n  - ../../base\n  - overlay-probe.yaml\n' >"$third/deploy/overlays/probe/kustomization.yaml"
-cat >"$third/deploy/overlays/probe/overlay-probe.yaml" <<'EOF'
-apiVersion: v1
-kind: Pod
-metadata:
-  name: overlay-probe
-  namespace: danteplanner
-spec:
-  hostNetwork: true
-  containers:
-    - name: probe
-      image: busybox
-EOF
+sed 's/^region: seoul$/region: probe/' "$third/deploy/chart/values-seoul.yaml" >"$third/deploy/chart/values-probe.yaml"
+has_line "$third/deploy/chart/values-probe.yaml" "region: probe" || fail "$name" "the region rewrite matched nothing"
 track "$third"
-run_scan "$work/third-overlay.out" "$third"
-[ "$status" -eq 1 ] || fail "$name" "exit $status, expected 1" "$work/third-overlay.out"
-grep -q '^NEW [A-Z0-9_]* /probe\.yaml ' "$work/third-overlay.out" || fail "$name" "no NEW line for /probe.yaml" "$work/third-overlay.out"
+run_scan "$work/third-region.out" "$third"
+[ "$status" -eq 2 ] || fail "$name" "exit $status, expected 2" "$work/third-region.out"
+grep -qF "values-probe.yaml failed" "$work/third-region.out" \
+  && grep -qF "don't meet the specifications of the schema" "$work/third-region.out" \
+  || fail "$name" "the output does not name values-probe.yaml and the schema" "$work/third-region.out"
 echo "PASS $name"
 
 name="a wrong argument or a malformed baseline is exit 2"
@@ -384,9 +376,9 @@ name="a renamed resource has a stated way forward"
 renamed=$work/renamed
 copy_tree "$renamed"
 awk 'previous_kind == "kind: Deployment" && /^  name: redis-ratelimit$/ { $0 = "  name: redis-ratelimit-renamed" }
-  /^kind: / { previous_kind = $0 } { print }' "$renamed/deploy/base/redis-ratelimit.yaml" >"$work/renamed.yaml"
-mv "$work/renamed.yaml" "$renamed/deploy/base/redis-ratelimit.yaml"
-grep -qx '  name: redis-ratelimit-renamed' "$renamed/deploy/base/redis-ratelimit.yaml" || fail "$name" "the rename matched nothing"
+  /^kind: / { previous_kind = $0 } { print }' "$renamed/deploy/chart/templates/redis-ratelimit.yaml" >"$work/renamed.yaml"
+mv "$work/renamed.yaml" "$renamed/deploy/chart/templates/redis-ratelimit.yaml"
+grep -qx '  name: redis-ratelimit-renamed' "$renamed/deploy/chart/templates/redis-ratelimit.yaml" || fail "$name" "the rename matched nothing"
 track "$renamed"
 run_scan "$work/renamed.out" "$renamed"
 [ "$status" -eq 1 ] || fail "$name" "exit $status, expected 1" "$work/renamed.out"
