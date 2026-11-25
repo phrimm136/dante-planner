@@ -1,5 +1,6 @@
 import contextlib
 import datetime
+import importlib
 import importlib.machinery
 import importlib.util
 import io
@@ -10,6 +11,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import types
 import unittest
 import unittest.mock
 from pathlib import Path
@@ -22,9 +24,14 @@ HOOK_FILE = REPO_ROOT / ".claude" / "hooks" / "ops-redirect.sh"
 
 cli_loader = importlib.machinery.SourceFileLoader("ops_cli", str(CLI_FILE))
 module_spec = importlib.util.spec_from_loader("ops_cli", cli_loader)
-ops_cli = importlib.util.module_from_spec(module_spec)
-sys.modules["ops_cli"] = ops_cli
-cli_loader.exec_module(ops_cli)
+ops_entry = importlib.util.module_from_spec(module_spec)
+sys.modules["ops_cli"] = ops_entry
+cli_loader.exec_module(ops_entry)
+MODULE_NAMES = ("paths", "redaction", "session", "commands", "terraform", "hook")
+MODULE_FILES = [SKILL_DIR / "lib" / "opscli" / f"{module_name}.py" for module_name in MODULE_NAMES]
+ops_cli = types.SimpleNamespace(main=ops_entry.main)
+for module_name in MODULE_NAMES:
+    vars(ops_cli).update(vars(importlib.import_module(f"opscli.{module_name}")))
 
 RUN_MOMENT = datetime.datetime(2026, 11, 9, 12, 30, 5)
 STAMP_TEXT = "20261109-123005"
@@ -63,8 +70,9 @@ def plugin_argv(local_port, remote_host, region_name):
 
 class FakeEffects:
     def __init__(self, session_rows=None, docker_up=True, stream_exit=0, show_text="", process_list=(),
-                 tool_paths=None, stream_text="script output\n", identity_accounts=None):
+                 tool_paths=None, stream_text="script output\n", identity_accounts=None, stream_err=""):
         self.stream_text = stream_text
+        self.stream_err = stream_err
         self.identity_accounts = identity_accounts or PROFILE_ACCOUNTS
         self.session_rows = session_rows or {}
         self.docker_up = docker_up
@@ -101,10 +109,15 @@ class FakeEffects:
         for one_arg in command_argv:
             if one_arg.startswith("-out="):
                 Path(one_arg.split("=", 1)[1]).write_bytes(PLAN_BYTES)
-        log_file.write(self.stream_text)
-        if echo_output:
-            sys.stdout.write(self.stream_text)
+        for text_chunk in (self.stream_err, self.stream_text):
+            log_file.write(text_chunk)
+            if echo_output:
+                sys.stdout.write(text_chunk)
         return self.stream_exit
+
+    def run_split(self, command_argv, child_env, work_dir):
+        self.stream_calls.append((tuple(command_argv), child_env, work_dir, False))
+        return subprocess.CompletedProcess(command_argv, self.stream_exit, self.stream_text, self.stream_err)
 
     def process_rows(self):
         return self.process_list
@@ -239,6 +252,9 @@ class DispatchTest(unittest.TestCase):
             ("tunnel", "scripts/ops/access/rds-tunnel.sh", "read"),
             ("verify db", "scripts/ops/access/db-observability-check.sh", "read"),
             ("verify fleet", "scripts/ops/fleet-verify.sh", "read"),
+            ("nodes", "scripts/ops/access/fleet-nodes.sh", "read"),
+            ("bootlog", "scripts/ops/access/boot-log.sh", "read"),
+            ("app", "scripts/ops/access/argocd-app.sh", "read"),
             ("tf plan", "scripts/ops/terraform-run.sh", "plan"),
             ("tf apply", "scripts/ops/terraform-run.sh", "apply"),
             ("whoami", "", "read"),
@@ -418,6 +434,314 @@ class RunTest(RepoCase):
         (self.log_dir / f"ops-logs-{STAMP_TEXT}.log").write_text("")
         self.run_main(["logs", "q"], FakeEffects())
         self.assertTrue((self.log_dir / f"ops-logs-{STAMP_TEXT}-2.log").is_file())
+
+
+class FleetReadTest(RepoCase):
+    def test_nodes_and_app_pass_the_site_and_need_its_stack_initialized(self):
+        for command_name, script_path in (("nodes", ops_cli.NODES_SCRIPT), ("app", ops_cli.APP_SCRIPT)):
+            with self.subTest(command_name=command_name):
+                fake_effects = FakeEffects(stream_exit=4)
+                exit_code, _, _ = self.run_main([command_name], fake_effects)
+                self.assertEqual(exit_code, 4)
+                self.assertEqual(fake_effects.stream_calls[0][0], self.script_argv(script_path, "oregon"))
+                with self.assertRaisesRegex(ops_cli.OpsError, "terraform/seoul is not initialized"):
+                    self.run_main([command_name, "--site", "seoul"], FakeEffects())
+                with self.assertRaisesRegex(ops_cli.OpsError, f"ops {command_name}: takes only --site, not 'x'"):
+                    self.run_main([command_name, "x"], FakeEffects())
+
+    def test_bootlog_refuses_an_id_that_is_not_i_and_hex(self):
+        for instance_id in ("i-0xyz", "0abc", "i-", "i-0abc;id", "i-0abc\n", "I-0abc"):
+            with self.subTest(instance_id=instance_id):
+                fake_effects = FakeEffects()
+                with self.assertRaisesRegex(ops_cli.OpsError, "<instance-id> is i- and hex digits"):
+                    self.run_main(["bootlog", instance_id], fake_effects)
+                self.assertEqual(fake_effects.stream_calls, [])
+
+    def test_bootlog_prints_and_logs_only_the_tail(self):
+        stream_text = "".join(f"line {line_number}\n" for line_number in range(100))
+        for extra_words, first_line in ((), "line 40"), (("--lines", "2", "--site", "seoul"), "line 98"):
+            with self.subTest(extra_words=extra_words):
+                for stale_file in self.log_dir.glob("*"):
+                    stale_file.unlink()
+                fake_effects = FakeEffects(stream_text=stream_text)
+                exit_code, out_text, _ = self.run_main(["bootlog", "i-0abc", *extra_words], fake_effects)
+                self.assertEqual((exit_code, out_text.splitlines()[0]), (0, first_line))
+                self.assertEqual(out_text.splitlines()[-1], "line 99")
+                self.assertFalse(fake_effects.stream_calls[0][3])
+                log_text = (self.log_dir / f"ops-bootlog-i-0abc-{STAMP_TEXT}.log").read_text()
+                self.assertIn(out_text, log_text)
+                self.assertNotIn("line 0\n", log_text)
+        self.assertEqual(fake_effects.stream_calls[0][0][1:], ("i-0abc", "seoul"))
+        with self.assertRaisesRegex(ops_cli.OpsError, "--lines takes a positive whole number"):
+            self.run_main(["bootlog", "i-0abc", "--lines", "0"], FakeEffects())
+
+    def test_metrics_names_reaches_the_script(self):
+        self.assertEqual(ops_cli.build_invocation(["metrics", "up", "--names", "--step", "1m"], "/").script_args,
+                         ("--names", "up", "", "1m"))
+
+
+JOIN_TOKENS = ("K10" + "a1b2c3d4" * 8 + "::server:" + "0f9e8d7c" * 4, "Zx81" * 12)
+IMDS_TOKEN = "AQAEA" + "Nq7-_x" * 8 + "=="
+SSH_BLOCK = ("-----BEGIN SSH HOST KEY KEYS-----", "ecdsa-sha2-nistp256 AAAAE2" + "Vj" * 20 + " root@ip",
+             "-----END SSH HOST KEY KEYS-----")
+PRIVATE_BLOCK = ("-----BEGIN RSA " + "PRIVATE KEY-----", "MIIE" + "pQIB" * 15, "-----END RSA " + "PRIVATE KEY-----")
+
+
+FIRST_LINE_NOTICE = "<first line dropped: the console buffer may start inside a secret>"
+
+
+def unclosed_notice(line_count):
+    return f"<redacted key block never closed: {line_count} lines hidden>"
+
+
+def text_pieces(secret_text):
+    return {secret_text[start_index:start_index + 16] for start_index in range(len(secret_text) - 15)}
+
+
+def boot_trace(join_token, work_dir):
+    user_data = REPO_ROOT / "terraform" / "modules" / "fleet" / "user-data"
+    cp_text = (user_data / "cp.sh.tftpl").read_text()
+    agent_text = (user_data / "agent.sh.tftpl").read_text()
+    token_lines = cp_text[cp_text.index("IMDS_TOKEN=$("):cp_text.index("# Soft-cap")]
+    install_lines = agent_text[agent_text.index("curl -sfL https://get.k3s.io"):]
+    script_text = "set -euxo pipefail\nCPV=/cpv\n" + token_lines + install_lines
+    for template_text, value_text in (("${region}", "us-west-2"), ("${token_param}", "/p/token"),
+                                      ("${k3s_version}", "v1"), ("${server_url}", "https://10.0.0.1:6443"),
+                                      ("${node_label}", "role=app"), ("/etc/k3s-token", f"{work_dir}/k3s-token")):
+        script_text = script_text.replace(template_text, value_text)
+    fake_bin = Path(work_dir) / "bin"
+    fake_bin.mkdir()
+    for tool_name, tool_text in (("aws", f"echo '{join_token}'"),
+                                 ("curl", f"case \"$*\" in *PUT*) echo '{IMDS_TOKEN}';; *get.k3s*) echo true;; esac")):
+        (fake_bin / tool_name).write_text(f"#!/bin/sh\n{tool_text}\n")
+        (fake_bin / tool_name).chmod(0o755)
+    trace_run = subprocess.run(["bash", "-c", script_text], capture_output=True, text=True,
+                               env={**os.environ, "PATH": f"{fake_bin}:{os.environ['PATH']}"})
+    assert trace_run.returncode == 0, trace_run.stderr
+    return [f"[   31.{line_index:06d}] cloud-init[1893]: {text_line}"
+            for line_index, text_line in enumerate(trace_run.stderr.splitlines())]
+
+
+class BootRedactionTest(RepoCase):
+    def console_texts(self, console_text, *extra_words):
+        for stale_file in self.log_dir.glob("*"):
+            stale_file.unlink()
+        _, out_text, err_text = self.run_main(["bootlog", "i-0abc", *extra_words],
+                                              FakeEffects(stream_text=console_text))
+        return out_text, err_text, (self.log_dir / f"ops-bootlog-i-0abc-{STAMP_TEXT}.log").read_text()
+
+    def bootlog_texts(self, console_lines, *extra_words):
+        return self.console_texts("\n".join(["cut line", *console_lines]) + "\n", *extra_words)
+
+    def assert_hidden(self, shown_texts, secret_texts):
+        for shown_text in shown_texts:
+            for secret_text in secret_texts:
+                self.assertNotIn(secret_text, shown_text)
+
+    def test_no_token_of_a_real_trace_reaches_the_terminal_or_the_log_at_any_tail_length(self):
+        for join_token in JOIN_TOKENS:
+            with tempfile.TemporaryDirectory() as work_dir:
+                trace_lines = boot_trace(join_token, work_dir)
+            trace_text = "\n".join(trace_lines)
+            self.assertIn(f"+ TOKEN={join_token}", trace_text)
+            self.assertIn(f"+ echo {join_token}", trace_text)
+            self.assertIn(f"K3S_TOKEN={join_token}", trace_text)
+            self.assertIn(f"X-aws-ec2-metadata-token: {IMDS_TOKEN}", trace_text)
+            for tail_count in range(1, len(trace_lines) + 1):
+                shown_texts = self.bootlog_texts(trace_lines, "--lines", str(tail_count))
+                self.assert_hidden(shown_texts, (join_token, join_token[:12], IMDS_TOKEN))
+            self.assertIn("+ TOKEN=<redacted>", shown_texts[0])
+            for cut_offset in range(len(trace_text)):
+                self.assert_hidden(self.console_texts(trace_text[cut_offset:] + "\n", "--lines", "5000"),
+                                   text_pieces(join_token) | text_pieces(IMDS_TOKEN))
+
+    def test_no_piece_of_a_token_is_shown_when_the_buffer_is_cut_at_any_byte(self):
+        join_token = JOIN_TOKENS[0]
+        console_text = f"+ TOKEN={join_token}\n+ K3S_TOKEN={join_token}\nafter\n"
+        for cut_offset in range(console_text.index("after")):
+            shown_texts = self.console_texts(console_text[cut_offset:])
+            self.assert_hidden(shown_texts, text_pieces(join_token))
+            self.assertEqual(shown_texts[0].splitlines()[0], FIRST_LINE_NOTICE)
+            self.assertEqual(shown_texts[0].splitlines()[-1], "after")
+            self.assertIn(shown_texts[0], shown_texts[2])
+
+    def test_the_dropped_first_line_still_teaches_its_whole_token_and_opens_its_key_block(self):
+        shown_texts = self.console_texts(f"+ TOKEN={JOIN_TOKENS[1]}\nbare {JOIN_TOKENS[1]}\n")
+        self.assertEqual(shown_texts[0], f"{FIRST_LINE_NOTICE}\nbare <redacted>\n")
+        shown_texts = self.console_texts("\n".join([*PRIVATE_BLOCK, "after"]) + "\n")
+        self.assert_hidden(shown_texts, text_pieces(PRIVATE_BLOCK[1]))
+        self.assertTrue(shown_texts[0].endswith("\nafter\n"))
+        shown_texts = self.console_texts("\n".join(PRIVATE_BLOCK[:2]) + "\n")
+        self.assert_hidden(shown_texts, text_pieces(PRIVATE_BLOCK[1]))
+        self.assertIn("never closed", shown_texts[0])
+
+    def test_the_first_line_ends_at_a_newline_only_and_an_empty_console_says_nothing(self):
+        shown_texts = self.console_texts(f"tail\x0b{JOIN_TOKENS[1]}\x0c{JOIN_TOKENS[1]}\nafter\n")
+        self.assertEqual(shown_texts[0], f"{FIRST_LINE_NOTICE}\nafter\n")
+        self.assertEqual(self.console_texts(JOIN_TOKENS[1])[0], f"{FIRST_LINE_NOTICE}\n")
+        self.assertEqual(self.console_texts("")[0], "")
+
+    def test_a_buffer_cut_inside_a_key_marker_shows_no_body_line(self):
+        begin_line, body_line, end_line = PRIVATE_BLOCK
+        for cut_offset in range(1, len(begin_line) + 1):
+            shown_texts = self.console_texts("\n".join([begin_line[cut_offset:], body_line, end_line, "after"]) + "\n")
+            self.assert_hidden(shown_texts, text_pieces(body_line))
+            self.assertTrue(shown_texts[0].endswith("\nafter\n"))
+        for cut_offset in range(len(end_line) + 1):
+            shown_texts = self.console_texts("\n".join([end_line[cut_offset:], "middle", "after"]) + "\n")
+            self.assertEqual(shown_texts[0], f"{FIRST_LINE_NOTICE}\nmiddle\nafter\n")
+
+    def test_each_token_form_is_hidden_without_an_earlier_assignment(self):
+        for join_token in JOIN_TOKENS:
+            with tempfile.TemporaryDirectory() as work_dir:
+                echo_lines = [one_line for one_line in boot_trace(join_token, work_dir) if "+ echo " in one_line]
+            self.assertTrue(echo_lines)
+            self.assert_hidden(self.bootlog_texts(echo_lines), (join_token,))
+        for console_line in ("+ TOKEN=short1", "+ K3S_TOKEN='short1 x'", f"joined with {JOIN_TOKENS[0]}",
+                             "-H 'X-aws-ec2-metadata-token: short1'", "ssh-ed25519 AAAAshort1 root@ip"):
+            with self.subTest(console_line=console_line):
+                self.assert_hidden(self.bootlog_texts([console_line]), ("short1", JOIN_TOKENS[0]))
+
+    def test_key_blocks_are_hidden_also_when_the_output_starts_inside_one(self):
+        for key_block in (SSH_BLOCK, PRIVATE_BLOCK):
+            console_lines = ["before", *key_block, "after"]
+            for tail_count in range(1, 6):
+                shown_texts = self.bootlog_texts(console_lines, "--lines", str(tail_count))
+                self.assert_hidden(shown_texts, (key_block[1][:30],))
+                self.assertIn("after", shown_texts[0])
+            self.assert_hidden(self.bootlog_texts(console_lines[2:]), (key_block[1][:30],))
+
+    def stream_texts(self, stream_text):
+        for stale_file in self.log_dir.glob("*"):
+            stale_file.unlink()
+        fake_effects = FakeEffects(stream_text=stream_text, stream_exit=3)
+        exit_code, out_text, err_text = self.run_main(["metrics", "up"], fake_effects)
+        self.assertEqual(exit_code, 3)
+        self.assertNotIn("never closed", err_text)
+        return out_text, (self.log_dir / f"ops-metrics-{STAMP_TEXT}.log").read_text()
+
+    def test_an_unclosed_key_block_is_left_at_the_bound_and_announced(self):
+        body_lines = [f"body {line_number:03d}" for line_number in range(1, 301)]
+        hidden_count = ops_cli.KEY_BLOCK_MAX_LINES + 1
+        for shown_text in self.stream_texts("\n".join([PRIVATE_BLOCK[0], *body_lines]) + "\n"):
+            self.assertIn(f"<redacted key block>\n{unclosed_notice(hidden_count)}\nbody 129\nbody 130\n", shown_text)
+            self.assertIn("body 300\n", shown_text)
+            self.assertNotIn("body 128", shown_text)
+            self.assertEqual(shown_text.count("never closed"), 1)
+
+    def test_an_output_that_ends_inside_a_key_block_is_announced_on_stdout_and_in_the_log(self):
+        out_text, log_text = self.stream_texts("\n".join(["before", PRIVATE_BLOCK[0], "one", "two", "three"]) + "\n")
+        self.assertEqual(out_text, f"before\n<redacted key block>\n{unclosed_notice(4)}\n")
+        self.assertTrue(log_text.endswith(
+            f"before\n<redacted key block>\n{unclosed_notice(4)}\n\n# ops: exit 3\n"), log_text)
+        self.assertNotIn("three", log_text)
+        self.assertEqual(ops_cli.redact_text(f"{PRIVATE_BLOCK[0]} one\ntwo"),
+                         f"<redacted key block>\n{unclosed_notice(2)}\n")
+        err_buffer = io.StringIO()
+        with contextlib.redirect_stderr(err_buffer), ops_cli.redacted_streams():
+            print(PRIVATE_BLOCK[0], file=sys.stderr)
+        self.assertEqual(err_buffer.getvalue(), f"<redacted key block>\n{unclosed_notice(1)}\n")
+
+    def test_a_closed_key_block_up_to_the_bound_is_hidden_in_every_chunking(self):
+        body_lines = [f"MIIE{line_number:03d}pQIB" for line_number in range(ops_cli.KEY_BLOCK_MAX_LINES - 2)]
+        for lead_lines in ([], [PRIVATE_BLOCK[0], *["cut key"] * 100]):
+            text_lines = [f"{one_line}\n" for one_line in
+                          ["before", *lead_lines, PRIVATE_BLOCK[0], *body_lines, PRIVATE_BLOCK[2], "after"]]
+            for chunk_size in range(1, len(text_lines) + 1):
+                out_buffer = io.StringIO()
+                one_writer = ops_cli.RedactingWriter(out_buffer)
+                for start_index in range(0, len(text_lines), chunk_size):
+                    one_writer.write("".join(text_lines[start_index:start_index + chunk_size]))
+                one_writer.end_output()
+                self.assertNotIn("MIIE", out_buffer.getvalue())
+                self.assertNotIn("cut key", out_buffer.getvalue())
+                self.assertTrue(out_buffer.getvalue().endswith("after\n"))
+                self.assertEqual(out_buffer.getvalue().count(unclosed_notice(101)), 1 if lead_lines else 0)
+
+    def test_a_key_block_body_stays_hidden_when_the_end_marker_is_split_at_any_offset(self):
+        body_text = f"{PRIVATE_BLOCK[1]}\n" * 3
+        for split_offset in range(len(PRIVATE_BLOCK[2]) + 1):
+            out_buffer = io.StringIO()
+            one_writer = ops_cli.RedactingWriter(out_buffer)
+            for text_chunk in (PRIVATE_BLOCK[0] + "\n", body_text, PRIVATE_BLOCK[2][:split_offset],
+                               PRIVATE_BLOCK[2][split_offset:] + "\n"):
+                one_writer.write(text_chunk)
+            one_writer.end_output()
+            self.assert_hidden((out_buffer.getvalue(),), text_pieces(PRIVATE_BLOCK[1]))
+
+    def test_a_plan_log_that_ends_inside_a_key_block_still_holds_its_footer(self):
+        self.run_main(["tf", "plan", "rds"], FakeEffects(stream_text=f"{PRIVATE_BLOCK[0]}\none\n", stream_exit=1))
+        log_text = (self.log_dir / f"ops-tf-rds-{STAMP_TEXT}.log").read_text()
+        self.assertTrue(log_text.endswith(
+            f"<redacted key block>\n{unclosed_notice(2)}\n\n# ops: plan exit 1\n"), log_text)
+
+    def bootlog_with_stderr(self, **effect_values):
+        exit_code, out_text, err_text = self.run_main(["bootlog", "i-0abc"], FakeEffects(**effect_values))
+        return exit_code, out_text, err_text, (self.log_dir / f"ops-bootlog-i-0abc-{STAMP_TEXT}.log").read_text()
+
+    def test_a_warning_before_the_console_text_is_not_the_dropped_line(self):
+        exit_code, *shown_texts = self.bootlog_with_stderr(
+            stream_err=f"warning: old CLI password=hunter2x\n{PRIVATE_BLOCK[0]}\n",
+            stream_text=f"{JOIN_TOKENS[0][40:]}\nafter\n")
+        self.assertEqual(exit_code, 0)
+        self.assert_hidden(shown_texts, text_pieces(JOIN_TOKENS[0]) | {"hunter2x"})
+        out_text, err_text, log_text = shown_texts
+        self.assertEqual(out_text, f"{FIRST_LINE_NOTICE}\nafter\n")
+        self.assertIn("warning: old CLI password=<redacted>\n", err_text)
+        self.assertIn("warning: old CLI password=<redacted>\n", log_text)
+        self.assertIn(out_text, log_text)
+
+    def test_a_failed_console_read_shows_its_one_line_error(self):
+        exit_code, out_text, err_text, log_text = self.bootlog_with_stderr(
+            stream_err="aws: no such instance\n", stream_text="", stream_exit=1)
+        self.assertEqual((exit_code, out_text), (1, ""))
+        self.assertTrue(err_text.startswith("aws: no such instance\n"))
+        self.assertIn("aws: no such instance\n\n# ops: exit 1\n", log_text)
+
+    def test_two_blocks_in_one_chunk_and_a_bound_in_the_middle_of_a_chunk(self):
+        block_text = "\n".join(PRIVATE_BLOCK)
+        self.assertEqual(ops_cli.redact_text(f"a\n{block_text}\nb\n{block_text}\nc\n"),
+                         "a\n<redacted key block>\nb\n<redacted key block>\nc\n")
+        unclosed_text = f"a\n{PRIVATE_BLOCK[0]}\n" + "x\n" * 128 + "shown\n"
+        once_text = ops_cli.redact_text(unclosed_text)
+        self.assertEqual(once_text, f"a\n<redacted key block>\n{unclosed_notice(129)}\nshown\n")
+        self.assertEqual(ops_cli.redact_text(once_text), once_text)
+        late_end_text = ops_cli.redact_text(unclosed_text + f"{PRIVATE_BLOCK[2]}\nc\n")
+        self.assertEqual(late_end_text, f"a\n<redacted key block>\n{unclosed_notice(129)}\n<redacted key block>\nc\n")
+
+    def test_passwords_accounts_and_command_line_tokens_are_hidden(self):
+        console_lines = ["+ mysql --password=hunter2x", "+ mysql --password hunter2x", "DB_PASSWORD='hunter2x y'",
+                         '{"password": "hunter2x"}', "redis://u:hunter2x@h", "+ MYSQL_PWD=hunter2x",
+                         f"k3s agent --token {JOIN_TOKENS[1]}", f"{UNMAPPED_ID}.dkr.ecr.us-west-2.amazonaws.com/x",
+                         f"owner {PROFILE_ACCOUNTS['prod']}"]
+        shown_texts = self.bootlog_texts(console_lines)
+        self.assert_hidden(shown_texts, ("hunter2x", JOIN_TOKENS[1]))
+        self.assert_no_ids(*shown_texts)
+        self.assertEqual(len(shown_texts[0].splitlines()), len(console_lines) + 1)
+
+    def test_every_other_stream_is_redacted_line_by_line(self):
+        stream_lines = [f"+ TOKEN={JOIN_TOKENS[1]}", f"later {JOIN_TOKENS[1]}", *PRIVATE_BLOCK, "after"]
+        out_buffer = io.StringIO()
+        one_writer = ops_cli.RedactingWriter(out_buffer)
+        for one_line in stream_lines:
+            one_writer.write(one_line)
+            one_writer.write("\n")
+        self.assert_hidden((out_buffer.getvalue(),), (JOIN_TOKENS[1], PRIVATE_BLOCK[1]))
+        self.assertTrue(out_buffer.getvalue().endswith("after\n"))
+
+    def test_redaction_is_stable_and_leaves_ordinary_text_alone(self):
+        ordinary_text = ('kubernetes_secret: token bucket 3, 2026-11-09 sha256:' + "0f" * 32 +
+                         ' X-aws-ec2-metadata-token-ttl-seconds: 300 ~ random_password.k3s_token')
+        self.assertEqual(ops_cli.redact_text(ordinary_text), ordinary_text)
+        once_text = ops_cli.redact_text(f"+ TOKEN={JOIN_TOKENS[0]} --token x PASSWORD=y")
+        self.assertEqual(ops_cli.redact_text(once_text), once_text)
+
+    def test_a_plan_verdict_is_judged_on_account_redaction_only(self):
+        plan_info = ops_cli.plan_summary({"resource_changes": [
+            {"address": f'x.y["PASSWORD={key_text}"]', "type": "x", "change": {"actions": ["delete"]}}
+            for key_text in ("a", "b")]})
+        one_verdict = ops_cli.plan_verdict(plan_info, ops_cli.PlanRequest("rds", (), ('x.y["PASSWORD=a"]',)), "prod", "0")
+        self.assertEqual(one_verdict.unexpected_addresses, ('x.y["PASSWORD=b"]',))
 
 
 class PlanTest(RepoCase):
@@ -1168,6 +1492,8 @@ class ChecksMissingTest(unittest.TestCase):
         self.bare_cli = Path(self.temp_handle.name) / ".claude" / "skills" / "ops" / "bin" / "ops"
         self.bare_cli.parent.mkdir(parents=True)
         shutil.copy(CLI_FILE, self.bare_cli)
+        shutil.copytree(SKILL_DIR / "lib", self.bare_cli.parents[1] / "lib",
+                        ignore=shutil.ignore_patterns("__pycache__"))
 
     def tearDown(self):
         self.temp_handle.cleanup()
@@ -1209,6 +1535,44 @@ class ChecksMissingTest(unittest.TestCase):
         self.assert_fail_closed()
 
 
+class ModuleTest(unittest.TestCase):
+    def test_each_module_imports_only_the_ones_above_it(self):
+        for module_index, module_file in enumerate(MODULE_FILES):
+            imported_names = set(re.findall(r"^from opscli\.(\w+) import", module_file.read_text(), re.MULTILINE))
+            self.assertLessEqual(imported_names, set(MODULE_NAMES[:module_index]), module_file.name)
+
+    def test_the_entry_stays_small(self):
+        self.assertLess(len(CLI_FILE.read_text().splitlines()), 60)
+
+    def test_the_hook_loads_neither_terraform_nor_session_at_start(self):
+        probe_text = (f"import runpy, sys, io\nsys.argv = ['ops', 'hook']\n"
+                      f"sys.stdin = io.StringIO({json.dumps(json.dumps({'tool_input': {'command': 'git status'}}))})\n"
+                      f"try:\n    runpy.run_path({str(CLI_FILE)!r}, run_name='__main__')\nexcept SystemExit:\n    pass\n"
+                      f"print(sorted(m for m in sys.modules if m.startswith('opscli.')))")
+        probe_run = subprocess.run([sys.executable, "-I", "-c", probe_text], capture_output=True, text=True)
+        self.assertEqual(probe_run.stdout.strip(), "['opscli.hook', 'opscli.paths', 'opscli.redaction']",
+                         probe_run.stderr)
+
+    def test_a_run_writes_no_byte_code_and_works_through_a_link_from_anywhere(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            checkout_dir = Path(temp_dir) / "checkout"
+            shutil.copytree(REPO_ROOT / ".claude" / "skills" / "checks" / "bin",
+                            checkout_dir / ".claude/skills/checks/bin", ignore=shutil.ignore_patterns("__pycache__"))
+            for part_name in ("bin", "lib"):
+                shutil.copytree(SKILL_DIR / part_name, checkout_dir / ".claude/skills/ops" / part_name,
+                                ignore=shutil.ignore_patterns("__pycache__"))
+            link_path = Path(temp_dir) / "linked-ops"
+            link_path.symlink_to(checkout_dir / CLI_TEXT)
+            child_env = {env_key: env_value for env_key, env_value in os.environ.items()
+                         if env_key != "PYTHONDONTWRITEBYTECODE"}
+            for cli_words, stdin_text in ((["list"], ""), (["hook"], json.dumps(
+                    {"tool_input": {"command": "scripts/ops/terraform-run.sh -chdir=terraform/rds plan"}}))):
+                cli_run = subprocess.run([str(link_path), *cli_words], input=stdin_text, capture_output=True, text=True,
+                                         cwd="/", env=child_env)
+                self.assertEqual(cli_run.returncode, 2 if cli_words == ["hook"] else 0, cli_run.stderr)
+            self.assertEqual(list(Path(temp_dir).rglob("__pycache__")), [])
+
+
 class SystemEffectsTest(unittest.TestCase):
     def test_the_real_seam_runs_local_commands(self):
         system_effects = ops_cli.SystemEffects()
@@ -1223,6 +1587,11 @@ class SystemEffectsTest(unittest.TestCase):
             self.assertEqual(log_file.read(), "streamed\n")
         self.assertEqual(exit_code, 4)
         self.assertEqual(out_buffer.getvalue(), "streamed\n")
+        split_run = system_effects.run_split(["sh", "-c", "printf '\\200cut\\n'; echo wrong >&2; exit 4"],
+                                             dict(os.environ), "/")
+        self.assertEqual((split_run.returncode, split_run.stdout, split_run.stderr), (4, "�cut\n", "wrong\n"))
+        with self.assertRaisesRegex(ops_cli.OpsError, "absent-tool is not installed"):
+            system_effects.run_split(["absent-tool"], dict(os.environ), "/")
         own_rows = [argv_words for process_id, argv_words in system_effects.process_rows() if process_id == os.getpid()]
         self.assertEqual(len(own_rows), 1)
 
@@ -1295,6 +1664,11 @@ HOOK_CASES = (
     ("rg -n 'access/rds-query.sh' docs", None),
     ("cat scripts/ops/access/rds-query.sh", None),
     ("scripts/ops/access/staging-env.sh", None),
+    ("scripts/ops/access/fleet-nodes.sh", f"{CLI_TEXT} nodes"),
+    ("AWS_PROFILE=prod bash scripts/ops/access/fleet-nodes.sh seoul", f"{CLI_TEXT} nodes --site seoul"),
+    ("scripts/ops/access/boot-log.sh i-0abc seoul", f"{CLI_TEXT} bootlog i-0abc --site seoul"),
+    ("scripts/ops/access/argocd-app.sh oregon", f"{CLI_TEXT} app --site oregon"),
+    ("scripts/ops/access/metrics-query.sh --names up 6h", f"{CLI_TEXT} metrics up --since 6h --names"),
 )
 
 
@@ -1483,7 +1857,8 @@ class ProfileTest(unittest.TestCase):
         found_sites = [f"{script_file.relative_to(REPO_ROOT)}:{line_number}" for script_file, line_number, text_line
                        in self.script_lines() if DANTE_PROFILE.search(text_line)]
         self.assertEqual(found_sites, [])
-        self.assertNotRegex(CLI_FILE.read_text(), DANTE_PROFILE)
+        for code_file in (CLI_FILE, *MODULE_FILES):
+            self.assertNotRegex(code_file.read_text(), DANTE_PROFILE)
 
     def test_a_direct_call_without_credentials_names_ops_doctor(self):
         with tempfile.TemporaryDirectory() as fake_dir:

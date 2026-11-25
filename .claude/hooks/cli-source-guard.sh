@@ -4,7 +4,7 @@
 
 input=$(cat)
 tool_name=$(jq -r '.tool_name // empty' <<<"$input")
-cli_pattern='([^[:space:]"'"'"'=]*/)?\.claude/skills/[^/[:space:]]+/bin/[A-Za-z0-9_-]+'
+cli_pattern='([^[:space:]"'"'"'=]*/)?\.claude/skills/[^/[:space:]]+/(bin/[A-Za-z0-9_-]+|lib(/[^[:space:];&|()"'"'"']*)?)'
 
 case "$tool_name" in
   Read)
@@ -25,6 +25,11 @@ if [[ "$checkout" != /* ]]; then
 fi
 [[ -e "${checkout%/}/.claude/.cli-edit" ]] && exit 0
 
+if [[ "$cli_path" == */.claude/skills/*/lib* || "$cli_path" == .claude/skills/*/lib* ]]; then
+  skill_name=${cli_path#*.claude/skills/}
+  skill_name=${skill_name%%/*}
+  cli_path=${checkout}.claude/skills/$skill_name/bin/$skill_name
+fi
 cli_name=${cli_path##*/}
 echo "cli-source-guard: run '$cli_path help' instead of reading the source of $cli_name. A unit that changes this CLI creates ${checkout%/}/.claude/.cli-edit first." >&2
 exit 2

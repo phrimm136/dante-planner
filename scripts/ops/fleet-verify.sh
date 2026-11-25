@@ -18,28 +18,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LIB_DIR="$SCRIPT_DIR/lib"
 # shellcheck source=lib/common.sh
 source "$LIB_DIR/common.sh"
+# shellcheck source=lib/control-plane.sh
+source "$LIB_DIR/control-plane.sh"
 # shellcheck source=lib/etcd-interval.sh
 source "$LIB_DIR/etcd-interval.sh"
 
 TF_ROOT="$SCRIPT_DIR/../../terraform"
-CHECK_BOUND_SECONDS=180
-POLL_SECONDS=5
-
-site_region() {
-    case "$1" in
-        oregon) echo us-west-2 ;;
-        seoul) echo ap-northeast-2 ;;
-        *) return 1 ;;
-    esac
-}
-
-resolve_cp_id() {
-    if [[ -n "${CP_INSTANCE_ID:-}" ]]; then
-        echo "$CP_INSTANCE_ID"
-        return
-    fi
-    terraform -chdir="$TF_ROOT/$1" output -raw cp_instance_id
-}
 
 fetch_kubeconfig() {
     local site="$1" param dest
@@ -94,39 +78,6 @@ else
   printf '%s\n' METRIC_PROXY_FAILED
 fi
 REMOTE
-}
-
-# The remote script is JSON-encoded line-by-line with jq so quoting inside the commands
-# (the pod's own $MYSQL_HOST, kubectl -o custom-columns) survives the send-command boundary.
-run_checks_on_cp() {
-    local cp_id="$1" params cmd_id status waited=0
-    params=$(jq -n --arg s "$(remote_checks)" '{commands: ($s | split("\n"))}')
-    cmd_id=$(aws ssm send-command --region "$AWS_REGION" \
-        --instance-ids "$cp_id" \
-        --document-name "AWS-RunShellScript" \
-        --parameters "$params" \
-        --query 'Command.CommandId' --output text)
-    while :; do
-        status=$(aws ssm get-command-invocation --region "$AWS_REGION" --command-id "$cmd_id" \
-            --instance-id "$cp_id" --query 'Status' --output text 2>/dev/null || echo Pending)
-        case "$status" in
-            Pending | InProgress | Delayed) ;;
-            *) break ;;
-        esac
-        if [[ "$waited" -ge "$CHECK_BOUND_SECONDS" ]]; then
-            log_error "the control plane did not answer within ${CHECK_BOUND_SECONDS} seconds; status $status" >&2
-            return 1
-        fi
-        sleep "$POLL_SECONDS"
-        waited=$((waited + POLL_SECONDS))
-    done
-    if [[ "$status" != Success ]]; then
-        log_error "the check command on the control plane ended with status $status" >&2
-        return 1
-    fi
-    aws ssm get-command-invocation --region "$AWS_REGION" \
-        --command-id "$cmd_id" --instance-id "$cp_id" \
-        --query 'StandardOutputContent' --output text
 }
 
 NODES_NOT_READY='$2!="Ready"{print $1}'
@@ -278,9 +229,9 @@ main() {
     if [[ "$want_kubeconfig" -eq 1 ]]; then
         fetch_kubeconfig "$site"
     fi
-    cp_id=$(resolve_cp_id "$site")
+    cp_id=$(control_plane_id "$TF_ROOT/$site")
     log_info "Verifying the $site fleet via its CP ($AWS_REGION)"
-    output=$(run_checks_on_cp "$cp_id") || exit 1
+    output=$(run_on_control_plane "$AWS_REGION" "$cp_id" "$(remote_checks)") || exit 1
     echo "$output"
     verdict "$output" "$interval"
 }

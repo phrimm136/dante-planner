@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Read metrics from Grafana Cloud Mimir (the query side of deploy/chart/templates/prometheus.yaml).
-# Usage: metrics-query.sh '<promql>' [since] [step]
+# Usage: metrics-query.sh [--names] '<promql>' [since] [step]
 #   since: relative window like 24h/2d (default 1h); step default 5m.
 # Examples:
 #   metrics-query.sh 'up'
@@ -11,7 +11,12 @@ set -euo pipefail
 
 MIMIR_HOST="https://prometheus-prod-56-prod-us-east-2.grafana.net"
 
-QUERY=${1:?usage: metrics-query.sh '<promql>' [since] [step]}
+NAMES=false
+if [ "${1:-}" = --names ]; then
+  NAMES=true
+  shift
+fi
+QUERY=${1:?usage: metrics-query.sh [--names] '<promql>' [since] [step]}
 SINCE=${2:-1h}
 STEP=${3:-5m}
 START=$(date -u -d "-$(echo "$SINCE" | sed -E 's/m$/ minutes/;s/h$/ hours/;s/d$/ days/')" +%s)
@@ -34,5 +39,6 @@ curl -sS -G -K <(printf 'user = "%s:%s"\n' "$MM_USER" "$MM_TOKEN") \
   --data-urlencode "start=${START}" \
   --data-urlencode "end=${END}" \
   --data-urlencode "step=${STEP}" |
-jq -r '.data.result[] | (.metric | del(.__name__) | to_entries | map("\(.key)=\(.value)") | join(",")) as $labels
-  | .values[] | "\(.[0] | todate)  \(.[1])  \($labels)"'
+jq -r --argjson names "$NAMES" '.data.result[] | (if $names then (.metric.__name__ // "-") + "  " else "" end) as $name
+  | (.metric | del(.__name__) | to_entries | map("\(.key)=\(.value)") | join(",")) as $labels
+  | .values[] | "\(.[0] | todate)  \(.[1])  \($name)\($labels)"'
