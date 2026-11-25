@@ -32,17 +32,15 @@ public class RateLimitService {
     }
 
     public void check(RateLimitPolicy policy, Long userId, String endpoint) {
-        consumeOrThrow(policy, policy.subjectPrefix() + userId, endpoint, userId.toString());
+        consumeOrThrow(policy, userId.toString(), endpoint, userId.toString());
     }
 
     public void check(RateLimitPolicy policy, String identifier) {
-        consumeOrThrow(policy, policy.subjectPrefix() + identifier, requireOwnEndpoint(policy),
-                NO_USER);
+        consumeOrThrow(policy, identifier, requireOwnEndpoint(policy), NO_USER);
     }
 
     public void check(RateLimitPolicy policy, UUID deviceId) {
-        consumeOrThrow(policy, policy.subjectPrefix() + deviceId, requireOwnEndpoint(policy),
-                NO_USER);
+        consumeOrThrow(policy, deviceId.toString(), requireOwnEndpoint(policy), NO_USER);
     }
 
     private static String requireOwnEndpoint(RateLimitPolicy policy) {

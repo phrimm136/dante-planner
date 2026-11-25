@@ -51,6 +51,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import io.lettuce.core.RedisConnectionException;
 import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.resource.DefaultClientResources;
@@ -66,6 +67,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -78,6 +80,8 @@ class RateLimitStoreOutageTest {
     private static final int REFUSED_PORT = 1;
     private static final Duration BUCKET_TTL = Duration.ofHours(1);
     private static final String FRONTEND_URL = "https://planner.example";
+    private static final String UNAUTHENTICATED_CHARGE =
+            "A user-keyed rate-limit policy was charged without an authenticated principal";
     private static final String NOT_CONNECTED = "Rate-limit store not connected";
     private static final ClientResources CLIENT_RESOURCES = DefaultClientResources.create();
 
@@ -277,17 +281,79 @@ class RateLimitStoreOutageTest {
             rateLimitStore.failNext(new RedisConnectionException("down"));
             mockMvc.perform(get("/api/planner/md/published")).andExpect(status().isOk());
 
-            assertThat(interceptorLog.at(Level.WARN)).hasSize(2);
+            assertThat(interceptorLog.at(Level.WARN)).extracting(ILoggingEvent::getFormattedMessage)
+                    .containsExactly("Rate-limit store unavailable, serving fail-open policies unmetered: down",
+                            "Rate-limit store unavailable, serving fail-open policies unmetered: down");
         }
         assertThat(skipped(RateLimitPolicy.PUBLIC_READ)).isEqualTo(4.0);
         assertThat(chargedKeys()).hasSize(5).allSatisfy(key -> assertThat(key).endsWith(":public-read"));
     }
 
     @Test
+    void failClosedHandler_WhenStoreUnreachable_AnswersUnavailableWithoutALogLine() throws Exception {
+        rateLimitStore.failNext(new RedisConnectionException("down"));
+
+        try (LogCapture interceptorLog = LogCapture.onThisThread(RateLimitInterceptor.class)) {
+            mvcAgainst().perform(get("/api/fixture/fail-closed"))
+                    .andExpect(status().isServiceUnavailable())
+                    .andExpect(jsonPath("$.code").value("RATE_LIMIT_TEMPORARILY_UNAVAILABLE"));
+
+            assertThat(interceptorLog.events()).isEmpty();
+        }
+        assertThat(meterRegistry.find(SKIPPED_COUNTER).counter()).isNull();
+    }
+
+    @Test
+    void failClosedHandler_WhenTheRateLimitBreakerIsOpen_AnswersUnavailable() throws Exception {
+        roleHealth = RoleOutages.withOpen(RedisRole.RATE_LIMIT);
+
+        mvcAgainst().perform(get("/api/fixture/fail-closed"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.code").value("RATE_LIMIT_TEMPORARILY_UNAVAILABLE"));
+
+        assertThat(meterRegistry.find(SKIPPED_COUNTER).counter()).isNull();
+    }
+
+    @Test
+    void googleCallback_WhenTheStoreStaysUnreachable_WarnsEveryTime() throws Exception {
+        MockMvc mockMvc = mvcAgainst();
+
+        try (LogCapture interceptorLog = LogCapture.onThisThread(RateLimitInterceptor.class)) {
+            for (int request = 0; request < 2; request++) {
+                rateLimitStore.failNext(new RedisConnectionException("down"));
+                mockMvc.perform(get("/api/auth/google/callback").param("code", "any").param("state", "any"))
+                        .andExpect(status().isFound());
+            }
+
+            assertThat(interceptorLog.at(Level.WARN)).extracting(ILoggingEvent::getFormattedMessage)
+                    .containsExactly("Rate-limit store unavailable on a browser-navigation endpoint: down",
+                            "Rate-limit store unavailable on a browser-navigation endpoint: down");
+        }
+    }
+
+    @Test
+    void userKeyedHandler_WhenNoPrincipalOrAnotherKindIsSignedIn_FailsWithoutCharging() throws Exception {
+        MockMvc mockMvc = mvcAgainst();
+
+        assertThat(failureOf(mockMvc)).hasMessage(UNAUTHENTICATED_CHARGE);
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("anonymousUser", null, List.of()));
+        assertThat(failureOf(mockMvc)).hasMessage(UNAUTHENTICATED_CHARGE);
+
+        assertThat(chargedKeys()).isEmpty();
+    }
+
+    @Test
     void policies_WhenClassified_OnlyAuthFailsClosed() {
         assertThat(List.of(RateLimitPolicy.values()))
-                .filteredOn(RateLimitPolicy::failsClosed)
+                .filteredOn(policy -> policy.onStoreFailure() == RateLimitPolicy.OnStoreFailure.REFUSE)
                 .containsExactly(RateLimitPolicy.AUTH);
+    }
+
+    private static Exception failureOf(MockMvc mockMvc) throws Exception {
+        return mockMvc.perform(get("/api/fixture/inherited"))
+                .andExpect(status().isInternalServerError())
+                .andReturn().getResolvedException();
     }
 
     private MockMvc mvcAgainst() {

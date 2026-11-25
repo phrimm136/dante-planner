@@ -22,6 +22,7 @@ import io.lettuce.core.RedisConnectionException;
 import io.lettuce.core.RedisException;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.LoginRedirect;
@@ -141,31 +142,56 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     private boolean withoutStore(
             RateLimited declaration, HttpServletResponse response, Supplier<RuntimeException> unavailable) {
-        RateLimitPolicy policy = declaration.value();
-        if (policy.failsClosed()) {
-            if (declaration.denial() != RateLimitDenial.REDIRECT_LOGIN) {
-                throw unavailable.get();
+        return switch (OutageResponse.of(declaration.value().onStoreFailure(), declaration.denial())) {
+            case FAIL -> throw unavailable.get();
+            case REDIRECT_LOGIN -> redirectToLogin(response, LoginRedirect.UNAVAILABLE);
+            case ADMIT -> {
+                meterRegistry.counter(CHARGE_SKIPPED_COUNTER, POLICY_TAG, declaration.value().name()).increment();
+                yield true;
             }
-            return redirectToLogin(response, LoginRedirect.UNAVAILABLE);
-        }
-        meterRegistry.counter(CHARGE_SKIPPED_COUNTER, POLICY_TAG, policy.name()).increment();
-        return true;
+        };
     }
 
     private void warnStoreUnavailable(RateLimited declaration, RuntimeException unavailable) {
-        RateLimitPolicy policy = declaration.value();
-        if (policy.failsClosed()) {
-            if (declaration.denial() == RateLimitDenial.REDIRECT_LOGIN) {
-                log.warn("Rate-limit store unavailable on a browser-navigation endpoint: {}",
-                        unavailable.getMessage());
-            }
-            return;
-        }
-        if (storeUnavailable.compareAndSet(false, true)) {
-            log.warn("Rate-limit store unavailable, serving fail-open policies unmetered: {}",
+        switch (OutageResponse.of(declaration.value().onStoreFailure(), declaration.denial())) {
+            case FAIL -> { }
+            case REDIRECT_LOGIN -> log.warn("Rate-limit store unavailable on a browser-navigation endpoint: {}",
                     unavailable.getMessage());
-        } else {
-            log.debug("Rate-limit store still unavailable, {} charge skipped: {}", policy, unavailable.getMessage());
+            case ADMIT -> warnUnmetered(declaration.value(), unavailable);
+        }
+    }
+
+    private void warnUnmetered(RateLimitPolicy policy, RuntimeException unavailable) {
+        switch (OutageSighting.of(storeUnavailable.compareAndSet(false, true))) {
+            case FIRST -> log.warn("Rate-limit store unavailable, serving fail-open policies unmetered: {}",
+                    unavailable.getMessage());
+            case REPEATED -> log.debug("Rate-limit store still unavailable, {} charge skipped: {}",
+                    policy, unavailable.getMessage());
+        }
+    }
+
+    private enum OutageResponse {
+        FAIL,
+        REDIRECT_LOGIN,
+        ADMIT;
+
+        static OutageResponse of(RateLimitPolicy.OnStoreFailure onStoreFailure, RateLimitDenial denial) {
+            return switch (onStoreFailure) {
+                case ADMIT -> ADMIT;
+                case REFUSE -> switch (denial) {
+                    case RESPOND -> FAIL;
+                    case REDIRECT_LOGIN -> REDIRECT_LOGIN;
+                };
+            };
+        }
+    }
+
+    private enum OutageSighting {
+        FIRST,
+        REPEATED;
+
+        static OutageSighting of(boolean first) {
+            return first ? FIRST : REPEATED;
         }
     }
 
@@ -195,12 +221,44 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     }
 
     private long authenticatedUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof Long userId)) {
-            throw new IllegalStateException(
-                    "A user-keyed rate-limit policy was charged without an authenticated principal");
+        return switch (SignIn.of(SecurityContextHolder.getContext().getAuthentication())) {
+            case SignIn.Absent absent -> throw unauthenticatedCharge();
+            case SignIn.Present present -> switch (Payer.of(present.authentication().getPrincipal())) {
+                case Payer.User user -> user.userId();
+                case Payer.Unidentified unidentified -> throw unauthenticatedCharge();
+            };
+        };
+    }
+
+    private static IllegalStateException unauthenticatedCharge() {
+        return new IllegalStateException(
+                "A user-keyed rate-limit policy was charged without an authenticated principal");
+    }
+
+    private sealed interface SignIn {
+
+        record Present(Authentication authentication) implements SignIn {
         }
-        return userId;
+
+        record Absent() implements SignIn {
+        }
+
+        static SignIn of(@Nullable Authentication authentication) {
+            return authentication == null ? new Absent() : new Present(authentication);
+        }
+    }
+
+    private sealed interface Payer {
+
+        record User(long userId) implements Payer {
+        }
+
+        record Unidentified() implements Payer {
+        }
+
+        static Payer of(@Nullable Object principal) {
+            return principal instanceof Long userId ? new User(userId) : new Unidentified();
+        }
     }
 
     private boolean deny(HandlerMethod handlerMethod, HttpServletRequest request,

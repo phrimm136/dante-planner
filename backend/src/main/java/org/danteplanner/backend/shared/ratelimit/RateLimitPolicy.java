@@ -10,25 +10,25 @@ import org.danteplanner.backend.shared.ratelimit.RateLimitProperties.BucketConfi
  */
 public enum RateLimitPolicy {
 
-    CRUD(RateLimitProperties::crud, new Endpoint.CallerNamed(), "", Subject.USER, false),
+    CRUD(RateLimitProperties::crud, new Endpoint.CallerNamed(), Subject.USER, OnStoreFailure.ADMIT),
 
-    SSE(RateLimitProperties::sse, new Endpoint.Fixed("sse"), "", Subject.USER, false),
+    SSE(RateLimitProperties::sse, new Endpoint.Fixed("sse"), Subject.USER, OnStoreFailure.ADMIT),
 
-    COMMENT(RateLimitProperties::comment, new Endpoint.Fixed("comment"), "", Subject.USER, false),
+    COMMENT(RateLimitProperties::comment, new Endpoint.Fixed("comment"), Subject.USER, OnStoreFailure.ADMIT),
 
-    REPORT(RateLimitProperties::report, new Endpoint.Fixed("report"), "", Subject.USER, false),
+    REPORT(RateLimitProperties::report, new Endpoint.Fixed("report"), Subject.USER, OnStoreFailure.ADMIT),
 
-    MODERATION(RateLimitProperties::moderation, new Endpoint.Fixed("moderation"), "", Subject.USER, false),
+    MODERATION(RateLimitProperties::moderation, new Endpoint.Fixed("moderation"), Subject.USER, OnStoreFailure.ADMIT),
 
-    AUTH(RateLimitProperties::auth, new Endpoint.Fixed("auth"), "", Subject.CLIENT, true),
+    AUTH(RateLimitProperties::auth, new Endpoint.Fixed("auth"), Subject.CLIENT, OnStoreFailure.REFUSE),
 
-    PLANNER_COMMENT_SSE(RateLimitProperties::sse, new Endpoint.Fixed("planner-comment-sse"), "", Subject.CLIENT, false),
+    PLANNER_COMMENT_SSE(RateLimitProperties::sse, new Endpoint.Fixed("planner-comment-sse"), Subject.CLIENT, OnStoreFailure.ADMIT),
 
-    PUBLIC_READ(RateLimitProperties::publicRead, new Endpoint.Fixed("public-read"), "", Subject.CLIENT, false),
+    PUBLIC_READ(RateLimitProperties::publicRead, new Endpoint.Fixed("public-read"), Subject.CLIENT, OnStoreFailure.ADMIT),
 
-    PLANNER_STATS(RateLimitProperties::plannerStats, new Endpoint.Fixed("planner-stats"), "", Subject.CLIENT, false),
+    PLANNER_STATS(RateLimitProperties::plannerStats, new Endpoint.Fixed("planner-stats"), Subject.CLIENT, OnStoreFailure.ADMIT),
 
-    VIEW_RECORD(RateLimitProperties::viewRecord, new Endpoint.Fixed("view-record"), "", Subject.CLIENT, false);
+    VIEW_RECORD(RateLimitProperties::viewRecord, new Endpoint.Fixed("view-record"), Subject.CLIENT, OnStoreFailure.ADMIT);
 
     public sealed interface Endpoint {
 
@@ -46,31 +46,35 @@ public enum RateLimitPolicy {
         CLIENT
     }
 
+    public enum OnStoreFailure {
+
+        REFUSE,
+
+        ADMIT
+    }
+
     private final Function<RateLimitProperties, BucketConfig> bucket;
     private final Endpoint endpoint;
-    private final String subjectPrefix;
     private final Subject subject;
-    private final boolean failClosed;
+    private final OnStoreFailure onStoreFailure;
 
     RateLimitPolicy(
             Function<RateLimitProperties, BucketConfig> bucket,
             Endpoint endpoint,
-            String subjectPrefix,
             Subject subject,
-            boolean failClosed) {
+            OnStoreFailure onStoreFailure) {
         this.bucket = bucket;
         this.endpoint = endpoint;
-        this.subjectPrefix = subjectPrefix;
         this.subject = subject;
-        this.failClosed = failClosed;
+        this.onStoreFailure = onStoreFailure;
     }
 
     public Subject subject() {
         return subject;
     }
 
-    public boolean failsClosed() {
-        return failClosed;
+    public OnStoreFailure onStoreFailure() {
+        return onStoreFailure;
     }
 
     public boolean requiresCallerNamedEndpoint() {
@@ -86,9 +90,5 @@ public enum RateLimitPolicy {
 
     Endpoint endpoint() {
         return endpoint;
-    }
-
-    String subjectPrefix() {
-        return subjectPrefix;
     }
 }

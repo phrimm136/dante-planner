@@ -27,6 +27,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import ch.qos.logback.classic.Level;
 
 import java.time.Clock;
+import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CsrfDoubleSubmitFilterTest {
 
     private CsrfDoubleSubmitFilter filter;
+    private CsrfTokenService expiredMinter;
     private String token;
 
     @BeforeEach
@@ -46,6 +48,8 @@ class CsrfDoubleSubmitFilterTest {
         JwtProperties jwtProperties = new JwtProperties(null, null, key, 900000L, 604800000L);
         CsrfTokenService csrfTokenService = new CsrfTokenService(jwtProperties, Clock.systemUTC());
         token = csrfTokenService.mint();
+        expiredMinter = new CsrfTokenService(jwtProperties,
+                Clock.offset(Clock.systemUTC(), Duration.ofDays(-8)));
 
         CookieUtils cookieUtils = new CookieUtils(true, "", "Lax");
         filter = new CsrfDoubleSubmitFilter(
@@ -136,6 +140,84 @@ class CsrfDoubleSubmitFilterTest {
     }
 
     @Nested
+    class CookieReissue {
+
+        private MockHttpServletResponse responseTo(String method, String cookie, String header) throws Exception {
+            MockHttpServletRequest req = request(method, "/api/planner/md/1");
+            if (cookie != null) {
+                req.setCookies(csrfCookie(cookie));
+            }
+            if (header != null) {
+                req.addHeader(CsrfDoubleSubmitFilter.CSRF_HEADER, header);
+            }
+            MockHttpServletResponse res = new MockHttpServletResponse();
+            filter.doFilter(req, res, new MockFilterChain());
+            return res;
+        }
+
+        private void assertReissued(MockHttpServletResponse res) {
+            Cookie reissued = responseCsrfCookie(res);
+            assertThat(reissued).isNotNull();
+            assertThat(reissued.getValue()).isNotEqualTo(token);
+            assertThat(reissued.getMaxAge()).isEqualTo(604800);
+            assertThat(reissued.getPath()).isEqualTo("/");
+            assertThat(reissued.getAttribute("SameSite")).isEqualTo("Lax");
+        }
+
+        private void assertCsrfTokenInvalid(MockHttpServletResponse res) throws Exception {
+            assertThat(res.getStatus()).isEqualTo(HttpServletResponse.SC_FORBIDDEN);
+            assertThat((String) JsonPath.read(res.getContentAsString(), "$.code")).isEqualTo("CSRF_TOKEN_INVALID");
+        }
+
+        @Test
+        void serverIssuedCookie_WhenPresented_IsNeverReissued() throws Exception {
+            assertThat(responseCsrfCookie(responseTo("GET", token, null))).isNull();
+            assertThat(responseCsrfCookie(responseTo("POST", token, token))).isNull();
+            assertThat(responseCsrfCookie(responseTo("POST", token, null))).isNull();
+            assertThat(responseCsrfCookie(responseTo("POST", token, "different-token"))).isNull();
+        }
+
+        @Test
+        void expiredCookie_WhenEchoed_IsReissuedAndRejected() throws Exception {
+            String expired = expiredMinter.mint();
+
+            MockHttpServletResponse res = responseTo("POST", expired, expired);
+
+            assertCsrfTokenInvalid(res);
+            assertReissued(res);
+        }
+
+        @Test
+        void unrecognizedCookie_WhenEchoed_IsReissuedAndRejected() throws Exception {
+            String forgedMac = token.substring(0, token.lastIndexOf('.') + 1) + "AAAA";
+            for (String planted : new String[]{"", ".", "a", "a.b.!", ".AAAA", forgedMac}) {
+                MockHttpServletResponse res = responseTo("POST", planted, planted);
+
+                assertCsrfTokenInvalid(res);
+                assertReissued(res);
+            }
+        }
+
+        @Test
+        void unrecognizedCookie_WhenTheMethodIsSafe_IsReissuedAndPasses() throws Exception {
+            for (String method : new String[]{"GET", "HEAD", "OPTIONS"}) {
+                MockHttpServletResponse res = responseTo(method, expiredMinter.mint(), null);
+
+                assertThat(res.getStatus()).as(method).isEqualTo(HttpServletResponse.SC_OK);
+                assertReissued(res);
+            }
+        }
+
+        @Test
+        void missingCookie_WhenTheHeaderIsSent_IsReissuedAndRejected() throws Exception {
+            MockHttpServletResponse res = responseTo("POST", null, token);
+
+            assertCsrfTokenInvalid(res);
+            assertReissued(res);
+        }
+    }
+
+    @Nested
     class RejectionLog {
 
         private static final String USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64)";
@@ -169,6 +251,25 @@ class CsrfDoubleSubmitFilterTest {
             req.addHeader(CsrfDoubleSubmitFilter.CSRF_HEADER, "attacker-planted-value");
 
             assertThat(rejectionLine(req)).contains("reason=INVALID_COOKIE");
+        }
+
+        @Test
+        void mutation_WhenCookieEmptyOrExpired_LogsInvalidCookie() throws Exception {
+            for (String cookie : new String[]{"", expiredMinter.mint()}) {
+                MockHttpServletRequest req = request("POST", "/api/planner/md/1");
+                req.setCookies(csrfCookie(cookie));
+
+                assertThat(rejectionLine(req)).contains("reason=INVALID_COOKIE");
+            }
+        }
+
+        @Test
+        void mutation_WhenHeaderEmpty_LogsNoHeader() throws Exception {
+            MockHttpServletRequest req = request("POST", "/api/planner/md/1");
+            req.setCookies(csrfCookie(token));
+            req.addHeader(CsrfDoubleSubmitFilter.CSRF_HEADER, "");
+
+            assertThat(rejectionLine(req)).contains("reason=NO_HEADER");
         }
 
         @Test

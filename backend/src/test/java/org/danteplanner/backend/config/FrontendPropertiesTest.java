@@ -48,6 +48,8 @@ class FrontendPropertiesTest {
         assertThat(properties.resolveReturnTo("not a url")).isEqualTo("http://localhost:5173");
         assertThat(properties.resolveReturnTo(null)).isEqualTo("http://localhost:5173");
         assertThat(properties.resolveReturnTo("   ")).isEqualTo("http://localhost:5173");
+        assertThat(properties.resolveReturnTo("")).isEqualTo("http://localhost:5173");
+        assertThat(properties.resolveReturnTo("http:///planner/1")).isEqualTo("http://localhost:5173");
     }
 
     @Test

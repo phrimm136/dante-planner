@@ -12,6 +12,7 @@ import org.jspecify.annotations.Nullable;
 
 import org.danteplanner.backend.shared.exception.ProblemWriter;
 import org.danteplanner.backend.shared.exception.Problems;
+import org.danteplanner.backend.shared.security.CsrfTokenService.TokenOutcome;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.backend.shared.util.LogValues;
@@ -25,7 +26,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.Optional;
 import java.util.Set;
 
 import static net.logstash.logback.argument.StructuredArguments.kv;
@@ -46,7 +46,30 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
     static final int COOKIE_MAX_AGE_SECONDS = 604800;
 
     /** INVALID_COOKIE covers a bad MAC and a token past its lifetime alike. */
-    private enum Verdict { ACCEPTED, NO_COOKIE, INVALID_COOKIE, NO_HEADER, MISMATCH }
+    private enum Verdict {
+        ACCEPTED, NO_COOKIE, INVALID_COOKIE, NO_HEADER, MISMATCH;
+
+        static Verdict of(String method, TokenOutcome cookie, @Nullable String headerToken) {
+            if (SAFE_METHODS.contains(method)) {
+                return ACCEPTED;
+            }
+            return switch (cookie) {
+                case TokenOutcome.Absent absent -> NO_COOKIE;
+                case TokenOutcome.Unrecognized unrecognized -> INVALID_COOKIE;
+                case TokenOutcome.ServerIssued issued -> ofEcho(issued.value(), headerToken);
+            };
+        }
+
+        private static Verdict ofEcho(String cookieToken, @Nullable String headerToken) {
+            if (headerToken == null || headerToken.isEmpty()) {
+                return NO_HEADER;
+            }
+            boolean echoed = MessageDigest.isEqual(
+                    cookieToken.getBytes(StandardCharsets.UTF_8),
+                    headerToken.getBytes(StandardCharsets.UTF_8));
+            return echoed ? ACCEPTED : MISMATCH;
+        }
+    }
 
     private static final Set<String> SAFE_METHODS = Set.of("GET", "HEAD", "OPTIONS");
 
@@ -69,44 +92,25 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-        Optional<String> cookieToken = cookieUtils.getCookieValue(request, CookieConstants.CSRF);
-        boolean serverIssued = cookieToken.map(csrfTokenService::isValid).orElse(false);
-
-        if (!serverIssued) {
-            cookieUtils.setReadableCookie(
-                    response, CookieConstants.CSRF, csrfTokenService.mint(), COOKIE_MAX_AGE_SECONDS);
+        TokenOutcome cookie = cookieUtils.getCookieValue(request, CookieConstants.CSRF)
+                .map(csrfTokenService::parse)
+                .orElseGet(TokenOutcome.Absent::new);
+        switch (cookie) {
+            case TokenOutcome.ServerIssued issued -> { }
+            case TokenOutcome.Unrecognized unrecognized -> issueCookie(response);
+            case TokenOutcome.Absent absent -> issueCookie(response);
         }
 
-        if (requiresEnforcement(request)) {
-            Verdict verdict = verdict(cookieToken, serverIssued, RequestHeaders.csrfToken(request));
-            if (verdict != Verdict.ACCEPTED) {
-                reject(verdict, request, response);
-                return;
-            }
+        Verdict verdict = Verdict.of(request.getMethod(), cookie, RequestHeaders.csrfToken(request));
+        switch (verdict) {
+            case ACCEPTED -> filterChain.doFilter(request, response);
+            case NO_COOKIE, INVALID_COOKIE, NO_HEADER, MISMATCH -> reject(verdict, request, response);
         }
-
-        filterChain.doFilter(request, response);
     }
 
-    private boolean requiresEnforcement(HttpServletRequest request) {
-        return !SAFE_METHODS.contains(request.getMethod());
-    }
-
-    private static Verdict verdict(Optional<String> cookieToken, boolean serverIssued,
-            @Nullable String headerToken) {
-        if (cookieToken.isEmpty()) {
-            return Verdict.NO_COOKIE;
-        }
-        if (!serverIssued) {
-            return Verdict.INVALID_COOKIE;
-        }
-        if (headerToken == null || headerToken.isEmpty()) {
-            return Verdict.NO_HEADER;
-        }
-        boolean echoed = MessageDigest.isEqual(
-                cookieToken.orElseThrow().getBytes(StandardCharsets.UTF_8),
-                headerToken.getBytes(StandardCharsets.UTF_8));
-        return echoed ? Verdict.ACCEPTED : Verdict.MISMATCH;
+    private void issueCookie(HttpServletResponse response) {
+        cookieUtils.setReadableCookie(
+                response, CookieConstants.CSRF, csrfTokenService.mint(), COOKIE_MAX_AGE_SECONDS);
     }
 
     private void reject(Verdict verdict, HttpServletRequest request, HttpServletResponse response)
