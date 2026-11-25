@@ -499,12 +499,10 @@ def text_pieces(secret_text):
 
 
 def boot_trace(join_token, work_dir):
-    user_data = REPO_ROOT / "terraform" / "modules" / "fleet" / "user-data"
-    cp_text = (user_data / "cp.sh.tftpl").read_text()
-    agent_text = (user_data / "agent.sh.tftpl").read_text()
-    token_lines = cp_text[cp_text.index("IMDS_TOKEN=$("):cp_text.index("# Soft-cap")]
-    install_lines = agent_text[agent_text.index("curl -sfL https://get.k3s.io"):]
-    script_text = "set -euxo pipefail\nCPV=/cpv\n" + token_lines + install_lines
+    # Pet nodes keep the boot script they were built with, and the older one prints the join token
+    # in its trace; these are its token and install steps.
+    fixture_text = (Path(__file__).parent / "fixtures" / "pet-node-boot.sh.tftpl").read_text()
+    script_text = "set -euxo pipefail\nCPV=/cpv\n" + fixture_text
     for template_text, value_text in (("${region}", "us-west-2"), ("${token_param}", "/p/token"),
                                       ("${k3s_version}", "v1"), ("${server_url}", "https://10.0.0.1:6443"),
                                       ("${node_label}", "role=app"), ("/etc/k3s-token", f"{work_dir}/k3s-token")):

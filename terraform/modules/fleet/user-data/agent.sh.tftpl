@@ -1,11 +1,15 @@
 #!/bin/bash
 set -euxo pipefail
 
+${boot_lib}
 # AL2023 ships awscli v2 in most AMIs; guard in case it is absent.
-command -v aws >/dev/null 2>&1 || dnf install -y awscli-2 || dnf install -y awscli
+command -v aws >/dev/null 2>&1 || retry install_awscli
 
-TOKEN=$(aws ssm get-parameter --with-decryption --region ${region} \
-  --name "${token_param}" --query 'Parameter.Value' --output text)
+fetch_token() {
+  (umask 077 && aws ssm get-parameter --with-decryption --region ${region} \
+    --name "${token_param}" --query 'Parameter.Value' --output text > /etc/k3s-token)
+}
+retry fetch_token
 %{ if set_nofile ~}
 
 # App nodes hold ~500 SSE connections; the fd ceiling is the only real cost
@@ -22,7 +26,7 @@ UNIT
 # from a private repo without a static imagePullSecret. arm64 fleet (t4g).
 CPV=/var/lib/rancher/credentialprovider
 mkdir -p "$CPV/bin"
-curl -sfL -o "$CPV/bin/ecr-credential-provider" \
+retry curl -sSfL -o "$CPV/bin/ecr-credential-provider" \
   "https://artifacts.k8s.io/binaries/cloud-provider-aws/${cred_provider_version}/linux/arm64/ecr-credential-provider-linux-arm64"
 chmod +x "$CPV/bin/ecr-credential-provider"
 cat > "$CPV/config.yaml" <<'CPCFG'
@@ -36,7 +40,12 @@ providers:
     apiVersion: credentialprovider.kubelet.k8s.io/v1
 CPCFG
 
-curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="${k3s_version}" K3S_TOKEN="$TOKEN" \
-  INSTALL_K3S_EXEC="agent --server ${server_url} --node-label ${node_label} \
+retry curl -sSfL -o /root/k3s-install.sh https://get.k3s.io
+# Forced: a second run that finds unchanged files skips the service start and exits 0.
+install_k3s() {
+  INSTALL_K3S_VERSION="${k3s_version}" INSTALL_K3S_FORCE_RESTART=true \
+    INSTALL_K3S_EXEC="agent --server ${server_url} --token-file /etc/k3s-token --node-label ${node_label} \
     --kubelet-arg=image-credential-provider-config=$CPV/config.yaml \
-    --kubelet-arg=image-credential-provider-bin-dir=$CPV/bin" sh -
+    --kubelet-arg=image-credential-provider-bin-dir=$CPV/bin" sh /root/k3s-install.sh
+}
+retry install_k3s

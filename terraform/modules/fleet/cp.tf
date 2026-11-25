@@ -92,6 +92,7 @@ locals {
     eso_chart_version   = var.external_secrets_chart_version
     image_repository    = local.backend_ecr_repository_url
 
+    boot_lib                = file("${path.module}/user-data/boot-lib.sh")
     install_scrape_annotate = file("${path.module}/user-data/scrape-annotate-install.sh")
   })
 }

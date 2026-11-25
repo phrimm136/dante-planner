@@ -1,25 +1,9 @@
 #!/bin/bash
 set -euxo pipefail
 
-# Retry a command up to 5 times (10s apart) before giving up. Network-dependent
-# bootstrap steps (CRD applies off raw.githubusercontent, the GitOps clone) are
-# otherwise single-shot: one transient failure under `set -e` aborts the whole
-# unattended boot, leaving a half-built control plane. Written with $@/$n (no
-# brace expansion) so templatefile does not read them as Terraform interpolations.
-retry() {
-  n=0
-  until "$@"; do
-    n=$((n + 1))
-    if [ "$n" -ge 5 ]; then
-      echo "FATAL: command failed after 5 attempts: $*"
-      return 1
-    fi
-    sleep 10
-  done
-}
-
-command -v aws >/dev/null 2>&1 || dnf install -y awscli-2 || dnf install -y awscli
-command -v git >/dev/null 2>&1 || dnf install -y git
+${boot_lib}
+command -v aws >/dev/null 2>&1 || retry install_awscli
+command -v git >/dev/null 2>&1 || retry dnf install -y git
 
 # 1 GiB swap as an overload valve: without swap, memory exhaustion evicts
 # executable pages and the host thrashes alive (apiserver and SSM stall but the
@@ -36,13 +20,15 @@ sysctl --system
 # CP private IP (IMDSv2 — IMDSv1 is disabled). Used as a k3s API cert SAN and in
 # the published kubeconfig so operators reach the API in-VPC without SSH. The CP
 # cannot get this from Terraform (self-reference in its own user_data = cycle).
-IMDS_TOKEN=$(curl -sf -X PUT http://169.254.169.254/latest/api/token -H 'X-aws-ec2-metadata-token-ttl-seconds: 300')
-CP_PRIVATE_IP=$(curl -sf -H "X-aws-ec2-metadata-token: $IMDS_TOKEN" http://169.254.169.254/latest/meta-data/local-ipv4)
+IMDS_TOKEN=$(retry curl -sSf -X PUT http://169.254.169.254/latest/api/token -H 'X-aws-ec2-metadata-token-ttl-seconds: 300')
+CP_PRIVATE_IP=$(retry curl -sSf -H "X-aws-ec2-metadata-token: $IMDS_TOKEN" http://169.254.169.254/latest/meta-data/local-ipv4)
 
-TOKEN=$(aws ssm get-parameter --with-decryption --region ${region} \
-  --name "${token_param}" --query 'Parameter.Value' --output text)
 umask 077
-echo "$TOKEN" > /etc/k3s-token
+fetch_token() {
+  aws ssm get-parameter --with-decryption --region ${region} \
+    --name "${token_param}" --query 'Parameter.Value' --output text > /etc/k3s-token
+}
+retry fetch_token
 
 # Soft-cap the k3s server Go heap (apiserver, etcd, scheduler, controllers in
 # one process — the node's dominant memory consumer). Near the cap the GC
@@ -68,14 +54,19 @@ K3SCONFIG
 # ship to S3. SQLite default has no etcd and cannot snapshot. Bundled Traefik
 # and servicelb are disabled: Traefik is deployed from deploy/chart on the
 # ingress node with Gateway API.
-curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="${k3s_version}" INSTALL_K3S_EXEC="server \
+retry curl -sSfL -o /root/k3s-install.sh https://get.k3s.io
+# Forced: a second run that finds unchanged files skips the service start and exits 0.
+install_k3s() {
+  INSTALL_K3S_VERSION="${k3s_version}" INSTALL_K3S_FORCE_RESTART=true INSTALL_K3S_EXEC="server \
   --cluster-init \
   --token-file /etc/k3s-token \
   --tls-san $CP_PRIVATE_IP \
   --disable traefik \
   --disable servicelb \
   --node-taint node-role.kubernetes.io/control-plane=true:NoSchedule \
-  --etcd-expose-metrics=true" sh -
+  --etcd-expose-metrics=true" sh /root/k3s-install.sh
+}
+retry install_k3s
 
 export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 until kubectl get nodes >/dev/null 2>&1; do sleep 5; done
@@ -84,7 +75,7 @@ until kubectl get nodes >/dev/null 2>&1; do sleep 5; done
 # a cert SAN via --tls-san) so operators fetch cluster access without SSH.
 # set +x so the embedded client key never lands in the cloud-init log.
 set +x
-aws ssm put-parameter --region ${region} --name "${kubeconfig_param}" \
+retry aws ssm put-parameter --region ${region} --name "${kubeconfig_param}" \
   --type SecureString --tier Intelligent-Tiering --overwrite \
   --value "$(sed 's#https://127.0.0.1:6443#https://'"$CP_PRIVATE_IP"':6443#' /etc/rancher/k3s/k3s.yaml)"
 set -x
@@ -92,7 +83,7 @@ set -x
 # ArgoCD core per cluster (reconciler only, no API server / UI — hub-spoke
 # rejected, no cross-region deploy dependency).
 kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
-kubectl apply -n argocd \
+retry kubectl apply -n argocd \
   -f https://raw.githubusercontent.com/argoproj/argo-cd/${argocd_version}/manifests/core-install.yaml
 
 # The chart references no submodules (static/data is baked into the backend
@@ -132,10 +123,11 @@ retry kubectl apply -f \
 # AWS SDK default-chain credential resolves to the app node instance profile —
 # the role granted secretsmanager:GetSecretValue (no-IRSA boundary). App nodes
 # may still be joining; ESO stays Pending until one is Ready, then schedules.
-curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-helm repo add external-secrets https://charts.external-secrets.io
-helm repo update
-helm upgrade --install external-secrets external-secrets/external-secrets \
+retry curl -sSfL -o /root/get-helm-3 https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+retry bash /root/get-helm-3
+retry helm repo add external-secrets https://charts.external-secrets.io
+retry helm repo update
+retry helm upgrade --install external-secrets external-secrets/external-secrets \
   --namespace external-secrets --create-namespace \
   --version ${eso_chart_version} \
   --set installCRDs=true \

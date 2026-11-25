@@ -44,6 +44,7 @@ locals {
     node_label            = "role=ingress"
     set_nofile            = false
     cred_provider_version = var.ecr_credential_provider_version
+    boot_lib              = file("${path.module}/user-data/boot-lib.sh")
   })
 }
 
