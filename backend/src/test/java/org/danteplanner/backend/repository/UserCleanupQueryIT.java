@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import org.junit.jupiter.api.Tag;
@@ -25,6 +26,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Tag("containerized")
 @Import(TestConfig.class)
 class UserCleanupQueryIT extends SharedMySqlContainerSupport {
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Autowired
     private UserRepository userRepository;
@@ -46,7 +50,8 @@ class UserCleanupQueryIT extends SharedMySqlContainerSupport {
 
     private Long scheduledFor(String email, Instant permanentDeleteAt) {
         User user = TestDataFactory.createTestUser(userRepository, email);
-        user.softDelete(Instant.now(), permanentDeleteAt);
-        return userRepository.save(user).getId();
+        transactionTemplate.executeWithoutResult(status ->
+                userRepository.softDelete(user.getId(), Instant.now(), permanentDeleteAt));
+        return user.getId();
     }
 }

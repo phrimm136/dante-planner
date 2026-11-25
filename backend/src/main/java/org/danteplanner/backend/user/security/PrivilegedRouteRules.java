@@ -27,6 +27,7 @@ import org.danteplanner.backend.shared.exception.DomainException;
 import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.backend.shared.security.SecurityRuleProvider;
 import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.api.Restriction;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserBannedException;
 import org.danteplanner.backend.user.api.UserTimedOutException;
@@ -89,10 +90,11 @@ public class PrivilegedRouteRules implements SecurityRuleProvider {
             return Optional.of(belowRole(minimum));
         }
         UserSummary user = UsersApiAdapter.toSummary(actor.get());
-        return switch (user.restrictionState(clock.instant())) {
-            case TIMED_OUT -> Optional.of(new UserTimedOutException(user.id(), user.requireTimeoutUntil()));
-            case BANNED -> Optional.of(new UserBannedException(user.id(), user.requireBannedAt()));
-            case ACTIVE -> user.role().hasRankAtLeast(minimum)
+        return switch (user.restriction(clock.instant())) {
+            case Restriction.Banned banned -> Optional.of(new UserBannedException(user.id(), banned.at()));
+            case Restriction.TimedOut timedOut ->
+                    Optional.of(new UserTimedOutException(user.id(), timedOut.until()));
+            case Restriction.Active active -> user.role().hasRankAtLeast(minimum)
                     ? Optional.empty()
                     : Optional.of(belowRole(minimum));
         };

@@ -159,7 +159,6 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
 
         // Assert - user is no longer banned
         User refreshed = userRepository.findById(regularUser.getId()).orElseThrow();
-        assertThat(refreshed.isBanned()).isFalse();
         assertThat(refreshed.getBannedAt()).isNull();
 
         // Scoped to the user this test moderated: the table also holds every other test's actions.
@@ -273,5 +272,46 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isTimedOut", is(true)))
                 .andExpect(jsonPath("$.timeoutUntil").exists());
+    }
+
+    @Test
+    void publish_WhenOwnerBannedAndTimedOut_IsRefusedByTheBanUntilItIsLifted() throws Exception {
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, false);
+        userModerationService.timeoutUser(adminUser.getId(), regularUser.getId(), 60, "Test timeout");
+        userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Also banned");
+
+        mockMvc.perform(post("/api/planner/md/" + planner.getId() + "/publish").with(withCsrf()).cookie(userCookie()))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code", is("USER_BANNED")));
+
+        userModerationService.unbanUser(adminUser.getId(), regularUser.getId(), "Test unban");
+
+        mockMvc.perform(post("/api/planner/md/" + planner.getId() + "/publish").with(withCsrf()).cookie(userCookie()))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code", is("USER_TIMED_OUT")));
+    }
+
+    @Test
+    void getMe_WhenBannedAndTimedOut_ReturnsOnlyTheBanUntilItIsLifted() throws Exception {
+        userModerationService.timeoutUser(adminUser.getId(), regularUser.getId(), 60, "Test timeout");
+        userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Also banned");
+
+        mockMvc.perform(get("/api/auth/me").cookie(userCookie()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isBanned", is(true)))
+                .andExpect(jsonPath("$.bannedAt").exists())
+                .andExpect(jsonPath("$.banReason", is("Also banned")))
+                .andExpect(jsonPath("$.isTimedOut").doesNotExist())
+                .andExpect(jsonPath("$.timeoutUntil").doesNotExist())
+                .andExpect(jsonPath("$.timeoutReason").doesNotExist());
+
+        userModerationService.unbanUser(adminUser.getId(), regularUser.getId(), "Test unban");
+
+        mockMvc.perform(get("/api/auth/me").cookie(userCookie()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.isBanned").doesNotExist())
+                .andExpect(jsonPath("$.isTimedOut", is(true)))
+                .andExpect(jsonPath("$.timeoutUntil").exists())
+                .andExpect(jsonPath("$.timeoutReason", is("Test timeout")));
     }
 }

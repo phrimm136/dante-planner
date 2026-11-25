@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -36,6 +37,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ModerationRosterIT extends SharedMySqlContainerSupport {
 
     @Autowired
+    private TransactionTemplate transactionTemplate;
+
+    @Autowired
     private ModerationQueryService moderationQueryService;
 
     @Autowired
@@ -49,8 +53,9 @@ class ModerationRosterIT extends SharedMySqlContainerSupport {
     void roster_WhenAccountSoftDeleted_OmitsIt() {
         User active = TestDataFactory.createTestUser(userRepository, "active@example.com");
         User removed = TestDataFactory.createTestUser(userRepository, "removed@example.com");
-        removed.softDelete(Instant.now(), Instant.now().plus(30, ChronoUnit.DAYS));
-        userRepository.save(removed);
+        transactionTemplate.executeWithoutResult(status ->
+                userRepository.softDelete(
+                        removed.getId(), Instant.now(), Instant.now().plus(30, ChronoUnit.DAYS)));
 
         List<String> roster = moderationQueryService.getAllUsers().value().stream()
                 .map(ModeratedUserResponse::usernameSuffix)

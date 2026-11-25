@@ -129,7 +129,7 @@ class AuthenticationServiceTest {
                     .provider(AuthProviderType.GOOGLE)
                     .providerId("deleted-123")
                     .build();
-            deletedUser.softDelete(Instant.now(), Instant.now().plusSeconds(86400 * 30));
+            TestDataFactory.softDelete(deletedUser, Instant.now(), Instant.now().plusSeconds(86400 * 30));
             users.add(deletedUser);
 
             oauthProvider.answer(new OAuthTokens.Response("access", null),
@@ -187,7 +187,7 @@ class AuthenticationServiceTest {
         void authenticateWithOAuth_WhenTheAccountIsSoftDeleted_ReactivatesAfterBothLookupsAndLogsIt() {
             CallOrder calls = new CallOrder(true);
             User deleted = activeUser();
-            deleted.softDelete(Instant.now(), Instant.now().plusSeconds(86400 * 30));
+            TestDataFactory.softDelete(deleted, Instant.now(), Instant.now().plusSeconds(86400 * 30));
             calls.add(deleted);
             oauthProvider.answer(new OAuthTokens.Response("access", null),
                     new OAuthUserInfo("raced-123", "raced@example.com"));

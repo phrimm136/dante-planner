@@ -17,11 +17,11 @@ import org.danteplanner.backend.moderation.dto.TimeoutRequest;
 import org.danteplanner.backend.moderation.dto.TimeoutResponse;
 import org.danteplanner.backend.moderation.dto.UnpublishPlannerResponse;
 import org.danteplanner.backend.user.api.UserSummary;
-import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.moderation.service.CommentModerationService;
 import org.danteplanner.backend.moderation.service.ModerationQueryService;
 import org.danteplanner.backend.moderation.service.PlannerModerationService;
 import org.danteplanner.backend.moderation.service.UserModerationService;
+import org.danteplanner.backend.moderation.service.UserModerationService.RestrictedAccount;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
@@ -57,10 +57,10 @@ public class ModerationController {
         log.info("Moderator {} timing out user with suffix {} for {} minutes with reason: {}",
                 actor.userId(), usernameSuffix, request.durationMinutes(), request.reason());
 
-        User user = userModerationService.timeoutUserBySuffix(actor.userId(), usernameSuffix, request.durationMinutes(), request.reason());
+        RestrictedAccount account = userModerationService.timeoutUserBySuffix(actor.userId(), usernameSuffix, request.durationMinutes(), request.reason());
         return ResponseEntity.ok(TimeoutResponse.builder()
-                .usernameSuffix(user.getUsernameSuffix())
-                .timeoutUntil(user.getTimeoutUntil())
+                .usernameSuffix(account.usernameSuffix())
+                .timeoutUntil(account.timeoutUntil())
                 .message("User timed out successfully")
                 .build());
     }
@@ -74,10 +74,10 @@ public class ModerationController {
 
         log.info("Moderator {} removing timeout from user with suffix {} with reason: {}", actor.userId(), usernameSuffix, request.reason());
 
-        User user = userModerationService.removeTimeoutBySuffix(actor.userId(), usernameSuffix, request.reason());
+        RestrictedAccount account = userModerationService.removeTimeoutBySuffix(actor.userId(), usernameSuffix, request.reason());
         return ResponseEntity.ok(TimeoutResponse.builder()
-                .usernameSuffix(user.getUsernameSuffix())
-                .timeoutUntil(user.getTimeoutUntil())
+                .usernameSuffix(account.usernameSuffix())
+                .timeoutUntil(account.timeoutUntil())
                 .message("Timeout removed successfully")
                 .build());
     }
@@ -104,8 +104,8 @@ public class ModerationController {
 
         log.info("Admin {} banning user with suffix {} with reason: {}", actor.userId(), usernameSuffix, request.reason());
 
-        User user = userModerationService.banUserBySuffix(actor.userId(), usernameSuffix, request.reason());
-        return ResponseEntity.ok(new BanStatusResponse(user.isBanned(), "User banned successfully"));
+        RestrictedAccount account = userModerationService.banUserBySuffix(actor.userId(), usernameSuffix, request.reason());
+        return ResponseEntity.ok(BanStatusResponse.of(account.restriction(), "User banned successfully"));
     }
 
     @RestrictionExempt(reason = "privileged route: PrivilegedRouteRules checks the live actor")
@@ -117,8 +117,8 @@ public class ModerationController {
 
         log.info("Admin {} unbanning user with suffix {} with reason: {}", actor.userId(), usernameSuffix, request.reason());
 
-        User user = userModerationService.unbanUserBySuffix(actor.userId(), usernameSuffix, request.reason());
-        return ResponseEntity.ok(new BanStatusResponse(user.isBanned(), "User unbanned successfully"));
+        RestrictedAccount account = userModerationService.unbanUserBySuffix(actor.userId(), usernameSuffix, request.reason());
+        return ResponseEntity.ok(BanStatusResponse.of(account.restriction(), "User unbanned successfully"));
     }
 
     @RateLimitExempt

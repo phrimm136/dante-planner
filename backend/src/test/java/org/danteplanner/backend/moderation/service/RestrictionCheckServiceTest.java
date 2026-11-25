@@ -31,30 +31,30 @@ class RestrictionCheckServiceTest {
 
     @Test
     void requireUnrestricted_WhenTheUserIsBanned_RefusesWithTheBanCode() {
-        user.setBannedAt(NOW.minus(Duration.ofDays(1)));
+        TestDataFactory.ban(user, NOW.minus(Duration.ofDays(1)), null);
 
         assertRejected(() -> check.requireUnrestricted(user.getId())).withCode("USER_BANNED");
     }
 
     @Test
     void requireUnrestricted_WhenTheUserIsTimedOut_RefusesWithTheTimeoutCode() {
-        user.setTimeoutUntil(NOW.plus(Duration.ofMinutes(1)));
+        TestDataFactory.timeOut(user, NOW.plus(Duration.ofMinutes(1)));
 
         assertRejected(() -> check.requireUnrestricted(user.getId())).withCode("USER_TIMED_OUT");
     }
 
     @Test
     void requireUnrestricted_WhenTheTimeoutHasEnded_Passes() {
-        user.setTimeoutUntil(NOW);
+        TestDataFactory.timeOut(user, NOW);
 
         assertThatCode(() -> check.requireUnrestricted(user.getId())).doesNotThrowAnyException();
     }
 
     @Test
-    void requireUnrestricted_WhenTheUserIsBothBannedAndTimedOut_RefusesWithTheTimeoutCode() {
-        user.setBannedAt(NOW.minus(Duration.ofDays(1)));
-        user.setTimeoutUntil(NOW.plus(Duration.ofMinutes(1)));
+    void requireUnrestricted_WhenTheUserIsBothBannedAndTimedOut_RefusesWithTheBanCode() {
+        TestDataFactory.ban(user, NOW.minus(Duration.ofDays(1)), null);
+        TestDataFactory.timeOut(user, NOW.plus(Duration.ofMinutes(1)));
 
-        assertRejected(() -> check.requireUnrestricted(user.getId())).withCode("USER_TIMED_OUT");
+        assertRejected(() -> check.requireUnrestricted(user.getId())).withCode("USER_BANNED");
     }
 }

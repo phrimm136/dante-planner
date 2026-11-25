@@ -568,8 +568,7 @@ class PlannerPublishingServiceTest {
 
         @Test
         void unpublish_WhenBannedOwner_Unpublishes() {
-            testUser.setBannedAt(java.time.Instant.now());
-            testUser.setBannedBy(1L);
+            TestDataFactory.ban(testUser, java.time.Instant.now(), 1L);
             Planner planner = testPlannerBuilder().published(true).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
             lenient().when(plannerRepository.findOwnershipById(planner.getId()))

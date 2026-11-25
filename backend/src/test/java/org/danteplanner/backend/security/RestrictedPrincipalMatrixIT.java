@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
@@ -108,6 +109,9 @@ class RestrictedPrincipalMatrixIT extends SharedMySqlContainerSupport {
     @Autowired private MockMvc mockMvc;
 
     @Autowired
+    private TransactionTemplate transactionTemplate;
+
+    @Autowired
     @Qualifier("requestMappingHandlerMapping")
     private RequestMappingHandlerMapping handlerMapping;
 
@@ -126,8 +130,8 @@ class RestrictedPrincipalMatrixIT extends SharedMySqlContainerSupport {
      */
     private Cookie freshBannedPrincipal() {
         User banned = TestDataFactory.createTestUser(userRepository, "banned@example.com");
-        banned.setBannedAt(Instant.now());
-        userRepository.save(banned);
+        transactionTemplate.executeWithoutResult(status ->
+                userRepository.ban(banned.getId(), banned.getRole(), null, Instant.now()));
         return AuthCookies.accessToken(TestDataFactory.generateAccessToken(jwtTokenService, banned));
     }
 

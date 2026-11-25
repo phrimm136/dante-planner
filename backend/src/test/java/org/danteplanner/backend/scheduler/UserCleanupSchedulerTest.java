@@ -70,7 +70,7 @@ class UserCleanupSchedulerTest {
 
     private User createExpiredUser(Long id) {
         User user = TestDataFactory.unsavedUser(id);
-        user.softDelete(Instant.now(), Instant.now().minusSeconds(86400)); // Expired 1 day ago
+        TestDataFactory.softDelete(user, Instant.now(), Instant.now().minusSeconds(86400)); // Expired 1 day ago
         return user;
     }
 

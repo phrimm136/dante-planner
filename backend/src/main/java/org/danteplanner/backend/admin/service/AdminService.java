@@ -5,6 +5,7 @@ import org.danteplanner.backend.moderation.api.ModerationTargetType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.user.api.RoleChange;
+import org.danteplanner.backend.user.api.RoleShift;
 import org.danteplanner.backend.user.api.UserMiss;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserSummary;
@@ -35,19 +36,27 @@ public class AdminService {
         UserRole oldRole = change.previousRole();
         UserSummary updated = change.user();
 
-        boolean demotion = oldRole.outranks(newRole);
-        auditService.record(actorId, updated.publicId().toString(),
-                demotion ? ModerationActionType.DEMOTE : ModerationActionType.PROMOTE,
-                ModerationTargetType.USER, oldRole + " -> " + newRole);
-
-        if (demotion) {
-            log.info("User {} demoted from {} to {} by admin {}", targetId, oldRole, newRole, actorId);
-        } else {
-            log.info("User {} role changed from {} to {} by admin {}",
-                    targetId, oldRole, newRole, actorId);
+        switch (RoleShift.of(oldRole, newRole)) {
+            case DEMOTED -> {
+                audit(actorId, updated, ModerationActionType.DEMOTE, oldRole, newRole);
+                log.info("User {} demoted from {} to {} by admin {}", targetId, oldRole, newRole, actorId);
+            }
+            case PROMOTED -> {
+                audit(actorId, updated, ModerationActionType.PROMOTE, oldRole, newRole);
+                log.info("User {} role changed from {} to {} by admin {}",
+                        targetId, oldRole, newRole, actorId);
+            }
+            case SAME -> throw new IllegalStateException(
+                    "role change of user " + targetId + " kept the role " + newRole);
         }
 
         return updated;
+    }
+
+    private void audit(Long actorId, UserSummary target, ModerationActionType action,
+            UserRole oldRole, UserRole newRole) {
+        auditService.record(actorId, target.publicId().toString(), action,
+                ModerationTargetType.USER, oldRole + " -> " + newRole);
     }
 
     @Transactional(readOnly = true)

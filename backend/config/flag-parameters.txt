@@ -20,4 +20,3 @@ org.danteplanner.backend.shared.gtid.GtidWriteCapture.recordCommit(java.lang.Str
 org.danteplanner.backend.shared.readpath.ChosenReadSource.record(java.lang.String, boolean)
 org.danteplanner.backend.shared.redis.AuthReadSources.sourceOrder(boolean, org.danteplanner.backend.shared.redis.RoleGated, org.danteplanner.backend.shared.redis.RoleGated)
 org.danteplanner.backend.shared.util.ClientIpResolver$ClientIpEvidence.of(java.lang.String, boolean)
-org.danteplanner.backend.user.entity.UserSettings.chooseSync(boolean)

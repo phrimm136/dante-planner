@@ -6,6 +6,8 @@ import org.danteplanner.backend.shared.exception.ConstraintViolationClassifier;
 import org.hibernate.exception.ConstraintViolationException;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
+import org.danteplanner.backend.shared.failure.WriteOutcome;
+import org.danteplanner.backend.user.api.Restriction;
 import org.danteplanner.backend.user.api.dto.UserResponse;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;
@@ -18,6 +20,8 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.RandomUsernameGenerator.UsernameComponents;
 import org.danteplanner.backend.user.validation.EpithetValidator;
 import org.danteplanner.backend.user.validation.EpithetValidator.Epithet;
+import org.danteplanner.backend.user.validation.RoleChangeValidator.AllowedRoleChange;
+import org.danteplanner.backend.user.validation.WrittenAccount;
 import org.danteplanner.backend.shared.freshness.FreshnessExempt;
 import org.danteplanner.backend.shared.freshness.ScopedRead;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -27,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -134,18 +139,20 @@ public class UserService {
                 .usernameSuffix(user.getUsernameSuffix())
                 .role(user.getRole().name());
 
-        if (user.isBanned()) {
-            builder.isBanned(true)
-                    .bannedAt(user.getBannedAt());
-            restrictionReasonProvider.latestBanReason(user.getPublicId())
-                    .ifPresent(builder::banReason);
-        }
-
-        if (user.isTimedOut(clock.instant())) {
-            builder.isTimedOut(true)
-                    .timeoutUntil(user.getTimeoutUntil());
-            restrictionReasonProvider.latestTimeoutReason(user.getPublicId())
-                    .ifPresent(builder::timeoutReason);
+        switch (Restriction.of(user.getBannedAt(), user.getTimeoutUntil(), clock.instant())) {
+            case Restriction.Active active -> { }
+            case Restriction.Banned banned -> {
+                builder.isBanned(true)
+                        .bannedAt(banned.at());
+                restrictionReasonProvider.latestBanReason(user.getPublicId())
+                        .ifPresent(builder::banReason);
+            }
+            case Restriction.TimedOut timedOut -> {
+                builder.isTimedOut(true)
+                        .timeoutUntil(timedOut.until());
+                restrictionReasonProvider.latestTimeoutReason(user.getPublicId())
+                        .ifPresent(builder::timeoutReason);
+            }
         }
 
         return builder.build();
@@ -245,11 +252,53 @@ public class UserService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException(userId));
 
-        user.setUsernameEpithet(epithet.getValue());
-        FreshnessDeclarations.declare(new FreshnessScope.User(userId), new FreshnessScope.Global());
+        WrittenAccount written = WrittenAccount.of(userId,
+                WriteOutcome.of(userRepository.changeEpithet(userId, epithet.getValue(), clock.instant())));
+        FreshnessDeclarations.declare(new FreshnessScope.User(written.userId()), new FreshnessScope.Global());
 
         log.info("User {} updated username epithet to {}", userId, epithet.getValue());
 
-        return toResponse(user);
+        return toResponse(user.toBuilder().usernameEpithet(epithet.getValue()).build());
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public User changeRole(AllowedRoleChange allowed) {
+        User target = allowed.getTarget();
+        WrittenAccount written = WrittenAccount.of(target.getId(),
+                WriteOutcome.of(userRepository.changeRole(target.getId(), target.getRole(), allowed.getNewRole(), clock.instant())));
+        FreshnessDeclarations.declare(new FreshnessScope.User(written.userId()));
+        return target.toBuilder().role(allowed.getNewRole()).build();
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void timeOut(User target, Instant until) {
+        WrittenAccount written = WrittenAccount.of(target.getId(),
+                WriteOutcome.of(userRepository.timeOut(
+                        target.getId(), target.getRole(), until, clock.instant())));
+        FreshnessDeclarations.declare(new FreshnessScope.User(written.userId()));
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void clearTimeout(User target) {
+        WrittenAccount written = WrittenAccount.of(target.getId(),
+                WriteOutcome.of(userRepository.clearTimeout(
+                        target.getId(), target.getRole(), clock.instant())));
+        FreshnessDeclarations.declare(new FreshnessScope.User(written.userId()));
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void ban(User target, Long actorId, Instant at) {
+        WrittenAccount written = WrittenAccount.of(target.getId(),
+                WriteOutcome.of(userRepository.ban(
+                        target.getId(), target.getRole(), actorId, at)));
+        FreshnessDeclarations.declare(new FreshnessScope.User(written.userId()));
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void unban(User target) {
+        WrittenAccount written = WrittenAccount.of(target.getId(),
+                WriteOutcome.of(userRepository.unban(
+                        target.getId(), target.getRole(), clock.instant())));
+        FreshnessDeclarations.declare(new FreshnessScope.User(written.userId()));
     }
 }

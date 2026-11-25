@@ -367,13 +367,16 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     }
 
     private User timedOut(User user) {
-        user.setTimeoutUntil(Instant.now().plus(Duration.ofHours(1)));
-        return userRepository.save(user);
+        new TransactionTemplate(transactionManager).executeWithoutResult(status ->
+                userRepository.timeOut(
+                        user.getId(), user.getRole(), Instant.now().plus(Duration.ofHours(1)), Instant.now()));
+        return user;
     }
 
     private User banned(User user) {
-        user.setBannedAt(Instant.now());
-        return userRepository.save(user);
+        new TransactionTemplate(transactionManager).executeWithoutResult(status ->
+                userRepository.ban(user.getId(), user.getRole(), null, Instant.now()));
+        return user;
     }
 
     private String json(Object body) throws Exception {

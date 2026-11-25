@@ -20,6 +20,8 @@ import org.danteplanner.backend.user.validation.RoleChangeValidator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,6 +39,7 @@ class RecordingSessionEndHandlerTest {
     @Test
     void calls_WhenTheRealLifecycleDeletesAnAccount_RecordThatAllItsSessionsEnd() {
         when(userRepository.findWithLockById(USER_ID)).thenReturn(Optional.of(TestDataFactory.unsavedUser(USER_ID)));
+        when(userRepository.softDelete(eq(USER_ID), any(), any())).thenReturn(1);
 
         new UserAccountLifecycleService(userRepository, List.of(), sessions,
                 new RoleChangeValidator(userRepository), Clock.systemUTC(), GRACE_PERIOD_DAYS).deleteAccount(USER_ID);
@@ -47,6 +50,7 @@ class RecordingSessionEndHandlerTest {
     @Test
     void failNext_WhenScripted_FailsOneCallAndThenRecovers() {
         when(userRepository.findWithLockById(USER_ID)).thenReturn(Optional.of(TestDataFactory.unsavedUser(USER_ID)));
+        when(userRepository.softDelete(eq(USER_ID), any(), any())).thenReturn(1);
         RedisConnectionFailureException down = new RedisConnectionFailureException("down");
         sessions.failNext(Operation.END_ALL_SESSIONS, down);
         UserAccountLifecycleService lifecycle =

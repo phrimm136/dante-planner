@@ -548,8 +548,7 @@ class PlannerCommandServiceTest {
 
         @Test
         void upsertPlanner_WhenBannedUser_IsNotBlockedByTheGuard() {
-            testUser.setBannedAt(java.time.Instant.now());
-            testUser.setBannedBy(1L);
+            TestDataFactory.ban(testUser, java.time.Instant.now(), 1L);
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
             when(plannerRepository.insert(any(Planner.class)))
                     .thenAnswer(invocation -> PlannerContentLifecycle.asPersisted(
@@ -600,8 +599,7 @@ class PlannerCommandServiceTest {
 
         @Test
         void upsertPlanner_WhenBannedOwnerEditsAPublishedPlanner_RefusesWithUserBanned() {
-            testUser.setBannedAt(Instant.now());
-            testUser.setBannedBy(2L);
+            TestDataFactory.ban(testUser, Instant.now(), 2L);
             Planner planner = testPlanner(1L, true, TestDataFactory.VALID_CONTENT);
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
@@ -614,7 +612,7 @@ class PlannerCommandServiceTest {
 
         @Test
         void upsertPlanner_WhenTimedOutOwnerEditsAPublishedPlanner_RefusesBeforeTheSyncVersionCheck() {
-            testUser.setTimeoutUntil(Instant.now().plusSeconds(3600));
+            TestDataFactory.timeOut(testUser, Instant.now().plusSeconds(3600));
             Planner planner = testPlanner(5L, true, TestDataFactory.VALID_CONTENT);
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
@@ -627,8 +625,7 @@ class PlannerCommandServiceTest {
 
         @Test
         void upsertPlanner_WhenBannedOwnerEditsAPrivatePlanner_SavesAndRecordsAPrivateDecision() {
-            testUser.setBannedAt(Instant.now());
-            testUser.setBannedBy(2L);
+            TestDataFactory.ban(testUser, Instant.now(), 2L);
             Planner planner = testPlanner(1L, false, TestDataFactory.VALID_CONTENT);
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));

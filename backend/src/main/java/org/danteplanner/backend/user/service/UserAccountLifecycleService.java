@@ -1,16 +1,19 @@
 package org.danteplanner.backend.user.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.shared.failure.WriteOutcome;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.user.api.AccountLifecycleParticipant;
 import org.danteplanner.backend.user.api.SessionEndHandler;
+import org.danteplanner.backend.user.entity.AccountLife;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.validation.RoleChangeValidator;
+import org.danteplanner.backend.user.validation.WrittenAccount;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -59,8 +62,11 @@ public class UserAccountLifecycleService {
         User user = userRepository.findWithLockById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        if (user.isDeleted()) {
-            return user.requirePermanentDeleteScheduledAt();
+        switch (user.life()) {
+            case AccountLife.Deactivated deactivated -> {
+                return deactivated.purgeAt();
+            }
+            case AccountLife.Live live -> { }
         }
 
         if (user.getRole() == UserRole.ADMIN) {
@@ -69,8 +75,9 @@ public class UserAccountLifecycleService {
 
         Instant now = clock.instant();
         Instant scheduledDeleteAt = now.plus(Duration.ofDays(gracePeriodDays));
-        user.softDelete(now, scheduledDeleteAt);
-        FreshnessDeclarations.declare(new FreshnessScope.User(userId));
+        WrittenAccount written = WrittenAccount.of(userId,
+                WriteOutcome.of(userRepository.softDelete(userId, now, scheduledDeleteAt)));
+        FreshnessDeclarations.declare(new FreshnessScope.User(written.userId()));
 
         participants.forEach(participant -> participant.accountDeactivated(userId));
         sessionEndHandler.endAllSessions(userId);
@@ -88,8 +95,9 @@ public class UserAccountLifecycleService {
             return;
         }
 
-        user.reactivate();
-        FreshnessDeclarations.declare(new FreshnessScope.User(userId));
+        WrittenAccount written = WrittenAccount.of(userId,
+                WriteOutcome.of(userRepository.reactivate(userId, clock.instant())));
+        FreshnessDeclarations.declare(new FreshnessScope.User(written.userId()));
         participants.forEach(participant -> participant.accountReactivated(userId));
     }
 

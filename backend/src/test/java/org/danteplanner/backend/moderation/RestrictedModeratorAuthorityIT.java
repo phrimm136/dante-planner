@@ -30,6 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -59,6 +60,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
 
     private static final String REASON = "{\"reason\":\"Content violates community guidelines\"}";
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Autowired
     private MockMvc mockMvc;
@@ -99,16 +103,14 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
     }
 
     private void ban(User actor) {
-        User row = userRepository.findById(actor.getId()).orElseThrow();
-        row.setBannedAt(Instant.now());
-        row.setBannedBy(admin.getId());
-        userRepository.save(row);
+        transactionTemplate.executeWithoutResult(status ->
+                userRepository.ban(actor.getId(), actor.getRole(), admin.getId(), Instant.now()));
     }
 
     private void timeOut(User actor) {
-        User row = userRepository.findById(actor.getId()).orElseThrow();
-        row.setTimeoutUntil(Instant.now().plus(1, ChronoUnit.HOURS));
-        userRepository.save(row);
+        transactionTemplate.executeWithoutResult(status ->
+                userRepository.timeOut(
+                        actor.getId(), actor.getRole(), Instant.now().plus(1, ChronoUnit.HOURS), Instant.now()));
     }
 
     private Planner reloaded() {
@@ -252,14 +254,14 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("USER_TIMED_OUT"));
 
-        assertThat(userRepository.findById(owner.getId()).orElseThrow().isBanned()).isFalse();
+        assertThat(userRepository.findById(owner.getId()).orElseThrow().getBannedAt()).isNull();
     }
 
     @Test
     void takedownPlanner_WhenActorDemoted_Returns403ForbiddenAndPlannerStaysPublished() throws Exception {
-        User row = userRepository.findById(moderator.getId()).orElseThrow();
-        row.setRole(UserRole.NORMAL);
-        userRepository.save(row);
+        transactionTemplate.executeWithoutResult(status ->
+                userRepository.changeRole(
+                        moderator.getId(), UserRole.MODERATOR, UserRole.NORMAL, Instant.now()));
 
         mockMvc.perform(post("/api/moderation/planner/{id}/takedown", planner.getId()).with(withCsrf())
                         .cookie(moderatorCookie)
@@ -283,9 +285,9 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
 
     @Test
     void changeRole_WhenAdminActorDemotedToModerator_Returns403ForbiddenAndRoleStays() throws Exception {
-        User row = userRepository.findById(admin.getId()).orElseThrow();
-        row.setRole(UserRole.MODERATOR);
-        userRepository.save(row);
+        transactionTemplate.executeWithoutResult(status ->
+                userRepository.changeRole(
+                        admin.getId(), UserRole.ADMIN, UserRole.MODERATOR, Instant.now()));
 
         mockMvc.perform(put("/api/admin/user/{id}/role", owner.getId()).with(withCsrf())
                         .cookie(adminCookie)
@@ -311,9 +313,9 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
 
     @Test
     void takedownPlanner_WhenActorAccountDeleted_Returns403Forbidden() throws Exception {
-        User row = userRepository.findById(moderator.getId()).orElseThrow();
-        row.softDelete(Instant.now(), Instant.now().plus(30, ChronoUnit.DAYS));
-        userRepository.save(row);
+        transactionTemplate.executeWithoutResult(status ->
+                userRepository.softDelete(
+                        moderator.getId(), Instant.now(), Instant.now().plus(30, ChronoUnit.DAYS)));
 
         mockMvc.perform(post("/api/moderation/planner/{id}/takedown", planner.getId()).with(withCsrf())
                         .cookie(moderatorCookie)
@@ -372,7 +374,7 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("USER_BANNED"));
 
-        assertThat(userRepository.findById(owner.getId()).orElseThrow().isTimedOut(Instant.now())).isTrue();
+        assertThat(userRepository.findById(owner.getId()).orElseThrow().getTimeoutUntil()).isAfter(Instant.now());
     }
 
     @Test
@@ -387,7 +389,7 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("USER_BANNED"));
 
-        assertThat(userRepository.findById(owner.getId()).orElseThrow().isBanned()).isTrue();
+        assertThat(userRepository.findById(owner.getId()).orElseThrow().getBannedAt()).isNotNull();
     }
 
     private JsonNode problemBody(MockHttpServletRequestBuilder request) throws Exception {

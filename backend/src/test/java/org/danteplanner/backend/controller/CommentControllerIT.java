@@ -34,6 +34,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -49,6 +50,9 @@ import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 @Tag("containerized")
 @Import(TestConfig.class)
 class CommentControllerIT extends SharedMySqlContainerSupport {
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Autowired
     private MockMvc mockMvc;
@@ -136,8 +140,9 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
         void getComments_WhenLeafAuthorDeactivated_ServesTheLeafWithHiddenBodyAndMaskedNameAndKeepsTheRowContent() throws Exception {
             PlannerComment leaf = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(
                     publishedPlanner.getId(), otherUser.getId(), null, 0), "still here");
-            otherUser.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
-            userRepository.save(otherUser);
+            transactionTemplate.executeWithoutResult(status ->
+                    userRepository.softDelete(
+                            otherUser.getId(), Instant.now(), Instant.now().plus(Duration.ofDays(30))));
 
             mockMvc.perform(get("/api/planner/{id}/comments", publishedPlanner.getId()))
                     .andExpect(status().isOk())
@@ -157,8 +162,9 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                     publishedPlanner.getId(), otherUser.getId(), null, 0), "still here");
             PlannerComment reply = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(
                     publishedPlanner.getId(), testUser.getId(), parent.getId(), 1), "a reply");
-            otherUser.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
-            userRepository.save(otherUser);
+            transactionTemplate.executeWithoutResult(status ->
+                    userRepository.softDelete(
+                            otherUser.getId(), Instant.now(), Instant.now().plus(Duration.ofDays(30))));
 
             mockMvc.perform(get("/api/planner/{id}/comments", publishedPlanner.getId()))
                     .andExpect(status().isOk())

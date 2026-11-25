@@ -186,6 +186,11 @@ describe('presentError', () => {
       expected: { key: 'common:errors.generic.message', severity: 'error', supportHint: true },
     },
     {
+      name: 'a role change that keeps the role',
+      error: { kind: 'conflict', code: 'ROLE_UNCHANGED', serverVersion: null },
+      expected: { key: 'common:errors.generic.message', severity: 'error', supportHint: true },
+    },
+    {
       name: 'a duplicate vote',
       error: { kind: 'conflict', code: 'VOTE_ALREADY_EXISTS', serverVersion: null },
       expected: { key: 'common:errors.generic.message', severity: 'error', supportHint: true },

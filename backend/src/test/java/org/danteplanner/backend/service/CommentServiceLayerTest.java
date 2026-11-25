@@ -455,7 +455,7 @@ class CommentServiceLayerTest {
         @Test
         void getCommentTree_WhenAuthorAccountDeactivated_OmitsTheAuthorName() {
             User deactivated = TestDataFactory.unsavedUser(UserRole.NORMAL);
-            deactivated.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
+            TestDataFactory.softDelete(deactivated, Instant.now(), Instant.now().plus(Duration.ofDays(30)));
 
             CommentRow byActive = CommentRows.live(10L, UUID.randomUUID(), plannerId, otherUser.getId(), "still here", null, 0);
 

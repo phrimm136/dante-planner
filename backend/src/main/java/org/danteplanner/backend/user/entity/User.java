@@ -16,27 +16,27 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import org.hibernate.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import org.danteplanner.backend.shared.entity.AuditedTimestampListener;
 import org.danteplanner.backend.user.api.AuthProviderType;
-import org.danteplanner.backend.user.api.RestrictionState;
 import org.danteplanner.backend.user.api.UserRole;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
+@Immutable
 @EntityListeners(AuditedTimestampListener.class)
 @Table(name = "users",
        uniqueConstraints = {
            @UniqueConstraint(columnNames = {"provider", "providerId"})
        })
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
@@ -59,7 +59,6 @@ public class User {
     private String providerId; // OAuth provider's user ID
 
     @Column(name = "username_epithet", nullable = false, length = 50)
-    @Setter
     private String usernameEpithet; // Epithet identifier (e.g., 'NAIVE') - user can change
 
     @Column(name = "username_suffix", nullable = false, unique = true, length = 5)
@@ -81,20 +80,16 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @Setter
     @Builder.Default
     private UserRole role = UserRole.NORMAL;
 
     @Column(name = "timeout_until")
-    @Setter
     private @Nullable Instant timeoutUntil;
 
     @Column(name = "banned_at")
-    @Setter
     private @Nullable Instant bannedAt;
 
     @Column(name = "banned_by")
-    @Setter
     private @Nullable Long bannedBy;
 
     @PrePersist
@@ -106,35 +101,7 @@ public class User {
         return deletedAt != null;
     }
 
-    public Instant requirePermanentDeleteScheduledAt() {
-        if (permanentDeleteScheduledAt == null) {
-            throw new IllegalStateException("user " + id + " is deleted without a permanent deletion time");
-        }
-        return permanentDeleteScheduledAt;
-    }
-
-    public void softDelete(Instant now, Instant scheduledDeleteAt) {
-        this.deletedAt = now;
-        this.permanentDeleteScheduledAt = scheduledDeleteAt;
-    }
-
-    public void reactivate() {
-        this.deletedAt = null;
-        this.permanentDeleteScheduledAt = null;
-    }
-
-    public RestrictionState restrictionState(Instant now) {
-        if (timeoutUntil != null && now.isBefore(timeoutUntil)) {
-            return RestrictionState.TIMED_OUT;
-        }
-        return bannedAt != null ? RestrictionState.BANNED : RestrictionState.ACTIVE;
-    }
-
-    public boolean isTimedOut(Instant now) {
-        return restrictionState(now) == RestrictionState.TIMED_OUT;
-    }
-
-    public boolean isBanned() {
-        return bannedAt != null;
+    public AccountLife life() {
+        return AccountLife.of(deletedAt, permanentDeleteScheduledAt);
     }
 }

@@ -52,7 +52,7 @@ class PrivilegedRouteRulesTest {
     @Test
     void refusal_WhenActorBanned_RefusesWithTheBanCode() {
         User actor = TestDataFactory.unsavedUser(UserRole.MODERATOR);
-        actor.setBannedAt(NOW.minusSeconds(60));
+        TestDataFactory.ban(actor, NOW.minusSeconds(60), null);
 
         assertThat(codeOf(PrivilegedRouteRules.refusal(Optional.of(actor), UserRole.MODERATOR, CLOCK)))
                 .contains("USER_BANNED");
@@ -61,26 +61,26 @@ class PrivilegedRouteRulesTest {
     @Test
     void refusal_WhenActorTimedOut_RefusesWithTheTimeoutCode() {
         User actor = TestDataFactory.unsavedUser(UserRole.MODERATOR);
-        actor.setTimeoutUntil(NOW.plusSeconds(3600));
+        TestDataFactory.timeOut(actor, NOW.plusSeconds(3600));
 
         assertThat(codeOf(PrivilegedRouteRules.refusal(Optional.of(actor), UserRole.MODERATOR, CLOCK)))
                 .contains("USER_TIMED_OUT");
     }
 
     @Test
-    void refusal_WhenActorBothBannedAndTimedOut_RefusesWithTheTimeoutCode() {
+    void refusal_WhenActorBothBannedAndTimedOut_RefusesWithTheBanCode() {
         User actor = TestDataFactory.unsavedUser(UserRole.ADMIN);
-        actor.setBannedAt(NOW.minusSeconds(60));
-        actor.setTimeoutUntil(NOW.plusSeconds(3600));
+        TestDataFactory.ban(actor, NOW.minusSeconds(60), null);
+        TestDataFactory.timeOut(actor, NOW.plusSeconds(3600));
 
         assertThat(codeOf(PrivilegedRouteRules.refusal(Optional.of(actor), UserRole.MODERATOR, CLOCK)))
-                .contains("USER_TIMED_OUT");
+                .contains("USER_BANNED");
     }
 
     @Test
     void refusal_WhenActorTimeoutElapsed_Admits() {
         User actor = TestDataFactory.unsavedUser(UserRole.MODERATOR);
-        actor.setTimeoutUntil(NOW.minusSeconds(1));
+        TestDataFactory.timeOut(actor, NOW.minusSeconds(1));
 
         assertThat(PrivilegedRouteRules.refusal(Optional.of(actor), UserRole.MODERATOR, CLOCK)).isEmpty();
     }

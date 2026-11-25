@@ -5,12 +5,12 @@ import org.danteplanner.backend.moderation.service.ModerationPolicy.PermittedRes
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.moderation.event.AccountSuspendedEvent;
-import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
-import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.sse.SuspensionType;
+import org.danteplanner.backend.user.api.Restriction;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserNotFoundException;
 import org.danteplanner.backend.user.service.UserService;
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,85 +34,92 @@ public class UserModerationService {
     private final ModerationPolicy moderationPolicy;
     private final Clock clock;
 
+    /** The restriction a moderation command left on an account. */
+    public record RestrictedAccount(
+            String usernameSuffix,
+            @Nullable Instant timeoutUntil,
+            Restriction restriction) {
+    }
+
     @Transactional
-    public User timeoutUser(Long actorId, Long targetId, int durationMinutes, String reason) {
-        User saved = restrict(actorId, targetId, new Suspension.Timeout(durationMinutes, reason),
-                target -> target.setTimeoutUntil(timeoutUntil(durationMinutes)));
+    public RestrictedAccount timeoutUser(Long actorId, Long targetId, int durationMinutes, String reason) {
+        Instant until = timeoutUntil(durationMinutes);
+        User restricted = restrict(actorId, targetId, new Suspension.Timeout(durationMinutes, reason),
+                target -> userService.timeOut(target, until));
 
         eventPublisher.publishEvent(new AccountSuspendedEvent(
                 targetId, reason, SuspensionType.TIMED_OUT, durationMinutes));
 
-        log.info("User {} timed out until {} by moderator {}", targetId, saved.getTimeoutUntil(), actorId);
-        return saved;
+        log.info("User {} timed out until {} by moderator {}", targetId, until, actorId);
+        return account(restricted, restricted.getBannedAt(), until);
     }
 
     @Transactional
-    public User removeTimeout(Long actorId, Long targetId, String reason) {
-        User saved = restrict(actorId, targetId, new Suspension.ClearTimeout(reason),
-                target -> target.setTimeoutUntil(null));
+    public RestrictedAccount removeTimeout(Long actorId, Long targetId, String reason) {
+        User restricted = restrict(actorId, targetId, new Suspension.ClearTimeout(reason),
+                target -> userService.clearTimeout(target));
 
         log.info("Timeout removed from user {} by moderator {} with reason: {}", targetId, actorId, reason);
-        return saved;
+        return account(restricted, restricted.getBannedAt(), null);
     }
 
     @Transactional
-    public User banUser(Long actorId, Long targetId, String reason) {
-        User saved = restrict(actorId, targetId, new Suspension.Ban(reason),
-                target -> {
-                    target.setBannedAt(clock.instant());
-                    target.setBannedBy(actorId);
-                });
+    public RestrictedAccount banUser(Long actorId, Long targetId, String reason) {
+        Instant at = clock.instant();
+        User restricted = restrict(actorId, targetId, new Suspension.Ban(reason),
+                target -> userService.ban(target, actorId, at));
 
         eventPublisher.publishEvent(AccountSuspendedEvent.ban(targetId, reason));
 
         log.info("User {} banned by admin {} with reason: {}", targetId, actorId, reason);
-        return saved;
+        return account(restricted, at, restricted.getTimeoutUntil());
     }
 
     @Transactional
-    public User unbanUser(Long actorId, Long targetId, String reason) {
-        User saved = restrict(actorId, targetId, new Suspension.Unban(reason),
-                target -> {
-                    target.setBannedAt(null);
-                    target.setBannedBy(null);
-                });
+    public RestrictedAccount unbanUser(Long actorId, Long targetId, String reason) {
+        User restricted = restrict(actorId, targetId, new Suspension.Unban(reason),
+                target -> userService.unban(target));
 
         log.info("User {} unbanned by admin {} with reason: {}", targetId, actorId, reason);
-        return saved;
+        return account(restricted, null, restricted.getTimeoutUntil());
     }
 
     @Transactional
-    public User timeoutUserBySuffix(Long actorId, String usernameSuffix, int durationMinutes, String reason) {
+    public RestrictedAccount timeoutUserBySuffix(Long actorId, String usernameSuffix, int durationMinutes, String reason) {
         return timeoutUser(actorId, targetIdBySuffix(usernameSuffix), durationMinutes, reason);
     }
 
     @Transactional
-    public User removeTimeoutBySuffix(Long actorId, String usernameSuffix, String reason) {
+    public RestrictedAccount removeTimeoutBySuffix(Long actorId, String usernameSuffix, String reason) {
         return removeTimeout(actorId, targetIdBySuffix(usernameSuffix), reason);
     }
 
     @Transactional
-    public User banUserBySuffix(Long actorId, String usernameSuffix, String reason) {
+    public RestrictedAccount banUserBySuffix(Long actorId, String usernameSuffix, String reason) {
         return banUser(actorId, targetIdBySuffix(usernameSuffix), reason);
     }
 
     @Transactional
-    public User unbanUserBySuffix(Long actorId, String usernameSuffix, String reason) {
+    public RestrictedAccount unbanUserBySuffix(Long actorId, String usernameSuffix, String reason) {
         return unbanUser(actorId, targetIdBySuffix(usernameSuffix), reason);
     }
 
-    private User restrict(Long actorId, Long targetId, Suspension suspension, Consumer<User> mutation) {
+    private User restrict(Long actorId, Long targetId, Suspension suspension, Consumer<User> command) {
         User actor = requireActive(actorId);
         PermittedRestriction permitted = moderationPolicy.requireCanRestrict(
                 actor, requireActive(targetId), suspension.action());
         User target = permitted.target();
 
-        mutation.accept(target);
-        FreshnessDeclarations.declare(new FreshnessScope.User(targetId));
+        command.accept(target);
 
         auditService.record(actorId, target.getPublicId().toString(), suspension);
 
         return target;
+    }
+
+    private RestrictedAccount account(User target, @Nullable Instant bannedAt, @Nullable Instant timeoutUntil) {
+        return new RestrictedAccount(target.getUsernameSuffix(), timeoutUntil,
+                Restriction.of(bannedAt, timeoutUntil, clock.instant()));
     }
 
     private Instant timeoutUntil(int durationMinutes) {

@@ -44,7 +44,7 @@ class CommentTreeNodeAuthorLifecycleTest {
     @Test
     void fromEntity_WhenAuthorDeactivatedInGraceWindow_BlanksTheBody() {
         User author = author("GONE");
-        author.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
+        TestDataFactory.softDelete(author, Instant.now(), Instant.now().plus(Duration.ofDays(30)));
         CommentRow comment = comment(author.getId());
 
         CommentTreeNode node = project(comment, author);
@@ -60,11 +60,11 @@ class CommentTreeNodeAuthorLifecycleTest {
     @Test
     void fromEntity_WhenAuthorReactivated_ServesTheBody() {
         User author = author("GONE");
-        author.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
+        TestDataFactory.softDelete(author, Instant.now(), Instant.now().plus(Duration.ofDays(30)));
         CommentRow comment = comment(author.getId());
         project(comment, author);
 
-        author.reactivate();
+        TestDataFactory.reactivate(author);
         CommentTreeNode node = project(comment, author);
 
         assertThat(node.content()).isEqualTo("still here");
@@ -92,7 +92,7 @@ class CommentTreeNodeAuthorLifecycleTest {
     @Test
     void fromEntity_WhenCommentDeletedAndAuthorDeactivated_BlanksTheBody() {
         User author = author("GONE");
-        author.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
+        TestDataFactory.softDelete(author, Instant.now(), Instant.now().plus(Duration.ofDays(30)));
         CommentRow comment = CommentRows.deleted(comment(author.getId()), Instant.now());
 
         CommentTreeNode node = project(comment, author);

@@ -4,6 +4,8 @@ import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.moderation.entity.ModerationAction;
+import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -19,6 +21,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -47,6 +50,9 @@ class AdminControllerIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ModerationActionRepository moderationActionRepository;
 
     @Autowired
     private JwtTokenService jwtTokenService;
@@ -87,6 +93,44 @@ class AdminControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(jsonPath("$.userId").value(regularUser.getId()))
                     .andExpect(jsonPath("$.role").value("MODERATOR"))
                     .andExpect(jsonPath("$.email").value(regularUser.getEmail()));
+        }
+
+        @Test
+        void changeRole_WhenTheRoleIsUnchanged_Returns409AndWritesNoAudit() throws Exception {
+            mockMvc.perform(put("/api/admin/user/{targetId}/role", regularUser.getId()).with(withCsrf())
+                            .cookie(adminCookie())
+                            .contentType(APPLICATION_JSON)
+                            .content("{\"role\":\"NORMAL\"}"))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.code").value("ROLE_UNCHANGED"));
+
+            assertThat(userRepository.findById(regularUser.getId()).orElseThrow().getRole())
+                    .isEqualTo(UserRole.NORMAL);
+            assertThat(moderationActionRepository.findAll())
+                    .extracting(ModerationAction::getTargetUuid)
+                    .doesNotContain(regularUser.getPublicId().toString());
+        }
+
+        @Test
+        void changeRole_WhenAnAdminKeepsTheirOwnRole_Returns409() throws Exception {
+            mockMvc.perform(put("/api/admin/user/{targetId}/role", adminUser.getId()).with(withCsrf())
+                            .cookie(adminCookie())
+                            .contentType(APPLICATION_JSON)
+                            .content("{\"role\":\"ADMIN\"}"))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.code").value("ROLE_UNCHANGED"));
+        }
+
+        @Test
+        void changeRole_WhenAnotherAdminWouldKeepTheirRole_Returns403() throws Exception {
+            User otherAdmin = TestDataFactory.createAdmin(userRepository, "other-admin@example.com");
+
+            mockMvc.perform(put("/api/admin/user/{targetId}/role", otherAdmin.getId()).with(withCsrf())
+                            .cookie(adminCookie())
+                            .contentType(APPLICATION_JSON)
+                            .content("{\"role\":\"ADMIN\"}"))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.code").value("FORBIDDEN"));
         }
 
         @Test

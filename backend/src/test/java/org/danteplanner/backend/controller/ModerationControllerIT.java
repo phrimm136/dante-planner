@@ -26,6 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -53,6 +54,9 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
 
     private static final String MINE =
             "$[?(@.reason == 'Spam behaviour in comments')]";
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Autowired
     private MockMvc mockMvc;
@@ -168,9 +172,8 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void timeoutUser_WhenActorBanned_Returns403() throws Exception {
-            moderatorUser.setBannedAt(Instant.now());
-            moderatorUser.setBannedBy(adminUser.getId());
-            userRepository.save(moderatorUser);
+            transactionTemplate.executeWithoutResult(status ->
+                    userRepository.ban(moderatorUser.getId(), moderatorUser.getRole(), adminUser.getId(), Instant.now()));
 
             mockMvc.perform(post("/api/moderation/user/{suffix}/timeout", regularUser.getUsernameSuffix()).with(withCsrf())
                             .cookie(moderatorCookie())
@@ -181,8 +184,9 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void timeoutUser_WhenActorTimedOut_Returns403() throws Exception {
-            moderatorUser.setTimeoutUntil(Instant.now().plus(1, ChronoUnit.HOURS));
-            userRepository.save(moderatorUser);
+            transactionTemplate.executeWithoutResult(status ->
+                    userRepository.timeOut(
+                            moderatorUser.getId(), moderatorUser.getRole(), Instant.now().plus(1, ChronoUnit.HOURS), Instant.now()));
 
             mockMvc.perform(post("/api/moderation/user/{suffix}/timeout", regularUser.getUsernameSuffix()).with(withCsrf())
                             .cookie(moderatorCookie())
@@ -194,9 +198,8 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
         @Test
         void removeTimeout_WhenActorBanned_Returns403() throws Exception {
             timeoutRegularUser();
-            moderatorUser.setBannedAt(Instant.now());
-            moderatorUser.setBannedBy(adminUser.getId());
-            userRepository.save(moderatorUser);
+            transactionTemplate.executeWithoutResult(status ->
+                    userRepository.ban(moderatorUser.getId(), moderatorUser.getRole(), adminUser.getId(), Instant.now()));
 
             mockMvc.perform(post("/api/moderation/user/{suffix}/clear-timeout", regularUser.getUsernameSuffix()).with(withCsrf())
                             .cookie(moderatorCookie())

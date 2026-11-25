@@ -21,9 +21,9 @@ public record ModeratedUserResponse(
                 user.usernameEpithet(),
                 user.usernameSuffix(),
                 user.role().name(),
-                user.isBanned(),
+                user.bannedAt() != null,
                 user.bannedAt(),
-                user.isTimedOut(now),
+                user.timeoutUntil() != null && now.isBefore(user.timeoutUntil()),
                 user.timeoutUntil());
     }
 }

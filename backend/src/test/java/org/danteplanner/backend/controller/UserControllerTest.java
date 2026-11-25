@@ -88,7 +88,7 @@ class UserControllerTest {
                 new UserAccountLifecycleService(userRepository, List.of(), sessionEndHandler,
                         new RoleChangeValidator(userRepository), Clock.systemUTC(), gracePeriodDays),
                 null,
-                new UserSettingsService(userSettingsRepository, userRepository),
+                new UserSettingsService(userSettingsRepository),
                 new SsePublisher(sseChannel, TestJsonMappers.springDefaults(), new SimpleMeterRegistry()),
                 null, sessionEndHandler, cookieUtils, Clock.fixed(NOW, ZoneOffset.UTC), gracePeriodDays);
     }
@@ -96,6 +96,7 @@ class UserControllerTest {
     private User givenAnAccount(Long userId) {
         User user = TestDataFactory.unsavedUser(userId);
         when(userRepository.findWithLockById(userId)).thenReturn(Optional.of(user));
+        lenient().when(userRepository.softDelete(eq(userId), any(), any())).thenReturn(1);
         return user;
     }
 
@@ -112,7 +113,7 @@ class UserControllerTest {
         @Test
         void deleteMyAccount_WhenAuthenticated_ReturnsSuccessResponse() {
             // Arrange
-            User account = givenAnAccount(TEST_USER_ID);
+            givenAnAccount(TEST_USER_ID);
 
             // Act
             ResponseEntity<UserDeletionResponse> result = userController.deleteMyAccount(new Viewer.Member(TEST_USER_ID), request, response);
@@ -125,7 +126,7 @@ class UserControllerTest {
             assertThat(body).isNotNull();
             assertThat(body.message()).isEqualTo("Account scheduled for deletion");
             assertThat(body.deletedAt()).isEqualTo(NOW);
-            assertThat(body.permanentDeleteAt()).isEqualTo(account.getPermanentDeleteScheduledAt());
+            verify(userRepository).softDelete(eq(TEST_USER_ID), any(), eq(body.permanentDeleteAt()));
             assertThat(body.gracePeriodDays()).isEqualTo(GRACE_PERIOD_DAYS);
         }
 
@@ -157,7 +158,7 @@ class UserControllerTest {
         void deleteMyAccount_WhenIdempotent_ReturnsExistingScheduledDate() {
             // Arrange - simulate second call returning same scheduled date
             Instant originalScheduledAt = Instant.now().plus(Duration.ofDays(25));
-            givenAnAccount(TEST_USER_ID).softDelete(Instant.now(), originalScheduledAt);
+            TestDataFactory.softDelete(givenAnAccount(TEST_USER_ID), Instant.now(), originalScheduledAt);
 
             // Act
             ResponseEntity<UserDeletionResponse> result = userController.deleteMyAccount(new Viewer.Member(TEST_USER_ID), request, response);
@@ -172,15 +173,14 @@ class UserControllerTest {
         void deleteMyAccount_WhenAuthenticated_PassesUserIdToLifecycleService() {
             // Arrange
             Long userId = 456L;
-            User account = givenAnAccount(userId);
+            givenAnAccount(userId);
 
             // Act
             ResponseEntity<UserDeletionResponse> result =
                     userController.deleteMyAccount(new Viewer.Member(userId), request, response);
 
             // Assert
-            assertThat(account.isDeleted()).isTrue();
-            assertThat(result.getBody().permanentDeleteAt()).isEqualTo(account.getPermanentDeleteScheduledAt());
+            verify(userRepository).softDelete(eq(userId), any(), eq(result.getBody().permanentDeleteAt()));
         }
 
         @Test
@@ -207,10 +207,12 @@ class UserControllerTest {
             UpdateUserSettingsRequest updateRequest = new UpdateUserSettingsRequest(true, null, null, null);
             List<List<SseEnvelope.Wire>> invalidationsAtPersist = new ArrayList<>();
             when(userSettingsRepository.findByUserId(TEST_USER_ID)).thenReturn(Optional.empty());
-            when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(TestDataFactory.unsavedUser(TEST_USER_ID)));
-            when(userSettingsRepository.insert(any(UserSettings.class))).thenAnswer(invocation -> {
+            when(userSettingsRepository.insertDefaults(TEST_USER_ID)).thenReturn(1);
+            when(userSettingsRepository.findWithLockByUserId(TEST_USER_ID))
+                    .thenReturn(Optional.of(UserSettings.builder().userId(TEST_USER_ID).build()));
+            when(userSettingsRepository.update(TEST_USER_ID, updateRequest)).thenAnswer(invocation -> {
                 invalidationsAtPersist.add(sseChannel.envelopes(SseChannel.USER));
-                return invocation.getArgument(0);
+                return 1;
             });
 
             // Act

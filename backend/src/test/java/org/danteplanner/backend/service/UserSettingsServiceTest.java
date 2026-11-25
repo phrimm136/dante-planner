@@ -7,7 +7,6 @@ import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserSettings;
-import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.repository.UserSettingsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -19,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.danteplanner.backend.support.Rejections.assertRejected;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -33,9 +33,6 @@ class UserSettingsServiceTest {
     @Mock
     private UserSettingsRepository userSettingsRepository;
 
-    @Mock
-    private UserRepository userRepository;
-
     private UserSettingsService userSettingsService;
 
     private User testUser;
@@ -43,12 +40,12 @@ class UserSettingsServiceTest {
 
     @BeforeEach
     void setUp() {
-        userSettingsService = new UserSettingsService(userSettingsRepository, userRepository);
+        userSettingsService = new UserSettingsService(userSettingsRepository);
 
         testUser = TestDataFactory.unsavedUser(123L);
 
         existingSettings = UserSettings.builder()
-                .user(testUser)
+                .userId(testUser.getId())
                 .syncEnabled(true)
                 .syncChoiceMade(true)
                 .notifyComments(true)
@@ -74,7 +71,6 @@ class UserSettingsServiceTest {
             assertThat(result.syncChoiceMade()).isTrue();
             assertThat(result.notifyComments()).isTrue();
             assertThat(result.notifyRecommendations()).isFalse();
-            verify(userRepository, never()).findById(any());
         }
 
         @Test
@@ -92,7 +88,7 @@ class UserSettingsServiceTest {
             assertThat(result.notifyComments()).isTrue();
             assertThat(result.notifyRecommendations()).isTrue();
             assertThat(result.notifyNewPublications()).isFalse();
-            verify(userSettingsRepository, never()).insert(any());
+            verify(userSettingsRepository, never()).insertDefaults(any());
         }
 
         @Test
@@ -137,6 +133,8 @@ class UserSettingsServiceTest {
                     null    // notifyNewPublications - should not change
             );
 
+            when(userSettingsRepository.update(testUser.getId(), request)).thenReturn(1);
+
             // Act
             UserSettingsResponse result = userSettingsService.updateSettings(testUser.getId(), request);
 
@@ -150,7 +148,7 @@ class UserSettingsServiceTest {
         @Test
         void updateSettings_WhenChoiceNotYetMade_MarksChoiceMade() {
             UserSettings unchosen = UserSettings.builder()
-                    .user(testUser)
+                .userId(testUser.getId())
                     .build();
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.of(unchosen));
@@ -158,6 +156,7 @@ class UserSettingsServiceTest {
             UpdateUserSettingsRequest request = new UpdateUserSettingsRequest(
                     true, null, null, null
             );
+            when(userSettingsRepository.update(testUser.getId(), request)).thenReturn(1);
 
             UserSettingsResponse result = userSettingsService.updateSettings(testUser.getId(), request);
 
@@ -168,7 +167,7 @@ class UserSettingsServiceTest {
         @Test
         void updateSettings_WhenSyncAbsent_LeavesChoiceUnmade() {
             UserSettings unchosen = UserSettings.builder()
-                    .user(testUser)
+                .userId(testUser.getId())
                     .build();
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.of(unchosen));
@@ -176,6 +175,7 @@ class UserSettingsServiceTest {
             UpdateUserSettingsRequest request = new UpdateUserSettingsRequest(
                     null, false, null, null
             );
+            when(userSettingsRepository.update(testUser.getId(), request)).thenReturn(1);
 
             UserSettingsResponse result = userSettingsService.updateSettings(testUser.getId(), request);
 
@@ -197,6 +197,8 @@ class UserSettingsServiceTest {
                     true    // notifyNewPublications
             );
 
+            when(userSettingsRepository.update(testUser.getId(), request)).thenReturn(1);
+
             // Act
             UserSettingsResponse result = userSettingsService.updateSettings(testUser.getId(), request);
 
@@ -217,6 +219,8 @@ class UserSettingsServiceTest {
             UpdateUserSettingsRequest request = new UpdateUserSettingsRequest(
                     null, null, null, null
             );
+
+            when(userSettingsRepository.update(testUser.getId(), request)).thenReturn(1);
 
             // Act
             UserSettingsResponse result = userSettingsService.updateSettings(testUser.getId(), request);
@@ -243,8 +247,7 @@ class UserSettingsServiceTest {
 
             // Assert
             assertThat(result).isSameAs(existingSettings);
-            verify(userRepository, never()).findById(any());
-            verify(userSettingsRepository, never()).insert(any());
+            verify(userSettingsRepository, never()).insertDefaults(any());
         }
 
         @Test
@@ -252,18 +255,23 @@ class UserSettingsServiceTest {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.empty());
-            when(userRepository.findById(testUser.getId()))
-                    .thenReturn(Optional.of(testUser));
-            when(userSettingsRepository.insert(any(UserSettings.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
+            when(userSettingsRepository.insertDefaults(testUser.getId())).thenReturn(1);
+            when(userSettingsRepository.findWithLockByUserId(testUser.getId()))
+                    .thenReturn(Optional.of(existingSettings));
 
             // Act
             UserSettings result = userSettingsService.getOrCreateEntity(testUser.getId());
 
             // Assert
-            assertThat(result).isNotNull();
-            assertThat(result.getUser()).isEqualTo(testUser);
-            verify(userSettingsRepository).insert(any(UserSettings.class));
+            assertThat(result).isSameAs(existingSettings);
+        }
+
+        @Test
+        void getOrCreateEntity_WhenTheUserDoesNotExist_AnswersNotFound() {
+            when(userSettingsRepository.findByUserId(999L)).thenReturn(Optional.empty());
+            when(userSettingsRepository.insertDefaults(999L)).thenReturn(0);
+
+            assertRejected(() -> userSettingsService.getOrCreateEntity(999L)).withCode("USER_NOT_FOUND");
         }
     }
 }

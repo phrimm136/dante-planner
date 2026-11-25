@@ -95,11 +95,11 @@ class RoleChangeValidatorTest {
     }
 
     @Test
-    void requireCanChangeRole_WhenAnAdminKeepsTheirOwnRole_AllowsWithoutCounting() {
+    void requireCanChangeRole_WhenAnAdminKeepsTheirOwnRole_RefusesWithoutCounting() {
         User admin = TestDataFactory.unsavedUser(UserRole.ADMIN);
 
-        assertThatCode(() -> validator.requireCanChangeRole(admin, admin, UserRole.ADMIN))
-                .doesNotThrowAnyException();
+        assertRejected(() -> validator.requireCanChangeRole(admin, admin, UserRole.ADMIN))
+                .withCode("ROLE_UNCHANGED");
         verifyNoInteractions(userRepository);
     }
 

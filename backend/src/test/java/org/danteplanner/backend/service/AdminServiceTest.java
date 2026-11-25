@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
+import static org.mockito.Mockito.verifyNoInteractions;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -75,6 +76,14 @@ class AdminServiceTest {
 
             // Assert
             assertThat(result.role()).isEqualTo(UserRole.NORMAL);
+        }
+
+        @Test
+        void changeRole_WhenTheRoleIsUnchanged_RefusesWithoutAudit() {
+            assertRejected(() -> adminService.changeRole(adminUser.getId(), normalUser.getId(), UserRole.NORMAL))
+                    .withCode("ROLE_UNCHANGED");
+
+            verifyNoInteractions(moderationActionRepository);
         }
 
         @Test

@@ -1,18 +1,16 @@
 package org.danteplanner.backend.user.service;
 
 import java.util.Set;
-import java.util.function.Consumer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.Nullable;
+import org.danteplanner.backend.shared.failure.WriteOutcome;
 import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
 import org.danteplanner.backend.user.dto.UserSettingsResponse;
-import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserSettings;
 import org.danteplanner.backend.user.api.UserNotFoundException;
-import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.repository.UserSettingsRepository;
+import org.danteplanner.backend.user.validation.WrittenAccount;
 import org.danteplanner.backend.shared.sse.NotificationPreferenceProvider;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
@@ -36,7 +34,6 @@ public class UserSettingsService implements NotificationPreferenceProvider {
     private static final boolean DEFAULT_NOTIFY_NEW_PUBLICATIONS = false;
 
     private final UserSettingsRepository userSettingsRepository;
-    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public ScopedRead<UserSettingsResponse> getSettings(Long userId) {
@@ -55,21 +52,13 @@ public class UserSettingsService implements NotificationPreferenceProvider {
     public UserSettingsResponse updateSettings(Long userId, UpdateUserSettingsRequest request) {
         UserSettings settings = getOrCreateEntity(userId);
 
-        applyIfPresent(request.syncEnabled(), settings::chooseSync);
-        applyIfPresent(request.notifyComments(), settings::setNotifyComments);
-        applyIfPresent(request.notifyRecommendations(), settings::setNotifyRecommendations);
-        applyIfPresent(request.notifyNewPublications(), settings::setNotifyNewPublications);
-        FreshnessDeclarations.declare(new FreshnessScope.User(userId));
+        WrittenAccount written = WrittenAccount.of(userId,
+                WriteOutcome.of(userSettingsRepository.update(userId, request)));
+        FreshnessDeclarations.declare(new FreshnessScope.User(written.userId()));
 
         log.debug("Updated settings for user {}", userId);
 
-        return UserSettingsResponse.fromEntity(settings);
-    }
-
-    private static <T> void applyIfPresent(@Nullable T value, Consumer<T> setter) {
-        if (value != null) {
-            setter.accept(value);
-        }
+        return UserSettingsResponse.afterUpdate(settings, request);
     }
 
     @Override
@@ -89,19 +78,10 @@ public class UserSettingsService implements NotificationPreferenceProvider {
     }
 
     private UserSettings createDefaultSettings(Long userId) {
-        User user = userRepository.findById(userId)
+        WrittenAccount written = WrittenAccount.of(userId,
+                WriteOutcome.of(userSettingsRepository.insertDefaults(userId)));
+        log.info("Created default settings for user {}", written.userId());
+        return userSettingsRepository.findWithLockByUserId(written.userId())
                 .orElseThrow(() -> new UserNotFoundException(userId));
-
-        UserSettings settings = UserSettings.builder()
-                .user(user)
-                .syncEnabled(DEFAULT_SYNC_ENABLED)
-                .syncChoiceMade(DEFAULT_SYNC_CHOICE_MADE)
-                .notifyComments(DEFAULT_NOTIFY_COMMENTS)
-                .notifyRecommendations(DEFAULT_NOTIFY_RECOMMENDATIONS)
-                .notifyNewPublications(DEFAULT_NOTIFY_NEW_PUBLICATIONS)
-                .build();
-
-        log.info("Created default settings for user {}", userId);
-        return userSettingsRepository.insert(settings);
     }
 }
