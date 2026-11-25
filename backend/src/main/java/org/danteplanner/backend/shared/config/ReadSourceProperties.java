@@ -26,7 +26,7 @@ import org.hibernate.validator.constraints.time.DurationMin;
 @ConfigurationProperties(prefix = "datasource")
 @Validated
 public record ReadSourceProperties(
-        @NotEmpty @Valid @DefaultValue List<Source> readSources,
+        @NotEmpty @DefaultValue List<@Valid Source> readSources,
         @Valid @DefaultValue Breaker readSourceBreaker,
         @Valid @DefaultValue Probe readSourceProbe) {
 

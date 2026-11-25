@@ -1,0 +1,27 @@
+id: no-valid-on-container
+language: Java
+severity: error
+message: 'Put @Valid on the type argument (List<@Valid X>); Hibernate Validator warns at startup for @Valid on the container (HV000271).'
+rule:
+  any:
+    - kind: formal_parameter
+    - kind: field_declaration
+    - kind: method_declaration
+  all:
+    - has:
+        kind: modifiers
+        has:
+          any:
+            - kind: marker_annotation
+            - kind: annotation
+          has:
+            field: name
+            regex: ^(jakarta\.validation\.)?Valid$
+    - has:
+        field: type
+        kind: generic_type
+        has:
+          any:
+            - kind: type_identifier
+            - kind: scoped_type_identifier
+          regex: ^(java\.util\.)?(Collection|List|Set|SortedSet|NavigableSet|Map|SortedMap|NavigableMap|Queue|Deque|Optional)$
