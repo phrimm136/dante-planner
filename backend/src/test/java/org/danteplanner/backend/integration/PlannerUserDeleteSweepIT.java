@@ -164,7 +164,7 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder()
                 .plannerId(published.getId()).viewCount(3).upvotes(1).build());
-        catalogService.add(published);
+        TestDataFactory.addToCatalog(catalogService, published);
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, published.getId());
         insertPlannerVote(other.getId(), published.getId());
         jdbc.update("INSERT INTO planner_views (planner_id, viewer_hash, view_date, created_at) "

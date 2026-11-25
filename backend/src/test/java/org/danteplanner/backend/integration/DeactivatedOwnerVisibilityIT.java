@@ -2,7 +2,6 @@ package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
-import org.danteplanner.backend.planner.entity.PlannerSubscription;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
@@ -26,10 +25,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -95,7 +96,7 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
         owner = TestDataFactory.createTestUser(userRepository, "deactivated-owner@example.com");
         planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-        catalogService.add(planner);
+        TestDataFactory.addToCatalog(catalogService, planner);
     }
 
     private Integer filterRows(UUID plannerId) {
@@ -164,7 +165,7 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
     @Test
     void reconcile_WhenDeactivatedOwnerKeepsCatalogRow_ReportsRowPresent() {
         lifecycleService.deleteAccount(owner.getId());
-        catalogService.add(planner);
+        TestDataFactory.addToCatalog(catalogService, planner);
 
         List<DriftRecord> records = reconciler.reconcile();
 
@@ -240,7 +241,8 @@ class DeactivatedOwnerVisibilityIT extends ExclusiveDatabaseSupport {
 
     private void assertRaceNeverLeavesAPublishedPlannerVisible(String holderLock, Object holderKey) throws Exception {
         Planner draft = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
-        subscriptionRepository.insert(new PlannerSubscription(owner.getId(), draft.getId()));
+        new TransactionTemplate(transactionManager).executeWithoutResult(status ->
+                subscriptionRepository.insertIfAbsent(owner.getId(), draft.getId(), Instant.now()));
         CompletableFuture<Void> deactivation;
         CompletableFuture<Void> publication;
 

@@ -67,6 +67,7 @@ class PlannerWriteParseTest {
         commandService = new PlannerCommandService(
                 plannerRepository,
                 statsRepository,
+                null,
                 contentValidator,
                 null,
                 null,

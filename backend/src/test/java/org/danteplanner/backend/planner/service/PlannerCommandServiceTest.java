@@ -2,6 +2,7 @@ package org.danteplanner.backend.planner.service;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.Level;
+import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.backend.planner.dto.UpsertResult;
@@ -89,6 +90,9 @@ class PlannerCommandServiceTest {
     @Mock
     private PlannerCatalogRepository catalogRepository;
 
+    @Mock
+    private PlannerPublicationRepository publicationRepository;
+
     private PlannerCommandService commandService;
 
     private RecordingRestrictionCheck restrictionCheck;
@@ -121,6 +125,7 @@ class PlannerCommandServiceTest {
         return new PlannerCommandService(
                 plannerRepository,
                 statsRepository,
+                publicationRepository,
                 contentValidator,
                 new ContentVersionValidator(TestDataFactory.gameDataRegistry()),
                 new PlannerCatalogService(catalogRepository, plannerRepository, statsRepository,
@@ -470,7 +475,7 @@ class PlannerCommandServiceTest {
             commandService.deletePlanner(testUser.getId(), planner.getId());
 
             // Assert
-            assertThat(planner.isPublished()).isFalse(); // Auto-unpublished
+            verify(publicationRepository).unpublish(planner.getId());
             assertThat(planner.getContent().getDeletedAt()).isNotNull(); // Then soft deleted
         }
 
@@ -489,7 +494,7 @@ class PlannerCommandServiceTest {
             commandService.deletePlanner(testUser.getId(), planner.getId());
 
             // Assert
-            assertThat(planner.isPublished()).isFalse(); // Still unpublished
+            verifyNoInteractions(publicationRepository);
             assertThat(planner.getContent().getDeletedAt()).isNotNull();
         }
     }

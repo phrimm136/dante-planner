@@ -124,7 +124,7 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-        catalogService.add(planner);
+        TestDataFactory.addToCatalog(catalogService, planner);
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
         PlannerEntityFilter planted = entityFilterRepository.save(
                 new PlannerEntityFilter(ContentEntityType.THEME_PACK, UNREACHABLE_ENTITY_ID, planner.getId()));
@@ -371,7 +371,7 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-        catalogService.add(planner);
+        TestDataFactory.addToCatalog(catalogService, planner);
         JsonNode received = ownerCopy(planner.getId());
         assertThat(entityFilterRows(planner.getId())).isZero();
 
@@ -388,7 +388,7 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-        catalogService.add(planner);
+        TestDataFactory.addToCatalog(catalogService, planner);
         JsonNode received = ownerCopy(planner.getId());
         PlannerEntityFilterId added = new PlannerEntityFilterId(ContentEntityType.IDENTITY, 10102, planner.getId());
         assertThat(entityFilterRepository.existsById(added)).isFalse();
@@ -434,7 +434,7 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
         Planner planner = TestDataFactory.planner(owner).title(title)
                 .selectedKeywords(Set.of("Sinking", "NotAKeyword")).published(true).save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-        catalogService.add(planner);
+        TestDataFactory.addToCatalog(catalogService, planner);
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
         return stored(planner.getId());
     }

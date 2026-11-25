@@ -67,10 +67,10 @@ public class Planner implements Persistable<UUID> {
     @OneToOne(mappedBy = "planner", cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
     private PlannerContent content;
 
-    @OneToOne(mappedBy = "planner", cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
+    @OneToOne(mappedBy = "planner", cascade = CascadeType.PERSIST, optional = false)
     private PlannerPublication publication;
 
-    @OneToOne(mappedBy = "planner", cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
+    @OneToOne(mappedBy = "planner", cascade = CascadeType.PERSIST, optional = false)
     private PlannerModeration moderation;
 
     @Transient
@@ -90,8 +90,6 @@ public class Planner implements Persistable<UUID> {
 
     public void attach(PlannerContent content, PlannerPublication publication, PlannerModeration moderation) {
         content.setPlanner(this);
-        publication.setPlanner(this);
-        moderation.setPlanner(this);
         this.content = content;
         this.publication = publication;
         this.moderation = moderation;
@@ -162,14 +160,6 @@ public class Planner implements Persistable<UUID> {
         return publication.getFirstPublishedAt();
     }
 
-    public Instant requireFirstPublishedAt() {
-        Instant firstPublishedAt = getFirstPublishedAt();
-        if (firstPublishedAt == null) {
-            throw new IllegalStateException("planner " + id + " is listed without a publication time");
-        }
-        return firstPublishedAt;
-    }
-
     public boolean isOwnerNotificationsEnabled() {
         return publication.isOwnerNotificationsEnabled();
     }
@@ -198,42 +188,30 @@ public class Planner implements Persistable<UUID> {
         content.markDeleted(now);
     }
 
-    public PublicationOutcome takeDown(Instant now) {
-        return publication.takeDown(moderation.takeDown(now));
+    public Publication publicationState() {
+        return Publication.of(this);
     }
 
-    public void hideFromRecommended(Long moderatorId, String reason, Instant now) {
-        moderation.hide(moderatorId, reason, now);
+    public Listing listing() {
+        return Listing.of(moderation);
     }
 
-    public void unhideFromRecommended() {
-        moderation.unhide();
-    }
-
-    public void setOwnerNotificationsEnabled(boolean enabled) {
-        publication.setOwnerNotificationsEnabled(enabled);
-    }
-
-    public PublicationOutcome publish(Instant now) {
-        return Publishable.parse(this).publication().publish(now);
+    public Publishable requirePublishable() {
+        return Publishable.parse(this);
     }
 
     @Parsed
-    private record Publishable(PlannerPublication publication) {
+    public record Publishable(Publication publication) {
 
         private static Publishable parse(Planner planner) {
-            if (planner.moderation.isTakenDown()) {
+            if (planner.isTakenDown()) {
                 throw new PlannerForbiddenException(planner.id);
             }
-            return new Publishable(planner.publication);
+            return new Publishable(planner.publicationState());
         }
     }
 
     public void recordSave() {
         content.recordSave();
-    }
-
-    public PublicationOutcome unpublish() {
-        return publication.unpublish();
     }
 }

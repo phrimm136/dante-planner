@@ -1,6 +1,7 @@
 package org.danteplanner.backend.controller;
 
 import jakarta.servlet.http.Cookie;
+import org.danteplanner.backend.moderation.api.PlannerModerationTarget;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
@@ -58,6 +59,9 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private JwtTokenService jwtTokenService;
+
+    @Autowired
+    private PlannerModerationTarget plannerTarget;
 
     private User regularUser;
     private User adminUser;
@@ -340,9 +344,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void unhideFromRecommended_WhenAdminRole_Returns200() throws Exception {
-            Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason", Instant.now());
-            plannerRepository.save(hidden);
+            plannerTarget.hideFromRecommended(testPlanner.getId(), adminUser.getId(), "Test hide reason");
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie()))
@@ -354,8 +356,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void unhideFromRecommended_WhenModeratorRole_Returns200() throws Exception {
-            testPlanner.hideFromRecommended(moderatorUser.getId(), "Test hide reason", Instant.now());
-            plannerRepository.save(testPlanner);
+            plannerTarget.hideFromRecommended(testPlanner.getId(), moderatorUser.getId(), "Test hide reason");
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(moderatorCookie()))
@@ -364,9 +365,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void unhideFromRecommended_WhenRegularUser_Returns403() throws Exception {
-            Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason", Instant.now());
-            plannerRepository.save(hidden);
+            plannerTarget.hideFromRecommended(testPlanner.getId(), adminUser.getId(), "Test hide reason");
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(regularUserCookie()))
@@ -375,9 +374,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void unhideFromRecommended_WhenHiddenPlanner_ClearsHiddenFlag() throws Exception {
-            Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason", Instant.now());
-            plannerRepository.save(hidden);
+            plannerTarget.hideFromRecommended(testPlanner.getId(), adminUser.getId(), "Test hide reason");
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie()))
@@ -389,9 +386,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void unhideFromRecommended_WhenHiddenPlanner_ClearsHiddenAt() throws Exception {
-            Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason", Instant.now());
-            plannerRepository.save(hidden);
+            plannerTarget.hideFromRecommended(testPlanner.getId(), adminUser.getId(), "Test hide reason");
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie()))
@@ -403,9 +398,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void unhideFromRecommended_WhenHiddenPlanner_ClearsModeratorId() throws Exception {
-            Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason", Instant.now());
-            plannerRepository.save(hidden);
+            plannerTarget.hideFromRecommended(testPlanner.getId(), adminUser.getId(), "Test hide reason");
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie()))
@@ -417,9 +410,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void unhideFromRecommended_WhenHiddenPlanner_ClearsHideReason() throws Exception {
-            Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason", Instant.now());
-            plannerRepository.save(hidden);
+            plannerTarget.hideFromRecommended(testPlanner.getId(), adminUser.getId(), "Test hide reason");
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie()))
@@ -431,8 +422,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void unhideFromRecommended_WhenHiddenPlanner_ClearsAllMetadata() throws Exception {
-            testPlanner.hideFromRecommended(adminUser.getId(), "Comprehensive metadata clearing test", Instant.now());
-            plannerRepository.save(testPlanner);
+            plannerTarget.hideFromRecommended(testPlanner.getId(), adminUser.getId(), "Comprehensive metadata clearing test");
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie()))
@@ -459,9 +449,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void unhideFromRecommended_WhenVotes_PreservesVotes() throws Exception {
-            Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason", Instant.now());
-            plannerRepository.save(hidden);
+            plannerTarget.hideFromRecommended(testPlanner.getId(), adminUser.getId(), "Test hide reason");
 
             PlannerVote vote1 = new PlannerVote(regularUser.getId(), testPlanner.getId(), VoteType.UP);
             voteRepository.save(vote1);

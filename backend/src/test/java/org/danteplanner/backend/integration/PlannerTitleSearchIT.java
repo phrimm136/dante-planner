@@ -90,7 +90,7 @@ class PlannerTitleSearchIT extends ExclusiveDatabaseSupport {
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-        catalogService.add(planner);
+        TestDataFactory.addToCatalog(catalogService, planner);
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
     }
 
@@ -160,7 +160,7 @@ class PlannerTitleSearchIT extends ExclusiveDatabaseSupport {
                     .firstPublishedAt(now.minus(3 - i, ChronoUnit.HOURS))
                     .save(plannerRepository);
             statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-            catalogService.add(planner);
+            TestDataFactory.addToCatalog(catalogService, planner);
         }
 
         mockMvc.perform(get("/api/planner/md/published"))

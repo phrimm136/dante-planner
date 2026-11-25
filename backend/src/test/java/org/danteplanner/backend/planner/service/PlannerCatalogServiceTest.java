@@ -1,6 +1,7 @@
 package org.danteplanner.backend.planner.service;
 
 import tools.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.planner.entity.Publication;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
@@ -86,7 +87,8 @@ class PlannerCatalogServiceTest {
     void onBecameVisible_WhenCalled_AddsTheRowAndSyncsTheFilters() {
         Planner planner = loadedPlanner();
 
-        catalogService.onBecameVisible(planner);
+        catalogService.onBecameVisible(planner,
+                        (Publication.Published) planner.publicationState(), planner.listing());
 
         verify(catalogRepository).insert(any(PlannerCatalog.class));
         verifySynced(planner.getId());

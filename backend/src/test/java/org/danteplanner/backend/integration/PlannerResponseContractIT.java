@@ -173,7 +173,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
                         .plannerId(published.getId())
                         .build();
         statsRepository.save(stats);
-        catalogService.add(published);
+        TestDataFactory.addToCatalog(catalogService, published);
 
         String json = mockMvc.perform(get("/api/planner/md/published"))
                 .andExpect(status().isOk())
@@ -195,7 +195,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     @Test
     void listCardFields_WhenListedAsViewer_CarriesUserContext() throws Exception {
         statsRepository.save(PlannerStats.builder().plannerId(published.getId()).build());
-        catalogService.add(published);
+        TestDataFactory.addToCatalog(catalogService, published);
         engageAsOwner();
 
         String json = performAuthed(mockMvc, get("/api/planner/md/published"), token)

@@ -22,6 +22,9 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.danteplanner.backend.planner.service.ModeratorAction;
+import org.danteplanner.backend.planner.repository.PlannerModerationRepository;
+import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.moderation.service.RestrictionCheckService;
@@ -29,7 +32,6 @@ import org.danteplanner.backend.moderation.validation.AccountStandingValidator;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
 import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerSubscription;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
@@ -98,6 +100,10 @@ class PlannerScopeDeclarationTest {
     @Mock
     private PlannerCatalogRepository catalogRepository;
     @Mock
+    private PlannerPublicationRepository publicationRepository;
+    @Mock
+    private PlannerModerationRepository moderationRepository;
+    @Mock
     private PlannerSubscriptionRepository subscriptionRepository;
     @Mock
     private PlannerVoteRepository voteRepository;
@@ -123,6 +129,11 @@ class PlannerScopeDeclarationTest {
             return row;
         });
         TransactionSynchronizationManager.initSynchronization();
+        lenient().when(publicationRepository.publishFirst(any(), any())).thenReturn(1);
+        lenient().when(publicationRepository.unpublish(any())).thenReturn(1);
+        lenient().when(publicationRepository.disableOwnerNotifications(any())).thenReturn(1);
+        lenient().when(moderationRepository.takeDown(any(), any())).thenReturn(1);
+        lenient().when(moderationRepository.hide(any(), any(), any(), any())).thenReturn(1);
         FreshnessDeclarations.begin();
     }
 
@@ -147,7 +158,7 @@ class PlannerScopeDeclarationTest {
     }
 
     private PlannerCommandService commandService(PlannerContentValidator contentValidator) {
-        return new PlannerCommandService(plannerRepository, statsRepository, contentValidator,
+        return new PlannerCommandService(plannerRepository, statsRepository, publicationRepository, contentValidator,
                 new ContentVersionValidator(TestDataFactory.gameDataRegistry()), catalogService(), accessGuard(),
                 new RestrictionCheckService(users, new AccountStandingValidator(), Clock.systemUTC()), new PlannerCategoryValidator(),
                 new PlannerLimitValidator(), new PlannerOwnershipValidator(), new SyncVersionValidator(), mapper, Clock.systemUTC(),
@@ -156,10 +167,10 @@ class PlannerScopeDeclarationTest {
 
     private PlannerPublishingService publishingService(PlannerContentValidator contentValidator) {
         PlannerAccessGuard accessGuard = accessGuard();
-        return new PlannerPublishingService(plannerRepository, statsRepository, commandService(contentValidator),
-                contentValidator, catalogService(),
+        return new PlannerPublishingService(plannerRepository, statsRepository, publicationRepository,
+                moderationRepository, commandService(contentValidator), contentValidator, catalogService(),
                 new PlannerSubscriptionService(subscriptionRepository, accessGuard,
-                        new RestrictionCheckService(users, new AccountStandingValidator(), Clock.systemUTC())),
+                        new RestrictionCheckService(users, new AccountStandingValidator(), Clock.systemUTC()), Clock.systemUTC()),
                 accessGuard, new PlannerOwnershipValidator(), new PlannerPublishValidator(),
                 new PlannerCategoryValidator(), recorder(), Clock.fixed(Instant.parse("2026-11-23T00:00:00Z"), ZoneOffset.UTC));
     }
@@ -285,7 +296,7 @@ class PlannerScopeDeclarationTest {
         Planner planner = stored(planner(true));
 
         publishingService(TestDataFactory.contentValidator()).withdrawFromPublicView(planner.getId(),
-                taken -> taken.takeDown(Instant.now()));
+                new ModeratorAction.TakeDown());
 
         assertThat(FreshnessDeclarations.declared()).containsExactlyInAnyOrder(
                 new FreshnessScope.Planner(planner.getId()), new FreshnessScope.Global());
@@ -296,7 +307,7 @@ class PlannerScopeDeclarationTest {
         Planner planner = stored(planner(true));
 
         publishingService(TestDataFactory.contentValidator()).changeRecommendedListing(planner.getId(),
-                listed -> listed.hideFromRecommended(READER_ID, "freshness", Instant.now()));
+                new ModeratorAction.Hide(READER_ID, "freshness"));
 
         assertThat(FreshnessDeclarations.declared()).containsExactly(new FreshnessScope.Global());
     }
@@ -319,7 +330,7 @@ class PlannerScopeDeclarationTest {
         PlannerAccessGuard accessGuard = accessGuard();
         PlannerEngagementService engagement = new PlannerEngagementService(voteRepository,
                 new PlannerStatsService(statsRepository), catalogService(), recorder(), accessGuard,
-                new PlannerReportService(reportRepository, new PlannerModerationTargetAdapter(null, accessGuard, Clock.systemUTC()),
+                new PlannerReportService(reportRepository, new PlannerModerationTargetAdapter(null, accessGuard),
                         new ReportUniquenessValidator()),
                 new VoteUniquenessValidator(), RECOMMENDED_THRESHOLD);
 
@@ -352,9 +363,9 @@ class PlannerScopeDeclarationTest {
     @Test
     void toggleSubscription_WhenTheReaderSubscribesFirst_DeclaresItsPlannerOnly() {
         UUID plannerId = publishedThread();
-        when(subscriptionRepository.findByUserIdAndPlannerId(READER_ID, plannerId)).thenReturn(Optional.empty());
-        when(subscriptionRepository.insert(any(PlannerSubscription.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(subscriptionRepository.findEnabledOf(READER_ID, plannerId))
+                .thenReturn(Optional.of(true));
+        when(subscriptionRepository.toggle(any(), any(), any())).thenReturn(1);
 
         subscriptionService().toggleSubscription(READER_ID, plannerId);
 
@@ -364,10 +375,29 @@ class PlannerScopeDeclarationTest {
     @Test
     void toggleSubscription_WhenTheReaderTogglesAnExistingSubscription_DeclaresItsPlannerOnly() {
         UUID plannerId = publishedThread();
-        when(subscriptionRepository.findByUserIdAndPlannerId(READER_ID, plannerId))
-                .thenReturn(Optional.of(new PlannerSubscription(READER_ID, plannerId)));
+        when(subscriptionRepository.findEnabledOf(READER_ID, plannerId))
+                .thenReturn(Optional.of(false));
+        when(subscriptionRepository.toggle(any(), any(), any())).thenReturn(2);
 
         subscriptionService().toggleSubscription(READER_ID, plannerId);
+
+        assertThat(FreshnessDeclarations.declared()).containsExactly(new FreshnessScope.Planner(plannerId));
+    }
+
+    @Test
+    void subscribe_WhenCalled_DeclaresItsPlannerOnly() {
+        UUID plannerId = publishedThread();
+
+        subscriptionService().subscribe(READER_ID, plannerId);
+
+        assertThat(FreshnessDeclarations.declared()).containsExactly(new FreshnessScope.Planner(plannerId));
+    }
+
+    @Test
+    void unsubscribe_WhenCalled_DeclaresItsPlannerOnly() {
+        UUID plannerId = publishedThread();
+
+        subscriptionService().unsubscribe(READER_ID, plannerId);
 
         assertThat(FreshnessDeclarations.declared()).containsExactly(new FreshnessScope.Planner(plannerId));
     }
@@ -381,6 +411,6 @@ class PlannerScopeDeclarationTest {
 
     private PlannerSubscriptionService subscriptionService() {
         return new PlannerSubscriptionService(subscriptionRepository, accessGuard(),
-                new RestrictionCheckService(users, new AccountStandingValidator(), Clock.systemUTC()));
+                new RestrictionCheckService(users, new AccountStandingValidator(), Clock.systemUTC()), Clock.systemUTC());
     }
 }

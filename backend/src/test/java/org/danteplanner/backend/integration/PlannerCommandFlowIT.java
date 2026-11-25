@@ -144,7 +144,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-        catalogService.add(planner);
+        TestDataFactory.addToCatalog(catalogService, planner);
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
         // MySQL re-serializes a JSON column, so "the content did not change" is only
         // expressible against the stored form, not the string handed to the insert.
@@ -305,7 +305,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-        catalogService.add(planner);
+        TestDataFactory.addToCatalog(catalogService, planner);
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
         return plannerRepository.findById(planner.getId()).orElseThrow();
     }

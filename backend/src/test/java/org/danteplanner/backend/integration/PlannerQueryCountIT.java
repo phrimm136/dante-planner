@@ -277,7 +277,7 @@ class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
                     .title(SEARCH_MARKER + " planner")
                     .published(true)
                     .save(plannerRepository);
-            plannerCatalogService.add(planner);
+            TestDataFactory.addToCatalog(plannerCatalogService, planner);
             seededIds.add(planner.getId());
 
             plannerVoteRepository.save(new PlannerVote(viewerId, planner.getId(), VoteType.UP));

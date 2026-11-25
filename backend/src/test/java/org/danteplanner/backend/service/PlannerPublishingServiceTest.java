@@ -4,6 +4,10 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.moderation.api.ModeratedPlanner;
+import org.danteplanner.backend.planner.service.ModeratorAction;
+import org.danteplanner.backend.planner.repository.PlannerModerationRepository;
+import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import org.danteplanner.backend.moderation.service.RestrictionCheckService;
 import org.danteplanner.backend.moderation.validation.AccountStandingValidator;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
@@ -29,7 +33,6 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
-import org.danteplanner.backend.planner.entity.PlannerSubscription;
 import org.danteplanner.backend.planner.precondition.ContentVersionValidator;
 import org.danteplanner.backend.planner.precondition.PlannerLimitValidator;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
@@ -76,12 +79,13 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
@@ -91,6 +95,8 @@ import static org.danteplanner.backend.support.Rejections.assertRejected;
  */
 @ExtendWith(MockitoExtension.class)
 class PlannerPublishingServiceTest {
+
+    private static final Instant NOW = Instant.parse("2026-11-23T00:00:00Z");
 
     private static final int MAX_PLANNERS_PER_USER = 100;
 
@@ -117,6 +123,12 @@ class PlannerPublishingServiceTest {
     private PlannerSubscriptionRepository subscriptionRepository;
 
     @Mock
+    private PlannerPublicationRepository publicationRepository;
+
+    @Mock
+    private PlannerModerationRepository moderationRepository;
+
+    @Mock
     private DomainEventRepository domainEventRepository;
 
     private final FakeUsers users = new FakeUsers();
@@ -132,6 +144,10 @@ class PlannerPublishingServiceTest {
         publishingService = publishingServiceWith(TestDataFactory.contentValidator());
 
         testUser = users.add(TestDataFactory.unsavedUser(1L));
+        lenient().when(publicationRepository.publishFirst(any(), any())).thenReturn(1);
+        lenient().when(publicationRepository.republish(any())).thenReturn(1);
+        lenient().when(publicationRepository.unpublish(any())).thenReturn(1);
+        lenient().when(moderationRepository.takeDown(any(), any())).thenReturn(1);
     }
 
     @AfterEach
@@ -158,6 +174,7 @@ class PlannerPublishingServiceTest {
         PlannerCommandService commandService = new PlannerCommandService(
                 plannerRepository,
                 plannerStatsRepository,
+                publicationRepository,
                 contentValidator,
                 new ContentVersionValidator(TestDataFactory.gameDataRegistry()),
                 catalogService,
@@ -173,16 +190,18 @@ class PlannerPublishingServiceTest {
         return new PlannerPublishingService(
                 plannerRepository,
                 plannerStatsRepository,
+                publicationRepository,
+                moderationRepository,
                 commandService,
                 contentValidator,
                 catalogService,
-                new PlannerSubscriptionService(subscriptionRepository, accessGuard, restrictionCheck),
+                new PlannerSubscriptionService(subscriptionRepository, accessGuard, restrictionCheck, Clock.systemUTC()),
                 accessGuard,
                 new PlannerOwnershipValidator(),
                 new PlannerPublishValidator(),
                 new PlannerCategoryValidator(),
                 new DomainEventRecorder(domainEventRepository, new ObjectMapper(), event -> { }),
-                Clock.fixed(Instant.parse("2026-11-23T00:00:00Z"), ZoneOffset.UTC)
+                Clock.fixed(NOW, ZoneOffset.UTC)
         );
     }
 
@@ -206,6 +225,8 @@ class PlannerPublishingServiceTest {
             publishedEventsPersist();
 
             PlannerResponse first = publishingService.publish(testUser.getId(), planner.getId());
+            when(plannerRepository.findAggregate(planner.getId()))
+                    .thenReturn(Optional.of(testPlannerBuilder().id(planner.getId()).published(true).build()));
             PlannerResponse second = publishingService.publish(testUser.getId(), planner.getId());
 
             assertThat(first.published()).isTrue();
@@ -269,7 +290,7 @@ class PlannerPublishingServiceTest {
             JsonNode published = mapper.readTree(planner.getContentJson());
             assertThat(published.path("observationGiftIds")).isEqualTo(mapper.createArrayNode().add("19002"));
             assertThat(indexedContent).isEqualTo(List.of(planner.getContentJson()));
-            assertThat(planner.isPublished()).isTrue();
+            verify(publicationRepository).publishFirst(planner.getId(), NOW);
         }
     }
 
@@ -296,17 +317,47 @@ class PlannerPublishingServiceTest {
 
         @Test
         void applyPublish_WhenAlreadyPublished_RecordsNothing() {
-            Planner planner = testPlannerBuilder().published(false).build();
+            Planner planner = testPlannerBuilder().published(true).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
             lenient().when(plannerRepository.findOwnershipById(planner.getId()))
                     .thenReturn(Optional.of(OwnershipRows.of(planner)));
-            publishedEventsPersist();
-            publishingService.publish(testUser.getId(), planner.getId());
-            clearInvocations(domainEventRepository);
 
             publishingService.publish(testUser.getId(), planner.getId());
 
             verify(domainEventRepository, never()).insert(any());
+            verifyNoInteractions(publicationRepository);
+        }
+
+        @Test
+        void applyPublish_WhenRepublished_ListsThePlannerWithoutAnEvent() {
+            Instant firstAt = NOW.minusSeconds(60);
+            Planner planner = testPlannerBuilder().published(false).firstPublishedAt(firstAt).build();
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
+
+            PlannerResponse result = publishingService.publish(testUser.getId(), planner.getId());
+
+            assertThat(result.published()).isTrue();
+            verify(domainEventRepository, never()).insert(any());
+            ArgumentCaptor<PlannerCatalog> row = ArgumentCaptor.forClass(PlannerCatalog.class);
+            verify(catalogRepository).insert(row.capture());
+            assertThat(row.getValue().getFirstPublishedAt()).isEqualTo(firstAt);
+        }
+
+        @Test
+        void applyPublish_WhenTheRaceIsLost_ListsAndRecordsNothing() {
+            Planner planner = testPlannerBuilder().published(false).build();
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            lenient().when(plannerRepository.findOwnershipById(planner.getId()))
+                    .thenReturn(Optional.of(OwnershipRows.of(planner)));
+            when(publicationRepository.publishFirst(planner.getId(), NOW)).thenReturn(0);
+
+            PlannerResponse result = publishingService.publish(testUser.getId(), planner.getId());
+
+            assertThat(result.published()).isFalse();
+            verify(domainEventRepository, never()).insert(any());
+            verify(catalogRepository, never()).insert(any());
         }
 
         @Test
@@ -330,10 +381,10 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
 
-            Planner result = publishingService.withdrawFromPublicView(
-                    planner.getId(), Planner::unpublish);
+            ModeratedPlanner result = publishingService.withdrawFromPublicView(
+                    planner.getId(), new ModeratorAction.Unpublish());
 
-            assertThat(result).isSameAs(planner);
+            assertThat(result.published()).isFalse();
             verify(catalogRepository, never()).deleteByPlannerId(any());
         }
 
@@ -342,11 +393,11 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().published(true).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
 
-            Planner result = publishingService.withdrawFromPublicView(
-                    planner.getId(), Planner::unpublish);
+            ModeratedPlanner result = publishingService.withdrawFromPublicView(
+                    planner.getId(), new ModeratorAction.Unpublish());
 
-            assertThat(result).isSameAs(planner);
-            assertThat(result.isPublished()).isFalse();
+            assertThat(result.id()).isEqualTo(planner.getId());
+            assertThat(result.published()).isFalse();
             verify(catalogRepository).deleteByPlannerId(planner.getId());
         }
 
@@ -355,10 +406,21 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
 
-            Planner result = publishingService.withdrawFromPublicView(planner.getId(), taken -> taken.takeDown(Instant.now()));
+            publishingService.withdrawFromPublicView(planner.getId(), new ModeratorAction.TakeDown());
 
-            assertThat(result).isSameAs(planner);
-            assertThat(result.isTakenDown()).isTrue();
+            verify(moderationRepository).takeDown(planner.getId(), NOW);
+            verify(catalogRepository).deleteByPlannerId(planner.getId());
+        }
+
+        @Test
+        void withdrawFromPublicView_WhenTakedownOfATakenDownUnpublished_HasNoSideEffects() {
+            Planner planner = testPlannerBuilder().published(false).build();
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            when(moderationRepository.takeDown(planner.getId(), NOW)).thenReturn(0);
+
+            publishingService.withdrawFromPublicView(planner.getId(), new ModeratorAction.TakeDown());
+
+            verify(catalogRepository, never()).deleteByPlannerId(any());
         }
     }
 
@@ -367,7 +429,8 @@ class PlannerPublishingServiceTest {
 
         private List<String> plannerCalls() {
             return MockCalls.inOrder(plannerRepository, plannerStatsRepository, catalogRepository,
-                    entityFilterRepository, keywordFilterRepository, subscriptionRepository);
+                    entityFilterRepository, keywordFilterRepository, subscriptionRepository,
+                    publicationRepository, moderationRepository);
         }
 
         private void stored(Planner planner) {
@@ -416,7 +479,7 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().published(true).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
 
-            publishingService.withdrawFromPublicView(planner.getId(), taken -> taken.takeDown(Instant.now()));
+            publishingService.withdrawFromPublicView(planner.getId(), new ModeratorAction.TakeDown());
 
             assertThat(plannerCalls()).startsWith("lockContent");
         }
@@ -509,7 +572,7 @@ class PlannerPublishingServiceTest {
                     .withCode("PLANNER_FORBIDDEN")
                     .isInstanceOfSatisfying(PlannerForbiddenException.class,
                             exception -> assertThat(exception.getPlannerId()).isEqualTo(planner.getId()));
-            assertThat(planner.isPublished()).isFalse();
+            verifyNoInteractions(publicationRepository);
         }
 
         @Test
@@ -539,10 +602,7 @@ class PlannerPublishingServiceTest {
             assertThat(result.published()).isTrue();
             // The subscription is a row in another aggregate and never reaches this response;
             // asserting it as state needs a containerized test with a real subscription repository.
-            ArgumentCaptor<PlannerSubscription> subscription = ArgumentCaptor.forClass(PlannerSubscription.class);
-            verify(subscriptionRepository).insert(subscription.capture());
-            assertThat(subscription.getValue().getUserId()).isEqualTo(testUser.getId());
-            assertThat(subscription.getValue().getPlannerId()).isEqualTo(planner.getId());
+            verify(subscriptionRepository).insertIfAbsent(eq(testUser.getId()), eq(planner.getId()), any());
         }
 
         @Test
@@ -559,7 +619,7 @@ class PlannerPublishingServiceTest {
 
             // Assert
             assertThat(result.published()).isFalse();
-            verify(subscriptionRepository, never()).insert(any());
+            verifyNoInteractions(subscriptionRepository);
         }
     }
 
@@ -592,13 +652,16 @@ class PlannerPublishingServiceTest {
             lenient().when(plannerRepository.findOwnershipById(planner.getId()))
                     .thenReturn(Optional.of(OwnershipRows.of(planner)));
 
+            when(publicationRepository.disableOwnerNotifications(planner.getId())).thenReturn(1);
+
             // Act
             ToggleOwnerNotificationsResponse response =
                     publishingService.toggleOwnerNotifications(testUser.getId(), planner.getId(), false);
 
             // Assert
             assertThat(response.ownerNotificationsEnabled()).isFalse();
-            assertThat(planner.isOwnerNotificationsEnabled()).isFalse();
+            verify(publicationRepository).disableOwnerNotifications(planner.getId());
+            verifyNoMoreInteractions(publicationRepository);
         }
 
         @Test
@@ -615,7 +678,7 @@ class PlannerPublishingServiceTest {
             // Act & Assert
             assertRejected(() -> publishingService.toggleOwnerNotifications(testUser.getId(), planner.getId(), true))
                     .withCode("PLANNER_FORBIDDEN");
-            assertThat(planner.isOwnerNotificationsEnabled()).isTrue();
+            verifyNoInteractions(publicationRepository);
         }
     }
 
@@ -633,8 +696,7 @@ class PlannerPublishingServiceTest {
                     .withViolation("MISSING_TITLE")
                     .isInstanceOfSatisfying(PlannerValidationException.class,
                             thrown -> assertThat(thrown.getOriginalCode()).isEqualTo("MISSING_TITLE"));
-            assertThat(planner.isPublished()).isFalse();
-            assertThat(planner.getFirstPublishedAt()).isNull();
+            verifyNoInteractions(publicationRepository);
         }
 
         @Test
@@ -658,7 +720,7 @@ class PlannerPublishingServiceTest {
                             thrown -> assertThat(thrown.getOriginalCode()).isEqualTo("MISSING_TITLE"));
             assertThat(planner.getSyncVersion()).isEqualTo(syncVersionBefore);
             assertThat(planner.getTitle()).isEqualTo("Stored Title");
-            assertThat(planner.isPublished()).isFalse();
+            verifyNoInteractions(publicationRepository);
         }
 
         @Test
@@ -752,8 +814,7 @@ class PlannerPublishingServiceTest {
             assertRejected(() -> publishingService.publish(testUser.getId(), planner.getId()))
                     .withCode("EMPTY_CONTENT");
 
-            assertThat(planner.isPublished()).isFalse();
-            assertThat(planner.getFirstPublishedAt()).isNull();
+            verifyNoInteractions(publicationRepository);
             verify(catalogRepository, never()).insert(any());
         }
     }

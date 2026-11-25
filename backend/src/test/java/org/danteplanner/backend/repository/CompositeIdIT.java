@@ -1,5 +1,6 @@
 package org.danteplanner.backend.repository;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -23,7 +24,6 @@ import org.danteplanner.backend.planner.entity.PlannerEntityFilter;
 import org.danteplanner.backend.planner.entity.PlannerEntityFilterId;
 import org.danteplanner.backend.planner.entity.PlannerKeywordFilter;
 import org.danteplanner.backend.planner.entity.PlannerKeywordFilterId;
-import org.danteplanner.backend.planner.entity.PlannerSubscription;
 import org.danteplanner.backend.planner.entity.PlannerSubscriptionId;
 import org.danteplanner.backend.planner.entity.PlannerView;
 import org.danteplanner.backend.planner.entity.PlannerViewId;
@@ -95,8 +95,10 @@ class CompositeIdIT extends SharedMySqlContainerSupport {
 
     @Test
     void subscription_WhenAddressedByItsCompositeId_LoadsAndDeletes() {
-        assertLoadsAndDeletes(subscriptionRepository, new PlannerSubscription(userId, plannerId),
-                new PlannerSubscriptionId(userId, plannerId));
+        transactionTemplate.executeWithoutResult(status ->
+                subscriptionRepository.insertIfAbsent(userId, plannerId, Instant.now()));
+
+        assertLoadsAndDeletes(subscriptionRepository, new PlannerSubscriptionId(userId, plannerId));
     }
 
     @Test
@@ -122,6 +124,10 @@ class CompositeIdIT extends SharedMySqlContainerSupport {
     private <T, I> void assertLoadsAndDeletes(JpaRepository<T, I> repository, T row, I id) {
         transactionTemplate.executeWithoutResult(status -> entityManager.persist(row));
 
+        assertLoadsAndDeletes(repository, id);
+    }
+
+    private <T, I> void assertLoadsAndDeletes(JpaRepository<T, I> repository, I id) {
         assertThat(repository.findById(id)).isPresent();
         transactionTemplate.executeWithoutResult(status ->
                 entityManager.remove(repository.findById(id).orElseThrow()));

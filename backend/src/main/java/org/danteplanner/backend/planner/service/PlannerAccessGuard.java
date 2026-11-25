@@ -76,7 +76,7 @@ public class PlannerAccessGuard implements PlannerAccess {
         }
     }
 
-    private static PlannerNotFoundException absent(UUID id) {
+    static PlannerNotFoundException absent(UUID id) {
         return new PlannerNotFoundException(new PlannerMiss.Absent(id));
     }
 }

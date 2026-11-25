@@ -6,6 +6,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.support.StoredComments;
+import org.danteplanner.backend.moderation.api.PlannerModerationTarget;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
@@ -84,6 +85,9 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private PlannerModerationTarget plannerTarget;
 
     private User owner;
     private User moderator;
@@ -200,9 +204,7 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
 
     @Test
     void unhideFromRecommended_WhenActorBanned_Returns403AndPlannerStaysHidden() throws Exception {
-        Planner hidden = reloaded();
-        hidden.hideFromRecommended(admin.getId(), "Hidden before the ban", Instant.now());
-        plannerRepository.save(hidden);
+        plannerTarget.hideFromRecommended(planner.getId(), admin.getId(), "Hidden before the ban");
         ban(moderator);
 
         mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", planner.getId()).with(withCsrf())

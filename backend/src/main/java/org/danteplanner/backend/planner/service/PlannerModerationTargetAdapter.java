@@ -3,10 +3,8 @@ package org.danteplanner.backend.planner.service;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.moderation.api.ModeratedPlanner;
 import org.danteplanner.backend.moderation.api.PlannerModerationTarget;
-import org.danteplanner.backend.planner.entity.Planner;
 import org.springframework.stereotype.Service;
 
-import java.time.Clock;
 import java.util.UUID;
 
 @Service
@@ -15,7 +13,6 @@ public class PlannerModerationTargetAdapter implements PlannerModerationTarget {
 
     private final PlannerPublishingService plannerPublishingService;
     private final PlannerAccessGuard accessGuard;
-    private final Clock clock;
 
     @Override
     public void checkPublished(UUID plannerId) {
@@ -24,40 +21,27 @@ public class PlannerModerationTargetAdapter implements PlannerModerationTarget {
 
     @Override
     public ModeratedPlanner takeDown(UUID plannerId) {
-        return moderated(plannerPublishingService.withdrawFromPublicView(plannerId,
-                planner -> planner.takeDown(clock.instant())));
+        return plannerPublishingService.withdrawFromPublicView(plannerId, new ModeratorAction.TakeDown());
     }
 
     @Override
     public ModeratedPlanner unpublish(UUID plannerId) {
-        return moderated(plannerPublishingService.withdrawFromPublicView(plannerId, Planner::unpublish));
+        return plannerPublishingService.withdrawFromPublicView(plannerId, new ModeratorAction.Unpublish());
     }
 
     @Override
     public ModeratedPlanner hideFromRecommended(UUID plannerId, Long moderatorId, String reason) {
-        return moderated(plannerPublishingService.changeRecommendedListing(plannerId,
-                planner -> planner.hideFromRecommended(moderatorId, reason, clock.instant())));
+        return plannerPublishingService.changeRecommendedListing(plannerId,
+                new ModeratorAction.Hide(moderatorId, reason));
     }
 
     @Override
     public ModeratedPlanner unhideFromRecommended(UUID plannerId) {
-        return moderated(plannerPublishingService.changeRecommendedListing(plannerId,
-                Planner::unhideFromRecommended));
+        return plannerPublishingService.changeRecommendedListing(plannerId, new ModeratorAction.Unhide());
     }
 
     @Override
     public int upvoteCount(UUID plannerId) {
         return plannerPublishingService.upvoteCount(plannerId);
-    }
-
-    private ModeratedPlanner moderated(Planner planner) {
-        return new ModeratedPlanner(
-                planner.getId(),
-                planner.getTitle(),
-                planner.isPublished(),
-                planner.isHiddenFromRecommended(),
-                planner.getModeration().getHiddenByModeratorId(),
-                planner.getModeration().getHiddenReason(),
-                planner.getModeration().getHiddenAt());
     }
 }

@@ -1,6 +1,7 @@
 package org.danteplanner.backend.integration;
 
 import com.jayway.jsonpath.JsonPath;
+import org.danteplanner.backend.moderation.api.PlannerModerationTarget;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -69,6 +70,9 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
 
     private User author;
 
+    @Autowired
+    private PlannerModerationTarget plannerTarget;
+
     @BeforeEach
     void setUp() {
         author = TestDataFactory.createTestUser(userRepository, "author@example.com");
@@ -100,11 +104,10 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
     @Test
     void list_WhenSeeded_ShowsOnlyPublished() throws Exception {
         Planner p1 = plannerRepository.save(base("P1").published(true).build());
-        catalogService.add(p1);
+        TestDataFactory.addToCatalog(catalogService, p1);
 
         Planner p2 = plannerRepository.save(base("P2").published(true).build());
-        p2.takeDown(Instant.now());
-        plannerRepository.save(p2);
+        plannerTarget.takeDown(p2.getId());
 
         Planner p3 = base("P3").published(true).build();
         p3.softDelete(Instant.now());
@@ -130,7 +133,7 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
                 .upvotes(7)
                 .viewCount(42)
                 .build());
-        catalogService.add(p);
+        TestDataFactory.addToCatalog(catalogService, p);
 
         mockMvc.perform(get("/api/planner/md/published").param("q", marker))
                 .andExpect(status().isOk())
@@ -150,7 +153,7 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
     private Planner listed(String title, String category, Set<String> keywords) {
         Planner planner = plannerRepository.save(
                 base(title).category(category).selectedKeywords(keywords).published(true).build());
-        catalogService.add(planner);
+        TestDataFactory.addToCatalog(catalogService, planner);
         return planner;
     }
 

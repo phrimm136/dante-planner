@@ -1,7 +1,6 @@
 package org.danteplanner.backend.service;
 
 import org.danteplanner.backend.planner.api.PlannerThread;
-import java.time.Clock;
 import java.util.Optional;
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
@@ -58,7 +57,7 @@ class PlannerReportServiceTest {
         FakeUsers users = new FakeUsers();
         reportService = new PlannerReportService(reportRepository,
                 new PlannerModerationTargetAdapter(null,
-                        new PlannerAccessGuard(users, plannerRepository), Clock.systemUTC()),
+                        new PlannerAccessGuard(users, plannerRepository)),
                 new ReportUniquenessValidator());
 
         testUser = users.add(TestDataFactory.unsavedUser(1L));

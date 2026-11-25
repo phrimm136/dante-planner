@@ -1,5 +1,4 @@
 package org.danteplanner.backend.service;
-import org.danteplanner.backend.planner.entity.PlannerSubscription;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
@@ -94,7 +93,7 @@ class PublishedPlannerQueryServiceTest {
                 plannerRepository,
                 catalogRepository,
                 plannerVoteRepository,
-                new PlannerSubscriptionService(subscriptionRepository, accessGuard, null),
+                new PlannerSubscriptionService(subscriptionRepository, accessGuard, null, Clock.systemUTC()),
                 new PlannerReportService(reportRepository, null, null),
                 null,
                 plannerStatsRepository,
@@ -256,8 +255,7 @@ class PublishedPlannerQueryServiceTest {
         private void mockUserContext(UUID plannerId) {
             when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(Optional.of(new PlannerVote(testUser.getId(), plannerId, VoteType.UP)));
-            when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(Optional.of(new PlannerSubscription(testUser.getId(), plannerId)));
+            when(subscriptionRepository.findEnabledOf(testUser.getId(), plannerId)).thenReturn(Optional.of(true));
             when(reportRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId)).thenReturn(false);
         }
 

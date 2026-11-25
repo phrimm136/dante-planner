@@ -3,10 +3,12 @@ package org.danteplanner.backend.planner.service;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.planner.entity.Listing;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.planner.entity.Publication;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository.FloorScopeRow;
@@ -65,8 +67,8 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
-    public void onBecameVisible(Planner planner) {
-        add(planner);
+    public void onBecameVisible(Planner planner, Publication.Published publication, Listing listing) {
+        add(planner, publication, listing);
         syncFilterRows(planner.getId());
     }
 
@@ -142,10 +144,10 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
     }
 
     @Transactional
-    public void add(Planner planner) {
+    public void add(Planner planner, Publication.Published publication, Listing listing) {
         boolean recommended = RecommendedSql.isRecommended(
                 statsRepository.upvotesOf(planner.getId()),
-                planner.isHiddenFromRecommended(),
+                listing.isHidden(),
                 recommendedThreshold);
         catalogRepository.insert(PlannerCatalog.builder()
                 .plannerId(planner.getId())
@@ -153,7 +155,7 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
                 .category(planner.getCategory())
                 .title(planner.getTitle())
                 .selectedKeywords(planner.getSelectedKeywords())
-                .firstPublishedAt(planner.requireFirstPublishedAt())
+                .firstPublishedAt(publication.firstAt())
                 .recommended(recommended)
                 .build());
         log.debug("Catalog row added for planner {}", planner.getId());

@@ -17,6 +17,10 @@ import java.util.stream.Stream;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
+import org.danteplanner.backend.planner.entity.PlannerSubscriptionId;
+import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
+import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
+import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.config.TestConfig;
@@ -28,6 +32,7 @@ import org.danteplanner.backend.moderation.entity.PlannerReport;
 import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerSubscription;
 import org.danteplanner.backend.planner.entity.PlannerView;
@@ -93,6 +98,15 @@ class AuditedTimestampIT extends SharedMySqlContainerSupport {
     private PlannerRepository plannerRepository;
 
     @Autowired
+    private PlannerPublicationRepository publicationRepository;
+
+    @Autowired
+    private PlannerSubscriptionRepository subscriptionRepository;
+
+    @Autowired
+    private PlannerSubscriptionService subscriptionService;
+
+    @Autowired
     private PlannerCommentRepository commentRepository;
 
     @Autowired
@@ -135,6 +149,15 @@ class AuditedTimestampIT extends SharedMySqlContainerSupport {
     }
 
     @Test
+    void newSubscription_WhenTheClockIsFixed_IsStampedWithItsInstant() {
+        subscriptionService.createSubscription(owner.getId(), planner.getId());
+
+        PlannerSubscription stored = subscriptionRepository
+                .findById(new PlannerSubscriptionId(owner.getId(), planner.getId())).orElseThrow();
+        assertThat(stored.getCreatedAt()).isEqualTo(T);
+    }
+
+    @Test
     void newCommentReport_WhenTheClockIsFixed_IsStampedWithItsInstant() {
         PlannerComment comment = commentRepository.save(
                 new PlannerComment(planner.getId(), owner.getId(), null, 0));
@@ -148,7 +171,6 @@ class AuditedTimestampIT extends SharedMySqlContainerSupport {
     private static Stream<Named<BiFunction<Long, Planner, Object>>> auditedRows() {
         return Stream.of(
                 Named.of("vote", (userId, planner) -> new PlannerVote(userId, planner.getId(), VoteType.UP)),
-                Named.of("subscription", (userId, planner) -> new PlannerSubscription(userId, planner.getId())),
                 Named.of("view", (userId, planner) -> new PlannerView(planner.getId(),
                         ViewerHashUtil.hashForAuthenticatedUser(userId, planner.getId()), LocalDate.of(2026, 3, 4))),
                 Named.of("report", (userId, planner) -> new PlannerReport(userId, planner.getId())),
@@ -220,7 +242,7 @@ class AuditedTimestampIT extends SharedMySqlContainerSupport {
         clock.set(LATER);
 
         transactionTemplate.executeWithoutResult(status ->
-                plannerRepository.findById(planner.getId()).orElseThrow().setOwnerNotificationsEnabled(false));
+                publicationRepository.disableOwnerNotifications(planner.getId()));
 
         Planner stored = plannerRepository.findById(planner.getId()).orElseThrow();
         assertThat(stored.isOwnerNotificationsEnabled()).isFalse();
@@ -286,18 +308,18 @@ class AuditedTimestampIT extends SharedMySqlContainerSupport {
 
     @Test
     void changedRow_WhenTheContextHasNoAuditing_FailsTheSave() {
-        PlannerSubscription stored = new PlannerSubscription(owner.getId(), planner.getId());
-        transactionTemplate.executeWithoutResult(status -> entityManager.persist(stored));
+        String title = entityManager.find(PlannerContent.class, planner.getId()).getTitle();
         try (AnnotationConfigApplicationContext unaudited = jpaContext(SUBJECT_TIME, () -> { })) {
             EntityManagerFactory factory = unaudited.getBean(EntityManagerFactory.class);
 
             assertThatThrownBy(() -> factory.runInTransaction(manager ->
-                    manager.find(PlannerSubscription.class, stored.getId()).toggle()))
+                    manager.find(PlannerContent.class, planner.getId()).setTitle("moved")))
                     .satisfies(failure -> assertThat(NestedExceptionUtils.getMostSpecificCause(failure))
                             .isInstanceOf(NoSuchBeanDefinitionException.class)
                             .hasMessageContaining("AuditingHandler"));
         }
-        assertThat(entityManager.find(PlannerSubscription.class, stored.getId()).isEnabled()).isTrue();
+        entityManager.clear();
+        assertThat(entityManager.find(PlannerContent.class, planner.getId()).getTitle()).isEqualTo(title);
     }
 
     @Test
