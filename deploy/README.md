@@ -26,7 +26,10 @@ deploy/
     prometheus.yaml        Prometheus on role=data (local scrape)
     cluster-identity.yaml  ConfigMap that holds the region name as CLUSTER_NAME, for charts (their Applications are identical in both regions)
     kube-state-metrics.yaml  ArgoCD Application (namespace argocd) that installs the kube-state-metrics chart on role=data, scraped locally by Prometheus
-    privileged-exporter-namespace.yaml, node-exporter.yaml  namespace privileged-exporter (enforce: privileged) + node-exporter DaemonSet
+    mysqld-exporter.yaml   ArgoCD Application of the mysqld-exporter chart on role=data + the ExternalSecret that gives it the region's endpoint under one key
+    mysqld-exporter-config.yaml  ConfigMap with the RDS CA bundle that mysqld-exporter mounts
+    redis-exporter.yaml    ArgoCD Applications of the redis-exporter chart, one per Redis, on role=data
+    privileged-exporter-namespace.yaml, node-exporter.yaml  namespace privileged-exporter (enforce: privileged) + ArgoCD Application of the node-exporter chart, a DaemonSet on every node
   chart/values.yaml        values common to both regions
   chart/values-oregon.yaml region-specific values (image tag, endpoints)
   chart/values-seoul.yaml  the same for Seoul
@@ -59,6 +62,12 @@ Renovate (`renovate.json`) proposes a newer chart version once it is seven days 
 reads `renovate.json`: Renovate's hosted app reports an invalid file by opening an issue in the
 repository. A values change or a version bump lands by merging it: ArgoCD syncs the Application
 from `main`.
+
+Helm ignores a value that a chart raise renamed, so the `charts` stage also runs
+`.github/scripts/rendered-exporters.py` over the region and chart renders. It fails when an exporter's scrape
+annotations or `app` label, the args of node-exporter or mysqld-exporter, mysqld-exporter's
+endpoint, credentials, my.cnf or CA mount, the Secret keys and CA file behind them, or a Redis
+exporter's args or env are no longer rendered as the metrics need them.
 
 Renovate also raises the pins of the CI scripts:
 

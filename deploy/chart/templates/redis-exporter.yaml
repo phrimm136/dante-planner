@@ -3,99 +3,125 @@
 # own exporter under its own job label. Auth instance password rides the same
 # backend-runtime-config key the server itself uses. Observers live on the
 # data node, untouched by the surge pipeline.
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Application
 metadata:
   name: redis-exporter-auth
-  namespace: danteplanner
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: redis-exporter-auth
-  template:
-    metadata:
-      labels:
-        app: redis-exporter-auth
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "9121"
-        prometheus.io/path: /metrics
-        prometheus.io/job: redis-auth
-    spec:
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: RuntimeDefault
-      nodeSelector:
-        role: data
-      containers:
-        - name: redis-exporter
-          image: oliver006/redis_exporter:v1.66.0
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: [ALL]
-          env:
-            - name: REDIS_ADDR
-              value: redis://redis-auth:6379
-            - name: REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: backend-runtime-config
-                  key: AUTH_REDIS_PASSWORD
-          ports:
-            - name: metrics
-              containerPort: 9121
-          resources:
-            requests:
-              cpu: 10m
-              memory: 32Mi
-            limits:
-              memory: 64Mi
+  project: default
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: prometheus-redis-exporter
+    targetRevision: 6.37.0
+    helm:
+      releaseName: redis-exporter-auth
+      valuesObject:
+        fullnameOverride: redis-exporter-auth
+        labels:
+          app: redis-exporter-auth
+        annotations:
+          prometheus.io/scrape: "true"
+          prometheus.io/path: /metrics
+          prometheus.io/port: "9121"
+          prometheus.io/job: redis-auth
+        redisAddress: redis://redis-auth:6379
+        auth:
+          enabled: true
+          secret:
+            name: backend-runtime-config
+            key: AUTH_REDIS_PASSWORD
+        serviceAccount:
+          create: false
+        rbac:
+          create: false
+        podSecurityContext:
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
+        nodeSelector:
+          role: data
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            memory: 64Mi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: danteplanner
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Application
 metadata:
   name: redis-exporter-ratelimit
-  namespace: danteplanner
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: redis-exporter-ratelimit
-  template:
-    metadata:
-      labels:
-        app: redis-exporter-ratelimit
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "9121"
-        prometheus.io/path: /metrics
-        prometheus.io/job: redis-ratelimit
-    spec:
-      securityContext:
-        runAsNonRoot: true
-        seccompProfile:
-          type: RuntimeDefault
-      nodeSelector:
-        role: data
-      containers:
-        - name: redis-exporter
-          image: oliver006/redis_exporter:v1.66.0
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: [ALL]
-          env:
-            - name: REDIS_ADDR
-              value: redis://redis-ratelimit:6379
-          ports:
-            - name: metrics
-              containerPort: 9121
-          resources:
-            requests:
-              cpu: 10m
-              memory: 32Mi
-            limits:
-              memory: 64Mi
+  project: default
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: prometheus-redis-exporter
+    targetRevision: 6.37.0
+    helm:
+      releaseName: redis-exporter-ratelimit
+      valuesObject:
+        fullnameOverride: redis-exporter-ratelimit
+        labels:
+          app: redis-exporter-ratelimit
+        annotations:
+          prometheus.io/scrape: "true"
+          prometheus.io/path: /metrics
+          prometheus.io/port: "9121"
+          prometheus.io/job: redis-ratelimit
+        redisAddress: redis://redis-ratelimit:6379
+        serviceAccount:
+          create: false
+        rbac:
+          create: false
+        podSecurityContext:
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
+        nodeSelector:
+          role: data
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            memory: 64Mi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: danteplanner
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m

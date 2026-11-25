@@ -1,0 +1,41 @@
+---
+# Source: danteplanner/templates/mysqld-exporter-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rds-ca-bundle
+  namespace: danteplanner
+data:
+  rds-global-bundle.pem: "-----BEGIN CERTIFICATE-----\n"
+---
+# Source: danteplanner/templates/mysqld-exporter.yaml
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: mysqld-exporter-dsn
+  namespace: danteplanner
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: aws-secrets-manager
+    kind: SecretStore
+  target:
+    name: mysqld-exporter-dsn
+    creationPolicy: Owner
+    template:
+      mergePolicy: Merge
+      data:
+        my.cnf: "[client]\nssl-ca=/etc/mysqld-certs/rds-global-bundle.pem\n"
+  data:
+    - secretKey: username
+      remoteRef:
+        key: danteplanner/mysqld-exporter/dsn
+        property: username
+    - secretKey: password
+      remoteRef:
+        key: danteplanner/mysqld-exporter/dsn
+        property: password
+    - secretKey: endpoint
+      remoteRef:
+        key: danteplanner/mysqld-exporter/dsn
+        property: replica_endpoint
