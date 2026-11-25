@@ -11,6 +11,7 @@ import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.user.api.dto.UserResponse;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.validation.RoleChangeValidator;
+import org.danteplanner.backend.user.validation.RoleChangeValidator.AllowedRoleChange;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -112,9 +113,9 @@ public class UsersApiAdapter implements Users {
         User target = userService.lockActiveById(targetId);
         UserRole previousRole = target.getRole();
 
-        roleChangeValidator.requireCanChangeRole(actor, target, newRole);
+        AllowedRoleChange allowed = roleChangeValidator.requireCanChangeRole(actor, target, newRole);
 
-        target.setRole(newRole);
+        allowed.getTarget().setRole(allowed.getNewRole());
         FreshnessDeclarations.declare(new FreshnessScope.User(targetId));
         return new RoleChange(previousRole, toSummary(target));
     }

@@ -52,7 +52,7 @@ A double has no atomicity, so the property passes and the race ships.
 and a mismatched call raises `PotentialStubbingProblem`. That makes a tightly-matched stub carry the
 assertion a following `verify` would restate.
 
-`JwtAuthenticationFilter.attemptAutoRefresh` ends in `catch (Exception e) { return false; }`, which
+`JwtAuthenticationFilter.attemptAutoRefresh` catches `Exception` and answers as a guest, which
 eats `PotentialStubbingProblem`. On any path whose outcome is "no auth", strict stubs pin only
 *that* a collaborator was called, never with what — so removing a `verify` there is a real
 weakening.

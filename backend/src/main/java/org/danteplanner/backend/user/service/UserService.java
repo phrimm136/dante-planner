@@ -17,6 +17,7 @@ import org.danteplanner.backend.user.api.RestrictionReasonProvider;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.RandomUsernameGenerator.UsernameComponents;
 import org.danteplanner.backend.user.validation.EpithetValidator;
+import org.danteplanner.backend.user.validation.EpithetValidator.Epithet;
 import org.danteplanner.backend.shared.freshness.FreshnessExempt;
 import org.danteplanner.backend.shared.freshness.ScopedRead;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -238,16 +239,16 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse updateUsernameEpithet(Long userId, String epithet) {
-        epithetValidator.requireValidEpithet(epithet);
+    public UserResponse updateUsernameEpithet(Long userId, String requested) {
+        Epithet epithet = epithetValidator.requireValidEpithet(requested);
 
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException(userId));
 
-        user.setUsernameEpithet(epithet);
+        user.setUsernameEpithet(epithet.getValue());
         FreshnessDeclarations.declare(new FreshnessScope.User(userId), new FreshnessScope.Global());
 
-        log.info("User {} updated username epithet to {}", userId, epithet);
+        log.info("User {} updated username epithet to {}", userId, epithet.getValue());
 
         return toResponse(user);
     }

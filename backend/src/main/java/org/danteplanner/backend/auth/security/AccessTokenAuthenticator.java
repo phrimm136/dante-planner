@@ -82,14 +82,14 @@ public class AccessTokenAuthenticator {
             };
         }
 
-        static TokenCheck ofBlacklist(AccessClaims claims, boolean blacklisted) {
+        private static TokenCheck ofBlacklist(AccessClaims claims, boolean blacklisted) {
             if (blacklisted) {
                 return new Done(new Terminal.Revoked());
             }
             return new NeedInvalidation(claims);
         }
 
-        static TokenCheck ofRevocation(AccessClaims claims, boolean invalidated, @Nullable Authentication current) {
+        private static TokenCheck ofRevocation(AccessClaims claims, boolean invalidated, @Nullable Authentication current) {
             if (invalidated) {
                 return new Done(new Terminal.Revoked());
             }

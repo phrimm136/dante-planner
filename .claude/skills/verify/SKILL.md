@@ -35,9 +35,9 @@ replace it; run a side-by-side instance.
 - Use a test user id from MySQL (`docker exec limbusplanner-mysql-1 sh -c 'mysql -u danteplanner
   -p"$MYSQL_PASSWORD" danteplanner -e "SELECT id,email,role FROM users LIMIT 5;"'`) — ids 4/5 are
   test accounts; avoid id 0 (sentinel, blocked) and real accounts.
-- `GET /api/auth/me`: authenticated → 200 user JSON; guest → 200 EMPTY body (not 401).
+- `GET /api/auth/me`: authenticated → 200 user JSON; guest → 204 (not 401).
 - Auto-refresh: send an expired `accessToken` + valid `refreshToken` → response Set-Cookie carries
-  a fresh pair. A self-minted refresh (unknown family) is accepted via the rotation legacy branch.
+  a fresh pair. A self-minted refresh needs a `family_id`; an unknown family is accepted as a first rotation.
 - `POST /api/auth/logout` returns 204; needs the `csrf` cookie + `X-CSRF-Token` header (value =
   csrf cookie, issued on any prior response).
 - Rejections surface as `WARN ... Security event: <CODE> (<REASON>)` in container logs.

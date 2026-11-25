@@ -1,6 +1,9 @@
 package org.danteplanner.backend.auth.service;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.danteplanner.backend.user.api.AuthProviderType;
+import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.backend.shared.exception.InvalidRequestException;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -22,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -140,6 +144,111 @@ class AuthenticationServiceTest {
             assertThat(result.user().id()).isEqualTo(deletedUser.getId());
             assertThat(deletedUser.isDeleted()).isFalse();
             assertTokensBelongTo(result, deletedUser.getId(), UserRole.NORMAL);
+        }
+
+        @Test
+        void authenticateWithOAuth_WhenTheAccountBecameActiveBetweenTheLookups_SignsInWithoutWriting() {
+            CallOrder calls = new CallOrder(false);
+            calls.add(activeUser());
+            oauthProvider.answer(new OAuthTokens.Response("access", null),
+                    new OAuthUserInfo("raced-123", "raced@example.com"));
+
+            AuthenticationService.AuthResult result = authenticateOver(calls);
+
+            assertThat(result.reactivated()).isFalse();
+            assertThat(result.user().id()).isEqualTo(789L);
+            assertThat(calls.made).containsExactly("findActiveByProvider", "findByProvider");
+        }
+
+        @Test
+        void authenticateWithOAuth_WhenTheAccountIsActive_AsksForNothingElse() {
+            CallOrder calls = new CallOrder(true);
+            calls.add(activeUser());
+            oauthProvider.answer(new OAuthTokens.Response("access", null),
+                    new OAuthUserInfo("raced-123", "raced@example.com"));
+
+            assertThat(authenticateOver(calls).reactivated()).isFalse();
+
+            assertThat(calls.made).containsExactly("findActiveByProvider");
+        }
+
+        @Test
+        void authenticateWithOAuth_WhenThereIsNoAccount_LooksTwiceBeforeCreating() {
+            CallOrder calls = new CallOrder(true);
+            oauthProvider.answer(new OAuthTokens.Response("access", null),
+                    new OAuthUserInfo("new-123", "new@example.com"));
+
+            authenticateOver(calls);
+
+            assertThat(calls.made).containsExactly("findActiveByProvider", "findByProvider", "findOrCreateUser");
+        }
+
+        @Test
+        void authenticateWithOAuth_WhenTheAccountIsSoftDeleted_ReactivatesAfterBothLookupsAndLogsIt() {
+            CallOrder calls = new CallOrder(true);
+            User deleted = activeUser();
+            deleted.softDelete(Instant.now(), Instant.now().plusSeconds(86400 * 30));
+            calls.add(deleted);
+            oauthProvider.answer(new OAuthTokens.Response("access", null),
+                    new OAuthUserInfo("raced-123", "raced@example.com"));
+
+            List<String> logged = LogCapture.during(() -> authenticateOver(calls), Level.INFO,
+                            AuthenticationService.class).stream()
+                    .map(ILoggingEvent::getFormattedMessage)
+                    .toList();
+
+            assertThat(calls.made).containsExactly("findActiveByProvider", "findByProvider", "reactivateAccount");
+            assertThat(logged).containsExactly(
+                    "Processing OAuth authentication for provider: google",
+                    "Reactivated soft-deleted account for user: 789",
+                    "User authenticated successfully via google: userId=789 (reactivated: true)");
+        }
+
+        private User activeUser() {
+            return TestDataFactory.user()
+                    .id(789L)
+                    .provider(AuthProviderType.GOOGLE)
+                    .providerId("raced-123")
+                    .build();
+        }
+
+        private AuthenticationService.AuthResult authenticateOver(FakeUsers accounts) {
+            return new AuthenticationService(new OAuthProviderRegistry(List.of(oauthProvider)), jwt.service(), accounts)
+                    .authenticateWithOAuth("google", "code", "redirect", "verifier");
+        }
+    }
+
+    private static final class CallOrder extends FakeUsers {
+
+        private final List<String> made = new ArrayList<>();
+        private final boolean seesActiveAccounts;
+
+        private CallOrder(boolean seesActiveAccounts) {
+            this.seesActiveAccounts = seesActiveAccounts;
+        }
+
+        @Override
+        public Optional<UserSummary> findActiveByProvider(AuthProviderType providerType, String providerId) {
+            made.add("findActiveByProvider");
+            return seesActiveAccounts ? super.findActiveByProvider(providerType, providerId) : Optional.empty();
+        }
+
+        @Override
+        public Optional<UserSummary> findByProvider(AuthProviderType providerType, String providerId) {
+            made.add("findByProvider");
+            return super.findByProvider(providerType, providerId);
+        }
+
+        @Override
+        public UserSummary findOrCreateUser(String provider, String providerId, String email) {
+            made.add("findOrCreateUser");
+            return super.findOrCreateUser(provider, providerId, email);
+        }
+
+        @Override
+        public void reactivateAccount(Long userId) {
+            made.add("reactivateAccount");
+            super.reactivateAccount(userId);
         }
     }
 

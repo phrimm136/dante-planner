@@ -4,6 +4,7 @@ import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.validation.RoleChangeValidator.AllowedRoleChange;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.danteplanner.backend.support.Rejections.assertRejected;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,6 +73,43 @@ class RoleChangeValidatorTest {
         assertThatCode(() -> validator.requireCanChangeRole(TestDataFactory.unsavedUser(UserRole.ADMIN),
                 TestDataFactory.unsavedUser(UserRole.NORMAL), UserRole.MODERATOR))
                 .doesNotThrowAnyException();
+    }
+
+    @Test
+    void requireCanChangeRole_WhenAllowed_CarriesTheTargetAndItsNewRole() {
+        User target = TestDataFactory.unsavedUser(UserRole.NORMAL);
+
+        AllowedRoleChange allowed = validator.requireCanChangeRole(
+                TestDataFactory.unsavedUser(UserRole.ADMIN), target, UserRole.MODERATOR);
+
+        assertThat(allowed.getTarget()).isSameAs(target);
+        assertThat(allowed.getNewRole()).isEqualTo(UserRole.MODERATOR);
+    }
+
+    @Test
+    void requireCanChangeRole_WhenBothRankRulesRefuse_NamesTheGrantedRoleFirst() {
+        assertRejected(() -> validator.requireCanChangeRole(TestDataFactory.unsavedUser(UserRole.MODERATOR),
+                TestDataFactory.unsavedUser(UserRole.ADMIN), UserRole.ADMIN))
+                .satisfies(rejection -> assertThat(rejection.getMessage())
+                        .isEqualTo("Cannot grant role higher than your own"));
+    }
+
+    @Test
+    void requireCanChangeRole_WhenAnAdminKeepsTheirOwnRole_AllowsWithoutCounting() {
+        User admin = TestDataFactory.unsavedUser(UserRole.ADMIN);
+
+        assertThatCode(() -> validator.requireCanChangeRole(admin, admin, UserRole.ADMIN))
+                .doesNotThrowAnyException();
+        verifyNoInteractions(userRepository);
+    }
+
+    @Test
+    void requireCanChangeRole_WhenAModeratorDemotesThemself_AllowsWithoutCounting() {
+        User moderator = TestDataFactory.unsavedUser(UserRole.MODERATOR);
+
+        assertThatCode(() -> validator.requireCanChangeRole(moderator, moderator, UserRole.NORMAL))
+                .doesNotThrowAnyException();
+        verifyNoInteractions(userRepository);
     }
 
     @Test
