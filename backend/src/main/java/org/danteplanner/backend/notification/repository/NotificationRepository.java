@@ -12,18 +12,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-    Optional<Notification> findByPublicId(UUID publicId);
+    Optional<Notification> findByPublicIdAndUserId(UUID publicId, Long userId);
 
-    /**
-     * The three columns are those of {@code uk_notification_dedup} and no others: the key does
-     * not include {@code deleted_at}, so a soft-deleted row still occupies it and is still what
-     * comes back.
-     */
     Optional<Notification> findByUserIdAndContentIdAndNotificationType(
             Long userId, String contentId, NotificationType notificationType);
 
@@ -47,29 +43,25 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             @Param("commentSnippet") @Nullable String commentSnippet,
             @Param("commentPublicId") @Nullable String commentPublicId);
 
-    Page<Notification> findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(Long userId, Pageable pageable);
+    Page<Notification> findByUserIdAndReadAtIsNullOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
-    long countByUserIdAndReadFalseAndDeletedAtIsNull(Long userId);
-
-    @Modifying
-    @Query("UPDATE Notification n SET n.read = true, n.readAt = :readAt WHERE n.id = :id AND n.read = false")
-    int markAsRead(@Param("id") Long id, @Param("readAt") Instant readAt);
+    long countByUserIdAndReadAtIsNull(Long userId);
 
     @Modifying
-    @Query("UPDATE Notification n SET n.read = true, n.readAt = :readAt WHERE n.userId = :userId AND n.read = false AND n.deletedAt IS NULL")
-    int markAllAsRead(@Param("userId") Long userId, @Param("readAt") Instant readAt);
+    @Query("UPDATE Notification n SET n.readAt = :at "
+            + "WHERE n.publicId = :id AND n.userId = :userId AND n.readAt IS NULL")
+    int markAsRead(@Param("id") UUID publicId, @Param("userId") Long userId, @Param("at") Instant at);
+
+    @Query("SELECT n.id FROM Notification n WHERE n.userId = :userId AND n.readAt IS NULL ORDER BY n.id")
+    List<Long> unreadIdsOf(@Param("userId") Long userId);
 
     @Modifying
-    @Query("UPDATE Notification n SET n.deletedAt = :deletedAt WHERE n.read = true AND n.createdAt < :cutoffDate AND n.deletedAt IS NULL")
-    int softDeleteOldReadNotifications(@Param("cutoffDate") Instant cutoffDate, @Param("deletedAt") Instant deletedAt);
+    @Query("UPDATE Notification n SET n.readAt = :at WHERE n.id IN :ids AND n.readAt IS NULL")
+    int markAllAsRead(@Param("ids") List<Long> ids, @Param("at") Instant at);
 
     @Modifying
-    @Query("DELETE FROM Notification n WHERE n.deletedAt IS NOT NULL AND n.deletedAt < :cutoffDate")
-    int hardDeleteOldNotifications(@Param("cutoffDate") Instant cutoffDate);
-
-    @Modifying
-    @Query("UPDATE Notification n SET n.deletedAt = :deletedAt WHERE n.userId = :userId AND n.deletedAt IS NULL")
-    int softDeleteAllByUserId(@Param("userId") Long userId, @Param("deletedAt") Instant deletedAt);
+    @Query("DELETE FROM Notification n WHERE n.readAt < :cutoff")
+    int deleteReadBefore(@Param("cutoff") Instant cutoff);
 
     @Modifying
     @Query(value = """

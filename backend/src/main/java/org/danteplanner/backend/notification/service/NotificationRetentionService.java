@@ -18,21 +18,17 @@ import java.time.temporal.ChronoUnit;
 @Slf4j
 public class NotificationRetentionService {
 
-    private static final int SOFT_DELETE_AFTER_DAYS = 90;
-    private static final int HARD_DELETE_AFTER_DAYS = 365;
+    private static final int READ_RETENTION_DAYS = 365;
 
     private final NotificationRepository notificationRepository;
     private final Clock clock;
 
     @Transactional
     public void purgeExpired() {
-        Instant now = clock.instant();
-        Instant softDeleteCutoff = now.minus(SOFT_DELETE_AFTER_DAYS, ChronoUnit.DAYS);
-        Instant hardDeleteCutoff = now.minus(HARD_DELETE_AFTER_DAYS, ChronoUnit.DAYS);
+        Instant cutoff = clock.instant().minus(READ_RETENTION_DAYS, ChronoUnit.DAYS);
 
-        int softDeleted = notificationRepository.softDeleteOldReadNotifications(softDeleteCutoff, now);
-        int hardDeleted = notificationRepository.hardDeleteOldNotifications(hardDeleteCutoff);
+        int deleted = notificationRepository.deleteReadBefore(cutoff);
 
-        log.info("Notification cleanup complete: {} soft-deleted, {} hard-deleted", softDeleted, hardDeleted);
+        log.info("Notification cleanup complete: {} deleted", deleted);
     }
 }

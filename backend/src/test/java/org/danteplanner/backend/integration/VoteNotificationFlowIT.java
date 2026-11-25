@@ -134,7 +134,7 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
     }
 
     private List<Notification> notificationsOf(Long userId) {
-        return notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
+        return notificationRepository.findByUserIdAndReadAtIsNullOrderByCreatedAtDesc(
                 userId, org.springframework.data.domain.PageRequest.of(0, 10)).getContent();
     }
 
@@ -148,7 +148,7 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
         entityManager.clear();
 
         // Verify no notification exists before
-        long notificationsBefore = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
+        long notificationsBefore = notificationRepository.findByUserIdAndReadAtIsNullOrderByCreatedAtDesc(
                 plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getTotalElements();
         assertThat(notificationsBefore).isEqualTo(0);
 
@@ -165,7 +165,7 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
         assertThat(notification.getUserId()).isEqualTo(plannerOwner.getId());
         assertThat(notification.getContentId()).isEqualTo(testPlanner.getId().toString());
         assertThat(notification.getNotificationType()).isEqualTo(NotificationType.PLANNER_RECOMMENDED);
-        assertThat(notification.isRead()).isFalse();
+        assertThat(notification.getReadAt()).isNull();
         assertThat(notification.getCreatedAt()).isNotNull();
 
         // Verify stats flag set
@@ -186,7 +186,7 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
         // The vote commits its event row; the dispatch derives from it afterwards.
 
         // Assert - No notification created
-        long notificationsCount = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
+        long notificationsCount = notificationRepository.findByUserIdAndReadAtIsNullOrderByCreatedAtDesc(
                 plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getTotalElements();
         assertThat(notificationsCount).isEqualTo(0);
 
@@ -252,7 +252,7 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
         long deadline = System.currentTimeMillis() + 2000;
         while (System.currentTimeMillis() < deadline) {
             entityManager.clear();
-            boolean present = !notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
+            boolean present = !notificationRepository.findByUserIdAndReadAtIsNullOrderByCreatedAtDesc(
                     plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getContent().isEmpty();
             if (present) {
                 break;
@@ -263,7 +263,7 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
         entityManager.clear();
 
         // Assert - Only ONE notification created despite multiple concurrent votes
-        List<Notification> notifications = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
+        List<Notification> notifications = notificationRepository.findByUserIdAndReadAtIsNullOrderByCreatedAtDesc(
                 plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getContent();
 
         assertThat(notifications.size())
@@ -293,7 +293,7 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
         notificationRepository.save(existingNotification);
 
         // Verify exactly 1 notification exists
-        long notificationsBefore = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
+        long notificationsBefore = notificationRepository.findByUserIdAndReadAtIsNullOrderByCreatedAtDesc(
                 plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getTotalElements();
         assertThat(notificationsBefore).isEqualTo(1);
 
@@ -303,7 +303,7 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
         // Commit and verify
 
         // Assert - No new notification created
-        long notificationsAfter = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
+        long notificationsAfter = notificationRepository.findByUserIdAndReadAtIsNullOrderByCreatedAtDesc(
                 plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getTotalElements();
         assertThat(notificationsAfter).as("No duplicate notification should be created").isEqualTo(1);
     }
@@ -326,7 +326,7 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
         // Commit and verify
 
         // Assert - Still only 1 notification
-        long notificationsCount = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
+        long notificationsCount = notificationRepository.findByUserIdAndReadAtIsNullOrderByCreatedAtDesc(
                 plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getTotalElements();
         assertThat(notificationsCount).isEqualTo(1);
     }
@@ -407,7 +407,7 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
 
         // Commit setup
 
-        long notificationsBefore = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
+        long notificationsBefore = notificationRepository.findByUserIdAndReadAtIsNullOrderByCreatedAtDesc(
                 plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getTotalElements();
         assertThat(notificationsBefore).isEqualTo(1);
 
@@ -416,7 +416,7 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
         // The notification is permanent once sent
 
         // Assert - Notification remains
-        long notificationsAfter = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
+        long notificationsAfter = notificationRepository.findByUserIdAndReadAtIsNullOrderByCreatedAtDesc(
                 plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getTotalElements();
         assertThat(notificationsAfter).isEqualTo(1);
     }

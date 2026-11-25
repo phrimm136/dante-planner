@@ -588,7 +588,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
     }
 
     private List<Notification> notificationsOf(Long userId) {
-        return notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
+        return notificationRepository.findByUserIdAndReadAtIsNullOrderByCreatedAtDesc(
                 userId, org.springframework.data.domain.PageRequest.of(0, 10)).getContent();
     }
 

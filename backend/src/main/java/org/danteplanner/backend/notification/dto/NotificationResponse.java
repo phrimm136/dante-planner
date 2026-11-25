@@ -25,7 +25,7 @@ public record NotificationResponse(
             notification.getPublicId(),
             notification.getContentId(),
             notification.getNotificationType(),
-            notification.isRead(),
+            notification.getReadAt() != null,
             notification.getCreatedAt(),
             notification.getReadAt(),
             notification.getPlannerId(),

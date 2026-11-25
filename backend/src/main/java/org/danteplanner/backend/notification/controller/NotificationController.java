@@ -88,8 +88,8 @@ public class NotificationController {
             Viewer.Member member,
             @PathVariable("id") UUID publicId) {
 
-        log.info("User {} deleting notification {}", member.userId(), publicId);
-        notificationInboxService.deleteNotification(publicId, member.userId());
+        log.info("User {} dismissing notification {}", member.userId(), publicId);
+        notificationInboxService.markAsRead(publicId, member.userId());
         return ResponseEntity.noContent().build();
     }
 
@@ -99,8 +99,8 @@ public class NotificationController {
     public ResponseEntity<NotificationBulkResultResponse> deleteAllNotifications(
             Viewer.Member member) {
 
-        log.info("User {} deleting all notifications", member.userId());
-        int count = notificationInboxService.deleteAllNotifications(member.userId());
+        log.info("User {} dismissing all notifications", member.userId());
+        int count = notificationInboxService.markAllAsRead(member.userId());
         return ResponseEntity.ok(new NotificationBulkResultResponse(count));
     }
 }
