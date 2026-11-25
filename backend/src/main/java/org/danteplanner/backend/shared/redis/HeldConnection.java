@@ -9,6 +9,8 @@ import java.util.List;
 
 final class HeldConnection {
 
+    private static final CompletableFuture<Void> NOTHING_TO_CLOSE = CompletableFuture.completedFuture(null);
+
     private final Supplier<CompletableFuture<StatefulRedisConnection<String, String>>> connector;
     private State state = new State.Disconnected();
 
@@ -35,7 +37,7 @@ final class HeldConnection {
     }
 
     private CompletableFuture<StatefulRedisConnection<String, String>> reconnect() {
-        discard();
+        var unused = discard();
         CompletableFuture<StatefulRedisConnection<String, String>> attempt = connector.get();
         state = new State.Held(attempt, false);
         return attempt;
@@ -52,33 +54,37 @@ final class HeldConnection {
         }
     }
 
-    synchronized void discardUnlessConnecting() {
-        switch (state) {
+    synchronized CompletableFuture<Void> discardUnlessConnecting() {
+        return switch (state) {
             case State.Held held when held.attempt().isDone() -> discard();
-            case State.Held held -> { }
-            case State.Disconnected disconnected -> { }
-            case State.Closed closed -> state = closed.withoutSettled();
-        }
+            case State.Held held -> NOTHING_TO_CLOSE;
+            case State.Disconnected disconnected -> NOTHING_TO_CLOSE;
+            case State.Closed closed -> {
+                state = closed.withoutSettled();
+                yield NOTHING_TO_CLOSE;
+            }
+        };
     }
 
-    synchronized void close() {
-        discardUnlessConnecting();
+    synchronized CompletableFuture<Void> close() {
+        CompletableFuture<Void> closing = discardUnlessConnecting();
         state = switch (state) {
             case State.Held held -> new State.Closed(List.of(held.attempt()));
             case State.Disconnected disconnected -> new State.Closed(List.of());
             case State.Closed closed -> closed;
         };
+        return closing;
     }
 
-    private void discard() {
-        switch (state) {
+    private CompletableFuture<Void> discard() {
+        return switch (state) {
             case State.Held held -> {
-                var unused = held.attempt().thenCompose(StatefulRedisConnection::closeAsync);
                 state = new State.Disconnected();
+                yield held.attempt().thenCompose(StatefulRedisConnection::closeAsync);
             }
-            case State.Disconnected disconnected -> { }
-            case State.Closed closed -> { }
-        }
+            case State.Disconnected disconnected -> NOTHING_TO_CLOSE;
+            case State.Closed closed -> NOTHING_TO_CLOSE;
+        };
     }
 
     private static boolean isUsable(CompletableFuture<StatefulRedisConnection<String, String>> attempt) {
