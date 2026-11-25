@@ -25,8 +25,4 @@ public enum MDCategory implements ValuedEnum {
     public static MDCategory fromValue(String value) {
         return EnumLookup.fromValue(MDCategory.class, value);
     }
-
-    public static boolean isValid(String value) {
-        return EnumLookup.isValid(MDCategory.class, value);
-    }
 }

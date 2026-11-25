@@ -6,26 +6,14 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum PlannerType implements ValuedEnum {
-    MIRROR_DUNGEON("MIRROR_DUNGEON") {
-        @Override
-        public boolean isValidCategory(String category) {
-            return MDCategory.isValid(category);
-        }
-    },
-    REFRACTED_RAILWAY("REFRACTED_RAILWAY") {
-        @Override
-        public boolean isValidCategory(String category) {
-            return RRCategory.isValid(category);
-        }
-    };
+    MIRROR_DUNGEON("MIRROR_DUNGEON"),
+    REFRACTED_RAILWAY("REFRACTED_RAILWAY");
 
     private final String value;
 
     PlannerType(String value) {
         this.value = value;
     }
-
-    public abstract boolean isValidCategory(String category);
 
     @JsonValue
     public String getValue() {

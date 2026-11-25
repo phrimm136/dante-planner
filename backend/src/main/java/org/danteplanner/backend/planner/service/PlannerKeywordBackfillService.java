@@ -14,9 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -50,6 +49,10 @@ public class PlannerKeywordBackfillService {
         /** After the last planner a page read. */
         record After(UUID plannerId) implements BackfillCursor {
         }
+
+        private static BackfillCursor following(BackfillCursor cursor, List<KeywordBackfillRow> page) {
+            return page.isEmpty() ? cursor : new After(page.getLast().plannerId());
+        }
     }
 
     private sealed interface KeywordColumn {
@@ -69,54 +72,80 @@ public class PlannerKeywordBackfillService {
         };
         int corrected = 0;
         for (KeywordBackfillRow candidate : rows) {
-            if (!correctionOf(candidate).needed()) {
-                continue;
+            corrected += switch (stateOf(candidate)) {
+                case RowState.Current current -> 0;
+                case RowState.Stale stale -> correctUnderLock(candidate.plannerId());
+            };
+        }
+        return new BackfillPage(BackfillCursor.following(cursor, rows), rows.size(), corrected);
+    }
+
+    private int correctUnderLock(UUID plannerId) {
+        plannerRepository.lockContent(plannerId);
+        return repository.keywordRowOf(plannerId).map(this::correct).orElse(0);
+    }
+
+    private int correct(KeywordBackfillRow row) {
+        return switch (stateOf(row)) {
+            case RowState.Current current -> 0;
+            case RowState.Stale(List<Correction> corrections) -> {
+                corrections.forEach(correction -> apply(row.plannerId(), correction));
+                yield 1;
             }
-            plannerRepository.lockContent(candidate.plannerId());
-            Optional<KeywordBackfillRow> locked = repository.keywordRowOf(candidate.plannerId());
-            if (locked.isEmpty()) {
-                continue;
-            }
-            KeywordBackfillRow row = locked.get();
-            Correction correction = correctionOf(row);
-            if (correction.columnStale()) {
-                switch (correction.derived()) {
-                    case KeywordColumn.Json json -> repository.refreshContentKeywords(row.plannerId(), json.text());
-                    case KeywordColumn.Empty empty -> repository.clearContentKeywords(row.plannerId());
-                }
+        };
+    }
+
+    private void apply(UUID plannerId, Correction correction) {
+        switch (correction) {
+            case Correction.Content(KeywordColumn.Json json) ->
+                    repository.refreshContentKeywords(plannerId, json.text());
+            case Correction.Content(KeywordColumn.Empty empty) -> repository.clearContentKeywords(plannerId);
+            case Correction.FilterRows filterRows -> plannerCatalogService.syncFilterRows(plannerId);
+            case Correction.Catalog(KeywordColumn.Json json) ->
+                    repository.refreshCatalogKeywords(plannerId, json.text());
+            case Correction.Catalog(KeywordColumn.Empty empty) -> repository.clearCatalogKeywords(plannerId);
+        }
+    }
+
+    private sealed interface Correction {
+
+        record Content(KeywordColumn derived) implements Correction {
+        }
+
+        record FilterRows() implements Correction {
+        }
+
+        record Catalog(KeywordColumn derived) implements Correction {
+        }
+    }
+
+    private sealed interface RowState {
+
+        record Current() implements RowState {
+        }
+
+        record Stale(List<Correction> corrections) implements RowState {
+        }
+
+        static RowState of(KeywordBackfillRow row, KeywordColumn derived, KeywordColumn column,
+                KeywordColumn catalog) {
+            List<Correction> corrections = new ArrayList<>();
+            if (!derived.equals(column)) {
+                corrections.add(new Correction.Content(derived));
                 if (row.published()) {
-                    plannerCatalogService.syncFilterRows(row.plannerId());
+                    corrections.add(new Correction.FilterRows());
                 }
             }
-            if (correction.catalogStale()) {
-                switch (correction.derived()) {
-                    case KeywordColumn.Json json -> repository.refreshCatalogKeywords(row.plannerId(), json.text());
-                    case KeywordColumn.Empty empty -> repository.clearCatalogKeywords(row.plannerId());
-                }
+            if (row.catalogued() && !derived.equals(catalog)) {
+                corrections.add(new Correction.Catalog(derived));
             }
-            if (correction.needed()) {
-                corrected++;
-            }
-        }
-        BackfillCursor next = rows.isEmpty()
-                ? cursor
-                : new BackfillCursor.After(rows.get(rows.size() - 1).plannerId());
-        return new BackfillPage(next, rows.size(), corrected);
-    }
-
-
-    private record Correction(KeywordColumn derived, boolean columnStale, boolean catalogStale) {
-
-        boolean needed() {
-            return columnStale || catalogStale;
+            return corrections.isEmpty() ? new Current() : new Stale(corrections);
         }
     }
 
-    private Correction correctionOf(KeywordBackfillRow row) {
-        KeywordColumn derived = derivedColumn(row.contentKeywords());
-        return new Correction(derived,
-                !Objects.equals(derived, canonical(row.columnKeywords())),
-                row.catalogued() && !Objects.equals(derived, canonical(row.catalogKeywords())));
+    private RowState stateOf(KeywordBackfillRow row) {
+        return RowState.of(row, derivedColumn(row.contentKeywords()), canonical(row.columnKeywords()),
+                canonical(row.catalogKeywords()));
     }
 
     private KeywordColumn derivedColumn(String selectionJson) {
@@ -135,7 +164,7 @@ public class PlannerKeywordBackfillService {
         }
         try {
             List<String> keywords = objectMapper.readValue(stored, STRING_LIST);
-            return keywords == null || keywords.contains(null) 
+            return keywords == null || keywords.contains(null)
                     ? new KeywordColumn.Json(stored)
                     : serialized(keywords);
         } catch (JacksonException e) {

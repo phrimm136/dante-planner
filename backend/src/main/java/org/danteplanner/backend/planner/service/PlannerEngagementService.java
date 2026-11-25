@@ -12,6 +12,8 @@ import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.moderation.api.PlannerReports;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator;
+import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator.FirstVote;
+import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator.PriorVote;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
@@ -63,10 +65,10 @@ public class PlannerEngagementService {
         Planner planner = accessGuard.requirePublished(plannerId);
 
         PlannerVoteId voteId = new PlannerVoteId(userId, plannerId);
-        voteUniquenessValidator.requireFirstVote(
-                plannerVoteRepository.existsById(voteId), plannerId, userId);
+        FirstVote firstVote = voteUniquenessValidator.requireFirstVote(
+                priorVote(plannerVoteRepository.existsById(voteId)), plannerId, userId);
 
-        PlannerVote newVote = new PlannerVote(userId, plannerId, voteType);
+        PlannerVote newVote = new PlannerVote(firstVote.userId(), firstVote.plannerId(), voteType);
         plannerVoteRepository.insert(newVote);
 
         plannerStatsService.incrementUpvotes(plannerId);
@@ -97,6 +99,10 @@ public class PlannerEngagementService {
                 .upvoteCount(upvotesAfter)
                 .hasUpvoted(true)
                 .build();
+    }
+
+    private static PriorVote priorVote(boolean exists) {
+        return exists ? PriorVote.CAST : PriorVote.NONE;
     }
 
     public void reportPlanner(Long userId, UUID plannerId) {

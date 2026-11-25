@@ -113,19 +113,9 @@ asset pipeline.
   failed INSERT — only the exception classifier is covered by synthesized exceptions. A
   containerized test driving a live suffix collision through the retry loop would close it.
   re-check: `rg -qF 'isUsernameSuffixCollision(e)' backend/src/main/java/org/danteplanner/backend/user/service/UserService.java && .claude/skills/debt-ledger/bin/debt absent backend/src/test -g '*IT.java' -i 'suffix.?collision'`
-- `PlannerContentEntityExtractor` keeps the pre-`path()` Jackson null-check idiom (~10
-  copies). Ruled out of the validator-traversal conversion (it coerces where validators
-  reject, and lives in `planner/searchindex`, outside `planner/validation`); local `path()` adoption would collapse
-  the checks without publishing the validation helper.
-  re-check: `rg -q '== null \|\| !\w+\.is(Object|Array)\(\)' backend/src/main/java/org/danteplanner/backend/planner/searchindex/PlannerContentEntityExtractor.java`
 - Toggle endpoints flip state instead of converging on it; make them idempotent the way
   planner publish is (repeat calls are no-ops, not inversions).
   re-check: `rg -q 'public PlannerSubscription toggleSubscription\(Long userId, UUID plannerId\)' backend/src/main/java/org/danteplanner/backend/planner/service/PlannerSubscriptionService.java`
-- FE `PublicPlannerSchema.selectedKeywords` (`PlannerListSchemas.ts`) still allows `.nullish()`
-  although the two response DTOs now always emit an array; tighten to a plain
-  `z.array(z.string())` and drop the now-dead `?? []` fallbacks on `selectedKeywords` in the
-  consumers (`PublishedPlannerCard`, `PublishedPlannerHeader`, `PersonalPlannerCard`).
-  re-check: `rg -q 'z.array\(z.string\(\)\).nullish\(\)' frontend/src/pages/planner/schemas/PlannerListSchemas.ts`
 - The frontend reads no `?login=` value (`error`, `rate_limited`, `unavailable`), so every
   OAuth failure redirect lands on a plain home page; closing it needs `validateSearch` on
   the `/` route, a toast in `GlobalLayout`, and `login.*` copy in every locale. Worth doing
@@ -533,15 +523,15 @@ column that does not exist, and the repo's own convention (status derived from s
 agrees with the wrong side. `docs/rfcs/0003-sync-identity-and-effect-delivery.md` and
 `0005-server-noop-conflict-arbitration.md` still show the column as target state.
   re-check: `.claude/skills/debt-ledger/bin/debt absent docs/adr/082-stale-write-noop-arbitration.md 'supersedes:' || .claude/skills/debt-ledger/bin/debt absent docs/adr/071-content-digest-lineage.md '^## Superseded'`
-- 2026-08-17 — `PlannerPublishingService.java:77` passes
+- 2026-08-17 — `PlannerPublishingService.publish` passes
 `upserted(userId, deviceId, plannerId, content)` as an argument, so the whole upsert — field
 mutation, `recordSave()`'s version bump, `onVisibleEditCommitted`, and `createAggregate`
 for an id the server has never seen — runs before `applyPublish` reaches the `Stage.PUBLISH`
-content gate (`:113-114`) and the takedown refusal in `Planner.publish()`; only the owner
-probe (`lockForUpsert`) and the title check (`:75`) run first. A stale `syncVersion` on a taken-down planner answers 409 from arbitration
+content gate and the takedown refusal in `Planner.publish()`; only the owner
+probe (`lockForUpsert`) and the title check run first. A stale `syncVersion` on a taken-down planner answers 409 from arbitration
 before the 403 the state warrants, which opens the client's conflict dialog for a planner
 that can never publish.
-  re-check: `rg -q 'return applyPublish\(userId, upserted\(userId, deviceId, plannerId, content\)\);' backend/src/main/java/org/danteplanner/backend/planner/service/PlannerPublishingService.java`
+  re-check: `rg -qU 'return applyPublish\(ownershipValidator.requireOwner\(\s*upserted\(userId, deviceId, plannerId, content\)' backend/src/main/java/org/danteplanner/backend/planner/service/PlannerPublishingService.java`
 - 2026-08-17 — Several find-then-insert paths rely on a real database constraint without the
 handled violation ADR 023 pairs it with, so the race answers `UNEXPECTED_CONFLICT` plus a
 Sentry page instead of a domain outcome: `RecommendedSql.java:19` inserts into
@@ -595,13 +585,13 @@ tombstone-immune draft under a fresh id.
   re-check: `rg -qF 'conflict.localPlanner.metadata.published && (' frontend/src/pages/planner/components/BatchConflictDialog.tsx && rg -qF "forkSide: 'incoming'" frontend/src/pages/planner/components/PlannerExportImportSection.tsx`
 - 2026-08-17 — `presentedVersion` is forward-only by construction
 (`usePlannerSave.ts:151-152`), but the server moves a version backwards on create:
-`UpsertPlannerRequest.withId` drops the requested value and `PlannerContent` defaults to 1,
+a create ignores the requested value and the new row starts at 1,
 so a client sending 12 for an unknown id is answered 1 with no error. `adoptAck` assigns it
 correctly and `presentedVersion` maxes it back up against the stale prop, so the next save
 presents an old version against a row at 1 and takes a 409 for a planner nobody else
 touched. Reachable through any id the server has re-created, and through the import fork
 above.
-  re-check: `rg -q 'Math.max\(syncVersionRef.current, initialSyncVersion \?\? INITIAL_SYNC_VERSION\)' frontend/src/pages/planner/hooks/usePlannerSave.ts && rg -q 'plannerType, null, selectedKeywords\);' backend/src/main/java/org/danteplanner/backend/planner/dto/UpsertPlannerRequest.java`
+  re-check: `rg -q 'Math.max\(syncVersionRef.current, initialSyncVersion \?\? INITIAL_SYNC_VERSION\)' frontend/src/pages/planner/hooks/usePlannerSave.ts && rg -q 'record Create\(' backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCommandService.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCommandService.java '\.syncVersion\(attempt|\.syncVersion\(request'`
 - 2026-08-17 — ADR 073 removed the SSE planner event family on the grounds that
 "`refetchOnWindowFocus` on the server-backed planner queries becomes the freshness
 mechanism in their place", but every personal-planner query disables it
@@ -1184,7 +1174,7 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   (`PlannerKeywordBackfillRepository.keywordRowsAfter` has no planner-type filter); prod held no
   RR rows on 2026-09-28. Worth resolving when RR content gets rules of its own: either RR content
   validates and audits, or RR planners stop being indexed.
-  re-check: `rg -q 'MDCategory.isValid\(category\)' backend/src/main/java/org/danteplanner/backend/planner/precondition/PlannerCategoryValidator.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/planner/repository/PlannerKeywordBackfillRepository.java -i 'planner_type'`
+  re-check: `rg -q 'case REFRACTED_RAILWAY -> throw' backend/src/main/java/org/danteplanner/backend/planner/precondition/PlannerCategoryValidator.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/planner/repository/PlannerKeywordBackfillRepository.java -i 'planner_type'`
 - `FloorBoundaryConfinementTest` reads bytecode through Spring's repackaged ASM
   (`org.springframework.asm`, marked internal) because ArchUnit 1.3 exposes no string
   constants. Worth moving to a declared `org.ow2.asm` test dependency if a Spring upgrade
@@ -1574,10 +1564,6 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   `""` in all ten constants, so it does nothing. Worth doing when a policy is added or a key
   spelling changes: drop `subjectPrefix` and name the endpoint and failure modes as types.
   re-check: `rg -q 'subjectPrefix' backend/src/main/java/org/danteplanner/backend/shared/ratelimit/RateLimitPolicy.java`
-- `PlannerChange` holds "which fields changed" as seven booleans, so `between`, `isNone` and the
-  constructor repeat one pattern seven times, and a new field must be added in each place by hand.
-  An `EnumSet` of a field enum states the model directly. Worth doing when a synced field is added.
-  re-check: `rg -q 'boolean deviceIdChanged' backend/src/main/java/org/danteplanner/backend/planner/sync/PlannerChange.java`
 - `JwtAuthenticationFilter` passes outcomes between five methods as `boolean`, and `false` means
   "stop, a 503 is written" in `establishAuthentication` but "continue as guest" in
   `attemptAutoRefresh`, `rotateRefreshCookie` and `abandonSession`. Its effects (cookies, the

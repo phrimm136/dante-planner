@@ -22,6 +22,7 @@ import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.support.UpsertRequests;
+import org.danteplanner.backend.planner.sync.SyncVersionValidator.WriteMode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -92,7 +93,7 @@ class SaveStageKeywordsTest {
         String before = planner.getContentJson();
 
         assertThatThrownBy(() -> commandService.upsertPlanner(
-                        owner.getId(), null, planner.getId(), UpsertRequests.resending(planner).content(UNKNOWN_KEYWORD_CONTENT).build(), false))
+                        owner.getId(), null, planner.getId(), UpsertRequests.resending(planner).content(UNKNOWN_KEYWORD_CONTENT).build(), WriteMode.CHECKED))
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
                     assertThat(ex.getStatusCode().value()).isEqualTo(400);
                     assertThat(ex.getBody().getProperties()).containsEntry("code", "UNKNOWN_KEYWORD");
@@ -108,7 +109,7 @@ class SaveStageKeywordsTest {
         Planner planner = stored(TestDataFactory.planner(owner).published(false).build());
 
         commandService.upsertPlanner(owner.getId(), null, planner.getId(), UpsertRequests.resending(planner).content(UNKNOWN_KEYWORD_CONTENT).build(),
-                false);
+                WriteMode.CHECKED);
 
         assertThat(planner.getContentJson()).isEqualTo(UNKNOWN_KEYWORD_CONTENT);
     }

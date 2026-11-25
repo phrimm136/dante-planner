@@ -23,6 +23,7 @@ import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
 import org.danteplanner.backend.support.UpsertRequests;
+import org.danteplanner.backend.planner.sync.SyncVersionValidator.WriteMode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -116,7 +117,7 @@ class CategoryChangeFloorRulesTest {
         Planner planner = stored(TestDataFactory.planner(owner).published(true).build());
 
         assertThatThrownBy(() -> commandService.upsertPlanner(
-                        owner.getId(), null, planner.getId(), UpsertRequests.resending(planner).category("15F").build(), false))
+                        owner.getId(), null, planner.getId(), UpsertRequests.resending(planner).category("15F").build(), WriteMode.CHECKED))
                 .isInstanceOfSatisfying(PlannerValidationException.class,
                         CategoryChangeFloorRulesTest::assertRejectsFloorsFiveToFourteen);
         assertThat(planner.getCategory()).isEqualTo("5F");
@@ -126,7 +127,7 @@ class CategoryChangeFloorRulesTest {
     void upsertPlanner_WhenADraftOverAnUnknownEgoMovesToTenFloors_SkipsTheIdChecks() {
         Planner planner = stored(TestDataFactory.planner(owner).content(UNKNOWN_EGO_CONTENT).build());
 
-        commandService.upsertPlanner(owner.getId(), null, planner.getId(), UpsertRequests.resending(planner).category("10F").build(), false);
+        commandService.upsertPlanner(owner.getId(), null, planner.getId(), UpsertRequests.resending(planner).category("10F").build(), WriteMode.CHECKED);
 
         assertThat(planner.getCategory()).isEqualTo("10F");
         assertThat(planner.getContentJson()).isEqualTo(UNKNOWN_EGO_CONTENT);
@@ -138,7 +139,7 @@ class CategoryChangeFloorRulesTest {
                 .content(UNKNOWN_START_BUFF_CONTENT).contentVersion(6).build());
         UpsertPlannerRequest request = UpsertRequests.resending(planner).category("10F").contentVersion(7).build();
 
-        assertThatThrownBy(() -> commandService.upsertPlanner(owner.getId(), null, planner.getId(), request, false))
+        assertThatThrownBy(() -> commandService.upsertPlanner(owner.getId(), null, planner.getId(), request, WriteMode.CHECKED))
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
                     assertThat(ex.getStatusCode().value()).isEqualTo(400);
                     assertThat(ex.getOriginalCode()).isEqualTo("VALIDATION_ERROR");
@@ -153,7 +154,7 @@ class CategoryChangeFloorRulesTest {
                 .content(FLOOR_SIX_NOT_AN_OBJECT_CONTENT).published(true).build());
 
         assertThatThrownBy(() -> commandService.upsertPlanner(
-                        owner.getId(), null, planner.getId(), UpsertRequests.resending(planner).category("15F").build(), false))
+                        owner.getId(), null, planner.getId(), UpsertRequests.resending(planner).category("15F").build(), WriteMode.CHECKED))
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex -> {
                     assertThat(ex.getStatusCode().value()).isEqualTo(400);
                     assertThat(ex.getSubErrors()).containsExactly(new ValidationError("INVALID_FIELD_TYPE", "floorSelections[6]",
@@ -167,7 +168,7 @@ class CategoryChangeFloorRulesTest {
         Planner planner = stored(TestDataFactory.planner(owner).content(REPEATED_GIFT_CONTENT).build());
 
         assertThatThrownBy(() -> commandService.upsertPlanner(
-                        owner.getId(), null, planner.getId(), UpsertRequests.resending(planner).category("10F").build(), false))
+                        owner.getId(), null, planner.getId(), UpsertRequests.resending(planner).category("10F").build(), WriteMode.CHECKED))
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex ->
                         assertThat(ex.getSubErrors()).containsExactly(new ValidationError("DUPLICATE_EGOGIFT", "floorSelections[0].giftIds",
                                 "Duplicate value '9002' in floorSelections[0].giftIds")));

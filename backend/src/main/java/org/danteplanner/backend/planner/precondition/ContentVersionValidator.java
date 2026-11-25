@@ -9,6 +9,8 @@ import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
+import org.danteplanner.backend.shared.failure.Parsed;
+import org.jspecify.annotations.Nullable;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
 import org.danteplanner.backend.planner.gamedata.PlannerVersions;
 import org.springframework.stereotype.Component;
@@ -55,19 +57,32 @@ public class ContentVersionValidator {
         return rule;
     }
 
-    public void validateVersionForCreate(PlannerType plannerType, Integer contentVersion) {
-        if (contentVersion == null) {
-            log.warn("Validation failed: content version is null");
-            throw new PlannerValidationException(CONTENT_VERSION_REQUIRED, "Content version is required");
+    public CreatableVersion requireCreatableVersion(PlannerType plannerType, @Nullable Integer contentVersion) {
+        int named = CreatableVersion.named(contentVersion);
+        VersionRule rule = ruleFor(plannerType);
+        return CreatableVersion.parse(plannerType, named, rule.displayName(),
+                rule.forCreate().apply(gameDataRegistry.plannerVersions()));
+    }
+
+    @Parsed
+    public record CreatableVersion(PlannerType plannerType, int value) {
+
+        private static int named(@Nullable Integer contentVersion) {
+            if (contentVersion == null) {
+                log.warn("Validation failed: content version is null");
+                throw new PlannerValidationException(CONTENT_VERSION_REQUIRED, "Content version is required");
+            }
+            return contentVersion;
         }
 
-        VersionRule rule = ruleFor(plannerType);
-        List<Integer> accepted = rule.forCreate().apply(gameDataRegistry.plannerVersions());
-        if (!accepted.contains(contentVersion)) {
-            log.warn("Validation failed: {} create version {} not in {}",
-                    rule.displayName(), contentVersion, accepted);
-            throw new PlannerValidationException(INVALID_CONTENT_VERSION,
-                    "Invalid content version for " + rule.displayName());
+        private static CreatableVersion parse(PlannerType plannerType, int named, String displayName,
+                List<Integer> accepted) {
+            if (!accepted.contains(named)) {
+                log.warn("Validation failed: {} create version {} not in {}", displayName, named, accepted);
+                throw new PlannerValidationException(INVALID_CONTENT_VERSION,
+                        "Invalid content version for " + displayName);
+            }
+            return new CreatableVersion(plannerType, named);
         }
     }
 }

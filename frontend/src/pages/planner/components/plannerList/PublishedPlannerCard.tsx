@@ -41,9 +41,8 @@ export function PublishedPlannerCard({
     createdAt,
   } = planner
 
-  const keywords = selectedKeywords ?? []
-  const displayedKeywords = keywords.slice(0, PLANNER_LIST.MAX_KEYWORDS_DISPLAY)
-  const hasMoreKeywords = keywords.length > PLANNER_LIST.MAX_KEYWORDS_DISPLAY
+  const displayedKeywords = selectedKeywords.slice(0, PLANNER_LIST.MAX_KEYWORDS_DISPLAY)
+  const hasMoreKeywords = selectedKeywords.length > PLANNER_LIST.MAX_KEYWORDS_DISPLAY
 
   return (
     <div
@@ -72,7 +71,7 @@ export function PublishedPlannerCard({
           ))}
           {hasMoreKeywords && (
             <span className={SECTION_STYLES.TEXT.captionSmall}>
-              +{keywords.length - PLANNER_LIST.MAX_KEYWORDS_DISPLAY}
+              +{selectedKeywords.length - PLANNER_LIST.MAX_KEYWORDS_DISPLAY}
             </span>
           )}
         </div>

@@ -18,6 +18,7 @@ import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.support.FilterRowsSync;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.UpsertRequests;
+import org.danteplanner.backend.planner.sync.SyncVersionValidator.WriteMode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -173,7 +174,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
                 .content(contentWith(Set.of("AccelBullet")))
                 .selectedKeywords(Set.of("AccelBullet", "NotAKeyword"))
                 .build();
-        commandService.upsertPlanner(owner.getId(), null, planner.getId(), req, false);
+        commandService.upsertPlanner(owner.getId(), null, planner.getId(), req, WriteMode.CHECKED);
 
         // Stored JSON carries only the normalized current id
         String stored = new JdbcTemplate(dataSource).queryForObject(
@@ -246,7 +247,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
                         .title(null)
                         .content(contentWith(Set.of("Sinking")))
                         .selectedKeywords(Set.of("Burst"))
-                        .build(), false);
+                        .build(), WriteMode.CHECKED);
 
         assertThat(storedKeywords(planner)).isEqualTo("[\"Sinking\"]");
         assertThat(topLevelCount("mismatch")).isEqualTo(mismatchesBefore + 1);
@@ -261,13 +262,13 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
         double matchesBefore = topLevelCount("match");
 
         commandService.upsertPlanner(owner.getId(), null, planner.getId(),
-                UpsertRequests.resending(planner).title(null).content(contentWith(Set.of("Burst"))).build(), false);
+                UpsertRequests.resending(planner).title(null).content(contentWith(Set.of("Burst"))).build(), WriteMode.CHECKED);
         commandService.upsertPlanner(owner.getId(), null, planner.getId(),
                 UpsertRequests.resending(planner)
                         .title(null)
                         .content(contentWith(Set.of("Combustion")))
                         .selectedKeywords(Set.of("Combustion"))
-                        .build(), true);
+                        .build(), WriteMode.FORCED);
 
         assertThat(topLevelCount("absent")).isEqualTo(absentBefore + 1);
         assertThat(topLevelCount("match")).isEqualTo(matchesBefore + 1);
@@ -281,7 +282,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
                 UpsertRequests.resending(draft)
                         .title(null)
                         .content(contentWith(new java.util.LinkedHashSet<>(java.util.List.of("AccelBullet", "NotAKeyword"))))
-                        .build(), false);
+                        .build(), WriteMode.CHECKED);
 
         assertThat(storedKeywords(draft)).isEqualTo("[\"9828\"]");
         String blobKeywords = new JdbcTemplate(dataSource).queryForObject(
@@ -297,7 +298,7 @@ class PlannerKeywordFacetIT extends ExclusiveDatabaseSupport {
                 .save(plannerRepository);
 
         commandService.upsertPlanner(owner.getId(), null, planner.getId(),
-                UpsertRequests.resending(planner).title(null).content(contentWith(Set.of("Burst"))).build(), false);
+                UpsertRequests.resending(planner).title(null).content(contentWith(Set.of("Burst"))).build(), WriteMode.CHECKED);
 
         assertThat(storedKeywords(planner)).isEqualTo("[\"Burst\"]");
     }
