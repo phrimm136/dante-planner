@@ -1,8 +1,11 @@
 package org.danteplanner.backend.moderation;
 
+import javax.sql.DataSource;
+
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
+import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
@@ -19,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
@@ -58,6 +62,9 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private DataSource dataSource;
 
     @Autowired
     private UserRepository userRepository;
@@ -206,7 +213,7 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
 
     @Test
     void deleteComment_WhenActorBanned_Returns403AndCommentSurvives() throws Exception {
-        PlannerComment comment = plannerCommentRepository.save(new PlannerComment(
+        PlannerComment comment = StoredComments.save(plannerCommentRepository, new JdbcTemplate(dataSource), new PlannerComment(
                 planner.getId(), owner.getId(), "A comment to be moderated", null, 0));
         ban(moderator);
 
@@ -217,7 +224,7 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("USER_BANNED"));
 
-        assertThat(plannerCommentRepository.findById(comment.getId()).orElseThrow().isDeleted()).isFalse();
+        assertThat(plannerCommentRepository.findRowById(comment.getId()).orElseThrow().isDeleted()).isFalse();
     }
 
     @Test

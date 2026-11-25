@@ -1,5 +1,8 @@
 package org.danteplanner.backend.integration;
 
+import javax.sql.DataSource;
+
+import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.moderation.service.CommentModerationService;
@@ -17,6 +20,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
@@ -34,6 +38,9 @@ class PlannerStatsIsolationIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private DataSource dataSource;
 
     @Autowired
     private UserRepository userRepository;
@@ -123,8 +130,7 @@ class PlannerStatsIsolationIT extends ExclusiveDatabaseSupport {
 
         // Floor: a live comment row the counter never accounted for (drift) must
         // not push the counter below zero on delete
-        PlannerComment drifted = commentRepository.save(
-                new PlannerComment(planner.getId(), commenter.getId(), "drifted", null, 0));
+        PlannerComment drifted = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(planner.getId(), commenter.getId(), "drifted", null, 0));
         commentCommandService.deleteComment(drifted.getPublicId(), commenter.getId());
         assertThat(commentCount()).as("decrement floors at zero").isEqualTo(0);
     }

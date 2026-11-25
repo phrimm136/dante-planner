@@ -1,5 +1,7 @@
 package org.danteplanner.backend.integration;
 
+import javax.sql.DataSource;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -36,6 +39,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 import tools.jackson.databind.ObjectMapper;
 
+import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
@@ -72,6 +76,9 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     private MockMvc mockMvc;
 
     @Autowired
+    private DataSource dataSource;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -104,7 +111,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     void setUp() {
         author = TestDataFactory.createTestUser(userRepository, "restriction-author@example.com");
         publishedPlanner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
-        comment = commentRepository.save(new PlannerComment(
+        comment = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(
                 publishedPlanner.getId(), author.getId(), "a comment to engage with", null, 0));
     }
 
@@ -225,7 +232,7 @@ class RestrictionEnforcementIT extends SharedMySqlContainerSupport {
     @Test
     void deleteOwnComment_WhenBanned_Succeeds() throws Exception {
         User reader = reader();
-        PlannerComment own = commentRepository.save(new PlannerComment(
+        PlannerComment own = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(
                 publishedPlanner.getId(), reader.getId(), "my own words", null, 0));
         banned(reader);
 

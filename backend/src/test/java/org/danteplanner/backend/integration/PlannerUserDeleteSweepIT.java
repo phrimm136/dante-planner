@@ -1,5 +1,6 @@
 package org.danteplanner.backend.integration;
 
+import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -103,7 +104,7 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
 
     private String commentContent(Long commentId) {
         return jdbc.queryForObject(
-                "SELECT content FROM planner_comments WHERE id = ?", String.class, commentId);
+                "SELECT content FROM planner_comment_content WHERE comment_id = ?", String.class, commentId);
     }
 
     private Long commentAuthorId(Long commentId) {
@@ -122,9 +123,11 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
         jdbc.update("INSERT INTO planner_comments (public_id, planner_id, user_id, content, depth, created_at) "
                 + "VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), ?, 'a comment', 0, NOW())",
                 publicId.toString(), plannerId.toString(), authorId);
-        return jdbc.queryForObject(
+        Long commentId = jdbc.queryForObject(
                 "SELECT id FROM planner_comments WHERE public_id = UUID_TO_BIN(?)",
                 Long.class, publicId.toString());
+        StoredComments.split(jdbc, commentId);
+        return commentId;
     }
 
     /**
@@ -164,7 +167,7 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
         jdbc.update("INSERT INTO planner_views (planner_id, viewer_hash, view_date, created_at) "
                 + "VALUES (UUID_TO_BIN(?), SHA2('viewer', 256), ?, NOW())",
                 published.getId().toString(), LocalDate.now(ZoneOffset.UTC));
-        insertComment(published.getId(), other.getId());
+        Long sweptComment = insertComment(published.getId(), other.getId());
         jdbc.update("INSERT INTO planner_bookmarks (user_id, planner_id, created_at) "
                 + "VALUES (?, UUID_TO_BIN(?), NOW())", other.getId(), published.getId().toString());
         jdbc.update("INSERT INTO planner_subscriptions (user_id, planner_id, enabled, created_at) "
@@ -181,6 +184,10 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
         purgeOwner(owner.getId());
 
         assertThat(userRepository.findById(owner.getId())).as("the user row is gone").isEmpty();
+        for (String table : List.of("planner_comment_content", "planner_comment_stats")) {
+            assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM " + table + " WHERE comment_id = ?",
+                    Integer.class, sweptComment)).as("%s rows of the swept comment", table).isZero();
+        }
         for (UUID plannerId : List.of(published.getId(), draft.getId())) {
             for (String table : List.of(
                     "planner", "planner_content", "planner_publication", "planner_moderation",
@@ -193,6 +200,27 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
                         .isZero();
             }
         }
+    }
+
+    @Test
+    void commentVotes_WhenTheSentinelAlreadyVotedOnTheSameComment_KeepOneSentinelRowAndTheCounter() {
+        Planner thirdPartyPlanner = TestDataFactory.planner(other)
+                .title("Sweep Vote Collision")
+                .published(true)
+                .save(plannerRepository);
+        Long collided = insertComment(thirdPartyPlanner.getId(), other.getId());
+        Long lone = insertComment(thirdPartyPlanner.getId(), other.getId());
+        insertCommentVote(UserAccountLifecycleService.SENTINEL_USER_ID, collided);
+        insertCommentVote(owner.getId(), collided);
+        insertCommentVote(owner.getId(), lone);
+        jdbc.update("UPDATE planner_comment_stats SET upvote_count = 2 WHERE comment_id = ?", collided);
+
+        purgeOwner(owner.getId());
+
+        assertThat(commentVoterIds(collided)).containsExactly(UserAccountLifecycleService.SENTINEL_USER_ID);
+        assertThat(commentVoterIds(lone)).containsExactly(UserAccountLifecycleService.SENTINEL_USER_ID);
+        assertThat(jdbc.queryForObject("SELECT upvote_count FROM planner_comment_stats WHERE comment_id = ?",
+                Integer.class, collided)).isEqualTo(2);
     }
 
     @Test
@@ -228,6 +256,8 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
         assertThat(commentAuthorId(ownComment))
                 .as("the row survives so replies keep a parent, now owned by the sentinel")
                 .isEqualTo(UserAccountLifecycleService.SENTINEL_USER_ID);
+        assertThat(jdbc.queryForObject("SELECT content FROM planner_comments WHERE id = ?",
+                String.class, ownComment)).as("nor in the row an old server reads").isEmpty();
         assertThat(commentContent(ownComment))
                 .as("the text does not survive the account that wrote it")
                 .isEmpty();

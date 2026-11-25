@@ -1,5 +1,6 @@
 package org.danteplanner.backend.integration;
 
+import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
@@ -142,9 +143,8 @@ class EffectPlacementIT extends ExclusiveDatabaseSupport {
 
     @Test
     void crashWindow_WhenTheEagerHopNeverRuns_TheRelayStillDerivesTheEffect() {
-        PlannerComment comment = transaction().execute(status -> commentRepository.insert(
-                new PlannerComment(planner.getId(), commenter.getId(), "A comment nobody announced",
-                        null, 0)));
+        PlannerComment comment = StoredComments.save(commentRepository, jdbcTemplate,
+                new PlannerComment(planner.getId(), commenter.getId(), "A comment nobody announced", null, 0));
 
         recordEventDirectly(comment.getId());
 

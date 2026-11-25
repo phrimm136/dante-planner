@@ -67,7 +67,9 @@ public class PlannerDriftAuditRepository {
                 SELECT BIN_TO_UUID(s.planner_id) AS planner_id, s.comment_count AS counter,
                        COUNT(c.planner_id) AS recounted
                 FROM planner_stats s
-                LEFT JOIN planner_comments c ON c.planner_id = s.planner_id AND c.deleted_at IS NULL
+                LEFT JOIN (planner_comments c
+                           JOIN planner_comment_content t ON t.comment_id = c.id AND t.deleted_at IS NULL)
+                       ON c.planner_id = s.planner_id
                 GROUP BY s.planner_id, s.comment_count
                 HAVING s.comment_count <> recounted
                 """,

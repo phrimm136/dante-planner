@@ -7,7 +7,10 @@ import org.danteplanner.backend.comment.dto.CreateCommentResponse;
 import org.danteplanner.backend.comment.dto.UpdateCommentRequest;
 import org.danteplanner.backend.comment.dto.UpdateCommentResponse;
 import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.comment.repository.CommentRow;
+import org.danteplanner.backend.comment.repository.PlannerCommentContentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
+import org.danteplanner.backend.comment.repository.PlannerCommentStatsRepository;
 import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
 import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator.AuthoredComment;
 import org.danteplanner.backend.comment.validation.CommentRefusal;
@@ -15,6 +18,7 @@ import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.danteplanner.backend.comment.validation.CommentStateValidator.ReplyableParent;
 import org.danteplanner.backend.planner.api.PlannerAccess;
 import org.danteplanner.backend.planner.api.PlannerCommentCounts;
+import org.danteplanner.backend.shared.failure.WriteOutcome;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
@@ -25,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 
@@ -38,6 +43,8 @@ import java.util.UUID;
 public class CommentCommandService {
 
     private final PlannerCommentRepository commentRepository;
+    private final PlannerCommentContentRepository contentRepository;
+    private final PlannerCommentStatsRepository statsRepository;
     private final CommentQueryService commentQueryService;
     private final DomainEventRecorder domainEventRecorder;
     private final PlannerAccess plannerAccess;
@@ -65,9 +72,9 @@ public class CommentCommandService {
 
     @Transactional
     public CreateCommentResponse createReply(UUID parentPublicId, Long userId, UUID deviceId, String content) {
-        PlannerComment parent = commentQueryService.requireByPublicId(parentPublicId);
+        CommentRow parent = commentQueryService.requireByPublicId(parentPublicId);
 
-        UUID plannerId = parent.getPlannerId();
+        UUID plannerId = parent.plannerId();
 
         plannerAccess.checkPublished(plannerId);
 
@@ -76,13 +83,15 @@ public class CommentCommandService {
 
         PlannerComment saved = insert(placement.row(plannerId, userId, content), Announcement.REPLY);
 
-        log.info("User {} created reply {} to comment {} on planner {}", userId, saved.getId(), parent.getId(), plannerId);
+        log.info("User {} created reply {} to comment {} on planner {}", userId, saved.getId(), parent.id(), plannerId);
 
         return new CreateCommentResponse(saved.getPublicId(), saved.getCreatedAt());
     }
 
     private PlannerComment insert(PlannerComment row, Announcement announcement) {
         PlannerComment saved = commentRepository.insert(row);
+        contentRepository.insertContent(saved.getId(), saved.getContent());
+        statsRepository.insertStats(saved.getId());
         plannerCommentCounts.incrementCommentCount(row.getPlannerId());
         declareCountChanged(row.getPlannerId());
         domainEventRecorder.recordDomainEvent(announcement.event, row.getPlannerId(),
@@ -125,11 +134,11 @@ public class CommentCommandService {
         }
 
         static Placement under(ReplyableParent replyable) {
-            PlannerComment parent = replyable.comment();
-            int depth = Math.min(parent.getDepth() + 1, CommentConstants.MAX_DEPTH);
-            Long effectiveParentId = parent.getDepth() >= CommentConstants.MAX_DEPTH
-                    ? parent.getParentCommentId()
-                    : parent.getId();
+            CommentRow parent = replyable.comment();
+            int depth = Math.min(parent.depth() + 1, CommentConstants.MAX_DEPTH);
+            Long effectiveParentId = parent.depth() >= CommentConstants.MAX_DEPTH
+                    ? parent.parentCommentId()
+                    : parent.id();
             return effectiveParentId == null ? new Parentless(depth) : new UnderParent(effectiveParentId, depth);
         }
 
@@ -154,21 +163,31 @@ public class CommentCommandService {
         AuthoredComment authored = CommentAuthorshipValidator
                 .editableBy(commentQueryService.requireByPublicId(commentPublicId), userId)
                 .orElseThrow(CommentRefusal::toException);
+        Instant editedAt = clock.instant();
 
-        authored.comment().edit(request.content(), clock.instant());
-        FreshnessDeclarations.declare(new FreshnessScope.Planner(authored.comment().getPlannerId()));
-        log.info("User {} edited comment {}", userId, commentPublicId);
+        switch (WriteOutcome.of(contentRepository.edit(authored.comment().id(), request.content(), editedAt))) {
+            case APPLIED -> {
+                FreshnessDeclarations.declare(new FreshnessScope.Planner(authored.comment().plannerId()));
+                log.info("User {} edited comment {}", userId, commentPublicId);
+            }
+            case NOTHING -> throw CommentRefusal.EDIT_DELETED.toException();
+        }
 
-        return new UpdateCommentResponse(authored.comment().getEditedAt());
+        return new UpdateCommentResponse(editedAt);
     }
 
     @Transactional
-    public void softDelete(PlannerComment comment) {
-        // The withdrawal must precede the counter: decrementing detaches the comment, and a
-        // mutation made after it would never reach the row.
-        comment.softDelete(clock.instant());
-        plannerCommentCounts.decrementCommentCount(comment.getPlannerId());
-        declareCountChanged(comment.getPlannerId());
+    public WriteOutcome softDelete(CommentRow comment) {
+        WriteOutcome withdrawn = WriteOutcome.of(contentRepository.withdraw(
+                comment.id(), CommentConstants.DELETED_CONTENT, clock.instant()));
+        switch (withdrawn) {
+            case APPLIED -> {
+                plannerCommentCounts.decrementCommentCount(comment.plannerId());
+                declareCountChanged(comment.plannerId());
+            }
+            case NOTHING -> { }
+        }
+        return withdrawn;
     }
 
     private static void declareCountChanged(UUID plannerId) {
@@ -177,15 +196,17 @@ public class CommentCommandService {
 
     @Transactional
     public void deleteComment(UUID commentPublicId, Long userId) {
-        PlannerComment comment = commentQueryService.requireByPublicId(commentPublicId);
+        CommentRow comment = commentQueryService.requireByPublicId(commentPublicId);
 
         switch (Withdrawal.of(comment)) {
             case ALREADY_DONE -> { }
             case DUE -> {
                 AuthoredComment authored = AuthoredComment.of(comment, userId, CommentRefusal.DELETE_NOT_AUTHOR)
                         .orElseThrow(CommentRefusal::toException);
-                softDelete(authored.comment());
-                log.info("User {} deleted comment {}", userId, commentPublicId);
+                switch (softDelete(authored.comment())) {
+                    case APPLIED -> log.info("User {} deleted comment {}", userId, commentPublicId);
+                    case NOTHING -> { }
+                }
             }
         }
     }
@@ -194,7 +215,7 @@ public class CommentCommandService {
         ALREADY_DONE,
         DUE;
 
-        static Withdrawal of(PlannerComment comment) {
+        static Withdrawal of(CommentRow comment) {
             return comment.isDeleted() ? ALREADY_DONE : DUE;
         }
     }

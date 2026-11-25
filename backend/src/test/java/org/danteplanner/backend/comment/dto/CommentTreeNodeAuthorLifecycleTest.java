@@ -1,7 +1,8 @@
 package org.danteplanner.backend.comment.dto;
 
+import org.danteplanner.backend.support.CommentRows;
+import org.danteplanner.backend.comment.repository.CommentRow;
 import org.danteplanner.backend.user.service.UsersApiAdapter;
-import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.shared.util.CommentConstants;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -28,27 +29,23 @@ class CommentTreeNodeAuthorLifecycleTest {
                 .build();
     }
 
-    private static PlannerComment comment(Long userId) {
-        PlannerComment comment = new PlannerComment(UUID.randomUUID(), userId, "still here", null, 0);
-        comment.setId(11L);
-        comment.setPublicId(UUID.randomUUID());
-        comment.setCreatedAt(Instant.now());
-        return comment;
+    private static CommentRow comment(Long userId) {
+        return CommentRows.live(11L, UUID.randomUUID(), UUID.randomUUID(), userId, "still here", null, 0);
     }
 
-    private static CommentTreeNode project(PlannerComment comment, User author) {
+    private static CommentTreeNode project(CommentRow comment, User author) {
         return CommentTreeNode.fromEntity(
                 comment, new CommentTreeNode.Parent.Thread(), author == null
                         ? new CommentTreeNode.Author.Missing()
                         : new CommentTreeNode.Author.Known(UsersApiAdapter.toSummary(author)),
-                new Viewer.Guest(), false, List.of());
+                new Viewer.Guest(), CommentTreeNode.Upvote.NONE, List.of());
     }
 
     @Test
     void fromEntity_WhenAuthorDeactivatedInGraceWindow_BlanksTheBody() {
         User author = author("GONE");
         author.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
-        PlannerComment comment = comment(author.getId());
+        CommentRow comment = comment(author.getId());
 
         CommentTreeNode node = project(comment, author);
 
@@ -61,21 +58,10 @@ class CommentTreeNodeAuthorLifecycleTest {
     }
 
     @Test
-    void fromEntity_WhenAuthorDeactivated_LeavesTheEntityContent() {
-        User author = author("GONE");
-        author.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
-        PlannerComment comment = comment(author.getId());
-
-        project(comment, author);
-
-        assertThat(comment.getContent()).isEqualTo("still here");
-    }
-
-    @Test
     void fromEntity_WhenAuthorReactivated_ServesTheBody() {
         User author = author("GONE");
         author.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
-        PlannerComment comment = comment(author.getId());
+        CommentRow comment = comment(author.getId());
         project(comment, author);
 
         author.reactivate();
@@ -107,8 +93,7 @@ class CommentTreeNodeAuthorLifecycleTest {
     void fromEntity_WhenCommentDeletedAndAuthorDeactivated_BlanksTheBody() {
         User author = author("GONE");
         author.softDelete(Instant.now(), Instant.now().plus(Duration.ofDays(30)));
-        PlannerComment comment = comment(author.getId());
-        comment.softDelete(Instant.now());
+        CommentRow comment = CommentRows.deleted(comment(author.getId()), Instant.now());
 
         CommentTreeNode node = project(comment, author);
 

@@ -1,9 +1,10 @@
 package org.danteplanner.backend.comment.effect;
 
 import tools.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.support.CommentRows;
+import org.danteplanner.backend.comment.repository.CommentRow;
 import org.danteplanner.backend.support.TestJsonMappers;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.planner.api.PlannerNotificationTarget;
@@ -87,8 +88,8 @@ class CommentEffectPublicVisibilityTest {
     @Test
     void commentReceived_WhenPlannerUnpublishedBeforeDispatch_PushesNoPublicCommentAdded() {
         givenUnpublished();
-        PlannerComment comment = comment(COMMENT_ID, WRITER_ID, null);
-        when(commentRepository.findById(COMMENT_ID)).thenReturn(Optional.of(comment));
+        CommentRow comment = comment(COMMENT_ID, WRITER_ID, null);
+        when(commentRepository.findRowById(COMMENT_ID)).thenReturn(Optional.of(comment));
         CommentReceivedEffect effect = new CommentReceivedEffect(commentRepository, commentQueryService(),
                 publishedPlanners, notifications, payloads);
 
@@ -103,9 +104,9 @@ class CommentEffectPublicVisibilityTest {
     @Test
     void replyReceived_WhenPlannerUnpublishedBeforeDispatch_PushesNoPublicCommentAdded() {
         givenUnpublished();
-        when(commentRepository.findById(PARENT_ID))
+        when(commentRepository.findRowById(PARENT_ID))
                 .thenReturn(Optional.of(comment(PARENT_ID, PARENT_AUTHOR_ID, null)));
-        when(commentRepository.findById(REPLY_ID))
+        when(commentRepository.findRowById(REPLY_ID))
                 .thenReturn(Optional.of(comment(REPLY_ID, WRITER_ID, PARENT_ID)));
 
         applyReply();
@@ -115,10 +116,9 @@ class CommentEffectPublicVisibilityTest {
 
     @Test
     void replyReceived_WhenParentWithdrawnBeforeDispatch_NotifiesNobody() {
-        PlannerComment parent = comment(PARENT_ID, PARENT_AUTHOR_ID, null);
-        parent.softDelete(Instant.now());
-        when(commentRepository.findById(PARENT_ID)).thenReturn(Optional.of(parent));
-        when(commentRepository.findById(REPLY_ID))
+        CommentRow parent = CommentRows.deleted(comment(PARENT_ID, PARENT_AUTHOR_ID, null), Instant.now());
+        when(commentRepository.findRowById(PARENT_ID)).thenReturn(Optional.of(parent));
+        when(commentRepository.findRowById(REPLY_ID))
                 .thenReturn(Optional.of(comment(REPLY_ID, WRITER_ID, PARENT_ID)));
 
         applyReply();
@@ -134,7 +134,7 @@ class CommentEffectPublicVisibilityTest {
     @Test
     void commentReceived_WhenPlannerUnpublishedBeforeDispatch_StillNotifiesTheOwner() {
         givenUnpublished();
-        when(commentRepository.findById(COMMENT_ID)).thenReturn(Optional.of(comment(COMMENT_ID, WRITER_ID, null)));
+        when(commentRepository.findRowById(COMMENT_ID)).thenReturn(Optional.of(comment(COMMENT_ID, WRITER_ID, null)));
         CommentReceivedEffect effect = new CommentReceivedEffect(commentRepository, commentQueryService(),
                 publishedPlanners, notifications, payloads);
 
@@ -153,10 +153,9 @@ class CommentEffectPublicVisibilityTest {
 
     @Test
     void replyReceived_WhenParentWithdrawnBeforeDispatch_StillPushesTheReplyToTheThread() {
-        PlannerComment parent = comment(PARENT_ID, PARENT_AUTHOR_ID, null);
-        parent.softDelete(Instant.now());
-        when(commentRepository.findById(PARENT_ID)).thenReturn(Optional.of(parent));
-        when(commentRepository.findById(REPLY_ID))
+        CommentRow parent = CommentRows.deleted(comment(PARENT_ID, PARENT_AUTHOR_ID, null), Instant.now());
+        when(commentRepository.findRowById(PARENT_ID)).thenReturn(Optional.of(parent));
+        when(commentRepository.findRowById(REPLY_ID))
                 .thenReturn(Optional.of(comment(REPLY_ID, WRITER_ID, PARENT_ID)));
 
         applyReply();
@@ -213,8 +212,8 @@ class CommentEffectPublicVisibilityTest {
     }
 
     private void givenAReplyUnder(Long parentAuthorId) {
-        when(commentRepository.findById(PARENT_ID)).thenReturn(Optional.of(comment(PARENT_ID, parentAuthorId, null)));
-        when(commentRepository.findById(REPLY_ID))
+        when(commentRepository.findRowById(PARENT_ID)).thenReturn(Optional.of(comment(PARENT_ID, parentAuthorId, null)));
+        when(commentRepository.findRowById(REPLY_ID))
                 .thenReturn(Optional.of(comment(REPLY_ID, WRITER_ID, PARENT_ID)));
     }
 
@@ -227,13 +226,8 @@ class CommentEffectPublicVisibilityTest {
         pushes.flush();
     }
 
-    private static PlannerComment comment(Long id, Long authorId, Long parentId) {
-        PlannerComment comment = new PlannerComment(PLANNER_ID, authorId, "text " + id, parentId,
+    private static CommentRow comment(Long id, Long authorId, Long parentId) {
+        return CommentRows.live(id, UUID.randomUUID(), PLANNER_ID, authorId, "text " + id, parentId,
                 parentId == null ? 0 : 1);
-        comment.setId(id);
-        comment.setPublicId(UUID.randomUUID());
-        comment.setCreatedAt(Instant.now());
-        comment.setAuthorNotificationsEnabled(true);
-        return comment;
     }
 }

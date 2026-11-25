@@ -2,6 +2,7 @@ package org.danteplanner.backend.integration;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -155,8 +156,8 @@ class DomainEventPoisonIT extends ExclusiveDatabaseSupport {
      * @return the event id
      */
     private long dispatchableEvent(int attempts) {
-        PlannerComment comment = transaction().execute(status -> commentRepository.insert(
-                new PlannerComment(planner.getId(), commenter.getId(), "A comment", null, 0)));
+        PlannerComment comment = StoredComments.save(commentRepository, jdbcTemplate,
+                new PlannerComment(planner.getId(), commenter.getId(), "A comment", null, 0));
         return transaction().execute(status -> {
             jdbcTemplate.update("""
                     INSERT INTO domain_events (event_type, aggregate_id, payload, created_at, attempts)

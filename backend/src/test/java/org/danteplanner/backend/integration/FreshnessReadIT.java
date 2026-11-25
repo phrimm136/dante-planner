@@ -17,7 +17,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 
@@ -30,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
+import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
@@ -769,8 +769,8 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
         User commenter = TestDataFactory.createTestUser(userRepository, "freshness-read-inbox-commenter-"
                 + UUID.randomUUID() + "@example.com");
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
-        PlannerComment comment = new TransactionTemplate(transactionManager).execute(status -> commentRepository.insert(
-                new PlannerComment(planner.getId(), commenter.getId(), "freshness read inbox", null, 0)));
+        PlannerComment comment = StoredComments.save(commentRepository, primaryJdbcTemplate,
+                new PlannerComment(planner.getId(), commenter.getId(), "freshness read inbox", null, 0));
         long eventId = recordCommentReceived(planner.getId(), comment.getId());
         replicationControl.awaitCaughtUp();
         try {

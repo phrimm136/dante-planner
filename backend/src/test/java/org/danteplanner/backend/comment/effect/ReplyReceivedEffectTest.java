@@ -1,9 +1,10 @@
 package org.danteplanner.backend.comment.effect;
 
 import tools.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.support.CommentRows;
+import org.danteplanner.backend.comment.repository.CommentRow;
 import org.danteplanner.backend.support.TestJsonMappers;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.planner.api.PlannerNotificationTarget;
@@ -93,12 +94,12 @@ class ReplyReceivedEffectTest {
 
     @Test
     void applyEffect_WhenTheParentAuthorIsEligible_NotifiesAndPushesBoth() {
-        PlannerComment reply = givenAReplyTo(givenAParent(PARENT_AUTHOR_ID, true));
+        CommentRow reply = givenAReplyTo(givenAParent(PARENT_AUTHOR_ID, true));
 
         applyAndFlush();
 
         assertThat(notifications.calls()).containsExactly(new ReplyReceived(
-                REPLY_ID, reply.getPublicId(), PLANNER_ID, "Test Planner", "A reply", PARENT_AUTHOR_ID));
+                REPLY_ID, reply.publicId(), PLANNER_ID, "Test Planner", "A reply", PARENT_AUTHOR_ID));
         assertThat(sseChannel.envelopes(SseChannel.USER))
                 .extracting(SseEnvelope.Wire::type, SseEnvelope.Wire::userId)
                 .containsExactly(tuple(SseEventType.NOTIFY_COMMENT, PARENT_AUTHOR_ID));
@@ -135,14 +136,8 @@ class ReplyReceivedEffectTest {
 
     @Test
     void applyEffect_WhenTheReplyWasWithdrawn_AnnouncesNothing() {
-        PlannerComment parent = parent(PARENT_AUTHOR_ID, true);
-        PlannerComment reply =
-                new PlannerComment(PLANNER_ID, REPLIER_ID, "A reply", parent.getId(), 1);
-        reply.setId(REPLY_ID);
-        reply.setPublicId(UUID.randomUUID());
-        reply.setCreatedAt(Instant.now());
-        reply.softDelete(Instant.now());
-        when(commentRepository.findById(REPLY_ID)).thenReturn(Optional.of(reply));
+        CommentRow reply = CommentRows.deleted(reply(PLANNER_ID, PARENT_ID), Instant.now());
+        when(commentRepository.findRowById(REPLY_ID)).thenReturn(Optional.of(reply));
 
         assertLogs("Reply 101 was withdrawn before it was announced");
 
@@ -152,7 +147,7 @@ class ReplyReceivedEffectTest {
 
     @Test
     void applyEffect_WhenTheReplyIsGone_AnnouncesNothing() {
-        when(commentRepository.findById(REPLY_ID)).thenReturn(Optional.empty());
+        when(commentRepository.findRowById(REPLY_ID)).thenReturn(Optional.empty());
 
         assertLogs("Reply 101 is gone before it was announced");
 
@@ -198,7 +193,7 @@ class ReplyReceivedEffectTest {
     @Test
     void applyEffect_WhenTheParentRowIsGone_NotifiesNobodyAndPushesNoParent() {
         givenAReplyTo(parent(PARENT_AUTHOR_ID, true));
-        when(commentRepository.findById(PARENT_ID)).thenReturn(Optional.empty());
+        when(commentRepository.findRowById(PARENT_ID)).thenReturn(Optional.empty());
 
         applyAndFlush();
 
@@ -208,7 +203,7 @@ class ReplyReceivedEffectTest {
 
     @Test
     void applyEffect_WhenTheReplyHasNoParent_NotifiesNobodyAndPushesNoParent() {
-        givenAReplyTo(parent(PARENT_AUTHOR_ID, true)).setParentCommentId(null);
+        givenTheReply(reply(PLANNER_ID, null));
 
         applyAndFlush();
 
@@ -219,7 +214,7 @@ class ReplyReceivedEffectTest {
     @Test
     void applyEffect_WhenThePlannerIsGone_AnnouncesNothing() {
         UUID gonePlannerId = UUID.randomUUID();
-        givenAReplyTo(parent(PARENT_AUTHOR_ID, true)).setPlannerId(gonePlannerId);
+        givenTheReply(reply(gonePlannerId, PARENT_ID));
 
         assertLogs("Planner " + gonePlannerId + " is gone before reply 101 was announced");
         assertThat(notifications.calls()).isEmpty();
@@ -254,29 +249,28 @@ class ReplyReceivedEffectTest {
         pushes.flush();
     }
 
-    private static PlannerComment parent(Long authorId, boolean authorNotificationsEnabled) {
-        PlannerComment parent = new PlannerComment(PLANNER_ID, authorId, "Parent", null, 0);
-        parent.setId(PARENT_ID);
-        parent.setPublicId(PARENT_PUBLIC_ID);
-        parent.setCreatedAt(Instant.now());
-        parent.setAuthorNotificationsEnabled(authorNotificationsEnabled);
+    private static CommentRow parent(Long authorId, boolean authorNotificationsEnabled) {
+        CommentRow parent = CommentRows.live(PARENT_ID, PARENT_PUBLIC_ID, PLANNER_ID, authorId, "Parent", null, 0);
+        return authorNotificationsEnabled ? parent : CommentRows.muted(parent);
+    }
+
+    private CommentRow givenAParent(Long authorId, boolean authorNotificationsEnabled) {
+        CommentRow parent = parent(authorId, authorNotificationsEnabled);
+        when(commentRepository.findRowById(PARENT_ID)).thenReturn(Optional.of(parent));
         return parent;
     }
 
-    private PlannerComment givenAParent(Long authorId, boolean authorNotificationsEnabled) {
-        PlannerComment parent = parent(authorId, authorNotificationsEnabled);
-        when(commentRepository.findById(PARENT_ID)).thenReturn(Optional.of(parent));
-        return parent;
+    private CommentRow givenAReplyTo(CommentRow parent) {
+        return givenTheReply(reply(PLANNER_ID, parent.id()));
     }
 
-    private PlannerComment givenAReplyTo(PlannerComment parent) {
-        PlannerComment reply =
-                new PlannerComment(PLANNER_ID, REPLIER_ID, "A reply", parent.getId(), 1);
-        reply.setId(REPLY_ID);
-        reply.setPublicId(UUID.randomUUID());
-        reply.setCreatedAt(Instant.now());
-        when(commentRepository.findById(REPLY_ID)).thenReturn(Optional.of(reply));
+    private CommentRow givenTheReply(CommentRow reply) {
+        when(commentRepository.findRowById(REPLY_ID)).thenReturn(Optional.of(reply));
         return reply;
+    }
+
+    private static CommentRow reply(UUID plannerId, Long parentId) {
+        return CommentRows.live(REPLY_ID, UUID.randomUUID(), plannerId, REPLIER_ID, "A reply", parentId, 1);
     }
 
     private static DomainEvent event() {

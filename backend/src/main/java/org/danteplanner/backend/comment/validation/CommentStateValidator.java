@@ -1,7 +1,8 @@
 package org.danteplanner.backend.comment.validation;
 
 import com.google.errorprone.annotations.CheckReturnValue;
-import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.comment.exception.CommentNotFoundException;
+import org.danteplanner.backend.comment.repository.CommentRow;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator.ParentInPlanner;
 import org.danteplanner.backend.shared.failure.Parsed;
 import org.danteplanner.backend.shared.failure.Result;
@@ -15,25 +16,29 @@ public final class CommentStateValidator {
     }
 
     @Parsed
-    public record LiveComment(PlannerComment comment) {
+    public record LiveComment(CommentRow comment) {
 
-        public static Result<LiveComment, CommentRefusal> of(PlannerComment comment, CommentRefusal refusal) {
+        public static Result<LiveComment, CommentRefusal> of(CommentRow comment, CommentRefusal refusal) {
             return comment.isDeleted() ? Result.err(refusal) : Result.ok(new LiveComment(comment));
         }
     }
 
     @Parsed
-    public record ReplyableParent(PlannerComment comment) {
+    public record ReplyableParent(CommentRow comment) {
 
         public static Result<ReplyableParent, CommentRefusal> of(ParentInPlanner placed) {
-            PlannerComment parent = placed.comment();
-            return parent.isDeleted() && parent.getDepth() == 0
+            CommentRow parent = placed.comment();
+            return parent.isDeleted() && parent.depth() == 0
                     ? Result.err(CommentRefusal.REPLY_DELETED)
                     : Result.ok(new ReplyableParent(parent));
         }
     }
 
-    public static Result<ReplyableParent, CommentRefusal> replyableIn(PlannerComment parent, UUID plannerId) {
+    public static Result<ReplyableParent, CommentRefusal> replyableIn(CommentRow parent, UUID plannerId) {
         return ParentInPlanner.of(parent, plannerId).flatMap(ReplyableParent::of);
+    }
+
+    public static CommentNotFoundException gone(UUID commentPublicId) {
+        return new CommentNotFoundException(commentPublicId);
     }
 }

@@ -1,5 +1,6 @@
 package org.danteplanner.backend.integration;
 
+import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.config.TestConfig;
@@ -100,9 +101,8 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
 
     @Test
     void dispatch_WhenTheSameEventIsDispatchedTwice_DerivesTheEffectOnce() {
-        PlannerComment comment = transaction().execute(status -> commentRepository.insert(
-                new PlannerComment(planner.getId(), commenter.getId(), "A comment dispatched twice",
-                        null, 0)));
+        PlannerComment comment = StoredComments.save(commentRepository, jdbcTemplate,
+                new PlannerComment(planner.getId(), commenter.getId(), "A comment dispatched twice", null, 0));
         long eventId = recordEvent(comment.getId());
 
         dispatcher.dispatchDomainEvent(eventId);
@@ -188,9 +188,9 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
     }
 
     private PlannerComment insertComment(User author, String content, Long parentCommentId) {
-        return transaction().execute(status -> commentRepository.insert(
+        return StoredComments.save(commentRepository, jdbcTemplate,
                 new PlannerComment(planner.getId(), author.getId(), content, parentCommentId,
-                        parentCommentId == null ? 0 : 1)));
+                        parentCommentId == null ? 0 : 1));
     }
 
     private long recordEvent(Long commentId) {

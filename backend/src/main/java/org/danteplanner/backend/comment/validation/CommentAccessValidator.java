@@ -3,7 +3,7 @@ package org.danteplanner.backend.comment.validation;
 import com.google.errorprone.annotations.CheckReturnValue;
 import org.danteplanner.backend.shared.security.Viewer;
 
-import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.comment.repository.CommentRow;
 import org.danteplanner.backend.planner.api.PlannerMiss;
 import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.api.PlannerThread;
@@ -29,10 +29,10 @@ public class CommentAccessValidator {
     }
 
     @Parsed
-    public record ParentInPlanner(PlannerComment comment) {
+    public record ParentInPlanner(CommentRow comment) {
 
-        public static Result<ParentInPlanner, CommentRefusal> of(PlannerComment parent, UUID plannerId) {
-            return parent.getPlannerId().equals(plannerId)
+        public static Result<ParentInPlanner, CommentRefusal> of(CommentRow parent, UUID plannerId) {
+            return parent.plannerId().equals(plannerId)
                     ? Result.ok(new ParentInPlanner(parent))
                     : Result.err(CommentRefusal.OTHER_PLANNER);
         }

@@ -313,6 +313,20 @@ VALUES
     (2, UNHEX('CC000002000000000000000000000002'), UNHEX('AAAA0001000000000000000000000001'), 3, 1, 'Agreed, very effective.', 1, 0, NOW());
 
 -- ============================================================================
+-- planner_comment_content, planner_comment_stats
+-- ============================================================================
+
+INSERT IGNORE INTO planner_comment_content (comment_id, content, edited_at, deleted_at, author_notifications_enabled)
+VALUES
+    (1, 'Great planner build.', NULL, NULL, TRUE),
+    (2, 'Agreed, very effective.', NULL, NULL, TRUE);
+
+INSERT IGNORE INTO planner_comment_stats (comment_id, upvote_count)
+VALUES
+    (1, 2),
+    (2, 0);
+
+-- ============================================================================
 -- planner_comment_votes
 -- ============================================================================
 

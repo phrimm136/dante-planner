@@ -3,6 +3,7 @@ package org.danteplanner.backend.integration;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -140,6 +141,9 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
         jdbc.update("INSERT INTO planner_comments (public_id, planner_id, user_id, content, depth, created_at) "
                 + "VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), ?, 'seeded', 0, NOW())",
                 UUID.randomUUID().toString(), commentDrift.getId().toString(), owner.getId());
+        StoredComments.split(jdbc, jdbc.queryForObject(
+                "SELECT id FROM planner_comments WHERE planner_id = UUID_TO_BIN(?)",
+                Long.class, commentDrift.getId().toString()));
         jdbc.update("UPDATE planner_stats SET comment_count = 3 WHERE planner_id = UUID_TO_BIN(?)",
                 commentDrift.getId().toString());
 

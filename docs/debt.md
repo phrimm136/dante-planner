@@ -120,14 +120,6 @@ asset pipeline.
   the `/` route, a toast in `GlobalLayout`, and `login.*` copy in every locale. Worth doing
   when a user reports a silent failed login.
   re-check: `rg -qF '"/?login=error"' backend/src/main/java/org/danteplanner/backend/shared/config/LoginRedirect.java && .claude/skills/debt-ledger/bin/debt absent frontend/src -e 'rate_limited' -e 'login='`
-- `CommentEngagementService.toggleUpvote` inserts a `PlannerCommentVote` and then runs
-  `incrementUpvoteCount`, which is `@Modifying(clearAutomatically = true)` without
-  `flushAutomatically`; whether auto-flush covers the pending vote insert depends on
-  query-space overlap between `planner_comments` and `planner_comment_votes`, which do
-  not overlap. No IT asserts that a second comment upvote returns 409, so the vote
-  row's durability on that path is untested. Add the duplicate-upvote IT (and consider
-  `flushAutomatically = true` on the increment).
-  re-check: `rg -qU '@Modifying\(clearAutomatically = true\)\n\s+@Query\("UPDATE PlannerComment c SET c.upvoteCount = c.upvoteCount \+ 1' backend/src/main/java/org/danteplanner/backend/comment/repository/PlannerCommentRepository.java && .claude/skills/debt-ledger/bin/debt absent backend/src/test/java/org/danteplanner/backend/controller/CommentControllerIT.java -i 'upvote_When(Second|Duplicate|Already|Twice|Repeat)'`
 - `DegradationIT.evictPooledPrimaryConnections` still cannot evict the primary pool: the
   routing target for PRIMARY is the `GtidCapturingDataSource` wrapper, not a
   `HikariDataSource`, so the helper's instanceof walk skips it. The replica is
@@ -446,11 +438,6 @@ the generic error message, so a user who hits the server-side planner cap is not
 the cap is or that they hit one. The server carries the current count and the maximum only
 inside an English prose message, with no structured field a translation could interpolate.
   re-check: `.claude/skills/debt-ledger/bin/debt absent frontend/src -g '!**/__tests__/**' 'PLANNER_LIMIT_EXCEEDED' && rg -qF '"Planner limit exceeded: current count is " + currentCount' backend/src/main/java/org/danteplanner/backend/planner/exception/PlannerLimitExceededException.java`
-- 2026-08-15 — `KnownConstraint` omits `planner_comment_votes`, so a raced duplicate comment
-upvote falls to `UNEXPECTED_CONFLICT`: it answers the generic `CONFLICT` code and raises a
-Sentry alert, while the equivalent planner-vote and comment-report races are listed and
-resolve silently to `DUPLICATE_ACTION`.
-  re-check: `rg -q 'COMMENT_REPORT\("planner_comment_reports"' backend/src/main/java/org/danteplanner/backend/shared/exception/KnownConstraint.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/shared/exception/KnownConstraint.java 'planner_comment_votes'`
 - 2026-08-16 — `PlannerContentDigestTest` was the only HTTP-level test asserting that
 `PlannerContentSanitizer` normalization survives the upsert endpoint. It went with the digest
 it was named for, and nothing replaced that assertion: sanitizer behavior is now covered only
@@ -1079,10 +1066,10 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   re-check: `rg -q '@OneToOne\(mappedBy = "planner", cascade = CascadeType.ALL, orphanRemoval = true, optional = false\)$' backend/src/main/java/org/danteplanner/backend/planner/entity/Planner.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/planner/entity/Planner.java 'FetchType'`
 - 2026-09-22 — `PlannerDriftAuditRepository.driftedUpvoteCounters` joins `planner_votes`
   without a `deleted_at IS NULL` predicate while `driftedCommentCounters` filters
-  `planner_comments.deleted_at IS NULL`; V018 made votes immutable so the asymmetry may be
+  `planner_comment_content.deleted_at IS NULL`; V018 made votes immutable so the asymmetry may be
   correct, but nothing says so. Worth a one-line comment or a shared predicate the next time
   either query changes.
-  re-check: `rg -q 'LEFT JOIN planner_votes v ON v.planner_id = s.planner_id$' backend/src/main/java/org/danteplanner/backend/planner/repository/PlannerDriftAuditRepository.java && rg -qF 'c.planner_id = s.planner_id AND c.deleted_at IS NULL' backend/src/main/java/org/danteplanner/backend/planner/repository/PlannerDriftAuditRepository.java`
+  re-check: `rg -q 'LEFT JOIN planner_votes v ON v.planner_id = s.planner_id$' backend/src/main/java/org/danteplanner/backend/planner/repository/PlannerDriftAuditRepository.java && rg -qF 't.comment_id = c.id AND t.deleted_at IS NULL' backend/src/main/java/org/danteplanner/backend/planner/repository/PlannerDriftAuditRepository.java`
 - 2026-09-23 — The production build's `VITE_API_BASE_URL` ends in a newline: the shipped
   `index.html` carries `href="https://api.dante-planner.com\n"`. URL parsing strips it, so
   fetches and the preconnect work. The value lives in the hosting build environment, not the

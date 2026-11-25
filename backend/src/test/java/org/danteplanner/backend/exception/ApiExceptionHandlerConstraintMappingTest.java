@@ -61,6 +61,8 @@ class ApiExceptionHandlerConstraintMappingTest {
                         "Action already performed"),
                 new ContractRow("planner_reports.uk_report_user_planner", HttpStatus.CONFLICT, "DUPLICATE_ACTION",
                         "Action already performed"),
+                new ContractRow("planner_comment_votes.PRIMARY", HttpStatus.CONFLICT, "DUPLICATE_ACTION",
+                        "Action already performed"),
                 new ContractRow("planner_comment_reports.uk_comment_report_reporter_comment", HttpStatus.CONFLICT,
                         "DUPLICATE_ACTION", "Action already performed"));
     }

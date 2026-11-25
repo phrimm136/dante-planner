@@ -15,6 +15,7 @@ public enum KnownConstraint {
 
     PLANNER_VOTE("planner_votes", Keys.ANY_UNIQUE, ConstraintViolationKind.DUPLICATE_ACTION),
     PLANNER_REPORT("planner_reports", Keys.ANY_UNIQUE, ConstraintViolationKind.DUPLICATE_ACTION),
+    COMMENT_VOTE("planner_comment_votes", Keys.ANY_UNIQUE, ConstraintViolationKind.DUPLICATE_ACTION),
     COMMENT_REPORT("planner_comment_reports", Keys.ANY_UNIQUE, ConstraintViolationKind.DUPLICATE_ACTION);
 
     /**

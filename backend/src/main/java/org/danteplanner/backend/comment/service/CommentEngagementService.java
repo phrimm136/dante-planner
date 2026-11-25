@@ -5,19 +5,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.comment.dto.CommentVoteResponse;
 import org.danteplanner.backend.comment.dto.ToggleNotificationResponse;
 import org.danteplanner.backend.comment.entity.CommentVoteType;
-import org.danteplanner.backend.comment.entity.PlannerComment;
-import org.danteplanner.backend.comment.entity.PlannerCommentVote;
-import org.danteplanner.backend.comment.entity.PlannerCommentVoteId;
-import org.danteplanner.backend.comment.exception.CommentNotFoundException;
-import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
+import org.danteplanner.backend.comment.repository.PlannerCommentContentRepository;
+import org.danteplanner.backend.comment.repository.PlannerCommentStatsRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator.AuthoredComment;
 import org.danteplanner.backend.comment.validation.CommentRefusal;
+import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.danteplanner.backend.comment.validation.CommentStateValidator.LiveComment;
 import org.danteplanner.backend.moderation.api.dto.CommentReportRequest;
 import org.danteplanner.backend.moderation.api.dto.CommentReportResponse;
 import org.danteplanner.backend.moderation.api.CommentReports;
 import org.danteplanner.backend.planner.api.PlannerVotes;
+import org.danteplanner.backend.shared.failure.WriteOutcome;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,8 @@ import java.util.UUID;
 @Slf4j
 public class CommentEngagementService {
 
-    private final PlannerCommentRepository commentRepository;
+    private final PlannerCommentContentRepository contentRepository;
+    private final PlannerCommentStatsRepository statsRepository;
     private final PlannerCommentVoteRepository commentVoteRepository;
     private final CommentQueryService commentQueryService;
     private final CommentReports reportService;
@@ -45,23 +45,19 @@ public class CommentEngagementService {
         LiveComment live = LiveComment
                 .of(commentQueryService.requireByPublicId(commentPublicId), CommentRefusal.VOTE_DELETED)
                 .orElseThrow(CommentRefusal::toException);
-        Long internalId = live.comment().getId();
+        Long commentId = live.comment().id();
+        UUID plannerId = live.comment().plannerId();
 
-        PlannerCommentVoteId voteId = new PlannerCommentVoteId(internalId, userId);
-        plannerVotes.requireFirstVote(
-                commentVoteRepository.existsById(voteId), live.comment().getPlannerId(), userId);
+        switch (WriteOutcome.of(commentVoteRepository.insertIgnore(commentId, userId, CommentVoteType.UP.name()))) {
+            case APPLIED -> {
+                statsRepository.incrementUpvoteCount(commentId);
+                FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId));
+            }
+            case NOTHING -> plannerVotes.requireFirstVote(true, plannerId, userId);
+        }
 
-        PlannerCommentVote newVote = new PlannerCommentVote(internalId, userId, CommentVoteType.UP);
-
-        commentVoteRepository.insert(newVote);
-        commentRepository.incrementUpvoteCount(internalId);
-        FreshnessDeclarations.declare(new FreshnessScope.Planner(live.comment().getPlannerId()));
-
-        // The increment clears the persistence context, so this reads the committed counter rather
-        // than the pre-increment copy the vote was checked against.
-        PlannerComment counted = commentRepository.findById(internalId)
-                .orElseThrow(() -> new CommentNotFoundException(commentPublicId));
-        CommentVoteResponse response = new CommentVoteResponse(commentPublicId, counted.getUpvoteCount(), true);
+        CommentVoteResponse response = new CommentVoteResponse(
+                commentPublicId, statsRepository.upvoteCountOf(commentId), true);
 
         log.debug("User {} cast immutable upvote on comment {}", userId, commentPublicId);
 
@@ -74,18 +70,37 @@ public class CommentEngagementService {
                 .of(commentQueryService.requireByPublicId(commentPublicId), userId, CommentRefusal.TOGGLE_NOT_AUTHOR)
                 .orElseThrow(CommentRefusal::toException);
 
-        authored.comment().setAuthorNotificationsEnabled(enabled);
-        FreshnessDeclarations.declare(new FreshnessScope.Planner(authored.comment().getPlannerId()));
+        NotificationChoice choice = NotificationChoice.of(enabled);
+        int matched = switch (choice) {
+            case ON -> contentRepository.enableAuthorNotifications(authored.comment().id());
+            case OFF -> contentRepository.disableAuthorNotifications(authored.comment().id());
+        };
+        switch (WriteOutcome.of(matched)) {
+            case APPLIED ->
+                    FreshnessDeclarations.declare(new FreshnessScope.Planner(authored.comment().plannerId()));
+            case NOTHING -> throw CommentStateValidator.gone(commentPublicId);
+        }
 
         ToggleNotificationResponse response = new ToggleNotificationResponse(enabled);
 
-        log.info("User {} toggled notifications {} for comment {}", userId, onOrOff(enabled), commentPublicId);
+        log.info("User {} toggled notifications {} for comment {}", userId, choice.label, commentPublicId);
 
         return response;
     }
 
-    private static String onOrOff(boolean enabled) {
-        return enabled ? "on" : "off";
+    private enum NotificationChoice {
+        ON("on"),
+        OFF("off");
+
+        private final String label;
+
+        NotificationChoice(String label) {
+            this.label = label;
+        }
+
+        static NotificationChoice of(boolean enabled) {
+            return enabled ? ON : OFF;
+        }
     }
 
     public CommentReportResponse reportComment(UUID commentPublicId, Long userId, CommentReportRequest request) {
