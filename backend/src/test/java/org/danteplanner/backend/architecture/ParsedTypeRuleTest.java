@@ -42,13 +42,19 @@ class ParsedTypeRuleTest {
                 .hasMessageContaining(FIXTURE + "$Elsewhere$1.<init>(")
                 .hasMessageContaining(FIXTURE + "$Subclass.<init>(")
                 .hasMessageContaining(FIXTURE + "$Email$NestedBuilder.nestedConstruction(")
-                .hasMessageContaining("(6 times)");
+                .hasMessageContaining(FIXTURE + "$SealedFact is an interface")
+                .hasMessageContaining("(7 times)");
     }
 
     private static ArchCondition<JavaClass> constructNoOtherParsedType() {
         return new ArchCondition<>("construct no other @Parsed type") {
             @Override
             public void check(JavaClass origin, ConditionEvents events) {
+                if (origin.isInterface() && origin.isAnnotatedWith(Parsed.class)) {
+                    events.add(SimpleConditionEvent.violated(origin, origin.getName()
+                            + " is an interface, whose constructions no rule sees: annotate each type that holds"
+                            + " the fact"));
+                }
                 Stream.<JavaAccess<?>>concat(
                                 origin.getConstructorCallsFromSelf().stream(),
                                 origin.getConstructorReferencesFromSelf().stream())

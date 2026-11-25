@@ -69,6 +69,10 @@ final class ParseConventionFixtures {
     static class Open {
     }
 
+    @Parsed
+    interface SealedFact {
+    }
+
     static final class Subclass extends Open {
     }
 
