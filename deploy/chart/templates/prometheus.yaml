@@ -55,7 +55,7 @@ data:
       external_labels:
         cluster: ${CLUSTER_NAME}
     rule_files:
-      - /etc/prometheus/rules.yml
+      - /etc/config/rules.yml
     remote_write:
       - url: https://prometheus-prod-56-prod-us-east-2.grafana.net/api/prom/push
         basic_auth:
@@ -151,103 +151,103 @@ data:
           - action: labeldrop
             regex: id|image|cpu
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Application
 metadata:
   name: prometheus
-  namespace: danteplanner
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: prometheus
-  template:
-    metadata:
-      labels:
-        app: prometheus
-    spec:
-      serviceAccountName: prometheus
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 65534
-        runAsGroup: 65534
-        fsGroup: 65534
-        seccompProfile:
-          type: RuntimeDefault
-      nodeSelector:
-        role: data
-      containers:
-        - name: prometheus
-          image: prom/prometheus:v2.54.1
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: [ALL]
-          args:
-            - --config.file=/etc/prometheus/prometheus.yml
-            - --storage.tsdb.retention.time=7d
-            - --enable-feature=expand-external-labels
-            # Required by the config-reloader sidecar's POST /-/reload.
-            - --web.enable-lifecycle
+  project: default
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: prometheus
+    targetRevision: 29.47.2
+    helm:
+      releaseName: prometheus
+      valuesObject:
+        alertmanager:
+          enabled: false
+        kube-state-metrics:
+          enabled: false
+        prometheus-node-exporter:
+          enabled: false
+        prometheus-pushgateway:
+          enabled: false
+        rbac:
+          create: false
+        serviceAccounts:
+          server:
+            create: false
+            name: prometheus
+        server:
+          fullnameOverride: prometheus
+          configMapOverrideName: config
+          retention: 7d
           env:
             - name: CLUSTER_NAME
-              value: {{ .Values.region }}
-          ports:
-            - name: web
-              containerPort: 9090
-          volumeMounts:
-            - name: config
-              mountPath: /etc/prometheus
+              valueFrom:
+                configMapKeyRef:
+                  name: cluster-identity
+                  key: CLUSTER_NAME
+          portName: web
+          service:
+            servicePort: 9090
+          podLabels:
+            app: prometheus
+          nodeSelector:
+            role: data
+          persistentVolume:
+            enabled: false
+            mountPath: /prometheus
+          extraVolumes:
+            - name: remote-write-auth
+              secret:
+                secretName: grafana-remote-write
+          extraVolumeMounts:
             - name: remote-write-auth
               mountPath: /etc/prometheus/remote-write
               readOnly: true
-            - name: data
-              mountPath: /prometheus
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            fsGroup: 65534
+            seccompProfile:
+              type: RuntimeDefault
+          containerSecurityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
           resources:
             requests:
               cpu: 100m
               memory: 384Mi
             limits:
               memory: 512Mi
-        - name: config-reloader
-          image: quay.io/prometheus-operator/prometheus-config-reloader:v0.76.0
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop: [ALL]
-          args:
-            - --watched-dir=/etc/prometheus
-          volumeMounts:
-            - name: config
-              mountPath: /etc/prometheus
-              readOnly: true
-          resources:
-            requests:
-              cpu: 5m
-              memory: 16Mi
-            limits:
-              memory: 32Mi
-      volumes:
-        - name: config
-          configMap:
-            name: prometheus-config
-        - name: remote-write-auth
-          secret:
-            secretName: grafana-remote-write
-        - name: data
-          emptyDir: {}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: prometheus
-  namespace: danteplanner
-  labels:
-    app: prometheus
-spec:
-  selector:
-    app: prometheus
-  ports:
-    - name: web
-      port: 9090
-      targetPort: web
+        configmapReload:
+          prometheus:
+            containerSecurityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: [ALL]
+            resources:
+              requests:
+                cpu: 5m
+                memory: 16Mi
+              limits:
+                memory: 32Mi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: danteplanner
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m
