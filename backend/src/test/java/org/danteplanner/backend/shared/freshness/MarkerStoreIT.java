@@ -35,6 +35,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
 import org.danteplanner.backend.shared.config.RedisConnectionConfig;
+import org.danteplanner.backend.shared.failure.OnUndeclared;
 import org.danteplanner.backend.shared.redis.RedisRole;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.shared.redis.RedisRoleProbe;
@@ -115,7 +116,7 @@ class MarkerStoreIT {
     private MarkerStore storeOver(
             LettuceConnectionFactory writeStore, List<MarkerStore.Source> readSources, RedisRoleHealth roleHealth) {
         MarkerStore store = new MarkerStore(writeStore, writeStore.getRequiredNativeClient().getResources(), readSources,
-                roleHealth, new MarkerStore.Settings(0, WAIT_BOUND, TTL, false), meters);
+                roleHealth, new MarkerStore.Settings(0, WAIT_BOUND, TTL, OnUndeclared.COUNT), meters);
         stores.add(store);
         return store;
     }

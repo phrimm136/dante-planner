@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
+import org.danteplanner.backend.shared.failure.OnUndeclared;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
@@ -36,7 +37,7 @@ class MarkerDispatchStampTest {
         private final List<Raise> raises = new ArrayList<>();
 
         RecordingMarkerStore() {
-            super(null, null, List.of(), new RedisRoleHealth(), new Settings(0, Duration.ofSeconds(1), Duration.ofHours(1), false),
+            super(null, null, List.of(), new RedisRoleHealth(), new Settings(0, Duration.ofSeconds(1), Duration.ofHours(1), OnUndeclared.COUNT),
                     new SimpleMeterRegistry());
         }
 
@@ -61,7 +62,7 @@ class MarkerDispatchStampTest {
         writeCapture = new GtidWriteCapture(new SimpleMeterRegistry());
         markerStore = new RecordingMarkerStore();
         stamp = new MarkerDispatchStamp(writeCapture,
-                new MarkerStamp(writeCapture, markerStore, new SimpleMeterRegistry(), false));
+                new MarkerStamp(writeCapture, markerStore, new SimpleMeterRegistry(), OnUndeclared.COUNT));
         seoul = new ReadSourceSelector.Source(SEOUL, false, null, breaker(SEOUL));
         selector = new ReadSourceSelector(List.of(seoul, new ReadSourceSelector.Source(
                 ReadSourceProperties.PRIMARY, true, null, breaker(ReadSourceProperties.PRIMARY))));

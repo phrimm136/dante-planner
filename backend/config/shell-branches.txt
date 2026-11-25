@@ -75,7 +75,7 @@ org.danteplanner.backend.shared.config.SecurityProperties$CidrRange.contains(jav
 org.danteplanner.backend.shared.config.SecurityProperties$CidrRange.parse(java.lang.String) # 3
 org.danteplanner.backend.shared.config.SecurityProperties.isTrustedProxy(java.lang.String) # 4
 org.danteplanner.backend.shared.config.SecurityProperties.parseTrustedProxyIps() # 3
-org.danteplanner.backend.shared.config.UndeclaredPrimaryAccessGuard.checkDeclared() # 3
+org.danteplanner.backend.shared.config.UndeclaredPrimaryAccessGuard.checkDeclared() # 2
 org.danteplanner.backend.shared.exception.ApiExceptionHandler.carriesDisconnectStrerror(java.io.IOException) # 1
 org.danteplanner.backend.shared.exception.ApiExceptionHandler.handleDataIntegrityViolation(org.springframework.dao.DataIntegrityViolationException, org.springframework.web.context.request.WebRequest) # 1
 org.danteplanner.backend.shared.exception.ApiExceptionHandler.handleExceptionInternal(java.lang.Exception, java.lang.Object, org.springframework.http.HttpHeaders, org.springframework.http.HttpStatusCode, org.springframework.web.context.request.WebRequest) # 3
@@ -87,7 +87,7 @@ org.danteplanner.backend.shared.freshness.FreshnessReadAspect.read(org.aspectj.l
 org.danteplanner.backend.shared.freshness.FreshnessReadGuard.await(org.danteplanner.backend.shared.config.ReadSourceSelector$Source, java.lang.String) # 2
 org.danteplanner.backend.shared.freshness.FreshnessReadGuard.read(org.danteplanner.backend.shared.freshness.FreshnessReadGuard$Attempt) # 3
 org.danteplanner.backend.shared.freshness.MarkerDispatchStamp.around(java.lang.Runnable) # 1
-org.danteplanner.backend.shared.freshness.MarkerStamp.judgeUndeclared(org.danteplanner.backend.shared.gtid.GtidWriteCapture$Capture) # 2
+org.danteplanner.backend.shared.freshness.MarkerStamp.judgeUndeclared(org.danteplanner.backend.shared.gtid.GtidWriteCapture$Capture) # 1
 org.danteplanner.backend.shared.freshness.MarkerStore.raise(java.util.Collection, java.lang.String) # 1
 org.danteplanner.backend.shared.freshness.MarkerStore.read(java.util.Collection) # 2
 org.danteplanner.backend.shared.freshness.MarkerStore.readFrom(org.danteplanner.backend.shared.freshness.MarkerStore$Source, java.util.List) # 1

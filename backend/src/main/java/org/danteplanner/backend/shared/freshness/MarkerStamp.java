@@ -3,6 +3,7 @@ package org.danteplanner.backend.shared.freshness;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 
+import org.danteplanner.backend.shared.failure.OnUndeclared;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 
 public class MarkerStamp {
@@ -15,14 +16,14 @@ public class MarkerStamp {
     private final GtidWriteCapture writeCapture;
     private final MarkerStore markerStore;
     private final Counter undeclared;
-    private final boolean failFast;
+    private final OnUndeclared onUndeclared;
 
     public MarkerStamp(GtidWriteCapture writeCapture, MarkerStore markerStore, MeterRegistry meterRegistry,
-            boolean failFast) {
+            OnUndeclared onUndeclared) {
         this.writeCapture = writeCapture;
         this.markerStore = markerStore;
         this.undeclared = Counter.builder(UNDECLARED_COUNTER).register(meterRegistry);
-        this.failFast = failFast;
+        this.onUndeclared = onUndeclared;
     }
 
     public void stamp() {
@@ -42,9 +43,9 @@ public class MarkerStamp {
         if (!capture.tracked()) {
             return;
         }
-        if (failFast) {
-            throw new IllegalStateException(UNDECLARED_MESSAGE);
+        switch (onUndeclared) {
+            case FAIL -> throw new IllegalStateException(UNDECLARED_MESSAGE);
+            case COUNT -> undeclared.increment();
         }
-        undeclared.increment();
     }
 }

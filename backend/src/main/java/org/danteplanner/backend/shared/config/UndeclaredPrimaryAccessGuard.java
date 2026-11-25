@@ -1,5 +1,6 @@
 package org.danteplanner.backend.shared.config;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.springframework.context.ApplicationListener;
@@ -9,6 +10,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.danteplanner.backend.shared.failure.OnUndeclared;
 
 /**
  * Flyway, Hibernate schema validation and the pool-metrics unwrap all acquire a connection before
@@ -19,12 +21,12 @@ public class UndeclaredPrimaryAccessGuard implements ApplicationListener<Applica
     static final String UNDECLARED_COUNTER = "datasource.primary.undeclared";
 
     private final Counter undeclaredCounter;
-    private final boolean failFast;
+    private final OnUndeclared onUndeclared;
     private final AtomicBoolean armed = new AtomicBoolean();
 
-    public UndeclaredPrimaryAccessGuard(MeterRegistry meterRegistry, boolean failFast) {
+    public UndeclaredPrimaryAccessGuard(MeterRegistry meterRegistry, OnUndeclared onUndeclared) {
         this.undeclaredCounter = Counter.builder(UNDECLARED_COUNTER).register(meterRegistry);
-        this.failFast = failFast;
+        this.onUndeclared = Objects.requireNonNull(onUndeclared, "datasource.routing.on-undeclared-primary");
     }
 
     @Override
@@ -36,11 +38,11 @@ public class UndeclaredPrimaryAccessGuard implements ApplicationListener<Applica
         if (!armed.get() || TransactionSynchronizationManager.isActualTransactionActive()) {
             return;
         }
-        if (failFast) {
-            throw new IllegalStateException(
+        switch (onUndeclared) {
+            case FAIL -> throw new IllegalStateException(
                     "PRIMARY connection acquired outside a transaction: declare the caller with "
                             + "@Transactional(readOnly = true) so the read can route to the replica");
+            case COUNT -> undeclaredCounter.increment();
         }
-        undeclaredCounter.increment();
     }
 }

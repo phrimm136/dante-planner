@@ -15,6 +15,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 
+import org.danteplanner.backend.shared.failure.OnUndeclared;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 
@@ -29,7 +30,7 @@ class FreshnessStampFilterTest {
     private final GtidWriteCapture writeCapture = new GtidWriteCapture(new SimpleMeterRegistry());
     private final RecordingMarkerStore markerStore = new RecordingMarkerStore();
     private final FreshnessStampFilter filter = new FreshnessStampFilter(writeCapture,
-            new MarkerStamp(writeCapture, markerStore, new SimpleMeterRegistry(), false));
+            new MarkerStamp(writeCapture, markerStore, new SimpleMeterRegistry(), OnUndeclared.COUNT));
 
     private static final class CookieRefusingRequest extends MockHttpServletRequest {
 

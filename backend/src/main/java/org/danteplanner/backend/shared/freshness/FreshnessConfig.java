@@ -75,7 +75,7 @@ public class FreshnessConfig {
     @Bean
     public MarkerStamp markerStamp(GtidWriteCapture writeCapture, MarkerStore markerStore,
             MarkerStore.Settings settings, MeterRegistry meterRegistry) {
-        return new MarkerStamp(writeCapture, markerStore, meterRegistry, settings.undeclaredFailFast());
+        return new MarkerStamp(writeCapture, markerStore, meterRegistry, settings.onUndeclared());
     }
 
     @Bean

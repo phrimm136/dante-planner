@@ -11,6 +11,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 
+import org.danteplanner.backend.shared.failure.OnUndeclared;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 
 
@@ -49,7 +50,7 @@ class FreshnessStampAdviceTest {
     void beforeBodyWrite_WhenTheCaptureYieldsItsGtidOnlyOnce_RaisesTheDeclaredScopesFromItAndSetsNoCookie() {
         RecordingMarkerStore markerStore = new RecordingMarkerStore();
         FreshnessStampAdvice advice = new FreshnessStampAdvice(
-                new MarkerStamp(new SingleTakeCapture(), markerStore, new SimpleMeterRegistry(), false));
+                new MarkerStamp(new SingleTakeCapture(), markerStore, new SimpleMeterRegistry(), OnUndeclared.COUNT));
         MockHttpServletResponse servletResponse = new MockHttpServletResponse();
         ServletServerHttpResponse response = new ServletServerHttpResponse(servletResponse);
         FreshnessScope.Planner planner = new FreshnessScope.Planner(UUID.randomUUID());
