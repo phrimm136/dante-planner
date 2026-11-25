@@ -5,6 +5,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LIB_DIR="$SCRIPT_DIR/lib"
 # shellcheck source=lib/common.sh
 source "$LIB_DIR/common.sh"
+# shellcheck source=lib/control-plane.sh
+source "$LIB_DIR/control-plane.sh"
 # shellcheck source=lib/traps.sh
 source "$LIB_DIR/traps.sh"
 # shellcheck source=lib/constants.sh
@@ -24,7 +26,7 @@ BACKEND_SELECTOR="app=backend"
 BACKEND_CONTAINER="backend"
 EXPORTER_SELECTOR="app=redis-exporter-auth"
 READY_TIMEOUT="300s"
-SSM_POLL_SECONDS=5
+COMMAND_BOUND_SECONDS=3900
 
 usage() {
     cat <<EOF
@@ -40,14 +42,6 @@ Needs ssm:SendCommand + ssm:GetCommandInvocation on the CP. jq required.
 EOF
 }
 
-resolve_cp_id() {
-    if [[ -n "${CP_INSTANCE_ID:-}" ]]; then
-        echo "$CP_INSTANCE_ID"
-        return
-    fi
-    terraform -chdir="$TF_DIR" output -raw cp_instance_id
-}
-
 remote_prelude() {
     printf 'NS=%q\nSECRET=%q\nKEY=%q\nREDIS_POD=%q\nREDIS_CONTAINER=%q\nREDIS_ENV=%q\nBACKEND_SELECTOR=%q\nBACKEND_CONTAINER=%q\nEXPORTER_SELECTOR=%q\nREADY_TIMEOUT=%q\n' \
         "$NAMESPACE" "$RUNTIME_SECRET" "$PASSWORD_KEY" "$REDIS_POD" "$REDIS_CONTAINER" \
@@ -55,32 +49,7 @@ remote_prelude() {
 }
 
 run_on_cp() {
-    local cp_id="$1" body="$2" remote params cmd_id status
-    remote="$(remote_prelude)"$'\n'"$body"
-    params=$(jq -n --arg s "$remote" '{commands: ($s | split("\n"))}')
-    cmd_id=$(aws ssm send-command --region "$AWS_REGION" \
-        --instance-ids "$cp_id" \
-        --document-name "AWS-RunShellScript" \
-        --parameters "$params" \
-        --query 'Command.CommandId' --output text)
-    while :; do
-        status=$(aws ssm get-command-invocation --region "$AWS_REGION" \
-            --command-id "$cmd_id" --instance-id "$cp_id" \
-            --query 'Status' --output text 2>/dev/null || echo Pending)
-        case "$status" in
-            Pending | InProgress | Delayed) sleep "$SSM_POLL_SECONDS" ;;
-            *) break ;;
-        esac
-    done
-    if [[ "$status" != "Success" ]]; then
-        log_error "SSM command $cmd_id ended $status" >&2
-        aws ssm get-command-invocation --region "$AWS_REGION" \
-            --command-id "$cmd_id" --instance-id "$cp_id" \
-            --query 'StandardErrorContent' --output text >&2
-    fi
-    aws ssm get-command-invocation --region "$AWS_REGION" \
-        --command-id "$cmd_id" --instance-id "$cp_id" \
-        --query 'StandardOutputContent' --output text
+    run_on_control_plane "$AWS_REGION" "$1" "$(remote_prelude)"$'\n'"$2" "$COMMAND_BOUND_SECONDS" || true
 }
 
 PRECHECK=$(cat <<'REMOTE'
@@ -200,7 +169,7 @@ main() {
     require_cmd jq
     require_cmd aws
     require_aws_session
-    cp_id=$(resolve_cp_id)
+    cp_id=$(control_plane_id "$TF_DIR")
     log_info "Pre-checks on Oregon CP $cp_id ($AWS_REGION)"
     output=$(run_on_cp "$cp_id" "$PRECHECK")
     if ! report_prechecks "$output"; then

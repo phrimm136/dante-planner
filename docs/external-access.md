@@ -26,9 +26,12 @@ command. `ops list` prints every command, `ops --help` the details.
 | `tunnel start\|stop\|status [--site oregon\|seoul]` | `access/rds-tunnel.sh` | RDS network path | Local port 3306 (override `RDS_TUNNEL_PORT`); oregon = primary, seoul = replica |
 | `sql "SQL" [--site …]` / `sql -f file.sql [--site …]` | `access/rds-query.sh` | Prod MySQL | Auto-starts the tunnel; throwaway `mysql:8` client container |
 | `logs '<logql>' [--since D] [--limit N]` / `logs --day YYYY-MM-DD '<logql>'` | `access/logs-query.sh` | Grafana Cloud Loki | Labels: `namespace`, `pod`, `app` (backend), `cluster` (oregon\|seoul) |
-| `metrics '<promql>' [--since D] [--step S]` | `access/metrics-query.sh` | Grafana Cloud Mimir | The dashboard's Prometheus panels; CloudWatch panels query via `aws cloudwatch` directly |
+| `metrics '<promql>' [--since D] [--step S] [--names]` | `access/metrics-query.sh` | Grafana Cloud Mimir | `--names` adds the metric name to each line. The dashboard's Prometheus panels; CloudWatch panels query via `aws cloudwatch` directly |
 | `verify db` | `access/db-observability-check.sh` | DB observability path | Metric families per cluster, `mysql_up`, the DB alert rules |
 | `verify fleet [--site oregon\|seoul]` | `fleet-verify.sh` | One site's fleet (default oregon) | Nodes, pods, Argo CD apps, RDS reachability, etcd snapshot count, S3 count and newest age, the snapshot metric series; the kubeconfig fetch (`--kubeconfig`) stays a direct script call |
+| `nodes [--site oregon\|seoul]` | `access/fleet-nodes.sh` | One site's instances and nodes (default oregon) | Joined, joining, NOT JOINED or gone per instance and node; exit 0, 4 (joining) or 1; prints the `!` terminate command of a NOT JOINED surge instance and never runs it |
+| `bootlog <instance-id> [--site …] [--lines N]` | `access/boot-log.sh` | EC2 console output | The last N lines (default 60), redacted by `ops`; the script alone prints the raw output |
+| `app [--site oregon\|seoul]` | `access/argocd-app.sh` | One site's root Application (default oregon) | Source path, values file, sync, health, automated sync, conditions and every resource that is not Synced |
 | `tf plan <stack> [-- args]` | `terraform-run.sh … plan` | Terraform | Plan file and full text go to the log; prints the summary and, when every replace, destroy, forget and update of an `aws_instance`, `aws_autoscaling_group` or `aws_db_instance` is named with `--expect`, the `! … ops tf apply <plan file>` command the user runs. A stack with an `envs/` directory (`rds`) gets `envs/<env>.tfvars` and the profile's account id from ops and refuses `-var-file`, and `-var` for a variable that file sets or for `aws_account_id` |
 | `tf apply <plan file>` | `terraform-run.sh … apply` | Terraform | The user runs it with `!`; applies only a plan file `tf plan` cleared and that has not changed since, with the stack and profile from its verdict file |
 | `whoami` | `aws sts get-caller-identity` | AWS identity | The account the selected profile resolves to |
@@ -80,7 +83,7 @@ New targets (control plane, individual pods) follow the same shape:
 
 - The script goes in `scripts/ops/access/`, named `<target>-<verb>.sh`.
 - A read the workstation repeats gets an `ops` command: a row in the CLI's `DISPATCH_TABLE`
-  (`.claude/skills/ops/bin/ops`), its argument mapping, the hook's replacement for a direct call,
+  (`.claude/skills/ops/lib/opscli/commands.py`), its argument mapping, the hook's replacement for a direct call,
   and the pinned table in the CLI's tests. Write paths stay scripts run from runbooks.
 - Reuse SSM as transport: `AWS-StartPortForwardingSessionToRemoteHost` for a
   network path, `aws ssm send-command` for one-shot remote execution.
