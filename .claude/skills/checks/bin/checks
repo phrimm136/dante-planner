@@ -34,8 +34,9 @@ USAGE_TEXT = f"""usage: checks [--root <path>] [--print] [--full REASON] <lane> 
        checks hook < tool-json
 
 Runs the repo's repeated local checks (frontend, e2e, backend, the tooling test suites). Every
-run takes the shared test lock (<main checkout>/.claude/.test.lock, exclusive, blocking with a
-status line while another run holds it), writes the tool's whole output to a dated log, and
+run takes the shared test lock (<main checkout>/.claude/.test.lock, blocking with a status line
+while another run holds it): exclusive, except that `be test --exclude-tags containerized` takes
+one of two slots beside it and the lock shared, so two such runs go at once; writes the tool's whole output to a dated log, and
 prints one line: PASS <log> or FAIL <log>, followed by the tool's own summary (vitest "Test
 Files", the tsc error count, oxlint "Found ...", playwright's counts, gradle "BUILD ...", the
 tooling suite count). The exit code is the tool's. Read the log; never re-run a check to see its
@@ -266,6 +267,7 @@ class RunPlan:
     command_argv: tuple
     extra_env: tuple = ()
     module_dir: Path = None
+    lock_share: str = "exclusive"
 
 
 class UsageFailure:
@@ -352,7 +354,8 @@ def be_test_plan(repo_paths, arg_words):
         task_words += ["--tests", ARCHUNIT_PATTERN]
     if exclude_tags:
         task_words.append(f"-PexcludeTags={exclude_tags}")
-    return RunPlan("be test", repo_paths.repo_root, gradle_argv(repo_paths, task_words))
+    lock_share = SLOT_SHARE if "containerized" in exclude_tags.split(",") else "exclusive"
+    return RunPlan("be test", repo_paths.repo_root, gradle_argv(repo_paths, task_words), lock_share=lock_share)
 
 
 def be_freeze_plan(repo_paths, arg_words):
@@ -799,16 +802,53 @@ def describe_holders(holder_rows):
                      for one_holder in holder_rows)
 
 
+SLOT_SHARE = "slot"
+SLOT_COUNT = 2
+
+
 class CheckLock:
-    def __init__(self, lock_path):
+    """Exclusive by default; a run without containers takes one of SLOT_COUNT slots and the lock shared.
+
+    The lock file is the one older copies of this CLI take exclusively, so they still wait for every slot holder."""
+
+    def __init__(self, lock_path, lock_share="exclusive"):
         self.lock_path = lock_path
+        self.lock_share = lock_share
         self.lock_file = None
+        self.slot_file = None
+
+    def slot_path(self, slot_index):
+        return self.lock_path.with_name(f"{self.lock_path.name}.slot{slot_index}")
+
+    def free_slot(self):
+        for slot_index in range(SLOT_COUNT):
+            slot_file = open(self.slot_path(slot_index), "a")
+            try:
+                fcntl.flock(slot_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                return slot_file
+            except BlockingIOError:
+                slot_file.close()
+        return None
+
+    def take_slot(self):
+        self.slot_file = self.free_slot()
+        if self.slot_file is not None:
+            return
+        print(f"checks: waiting for one of {SLOT_COUNT} test slots beside {self.lock_path}",
+              file=sys.stderr, flush=True)
+        wait_start = time.monotonic()
+        self.slot_file = open(self.slot_path(os.getpid() % SLOT_COUNT), "a")
+        fcntl.flock(self.slot_file, fcntl.LOCK_EX)
+        print(f"checks: took a test slot after {time.monotonic() - wait_start:.0f}s", file=sys.stderr, flush=True)
 
     def __enter__(self):
         self.lock_path.parent.mkdir(parents=True, exist_ok=True)
+        if self.lock_share == SLOT_SHARE:
+            self.take_slot()
+        lock_operation = fcntl.LOCK_SH if self.lock_share == SLOT_SHARE else fcntl.LOCK_EX
         self.lock_file = open(self.lock_path, "a")
         try:
-            fcntl.flock(self.lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            fcntl.flock(self.lock_file, lock_operation | fcntl.LOCK_NB)
             return self
         except BlockingIOError:
             pass
@@ -821,13 +861,16 @@ class CheckLock:
         print(f"checks: waiting for the test lock {self.lock_path}, held by {describe_holders(holder_rows)}",
               file=sys.stderr, flush=True)
         wait_start = time.monotonic()
-        fcntl.flock(self.lock_file, fcntl.LOCK_EX)
+        fcntl.flock(self.lock_file, lock_operation)
         print(f"checks: took the test lock after {time.monotonic() - wait_start:.0f}s", file=sys.stderr, flush=True)
         return self
 
     def __exit__(self, *exit_info):
         fcntl.flock(self.lock_file, fcntl.LOCK_UN)
         self.lock_file.close()
+        if self.slot_file is not None:
+            fcntl.flock(self.slot_file, fcntl.LOCK_UN)
+            self.slot_file.close()
 
 
 def require_modules(run_plan, repo_paths):
@@ -880,7 +923,7 @@ def run_single(repo_paths, run_plan, name_parts, print_only):
     require_modules(run_plan, repo_paths)
     repo_paths.log_dir.mkdir(parents=True, exist_ok=True)
     print(f"checks: root {repo_paths.repo_root}", file=sys.stderr, flush=True)
-    with CheckLock(repo_paths.lock_path):
+    with CheckLock(repo_paths.lock_path, run_plan.lock_share):
         log_path = log_path_for(repo_paths.log_dir, name_parts, datetime.datetime.now())
         exit_code, verdict_text, summary_text = execute_plan(run_plan, log_path)
     print(f"{verdict_text} {log_path}  {summary_text}")
