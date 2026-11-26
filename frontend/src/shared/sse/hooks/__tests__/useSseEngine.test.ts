@@ -481,6 +481,50 @@ describe('useSseEngine — stream gone', () => {
   })
 })
 
+describe('useSseEngine — refused', () => {
+  it('announces a 401 open once and never reconnects', async () => {
+    serveAlways(statusResponse(SSE_TRANSPORT.UNAUTHORIZED_STATUS))
+    renderEngine(makeConfig())
+
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+    await advance(SSE_CONNECTION.IDLE_RESET_TIMEOUT + SSE_CONNECTION.MAX_DELAY)
+
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1)
+    expect(console.warn).toHaveBeenCalledTimes(1)
+    expect(useSseStore.getState().isConnected).toBe(false)
+    expect(useSseStore.getState().reconnectAttempts).toBe(0)
+  })
+
+  it('stops on a 401 reopen even with an idle reset armed', async () => {
+    renderEngine(makeConfig())
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+
+    serveAlways(statusResponse(SSE_TRANSPORT.UNAUTHORIZED_STATUS))
+    lastStream().end()
+    await settle()
+    await advance(SSE_CONNECTION.BASE_DELAY)
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+
+    await advance(SSE_CONNECTION.IDLE_RESET_TIMEOUT + SSE_CONNECTION.MAX_DELAY)
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+    expect(console.warn).toHaveBeenCalledTimes(1)
+  })
+
+  it('opens a fresh stream when the gate closes and reopens after a refusal', async () => {
+    serveOnce(statusResponse(SSE_TRANSPORT.UNAUTHORIZED_STATUS))
+    const config = makeConfig()
+    const { rerender } = renderEngine(config)
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+
+    rerender({ ...config, shouldConnect: false })
+    rerender({ ...config, shouldConnect: true })
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+    expect(useSseStore.getState().isConnected).toBe(true)
+  })
+})
+
 describe('useSseEngine — rate limiting', () => {
   it('waits out Retry-After without spending an attempt', async () => {
     serveOnce(rateLimited(RETRY_AFTER_SECONDS))

@@ -104,7 +104,7 @@ export function useSseEngine({
     let idleResetTimeout: ReturnType<typeof setTimeout> | null = null
     let connectionStartTime = 0
     let serverRetryMs: number | null = null
-    let streamGone = false
+    let halted: 'gone' | 'refused' | null = null
     let hasOpened = false
 
     function clearAllTimers() {
@@ -185,9 +185,16 @@ export function useSseEngine({
       connectionState.setConnected(false)
 
       if (configRef.current.stopOnNotFound && status === SSE_TRANSPORT.STREAM_GONE_STATUS) {
-        streamGone = true
+        halted = 'gone'
         clearAllTimers()
         configRef.current.onStreamGone?.()
+        return
+      }
+
+      if (status === SSE_TRANSPORT.UNAUTHORIZED_STATUS) {
+        halted = 'refused'
+        clearAllTimers()
+        console.warn('SSE: Server refused the stream as unauthorized, not reconnecting')
         return
       }
 
@@ -229,7 +236,7 @@ export function useSseEngine({
     }
 
     function openStream() {
-      if (controller || streamGone) return
+      if (controller || halted !== null) return
       const active = new AbortController()
       controller = active
       connectionStartTime = 0
