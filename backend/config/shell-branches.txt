@@ -113,8 +113,7 @@ org.danteplanner.backend.shared.sse.SseService.cleanupZombieConnections() # 1
 org.danteplanner.backend.shared.sse.SseService.sendToUser(java.lang.Long, java.lang.String, java.lang.Object) # 3
 org.danteplanner.backend.shared.sse.SseSubscription.connect() # 3
 org.danteplanner.backend.shared.util.ClientIpResolver.isPrivateIp(java.lang.String) # 3
-org.danteplanner.backend.shared.util.ClientIpResolver.resolve(jakarta.servlet.http.HttpServletRequest, org.danteplanner.backend.shared.config.SecurityProperties) # 1
-org.danteplanner.backend.shared.util.ClientIpResolver.resolveClientIdentifier(jakarta.servlet.http.HttpServletRequest, org.danteplanner.backend.shared.config.SecurityProperties, java.util.function.Supplier) # 3
+org.danteplanner.backend.shared.util.ClientIpResolver.resolveClientIdentifier(jakarta.servlet.http.HttpServletRequest, org.danteplanner.backend.shared.config.SecurityProperties, java.util.function.Supplier) # 2
 org.danteplanner.backend.shared.util.CookieUtils.buildCookie(java.lang.String, java.lang.String, int, boolean) # 1
 org.danteplanner.backend.shared.util.CookieUtils.getCookieValue(jakarta.servlet.http.HttpServletRequest, java.lang.String) # 2
 org.danteplanner.backend.shared.util.HtmlSanitizer.sanitize(java.lang.String) # 2
