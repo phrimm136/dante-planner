@@ -1,4 +1,4 @@
-# 576 a-planner-save-locks-reads-decides-and-writes-once
+# 577 a-planner-save-locks-reads-decides-and-writes-once
 epic: none · pr: none · supersedes: 015 @aggregate
 
 ## Decisions
