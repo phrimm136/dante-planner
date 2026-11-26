@@ -32,10 +32,11 @@ public class MdcLoggingFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-        MDC.put("userId", switch (SpringContextAdapter.viewer()) {
+        String userId = switch (SpringContextAdapter.viewer()) {
             case Viewer.Member member -> String.valueOf(member.userId());
             case Viewer.Guest guest -> "guest";
-        });
+        };
+        MDC.put("userId", userId);
         MDC.put("method", request.getMethod());
         MDC.put("path", LogValues.oneLine(request.getRequestURI()));
 
