@@ -27,6 +27,8 @@ import com.tngtech.archunit.thirdparty.org.objectweb.asm.MethodVisitor;
 import com.tngtech.archunit.thirdparty.org.objectweb.asm.Opcodes;
 import com.tngtech.archunit.thirdparty.org.objectweb.asm.Type;
 
+import org.danteplanner.backend.shared.security.SpringContextAdapter;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class DecisionPurityTest {
@@ -40,6 +42,8 @@ class DecisionPurityTest {
     private static final String PROJECT = "org.danteplanner";
 
     private static final String OUTCOME_SUFFIX = "Outcome";
+
+    private static final Set<String> CONTEXT_READS = Set.of("viewer", "requestValue");
 
     private static final JavaClasses MAIN_CLASSES = ImportedClasses.production();
 
@@ -101,11 +105,6 @@ class DecisionPurityTest {
     }
 
     @Test
-    void branchFreeReader_WhenTheRuleRunsOverTheFixture_IsNotNamed() {
-        assertThat(offendersIn(FIXTURE_CLASSES, FIXTURE_PACKAGE)).doesNotContainKey("BranchFreeReader.decide");
-    }
-
-    @Test
     void threadLocalAccessor_WhenTheRuleRunsOverTheFixture_IsAllowedButABranchingReadIsNamed() {
         Map<String, Set<String>> offenders = offendersIn(FIXTURE_CLASSES, FIXTURE_PACKAGE);
 
@@ -121,7 +120,12 @@ class DecisionPurityTest {
                         "Ledger.counted", "PublicPortReader.decide", "ClockReader.decide", "FutureReader.decide",
                         "Minter.decide", "Cache.decide", "Tally.decide", "Seen.decide", "Slots.decide",
                         "Pool.decide", "Broken.decide", "MonitorWaiter.decide", "BaseCaller.decide",
-                        "AskerCaller.decide", "Unsigner.decide");
+                        "AskerCaller.decide", "Unsigner.decide", "Saver.decide");
+    }
+
+    @Test
+    void branchFreeWrite_WhenTheRuleRunsOverTheFixture_IsNamed() {
+        assertThat(offendersIn(FIXTURE_CLASSES, FIXTURE_PACKAGE)).containsEntry("Saver.decide", Set.of("port Store.save"));
     }
 
     @Test
@@ -217,11 +221,11 @@ class DecisionPurityTest {
         Map<String, Set<String>> offenders = new TreeMap<>();
         for (JavaClass clazz : classes) {
             for (JavaMethod method : clazz.getMethods()) {
-                if (!isDecision(method, within) || !branchesInItsBodyOrLambdas(method)) {
+                if (!isDecision(method, within) || isAccessor(method) || isContextRead(method)) {
                     continue;
                 }
-                Map<String, List<String>> effects =
-                        Effects.reachableFrom(method, within, DecisionPurityTest::isAccessor);
+                Map<String, List<String>> effects = Effects.reachableFrom(method, within,
+                        unit -> isAccessor(unit) || isContextRead(unit));
                 if (!effects.isEmpty()) {
                     offenders.computeIfAbsent(clazz.getSimpleName() + "." + method.getName(), key -> new TreeSet<>())
                             .addAll(effects.keySet());
@@ -264,6 +268,10 @@ class DecisionPurityTest {
         return unpaired;
     }
 
+    private static boolean isContextRead(JavaCodeUnit unit) {
+        return unit.getOwner().isEquivalentTo(SpringContextAdapter.class) && CONTEXT_READS.contains(unit.getName());
+    }
+
     private static boolean isAccessor(JavaCodeUnit unit) {
         if (!(unit instanceof JavaMethod method) || !method.getRawParameterTypes().isEmpty()) {
             return false;
@@ -282,44 +290,21 @@ class DecisionPurityTest {
                 .orElse(false);
     }
 
-    private record BytecodeShape(List<String> calls, List<String> staticReads, boolean branches, List<Handle> lambdas) {
-    }
-
-    private static boolean branchesInItsBodyOrLambdas(JavaMethod method) {
-        String owner = method.getOwner().getName().replace('.', '/');
-        Set<String> seen = new TreeSet<>();
-        List<BytecodeShape> pending = new ArrayList<>(List.of(shapeOf(method)));
-        while (!pending.isEmpty()) {
-            BytecodeShape shape = pending.removeLast();
-            if (shape.branches()) {
-                return true;
-            }
-            shape.lambdas().stream()
-                    .filter(lambda -> lambda.getOwner().equals(owner) && lambda.getName().startsWith("lambda$"))
-                    .filter(lambda -> seen.add(lambda.getName() + lambda.getDesc()))
-                    .map(lambda -> shapeOf(owner, lambda.getName(), lambda.getDesc()))
-                    .forEach(pending::add);
-        }
-        return false;
+    private record BytecodeShape(List<String> calls, List<String> staticReads, boolean branches) {
     }
 
     private static BytecodeShape shapeOf(JavaMethod method) {
-        return shapeOf(method.getOwner().getName().replace('.', '/'), method.getName(),
-                Type.getMethodDescriptor(method.reflect()));
-    }
-
-    private static BytecodeShape shapeOf(String owner, String methodName, String descriptor) {
+        String descriptor = Type.getMethodDescriptor(method.reflect());
         List<String> calls = new ArrayList<>();
         List<String> staticReads = new ArrayList<>();
-        List<Handle> lambdas = new ArrayList<>();
         boolean[] branches = {false};
-        String resource = "/" + owner + ".class";
+        String resource = "/" + method.getOwner().getName().replace('.', '/') + ".class";
         try (InputStream bytes = DecisionPurityTest.class.getResourceAsStream(resource)) {
             new ClassReader(bytes).accept(new ClassVisitor(Opcodes.ASM9) {
                 @Override
                 public MethodVisitor visitMethod(int access, String name, String desc, String signature,
                         String[] exceptions) {
-                    if (!name.equals(methodName) || !desc.equals(descriptor)) {
+                    if (!name.equals(method.getName()) || !desc.equals(descriptor)) {
                         return null;
                     }
                     return new MethodVisitor(Opcodes.ASM9) {
@@ -333,11 +318,6 @@ class DecisionPurityTest {
                         public void visitInvokeDynamicInsn(String callee, String calleeDesc, Handle bootstrap,
                                 Object... arguments) {
                             calls.add("indy." + callee);
-                            for (Object argument : arguments) {
-                                if (argument instanceof Handle handle) {
-                                    lambdas.add(handle);
-                                }
-                            }
                         }
 
                         @Override
@@ -369,6 +349,6 @@ class DecisionPurityTest {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-        return new BytecodeShape(List.copyOf(calls), List.copyOf(staticReads), branches[0], List.copyOf(lambdas));
+        return new BytecodeShape(List.copyOf(calls), List.copyOf(staticReads), branches[0]);
     }
 }

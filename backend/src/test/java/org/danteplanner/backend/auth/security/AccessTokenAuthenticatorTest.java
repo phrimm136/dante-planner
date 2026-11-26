@@ -6,12 +6,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import org.danteplanner.backend.auth.token.RevocationOutcome;
 import org.danteplanner.backend.support.RecordingTokenBlacklist;
 import org.danteplanner.backend.support.TestJwt;
 import org.danteplanner.backend.user.api.UserRole;
+import org.danteplanner.backend.user.api.Users;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -96,6 +100,35 @@ class AccessTokenAuthenticatorTest {
     }
 
     @Test
+    void authenticate_WhenAUserIsAlreadySignedIn_KeepsThatUser() {
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(7L, null, List.of()));
+        String token = jwt.service().generateAccessToken(USER_ID, UserRole.NORMAL);
+
+        assertThat(authenticator.authenticate(token, request))
+                .isEqualTo(AccessTokenAuthenticator.AccessTokenOutcome.AUTHENTICATED);
+        assertThat(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).isEqualTo(7L);
+    }
+
+    @Test
+    void authenticate_WhenOnlyAnAnonymousTokenIsPresent_SignsInTheTokensUser() {
+        SecurityContextHolder.getContext().setAuthentication(anonymous());
+        String token = jwt.service().generateAccessToken(USER_ID, UserRole.NORMAL);
+
+        assertThat(authenticator.authenticate(token, request))
+                .isEqualTo(AccessTokenAuthenticator.AccessTokenOutcome.AUTHENTICATED);
+        assertThat(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).isEqualTo(USER_ID);
+    }
+
+    @Test
+    void authenticate_WhenOnlyAnAnonymousTokenIsPresentAndTheTokenIsTheSentinels_Refuses() {
+        SecurityContextHolder.getContext().setAuthentication(anonymous());
+        String token = jwt.service().generateAccessToken(Users.SENTINEL_USER_ID, UserRole.NORMAL);
+
+        assertThat(authenticator.authenticate(token, request))
+                .isEqualTo(AccessTokenAuthenticator.AccessTokenOutcome.SENTINEL_BLOCKED);
+    }
+
+    @Test
     void authenticate_WhenTheUserIsInvalidated_RevokesAfterBothReads() {
         String token = jwt.service().generateAccessToken(USER_ID, UserRole.NORMAL);
         jwt.clock().advance(Duration.ofSeconds(2));
@@ -130,5 +163,10 @@ class AccessTokenAuthenticatorTest {
                 .isEqualTo(AccessTokenAuthenticator.AccessTokenOutcome.AUTHENTICATED);
         assertThat(skippedReads).containsExactly("blacklistCheck", "invalidationCheck");
         assertThat(SecurityContextHolder.getContext().getAuthentication().getPrincipal()).isEqualTo(USER_ID);
+    }
+
+    private static AnonymousAuthenticationToken anonymous() {
+        return new AnonymousAuthenticationToken("key", "anonymousUser",
+                List.of(new SimpleGrantedAuthority("ROLE_ANONYMOUS")));
     }
 }
