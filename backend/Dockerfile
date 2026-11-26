@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 ARG JAR_STAGE=builder
-FROM --platform=$BUILDPLATFORM gradle:9.8.2-jdk21-noble@sha256:7b50a8bc3d5dab9db23053c9fd517f8dfc5166eedad236545eca019fb613ebfd AS builder
+FROM --platform=$BUILDPLATFORM gradle:9.9.1-jdk25-noble@sha256:2f74f9da2e2abd357ae8d7d954c14809ee5931f864ebcde7d4b8a884d900f786 AS builder
 
 WORKDIR /app
 
@@ -30,7 +30,7 @@ FROM ${JAR_STAGE} AS jar
 # Runs on $BUILDPLATFORM so keytool executes natively (not under QEMU on the
 # amd64 runner) and the layer caches independently of app code and game data;
 # the resulting .p12 is architecture-independent.
-FROM --platform=$BUILDPLATFORM eclipse-temurin:21.0.13_9-jre-alpine-3.24@sha256:ac05c3c42b7c2f1a52c9bd52f01041fa1958231b15ebeae7420429cbc5baf474 AS rds-certs
+FROM --platform=$BUILDPLATFORM eclipse-temurin:25.0.5.1_2-jre-alpine-3.24@sha256:69c2a26e9894016e274c880fa542956d005b3755f84db765145185e87405bd89 AS rds-certs
 
 RUN set -eux; \
     apk add --no-cache curl; \
@@ -45,7 +45,7 @@ RUN set -eux; \
     done; \
     rm -f /tmp/rds-bundle.pem /tmp/rds-cert-*.pem
 
-FROM eclipse-temurin:21.0.13_9-jre-alpine-3.24@sha256:ac05c3c42b7c2f1a52c9bd52f01041fa1958231b15ebeae7420429cbc5baf474
+FROM eclipse-temurin:25.0.5.1_2-jre-alpine-3.24@sha256:69c2a26e9894016e274c880fa542956d005b3755f84db765145185e87405bd89
 
 WORKDIR /app
 

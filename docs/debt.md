@@ -1525,16 +1525,6 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   to matter: give the rig its own project name (and with it its own volume) and container names
   passed to the suites through `E2E_REPLICA_CONTAINER` and its siblings.
   re-check: `rg -q '^PROJECT=limbusplanner$' scripts/ops/local-multiregion-up.sh && rg -q 'mysql-data:/var/lib/mysql' docker-compose.local.yml`
-- `SseService.cacheSettingsIfAbsent` pins a virtual thread on JDK 21: Caffeine runs its loader inside
-  `ConcurrentHashMap.compute`, which holds a bin monitor, and the loader runs a read-write MySQL
-  transaction, so every socket wait keeps the carrier. JFR (`jdk.VirtualThreadPinned`, threshold 0)
-  recorded 43 such parks on the SSE subscribe path and none elsewhere; a Seoul pod's cold subscribe
-  would hold a carrier for about 0.5 s against the Oregon primary (inferred from the round trips, not
-  measured). ADR 112's claim that every blocking path unmounts is false for this site. The fix is the
-  JDK upgrade: JEP 491 (JDK 24, and the JDK 25 LTS) lets virtual threads unmount inside monitors.
-  Worth doing with the move off JDK 21; until then, a cache load that does I/O belongs outside the
-  compute call (`getIfPresent` then `put`).
-  re-check: `rg -q 'JavaLanguageVersion.of\(21\)' backend/build.gradle.kts`
 - Request-scoped state lives in separate ThreadLocals (`GtidWriteCapture`, `FreshnessDeclarations`,
   `ChosenReadSource`, `ReadOnlyRoutingDataSource`, `RestrictionTransactionHook`) and MDC, each with
   its own begin and clear. No file shows the request lifecycle, and a participant that forgets to
@@ -1630,9 +1620,8 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   re-check: `rg -q 'MAX_USERNAME_RETRIES' backend/src/main/java/org/danteplanner/backend/user/service/UserService.java`
 - Spring starts in 20 to 30 s from a cold JVM, and `backend/Dockerfile` uses no class-data
   archive. A Spot replacement hides that start behind the scale-to-two drain, so it is not user
-  visible today. Worth doing if a drain path without the surge appears, or at the JDK 25 upgrade:
-  an AppCDS archive from a Spring Boot training run (JDK 21, CPU-independent), then the Leyden AOT
-  cache on JDK 25. CRaC is not the fix: a checkpoint carries JIT code for one CPU generation while
+  visible today. Worth doing if a drain path without the surge appears: the JDK 25 AOT cache
+  (Leyden, `-XX:AOTCache`) from a Spring Boot training run in the image build. CRaC is not the fix: a checkpoint carries JIT code for one CPU generation while
   the Spot workers mix Graviton2 and Graviton3, and CRIU restore needs capabilities the restricted
   pod security level forbids.
   re-check: `.claude/skills/debt-ledger/bin/debt absent backend/Dockerfile 'SharedArchiveFile|AOTCache'`
