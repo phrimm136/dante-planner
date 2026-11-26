@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.user.api.RoleChange;
 import org.danteplanner.backend.user.api.UserMiss;
@@ -46,7 +47,7 @@ public interface UsersContract {
     default void findActiveById_WhenTheUserIsLive_ReturnsItsSummary() {
         User user = persisted(newUser().build());
 
-        assertThat(users().findActiveById(user.getId())).hasValueSatisfying(summary -> {
+        assertThat(users().findActiveById(user.getId()).orElseThrow(AssertionError::new)).satisfies(summary -> {
             assertThat(summary.id()).isEqualTo(user.getId());
             assertThat(summary.publicId()).isEqualTo(user.getPublicId());
             assertThat(summary.email()).isEqualTo(user.getEmail());
@@ -61,14 +62,14 @@ public interface UsersContract {
     default void findActiveById_WhenTheUserIsDeleted_ReturnsEmpty() {
         User user = persisted(deletedUser().build());
 
-        assertThat(users().findActiveById(user.getId())).isEmpty();
+        assertThat(users().findActiveById(user.getId())).isInstanceOf(Option.None.class);
     }
 
     @Test
     default void findActiveById_WhenTheUserIsBannedAndTimedOut_StillReturnsIt() {
         User user = persisted(restrictedUser().build());
 
-        assertThat(users().findActiveById(user.getId())).hasValueSatisfying(summary -> {
+        assertThat(users().findActiveById(user.getId()).orElseThrow(AssertionError::new)).satisfies(summary -> {
             assertThat(summary.bannedAt()).isEqualTo(user.getBannedAt());
             assertThat(summary.timeoutUntil()).isEqualTo(user.getTimeoutUntil());
         });
@@ -76,7 +77,7 @@ public interface UsersContract {
 
     @Test
     default void findActiveById_WhenTheIdIsUnknown_ReturnsEmpty() {
-        assertThat(users().findActiveById(UNKNOWN_ID)).isEmpty();
+        assertThat(users().findActiveById(UNKNOWN_ID)).isInstanceOf(Option.None.class);
     }
 
     @Test
@@ -113,67 +114,44 @@ public interface UsersContract {
     default void findOptionalById_WhenTheUserIsDeleted_ReturnsIt() {
         User user = persisted(deletedUser().build());
 
-        assertThat(inTransaction(() -> users().findOptionalById(user.getId()))).hasValueSatisfying(
-                summary -> assertThat(summary.deleted()).isTrue());
+        assertThat(inTransaction(() -> users().findOptionalById(user.getId())).orElseThrow(AssertionError::new))
+                .satisfies(summary -> assertThat(summary.deleted()).isTrue());
     }
 
     @Test
     default void findOptionalById_WhenTheIdIsUnknown_ReturnsEmpty() {
-        assertThat(inTransaction(() -> users().findOptionalById(UNKNOWN_ID))).isEmpty();
+        assertThat(inTransaction(() -> users().findOptionalById(UNKNOWN_ID))).isInstanceOf(Option.None.class);
     }
 
     @Test
     default void findByProvider_WhenTheUserIsDeleted_ReturnsIt() {
         User user = persisted(deletedUser().build());
 
-        assertThat(users().findByProvider(AuthProviderType.GOOGLE, user.getProviderId()))
-                .map(UserSummary::id).hasValue(user.getId());
+        assertThat(users().findByProvider(AuthProviderType.GOOGLE, user.getProviderId()).map(UserSummary::id))
+                .isEqualTo(new Option.Some<>(user.getId()));
     }
 
     @Test
     default void findActiveByProvider_WhenTheUserIsLive_ReturnsIt() {
         User user = persisted(newUser().build());
 
-        assertThat(users().findActiveByProvider(AuthProviderType.GOOGLE, user.getProviderId()))
-                .map(UserSummary::id).hasValue(user.getId());
+        assertThat(users().findActiveByProvider(AuthProviderType.GOOGLE, user.getProviderId()).map(UserSummary::id))
+                .isEqualTo(new Option.Some<>(user.getId()));
     }
 
     @Test
     default void findActiveByProvider_WhenTheUserIsDeleted_ReturnsEmpty() {
         User user = persisted(deletedUser().build());
 
-        assertThat(users().findActiveByProvider(AuthProviderType.GOOGLE, user.getProviderId())).isEmpty();
-    }
-
-    @Test
-    default void findActiveBySuffix_WhenTheUserIsLive_ReturnsIt() {
-        User user = persisted(newUser().build());
-
-        assertThat(inTransaction(() -> users().findActiveBySuffix(user.getUsernameSuffix())))
-                .map(UserSummary::id).hasValue(user.getId());
-    }
-
-    @Test
-    default void findActiveBySuffix_WhenTheUserIsDeleted_ReturnsEmpty() {
-        User user = persisted(deletedUser().build());
-
-        assertThat(inTransaction(() -> users().findActiveBySuffix(user.getUsernameSuffix()))).isEmpty();
-    }
-
-    @Test
-    default void findActiveBySuffix_WhenTheCaseDiffers_StillFindsIt() {
-        User user = persisted(newUser().usernameSuffix(TestDataFactory.uniqueSuffix("c")).build());
-
-        assertThat(inTransaction(() -> users().findActiveBySuffix(user.getUsernameSuffix().toUpperCase(Locale.ROOT))))
-                .map(UserSummary::id).hasValue(user.getId());
+        assertThat(users().findActiveByProvider(AuthProviderType.GOOGLE, user.getProviderId())).isInstanceOf(Option.None.class);
     }
 
     @Test
     default void findByProvider_WhenTheProviderIdCaseDiffers_StillFindsIt() {
         User user = persisted(newUser().build());
 
-        assertThat(users().findByProvider(AuthProviderType.GOOGLE, user.getProviderId().toUpperCase(Locale.ROOT)))
-                .map(UserSummary::id).hasValue(user.getId());
+        assertThat(users().findByProvider(AuthProviderType.GOOGLE, user.getProviderId().toUpperCase(Locale.ROOT)).map(UserSummary::id))
+                .isEqualTo(new Option.Some<>(user.getId()));
     }
 
     @Test
@@ -230,7 +208,7 @@ public interface UsersContract {
     default void listActiveAccounts_WhenTheSentinelIsLive_LeavesItOut() {
         Long sentinel = liveSentinelId();
 
-        assertThat(users().findActiveById(sentinel)).isPresent();
+        assertThat(users().findActiveById(sentinel)).isInstanceOf(Option.Some.class);
         assertThat(inTransaction(() -> users().listActiveAccounts()))
                 .extracting(UserSummary::id).doesNotContain(sentinel);
     }
@@ -260,8 +238,8 @@ public interface UsersContract {
         assertThat(created.deleted()).isFalse();
         assertThat(created.usernameEpithet()).isNotBlank();
         assertThat(created.usernameSuffix()).isNotBlank();
-        assertThat(users().findByProvider(AuthProviderType.GOOGLE, providerId))
-                .map(UserSummary::id).hasValue(created.id());
+        assertThat(users().findByProvider(AuthProviderType.GOOGLE, providerId).map(UserSummary::id))
+                .isEqualTo(new Option.Some<>(created.id()));
     }
 
     @Test
@@ -315,8 +293,8 @@ public interface UsersContract {
 
         users().reactivateAccount(user.getId());
 
-        assertThat(users().findActiveById(user.getId())).hasValueSatisfying(
-                summary -> assertThat(summary.deleted()).isFalse());
+        assertThat(users().findActiveById(user.getId()).orElseThrow(AssertionError::new))
+                .satisfies(summary -> assertThat(summary.deleted()).isFalse());
     }
 
     @Test

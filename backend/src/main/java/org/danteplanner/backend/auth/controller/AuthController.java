@@ -20,6 +20,7 @@ import org.danteplanner.backend.auth.service.AuthenticationService.AuthResult;
 import org.danteplanner.backend.auth.service.SessionRevocationService;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthStateService;
+import org.danteplanner.backend.auth.oauth.OAuthStateService.OAuthStateCheck;
 import org.danteplanner.backend.auth.oauth.OAuthStateService.OAuthTransaction;
 import org.danteplanner.backend.shared.security.Viewer;
 import org.danteplanner.backend.shared.util.CookieConstants;
@@ -38,7 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -97,31 +97,41 @@ public class AuthController {
             HttpServletRequest request,
             HttpServletResponse response) {
 
-        Optional<String> oauthTx = cookieUtils.getCookieValue(request, CookieConstants.OAUTH_TX);
         cookieUtils.clearCookie(response, CookieConstants.OAUTH_TX);
 
         try {
+            OAuthStateCheck stateCheck = cookieUtils.getCookieValue(request, CookieConstants.OAUTH_TX)
+                    .map(oAuthStateService::open).orElseGet(OAuthStateCheck.Missing::new);
             switch (ProviderAnswer.of(code, state, error)) {
                 case ProviderAnswer.Refused refused -> {
                     return redirect(frontendProperties.getUrl() + LoginRedirect.ERROR);
                 }
                 case ProviderAnswer.Granted granted -> {
-                    Optional<OAuthTransaction> transaction = oauthTx.flatMap(oAuthStateService::open);
-                    if (transaction.isEmpty() || !statesMatch(transaction.get().state(), granted.state())) {
-                        log.warn("OAuth callback rejected: oauth_tx absent/expired/tampered or state mismatch");
-                        return redirect(frontendProperties.getUrl() + LoginRedirect.ERROR);
+                    OAuthTransaction transaction;
+                    switch (stateCheck) {
+                        case OAuthStateCheck.Opened opened -> transaction = opened.transaction();
+                        case OAuthStateCheck.Missing missing -> {
+                            return rejectedCallback();
+                        }
+                        case OAuthStateCheck.Rejected rejected -> {
+                            log.warn("oauth_tx open rejected [{}]: {}", rejected.failure(), rejected.detail());
+                            return rejectedCallback();
+                        }
+                    }
+                    if (!statesMatch(transaction.state(), granted.state())) {
+                        return rejectedCallback();
                     }
 
                     AuthResult result = authService.authenticateWithOAuth(
                             "google",
                             granted.code(),
                             oAuthProperties.google().redirectUri(),
-                            transaction.get().codeVerifier()
+                            transaction.codeVerifier()
                     );
 
                     setAuthCookies(response, result);
 
-                    return redirect(transaction.get().returnTo());
+                    return redirect(transaction.returnTo());
                 }
             }
         } catch (Exception e) {
@@ -192,6 +202,11 @@ public class AuthController {
         cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)
                 .ifPresent(token -> tokens.add(new SessionToken.Refresh(token)));
         return List.copyOf(tokens);
+    }
+
+    private ResponseEntity<Void> rejectedCallback() {
+        log.warn("OAuth callback rejected: oauth_tx absent/expired/tampered or state mismatch");
+        return redirect(frontendProperties.getUrl() + LoginRedirect.ERROR);
     }
 
     /**

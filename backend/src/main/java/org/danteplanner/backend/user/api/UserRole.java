@@ -4,9 +4,9 @@ import org.danteplanner.backend.shared.entity.EnumLookup;
 import org.danteplanner.backend.shared.entity.ValuedEnum;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 public enum UserRole implements ValuedEnum {
     NORMAL("NORMAL", 1),
@@ -35,10 +35,11 @@ public enum UserRole implements ValuedEnum {
         return EnumLookup.fromValue(UserRole.class, value);
     }
 
-    public static Optional<UserRole> parse(String value) {
+    public static UserRole fromClaim(@Nullable String claim) {
         return Arrays.stream(values())
-                .filter(role -> role.value.equals(value))
-                .findFirst();
+                .filter(role -> role.value.equals(claim))
+                .findFirst()
+                .orElse(NORMAL);
     }
 
     public boolean hasRankAtLeast(UserRole other) {

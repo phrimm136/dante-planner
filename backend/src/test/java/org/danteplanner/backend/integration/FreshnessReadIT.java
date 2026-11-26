@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
@@ -603,8 +604,8 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
                     .content(MODERATOR_ROLE_BODY)
                     .cookie(admin));
 
-            assertThat(userService.findActiveById(target.getId()).value())
-                    .hasValueSatisfying(user -> assertThat(user.getRole()).isEqualTo(UserRole.MODERATOR));
+            assertThat(userService.findActiveById(target.getId()).value().orElseThrow(AssertionError::new))
+                    .satisfies(user -> assertThat(user.getRole()).isEqualTo(UserRole.MODERATOR));
         } finally {
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();
@@ -650,9 +651,9 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
             perform(delete("/api/user/me").cookie(session));
 
             assertThat(userService.findActiveByProvider(AuthProviderType.GOOGLE, user.getProviderId()).value())
-                    .isEmpty();
-            assertThat(userService.findByProvider(AuthProviderType.GOOGLE, user.getProviderId()).value())
-                    .hasValueSatisfying(found -> {
+                    .isInstanceOf(Option.None.class);
+            assertThat(userService.findByProvider(AuthProviderType.GOOGLE, user.getProviderId()).value()
+                    .orElseThrow(AssertionError::new)).satisfies(found -> {
                         assertThat(found.getId()).isEqualTo(user.getId());
                         assertThat(found.isDeleted()).isTrue();
                     });

@@ -5,6 +5,7 @@ import tools.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.danteplanner.backend.shared.config.JwtProperties;
+import org.danteplanner.backend.auth.oauth.OAuthStateService.OAuthStateCheck;
 import org.danteplanner.backend.auth.oauth.OAuthStateService.OAuthTransaction;
 import org.danteplanner.backend.auth.token.AesGcmCipher;
 import org.danteplanner.backend.support.TestJwt;
@@ -19,7 +20,6 @@ import java.security.SecureRandom;
 import java.time.Clock;
 import java.util.Base64;
 import java.util.Date;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -74,26 +74,22 @@ class OAuthStateServiceTest {
         String verifier = "verifier-xyz";
         String returnTo = "http://localhost:5173/planner/1";
 
-        Optional<OAuthTransaction> result = stateService.open(stateService.seal(state, verifier, returnTo));
-
-        assertThat(result).isPresent();
-        assertThat(result.get().state()).isEqualTo(state);
-        assertThat(result.get().codeVerifier()).isEqualTo(verifier);
-        assertThat(result.get().returnTo()).isEqualTo(returnTo);
+        assertThat(stateService.open(stateService.seal(state, verifier, returnTo)))
+                .isEqualTo(new OAuthStateCheck.Opened(new OAuthTransaction(state, verifier, returnTo)));
     }
 
     @Test
-    void open_WhenNull_ReturnsEmpty() {
-        assertThat(stateService.open(null)).isEmpty();
+    void open_WhenNull_IsMissing() {
+        assertThat(stateService.open(null)).isInstanceOf(OAuthStateCheck.Missing.class);
     }
 
     @Test
-    void open_WhenBlank_ReturnsEmpty() {
-        assertThat(stateService.open("   ")).isEmpty();
+    void open_WhenBlank_IsMissing() {
+        assertThat(stateService.open("   ")).isInstanceOf(OAuthStateCheck.Missing.class);
     }
 
     @Test
-    void open_WhenTampered_ReturnsEmpty() {
+    void open_WhenTampered_IsRejected() {
         String sealed = stateService.seal("state", "verifier", "http://localhost");
         // Corrupt a character mid-payload so the signed content changes (flipping the final
         // signature char only touches unused base64 bits and can still verify).
@@ -102,11 +98,11 @@ class OAuthStateServiceTest {
         char swapped = current == 'a' ? 'b' : 'a';
         String tampered = sealed.substring(0, mid) + swapped + sealed.substring(mid + 1);
 
-        assertThat(stateService.open(tampered)).isEmpty();
+        assertThat(stateService.open(tampered)).isInstanceOf(OAuthStateCheck.Rejected.class);
     }
 
     @Test
-    void open_WhenSignedByForeignKey_ReturnsEmpty() throws Exception {
+    void open_WhenSignedByForeignKey_IsRejected() throws Exception {
         PrivateKey foreignKey = FOREIGN_KEY_PAIR.getPrivate();
 
         String foreignToken = Jwts.builder()
@@ -116,11 +112,11 @@ class OAuthStateServiceTest {
                 .signWith(foreignKey, SignatureAlgorithm.RS256)
                 .compact();
 
-        assertThat(stateService.open(foreignToken)).isEmpty();
+        assertThat(stateService.open(foreignToken)).isInstanceOf(OAuthStateCheck.Rejected.class);
     }
 
     @Test
-    void open_WhenExpired_ReturnsEmpty() throws Exception {
+    void open_WhenExpired_IsRejected() throws Exception {
         Date past = new Date(System.currentTimeMillis() - 1_000L);
         String expiredToken = Jwts.builder()
                 .claim(TX_CLAIM, encryptTx("state", "verifier"))
@@ -129,7 +125,7 @@ class OAuthStateServiceTest {
                 .signWith(signingKey, SignatureAlgorithm.RS256)
                 .compact();
 
-        assertThat(stateService.open(expiredToken)).isEmpty();
+        assertThat(stateService.open(expiredToken)).isInstanceOf(OAuthStateCheck.Rejected.class);
     }
 
     @Test

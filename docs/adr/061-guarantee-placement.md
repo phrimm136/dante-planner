@@ -16,7 +16,10 @@
   (ArchUnit), downstream re-check idioms a checkstyle migration target recorded in debt.
   REJECTED: re-checking downstream of a gate — every defensive re-check is the ladder's
   rung 1 or 2 having been skipped, and it hides which check is authoritative.
-- @convention @nullability — A declaration may be nullable only where null is data at a
+
+## Superseded
+
+- @convention @nullability → 576 — A declaration may be nullable only where null is data at a
   wire boundary, mapped to explicit types immediately on both sides; internal
   null-as-data (nullable columns encoding a third state) is a migration target, not a
   convention. Provably present values are primitive or non-null. A possibly-absent

@@ -84,8 +84,7 @@ public class CommentQueryService {
     @Transactional(readOnly = true, propagation = Propagation.MANDATORY)
     public CommentTreeNode broadcastNode(CommentRow comment, CommentTreeNode.Parent parent) {
         CommentTreeNode.Author author = users.findOptionalById(comment.userId())
-                .<CommentTreeNode.Author>map(CommentTreeNode.Author.Known::new)
-                .orElseGet(CommentTreeNode.Author.Missing::new);
+                .fold(CommentTreeNode.Author.Known::new, CommentTreeNode.Author.Missing::new);
         return CommentTreeNode.forBroadcast(comment, parent, author);
     }
 

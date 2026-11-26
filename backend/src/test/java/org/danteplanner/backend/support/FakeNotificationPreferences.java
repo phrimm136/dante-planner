@@ -3,6 +3,8 @@ package org.danteplanner.backend.support;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.danteplanner.backend.user.api.UserSummary;
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.shared.sse.NotificationPreferenceProvider;
 import org.danteplanner.backend.user.api.UserNotFoundException;
 
@@ -34,7 +36,7 @@ public class FakeNotificationPreferences implements NotificationPreferenceProvid
     }
 
     private void requireUser(Long userId) {
-        if (users.findOptionalById(userId).isEmpty()) {
+        if (users.findOptionalById(userId) instanceof Option.None<UserSummary>) {
             throw new UserNotFoundException(userId);
         }
     }

@@ -46,7 +46,7 @@ class RedisRoleProbeHeldConnectionTest {
             probe.close();
         }
         redis.close();
-        var unused = clientResources.shutdown();
+        var _ = clientResources.shutdown();
     }
 
     @Test

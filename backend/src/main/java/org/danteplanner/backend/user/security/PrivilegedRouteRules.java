@@ -1,8 +1,8 @@
 package org.danteplanner.backend.user.security;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
@@ -25,8 +25,9 @@ import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
 import org.danteplanner.backend.shared.exception.DomainException;
 import org.danteplanner.backend.shared.exception.Problems;
-import org.danteplanner.backend.shared.security.SecurityRuleProvider;
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.shared.security.SecurityRuleProvider;
 import org.danteplanner.backend.shared.restriction.Restriction;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserBannedException;
@@ -62,16 +63,17 @@ public class PrivilegedRouteRules implements SecurityRuleProvider {
             if (!(authentication.get().getPrincipal() instanceof Long actorId)) {
                 return new AuthorizationDecision(false);
             }
-            Optional<User> actor;
+            Option<User> actor;
             try {
                 actor = userService.findActiveByIdFromPrimary(actorId);
             } catch (DataAccessException | TransactionException failure) {
                 throw new AccessDeniedException(String.valueOf(failure.getMessage()), databaseUnavailable(failure));
             }
-            refusal(actor, minimum, clock).ifPresent(refused -> {
-                throw new AccessDeniedException(refused.getMessage(), refused);
-            });
-            return new AuthorizationDecision(true);
+            return switch (RouteDecision.of(actor, minimum, clock.instant())) {
+                case RouteDecision.Admit admit -> new AuthorizationDecision(true);
+                case RouteDecision.Refuse refuse ->
+                        throw new AccessDeniedException(refuse.refusal().getMessage(), refuse.refusal());
+            };
         };
     }
 
@@ -85,19 +87,28 @@ public class PrivilegedRouteRules implements SecurityRuleProvider {
         return unavailable;
     }
 
-    static Optional<DomainException> refusal(Optional<User> actor, UserRole minimum, Clock clock) {
-        if (actor.isEmpty()) {
-            return Optional.of(belowRole(minimum));
+    sealed interface RouteDecision {
+
+        record Admit() implements RouteDecision {
         }
-        UserSummary user = UsersApiAdapter.toSummary(actor.get());
-        return switch (user.restriction(clock.instant())) {
-            case Restriction.Banned banned -> Optional.of(new UserBannedException(user.id(), banned.at()));
-            case Restriction.TimedOut timedOut ->
-                    Optional.of(new UserTimedOutException(user.id(), timedOut.until()));
-            case Restriction.Active active -> user.role().hasRankAtLeast(minimum)
-                    ? Optional.empty()
-                    : Optional.of(belowRole(minimum));
-        };
+
+        record Refuse(DomainException refusal) implements RouteDecision {
+        }
+
+        static RouteDecision of(Option<User> actor, UserRole minimum, Instant now) {
+            return actor.map(UsersApiAdapter::toSummary)
+                    .fold(user -> ofLive(user, minimum, now), () -> new Refuse(belowRole(minimum)));
+        }
+
+        private static RouteDecision ofLive(UserSummary user, UserRole minimum, Instant now) {
+            return switch (user.restriction(now)) {
+                case Restriction.Banned banned -> new Refuse(new UserBannedException(user.id(), banned.at()));
+                case Restriction.TimedOut timedOut -> new Refuse(new UserTimedOutException(user.id(), timedOut.until()));
+                case Restriction.Active active -> user.role().hasRankAtLeast(minimum)
+                        ? new Admit()
+                        : new Refuse(belowRole(minimum));
+            };
+        }
     }
 
     private static DomainException belowRole(UserRole minimum) {

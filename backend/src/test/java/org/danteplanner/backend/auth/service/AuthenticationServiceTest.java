@@ -2,6 +2,7 @@ package org.danteplanner.backend.auth.service;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.support.LogCapture;
 import org.danteplanner.backend.shared.exception.InvalidRequestException;
@@ -25,7 +26,6 @@ import org.junit.jupiter.api.Test;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -114,7 +114,7 @@ class AuthenticationServiceTest {
                     "google", "code", "redirect", "verifier");
 
             // Assert
-            UserSummary created = users.findByProvider(AuthProviderType.GOOGLE, "provider-id-123").orElseThrow();
+            UserSummary created = users.findByProvider(AuthProviderType.GOOGLE, "provider-id-123").orElseThrow(AssertionError::new);
             assertThat(result.reactivated()).isFalse();
             assertThat(result.user().id()).isEqualTo(created.id());
             assertThat(created.email()).isEqualTo("user@email.com");
@@ -228,13 +228,13 @@ class AuthenticationServiceTest {
         }
 
         @Override
-        public Optional<UserSummary> findActiveByProvider(AuthProviderType providerType, String providerId) {
+        public Option<UserSummary> findActiveByProvider(AuthProviderType providerType, String providerId) {
             made.add("findActiveByProvider");
-            return seesActiveAccounts ? super.findActiveByProvider(providerType, providerId) : Optional.empty();
+            return seesActiveAccounts ? super.findActiveByProvider(providerType, providerId) : new Option.None<>();
         }
 
         @Override
-        public Optional<UserSummary> findByProvider(AuthProviderType providerType, String providerId) {
+        public Option<UserSummary> findByProvider(AuthProviderType providerType, String providerId) {
             made.add("findByProvider");
             return super.findByProvider(providerType, providerId);
         }

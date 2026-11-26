@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.danteplanner.backend.auth.token.TokenStoreKeys;
 import org.danteplanner.backend.integration.ExclusiveDatabaseSupport;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
-import org.danteplanner.backend.shared.redis.RedisKeyScanner;
+import org.danteplanner.backend.support.RedisKeyScanner;
 import org.danteplanner.fixture.testtransaction.InheritingFixture;
 import org.danteplanner.fixture.testtransaction.JakartaTransactionalFixture;
 import org.danteplanner.fixture.testtransaction.TransactionalBeanFixture;

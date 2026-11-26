@@ -1,5 +1,6 @@
 package org.danteplanner.backend.auth.security;
 
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.shared.security.AuthDegradationResponder;
 import org.danteplanner.backend.shared.security.CustomAuthenticationEntryPoint;
 
@@ -44,7 +45,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -113,7 +113,7 @@ class JwtAuthenticationFilterTest {
     private static FakeUsers usersFailingWith(RuntimeException failure) {
         return new FakeUsers() {
             @Override
-            public Optional<UserSummary> findActiveById(Long userId) {
+            public Option<UserSummary> findActiveById(Long userId) {
                 throw failure;
             }
 

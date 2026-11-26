@@ -3,23 +3,36 @@ package org.danteplanner.backend.shared.redis;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.resource.DefaultClientResources;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
+import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.support.RedisEndpoints;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ExtendWith(MockitoExtension.class)
 class RedisRoleConfigTest {
 
     private static final String BREAKER_STATE_GAUGE = "resilience4j.circuitbreaker.state";
     private static final String REFUSED_HOST = "127.0.0.1";
     private static final int REFUSED_PORT = 1;
+
+    @Mock
+    private StringRedisTemplate authLocalStore;
+
+    @Mock
+    private StringRedisTemplate authStore;
 
     private final RedisRoleConfig config = new RedisRoleConfig();
 
@@ -61,5 +74,21 @@ class RedisRoleConfigTest {
         }
 
         assertThat(RedisRole.values()).noneMatch(health::isAvailable);
+    }
+
+    @Test
+    void authReadSources_WhenNoReadSourcesAreConfigured_ReadsAuthLocalFirst() {
+        AuthReadSources sources = config.authReadSources(authLocalStore, authStore,
+                new DefaultListableBeanFactory().getBeanProvider(ReadSourceProperties.class),
+                config.redisRoleHealth(), new SimpleMeterRegistry());
+
+        assertThat(sources.<StringRedisTemplate>read(store -> store, () -> null)).isSameAs(authLocalStore);
+    }
+
+    @Test
+    void authWrites_WhenAuthIsAvailable_WritesOnTheAuthStore() {
+        AuthWrites writes = config.authWrites(authStore, config.redisRoleHealth(), new SimpleMeterRegistry());
+
+        assertThat(writes.<StringRedisTemplate>write(store -> store)).isSameAs(authStore);
     }
 }

@@ -255,7 +255,7 @@ class PlannerCatalogRemovalConcurrencyIT extends ExclusiveDatabaseSupport {
         List<Integer> unsettledRounds = new ArrayList<>();
         int overlappingRounds = 0;
         int excusedRounds = 0;
-        try (TransactionSpans.Installed unused = TransactionSpans.install(transactionManager)) {
+        try (TransactionSpans.Installed _ = TransactionSpans.install(transactionManager)) {
             for (int index = 0; index < ROUNDS; index++) {
                 Round round = seeder.get();
                 CyclicBarrier start = new CyclicBarrier(orderedByLockQueue ? 1 : 2);

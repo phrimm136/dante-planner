@@ -104,7 +104,7 @@ class PlannerFilterRowsConcurrencyIT extends ExclusiveDatabaseSupport {
 
         List<Throwable> failures = Collections.synchronizedList(new ArrayList<>());
         int overlapped = 0;
-        try (TransactionSpans.Installed unused = TransactionSpans.install(transactionManager)) {
+        try (TransactionSpans.Installed _ = TransactionSpans.install(transactionManager)) {
             for (int round = 0; round < ROUNDS && failures.isEmpty(); round++) {
                 clearFilterRows(first, second);
                 CyclicBarrier start = new CyclicBarrier(2);
@@ -150,7 +150,7 @@ class PlannerFilterRowsConcurrencyIT extends ExclusiveDatabaseSupport {
 
         List<Throwable> failures = Collections.synchronizedList(new ArrayList<>());
         int overlapped = 0;
-        try (TransactionSpans.Installed unused = TransactionSpans.install(transactionManager)) {
+        try (TransactionSpans.Installed _ = TransactionSpans.install(transactionManager)) {
             for (int round = 0; round < ROUNDS && failures.isEmpty(); round++) {
                 String next = round % 2 == 0 ? SECOND_CONTENT : original;
                 CyclicBarrier start = new CyclicBarrier(2);

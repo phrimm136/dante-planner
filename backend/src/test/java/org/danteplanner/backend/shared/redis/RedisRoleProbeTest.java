@@ -11,12 +11,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import ch.qos.logback.classic.Level;
+import io.lettuce.core.ClientOptions;
 import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.resource.DefaultClientResources;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 
+import org.danteplanner.backend.shared.config.RedisConnectionConfig;
+import org.danteplanner.backend.shared.config.RedisConnectionConfig.Endpoints;
+import org.danteplanner.backend.shared.config.RedisConnectionConfig.Endpoints.Endpoint;
 import org.danteplanner.backend.support.Elapsed;
 import org.danteplanner.backend.support.LogCapture;
+import org.danteplanner.backend.support.PongRedis;
 import org.danteplanner.backend.support.RedisEndpoints;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,6 +32,8 @@ class RedisRoleProbeTest {
     private static final int REFUSED_PORT = 1;
     private static final int REPEATED_FAILURES = 5;
     private static final int ACCEPT_BACKLOG = 16;
+    private static final String PASSWORD = "role-secret";
+    private static final String NOT_PONG = "OK";
 
     private final ClientResources clientResources = DefaultClientResources.create();
     private final RedisRoleHealth health = new RedisRoleHealth();
@@ -131,6 +138,48 @@ class RedisRoleProbeTest {
             assertThat(capture.at(Level.INFO)).hasSize(RedisRole.values().length);
             assertThat(capture.events()).hasSize(RedisRole.values().length);
         }
+    }
+
+    @Test
+    void probeAtStartup_WhenEveryRoleRequiresItsConfiguredPassword_AuthenticatesAndKeepsEveryRoleAvailable()
+            throws IOException {
+        try (PongRedis redis = new PongRedis()) {
+            redis.requirePassword(PASSWORD);
+            Endpoint endpoint = Endpoint.at(redis.host(), redis.port());
+            Endpoint passworded = new Endpoint(endpoint.host(), endpoint.port(), endpoint.bucketTtlSeconds(), PASSWORD);
+            RedisRoleHealth authenticated = new RedisRoleHealth();
+            try (RedisRoleProbe passwordedProbe = new RedisRoleProbe(clientResources, new RedisConnectionConfig(
+                    new Endpoints(passworded, passworded, passworded, passworded)), authenticated, List.of(),
+                    RoomyProbeTimeouts.BOTH_PHASES)) {
+                passwordedProbe.probeAtStartup();
+            }
+
+            assertThat(RedisRole.values()).allMatch(authenticated::isAvailable);
+        }
+    }
+
+    @Test
+    void probeAtStartup_WhenEveryRoleAnswersPingWithSomethingOtherThanPong_MakesEveryRoleUnavailable()
+            throws IOException {
+        try (PongRedis redis = new PongRedis()) {
+            redis.answerPingsWith(NOT_PONG);
+            RedisRoleHealth misanswered = new RedisRoleHealth();
+            try (RedisRoleProbe misansweredProbe = new RedisRoleProbe(clientResources,
+                    RedisEndpoints.everyRoleAt(redis.host(), redis.port()), misanswered, List.of(),
+                    RoomyProbeTimeouts.BOTH_PHASES)) {
+                misansweredProbe.probeAtStartup();
+            }
+
+            assertThat(RedisRole.values()).noneMatch(misanswered::isAvailable);
+        }
+    }
+
+    @Test
+    void clientOptions_WhenBuilt_NeverReconnectsOnItsOwnAndBoundsTheConnectByTheStartupTimeout() {
+        ClientOptions options = probe.clientOptions();
+
+        assertThat(options.isAutoReconnect()).isFalse();
+        assertThat(options.getSocketOptions().getConnectTimeout()).isEqualTo(RedisRoleProbe.STARTUP_PROBE_TIMEOUT);
     }
 
     @Test

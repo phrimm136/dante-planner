@@ -22,8 +22,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
-import org.danteplanner.backend.shared.exception.DomainException;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -45,7 +45,7 @@ class PrivilegedRouteRulesTest {
 
     @Test
     void refusal_WhenActorRowMissing_RefusesAsForbidden() {
-        assertThat(codeOf(PrivilegedRouteRules.refusal(Optional.empty(), UserRole.MODERATOR, CLOCK)))
+        assertThat(codeOf(PrivilegedRouteRules.RouteDecision.of(new Option.None<>(), UserRole.MODERATOR, NOW)))
                 .contains("FORBIDDEN");
     }
 
@@ -54,7 +54,7 @@ class PrivilegedRouteRulesTest {
         User actor = TestDataFactory.unsavedUser(UserRole.MODERATOR);
         TestDataFactory.ban(actor, NOW.minusSeconds(60), null);
 
-        assertThat(codeOf(PrivilegedRouteRules.refusal(Optional.of(actor), UserRole.MODERATOR, CLOCK)))
+        assertThat(codeOf(PrivilegedRouteRules.RouteDecision.of(new Option.Some<>(actor), UserRole.MODERATOR, NOW)))
                 .contains("USER_BANNED");
     }
 
@@ -63,7 +63,7 @@ class PrivilegedRouteRulesTest {
         User actor = TestDataFactory.unsavedUser(UserRole.MODERATOR);
         TestDataFactory.timeOut(actor, NOW.plusSeconds(3600));
 
-        assertThat(codeOf(PrivilegedRouteRules.refusal(Optional.of(actor), UserRole.MODERATOR, CLOCK)))
+        assertThat(codeOf(PrivilegedRouteRules.RouteDecision.of(new Option.Some<>(actor), UserRole.MODERATOR, NOW)))
                 .contains("USER_TIMED_OUT");
     }
 
@@ -73,7 +73,7 @@ class PrivilegedRouteRulesTest {
         TestDataFactory.ban(actor, NOW.minusSeconds(60), null);
         TestDataFactory.timeOut(actor, NOW.plusSeconds(3600));
 
-        assertThat(codeOf(PrivilegedRouteRules.refusal(Optional.of(actor), UserRole.MODERATOR, CLOCK)))
+        assertThat(codeOf(PrivilegedRouteRules.RouteDecision.of(new Option.Some<>(actor), UserRole.MODERATOR, NOW)))
                 .contains("USER_BANNED");
     }
 
@@ -82,27 +82,28 @@ class PrivilegedRouteRulesTest {
         User actor = TestDataFactory.unsavedUser(UserRole.MODERATOR);
         TestDataFactory.timeOut(actor, NOW.minusSeconds(1));
 
-        assertThat(PrivilegedRouteRules.refusal(Optional.of(actor), UserRole.MODERATOR, CLOCK)).isEmpty();
+        assertThat(PrivilegedRouteRules.RouteDecision.of(new Option.Some<>(actor), UserRole.MODERATOR, NOW))
+                .isInstanceOf(PrivilegedRouteRules.RouteDecision.Admit.class);
     }
 
     @Test
     void refusal_WhenActorRoleBelowTheRoute_RefusesAsForbidden() {
-        assertThat(codeOf(PrivilegedRouteRules.refusal(Optional.of(TestDataFactory.unsavedUser(UserRole.NORMAL)), UserRole.MODERATOR, CLOCK)))
+        assertThat(codeOf(PrivilegedRouteRules.RouteDecision.of(new Option.Some<>(TestDataFactory.unsavedUser(UserRole.NORMAL)), UserRole.MODERATOR, NOW)))
                 .contains("FORBIDDEN");
-        assertThat(codeOf(PrivilegedRouteRules.refusal(Optional.of(TestDataFactory.unsavedUser(UserRole.MODERATOR)), UserRole.ADMIN, CLOCK)))
+        assertThat(codeOf(PrivilegedRouteRules.RouteDecision.of(new Option.Some<>(TestDataFactory.unsavedUser(UserRole.MODERATOR)), UserRole.ADMIN, NOW)))
                 .contains("FORBIDDEN");
     }
 
     @Test
     void refusal_WhenActiveAdminOnModerationRoute_Admits() {
-        assertThat(PrivilegedRouteRules.refusal(Optional.of(TestDataFactory.unsavedUser(UserRole.ADMIN)), UserRole.MODERATOR, CLOCK))
-                .isEmpty();
+        assertThat(PrivilegedRouteRules.RouteDecision.of(new Option.Some<>(TestDataFactory.unsavedUser(UserRole.ADMIN)), UserRole.MODERATOR, NOW))
+                .isInstanceOf(PrivilegedRouteRules.RouteDecision.Admit.class);
     }
 
     @Test
     void refusal_WhenActiveModeratorOnModerationRoute_Admits() {
-        assertThat(PrivilegedRouteRules.refusal(Optional.of(TestDataFactory.unsavedUser(UserRole.MODERATOR)), UserRole.MODERATOR, CLOCK))
-                .isEmpty();
+        assertThat(PrivilegedRouteRules.RouteDecision.of(new Option.Some<>(TestDataFactory.unsavedUser(UserRole.MODERATOR)), UserRole.MODERATOR, NOW))
+                .isInstanceOf(PrivilegedRouteRules.RouteDecision.Admit.class);
     }
 
     @Test
@@ -130,7 +131,9 @@ class PrivilegedRouteRulesTest {
                 });
     }
 
-    private static Optional<Object> codeOf(Optional<DomainException> refusal) {
-        return refusal.map(ErrorResponse::getBody).map(body -> body.getProperties().get("code"));
+    private static Optional<Object> codeOf(PrivilegedRouteRules.RouteDecision decision) {
+        return decision instanceof PrivilegedRouteRules.RouteDecision.Refuse refuse
+                ? Optional.ofNullable(refuse.refusal().getBody().getProperties().get("code"))
+                : Optional.empty();
     }
 }

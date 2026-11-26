@@ -5,10 +5,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisConnectionException;
+import io.lettuce.core.RedisFuture;
 import io.lettuce.core.api.StatefulRedisConnection;
+import io.lettuce.core.api.async.RedisAsyncCommands;
 import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.resource.DefaultClientResources;
@@ -18,8 +23,21 @@ import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.PongRedis;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class HeldConnectionTest {
+
+    @Mock
+    private StatefulRedisConnection<String, String> connection;
+
+    @Mock
+    private RedisAsyncCommands<String, String> commands;
+
+    @Mock
+    private RedisFuture<String> pong;
 
     private final AtomicInteger connects = new AtomicInteger();
     private final AtomicReference<CompletableFuture<StatefulRedisConnection<String, String>>> nextAttempt =
@@ -84,8 +102,34 @@ class HeldConnectionTest {
             assertThat(connection.isOpen()).isFalse();
             client.shutdown();
         } finally {
-            var unused = clientResources.shutdown();
+            var _ = clientResources.shutdown();
         }
+    }
+
+    @Test
+    void ping_WhenTheHeldConnectionClosedAfterItsLastPong_ConnectsAgain() {
+        nextAttempt.set(CompletableFuture.completedFuture(closedAfterAnsweringPong()));
+        assertThat(held.ping()).isCompletedWithValue("PONG");
+
+        held.ping();
+
+        assertThat(connects).hasValue(2);
+    }
+
+    @Test
+    void discardUnlessConnecting_WhenAnAttemptPendingAtCloseSettlesBetweenRounds_ClosesItsConnectionOnce() {
+        closesOnRequest();
+        CompletableFuture<StatefulRedisConnection<String, String>> slow = new CompletableFuture<>();
+        nextAttempt.set(slow);
+        held.ping();
+        held.close();
+        held.discardUnlessConnecting();
+
+        slow.complete(connection);
+        held.discardUnlessConnecting();
+        held.discardUnlessConnecting();
+
+        verify(connection, times(1)).closeAsync();
     }
 
     @Test
@@ -106,7 +150,7 @@ class HeldConnectionTest {
             connecting.close();
             client.shutdown();
         } finally {
-            var unused = clientResources.shutdown();
+            var _ = clientResources.shutdown();
         }
     }
 
@@ -131,7 +175,7 @@ class HeldConnectionTest {
             connecting.close();
             client.shutdown();
         } finally {
-            var unused = clientResources.shutdown();
+            var _ = clientResources.shutdown();
         }
     }
 
@@ -172,7 +216,20 @@ class HeldConnectionTest {
             Hang.until(() -> redis.connectionsClosedByClients() == 1, "the held connection closing");
             client.shutdown();
         } finally {
-            var unused = clientResources.shutdown();
+            var _ = clientResources.shutdown();
         }
+    }
+
+    private void closesOnRequest() {
+        when(connection.closeAsync()).thenReturn(CompletableFuture.completedFuture(null));
+    }
+
+    private StatefulRedisConnection<String, String> closedAfterAnsweringPong() {
+        when(pong.toCompletableFuture()).thenReturn(CompletableFuture.completedFuture("PONG"));
+        when(commands.ping()).thenReturn(pong);
+        when(connection.async()).thenReturn(commands);
+        when(connection.isOpen()).thenReturn(false);
+        closesOnRequest();
+        return connection;
     }
 }
