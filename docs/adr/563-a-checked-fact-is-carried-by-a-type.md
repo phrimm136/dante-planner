@@ -13,7 +13,8 @@ epic: none · pr: none
   NON-GOAL: typed ids — an id carries nothing to validate, and the raw `Long` and `UUID` stay.
 - @parse @types @archunit — A public method takes no boolean: a choice between behaviors is an enum or two methods, because a call site reads `true` without saying which behavior it picks.
   REJECTED: banning only a boolean the method branches on — whether a value is a choice or a fact is not visible to a rule over signatures.
-  INVARIANT: the set of public methods with a boolean parameter only shrinks — `FlagParameterRuleTest` over a committed sorted list; constructors, one-parameter setters, overrides of library types and generated code are outside it.
+  INVARIANT: the set of public methods with a boolean parameter only shrinks — `FlagParameterRuleTest` over a committed sorted list; constructors, one-parameter setters, overrides of library types, generated code and a `@Modifying @Query` method whose boolean is the value its statement stores are outside it.
+  REJECTED: two queries or an enum for a stored boolean — a comment's notification switch had an enum and two update queries to store one value the request already named (ADR 568), 46 lines where one parameter does.
   NON-GOAL: a boolean returned as a control signal — a signature does not tell it from an answer.
 
 ## Takeaway

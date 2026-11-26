@@ -180,7 +180,7 @@ public class JwtAuthenticationFilter extends ChainAuthenticationFilter {
             throws IOException {
         return switch (CookieToken.of(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN))) {
             case CookieToken.Absent absent -> refreshOrReportOutage(request, response);
-            case CookieToken.Presented access -> switch (accessTokenAuthenticator.verify(access.token(), request)) {
+            case CookieToken.Presented access -> switch (accessTokenAuthenticator.authenticate(access.token(), request)) {
                 case AUTHENTICATED -> new SessionOutcome.Authenticated();
                 case EXPIRED -> refreshExpiredSession(request, response);
                 case SENTINEL_BLOCKED, REVOKED, REJECTED -> {

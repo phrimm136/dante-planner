@@ -55,6 +55,7 @@ final class Effects {
             "tools.jackson.", "com.networknt.schema.", "io.jsonwebtoken.",
             "org.springframework.util.Assert", "org.springframework.http.ProblemDetail",
             "org.springframework.web.ErrorResponseException", "org.springframework.web.method.HandlerMethod",
+            "org.springframework.security.core.Authentication",
             "[");
 
     private static final Set<String> EFFECTFUL_JDK = Set.of(
