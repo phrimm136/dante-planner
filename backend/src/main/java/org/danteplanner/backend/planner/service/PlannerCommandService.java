@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.danteplanner.backend.moderation.api.RestrictionCheck;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
+import org.danteplanner.backend.planner.entity.Device;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerContent;
@@ -53,6 +54,7 @@ import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.failure.WriteOutcome;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.restriction.PrivateWrite;
+import org.danteplanner.backend.shared.util.PlannerConstants;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -208,7 +210,7 @@ public class PlannerCommandService {
         }
     }
 
-    private record SaveAttempt(UpsertPlannerRequest request, UUID deviceId, WriteMode mode, int schemaVersion) {
+    private record SaveAttempt(UpsertPlannerRequest request, Device device, WriteMode mode, int schemaVersion) {
 
         PlannerChange changeTo(StoredPlanner planner, ObjectMapper mapper) {
             CarriedWrite carried = new CarriedWrite(
@@ -218,7 +220,7 @@ public class PlannerCommandService {
                     request.content(),
                     request.contentVersion(),
                     schemaVersion,
-                    deviceId);
+                    device);
             return PlannerChange.between(planner.content(), carried, mapper);
         }
     }
@@ -290,13 +292,16 @@ public class PlannerCommandService {
                 document.json(),
                 currentSchemaVersion,
                 request.contentVersion(),
-                deviceIdOr(attempt.deviceId(), stored.deviceId()),
+                carriedOr(attempt.device(), stored.device()),
                 stored.syncVersion() + 1,
                 now);
     }
 
-    private static @Nullable UUID deviceIdOr(@Nullable UUID carried, @Nullable UUID stored) {
-        return carried == null ? stored : carried;
+    private static Device carriedOr(Device carried, Device stored) {
+        return switch (carried) {
+            case Device.Known known -> known;
+            case Device.Unknown unknown -> stored;
+        };
     }
 
     private enum TopLevelCopy {
@@ -320,12 +325,6 @@ public class PlannerCommandService {
 
     private void countTopLevelCopy(TopLevelCopy copy) {
         meterRegistry.counter(TOP_LEVEL_KEYWORDS_METRIC, "outcome", copy.tag).increment();
-    }
-
-    private PlannerConcurrentWriteException concurrentWrite(UUID plannerId, String statement) {
-        log.error("Planner {} content row matched no row on {} under its lock", plannerId, statement);
-        meterRegistry.counter(CONCURRENT_WRITE_METRIC, "statement", statement).increment();
-        return PlannerAccessGuard.changedUnderLock(plannerId);
     }
 
     @Transactional
@@ -354,14 +353,14 @@ public class PlannerCommandService {
         countTopLevelCopy(TopLevelCopy.of(request.selectedKeywords(), document.keywords()));
 
         ContentWrite write = new ContentWrite(
-                request.titleOr("Untitled"),
+                request.titleOr(PlannerConstants.DEFAULT_TITLE),
                 request.statusOr(PlannerStatus.DRAFT),
                 category.getValue(),
                 document.keywords(),
                 document.json(),
                 currentSchemaVersion,
                 version.value(),
-                deviceId,
+                Device.of(deviceId),
                 1L,
                 clock.instant());
         plannerRepository.insertAggregate(
@@ -398,7 +397,10 @@ public class PlannerCommandService {
                 document.json(), migrated.content().lastModifiedAt()))) {
             case APPLIED -> FreshnessDeclarations.declare(new FreshnessScope.Planner(planner.id()),
                     new FreshnessScope.User(planner.userId()));
-            case NOTHING -> throw concurrentWrite(planner.id(), "migrate");
+            case NOTHING -> {
+                reportConcurrentWrite(planner.id(), "migrate");
+                throw new PlannerConcurrentWriteException(planner.id());
+            }
         }
         return migrated;
     }
@@ -414,7 +416,7 @@ public class PlannerCommandService {
             Long userId, UUID deviceId, UUID id, UpsertPlannerRequest request, WriteMode mode) {
         UpsertTarget target = UpsertTarget.of(plannerRepository.findAggregateForOwner(id, userId));
         admit(target, mode);
-        SaveAttempt attempt = new SaveAttempt(request, deviceId, mode, currentSchemaVersion);
+        SaveAttempt attempt = new SaveAttempt(request, Device.of(deviceId), mode, currentSchemaVersion);
         return switch (UpsertDecision.of(target, attempt, syncVersionValidator, objectMapper)) {
             case UpsertDecision.Create create -> createAtAvailableId(userId, deviceId, id, request);
             case UpsertDecision.Acknowledge(StoredPlanner planner) -> acknowledge(planner, request);
@@ -470,13 +472,21 @@ public class PlannerCommandService {
         switch (WriteOutcome.of(contentRepository.replaceAtVersion(planner.id(), planner.content().syncVersion(),
                 write))) {
             case APPLIED -> { }
-            case NOTHING -> throw concurrentWrite(planner.id(), "replace");
+            case NOTHING -> {
+                reportConcurrentWrite(planner.id(), "replace");
+                throw new PlannerConcurrentWriteException(planner.id());
+            }
         }
         log.info("Updated planner {} via upsert, new syncVersion: {}", planner.id(), write.syncVersion());
 
         FreshnessDeclarations.declare(new FreshnessScope.Planner(planner.id()),
                 new FreshnessScope.User(planner.userId()));
         return planner.saved(write);
+    }
+
+    private void reportConcurrentWrite(UUID plannerId, String statement) {
+        log.error("Planner {} content row matched no row on {} under its lock", plannerId, statement);
+        meterRegistry.counter(CONCURRENT_WRITE_METRIC, "statement", statement).increment();
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)

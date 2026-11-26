@@ -56,7 +56,7 @@ public record PlannerChange(Set<Field> fields) {
                     !Objects.equals(carried.gameContentVersion(), stored.gameContentVersion());
             case CONTENT_SCHEMA_VERSION ->
                     !Objects.equals(carried.contentSchemaVersion(), stored.schemaVersion());
-            case DEVICE_ID -> !Objects.equals(carried.deviceId(), stored.deviceId());
+            case DEVICE_ID -> !carried.device().equals(stored.device());
         };
     }
 

@@ -3,6 +3,8 @@ package org.danteplanner.backend.architecture;
 import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaAnnotation;
 import com.tngtech.archunit.core.domain.JavaClass;
+import com.tngtech.archunit.core.domain.JavaClasses;
+import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.domain.JavaCodeUnit;
 import com.tngtech.archunit.core.domain.JavaConstructorCall;
 import com.tngtech.archunit.core.importer.ImportOption;
@@ -13,7 +15,11 @@ import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
 import org.danteplanner.backend.moderation.service.ModerationPolicy;
+import org.danteplanner.backend.planner.exception.PlannerConcurrentWriteException;
+import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.danteplanner.fixture.guaranteeplacement.service.RefusingService;
+import org.junit.jupiter.api.Test;
 import org.danteplanner.backend.shared.exception.DomainException;
 
 import java.util.LinkedHashSet;
@@ -23,6 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
 
@@ -53,6 +60,13 @@ class GuaranteePlacementTest {
     private static final Set<String> AUTHORITY_COMPONENTS = Set.of(
             PlannerAccessGuard.class.getName(),
             ModerationPolicy.class.getName());
+
+    /**
+     * Exceptions that report a write which matched no row under the content lock. Zero rows there
+     * refuses no business rule: it is the tripwire for a writer that skipped the lock, raised by the
+     * command that ran the statement.
+     */
+    private static final Set<String> TRIPWIRE_EXCEPTIONS = Set.of(PlannerConcurrentWriteException.class.getName());
 
     /**
      * A domain exception is the wire form of a refused business rule, so constructing one is
@@ -113,13 +127,26 @@ class GuaranteePlacementTest {
                     .should(carryNoJakartaConstraint())
                     .as("jakarta.validation.constraints annotations live on request DTOs only");
 
+    @Test
+    void domainException_WhenAServiceBuildsOneOtherThanTheTripwire_IsRefused() {
+        JavaClasses fixture = new ClassFileImporter().importPackages(RefusingService.class.getPackageName());
+
+        assertThatThrownBy(() -> domain_exceptions_are_raised_by_rule_components.check(fixture))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining(RefusingService.class.getName() + ".refuse(java.util.UUID) constructs "
+                        + PlannerForbiddenException.class.getName())
+                .hasMessageNotContaining(PlannerConcurrentWriteException.class.getName())
+                .hasMessageContaining("(1 times)");
+    }
+
     private static ArchCondition<JavaClass> constructNoDomainExceptionOutsideALambda() {
         return new ArchCondition<>("construct no DomainException outside a lambda") {
             @Override
             public void check(JavaClass javaClass, ConditionEvents events) {
                 for (JavaConstructorCall call : javaClass.getConstructorCallsFromSelf()) {
                     if (!call.getTargetOwner().isAssignableTo(DomainException.class)
-                            || call.isDeclaredInLambda()) {
+                            || call.isDeclaredInLambda()
+                            || TRIPWIRE_EXCEPTIONS.contains(call.getTargetOwner().getName())) {
                         continue;
                     }
                     events.add(SimpleConditionEvent.violated(javaClass,

@@ -1,5 +1,6 @@
 package org.danteplanner.backend.repository;
 
+import org.danteplanner.backend.planner.entity.Device;
 import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
@@ -71,7 +72,8 @@ class PlannerContentWriteIT extends SharedMySqlContainerSupport {
     private ContentWrite renamed(long syncVersion) {
         StoredContent stored = planner.content();
         return new ContentWrite("Renamed", PlannerStatus.SAVED, "10F", Set.of("Burst"), stored.json(),
-                stored.schemaVersion(), stored.gameContentVersion(), UUID.randomUUID(), syncVersion, SAVED_AT);
+                stored.schemaVersion(), stored.gameContentVersion(), new Device.Known(UUID.randomUUID()), syncVersion,
+                SAVED_AT);
     }
 
     private int inTransaction(Supplier<Integer> write) {

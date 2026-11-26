@@ -1,6 +1,6 @@
 package org.danteplanner.backend.integration;
 
-import org.danteplanner.backend.planner.entity.PlannerRows;
+import org.danteplanner.backend.support.PlannerRows;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.danteplanner.backend.support.PlannerContentRows;
 import com.jayway.jsonpath.JsonPath;

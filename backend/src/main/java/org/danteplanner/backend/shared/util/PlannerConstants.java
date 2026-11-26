@@ -9,6 +9,11 @@ public final class PlannerConstants {
 
     public static final int BATCH_PULL_MAX_IDS = 50;
 
+    /**
+     * Matches the default of the {@code planner_content.title} column.
+     */
+    public static final String DEFAULT_TITLE = "Untitled";
+
     public static final boolean RETIRED_BOOKMARK_FLAG = false;
 
     private PlannerConstants() {

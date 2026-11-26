@@ -1,5 +1,6 @@
 package org.danteplanner.backend.support;
 
+import org.danteplanner.backend.planner.entity.Device;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -11,7 +12,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.entity.Listing;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
-import org.danteplanner.backend.planner.entity.PlannerRows;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
@@ -486,7 +486,7 @@ public class TestDataFactory {
                     new StoredContent(title, status != null ? status
                             : (published ? PlannerStatus.SAVED : PlannerStatus.DRAFT),
                             category, PlannerKeywords.fromContent(document).asSet(), document, schemaVersion,
-                            contentVersion, syncVersion, deviceId, stamp),
+                            contentVersion, syncVersion, Device.of(deviceId), stamp),
                     publication, NotificationSetting.ON, new Listing.Listed(), Takedown.of(takenDownAt));
         }
 

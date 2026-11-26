@@ -1,6 +1,14 @@
-package org.danteplanner.backend.planner.entity;
+package org.danteplanner.backend.support;
 
 import org.jspecify.annotations.Nullable;
+
+import org.danteplanner.backend.planner.entity.Listing;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerContent;
+import org.danteplanner.backend.planner.entity.PlannerModeration;
+import org.danteplanner.backend.planner.entity.PlannerPublication;
+import org.danteplanner.backend.planner.entity.Publication;
+import org.danteplanner.backend.planner.entity.Takedown;
 
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
@@ -27,7 +35,7 @@ public final class PlannerRows {
         StoredContent content = planner.content();
         return new PlannerContent(planner.id(), content.title(), content.status(), content.category(),
                 content.keywords(), content.json(), content.schemaVersion(), content.gameContentVersion(),
-                content.syncVersion(), content.deviceId(), content.lastModifiedAt(), null);
+                content.syncVersion(), content.device().columnValue(), content.lastModifiedAt(), null);
     }
 
     public static PlannerPublication publication(StoredPlanner planner) {

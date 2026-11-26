@@ -69,7 +69,7 @@ public class PlannerContent implements Persistable<UUID> {
     @Column(name = "deleted_at")
     private @Nullable Instant deletedAt;
 
-    PlannerContent(UUID plannerId, String title, PlannerStatus status, String category,
+    public PlannerContent(UUID plannerId, String title, PlannerStatus status, String category,
             @Nullable Set<String> selectedKeywords, String content, int contentSchemaVersion,
             int gameContentVersion, long syncVersion, @Nullable UUID deviceId, Instant lastModifiedAt,
             @Nullable Instant deletedAt) {
@@ -90,7 +90,7 @@ public class PlannerContent implements Persistable<UUID> {
     public static PlannerContent created(UUID plannerId, ContentWrite write) {
         return new PlannerContent(plannerId, write.title(), write.status(), write.category(), write.keywords(),
                 write.json(), write.schemaVersion(), write.gameContentVersion(), write.syncVersion(),
-                write.deviceId(), write.savedAt(), null);
+                write.device().columnValue(), write.savedAt(), null);
     }
 
     @Transient

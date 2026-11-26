@@ -4,7 +4,6 @@ import org.danteplanner.backend.planner.api.PlannerAccess;
 import org.danteplanner.backend.planner.api.PlannerMiss;
 import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.api.PlannerThread;
-import org.danteplanner.backend.planner.exception.PlannerConcurrentWriteException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
@@ -76,10 +75,6 @@ public class PlannerAccessGuard implements PlannerAccess {
 
     private static PlannerNotFoundException hidden(UUID plannerId, long ownerId) {
         return new PlannerNotFoundException(new PlannerMiss.Hidden(plannerId, ownerId));
-    }
-
-    static PlannerConcurrentWriteException changedUnderLock(UUID id) {
-        return new PlannerConcurrentWriteException(id);
     }
 
     static PlannerNotFoundException absent(UUID id) {
