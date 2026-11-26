@@ -2,7 +2,8 @@ package org.danteplanner.backend.shared.exception;
 
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.Optional;
+
+import org.danteplanner.backend.shared.failure.Option;
 
 /**
  * Rows are keyed on the qualified constraint identifier MySQL reports for error 1062
@@ -45,17 +46,17 @@ public enum KnownConstraint {
      * Comparison folds case under {@link Locale#ROOT}: Turkish lower-cases the {@code I} in
      * {@code PRIMARY} to a dotless {@code ı}.
      */
-    public static Optional<KnownConstraint> matching(String qualifiedConstraintName) {
+    public static Option<KnownConstraint> matching(String qualifiedConstraintName) {
         String normalized = qualifiedConstraintName.toLowerCase(Locale.ROOT);
         int separator = normalized.indexOf(QUALIFIER_SEPARATOR);
         if (separator < 0) {
-            return Optional.empty();
+            return new Option.None<>();
         }
         String violatedTable = normalized.substring(0, separator);
         String violatedKey = normalized.substring(separator + 1);
-        return Arrays.stream(values())
+        return Option.from(Arrays.stream(values())
                 .filter(constraint -> constraint.covers(violatedTable, violatedKey))
-                .findFirst();
+                .findFirst());
     }
 
     private boolean covers(String violatedTable, String violatedKey) {

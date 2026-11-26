@@ -51,7 +51,7 @@ class SseEventTypeMatrixTest {
                     assertThat(type.userDelivery().name())
                             .as("delivery decides which subscriber branch runs")
                             .isEqualTo(expected[1]);
-                    assertThat(type.deliversRawPayload())
+                    assertThat(type.payloadDelivery() == SseEventType.PayloadDelivery.RAW)
                             .as("a client schema expecting top-level fields breaks on the envelope")
                             .isEqualTo("payload".equals(expected[2]));
                 }));

@@ -8,12 +8,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public enum SseEventType {
-    COMMENT_ADDED("comment:added", false, UserDelivery.EMITTERS),
-    NOTIFY_COMMENT("notify:comment", true, UserDelivery.EMITTERS),
-    NOTIFY_PUBLISHED("notify:published", true, UserDelivery.EMITTERS),
-    NOTIFY_RECOMMENDED("notify:recommended", true, UserDelivery.EMITTERS),
-    SETTINGS_INVALIDATED("settings:invalidated", false, UserDelivery.SETTINGS_CACHE),
-    ACCOUNT_SUSPENDED("account_suspended", true, UserDelivery.SUSPENSION_NOTICE);
+    COMMENT_ADDED("comment:added", PayloadDelivery.ENVELOPE, UserDelivery.EMITTERS),
+    NOTIFY_COMMENT("notify:comment", PayloadDelivery.RAW, UserDelivery.EMITTERS),
+    NOTIFY_PUBLISHED("notify:published", PayloadDelivery.RAW, UserDelivery.EMITTERS),
+    NOTIFY_RECOMMENDED("notify:recommended", PayloadDelivery.RAW, UserDelivery.EMITTERS),
+    SETTINGS_INVALIDATED("settings:invalidated", PayloadDelivery.ENVELOPE, UserDelivery.SETTINGS_CACHE),
+    ACCOUNT_SUSPENDED("account_suspended", PayloadDelivery.RAW, UserDelivery.SUSPENSION_NOTICE);
 
     public enum UserDelivery {
         EMITTERS,
@@ -21,13 +21,18 @@ public enum SseEventType {
         SUSPENSION_NOTICE
     }
 
+    public enum PayloadDelivery {
+        RAW,
+        ENVELOPE
+    }
+
     private final String value;
-    private final boolean rawPayloadDelivery;
+    private final PayloadDelivery payloadDelivery;
     private final UserDelivery userDelivery;
 
-    SseEventType(String value, boolean rawPayloadDelivery, UserDelivery userDelivery) {
+    SseEventType(String value, PayloadDelivery payloadDelivery, UserDelivery userDelivery) {
         this.value = value;
-        this.rawPayloadDelivery = rawPayloadDelivery;
+        this.payloadDelivery = payloadDelivery;
         this.userDelivery = userDelivery;
     }
 
@@ -35,8 +40,8 @@ public enum SseEventType {
         return userDelivery;
     }
 
-    public boolean deliversRawPayload() {
-        return rawPayloadDelivery;
+    public PayloadDelivery payloadDelivery() {
+        return payloadDelivery;
     }
 
     @JsonValue

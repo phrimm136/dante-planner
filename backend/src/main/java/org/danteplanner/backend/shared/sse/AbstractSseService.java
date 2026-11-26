@@ -23,7 +23,7 @@ public abstract class AbstractSseService<K> implements ApplicationListener<Conte
 
     private final TaskExecutor heartbeatWorker;
 
-    private volatile boolean closing;
+    private volatile Phase phase = Phase.SERVING;
 
     protected AbstractSseService(TaskExecutor heartbeatWorker) {
         this.heartbeatWorker = heartbeatWorker;
@@ -37,7 +37,7 @@ public abstract class AbstractSseService<K> implements ApplicationListener<Conte
 
     protected SseEmitter register(K key, UUID deviceId, Viewer subscriber) throws IOException {
         SseEmitter emitter = new SseEmitter(SSE_TIMEOUT_MS);
-        switch (Phase.of(closing)) {
+        switch (phase) {
             case CLOSING -> emitter.complete();
             case SERVING -> open(key, deviceId, subscriber, emitter);
         }
@@ -46,11 +46,7 @@ public abstract class AbstractSseService<K> implements ApplicationListener<Conte
 
     private enum Phase {
         SERVING,
-        CLOSING;
-
-        static Phase of(boolean closing) {
-            return closing ? CLOSING : SERVING;
-        }
+        CLOSING
     }
 
     private void open(K key, UUID deviceId, Viewer subscriber, SseEmitter emitter) throws IOException {
@@ -68,7 +64,7 @@ public abstract class AbstractSseService<K> implements ApplicationListener<Conte
         emitter.onTimeout(() -> removeConnection(key, deviceId));
         emitter.onError(e -> removeConnection(key, deviceId));
 
-        switch (Phase.of(closing)) {
+        switch (phase) {
             case CLOSING -> emitter.complete();
             case SERVING -> { }
         }
@@ -136,7 +132,7 @@ public abstract class AbstractSseService<K> implements ApplicationListener<Conte
 
     @Override
     public void onApplicationEvent(ContextClosedEvent event) {
-        closing = true;
+        phase = Phase.CLOSING;
         emitters.values().forEach(connections -> connections.forEach(AbstractSseService::complete));
     }
 

@@ -19,6 +19,7 @@ import org.danteplanner.backend.shared.config.RoutingKey;
 import org.danteplanner.backend.shared.config.UndeclaredPrimaryAccessGuard;
 import org.danteplanner.backend.shared.exception.ReadTemporarilyUnavailableException;
 import org.danteplanner.backend.shared.failure.OnUndeclared;
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.shared.gtid.GtidCapturingDataSource;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 
@@ -256,7 +257,7 @@ class ReadOnlyRoutingDataSourceTest {
         assertThat(routing.getConnection()).isSameAs(primaryReadConnection);
         verify(primary, never()).getConnection();
         verify(replicaPool, never()).getConnection();
-        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).contains(ReadSourceProperties.PRIMARY);
+        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).isEqualTo(new Option.Some<>(ReadSourceProperties.PRIMARY));
     }
 
     @Test
@@ -266,7 +267,7 @@ class ReadOnlyRoutingDataSourceTest {
         TransactionSynchronizationManager.setCurrentTransactionReadOnly(true);
 
         assertThat(routing.getConnection()).isSameAs(primaryConnection);
-        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).contains(ReadSourceProperties.PRIMARY);
+        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).isEqualTo(new Option.Some<>(ReadSourceProperties.PRIMARY));
     }
 
     @Test
@@ -281,7 +282,7 @@ class ReadOnlyRoutingDataSourceTest {
         assertThat(Proxy.isProxyClass(lent.getClass())).isTrue();
         verify(primary).getConnection();
         verify(primaryReadPool, never()).getConnection();
-        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).isEmpty();
+        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).isInstanceOf(Option.None.class);
     }
 
     @Test
@@ -299,6 +300,6 @@ class ReadOnlyRoutingDataSourceTest {
         assertThat(thrown).hasCauseInstanceOf(ReadTemporarilyUnavailableException.class);
         assertThat(thrown.getCause().getCause()).hasSuppressedException(linkFailure);
         verify(primary, never()).getConnection();
-        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).isEmpty();
+        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).isInstanceOf(Option.None.class);
     }
 }

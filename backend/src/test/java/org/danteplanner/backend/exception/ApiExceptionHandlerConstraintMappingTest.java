@@ -4,6 +4,7 @@ import io.sentry.Sentry;
 import org.danteplanner.backend.shared.exception.ApiExceptionHandler;
 import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.backend.shared.exception.KnownConstraint;
+import org.danteplanner.backend.shared.failure.Option;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,7 +22,6 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.EnumSet;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -86,7 +86,7 @@ class ApiExceptionHandlerConstraintMappingTest {
         Set<KnownConstraint> covered = frozenContract()
                 .map(ContractRow::constraintName)
                 .map(KnownConstraint::matching)
-                .flatMap(Optional::stream)
+                .flatMap(Option::stream)
                 .collect(Collectors.toCollection(() -> EnumSet.noneOf(KnownConstraint.class)));
 
         assertThat(covered).isEqualTo(EnumSet.allOf(KnownConstraint.class));

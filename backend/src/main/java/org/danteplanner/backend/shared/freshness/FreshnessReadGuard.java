@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -159,9 +160,8 @@ public class FreshnessReadGuard {
     }
 
     private ReadSourceSelector.Source servedSource() {
-        return ChosenReadSource.source()
-                .or(selector::current)
-                .orElseThrow(ReadTemporarilyUnavailableException::new);
+        return ChosenReadSource.source().fold(Function.identity(),
+                () -> selector.current().orElseThrow(ReadTemporarilyUnavailableException::new));
     }
 
     public Map<String, String> applied() {

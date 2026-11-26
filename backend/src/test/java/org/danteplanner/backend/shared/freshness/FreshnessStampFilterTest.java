@@ -2,7 +2,6 @@ package org.danteplanner.backend.shared.freshness;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -19,6 +18,7 @@ import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.shared.config.ChosenReadSource;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.failure.OnUndeclared;
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.shared.gtid.GtidOrigin;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 
@@ -113,18 +113,18 @@ class FreshnessStampFilterTest {
                 new MockHttpServletRequest("GET", "/api/planners"), new MockHttpServletResponse(), throwingChain))
                 .isSameAs(boom);
 
-        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).isEmpty();
+        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).isInstanceOf(Option.None.class);
     }
 
     @Test
     void request_WhenAStaleSourceIsRecordedOnTheThread_StartsWithNoneRecorded() throws Exception {
         ChosenReadSource.record(SEOUL_REPLICA);
-        List<Optional<String>> recorded = new ArrayList<>();
+        List<Option<String>> recorded = new ArrayList<>();
 
         filter.doFilter(new MockHttpServletRequest("GET", "/api/planners"), new MockHttpServletResponse(),
                 (req, res) -> recorded.add(ChosenReadSource.source().map(ReadSourceSelector.Source::name)));
 
-        assertThat(recorded).containsExactly(Optional.empty());
+        assertThat(recorded).containsExactly(new Option.None<>());
     }
 
     @Test

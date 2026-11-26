@@ -29,8 +29,7 @@ public final class ConstraintViolationClassifier {
         return switch (hibernateViolation) {
             case Cause.Found<ConstraintViolationException> found -> switch (ConstraintName.of(found.cause())) {
                 case ConstraintName.Named named -> KnownConstraint.matching(named.qualified())
-                        .map(KnownConstraint::outcome)
-                        .orElse(ConstraintViolationKind.UNEXPECTED_CONFLICT);
+                        .fold(KnownConstraint::outcome, () -> ConstraintViolationKind.UNEXPECTED_CONFLICT);
                 case ConstraintName.Unnamed unnamed -> ConstraintViolationKind.UNEXPECTED_CONFLICT;
             };
             case Cause.Absent<ConstraintViolationException> absent -> ConstraintViolationKind.UNEXPECTED_CONFLICT;

@@ -18,6 +18,7 @@ import org.danteplanner.backend.shared.config.ChosenReadSource;
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.failure.OnUndeclared;
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.shared.gtid.GtidOrigin;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
@@ -172,15 +173,15 @@ class MarkerDispatchStampTest {
     @Test
     void around_WhenAReadSourceWasChosenBeforeAndInside_SeesNoEarlierChoiceAndLeavesNoInnerChoice() {
         ChosenReadSource.record(seoul);
-        List<Optional<String>> chosenInside = new ArrayList<>();
+        List<Option<String>> chosenInside = new ArrayList<>();
 
         stamp.around(() -> {
             chosenInside.add(ChosenReadSource.source().map(ReadSourceSelector.Source::name));
             ChosenReadSource.record(seoul);
         });
 
-        assertThat(chosenInside).containsExactly(Optional.empty());
-        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).isEmpty();
+        assertThat(chosenInside).containsExactly(new Option.None<>());
+        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).isInstanceOf(Option.None.class);
     }
 
     private static void clearThreadState() {
