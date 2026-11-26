@@ -28,8 +28,7 @@ Unchanged: `danteplanner/backend/runtime-config`, `danteplanner/rds/master-passw
 
 Prerequisites: AWS profiles `prod` and `staging`, `jq`, SSM access to both control planes, and a
 checkout of the consolidation branch for steps 1 and 2. A worktree lacks the gitignored files, so
-copy them from the main checkout first: `terraform/secrets/prod.tfvars`, `terraform/backend.prod.hcl`
-and `terraform/backend.staging.hcl`. Terraform runs only through `scripts/ops/terraform-run.sh`.
+copy them from the main checkout first: `terraform/backend.prod.hcl` and `terraform/backend.staging.hcl`. Terraform runs only through `scripts/ops/terraform-run.sh`.
 
 ## The ordering rules
 
@@ -158,29 +157,21 @@ means anything.
 export AWS_PROFILE=prod
 scripts/ops/terraform-run.sh -chdir=terraform/secrets init -backend-config=../backend.prod.hcl -reconfigure
 scripts/ops/terraform-run.sh -chdir=terraform/secrets state list | rg origin_client_ca   # expect nothing
-.claude/skills/ops/bin/ops tf plan secrets -- -var-file=prod.tfvars       # READ IT
+.claude/skills/ops/bin/ops tf plan secrets       # READ IT
 .claude/skills/ops/bin/ops tf apply <plan file printed above>    # the user, as the printed ! line
 ```
 
-**Staging:** the rehearsal workflow reads `/danteplanner/staging/tfvars/secrets` from SSM, but on
-2026-11-07 the staging account held no SSM parameter at all and the only copy was the main
-checkout's gitignored `terraform/secrets/staging.tfvars`. Use that file when the parameter is
-absent (copy it into the worktree, edit, plan, apply, copy it back, delete the worktree copy);
-when the parameter exists, fetch it, edit it as above, and write it back before planning:
+**Staging:** the settings are tracked in `terraform/secrets/envs/staging.tfvars`, which
+`ops --env staging tf plan secrets` passes with the profile's account id:
 
 ```bash
 export AWS_PROFILE=staging
-aws ssm get-parameter --region us-west-2 --name /danteplanner/staging/tfvars/secrets \
-  --with-decryption --query Parameter.Value --output text > terraform/secrets/staging.tfvars
-"${EDITOR:-vi}" terraform/secrets/staging.tfvars        # add secret_names, delete origin_client_ca
-aws ssm put-parameter --region us-west-2 --name /danteplanner/staging/tfvars/secrets \
-  --type SecureString --overwrite --value file://terraform/secrets/staging.tfvars
 scripts/ops/terraform-run.sh -chdir=terraform/secrets init -backend-config=../backend.staging.hcl -reconfigure
 scripts/ops/terraform-run.sh -chdir=terraform/secrets state list | rg origin_client_ca
 # for each address it lists:
 scripts/ops/terraform-run.sh -chdir=terraform/secrets state rm \
   'aws_secretsmanager_secret.origin_client_ca[0]' 'aws_secretsmanager_secret_version.origin_client_ca[0]'
-.claude/skills/ops/bin/ops --env staging tf plan secrets -- -var-file=staging.tfvars    # READ IT
+.claude/skills/ops/bin/ops --env staging tf plan secrets    # READ IT
 .claude/skills/ops/bin/ops tf apply <plan file printed above>    # the user, as the printed ! line
 ```
 
@@ -228,9 +219,9 @@ Gate: every row reads `True  SecretSynced`, the KEY and EXTRACT columns name onl
 layout, and no `origin-client-ca` row is left. Then narrow the app-node grants to the bundles:
 
 ```bash
-.claude/skills/ops/bin/ops tf plan oregon -- -var-file=prod.tfvars    # READ IT: the app-node secrets policy updates in place, nothing else
+.claude/skills/ops/bin/ops tf plan oregon    # READ IT: the app-node secrets policy updates in place, nothing else
 .claude/skills/ops/bin/ops tf apply <oregon plan file printed above>    # the user, as the printed ! line
-.claude/skills/ops/bin/ops tf plan seoul -- -var-file=prod.tfvars
+.claude/skills/ops/bin/ops tf plan seoul
 .claude/skills/ops/bin/ops tf apply <seoul plan file printed above>     # the user, as the printed ! line
 synced us-west-2 oregon
 synced ap-northeast-2 seoul
@@ -266,7 +257,7 @@ delete them with the seven-day recovery window. A replicated primary cannot be d
 replica goes first.
 
 ```bash
-export AWS_PROFILE=prod        # staging: AWS_PROFILE=staging, backend.staging.hcl, staging.tfvars
+export AWS_PROFILE=prod        # staging: AWS_PROFILE=staging and backend.staging.hcl; plans run as `ops --env staging tf plan secrets`
 scripts/ops/terraform-run.sh -chdir=terraform/secrets init -backend-config=../backend.prod.hcl -reconfigure
 # staging: scripts/ops/terraform-run.sh -chdir=terraform/secrets init -backend-config=../backend.staging.hcl -reconfigure
 bash -euo pipefail <<'EOF'
@@ -283,7 +274,7 @@ for n in "${old[@]}"; do
   scripts/ops/terraform-run.sh -chdir=terraform/secrets state rm "aws_secretsmanager_secret.replicated[\"$n\"]"
 done
 EOF
-.claude/skills/ops/bin/ops tf plan secrets -- -var-file=prod.tfvars       # expect: Outputs only, no resource line
+.claude/skills/ops/bin/ops tf plan secrets       # expect: Outputs only, no resource line
 ```
 
 The plan removes the outputs of the forgotten names, so it reads `Outputs only`, not `No changes.`.

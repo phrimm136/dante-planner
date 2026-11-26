@@ -43,7 +43,7 @@ command. `ops list` prints every command, `ops --help` the details.
 .claude/skills/ops/bin/ops sql -f query.sql --site seoul
 .claude/skills/ops/bin/ops logs '{app="backend"} |= "ERROR"' --since 24h
 .claude/skills/ops/bin/ops logs --day 2026-07-23 '{app="backend", cluster="seoul"}'
-.claude/skills/ops/bin/ops --env staging tf plan secrets -- -var-file=staging.tfvars
+.claude/skills/ops/bin/ops --env staging tf plan secrets
 ```
 
 ## One-time setup
