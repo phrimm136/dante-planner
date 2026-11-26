@@ -252,7 +252,7 @@ public class UserService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException(userId));
 
-        WrittenAccount written = WrittenAccount.of(userId,
+        WrittenAccount written = WrittenAccount.ofOwnAccount(userId,
                 WriteOutcome.of(userRepository.changeEpithet(userId, epithet.getValue(), clock.instant())));
         FreshnessDeclarations.declare(new FreshnessScope.User(written.userId()), new FreshnessScope.Global());
 

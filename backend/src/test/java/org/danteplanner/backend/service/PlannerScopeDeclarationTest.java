@@ -41,7 +41,6 @@ import org.danteplanner.backend.planner.precondition.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.precondition.PlannerLimitValidator;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.precondition.PlannerPublishValidator;
-import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
@@ -343,7 +342,8 @@ class PlannerScopeDeclarationTest {
                 new PlannerStatsService(statsRepository), catalogService(), recorder(), accessGuard,
                 new PlannerReportService(reportRepository, new PlannerModerationTargetAdapter(null, accessGuard),
                         new ReportUniquenessValidator()),
-                new VoteUniquenessValidator(), RECOMMENDED_THRESHOLD);
+                Clock.systemUTC(), RECOMMENDED_THRESHOLD);
+        when(voteRepository.insertIgnore(any(), any(), any(), any())).thenReturn(1);
 
         engagement.castVote(READER_ID, planner.id(), VoteType.UP);
 
@@ -406,7 +406,7 @@ class PlannerScopeDeclarationTest {
 
     @Test
     void unsubscribe_WhenCalled_DeclaresItsPlannerOnly() {
-        UUID plannerId = publishedThread();
+        UUID plannerId = UUID.randomUUID();
 
         subscriptionService().unsubscribe(READER_ID, plannerId);
 
