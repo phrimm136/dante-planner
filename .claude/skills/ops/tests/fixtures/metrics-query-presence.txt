@@ -1,0 +1,7 @@
+2026-11-26T02:40:00Z  3  cluster=oregon,metric=aaa_total
+2026-11-26T02:41:00Z  3  cluster=oregon,metric=aaa_total
+2026-11-26T02:40:00Z  2  cluster=seoul,metric=aaa_total
+2026-11-26T02:41:00Z  2  cluster=seoul,metric=aaa_total
+2026-11-26T02:41:00Z  1  cluster=oregon,metric=bbb_ready
+2026-11-26T02:40:00Z  1  cluster=seoul,metric=ccc_up
+2026-11-26T02:41:00Z  1  cluster=seoul,metric=ccc_up

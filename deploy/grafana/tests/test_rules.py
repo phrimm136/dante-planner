@@ -1,5 +1,8 @@
+import importlib.machinery
+import importlib.util
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -11,6 +14,43 @@ import yaml
 RULES_PY = Path(__file__).resolve().parents[1] / "rules.py"
 CLUSTER_RULES = Path(__file__).resolve().parents[1] / "rules" / "cluster-rules.yaml"
 INTERVAL_LIB = Path(__file__).resolve().parents[3] / "scripts" / "ops" / "lib" / "etcd-interval.sh"
+RULES_LOADER = importlib.machinery.SourceFileLoader("grafana_rules", str(RULES_PY))
+rules_module = importlib.util.module_from_spec(importlib.util.spec_from_loader("grafana_rules", RULES_LOADER))
+RULES_LOADER.exec_module(rules_module)
+SELECTOR_CASES = (
+    ("((time() - max by (cluster) (kube_etcd_snapshot_creation_timestamp_seconds)) > (1.5 * 21600)) or (count by "
+     "(cluster) (up{job=\"kube-state-metrics\"} == 1) unless count by (cluster) "
+     "(kube_etcd_snapshot_creation_timestamp_seconds))",
+     (("kube_etcd_snapshot_creation_timestamp_seconds", ()), ("up", (("job", "=", "kube-state-metrics"),)),
+      ("kube_etcd_snapshot_creation_timestamp_seconds", ()))),
+    ("max(redis_master_repl_offset{job=\"redis-auth\",cluster=\"seoul\"}) == bool 0",
+     (("redis_master_repl_offset", (("job", "=", "redis-auth"), ("cluster", "=", "seoul"))),)),
+    ("(1 - node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay\"} / node_filesystem_size_bytes"
+     "{fstype!~\"tmpfs|overlay\"}) * 100 > 85",
+     (("node_filesystem_avail_bytes", (("fstype", "!~", "tmpfs|overlay"),)),
+      ("node_filesystem_size_bytes", (("fstype", "!~", "tmpfs|overlay"),)))),
+    ("max by (cluster, name) (resilience4j_circuitbreaker_state{name=~\"read-source-.+\",state=\"open\"}) > 0",
+     (("resilience4j_circuitbreaker_state", (("name", "=~", "read-source-.+"), ("state", "=", "open"))),)),
+    ("node_memory_MemAvailable_bytes < 209715200", (("node_memory_MemAvailable_bytes", ()),)),
+    ("sum without (pod) (rate(aaa_total[5m:1m] offset 1h)) * on (cluster) group_left (region) bbb_info",
+     (("aaa_total", ()), ("bbb_info", ()))),
+    ("label_replace(up, \"dst\", \"$1 or src\", \"src\", \"(.*)\") > 1e3", (("up", ()),)),
+    ("sum by (uri) (avg_over_time(uri:http_server_requests_seconds_count:rate5m[$__range])) * $__range_s > 0",
+     (("uri:http_server_requests_seconds_count:rate5m", ()),)),
+    ("sum(increase(logback_events_total{level=~\"warn|error\"}[${__interval}])) by (cluster, level)",
+     (("logback_events_total", (("level", "=~", "warn|error"),)),)),
+    ('up{path="a\\"b"}', (("up", (("path", "=", 'a"b'),)),)),
+    ("vector(1)", ()),
+    ("a atan2 b", (("a", ()), ("b", ()))),
+    ("sum(a) BY (job)", (("a", ()),)),
+    ("a > Inf", (("a", ()),)),
+)
+EXPR_PROBLEMS = (
+    ("{__name__=\"up\"} == 0", "a selector without a metric name"),
+    ("up{__name__=\"up\"} == 0", "names its metric through __name__"),
+    ("up{job=\"x\" == 0", "never closes"),
+    ("up{job=~x} == 0", "do not parse"),
+)
 PAYLOAD_ENV = {"FOLDER_UID": "folder-uid", "DS_UID": "prom-uid", "LOKI_DS_UID": "loki-uid", "CW_DS_UID": "cw-uid",
                "ETCD_INTERVAL": "21600"}
 
@@ -47,6 +87,33 @@ def cloudwatch_rule(rule_name="probe-lag", **field_overrides):
     }
     rule_fields.update(field_overrides)
     return rule_fields
+
+
+class SelectorTest(unittest.TestCase):
+    def test_each_expression_yields_its_selectors_in_order(self):
+        for expr_text, expected_selectors in SELECTOR_CASES:
+            with self.subTest(expr_text=expr_text):
+                self.assertEqual(tuple((one_selector.metric_name, one_selector.label_matchers)
+                                       for one_selector in rules_module.expression_selectors(expr_text)),
+                                 expected_selectors)
+
+    def test_an_expression_it_cannot_read_says_why(self):
+        for expr_text, problem_text in EXPR_PROBLEMS:
+            with self.subTest(expr_text=expr_text):
+                with self.assertRaisesRegex(rules_module.ExprError, re.escape(problem_text)):
+                    rules_module.expression_selectors(expr_text)
+
+    def test_every_committed_prometheus_rule_reads_metrics_named_in_its_expr(self):
+        prometheus_rules = [rule_entry for rule_entry in rules_module.load_rules(rules_module.DEFAULT_FILES)
+                            if rule_entry.rule_kind == "prometheus"]
+        self.assertTrue(prometheus_rules)
+        for rule_entry in prometheus_rules:
+            expr_text = rule_entry.test_expr()
+            with self.subTest(rule_name=rule_entry.rule_name):
+                read_names = rules_module.metric_names(expr_text)
+                self.assertTrue(read_names)
+                for metric_name in read_names:
+                    self.assertRegex(expr_text, rf"(?<![\w:]){re.escape(metric_name)}(?![\w:])")
 
 
 class RulesCliTest(unittest.TestCase):
@@ -122,13 +189,34 @@ class RulesCliTest(unittest.TestCase):
                                "params not allowed on a loki rule")
         self.assert_load_error([prometheus_rule(threshold=60)], "rule probe-rule", "threshold not allowed")
 
+    def test_absent_until_event_names_only_metrics_the_expr_reads(self):
+        self.assert_load_error([prometheus_rule(absent_until_event=["down"])], "rule probe-rule",
+                               "absent_until_event names down, which expr does not read")
+        self.assert_load_error([prometheus_rule(absent_until_event="up")], "rule probe-rule",
+                               "absent_until_event must be a list of one or more metric names")
+        self.assert_load_error([prometheus_rule(absent_until_event=[])], "rule probe-rule",
+                               "absent_until_event must be a list")
+        self.assert_load_error([prometheus_rule(expr="{__name__=\"up\"} == 0", absent_until_event=["up"])],
+                               "rule probe-rule", "absent_until_event needs a readable expr")
+        self.assert_load_error([loki_rule(absent_until_event=["up"])], "rule probe-logs",
+                               "absent_until_event not allowed on a loki rule")
+
+    def test_absent_until_event_stays_out_of_grafana_and_promtool(self):
+        rule_file = self.rules_file("probe-rules.yaml", [prometheus_rule(absent_until_event=["up"])])
+        payload_result = self.run_rules([rule_file], "payloads", "probe-rules")
+        self.assertEqual(payload_result.returncode, 0, payload_result.stderr)
+        self.assertNotIn("absent_until_event", payload_result.stdout)
+        out_dir = Path(self.scratch_dir.name) / "promtool"
+        self.assertEqual(self.run_rules([rule_file], "promtool", str(out_dir)).returncode, 0)
+        self.assertNotIn("absent_until_event", (out_dir / "rules.yaml").read_text())
+
     def test_unknown_kind_cannot_load(self):
         self.assert_load_error([prometheus_rule(kind="graphite")], "rule probe-rule", "unknown kind 'graphite'")
 
     def test_duplicate_name_across_files_cannot_load(self):
         first_file = self.rules_file("first-rules.yaml", [prometheus_rule("shared-name")])
         second_file = self.rules_file("second-rules.yaml", [loki_rule("shared-name")])
-        run_result = self.run_rules([first_file, second_file], "exprs")
+        run_result = self.run_rules([first_file, second_file], "loki-cases")
         self.assertNotEqual(run_result.returncode, 0)
         self.assertIn(f"{second_file}: rule shared-name: duplicate name, also in {first_file}", run_result.stderr)
 
@@ -144,15 +232,15 @@ class RulesCliTest(unittest.TestCase):
         self.assertIn("rule probe-rule: param limit reads PROBE_LIMIT, which is not set", unset_result.stderr)
         set_result = self.run_rules([rule_file], "payloads", "probe-rules", extra_env={"PROBE_LIMIT": "7"})
         self.assertEqual(json.loads(set_result.stdout)["body"]["data"][0]["model"]["expr"], "up > 7")
-        self.assertEqual(self.run_rules([rule_file], "exprs").stdout, "up > 3\n")
+        self.assertEqual(rules_module.load_rules([rule_file])[0].test_expr(), "up > 3")
 
     def test_substitution_leaves_selector_and_template_braces(self):
         braced_expr = 'max by (cluster) (up{job="probe",cluster=~"a|b"}) > {limit} or vector({limit}) * {{limit}}'
         param_rule = prometheus_rule(expr=braced_expr, params={"limit": {"env": "PROBE_LIMIT", "test": 3}},
                                      summary="{{ $labels.cluster }} {limit}")
         rule_file = self.rules_file("probe-rules.yaml", [param_rule])
-        self.assertEqual(self.run_rules([rule_file], "exprs").stdout,
-                         'max by (cluster) (up{job="probe",cluster=~"a|b"}) > 3 or vector(3) * {{limit}}\n')
+        self.assertEqual(rules_module.load_rules([rule_file])[0].test_expr(),
+                         'max by (cluster) (up{job="probe",cluster=~"a|b"}) > 3 or vector(3) * {{limit}}')
         payload_result = self.run_rules([rule_file], "payloads", "probe-rules", extra_env={"PROBE_LIMIT": "9"})
         self.assertEqual(json.loads(payload_result.stdout)["body"]["annotations"]["summary"],
                          "{{ $labels.cluster }} {limit}")

@@ -42,6 +42,7 @@
   kind: prometheus
   for: 10m
   expr: 'kube_pod_container_status_waiting_reason{reason=~"CrashLoopBackOff|ImagePullBackOff|CreateContainerConfigError"} == 1'
+  absent_until_event: [kube_pod_container_status_waiting_reason]
   cases:
     fires:
       - series:
