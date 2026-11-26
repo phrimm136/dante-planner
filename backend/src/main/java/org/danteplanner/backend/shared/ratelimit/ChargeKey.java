@@ -11,8 +11,6 @@ public sealed interface ChargeKey {
     @Parsed
     record Client(String identifier, String endpoint) implements ChargeKey {
 
-        private static final String REFUSED_USER_TEXT = "null";
-
         public static Client parse(RateLimitPolicy policy, String clientIdentifier) {
             return new Client(clientIdentifier, fixedEndpoint(policy));
         }
@@ -24,7 +22,7 @@ public sealed interface ChargeKey {
 
         @Override
         public RateLimitExceededException refusal(long retryAfterSeconds) {
-            return new RateLimitExceededException(REFUSED_USER_TEXT, endpoint, retryAfterSeconds);
+            return new RateLimitExceededException("client", endpoint, retryAfterSeconds);
         }
     }
 
@@ -42,7 +40,7 @@ public sealed interface ChargeKey {
 
         @Override
         public RateLimitExceededException refusal(long retryAfterSeconds) {
-            return new RateLimitExceededException(String.valueOf(userId), endpoint, retryAfterSeconds);
+            return new RateLimitExceededException("user " + userId, endpoint, retryAfterSeconds);
         }
     }
 

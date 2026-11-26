@@ -13,9 +13,9 @@ public class RateLimitExceededException extends DomainException {
 
     private final String endpoint;
 
-    public RateLimitExceededException(String user, String endpoint, long retryAfterSeconds) {
+    public RateLimitExceededException(String subject, String endpoint, long retryAfterSeconds) {
         super(ErrorKind.OVER_QUOTA, ERROR_CODE,
-                "Rate limit exceeded for user " + user + " on endpoint " + endpoint);
+                "Rate limit exceeded for " + subject + " on endpoint " + endpoint);
         this.endpoint = endpoint;
         getHeaders().set(HttpHeaders.RETRY_AFTER, Long.toString(retryAfterSeconds));
     }
