@@ -1845,14 +1845,6 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   declare none, so a Redis replaying its AOF file counts as Ready and its Service sends it traffic.
   Worth doing with the auth Redis entry above.
   re-check: `.claude/skills/debt-ledger/bin/debt absent deploy/chart/templates/redis-auth.yaml 'readinessProbe'`
-- **Nothing finds a metric that production never emits.** An alert rule's cases feed it series
-  that the case itself writes, and the remote-write keep-list only filters what exists, so a
-  rule over a metric with no series in Mimir passes every gate and never fires. Five alerts were
-  dead this way, the last one because a ClusterRole lacked one rule. The fix is a read-only `ops`
-  command that takes the metric names from `deploy/grafana/rules` and reports each one with no
-  series in either region, run after any change to the rules, the keep-list or an exporter.
-  Worth doing at the next change to the `ops` CLI.
-  re-check: `.claude/skills/debt-ledger/bin/debt absent .claude/skills/ops/SKILL.md -i 'no series'`
 
 ## 2026-11-19 tests that need a hand edit after a data refresh
 

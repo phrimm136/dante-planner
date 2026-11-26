@@ -3,9 +3,10 @@
 remote_write keep regex in deploy/chart/templates/prometheus.yaml does not admit, or selects
 only series its label drop rules remove."""
 
+import importlib.machinery
+import importlib.util
 import json
 import re
-import subprocess
 import sys
 from pathlib import Path
 
@@ -18,16 +19,9 @@ DASHBOARD_FILE = GRAFANA_DIR / "fleet-dashboard.json"
 RULES_PY = GRAFANA_DIR / "rules.py"
 RULES_DIR = GRAFANA_DIR / "rules"
 
-PROMQL_KEYWORDS = {
-    "and", "or", "unless", "by", "without", "on", "ignoring",
-    "group_left", "group_right", "bool", "offset", "inf", "nan", "atan2",
-}
-
 JQ_EXPR_LITERAL = re.compile(r'expr:\s*"((?:[^"\\]|\\.)*)"')
 JQ_EXPR_CONCAT = re.compile(r'expr:\s*\(((?:"(?:[^"\\]|\\.)*"|[^()"])*)\)')
 JQ_STRING = re.compile(r'"((?:[^"\\]|\\.)*)"')
-SERIES_SELECTOR = re.compile(r"(?<![\w:])([A-Za-z_:][A-Za-z0-9_:]*)\s*\{([^}]*)\}")
-LABEL_MATCHER = re.compile(r'([A-Za-z_][A-Za-z0-9_]*)\s*(=~|!=|!~|=)\s*"((?:[^"\\]|\\.)*)"')
 REGEX_METACHARACTERS = set(".^$*+?()[]{}\\")
 
 
@@ -88,13 +82,25 @@ def matched_values(match_op, match_value):
     return None
 
 
-def dropped_selections(promql_expr, drop_rules):
+def rules_loader():
+    module_loader = importlib.machinery.SourceFileLoader("grafana_rules", str(RULES_PY))
+    rules_module = importlib.util.module_from_spec(importlib.util.spec_from_loader("grafana_rules", module_loader))
+    module_loader.exec_module(rules_module)
+    return rules_module
+
+
+def expr_selectors(rules_module, promql_expr):
+    try:
+        return rules_module.expression_selectors(promql_expr)
+    except rules_module.ExprError as expr_problem:
+        sys.exit(f"cannot read the metrics of {promql_expr!r}: {expr_problem}")
+
+
+def dropped_selections(series_selectors, drop_rules):
     selection_hits = []
-    for selector_match in SERIES_SELECTOR.finditer(promql_expr):
-        metric_name = selector_match.group(1)
-        for label_matcher in LABEL_MATCHER.finditer(selector_match.group(2)):
-            match_label, match_op, match_value = label_matcher.groups()
-            match_value = unescape_double(match_value)
+    for one_selector in series_selectors:
+        metric_name = one_selector.metric_name
+        for match_label, match_op, match_value in one_selector.label_matchers:
             selected_values = matched_values(match_op, match_value)
             if selected_values is None:
                 continue
@@ -112,11 +118,12 @@ def unescape_double(quoted_body):
     return re.sub(r'\\(.)', r"\1", quoted_body)
 
 
-def exprs_from_rules():
-    rules_run = subprocess.run([sys.executable, str(RULES_PY), "exprs"], capture_output=True, text=True)
-    if rules_run.returncode != 0:
-        sys.exit(f"{RULES_PY} exprs failed: {rules_run.stderr.strip()}")
-    return rules_run.stdout.splitlines()
+def exprs_from_rules(rules_module):
+    try:
+        loaded_rules = rules_module.load_rules(rules_module.DEFAULT_FILES)
+    except rules_module.RuleError as rule_problem:
+        sys.exit(f"{RULES_PY} could not load the rules: {rule_problem}")
+    return [rule_entry.test_expr() for rule_entry in loaded_rules if rule_entry.rule_kind == "prometheus"]
 
 
 def exprs_from_script(script_path):
@@ -146,28 +153,12 @@ def exprs_from_dashboard(dashboard_path):
     return found_exprs
 
 
-def metric_names(promql_expr):
-    stripped_expr = re.sub(r'"(?:[^"\\]|\\.)*"|\'(?:[^\'\\]|\\.)*\'|`[^`]*`', "", promql_expr)
-    stripped_expr = re.sub(r"\{[^}]*\}|\[[^\]]*\]", " ", stripped_expr)
-    stripped_expr = re.sub(
-        r"\b(?:by|without|on|ignoring|group_left|group_right)\s*\([^)]*\)", " ", stripped_expr
-    )
-    stripped_expr = re.sub(r"\$[A-Za-z_][A-Za-z0-9_]*", " ", stripped_expr)
-    stripped_expr = re.sub(r"(?<![\w:.])\d*\.?\d+(?:[eE][+-]?\d+)?[a-z]*", " ", stripped_expr)
-    name_hits = re.finditer(r"[A-Za-z_:][A-Za-z0-9_:]*", stripped_expr)
-    return {
-        name_hit.group(0)
-        for name_hit in name_hits
-        if name_hit.group(0) not in PROMQL_KEYWORDS
-        and not re.match(r"\s*\(", stripped_expr[name_hit.end():])
-    }
-
-
 def main():
     config_text = PROMETHEUS_CONFIG.read_text()
     keep_regex = keep_regex_from_config(config_text)
     drop_rules = drop_rules_from_config(config_text)
-    expr_sources = [(RULES_DIR, exprs_from_rules())]
+    rules_module = rules_loader()
+    expr_sources = [(RULES_DIR, exprs_from_rules(rules_module))]
     expr_sources += [(script_path, exprs_from_script(script_path)) for script_path in sorted(GRAFANA_DIR.glob("*.sh"))]
     expr_sources.append((DASHBOARD_FILE, exprs_from_dashboard(DASHBOARD_FILE)))
 
@@ -176,9 +167,10 @@ def main():
     checked_names = set()
     for source_path, source_exprs in expr_sources:
         for promql_expr in source_exprs:
-            for selection_hit in dropped_selections(promql_expr, drop_rules):
+            series_selectors = expr_selectors(rules_module, promql_expr)
+            for selection_hit in dropped_selections(series_selectors, drop_rules):
                 dropped_hits.setdefault(selection_hit, set()).add(source_path.relative_to(REPO_ROOT))
-            for metric_name in metric_names(promql_expr):
+            for metric_name in {one_selector.metric_name for one_selector in series_selectors}:
                 checked_names.add(metric_name)
                 if not keep_regex.fullmatch(metric_name):
                     missing_names.setdefault(metric_name, set()).add(source_path.relative_to(REPO_ROOT))

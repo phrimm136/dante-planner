@@ -5,12 +5,13 @@ from pathlib import Path
 
 from opscli.paths import (
     ACCOUNT_VARIABLE, ACCOUNT_VARS_EXAMPLE, APP_SCRIPT, BLOCKED_EXIT, BOOTLOG_SCRIPT, DAY_PATTERN, DB_VERIFY_SCRIPT,
-    DEFAULT_BOOTLOG_LINES, DEFAULT_ENV, DEFAULT_SITE, INSTANCE_PATTERN, NODES_SCRIPT,
+    DEFAULT_BOOTLOG_LINES, DEFAULT_ENV, DEFAULT_SERIES_WINDOW, DEFAULT_SITE, INSTANCE_PATTERN, NODES_SCRIPT,
     ENV_PROFILES, FLEET_VERIFY_SCRIPT, GUARDED_UPDATE_TYPES, LOGS_SCRIPT, METRICS_SCRIPT, NET_NAMES,
-    OpsError, SETTINGS_DIR, SINCE_PATTERN, SITE_NAMES, SQL_SCRIPT, STEP_PATTERN, STS_ARGV, TERRAFORM_RUNNER,
+    OpsError, RULES_LOADER, SETTINGS_DIR, SINCE_PATTERN, SITE_NAMES, SQL_SCRIPT, STEP_PATTERN, STS_ARGV, TERRAFORM_RUNNER,
     TUNNEL_MODES, TUNNEL_SCRIPT, VERDICT_SUFFIX, WARN_CHECK_STATUSES, log_stem)
 from opscli.redaction import KEY_BLOCK_MAX_LINES, SecretRedactor, redact_text, redacted_log
 from opscli.session import child_environment, require_docker, require_session, write_header
+from opscli.series import run_series_check
 
 FIRST_LINE_DROPPED = "<first line dropped: the console buffer may start inside a secret>\n"
 USAGE_TEXT = f"""usage: ops [--env prod|staging|mgmt] <command> [args]
@@ -34,6 +35,15 @@ nodes:      one line per app, data, ingress and cp instance and node: joined, jo
             10 minutes, no node), NOT JOINED (running 10 minutes or more, no node) or gone (a node with
             no instance). Exit 0 all joined, 4 one joining, 1 one NOT JOINED or gone, 2 not readable. A
             NOT JOINED surge instance of the app ASG gets a `!` command for you to run; ops never runs it.
+verify rules: loads the alert rules through {RULES_LOADER} (params at their test values), takes the
+            metric names each prometheus rule's expression reads, and asks Mimir in one metrics-query.sh
+            read which of {' and '.join(SITE_NAMES)} has any series of each within --since (default
+            {DEFAULT_SERIES_WINDOW}). A selector with cluster="<site>" is checked in that site only. One line per
+            rule: ok, NO SERIES <metric> (<sites>)..., or unreadable <reason>; a metric the rule lists
+            in absent_until_event (a series that exists only while its event lasts) prints
+            ok (absent until event) when it has none. Loki and cloudwatch rules are counted, not
+            checked. Exit 0 every rule has series, 1 one has no series, 2 one is unreadable. Reads
+            only; run it after a change to the rules, the keep-list or an exporter.
 repo root:  the checkout this CLI file lives in, whatever the current directory.
 tf plan:    writes the plan file beside its log (ops-tf-<stack>-<ts>.plan), keeps the full plan
             text in the log, and prints one line per changed resource (- destroy, -/+ replace,
@@ -107,6 +117,10 @@ DISPATCH_TABLE = (
     CommandSpec("verify fleet", "[--site oregon|seoul]",
                 "a site's nodes, pods, Argo CD apps, RDS reachability and etcd snapshots (fleet-verify.sh); "
                 "site default oregon", FLEET_VERIFY_SCRIPT),
+    CommandSpec("verify rules", "[--since D]",
+                "one line per Prometheus alert rule in deploy/grafana/rules: ok, NO SERIES with each metric it "
+                "reads that has no series in a region within the window, or unreadable (metrics-query.sh); since "
+                f"default {DEFAULT_SERIES_WINDOW}; exit 1 on no series, 2 unreadable", METRICS_SCRIPT),
     CommandSpec("nodes", "[--site oregon|seoul]",
                 "each app, data, ingress and cp instance joined with its cluster node (fleet-nodes.sh); exit 4 while "
                 "one is joining, 1 when one has not joined or a node has no instance", NODES_SCRIPT),
@@ -205,6 +219,7 @@ class ScriptInvocation:
     needs_docker: bool = False
     site_stack: str = ""
     tail_lines: int = 0
+    series_window: str = ""
 
 
 class ArgReader:
@@ -358,6 +373,13 @@ def verify_invocation(arg_words):
         raise OpsError(f"ops verify takes one of {', '.join(target_names)}; see ops list")
     target_name = arg_words[0]
     arg_reader = ArgReader(f"ops verify {target_name}", arg_words[1:])
+    if target_name == "rules":
+        option_values, free_words = arg_reader.split_options({"--since"})
+        if free_words:
+            arg_reader.raise_failure(f"takes only --since, not '{free_words[0]}'")
+        window_text = arg_reader.matched_value(option_values, "--since", SINCE_PATTERN, "a window like 30m, 6h or 2d")
+        return ScriptInvocation(spec_named("verify rules"), (), ("verify", "rules"), True,
+                                series_window=window_text or DEFAULT_SERIES_WINDOW)
     if target_name != "fleet":
         if arg_words[1:]:
             arg_reader.raise_failure("takes no arguments")
@@ -442,6 +464,8 @@ def run_invocation(repo_paths, script_invocation, env_name, system_effects, run_
     profile_name = ENV_PROFILES[env_name or DEFAULT_ENV]
     if script_invocation.command_spec.command_name == "whoami":
         return run_whoami(repo_paths, profile_name, system_effects, run_moment)
+    if script_invocation.command_spec.command_name == "verify rules":
+        return run_series_check(repo_paths, script_invocation.series_window, profile_name, system_effects, run_moment)
     if script_invocation.needs_session:
         require_session(repo_paths, profile_name, system_effects)
     if script_invocation.needs_docker:
