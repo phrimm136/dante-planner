@@ -694,8 +694,41 @@ def test_a_tooling_change_runs_the_tooling_suites():
     assert [one_row[0] for one_row in changed_rows(".githooks/pre-push")] == ["tools test"]
 
 
+def test_an_ops_script_or_its_test_runs_the_tooling_suites():
+    for changed_path in ("scripts/ops/provision/k3s-snapshot-schedule-repair.sh",
+                         "scripts/ops/tests/test_snapshot_repair.py", ".github/scripts/no-real-time-in-tooling-tests.py"):
+        assert [one_row[0] for one_row in changed_rows(changed_path)] == ["tools test"], changed_path
+
+
+def fleet_tree_rows(tree_root, changed_path):
+    for stack_name, source_text in (("oregon", 'module "fleet" {\n  source = "../modules/fleet"\n}\n'),
+                                    ("rds", 'module "db" {\n  source = "../modules/rds"\n}\n')):
+        (tree_root / "terraform" / stack_name).mkdir(parents=True, exist_ok=True)
+        (tree_root / "terraform" / stack_name / "main.tf").write_text(source_text)
+    return [run_plan.step_label for run_plan, _ in checks_cli.changed_plans(
+        checks_cli.RepoPaths(tree_root, tree_root), {changed_path}, "abc123")]
+
+
+@pytest.mark.parametrize("changed_path", [
+    "terraform/modules/fleet/user-data/cp.sh.tftpl", "terraform/modules/fleet/variables.tf",
+    "terraform/oregon/variables.tf", "terraform/oregon/environment.tfvars.example", "terraform/rds/main.tf",
+    "deploy/chart/templates/external-secrets.yaml", "deploy/chart/values-seoul.yaml",
+    ".github/workflows/deploy-fleet.yml", "deploy/argocd/root-app-oregon.yaml", ".claude/settings.json",
+    "scripts/dev/seed.sh", "terraform/oregon/envs/prod.tfvars"])
+def test_an_input_the_ops_tests_read_runs_the_tooling_suites(tmp_path, changed_path):
+    assert fleet_tree_rows(tmp_path, changed_path) == ["tools test"]
+
+
+@pytest.mark.parametrize("changed_path", [
+    "terraform/rds/variables.tf", "terraform/modules/rds/main.tf", "terraform/oregon/README.md",
+    "terraform/oregon/.terraform.lock.hcl", "deploy/chart/templates/backend.yaml", "deploy/chart/values.yaml",
+    "deploy/argocd/project.yaml", "scripts/dev/seed.py", ".claude/settings.local.json"])
+def test_a_terraform_or_chart_file_no_ops_test_reads_reaches_nothing(tmp_path, changed_path):
+    assert fleet_tree_rows(tmp_path, changed_path) == []
+
+
 def test_a_path_no_check_reads_reaches_nothing():
-    assert changed_rows("docs/adr/509-x.md", "terraform/main.tf", "backend/README.md",
+    assert changed_rows("docs/adr/509-x.md", "terraform/modules/rds/main.tf", "backend/README.md",
                         "frontend/CLAUDE.md", ".claude/skills/checks/SKILL.md") == []
 
 
