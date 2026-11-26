@@ -41,6 +41,7 @@ public class CommentModerationTargetAdapter implements CommentModerationTarget {
     }
 
     private static ModeratedComment moderated(CommentRow comment) {
-        return new ModeratedComment(comment.id(), comment.publicId(), comment.isDeleted());
+        return new ModeratedComment(comment.id(), comment.publicId(),
+                comment.isDeleted() ? ModeratedComment.State.DELETED : ModeratedComment.State.LIVE);
     }
 }

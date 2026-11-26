@@ -10,6 +10,7 @@ import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator.VisibleThread;
 import org.danteplanner.backend.planner.api.PlannerAccess;
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.freshness.ScopedRead;
 import org.danteplanner.backend.user.api.UserSummary;
@@ -23,7 +24,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -125,11 +125,11 @@ public class CommentQueryService {
 
         return topLevel.stream()
                 .map(c -> buildNode(c, new CommentTreeNode.Parent.Thread(), childrenMap, userMap, upvotedIds, viewer))
-                .flatMap(Optional::stream)
+                .flatMap(Option::stream)
                 .toList();
     }
 
-    private Optional<CommentTreeNode> buildNode(
+    private Option<CommentTreeNode> buildNode(
             CommentRow comment,
             CommentTreeNode.Parent parent,
             Map<Long, List<CommentRow>> childrenMap,
@@ -142,11 +142,11 @@ public class CommentQueryService {
         List<CommentTreeNode> childNodes = children.stream()
                 .sorted(Comparator.comparing(CommentRow::createdAt))
                 .map(c -> buildNode(c, self, childrenMap, userMap, upvotedIds, viewer))
-                .flatMap(Optional::stream)
+                .flatMap(Option::stream)
                 .toList();
 
         if (comment.isDeleted() && childNodes.isEmpty()) {
-            return Optional.empty();
+            return new Option.None<>();
         }
 
         UserSummary summary = userMap.get(comment.userId());
@@ -157,7 +157,7 @@ public class CommentQueryService {
                 ? CommentTreeNode.Upvote.CAST
                 : CommentTreeNode.Upvote.NONE;
 
-        return Optional.of(CommentTreeNode.fromEntity(
+        return new Option.Some<>(CommentTreeNode.fromEntity(
                 comment, parent, author, viewer, upvote, childNodes));
     }
 }

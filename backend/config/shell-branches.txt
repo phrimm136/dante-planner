@@ -35,7 +35,7 @@ org.danteplanner.backend.planner.service.PlannerEngagementService.castVote(java.
 org.danteplanner.backend.planner.service.PublishedPlannerQueryService.mapCatalogWithUserContext(org.springframework.data.domain.Page, org.danteplanner.backend.shared.security.Viewer) # 1
 org.danteplanner.backend.planner.service.PublishedPlannerQueryService.memberView(org.danteplanner.backend.shared.security.Viewer$Member, org.danteplanner.backend.planner.repository.StoredPlanner) # 3
 org.danteplanner.backend.planner.service.ViewCountFlushService.applyBatch(java.util.UUID, java.util.Map) # 1
-org.danteplanner.backend.shared.config.ChosenReadSource.record(org.danteplanner.backend.shared.config.ReadSourceSelector$Source) # 3
+org.danteplanner.backend.shared.config.ChosenReadSource.record(org.danteplanner.backend.shared.config.ReadSourceSelector$Source) # 1
 org.danteplanner.backend.shared.config.DeviceIdArgumentResolver.resolveArgument(org.springframework.core.MethodParameter, org.springframework.web.method.support.ModelAndViewContainer, org.springframework.web.context.request.NativeWebRequest, org.springframework.web.bind.support.WebDataBinderFactory) # 2
 org.danteplanner.backend.shared.config.DeviceIdResolver.resolve(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse) # 1
 org.danteplanner.backend.shared.config.JwtProperties.loadPrivateKey(java.lang.String) # 1
@@ -110,7 +110,7 @@ org.danteplanner.backend.shared.sse.SseService.sendToUser(java.lang.Long, java.l
 org.danteplanner.backend.shared.sse.SseSubscription.connect() # 3
 org.danteplanner.backend.shared.util.ClientIpResolver.isPrivateIp(java.lang.String) # 3
 org.danteplanner.backend.shared.util.ClientIpResolver.resolveClientIdentifier(jakarta.servlet.http.HttpServletRequest, org.danteplanner.backend.shared.config.SecurityProperties, java.util.function.Supplier) # 2
-org.danteplanner.backend.shared.util.CookieUtils.buildCookie(java.lang.String, java.lang.String, int, boolean) # 1
+org.danteplanner.backend.shared.util.CookieUtils.buildCookie(java.lang.String, java.lang.String, int) # 1
 org.danteplanner.backend.shared.util.CookieUtils.getCookieValue(jakarta.servlet.http.HttpServletRequest, java.lang.String) # 2
 org.danteplanner.backend.shared.util.HtmlSanitizer.sanitize(java.lang.String) # 2
 org.danteplanner.backend.user.scheduler.UserCleanupScheduler.cleanupExpiredUsers() # 2

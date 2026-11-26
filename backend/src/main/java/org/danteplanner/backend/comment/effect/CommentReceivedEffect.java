@@ -11,6 +11,7 @@ import org.danteplanner.backend.notification.api.Notifications;
 import org.danteplanner.backend.planner.api.PlannerNotificationTarget;
 import org.danteplanner.backend.planner.api.PublishedPlanners;
 import org.danteplanner.backend.shared.entity.SseEventType;
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
@@ -19,8 +20,6 @@ import org.danteplanner.backend.shared.outbox.service.DomainEffectHandler;
 import org.danteplanner.backend.shared.outbox.service.DomainEventPayloadReader;
 import org.danteplanner.backend.shared.outbox.service.EffectPushQueue;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -41,7 +40,7 @@ public class CommentReceivedEffect implements DomainEffectHandler {
     @Override
     public void applyEffect(DomainEvent event, EffectPushQueue pushes) {
         long commentId = payloads.requireId(event, "commentId");
-        switch (Subject.of(commentRepository.findRowById(commentId))) {
+        switch (Subject.of(Option.from(commentRepository.findRowById(commentId)))) {
             case Subject.Gone gone -> log.info("Comment {} is gone before it was announced", commentId);
             case Subject.Withdrawn withdrawn ->
                     log.info("Comment {} was withdrawn before it was announced", commentId);
@@ -50,10 +49,10 @@ public class CommentReceivedEffect implements DomainEffectHandler {
     }
 
     private void announce(CommentRow comment, EffectPushQueue pushes) {
-        switch (Destination.of(publishedPlanners.notificationTargetOf(comment.plannerId()))) {
-            case Destination.Gone gone -> log.info("Planner {} is gone before comment {} was announced",
+        switch (Option.from(publishedPlanners.notificationTargetOf(comment.plannerId()))) {
+            case Option.None() -> log.info("Planner {} is gone before comment {} was announced",
                     comment.plannerId(), comment.id());
-            case Destination.Known(PlannerNotificationTarget target) -> {
+            case Option.Some(PlannerNotificationTarget target) -> {
                 notifyOwner(comment, target, pushes);
                 pushToThread(comment, pushes);
             }
@@ -106,22 +105,8 @@ public class CommentReceivedEffect implements DomainEffectHandler {
         record Live(CommentRow comment) implements Subject {
         }
 
-        static Subject of(Optional<CommentRow> found) {
-            return found.<Subject>map(comment -> comment.isDeleted() ? new Withdrawn() : new Live(comment))
-                    .orElseGet(Gone::new);
-        }
-    }
-
-    sealed interface Destination {
-
-        record Gone() implements Destination {
-        }
-
-        record Known(PlannerNotificationTarget target) implements Destination {
-        }
-
-        static Destination of(Optional<PlannerNotificationTarget> target) {
-            return target.<Destination>map(Known::new).orElseGet(Gone::new);
+        static Subject of(Option<CommentRow> found) {
+            return found.fold(comment -> comment.isDeleted() ? new Withdrawn() : new Live(comment), Gone::new);
         }
     }
 

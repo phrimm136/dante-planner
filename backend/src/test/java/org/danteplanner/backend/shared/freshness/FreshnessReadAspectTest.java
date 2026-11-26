@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 import javax.sql.DataSource;
 
@@ -142,7 +143,8 @@ class FreshnessReadAspectTest {
         }
 
         private Attempt attempt() {
-            Attempt attempt = new Attempt(ChosenReadSource.source().map(ReadSourceSelector.Source::name).orElse(""),
+            Attempt attempt = new Attempt(
+                    ChosenReadSource.source().map(ReadSourceSelector.Source::name).fold(Function.identity(), () -> ""),
                     TransactionSynchronizationManager.isActualTransactionActive(),
                     TransactionSynchronizationManager.isCurrentTransactionReadOnly());
             attempts.add(attempt);

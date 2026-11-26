@@ -3,7 +3,6 @@ package org.danteplanner.backend.comment.effect;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.comment.dto.CommentTreeNode;
-import org.danteplanner.backend.comment.effect.CommentReceivedEffect.Destination;
 import org.danteplanner.backend.comment.effect.CommentReceivedEffect.Recipient;
 import org.danteplanner.backend.comment.effect.CommentReceivedEffect.Subject;
 import org.danteplanner.backend.comment.effect.CommentReceivedEffect.Visibility;
@@ -14,6 +13,7 @@ import org.danteplanner.backend.notification.api.Notifications;
 import org.danteplanner.backend.planner.api.PlannerNotificationTarget;
 import org.danteplanner.backend.planner.api.PublishedPlanners;
 import org.danteplanner.backend.shared.entity.SseEventType;
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
@@ -23,7 +23,7 @@ import org.danteplanner.backend.shared.outbox.service.DomainEventPayloadReader;
 import org.danteplanner.backend.shared.outbox.service.EffectPushQueue;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
+import java.util.function.Function;
 
 @Component
 @RequiredArgsConstructor
@@ -44,7 +44,7 @@ public class ReplyReceivedEffect implements DomainEffectHandler {
     @Override
     public void applyEffect(DomainEvent event, EffectPushQueue pushes) {
         long replyId = payloads.requireId(event, "replyId");
-        switch (Subject.of(commentRepository.findRowById(replyId))) {
+        switch (Subject.of(Option.from(commentRepository.findRowById(replyId)))) {
             case Subject.Gone gone -> log.info("Reply {} is gone before it was announced", replyId);
             case Subject.Withdrawn withdrawn -> log.info("Reply {} was withdrawn before it was announced", replyId);
             case Subject.Live(CommentRow reply) -> announce(reply, pushes);
@@ -52,16 +52,16 @@ public class ReplyReceivedEffect implements DomainEffectHandler {
     }
 
     private void announce(CommentRow reply, EffectPushQueue pushes) {
-        switch (Destination.of(publishedPlanners.notificationTargetOf(reply.plannerId()))) {
-            case Destination.Gone gone -> log.info("Planner {} is gone before reply {} was announced",
+        switch (Option.from(publishedPlanners.notificationTargetOf(reply.plannerId()))) {
+            case Option.None() -> log.info("Planner {} is gone before reply {} was announced",
                     reply.plannerId(), reply.id());
-            case Destination.Known(PlannerNotificationTarget target) -> announceOn(target, reply, pushes);
+            case Option.Some(PlannerNotificationTarget target) -> announceOn(target, reply, pushes);
         }
     }
 
     private void announceOn(PlannerNotificationTarget target, CommentRow reply, EffectPushQueue pushes) {
-        Optional<CommentRow> parent = Optional.ofNullable(reply.parentCommentId())
-                .flatMap(commentRepository::findRowById);
+        Option<CommentRow> parent = Option.fromNullable(reply.parentCommentId())
+                .flatMap(parentId -> Option.from(commentRepository.findRowById(parentId)));
         Visibility visibility = Visibility.of(publishedPlanners.isPublished(reply.plannerId()));
 
         notifyParentAuthor(recipientOf(reply, parent, target, visibility), reply, target, pushes);
@@ -93,17 +93,16 @@ public class ReplyReceivedEffect implements DomainEffectHandler {
         }
     }
 
-    private static Recipient recipientOf(CommentRow reply, Optional<CommentRow> parent,
+    private static Recipient recipientOf(CommentRow reply, Option<CommentRow> parent,
             PlannerNotificationTarget target, Visibility visibility) {
         return parent.filter(it -> !it.isDeleted())
                 .filter(it -> visibility == Visibility.PUBLIC || it.userId().equals(target.ownerId()))
                 .filter(it -> !reply.userId().equals(it.userId()) && it.authorNotificationsEnabled())
                 .<Recipient>map(it -> new Recipient.Member(it.userId()))
-                .orElseGet(Recipient.Nobody::new);
+                .fold(Function.identity(), Recipient.Nobody::new);
     }
 
-    private static CommentTreeNode.Parent nodeParentOf(Optional<CommentRow> parent) {
-        return parent.<CommentTreeNode.Parent>map(it -> new CommentTreeNode.Parent.Comment(it.publicId()))
-                .orElseGet(CommentTreeNode.Parent.Thread::new);
+    private static CommentTreeNode.Parent nodeParentOf(Option<CommentRow> parent) {
+        return parent.fold(it -> new CommentTreeNode.Parent.Comment(it.publicId()), CommentTreeNode.Parent.Thread::new);
     }
 }

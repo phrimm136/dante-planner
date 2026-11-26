@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class OptionalSignatureScopeRuleTest {
 
     private static final String ROOT = "org.danteplanner.backend";
-    private static final Set<String> MODULES = Set.of("user", "auth");
+    private static final Set<String> MODULES = Set.of("user", "auth", "moderation", "notification", "admin", "comment");
     private static final String FIXTURE_ROOT = "org.danteplanner.fixture.optionalsignature";
     private static final String FIXTURE = FIXTURE_ROOT + ".scoped.OptionalSignatureFixture";
 

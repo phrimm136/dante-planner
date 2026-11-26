@@ -1,24 +1,27 @@
 package org.danteplanner.backend.shared.config;
 
-import java.util.Optional;
+import java.util.function.Function;
+
+import org.danteplanner.backend.shared.failure.Option;
 
 public final class ChosenReadSource {
 
-    private static final ThreadLocal<ReadSourceSelector.Source> CHOSEN = new ThreadLocal<>();
+    private static final ThreadLocal<Option<ReadSourceSelector.Source>> CHOSEN =
+            ThreadLocal.withInitial(Option.None::new);
 
     private ChosenReadSource() {
     }
 
     public static void record(ReadSourceSelector.Source source) {
-        ReadSourceSelector.Source chosen = CHOSEN.get();
-        if (chosen == null || (chosen.authority() == ReadSourceSelector.Authority.PRIMARY
-                && source.authority() == ReadSourceSelector.Authority.REPLICA)) {
-            CHOSEN.set(source);
-        }
+        ReadSourceSelector.Source recorded = CHOSEN.get()
+                .filter(chosen -> chosen.authority() != ReadSourceSelector.Authority.PRIMARY
+                        || source.authority() != ReadSourceSelector.Authority.REPLICA)
+                .fold(Function.identity(), () -> source);
+        CHOSEN.set(new Option.Some<>(recorded));
     }
 
-    public static Optional<ReadSourceSelector.Source> source() {
-        return Optional.ofNullable(CHOSEN.get());
+    public static Option<ReadSourceSelector.Source> source() {
+        return CHOSEN.get();
     }
 
     public static void clear() {

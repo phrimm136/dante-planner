@@ -26,7 +26,7 @@ public class CommentModerationService {
     public void deleteComment(Long actorId, Long commentId) {
         ModeratedComment comment = commentTarget.requireById(commentId);
 
-        if (comment.deleted()) {
+        if (comment.state() == ModeratedComment.State.DELETED) {
             return;
         }
 
@@ -45,7 +45,7 @@ public class CommentModerationService {
         auditService.record(actorId, comment.publicId().toString(),
                 ModerationActionType.DELETE_COMMENT, ModerationTargetType.COMMENT, reason);
 
-        if (comment.deleted()) {
+        if (comment.state() == ModeratedComment.State.DELETED) {
             log.info("Moderator {} attempted delete of already-deleted comment {} (idempotent)", actorId, commentPublicId);
             return;
         }

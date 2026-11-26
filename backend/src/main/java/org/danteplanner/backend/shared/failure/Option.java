@@ -4,7 +4,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 import org.jspecify.annotations.Nullable;
@@ -39,6 +41,14 @@ public sealed interface Option<T> {
             case Some<T>(T value) -> mapper.apply(value);
             case None<T>() -> new None<>();
         };
+    }
+
+    default Option<T> filter(Predicate<? super T> kept) {
+        return flatMap(value -> kept.test(value) ? new Some<>(value) : new None<>());
+    }
+
+    default Stream<T> stream() {
+        return fold(Stream::of, Stream::empty);
     }
 
     default <R> R fold(Function<? super T, ? extends R> some, Supplier<? extends R> none) {

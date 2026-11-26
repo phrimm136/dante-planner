@@ -50,6 +50,9 @@ public class SseRedisSubscriber implements MessageListener {
     }
 
     private static Object clientPayload(SseEnvelope envelope, Object payload, ClientSseEvent event) {
-        return envelope.type().deliversRawPayload() ? payload : event;
+        return switch (envelope.type().payloadDelivery()) {
+            case RAW -> payload;
+            case ENVELOPE -> event;
+        };
     }
 }

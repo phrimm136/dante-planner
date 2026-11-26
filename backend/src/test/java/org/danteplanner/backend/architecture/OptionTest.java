@@ -70,6 +70,24 @@ class OptionTest {
     }
 
     @Test
+    void filter_WhenSomeKeptOrRejected_ReturnsSomeOrNone() {
+        assertThat(SOME.filter(value -> value == 2)).isEqualTo(new Option.Some<>(2));
+        assertThat(SOME.filter(value -> value != 2)).isEqualTo(new Option.None<>());
+    }
+
+    @Test
+    void filter_WhenNone_SkipsThePredicate() {
+        assertThat(NONE.filter(value -> calls.incrementAndGet() > 0)).isEqualTo(new Option.None<>());
+        assertThat(calls).hasValue(0);
+    }
+
+    @Test
+    void stream_WhenSomeOrNone_HoldsTheValueOrNothing() {
+        assertThat(SOME.stream()).containsExactly(2);
+        assertThat(NONE.stream()).isEmpty();
+    }
+
+    @Test
     void fold_WhenSomeOrNone_TakesTheMatchingBranch() {
         assertThat(SOME.fold(value -> "some " + value, () -> "none")).isEqualTo("some 2");
         assertThat(NONE.fold(value -> "some " + value, () -> "none")).isEqualTo("none");

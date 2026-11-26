@@ -1,13 +1,14 @@
 package org.danteplanner.backend.shared.config;
 
-import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
 import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.danteplanner.backend.shared.failure.Option;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 
@@ -26,27 +27,24 @@ public class DeviceIdResolver {
             return memoised;
         }
 
-        UUID deviceId = readDeviceId(request).orElseGet(() -> {
-            UUID minted = UUID.randomUUID();
-            cookieUtils.setCookie(
-                    response, CookieConstants.DEVICE_ID, minted.toString(), DEVICE_ID_MAX_AGE_SECONDS);
-            return minted;
-        });
+        UUID deviceId = Option.from(cookieUtils.getCookieValue(request, CookieConstants.DEVICE_ID))
+                .flatMap(DeviceIdResolver::parseUuid)
+                .fold(Function.identity(), () -> {
+                    UUID minted = UUID.randomUUID();
+                    cookieUtils.setCookie(
+                            response, CookieConstants.DEVICE_ID, minted.toString(), DEVICE_ID_MAX_AGE_SECONDS);
+                    return minted;
+                });
 
         request.setAttribute(REQUEST_ATTRIBUTE, deviceId);
         return deviceId;
     }
 
-    private Optional<UUID> readDeviceId(HttpServletRequest request) {
-        return cookieUtils.getCookieValue(request, CookieConstants.DEVICE_ID)
-                .flatMap(DeviceIdResolver::parseUuid);
-    }
-
-    private static Optional<UUID> parseUuid(String value) {
+    private static Option<UUID> parseUuid(String value) {
         try {
-            return Optional.of(UUID.fromString(value));
+            return new Option.Some<>(UUID.fromString(value));
         } catch (IllegalArgumentException e) {
-            return Optional.empty();
+            return new Option.None<>();
         }
     }
 }

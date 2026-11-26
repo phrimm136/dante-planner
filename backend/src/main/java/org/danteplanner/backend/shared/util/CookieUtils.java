@@ -31,16 +31,18 @@ public class CookieUtils {
     }
 
     public void setCookie(HttpServletResponse response, String name, String value, int maxAgeSeconds) {
-        response.addCookie(buildCookie(name, value, maxAgeSeconds, true));
+        response.addCookie(buildCookie(name, value, maxAgeSeconds));
     }
 
     public void setReadableCookie(HttpServletResponse response, String name, String value, int maxAgeSeconds) {
-        response.addCookie(buildCookie(name, value, maxAgeSeconds, false));
+        Cookie cookie = buildCookie(name, value, maxAgeSeconds);
+        cookie.setHttpOnly(false);
+        response.addCookie(cookie);
     }
 
-    private Cookie buildCookie(String name, String value, int maxAgeSeconds, boolean httpOnly) {
+    private Cookie buildCookie(String name, String value, int maxAgeSeconds) {
         Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(httpOnly);
+        cookie.setHttpOnly(true);
         cookie.setSecure(secureCookies);
         cookie.setPath("/");
         cookie.setMaxAge(maxAgeSeconds);
@@ -54,7 +56,7 @@ public class CookieUtils {
     public void clearCookie(HttpServletResponse response, String name) {
         // A browser drops the stored cookie only when the expiring one matches it on
         // domain/path/secure, so the attributes must come from the same builder that set it.
-        response.addCookie(buildCookie(name, "", 0, true));
+        response.addCookie(buildCookie(name, "", 0));
     }
 
     public void clearAuthCookies(HttpServletResponse response) {
