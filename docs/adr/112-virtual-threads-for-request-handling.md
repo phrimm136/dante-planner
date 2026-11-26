@@ -9,12 +9,6 @@
   costing a stack.
   REJECTED: tuning `server.tomcat.threads.max` per profile — the right cap differs between the
   primary-only pod and the routing pod, and every fixed cap is wrong on the side that saturates first.
-- @threads @pinning — The switch is safe on JDK 21 because every blocking path unmounts: Connector/J
-  9.x replaced its I/O monitors with `ReentrantLock` (9.0.0), Lettuce runs on Netty and never blocks a
-  request thread, and the rate-limit proxy's lazy Redis connect holds a `ReentrantLock` that concurrent
-  callers skip rather than wait on.
-  REJECTED: waiting for the JDK release that lifts monitor pinning — nothing in this codebase waits
-  on it.
 - @threads @schedulers — The hand-built pools (shared scheduler, view-flush scheduler, SSE heartbeat
   worker, outbox dispatch executor) stay platform-thread pools; the flag does not reach them. Those
   pools exist to bound concurrency, not to provide it: the view-flush scheduler's single thread and
@@ -24,6 +18,14 @@
 - @threads @backpressure — Backpressure moves from Tomcat's thread cap to Hikari's
   `connection-timeout`. A burst that used to queue at the acceptor now queues at the pool and
   surfaces as a pool-timeout after five seconds; `hikari_pool_pending` is the saturation signal.
+
+## Superseded
+- @threads @pinning → 572 — The switch is safe on JDK 21 because every blocking path unmounts: Connector/J
+  9.x replaced its I/O monitors with `ReentrantLock` (9.0.0), Lettuce runs on Netty and never blocks a
+  request thread, and the rate-limit proxy's lazy Redis connect holds a `ReentrantLock` that concurrent
+  callers skip rather than wait on.
+  REJECTED: waiting for the JDK release that lifts monitor pinning — nothing in this codebase waits
+  on it.
 
 ## Takeaway
 - takeaway: A blocking-I/O service gains from virtual threads only when every driver on the request

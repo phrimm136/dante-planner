@@ -38,7 +38,7 @@ version = "0.0.1-SNAPSHOT"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -180,7 +180,8 @@ tasks.withType<Test> {
     // exhaust the adapter space ("Out of space in CodeCache for adapters").
     jvmArgs("-XX:TieredStopAtLevel=1", "-XX:+UseG1GC", "-XX:+HeapDumpOnOutOfMemoryError",
             "-XX:MinHeapFreeRatio=10", "-XX:MaxHeapFreeRatio=30",
-            "-XX:ReservedCodeCacheSize=256m")
+            "-XX:ReservedCodeCacheSize=256m", "-Djdk.virtualThreadScheduler.parallelism=2",
+            "-XX:FlightRecorderOptions:stackdepth=2048")
     filter {
         includeTestsMatching("*Test")
         includeTestsMatching("*Tests")
@@ -220,19 +221,20 @@ pitest {
     targetTests.set(listOf("org.danteplanner.backend.*", "org.danteplanner.consistency.*"))
     excludedTestClasses.set(listOf("*IT", "*IntegrationTest", "*ControllerTest"))
     // The minion does not inherit the test task's system properties.
-    jvmArgs.set(listOf("-Dorg.springframework.boot.logging.LoggingSystem=none", "-Dspring.test.context.cache.pause=never"))
+    jvmArgs.set(listOf("-Dorg.springframework.boot.logging.LoggingSystem=none", "-Dspring.test.context.cache.pause=never",
+            "-Djdk.virtualThreadScheduler.parallelism=2"))
+    pitestVersion.set("1.30.2")
     junit5PluginVersion.set("1.2.1")
     threads.set(4)
-    enableDefaultIncrementalAnalysis.set(true)
     timestampedReports.set(false)
     outputFormats.set(setOf("HTML", "XML"))
-    // Pinned to 1.19.0-rc.1: the 1.19.0 release crashes the coverage minion on this project
-    // (UNKNOWN_ERROR) across every pitest core from 1.19.6 to 1.22.1.
+    // The plugin's default core (1.19.5) cannot read Java 25 class files. Cores 1.19.6 to 1.22.1
+    // crashed the coverage minion on this project under JDK 21 (UNKNOWN_ERROR); 1.30.2 runs on 25.
+    // From 1.2x the core ships no incremental history without the arcmutate plugin.
 }
 
-// A fall passes and is only reported: a run that reuses PIT's incremental history can count fewer
-// survivors than a cold run of the same commit, so the baseline is lowered by hand from the
-// weekly cold run's issue (mutation.yml).
+// A fall passes and is only reported; the baseline is lowered by hand from the weekly run's issue
+// (mutation.yml).
 val pitestRatchet by tasks.registering {
     dependsOn(tasks.named("pitest"))
     val report = layout.buildDirectory.file("reports/pitest/mutations.xml")
@@ -484,7 +486,7 @@ tasks.named<de.aaschmid.gradle.plugins.cpd.Cpd>("cpdCheck") {
 }
 
 jacoco {
-    toolVersion = "0.8.11"
+    toolVersion = "0.8.16"
 }
 
 tasks.jacocoTestReport {
