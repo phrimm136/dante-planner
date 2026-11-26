@@ -10,7 +10,8 @@ decision, not a guard: a run of them is a decision table inside an effect method
 
 ## Values and effects
 - **V1** Does a method that reads, writes, logs or calls a port also work out a judgement beyond
-  guards? Evidence: the effect line and the judgement line in one method.
+  guards? Evidence: the effect line and the judgement line in one method. A line raised in
+  `backend/config/shell-branches.txt` marks a method to ask this of; the count alone is no finding.
 - **V2** When several facts decide the case, are they read first, decided by one pure method, and
   acted on after? Failed by a decision spread over several effect methods, or a pure decision that
   performs a read. When each step needs the previous result and stops for one reason, a chain of

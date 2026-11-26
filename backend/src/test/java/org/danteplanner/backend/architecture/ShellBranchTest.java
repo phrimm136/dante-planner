@@ -47,20 +47,12 @@ class ShellBranchTest {
     Path directory;
 
     @Test
-    void mainTree_WhenCounted_RaisesNoLineOfTheStore() {
-        assertThat(ShellBranches.raised(ShellBranches.read(ShellBranches.STORE), counted(ImportedClasses.production(),
+    void mainTree_WhenCounted_MatchesTheStore() {
+        assertThat(ShellBranches.moved(ShellBranches.read(ShellBranches.STORE), counted(ImportedClasses.production(),
                 ShellBranches.MAIN_SOURCES, ShellBranches.MAIN_PACKAGE)))
-                .as("an effectful method may branch only by switching on a decision value (a sealed type or enum);"
-                        + " these gained branches")
-                .isEmpty();
-    }
-
-    @Test
-    void mainTree_WhenCounted_LeavesNoLineOfTheStoreStale() {
-        assertThat(ShellBranches.stale(ShellBranches.read(ShellBranches.STORE), counted(ImportedClasses.production(),
-                ShellBranches.MAIN_SOURCES, ShellBranches.MAIN_PACKAGE)))
-                .as("these lost branches, are gone, or no longer reach an effect; run `checks be freeze-branches`"
-                        + " so that %s holds the new counts", ShellBranches.STORE)
+                .as("the branch counts of effectful methods moved; run `checks be freeze-branches` so that %s"
+                        + " shows them in the diff, where review reads a raised line as a method to look at",
+                        ShellBranches.STORE)
                 .isEmpty();
     }
 
@@ -122,35 +114,32 @@ class ShellBranchTest {
     }
 
     @Test
-    void raised_WhenAFrozenMethodGainsABranch_NamesItWithBothCounts() {
+    void moved_WhenAListedMethodGainsABranch_NamesItWithBothCounts() {
         String method = SHAPES + ".overloaded([[I)";
-        SortedMap<String, Integer> stored = with(method, 2);
 
-        assertThat(ShellBranches.raised(stored, COUNTED)).containsExactly(method + " 2 -> 3");
-        assertThat(ShellBranches.stale(stored, COUNTED)).isEmpty();
+        assertThat(ShellBranches.moved(with(method, 2), COUNTED)).containsExactly(method + " 2 -> 3");
     }
 
     @Test
-    void raised_WhenAnUnlistedMethodBranches_NamesIt() {
+    void moved_WhenAnUnlistedMethodBranches_NamesIt() {
         SortedMap<String, Integer> stored = new TreeMap<>(COUNTED);
         stored.remove(LATE);
 
-        assertThat(ShellBranches.raised(stored, counted(FIXTURES, FIXTURE_SOURCES, FIXTURE_PACKAGE)))
+        assertThat(ShellBranches.moved(stored, counted(FIXTURES, FIXTURE_SOURCES, FIXTURE_PACKAGE)))
                 .containsExactly(LATE + " 0 -> 1");
     }
 
     @Test
-    void stale_WhenAFrozenMethodLosesABranch_NamesItUntilTheLineReadsTheNewCount() {
-        assertThat(ShellBranches.stale(with(SAVE, 2), COUNTED)).containsExactly(SAVE + " 2 -> 1");
-        assertThat(ShellBranches.raised(with(SAVE, 2), COUNTED)).isEmpty();
-        assertThat(ShellBranches.stale(with(SAVE, 1), COUNTED)).isEmpty();
+    void moved_WhenAListedMethodLosesABranch_NamesItUntilTheLineReadsTheNewCount() {
+        assertThat(ShellBranches.moved(with(SAVE, 2), COUNTED)).containsExactly(SAVE + " 2 -> 1");
+        assertThat(ShellBranches.moved(with(SAVE, 1), COUNTED)).isEmpty();
     }
 
     @Test
-    void stale_WhenAStoredMethodIsGoneOrHasNoBranch_NamesIt() {
-        assertThat(ShellBranches.stale(with(ACT, 1), counted(FIXTURES, FIXTURE_SOURCES, FIXTURE_PACKAGE)))
+    void moved_WhenAStoredMethodIsGoneOrHasNoBranch_NamesIt() {
+        assertThat(ShellBranches.moved(with(ACT, 1), counted(FIXTURES, FIXTURE_SOURCES, FIXTURE_PACKAGE)))
                 .containsExactly(ACT + " 1 -> 0");
-        assertThat(ShellBranches.stale(with(SHELLS + ".gone()", 1), COUNTED))
+        assertThat(ShellBranches.moved(with(SHELLS + ".gone()", 1), COUNTED))
                 .containsExactly(SHELLS + ".gone() 1 -> 0");
     }
 
@@ -179,35 +168,21 @@ class ShellBranchTest {
     }
 
     @Test
-    void regenerate_WhenALineWouldBeAddedOrRaisedWithoutAReason_IsRefusedAndWritesNothing() {
+    void regenerate_WhenCountsMoved_WritesThemAndPrintsEachChange() {
         SortedMap<String, Integer> stored = with(SAVE, 2);
         stored.remove(LATE);
         Path store = written(stored);
 
-        assertThatThrownBy(() -> ShellBranches.regenerate(store, COUNTED, " "))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining(LATE + " 0 -> 1")
-                .hasMessageNotContaining(SAVE);
-        assertThat(ShellBranches.read(store)).isEqualTo(stored);
-    }
-
-    @Test
-    void regenerate_WhenGivenAReason_AddsTheLineAndReportsItWithTheReason() {
-        SortedMap<String, Integer> stored = new TreeMap<>(COUNTED);
-        stored.remove(LATE);
-        Path store = written(stored);
-
-        assertThat(ShellBranches.regenerate(store, COUNTED, "the port moved"))
-                .containsExactly("raised, because the port moved:", LATE + " 0 -> 1");
+        assertThat(ShellBranches.regenerate(store, COUNTED))
+                .containsExactly("moved:", LATE + " 0 -> 1", SAVE + " 2 -> 1");
         assertThat(ShellBranches.read(store)).isEqualTo(COUNTED);
     }
 
     @Test
-    void regenerate_WhenLinesOnlyShrink_NeedsNoReason() {
-        Path store = written(with(SAVE, 2));
+    void regenerate_WhenNothingMoved_PrintsNothing() {
+        Path store = written(COUNTED);
 
-        assertThat(ShellBranches.regenerate(store, COUNTED, "")).isEmpty();
-        assertThat(ShellBranches.read(store)).isEqualTo(COUNTED);
+        assertThat(ShellBranches.regenerate(store, COUNTED)).isEmpty();
     }
 
     @Test
