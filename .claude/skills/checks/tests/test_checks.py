@@ -714,7 +714,8 @@ def fleet_tree_rows(tree_root, changed_path):
     "terraform/oregon/variables.tf", "terraform/oregon/environment.tfvars.example", "terraform/rds/main.tf",
     "deploy/chart/templates/external-secrets.yaml", "deploy/chart/values-seoul.yaml",
     ".github/workflows/deploy-fleet.yml", "deploy/argocd/root-app-oregon.yaml", ".claude/settings.json",
-    "scripts/dev/seed.sh", "terraform/oregon/envs/prod.tfvars"])
+    "scripts/dev/seed.sh", "terraform/oregon/envs/prod.tfvars", "deploy/grafana/rules/cluster-rules.yaml",
+    "deploy/grafana/rules.py"])
 def test_an_input_the_ops_tests_read_runs_the_tooling_suites(tmp_path, changed_path):
     assert fleet_tree_rows(tmp_path, changed_path) == ["tools test"]
 
@@ -722,7 +723,8 @@ def test_an_input_the_ops_tests_read_runs_the_tooling_suites(tmp_path, changed_p
 @pytest.mark.parametrize("changed_path", [
     "terraform/rds/variables.tf", "terraform/modules/rds/main.tf", "terraform/oregon/README.md",
     "terraform/oregon/.terraform.lock.hcl", "deploy/chart/templates/backend.yaml", "deploy/chart/values.yaml",
-    "deploy/argocd/project.yaml", "scripts/dev/seed.py", ".claude/settings.local.json"])
+    "deploy/argocd/project.yaml", "scripts/dev/seed.py", ".claude/settings.local.json",
+    "deploy/grafana/tests/test_rules.py"])
 def test_a_terraform_or_chart_file_no_ops_test_reads_reaches_nothing(tmp_path, changed_path):
     assert fleet_tree_rows(tmp_path, changed_path) == []
 
