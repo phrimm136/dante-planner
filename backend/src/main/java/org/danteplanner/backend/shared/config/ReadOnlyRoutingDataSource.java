@@ -5,9 +5,10 @@ import java.sql.SQLException;
 import java.sql.SQLTransientConnectionException;
 
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import org.danteplanner.backend.shared.exception.ReadTemporarilyUnavailableException;
+import org.danteplanner.backend.shared.security.SpringContextAdapter;
+import org.danteplanner.backend.shared.security.TransactionScope;
 
 /**
  * The lookup key is read lazily via {@code LazyConnectionDataSourceProxy}, so the read-only flag
@@ -26,11 +27,14 @@ public class ReadOnlyRoutingDataSource extends AbstractRoutingDataSource {
 
     @Override
     public Object determineCurrentLookupKey() {
-        if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
-            return RoutingKey.REPLICA;
-        }
-        undeclaredGuard.checkDeclared();
-        return RoutingKey.PRIMARY;
+        return switch (SpringContextAdapter.transactionScope()) {
+            case READ_ONLY -> RoutingKey.REPLICA;
+            case IN_TRANSACTION -> RoutingKey.PRIMARY;
+            case NONE -> {
+                undeclaredGuard.reportUndeclared();
+                yield RoutingKey.PRIMARY;
+            }
+        };
     }
 
     @Override
@@ -47,7 +51,7 @@ public class ReadOnlyRoutingDataSource extends AbstractRoutingDataSource {
         try {
             return acquisition.connect();
         } catch (SQLException failure) {
-            if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
+            if (SpringContextAdapter.transactionScope() == TransactionScope.READ_ONLY) {
                 throw new SQLTransientConnectionException(READ_NOT_LENT_MESSAGE, UNABLE_TO_CONNECT_SQL_STATE,
                         new ReadTemporarilyUnavailableException(failure));
             }

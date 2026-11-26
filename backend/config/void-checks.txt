@@ -2,4 +2,3 @@ org.danteplanner.backend.planner.precondition.PlannerPublishValidator.requireTit
 org.danteplanner.backend.planner.service.PlannerAccessGuard.requireUser(java.lang.Long)
 org.danteplanner.backend.planner.service.PlannerAccessGuard.requireVisible(org.danteplanner.backend.planner.service.PlannerVisibilityFacts)
 org.danteplanner.backend.planner.service.PlannerPublishingService.requireTitleAfterUpsert(java.lang.Long, java.util.UUID, org.danteplanner.backend.planner.dto.UpsertPlannerRequest)
-org.danteplanner.backend.shared.config.UndeclaredPrimaryAccessGuard.checkDeclared()

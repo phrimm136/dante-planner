@@ -42,7 +42,6 @@ org.danteplanner.backend.shared.config.DeviceIdArgumentResolver.resolveArgument(
 org.danteplanner.backend.shared.config.DeviceIdResolver.resolve(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse) # 1
 org.danteplanner.backend.shared.config.JwtProperties.loadPrivateKey(java.lang.String) # 1
 org.danteplanner.backend.shared.config.JwtProperties.loadPublicKey(java.lang.String) # 1
-org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource.determineCurrentLookupKey() # 1
 org.danteplanner.backend.shared.config.ReadSourceHealthProbe$SourceProbe.probe() # 4
 org.danteplanner.backend.shared.config.ReadSourceProperties$Source.isEndpointMatchingItsRole() # 3
 org.danteplanner.backend.shared.config.ReadSourceSelector.acquire(org.danteplanner.backend.shared.config.ReadSourceSelector$ConnectionSource) # 1
@@ -55,7 +54,6 @@ org.danteplanner.backend.shared.config.RedisConnectionConfig.standaloneConfigura
 org.danteplanner.backend.shared.config.SecurityProperties$CidrRange.contains(java.lang.String) # 5
 org.danteplanner.backend.shared.config.SecurityProperties.isTrustedProxy(java.lang.String) # 4
 org.danteplanner.backend.shared.config.SecurityProperties.parseTrustedProxyIps() # 3
-org.danteplanner.backend.shared.config.UndeclaredPrimaryAccessGuard.checkDeclared() # 2
 org.danteplanner.backend.shared.exception.ApiExceptionHandler.carriesDisconnectStrerror(java.io.IOException) # 1
 org.danteplanner.backend.shared.exception.ApiExceptionHandler.handleDataIntegrityViolation(org.springframework.dao.DataIntegrityViolationException, org.springframework.web.context.request.WebRequest) # 1
 org.danteplanner.backend.shared.exception.ApiExceptionHandler.handleExceptionInternal(java.lang.Exception, java.lang.Object, org.springframework.http.HttpHeaders, org.springframework.http.HttpStatusCode, org.springframework.web.context.request.WebRequest) # 3
@@ -115,7 +113,8 @@ org.danteplanner.backend.shared.sse.SseService.cleanupZombieConnections() # 1
 org.danteplanner.backend.shared.sse.SseService.sendToUser(java.lang.Long, java.lang.String, java.lang.Object) # 3
 org.danteplanner.backend.shared.sse.SseSubscription.connect() # 3
 org.danteplanner.backend.shared.util.ClientIpResolver.isPrivateIp(java.lang.String) # 3
-org.danteplanner.backend.shared.util.ClientIpResolver.resolveClientIdentifier(jakarta.servlet.http.HttpServletRequest, org.danteplanner.backend.shared.config.SecurityProperties, java.util.function.Supplier) # 2
+org.danteplanner.backend.shared.util.ClientIpResolver.resolve(jakarta.servlet.http.HttpServletRequest, org.danteplanner.backend.shared.config.SecurityProperties) # 1
+org.danteplanner.backend.shared.util.ClientIpResolver.resolveClientIdentifier(jakarta.servlet.http.HttpServletRequest, org.danteplanner.backend.shared.config.SecurityProperties, java.util.function.Supplier) # 3
 org.danteplanner.backend.shared.util.CookieUtils.buildCookie(java.lang.String, java.lang.String, int, boolean) # 1
 org.danteplanner.backend.shared.util.CookieUtils.getCookieValue(jakarta.servlet.http.HttpServletRequest, java.lang.String) # 2
 org.danteplanner.backend.shared.util.HtmlSanitizer.sanitize(java.lang.String) # 2

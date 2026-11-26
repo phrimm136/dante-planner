@@ -43,7 +43,7 @@ class DecisionPurityTest {
 
     private static final String OUTCOME_SUFFIX = "Outcome";
 
-    private static final Set<String> CONTEXT_READS = Set.of("viewer", "requestValue");
+    private static final Set<String> CONTEXT_READS = Set.of("viewer", "requestValue", "transactionScope");
 
     private static final JavaClasses MAIN_CLASSES = ImportedClasses.production();
 
