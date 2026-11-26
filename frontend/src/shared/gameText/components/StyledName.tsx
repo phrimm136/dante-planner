@@ -1,4 +1,4 @@
-import { useId, useLayoutEffect, useState, type CSSProperties } from 'react'
+import { useId, useLayoutEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getAttributeColors, type ImportancePalette } from '@/shared/gameData'
 import {
@@ -10,6 +10,8 @@ import {
   type TextNodeSpec,
 } from '@/shared/cardLayout'
 import { panelNameShadow } from '../lib/panelUnderlay'
+import { scanTmpRuns, type TmpRun } from '../lib/tmpRichText'
+import { renderTmpRun } from '../lib/unityRichText'
 import { importanceBannerStyle, importanceStyle } from '@/shared/importance'
 import { namePlateSliceStyles, tintColorMatrix, type NamePlateKind } from '../lib/namePlate'
 import { CLIENT_TEXT_SCALE, NAME_PLATE_UNITS, UNIT_PANEL_COLORS } from '@/lib/constants'
@@ -197,7 +199,51 @@ function useClientWidth(): [number | undefined, (element: HTMLDivElement | null)
   return [width, setElement]
 }
 
-export function NamePlate({ kind, name, attributeType, importance }: NamePlateProps) {
+const NAME_BREAK: TmpRun = {
+  kind: 'run',
+  text: '\n',
+  bold: false,
+  italic: false,
+  underline: false,
+  strike: false,
+}
+
+export function nameRuns(name: string): TmpRun[] {
+  return scanTmpRuns(name).map((token) => (token.kind === 'run' ? token : NAME_BREAK))
+}
+
+function runsBetween(runs: readonly TmpRun[], start: number, end: number): TmpRun[] {
+  const pieces: TmpRun[] = []
+  let offset = 0
+  for (const run of runs) {
+    const from = Math.max(start, offset)
+    const to = Math.min(end, offset + run.text.length)
+    if (from < to) pieces.push({ ...run, text: run.text.slice(from - offset, to - offset) })
+    offset += run.text.length
+  }
+  return pieces
+}
+
+/** Each fitted line of a tagged name, drawn with the runs its characters came from. */
+export function styledLines(
+  runs: readonly TmpRun[],
+  plain: string,
+  lines: readonly string[],
+): ReactNode[] {
+  let cursor = 0
+  return lines.map((line) => {
+    const found = plain.indexOf(line, cursor)
+    const start = found < 0 ? cursor : found
+    cursor = start + line.length
+    return runsBetween(runs, start, cursor).map((piece, index) =>
+      renderTmpRun(piece, index, piece.text),
+    )
+  })
+}
+
+export function NamePlate({ kind, name: rawName, attributeType, importance }: NamePlateProps) {
+  const runs = nameRuns(rawName)
+  const name = runs.map((run) => run.text).join('')
   const { i18n } = useTranslation()
   const table = useFontAdvances(i18n.language)
   const { primary } = getAttributeColors(attributeType)
@@ -213,6 +259,7 @@ export function NamePlate({ kind, name, attributeType, importance }: NamePlatePr
   const tracking = faceTracking(table, spec.node)
   const pitches = linePitchesEm(table, fitted.lines, spec.node.lineSpacingEm)
   const centreEm = blockGeometryCentreEm(table, fitted.lines, spec.node.lineSpacingEm)
+  const lineContent = name === rawName ? fitted.lines : styledLines(runs, name, fitted.lines)
   const bannerStyle =
     importance === undefined
       ? undefined
@@ -250,7 +297,7 @@ export function NamePlate({ kind, name, attributeType, importance }: NamePlatePr
                   data-slot="name-line"
                   style={{ display: 'block', marginTop: `${String(pitches[index] ?? 0)}em` }}
                 >
-                  {line}
+                  {lineContent[index]}
                 </span>
               ))}
             </span>
