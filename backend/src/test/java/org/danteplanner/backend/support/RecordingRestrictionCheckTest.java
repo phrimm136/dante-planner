@@ -4,6 +4,7 @@ import java.time.Instant;
 
 import org.junit.jupiter.api.Test;
 
+import org.danteplanner.backend.shared.restriction.PrivateWrite;
 import org.danteplanner.backend.support.RecordingRestrictionCheck.Decision;
 import org.danteplanner.backend.user.entity.User;
 
@@ -26,9 +27,10 @@ class RecordingRestrictionCheckTest {
     }
 
     @Test
-    void recordPrivate_WhenCalled_RecordsThePrivateDecision() {
-        check.recordPrivate();
+    void record_WhenGivenAPrivateWrite_RecordsThePrivateDecision() {
+        check.record(new PrivateWrite());
 
         assertThat(check.decisions()).containsExactly(Decision.PRIVATE);
+        assertThat(check.clearances()).containsExactly(new PrivateWrite());
     }
 }

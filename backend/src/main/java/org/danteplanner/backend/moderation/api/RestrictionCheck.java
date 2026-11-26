@@ -1,8 +1,9 @@
 package org.danteplanner.backend.moderation.api;
 
-public interface RestrictionCheck {
+import org.danteplanner.backend.shared.restriction.Clearance;
+import org.danteplanner.backend.shared.restriction.RestrictionCheckHandler;
 
-    void requireUnrestricted(Long userId);
+public interface RestrictionCheck extends RestrictionCheckHandler {
 
-    void recordPrivate();
+    void record(Clearance clearance);
 }

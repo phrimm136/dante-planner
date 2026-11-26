@@ -23,7 +23,7 @@ import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.Publication;
 import org.danteplanner.backend.planner.entity.WithdrawalOutcome;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
-import org.danteplanner.backend.planner.validation.floor.Stage;
+import org.danteplanner.backend.planner.gamedata.Stage;
 import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -47,6 +47,7 @@ import org.danteplanner.backend.planner.sync.WriteArbitration;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.failure.WriteOutcome;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
+import org.danteplanner.backend.shared.restriction.PrivateWrite;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -414,11 +415,11 @@ public class PlannerCommandService {
             case UpsertTarget.Absent absent -> { }
             case UpsertTarget.Private(Planner planner) -> {
                 logFound(planner, mode);
-                restrictionCheck.recordPrivate();
+                restrictionCheck.record(new PrivateWrite());
             }
             case UpsertTarget.Published(Planner planner) -> {
                 logFound(planner, mode);
-                restrictionCheck.requireUnrestricted(planner.getUserId());
+                restrictionCheck.record(restrictionCheck.requireUnrestricted(planner.getUserId()));
             }
         }
     }
@@ -433,7 +434,7 @@ public class PlannerCommandService {
                 ownershipValidator.requireIdAvailable(id, userId, plannerRepository.findOwnershipById(id));
         log.info("Planner {} not found, creating for user {}", id, userId);
 
-        restrictionCheck.recordPrivate();
+        restrictionCheck.record(new PrivateWrite());
         return createAggregate(userId, deviceId, available.plannerId(), request);
     }
 

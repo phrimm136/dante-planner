@@ -25,7 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import java.util.List;
 
 @Configuration
-@EnableConfigurationProperties({JwtProperties.class, OAuthProperties.class})
+@EnableConfigurationProperties({JwtSettings.class, OAuthProperties.class})
 @RequiredArgsConstructor
 @EnableWebSecurity
 public class SecurityConfig {
@@ -36,6 +36,11 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final ProblemAccessDeniedHandler accessDeniedHandler;
     private final List<SecurityRuleProvider> ruleContributions;
+
+    @Bean
+    public static JwtProperties jwtProperties(JwtSettings settings) {
+        return JwtProperties.load(settings);
+    }
 
     /**
      * Spring Boot auto-registers a filter bean in the servlet container, where it runs a second

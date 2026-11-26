@@ -2,7 +2,7 @@ package org.danteplanner.backend.planner.validation;
 
 import tools.jackson.databind.JsonNode;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
-import org.danteplanner.backend.planner.validation.floor.Stage;
+import org.danteplanner.backend.planner.gamedata.Stage;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;

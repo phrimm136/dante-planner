@@ -31,7 +31,7 @@ public final class FreshnessDeclarations {
 
     public static void declareNone(String reason) {
         if (window() instanceof Window.Open open) {
-            DECLARED.set(new Window.Open(open.declaration().declareNone(reason)));
+            DECLARED.set(new Window.Open(open.declaration().declareNone(new FreshnessDeclaration.None(reason))));
         }
     }
 

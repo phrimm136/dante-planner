@@ -15,7 +15,7 @@ import org.danteplanner.backend.planner.validation.floor.FloorBoundary;
 import org.danteplanner.backend.planner.validation.floor.FloorReferenceData;
 import org.danteplanner.backend.planner.validation.floor.FloorReferences;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
-import org.danteplanner.backend.planner.validation.floor.Stage;
+import org.danteplanner.backend.planner.gamedata.Stage;
 import org.danteplanner.backend.planner.validation.identity.IdentityRules;
 import org.danteplanner.backend.planner.validation.sinner.DeploymentOrder;
 import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;

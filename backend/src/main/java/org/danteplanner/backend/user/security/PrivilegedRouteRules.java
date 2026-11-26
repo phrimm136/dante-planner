@@ -27,7 +27,7 @@ import org.danteplanner.backend.shared.exception.DomainException;
 import org.danteplanner.backend.shared.exception.Problems;
 import org.danteplanner.backend.shared.security.SecurityRuleProvider;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.user.api.Restriction;
+import org.danteplanner.backend.shared.restriction.Restriction;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.UserBannedException;
 import org.danteplanner.backend.user.api.UserTimedOutException;

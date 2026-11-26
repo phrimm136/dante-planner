@@ -28,7 +28,6 @@ import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.moderation.service.RestrictionCheckService;
-import org.danteplanner.backend.moderation.validation.AccountStandingValidator;
 import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
 import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -162,7 +161,7 @@ class PlannerScopeDeclarationTest {
     private PlannerCommandService commandService(PlannerContentValidator contentValidator) {
         return new PlannerCommandService(plannerRepository, statsRepository, publicationRepository, contentValidator,
                 new ContentVersionValidator(TestDataFactory.gameDataRegistry()), catalogService(), accessGuard(),
-                new RestrictionCheckService(users, new AccountStandingValidator(), Clock.systemUTC()), new PlannerCategoryValidator(),
+                new RestrictionCheckService(users, Clock.systemUTC()), new PlannerCategoryValidator(),
                 new PlannerLimitValidator(), new PlannerOwnershipValidator(), new SyncVersionValidator(), mapper, Clock.systemUTC(),
                 MAX_PLANNERS, SCHEMA_VERSION);
     }
@@ -172,7 +171,7 @@ class PlannerScopeDeclarationTest {
         return new PlannerPublishingService(plannerRepository, statsRepository, publicationRepository,
                 moderationRepository, commandService(contentValidator), contentValidator, catalogService(),
                 new PlannerSubscriptionService(subscriptionRepository, accessGuard,
-                        new RestrictionCheckService(users, new AccountStandingValidator(), Clock.systemUTC()), Clock.systemUTC()),
+                        new RestrictionCheckService(users, Clock.systemUTC()), Clock.systemUTC()),
                 accessGuard, new PlannerOwnershipValidator(), new PlannerPublishValidator(),
                 new PlannerCategoryValidator(), recorder(), Clock.fixed(Instant.parse("2026-11-23T00:00:00Z"), ZoneOffset.UTC));
     }
@@ -413,6 +412,6 @@ class PlannerScopeDeclarationTest {
 
     private PlannerSubscriptionService subscriptionService() {
         return new PlannerSubscriptionService(subscriptionRepository, accessGuard(),
-                new RestrictionCheckService(users, new AccountStandingValidator(), Clock.systemUTC()), Clock.systemUTC());
+                new RestrictionCheckService(users, Clock.systemUTC()), Clock.systemUTC());
     }
 }

@@ -37,6 +37,23 @@ public class RoleChangeValidator {
         }
     }
 
+    @Parsed
+    @Getter
+    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class DeletableAccount {
+
+        private final Long userId;
+
+        private static DeletableAccount of(User user) {
+            return new DeletableAccount(user.getId());
+        }
+
+        private static DeletableAccount ofAdministrator(User user, long activeAdministrators) {
+            refuseLastAdministrator(activeAdministrators);
+            return new DeletableAccount(user.getId());
+        }
+    }
+
     private enum RankRefusal {
         GRANT_ABOVE_OWN("Cannot grant role higher than your own"),
         TARGET_NOT_BELOW("Cannot modify user of equal or higher rank");
@@ -90,8 +107,10 @@ public class RoleChangeValidator {
         };
     }
 
-    public void requireAnotherActiveAdministrator() {
-        refuseLastAdministrator(activeAdministrators());
+    public DeletableAccount requireDeletable(User user) {
+        return user.getRole() == UserRole.ADMIN
+                ? DeletableAccount.ofAdministrator(user, activeAdministrators())
+                : DeletableAccount.of(user);
     }
 
     private long activeAdministrators() {

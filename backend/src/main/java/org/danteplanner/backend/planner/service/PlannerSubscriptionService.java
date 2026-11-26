@@ -8,6 +8,7 @@ import org.danteplanner.backend.shared.failure.CommandOutcome;
 import org.danteplanner.backend.shared.failure.WriteOutcome;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
+import org.danteplanner.backend.shared.restriction.PrivateWrite;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,8 +58,8 @@ public class PlannerSubscriptionService {
         ToggleOutcome outcome = ToggleOutcome.of(subscriptionRepository.toggle(userId, plannerId, clock.instant()));
         SubscriptionState entered = SubscriptionState.of(subscriptionRepository.findEnabledOf(userId, plannerId));
         switch (entered) {
-            case ON -> restrictionCheck.requireUnrestricted(userId);
-            case OFF -> restrictionCheck.recordPrivate();
+            case ON -> restrictionCheck.record(restrictionCheck.requireUnrestricted(userId));
+            case OFF -> restrictionCheck.record(new PrivateWrite());
         }
         FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId));
         boolean enabled = entered == SubscriptionState.ON;

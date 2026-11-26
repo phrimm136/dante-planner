@@ -23,7 +23,7 @@ import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.planner.validation.PlannerDocument;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
-import org.danteplanner.backend.planner.validation.floor.Stage;
+import org.danteplanner.backend.planner.gamedata.Stage;
 import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
 import org.danteplanner.backend.user.api.UserProfile;
 import org.danteplanner.backend.user.entity.User;

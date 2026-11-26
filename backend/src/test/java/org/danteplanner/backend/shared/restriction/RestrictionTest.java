@@ -1,4 +1,4 @@
-package org.danteplanner.backend.user.api;
+package org.danteplanner.backend.shared.restriction;
 
 import java.time.Instant;
 

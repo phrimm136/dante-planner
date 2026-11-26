@@ -13,7 +13,7 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.Publication;
 import org.danteplanner.backend.planner.entity.PublishOutcome;
 import org.danteplanner.backend.planner.entity.WithdrawalOutcome;
-import org.danteplanner.backend.planner.validation.floor.Stage;
+import org.danteplanner.backend.planner.gamedata.Stage;
 import org.danteplanner.backend.planner.repository.PlannerModerationRepository;
 import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
