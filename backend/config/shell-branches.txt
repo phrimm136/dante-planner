@@ -50,9 +50,7 @@ org.danteplanner.backend.shared.config.ReadSourcesConfig$SourcePoolRegistrar.reg
 org.danteplanner.backend.shared.config.ReadSourcesConfig.buildSourceHikariConfig(java.lang.String) # 1
 org.danteplanner.backend.shared.config.ReadSourcesConfig.readSourceSelector(com.zaxxer.hikari.HikariDataSource, io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry, io.micrometer.core.instrument.MeterRegistry, org.springframework.beans.factory.BeanFactory) # 2
 org.danteplanner.backend.shared.config.RedisConnectionConfig.standaloneConfiguration(org.danteplanner.backend.shared.config.RedisConnectionConfig$Endpoints$Endpoint) # 1
-org.danteplanner.backend.shared.config.SecurityProperties$CidrRange.contains(java.lang.String) # 5
-org.danteplanner.backend.shared.config.SecurityProperties.isTrustedProxy(java.lang.String) # 4
-org.danteplanner.backend.shared.config.SecurityProperties.parseTrustedProxyIps() # 3
+org.danteplanner.backend.shared.config.SecurityProperties.parseTrustedProxyIps() # 1
 org.danteplanner.backend.shared.exception.ApiExceptionHandler.carriesDisconnectStrerror(java.io.IOException) # 1
 org.danteplanner.backend.shared.exception.ApiExceptionHandler.handleDataIntegrityViolation(org.springframework.dao.DataIntegrityViolationException, org.springframework.web.context.request.WebRequest) # 1
 org.danteplanner.backend.shared.exception.ApiExceptionHandler.handleExceptionInternal(java.lang.Exception, java.lang.Object, org.springframework.http.HttpHeaders, org.springframework.http.HttpStatusCode, org.springframework.web.context.request.WebRequest) # 3
