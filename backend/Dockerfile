@@ -30,7 +30,7 @@ FROM ${JAR_STAGE} AS jar
 # Runs on $BUILDPLATFORM so keytool executes natively (not under QEMU on the
 # amd64 runner) and the layer caches independently of app code and game data;
 # the resulting .p12 is architecture-independent.
-FROM --platform=$BUILDPLATFORM eclipse-temurin:25.0.5.1_2-jre-alpine-3.24@sha256:69c2a26e9894016e274c880fa542956d005b3755f84db765145185e87405bd89 AS rds-certs
+FROM --platform=$BUILDPLATFORM eclipse-temurin:25-jre-alpine-3.21@sha256:bf30e2e0d17471cf174fffeaa86fdb45c46810a11d1fda4f0ff86f5fb3577202 AS rds-certs
 
 RUN set -eux; \
     apk add --no-cache curl; \
@@ -45,7 +45,7 @@ RUN set -eux; \
     done; \
     rm -f /tmp/rds-bundle.pem /tmp/rds-cert-*.pem
 
-FROM eclipse-temurin:25.0.5.1_2-jre-alpine-3.24@sha256:69c2a26e9894016e274c880fa542956d005b3755f84db765145185e87405bd89
+FROM eclipse-temurin:25-jre-alpine-3.21@sha256:bf30e2e0d17471cf174fffeaa86fdb45c46810a11d1fda4f0ff86f5fb3577202
 
 WORKDIR /app
 
