@@ -8,7 +8,7 @@ import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.moderation.service.CommentModerationService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -67,7 +67,7 @@ class PlannerStatsIsolationIT extends ExclusiveDatabaseSupport {
     private User owner;
     private User commenter;
     private User admin;
-    private Planner planner;
+    private StoredPlanner planner;
 
     @BeforeEach
     void setUp() {
@@ -88,10 +88,10 @@ class PlannerStatsIsolationIT extends ExclusiveDatabaseSupport {
     }
 
     private void seedStats(int viewCount, int upvotes, int commentCount) {
-        statsRepository.deleteById(planner.getId());
+        statsRepository.deleteById(planner.id());
         statsRepository.flush();
         statsRepository.save(PlannerStats.builder()
-                .plannerId(planner.getId())
+                .plannerId(planner.id())
                 .viewCount(viewCount)
                 .upvotes(upvotes)
                 .commentCount(commentCount)
@@ -99,7 +99,7 @@ class PlannerStatsIsolationIT extends ExclusiveDatabaseSupport {
     }
 
     private int commentCount() {
-        return statsRepository.findById(planner.getId())
+        return statsRepository.findById(planner.id())
                 .map(PlannerStats::getCommentCount)
                 .orElse(-1);
     }
@@ -109,7 +109,7 @@ class PlannerStatsIsolationIT extends ExclusiveDatabaseSupport {
     void commentCountMaintained_WhenCreateAndDeleteTransitions_CounterTracks() {
         seedStats(0, 0, 0);
 
-        UUID topLevelId = commentCommandService.createComment(planner.getId(), commenter.getId(), null,
+        UUID topLevelId = commentCommandService.createComment(planner.id(), commenter.getId(), null,
                 new CreateCommentRequest("first", null)).id();
         assertThat(commentCount()).as("top-level comment increments").isEqualTo(1);
 
@@ -130,7 +130,7 @@ class PlannerStatsIsolationIT extends ExclusiveDatabaseSupport {
 
         // Floor: a live comment row the counter never accounted for (drift) must
         // not push the counter below zero on delete
-        PlannerComment drifted = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(planner.getId(), commenter.getId(), null, 0), "drifted");
+        PlannerComment drifted = StoredComments.save(commentRepository, new JdbcTemplate(dataSource), new PlannerComment(planner.id(), commenter.getId(), null, 0), "drifted");
         commentCommandService.deleteComment(drifted.getPublicId(), commenter.getId());
         assertThat(commentCount()).as("decrement floors at zero").isEqualTo(0);
     }
@@ -149,7 +149,7 @@ class PlannerStatsIsolationIT extends ExclusiveDatabaseSupport {
                 .andExpect(jsonPath("$.content[0].upvotes").value(5))
                 .andExpect(jsonPath("$.content[0].commentCount").value(7));
 
-        mockMvc.perform(get("/api/planner/md/published/{id}", planner.getId()))
+        mockMvc.perform(get("/api/planner/md/published/{id}", planner.id()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.viewCount").value(42))
                 .andExpect(jsonPath("$.upvotes").value(5))

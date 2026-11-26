@@ -291,7 +291,7 @@ class ReconnectStormIT {
     private UUID seedCommentedPlanner() {
         User author = TestDataFactory.createTestUser(
                 userRepository, "storm-author-" + UUID.randomUUID() + "@example.com");
-        UUID plannerId = TestDataFactory.createTestPlanner(plannerRepository, author, true).getId();
+        UUID plannerId = TestDataFactory.createTestPlanner(plannerRepository, author, true).id();
         for (int i = 0; i < SEEDED_COMMENTS; i++) {
             StoredComments.save(commentRepository, PRIMARY_ADMIN,
                     new PlannerComment(plannerId, author.getId(), null, 0), "storm comment " + i);

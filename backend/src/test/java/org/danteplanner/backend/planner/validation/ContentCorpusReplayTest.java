@@ -1,5 +1,6 @@
 package org.danteplanner.backend.planner.validation;
 
+import org.danteplanner.backend.planner.precondition.PlannerPublishValidator.PublishTitle;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
@@ -11,7 +12,6 @@ import org.danteplanner.backend.planner.gamedata.GameDataLoader;
 import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
 import org.danteplanner.backend.planner.gamedata.MirrorDungeonSeason;
 import org.danteplanner.backend.planner.gamedata.PlannerVersions;
-import org.danteplanner.backend.planner.precondition.PlannerPublishValidator;
 import org.danteplanner.backend.planner.validation.floor.FloorRules;
 import org.danteplanner.backend.planner.gamedata.Stage;
 import org.danteplanner.backend.planner.validation.sinner.SinnerIdValidator;
@@ -53,7 +53,6 @@ class ContentCorpusReplayTest {
     private final GameDataRegistry registry = registry();
     private final PlannerContentValidator validator = new PlannerContentValidator(MAPPER, MAX_CONTENT_SIZE_BYTES,
             MAX_NOTE_SIZE_BYTES, registry, new SinnerIdValidator(), new FloorRules(registry));
-    private final PlannerPublishValidator publishValidator = new PlannerPublishValidator();
 
     static Stream<Arguments> caseStages() {
         return cases().flatMap(corpusCase -> stagesOf(corpusCase).stream()
@@ -137,7 +136,7 @@ class ContentCorpusReplayTest {
         ObjectNode outcome = MAPPER.createObjectNode();
         try {
             if (validatorStage == Stage.PUBLISH) {
-                publishValidator.requireTitle(titleOf(corpusCase));
+                PublishTitle _ = PublishTitle.parse(titleOf(corpusCase)).orElseThrow(PlannerValidationException::refusing);
             }
             validator.parse(content, MDCategory.fromValue(category), validator.season(version), validatorStage);
             outcome.putArray("violations");

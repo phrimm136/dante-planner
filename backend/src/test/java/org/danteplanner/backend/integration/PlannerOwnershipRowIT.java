@@ -3,7 +3,7 @@ package org.danteplanner.backend.integration;
 import java.util.Optional;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerOwnershipRow;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -39,10 +39,10 @@ class PlannerOwnershipRowIT extends SharedMySqlContainerSupport {
     @Test
     void findOwnershipById_WhenActivePlanner_ProjectsOwnerAndNullDeletedAt() {
         User owner = TestDataFactory.createTestUser(userRepository, "ownership-" + System.nanoTime() + "@example.com");
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
 
         Optional<PlannerOwnershipRow> ownership =
-                plannerRepository.findOwnershipById(planner.getId());
+                plannerRepository.findOwnershipById(planner.id());
 
         assertThat(ownership).isPresent();
         assertThat(ownership.get().getUserId()).isEqualTo(owner.getId());

@@ -65,7 +65,7 @@ class PlannerPublishEventIT extends SharedMySqlContainerSupport {
     void setUp() {
         recorder = SseTopicRecorder.open(sseConnectionFactory, objectMapper);
         owner = TestDataFactory.createTestUser(userRepository, "publisher@example.com");
-        plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, false).getId();
+        plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, false).id();
     }
 
     @AfterEach

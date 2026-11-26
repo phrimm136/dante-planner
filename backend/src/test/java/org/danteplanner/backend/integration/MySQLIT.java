@@ -7,7 +7,7 @@ import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerVote;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -89,7 +89,7 @@ class MySQLIT extends SharedMySqlContainerSupport {
     private TransactionTemplate transactionTemplate;
 
     private User testUser;
-    private Planner testPlanner;
+    private StoredPlanner testPlanner;
 
     @BeforeEach
     void setUp() {
@@ -121,7 +121,7 @@ class MySQLIT extends SharedMySqlContainerSupport {
                     try {
                         startLatch.await();
 
-                        PlannerVote vote = new PlannerVote(user.getId(), testPlanner.getId(), VoteType.UP);
+                        PlannerVote vote = new PlannerVote(user.getId(), testPlanner.id(), VoteType.UP);
                         voteRepository.save(vote);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
@@ -147,7 +147,7 @@ class MySQLIT extends SharedMySqlContainerSupport {
             // Scoped to this test's planner: the database is shared with every other integration
             // class, so a bare count() also sees their rows and this class's earlier methods'.
             long voteCount = voteRepository.findAll().stream()
-                    .filter(vote -> testPlanner.getId().equals(vote.getPlannerId()))
+                    .filter(vote -> testPlanner.id().equals(vote.getPlannerId()))
                     .count();
             assertThat(voteCount).isEqualTo(20);
         }
@@ -170,10 +170,10 @@ class MySQLIT extends SharedMySqlContainerSupport {
                     .collect(Collectors.toList());
 
             for (int i = 0; i < seedVotes; i++) {
-                plannerEngagementService.castVote(users.get(i).getId(), testPlanner.getId(), VoteType.UP);
+                plannerEngagementService.castVote(users.get(i).getId(), testPlanner.id(), VoteType.UP);
             }
             assertThat(notificationRepository.findAll().stream()
-                            .filter(n -> testPlanner.getId().equals(n.getPlannerId()))
+                            .filter(n -> testPlanner.id().equals(n.getPlannerId()))
                             .count())
                     .as("seeding below the threshold raises no recommendation notification")
                     .isZero();
@@ -191,7 +191,7 @@ class MySQLIT extends SharedMySqlContainerSupport {
                         // No deadlock retry: every voter writes only planner_stats
                         // (atomic upsert) and the vote row's FK targets the
                         // write-once planner core, so no lock upgrade can cycle
-                        plannerEngagementService.castVote(voter.getId(), testPlanner.getId(), VoteType.UP);
+                        plannerEngagementService.castVote(voter.getId(), testPlanner.id(), VoteType.UP);
                     } catch (Throwable t) {
                         failures.add(t);
                     } finally {
@@ -208,9 +208,9 @@ class MySQLIT extends SharedMySqlContainerSupport {
 
             // Atomic increment: the denormalized counter equals the real vote-row count (no lost update)
             long voteRows = voteRepository.findAll().stream()
-                    .filter(vote -> testPlanner.getId().equals(vote.getPlannerId()))
+                    .filter(vote -> testPlanner.id().equals(vote.getPlannerId()))
                     .count();
-            int upvotes = statsRepository.findById(testPlanner.getId())
+            int upvotes = statsRepository.findById(testPlanner.id())
                     .map(PlannerStats::getUpvotes).orElse(0);
             assertThat(voteRows).isEqualTo(totalVoters);
             assertThat(upvotes).isEqualTo(totalVoters);
@@ -245,11 +245,11 @@ class MySQLIT extends SharedMySqlContainerSupport {
 
         @Test
         void uniqueConstraint_WhenDuplicateVote_ThrowsException() {
-            PlannerVote vote1 = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
+            PlannerVote vote1 = new PlannerVote(testUser.getId(), testPlanner.id(), VoteType.UP);
             voteRepository.save(vote1);
 
             // Try to create duplicate vote - will hit MySQL constraint
-            PlannerVote vote2 = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
+            PlannerVote vote2 = new PlannerVote(testUser.getId(), testPlanner.id(), VoteType.UP);
 
             assertThatThrownBy(() -> transactionTemplate.executeWithoutResult(status -> {
                 voteRepository.save(vote2);
@@ -305,19 +305,19 @@ class MySQLIT extends SharedMySqlContainerSupport {
 
         @Test
         void plannerStatus_WhenSaved_RoundTripsThroughEnumColumn() {
-            Planner planner = TestDataFactory.planner(testUser)
+            StoredPlanner planner = TestDataFactory.planner(testUser)
                     .status(PlannerStatus.SAVED)
                     .save(plannerRepository);
 
-            String hexId = planner.getId().toString().replace("-", "");
+            String hexId = planner.id().toString().replace("-", "");
             String rawColumn = (String) entityManager.createNativeQuery(
                             "SELECT status FROM planner_content WHERE planner_id = UNHEX(?)")
                     .setParameter(1, hexId)
                     .getSingleResult();
             assertThat(rawColumn).isEqualTo("saved");
 
-            Planner reloaded = plannerRepository.findById(planner.getId()).orElseThrow();
-            assertThat(reloaded.getStatus()).isEqualTo(PlannerStatus.SAVED);
+            StoredPlanner reloaded = plannerRepository.findAggregate(planner.id()).orElseThrow();
+            assertThat(reloaded.content().status()).isEqualTo(PlannerStatus.SAVED);
         }
     }
 
@@ -328,14 +328,14 @@ class MySQLIT extends SharedMySqlContainerSupport {
         void reassignVotes_WhenSentinelAlreadyVotedSamePlanner_DeletesCollisionThenReassigns() {
             User leaving = TestDataFactory.createTestUser(userRepository, "leaving@example.com");
             User sentinel = TestDataFactory.createTestUser(userRepository, "sentinel@example.com");
-            Planner sharedPlanner = testPlanner;
-            Planner soloPlanner = TestDataFactory.createTestPlanner(plannerRepository, leaving, true);
+            StoredPlanner sharedPlanner = testPlanner;
+            StoredPlanner soloPlanner = TestDataFactory.createTestPlanner(plannerRepository, leaving, true);
 
             // Sentinel and the leaving user both voted on sharedPlanner -> collision on (user_id, planner_id).
             // The leaving user also voted on soloPlanner -> must be reassigned cleanly.
-            voteRepository.save(new PlannerVote(sentinel.getId(), sharedPlanner.getId(), VoteType.UP));
-            voteRepository.save(new PlannerVote(leaving.getId(), sharedPlanner.getId(), VoteType.UP));
-            voteRepository.save(new PlannerVote(leaving.getId(), soloPlanner.getId(), VoteType.UP));
+            voteRepository.save(new PlannerVote(sentinel.getId(), sharedPlanner.id(), VoteType.UP));
+            voteRepository.save(new PlannerVote(leaving.getId(), sharedPlanner.id(), VoteType.UP));
+            voteRepository.save(new PlannerVote(leaving.getId(), soloPlanner.id(), VoteType.UP));
 
             // Replicates the hard-delete vote step: drop collisions, then reassign the rest.
             transactionTemplate.executeWithoutResult(status -> {
@@ -343,10 +343,10 @@ class MySQLIT extends SharedMySqlContainerSupport {
                 voteRepository.reassignUserVotes(leaving.getId(), sentinel.getId());
             });
 
-            assertThat(voteRepository.findByUserIdAndPlannerId(leaving.getId(), sharedPlanner.getId())).isEmpty();
-            assertThat(voteRepository.findByUserIdAndPlannerId(leaving.getId(), soloPlanner.getId())).isEmpty();
-            assertThat(voteRepository.findByUserIdAndPlannerId(sentinel.getId(), sharedPlanner.getId())).isPresent();
-            assertThat(voteRepository.findByUserIdAndPlannerId(sentinel.getId(), soloPlanner.getId())).isPresent();
+            assertThat(voteRepository.findByUserIdAndPlannerId(leaving.getId(), sharedPlanner.id())).isEmpty();
+            assertThat(voteRepository.findByUserIdAndPlannerId(leaving.getId(), soloPlanner.id())).isEmpty();
+            assertThat(voteRepository.findByUserIdAndPlannerId(sentinel.getId(), sharedPlanner.id())).isPresent();
+            assertThat(voteRepository.findByUserIdAndPlannerId(sentinel.getId(), soloPlanner.id())).isPresent();
         }
     }
 
@@ -412,14 +412,14 @@ class MySQLIT extends SharedMySqlContainerSupport {
             // Empirical all-keywords save against the real MySQL JSON column: the full
             // set must survive the converter's write and read paths end-to-end, which
             // is why it lives in the containerized tier.
-            Planner planner = TestDataFactory.planner(testUser)
+            StoredPlanner planner = TestDataFactory.planner(testUser)
                     .selectedKeywords(new HashSet<>(PlannerKeywords.VALID_KEYWORDS))
                     .save(plannerRepository);
 
             // No surrounding @Transactional: save commits in its own session, so this
             // findById re-reads from the DB and exercises the converter's read path.
-            Planner reloaded = plannerRepository.findById(planner.getId()).orElseThrow();
-            assertThat(reloaded.getSelectedKeywords())
+            StoredPlanner reloaded = plannerRepository.findAggregate(planner.id()).orElseThrow();
+            assertThat(reloaded.content().keywords())
                     .containsExactlyInAnyOrderElementsOf(PlannerKeywords.VALID_KEYWORDS);
         }
     }

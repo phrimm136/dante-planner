@@ -19,7 +19,7 @@ Spring Boot + Java + JPA/Hibernate + Bean Validation (Jakarta) + MySQL + Redis +
 - A public method takes no `boolean`: use an enum or two methods (`FlagParameterRuleTest`); a `@Modifying @Query` method may take a boolean its SET clause assigns, and a `@RestController` handler a boolean bound by `@RequestParam`, `@PathVariable`, `@RequestHeader` or `@CookieValue`, which its first line turns into a type.
 - A write is an insert or a conditional `UPDATE` or `DELETE` decided by its matched-row count (`WriteOutcome`); an entity is `@Immutable` (`ImmutableEntityRuleTest`), and no `@Modifying` query clears the persistence context (`PersistenceContextClearingTest`).
 - A request names the state it wants; no query assigns a column from its own negation (`SelfFlipQueryTest`).
-- The lists `backend/config/void-checks.txt`, `flag-parameters.txt`, `mutable-entities-*.txt`, `context-clearing-*.txt` and `self-flip-queries.txt` only shrink: delete the line your change ended.
+- The lists `backend/config/void-checks.txt` and `flag-parameters.txt` are empty and `self-flip-queries.txt` holds one line; they only shrink: never add a line, delete the one your change ended.
 - `backend/config/shell-branches.txt` counts the branches of each effectful method and never blocks a change: `checks be freeze-branches` rewrites it, and a raised line in the diff is a method review reads for a decision inside an effect method.
 
 ## Async model

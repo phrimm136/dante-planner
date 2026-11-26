@@ -15,7 +15,7 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.danteplanner.backend.moderation.api.ModeratedPlanner;
 import org.danteplanner.backend.moderation.service.PlannerModerationService;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -54,40 +54,40 @@ class PlannerModerationServiceIT extends SharedMySqlContainerSupport {
         admin = TestDataFactory.createAdmin(userRepository, "unpublishing-admin@example.com");
     }
 
-    private Planner persisted(UUID plannerId) {
+    private StoredPlanner persisted(UUID plannerId) {
         return plannerRepository.findAggregate(plannerId).orElseThrow();
     }
 
     @Test
     void unpublishPlanner_WhenModeratorUnpublishes_Succeeds() {
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
 
-        ModeratedPlanner result = moderationService.unpublishPlanner(moderator.getId(), planner.getId());
+        ModeratedPlanner result = moderationService.unpublishPlanner(moderator.getId(), planner.id());
 
         assertThat(result.published()).isFalse();
-        Planner persisted = persisted(planner.getId());
-        assertThat(persisted.getId()).isEqualTo(planner.getId());
-        assertThat(persisted.isPublished()).isFalse();
+        StoredPlanner persisted = persisted(planner.id());
+        assertThat(persisted.id()).isEqualTo(planner.id());
+        assertThat(persisted.publication().isPublished()).isFalse();
     }
 
     @Test
     void unpublishPlanner_WhenAdminUnpublishes_Succeeds() {
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
 
-        ModeratedPlanner result = moderationService.unpublishPlanner(admin.getId(), planner.getId());
+        ModeratedPlanner result = moderationService.unpublishPlanner(admin.getId(), planner.id());
 
         assertThat(result.published()).isFalse();
-        assertThat(persisted(planner.getId()).isPublished()).isFalse();
+        assertThat(persisted(planner.id()).publication().isPublished()).isFalse();
     }
 
     @Test
     void unpublishPlanner_WhenAlreadyUnpublished_Succeeds() {
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
 
-        ModeratedPlanner result = moderationService.unpublishPlanner(moderator.getId(), planner.getId());
+        ModeratedPlanner result = moderationService.unpublishPlanner(moderator.getId(), planner.id());
 
         assertThat(result.published()).isFalse();
-        assertThat(persisted(planner.getId()).isPublished()).isFalse();
+        assertThat(persisted(planner.id()).publication().isPublished()).isFalse();
     }
 
     @Test
@@ -100,10 +100,10 @@ class PlannerModerationServiceIT extends SharedMySqlContainerSupport {
 
     @Test
     void unpublishPlanner_WhenDeletedPlanner_ThrowsPlannerNotFoundException() {
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
-        plannerCommandService.deletePlanner(owner.getId(), planner.getId());
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        plannerCommandService.deletePlanner(owner.getId(), planner.id());
 
-        assertRejected(() -> moderationService.unpublishPlanner(moderator.getId(), planner.getId()))
+        assertRejected(() -> moderationService.unpublishPlanner(moderator.getId(), planner.id()))
                 .withCode("PLANNER_NOT_FOUND");
     }
 }

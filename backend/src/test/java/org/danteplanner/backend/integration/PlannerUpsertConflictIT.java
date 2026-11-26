@@ -3,7 +3,7 @@ package org.danteplanner.backend.integration;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.Hang;
@@ -20,12 +20,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -70,9 +72,12 @@ class PlannerUpsertConflictIT extends SharedMySqlContainerSupport {
     @Autowired
     private PlatformTransactionManager transactionManager;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     private User owner;
     private String token;
-    private Planner planner;
+    private StoredPlanner planner;
 
     @BeforeEach
     void setUp() {
@@ -90,7 +95,7 @@ class PlannerUpsertConflictIT extends SharedMySqlContainerSupport {
     }
 
     private MockHttpServletResponse doPut(Long syncVersion, String title) throws Exception {
-        return mockMvc.perform(put("/api/planner/md/{id}", planner.getId())
+        return mockMvc.perform(put("/api/planner/md/{id}", planner.id())
                         .cookie(AuthCookies.accessToken(token))
                         .with(withCsrf())
                         .contentType(APPLICATION_JSON)
@@ -105,7 +110,7 @@ class PlannerUpsertConflictIT extends SharedMySqlContainerSupport {
         int overlapped = 0;
         try (TransactionSpans.Installed unused = TransactionSpans.install(transactionManager)) {
             for (int attempt = 0; attempt < ATTEMPTS; attempt++) {
-                long current = plannerRepository.findById(planner.getId()).orElseThrow().getSyncVersion();
+                long current = plannerRepository.findAggregate(planner.id()).orElseThrow().content().syncVersion();
                 String title = "Conflict Test " + attempt;
                 CyclicBarrier barrier = new CyclicBarrier(2);
                 Future<Timed> a = pool.submit(() -> raced(barrier, current, title));
@@ -137,6 +142,56 @@ class PlannerUpsertConflictIT extends SharedMySqlContainerSupport {
         assertThat(overlapped)
                 .as("attempts whose two save transactions overlapped, so the second waited on the first's lock")
                 .isGreaterThanOrEqualTo(MIN_OVERLAPPING_ATTEMPTS);
+    }
+
+    @Test
+    void upsert_WhenTwoFirstSavesOfOneIdRace_OneCreatesAndTheOtherIsRefusedLeavingOneRowPerTable() throws Exception {
+        ExecutorService pool = Executors.newFixedThreadPool(2);
+        int collisions = 0;
+        try {
+            for (int attempt = 0; attempt < ATTEMPTS; attempt++) {
+                UUID id = UUID.randomUUID();
+                String body = objectMapper.writeValueAsString(UpsertRequests.draft().id(id.toString()).build());
+                CyclicBarrier barrier = new CyclicBarrier(2);
+                Future<MockHttpServletResponse> a = pool.submit(() -> firstSave(barrier, id, body));
+                Future<MockHttpServletResponse> b = pool.submit(() -> firstSave(barrier, id, body));
+                List<MockHttpServletResponse> responses = List.of(
+                        Hang.get(a, "the first racing create"), Hang.get(b, "the second racing create"));
+
+                assertThat(responses).extracting(MockHttpServletResponse::getStatus)
+                        .as("attempt %d", attempt)
+                        .containsExactlyInAnyOrder(201, 409);
+                MockHttpServletResponse loser = responses.get(0).getStatus() == 409 ? responses.get(0) : responses.get(1);
+                String code = objectMapper.readTree(loser.getContentAsString()).path("code").asString();
+                assertThat(code).as("attempt %d", attempt).isIn("UUID_COLLISION", "SYNC_CONFLICT");
+                if (code.equals("UUID_COLLISION")) {
+                    collisions++;
+                }
+                for (String table : List.of("planner", "planner_content", "planner_publication",
+                        "planner_moderation", "planner_stats")) {
+                    String key = table.equals("planner") ? "id" : "planner_id";
+                    assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + table + " WHERE " + key
+                            + " = UUID_TO_BIN(?)", Integer.class, id.toString()))
+                            .as("attempt %d: rows in %s", attempt, table)
+                            .isOne();
+                }
+            }
+        } finally {
+            pool.shutdownNow();
+        }
+        assertThat(collisions)
+                .as("attempts where both creates passed the ownership read before either committed")
+                .isPositive();
+    }
+
+    private MockHttpServletResponse firstSave(CyclicBarrier barrier, UUID id, String body) throws Exception {
+        Hang.await(barrier, "both creates reaching the barrier");
+        return mockMvc.perform(put("/api/planner/md/{id}", id)
+                        .cookie(AuthCookies.accessToken(token))
+                        .with(withCsrf())
+                        .contentType(APPLICATION_JSON)
+                        .content(body))
+                .andReturn().getResponse();
     }
 
     private record Timed(MockHttpServletResponse response, Span span) {

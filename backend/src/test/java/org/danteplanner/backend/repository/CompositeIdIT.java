@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerEntityFilter;
 import org.danteplanner.backend.planner.entity.PlannerEntityFilterId;
 import org.danteplanner.backend.planner.entity.PlannerKeywordFilter;
@@ -82,9 +82,9 @@ class CompositeIdIT extends SharedMySqlContainerSupport {
     @BeforeEach
     void setUp() {
         User user = TestDataFactory.createTestUser(userRepository, "composite-id@example.com");
-        Planner planner = TestDataFactory.planner(user).published(true).save(plannerRepository);
+        StoredPlanner planner = TestDataFactory.planner(user).published(true).save(plannerRepository);
         userId = user.getId();
-        plannerId = planner.getId();
+        plannerId = planner.id();
     }
 
     @Test

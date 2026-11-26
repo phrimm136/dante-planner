@@ -1,9 +1,10 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.planner.api.Visibility;
 import org.danteplanner.backend.planner.api.PlannerThread;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.mockito.ArgumentCaptor;
 
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
@@ -121,20 +122,20 @@ class PlannerEngagementServiceTest {
     @Nested
     class CastVoteImmutabilityTests {
 
-        private Planner createPublishedPlanner() {
+        private StoredPlanner createPublishedPlanner() {
             return testPlannerBuilder().published(true).build();
         }
 
         @Test
         void castVote_WhenDuplicateVote_ThrowsException() {
             // Arrange
-            Planner planner = createPublishedPlanner();
-            UUID plannerId = planner.getId();
+            StoredPlanner planner = createPublishedPlanner();
+            UUID plannerId = planner.id();
             PlannerVoteId voteId =
                 new PlannerVoteId(testUser.getId(), plannerId);
 
             when(plannerRepository.findAggregateWithAuthor(plannerId))
-                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser))));
+                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser), Visibility.SHOWN)));
             when(plannerVoteRepository.existsById(voteId))
                     .thenReturn(true);
 
@@ -152,13 +153,13 @@ class PlannerEngagementServiceTest {
         @Test
         void castVote_WhenFirstVote_CreatesVote() {
             // Arrange
-            Planner planner = createPublishedPlanner();
-            UUID plannerId = planner.getId();
+            StoredPlanner planner = createPublishedPlanner();
+            UUID plannerId = planner.id();
             PlannerVoteId voteId =
                 new PlannerVoteId(testUser.getId(), plannerId);
 
             when(plannerRepository.findAggregateWithAuthor(plannerId))
-                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser))));
+                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser), Visibility.SHOWN)));
             when(plannerVoteRepository.existsById(voteId))
                     .thenReturn(false);
             when(plannerVoteRepository.insert(any(PlannerVote.class)))
@@ -184,11 +185,11 @@ class PlannerEngagementServiceTest {
 
         @Test
         void castVote_WhenCrossingTheThreshold_RecordsTheRecommendedEvent() {
-            Planner planner = createPublishedPlanner();
-            UUID plannerId = planner.getId();
+            StoredPlanner planner = createPublishedPlanner();
+            UUID plannerId = planner.id();
 
             when(plannerRepository.findAggregateWithAuthor(plannerId))
-                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser))));
+                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser), Visibility.SHOWN)));
             when(plannerVoteRepository.existsById(any(PlannerVoteId.class))).thenReturn(false);
             when(plannerVoteRepository.insert(any(PlannerVote.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
@@ -207,16 +208,16 @@ class PlannerEngagementServiceTest {
             verify(domainEventRepository).insert(recorded.capture());
             assertThat(recorded.getValue().getEventType()).isEqualTo(DomainEventType.PLANNER_RECOMMENDED);
             assertThat(recorded.getValue().getAggregateId()).isEqualTo(plannerId);
-            assertThat(recorded.getValue().getPayload()).isEqualTo("{\"ownerId\":" + planner.getUserId() + "}");
+            assertThat(recorded.getValue().getPayload()).isEqualTo("{\"ownerId\":" + planner.userId() + "}");
         }
 
         @Test
         void castVote_WhenAnotherVoteAlreadyLatched_RecordsNothing() {
-            Planner planner = createPublishedPlanner();
-            UUID plannerId = planner.getId();
+            StoredPlanner planner = createPublishedPlanner();
+            UUID plannerId = planner.id();
 
             when(plannerRepository.findAggregateWithAuthor(plannerId))
-                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser))));
+                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser), Visibility.SHOWN)));
             when(plannerVoteRepository.existsById(any(PlannerVoteId.class))).thenReturn(false);
             when(plannerVoteRepository.insert(any(PlannerVote.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
@@ -231,11 +232,11 @@ class PlannerEngagementServiceTest {
 
         @Test
         void castVote_WhenBelowTheThreshold_RecordsNothing() {
-            Planner planner = createPublishedPlanner();
-            UUID plannerId = planner.getId();
+            StoredPlanner planner = createPublishedPlanner();
+            UUID plannerId = planner.id();
 
             when(plannerRepository.findAggregateWithAuthor(plannerId))
-                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser))));
+                    .thenReturn(Optional.of(new PublishedPlannerRow(planner, TestDataFactory.profileOf(testUser), Visibility.SHOWN)));
             when(plannerVoteRepository.existsById(any(PlannerVoteId.class))).thenReturn(false);
             when(plannerVoteRepository.insert(any(PlannerVote.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
@@ -251,7 +252,7 @@ class PlannerEngagementServiceTest {
     void reportPlanner_WhenCalled_CreatesTheReportForTheReporterAndPlanner() {
         UUID plannerId = UUID.randomUUID();
         when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, Visibility.SHOWN)));
 
         engagementService.reportPlanner(testUser.getId(), plannerId);
 

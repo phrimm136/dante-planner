@@ -13,7 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -60,10 +60,10 @@ class PlannerCommentSseControllerIT extends SharedMySqlContainerSupport {
     @BeforeEach
     void setUp() {
         User owner = TestDataFactory.createTestUser(userRepository, "sse-owner@example.com");
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .published(true)
                 .save(plannerRepository);
-        publishedPlannerId = planner.getId();
+        publishedPlannerId = planner.id();
     }
 
     @Test

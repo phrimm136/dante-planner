@@ -11,8 +11,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
+import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.jspecify.annotations.Nullable;
@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
+@Immutable
 @Table(name = "planner_catalog")
 @Getter
 @Builder
@@ -41,15 +42,12 @@ public class PlannerCatalog {
     private PlannerType plannerType;
 
     @Column(nullable = false, length = 50)
-    @Setter
     private String category;
 
     @Column(nullable = false)
-    @Setter
     private String title;
 
     @Column(name = "selected_keywords", columnDefinition = "JSON")
-    @Setter
     @Convert(converter = KeywordSetConverter.class)
     private @Nullable Set<String> selectedKeywords;
 

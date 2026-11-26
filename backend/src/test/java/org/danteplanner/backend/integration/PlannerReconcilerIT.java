@@ -1,12 +1,13 @@
 package org.danteplanner.backend.integration;
 
+import org.danteplanner.backend.planner.precondition.PlannerPublishValidator;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.planner.entity.Publication;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
@@ -90,20 +91,20 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
         owner = TestDataFactory.createTestUser(userRepository, "reconciler-owner@example.com");
     }
 
-    private Planner publishClean(String title) {
+    private StoredPlanner publishClean(String title) {
         return publishClean(title, Set.of("Sinking"));
     }
 
-    private Planner publishClean(String title, Set<String> keywords) {
-        Planner planner = TestDataFactory.planner(owner)
+    private StoredPlanner publishClean(String title, Set<String> keywords) {
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .title(title)
                 .selectedKeywords(keywords)
                 .published(true)
                 .save(plannerRepository);
-        statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+        statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         FilterRowsSync.readCommitted(transactionManager)
                 .executeWithoutResult(status -> catalogService.onBecameVisible(planner,
-                        (Publication.Published) planner.publicationState(), planner.listing()));
+                        new PlannerPublishValidator().requirePublishable(planner), (Publication.Published) planner.publication()));
         return planner;
     }
 
@@ -129,57 +130,57 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
     @Test
     void reconcilerDetectsDrift_WhenDriftSeeded_ReportsWithoutRepair() {
         // A clean planner: must produce no records
-        Planner clean = publishClean("Clean");
+        StoredPlanner clean = publishClean("Clean");
 
         // Upvote drift: counter says 5, one real vote row
-        Planner voteDrift = publishClean("Vote Drift");
+        StoredPlanner voteDrift = publishClean("Vote Drift");
         jdbc.update("INSERT INTO planner_votes (user_id, planner_id, vote_type, created_at, version) "
-                + "VALUES (?, UUID_TO_BIN(?), 'UP', NOW(), 0)", owner.getId(), voteDrift.getId().toString());
+                + "VALUES (?, UUID_TO_BIN(?), 'UP', NOW(), 0)", owner.getId(), voteDrift.id().toString());
         jdbc.update("UPDATE planner_stats SET upvotes = 5 WHERE planner_id = UUID_TO_BIN(?)",
-                voteDrift.getId().toString());
+                voteDrift.id().toString());
 
         // Comment-count drift: counter says 3, one live comment row
-        Planner commentDrift = publishClean("Comment Drift");
+        StoredPlanner commentDrift = publishClean("Comment Drift");
         jdbc.update("INSERT INTO planner_comments (public_id, planner_id, user_id, content, depth, created_at) "
                 + "VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), ?, 'seeded', 0, NOW())",
-                UUID.randomUUID().toString(), commentDrift.getId().toString(), owner.getId());
+                UUID.randomUUID().toString(), commentDrift.id().toString(), owner.getId());
         StoredComments.split(jdbc, jdbc.queryForObject(
                 "SELECT id FROM planner_comments WHERE planner_id = UUID_TO_BIN(?)",
-                Long.class, commentDrift.getId().toString()));
+                Long.class, commentDrift.id().toString()));
         jdbc.update("UPDATE planner_stats SET comment_count = 3 WHERE planner_id = UUID_TO_BIN(?)",
-                commentDrift.getId().toString());
+                commentDrift.id().toString());
 
         // Catalog membership drift, both directions: a visible planner missing its
         // row, and a row surviving for an unpublished planner
-        Planner missingRow = publishClean("Missing Catalog Row");
+        StoredPlanner missingRow = publishClean("Missing Catalog Row");
         jdbc.update("DELETE FROM planner_catalog WHERE planner_id = UUID_TO_BIN(?)",
-                missingRow.getId().toString());
-        Planner orphanRow = publishClean("Orphan Catalog Row");
+                missingRow.id().toString());
+        StoredPlanner orphanRow = publishClean("Orphan Catalog Row");
         jdbc.update("UPDATE planner_publication SET published = FALSE WHERE planner_id = UUID_TO_BIN(?)",
-                orphanRow.getId().toString());
+                orphanRow.id().toString());
 
         // Filter drift: an entity row deleted, a keyword row that should not exist
-        Planner filterDrift = publishClean("Filter Drift");
+        StoredPlanner filterDrift = publishClean("Filter Drift");
         jdbc.update("DELETE FROM planner_entity_filter WHERE planner_id = UUID_TO_BIN(?) LIMIT 1",
-                filterDrift.getId().toString());
+                filterDrift.id().toString());
         jdbc.update("INSERT INTO planner_keyword_filter (keyword, planner_id) "
-                + "VALUES ('DawnTeam', UUID_TO_BIN(?))", filterDrift.getId().toString());
+                + "VALUES ('DawnTeam', UUID_TO_BIN(?))", filterDrift.id().toString());
 
         // Recommended drift: flagged recommended while far below the threshold
-        Planner recommendedDrift = publishClean("Recommended Drift");
+        StoredPlanner recommendedDrift = publishClean("Recommended Drift");
         jdbc.update("UPDATE planner_catalog SET recommended = TRUE WHERE planner_id = UUID_TO_BIN(?)",
-                recommendedDrift.getId().toString());
+                recommendedDrift.id().toString());
 
         List<DriftRecord> records = reconciler.reconcile();
 
-        assertThat(kindsFor(records, clean.getId())).as("clean planner yields no drift").isEmpty();
-        assertThat(kindsFor(records, voteDrift.getId())).contains("upvotes");
-        assertThat(kindsFor(records, commentDrift.getId())).contains("comment_count");
-        assertThat(kindsFor(records, missingRow.getId())).contains("catalog_membership");
-        assertThat(kindsFor(records, orphanRow.getId())).contains("catalog_membership");
-        assertThat(kindsFor(records, filterDrift.getId()))
+        assertThat(kindsFor(records, clean.id())).as("clean planner yields no drift").isEmpty();
+        assertThat(kindsFor(records, voteDrift.id())).contains("upvotes");
+        assertThat(kindsFor(records, commentDrift.id())).contains("comment_count");
+        assertThat(kindsFor(records, missingRow.id())).contains("catalog_membership");
+        assertThat(kindsFor(records, orphanRow.id())).contains("catalog_membership");
+        assertThat(kindsFor(records, filterDrift.id()))
                 .contains("entity_filter", "keyword_filter");
-        assertThat(kindsFor(records, recommendedDrift.getId())).contains("recommended");
+        assertThat(kindsFor(records, recommendedDrift.id())).contains("recommended");
 
         // Metric: one counter increment per record
         double counted = meterRegistry.find("planner_reconciler_drift_total").counters().stream()
@@ -190,27 +191,27 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
 
         // No auto-repair: every seeded divergence is still in place
         assertThat(jdbc.queryForObject("SELECT upvotes FROM planner_stats WHERE planner_id = UUID_TO_BIN(?)",
-                Integer.class, voteDrift.getId().toString())).isEqualTo(5);
+                Integer.class, voteDrift.id().toString())).isEqualTo(5);
         assertThat(jdbc.queryForObject("SELECT comment_count FROM planner_stats WHERE planner_id = UUID_TO_BIN(?)",
-                Integer.class, commentDrift.getId().toString())).isEqualTo(3);
-        assertThat(catalogRepository.existsById(missingRow.getId())).isFalse();
-        assertThat(catalogRepository.existsById(orphanRow.getId())).isTrue();
+                Integer.class, commentDrift.id().toString())).isEqualTo(3);
+        assertThat(catalogRepository.existsById(missingRow.id())).isFalse();
+        assertThat(catalogRepository.existsById(orphanRow.id())).isTrue();
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM planner_keyword_filter "
                         + "WHERE planner_id = UUID_TO_BIN(?) AND keyword = 'DawnTeam'",
-                Integer.class, filterDrift.getId().toString())).isEqualTo(1);
+                Integer.class, filterDrift.id().toString())).isEqualTo(1);
         assertThat(jdbc.queryForObject("SELECT recommended FROM planner_catalog WHERE planner_id = UUID_TO_BIN(?)",
-                Boolean.class, recommendedDrift.getId().toString())).isTrue();
+                Boolean.class, recommendedDrift.id().toString())).isTrue();
     }
 
     @Test
     void recommendedDrift_WhenModerationRowMissing_IsStillReported() {
-        Planner noModeration = publishClean("No Moderation Row");
+        StoredPlanner noModeration = publishClean("No Moderation Row");
         jdbc.update("DELETE FROM planner_moderation WHERE planner_id = UUID_TO_BIN(?)",
-                noModeration.getId().toString());
+                noModeration.id().toString());
         jdbc.update("UPDATE planner_catalog SET recommended = TRUE WHERE planner_id = UUID_TO_BIN(?)",
-                noModeration.getId().toString());
+                noModeration.id().toString());
 
-        Set<String> kinds = kindsFor(reconciler.reconcile(), noModeration.getId());
+        Set<String> kinds = kindsFor(reconciler.reconcile(), noModeration.id());
 
         assertThat(kinds)
                 .as("an absent moderation row hides nothing, so the flag derives FALSE and disagrees")
@@ -222,21 +223,21 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
 
     @Test
     void corruptKeywordColumn_WhenTheContentIsReadable_ReportsCatalogDriftButNoFilterDrift() {
-        Planner unreadable = publishClean("Unreadable Content");
-        assertThat(entityFilterRows(unreadable.getId()))
+        StoredPlanner unreadable = publishClean("Unreadable Content");
+        assertThat(entityFilterRows(unreadable.id()))
                 .as("the planner starts with a correctly built index").isPositive();
 
         // The column enforces well-formed JSON, so a document is unreadable by carrying a shape the
         // rebuild cannot consume rather than by being malformed.
         jdbc.update("UPDATE planner_content SET selected_keywords = '{\"not\": \"a list\"}' "
-                + "WHERE planner_id = UUID_TO_BIN(?)", unreadable.getId().toString());
+                + "WHERE planner_id = UUID_TO_BIN(?)", unreadable.id().toString());
 
         List<DriftRecord> records = reconciler.reconcile();
 
-        assertThat(kindsFor(records, unreadable.getId()))
+        assertThat(kindsFor(records, unreadable.id()))
                 .as("an unrebuildable document is unknown, not empty: its indexed rows are not drift")
                 .doesNotContain("entity_filter", "keyword_filter");
-        assertThat(recordsFor(records, unreadable.getId(), "catalog_keywords"))
+        assertThat(recordsFor(records, unreadable.id(), "catalog_keywords"))
                 .as("the runtime serves the corrupt column as no keywords, so the catalog's copy "
                         + "is a divergence a reader can see")
                 .singleElement()
@@ -244,49 +245,49 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
                     assertThat(record.expected()).isEqualTo("[]");
                     assertThat(record.actual()).isEqualTo("[Sinking]");
                 });
-        assertThat(entityFilterRows(unreadable.getId()))
+        assertThat(entityFilterRows(unreadable.id()))
                 .as("nothing is repaired away either").isPositive();
     }
 
     @Test
     void catalogTitleDrift_WhenTheCatalogCopyDivergesFromTheContentRow_ReportsOneRecord() {
-        Planner titleDrift = publishClean("Catalog Title Drift");
+        StoredPlanner titleDrift = publishClean("Catalog Title Drift");
         jdbc.update("UPDATE planner_catalog SET title = 'Stale Copy' WHERE planner_id = UUID_TO_BIN(?)",
-                titleDrift.getId().toString());
+                titleDrift.id().toString());
 
         List<DriftRecord> records = reconciler.reconcile();
 
-        assertThat(recordsFor(records, titleDrift.getId(), "catalog_title"))
+        assertThat(recordsFor(records, titleDrift.id(), "catalog_title"))
                 .singleElement()
                 .satisfies(record -> {
                     assertThat(record.expected()).isEqualTo("Catalog Title Drift");
                     assertThat(record.actual()).isEqualTo("Stale Copy");
                 });
-        assertThat(kindsFor(records, titleDrift.getId()))
+        assertThat(kindsFor(records, titleDrift.id()))
                 .as("only the diverged column is reported")
                 .doesNotContain("catalog_category");
         assertThat(jdbc.queryForObject("SELECT title FROM planner_catalog WHERE planner_id = UUID_TO_BIN(?)",
-                String.class, titleDrift.getId().toString()))
+                String.class, titleDrift.id().toString()))
                 .as("the audit repairs nothing").isEqualTo("Stale Copy");
     }
 
     @Test
     void catalogTitleDrift_WhenTheCopyDiffersOnlyByCaseOrTrailingSpace_ReportsEachAsDrift() {
-        Planner caseOnly = publishClean("Sinking Build");
+        StoredPlanner caseOnly = publishClean("Sinking Build");
         jdbc.update("UPDATE planner_catalog SET title = 'sinking build' WHERE planner_id = UUID_TO_BIN(?)",
-                caseOnly.getId().toString());
+                caseOnly.id().toString());
 
-        Planner spaceOnly = publishClean("Trailing Space");
+        StoredPlanner spaceOnly = publishClean("Trailing Space");
         jdbc.update("UPDATE planner_catalog SET title = 'Trailing Space ' WHERE planner_id = UUID_TO_BIN(?)",
-                spaceOnly.getId().toString());
+                spaceOnly.id().toString());
 
         List<DriftRecord> records = reconciler.reconcile();
 
-        assertThat(recordsFor(records, caseOnly.getId(), "catalog_title"))
+        assertThat(recordsFor(records, caseOnly.id(), "catalog_title"))
                 .as("the columns collate case-insensitively, which is where a half-landed rename hides")
                 .singleElement()
                 .satisfies(record -> assertThat(record.actual()).isEqualTo("sinking build"));
-        assertThat(recordsFor(records, spaceOnly.getId(), "catalog_title"))
+        assertThat(recordsFor(records, spaceOnly.id(), "catalog_title"))
                 .as("the columns collate PAD SPACE, so a trailing space is invisible to the default comparison")
                 .singleElement()
                 .satisfies(record -> assertThat(record.actual()).isEqualTo("Trailing Space "));
@@ -294,33 +295,33 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
 
     @Test
     void catalogKeywordDrift_WhenTheStoredArraysDifferInOrderAndInMembership_ReportsOnlyTheSetDifference() {
-        Planner reordered = publishClean("Reordered Keywords", Set.of("Burst", "Sinking"));
+        StoredPlanner reordered = publishClean("Reordered Keywords", Set.of("Burst", "Sinking"));
         jdbc.update("UPDATE planner_catalog SET selected_keywords = '[\"Sinking\", \"Burst\"]' "
-                + "WHERE planner_id = UUID_TO_BIN(?)", reordered.getId().toString());
+                + "WHERE planner_id = UUID_TO_BIN(?)", reordered.id().toString());
 
-        Planner different = publishClean("Different Keywords", Set.of("Burst", "Sinking"));
+        StoredPlanner different = publishClean("Different Keywords", Set.of("Burst", "Sinking"));
         jdbc.update("UPDATE planner_catalog SET selected_keywords = '[\"Combustion\"]' "
-                + "WHERE planner_id = UUID_TO_BIN(?)", different.getId().toString());
+                + "WHERE planner_id = UUID_TO_BIN(?)", different.id().toString());
 
         List<DriftRecord> records = reconciler.reconcile();
 
-        assertThat(kindsFor(records, reordered.getId()))
+        assertThat(kindsFor(records, reordered.id()))
                 .as("the stored array is order-bearing and the set it denotes is not")
                 .doesNotContain("catalog_keywords");
-        assertThat(recordsFor(records, different.getId(), "catalog_keywords"))
+        assertThat(recordsFor(records, different.id(), "catalog_keywords"))
                 .as("a differing membership is drift")
                 .hasSize(1);
     }
 
     @Test
     void catalogCopyDrift_WhenThePlannerIsTombstoned_ReportsMembershipAlone() {
-        Planner tombstoned = publishClean("Tombstoned Copy");
+        StoredPlanner tombstoned = publishClean("Tombstoned Copy");
         jdbc.update("UPDATE planner_catalog SET title = 'Stale', selected_keywords = '[\"Combustion\"]' "
-                + "WHERE planner_id = UUID_TO_BIN(?)", tombstoned.getId().toString());
+                + "WHERE planner_id = UUID_TO_BIN(?)", tombstoned.id().toString());
         jdbc.update("UPDATE planner_content SET deleted_at = NOW(6) WHERE planner_id = UUID_TO_BIN(?)",
-                tombstoned.getId().toString());
+                tombstoned.id().toString());
 
-        Set<String> kinds = kindsFor(reconciler.reconcile(), tombstoned.getId());
+        Set<String> kinds = kindsFor(reconciler.reconcile(), tombstoned.id());
 
         assertThat(kinds)
                 .as("the leftover row is the bug, and the audit that owns it already names it")
@@ -332,131 +333,131 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
 
     @Test
     void recommendedNotificationDrift_WhenTheStampCarriesNeitherRow_ReportsUntilEitherExists() {
-        Planner neither = publishClean("Stamped Without Effect");
-        Planner withEvent = publishClean("Stamped With Event");
-        Planner withNotification = publishClean("Stamped With Notification");
+        StoredPlanner neither = publishClean("Stamped Without Effect");
+        StoredPlanner withEvent = publishClean("Stamped With Event");
+        StoredPlanner withNotification = publishClean("Stamped With Notification");
         stampRecommended(neither);
         stampRecommended(withEvent);
         stampRecommended(withNotification);
 
         jdbc.update("INSERT INTO domain_events (event_type, aggregate_id, payload) "
                         + "VALUES ('PLANNER_RECOMMENDED', UUID_TO_BIN(?), ?)",
-                withEvent.getId().toString(), "{\"ownerId\": " + owner.getId() + "}");
+                withEvent.id().toString(), "{\"ownerId\": " + owner.getId() + "}");
         jdbc.update("INSERT INTO notifications (user_id, content_id, notification_type, public_id) "
                         + "VALUES (?, ?, 'PLANNER_RECOMMENDED', UUID_TO_BIN(?))",
-                owner.getId(), withNotification.getId().toString(), UUID.randomUUID().toString());
+                owner.getId(), withNotification.id().toString(), UUID.randomUUID().toString());
 
         List<DriftRecord> records = reconciler.reconcile();
 
-        assertThat(recordsFor(records, neither.getId(), "recommended_notification"))
+        assertThat(recordsFor(records, neither.id(), "recommended_notification"))
                 .as("the latch was taken, so the owner was owed a notification nothing carries")
                 .singleElement()
                 .satisfies(record -> {
                     assertThat(record.expected()).isEqualTo("event or notification row");
                     assertThat(record.actual()).isEqualTo("neither");
                 });
-        assertThat(kindsFor(records, withEvent.getId()))
+        assertThat(kindsFor(records, withEvent.id()))
                 .as("an event row aged out of retention after delivery is not drift, so its presence clears")
                 .doesNotContain("recommended_notification");
-        assertThat(kindsFor(records, withNotification.getId()))
+        assertThat(kindsFor(records, withNotification.id()))
                 .as("a recipient who deleted the row still received it, so its presence clears")
                 .doesNotContain("recommended_notification");
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM notifications WHERE content_id = ?",
-                Integer.class, neither.getId().toString()))
+                Integer.class, neither.id().toString()))
                 .as("the audit repairs nothing").isZero();
     }
 
     @Test
     void recommendedNotificationDrift_WhenTheStampPredatesTheAuditWindow_ReportsNothing() {
-        Planner aged = publishClean("Stamped Long Ago");
+        StoredPlanner aged = publishClean("Stamped Long Ago");
         jdbc.update("UPDATE planner_stats SET recommended_notified_at = DATE_SUB(NOW(6), INTERVAL 60 DAY) "
-                + "WHERE planner_id = UUID_TO_BIN(?)", aged.getId().toString());
+                + "WHERE planner_id = UUID_TO_BIN(?)", aged.id().toString());
 
-        assertThat(kindsFor(reconciler.reconcile(), aged.getId()))
+        assertThat(kindsFor(reconciler.reconcile(), aged.id()))
                 .as("both carriers are swept on their own retention, so an old stamp with neither "
                         + "row is the expected end state rather than a finding")
                 .doesNotContain("recommended_notification");
     }
 
-    private void stampRecommended(Planner planner) {
+    private void stampRecommended(StoredPlanner planner) {
         jdbc.update("UPDATE planner_stats SET recommended_notified_at = NOW(6) "
-                + "WHERE planner_id = UUID_TO_BIN(?)", planner.getId().toString());
+                + "WHERE planner_id = UUID_TO_BIN(?)", planner.id().toString());
     }
 
     @Test
     void reconcile_WhenAFiveFloorPlannerStoresASixthFloor_ReportsNoEntityFilterDrift() {
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .title("Hidden Floor")
                 .selectedKeywords(Set.of("Sinking"))
                 .content(SIX_FLOOR_CONTENT)
                 .published(true)
                 .save(plannerRepository);
-        statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+        statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         FilterRowsSync.readCommitted(transactionManager)
                 .executeWithoutResult(status -> catalogService.onBecameVisible(planner,
-                        (Publication.Published) planner.publicationState(), planner.listing()));
+                        new PlannerPublishValidator().requirePublishable(planner), (Publication.Published) planner.publication()));
 
-        assertThat(kindsFor(reconciler.reconcile(), planner.getId())).doesNotContain("entity_filter");
+        assertThat(kindsFor(reconciler.reconcile(), planner.id())).doesNotContain("entity_filter");
     }
 
     @Test
     void reconcile_WhenARefractedRailwayPlannerIsIndexed_SkipsItsFilterAudit() {
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .title("Railway")
                 .plannerType(PlannerType.REFRACTED_RAILWAY)
                 .category("RR_PLACEHOLDER")
                 .selectedKeywords(Set.of("Sinking"))
                 .published(true)
                 .save(plannerRepository);
-        statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
+        statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         FilterRowsSync.readCommitted(transactionManager)
                 .executeWithoutResult(status -> catalogService.onBecameVisible(planner,
-                        (Publication.Published) planner.publicationState(), planner.listing()));
+                        new PlannerPublishValidator().requirePublishable(planner), (Publication.Published) planner.publication()));
 
-        assertThat(kindsFor(reconciler.reconcile(), planner.getId()))
+        assertThat(kindsFor(reconciler.reconcile(), planner.id()))
                 .doesNotContain("entity_filter", "keyword_filter");
     }
 
     @Test
     void reconcile_WhenTheKeywordColumnDisagreesWithTheContent_ReportsContentKeywordDrift() {
-        Planner planner = publishClean("Keyword Column Drift", Set.of("Sinking"));
+        StoredPlanner planner = publishClean("Keyword Column Drift", Set.of("Sinking"));
         jdbc.update("UPDATE planner_content SET selected_keywords = '[\"Burst\"]' WHERE planner_id = UUID_TO_BIN(?)",
-                planner.getId().toString());
+                planner.id().toString());
 
         List<DriftRecord> records = reconciler.reconcile();
 
-        assertThat(recordsFor(records, planner.getId(), "content_keywords"))
+        assertThat(recordsFor(records, planner.id(), "content_keywords"))
                 .singleElement()
                 .satisfies(record -> {
                     assertThat(record.expected()).isEqualTo("[Sinking]");
                     assertThat(record.actual()).isEqualTo("[Burst]");
                 });
         assertThat(jdbc.queryForObject("SELECT selected_keywords FROM planner_content WHERE planner_id = UUID_TO_BIN(?)",
-                String.class, planner.getId().toString()))
+                String.class, planner.id().toString()))
                 .as("the audit repairs nothing").isEqualTo("[\"Burst\"]");
     }
 
     @Test
     void reconcile_WhenADraftKeywordColumnDisagreesWithItsContent_ReportsContentKeywordDrift() {
-        Planner draft = TestDataFactory.planner(owner).title("Draft Keyword Drift")
+        StoredPlanner draft = TestDataFactory.planner(owner).title("Draft Keyword Drift")
                 .selectedKeywords(Set.of("Sinking"))
                 .save(plannerRepository);
         jdbc.update("UPDATE planner_content SET selected_keywords = NULL WHERE planner_id = UUID_TO_BIN(?)",
-                draft.getId().toString());
+                draft.id().toString());
 
-        assertThat(recordsFor(reconciler.reconcile(), draft.getId(), "content_keywords"))
+        assertThat(recordsFor(reconciler.reconcile(), draft.id(), "content_keywords"))
                 .singleElement()
                 .satisfies(record -> assertThat(record.actual()).isEqualTo("[]"));
     }
 
     @Test
     void reconcile_WhenTheKeywordIndexMatchesTheColumnButNotTheContent_ReportsKeywordFilterDrift() {
-        Planner planner = publishClean("Index Follows Column", Set.of("Sinking"));
+        StoredPlanner planner = publishClean("Index Follows Column", Set.of("Sinking"));
         jdbc.update("UPDATE planner_content SET selected_keywords = '[\"Burst\"]' WHERE planner_id = UUID_TO_BIN(?)",
-                planner.getId().toString());
-        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.getId());
+                planner.id().toString());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
 
-        assertThat(recordsFor(reconciler.reconcile(), planner.getId(), "keyword_filter"))
+        assertThat(recordsFor(reconciler.reconcile(), planner.id(), "keyword_filter"))
                 .singleElement()
                 .satisfies(record -> {
                     assertThat(record.expected()).isEqualTo("[Sinking]");
@@ -479,12 +480,12 @@ class PlannerReconcilerIT extends ExclusiveDatabaseSupport {
 
     @Test
     void save_WhenTheFilterRebuildFails_RollsTheWholeSaveBack() throws Exception {
-        Planner planner = publishClean("Rebuild Fails", Set.of());
-        UUID plannerId = planner.getId();
+        StoredPlanner planner = publishClean("Rebuild Fails", Set.of());
+        UUID plannerId = planner.id();
         Set<String> indexedBefore = indexedEntities(plannerId);
         Map<String, Object> storedBefore = storedContentRow(plannerId);
-        Planner loaded = plannerRepository.findAggregateForOwner(plannerId, owner.getId()).orElseThrow();
-        ObjectNode edited = (ObjectNode) objectMapper.readTree(loaded.getContentJson());
+        StoredPlanner loaded = plannerRepository.findAggregateForOwner(plannerId, owner.getId()).orElseThrow();
+        ObjectNode edited = (ObjectNode) objectMapper.readTree(loaded.content().json());
         ((ObjectNode) edited.get("equipment").get("1").get("identity")).put("id", "10102");
         UpsertPlannerRequest save = UpsertRequests.resending(loaded)
                 .status(PlannerStatus.SAVED)

@@ -7,7 +7,7 @@ epic: none · pr: none · supersedes: 056 @persistence @convention
   REJECTED: `INSERT IGNORE` before such a lock — the loser holds a shared lock on the duplicate row and upgrades it: four first-time settings writers deadlocked in 19 of 20 rounds with `INSERT IGNORE` and `FOR UPDATE`, in none with `ON DUPLICATE KEY UPDATE`.
   REJECTED: Spring Data JDBC — its update also writes the whole row from what was read.
   REJECTED: jOOQ or JdbcClient for every write — jOOQ adds a code generator and a dependency, JdbcClient loses the startup check that a query's names resolve; neither is needed once nothing is written implicitly.
-  INVARIANT: every entity is `@Immutable` except the lines of `backend/config/mutable-entities-MODULE.txt`, which only shrink — `ImmutableEntityRuleTest`.
+  INVARIANT: every entity is `@Immutable`; a module that needs an exception adds a `backend/config/mutable-entities-MODULE.txt` line, and none is left — `ImmutableEntityRuleTest`.
   INVARIANT: no field of an immutable entity is written outside its own constructors and persist or load callbacks — `ImmutableEntityRuleTest`.
   INVARIANT: no `@Modifying` query clears the persistence context except the lines of `backend/config/context-clearing-MODULE.txt`, which only shrink — `PersistenceContextClearingTest`.
   INVARIANT: a JPQL `UPDATE` may name an immutable entity (`hibernate.query.immutable_entity_update_query_handling_mode=allow`) — `UserProfileImmutableIT`.

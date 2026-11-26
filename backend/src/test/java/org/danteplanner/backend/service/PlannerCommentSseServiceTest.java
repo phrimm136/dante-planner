@@ -1,4 +1,5 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.planner.api.Visibility;
 import org.danteplanner.backend.planner.api.PlannerThread;
 import java.util.Optional;
 import org.danteplanner.backend.comment.service.PlannerCommentSseService;
@@ -74,7 +75,7 @@ class PlannerCommentSseServiceTest {
         plannerId = UUID.randomUUID();
         lenient().when(plannerRepository.findThread(any(UUID.class)))
                 .thenAnswer(invocation -> Optional.of(
-                        new PlannerThread(invocation.getArgument(0), PLANNER_OWNER_ID, true, false)));
+                        new PlannerThread(invocation.getArgument(0), PLANNER_OWNER_ID, Visibility.SHOWN)));
     }
 
     @Nested

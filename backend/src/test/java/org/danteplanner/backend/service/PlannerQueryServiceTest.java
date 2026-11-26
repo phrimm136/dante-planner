@@ -4,7 +4,7 @@ import org.danteplanner.backend.planner.service.PlannerQueryService;
 
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
@@ -63,50 +63,50 @@ class PlannerQueryServiceTest {
                 .plannerType(PlannerType.MIRROR_DUNGEON);
     }
 
-    private Planner createTestPlanner() {
+    private StoredPlanner createTestPlanner() {
         return testPlannerBuilder().build();
     }
 
-    private static PlannerSummaryRow summaryRow(Planner planner) {
+    private static PlannerSummaryRow summaryRow(StoredPlanner planner) {
         return summaryRow(planner, null);
     }
 
-    private static PlannerSummaryRow summaryRow(Planner planner, Instant deletedAt) {
+    private static PlannerSummaryRow summaryRow(StoredPlanner planner, Instant deletedAt) {
         return new PlannerSummaryRow() {
 
             @Override
             public UUID getId() {
-                return planner.getId();
+                return planner.id();
             }
 
             @Override
             public String getTitle() {
-                return planner.getTitle();
+                return planner.content().title();
             }
 
             @Override
             public String getCategory() {
-                return planner.getCategory();
+                return planner.content().category();
             }
 
             @Override
             public PlannerType getPlannerType() {
-                return planner.getPlannerType();
+                return planner.plannerType();
             }
 
             @Override
             public PlannerStatus getStatus() {
-                return planner.getStatus();
+                return planner.content().status();
             }
 
             @Override
             public long getSyncVersion() {
-                return planner.getSyncVersion();
+                return planner.content().syncVersion();
             }
 
             @Override
             public Instant getLastModifiedAt() {
-                return planner.getLastModifiedAt();
+                return planner.content().lastModifiedAt();
             }
 
             @Override
@@ -123,7 +123,7 @@ class PlannerQueryServiceTest {
         void getPlanners_WhenCalled_ReturnsPaginatedResults() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
-            Planner planner = createTestPlanner();
+            StoredPlanner planner = createTestPlanner();
             List<PlannerSummaryRow> rows = List.of(summaryRow(planner), summaryRow(createTestPlanner()));
             Page<PlannerSummaryRow> rowPage = new PageImpl<>(rows, pageable, 2);
 
@@ -136,8 +136,8 @@ class PlannerQueryServiceTest {
             // Assert
             assertThat(result.getTotalElements()).isEqualTo(2);
             assertThat(result.getContent().size()).isEqualTo(2);
-            assertThat(result.getContent().get(0).title()).isEqualTo(planner.getTitle());
-            assertThat(result.getContent().get(0).syncVersion()).isEqualTo(planner.getSyncVersion());
+            assertThat(result.getContent().get(0).title()).isEqualTo(planner.content().title());
+            assertThat(result.getContent().get(0).syncVersion()).isEqualTo(planner.content().syncVersion());
         }
 
         @Test
@@ -183,17 +183,17 @@ class PlannerQueryServiceTest {
         @Test
         void getPlanner_WhenFound_ReturnsPlanner() {
             // Arrange
-            Planner planner = createTestPlanner();
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+            StoredPlanner planner = createTestPlanner();
+            when(plannerRepository.findAggregateForOwner(planner.id(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
 
             // Act
-            PlannerResponse response = queryService.getPlanner(testUser.getId(), planner.getId()).value();
+            PlannerResponse response = queryService.getPlanner(testUser.getId(), planner.id()).value();
 
             // Assert
             assertThat(response).isNotNull();
-            assertThat(response.id()).isEqualTo(planner.getId());
-            assertThat(response.title()).isEqualTo(planner.getTitle());
+            assertThat(response.id()).isEqualTo(planner.id());
+            assertThat(response.title()).isEqualTo(planner.content().title());
         }
 
         @Test

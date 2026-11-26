@@ -1,7 +1,7 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.support.StoredComments;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
@@ -158,31 +158,31 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
     @Test
     void userDeleteSweepsAggregate_WhenHardDeleted_NoOrphansRemain() {
         // Published planner with the full projection set and third-party engagement
-        Planner published = TestDataFactory.planner(owner)
+        StoredPlanner published = TestDataFactory.planner(owner)
                 .title("Sweep Published")
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder()
-                .plannerId(published.getId()).viewCount(3).upvotes(1).build());
+                .plannerId(published.id()).viewCount(3).upvotes(1).build());
         TestDataFactory.addToCatalog(catalogService, published);
-        FilterRowsSync.syncFilterRows(transactionManager, catalogService, published.getId());
-        insertPlannerVote(other.getId(), published.getId());
+        FilterRowsSync.syncFilterRows(transactionManager, catalogService, published.id());
+        insertPlannerVote(other.getId(), published.id());
         jdbc.update("INSERT INTO planner_views (planner_id, viewer_hash, view_date, created_at) "
                 + "VALUES (UUID_TO_BIN(?), SHA2('viewer', 256), ?, NOW())",
-                published.getId().toString(), LocalDate.now(ZoneOffset.UTC));
-        Long sweptComment = insertComment(published.getId(), other.getId());
+                published.id().toString(), LocalDate.now(ZoneOffset.UTC));
+        Long sweptComment = insertComment(published.id(), other.getId());
         jdbc.update("INSERT INTO planner_bookmarks (user_id, planner_id, created_at) "
-                + "VALUES (?, UUID_TO_BIN(?), NOW())", other.getId(), published.getId().toString());
+                + "VALUES (?, UUID_TO_BIN(?), NOW())", other.getId(), published.id().toString());
         jdbc.update("INSERT INTO planner_subscriptions (user_id, planner_id, enabled, created_at) "
-                + "VALUES (?, UUID_TO_BIN(?), TRUE, NOW())", other.getId(), published.getId().toString());
+                + "VALUES (?, UUID_TO_BIN(?), TRUE, NOW())", other.getId(), published.id().toString());
         jdbc.update("INSERT INTO planner_reports (user_id, planner_id, created_at) "
-                + "VALUES (?, UUID_TO_BIN(?), NOW())", other.getId(), published.getId().toString());
+                + "VALUES (?, UUID_TO_BIN(?), NOW())", other.getId(), published.id().toString());
 
         // Draft planner with only aggregate rows
-        Planner draft = TestDataFactory.planner(owner)
+        StoredPlanner draft = TestDataFactory.planner(owner)
                 .title("Sweep Draft")
                 .save(plannerRepository);
-        statsRepository.save(PlannerStats.builder().plannerId(draft.getId()).build());
+        statsRepository.save(PlannerStats.builder().plannerId(draft.id()).build());
 
         purgeOwner(owner.getId());
 
@@ -191,7 +191,7 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
             assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM " + table + " WHERE comment_id = ?",
                     Integer.class, sweptComment)).as("%s rows of the swept comment", table).isZero();
         }
-        for (UUID plannerId : List.of(published.getId(), draft.getId())) {
+        for (UUID plannerId : List.of(published.id(), draft.id())) {
             for (String table : List.of(
                     "planner", "planner_content", "planner_publication", "planner_moderation",
                     "planner_stats", "planner_catalog", "planner_entity_filter",
@@ -207,12 +207,12 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
 
     @Test
     void commentVotes_WhenTheSentinelAlreadyVotedOnTheSameComment_KeepOneSentinelRowAndTheCounter() {
-        Planner thirdPartyPlanner = TestDataFactory.planner(other)
+        StoredPlanner thirdPartyPlanner = TestDataFactory.planner(other)
                 .title("Sweep Vote Collision")
                 .published(true)
                 .save(plannerRepository);
-        Long collided = insertComment(thirdPartyPlanner.getId(), other.getId());
-        Long lone = insertComment(thirdPartyPlanner.getId(), other.getId());
+        Long collided = insertComment(thirdPartyPlanner.id(), other.getId());
+        Long lone = insertComment(thirdPartyPlanner.id(), other.getId());
         insertCommentVote(UserAccountLifecycleService.SENTINEL_USER_ID, collided);
         insertCommentVote(owner.getId(), collided);
         insertCommentVote(owner.getId(), lone);
@@ -228,16 +228,16 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
 
     @Test
     void reassignedPlannerVote_WhenSwept_PointsAtLiveSentinelAccount() {
-        Planner thirdPartyPlanner = TestDataFactory.planner(other)
+        StoredPlanner thirdPartyPlanner = TestDataFactory.planner(other)
                 .title("Sweep Voted")
                 .published(true)
                 .save(plannerRepository);
-        insertPlannerVote(owner.getId(), thirdPartyPlanner.getId());
+        insertPlannerVote(owner.getId(), thirdPartyPlanner.id());
 
         purgeOwner(owner.getId());
 
         assertThat(userRepository.findById(owner.getId())).as("the deleted account row is gone").isEmpty();
-        assertThat(plannerVoterIds(thirdPartyPlanner.getId()))
+        assertThat(plannerVoterIds(thirdPartyPlanner.id()))
                 .as("the vote outlives the voter, now cast by the sentinel")
                 .containsExactly(UserAccountLifecycleService.SENTINEL_USER_ID);
         assertThat(userRepository.findById(UserAccountLifecycleService.SENTINEL_USER_ID))
@@ -247,12 +247,12 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
 
     @Test
     void commentContent_WhenAuthorHardDeleted_IsEmptiedWhileTheRowSurvives() {
-        Planner thirdPartyPlanner = TestDataFactory.planner(other)
+        StoredPlanner thirdPartyPlanner = TestDataFactory.planner(other)
                 .title("Sweep Comment Content")
                 .published(true)
                 .save(plannerRepository);
-        Long ownComment = insertComment(thirdPartyPlanner.getId(), owner.getId());
-        Long thirdPartyComment = insertComment(thirdPartyPlanner.getId(), other.getId());
+        Long ownComment = insertComment(thirdPartyPlanner.id(), owner.getId());
+        Long thirdPartyComment = insertComment(thirdPartyPlanner.id(), other.getId());
 
         purgeOwner(owner.getId());
 
@@ -271,19 +271,19 @@ class PlannerUserDeleteSweepIT extends ExclusiveDatabaseSupport {
 
     @Test
     void voteRow_WhenAccountDeleted_SurvivesInNeitherTable() {
-        Planner thirdPartyPlanner = TestDataFactory.planner(other)
+        StoredPlanner thirdPartyPlanner = TestDataFactory.planner(other)
                 .title("Sweep Both Vote Tables")
                 .published(true)
                 .save(plannerRepository);
-        Long comment = insertComment(thirdPartyPlanner.getId(), other.getId());
-        insertPlannerVote(owner.getId(), thirdPartyPlanner.getId());
-        insertPlannerVote(other.getId(), thirdPartyPlanner.getId());
+        Long comment = insertComment(thirdPartyPlanner.id(), other.getId());
+        insertPlannerVote(owner.getId(), thirdPartyPlanner.id());
+        insertPlannerVote(other.getId(), thirdPartyPlanner.id());
         insertCommentVote(owner.getId(), comment);
         insertCommentVote(other.getId(), comment);
 
         purgeOwner(owner.getId());
 
-        assertThat(plannerVoterIds(thirdPartyPlanner.getId()))
+        assertThat(plannerVoterIds(thirdPartyPlanner.id()))
                 .as("the planner vote moved to the sentinel and the third party's own vote stayed put")
                 .containsExactlyInAnyOrder(UserAccountLifecycleService.SENTINEL_USER_ID, other.getId());
         assertThat(commentVoterIds(comment))

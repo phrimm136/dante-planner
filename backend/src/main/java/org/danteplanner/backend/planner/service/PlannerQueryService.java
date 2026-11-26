@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
-import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerSummaryRow;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.freshness.ScopedRead;
 import org.springframework.data.domain.Page;
@@ -47,7 +47,7 @@ public class PlannerQueryService {
     @Transactional(readOnly = true)
     public ScopedRead<List<PlannerResponse>> getPlanners(Long userId, List<UUID> ids) {
         List<PlannerResponse> planners = plannerRepository.findAggregatesForOwner(ids, userId).stream()
-                .map(PlannerResponse::fromEntity)
+                .map(PlannerResponse::from)
                 .toList();
         Set<FreshnessScope> scopes = ids.stream()
                 .map(FreshnessScope.Planner::new)
@@ -57,7 +57,7 @@ public class PlannerQueryService {
 
     @Transactional(readOnly = true)
     public ScopedRead<PlannerResponse> getPlanner(Long userId, UUID id) {
-        Planner planner = accessGuard.findPlannerOrThrow(userId, id);
-        return new ScopedRead<>(PlannerResponse.fromEntity(planner), Set.of(new FreshnessScope.Planner(id)));
+        StoredPlanner planner = accessGuard.findPlannerOrThrow(userId, id);
+        return new ScopedRead<>(PlannerResponse.from(planner), Set.of(new FreshnessScope.Planner(id)));
     }
 }

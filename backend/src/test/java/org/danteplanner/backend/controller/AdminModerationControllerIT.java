@@ -1,11 +1,14 @@
 package org.danteplanner.backend.controller;
 
+import org.danteplanner.backend.planner.repository.PlannerModerationRepository;
+import org.danteplanner.backend.planner.entity.Listing;
+import org.danteplanner.backend.planner.entity.PlannerModeration;
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.moderation.api.PlannerModerationTarget;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.user.entity.User;
@@ -51,6 +54,11 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
     @Autowired
     private PlannerRepository plannerRepository;
 
+
+    @Autowired
+
+    private PlannerModerationRepository moderationRepository;
+
     @Autowired
     private PlannerVoteRepository voteRepository;
 
@@ -66,7 +74,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
     private User regularUser;
     private User adminUser;
     private User moderatorUser;
-    private Planner testPlanner;
+    private StoredPlanner testPlanner;
     private String regularUserToken;
     private String adminToken;
     private String moderatorToken;
@@ -108,13 +116,13 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
                 }
                 """;
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
                     .andExpect(status().isOk());
 
-            Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
+            PlannerModeration updated = moderationRepository.findById(testPlanner.id()).orElseThrow();
             assertThat(updated.isHiddenFromRecommended()).isTrue();
         }
 
@@ -126,7 +134,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
                 }
                 """;
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(moderatorCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
@@ -141,7 +149,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
                 }
                 """;
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(regularUserCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
@@ -156,7 +164,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
                 }
                 """;
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.id()).with(withCsrf())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
                     .andExpect(status().isUnauthorized());
@@ -170,7 +178,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
                 }
                 """;
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
@@ -186,7 +194,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
                 }
                 """, longReason);
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
@@ -202,7 +210,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
                 }
                 """;
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
@@ -217,13 +225,13 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
                 }
                 """;
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
                     .andExpect(status().isOk());
 
-            Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
+            PlannerModeration updated = moderationRepository.findById(testPlanner.id()).orElseThrow();
             assertThat(updated.isHiddenFromRecommended()).isTrue();
         }
 
@@ -237,15 +245,15 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
             Instant beforeHide = Instant.now();
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
                     .andExpect(status().isOk());
 
-            Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            assertThat(updated.getModeration().getHiddenAt()).isNotNull();
-            assertThat(updated.getModeration().getHiddenAt()).isAfterOrEqualTo(beforeHide);
+            PlannerModeration updated = moderationRepository.findById(testPlanner.id()).orElseThrow();
+            assertThat(updated.getHiddenAt()).isNotNull();
+            assertThat(updated.getHiddenAt()).isAfterOrEqualTo(beforeHide);
         }
 
         @Test
@@ -256,14 +264,14 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
                 }
                 """;
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
                     .andExpect(status().isOk());
 
-            Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            assertThat(updated.getModeration().getHiddenByModeratorId()).isEqualTo(adminUser.getId());
+            PlannerModeration updated = moderationRepository.findById(testPlanner.id()).orElseThrow();
+            assertThat(updated.getHiddenByModeratorId()).isEqualTo(adminUser.getId());
         }
 
         @Test
@@ -275,14 +283,14 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
                 }
                 """, reason);
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
                     .andExpect(status().isOk());
 
-            Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            assertThat(updated.getModeration().getHiddenReason()).isEqualTo(reason);
+            PlannerModeration updated = moderationRepository.findById(testPlanner.id()).orElseThrow();
+            assertThat(updated.getHiddenReason()).isEqualTo(reason);
         }
 
         @Test
@@ -294,29 +302,29 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
                 }
                 """, reason);
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
                     .andExpect(status().isOk());
 
-            Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
+            PlannerModeration updated = moderationRepository.findById(testPlanner.id()).orElseThrow();
             assertThat(updated.isHiddenFromRecommended()).isTrue();
-            assertThat(updated.getModeration().getHiddenAt()).isNotNull();
-            assertThat(updated.getModeration().getHiddenByModeratorId()).isEqualTo(adminUser.getId());
-            assertThat(updated.getModeration().getHiddenReason()).isEqualTo(reason);
+            assertThat(updated.getHiddenAt()).isNotNull();
+            assertThat(updated.getHiddenByModeratorId()).isEqualTo(adminUser.getId());
+            assertThat(updated.getHiddenReason()).isEqualTo(reason);
         }
 
         @Test
         void hideFromRecommended_WhenVotes_PreservesVotes() throws Exception {
-            PlannerVote vote1 = new PlannerVote(regularUser.getId(), testPlanner.getId(), VoteType.UP);
+            PlannerVote vote1 = new PlannerVote(regularUser.getId(), testPlanner.id(), VoteType.UP);
             voteRepository.save(vote1);
 
-            PlannerVote vote2 = new PlannerVote(adminUser.getId(), testPlanner.getId(), VoteType.UP);
+            PlannerVote vote2 = new PlannerVote(adminUser.getId(), testPlanner.id(), VoteType.UP);
             voteRepository.save(vote2);
 
             statsRepository.save(PlannerStats.builder()
-                    .plannerId(testPlanner.getId())
+                    .plannerId(testPlanner.id())
                     .upvotes(2)
                     .build());
 
@@ -326,16 +334,16 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
                 }
                 """;
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
                     .andExpect(status().isOk());
 
-            assertThat(voteRepository.findByUserIdAndPlannerId(regularUser.getId(), testPlanner.getId())).isPresent();
-            assertThat(voteRepository.findByUserIdAndPlannerId(adminUser.getId(), testPlanner.getId())).isPresent();
+            assertThat(voteRepository.findByUserIdAndPlannerId(regularUser.getId(), testPlanner.id())).isPresent();
+            assertThat(voteRepository.findByUserIdAndPlannerId(adminUser.getId(), testPlanner.id())).isPresent();
 
-            assertThat(statsRepository.findById(testPlanner.getId()).orElseThrow().getUpvotes()).isEqualTo(2);
+            assertThat(statsRepository.findById(testPlanner.id()).orElseThrow().getUpvotes()).isEqualTo(2);
         }
     }
 
@@ -344,132 +352,132 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void unhideFromRecommended_WhenAdminRole_Returns200() throws Exception {
-            plannerTarget.hideFromRecommended(testPlanner.getId(), adminUser.getId(), "Test hide reason");
+            plannerTarget.hideFromRecommended(testPlanner.id(), adminUser.getId(), "Test hide reason");
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(adminCookie()))
                     .andExpect(status().isOk());
 
-            Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
+            PlannerModeration updated = moderationRepository.findById(testPlanner.id()).orElseThrow();
             assertThat(updated.isHiddenFromRecommended()).isFalse();
         }
 
         @Test
         void unhideFromRecommended_WhenModeratorRole_Returns200() throws Exception {
-            plannerTarget.hideFromRecommended(testPlanner.getId(), moderatorUser.getId(), "Test hide reason");
+            plannerTarget.hideFromRecommended(testPlanner.id(), moderatorUser.getId(), "Test hide reason");
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(moderatorCookie()))
                     .andExpect(status().isOk());
         }
 
         @Test
         void unhideFromRecommended_WhenRegularUser_Returns403() throws Exception {
-            plannerTarget.hideFromRecommended(testPlanner.getId(), adminUser.getId(), "Test hide reason");
+            plannerTarget.hideFromRecommended(testPlanner.id(), adminUser.getId(), "Test hide reason");
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(regularUserCookie()))
                     .andExpect(status().isForbidden());
         }
 
         @Test
         void unhideFromRecommended_WhenHiddenPlanner_ClearsHiddenFlag() throws Exception {
-            plannerTarget.hideFromRecommended(testPlanner.getId(), adminUser.getId(), "Test hide reason");
+            plannerTarget.hideFromRecommended(testPlanner.id(), adminUser.getId(), "Test hide reason");
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(adminCookie()))
                     .andExpect(status().isOk());
 
-            Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
+            PlannerModeration updated = moderationRepository.findById(testPlanner.id()).orElseThrow();
             assertThat(updated.isHiddenFromRecommended()).isFalse();
         }
 
         @Test
         void unhideFromRecommended_WhenHiddenPlanner_ClearsHiddenAt() throws Exception {
-            plannerTarget.hideFromRecommended(testPlanner.getId(), adminUser.getId(), "Test hide reason");
+            plannerTarget.hideFromRecommended(testPlanner.id(), adminUser.getId(), "Test hide reason");
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(adminCookie()))
                     .andExpect(status().isOk());
 
-            Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            assertThat(updated.getModeration().getHiddenAt()).isNull();
+            PlannerModeration updated = moderationRepository.findById(testPlanner.id()).orElseThrow();
+            assertThat(updated.getHiddenAt()).isNull();
         }
 
         @Test
         void unhideFromRecommended_WhenHiddenPlanner_ClearsModeratorId() throws Exception {
-            plannerTarget.hideFromRecommended(testPlanner.getId(), adminUser.getId(), "Test hide reason");
+            plannerTarget.hideFromRecommended(testPlanner.id(), adminUser.getId(), "Test hide reason");
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(adminCookie()))
                     .andExpect(status().isOk());
 
-            Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            assertThat(updated.getModeration().getHiddenByModeratorId()).isNull();
+            PlannerModeration updated = moderationRepository.findById(testPlanner.id()).orElseThrow();
+            assertThat(updated.getHiddenByModeratorId()).isNull();
         }
 
         @Test
         void unhideFromRecommended_WhenHiddenPlanner_ClearsHideReason() throws Exception {
-            plannerTarget.hideFromRecommended(testPlanner.getId(), adminUser.getId(), "Test hide reason");
+            plannerTarget.hideFromRecommended(testPlanner.id(), adminUser.getId(), "Test hide reason");
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(adminCookie()))
                     .andExpect(status().isOk());
 
-            Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            assertThat(updated.getModeration().getHiddenReason()).isNull();
+            PlannerModeration updated = moderationRepository.findById(testPlanner.id()).orElseThrow();
+            assertThat(updated.getHiddenReason()).isNull();
         }
 
         @Test
         void unhideFromRecommended_WhenHiddenPlanner_ClearsAllMetadata() throws Exception {
-            plannerTarget.hideFromRecommended(testPlanner.getId(), adminUser.getId(), "Comprehensive metadata clearing test");
+            plannerTarget.hideFromRecommended(testPlanner.id(), adminUser.getId(), "Comprehensive metadata clearing test");
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(adminCookie()))
                     .andExpect(status().isOk());
 
-            Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
+            PlannerModeration updated = moderationRepository.findById(testPlanner.id()).orElseThrow();
             assertThat(updated.isHiddenFromRecommended()).isFalse();
-            assertThat(updated.getModeration().getHiddenAt()).isNull();
-            assertThat(updated.getModeration().getHiddenByModeratorId()).isNull();
-            assertThat(updated.getModeration().getHiddenReason()).isNull();
+            assertThat(updated.getHiddenAt()).isNull();
+            assertThat(updated.getHiddenByModeratorId()).isNull();
+            assertThat(updated.getHiddenReason()).isNull();
         }
 
         @Test
         void unhideFromRecommended_WhenAlreadyUnhidden_IsIdempotent() throws Exception {
-            assertThat(testPlanner.isHiddenFromRecommended()).isFalse();
+            assertThat(testPlanner.listing()).isEqualTo(new Listing.Listed());
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(adminCookie()))
                     .andExpect(status().isOk());
 
-            Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
+            PlannerModeration updated = moderationRepository.findById(testPlanner.id()).orElseThrow();
             assertThat(updated.isHiddenFromRecommended()).isFalse();
         }
 
         @Test
         void unhideFromRecommended_WhenVotes_PreservesVotes() throws Exception {
-            plannerTarget.hideFromRecommended(testPlanner.getId(), adminUser.getId(), "Test hide reason");
+            plannerTarget.hideFromRecommended(testPlanner.id(), adminUser.getId(), "Test hide reason");
 
-            PlannerVote vote1 = new PlannerVote(regularUser.getId(), testPlanner.getId(), VoteType.UP);
+            PlannerVote vote1 = new PlannerVote(regularUser.getId(), testPlanner.id(), VoteType.UP);
             voteRepository.save(vote1);
 
-            PlannerVote vote2 = new PlannerVote(moderatorUser.getId(), testPlanner.getId(), VoteType.UP);
+            PlannerVote vote2 = new PlannerVote(moderatorUser.getId(), testPlanner.id(), VoteType.UP);
             voteRepository.save(vote2);
 
             statsRepository.save(PlannerStats.builder()
-                    .plannerId(testPlanner.getId())
+                    .plannerId(testPlanner.id())
                     .upvotes(2)
                     .build());
 
-            mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.id()).with(withCsrf())
                             .cookie(adminCookie()))
                     .andExpect(status().isOk());
 
-            assertThat(voteRepository.findByUserIdAndPlannerId(regularUser.getId(), testPlanner.getId())).isPresent();
-            assertThat(voteRepository.findByUserIdAndPlannerId(moderatorUser.getId(), testPlanner.getId())).isPresent();
+            assertThat(voteRepository.findByUserIdAndPlannerId(regularUser.getId(), testPlanner.id())).isPresent();
+            assertThat(voteRepository.findByUserIdAndPlannerId(moderatorUser.getId(), testPlanner.id())).isPresent();
 
-            assertThat(statsRepository.findById(testPlanner.getId()).orElseThrow().getUpvotes()).isEqualTo(2);
+            assertThat(statsRepository.findById(testPlanner.id()).orElseThrow().getUpvotes()).isEqualTo(2);
         }
     }
 }

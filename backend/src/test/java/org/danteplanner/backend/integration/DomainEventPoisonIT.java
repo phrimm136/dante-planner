@@ -7,7 +7,7 @@ import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.outbox.config.OutboxConstants;
 import org.danteplanner.backend.shared.outbox.service.DomainEventDispatcher;
@@ -63,7 +63,7 @@ class DomainEventPoisonIT extends ExclusiveDatabaseSupport {
     @Autowired
     private PlatformTransactionManager transactionManager;
 
-    private Planner planner;
+    private StoredPlanner planner;
     private User commenter;
     private LogCapture alarms;
 
@@ -111,7 +111,7 @@ class DomainEventPoisonIT extends ExclusiveDatabaseSupport {
         assertThat(attemptsOf(eventId)).isEqualTo(1);
 
         PlannerComment comment = StoredComments.save(commentRepository, jdbcTemplate,
-                new PlannerComment(planner.getId(), commenter.getId(), null, 0), "A comment");
+                new PlannerComment(planner.id(), commenter.getId(), null, 0), "A comment");
         transaction().executeWithoutResult(status -> jdbcTemplate.update(
                 "UPDATE domain_events SET payload = JSON_OBJECT('commentId', ?) WHERE id = ?",
                 comment.getId(), eventId));
@@ -120,7 +120,7 @@ class DomainEventPoisonIT extends ExclusiveDatabaseSupport {
         assertThat(dispatchedRows(eventId)).isEqualTo(1);
         assertThat(attemptsOf(eventId)).isEqualTo(2);
         assertThat(notificationRepository.findByUserIdAndContentIdAndNotificationType(
-                planner.getUserId(), comment.getId().toString(), NotificationType.COMMENT_RECEIVED)).isPresent();
+                planner.userId(), comment.getId().toString(), NotificationType.COMMENT_RECEIVED)).isPresent();
     }
 
     @Test
@@ -185,17 +185,17 @@ class DomainEventPoisonIT extends ExclusiveDatabaseSupport {
      */
     private long dispatchableEvent(int attempts) {
         PlannerComment comment = StoredComments.save(commentRepository, jdbcTemplate,
-                new PlannerComment(planner.getId(), commenter.getId(), null, 0), "A comment");
+                new PlannerComment(planner.id(), commenter.getId(), null, 0), "A comment");
         return transaction().execute(status -> {
             jdbcTemplate.update("""
                     INSERT INTO domain_events (event_type, aggregate_id, payload, created_at, attempts)
                     VALUES ('COMMENT_RECEIVED', UUID_TO_BIN(?), JSON_OBJECT('commentId', ?),
                             DATE_SUB(NOW(6), INTERVAL 1 MINUTE), ?)
                     """,
-                    planner.getId().toString(), comment.getId(), attempts);
+                    planner.id().toString(), comment.getId(), attempts);
             return jdbcTemplate.queryForObject(
                     "SELECT id FROM domain_events WHERE aggregate_id = UUID_TO_BIN(?)",
-                    Long.class, planner.getId().toString());
+                    Long.class, planner.id().toString());
         });
     }
 
@@ -213,10 +213,10 @@ class DomainEventPoisonIT extends ExclusiveDatabaseSupport {
                     VALUES ('COMMENT_RECEIVED', UUID_TO_BIN(?), JSON_OBJECT(),
                             DATE_SUB(NOW(6), INTERVAL 1 MINUTE), ?)
                     """,
-                    planner.getId().toString(), attempts);
+                    planner.id().toString(), attempts);
             return jdbcTemplate.queryForObject(
                     "SELECT id FROM domain_events WHERE aggregate_id = UUID_TO_BIN(?)",
-                    Long.class, planner.getId().toString());
+                    Long.class, planner.id().toString());
         });
     }
 

@@ -12,7 +12,7 @@ import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
 
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.user.entity.User;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
@@ -25,13 +25,13 @@ final class FixtureConstructionRule {
             classes()
                     .that().resideOutsideOfPackage(SUPPORT)
                     .should(constructNoFixtureByHand())
-                    .as("no test outside " + SUPPORT + " calls User.builder(), Planner.builder(), or a constructor"
-                            + " of User, Planner or UpsertPlannerRequest; fixtures come from TestDataFactory"
+                    .as("no test outside " + SUPPORT + " calls User.builder() or a constructor"
+                            + " of User, StoredPlanner or UpsertPlannerRequest; fixtures come from TestDataFactory"
                             + " and UpsertRequests");
 
-    private static final Set<String> BUILT_TYPES = Set.of(User.class.getName(), Planner.class.getName());
+    private static final Set<String> BUILT_TYPES = Set.of(User.class.getName());
     private static final Set<String> CONSTRUCTED_TYPES =
-            Set.of(User.class.getName(), Planner.class.getName(), UpsertPlannerRequest.class.getName());
+            Set.of(User.class.getName(), StoredPlanner.class.getName(), UpsertPlannerRequest.class.getName());
 
     private FixtureConstructionRule() {
     }

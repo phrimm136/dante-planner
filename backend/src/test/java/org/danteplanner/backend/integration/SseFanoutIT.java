@@ -15,7 +15,7 @@ import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.dto.CreateCommentResponse;
 import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.sse.SseChannel;
@@ -187,12 +187,12 @@ class SseFanoutIT extends CausalHarnessSupport {
     @Test
     void commentFanout_WhenPublishedOnPrimary_DeliveredToCommentSubscribersWithPayload() {
         User owner = user("sse-comment-fanout-owner");
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
         String commentId = "comment-" + UUID.randomUUID();
         Map<String, Object> payload = Map.of("commentId", commentId, "body", "nice deck");
 
-        try (SseStream stream = SseStream.comments(port, planner.getId(), session(owner))) {
-            ssePublisher.publishCommentEvent(planner.getId(), SseEventType.COMMENT_ADDED, commentId, null, payload);
+        try (SseStream stream = SseStream.comments(port, planner.id(), session(owner))) {
+            ssePublisher.publishCommentEvent(planner.id(), SseEventType.COMMENT_ADDED, commentId, null, payload);
 
             assertThat(stream.next(SseEventType.COMMENT_ADDED.getValue())).contains(commentId);
         }
@@ -201,10 +201,10 @@ class SseFanoutIT extends CausalHarnessSupport {
     @Test
     void createComment_WhenWritePathRuns_FansOutToEverySubscriberButTheCommenter() {
         User owner = user("sse-comment-owner");
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
         User commenter = user("sse-comment");
         User markerAuthor = user("sse-comment-marker");
-        UUID plannerId = planner.getId();
+        UUID plannerId = planner.id();
 
         try (SseStream commenterStream = SseStream.comments(port, plannerId, session(commenter));
              SseStream stream = SseStream.comments(port, plannerId, session(owner))) {

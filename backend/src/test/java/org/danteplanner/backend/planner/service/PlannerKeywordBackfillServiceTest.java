@@ -47,7 +47,7 @@ class PlannerKeywordBackfillServiceTest {
     @Test
     void backfillPage_WhenARowIsCorrected_LocksItsContentRowAndRereadsItBeforeAnyWrite() {
         UUID plannerId = UUID.randomUUID();
-        KeywordBackfillRow stale = new KeywordBackfillRow(plannerId, "[\"Burst\"]", null, true, null, true);
+        KeywordBackfillRow stale = new KeywordBackfillRow(plannerId, 1L, "[\"Burst\"]", null, true, null, true);
 
         backfill(new RecordingBackfillRepository(stale, stale));
 
@@ -58,8 +58,8 @@ class PlannerKeywordBackfillServiceTest {
     @Test
     void backfillPage_WhenTheContentChangedBeforeTheLock_DerivesTheCorrectionFromTheLockedRow() {
         UUID plannerId = UUID.randomUUID();
-        KeywordBackfillRow paged = new KeywordBackfillRow(plannerId, "[\"Burst\"]", null, true, null, true);
-        KeywordBackfillRow locked = new KeywordBackfillRow(plannerId, "[\"Combustion\"]", null, true, null, true);
+        KeywordBackfillRow paged = new KeywordBackfillRow(plannerId, 1L, "[\"Burst\"]", null, true, null, true);
+        KeywordBackfillRow locked = new KeywordBackfillRow(plannerId, 1L, "[\"Combustion\"]", null, true, null, true);
 
         backfill(new RecordingBackfillRepository(paged, locked));
 
@@ -69,11 +69,23 @@ class PlannerKeywordBackfillServiceTest {
     }
 
     @Test
+    void backfillPage_WhenTheVersionMovedBetweenThePageAndTheStatement_LeavesTheRowAlone() {
+        UUID plannerId = UUID.randomUUID();
+        KeywordBackfillRow paged = new KeywordBackfillRow(plannerId, 1L, "[\"Burst\"]", null, true, null, true);
+        KeywordBackfillRow locked = new KeywordBackfillRow(plannerId, 2L, "[\"Burst\"]", null, true, null, true);
+
+        PlannerKeywordBackfillService.BackfillPage page = backfill(new RecordingBackfillRepository(paged, locked));
+
+        assertThat(calls).containsExactly("lockContent", "keywordRowOf", "refreshContentKeywords [\"Burst\"]");
+        assertThat(page.corrected()).isZero();
+    }
+
+    @Test
     void backfillPage_WhenTheLockedRowNoLongerNeedsACorrection_WritesNothing() {
         UUID plannerId = UUID.randomUUID();
-        KeywordBackfillRow paged = new KeywordBackfillRow(plannerId, "[\"Burst\"]", null, true, null, true);
+        KeywordBackfillRow paged = new KeywordBackfillRow(plannerId, 1L, "[\"Burst\"]", null, true, null, true);
         KeywordBackfillRow locked = new KeywordBackfillRow(
-                plannerId, "[\"Combustion\"]", "[\"Combustion\"]", true, "[\"Combustion\"]", true);
+                plannerId, 1L, "[\"Combustion\"]", "[\"Combustion\"]", true, "[\"Combustion\"]", true);
 
         PlannerKeywordBackfillService.BackfillPage page = backfill(new RecordingBackfillRepository(paged, locked));
 
@@ -85,7 +97,7 @@ class PlannerKeywordBackfillServiceTest {
     void backfillPage_WhenTheRowIsCurrent_TakesNoLock() {
         UUID plannerId = UUID.randomUUID();
         KeywordBackfillRow current = new KeywordBackfillRow(
-                plannerId, "[\"Burst\"]", "[\"Burst\"]", false, null, false);
+                plannerId, 1L, "[\"Burst\"]", "[\"Burst\"]", false, null, false);
 
         PlannerKeywordBackfillService.BackfillPage page = backfill(new RecordingBackfillRepository(current, current));
 
@@ -97,7 +109,7 @@ class PlannerKeywordBackfillServiceTest {
     @Test
     void backfillPage_WhenOnlyTheColumnOfAPrivatePlannerIsStale_RewritesTheColumnAlone() {
         KeywordBackfillRow stale = new KeywordBackfillRow(
-                UUID.randomUUID(), "[\"Burst\"]", "unreadable", false, null, false);
+                UUID.randomUUID(), 1L, "[\"Burst\"]", "unreadable", false, null, false);
 
         PlannerKeywordBackfillService.BackfillPage page = backfill(new RecordingBackfillRepository(stale, stale));
 
@@ -108,7 +120,7 @@ class PlannerKeywordBackfillServiceTest {
     @Test
     void backfillPage_WhenOnlyTheCatalogCopyIsStale_RewritesTheCatalogAlone() {
         KeywordBackfillRow stale = new KeywordBackfillRow(
-                UUID.randomUUID(), "[\"Burst\"]", "[\"Burst\"]", true, null, true);
+                UUID.randomUUID(), 1L, "[\"Burst\"]", "[\"Burst\"]", true, null, true);
 
         PlannerKeywordBackfillService.BackfillPage page = backfill(new RecordingBackfillRepository(stale, stale));
 
@@ -119,7 +131,7 @@ class PlannerKeywordBackfillServiceTest {
     @Test
     void backfillPage_WhenTheContentSelectsNothing_ClearsBothCopies() {
         KeywordBackfillRow stale = new KeywordBackfillRow(
-                UUID.randomUUID(), null, "[\"Burst\"]", true, "[\"Burst\"]", true);
+                UUID.randomUUID(), 1L, null, "[\"Burst\"]", true, "[\"Burst\"]", true);
 
         backfill(new RecordingBackfillRepository(stale, stale));
 
@@ -129,7 +141,7 @@ class PlannerKeywordBackfillServiceTest {
 
     @Test
     void backfillPage_WhenTheRowIsGoneUnderTheLock_CountsNoCorrection() {
-        KeywordBackfillRow stale = new KeywordBackfillRow(UUID.randomUUID(), "[\"Burst\"]", null, true, null, true);
+        KeywordBackfillRow stale = new KeywordBackfillRow(UUID.randomUUID(), 1L, "[\"Burst\"]", null, true, null, true);
 
         PlannerKeywordBackfillService.BackfillPage page = backfill(new RecordingBackfillRepository(stale, null));
 
@@ -178,15 +190,15 @@ class PlannerKeywordBackfillServiceTest {
         }
 
         @Override
-        public int refreshContentKeywords(UUID plannerId, String keywords) {
+        public int refreshContentKeywords(UUID plannerId, long readVersion, String keywords) {
             calls.add("refreshContentKeywords " + keywords);
-            return 1;
+            return readVersion == locked.syncVersion() ? 1 : 0;
         }
 
         @Override
-        public int clearContentKeywords(UUID plannerId) {
+        public int clearContentKeywords(UUID plannerId, long readVersion) {
             calls.add("clearContentKeywords");
-            return 1;
+            return readVersion == locked.syncVersion() ? 1 : 0;
         }
 
         @Override

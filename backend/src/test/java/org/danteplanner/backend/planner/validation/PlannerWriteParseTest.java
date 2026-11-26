@@ -4,8 +4,7 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.moderation.service.RestrictionCheckService;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
-import org.danteplanner.backend.planner.dto.UpsertResult;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException.ValidationError;
 import org.danteplanner.backend.planner.gamedata.GameDataLoader;
@@ -13,7 +12,9 @@ import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
 import org.danteplanner.backend.planner.precondition.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.precondition.PlannerLimitValidator;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
+import org.danteplanner.backend.planner.repository.PlannerContentRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.service.SaveOutcome;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
@@ -35,6 +36,11 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,6 +56,9 @@ class PlannerWriteParseTest {
     private PlannerRepository plannerRepository;
 
     @Mock
+    private PlannerContentRepository contentRepository;
+
+    @Mock
     private PlannerStatsRepository statsRepository;
 
     private final User owner = TestDataFactory.unsavedUser(1L);
@@ -63,8 +72,10 @@ class PlannerWriteParseTest {
         PlannerContentValidator contentValidator = new PlannerContentValidator(MAPPER,
                 ValidatorGoldenCorpus.MAX_CONTENT_SIZE_BYTES, ValidatorGoldenCorpus.MAX_NOTE_SIZE_BYTES,
                 registry, new SinnerIdValidator(), new FloorRules(registry));
+        lenient().when(contentRepository.replaceAtVersion(any(), anyLong(), any())).thenReturn(1);
         commandService = new PlannerCommandService(
                 plannerRepository,
+                contentRepository,
                 statsRepository,
                 null,
                 contentValidator,
@@ -81,30 +92,30 @@ class PlannerWriteParseTest {
                 SCHEMA_VERSION);
     }
 
-    private Planner stored(String content) {
-        Planner planner = TestDataFactory.planner(owner).content(content).schemaVersion(SCHEMA_VERSION).build();
-        when(plannerRepository.findAggregateForOwner(planner.getId(), owner.getId()))
+    private StoredPlanner stored(String content) {
+        StoredPlanner planner = TestDataFactory.planner(owner).content(content).schemaVersion(SCHEMA_VERSION).build();
+        when(plannerRepository.findAggregateForOwner(planner.id(), owner.getId()))
                 .thenReturn(Optional.of(planner));
         return planner;
     }
 
-    private UpsertResult upsert(Planner planner, UpsertPlannerRequest request) {
-        return commandService.upsertPlanner(owner.getId(), null, planner.getId(), request, WriteMode.CHECKED);
+    private SaveOutcome upsert(StoredPlanner planner, UpsertPlannerRequest request) {
+        return commandService.upsertPlanner(owner.getId(), null, planner.id(), request, WriteMode.CHECKED);
     }
 
     @Test
     void upsertPlanner_WhenOnlyTheCategoryChanges_ReadmitsTheStoredDocumentWithoutTheIdChecks() {
-        Planner planner = stored(UNKNOWN_IDENTITY_CONTENT);
+        StoredPlanner planner = stored(UNKNOWN_IDENTITY_CONTENT);
 
-        upsert(planner, UpsertRequests.resending(planner).category("10F").build());
+        SaveOutcome saved = upsert(planner, UpsertRequests.resending(planner).category("10F").build());
 
-        assertThat(planner.getCategory()).isEqualTo("10F");
-        assertThat(planner.getContentJson()).isEqualTo(UNKNOWN_IDENTITY_CONTENT);
+        assertThat(saved.planner().content().category()).isEqualTo("10F");
+        assertThat(saved.planner().content().json()).isEqualTo(UNKNOWN_IDENTITY_CONTENT);
     }
 
     @Test
     void upsertPlanner_WhenTheContentItselfCarriesTheUnknownIdentity_ReportsIt() {
-        Planner planner = stored(TestDataFactory.VALID_CONTENT);
+        StoredPlanner planner = stored(TestDataFactory.VALID_CONTENT);
 
         assertThatThrownBy(() -> upsert(planner, UpsertRequests.resending(planner)
                 .category("10F")
@@ -113,30 +124,31 @@ class PlannerWriteParseTest {
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex ->
                         assertThat(ex.getSubErrors()).extracting(ValidationError::code)
                                 .contains("UNKNOWN_IDENTITY"));
-        assertThat(planner.getCategory()).isEqualTo("5F");
+        verify(contentRepository, never()).replaceAtVersion(any(), anyLong(), any());
     }
 
     @Test
     void upsertPlanner_WhenAStaleRequestEqualsTheStoredRowInEveryCarriedField_AcknowledgesWithoutAWrite()
             throws JacksonException {
-        Planner planner = stored(TestDataFactory.VALID_CONTENT);
-        long storedVersion = planner.getSyncVersion();
-        String restyled = MAPPER.readTree(planner.getContentJson()).toPrettyString();
+        StoredPlanner planner = stored(TestDataFactory.VALID_CONTENT);
+        long storedVersion = planner.content().syncVersion();
+        String restyled = MAPPER.readTree(planner.content().json()).toPrettyString();
 
-        UpsertResult result = upsert(planner, UpsertRequests.resending(planner)
+        SaveOutcome result = upsert(planner, UpsertRequests.resending(planner)
                 .content(restyled)
                 .syncVersion(storedVersion - 1)
                 .build());
 
-        assertThat(restyled).isNotEqualTo(planner.getContentJson());
-        assertThat(result.response().syncVersion()).isEqualTo(storedVersion);
-        assertThat(planner.getSyncVersion()).isEqualTo(storedVersion);
-        assertThat(planner.getContentJson()).isEqualTo(TestDataFactory.VALID_CONTENT);
+        assertThat(restyled).isNotEqualTo(planner.content().json());
+        assertThat(result).isInstanceOf(SaveOutcome.Acknowledged.class);
+        assertThat(result.planner().content().syncVersion()).isEqualTo(storedVersion);
+        assertThat(result.planner().content().json()).isEqualTo(TestDataFactory.VALID_CONTENT);
+        verify(contentRepository, never()).replaceAtVersion(any(), anyLong(), any());
     }
 
     @Test
     void upsertPlanner_WhenTheCarriedContentIsUnparseable_RefusesItAsMalformed() {
-        Planner planner = stored(TestDataFactory.VALID_CONTENT);
+        StoredPlanner planner = stored(TestDataFactory.VALID_CONTENT);
 
         assertThatThrownBy(() -> upsert(planner, UpsertRequests.resending(planner)
                 .content("{\"equipment\":")
@@ -148,7 +160,7 @@ class PlannerWriteParseTest {
 
     @Test
     void upsertPlanner_WhenAnUpdateCarriesAVersionWithNoGameData_RefusesTheVersionAlone() {
-        Planner planner = stored(TestDataFactory.VALID_CONTENT);
+        StoredPlanner planner = stored(TestDataFactory.VALID_CONTENT);
 
         assertThatThrownBy(() -> upsert(planner, UpsertRequests.resending(planner)
                 .content(UNKNOWN_IDENTITY_CONTENT)
@@ -157,6 +169,6 @@ class PlannerWriteParseTest {
                 .isInstanceOfSatisfying(PlannerValidationException.class, ex ->
                         assertThat(ex.getSubErrors()).containsExactly(new ValidationError("UNKNOWN_VERSION", "",
                                 "No game data for content version 99")));
-        assertThat(planner.getContentJson()).isEqualTo(TestDataFactory.VALID_CONTENT);
+        assertThat(planner.content().json()).isEqualTo(TestDataFactory.VALID_CONTENT);
     }
 }

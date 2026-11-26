@@ -10,6 +10,7 @@ import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.planner.repository.PlannerKeywordBackfillRepository;
 import org.danteplanner.backend.planner.repository.PlannerKeywordBackfillRepository.KeywordBackfillRow;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.shared.failure.WriteOutcome;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,37 +75,57 @@ public class PlannerKeywordBackfillService {
         for (KeywordBackfillRow candidate : rows) {
             corrected += switch (stateOf(candidate)) {
                 case RowState.Current current -> 0;
-                case RowState.Stale stale -> correctUnderLock(candidate.plannerId());
+                case RowState.Stale stale -> correctUnderLock(candidate);
             };
         }
         return new BackfillPage(BackfillCursor.following(cursor, rows), rows.size(), corrected);
     }
 
-    private int correctUnderLock(UUID plannerId) {
-        plannerRepository.lockContent(plannerId);
-        return repository.keywordRowOf(plannerId).map(this::correct).orElse(0);
+    private int correctUnderLock(KeywordBackfillRow candidate) {
+        plannerRepository.lockContent(candidate.plannerId());
+        return repository.keywordRowOf(candidate.plannerId())
+                .map(row -> correct(row, candidate.syncVersion()))
+                .orElse(0);
     }
 
-    private int correct(KeywordBackfillRow row) {
+    private int correct(KeywordBackfillRow row, long pageVersion) {
         return switch (stateOf(row)) {
             case RowState.Current current -> 0;
-            case RowState.Stale(List<Correction> corrections) -> {
-                corrections.forEach(correction -> apply(row.plannerId(), correction));
-                yield 1;
-            }
+            case RowState.Stale(List<Correction> corrections) -> applied(row.plannerId(), pageVersion, corrections);
         };
     }
 
-    private void apply(UUID plannerId, Correction correction) {
-        switch (correction) {
-            case Correction.Content(KeywordColumn.Json json) ->
-                    repository.refreshContentKeywords(plannerId, json.text());
-            case Correction.Content(KeywordColumn.Empty empty) -> repository.clearContentKeywords(plannerId);
-            case Correction.FilterRows filterRows -> plannerCatalogService.syncFilterRows(plannerId);
-            case Correction.Catalog(KeywordColumn.Json json) ->
-                    repository.refreshCatalogKeywords(plannerId, json.text());
-            case Correction.Catalog(KeywordColumn.Empty empty) -> repository.clearCatalogKeywords(plannerId);
+    private int applied(UUID plannerId, long pageVersion, List<Correction> corrections) {
+        for (Correction correction : corrections) {
+            switch (apply(plannerId, pageVersion, correction)) {
+                case APPLIED -> { }
+                case NOTHING -> {
+                    return 0;
+                }
+            }
         }
+        return 1;
+    }
+
+    private WriteOutcome apply(UUID plannerId, long pageVersion, Correction correction) {
+        return switch (correction) {
+            case Correction.Content(KeywordColumn.Json json) ->
+                    WriteOutcome.of(repository.refreshContentKeywords(plannerId, pageVersion, json.text()));
+            case Correction.Content(KeywordColumn.Empty empty) ->
+                    WriteOutcome.of(repository.clearContentKeywords(plannerId, pageVersion));
+            case Correction.FilterRows filterRows -> {
+                plannerCatalogService.syncFilterRows(plannerId);
+                yield WriteOutcome.APPLIED;
+            }
+            case Correction.Catalog(KeywordColumn.Json json) -> {
+                repository.refreshCatalogKeywords(plannerId, json.text());
+                yield WriteOutcome.APPLIED;
+            }
+            case Correction.Catalog(KeywordColumn.Empty empty) -> {
+                repository.clearCatalogKeywords(plannerId);
+                yield WriteOutcome.APPLIED;
+            }
+        };
     }
 
     private sealed interface Correction {

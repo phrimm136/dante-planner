@@ -6,7 +6,7 @@ import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
 import org.danteplanner.backend.planner.dto.CatalogQuery.Shelf;
 import org.danteplanner.backend.planner.dto.CatalogQuery.TextFilter;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.user.entity.User;
@@ -197,7 +197,7 @@ class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
     @Test
     void commentThread_WhenTheNumberOfCommentsVaries_IssuesFixedStatementCount() {
         User author = TestDataFactory.createTestUser(userRepository, "thread-author@example.com");
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
         comment(planner, author);
         long unusedWarmUp = measureThread(planner);
 
@@ -208,14 +208,14 @@ class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
         assertThat(measureThread(planner)).as("statements for many comments").isEqualTo(THREAD_STATEMENTS);
     }
 
-    private void comment(Planner planner, User author) {
-        commentCommandService.createComment(planner.getId(), author.getId(), UUID.randomUUID(),
+    private void comment(StoredPlanner planner, User author) {
+        commentCommandService.createComment(planner.id(), author.getId(), UUID.randomUUID(),
                 new CreateCommentRequest("counted", null));
     }
 
-    private long measureThread(Planner planner) {
+    private long measureThread(StoredPlanner planner) {
         ThreadStatementCounter.start();
-        commentQueryService.getCommentTree(planner.getId(), new Viewer.Member(viewerId));
+        commentQueryService.getCommentTree(planner.id(), new Viewer.Member(viewerId));
         return ThreadStatementCounter.stop();
     }
 
@@ -274,15 +274,15 @@ class PlannerQueryCountIT extends ExclusiveDatabaseSupport {
         for (int i = 0; i < count; i++) {
             String unique = UUID.randomUUID().toString();
             User author = TestDataFactory.createTestUser(userRepository, "author-" + unique + "@example.com");
-            Planner planner = TestDataFactory.planner(author)
+            StoredPlanner planner = TestDataFactory.planner(author)
                     .title(SEARCH_MARKER + " planner")
                     .published(true)
                     .save(plannerRepository);
             TestDataFactory.addToCatalog(plannerCatalogService, planner);
-            seededIds.add(planner.getId());
+            seededIds.add(planner.id());
 
-            plannerVoteRepository.save(new PlannerVote(viewerId, planner.getId(), VoteType.UP));
-            StoredComments.save(plannerCommentRepository, new JdbcTemplate(dataSource), new PlannerComment(planner.getId(), viewerId, null, 0), "context comment");
+            plannerVoteRepository.save(new PlannerVote(viewerId, planner.id(), VoteType.UP));
+            StoredComments.save(plannerCommentRepository, new JdbcTemplate(dataSource), new PlannerComment(planner.id(), viewerId, null, 0), "context comment");
         }
 
         if (crossRecommendedThreshold) {

@@ -38,7 +38,7 @@ import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.planner.dto.PlannerBatchRequest;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.freshness.DispatchStamp;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
@@ -768,10 +768,10 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
                 + "@example.com");
         User commenter = TestDataFactory.createTestUser(userRepository, "freshness-read-inbox-commenter-"
                 + UUID.randomUUID() + "@example.com");
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
         PlannerComment comment = StoredComments.save(commentRepository, primaryJdbcTemplate,
-                new PlannerComment(planner.getId(), commenter.getId(), null, 0), "freshness read inbox");
-        long eventId = recordCommentReceived(planner.getId(), comment.getId());
+                new PlannerComment(planner.id(), commenter.getId(), null, 0), "freshness read inbox");
+        long eventId = recordCommentReceived(planner.id(), comment.getId());
         replicationControl.awaitCaughtUp();
         try {
             replicationControl.stopReplica();

@@ -2,7 +2,7 @@ package org.danteplanner.backend.integration;
 
 import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.entity.MDCategory;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -247,13 +247,13 @@ class PlannerFilterRowsConcurrencyIT extends ExclusiveDatabaseSupport {
     }
 
     private UUID planner(UUID id, boolean published) {
-        Planner planner = TestDataFactory.planner(owner)
+        StoredPlanner planner = TestDataFactory.planner(owner)
                 .id(id)
                 .selectedKeywords(Set.of("Sinking", "Combustion"))
                 .published(published)
                 .save(plannerRepository);
-        statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
-        return planner.getId();
+        statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
+        return planner.id();
     }
 
     private void clearFilterRows(UUID... plannerIds) {

@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.moderation.service.UserModerationService;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -60,7 +60,7 @@ class RestrictionReadsThePrimaryIT extends ReplicaRoutingHarnessSupport {
         User author = TestDataFactory.createTestUser(userRepository, "restriction-primary-author@example.com");
         User admin = TestDataFactory.createAdmin(userRepository, "restriction-primary-admin@example.com");
         User reader = TestDataFactory.createTestUser(userRepository, "restriction-primary-reader@example.com");
-        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
         replicationControl.awaitCaughtUp();
 
         try {
@@ -72,7 +72,7 @@ class RestrictionReadsThePrimaryIT extends ReplicaRoutingHarnessSupport {
                     .as("the replica must still hold the reader unbanned, or the write proves nothing")
                     .isTrue();
 
-            mockMvc.perform(post("/api/planner/{id}/comments", planner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/planner/{id}/comments", planner.id()).with(withCsrf())
                             .cookie(AuthCookies.accessToken(TestDataFactory.generateAccessToken(jwtTokenService, reader)))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\"content\":\"written after the ban answered\"}"))

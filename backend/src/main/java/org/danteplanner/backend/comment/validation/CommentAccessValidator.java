@@ -7,6 +7,7 @@ import org.danteplanner.backend.comment.repository.CommentRow;
 import org.danteplanner.backend.planner.api.PlannerMiss;
 import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.api.PlannerThread;
+import org.danteplanner.backend.planner.api.Visibility;
 import org.danteplanner.backend.shared.failure.Parsed;
 import org.danteplanner.backend.shared.failure.Result;
 import org.springframework.stereotype.Component;
@@ -21,7 +22,7 @@ public class CommentAccessValidator {
     public record VisibleThread(PlannerThread planner) {
 
         private static VisibleThread of(PlannerThread planner, Viewer viewer) {
-            if (!viewer.is(planner.ownerId()) && (!planner.published() || planner.ownerDeactivated())) {
+            if (!viewer.is(planner.ownerId()) && planner.visibility() == Visibility.HIDDEN) {
                 throw new PlannerNotFoundException(new PlannerMiss.Hidden(planner.id(), planner.ownerId()));
             }
             return new VisibleThread(planner);

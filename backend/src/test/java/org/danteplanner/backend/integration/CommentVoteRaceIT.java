@@ -35,7 +35,7 @@ import org.danteplanner.backend.comment.service.CommentEngagementService;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.moderation.service.CommentModerationService;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.api.VoteAlreadyExistsException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.dto.NotificationSetting;
@@ -83,7 +83,7 @@ class CommentVoteRaceIT extends SharedMySqlContainerSupport {
     private User first;
     private User second;
     private User moderator;
-    private Planner planner;
+    private StoredPlanner planner;
 
     @BeforeEach
     void setUp() {
@@ -139,7 +139,7 @@ class CommentVoteRaceIT extends SharedMySqlContainerSupport {
                         .andExpect(status().isConflict())
                         .andExpect(jsonPath("$.code").value("VOTE_ALREADY_EXISTS"))
                         .andExpect(jsonPath("$.detail").value("User " + first.getId()
-                                + " has already voted on planner " + planner.getId()
+                                + " has already voted on planner " + planner.id()
                                 + ". Votes are permanent and cannot be changed."));
             } catch (Exception e) {
                 throw new AssertionError(e);
@@ -324,7 +324,7 @@ class CommentVoteRaceIT extends SharedMySqlContainerSupport {
     }
 
     private UUID comment() {
-        return commandService.createComment(planner.getId(), author.getId(), UUID.randomUUID(),
+        return commandService.createComment(planner.id(), author.getId(), UUID.randomUUID(),
                 new CreateCommentRequest("original", null)).id();
     }
 
@@ -353,7 +353,7 @@ class CommentVoteRaceIT extends SharedMySqlContainerSupport {
     }
 
     private CommentTreeNode shown(UUID comment, User viewer) {
-        return queryService.getCommentTree(planner.getId(), new Viewer.Member(viewer.getId())).value().stream()
+        return queryService.getCommentTree(planner.id(), new Viewer.Member(viewer.getId())).value().stream()
                 .filter(node -> node.id().equals(comment))
                 .findFirst()
                 .orElseThrow();
@@ -376,7 +376,7 @@ class CommentVoteRaceIT extends SharedMySqlContainerSupport {
 
     private int commentCount() {
         Integer count = jdbc.queryForObject("SELECT comment_count FROM planner_stats WHERE planner_id = UUID_TO_BIN(?)",
-                Integer.class, planner.getId().toString());
+                Integer.class, planner.id().toString());
         return count != null ? count : -1;
     }
 }

@@ -19,12 +19,13 @@ public class PlannerKeywordBackfillRepository {
         this.jdbc = new JdbcTemplate(dataSource);
     }
 
-    public record KeywordBackfillRow(UUID plannerId, String contentKeywords, String columnKeywords,
+    public record KeywordBackfillRow(UUID plannerId, long syncVersion, String contentKeywords, String columnKeywords,
             boolean catalogued, String catalogKeywords, boolean published) {
     }
 
     private static final String KEYWORD_ROW = """
             SELECT BIN_TO_UUID(c.planner_id) AS planner_id,
+                   c.sync_version AS sync_version,
                    JSON_EXTRACT(c.content, '$.selectedKeywords') AS content_keywords,
                    c.selected_keywords AS column_keywords,
                    cat.planner_id IS NOT NULL AS catalogued,
@@ -35,10 +36,12 @@ public class PlannerKeywordBackfillRepository {
             LEFT JOIN planner_publication pub ON pub.planner_id = c.planner_id
             """;
 
+    private static final String CURRENT_LIVE_ROW = " AND sync_version = ? AND deleted_at IS NULL";
+
     private static final String PAGE_ORDER = "ORDER BY c.planner_id LIMIT ?";
 
     private static final RowMapper<KeywordBackfillRow> KEYWORD_ROW_MAPPER = (rs, rowNum) -> new KeywordBackfillRow(
-            UUID.fromString(rs.getString("planner_id")),
+            UUID.fromString(rs.getString("planner_id")), rs.getLong("sync_version"),
             rs.getString("content_keywords"), rs.getString("column_keywords"),
             rs.getBoolean("catalogued"), rs.getString("catalog_keywords"), rs.getBoolean("published"));
 
@@ -56,9 +59,9 @@ public class PlannerKeywordBackfillRepository {
                 plannerId.toString()).stream().findFirst();
     }
 
-    public int refreshContentKeywords(UUID plannerId, String keywords) {
-        return jdbc.update("UPDATE planner_content SET selected_keywords = ? WHERE planner_id = UUID_TO_BIN(?)",
-                keywords, plannerId.toString());
+    public int refreshContentKeywords(UUID plannerId, long readVersion, String keywords) {
+        return jdbc.update("UPDATE planner_content SET selected_keywords = ? WHERE planner_id = UUID_TO_BIN(?)"
+                + CURRENT_LIVE_ROW, keywords, plannerId.toString(), readVersion);
     }
 
     public int refreshCatalogKeywords(UUID plannerId, String keywords) {
@@ -66,9 +69,9 @@ public class PlannerKeywordBackfillRepository {
                 keywords, plannerId.toString());
     }
 
-    public int clearContentKeywords(UUID plannerId) {
-        return jdbc.update("UPDATE planner_content SET selected_keywords = NULL WHERE planner_id = UUID_TO_BIN(?)",
-                plannerId.toString());
+    public int clearContentKeywords(UUID plannerId, long readVersion) {
+        return jdbc.update("UPDATE planner_content SET selected_keywords = NULL WHERE planner_id = UUID_TO_BIN(?)"
+                + CURRENT_LIVE_ROW, plannerId.toString(), readVersion);
     }
 
     public int clearCatalogKeywords(UUID plannerId) {

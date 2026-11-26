@@ -1,4 +1,5 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.planner.api.Visibility;
 import org.danteplanner.backend.shared.dto.NotificationSetting;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclaration;
@@ -10,7 +11,7 @@ import org.danteplanner.backend.comment.repository.CommentRow;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.support.FakeUsers;
 import org.danteplanner.backend.planner.entity.PlannerType;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.user.api.UserRole;
 import org.danteplanner.backend.user.api.Users;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
@@ -112,7 +113,7 @@ class CommentServiceLayerTest {
 
     private User testUser;
     private User otherUser;
-    private Planner publishedPlanner;
+    private StoredPlanner publishedPlanner;
     private UUID plannerId;
 
     @BeforeEach
@@ -168,7 +169,7 @@ class CommentServiceLayerTest {
             CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
             AtomicReference<PlannerComment> persisted = new AtomicReference<>();
             when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, Visibility.SHOWN)));
             when(commentRepository.insert(any(PlannerComment.class)))
                     .thenAnswer(i -> {
                         PlannerComment c = CommentRows.insertedAs(100L).answer(i);
@@ -201,7 +202,7 @@ class CommentServiceLayerTest {
             CreateCommentRequest request = new CreateCommentRequest("Reply comment", parentPublicId);
             AtomicReference<PlannerComment> persisted = new AtomicReference<>();
             when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, Visibility.SHOWN)));
             when(commentRepository.findByPublicId(parentPublicId))
                     .thenReturn(Optional.of(parentComment));
             when(commentRepository.insert(any(PlannerComment.class)))
@@ -242,7 +243,7 @@ class CommentServiceLayerTest {
             UUID nonExistentParentId = UUID.randomUUID();
             CreateCommentRequest request = new CreateCommentRequest("Reply", nonExistentParentId);
             when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, Visibility.SHOWN)));
             when(commentRepository.findByPublicId(nonExistentParentId))
                     .thenReturn(Optional.empty());
 
@@ -263,7 +264,7 @@ class CommentServiceLayerTest {
             CreateCommentRequest request = new CreateCommentRequest("Very deep reply", parentPublicId);
             AtomicReference<PlannerComment> persisted = new AtomicReference<>();
             when(plannerRepository.findThread(plannerId))
-                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, true, false)));
+                .thenReturn(Optional.of(new PlannerThread(plannerId, PLANNER_OWNER_ID, Visibility.SHOWN)));
             when(commentRepository.findByPublicId(parentPublicId))
                     .thenReturn(Optional.of(depth5Parent));
             when(commentRepository.insert(any(PlannerComment.class)))
@@ -441,7 +442,7 @@ class CommentServiceLayerTest {
         void getCommentTree_WhenNoComments_ReturnsEmptyList() {
             // Arrange
             when(plannerRepository.findThread(plannerId))
-                    .thenReturn(Optional.of(new PlannerThread(plannerId, publishedPlanner.getUserId(), publishedPlanner.isPublished(), false)));
+                    .thenReturn(Optional.of(new PlannerThread(plannerId, publishedPlanner.userId(), publishedPlanner.publication().isPublished() ? Visibility.SHOWN : Visibility.HIDDEN)));
             when(commentRepository.findByPlannerId(plannerId))
                     .thenReturn(Collections.emptyList());
 
@@ -462,7 +463,7 @@ class CommentServiceLayerTest {
             CommentRow byDeactivated = CommentRows.live(11L, UUID.randomUUID(), plannerId, deactivated.getId(), "also still here", null, 0);
 
             when(plannerRepository.findThread(plannerId))
-                    .thenReturn(Optional.of(new PlannerThread(plannerId, publishedPlanner.getUserId(), publishedPlanner.isPublished(), false)));
+                    .thenReturn(Optional.of(new PlannerThread(plannerId, publishedPlanner.userId(), publishedPlanner.publication().isPublished() ? Visibility.SHOWN : Visibility.HIDDEN)));
             when(commentRepository.findByPlannerId(plannerId))
                     .thenReturn(List.of(byActive, byDeactivated));
             users.add(deactivated);
@@ -490,7 +491,7 @@ class CommentServiceLayerTest {
                 thread.add(comment);
             }
             when(plannerRepository.findThread(plannerId))
-                    .thenReturn(Optional.of(new PlannerThread(plannerId, 1L, true, false)));
+                    .thenReturn(Optional.of(new PlannerThread(plannerId, 1L, Visibility.SHOWN)));
             when(commentRepository.findByPlannerId(plannerId)).thenReturn(thread);
 
             assertThat(queryService.getCommentTree(plannerId, new Viewer.Guest()).scopes()).containsExactlyInAnyOrder(
