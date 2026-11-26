@@ -45,6 +45,7 @@ import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator.AvailableId;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator.LiveOwned;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator.UpsertableId;
+import org.danteplanner.backend.planner.precondition.PlannerPublishValidator.PublishTitle;
 import org.danteplanner.backend.user.api.UserSummary;
 import org.danteplanner.backend.planner.sync.PlannerChange;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator;
@@ -214,14 +215,22 @@ public class PlannerCommandService {
 
         PlannerChange changeTo(StoredPlanner planner, ObjectMapper mapper) {
             CarriedWrite carried = new CarriedWrite(
-                    request.titleOr(planner.content().title()),
-                    request.statusOr(planner.content().status()),
+                    titleFor(planner),
+                    statusFor(planner),
                     request.category(),
                     request.content(),
                     request.contentVersion(),
                     schemaVersion,
                     device);
             return PlannerChange.between(planner.content(), carried, mapper);
+        }
+
+        String titleFor(StoredPlanner planner) {
+            return request.titleOr(planner.content().title());
+        }
+
+        PlannerStatus statusFor(StoredPlanner planner) {
+            return request.statusOr(planner.content().status());
         }
     }
 
@@ -266,7 +275,7 @@ public class PlannerCommandService {
         }
     }
 
-    private ContentWrite contentWrite(StoredPlanner planner, SaveAttempt attempt, PlannerChange change,
+    private ContentWrite contentWrite(StoredPlanner planner, SaveAttempt attempt, PlannerChange change, String title,
             Instant now) {
         UpsertPlannerRequest request = attempt.request();
         StoredContent stored = planner.content();
@@ -285,8 +294,8 @@ public class PlannerCommandService {
         };
         countTopLevelCopy(TopLevelCopy.of(request.selectedKeywords(), document.keywords()));
         return new ContentWrite(
-                request.titleOr(stored.title()),
-                request.statusOr(stored.status()),
+                title,
+                attempt.statusFor(planner),
                 category.getValue(),
                 document.keywords(),
                 document.json(),
@@ -414,9 +423,11 @@ public class PlannerCommandService {
             case UpsertDecision.Create create -> createAtAvailableId(userId, deviceId, id, request);
             case UpsertDecision.Acknowledge(StoredPlanner planner) -> acknowledge(planner, request);
             case UpsertDecision.UpdatePrivate(StoredPlanner planner, PlannerChange change) ->
-                    new SaveOutcome.Updated(update(planner, attempt, change));
+                    new SaveOutcome.Updated(update(planner, attempt, change, attempt.titleFor(planner)));
             case UpsertDecision.UpdatePublished(StoredPlanner planner, PlannerChange change) -> {
-                StoredPlanner saved = update(planner, attempt, change);
+                PublishTitle title = PublishTitle.parse(attempt.titleFor(planner))
+                        .orElseThrow(PlannerValidationException::refusing);
+                StoredPlanner saved = update(planner, attempt, change, title.value());
                 plannerCatalogService.onVisibleEditCommitted(planner, saved);
                 FreshnessDeclarations.declare(new FreshnessScope.Global());
                 yield new SaveOutcome.Updated(saved);
@@ -460,8 +471,8 @@ public class PlannerCommandService {
         return new SaveOutcome.Acknowledged(planner);
     }
 
-    private StoredPlanner update(StoredPlanner planner, SaveAttempt attempt, PlannerChange change) {
-        ContentWrite write = contentWrite(planner, attempt, change, clock.instant());
+    private StoredPlanner update(StoredPlanner planner, SaveAttempt attempt, PlannerChange change, String title) {
+        ContentWrite write = contentWrite(planner, attempt, change, title, clock.instant());
         switch (WriteOutcome.of(contentRepository.replaceAtVersion(planner.id(), planner.content().syncVersion(),
                 write))) {
             case APPLIED -> { }

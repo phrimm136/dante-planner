@@ -321,6 +321,72 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
     }
 
     @Test
+    void publishedSave_WhenTheBodyTitleIsBlank_RefusesLikeABlankPublishAndKeepsBothTitles() throws Exception {
+        StoredPlanner planner = TestDataFactory.planner(owner)
+                .title("Published Title")
+                .published(true)
+                .save(plannerRepository);
+        statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
+        TestDataFactory.addToCatalog(catalogService, planner);
+
+        for (String blank : List.of("", "   ", "<script>alert('xss')</script>")) {
+            UpsertPlannerRequest blanking = UpsertRequests.resending(planner)
+                    .title(blank)
+                    .status(PlannerStatus.SAVED)
+                    .build();
+
+            mockMvc.perform(put("/api/planner/md/{id}", planner.id())
+                            .cookie(AuthCookies.accessToken(token))
+                            .with(withCsrf())
+                            .contentType(APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(blanking)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                    .andExpect(jsonPath("$.detail").value("Invalid planner content structure"));
+
+            assertThat(stored(planner.id()).content().title()).as(blank).isEqualTo("Published Title");
+            assertThat(catalogRepository.findById(planner.id()).orElseThrow().getTitle()).as(blank)
+                    .isEqualTo("Published Title");
+        }
+    }
+
+    @Test
+    void publishedSave_WhenRenamed_UpdatesTheContentAndCatalogTitles() throws Exception {
+        StoredPlanner planner = TestDataFactory.planner(owner)
+                .title("Published Title")
+                .published(true)
+                .save(plannerRepository);
+        statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
+        TestDataFactory.addToCatalog(catalogService, planner);
+        UpsertPlannerRequest rename = UpsertRequests.resending(planner)
+                .title("Renamed Title")
+                .status(PlannerStatus.SAVED)
+                .build();
+
+        mockMvc.perform(put("/api/planner/md/{id}", planner.id())
+                        .cookie(AuthCookies.accessToken(token))
+                        .with(withCsrf())
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(rename)))
+                .andExpect(status().isOk());
+
+        assertThat(stored(planner.id()).content().title()).isEqualTo("Renamed Title");
+        assertThat(catalogRepository.findById(planner.id()).orElseThrow().getTitle()).isEqualTo("Renamed Title");
+    }
+
+    @Test
+    void draftSave_WhenTheBodyTitleIsBlank_SavesTheBlankTitle() throws Exception {
+        UUID device = UUID.randomUUID();
+        UUID id = UUID.randomUUID();
+        long version = savedPlanner(id, device);
+
+        sendAs(device, put("/api/planner/md/{id}", id), upsertBody(id, "   ", TestDataFactory.VALID_CONTENT, version))
+                .andExpect(status().isOk());
+
+        assertThat(stored(id).content().title()).isEqualTo("   ");
+    }
+
+    @Test
     void publishWithContent_WhenStaleResendFromAnotherDevice_ConflictsInsteadOfAcking() throws Exception {
         UUID firstDevice = UUID.randomUUID();
         UUID secondDevice = UUID.randomUUID();
