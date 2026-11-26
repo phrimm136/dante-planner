@@ -66,7 +66,10 @@ terraform output backend_ecr_repository_url
 - **No IRSA.** Without EKS there is no IRSA; the node **instance profile** is the AWS-auth
   boundary. The External Secrets Operator controller (pinned to `role=app` nodes) reads the
   RS256 key from Secrets Manager via the app node role — coarser than IRSA, since any pod on an
-  app node inherits it. Documented, accepted.
+  app node inherits it. The EBS CSI driver likewise acts through the data node role (create,
+  attach, detach and modify of volumes tagged `ebs.csi.aws.com/cluster=true`, no delete), and
+  the data node's IMDS hop limit of 2 lets every pod on a `role=data` node use it. Documented,
+  accepted.
 - **Public subnets, no NAT gateway.** A NAT gateway is ~$32/mo/AZ against a ~$145-190/mo budget.
   Nodes sit in public subnets; the cluster SG is the boundary and Cloudflare mTLS is the real
   origin gate.
