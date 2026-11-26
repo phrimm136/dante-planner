@@ -17,7 +17,7 @@ asset pipeline.
   absent, floors past the category's count untouched, and section notes opaque, or `PlannerChange`
   sees every resend as a change and ADR 136's hidden floors are lost. Worth doing when a consumer
   needs a content shape the stored JSON cannot give, or the double hold causes a drift bug.
-  re-check: `rg -qF 'this.content = document.json();' backend/src/main/java/org/danteplanner/backend/planner/entity/PlannerContent.java && rg -qF 'private final String json;' backend/src/main/java/org/danteplanner/backend/planner/validation/PlannerDocument.java`
+  re-check: `rg -qF 'this.content = write.json();' backend/src/main/java/org/danteplanner/backend/planner/entity/PlannerContent.java && rg -qF 'private final String json;' backend/src/main/java/org/danteplanner/backend/planner/validation/PlannerDocument.java`
 - A 429's `Retry-After` is on the wire, but `CorsConfig` does not list it as an exposed header, so
   the frontend's cross-origin fetches cannot read it (inferred from the config, not checked
   against prod), and the SSE client, which reads it (`sseStream.ts`), gets null and waits its own
@@ -158,7 +158,8 @@ asset pipeline.
   100 ms, 0.48 s at 10 ms and 0.46 s at 0 ms, so at this zone's round trip nearly all of the
   load is waiting, and at an in-country round trip the waterfall barely matters. A repeat visit
   in production serves every chunk from the browser cache and still takes 1.2–1.4 s, all of it
-  round trips (HTML revalidation and API calls). The zone is on the Free plan. Community and
+  round trips (HTML revalidation and API calls). The zone is on the Pro plan (user,
+  2026-11-26); which plan it was on when these numbers were measured is not recorded. Community and
   wiki sources (no Cloudflare statement found) say Korean visitors reach ICN only on Enterprise,
   and Cloudflare's own blog puts Seoul transit at 15× Europe with 2% of Korean traffic peered.
   From the same Korean ISP, CloudFront (ICN57, 17 ms connect), Bunny (KR1, 20 ms), Fastly (ICN,
@@ -170,8 +171,10 @@ asset pipeline.
   (price not public); every visitor on CloudFront's flat-rate Business plan ($200 a month for
   this volume; staying over a plan's allowance may move traffic to "fewer or more distant edge
   locations"); or Korea alone on an in-country CDN (about 2.8 M requests a month, inside
-  CloudFront Pro's 10 M at $15), which needs per-country DNS routing that Cloudflare DNS on the
-  Free plan may not provide (unverified). The API hostname sits behind the same Cloudflare
+  CloudFront Pro's 10 M at $15), which needs per-country DNS routing. On Cloudflare that is
+  Load Balancing's geo steering, an add-on rather than a feature of the Pro plan (unverified),
+  and the account's two load-balancing origins are already taken by the production pools
+  (`terraform/cloudflare/README.md`, Constraints). The API hostname sits behind the same Cloudflare
   tunnels, Access and load balancer, so moving it too reopens ADR 011 and ADR 091. Worth doing
   when Korean users are a stated priority, weighed against ADR 115's fewer round trips, which
   help every region.
@@ -509,15 +512,15 @@ column that does not exist, and the repo's own convention (status derived from s
 agrees with the wrong side. `docs/rfcs/0003-sync-identity-and-effect-delivery.md` and
 `0005-server-noop-conflict-arbitration.md` still show the column as target state.
   re-check: `.claude/skills/debt-ledger/bin/debt absent docs/adr/082-stale-write-noop-arbitration.md 'supersedes:' || .claude/skills/debt-ledger/bin/debt absent docs/adr/071-content-digest-lineage.md '^## Superseded'`
-- 2026-08-17 — `PlannerPublishingService.publish` passes
-`upserted(userId, deviceId, plannerId, content)` as an argument, so the whole upsert — field
-mutation, `recordSave()`'s version bump, `onVisibleEditCommitted`, and `createAggregate`
+- 2026-08-17 — `PlannerPublishingService.publish` runs
+`upsertAggregate(userId, deviceId, plannerId, content, WriteMode.CHECKED)` before `applyPublish`,
+so the whole upsert — arbitration, the version bump, `onVisibleEditCommitted`, and `createAggregate`
 for an id the server has never seen — runs before `applyPublish` reaches the `Stage.PUBLISH`
 content gate and the takedown refusal in `Planner.publish()`; only the owner
 probe (`lockForUpsert`) and the title check run first. A stale `syncVersion` on a taken-down planner answers 409 from arbitration
 before the 403 the state warrants, which opens the client's conflict dialog for a planner
 that can never publish.
-  re-check: `rg -qU 'return applyPublish\(ownershipValidator.requireOwner\(\s*upserted\(userId, deviceId, plannerId, content\)' backend/src/main/java/org/danteplanner/backend/planner/service/PlannerPublishingService.java`
+  re-check: `rg -qU 'upsertAggregate\(userId, deviceId, plannerId, content,\s*WriteMode.CHECKED\);\s*return applyPublish\(ownershipValidator.requireOwner\(saved.planner\(\), userId\)\)' backend/src/main/java/org/danteplanner/backend/planner/service/PlannerPublishingService.java`
 - 2026-08-17 — Several find-then-insert paths rely on a real database constraint without the
 handled violation ADR 023 pairs it with, so the race answers `UNEXPECTED_CONFLICT` plus a
 Sentry page instead of a domain outcome: `RecommendedSql.java:19` inserts into
@@ -570,14 +573,14 @@ and `status`, sorting into the list at the original's position and landing as a
 tombstone-immune draft under a fresh id.
   re-check: `rg -qF 'conflict.localPlanner.metadata.published && (' frontend/src/pages/planner/components/BatchConflictDialog.tsx && rg -qF "forkSide: 'incoming'" frontend/src/pages/planner/components/PlannerExportImportSection.tsx`
 - 2026-08-17 — `presentedVersion` is forward-only by construction
-(`usePlannerSave.ts:151-152`), but the server moves a version backwards on create:
+(`usePlannerSave.ts:160-161`), but the server moves a version backwards on create:
 a create ignores the requested value and the new row starts at 1,
 so a client sending 12 for an unknown id is answered 1 with no error. `adoptAck` assigns it
 correctly and `presentedVersion` maxes it back up against the stale prop, so the next save
 presents an old version against a row at 1 and takes a 409 for a planner nobody else
 touched. Reachable through any id the server has re-created, and through the import fork
 above.
-  re-check: `rg -q 'Math.max\(syncVersionRef.current, initialSyncVersion \?\? INITIAL_SYNC_VERSION\)' frontend/src/pages/planner/hooks/usePlannerSave.ts && rg -qU 'public static PlannerContent of\(String title, PlannerStatus status, String category, PlannerDocument document,\s*int gameContentVersion, UUID deviceId\)' backend/src/main/java/org/danteplanner/backend/planner/entity/PlannerContent.java`
+  re-check: `rg -q 'Math.max\(syncVersionRef.current, initialSyncVersion \?\? INITIAL_SYNC_VERSION\)' frontend/src/pages/planner/hooks/usePlannerSave.ts && rg -qU 'new Device.Known\(deviceId\),\s*1L,' backend/src/main/java/org/danteplanner/backend/planner/service/PlannerCommandService.java`
 - 2026-08-17 — ADR 073 removed the SSE planner event family on the grounds that
 "`refetchOnWindowFocus` on the server-backed planner queries becomes the freshness
 mechanism in their place", but every personal-planner query disables it
@@ -630,14 +633,11 @@ guards the parse but likewise skips the schema gate.
   `danteplanner-tfstate-${AWS_ACCOUNT_ID}`, which since the account cutover resolves to the
   prod bucket, so the stack list has to describe prod and only prod. Applied here:
   `global-accelerator` dropped from `STACKS` because it lived in the management account (the
-  stack is now deleted), and `cloudflare` added, which needed workspace
-  support in `scripts/ops/terraform-drift-check.sh` — that stack keeps a `prod-fleet`
-  workspace alongside `default`, and planning without selecting reports the whole stack as
-  absent. Re-enabling the cron needs the five secrets populated with prod values and the
+  stack is now deleted), and `cloudflare` added. Re-enabling the cron needs the five secrets populated with prod values and the
   credential path settled.
   re-check: `.claude/skills/debt-ledger/bin/debt absent .github/workflows/terraform-drift.yml -e '^\s+schedule:' -e '^\s+environment:'`
-- 2026-08-20 — infra-suite's `edge-suites` is disabled: it cannot reach the staging origin,
-  and the staging edge it drives is unmanaged. Four defects were cleared before the fifth
+- 2026-08-20 — infra-suite's `edge-suites` is disabled: it cannot reach the staging origin.
+  Four defects were cleared before the fifth
   proved blocking. (1) `STAGING_PROVISIONER_ROLE_ARN` existed nowhere, so the job could not
   assume a role; set as a `staging` environment secret. (2) The staging provisioning role
   granted `secretsmanager:GetSecretValue` on the RDS master password alone, so both
@@ -653,21 +653,14 @@ guards the parse but likewise skips the schema gate.
   workstation, which returns 530 (Access passed, origin unreachable). A presented token that
   no policy admits is 403 where no token at all is 302, so the token reaches Access and is
   refused there — the condition that distinguishes the two callers has not been found.
-
-  Reconciling the edge against terraform is blocked separately. A `staging` workspace now
-  exists in `terraform/cloudflare` holding nine imported resources — both tunnel configs, all
-  five DNS records, both Access policies. The remaining eight cannot be adopted as the config
-  stands: `access.tf` declares `zone_id = var.zone_id` on
-  `cloudflare_zero_trust_access_application`, while the five live applications are
-  account-scoped, so an import plans `5 to destroy` and recreates the applications guarding
-  every staging hostname. Note also that one-at-a-time `terraform import` cannot adopt the two
-  tunnels at all: `tunnels.tf:68` reads
-  `cloudflare_zero_trust_tunnel_cloudflared.region[each.key].id` for both regions, so the
-  config is unevaluable while only one is in state — config-driven `import` blocks are the
-  route. Separately, the `default` workspace still lists `cloudflare_load_balancer.api[0]`,
-  its monitor and both pools, deleted on 2026-08-17 to free the account's two-origin quota for
-  the prod load balancer; a plain apply there will try to recreate them and hit the limit.
-  re-check: `rg -qU '^  edge-suites:\n(.*\n){0,8}    if: false$' .github/workflows/infra-suite.yml && rg -q 'zone_id\s+= var\.zone_id' terraform/cloudflare/access.tf`
+  re-check: `rg -qU '^  edge-suites:\n(.*\n){0,8}    if: false$' .github/workflows/infra-suite.yml`
+- 2026-11-26 — The staging edge plans two in-place updates: both live Access policies
+  (`humans`, `service_token`) carry `session_duration = "24h"`, but `terraform/cloudflare/access.tf`
+  sets `session_duration` only on the applications, so an apply would drop it from the policies.
+  The five Access applications are in the staging state and plan no change. Whether the 24h
+  policy session is wanted, or the application's session alone should govern, is not decided.
+  Worth doing before the next staging edge apply.
+  re-check: `test -z "$(awk '/^resource "cloudflare_zero_trust_access_policy"/,/^}/' terraform/cloudflare/access.tf | rg session_duration)"`
 - 2026-08-20 — `edge-gate` in deploy-fleet is disabled, and with it the last verification
   that a release traverses the real Cloudflare path before production capacity moves. The
   cause is Bot Fight Mode: firewall events for `api-staging.dante-planner.com/healthz-local`
@@ -681,11 +674,11 @@ guards the parse but likewise skips the schema gate.
   sent no Access token, and tunnel tokens addressing tunnels deleted 2026-07-31. A browser
   User-Agent on the poll was tried and did not clear it; whether the datacenter ASN alone is
   sufficient signal was not confirmed, because Cloudflare's analytics lag left no event for
-  that run at the time of writing. The zone is on the Free plan, where Bot Fight Mode is a
-  zone-wide toggle with no exception mechanism — WAF skip rules for bot products need Super
-  Bot Fight Mode (Pro). So the choices are: disable Bot Fight Mode zone-wide, which also
-  removes it from the public production hostname; upgrade the plan and write a skip rule
-  scoped to the staging hostnames; or leave the gate off. Note the job graph needed a second
+  that run at the time of writing. The zone is on the Pro plan (user, 2026-11-26), where Super
+  Bot Fight Mode is available and a WAF skip rule for bot products can be scoped to the
+  staging hostnames; which bot mode the zone runs now has not been checked. So the choices
+  are: disable bot protection zone-wide, which also removes it from the public production
+  hostname; write the skip rule scoped to the staging hostnames; or leave the gate off. Note the job graph needed a second
   edit: `surge-up` declared `needs: [build-push, edge-gate]`, so gating edge-gate off with
   `if: false` would have skipped the surge, the tag bump and the settle in turn, disabling
   deployment rather than one check.
@@ -753,23 +746,6 @@ guards the parse but likewise skips the schema gate.
   `rate(hikaricp_connections_usage_seconds_count[...])`; waiting will not clear it, because the
   gauge it watches will keep reading zero.
   re-check: `rg -qF 'argocd_app_info{sync_status="OutOfSync"} == 1' deploy/grafana/rules/cluster-rules.yaml && .claude/skills/debt-ledger/bin/debt absent deploy/grafana -e 'autosync_enabled' -e 'hikaricp_connections_usage_seconds_count'`
-- 2026-08-24 — `terraform/cloudflare` splits one logical stack across two state buckets with
-  inconsistent workspace names, and the stack's resources live in Cloudflare rather than in
-  any AWS account, so the repo's "state lives in the account whose resources it describes"
-  rule gives no answer for it. The staging edge is the staging bucket's `default` workspace
-  (19 resources, both `danteplanner-staging-*` tunnels); the production edge is the prod
-  bucket's `prod-fleet` workspace (10 resources). The prod bucket also carries an EMPTY
-  `staging` workspace that manages nothing and shares a name used meaningfully in the other
-  bucket. Selecting a workspace is therefore the only barrier between planning one
-  environment and another, and the selection lives in `.terraform/environment`, which no
-  command prints. A `plan` run in the prod bucket's `default` or `staging` workspace reads as
-  "create the whole edge" because both are empty. Resting selection should be `prod-fleet`,
-  where config and state agree. The prod bucket's `default` workspace previously held a stale
-  duplicate of the retired management edge-test setup — the same objects a second state file
-  in the management bucket also described — and an apply there would have recreated an
-  `edge-test.dante-planner.com` load balancer and a tunnel named `danteplanner-oregon`; those
-  eight addresses have been removed from state.
-  re-check: `rg -qF 'workspace select prod-fleet' terraform/cloudflare/README.md && .claude/skills/debt-ledger/bin/debt absent scripts/ops/terraform-run.sh -i 'workspace'`
 - 2026-09-11 — IndexedDB still holds the one-part `deviceId` singleton row in every browser
   that ran a version before ADR 096; nothing reads it and the planner listing skips one-part
   keys. Delete it inside `onupgradeneeded` at the next database version bump, whatever that
@@ -1058,12 +1034,6 @@ GTID_SET` runs on one pooled connection and the request's read uses another; sou
   between pages. Worth doing when list p99 becomes a reported problem or a duplicate-across-
   pages report arrives: return a slice (limit+1) and append `plannerId` to the sort.
   re-check: `rg -qF 'Page<PlannerCatalog> rows = catalogRepository.findAll(spec, recencySorted(pageable));' backend/src/main/java/org/danteplanner/backend/planner/service/PublishedPlannerQueryService.java && rg -qF 'Sort.by(Sort.Direction.DESC, "firstPublishedAt"));' backend/src/main/java/org/danteplanner/backend/planner/service/PublishedPlannerQueryService.java`
-- 2026-09-22 — `Planner.java:62-69` declares the three inverse `@OneToOne(mappedBy=...)`
-  sides without `fetch`, so they default to EAGER; no main-source caller uses an inherited
-  `findById`/`findAll` today (every path goes through the `AGGREGATE_LOAD` JOIN FETCH), so
-  the cost is latent. Worth pinning with `FetchType.LAZY` or an ArchUnit ban on inherited
-  finders the first time a caller of an inherited `PlannerRepository` method lands.
-  re-check: `rg -q '@OneToOne\(mappedBy = "planner", cascade = CascadeType.ALL, orphanRemoval = true, optional = false\)$' backend/src/main/java/org/danteplanner/backend/planner/entity/Planner.java && .claude/skills/debt-ledger/bin/debt absent backend/src/main/java/org/danteplanner/backend/planner/entity/Planner.java 'FetchType'`
 - 2026-09-22 — `PlannerDriftAuditRepository.driftedUpvoteCounters` joins `planner_votes`
   without a `deleted_at IS NULL` predicate while `driftedCommentCounters` filters
   `planner_comment_content.deleted_at IS NULL`; V018 made votes immutable so the asymmetry may be

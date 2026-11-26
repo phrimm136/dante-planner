@@ -19,7 +19,8 @@ A key block that never closes is hidden for at most 128 lines after its BEGIN li
 
 The CLI runs the scripts of the checkout it lives in: from a worktree run
 `<worktree>/.claude/skills/ops/bin/ops`. `tf plan <stack>`, and `verify fleet`, `nodes` and `app` for their `--site` (unless
-`CP_INSTANCE_ID` is set) need `terraform/<stack>/.terraform` (the site's stack for those three) in that checkout; when it is missing
+`CP_INSTANCE_ID` is set) need the stack's data directory (`TF_DATA_DIR`, absolute or under the stack, else
+`terraform/<stack>/.terraform`; the site's stack for those three) in that checkout; when it is missing
 they stop before terraform runs and print the `init` command, with absolute paths and the
 stack's backend file (`backend.<env>.hcl` from `--env`, `backend.management.hcl` for `mgmt`, or the fixed file a fixed-account stack
 names in its header). Worktrees start uninitialized; plan from the main checkout or run that init.

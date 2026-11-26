@@ -274,9 +274,13 @@ def backend_file_name(repo_root, stack_name):
     return fixed_names.pop() if len(fixed_names) == 1 else ""
 
 
+def data_dir(stack_dir):
+    return stack_dir / (os.environ.get("TF_DATA_DIR") or ".terraform")
+
+
 def require_init(repo_root, one_stack, env_name):
     stack_dir = repo_root / TERRAFORM_ROOT / one_stack.stack_name
-    state_dir = stack_dir / ".terraform"
+    state_dir = data_dir(stack_dir)
     if state_dir.is_dir():
         return
     backend_file = repo_root / TERRAFORM_ROOT / (one_stack.fixed_backend or env_backend_name(env_name))

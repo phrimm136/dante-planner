@@ -3,9 +3,9 @@
 #
 # Two inputs reach a plan without appearing on the command line, and each has its own check:
 #
-#   1. The backend. A stack's account lives in .terraform/terraform.tfstate, which no command
-#      names, so a directory initialized against one account's state bucket accepts a
-#      -var-file describing another. The provider's allowed_account_ids catches only the
+#   1. The backend. A stack's account lives in terraform.tfstate of its data directory
+#      (TF_DATA_DIR, else .terraform), which no command names, so a directory initialized
+#      against one account's state bucket accepts a -var-file describing another. The provider's allowed_account_ids catches only the
 #      reverse case. Terraform would read the wrong account's state, refresh resource ids it
 #      does not hold, and drop them from state as deleted. Buckets are named
 #      <prefix>-tfstate-<account_id>, which is what makes the comparison possible. Where the
@@ -43,27 +43,41 @@ tf_guard_chdir() {
     printf '.\n'
 }
 
-# tf_guard_backend DIR
-# Echoes "BUCKET ROLE_ARN", each "-" when absent. Empty output means no stored backend,
-# which is a local-state or uninitialized directory rather than a fault.
+# tf_guard_data_dir TARGET
+# Echoes the directory Terraform keeps TARGET's backend in. A relative TF_DATA_DIR is resolved
+# under the -chdir target, as Terraform resolves it.
+tf_guard_data_dir() {
+    case "${TF_DATA_DIR:-}" in
+        "") printf '%s\n' "$1/.terraform" ;;
+        /*) printf '%s\n' "$TF_DATA_DIR" ;;
+        *) printf '%s\n' "$1/$TF_DATA_DIR" ;;
+    esac
+}
+
+# tf_guard_backend DATA_DIR
+# Echoes "BUCKET ROLE_ARN", each "-" when absent. Returns 1 when DATA_DIR holds no backend
+# file, which is a local-state or uninitialized directory rather than a fault, and 3 when the
+# file exists but cannot be read as a backend record.
 tf_guard_backend() {
-    local cfg="$1/.terraform/terraform.tfstate"
+    local cfg="$1/terraform.tfstate"
     [ -f "$cfg" ] || return 1
-    python3 -c "
-import json
+    python3 -c '
+import json, sys
 try:
-    c = json.load(open('$cfg')).get('backend', {}).get('config', {}) or {}
+    with open(sys.argv[1], encoding="utf-8") as backend_file:
+        stored = json.load(backend_file)
+    config = (stored.get("backend") or {}).get("config") or {}
+    role = config.get("assume_role") or {}
+    print(config.get("bucket") or "-", (role.get("role_arn") if isinstance(role, dict) else None) or "-")
 except Exception:
-    c = {}
-ar = c.get('assume_role') or {}
-print(c.get('bucket') or '-', (ar.get('role_arn') if isinstance(ar, dict) else None) or '-')
-" 2>/dev/null
+    sys.exit(3)
+' "$cfg" 2>/dev/null || return 3
 }
 
 # terraform_guard ARGS...
 # Returns 0 to allow, 2 to refuse with the reason on stderr. Mutates nothing.
 terraform_guard() {
-    local sub target bucket role_arn bucket_acct role_acct caller
+    local sub target data_dir backend_line bucket role_arn bucket_acct role_acct caller
 
     # Guarded: anything that refreshes state or acts on infrastructure. `output` and `console`
     # only read what is already stored, are used inside command substitution across the ops
@@ -87,7 +101,21 @@ terraform_guard() {
         return 2
     fi
 
-    read -r bucket role_arn < <(tf_guard_backend "$target") || return 0
+    data_dir=$(tf_guard_data_dir "$target")
+    backend_line=$(tf_guard_backend "$data_dir")
+    case $? in
+        0) ;;
+        1) return 0 ;;
+        *)
+            {
+                echo "terraform-guard: $data_dir/terraform.tfstate exists but cannot be read as a"
+                echo "backend record, so the account it points at is unknown."
+                echo "  terraform -chdir=$target init -reconfigure -backend-config=../backend.<account>.hcl"
+            } >&2
+            return 2
+            ;;
+    esac
+    read -r bucket role_arn <<<"$backend_line"
     [ "${bucket:--}" = "-" ] && return 0
 
     # Only the <prefix>-tfstate-<account_id> convention is understood; anything else is left
@@ -115,7 +143,7 @@ terraform_guard() {
         echo "terraform-guard: credentials and state bucket disagree on the account."
         echo
         echo "  credentials resolve to  $caller${AWS_PROFILE:+  (AWS_PROFILE=$AWS_PROFILE)}"
-        echo "  $target is initialized against $bucket"
+        echo "  $data_dir is initialized against $bucket"
         echo "  which belongs to        $bucket_acct"
         echo
         echo "Terraform would read that account's state with these credentials, find none of"

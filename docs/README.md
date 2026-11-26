@@ -48,6 +48,7 @@ principle without a corresponding entry is an untested claim rather than a settl
 | File | Operation |
 |---|---|
 | `runbooks/backend-image-rollback.md` | Reverting a bad backend release through the deploy pipeline |
+| `runbooks/cloudflare-state-per-env.md` | Moving the prod Cloudflare state into the prod bucket's default workspace |
 | `runbooks/environment-setup.md` | Standing up a working environment from scratch |
 | `runbooks/etcd-snapshot-repair.md` | Turning on the etcd snapshot schedule of a running control plane |
 | `runbooks/prod-account-rewire.md` | Preparing the vended prod account to receive production |

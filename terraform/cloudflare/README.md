@@ -20,18 +20,25 @@ assumed floor, not a measured one.
 
 ## Applying
 
-Each environment has its own state bucket and var-file; prod also keeps its state in the
-`prod-fleet` workspace. From the repo root, through the guard:
+Each environment keeps one state, in its own bucket's default workspace, and has its own
+var-file. The backend file chosen at init is the only thing that picks the environment. From the
+repo root, through the guard:
 
 ```bash
 cp terraform/cloudflare/environment.tfvars.example terraform/cloudflare/prod.tfvars   # fill in token, account, zone
 AWS_PROFILE=<prod> scripts/ops/terraform-run.sh -chdir=terraform/cloudflare init -reconfigure -backend-config=../backend.prod.hcl
-AWS_PROFILE=<prod> scripts/ops/terraform-run.sh -chdir=terraform/cloudflare workspace select prod-fleet
-.claude/skills/ops/bin/ops tf plan cloudflare -- -var-file=prod.tfvars    # expect creates only
+.claude/skills/ops/bin/ops tf plan cloudflare -- -var-file=prod.tfvars
 .claude/skills/ops/bin/ops tf apply <plan file printed above>    # the user, as the printed ! line
 ```
 
-Staging uses `backend.staging.hcl`, the default workspace, and `-var-file=staging.tfvars`.
+Staging:
+
+```bash
+AWS_PROFILE=<staging> scripts/ops/terraform-run.sh -chdir=terraform/cloudflare init -reconfigure -backend-config=../backend.staging.hcl
+.claude/skills/ops/bin/ops --env staging tf plan cloudflare -- -var-file=staging.tfvars
+```
+
+One `.terraform/` holds one backend at a time, so re-run the init on every switch between the two.
 
 Point `api_hostname` at a throwaway hostname for the first apply, and confirm each tunnel
 reports **≥4 edge connections** before any client depends on it — one connection is a single
@@ -70,4 +77,4 @@ The window sequence, drills, and teardown ledger live in
 
 Cloudflare load balancing is at the account's limit of two origins, both used by the production
 pools, so no second environment can hold a load balancer. Nothing in this stack expresses the
-limit: each workspace plans cleanly on its own, and the limit appears only as a 400 during apply.
+limit: each environment plans cleanly on its own, and the limit appears only as a 400 during apply.
