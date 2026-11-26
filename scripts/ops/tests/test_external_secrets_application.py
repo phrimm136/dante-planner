@@ -31,7 +31,7 @@ def fleet_stacks():
 def read_texts():
     file_paths = [REPO_ROOT / APPLICATION_PATH, REPO_ROOT / MODULE_PATH]
     for stack_dir in fleet_stacks():
-        file_paths += [*stack_dir.glob("*.tf"), *stack_dir.glob("*.tfvars.example")]
+        file_paths += [*stack_dir.glob("*.tf"), *stack_dir.glob("envs/*.tfvars")]
     return {str(file_path.relative_to(REPO_ROOT)): file_path.read_text(encoding="utf-8") for file_path in file_paths}
 
 
@@ -39,9 +39,14 @@ def application_version(file_texts):
     return yaml.safe_load(file_texts[APPLICATION_PATH])["spec"]["source"]["targetRevision"]
 
 
+def stack_of(file_path):
+    path = Path(file_path)
+    return str(path.parent.parent if path.parent.name == "envs" else path.parent)
+
+
 def version_problems(file_texts):
     chart_version = application_version(file_texts)
-    stack_paths = {str(Path(file_path).parent) for file_path in file_texts} - {str(Path(APPLICATION_PATH).parent)}
+    stack_paths = {stack_of(file_path) for file_path in file_texts} - {str(Path(APPLICATION_PATH).parent)}
     problem_texts = []
     for stack_path in sorted(stack_paths):
         defaults = DEFAULT_PATTERN.findall(file_texts[f"{stack_path}/variables.tf"])
@@ -52,7 +57,7 @@ def version_problems(file_texts):
             continue
         assignments = {file_path: ASSIGNMENT_PATTERN.findall(file_text)
                        for file_path, file_text in file_texts.items()
-                       if str(Path(file_path).parent) == stack_path}
+                       if stack_of(file_path) == stack_path}
         expected_assignments = {file_path: [f"var.{VARIABLE_NAME}"] if file_path == f"{stack_path}/main.tf" else []
                                 for file_path in assignments}
         problem_texts += [f"{file_path} sets {VARIABLE_NAME} to {found}, want {expected_assignments[file_path]}"
@@ -161,13 +166,13 @@ class ExternalSecretsApplicationTest(unittest.TestCase):
                 (problem_text,) = self.problems_after(f"{stack_path}/main.tf", f"var.{VARIABLE_NAME}",
                                                       f'"{OTHER_VERSION}"')
                 self.assertIn(f"{stack_path}/main.tf sets {VARIABLE_NAME}", problem_text)
-                example_path = f"{stack_path}/environment.tfvars.example"
+                settings_path = f"{stack_path}/envs/prod.tfvars"
                 problem_texts = version_problems({
                     **self.file_texts,
-                    example_path: self.file_texts[example_path] + f'\n{VARIABLE_NAME} = "{OTHER_VERSION}"\n',
+                    settings_path: self.file_texts[settings_path] + f'\n{VARIABLE_NAME} = "{OTHER_VERSION}"\n',
                 })
                 self.assertEqual(problem_texts,
-                                 [f"{example_path} sets {VARIABLE_NAME} to ['\"{OTHER_VERSION}\"'], want []"])
+                                 [f"{settings_path} sets {VARIABLE_NAME} to ['\"{OTHER_VERSION}\"'], want []"])
 
 
 if __name__ == "__main__":
