@@ -22,6 +22,7 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.FilterRowsSync;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.UpsertRequests;
 import org.junit.jupiter.api.AfterEach;
@@ -63,6 +64,9 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private PlannerRepository plannerRepository;
+
+    @Autowired
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerCatalogRepository catalogRepository;
@@ -123,7 +127,7 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
         StoredPlanner planner = TestDataFactory.planner(owner)
                 .title("Before Edit")
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         TestDataFactory.addToCatalog(catalogService, planner);
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
@@ -325,7 +329,7 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
         StoredPlanner planner = TestDataFactory.planner(owner)
                 .title("Published Title")
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         TestDataFactory.addToCatalog(catalogService, planner);
 
@@ -355,7 +359,7 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
         StoredPlanner planner = TestDataFactory.planner(owner)
                 .title("Published Title")
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         TestDataFactory.addToCatalog(catalogService, planner);
         UpsertPlannerRequest rename = UpsertRequests.resending(planner)
@@ -456,7 +460,7 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
     void publishedTitleSave_WhenContentResentAsReceived_SkipsFilterRebuild() throws Exception {
         StoredPlanner planner = TestDataFactory.planner(owner)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         TestDataFactory.addToCatalog(catalogService, planner);
         JsonNode received = ownerCopy(planner.id());
@@ -473,7 +477,7 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
     void publishedContentSave_WhenIdentityAdded_FilterRowsAndFilteredListReflectItOnResponse() throws Exception {
         StoredPlanner planner = TestDataFactory.planner(owner)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         TestDataFactory.addToCatalog(catalogService, planner);
         JsonNode received = ownerCopy(planner.id());
@@ -496,10 +500,10 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
     @Test
     void publish_WhenStoredContentSelectsAnUnknownKeyword_Returns400UnknownKeywordAndStaysUnpublished() throws Exception {
         StoredPlanner known = TestDataFactory.planner(owner).title("Known Keyword Draft")
-                .selectedKeywords(Set.of("Sinking")).save(plannerRepository);
+                .selectedKeywords(Set.of("Sinking")).save(plannerSeeds);
         statsRepository.save(PlannerStats.builder().plannerId(known.id()).build());
         StoredPlanner unknown = TestDataFactory.planner(owner).title("Unknown Keyword Draft")
-                .selectedKeywords(Set.of("Sinking", "NotAKeyword")).save(plannerRepository);
+                .selectedKeywords(Set.of("Sinking", "NotAKeyword")).save(plannerSeeds);
         statsRepository.save(PlannerStats.builder().plannerId(unknown.id()).build());
 
         mockMvc.perform(post("/api/planner/md/{id}/publish", known.id())
@@ -519,7 +523,7 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
 
     private StoredPlanner publishedWithUnknownKeyword(String title) {
         StoredPlanner planner = TestDataFactory.planner(owner).title(title)
-                .selectedKeywords(Set.of("Sinking", "NotAKeyword")).published(true).save(plannerRepository);
+                .selectedKeywords(Set.of("Sinking", "NotAKeyword")).published(true).save(plannerSeeds);
         statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         TestDataFactory.addToCatalog(catalogService, planner);
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
@@ -549,7 +553,7 @@ class PlannerPublishFlowIT extends ExclusiveDatabaseSupport {
     @Test
     void publishWithContent_WhenTheDraftSelectsAnUnknownKeyword_Returns400AndRollsBackTheSave() throws Exception {
         StoredPlanner draft = TestDataFactory.planner(owner).title("Draft Before Publish")
-                .selectedKeywords(Set.of("Sinking")).save(plannerRepository);
+                .selectedKeywords(Set.of("Sinking")).save(plannerSeeds);
         statsRepository.save(PlannerStats.builder().plannerId(draft.id()).build());
         UpsertPlannerRequest publishBody = UpsertRequests.resending(draft)
                 .title("Draft Published With Unknown")

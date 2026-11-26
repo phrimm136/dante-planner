@@ -22,8 +22,8 @@ import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -42,7 +42,7 @@ class CommentDecompositionMigrationIT extends ExclusiveDatabaseSupport {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private UserRepository userRepository;
-    @Autowired private PlannerRepository plannerRepository;
+    @Autowired private PlannerSeeds plannerSeeds;
     @Autowired private JwtTokenService jwtTokenService;
     @Autowired private DataSource dataSource;
 
@@ -55,7 +55,7 @@ class CommentDecompositionMigrationIT extends ExclusiveDatabaseSupport {
         jdbc = new JdbcTemplate(dataSource);
         emptyPlannerTables(jdbc);
         author = TestDataFactory.createTestUser(userRepository, "decomposition-author@example.com");
-        planner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        planner = TestDataFactory.createTestPlanner(plannerSeeds, author, true);
     }
 
     @AfterEach

@@ -14,6 +14,7 @@ import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.FilterRowsSync;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,6 +50,9 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private PlannerRepository plannerRepository;
+
+    @Autowired
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerEntityFilterRepository entityFilterRepository;
@@ -117,7 +121,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
         StoredPlanner planner = TestDataFactory.planner(owner)
                 .selectedKeywords(Set.of("Sinking", "Combustion"))
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
 
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
         long entityRowsAfterFirstBuild = entityFilterRepository.count();
@@ -136,7 +140,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
         StoredPlanner planner = TestDataFactory.planner(owner)
                 .selectedKeywords(Set.of("Sinking"))
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
         assertThat(storedKeywords(planner)).containsExactly("Sinking");
 
@@ -155,7 +159,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
         StoredPlanner planner = TestDataFactory.planner(owner)
                 .selectedKeywords(Set.of("Sinking", "Combustion"))
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
         Set<String> before = indexedRows(planner);
         assertThat(before).contains("IDENTITY:10101", "EGO_GIFT:9001");
@@ -187,7 +191,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
     void rebuildFilters_WhenFactoryContent_MatchesExtractorOracle() throws Exception {
         StoredPlanner planner = TestDataFactory.planner(owner)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
 
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
 
@@ -217,7 +221,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
         StoredPlanner planner = TestDataFactory.planner(owner)
                 .published(true)
                 .content(content)
-                .save(plannerRepository);
+                .save(plannerSeeds);
 
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
 
@@ -260,7 +264,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                 .category("5F")
                 .content(SIX_FLOOR_CONTENT)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
 
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
 
@@ -277,7 +281,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                 .category("15F")
                 .content(SIX_FLOOR_CONTENT)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
 
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
 
@@ -293,7 +297,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                     .category(category.getValue())
                     .content(FIFTEEN_FLOORS)
                     .published(true)
-                    .save(plannerRepository);
+                    .save(plannerSeeds);
 
             FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
 
@@ -326,7 +330,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                 .category("15F")
                 .content(FIFTEEN_FLOORS)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
 
         callProcedure(planner, 10);
 
@@ -339,7 +343,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                 .category("5F")
                 .content(SIX_FLOOR_CONTENT)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
 
         callProcedure(planner, 15);
 
@@ -353,7 +357,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                 .category("15F")
                 .content(SIX_FLOOR_CONTENT)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
 
         callProcedure(planner, 0);
 
@@ -370,7 +374,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                 .category("RR_PLACEHOLDER")
                 .content(SIX_FLOOR_CONTENT)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
 
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
 
@@ -392,7 +396,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                     .category(category.getValue())
                     .content(FIFTEEN_FLOORS)
                     .published(true)
-                    .save(plannerRepository);
+                    .save(plannerSeeds);
 
             FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
             Set<String> scoped = indexedRows(planner);
@@ -412,7 +416,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                 .category("RR_PLACEHOLDER")
                 .content(SIX_FLOOR_CONTENT)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
 
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
         Set<String> scoped = indexedRows(planner);
@@ -430,7 +434,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                 .category("5F")
                 .content(MALFORMED_OBJECT_FLOORS)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
 
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
 
@@ -447,7 +451,7 @@ class PlannerFilterRebuildIT extends ExclusiveDatabaseSupport {
                 .category("5F")
                 .content(FIFTEEN_FLOORS)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
 
         new TransactionTemplate(transactionManager).executeWithoutResult(rebuild -> {
             assertThat(entityFilterRepository.floorScopeOf(planner.id())).isPresent();

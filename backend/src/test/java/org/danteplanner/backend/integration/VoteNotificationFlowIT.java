@@ -7,6 +7,7 @@ import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerVoteId;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.support.Hang;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -53,6 +54,9 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
     private PlannerRepository plannerRepository;
 
     @Autowired
+    private PlannerSeeds plannerSeeds;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -87,7 +91,7 @@ class VoteNotificationFlowIT extends ExclusiveDatabaseSupport {
                 .title("Test Planner for Notification")
                 .content("{\"data\":\"test\"}")
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         plannerRepository.flush();
         entityManager.clear();
     }

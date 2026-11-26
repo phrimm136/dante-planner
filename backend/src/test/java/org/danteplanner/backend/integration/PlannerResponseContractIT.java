@@ -4,10 +4,10 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -64,7 +64,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private JwtTokenService jwtTokenService;
@@ -92,7 +92,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     void setUp() {
         owner = TestDataFactory.createTestUser(userRepository, "contract-owner@example.com");
         token = TestDataFactory.generateAccessToken(jwtTokenService, owner);
-        published = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        published = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
     }
 
 
@@ -136,7 +136,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     @Test
     void responseContractStable_WhenOwnerDetail_FieldSetUnchanged() throws Exception {
         published = TestDataFactory.planner(owner).published(true).deviceId(UUID.randomUUID())
-                .save(plannerRepository);
+                .save(plannerSeeds);
 
         String json = performAuthed(mockMvc, get("/api/planner/md/{id}", published.id()), token)
                 .andExpect(status().isOk())
@@ -219,7 +219,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     void unpublishedChangesVisibleToOwner_WhenStatusDirty_StatusAndPublishedCarried() throws Exception {
         // A published planner whose edit state went dirty (draft) after publish
         published = TestDataFactory.planner(owner).published(true).status(PlannerStatus.DRAFT)
-                .save(plannerRepository);
+                .save(plannerSeeds);
 
         performAuthed(mockMvc, get("/api/planner/md/{id}", published.id()), token)
                 .andExpect(status().isOk())
@@ -317,7 +317,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
 
     @Test
     void noUpvotes_WhenBatchPulledByGet_KeyAbsent() throws Exception {
-        StoredPlanner draft = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        StoredPlanner draft = TestDataFactory.createTestPlanner(plannerSeeds, owner, false);
 
         performAuthed(mockMvc, get("/api/planner/md/batch")
                         .param("ids", published.id() + "," + draft.id()),

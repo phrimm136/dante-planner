@@ -1,5 +1,4 @@
 package org.danteplanner.backend.repository;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -13,6 +12,7 @@ import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PlannerStatsRepositoryIT extends SharedMySqlContainerSupport {
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerStatsRepository statsRepository;
@@ -62,7 +62,7 @@ class PlannerStatsRepositoryIT extends SharedMySqlContainerSupport {
         testPlanner = TestDataFactory.planner(testUser)
                 .status(PlannerStatus.DRAFT)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         statsRepository.save(PlannerStats.builder().plannerId(testPlanner.id()).build());
     }
 

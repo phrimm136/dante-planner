@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.moderation.api.PlannerModerationTarget;
 import org.danteplanner.backend.auth.token.JwtTokenService;
@@ -80,6 +81,9 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
     private PlannerRepository plannerRepository;
 
     @Autowired
+    private PlannerSeeds plannerSeeds;
+
+    @Autowired
     private PlannerCommentRepository plannerCommentRepository;
 
     @Autowired
@@ -103,7 +107,7 @@ class RestrictedModeratorAuthorityIT extends SharedMySqlContainerSupport {
         owner = TestDataFactory.createTestUser(userRepository, "owner@example.com");
         moderator = TestDataFactory.createModerator(userRepository, "mod@example.com");
         admin = TestDataFactory.createAdmin(userRepository, "admin@example.com");
-        planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
         moderatorCookie = AuthCookies.accessToken(TestDataFactory.generateAccessToken(jwtTokenService, moderator));
         adminCookie = AuthCookies.accessToken(TestDataFactory.generateAccessToken(jwtTokenService, admin));
     }

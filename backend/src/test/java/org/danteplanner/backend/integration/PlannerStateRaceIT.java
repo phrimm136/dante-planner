@@ -2,6 +2,7 @@ package org.danteplanner.backend.integration;
 
 import java.util.stream.Collectors;
 import java.util.Set;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.UpsertRequests;
 import org.danteplanner.backend.planner.sync.SyncVersionValidator.WriteMode;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
@@ -68,6 +69,7 @@ class PlannerStateRaceIT extends SharedMySqlContainerSupport {
 
     @Autowired private UserRepository userRepository;
     @Autowired private PlannerRepository plannerRepository;
+    @Autowired private PlannerSeeds plannerSeeds;
     @Autowired private PlannerStatsRepository statsRepository;
     @Autowired private PlannerCatalogRepository catalogRepository;
     @Autowired private PlannerPublicationRepository publicationRepository;
@@ -477,7 +479,7 @@ class PlannerStateRaceIT extends SharedMySqlContainerSupport {
     }
 
     private UUID draft() {
-        UUID id = TestDataFactory.createTestPlanner(plannerRepository, owner, false).id();
+        UUID id = TestDataFactory.createTestPlanner(plannerSeeds, owner, false).id();
         statsRepository.save(PlannerStats.builder().plannerId(id).build());
         return id;
     }

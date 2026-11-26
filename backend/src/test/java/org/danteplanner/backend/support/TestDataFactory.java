@@ -32,7 +32,6 @@ import org.danteplanner.backend.user.entity.User;
 import org.springframework.beans.BeanUtils;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.danteplanner.backend.user.api.UserRole;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -229,9 +228,9 @@ public class TestDataFactory {
                 .save(userRepository);
     }
 
-    public static StoredPlanner createTestPlanner(PlannerRepository plannerRepository, User owner,
+    public static StoredPlanner createTestPlanner(PlannerSeeds plannerSeeds, User owner,
             boolean published) {
-        return planner(owner).published(published).save(plannerRepository);
+        return planner(owner).published(published).save(plannerSeeds);
     }
 
     public static void addToCatalog(PlannerCatalogService catalogService, StoredPlanner planner) {
@@ -490,14 +489,14 @@ public class TestDataFactory {
                     publication, NotificationSetting.ON, new Listing.Listed(), Takedown.of(takenDownAt));
         }
 
-        public StoredPlanner save(PlannerRepository plannerRepository) {
-            return PlannerRows.insert(plannerRepository, build());
+        public StoredPlanner save(PlannerSeeds plannerSeeds) {
+            return PlannerRows.insert(plannerSeeds, build());
         }
 
-        public StoredPlanner savePublished(PlannerRepository plannerRepository, PlannerStatsRepository statsRepository,
+        public StoredPlanner savePublished(PlannerSeeds plannerSeeds, PlannerStatsRepository statsRepository,
                 PlannerCatalogService catalogService) {
             published = true;
-            StoredPlanner planner = save(plannerRepository);
+            StoredPlanner planner = save(plannerSeeds);
             statsRepository.save(PlannerStats.builder()
                     .plannerId(planner.id())
                     .upvotes(upvotes)

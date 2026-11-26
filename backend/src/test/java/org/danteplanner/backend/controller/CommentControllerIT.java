@@ -5,6 +5,7 @@ import javax.sql.DataSource;
 
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.comment.repository.CommentRow;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
@@ -17,7 +18,6 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.shared.util.CommentConstants;
 import org.danteplanner.backend.auth.token.JwtTokenService;
@@ -64,7 +64,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerCommentRepository commentRepository;
@@ -90,8 +90,8 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
         otherUser = TestDataFactory.createTestUser(userRepository, "other@example.com");
-        publishedPlanner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
-        unpublishedPlanner = TestDataFactory.createTestPlanner(plannerRepository, testUser, false);
+        publishedPlanner = TestDataFactory.createTestPlanner(plannerSeeds, testUser, true);
+        unpublishedPlanner = TestDataFactory.createTestPlanner(plannerSeeds, testUser, false);
 
         accessToken = TestDataFactory.generateAccessToken(jwtTokenService, testUser);
         otherUserAccessToken = TestDataFactory.generateAccessToken(jwtTokenService, otherUser);

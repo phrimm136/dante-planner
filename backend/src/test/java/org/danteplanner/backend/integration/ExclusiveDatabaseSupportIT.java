@@ -10,7 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.planner.repository.StoredPlanner;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -23,7 +23,7 @@ class ExclusiveDatabaseSupportIT extends ExclusiveDatabaseSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private DataSource dataSource;
@@ -33,7 +33,7 @@ class ExclusiveDatabaseSupportIT extends ExclusiveDatabaseSupport {
         JdbcTemplate jdbc = new JdbcTemplate(dataSource);
         User author = TestDataFactory.createTestUser(userRepository, "report-author@example.com");
         User reporter = TestDataFactory.createTestUser(userRepository, "report-reporter@example.com");
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, author, true);
         UUID commentPublicId = UUID.randomUUID();
         jdbc.update("INSERT INTO planner_comments (public_id, planner_id, user_id, content, depth, created_at) "
                 + "VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), ?, 'a reported comment', 0, NOW())",

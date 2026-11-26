@@ -22,6 +22,7 @@ import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.searchindex.PlannerContentEntityExtractor;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
 import org.danteplanner.backend.support.FilterRowsSync;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -90,6 +91,9 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
     private PlannerRepository plannerRepository;
 
     @Autowired
+    private PlannerSeeds plannerSeeds;
+
+    @Autowired
     private PlannerContentRepository contentRepository;
 
     @Autowired
@@ -142,7 +146,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
                 .title(title)
                 .selectedKeywords(keywords)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         TestDataFactory.addToCatalog(catalogService, planner);
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());
@@ -303,7 +307,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
                 .category(category)
                 .content(FIFTEEN_FLOOR_CONTENT)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         TestDataFactory.addToCatalog(catalogService, planner);
         FilterRowsSync.syncFilterRows(transactionManager, catalogService, planner.id());

@@ -20,13 +20,13 @@ import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.PlannerBatchRequest;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.config.PoolLedger;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
 import org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter;
 import org.danteplanner.backend.shared.security.CsrfTokenService;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.ViewerHashUtil;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -51,7 +51,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private UserRepository userRepository;
@@ -88,7 +88,7 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
             throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-withdraw-" + withdrawal + "@example.com");
         User moderator = TestDataFactory.createModerator(userRepository, "replica-lag-withdraw-mod-" + withdrawal + "@example.com");
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
         UUID plannerId = planner.id();
         replicationControl.awaitCaughtUp();
 
@@ -110,7 +110,7 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
     @Test
     void publishedRead_WhenRepublishedOnPausedReplica_ServesThePlanner() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-republish@example.com");
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
         UUID plannerId = planner.id();
         replicationControl.awaitCaughtUp();
 
@@ -136,8 +136,8 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
     @ValueSource(strings = {"GET", "POST"})
     void batchPull_WhenAPlannerIsDeletedOnPausedReplica_OmitsItWhileKeepingTheLiveOne(String method) throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-batch-deleted-" + method + "@example.com");
-        StoredPlanner live = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
-        StoredPlanner doomed = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        StoredPlanner live = TestDataFactory.createTestPlanner(plannerSeeds, owner, false);
+        StoredPlanner doomed = TestDataFactory.createTestPlanner(plannerSeeds, owner, false);
         replicationControl.awaitCaughtUp();
 
         try {
@@ -227,7 +227,7 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
     @Test
     void publish_WhenTheFilterRebuildRunsOnTheGtidPrimary_ReplicatesTheSameFilterRows() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-filter-rows@example.com");
-        UUID plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, true).id();
+        UUID plannerId = TestDataFactory.createTestPlanner(plannerSeeds, owner, true).id();
 
         send(owner, "POST", "/api/planner/md/" + plannerId + "/unpublish", null);
         send(owner, "POST", "/api/planner/md/" + plannerId + "/publish", null);
@@ -308,8 +308,8 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
     @Test
     void publishedRead_WhenOwnerDeactivatedOnPausedReplica_Returns404LikeACaughtUpReplica() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-deactivate@example.com");
-        StoredPlanner first = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
-        StoredPlanner second = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner first = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
+        StoredPlanner second = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
         replicationControl.awaitCaughtUp();
 
         try {
@@ -336,7 +336,7 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
     void splitReads_WhenOwnerDeactivatedOnPausedReplica_Return404AndRecordNoView() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-split-owner@example.com");
         User viewer = TestDataFactory.createTestUser(userRepository, "replica-lag-split-viewer@example.com");
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
         UUID plannerId = planner.id();
         replicationControl.awaitCaughtUp();
 
@@ -379,7 +379,7 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
     @Test
     void commentThread_WhenOwnerDeactivatedOnPausedReplica_Returns404LikeACaughtUpReplica() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "comment-lag-owner@example.com");
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
         UUID plannerId = planner.id();
         replicationControl.awaitCaughtUp();
 
@@ -406,7 +406,7 @@ class ReplicaLagIT extends ReplicaRoutingHarnessSupport {
     @Test
     void commentThread_WhenOwnerDeactivatedOnCaughtUpReplica_Returns404() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "comment-caught-up-owner@example.com");
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
 
         deleteAccount(owner);
         replicationControl.awaitCaughtUp();

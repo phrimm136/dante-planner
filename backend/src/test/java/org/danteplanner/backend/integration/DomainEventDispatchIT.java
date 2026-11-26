@@ -1,5 +1,6 @@
 package org.danteplanner.backend.integration;
 
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
@@ -8,7 +9,6 @@ import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.api.NotificationType;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
 import org.danteplanner.backend.shared.outbox.service.DomainEventDispatcher;
@@ -85,7 +85,7 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerCommentRepository commentRepository;
@@ -112,7 +112,7 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
         recorder = SseTopicRecorder.open(sseConnectionFactory, objectMapper);
         owner = TestDataFactory.createTestUser(userRepository, "dispatch-owner@example.com");
         commenter = TestDataFactory.createTestUser(userRepository, "dispatch-commenter@example.com");
-        planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
     }
 
     @AfterEach
@@ -151,7 +151,7 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
         List<StoredPlanner> raced = new ArrayList<>();
         try (ExecutorService workers = Executors.newFixedThreadPool(2)) {
             for (int round = 0; round < ROUNDS; round++) {
-                planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+                planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
                 raced.add(planner);
                 long eventId = recordEvent(insertComment(commenter, "A comment raced for", null).getId());
                 CyclicBarrier start = new CyclicBarrier(2);

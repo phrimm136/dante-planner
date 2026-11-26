@@ -10,6 +10,7 @@ import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerSummaryRow;
 import org.danteplanner.backend.planner.repository.PublishedPlannerRow;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.ThreadStatementCounter;
 import org.danteplanner.backend.user.entity.User;
@@ -46,6 +47,9 @@ class PlannerAuthorJoinIT extends SharedMySqlContainerSupport {
     private PlannerRepository plannerRepository;
 
     @Autowired
+    private PlannerSeeds plannerSeeds;
+
+    @Autowired
     private EntityManager entityManager;
 
     @Autowired
@@ -60,7 +64,7 @@ class PlannerAuthorJoinIT extends SharedMySqlContainerSupport {
     @Test
     void findPublishedAggregate_WhenPublished_ReadsAuthorInOneStatement() {
         User author = newUser();
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, author, true);
 
         Counted<Optional<PublishedPlannerRow>> read =
                 counted(() -> plannerRepository.findPublishedAggregate(planner.id()));
@@ -75,7 +79,7 @@ class PlannerAuthorJoinIT extends SharedMySqlContainerSupport {
     @Test
     void findPublishedAggregate_WhenAuthorDeactivated_ReturnsEmpty() {
         User author = newUser();
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, author, true);
         deactivate(author);
 
         assertThat(counted(() -> plannerRepository.findPublishedAggregate(planner.id())).value()).isEmpty();
@@ -84,7 +88,7 @@ class PlannerAuthorJoinIT extends SharedMySqlContainerSupport {
     @Test
     void existsPublishedById_WhenAuthorDeactivated_TurnsFalseInOneStatement() {
         User author = newUser();
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, author, true);
 
         Counted<Boolean> active = counted(() -> plannerRepository.existsPublishedById(planner.id()));
         deactivate(author);
@@ -99,7 +103,7 @@ class PlannerAuthorJoinIT extends SharedMySqlContainerSupport {
     @Test
     void findThread_WhenOwnerDeactivated_ReportsItInOneStatement() {
         User owner = newUser();
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
 
         Counted<Optional<PlannerThread>> active = counted(() -> plannerRepository.findThread(planner.id()));
         deactivate(owner);
@@ -116,7 +120,7 @@ class PlannerAuthorJoinIT extends SharedMySqlContainerSupport {
     void visibility_WhenReadForEachPublicationAndAuthorState_IsShownOnlyForAPublishedLiveAuthor(
             boolean published, boolean authorDeactivated, Visibility expected) {
         User owner = newUser();
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, published);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, published);
         if (authorDeactivated) {
             deactivate(owner);
         }
@@ -131,7 +135,7 @@ class PlannerAuthorJoinIT extends SharedMySqlContainerSupport {
         User owner = newUser();
         StoredPlanner planner = TestDataFactory.planner(owner).published(true)
                 .selectedKeywords(java.util.Set.of("Burst")).deviceId(UUID.randomUUID())
-                .save(plannerRepository);
+                .save(plannerSeeds);
 
         StoredPlanner read = plannerRepository.findAggregate(planner.id()).orElseThrow();
 
@@ -144,7 +148,7 @@ class PlannerAuthorJoinIT extends SharedMySqlContainerSupport {
     @Test
     void insert_WhenSavedWithUserId_StoresItAndOwnerQueriesFindIt() {
         User owner = newUser();
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
 
         assertThat(jdbcTemplate.queryForObject(
                 "SELECT user_id FROM planner WHERE id = UUID_TO_BIN(?)", Long.class, planner.id().toString()))

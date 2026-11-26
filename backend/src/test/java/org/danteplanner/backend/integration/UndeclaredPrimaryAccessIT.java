@@ -12,7 +12,7 @@ import javax.sql.DataSource;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -60,7 +60,7 @@ class UndeclaredPrimaryAccessIT extends SharedRoutingSupport {
     private ModerationAuditService moderationAuditService;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @LocalServerPort
     private int port;
@@ -72,7 +72,7 @@ class UndeclaredPrimaryAccessIT extends SharedRoutingSupport {
         User owner = TestDataFactory.createTestUser(userRepository, "undeclared-primary-owner@example.com");
         publishedPlannerId = TestDataFactory.planner(owner)
                 .published(true)
-                .save(plannerRepository)
+                .save(plannerSeeds)
                 .id();
     }
 

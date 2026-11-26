@@ -2,7 +2,7 @@ package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -50,7 +50,7 @@ class PlannerViewPurgeIT extends SharedMySqlContainerSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private UserAccountLifecycleService lifecycleService;
@@ -98,7 +98,7 @@ class PlannerViewPurgeIT extends SharedMySqlContainerSupport {
         StoredPlanner planner = TestDataFactory.planner(plannerOwner)
                 .title(title)
                 .published(true)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         viewedPlanners.add(planner.id());
         LocalDate today = LocalDate.now(ZoneOffset.UTC);
         for (int day = 0; day < days; day++) {

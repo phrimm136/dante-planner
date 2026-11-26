@@ -18,6 +18,7 @@ import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.user.api.AuthProviderType;
 import jakarta.persistence.EntityManager;
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -52,6 +53,9 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private PlannerRepository plannerRepository;
+
+    @Autowired
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerVoteRepository voteRepository;
@@ -94,7 +98,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         }
         @Test
         void foreignKey_WhenInvalidUserId_ThrowsException() {
-            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
+            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, testUser, true);
 
             assertThatThrownBy(() -> {
                 PlannerVote vote = new PlannerVote(99999L, planner.id(), VoteType.UP);
@@ -118,7 +122,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         }
         @Test
         void foreignKey_WhenInvalidUserIdInComment_ThrowsException() {
-            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
+            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, testUser, true);
 
             assertThatThrownBy(() -> inTransaction(() -> {
                 PlannerComment comment = new PlannerComment(
@@ -134,7 +138,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         }
         @Test
         void foreignKey_WhenCascadeDelete_DeletesChildVotes() {
-            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
+            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, testUser, true);
 
             PlannerVote vote = new PlannerVote(testUser.getId(), planner.id(), VoteType.UP);
             voteRepository.save(vote);
@@ -149,7 +153,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         }
         @Test
         void foreignKey_WhenCascadeDelete_DeletesChildComments() {
-            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
+            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, testUser, true);
 
             PlannerComment comment = new PlannerComment(
                     planner.id(),
@@ -186,7 +190,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
 
         @Test
         void uniqueConstraint_WhenDuplicateVote_ThrowsException() {
-            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
+            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, testUser, true);
 
             PlannerVote vote1 = new PlannerVote(testUser.getId(), planner.id(), VoteType.UP);
             voteRepository.save(vote1);
@@ -203,7 +207,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
 
         @Test
         void uniqueConstraint_WhenDifferentUserSamePlanner_Allowed() {
-            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
+            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, testUser, true);
             User otherUser = TestDataFactory.createTestUser(userRepository, "other@example.com");
 
             PlannerVote vote1 = new PlannerVote(testUser.getId(), planner.id(), VoteType.UP);
@@ -218,8 +222,8 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
 
         @Test
         void uniqueConstraint_WhenSameUserDifferentPlanner_Allowed() {
-            StoredPlanner planner1 = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
-            StoredPlanner planner2 = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
+            StoredPlanner planner1 = TestDataFactory.createTestPlanner(plannerSeeds, testUser, true);
+            StoredPlanner planner2 = TestDataFactory.createTestPlanner(plannerSeeds, testUser, true);
 
             PlannerVote vote1 = new PlannerVote(testUser.getId(), planner1.id(), VoteType.UP);
             PlannerVote vote2 = new PlannerVote(testUser.getId(), planner2.id(), VoteType.UP);
@@ -295,7 +299,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         void notNullConstraint_WhenMissingTitle_ThrowsException() {
             assertThatThrownBy(() -> inTransaction(() -> {
                 StoredPlanner planner = TestDataFactory.planner(testUser).title(null).build();
-                PlannerRows.insert(plannerRepository, planner);
+                PlannerRows.insert(plannerSeeds, planner);
                 entityManager.flush();
             })).satisfiesAnyOf(
                     e -> assertThat(e).isInstanceOf(DataIntegrityViolationException.class),
@@ -307,7 +311,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         void notNullConstraint_WhenMissingOwner_ThrowsException() {
             assertThatThrownBy(() -> inTransaction(() -> {
                 StoredPlanner planner = TestDataFactory.planner(testUser).ownerId(null).build();
-                PlannerRows.insert(plannerRepository, planner);
+                PlannerRows.insert(plannerSeeds, planner);
                 entityManager.flush();
             })).satisfiesAnyOf(
                     e -> assertThat(e).isInstanceOf(DataIntegrityViolationException.class),
@@ -317,7 +321,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
 
         @Test
         void notNullConstraint_WhenMissingCommentContent_ThrowsException() {
-            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
+            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, testUser, true);
 
             assertThatThrownBy(() -> inTransaction(() -> {
                 PlannerComment comment = commentRepository.save(new PlannerComment(
@@ -371,13 +375,13 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         void notNullConstraint_WhenEmptyStringAllowed_NullForbidden() {
             StoredPlanner planner1 = TestDataFactory.planner(testUser).title("").build();
             assertThatNoException().isThrownBy(() -> inTransaction(() -> {
-                PlannerRows.insert(plannerRepository, planner1);
+                PlannerRows.insert(plannerSeeds, planner1);
                 entityManager.flush();
             }));
 
             assertThatThrownBy(() -> inTransaction(() -> {
                 StoredPlanner planner2 = TestDataFactory.planner(testUser).title(null).build();
-                PlannerRows.insert(plannerRepository, planner2);
+                PlannerRows.insert(plannerSeeds, planner2);
                 entityManager.flush();
             })).satisfiesAnyOf(
                     e -> assertThat(e).isInstanceOf(DataIntegrityViolationException.class),
@@ -388,7 +392,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         @Test
         void notNullConstraint_WhenDefaultValueApplied_PublishedFalse() {
             StoredPlanner planner = TestDataFactory.planner(testUser).build();
-            PlannerRows.insert(plannerRepository, planner);
+            PlannerRows.insert(plannerSeeds, planner);
 
             StoredPlanner saved = plannerRepository.findAggregate(planner.id()).orElseThrow();
             assertThat(saved.publication().isPublished()).isFalse();
@@ -397,7 +401,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
         @Test
         void notNullConstraint_WhenDefaultValueApplied_UpvotesZero() {
             StoredPlanner planner = TestDataFactory.planner(testUser).build();
-            PlannerRows.insert(plannerRepository, planner);
+            PlannerRows.insert(plannerSeeds, planner);
             statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
 
             PlannerStats saved = statsRepository.findById(planner.id()).orElseThrow();

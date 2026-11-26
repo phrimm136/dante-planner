@@ -29,6 +29,7 @@ import org.testcontainers.toxiproxy.ToxiproxyContainer;
 import org.danteplanner.backend.shared.redis.RedisRole;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 import org.danteplanner.backend.support.Hang;
+import org.danteplanner.backend.support.PlannerSeeds;
 
 
 /**
@@ -41,7 +42,7 @@ import org.danteplanner.backend.support.Hang;
  * the harness exposes the primary and replica as qualified {@link JdbcTemplate} beans and hands
  * both to {@link ReplicationControl}.</p>
  */
-@Import(CausalHarnessSupport.HarnessDataSourceConfig.class)
+@Import({CausalHarnessSupport.HarnessDataSourceConfig.class, PlannerSeeds.Config.class})
 @ResourceLock(CausalHarnessSupport.SHARED_HARNESS)
 abstract class CausalHarnessSupport {
 

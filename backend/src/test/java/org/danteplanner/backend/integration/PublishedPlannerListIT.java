@@ -10,11 +10,11 @@ import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -59,7 +59,7 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
 
     @Autowired
@@ -110,16 +110,16 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
 
     @Test
     void list_WhenSeeded_ShowsOnlyPublished() throws Exception {
-        StoredPlanner p1 = base("P1").published(true).save(plannerRepository);
+        StoredPlanner p1 = base("P1").published(true).save(plannerSeeds);
         TestDataFactory.addToCatalog(catalogService, p1);
 
-        StoredPlanner p2 = base("P2").published(true).save(plannerRepository);
+        StoredPlanner p2 = base("P2").published(true).save(plannerSeeds);
         plannerTarget.takeDown(p2.id());
 
-        StoredPlanner p3 = base("P3").published(true).save(plannerRepository);
+        StoredPlanner p3 = base("P3").published(true).save(plannerSeeds);
         PlannerContentRows.markDeleted(jdbcTemplate, p3.id());
 
-        base("P4").published(false).save(plannerRepository);
+        base("P4").published(false).save(plannerSeeds);
 
         mockMvc.perform(get("/api/planner/md/published").param("q", marker))
                 .andExpect(status().isOk())
@@ -133,7 +133,7 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
                 .published(true)
                 .selectedKeywords(Set.of("Burst", "Sinking"))
                 .build();
-        p = PlannerRows.insert(plannerRepository, p);
+        p = PlannerRows.insert(plannerSeeds, p);
         plannerStatsRepository.save(PlannerStats.builder()
                 .plannerId(p.id())
                 .upvotes(7)
@@ -157,7 +157,7 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
     }
 
     private StoredPlanner listed(String title, String category, Set<String> keywords) {
-        StoredPlanner planner = base(title).category(category).selectedKeywords(keywords).published(true).save(plannerRepository);
+        StoredPlanner planner = base(title).category(category).selectedKeywords(keywords).published(true).save(plannerSeeds);
         TestDataFactory.addToCatalog(catalogService, planner);
         return planner;
     }

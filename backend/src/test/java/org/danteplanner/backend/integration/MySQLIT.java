@@ -23,6 +23,7 @@ import jakarta.persistence.EntityManager;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -65,6 +66,9 @@ class MySQLIT extends SharedMySqlContainerSupport {
     private PlannerRepository plannerRepository;
 
     @Autowired
+    private PlannerSeeds plannerSeeds;
+
+    @Autowired
     private PlannerVoteRepository voteRepository;
 
     @Autowired
@@ -96,7 +100,7 @@ class MySQLIT extends SharedMySqlContainerSupport {
         // Clean up in dependency order (no sentinel user needed for these tests)
 
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
-        testPlanner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
+        testPlanner = TestDataFactory.createTestPlanner(plannerSeeds, testUser, true);
     }
 
     @Nested
@@ -307,7 +311,7 @@ class MySQLIT extends SharedMySqlContainerSupport {
         void plannerStatus_WhenSaved_RoundTripsThroughEnumColumn() {
             StoredPlanner planner = TestDataFactory.planner(testUser)
                     .status(PlannerStatus.SAVED)
-                    .save(plannerRepository);
+                    .save(plannerSeeds);
 
             String hexId = planner.id().toString().replace("-", "");
             String rawColumn = (String) entityManager.createNativeQuery(
@@ -329,7 +333,7 @@ class MySQLIT extends SharedMySqlContainerSupport {
             User leaving = TestDataFactory.createTestUser(userRepository, "leaving@example.com");
             User sentinel = TestDataFactory.createTestUser(userRepository, "sentinel@example.com");
             StoredPlanner sharedPlanner = testPlanner;
-            StoredPlanner soloPlanner = TestDataFactory.createTestPlanner(plannerRepository, leaving, true);
+            StoredPlanner soloPlanner = TestDataFactory.createTestPlanner(plannerSeeds, leaving, true);
 
             // Sentinel and the leaving user both voted on sharedPlanner -> collision on (user_id, planner_id).
             // The leaving user also voted on soloPlanner -> must be reassigned cleanly.
@@ -414,7 +418,7 @@ class MySQLIT extends SharedMySqlContainerSupport {
             // is why it lives in the containerized tier.
             StoredPlanner planner = TestDataFactory.planner(testUser)
                     .selectedKeywords(new HashSet<>(PlannerKeywords.VALID_KEYWORDS))
-                    .save(plannerRepository);
+                    .save(plannerSeeds);
 
             // No surrounding @Transactional: save commits in its own session, so this
             // findById re-reads from the DB and exercises the converter's read path.

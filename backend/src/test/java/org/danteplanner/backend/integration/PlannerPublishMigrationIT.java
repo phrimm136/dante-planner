@@ -23,6 +23,7 @@ import org.danteplanner.backend.planner.gamedata.GameDataRegistry;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -44,6 +45,9 @@ class PlannerPublishMigrationIT extends ExclusiveDatabaseSupport {
 
     @Autowired
     private PlannerRepository plannerRepository;
+
+    @Autowired
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private JwtTokenService jwtTokenService;
@@ -98,7 +102,7 @@ class PlannerPublishMigrationIT extends ExclusiveDatabaseSupport {
         String stored = TestDataFactory.VALID_CONTENT.replace(
                 "\"observationGiftIds\":[]", "\"observationGiftIds\":[\"19247\"]");
         StoredPlanner planner = TestDataFactory.planner(owner).published(false).content(stored)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         long version = planner.content().syncVersion();
 
         String body = mockMvc.perform(post("/api/planner/md/{id}/publish", planner.id())

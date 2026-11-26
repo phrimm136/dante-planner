@@ -16,7 +16,6 @@ import org.danteplanner.backend.comment.dto.CreateCommentResponse;
 import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.sse.SseChannel;
 import org.danteplanner.backend.shared.sse.SseChannelSender;
@@ -25,6 +24,7 @@ import org.danteplanner.backend.shared.sse.SseService;
 import org.danteplanner.backend.shared.sse.SuspensionType;
 import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.Hang;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.SseStream;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
@@ -87,7 +87,7 @@ class SseFanoutIT extends CausalHarnessSupport {
     private CommentCommandService commentCommandService;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private UserRepository userRepository;
@@ -187,7 +187,7 @@ class SseFanoutIT extends CausalHarnessSupport {
     @Test
     void commentFanout_WhenPublishedOnPrimary_DeliveredToCommentSubscribersWithPayload() {
         User owner = user("sse-comment-fanout-owner");
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
         String commentId = "comment-" + UUID.randomUUID();
         Map<String, Object> payload = Map.of("commentId", commentId, "body", "nice deck");
 
@@ -201,7 +201,7 @@ class SseFanoutIT extends CausalHarnessSupport {
     @Test
     void createComment_WhenWritePathRuns_FansOutToEverySubscriberButTheCommenter() {
         User owner = user("sse-comment-owner");
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
         User commenter = user("sse-comment");
         User markerAuthor = user("sse-comment-marker");
         UUID plannerId = planner.id();

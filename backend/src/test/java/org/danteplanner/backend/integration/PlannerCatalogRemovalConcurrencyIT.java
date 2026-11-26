@@ -30,12 +30,12 @@ import org.danteplanner.backend.planner.api.PlannerNotFoundException;
 import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerContentRepository;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.danteplanner.backend.support.Hang;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.support.TransactionSpans;
 import org.danteplanner.backend.support.TransactionSpans.Span;
@@ -61,7 +61,7 @@ class PlannerCatalogRemovalConcurrencyIT extends ExclusiveDatabaseSupport {
             """;
 
     @Autowired private UserRepository userRepository;
-    @Autowired private PlannerRepository plannerRepository;
+    @Autowired private PlannerSeeds plannerSeeds;
     @Autowired private PlannerContentRepository contentRepository;
     @Autowired private PlannerStatsRepository statsRepository;
     @Autowired private PlannerCatalogRepository catalogRepository;
@@ -226,7 +226,7 @@ class PlannerCatalogRemovalConcurrencyIT extends ExclusiveDatabaseSupport {
     private Round seed() {
         User owner = TestDataFactory.createTestUser(userRepository, "removal-owner@example.com");
         UUID plannerId = TestDataFactory.planner(owner)
-                .savePublished(plannerRepository, statsRepository, catalogService)
+                .savePublished(plannerSeeds, statsRepository, catalogService)
                 .id();
         return new Round(owner, plannerId);
     }

@@ -48,7 +48,6 @@ import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.LoginRedirect;
@@ -67,6 +66,7 @@ import org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter;
 import org.danteplanner.backend.shared.security.CsrfTokenService;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.support.Hang;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.RedisEndpoints;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -120,7 +120,7 @@ class RedisRoleRequestPathIT extends ReplicaRoutingHarnessSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private JwtTokenService jwtTokenService;
@@ -295,7 +295,7 @@ class RedisRoleRequestPathIT extends ReplicaRoutingHarnessSupport {
             throws IOException {
         User user = TestDataFactory.createTestUser(userRepository, "role-both-open@example.com");
         String token = TestDataFactory.generateAccessToken(jwtTokenService, user);
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, user, false);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, user, false);
         replicationControl.awaitCaughtUp();
         awaitAvailable(RedisRole.AUTH_LOCAL, RedisRole.AUTH);
 

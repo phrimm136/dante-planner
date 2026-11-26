@@ -23,11 +23,11 @@ import org.junit.jupiter.api.Test;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.exception.VoteAlreadyExistsException;
 import org.danteplanner.backend.planner.entity.VoteType;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.danteplanner.backend.support.Hang;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -43,7 +43,7 @@ class PlannerVoteRaceIT extends SharedMySqlContainerSupport {
     private static final int ROUNDS = 20;
 
     @Autowired private UserRepository userRepository;
-    @Autowired private PlannerRepository plannerRepository;
+    @Autowired private PlannerSeeds plannerSeeds;
     @Autowired private PlannerStatsRepository statsRepository;
     @Autowired private PlannerCatalogService catalogService;
     @Autowired private PlannerEngagementService engagementService;
@@ -70,7 +70,7 @@ class PlannerVoteRaceIT extends SharedMySqlContainerSupport {
     @Test
     void castVote_WhenOneUserVotesTwiceAtOnce_StoresOneVoteCountsOneAndRefusesTheOther() throws Exception {
         for (int round = 0; round < ROUNDS; round++) {
-            UUID planner = TestDataFactory.planner(author).savePublished(plannerRepository, statsRepository,
+            UUID planner = TestDataFactory.planner(author).savePublished(plannerSeeds, statsRepository,
                     catalogService).id();
 
             assertThat(twiceAtOnce(planner)).singleElement().isInstanceOf(VoteAlreadyExistsException.class);

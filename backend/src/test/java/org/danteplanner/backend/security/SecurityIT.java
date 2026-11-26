@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -45,7 +45,7 @@ class SecurityIT extends SharedMySqlContainerSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private JwtTokenService jwtTokenService;
@@ -148,7 +148,7 @@ class SecurityIT extends SharedMySqlContainerSupport {
 
         @Test
         void adminEndpoint_WhenRegularUser_Returns403() throws Exception {
-            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
+            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, regularUser, true);
 
             mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", planner.id()).with(withCsrf())
                             .cookie(regularUserCookie())
@@ -159,7 +159,7 @@ class SecurityIT extends SharedMySqlContainerSupport {
 
         @Test
         void adminEndpoint_WhenAdminUser_Returns200() throws Exception {
-            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
+            StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, regularUser, true);
 
             mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", planner.id()).with(withCsrf())
                             .cookie(adminCookie())

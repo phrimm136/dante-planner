@@ -30,6 +30,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import org.danteplanner.backend.shared.failure.Option;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.StoredComments;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
@@ -40,7 +41,6 @@ import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.planner.dto.PlannerBatchRequest;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.freshness.DispatchStamp;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessReadGuard;
@@ -153,7 +153,7 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
     private DispatchStamp dispatchStamp;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerCommentRepository commentRepository;
@@ -769,7 +769,7 @@ class FreshnessReadIT extends ReplicaRoutingHarnessSupport {
                 + "@example.com");
         User commenter = TestDataFactory.createTestUser(userRepository, "freshness-read-inbox-commenter-"
                 + UUID.randomUUID() + "@example.com");
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
         PlannerComment comment = StoredComments.save(commentRepository, primaryJdbcTemplate,
                 new PlannerComment(planner.id(), commenter.getId(), null, 0), "freshness read inbox");
         long eventId = recordCommentReceived(planner.id(), comment.getId());

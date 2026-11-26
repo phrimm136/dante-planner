@@ -13,12 +13,12 @@ import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.entity.VoteType;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -52,7 +52,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
 
     @Autowired
@@ -86,7 +86,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
         adminUser = TestDataFactory.createAdmin(userRepository, "admin@example.com");
         moderatorUser = TestDataFactory.createModerator(userRepository, "mod@example.com");
 
-        testPlanner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
+        testPlanner = TestDataFactory.createTestPlanner(plannerSeeds, regularUser, true);
 
         regularUserToken = TestDataFactory.generateAccessToken(jwtTokenService, regularUser);
         adminToken = TestDataFactory.generateAccessToken(jwtTokenService, adminUser);

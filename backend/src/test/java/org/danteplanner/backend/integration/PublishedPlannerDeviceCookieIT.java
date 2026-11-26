@@ -18,8 +18,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.util.CookieConstants;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -49,7 +49,7 @@ class PublishedPlannerDeviceCookieIT extends SharedMySqlContainerSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private ProxyManager<byte[]> proxyManager;
@@ -59,7 +59,7 @@ class PublishedPlannerDeviceCookieIT extends SharedMySqlContainerSupport {
     @BeforeEach
     void setUp() {
         User owner = TestDataFactory.createTestUser(userRepository, "device-cookie-owner@example.com");
-        plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, true).id();
+        plannerId = TestDataFactory.createTestPlanner(plannerSeeds, owner, true).id();
     }
 
     private static List<String> deviceIdCookies(MockHttpServletResponse response) {

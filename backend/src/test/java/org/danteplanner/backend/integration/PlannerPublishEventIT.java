@@ -6,8 +6,8 @@ import java.util.UUID;
 import tools.jackson.databind.ObjectMapper;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.SseTopicRecorder;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -42,7 +42,7 @@ class PlannerPublishEventIT extends SharedMySqlContainerSupport {
     private PlannerPublishingService plannerPublishingService;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private UserRepository userRepository;
@@ -65,7 +65,7 @@ class PlannerPublishEventIT extends SharedMySqlContainerSupport {
     void setUp() {
         recorder = SseTopicRecorder.open(sseConnectionFactory, objectMapper);
         owner = TestDataFactory.createTestUser(userRepository, "publisher@example.com");
-        plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, false).id();
+        plannerId = TestDataFactory.createTestPlanner(plannerSeeds, owner, false).id();
     }
 
     @AfterEach

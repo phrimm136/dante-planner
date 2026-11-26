@@ -18,6 +18,7 @@ import org.danteplanner.backend.moderation.service.PlannerModerationService;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -43,6 +44,9 @@ class PlannerModerationServiceIT extends SharedMySqlContainerSupport {
     @Autowired
     private PlannerRepository plannerRepository;
 
+    @Autowired
+    private PlannerSeeds plannerSeeds;
+
     private User owner;
     private User moderator;
     private User admin;
@@ -60,7 +64,7 @@ class PlannerModerationServiceIT extends SharedMySqlContainerSupport {
 
     @Test
     void unpublishPlanner_WhenModeratorUnpublishes_Succeeds() {
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
 
         ModeratedPlanner result = moderationService.unpublishPlanner(moderator.getId(), planner.id());
 
@@ -72,7 +76,7 @@ class PlannerModerationServiceIT extends SharedMySqlContainerSupport {
 
     @Test
     void unpublishPlanner_WhenAdminUnpublishes_Succeeds() {
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
 
         ModeratedPlanner result = moderationService.unpublishPlanner(admin.getId(), planner.id());
 
@@ -82,7 +86,7 @@ class PlannerModerationServiceIT extends SharedMySqlContainerSupport {
 
     @Test
     void unpublishPlanner_WhenAlreadyUnpublished_Succeeds() {
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, false);
 
         ModeratedPlanner result = moderationService.unpublishPlanner(moderator.getId(), planner.id());
 
@@ -100,7 +104,7 @@ class PlannerModerationServiceIT extends SharedMySqlContainerSupport {
 
     @Test
     void unpublishPlanner_WhenDeletedPlanner_ThrowsPlannerNotFoundException() {
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, owner, true);
         plannerCommandService.deletePlanner(owner.getId(), planner.id());
 
         assertRejected(() -> moderationService.unpublishPlanner(moderator.getId(), planner.id()))

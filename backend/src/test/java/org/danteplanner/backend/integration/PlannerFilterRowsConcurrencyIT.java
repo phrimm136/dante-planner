@@ -4,7 +4,6 @@ import tools.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.searchindex.PlannerContentEntityExtractor;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
@@ -12,6 +11,7 @@ import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.danteplanner.backend.support.FilterRowsSync;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.support.LockWaits;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TransactionSpans;
 import org.danteplanner.backend.support.TransactionSpans.Span;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -58,7 +58,7 @@ class PlannerFilterRowsConcurrencyIT extends ExclusiveDatabaseSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private PlannerStatsRepository statsRepository;
@@ -251,7 +251,7 @@ class PlannerFilterRowsConcurrencyIT extends ExclusiveDatabaseSupport {
                 .id(id)
                 .selectedKeywords(Set.of("Sinking", "Combustion"))
                 .published(published)
-                .save(plannerRepository);
+                .save(plannerSeeds);
         statsRepository.save(PlannerStats.builder().plannerId(planner.id()).build());
         return planner.id();
     }

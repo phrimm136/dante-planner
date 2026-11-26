@@ -17,8 +17,8 @@ import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.moderation.service.UserModerationService;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.AuthCookies;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -43,7 +43,7 @@ class RestrictionReadsThePrimaryIT extends ReplicaRoutingHarnessSupport {
     private UserRepository userRepository;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private UserModerationService userModerationService;
@@ -60,7 +60,7 @@ class RestrictionReadsThePrimaryIT extends ReplicaRoutingHarnessSupport {
         User author = TestDataFactory.createTestUser(userRepository, "restriction-primary-author@example.com");
         User admin = TestDataFactory.createAdmin(userRepository, "restriction-primary-admin@example.com");
         User reader = TestDataFactory.createTestUser(userRepository, "restriction-primary-reader@example.com");
-        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+        StoredPlanner planner = TestDataFactory.createTestPlanner(plannerSeeds, author, true);
         replicationControl.awaitCaughtUp();
 
         try {

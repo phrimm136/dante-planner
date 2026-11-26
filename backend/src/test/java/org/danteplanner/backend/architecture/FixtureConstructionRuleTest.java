@@ -35,6 +35,12 @@ class FixtureConstructionRuleTest {
                 .hasMessageContaining(PlannerConstructorFixture.class.getName()
                         + ".content() constructs org.danteplanner.backend.planner.entity.PlannerContent;"
                         + " use TestDataFactory or UpsertRequests")
+                .hasMessageContaining(PlannerConstructorFixture.class.getName()
+                        + ".publication() constructs org.danteplanner.backend.planner.entity.PlannerPublication;"
+                        + " use TestDataFactory or UpsertRequests")
+                .hasMessageContaining(PlannerConstructorFixture.class.getName()
+                        + ".moderation() constructs org.danteplanner.backend.planner.entity.PlannerModeration;"
+                        + " use TestDataFactory or UpsertRequests")
                 .hasMessageContaining(UpsertRequestFixture.class.getName()
                         + ".request() constructs org.danteplanner.backend.planner.dto.UpsertPlannerRequest;"
                         + " use TestDataFactory or UpsertRequests");

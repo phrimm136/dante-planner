@@ -12,6 +12,7 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.StoredPlanner;
 import org.danteplanner.backend.planner.repository.StoredPlanner.StoredContent;
 import org.danteplanner.backend.support.PlannerContentRows;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -50,6 +51,9 @@ class PlannerContentWriteIT extends SharedMySqlContainerSupport {
     private PlannerRepository plannerRepository;
 
     @Autowired
+    private PlannerSeeds plannerSeeds;
+
+    @Autowired
     private PlannerContentRepository contentRepository;
 
     @Autowired
@@ -66,7 +70,7 @@ class PlannerContentWriteIT extends SharedMySqlContainerSupport {
     @BeforeEach
     void setUp() {
         User owner = TestDataFactory.createTestUser(userRepository, "content-write@example.com");
-        planner = TestDataFactory.planner(owner).syncVersion(3).save(plannerRepository);
+        planner = TestDataFactory.planner(owner).syncVersion(3).save(plannerSeeds);
     }
 
     private ContentWrite renamed(long syncVersion) {

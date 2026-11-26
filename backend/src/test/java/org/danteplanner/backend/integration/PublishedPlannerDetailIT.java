@@ -2,10 +2,10 @@ package org.danteplanner.backend.integration;
 
 import tools.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.Hang;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.support.PlannerSeeds;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ class PublishedPlannerDetailIT extends ExclusiveDatabaseSupport {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private PlannerRepository plannerRepository;
+    private PlannerSeeds plannerSeeds;
 
     @Autowired
     private EntityManager entityManager;
@@ -53,7 +53,7 @@ class PublishedPlannerDetailIT extends ExclusiveDatabaseSupport {
     @BeforeEach
     void setUp() {
         User owner = TestDataFactory.createTestUser(userRepository, "detail-owner@example.com");
-        plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, true).id();
+        plannerId = TestDataFactory.createTestPlanner(plannerSeeds, owner, true).id();
     }
 
     private int detailViewCount() throws Exception {
