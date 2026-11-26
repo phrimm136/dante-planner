@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 
 import org.jspecify.annotations.Nullable;
 
+import org.danteplanner.backend.planner.dto.CatalogQuery.Shelf;
 import org.danteplanner.backend.planner.dto.CatalogQuery.TextFilter;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
 import org.danteplanner.backend.shared.util.PageWindow;
@@ -24,8 +25,8 @@ public record PublishedListParams(
         @Nullable String gift,
         @Nullable String themePack) {
 
-    public CatalogQuery catalogQuery(boolean recommendedOnly) {
-        return new CatalogQuery(recommendedOnly, TextFilter.exactly(category), TextFilter.nonBlank(q),
+    public CatalogQuery catalogQuery(Shelf shelf) {
+        return new CatalogQuery(shelf, TextFilter.exactly(category), TextFilter.nonBlank(q),
                 parseCsv(keyword), entityFilters());
     }
 

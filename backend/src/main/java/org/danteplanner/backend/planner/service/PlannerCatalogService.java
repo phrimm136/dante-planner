@@ -147,7 +147,7 @@ public class PlannerCatalogService implements AccountLifecycleParticipant {
     public void add(Planner planner, Publication.Published publication, Listing listing) {
         boolean recommended = RecommendedSql.isRecommended(
                 statsRepository.upvotesOf(planner.getId()),
-                listing.isHidden(),
+                listing,
                 recommendedThreshold);
         catalogRepository.insert(PlannerCatalog.builder()
                 .plannerId(planner.getId())

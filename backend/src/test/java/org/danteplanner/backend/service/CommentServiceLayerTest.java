@@ -1,4 +1,5 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.shared.dto.NotificationSetting;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclaration;
 import org.danteplanner.backend.comment.dto.ToggleNotificationResponse;
@@ -19,7 +20,6 @@ import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.comment.service.CommentEngagementService;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.comment.validation.CommentAccessValidator;
-import org.danteplanner.backend.planner.precondition.VoteUniquenessValidator;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
@@ -129,7 +129,7 @@ class CommentServiceLayerTest {
                 Clock.systemUTC());
         engagementService = new CommentEngagementService(
                 contentRepository, statsRepository, commentVoteRepository, queryService,
-                null, new VoteUniquenessValidator());
+                null);
 
         testUser = TestDataFactory.unsavedUser(UserRole.NORMAL);
 
@@ -566,7 +566,7 @@ class CommentServiceLayerTest {
             CommentRow comment = CommentRows.live(100L, commentPublicId, plannerId, testUser.getId(), "text", null, 0);
             when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(comment));
 
-            assertRejected(() -> engagementService.toggleNotification(commentPublicId, otherUser.getId(), false))
+            assertRejected(() -> engagementService.toggleNotification(commentPublicId, otherUser.getId(), NotificationSetting.OFF))
                     .withCode("COMMENT_FORBIDDEN")
                     .satisfies(rejection -> assertThat(rejection.getMessage())
                             .isEqualTo("Only the author can toggle notification settings"));
@@ -580,10 +580,10 @@ class CommentServiceLayerTest {
                     CommentRows.live(100L, commentPublicId, plannerId, testUser.getId(), "text", null, 0),
                     Instant.now());
             when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(comment));
-            when(contentRepository.disableAuthorNotifications(100L)).thenReturn(1);
+            when(contentRepository.setAuthorNotifications(100L, false)).thenReturn(1);
 
             List<ILoggingEvent> logged = LogCapture.during(
-                    () -> engagementService.toggleNotification(commentPublicId, testUser.getId(), false),
+                    () -> engagementService.toggleNotification(commentPublicId, testUser.getId(), NotificationSetting.OFF),
                     Level.INFO, CommentEngagementService.class);
 
             assertThat(logged).extracting(ILoggingEvent::getFormattedMessage).containsExactly(
@@ -595,9 +595,9 @@ class CommentServiceLayerTest {
             UUID commentPublicId = UUID.randomUUID();
             when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(
                     CommentRows.live(100L, commentPublicId, plannerId, testUser.getId(), "text", null, 0)));
-            when(contentRepository.enableAuthorNotifications(100L)).thenReturn(1);
+            when(contentRepository.setAuthorNotifications(100L, true)).thenReturn(1);
 
-            assertThat(engagementService.toggleNotification(commentPublicId, testUser.getId(), true))
+            assertThat(engagementService.toggleNotification(commentPublicId, testUser.getId(), NotificationSetting.ON))
                     .isEqualTo(new ToggleNotificationResponse(true));
         }
 
@@ -606,9 +606,9 @@ class CommentServiceLayerTest {
             UUID commentPublicId = UUID.randomUUID();
             when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(
                     CommentRows.live(100L, commentPublicId, plannerId, testUser.getId(), "text", null, 0)));
-            when(contentRepository.disableAuthorNotifications(100L)).thenReturn(0);
+            when(contentRepository.setAuthorNotifications(100L, false)).thenReturn(0);
 
-            assertRejected(() -> engagementService.toggleNotification(commentPublicId, testUser.getId(), false))
+            assertRejected(() -> engagementService.toggleNotification(commentPublicId, testUser.getId(), NotificationSetting.OFF))
                     .withCode("COMMENT_NOT_FOUND");
         }
     }

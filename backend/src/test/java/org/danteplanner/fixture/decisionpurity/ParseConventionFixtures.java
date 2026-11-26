@@ -13,6 +13,8 @@ import lombok.Setter;
 import org.danteplanner.backend.shared.failure.Parsed;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 final class ParseConventionFixtures {
 
@@ -213,6 +215,17 @@ final class ParseConventionFixtures {
     }
 
     record FlagRecord(boolean enabled) {
+    }
+
+    @RestController
+    static final class FlagController {
+
+        public Grade boundRequestFlag(@RequestParam(defaultValue = "false") boolean weighted) {
+            return weighted ? Grade.WITH_BODY : Grade.PLAIN;
+        }
+
+        public void unboundFlag(boolean flag) {
+        }
     }
 
     static final class LibraryFuture extends CompletableFuture<String> {

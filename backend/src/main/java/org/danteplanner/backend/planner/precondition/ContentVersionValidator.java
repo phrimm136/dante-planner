@@ -1,9 +1,6 @@
 package org.danteplanner.backend.planner.precondition;
 
-import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 import lombok.extern.slf4j.Slf4j;
@@ -24,37 +21,22 @@ public class ContentVersionValidator {
 
     private record VersionRule(Function<PlannerVersions, List<Integer>> forCreate, String displayName) {}
 
+    private static final VersionRule MIRROR_DUNGEON =
+            new VersionRule(versions -> List.of(versions.mdCurrentVersion()), "Mirror Dungeon");
+    private static final VersionRule REFRACTED_RAILWAY =
+            new VersionRule(PlannerVersions::rrAvailableVersions, "Refracted Railway");
+
     private final GameDataRegistry gameDataRegistry;
-    private final Map<PlannerType, VersionRule> rules;
 
     public ContentVersionValidator(GameDataRegistry gameDataRegistry) {
         this.gameDataRegistry = gameDataRegistry;
-
-        Map<PlannerType, VersionRule> byType = new EnumMap<>(PlannerType.class);
-        byType.put(PlannerType.MIRROR_DUNGEON,
-                new VersionRule(versions -> List.of(versions.mdCurrentVersion()), "Mirror Dungeon"));
-        byType.put(PlannerType.REFRACTED_RAILWAY,
-                new VersionRule(PlannerVersions::rrAvailableVersions, "Refracted Railway"));
-        this.rules = Map.copyOf(byType);
-
-        requireEveryTypeCovered();
     }
 
-    private void requireEveryTypeCovered() {
-        List<PlannerType> uncovered = Arrays.stream(PlannerType.values())
-                .filter(type -> !rules.containsKey(type))
-                .toList();
-        if (!uncovered.isEmpty()) {
-            throw new IllegalStateException("No content version rule for planner type(s): " + uncovered);
-        }
-    }
-
-    private VersionRule ruleFor(PlannerType plannerType) {
-        VersionRule rule = rules.get(plannerType);
-        if (rule == null) {
-            throw new IllegalStateException("No content version rule for planner type " + plannerType);
-        }
-        return rule;
+    private static VersionRule ruleFor(PlannerType plannerType) {
+        return switch (plannerType) {
+            case MIRROR_DUNGEON -> MIRROR_DUNGEON;
+            case REFRACTED_RAILWAY -> REFRACTED_RAILWAY;
+        };
     }
 
     public CreatableVersion requireCreatableVersion(PlannerType plannerType, @Nullable Integer contentVersion) {

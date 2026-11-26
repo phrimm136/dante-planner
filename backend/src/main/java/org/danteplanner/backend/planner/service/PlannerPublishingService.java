@@ -26,6 +26,7 @@ import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator.LiveOwner;
 import org.danteplanner.backend.planner.precondition.PlannerOwnershipValidator.OwnedPlanner;
 import org.danteplanner.backend.planner.precondition.PlannerPublishValidator;
+import org.danteplanner.backend.shared.dto.NotificationSetting;
 import org.danteplanner.backend.shared.failure.WriteOutcome;
 import org.danteplanner.backend.shared.freshness.FreshnessDeclarations;
 import org.danteplanner.backend.shared.freshness.FreshnessScope;
@@ -257,31 +258,17 @@ public class PlannerPublishingService {
 
 
     @Transactional
-    public ToggleOwnerNotificationsResponse toggleOwnerNotifications(Long userId, UUID plannerId, boolean enabled) {
+    public ToggleOwnerNotificationsResponse toggleOwnerNotifications(Long userId, UUID plannerId,
+            NotificationSetting setting) {
         OwnedPlanner owned = ownershipValidator.requireOwner(accessGuard.requireAggregate(plannerId), userId);
 
-        switch (write(owned.planner().getId(), OwnerNotifications.of(enabled))) {
+        switch (WriteOutcome.of(publicationRepository.setOwnerNotifications(owned.planner().getId(),
+                setting == NotificationSetting.ON))) {
             case APPLIED -> FreshnessDeclarations.declare(new FreshnessScope.Planner(plannerId));
             case NOTHING -> throw PlannerAccessGuard.absent(plannerId);
         }
 
-        log.info("User {} toggled owner notifications for planner {} to {}", userId, plannerId, enabled);
-        return new ToggleOwnerNotificationsResponse(enabled);
-    }
-
-    private WriteOutcome write(UUID plannerId, OwnerNotifications notifications) {
-        return switch (notifications) {
-            case ENABLED -> WriteOutcome.of(publicationRepository.enableOwnerNotifications(plannerId));
-            case DISABLED -> WriteOutcome.of(publicationRepository.disableOwnerNotifications(plannerId));
-        };
-    }
-
-    private enum OwnerNotifications {
-        ENABLED,
-        DISABLED;
-
-        static OwnerNotifications of(boolean enabled) {
-            return enabled ? ENABLED : DISABLED;
-        }
+        log.info("User {} set owner notifications for planner {} to {}", userId, plannerId, setting);
+        return ToggleOwnerNotificationsResponse.of(setting);
     }
 }

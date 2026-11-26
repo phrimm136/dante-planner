@@ -251,7 +251,7 @@ class AuditedTimestampIT extends SharedMySqlContainerSupport {
         clock.set(LATER);
 
         transactionTemplate.executeWithoutResult(status ->
-                publicationRepository.disableOwnerNotifications(planner.getId()));
+                publicationRepository.setOwnerNotifications(planner.getId(), false));
 
         Planner stored = plannerRepository.findById(planner.getId()).orElseThrow();
         assertThat(stored.isOwnerNotificationsEnabled()).isFalse();

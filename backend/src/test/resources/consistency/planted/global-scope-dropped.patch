@@ -1,8 +1,8 @@
 diff --git a/backend/src/main/java/org/danteplanner/backend/planner/service/PublishedPlannerQueryService.java b/backend/src/main/java/org/danteplanner/backend/planner/service/PublishedPlannerQueryService.java
 --- a/backend/src/main/java/org/danteplanner/backend/planner/service/PublishedPlannerQueryService.java
 +++ b/backend/src/main/java/org/danteplanner/backend/planner/service/PublishedPlannerQueryService.java
-@@ -162,7 +162,6 @@
-             return PublicPlannerResponse.fromCatalog(row, core, stats, upvotedIds.contains(id));
+@@ -168,7 +168,6 @@
+             return PublicPlannerResponse.fromCatalog(row, core, stats, upvote);
          });
          Set<FreshnessScope> scopes = new LinkedHashSet<>();
 -        scopes.add(new FreshnessScope.Global());

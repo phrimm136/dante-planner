@@ -7,6 +7,7 @@ import org.danteplanner.backend.planner.precondition.CatalogReadValidator;
 
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
+import org.danteplanner.backend.planner.dto.CatalogQuery.Shelf;
 import org.danteplanner.backend.planner.dto.CatalogQuery.TextFilter;
 import org.danteplanner.backend.planner.dto.PlannerCoreInfo;
 import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
@@ -14,6 +15,7 @@ import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.entity.PlannerStats;
+import org.danteplanner.backend.planner.entity.Upvote;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.VoteType;
@@ -139,7 +141,7 @@ class PublishedPlannerQueryServiceTest {
             stubCatalogPage(pageOf(pageable, catalogRow("Planner 1", false), catalogRow("Planner 2", false)));
 
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
-                    new CatalogQuery(false, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, new Viewer.Guest()).value();
+                    new CatalogQuery(Shelf.ALL_PUBLISHED, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, new Viewer.Guest()).value();
 
             assertThat(result.getTotalElements()).isEqualTo(2);
             assertThat(result.getContent().size()).isEqualTo(2);
@@ -152,7 +154,7 @@ class PublishedPlannerQueryServiceTest {
             stubCatalogPage(pageOf(pageable, inCategory));
 
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
-                    new CatalogQuery(false, TextFilter.exactly("5F"), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, new Viewer.Guest()).value();
+                    new CatalogQuery(Shelf.ALL_PUBLISHED, TextFilter.exactly("5F"), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, new Viewer.Guest()).value();
 
             assertThat(result.getTotalElements()).isEqualTo(1);
             PublicPlannerResponse card = result.getContent().get(0);
@@ -167,7 +169,7 @@ class PublishedPlannerQueryServiceTest {
             stubCatalogPage(new PageImpl<>(List.of(), pageable, 0));
 
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
-                    new CatalogQuery(false, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, new Viewer.Guest()).value();
+                    new CatalogQuery(Shelf.ALL_PUBLISHED, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, new Viewer.Guest()).value();
 
             assertThat(result.getTotalElements()).isEqualTo(0);
             assertThat(result.getContent()).isEmpty();
@@ -182,7 +184,7 @@ class PublishedPlannerQueryServiceTest {
             when(plannerStatsRepository.findAllById(List.of(row.getPlannerId()))).thenReturn(List.of());
 
             PublicPlannerResponse card = publishedQueryService.searchPlanners(
-                    new CatalogQuery(false, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, new Viewer.Guest()).value()
+                    new CatalogQuery(Shelf.ALL_PUBLISHED, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, new Viewer.Guest()).value()
                     .getContent().get(0);
 
             assertThat(card.upvotes()).isEqualTo(0);
@@ -203,7 +205,7 @@ class PublishedPlannerQueryServiceTest {
             stubCatalogPage(pageOf(pageable, catalogRow("High Votes", true), catalogRow("Medium Votes", true)));
 
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
-                    new CatalogQuery(true, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, new Viewer.Guest()).value();
+                    new CatalogQuery(Shelf.RECOMMENDED, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, new Viewer.Guest()).value();
 
             assertThat(result.getTotalElements()).isEqualTo(2);
         }
@@ -215,7 +217,7 @@ class PublishedPlannerQueryServiceTest {
             stubCatalogPage(pageOf(pageable, inCategory));
 
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
-                    new CatalogQuery(true, TextFilter.exactly("10F"), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, new Viewer.Guest()).value();
+                    new CatalogQuery(Shelf.RECOMMENDED, TextFilter.exactly("10F"), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, new Viewer.Guest()).value();
 
             assertThat(result.getTotalElements()).isEqualTo(1);
             PublicPlannerResponse card = result.getContent().get(0);
@@ -229,7 +231,7 @@ class PublishedPlannerQueryServiceTest {
             stubCatalogPage(new PageImpl<>(List.of(), pageable, 0));
 
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
-                    new CatalogQuery(true, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, new Viewer.Guest()).value();
+                    new CatalogQuery(Shelf.RECOMMENDED, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, new Viewer.Guest()).value();
 
             assertThat(result.getContent()).isEmpty();
         }
@@ -342,7 +344,7 @@ class PublishedPlannerQueryServiceTest {
                             .build()));
 
             ScopedRead<Page<PublicPlannerResponse>> read = publishedQueryService.searchPlanners(
-                    new CatalogQuery(false, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, new Viewer.Guest());
+                    new CatalogQuery(Shelf.ALL_PUBLISHED, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, new Viewer.Guest());
             Page<PublicPlannerResponse> result = read.value();
 
             assertThat(read.scopes()).containsExactlyInAnyOrder(
@@ -378,7 +380,7 @@ class PublishedPlannerQueryServiceTest {
 
             // Act
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
-                    new CatalogQuery(false, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, new Viewer.Guest()).value();
+                    new CatalogQuery(Shelf.ALL_PUBLISHED, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(), Map.of()), pageable, new Viewer.Guest()).value();
 
             // Assert
             assertThat(result.getTotalElements()).isEqualTo(1);
@@ -391,7 +393,7 @@ class PublishedPlannerQueryServiceTest {
         @Test
         void malformedEntityFilterId_WhenParsed_IsRejectedNotSilentlyDropped() {
             // Arrange
-            CatalogQuery query = new CatalogQuery(false, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(),
+            CatalogQuery query = new CatalogQuery(Shelf.ALL_PUBLISHED, TextFilter.exactly(null), TextFilter.nonBlank(null), List.of(),
                     Map.of(ContentEntityType.THEME_PACK, List.of("not-a-number")));
 
             // Act & Assert
@@ -407,7 +409,7 @@ class PublishedPlannerQueryServiceTest {
         PlannerCatalog row = PlannerCatalog.builder().plannerId(UUID.randomUUID()).title("Deck").build();
 
         PublicPlannerResponse response = PublicPlannerResponse.fromCatalog(
-                row, new PlannerCoreInfo.PlannerCore.Absent(), PlannerStats.builder().build(), false);
+                row, new PlannerCoreInfo.PlannerCore.Absent(), PlannerStats.builder().build(), Upvote.NONE);
 
         assertThat(response.authorUsernameEpithet()).isNull();
         assertThat(response.authorUsernameSuffix()).isNull();

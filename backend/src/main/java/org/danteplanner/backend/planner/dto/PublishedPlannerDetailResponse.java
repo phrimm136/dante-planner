@@ -52,11 +52,10 @@ public record PublishedPlannerDetailResponse(
             Planner planner,
             UserProfile author,
             long commentCount,
-            boolean ownerNotificationsEnabled,
             int viewCount,
             int upvotes) {
         return fromEntity(planner, author, false, false, false,
-                commentCount, ownerNotificationsEnabled, viewCount, upvotes);
+                commentCount, false, viewCount, upvotes);
     }
 
     public static PublishedPlannerDetailResponse fromEntity(
