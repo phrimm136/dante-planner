@@ -305,9 +305,7 @@
             "CKV_K8S_22",
             "CKV_K8S_38",
             "CKV_K8S_40",
-            "CKV_K8S_43",
-            "CKV_K8S_8",
-            "CKV_K8S_9"
+            "CKV_K8S_43"
           ],
           "resource": "Deployment.danteplanner.redis-ratelimit"
         },
@@ -349,9 +347,7 @@
             "CKV_K8S_35",
             "CKV_K8S_38",
             "CKV_K8S_40",
-            "CKV_K8S_43",
-            "CKV_K8S_8",
-            "CKV_K8S_9"
+            "CKV_K8S_43"
           ],
           "resource": "StatefulSet.danteplanner.redis-auth"
         }
@@ -419,9 +415,7 @@
             "CKV_K8S_22",
             "CKV_K8S_38",
             "CKV_K8S_40",
-            "CKV_K8S_43",
-            "CKV_K8S_8",
-            "CKV_K8S_9"
+            "CKV_K8S_43"
           ],
           "resource": "Deployment.danteplanner.redis-ratelimit"
         },
@@ -463,9 +457,7 @@
             "CKV_K8S_35",
             "CKV_K8S_38",
             "CKV_K8S_40",
-            "CKV_K8S_43",
-            "CKV_K8S_8",
-            "CKV_K8S_9"
+            "CKV_K8S_43"
           ],
           "resource": "StatefulSet.danteplanner.redis-auth"
         }
