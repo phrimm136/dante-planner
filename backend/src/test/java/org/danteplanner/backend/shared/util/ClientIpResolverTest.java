@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Covers trusted-proxy admission, header parsing, and the private-address fallback that keeps
@@ -17,12 +18,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ClientIpResolverTest {
 
     private static final String TRUSTED_PROXY_IP = "10.0.0.1";
+    private static final String TRUSTED_PROXY_RANGE = TRUSTED_PROXY_IP + "/32";
     private static final String PROXY_IN_CIDR = "172.18.0.7";
     private static final String UNTRUSTED_IP = "203.0.113.50";
     private static final String PUBLIC_CLIENT_IP = "8.8.8.8";
     private static final String OTHER_PUBLIC_IP = "1.1.1.1";
     private static final String PRIVATE_CLIENT_IP = "192.168.1.100";
     private static final UUID DEVICE_ID = UUID.fromString("11111111-2222-3333-4444-555555555555");
+    private static final String CHART_TRUSTED_PROXIES = "127.0.0.1/32,::1/128,10.42.0.0/16";
 
     private static SecurityProperties properties(String trustedProxyIps) {
         SecurityProperties properties = new SecurityProperties();
@@ -53,7 +56,7 @@ class ClientIpResolverTest {
         @Test
         void resolve_WhenPeerIsTrustedByExactMatch_ReturnsForwardedIp() {
             String result = ClientIpResolver.resolve(
-                    request(TRUSTED_PROXY_IP, PUBLIC_CLIENT_IP), properties(TRUSTED_PROXY_IP));
+                    request(TRUSTED_PROXY_IP, PUBLIC_CLIENT_IP), properties(TRUSTED_PROXY_RANGE));
 
             assertThat(result).isEqualTo(PUBLIC_CLIENT_IP);
         }
@@ -79,7 +82,7 @@ class ClientIpResolverTest {
             String chain = PUBLIC_CLIENT_IP + ", " + OTHER_PUBLIC_IP + ", " + TRUSTED_PROXY_IP;
 
             String result = ClientIpResolver.resolve(
-                    request(TRUSTED_PROXY_IP, chain), properties(TRUSTED_PROXY_IP));
+                    request(TRUSTED_PROXY_IP, chain), properties(TRUSTED_PROXY_RANGE));
 
             assertThat(result).isEqualTo(PUBLIC_CLIENT_IP);
         }
@@ -87,7 +90,7 @@ class ClientIpResolverTest {
         @Test
         void resolve_WhenPeerIsUntrusted_IgnoresTheHeader() {
             String result = ClientIpResolver.resolve(
-                    request(UNTRUSTED_IP, PUBLIC_CLIENT_IP), properties(TRUSTED_PROXY_IP));
+                    request(UNTRUSTED_IP, PUBLIC_CLIENT_IP), properties(TRUSTED_PROXY_RANGE));
 
             assertThat(result).isEqualTo(UNTRUSTED_IP);
         }
@@ -95,7 +98,7 @@ class ClientIpResolverTest {
         @Test
         void resolve_WhenHeaderIsAbsent_ReturnsTheDirectPeer() {
             String result = ClientIpResolver.resolve(
-                    request(TRUSTED_PROXY_IP, null), properties(TRUSTED_PROXY_IP));
+                    request(TRUSTED_PROXY_IP, null), properties(TRUSTED_PROXY_RANGE));
 
             assertThat(result).isEqualTo(TRUSTED_PROXY_IP);
         }
@@ -103,7 +106,7 @@ class ClientIpResolverTest {
         @Test
         void resolve_WhenHeaderIsBlank_ReturnsTheDirectPeer() {
             String result = ClientIpResolver.resolve(
-                    request(TRUSTED_PROXY_IP, "   "), properties(TRUSTED_PROXY_IP));
+                    request(TRUSTED_PROXY_IP, "   "), properties(TRUSTED_PROXY_RANGE));
 
             assertThat(result).isEqualTo(TRUSTED_PROXY_IP);
         }
@@ -111,7 +114,7 @@ class ClientIpResolverTest {
         @Test
         void resolve_WhenHeaderIsNotAnAddress_ReturnsTheDirectPeer() {
             String result = ClientIpResolver.resolve(
-                    request(TRUSTED_PROXY_IP, "<script>alert(1)</script>"), properties(TRUSTED_PROXY_IP));
+                    request(TRUSTED_PROXY_IP, "<script>alert(1)</script>"), properties(TRUSTED_PROXY_RANGE));
 
             assertThat(result).isEqualTo(TRUSTED_PROXY_IP);
         }
@@ -201,7 +204,7 @@ class ClientIpResolverTest {
         @Test
         void resolveClientIdentifier_WhenPublicIpBehindTrustedProxy_KeysOnTheIp() {
             String result = ClientIpResolver.resolveClientIdentifier(
-                    request(TRUSTED_PROXY_IP, PUBLIC_CLIENT_IP), properties(TRUSTED_PROXY_IP), () -> DEVICE_ID);
+                    request(TRUSTED_PROXY_IP, PUBLIC_CLIENT_IP), properties(TRUSTED_PROXY_RANGE), () -> DEVICE_ID);
 
             assertThat(result).isEqualTo("ip:" + PUBLIC_CLIENT_IP);
         }
@@ -256,6 +259,90 @@ class ClientIpResolverTest {
                     });
 
             assertThat(result).isEqualTo("ip:" + PUBLIC_CLIENT_IP);
+        }
+    }
+
+    @Nested
+    class EdgeTrust {
+
+        @Test
+        void resolveClientIdentifier_WhenPeerIsLoopback_KeysOnTheCloudflareHeader() {
+            String result = ClientIpResolver.resolveClientIdentifier(
+                    request("127.0.0.1", null, PUBLIC_CLIENT_IP), properties(CHART_TRUSTED_PROXIES), () -> DEVICE_ID);
+
+            assertThat(result).isEqualTo("ip:" + PUBLIC_CLIENT_IP);
+        }
+
+        @Test
+        void resolveClientIdentifier_WhenPeerIsInThePodCidr_KeysOnTheCloudflareHeader() {
+            String result = ClientIpResolver.resolveClientIdentifier(
+                    request("10.42.3.7", null, PUBLIC_CLIENT_IP), properties(CHART_TRUSTED_PROXIES), () -> DEVICE_ID);
+
+            assertThat(result).isEqualTo("ip:" + PUBLIC_CLIENT_IP);
+        }
+
+        @Test
+        void resolveClientIdentifier_WhenPeerIsAVpcNode_IgnoresTheCloudflareHeader() {
+            String result = ClientIpResolver.resolveClientIdentifier(
+                    request("10.20.0.5", null, PUBLIC_CLIENT_IP), properties(CHART_TRUSTED_PROXIES), () -> DEVICE_ID);
+
+            assertThat(result).isEqualTo("device:" + DEVICE_ID);
+        }
+
+        @Test
+        void resolveClientIdentifier_WhenPublicPeerForgesBothHeaders_KeysOnThePeer() {
+            String result = ClientIpResolver.resolveClientIdentifier(
+                    request(UNTRUSTED_IP, PUBLIC_CLIENT_IP, OTHER_PUBLIC_IP), properties(CHART_TRUSTED_PROXIES),
+                    () -> DEVICE_ID);
+
+            assertThat(result).isEqualTo("ip:" + UNTRUSTED_IP);
+        }
+
+        @Test
+        void resolveClientIdentifier_WhenRemoteAddressIsAHostName_IgnoresTheCloudflareHeader() {
+            String result = ClientIpResolver.resolveClientIdentifier(
+                    request("localhost", null, PUBLIC_CLIENT_IP), properties(CHART_TRUSTED_PROXIES), () -> DEVICE_ID);
+
+            assertThat(result).isNotEqualTo("ip:" + PUBLIC_CLIENT_IP);
+        }
+    }
+
+    @Nested
+    class TrustedProxyConfiguration {
+
+        @Test
+        void parseTrustedProxyIps_WhenAnEntryHasAnImpossiblePrefix_FailsNamingTheEntry() {
+            assertThatThrownBy(() -> properties("127.0.0.1/32,10.42.0.0/33"))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("'10.42.0.0/33'");
+        }
+
+        @Test
+        void parseTrustedProxyIps_WhenAnEntryIsAHostName_FailsNamingTheEntry() {
+            assertThatThrownBy(() -> properties("traefik.danteplanner.svc/32"))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("'traefik.danteplanner.svc/32'");
+        }
+
+        @Test
+        void parseTrustedProxyIps_WhenAnEntryHasNoPrefix_FailsNamingTheEntry() {
+            assertThatThrownBy(() -> properties("127.0.0.1/32,10.0.0.1"))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("'10.0.0.1'");
+        }
+
+        @Test
+        void parseTrustedProxyIps_WhenAnEntryHasANegativePrefix_FailsNamingTheEntry() {
+            assertThatThrownBy(() -> properties("10.42.0.0/-1"))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("'10.42.0.0/-1'");
+        }
+
+        @Test
+        void parseTrustedProxyIps_WhenAnEntryHasANonNumericPrefix_FailsNamingTheEntry() {
+            assertThatThrownBy(() -> properties("10.42.0.0/x"))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("'10.42.0.0/x'");
         }
     }
 }
