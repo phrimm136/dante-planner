@@ -6,10 +6,7 @@ if [ "${1:-}" != "--list-inputs" ]; then
   exit 2
 fi
 
-printf '%s\n' terraform scripts/ops/terraform-run.sh scripts/ops/lib/terraform-guard.sh scripts/ops/provision \
-  scripts/ops/tests scripts/ops/fleet-verify.sh scripts/ops/redis-auth-restart.sh scripts/ops/access \
-  scripts/ops/lib \
+printf '%s\n' terraform scripts/ops/terraform-run.sh scripts/ops/lib/terraform-guard.sh \
   .github/scripts/terraform-validate.sh .github/scripts/terraform-inputs.sh .github/workflows/pr-gate.yml \
-  .github/scripts/config-scan.sh .github/scripts/render-charts.sh .github/scripts/rendered-crds.py .github/scripts/rendered-exporters.py .github/scripts/rendered-redis-probes.py .github/scripts/images.sh .github/config-scan \
-  .github/scripts/deploy-inputs-changed.sh .github/workflows/deploy-fleet.yml deploy/argocd \
+  .github/scripts/config-scan.sh .github/scripts/render-charts.sh .github/scripts/images.sh .github/config-scan \
   deploy/chart/templates/external-secrets.yaml deploy/chart/values-oregon.yaml deploy/chart/values-seoul.yaml

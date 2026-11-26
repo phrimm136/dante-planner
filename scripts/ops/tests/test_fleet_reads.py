@@ -14,6 +14,11 @@ BOOTLOG_SCRIPT = OPS_DIR / "access" / "boot-log.sh"
 APP_SCRIPT = OPS_DIR / "access" / "argocd-app.sh"
 METRICS_SCRIPT = OPS_DIR / "access" / "metrics-query.sh"
 GROUP_NAME = "danteplanner-oregon-app"
+CLOCK_NOW = 1767225600
+FAKE_DATE = f"""#!/bin/sh
+[ "$*" = +%s ] && {{ printf '%s\\n' {CLOCK_NOW}; exit 0; }}
+PATH=${{PATH#*:}}; export PATH; exec date "$@"
+"""
 
 FAKE_AWS = """#!/bin/sh
 printf '%s\\n' "$*" >> "$FAKE_DIR/aws-calls"
@@ -22,16 +27,21 @@ case "$1 $2" in
   "ssm send-command")
     while [ "$1" != "--parameters" ]; do shift; done
     printf '%s\\n' "$2" | jq -r '.commands[]' > "$FAKE_DIR/remote"
+    [ -f "$FAKE_DIR/send-fails" ] && grep -qF "$(cat "$FAKE_DIR/send-fails")" "$FAKE_DIR/remote" \\
+      && { printf '%s\\n' 'An error occurred (InvalidInstanceId) when calling the SendCommand operation' >&2; exit 254; }
     "$FAKE_SHELL" "$FAKE_DIR/remote" > "$FAKE_DIR/stdout" 2> "$FAKE_DIR/stderr" \\
       && printf '%s\\n' Success > "$FAKE_DIR/status" || printf '%s\\n' Failed > "$FAKE_DIR/status"
     [ -f "$FAKE_DIR/failing-command" ] && grep -qF "$(cat "$FAKE_DIR/failing-command")" "$FAKE_DIR/remote" \\
-      && printf '%s\\n' Failed > "$FAKE_DIR/status"
+      && printf '%s\\n' "$(cat "$FAKE_DIR/failing-status" 2>/dev/null || echo Failed)" > "$FAKE_DIR/status"
     printf '%s\\n' cmd-1 ;;
   "ssm get-command-invocation")
     case "$*" in
       *"--query Status"*) cat "$FAKE_DIR/status" ;;
       *StandardErrorContent*) cat "$FAKE_DIR/stderr" ;;
-      *) cat "$FAKE_DIR/stdout" ;;
+      *)
+        [ -f "$FAKE_DIR/output-read-fails" ] && grep -qF "$(cat "$FAKE_DIR/output-read-fails")" "$FAKE_DIR/remote" \\
+          && { printf '%s\\n' 'An error occurred (ThrottlingException) when calling the GetCommandInvocation operation' >&2; exit 254; }
+        cat "$FAKE_DIR/stdout" ;;
     esac ;;
   "ec2 describe-instances") cat "$FAKE_DIR/instances" ;;
   "autoscaling describe-auto-scaling-groups") cat "$FAKE_DIR/members" ;;
@@ -47,6 +57,9 @@ printf '%s\\n' "$*" >> "$FAKE_DIR/k3s-calls"
 [ -f "$FAKE_DIR/k3s-fails" ] && { printf '%s\\n' 'connection refused' >&2; exit 1; }
 case " $* " in
   *" wait "*) [ -f "$FAKE_DIR/wait-fails" ] && { printf '%s\\n' 'timed out waiting' >&2; exit 1; } ;;
+  *" redis-cli "*)
+    [ -f "$FAKE_DIR/auth-off" ] && { printf '%s\\n' PONG; exit 0; }
+    printf '%s\\n' 'NOAUTH Authentication required.'; exit 0 ;;
 esac
 cat "$FAKE_DIR/k3s-output"
 """
@@ -57,7 +70,7 @@ def node_line(node_name, private_ip, ready_text="True", role_text="app", cp_text
 
 
 def instance_row(instance_id, private_ip, role_text, age_seconds, **extra_tags):
-    launch_text = time.strftime("%Y-%m-%dT%H:%M:%S+00:00", time.gmtime(time.time() - age_seconds))
+    launch_text = time.strftime("%Y-%m-%dT%H:%M:%S+00:00", time.gmtime(CLOCK_NOW - age_seconds))
     tag_rows = [{"Key": "Role", "Value": role_text}] + [{"Key": tag_key, "Value": tag_value}
                                                         for tag_key, tag_value in extra_tags.items()]
     return {"InstanceId": instance_id, "PrivateIpAddress": private_ip, "LaunchTime": launch_text,
@@ -72,7 +85,7 @@ class FakeFleetCase(unittest.TestCase):
         self.work_dir = Path(self.work_handle.name)
         fake_bin = self.work_dir / "bin"
         fake_bin.mkdir()
-        for tool_name, tool_text in (("aws", FAKE_AWS), ("k3s", FAKE_K3S)):
+        for tool_name, tool_text in (("aws", FAKE_AWS), ("k3s", FAKE_K3S), ("date", FAKE_DATE)):
             (fake_bin / tool_name).write_text(tool_text)
             (fake_bin / tool_name).chmod(0o755)
         self.fake_bin = fake_bin
@@ -224,6 +237,13 @@ class ArgocdAppTest(FakeFleetCase):
         self.assertNotEqual(app_run.returncode, 0)
         self.assertIn("connection refused", app_run.stderr)
 
+    def test_a_complete_read_whose_command_failed_reports_nothing(self):
+        (self.work_dir / "failing-command").write_text("=== END ===")
+        app_run = self.app_run("path\tdeploy/chart", "sync\tSynced")
+        self.assertEqual(app_run.returncode, 1)
+        self.assertEqual(app_run.stdout, "")
+        self.assertIn("ended with status Failed", app_run.stderr)
+
     def test_a_truncated_read_says_so(self):
         output_text = "path\tdeploy/chart\nresource\tOutOfSy"
         app_run = subprocess.run(["bash", "-c", f'source "{APP_SCRIPT}"\n'
@@ -248,35 +268,175 @@ class MetricNamesTest(FakeFleetCase):
                          "1970-01-01T00:00:00Z  1  up  job=a\n1970-01-01T00:01:00Z  2  -  job=b\n")
 
 
-class RedisRestartTest(FakeFleetCase):
-    def test_a_failed_remote_command_still_reports_what_it_printed(self):
-        redis_text = (OPS_DIR / "redis-auth-restart.sh").read_text()
-        self.assertNotIn("send-command --region", redis_text)
-        (self.work_dir / "k3s-fails").write_text("")
-        (self.work_dir / "failing-command").write_text("=== SECRET ===")
-        redis_run = self.run_read(OPS_DIR / "redis-auth-restart.sh", "--dry-run")
-        self.assertEqual((self.work_dir / "status").read_text(), "Failed\n")
-        self.assertEqual(redis_run.returncode, 1)
-        self.assertIn("key-absent", redis_run.stdout)
-        self.assertIn("exec-failed", redis_run.stdout)
-        self.assertIn("pre-checks failed; not restarting", redis_run.stdout)
-        self.assertIn("ended with status Failed", redis_run.stderr)
-        self.assertIn("connection refused", redis_run.stderr)
+RESTART_STEPS = (("pre-check", "=== SECRET ===", "key-present", ("pre-checks passed", "pre-checks failed")),
+                 ("Redis restart", "REDIS_NOT_READY", "AUTH_REQUIRED",
+                  ("Ready and requires AUTH", "not Ready; exporter left untouched", "does not require AUTH")),
+                 ("exporter restart", "EXPORTER_NOT_READY", "EXPORTER_READY",
+                  ("auth exporter Ready", "auth exporter not Ready")),
+                 ("AUTH check", "AUTH_NOT_REQUIRED", "AUTH_REQUIRED",
+                  ("does not require AUTH; exporter left untouched", "Restarting auth exporter pods")))
+MODE_STEPS = {"--apply": ("pre-check", "Redis restart", "exporter restart"),
+              "--exporter-only": ("AUTH check", "exporter restart")}
+STEP_FAULTS = (("Failed", "failing-command", "SENT_FAILED", True, "ended with status Failed"),
+               ("TimedOut", "failing-command", "SENT_OUTCOME_UNKNOWN", True, "ended with status TimedOut"),
+               ("output unreadable", "output-read-fails", "SENT_OUTCOME_UNKNOWN", False, "ThrottlingException"),
+               ("not sent", "send-fails", "NOT_SENT", False, "InvalidInstanceId"))
+RERUN_RESTARTS_REDIS = "a rerun of --apply restarts auth Redis again"
 
-    def test_a_failed_restart_command_still_reports_that_redis_is_not_ready(self):
+
+def next_action(step_name, ending_name):
+    if step_name in ("pre-check", "AUTH check"):
+        return f"the {step_name} only reads; a rerun is safe"
+    if step_name == "exporter restart":
+        return "rerun with --exporter-only to restart only the exporter"
+    if ending_name == "NOT_SENT":
+        return "nothing ran; a rerun is safe"
+    return RERUN_RESTARTS_REDIS
+
+
+class RedisRestartTest(FakeFleetCase):
+    def restart_run(self, *script_args):
         (self.fake_bin / "sleep").write_text("#!/bin/sh\nexit 0\n")
         (self.fake_bin / "sleep").chmod(0o755)
         (self.work_dir / "k3s-output").write_text("set\n")
+        return self.run_read(OPS_DIR / "redis-auth-restart.sh", *script_args)
+
+    def steps_sent(self):
+        sent_texts = (self.work_dir / "aws-calls").read_text().split("ssm send-command")[1:]
+        return [next(step_name for step_name, step_marker, _, _ in RESTART_STEPS if step_marker in sent_text)
+                for sent_text in sent_texts]
+
+    def redis_deleted(self):
+        calls_path = self.work_dir / "k3s-calls"
+        return calls_path.is_file() and "delete pod redis-auth-0" in calls_path.read_text()
+
+    def test_the_script_reaches_the_control_plane_only_through_the_shared_function(self):
+        self.assertNotIn("send-command --region", (OPS_DIR / "redis-auth-restart.sh").read_text())
+
+    def test_every_step_succeeding_restarts_redis_then_the_exporter(self):
+        redis_run = self.restart_run("--apply")
+        self.assertEqual(redis_run.returncode, 0, redis_run.stderr)
+        self.assertIn("redis-auth-0 Ready and requires AUTH", redis_run.stdout)
+        self.assertIn("auth exporter Ready", redis_run.stdout)
+        self.assertEqual(self.steps_sent(), ["pre-check", "Redis restart", "exporter restart"])
+
+    def test_a_dry_run_sends_only_the_pre_check(self):
+        redis_run = self.restart_run("--dry-run")
+        self.assertEqual(redis_run.returncode, 0, redis_run.stderr)
+        self.assertIn("pre-checks passed; re-run with --apply to restart", redis_run.stdout)
+        self.assertEqual(self.steps_sent(), ["pre-check"])
+
+    def test_a_succeeded_restart_that_reports_redis_not_ready_leaves_the_exporter(self):
         (self.work_dir / "wait-fails").write_text("")
-        (self.work_dir / "failing-command").write_text("REDIS_NOT_READY")
-        redis_run = self.run_read(OPS_DIR / "redis-auth-restart.sh", "--apply")
-        self.assertEqual((self.work_dir / "status").read_text(), "Failed\n")
+        redis_run = self.restart_run("--apply")
+        self.assertEqual((self.work_dir / "status").read_text(), "Success\n")
         self.assertEqual(redis_run.returncode, 1)
         self.assertIn("REDIS_NOT_READY", redis_run.stdout.splitlines())
         self.assertIn("redis-auth-0 not Ready; exporter left untouched", redis_run.stdout)
-        self.assertIn("ended with status Failed", redis_run.stderr)
-        self.assertIn("timed out waiting", redis_run.stderr)
-        self.assertNotIn("app=redis-exporter-auth --wait", (self.work_dir / "k3s-calls").read_text())
+        self.assertEqual(self.steps_sent(), ["pre-check", "Redis restart"])
+
+    def test_exporter_only_checks_auth_then_restarts_only_the_exporter(self):
+        exporter_run = self.restart_run("--exporter-only")
+        self.assertEqual(exporter_run.returncode, 0, exporter_run.stderr)
+        self.assertIn("redis-auth-0 requires AUTH", exporter_run.stdout)
+        self.assertIn("auth exporter Ready", exporter_run.stdout)
+        self.assertEqual(self.steps_sent(), ["AUTH check", "exporter restart"])
+        self.assertFalse(self.redis_deleted())
+
+    def test_exporter_only_restarts_nothing_while_redis_does_not_require_auth(self):
+        (self.work_dir / "auth-off").write_text("")
+        exporter_run = self.restart_run("--exporter-only")
+        self.assertEqual(exporter_run.returncode, 1)
+        self.assertIn("AUTH_NOT_REQUIRED", exporter_run.stdout.splitlines())
+        self.assertIn("redis-auth-0 does not require AUTH; exporter left untouched; run --apply", exporter_run.stdout)
+        self.assertEqual(self.steps_sent(), ["AUTH check"])
+        self.assertFalse(self.redis_deleted())
+
+    def test_a_step_that_does_not_succeed_stops_with_its_ending_and_next_action(self):
+        step_rows = {one_step[0]: one_step for one_step in RESTART_STEPS}
+        for mode_flag, mode_steps in MODE_STEPS.items():
+            for step_index, step_name in enumerate(mode_steps):
+                self.check_step_faults(mode_flag, mode_steps[:step_index + 1], step_rows[step_name])
+
+    def check_step_faults(self, mode_flag, steps_until, step_row):
+        step_name, step_marker, output_line, verdict_lines = step_row
+        for fault_name, fault_file, ending_name, output_printed, fault_text in STEP_FAULTS:
+            with self.subTest(mode_flag=mode_flag, step_name=step_name, fault_name=fault_name):
+                for state_name in ("aws-calls", "failing-command", "failing-status", "send-fails",
+                                   "output-read-fails"):
+                    (self.work_dir / state_name).unlink(missing_ok=True)
+                (self.work_dir / fault_file).write_text(step_marker)
+                if fault_file == "failing-command":
+                    (self.work_dir / "failing-status").write_text(f"{fault_name}\n")
+                redis_run = self.restart_run(mode_flag)
+                self.assertEqual(redis_run.returncode, 1)
+                self.assertIn(f"the {step_name} command ended {ending_name} on the control plane; stopping",
+                              redis_run.stderr)
+                self.assertIn(fault_text, redis_run.stderr)
+                self.assertIn(next_action(step_name, ending_name), redis_run.stderr)
+                self.assertEqual(RERUN_RESTARTS_REDIS in redis_run.stderr,
+                                 next_action(step_name, ending_name) == RERUN_RESTARTS_REDIS)
+                self.assertEqual("ops verify fleet --site oregon" in redis_run.stderr,
+                                 step_name in ("Redis restart", "exporter restart") and ending_name != "NOT_SENT")
+                self.assertEqual(output_line in redis_run.stdout.splitlines(), output_printed)
+                self.assertEqual(self.steps_sent(), list(steps_until))
+                for verdict_line in verdict_lines:
+                    self.assertNotIn(verdict_line, redis_run.stdout)
+
+
+HELPER_MARKER = "helper-remote-ran"
+HELPER_ENDINGS = (("Success", {}, "SUCCESS"),
+                  ("Failed", {"failing-command": HELPER_MARKER, "failing-status": "Failed\n"}, "SENT_FAILED"),
+                  ("Failed, output unreadable", {"failing-command": HELPER_MARKER, "failing-status": "Failed\n",
+                                                 "output-read-fails": HELPER_MARKER}, "SENT_OUTCOME_UNKNOWN"),
+                  ("TimedOut", {"failing-command": HELPER_MARKER, "failing-status": "TimedOut\n"},
+                   "SENT_OUTCOME_UNKNOWN"),
+                  ("Cancelled", {"failing-command": HELPER_MARKER, "failing-status": "Cancelled\n"},
+                   "SENT_OUTCOME_UNKNOWN"),
+                  ("local bound", {"failing-command": HELPER_MARKER, "failing-status": "InProgress\n"},
+                   "SENT_OUTCOME_UNKNOWN"),
+                  ("Success, output unreadable", {"output-read-fails": HELPER_MARKER}, "SENT_OUTCOME_UNKNOWN"),
+                  ("send fails", {"send-fails": HELPER_MARKER}, "NOT_SENT"))
+HELPER_CALL = f"""source "{OPS_DIR}/lib/common.sh"
+source "{OPS_DIR}/lib/control-plane.sh"
+helper_output=$(run_on_control_plane us-west-2 i-0cc "echo {HELPER_MARKER}" 10)
+helper_code=$?
+printf '%s\\n' "$helper_output"
+exit "$helper_code"
+"""
+
+
+class ControlPlaneEndingTest(FakeFleetCase):
+    def helper_run(self, fault_files, **extra_env):
+        for state_name in ("aws-calls", "failing-command", "failing-status", "send-fails", "output-read-fails"):
+            (self.work_dir / state_name).unlink(missing_ok=True)
+        for state_name, state_text in fault_files.items():
+            (self.work_dir / state_name).write_text(state_text)
+        (self.fake_bin / "sleep").write_text("#!/bin/sh\nexit 0\n")
+        (self.fake_bin / "sleep").chmod(0o755)
+        helper_run = subprocess.run(["bash", "-c", HELPER_CALL], capture_output=True, text=True,
+                                    env=self.fake_env(**extra_env), stdin=subprocess.DEVNULL)
+        return helper_run.returncode, helper_run.stdout, helper_run.stderr
+
+    def test_each_ending_is_written_through_command_substitution(self):
+        ending_path = self.work_dir / "ending"
+        for fault_name, fault_files, ending_name in HELPER_ENDINGS:
+            with self.subTest(fault_name=fault_name):
+                ending_path.unlink(missing_ok=True)
+                return_code, _, _ = self.helper_run(fault_files, CONTROL_PLANE_ENDING_FILE=str(ending_path))
+                self.assertEqual((return_code == 0, ending_path.read_text()), (ending_name == "SUCCESS",
+                                                                             f"{ending_name}\n"))
+
+    def test_a_caller_without_the_variable_sees_the_same_code_and_output(self):
+        ending_path = self.work_dir / "ending"
+        for fault_name, fault_files, _ in HELPER_ENDINGS:
+            with self.subTest(fault_name=fault_name):
+                reported_run = self.helper_run(fault_files, CONTROL_PLANE_ENDING_FILE=str(ending_path))
+                ending_path.unlink()
+                files_before = sorted(self.work_dir.iterdir())
+                plain_run = self.helper_run(fault_files)
+                self.assertEqual(plain_run, reported_run)
+                self.assertEqual(sorted(self.work_dir.iterdir()), files_before)
 
 
 for read_class in (FleetNodesTest, ArgocdAppTest, RedisRestartTest):
