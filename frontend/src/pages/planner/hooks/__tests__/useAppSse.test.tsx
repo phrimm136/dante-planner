@@ -1,8 +1,8 @@
 import { renderHook, act } from '@testing-library/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
-import { SSE_CONNECTION, SSE_EVENTS } from '@/lib/constants'
+import { SSE_CONNECTION, SSE_EVENTS, SSE_TRANSPORT } from '@/lib/constants'
 import { useSseStore } from '@/shared/sse'
 
 /**
@@ -47,9 +47,17 @@ vi.mock('@/shared/userSettings', () => ({
   userSettingsKeys: h.SETTINGS_KEYS,
 }))
 
-vi.mock('@/shared/auth', () => ({
-  useAuthQueryNonBlocking: () => ({ data: h.userRef.current }),
+vi.mock('@/shared/auth', async (importOriginal) => ({
+  useAuthQueryNonBlocking: () =>
+    useQuery({
+      queryKey: h.AUTH_KEYS.me,
+      queryFn: () => h.userRef.current,
+      initialData: () => h.userRef.current,
+      staleTime: Infinity,
+    }),
   authQueryKeys: h.AUTH_KEYS,
+  clearSessionOnUnauthorized: (await importOriginal<typeof import('@/shared/auth')>())
+    .clearSessionOnUnauthorized,
 }))
 
 vi.mock('@/shared/notifications', () => ({
@@ -64,6 +72,7 @@ vi.mock('@/shared/notifications', () => ({
 vi.mock('@/lib/i18n', () => ({ default: { t: (k: string) => k } }))
 vi.mock('@/lib/formatUsername', () => ({ formatUsername: (a: string, b: string) => `${a}-${b}` }))
 
+import { clearSessionOnUnauthorized } from '@/shared/auth'
 import { useAppSse } from '../useAppSse'
 
 const SYNC_ON = {
@@ -209,18 +218,71 @@ describe('useAppSse — gating truth-table', () => {
   it('disconnects (aborts the stream) when the gate flips to false', async () => {
     h.userRef.current = USER
     h.settingsRef.current = SYNC_ON
-    const { wrapper } = createWrapper()
-    const { rerender } = renderHook(() => useAppSse(), { wrapper })
+    const { queryClient, wrapper } = createWrapper()
+    renderHook(() => useAppSse(), { wrapper })
     await flushConnectDelay()
     const stream = lastStream()
 
     // Gate flips off → effect cleanup disconnects
-    h.userRef.current = null
-    act(() => rerender())
-    await settle()
+    act(() => {
+      queryClient.setQueryData(h.AUTH_KEYS.me, null)
+    })
+    await advance(0)
 
     expect(stream.signal?.aborted).toBe(true)
     expect(useSseStore.getState().isConnected).toBe(false)
+  })
+})
+
+describe('useAppSse — refused stream', () => {
+  function refuseNextOpen() {
+    vi.mocked(globalThis.fetch).mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: false,
+        status: SSE_TRANSPORT.UNAUTHORIZED_STATUS,
+        headers: new Headers(),
+        body: null,
+      } as unknown as Response),
+    )
+  }
+
+  it('clears the session and stays closed after a 401 open', async () => {
+    h.userRef.current = USER
+    h.settingsRef.current = SYNC_ON
+    const { queryClient, wrapper } = createWrapper()
+    const stopClearing = clearSessionOnUnauthorized(queryClient)
+    refuseNextOpen()
+    renderHook(() => useAppSse(), { wrapper })
+
+    await flushConnectDelay()
+    await advance(SSE_CONNECTION.IDLE_RESET_TIMEOUT + SSE_CONNECTION.MAX_DELAY)
+    stopClearing()
+
+    expect(queryClient.getQueryData(h.AUTH_KEYS.me)).toBeNull()
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1)
+    expect(useSseStore.getState().isConnected).toBe(false)
+  })
+
+  it('opens a fresh stream when a user signs in after the refusal', async () => {
+    h.userRef.current = USER
+    h.settingsRef.current = SYNC_ON
+    const { queryClient, wrapper } = createWrapper()
+    const stopClearing = clearSessionOnUnauthorized(queryClient)
+    refuseNextOpen()
+    renderHook(() => useAppSse(), { wrapper })
+    await flushConnectDelay()
+    await advance(1)
+    expect(queryClient.getQueryData(h.AUTH_KEYS.me)).toBeNull()
+
+    act(() => {
+      queryClient.setQueryData(h.AUTH_KEYS.me, USER)
+    })
+    await advance(0)
+    await flushConnectDelay()
+    stopClearing()
+
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+    expect(useSseStore.getState().isConnected).toBe(true)
   })
 })
 

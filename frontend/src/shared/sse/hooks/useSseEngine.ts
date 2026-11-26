@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useQueryClient, type QueryKey } from '@tanstack/react-query'
 
+import { announceUnauthorized } from '@/lib/api'
 import { SSE_CONNECTION, SSE_EVENTS, SSE_TRANSPORT, type SseEventType } from '@/lib/constants'
 import { useSseStore } from '../stores/useSseStore'
 import { runSseStream, type SseFrame } from '../lib/sseStream'
@@ -195,6 +196,7 @@ export function useSseEngine({
         halted = 'refused'
         clearAllTimers()
         console.warn('SSE: Server refused the stream as unauthorized, not reconnecting')
+        announceUnauthorized()
         return
       }
 

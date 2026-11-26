@@ -3,6 +3,7 @@ import { renderHook, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest'
 
+import { onUnauthorized } from '@/lib/api'
 import { SSE_CONNECTION, SSE_EVENTS, SSE_TRANSPORT } from '@/lib/constants'
 import { useSseStore } from '../../stores/useSseStore'
 import { useSseEngine, type SseEngineConfig } from '../useSseEngine'
@@ -493,6 +494,19 @@ describe('useSseEngine — refused', () => {
     expect(console.warn).toHaveBeenCalledTimes(1)
     expect(useSseStore.getState().isConnected).toBe(false)
     expect(useSseStore.getState().reconnectAttempts).toBe(0)
+  })
+
+  it('announces a 401 open to the unauthorized listeners once', async () => {
+    serveAlways(statusResponse(SSE_TRANSPORT.UNAUTHORIZED_STATUS))
+    const listener = vi.fn()
+    const stopListening = onUnauthorized(listener)
+    renderEngine(makeConfig())
+
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+    await advance(SSE_CONNECTION.IDLE_RESET_TIMEOUT + SSE_CONNECTION.MAX_DELAY)
+    stopListening()
+
+    expect(listener).toHaveBeenCalledTimes(1)
   })
 
   it('stops on a 401 reopen even with an idle reset armed', async () => {

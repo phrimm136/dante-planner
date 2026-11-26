@@ -83,7 +83,7 @@ export function onUnauthorized(listener: UnauthorizedListener): () => void {
   }
 }
 
-function announceUnauthorized(): void {
+export function announceUnauthorized(): void {
   for (const listener of unauthorizedListeners) {
     try {
       listener()
