@@ -65,7 +65,7 @@ public class RateLimitStore implements ProxyManager<byte[]>, RoleConnector, Auto
                         return CONNECTED;
                     }
                     state = new State.Disconnected();
-                    var unused = connected.connection().redis().closeAsync();
+                    var _ = connected.connection().redis().closeAsync();
                 }
                 case State.Connecting connecting -> {
                     if (!connecting.attempt().isDone()) {

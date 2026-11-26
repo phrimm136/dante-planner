@@ -57,6 +57,8 @@ repositories {
 
 val consistency by sourceSets.creating
 
+val mockitoAgent by configurations.creating
+
 sourceSets.test {
     compileClasspath += consistency.output
     runtimeClasspath += consistency.output
@@ -133,6 +135,17 @@ dependencies {
     errorprone("com.uber.nullaway:nullaway:0.14.3")
 
     "consistencyImplementation"("tools.jackson.core:jackson-databind")
+
+    mockitoAgent("org.mockito:mockito-core") {
+        isTransitive = false
+    }
+}
+
+abstract class JavaAgent : CommandLineArgumentProvider {
+    @get:Classpath
+    abstract val jar: ConfigurableFileCollection
+
+    override fun asArguments(): Iterable<String> = listOf("-javaagent:${jar.singleFile.absolutePath}")
 }
 
 tasks.processResources {
@@ -182,6 +195,7 @@ tasks.withType<Test> {
             "-XX:MinHeapFreeRatio=10", "-XX:MaxHeapFreeRatio=30",
             "-XX:ReservedCodeCacheSize=256m", "-Djdk.virtualThreadScheduler.parallelism=2",
             "-XX:FlightRecorderOptions:stackdepth=2048")
+    jvmArgumentProviders.add(objects.newInstance<JavaAgent>().apply { jar.from(mockitoAgent) })
     filter {
         includeTestsMatching("*Test")
         includeTestsMatching("*Tests")
@@ -223,6 +237,7 @@ pitest {
     // The minion does not inherit the test task's system properties.
     jvmArgs.set(listOf("-Dorg.springframework.boot.logging.LoggingSystem=none", "-Dspring.test.context.cache.pause=never",
             "-Djdk.virtualThreadScheduler.parallelism=2"))
+    jvmArgs.addAll(mockitoAgent.elements.map { jars -> jars.map { "-javaagent:${it.asFile.absolutePath}" } })
     pitestVersion.set("1.30.2")
     junit5PluginVersion.set("1.2.1")
     threads.set(4)
@@ -308,7 +323,7 @@ tasks.withType<JavaCompile>().configureEach {
         error("StringCaseLocaleUsage", "DefaultCharset", "JavaTimeDefaultTimeZone", "ReferenceEquality")
         disable("NullAway")
     }
-    options.compilerArgs.add("-XDaddTypeAnnotationsToSymbol=true")
+    options.compilerArgs.addAll(listOf("-XDaddTypeAnnotationsToSymbol=true", "-Xmaxwarns", "100000"))
     options.forkOptions.jvmArgs!!.addAll(
         listOf(
             "--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
@@ -345,7 +360,6 @@ tasks.named<JavaCompile>("compileJava") {
                 + "org.springframework.data.annotation.LastModifiedDate"
         )
     }
-    options.compilerArgs.addAll(listOf("-Xmaxwarns", "100000"))
 }
 
 checkstyle {
