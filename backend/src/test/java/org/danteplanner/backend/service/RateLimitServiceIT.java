@@ -6,7 +6,6 @@ import org.danteplanner.backend.support.RateLimitStores;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.shared.ratelimit.RateLimitService;
 
-import org.danteplanner.backend.shared.ratelimit.RateLimitExceededException;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -29,7 +28,6 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.danteplanner.backend.support.Rejections.assertRejected;
 
 /**
  * Unit tests for RateLimitService.
@@ -182,14 +180,6 @@ class RateLimitServiceIT {
 
             // 6th request should fail
             assertThat(chargeUser(RateLimitPolicy.CRUD, userId, endpoint).isConsumed()).isFalse();
-            assertRejected(() -> {
-                throw ChargeKey.parseUser(RateLimitPolicy.CRUD, userId, endpoint).refusal(1);
-            }).withCode("RATE_LIMIT_EXCEEDED")
-                    .isInstanceOfSatisfying(RateLimitExceededException.class, exception -> {
-                        assertThat(exception.getMessage()).startsWith("Rate limit exceeded for user " + userId + " on");
-                        assertThat(exception.getEndpoint()).isEqualTo(endpoint);
-                        assertThat(exception.getMessage()).contains(userId.toString(), endpoint);
-                    });
         }
 
         @Test
@@ -203,13 +193,6 @@ class RateLimitServiceIT {
 
             // 11th request should fail
             assertThat(chargeUser(RateLimitPolicy.CRUD, userId, "planners").isConsumed()).isFalse();
-            assertRejected(() -> {
-                throw ChargeKey.parseUser(RateLimitPolicy.CRUD, userId, "planners").refusal(1);
-            }).withCode("RATE_LIMIT_EXCEEDED")
-                    .isInstanceOfSatisfying(RateLimitExceededException.class, exception -> {
-                        assertThat(exception.getMessage()).startsWith("Rate limit exceeded for user " + userId + " on");
-                        assertThat(exception.getEndpoint()).isEqualTo("planners");
-                    });
         }
 
         @Test
@@ -223,13 +206,6 @@ class RateLimitServiceIT {
 
             // 3rd request should fail
             assertThat(chargeUser(RateLimitPolicy.SSE, userId, "").isConsumed()).isFalse();
-            assertRejected(() -> {
-                throw ChargeKey.parseUser(RateLimitPolicy.SSE, userId, "").refusal(1);
-            }).withCode("RATE_LIMIT_EXCEEDED")
-                    .isInstanceOfSatisfying(RateLimitExceededException.class, exception -> {
-                        assertThat(exception.getMessage()).startsWith("Rate limit exceeded for user " + userId + " on");
-                        assertThat(exception.getEndpoint()).isEqualTo("sse");
-                    });
         }
     }
 

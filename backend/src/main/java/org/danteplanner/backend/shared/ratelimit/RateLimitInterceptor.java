@@ -207,13 +207,18 @@ public class RateLimitInterceptor implements HandlerInterceptor {
                 markStoreAvailable();
                 yield true;
             }
-            case REFUSE -> throw key.refusal(RateLimitService.retryAfterSeconds(probe.getNanosToWaitForRefill()));
+            case REFUSE -> throw refusalOf(key, probe);
             case REDIRECT_LOGIN -> {
-                log.warn("Rate limit exceeded on a browser-navigation endpoint: {}",
-                        key.refusal(RateLimitService.retryAfterSeconds(probe.getNanosToWaitForRefill())).getMessage());
+                RateLimitExceededException refusal = refusalOf(key, probe);
+                log.warn("Rate limit exceeded on a browser-navigation endpoint: {}", refusal.getMessage());
                 yield redirectToLogin(response, LoginRedirect.RATE_LIMITED);
             }
         };
+    }
+
+    private static RateLimitExceededException refusalOf(ChargeKey key, ConsumptionProbe probe) {
+        long retryAfterSeconds = RateLimitService.retryAfterSeconds(probe.getNanosToWaitForRefill());
+        return key.refusal(retryAfterSeconds);
     }
 
     private ChargeKey keyOf(RateLimited declaration, HttpServletRequest request, HttpServletResponse response) {

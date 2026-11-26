@@ -830,15 +830,16 @@ class CheckLock:
                 slot_file.close()
         return None
 
-    def take_slot(self):
+    def take_slot(self, poll_seconds=1.0):
         self.slot_file = self.free_slot()
         if self.slot_file is not None:
             return
         print(f"checks: waiting for one of {SLOT_COUNT} test slots beside {self.lock_path}",
               file=sys.stderr, flush=True)
         wait_start = time.monotonic()
-        self.slot_file = open(self.slot_path(os.getpid() % SLOT_COUNT), "a")
-        fcntl.flock(self.slot_file, fcntl.LOCK_EX)
+        while self.slot_file is None:
+            time.sleep(poll_seconds)
+            self.slot_file = self.free_slot()
         print(f"checks: took a test slot after {time.monotonic() - wait_start:.0f}s", file=sys.stderr, flush=True)
 
     def __enter__(self):

@@ -3,9 +3,11 @@ import fcntl
 import importlib.machinery
 import importlib.util
 import json
+import os
 import re
 import subprocess
 import sys
+import threading
 from pathlib import Path
 
 import pytest
@@ -426,6 +428,23 @@ def test_two_slot_runs_hold_the_lock_together_and_keep_an_exclusive_run_out(tmp_
                 fcntl.flock(exclusive_probe, fcntl.LOCK_EX | fcntl.LOCK_NB)
     with open(lock_path, "a") as exclusive_probe:
         fcntl.flock(exclusive_probe, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+
+def test_a_waiting_slot_run_takes_whichever_slot_frees_first(tmp_path):
+    lock_path = tmp_path / ".test.lock"
+    holders = [checks_cli.CheckLock(lock_path, "slot") for _ in range(checks_cli.SLOT_COUNT)]
+    held = [holder.free_slot() for holder in holders]
+    waiter = checks_cli.CheckLock(lock_path, "slot")
+    freed_index = (os.getpid() + 1) % checks_cli.SLOT_COUNT
+    releaser = threading.Timer(0.2, lambda: held[freed_index].close())
+    releaser.start()
+    waiter.take_slot(poll_seconds=0.05)
+    releaser.join()
+    assert waiter.slot_file.name == str(waiter.slot_path(freed_index))
+    waiter.slot_file.close()
+    for index, slot_file in enumerate(held):
+        if index != freed_index:
+            slot_file.close()
 
 
 def test_an_exclusive_run_keeps_a_slot_run_out(tmp_path):

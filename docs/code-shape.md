@@ -78,7 +78,8 @@ public AccessTokenOutcome authenticate(String token, HttpServletRequest request)
         return refuseInvalid(invalid.getReason(), request);              // V3: stays until the validator returns a value
     }
 
-    AccessDecision decision = AccessDecision.of(claims, revocationOf(token, claims), currentLogin()); // V2, C1, C2
+    Viewer current = SpringContextAdapter.viewer();                     // T6: the adapter turns the null into a type
+    AccessDecision decision = AccessDecision.of(claims, revocationOf(token, claims), current); // V2, C1, C2
     perform(decision, claims, request);
     return decision.outcome;                                              // T3: the decision carries the answer
 }
@@ -89,9 +90,9 @@ enum AccessDecision {
     REFUSE_REVOKED(AccessTokenOutcome.REVOKED),
     REFUSE_SENTINEL(AccessTokenOutcome.SENTINEL_BLOCKED);
     ...
-    static AccessDecision of(AccessClaims claims, RevocationOutcome revocation, @Nullable Authentication current) {
+    static AccessDecision of(AccessClaims claims, RevocationOutcome revocation, Viewer current) {
         return revocation == RevocationOutcome.REVOKED ? REFUSE_REVOKED
-                : current != null ? KEEP_SIGNED_IN
+                : current instanceof Viewer.Member ? KEEP_SIGNED_IN
                 : claims.isSentinel() ? REFUSE_SENTINEL
                 : SIGN_IN;
     }
