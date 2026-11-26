@@ -1,7 +1,7 @@
 # Names the cluster on metrics and logs, and selects the Cloudflare tunnel token.
 region: oregon
 image:
-  tag: "b3beac91c367a9f8dfb39d20f1c375497d7aa10e"
+  tag: "f7d4c7944f6473aa70e593d0a72550972e1da49c"
 awsRegion: us-west-2
 mysqldEndpointProperty: primary_endpoint
 redisAuth:
