@@ -177,22 +177,18 @@ def test_a_passing_gradle_run_has_no_failure_lines():
     assert checks_cli.gradle_failure_lines(fixture_text("gradle-pass.log")) == []
 
 
-def test_freezing_the_branches_passes_its_reason_to_gradle():
+def test_freezing_the_branches_runs_the_task_and_takes_no_arguments():
     assert plan_for("be", "freeze-branches").command_argv[4:] == ("freezeShellBranches",)
-    assert plan_for("be", "freeze-branches", "--reason", "the port moved").command_argv[4:] == (
-        "freezeShellBranches", "-PfreezeReason=the port moved")
-    with pytest.raises(checks_cli.CheckError, match="--reason needs a reason"):
-        plan_for("be", "freeze-branches", "--reason", " ")
-    with pytest.raises(checks_cli.CheckError, match="unknown argument --force"):
-        plan_for("be", "freeze-branches", "--force")
+    with pytest.raises(checks_cli.CheckError, match="unknown argument --reason"):
+        plan_for("be", "freeze-branches", "--reason", "the port moved")
 
 
-def test_a_freeze_shows_the_raised_lines_and_their_reason():
-    log_text = "\n".join(["> Task :freezeShellBranches", "raised, because the port moved:",
-                          "a.B.run(a.Port) 0 -> 1", "a.C.<init>() 1 -> 12", "", "BUILD SUCCESSFUL in 9s"])
-    assert checks_cli.raised_branch_lines(log_text) == [
-        "raised, because the port moved:", "a.B.run(a.Port) 0 -> 1", "a.C.<init>() 1 -> 12"]
-    assert checks_cli.raised_branch_lines("> Task :freezeShellBranches\nBUILD SUCCESSFUL in 9s") == []
+def test_a_freeze_shows_every_count_that_moved():
+    log_text = "\n".join(["> Task :freezeShellBranches", "moved:",
+                          "a.B.run(a.Port) 0 -> 1", "a.C.<init>() 12 -> 1", "", "BUILD SUCCESSFUL in 9s"])
+    assert checks_cli.moved_branch_lines(log_text) == [
+        "moved:", "a.B.run(a.Port) 0 -> 1", "a.C.<init>() 12 -> 1"]
+    assert checks_cli.moved_branch_lines("> Task :freezeShellBranches\nBUILD SUCCESSFUL in 9s") == []
 
 
 def test_tools_test_runs_the_shared_tooling_script_from_the_root():

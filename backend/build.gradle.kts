@@ -501,7 +501,6 @@ tasks.jacocoTestReport {
 val freezeShellBranches by tasks.registering(JavaExec::class) {
     classpath = sourceSets.test.get().runtimeClasspath
     mainClass = "org.danteplanner.backend.architecture.ShellBranches"
-    args(providers.gradleProperty("freezeReason").map { listOf(it) }.getOrElse(emptyList()))
 }
 
 abstract class RandomOrderSeed : CommandLineArgumentProvider {
