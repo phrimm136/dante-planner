@@ -16,7 +16,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 
 public class GtidWriteCapture {
 
-    public record Capture(String gtidSet, boolean tracked) {
+    public record Capture(String gtidSet, GtidOrigin origin) {
     }
 
     private final Counter trackerCaptures;
@@ -25,8 +25,8 @@ public class GtidWriteCapture {
     private final ThreadLocal<Accumulator> accumulator = new ThreadLocal<>();
 
     public GtidWriteCapture(MeterRegistry meterRegistry) {
-        this.trackerCaptures = meterRegistry.counter("gtid.capture", "source", "tracker");
-        this.fallbackCaptures = meterRegistry.counter("gtid.capture", "source", "fallback");
+        this.trackerCaptures = meterRegistry.counter("gtid.capture", "source", GtidOrigin.TRACKER.tag());
+        this.fallbackCaptures = meterRegistry.counter("gtid.capture", "source", GtidOrigin.FALLBACK.tag());
     }
 
     public void begin() {
@@ -37,24 +37,22 @@ public class GtidWriteCapture {
         return accumulator.get() != null;
     }
 
-    public void recordCommit(String gtid, boolean fromTracker) {
+    public void recordCommit(String gtid, GtidOrigin origin) {
         Accumulator acc = accumulator.get();
         if (acc == null || !StringUtils.hasText(gtid)) {
             return;
         }
-        acc.committed = true;
         acc.gtids.add(gtid.replaceAll("\\s+", ""));
-        if (fromTracker) {
-            acc.tracked = true;
-            trackerCaptures.increment();
-        } else {
-            fallbackCaptures.increment();
+        acc.origin = acc.origin.joinedWith(origin);
+        switch (origin) {
+            case TRACKER -> trackerCaptures.increment();
+            case FALLBACK -> fallbackCaptures.increment();
         }
     }
 
     public Optional<String> pollCapturedGtid() {
         Accumulator acc = accumulator.get();
-        if (acc == null || !acc.committed) {
+        if (acc == null || acc.gtids.isEmpty()) {
             return Optional.empty();
         }
         return Optional.of(unionGtidSets(acc.gtids));
@@ -67,7 +65,7 @@ public class GtidWriteCapture {
             return Optional.empty();
         }
         accumulator.set(new Accumulator());
-        return Optional.of(new Capture(gtid.get(), acc.tracked));
+        return Optional.of(new Capture(gtid.get(), acc.origin));
     }
 
     public void clear() {
@@ -130,8 +128,7 @@ public class GtidWriteCapture {
     }
 
     private static final class Accumulator {
-        private boolean committed;
-        private boolean tracked;
+        private GtidOrigin origin = GtidOrigin.FALLBACK;
         private final Set<String> gtids = new LinkedHashSet<>();
     }
 }

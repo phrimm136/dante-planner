@@ -70,7 +70,7 @@ class RoutingDataSourceConfigTest {
 
     private static ReadSourceSelector selector() {
         return new ReadSourceSelector(List.of(new ReadSourceSelector.Source(
-                ReadSourceProperties.PRIMARY, true, new HikariDataSource(), CircuitBreaker.ofDefaults("test"))));
+                ReadSourceProperties.PRIMARY, ReadSourceSelector.Authority.PRIMARY, new HikariDataSource(), CircuitBreaker.ofDefaults("test"))));
     }
 
     private static AbstractRoutingDataSource routing(

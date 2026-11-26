@@ -12,6 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
+import org.danteplanner.backend.shared.config.ReadSourceProperties;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,13 +36,13 @@ class AuthReadSourcesTest {
             new RoleGated<>(RedisRole.AUTH, null, new RedisRoleHealth(), meters);
 
     @Test
-    void sourceOrder_WhenTheRegionReadsItsReplicaFirst_IsAuthLocalThenAuth() {
-        assertThat(AuthReadSources.sourceOrder(false, local, auth)).containsExactly(local, auth);
+    void readOrder_WhenTheRegionReadsItsReplicaFirst_IsAuthLocalThenAuth() {
+        assertThat(ReadSourceProperties.ReadOrder.REPLICA_FIRST.stores(local, auth)).containsExactly(local, auth);
     }
 
     @Test
-    void sourceOrder_WhenTheRegionReadsThePrimaryFirst_IsAuthAlone() {
-        assertThat(AuthReadSources.sourceOrder(true, local, auth)).containsExactly(auth);
+    void readOrder_WhenTheRegionReadsThePrimaryFirst_IsAuthAlone() {
+        assertThat(ReadSourceProperties.ReadOrder.PRIMARY_FIRST.stores(local, auth)).containsExactly(auth);
     }
 
     @Test
@@ -88,7 +90,7 @@ class AuthReadSourcesTest {
     }
 
     private AuthReadSources sources(RedisRoleHealth health) {
-        return new AuthReadSources(AuthReadSources.sourceOrder(false,
+        return new AuthReadSources(ReadSourceProperties.ReadOrder.REPLICA_FIRST.stores(
                 new RoleGated<>(RedisRole.AUTH_LOCAL, localStore, health, meters),
                 new RoleGated<>(RedisRole.AUTH, authStore, health, meters)));
     }

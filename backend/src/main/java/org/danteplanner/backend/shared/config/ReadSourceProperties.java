@@ -62,8 +62,22 @@ public record ReadSourceProperties(
         return readSources.stream().allMatch(source -> names.add(source.name()));
     }
 
-    public boolean readsPrimaryFirst() {
-        return !readSources.isEmpty() && readSources.get(0).isPrimary();
+    public enum ReadOrder {
+        PRIMARY_FIRST,
+        REPLICA_FIRST;
+
+        public <T> List<T> stores(T regional, T primary) {
+            return switch (this) {
+                case PRIMARY_FIRST -> List.of(primary);
+                case REPLICA_FIRST -> List.of(regional, primary);
+            };
+        }
+    }
+
+    public ReadOrder readOrder() {
+        return !readSources.isEmpty() && readSources.get(0).isPrimary()
+                ? ReadOrder.PRIMARY_FIRST
+                : ReadOrder.REPLICA_FIRST;
     }
 
     public record Source(

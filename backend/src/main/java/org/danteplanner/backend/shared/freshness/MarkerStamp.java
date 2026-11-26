@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 
 import org.danteplanner.backend.shared.failure.OnUndeclared;
+import org.danteplanner.backend.shared.gtid.GtidOrigin;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 
 public class MarkerStamp {
@@ -40,12 +41,14 @@ public class MarkerStamp {
     }
 
     private void judgeUndeclared(GtidWriteCapture.Capture capture) {
-        if (!capture.tracked()) {
-            return;
-        }
-        switch (onUndeclared) {
-            case FAIL -> throw new IllegalStateException(UNDECLARED_MESSAGE);
-            case COUNT -> undeclared.increment();
+        switch (capture.origin()) {
+            case TRACKER -> {
+                switch (onUndeclared) {
+                    case FAIL -> throw new IllegalStateException(UNDECLARED_MESSAGE);
+                    case COUNT -> undeclared.increment();
+                }
+            }
+            case FALLBACK -> { }
         }
     }
 }

@@ -22,6 +22,7 @@ import ch.qos.logback.classic.Level;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
+import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.failure.OnUndeclared;
 import org.danteplanner.backend.shared.redis.RedisRole;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
@@ -99,19 +100,19 @@ class MarkerStoreTest {
     }
 
     @Test
-    void sourceOrder_WhenTheRegionReadsAReplicaFirst_ReadsTheLocalStoreThenTheAuthStore() {
+    void readOrder_WhenTheRegionReadsAReplicaFirst_ReadsTheLocalStoreThenTheAuthStore() {
         MarkerStore.Source local = new MarkerStore.Source(RedisRole.AUTH_LOCAL, null);
         MarkerStore.Source auth = new MarkerStore.Source(RedisRole.AUTH, null);
 
-        assertThat(MarkerStore.sourceOrder(false, local, auth)).containsExactly(local, auth);
+        assertThat(ReadSourceProperties.ReadOrder.REPLICA_FIRST.stores(local, auth)).containsExactly(local, auth);
     }
 
     @Test
-    void sourceOrder_WhenTheRegionReadsThePrimaryFirst_ReadsOnlyTheAuthStore() {
+    void readOrder_WhenTheRegionReadsThePrimaryFirst_ReadsOnlyTheAuthStore() {
         MarkerStore.Source local = new MarkerStore.Source(RedisRole.AUTH_LOCAL, null);
         MarkerStore.Source auth = new MarkerStore.Source(RedisRole.AUTH, null);
 
-        assertThat(MarkerStore.sourceOrder(true, local, auth)).containsExactly(auth);
+        assertThat(ReadSourceProperties.ReadOrder.PRIMARY_FIRST.stores(local, auth)).containsExactly(auth);
     }
 
     @Test

@@ -14,11 +14,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.danteplanner.backend.shared.config.ChosenReadSource;
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.failure.OnUndeclared;
+import org.danteplanner.backend.shared.gtid.GtidOrigin;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
-import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 import org.danteplanner.backend.shared.redis.RedisRoleHealth;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -63,9 +64,9 @@ class MarkerDispatchStampTest {
         markerStore = new RecordingMarkerStore();
         stamp = new MarkerDispatchStamp(writeCapture,
                 new MarkerStamp(writeCapture, markerStore, new SimpleMeterRegistry(), OnUndeclared.COUNT));
-        seoul = new ReadSourceSelector.Source(SEOUL, false, null, breaker(SEOUL));
+        seoul = new ReadSourceSelector.Source(SEOUL, ReadSourceSelector.Authority.REPLICA, null, breaker(SEOUL));
         selector = new ReadSourceSelector(List.of(seoul, new ReadSourceSelector.Source(
-                ReadSourceProperties.PRIMARY, true, null, breaker(ReadSourceProperties.PRIMARY))));
+                ReadSourceProperties.PRIMARY, ReadSourceSelector.Authority.PRIMARY, null, breaker(ReadSourceProperties.PRIMARY))));
     }
 
     @AfterEach
@@ -112,7 +113,7 @@ class MarkerDispatchStampTest {
     @Test
     void raise_WhenAGtidIsCapturedAndAUserScopeDeclared_RaisesItOnceAndNothingOnTheSecondCall() {
         stamp.around(() -> {
-            writeCapture.recordCommit(DISPATCH_GTID, true);
+            writeCapture.recordCommit(DISPATCH_GTID, GtidOrigin.TRACKER);
             FreshnessDeclarations.declare(new FreshnessScope.User(7));
             stamp.raise();
             stamp.raise();
@@ -125,7 +126,7 @@ class MarkerDispatchStampTest {
     @Test
     void raise_WhenTheDeclarationIsNone_RaisesNothing() {
         stamp.around(() -> {
-            writeCapture.recordCommit(DISPATCH_GTID, true);
+            writeCapture.recordCommit(DISPATCH_GTID, GtidOrigin.TRACKER);
             FreshnessDeclarations.declareNone("outbox bookkeeping");
             stamp.raise();
         });
@@ -135,7 +136,7 @@ class MarkerDispatchStampTest {
 
     @Test
     void raise_WhenNoWindowIsOpen_RaisesNothing() {
-        writeCapture.recordCommit(DISPATCH_GTID, true);
+        writeCapture.recordCommit(DISPATCH_GTID, GtidOrigin.TRACKER);
         FreshnessDeclarations.declare(new FreshnessScope.User(7));
 
         stamp.raise();
@@ -170,16 +171,16 @@ class MarkerDispatchStampTest {
 
     @Test
     void around_WhenAReadSourceWasChosenBeforeAndInside_SeesNoEarlierChoiceAndLeavesNoInnerChoice() {
-        ChosenReadSource.record(SEOUL, false);
+        ChosenReadSource.record(seoul);
         List<Optional<String>> chosenInside = new ArrayList<>();
 
         stamp.around(() -> {
-            chosenInside.add(ChosenReadSource.name());
-            ChosenReadSource.record(SEOUL, false);
+            chosenInside.add(ChosenReadSource.source().map(ReadSourceSelector.Source::name));
+            ChosenReadSource.record(seoul);
         });
 
         assertThat(chosenInside).containsExactly(Optional.empty());
-        assertThat(ChosenReadSource.name()).isEmpty();
+        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).isEmpty();
     }
 
     private static void clearThreadState() {

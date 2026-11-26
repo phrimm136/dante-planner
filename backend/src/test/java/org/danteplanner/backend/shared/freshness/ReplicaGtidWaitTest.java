@@ -54,7 +54,7 @@ class ReplicaGtidWaitTest {
 
     @BeforeEach
     void setUp() {
-        source = new ReadSourceSelector.Source(REPLICA, false, replica, CircuitBreaker.ofDefaults(REPLICA));
+        source = new ReadSourceSelector.Source(REPLICA, ReadSourceSelector.Authority.REPLICA, replica, CircuitBreaker.ofDefaults(REPLICA));
     }
 
     private void answers(int value) throws SQLException {

@@ -15,6 +15,7 @@ import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import io.github.bucket4j.ConsumptionProbe;
 import io.github.bucket4j.TimeoutException;
 import io.lettuce.core.RedisConnectionException;
 import io.lettuce.core.RedisException;
@@ -117,18 +118,10 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private boolean charge(RateLimited declaration, HttpServletRequest request, HttpServletResponse response) {
         return rateLimit.call(service -> {
             try {
-                chargeBucket(service, declaration, request, response);
-                markStoreAvailable();
-                return true;
+                return chargeBucket(service, declaration, request, response);
             } catch (RedisException | TimeoutException unavailable) {
                 warnStoreUnavailable(declaration, unavailable);
                 return withoutStore(declaration, response, () -> unavailable);
-            } catch (RateLimitExceededException refused) {
-                if (declaration.denial() != RateLimitDenial.REDIRECT_LOGIN) {
-                    throw refused;
-                }
-                log.warn("Rate limit exceeded on a browser-navigation endpoint: {}", refused.getMessage());
-                return redirectToLogin(response, LoginRedirect.RATE_LIMITED);
             }
         }, () -> withoutStore(declaration, response, () -> new RedisConnectionException(BREAKER_OPEN)));
     }
@@ -141,8 +134,8 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     private boolean withoutStore(
             RateLimited declaration, HttpServletResponse response, Supplier<RuntimeException> unavailable) {
-        return switch (OutageResponse.of(declaration.value().onStoreFailure(), declaration.denial())) {
-            case FAIL -> throw unavailable.get();
+        return switch (Admission.ofOutage(declaration.value().onStoreFailure(), declaration.denial())) {
+            case REFUSE -> throw unavailable.get();
             case REDIRECT_LOGIN -> redirectToLogin(response, LoginRedirect.UNAVAILABLE);
             case ADMIT -> {
                 meterRegistry.counter(CHARGE_SKIPPED_COUNTER, POLICY_TAG, declaration.value().name()).increment();
@@ -152,8 +145,8 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     }
 
     private void warnStoreUnavailable(RateLimited declaration, RuntimeException unavailable) {
-        switch (OutageResponse.of(declaration.value().onStoreFailure(), declaration.denial())) {
-            case FAIL -> { }
+        switch (Admission.ofOutage(declaration.value().onStoreFailure(), declaration.denial())) {
+            case REFUSE -> { }
             case REDIRECT_LOGIN -> log.warn("Rate-limit store unavailable on a browser-navigation endpoint: {}",
                     unavailable.getMessage());
             case ADMIT -> warnUnmetered(declaration.value(), unavailable);
@@ -169,18 +162,22 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         }
     }
 
-    private enum OutageResponse {
-        FAIL,
-        REDIRECT_LOGIN,
-        ADMIT;
+    private enum Admission {
+        ADMIT,
+        REFUSE,
+        REDIRECT_LOGIN;
 
-        static OutageResponse of(RateLimitPolicy.OnStoreFailure onStoreFailure, RateLimitDenial denial) {
+        static Admission ofOutage(RateLimitPolicy.OnStoreFailure onStoreFailure, RateLimitDenial denial) {
             return switch (onStoreFailure) {
                 case ADMIT -> ADMIT;
-                case REFUSE -> switch (denial) {
-                    case RESPOND -> FAIL;
-                    case REDIRECT_LOGIN -> REDIRECT_LOGIN;
-                };
+                case REFUSE -> refused(denial);
+            };
+        }
+
+        static Admission refused(RateLimitDenial denial) {
+            return switch (denial) {
+                case RESPOND -> REFUSE;
+                case REDIRECT_LOGIN -> REDIRECT_LOGIN;
             };
         }
     }
@@ -200,23 +197,32 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         }
     }
 
-    private void chargeBucket(RateLimitService rateLimitService, RateLimited declaration, HttpServletRequest request,
+    private boolean chargeBucket(RateLimitService service, RateLimited declaration, HttpServletRequest request,
             HttpServletResponse response) {
+        ChargeKey key = keyOf(declaration, request, response);
+        ConsumptionProbe probe = service.charge(declaration.value(), key);
+        Admission admission = probe.isConsumed() ? Admission.ADMIT : Admission.refused(declaration.denial());
+        return switch (admission) {
+            case ADMIT -> {
+                markStoreAvailable();
+                yield true;
+            }
+            case REFUSE -> throw key.refusal(RateLimitService.retryAfterSeconds(probe.getNanosToWaitForRefill()));
+            case REDIRECT_LOGIN -> {
+                log.warn("Rate limit exceeded on a browser-navigation endpoint: {}",
+                        key.refusal(RateLimitService.retryAfterSeconds(probe.getNanosToWaitForRefill())).getMessage());
+                yield redirectToLogin(response, LoginRedirect.RATE_LIMITED);
+            }
+        };
+    }
+
+    private ChargeKey keyOf(RateLimited declaration, HttpServletRequest request, HttpServletResponse response) {
         RateLimitPolicy policy = declaration.value();
-
-        if (policy.subject() == RateLimitPolicy.Subject.CLIENT) {
-            String identifier = ClientIpResolver.resolveClientIdentifier(
-                    request, securityProperties, () -> deviceIdResolver.resolve(request, response));
-            rateLimitService.check(policy, identifier);
-            return;
-        }
-
-        long userId = authenticatedUserId();
-        if (declaration.endpoint().isEmpty()) {
-            rateLimitService.check(policy, userId);
-        } else {
-            rateLimitService.check(policy, userId, declaration.endpoint());
-        }
+        return switch (policy.subject()) {
+            case CLIENT -> ChargeKey.parseClient(policy, ClientIpResolver.resolveClientIdentifier(
+                    request, securityProperties, () -> deviceIdResolver.resolve(request, response)));
+            case USER -> ChargeKey.parseUser(policy, authenticatedUserId(), declaration.endpoint());
+        };
     }
 
     private long authenticatedUserId() {

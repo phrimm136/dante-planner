@@ -18,10 +18,10 @@ import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
+import org.danteplanner.backend.shared.config.ChosenReadSource;
 import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.exception.ReadTemporarilyUnavailableException;
-import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
@@ -79,8 +79,8 @@ class ReadSourceSelectorTest {
         ChosenReadSource.clear();
         ReadSourceSelector.clearSkips();
         selector = new ReadSourceSelector(List.of(
-                new ReadSourceSelector.Source(FIRST, false, firstPool, firstBreaker),
-                new ReadSourceSelector.Source(SECOND, true, secondPool, secondBreaker)));
+                new ReadSourceSelector.Source(FIRST, ReadSourceSelector.Authority.REPLICA, firstPool, firstBreaker),
+                new ReadSourceSelector.Source(SECOND, ReadSourceSelector.Authority.PRIMARY, secondPool, secondBreaker)));
     }
 
     @AfterEach
@@ -106,7 +106,7 @@ class ReadSourceSelectorTest {
         when(firstPool.getConnection()).thenReturn(firstConnection);
 
         assertThat(selector.getConnection()).isSameAs(firstConnection);
-        assertThat(ChosenReadSource.name()).contains(FIRST);
+        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).contains(FIRST);
         verify(secondPool, never()).getConnection();
     }
 
@@ -119,7 +119,7 @@ class ReadSourceSelectorTest {
         assertThat(selector.getConnection()).isSameAs(secondConnection);
         assertThat(firstBreaker.getMetrics().getNumberOfFailedCalls()).isEqualTo(1);
         assertThat(firstBreaker.getState()).isEqualTo(CircuitBreaker.State.CLOSED);
-        assertThat(ChosenReadSource.name()).contains(SECOND);
+        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).contains(SECOND);
     }
 
     @ParameterizedTest
@@ -142,7 +142,7 @@ class ReadSourceSelectorTest {
 
         assertThatThrownBy(selector::getConnection).isSameAs(failure);
         assertThat(firstBreaker.getMetrics().getNumberOfFailedCalls()).isZero();
-        assertThat(ChosenReadSource.name()).isEmpty();
+        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).isEmpty();
         verify(secondPool, never()).getConnection();
     }
 
@@ -170,7 +170,7 @@ class ReadSourceSelectorTest {
         Connection lent = selector.getConnection();
 
         assertThatThrownBy(lent::createStatement).isSameAs(midStatement);
-        assertThat(ChosenReadSource.name()).contains(FIRST);
+        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).contains(FIRST);
         verify(secondPool, never()).getConnection();
     }
 
@@ -188,7 +188,7 @@ class ReadSourceSelectorTest {
                 .hasCauseInstanceOf(ReadTemporarilyUnavailableException.class);
         assertThat(((SQLException) thrown).getSQLState()).isEqualTo(UNABLE_TO_CONNECT);
         assertThat(thrown.getSuppressed()).containsExactly(firstFailure, secondFailure);
-        assertThat(ChosenReadSource.name()).isEmpty();
+        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).isEmpty();
     }
 
     @Test
@@ -211,8 +211,8 @@ class ReadSourceSelectorTest {
                 .clock(clock)
                 .build());
         ReadSourceSelector defaults = new ReadSourceSelector(List.of(
-                new ReadSourceSelector.Source(FIRST, false, firstPool, defaultBreaker),
-                new ReadSourceSelector.Source(SECOND, true, secondPool, secondBreaker)));
+                new ReadSourceSelector.Source(FIRST, ReadSourceSelector.Authority.REPLICA, firstPool, defaultBreaker),
+                new ReadSourceSelector.Source(SECOND, ReadSourceSelector.Authority.PRIMARY, secondPool, secondBreaker)));
         when(secondPool.getConnection()).thenReturn(secondConnection);
         defaultBreaker.transitionToOpenState();
         clock.advance(OPEN_BREAKER_ELAPSED);
@@ -236,18 +236,18 @@ class ReadSourceSelectorTest {
 
         selector.getConnection();
 
-        assertThat(ChosenReadSource.name()).contains(FIRST);
+        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).contains(FIRST);
     }
 
     @Test
     void getConnection_WhenThePrimaryReadsFirstOnAClosedBreaker_ServesThePrimaryAndRecordsIt() throws SQLException {
         ReadSourceSelector oregon = new ReadSourceSelector(List.of(
-                new ReadSourceSelector.Source(SECOND, true, secondPool, secondBreaker),
-                new ReadSourceSelector.Source(FIRST, false, firstPool, firstBreaker)));
+                new ReadSourceSelector.Source(SECOND, ReadSourceSelector.Authority.PRIMARY, secondPool, secondBreaker),
+                new ReadSourceSelector.Source(FIRST, ReadSourceSelector.Authority.REPLICA, firstPool, firstBreaker)));
         when(secondPool.getConnection()).thenReturn(secondConnection);
 
         assertThat(oregon.getConnection()).isSameAs(secondConnection);
-        assertThat(ChosenReadSource.name()).contains(ReadSourceProperties.PRIMARY);
+        assertThat(ChosenReadSource.source().map(ReadSourceSelector.Source::name)).contains(ReadSourceProperties.PRIMARY);
         verify(firstPool, never()).getConnection();
     }
 

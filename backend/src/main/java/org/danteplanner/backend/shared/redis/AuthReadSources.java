@@ -14,11 +14,6 @@ public final class AuthReadSources {
         this.order = List.copyOf(order);
     }
 
-    public static List<RoleGated<StringRedisTemplate>> sourceOrder(
-            boolean readsPrimaryFirst, RoleGated<StringRedisTemplate> local, RoleGated<StringRedisTemplate> auth) {
-        return readsPrimaryFirst ? List.of(auth) : List.of(local, auth);
-    }
-
     public <T> T read(Function<StringRedisTemplate, T> read, Supplier<T> noSourceAvailable) {
         return readFrom(0, read, noSourceAvailable);
     }

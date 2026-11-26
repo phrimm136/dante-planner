@@ -76,8 +76,8 @@ class ReadSourcesConfigTest {
             ReadSourceSelector selector = context.getBean(ReadSourceSelector.class);
 
             assertThat(sourceNames(selector)).containsExactly(REPLICA, ReadSourceProperties.PRIMARY);
-            assertThat(selector.sources()).extracting(ReadSourceSelector.Source::authoritative)
-                    .containsExactly(false, true);
+            assertThat(selector.sources()).extracting(ReadSourceSelector.Source::authority)
+                    .containsExactly(ReadSourceSelector.Authority.REPLICA, ReadSourceSelector.Authority.PRIMARY);
             assertThat(selector.sources()).extracting(source -> source.breaker().getName())
                     .containsExactly("read-source-" + REPLICA, "read-source-primary");
         });
@@ -128,7 +128,7 @@ class ReadSourcesConfigTest {
             assertThat(pool.getPassword()).isEqualTo("primaryPw");
             assertThat(pool.getMaximumPoolSize()).isEqualTo(PoolLedger.SEOUL_PRIMARY_READ_POOL);
             assertThat(pool.getInitializationFailTimeout()).isNegative();
-            assertThat(context.getBean(ReadSourceSelector.class).sources()).filteredOn(ReadSourceSelector.Source::authoritative)
+            assertThat(context.getBean(ReadSourceSelector.class).sources()).filteredOn(source -> source.authority() == ReadSourceSelector.Authority.PRIMARY)
                     .extracting(ReadSourceSelector.Source::dataSource).containsExactly(pool);
         });
     }
@@ -137,7 +137,7 @@ class ReadSourcesConfigTest {
     void sourcePool_WhenOregonPodReadsThePrimaryFirst_ReadsThroughThePrimaryPool() {
         oregonPod().run(context -> {
             assertThat(context).doesNotHaveBean(ReadSourcesConfig.poolBeanName(ReadSourceProperties.PRIMARY));
-            assertThat(context.getBean(ReadSourceSelector.class).sources()).filteredOn(ReadSourceSelector.Source::authoritative)
+            assertThat(context.getBean(ReadSourceSelector.class).sources()).filteredOn(source -> source.authority() == ReadSourceSelector.Authority.PRIMARY)
                     .extracting(ReadSourceSelector.Source::dataSource).containsExactly(context.getBean("primaryPool", HikariDataSource.class));
         });
     }

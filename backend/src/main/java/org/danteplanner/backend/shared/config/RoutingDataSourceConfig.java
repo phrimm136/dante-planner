@@ -59,10 +59,10 @@ public class RoutingDataSourceConfig {
         HikariConfig config = new HikariConfig();
         config.setPoolName(PoolLedger.PRIMARY_POOL_NAME);
         applyEndpoint(config, ReadSourcesConfig.Credentials.of(primaryProperties));
-        config.setMaximumPoolSize(
-                readSourceProperties.readsPrimaryFirst()
-                        ? PoolLedger.OREGON_PRIMARY_POOL
-                        : PoolLedger.SEOUL_PRIMARY_POOL);
+        config.setMaximumPoolSize(switch (readSourceProperties.readOrder()) {
+            case PRIMARY_FIRST -> PoolLedger.OREGON_PRIMARY_POOL;
+            case REPLICA_FIRST -> PoolLedger.SEOUL_PRIMARY_POOL;
+        });
         config.setConnectionTimeout(hikariProperties.getConnectionTimeout());
         return config;
     }

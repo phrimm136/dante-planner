@@ -34,6 +34,7 @@ import ch.qos.logback.classic.Level;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.danteplanner.backend.shared.config.BoundedRedisConnections;
+import org.danteplanner.backend.shared.config.ReadSourceProperties;
 import org.danteplanner.backend.shared.config.RedisConnectionConfig;
 import org.danteplanner.backend.shared.failure.OnUndeclared;
 import org.danteplanner.backend.shared.redis.RedisRole;
@@ -252,7 +253,7 @@ class MarkerStoreIT {
             LettuceConnectionFactory stallingFactory = factory(stalling.getRedisHost(), stalling.getRedisPort());
             try {
                 StringRedisTemplate stallingStore = template(stallingFactory);
-                MarkerStore store = storeOver(liveFactory, MarkerStore.sourceOrder(false,
+                MarkerStore store = storeOver(liveFactory, ReadSourceProperties.ReadOrder.REPLICA_FIRST.stores(
                         new MarkerStore.Source(RedisRole.AUTH_LOCAL, stallingStore),
                         new MarkerStore.Source(RedisRole.AUTH, live)));
                 FreshnessScope scope = new FreshnessScope.Planner(UUID.randomUUID());
@@ -275,7 +276,7 @@ class MarkerStoreIT {
 
     @Test
     void read_WhenTheLocalStoreIsDown_ServesFromTheAuthStore() {
-        MarkerStore store = storeOver(liveFactory, MarkerStore.sourceOrder(false,
+        MarkerStore store = storeOver(liveFactory, ReadSourceProperties.ReadOrder.REPLICA_FIRST.stores(
                 new MarkerStore.Source(RedisRole.AUTH_LOCAL, refused), new MarkerStore.Source(RedisRole.AUTH, live)));
         FreshnessScope scope = new FreshnessScope.Planner(UUID.randomUUID());
         store.raise(Set.of(scope), serverA + ":1-5");
@@ -302,7 +303,7 @@ class MarkerStoreIT {
             }, "the live auth role answering a probe");
         }
         assertThat(roleHealth.isAvailable(RedisRole.AUTH_LOCAL)).as("the refused local role").isFalse();
-        MarkerStore store = storeOver(liveFactory, MarkerStore.sourceOrder(false,
+        MarkerStore store = storeOver(liveFactory, ReadSourceProperties.ReadOrder.REPLICA_FIRST.stores(
                 new MarkerStore.Source(RedisRole.AUTH_LOCAL, refused), new MarkerStore.Source(RedisRole.AUTH, live)),
                 roleHealth);
         FreshnessScope scope = new FreshnessScope.Planner(UUID.randomUUID());

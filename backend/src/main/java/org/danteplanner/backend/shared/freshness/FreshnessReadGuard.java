@@ -15,12 +15,12 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 
+import org.danteplanner.backend.shared.config.ChosenReadSource;
 import org.danteplanner.backend.shared.config.ReadSourceSelector;
 import org.danteplanner.backend.shared.exception.ReadTemporarilyUnavailableException;
 import org.danteplanner.backend.shared.failure.CommandOutcome;
 import org.danteplanner.backend.shared.freshness.MarkerStore.MarkerView;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
-import org.danteplanner.backend.shared.readpath.ChosenReadSource;
 
 public class FreshnessReadGuard {
 
@@ -79,15 +79,6 @@ public class FreshnessReadGuard {
         }
 
         record WaitFor(String gtids) implements Verdict {
-        }
-    }
-
-    private enum MarkerNeed {
-        NONE,
-        READ;
-
-        static MarkerNeed of(ReadSourceSelector.Source source) {
-            return source.authoritative() ? NONE : READ;
         }
     }
 
@@ -157,7 +148,7 @@ public class FreshnessReadGuard {
     private SettleOutcome settleOnce(Collection<FreshnessScope> scopes, Map<String, String> appliedAtLoadStart,
             Set<String> reloaded) {
         ReadSourceSelector.Source source = servedSource();
-        return switch (settle(scopes, source, appliedAtLoadStart, mayReload(source, reloaded))) {
+        return switch (settle(scopes, source, appliedAtLoadStart, reloaded)) {
             case SettleOutcome.Reload reload -> {
                 reloaded.add(source.name());
                 yield reload;
@@ -167,13 +158,8 @@ public class FreshnessReadGuard {
         };
     }
 
-    private static boolean mayReload(ReadSourceSelector.Source source, Set<String> reloaded) {
-        return !reloaded.contains(source.name());
-    }
-
     private ReadSourceSelector.Source servedSource() {
-        return ChosenReadSource.name()
-                .flatMap(name -> selector.sources().stream().filter(source -> source.name().equals(name)).findFirst())
+        return ChosenReadSource.source()
                 .or(selector::current)
                 .orElseThrow(ReadTemporarilyUnavailableException::new);
     }
@@ -183,9 +169,9 @@ public class FreshnessReadGuard {
     }
 
     public SettleOutcome settle(Collection<FreshnessScope> scopes, ReadSourceSelector.Source source,
-            Map<String, String> appliedAtLoadStart, boolean mayReload) {
+            Map<String, String> appliedAtLoadStart, Set<String> reloadedSources) {
         String appliedAtStart = appliedAtLoadStart.getOrDefault(source.name(), NO_GTIDS);
-        return switch (verdict(Required.of(viewsFor(scopes, source)), source, appliedAtStart, mayReload)) {
+        return switch (verdict(Required.of(viewsFor(scopes, source)), source, appliedAtStart, reloadedSources)) {
             case Verdict.Serve serve -> new SettleOutcome.Serve();
             case Verdict.NextSource next -> skip(source);
             case Verdict.WaitFor wait -> switch (Waited.of(await(source, wait.gtids()))) {
@@ -196,23 +182,24 @@ public class FreshnessReadGuard {
     }
 
     public static Verdict verdict(Required required, ReadSourceSelector.Source source, String appliedAtStart,
-            boolean mayReload) {
-        if (source.authoritative()) {
-            return new Verdict.Serve();
-        }
-        return switch (required) {
-            case Required.None none -> new Verdict.Serve();
-            case Required.Unknown unknown -> new Verdict.NextSource();
-            case Required.AtLeast atLeast when contains(appliedAtStart, atLeast.gtidSet()) -> new Verdict.Serve();
-            case Required.AtLeast atLeast when mayReload -> new Verdict.WaitFor(atLeast.gtidSet());
-            case Required.AtLeast atLeast -> new Verdict.NextSource();
+            Set<String> reloadedSources) {
+        return switch (source.authority()) {
+            case PRIMARY -> new Verdict.Serve();
+            case REPLICA -> switch (required) {
+                case Required.None none -> new Verdict.Serve();
+                case Required.Unknown unknown -> new Verdict.NextSource();
+                case Required.AtLeast atLeast when contains(appliedAtStart, atLeast.gtidSet()) -> new Verdict.Serve();
+                case Required.AtLeast atLeast when !reloadedSources.contains(source.name()) ->
+                        new Verdict.WaitFor(atLeast.gtidSet());
+                case Required.AtLeast atLeast -> new Verdict.NextSource();
+            };
         };
     }
 
     private Collection<MarkerView> viewsFor(Collection<FreshnessScope> scopes, ReadSourceSelector.Source source) {
-        return switch (MarkerNeed.of(source)) {
-            case NONE -> List.of();
-            case READ -> markers.read(scopes).values();
+        return switch (source.authority()) {
+            case PRIMARY -> List.of();
+            case REPLICA -> markers.read(scopes).values();
         };
     }
 
