@@ -1,7 +1,7 @@
 # Names the cluster on metrics and logs, and selects the Cloudflare tunnel token.
 region: seoul
 image:
-  tag: "a66fd47aadf6fe2d988bdf92444a3afe463de23e"
+  tag: "b3beac91c367a9f8dfb39d20f1c375497d7aa10e"
 # Seoul reads the LOCAL (ap-northeast-2) secret replicas, not Oregon's us-west-2
 # originals — that is the whole point of terraform/secrets multi-region
 # replication (chunk 2). With us-west-2 here Seoul's ESO would pull cross-region
