@@ -1,0 +1,4 @@
+/actuator/prometheus
+/actuator/health
+/
+/apix

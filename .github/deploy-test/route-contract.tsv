@@ -1,3 +1,4 @@
 route	rule	request_path	backend_path	headers_present	headers_absent
 backend	0	/api/x	/api/x	X-Deploy-Test-Marker	Accept-Language
+backend	0	/robots.txt	/robots.txt	X-Deploy-Test-Marker	Accept-Language
 healthz-local	0	/healthz-local	/actuator/health/readiness	X-Deploy-Test-Marker	-

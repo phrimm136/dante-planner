@@ -37,7 +37,10 @@ spec:
     - matches:
         - path:
             type: PathPrefix
-            value: /
+            value: /api
+        - path:
+            type: Exact
+            value: /robots.txt
       filters:
         - type: RequestHeaderModifier
           requestHeaderModifier:

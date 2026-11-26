@@ -18,7 +18,7 @@ deploy/
   chart/templates/         every manifest, in namespace danteplanner unless it names another
     spring-daemonset.yaml  Spring backend, DaemonSet on role=app nodes
     spring-service.yaml    backend Service + ConfigMap
-    traefik-gateway.yaml   Gateway API: Gateway + app HTTPRoute + /healthz-local route
+    traefik-gateway.yaml   Gateway API: Gateway + app HTTPRoute (/api, /robots.txt) + /healthz-local route
     external-secret.yaml   ESO SecretStore + ExternalSecret (RS256 private key ← Secrets Manager)
     jwt-secrets.yaml       ExternalSecrets: RS256 public key + AES-256 encryption key ← Secrets Manager
     redis-auth.yaml        auth-state Redis StatefulSet on role=data (AOF, no auto-promote)
@@ -90,6 +90,14 @@ finalizer in one merge, wait until both regions have synced it, and remove the A
 The `render` stage runs `.github/scripts/rendered-redis-probes.py` over the region renders: it fails
 when redis-auth or redis-ratelimit loses its TCP liveness probe or its readiness probe that passes
 only when PING answers PONG, which keeps a Redis replaying its AOF out of its Service.
+
+The `behavior` stage serves the rendered HTTPRoutes through Traefik to a header-echo backend.
+Every rule that targets the backend needs a row in `.github/deploy-test/route-contract.tsv`, whose
+probe must reach the backend with that row's path and headers. Each path in
+`.github/deploy-test/unrouted-paths.txt` must match no rendered backend rule and must get 404 from
+Traefik; these are the paths the public edge must not forward, `/actuator/**` among them. Only the
+listed paths are checked: a new rule that serves an unlisted path such as another actuator
+endpoint passes unless a path in that file falls under it.
 
 Renovate also raises the pins of the CI scripts:
 
