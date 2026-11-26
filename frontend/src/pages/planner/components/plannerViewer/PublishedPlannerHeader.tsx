@@ -94,7 +94,10 @@ export function PublishedPlannerHeader({
 
   const handleSubscriptionToggle = () => {
     if (planner.id) {
-      subscriptionMutation.mutate(planner.id)
+      subscriptionMutation.mutate({
+        plannerId: planner.id,
+        intent: planner.isSubscribed ? 'unsubscribe' : 'subscribe',
+      })
     }
   }
 
