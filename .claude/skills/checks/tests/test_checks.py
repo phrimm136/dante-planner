@@ -1,4 +1,5 @@
 import datetime
+import fcntl
 import importlib.machinery
 import importlib.util
 import json
@@ -409,6 +410,30 @@ def test_summary_of_a_tooling_run_is_its_suite_count():
 def test_summary_of_a_silent_tool_names_the_command():
     assert checks_cli.summary_line("yarn run v1.22.22\n$ ast-grep scan\nDone in 0.29s.\n") == \
         "(no output from `ast-grep scan`)"
+
+
+def test_a_run_without_containers_takes_a_slot_and_the_lock_shared():
+    assert plan_for("be", "test", "--tests", "*X", "--exclude-tags", "containerized").lock_share == "slot"
+    assert plan_for("be", "test", "--tests", "*XIT").lock_share == "exclusive"
+
+
+def test_two_slot_runs_hold_the_lock_together_and_keep_an_exclusive_run_out(tmp_path):
+    lock_path = tmp_path / ".test.lock"
+    with checks_cli.CheckLock(lock_path, "slot"), checks_cli.CheckLock(lock_path, "slot") as second:
+        assert second.free_slot() is None
+        with open(lock_path, "a") as exclusive_probe:
+            with pytest.raises(BlockingIOError):
+                fcntl.flock(exclusive_probe, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    with open(lock_path, "a") as exclusive_probe:
+        fcntl.flock(exclusive_probe, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+
+def test_an_exclusive_run_keeps_a_slot_run_out(tmp_path):
+    lock_path = tmp_path / ".test.lock"
+    with checks_cli.CheckLock(lock_path):
+        with open(lock_path, "a") as shared_probe:
+            with pytest.raises(BlockingIOError):
+                fcntl.flock(shared_probe, fcntl.LOCK_SH | fcntl.LOCK_NB)
 
 
 def test_lock_holders_read_proc_locks():
