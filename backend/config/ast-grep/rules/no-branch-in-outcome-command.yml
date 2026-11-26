@@ -1,17 +1,10 @@
 id: no-branch-in-outcome-command
 language: Java
 severity: error
-message: 'A command returning an *Outcome branches only by an exhaustive switch over a decision value or a guard (an if without else whose body is one bare return, a throw or a continue); move the condition into a pure method returning a sealed type or enum and switch on it here.'
+message: 'A command returning an *Outcome branches only by an exhaustive switch over a decision value or a guard (an if without else whose body is one throw); move the condition into a pure method returning a sealed type or enum and switch on it here.'
 files:
   - src/main/java/**/*.java
 utils:
-  guard-exit:
-    any:
-      - kind: throw_statement
-      - kind: continue_statement
-      - all:
-          - kind: return_statement
-          - regex: '^return\s*;$'
   guard:
     kind: if_statement
     not:
@@ -21,11 +14,11 @@ utils:
     has:
       field: consequence
       any:
-        - matches: guard-exit
+        - kind: throw_statement
         - all:
             - kind: block
             - has:
-                matches: guard-exit
+                kind: throw_statement
             - not:
                 has:
                   nthChild: 2

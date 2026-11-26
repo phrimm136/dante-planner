@@ -31,22 +31,15 @@ public class ViewerArgumentResolver implements HandlerMethodArgumentResolver {
             NativeWebRequest webRequest,
             @Nullable WebDataBinderFactory binderFactory) {
 
-        Viewer viewer = Viewer.of(userIdOf(currentPrincipal()));
+        Viewer viewer = Viewer.of(userIdOf(SecurityContextHolder.getContext().getAuthentication()));
         return switch (Required.by(parameter.getParameterType())) {
             case ANYONE -> viewer;
             case MEMBER -> viewer.requireMember();
         };
     }
 
-    private static @Nullable Object currentPrincipal() {
-        return switch (SecurityContextHolder.getContext().getAuthentication()) {
-            case null -> null;
-            case Authentication authentication -> authentication.getPrincipal();
-        };
-    }
-
-    private static @Nullable Long userIdOf(@Nullable Object principal) {
-        return principal instanceof Long userId ? userId : null;
+    private static @Nullable Long userIdOf(@Nullable Authentication authentication) {
+        return authentication != null && authentication.getPrincipal() instanceof Long userId ? userId : null;
     }
 
     private enum Required {

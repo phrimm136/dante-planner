@@ -38,8 +38,6 @@ import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.IfTree;
 import com.sun.source.tree.ThrowTree;
 import com.sun.source.tree.StatementTree;
-import com.sun.source.tree.ReturnTree;
-import com.sun.source.tree.ContinueTree;
 import com.sun.source.tree.BlockTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodTree;
@@ -210,12 +208,7 @@ final class SourceBranches {
                 }
                 body = block.getStatements().getFirst();
             }
-            return switch (body) {
-                case ThrowTree thrown -> true;
-                case ContinueTree skipped -> true;
-                case ReturnTree returned -> returned.getExpression() == null;
-                default -> false;
-            };
+            return body instanceof ThrowTree;
         }
 
         @Override
